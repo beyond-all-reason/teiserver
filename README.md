@@ -1,0 +1,37 @@
+# Teiserver
+
+An Elixir implementation of Uberserver
+
+## Setup and running
+
+You will need to have [Elixir/Erlang installed](https://elixir-lang.org/install.html).
+
+```
+cd teiserver
+mix deps.get
+mix run --no-halt
+```
+
+By default it will listen on port 8200 for TCP and port 8202 for UDP (not used at this time).
+
+## Code layout/placement
+- lib/protocols contains implementations for specific protocols
+- lib/teiserver contains the main program implementation
+
+### Entry point
+lib/teiserver/tcp_server.ex is the main tcp server which handles TCP messages, these are typically handled by a protocol. By setting a different protocol in the state of a TCP listener you can change which protocol it uses.
+
+### Testing
+Run as above (`mix run --no-halt`) and load up Chobby. Set Chobby's server to `localhost`. In my experience it's then fastest to restart Chobby and it will connect to your locally running instance.
+
+You can login using the normal login command but it's much easier to login using `LI <username>` which is currently in place for testing purposes.
+
+### State
+##### Users
+Keyed to the name of the user, these represent users registered with the system.
+
+##### Clients
+Keyed to the name of the user, these represent the users currently logged in. Client contains both the PID of the client and a Module reference to the protocol in use.
+
+##### Battles
+Does what it says on the tin.
