@@ -22,9 +22,9 @@ By default it will listen on port 8200 for TCP and port 8202 for UDP (not used a
 lib/teiserver/tcp_server.ex is the main tcp server which handles TCP messages, these are typically handled by a protocol. By setting a different protocol in the state of a TCP listener you can change which protocol it uses.
 
 ### Testing
-Run as above (`mix run --no-halt`) and load up Chobby. Set Chobby's server to `localhost`. In my experience it's then fastest to restart Chobby and it will connect to your locally running instance.
+Run as above (`mix run --no-halt`) and load up Chobby. Set Chobby's server to `localhost`. In my experience it's then fastest to restart Chobby and it will connect to your locally running instance. After you've finished you'll want to set the server back to `road-flag.bnr.la`.
 
-You can login using the normal login command but it's much easier to login using `LI <username>` which is currently in place for testing purposes.
+You can login using the normal login command but it's much easier to login using `LI <username>` which is currently in place for testing purposes. If you are familiar with Elixir then starting it with `iex -S mix` will put it in console mode and you can execute commands through the modules there too.
 
 ### State
 ##### Users
