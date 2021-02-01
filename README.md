@@ -35,3 +35,8 @@ Keyed to the name of the user, these represent the users currently logged in. Cl
 
 ##### Battles
 Does what it says on the tin.
+
+
+#### TODO
+- Periodically clean up empty chat rooms
+- joinbattlerequest

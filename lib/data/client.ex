@@ -10,7 +10,8 @@ defmodule Teiserver.Client do
       away: false,
       rank: 1,
       moderator: 0,
-      bot: 0
+      bot: 0,
+      battlestatus: 0
     }
   end
 
@@ -29,7 +30,7 @@ defmodule Teiserver.Client do
     })
   end
   def create_from_bits(bits, client) do
-    [in_game, away, _r1, _r2, _r3, _moderator, _bot | _] = bits ++ [0,0,0,0,0,0,00,0,0]
+    [in_game, away, _r1, _r2, _r3, _moderator, _bot | _] = bits ++ [0,0,0,0,0,0,0,0,0]
     Map.merge(client, %{
       in_game: (in_game == 1),
       away: (away == 1),
@@ -40,12 +41,13 @@ defmodule Teiserver.Client do
   end
 
   def to_bits(client) do
+    [r1, r2, r3 | _] = Integer.digits(client.rank, 2) ++ [0, 0, 0]
     [
       (if client.in_game, do: 1, else: 0),
       (if client.away, do: 1, else: 0),
-      1,
-      0,
-      0,
+      r1,
+      r2,
+      r3,
       (if client.moderator, do: 1, else: 0),
       (if client.bot, do: 1, else: 0)
     ]

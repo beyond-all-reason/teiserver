@@ -23,6 +23,13 @@ Welcome to teiserver
   end
 
   def _send(msg, socket, transport, msg_id) do
+    # # If no line return at the end we should warn about that
+    # # I've made the mistake of forgetting it and wondering
+    # # why stuff wasn't working so it's staying here
+    # if String.slice(msg, -1, 1) != "\n" do
+    #   Logger.error("Attempting to send message without newline at the end - #{msg}")
+    # end
+
     msg = if msg_id != "" and msg_id != nil do
       msg
       |> String.trim()
@@ -90,13 +97,14 @@ Welcome to teiserver
   def _handle({"JOIN", data, msg_id}, state) do
     case Regex.run(~r/(\w+)(?:\t)?(\w+)?/, data) do
       [_, room_name] ->
-        Room.add_user_to_room(state.user.name, room_name)
-        room = Room.get_room(room_name)
-        members = Enum.join(room.members, " ")
-        _send("CHANNELTOPIC #{room_name} #{room.author}", state, msg_id)
-        _send("CLIENTS #{room_name} #{members}", state, msg_id)
+        Logger.warn("[JOIN] #{room_name}")
 
-        # do_join_channel(room_name, state)
+        room = Room.get_room(room_name)
+        Room.add_user_to_room(state.user.name, room_name)
+        members = Enum.join(room.members, " ")
+        _send("JOIN #{room_name}\n", state, msg_id)
+        _send("CHANNELTOPIC #{room_name} #{room.author}\n", state, msg_id)
+        _send("CLIENTS #{room_name} #{members}\n", state, msg_id)
 
         # Join the channel
         # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#CLIENTS:server
@@ -108,6 +116,11 @@ Welcome to teiserver
       _ ->
         {:failed, "Bad details"}
     end
+    state
+  end
+
+  def _handle({"LEAVE", room_name, _msg_id}, state) do
+    Room.remove_user_from_room(state.user.name, room_name)
     state
   end
 
@@ -124,7 +137,6 @@ Welcome to teiserver
         User.create_user(%{
           name: username,
           country: "GB",
-          userid: :random.uniform(899999) + 100000,
           lobbyid: "LuaLobby Chobby"
         })
         |> User.add_user()
@@ -146,9 +158,9 @@ Welcome to teiserver
       Logger.debug("[battleopened] sent battle info")
       _send(do_battleopened(b), state, msg_id)
       _send(do_updatebattleinfo(b), state, msg_id)
+      _send(do_battle_players(b), state, msg_id)
     end)
 
-    _send("JOINEDBATTLE 898 Testuser1\n", state, msg_id)
     _send("LOGININFOEND\n", state, msg_id)
     %{state | client: client, user: user}
   end
@@ -178,7 +190,6 @@ Welcome to teiserver
             User.create_user(%{
               name: username,
               country: "GB",
-              userid: :random.uniform(899999) + 100000,
               lobbyid: "LuaLobby Chobby"
             })
             |> User.add_user()
@@ -200,9 +211,9 @@ Welcome to teiserver
           Logger.debug("[battleopened] sent battle info")
           _send(do_battleopened(b), state, msg_id)
           _send(do_updatebattleinfo(b), state, msg_id)
+          _send(do_battle_players(b), state, msg_id)
         end)
 
-        _send("JOINEDBATTLE 898 Testuser1\n", state, msg_id)
         _send("LOGININFOEND\n", state, msg_id)
         %{state | client: client, user: user}
       {:denied, reason} ->
@@ -212,6 +223,41 @@ Welcome to teiserver
       # :agreement ->
       #   _send(@agreement, state)
       #   state
+    end
+  end
+
+  def _handle({"JOINBATTLE", data, msg_id}, state) do
+    response = case Regex.run(~r/^(\w+) (\S+) (\S+)$/, data) do
+      [_, battleid, _password, _script_password] ->
+        battle = battleid
+        |> String.to_integer
+        |> Battle.get_battle
+        {:accepted, battle}
+      nil ->
+        {:denied, "Invalid details"}
+    end
+
+    case response do
+      {:accepted, nil} ->
+        Logger.debug("[command:joinbattle] failed as could not find battle")
+        _send("JOINBATTLEFAILED battle_not_found\n", state, msg_id)
+        state
+
+      {:accepted, battle} ->
+        _send(do_joinbattle(battle), state, msg_id)
+        _send(do_srcipt_tags(battle), state, msg_id)
+
+        battle.start_rectangles
+        |> Enum.each(fn r ->
+          _send(do_start_rectangle(r), state, msg_id)
+        end)
+        _send("REQUESTBATTLESTATUS", state, msg_id)
+        state
+
+      {:denied, reason} ->
+        Logger.debug("[command:joinbattle] denied with reason #{reason}")
+        _send("JOINBATTLEFAILED #{reason}\n", state, msg_id)
+        state
     end
   end
 
@@ -247,7 +293,7 @@ Welcome to teiserver
 
   # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#ADDUSER:server
   def do_adduser(user) do
-    "ADDUSER #{user.name} #{user.country} #{user.userid}\t#{user.lobbyid}\n"
+    "ADDUSER #{user.name} #{user.country} #{user.id}\t#{user.lobbyid}\n"
   end
 
   def do_clientstatus(client) do
@@ -291,17 +337,42 @@ Welcome to teiserver
       :holepunch -> 1
       :fixed -> 2
     end
-    passworded = (battle.passworded == 1)
+    passworded = if battle.passworded, do: 1, else: 0
 
-    "BATTLEOPENED #{battle.id} #{type} #{nattype} #{battle.founder} #{battle.ip} #{battle.port} #{battle.max_players} #{passworded} #{battle.rank} #{battle.map_hash} #{battle.engine_name} #{battle.engine_version} #{battle.map_name}\t#{battle.title}\t#{battle.title}\t#{battle.game_name}\t#{battle.channel}\n"
+    "BATTLEOPENED #{battle.id} #{type} #{nattype} #{battle.founder} #{battle.ip} #{battle.port} #{battle.max_players} #{passworded} #{battle.rank} #{battle.map_hash} #{battle.engine_name}\t#{battle.engine_version}\t#{battle.map_name}\t#{battle.title}\t#{battle.game_name}\ttest-15386-5c98cfa\n"
   end
 
   def do_updatebattleinfo(battle) do
     locked = (battle.locked == 1)
-    "UPDATEBATTLEINFO #{Enum.count(battle.spectators)} #{locked} #{battle.map_hash}\t#{battle.map_name}}\n"
+    "UPDATEBATTLEINFO #{battle.id} #{Enum.count(battle.spectators)} #{locked} #{battle.map_hash} #{battle.map_name}\n"
   end
 
   def do_joined(channel, username) do
     "JOINED #{channel}\t#{username}\n"
+  end
+
+  # def do_joinedbattle(battle, username) do
+  #   "JOINBATTLE #{battle.id} #{username}\n"
+  # end
+
+  def do_joinbattle(battle) do
+    "JOINBATTLE #{battle.id} #{battle.hash_code}\n"
+  end
+
+  def do_start_rectangle([team, left, top, right, bottom]) do
+    "ADDSTARTRECT #{team} #{left} #{top} #{right} #{bottom}\n"
+  end
+  
+  def do_srcipt_tags(battle) do
+    tags = battle.tags
+    |> Enum.map(fn {key, value} -> "#{key}=#{value}" end)
+    |> Enum.join("\t")
+
+    "SETSCRIPTTAGS " <> tags <> "\n"
+  end
+  
+  def do_battle_players(battle) do
+    battle.players
+    |> Enum.map(fn p -> "JOINEDBATTLE #{battle.id} #{p}\n" end)
   end
 end

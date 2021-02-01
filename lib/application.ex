@@ -1,6 +1,5 @@
 defmodule Teiserver.Application do
   @moduledoc false
-
   use Application
 
   @impl true
@@ -9,6 +8,7 @@ defmodule Teiserver.Application do
       {Phoenix.PubSub, name: :teiserver_pubsub},
       {Teiserver.TcpServer, []},
       {UDPServer, []},
+      concache_perm_sup(:id_counters),
       concache_perm_sup(:lists),
       concache_perm_sup(:users),
       concache_perm_sup(:clients),
@@ -46,20 +46,21 @@ defmodule Teiserver.Application do
     receive do
       :begin -> nil
     end
+    ConCache.put(:lists, :clients, [])
+    ConCache.put(:lists, :rooms, [])
+
+    ConCache.put(:id_counters, :battle, 0)
+    ConCache.put(:id_counters, :user, 0)
 
     Teiserver.TestData.create_users()
     Teiserver.TestData.create_battles()
-    ConCache.put(:lists, :clients, [])
-    ConCache.put(:lists, :rooms, [])
 
     Teiserver.Room.create_room(%{
       name: "main",
       topic: "main",
-      author: "ChanServ"
+      author: "ChanServ",
+      members: ["Addas"]
     })
     |> Teiserver.Room.add_room
-
-    # ConCache.get(:lists, :rooms)
-    # ConCache.get(:rooms, "main")
   end
 end

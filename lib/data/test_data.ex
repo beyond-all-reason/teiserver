@@ -8,9 +8,15 @@ defmodule Teiserver.TestData do
     ConCache.insert_new(:lists, :users, [])
     [
       %{
+        name: "ChanServ",
+        country: "GB",
+        lobbyid: "LuaLobby Chobby",
+        friends: [],
+        friend_requests: []
+      },
+      %{
         name: "Testuser1",
         country: "GB",
-        userid: 1,
         lobbyid: "LuaLobby Chobby",
         friends: [],
         friend_requests: []
@@ -18,7 +24,6 @@ defmodule Teiserver.TestData do
       %{
         name: "Testuser2",
         country: "DE",
-        userid: 2,
         lobbyid: "LuaLobby Chobby",
         friends: [],
         friend_requests: []
@@ -26,7 +31,6 @@ defmodule Teiserver.TestData do
       %{
         name: "Teifion",
         country: "DE",
-        userid: 3,
         lobbyid: "LuaLobby Chobby",
         friends: ["Addas"],
         friend_requests: ["Link"]
@@ -34,7 +38,6 @@ defmodule Teiserver.TestData do
       %{
         name: "Addas",
         country: "DE",
-        userid: 4,
         lobbyid: "LuaLobby Chobby",
         friends: ["Teifion"],
         friend_requests: []
@@ -42,12 +45,12 @@ defmodule Teiserver.TestData do
       %{
         name: "Link",
         country: "IR",
-        userid: 5,
         lobbyid: "LuaLobby Chobby",
         friends: [],
         friend_requests: []
       },
     ]
+    |> Enum.map(&User.create_user/1)
     |> Enum.map(&User.add_user/1)
   end
 
@@ -55,7 +58,6 @@ defmodule Teiserver.TestData do
     ConCache.insert_new(:lists, :battles, [])
     [
       %{
-        id: 898,
         type: :normal,
         nattype: :none,
         founder: "Testuser1",
@@ -68,15 +70,15 @@ defmodule Teiserver.TestData do
         map_hash: 1794707373,
         engine_name: "spring",
         engine_version: "104.0.1-1714-g321b911",
-        map_name: "BAR Glacier Pass 1.2",
+        map_name: "SpeedMetal BAR V2",
         title: "USA -- 04",
-        game_name: "Beyond All Reason",
-        channel: "test-15367-6bfafcb",
+        game_name: "Beyond All Reason test-15367-6bfafcb",
 
         spectators: [],
         players: []
       }
     ]
+    |> Enum.map(&Battle.create_battle/1)
     |> Enum.map(&Battle.add_battle/1)
   end
 end

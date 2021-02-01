@@ -1,6 +1,22 @@
 defmodule Teiserver.User do
+  defp next_id() do
+    ConCache.isolated(:id_counters, :user, fn -> 
+      new_value = ConCache.get(:id_counters, :user) + 1
+      ConCache.put(:id_counters, :user, new_value)
+      new_value
+    end)
+  end
+
+  defp set_id(id) do
+    ConCache.update(:id_counters, :user, fn existing -> 
+      new_value = max(id, existing)
+      {:ok, new_value}
+    end)
+  end
+
   def create_user(user) do
     Map.merge(%{
+      id: next_id(),
       rank: 1,
       moderator: false,
       bot: false,
