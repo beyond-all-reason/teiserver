@@ -113,7 +113,7 @@ defmodule Teiserver.Battle do
         # No change takes place, they're already in the battle!
         battle_state
       else
-        PubSub.broadcast :teiserver_pubsub, "battle:#{battle_name}", {:add_user, new_username}
+        PubSub.broadcast :teiserver_pubsub, "battle_updates", {:add_user_to_battle, battle_name, new_username}
 
         new_players = battle_state.players ++ [new_username]
         Map.put(battle_state, :players, new_players)
@@ -129,7 +129,7 @@ defmodule Teiserver.Battle do
         # No change takes place, they've already left the battle
         battle_state
       else
-        PubSub.broadcast :teiserver_pubsub, "battle:#{battle_name}", {:remove_user, username}
+        PubSub.broadcast :teiserver_pubsub, "battle_updates", {:remove_user_from_battle, battle_name, username}
 
         new_players = Enum.filter(battle_state.players, fn m -> m != username end)
         Map.put(battle_state, :players, new_players)

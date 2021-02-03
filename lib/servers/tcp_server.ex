@@ -3,6 +3,7 @@
 defmodule Teiserver.TcpServer do
   use GenServer
   require Logger
+  alias Phoenix.PubSub
 
   alias Teiserver.Protocols.Spring
 
@@ -32,12 +33,11 @@ defmodule Teiserver.TcpServer do
       transport: transport,
       protocol: @default_protocol
     })
+    PubSub.subscribe :teiserver_pubsub, "battle_updates"
+    PubSub.subscribe :teiserver_pubsub, "client_updates"
   end
 
   def init(init_arg) do
-    IO.puts "init"
-    IO.inspect init_arg
-    IO.puts ""
     {:ok, init_arg}
   end
 
@@ -56,6 +56,21 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  def handle_info({:new_message, from, room_name, msg}, state) do
+    new_state = state.protocol.handle_chat_message({from, room_name, msg}, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info({:add_user_to_room, username, room_name}, state) do
+    new_state = state.protocol.handle_add_user_to_room({username, room_name}, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info({:remove_user_from_room, username, room_name}, state) do
+    new_state = state.protocol.handle_remove_user_from_room({username, room_name}, state)
+    {:noreply, new_state}
+  end
+
   def handle_info({:tcp_closed, socket}, state = %{socket: socket, transport: transport}) do
     Logger.debug("Closing TCP connection")
     transport.close(socket)
@@ -67,11 +82,11 @@ defmodule Teiserver.TcpServer do
     {:stop, :normal, state}
   end
 
-  def handle_info(other, state) do
-    IO.puts "Other, no handler"
-    IO.inspect other
-    IO.puts ""
+  # def handle_info(other, state) do
+  #   IO.puts "Other, no handler"
+  #   IO.inspect other
+  #   IO.puts ""
     
-    {:noreply, state}
-  end
+  #   {:noreply, state}
+  # end
 end

@@ -5,6 +5,7 @@ defmodule Teiserver.Protocols.Spring do
   alias Teiserver.Battle
   alias Teiserver.Room
   alias Teiserver.User
+  alias Phoenix.PubSub
 
   @motd """
 --------------------
@@ -22,13 +23,14 @@ Welcome to teiserver
     _send(msg, state.socket, state.transport, msg_id)
   end
 
+  def _send([], _, _, _), do: nil
   def _send(msg, socket, transport, msg_id) do
-    # # If no line return at the end we should warn about that
-    # # I've made the mistake of forgetting it and wondering
-    # # why stuff wasn't working so it's staying here
-    # if String.slice(msg, -1, 1) != "\n" do
-    #   Logger.error("Attempting to send message without newline at the end - #{msg}")
-    # end
+    # If no line return at the end we should warn about that
+    # I've made the mistake of forgetting it and wondering
+    # why stuff wasn't working so it's staying here
+    if not String.ends_with?(msg, "\n") do
+      Logger.error("Attempting to send message without newline at the end - #{msg}")
+    end
 
     msg = if msg_id != "" and msg_id != nil do
       msg
@@ -106,9 +108,7 @@ Welcome to teiserver
         _send("CHANNELTOPIC #{room_name} #{room.author}\n", state, msg_id)
         _send("CLIENTS #{room_name} #{members}\n", state, msg_id)
 
-        # Join the channel
-        # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#CLIENTS:server
-        # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#CLIENTSFROM:server
+        PubSub.subscribe :teiserver_pubsub, "room:#{room_name}"
         {:success, room_name}
       [_, _room_name, _key] ->
         # Join the channel
@@ -121,6 +121,25 @@ Welcome to teiserver
 
   def _handle({"LEAVE", room_name, _msg_id}, state) do
     Room.remove_user_from_room(state.user.name, room_name)
+    state
+  end
+
+  def _handle({"SAY", data, _msg_id}, state) do
+    case Regex.run(~r/(\w+) (.+)/, data) do
+      [_, room_name, msg] ->
+        Logger.warn("[SAY] #{room_name} - msg")
+
+        # TODO: Check is part of the room
+        room = Room.get_room(room_name)
+        Room.send_message(state.user.name, room.name, msg)
+
+        {:success, room_name}
+      # [_, _room_name, _key] ->
+      #   # Join the channel
+      #   {:failed, "Locked"}
+      _ ->
+        {:failed, "Bad details"}
+    end
     state
   end
 
@@ -266,12 +285,6 @@ Welcome to teiserver
     state
   end
 
-  def _handle({com, args, _msg_id}, state) do
-    Logger.error("No handler for command of #{com} with args: #{args}")
-    _send("ERR - No handler\n", state)
-    state
-  end
-
   def _handle(nil, state), do: state
   def _handle(match, state) do
     Logger.error("No match  #{match}")
@@ -347,14 +360,6 @@ Welcome to teiserver
     "UPDATEBATTLEINFO #{battle.id} #{Enum.count(battle.spectators)} #{locked} #{battle.map_hash} #{battle.map_name}\n"
   end
 
-  def do_joined(channel, username) do
-    "JOINED #{channel}\t#{username}\n"
-  end
-
-  # def do_joinedbattle(battle, username) do
-  #   "JOINBATTLE #{battle.id} #{username}\n"
-  # end
-
   def do_joinbattle(battle) do
     "JOINBATTLE #{battle.id} #{battle.hash_code}\n"
   end
@@ -374,5 +379,21 @@ Welcome to teiserver
   def do_battle_players(battle) do
     battle.players
     |> Enum.map(fn p -> "JOINEDBATTLE #{battle.id} #{p}\n" end)
+  end
+
+  # Handle other items
+  def handle_chat_message({from, room_name, msg}, state) do
+    _send("SAID #{room_name} #{from} #{msg}\n", state, nil)
+    state
+  end
+
+  def handle_add_user_to_room({username, room_name}, state) do
+    _send("JOINED #{room_name} #{username}\n", state, nil)
+    state
+  end
+
+  def handle_remove_user_from_room({username, room_name}, state) do
+    _send("LEFT #{room_name} #{username}\n", state, nil)
+    state
   end
 end
