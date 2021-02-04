@@ -55,19 +55,42 @@ defmodule Teiserver.TcpServer do
     new_state = state.protocol.handle(data, state)
     {:noreply, new_state}
   end
+  
+  # Client updates
+  def handle_info({:new_clientstatus, username, status}, state) do
+    new_state = state.protocol.forward_new_clientstatus({username, status}, state)
+    {:noreply, new_state}
+  end
 
+  def handle_info({:new_battlestatus, username, battlestatus, team_colour}, state) do
+    new_state = state.protocol.forward_new_battlestatus({username, battlestatus, team_colour}, state)
+    {:noreply, new_state}
+  end
+
+  # Chat
   def handle_info({:new_message, from, room_name, msg}, state) do
-    new_state = state.protocol.handle_chat_message({from, room_name, msg}, state)
+    new_state = state.protocol.forward_chat_message({from, room_name, msg}, state)
     {:noreply, new_state}
   end
 
   def handle_info({:add_user_to_room, username, room_name}, state) do
-    new_state = state.protocol.handle_add_user_to_room({username, room_name}, state)
+    new_state = state.protocol.forward_add_user_to_room({username, room_name}, state)
     {:noreply, new_state}
   end
 
   def handle_info({:remove_user_from_room, username, room_name}, state) do
-    new_state = state.protocol.handle_remove_user_from_room({username, room_name}, state)
+    new_state = state.protocol.forward_remove_user_from_room({username, room_name}, state)
+    {:noreply, new_state}
+  end
+
+  # Battles
+  def handle_info({:add_user_to_battle, username, battle_name}, state) do
+    new_state = state.protocol.forward_add_user_to_battle({username, battle_name}, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info({:remove_user_from_battle, username, battle_name}, state) do
+    new_state = state.protocol.forward_remove_user_from_battle({username, battle_name}, state)
     {:noreply, new_state}
   end
 

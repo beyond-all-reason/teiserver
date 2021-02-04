@@ -39,4 +39,7 @@ Does what it says on the tin.
 
 #### TODO
 - Periodically clean up empty chat rooms
-- joinbattlerequest
+- Logging certain actions (in particular mod actions)
+- Automated tests
+- Benchmark suite
+

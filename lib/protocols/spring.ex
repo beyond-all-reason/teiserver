@@ -24,6 +24,9 @@ Welcome to teiserver
   end
 
   def _send([], _, _, _), do: nil
+  def _send(msg, socket, transport, msg_id) when is_list(msg) do
+    _send(Enum.join(msg, ""), socket, transport, msg_id)
+  end
   def _send(msg, socket, transport, msg_id) do
     # If no line return at the end we should warn about that
     # I've made the mistake of forgetting it and wondering
@@ -69,6 +72,7 @@ Welcome to teiserver
     result
   end
 
+  @spec _handle(Tuple.t, Map.t) :: Map.t
   def _handle({"MYSTATUS", data, _msg_id}, state) do
     case Regex.run(~r/([0-9]+)/, data) do
       nil ->
@@ -246,7 +250,7 @@ Welcome to teiserver
   end
 
   def _handle({"JOINBATTLE", data, msg_id}, state) do
-    response = case Regex.run(~r/^(\w+) (\S+) (\S+)$/, data) do
+    response = case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
       [_, battleid, _password, _script_password] ->
         battle = battleid
         |> String.to_integer
@@ -263,21 +267,52 @@ Welcome to teiserver
         state
 
       {:accepted, battle} ->
+        Logger.debug("[command:joinbattle] success")
+        Battle.add_user_to_battle(state.user.name, battle.id)
+        PubSub.subscribe :teiserver_pubsub, "battle_updates:#{battle.id}"
         _send(do_joinbattle(battle), state, msg_id)
         _send(do_srcipt_tags(battle), state, msg_id)
+
+        battle.players
+        |> Enum.each(fn username ->
+          client = Client.get_client(username)
+          _send(do_battlestatus(username, client.battlestatus, client.team_colour), state, msg_id)
+        end)
+
+        Client.new_battlestatus(state.client.name, 0, 0)
+        _send(do_battlestatus(state.client.name, 0, 0), state, msg_id)
 
         battle.start_rectangles
         |> Enum.each(fn r ->
           _send(do_start_rectangle(r), state, msg_id)
         end)
-        _send("REQUESTBATTLESTATUS", state, msg_id)
-        state
+        _send("REQUESTBATTLESTATUS\n", state, msg_id)
+
+        new_client = Map.put(state.client, :battle_id, battle.id)
+        Map.put(state, :client, new_client)
 
       {:denied, reason} ->
         Logger.debug("[command:joinbattle] denied with reason #{reason}")
         _send("JOINBATTLEFAILED #{reason}\n", state, msg_id)
         state
     end
+  end
+
+  def _handle({"LEAVEBATTLE", _, _msg_id}, state) do
+    Battle.remove_user_from_battle(state.user.name, state.client.battle_id)
+    _send(do_leavebattle(state))
+    new_client = Map.put(state.client, :battle_id, nil)
+    Map.put(state, :client, new_client)
+  end
+
+  def _handle({"MYBATTLESTATUS", data, _msg_id}, state) do
+    new_client = case Regex.run(~r/(\S+) (.+)/, data) do
+      [_, battlestatus, team_colour] ->
+        Client.new_battlestatus(state.client.name, battlestatus, team_colour)
+      _ ->
+        state.client
+    end
+    Map.put(state, :client, new_client)
   end
 
   def _handle({"PING", _, msg_id}, state) do
@@ -367,7 +402,7 @@ Welcome to teiserver
   def do_start_rectangle([team, left, top, right, bottom]) do
     "ADDSTARTRECT #{team} #{left} #{top} #{right} #{bottom}\n"
   end
-  
+
   def do_srcipt_tags(battle) do
     tags = battle.tags
     |> Enum.map(fn {key, value} -> "#{key}=#{value}" end)
@@ -375,25 +410,52 @@ Welcome to teiserver
 
     "SETSCRIPTTAGS " <> tags <> "\n"
   end
-  
+
   def do_battle_players(battle) do
     battle.players
     |> Enum.map(fn p -> "JOINEDBATTLE #{battle.id} #{p}\n" end)
   end
+  
+  def do_battlestatus(username, battlestatus, team_colour) do
+    "CLIENTBATTLESTATUS #{username} #{battlestatus} #{team_colour}\n"
+  end
 
-  # Handle other items
-  def handle_chat_message({from, room_name, msg}, state) do
+  # Forward server updates
+  # Client
+  def forward_new_clientstatus({username, status}, state) do
+    _send("CLIENTSTATUS #{username} #{status}\n", state, nil)
+    state
+  end
+  
+  def forward_new_battlestatus({username, battlestatus, team_colour}, state) do
+    _send(do_battlestatus(username, battlestatus, team_colour), state, nil)
+    state
+  end
+  
+  # Chat
+  def forward_chat_message({from, room_name, msg}, state) do
     _send("SAID #{room_name} #{from} #{msg}\n", state, nil)
     state
   end
 
-  def handle_add_user_to_room({username, room_name}, state) do
+  def forward_add_user_to_room({username, room_name}, state) do
     _send("JOINED #{room_name} #{username}\n", state, nil)
     state
   end
 
-  def handle_remove_user_from_room({username, room_name}, state) do
+  # Battle
+  def forward_remove_user_from_room({username, room_name}, state) do
     _send("LEFT #{room_name} #{username}\n", state, nil)
+    state
+  end
+
+  def forward_add_user_to_battle({username, battleid}, state) do
+    _send("JOINEDBATTLE #{battleid} #{username}\n", state, nil)
+    state
+  end
+
+  def handle_remove_user_from_battle({username, battleid}, state) do
+    _send("LEFTBATTLE #{battleid} #{username}\n", state, nil)
     state
   end
 end

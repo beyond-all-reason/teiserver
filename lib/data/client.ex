@@ -1,6 +1,19 @@
 defmodule Teiserver.Client do
   alias Phoenix.PubSub
 
+  def create(client) do
+    Map.merge(%{
+      in_game: false,
+      away: false,
+      rank: 1,
+      moderator: 0,
+      bot: 0,
+      battlestatus: 0,
+      team_colour: 0,
+      battle_id: nil
+    }, client)
+  end
+
   def create(name, pid, protocol) do
     %{
       pid: pid,
@@ -11,7 +24,9 @@ defmodule Teiserver.Client do
       rank: 1,
       moderator: 0,
       bot: 0,
-      battlestatus: 0
+      battlestatus: 0,
+      team_colour: 0,
+      battle_id: nil
     }
   end
 
@@ -58,10 +73,21 @@ defmodule Teiserver.Client do
   # State is only used to enable sending of a message
   def update(updated_client) do
     add_client(updated_client)
-    PubSub.broadcast :teiserver_pubsub, "client_update", updated_client
+    PubSub.broadcast :teiserver_pubsub, "client_updates", {:new_clientstatus, updated_client}
     updated_client
   end
-  
+
+  def new_battlestatus(username, new_battlestatus, team_colour) do
+    client = get_client(username)
+    PubSub.broadcast :teiserver_pubsub, "client_updates", {:new_battlestatus, username, new_battlestatus}
+
+    updated_client = Map.merge(client, %{
+      battlestatus: new_battlestatus,
+      team_colour: team_colour
+    })
+    add_client(updated_client)
+  end
+
   def get_client(username) do
     ConCache.get(:clients, username)
   end
@@ -74,11 +100,12 @@ defmodule Teiserver.Client do
 
       {:ok, new_value}
     end)
+    client
   end
 
   def list_clients() do
     ConCache.get(:lists, :clients)
-    |> Enum.map(fn client_id -> ConCache.get(:clients, client_id) end)
+    |> Enum.map(fn username -> ConCache.get(:clients, username) end)
   end
 
   def get_client_state(pid) do

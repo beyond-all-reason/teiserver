@@ -107,13 +107,14 @@ defmodule Teiserver.Battle do
     end)
   end
 
-  def add_user_to_battle(new_username, battle_name) do
-    ConCache.update(:battles, battle_name, fn battle_state -> 
+  def add_user_to_battle(_, nil), do: nil
+  def add_user_to_battle(new_username, battle_id) do
+    ConCache.update(:battles, battle_id, fn battle_state -> 
       new_state = if Enum.member?(battle_state.players, new_username) do
         # No change takes place, they're already in the battle!
         battle_state
       else
-        PubSub.broadcast :teiserver_pubsub, "battle_updates", {:add_user_to_battle, battle_name, new_username}
+        PubSub.broadcast :teiserver_pubsub, "battle_updates:#{battle_id}", {:add_user_to_battle, battle_id, new_username}
 
         new_players = battle_state.players ++ [new_username]
         Map.put(battle_state, :players, new_players)
@@ -123,13 +124,14 @@ defmodule Teiserver.Battle do
     end)
   end
 
-  def remove_user_from_battle(username, battle_name) do
-    ConCache.update(:battles, battle_name, fn battle_state -> 
+  def remove_user_from_battle(_, nil), do: nil
+  def remove_user_from_battle(username, battle_id) do
+    ConCache.update(:battles, battle_id, fn battle_state -> 
       new_state = if not Enum.member?(battle_state.players, username) do
         # No change takes place, they've already left the battle
         battle_state
       else
-        PubSub.broadcast :teiserver_pubsub, "battle_updates", {:remove_user_from_battle, battle_name, username}
+        PubSub.broadcast :teiserver_pubsub, "battle_updates:#{battle_id}", {:remove_user_from_battle, battle_id, username}
 
         new_players = Enum.filter(battle_state.players, fn m -> m != username end)
         Map.put(battle_state, :players, new_players)

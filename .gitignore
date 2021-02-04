@@ -29,3 +29,6 @@ teiserver-*.tar
 /tmp
 
 /ignore
+
+# I'm storing server output here, don't want to push it to git
+example_output
