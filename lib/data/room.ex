@@ -35,7 +35,7 @@ defmodule Teiserver.Room do
         # No change takes place, they're already in the room!
         room_state
       else
-        PubSub.broadcast :teiserver_pubsub, "room:#{room_name}", {:add_user_to_room, new_username, room_name}
+        PubSub.broadcast Teiserver.PubSub, "room:#{room_name}", {:add_user_to_room, new_username, room_name}
 
         new_members = room_state.members ++ [new_username]
         Map.put(room_state, :members, new_members)
@@ -51,7 +51,7 @@ defmodule Teiserver.Room do
         # No change takes place, they've already left the room
         room_state
       else
-        PubSub.broadcast :teiserver_pubsub, "room:#{room_name}", {:remove_user_from_room, username, room_name}
+        PubSub.broadcast Teiserver.PubSub, "room:#{room_name}", {:remove_user_from_room, username, room_name}
 
         new_members = Enum.filter(room_state.members, fn m -> m != username end)
         Map.put(room_state, :members, new_members)
@@ -73,6 +73,6 @@ defmodule Teiserver.Room do
   end
 
   def send_message(from, room_name, msg) do
-    PubSub.broadcast :teiserver_pubsub, "room:#{room_name}", {:new_message, from, room_name, msg}
+    PubSub.broadcast Teiserver.PubSub, "room:#{room_name}", {:new_message, from, room_name, msg}
   end
 end

@@ -99,54 +99,6 @@ Welcome to teiserver
     state
   end
 
-  # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#JOIN:client
-  def _handle({"JOIN", data, msg_id}, state) do
-    case Regex.run(~r/(\w+)(?:\t)?(\w+)?/, data) do
-      [_, room_name] ->
-        Logger.warn("[JOIN] #{room_name}")
-
-        room = Room.get_room(room_name)
-        Room.add_user_to_room(state.user.name, room_name)
-        members = Enum.join(room.members, " ")
-        _send("JOIN #{room_name}\n", state, msg_id)
-        _send("CHANNELTOPIC #{room_name} #{room.author}\n", state, msg_id)
-        _send("CLIENTS #{room_name} #{members}\n", state, msg_id)
-
-        PubSub.subscribe :teiserver_pubsub, "room:#{room_name}"
-        {:success, room_name}
-      [_, _room_name, _key] ->
-        # Join the channel
-        {:failed, "Locked"}
-      _ ->
-        {:failed, "Bad details"}
-    end
-    state
-  end
-
-  def _handle({"LEAVE", room_name, _msg_id}, state) do
-    Room.remove_user_from_room(state.user.name, room_name)
-    state
-  end
-
-  def _handle({"SAY", data, _msg_id}, state) do
-    case Regex.run(~r/(\w+) (.+)/, data) do
-      [_, room_name, msg] ->
-        Logger.warn("[SAY] #{room_name} - msg")
-
-        # TODO: Check is part of the room
-        room = Room.get_room(room_name)
-        Room.send_message(state.user.name, room.name, msg)
-
-        {:success, room_name}
-      # [_, _room_name, _key] ->
-      #   # Join the channel
-      #   {:failed, "Locked"}
-      _ ->
-        {:failed, "Bad details"}
-    end
-    state
-  end
-
   # Special handler to allow us to test more easily, it just accepts
   # any login
   def _handle({"LI", username, msg_id}, state) do
@@ -186,6 +138,54 @@ Welcome to teiserver
 
     _send("LOGININFOEND\n", state, msg_id)
     %{state | client: client, user: user}
+  end
+
+  # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#JOIN:client
+  def _handle({"JOIN", data, msg_id}, state) do
+    case Regex.run(~r/(\w+)(?:\t)?(\w+)?/, data) do
+      [_, room_name] ->
+        Logger.warn("[JOIN] #{room_name}")
+
+        room = Room.get_room(room_name)
+        Room.add_user_to_room(state.user.name, room_name)
+        members = Enum.join(room.members, " ")
+        _send("JOIN #{room_name}\n", state, msg_id)
+        _send("CHANNELTOPIC #{room_name} #{room.author}\n", state, msg_id)
+        _send("CLIENTS #{room_name} #{members}\n", state, msg_id)
+
+        :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
+        {:success, room_name}
+      [_, _room_name, _key] ->
+        # Join the channel
+        {:failed, "Locked"}
+      _ ->
+        {:failed, "Bad details"}
+    end
+    state
+  end
+
+  def _handle({"LEAVE", room_name, _msg_id}, state) do
+    Room.remove_user_from_room(state.user.name, room_name)
+    state
+  end
+
+  def _handle({"SAY", data, _msg_id}, state) do
+    case Regex.run(~r/(\w+) (.+)/, data) do
+      [_, room_name, msg] ->
+        Logger.warn("[SAY] #{room_name} - msg")
+
+        # TODO: Check is part of the room
+        room = Room.get_room(room_name)
+        Room.send_message(state.user.name, room.name, msg)
+
+        {:success, room_name}
+      # [_, _room_name, _key] ->
+      #   # Join the channel
+      #   {:failed, "Locked"}
+      _ ->
+        {:failed, "Bad details"}
+    end
+    state
   end
 
   # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#LOGIN:client
@@ -269,7 +269,7 @@ Welcome to teiserver
       {:accepted, battle} ->
         Logger.debug("[command:joinbattle] success")
         Battle.add_user_to_battle(state.user.name, battle.id)
-        PubSub.subscribe :teiserver_pubsub, "battle_updates:#{battle.id}"
+        PubSub.subscribe Teiserver.PubSub, "battle_updates:#{battle.id}"
         _send(do_joinbattle(battle), state, msg_id)
         _send(do_srcipt_tags(battle), state, msg_id)
 
@@ -298,9 +298,13 @@ Welcome to teiserver
     end
   end
 
+  def _handle({"SAYBATTLE", msg, _msg_id}, state) do
+    Battle.say(state.user.name, msg, state.client.battle_id)
+    state
+  end
+
   def _handle({"LEAVEBATTLE", _, _msg_id}, state) do
     Battle.remove_user_from_battle(state.user.name, state.client.battle_id)
-    _send(do_leavebattle(state))
     new_client = Map.put(state.client, :battle_id, nil)
     Map.put(state, :client, new_client)
   end
@@ -454,8 +458,18 @@ Welcome to teiserver
     state
   end
 
-  def handle_remove_user_from_battle({username, battleid}, state) do
+  def forward_remove_user_from_battle({username, battleid}, state) do
     _send("LEFTBATTLE #{battleid} #{username}\n", state, nil)
+    state
+  end
+
+  def forward_battle_said({username, msg, _battle_id}, state) do
+    _send("SAIDBATTLE #{username} #{msg}\n", state, nil)
+    state
+  end
+
+  def forward_battle_saidex({username, msg, _battle_id}, state) do
+    _send("SAIDBATTLEEX #{username} #{msg}\n", state, nil)
     state
   end
 end

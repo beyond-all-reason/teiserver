@@ -87,9 +87,6 @@ defmodule Teiserver.Battle do
         [0, 0, 126, 74, 200],
         [1, 126, 0, 200, 74]
       ],
-
-      # Temporarily defaulting
-      hash_code: -1540855590,
     }, battle)
   end
 
@@ -114,7 +111,7 @@ defmodule Teiserver.Battle do
         # No change takes place, they're already in the battle!
         battle_state
       else
-        PubSub.broadcast :teiserver_pubsub, "battle_updates:#{battle_id}", {:add_user_to_battle, battle_id, new_username}
+        PubSub.broadcast Teiserver.PubSub, "battle_updates:#{battle_id}", {:add_user_to_battle, battle_id, new_username}
 
         new_players = battle_state.players ++ [new_username]
         Map.put(battle_state, :players, new_players)
@@ -131,7 +128,7 @@ defmodule Teiserver.Battle do
         # No change takes place, they've already left the battle
         battle_state
       else
-        PubSub.broadcast :teiserver_pubsub, "battle_updates:#{battle_id}", {:remove_user_from_battle, battle_id, username}
+        PubSub.broadcast Teiserver.PubSub, "battle_updates:#{battle_id}", {:remove_user_from_battle, battle_id, username}
 
         new_players = Enum.filter(battle_state.players, fn m -> m != username end)
         Map.put(battle_state, :players, new_players)
@@ -139,6 +136,10 @@ defmodule Teiserver.Battle do
 
       {:ok, new_state}
     end)
+  end
+
+  def say(username, msg, battle_id) do
+    PubSub.broadcast Teiserver.PubSub, "battle_updates:#{battle_id}", {:battle_message, username, msg, battle_id}
   end
 
   def list_battles() do

@@ -45,7 +45,7 @@ defmodule Teiserver.TestData do
       },
       %{
         name: "Link",
-        country: "IR",
+        country: "IE",
         lobbyid: "LuaLobby Chobby",
         friends: [],
         friend_requests: []
@@ -88,10 +88,11 @@ defmodule Teiserver.TestData do
         passworded: false,
         rank: 0,
         locked: false,
-        map_hash: 2222222222,
+        map_hash: 1683043765,
+        hash_code: 1683043765,
         engine_name: "spring",
         engine_version: "104.0.1-1714-g321b911",
-        map_name: "SpeedMetal BAR V2",
+        map_name: "Supreme_Crossing_V1",
         title: "USA -- 04",
         game_name: "Beyond All Reason test-15367-6bfafcb",
 
@@ -107,10 +108,11 @@ defmodule Teiserver.TestData do
         passworded: false,
         rank: 0,
         locked: false,
-        map_hash: 1111111111,
+        map_hash: 733360208,
+        hash_code: 733360208,
         engine_name: "spring",
         engine_version: "104.0.1-1714-g321b911",
-        map_name: "Comet Catcher Remake 1.8",
+        map_name: "Quicksilver Remake 1.24",
         title: "USA -- 03",
         game_name: "Beyond All Reason test-15367-6bfafcb",
 

@@ -5,7 +5,7 @@ defmodule Teiserver.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      {Phoenix.PubSub, name: :teiserver_pubsub},
+      {Phoenix.PubSub, name: Teiserver.PubSub},
       {Teiserver.TcpServer, []},
       {UDPServer, []},
       concache_perm_sup(:id_counters),

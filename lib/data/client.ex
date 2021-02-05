@@ -73,14 +73,13 @@ defmodule Teiserver.Client do
   # State is only used to enable sending of a message
   def update(updated_client) do
     add_client(updated_client)
-    PubSub.broadcast :teiserver_pubsub, "client_updates", {:new_clientstatus, updated_client}
+    PubSub.broadcast Teiserver.PubSub, "client_updates", {:new_clientstatus, updated_client}
     updated_client
   end
 
   def new_battlestatus(username, new_battlestatus, team_colour) do
     client = get_client(username)
-    PubSub.broadcast :teiserver_pubsub, "client_updates", {:new_battlestatus, username, new_battlestatus}
-
+    :ok = PubSub.broadcast Teiserver.PubSub, "client_updates", {:new_battlestatus, username, new_battlestatus, team_colour}
     updated_client = Map.merge(client, %{
       battlestatus: new_battlestatus,
       team_colour: team_colour

@@ -26,6 +26,8 @@ defmodule Teiserver.TcpServer do
 
     @default_protocol.welcome(socket, transport)
 
+    :ok = PubSub.subscribe(Teiserver.PubSub, "battle_updates")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "client_updates")
     :gen_server.enter_loop(__MODULE__, [], %{
       client: nil,
       user: nil,
@@ -33,8 +35,6 @@ defmodule Teiserver.TcpServer do
       transport: transport,
       protocol: @default_protocol
     })
-    PubSub.subscribe :teiserver_pubsub, "battle_updates"
-    PubSub.subscribe :teiserver_pubsub, "client_updates"
   end
 
   def init(init_arg) do
@@ -62,6 +62,12 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  def handle_info({:new_clientstatus, new_client}, state) when is_map(new_client) do
+    Logger.warn("handle_info with map does not yet forward the new client status")
+    # new_state = state.protocol.forward_new_clientstatus({username, status}, state)
+    {:noreply, state}
+  end
+
   def handle_info({:new_battlestatus, username, battlestatus, team_colour}, state) do
     new_state = state.protocol.forward_new_battlestatus({username, battlestatus, team_colour}, state)
     {:noreply, new_state}
@@ -84,13 +90,18 @@ defmodule Teiserver.TcpServer do
   end
 
   # Battles
-  def handle_info({:add_user_to_battle, username, battle_name}, state) do
-    new_state = state.protocol.forward_add_user_to_battle({username, battle_name}, state)
+  def handle_info({:add_user_to_battle, username, battle_id}, state) do
+    new_state = state.protocol.forward_add_user_to_battle({username, battle_id}, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:remove_user_from_battle, username, battle_name}, state) do
-    new_state = state.protocol.forward_remove_user_from_battle({username, battle_name}, state)
+  def handle_info({:remove_user_from_battle, username, battle_id}, state) do
+    new_state = state.protocol.forward_remove_user_from_battle({username, battle_id}, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info({:battle_message, username, msg, battle_id}, state) do
+    new_state = state.protocol.forward_battle_said({username, msg, battle_id}, state)
     {:noreply, new_state}
   end
 
@@ -106,10 +117,7 @@ defmodule Teiserver.TcpServer do
   end
 
   # def handle_info(other, state) do
-  #   IO.puts "Other, no handler"
-  #   IO.inspect other
-  #   IO.puts ""
-    
+  #   Logger.error("No handler: #{other}")
   #   {:noreply, state}
   # end
 end

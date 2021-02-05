@@ -38,6 +38,9 @@ Does what it says on the tin.
 
 
 #### TODO
+- Friend requests
+- Full battle room testing
+- Battle chat
 - Periodically clean up empty chat rooms
 - Logging certain actions (in particular mod actions)
 - Automated tests
