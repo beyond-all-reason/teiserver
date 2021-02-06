@@ -9,13 +9,6 @@ defmodule Teiserver.User do
     end)
   end
 
-  # defp set_id(id) do
-  #   ConCache.update(:id_counters, :user, fn existing -> 
-  #     new_value = max(id, existing)
-  #     {:ok, new_value}
-  #   end)
-  # end
-
   def create_user(user) do
     Map.merge(%{
       id: next_id(),
@@ -56,6 +49,9 @@ defmodule Teiserver.User do
       new_requester = Map.merge(requester, %{
         frields: requester.friends ++ [accepter_name],
       })
+      
+      add_user(new_accepter)
+      add_user(new_requester)
 
       # Now push out the updates
       PubSub.broadcast Teiserver.PubSub, "user_updates", {:updated_user, accepter_name, new_accepter, "accepted_friend"}
@@ -71,6 +67,8 @@ defmodule Teiserver.User do
         friend_requests: Enum.filter(decliner.friend_requests, fn f -> f != requester_name end)
       })
 
+      add_user(new_decliner)
+
       # Now push out the updates
       PubSub.broadcast Teiserver.PubSub, "user_updates", {:updated_user, decliner_name, new_decliner, "declined_friend"}
     end
@@ -83,6 +81,8 @@ defmodule Teiserver.User do
       new_potential = Map.merge(potential, %{
         friend_requests: potential.friend_requests ++ [requester_name]
       })
+
+      add_user(new_potential)
 
       # Now push out the updates
       PubSub.broadcast Teiserver.PubSub, "user_updates", {:updated_user, potential_name, new_potential, "request_created"}

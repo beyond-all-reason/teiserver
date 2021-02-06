@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Spring do
+defmodule Teiserver.Protocols.SpringProtocol do
   require Logger
   alias Regex
   alias Teiserver.Client
@@ -6,6 +6,7 @@ defmodule Teiserver.Protocols.Spring do
   alias Teiserver.Room
   alias Teiserver.User
   alias Phoenix.PubSub
+  alias Teiserver.Implementations.SpringImplementation, as: Impl
 
   @motd """
 --------------------
@@ -18,6 +19,43 @@ Welcome to teiserver
 # AGREEMENT The agreement goes here
 # AGREEMENT --------------------
 # """
+
+  # Friend/user stuff TODO
+  # IGNORE
+  # UNFRIEND
+  # IGNORELIST
+
+  # Setup stuff TODO
+  # REGISTER (REGISTRATIONACCEPTED, REGISTRATIONDENIED)
+
+  # Other TODO
+  # CONFIRMAGREEMENT
+  # RENAMEACCOUNT
+  # CHANGEPASSWORD
+  # CHANGEEMAILREQUEST
+  # CHANGEEMAIL
+  # RESENDVERIFICATION
+  # RESETPASSWORDREQUEST
+  # RESETPASSWORD
+  # CHANNELS
+  # HANDICAP
+  # KICKFROMBATTLE
+  # FORECTEAMNO
+  # FORCEALLYNO
+  # FORCETEAMCOLOR
+  # FORCESPECTATORMODE
+  # DISABLEUNITS
+  # ENABLEUNITS
+  # ENABLEALLUNITS
+  # RING
+  # ADDBOT
+  # UPDATEBOT
+  # ADDSTARTRECT
+  # REMOVESTARTRECT
+  # SETSCRIPTTAGS
+  # REMOVESCRIPTTAGS
+  # LISTCOMPFLAGS
+  # PROMOTE
 
   def _send(msg, state, msg_id \\ nil) do
     _send(msg, state.socket, state.transport, msg_id)
@@ -72,6 +110,43 @@ Welcome to teiserver
     result
   end
 
+  # Temporary function while we have our shorthand function
+  defp do_login(username, msg_id, state) do
+    _send(do_accepted(username), state, msg_id)
+    _send(do_motd(@motd), state, msg_id)
+
+    user = case User.get_user(username) do
+      nil ->
+        Logger.warn("Adding user based on login, this should be replaced with registration functionality")
+        User.create_user(%{
+          name: username,
+          country: "GB",
+          lobbyid: "LuaLobby Chobby"
+        })
+        |> User.add_user()
+      user ->
+        user
+    end
+
+    client = Client.login(username, self(), state.protocol)
+
+    Client.list_client_names()
+    |> Enum.each(fn name ->
+      user = User.get_user(name)
+      _send(do_adduser(user), state, msg_id)
+    end)
+
+    Battle.list_battles()
+    |> Enum.each(fn b ->
+      _send(do_battleopened(b), state, msg_id)
+      _send(do_updatebattleinfo(b), state, msg_id)
+      _send(do_battle_players(b), state, msg_id)
+    end)
+
+    _send("LOGININFOEND\n", state, msg_id)
+    %{state | client: client, user: user}
+  end
+
   @spec _handle(Tuple.t, Map.t) :: Map.t
   def _handle({"MYSTATUS", data, _msg_id}, state) do
     case Regex.run(~r/([0-9]+)/, data) do
@@ -118,37 +193,6 @@ Welcome to teiserver
     [_, username] = String.split(data, "=")
     User.create_friend_request(username, state.user.name)
     state
-  end
-
-  # Friend/user stuff TODO
-  # IGNORE
-  # UNFRIEND
-  # IGNORELIST
-
-  # Other TODO
-  # HANDICAP
-  # KICKFROMBATTLE
-  # FORECTEAMNO
-  # FORCEALLYNO
-  # FORCETEAMCOLOR
-  # FORCESPECTATORMODE
-  # DISABLEUNITS
-  # ENABLEUNITS
-  # ENABLEALLUNITS
-  # RING
-  # ADDBOT
-  # UPDATEBOT
-  # ADDSTARTRECT
-  # REMOVESTARTRECT
-  # SETSCRIPTTAGS
-  # REMOVESCRIPTTAGS
-  # LISTCOMPFLAGS
-  # PROMOTE
-
-  # Special handler to allow us to test more easily, it just accepts
-  # any login
-  def _handle({"LI", username, msg_id}, state) do
-    do_login(username, msg_id, state)
   end
 
   # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#JOIN:client
@@ -205,45 +249,11 @@ Welcome to teiserver
   #   end
   #   state
   # end
-  
-  # Temporary function while we have our shorthand function
-  defp do_login(username, msg_id, state) do
-    Logger.debug("[command:login] accepted #{username}")
-    _send(do_accepted(username), state, msg_id)
-    _send(do_motd(@motd), state, msg_id)
 
-    user = case User.get_user(username) do
-      nil ->
-        Logger.warn("Adding user based on login, this should be replaced with registration functionality")
-        User.create_user(%{
-          name: username,
-          country: "GB",
-          lobbyid: "LuaLobby Chobby"
-        })
-        |> User.add_user()
-      user ->
-        user
-    end
-
-    client = Client.login(username, self(), state.protocol)
-
-    Client.list_client_names()
-    |> Enum.each(fn name ->
-      Logger.debug("[adduser] sent user info for #{name}")
-      user = User.get_user(name)
-      _send(do_adduser(user), state, msg_id)
-    end)
-
-    Battle.list_battles()
-    |> Enum.each(fn b ->
-      Logger.debug("[battleopened] sent battle info")
-      _send(do_battleopened(b), state, msg_id)
-      _send(do_updatebattleinfo(b), state, msg_id)
-      _send(do_battle_players(b), state, msg_id)
-    end)
-
-    _send("LOGININFOEND\n", state, msg_id)
-    %{state | client: client, user: user}
+  # Special handler to allow us to test more easily, it just accepts
+  # any login
+  def _handle({"LI", username, msg_id}, state) do
+    do_login(username, msg_id, state)
   end
 
   # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#LOGIN:client
@@ -252,8 +262,10 @@ Welcome to teiserver
     response = case Regex.run(~r/^(\w+) ([a-zA-Z0-9=]+) (0) ([0-9\.\*]+) ([^\t]+)\t([^\t]+)\t([^\t]+)/, data) do
       [_, username, password, _cpu, ip, lobby, user_id, modes] ->
         _ = [username, password, ip, lobby, user_id, modes]
+        Logger.debug("[command:login] accepted #{username}")
         {:accepted, username}
       nil ->
+        Logger.debug("[command:login] denied with reason Invalid details")
         {:denied, "Invalid details"}
     end
 
@@ -263,7 +275,6 @@ Welcome to teiserver
       {:accepted, username} ->
         do_login(username, msg_id, state)
       {:denied, reason} ->
-        Logger.debug("[command:login] denied with reason #{reason}")
         _send("DENIED #{reason}\n", state, msg_id)
         state
       # :agreement ->
@@ -397,6 +408,10 @@ Welcome to teiserver
   end
 
   def do_friendlist(user) do
+    IO.puts "do_friendlist"
+    IO.inspect user.friends
+    IO.puts ""
+    
     friends = user.friends
     |> Enum.map(fn f ->
       "FRIENDLIST userName=#{f}\n"
@@ -407,7 +422,10 @@ Welcome to teiserver
   end
 
   def do_friendlist_request(user) do
-    # Don't know for certain this is correct, making a guess
+    IO.puts "do_friendlist_request"
+    IO.inspect user.friend_requests
+    IO.puts ""
+
     requests = user.friend_requests
     |> Enum.map(fn f ->
       "FRIENDREQUESTLIST userName=#{f}\n"

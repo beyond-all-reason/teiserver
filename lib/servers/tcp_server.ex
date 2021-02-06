@@ -6,10 +6,10 @@ defmodule Teiserver.TcpServer do
   alias Phoenix.PubSub
 
   alias Teiserver.Client
-  alias Teiserver.Protocols.Spring
+  alias Teiserver.Protocols.SpringProtocol
 
   @behaviour :ranch_protocol
-  @default_protocol Spring
+  @default_protocol SpringProtocol
 
   def start_link(_opts) do
     :ranch.start_listener(make_ref(), :ranch_tcp, [{:port, 8200}], __MODULE__, [])
@@ -82,7 +82,7 @@ defmodule Teiserver.TcpServer do
     new_state = state.protocol.forward_new_battlestatus({username, battlestatus, team_colour}, state)
     {:noreply, new_state}
   end
-  
+
   # User
   def handle_info({:updated_user, username, new_user, cause}, state) do
     new_state = if username == state.user.name do
@@ -154,9 +154,10 @@ defmodule Teiserver.TcpServer do
   #   Logger.error("No handler: #{other}")
   #   {:noreply, state}
   # end
-  
+
   def terminate(reason, state) do
     Logger.warn("disconnect because #{Kernel.inspect reason}")
     Client.disconnect(state.client.name)
   end
+
 end
