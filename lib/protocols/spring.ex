@@ -78,13 +78,15 @@ Welcome to teiserver
       nil ->
         Logger.debug("[command:mystatus] bad match on: #{data}")
       [_, status] ->
-        # Logger.warn("[command:mystatus] status: #{status}")
-        # Logger.warn("[command:mystatus] status as bin: #{status |> String.to_integer |> Integer.digits(2)}")
-        status
-        |> String.to_integer
-        |> Integer.digits(2)
-        |> Client.create_from_bits(state.client)
-        |> Client.update
+        # This is trying to parse it
+        # status
+        # |> String.to_integer
+        # |> Integer.digits(2)
+        # |> Client.create_from_bits(state.client)
+        # |> Client.update
+
+        # This just accepts it and updates the client
+        Client.new_status(state.client.name, status)
     end
     state
   end
@@ -288,8 +290,12 @@ Welcome to teiserver
         end)
         _send("REQUESTBATTLESTATUS\n", state, msg_id)
 
-        new_client = Map.put(state.client, :battle_id, battle.id)
-        Map.put(state, :client, new_client)
+        # I think this is sent by SPADS but for now we're going to fake it
+        _send("SAIDBATTLEEX #{battle.founder} Hi #{state.user.name}! Current battle type is faked_team.\n", state, msg_id)
+
+        Map.put(state.client, :battle_id, battle.id)
+        |> Client.update
+        state
 
       {:denied, reason} ->
         Logger.debug("[command:joinbattle] denied with reason #{reason}")
@@ -304,6 +310,9 @@ Welcome to teiserver
   end
 
   def _handle({"LEAVEBATTLE", _, _msg_id}, state) do
+    IO.puts ""
+    IO.inspect {state.user.name, state.client.battle_id}
+    IO.puts ""
     Battle.remove_user_from_battle(state.user.name, state.client.battle_id)
     new_client = Map.put(state.client, :battle_id, nil)
     Map.put(state, :client, new_client)
@@ -349,12 +358,12 @@ Welcome to teiserver
   end
 
   def do_clientstatus(client) do
-    status = Client.to_bits(client)
-    |> Integer.undigits(2)
+    # status = Client.to_bits(client)
+    # |> Integer.undigits(2)
 
-    IO.inspect status, label: "do_clientstatus"
+    # IO.inspect status, label: "do_clientstatus"
 
-    "CLIENTSTATUS #{client.name}\t#{status}"
+    "CLIENTSTATUS #{client.name}\t#{client.status}"
   end
 
   def do_friendlist(user) do

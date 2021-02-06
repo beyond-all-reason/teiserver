@@ -13,4 +13,9 @@ defmodule Teiserver do
     IO.puts "User entry Teifion"
     ConCache.get(:users, "Teifion")
   end
+  
+  def clientstatus(name, new_status) do
+    Phoenix.PubSub.broadcast Teiserver.PubSub, "client_updates", {:new_status, name, new_status}
+  end
+  # Teiserer.clientstatus("Addas", "12")
 end

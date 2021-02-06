@@ -68,7 +68,8 @@ defmodule Teiserver.TestData do
         bot: true,
         battlestatus: 4194306,
         team_colour: 16777215,
-        battle_id: 1
+        battle_id: 1,
+        status: 16
       }
     ]
     |> Enum.map(&Client.create/1)
@@ -95,7 +96,6 @@ defmodule Teiserver.TestData do
         map_name: "Supreme_Crossing_V1",
         title: "USA -- 04",
         game_name: "Beyond All Reason test-15367-6bfafcb",
-
         players: ["[teh]cluster1[03]"]
       },
       %{

@@ -4,6 +4,7 @@ defmodule Teiserver.Client do
   def create(client) do
     Map.merge(%{
       in_game: false,
+      status: "0",
       away: false,
       rank: 1,
       moderator: 0,
@@ -19,6 +20,7 @@ defmodule Teiserver.Client do
       pid: pid,
       name: name,
       protocol: protocol,
+      status: "0",
       in_game: false,
       away: false,
       rank: 1,
@@ -68,13 +70,19 @@ defmodule Teiserver.Client do
     ]
   end
 
-  # In addition to updating the client
-  # it will trigger a broadcast of the update to all other clients
-  # State is only used to enable sending of a message
   def update(updated_client) do
     add_client(updated_client)
-    PubSub.broadcast Teiserver.PubSub, "client_updates", {:new_clientstatus, updated_client}
+    PubSub.broadcast Teiserver.PubSub, "client_updates", {:updated_client, updated_client}
     updated_client
+  end
+
+  def new_status(username, status) do
+    client = get_client(username)
+    Map.merge(client, %{
+      status: status
+    })
+    |> add_client()
+    PubSub.broadcast Teiserver.PubSub, "client_updates", {:updated_client_status, username, status}
   end
 
   def new_battlestatus(username, new_battlestatus, team_colour) do

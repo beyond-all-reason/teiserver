@@ -57,15 +57,20 @@ defmodule Teiserver.TcpServer do
   end
   
   # Client updates
-  def handle_info({:new_clientstatus, username, status}, state) do
+  def handle_info({:updated_client_status, username, status}, state) do
     new_state = state.protocol.forward_new_clientstatus({username, status}, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:new_clientstatus, new_client}, state) when is_map(new_client) do
-    Logger.warn("handle_info with map does not yet forward the new client status")
-    # new_state = state.protocol.forward_new_clientstatus({username, status}, state)
-    {:noreply, state}
+  def handle_info({:updated_client, new_client}, state) when is_map(new_client) do
+    new_state = if state.client.name == new_client.name do
+      Logger.warn("updated client #{state.client.name}")
+      Map.put(state, :client, new_client)
+    else
+      Logger.warn("no update for client #{state.client.name} as found #{new_client.name}")
+      state
+    end
+    {:noreply, new_state}
   end
 
   def handle_info({:new_battlestatus, username, battlestatus, team_colour}, state) do
@@ -101,6 +106,9 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:battle_message, username, msg, battle_id}, state) do
+    IO.puts ""
+    IO.inspect "New battle message"
+    IO.puts ""
     new_state = state.protocol.forward_battle_said({username, msg, battle_id}, state)
     {:noreply, new_state}
   end
