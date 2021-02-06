@@ -101,6 +101,45 @@ Welcome to teiserver
     state
   end
 
+  def _handle({"ACCEPTFRIENDREQUEST", data, msg_id}, state) do
+    throw "TODO"
+    data = "userName=Link"
+    state
+  end
+
+  def _handle({"DECLINEFRIENDREQUEST", data, msg_id}, state) do
+    throw "TODO"
+    data = "userName=Link"
+    state
+  end
+  
+  # Friend/user stuff TODO
+  # IGNORE
+  # UNFRIEND
+  # FRIENDREQUEST
+  # IGNORELIST
+
+  # Other TODO
+  # HANDICAP
+  # KICKFROMBATTLE
+  # FORECTEAMNO
+  # FORCEALLYNO
+  # FORCETEAMCOLOR
+  # FORCESPECTATORMODE
+  # DISABLEUNITS
+  # ENABLEUNITS
+  # ENABLEALLUNITS
+  # RING
+  # ADDBOT
+  # UPDATEBOT
+  # ADDSTARTRECT
+  # REMOVESTARTRECT
+  # SETSCRIPTTAGS
+  # REMOVESCRIPTTAGS
+  # LISTCOMPFLAGS
+  # PROMOTE
+  
+
   # Special handler to allow us to test more easily, it just accepts
   # any login
   def _handle({"LI", username, msg_id}, state) do
@@ -184,6 +223,17 @@ Welcome to teiserver
       # [_, _room_name, _key] ->
       #   # Join the channel
       #   {:failed, "Locked"}
+      _ ->
+        {:failed, "Bad details"}
+    end
+    state
+  end
+
+  def _handle({"SAYPRIVATE", data, _msg_id}, state) do
+    throw "TODO"
+    case Regex.run(~r/(\w+) (.+)/, data) do
+      [_, username, msg] ->
+        nil
       _ ->
         {:failed, "Bad details"}
     end

@@ -37,12 +37,14 @@ Keyed to the name of the user, these represent the users currently logged in. Cl
 Does what it says on the tin.
 
 
-#### TODO
-- Friend requests
-- Full battle room testing
-- Battle chat
+### Rough roadmap (very happy to change it up):
+- Friendlist stuff
+- Ignoring users
+- First unit tests
+- Persistent data store
+- More units tests
+- End to end tests
 - Periodically clean up empty chat rooms
 - Logging certain actions (in particular mod actions)
-- Automated tests
 - Benchmark suite
 

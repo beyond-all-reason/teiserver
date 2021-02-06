@@ -50,6 +50,13 @@ defmodule Teiserver.TestData do
         friends: [],
         friend_requests: []
       },
+      %{
+        name: "Chon",
+        country: "IE",
+        lobbyid: "LuaLobby Chobby",
+        friends: [],
+        friend_requests: []
+      },
     ]
     |> Enum.map(&User.create_user/1)
     |> Enum.map(&User.add_user/1)
@@ -69,6 +76,20 @@ defmodule Teiserver.TestData do
         battlestatus: 4194306,
         team_colour: 16777215,
         battle_id: 1,
+        status: 16
+      },
+      %{
+        pid: nil,
+        name: "Chon",
+        protocol: Teiserver.Protocols.Spring,
+        in_game: false,
+        away: false,
+        rank: 1,
+        moderator: false,
+        bot: true,
+        battlestatus: 0,
+        team_colour: 0,
+        battle_id: nil,
         status: 16
       }
     ]
