@@ -101,22 +101,28 @@ Welcome to teiserver
     state
   end
 
-  def _handle({"ACCEPTFRIENDREQUEST", data, msg_id}, state) do
-    throw "TODO"
-    data = "userName=Link"
+  def _handle({"ACCEPTFRIENDREQUEST", data, _msg_id}, state) do
+    [_, username] = String.split(data, "=")
+    User.accept_friend_request(username, state.user.name)
     state
   end
 
-  def _handle({"DECLINEFRIENDREQUEST", data, msg_id}, state) do
-    throw "TODO"
-    data = "userName=Link"
+  def _handle({"DECLINEFRIENDREQUEST", data, _msg_id}, state) do
+    [_, username] = String.split(data, "=")
+    User.decline_friend_request(username, state.user.name)
     state
   end
-  
+
+  def _handle({"FRIENDREQUEST", data, _msg_id}, state) do
+    throw "TODO"
+    [_, username] = String.split(data, "=")
+    User.create_friend_request(username, state.user.name)
+    state
+  end
+
   # Friend/user stuff TODO
   # IGNORE
   # UNFRIEND
-  # FRIENDREQUEST
   # IGNORELIST
 
   # Other TODO
@@ -138,55 +144,17 @@ Welcome to teiserver
   # REMOVESCRIPTTAGS
   # LISTCOMPFLAGS
   # PROMOTE
-  
 
   # Special handler to allow us to test more easily, it just accepts
   # any login
   def _handle({"LI", username, msg_id}, state) do
-    Logger.debug("[command:login] accepted #{username}")
-    _send(do_accepted(username), state, msg_id)
-    _send(do_motd(@motd), state, msg_id)
-
-    user = case User.get_user(username) do
-      nil ->
-        Logger.warn("Adding user based on login, this should be replaced with registration functionality")
-        User.create_user(%{
-          name: username,
-          country: "GB",
-          lobbyid: "LuaLobby Chobby"
-        })
-        |> User.add_user()
-      user ->
-        user
-    end
-
-    client = Client.create(username, self(), state.protocol)
-    |> Client.update
-
-    User.list_users()
-    |> Enum.each(fn u ->
-      Logger.debug("[adduser] sent user info")
-      _send(do_adduser(u), state, msg_id)
-    end)
-
-    Battle.list_battles()
-    |> Enum.each(fn b ->
-      Logger.debug("[battleopened] sent battle info")
-      _send(do_battleopened(b), state, msg_id)
-      _send(do_updatebattleinfo(b), state, msg_id)
-      _send(do_battle_players(b), state, msg_id)
-    end)
-
-    _send("LOGININFOEND\n", state, msg_id)
-    %{state | client: client, user: user}
+    do_login(username, msg_id, state)
   end
 
   # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#JOIN:client
   def _handle({"JOIN", data, msg_id}, state) do
     case Regex.run(~r/(\w+)(?:\t)?(\w+)?/, data) do
       [_, room_name] ->
-        Logger.warn("[JOIN] #{room_name}")
-
         room = Room.get_room(room_name)
         Room.add_user_to_room(state.user.name, room_name)
         members = Enum.join(room.members, " ")
@@ -213,9 +181,7 @@ Welcome to teiserver
   def _handle({"SAY", data, _msg_id}, state) do
     case Regex.run(~r/(\w+) (.+)/, data) do
       [_, room_name, msg] ->
-        Logger.warn("[SAY] #{room_name} - msg")
-
-        # TODO: Check is part of the room
+        Logger.warn("TODO: Check is part of the room")
         room = Room.get_room(room_name)
         Room.send_message(state.user.name, room.name, msg)
 
@@ -229,15 +195,55 @@ Welcome to teiserver
     state
   end
 
-  def _handle({"SAYPRIVATE", data, _msg_id}, state) do
-    throw "TODO"
-    case Regex.run(~r/(\w+) (.+)/, data) do
-      [_, username, msg] ->
-        nil
-      _ ->
-        {:failed, "Bad details"}
+  # def _handle({"SAYPRIVATE", data, _msg_id}, state) do
+  #   throw "TODO"
+  #   case Regex.run(~r/(\w+) (.+)/, data) do
+  #     [_, username, _msg] ->
+  #       nil
+  #     _ ->
+  #       {:failed, "Bad details"}
+  #   end
+  #   state
+  # end
+  
+  # Temporary function while we have our shorthand function
+  defp do_login(username, msg_id, state) do
+    Logger.debug("[command:login] accepted #{username}")
+    _send(do_accepted(username), state, msg_id)
+    _send(do_motd(@motd), state, msg_id)
+
+    user = case User.get_user(username) do
+      nil ->
+        Logger.warn("Adding user based on login, this should be replaced with registration functionality")
+        User.create_user(%{
+          name: username,
+          country: "GB",
+          lobbyid: "LuaLobby Chobby"
+        })
+        |> User.add_user()
+      user ->
+        user
     end
-    state
+
+    client = Client.login(username, self(), state.protocol)
+
+    Client.list_client_names()
+    |> Enum.each(fn name ->
+      Logger.debug("[adduser] sent user info for #{name}")
+      user = User.get_user(name)
+      _send(do_adduser(user), state, msg_id)
+    end)
+
+    Battle.list_battles()
+    |> Enum.each(fn b ->
+      Logger.debug("[battleopened] sent battle info")
+      _send(do_battleopened(b), state, msg_id)
+      _send(do_updatebattleinfo(b), state, msg_id)
+      _send(do_battle_players(b), state, msg_id)
+    end)
+
+    _send("LOGININFOEND\n", state, msg_id)
+    %{state | client: client, user: user}
   end
 
   # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#LOGIN:client
@@ -255,42 +261,7 @@ Welcome to teiserver
     # :crypto.hash(:md5 , "password") |> Base.encode64()
     case response do
       {:accepted, username} ->
-        Logger.debug("[command:login] accepted #{username}")
-        _send(do_accepted(username), state, msg_id)
-        _send(do_motd(@motd), state, msg_id)
-
-        user = case User.get_user(username) do
-          nil ->
-            Logger.warn("Adding user based on login, this should be replaced with registration functionality")
-            User.create_user(%{
-              name: username,
-              country: "GB",
-              lobbyid: "LuaLobby Chobby"
-            })
-            |> User.add_user()
-          user ->
-            user
-        end
-
-        client = Client.create(username, self(), state.protocol)
-        |> Client.update
-
-        User.list_users()
-        |> Enum.each(fn u ->
-          Logger.debug("[adduser] sent user info")
-          _send(do_adduser(u), state, msg_id)
-        end)
-
-        Battle.list_battles()
-        |> Enum.each(fn b ->
-          Logger.debug("[battleopened] sent battle info")
-          _send(do_battleopened(b), state, msg_id)
-          _send(do_updatebattleinfo(b), state, msg_id)
-          _send(do_battle_players(b), state, msg_id)
-        end)
-
-        _send("LOGININFOEND\n", state, msg_id)
-        %{state | client: client, user: user}
+        do_login(username, msg_id, state)
       {:denied, reason} ->
         Logger.debug("[command:login] denied with reason #{reason}")
         _send("DENIED #{reason}\n", state, msg_id)
@@ -387,6 +358,17 @@ Welcome to teiserver
     _send("ERR - No match\n", state)
     state
   end
+
+  # Update based on changed state
+  def update_friend_list(state, msg_id \\ nil) do
+    _send(do_friendlist(state.user), state, msg_id)
+  end
+
+  def update_friend_request_list(state, msg_id \\ nil) do
+    _send(do_friendlist_request(state.user), state, msg_id)
+  end
+  
+
 
   # DO send commands
   def do_accepted(user) do
@@ -492,7 +474,13 @@ Welcome to teiserver
     _send(do_battlestatus(username, battlestatus, team_colour), state, nil)
     state
   end
-  
+
+  def forward_logged_in_client(username, state) do
+    user = User.get_user(username)
+    _send(do_adduser(user), state, nil)
+    state
+  end
+
   # Chat
   def forward_chat_message({from, room_name, msg}, state) do
     _send("SAID #{room_name} #{from} #{msg}\n", state, nil)

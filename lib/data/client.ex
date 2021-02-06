@@ -69,6 +69,14 @@ defmodule Teiserver.Client do
       (if client.bot, do: 1, else: 0)
     ]
   end
+  
+  def login(username, pid, protocol) do
+    client = create(username, pid, protocol)
+    |> add_client
+
+    PubSub.broadcast Teiserver.PubSub, "client_updates", {:logged_in_client, username}
+    client
+  end
 
   def update(updated_client) do
     add_client(updated_client)
@@ -110,6 +118,10 @@ defmodule Teiserver.Client do
     client
   end
 
+  def list_client_names() do
+    ConCache.get(:lists, :clients)
+  end
+
   def list_clients() do
     ConCache.get(:lists, :clients)
     |> Enum.map(fn username -> ConCache.get(:clients, username) end)
@@ -117,5 +129,15 @@ defmodule Teiserver.Client do
 
   def get_client_state(pid) do
     GenServer.call(pid, :get_state)
+  end
+
+  def disconnect(name) do
+    ConCache.delete(:clients, name)
+    ConCache.update(:lists, :clients, fn value -> 
+      new_value = value
+      |> Enum.filter(fn v -> v != name end)
+
+      {:ok, new_value}
+    end)
   end
 end

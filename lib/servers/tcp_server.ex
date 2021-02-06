@@ -5,6 +5,7 @@ defmodule Teiserver.TcpServer do
   require Logger
   alias Phoenix.PubSub
 
+  alias Teiserver.Client
   alias Teiserver.Protocols.Spring
 
   @behaviour :ranch_protocol
@@ -28,6 +29,7 @@ defmodule Teiserver.TcpServer do
 
     :ok = PubSub.subscribe(Teiserver.PubSub, "battle_updates")
     :ok = PubSub.subscribe(Teiserver.PubSub, "client_updates")
+    :ok = PubSub.subscribe(Teiserver.PubSub, "user_updates")
     :gen_server.enter_loop(__MODULE__, [], %{
       client: nil,
       user: nil,
@@ -57,6 +59,11 @@ defmodule Teiserver.TcpServer do
   end
   
   # Client updates
+  def handle_info({:logged_in_client, username}, state) do
+    new_state = state.protocol.forward_logged_in_client(username, state)
+    {:noreply, new_state}
+  end
+
   def handle_info({:updated_client_status, username, status}, state) do
     new_state = state.protocol.forward_new_clientstatus({username, status}, state)
     {:noreply, new_state}
@@ -64,10 +71,8 @@ defmodule Teiserver.TcpServer do
 
   def handle_info({:updated_client, new_client}, state) when is_map(new_client) do
     new_state = if state.client.name == new_client.name do
-      Logger.warn("updated client #{state.client.name}")
       Map.put(state, :client, new_client)
     else
-      Logger.warn("no update for client #{state.client.name} as found #{new_client.name}")
       state
     end
     {:noreply, new_state}
@@ -75,6 +80,30 @@ defmodule Teiserver.TcpServer do
 
   def handle_info({:new_battlestatus, username, battlestatus, team_colour}, state) do
     new_state = state.protocol.forward_new_battlestatus({username, battlestatus, team_colour}, state)
+    {:noreply, new_state}
+  end
+  
+  # User
+  def handle_info({:updated_user, username, new_user, cause}, state) do
+    new_state = if username == state.user.name do
+      new_state = Map.put(state, :user, new_user)
+      case cause do
+        "accepted_friend" ->
+          new_state.protocol.update_friend_list(new_state)
+          new_state.protocol.update_friend_request_list(new_state)
+          Logger.warn("Friend request accepted, no action")
+        "request_accepted by " <> accepter ->
+          new_state.protocol.update_friend_list(new_state)
+          Logger.warn("Friend request to accepted by #{accepter}, no action")
+        "declined_friend" ->
+          new_state.protocol.do_friendlist_request(new_state)
+          Logger.warn("Friend request declined, no action")
+      end
+
+      new_state
+    else
+      state
+    end
     {:noreply, new_state}
   end
 
@@ -125,4 +154,9 @@ defmodule Teiserver.TcpServer do
   #   Logger.error("No handler: #{other}")
   #   {:noreply, state}
   # end
+  
+  def terminate(reason, state) do
+    Logger.warn("disconnect because #{Kernel.inspect reason}")
+    Client.disconnect(state.client.name)
+  end
 end
