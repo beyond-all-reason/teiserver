@@ -310,10 +310,8 @@ Welcome to teiserver
   end
 
   def _handle({"LEAVEBATTLE", _, _msg_id}, state) do
-    IO.puts ""
-    IO.inspect {state.user.name, state.client.battle_id}
-    IO.puts ""
     Battle.remove_user_from_battle(state.user.name, state.client.battle_id)
+    Client.new_battlestatus(state.client.name, 0, 0)
     new_client = Map.put(state.client, :battle_id, nil)
     Map.put(state, :client, new_client)
   end

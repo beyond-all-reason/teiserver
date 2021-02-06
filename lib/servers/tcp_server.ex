@@ -106,9 +106,6 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:battle_message, username, msg, battle_id}, state) do
-    IO.puts ""
-    IO.inspect "New battle message"
-    IO.puts ""
     new_state = state.protocol.forward_battle_said({username, msg, battle_id}, state)
     {:noreply, new_state}
   end
