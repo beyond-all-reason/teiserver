@@ -1,4 +1,5 @@
 defmodule Teiserver.Room do
+  require Logger
   alias Phoenix.PubSub
 
   def create_room(%{name: _} = room) do
@@ -73,6 +74,12 @@ defmodule Teiserver.Room do
   end
 
   def send_message(from, room_name, msg) do
-    PubSub.broadcast Teiserver.PubSub, "room:#{room_name}", {:new_message, from, room_name, msg}
+    Logger.warn("TODO: Check is part of the room")
+    case get_room(room_name) do
+      nil ->
+        nil
+      _room ->
+        PubSub.broadcast Teiserver.PubSub, "room:#{room_name}", {:new_message, from, room_name, msg}
+    end
   end
 end

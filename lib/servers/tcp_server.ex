@@ -6,6 +6,7 @@ defmodule Teiserver.TcpServer do
   alias Phoenix.PubSub
 
   alias Teiserver.Client
+  alias Teiserver.User
   alias Teiserver.Protocols.SpringProtocol
 
   @behaviour :ranch_protocol
@@ -31,9 +32,11 @@ defmodule Teiserver.TcpServer do
     :ok = PubSub.subscribe(Teiserver.PubSub, "client_updates")
     :ok = PubSub.subscribe(Teiserver.PubSub, "user_updates")
     :gen_server.enter_loop(__MODULE__, [], %{
+      name: nil,
       client: nil,
       user: nil,
       socket: socket,
+      msg_id: nil,
       transport: transport,
       protocol: @default_protocol
     })
@@ -54,23 +57,27 @@ defmodule Teiserver.TcpServer do
 
   def handle_info({:tcp, _socket, data}, state) do
     Logger.debug("<-- #{data}")
-    new_state = state.protocol.handle(data, state)
+    new_state = data
+    |> String.split("\n")
+    |> Enum.reduce(state, fn (data, acc) ->
+      state.protocol.handle(data, acc)
+    end)
     {:noreply, new_state}
   end
-  
+
   # Client updates
   def handle_info({:logged_in_client, username}, state) do
-    new_state = state.protocol.forward_logged_in_client(username, state)
+    new_state = state.protocol.reply(:logged_in_client, username, state)
     {:noreply, new_state}
   end
 
   def handle_info({:updated_client_status, username, status}, state) do
-    new_state = state.protocol.forward_new_clientstatus({username, status}, state)
+    new_state = state.protocol.reply(:new_clientstatus, [username, status], state)
     {:noreply, new_state}
   end
 
   def handle_info({:updated_client, new_client}, state) when is_map(new_client) do
-    new_state = if state.client.name == new_client.name do
+    new_state = if state.name == new_client.name do
       Map.put(state, :client, new_client)
     else
       state
@@ -79,63 +86,55 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:new_battlestatus, username, battlestatus, team_colour}, state) do
-    new_state = state.protocol.forward_new_battlestatus({username, battlestatus, team_colour}, state)
+    new_state = state.protocol.reply(:battlestatus, [username, battlestatus, team_colour], state)
     {:noreply, new_state}
   end
 
   # User
-  def handle_info({:updated_user, username, new_user, cause}, state) do
-    new_state = if username == state.user.name do
-      new_state = Map.put(state, :user, new_user)
-      case cause do
-        "accepted_friend" ->
-          new_state.protocol.update_friend_list(new_state)
-          new_state.protocol.update_friend_request_list(new_state)
-          Logger.warn("Friend request accepted, no action")
-        "request_accepted by " <> accepter ->
-          new_state.protocol.update_friend_list(new_state)
-          Logger.warn("Friend request to accepted by #{accepter}, no action")
-        "declined_friend" ->
-          new_state.protocol.do_friendlist_request(new_state)
-          Logger.warn("Friend request declined, no action")
-      end
+  def handle_info({:this_user_updated, fields}, state) do
+    new_user = User.get_user(state.name)
+    new_state = %{state | user: new_user}
 
-      new_state
-    else
-      state
-    end
+    fields
+    |> Enum.each(fn field ->
+      case field do
+        :friends -> state.protocol.reply(:friendlist, new_user, state)
+        :friend_requests -> state.protocol.reply(:friendlist_request, new_user, state)
+      end
+    end)
+
     {:noreply, new_state}
   end
 
   # Chat
   def handle_info({:new_message, from, room_name, msg}, state) do
-    new_state = state.protocol.forward_chat_message({from, room_name, msg}, state)
+    new_state = state.protocol.reply(:chat_message, [from, room_name, msg], state)
     {:noreply, new_state}
   end
 
   def handle_info({:add_user_to_room, username, room_name}, state) do
-    new_state = state.protocol.forward_add_user_to_room({username, room_name}, state)
+    new_state = state.protocol.reply(:add_user_to_room, {username, room_name}, state)
     {:noreply, new_state}
   end
 
   def handle_info({:remove_user_from_room, username, room_name}, state) do
-    new_state = state.protocol.forward_remove_user_from_room({username, room_name}, state)
+    new_state = state.protocol.reply(:remove_user_from_room, {username, room_name}, state)
     {:noreply, new_state}
   end
 
   # Battles
   def handle_info({:add_user_to_battle, username, battle_id}, state) do
-    new_state = state.protocol.forward_add_user_to_battle({username, battle_id}, state)
+    new_state = state.protocol.reply(:add_user_to_battle, {username, battle_id}, state)
     {:noreply, new_state}
   end
 
   def handle_info({:remove_user_from_battle, username, battle_id}, state) do
-    new_state = state.protocol.forward_remove_user_from_battle({username, battle_id}, state)
+    new_state = state.protocol.reply(:remove_user_from_battle, {username, battle_id}, state)
     {:noreply, new_state}
   end
 
   def handle_info({:battle_message, username, msg, battle_id}, state) do
-    new_state = state.protocol.forward_battle_said({username, msg, battle_id}, state)
+    new_state = state.protocol.reply(:battle_message, {username, msg, battle_id}, state)
     {:noreply, new_state}
   end
 
@@ -149,6 +148,10 @@ defmodule Teiserver.TcpServer do
     Logger.debug("Closing TCP connection - no transport")
     {:stop, :normal, state}
   end
+  
+  def handle_info(:terminate, state) do
+    {:stop, :normal, state}
+  end
 
   # def handle_info(other, state) do
   #   Logger.error("No handler: #{other}")
@@ -157,7 +160,6 @@ defmodule Teiserver.TcpServer do
 
   def terminate(reason, state) do
     Logger.warn("disconnect because #{Kernel.inspect reason}")
-    Client.disconnect(state.client.name)
+    Client.disconnect(state.name)
   end
-
 end

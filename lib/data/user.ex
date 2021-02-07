@@ -1,5 +1,13 @@
 defmodule Teiserver.User do
+  @moduledoc """
+  Structure:
+    id: integer
+    name: string
+  """
+
+  require Logger
   alias Phoenix.PubSub
+  # alias Teiserver.Client
 
   defp next_id() do
     ConCache.isolated(:id_counters, :user, fn -> 
@@ -42,20 +50,23 @@ defmodule Teiserver.User do
 
       # Add to friends, remove from requests
       new_accepter = Map.merge(accepter, %{
-        frields: accepter.friends ++ [requester_name],
+        friends: accepter.friends ++ [requester_name],
         friend_requests: Enum.filter(accepter.friend_requests, fn f -> f != requester_name end)
       })
 
       new_requester = Map.merge(requester, %{
-        frields: requester.friends ++ [accepter_name],
+        friends: requester.friends ++ [accepter_name],
       })
       
       add_user(new_accepter)
       add_user(new_requester)
 
       # Now push out the updates
-      PubSub.broadcast Teiserver.PubSub, "user_updates", {:updated_user, accepter_name, new_accepter, "accepted_friend"}
-      PubSub.broadcast Teiserver.PubSub, "user_updates", {:updated_user, requester_name, new_requester, "request_accepted by #{accepter_name}"}
+      PubSub.broadcast Teiserver.PubSub, "user_updates:#{requester_name}", {:this_user_updated, [:friends]}
+      PubSub.broadcast Teiserver.PubSub, "user_updates:#{accepter_name}", {:this_user_updated, [:friends, :friend_requests]}
+      new_accepter
+    else
+      accepter
     end
   end
 
@@ -70,7 +81,10 @@ defmodule Teiserver.User do
       add_user(new_decliner)
 
       # Now push out the updates
-      PubSub.broadcast Teiserver.PubSub, "user_updates", {:updated_user, decliner_name, new_decliner, "declined_friend"}
+      PubSub.broadcast Teiserver.PubSub, "user_updates:#{decliner_name}", {:this_user_updated, [:friend_requests]}
+      new_decliner
+    else
+      decliner
     end
   end
 
@@ -85,12 +99,43 @@ defmodule Teiserver.User do
       add_user(new_potential)
 
       # Now push out the updates
-      PubSub.broadcast Teiserver.PubSub, "user_updates", {:updated_user, potential_name, new_potential, "request_created"}
+      PubSub.broadcast Teiserver.PubSub, "user_updates:#{potential_name}", {:this_user_updated, [:friend_requests]}
+      new_potential
+    else
+      potential
     end
   end
 
   def list_users() do
     ConCache.get(:lists, :users)
     |> Enum.map(fn user_id -> ConCache.get(:users, user_id) end)
+  end
+
+  def try_login(username, _password, state) do
+    # Password hashing for spring is:
+    # :crypto.hash(:md5 , "password") |> Base.encode64()
+    do_login(username, state)
+  end
+
+  defp do_login(username, state) do
+    proto = state.protocol
+
+    proto.reply(:login_accepted, username, state)
+    proto.reply(:motd, state)
+
+    user = case get_user(username) do
+      nil ->
+        Logger.warn("Adding user based on login, this should be replaced with registration functionality")
+        create_user(%{
+          name: username,
+          country: "GB",
+          lobbyid: "LuaLobby Chobby"
+        })
+        |> add_user()
+      user ->
+        user
+    end
+    
+    {:ok, user}
   end
 end

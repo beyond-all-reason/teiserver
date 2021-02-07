@@ -1,5 +1,6 @@
 defmodule Teiserver.Client do
   alias Phoenix.PubSub
+  alias Teiserver.Battle
 
   def create(client) do
     Map.merge(%{
@@ -69,12 +70,12 @@ defmodule Teiserver.Client do
       (if client.bot, do: 1, else: 0)
     ]
   end
-  
-  def login(username, pid, protocol) do
-    client = create(username, pid, protocol)
+
+  def login(user, pid, protocol) do
+    client = create(user.name, pid, protocol)
     |> add_client
 
-    PubSub.broadcast Teiserver.PubSub, "client_updates", {:logged_in_client, username}
+    PubSub.broadcast Teiserver.PubSub, "client_updates", {:logged_in_client, user.name}
     client
   end
 
@@ -85,22 +86,36 @@ defmodule Teiserver.Client do
   end
 
   def new_status(username, status) do
+    :ok = PubSub.broadcast Teiserver.PubSub, "client_updates", {:updated_client_status, username, status}
     client = get_client(username)
     Map.merge(client, %{
       status: status
     })
     |> add_client()
-    PubSub.broadcast Teiserver.PubSub, "client_updates", {:updated_client_status, username, status}
   end
 
   def new_battlestatus(username, new_battlestatus, team_colour) do
-    client = get_client(username)
     :ok = PubSub.broadcast Teiserver.PubSub, "client_updates", {:new_battlestatus, username, new_battlestatus, team_colour}
-    updated_client = Map.merge(client, %{
+    client = get_client(username)
+    Map.merge(client, %{
       battlestatus: new_battlestatus,
-      team_colour: team_colour
+      team_colour: team_colour,
     })
-    add_client(updated_client)
+    |> add_client
+  end
+
+  def leave_battle(username) do
+    :ok = PubSub.broadcast Teiserver.PubSub, "client_updates", {:new_battlestatus, username, 0, 0}
+    client = get_client(username)
+    new_client = Map.merge(client, %{
+      battlestatus: 0,
+      team_colour: 0,
+      battle_id: nil
+    })
+    |> add_client
+
+    Battle.remove_user_from_battle(username, client.battle_id)
+    new_client
   end
 
   def get_client(username) do
@@ -109,7 +124,7 @@ defmodule Teiserver.Client do
 
   def add_client(client) do
     ConCache.put(:clients, client.name, client)
-    ConCache.update(:lists, :clients, fn value -> 
+    ConCache.update(:lists, :clients, fn value ->
       new_value = (value ++ [client.name])
       |> Enum.uniq
 
