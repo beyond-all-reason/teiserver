@@ -100,6 +100,7 @@ defmodule Teiserver.TcpServer do
       case field do
         :friends -> state.protocol.reply(:friendlist, new_user, state)
         :friend_requests -> state.protocol.reply(:friendlist_request, new_user, state)
+        :ignored -> state.protocol.reply(:ignorelist, new_user, state)
       end
     end)
 

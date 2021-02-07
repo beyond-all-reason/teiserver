@@ -62,3 +62,6 @@ Does what it says on the tin.
 - Logging certain actions (in particular mod actions)
 - Benchmark suite
 
+### Possible bugs to address
+- What happens if someone appears on both a friend and ignore list?
+- What happens if someone is friends/ignored and changes their name?

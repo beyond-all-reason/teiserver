@@ -69,6 +69,7 @@ Welcome to Teiserver
         do_handle(command, data, %{state | msg_id: msg_id})
       nil ->
         Logger.error("Bad match on command: '#{data}'")
+        state
     end
   end
 
@@ -176,10 +177,19 @@ Welcome to Teiserver
     state
   end
 
-  # Friend/user stuff TODO
-  # IGNORE
-  # UNFRIEND
-  # IGNORELIST
+  defp do_handle("IGNORE", data, state) do
+    [_, username] = String.split(data, "=")
+    User.ignore_user(state.name, username)
+    state
+  end
+
+  defp do_handle("UNIGNORE", data, state) do
+    [_, username] = String.split(data, "=")
+    User.unignore_user(state.name, username)
+    state
+  end
+
+  defp do_handle("IGNORELIST", _, state), do: reply(:ignorelist, state.user, state)
 
   # Chat related
   defp do_handle("JOIN", data, state) do
@@ -363,6 +373,16 @@ Welcome to Teiserver
     end)
 
     ["FRIENDREQUESTLISTBEGIN\n"] ++ requests ++ ["FRIENDREQUESTLISTEND\n"]
+    |> Enum.join("")
+  end
+
+  defp do_reply(:ignorelist, user) do
+    ignored = user.ignored
+    |> Enum.map(fn f ->
+      "IGNORELIST userName=#{f}\n"
+    end)
+
+    ["IGNORELISTBEGIN\n"] ++ ignored ++ ["IGNORELISTEND\n"]
     |> Enum.join("")
   end
 

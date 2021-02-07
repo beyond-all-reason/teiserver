@@ -24,7 +24,8 @@ defmodule Teiserver.User do
       moderator: false,
       bot: false,
       friends: [],
-      friend_requests: []
+      friend_requests: [],
+      ignored: []
     }, user)
   end
   
@@ -103,6 +104,42 @@ defmodule Teiserver.User do
       new_potential
     else
       potential
+    end
+  end
+
+  def ignore_user(ignorer_name, ignored_name) do
+    ignorer = get_user(ignorer_name)
+    if ignored_name not in ignorer.ignored do
+      # Add to requests
+      new_ignorer = Map.merge(ignorer, %{
+        ignored: ignorer.ignored ++ [ignored_name]
+      })
+
+      add_user(new_ignorer)
+
+      # Now push out the updates
+      PubSub.broadcast Teiserver.PubSub, "user_updates:#{ignorer_name}", {:this_user_updated, [:ignored]}
+      new_ignorer
+    else
+      ignorer
+    end
+  end
+
+  def unignore_user(unignorer_name, unignored_name) do
+    unignorer = get_user(unignorer_name)
+    if unignored_name in unignorer.ignored do
+      # Add to requests
+      new_unignorer = Map.merge(unignorer, %{
+        ignored: Enum.filter(unignorer.ignored, fn f -> f != unignored_name end)
+      })
+
+      add_user(new_unignorer)
+
+      # Now push out the updates
+      PubSub.broadcast Teiserver.PubSub, "user_updates:#{unignorer_name}", {:this_user_updated, [:ignored]}
+      new_unignorer
+    else
+      unignorer
     end
   end
 

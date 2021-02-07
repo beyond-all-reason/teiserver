@@ -34,7 +34,7 @@ defmodule Teiserver.TestData do
         country: "GB",
         lobbyid: "LuaLobby Chobby",
         friends: ["Addas"],
-        friend_requests: ["Link"]
+        friend_requests: []
       },
       %{
         name: "Addas",
@@ -48,7 +48,8 @@ defmodule Teiserver.TestData do
         country: "IE",
         lobbyid: "LuaLobby Chobby",
         friends: [],
-        friend_requests: []
+        friend_requests: [],
+        ignored: []
       },
       %{
         name: "Chon",
