@@ -226,9 +226,15 @@ Welcome to Teiserver
     end
     state
   end
-  
+
   defp do_handle("SAYPRIVATE", data, state) do
-    Logger.error("TODO: SAYPRIVATE - #{data}")
+    case Regex.run(~r/(\w+) (.+)/, data) do
+      [_, to_name, msg] ->
+        User.send_direct_message(state.name, to_name, msg)
+        _send("SAIDPRIVATE #{to_name} #{msg}\n", state)
+      _ ->
+        nil
+    end
     state
   end
 
@@ -325,7 +331,7 @@ Welcome to Teiserver
   
   # Reply commands, these are things we are sending to the client
   # based on messages they sent us
-  @spec reply(Atom.t, nil | String.t | List.t, Map.t) :: Map.t
+  @spec reply(Atom.t, nil | String.t | Tuple.t | List.t, Map.t) :: Map.t
   def reply(reply_type, data, state) do
     msg = do_reply(reply_type, data)
     _send(msg, state)
@@ -443,6 +449,12 @@ Welcome to Teiserver
   end
 
   # Chat
+  defp do_reply(:direct_message, {from, msg, state_user}) do
+    if from not in state_user.ignored do
+      "SAIDPRIVATE #{from} #{msg}\n"
+    end
+  end
+
   defp do_reply(:chat_message, {from, room_name, msg, state_user}) do
     if from not in state_user.ignored do
       "SAID #{room_name} #{from} #{msg}\n"

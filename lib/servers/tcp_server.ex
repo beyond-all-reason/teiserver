@@ -108,8 +108,13 @@ defmodule Teiserver.TcpServer do
   end
 
   # Chat
+  def handle_info({:direct_message, from, msg}, state) do
+    new_state = state.protocol.reply(:direct_message, {from, msg, state.user}, state)
+    {:noreply, new_state}
+  end
+
   def handle_info({:new_message, from, room_name, msg}, state) do
-    new_state = state.protocol.reply(:chat_message, [from, room_name, msg, state.user], state)
+    new_state = state.protocol.reply(:chat_message, {from, room_name, msg, state.user}, state)
     {:noreply, new_state}
   end
 
@@ -144,7 +149,7 @@ defmodule Teiserver.TcpServer do
     transport.close(socket)
     {:stop, :normal, state}
   end
-  
+
   def handle_info({:tcp_closed, _socket}, state) do
     Logger.debug("Closing TCP connection - no transport")
     {:stop, :normal, state}

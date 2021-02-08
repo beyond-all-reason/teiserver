@@ -143,6 +143,10 @@ defmodule Teiserver.User do
     end
   end
 
+  def send_direct_message(from_name, to_name, msg) do
+    PubSub.broadcast Teiserver.PubSub, "user_updates:#{to_name}", {:direct_message, from_name, msg}
+  end
+
   def list_users() do
     ConCache.get(:lists, :users)
     |> Enum.map(fn user_id -> ConCache.get(:users, user_id) end)
