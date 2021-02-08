@@ -109,7 +109,7 @@ defmodule Teiserver.TcpServer do
 
   # Chat
   def handle_info({:new_message, from, room_name, msg}, state) do
-    new_state = state.protocol.reply(:chat_message, [from, room_name, msg], state)
+    new_state = state.protocol.reply(:chat_message, [from, room_name, msg, state.user], state)
     {:noreply, new_state}
   end
 

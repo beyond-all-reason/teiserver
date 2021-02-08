@@ -58,7 +58,7 @@ defmodule Teiserver.User do
       new_requester = Map.merge(requester, %{
         friends: requester.friends ++ [accepter_name],
       })
-      
+
       add_user(new_accepter)
       add_user(new_requester)
 

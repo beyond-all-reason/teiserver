@@ -443,8 +443,10 @@ Welcome to Teiserver
   end
 
   # Chat
-  defp do_reply(:chat_message, {from, room_name, msg}) do
-    "SAID #{room_name} #{from} #{msg}\n"
+  defp do_reply(:chat_message, {from, room_name, msg, state_user}) do
+    if from not in state_user.ignored do
+      "SAID #{room_name} #{from} #{msg}\n"
+    end
   end
 
   defp do_reply(:add_user_to_room, {username, room_name}) do
@@ -477,6 +479,7 @@ Welcome to Teiserver
     _send(msg, state.socket, state.transport, state.msg_id)
   end
 
+  defp _send(nil, _, _, _), do: nil
   defp _send("", _, _, _), do: nil
   defp _send([], _, _, _), do: nil
   defp _send(msg, socket, transport, msg_id) when is_list(msg) do
