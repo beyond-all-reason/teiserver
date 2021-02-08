@@ -155,6 +155,17 @@ Welcome to Teiserver
     state
   end
 
+  defp do_handle("GETUSERINFO", _, state) do
+    # TODO: Actually have this information
+    msg = [
+      "SERVERMSG Registration date: yesterday\n",
+      "SERVERMSG Email address: #{state.name}@#{state.name}.com\n",
+      "SERVERMSG Ingame time: xyz hours\n",
+    ]
+    _send(msg, state)
+    state
+  end
+
   # Friend list
   defp do_handle("FRIENDLIST", _, state), do: reply(:friendlist, state.user, state)
   defp do_handle("FRIENDREQUESTLIST", _, state), do: reply(:friendlist_request, state.user, state)

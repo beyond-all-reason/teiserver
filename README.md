@@ -52,7 +52,9 @@ Does what it says on the tin.
 
 ### Rough roadmap (very happy to change it up):
 - First unit tests
+- Remaining Spring commands
 - Persistent data store
+- Permissions system
 - More units tests
 - End to end tests
 - Periodically clean up empty chat rooms

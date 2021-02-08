@@ -23,8 +23,9 @@ defmodule Teiserver.TestData do
         friend_requests: []
       },
       %{
-        name: "Testuser2",
+        name: "TestUser",
         country: "US",
+        password_hash: "X03MO1qnZdYdgyfeuILPmQ==",# "password"
         lobbyid: "LuaLobby Chobby",
         friends: [],
         friend_requests: []
