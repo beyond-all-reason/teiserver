@@ -74,12 +74,13 @@ defmodule Teiserver.Room do
   end
 
   def send_message(from, room_name, msg) do
-    Logger.warn("TODO: Check is part of the room")
     case get_room(room_name) do
       nil ->
         nil
-      _room ->
-        PubSub.broadcast Teiserver.PubSub, "room:#{room_name}", {:new_message, from, room_name, msg}
+      room ->
+        if from in room.members do
+          PubSub.broadcast Teiserver.PubSub, "room:#{room_name}", {:new_message, from, room_name, msg}
+        end
     end
   end
 end
