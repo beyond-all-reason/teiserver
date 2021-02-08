@@ -50,10 +50,7 @@ Keyed to the name of the user, these represent the users currently logged in. Cl
 ##### Battles
 Does what it says on the tin.
 
-
 ### Rough roadmap (very happy to change it up):
-- Friendlist stuff
-- Ignoring users
 - First unit tests
 - Persistent data store
 - More units tests

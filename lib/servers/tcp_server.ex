@@ -165,7 +165,7 @@ defmodule Teiserver.TcpServer do
   # end
 
   def terminate(reason, state) do
-    Logger.warn("disconnect because #{Kernel.inspect reason}")
+    Logger.debug("disconnect because #{Kernel.inspect reason}")
     Client.disconnect(state.name)
   end
 end
