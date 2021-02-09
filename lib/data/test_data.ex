@@ -14,6 +14,7 @@ defmodule Teiserver.TestData do
         lobbyid: "LuaLobby Chobby",
         friends: [],
         friend_requests: [],
+        ignored: [],
         rank: 1,
         bot: true,
         moderator: true
@@ -24,6 +25,7 @@ defmodule Teiserver.TestData do
         lobbyid: "LuaLobby Chobby",
         friends: [],
         friend_requests: [],
+        ignored: [],
         rank: 1,
         bot: true,
         moderator: false
@@ -33,8 +35,9 @@ defmodule Teiserver.TestData do
         country: "US",
         password_hash: "X03MO1qnZdYdgyfeuILPmQ==",# "password"
         lobbyid: "LuaLobby Chobby",
-        friends: [],
-        friend_requests: [],
+        friends: ["Friend1", "Friend2"],
+        friend_requests: ["FriendRequest1"],
+        ignored: ["Ignored1", "Ignored2"],
         rank: 1,
         bot: false,
         moderator: true
@@ -45,6 +48,7 @@ defmodule Teiserver.TestData do
         lobbyid: "LuaLobby Chobby",
         friends: ["Addas"],
         friend_requests: [],
+        ignored: [],
         rank: 5,
         bot: false,
         moderator: false
@@ -55,6 +59,7 @@ defmodule Teiserver.TestData do
         lobbyid: "LuaLobby Chobby",
         friends: ["Teifion"],
         friend_requests: [],
+        ignored: [],
         rank: 4,
         bot: false,
         moderator: false

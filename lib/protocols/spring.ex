@@ -147,7 +147,7 @@ Welcome to Teiserver
         state
     end
   end
-  
+
   defp do_handle("EXIT", _reason, state) do
     send(self(), :terminate)
     # GenServer.cast(via_tuple(t.id), {:terminate})
