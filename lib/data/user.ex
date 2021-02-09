@@ -176,7 +176,7 @@ defmodule Teiserver.User do
       user ->
         user
     end
-    
+
     {:ok, user}
   end
 end

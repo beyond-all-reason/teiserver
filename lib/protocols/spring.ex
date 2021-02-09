@@ -10,6 +10,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   alias Teiserver.Room
   alias Teiserver.User
   alias Phoenix.PubSub
+  alias Teiserver.BitParse
 
   # Setup stuff TODO
   # REGISTER
@@ -83,18 +84,16 @@ Welcome to Teiserver
   defp do_handle("MYSTATUS", data, state) do
     case Regex.run(~r/([0-9]+)/, data) do
       [_, new_value] ->
-        # TODO
-        # This is trying to parse it, currently not sure
-        # how well this is working so for now
-        # not parsing it
-        # status
-        # |> String.to_integer
-        # |> Integer.digits(2)
-        # |> Client.create_from_bits(state.client)
-        # |> Client.update
+        status_bits = BitParse.parse_bits(new_value, 7)
+        [in_game, away, _r1, _r2, _r3, _mod, _bot] = status_bits
+
+        new_client = Map.merge(state.client, %{
+          in_game: (in_game == 1),
+          away: (away == 1),
+        })
 
         # This just accepts it and updates the client
-        new_client = Client.new_status(state.name, new_value)
+        new_client = Client.update(new_client, :client_updated_status)
         %{state | client: new_client}
       nil ->
         Logger.debug("[command:mystatus] bad match on: #{data}")
@@ -369,8 +368,8 @@ Welcome to Teiserver
     "ADDUSER #{user.name} #{user.country} #{user.id}\t#{user.lobbyid}\n"
   end
 
-  defp do_reply(:clientstatus, client) do
-    "CLIENTSTATUS #{client.name}\t#{client.status}"
+  defp do_reply(:client_status, {client, _reason}) do
+    "CLIENTSTATUS #{client.name}\t#{client.status}\n"
   end
 
   defp do_reply(:friendlist, user) do

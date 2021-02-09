@@ -76,7 +76,8 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:updated_client, new_client}, state) when is_map(new_client) do
+  def handle_info({:updated_client, new_client, reason}, state) when is_map(new_client) do
+    state.protocol.reply(:client_status, {new_client, reason}, state)
     new_state = if state.name == new_client.name do
       Map.put(state, :client, new_client)
     else
@@ -144,7 +145,7 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:tcp_closed, socket}, state = %{socket: socket, transport: transport}) do
+  def handle_info({:tcp_closed, socket}, %{socket: socket, transport: transport} = state) do
     Logger.debug("Closing TCP connection")
     transport.close(socket)
     {:stop, :normal, state}

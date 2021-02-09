@@ -1,6 +1,7 @@
 defmodule Teiserver.Client do
   alias Phoenix.PubSub
   alias Teiserver.Battle
+  alias Teiserver.BitParse
 
   def create(client) do
     Map.merge(%{
@@ -33,34 +34,43 @@ defmodule Teiserver.Client do
     }
   end
 
-  def create_from_user(user, client) do
-    Map.merge(client, %{
+  # def create_from_user(user, client) do
+  #   Map.merge(client, %{
+  #     rank: user.rank,
+  #     moderator: (user.moderator == 1),
+  #     bot: (user.bot == 1)
+  #   })
+  # end
+
+  # def create_from_bits([0], client) do
+  #   Map.merge(client, %{
+  #     in_game: 0,
+  #     away: 0
+  #   })
+  # end
+
+  def login(user, pid, protocol) do
+    client = create(%{
+      name: user.name,
+      pid: pid,
+      protocol: protocol,
       rank: user.rank,
-      moderator: (user.moderator == 1),
-      bot: (user.bot == 1)
+      moderator: user.moderator,
+      bot: user.bot,
+      away: false,
+      in_game: false
     })
+    |> calculate_status
+    |> add_client
+
+    PubSub.broadcast Teiserver.PubSub, "client_updates", {:logged_in_client, user.name}
+    client
   end
 
-  def create_from_bits([0], client) do
-    Map.merge(client, %{
-      in_game: 0,
-      away: 0
-    })
-  end
-  def create_from_bits(bits, client) do
-    [in_game, away, _r1, _r2, _r3, _moderator, _bot | _] = bits ++ [0,0,0,0,0,0,0,0,0]
-    Map.merge(client, %{
-      in_game: (in_game == 1),
-      away: (away == 1),
-      # rank: r1 + r2 + r3,
-      # moderator: (moderator == 1),
-      # bot: (bot == 1)
-    })
-  end
+  def calculate_status(client) do
+    [r1, r2, r3] = BitParse.parse_bits("#{client.rank}", 3)
 
-  def to_bits(client) do
-    [r1, r2, r3 | _] = Integer.digits(client.rank, 2) ++ [0, 0, 0]
-    [
+    status = [
       (if client.in_game, do: 1, else: 0),
       (if client.away, do: 1, else: 0),
       r1,
@@ -69,29 +79,15 @@ defmodule Teiserver.Client do
       (if client.moderator, do: 1, else: 0),
       (if client.bot, do: 1, else: 0)
     ]
+    |> Integer.undigits(2)
+    %{client | status: status}
   end
 
-  def login(user, pid, protocol) do
-    client = create(user.name, pid, protocol)
-    |> add_client
-
-    PubSub.broadcast Teiserver.PubSub, "client_updates", {:logged_in_client, user.name}
+  def update(client, reason \\ nil) do
+    client = calculate_status(client)
+    add_client(client)
+    PubSub.broadcast Teiserver.PubSub, "client_updates", {:updated_client, client, reason}
     client
-  end
-
-  def update(updated_client) do
-    add_client(updated_client)
-    PubSub.broadcast Teiserver.PubSub, "client_updates", {:updated_client, updated_client}
-    updated_client
-  end
-
-  def new_status(username, status) do
-    :ok = PubSub.broadcast Teiserver.PubSub, "client_updates", {:updated_client_status, username, status}
-    client = get_client(username)
-    Map.merge(client, %{
-      status: status
-    })
-    |> add_client()
   end
 
   def new_battlestatus(username, new_battlestatus, team_colour) do

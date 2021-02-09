@@ -28,8 +28,8 @@ defmodule UDPServer do
 
   def start_link(_) do
     {mod, fun} = Application.get_env :udp_server, :udp_handler, {__MODULE__, :default_handler}
-    {ip, port} = {Application.get_env(:udp_server, :ip, {127,0,0,1}), Application.get_env(:udp_server, :port, 8202)}
-    GenServer.start_link(__MODULE__, [%State{handler: {mod,fun}, ip: ip, port: port}], name: __MODULE__)
+    {ip, port} = {Application.get_env(:udp_server, :ip, {127, 0, 0, 1}), Application.get_env(:udp_server, :port, 8202)}
+    GenServer.start_link(__MODULE__, [%State{handler: {mod, fun}, ip: ip, port: port}], name: __MODULE__)
   end
 
   def init([%State{} = state]) do

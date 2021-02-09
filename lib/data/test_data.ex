@@ -13,14 +13,20 @@ defmodule Teiserver.TestData do
         country: "GB",
         lobbyid: "LuaLobby Chobby",
         friends: [],
-        friend_requests: []
+        friend_requests: [],
+        rank: 1,
+        bot: true,
+        moderator: true
       },
       %{
         name: "[teh]cluster1[03]",
         country: "GB",
         lobbyid: "LuaLobby Chobby",
         friends: [],
-        friend_requests: []
+        friend_requests: [],
+        rank: 1,
+        bot: true,
+        moderator: false
       },
       %{
         name: "TestUser",
@@ -28,21 +34,30 @@ defmodule Teiserver.TestData do
         password_hash: "X03MO1qnZdYdgyfeuILPmQ==",# "password"
         lobbyid: "LuaLobby Chobby",
         friends: [],
-        friend_requests: []
+        friend_requests: [],
+        rank: 1,
+        bot: false,
+        moderator: true
       },
       %{
         name: "Teifion",
         country: "GB",
         lobbyid: "LuaLobby Chobby",
         friends: ["Addas"],
-        friend_requests: []
+        friend_requests: [],
+        rank: 5,
+        bot: false,
+        moderator: false
       },
       %{
         name: "Addas",
         country: "DE",
         lobbyid: "LuaLobby Chobby",
         friends: ["Teifion"],
-        friend_requests: []
+        friend_requests: [],
+        rank: 4,
+        bot: false,
+        moderator: false
       },
       %{
         name: "Link",
@@ -50,14 +65,20 @@ defmodule Teiserver.TestData do
         lobbyid: "LuaLobby Chobby",
         friends: [],
         friend_requests: [],
-        ignored: []
+        ignored: [],
+        rank: 3,
+        bot: false,
+        moderator: false
       },
       %{
         name: "Chon",
         country: "IE",
         lobbyid: "LuaLobby Chobby",
         friends: [],
-        friend_requests: []
+        friend_requests: [],
+        rank: 2,
+        bot: false,
+        moderator: true
       },
     ]
     |> Enum.map(&User.create_user/1)
@@ -75,8 +96,8 @@ defmodule Teiserver.TestData do
         rank: 1,
         moderator: true,
         bot: true,
-        battlestatus: 4194306,
-        team_colour: 16777215,
+        battlestatus: 4_194_306,
+        team_colour: 16_777_215,
         battle_id: 1,
         status: 16
       },
@@ -112,8 +133,8 @@ defmodule Teiserver.TestData do
         passworded: false,
         rank: 0,
         locked: false,
-        map_hash: 1683043765,
-        hash_code: 1683043765,
+        map_hash: 1_683_043_765,
+        hash_code: 1_683_043_765,
         engine_name: "spring",
         engine_version: "104.0.1-1714-g321b911",
         map_name: "Supreme_Crossing_V1",
@@ -131,8 +152,8 @@ defmodule Teiserver.TestData do
         passworded: false,
         rank: 0,
         locked: false,
-        map_hash: 733360208,
-        hash_code: 733360208,
+        map_hash: 733_360_208,
+        hash_code: 733_360_208,
         engine_name: "spring",
         engine_version: "104.0.1-1714-g321b911",
         map_name: "Quicksilver Remake 1.24",
