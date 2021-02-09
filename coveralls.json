@@ -1,0 +1,22 @@
+{
+  "skip_files": [
+    
+  ],
+
+  "custom_stop_words": [
+    "GenServer.start_link\\(__MODULE__, \\[\\], opts\\)"
+  ],
+
+  "terminal_options": {
+    "file_column_width": 60
+  },
+  
+  "coverage_options": {
+    "treat_no_relevant_lines_as_cover*ed": true,
+    "output_dir": "cover/",
+    "ttemplate_temp": "https://github.com/parroty/excoveralls/blob/master/lib/templates/html/htmlcov/coverage.html.eex",
+    "ttemplate_path": "custom/path/to/template/",
+    "minimum_coverage": 80
+  }
+}
+
