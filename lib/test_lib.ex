@@ -24,7 +24,9 @@ defmodule Teiserver.TestLib do
   end
 
   def _recv(socket) do
-    {:ok, reply} = :gen_tcp.recv(socket, 0, 1000)
-    reply |> to_string
+    case :gen_tcp.recv(socket, 0, 1000) do
+      {:ok, reply} -> reply |> to_string
+      {:error, :timeout} -> :timeout
+    end
   end
 end

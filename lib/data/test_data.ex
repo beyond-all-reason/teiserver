@@ -43,6 +43,18 @@ defmodule Teiserver.TestData do
         moderator: true
       },
       %{
+        name: "TestUser2",
+        country: "GB",
+        password_hash: "X03MO1qnZdYdgyfeuILPmQ==",# "password"
+        lobbyid: "LuaLobby Chobby",
+        friends: [],
+        friend_requests: [],
+        ignored: [],
+        rank: 2,
+        bot: false,
+        moderator: false
+      },
+      %{
         name: "Teifion",
         country: "GB",
         lobbyid: "LuaLobby Chobby",

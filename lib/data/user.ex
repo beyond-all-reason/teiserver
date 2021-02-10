@@ -143,6 +143,31 @@ defmodule Teiserver.User do
     end
   end
 
+  def remove_friend(remover_name, removed_name) do
+    remover = get_user(remover_name)
+    if removed_name in remover.friends do
+      # Add to requests
+      new_remover = Map.merge(remover, %{
+        friends: Enum.filter(remover.friends, fn f -> f != removed_name end)
+      })
+
+      removed = get_user(removed_name)
+      new_removed = Map.merge(removed, %{
+        friends: Enum.filter(removed.friends, fn f -> f != remover_name end)
+      })
+
+      add_user(new_remover)
+      add_user(new_removed)
+
+      # Now push out the updates
+      PubSub.broadcast Teiserver.PubSub, "user_updates:#{remover_name}", {:this_user_updated, [:friends]}
+      PubSub.broadcast Teiserver.PubSub, "user_updates:#{removed_name}", {:this_user_updated, [:friends]}
+      new_remover
+    else
+      remover
+    end
+  end
+
   def send_direct_message(from_name, to_name, msg) do
     PubSub.broadcast Teiserver.PubSub, "user_updates:#{to_name}", {:direct_message, from_name, msg}
   end

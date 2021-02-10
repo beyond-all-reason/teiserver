@@ -1,9 +1,7 @@
 # Teiserver
-
 An Elixir implementation of Uberserver
 
 ## Setup and running
-
 You will need to have [Elixir/Erlang installed](https://elixir-lang.org/install.html).
 
 ```
@@ -51,12 +49,12 @@ Keyed to the name of the user, these represent the users currently logged in. Cl
 Does what it says on the tin.
 
 ### Rough roadmap (very happy to change it up):
-- First unit tests
 - Remaining Spring commands
 - Persistent data store
 - Permissions system
 - More units tests
 - End to end tests
+- Locked/passworded chat rooms
 - Periodically clean up empty chat rooms
 - Logging certain actions (in particular mod actions)
 - Benchmark suite

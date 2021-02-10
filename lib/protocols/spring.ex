@@ -65,13 +65,14 @@ Welcome to Teiserver
     |> Regex.run(data)
     |> _clean
 
-    case tuple do
+    state = case tuple do
       {command, data, msg_id} ->
         do_handle(command, data, %{state | msg_id: msg_id})
       nil ->
-        Logger.error("Bad match on command: '#{data}'")
+        Logger.warn("Bad match on command: '#{data}'")
         state
     end
+    %{state | msg_id: nil}
   end
 
   defp _clean(nil), do: nil
@@ -169,6 +170,12 @@ Welcome to Teiserver
   defp do_handle("FRIENDLIST", _, state), do: reply(:friendlist, state.user, state)
   defp do_handle("FRIENDREQUESTLIST", _, state), do: reply(:friendlist_request, state.user, state)
 
+  defp do_handle("UNFRIEND", data, state) do
+    [_, username] = String.split(data, "=")
+    new_user = User.remove_friend(state.name, username)
+    %{state | user: new_user}
+  end
+
   defp do_handle("ACCEPTFRIENDREQUEST", data, state) do
     [_, username] = String.split(data, "=")
     new_user = User.accept_friend_request(username, state.name)
@@ -208,8 +215,9 @@ Welcome to Teiserver
         room = Room.get_room(room_name)
         Room.add_user_to_room(state.name, room_name)
         _send("JOIN #{room_name}\n", state)
+        _send("JOINED #{room_name} #{state.name}\n", state)
         _send("CHANNELTOPIC #{room_name} #{room.author}\n", state)
-        members = Enum.join(room.members, " ")
+        members = Enum.join(room.members ++ [state.name], " ")
         _send("CLIENTS #{room_name} #{members}\n", state)
 
         :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
@@ -223,6 +231,7 @@ Welcome to Teiserver
 
   defp do_handle("LEAVE", room_name, state) do
     PubSub.unsubscribe Teiserver.PubSub, "room:#{room_name}"
+    _send("LEFT #{room_name} #{state.name}\n", state)
     Room.remove_user_from_room(state.name, room_name)
     state
   end
@@ -268,18 +277,18 @@ Welcome to Teiserver
 
       {:accepted, battle} ->
         Logger.debug("[command:joinbattle] success")
-        Battle.add_user_to_battle(state.name, battle.id)
         PubSub.subscribe Teiserver.PubSub, "battle_updates:#{battle.id}"
+        Battle.add_user_to_battle(state.name, battle.id)
         reply(:join_battle, battle, state)
         reply(:battle_settings, battle, state)
 
         battle.players
         |> Enum.each(fn username ->
           client = Client.get_client(username)
-          reply(:battlestatus, [username, client.battlestatus, client.team_colour], state)
+          reply(:client_battlestatus, client, state)
         end)
 
-        reply(:battlestatus, [state.name, 0, 0], state)
+        reply(:client_battlestatus, state.client, state)
 
         battle.start_rectangles
         |> Enum.each(fn r ->
@@ -302,11 +311,13 @@ Welcome to Teiserver
     end
   end
 
+  defp do_handle("SAYBATTLE", _msg, %{client: %{battle_id: nil}} = state), do: state
   defp do_handle("SAYBATTLE", msg, state) do
     Battle.say(state.name, msg, state.client.battle_id)
     state
   end
 
+  defp do_handle("LEAVEBATTLE", _, %{client: %{battle_id: nil}} = state), do: state
   defp do_handle("LEAVEBATTLE", _, state) do
     PubSub.unsubscribe Teiserver.PubSub, "battle_updates:#{state.client.battle_id}"
     reply(:remove_user_from_battle, {state.name, state.client.battle_id}, state)
@@ -314,10 +325,55 @@ Welcome to Teiserver
     %{state | client: new_client}
   end
 
+
+# status_bits = BitParse.parse_bits(new_value, 7)
+#         [in_game, away, _r1, _r2, _r3, _mod, _bot] = status_bits
+
+#         new_client = Map.merge(state.client, %{
+#           in_game: (in_game == 1),
+#           away: (away == 1),
+#         })
+
+#         # This just accepts it and updates the client
+#         new_client = Client.update(new_client, :client_updated_status)
+
+  # b0 = undefined (reserved for future use)
+  # b1 = ready (0=not ready, 1=ready)
+  # b2..b5 = team no. (from 0 to 15. b2 is LSB, b5 is MSB)
+  # b6..b9 = ally team no. (from 0 to 15. b6 is LSB, b9 is MSB)
+  # b10 = mode (0 = spectator, 1 = normal player)
+  # b11..b17 = handicap (7-bit number. Must be in range 0..100). Note: Only host can change handicap values of the players in the battle (with HANDICAP command). These 7 bits are always ignored in this command. They can only be changed using HANDICAP command.
+  # b18..b21 = reserved for future use (with pre 0.71 versions these bits were used for team color index)
+  # b22..b23 = sync status (0 = unknown, 1 = synced, 2 = unsynced)
+  # b24..b27 = side (e.g.: arm, core, tll, ... Side index can be between 0 and 15, inclusive)
+  # b28..b31 = undefined (reserved for future use)
+  defp do_handle("MYBATTLESTATUS", _, %{client: %{battle_id: nil}} = state), do: state
   defp do_handle("MYBATTLESTATUS", data, state) do
     new_client = case Regex.run(~r/(\S+) (.+)/, data) do
       [_, battlestatus, team_colour] ->
-        Client.new_battlestatus(state.name, battlestatus, team_colour)
+        status_bits = BitParse.parse_bits(battlestatus, 32)
+
+        [_, ready,
+        t1, t2, t3, t4,
+        a1, a2, a3, a4,
+        spectator,
+        _h1, _h2, _h3, _h4, _h5, _h6, _h7,#Handicap, not set here
+        _, _, _, _,
+        sync1, sync2,
+        side1, side2, side3, side4,
+        _, _, _, _] = status_bits
+
+        new_client = Map.merge(state.client, %{
+          ready: (ready == 1),
+          team_number: [t1, t2, t3, t4] |> Integer.undigits(2),
+          ally_team_number: [a1, a2, a3, a4] |> Integer.undigits(2),
+          spectator: (spectator == 1),
+          sync: [sync1, sync2] |> Integer.undigits(2),
+          side: [side1, side2, side3, side4] |> Integer.undigits(2),
+          team_colour: team_colour
+        })
+
+        Client.update(new_client, :client_updated_battlestatus)
       _ ->
         state.client
     end
@@ -366,10 +422,6 @@ Welcome to Teiserver
 
   defp do_reply(:add_user, user) do
     "ADDUSER #{user.name} #{user.country} #{user.id}\t#{user.lobbyid}\n"
-  end
-
-  defp do_reply(:client_status, {client, _reason}) do
-    "CLIENTSTATUS #{client.name}\t#{client.status}\n"
   end
 
   defp do_reply(:friendlist, user) do
@@ -445,13 +497,17 @@ Welcome to Teiserver
   end
 
   # Client
-  defp do_reply(:new_clientstatus, [username, status]) do
-    "CLIENTSTATUS #{username} #{status}\n"
+  defp do_reply(:client_status, client) do
+    "CLIENTSTATUS #{client.name}\t#{client.status}\n"
   end
 
-  defp do_reply(:battlestatus, [username, battlestatus, team_colour]) do
-    "CLIENTBATTLESTATUS #{username} #{battlestatus} #{team_colour}\n"
+  defp do_reply(:client_battlestatus, {name, battlestatus, team_colour}) do
+    "CLIENTBATTLESTATUS #{name} #{battlestatus} #{team_colour}\n"
   end
+  defp do_reply(:client_battlestatus, client) do
+    "CLIENTBATTLESTATUS #{client.name} #{client.battlestatus} #{client.team_colour}\n"
+  end
+  
 
   defp do_reply(:logged_in_client, username) do
     user = User.get_user(username)

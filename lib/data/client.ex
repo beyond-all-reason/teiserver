@@ -5,49 +5,27 @@ defmodule Teiserver.Client do
 
   def create(client) do
     Map.merge(%{
-      in_game: false,
       status: "0",
+      in_game: false,
       away: false,
       rank: 1,
       moderator: 0,
       bot: 0,
+      
+      # Battle stuff
+      ready: false,
+      team_number: 0,
+      ally_team_number: 0,
+      spectator: true,
+      handicap: 0,
+      sync: 0,
+      side: 0,
+
       battlestatus: 0,
       team_colour: 0,
       battle_id: nil
     }, client)
   end
-
-  def create(name, pid, protocol) do
-    %{
-      pid: pid,
-      name: name,
-      protocol: protocol,
-      status: "0",
-      in_game: false,
-      away: false,
-      rank: 1,
-      moderator: 0,
-      bot: 0,
-      battlestatus: 0,
-      team_colour: 0,
-      battle_id: nil
-    }
-  end
-
-  # def create_from_user(user, client) do
-  #   Map.merge(client, %{
-  #     rank: user.rank,
-  #     moderator: (user.moderator == 1),
-  #     bot: (user.bot == 1)
-  #   })
-  # end
-
-  # def create_from_bits([0], client) do
-  #   Map.merge(client, %{
-  #     in_game: 0,
-  #     away: 0
-  #   })
-  # end
 
   def login(user, pid, protocol) do
     client = create(%{
@@ -83,22 +61,44 @@ defmodule Teiserver.Client do
     %{client | status: status}
   end
 
+  def calculate_battlestatus(client) do
+    [t1, t2, t3, t4] = BitParse.parse_bits("#{client.team_number}", 4)
+    [a1, a2, a3, a4] = BitParse.parse_bits("#{client.ally_team_number}", 4)
+    [h1, h2, h3, h4, h5, h6, h7] = BitParse.parse_bits("#{client.handicap}", 7)
+    [sync1, sync2] = BitParse.parse_bits("#{client.sync}", 2)
+    [side1, side2, side3, side4] = BitParse.parse_bits("#{client.side}", 4)
+    
+    battlestatus = [0, (if client.ready, do: 1, else: 0),
+    t1, t2, t3, t4,
+    a1, a2, a3, a4,
+    (if client.spectator, do: 1, else: 0),
+    h1, h2, h3, h4, h5, h6, h7,
+    0, 0, 0, 0,
+    sync1, sync2,
+    side1, side2, side3, side4,
+    0, 0, 0, 0]
+    |> Integer.undigits(2)
+    %{client | battlestatus: battlestatus}
+  end
+
   def update(client, reason \\ nil) do
-    client = calculate_status(client)
-    add_client(client)
+    client = client
+    |> calculate_status
+    |> calculate_battlestatus
+    |> add_client
     PubSub.broadcast Teiserver.PubSub, "client_updates", {:updated_client, client, reason}
     client
   end
 
-  def new_battlestatus(username, new_battlestatus, team_colour) do
-    :ok = PubSub.broadcast Teiserver.PubSub, "client_updates", {:new_battlestatus, username, new_battlestatus, team_colour}
-    client = get_client(username)
-    Map.merge(client, %{
-      battlestatus: new_battlestatus,
-      team_colour: team_colour,
-    })
-    |> add_client
-  end
+  # def new_battlestatus(username, new_battlestatus, team_colour) do
+  #   :ok = PubSub.broadcast Teiserver.PubSub, "client_updates", {:new_battlestatus, username, new_battlestatus, team_colour}
+  #   client = get_client(username)
+  #   Map.merge(client, %{
+  #     battlestatus: new_battlestatus,
+  #     team_colour: team_colour,
+  #   })
+  #   |> add_client
+  # end
 
   def leave_battle(username) do
     :ok = PubSub.broadcast Teiserver.PubSub, "client_updates", {:new_battlestatus, username, 0, 0}
@@ -133,14 +133,10 @@ defmodule Teiserver.Client do
     ConCache.get(:lists, :clients)
   end
 
-  def list_clients() do
-    ConCache.get(:lists, :clients)
-    |> Enum.map(fn username -> ConCache.get(:clients, username) end)
-  end
-
-  def get_client_state(pid) do
-    GenServer.call(pid, :get_state)
-  end
+  # It appears this isn't used but I suspect it will be at a later stage
+  # def get_client_state(pid) do
+  #   GenServer.call(pid, :get_state)
+  # end
 
   def disconnect(name) do
     ConCache.delete(:clients, name)
