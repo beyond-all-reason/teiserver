@@ -3,7 +3,8 @@ defmodule Teiserver.TcpServerTest do
   import Teiserver.TestLib, only: [raw_setup: 0, _send: 2, _recv: 1]
   
   setup do
-    raw_setup()
+    %{socket: socket} = raw_setup()
+    {:ok, socket: socket}
   end
 
   test "tcp startup and exit", %{socket: socket} do
@@ -11,10 +12,10 @@ defmodule Teiserver.TcpServerTest do
     reply = _recv(socket)
     assert reply == "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
 
-    _send(socket, "LOGIN Addas password 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
+    _send(socket, "LOGIN TestUser X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
     reply = _recv(socket)
     [accepted | remainder] = String.split(reply, "\n")
-    assert accepted == "ACCEPTED Addas"
+    assert accepted == "ACCEPTED TestUser"
 
     commands = remainder
     |> Enum.map(fn line -> String.split(line, " ") |> hd end)

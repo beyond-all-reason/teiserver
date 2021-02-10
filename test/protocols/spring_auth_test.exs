@@ -4,7 +4,8 @@ defmodule Teiserver.SpringAuthTest do
   import Teiserver.TestLib, only: [auth_setup: 0, _send: 2, _recv: 1]
 
   setup do
-    auth_setup()
+    %{socket: socket} = auth_setup()
+    {:ok, socket: socket}
   end
 
   test "PING", %{socket: socket} do

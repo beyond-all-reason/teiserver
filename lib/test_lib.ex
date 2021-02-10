@@ -3,19 +3,19 @@ defmodule Teiserver.TestLib do
 
   def raw_setup() do
     {:ok, socket} = :gen_tcp.connect(@host, 8200, [active: false])
-    {:ok, socket: socket}
+    %{socket: socket}
   end
 
-  def auth_setup() do
+  def auth_setup(username \\ "TestUser") do
     {:ok, socket} = :gen_tcp.connect(@host, 8200, [active: false])
     # Ignore the TASSERVER
     _ = _recv(socket)
     
     # Now do our login
-    _send(socket, "LOGIN TestUser X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
+    _send(socket, "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
     _ = _recv(socket)
 
-    {:ok, socket: socket}
+    %{socket: socket}
   end
 
   def _send(socket, msg) do

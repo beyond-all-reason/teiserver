@@ -3,7 +3,8 @@ defmodule Teiserver.SpringRawTest do
   import Teiserver.TestLib, only: [raw_setup: 0, _send: 2, _recv: 1]
 
   setup do
-    raw_setup()
+    %{socket: socket} = raw_setup()
+    {:ok, socket: socket}
   end
 
   test "ping", %{socket: socket} do
