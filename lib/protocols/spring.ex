@@ -386,6 +386,11 @@ Welcome to Teiserver
     state
   end
 
+  defp do_handle("RING", username, state) do
+    User.ring(username, state.name)
+    state
+  end
+
   # Not handled cacther
   defp do_handle(nil, _, state), do: state
   defp do_handle(match, _, state) do
@@ -508,10 +513,16 @@ Welcome to Teiserver
     "CLIENTBATTLESTATUS #{client.name} #{client.battlestatus} #{client.team_colour}\n"
   end
   
-
   defp do_reply(:logged_in_client, username) do
     user = User.get_user(username)
     do_reply(:add_user, user)
+  end
+
+  # Commands
+  defp do_reply(:ring, {ringer, state_user}) do
+    if ringer not in state_user.ignored do
+      "RING #{ringer}\n"
+    end
   end
 
   # Chat

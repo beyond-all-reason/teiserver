@@ -177,6 +177,10 @@ defmodule Teiserver.User do
     |> Enum.map(fn user_id -> ConCache.get(:users, user_id) end)
   end
 
+  def ring(ringee, ringer) do
+    PubSub.broadcast Teiserver.PubSub, "user_updates:#{ringee}", {:ring, ringer}
+  end
+
   def try_login(username, _password, state) do
     # Password hashing for spring is:
     # :crypto.hash(:md5 , "password") |> Base.encode64()

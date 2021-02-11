@@ -96,6 +96,12 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  # Commands
+  def handle_info({:ring, ringer}, state) do
+    new_state = state.protocol.reply(:ring, {ringer, state.user}, state)
+    {:noreply, new_state}
+  end
+
   # User
   def handle_info({:this_user_updated, fields}, state) do
     new_user = User.get_user(state.name)

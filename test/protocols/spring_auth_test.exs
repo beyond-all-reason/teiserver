@@ -261,4 +261,17 @@ CLIENTBATTLESTATUS TestUser 0 0\n"
     reply = _recv(socket)
     assert reply == :timeout
   end
+
+  test "ring", %{socket: socket1} do
+    %{socket: socket2} = auth_setup("TestUser2")
+    reply = _recv(socket1)
+    assert reply == "ADDUSER TestUser2 GB 4\tLuaLobby Chobby\n"
+
+    _send(socket2, "RING TestUser\n")
+    reply = _recv(socket2)
+    assert reply == :timeout
+
+    reply = _recv(socket1)
+    assert reply == "RING TestUser2\n"
+  end
 end
