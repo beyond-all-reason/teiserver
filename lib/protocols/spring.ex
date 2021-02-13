@@ -24,7 +24,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # RESENDVERIFICATION
   # RESETPASSWORDREQUEST
   # RESETPASSWORD
-  # CHANNELS
   # HANDICAP
   # KICKFROMBATTLE
   # FORECTEAMNO
@@ -42,7 +41,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # REMOVESCRIPTTAGS
   # LISTCOMPFLAGS
   # PROMOTE
-  
+
   @motd """
 Message of the day
 Welcome to Teiserver
@@ -236,6 +235,11 @@ Welcome to Teiserver
     PubSub.unsubscribe Teiserver.PubSub, "room:#{room_name}"
     _send("LEFT #{room_name} #{state.name}\n", state)
     Room.remove_user_from_room(state.name, room_name)
+    state
+  end
+
+  defp do_handle("CHANNELS", _, state) do
+    reply(:list_channels, state)
     state
   end
 
@@ -530,6 +534,16 @@ Welcome to Teiserver
   end
 
   # Chat
+  defp do_reply(:list_channels, nil) do
+    channels = Room.list_rooms()
+    |> Enum.map(fn room ->
+      "CHANNEL #{room.name} #{Enum.count(room.members)}\n"
+    end)
+
+    ["CHANNELS\n"] ++ channels ++ ["ENDOFCHANNELS\n"]
+    |> Enum.join("")
+  end
+
   defp do_reply(:direct_message, {from, msg, state_user}) do
     if from not in state_user.ignored do
       "SAIDPRIVATE #{from} #{msg}\n"

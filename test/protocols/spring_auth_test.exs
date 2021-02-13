@@ -188,7 +188,7 @@ FRIENDREQUESTLISTEND\n"
     assert reply == :timeout
   end
 
-  test "JOIN, LEAVE, SAY", %{socket: socket} do
+  test "JOIN, LEAVE, SAY, CHANNELS", %{socket: socket} do
     _send(socket, "JOIN test_room\n")
     reply = _recv(socket)
     assert reply == "JOIN test_room
@@ -201,10 +201,26 @@ CLIENTS test_room TestUser\n"
     reply = _recv(socket)
     assert reply == "SAID test_room TestUser Hello there\n"
 
+    # Check for channel list
+    _send(socket, "CHANNELS\n")
+    reply = _recv(socket)
+    assert reply == "CHANNELS
+CHANNEL main 1
+CHANNEL test_room 1
+ENDOFCHANNELS\n"
+
     # Leave
     _send(socket, "LEAVE test_room\n")
     reply = _recv(socket)
     assert reply == "LEFT test_room TestUser\n"
+
+    # Check for channel list
+    _send(socket, "CHANNELS\n")
+    reply = _recv(socket)
+    assert reply == "CHANNELS
+CHANNEL main 1
+CHANNEL test_room 0
+ENDOFCHANNELS\n"
 
     # Say something
     _send(socket, "SAY test_room Second test\n")

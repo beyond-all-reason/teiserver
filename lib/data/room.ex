@@ -73,6 +73,11 @@ defmodule Teiserver.Room do
     room
   end
 
+  def list_rooms() do
+    ConCache.get(:lists, :rooms)
+    |> Enum.map(fn room_name -> ConCache.get(:rooms, room_name) end)
+  end
+
   def send_message(from, room_name, msg) do
     case get_room(room_name) do
       nil ->
