@@ -34,7 +34,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # DISABLEUNITS
   # ENABLEUNITS
   # ENABLEALLUNITS
-  # RING
   # ADDBOT
   # UPDATEBOT
   # ADDSTARTRECT
@@ -109,6 +108,10 @@ Welcome to Teiserver
     do_handle("LOGIN", "#{username} password 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp", state)
   end
 
+  defp do_handle("JB", _, state) do
+    do_handle("JOINBATTLE", "1 empty 193322681", state)
+  end
+
   defp do_handle("LOGIN", data, state) do
     response = case Regex.run(~r/^(\w+) ([a-zA-Z0-9=]+) (0) ([0-9\.\*]+) ([^\t]+)\t([^\t]+)\t([^\t]+)/, data) do
       [_, username, password, _cpu, ip, lobby, user_id, modes] ->
@@ -125,9 +128,9 @@ Welcome to Teiserver
         client = Client.login(user, self(), __MODULE__)
 
         # Who is online?
-        Client.list_client_names()
-        |> Enum.each(fn name ->
-          user = User.get_user(name)
+        Client.list_client_ids()
+        |> Enum.each(fn user_id ->
+          user = User.get_user_by_id(user_id)
           reply(:add_user, user, state)
         end)
 
@@ -140,7 +143,7 @@ Welcome to Teiserver
 
         :ok = PubSub.subscribe(Teiserver.PubSub, "user_updates:#{user.name}")
         _send("LOGININFOEND\n", state)
-        %{state | client: client, user: user, name: user.name}
+        %{state | client: client, user: user, name: user.name, userid: user.id}
 
       {:error, reason} ->
         Logger.debug("[command:login] denied with reason #{reason}")
@@ -297,7 +300,8 @@ Welcome to Teiserver
         _send("REQUESTBATTLESTATUS\n", state)
 
         # I think this is sent by SPADS but for now we're going to fake it
-        _send("SAIDBATTLEEX #{battle.founder} Hi #{state.name}! Current battle type is faked_team.\n", state)
+        founder_name = User.get_username(battle.founder)
+        _send("SAIDBATTLEEX #{founder_name} Hi #{state.name}! Current battle type is faked_team.\n", state)
 
         new_client = Map.put(state.client, :battle_id, battle.id)
         |> Client.update
@@ -321,7 +325,7 @@ Welcome to Teiserver
   defp do_handle("LEAVEBATTLE", _, state) do
     PubSub.unsubscribe Teiserver.PubSub, "battle_updates:#{state.client.battle_id}"
     reply(:remove_user_from_battle, {state.name, state.client.battle_id}, state)
-    new_client = Client.leave_battle(state.name)
+    new_client = Client.leave_battle(state.userid)
     %{state | client: new_client}
   end
 
@@ -512,9 +516,9 @@ Welcome to Teiserver
   defp do_reply(:client_battlestatus, client) do
     "CLIENTBATTLESTATUS #{client.name} #{client.battlestatus} #{client.team_colour}\n"
   end
-  
-  defp do_reply(:logged_in_client, username) do
-    user = User.get_user(username)
+
+  defp do_reply(:logged_in_client, {userid, _username}) do
+    user = User.get_user_by_id(userid)
     do_reply(:add_user, user)
   end
 
@@ -561,6 +565,11 @@ Welcome to Teiserver
 
   defp do_reply(:battle_saidex, {username, msg, _battle_id}) do
     "SAIDBATTLEEX #{username} #{msg}\n"
+  end
+  
+  defp do_reply(atom, data) do
+    Logger.error("No match in spring.ex for atom: #{atom} and data: #{data}")
+    ""
   end
 
   # Sends a message to the client. The function takes into account message ID and well warn if a message without a newline ending is sent.

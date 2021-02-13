@@ -1,4 +1,10 @@
+defmodule Teiserver.FakeTransport do
+  def send(_, _), do: nil
+end
+
 defmodule Teiserver.TestLib do
+  alias Teiserver.User
+  alias Teiserver.Client
   @host '127.0.0.1'
 
   def raw_setup() do
@@ -28,5 +34,43 @@ defmodule Teiserver.TestLib do
       {:ok, reply} -> reply |> to_string
       {:error, :timeout} -> :timeout
     end
+  end
+
+  def mock_socket() do
+    %{
+      transport: Teiserver.FakeTransport
+    }
+  end
+
+  def mock_state_raw(protocol, socket \\ nil) do
+    socket = if socket, do: socket, else: mock_socket()
+
+    %{
+      userid: nil,
+      name: nil,
+      client: nil,
+      user: nil,
+      socket: socket,
+      msg_id: nil,
+      transport: socket.transport,
+      protocol: protocol
+    }
+  end
+
+  def mock_state_auth(protocol, socket \\ nil) do
+    socket = if socket, do: socket, else: mock_socket()
+    user = User.get_user_by_name("TestUser")
+    client = Client.login(user, self(), protocol)
+
+    %{
+      userid: user.id,
+      name: user.name,
+      client: client,
+      user: user,
+      socket: socket,
+      msg_id: nil,
+      transport: socket.transport,
+      protocol: protocol
+    }
   end
 end

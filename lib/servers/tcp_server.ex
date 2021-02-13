@@ -32,6 +32,7 @@ defmodule Teiserver.TcpServer do
     :ok = PubSub.subscribe(Teiserver.PubSub, "client_updates")
     :ok = PubSub.subscribe(Teiserver.PubSub, "user_updates")
     :gen_server.enter_loop(__MODULE__, [], %{
+      userid: nil,
       name: nil,
       client: nil,
       user: nil,
@@ -66,8 +67,8 @@ defmodule Teiserver.TcpServer do
   end
 
   # Client updates
-  def handle_info({:logged_in_client, username}, state) do
-    new_state = state.protocol.reply(:logged_in_client, username, state)
+  def handle_info({:logged_in_client, userid, username}, state) do
+    new_state = state.protocol.reply(:logged_in_client, {userid, username}, state)
     {:noreply, new_state}
   end
 
@@ -104,7 +105,7 @@ defmodule Teiserver.TcpServer do
 
   # User
   def handle_info({:this_user_updated, fields}, state) do
-    new_user = User.get_user(state.name)
+    new_user = User.get_user_by_name(state.name)
     new_state = %{state | user: new_user}
 
     fields

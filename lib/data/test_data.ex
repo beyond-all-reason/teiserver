@@ -9,6 +9,7 @@ defmodule Teiserver.TestData do
     ConCache.insert_new(:lists, :users, [])
     [
       %{
+        # ID: 1
         name: "ChanServ",
         country: "GB",
         lobbyid: "LuaLobby Chobby",
@@ -20,6 +21,7 @@ defmodule Teiserver.TestData do
         moderator: true
       },
       %{
+        # ID: 2
         name: "[teh]cluster1[03]",
         country: "GB",
         lobbyid: "LuaLobby Chobby",
@@ -116,22 +118,23 @@ defmodule Teiserver.TestData do
         battlestatus: 4_194_306,
         team_colour: 16_777_215,
         battle_id: 1,
-        status: 16
+        status: 16,
+        userid: 2
       },
-      %{
-        pid: nil,
-        name: "Chon",
-        protocol: Teiserver.Protocols.Spring,
-        in_game: false,
-        away: false,
-        rank: 1,
-        moderator: false,
-        bot: true,
-        battlestatus: 0,
-        team_colour: 0,
-        battle_id: nil,
-        status: 16
-      }
+      # %{
+      #   pid: nil,
+      #   name: "Chon",
+      #   protocol: Teiserver.Protocols.Spring,
+      #   in_game: false,
+      #   away: false,
+      #   rank: 1,
+      #   moderator: false,
+      #   bot: true,
+      #   battlestatus: 0,
+      #   team_colour: 0,
+      #   battle_id: nil,
+      #   status: 16
+      # }
     ]
     |> Enum.map(&Client.create/1)
     |> Enum.map(&Client.add_client/1)
@@ -143,7 +146,7 @@ defmodule Teiserver.TestData do
       %{
         type: :normal,
         nattype: :none,
-        founder: "[teh]cluster1[03]",
+        founder: 2,
         ip: "127.8.0.1",
         port: "322",
         max_players: 16,
@@ -157,12 +160,12 @@ defmodule Teiserver.TestData do
         map_name: "Supreme_Crossing_V1",
         title: "USA -- 04",
         game_name: "Beyond All Reason test-15367-6bfafcb",
-        players: ["[teh]cluster1[03]"]
+        players: [2]
       },
       %{
         type: :normal,
         nattype: :none,
-        founder: "[teh]cluster1[03]",
+        founder: 2,
         ip: "127.8.0.1",
         port: "322",
         max_players: 16,
@@ -177,7 +180,7 @@ defmodule Teiserver.TestData do
         title: "USA -- 03",
         game_name: "Beyond All Reason test-15367-6bfafcb",
 
-        players: ["[teh]cluster1[03]"]
+        players: [2]
       }
     ]
     |> Enum.map(&Battle.create_battle/1)

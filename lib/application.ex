@@ -10,6 +10,8 @@ defmodule Teiserver.Application do
       {UDPServer, []},
       concache_perm_sup(:id_counters),
       concache_perm_sup(:lists),
+      concache_perm_sup(:users_lookup_name_with_id),
+      concache_perm_sup(:users_lookup_id_with_name),
       concache_perm_sup(:users),
       concache_perm_sup(:clients),
       concache_perm_sup(:battles),

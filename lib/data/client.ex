@@ -1,6 +1,7 @@
 defmodule Teiserver.Client do
   alias Phoenix.PubSub
   alias Teiserver.Battle
+  alias Teiserver.User
   alias Teiserver.BitParse
 
   def create(client) do
@@ -29,6 +30,7 @@ defmodule Teiserver.Client do
 
   def login(user, pid, protocol) do
     client = create(%{
+      userid: user.id,
       name: user.name,
       pid: pid,
       protocol: protocol,
@@ -41,7 +43,7 @@ defmodule Teiserver.Client do
     |> calculate_status
     |> add_client
 
-    PubSub.broadcast Teiserver.PubSub, "client_updates", {:logged_in_client, user.name}
+    PubSub.broadcast Teiserver.PubSub, "client_updates", {:logged_in_client, user.id, user.name}
     client
   end
 
@@ -90,38 +92,29 @@ defmodule Teiserver.Client do
     client
   end
 
-  # def new_battlestatus(username, new_battlestatus, team_colour) do
-  #   :ok = PubSub.broadcast Teiserver.PubSub, "client_updates", {:new_battlestatus, username, new_battlestatus, team_colour}
-  #   client = get_client(username)
-  #   Map.merge(client, %{
-  #     battlestatus: new_battlestatus,
-  #     team_colour: team_colour,
-  #   })
-  #   |> add_client
-  # end
-
-  def leave_battle(username) do
+  def leave_battle(userid) do
+    username = User.get_username(userid)
     :ok = PubSub.broadcast Teiserver.PubSub, "client_updates", {:new_battlestatus, username, 0, 0}
-    client = get_client(username)
+    client = get_client(userid)
     new_client = Map.merge(client, %{
       battlestatus: 0,
       team_colour: 0,
       battle_id: nil
     })
-    |> add_client
+    ConCache.put(:clients, new_client.userid, new_client)
 
     Battle.remove_user_from_battle(username, client.battle_id)
     new_client
   end
 
-  def get_client(username) do
-    ConCache.get(:clients, username)
+  def get_client(userid) do
+    ConCache.get(:clients, userid)
   end
 
   def add_client(client) do
-    ConCache.put(:clients, client.name, client)
+    ConCache.put(:clients, client.userid, client)
     ConCache.update(:lists, :clients, fn value ->
-      new_value = (value ++ [client.name])
+      new_value = (value ++ [client.userid])
       |> Enum.uniq
 
       {:ok, new_value}
@@ -129,7 +122,7 @@ defmodule Teiserver.Client do
     client
   end
 
-  def list_client_names() do
+  def list_client_ids() do
     ConCache.get(:lists, :clients)
   end
 
@@ -138,11 +131,12 @@ defmodule Teiserver.Client do
   #   GenServer.call(pid, :get_state)
   # end
 
-  def disconnect(name) do
-    ConCache.delete(:clients, name)
+  def disconnect(username) do
+    user = User.get_user_by_name(username)
+    ConCache.delete(:clients, user.id)
     ConCache.update(:lists, :clients, fn value -> 
       new_value = value
-      |> Enum.filter(fn v -> v != name end)
+      |> Enum.filter(fn v -> v != user.id end)
 
       {:ok, new_value}
     end)
