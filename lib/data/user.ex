@@ -22,6 +22,8 @@ defmodule Teiserver.User do
     Map.merge(%{
       id: next_id(),
       rank: 1,
+      country: "GB",
+      lobbyid: nil,
       moderator: false,
       bot: false,
       friends: [],

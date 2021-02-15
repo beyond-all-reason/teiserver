@@ -50,6 +50,7 @@ defmodule Teiserver.Benchmark.UserClient do
 
   def init(opts) do
     {:ok, socket} = :gen_tcp.connect('localhost', 8200, [active: false])
+    _send(socket, "REGISTER #{opts.id}\tpassword\temail\n")
     _send(socket, "LOGIN #{opts.id} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
     _ = _recv(socket)
 
