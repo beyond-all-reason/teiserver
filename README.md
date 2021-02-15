@@ -57,4 +57,5 @@ Does what it says on the tin.
 - Locked/passworded chat rooms
 - Periodically clean up empty chat rooms
 - Logging certain actions (in particular mod actions)
-- Benchmark suite
+- Spam/Flooding controls
+- Email on user registration/password reset

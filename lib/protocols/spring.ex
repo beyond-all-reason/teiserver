@@ -13,7 +13,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   alias Teiserver.BitParse
 
   # TODO - Setup/Account stuff
-  # REGISTER
   # CONFIRMAGREEMENT
   # RENAMEACCOUNT
   # CHANGEEMAILREQUEST
@@ -22,7 +21,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # RESETPASSWORDREQUEST
   # RESETPASSWORD
 
-  # Other TODO
+  # Handled by SPADS (I think)
   # HANDICAP
   # KICKFROMBATTLE
   # FORECTEAMNO
@@ -39,8 +38,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # SETSCRIPTTAGS
   # REMOVESCRIPTTAGS
   # LISTCOMPFLAGS
-
-  # Handled by SPADS (I think)
   # PROMOTE
 
   @motd """
@@ -150,6 +147,28 @@ Welcome to Teiserver
         _send("DENIED #{reason}\n", state)
         state
     end
+  end
+
+  defp do_handle("REGISTER", data, state) do
+    case Regex.run(~r/(\w+)\t(\w+)\t(\w+)/, data) do
+      [_, username, plain_password, email] ->
+        case User.get_user_by_name(username) do
+          nil ->
+            User.create_user(%{
+              name: username,
+              password_hash: User.encrypt_password(plain_password),
+              email: email
+            })
+            |> User.add_user
+
+            reply(:registration_accepted, state)
+          _ ->
+            reply(:registration_denied, "User already exists", state)
+        end
+      _ ->
+        nil
+    end
+    state
   end
 
   defp do_handle("EXIT", _reason, state) do
@@ -529,6 +548,14 @@ Welcome to Teiserver
   end
 
   # Client
+  defp do_reply(:registration_accepted, nil) do
+    "REGISTRATIONACCEPTED\n"
+  end
+
+  defp do_reply(:registration_denied, reason) do
+    "REGISTRATIONDENIED #{reason}\n"
+  end
+
   defp do_reply(:client_status, client) do
     "CLIENTSTATUS #{client.name}\t#{client.status}\n"
   end

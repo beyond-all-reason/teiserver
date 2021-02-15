@@ -26,7 +26,8 @@ defmodule Teiserver.User do
       bot: false,
       friends: [],
       friend_requests: [],
-      ignored: []
+      ignored: [],
+      verification_code: nil
     }, user)
   end
   
@@ -48,6 +49,9 @@ defmodule Teiserver.User do
   end
 
   def add_user(user) do
+    verification_code = :random.uniform(899999) + 100000
+    user = %{user | verification_code: verification_code}
+
     update_user(user)
     ConCache.put(:users_lookup_name_with_id, user.id, user.name)
     ConCache.put(:users_lookup_id_with_name, user.name, user.id)
@@ -57,6 +61,7 @@ defmodule Teiserver.User do
 
       {:ok, new_value}
     end)
+    Logger.debug("TODO: Verification email should be sent here with code #{verification_code}")
     user
   end
   

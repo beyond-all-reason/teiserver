@@ -11,6 +11,7 @@ defmodule Teiserver.TestData do
       %{
         # ID: 1
         name: "ChanServ",
+        email: "ChanServ@teiserver.com",
         country: "GB",
         lobbyid: "LuaLobby Chobby",
         friends: [],
@@ -24,6 +25,7 @@ defmodule Teiserver.TestData do
       %{
         # ID: 2
         name: "[teh]cluster1[03]",
+        email: "[teh]cluster1[03]@teiserver.com",
         country: "GB",
         lobbyid: "LuaLobby Chobby",
         friends: [],
@@ -36,6 +38,7 @@ defmodule Teiserver.TestData do
       },
       %{
         name: "TestUser",
+        email: "TestUser@teiserver.com",
         country: "US",
         lobbyid: "LuaLobby Chobby",
         friends: ["Friend1", "Friend2"],
@@ -48,6 +51,7 @@ defmodule Teiserver.TestData do
       },
       %{
         name: "TestUser2",
+        email: "TestUser2@teiserver.com",
         country: "GB",
         lobbyid: "LuaLobby Chobby",
         friends: [],
@@ -60,6 +64,7 @@ defmodule Teiserver.TestData do
       },
       %{
         name: "Teifion",
+        email: "Teifion@teiserver.com",
         country: "GB",
         lobbyid: "LuaLobby Chobby",
         friends: ["Addas"],
@@ -72,6 +77,7 @@ defmodule Teiserver.TestData do
       },
       %{
         name: "Addas",
+        email: "Addas@teiserver.com",
         country: "DE",
         lobbyid: "LuaLobby Chobby",
         friends: ["Teifion"],
@@ -84,6 +90,7 @@ defmodule Teiserver.TestData do
       },
       %{
         name: "Link",
+        email: "Link@teiserver.com",
         country: "IE",
         lobbyid: "LuaLobby Chobby",
         friends: [],
@@ -96,6 +103,7 @@ defmodule Teiserver.TestData do
       },
       %{
         name: "Chon",
+        email: "Chon@teiserver.com",
         country: "IE",
         lobbyid: "LuaLobby Chobby",
         friends: [],

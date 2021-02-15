@@ -131,6 +131,7 @@ defmodule Teiserver.Client do
   #   GenServer.call(pid, :get_state)
   # end
 
+  def disconnect(nil), do: nil
   def disconnect(username) do
     user = User.get_user_by_name(username)
     ConCache.delete(:clients, user.id)
