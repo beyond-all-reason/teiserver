@@ -110,7 +110,7 @@ Welcome to Teiserver
   end
 
   defp do_handle("LOGIN", data, state) do
-    response = case Regex.run(~r/^(\w+) ([a-zA-Z0-9=]+) (0) ([0-9\.\*]+) ([^\t]+)\t([^\t]+)\t([^\t]+)/, data) do
+    response = case Regex.run(~r/^(\w+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)\t([^\t]+)\t([^\t]+)/, data) do
       [_, username, password, _cpu, ip, lobby, user_id, modes] ->
         _ = [username, password, ip, lobby, user_id, modes]
         Logger.debug("[protocol:login] matched #{username}")
