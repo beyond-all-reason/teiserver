@@ -23,7 +23,7 @@ defmodule Teiserver.Application do
     opts = [strategy: :one_for_one, name: Teiserver.Supervisor]
     start_result = Supervisor.start_link(children, opts)
 
-    # # Call all our sub function st
+    # Call all our sub function st
     {:ok, t} = Task.start(fn -> startup() end)
 
     send(t, :begin)

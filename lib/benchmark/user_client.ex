@@ -4,9 +4,8 @@ defmodule Teiserver.Benchmark.UserClient do
   noise on the server. This one though will report on it's
   ping and the like.
   """
+  require Logger
   use GenServer
-  @tick_interval 2_000
-  # @tick_interval 100
 
   def handle_info(:tick, state) do
     _send(state.socket, "SAY tick_#{state.tick} this is a test message\n")
@@ -57,7 +56,7 @@ defmodule Teiserver.Benchmark.UserClient do
     _send(socket, "JOIN main\n")
     _send(socket, "JOIN tick_#{opts.tick}\n")
 
-    :timer.send_interval(@tick_interval, self(), :tick)
+    :timer.send_interval(opts.interval, self(), :tick)
 
     {:ok, %{
       socket: socket,

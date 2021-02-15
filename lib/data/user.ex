@@ -216,7 +216,7 @@ defmodule Teiserver.User do
 
     user = case get_user_by_name(username) do
       nil ->
-        Logger.warn("Adding user based on login, this should be replaced with registration functionality")
+        # Logger.warn("Adding user based on login, this should be replaced with registration functionality")
         create_user(%{
           name: username,
           country: "GB",

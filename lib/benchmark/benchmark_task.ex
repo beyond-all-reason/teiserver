@@ -1,7 +1,7 @@
 defmodule Mix.Tasks.Benchmark do
   use Mix.Task
 
-  """
+  _ = """
   :ranch.info()
   :ranch.procs(:tcp_echo, :acceptors)
   """
@@ -15,6 +15,7 @@ defmodule Mix.Tasks.Benchmark do
   @shortdoc "Starts the benchmark procecess for the server"
   def run(_) do
     Mix.Task.run("app.start")
+    Logger.configure(level: :info)
 
     children = [
       # Benchmark stuff
@@ -32,7 +33,7 @@ defmodule Mix.Tasks.Benchmark do
     {:ok, t} = Task.start(fn -> startup() end)
     send(t, :begin)
     
-    :timer.sleep(180_000)
+    :timer.sleep(300_000)
 
     start_result
   end

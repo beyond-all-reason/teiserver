@@ -4,9 +4,6 @@ defmodule Teiserver.Benchmark.SilentClient do
   noise on the server.
   """
   use GenServer
-  @tick_interval 15_000
-  # @tick_interval 100
-
   def handle_info(:tick, state) do
     _send(state.socket, "PING\n")
     _ = _recv(state.socket)
@@ -37,7 +34,7 @@ defmodule Teiserver.Benchmark.SilentClient do
     _send(socket, "JOIN main\n")
     _send(socket, "JOIN tick_#{opts.tick}\n")
 
-    :timer.send_interval(@tick_interval, self(), :tick)
+    :timer.send_interval(opts.interval, self(), :tick)
 
     {:ok, %{
       socket: socket,

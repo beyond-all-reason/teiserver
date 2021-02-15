@@ -12,10 +12,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   alias Phoenix.PubSub
   alias Teiserver.BitParse
 
-  # Setup stuff TODO
+  # TODO - Setup/Account stuff
   # REGISTER
-
-  # Other TODO
   # CONFIRMAGREEMENT
   # RENAMEACCOUNT
   # CHANGEPASSWORD
@@ -24,6 +22,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # RESENDVERIFICATION
   # RESETPASSWORDREQUEST
   # RESETPASSWORD
+
+  # Other TODO
   # HANDICAP
   # KICKFROMBATTLE
   # FORECTEAMNO
@@ -40,6 +40,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # SETSCRIPTTAGS
   # REMOVESCRIPTTAGS
   # LISTCOMPFLAGS
+
+  # Handled by SPADS (I think)
   # PROMOTE
 
   @motd """
@@ -615,7 +617,7 @@ Welcome to Teiserver
       msg
     end
 
-    Logger.debug("--> #{msg}")
+    Logger.debug("--> #{String.trim(msg)}")
     transport.send(socket, msg)
   end
 end

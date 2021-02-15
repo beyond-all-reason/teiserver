@@ -13,7 +13,10 @@ defmodule Teiserver.TcpServer do
   @default_protocol SpringProtocol
 
   def start_link(_opts) do
-    :ranch.start_listener(make_ref(), :ranch_tcp, [{:port, 8200}], __MODULE__, [])
+    :ranch.start_listener(make_ref(), :ranch_tcp, [
+      {:port, 8200},
+      {:max_connections, :infinty}
+    ], __MODULE__, [])
   end
 
   def start_link(ref, socket, transport, _opts) do
@@ -57,7 +60,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:tcp, _socket, data}, state) do
-    Logger.debug("<-- #{data}")
+    Logger.debug("<-- #{String.trim(data)}")
     new_state = data
     |> String.split("\n")
     |> Enum.reduce(state, fn (data, acc) ->
