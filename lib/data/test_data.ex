@@ -18,7 +18,8 @@ defmodule Teiserver.TestData do
         ignored: [],
         rank: 1,
         bot: true,
-        moderator: true
+        moderator: true,
+        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
       },
       %{
         # ID: 2
@@ -30,31 +31,32 @@ defmodule Teiserver.TestData do
         ignored: [],
         rank: 1,
         bot: true,
-        moderator: false
+        moderator: false,
+        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
       },
       %{
         name: "TestUser",
         country: "US",
-        password_hash: "X03MO1qnZdYdgyfeuILPmQ==",# "password"
         lobbyid: "LuaLobby Chobby",
         friends: ["Friend1", "Friend2"],
         friend_requests: ["FriendRequest1"],
         ignored: ["Ignored1", "Ignored2"],
         rank: 1,
         bot: false,
-        moderator: true
+        moderator: true,
+        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
       },
       %{
         name: "TestUser2",
         country: "GB",
-        password_hash: "X03MO1qnZdYdgyfeuILPmQ==",# "password"
         lobbyid: "LuaLobby Chobby",
         friends: [],
         friend_requests: [],
         ignored: [],
         rank: 2,
         bot: false,
-        moderator: false
+        moderator: false,
+        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
       },
       %{
         name: "Teifion",
@@ -65,7 +67,8 @@ defmodule Teiserver.TestData do
         ignored: [],
         rank: 5,
         bot: false,
-        moderator: false
+        moderator: false,
+        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
       },
       %{
         name: "Addas",
@@ -76,7 +79,8 @@ defmodule Teiserver.TestData do
         ignored: [],
         rank: 4,
         bot: false,
-        moderator: false
+        moderator: false,
+        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
       },
       %{
         name: "Link",
@@ -87,7 +91,8 @@ defmodule Teiserver.TestData do
         ignored: [],
         rank: 3,
         bot: false,
-        moderator: false
+        moderator: false,
+        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
       },
       %{
         name: "Chon",
@@ -97,7 +102,8 @@ defmodule Teiserver.TestData do
         friend_requests: [],
         rank: 2,
         bot: false,
-        moderator: true
+        moderator: true,
+        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
       },
     ]
     |> Enum.map(&User.create_user/1)

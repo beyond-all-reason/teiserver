@@ -30,7 +30,7 @@ defmodule Teiserver.Benchmark.StatsClient do
     |> Enum.reduce(0, fn (value, acc) ->
       acc + case value do
         {_key, v} -> v
-        {_key, v1, v2} -> v1
+        {_key, v1, _v2} -> v1
       end
     end)
 

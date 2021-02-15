@@ -16,7 +16,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # REGISTER
   # CONFIRMAGREEMENT
   # RENAMEACCOUNT
-  # CHANGEPASSWORD
   # CHANGEEMAILREQUEST
   # CHANGEEMAIL
   # RESENDVERIFICATION
@@ -69,7 +68,7 @@ Welcome to Teiserver
       {command, data, msg_id} ->
         do_handle(command, data, %{state | msg_id: msg_id})
       nil ->
-        Logger.warn("Bad match on command: '#{data}'")
+        Logger.debug("Bad match on command: '#{data}'")
         state
     end
     %{state | msg_id: nil}
@@ -106,7 +105,7 @@ Welcome to Teiserver
   # any login. As soon as we put password checking in place this will
   # stop working
   defp do_handle("LI", username, state) do
-    do_handle("LOGIN", "#{username} password 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp", state)
+    do_handle("LOGIN", "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp", state)
   end
 
   defp do_handle("JB", _, state) do
@@ -167,6 +166,24 @@ Welcome to Teiserver
       "SERVERMSG Ingame time: xyz hours\n",
     ]
     _send(msg, state)
+    state
+  end
+
+  defp do_handle("CHANGEPASSWORD", data, state) do
+    case Regex.run(~r/(\w+)\t(\w+)/, data) do
+      [_, plain_old_password, plain_new_password] ->
+        case User.test_password(User.encrypt_password(plain_old_password), state.user.password_hash) do
+          false ->
+            _send("SERVERMSG Current password entered incorrectly\n", state)
+          true ->
+            encrypted_new_password = User.encrypt_password(plain_new_password)
+            new_user = %{state.user | password_hash: encrypted_new_password}
+            User.update_user(new_user)
+            _send("SERVERMSG Password changed, you will need to use it next time you login\n", state)
+          end
+      _ ->
+        nil
+    end
     state
   end
 

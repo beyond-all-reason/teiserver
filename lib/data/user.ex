@@ -202,30 +202,38 @@ defmodule Teiserver.User do
     PubSub.broadcast Teiserver.PubSub, "user_updates:#{ringee}", {:ring, ringer}
   end
 
-  def try_login(username, _password, state) do
-    # Password hashing for spring is:
-    # :crypto.hash(:md5 , "password") |> Base.encode64()
-    do_login(username, state)
+  def encrypt_password(password) do
+    :crypto.hash(:md5 , password) |> Base.encode64()
   end
 
-  defp do_login(username, state) do
+  @spec test_password(String.t, String.t | Map.t) :: boolean
+  def test_password(password, user) when is_map(user) do
+    test_password(password, user.password_hash)
+  end
+
+  def test_password(password, existing_password) do
+    password == existing_password
+  end
+
+  def try_login(username, password, state) do
+    case get_user_by_name(username) do
+      nil ->
+        {:error, "No user found"}
+      user ->
+        case test_password(password, user) do
+          true ->
+            do_login(user, state)
+          false ->
+            {:error, "Invalid password"}
+        end
+    end
+  end
+
+  defp do_login(user, state) do
     proto = state.protocol
 
-    proto.reply(:login_accepted, username, state)
+    proto.reply(:login_accepted, user.name, state)
     proto.reply(:motd, state)
-
-    user = case get_user_by_name(username) do
-      nil ->
-        # Logger.warn("Adding user based on login, this should be replaced with registration functionality")
-        create_user(%{
-          name: username,
-          country: "GB",
-          lobbyid: "LuaLobby Chobby"
-        })
-        |> add_user()
-      user ->
-        user
-    end
 
     {:ok, user}
   end

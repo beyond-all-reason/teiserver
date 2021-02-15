@@ -2,6 +2,7 @@ defmodule Teiserver.SpringAuthTest do
   use ExUnit.Case
   require Logger
   alias Teiserver.BitParse
+  alias Teiserver.User
   import Teiserver.TestLib, only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1]
 
   setup do
@@ -63,6 +64,20 @@ SERVERMSG Ingame time: xyz hours\n"
     _send(socket, "MYSTATUS\n")
     reply = _recv(socket)
     assert reply == :timeout
+    
+    # Now change the password - incorrectly
+    _send(socket, "CHANGEPASSWORD wrong_pass\tnew_pass\n")
+    reply = _recv(socket)
+    assert reply == "SERVERMSG Current password entered incorrectly\n"
+    user = User.get_user_by_name("TestUser")
+    assert user.password_hash == "X03MO1qnZdYdgyfeuILPmQ=="
+
+    # Change it correctly
+    _send(socket, "CHANGEPASSWORD password\tnew_pass\n")
+    reply = _recv(socket)
+    assert reply == "SERVERMSG Password changed, you will need to use it next time you login\n"
+    user = User.get_user_by_name("TestUser")
+    assert user.password_hash != "X03MO1qnZdYdgyfeuILPmQ=="
   end
 
   test "IGNORELIST, IGNORE, UNIGNORE, SAYPRIVATE", %{socket: socket1} do
