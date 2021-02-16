@@ -23,7 +23,7 @@ defmodule Teiserver.User do
       id: next_id(),
       rank: 1,
       country: "GB",
-      lobbyid: nil,
+      lobbyid: "LuaLobby Chobby",
       moderator: false,
       bot: false,
       friends: [],

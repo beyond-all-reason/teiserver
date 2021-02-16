@@ -11,17 +11,34 @@ defmodule Teiserver.TestLib do
     {:ok, socket} = :gen_tcp.connect(@host, 8200, [active: false])
     %{socket: socket}
   end
+  
+  def new_user_name() do
+    "new_test_user_#{:random.uniform(99999999) + 1000000}"
+  end
 
-  def auth_setup(username \\ "TestUser") do
+  def new_user() do
+    name = new_user_name()
+    user = User.create_user(%{
+      name: name,
+      email: "#{name}@email.com",
+      password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
+    })
+    |> User.add_user
+    user
+  end
+
+  def auth_setup(user \\ nil) do
+    user = if user, do: user, else: new_user()
+
     {:ok, socket} = :gen_tcp.connect(@host, 8200, [active: false])
     # Ignore the TASSERVER
     _ = _recv(socket)
     
     # Now do our login
-    _send(socket, "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
+    _send(socket, "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
     _ = _recv(socket)
 
-    %{socket: socket}
+    %{socket: socket, user: user}
   end
 
   def _send(socket, msg) do
@@ -30,7 +47,7 @@ defmodule Teiserver.TestLib do
   end
 
   def _recv(socket) do
-    case :gen_tcp.recv(socket, 0, 1000) do
+    case :gen_tcp.recv(socket, 0, 500) do
       {:ok, reply} -> reply |> to_string
       {:error, :timeout} -> :timeout
     end

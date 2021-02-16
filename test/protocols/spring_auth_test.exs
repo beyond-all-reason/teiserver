@@ -1,13 +1,13 @@
 defmodule Teiserver.SpringAuthTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   require Logger
   alias Teiserver.BitParse
   alias Teiserver.User
-  import Teiserver.TestLib, only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1]
+  import Teiserver.TestLib, only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, new_user: 0]
 
   setup do
-    %{socket: socket} = auth_setup()
-    {:ok, socket: socket}
+    %{socket: socket, user: user} = auth_setup()
+    {:ok, socket: socket, user: user}
   end
 
   test "Test bad match", %{socket: socket} do
@@ -28,37 +28,39 @@ defmodule Teiserver.SpringAuthTest do
     assert reply == "#4 PONG\n"
   end
 
-  test "GETUSERINFO", %{socket: socket} do
+  test "GETUSERINFO", %{socket: socket, user: user} do
     _send(socket, "GETUSERINFO\n")
     reply = _recv(socket)
-    assert reply == "SERVERMSG Registration date: yesterday
-SERVERMSG Email address: TestUser@TestUser.com
+    assert reply =~ "SERVERMSG Registration date: yesterday
+SERVERMSG Email address: #{user.email}
 SERVERMSG Ingame time: xyz hours\n"
   end
 
-  test "MYSTATUS", %{socket: socket} do
+  test "MYSTATUS", %{socket: socket, user: user} do
     # Start by setting everything to 1, most of this
     # stuff we can't set. We should be rank 1, not a bot but are a mod
     _send(socket, "MYSTATUS 127\n")
-    "CLIENTSTATUS TestUser\t" <> reply = _recv(socket)
-    assert reply == "102\n"
-    reply_bits = BitParse.parse_bits(String.trim(reply), 7)
+    reply = _recv(socket)
+    [p1, p2] = String.split(reply, "\t")
+    assert p1 == "CLIENTSTATUS #{user.name}"
+    assert p2 == "100\n"
+    reply_bits = BitParse.parse_bits(String.trim(p2), 7)
 
     # Lets make sure it's coming back the way we expect
     # [in_game, away, r1, r2, r3, mod, bot]
-    [1, 1, 0, 0, 1, 1, 0] = reply_bits
+    [1, 1, 0, 0, 1, 0, 0] = reply_bits
 
     # Lets check we can correctly in-game
-    new_status = Integer.undigits([0, 1, 0, 0, 1, 1, 0], 2)
+    new_status = Integer.undigits([0, 1, 0, 0, 1, 0, 0], 2)
     _send(socket, "MYSTATUS #{new_status}\n")
     reply = _recv(socket)
-    assert reply == "CLIENTSTATUS TestUser\t#{new_status}\n"
+    assert reply == "CLIENTSTATUS #{user.name}\t#{new_status}\n"
 
     # And now the away flag
-    new_status = Integer.undigits([0, 0, 0, 0, 1, 1, 0], 2)
+    new_status = Integer.undigits([0, 0, 0, 0, 1, 0, 0], 2)
     _send(socket, "MYSTATUS #{new_status}\n")
     reply = _recv(socket)
-    assert reply == "CLIENTSTATUS TestUser\t#{new_status}\n"
+    assert reply == "CLIENTSTATUS #{user.name}\t#{new_status}\n"
     
     # And now we try for a bad mystatus command
     _send(socket, "MYSTATUS\n")
@@ -69,27 +71,27 @@ SERVERMSG Ingame time: xyz hours\n"
     _send(socket, "CHANGEPASSWORD wrong_pass\tnew_pass\n")
     reply = _recv(socket)
     assert reply == "SERVERMSG Current password entered incorrectly\n"
-    user = User.get_user_by_name("TestUser")
+    user = User.get_user_by_name(user.name)
     assert user.password_hash == "X03MO1qnZdYdgyfeuILPmQ=="
 
     # Change it correctly
     _send(socket, "CHANGEPASSWORD password\tnew_pass\n")
     reply = _recv(socket)
     assert reply == "SERVERMSG Password changed, you will need to use it next time you login\n"
-    user = User.get_user_by_name("TestUser")
+    user = User.get_user_by_name(user.name)
     assert user.password_hash != "X03MO1qnZdYdgyfeuILPmQ=="
   end
 
-  test "IGNORELIST, IGNORE, UNIGNORE, SAYPRIVATE", %{socket: socket1} do
-    %{socket: socket2} = auth_setup("TestUser2")
+  test "IGNORELIST, IGNORE, UNIGNORE, SAYPRIVATE", %{socket: socket1, user: user} do
+    user2 = new_user()
+    %{socket: socket2} = auth_setup(user2)
     reply = _recv(socket1)
-    assert reply == "ADDUSER TestUser2 GB 4\tLuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} GB "
+    assert reply =~ "\tLuaLobby Chobby\n"
 
     _send(socket1, "#111 IGNORELIST\n")
     reply = _recv(socket1)
     assert reply == "#111 IGNORELISTBEGIN
-#111 IGNORELIST userName=Ignored1
-#111 IGNORELIST userName=Ignored2
 #111 IGNORELISTEND\n"
 
     # We expect no messages to be waiting for us
@@ -97,87 +99,76 @@ SERVERMSG Ingame time: xyz hours\n"
     assert reply == :timeout
 
     # Send a message from 2 to 1
-    _send(socket2, "SAYPRIVATE TestUser Hello there!\n")
+    _send(socket2, "SAYPRIVATE #{user.name} Hello there!\n")
     reply = _recv(socket1)
-    assert reply == "SAIDPRIVATE TestUser2 Hello there!\n"
+    assert reply == "SAIDPRIVATE #{user2.name} Hello there!\n"
 
     # Now lets ignore them
-    _send(socket1, "IGNORE userName=TestUser2\n")
+    _send(socket1, "IGNORE userName=#{user2.name}\n")
     reply = _recv(socket1)
     assert reply == "IGNORELISTBEGIN
-IGNORELIST userName=Ignored1
-IGNORELIST userName=Ignored2
-IGNORELIST userName=TestUser2
+IGNORELIST userName=#{user2.name}
 IGNORELISTEND\n"
 
     # Send a message?
-    _send(socket2, "SAYPRIVATE TestUser You still there?\n")
+    _send(socket2, "SAYPRIVATE #{user.name} You still there?\n")
     reply = _recv(socket1)
     assert reply == :timeout
     
     # Now unignore them
-    _send(socket1, "UNIGNORE userName=TestUser2\n")
+    _send(socket1, "UNIGNORE userName=#{user2.name}\n")
     reply = _recv(socket1)
     assert reply == "IGNORELISTBEGIN
-IGNORELIST userName=Ignored1
-IGNORELIST userName=Ignored2
 IGNORELISTEND\n"
 
     # Send a message?
-    _send(socket2, "SAYPRIVATE TestUser What about now?\n")
+    _send(socket2, "SAYPRIVATE #{user.name} What about now?\n")
     reply = _recv(socket1)
-    assert reply == "SAIDPRIVATE TestUser2 What about now?\n"
+    assert reply == "SAIDPRIVATE #{user2.name} What about now?\n"
   end
 
-  test "FRIENDLIST, ADDFRIEND, REMOVEFRIEIND, ACCEPTFRIENDREQUEST, DECLINEFRIENDREQUEST", %{socket: socket1} do
-    %{socket: socket2} = auth_setup("TestUser2")
+  test "FRIENDLIST, ADDFRIEND, REMOVEFRIEIND, ACCEPTFRIENDREQUEST, DECLINEFRIENDREQUEST", %{socket: socket1, user: user} do
+    user2 = new_user()
+    %{socket: socket2} = auth_setup(user2)
     reply = _recv(socket1)
-    assert reply == "ADDUSER TestUser2 GB 4\tLuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} GB "
+    assert reply =~ "\tLuaLobby Chobby\n"
 
     _send(socket1, "#7 FRIENDLIST\n")
     reply = _recv(socket1)
     assert reply == "#7 FRIENDLISTBEGIN
-#7 FRIENDLIST userName=Friend1
-#7 FRIENDLIST userName=Friend2
 #7 FRIENDLISTEND\n"
 
     _send(socket1, "#187 FRIENDREQUESTLIST\n")
     reply = _recv(socket1)
     assert reply == "#187 FRIENDREQUESTLISTBEGIN
-#187 FRIENDREQUESTLIST userName=FriendRequest1
 #187 FRIENDREQUESTLISTEND\n"
 
     # Now we send the friend request
-    _send(socket2, "FRIENDREQUEST userName=TestUser\n")
+    _send(socket2, "FRIENDREQUEST userName=#{user.name}\n")
     reply = _recv(socket1)
     assert reply == "FRIENDREQUESTLISTBEGIN
-FRIENDREQUESTLIST userName=FriendRequest1
-FRIENDREQUESTLIST userName=TestUser2
+FRIENDREQUESTLIST userName=#{user2.name}
 FRIENDREQUESTLISTEND\n"
 
     # Accept the friend request
-    _send(socket1, "ACCEPTFRIENDREQUEST userName=TestUser2\n")
+    _send(socket1, "ACCEPTFRIENDREQUEST userName=#{user2.name}\n")
     reply = _recv(socket1)
     assert reply == "FRIENDLISTBEGIN
-FRIENDLIST userName=Friend1
-FRIENDLIST userName=Friend2
-FRIENDLIST userName=TestUser2
+FRIENDLIST userName=#{user2.name}
 FRIENDLISTEND
 FRIENDREQUESTLISTBEGIN
-FRIENDREQUESTLIST userName=FriendRequest1
 FRIENDREQUESTLISTEND\n"
 
     reply = _recv(socket2)
     assert reply == "FRIENDLISTBEGIN
-FRIENDLIST userName=TestUser
+FRIENDLIST userName=#{user.name}
 FRIENDLISTEND\n"
 
     # Change of plan, remove them
-    _send(socket1, "UNFRIEND userName=TestUser2\n")
+    _send(socket1, "UNFRIEND userName=#{user2.name}\n")
     reply = _recv(socket1)
     assert reply == "FRIENDLISTBEGIN
-FRIENDLIST userName=Friend1
-FRIENDLIST userName=Friend2
 FRIENDLISTEND\n"
 
     reply = _recv(socket2)
@@ -185,36 +176,34 @@ FRIENDLISTEND\n"
 FRIENDLISTEND\n"
 
     # Request a friend again so we can decline it
-    _send(socket2, "FRIENDREQUEST userName=TestUser\n")
+    _send(socket2, "FRIENDREQUEST userName=#{user.name}\n")
     reply = _recv(socket1)
     assert reply == "FRIENDREQUESTLISTBEGIN
-FRIENDREQUESTLIST userName=FriendRequest1
-FRIENDREQUESTLIST userName=TestUser2
+FRIENDREQUESTLIST userName=#{user2.name}
 FRIENDREQUESTLISTEND\n"
 
     # Decline the friend request
-    _send(socket1, "DECLINEFRIENDREQUEST userName=TestUser2\n")
+    _send(socket1, "DECLINEFRIENDREQUEST userName=#{user2.name}\n")
     reply = _recv(socket1)
     assert reply == "FRIENDREQUESTLISTBEGIN
-FRIENDREQUESTLIST userName=FriendRequest1
 FRIENDREQUESTLISTEND\n"
 
     reply = _recv(socket2)
     assert reply == :timeout
   end
 
-  test "JOIN, LEAVE, SAY, CHANNELS", %{socket: socket} do
+  test "JOIN, LEAVE, SAY, CHANNELS", %{socket: socket, user: user} do
     _send(socket, "JOIN test_room\n")
     reply = _recv(socket)
     assert reply == "JOIN test_room
-JOINED test_room TestUser
+JOINED test_room #{user.name}
 CHANNELTOPIC test_room no author
-CLIENTS test_room TestUser\n"
+CLIENTS test_room #{user.name}\n"
 
     # Say something
     _send(socket, "SAY test_room Hello there\n")
     reply = _recv(socket)
-    assert reply == "SAID test_room TestUser Hello there\n"
+    assert reply == "SAID test_room #{user.name} Hello there\n"
 
     # Check for channel list
     _send(socket, "CHANNELS\n")
@@ -227,7 +216,7 @@ ENDOFCHANNELS\n"
     # Leave
     _send(socket, "LEAVE test_room\n")
     reply = _recv(socket)
-    assert reply == "LEFT test_room TestUser\n"
+    assert reply == "LEFT test_room #{user.name}\n"
 
     # Check for channel list
     _send(socket, "CHANNELS\n")
@@ -243,7 +232,7 @@ ENDOFCHANNELS\n"
     assert reply == :timeout
   end
 
-  test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket} do
+  test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket, user: user} do
     _send(socket, "JOINBATTLE 1 empty 1683043765\n")
     # The remainder of this string is just the script tags, we'll assume it's correct for now
     part1 = _recv(socket)
@@ -257,27 +246,27 @@ ENDOFCHANNELS\n"
     
     assert join == "JOINBATTLE 1 1683043765"
     assert client1 == "CLIENTBATTLESTATUS [teh]cluster1[03] 4194306 16777215"
-    assert client2 == "CLIENTBATTLESTATUS TestUser 0 0"
+    assert client2 == "CLIENTBATTLESTATUS #{user.name} 0 0"
     assert rect1 == "ADDSTARTRECT 0 0 126 74 200"
     assert rect2 == "ADDSTARTRECT 1 126 0 200 74"
     assert battle_status == "REQUESTBATTLESTATUS"
-    assert saidbattle == "SAIDBATTLEEX [teh]cluster1[03] Hi TestUser! Current battle type is faked_team."
-    assert joinedbattle == "JOINEDBATTLE TestUser 1"
-    assert clientstatus == "CLIENTSTATUS TestUser\t6"
+    assert saidbattle == "SAIDBATTLEEX [teh]cluster1[03] Hi #{user.name}! Current battle type is faked_team."
+    assert joinedbattle == "JOINEDBATTLE #{user.name} 1"
+    assert clientstatus == "CLIENTSTATUS #{user.name}\t4"
 
     _send(socket, "SAYBATTLE Hello there!\n")
     reply = _recv(socket)
-    assert reply == "SAIDBATTLE TestUser Hello there!\n"
+    assert reply == "SAIDBATTLE #{user.name} Hello there!\n"
 
     _send(socket, "MYBATTLESTATUS 12 0\n")
     reply = _recv(socket)
-    assert reply == "CLIENTBATTLESTATUS TestUser 0 0\n"
+    assert reply == "CLIENTBATTLESTATUS #{user.name} 0 0\n"
 
     # Time to leave
     _send(socket, "LEAVEBATTLE\n")
     reply = _recv(socket)
-    assert reply == "LEFTBATTLE 1 TestUser
-CLIENTBATTLESTATUS TestUser 0 0\n"
+    assert reply == "LEFTBATTLE 1 #{user.name}
+CLIENTBATTLESTATUS #{user.name} 0 0\n"
 
     # These commands shouldn't work, they also shouldn't error
     _send(socket, "SAYBATTLE I'm not here anymore!\n")
@@ -293,16 +282,18 @@ CLIENTBATTLESTATUS TestUser 0 0\n"
     assert reply == :timeout
   end
 
-  test "ring", %{socket: socket1} do
-    %{socket: socket2} = auth_setup("TestUser2")
+  test "ring", %{socket: socket1, user: user} do
+    user2 = new_user()
+    %{socket: socket2} = auth_setup(user2)
     reply = _recv(socket1)
-    assert reply == "ADDUSER TestUser2 GB 4\tLuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} GB "
+    assert reply =~ "\tLuaLobby Chobby\n"
 
-    _send(socket2, "RING TestUser\n")
+    _send(socket2, "RING #{user.name}\n")
     reply = _recv(socket2)
     assert reply == :timeout
 
     reply = _recv(socket1)
-    assert reply == "RING TestUser2\n"
+    assert reply == "RING #{user2.name}\n"
   end
 end

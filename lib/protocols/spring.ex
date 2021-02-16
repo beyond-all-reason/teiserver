@@ -181,7 +181,7 @@ Welcome to Teiserver
     # TODO: Actually have this information
     msg = [
       "SERVERMSG Registration date: yesterday\n",
-      "SERVERMSG Email address: #{state.name}@#{state.name}.com\n",
+      "SERVERMSG Email address: #{state.user.email}\n",
       "SERVERMSG Ingame time: xyz hours\n",
     ]
     _send(msg, state)

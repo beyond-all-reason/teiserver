@@ -1,5 +1,5 @@
 defmodule Teiserver.TestBitParse do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
   alias Teiserver.BitParse
 
   test "bit_parse" do
