@@ -1,6 +1,7 @@
 use Mix.Config
 
-config :logger, :console, format: "[$level] $message\n",
+config :logger, :console,
+  format: "[$level] $message\n",
   level: :debug
 
 # Import environment specific config. This must remain at the bottom

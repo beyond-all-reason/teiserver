@@ -7,6 +7,7 @@ defmodule Teiserver.TestData do
 
   def create_users do
     ConCache.insert_new(:lists, :users, [])
+
     [
       %{
         # ID: 1
@@ -112,7 +113,7 @@ defmodule Teiserver.TestData do
         bot: false,
         moderator: true,
         password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
-      },
+      }
     ]
     |> Enum.map(&User.create_user/1)
     |> Enum.map(&User.add_user/1)
@@ -134,7 +135,7 @@ defmodule Teiserver.TestData do
         battle_id: 1,
         status: 16,
         userid: 2
-      },
+      }
       # %{
       #   pid: nil,
       #   name: "Chon",
@@ -156,6 +157,7 @@ defmodule Teiserver.TestData do
 
   def create_battles do
     ConCache.insert_new(:lists, :battles, [])
+
     [
       %{
         type: :normal,
@@ -193,7 +195,6 @@ defmodule Teiserver.TestData do
         map_name: "Quicksilver Remake 1.24",
         title: "USA -- 03",
         game_name: "Beyond All Reason test-15367-6bfafcb",
-
         players: [2]
       }
     ]

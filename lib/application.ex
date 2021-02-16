@@ -15,7 +15,7 @@ defmodule Teiserver.Application do
       concache_perm_sup(:users),
       concache_perm_sup(:clients),
       concache_perm_sup(:battles),
-      concache_perm_sup(:rooms),
+      concache_perm_sup(:rooms)
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -48,6 +48,7 @@ defmodule Teiserver.Application do
     receive do
       :begin -> nil
     end
+
     ConCache.put(:lists, :clients, [])
     ConCache.put(:lists, :rooms, [])
 
@@ -64,6 +65,6 @@ defmodule Teiserver.Application do
       author: "ChanServ",
       members: ["Addas"]
     })
-    |> Teiserver.Room.add_room
+    |> Teiserver.Room.add_room()
   end
 end

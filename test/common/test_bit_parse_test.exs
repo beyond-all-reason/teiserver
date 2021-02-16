@@ -12,7 +12,12 @@ defmodule Teiserver.TestBitParse do
 
     for {string, length, expected} <- values do
       result = BitParse.parse_bits(string, length)
-      assert expected == result, message: "Input of #{string}, expected #{Kernel.inspect expected}, got: #{Kernel.inspect result}"
+
+      assert expected == result,
+        message:
+          "Input of #{string}, expected #{Kernel.inspect(expected)}, got: #{
+            Kernel.inspect(result)
+          }"
     end
   end
 end

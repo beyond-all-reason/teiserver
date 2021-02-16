@@ -41,9 +41,9 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # PROMOTE
 
   @motd """
-Message of the day
-Welcome to Teiserver
-"""
+  Message of the day
+  Welcome to Teiserver
+  """
 
   # The welcome message is sent to a client when they first connect
   # to the server
@@ -53,45 +53,53 @@ Welcome to Teiserver
 
   # The main entry point for the module and the wrapper around
   # parsing, processing and acting upon a player message
-  @spec handle(String.t, Map.t) :: Map.t
+  @spec handle(String.t(), Map.t()) :: Map.t()
   def handle("", state), do: state
   def handle("\r\n", state), do: state
-  def handle(data, state) do
-    tuple = ~r/^(#[0-9]+ )?([A-Z0-9]+)(.*)?$/
-    |> Regex.run(data)
-    |> _clean
 
-    state = case tuple do
-      {command, data, msg_id} ->
-        do_handle(command, data, %{state | msg_id: msg_id})
-      nil ->
-        Logger.debug("Bad match on command: '#{data}'")
-        state
-    end
+  def handle(data, state) do
+    tuple =
+      ~r/^(#[0-9]+ )?([A-Z0-9]+)(.*)?$/
+      |> Regex.run(data)
+      |> _clean
+
+    state =
+      case tuple do
+        {command, data, msg_id} ->
+          do_handle(command, data, %{state | msg_id: msg_id})
+
+        nil ->
+          Logger.debug("Bad match on command: '#{data}'")
+          state
+      end
+
     %{state | msg_id: nil}
   end
 
   defp _clean(nil), do: nil
+
   defp _clean([_, msg_id, command, data]) do
     {command, String.trim(data), String.trim(msg_id)}
   end
 
   # Specific handlers for different commands
-  @spec do_handle(String.t, String.t, Map.t) :: Map.t
+  @spec do_handle(String.t(), String.t(), Map.t()) :: Map.t()
   defp do_handle("MYSTATUS", data, state) do
     case Regex.run(~r/([0-9]+)/, data) do
       [_, new_value] ->
         status_bits = BitParse.parse_bits(new_value, 7)
         [in_game, away, _r1, _r2, _r3, _mod, _bot] = status_bits
 
-        new_client = Map.merge(state.client, %{
-          in_game: (in_game == 1),
-          away: (away == 1),
-        })
+        new_client =
+          Map.merge(state.client, %{
+            in_game: in_game == 1,
+            away: away == 1
+          })
 
         # This just accepts it and updates the client
         new_client = Client.update(new_client, :client_updated_status)
         %{state | client: new_client}
+
       nil ->
         Logger.debug("[command:mystatus] bad match on: #{data}")
         state
@@ -102,7 +110,11 @@ Welcome to Teiserver
   # any login. As soon as we put password checking in place this will
   # stop working
   defp do_handle("LI", username, state) do
-    do_handle("LOGIN", "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp", state)
+    do_handle(
+      "LOGIN",
+      "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp",
+      state
+    )
   end
 
   defp do_handle("JB", _, state) do
@@ -110,14 +122,16 @@ Welcome to Teiserver
   end
 
   defp do_handle("LOGIN", data, state) do
-    response = case Regex.run(~r/^(\w+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)\t([^\t]+)\t([^\t]+)/, data) do
-      [_, username, password, _cpu, ip, lobby, user_id, modes] ->
-        _ = [username, password, ip, lobby, user_id, modes]
-        Logger.debug("[protocol:login] matched #{username}")
-        User.try_login(username, password, state)
-      nil ->
-        {:error, "Invalid details format"}
-    end
+    response =
+      case Regex.run(~r/^(\w+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)\t([^\t]+)\t([^\t]+)/, data) do
+        [_, username, password, _cpu, ip, lobby, user_id, modes] ->
+          _ = [username, password, ip, lobby, user_id, modes]
+          Logger.debug("[protocol:login] matched #{username}")
+          User.try_login(username, password, state)
+
+        nil ->
+          {:error, "Invalid details format"}
+      end
 
     case response do
       {:ok, user} ->
@@ -159,15 +173,18 @@ Welcome to Teiserver
               password_hash: User.encrypt_password(plain_password),
               email: email
             })
-            |> User.add_user
+            |> User.add_user()
 
             reply(:registration_accepted, state)
+
           _ ->
             reply(:registration_denied, "User already exists", state)
         end
+
       _ ->
         nil
     end
+
     state
   end
 
@@ -182,8 +199,9 @@ Welcome to Teiserver
     msg = [
       "SERVERMSG Registration date: yesterday\n",
       "SERVERMSG Email address: #{state.user.email}\n",
-      "SERVERMSG Ingame time: xyz hours\n",
+      "SERVERMSG Ingame time: xyz hours\n"
     ]
+
     _send(msg, state)
     state
   end
@@ -191,18 +209,28 @@ Welcome to Teiserver
   defp do_handle("CHANGEPASSWORD", data, state) do
     case Regex.run(~r/(\w+)\t(\w+)/, data) do
       [_, plain_old_password, plain_new_password] ->
-        case User.test_password(User.encrypt_password(plain_old_password), state.user.password_hash) do
+        case User.test_password(
+               User.encrypt_password(plain_old_password),
+               state.user.password_hash
+             ) do
           false ->
             _send("SERVERMSG Current password entered incorrectly\n", state)
+
           true ->
             encrypted_new_password = User.encrypt_password(plain_new_password)
             new_user = %{state.user | password_hash: encrypted_new_password}
             User.update_user(new_user)
-            _send("SERVERMSG Password changed, you will need to use it next time you login\n", state)
-          end
+
+            _send(
+              "SERVERMSG Password changed, you will need to use it next time you login\n",
+              state
+            )
+        end
+
       _ ->
         nil
     end
+
     state
   end
 
@@ -261,16 +289,19 @@ Welcome to Teiserver
         _send("CLIENTS #{room_name} #{members}\n", state)
 
         :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
+
       [_, room_name, _key] ->
         _send("JOINFAILED #{room_name} Locked\n", state)
+
       _ ->
         _send("JOINFAILED No match for details\n", state)
     end
+
     state
   end
 
   defp do_handle("LEAVE", room_name, state) do
-    PubSub.unsubscribe Teiserver.PubSub, "room:#{room_name}"
+    PubSub.unsubscribe(Teiserver.PubSub, "room:#{room_name}")
     _send("LEFT #{room_name} #{state.name}\n", state)
     Room.remove_user_from_room(state.name, room_name)
     state
@@ -285,9 +316,11 @@ Welcome to Teiserver
     case Regex.run(~r/(\w+) (.+)/, data) do
       [_, room_name, msg] ->
         Room.send_message(state.name, room_name, msg)
+
       _ ->
         nil
     end
+
     state
   end
 
@@ -296,23 +329,29 @@ Welcome to Teiserver
       [_, to_name, msg] ->
         User.send_direct_message(state.name, to_name, msg)
         _send("SAIDPRIVATE #{to_name} #{msg}\n", state)
+
       _ ->
         nil
     end
+
     state
   end
 
   # Battles
   defp do_handle("JOINBATTLE", data, state) do
-    response = case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
-      [_, battleid, _password, _script_password] ->
-        battle = battleid
-        |> String.to_integer
-        |> Battle.get_battle
-        {:accepted, battle}
-      nil ->
-        {:denied, "Invalid details"}
-    end
+    response =
+      case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
+        [_, battleid, _password, _script_password] ->
+          battle =
+            battleid
+            |> String.to_integer()
+            |> Battle.get_battle()
+
+          {:accepted, battle}
+
+        nil ->
+          {:denied, "Invalid details"}
+      end
 
     case response do
       {:accepted, nil} ->
@@ -322,7 +361,7 @@ Welcome to Teiserver
 
       {:accepted, battle} ->
         Logger.debug("[command:joinbattle] success")
-        PubSub.subscribe Teiserver.PubSub, "battle_updates:#{battle.id}"
+        PubSub.subscribe(Teiserver.PubSub, "battle_updates:#{battle.id}")
         Battle.add_user_to_battle(state.name, battle.id)
         reply(:join_battle, battle, state)
         reply(:battle_settings, battle, state)
@@ -339,14 +378,20 @@ Welcome to Teiserver
         |> Enum.each(fn r ->
           reply(:start_rectangle, r, state)
         end)
+
         _send("REQUESTBATTLESTATUS\n", state)
 
         # I think this is sent by SPADS but for now we're going to fake it
         founder_name = User.get_username(battle.founder)
-        _send("SAIDBATTLEEX #{founder_name} Hi #{state.name}! Current battle type is faked_team.\n", state)
 
-        new_client = Map.put(state.client, :battle_id, battle.id)
-        |> Client.update
+        _send(
+          "SAIDBATTLEEX #{founder_name} Hi #{state.name}! Current battle type is faked_team.\n",
+          state
+        )
+
+        new_client =
+          Map.put(state.client, :battle_id, battle.id)
+          |> Client.update()
 
         %{state | client: new_client}
 
@@ -358,30 +403,31 @@ Welcome to Teiserver
   end
 
   defp do_handle("SAYBATTLE", _msg, %{client: %{battle_id: nil}} = state), do: state
+
   defp do_handle("SAYBATTLE", msg, state) do
     Battle.say(state.name, msg, state.client.battle_id)
     state
   end
 
   defp do_handle("LEAVEBATTLE", _, %{client: %{battle_id: nil}} = state), do: state
+
   defp do_handle("LEAVEBATTLE", _, state) do
-    PubSub.unsubscribe Teiserver.PubSub, "battle_updates:#{state.client.battle_id}"
+    PubSub.unsubscribe(Teiserver.PubSub, "battle_updates:#{state.client.battle_id}")
     reply(:remove_user_from_battle, {state.name, state.client.battle_id}, state)
     new_client = Client.leave_battle(state.userid)
     %{state | client: new_client}
   end
 
+  # status_bits = BitParse.parse_bits(new_value, 7)
+  #         [in_game, away, _r1, _r2, _r3, _mod, _bot] = status_bits
 
-# status_bits = BitParse.parse_bits(new_value, 7)
-#         [in_game, away, _r1, _r2, _r3, _mod, _bot] = status_bits
+  #         new_client = Map.merge(state.client, %{
+  #           in_game: (in_game == 1),
+  #           away: (away == 1),
+  #         })
 
-#         new_client = Map.merge(state.client, %{
-#           in_game: (in_game == 1),
-#           away: (away == 1),
-#         })
-
-#         # This just accepts it and updates the client
-#         new_client = Client.update(new_client, :client_updated_status)
+  #         # This just accepts it and updates the client
+  #         new_client = Client.update(new_client, :client_updated_status)
 
   # b0 = undefined (reserved for future use)
   # b1 = ready (0=not ready, 1=ready)
@@ -394,35 +440,66 @@ Welcome to Teiserver
   # b24..b27 = side (e.g.: arm, core, tll, ... Side index can be between 0 and 15, inclusive)
   # b28..b31 = undefined (reserved for future use)
   defp do_handle("MYBATTLESTATUS", _, %{client: %{battle_id: nil}} = state), do: state
+
   defp do_handle("MYBATTLESTATUS", data, state) do
-    new_client = case Regex.run(~r/(\S+) (.+)/, data) do
-      [_, battlestatus, team_colour] ->
-        status_bits = BitParse.parse_bits(battlestatus, 32)
+    new_client =
+      case Regex.run(~r/(\S+) (.+)/, data) do
+        [_, battlestatus, team_colour] ->
+          status_bits = BitParse.parse_bits(battlestatus, 32)
 
-        [_, ready,
-        t1, t2, t3, t4,
-        a1, a2, a3, a4,
-        spectator,
-        _h1, _h2, _h3, _h4, _h5, _h6, _h7,#Handicap, not set here
-        _, _, _, _,
-        sync1, sync2,
-        side1, side2, side3, side4,
-        _, _, _, _] = status_bits
+          [
+            _,
+            ready,
+            t1,
+            t2,
+            t3,
+            t4,
+            a1,
+            a2,
+            a3,
+            a4,
+            spectator,
+            # Handicap, not set here
+            _h1,
+            _h2,
+            _h3,
+            _h4,
+            _h5,
+            _h6,
+            _h7,
+            _,
+            _,
+            _,
+            _,
+            sync1,
+            sync2,
+            side1,
+            side2,
+            side3,
+            side4,
+            _,
+            _,
+            _,
+            _
+          ] = status_bits
 
-        new_client = Map.merge(state.client, %{
-          ready: (ready == 1),
-          team_number: [t1, t2, t3, t4] |> Integer.undigits(2),
-          ally_team_number: [a1, a2, a3, a4] |> Integer.undigits(2),
-          spectator: (spectator == 1),
-          sync: [sync1, sync2] |> Integer.undigits(2),
-          side: [side1, side2, side3, side4] |> Integer.undigits(2),
-          team_colour: team_colour
-        })
+          new_client =
+            Map.merge(state.client, %{
+              ready: ready == 1,
+              team_number: [t1, t2, t3, t4] |> Integer.undigits(2),
+              ally_team_number: [a1, a2, a3, a4] |> Integer.undigits(2),
+              spectator: spectator == 1,
+              sync: [sync1, sync2] |> Integer.undigits(2),
+              side: [side1, side2, side3, side4] |> Integer.undigits(2),
+              team_colour: team_colour
+            })
 
-        Client.update(new_client, :client_updated_battlestatus)
-      _ ->
-        state.client
-    end
+          Client.update(new_client, :client_updated_battlestatus)
+
+        _ ->
+          state.client
+      end
+
     Map.put(state, :client, new_client)
   end
 
@@ -439,16 +516,16 @@ Welcome to Teiserver
 
   # Not handled cacther
   defp do_handle(nil, _, state), do: state
+
   defp do_handle(match, _, state) do
     Logger.error("No match  #{match}")
     _send("ERR - No match\n", state)
     state
   end
 
-  
   # Reply commands, these are things we are sending to the client
   # based on messages they sent us
-  @spec reply(Atom.t, nil | String.t | Tuple.t | List.t, Map.t) :: Map.t
+  @spec reply(Atom.t(), nil | String.t() | Tuple.t() | List.t(), Map.t()) :: Map.t()
   def reply(reply_type, data, state) do
     msg = do_reply(reply_type, data)
     _send(msg, state)
@@ -456,10 +533,10 @@ Welcome to Teiserver
   end
 
   # Two argument version of the above, just means the data is nil
-  @spec reply(Atom.t, Map.t) :: Map.t
+  @spec reply(Atom.t(), Map.t()) :: Map.t()
   def reply(reply_type, state), do: reply(reply_type, nil, state)
 
-  @spec do_reply(Atom.t, String.t | List.t) :: String.t
+  @spec do_reply(Atom.t(), String.t() | List.t()) :: String.t()
   defp do_reply(:login_accepted, user) do
     "ACCEPTED #{user}\n"
   end
@@ -476,54 +553,68 @@ Welcome to Teiserver
   end
 
   defp do_reply(:friendlist, user) do
-    friends = user.friends
-    |> Enum.map(fn f ->
-      "FRIENDLIST userName=#{f}\n"
-    end)
+    friends =
+      user.friends
+      |> Enum.map(fn f ->
+        "FRIENDLIST userName=#{f}\n"
+      end)
 
-    ["FRIENDLISTBEGIN\n"] ++ friends ++ ["FRIENDLISTEND\n"]
+    (["FRIENDLISTBEGIN\n"] ++ friends ++ ["FRIENDLISTEND\n"])
     |> Enum.join("")
   end
 
   defp do_reply(:friendlist_request, user) do
-    requests = user.friend_requests
-    |> Enum.map(fn f ->
-      "FRIENDREQUESTLIST userName=#{f}\n"
-    end)
+    requests =
+      user.friend_requests
+      |> Enum.map(fn f ->
+        "FRIENDREQUESTLIST userName=#{f}\n"
+      end)
 
-    ["FRIENDREQUESTLISTBEGIN\n"] ++ requests ++ ["FRIENDREQUESTLISTEND\n"]
+    (["FRIENDREQUESTLISTBEGIN\n"] ++ requests ++ ["FRIENDREQUESTLISTEND\n"])
     |> Enum.join("")
   end
 
   defp do_reply(:ignorelist, user) do
-    ignored = user.ignored
-    |> Enum.map(fn f ->
-      "IGNORELIST userName=#{f}\n"
-    end)
+    ignored =
+      user.ignored
+      |> Enum.map(fn f ->
+        "IGNORELIST userName=#{f}\n"
+      end)
 
-    ["IGNORELISTBEGIN\n"] ++ ignored ++ ["IGNORELISTEND\n"]
+    (["IGNORELISTBEGIN\n"] ++ ignored ++ ["IGNORELISTEND\n"])
     |> Enum.join("")
   end
 
   # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#BATTLEOPENED:server
   defp do_reply(:battle_opened, battle) do
-    type = case battle.type do
-      :normal -> 0
-      :replay -> 1
-    end
-    nattype = case battle.nattype do
-      :none -> 0
-      :holepunch -> 1
-      :fixed -> 2
-    end
+    type =
+      case battle.type do
+        :normal -> 0
+        :replay -> 1
+      end
+
+    nattype =
+      case battle.nattype do
+        :none -> 0
+        :holepunch -> 1
+        :fixed -> 2
+      end
+
     passworded = if battle.passworded, do: 1, else: 0
 
-    "BATTLEOPENED #{battle.id} #{type} #{nattype} #{battle.founder} #{battle.ip} #{battle.port} #{battle.max_players} #{passworded} #{battle.rank} #{battle.map_hash} #{battle.engine_name}\t#{battle.engine_version}\t#{battle.map_name}\t#{battle.title}\t#{battle.game_name}\ttest-15386-5c98cfa\n"
+    "BATTLEOPENED #{battle.id} #{type} #{nattype} #{battle.founder} #{battle.ip} #{battle.port} #{
+      battle.max_players
+    } #{passworded} #{battle.rank} #{battle.map_hash} #{battle.engine_name}\t#{
+      battle.engine_version
+    }\t#{battle.map_name}\t#{battle.title}\t#{battle.game_name}\ttest-15386-5c98cfa\n"
   end
 
   defp do_reply(:update_battle, battle) do
-    locked = (battle.locked == 1)
-    "UPDATEBATTLEINFO #{battle.id} #{Enum.count(battle.spectators)} #{locked} #{battle.map_hash} #{battle.map_name}\n"
+    locked = battle.locked == 1
+
+    "UPDATEBATTLEINFO #{battle.id} #{Enum.count(battle.spectators)} #{locked} #{battle.map_hash} #{
+      battle.map_name
+    }\n"
   end
 
   defp do_reply(:join_battle, battle) do
@@ -535,9 +626,10 @@ Welcome to Teiserver
   end
 
   defp do_reply(:battle_settings, battle) do
-    tags = battle.tags
-    |> Enum.map(fn {key, value} -> "#{key}=#{value}" end)
-    |> Enum.join("\t")
+    tags =
+      battle.tags
+      |> Enum.map(fn {key, value} -> "#{key}=#{value}" end)
+      |> Enum.join("\t")
 
     "SETSCRIPTTAGS " <> tags <> "\n"
   end
@@ -563,6 +655,7 @@ Welcome to Teiserver
   defp do_reply(:client_battlestatus, {name, battlestatus, team_colour}) do
     "CLIENTBATTLESTATUS #{name} #{battlestatus} #{team_colour}\n"
   end
+
   defp do_reply(:client_battlestatus, client) do
     "CLIENTBATTLESTATUS #{client.name} #{client.battlestatus} #{client.team_colour}\n"
   end
@@ -581,12 +674,13 @@ Welcome to Teiserver
 
   # Chat
   defp do_reply(:list_channels, nil) do
-    channels = Room.list_rooms()
-    |> Enum.map(fn room ->
-      "CHANNEL #{room.name} #{Enum.count(room.members)}\n"
-    end)
+    channels =
+      Room.list_rooms()
+      |> Enum.map(fn room ->
+        "CHANNEL #{room.name} #{Enum.count(room.members)}\n"
+      end)
 
-    ["CHANNELS\n"] ++ channels ++ ["ENDOFCHANNELS\n"]
+    (["CHANNELS\n"] ++ channels ++ ["ENDOFCHANNELS\n"])
     |> Enum.join("")
   end
 
@@ -626,7 +720,7 @@ Welcome to Teiserver
   defp do_reply(:battle_saidex, {username, msg, _battle_id}) do
     "SAIDBATTLEEX #{username} #{msg}\n"
   end
-  
+
   defp do_reply(atom, data) do
     Logger.error("No match in spring.ex for atom: #{atom} and data: #{data}")
     ""
@@ -640,9 +734,11 @@ Welcome to Teiserver
   defp _send(nil, _, _, _), do: nil
   defp _send("", _, _, _), do: nil
   defp _send([], _, _, _), do: nil
+
   defp _send(msg, socket, transport, msg_id) when is_list(msg) do
     _send(Enum.join(msg, ""), socket, transport, msg_id)
   end
+
   defp _send(msg, socket, transport, msg_id) do
     # If no line return at the end we should warn about that
     # I've made the mistake of forgetting it and wondering
@@ -651,15 +747,16 @@ Welcome to Teiserver
       Logger.warn("Attempting to send message without newline at the end - #{msg}")
     end
 
-    msg = if msg_id != "" and msg_id != nil do
-      msg
-      |> String.trim()
-      |> String.split("\n")
-      |> Enum.map(fn m -> "#{msg_id} #{m}\n" end)
-      |> Enum.join("")
-    else
-      msg
-    end
+    msg =
+      if msg_id != "" and msg_id != nil do
+        msg
+        |> String.trim()
+        |> String.split("\n")
+        |> Enum.map(fn m -> "#{msg_id} #{m}\n" end)
+        |> Enum.join("")
+      else
+        msg
+      end
 
     Logger.debug("--> #{String.trim(msg)}")
     transport.send(socket, msg)

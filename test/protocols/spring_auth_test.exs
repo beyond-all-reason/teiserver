@@ -61,12 +61,12 @@ SERVERMSG Ingame time: xyz hours\n"
     _send(socket, "MYSTATUS #{new_status}\n")
     reply = _recv(socket)
     assert reply == "CLIENTSTATUS #{user.name}\t#{new_status}\n"
-    
+
     # And now we try for a bad mystatus command
     _send(socket, "MYSTATUS\n")
     reply = _recv(socket)
     assert reply == :timeout
-    
+
     # Now change the password - incorrectly
     _send(socket, "CHANGEPASSWORD wrong_pass\tnew_pass\n")
     reply = _recv(socket)
@@ -114,7 +114,7 @@ IGNORELISTEND\n"
     _send(socket2, "SAYPRIVATE #{user.name} You still there?\n")
     reply = _recv(socket1)
     assert reply == :timeout
-    
+
     # Now unignore them
     _send(socket1, "UNIGNORE userName=#{user2.name}\n")
     reply = _recv(socket1)
@@ -127,7 +127,10 @@ IGNORELISTEND\n"
     assert reply == "SAIDPRIVATE #{user2.name} What about now?\n"
   end
 
-  test "FRIENDLIST, ADDFRIEND, REMOVEFRIEIND, ACCEPTFRIENDREQUEST, DECLINEFRIENDREQUEST", %{socket: socket1, user: user} do
+  test "FRIENDLIST, ADDFRIEND, REMOVEFRIEIND, ACCEPTFRIENDREQUEST, DECLINEFRIENDREQUEST", %{
+    socket: socket1,
+    user: user
+  } do
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
     reply = _recv(socket1)
@@ -238,19 +241,35 @@ ENDOFCHANNELS\n"
     part1 = _recv(socket)
     part2 = _recv(socket)
     :timeout = _recv(socket)
-    
-    reply = (part1 <> part2)
-    |> String.split("\n")
-    
-    [join, _tags, client1, client2, rect1, rect2, battle_status, saidbattle, joinedbattle, clientstatus, ""] = reply
-    
+
+    reply =
+      (part1 <> part2)
+      |> String.split("\n")
+
+    [
+      join,
+      _tags,
+      client1,
+      client2,
+      rect1,
+      rect2,
+      battle_status,
+      saidbattle,
+      joinedbattle,
+      clientstatus,
+      ""
+    ] = reply
+
     assert join == "JOINBATTLE 1 1683043765"
     assert client1 == "CLIENTBATTLESTATUS [teh]cluster1[03] 4194306 16777215"
     assert client2 == "CLIENTBATTLESTATUS #{user.name} 0 0"
     assert rect1 == "ADDSTARTRECT 0 0 126 74 200"
     assert rect2 == "ADDSTARTRECT 1 126 0 200 74"
     assert battle_status == "REQUESTBATTLESTATUS"
-    assert saidbattle == "SAIDBATTLEEX [teh]cluster1[03] Hi #{user.name}! Current battle type is faked_team."
+
+    assert saidbattle ==
+             "SAIDBATTLEEX [teh]cluster1[03] Hi #{user.name}! Current battle type is faked_team."
+
     assert joinedbattle == "JOINEDBATTLE #{user.name} 1"
     assert clientstatus == "CLIENTSTATUS #{user.name}\t4"
 

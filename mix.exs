@@ -31,12 +31,11 @@ defmodule Teiserver.MixProject do
     [
       {:ranch, "~> 1.4"},
       {:parallel, "~> 0.0"},
-
       {:con_cache, "~> 0.13"},
       {:phoenix_pubsub, "~> 2.0"},
       {:excoveralls, "~> 0.12.3", only: :test},
       {:credo, "~> 1.2", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
+      {:dialyxir, "~> 0.5", only: [:dev], runtime: false}
     ]
   end
 end

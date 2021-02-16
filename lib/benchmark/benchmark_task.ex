@@ -7,9 +7,9 @@ defmodule Mix.Tasks.Benchmark do
   """
 
   def spawn_run do
-    spawn fn ->
+    spawn(fn ->
       run(nil)
-    end
+    end)
   end
 
   @shortdoc "Starts the benchmark procecess for the server"
@@ -23,7 +23,7 @@ defmodule Mix.Tasks.Benchmark do
       {Registry, keys: :unique, name: Teiserver.Benchmark.SilentRegistry},
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Benchmark.UserSupervisor},
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Benchmark.SilentSupervisor},
-      {Teiserver.Benchmark.StatsClient, name: Central.Account.RecentlyUsedCache},
+      {Teiserver.Benchmark.StatsClient, name: Central.Account.RecentlyUsedCache}
     ]
 
     opts = [strategy: :one_for_one, name: Teiserver.Benchmark.Supervisor]
@@ -32,7 +32,7 @@ defmodule Mix.Tasks.Benchmark do
     # Call all our sub function st
     {:ok, t} = Task.start(fn -> startup() end)
     send(t, :begin)
-    
+
     :timer.sleep(300_000)
 
     start_result

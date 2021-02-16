@@ -13,10 +13,16 @@ defmodule Teiserver.TcpServer do
   @default_protocol SpringProtocol
 
   def start_link(_opts) do
-    :ranch.start_listener(make_ref(), :ranch_tcp, [
-      {:port, 8200},
-      {:max_connections, :infinty}
-    ], __MODULE__, [])
+    :ranch.start_listener(
+      make_ref(),
+      :ranch_tcp,
+      [
+        {:port, 8200},
+        {:max_connections, :infinty}
+      ],
+      __MODULE__,
+      []
+    )
   end
 
   def start_link(ref, socket, transport, _opts) do
@@ -34,6 +40,7 @@ defmodule Teiserver.TcpServer do
     :ok = PubSub.subscribe(Teiserver.PubSub, "battle_updates")
     :ok = PubSub.subscribe(Teiserver.PubSub, "client_updates")
     :ok = PubSub.subscribe(Teiserver.PubSub, "user_updates")
+
     :gen_server.enter_loop(__MODULE__, [], %{
       userid: nil,
       name: nil,
@@ -61,11 +68,14 @@ defmodule Teiserver.TcpServer do
 
   def handle_info({:tcp, _socket, data}, state) do
     Logger.debug("<-- #{String.trim(data)}")
-    new_state = data
-    |> String.split("\n")
-    |> Enum.reduce(state, fn (data, acc) ->
-      state.protocol.handle(data, acc)
-    end)
+
+    new_state =
+      data
+      |> String.split("\n")
+      |> Enum.reduce(state, fn data, acc ->
+        state.protocol.handle(data, acc)
+      end)
+
     {:noreply, new_state}
   end
 
@@ -84,19 +94,24 @@ defmodule Teiserver.TcpServer do
     state.protocol.reply(:client_battlestatus, new_client, state)
     {:noreply, state}
   end
-  
+
   def handle_info({:updated_client, new_client, _reason}, state) do
     state.protocol.reply(:client_status, new_client, state)
-    new_state = if state.name == new_client.name do
-      Map.put(state, :client, new_client)
-    else
-      state
-    end
+
+    new_state =
+      if state.name == new_client.name do
+        Map.put(state, :client, new_client)
+      else
+        state
+      end
+
     {:noreply, new_state}
   end
 
   def handle_info({:new_battlestatus, username, battlestatus, team_colour}, state) do
-    new_state = state.protocol.reply(:client_battlestatus, {username, battlestatus, team_colour}, state)
+    new_state =
+      state.protocol.reply(:client_battlestatus, {username, battlestatus, team_colour}, state)
+
     {:noreply, new_state}
   end
 
@@ -170,7 +185,7 @@ defmodule Teiserver.TcpServer do
     Logger.debug("Closing TCP connection - no transport")
     {:stop, :normal, state}
   end
-  
+
   def handle_info(:terminate, state) do
     {:stop, :normal, state}
   end
@@ -181,7 +196,7 @@ defmodule Teiserver.TcpServer do
   # end
 
   def terminate(reason, state) do
-    Logger.debug("disconnect because #{Kernel.inspect reason}")
+    Logger.debug("disconnect because #{Kernel.inspect(reason)}")
     Client.disconnect(state.name)
   end
 end

@@ -6,13 +6,15 @@ defmodule Teiserver.BitParse do
   the same way with an integer
   """
   def parse_bits(string, bit_length) do
-    result = string
-    |> String.to_integer
-    |> Integer.digits(2)
+    result =
+      string
+      |> String.to_integer()
+      |> Integer.digits(2)
 
     if bit_length > Enum.count(result) do
-      padding = List.duplicate([0], bit_length - Enum.count(result))
-      |> List.flatten
+      padding =
+        List.duplicate([0], bit_length - Enum.count(result))
+        |> List.flatten()
 
       padding ++ result
     else

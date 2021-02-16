@@ -22,11 +22,14 @@ defmodule Teiserver.Benchmark.UserClient do
 
   defp wait_for_reply(socket, msg_id, start_time) do
     reply = _recv(socket)
+
     cond do
       reply == :timeout ->
         wait_for_reply(socket, msg_id, start_time)
+
       String.contains?(reply, msg_id) ->
         :os.system_time(:millisecond) - start_time
+
       true ->
         wait_for_reply(socket, msg_id, start_time)
     end
@@ -49,9 +52,14 @@ defmodule Teiserver.Benchmark.UserClient do
   end
 
   def init(opts) do
-    {:ok, socket} = :gen_tcp.connect('localhost', 8200, [active: false])
+    {:ok, socket} = :gen_tcp.connect('localhost', 8200, active: false)
     _send(socket, "REGISTER #{opts.id}\tpassword\temail\n")
-    _send(socket, "LOGIN #{opts.id} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
+
+    _send(
+      socket,
+      "LOGIN #{opts.id} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+    )
+
     _ = _recv(socket)
 
     _send(socket, "JOIN main\n")
@@ -59,10 +67,11 @@ defmodule Teiserver.Benchmark.UserClient do
 
     :timer.send_interval(opts.interval, self(), :tick)
 
-    {:ok, %{
-      socket: socket,
-      tick: opts.tick,
-      stats: opts.stats
-    }}
+    {:ok,
+     %{
+       socket: socket,
+       tick: opts.tick,
+       stats: opts.stats
+     }}
   end
 end

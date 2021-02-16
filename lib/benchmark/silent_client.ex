@@ -4,6 +4,7 @@ defmodule Teiserver.Benchmark.SilentClient do
   noise on the server.
   """
   use GenServer
+
   def handle_info(:tick, state) do
     _send(state.socket, "PING\n")
     _ = _recv(state.socket)
@@ -27,9 +28,14 @@ defmodule Teiserver.Benchmark.SilentClient do
   end
 
   def init(opts) do
-    {:ok, socket} = :gen_tcp.connect('localhost', 8200, [active: false])
+    {:ok, socket} = :gen_tcp.connect('localhost', 8200, active: false)
     _send(socket, "REGISTER #{opts.id}\tpassword\temail\n")
-    _send(socket, "LOGIN #{opts.id} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
+
+    _send(
+      socket,
+      "LOGIN #{opts.id} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+    )
+
     _ = _recv(socket)
 
     _send(socket, "JOIN main\n")
@@ -37,9 +43,10 @@ defmodule Teiserver.Benchmark.SilentClient do
 
     :timer.send_interval(opts.interval, self(), :tick)
 
-    {:ok, %{
-      socket: socket,
-      tick: opts.tick
-    }}
+    {:ok,
+     %{
+       socket: socket,
+       tick: opts.tick
+     }}
   end
 end

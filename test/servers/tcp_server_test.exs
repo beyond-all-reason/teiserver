@@ -17,16 +17,29 @@ defmodule Teiserver.TcpServerTest do
     _send(socket, "REGISTER #{username}\tpassword\temail\n")
     _ = _recv(socket)
 
-    _send(socket, "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
+    _send(
+      socket,
+      "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+    )
+
     reply = _recv(socket)
     [accepted | remainder] = String.split(reply, "\n")
     assert accepted == "ACCEPTED #{username}"
 
-    commands = remainder
-    |> Enum.map(fn line -> String.split(line, " ") |> hd end)
-    |> Enum.uniq
+    commands =
+      remainder
+      |> Enum.map(fn line -> String.split(line, " ") |> hd end)
+      |> Enum.uniq()
 
-    assert commands == ["MOTD", "ADDUSER", "BATTLEOPENED", "UPDATEBATTLEINFO", "JOINEDBATTLE", "LOGININFOEND", ""]
+    assert commands == [
+             "MOTD",
+             "ADDUSER",
+             "BATTLEOPENED",
+             "UPDATEBATTLEINFO",
+             "JOINEDBATTLE",
+             "LOGININFOEND",
+             ""
+           ]
 
     _send(socket, "EXIT\n")
     {:error, :closed} = :gen_tcp.recv(socket, 0, 1000)

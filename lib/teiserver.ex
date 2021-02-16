@@ -1,3 +1,2 @@
 defmodule Teiserver do
-  
 end

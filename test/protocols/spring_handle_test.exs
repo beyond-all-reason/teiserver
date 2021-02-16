@@ -9,7 +9,11 @@ defmodule Teiserver.SpringHandleTest do
 
   test "LOGIN" do
     state = TestLib.mock_state_raw(SpringProtocol)
-    SpringProtocol.handle("LOGIN TestUser X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n", state)
+
+    SpringProtocol.handle(
+      "LOGIN TestUser X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n",
+      state
+    )
   end
 
   test "EXIT" do
