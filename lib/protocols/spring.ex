@@ -13,10 +13,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   alias Teiserver.BitParse
 
   # TODO - Setup/Account stuff
-  # CONFIRMAGREEMENT
-  # CHANGEEMAILREQUEST
-  # CHANGEEMAIL
-  # RESENDVERIFICATION
+  # CONFIRMAGREEMENT - Waiting to hear from Beherith on how he wants it to work
+  # RESENDVERIFICATION - See above
 
   # Handled by SPADS (I think)
   # HANDICAP
@@ -229,7 +227,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("RESETPASSWORD", data, state) do
-    case Regex.run(~r/(\S+) (\w+)/, data) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
       [_, email, code] ->
         user = User.get_user_by_email(email)
 
@@ -237,7 +235,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           user == nil ->
             _send("RESETPASSWORDDENIED no_user\n", state)
 
-          user.reset_code == nil ->
+          user.password_reset_code == nil ->
             _send("RESETPASSWORDDENIED nil_code\n", state)
 
           state.userid != nil and state.userid != user.id ->
@@ -258,6 +256,45 @@ defmodule Teiserver.Protocols.SpringProtocol do
     end
 
     state
+  end
+
+  defp do_handle("CHANGEEMAILREQUEST", new_email, state) do
+    new_user = User.request_email_change(state.user, new_email)
+
+    case new_user do
+      nil ->
+        _send("CHANGEEMAILREQUESTDENIED no user\n", state)
+        state
+
+      _ ->
+        _send("CHANGEEMAILREQUESTACCEPTED\n", state)
+        %{state | user: new_user}
+    end
+  end
+
+  defp do_handle("CHANGEEMAIL", data, state) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
+      [_, new_email, supplied_code] ->
+        [correct_code, expected_email] = state.user.email_change_code
+
+        cond do
+          correct_code != supplied_code ->
+            _send("CHANGEEMAILDENIED bad code\n", state)
+            state
+
+          new_email != expected_email ->
+            _send("CHANGEEMAILDENIED bad email\n", state)
+            state
+
+          true ->
+            new_user = User.change_email(state.user, new_email)
+            _send("CHANGEEMAILACCEPTED\n", state)
+            %{state | user: new_user}
+        end
+
+      _ ->
+        state
+    end
   end
 
   defp do_handle("EXIT", _reason, state) do

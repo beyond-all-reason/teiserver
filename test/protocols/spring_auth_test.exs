@@ -324,4 +324,32 @@ CLIENTBATTLESTATUS #{user.name} 0 0\n"
     new_user = User.get_user_by_name("rename_test_user")
     assert new_user != nil
   end
+
+  test "CHANGEEMAIL", %{socket: socket, user: user} do
+    # Make the request
+    _send(socket, "CHANGEEMAILREQUEST new_email@email.com\n")
+    reply = _recv(socket)
+    assert reply == "CHANGEEMAILREQUESTACCEPTED\n"
+    new_user = User.get_user_by_id(user.id)
+    [code, new_email] = new_user.email_change_code
+    assert new_email == "new_email@email.com"
+
+    # Submit a bad code
+    _send(socket, "CHANGEEMAIL new_email@email.com bad_code\n")
+    reply = _recv(socket)
+    assert reply == "CHANGEEMAILDENIED bad code\n"
+
+    # Submit a bad email
+    _send(socket, "CHANGEEMAIL bad_email #{code}\n")
+    reply = _recv(socket)
+    assert reply == "CHANGEEMAILDENIED bad email\n"
+
+    # Now do it correctly
+    _send(socket, "CHANGEEMAIL new_email@email.com #{code}\n")
+    reply = _recv(socket)
+    assert reply == "CHANGEEMAILACCEPTED\n"
+    new_user = User.get_user_by_id(user.id)
+    assert new_user.email == "new_email@email.com"
+    assert new_user.email_change_code == [nil, nil]
+  end
 end

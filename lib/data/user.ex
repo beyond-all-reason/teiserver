@@ -45,7 +45,8 @@ defmodule Teiserver.User do
         ignored: [],
         verification_code: nil,
         verified: false,
-        reset_code: nil
+        password_reset_code: nil,
+        email_change_code: [nil, nil]
       },
       user
     )
@@ -114,21 +115,34 @@ defmodule Teiserver.User do
 
   def request_password_reset(user) do
     code = :random.uniform(899_999) + 100_000
-    update_user(%{user | reset_code: "#{code}"})
+    update_user(%{user | password_reset_code: "#{code}"})
   end
 
   def reset_password(user, code) do
-    case code == user.reset_code do
+    case code == user.password_reset_code do
       true ->
         new_plain_password = generate_random_password()
         new_encrypted_password = encrypt_password(new_plain_password)
         EmailHelper.send_new_password(user, new_plain_password)
-        update_user(%{user | reset_code: nil, password_hash: new_encrypted_password})
+        update_user(%{user | password_reset_code: nil, password_hash: new_encrypted_password})
         :ok
 
       false ->
         :error
     end
+  end
+
+  def request_email_change(nil, _), do: nil
+
+  def request_email_change(user, new_email) do
+    code = :random.uniform(899_999) + 100_000
+    update_user(%{user | email_change_code: ["#{code}", new_email]})
+  end
+
+  def change_email(user, new_email) do
+    ConCache.delete(:users_lookup_id_with_email, user.email)
+    ConCache.put(:users_lookup_id_with_email, new_email, user.id)
+    update_user(%{user | email: new_email, email_change_code: [nil, nil]})
   end
 
   def accept_friend_request(requester_name, accepter_name) do

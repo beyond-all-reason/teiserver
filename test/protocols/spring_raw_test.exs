@@ -94,7 +94,7 @@ defmodule Teiserver.SpringRawTest do
     )
 
     reply = _recv(socket)
-    assert reply == "RESETPASSWORDREQUESTDENIED error\n"
+    assert reply =~ "RESETPASSWORDREQUESTDENIED error\n"
 
     # Send the correct request
     _send(
@@ -102,9 +102,9 @@ defmodule Teiserver.SpringRawTest do
       "RESETPASSWORDREQUEST #{user.email}\n"
     )
 
-    assert user.reset_code == nil
+    assert user.password_reset_code == nil
     new_user = User.get_user_by_id(user.id)
-    assert new_user.reset_code != nil
+    assert new_user.password_reset_code != nil
     reply = _recv(socket)
     assert reply == "RESETPASSWORDREQUESTACCEPTED\n"
     user = new_user
@@ -116,20 +116,20 @@ defmodule Teiserver.SpringRawTest do
     )
 
     reply = _recv(socket)
-    assert reply == "RESETPASSWORDDENIED wrong_code\n"
+    assert reply =~ "RESETPASSWORDDENIED wrong_code\n"
     new_user = User.get_user_by_id(user.id)
     assert new_user.password_hash == user.password_hash
 
     # Now verify correctly
     _send(
       socket,
-      "RESETPASSWORD #{user.email} #{user.reset_code}\n"
+      "RESETPASSWORD #{user.email} #{user.password_reset_code}\n"
     )
 
     reply = _recv(socket)
     assert reply == "RESETPASSWORDACCEPTED\n"
     new_user = User.get_user_by_id(user.id)
     assert new_user.password_hash != user.password_hash
-    assert new_user.reset_code == nil
+    assert new_user.password_reset_code == nil
   end
 end
