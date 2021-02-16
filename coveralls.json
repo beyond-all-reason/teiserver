@@ -1,6 +1,6 @@
 {
   "skip_files": [
-    
+    "lib/benchmark/*"
   ],
 
   "custom_stop_words": [
@@ -10,12 +10,10 @@
   "terminal_options": {
     "file_column_width": 40
   },
-  
+
   "coverage_options": {
-    "treat_no_relevant_lines_as_cover*ed": true,
+    "treat_no_relevant_lines_as_covered": true,
     "output_dir": "cover/",
-    "ttemplate_temp": "https://github.com/parroty/excoveralls/blob/master/lib/templates/html/htmlcov/coverage.html.eex",
-    "ttemplate_path": "custom/path/to/template/",
     "minimum_coverage": 80
   }
 }
