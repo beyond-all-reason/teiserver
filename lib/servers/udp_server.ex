@@ -1,5 +1,5 @@
 defmodule UDPServer.State do
-  @doc ~S"""
+  @moduledoc """
   UDPServer State:
   port :: integer
   count :: integer
@@ -18,7 +18,7 @@ defmodule UDPServer.State do
 end
 
 defmodule UDPServer.Response do
-  @doc ~S"""
+  @moduledoc """
   Struct for UDP response packet
   ip :: String.t
   fromport :: integer
@@ -29,6 +29,7 @@ defmodule UDPServer.Response do
 end
 
 defmodule UDPServer do
+  @moduledoc false
   use GenServer
   alias UDPServer.State
   alias UDPServer.Response

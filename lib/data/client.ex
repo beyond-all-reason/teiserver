@@ -1,4 +1,5 @@
 defmodule Teiserver.Client do
+  @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Battle
   alias Teiserver.User

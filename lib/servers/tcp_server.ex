@@ -1,6 +1,7 @@
 # Stated with this
 # https://blog.oestrich.org/2017/07/using-ranch-with-elixir/
 defmodule Teiserver.TcpServer do
+  @moduledoc false
   use GenServer
   require Logger
   alias Phoenix.PubSub

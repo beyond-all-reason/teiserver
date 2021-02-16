@@ -1,4 +1,5 @@
 defmodule Mix.Tasks.Benchmark do
+  @moduledoc false
   use Mix.Task
 
   _ = """

@@ -23,9 +23,10 @@ defmodule Teiserver.Benchmark.StatsClient do
     users = Registry.count(Teiserver.Benchmark.UserRegistry)
     silents = Registry.count(Teiserver.Benchmark.SilentRegistry)
 
+    {load, _} = System.cmd("uptime", [])
     [_, l1, l5, l15] =
       ~r/load average: ([0-9\.]+), ([0-9\.]+), ([0-9\.]+)/
-      |> Regex.run(:os.cmd('uptime') |> to_string)
+      |> Regex.run(load)
 
     memory =
       :erlang.system_info(:allocated_areas)
@@ -80,7 +81,7 @@ Memory: #{Kernel.inspect(memory)}MB
           Teiserver.Benchmark.SilentClient,
           name: via_silent_tuple(id),
           data: %{
-            interval: 5000 + :random.uniform(10000),
+            interval: 5_000 + :random.uniform(10_000),
             id: id,
             tick: state.tick
           }

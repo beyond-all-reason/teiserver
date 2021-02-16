@@ -1,8 +1,10 @@
 defmodule Teiserver.FakeTransport do
+  @moduledoc false
   def send(_, _), do: nil
 end
 
 defmodule Teiserver.TestLib do
+  @moduledoc false
   alias Teiserver.User
   alias Teiserver.Client
   @host '127.0.0.1'

@@ -1,5 +1,5 @@
 defmodule Teiserver.BitParse do
-  @doc """
+  @moduledoc """
   Given an integer represented as a string it will convert it to
   bits on the assumption the length of bits should be bit_length.
   The reason being [0,0,1,0] and [0,0,0,0,1,0] would both be represented

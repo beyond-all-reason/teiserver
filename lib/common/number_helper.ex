@@ -1,4 +1,5 @@
 defmodule Teiserver.NumberHelper do
+  @moduledoc false
   def int_parse(""), do: 0
   def int_parse(nil), do: 0
   def int_parse(i) when is_number(i), do: round(i)

@@ -1,6 +1,8 @@
 defmodule Teiserver.TestData do
-  # Dummy module to create fake data until this is hooked up to
-  # an actual data store
+  @moduledoc """
+  Dummy module to create fake data until this is hooked up to
+  an actual data store
+  """
   alias Teiserver.User
   alias Teiserver.Client
   alias Teiserver.Battle

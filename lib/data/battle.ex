@@ -1,4 +1,5 @@
 defmodule Teiserver.Battle do
+  @moduledoc false
   alias Phoenix.PubSub
   require Logger
 

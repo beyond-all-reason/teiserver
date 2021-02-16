@@ -1,4 +1,5 @@
 defmodule Teiserver.Room do
+  @moduledoc false
   require Logger
   alias Phoenix.PubSub
 
