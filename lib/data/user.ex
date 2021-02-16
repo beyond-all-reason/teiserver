@@ -5,10 +5,12 @@ defmodule Teiserver.User do
     name: string
   """
 
+  @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulance cats dogs mice oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave)
+
   require Logger
   alias Phoenix.PubSub
   import Teiserver.NumberHelper, only: [int_parse: 1]
-  # alias Teiserver.Client
+  alias Teiserver.EmailHelper
 
   defp next_id() do
     ConCache.isolated(:id_counters, :user, fn ->
@@ -16,6 +18,12 @@ defmodule Teiserver.User do
       ConCache.put(:id_counters, :user, new_value)
       new_value
     end)
+  end
+
+  def generate_random_password() do
+    @wordlist
+    |> Enum.take_random(3)
+    |> Enum.join(" ")
   end
 
   def clean_name(name) do
@@ -79,7 +87,7 @@ defmodule Teiserver.User do
 
   def add_user(user) do
     verification_code = :random.uniform(899_999) + 100_000
-    user = %{user | verification_code: verification_code}
+    user = %{user | verification_code: "#{verification_code}"}
 
     update_user(user)
     ConCache.put(:users_lookup_name_with_id, user.id, user.name)
@@ -106,7 +114,21 @@ defmodule Teiserver.User do
 
   def request_password_reset(user) do
     code = :random.uniform(899_999) + 100_000
-    update_user(%{user | reset_code: code})
+    update_user(%{user | reset_code: "#{code}"})
+  end
+
+  def reset_password(user, code) do
+    case code == user.reset_code do
+      true ->
+        new_plain_password = generate_random_password()
+        new_encrypted_password = encrypt_password(new_plain_password)
+        EmailHelper.send_new_password(user, new_plain_password)
+        update_user(%{user | reset_code: nil, password_hash: new_encrypted_password})
+        :ok
+
+      false ->
+        :error
+    end
   end
 
   def accept_friend_request(requester_name, accepter_name) do

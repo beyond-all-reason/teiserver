@@ -27,11 +27,11 @@ defmodule Teiserver.SpringHandleTest do
     state = %{state | client: new_client}
     SpringProtocol.handle("LEAVEBATTLE", state)
   end
-  
+
   test "badly formed commands" do
     values = [
       "REGISTER name",
-      "LOGIN name",
+      "LOGIN name"
     ]
 
     state = TestLib.mock_state_auth(SpringProtocol)

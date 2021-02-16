@@ -1,6 +1,9 @@
 defmodule Teiserver.SpringRawTest do
   use ExUnit.Case, async: true
-  import Teiserver.TestLib, only: [raw_setup: 0, _send: 2, _recv: 1, new_user_name: 0, new_user: 0]
+
+  import Teiserver.TestLib,
+    only: [raw_setup: 0, _send: 2, _recv: 1, new_user_name: 0, new_user: 0]
+
   alias Teiserver.User
 
   setup do
@@ -84,6 +87,16 @@ defmodule Teiserver.SpringRawTest do
     user = new_user()
     _ = _recv(socket)
 
+    # Send the wrong request
+    _send(
+      socket,
+      "RESETPASSWORDREQUEST not_an_email\n"
+    )
+
+    reply = _recv(socket)
+    assert reply == "RESETPASSWORDREQUESTDENIED error\n"
+
+    # Send the correct request
     _send(
       socket,
       "RESETPASSWORDREQUEST #{user.email}\n"
@@ -92,5 +105,31 @@ defmodule Teiserver.SpringRawTest do
     assert user.reset_code == nil
     new_user = User.get_user_by_id(user.id)
     assert new_user.reset_code != nil
+    reply = _recv(socket)
+    assert reply == "RESETPASSWORDREQUESTACCEPTED\n"
+    user = new_user
+
+    # Now verify badly
+    _send(
+      socket,
+      "RESETPASSWORD #{user.email} the_wrong_code\n"
+    )
+
+    reply = _recv(socket)
+    assert reply == "RESETPASSWORDDENIED wrong_code\n"
+    new_user = User.get_user_by_id(user.id)
+    assert new_user.password_hash == user.password_hash
+
+    # Now verify correctly
+    _send(
+      socket,
+      "RESETPASSWORD #{user.email} #{user.reset_code}\n"
+    )
+
+    reply = _recv(socket)
+    assert reply == "RESETPASSWORDACCEPTED\n"
+    new_user = User.get_user_by_id(user.id)
+    assert new_user.password_hash != user.password_hash
+    assert new_user.reset_code == nil
   end
 end

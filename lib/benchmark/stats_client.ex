@@ -24,6 +24,7 @@ defmodule Teiserver.Benchmark.StatsClient do
     silents = Registry.count(Teiserver.Benchmark.SilentRegistry)
 
     {load, _} = System.cmd("uptime", [])
+
     [_, l1, l5, l15] =
       ~r/load average: ([0-9\.]+), ([0-9\.]+), ([0-9\.]+)/
       |> Regex.run(load)

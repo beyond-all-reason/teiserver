@@ -17,7 +17,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # CHANGEEMAILREQUEST
   # CHANGEEMAIL
   # RESENDVERIFICATION
-  # RESETPASSWORD
 
   # Handled by SPADS (I think)
   # HANDICAP
@@ -169,7 +168,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("REGISTER", data, state) do
-    case Regex.run(~r/(\w+)\t(\w+)\t(\w+)/, data) do
+    case Regex.run(~r/(\w+)\t(\w+)\t(\S+)/, data) do
       [_, username, plain_password, email] ->
         case User.get_user_by_name(username) do
           nil ->
@@ -196,7 +195,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # defp do_handle("CONFIRMAGREEMENT", code, state) do
   #   case  do
   #      ->
-        
+
   #   end
   # end
 
@@ -211,12 +210,54 @@ defmodule Teiserver.Protocols.SpringProtocol do
     case state.user == nil or email == state.user.email do
       true ->
         user = User.get_user_by_email(email)
-        User.request_password_reset(user)
-        state
+
+        case user do
+          nil ->
+            _send("RESETPASSWORDREQUESTDENIED error\n", state)
+
+          _ ->
+            User.request_password_reset(user)
+            _send("RESETPASSWORDREQUESTACCEPTED\n", state)
+        end
+
       false ->
         # They have requested a password reset for a different user?
-        state
+        _send("RESETPASSWORDREQUESTDENIED error\n", state)
     end
+
+    state
+  end
+
+  defp do_handle("RESETPASSWORD", data, state) do
+    case Regex.run(~r/(\S+) (\w+)/, data) do
+      [_, email, code] ->
+        user = User.get_user_by_email(email)
+
+        cond do
+          user == nil ->
+            _send("RESETPASSWORDDENIED no_user\n", state)
+
+          user.reset_code == nil ->
+            _send("RESETPASSWORDDENIED nil_code\n", state)
+
+          state.userid != nil and state.userid != user.id ->
+            _send("RESETPASSWORDDENIED wrong_user\n", state)
+
+          true ->
+            case User.reset_password(user, code) do
+              :ok ->
+                _send("RESETPASSWORDACCEPTED\n", state)
+
+              :error ->
+                _send("RESETPASSWORDDENIED wrong_code\n", state)
+            end
+        end
+
+      _ ->
+        nil
+    end
+
+    state
   end
 
   defp do_handle("EXIT", _reason, state) do

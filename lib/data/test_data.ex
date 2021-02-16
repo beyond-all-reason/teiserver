@@ -110,11 +110,14 @@ defmodule Teiserver.TestData do
       }
     ]
     |> Enum.map(fn user ->
-      Map.merge(%{
-        password_hash: "X03MO1qnZdYdgyfeuILPmQ==",
-        verified: true,
-        verification_code: nil
-      }, user)
+      Map.merge(
+        %{
+          password_hash: "X03MO1qnZdYdgyfeuILPmQ==",
+          verified: true,
+          verification_code: nil
+        },
+        user
+      )
     end)
     |> Enum.map(&User.create_user/1)
     |> Enum.map(&User.add_user/1)
