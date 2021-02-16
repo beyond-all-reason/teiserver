@@ -17,7 +17,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # CHANGEEMAILREQUEST
   # CHANGEEMAIL
   # RESENDVERIFICATION
-  # RESETPASSWORDREQUEST
   # RESETPASSWORD
 
   # Handled by SPADS (I think)
@@ -206,6 +205,18 @@ defmodule Teiserver.Protocols.SpringProtocol do
     _send("SERVERMSG Username changed, please log back in\n", state)
     send(self(), :terminate)
     state
+  end
+
+  defp do_handle("RESETPASSWORDREQUEST", email, state) do
+    case state.user == nil or email == state.user.email do
+      true ->
+        user = User.get_user_by_email(email)
+        User.request_password_reset(user)
+        state
+      false ->
+        # They have requested a password reset for a different user?
+        state
+    end
   end
 
   defp do_handle("EXIT", _reason, state) do

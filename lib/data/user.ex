@@ -36,7 +36,8 @@ defmodule Teiserver.User do
         friend_requests: [],
         ignored: [],
         verification_code: nil,
-        verified: false
+        verified: false,
+        reset_code: nil
       },
       user
     )
@@ -52,6 +53,11 @@ defmodule Teiserver.User do
 
   def get_user_by_name(username) do
     id = ConCache.get(:users_lookup_id_with_name, username)
+    ConCache.get(:users, id)
+  end
+
+  def get_user_by_email(email) do
+    id = ConCache.get(:users_lookup_id_with_email, email)
     ConCache.get(:users, id)
   end
 
@@ -78,6 +84,7 @@ defmodule Teiserver.User do
     update_user(user)
     ConCache.put(:users_lookup_name_with_id, user.id, user.name)
     ConCache.put(:users_lookup_id_with_name, user.name, user.id)
+    ConCache.put(:users_lookup_id_with_email, user.email, user.id)
 
     ConCache.update(:lists, :users, fn value ->
       new_value =
@@ -95,6 +102,11 @@ defmodule Teiserver.User do
   def update_user(user) do
     ConCache.put(:users, user.id, user)
     user
+  end
+
+  def request_password_reset(user) do
+    code = :random.uniform(899_999) + 100_000
+    update_user(%{user | reset_code: code})
   end
 
   def accept_friend_request(requester_name, accepter_name) do
