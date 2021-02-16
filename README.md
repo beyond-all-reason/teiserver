@@ -36,14 +36,14 @@ lib/teiserver/tcp_server.ex is the main tcp server which handles TCP messages, t
 ### Testing
 Run as above (`mix run --no-halt`) and load up Chobby. Set Chobby's server to `localhost`. In my experience it's then fastest to restart Chobby and it will connect to your locally running instance. After you've finished you'll want to set the server back to `road-flag.bnr.la`.
 
-You can login using the normal login command but it's much easier to login using `LI <username>` which is currently in place for testing purposes. If you are familiar with Elixir then starting it with `iex -S mix` will put it in console mode and you can execute commands through the modules there too.
+You can login using the normal login command but it's much easier to login using `LI <username>` which is currently in place for testing purposes. `test_data.ex` has a bunch of existing users for testing purposes but you can use the protocols `REGISTER username password email` command to create a new user. State is currently not persisted over restarts. If you are familiar with Elixir then starting it with `iex -S mix` will put it in console mode and you can execute commands through the modules there too.
 
 ### State
 ##### Users
-Keyed to the name of the user, these represent users registered with the system.
+Keyed to the id of the user, these represent users registered with the system. These will be persisted over restarts at a later date.
 
 ##### Clients
-Keyed to the name of the user, these represent the users currently logged in. Client contains both the PID of the client and a Module reference to the protocol in use.
+Keyed to the id of the user, these represent the users currently logged in. Client contains both the PID of the client and a Module reference to the protocol in use.
 
 ##### Battles
 Does what it says on the tin.
@@ -59,3 +59,6 @@ Does what it says on the tin.
 - Logging certain actions (in particular mod actions)
 - Spam/Flooding controls
 - Email on user registration/password reset
+
+### Contributing
+All contributors are welcome; if you spot an issue or bug with it message me directly on the discord or open an issue in github.
