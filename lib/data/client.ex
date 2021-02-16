@@ -177,14 +177,13 @@ defmodule Teiserver.Client do
 
   def disconnect(nil), do: nil
 
-  def disconnect(username) do
-    user = User.get_user_by_name(username)
-    ConCache.delete(:clients, user.id)
+  def disconnect(userid) do
+    ConCache.delete(:clients, userid)
 
     ConCache.update(:lists, :clients, fn value ->
       new_value =
         value
-        |> Enum.filter(fn v -> v != user.id end)
+        |> Enum.filter(fn v -> v != userid end)
 
       {:ok, new_value}
     end)

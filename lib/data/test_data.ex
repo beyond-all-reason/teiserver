@@ -22,8 +22,7 @@ defmodule Teiserver.TestData do
         ignored: [],
         rank: 1,
         bot: true,
-        moderator: true,
-        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
+        moderator: true
       },
       %{
         # ID: 2
@@ -36,8 +35,7 @@ defmodule Teiserver.TestData do
         ignored: [],
         rank: 1,
         bot: true,
-        moderator: false,
-        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
+        moderator: false
       },
       %{
         name: "TestUser",
@@ -49,8 +47,7 @@ defmodule Teiserver.TestData do
         ignored: ["Ignored1", "Ignored2"],
         rank: 1,
         bot: false,
-        moderator: true,
-        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
+        moderator: true
       },
       %{
         name: "TestUser2",
@@ -62,8 +59,7 @@ defmodule Teiserver.TestData do
         ignored: [],
         rank: 2,
         bot: false,
-        moderator: false,
-        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
+        moderator: false
       },
       %{
         name: "Teifion",
@@ -75,8 +71,7 @@ defmodule Teiserver.TestData do
         ignored: [],
         rank: 5,
         bot: false,
-        moderator: false,
-        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
+        moderator: false
       },
       %{
         name: "Addas",
@@ -88,8 +83,7 @@ defmodule Teiserver.TestData do
         ignored: [],
         rank: 4,
         bot: false,
-        moderator: false,
-        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
+        moderator: false
       },
       %{
         name: "Link",
@@ -101,8 +95,7 @@ defmodule Teiserver.TestData do
         ignored: [],
         rank: 3,
         bot: false,
-        moderator: false,
-        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
+        moderator: false
       },
       %{
         name: "Chon",
@@ -113,10 +106,16 @@ defmodule Teiserver.TestData do
         friend_requests: [],
         rank: 2,
         bot: false,
-        moderator: true,
-        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
+        moderator: true
       }
     ]
+    |> Enum.map(fn user ->
+      Map.merge(%{
+        password_hash: "X03MO1qnZdYdgyfeuILPmQ==",
+        verified: true,
+        verification_code: nil
+      }, user)
+    end)
     |> Enum.map(&User.create_user/1)
     |> Enum.map(&User.add_user/1)
   end

@@ -18,6 +18,11 @@ defmodule Teiserver.User do
     end)
   end
 
+  def clean_name(name) do
+    ~r/([^a-zA-Z0-9_\-\[\]]|\s)/
+    |> Regex.replace(name, "")
+  end
+
   def create_user(user) do
     Map.merge(
       %{
@@ -30,14 +35,15 @@ defmodule Teiserver.User do
         friends: [],
         friend_requests: [],
         ignored: [],
-        verification_code: nil
+        verification_code: nil,
+        verified: false
       },
       user
     )
   end
 
-  def get_username(user_id) do
-    ConCache.get(:users_lookup_name_with_id, int_parse(user_id))
+  def get_username(userid) do
+    ConCache.get(:users_lookup_name_with_id, int_parse(userid))
   end
 
   def get_userid(username) do
@@ -51,6 +57,18 @@ defmodule Teiserver.User do
 
   def get_user_by_id(id) do
     ConCache.get(:users, id)
+  end
+
+  def rename_user(user, new_name) do
+    old_name = user.name
+    new_name = clean_name(new_name)
+    new_user = %{user | name: new_name}
+
+    ConCache.delete(:users_lookup_id_with_name, old_name)
+    ConCache.put(:users_lookup_name_with_id, user.id, new_name)
+    ConCache.put(:users_lookup_id_with_name, new_name, user.id)
+    ConCache.put(:users, user.id, new_user)
+    new_user
   end
 
   def add_user(user) do
@@ -69,6 +87,7 @@ defmodule Teiserver.User do
       {:ok, new_value}
     end)
 
+    # EmailHelper.send_email(to, subject, body)
     Logger.debug("TODO: Verification email should be sent here with code #{verification_code}")
     user
   end
@@ -267,7 +286,7 @@ defmodule Teiserver.User do
 
   def list_users() do
     ConCache.get(:lists, :users)
-    |> Enum.map(fn user_id -> ConCache.get(:users, user_id) end)
+    |> Enum.map(fn userid -> ConCache.get(:users, userid) end)
   end
 
   def ring(ringee, ringer) do

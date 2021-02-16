@@ -27,4 +27,22 @@ defmodule Teiserver.SpringHandleTest do
     state = %{state | client: new_client}
     SpringProtocol.handle("LEAVEBATTLE", state)
   end
+  
+  test "badly formed commands" do
+    values = [
+      "REGISTER name",
+      "LOGIN name",
+    ]
+
+    state = TestLib.mock_state_auth(SpringProtocol)
+    new_client = %{state.client | battle_id: 1}
+    state = %{state | client: new_client}
+
+    for v <- values do
+      resp = SpringProtocol.handle(v, state)
+      assert is_map(resp)
+      assert Map.has_key?(resp, :user)
+      assert Map.has_key?(resp, :client)
+    end
+  end
 end

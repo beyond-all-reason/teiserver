@@ -18,11 +18,12 @@ defmodule Teiserver.TcpServer do
       make_ref(),
       :ranch_tcp,
       [
-        {:port, 8200},
-        {:max_connections, :infinty}
+        {:port, 8200}
       ],
       __MODULE__,
-      []
+      [
+        {:max_connections, :infinty}
+      ]
     )
   end
 
@@ -198,6 +199,6 @@ defmodule Teiserver.TcpServer do
 
   def terminate(reason, state) do
     Logger.debug("disconnect because #{Kernel.inspect(reason)}")
-    Client.disconnect(state.name)
+    Client.disconnect(state.userid)
   end
 end

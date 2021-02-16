@@ -14,7 +14,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   # TODO - Setup/Account stuff
   # CONFIRMAGREEMENT
-  # RENAMEACCOUNT
   # CHANGEEMAILREQUEST
   # CHANGEEMAIL
   # RESENDVERIFICATION
@@ -124,8 +123,9 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("LOGIN", data, state) do
     response =
       case Regex.run(~r/^(\w+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)\t([^\t]+)\t([^\t]+)/, data) do
-        [_, username, password, _cpu, ip, lobby, user_id, modes] ->
-          _ = [username, password, ip, lobby, user_id, modes]
+        [_, username, password, _cpu, ip, lobby, userid, modes] ->
+          _ = [username, password, ip, lobby, userid, modes]
+          username = User.clean_name(username)
           Logger.debug("[protocol:login] matched #{username}")
           User.try_login(username, password, state)
 
@@ -134,14 +134,20 @@ defmodule Teiserver.Protocols.SpringProtocol do
       end
 
     case response do
+      # {:ok, %{verified: false} = _user} ->
+      #   reason = "Account not verified"
+      #   Logger.debug("[command:login] denied with reason #{reason}")
+      #   _send("DENIED #{reason}\n", state)
+      #   state
+
       {:ok, user} ->
         # Login the client
         client = Client.login(user, self(), __MODULE__)
 
         # Who is online?
         Client.list_client_ids()
-        |> Enum.each(fn user_id ->
-          user = User.get_user_by_id(user_id)
+        |> Enum.each(fn userid ->
+          user = User.get_user_by_id(userid)
           reply(:add_user, user, state)
         end)
 
@@ -169,7 +175,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         case User.get_user_by_name(username) do
           nil ->
             User.create_user(%{
-              name: username,
+              name: User.clean_name(username),
               password_hash: User.encrypt_password(plain_password),
               email: email
             })
@@ -185,6 +191,20 @@ defmodule Teiserver.Protocols.SpringProtocol do
         nil
     end
 
+    state
+  end
+
+  # defp do_handle("CONFIRMAGREEMENT", code, state) do
+  #   case  do
+  #      ->
+        
+  #   end
+  # end
+
+  defp do_handle("RENAMEACCOUNT", new_name, state) do
+    User.rename_user(state.user, new_name)
+    _send("SERVERMSG Username changed, please log back in\n", state)
+    send(self(), :terminate)
     state
   end
 

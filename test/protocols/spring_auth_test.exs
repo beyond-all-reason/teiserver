@@ -315,4 +315,13 @@ CLIENTBATTLESTATUS #{user.name} 0 0\n"
     reply = _recv(socket1)
     assert reply == "RING #{user2.name}\n"
   end
+
+  test "RENAMEACCOUNT", %{socket: socket} do
+    _send(socket, "RENAMEACCOUNT rename_test_user\n")
+    reply = _recv(socket)
+    assert reply == "SERVERMSG Username changed, please log back in\n"
+
+    new_user = User.get_user_by_name("rename_test_user")
+    assert new_user != nil
+  end
 end
