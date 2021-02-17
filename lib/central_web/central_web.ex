@@ -87,6 +87,32 @@ defmodule CentralWeb do
     end
   end
 
+  def live_view_structure do
+    quote do
+      use Phoenix.LiveView,
+        layout: {CentralWeb.LayoutView, "admin_live.html"}
+
+      alias Central.Account.AuthPlug
+      alias Central.Communication.NotificationPlug
+
+      unquote(view_helpers())
+    end
+  end
+
+  def live_view do
+    quote do
+      use CentralWeb, :live_view_structure
+    end
+  end
+
+  def live_component do
+    quote do
+      use Phoenix.LiveComponent
+
+      unquote(view_helpers())
+    end
+  end
+
   def library do
     quote do
       alias Central.Repo
@@ -145,6 +171,24 @@ defmodule CentralWeb do
     quote do
       use Phoenix.Channel
       import CentralWeb.Gettext
+    end
+  end
+
+  defp view_helpers do
+    quote do
+      # Use all HTML functionality (forms, tags, etc)
+      use Phoenix.HTML
+
+      # Import LiveView helpers (live_render, live_component, live_patch, etc)
+      import Phoenix.LiveView.Helpers
+      import CentralWeb.LiveHelpers
+
+      # Import basic rendering functionality (render, render_layout, etc)
+      import Phoenix.View
+
+      import CentralWeb.ErrorHelpers
+      import CentralWeb.Gettext
+      alias CentralWeb.Router.Helpers, as: Routes
     end
   end
 

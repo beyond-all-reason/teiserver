@@ -23,7 +23,8 @@ defmodule CentralWeb.Account.RegistrationController do
       {:ok, _user} ->
         conn
         |> put_flash(:info, "User created successfully.")
-        |> redirect(to: Routes.play_general_path(conn, :index))
+        # |> redirect(to: Routes.play_general_path(conn, :index))
+        |> redirect(to: "/")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn

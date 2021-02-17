@@ -2,6 +2,7 @@ defmodule Teiserver.Battle do
   @moduledoc false
   alias Phoenix.PubSub
   require Logger
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @default_tags %{
     "game/startpostype" => 2,
@@ -95,8 +96,12 @@ defmodule Teiserver.Battle do
     )
   end
 
+  def get_battle!(id) do
+    ConCache.get(:battles, int_parse(id))
+  end
+  
   def get_battle(id) do
-    ConCache.get(:battles, id)
+    ConCache.get(:battles, int_parse(id))
   end
 
   def add_battle(battle) do

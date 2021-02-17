@@ -1,4 +1,4 @@
 defmodule Teiserver do
   @moduledoc false
-  def icon(), do: "fad fa-circle"
+  def icon(), do: "fad fa-robot"
 end

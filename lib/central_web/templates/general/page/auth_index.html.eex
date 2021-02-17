@@ -59,6 +59,20 @@
 
 &nbsp;
 
+<div class="row">
+  <%= if allow?(@current_user, "teiserver") do %>
+    <%=
+      component "menu_card",
+      icon: Teiserver.icon(),
+      name: "teiserver",
+      text: "Teiserver",
+      link: Routes.ts_lobby_general_path(@conn, :index)
+    %>
+  <% end %>
+</div>
+
+&nbsp;
+
 <%= if @current_user do %>
   <div class="row">
     <%

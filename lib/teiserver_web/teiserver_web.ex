@@ -10,6 +10,12 @@ defmodule TeiserverWeb do
     end
   end
 
+  def live_view do
+    quote do
+      use CentralWeb, :live_view_structure
+    end
+  end
+
   @doc """
   When used, dispatch to the appropriate controller/view/etc.
   """

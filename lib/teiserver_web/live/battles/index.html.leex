@@ -1,0 +1,31 @@
+<h1>Battle list</h1>
+
+<%= if @live_action in [:new, :edit] do %>
+  <%= live_modal @socket, TeiserverWeb.UserLive.FormComponent,
+    id: @battle.id || :new,
+    title: @page_title,
+    action: @live_action,
+    battle: @battle,
+    return_to: Routes.battle_index_path(@socket, :index) %>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="battles">
+    <%= for battle <- @battles do %>
+      <tr id="battle-<%= battle.id %>">
+        <td><%= battle.title %></td>
+
+        <td>
+          <span><%= live_redirect "Show", to: Routes.ts_battle_show_path(@socket, :show, battle.id) %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

@@ -1,0 +1,9 @@
+<%= if allow?(@current_user, "teiserver") do %>
+  <%= component "sidemenu_item",
+    name: "lobby",
+    label: "Lobby",
+    active: assigns[:sidemenu_active],
+    lib: Teiserver,
+    url: Routes.ts_lobby_general_path(@conn, :index)
+  %>
+<% end %>

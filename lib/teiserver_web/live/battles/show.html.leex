@@ -1,0 +1,11 @@
+<h1>Show Battle</h1>
+
+<ul>
+
+  <li>
+    <strong>Name:</strong>
+    <%= @battle.title %>
+  </li>
+</ul>
+
+<span><%= live_redirect "Back", to: Routes.ts_battle_index_path(@socket, :index) %></span>

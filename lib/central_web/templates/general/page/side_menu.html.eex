@@ -39,6 +39,10 @@
     %>
   <% end %>
 
+  <%= small_divider %>
+
+  <%= render TeiserverWeb.Lobby.GeneralView, "side_menu.html", assigns %>
+
   <%= component "sidemenu_item",
     name: "account",
     label: "Account",
