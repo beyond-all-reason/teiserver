@@ -1,0 +1,47 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('logging');
+    tint_page("<%= fg %>", "<%= bg %>");
+
+    $('.datepicker').datepicker({
+      format: "dd/mm/yyyy" 
+    });
+
+    $("#centaur-user-search").val('<%= @params["centaur_user"] %>');
+  });
+</script>
+
+<%= render CentralWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "page_view"})
+%>
+
+<div class="row page-row">
+  <div class="col-md-12">
+    <div class="card card-<= bsname >">
+      <div class="card-body">
+        <%= render Central.Logging.PageViewLogView, "section_menu.html",
+          conn: @conn,
+          permissions: @current_user.permissions,
+          active: "table"
+        %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= render Central.Logging.PageViewLogView, "search_report.html",
+  conn: @conn,
+  params: @params,
+  permissions: @current_user.permissions
+%>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+
+      </div>
+    </div>
+  </div>
+</div>

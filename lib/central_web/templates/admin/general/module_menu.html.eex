@@ -1,0 +1,45 @@
+<% {fg, _bg, _bsname} = colours(@active) %>
+
+<style>
+  .sub-menu-icon a:hover {
+    border-bottom: 5px solid <%= fg %>;
+    color: <%= fg %>;
+  }
+
+  .sub-menu-icon .active {
+    border-bottom-color: <%= fg %>;
+  }
+
+  .sub-menu .active, .sub-menu .active:hover {
+    color: <%= fg %>;
+  }
+</style>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('#sub-menu-<%= @active %>').addClass('active');
+    if (!$('#sub-menu-<%= @active %> i').hasClass("fab")) {
+      $('#sub-menu-<%= @active %> i').addClass('fas');
+      $('#sub-menu-<%= @active %> i').removeClass('far');
+      $('#sub-menu-<%= @active %> i').removeClass('fal');
+    }
+  });
+</script>
+
+<div class="row sub-menu">
+  <div class="col-md-12">
+    <div class="card card-default">
+      <div class="card-body" style="padding: 0 15px;">
+
+        <div class="row">
+          <%= component "module_menu_card",
+            link: Routes.admin_user_path(@conn, :index),
+            name: "user",
+            icon: Central.Account.UserLib.icon()
+          %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

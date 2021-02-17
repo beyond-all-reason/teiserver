@@ -1,0 +1,35 @@
+<%
+  small_divider = raw "<li style='height: 5px; border-bottom: 1px solid #DDD;'>&nbsp;</li>"
+%>
+
+<ul class="sidebar-nav sidebar-nav-small" id="side-menu" style="margin-top: 4px;">
+  <li id="sidebar_index">
+    <a href="/">
+      <i class="fas fa-th fa-fw fa-lg"></i>
+      &nbsp;
+      Main menu
+    </a>
+  </li>
+
+  <%= if allow?(@current_user, "admin") do %>
+    <li id="sidebar_admin">
+      <a href="<%= Routes.admin_general_path(@conn, :index) %>">
+        <%= component "icon", icon: Central.Admin.icon(), class: "fa-lg" %>
+        &nbsp;
+        Admin
+      </a>
+    </li>
+  <% end %>
+
+  <%= if allow?(@current_user, "logging") do %>
+    <li id="sidebar_logging">
+      <a href="<%= Routes.logging_general_path(@conn, :index) %>">
+        <%= component "icon", icon: Central.Logging.icon(), class: "fa-lg" %>
+        &nbsp;
+        Logging
+      </a>
+    </li>
+  <% end %>
+
+  <%= small_divider %>
+</ul>

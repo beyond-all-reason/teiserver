@@ -1,0 +1,98 @@
+<script type="text/javascript">
+  var message_freq = 0.5;
+  // var message_freq = 3;
+  var messages_sent = 0;
+  var messages_rec = 0;
+  var last_sent_at = 0;
+
+  function new_message(resp) {
+    if (resp.sender == "<%= @uid %>") {
+      time_taken = window.performance.now() - last_sent_at;
+      time_taken_str = Math.round(time_taken * 100)/100;
+      $("#time-taken").html(time_taken_str + "ms");
+
+      let load_test_channel = $("body").data("load_test_channel");
+      load_test_channel.push("tester ping update", {"uid": "<%= @uid %>", "time_taken": time_taken})
+        .receive("error", e => console.log(e));
+    }
+
+    messages_rec += 1;
+    $("#messages-rec").html(messages_rec);
+  }
+
+  function new_stats(resp) {
+    $("#tester-count").html(resp.testers);
+    $("#cpu-load").html(resp.cpu);
+    $("#ram-usage").html(resp.ram);
+    $("#average-ping").html(Math.round(resp.average_ping * 100)/100);
+    $("#messages-per-second").html(resp.message_count);
+  }
+
+  function tester_ping(uid) {
+    console.log("Tester ping: " + uid);
+  }
+
+  function register_tester() {
+    let load_test_channel = $("body").data("load_test_channel");
+    let payload = {uid: "<%= @uid %>", agent: "<%= @user_agent %>"};
+
+    load_test_channel.push("register tester", payload)
+      .receive("error", e => console.log(e));
+  }
+
+  function broadcast_message() {
+    let load_test_channel = $("body").data("load_test_channel");
+    let payload = {uid: "<%= @uid %>", text: "random text here", agent: "<%= @user_agent %>"};
+
+    load_test_channel.push("tester broadcast", payload)
+      .receive("error", e => console.log(e));
+
+    last_sent_at = window.performance.now();
+    messages_sent += 1;
+    $("#messages-sent").html(messages_sent + " (every " + message_freq + "s)");
+  }
+
+  $(function() {
+    register_tester();
+    setInterval(broadcast_message, message_freq * 1000);
+  });
+</script>
+
+<div class="row" style="margin-top: 15vh;" id="load_test-element" data-load-test-id="<%= @uid %>">
+  <div class="col-sm-10 col-sm-offset-1 col-md-6 offset-md-3 col-xl-4 offset-xl-4">
+    <div class="card card-primary">
+      <div class="card-header">
+        <h3 class="card-title">
+          <a href="/load_test" class="float-right">
+            <i class="far fa-fw fa-link"></i>
+          </a>
+
+          <i class="fas fa-fw fa-server"></i>
+          Server load test
+        </h3>
+      </div>
+      <div class="card-body">
+        All you need to do is leave your tab open it will continue to ping the server; you can close the tab at any time without causing issue. Thank you for helping to load test the server.
+        <br /><br />
+
+        <h4>Server stats</h4>
+        <div>
+          <strong>Testers connected:</strong> <span id="tester-count"></span><br />
+          <strong>CPU load:</strong> <span id="cpu-load"></span><br />
+          <strong>RAM usage:</strong> <span id="ram-usage"></span><br />
+          <strong>Average ping:</strong> <span id="average-ping"></span><br />
+          <strong>Total messages per second:</strong> <span id="messages-per-second"></span><br />
+        </div>
+        <br /><br />
+
+        <h4>Your stats - Random ID #<%= @uid %></h4>
+        <div>
+          <strong>Start time:</strong> <%= date_to_str(@start_time, :hms) %><br />
+          <strong>Messages sent:</strong> <span id="messages-sent">0</span><br />
+          <strong>Last message took:</strong> <span id="time-taken">N/A</span><br />
+          <strong>Messages received:</strong> <span id="messages-rec">0</span><br />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('blog');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+</script>
+
+<%= render CentralWeb.Communication.GeneralView, "sub_menu.html", Map.put(assigns, :active, "posts") %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= if @content_mode != true do %>
+          <%= render CentralWeb.Communication.PostView, "section_menu.html",
+            conn: @conn,
+            permissions: @current_user.permissions,
+            show_search: true,
+            quick_search: "",
+            active: "edit"
+          %>
+
+          <div class="float-right">
+            <a href="<%= Routes.blog_post_path(@conn, :edit, @post) %>?content_mode=true" class="btn btn-outline-<%= bsname %>">
+              <i class="far fa-fw fa-pencil"></i>
+              &nbsp;
+              Content mode
+            </a>
+          </div>
+          <hr />
+        <% end %>
+
+        <%= render "form.html", Map.merge(assigns, %{
+            action: Routes.blog_post_path(@conn, :update, @post)
+          })
+        %>
+      </div>
+    </div>
+  </div>
+</div>

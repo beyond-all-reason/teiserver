@@ -1,0 +1,210 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('.list-builder-freestyle').select2({
+      tags: true,
+      width: "100%"
+    });
+  });
+</script>
+
+<%= component "icon_dropdown_js", [] %>
+
+<link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
+<script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
+
+<%= if @content_mode do %>
+  <style type="text/css">
+    .not-content-group {
+      display: none;
+    }
+
+    #html-editor {
+      height: 800px;
+      font-size: 18px;
+      line-height: 22px;
+    }
+  </style>
+
+  <script src='<%= Routes.static_path(@conn, "/js/ace/ace.js") %>'></script>
+
+  <script type="text/javascript">
+    $(function() {
+      <%= if get_user_config_cache(@conn, "general.Sidebar") != false do %>
+      if (window.innerWidth > 1280) {
+        $("#wrapper").toggleClass("toggled");
+        $("#dev-error-dropdown").hide();
+        $("#page-title").hide();
+        $(".navbar-brand").css("width", 20);
+      }
+      <% end %>
+
+      $("#html-editor").html($("#main-form_content").html());
+      $("#main-form_content").hide();
+
+      var editor = ace.edit("html-editor");
+      editor.setTheme("ace/theme/monokai");
+      editor.setKeyboardHandler("ace/keyboard/sublime");
+      editor.getSession().setMode("ace/mode/html");
+
+      editor.getSession().setTabSize(2);
+
+      editor.getSession().setUseWrapMode(true);
+      editor.setShowPrintMargin(false);
+
+      editor.moveCursorTo(<%= @row %>, <%= @col %>);
+      editor.scrollToLine(<%= @row %>, true, true);
+      editor.focus();
+
+      $('#main-form').submit(function() {
+        // return false;
+        var editor = ace.edit('html-editor');
+        var position = editor.getCursorPosition();
+
+        $('#post_row').val(position.row);
+        $('#post_col').val(position.column);
+
+        $('#main-form_content').val(editor.getSession().getValue());
+      });
+    });
+
+    $(window).bind('keydown', function(event) {
+      if (event.ctrlKey || event.metaKey) {
+        switch (String.fromCharCode(event.which).toLowerCase()) {
+          case 's':
+            event.preventDefault();
+            // alert('ctrl-s');
+            $('#main-form').submit();
+            break;
+          // case 'f':
+          //   event.preventDefault();
+          //   alert('ctrl-f');
+          //   break;
+          // case 'g':
+          //   event.preventDefault();
+          //   alert('ctrl-g');
+          //   break;
+        }
+      }
+    });
+  </script>
+<% end %>
+
+<%= form_for @changeset, @action, [id: "main-form"], fn f -> %>
+  <%= if @content_mode do %>
+    <input type="hidden" name="post[content_mode]" value="true" />
+
+    <input type="hidden" id="post_row" name="post[row]" value="<%= @row %>" />
+    <input type="hidden" id="post_col" name="post[col]" value="<%= @col %>" />
+
+    <a href="<%= Routes.blog_post_path(@conn, :edit, @changeset.data.id) %>" class="btn btn-outline-<%= bsname %>" id="mode-button">
+      <i class="far fa-fw fa-file-alt"></i>
+      &nbsp;
+      Normal mode
+    </a>
+
+    <a href="<%= Routes.blog_path(@conn, :show, @post.url_slug) %>?key=<%= get_key @post.url_slug %>" class="btn btn-outline-<%= bsname %>">
+      <%= component "icon", icon: Central.Communication.BlogLib.icon() %>
+      &nbsp;
+      View post
+    </a>
+
+    <input type="submit" value="Submit" name="form.submitted" class="btn btn-<%= bsname %> float-right" />
+    <hr />
+  <% end %>
+
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+    <br />
+  <% end %>
+
+  <div class="row page-row not-content-group">
+    <div class="col-md-4 col-xl-3">
+      <label for="post_category_id" class="control-label">Category</label>
+      <%= component "icon_dropdown", %{
+        name: "post[category_id]",
+        id: "post_category_id",
+        selected: f.data.category_id || Map.get(@changeset.changes, :category_id),
+        enumerable: @categories
+      } %>
+    </div>
+
+    <div class="col-md-4 col-xl-3">
+      <%= label f, :title, class: "control-label" %>
+      <%= text_input f, :title, class: "form-control" %>
+      <%= error_tag f, :title %>
+    </div>
+
+    <div class="col-md-4 col-xl-3">
+      <label for="post_url_slug" class="control-label">URL Slug</label>
+      <%= text_input f, :url_slug, class: "form-control" %>
+      <%= error_tag f, :url_slug %>
+    </div>
+  </div>
+
+  <div class="row page-row">
+    <div class="col-md-12">
+      <%= label f, :content, class: "control-label" %>
+      <%= textarea f, :content, class: "form-control", rows: (if @content_mode, do: 40, else: 12), style: "font-family: monospace;"  %>
+      <%= error_tag f, :content %>
+      <div id="html-editor"></div>
+    </div>
+  </div>
+
+  <div class="row page-row not-content-group">
+    <div class="col-md-12">
+      <%= label f, :short_content, class: "control-label" %>
+      <%= textarea f, :short_content, class: "form-control", rows: 6, style: "font-family: monospace;"  %>
+      <%= error_tag f, :short_content %>
+    </div>
+  </div>
+
+  <div class="row page-row not-content-group">
+    <div class="col-md-12">
+      <%= date_picker f, :live_from, class: "form-control" %>
+    </div>
+  </div>
+
+  <div class="row page-row not-content-group">
+    <div class="col-md-6">
+      <div class="custom-control custom-checkbox mb-3">
+        <input type="checkbox" name="post[allow_comments]" id="comments" class="custom-control-input" value="true" <%= if @changeset.data.allow_comments == true, do: 'checked=""' %> />
+        <label for="comments" class="custom-control-label"><strong>Allow comments</strong></label>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="custom-control custom-checkbox mb-3">
+        <input type="checkbox" name="post[visible]" id="visible" class="custom-control-input" value="true" <%= if @changeset.data.visible == true, do: 'checked=""' %> />
+        <label for="visible" class="custom-control-label"><strong>Visible</strong></label>
+      </div>
+    </div>
+
+    <div class="col-md-12">
+      <label for="post_tags" class="control-label">Tags</label><br />
+      <select class="form-control list-builder-freestyle" multiple="multiple" name="post[tags][]" id="post_tags">
+        <%= for t <- (@changeset.data.tags || []) do %>
+          <option value="<%= t %>" selected=""><%= t %></option>
+        <% end %>
+      </select>
+    </div>
+  </div>
+
+  <div class="row page-row">
+    <div class="col-md-12">
+      <%= if @changeset.data.id do %>
+        <a href="<%= Routes.blog_post_path(@conn, :show, @changeset.data.id) %>" class="btn btn-secondary">
+          Cancel
+        </a>
+
+        <input type="submit" value="Save changes" name="form.submitted" class="btn btn-<%= bsname %> float-right" />
+      <% else %>
+        <input type="submit" value="Create" name="form.submitted" class="btn btn-<%= bsname %> float-right" />
+      <% end %>
+
+    </div>
+  </div>
+<% end %>

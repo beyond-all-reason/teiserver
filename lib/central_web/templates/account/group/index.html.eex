@@ -1,0 +1,74 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('group');
+    sidebar_active('account');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+</script>
+
+<%= render CentralWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "groups"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= render CentralWeb.Account.GroupView, "section_menu.html", Map.merge(assigns, %{
+            active: "index"
+          })
+        %>
+        <br /><br >
+
+        <h5>
+          <%= if Enum.count(@groups) > 0 do %>
+            Groups - Row count: <%= Enum.count(@groups) %>
+          <% else %>
+            You are not a member of any groups
+          <% end %>
+        </h5>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th colspan="2">Name</th>
+              <th>Super group</th>
+              <th>Type</th>
+              <th>Members</th>
+              <th>&nbsp;</th>
+
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+        <%= for group <- @groups do %>
+            <tr>
+              <%
+                c = ColourHelper.new(group.colour)
+
+                rgba = c |> ColourHelper.as_css_style(0.1)
+                rgb = c |> ColourHelper.as_css_style()
+              %>
+
+              <td style="background-color: <%= rgb %>; color: #FFF;" width="22">
+                <i class="fa-fw <%= group.icon %>"></i>
+              </td>
+
+              <td style="background-color: <%= rgba %>;"><%= group.name %></td>
+
+              <td><%= if group.super_group, do: group.super_group.name %></td>
+              <td><%= group.group_type %></td>
+
+              <td><%= Enum.count(group.memberships) %></td>
+
+              <td>
+                <%= link "Show", to: Routes.account_group_path(@conn, :show, group), class: "btn btn-secondary btn-sm" %>
+              </td>
+            </tr>
+        <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,68 @@
+<% {fg, _bg, _bsname} = colours(@active) %>
+
+<style>
+  .sub-menu-icon a:hover {
+    border-bottom: 5px solid <%= fg %>;
+    color: <%= fg %>;
+  }
+
+  .sub-menu-icon .active {
+    border-bottom-color: <%= fg %>;
+  }
+
+  .sub-menu .active, .sub-menu .active:hover {
+    color: <%= fg %>;
+  }
+</style>
+
+<div class="row sub-menu">
+  <div class="col-md-12">
+    <div class="card card-default">
+      <div class="card-body" style="padding: 0 15px;">
+
+        <div class="row">
+          <%= component "sub_menu_icon",
+            name: "blog",
+            label: "Blog",
+            active: @active,
+            url: Routes.blog_path(@conn, :index),
+            lib: Central.Communication.BlogLib
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "posts",
+            label: "Posts",
+            active: @active,
+            url: Routes.blog_post_path(@conn, :index),
+            lib: Central.Communication.PostLib
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "categories",
+            label: "Categories",
+            active: @active,
+            url: Routes.blog_category_path(@conn, :index),
+            lib: Central.Communication.CategoryLib
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "comments",
+            label: "Comments",
+            active: @active,
+            url: Routes.blog_comment_path(@conn, :index),
+            lib: Central.Communication.CommentLib
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "files",
+            label: "Files",
+            active: @active,
+            url: Routes.blog_file_path(@conn, :index),
+            lib: Central.Communication.BlogFileLib
+          %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

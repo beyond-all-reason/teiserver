@@ -1,6 +1,9 @@
 # Teiserver
 An Elixir implementation of Uberserver
 
+## Sorry for the mess
+I'm in the process of adding a webserver component to it and I've quite literally copied and pasted code from my own site. This is because I'm running it on the site and integration is easier this way. Additionally my site already has things like user authentication so it is significantly faster to just copy it over!
+
 ## Setup and running
 You will need to have [Elixir/Erlang installed](https://elixir-lang.org/install.html).
 

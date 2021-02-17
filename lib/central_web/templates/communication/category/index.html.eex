@@ -1,0 +1,94 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('blog');
+    sidebar_active('communications');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+
+  function show_search() {
+    $("#search-box-shower").hide();
+    $("#search-box").show(350);
+  }
+</script>
+
+<%= render CentralWeb.Communication.GeneralView, "sub_menu.html", Map.put(assigns, :active, "categories") %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= render CentralWeb.Communication.CategoryView, "section_menu.html", Map.merge(assigns, %{
+            show_search: false,
+            active: (cond do
+              @conn.params["search"] != nil -> "search"
+              true -> "index"
+            end)
+          })
+        %>
+
+<%= if @show_search do %>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <%= render CentralWeb.Communication.CategoryView, "search.html",
+    conn: @conn,
+    params: @params,
+    groups: @groups,
+    permissions: @current_user.permissions
+  %>
+<div class="row page-row">
+  <div class="col-md-12"> 
+    <div class="card border-<%= bsname %> ">
+      <div class="card-body">
+<% else %>
+  <br /><br />
+<% end %>
+
+        <h5>
+          <%= if Enum.count(@categories) > 0 do %>
+            Listing Categories - Row count: <%= Enum.count(@categories) %>
+          <% else %>
+            No categories found
+          <% end %>
+        </h5>
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th colspan="2">Name</th>
+              <th>Visible</th>
+              <th colspan="1"></th>
+            </tr>
+          </thead>
+          <tbody>
+      <%= for category <- @categories do %>
+            <tr>
+              <td style="background-color: <%= category.colour %>; color: #FFF;" width="22">
+                <i class="fa-fw <%= category.icon %>"></i>
+              </td>
+              <td style="background-color: <%= rgba_css category.colour %>;">
+                &nbsp;
+                <%= category.name %>
+              </td>
+
+              <td><%= if category.public, do: "Visible", else: "" %></td>
+
+              <td width="160">
+                <a href="<%= Routes.blog_category_path(@conn, :edit, category) %>" class="btn btn-secondary btn-block">
+                  <i class="far fa-fw fa-wrench"></i>
+                  &nbsp;
+                  Edit
+                </a>
+              </td>
+            </tr>
+        <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

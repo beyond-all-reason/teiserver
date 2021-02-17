@@ -1,0 +1,38 @@
+<%= component "detail_line",
+  label: "Total views",
+  value: format_number @log.total_views
+%>
+
+<%= component "detail_line",
+  label: "Total uniques",
+  value: format_number @log.total_uniques
+%>
+
+<hr />
+
+<%= component "detail_line",
+  label: "Average load time",
+  value: convert_load_time(@log.average_load_time) <> "ms"
+%>
+
+<%= component "detail_line",
+  label: "95th percentile",
+  value: convert_load_time(@log.percentile_load_time_95) <> "ms"
+%>
+
+<%= component "detail_line",
+  label: "99th percentile",
+  value: convert_load_time(@log.percentile_load_time_99) <> "ms"
+%>
+
+<hr />
+
+<%= component "detail_line",
+  label: "Guest views",
+  value: format_number @log.guest_view_count
+%>
+
+<%= component "detail_line",
+  label: "Guest IPs",
+  value: format_number @log.guest_unique_ip_count
+%>

@@ -1,0 +1,20 @@
+<%
+  is_active = assigns[:active] == @name
+  icon = if is_atom(@icon), do: Central.Helpers.StylingHelper.icon(@icon), else: @icon
+
+  icon = if is_active do
+    icon
+    |> String.replace("far ", "fas ")
+    |> String.replace("fal ", "fas ")
+  else
+    icon
+  end
+
+  active_class = if is_active, do: "active"
+%>
+
+<a href="<%= @url %>" class="btn btn-outline-<%= @bsname %> <%= active_class %>" id="section-menu-<%= @name %>">
+  <%= component "icon", icon: icon %>
+  &nbsp;
+  <%= @label %>
+</a>

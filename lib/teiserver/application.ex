@@ -1,13 +1,8 @@
 defmodule Teiserver.Application do
   @moduledoc false
-  use Application
-
-  @impl true
-  def start(_type, _args) do
-    children = [
-      {Phoenix.PubSub, name: Teiserver.PubSub},
+  def children() do
+    [
       {Teiserver.TcpServer, []},
-      {UDPServer, []},
       concache_perm_sup(:id_counters),
       concache_perm_sup(:lists),
       concache_perm_sup(:users_lookup_name_with_id),
@@ -18,18 +13,6 @@ defmodule Teiserver.Application do
       concache_perm_sup(:battles),
       concache_perm_sup(:rooms)
     ]
-
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: Teiserver.Supervisor]
-    start_result = Supervisor.start_link(children, opts)
-
-    # Call all our sub function st
-    {:ok, t} = Task.start(fn -> startup() end)
-
-    send(t, :begin)
-
-    start_result
   end
 
   defp concache_perm_sup(name) do
@@ -45,11 +28,7 @@ defmodule Teiserver.Application do
     )
   end
 
-  defp startup() do
-    receive do
-      :begin -> nil
-    end
-
+  def startup_sub_functions() do
     ConCache.put(:lists, :clients, [])
     ConCache.put(:lists, :rooms, [])
 

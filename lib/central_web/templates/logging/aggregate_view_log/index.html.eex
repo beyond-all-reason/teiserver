@@ -1,0 +1,84 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('logging');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+</script>
+
+<%= render CentralWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "aggregate"})
+%>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= render CentralWeb.Logging.AggregateViewLogView, "section_menu.html",
+          conn: @conn,
+          permissions: @current_user.permissions,
+          active: "index"
+        %>
+        <br /><br />
+
+        <h4>
+          <%= if Enum.count(@logs) > 0 do %>
+            Aggregate view logs - Row count: <%= Enum.count(@logs) %>
+          <% else %>
+            No page view logs found
+          <% end %>
+        </h4>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Date</th>
+
+              <th>Views</th>
+              <th>Uniques</th>
+
+              <th>Load time</th>
+              <th class="d-lg-none d-xl-table-cell">Load time (95th)</th>
+              <th class="d-lg-none d-xl-table-cell">Load time (99th)</th>
+              <th class="d-lg-none d-xl-table-cell">Load time (max)</th>
+
+              <th>Guest views</th>
+
+              <th colspan="1"></th>
+            </tr>
+          </thead>
+          <tbody>
+        <%= for log <- @logs do %>
+
+            <tr>
+              <td><%= Timex.format!(log.date, "{0D}/{0M}/{YYYY} {WDshort}") %></td>
+
+              <td><%= format_number log.total_views %></td>
+              <td><%= format_number log.total_uniques %></td>
+
+              <td><%= convert_load_time log.average_load_time %></td>
+              <td class="d-lg-none d-xl-table-cell"><%= convert_load_time log.percentile_load_time_95 %></td>
+              <td class="d-lg-none d-xl-table-cell"><%= convert_load_time log.percentile_load_time_99 %></td>
+              <td class="d-lg-none d-xl-table-cell"><%= convert_load_time log.max_load_time %></td>
+
+              <td><%= format_number log.guest_view_count %></td>
+
+              <td>
+                <%= link "Show", to: Routes.logging_aggregate_view_log_path(@conn, :show, date_to_str(log.date, :ymd)), class: "btn btn-secondary btn-sm" %>
+              </td>
+            </tr>
+
+          <%= if log.date.day == 1 do %>
+            <tr>
+              <td colspan="9" style="background-color: <%= bg %>">
+                <div style="height: 5px;">&nbsp;</div>
+              </td>
+            </tr>
+          <% end %>
+
+        <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

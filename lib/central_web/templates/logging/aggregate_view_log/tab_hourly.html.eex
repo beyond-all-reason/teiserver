@@ -1,0 +1,83 @@
+<div class="col-md-12 d-xl-none">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>&nbsp;</th>
+
+        <%= for i <- 8..20 do %>
+          <th><%= i %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Views</td>
+        <% maximum = Enum.reduce(@log.hourly_views, 0, &max/2) %>
+        <%= for i <- 8..20 do %>
+          <td class="hourly-view-td" style='background-color: #<%= heatmap(Enum.fetch!(@log.hourly_views, i), maximum, "white-green") %>;'><%= Enum.fetch!(@log.hourly_views, i) %></td>
+        <% end %>
+      </tr>
+      <tr>
+        <td>Uniques</td>
+        <% maximum = Enum.reduce(@log.hourly_uniques, 0, &max/2) %>
+        <%= for i <- 8..20 do %>
+          <td class="hourly-unique-td" style='background-color: #<%= heatmap(Enum.fetch!(@log.hourly_uniques, i), maximum, "white-green") %>;'>
+            <%= Enum.fetch!(@log.hourly_uniques, i) %>
+          </td>
+        <% end %>
+      </tr>
+      <tr>
+        <td>Load</td>
+        <% maximum = Enum.reduce(@log.hourly_average_load_times, 0, &max/2) %>
+
+        <%= for i <- 8..20 do %>
+          <td class="hourly-load-td" style='background-color: #<%= heatmap(Enum.fetch!(@log.hourly_average_load_times, i), maximum, "green-red") %>;'>
+            <%= convert_load_time Enum.fetch!(@log.hourly_average_load_times, i) %>
+          </td>
+        <% end %>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="d-none d-xl-block col-md-12">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>&nbsp;</th>
+        <%= for i <- 0..23 do %>
+          <th><%= i %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Views</td>
+        <% maximum = Enum.reduce(@log.hourly_views, 0, &max/2) %>
+        <%= for i <- 0..23 do %>
+          <td class="heatmap-td" style='background-color: #<%= heatmap(Enum.fetch!(@log.hourly_views, i), maximum, "white-green") %>;'>
+            <%= Enum.fetch!(@log.hourly_views, i) %>
+          </td>
+        <% end %>
+      </tr>
+      <tr>
+        <td>Uniques</td>
+        <% maximum = Enum.reduce(@log.hourly_uniques, 0, &max/2) %>
+
+        <%= for i <- 0..23 do %>
+          <td class="heatmap-td" style='background-color: #<%= heatmap(Enum.fetch!(@log.hourly_uniques, i), maximum, "white-green") %>;'><%= Enum.fetch!(@log.hourly_uniques, i) %></td>
+        <% end %>
+      </tr>
+      <tr>
+        <td>Load</td>
+        <% maximum = Enum.reduce(@log.hourly_average_load_times, 0, &max/2) %>
+
+        <%= for i <- 0..23 do %>
+          <td class="heatmap-td" style='background-color: #<%= heatmap(Enum.fetch!(@log.hourly_average_load_times, i), maximum, "green-red") %>;'>
+            <%= convert_load_time Enum.fetch!(@log.hourly_average_load_times, i) %>
+          </td>
+        <% end %>
+      </tr>
+    </tbody>
+  </table>
+</div>

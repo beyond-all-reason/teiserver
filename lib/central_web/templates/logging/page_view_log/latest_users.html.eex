@@ -1,0 +1,81 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('logging');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+</script>
+
+<style type="text/css">
+  .block-button {
+    margin-bottom: 20px;
+  }
+</style>
+
+<%= render CentralWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "page_view"})
+%>
+
+<div class="row page-row">
+  <div class="col-md-12">
+
+    <div class="card border-<%= bsname %>">
+      <div class="card-header text-<%= bsname %>">
+        Logs - Server time: <%= date_to_str @server_time, :hms %>
+      </div>
+      <div class="card-body">
+        <%= render Central.Logging.PageViewLogView, "section_menu.html",
+          conn: @conn,
+          permissions: @current_user.permissions,
+          active: "latest_users"
+        %>
+        <hr />
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Last page view</th>
+
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+        <%= for {userid, name, email, last_timestamp}  <- @data do %>
+            <tr>
+              <td><%= name %></td>
+              <td><%= email %></td>
+
+              <%# https://hexdocs.pm/timex/Timex.html#compare/2 %>
+
+              <% style = cond do
+                  Timex.compare(last_timestamp, @currently) == 1 ->
+                    "font-weight:bold; background-color: #8F8;"
+                  @now.day == last_timestamp.day && @now.month == last_timestamp.month && @now.year == last_timestamp.year ->
+                    "font-weight:bold; background-color: #CFC;"
+                  Timex.compare(last_timestamp, @recent) == 1 ->
+                    "font-weight:bold; background-color: #EFE;"
+                  true ->
+                    "background-color: #FEE;"
+              end %>
+
+              <td style="<%= style %>">
+                <%= date_to_str last_timestamp, :hms_dmy %>
+              </td>
+
+              <td>
+                <a href="<%#= logging_report_path(@conn, :list) %>?user_id=<%= userid %>" class="btn btn-secondary btn-outline btn-sm">
+                  <i class="far fa-fw fa-user"></i>
+                  Show user logs
+                </a>
+              </td>
+            </tr>
+        <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

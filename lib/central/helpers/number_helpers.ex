@@ -1,0 +1,76 @@
+defmodule Central.Helpers.NumberHelper do
+
+  def int_parse(""), do: 0
+  def int_parse(nil), do: 0
+  def int_parse(i) when is_number(i), do: round(i)
+  def int_parse(l) when is_list(l), do: Enum.map(l, &int_parse/1)
+  def int_parse(s), do: String.trim(s) |> String.to_integer
+
+  def float_parse(""), do: 0.0
+  def float_parse(nil), do: 0.0
+  def float_parse(i) when is_number(i), do: i/1
+  def float_parse(l) when is_list(l), do: Enum.map(l, &float_parse/1)
+  def float_parse(s) do
+    if String.contains?(s, ".") do
+      String.trim(s) |> String.to_float
+    else
+      (String.trim(s) |> String.to_integer)/1
+    end
+  end
+
+  # def normalize(v) when is_list(v), do: Enum.map(v, &normalize/1)
+  # def normalize(v) when is_integer(v), do: _normalize(v)
+  # def normalize(v), do: v
+
+  # defp _normalize(v) when v > 1_000_000_000_000_000, do: "#{Float.round(v / 1_000_000_000_000_000, 2)}Q"
+  # defp _normalize(v) when v > 1_000_000_000_000, do: "#{Float.round(v / 1_000_000_000_000, 2)}T"
+  # defp _normalize(v) when v > 1_000_000_000, do: "#{Float.round(v / 1_000_000_000, 2)}B"
+  # defp _normalize(v) when v > 1_000_000, do: "#{Float.round(v / 1_000_000, 2)}M"
+  # defp _normalize(v) when v > 1_000, do: "#{Float.round(v / 1_000, 2)}K"
+  # defp _normalize(v), do: v
+
+  # def dec_parse(""), do: Decimal.new(0)
+  # def dec_parse(nil), do: Decimal.new(0)
+  # def dec_parse(d) when is_number(d), do: Decimal.new(d)
+  # def dec_parse(s) do
+  #   # Special handler we put in to handle some CSV stuff
+  #   new_s = s
+  #   |> String.replace("+AC0-", "-")
+  #   |> String.replace("+AC0+", "")
+
+  #   new_s = ~r/[^0-9\-\.]/
+  #   |> Regex.replace(new_s, "")
+  #   |> String.replace("..", ".")
+
+  #   try do
+  #     if new_s == "" do
+  #       Decimal.new(0)
+  #     else
+  #       Decimal.new(new_s)
+  #     end
+  #   catch
+  #     :error, e ->
+  #       raise %Decimal.Error{
+  #         message: "Error converting decimal value of '#{new_s}', original string '#{s}'",
+  #         reason: e.reason,
+  #         result: e.result,
+  #         signal: e.signal
+  #       }
+  #   end
+  # end
+
+  # def dec_sum(decimals) do
+  #   decimals
+  #   |> Enum.reduce(Decimal.new(0), fn (d, acc) ->
+  #     Decimal.add(d, acc)
+  #   end)
+  # end
+
+  # # This is for summing objects with a decimal as a property
+  # def dec_sum(objects, key) do
+  #   objects
+  #   |> Enum.reduce(Decimal.new(0), fn (obj, acc) ->
+  #     Decimal.add(Map.get(obj, key), acc)
+  #   end)
+  # end
+end

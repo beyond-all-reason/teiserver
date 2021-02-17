@@ -1,0 +1,161 @@
+body {
+  color: #EEEEEE;
+  background-color: #333;
+}
+
+h1 {
+  color: #EEEEEE;
+}
+
+table, td, th {
+  color: #EEEEEE;
+}
+
+.Observing {
+  border-bottom: 2px solid #3366CC;
+}
+
+.Radiant {
+  border-bottom: 2px solid #00AA00;
+}
+
+.Dire {
+  border-bottom: 2px solid #AA0000;
+}
+
+.card {
+  background-color: #444;
+  box-shadow: none;
+}
+
+h2, h4, h5 {
+  color: #EEEEEE;
+}
+
+h4, h5 {
+  text-align: center;
+}
+
+.menu-card a, .menu-card span {
+  color: #FFFFFF;
+}
+
+.menu-card a:hover, .menu-card span:hover {
+  color: #20B0FF;
+}
+
+
+.hero-icon {
+  width: 128px;
+  height: 72px;
+  background-size: 128px 72px;
+  display: inline-block;
+  border: 1px solid #666;
+}
+
+.hero-icon:hover {
+  border: 1px solid #888;
+}
+
+.hero-icon-disabled {
+  -webkit-filter: opacity(.1);
+  filter: opacity(.1);
+}
+
+.Radiant-side .pick-selector, .Radiant-side .ban-selector {
+  margin-left:auto;
+  margin-right:0;
+}
+
+.number-side {
+  text-align: center;
+  margin: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.Dire-side {
+  
+}
+
+.pick-number {
+  margin: 4px 0;
+}
+
+  .number-type-pick {
+    font-size: 25px;
+    color: #FFF;
+  }
+  
+  .number-type-ban {
+    font-size: 20px;
+    color: #CCC;
+  }
+
+.Radiant-number {
+  border-left: 10px solid #006600;
+  border-right: 10px solid #444444;
+}
+
+.Dire-number {
+  border-left: 10px solid #444444;
+  border-right: 10px solid #660000;
+}
+
+.pick-selector, .ban-selector {
+  background-color: #EEEEEE;
+}
+
+.pick-selector {
+  width: 132px;
+  height: 76px;
+  border: 2px solid #333333;
+  margin: 10px 0;
+}
+
+.pick-selector img {
+  width: 128px;
+  height: 72px;
+}
+
+.ban-selector {
+  width: 100px;
+  height: 58px;
+  border: 2px solid #333333;
+  margin: 10px 0;
+}
+
+.ban-selector img {
+  width: 96px;
+  height: 54px;
+  -webkit-filter: grayscale(1); /* Google Chrome, Safari 6+ & Opera 15+ */
+  filter: grayscale(1); /* Microsoft Edge and Firefox 35+ */
+}
+
+.this-side-turn {
+  font-weight: bold;
+  color: #FFFFFF;
+}
+
+.side-turn-radiant {
+  text-shadow: 0px 0px 4px green;
+}
+
+.side-turn-dire {
+  text-shadow: 0px 0px 4px red;
+}
+
+.side-turn-radiant-box {
+  box-shadow: 0px 0px 4px green;
+  background-color: #CFC;
+}
+
+.side-turn-dire-box {
+  box-shadow: 0px 0px 4px red;
+  background-color: #FCC;
+}
+
+.selected-hero {
+  -webkit-filter:sepia(0.75);
+  filter:sepia(0.75);
+}

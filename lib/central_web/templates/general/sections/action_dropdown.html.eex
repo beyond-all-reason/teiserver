@@ -1,0 +1,11 @@
+<li class="nav-item dropdown" id="general-actions-wrapper" data-user-id="<%= @current_user.id %>">
+  <a class="nav-link dropdown-toggle dropdown-toggle-icon-only" href="#" id="general-actions-menu-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <div id="general-actions-icon-wrapper">
+      <i class="fas fa-bolt fa-fw fa-lg align-middle" id="general-actions-icon"></i>
+    </div>
+  </a>
+
+  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="general-actions-menu-link" id="general-actions-dropdown-list" style="min-width: 300px; max-width: 500px;">
+
+  </div>
+</li>

@@ -1,0 +1,95 @@
+<% {fg, bg, bsname} = colours() %>
+<% now = Timex.local() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    // sidebar_active('home');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+</script>
+
+<%#= render CentralWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "notifications"})
+%>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+        <h4>
+          Notifications
+        </h4>
+
+        <a href="<%= Routes.communication_notification_path(@conn, :mark_all) %>" class="btn btn-info">
+          <i class="fa fa-eye fa-fw"></i>
+          Mark all as read
+        </a>
+
+        <%= if allow?(@current_user, "admin.dev.developer") do %>
+          <a href="<%= Routes.communication_notification_path(@conn, :admin) %>" class="btn btn-danger2">
+            <i class="fa fa-user fa-fw"></i>
+            Admin section
+          </a>
+        <% end %>
+
+        <div class="float-right">
+          <a href="<%= Routes.communication_notification_path(@conn, :delete_all) %>" class="btn btn-danger">
+            <i class="fa fa-trash fa-fw"></i>
+            Delete all notifications
+          </a>
+        </div>
+        <br /><br />
+
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th colspan="2">Title</th>
+              <th>Body</th>
+              <th>&nbsp;</th>
+              <th>Expires</th>
+              <%# <th>Data</th> %>
+
+              <th colspan="2"></th>
+            </tr>
+          </thead>
+          <tbody>
+        <%= for notification <- @notifications do %>
+            <tr>
+              <td style="width: 10px; background-color: <%= notification.colour %>">
+                &nbsp;
+              </td>
+              <td style="color: <%= notification.colour %>">
+                <%= component "icon", icon: notification.icon %>
+                <%= notification.title %>
+              </td>
+              <td><%= notification.body %></td>
+
+              <%= if notification.read do %>
+                <td style="background-color: #EEE; text-align: center;">
+                  <i class="far fa-fw fa-check"></i>
+                  &nbsp;
+                  Read
+                </td>
+              <% else %>
+                <td></td>
+              <% end %>
+
+              <td style='<%= if Timex.compare(now, notification.expires) == 1, do: "background-color: #FEE;" %>'>
+                <%= date_to_str notification.expires, :dmy %>
+              </td>
+              <td>
+                <a href="<%= Central.Communication.notification_url(notification) %>" class="btn btn-secondary btn-sm">
+                  Link
+                </a>
+              </td>
+              <td>
+                <%= link "Delete", to: Routes.communication_notification_path(@conn, :delete, notification), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-sm" %>
+              </td>
+            </tr>
+        <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

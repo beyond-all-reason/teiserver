@@ -1,0 +1,18 @@
+<%
+  checked = cond do
+    assigns[:checked] == true -> 'checked="checked"'
+    @changes == true -> 'checked="checked"'
+    @changes == nil and @data == true -> 'checked="checked"'
+    true -> ""
+  end
+%>
+<div class="custom-control custom-checkbox mb-3">
+  <input name="<%= @name %>" type="hidden" value="false">
+  <input type="checkbox" name="<%= @name %>" id="<%= @id %>" class="custom-control-input" value="true" <%= checked  %> />
+  <label for="<%= @id %>" class="custom-control-label"><strong><%= @label %></strong><%= assigns[:text] %>
+  <%= if assigns[:description] do %>
+    &nbsp;<%= assigns[:description] %>
+  <% end %>
+  </label>
+
+</div>

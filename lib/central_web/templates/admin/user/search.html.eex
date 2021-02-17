@@ -1,0 +1,96 @@
+<% {fg, _bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('.datepicker').datepicker({
+      format: "dd/mm/yyyy" 
+    });
+
+    $('select').select2({
+      width: "100%",
+    });
+  });
+</script>
+
+<%= component "icon_dropdown_js", [] %>
+
+<link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
+<script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+        <div class="btn btn-outline-<%= bsname %>" onclick="show_search();" id="search-box-shower">
+          <i class="far fa-fw fa-search"></i>
+          Show search form
+        </div>
+
+        <form action="<%= Routes.admin_user_path(@conn, :search) %>" method="post" class="form-horizontal" id="search-box" style="display: none;">
+          <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+
+          <div class="row">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_name" class="control-label">Name/Email: </label>
+              <input type="text" name="search[name]" id="search_name" value='<%= @params["name"] %>' placeholder="" class="form-control" />
+            </div>
+
+            <%= if allow?(@current_user, "admin.admin.full") do %>
+              <div class="col-md-4 col-xl-2 search-form-input">
+                <label for="search_admin_group" class="control-label">Admin group: </label>
+                <%= component "icon_dropdown", %{
+                  name: "search[admin_group_id]",
+                  id: "search_admin_group_id",
+                  insert_blank: %{id: "", name: "All groups", icon: "far far far fa-th", colour: fg},
+                  selected: @params["admin_group_id"],
+                  enumerable: @groups
+                } %>
+              </div>
+
+              <div class="col-md-4 col-xl-2 search-form-input">
+                <label for="search_has_admin_group" class="control-label">Has admin group: </label>
+                <%= component "icon_dropdown", %{
+                  name: "search[has_admin_group]",
+                  id: "search_has_admin_group",
+                  selected: @params["has_admin_group"],
+                  enumerable: [
+                    %{id: "Either", icon: "far far fa-th", colour: fg},
+                    %{id: "Has group", icon: "far far fa-check", colour: fg},
+                    %{id: "No group", icon: "far far fa-times", colour: fg},
+                  ]
+                } %>
+              </div>
+            <% end %>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_limit" class="control-label">Limit: </label>
+              <input type="text" name="search[limit]" id="search_limit" value='<%= @params["limit"] %>' placeholder="" class="form-control" />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_order" class="control-label">Order by: </label>
+              <%= component "icon_dropdown", %{
+                name: "search[order]",
+                id: "search_order",
+                selected: @params["order"],
+                enumerable: [
+                  %{id: "Name (A-Z)", icon: "far far fa-sort-numeric-down", colour: fg},
+                  %{id: "Name (Z-A)", icon: "far far fa-sort-numeric-up", colour: fg},
+                  %{id: "Newest first", icon: "far far fa-sort-numeric-down", colour: fg},
+                  %{id: "Oldest first", icon: "far far fa-sort-numeric-up", colour: fg},
+                ]
+              } %>
+            </div>
+          </div>
+          <div class="row">
+            <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
+              &nbsp;<br />
+              <input type="submit" value="Search" name="form.submitted" class="btn btn-<%= bsname %> btn-block" />
+            </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>

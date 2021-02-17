@@ -1,0 +1,41 @@
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('home');
+  });
+</script>
+
+<div class="row page-row">
+  <div class="col-md-12 col-lg-8 offset-lg-2 col-xl-4 offset-xl-4">
+
+    <div class="card card-default">
+      <div class="card-header">
+        Test notification #<%= @notification.id %>
+      </div>
+      <div class="card-body">
+        <table class="table">
+          <tbody>
+            <tr>
+              <td><strong>Created</strong></td>
+              <td><%= date_to_str @notification.inserted_at, :hms_dmy %></td>
+            </tr>
+            <tr>
+              <td><strong>Expires</strong></td>
+              <td><%= date_to_str @notification.expires, :hms_dmy %></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <a href="<%= Routes.communication_notification_path(@conn, :index) %>" class="btn btn-secondary">
+          <i class="far fa-fw fa-bell"></i>
+          Notification list
+        </a>
+
+        <a href="<%= Routes.general_page_path(@conn, :index) %>" class="btn btn-secondary float-right">
+          <i class="far fa-fw fa-home"></i>
+          Site home page
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>

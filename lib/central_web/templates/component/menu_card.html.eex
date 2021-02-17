@@ -1,0 +1,17 @@
+<%
+  the_icon = if assigns[:icon_class] do
+    assigns[:icon]
+    |> String.replace("fal ", "#{assigns[:icon_class]} ")
+    |> String.replace("far ", "#{assigns[:icon_class]} ")
+    |> String.replace("fas ", "#{assigns[:icon_class]} ")
+  else
+    assigns[:icon]
+  end
+%>
+
+<div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 menu-card">
+  <a href="<%= assigns[:link] %>" class="block-link" id="sub-menu-<%= assigns[:name] %>">
+    <i class="fa-fw <%= the_icon %> fa-3x"></i><br />
+    <%= assigns[:text] %>
+  </a>
+</div>

@@ -1,0 +1,50 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('.datepicker').datepicker({
+      format: "dd/mm/yyyy" 
+    });
+  });
+</script>
+
+<link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
+<script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
+
+<%= form_for @changeset, @action, fn f -> %>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+    <br />
+  <% end %>
+
+  <div class="form-group">
+    <%= label f, :name, class: "control-label" %>
+    <%= text_input f, :name, class: "form-control" , autofocus: "" %>
+    <%= error_tag f, :name %>
+  </div>
+
+  <div class="form-group">
+    <%= input_with_type f, :colour, "color" %>
+  </div>
+
+  <div class="form-group">
+    <%= component "fa5_icon_picker", %{form: f, field: :icon} %>
+  </div>
+
+  <div class="form-group">
+    <div class="custom-control custom-checkbox mb-3">
+      <input type="checkbox" name="category[public]" id="category_public" class="custom-control-input" value="true" <%= if @changeset.data.public == true, do: 'checked=""' %> />
+      <label for="category_public" class="custom-control-label">Visible</label>
+    </div>
+  </div>
+
+  <%= if @changeset.data.id do %>
+    <a href="<%= Routes.blog_category_path(@conn, :index) %>" class="btn btn-secondary">
+      Cancel
+    </a>
+  <% end %>
+
+  <input type="submit" value="Save changes" name="form.submitted" class="btn btn-<%= bsname %> float-right" />
+<% end %>

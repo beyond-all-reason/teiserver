@@ -1,0 +1,125 @@
+<% {fg, bg, bsname} = colours() %>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Central</title>
+    <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/bootstrap.min.css") %>'>
+    <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/shards.css") %>'>
+    <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/layout.css") %>'>
+    <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/styles.css") %>'>
+
+    <script>
+      window.userToken = "<%= assigns[:user_token] %>";
+    </script>
+
+    <script src='<%= Routes.static_path(@conn, "/js/jquery.min.js") %>'></script>
+    <script src='<%= Routes.static_path(@conn, "/js/popper.js") %>'></script>
+    <script src='<%= Routes.static_path(@conn, "/js/bootstrap.min.js") %>'></script>
+    <script src='<%= Routes.static_path(@conn, "/js/fontawesome.js") %>'></script>
+    <script src='<%= Routes.static_path(@conn, "/js/app.js") %>'></script>
+
+    <script type="text/javascript" charset="utf-8">
+      function sidebar_active (name) {}
+      function tint_page (fore_colour, back_colour) {}
+    </script>
+  </head>
+
+  <body class="blank">
+    <div class="color-line"></div>
+
+    <div id="container">
+      <div class="content animate-panel animated">
+
+        <div class="row">
+          <div class="col-sm-10 col-sm-offset-1">
+            <div id="flash-messages">
+              <%= if get_flash(@conn, :danger) do %>
+                <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= get_flash(@conn, :danger) %></p>
+              <% end %>
+              <%= if get_flash(@conn, :warning) do %>
+                <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning"><%= get_flash(@conn, :warning) %></p>
+              <% end %>
+              <%= if get_flash(@conn, :info) do %>
+                <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= get_flash(@conn, :info) %></p>
+              <% end %>
+              <%= if get_flash(@conn, :success) do %>
+                <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success"><%= get_flash(@conn, :success) %></p>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('home');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+</script>
+
+<div class="row page-row">
+  <div class="col-md-10 offset-md-1">
+
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= if @current_user do %>
+          <a href="<%= Routes.general_page_path(@conn, :index) %>" class="btn btn-secondary float-right">
+            <i class="far fa-fw fa-home"></i>
+            Home page
+          </a>
+
+          <h4 style="padding-bottom: 10px;">Access denied!</h4>
+          You do not have access to this page.
+        <% else %>
+
+          You must be logged in to access this page.
+          <br /><br />
+
+          <%
+            changeset = Central.Account.change_user(%Central.Account.User{})
+          %>
+
+          <%= form_for changeset, Routes.account_session_path(@conn, :login), fn f -> %>
+
+            <div class="form-group">
+              <%= label f, :username, class: "control-label" %>
+              <%= text_input f, :username, class: "form-control", autofocus: "autofocus" %>
+              <%= error_tag f, :username %>
+            </div>
+
+            <div class="form-group">
+              <%= label f, :password, class: "control-label" %>
+              <%= password_input f, :password, class: "form-control" %>
+              <%= error_tag f, :password %>
+            </div>
+
+            <div class="form-group">
+              <div class="row">
+                <div class="col-md-6 d-none">
+                  &nbsp;
+                </div>
+                <div class="col-md-12">
+                  <%= submit "Sign In", class: "btn btn-primary btn-block" %>
+                </div>
+              </div>
+            </div>
+
+          <% end %>
+
+        <% end %>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+      </div>
+    </div>
+  </body>
+ </html>

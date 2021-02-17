@@ -1,0 +1,35 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('admin');
+    tint_page("<%= fg %>", "<%= bg %>");
+
+    var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+    $('#the_tabs a:first').tab('show');
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+  });
+</script>
+
+<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "group"})
+%>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= render CentralWeb.Admin.GroupView, "section_menu.html", Map.merge(assigns, %{
+          quick_search: "",
+          show_search: false,
+          active: ""
+        })
+        %>
+
+        <hr />
+
+        <pre></pre>
+
+      </div>
+    </div>
+  </div>
+</div>

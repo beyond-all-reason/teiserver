@@ -1,0 +1,120 @@
+body {
+  color: #EEEEEE;
+  background-color: #050505;
+}
+
+h2, h3, h4, h5 {
+  color: #EEEEEE;
+}
+
+table, td, th {
+  color: #EEEEEE;
+}
+
+
+#main-content {
+  width: 1280px;
+  height: 720px;
+  background-color: #000000;
+  margin: 100px auto 0;
+}
+
+/* Main board */
+#header, #header-full {
+  width: 960px;
+  height: 60px;
+  font-size: 30px;
+  background-color: #111111;
+  padding: 10px;
+}
+
+#header-full {
+  width: 1280px;
+}
+
+#board, #board-full {
+  width: 960px;
+  height: 660px;
+  background-color: #000000;
+  position: relative;
+  float: left;
+}
+
+#board-full {
+  width: 1280px;
+}
+
+.space-grid {
+  background-image:
+    repeating-linear-gradient(#222 0 1px, transparent 1px 100%),
+    repeating-linear-gradient(90deg, #222 0 1px, transparent 1px 100%);
+  background-size: 80px 80px;
+}
+
+  .board-item {
+    border: 2px solid rgba(0, 0, 0, 0);
+  }
+
+  .colony {
+    background-color: #FFFFFF;
+    position: absolute;
+  }
+
+  .system_object {
+    background-color: #AAAAFF;
+    position: absolute;
+  }
+
+  .ship {
+    background-color: #FFFFFF;
+    position: absolute;
+  }
+
+/* Controls */
+#side-panel {
+  width: 320px;
+  /*height: 660px;*/
+  height: 720px;
+  background-color: #111111;
+  margin: 0px;
+  float: right;
+  padding: 5px;
+}
+
+  .command-display-row {
+    min-height: 32px;
+    margin: 2px 0;
+  }
+
+  .command-display-row .active {
+    background-color: #EEE;
+    margin: 2px 0;
+  }
+  
+  .command-button-row {
+    min-height: 40px;
+    margin: 2px 0;
+    line-height: 44px;
+  }
+
+.deselect-button {
+  float: right;
+  cursor: pointer;
+  color: #AA0000;
+}
+
+@keyframes pulse-combat {
+  0% {
+    background-color: #FFEEEE;
+  }
+  50% {
+    background-color: #FF6666;
+  }
+  100% {
+    background-color: #FFEEEE;
+  }
+}
+.in-combat-pulse {
+  animation: pulse-combat 2s ease infinite;
+}
+

@@ -1,0 +1,56 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('developer');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+</script>
+
+<%= render CentralWeb.Admin.ToolView, "sub_menu.html", Map.merge(assigns, %{active: "conn_params"})
+%>
+
+<div class="row">
+  <div class="col-xl-6 col-lg-12">
+    <div class="card page-card border-<%= bsname %>">
+      <div class="card-body">
+        <h4>
+          Connection parameters
+        </h4>
+        <textarea rows="20" class="form-control" style="font-family: monospace; font-size: 0.9em;">
+          <%= @conn_params %>
+        </textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6 col-md-12">
+    <div class="card page-card border-<%= bsname %>">
+      <div class="card-body">
+        <h4>
+          Current user - Configs
+        </h4>
+        <textarea rows="10" class="form-control" style="font-family: monospace; font-size: 0.9em;"><%=
+            for {k, v} <- @user_configs do
+              "\"#{k}\" => \"#{v}\"\n"
+            end
+          %></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6 col-md-12">
+    <div class="card page-card border-<%= bsname %>">
+      <div class="card-body">
+        <h4>
+          Current user - Permissions
+        </h4>
+        <textarea rows="10" class="form-control" style="font-family: monospace; font-size: 0.9em;"><%=
+            for p <- @current_user.permissions do
+              p
+            end
+          %></textarea>
+      </div>
+    </div>
+  </div>
+</div>

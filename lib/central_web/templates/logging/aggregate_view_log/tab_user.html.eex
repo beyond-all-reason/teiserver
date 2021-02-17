@@ -1,0 +1,23 @@
+<table class="table table-striped table-hover table-sm make-data-table">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Views</th>
+      <th>Load time</th>
+      <th>Sections</th>
+      <th>IPs</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for {uid, data} <- @log.user_data do %>
+    <% user = Map.fetch!(@users, uid |> String.to_integer) %>
+    <tr>
+      <td><%= user.name %></td>
+      <td><%= format_number data["count"] %></td>
+      <td><%= convert_load_time data["load_time"] %></td>
+      <td><%= Enum.join(data["sections"], ", ") %></td>
+      <td><%= Enum.count(data["ips"]) %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>

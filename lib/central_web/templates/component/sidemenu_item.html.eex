@@ -1,0 +1,12 @@
+<%
+  is_active = @active == @name
+  active_class = if is_active, do: "active side-menu-active"
+%>
+
+<li id="sidebar_<%= @name %>" class="<%= active_class %>">
+  <a href="<%= @url %>">
+    <i class="fa-fw fa-lg <%= @lib.icon() %>"></i>
+    &nbsp;
+    <%= @label %>
+  </a>
+</li>

@@ -1,0 +1,24 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('#section-menu-<%= @active %>').addClass('active');
+    if (!$('#section-menu-<%= @active %> i').hasClass("fab")) {
+      $('#section-menu-<%= @active %> i').addClass('fas');
+      $('#section-menu-<%= @active %> i').removeClass('far');
+      $('#section-menu-<%= @active %> i').removeClass('fal');
+    }
+  });
+</script>
+
+<a href="<%= Routes.logging_aggregate_view_log_path(@conn, :index) %>" class="btn btn-outline-<%= bsname %>" id="section-menu-index">
+  <i class="far fa-bars"></i>
+  &nbsp;
+  List
+</a>
+
+<a href="<%= Routes.logging_aggregate_view_log_path(@conn, :perform_form) %>" class="btn btn-outline-<%= bsname %>" id="section-menu-perform">
+  <i class="far fa-sync"></i>
+  &nbsp;
+  Perform conversion
+</a>

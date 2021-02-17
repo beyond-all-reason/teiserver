@@ -1,0 +1,46 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('logging');
+    tint_page("<%= fg %>", "<%= bg %>");
+
+    var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+    $('#the_tabs a:first').tab('show');
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+  });
+</script>
+
+<%= render CentralWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "page_view"})
+%>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= render CentralWeb.Logging.PageViewLogView, "section_menu.html",
+          conn: @conn,
+          permissions: @current_user.permissions,
+          active: ""
+        %>
+
+        <hr />
+
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+          <li>
+            <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
+              <%= component "icon", icon: icon() %>
+              Details
+            </a>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <div class="tab-pane" id="details_tab">
+            <%= render "tab_details.html", assigns %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

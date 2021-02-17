@@ -1,0 +1,42 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('admin');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+</script>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+        <h4>Scheduled jobs</h4>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Worker</th>
+              <th>State</th>
+              <th>Scheduled</th>
+              <th>Attempted</th>
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for j <- @jobs do %>
+              <tr>
+                <td><%= j.id %></td>
+                <td><%= j.worker %></td>
+                <td><%= j.state %></td>
+                <td><%= date_to_str j.scheduled_at, format: :hms_or_dmy, until: true %></td>
+                <td><%= date_to_str j.attempted_at, format: :hms_or_dmy, until: true %></td>
+                <td></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

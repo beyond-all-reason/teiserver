@@ -1,0 +1,117 @@
+<script type="text/javascript" charset="utf-8">
+  sidebar_active('logging');
+</script>
+
+<%#
+<script src="/js/d3_v3.js"></script>
+<script src="/js/nvd3.js"></script>
+<link href="/css/nvd3.css" rel="stylesheet">
+%>
+
+<script src="/js/d3_v3.min.js"></script>
+<script src="/js/nvd3.js"></script>
+<link href="/css/nvd3.css" rel="stylesheet">
+
+<style>
+  text {
+      font: 12px sans-serif;
+  }
+  .spaced {
+      float: left;
+      margin: 10px 0 10px 10px;
+  }
+  .svg-container {
+      display: block;
+      position: absolute;
+      top: 30px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+  }
+  html, body, svg {
+      margin: 0px;
+      padding: 0px;
+      height: 100%;
+      width: 100%;
+  }
+
+  .nvd3 line.nv-guideline { /* Hide the guideline */
+      display: none;
+      stroke-width: 0.0;
+  }
+
+  .nvd3 .nv-bars rect { /* fix the hover guideline to be snappy */
+      transition: fill-opacity 0ms linear;
+      -moz-transition: fill-opacity 0ms linear;
+      -webkit-transition: fill-opacity 0ms linear;
+  }
+
+  .nvd3 .nv-x .nv-axis .x-axis-tick-mark {
+      stroke: #000; /* black tick marks */
+  }
+
+  .nvd3 .nv-y .nv-axis .tick.zero line {
+      stroke: #000; /* black line for the x axis */
+  }
+
+</style>
+
+<script>
+$(function() {
+  nv.addGraph(function() {
+    var chart = nv.models.lineChart()
+      .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
+      .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
+      .transitionDuration(350)  //how fast do you want the lines to transition?
+      .showLegend(true)       //Show the legend, allowing users to turn on/off line series.
+      .showYAxis(true)        //Show the y-axis
+      .showXAxis(true)        //Show the x-axis
+      .x(function(d,i) { return i })
+      .y(function(d,i) {return d[1] })
+    ;
+
+    data = <%= raw Jason.encode! @data %>
+
+    chart.xAxis     //Chart x-axis settings
+        .axisLabel('Month')
+      ;
+
+    chart.xAxis.tickFormat(function(d) {
+      var dx = data[0].values[d] && data[0].values[d][0] || '';
+      //var dx = data[0].values[d][0];
+      //console.log(data[0].values[d][0]);
+      //console.log(dx);
+      //return d3.time.format('%d/%m/%y')(new Date(dx))
+      return dx;
+      return d3.time.format('%d/%m/%y')(new Date(dx))
+    });
+
+    chart.yAxis     //Chart y-axis settings
+        .axisLabel('Views')
+        //.tickFormat(d3.format('f'));
+        .tickFormat(d3.format('f'));
+
+    chart.forceY([0]);
+
+    d3.select('#total_views svg')    //Select the <svg> element you want to render the chart in.   
+        .datum(data)         //Populate the <svg> element with chart data...
+        .call(chart);          //Finally, render the chart!
+
+    // Update the chart when window resizes.
+    nv.utils.windowResize(function() { chart.update() });
+    return chart;
+  });
+});
+
+</script>
+
+<div class="card card-default">
+  <div class="card-header">
+    Page views by section for the past month
+  </div>
+  <div class="card-body">
+    <div id="total_views">
+      <svg style="height: 400px;"></svg>
+    </div>
+  </div>
+</div>

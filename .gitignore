@@ -21,14 +21,35 @@ erl_crash.dump
 
 # Ignore package tarball (built via "mix hex.build").
 teiserver-*.tar
+central-*.tar
 
 *.sublime-project
 *.sublime-workspace
 
 # Temporary files for e.g. tests
 /tmp
-
 /ignore
+
+# Secrets
+/config/*.secret.exs
+
+# Static
+/assets/node_modules/
+/priv/static/
+
+# Other
+/assets/static/js/fontawesome.js
+/assets/static/js/ace
+/backups/
+/remote/
+/scripts/
+/rel/
+/source_deploy
+/source_deploy.tar.gz
+central.tar.gz
+/documents
+/bin
+Dockerfile
 
 # I'm storing server output here, don't want to push it to git
 example_output

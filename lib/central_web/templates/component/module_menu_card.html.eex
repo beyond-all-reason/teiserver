@@ -1,0 +1,8 @@
+<%# If we add padding-0 to the class it will have no padding %>
+
+<div class="col-6 col-sm-3 col-md-2 col-lg-2 col-xl-2 sub-menu-icon">
+  <a href="<%= assigns[:link] %>" class="block-link" id="sub-menu-<%= assigns[:name] %>">
+    <i class="fa-fw fa-2x <%= assigns[:icon] %>"></i><br />
+    Users
+  </a>
+</div>

@@ -1,0 +1,101 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('home');
+    tint_page("<%= fg %>", "<%= bg %>");
+
+    var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+    $('#the_tabs a:first').tab('show');
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+  });
+</script>
+
+<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "group"})
+%>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= render CentralWeb.Admin.GroupView, "section_menu.html", Map.merge(assigns, %{
+          quick_search: "",
+          show_search: false,
+          active: ""
+        })
+        %>
+
+        &nbsp;&nbsp;&nbsp;
+
+        <a href="<%= Routes.admin_group_path(@conn, :show, @group) %>" class="btn btn-outline-<%= bsname %>">
+          <%= component "icon", icon: icon() %>
+          Group details
+        </a>
+
+        <hr />
+
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+          <%= for {group_name, _group_configs} <- @config_infos do %>
+            <li>
+              <a href="#<%= remove_spaces group_name %>_tab" role="tab" class="nav-link" data-toggle="tab"><%= String.capitalize group_name %>
+              </a>
+          </li>
+          <% end %>
+        </ul>
+
+        <div class="tab-content">
+          <%= for {group_name, group_configs} <- @config_infos do %>
+            <div class="tab-pane" id="<%= remove_spaces group_name %>_tab" style="padding:5px;">
+
+              <table class="table table-striped">
+                <tbody>
+                  <%= for the_config <- group_configs do %>
+                    <tr>
+                      <td>
+                        <label>
+                          <%= config_name the_config.key %>
+                        </label>
+                      </td>
+                      <td>
+                        <%= if the_config.visible do %>
+                          <%= if the_config.type == "password" do %>
+                            <em>Hidden</em>
+                          <% else %>
+                            <%= @config_values[the_config.key] || raw "#{the_config.default} <em>(default)</em>" %>
+                          <% end %>
+                        <% end %>
+                      </td>
+
+                      <td style="min-width:50px;" tal:condition="input_type == 'boolean'">
+                        <%= if the_config.editable do %>
+                          <%= if Map.has_key?(@config_values, the_config.key) do %>
+                            <a href="<%#= Routes.group_config_path(@conn, :edit, @group.id, the_config.key) %>" class="btn btn-secondary btn-sm">
+                              Edit
+                            </a>
+                          <% else %>
+                            <a href="<%#= Routes.group_config_path(@conn, :new, @group.id, the_config.key) %>" class="btn btn-secondary btn-sm">
+                              Edit
+                            </a>
+                          <% end %>
+                        <% else %>
+                          &nbsp;
+                        <% end %>
+                      </td>
+
+                      <td>
+                        <%= raw the_config.description %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+
+            </div>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

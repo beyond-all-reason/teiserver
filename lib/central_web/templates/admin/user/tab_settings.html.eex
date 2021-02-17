@@ -1,0 +1,12 @@
+<br />
+
+<table class="table table-striped">
+  <tbody>
+    <%= for config <- @user.user_configs do %>
+    <tr>
+      <td><%= config.key %></td>
+      <td><%= config.value %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>

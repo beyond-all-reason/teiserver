@@ -1,0 +1,61 @@
+<% {_fg, _bg, _bsname} = colours() %>
+
+<%= component "detail_line",
+  label: "Short content",
+  value: @post.short_content,
+  type: "textarea"
+%>
+
+<%= component "detail_line",
+  label: "Live from",
+  value: date_to_str @post.live_from, :dmy
+%>
+
+<%= component "detail_line",
+  label: "Comments",
+  value: if @post.comments, do: "Comments enabled", else: "Comments not enabled"
+%>
+
+<%= component "detail_line",
+  label: "Visible",
+  value: (if @post.visible, do: "Post is visible", else: "Post is not visible"),
+  link: %{
+    path: Routes.blog_path(@conn, :show, @post.url_slug),
+    bsname: Central.Communication.BlogLib.colours |> elem(2),
+    icon: Central.Communication.BlogLib.icon()
+  }
+%>
+<br />
+
+<strong>Tags:</strong><br />
+<%= for t <- @post.tags do %>
+  <span class="badge badge-primary"><%= t %></span>
+<% end %>
+
+<hr />
+
+<%= component "detail_line",
+  label: "Poster",
+  icon: %{
+    colour: @post.poster.colour,
+    icon: @post.poster.icon,
+  },
+  value: @post.poster.name,
+  link: %{
+    path: "",
+    bsname: Central.Account.UserLib.colours() |> elem(2),
+    icon: Central.Account.UserLib.icon(),
+  }
+%>
+
+<hr />
+
+<%= component "detail_line",
+  label: "Inserted",
+  value: date_to_str @post.inserted_at, :hms_dmy
+%>
+
+<%= component "detail_line",
+  label: "Updated",
+  value: date_to_str @post.updated_at, :hms_dmy
+%>

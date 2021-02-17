@@ -1,0 +1,21 @@
+<%
+  palette = case assigns[:palette] do
+    "common" ->
+      ["#AA3333", "#33AA33", "#3333AA", "#DD8833", "#AA33AA", "#33AACC", "#777777", "#000000"]
+    _ ->
+      ["#AAAA33", "#AA33AA", "#33AAAA"]
+  end
+%>
+
+<select class="form-control icon-dropdown" name="<%= @name %>" id="<%= @id %>" onchange="<%= assigns[:onchange] %>">
+  <%= if assigns[:insert_blank] != nil do %>
+    <option value="" data-icon=""><%= assigns[:insert_blank] %></option>
+  <% end %>
+  <%= for colour <- palette do %>
+    <option value="<%= colour %>"
+      data-bgcolour="<%= colour %>"
+      <%= if "#{assigns[:selected]}" == "#{colour}", do: "selected=''" %>>
+      &nbsp;
+    </option>
+  <% end %>
+</select>

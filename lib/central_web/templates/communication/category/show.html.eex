@@ -1,0 +1,115 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('communications');
+    tint_page("<%= fg %>", "<%= bg %>");
+    $('#the_tabs a:first').tab('show');
+  });
+</script>
+
+<%= render CentralWeb.Communication.GeneralView, "sub_menu.html", Map.put(assigns, :active, "categories") %>
+
+<div class="row page-row">
+  <div class="col-md-12">
+
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= render CentralWeb.Communication.CategoryView, "section_menu.html",
+          conn: @conn,
+          permissions: @current_user.permissions,
+          show_search: true,
+          quick_search: "",
+          active: ""
+        %>
+
+        <hr />
+
+<div class="row page-row">
+  <div class="col-md-12">
+    <h3>Category:</h3>
+
+    <!-- Actions can go here -->
+
+    <div class="float-right">
+      <%= link raw("<i class='far fa-fw fa-trash'></i> Delete"), to: Routes.blog_category_path(@conn, :delete, @category), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-outline" %>
+    </div>
+    <div class="float-right">
+      <a href="<%= Routes.blog_category_path(@conn, :edit, @category) %>" class="btn btn-outline-<%= bsname %>">
+        <i class="far fa-fw fa-wrench"></i>
+        Edit category
+      </a>
+      &nbsp;&nbsp;&nbsp;
+    </div>
+    <br /><br />
+
+    <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+      <li>
+        <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
+          <i class="fa-fw <%= icon() %>"></i>
+          Details
+        </a>
+      </li>
+
+    </ul>
+
+    <div class="tab-content">
+      <div class="tab-pane" id="details_tab" style="padding:5px;">
+
+<div class="input-group input-group-show">
+  <span class="input-group-addon row-left">
+    Name
+  </span>
+  <input type="text" class="form-control" disabled="" value="<%= @category.name %>" />
+</div>
+
+<div class="input-group input-group-show">
+  <span class="input-group-addon row-left">
+    Colour
+  </span>
+  <input type="text" class="form-control" disabled="" value="<%= @category.colour %>" />
+</div>
+
+<div class="input-group input-group-show">
+  <span class="input-group-addon row-left">
+    Icon
+  </span>
+  <input type="text" class="form-control" disabled="" value="<%= @category.icon %>" />
+</div>
+
+<hr />
+
+<hr />
+
+<div class="input-group input-group-show">
+  <span class="input-group-addon row-left">
+    Inserted
+  </span>
+  <input type="text" class="form-control" disabled="" value="<%= date_to_str @category.inserted_at, :hms_dmy %>" />
+</div>
+
+<div class="input-group input-group-show">
+  <span class="input-group-addon row-left">
+    Updated
+  </span>
+  <input type="text" class="form-control" disabled="" value="<%= date_to_str @category.updated_at, :hms_dmy %>" />
+</div>
+
+          </div>
+
+          <div class="tab-pane" id="links_tab" style="padding:5px;">
+
+              <!-- Link listing goes here -->
+
+          </div>
+          <div class="tab-pane" id="link_add_tab" style="padding:5px;">
+
+            <!-- Link adding goes here -->
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,188 @@
+<% {fg, bg, bsname} = colours() %>
+<% now = Timex.local() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('home');
+    tint_page("<%= fg %>", "<%= bg %>");
+
+    $("#quick-new-form input").keyup(function(e) {
+      if (e.keyCode == 13) {
+        submit_form();
+        return true;
+      }
+    });
+  });
+
+  function submit_form () {
+    user = $('#account_user_picker_input').val().trim();
+    colour = $('#f_colour').val();
+    icon = $('#f_icon').val();
+    body = $('#f_body').val().trim();
+    url = $('#f_url').val().trim();
+    title = $('#f_title').val().trim();
+
+    if (user == "") {user = "#<%= @current_user.id %>";}
+
+    if (body != "" && url != "") {
+      $.ajax({
+        url: "<%= Routes.communication_notification_path(@conn, :quick_new) %>",
+        type: "POST",
+        data: {
+          "_csrf_token": "<%= get_csrf_token() %>",
+          "f[user_id]": user,
+          "f[colour]": colour,
+          "f[icon]": icon,
+          "f[body]": body,
+          "f[url]": url,
+          "f[title]": title,
+        }
+      }).done(function (result) {
+        if (user != "#<%= @current_user.id %>") {
+          alert(result);
+        }
+      })
+    }
+  }
+</script>
+
+<link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
+<script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
+
+<%= component "icon_dropdown_js", [] %>
+
+<%#= render CentralWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "notifications"})
+%>
+
+<%= component "picker_script",
+  module: Central.Account.UserLib,
+  name: "account_user",
+  title: "User search"
+%>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+
+        <form action="<%= Routes.communication_notification_path(@conn, :quick_new) %>" method="post" class="form-horizontal" id="quick-new-form">
+          <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+
+          <div class="row">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="centaur-user-search" class="control-label">User:</label>
+              <%= render CentralWeb.Account.UserView, "picker.html" %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <%= component "fa5_icon_picker", %{form: :f, field: :icon, short_link: true, default: "fa-exclamation"} %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="f_colour" class="control-label">Colour:</label>
+              <%= component "icon_dropdown", %{
+                  name: "f[colour]",
+                  id: "f_colour",
+                  enumerable: [
+                    %{name: "Primary", id: "#4466BB", colour: "#4466BB"},
+                    %{name: "Primary 2", id: "#990088", colour: "#990088"},
+
+                    %{name: "Info", id: "#22AACC", colour: "#22AACC"},
+                    %{name: "Info 2", id: "#17b0ad", colour: "#17b0ad"},
+
+                    %{name: "Success", id: "#22AA44", colour: "#22AA44"},
+                    %{name: "Success 2", id: "#17a120", colour: "#17a120"},
+
+                    %{name: "Warning", id: "#ffb606", colour: "#ffb606"},
+                    %{name: "Warning 2", id: "#CC4400", colour: "#CC4400"},
+
+                    %{name: "Danger", id: "#e74c3c", colour: "#e74c3c"},
+                    %{name: "Danger 2", id: "#AA1122", colour: "#AA1122"},
+                  ]
+                } %>
+            </div>
+
+            <div class="col-md-4 col-xl-3 search-form-input">
+              <label for="f_title" class="control-label">Title:</label>
+              <input type="text" name="f[title]" id="f_title" value="Test notification" class="form-control" />
+            </div>
+
+            <div class="col-md-4 col-xl-3 search-form-input">
+              <label for="f_body" class="control-label">Body:</label>
+              <input type="text" name="f[body]" id="f_body" value="This is a test notification" class="form-control" />
+            </div>
+
+            <div class="col-md-4 col-xl-3 search-form-input">
+              <label for="f_url" class="control-label">Url:</label>
+              <input type="text" name="f[url]" id="f_url" value="<%= Routes.communication_notification_path(@conn, :handle_test) %>" class="form-control" />
+            </div>
+          </div>
+
+          <span class="btn btn-success float-right" onclick="submit_form();">
+            Send notification
+          </span>
+        </form>
+        <div style="clear: both"></div>
+        <br />
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th colspan="2">Title</th>
+              <th>User</th>
+              <th>Body</th>
+              <th>&nbsp;</th>
+              <th>Expires</th>
+              <%# <th>Data</th> %>
+
+              <th colspan="2"></th>
+            </tr>
+          </thead>
+          <tbody>
+        <%= for notification <- @notifications do %>
+            <tr>
+              <td style="width: 10px; background-color: <%= notification.colour %>">
+                &nbsp;
+              </td>
+              <td>
+                <a href="<%= Routes.admin_user_path(@conn, :show, notification.user_id) %>">
+                  <%= notification.user.name %>
+                </a>
+              </td>
+              <td style="color: <%= notification.colour %>">
+                <%= component "icon", icon: notification.icon %>
+                &nbsp;
+                <%= notification.title %>
+              </td>
+              <td><%= notification.body %></td>
+
+              <%= if notification.read do %>
+                <td style="background-color: #EEE; text-align: center;">
+                  <i class="far fa-fw fa-check"></i>
+                  &nbsp;
+                  Read
+                </td>
+              <% else %>
+                <td></td>
+              <% end %>
+
+              <td style='<%= if Timex.compare(now, notification.expires) == 1, do: "background-color: #FEE;" %>'>
+                <%= date_to_str notification.expires, :dmy %>
+              </td>
+              <td>
+                <a href="<%= Central.Communication.notification_url notification %>" class="btn btn-secondary btn-sm">
+                  Follow
+                </a>
+              </td>
+              <td>
+                <%= link "Delete", to: Routes.communication_notification_path(@conn, :delete, notification), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-sm" %>
+              </td>
+            </tr>
+        <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

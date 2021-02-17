@@ -1,0 +1,61 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('logging');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+</script>
+
+<%= render CentralWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "report"})
+%>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+
+        <div class="row">
+          <div class="col-md-12">
+            <h4>
+              <%= component "icon", icon: Central.Logging.PageViewLogLib.icon() %>
+              Page views
+            </h4>
+          </div>
+
+          <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 line-card">
+            <a href='<%= Routes.logging_report_path(@conn, :show, "most_recent_users") %>'>
+              <i class="fal fa-fw fa-clock fa-lg"></i>
+              Most recent users
+            </a>
+          </div>
+
+          <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 line-card">
+            <a href='<%= Routes.logging_report_path(@conn, :show, "individual_page_views") %>'>
+              <i class="far fa-fw fa-table fa-lg"></i>
+              Page view stats
+            </a>
+          </div>
+        </div>
+        <br /><br />
+
+        <div class="row">
+          <div class="col-md-12">
+            <h4>
+              <%= component "icon", icon: Central.Logging.AggregateViewLogLib.icon() %>
+              Aggregate views
+            </h4>
+          </div>
+
+          <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 line-card">
+            <a href='<%= Routes.logging_report_path(@conn, :show, "aggregrate_page_views") %>'>
+              <i class="far fa-fw fa-hourglass fa-lg"></i>
+              Historic stats
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

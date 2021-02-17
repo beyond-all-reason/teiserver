@@ -1,0 +1,120 @@
+<% {fg, _bg, bsname} = colours() %>
+<%= component "picker_script",
+  module: Central.Account.UserLib,
+  name: "account_user",
+  title: "User search"
+%>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('select').select2({
+      width: "100%",
+    });
+
+    <%= if @show_search == true do %>
+      show_search();
+    <% end %>
+  });
+</script>
+
+<%= component "icon_dropdown_js", [] %>
+
+<link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
+<script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+        <div class="btn btn-outline-<%= bsname %>" onclick="show_search();" id="search-box-shower">
+          <i class="far fa-fw fa-search"></i>
+          Show search form
+        </div>
+
+        <form action="<%= Routes.logging_page_view_log_path(@conn, :search) %>" method="post" class="form-horizontal" id="search-box" style="display: none;">
+          <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+
+          <div class="row">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="centaur-user-search" class="control-label">User: </label>
+              <%= render CentralWeb.Account.UserView, "picker.html",
+                input_name: "search[account_user]",
+                value: @params["account_user"] %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_path" class="control-label">Path: </label>
+              <input type="text" name="search[path]" id="search_path" value='<%= @params["path"] %>' class="form-control" />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_section" class="control-label">Section: </label>
+              <%= component "icon_dropdown", %{
+                name: "search[section]",
+                id: "search_section",
+                selected: @params["section"],
+                enumerable: [
+                  %{id: "any", name: "Any section", icon: "fas fa-th", colour: fg},
+                  %{id: "admin", icon: "far fa-user-circle", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <%= if allow?(@permissions, "admin.admin.full") do %>
+              <div class="col-md-4 col-xl-2 search-form-input">
+                <label for="search_admin_group" class="control-label">Admin group: </label>
+                <%= component "icon_dropdown", %{
+                  name: "search[admin_group_id]",
+                  id: "search_admin_group_id",
+                  insert_blank: %{id: "", name: "All groups", icon: "fas fa-th", colour: fg},
+                  selected: @params["admin_group_id"],
+                  enumerable: @groups
+                } %>
+              </div>
+            <% end %>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_limit" class="control-label">Limit: </label>
+              <%= select :search, :limit, [
+                {"50", "50"}, {"100", "100"}, {"200", "200"}
+                ], class: "form-control", selected: @params["limit"] %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="start_date" class="control-label">From: </label>
+              <input type="text" id="start_date" name="search[start_date]" value='<%= @params["start_date"] %>' class="form-control datepicker" />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="end_date" class="control-label">Until: </label>
+              <input type="text" id="end_date" name="search[end_date]" value='<%= @params["end_date"] %>' class="form-control datepicker" />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_order_by" class="control-label">Order by: </label>
+              <%= component "icon_dropdown", %{
+                name: "search[order]",
+                id: "search_search_group",
+                selected: @params["order"],
+                enumerable: [
+                  %{id: "Newest first", icon: "far fa-sort-numeric-down", colour: fg},
+                  %{id: "Oldest first", icon: "far fa-sort-numeric-up", colour: fg},
+
+                  %{id: "Slowest", icon: "far fa-hourglass-end", colour: fg},
+                ]
+              } %>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
+              &nbsp;<br />
+              <input type="submit" value="Search" name="form.submitted" class="btn btn-<%= bsname %> btn-block" />
+            </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>

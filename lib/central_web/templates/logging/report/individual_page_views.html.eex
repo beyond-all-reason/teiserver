@@ -1,0 +1,144 @@
+<% {fg, _bg, bsname} = colours() %>
+<%= component "picker_script",
+  module: Central.Account.UserLib,
+  name: "account_user",
+  title: "User search"
+%>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('select').select2({
+      width: "100%",
+    });
+
+    // $('#result-table').dataTable({
+    //   pageLength: 50
+    // });
+  });
+</script>
+
+<%= component "icon_dropdown_js", [] %>
+
+<link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
+<script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
+
+<%= render CentralWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "report"})
+%>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card page-card border-<%= bsname %>">
+      <div class="card-body">
+        <h4>
+          Individual page views
+        </h4>
+        <form action='<%= Routes.logging_report_path(@conn, :show, "individual_page_views") %>' method="post" class="form-horizontal">
+          <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+          <input type="hidden" name="name" value="transaction_breakdown" />
+
+          <div class="row">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_mode" class="control-label">Mode:</label>
+              <%= component "icon_dropdown", %{
+                name: "report[mode]",
+                id: "report_mode",
+                selected: @params["mode"],
+                enumerable: [
+                  %{id: "User", icon: Central.Account.UserLib.icon(), colour: fg},
+                  %{id: "Group", icon: Central.Account.GroupLib.icon(), colour: fg},
+                  %{id: "Path (Full)", icon: "fa-sitemap", colour: fg},
+                  %{id: "Path (1 part)", icon: "fa-sitemap", colour: fg},
+                  %{id: "Path (2 parts)", icon: "fa-sitemap", colour: fg},
+                  %{id: "Path (3 parts)", icon: "fa-sitemap", colour: fg},
+                  %{id: "Path (4 parts)", icon: "fa-sitemap", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="centaur-user-search" class="control-label">User: </label>
+              <%= render CentralWeb.Account.UserView, "picker.html" %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_path" class="control-label">Path:</label>
+              <input type="text" name="report[path]" id="report_path" value='<%= @params["path"] %>' class="form-control" />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_mode" class="control-label">Group:</label>
+              <%= component "icon_dropdown", %{
+                name: "report[group]",
+                id: "report_group",
+                insert_blank: %{id: "", name: "All", icon: "fas fa-th", colour: fg},
+                selected: @params["group"],
+                enumerable: @groups
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_metric" class="control-label">Section:</label>
+              <%= component "icon_dropdown", %{
+                name: "report[section]",
+                id: "report_section",
+                selected: @params["section"],
+                enumerable: [
+                  %{id: "", name: "Any section", icon: "fas fa-th", colour: fg},
+                  %{id: "admin", icon: "fa-user-circle", colour: fg},
+                ]
+              } %>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_date_preset" class="control-label">Date range:</label>
+              <%= select :report, :date_preset, @presets, class: "form-control", selected: @params["date_preset"] %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_start_date" class="control-label">Start date:</label>
+              <input type="text" id="report_start_date" name="report[start_date]" value='<%= @params["start_date"] %>' class="form-control datepicker" />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_end_date" class="control-label">End date:</label>
+              <input type="text" id="report_end_date" name="report[end_date]" value='<%= @params["end_date"] %>' class="form-control datepicker" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="offset-md-8 col-md-4 offset-xl-9 col-xl-3">
+              &nbsp;<br />
+              <input type="submit" value="Run individual views report" name="form.submitted" class="btn btn-<%= bsname %> btn-block" />
+            </div>
+          </div>
+        </form>
+
+        <hr />
+
+        <table class="table" id="result-table">
+          <thead>
+            <tr>
+              <th>Key</th>
+              <th>Count</th>
+              <th>Average Load time <small>(ms)</small></th>
+              <th>Total Load time <small>(s)</small></th>
+            </tr>
+          </thead>
+          <tbody>
+        <%= for row <- @data do %>
+            <tr>
+              <td><%= row["key"] %></td>
+              <td><%= format_number row["log_count"] %></td>
+              <td><%= row["load_time"] %></td>
+              <td><%= Decimal.to_float(row["total_load_time"]) |> round |> format_number %></td>
+            </tr>
+        <% end %>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

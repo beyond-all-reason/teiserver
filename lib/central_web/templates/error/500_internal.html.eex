@@ -1,0 +1,81 @@
+<% {fg, bg, bsname} = {"#A12", "#FEE", "danger2"} %>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title><%= Application.get_env(:centaur, CentralWeb)[:page_title] %></title>
+    <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/bootstrap.min.css") %>'>
+    <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/shards.css") %>'>
+    <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/fontawesome/css/all.min.css") %>'>
+    <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/layout.css") %>'>
+    <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/styles.css") %>'>
+
+    <script>
+      window.userToken = "<%= assigns[:user_token] %>";
+    </script>
+
+    <script src='<%= Routes.static_path(@conn, "/js/app.js") %>'></script>
+
+    <script type="text/javascript" charset="utf-8">
+      function sidebar_active (name) {}
+      function tint_page (fore_colour, back_colour) {}
+
+      $(function() {
+
+      });
+    </script>
+  </head>
+
+  <body class="blank">
+    <div id="container">
+      <div class="content animate-panel animated">
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('home');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+</script>
+
+<div class="row page-row">
+  <div class="col-md-12">
+
+    <div class="card border-<%= bsname %>" style="margin: 0px 20px;">
+      <div class="card-body">
+        <a href="<%= Routes.general_page_path(@conn, :index) %>" class="btn btn-primary float-right">
+          <i class="fas fa-fw fa-home"></i>
+          Home page
+        </a>
+
+        <h4 style="padding-bottom: 10px;">Internal server error</h4>
+        This means something has gone wrong which the application did not anticipate. I'm very sorry this has happened, it's already been logged behind the scenes and I will endeavour to fix it as soon as posssible.
+        <br /><br />
+
+        <%= if assigns[:current_user] do %>
+          <%= if allow?(@current_user, "debug") or allow?(@current_user, "admin.dev.developer") do %>
+          <h4>Debug traceback info</h4>
+          <textarea rows="40" class="form-control" style="font-family: monospace;">Reason: <%= @error.reason |> Kernel.inspect |> String.replace("\\n", "\n") %>
+------
+
+<%= for {k, v} <- @error do %>
+<%= k %> =&gt; <%= v |> Kernel.inspect %>
+<% end %></textarea>
+          <% end %>
+        <% end %>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+      </div>
+    </div>
+  </body>
+ </html>

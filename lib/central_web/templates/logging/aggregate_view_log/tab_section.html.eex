@@ -1,0 +1,20 @@
+<table class="table">
+  <thead>
+    <tr>
+      <th>Section</th>
+      <th>Views</th>
+      <th>Load times</th>
+      <th>Users</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for {section, data} <- @log.section_data do %>
+    <tr>
+      <td><%= section %></td>
+      <td><%= format_number data["count"] %></td>
+      <td><%= convert_load_time data["load_time"] %></td>
+      <td><%= format_number Enum.count(data["users"]) %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>

@@ -1,0 +1,60 @@
+<% {fg, _bg, _bsname} = colours(@active) %>
+
+<style>
+  .sub-menu-icon a:hover {
+    border-bottom: 5px solid <%= fg %>;
+    color: <%= fg %>;
+  }
+
+  .sub-menu-icon .active {
+    border-bottom-color: <%= fg %>;
+  }
+
+  .sub-menu .active, .sub-menu .active:hover {
+    color: <%= fg %>;
+  }
+</style>
+
+<div class="row sub-menu">
+  <div class="col-md-12">
+    <div class="card card-default">
+      <div class="card-body" style="padding: 0 15px;">
+
+        <div class="row">
+          <%= component "sub_menu_icon",
+            name: "groups",
+            label: "Groups",
+            active: @active,
+            url: Routes.account_group_path(@conn, :index),
+            lib: Central.Account.GroupLib
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "user_configs",
+            label: "Preferences",
+            active: @active,
+            url: Routes.user_config_path(@conn, :index),
+            lib: Central.Config.UserConfigLib
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "details",
+            label: "Account details",
+            active: @active,
+            url: Routes.account_registration_path(@conn, :edit_details),
+            lib: Central.Account
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "password",
+            label: "Password",
+            active: @active,
+            url: Routes.account_registration_path(@conn, :edit_password),
+            lib: %{icon: "far fa-lock"}
+          %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

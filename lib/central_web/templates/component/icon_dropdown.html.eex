@@ -1,0 +1,34 @@
+<select class="form-control icon-dropdown" name="<%= @name %>" id="<%= @id %>" onchange="<%= assigns[:onchange] %>">
+  <%= if assigns[:insert_blank] != nil do %>
+    <%= if is_map(assigns[:insert_blank]) do %>
+      <% row = assigns[:insert_blank] %>
+      <option value="<%= row.id || '' %>"
+        data-textcolour='<%= Map.get(row, :text_colour, "#FFFFFF") %>'
+        data-bgcolour='<%= Map.get(row, :colour, "#000000") %>'
+        <%= if Map.has_key?(row, :icons) do %>
+          data-icons='<%= Enum.join(row.icons, ",") %>'
+        <% else %>
+          data-icon='<%= Map.get(row, :icon, "") %>'
+        <% end %>
+      >
+        <%= Map.get(row, :name, row.id) %>
+      </option>
+    <% else %>
+      <option value=""><%= assigns[:insert_blank] %></option>
+    <% end %>
+  <% end %>
+
+  <%= for row <- @enumerable do %>
+    <option value="<%= row.id %>"
+      data-textcolour='<%= Map.get(row, :text_colour, "#FFFFFF") %>'
+      data-bgcolour='<%= Map.get(row, :colour, "#000000") %>'
+      <%= if Map.has_key?(row, :icons) do %>
+        data-icons='<%= Enum.join(row.icons, ",") %>'
+      <% else %>
+        data-icon='<%= Map.get(row, :icon, "") %>'
+      <% end %>
+      <%= if "#{assigns[:selected]}" == "#{row.id}", do: "selected='selected'" %>>
+      <%= Map.get(row, :name, row.id) %>
+    </option>
+  <% end %>
+</select>

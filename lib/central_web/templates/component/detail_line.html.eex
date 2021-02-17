@@ -1,0 +1,48 @@
+<div class="input-group input-group-show">
+  <%= if assigns[:label] do %>
+  <span class="input-group-prepend">
+    <span class="input-group-text row-left" style='<%= if assigns[:width], do: "width: #{assigns[:width]}px" %>'>
+      <%= @label %>
+    </span>
+  </span>
+  <% end %>
+
+  <%= if assigns[:icon] do %>
+  <span class="input-group-prepend">
+    <span class="input-group-text" style="background-color: <%= @icon.colour %>; color: #FFF;">
+      <%= component "icon", icon: @icon.icon %>
+    </span>
+  </span>
+  <% end %>
+
+  <%
+    type = assigns[:type] || "text"
+    disabled = if Map.get(assigns, :disabled, true), do: "disabled='disabled'"
+  %>
+
+  <%= case type do %>
+    <% "text" -> %>
+      <input type="text" class="form-control" <%= disabled %> value="<%= @value %>" style="<%= assigns[:style] %>" />
+
+    <% "textarea" -> %>
+      <textarea class="form-control" rows="<%= assigns[:rows] || 4 %>" <%= disabled %> style="<%= assigns[:style] %>"><%= @value %></textarea>
+
+    <% "list" -> %>
+      <input type="text" class="form-control" <%= disabled %> value='<%= @value |> Enum.join(", ") %>' style="<%= assigns[:style] %>" />
+
+    <% "map" -> %>
+      <textarea class="form-control" rows="<%= assigns[:rows] || 4 %>" <%= disabled %> style="<%= assigns[:style] %>"><%= raw (Kernel.inspect @value, pretty: true) %></textarea>
+  <% end %>
+
+  <%= if assigns[:link] do %>
+    <span class="input-group-append">
+      <a class="input-group-text btn btn-<%= @link.bsname %> btn-sm" href="<%= @link.path %>">
+        <%= if @link.icon do %>
+          <%= component "icon", icon: @link.icon %>
+          &nbsp;
+        <% end %>
+        <i class="fas fa-fw fa-link"></i>
+      </a>
+    </span>
+  <% end %>
+</div>

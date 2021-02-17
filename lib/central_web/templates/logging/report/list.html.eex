@@ -1,0 +1,68 @@
+<div class="card card-default">
+  <div class="card-header">
+
+  </div>
+  <div class="card-body">
+    <form action="<%#= logging_report_path(@conn, :list) %>" method="post" class="form-horizontal">
+      <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+      <div class="form-group">
+        <label for="control_id" class="col-sm-2 control-label">Label</label>
+        <div class="col-sm-10">
+
+        </div>
+      </div>
+
+      <input type="submit" value="Submit" name="form.submitted" class="btn btn-primary float-right" />
+    </form>
+  </div>
+</div>
+
+<div class="card card-default">
+  <div class="card-header">
+    Logs
+  </div>
+  <div class="card-body">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>User</th>
+          <th>Section</th>
+          <th>Path</th>
+          <th>Method</th>
+          <th>Ip</th>
+          <th>Load time <small>(ms)</small></th>
+          <th>Status</th>
+
+          <th colspan="2"></th>
+        </tr>
+      </thead>
+      <tbody>
+    <%= for page_view_log <- @data do %>
+        <tr>
+          <td><%= date_to_str page_view_log.inserted_at, :hms_dmy %></td>
+          <td>
+            <%= page_view_log.user.name %> (<%= page_view_log.user.id %>)
+            <a href="<%= Routes.admin_user_path(@conn, :edit, page_view_log.user) %>">
+              <i class="fa fa-dot-circle-o"></i>
+            </a>
+          </td>
+          <td><%= page_view_log.section %></td>
+          <td><%= page_view_log.path %></td>
+          <td><%= page_view_log.method %></td>
+          <td><%= page_view_log.ip %></td>
+          <td><%= page_view_log.load_time %></td>
+          <td><%= page_view_log.status %></td>
+
+          <td>
+            <%= link "Show", to: Routes.logging_page_view_log_path(@conn, :show, page_view_log), class: "btn btn-secondary btn-sm" %>
+          </td>
+          <td>
+            <%= link "Delete", to: Routes.logging_page_view_log_path(@conn, :delete, page_view_log), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-sm" %>
+          </td>
+        </tr>
+    <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,48 @@
+<% {fg, _bg, _bsname} = colours(@active) %>
+
+<style>
+  .sub-menu-icon a:hover {
+    border-bottom: 5px solid <%= fg %>;
+    color: <%= fg %>;
+  }
+
+  .sub-menu-icon .active {
+    border-bottom-color: <%= fg %>;
+  }
+
+  .sub-menu .active, .sub-menu .active:hover {
+    color: <%= fg %>;
+  }
+</style>
+
+<div class="row sub-menu">
+  <div class="col-md-12">
+    <div class="card card-default">
+      <div class="card-body" style="padding: 0 15px;">
+
+        <div class="row">
+          <%= component "sub_menu_icon",
+            name: "coverage",
+            label: "Coverage",
+            active: @active,
+            url: Routes.admin_tool_path(@conn, :coverage_form),
+            lib: %{
+              icon: "far fa-barcode-scan"
+            }
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "live_dashboard",
+            label: "Live dashboard",
+            active: @active,
+            url: "/admin/dashboard",
+            lib: %{
+              icon: "far fa-tachometer-alt"
+            }
+          %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

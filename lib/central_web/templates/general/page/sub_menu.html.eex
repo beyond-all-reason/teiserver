@@ -1,0 +1,45 @@
+<% {fg, _bg, bsname} = colours(@active) %>
+
+<style>
+  .sub-menu-icon a:hover {
+    border-bottom: 5px solid <%= fg %>;
+    color: <%= fg %>;
+  }
+
+  .sub-menu-icon .active {
+    border-bottom-color: <%= fg %>;
+  }
+
+  .sub-menu .active, .sub-menu .active:hover {
+    color: <%= fg %>;
+  }
+</style>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('#sub-menu-<%= @active %>').addClass('active');
+    if (!$('#sub-menu-<%= @active %> i').hasClass("fab")) {
+      $('#sub-menu-<%= @active %> i').addClass('fas');
+      $('#sub-menu-<%= @active %> i').removeClass('far');
+      $('#sub-menu-<%= @active %> i').removeClass('fal');
+    }
+  });
+</script>
+
+<div class="row sub-menu">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body" style="padding: 0 15px;" id="sub-menu-panel-body">
+
+        <div class="row">
+          <div class="col-6 col-sm-4 col-md-3 col-lg-2 col-xl-2 sub-menu-icon">
+            <a href="<%= Routes.user_config_path(@conn, :index) %>" class="block-link" id="sub-menu-user_configs">
+              <%= component "icon", icon: Central.Config.UserConfigLib.icon(), class: "fa-2x" %><br />
+              Preferences
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

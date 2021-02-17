@@ -1,0 +1,73 @@
+<div class="row" style="padding-top: 15vh;">
+  <div class="col-sm-10 col-sm-offset-1 col-md-6 offset-md-3 col-xl-4 offset-xl-4">
+
+    <div class="card card-default" style="background-color: transparent;">
+      <div class="card-header" style="background-color: transparent;">
+        <h3 class="card-title">
+          <img src='<%= Routes.static_path(@conn, "/images/logo/logo favicon.png") %>'
+          height="42" style="margin-right: 5px;" class="d-inline align-top"
+        />
+
+          Register account
+        </h3>
+      </div>
+      <div class="card-body">
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('#registration-form').submit(function(e){
+        var form = this;
+        e.preventDefault();
+        // Check Passwords are the same
+        if( $('#user_password').val()==$('#user_password_confirmation').val() ) {
+            // Submit Form
+            form.submit();
+        } else {
+            // Complain bitterly
+            alert('Your passwords do not match.');
+            return false;
+        }
+    });
+  });
+</script>
+
+<%= form_for @changeset, Routes.account_registration_path(@conn, :create), [id: "registration-form"], fn f -> %>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= label f, :name, class: "control-label" %>
+    <%= text_input f, :name, class: "form-control", required: "", autofocus: "autofocus" %>
+    <%= error_tag f, :name %>
+  </div>
+
+  <div class="form-group" style="display: nnone;">
+    <%= label f, :email, class: "control-label" %> (optional)
+    <%= text_input f, :email, class: "form-control" %>
+    <%= error_tag f, :email %>
+  </div>
+
+  <div class="form-group">
+    <%= label f, :password, class: "control-label" %>
+    <%= password_input f, :password, [class: "form-control"] %>
+    <%= error_tag f, :password %>
+  </div>
+
+  <div class="form-group">
+    <%= label f, :password_confirmation, class: "control-label" %>
+    <%= password_input f, :password_confirmation, [class: "form-control"] %>
+    <%= error_tag f, :password_confirmation %>
+  </div>
+
+  <div class="form-group">
+    <%= submit "Create account", class: "btn btn-primary float-right" %>
+  </div>
+<% end %>
+
+      </div>
+    </div>
+  </div>
+</div>

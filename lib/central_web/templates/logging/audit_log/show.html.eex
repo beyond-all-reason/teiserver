@@ -1,0 +1,99 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('logging');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+</script>
+
+<%= render CentralWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "audit"})
+%>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= render CentralWeb.Logging.AuditLogView, "section_menu.html",
+          conn: @conn,
+          show_search: false,
+          active: ""
+        %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row page-row">
+  <div class="col-lg-12 col-xl-6">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+
+<h2>Audit log #<%= @log.id %></h2>
+
+<%= component "detail_line",
+  label: "Action",
+  value: @log.action
+%>
+
+<%= component "detail_line",
+  label: "IP",
+  value: @log.ip
+%>
+
+<%= component "detail_line",
+  label: "Timestamp",
+  value: date_to_str(@log.inserted_at, :hms_or_dmy)
+%>
+
+<%= if @log.group_id do %>
+  <%= component "detail_line",
+    label: "Group",
+    icon: %{
+      colour: @log.group.colour,
+      icon: @log.group.icon,
+    },
+    value: @log.group.name
+    # link: %{
+    #   path: Routes.party_team_path(@conn, :show, @log.team_id),
+    #   bsname: elem(Central.Account.GroupLib.colours(), 2),
+    #   icon: Central.Account.GroupLib.icon(),
+    # }
+  %>
+<% else %>
+  <%= component "detail_line",
+    label: "Group",
+    value: "none"
+  %>
+<% end %>
+
+<%= if @log.group_id do %>
+  <%= component "detail_line",
+    label: "User",
+    icon: %{
+      colour: @log.user.colour,
+      icon: @log.user.icon,
+    },
+    value: @log.user.name,
+    link: %{
+      path: Routes.admin_user_path(@conn, :show, @log.user_id),
+      bsname: elem(Central.Account.UserLib.colours(), 2),
+      icon: Central.Account.UserLib.icon(),
+    }
+  %>
+<% else %>
+  <%= component "detail_line",
+    label: "User",
+    value: "none"
+  %>
+<% end %>
+
+<br /><br />
+
+<h4>Details</h4>
+<pre><%= Jason.encode!(@log.details, pretty: true) %></pre>
+
+      </div>
+    </div>
+  </div>
+</div>

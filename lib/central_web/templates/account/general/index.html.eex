@@ -1,0 +1,45 @@
+<% {fg, bg, _bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('account');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+</script>
+
+<div class="row page-row">
+  <%=
+    component "menu_card",
+    icon: Central.Account.GroupLib.index_icon(),
+    name: "groups",
+    text: "Groups",
+    link: Routes.account_group_path(@conn, :index)
+  %>
+  <%=
+    component "menu_card",
+    icon: "fad fa-cog",
+    name: "settings",
+    text: "Preferences",
+    link: Routes.user_config_path(@conn, :index)
+  %>
+
+  <%=
+    component "menu_card",
+    icon: Central.Account.icon(),
+    name: "account",
+    text: "Account details",
+    link: Routes.account_registration_path(@conn, :edit_details)
+  %>
+
+  <%=
+    component "menu_card",
+    icon: "fad fa-lock",
+    name: "password",
+    text: "Password",
+    link: Routes.account_registration_path(@conn, :edit_password)
+  %>
+</div>
+
+<div class="row page-row">
+  <%= component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.general_page_path(@conn, :index) %>
+</div>

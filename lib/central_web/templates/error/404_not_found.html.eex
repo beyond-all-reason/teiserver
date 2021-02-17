@@ -1,0 +1,62 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Central</title>
+    <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/bootstrap.min.css") %>'>
+    <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/shards.css") %>'>
+    <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/layout.css") %>'>
+    <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/styles.css") %>'>
+
+    <script>
+      window.userToken = "<%= assigns[:user_token] %>";
+    </script>
+
+    <script src='<%= Routes.static_path(@conn, "/js/jquery.min.js") %>'></script>
+    <script src='<%= Routes.static_path(@conn, "/js/popper.js") %>'></script>
+    <script src='<%= Routes.static_path(@conn, "/js/bootstrap.min.js") %>'></script>
+    <script src='<%= Routes.static_path(@conn, "/js/fontawesome.js") %>'></script>
+    <script src='<%= Routes.static_path(@conn, "/js/app.js") %>'></script>
+
+    <script type="text/javascript" charset="utf-8">
+      function sidebar_active (name) {}
+      function tint_page (fore_colour, back_colour) {}
+    </script>
+  </head>
+
+  <body class="blank">
+    <div class="color-line"></div>
+
+    <div id="container">
+      <div class="content animate-panel animated">
+
+<div class="row page-row">
+  <div class="col-md-10 offset-md-1">
+
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <a href="<%= Routes.general_page_path(@conn, :index) %>" class="btn btn-secondary float-right">
+          <i class="far fa-fw fa-home"></i>
+          Home page
+        </a>
+
+        This page does not exist.
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+      </div>
+    </div>
+
+  </body>
+</html>

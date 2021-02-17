@@ -1,0 +1,61 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('blog');
+    tint_page("<%= fg %>", "<%= bg %>");
+
+    var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+    $('#the_tabs a:first').tab('show');
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+  });
+</script>
+
+<%= render CentralWeb.Communication.GeneralView, "sub_menu.html", Map.put(assigns, :active, "comments") %>
+
+<div class="row page-row">
+  <div class="col-md-12">
+
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= render CentralWeb.Communication.CommentView, "section_menu.html",
+          conn: @conn,
+          permissions: @current_user.permissions,
+          show_search: true,
+          quick_search: "",
+          active: ""
+        %>
+
+        <hr />
+
+<div class="row page-row">
+  <div class="col-md-12">
+    <div class="float-right">
+      <%= link raw("<i class='far fa-fw fa-trash'></i> Delete"), to: Routes.blog_comment_path(@conn, :delete, @comment), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-outline" %>
+    </div>
+
+    <h4><%= @comment.poster.name %> in <%= @comment.post.title %></h4>
+
+    <br /><br />
+
+    <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+      <li>
+        <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
+          <i class="fa-fw <%= icon() %>"></i>
+          Details
+        </a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <div class="tab-pane" id="details_tab" style="padding:5px;">
+        <%= render "tab_details.html", assigns %>
+      </div>
+    </div>
+  </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+</div>

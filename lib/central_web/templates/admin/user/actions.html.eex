@@ -1,0 +1,32 @@
+<div class="dropdown-menu">
+  <%= if allow?(@current_user, "logging.page_view.show") do %>
+    <a class="dropdown-item" href='<%= Routes.logging_page_view_log_path(@conn, :index) %>?user_id=<%= @user.id %>'>
+      <%= component "icon", icon: Central.Logging.LoggingLib.icon() %>
+      <%= component "icon", icon: Central.Logging.PageViewLogLib.icon() %>
+      &nbsp;
+      Page view logs
+    </a>
+
+  <% end %>
+
+  <%= if allow?(@current_user, ~w(admin.user.show logging.page_view.show)) do %>
+    <%# TODO: Add overwatch %>
+    <a class="dropdown-item" href='<%#= overwatch_usage_path(@conn, :index) %>?user_id=<%= @user.id %>'>
+
+      &nbsp;
+      Overwatch
+    </a>
+  <% end %>
+
+<%= if allow?(@current_user, "admin.admin.full") do %>
+<div class="dropdown-divider"></div>
+
+  <a class="dropdown-item" href='<%= Routes.admin_user_path(@conn, :delete_check, @user) %>?user_id=<%= @user.id %>'>
+    <%= component "icon", icon: Central.Account.UserLib.icon() %>
+    <i class="far fa-fw fa-trash"></i>
+    &nbsp;
+    Check deletion
+  </a>
+<% end %>
+
+</div>

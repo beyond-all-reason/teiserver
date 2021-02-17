@@ -1,0 +1,41 @@
+<br />
+
+<%= component "detail_line",
+  label: "Email",
+  value: @user.email
+%>
+
+<%= component "detail_line",
+  label: "Created",
+  value: date_to_str(@user.inserted_at, :hms_dmy)
+%>
+
+<%= component "detail_line",
+  label: "Styling",
+  icon: %{
+    colour: @user.colour,
+    icon: @user.icon,
+  },
+  value: @user.colour
+%>
+
+<%= if @user.admin_group do %>
+  <%= component "detail_line",
+    label: "Admin group",
+    icon: %{
+      colour: @user.admin_group.colour,
+      icon: @user.admin_group.icon,
+    },
+    value: @user.admin_group.name,
+    link: %{
+      path: Routes.admin_group_path(@conn, :show, @user.admin_group),
+      bsname: elem(Central.Account.GroupLib.colours(), 2),
+      icon: Central.Account.GroupLib.icon(),
+    }
+  %>
+<% else %>
+  <%= component "detail_line",
+    label: "Admin group",
+    value: "None"
+  %>
+<% end %>

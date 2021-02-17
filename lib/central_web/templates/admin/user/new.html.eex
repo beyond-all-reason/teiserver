@@ -1,0 +1,32 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    sidebar_active('admin');
+    tint_page("<%= fg %>", "<%= bg %>");
+  });
+</script>
+
+<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "user"}) %>
+
+<div class="row page-row">
+  <div class="col-lg-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+
+        <%= render CentralWeb.Admin.UserView, "section_menu.html",
+          conn: @conn,
+          permissions: @current_user.permissions,
+          show_search: false,
+          quick_search: "",
+          active: "new"
+        %>
+
+        <hr />
+
+        <%= render "form.html", Map.put(assigns, :action, Routes.admin_user_path(@conn, :create)) %>
+
+      </div>
+    </div>
+  </div>
+</div>

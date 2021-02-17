@@ -1,0 +1,75 @@
+<% {fg, _bg, _bsname} = colours(@active) %>
+
+<style>
+  .sub-menu-icon a:hover {
+    border-bottom: 5px solid <%= fg %>;
+    color: <%= fg %>;
+  }
+
+  .sub-menu-icon .active {
+    border-bottom-color: <%= fg %>;
+  }
+
+  .sub-menu .active, .sub-menu .active:hover {
+    color: <%= fg %>;
+  }
+</style>
+
+<div class="row sub-menu">
+  <div class="col-md-12">
+    <div class="card card-default">
+      <div class="card-body" style="padding: 0 15px;">
+
+        <div class="row">
+          <%= component "sub_menu_icon",
+            name: "logging",
+            label: "Logging",
+            active: @active,
+            url: Routes.logging_general_path(@conn, :index),
+            lib: Central.Logging
+          %>
+
+          <%= if allow?(@current_user, "logging.page_view") do %>
+            <%= component "sub_menu_icon",
+              name: "page_view",
+              label: "Page view",
+              active: @active,
+              url: Routes.logging_page_view_log_path(@conn, :index),
+              lib: Central.Logging.PageViewLogLib
+            %>
+          <% end %>
+
+          <%= if allow?(@current_user, "logging.aggregate") do %>
+            <%= component "sub_menu_icon",
+              name: "aggregate",
+              label: "Aggregate",
+              active: @active,
+              url: Routes.logging_aggregate_view_log_path(@conn, :index),
+              lib: Central.Logging.AggregateViewLogLib
+            %>
+          <% end %>
+
+          <%= if allow?(@current_user, "logging.audit") do %>
+            <%= component "sub_menu_icon",
+              name: "audit",
+              label: "Audit",
+              active: @active,
+              url: Routes.logging_audit_log_path(@conn, :index),
+              lib: Central.Logging.AuditLogLib
+            %>
+          <% end %>
+
+          <%= component "sub_menu_icon",
+            name: "report",
+            label: "Reports",
+            active: @active,
+            url: Routes.logging_report_path(@conn, :index),
+            lib: Central.Helpers.StylingHelper.report_mod()
+          %>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,7 @@
+<%= if is_list(@icon) do %>
+  <%= for i <- @icon do %>
+    <i class="fa-fw <%= i %>"></i>
+  <% end %>
+<% else %>
+  <i class="fa-fw <%= @icon %> <%= assigns[:class] %>" style="<%= assigns[:style] %>"></i>
+<% end %>
