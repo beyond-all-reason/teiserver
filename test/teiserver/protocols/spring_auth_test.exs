@@ -278,6 +278,11 @@ ENDOFCHANNELS\n"
     _send(socket, "MYBATTLESTATUS 12 0\n")
     reply = _recv(socket)
     assert reply == "CLIENTBATTLESTATUS #{user.name} 0 0\n"
+    
+    # Add a bot
+    _send(socket, "ADDBOT STAI(1) 4195458 0 STAI\n")
+    reply = _recv(socket)
+    assert reply == "ADDBOT 1 STAI(1) #{user.name} 4195458 0 STAI\n"
 
     # Time to leave
     _send(socket, "LEAVEBATTLE\n")

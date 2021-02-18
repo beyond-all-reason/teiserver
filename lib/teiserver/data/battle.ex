@@ -3,6 +3,7 @@ defmodule Teiserver.Battle do
   alias Phoenix.PubSub
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Teiserver.User
 
   @default_tags %{
     "game/startpostype" => 2,
@@ -86,6 +87,7 @@ defmodule Teiserver.Battle do
         engine_name: "spring",
         spectators: [],
         players: [],
+        bots: %{},
         tags: @default_tags,
         start_rectangles: [
           [0, 0, 126, 74, 200],
@@ -114,6 +116,26 @@ defmodule Teiserver.Battle do
 
       {:ok, new_value}
     end)
+  end
+
+  def add_bot_to_battle(battle_id, owner_id, {name, battlestatus, team_colour, ai_dll}) do
+    bot = %{
+      name: name,
+      owner_id: owner_id,
+      owner_name: User.get_user_by_id(owner_id).name,
+      battlestatus: battlestatus,
+      team_colour: team_colour,
+      ai_dll: ai_dll
+    }
+    battle = get_battle(battle_id)
+    new_bots = Map.put(battle.bots, name, bot)
+    new_battle = %{battle | bots: new_bots}
+    ConCache.put(:battles, battle.id, new_battle)
+    PubSub.broadcast(
+      Central.PubSub,
+      "battle_updates:#{battle_id}",
+      {:add_bot_to_battle, battle_id, bot}
+    )
   end
 
   def add_user_to_battle(_, nil), do: nil
