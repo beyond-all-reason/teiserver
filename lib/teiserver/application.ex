@@ -29,6 +29,8 @@ defmodule Teiserver.Application do
   end
 
   def startup_sub_functions() do
+    Teiserver.Startup.startup()
+
     ConCache.put(:lists, :clients, [])
     ConCache.put(:lists, :rooms, [])
 

@@ -3,6 +3,7 @@
 // its own CSS file.
 import "phoenix_html"
 import {Socket} from "phoenix"
+import NProgress from "nprogress"
 import {LiveSocket, debug} from "phoenix_live_view"
 
 // Import local files
@@ -62,5 +63,10 @@ let liveSocket = new LiveSocket("/live", Socket, {
   }
 })
 
+window.addEventListener("phx:page-loading-start", info => NProgress.start())
+window.addEventListener("phx:page-loading-stop", info => NProgress.done())
+
+
 // let liveSocket = new LiveSocket("/live", Socket)
 liveSocket.connect()
+window.liveSocket = liveSocket

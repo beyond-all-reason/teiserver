@@ -14,7 +14,7 @@ defmodule Central.Account.User do
     field :icon, :string
     field :colour, :string
 
-    field :data, :map
+    field :data, :map, default: %{}
 
     field :permissions, {:array, :string}, default: []
 
@@ -53,6 +53,11 @@ defmodule Central.Account.User do
   def changeset(user, attrs, :limited) do
     user
     |> cast(attrs, [:name, :email, :icon, :colour])
+    |> validate_required([:name, :email, :icon, :colour])
+  end
+  def changeset(user, attrs, :limited_with_data) do
+    user
+    |> cast(attrs, [:name, :email, :icon, :colour, :data])
     |> validate_required([:name, :email, :icon, :colour])
   end
   def changeset(user, attrs, :user_form) do

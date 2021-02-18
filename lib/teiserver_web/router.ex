@@ -28,9 +28,19 @@ defmodule TeiserverWeb.Router do
 
       scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
         pipe_through [:browser, :admin_layout, :protected]
-
-        get "/", GeneralController, :index
+        resources "/user", UserController
       end
+
+      # scope "/teiserver", TeiserverWeb.AdminLive, as: :ts do
+      #   pipe_through [:browser, :admin_layout, :protected]
+
+      #   live "/admin", Index, :index
+      #   live "/admin/new", Index, :new
+      #   live "/admin/:id/edit", Index, :edit
+
+      #   live "/admin/:id", Show, :show
+      #   live "/admin/:id/show/edit", Show, :edit
+      # end
     end
 
   end

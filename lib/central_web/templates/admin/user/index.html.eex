@@ -2,11 +2,6 @@
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
-    sidebar_active('user');
-    sidebar_active('admin');
-
-    tint_page("<%= fg %>", "<%= bg %>");
-
     <%= if @conn.params["search"] != nil do %>
       show_search();
     <% end %>

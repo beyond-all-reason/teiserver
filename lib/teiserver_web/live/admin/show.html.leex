@@ -1,0 +1,45 @@
+<% {_fg, _bg, bsname} = @colours %>
+<h1>Show User</h1>
+
+<%= if @live_action in [:edit] do %>
+  <%= live_modal @socket, TeiserverWeb.AdminLive.FormComponent,
+    id: @user.id,
+    title: @page_title,
+    action: @live_action,
+    user: @user,
+    return_to: Routes.ts_admin_show_path(@socket, :show, @user) %>
+<% end %>
+
+<div class="row">
+  <div class="col-md-12"> 
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+
+
+<ul>
+
+  <li>
+    <strong>Name:</strong>
+    <%= @user.name %>
+  </li>
+
+  <li>
+    <strong>Email:</strong>
+    <%= @user.email %>
+  </li>
+
+  <li>
+    <strong>Rank:</strong>
+    <%= @user.data["rank"] %>
+  </li>
+
+</ul>
+
+<span><%= live_patch "Edit", to: Routes.ts_admin_show_path(@socket, :edit, @user), class: "btn btn-#{bsname}" %></span>
+<span><%= live_redirect "Back", to: Routes.ts_admin_index_path(@socket, :index), class: "btn btn-#{bsname}" %></span>
+
+
+      </div>
+    </div>
+  </div>
+</div>

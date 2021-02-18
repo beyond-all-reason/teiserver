@@ -28,11 +28,13 @@ defmodule CentralWeb.UserSocket do
   # end
 
   # Guests would fire this function
+  @impl true
   def connect(%{"token" => ""}, socket) do
     {:ok, socket}
   end
 
   # Accounts seeking to say they are someone use this
+  @impl true
   def connect(%{"token" => token}, socket) do
     case Guardian.resource_from_token(token) do
       {:error, _error} ->
@@ -43,6 +45,7 @@ defmodule CentralWeb.UserSocket do
     end
   end
 
+  @impl true
   def connect(_params, _socket) do
     :error
   end
@@ -57,5 +60,6 @@ defmodule CentralWeb.UserSocket do
   #     CentralWeb.Endpoint.broadcast("user_socket:#{user.id}", "disconnect", %{})
   #
   # Returning `nil` makes this socket anonymous.
+  @impl true
   def id(_socket), do: nil
 end

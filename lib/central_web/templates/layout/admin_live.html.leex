@@ -76,6 +76,7 @@
       }
     </style>
   </head>
+
   <body class="fixed-navbar fixed-sidebar">
     <nav class="navbar fixed-top navbar-expand-md mb-3" id="top-nav" style="padding-top: 0; padding-bottom: 0;">
 
@@ -121,6 +122,7 @@
     <div style="height: 47px;">&nbsp;</div>
     <div id="wrapper" class="toggled">
       <!-- Sidebar -->
+
       <div id="sidebar-wrapper">
         <%= render CentralWeb.General.PageView, "side_menu.html", Map.put(assigns, :conn, @socket) %>
       </div>
