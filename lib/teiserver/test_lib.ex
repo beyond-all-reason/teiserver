@@ -7,6 +7,7 @@ defmodule Teiserver.TestLib do
   @moduledoc false
   alias Teiserver.User
   alias Teiserver.Client
+  alias Teiserver.Account
   @host '127.0.0.1'
 
   def raw_setup() do
@@ -21,15 +22,13 @@ defmodule Teiserver.TestLib do
   def new_user() do
     name = new_user_name()
 
-    user =
-      User.create_user(%{
-        name: name,
-        email: "#{name}@email.com",
-        password_hash: "X03MO1qnZdYdgyfeuILPmQ=="
-      })
-      |> User.add_user()
-
+    {:ok, user} =
+      User.user_register_params(name, "#{name}@email.com", "password")
+      |> Account.create_user
+      
     user
+      |> User.convert_user
+      |> User.add_user
   end
 
   def auth_setup(user \\ nil) do
@@ -85,7 +84,7 @@ defmodule Teiserver.TestLib do
 
   def mock_state_auth(protocol, socket \\ nil) do
     socket = if socket, do: socket, else: mock_socket()
-    user = User.get_user_by_name("TestUser")
+    user = new_user()
     client = Client.login(user, self(), protocol)
 
     %{

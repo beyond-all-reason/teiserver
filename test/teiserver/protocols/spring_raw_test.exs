@@ -1,10 +1,11 @@
 defmodule Teiserver.SpringRawTest do
-  use Central.DataCase, async: true
+  use Central.ServerCase
 
   import Teiserver.TestLib,
     only: [raw_setup: 0, _send: 2, _recv: 1, new_user_name: 0, new_user: 0]
 
   alias Teiserver.User
+  alias Central.Account
 
   setup do
     %{socket: socket} = raw_setup()
@@ -20,18 +21,27 @@ defmodule Teiserver.SpringRawTest do
 
   test "REGISTER", %{socket: socket} do
     _ = _recv(socket)
+    existing = new_user()
+    name = "TestUser_#{:random.uniform(999_999_999)}"
 
     # Failure first
-    _send(socket, "REGISTER TestUser\tpassword\temail\n")
+    _send(socket, "REGISTER #{existing.name}\tpassword\temail\n")
     reply = _recv(socket)
     assert reply =~ "REGISTRATIONDENIED User already exists\n"
 
     # Success second
-    _send(socket, "REGISTER NewUser\tpassword\temail\n")
+    _send(socket, "REGISTER #{name}\tpassword\temail\n")
     reply = _recv(socket)
     assert reply =~ "REGISTRATIONACCEPTED\n"
-    user = User.get_user_by_name("NewUser")
+    user = User.get_user_by_name(name)
     assert user != nil
+
+    # Now check the DB!
+    [db_user] = Account.list_users(search: [name: name], joins: [:groups])
+    assert Enum.count(db_user.groups) == 1
+    
+    # Finally clean up
+    
   end
 
   test "LOGIN", %{socket: socket} do
@@ -41,7 +51,7 @@ defmodule Teiserver.SpringRawTest do
     reply = _recv(socket)
     assert reply == "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
 
-    _send(socket, "REGISTER #{username}\tpassword\temail\n")
+    _send(socket, "REGISTER #{username}\tpassword\t#{username}@email\n")
     _ = _recv(socket)
 
     _send(
@@ -103,11 +113,11 @@ defmodule Teiserver.SpringRawTest do
     )
 
     assert user.password_reset_code == nil
-    new_user = User.get_user_by_id(user.id)
-    assert new_user.password_reset_code != nil
+    user2 = User.get_user_by_id(user.id)
+    assert user2.password_reset_code != nil
     reply = _recv(socket)
     assert reply =~ "RESETPASSWORDREQUESTACCEPTED\n"
-    user = new_user
+    user = user2
 
     # Now verify badly
     _send(
@@ -117,8 +127,8 @@ defmodule Teiserver.SpringRawTest do
 
     reply = _recv(socket)
     assert reply =~ "RESETPASSWORDDENIED wrong_code\n"
-    new_user = User.get_user_by_id(user.id)
-    assert new_user.password_hash == user.password_hash
+    user2 = User.get_user_by_id(user.id)
+    assert user2.password_hash == user.password_hash
 
     # Now verify correctly
     _send(
@@ -128,8 +138,8 @@ defmodule Teiserver.SpringRawTest do
 
     reply = _recv(socket)
     assert reply == "RESETPASSWORDACCEPTED\n"
-    new_user = User.get_user_by_id(user.id)
-    assert new_user.password_hash != user.password_hash
-    assert new_user.password_reset_code == nil
+    user2 = User.get_user_by_id(user.id)
+    assert user2.password_hash != user.password_hash
+    assert user2.password_reset_code == nil
   end
 end

@@ -7,6 +7,39 @@ defmodule Teiserver.Startup do
 
     add_group_type("Bar team", %{fields: []})
 
+    umbrella_id = case Central.Account.get_group(nil, search: [name: "BAR umbrella group"]) do
+      nil ->
+        {:ok, group} = Central.Account.create_group(%{
+          "name" => "BAR umbrella group",
+          "active" => true,
+          "icon" => "fas fa-umbrella",
+          "colour" => "#00AA66",
+          "data" => %{}
+        })
+        group.id
+      group ->
+        group.id
+
+    end
+
+    group_id = case Central.Account.get_group(nil, search: [name: "BAR Users"]) do
+      nil ->
+        {:ok, group} = Central.Account.create_group(%{
+          "name" => "BAR Users",
+          "active" => true,
+          "icon" => "fas fa-robot",
+          "colour" => "#000000",
+          "data" => %{},
+          "super_group_id" => umbrella_id
+        })
+        group.id
+      group ->
+        group.id
+    end
+
+    ConCache.put(:application_metadata_cache, "bar_umbrella_group", umbrella_id)
+    ConCache.put(:application_metadata_cache, "bar_user_group", group_id)
+
     # QuickAction.add_items([
     #   %{label: "Battles", icons: [Teiserver.BattleLib.icon(), :list], input: "s", method: "get", placeholder: "Search battle name", url: "/teiserver/battle", permissions: "teiserver"},
     # ])

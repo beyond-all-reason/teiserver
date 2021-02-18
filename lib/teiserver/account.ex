@@ -108,4 +108,8 @@ defmodule Teiserver.Account do
   def change_user(%User{} = user) do
     User.changeset(user, %{})
   end
+  
+  # Group stuff
+  def create_group_membership(params),
+    do: Central.Account.create_group_membership(params)
 end

@@ -16,7 +16,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # CONFIRMAGREEMENT - Waiting to hear from Beherith on how he wants it to work
   # RESENDVERIFICATION - See above
 
-  # Handled by SPADS (I think)
+  # Battle management
   # HANDICAP
   # KICKFROMBATTLE
   # FORECTEAMNO
@@ -32,7 +32,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # SETSCRIPTTAGS
   # REMOVESCRIPTTAGS
   # LISTCOMPFLAGS
-  # PROMOTE
 
   @motd """
   Message of the day
@@ -169,13 +168,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       [_, username, plain_password, email] ->
         case User.get_user_by_name(username) do
           nil ->
-            User.create_user(%{
-              name: User.clean_name(username),
-              password_hash: User.encrypt_password(plain_password),
-              email: email
-            })
-            |> User.add_user()
-
+            User.register_user(username, email, plain_password)
             reply(:registration_accepted, state)
 
           _ ->
@@ -508,6 +501,12 @@ defmodule Teiserver.Protocols.SpringProtocol do
         _send("JOINBATTLEFAILED #{reason}\n", state)
         state
     end
+  end
+
+  defp do_handle("PROMOTE", _, %{client: %{battle_id: nil}} = state), do: state
+  defp do_handle("PROMOTE", _, state) do
+    Logger.debug("PROMOTE is not handled at this time as Chobby has no way to handle it - TODO")
+    state
   end
 
   # ADDBOT STAI(1) 4195458 0 STAI

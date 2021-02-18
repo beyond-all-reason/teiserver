@@ -1,16 +1,34 @@
 defmodule Teiserver.User do
   @moduledoc """
-  Structure:
-    id: integer
-    name: string
+  Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their exepected use case is very different.
   """
 
   @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulance cats dogs mice oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave)
+
+  @keys [:id, :name, :email]
+  @data_keys [:rank, :country, :lobbyid, :moderator, :bot, :friends, :friend_requests, :ignored, :verification_code, :verified, :password_reset_code, :email_change_code, :password_hash]
+
+  @default_data %{
+    "rank" => 1,
+    "country" => "XX",
+    "lobbyid" => "LuaLobby Chobby",
+    "moderator" => false,
+    "bot" => false,
+    "friends" => [],
+    "friend_requests" => [],
+    "ignored" => [],
+    "password_hash" => nil,
+    "verification_code" => nil,
+    "verified" => false,
+    "password_reset_code" => nil,
+    "email_change_code" => nil,
+  }
 
   require Logger
   alias Phoenix.PubSub
   import Teiserver.NumberHelper, only: [int_parse: 1]
   alias Teiserver.EmailHelper
+  alias Teiserver.Account
 
   defp next_id() do
     ConCache.isolated(:id_counters, :user, fn ->
@@ -31,6 +49,55 @@ defmodule Teiserver.User do
     |> Regex.replace(name, "")
   end
 
+  def bar_user_group_id() do
+    ConCache.get(:application_metadata_cache, "bar_user_group")
+  end
+  
+  def user_register_params(name, email, plain_password) do
+    name = clean_name(name)
+    password_hash = encrypt_password(plain_password)
+    verification_code = :random.uniform(899_999) + 100_000
+    %{
+      name: name,
+      email: email,
+      password: "#{:random.uniform(999_999_999_999_999_999)}",
+      colour: "#AA0000",
+      icon: "fas fa-user",
+      admin_group_id: bar_user_group_id(),
+      permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
+      data: Map.merge(@default_data, %{
+        "password_hash" => password_hash,
+        "verification_code" => verification_code
+      })
+    }
+  end
+
+  def register_user(name, email, plain_password) do
+    params = user_register_params(name, email, plain_password)
+    case Account.create_user(params) do
+      {:ok, user} ->
+        Account.create_group_membership(%{
+          user_id: user.id,
+          group_id: bar_user_group_id()
+        })
+
+        # Now add them to the cache
+        user
+        |> convert_user
+        |> add_user
+
+        # EmailHelper.send_email(to, subject, body)
+        Logger.debug("TODO: Verification email should be sent here with code #{user.data["verification_code"]}")
+        user
+      
+      {:error, changeset} ->
+        Logger.error("Unable to create user with params #{Kernel.inspect params}\n#{Kernel.inspect changeset}")
+    end
+  end
+
+  # TODO
+  # Used to be used to create new users pre persistent storage,
+  # can probably be removed
   def create_user(user) do
     Map.merge(
       %{
@@ -92,9 +159,6 @@ defmodule Teiserver.User do
   end
 
   def add_user(user) do
-    verification_code = :random.uniform(899_999) + 100_000
-    user = %{user | verification_code: "#{verification_code}"}
-
     update_user(user)
     ConCache.put(:users_lookup_name_with_id, user.id, user.name)
     ConCache.put(:users_lookup_id_with_name, user.name, user.id)
@@ -107,9 +171,6 @@ defmodule Teiserver.User do
 
       {:ok, new_value}
     end)
-
-    # EmailHelper.send_email(to, subject, body)
-    Logger.debug("TODO: Verification email should be sent here with code #{verification_code}")
     user
   end
 
@@ -382,5 +443,29 @@ defmodule Teiserver.User do
     proto.reply(:motd, state)
 
     {:ok, user}
+  end
+
+  def convert_user(user) do
+    data = @data_keys
+    |> Map.new(fn k -> {k, Map.get(user.data, to_string(k), nil)} end)
+
+    user
+    |> Map.take(@keys)
+    |> Map.merge(@default_data)
+    |> Map.merge(data)
+  end
+
+  def pre_cache_users() do
+    group_id = bar_user_group_id()
+    ConCache.insert_new(:lists, :users, [])
+
+    Account.list_users(search: [
+      admin_group: group_id
+    ])
+    |> Parallel.map(fn user ->
+      user
+      |> convert_user
+      |> add_user
+    end)
   end
 end

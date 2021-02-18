@@ -78,6 +78,7 @@ defmodule Teiserver.Battle do
     Map.merge(
       %{
         id: next_id(),
+        founder: nil,
         type: :normal,
         nattype: :none,
         max_players: 16,
@@ -140,20 +141,21 @@ defmodule Teiserver.Battle do
 
   def add_user_to_battle(_, nil), do: nil
 
-  def add_user_to_battle(new_username, battle_id) do
+  def add_user_to_battle(username, battle_id) do
+    userid = User.get_userid(username)
     ConCache.update(:battles, battle_id, fn battle_state ->
       new_state =
-        if Enum.member?(battle_state.players, new_username) do
+        if Enum.member?(battle_state.players, userid) do
           # No change takes place, they're already in the battle!
           battle_state
         else
           PubSub.broadcast(
             Central.PubSub,
             "battle_updates:#{battle_id}",
-            {:add_user_to_battle, battle_id, new_username}
+            {:add_user_to_battle, battle_id, userid}
           )
 
-          new_players = battle_state.players ++ [new_username]
+          new_players = battle_state.players ++ [userid]
           Map.put(battle_state, :players, new_players)
         end
 
@@ -164,19 +166,20 @@ defmodule Teiserver.Battle do
   def remove_user_from_battle(_, nil), do: nil
 
   def remove_user_from_battle(username, battle_id) do
+    userid = User.get_userid(username)
     ConCache.update(:battles, battle_id, fn battle_state ->
       new_state =
-        if not Enum.member?(battle_state.players, username) do
+        if not Enum.member?(battle_state.players, userid) do
           # No change takes place, they've already left the battle
           battle_state
         else
           PubSub.broadcast(
             Central.PubSub,
             "battle_updates:#{battle_id}",
-            {:remove_user_from_battle, username, battle_id}
+            {:remove_user_from_battle, userid, battle_id}
           )
 
-          new_players = Enum.filter(battle_state.players, fn m -> m != username end)
+          new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
           Map.put(battle_state, :players, new_players)
         end
 
