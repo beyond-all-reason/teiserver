@@ -1,5 +1,5 @@
 defmodule Teiserver.SpringAuthTest do
-  use ExUnit.Case, async: true
+  use Central.DataCase, async: true
   require Logger
   alias Teiserver.BitParse
   alias Teiserver.User
@@ -41,10 +41,8 @@ SERVERMSG Ingame time: xyz hours\n"
     # stuff we can't set. We should be rank 1, not a bot but are a mod
     _send(socket, "MYSTATUS 127\n")
     reply = _recv(socket)
-    [p1, p2] = String.split(reply, "\t")
-    assert p1 == "CLIENTSTATUS #{user.name}"
-    assert p2 == "100\n"
-    reply_bits = BitParse.parse_bits(String.trim(p2), 7)
+    assert reply =~ "CLIENTSTATUS #{user.name}\t100\n"
+    reply_bits = BitParse.parse_bits("100", 7)
 
     # Lets make sure it's coming back the way we expect
     # [in_game, away, r1, r2, r3, mod, bot]

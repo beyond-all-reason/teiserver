@@ -39,9 +39,9 @@ defmodule Teiserver.TcpServer do
 
     @default_protocol.welcome(socket, transport)
 
-    :ok = PubSub.subscribe(Teiserver.PubSub, "battle_updates")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "client_updates")
-    :ok = PubSub.subscribe(Teiserver.PubSub, "user_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "client_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "user_updates")
 
     :gen_server.enter_loop(__MODULE__, [], %{
       userid: nil,

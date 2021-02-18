@@ -92,6 +92,7 @@ defmodule CentralWeb do
       use Phoenix.LiveView,
         layout: {CentralWeb.LayoutView, "admin_live.html"}
 
+      use Breadcrumble
       alias Central.Account.AuthPlug
       alias Central.Communication.NotificationPlug
 

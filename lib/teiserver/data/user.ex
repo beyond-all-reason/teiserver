@@ -74,6 +74,11 @@ defmodule Teiserver.User do
     ConCache.get(:users, id)
   end
 
+  def get_users(id_list) do
+    id_list
+    |> Enum.map(fn userid -> ConCache.get(:users, userid) end)
+  end
+
   def rename_user(user, new_name) do
     old_name = user.name
     new_name = clean_name(new_name)
@@ -168,13 +173,13 @@ defmodule Teiserver.User do
 
       # Now push out the updates
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Central.PubSub,
         "user_updates:#{requester_name}",
         {:this_user_updated, [:friends]}
       )
 
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Central.PubSub,
         "user_updates:#{accepter_name}",
         {:this_user_updated, [:friends, :friend_requests]}
       )
@@ -199,7 +204,7 @@ defmodule Teiserver.User do
 
       # Now push out the updates
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Central.PubSub,
         "user_updates:#{decliner_name}",
         {:this_user_updated, [:friend_requests]}
       )
@@ -224,7 +229,7 @@ defmodule Teiserver.User do
 
       # Now push out the updates
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Central.PubSub,
         "user_updates:#{potential_name}",
         {:this_user_updated, [:friend_requests]}
       )
@@ -249,7 +254,7 @@ defmodule Teiserver.User do
 
       # Now push out the updates
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Central.PubSub,
         "user_updates:#{ignorer_name}",
         {:this_user_updated, [:ignored]}
       )
@@ -274,7 +279,7 @@ defmodule Teiserver.User do
 
       # Now push out the updates
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Central.PubSub,
         "user_updates:#{unignorer_name}",
         {:this_user_updated, [:ignored]}
       )
@@ -307,13 +312,13 @@ defmodule Teiserver.User do
 
       # Now push out the updates
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Central.PubSub,
         "user_updates:#{remover_name}",
         {:this_user_updated, [:friends]}
       )
 
       PubSub.broadcast(
-        Teiserver.PubSub,
+        Central.PubSub,
         "user_updates:#{removed_name}",
         {:this_user_updated, [:friends]}
       )
@@ -326,7 +331,7 @@ defmodule Teiserver.User do
 
   def send_direct_message(from_name, to_name, msg) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Central.PubSub,
       "user_updates:#{to_name}",
       {:direct_message, from_name, msg}
     )
@@ -338,7 +343,7 @@ defmodule Teiserver.User do
   end
 
   def ring(ringee, ringer) do
-    PubSub.broadcast(Teiserver.PubSub, "user_updates:#{ringee}", {:ring, ringer})
+    PubSub.broadcast(Central.PubSub, "user_updates:#{ringee}", {:ring, ringer})
   end
 
   def encrypt_password(password) do

@@ -3,7 +3,7 @@ defmodule Teiserver.SpringHandleTest do
   These are tests just to ensure no errors are thrown. If you want to 
   check the results coming back ensure you look at the auth and raw tests.
   """
-  use ExUnit.Case, async: true
+  use Central.DataCase, async: true
   alias Teiserver.TestLib
   alias Teiserver.Protocols.SpringProtocol
 

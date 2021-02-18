@@ -1,11 +1,45 @@
-<h1>Show Battle</h1>
+<% {_fg, _bg, bsname} = @colours %>
+
+<div class="row">
+  <div class="col-md-12"> 
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+
+<h2><%= @battle.name %> - <%= @battle.map_name %></h2>
 
 <ul>
-
-  <li>
-    <strong>Name:</strong>
-    <%= @battle.title %>
-  </li>
+  <li>Max players: <%= @battle.max_players %></li>
+  <li>Passwored: <%= @battle.passworded %></li>
+  <li>Locked: <%= @battle.locked %></li>
 </ul>
 
-<span><%= live_redirect "Back", to: Routes.ts_battle_index_path(@socket, :index) %></span>
+<h4>Players</h4>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Stuff</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for p <- @battle.players do %>
+      <%
+        user = @users[p]
+        client = @clients[p]
+      %>
+      <tr>
+        <td><%= user.name %></td>
+        <td><%= client.battlestatus %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<span>
+  <%= live_redirect "Back", to: Routes.ts_battle_index_path(@socket, :index), class: "btn btn-#{bsname}" %>
+</span>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,5 +1,5 @@
 defmodule Teiserver.TcpServerTest do
-  use ExUnit.Case, async: true
+  use Central.DataCase, async: true
   import Teiserver.TestLib, only: [raw_setup: 0, _send: 2, _recv: 1, new_user_name: 0]
 
   setup do

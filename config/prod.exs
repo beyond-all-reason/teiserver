@@ -16,10 +16,6 @@ config :central, CentralWeb.Endpoint,
     port: 8888,
     otp_app: :central,
 
-    # keyfile: "/etc/letsencrypt/live/tjsoftware.co.uk/privkey.pem",
-    # certfile: "/etc/letsencrypt/live/tjsoftware.co.uk/cert.pem",
-    # cacertfile: "/etc/letsencrypt/live/tjsoftware.co.uk/chain.pem",
-
     keyfile: "/var/www/tls/privkey.pem",
     certfile: "/var/www/tls/cert.pem",
     cacertfile: "/var/www/tls/fullchain.pem",

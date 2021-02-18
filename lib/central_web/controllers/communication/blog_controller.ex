@@ -8,7 +8,7 @@ defmodule CentralWeb.Communication.BlogController do
 
   plug :add_breadcrumb, name: 'Blog', url: '/blog'
 
-  plug :put_layout, "tjsoftware.html"
+  plug :put_layout, "blank.html"
 
   def index(conn, _params) do
     categories = Communication.list_categories(

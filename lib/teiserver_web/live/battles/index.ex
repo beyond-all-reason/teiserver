@@ -9,7 +9,11 @@ defmodule TeiserverWeb.BattleLive.Index do
     socket = socket
     |> AuthPlug.live_call(session)
     |> NotificationPlug.live_call
-    
+    |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
+    |> add_breadcrumb(name: "Battles", url: "/teiserver/battles")
+    |> assign(:sidemenu_active, "teiserver")
+    |> assign(:colours, Central.Helpers.StylingHelper.colours(:primary2))
+
     {:ok, assign(socket, :battles, list_battles())}
   end
 

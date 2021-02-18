@@ -154,7 +154,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           reply(:battle_players, b, state)
         end)
 
-        :ok = PubSub.subscribe(Teiserver.PubSub, "user_updates:#{user.name}")
+        :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.name}")
         _send("LOGININFOEND\n", state)
         %{state | client: client, user: user, name: user.name, userid: user.id}
 
@@ -397,7 +397,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         members = Enum.join(room.members ++ [state.name], " ")
         _send("CLIENTS #{room_name} #{members}\n", state)
 
-        :ok = PubSub.subscribe(Teiserver.PubSub, "room:#{room_name}")
+        :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
 
       [_, room_name, _key] ->
         _send("JOINFAILED #{room_name} Locked\n", state)
@@ -410,7 +410,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("LEAVE", room_name, state) do
-    PubSub.unsubscribe(Teiserver.PubSub, "room:#{room_name}")
+    PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
     _send("LEFT #{room_name} #{state.name}\n", state)
     Room.remove_user_from_room(state.name, room_name)
     state
@@ -470,7 +470,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
       {:accepted, battle} ->
         Logger.debug("[command:joinbattle] success")
-        PubSub.subscribe(Teiserver.PubSub, "battle_updates:#{battle.id}")
+        PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
         Battle.add_user_to_battle(state.name, battle.id)
         reply(:join_battle, battle, state)
         reply(:battle_settings, battle, state)
@@ -521,7 +521,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("LEAVEBATTLE", _, %{client: %{battle_id: nil}} = state), do: state
 
   defp do_handle("LEAVEBATTLE", _, state) do
-    PubSub.unsubscribe(Teiserver.PubSub, "battle_updates:#{state.client.battle_id}")
+    PubSub.unsubscribe(Central.PubSub, "battle_updates:#{state.client.battle_id}")
     reply(:remove_user_from_battle, {state.name, state.client.battle_id}, state)
     new_client = Client.leave_battle(state.userid)
     %{state | client: new_client}
@@ -715,7 +715,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       battle.max_players
     } #{passworded} #{battle.rank} #{battle.map_hash} #{battle.engine_name}\t#{
       battle.engine_version
-    }\t#{battle.map_name}\t#{battle.title}\t#{battle.game_name}\ttest-15386-5c98cfa\n"
+    }\t#{battle.map_name}\t#{battle.name}\t#{battle.game_name}\ttest-15386-5c98cfa\n"
   end
 
   defp do_reply(:update_battle, battle) do

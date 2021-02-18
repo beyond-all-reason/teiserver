@@ -43,7 +43,7 @@ defmodule Teiserver.Room do
           room_state
         else
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Central.PubSub,
             "room:#{room_name}",
             {:add_user_to_room, new_username, room_name}
           )
@@ -64,7 +64,7 @@ defmodule Teiserver.Room do
           room_state
         else
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Central.PubSub,
             "room:#{room_name}",
             {:remove_user_from_room, username, room_name}
           )
@@ -104,7 +104,7 @@ defmodule Teiserver.Room do
       room ->
         if from in room.members do
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Central.PubSub,
             "room:#{room_name}",
             {:new_message, from, room_name, msg}
           )

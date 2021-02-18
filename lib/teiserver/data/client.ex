@@ -47,7 +47,7 @@ defmodule Teiserver.Client do
       |> calculate_status
       |> add_client
 
-    PubSub.broadcast(Teiserver.PubSub, "client_updates", {:logged_in_client, user.id, user.name})
+    PubSub.broadcast(Central.PubSub, "client_updates", {:logged_in_client, user.id, user.name})
     client
   end
 
@@ -123,7 +123,7 @@ defmodule Teiserver.Client do
       |> calculate_battlestatus
       |> add_client
 
-    PubSub.broadcast(Teiserver.PubSub, "client_updates", {:updated_client, client, reason})
+    PubSub.broadcast(Central.PubSub, "client_updates", {:updated_client, client, reason})
     client
   end
 
@@ -131,7 +131,7 @@ defmodule Teiserver.Client do
     username = User.get_username(userid)
 
     :ok =
-      PubSub.broadcast(Teiserver.PubSub, "client_updates", {:new_battlestatus, username, 0, 0})
+      PubSub.broadcast(Central.PubSub, "client_updates", {:new_battlestatus, username, 0, 0})
 
     client = get_client(userid)
 
@@ -150,6 +150,11 @@ defmodule Teiserver.Client do
 
   def get_client(userid) do
     ConCache.get(:clients, userid)
+  end
+
+  def get_clients(id_list) do
+    id_list
+    |> Enum.map(fn userid -> ConCache.get(:clients, userid) end)
   end
 
   def add_client(client) do

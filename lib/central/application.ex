@@ -6,7 +6,6 @@ defmodule Central.Application do
   use Application
   require Logger
 
-  @impl true
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
@@ -44,11 +43,7 @@ defmodule Central.Application do
     opts = [strategy: :one_for_one, name: Central.Supervisor]
     start_result = Supervisor.start_link(children, opts)
 
-    Logger.warn("pre sub")
-
     startup_sub_functions()
-    
-    Logger.warn("post sub")
 
     start_result
   end

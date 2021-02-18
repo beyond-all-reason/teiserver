@@ -1,18 +1,23 @@
-<h1>Battle list</h1>
+<% {_fg, _bg, bsname} = @colours %>
 
-<%= if @live_action in [:new, :edit] do %>
-  <%= live_modal @socket, TeiserverWeb.UserLive.FormComponent,
-    id: @battle.id || :new,
-    title: @page_title,
-    action: @live_action,
-    battle: @battle,
-    return_to: Routes.battle_index_path(@socket, :index) %>
-<% end %>
+<div class="row">
+  <div class="col-md-12"> 
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
 
-<table>
+        <h4>
+          <%= if Enum.count(@battles) > 0 do %>
+            Battles - Row count: <%= Enum.count(@battles) %>
+          <% else %>
+            No battles found
+          <% end %>
+        </h4>
+
+<table class="table table-sm">
   <thead>
     <tr>
       <th>Name</th>
+      <th>Player count</th>
 
       <th></th>
     </tr>
@@ -20,12 +25,21 @@
   <tbody id="battles">
     <%= for battle <- @battles do %>
       <tr id="battle-<%= battle.id %>">
-        <td><%= battle.title %></td>
+        <td><%= battle.name %></td>
+        <td><%= Enum.count(battle.players) %></td>
 
         <td>
-          <span><%= live_redirect "Show", to: Routes.ts_battle_show_path(@socket, :show, battle.id) %></span>
+          <span>
+            <%= live_redirect "Show", to: Routes.ts_battle_show_path(@socket, :show, battle.id), class: "btn btn-sm btn-#{bsname}" %>
+          </span>
         </td>
       </tr>
     <% end %>
   </tbody>
 </table>
+
+
+      </div>
+    </div>
+  </div>
+</div>

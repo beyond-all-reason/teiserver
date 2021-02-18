@@ -140,20 +140,6 @@ defmodule Teiserver.TestData do
         status: 16,
         userid: 2
       }
-      # %{
-      #   pid: nil,
-      #   name: "Chon",
-      #   protocol: Teiserver.Protocols.Spring,
-      #   in_game: false,
-      #   away: false,
-      #   rank: 1,
-      #   moderator: false,
-      #   bot: true,
-      #   battlestatus: 0,
-      #   team_colour: 0,
-      #   battle_id: nil,
-      #   status: 16
-      # }
     ]
     |> Enum.map(&Client.create/1)
     |> Enum.map(&Client.add_client/1)
@@ -178,7 +164,7 @@ defmodule Teiserver.TestData do
         engine_name: "spring",
         engine_version: "104.0.1-1714-g321b911",
         map_name: "Supreme_Crossing_V1",
-        title: "USA -- 04",
+        name: "USA -- 04",
         game_name: "Beyond All Reason test-15367-6bfafcb",
         players: [2]
       },
@@ -197,7 +183,7 @@ defmodule Teiserver.TestData do
         engine_name: "spring",
         engine_version: "104.0.1-1714-g321b911",
         map_name: "Quicksilver Remake 1.24",
-        title: "USA -- 03",
+        name: "USA -- 03",
         game_name: "Beyond All Reason test-15367-6bfafcb",
         players: [2]
       }

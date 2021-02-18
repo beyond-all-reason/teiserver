@@ -73,7 +73,7 @@ defmodule Teiserver.Battle do
 
   def create_battle(battle) do
     # Needs to be supplied a map with:
-    # founder, ip, port, engine_version, map_hash, map_name, title, game_name, hash_code
+    # founder, ip, port, engine_version, map_hash, map_name, name, game_name, hash_code
     Map.merge(
       %{
         id: next_id(),
@@ -126,7 +126,7 @@ defmodule Teiserver.Battle do
           battle_state
         else
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Central.PubSub,
             "battle_updates:#{battle_id}",
             {:add_user_to_battle, battle_id, new_username}
           )
@@ -149,7 +149,7 @@ defmodule Teiserver.Battle do
           battle_state
         else
           PubSub.broadcast(
-            Teiserver.PubSub,
+            Central.PubSub,
             "battle_updates:#{battle_id}",
             {:remove_user_from_battle, username, battle_id}
           )
@@ -164,7 +164,7 @@ defmodule Teiserver.Battle do
 
   def say(username, msg, battle_id) do
     PubSub.broadcast(
-      Teiserver.PubSub,
+      Central.PubSub,
       "battle_updates:#{battle_id}",
       {:battle_message, username, msg, battle_id}
     )

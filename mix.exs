@@ -58,6 +58,7 @@ defmodule Central.MixProject do
       {:guardian, "~> 2.1"},
       {:argon2_elixir, "~> 2.3"},
       {:bodyguard, "~> 2.4"},
+      {:human_time, "~> 0.2.4"},
       {:oban, "~> 2.3.4"},
 
       {:ranch, "~> 1.4"},

@@ -1,7 +1,7 @@
 <div class="row page-row">
   <%=
     component "menu_card",
-    icon: "fas fa-square",
+    icon: "fas fa-swords",
     name: "battles",
     text: "Battles",
     link: Routes.ts_battle_index_path(@conn, :index)
@@ -12,17 +12,15 @@
     icon: "fas fa-user",
     name: "account",
     text: "Account",
-    # link: Routes.ts_account_general_path(@conn, :index)
-    link: ""
+    link: Routes.ts_account_general_path(@conn, :index)
   %>
 
   <%=
     component "menu_card",
-    icon: "fas fa-square",
+    icon: "fas fa-power-off",
     name: "admin",
     text: "Admin",
-    # link: Routes.ts_admin_general_path(@conn, :index)
-    link: ""
+    link: Routes.ts_admin_general_path(@conn, :index)
   %>
 </div>
 
