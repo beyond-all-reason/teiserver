@@ -141,8 +141,7 @@ defmodule Teiserver.Battle do
 
   def add_user_to_battle(_, nil), do: nil
 
-  def add_user_to_battle(username, battle_id) do
-    userid = User.get_userid(username)
+  def add_user_to_battle(userid, battle_id) do
     ConCache.update(:battles, battle_id, fn battle_state ->
       new_state =
         if Enum.member?(battle_state.players, userid) do
@@ -152,7 +151,7 @@ defmodule Teiserver.Battle do
           PubSub.broadcast(
             Central.PubSub,
             "battle_updates:#{battle_id}",
-            {:add_user_to_battle, battle_id, userid}
+            {:add_user_to_battle, userid, battle_id}
           )
 
           new_players = battle_state.players ++ [userid]
@@ -165,8 +164,7 @@ defmodule Teiserver.Battle do
 
   def remove_user_from_battle(_, nil), do: nil
 
-  def remove_user_from_battle(username, battle_id) do
-    userid = User.get_userid(username)
+  def remove_user_from_battle(userid, battle_id) do
     ConCache.update(:battles, battle_id, fn battle_state ->
       new_state =
         if not Enum.member?(battle_state.players, userid) do
@@ -187,11 +185,11 @@ defmodule Teiserver.Battle do
     end)
   end
 
-  def say(username, msg, battle_id) do
+  def say(userid, msg, battle_id) do
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
-      {:battle_message, username, msg, battle_id}
+      {:battle_message, userid, msg, battle_id}
     )
   end
 

@@ -27,7 +27,7 @@ defmodule Central.ServerCase do
     end
   end
 
-  setup tags do
+  setup _tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Central.Repo)
     Ecto.Adapters.SQL.Sandbox.mode(Central.Repo, {:shared, self()})
 

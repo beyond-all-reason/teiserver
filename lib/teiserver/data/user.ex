@@ -57,6 +57,7 @@ defmodule Teiserver.User do
     name = clean_name(name)
     password_hash = encrypt_password(plain_password)
     verification_code = :random.uniform(899_999) + 100_000
+
     %{
       name: name,
       email: email,
@@ -138,7 +139,7 @@ defmodule Teiserver.User do
   end
 
   def get_user_by_id(id) do
-    ConCache.get(:users, id)
+    ConCache.get(:users, int_parse(id))
   end
 
   def get_users(id_list) do
@@ -211,22 +212,22 @@ defmodule Teiserver.User do
     update_user(%{user | email: new_email, email_change_code: [nil, nil]})
   end
 
-  def accept_friend_request(requester_name, accepter_name) do
-    accepter = get_user_by_name(accepter_name)
+  def accept_friend_request(requester_id, accepter_id) do
+    accepter = get_user_by_id(accepter_id)
 
-    if requester_name in accepter.friend_requests do
-      requester = get_user_by_name(requester_name)
+    if requester_id in accepter.friend_requests do
+      requester = get_user_by_id(requester_id)
 
       # Add to friends, remove from requests
       new_accepter =
         Map.merge(accepter, %{
-          friends: accepter.friends ++ [requester_name],
-          friend_requests: Enum.filter(accepter.friend_requests, fn f -> f != requester_name end)
+          friends: accepter.friends ++ [requester_id],
+          friend_requests: Enum.filter(accepter.friend_requests, fn f -> f != requester_id end)
         })
 
       new_requester =
         Map.merge(requester, %{
-          friends: requester.friends ++ [accepter_name]
+          friends: requester.friends ++ [accepter_id]
         })
 
       update_user(new_accepter)
@@ -235,13 +236,13 @@ defmodule Teiserver.User do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{requester_name}",
+        "user_updates:#{requester_id}",
         {:this_user_updated, [:friends]}
       )
 
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{accepter_name}",
+        "user_updates:#{accepter_id}",
         {:this_user_updated, [:friends, :friend_requests]}
       )
 
@@ -251,14 +252,14 @@ defmodule Teiserver.User do
     end
   end
 
-  def decline_friend_request(requester_name, decliner_name) do
-    decliner = get_user_by_name(decliner_name)
+  def decline_friend_request(requester_id, decliner_id) do
+    decliner = get_user_by_id(decliner_id)
 
-    if requester_name in decliner.friend_requests do
+    if requester_id in decliner.friend_requests do
       # Remove from requests
       new_decliner =
         Map.merge(decliner, %{
-          friend_requests: Enum.filter(decliner.friend_requests, fn f -> f != requester_name end)
+          friend_requests: Enum.filter(decliner.friend_requests, fn f -> f != requester_id end)
         })
 
       update_user(new_decliner)
@@ -266,7 +267,7 @@ defmodule Teiserver.User do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{decliner_name}",
+        "user_updates:#{decliner_id}",
         {:this_user_updated, [:friend_requests]}
       )
 
@@ -276,14 +277,14 @@ defmodule Teiserver.User do
     end
   end
 
-  def create_friend_request(requester_name, potential_name) do
-    potential = get_user_by_name(potential_name)
+  def create_friend_request(requester_id, potential_id) do
+    potential = get_user_by_id(potential_id)
 
-    if requester_name not in potential.friend_requests and requester_name not in potential.friends do
+    if requester_id not in potential.friend_requests and requester_id not in potential.friends do
       # Add to requests
       new_potential =
         Map.merge(potential, %{
-          friend_requests: potential.friend_requests ++ [requester_name]
+          friend_requests: potential.friend_requests ++ [requester_id]
         })
 
       update_user(new_potential)
@@ -291,7 +292,7 @@ defmodule Teiserver.User do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{potential_name}",
+        "user_updates:#{potential_id}",
         {:this_user_updated, [:friend_requests]}
       )
 
@@ -301,14 +302,14 @@ defmodule Teiserver.User do
     end
   end
 
-  def ignore_user(ignorer_name, ignored_name) do
-    ignorer = get_user_by_name(ignorer_name)
+  def ignore_user(ignorer_id, ignored_id) do
+    ignorer = get_user_by_id(ignorer_id)
 
-    if ignored_name not in ignorer.ignored do
+    if ignored_id not in ignorer.ignored do
       # Add to requests
       new_ignorer =
         Map.merge(ignorer, %{
-          ignored: ignorer.ignored ++ [ignored_name]
+          ignored: ignorer.ignored ++ [ignored_id]
         })
 
       update_user(new_ignorer)
@@ -316,7 +317,7 @@ defmodule Teiserver.User do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{ignorer_name}",
+        "user_updates:#{ignorer_id}",
         {:this_user_updated, [:ignored]}
       )
 
@@ -326,14 +327,14 @@ defmodule Teiserver.User do
     end
   end
 
-  def unignore_user(unignorer_name, unignored_name) do
-    unignorer = get_user_by_name(unignorer_name)
+  def unignore_user(unignorer_id, unignored_id) do
+    unignorer = get_user_by_id(unignorer_id)
 
-    if unignored_name in unignorer.ignored do
+    if unignored_id in unignorer.ignored do
       # Add to requests
       new_unignorer =
         Map.merge(unignorer, %{
-          ignored: Enum.filter(unignorer.ignored, fn f -> f != unignored_name end)
+          ignored: Enum.filter(unignorer.ignored, fn f -> f != unignored_id end)
         })
 
       update_user(new_unignorer)
@@ -341,7 +342,7 @@ defmodule Teiserver.User do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{unignorer_name}",
+        "user_updates:#{unignorer_id}",
         {:this_user_updated, [:ignored]}
       )
 
@@ -351,21 +352,21 @@ defmodule Teiserver.User do
     end
   end
 
-  def remove_friend(remover_name, removed_name) do
-    remover = get_user_by_name(remover_name)
+  def remove_friend(remover_id, removed_id) do
+    remover = get_user_by_id(remover_id)
 
-    if removed_name in remover.friends do
+    if removed_id in remover.friends do
       # Add to requests
       new_remover =
         Map.merge(remover, %{
-          friends: Enum.filter(remover.friends, fn f -> f != removed_name end)
+          friends: Enum.filter(remover.friends, fn f -> f != removed_id end)
         })
 
-      removed = get_user_by_name(removed_name)
+      removed = get_user_by_id(removed_id)
 
       new_removed =
         Map.merge(removed, %{
-          friends: Enum.filter(removed.friends, fn f -> f != remover_name end)
+          friends: Enum.filter(removed.friends, fn f -> f != remover_id end)
         })
 
       update_user(new_remover)
@@ -374,13 +375,13 @@ defmodule Teiserver.User do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{remover_name}",
+        "user_updates:#{remover_id}",
         {:this_user_updated, [:friends]}
       )
 
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{removed_name}",
+        "user_updates:#{removed_id}",
         {:this_user_updated, [:friends]}
       )
 
@@ -390,11 +391,11 @@ defmodule Teiserver.User do
     end
   end
 
-  def send_direct_message(from_name, to_name, msg) do
+  def send_direct_message(from_id, to_id, msg) do
     PubSub.broadcast(
       Central.PubSub,
-      "user_updates:#{to_name}",
-      {:direct_message, from_name, msg}
+      "user_updates:#{to_id}",
+      {:direct_message, from_id, msg}
     )
   end
 
@@ -403,8 +404,8 @@ defmodule Teiserver.User do
     |> Enum.map(fn userid -> ConCache.get(:users, userid) end)
   end
 
-  def ring(ringee, ringer) do
-    PubSub.broadcast(Central.PubSub, "user_updates:#{ringee}", {:ring, ringer})
+  def ring(ringee_id, ringer_id) do
+    PubSub.broadcast(Central.PubSub, "user_updates:#{ringee_id}", {:ring, ringer_id})
   end
 
   def encrypt_password(password) do

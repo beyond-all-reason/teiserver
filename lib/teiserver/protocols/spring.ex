@@ -152,7 +152,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           reply(:battle_players, b, state)
         end)
 
-        :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.name}")
+        :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
         _send("LOGININFOEND\n", state)
         %{state | client: client, user: user, name: user.name, userid: user.id}
 
@@ -341,37 +341,37 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_handle("UNFRIEND", data, state) do
     [_, username] = String.split(data, "=")
-    new_user = User.remove_friend(state.name, username)
+    new_user = User.remove_friend(state.userid, User.get_userid(username))
     %{state | user: new_user}
   end
 
   defp do_handle("ACCEPTFRIENDREQUEST", data, state) do
     [_, username] = String.split(data, "=")
-    new_user = User.accept_friend_request(username, state.name)
+    new_user = User.accept_friend_request(User.get_userid(username), state.userid)
     %{state | user: new_user}
   end
 
   defp do_handle("DECLINEFRIENDREQUEST", data, state) do
     [_, username] = String.split(data, "=")
-    new_user = User.decline_friend_request(username, state.name)
+    new_user = User.decline_friend_request(User.get_userid(username), state.userid)
     %{state | user: new_user}
   end
 
   defp do_handle("FRIENDREQUEST", data, state) do
     [_, username] = String.split(data, "=")
-    User.create_friend_request(state.name, username)
+    User.create_friend_request(state.userid, User.get_userid(username))
     state
   end
 
   defp do_handle("IGNORE", data, state) do
     [_, username] = String.split(data, "=")
-    User.ignore_user(state.name, username)
+    User.ignore_user(state.userid, User.get_userid(username))
     state
   end
 
   defp do_handle("UNIGNORE", data, state) do
     [_, username] = String.split(data, "=")
-    User.unignore_user(state.name, username)
+    User.unignore_user(state.userid, User.get_userid(username))
     state
   end
 
@@ -382,11 +382,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
     case Regex.run(~r/(\w+)(?:\t)?(\w+)?/, data) do
       [_, room_name] ->
         room = Room.get_room(room_name)
-        Room.add_user_to_room(state.name, room_name)
+        Room.add_user_to_room(state.userid, room_name)
         _send("JOIN #{room_name}\n", state)
         _send("JOINED #{room_name} #{state.name}\n", state)
         _send("CHANNELTOPIC #{room_name} #{room.author}\n", state)
-        members = Enum.join(room.members ++ [state.name], " ")
+        members = room.members
+        |> Enum.map(fn m -> User.get_username(m) end)
+        |> List.insert_at(0, state.name)
+        |> Enum.join(" ")
         _send("CLIENTS #{room_name} #{members}\n", state)
 
         :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
@@ -404,7 +407,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("LEAVE", room_name, state) do
     PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
     _send("LEFT #{room_name} #{state.name}\n", state)
-    Room.remove_user_from_room(state.name, room_name)
+    Room.remove_user_from_room(state.userid, room_name)
     state
   end
 
@@ -416,7 +419,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("SAY", data, state) do
     case Regex.run(~r/(\w+) (.+)/, data) do
       [_, room_name, msg] ->
-        Room.send_message(state.name, room_name, msg)
+        Room.send_message(state.userid, room_name, msg)
 
       _ ->
         nil
@@ -428,7 +431,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("SAYPRIVATE", data, state) do
     case Regex.run(~r/(\w+) (.+)/, data) do
       [_, to_name, msg] ->
-        User.send_direct_message(state.name, to_name, msg)
+        User.send_direct_message(state.userid, User.get_userid(to_name), msg)
         _send("SAIDPRIVATE #{to_name} #{msg}\n", state)
 
       _ ->
@@ -463,7 +466,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       {:accepted, battle} ->
         Logger.debug("[command:joinbattle] success")
         PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
-        Battle.add_user_to_battle(state.name, battle.id)
+        Battle.add_user_to_battle(state.userid, battle.id)
         reply(:join_battle, battle, state)
         reply(:battle_settings, battle, state)
 
@@ -524,7 +527,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("SAYBATTLE", _msg, %{client: %{battle_id: nil}} = state), do: state
 
   defp do_handle("SAYBATTLE", msg, state) do
-    Battle.say(state.name, msg, state.client.battle_id)
+    Battle.say(state.userid, msg, state.client.battle_id)
     state
   end
 
@@ -532,7 +535,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_handle("LEAVEBATTLE", _, state) do
     PubSub.unsubscribe(Central.PubSub, "battle_updates:#{state.client.battle_id}")
-    reply(:remove_user_from_battle, {state.name, state.client.battle_id}, state)
+    reply(:remove_user_from_battle, {state.userid, state.client.battle_id}, state)
     new_client = Client.leave_battle(state.userid)
     %{state | client: new_client}
   end
@@ -618,7 +621,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("RING", username, state) do
-    User.ring(username, state.name)
+    userid = User.get_userid(username)
+    User.ring(userid, state.userid)
     state
   end
 
@@ -664,7 +668,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
     friends =
       user.friends
       |> Enum.map(fn f ->
-        "FRIENDLIST userName=#{f}\n"
+        name = User.get_username(f)
+        "FRIENDLIST userName=#{name}\n"
       end)
 
     (["FRIENDLISTBEGIN\n"] ++ friends ++ ["FRIENDLISTEND\n"])
@@ -675,7 +680,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
     requests =
       user.friend_requests
       |> Enum.map(fn f ->
-        "FRIENDREQUESTLIST userName=#{f}\n"
+        name = User.get_username(f)
+        "FRIENDREQUESTLIST userName=#{name}\n"
       end)
 
     (["FRIENDREQUESTLISTBEGIN\n"] ++ requests ++ ["FRIENDREQUESTLISTEND\n"])
@@ -686,7 +692,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
     ignored =
       user.ignored
       |> Enum.map(fn f ->
-        "IGNORELIST userName=#{f}\n"
+        name = User.get_username(f)
+        "IGNORELIST userName=#{name}\n"
       end)
 
     (["IGNORELISTBEGIN\n"] ++ ignored ++ ["IGNORELISTEND\n"])
@@ -748,7 +755,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_reply(:battle_players, battle) do
     battle.players
-    |> Enum.map(fn p -> "JOINEDBATTLE #{battle.id} #{p}\n" end)
+    |> Parallel.map(fn player_id ->
+      pname = User.get_username(player_id)
+      "JOINEDBATTLE #{battle.id} #{pname}\n"
+    end)
   end
 
   defp do_reply(:close_battle, battle) do
@@ -768,7 +778,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "CLIENTSTATUS #{client.name}\t#{client.status}\n"
   end
 
-  defp do_reply(:client_battlestatus, {name, battlestatus, team_colour}) do
+  defp do_reply(:client_battlestatus, {userid, battlestatus, team_colour}) do
+    name = User.get_username(userid)
     "CLIENTBATTLESTATUS #{name} #{battlestatus} #{team_colour}\n"
   end
 
@@ -782,9 +793,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   # Commands
-  defp do_reply(:ring, {ringer, state_user}) do
-    if ringer not in state_user.ignored do
-      "RING #{ringer}\n"
+  defp do_reply(:ring, {ringer_id, state_user}) do
+    if ringer_id not in state_user.ignored do
+      ringer_name = User.get_username(ringer_id)
+      "RING #{ringer_name}\n"
     end
   end
 
@@ -800,40 +812,48 @@ defmodule Teiserver.Protocols.SpringProtocol do
     |> Enum.join("")
   end
 
-  defp do_reply(:direct_message, {from, msg, state_user}) do
-    if from not in state_user.ignored do
-      "SAIDPRIVATE #{from} #{msg}\n"
+  defp do_reply(:direct_message, {from_id, msg, state_user}) do
+    if from_id not in state_user.ignored do
+      from_name = User.get_username(from_id)
+      "SAIDPRIVATE #{from_name} #{msg}\n"
     end
   end
 
-  defp do_reply(:chat_message, {from, room_name, msg, state_user}) do
-    if from not in state_user.ignored do
-      "SAID #{room_name} #{from} #{msg}\n"
+  defp do_reply(:chat_message, {from_id, room_name, msg, state_user}) do
+    if from_id not in state_user.ignored do
+      from_name = User.get_username(from_id)
+      "SAID #{room_name} #{from_name} #{msg}\n"
     end
   end
 
-  defp do_reply(:add_user_to_room, {username, room_name}) do
+  defp do_reply(:add_user_to_room, {userid, room_name}) do
+    username = User.get_username(userid)
     "JOINED #{room_name} #{username}\n"
   end
 
   # Battle
-  defp do_reply(:remove_user_from_room, {username, room_name}) do
+  defp do_reply(:remove_user_from_room, {userid, room_name}) do
+    username = User.get_username(userid)
     "LEFT #{room_name} #{username}\n"
   end
 
-  defp do_reply(:add_user_to_battle, {username, battleid}) do
+  defp do_reply(:add_user_to_battle, {userid, battleid}) do
+    username = User.get_username(userid)
     "JOINEDBATTLE #{battleid} #{username}\n"
   end
 
-  defp do_reply(:remove_user_from_battle, {username, battleid}) do
+  defp do_reply(:remove_user_from_battle, {userid, battleid}) do
+    username = User.get_username(userid)
     "LEFTBATTLE #{battleid} #{username}\n"
   end
 
-  defp do_reply(:battle_message, {username, msg, _battle_id}) do
+  defp do_reply(:battle_message, {userid, msg, _battle_id}) do
+    username = User.get_username(userid)
     "SAIDBATTLE #{username} #{msg}\n"
   end
 
-  defp do_reply(:battle_saidex, {username, msg, _battle_id}) do
+  defp do_reply(:battle_saidex, {userid, msg, _battle_id}) do
+    username = User.get_username(userid)
     "SAIDBATTLEEX #{username} #{msg}\n"
   end
 

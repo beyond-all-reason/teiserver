@@ -267,7 +267,7 @@ ENDOFCHANNELS\n"
     assert saidbattle ==
              "SAIDBATTLEEX  Hi #{user.name}! Current battle type is faked_team."
 
-    assert joinedbattle == "JOINEDBATTLE #{user.name} 1"
+    assert joinedbattle == "JOINEDBATTLE 1 #{user.name}"
     assert clientstatus == "CLIENTSTATUS #{user.name}\t4"
 
     _send(socket, "SAYBATTLE Hello there!\n")

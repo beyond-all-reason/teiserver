@@ -101,7 +101,7 @@ defmodule Teiserver.TcpServer do
     state.protocol.reply(:client_status, new_client, state)
 
     new_state =
-      if state.name == new_client.name do
+      if state.userid == new_client.userid do
         Map.put(state, :client, new_client)
       else
         state
@@ -110,9 +110,9 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:new_battlestatus, username, battlestatus, team_colour}, state) do
+  def handle_info({:new_battlestatus, userid, battlestatus, team_colour}, state) do
     new_state =
-      state.protocol.reply(:client_battlestatus, {username, battlestatus, team_colour}, state)
+      state.protocol.reply(:client_battlestatus, {userid, battlestatus, team_colour}, state)
 
     {:noreply, new_state}
   end
@@ -125,7 +125,7 @@ defmodule Teiserver.TcpServer do
 
   # User
   def handle_info({:this_user_updated, fields}, state) do
-    new_user = User.get_user_by_name(state.name)
+    new_user = User.get_user_by_id(state.userid)
     new_state = %{state | user: new_user}
 
     fields
@@ -151,29 +151,29 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:add_user_to_room, username, room_name}, state) do
-    new_state = state.protocol.reply(:add_user_to_room, {username, room_name}, state)
+  def handle_info({:add_user_to_room, userid, room_name}, state) do
+    new_state = state.protocol.reply(:add_user_to_room, {userid, room_name}, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:remove_user_from_room, username, room_name}, state) do
-    new_state = state.protocol.reply(:remove_user_from_room, {username, room_name}, state)
+  def handle_info({:remove_user_from_room, userid, room_name}, state) do
+    new_state = state.protocol.reply(:remove_user_from_room, {userid, room_name}, state)
     {:noreply, new_state}
   end
 
   # Battles
-  def handle_info({:add_user_to_battle, username, battle_id}, state) do
-    new_state = state.protocol.reply(:add_user_to_battle, {username, battle_id}, state)
+  def handle_info({:add_user_to_battle, userid, battle_id}, state) do
+    new_state = state.protocol.reply(:add_user_to_battle, {userid, battle_id}, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:remove_user_from_battle, username, battle_id}, state) do
-    new_state = state.protocol.reply(:remove_user_from_battle, {username, battle_id}, state)
+  def handle_info({:remove_user_from_battle, userid, battle_id}, state) do
+    new_state = state.protocol.reply(:remove_user_from_battle, {userid, battle_id}, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:battle_message, username, msg, battle_id}, state) do
-    new_state = state.protocol.reply(:battle_message, {username, msg, battle_id}, state)
+  def handle_info({:battle_message, userid, msg, battle_id}, state) do
+    new_state = state.protocol.reply(:battle_message, {userid, msg, battle_id}, state)
     {:noreply, new_state}
   end
 

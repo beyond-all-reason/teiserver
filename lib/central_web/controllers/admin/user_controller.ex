@@ -89,10 +89,9 @@ defmodule CentralWeb.Admin.UserController do
 
   def create(conn, %{"user" => user_params}) do
     admin_group_id = user_params["admin_group_id"] |> int_parse
-
-    data = case user_params["data"] do
-      "" -> %{}
-      v -> Jason.decode!(v)
+    data = case Jason.decode(user_params["data"] || "") do
+      {:ok, v} -> v || %{}
+      _ -> %{}
     end
 
     user_params = Map.merge(user_params, %{
@@ -231,6 +230,11 @@ defmodule CentralWeb.Admin.UserController do
         |> redirect(to: Routes.admin_user_path(conn, :index))
 
       {true, _} ->
+        data = case Jason.decode(user_params["data"] || "") do
+          {:ok, v} -> v || %{}
+          _ -> %{}
+        end
+        user_params = Map.put(user_params, "data", data)
         case Account.update_user(user, user_params) do
           {:ok, user} ->
             add_audit_log(conn, "Account: Updated user", %{

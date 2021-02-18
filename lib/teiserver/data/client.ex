@@ -2,7 +2,6 @@ defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Battle
-  alias Teiserver.User
   alias Teiserver.BitParse
 
   def create(client) do
@@ -128,10 +127,8 @@ defmodule Teiserver.Client do
   end
 
   def leave_battle(userid) do
-    username = User.get_username(userid)
-
     :ok =
-      PubSub.broadcast(Central.PubSub, "client_updates", {:new_battlestatus, username, 0, 0})
+      PubSub.broadcast(Central.PubSub, "client_updates", {:new_battlestatus, userid, 0, 0})
 
     client = get_client(userid)
 
@@ -144,7 +141,7 @@ defmodule Teiserver.Client do
 
     ConCache.put(:clients, new_client.userid, new_client)
 
-    Battle.remove_user_from_battle(username, client.battle_id)
+    Battle.remove_user_from_battle(userid, client.battle_id)
     new_client
   end
 

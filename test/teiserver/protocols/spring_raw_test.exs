@@ -22,7 +22,7 @@ defmodule Teiserver.SpringRawTest do
   test "REGISTER", %{socket: socket} do
     _ = _recv(socket)
     existing = new_user()
-    name = "TestUser_#{:random.uniform(999_999_999)}"
+    name = "TestUser_raw_register"
 
     # Failure first
     _send(socket, "REGISTER #{existing.name}\tpassword\temail\n")
@@ -39,9 +39,6 @@ defmodule Teiserver.SpringRawTest do
     # Now check the DB!
     [db_user] = Account.list_users(search: [name: name], joins: [:groups])
     assert Enum.count(db_user.groups) == 1
-    
-    # Finally clean up
-    
   end
 
   test "LOGIN", %{socket: socket} do
@@ -73,7 +70,6 @@ defmodule Teiserver.SpringRawTest do
              "ADDUSER",
              "BATTLEOPENED",
              "UPDATEBATTLEINFO",
-             "JOINEDBATTLE",
              "LOGININFOEND",
              ""
            ]
