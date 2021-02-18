@@ -8,9 +8,9 @@ defmodule CentralWeb.Admin.UserControllerTest do
     GeneralTestLib.conn_setup(~w(admin admin.user admin.user.show admin.user.create admin.user.update admin.user.report))
   end
 
-  @create_attrs %{colour: "some colour", email: "some email", icon: "far fa-home", name: "some name", permissions: [], username: "some username", password: "some password"}
-  @update_attrs %{colour: "some updated colour", icon: "fas fa-wrench", name: "some updated name", permissions: [], username: "some updated username", password: "some updated password"}
-  @invalid_attrs %{colour: nil, icon: nil, name: nil, permissions: nil, username: nil}
+  @create_attrs %{colour: "some colour", email: "some email", icon: "far fa-home", name: "some name", permissions: [], username: "some username", password: "some password", data: "{}"}
+  @update_attrs %{colour: "some updated colour", icon: "fas fa-wrench", name: "some updated name", permissions: [], username: "some updated username", password: "some updated password", data: "{}"}
+  @invalid_attrs %{colour: nil, icon: nil, name: nil, permissions: nil, username: nil, data: nil}
 
   def fixture(:user) do
     {:ok, user} = Account.create_user(@create_attrs)

@@ -37,8 +37,7 @@ defmodule Teiserver.Application do
     ConCache.put(:id_counters, :battle, 0)
     ConCache.put(:id_counters, :user, 0)
 
-    Teiserver.TestData.create_users()
-    Teiserver.TestData.create_clients()
+    Teiserver.User.pre_cache_users()
     Teiserver.TestData.create_battles()
 
     Teiserver.Room.create_room(%{

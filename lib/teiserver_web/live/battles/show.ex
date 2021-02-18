@@ -20,7 +20,7 @@ defmodule TeiserverWeb.BattleLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
-    battle = Battle.get_battle!(id)
+    battle = Battle.get_battle!(id)    
     users = User.get_users(battle.players)
       |> Map.new(fn u -> {u.id, u} end)
     clients = Client.get_clients(battle.players)

@@ -177,6 +177,12 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  def handle_info({:add_bot_to_battle, battleid, bot}, state) do
+    new_state = state.protocol.reply(:add_bot_to_battle, {battleid, bot}, state)
+    {:noreply, new_state}
+  end
+
+  # Connection
   def handle_info({:tcp_closed, socket}, %{socket: socket, transport: transport} = state) do
     Logger.debug("Closing TCP connection")
     transport.close(socket)

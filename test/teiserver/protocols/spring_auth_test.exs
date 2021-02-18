@@ -1,5 +1,5 @@
 defmodule Teiserver.SpringAuthTest do
-  use Central.DataCase, async: true
+  use Central.ServerCase
   require Logger
   alias Teiserver.BitParse
   alias Teiserver.User
@@ -84,7 +84,7 @@ SERVERMSG Ingame time: xyz hours\n"
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
     reply = _recv(socket1)
-    assert reply =~ "ADDUSER #{user2.name} GB "
+    assert reply =~ "ADDUSER #{user2.name} XX "
     assert reply =~ "\tLuaLobby Chobby\n"
 
     _send(socket1, "#111 IGNORELIST\n")
@@ -132,7 +132,7 @@ IGNORELISTEND\n"
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
     reply = _recv(socket1)
-    assert reply =~ "ADDUSER #{user2.name} GB "
+    assert reply =~ "ADDUSER #{user2.name} XX "
     assert reply =~ "\tLuaLobby Chobby\n"
 
     _send(socket1, "#7 FRIENDLIST\n")
@@ -247,8 +247,7 @@ ENDOFCHANNELS\n"
     [
       join,
       _tags,
-      client1,
-      client2,
+      client,
       rect1,
       rect2,
       battle_status,
@@ -259,14 +258,14 @@ ENDOFCHANNELS\n"
     ] = reply
 
     assert join == "JOINBATTLE 1 1683043765"
-    assert client1 == "CLIENTBATTLESTATUS [teh]cluster1[03] 4194306 16777215"
-    assert client2 == "CLIENTBATTLESTATUS #{user.name} 0 0"
+    assert client == "CLIENTBATTLESTATUS #{user.name} 0 0"
     assert rect1 == "ADDSTARTRECT 0 0 126 74 200"
     assert rect2 == "ADDSTARTRECT 1 126 0 200 74"
     assert battle_status == "REQUESTBATTLESTATUS"
 
+    # No founder name means a double space, technically it's working
     assert saidbattle ==
-             "SAIDBATTLEEX [teh]cluster1[03] Hi #{user.name}! Current battle type is faked_team."
+             "SAIDBATTLEEX  Hi #{user.name}! Current battle type is faked_team."
 
     assert joinedbattle == "JOINEDBATTLE #{user.name} 1"
     assert clientstatus == "CLIENTSTATUS #{user.name}\t4"
@@ -278,6 +277,15 @@ ENDOFCHANNELS\n"
     _send(socket, "MYBATTLESTATUS 12 0\n")
     reply = _recv(socket)
     assert reply == "CLIENTBATTLESTATUS #{user.name} 0 0\n"
+    
+    # Add a bot
+    _send(socket, "ADDBOT STAI(1) 4195458 0 STAI\n")
+    reply = _recv(socket)
+    assert reply == "ADDBOT 1 STAI(1) #{user.name} 4195458 0 STAI\n"
+    
+    # Promote?
+    _send(socket, "PROMOTE\n")
+    _ = _recv(socket)
 
     # Time to leave
     _send(socket, "LEAVEBATTLE\n")
@@ -303,12 +311,11 @@ CLIENTBATTLESTATUS #{user.name} 0 0\n"
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
     reply = _recv(socket1)
-    assert reply =~ "ADDUSER #{user2.name} GB "
+    assert reply =~ "ADDUSER #{user2.name} XX "
     assert reply =~ "\tLuaLobby Chobby\n"
 
     _send(socket2, "RING #{user.name}\n")
-    reply = _recv(socket2)
-    assert reply == :timeout
+    _ = _recv(socket2)
 
     reply = _recv(socket1)
     assert reply == "RING #{user2.name}\n"

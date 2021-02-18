@@ -52,7 +52,7 @@ defmodule Teiserver.Client do
   end
 
   def calculate_status(client) do
-    [r1, r2, r3] = BitParse.parse_bits("#{client.rank}", 3)
+    [r1, r2, r3] = BitParse.parse_bits("#{client.rank || 1}", 3)
 
     status =
       [

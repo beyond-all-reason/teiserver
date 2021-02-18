@@ -231,13 +231,6 @@ defmodule CentralWeb.Admin.UserController do
         |> redirect(to: Routes.admin_user_path(conn, :index))
 
       {true, _} ->
-        new_data = case user_params["data"] do
-          "null" -> %{}
-          "" -> %{}
-          v -> Jason.decode!(v)
-        end
-        user_params = Map.put(user_params, "data", new_data)
-
         case Account.update_user(user, user_params) do
           {:ok, user} ->
             add_audit_log(conn, "Account: Updated user", %{

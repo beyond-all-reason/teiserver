@@ -3,6 +3,7 @@ defmodule Teiserver.Battle do
   alias Phoenix.PubSub
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Teiserver.User
 
   @default_tags %{
     "game/startpostype" => 2,
@@ -77,6 +78,7 @@ defmodule Teiserver.Battle do
     Map.merge(
       %{
         id: next_id(),
+        founder: nil,
         type: :normal,
         nattype: :none,
         max_players: 16,
@@ -86,6 +88,7 @@ defmodule Teiserver.Battle do
         engine_name: "spring",
         spectators: [],
         players: [],
+        bots: %{},
         tags: @default_tags,
         start_rectangles: [
           [0, 0, 126, 74, 200],
@@ -116,22 +119,43 @@ defmodule Teiserver.Battle do
     end)
   end
 
+  def add_bot_to_battle(battle_id, owner_id, {name, battlestatus, team_colour, ai_dll}) do
+    bot = %{
+      name: name,
+      owner_id: owner_id,
+      owner_name: User.get_user_by_id(owner_id).name,
+      battlestatus: battlestatus,
+      team_colour: team_colour,
+      ai_dll: ai_dll
+    }
+    battle = get_battle(battle_id)
+    new_bots = Map.put(battle.bots, name, bot)
+    new_battle = %{battle | bots: new_bots}
+    ConCache.put(:battles, battle.id, new_battle)
+    PubSub.broadcast(
+      Central.PubSub,
+      "battle_updates:#{battle_id}",
+      {:add_bot_to_battle, battle_id, bot}
+    )
+  end
+
   def add_user_to_battle(_, nil), do: nil
 
-  def add_user_to_battle(new_username, battle_id) do
+  def add_user_to_battle(username, battle_id) do
+    userid = User.get_userid(username)
     ConCache.update(:battles, battle_id, fn battle_state ->
       new_state =
-        if Enum.member?(battle_state.players, new_username) do
+        if Enum.member?(battle_state.players, userid) do
           # No change takes place, they're already in the battle!
           battle_state
         else
           PubSub.broadcast(
             Central.PubSub,
             "battle_updates:#{battle_id}",
-            {:add_user_to_battle, battle_id, new_username}
+            {:add_user_to_battle, battle_id, userid}
           )
 
-          new_players = battle_state.players ++ [new_username]
+          new_players = battle_state.players ++ [userid]
           Map.put(battle_state, :players, new_players)
         end
 
@@ -142,19 +166,20 @@ defmodule Teiserver.Battle do
   def remove_user_from_battle(_, nil), do: nil
 
   def remove_user_from_battle(username, battle_id) do
+    userid = User.get_userid(username)
     ConCache.update(:battles, battle_id, fn battle_state ->
       new_state =
-        if not Enum.member?(battle_state.players, username) do
+        if not Enum.member?(battle_state.players, userid) do
           # No change takes place, they've already left the battle
           battle_state
         else
           PubSub.broadcast(
             Central.PubSub,
             "battle_updates:#{battle_id}",
-            {:remove_user_from_battle, username, battle_id}
+            {:remove_user_from_battle, userid, battle_id}
           )
 
-          new_players = Enum.filter(battle_state.players, fn m -> m != username end)
+          new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
           Map.put(battle_state, :players, new_players)
         end
 

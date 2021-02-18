@@ -16,7 +16,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # CONFIRMAGREEMENT - Waiting to hear from Beherith on how he wants it to work
   # RESENDVERIFICATION - See above
 
-  # Handled by SPADS (I think)
+  # Battle management
   # HANDICAP
   # KICKFROMBATTLE
   # FORECTEAMNO
@@ -26,14 +26,12 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # DISABLEUNITS
   # ENABLEUNITS
   # ENABLEALLUNITS
-  # ADDBOT
   # UPDATEBOT
   # ADDSTARTRECT
   # REMOVESTARTRECT
   # SETSCRIPTTAGS
   # REMOVESCRIPTTAGS
   # LISTCOMPFLAGS
-  # PROMOTE
 
   @motd """
   Message of the day
@@ -170,13 +168,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       [_, username, plain_password, email] ->
         case User.get_user_by_name(username) do
           nil ->
-            User.create_user(%{
-              name: User.clean_name(username),
-              password_hash: User.encrypt_password(plain_password),
-              email: email
-            })
-            |> User.add_user()
-
+            User.register_user(username, email, plain_password)
             reply(:registration_accepted, state)
 
           _ ->
@@ -511,6 +503,24 @@ defmodule Teiserver.Protocols.SpringProtocol do
     end
   end
 
+  defp do_handle("PROMOTE", _, %{client: %{battle_id: nil}} = state), do: state
+  defp do_handle("PROMOTE", _, state) do
+    Logger.debug("PROMOTE is not handled at this time as Chobby has no way to handle it - TODO")
+    state
+  end
+
+  # ADDBOT STAI(1) 4195458 0 STAI
+  defp do_handle("ADDBOT", _msg, %{client: %{battle_id: nil}} = state), do: state
+  defp do_handle("ADDBOT", data, state) do
+    case Regex.run(~r/(\S+) (\d+) (\d+) (\S+)/, data) do
+      [_, name, battlestatus, team_colour, ai_dll] ->
+        Battle.add_bot_to_battle(state.client.battle_id, state.userid, {name, battlestatus, team_colour, ai_dll})
+      _ ->
+        nil
+    end
+    state
+  end
+
   defp do_handle("SAYBATTLE", _msg, %{client: %{battle_id: nil}} = state), do: state
 
   defp do_handle("SAYBATTLE", msg, state) do
@@ -526,17 +536,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
     new_client = Client.leave_battle(state.userid)
     %{state | client: new_client}
   end
-
-  # status_bits = BitParse.parse_bits(new_value, 7)
-  #         [in_game, away, _r1, _r2, _r3, _mod, _bot] = status_bits
-
-  #         new_client = Map.merge(state.client, %{
-  #           in_game: (in_game == 1),
-  #           away: (away == 1),
-  #         })
-
-  #         # This just accepts it and updates the client
-  #         new_client = Client.update(new_client, :client_updated_status)
 
   # b0 = undefined (reserved for future use)
   # b1 = ready (0=not ready, 1=ready)
@@ -743,9 +742,17 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "SETSCRIPTTAGS " <> tags <> "\n"
   end
 
+  defp do_reply(:add_bot_to_battle, {battle_id, bot}) do
+    "ADDBOT #{battle_id} #{bot.name} #{bot.owner_name} #{bot.battlestatus} #{bot.team_colour} #{bot.ai_dll}\n"
+  end
+
   defp do_reply(:battle_players, battle) do
     battle.players
     |> Enum.map(fn p -> "JOINEDBATTLE #{battle.id} #{p}\n" end)
+  end
+
+  defp do_reply(:close_battle, battle) do
+    "BATTLECLOSED #{battle.id}\n"
   end
 
   # Client
