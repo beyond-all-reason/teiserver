@@ -106,7 +106,7 @@ defmodule Teiserver.SpringRawTest do
     new_user = User.get_user_by_id(user.id)
     assert new_user.password_reset_code != nil
     reply = _recv(socket)
-    assert reply == "RESETPASSWORDREQUESTACCEPTED\n"
+    assert reply =~ "RESETPASSWORDREQUESTACCEPTED\n"
     user = new_user
 
     # Now verify badly

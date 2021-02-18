@@ -307,8 +307,7 @@ CLIENTBATTLESTATUS #{user.name} 0 0\n"
     assert reply =~ "\tLuaLobby Chobby\n"
 
     _send(socket2, "RING #{user.name}\n")
-    reply = _recv(socket2)
-    assert reply == :timeout
+    _ = _recv(socket2)
 
     reply = _recv(socket1)
     assert reply == "RING #{user2.name}\n"
