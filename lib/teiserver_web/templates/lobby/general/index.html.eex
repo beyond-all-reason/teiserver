@@ -15,13 +15,15 @@
     link: Routes.ts_account_general_path(@conn, :index)
   %>
 
-  <%=
-    component "menu_card",
-    icon: "fas fa-power-off",
-    name: "admin",
-    text: "Admin",
-    link: Routes.ts_admin_user_path(@conn, :index)
-  %>
+  <%= if allow?(@conn, "teiserver.admin.account") do %>
+    <%=
+      component "menu_card",
+      icon: "fas fa-power-off",
+      name: "admin",
+      text: "Admin",
+      link: Routes.ts_admin_user_path(@conn, :index)
+    %>
+  <% end %>
 </div>
 
 <div class="row page-row">

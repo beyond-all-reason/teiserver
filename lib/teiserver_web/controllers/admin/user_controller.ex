@@ -9,10 +9,10 @@ defmodule TeiserverWeb.Admin.UserController do
   plug AssignPlug,
     sidemenu_active: "teiserver"
 
-  # plug Bodyguard.Plug.Authorize,
-  #   policy: Teiserver.Admin.Location,
-  #   action: {Phoenix.Controller, :action_name},
-  #   user: {Teiserver.Account.AuthLib, :current_user}
+  plug Bodyguard.Plug.Authorize,
+    policy: Teiserver.Account.Auth,
+    action: {Phoenix.Controller, :action_name},
+    user: {Central.Account.AuthLib, :current_user}
 
   plug :add_breadcrumb, name: 'Teiserver', url: '/teiserver'
   plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
@@ -80,7 +80,9 @@ defmodule TeiserverWeb.Admin.UserController do
     })
 
     case Account.create_user(user_params) do
-      {:ok, _user} ->
+      {:ok, user} ->
+        Teiserver.User.recache_user(user)
+
         conn
         |> put_flash(:info, "User created successfully.")
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
@@ -124,9 +126,39 @@ defmodule TeiserverWeb.Admin.UserController do
       {true, _} ->
         case Account.update_user(user, user_params) do
           {:ok, _user} ->
+            Teiserver.User.recache_user(id)
+
             conn
             |> put_flash(:info, "User updated successfully.")
             |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+          {:error, %Ecto.Changeset{} = changeset} ->
+            render(conn, "edit.html", user: user, changeset: changeset)
+        end
+      _ ->
+        conn
+        |> put_flash(:warning, "Unable to access this user")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
+  end
+
+  def reset_password(conn, %{"id" => id}) do
+    user = Account.get_user!(id)
+    case Central.Account.UserLib.has_access(user, conn) do
+      {true, _} ->
+        {plain_password, encrypted_password} = Teiserver.User.generate_new_password()
+
+        data = Map.merge(user.data || %{}, %{
+          "password_hash" => encrypted_password,
+        })
+        user_params = %{"data" => data}
+
+        case Account.update_user(user, user_params) do
+          {:ok, _user} ->
+            Teiserver.User.recache_user(id)
+
+            conn
+            |> put_flash(:info, "Password changed to '#{plain_password}'.")
+            |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
           {:error, %Ecto.Changeset{} = changeset} ->
             render(conn, "edit.html", user: user, changeset: changeset)
         end

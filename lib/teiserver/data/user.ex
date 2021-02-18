@@ -185,13 +185,18 @@ defmodule Teiserver.User do
     update_user(%{user | password_reset_code: "#{code}"})
   end
 
+  def generate_new_password() do
+    new_plain_password = generate_random_password()
+    new_encrypted_password = encrypt_password(new_plain_password)
+    {new_plain_password, new_encrypted_password}
+  end
+
   def reset_password(user, code) do
     case code == user.password_reset_code do
       true ->
-        new_plain_password = generate_random_password()
-        new_encrypted_password = encrypt_password(new_plain_password)
-        EmailHelper.send_new_password(user, new_plain_password)
-        update_user(%{user | password_reset_code: nil, password_hash: new_encrypted_password})
+        {plain_password, encrypted_password} = generate_new_password()
+        EmailHelper.send_new_password(user, plain_password)
+        update_user(%{user | password_reset_code: nil, password_hash: encrypted_password})
         :ok
 
       false ->
@@ -454,6 +459,12 @@ defmodule Teiserver.User do
     |> Map.take(@keys)
     |> Map.merge(@default_data)
     |> Map.merge(data)
+  end
+
+  def recache_user(id) do
+    Account.get_user!(id)
+    |> convert_user
+    |> update_user
   end
 
   def pre_cache_users() do

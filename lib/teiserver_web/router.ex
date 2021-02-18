@@ -29,6 +29,7 @@ defmodule TeiserverWeb.Router do
       scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
         pipe_through [:browser, :admin_layout, :protected]
         resources "/user", UserController
+        post "/user/reset_password/:id", UserController, :reset_password
       end
 
       # scope "/teiserver", TeiserverWeb.AdminLive, as: :ts do

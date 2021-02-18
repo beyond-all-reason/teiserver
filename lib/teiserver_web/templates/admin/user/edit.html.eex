@@ -23,6 +23,16 @@
         <hr />
 
 <%= render "form.html", Map.put(assigns, :action, Routes.ts_admin_user_path(@conn, :update, @user)) %>
+<hr />
+
+<form action="<%= Routes.ts_admin_user_path(@conn, :reset_password, @user) %>" method="POST" class="form-horizontal" style="padding-right: 15px;">
+  <input type="hidden" name="_method" value="POST">
+
+  <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+
+  <input type="submit" value="Reset password" name="form.submitted" class="btn btn-danger float-right" data-confirm="Are you sure?" />
+</form>
+
       </div>
     </div>
   </div>
