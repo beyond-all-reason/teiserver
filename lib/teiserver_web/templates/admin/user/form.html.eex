@@ -1,0 +1,72 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= form_for @changeset, @action, fn f -> %>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+  <% end %>
+
+  <div class="form-group row">
+    <div class="col-lg-6">
+      <%= label f, :name, class: "control-label" %>
+      <%= text_input f, :name, class: "form-control", autofocus: :autofocus %>
+      <%= error_tag f, :name %>
+    </div>
+
+    <div class="col-lg-6">
+      <%= label f, :email, class: "control-label" %>
+      <%= text_input f, :email, class: "form-control" %>
+      <%= error_tag f, :email %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <%= component "checkbox",
+      id: "user_verified",
+      name: "user[verified]",
+      label: "Verified",
+      checked: @changeset.data.data["verified"],
+      changes: nil,
+      data: nil
+    %>
+    
+    <%= component "checkbox",
+      id: "user_bot",
+      name: "user[bot]",
+      label: "Bot",
+      checked: @changeset.data.data["bot"],
+      changes: nil,
+      data: nil
+    %>
+    
+    <%= component "checkbox",
+      id: "user_moderator",
+      name: "user[moderator]",
+      label: "Moderator",
+      checked: @changeset.data.data["moderator"],
+      changes: nil,
+      data: nil
+    %>
+  </div>
+  
+  <hr />
+
+  <div class="form-group">
+    <%= input_with_type f, :colour, "color" %>
+  </div>
+
+  <div class="form-group">
+    <%= component "fa5_icon_picker", %{form: f, field: :icon} %>
+  </div>
+
+  <div class="form-group">
+    <%= if @changeset.data.id do %>
+      <a href="<%= Routes.ts_admin_user_path(@conn, :show, @user) %>" class="btn btn-secondary btn-outline">
+        Cancel
+      </a>
+    <% end %>
+
+    <input type="submit" value="Save changes" name="form.submitted" class="btn btn-<%= bsname %> float-right" />
+  </div>
+<% end %>

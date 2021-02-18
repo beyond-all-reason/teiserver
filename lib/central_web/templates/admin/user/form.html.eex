@@ -75,6 +75,21 @@
   -->
 
   <div class="form-group">
+    <%
+      data = f.data.data || Map.get(@changeset.changes, :data, @current_user.data)
+    %>
+    <%= label f, :data, class: "control-label" %>
+    <textarea id="user_data" name="user[data]" rows="8" class="form-control monospace"><%= Jason.encode! data, pretty: true %></textarea>
+    <%= error_tag f, :data %>
+  </div>
+  
+  <%# 
+  changes: Map.get(@changeset.changes, :default_options, %{})[@option.name],
+  data: 
+  description: @option.description
+  %>
+
+  <div class="form-group">
     <%= if @changeset.data.id do %>
       <a href="<%= Routes.admin_user_path(@conn, :show, @changeset.data.id) %>" class="btn btn-secondary btn-outline">
         Cancel

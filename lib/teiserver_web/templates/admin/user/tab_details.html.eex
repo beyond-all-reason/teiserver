@@ -1,0 +1,20 @@
+<br />
+
+<%= component "detail_line",
+  label: "Email",
+  value: @user.email
+%>
+
+<%= component "detail_line",
+  label: "Created",
+  value: date_to_str(@user.inserted_at, :hms_dmy)
+%>
+
+<%= component "detail_line",
+  label: "Styling",
+  icon: %{
+    colour: @user.colour,
+    icon: @user.icon,
+  },
+  value: @user.colour
+%>

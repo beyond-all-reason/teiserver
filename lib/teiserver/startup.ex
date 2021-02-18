@@ -7,9 +7,9 @@ defmodule Teiserver.Startup do
 
     add_group_type("Bar team", %{fields: []})
 
-    QuickAction.add_items([
-      %{label: "Battles", icons: [Teiserver.BattleLib.icon(), :list], input: "s", method: "get", placeholder: "Search battle name", url: "/teiserver/battle", permissions: "teiserver"},
-    ])
+    # QuickAction.add_items([
+    #   %{label: "Battles", icons: [Teiserver.BattleLib.icon(), :list], input: "s", method: "get", placeholder: "Search battle name", url: "/teiserver/battle", permissions: "teiserver"},
+    # ])
 
     # add_user_config_type %{
     #   key: "metis.Hide readme",

@@ -20,7 +20,7 @@
     icon: "fas fa-power-off",
     name: "admin",
     text: "Admin",
-    link: Routes.ts_admin_general_path(@conn, :index)
+    link: Routes.ts_admin_user_path(@conn, :index)
   %>
 </div>
 

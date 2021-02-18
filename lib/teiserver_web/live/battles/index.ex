@@ -3,6 +3,7 @@ defmodule TeiserverWeb.BattleLive.Index do
 
   alias Teiserver
   alias Teiserver.Battle
+  alias Teiserver.BattleLib
 
   @impl true
   def mount(_params, session, socket) do
@@ -12,9 +13,10 @@ defmodule TeiserverWeb.BattleLive.Index do
     |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
     |> add_breadcrumb(name: "Battles", url: "/teiserver/battles")
     |> assign(:sidemenu_active, "teiserver")
-    |> assign(:colours, Central.Helpers.StylingHelper.colours(:primary2))
+    |> assign(:colours, BattleLib.colours())
+    |> assign(:battles, list_battles())
 
-    {:ok, assign(socket, :battles, list_battles())}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "bar_live.html"}}
   end
 
   @impl true

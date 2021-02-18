@@ -1,0 +1,57 @@
+<% {_fg, _bg, bsname} = @colours %>
+<%= if @live_action in [:new, :edit] do %>
+  <%= live_modal @socket, TeiserverWeb.AdminLive.FormComponent,
+    id: @user.id || :new,
+    title: @page_title,
+    action: @live_action,
+    user: @user,
+    return_to: Routes.ts_admin_index_path(@socket, :index) %>
+<% end %>
+
+<div class="row">
+  <div class="col-md-12"> 
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+
+        <h4>
+          <%= if Enum.count(@users) > 0 do %>
+            Users - Row count: <%= Enum.count(@users) %>
+          <% else %>
+            No users found
+          <% end %>
+        </h4>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Rank</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="users">
+    <%= for user <- @users do %>
+      <tr id="user-<%= user.id %>">
+        <td><%= user.name %></td>
+        <td><%= user.email %></td>
+        <td><%= user.data["rank"] %></td>
+
+        <td>
+          <span><%= live_redirect "Show", to: Routes.ts_admin_show_path(@socket, :show, user), class: "btn btn-sm btn-#{bsname}" %></span>
+          <span><%= live_patch "Edit", to: Routes.ts_admin_show_path(@socket, :edit, user), class: "btn btn-sm btn-#{bsname}" %></span>
+          <span><%= link "Delete", to: "#", phx_click: "delete", phx_value_id: user.id, data: [confirm: "Are you sure?"], class: "btn btn-sm btn-#{bsname}" %></span>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<span><%= live_patch "New User", to: Routes.ts_admin_index_path(@socket, :new), class: "btn btn-#{bsname}" %></span>
+
+
+      </div>
+    </div>
+  </div>
+</div>
