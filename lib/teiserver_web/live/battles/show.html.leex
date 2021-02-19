@@ -5,11 +5,17 @@
     <div class="card border-<%= bsname %> page-card">
       <div class="card-body">
 
-<h2><%= @battle.name %> - <%= @battle.map_name %></h2>
+<h3>
+  <%= @battle.name %>
+  &nbsp;&nbsp;&nbsp;
+  <%= @battle.map_name %>
+  &nbsp;&nbsp;&nbsp;
+  <%= @battle.founder_name %>
+</h3>
 
 <ul>
   <li>Max players: <%= @battle.max_players %></li>
-  <li>Passwored: <%= @battle.passworded %></li>
+  <li>Password: <%= @battle.password %></li>
   <li>Locked: <%= @battle.locked %></li>
 </ul>
 
@@ -27,13 +33,20 @@
         user = @users[p]
         client = @clients[p]
       %>
-      <tr>
-        <td><%= user.name %></td>
-        <td><%= client.battlestatus %></td>
-      </tr>
+      <%= if user do %>
+        <tr>
+          <td><%= user.name %></td>
+          <td><%= client.battlestatus %></td>
+        </tr>
+      <% end %>
     <% end %>
   </tbody>
 </table>
+
+<pre>
+  <%= Kernel.inspect @battle, pretty: true, limit: :infinity %>
+</pre>
+<br />
 
 <span>
   <%= live_redirect "Back", to: Routes.ts_battle_index_path(@socket, :index), class: "btn btn-#{bsname}" %>

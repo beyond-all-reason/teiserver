@@ -26,7 +26,7 @@ defmodule Teiserver.User do
 
   require Logger
   alias Phoenix.PubSub
-  import Teiserver.NumberHelper, only: [int_parse: 1]
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.EmailHelper
   alias Teiserver.Account
 

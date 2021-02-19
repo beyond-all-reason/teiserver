@@ -2,6 +2,7 @@ defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.Battle
+  alias Teiserver.User
   alias Teiserver.BitParse
 
   def create(client) do
@@ -123,6 +124,7 @@ defmodule Teiserver.Client do
       |> add_client
 
     PubSub.broadcast(Central.PubSub, "client_updates", {:updated_client, client, reason})
+    if client.battle_id, do: PubSub.broadcast(Central.PubSub, "live_battle_updates:#{client.battle_id}", {:updated_client, client, reason})
     client
   end
 
@@ -132,17 +134,18 @@ defmodule Teiserver.Client do
 
     client = get_client(userid)
 
-    new_client =
-      Map.merge(client, %{
-        battlestatus: 0,
-        team_colour: 0,
-        battle_id: nil
-      })
-
-    ConCache.put(:clients, new_client.userid, new_client)
-
-    Battle.remove_user_from_battle(userid, client.battle_id)
-    new_client
+    case client do
+      nil -> nil
+      client ->
+        Battle.remove_user_from_battle(userid, client.battle_id)
+        new_client = Map.merge(client, %{
+          battlestatus: 0,
+          team_colour: 0,
+          battle_id: nil
+        })
+        ConCache.put(:clients, new_client.userid, new_client)
+        new_client
+    end
   end
 
   def get_client(userid) do
@@ -180,6 +183,10 @@ defmodule Teiserver.Client do
   def disconnect(nil), do: nil
 
   def disconnect(userid) do
+    username = User.get_username(userid)
+    leave_battle(userid)
+    PubSub.broadcast(Central.PubSub, "client_updates", {:logged_out_client, userid, username})
+
     ConCache.delete(:clients, userid)
 
     ConCache.update(:lists, :clients, fn value ->

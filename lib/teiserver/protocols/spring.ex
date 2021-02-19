@@ -17,6 +17,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # RESENDVERIFICATION - See above
 
   # Battle management
+  # OPENBATTLE
   # HANDICAP
   # KICKFROMBATTLE
   # FORECTEAMNO
@@ -290,6 +291,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("EXIT", _reason, state) do
+    Client.disconnect(state.userid)
     send(self(), :terminate)
     # GenServer.cast(via_tuple(t.id), {:terminate})
     state
@@ -446,24 +448,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
     response =
       case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
         [_, battleid, _password, _script_password] ->
-          battle =
-            battleid
-            |> String.to_integer()
-            |> Battle.get_battle()
-
-          {:accepted, battle}
+          Battle.can_join?(state.user, battleid)
 
         nil ->
-          {:denied, "Invalid details"}
+          {:failure, "Invalid details"}
       end
 
     case response do
-      {:accepted, nil} ->
-        Logger.debug("[command:joinbattle] failed as could not find battle")
-        _send("JOINBATTLEFAILED battle_not_found\n", state)
-        state
-
-      {:accepted, battle} ->
+      {:success, battle} ->
         Logger.debug("[command:joinbattle] success")
         PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
         Battle.add_user_to_battle(state.userid, battle.id)
@@ -486,10 +478,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
         _send("REQUESTBATTLESTATUS\n", state)
 
         # I think this is sent by SPADS but for now we're going to fake it
-        founder_name = User.get_username(battle.founder)
-
         _send(
-          "SAIDBATTLEEX #{founder_name} Hi #{state.name}! Current battle type is faked_team.\n",
+          "SAIDBATTLEEX #{battle.founder_name} Hi #{state.name}! Current battle type is faked_team.\n",
           state
         )
 
@@ -499,8 +489,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
         %{state | client: new_client}
 
-      {:denied, reason} ->
-        Logger.debug("[command:joinbattle] denied with reason #{reason}")
+      {:failure, reason} ->
+        Logger.debug("[command:joinbattle] denied with reason: #{reason}")
         _send("JOINBATTLEFAILED #{reason}\n", state)
         state
     end
@@ -664,6 +654,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "ADDUSER #{user.name} #{user.country} #{user.id}\t#{user.lobbyid}\n"
   end
 
+  defp do_reply(:add_user, {_userid, username}) do
+    "REMOVEUSER #{username}\n"
+  end
+
   defp do_reply(:friendlist, user) do
     friends =
       user.friends
@@ -715,9 +709,9 @@ defmodule Teiserver.Protocols.SpringProtocol do
         :fixed -> 2
       end
 
-    passworded = if battle.passworded, do: 1, else: 0
+    passworded = if battle.password == nil, do: 0, else: 1
 
-    "BATTLEOPENED #{battle.id} #{type} #{nattype} #{battle.founder} #{battle.ip} #{battle.port} #{
+    "BATTLEOPENED #{battle.id} #{type} #{nattype} #{battle.founder_name} #{battle.ip} #{battle.port} #{
       battle.max_players
     } #{passworded} #{battle.rank} #{battle.map_hash} #{battle.engine_name}\t#{
       battle.engine_version
@@ -727,7 +721,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_reply(:update_battle, battle) do
     locked = battle.locked == 1
 
-    "UPDATEBATTLEINFO #{battle.id} #{Enum.count(battle.spectators)} #{locked} #{battle.map_hash} #{
+    "UPDATEBATTLEINFO #{battle.id} #{battle.spectator_count} #{locked} #{battle.map_hash} #{
       battle.map_name
     }\n"
   end
@@ -790,6 +784,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_reply(:logged_in_client, {userid, _username}) do
     user = User.get_user_by_id(userid)
     do_reply(:add_user, user)
+  end
+
+  defp do_reply(:logged_out_client, {userid, username}) do
+    do_reply(:remove_user, {userid, username})
   end
 
   # Commands
@@ -858,7 +856,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(atom, data) do
-    Logger.error("No match in spring.ex for atom: #{atom} and data: #{data}")
+    Logger.error("No match in spring.ex for atom: #{atom} and data: #{Kernel.inspect data}")
     ""
   end
 

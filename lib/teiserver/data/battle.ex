@@ -78,16 +78,19 @@ defmodule Teiserver.Battle do
     Map.merge(
       %{
         id: next_id(),
-        founder: nil,
+        founder_id: nil,
+        founder_name: nil,
         type: :normal,
         nattype: :none,
         max_players: 16,
-        passworded: false,
+        password: nil,
         rank: 0,
         locked: false,
         engine_name: "spring",
-        spectators: [],
         players: [],
+        player_count: 0,
+        spectator_count: 0,
+        bot_count: 0,
         bots: %{},
         tags: @default_tags,
         start_rectangles: [
@@ -183,6 +186,24 @@ defmodule Teiserver.Battle do
 
       {:ok, new_state}
     end)
+  end
+
+  def can_join?(_user, battle_id, password \\ nil, _script_password \\ nil) do
+    battle = get_battle(battle_id)
+
+    cond do
+      battle == nil ->
+        {:failure, "No battle found"}
+
+      battle.locked == true ->
+        {:failure, "Battle locked"}
+
+      battle.password != nil and password != battle.password ->
+        {:failure, "Invalid password"}
+
+      true ->
+        {:success, battle}
+    end
   end
 
   def say(userid, msg, battle_id) do

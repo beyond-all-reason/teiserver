@@ -25,7 +25,7 @@ defmodule Teiserver.Account do
   @doc """
   Gets a single user.
 
-  Raises `Ecto.NoResultsError` if the Staff does not exist.
+  Raises `Ecto.NoResultsError` if the User does not exist.
 
   ## Examples
 
@@ -81,7 +81,7 @@ defmodule Teiserver.Account do
   end
 
   @doc """
-  Deletes a Staff.
+  Deletes a User.
 
   ## Examples
 
