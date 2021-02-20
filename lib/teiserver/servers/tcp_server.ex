@@ -129,6 +129,10 @@ defmodule Teiserver.TcpServer do
           state.protocol.reply(:add_start_rectangle, data, state)
         :remove_start_rectangle ->
           state.protocol.reply(:remove_start_rectangle, data, state)
+        :add_script_tags ->
+          state.protocol.reply(:add_script_tags, data, state)
+        :remove_script_tags ->
+          state.protocol.reply(:remove_script_tags, data, state)
       end
     end
     {:noreply, state}

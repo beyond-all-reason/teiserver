@@ -103,11 +103,11 @@ defmodule Teiserver.Battle do
       "battle_updates:#{battle.id}",
       {:battle_updated, battle.id, data, reason}
     )
-    PubSub.broadcast(
-      Central.PubSub,
-      "all_battle_updates",
-      {:battle_updated, battle.id, data, reason}
-    )
+    # PubSub.broadcast(
+    #   Central.PubSub,
+    #   "all_battle_updates",
+    #   {:battle_updated, battle.id, data, reason}
+    # )
     battle
   end
 
@@ -259,6 +259,7 @@ defmodule Teiserver.Battle do
     end)
   end
 
+  # Start rects
   def add_start_rectangle(battle_id, [_, _, _, _, _] = rectangle) do
     battle = get_battle(battle_id)
     new_rectangles = battle.start_rectangles ++ [rectangle]
@@ -273,6 +274,21 @@ defmodule Teiserver.Battle do
 
     new_battle = %{battle | start_rectangles: new_rectangles}
     update_battle(new_battle, team, :remove_start_rectangle)
+  end
+
+  # Script tags
+  def set_script_tags(battle_id, tags) do
+    battle = get_battle(battle_id)
+    new_tags = Map.merge(battle.tags, tags)
+    new_battle = %{battle | tags: new_tags}
+    update_battle(new_battle, tags, :add_script_tags)
+  end
+
+  def remove_script_tags(battle_id, keys) do
+    battle = get_battle(battle_id)
+    new_tags = Map.drop(battle.tags, keys)
+    new_battle = %{battle | tags: new_tags}
+    update_battle(new_battle, keys, :remove_script_tags)
   end
 
   def can_join?(_user, battle_id, password \\ nil, _script_password \\ nil) do
@@ -301,7 +317,7 @@ defmodule Teiserver.Battle do
     )
   end
 
-  def allow?(user, cmd, %{client: %{battle_id: battle_id}}), do: allow?(user, cmd, battle_id)
+  def allow?(cmd, %{user: user, client: %{battle_id: battle_id}}), do: allow?(user, cmd, battle_id)
   def allow?(user, cmd, battle_id) do
     battle = get_battle(battle_id)
     mod_command = Enum.member?(~w(HANDICAP ADDSTARTRECT REMOVESTARTRECT), cmd)

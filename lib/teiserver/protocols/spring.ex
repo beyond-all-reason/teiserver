@@ -23,8 +23,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # FORCEALLYNO
   # FORCETEAMCOLOR
   # FORCESPECTATORMODE
-  # SETSCRIPTTAGS
-  # REMOVESCRIPTTAGS
 
   # Need to do at some stage but not used at this time
   # DISABLEUNITS
@@ -493,7 +491,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
         _send("OPENBATTLE #{battle.id}\n", state)
         reply(:join_battle, battle, state)
-        reply(:battle_settings, battle, state)
+        reply(:add_script_tags, battle.tags, state)
 
         battle.start_rectangles
         |> Enum.each(fn r ->
@@ -530,7 +528,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
         Battle.add_user_to_battle(state.userid, battle.id)
         reply(:join_battle, battle, state)
-        reply(:battle_settings, battle, state)
+        reply(:add_script_tags, battle.tags, state)
 
         battle.players
         |> Enum.each(fn username ->
@@ -569,7 +567,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("HANDICAP", data, state) do
     case Regex.run(~r/(\S+) (\d+)/, data) do
       [_, username, value] ->
-        if Battle.allow?(state.user, "HANDICAP", state) do
+        if Battle.allow?("HANDICAP", state) do
           clint_id = User.get_userid(username)
           client = Client.get_client(clint_id)
           # Can't update a client that doesn't exist
@@ -587,7 +585,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("ADDSTARTRECT", data, state) do
     case Regex.run(~r/(\d+) (\d+) (\d+) (\d+) (\d+)/, data) do
       [_, team, left, top, right, bottom] ->
-        if Battle.allow?(state.user, "ADDSTARTRECT", state) do
+        if Battle.allow?("ADDSTARTRECT", state) do
           rectangle = int_parse([team, left, top, right, bottom])
           Battle.add_start_rectangle(state.client.battle_id, rectangle)
         end
@@ -598,9 +596,34 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("REMOVESTARTRECT", team, state) do
-    if Battle.allow?(state.user, "REMOVESTARTRECT", state) do
+    if Battle.allow?("REMOVESTARTRECT", state) do
       team = int_parse(team)
       Battle.remove_start_rectangle(state.client.battle_id, team)
+    end
+    state
+  end
+
+  defp do_handle("SETSCRIPTTAGS", data, state) do
+    if Battle.allow?("SETSCRIPTTAGS", state) do
+      tags = data
+        |> String.split("\t")
+        |> Map.new(fn t ->
+          [k, v] = String.split(t, "=")
+          {String.downcase(k), v}
+        end)
+
+      Battle.set_script_tags(state.client.battle_id, tags)
+    end
+    state
+  end
+
+  defp do_handle("REMOVESCRIPTTAGS", data, state) do
+    if Battle.allow?("SETSCRIPTTAGS", state) do
+      keys = data
+        |> String.downcase
+        |> String.split("\t")
+
+      Battle.remove_script_tags(state.client.battle_id, keys)
     end
     state
   end
@@ -616,7 +639,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("ADDBOT", data, state) do
     case Regex.run(~r/(\S+) (\d+) (\d+) (\S+)/, data) do
       [_, name, battlestatus, team_colour, ai_dll] ->
-        if Battle.allow?(state.user, "ADDBOT", state.client.battle_id) do
+        if Battle.allow?("ADDBOT", state) do
           Battle.add_bot_to_battle(state.client.battle_id, state.userid, {name, battlestatus, team_colour, ai_dll})
         end
       _ ->
@@ -629,7 +652,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("UPDATEBOT", data, state) do
     case Regex.run(~r/(\S+) (\d+) (\d+) (\S+)/, data) do
       [_, name, battlestatus, team_colour] ->
-        if Battle.allow?(state.user, "UPDATEBOT", state.client.battle_id) do
+        if Battle.allow?("UPDATEBOT", state) do
           Battle.update_bot(state.client.battle_id, name, battlestatus, team_colour)
         end
       _ ->
@@ -641,7 +664,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("SAYBATTLE", _msg, %{client: %{battle_id: nil}} = state), do: state
 
   defp do_handle("SAYBATTLE", msg, state) do
-    if Battle.allow?(state.user, "SAYBATTLE", state) do
+    if Battle.allow?("SAYBATTLE", state) do
       Battle.say(state.userid, msg, state.client.battle_id)
     end
     state
@@ -722,7 +745,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
             })
 
           # This one needs a bit more nuance, for now we'll wrap it in this
-          if Battle.allow?(state.user, "MYBATTLESTATUS", state) do
+          if Battle.allow?("MYBATTLESTATUS", state) do
             Client.update(new_client, :client_updated_battlestatus)
           else
             state.client
@@ -873,13 +896,16 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "REMOVESTARTRECT #{team}\n"
   end
 
-  defp do_reply(:battle_settings, battle) do
-    tags =
-      battle.tags
+  defp do_reply(:add_script_tags, tags) do
+    tags = tags
       |> Enum.map(fn {key, value} -> "#{key}=#{value}" end)
       |> Enum.join("\t")
 
     "SETSCRIPTTAGS " <> tags <> "\n"
+  end
+
+  defp do_reply(:remove_script_tags, keys) do
+    "REMOVESCRIPTTAGS " <> Enum.join(keys, "\t") <> "\n"
   end
 
   defp do_reply(:add_bot_to_battle, {battle_id, bot}) do

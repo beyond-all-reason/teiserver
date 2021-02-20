@@ -74,6 +74,28 @@ defmodule Teiserver.SpringBattleHostTest do
     battle = Battle.get_battle(battle_id)
     assert Enum.count(battle.start_rectangles) == 2
 
+    # Add and remove script tags
+    refute Map.has_key?(battle.tags, "custom/key1")
+    refute Map.has_key?(battle.tags, "custom/key2")
+    _send(socket, "SETSCRIPTTAGS custom/key1=customValue\tcustom/key2=customValue2\n")
+    reply = _recv(socket)
+    
+    assert reply == "SETSCRIPTTAGS custom/key1=customValue\tcustom/key2=customValue2\n"
+
+    battle = Battle.get_battle(battle_id)
+    assert Map.has_key?(battle.tags, "custom/key1")
+    assert Map.has_key?(battle.tags, "custom/key2")
+
+    _send(socket, "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n")
+    reply = _recv(socket)
+    
+    assert reply == "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n"
+    
+    battle = Battle.get_battle(battle_id)
+    refute Map.has_key?(battle.tags, "custom/key1")
+    # We never removed key2, it should still be there
+    assert Map.has_key?(battle.tags, "custom/key2")
+
     # Leave the battle
     
   end
