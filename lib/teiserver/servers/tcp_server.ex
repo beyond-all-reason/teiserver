@@ -167,6 +167,11 @@ defmodule Teiserver.TcpServer do
   end
 
   # Battles
+  def handle_info({:battle_opened, battle_id}, state) do
+    new_state = state.protocol.reply(:battle_opened, battle_id, state)
+    {:noreply, new_state}
+  end
+
   def handle_info({:add_user_to_battle, userid, battle_id}, state) do
     new_state = state.protocol.reply(:add_user_to_battle, {userid, battle_id}, state)
     {:noreply, new_state}

@@ -17,21 +17,22 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # CONFIRMAGREEMENT - Waiting to hear from Beherith on how he wants it to work
   # RESENDVERIFICATION - See above
 
-  # Battle management
-  # HANDICAP
+  # TODO
   # KICKFROMBATTLE
   # FORECTEAMNO
   # FORCEALLYNO
   # FORCETEAMCOLOR
   # FORCESPECTATORMODE
-  # DISABLEUNITS
-  # ENABLEUNITS
-  # ENABLEALLUNITS
   # UPDATEBOT
   # ADDSTARTRECT
   # REMOVESTARTRECT
   # SETSCRIPTTAGS
   # REMOVESCRIPTTAGS
+
+  # Need to do at some stage but not used at this time
+  # DISABLEUNITS
+  # ENABLEUNITS
+  # ENABLEALLUNITS
   # LISTCOMPFLAGS
 
   @motd """
@@ -111,8 +112,12 @@ defmodule Teiserver.Protocols.SpringProtocol do
     )
   end
 
-  defp do_handle("JB", _, state) do
-    do_handle("JOINBATTLE", "1 empty 193322681", state)
+  defp do_handle("JB", bnum, state) do
+    do_handle("JOINBATTLE", "#{bnum} empty 193322681", state)
+  end
+
+  defp do_handle("OB", _, state) do
+    do_handle("OPENBATTLE", "0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName", state)
   end
 
   defp do_handle("LOGIN", data, state) do
@@ -486,7 +491,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
     case response do
       {:success, battle} ->
-        _send("OPENBATTLE #{battle.id}", state)
+        PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
+        Battle.add_user_to_battle(state.userid, battle.id)
+
+        _send("OPENBATTLE #{battle.id}\n", state)
         reply(:join_battle, battle, state)
         reply(:battle_settings, battle, state)
 
@@ -497,8 +505,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
         _send("REQUESTBATTLESTATUS\n", state)
 
+        new_client =
+          Map.put(state.client, :battle_id, battle.id)
+          |> Client.update()
+
+        %{state | client: new_client}
+
       {:failure, reason} ->
-        _send("OPENBATTLEFAILED #{reason}", state)
+        _send("OPENBATTLEFAILED #{reason}\n", state)
         state
     end
   end
@@ -554,10 +568,28 @@ defmodule Teiserver.Protocols.SpringProtocol do
         state
     end
   end
+  
+  defp do_handle("HANDICAP", data, state) do
+    case Regex.run(~r/(\S+) (\d+)/, data) do
+      [_, username, value] ->
+        if Battle.allow?(state.user, "HANDICAP", state) do
+          clint_id = User.get_userid(username)
+          client = Client.get_client(clint_id)
+          # Can't update a client that doesn't exist
+          if client != nil and client.battle_id == state.client.battle_id do
+            client = %{client | handicap: int_parse(value)}
+            Client.update(client, :client_updated_battlestatus)
+          end
+        end
+      _ ->
+        nil
+    end
+    state
+  end
 
   defp do_handle("PROMOTE", _, %{client: %{battle_id: nil}} = state), do: state
   defp do_handle("PROMOTE", _, state) do
-    Logger.debug("PROMOTE is not handled at this time as Chobby has no way to handle it - TODO")
+    Logger.info("PROMOTE is not handled at this time as Chobby has no way to handle it - TODO")
     state
   end
 
@@ -566,7 +598,9 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("ADDBOT", data, state) do
     case Regex.run(~r/(\S+) (\d+) (\d+) (\S+)/, data) do
       [_, name, battlestatus, team_colour, ai_dll] ->
-        Battle.add_bot_to_battle(state.client.battle_id, state.userid, {name, battlestatus, team_colour, ai_dll})
+        if Battle.allow?(state.user, "ADDBOT", state.client.battle_id) do
+          Battle.add_bot_to_battle(state.client.battle_id, state.userid, {name, battlestatus, team_colour, ai_dll})
+        end
       _ ->
         nil
     end
@@ -576,7 +610,9 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("SAYBATTLE", _msg, %{client: %{battle_id: nil}} = state), do: state
 
   defp do_handle("SAYBATTLE", msg, state) do
-    Battle.say(state.userid, msg, state.client.battle_id)
+    if Battle.allow?(state.user, "SAYBATTLE", state) do
+      Battle.say(state.userid, msg, state.client.battle_id)
+    end
     state
   end
 
@@ -654,7 +690,12 @@ defmodule Teiserver.Protocols.SpringProtocol do
               team_colour: team_colour
             })
 
-          Client.update(new_client, :client_updated_battlestatus)
+          # This one needs a bit more nuance, for now we'll wrap it in this
+          if Battle.allow?(state.user, "MYBATTLESTATUS", state) do
+            Client.update(new_client, :client_updated_battlestatus)
+          else
+            state.client
+          end
 
         _ ->
           state.client
@@ -678,8 +719,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # Not handled cacther
   defp do_handle(nil, _, state), do: state
 
-  defp do_handle(match, _, state) do
-    Logger.error("No match  #{match}")
+  defp do_handle(match, data, state) do
+    Logger.error("No match for #{match}, #{data}")
     _send("ERR - No match\n", state)
     state
   end
@@ -754,7 +795,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#BATTLEOPENED:server
-  defp do_reply(:battle_opened, battle) do
+  defp do_reply(:battle_opened, battle) when is_map(battle) do
     type =
       case battle.type do
         :normal -> 0
@@ -777,6 +818,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
     }\t#{battle.map_name}\t#{battle.name}\t#{battle.game_name}\ttest-15386-5c98cfa\n"
   end
 
+  defp do_reply(:battle_opened, battle_id) do
+    do_reply(:battle_opened, Battle.get_battle(battle_id))
+  end
+
   defp do_reply(:update_battle, battle) do
     locked = battle.locked == 1
 
@@ -786,7 +831,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(:join_battle, battle) do
-    "JOINBATTLE #{battle.id} #{battle.hash_code}\n"
+    "JOINBATTLE #{battle.id} #{battle.game_hash}\n"
   end
 
   defp do_reply(:start_rectangle, [team, left, top, right, bottom]) do

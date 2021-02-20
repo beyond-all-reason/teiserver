@@ -92,6 +92,7 @@ defmodule Teiserver.Battle do
         spectator_count: 0,
         bot_count: 0,
         bots: %{},
+        ip: nil,
         tags: @default_tags,
         start_rectangles: [
           [0, 0, 126, 74, 200],
@@ -124,8 +125,9 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "all_battle_updates",
-      {:new_battle, battle.id}
+      {:battle_opened, battle.id}
     )
+    battle
   end
   
   def close_battle(battle_id) do
@@ -238,6 +240,33 @@ defmodule Teiserver.Battle do
       "battle_updates:#{battle_id}",
       {:battle_message, userid, msg, battle_id}
     )
+  end
+
+  def allow?(user, cmd, %{client: %{battle_id: battle_id}}), do: allow?(user, cmd, battle_id)
+  def allow?(user, cmd, battle_id) do
+    battle = get_battle(battle_id)
+    mod_command = Enum.member?(~w(HANDICAP), cmd)
+
+    cond do
+      battle == nil ->
+        false
+
+      battle.founder_id == user.id ->
+        true
+
+      user.moderator == true ->
+        true
+
+      # If they're not a moderator/founder then they can't
+      # do moderator commands
+      mod_command == true ->
+        false
+
+      # TODO: something about boss mode here?
+
+      # Default to true
+      true -> true
+    end
   end
 
   def list_battles() do
