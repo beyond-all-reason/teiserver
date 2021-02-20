@@ -47,7 +47,7 @@ defmodule Teiserver.Client do
       |> calculate_status
       |> add_client
 
-    PubSub.broadcast(Central.PubSub, "client_updates", {:logged_in_client, user.id, user.name})
+    PubSub.broadcast(Central.PubSub, "all_client_updates", {:logged_in_client, user.id, user.name})
     client
   end
 
@@ -123,14 +123,14 @@ defmodule Teiserver.Client do
       |> calculate_battlestatus
       |> add_client
 
-    PubSub.broadcast(Central.PubSub, "client_updates", {:updated_client, client, reason})
+    PubSub.broadcast(Central.PubSub, "all_client_updates", {:updated_client, client, reason})
     if client.battle_id, do: PubSub.broadcast(Central.PubSub, "live_battle_updates:#{client.battle_id}", {:updated_client, client, reason})
     client
   end
 
   def leave_battle(userid) do
     :ok =
-      PubSub.broadcast(Central.PubSub, "client_updates", {:new_battlestatus, userid, 0, 0})
+      PubSub.broadcast(Central.PubSub, "all_client_updates", {:new_battlestatus, userid, 0, 0})
 
     client = get_client(userid)
 
@@ -185,7 +185,6 @@ defmodule Teiserver.Client do
   def disconnect(userid) do
     username = User.get_username(userid)
     leave_battle(userid)
-    PubSub.broadcast(Central.PubSub, "client_updates", {:logged_out_client, userid, username})
 
     ConCache.delete(:clients, userid)
 
@@ -196,5 +195,6 @@ defmodule Teiserver.Client do
 
       {:ok, new_value}
     end)
+    PubSub.broadcast(Central.PubSub, "all_client_updates", {:logged_out_client, userid, username})
   end
 end

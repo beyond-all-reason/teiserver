@@ -74,7 +74,7 @@ defmodule Teiserver.Battle do
 
   def create_battle(battle) do
     # Needs to be supplied a map with:
-    # founder, ip, port, engine_version, map_hash, map_name, name, game_name, hash_code
+    # founder_id/name, ip, port, engine_version, map_hash, map_name, name, game_name, hash_code
     Map.merge(
       %{
         id: next_id(),
@@ -120,6 +120,32 @@ defmodule Teiserver.Battle do
 
       {:ok, new_value}
     end)
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "all_battle_updates",
+      {:new_battle, battle.id}
+    )
+  end
+  
+  def close_battle(battle_id) do
+    Logger.error("TODO - Tell users they've left the battle?")
+    
+    ConCache.delete(:battles, battle_id)
+
+    ConCache.update(:lists, :battles, fn value ->
+      new_value =
+        value
+        |> Enum.filter(fn v -> v != battle_id end)
+
+      {:ok, new_value}
+    end)
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "all_battle_updates",
+      {:closed_battle, battle_id}
+    )
   end
 
   def add_bot_to_battle(battle_id, owner_id, {name, battlestatus, team_colour, ai_dll}) do

@@ -11,13 +11,13 @@ defmodule Teiserver.Protocols.SpringProtocol do
   alias Teiserver.User
   alias Phoenix.PubSub
   alias Teiserver.BitParse
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   # TODO - Setup/Account stuff
   # CONFIRMAGREEMENT - Waiting to hear from Beherith on how he wants it to work
   # RESENDVERIFICATION - See above
 
   # Battle management
-  # OPENBATTLE
   # HANDICAP
   # KICKFROMBATTLE
   # FORECTEAMNO
@@ -444,6 +444,65 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   # Battles
+  # OPENBATTLE type natType password port maxPlayers gameHash rank mapHash {engineName} {engineVersion} {map} {title} {gameName}
+  defp do_handle("OPENBATTLE", data, state) do
+    response =
+      case Regex.run(~r/^(\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) ([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t(.+)$/, data) do
+        [_, type, nattype, _password, port, max_players, game_hash, _rank, map_hash, engine_name, engine_version, map_name, name, game_name] ->
+
+          nattype =
+            case nattype do
+              "0" -> :none
+              "1" -> :holepunch
+              "2" -> :fixed
+            end
+
+          battle = %{
+            founder_id: state.userid,
+            founder_name: state.name,
+            name: name,
+            type: (if type == "0", do: :normal, else: :replay),
+            nattype: nattype,
+            port: port,
+            max_players: int_parse(max_players),
+            game_hash: game_hash,
+            map_hash: map_hash,
+            password: nil,
+            rank: 0,
+            locked: false,
+            engine_name: engine_name,
+            engine_version: engine_version,
+            map_name: map_name,
+            game_name: game_name
+          }
+          |> Battle.create_battle()
+          |> Battle.add_battle()
+
+          {:success, battle}
+
+        nil ->
+          {:failure, "No match"}
+      end
+
+    case response do
+      {:success, battle} ->
+        _send("OPENBATTLE #{battle.id}", state)
+        reply(:join_battle, battle, state)
+        reply(:battle_settings, battle, state)
+
+        battle.start_rectangles
+        |> Enum.each(fn r ->
+          reply(:start_rectangle, r, state)
+        end)
+
+        _send("REQUESTBATTLESTATUS\n", state)
+
+      {:failure, reason} ->
+        _send("OPENBATTLEFAILED #{reason}", state)
+        state
+    end
+  end
+  
   defp do_handle("JOINBATTLE", data, state) do
     response =
       case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
@@ -654,7 +713,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "ADDUSER #{user.name} #{user.country} #{user.id}\t#{user.lobbyid}\n"
   end
 
-  defp do_reply(:add_user, {_userid, username}) do
+  defp do_reply(:remove_user, {_userid, username}) do
     "REMOVEUSER #{username}\n"
   end
 

@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.BattleLive.Index do
   use TeiserverWeb, :live_view
+  alias Phoenix.PubSub
 
   alias Teiserver
   alias Teiserver.Battle
@@ -24,7 +25,18 @@ defmodule TeiserverWeb.BattleLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
+  @impl true
+  def handle_info({:new_battle, _battle_id}, socket) do
+    {:noreply, assign(socket, :battles, list_battles())}
+  end
+
+  def handle_info({:closed_battle, _battle_id}, socket) do
+    {:noreply, assign(socket, :battles, list_battles())}
+  end
+
   defp apply_action(socket, :index, _params) do
+    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
+
     socket
     |> assign(:page_title, "Listing Battles")
     |> assign(:battle, nil)

@@ -69,6 +69,7 @@ defmodule TeiserverWeb.BattleLive.Show do
     |> assign(:battle, Battle.get_battle(assigns.id))
   end
 
+  @impl true
   def handle_info({:updated_client, new_client, _reason}, %{assigns: assigns} = socket) do
     new_clients = Map.put(assigns.clients, new_client.userid, new_client)
 
