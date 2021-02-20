@@ -75,13 +75,14 @@ defmodule TeiserverWeb.Admin.UserController do
         "friend_requests" => [],
         "ignored" => [],
         "bot" => user_params["bot"],
-        "moderator" => user_params["moderator"]
+        "moderator" => user_params["moderator"],
+        "password_hash" => "X03MO1qnZdYdgyfeuILPmQ=="
       }
     })
 
     case Account.create_user(user_params) do
       {:ok, user} ->
-        Teiserver.User.recache_user(user)
+        Teiserver.User.recache_user(user.id)
 
         conn
         |> put_flash(:info, "User created successfully.")

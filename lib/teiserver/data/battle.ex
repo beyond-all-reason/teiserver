@@ -176,7 +176,7 @@ defmodule Teiserver.Battle do
           team_colour: new_team_colour
         })
         new_bots = Map.put(battle.bots, botname, new_bot)
-        battle = %{battle | bots: new_bots}
+        new_battle = %{battle | bots: new_bots}
         ConCache.put(:battles, battle.id, new_battle)
         PubSub.broadcast(
           Central.PubSub,
@@ -189,7 +189,7 @@ defmodule Teiserver.Battle do
   def remove_bot(battle_id, botname) do
     battle = get_battle(battle_id)
     new_bots = Map.delete(battle.bots, botname)
-    battle = %{battle | bots: new_bots}
+    new_battle = %{battle | bots: new_bots}
     ConCache.put(:battles, battle.id, new_battle)
     PubSub.broadcast(
       Central.PubSub,

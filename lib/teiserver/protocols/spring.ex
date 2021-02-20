@@ -611,7 +611,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     case Regex.run(~r/(\S+) (\d+) (\d+) (\S+)/, data) do
       [_, name, battlestatus, team_colour] ->
         if Battle.allow?(state.user, "UPDATEBOT", state.client.battle_id) do
-          Battle.update_bot(state.client.battle_id, name, battlestatus, team_colour, ai_dll)
+          Battle.update_bot(state.client.battle_id, name, battlestatus, team_colour)
         end
       _ ->
         nil
