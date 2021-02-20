@@ -60,22 +60,6 @@
             <i class="fas fa-fw fa-th"></i>
             Main menu
           </a>
-
-          &nbsp;&nbsp;&nbsp;&nbsp;
-
-          <a href="<%= Routes.play_general_path(@socket, :index) %>" class="btn btn-outline-primary" id="see-all-events-button">
-            <i class="fas fa-fw fa-list"></i>
-            See all my events
-          </a>
-
-          &nbsp;&nbsp;&nbsp;&nbsp;
-
-          <%= if assigns[:team] do %>
-            <a href="<%= Routes.play_team_path(@socket, :show, @team.id) %>" class="btn btn-outline-primary" id="team-overview-button">
-              <i class="fa-fw <%= Metis.Instance.TeamLib.icon() %> fas"></i>
-              Team and Event overview
-            </a>
-          <% end %>
         <% end %>
 
         <%# Right side %>

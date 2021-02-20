@@ -265,7 +265,7 @@ ENDOFCHANNELS\n"
 
     # No founder name means a double space, technically it's working
     assert saidbattle ==
-             "SAIDBATTLEEX  Hi #{user.name}! Current battle type is faked_team."
+             "SAIDBATTLEEX SPADS EU-1 Hi #{user.name}! Current battle type is faked_team."
 
     assert joinedbattle == "JOINEDBATTLE 1 #{user.name}"
     assert clientstatus == "CLIENTSTATUS #{user.name}\t4"

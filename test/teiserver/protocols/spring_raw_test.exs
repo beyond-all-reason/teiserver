@@ -75,6 +75,7 @@ defmodule Teiserver.SpringRawTest do
            ]
 
     _send(socket, "EXIT\n")
+    _ = _recv(socket)
     {:error, :closed} = :gen_tcp.recv(socket, 0, 1000)
   end
 
