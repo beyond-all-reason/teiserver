@@ -30,14 +30,6 @@ defmodule Teiserver.User do
   alias Teiserver.EmailHelper
   alias Teiserver.Account
 
-  defp next_id() do
-    ConCache.isolated(:id_counters, :user, fn ->
-      new_value = ConCache.get(:id_counters, :user) + 1
-      ConCache.put(:id_counters, :user, new_value)
-      new_value
-    end)
-  end
-
   def generate_random_password() do
     @wordlist
     |> Enum.take_random(3)
@@ -102,7 +94,6 @@ defmodule Teiserver.User do
   def create_user(user) do
     Map.merge(
       %{
-        id: next_id(),
         rank: 1,
         country: "GB",
         lobbyid: "LuaLobby Chobby",

@@ -90,9 +90,12 @@ defmodule TeiserverWeb.BattleLive.Show do
     {:noreply, assign(socket, :messages, new_messages)}
   end
 
-  def handle_info({:add_bot_to_battle, battleid, bot}, %{assigns: assigns} = socket) do
-    Logger.warn("No handler for adding a bot to a battle in live/battle/show.ex")
-    {:noreply, socket}
+  def handle_info({:add_bot_to_battle, _battleid, _bot}, socket) do
+    {:noreply, assign(socket, :battle, Battle.get_battle(assigns.id))}
+  end
+
+  def handle_info({:update_bot, _battleid, _bot}, state) do
+    {:noreply, assign(socket, :battle, Battle.get_battle(assigns.id))}
   end
 
   defp page_title(:show), do: "Show Battle"

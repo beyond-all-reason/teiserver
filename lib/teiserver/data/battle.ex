@@ -65,13 +65,6 @@ defmodule Teiserver.Battle do
     end)
   end
 
-  # defp set_id(id) do
-  #   ConCache.update(:id_counters, :battle, fn existing -> 
-  #     new_value = max(id, existing)
-  #     {:ok, new_value}
-  #   end)
-  # end
-
   def create_battle(battle) do
     # Needs to be supplied a map with:
     # founder_id/name, ip, port, engine_version, map_hash, map_name, name, game_name, hash_code
@@ -167,6 +160,41 @@ defmodule Teiserver.Battle do
       Central.PubSub,
       "battle_updates:#{battle_id}",
       {:add_bot_to_battle, battle_id, bot}
+    )
+  end
+  
+  def update_bot(battle_id, botname, "0", _), do: remove_bot(battle_id, botname)
+  def update_bot(battle_id, botname, new_status, new_team_colour) do
+    battle = get_battle(battle_id)
+    case battle.bots[botname] do
+      nil ->
+        nil
+
+      bot ->
+        new_bot = Map.merge(bot, %{
+          battlestatus: new_status,
+          team_colour: new_team_colour
+        })
+        new_bots = Map.put(battle.bots, botname, new_bot)
+        battle = %{battle | bots: new_bots}
+        ConCache.put(:battles, battle.id, new_battle)
+        PubSub.broadcast(
+          Central.PubSub,
+          "battle_updates:#{battle_id}",
+          {:update_bot, battle_id, bot}
+        )
+    end
+  end
+
+  def remove_bot(battle_id, botname) do
+    battle = get_battle(battle_id)
+    new_bots = Map.delete(battle.bots, botname)
+    battle = %{battle | bots: new_bots}
+    ConCache.put(:battles, battle.id, new_battle)
+    PubSub.broadcast(
+      Central.PubSub,
+      "battle_updates:#{battle_id}",
+      {:update_bot, battle_id, %{name: botname, battlestatus: 0, team_colour: "#000000"}}
     )
   end
 

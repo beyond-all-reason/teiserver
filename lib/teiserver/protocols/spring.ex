@@ -23,7 +23,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # FORCEALLYNO
   # FORCETEAMCOLOR
   # FORCESPECTATORMODE
-  # UPDATEBOT
   # ADDSTARTRECT
   # REMOVESTARTRECT
   # SETSCRIPTTAGS
@@ -607,6 +606,19 @@ defmodule Teiserver.Protocols.SpringProtocol do
     state
   end
 
+  defp do_handle("UPDATEBOT", _msg, %{client: %{battle_id: nil}} = state), do: state
+  defp do_handle("UPDATEBOT", data, state) do
+    case Regex.run(~r/(\S+) (\d+) (\d+) (\S+)/, data) do
+      [_, name, battlestatus, team_colour] ->
+        if Battle.allow?(state.user, "UPDATEBOT", state.client.battle_id) do
+          Battle.update_bot(state.client.battle_id, name, battlestatus, team_colour, ai_dll)
+        end
+      _ ->
+        nil
+    end
+    state
+  end
+
   defp do_handle("SAYBATTLE", _msg, %{client: %{battle_id: nil}} = state), do: state
 
   defp do_handle("SAYBATTLE", msg, state) do
@@ -849,6 +861,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_reply(:add_bot_to_battle, {battle_id, bot}) do
     "ADDBOT #{battle_id} #{bot.name} #{bot.owner_name} #{bot.battlestatus} #{bot.team_colour} #{bot.ai_dll}\n"
+  end
+
+  defp do_reply(:update_bot, {battle_id, bot}) do
+    "UPDATEBOT #{battle_id} #{bot.name} #{bot.owner_name} #{bot.battlestatus} #{bot.team_colour}\n"
   end
 
   defp do_reply(:battle_players, battle) do
