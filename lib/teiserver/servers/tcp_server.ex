@@ -122,6 +122,18 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  def handle_info({:battle_updated, battle_id, data, reason}, state) do
+    if state.client.battle_id == battle_id do
+      case reason do
+        :add_start_rectangle ->
+          state.protocol.reply(:add_start_rectangle, data, state)
+        :remove_start_rectangle ->
+          state.protocol.reply(:remove_start_rectangle, data, state)
+      end
+    end
+    {:noreply, state}
+  end
+
   # Commands
   def handle_info({:ring, ringer}, state) do
     new_state = state.protocol.reply(:ring, {ringer, state.user}, state)

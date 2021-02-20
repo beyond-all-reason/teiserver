@@ -96,6 +96,21 @@ defmodule Teiserver.Battle do
     )
   end
 
+  def update_battle(battle, data \\ nil, reason \\ nil) do
+    ConCache.put(:battles, battle.id, battle)
+    PubSub.broadcast(
+      Central.PubSub,
+      "battle_updates:#{battle.id}",
+      {:battle_updated, battle.id, data, reason}
+    )
+    PubSub.broadcast(
+      Central.PubSub,
+      "all_battle_updates",
+      {:battle_updated, battle.id, data, reason}
+    )
+    battle
+  end
+
   def get_battle!(id) do
     ConCache.get(:battles, int_parse(id))
   end
@@ -244,6 +259,22 @@ defmodule Teiserver.Battle do
     end)
   end
 
+  def add_start_rectangle(battle_id, [_, _, _, _, _] = rectangle) do
+    battle = get_battle(battle_id)
+    new_rectangles = battle.start_rectangles ++ [rectangle]
+    new_battle = %{battle | start_rectangles: new_rectangles}
+    update_battle(new_battle, rectangle, :add_start_rectangle)
+  end
+
+  def remove_start_rectangle(battle_id, team) do
+    battle = get_battle(battle_id)
+    new_rectangles = battle.start_rectangles
+      |> Enum.filter(fn [rteam | _] -> rteam != team end)
+
+    new_battle = %{battle | start_rectangles: new_rectangles}
+    update_battle(new_battle, team, :remove_start_rectangle)
+  end
+
   def can_join?(_user, battle_id, password \\ nil, _script_password \\ nil) do
     battle = get_battle(battle_id)
 
@@ -273,7 +304,7 @@ defmodule Teiserver.Battle do
   def allow?(user, cmd, %{client: %{battle_id: battle_id}}), do: allow?(user, cmd, battle_id)
   def allow?(user, cmd, battle_id) do
     battle = get_battle(battle_id)
-    mod_command = Enum.member?(~w(HANDICAP), cmd)
+    mod_command = Enum.member?(~w(HANDICAP ADDSTARTRECT REMOVESTARTRECT), cmd)
 
     cond do
       battle == nil ->

@@ -22,13 +22,18 @@ defmodule Teiserver.TestLib do
   def new_user() do
     name = new_user_name()
 
-    {:ok, user} =
-      User.user_register_params(name, "#{name}@email.com", "password")
-      |> Account.create_user
-      
-    user
-      |> User.convert_user
-      |> User.add_user
+    case User.get_user_by_name(name) do
+      nil ->
+        {:ok, user} =
+          User.user_register_params(name, "#{name}@email.com", "password")
+          |> Account.create_user
+          
+        user
+          |> User.convert_user
+          |> User.add_user
+      _ ->
+        new_user()
+    end
   end
 
   def auth_setup(user \\ nil) do

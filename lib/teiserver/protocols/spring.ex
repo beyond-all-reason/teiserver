@@ -23,8 +23,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # FORCEALLYNO
   # FORCETEAMCOLOR
   # FORCESPECTATORMODE
-  # ADDSTARTRECT
-  # REMOVESTARTRECT
   # SETSCRIPTTAGS
   # REMOVESCRIPTTAGS
 
@@ -499,7 +497,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
         battle.start_rectangles
         |> Enum.each(fn r ->
-          reply(:start_rectangle, r, state)
+          reply(:add_start_rectangle, r, state)
         end)
 
         _send("REQUESTBATTLESTATUS\n", state)
@@ -544,7 +542,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
         battle.start_rectangles
         |> Enum.each(fn r ->
-          reply(:start_rectangle, r, state)
+          reply(:add_start_rectangle, r, state)
         end)
 
         _send("REQUESTBATTLESTATUS\n", state)
@@ -582,6 +580,27 @@ defmodule Teiserver.Protocols.SpringProtocol do
         end
       _ ->
         nil
+    end
+    state
+  end
+  
+  defp do_handle("ADDSTARTRECT", data, state) do
+    case Regex.run(~r/(\d+) (\d+) (\d+) (\d+) (\d+)/, data) do
+      [_, team, left, top, right, bottom] ->
+        if Battle.allow?(state.user, "ADDSTARTRECT", state) do
+          rectangle = int_parse([team, left, top, right, bottom])
+          Battle.add_start_rectangle(state.client.battle_id, rectangle)
+        end
+      _ ->
+        nil
+    end
+    state
+  end
+
+  defp do_handle("REMOVESTARTRECT", team, state) do
+    if Battle.allow?(state.user, "REMOVESTARTRECT", state) do
+      team = int_parse(team)
+      Battle.remove_start_rectangle(state.client.battle_id, team)
     end
     state
   end
@@ -846,8 +865,12 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "JOINBATTLE #{battle.id} #{battle.game_hash}\n"
   end
 
-  defp do_reply(:start_rectangle, [team, left, top, right, bottom]) do
+  defp do_reply(:add_start_rectangle, [team, left, top, right, bottom]) do
     "ADDSTARTRECT #{team} #{left} #{top} #{right} #{bottom}\n"
+  end
+
+  defp do_reply(:remove_start_rectangle, team) do
+    "REMOVESTARTRECT #{team}\n"
   end
 
   defp do_reply(:battle_settings, battle) do
