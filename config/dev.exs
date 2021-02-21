@@ -32,9 +32,9 @@ config :central, CentralWeb.Endpoint,
 
 config :central, Teiserver,
   certs: [
-    keyfile: "/priv/certs/localhost.key",
-    certfile: "/priv/certs/localhost.crt",
-    cacertfile: "/priv/certs/localhost.crt",
+    keyfile: "priv/certs/localhost.key",
+    certfile: "priv/certs/localhost.crt",
+    cacertfile: "priv/certs/localhost.crt",
   ]
 
 # ## SSL Support

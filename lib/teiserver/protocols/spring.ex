@@ -72,6 +72,35 @@ defmodule Teiserver.Protocols.SpringProtocol do
     {command, String.trim(data), String.trim(msg_id)}
   end
 
+  defp do_handle("SLTS", _, state) do
+    _send("OK cmd=SLTS\n", state)
+    state
+  end
+
+  defp do_handle("STLS", _, state) do
+    _send("OK cmd=STLS\n", state)
+    state
+  end
+
+  # Special handler to allow us to test more easily, it just accepts
+  # any login. As soon as we put password checking in place this will
+  # stop working
+  defp do_handle("LI", username, state) do
+    do_handle(
+      "LOGIN",
+      "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp",
+      state
+    )
+  end
+
+  defp do_handle("JB", bnum, state) do
+    do_handle("JOINBATTLE", "#{bnum} empty 193322681", state)
+  end
+
+  defp do_handle("OB", _, state) do
+    do_handle("OPENBATTLE", "0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName", state)
+  end
+
   # Specific handlers for different commands
   @spec do_handle(String.t(), String.t(), Map.t()) :: Map.t()
   defp do_handle("MYSTATUS", data, state) do
@@ -94,25 +123,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
         Logger.debug("[command:mystatus] bad match on: #{data}")
         state
     end
-  end
-
-  # Special handler to allow us to test more easily, it just accepts
-  # any login. As soon as we put password checking in place this will
-  # stop working
-  defp do_handle("LI", username, state) do
-    do_handle(
-      "LOGIN",
-      "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp",
-      state
-    )
-  end
-
-  defp do_handle("JB", bnum, state) do
-    do_handle("JOINBATTLE", "#{bnum} empty 193322681", state)
-  end
-
-  defp do_handle("OB", _, state) do
-    do_handle("OPENBATTLE", "0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName", state)
   end
 
   defp do_handle("LOGIN", data, state) do
@@ -805,7 +815,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(:add_user, user) do
-    "ADDUSER #{user.name} #{user.country} #{user.id}\t#{user.lobbyid}\n"
+    "ADDUSER #{user.name} #{user.country} #{user.id} #{user.lobbyid}\n"
   end
 
   defp do_reply(:remove_user, {_userid, username}) do
@@ -1061,7 +1071,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         msg
       end
 
-    Logger.debug("--> #{String.trim(msg)}")
+    Logger.info("--> #{String.trim(msg)}")
     transport.send(socket, msg)
   end
 end

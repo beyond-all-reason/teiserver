@@ -57,7 +57,7 @@ defmodule Teiserver.SpringBattleHostTest do
     _ = _recv(socket2)
 
     reply = _recv(socket)
-    assert reply =~ "ADDUSER #{user2.name} XX #{user2.id}\tLuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} XX #{user2.id} LuaLobby Chobby\n"
     assert reply =~ "JOINEDBATTLE 3 #{user2.name}\n"
     assert reply =~ "CLIENTSTATUS #{user2.name}\t4\n"
     

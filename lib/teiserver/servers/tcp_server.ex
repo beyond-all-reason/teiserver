@@ -31,9 +31,9 @@ defmodule Teiserver.TcpServer do
     if mode == :ranch_ssl do
       {certfile, cacertfile, keyfile} = 
         {
-          Application.get_env(:central, CentralWeb.Endpoint)[:https][:certfile],
-          Application.get_env(:central, CentralWeb.Endpoint)[:https][:cacertfile],
-          Application.get_env(:central, CentralWeb.Endpoint)[:https][:keyfile],
+          Application.get_env(:central, Teiserver)[:certs][:certfile],
+          Application.get_env(:central, Teiserver)[:certs][:cacertfile],
+          Application.get_env(:central, Teiserver)[:certs][:keyfile],
         }
 
       :ranch.start_listener(
@@ -104,7 +104,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:tcp, _socket, data}, state) do
-    Logger.debug("<-- #{String.trim(data)}")
+    Logger.info("<-- TCP #{String.trim(data)}")
 
     new_state =
       data
@@ -117,7 +117,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    Logger.debug("<-- #{String.trim(data)}")
+    Logger.info("<-- SSL #{String.trim(data)}")
 
     new_state =
       data

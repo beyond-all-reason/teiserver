@@ -85,7 +85,7 @@ SERVERMSG Ingame time: xyz hours\n"
     %{socket: socket2} = auth_setup(user2)
     reply = _recv(socket1)
     assert reply =~ "ADDUSER #{user2.name} XX "
-    assert reply =~ "\tLuaLobby Chobby\n"
+    assert reply =~ " LuaLobby Chobby\n"
 
     _send(socket1, "#111 IGNORELIST\n")
     reply = _recv(socket1)
@@ -133,7 +133,7 @@ IGNORELISTEND\n"
     %{socket: socket2} = auth_setup(user2)
     reply = _recv(socket1)
     assert reply =~ "ADDUSER #{user2.name} XX "
-    assert reply =~ "\tLuaLobby Chobby\n"
+    assert reply =~ " LuaLobby Chobby\n"
 
     _send(socket1, "#7 FRIENDLIST\n")
     reply = _recv(socket1)
@@ -312,7 +312,7 @@ CLIENTBATTLESTATUS #{user.name} 0 0\n"
     %{socket: socket2} = auth_setup(user2)
     reply = _recv(socket1)
     assert reply =~ "ADDUSER #{user2.name} XX "
-    assert reply =~ "\tLuaLobby Chobby\n"
+    assert reply =~ " LuaLobby Chobby\n"
 
     _send(socket2, "RING #{user.name}\n")
     _ = _recv(socket2)
