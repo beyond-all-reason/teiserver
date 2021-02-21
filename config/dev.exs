@@ -30,6 +30,13 @@ config :central, CentralWeb.Endpoint,
     ]
   ]
 
+config :central, Teiserver,
+  certs: [
+    keyfile: "/priv/certs/localhost.key",
+    certfile: "/priv/certs/localhost.crt",
+    cacertfile: "/priv/certs/localhost.crt",
+  ]
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed

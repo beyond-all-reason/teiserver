@@ -47,6 +47,13 @@ config :central, CentralWeb.Endpoint,
   check_origin: ["//teifion.co.uk", "//*.teifion.co.uk"],
   version: Mix.Project.config[:version]
 
+config :central, Teiserver,
+  certs: [
+    keyfile: "/var/www/tls/privkey.pem",
+    certfile: "/var/www/tls/cert.pem",
+    cacertfile: "/var/www/tls/fullchain.pem",
+  ]
+
 # Do not print debug messages in production
 config :logger, level: :info
 

@@ -36,6 +36,7 @@ central-*.tar
 # Static
 /assets/node_modules/
 /priv/static/
+/priv/certs/
 
 # Other
 /assets/static/js/fontawesome.js

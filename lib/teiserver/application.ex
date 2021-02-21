@@ -3,12 +3,12 @@ defmodule Teiserver.Application do
   def children() do
     [
       %{
-        id: Teiserver.RawTcpServer,
-        start: {Teiserver.TcpServer, :start_link, [[]]}
-      },
-      %{
         id: Teiserver.SSLTcpServer,
         start: {Teiserver.TcpServer, :start_link, [[ssl: true]]}
+      },
+      %{
+        id: Teiserver.RawTcpServer,
+        start: {Teiserver.TcpServer, :start_link, [[]]}
       },
       concache_perm_sup(:id_counters),
       concache_perm_sup(:lists),

@@ -15,10 +15,12 @@ defmodule Teiserver.TcpServer do
 
   _ = """
   -- Testing locally
-  openssl s_client -connect localhost:8200
+  telnet localhost 8200
+  openssl s_client -connect localhost:8201
 
   -- Testing on website
-  openssl s_client -connect teifion.co.uk:443
+  telnet bar.teifion.co.uk 8200
+  openssl s_client -connect bar.teifion.co.uk:8201
   """
 
   # Called at startup
@@ -27,25 +29,18 @@ defmodule Teiserver.TcpServer do
 
     # start_listener(Ref, Transport, TransOpts0, Protocol, ProtoOpts)
     if mode == :ranch_ssl do
-      {certfile, cacertfile, keyfile} = if Mix.env() == :prod do
+      {certfile, cacertfile, keyfile} = 
         {
           Application.get_env(:central, CentralWeb.Endpoint)[:https][:certfile],
           Application.get_env(:central, CentralWeb.Endpoint)[:https][:cacertfile],
           Application.get_env(:central, CentralWeb.Endpoint)[:https][:keyfile],
         }
-      else
-        {
-          "priv/certs/localhost.crt",
-          "priv/certs/localhost.crt",
-          "priv/certs/localhost.key"
-        }
-      end
 
       :ranch.start_listener(
         make_ref(),
         :ranch_ssl,
         [
-          {:port, 8200},
+          {:port, 8201},
           {:certfile, certfile},
           {:cacertfile, cacertfile},
           {:keyfile, keyfile},
@@ -58,7 +53,7 @@ defmodule Teiserver.TcpServer do
         make_ref(),
         :ranch_tcp,
         [
-          {:port, 8201}
+          {:port, 8200}
         ],
         __MODULE__,
         []
