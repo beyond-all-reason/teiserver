@@ -259,6 +259,27 @@ defmodule Teiserver.Battle do
     end)
   end
 
+  def kick_user_from_battle(userid, battle_id) do
+    ConCache.update(:battles, battle_id, fn battle_state ->
+      new_state =
+        if not Enum.member?(battle_state.players, userid) do
+          # No change takes place, they've already left the battle
+          battle_state
+        else
+          PubSub.broadcast(
+            Central.PubSub,
+            "battle_updates:#{battle_id}",
+            {:kick_user_from_battle, userid, battle_id}
+          )
+
+          new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
+          Map.put(battle_state, :players, new_players)
+        end
+
+      {:ok, new_state}
+    end)
+  end
+
   # Start rects
   def add_start_rectangle(battle_id, [_, _, _, _, _] = rectangle) do
     battle = get_battle(battle_id)
@@ -320,7 +341,7 @@ defmodule Teiserver.Battle do
   def allow?(cmd, %{user: user, client: %{battle_id: battle_id}}), do: allow?(user, cmd, battle_id)
   def allow?(user, cmd, battle_id) do
     battle = get_battle(battle_id)
-    mod_command = Enum.member?(~w(HANDICAP ADDSTARTRECT REMOVESTARTRECT), cmd)
+    mod_command = Enum.member?(~w(HANDICAP ADDSTARTRECT REMOVESTARTRECT KICKFROMBATTLE), cmd)
 
     cond do
       battle == nil ->

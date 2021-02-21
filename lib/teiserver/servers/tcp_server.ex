@@ -246,6 +246,14 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  def handle_info({:kick_user_from_battle, userid, battle_id}, state) do
+    if userid == state.userid and battle_id == state.client.battle_id do
+      state.protocol.reply(:forcequit_battle, state)
+    end
+    new_state = state.protocol.reply(:remove_user_from_battle, {userid, battle_id}, state)
+    {:noreply, new_state}
+  end
+
   def handle_info({:battle_message, userid, msg, battle_id}, state) do
     new_state = state.protocol.reply(:battle_message, {userid, msg, battle_id}, state)
     {:noreply, new_state}

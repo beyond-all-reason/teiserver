@@ -48,6 +48,7 @@ defmodule Teiserver.SpringBattleHostTest do
     # Check the battle actually got created
     battle = Battle.get_battle(battle_id)
     assert battle != nil
+    assert Enum.count(battle.players) == 1
 
     # Now create a user to join the battle
     user2 = new_user()
@@ -55,12 +56,21 @@ defmodule Teiserver.SpringBattleHostTest do
     _send(socket2, "JOINBATTLE 3 empty gameHash\n")
     # The response to joining a battle is tested elsewhere, we just care about the host right now
     _ = _recv(socket2)
+    _ = _recv(socket2)
 
     reply = _recv(socket)
     assert reply =~ "ADDUSER #{user2.name} XX #{user2.id} LuaLobby Chobby\n"
     assert reply =~ "JOINEDBATTLE 3 #{user2.name}\n"
     assert reply =~ "CLIENTSTATUS #{user2.name}\t4\n"
-    
+
+    # Kick user2
+    battle = Battle.get_battle(battle_id)
+    assert Enum.count(battle.players) == 2
+
+    _send(socket, "KICKFROMBATTLE #{battle_id} #{user2.name}\n")
+    reply = _recv(socket2)
+    assert reply == "FORCEQUITBATTLE\nLEFTBATTLE #{battle_id} #{user2.name}\n"
+
     # Adding start rectangles
     assert Enum.count(battle.start_rectangles) == 2
     _send(socket, "ADDSTARTRECT 2 50 50 100 100\n")

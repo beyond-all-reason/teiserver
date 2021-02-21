@@ -18,7 +18,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # RESENDVERIFICATION - See above
 
   # TODO
-  # KICKFROMBATTLE
   # FORECTEAMNO
   # FORCEALLYNO
   # FORCETEAMCOLOR
@@ -638,6 +637,19 @@ defmodule Teiserver.Protocols.SpringProtocol do
     state
   end
 
+  defp do_handle("KICKFROMBATTLE", data, state) do
+    case Regex.run(~r/(\d+) (\S+)/, data) do
+      [_, battle_id, username] ->
+        if Battle.allow?("KICKFROMBATTLE", state) do
+          userid = User.get_userid(username)
+          Battle.kick_user_from_battle(userid, int_parse(battle_id))
+        end
+      _ ->
+        nil
+    end
+    state
+  end
+
   defp do_handle("PROMOTE", _, %{client: %{battle_id: nil}} = state), do: state
   defp do_handle("PROMOTE", _, state) do
     Logger.info("PROMOTE is not handled at this time as Chobby has no way to handle it - TODO")
@@ -1022,6 +1034,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_reply(:remove_user_from_battle, {userid, battleid}) do
     username = User.get_username(userid)
     "LEFTBATTLE #{battleid} #{username}\n"
+  end
+
+  defp do_reply(:forcequit_battle, nil) do
+    "FORCEQUITBATTLE\n"
   end
 
   defp do_reply(:battle_message, {userid, msg, _battle_id}) do
