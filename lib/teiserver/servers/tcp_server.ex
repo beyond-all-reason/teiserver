@@ -13,20 +13,60 @@ defmodule Teiserver.TcpServer do
   @behaviour :ranch_protocol
   @default_protocol SpringProtocol
 
-  def start_link(_opts) do
-    :ranch.start_listener(
-      make_ref(),
-      :ranch_tcp,
-      [
-        {:port, 8200}
-      ],
-      __MODULE__,
-      [
-        {:max_connections, :infinty}
-      ]
-    )
+  _ = """
+  -- Testing locally
+  openssl s_client -connect localhost:8200
+
+  -- Testing on website
+  openssl s_client -connect teifion.co.uk:443
+  """
+
+  # Called at startup
+  def start_link(opts) do
+    mode = if opts[:ssl], do: :ranch_ssl, else: :ranch_tcp
+
+    # start_listener(Ref, Transport, TransOpts0, Protocol, ProtoOpts)
+    if mode == :ranch_ssl do
+      {certfile, cacertfile, keyfile} = if Mix.env() == :prod do
+        {
+          Application.get_env(:central, CentralWeb.Endpoint)[:https][:certfile],
+          Application.get_env(:central, CentralWeb.Endpoint)[:https][:cacertfile],
+          Application.get_env(:central, CentralWeb.Endpoint)[:https][:keyfile],
+        }
+      else
+        {
+          "priv/certs/localhost.crt",
+          "priv/certs/localhost.crt",
+          "priv/certs/localhost.key"
+        }
+      end
+
+      :ranch.start_listener(
+        make_ref(),
+        :ranch_ssl,
+        [
+          {:port, 8200},
+          {:certfile, certfile},
+          {:cacertfile, cacertfile},
+          {:keyfile, keyfile},
+        ],
+        __MODULE__,
+        []
+      )
+    else
+      :ranch.start_listener(
+        make_ref(),
+        :ranch_tcp,
+        [
+          {:port, 8201}
+        ],
+        __MODULE__,
+        []
+      )
+    end
   end
 
+  # Called on new connection
   def start_link(ref, socket, transport, _opts) do
     pid = :proc_lib.spawn_link(__MODULE__, :init, [ref, socket, transport])
     {:ok, pid}
@@ -69,6 +109,19 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:tcp, _socket, data}, state) do
+    Logger.debug("<-- #{String.trim(data)}")
+
+    new_state =
+      data
+      |> String.split("\n")
+      |> Enum.reduce(state, fn data, acc ->
+        state.protocol.handle(data, acc)
+      end)
+
+    {:noreply, new_state}
+  end
+
+  def handle_info({:ssl, _socket, data}, state) do
     Logger.debug("<-- #{String.trim(data)}")
 
     new_state =
@@ -222,6 +275,17 @@ defmodule Teiserver.TcpServer do
 
   def handle_info({:tcp_closed, _socket}, state) do
     Logger.debug("Closing TCP connection - no transport")
+    {:stop, :normal, state}
+  end
+
+  def handle_info({:ssl_closed, socket}, %{socket: socket, transport: transport} = state) do
+    Logger.debug("Closing SSL connection")
+    transport.close(socket)
+    {:stop, :normal, state}
+  end
+
+  def handle_info({:ssl_closed, _socket}, state) do
+    Logger.debug("Closing SSL connection - no transport")
     {:stop, :normal, state}
   end
 

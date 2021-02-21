@@ -2,7 +2,14 @@ defmodule Teiserver.Application do
   @moduledoc false
   def children() do
     [
-      {Teiserver.TcpServer, []},
+      %{
+        id: Teiserver.RawTcpServer,
+        start: {Teiserver.TcpServer, :start_link, [[]]}
+      },
+      %{
+        id: Teiserver.SSLTcpServer,
+        start: {Teiserver.TcpServer, :start_link, [[ssl: true]]}
+      },
       concache_perm_sup(:id_counters),
       concache_perm_sup(:lists),
       concache_perm_sup(:users_lookup_name_with_id),

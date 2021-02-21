@@ -61,7 +61,7 @@ defmodule Central.MixProject do
       {:human_time, "~> 0.2.4"},
       {:oban, "~> 2.3.4"},
 
-      {:ranch, "~> 1.4"},
+      {:ranch, "~> 1.7"},
       {:parallel, "~> 0.0"},
       {:con_cache, "~> 0.13"},
       {:phoenix_pubsub, "~> 2.0"},
