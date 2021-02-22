@@ -4,7 +4,6 @@ defmodule Teiserver.TcpServer do
   @moduledoc false
   use GenServer
   require Logger
-  alias Phoenix.PubSub
 
   alias Teiserver.Client
   alias Teiserver.User
@@ -73,10 +72,6 @@ defmodule Teiserver.TcpServer do
     :ok = transport.setopts(socket, [{:active, true}])
 
     @default_protocol.welcome(socket, transport)
-
-    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
 
     :gen_server.enter_loop(__MODULE__, [], %{
       userid: nil,

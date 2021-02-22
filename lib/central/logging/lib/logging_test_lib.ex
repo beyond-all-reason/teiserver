@@ -1,7 +1,6 @@
 defmodule Central.Logging.LoggingTestLib do
   use CentralWeb, :library
 
-  alias Central.Logging
   alias Central.Logging.PageViewLog
   alias Central.Logging.PageViewLogLib
   alias Central.Logging.AuditLog

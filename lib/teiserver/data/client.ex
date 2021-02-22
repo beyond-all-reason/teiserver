@@ -48,6 +48,10 @@ defmodule Teiserver.Client do
       |> add_client
 
     PubSub.broadcast(Central.PubSub, "all_client_updates", {:logged_in_client, user.id, user.name})
+
+    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
     client
   end
 

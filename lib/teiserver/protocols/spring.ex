@@ -151,10 +151,16 @@ defmodule Teiserver.Protocols.SpringProtocol do
         # Who is online?
         # skip ourselves because that will result in a double ADDUSER
         Client.list_client_ids()
-        |> Enum.filter(fn userid -> userid != user.id end)
         |> Enum.map(fn userid ->
           user = User.get_user_by_id(userid)
           reply(:add_user, user, state)
+        end)
+        :timer.sleep(300)
+
+        # Client status messages
+        Client.list_clients()
+        |> Enum.map(fn client ->
+          reply(:client_status, client, state)
         end)
 
         Battle.list_battles()
@@ -162,12 +168,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
           reply(:battle_opened, b, state)
           reply(:update_battle, b, state)
           reply(:battle_players, b, state)
-        end)
-
-        # Client status messages
-        Client.list_clients()
-        |> Enum.map(fn client ->
-          reply(:client_status, client, state)
         end)
 
         :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
@@ -1013,7 +1013,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(:client_status, client) do
-    "CLIENTSTATUS #{client.name}\t#{client.status}\n"
+    "CLIENTSTATUS #{client.name} #{client.status}\n"
   end
 
   defp do_reply(:client_battlestatus, {userid, battlestatus, team_colour}) do
