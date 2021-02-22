@@ -5,6 +5,7 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Central.Account.User
   alias Teiserver.Account.UserLib
   alias Central.Account.GroupLib
+  import Teiserver.User, only: [bar_user_group_id: 0]
 
   plug AssignPlug,
     sidemenu_active: "teiserver"
@@ -66,7 +67,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
   def create(conn, %{"user" => user_params}) do
     user_params = Map.merge(user_params, %{
-      "admin_group_id" => conn.current_user.admin_group_id,
+      "admin_group_id" => bar_user_group_id(),
       "password" => "pass",
       "data" => %{
         "rank" => 1,

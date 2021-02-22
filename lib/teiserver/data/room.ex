@@ -35,20 +35,20 @@ defmodule Teiserver.Room do
     end
   end
 
-  def add_user_to_room(new_username, room_name) do
+  def add_user_to_room(user_id, room_name) do
     ConCache.update(:rooms, room_name, fn room_state ->
       new_state =
-        if Enum.member?(room_state.members, new_username) do
+        if Enum.member?(room_state.members, user_id) do
           # No change takes place, they're already in the room!
           room_state
         else
           PubSub.broadcast(
             Central.PubSub,
             "room:#{room_name}",
-            {:add_user_to_room, new_username, room_name}
+            {:add_user_to_room, user_id, room_name}
           )
 
-          new_members = room_state.members ++ [new_username]
+          new_members = room_state.members ++ [user_id]
           Map.put(room_state, :members, new_members)
         end
 
@@ -56,20 +56,20 @@ defmodule Teiserver.Room do
     end)
   end
 
-  def remove_user_from_room(username, room_name) do
+  def remove_user_from_room(user_id, room_name) do
     ConCache.update(:rooms, room_name, fn room_state ->
       new_state =
-        if not Enum.member?(room_state.members, username) do
+        if not Enum.member?(room_state.members, user_id) do
           # No change takes place, they've already left the room
           room_state
         else
           PubSub.broadcast(
             Central.PubSub,
             "room:#{room_name}",
-            {:remove_user_from_room, username, room_name}
+            {:remove_user_from_room, user_id, room_name}
           )
 
-          new_members = Enum.filter(room_state.members, fn m -> m != username end)
+          new_members = Enum.filter(room_state.members, fn m -> m != user_id end)
           Map.put(room_state, :members, new_members)
         end
 

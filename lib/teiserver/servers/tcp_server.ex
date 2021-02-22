@@ -40,7 +40,7 @@ defmodule Teiserver.TcpServer do
         make_ref(),
         :ranch_ssl,
         [
-          {:port, 8201},
+          {:port, Application.get_env(:central, Teiserver)[:ports][:tls]},
           {:certfile, certfile},
           {:cacertfile, cacertfile},
           {:keyfile, keyfile},
@@ -53,7 +53,7 @@ defmodule Teiserver.TcpServer do
         make_ref(),
         :ranch_tcp,
         [
-          {:port, 8200}
+          {:port, Application.get_env(:central, Teiserver)[:ports][:tcp]}
         ],
         __MODULE__,
         []

@@ -11,6 +11,12 @@ config :central, CentralWeb.Endpoint,
   render_errors: [view: CentralWeb.ErrorView, accepts: ~w(html json)],
   pubsub_server: Central.PubSub
 
+config :central, Teiserver,
+  ports: [
+    tcp: 8200,
+    tls: 8201
+  ]
+
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]

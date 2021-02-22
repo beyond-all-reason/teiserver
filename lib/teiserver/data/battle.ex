@@ -341,7 +341,7 @@ defmodule Teiserver.Battle do
   def allow?(cmd, %{user: user, client: %{battle_id: battle_id}}), do: allow?(user, cmd, battle_id)
   def allow?(user, cmd, battle_id) do
     battle = get_battle(battle_id)
-    mod_command = Enum.member?(~w(HANDICAP ADDSTARTRECT REMOVESTARTRECT KICKFROMBATTLE), cmd)
+    mod_command = Enum.member?(~w(HANDICAP ADDSTARTRECT REMOVESTARTRECT KICKFROMBATTLE FORCETEAMNO FORCEALLYNO FORCETEAMCOLOR FORCESPECTATORMODE), cmd)
 
     cond do
       battle == nil ->

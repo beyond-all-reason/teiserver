@@ -12,8 +12,8 @@ defmodule Teiserver.Client do
         in_game: false,
         away: false,
         rank: 1,
-        moderator: 0,
-        bot: 0,
+        moderator: false,
+        bot: false,
 
         # Battle stuff
         ready: false,
@@ -173,6 +173,11 @@ defmodule Teiserver.Client do
 
   def list_client_ids() do
     ConCache.get(:lists, :clients)
+  end
+
+  def list_clients() do
+    ConCache.get(:lists, :clients)
+    |> Enum.map(fn c -> get_client(c) end)
   end
 
   # It appears this isn't used but I suspect it will be at a later stage

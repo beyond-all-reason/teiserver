@@ -17,12 +17,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # CONFIRMAGREEMENT - Waiting to hear from Beherith on how he wants it to work
   # RESENDVERIFICATION - See above
 
-  # TODO
-  # FORECTEAMNO
-  # FORCEALLYNO
-  # FORCETEAMCOLOR
-  # FORCESPECTATORMODE
-
   # Need to do at some stage but not used at this time
   # DISABLEUNITS
   # ENABLEUNITS
@@ -32,6 +26,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   @motd """
   Message of the day
   Welcome to Teiserver
+  Connect on port 8201 for TLS
+  ---------
   """
 
   # The welcome message is sent to a client when they first connect
@@ -88,6 +84,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     do_handle(
       "LOGIN",
       "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp",
+      # "SPADS1[00] X03MO1qnZdYdgyfeuILPmQ== 0 192.168.1.102 SPADS v0.12.30\t0\tb_sp",
       state
     )
   end
@@ -126,7 +123,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_handle("LOGIN", data, state) do
     response =
-      case Regex.run(~r/^(\w+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)\t([^\t]+)\t([^\t]+)/, data) do
+      case Regex.run(~r/^(\S+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)\t([^\t]+)\t([^\t]+)/, data) do
         [_, username, password, _cpu, ip, lobby, userid, modes] ->
           _ = [username, password, ip, lobby, userid, modes]
           username = User.clean_name(username)
@@ -134,7 +131,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
           User.try_login(username, password, state)
 
         nil ->
-          {:error, "Invalid details format"}
+          new_data = data
+          |> String.replace("\t", "~")
+          |> String.replace(" ", "_")
+          {:error, "Invalid details format, got #{new_data}"}
       end
 
     case response do
@@ -149,8 +149,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
         client = Client.login(user, self(), __MODULE__)
 
         # Who is online?
+        # skip ourselves because that will result in a double ADDUSER
         Client.list_client_ids()
-        |> Enum.each(fn userid ->
+        |> Enum.filter(fn userid -> userid != user.id end)
+        |> Enum.map(fn userid ->
           user = User.get_user_by_id(userid)
           reply(:add_user, user, state)
         end)
@@ -160,6 +162,12 @@ defmodule Teiserver.Protocols.SpringProtocol do
           reply(:battle_opened, b, state)
           reply(:update_battle, b, state)
           reply(:battle_players, b, state)
+        end)
+
+        # Client status messages
+        Client.list_clients()
+        |> Enum.map(fn client ->
+          reply(:client_status, client, state)
         end)
 
         :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
@@ -302,16 +310,15 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("EXIT", _reason, state) do
     Client.disconnect(state.userid)
     send(self(), :terminate)
-    # GenServer.cast(via_tuple(t.id), {:terminate})
     state
   end
 
   defp do_handle("GETUSERINFO", _, state) do
     # TODO: Actually have this information
     msg = [
-      "SERVERMSG Registration date: yesterday\n",
+      "SERVERMSG Registration date: Oct 21, 2020\n",
       "SERVERMSG Email address: #{state.user.email}\n",
-      "SERVERMSG Ingame time: xyz hours\n"
+      "SERVERMSG Ingame time: 3 hours\n"
     ]
 
     _send(msg, state)
@@ -397,10 +404,12 @@ defmodule Teiserver.Protocols.SpringProtocol do
         _send("JOIN #{room_name}\n", state)
         _send("JOINED #{room_name} #{state.name}\n", state)
         _send("CHANNELTOPIC #{room_name} #{room.author}\n", state)
+
         members = room.members
-        |> Enum.map(fn m -> User.get_username(m) end)
-        |> List.insert_at(0, state.name)
-        |> Enum.join(" ")
+          |> Enum.map(fn m -> User.get_username(m) end)
+          |> List.insert_at(0, state.name)
+          |> Enum.join(" ")
+
         _send("CLIENTS #{room_name} #{members}\n", state)
 
         :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
@@ -646,6 +655,50 @@ defmodule Teiserver.Protocols.SpringProtocol do
         end
       _ ->
         nil
+    end
+    state
+  end
+
+  defp do_handle("FORCETEAMNO", data, state) do
+    case Regex.run(~r/(\d+) (\S+)/, data) do
+      [_, username, team_number] ->
+        if Battle.allow?("FORCETEAMNO", state) do
+          Client.force_status_change()
+          Logger.error("TODO - Not implemented")
+        end
+      _ ->
+        nil
+    end
+    state
+  end
+
+  defp do_handle("FORCEALLYNO", data, state) do
+    case Regex.run(~r/(\d+) (\S+)/, data) do
+      [_, username, team_number] ->
+        if Battle.allow?("FORCEALLYNO", state) do
+          Logger.error("TODO - Not implemented")
+        end
+      _ ->
+        nil
+    end
+    state
+  end
+
+  defp do_handle("FORCETEAMCOLOR", data, state) do
+    case Regex.run(~r/(\d+) (\S+)/, data) do
+      [_, username, colour] ->
+        if Battle.allow?("FORCETEAMCOLOR", state) do
+          Logger.error("TODO - Not implemented")
+        end
+      _ ->
+        nil
+    end
+    state
+  end
+
+  defp do_handle("FORCESPECTATORMODE", username, state) do
+    if Battle.allow?("FORCESPECTATORMODE", state) do
+      Logger.error("TODO - Not implemented")
     end
     state
   end

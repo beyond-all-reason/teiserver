@@ -420,7 +420,7 @@ defmodule Teiserver.User do
   def try_login(username, password, state) do
     case get_user_by_name(username) do
       nil ->
-        {:error, "No user found"}
+        {:error, "No user found for '#{username}'"}
 
       user ->
         case test_password(password, user) do
@@ -453,9 +453,15 @@ defmodule Teiserver.User do
   end
 
   def recache_user(id) do
-    Account.get_user!(id)
-    |> convert_user
-    |> update_user
+    if get_user_by_id(id) do
+      Account.get_user!(id)
+      |> convert_user
+      |> update_user
+    else
+      Account.get_user!(id)
+      |> convert_user
+      |> add_user
+    end
   end
 
   def pre_cache_users() do

@@ -31,9 +31,9 @@ defmodule Teiserver.SpringAuthTest do
   test "GETUSERINFO", %{socket: socket, user: user} do
     _send(socket, "GETUSERINFO\n")
     reply = _recv(socket)
-    assert reply =~ "SERVERMSG Registration date: yesterday
+    assert reply =~ "SERVERMSG Registration date: Oct 21, 2020
 SERVERMSG Email address: #{user.email}
-SERVERMSG Ingame time: xyz hours\n"
+SERVERMSG Ingame time: 3 hours\n"
   end
 
   test "MYSTATUS", %{socket: socket, user: user} do
@@ -210,7 +210,7 @@ CLIENTS test_room #{user.name}\n"
     _send(socket, "CHANNELS\n")
     reply = _recv(socket)
     assert reply == "CHANNELS
-CHANNEL main 1
+CHANNEL main 0
 CHANNEL test_room 1
 ENDOFCHANNELS\n"
 
@@ -223,7 +223,7 @@ ENDOFCHANNELS\n"
     _send(socket, "CHANNELS\n")
     reply = _recv(socket)
     assert reply == "CHANNELS
-CHANNEL main 1
+CHANNEL main 0
 CHANNEL test_room 0
 ENDOFCHANNELS\n"
 
@@ -234,6 +234,8 @@ ENDOFCHANNELS\n"
   end
 
   test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket, user: user} do
+    # Currently not working as no battles are present at this stage
+    # TODO - Add battle
     _send(socket, "JOINBATTLE 1 empty 1683043765\n")
     # The remainder of this string is just the script tags, we'll assume it's correct for now
     part1 = _recv(socket)

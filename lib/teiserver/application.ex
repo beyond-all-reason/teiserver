@@ -40,18 +40,19 @@ defmodule Teiserver.Application do
 
     ConCache.put(:lists, :clients, [])
     ConCache.put(:lists, :rooms, [])
+    ConCache.insert_new(:lists, :battles, [])
 
     ConCache.put(:id_counters, :battle, 0)
     ConCache.put(:id_counters, :user, 0)
 
     Teiserver.User.pre_cache_users()
-    Teiserver.TestData.create_battles()
+    # Teiserver.TestData.create_battles()
 
     Teiserver.Room.create_room(%{
       name: "main",
       topic: "main",
       author: "ChanServ",
-      members: ["Addas"]
+      members: []
     })
     |> Teiserver.Room.add_room()
   end
