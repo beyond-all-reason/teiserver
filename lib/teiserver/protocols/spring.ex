@@ -127,10 +127,9 @@ defmodule Teiserver.Protocols.SpringProtocol do
     response =
       case regex do
         [_, username, password, _cpu, ip, lobby, userid, modes | _] ->
-          _ = [username, password, ip, lobby, userid, modes]
           username = User.clean_name(username)
           Logger.debug("[protocol:login] matched #{username}")
-          User.try_login(username, password, state)
+          User.try_login(username, password, state, ip, lobby)
 
         nil ->
           new_data = data
@@ -893,7 +892,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(:add_user, user) do
-    "ADDUSER #{user.name} #{user.country} #{user.id} #{user.lobbyid}\n"
+    "ADDUSER #{user.name} #{user.country} 0 #{user.id} #{user.lobbyid}\n"
   end
 
   defp do_reply(:remove_user, {_userid, username}) do

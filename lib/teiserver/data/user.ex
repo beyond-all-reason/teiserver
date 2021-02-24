@@ -6,12 +6,13 @@ defmodule Teiserver.User do
   @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulance cats dogs mice oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave)
 
   @keys [:id, :name, :email]
-  @data_keys [:rank, :country, :lobbyid, :moderator, :bot, :friends, :friend_requests, :ignored, :verification_code, :verified, :password_reset_code, :email_change_code, :password_hash]
+  @data_keys [:rank, :country, :lobbyid, :ip, :moderator, :bot, :friends, :friend_requests, :ignored, :verification_code, :verified, :password_reset_code, :email_change_code, :password_hash]
 
   @default_data %{
     rank: 1,
     country: "XX",
     lobbyid: "LuaLobby Chobby",
+    ip: "*",
     moderator: false,
     bot: false,
     friends: [],
@@ -99,6 +100,7 @@ defmodule Teiserver.User do
         rank: 1,
         country: "GB",
         lobbyid: "LuaLobby Chobby",
+        ip: "192.168.0.1",
         moderator: false,
         bot: false,
         friends: [],
@@ -168,8 +170,20 @@ defmodule Teiserver.User do
     user
   end
 
-  def update_user(user) do
+  # Persists the changes into the database so they will
+  # be pulled out next time the user is accessed/recached
+  defp persist_user(user) do
+    db_user = Account.get_user!(user.id)
+
+    data = @data_keys
+    |> Map.new(fn k -> {to_string(k), Map.get(user, k, @default_data[k])} end)
+
+    Account.update_user(db_user, %{"data" => data})
+  end
+
+  def update_user(user, persist \\ false) do
     ConCache.put(:users, user.id, user)
+    if persist, do: persist_user(user)
     user
   end
 
@@ -419,7 +433,7 @@ defmodule Teiserver.User do
     password == existing_password
   end
 
-  def try_login(username, password, state) do
+  def try_login(username, password, state, ip, lobby) do
     case get_user_by_name(username) do
       nil ->
         {:error, "No user found for '#{username}'"}
@@ -427,7 +441,9 @@ defmodule Teiserver.User do
       user ->
         case test_password(password, user) do
           true ->
-            do_login(user, state)
+            user = %{user | ip: ip, lobbyid: lobby}
+            update_user(user, persist: true)
+            do_login(user, state, ip, lobby)
 
           false ->
             {:error, "Invalid password"}
@@ -435,7 +451,7 @@ defmodule Teiserver.User do
     end
   end
 
-  defp do_login(user, state) do
+  defp do_login(user, state, ip, lobby) do
     proto = state.protocol
 
     proto.reply(:login_accepted, user.name, state)
@@ -446,7 +462,7 @@ defmodule Teiserver.User do
 
   def convert_user(user) do
     data = @data_keys
-    |> Map.new(fn k -> {k, Map.get(user.data, to_string(k), nil)} end)
+    |> Map.new(fn k -> {k, Map.get(user.data, to_string(k), @default_data[k])} end)
 
     user
     |> Map.take(@keys)
