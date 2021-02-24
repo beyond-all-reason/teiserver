@@ -9,19 +9,19 @@ defmodule Teiserver.User do
   @data_keys [:rank, :country, :lobbyid, :moderator, :bot, :friends, :friend_requests, :ignored, :verification_code, :verified, :password_reset_code, :email_change_code, :password_hash]
 
   @default_data %{
-    "rank" => 1,
-    "country" => "XX",
-    "lobbyid" => "LuaLobby Chobby",
-    "moderator" => false,
-    "bot" => false,
-    "friends" => [],
-    "friend_requests" => [],
-    "ignored" => [],
-    "password_hash" => nil,
-    "verification_code" => nil,
-    "verified" => false,
-    "password_reset_code" => nil,
-    "email_change_code" => nil,
+    rank: 1,
+    country: "XX",
+    lobbyid: "LuaLobby Chobby",
+    moderator: false,
+    bot: false,
+    friends: [],
+    friend_requests: [],
+    ignored: [],
+    password_hash: nil,
+    verification_code: nil,
+    verified: false,
+    password_reset_code: nil,
+    email_change_code: nil,
   }
 
   require Logger
@@ -45,10 +45,12 @@ defmodule Teiserver.User do
     ConCache.get(:application_metadata_cache, "bar_user_group")
   end
   
-  def user_register_params(name, email, plain_password) do
+  def user_register_params(name, email, password_hash) do
     name = clean_name(name)
-    password_hash = encrypt_password(plain_password)
     verification_code = :random.uniform(899_999) + 100_000
+
+    data = @default_data
+    |> Map.new(fn {k, v} -> {to_string(k), v} end)
 
     %{
       name: name,
@@ -58,15 +60,15 @@ defmodule Teiserver.User do
       icon: "fas fa-user",
       admin_group_id: bar_user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
-      data: Map.merge(@default_data, %{
+      data: Map.merge(data, %{
         "password_hash" => password_hash,
         "verification_code" => verification_code
       })
     }
   end
 
-  def register_user(name, email, plain_password) do
-    params = user_register_params(name, email, plain_password)
+  def register_user(name, email, password_hash) do
+    params = user_register_params(name, email, password_hash)
     case Account.create_user(params) do
       {:ok, user} ->
         Account.create_group_membership(%{

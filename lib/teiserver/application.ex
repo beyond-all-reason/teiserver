@@ -48,12 +48,12 @@ defmodule Teiserver.Application do
     Teiserver.User.pre_cache_users()
     # Teiserver.TestData.create_battles()
 
-    Teiserver.Room.create_room(%{
-      name: "main",
-      topic: "main",
-      author: "ChanServ",
-      members: []
-    })
-    |> Teiserver.Room.add_room()
+    # Teiserver.Room.create_room(%{
+    #   name: "main",
+    #   topic: "main",
+    #   author: "ChanServ",
+    #   members: []
+    # })
+    # |> Teiserver.Room.add_room()
   end
 end

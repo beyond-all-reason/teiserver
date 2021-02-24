@@ -22,6 +22,10 @@ defmodule Teiserver.TcpServer do
   openssl s_client -connect bar.teifion.co.uk:8201
   """
 
+  def format_log(s) do
+    String.replace(s, "\n", "\\n")
+  end
+
   # Called at startup
   def start_link(opts) do
     mode = if opts[:ssl], do: :ranch_ssl, else: :ranch_tcp
@@ -67,7 +71,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def init(ref, socket, transport) do
-    Logger.debug("New TCP connection")
+    Logger.info("New TCP connection #{Kernel.inspect(socket)}")
     :ok = :ranch.accept_ack(ref)
     :ok = transport.setopts(socket, [{:active, true}])
 
@@ -98,8 +102,8 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:tcp, _socket, data}, state) do
-    Logger.info("<-- TCP #{String.trim(data)}")
+  def handle_info({:tcp, socket, data}, state) do
+    Logger.info("<-- #{Kernel.inspect(socket)}:TCP #{format_log(data)}")
 
     new_state =
       data
@@ -111,8 +115,8 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:ssl, _socket, data}, state) do
-    Logger.info("<-- SSL #{String.trim(data)}")
+  def handle_info({:ssl, socket, data}, state) do
+    Logger.info("<-- #{Kernel.inspect(socket)}:SSL #{format_log(data)}")
 
     new_state =
       data
@@ -266,24 +270,24 @@ defmodule Teiserver.TcpServer do
 
   # Connection
   def handle_info({:tcp_closed, socket}, %{socket: socket, transport: transport} = state) do
-    Logger.debug("Closing TCP connection")
+    Logger.info("Closing TCP connection #{Kernel.inspect(socket)}")
     transport.close(socket)
     {:stop, :normal, state}
   end
 
-  def handle_info({:tcp_closed, _socket}, state) do
-    Logger.debug("Closing TCP connection - no transport")
+  def handle_info({:tcp_closed, socket}, state) do
+    Logger.info("Closing TCP connection - no transport #{Kernel.inspect(socket)}")
     {:stop, :normal, state}
   end
 
   def handle_info({:ssl_closed, socket}, %{socket: socket, transport: transport} = state) do
-    Logger.debug("Closing SSL connection")
+    Logger.debug("Closing SSL connection #{Kernel.inspect(socket)}")
     transport.close(socket)
     {:stop, :normal, state}
   end
 
-  def handle_info({:ssl_closed, _socket}, state) do
-    Logger.debug("Closing SSL connection - no transport")
+  def handle_info({:ssl_closed, socket}, state) do
+    Logger.debug("Closing SSL connection - no transport #{Kernel.inspect(socket)}")
     {:stop, :normal, state}
   end
 

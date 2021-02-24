@@ -3,6 +3,7 @@ defmodule Teiserver.Client do
   alias Phoenix.PubSub
   alias Teiserver.Battle
   alias Teiserver.User
+  alias Teiserver.Room
   alias Teiserver.BitParse
 
   def create(client) do
@@ -48,10 +49,6 @@ defmodule Teiserver.Client do
       |> add_client
 
     PubSub.broadcast(Central.PubSub, "all_client_updates", {:logged_in_client, user.id, user.name})
-
-    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
     client
   end
 
@@ -133,23 +130,29 @@ defmodule Teiserver.Client do
   end
 
   def leave_battle(userid) do
-    :ok =
-      PubSub.broadcast(Central.PubSub, "all_client_updates", {:new_battlestatus, userid, 0, 0})
-
-    client = get_client(userid)
-
-    case client do
+    case get_client(userid) do
       nil -> nil
       client ->
-        Battle.remove_user_from_battle(userid, client.battle_id)
-        new_client = Map.merge(client, %{
-          battlestatus: 0,
-          team_colour: 0,
-          battle_id: nil
-        })
-        ConCache.put(:clients, new_client.userid, new_client)
-        new_client
+        case Battle.get_battle(client.battle_id) do
+          nil -> nil
+            Battle.remove_user_from_battle(userid, client.battle_id)
+            new_client = Map.merge(client, %{
+              battlestatus: 0,
+              team_colour: 0,
+              battle_id: nil
+            })
+            ConCache.put(:clients, new_client.userid, new_client)
+        end
     end
+  end
+
+  def leave_rooms(userid) do
+    Room.list_rooms
+    |> Enum.each(fn room ->
+      if userid in room.members do
+        Room.remove_user_from_room(userid, room.name)
+      end
+    end)
   end
 
   def get_client(userid) do
@@ -192,8 +195,8 @@ defmodule Teiserver.Client do
   def disconnect(nil), do: nil
 
   def disconnect(userid) do
-    username = User.get_username(userid)
     leave_battle(userid)
+    leave_rooms(userid)
 
     ConCache.delete(:clients, userid)
 
@@ -204,6 +207,7 @@ defmodule Teiserver.Client do
 
       {:ok, new_value}
     end)
+    username = User.get_username(userid)
     PubSub.broadcast(Central.PubSub, "all_client_updates", {:logged_out_client, userid, username})
   end
 end

@@ -3,7 +3,7 @@ defmodule Teiserver.SpringAuthTest do
   require Logger
   alias Teiserver.BitParse
   alias Teiserver.User
-  import Teiserver.TestLib, only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, new_user: 0]
+  import Teiserver.TestLib, only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, _recv_until: 1, new_user: 0]
 
   setup do
     %{socket: socket, user: user} = auth_setup()
@@ -41,7 +41,7 @@ SERVERMSG Ingame time: 3 hours\n"
     # stuff we can't set. We should be rank 1, not a bot but are a mod
     _send(socket, "MYSTATUS 127\n")
     reply = _recv(socket)
-    assert reply =~ "CLIENTSTATUS #{user.name}\t100\n"
+    assert reply =~ "CLIENTSTATUS #{user.name} 100\n"
     reply_bits = BitParse.parse_bits("100", 7)
 
     # Lets make sure it's coming back the way we expect
@@ -52,13 +52,13 @@ SERVERMSG Ingame time: 3 hours\n"
     new_status = Integer.undigits([0, 1, 0, 0, 1, 0, 0], 2)
     _send(socket, "MYSTATUS #{new_status}\n")
     reply = _recv(socket)
-    assert reply == "CLIENTSTATUS #{user.name}\t#{new_status}\n"
+    assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
 
     # And now the away flag
     new_status = Integer.undigits([0, 0, 0, 0, 1, 0, 0], 2)
     _send(socket, "MYSTATUS #{new_status}\n")
     reply = _recv(socket)
-    assert reply == "CLIENTSTATUS #{user.name}\t#{new_status}\n"
+    assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
 
     # And now we try for a bad mystatus command
     _send(socket, "MYSTATUS\n")
@@ -198,7 +198,7 @@ FRIENDREQUESTLISTEND\n"
     reply = _recv(socket)
     assert reply == "JOIN test_room
 JOINED test_room #{user.name}
-CHANNELTOPIC test_room no author
+CHANNELTOPIC test_room #{user.name}
 CLIENTS test_room #{user.name}\n"
 
     # Say something
@@ -210,7 +210,6 @@ CLIENTS test_room #{user.name}\n"
     _send(socket, "CHANNELS\n")
     reply = _recv(socket)
     assert reply == "CHANNELS
-CHANNEL main 0
 CHANNEL test_room 1
 ENDOFCHANNELS\n"
 
@@ -223,7 +222,6 @@ ENDOFCHANNELS\n"
     _send(socket, "CHANNELS\n")
     reply = _recv(socket)
     assert reply == "CHANNELS
-CHANNEL main 0
 CHANNEL test_room 0
 ENDOFCHANNELS\n"
 
@@ -238,12 +236,7 @@ ENDOFCHANNELS\n"
     # TODO - Add battle
     _send(socket, "JOINBATTLE 1 empty 1683043765\n")
     # The remainder of this string is just the script tags, we'll assume it's correct for now
-    part1 = _recv(socket)
-    part2 = _recv(socket)
-    :timeout = _recv(socket)
-
-    reply =
-      (part1 <> part2)
+    reply = _recv_until(socket)
       |> String.split("\n")
 
     [
@@ -270,7 +263,7 @@ ENDOFCHANNELS\n"
              "SAIDBATTLEEX SPADS EU-1 Hi #{user.name}! Current battle type is faked_team."
 
     assert joinedbattle == "JOINEDBATTLE 1 #{user.name}"
-    assert clientstatus == "CLIENTSTATUS #{user.name}\t4"
+    assert clientstatus == "CLIENTSTATUS #{user.name} 4"
 
     _send(socket, "SAYBATTLE Hello there!\n")
     reply = _recv(socket)

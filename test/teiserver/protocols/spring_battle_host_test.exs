@@ -5,7 +5,7 @@ defmodule Teiserver.SpringBattleHostTest do
   # alias Teiserver.User
   alias Teiserver.Battle
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  import Teiserver.TestLib, only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, new_user: 0]
+  import Teiserver.TestLib, only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, _recv_until: 1, new_user: 0]
 
   setup do
     %{socket: socket, user: user} = auth_setup()
@@ -14,12 +14,7 @@ defmodule Teiserver.SpringBattleHostTest do
 
   test "host battle test", %{socket: socket} do
     _send(socket, "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName\n")
-    part1 = _recv(socket)
-    part2 = _recv(socket)
-    :timeout = _recv(socket)
-
-    reply =
-      (part1 <> part2)
+    reply = _recv_until(socket)
       |> String.split("\n")
 
     [

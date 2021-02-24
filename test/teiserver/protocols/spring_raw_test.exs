@@ -2,7 +2,7 @@ defmodule Teiserver.SpringRawTest do
   use Central.ServerCase
 
   import Teiserver.TestLib,
-    only: [raw_setup: 0, _send: 2, _recv: 1, new_user_name: 0, new_user: 0]
+    only: [raw_setup: 0, _send: 2, _recv: 1, _recv_until: 1, new_user: 0]
 
   alias Teiserver.User
   alias Central.Account
@@ -25,12 +25,12 @@ defmodule Teiserver.SpringRawTest do
     name = "TestUser_raw_register"
 
     # Failure first
-    _send(socket, "REGISTER #{existing.name}\tpassword\temail\n")
+    _send(socket, "REGISTER #{existing.name} password email\n")
     reply = _recv(socket)
     assert reply =~ "REGISTRATIONDENIED User already exists\n"
 
     # Success second
-    _send(socket, "REGISTER #{name}\tpassword\temail\n")
+    _send(socket, "REGISTER #{name} password email\n")
     reply = _recv(socket)
     assert reply =~ "REGISTRATIONACCEPTED\n"
     user = User.get_user_by_name(name)
@@ -42,23 +42,27 @@ defmodule Teiserver.SpringRawTest do
   end
 
   test "LOGIN", %{socket: socket} do
-    username = new_user_name()
+    username = "raw_new_user_test"
 
     # We expect to be greeted by a welcome message
     reply = _recv(socket)
     assert reply == "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
 
-    _send(socket, "REGISTER #{username}\tpassword\t#{username}@email\n")
+    _send(socket, "REGISTER #{username} X03MO1qnZdYdgyfeuILPmQ== #{username}@email\n")
     _ = _recv(socket)
+    user = User.get_user_by_name(username)
+    assert user != nil
 
     _send(
       socket,
       "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
     )
 
-    reply = _recv(socket)
+    reply = _recv_until(socket)
     [accepted | remainder] = String.split(reply, "\n")
-    assert accepted == "ACCEPTED #{username}"
+    user = User.get_user_by_name(username)
+    assert accepted == "ACCEPTED #{username}",
+      message: "Bad password, gave X03MO1qnZdYdgyfeuILPmQ== but needed #{user.password_hash}"
 
     commands =
       remainder
@@ -68,8 +72,9 @@ defmodule Teiserver.SpringRawTest do
     assert commands == [
              "MOTD",
              "ADDUSER",
-             "BATTLEOPENED",
-             "UPDATEBATTLEINFO",
+             "CLIENTSTATUS",
+             # "BATTLEOPENED",
+             # "UPDATEBATTLEINFO",
              "LOGININFOEND",
              ""
            ]

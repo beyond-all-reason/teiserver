@@ -137,12 +137,20 @@ defmodule Teiserver.Battle do
     )
     battle
   end
-  
-  def close_battle(battle_id) do
-    Logger.error("TODO - Tell users they've left the battle?")
-    
-    ConCache.delete(:battles, battle_id)
 
+  def close_battle(battle_id) do
+    battle = get_battle(battle_id)
+    
+    battle.players
+    |> Enum.each(fn userid ->
+      PubSub.broadcast(
+        Central.PubSub,
+        "battle_updates:#{battle_id}",
+        {:remove_user_from_battle, userid, battle_id}
+      )
+    end)
+
+    ConCache.delete(:battles, battle_id)
     ConCache.update(:lists, :battles, fn value ->
       new_value =
         value
@@ -239,24 +247,29 @@ defmodule Teiserver.Battle do
   def remove_user_from_battle(_, nil), do: nil
 
   def remove_user_from_battle(userid, battle_id) do
-    ConCache.update(:battles, battle_id, fn battle_state ->
-      new_state =
-        if not Enum.member?(battle_state.players, userid) do
-          # No change takes place, they've already left the battle
-          battle_state
-        else
-          PubSub.broadcast(
-            Central.PubSub,
-            "battle_updates:#{battle_id}",
-            {:remove_user_from_battle, userid, battle_id}
-          )
+    battle = get_battle(battle_id)
+    if battle.founder_id == userid do
+      close_battle(battle_id)
+    else
+      ConCache.update(:battles, battle_id, fn battle_state ->
+        new_state =
+          if not Enum.member?(battle_state.players, userid) do
+            # No change takes place, they've already left the battle
+            battle_state
+          else
+            PubSub.broadcast(
+              Central.PubSub,
+              "battle_updates:#{battle_id}",
+              {:remove_user_from_battle, userid, battle_id}
+            )
 
-          new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
-          Map.put(battle_state, :players, new_players)
-        end
+            new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
+            Map.put(battle_state, :players, new_players)
+          end
 
-      {:ok, new_state}
-    end)
+        {:ok, new_state}
+      end)
+    end
   end
 
   def kick_user_from_battle(userid, battle_id) do

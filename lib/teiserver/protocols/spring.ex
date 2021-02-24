@@ -11,6 +11,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   alias Teiserver.User
   alias Phoenix.PubSub
   alias Teiserver.BitParse
+  alias Teiserver.TcpServer
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   # TODO - Setup/Account stuff
@@ -155,13 +156,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
           user = User.get_user_by_id(userid)
           reply(:add_user, user, state)
         end)
-        :timer.sleep(300)
+        :timer.sleep(100)
 
         # Client status messages
         Client.list_clients()
         |> Enum.map(fn client ->
           reply(:client_status, client, state)
         end)
+        :timer.sleep(100)
 
         Battle.list_battles()
         |> Enum.each(fn b ->
@@ -169,9 +171,13 @@ defmodule Teiserver.Protocols.SpringProtocol do
           reply(:update_battle, b, state)
           reply(:battle_players, b, state)
         end)
+        :timer.sleep(100)
 
-        :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
         _send("LOGININFOEND\n", state)
+        :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
+        :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
+        :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
+        :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
         %{state | client: client, user: user, name: user.name, userid: user.id}
 
       {:error, reason} ->
@@ -182,11 +188,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("REGISTER", data, state) do
-    case Regex.run(~r/(\w+)\t(\w+)\t(\S+)/, data) do
-      [_, username, plain_password, email] ->
+    case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
+      [_, username, password_hash, email] ->
         case User.get_user_by_name(username) do
           nil ->
-            User.register_user(username, email, plain_password)
+            User.register_user(username, email, password_hash)
             reply(:registration_accepted, state)
 
           _ ->
@@ -399,11 +405,13 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("JOIN", data, state) do
     case Regex.run(~r/(\w+)(?:\t)?(\w+)?/, data) do
       [_, room_name] ->
-        room = Room.get_room(room_name)
+        room = Room.get_or_make_room(room_name, state.userid)
         Room.add_user_to_room(state.userid, room_name)
         _send("JOIN #{room_name}\n", state)
         _send("JOINED #{room_name} #{state.name}\n", state)
-        _send("CHANNELTOPIC #{room_name} #{room.author}\n", state)
+
+        author_name = User.get_username(room.author_id)
+        _send("CHANNELTOPIC #{room_name} #{author_name}\n", state)
 
         members = room.members
           |> Enum.map(fn m -> User.get_username(m) end)
@@ -1036,7 +1044,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   # Commands
   defp do_reply(:ring, {ringer_id, state_user}) do
-    if ringer_id not in state_user.ignored do
+    if ringer_id not in (state_user.ignored || []) do
       ringer_name = User.get_username(ringer_id)
       "RING #{ringer_name}\n"
     end
@@ -1055,14 +1063,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(:direct_message, {from_id, msg, state_user}) do
-    if from_id not in state_user.ignored do
+    if from_id not in (state_user.ignored || []) do
       from_name = User.get_username(from_id)
       "SAIDPRIVATE #{from_name} #{msg}\n"
     end
   end
 
   defp do_reply(:chat_message, {from_id, room_name, msg, state_user}) do
-    if from_id not in state_user.ignored do
+    if from_id not in (state_user.ignored || []) do
       from_name = User.get_username(from_id)
       "SAID #{room_name} #{from_name} #{msg}\n"
     end
@@ -1140,7 +1148,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         msg
       end
 
-    Logger.info("--> #{String.trim(msg)}")
+    Logger.info("--> #{Kernel.inspect(socket)} #{TcpServer.format_log(msg)}")
     transport.send(socket, msg)
   end
 end

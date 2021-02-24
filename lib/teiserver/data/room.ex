@@ -13,21 +13,26 @@ defmodule Teiserver.Room do
     )
   end
 
-  def create_room(room_name, author) do
+  def create_room(room_name, author_id) do
     %{
       name: room_name,
       members: [],
-      author: author,
-      topic: "no topic",
+      author_id: author_id,
+      topic: "topic",
       password: ""
     }
   end
 
+
   def get_room(name) do
+    ConCache.get(:rooms, name)
+  end
+
+  def get_or_make_room(name, author_id) do
     case ConCache.get(:rooms, name) do
       nil ->
         # No room, we need to make one!
-        create_room(name, "no author")
+        create_room(name, author_id)
         |> add_room
 
       room ->

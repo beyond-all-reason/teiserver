@@ -25,7 +25,7 @@ defmodule Teiserver.TestLib do
     case User.get_user_by_name(name) do
       nil ->
         {:ok, user} =
-          User.user_register_params(name, "#{name}@email.com", "password")
+          User.user_register_params(name, "#{name}@email.com", "X03MO1qnZdYdgyfeuILPmQ==")
           |> Account.create_user
           
         user
@@ -49,7 +49,7 @@ defmodule Teiserver.TestLib do
       "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
     )
 
-    _ = _recv(socket)
+    _ = _recv_until(socket)
 
     %{socket: socket, user: user}
   end
@@ -63,6 +63,15 @@ defmodule Teiserver.TestLib do
     case :gen_tcp.recv(socket, 0, 500) do
       {:ok, reply} -> reply |> to_string
       {:error, :timeout} -> :timeout
+    end
+  end
+
+  def _recv_until(socket, acc \\ "") do
+    case :gen_tcp.recv(socket, 0, 500) do
+      {:ok, reply} ->
+        _recv_until(socket, acc <> to_string(reply))
+      {:error, :timeout} ->
+        acc
     end
   end
 
