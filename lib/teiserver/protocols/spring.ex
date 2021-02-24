@@ -84,8 +84,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("LI", username, state) do
     do_handle(
       "LOGIN",
-      "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp",
-      # "SPADS1[00] X03MO1qnZdYdgyfeuILPmQ== 0 192.168.1.102 SPADS v0.12.30\t0\tb_sp",
+      # "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp",
+      "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * bop",
       state
     )
   end
@@ -123,9 +123,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("LOGIN", data, state) do
+    regex = Regex.run(~r/^(\S+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)?\t?([^\t]+)?\t?([^\t]+)?/, data) ++ ["", "", "", "", ""]
     response =
-      case Regex.run(~r/^(\S+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)\t([^\t]+)\t([^\t]+)/, data) do
-        [_, username, password, _cpu, ip, lobby, userid, modes] ->
+      case regex do
+        [_, username, password, _cpu, ip, lobby, userid, modes | _] ->
           _ = [username, password, ip, lobby, userid, modes]
           username = User.clean_name(username)
           Logger.debug("[protocol:login] matched #{username}")
@@ -503,6 +504,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
           }
           |> Battle.create_battle()
           |> Battle.add_battle()
+
+          nbattle = Map.delete(battle, :tags)
+          Logger.info("Battle started, battle_id: #{battle.id}, founder_id: #{battle.founder_id}, founder_name: #{battle.founder_name} userid: #{state.userid}, username: #{state.name}")
+          Logger.info("spring.OPENBATTLE -> #{Kernel.inspect nbattle}")
 
           {:success, battle}
 

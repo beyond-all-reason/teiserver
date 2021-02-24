@@ -470,7 +470,7 @@ defmodule Teiserver.User do
     group_id = bar_user_group_id()
     ConCache.insert_new(:lists, :users, [])
 
-    Account.list_users(search: [
+    user_count = Account.list_users(search: [
       admin_group: group_id
     ])
     |> Parallel.map(fn user ->
@@ -478,5 +478,8 @@ defmodule Teiserver.User do
       |> convert_user
       |> add_user
     end)
+    |> Enum.count
+    
+    Logger.info("pre_cache_users, got #{user_count} users")
   end
 end
