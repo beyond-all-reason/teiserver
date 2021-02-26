@@ -17,12 +17,96 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # TODO - Setup/Account stuff
   # CONFIRMAGREEMENT - Waiting to hear from Beherith on how he wants it to work
   # RESENDVERIFICATION - See above
-
-  # Need to do at some stage but not used at this time
-  # DISABLEUNITS
-  # ENABLEUNITS
-  # ENABLEALLUNITS
   # LISTCOMPFLAGS
+  
+  # Bridge commands, may not be needed
+  # in_BRIDGECLIENTFROM
+  # in_UNBRIDGECLIENTFROM
+  # in_JOINFROM
+  # in_LEAVEFROM
+  # in_SAYFROM
+
+  # Checklist against uberserver Protocol.py
+  # https://github.com/spring/uberserver/blob/cc4155c3b45e8189100d9dd9097a9aa04c0eb3ec/protocol/Protocol.py#L1109
+  # in_STLS - Technically implemented, won't work the same way due to TCP/TLS port different in ranch
+  # in_PORTTEST
+  # in_CONFIRMAGREEMENT
+  # in_SAYEX
+  # in_SAYPRIVATE
+  # in_SAYPRIVATEEX
+  # in_BATTLEHOSTMSG
+  # in_JOIN
+  # in_LEAVE
+  # in_OPENBATTLE
+  # in_JOINBATTLE
+  # in_JOINBATTLEACCEPT
+  # in_JOINBATTLEDENY
+  # in_KICKFROMBATTLE
+  # in_SETSCRIPTTAGS
+  # in_REMOVESCRIPTTAGS
+  # in_LEAVEBATTLE
+  # in_MYBATTLESTATUS
+  # in_UPDATEBATTLEINFO
+  # in_MYSTATUS
+  # in_CHANNELS
+  # in_CHANNELTOPIC
+  # in_GETCHANNELMESSAGES
+  # in_ADDSTARTRECT
+  # in_REMOVESTARTRECT
+  # in_DISABLEUNITS
+  # in_ENABLEUNITS
+  # in_ENABLEALLUNITS
+  # in_HANDICAP
+  # in_FORCETEAMNO
+  # in_FORCEALLYNO
+  # in_FORCETEAMCOLOR
+  # in_FORCESPECTATORMODE
+  # in_ADDBOT
+  # in_UPDATEBOT
+  # in_REMOVEBOT
+  # in_GETUSERID
+  # in_GETUSERINFO
+  # in_FINDIP
+  # in_GETIP
+  # in_RENAMEACCOUNT
+  # in_CHANGEPASSWORD
+  # in_SETBOTMODE
+  # in_BROADCAST
+  # in_BROADCASTEX
+  # in_ADMINBROADCAST
+  # in_SETMINSPRINGVERSION
+  # in_EXIT
+  # in_LISTCOMPFLAGS
+  # in_KICK
+  # in_BAN
+  # in_BANSPECIFIC
+  # in_UNBAN
+  # in_BLACKLIST
+  # in_UNBLACKLIST
+  # in_LISTBANS
+  # in_LISTBLACKLIST
+  # in_SETACCESS
+  # in_STATS
+  # in_RELOAD
+  # in_CLEANUP
+  # in_CHANGEEMAILREQUEST
+  # in_CHANGEEMAIL
+  # in_RESETPASSWORDREQUEST
+  # in_RESETPASSWORD
+  # in_RESETUSERPASSWORD
+  # in_DELETEACCOUNT
+  # in_RESENDVERIFICATION
+  # in_JSON
+  # in_MUTE
+  # in_UNMUTE
+  # in_MUTELIST
+  # in_FORCELEAVECHANNEL
+  # in_SETCHANNELKEY
+  # in_STARTTLS
+  # in_SAYBATTLE
+  # in_SAYBATTLEEX
+  # in_SAYBATTLEPRIVATEEX
+  # in_GETINGAMETIME
 
   @motd """
   Message of the day
@@ -215,9 +299,24 @@ defmodule Teiserver.Protocols.SpringProtocol do
   #   end
   # end
 
+  defp do_handle("CREATEBOTACCOUNT", _, %{user: %{moderator: false}} = state),
+    do: deny(state)
+  defp do_handle("CREATEBOTACCOUNT", data, state) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
+      [_, botname, _owner_name] ->
+        User.register_bot(botname, state.userid)
+        reply(:servermsg, "A new bot account #{botname} has been created, with the same password as #{state.name}", state)
+
+      _ ->
+        _no_match(state, "CREATEBOTACCOUNT", data)
+    end
+
+    state
+  end
+
   defp do_handle("RENAMEACCOUNT", new_name, state) do
     User.rename_user(state.user, new_name)
-    _send("SERVERMSG Username changed, please log back in\n", state)
+    reply(:servermsg, "Username changed, please log back in", state)
     send(self(), :terminate)
     state
   end
@@ -323,13 +422,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_handle("GETUSERINFO", _, state) do
     # TODO: Actually have this information
-    msg = [
-      "SERVERMSG Registration date: Oct 21, 2020\n",
-      "SERVERMSG Email address: #{state.user.email}\n",
-      "SERVERMSG Ingame time: 3 hours\n"
+    [
+      "Registration date: Oct 21, 2020",
+      "Email address: #{state.user.email}",
+      "Ingame time: 3 hours"
     ]
-
-    _send(msg, state)
+    |> Enum.each(fn msg ->
+      reply(:servermsg, msg, state)
+    end)
     state
   end
 
@@ -341,17 +441,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
                state.user.password_hash
              ) do
           false ->
-            _send("SERVERMSG Current password entered incorrectly\n", state)
+            reply(:servermsg, "Current password entered incorrectly", state)
 
           true ->
             encrypted_new_password = User.encrypt_password(plain_new_password)
             new_user = %{state.user | password_hash: encrypted_new_password}
             User.update_user(new_user)
 
-            _send(
-              "SERVERMSG Password changed, you will need to use it next time you login\n",
-              state
-            )
+            reply(:servermsg, "Password changed, you will need to use it next time you login", state)
         end
 
       _ ->
@@ -719,6 +816,29 @@ defmodule Teiserver.Protocols.SpringProtocol do
     state
   end
 
+  defp do_handle("DISABLEUNITS", data, state) do
+    if Battle.allow?("DISABLEUNITS", state) do
+      units = String.split(data, " ")
+      Battle.disable_units(state.client.battle_id, units)
+    end
+    state
+  end
+
+  defp do_handle("ENABLEUNITS", data, state) do
+    if Battle.allow?("ENABLEUNITS", state) do
+      units = String.split(data, " ")
+      Battle.enable_units(state.client.battle_id, units)
+    end
+    state
+  end
+
+  defp do_handle("ENABLEALLUNITS", _data, state) do
+    if Battle.allow?("ENABLEALLUNITS", state) do
+      Battle.enable_all_units(state.client.battle_id)
+    end
+    state
+  end
+
   defp do_handle("PROMOTE", _, %{client: %{battle_id: nil}} = state), do: state
   defp do_handle("PROMOTE", _, state) do
     Logger.info("PROMOTE is not handled at this time as Chobby has no way to handle it - TODO")
@@ -866,10 +986,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # Not handled cacther
   defp do_handle(nil, _, state), do: state
 
-  defp do_handle(match, data, state) do
-    Logger.error("No match for #{match}, #{data}")
-    _send("ERR - No match\n", state)
-    state
+  defp do_handle(cmd, data, state) do
+    _no_match(state, cmd, data)
   end
 
   # Reply commands, these are things we are sending to the client
@@ -967,6 +1085,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_reply(:battle_opened, battle_id) do
     do_reply(:battle_opened, Battle.get_battle(battle_id))
+  end
+
+  defp do_reply(:battle_closed, battle_id) do
+    "BATTLECLOSED #{battle_id}"
   end
 
   defp do_reply(:update_battle, battle) do
@@ -1125,6 +1247,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "SAIDBATTLEEX #{username} #{msg}\n"
   end
 
+  defp do_reply(:servermsg, msg) do
+    "SERVERMSG #{msg}\n"
+  end
+
   defp do_reply(atom, data) do
     Logger.error("No match in spring.ex for atom: #{atom} and data: #{Kernel.inspect data}")
     ""
@@ -1176,6 +1302,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
     transport.send(socket, msg)
   end
   
+  defp deny(state) do
+    reply(:servermsg, "You do not have permission to execute that command", state)
+    state
+  end
+
   defp create_client_status(client) do
     [r1, r2, r3] = BitParse.parse_bits("#{client.rank || 1}", 3)
 

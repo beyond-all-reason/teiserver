@@ -46,7 +46,7 @@ defmodule Teiserver.User do
     ConCache.get(:application_metadata_cache, "bar_user_group")
   end
   
-  def user_register_params(name, email, password_hash) do
+  def user_register_params(name, email, password_hash, extra_data \\ %{}) do
     name = clean_name(name)
     verification_code = :random.uniform(899_999) + 100_000
 
@@ -61,10 +61,12 @@ defmodule Teiserver.User do
       icon: "fas fa-user",
       admin_group_id: bar_user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
-      data: Map.merge(data, %{
+      data: data
+      |> Map.merge(%{
         "password_hash" => password_hash,
         "verification_code" => verification_code
       })
+      |> Map.merge(extra_data)
     }
   end
 
@@ -86,6 +88,34 @@ defmodule Teiserver.User do
         Logger.debug("TODO: Verification email should be sent here with code #{user.data["verification_code"]}")
         user
       
+      {:error, changeset} ->
+        Logger.error("Unable to create user with params #{Kernel.inspect params}\n#{Kernel.inspect changeset}")
+    end
+  end
+
+  def register_bot(bot_name, bot_host_id) do
+    host = get_user_by_id(bot_host_id)
+
+    params = user_register_params(bot_name, host.email, host.password_hash, %{
+      "bot" => true,
+      "verified" => true
+    })
+    |> Map.merge(%{
+      email: String.replace(host.email, "@", ".bot#{bot_name}@"),
+    })
+    case Account.create_user(params) do
+      {:ok, user} ->
+        Account.create_group_membership(%{
+          user_id: user.id,
+          group_id: bar_user_group_id()
+        })
+
+        # Now add them to the cache
+        user
+        |> convert_user
+        |> add_user
+        user
+
       {:error, changeset} ->
         Logger.error("Unable to create user with params #{Kernel.inspect params}\n#{Kernel.inspect changeset}")
     end

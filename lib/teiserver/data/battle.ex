@@ -87,6 +87,7 @@ defmodule Teiserver.Battle do
         bots: %{},
         ip: nil,
         tags: @default_tags,
+        disabled_units: [],
         start_rectangles: [
           [0, 0, 126, 74, 200],
           [1, 126, 0, 200, 74]
@@ -152,7 +153,7 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "all_battle_updates",
-      {:closed_battle, battle_id}
+      {:battle_closed, battle_id}
     )
 
     battle.players
@@ -309,6 +310,19 @@ defmodule Teiserver.Battle do
     update_battle(new_battle, team, :remove_start_rectangle)
   end
 
+  # Unit enabling
+  def enable_all_units(battle_id) do
+    Logger.error("TODO - Implement Battle.enable_all_units/1")
+  end
+  
+  def enable_units(battle_id, units) do
+    Logger.error("TODO - Implement Battle.enable_units/2")
+  end
+  
+  def disable_units(battle_id, units) do
+    Logger.error("TODO - Implement Battle.disable_units/2")
+  end
+
   # Script tags
   def set_script_tags(battle_id, tags) do
     battle = get_battle(battle_id)
@@ -353,7 +367,7 @@ defmodule Teiserver.Battle do
   def allow?(cmd, %{user: user, client: %{battle_id: battle_id}}), do: allow?(user, cmd, battle_id)
   def allow?(user, cmd, battle_id) do
     battle = get_battle(battle_id)
-    mod_command = Enum.member?(~w(HANDICAP ADDSTARTRECT REMOVESTARTRECT KICKFROMBATTLE FORCETEAMNO FORCEALLYNO FORCETEAMCOLOR FORCESPECTATORMODE), cmd)
+    mod_command = Enum.member?(~w(HANDICAP ADDSTARTRECT REMOVESTARTRECT KICKFROMBATTLE FORCETEAMNO FORCEALLYNO FORCETEAMCOLOR FORCESPECTATORMODE DISABLEUNITS ENABLEUNITS ENABLEALLUNITS), cmd)
 
     cond do
       battle == nil ->
