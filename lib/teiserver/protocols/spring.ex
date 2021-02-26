@@ -996,11 +996,13 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(:add_bot_to_battle, {battle_id, bot}) do
-    "ADDBOT #{battle_id} #{bot.name} #{bot.owner_name} #{bot.battlestatus} #{bot.team_colour} #{bot.ai_dll}\n"
+    status = create_battle_status(bot)
+    "ADDBOT #{battle_id} #{bot.name} #{bot.owner_name} #{status} #{bot.team_colour} #{bot.ai_dll}\n"
   end
 
   defp do_reply(:update_bot, {battle_id, bot}) do
-    "UPDATEBOT #{battle_id} #{bot.name} #{bot.owner_name} #{bot.battlestatus} #{bot.team_colour}\n"
+    status = create_battle_status(bot)
+    "UPDATEBOT #{battle_id} #{bot.name} #{bot.owner_name} #{battlestatus} #{bot.team_colour}\n"
   end
 
   defp do_reply(:battle_players, battle) do
@@ -1025,7 +1027,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(:client_status, client) do
-    "CLIENTSTATUS #{client.name} #{client.status}\n"
+    status = create_client_status(client)
+    "CLIENTSTATUS #{client.name} #{status}\n"
   end
 
   defp do_reply(:client_battlestatus, {userid, battlestatus, team_colour}) do
@@ -1034,7 +1037,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(:client_battlestatus, client) do
-    "CLIENTBATTLESTATUS #{client.name} #{client.battlestatus} #{client.team_colour}\n"
+    status = create_battle_status(client)
+    "CLIENTBATTLESTATUS #{client.name} #{status} #{client.team_colour}\n"
   end
 
   defp do_reply(:logged_in_client, {userid, _username}) do
@@ -1164,5 +1168,66 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
     Logger.info("--> #{Kernel.inspect(socket)} #{TcpServer.format_log(msg)}")
     transport.send(socket, msg)
+  end
+  
+  defp create_client_status(client) do
+    [r1, r2, r3] = BitParse.parse_bits("#{client.rank || 1}", 3)
+
+    [
+      if(client.in_game, do: 1, else: 0),
+      if(client.away, do: 1, else: 0),
+      r1,
+      r2,
+      r3,
+      if(client.moderator, do: 1, else: 0),
+      if(client.bot, do: 1, else: 0)
+    ]
+      |> Enum.reverse
+      |> Integer.undigits(2)
+  end
+  
+  defp create_battle_status(client) do
+    [t1, t2, t3, t4] = BitParse.parse_bits("#{client.team_number}", 4)
+    [a1, a2, a3, a4] = BitParse.parse_bits("#{client.ally_team_number}", 4)
+    [h1, h2, h3, h4, h5, h6, h7] = BitParse.parse_bits("#{client.handicap}", 7)
+    [sync1, sync2] = BitParse.parse_bits("#{client.sync}", 2)
+    [side1, side2, side3, side4] = BitParse.parse_bits("#{client.side}", 4)
+
+    [
+      0,
+      if(client.ready, do: 1, else: 0),
+      t1,
+      t2,
+      t3,
+      t4,
+      a1,
+      a2,
+      a3,
+      a4,
+      if(client.spectator, do: 1, else: 0),
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      h7,
+      0,
+      0,
+      0,
+      0,
+      sync1,
+      sync2,
+      side1,
+      side2,
+      side3,
+      side4,
+      0,
+      0,
+      0,
+      0
+    ]
+      |> Enum.reverse
+      |> Integer.undigits(2)
   end
 end

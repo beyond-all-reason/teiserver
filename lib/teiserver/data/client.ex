@@ -9,7 +9,6 @@ defmodule Teiserver.Client do
   def create(client) do
     Map.merge(
       %{
-        status: "0",
         in_game: false,
         away: false,
         rank: 1,
@@ -24,7 +23,6 @@ defmodule Teiserver.Client do
         handicap: 0,
         sync: 0,
         side: 0,
-        battlestatus: 0,
         team_colour: 0,
         battle_id: nil
       },
@@ -45,92 +43,15 @@ defmodule Teiserver.Client do
         away: false,
         in_game: false
       })
-      |> calculate_status
       |> add_client
 
     PubSub.broadcast(Central.PubSub, "all_client_updates", {:logged_in_client, user.id, user.name})
     client
   end
 
-  def calculate_status(client) do
-    [r1, r2, r3] = BitParse.parse_bits("#{client.rank || 1}", 3)
-
-    status =
-      # [
-      #   if(client.in_game, do: 1, else: 0),
-      #   if(client.away, do: 1, else: 0),
-      #   r1,
-      #   r2,
-      #   r3,
-      #   if(client.moderator, do: 1, else: 0),
-      #   if(client.bot, do: 1, else: 0)
-      # ]
-      [
-        if(client.bot, do: 1, else: 0),
-        if(client.moderator, do: 1, else: 0),
-        r3,
-        r2,
-        r1,
-        if(client.away, do: 1, else: 0),
-        if(client.in_game, do: 1, else: 0),
-      ]
-      |> Integer.undigits(2)
-
-    %{client | status: status}
-  end
-
-  def calculate_battlestatus(client) do
-    [t1, t2, t3, t4] = BitParse.parse_bits("#{client.team_number}", 4)
-    [a1, a2, a3, a4] = BitParse.parse_bits("#{client.ally_team_number}", 4)
-    [h1, h2, h3, h4, h5, h6, h7] = BitParse.parse_bits("#{client.handicap}", 7)
-    [sync1, sync2] = BitParse.parse_bits("#{client.sync}", 2)
-    [side1, side2, side3, side4] = BitParse.parse_bits("#{client.side}", 4)
-
-    battlestatus =
-      [
-        0,
-        if(client.ready, do: 1, else: 0),
-        t1,
-        t2,
-        t3,
-        t4,
-        a1,
-        a2,
-        a3,
-        a4,
-        if(client.spectator, do: 1, else: 0),
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6,
-        h7,
-        0,
-        0,
-        0,
-        0,
-        sync1,
-        sync2,
-        side1,
-        side2,
-        side3,
-        side4,
-        0,
-        0,
-        0,
-        0
-      ]
-      |> Integer.undigits(2)
-
-    %{client | battlestatus: battlestatus}
-  end
-
   def update(client, reason \\ nil) do
     client =
       client
-      |> calculate_status
-      |> calculate_battlestatus
       |> add_client
 
     PubSub.broadcast(Central.PubSub, "all_client_updates", {:updated_client, client, reason})
