@@ -4,72 +4,13 @@ An Elixir implementation of Uberserver
 ## Sorry for the mess
 I'm in the process of adding a webserver component to it and I've quite literally copied and pasted code from my own site. This is because I'm running it on the site and integration is easier this way. Additionally my site already has things like user authentication so it is significantly faster to just copy it over!
 
-## Setup and running
-You will need to have [Elixir/Erlang installed](https://elixir-lang.org/install.html). You will also need to create localhost certificates in `priv/certs` using the following commands
-
-```
-openssl req -x509 -out localhost.crt -keyout localhost.key \
-  -newkey rsa:2048 -nodes -sha256 \
-  -subj '/CN=localhost' -extensions EXT -config <( \
-   printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
-mkdir priv/certs
-mv localhost.crt priv/certs/localhost.crt
-mv localhost.key priv/certs/localhost.key
-```
-
-At this stage you can now run the server
-```
-cd teiserver
-mix deps.get
-mix run --no-halt
-```
-
-By default it will listen on port 8200 for TCP and 8201 for TLS. You can connect to these with:
-
-```
-telnet localhost 8200
-openssl s_client -connect localhost:8201
-```
-
-### Structure
-```
-    Client <--> TcpServer <--> Protocol <--> Data store <--> Logic
-                    ^                            |
-                    |                            |
-                    -----------------------------
-```
-
-## Code layout/placement
-- lib/protocols contains the interface for the protocols, these will interface with the TCP server and transform the input into function calls, protocols also handle sending messages back to the client
-- lib/data contains the main backend implementation and handling for logic. Ideally written in a protocol-free way
-
-### Protocols
-A protocol (currently just the one) interfaces between the sever state logic and the client as shown above in the structure section. Protocols have a few common functions as defined in their MDoc property but loosely are:
-- **handle/3** When the server receives a message it will hand it to the handle function which will parse it and subsequently call do_handle
-- **do_handle/3** Handles a specific command, it may deal with subsequent parsing and sending messages back but will not directly update any global state or broadcast messages via PubSub.
-- **reply/3** Handles sending commands/information back to the client. The protocol will transform the data to suit the protocol as needed, it is not expected to be in a specific format already.
-
-### Entry point
-lib/teiserver/tcp_server.ex is the main tcp server which handles TCP messages, these are typically handled by a protocol. By setting a different protocol in the state of a TCP listener you can change which protocol it uses.
-
-### Testing
-Run as above (`mix run --no-halt`) and load up Chobby. Set Chobby's server to `localhost`. In my experience it's then fastest to restart Chobby and it will connect to your locally running instance. After you've finished you'll want to set the server back to `road-flag.bnr.la`.
-
-You can login using the normal login command but it's much easier to login using `LI <username>` which is currently in place for testing purposes. `test_data.ex` has a bunch of existing users for testing purposes but you can use the protocols `REGISTER username password email` command to create a new user. State is currently not persisted over restarts. If you are familiar with Elixir then starting it with `iex -S mix` will put it in console mode and you can execute commands through the modules there too.
-
-### State
-##### Users
-Keyed to the id of the user, these represent users registered with the system. These will be persisted over restarts at a later date.
-
-##### Clients
-Keyed to the id of the user, these represent the users currently logged in. Client contains both the PID of the client and a Module reference to the protocol in use.
-
-##### Battles
-Does what it says on the tin.
+## Documentation
+- [Setup instructions](documents/setup.md)
+- [Architecture](documents/architecture.md)
+- [Testing](documents/testing.md)
 
 ### Rough roadmap (very happy to change it up):
 - Remaining Spring commands
-- Persistent data store
 - Permissions system
 - More units tests
 - End to end tests

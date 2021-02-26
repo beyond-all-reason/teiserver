@@ -56,14 +56,23 @@ defmodule Teiserver.Client do
     [r1, r2, r3] = BitParse.parse_bits("#{client.rank || 1}", 3)
 
     status =
+      # [
+      #   if(client.in_game, do: 1, else: 0),
+      #   if(client.away, do: 1, else: 0),
+      #   r1,
+      #   r2,
+      #   r3,
+      #   if(client.moderator, do: 1, else: 0),
+      #   if(client.bot, do: 1, else: 0)
+      # ]
       [
-        if(client.in_game, do: 1, else: 0),
-        if(client.away, do: 1, else: 0),
-        r1,
-        r2,
-        r3,
+        if(client.bot, do: 1, else: 0),
         if(client.moderator, do: 1, else: 0),
-        if(client.bot, do: 1, else: 0)
+        r3,
+        r2,
+        r1,
+        if(client.away, do: 1, else: 0),
+        if(client.in_game, do: 1, else: 0),
       ]
       |> Integer.undigits(2)
 

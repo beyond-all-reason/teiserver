@@ -48,7 +48,6 @@ central-*.tar
 /source_deploy
 /source_deploy.tar.gz
 central.tar.gz
-/documents
 /bin
 Dockerfile
 
