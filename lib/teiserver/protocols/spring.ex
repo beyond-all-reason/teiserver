@@ -117,8 +117,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         %{state | client: new_client}
 
       nil ->
-        Logger.debug("[command:mystatus] bad match on: #{data}")
-        state
+        _no_match(state, "MYSTATUS", data)
     end
   end
 
@@ -132,10 +131,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
           User.try_login(username, password, state, ip, lobby)
 
         nil ->
-          new_data = data
-          |> String.replace("\t", "~")
-          |> String.replace(" ", "_")
-          {:error, "Invalid details format, got #{new_data}"}
+          _no_match(state, "LOGIN", data)
+          {:error, "Invalid details format"}
       end
 
     case response do
@@ -200,7 +197,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         end
 
       _ ->
-        nil
+        _no_match(state, "REGISTER", data)
     end
 
     state
@@ -268,7 +265,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         end
 
       _ ->
-        nil
+        _no_match(state, "RESETPASSWORD", data)
     end
 
     state
@@ -309,7 +306,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         end
 
       _ ->
-        state
+        _no_match(state, "CHANGEEMAIL", data)
     end
   end
 
@@ -353,7 +350,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         end
 
       _ ->
-        nil
+        _no_match(state, "CHANGEPASSWORD", data)
     end
 
     state
@@ -426,7 +423,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         _send("JOINFAILED #{room_name} Locked\n", state)
 
       _ ->
-        _send("JOINFAILED No match for details\n", state)
+        _no_match(state, "JOIN", data)
     end
 
     state
@@ -450,7 +447,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         Room.send_message(state.userid, room_name, msg)
 
       _ ->
-        nil
+        _no_match(state, "SAY", data)
     end
 
     state
@@ -463,7 +460,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         _send("SAIDPRIVATE #{to_name} #{msg}\n", state)
 
       _ ->
-        nil
+        _no_match(state, "SAYPRIVATE", data)
     end
 
     state
@@ -511,6 +508,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           {:success, battle}
 
         nil ->
+          _no_match(state, "OPENBATTLE", data)
           {:failure, "No match"}
       end
 
@@ -549,6 +547,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           Battle.can_join?(state.user, battleid)
 
         nil ->
+          _no_match(state, "JOINBATTLE", data)
           {:failure, "Invalid details"}
       end
 
@@ -607,7 +606,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           end
         end
       _ ->
-        nil
+        _no_match(state, "HANDICAP", data)
     end
     state
   end
@@ -620,7 +619,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           Battle.add_start_rectangle(state.client.battle_id, rectangle)
         end
       _ ->
-        nil
+        _no_match(state, "ADDSTARTRECT", data)
     end
     state
   end
@@ -666,7 +665,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           Battle.kick_user_from_battle(userid, int_parse(battle_id))
         end
       _ ->
-        nil
+        _no_match(state, "KICKFROMBATTLE", data)
     end
     state
   end
@@ -679,7 +678,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           Logger.error("TODO - Not implemented")
         end
       _ ->
-        nil
+        _no_match(state, "FORCETEAMNO", data)
     end
     state
   end
@@ -691,7 +690,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           Logger.error("TODO - Not implemented")
         end
       _ ->
-        nil
+        _no_match(state, "FORCEALLYNO", data)
     end
     state
   end
@@ -703,7 +702,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           Logger.error("TODO - Not implemented")
         end
       _ ->
-        nil
+        _no_match(state, "FORCETEAMCOLOR", data)
     end
     state
   end
@@ -730,7 +729,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           Battle.add_bot_to_battle(state.client.battle_id, state.userid, {name, battlestatus, team_colour, ai_dll})
         end
       _ ->
-        nil
+        _no_match(state, "ADDBOT", data)
     end
     state
   end
@@ -743,7 +742,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           Battle.update_bot(state.client.battle_id, name, battlestatus, team_colour)
         end
       _ ->
-        nil
+        _no_match(state, "UPDATEBOT", data)
     end
     state
   end
@@ -839,6 +838,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           end
 
         _ ->
+          _no_match(state, "MYBATTLESTATUS", data)
           state.client
       end
 
@@ -1118,6 +1118,16 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_reply(atom, data) do
     Logger.error("No match in spring.ex for atom: #{atom} and data: #{Kernel.inspect data}")
     ""
+  end
+
+  defp _no_match(state, cmd, data) do
+    data = data
+      |> String.replace("\t", "\\t")
+
+    msg = "No match for #{cmd} with data '#{data}'"
+    Logger.debug(msg)
+    _send("SERVERMSG #{msg}")
+    state
   end
 
   # Sends a message to the client. The function takes into account message ID and well warn if a message without a newline ending is sent.
