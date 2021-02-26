@@ -48,15 +48,18 @@ defmodule Teiserver.SpringBattleHostTest do
     # Now create a user to join the battle
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
-    _send(socket2, "JOINBATTLE 3 empty gameHash\n")
+    _send(socket2, "JOINBATTLE #{battle_id} empty gameHash\n")
     # The response to joining a battle is tested elsewhere, we just care about the host right now
     _ = _recv(socket2)
     _ = _recv(socket2)
 
-    reply = _recv(socket)
-    assert reply =~ "ADDUSER #{user2.name} XX #{user2.id} LuaLobby Chobby\n"
-    assert reply =~ "JOINEDBATTLE 3 #{user2.name}\n"
-    assert reply =~ "CLIENTSTATUS #{user2.name}\t4\n"
+    reply = _recv_until(socket)
+    IO.puts ""
+    IO.inspect reply
+    IO.puts ""
+    assert reply =~ "ADDUSER #{user2.name} XX 0 #{user2.id} LuaLobby Chobby\n"
+    assert reply =~ "JOINEDBATTLE #{battle_id} #{user2.name}\n"
+    assert reply =~ "CLIENTSTATUS #{user2.name} 16\n"
 
     # Kick user2
     battle = Battle.get_battle(battle_id)

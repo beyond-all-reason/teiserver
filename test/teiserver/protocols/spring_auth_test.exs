@@ -41,7 +41,7 @@ SERVERMSG Ingame time: 3 hours\n"
     # stuff we can't set. We should be rank 1, not a bot but are a mod
     _send(socket, "MYSTATUS 127\n")
     reply = _recv(socket)
-    assert reply =~ "CLIENTSTATUS #{user.name} 100\n"
+    assert reply =~ "CLIENTSTATUS #{user.name} 19\n"
     reply_bits = BitParse.parse_bits("100", 7)
 
     # Lets make sure it's coming back the way we expect
@@ -49,13 +49,13 @@ SERVERMSG Ingame time: 3 hours\n"
     [1, 1, 0, 0, 1, 0, 0] = reply_bits
 
     # Lets check we can correctly in-game
-    new_status = Integer.undigits([0, 1, 0, 0, 1, 0, 0], 2)
+    new_status = Integer.undigits(Enum.reverse([0, 1, 0, 0, 1, 0, 0]), 2)
     _send(socket, "MYSTATUS #{new_status}\n")
     reply = _recv(socket)
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
 
     # And now the away flag
-    new_status = Integer.undigits([0, 0, 0, 0, 1, 0, 0], 2)
+    new_status = Integer.undigits(Enum.reverse([0, 0, 0, 0, 1, 0, 0]), 2)
     _send(socket, "MYSTATUS #{new_status}\n")
     reply = _recv(socket)
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
@@ -63,7 +63,7 @@ SERVERMSG Ingame time: 3 hours\n"
     # And now we try for a bad mystatus command
     _send(socket, "MYSTATUS\n")
     reply = _recv(socket)
-    assert reply == :timeout
+    assert reply == "SERVERMSG No match for MYSTATUS with data ''\n"
 
     # Now change the password - incorrectly
     _send(socket, "CHANGEPASSWORD wrong_pass\tnew_pass\n")
@@ -232,6 +232,7 @@ ENDOFCHANNELS\n"
   end
 
   test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket, user: user} do
+    flunk "Not implemented"
     # Currently not working as no battles are present at this stage
     # TODO - Add battle
     _send(socket, "JOINBATTLE 1 empty 1683043765\n")

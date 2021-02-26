@@ -69,15 +69,23 @@ defmodule Teiserver.SpringRawTest do
       |> Enum.map(fn line -> String.split(line, " ") |> hd end)
       |> Enum.uniq()
 
-    assert commands == [
+    # Due to things running concurrently it's possible either of these will be the case
+    assert (commands == [
              "MOTD",
              "ADDUSER",
              "CLIENTSTATUS",
-             # "BATTLEOPENED",
-             # "UPDATEBATTLEINFO",
+             "BATTLEOPENED",
+             "UPDATEBATTLEINFO",
+             "JOINEDBATTLE",
              "LOGININFOEND",
              ""
-           ]
+           ] or commands == [
+             "MOTD",
+             "ADDUSER",
+             "CLIENTSTATUS",
+             "LOGININFOEND",
+             ""
+           ])
 
     _send(socket, "EXIT\n")
     _ = _recv(socket)

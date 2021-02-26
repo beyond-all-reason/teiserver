@@ -4,7 +4,6 @@ defmodule Teiserver.Client do
   alias Teiserver.Battle
   alias Teiserver.User
   alias Teiserver.Room
-  alias Teiserver.BitParse
 
   def create(client) do
     Map.merge(
@@ -65,6 +64,7 @@ defmodule Teiserver.Client do
       client ->
         case Battle.get_battle(client.battle_id) do
           nil -> nil
+          _battle ->
             Battle.remove_user_from_battle(userid, client.battle_id)
             new_client = Map.merge(client, %{
               battlestatus: 0,

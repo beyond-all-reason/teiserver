@@ -104,6 +104,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     case Regex.run(~r/([0-9]+)/, data) do
       [_, new_value] ->
         status_bits = BitParse.parse_bits(new_value, 7)
+          |> Enum.reverse
         [in_game, away, _r1, _r2, _r3, _mod, _bot] = status_bits
 
         new_client =
@@ -122,10 +123,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("LOGIN", data, state) do
-    regex = Regex.run(~r/^(\S+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)?\t?([^\t]+)?\t?([^\t]+)?/, data) ++ ["", "", "", "", ""]
+    regex_result = case Regex.run(~r/^(\S+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)?\t?([^\t]+)?\t?([^\t]+)?/, data) do
+      nil -> nil
+      result -> result ++ ["", "", "", "", ""]
+    end
+
     response =
-      case regex do
-        [_, username, password, _cpu, ip, lobby, userid, modes | _] ->
+      case regex_result do
+        [_, username, password, _cpu, ip, lobby, _userid, _modes | _] ->
           username = User.clean_name(username)
           Logger.debug("[protocol:login] matched #{username}")
           User.try_login(username, password, state, ip, lobby)
@@ -782,6 +787,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       case Regex.run(~r/(\S+) (.+)/, data) do
         [_, battlestatus, team_colour] ->
           status_bits = BitParse.parse_bits(battlestatus, 32)
+            |> Enum.reverse
 
           [
             _,
@@ -1002,7 +1008,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_reply(:update_bot, {battle_id, bot}) do
     status = create_battle_status(bot)
-    "UPDATEBOT #{battle_id} #{bot.name} #{bot.owner_name} #{battlestatus} #{bot.team_colour}\n"
+    "UPDATEBOT #{battle_id} #{bot.name} #{bot.owner_name} #{status} #{bot.team_colour}\n"
   end
 
   defp do_reply(:battle_players, battle) do
@@ -1130,7 +1136,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
     msg = "No match for #{cmd} with data '#{data}'"
     Logger.debug(msg)
-    _send("SERVERMSG #{msg}")
+    _send("SERVERMSG #{msg}\n", state)
     state
   end
 

@@ -140,16 +140,6 @@ defmodule Teiserver.Battle do
 
   def close_battle(battle_id) do
     battle = get_battle(battle_id)
-    
-    battle.players
-    |> Enum.each(fn userid ->
-      PubSub.broadcast(
-        Central.PubSub,
-        "battle_updates:#{battle_id}",
-        {:remove_user_from_battle, userid, battle_id}
-      )
-    end)
-
     ConCache.delete(:battles, battle_id)
     ConCache.update(:lists, :battles, fn value ->
       new_value =
@@ -164,6 +154,15 @@ defmodule Teiserver.Battle do
       "all_battle_updates",
       {:closed_battle, battle_id}
     )
+
+    battle.players
+    |> Enum.each(fn userid ->
+      PubSub.broadcast(
+        Central.PubSub,
+        "battle_updates:#{battle_id}",
+        {:remove_user_from_battle, userid, battle_id}
+      )
+    end)
   end
 
   def add_bot_to_battle(battle_id, owner_id, {name, battlestatus, team_colour, ai_dll}) do
