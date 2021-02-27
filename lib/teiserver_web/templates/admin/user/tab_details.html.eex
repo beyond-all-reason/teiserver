@@ -18,3 +18,5 @@
   },
   value: @user.colour
 %>
+
+<textarea id="user_data" rows="20" class="form-control monospace"><%= Jason.encode! @user.data, pretty: true %></textarea>

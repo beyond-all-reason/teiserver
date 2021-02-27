@@ -603,10 +603,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
           |> Battle.create_battle()
           |> Battle.add_battle()
 
-          nbattle = Map.delete(battle, :tags)
-          Logger.info("Battle started, battle_id: #{battle.id}, founder_id: #{battle.founder_id}, founder_name: #{battle.founder_name} userid: #{state.userid}, username: #{state.name}")
-          Logger.info("spring.OPENBATTLE -> #{Kernel.inspect nbattle}")
-
           {:success, battle}
 
         nil ->
@@ -1088,7 +1084,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(:battle_closed, battle_id) do
-    "BATTLECLOSED #{battle_id}"
+    "BATTLECLOSED #{battle_id}\n"
   end
 
   defp do_reply(:update_battle, battle) do
@@ -1123,6 +1119,21 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "REMOVESCRIPTTAGS " <> Enum.join(keys, "\t") <> "\n"
   end
 
+  defp do_reply(:enable_all_units, _units) do
+    # " " <> Enum.join(units, "\t") <> "\n"
+    nil
+  end
+
+  defp do_reply(:enable_units, _units) do
+    # " " <> Enum.join(units, "\t") <> "\n"
+    nil
+  end
+
+  defp do_reply(:disable_units, _units) do
+    # " " <> Enum.join(units, "\t") <> "\n"
+    nil
+  end
+
   defp do_reply(:add_bot_to_battle, {battle_id, bot}) do
     status = create_battle_status(bot)
     "ADDBOT #{battle_id} #{bot.name} #{bot.owner_name} #{status} #{bot.team_colour} #{bot.ai_dll}\n"
@@ -1139,10 +1150,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
       pname = User.get_username(player_id)
       "JOINEDBATTLE #{battle.id} #{pname}\n"
     end)
-  end
-
-  defp do_reply(:close_battle, battle) do
-    "BATTLECLOSED #{battle.id}\n"
   end
 
   # Client

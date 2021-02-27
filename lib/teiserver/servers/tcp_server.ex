@@ -180,6 +180,12 @@ defmodule Teiserver.TcpServer do
           state.protocol.reply(:add_script_tags, data, state)
         :remove_script_tags ->
           state.protocol.reply(:remove_script_tags, data, state)
+        :enable_all_units ->
+          state.protocol.reply(:enable_all_units, data, state)
+        :enable_units ->
+          state.protocol.reply(:enable_units, data, state)
+        :disable_units ->
+          state.protocol.reply(:disable_units, data, state)
       end
     end
     {:noreply, state}

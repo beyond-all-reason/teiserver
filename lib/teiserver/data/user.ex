@@ -12,7 +12,7 @@ defmodule Teiserver.User do
     rank: 1,
     country: "XX",
     lobbyid: "LuaLobby Chobby",
-    ip: "*",
+    ip: "default_ip",
     moderator: false,
     bot: false,
     friends: [],
@@ -94,55 +94,33 @@ defmodule Teiserver.User do
   end
 
   def register_bot(bot_name, bot_host_id) do
-    host = get_user_by_id(bot_host_id)
+    if get_user_by_name(bot_name) do
+      host = get_user_by_id(bot_host_id)
 
-    params = user_register_params(bot_name, host.email, host.password_hash, %{
-      "bot" => true,
-      "verified" => true
-    })
-    |> Map.merge(%{
-      email: String.replace(host.email, "@", ".bot#{bot_name}@"),
-    })
-    case Account.create_user(params) do
-      {:ok, user} ->
-        Account.create_group_membership(%{
-          user_id: user.id,
-          group_id: bar_user_group_id()
-        })
+      params = user_register_params(bot_name, host.email, host.password_hash, %{
+        "bot" => true,
+        "verified" => true
+      })
+      |> Map.merge(%{
+        email: String.replace(host.email, "@", ".bot#{bot_name}@"),
+      })
+      case Account.create_user(params) do
+        {:ok, user} ->
+          Account.create_group_membership(%{
+            user_id: user.id,
+            group_id: bar_user_group_id()
+          })
 
-        # Now add them to the cache
-        user
-        |> convert_user
-        |> add_user
-        user
+          # Now add them to the cache
+          user
+          |> convert_user
+          |> add_user
+          user
 
-      {:error, changeset} ->
-        Logger.error("Unable to create user with params #{Kernel.inspect params}\n#{Kernel.inspect changeset}")
+        {:error, changeset} ->
+          Logger.error("Unable to create user with params #{Kernel.inspect params}\n#{Kernel.inspect changeset}")
+      end
     end
-  end
-
-  # TODO
-  # Used to be used to create new users pre persistent storage,
-  # can probably be removed
-  def create_user(user) do
-    Map.merge(
-      %{
-        rank: 1,
-        country: "GB",
-        lobbyid: "LuaLobby Chobby",
-        ip: "192.168.0.1",
-        moderator: false,
-        bot: false,
-        friends: [],
-        friend_requests: [],
-        ignored: [],
-        verification_code: nil,
-        verified: false,
-        password_reset_code: nil,
-        email_change_code: [nil, nil]
-      },
-      user
-    )
   end
 
   def get_username(userid) do
@@ -481,7 +459,7 @@ defmodule Teiserver.User do
     end
   end
 
-  defp do_login(user, state, ip, lobby) do
+  defp do_login(user, state, _ip, _lobby) do
     proto = state.protocol
 
     proto.reply(:login_accepted, user.name, state)
@@ -526,6 +504,7 @@ defmodule Teiserver.User do
     end)
     |> Enum.count
     
+    Logger.info("---------------------------------")
     Logger.info("pre_cache_users, got #{user_count} users")
   end
 end
