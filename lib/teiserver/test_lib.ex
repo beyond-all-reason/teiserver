@@ -19,8 +19,8 @@ defmodule Teiserver.TestLib do
     "new_test_user_#{:random.uniform(99_999_999) + 1_000_000}"
   end
 
-  def new_user() do
-    name = new_user_name()
+  def new_user(name \\ nil) do
+    name = name || new_user_name()
 
     case User.get_user_by_name(name) do
       nil ->

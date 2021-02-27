@@ -96,7 +96,10 @@ defmodule Teiserver.User do
   end
 
   def register_bot(bot_name, bot_host_id) do
-    if get_user_by_name(bot_name) do
+    existing_bot = get_user_by_name(bot_name)
+    if existing_bot do
+      existing_bot
+    else
       host = get_user_by_id(bot_host_id)
 
       params = user_register_params(bot_name, host.email, host.password_hash, %{
@@ -117,7 +120,6 @@ defmodule Teiserver.User do
           user
           |> convert_user
           |> add_user
-          user
 
         {:error, changeset} ->
           Logger.error("Unable to create user with params #{Kernel.inspect params}\n#{Kernel.inspect changeset}")
@@ -517,8 +519,10 @@ defmodule Teiserver.User do
       |> add_user
     end)
     |> Enum.count
-    
-    Logger.info("---------------------------------")
+
+    # This is mostly so I can see exactly when the restart happened and get logs from this point on
+    Logger.info("----------------------------------------")
     Logger.info("pre_cache_users, got #{user_count} users")
+    Logger.info("----------------------------------------")
   end
 end
