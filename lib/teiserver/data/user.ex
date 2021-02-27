@@ -506,6 +506,23 @@ defmodule Teiserver.User do
     end
   end
 
+  def delete_user(userid) do
+    user = get_user_by_id(userid)
+    if user do
+      Client.disconnect(userid)
+      :timer.sleep(100)
+
+      ConCache.delete(:users, userid)
+      ConCache.update(:lists, :users, fn value ->
+        new_value =
+          value
+          |> Enum.filter(fn v -> v != userid end)
+
+        {:ok, new_value}
+      end)
+    end
+  end
+
   def pre_cache_users() do
     group_id = bar_user_group_id()
     ConCache.insert_new(:lists, :users, [])
