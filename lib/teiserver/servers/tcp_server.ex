@@ -71,15 +71,16 @@ defmodule Teiserver.TcpServer do
   end
 
   def init(ref, socket, transport) do
-    Logger.info("New TCP connection #{Kernel.inspect(socket)}")
     :ok = :ranch.accept_ack(ref)
     :ok = transport.setopts(socket, [{:active, true}])
 
     @default_protocol.welcome(socket, transport)
-    {ip, _port} = :ranch.get_addr(ref)
+    {:ok, {ip, _}} = transport.peername(socket)
     ip = ip
-    |> Tuple.to_list()
+    |> Tuple.to_list
     |> Enum.join(".")
+
+    Logger.info("New TCP connection #{Kernel.inspect(socket)}, IP: #{ip}")
 
     :gen_server.enter_loop(__MODULE__, [], %{
       userid: nil,

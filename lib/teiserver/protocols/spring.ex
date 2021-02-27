@@ -13,6 +13,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   alias Teiserver.BitParse
   alias Teiserver.TcpServer
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
 
   # TODO - Setup/Account stuff
   # CONFIRMAGREEMENT - Waiting to hear from Beherith on how he wants it to work
@@ -32,40 +33,18 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # in_PORTTEST
   # in_CONFIRMAGREEMENT
   # in_SAYEX
-  # in_SAYPRIVATE
   # in_SAYPRIVATEEX
   # in_BATTLEHOSTMSG
-  # in_JOIN
-  # in_LEAVE
-  # in_OPENBATTLE
-  # in_JOINBATTLE
   # in_JOINBATTLEACCEPT
   # in_JOINBATTLEDENY
-  # in_KICKFROMBATTLE
-  # in_SETSCRIPTTAGS
-  # in_REMOVESCRIPTTAGS
-  # in_LEAVEBATTLE
-  # in_MYBATTLESTATUS
   # in_UPDATEBATTLEINFO
-  # in_MYSTATUS
-  # in_CHANNELS
   # in_CHANNELTOPIC
   # in_GETCHANNELMESSAGES
-  # in_ADDSTARTRECT
-  # in_REMOVESTARTRECT
-  # in_DISABLEUNITS
-  # in_ENABLEUNITS
-  # in_ENABLEALLUNITS
-  # in_HANDICAP
   # in_FORCETEAMNO
   # in_FORCEALLYNO
   # in_FORCETEAMCOLOR
   # in_FORCESPECTATORMODE
-  # in_ADDBOT
-  # in_UPDATEBOT
-  # in_REMOVEBOT
   # in_GETUSERID
-  # in_GETUSERINFO
   # in_FINDIP
   # in_GETIP
   # in_RENAMEACCOUNT
@@ -75,7 +54,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # in_BROADCASTEX
   # in_ADMINBROADCAST
   # in_SETMINSPRINGVERSION
-  # in_EXIT
   # in_LISTCOMPFLAGS
   # in_KICK
   # in_BAN
@@ -103,7 +81,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # in_FORCELEAVECHANNEL
   # in_SETCHANNELKEY
   # in_STARTTLS
-  # in_SAYBATTLE
   # in_SAYBATTLEEX
   # in_SAYBATTLEPRIVATEEX
   # in_GETINGAMETIME
@@ -422,11 +399,12 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("GETUSERINFO", _, state) do
-    # TODO: Actually have this information
+    ingame_hours = state.user.ingame_seconds
+
     [
-      "Registration date: Oct 21, 2020",
+      "Registration date: #{date_to_str(state.user.inserted_at, :ymd_hms)}",
       "Email address: #{state.user.email}",
-      "Ingame time: 3 hours"
+      "Ingame time: #{ingame_hours}"
     ]
     |> Enum.each(fn msg ->
       reply(:servermsg, msg, state)
@@ -541,7 +519,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_handle("CHANNELS", _, state) do
     reply(:list_channels, state)
-    state
   end
 
   defp do_handle("SAY", data, state) do

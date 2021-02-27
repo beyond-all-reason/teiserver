@@ -5,7 +5,7 @@ defmodule Teiserver.User do
 
   @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulance cats dogs mice oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave)
 
-  @keys [:id, :name, :email]
+  @keys [:id, :name, :email, :inserted_at]
   @data_keys [:rank, :country, :lobbyid, :ip, :moderator, :bot, :friends, :friend_requests, :ignored, :verification_code, :verified, :password_reset_code, :email_change_code, :password_hash]
 
   @default_data %{
@@ -23,6 +23,8 @@ defmodule Teiserver.User do
     verified: false,
     password_reset_code: nil,
     email_change_code: nil,
+    last_login: nil,
+    ingame_seconds: 0
   }
 
   require Logger
@@ -449,8 +451,6 @@ defmodule Teiserver.User do
       user ->
         case test_password(password, user) do
           true ->
-            user = %{user | ip: ip, lobbyid: lobby, country: "GB"}
-            update_user(user, persist: true)
             do_login(user, state, ip, lobby)
 
           false ->
@@ -459,7 +459,12 @@ defmodule Teiserver.User do
     end
   end
 
-  defp do_login(user, state, _ip, _lobby) do
+  defp do_login(user, state, ip, lobby) do
+    country = "GB"
+    last_login = :erlang.system_time(:seconds)
+    user = %{user | ip: ip, lobbyid: lobby, country: country, last_login: last_login}
+    update_user(user, persist: true)
+
     proto = state.protocol
 
     proto.reply(:login_accepted, user.name, state)
@@ -468,9 +473,17 @@ defmodule Teiserver.User do
     {:ok, user}
   end
 
+  def logout(nil), do: nil
+  def logout(user_id) do
+    user = get_user_by_id(user_id)
+    new_ingame_seconds = user.ingame_seconds + (:erlang.system_time(:seconds) - user.last_login)
+    user = %{user | ingame_seconds: new_ingame_seconds}
+    update_user(user, persist: true)
+  end
+
   def convert_user(user) do
     data = @data_keys
-    |> Map.new(fn k -> {k, Map.get(user.data, to_string(k), @default_data[k])} end)
+    |> Map.new(fn k -> {k, Map.get(user.data || %{}, to_string(k), @default_data[k])} end)
 
     user
     |> Map.take(@keys)

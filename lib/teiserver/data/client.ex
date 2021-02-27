@@ -130,6 +130,7 @@ defmodule Teiserver.Client do
   def disconnect(userid) do
     leave_battle(userid)
     leave_rooms(userid)
+    User.logout(userid)
 
     ConCache.delete(:clients, userid)
 
