@@ -62,7 +62,7 @@ defmodule Teiserver.Client do
   end
 
   def leave_battle(userid) do
-    case get_client(userid) do
+    case get_client_by_id(userid) do
       nil -> nil
       client ->
         case Battle.get_battle(client.battle_id) do
@@ -88,7 +88,12 @@ defmodule Teiserver.Client do
     end)
   end
 
-  def get_client(userid) do
+  def get_client_by_name(name) do
+    userid = User.get_userid(name)
+    ConCache.get(:clients, userid)
+  end
+
+  def get_client_by_id(userid) do
     ConCache.get(:clients, userid)
   end
 
@@ -117,7 +122,7 @@ defmodule Teiserver.Client do
 
   def list_clients() do
     ConCache.get(:lists, :clients)
-    |> Enum.map(fn c -> get_client(c) end)
+    |> Enum.map(fn c -> get_client_by_id(c) end)
   end
 
   # It appears this isn't used but I suspect it will be at a later stage

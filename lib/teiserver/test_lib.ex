@@ -27,7 +27,7 @@ defmodule Teiserver.TestLib do
         {:ok, user} =
           User.user_register_params(name, "#{name}@email.com", "X03MO1qnZdYdgyfeuILPmQ==")
           |> Account.create_user
-          
+
         user
           |> User.convert_user
           |> User.add_user
@@ -89,8 +89,9 @@ defmodule Teiserver.TestLib do
       name: nil,
       client: nil,
       user: nil,
-      socket: socket,
       msg_id: nil,
+      ip: "127.0.0.1",
+      socket: socket,
       transport: socket.transport,
       protocol: protocol
     }

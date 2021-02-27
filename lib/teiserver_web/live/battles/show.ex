@@ -50,7 +50,7 @@ defmodule TeiserverWeb.BattleLive.Show do
   defp add_user(%{assigns: assigns} = socket, id) do
     id = int_parse(id)
     new_users = Map.put(assigns.users, id, User.get_user_by_id(id))
-    new_clients = Map.put(assigns.clients, id, Client.get_client(id))
+    new_clients = Map.put(assigns.clients, id, Client.get_client_by_id(id))
 
     socket
     |> assign(:users, new_users)

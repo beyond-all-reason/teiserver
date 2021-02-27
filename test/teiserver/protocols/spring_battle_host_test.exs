@@ -21,10 +21,8 @@ defmodule Teiserver.SpringBattleHostTest do
       _open,
       join,
       _tags,
-      rect1,
-      rect2,
       battle_status,
-      _saidbattle,
+      _battle_opened,
       _joinedbattle,
       _clientstatus
       | _
@@ -36,8 +34,6 @@ defmodule Teiserver.SpringBattleHostTest do
       |> String.replace("JOINBATTLE ", "")
       |> String.replace(" gameHash", "")
       |> int_parse
-    assert rect1 == "ADDSTARTRECT 0 0 126 74 200"
-    assert rect2 == "ADDSTARTRECT 1 126 0 200 74"
     assert battle_status == "REQUESTBATTLESTATUS"
 
     # Check the battle actually got created
@@ -54,7 +50,7 @@ defmodule Teiserver.SpringBattleHostTest do
     _ = _recv(socket2)
 
     reply = _recv_until(socket)
-    assert reply =~ "ADDUSER #{user2.name} XX 0 #{user2.id} LuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} GB 0 #{user2.id} LuaLobby Chobby\n"
     assert reply =~ "JOINEDBATTLE #{battle_id} #{user2.name}\n"
     assert reply =~ "CLIENTSTATUS #{user2.name} 16\n"
 
@@ -67,17 +63,17 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == "FORCEQUITBATTLE\nLEFTBATTLE #{battle_id} #{user2.name}\n"
 
     # Adding start rectangles
-    assert Enum.count(battle.start_rectangles) == 2
+    assert Enum.count(battle.start_rectangles) == 0
     _send(socket, "ADDSTARTRECT 2 50 50 100 100\n")
     _ = _recv(socket)
 
     battle = Battle.get_battle(battle_id)
-    assert Enum.count(battle.start_rectangles) == 3
+    assert Enum.count(battle.start_rectangles) == 1
 
     _send(socket, "REMOVESTARTRECT 2\n")
     _ = _recv(socket)
     battle = Battle.get_battle(battle_id)
-    assert Enum.count(battle.start_rectangles) == 2
+    assert Enum.count(battle.start_rectangles) == 0
 
     # Add and remove script tags
     refute Map.has_key?(battle.tags, "custom/key1")
@@ -102,6 +98,11 @@ defmodule Teiserver.SpringBattleHostTest do
     assert Map.has_key?(battle.tags, "custom/key2")
 
     # Leave the battle
-    
+
+    _send(socket, "EXIT\n")
+    _recv(socket)
+
+    _send(socket2, "EXIT\n")
+    _recv(socket2)
   end
 end

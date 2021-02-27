@@ -638,7 +638,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
         battle.players
         |> Enum.each(fn username ->
-          client = Client.get_client(username)
+          client = Client.get_client_by_id(username)
           reply(:client_battlestatus, client, state)
         end)
 
@@ -650,12 +650,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
         end)
 
         _send("REQUESTBATTLESTATUS\n", state)
-
-        # I think this is sent by SPADS but for now we're going to fake it
-        _send(
-          "SAIDBATTLEEX #{battle.founder_name} Hi #{state.name}! Current battle type is faked_team.\n",
-          state
-        )
 
         new_client =
           Map.put(state.client, :battle_id, battle.id)
@@ -675,7 +669,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       [_, username, value] ->
         if Battle.allow?("HANDICAP", state) do
           clint_id = User.get_userid(username)
-          client = Client.get_client(clint_id)
+          client = Client.get_client_by_id(clint_id)
           # Can't update a client that doesn't exist
           if client != nil and client.battle_id == state.client.battle_id do
             client = %{client | handicap: int_parse(value)}
@@ -749,10 +743,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_handle("FORCETEAMNO", data, state) do
     case Regex.run(~r/(\d+) (\S+)/, data) do
-      [_, username, team_number] ->
+      [_, name, team_number] ->
         if Battle.allow?("FORCETEAMNO", state) do
-          Client.force_status_change()
-          Logger.error("TODO - Not implemented")
+          client = Client.get_client_by_name(name)
+          new_client = %{state.client | team_number: int_parse(team_number)}
+          Client.update(new_client, :client_updated_battlestatus)
         end
       _ ->
         _no_match(state, "FORCETEAMNO", data)
@@ -762,9 +757,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_handle("FORCEALLYNO", data, state) do
     case Regex.run(~r/(\d+) (\S+)/, data) do
-      [_, username, team_number] ->
+      [_, name, ally_team_number] ->
         if Battle.allow?("FORCEALLYNO", state) do
-          Logger.error("TODO - Not implemented")
+          client = Client.get_client_by_name(name)
+          new_client = %{state.client | ally_team_number: int_parse(ally_team_number)}
+          Client.update(new_client, :client_updated_battlestatus)
         end
       _ ->
         _no_match(state, "FORCEALLYNO", data)
@@ -774,9 +771,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_handle("FORCETEAMCOLOR", data, state) do
     case Regex.run(~r/(\d+) (\S+)/, data) do
-      [_, username, colour] ->
+      [_, name, team_colour] ->
         if Battle.allow?("FORCETEAMCOLOR", state) do
-          Logger.error("TODO - Not implemented")
+          client = Client.get_client_by_name(name)
+          new_client = %{state.client | team_colour: team_colour}
+          Client.update(new_client, :client_updated_battlestatus)
         end
       _ ->
         _no_match(state, "FORCETEAMCOLOR", data)
@@ -784,9 +783,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
     state
   end
 
-  defp do_handle("FORCESPECTATORMODE", username, state) do
+  defp do_handle("FORCESPECTATORMODE", name, state) do
     if Battle.allow?("FORCESPECTATORMODE", state) do
-      Logger.error("TODO - Not implemented")
+      client = Client.get_client_by_name(name)
+      new_client = %{state.client | spectator: true}
+      Client.update(new_client, :client_updated_battlestatus)
     end
     state
   end

@@ -476,7 +476,8 @@ defmodule Teiserver.User do
   def logout(nil), do: nil
   def logout(user_id) do
     user = get_user_by_id(user_id)
-    new_ingame_seconds = user.ingame_seconds + (:erlang.system_time(:seconds) - user.last_login)
+    # TODO In some tests it's possible for last_login to be nil, this is a temoparay workaround
+    new_ingame_seconds = user.ingame_seconds + (:erlang.system_time(:seconds) - (user.last_login || :erlang.system_time(:seconds)))
     user = %{user | ingame_seconds: new_ingame_seconds}
     update_user(user, persist: true)
   end
