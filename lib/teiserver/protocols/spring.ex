@@ -152,6 +152,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
     {command, String.trim(data), String.trim(msg_id)}
   end
 
+  # TODO
+  # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
   defp do_handle("SLTS", _, state) do
     _send("OK cmd=SLTS\n", state)
     state
@@ -214,10 +216,9 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
     response =
       case regex_result do
-        [_, username, password, _cpu, ip, lobby, _userid, _modes | _] ->
+        [_, username, password, _cpu, _ip, lobby, _userid, _modes | _] ->
           username = User.clean_name(username)
-          Logger.debug("[protocol:login] matched #{username}")
-          User.try_login(username, password, state, ip, lobby)
+          User.try_login(username, password, state, state.ip, lobby)
 
         nil ->
           _no_match(state, "LOGIN", data)
@@ -598,7 +599,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
             engine_name: engine_name,
             engine_version: engine_version,
             map_name: map_name,
-            game_name: game_name
+            game_name: game_name,
+            ip: state.client.ip
           }
           |> Battle.create_battle()
           |> Battle.add_battle()

@@ -449,7 +449,7 @@ defmodule Teiserver.User do
       user ->
         case test_password(password, user) do
           true ->
-            user = %{user | ip: ip, lobbyid: lobby}
+            user = %{user | ip: ip, lobbyid: lobby, country: "GB"}
             update_user(user, persist: true)
             do_login(user, state, ip, lobby)
 

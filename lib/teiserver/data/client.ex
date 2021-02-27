@@ -40,7 +40,10 @@ defmodule Teiserver.Client do
         moderator: user.moderator,
         bot: user.bot,
         away: false,
-        in_game: false
+        in_game: false,
+        ip: user.ip,
+        country: user.country,
+        lobbyid: user.lobbyid
       })
       |> add_client
 

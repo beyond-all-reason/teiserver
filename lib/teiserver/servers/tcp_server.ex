@@ -76,14 +76,19 @@ defmodule Teiserver.TcpServer do
     :ok = transport.setopts(socket, [{:active, true}])
 
     @default_protocol.welcome(socket, transport)
+    {ip, _port} = :ranch.get_addr(ref)
+    ip = ip
+    |> Tuple.to_list()
+    |> Enum.join(".")
 
     :gen_server.enter_loop(__MODULE__, [], %{
       userid: nil,
       name: nil,
       client: nil,
       user: nil,
-      socket: socket,
       msg_id: nil,
+      ip: ip,
+      socket: socket,
       transport: transport,
       protocol: @default_protocol
     })
