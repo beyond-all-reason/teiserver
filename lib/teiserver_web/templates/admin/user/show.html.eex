@@ -13,6 +13,10 @@
     page_quick_actions = [
       {label: "Edit user", icon: "<%= icon() %>", url: "<%= Routes.ts_admin_user_path(@conn, :edit, @user) %>", keywords: ["edit", "user", "edit user"]},
     ];
+
+    setTimeout(function() {
+      $("#flash-messages").show();
+    }, 4001);
   });
 </script>
 
