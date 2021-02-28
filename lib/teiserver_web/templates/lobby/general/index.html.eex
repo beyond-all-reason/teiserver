@@ -1,20 +1,28 @@
 <div class="row page-row">
-  <%=
-    component "menu_card",
-    icon: "fas fa-swords",
-    name: "battles",
-    text: "Battles",
-    link: Routes.ts_battle_index_path(@conn, :index)
-  %>
+  <%= if @server_user do %>
+    <%=
+      component "menu_card",
+      icon: "fas fa-swords",
+      name: "battles",
+      text: "Battles",
+      link: Routes.ts_battle_index_path(@conn, :index)
+    %>
 
-  <%=
-    component "menu_card",
-    icon: "fas fa-user",
-    name: "account",
-    text: "Account",
-    link: Routes.ts_account_general_path(@conn, :index)
-  %>
+    <%=
+      component "menu_card",
+      icon: "fas fa-user",
+      name: "account",
+      text: "Account",
+      link: Routes.ts_account_general_path(@conn, :index)
+    %>
+  <% else %>
+    <div style="margin-left: 40px; height: 100px; font-size: 1.2em;">
+      No server user detected, please login.
+    </div>
+  <% end %>
+</div>
 
+<div class="row page-row">
   <%= if allow?(@conn, "teiserver.admin.account") do %>
     <%=
       component "menu_card",

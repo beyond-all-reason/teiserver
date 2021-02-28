@@ -1,4 +1,9 @@
-Stuff related to your Teiserver account will go here.
-<br /><br />
+<div class="row page-row">
+  <%= component "menu_card", icon_class: "fas", name: "", icon: "fas fa-users", text: "Friends", link: Routes.ts_account_general_path(@conn, :index) %>
 
-<%= component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_lobby_general_path(@conn, :index) %>
+  <%= component "menu_card", icon_class: "fas", name: "", icon: "fas fa-volume-slash", text: "Ignored/Muted", link: Routes.ts_account_general_path(@conn, :index) %>
+</div>
+
+<div class="row page-row">
+  <%= component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_lobby_general_path(@conn, :index) %>
+</div>
