@@ -30,18 +30,17 @@ config :central, Central.Account.Guardian,
   secret_key: "8vJcJOYwsjdIQ9IhfOI5F9GQMykuNjBW58FY9S/TqMsq6gRdKgY05jscQAFVKfwa",
   ttl: {30, :days}
 
-config :central, Central.General.LoadTestServer,
-  enable_loadtest: false
+config :central, Central.General.LoadTestServer, enable_loadtest: false
 
-config :central, Central.Communication.BlogFile,
-  save_path: "/etc/central/blog_files"
+config :central, Central.Communication.BlogFile, save_path: "/etc/central/blog_files"
 
 config :central, Oban,
   repo: Central.Repo,
   plugins: [{Oban.Plugins.Pruner, max_age: 3600}],
   queues: [metis: 10, logging: 1],
   crontab: [
-    {"0 2 * * *", Central.Logging.AggregateViewLogsTask},# Every day at 2am
+    # Every day at 2am
+    {"0 2 * * *", Central.Logging.AggregateViewLogsTask}
   ]
 
 # Import environment specific config. This must remain at the bottom

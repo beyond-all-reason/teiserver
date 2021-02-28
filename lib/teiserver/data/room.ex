@@ -23,7 +23,6 @@ defmodule Teiserver.Room do
     }
   end
 
-
   def get_room(name) do
     ConCache.get(:rooms, name)
   end

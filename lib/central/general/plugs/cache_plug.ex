@@ -4,7 +4,6 @@ defmodule Central.General.CachePlug do
   alias Central.Account
 
   def init(_) do
-
   end
 
   def call(%{user_id: nil} = conn, _) do

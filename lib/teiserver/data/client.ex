@@ -47,7 +47,12 @@ defmodule Teiserver.Client do
       })
       |> add_client
 
-    PubSub.broadcast(Central.PubSub, "all_client_updates", {:logged_in_client, user.id, user.name})
+    PubSub.broadcast(
+      Central.PubSub,
+      "all_client_updates",
+      {:logged_in_client, user.id, user.name}
+    )
+
     client
   end
 
@@ -57,30 +62,45 @@ defmodule Teiserver.Client do
       |> add_client
 
     PubSub.broadcast(Central.PubSub, "all_client_updates", {:updated_client, client, reason})
-    if client.battle_id, do: PubSub.broadcast(Central.PubSub, "live_battle_updates:#{client.battle_id}", {:updated_client, client, reason})
+
+    if client.battle_id,
+      do:
+        PubSub.broadcast(
+          Central.PubSub,
+          "live_battle_updates:#{client.battle_id}",
+          {:updated_client, client, reason}
+        )
+
     client
   end
 
   def leave_battle(userid) do
     case get_client_by_id(userid) do
-      nil -> nil
+      nil ->
+        nil
+
       client ->
         case Battle.get_battle(client.battle_id) do
-          nil -> nil
+          nil ->
+            nil
+
           _battle ->
             Battle.remove_user_from_battle(userid, client.battle_id)
-            new_client = Map.merge(client, %{
-              battlestatus: 0,
-              team_colour: 0,
-              battle_id: nil
-            })
+
+            new_client =
+              Map.merge(client, %{
+                battlestatus: 0,
+                team_colour: 0,
+                battle_id: nil
+              })
+
             ConCache.put(:clients, new_client.userid, new_client)
         end
     end
   end
 
   def leave_rooms(userid) do
-    Room.list_rooms
+    Room.list_rooms()
     |> Enum.each(fn room ->
       if userid in room.members do
         Room.remove_user_from_room(userid, room.name)
@@ -146,6 +166,7 @@ defmodule Teiserver.Client do
 
       {:ok, new_value}
     end)
+
     username = User.get_username(userid)
     PubSub.broadcast(Central.PubSub, "all_client_updates", {:logged_out_client, userid, username})
   end

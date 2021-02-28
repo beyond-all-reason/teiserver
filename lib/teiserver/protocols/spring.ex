@@ -19,7 +19,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # CONFIRMAGREEMENT - Waiting to hear from Beherith on how he wants it to work
   # RESENDVERIFICATION - See above
   # LISTCOMPFLAGS
-  
+
   # Bridge commands, may not be needed
   # in_BRIDGECLIENTFROM
   # in_UNBRIDGECLIENTFROM
@@ -158,7 +158,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("OB", _, state) do
-    do_handle("OPENBATTLE", "0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName", state)
+    do_handle(
+      "OPENBATTLE",
+      "0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName",
+      state
+    )
   end
 
   # Specific handlers for different commands
@@ -166,8 +170,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("MYSTATUS", data, state) do
     case Regex.run(~r/([0-9]+)/, data) do
       [_, new_value] ->
-        status_bits = BitParse.parse_bits(new_value, 7)
-          |> Enum.reverse
+        status_bits =
+          BitParse.parse_bits(new_value, 7)
+          |> Enum.reverse()
+
         [in_game, away, _r1, _r2, _r3, _mod, _bot] = status_bits
 
         new_client =
@@ -186,10 +192,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("LOGIN", data, state) do
-    regex_result = case Regex.run(~r/^(\S+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)?\t?([^\t]+)?\t?([^\t]+)?/, data) do
-      nil -> nil
-      result -> result ++ ["", "", "", "", ""]
-    end
+    regex_result =
+      case Regex.run(~r/^(\S+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)?\t?([^\t]+)?\t?([^\t]+)?/, data) do
+        nil -> nil
+        result -> result ++ ["", "", "", "", ""]
+      end
 
     response =
       case regex_result do
@@ -220,6 +227,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           user = User.get_user_by_id(userid)
           reply(:add_user, user, state)
         end)
+
         :timer.sleep(100)
 
         # Client status messages
@@ -227,6 +235,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         |> Enum.map(fn client ->
           reply(:client_status, client, state)
         end)
+
         :timer.sleep(100)
 
         Battle.list_battles()
@@ -235,6 +244,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           reply(:update_battle, b, state)
           reply(:battle_players, b, state)
         end)
+
         :timer.sleep(100)
 
         _send("LOGININFOEND\n", state)
@@ -279,11 +289,17 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_handle("CREATEBOTACCOUNT", _, %{user: %{moderator: false}} = state),
     do: deny(state)
+
   defp do_handle("CREATEBOTACCOUNT", data, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_, botname, _owner_name] ->
         User.register_bot(botname, state.userid)
-        reply(:servermsg, "A new bot account #{botname} has been created, with the same password as #{state.name}", state)
+
+        reply(
+          :servermsg,
+          "A new bot account #{botname} has been created, with the same password as #{state.name}",
+          state
+        )
 
       _ ->
         _no_match(state, "CREATEBOTACCOUNT", data)
@@ -409,6 +425,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     |> Enum.each(fn msg ->
       reply(:servermsg, msg, state)
     end)
+
     state
   end
 
@@ -427,7 +444,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
             new_user = %{state.user | password_hash: encrypted_new_password}
             User.update_user(new_user)
 
-            reply(:servermsg, "Password changed, you will need to use it next time you login", state)
+            reply(
+              :servermsg,
+              "Password changed, you will need to use it next time you login",
+              state
+            )
         end
 
       _ ->
@@ -491,7 +512,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
         author_name = User.get_username(room.author_id)
         _send("CHANNELTOPIC #{room_name} #{author_name}\n", state)
 
-        members = room.members
+        members =
+          room.members
           |> Enum.map(fn m -> User.get_username(m) end)
           |> List.insert_at(0, state.name)
           |> Enum.join(" ")
@@ -550,9 +572,26 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # OPENBATTLE type natType password port maxPlayers gameHash rank mapHash {engineName} {engineVersion} {map} {title} {gameName}
   defp do_handle("OPENBATTLE", data, state) do
     response =
-      case Regex.run(~r/^(\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) ([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t(.+)$/, data) do
-        [_, type, nattype, _password, port, max_players, game_hash, _rank, map_hash, engine_name, engine_version, map_name, name, game_name] ->
-
+      case Regex.run(
+             ~r/^(\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) ([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t(.+)$/,
+             data
+           ) do
+        [
+          _,
+          type,
+          nattype,
+          _password,
+          port,
+          max_players,
+          game_hash,
+          _rank,
+          map_hash,
+          engine_name,
+          engine_version,
+          map_name,
+          name,
+          game_name
+        ] ->
           nattype =
             case nattype do
               "0" -> :none
@@ -560,27 +599,28 @@ defmodule Teiserver.Protocols.SpringProtocol do
               "2" -> :fixed
             end
 
-          battle = %{
-            founder_id: state.userid,
-            founder_name: state.name,
-            name: name,
-            type: (if type == "0", do: :normal, else: :replay),
-            nattype: nattype,
-            port: port,
-            max_players: int_parse(max_players),
-            game_hash: game_hash,
-            map_hash: map_hash,
-            password: nil,
-            rank: 0,
-            locked: false,
-            engine_name: engine_name,
-            engine_version: engine_version,
-            map_name: map_name,
-            game_name: game_name,
-            ip: state.client.ip
-          }
-          |> Battle.create_battle()
-          |> Battle.add_battle()
+          battle =
+            %{
+              founder_id: state.userid,
+              founder_name: state.name,
+              name: name,
+              type: if(type == "0", do: :normal, else: :replay),
+              nattype: nattype,
+              port: port,
+              max_players: int_parse(max_players),
+              game_hash: game_hash,
+              map_hash: map_hash,
+              password: nil,
+              rank: 0,
+              locked: false,
+              engine_name: engine_name,
+              engine_version: engine_version,
+              map_name: map_name,
+              game_name: game_name,
+              ip: state.client.ip
+            }
+            |> Battle.create_battle()
+            |> Battle.add_battle()
 
           {:success, battle}
 
@@ -616,7 +656,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         state
     end
   end
-  
+
   defp do_handle("JOINBATTLE", data, state) do
     response =
       case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
@@ -663,7 +703,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         state
     end
   end
-  
+
   defp do_handle("HANDICAP", data, state) do
     case Regex.run(~r/(\S+) (\d+)/, data) do
       [_, username, value] ->
@@ -676,12 +716,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
             Client.update(client, :client_updated_battlestatus)
           end
         end
+
       _ ->
         _no_match(state, "HANDICAP", data)
     end
+
     state
   end
-  
+
   defp do_handle("ADDSTARTRECT", data, state) do
     case Regex.run(~r/(\d+) (\d+) (\d+) (\d+) (\d+)/, data) do
       [_, team, left, top, right, bottom] ->
@@ -689,9 +731,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
           rectangle = int_parse([team, left, top, right, bottom])
           Battle.add_start_rectangle(state.client.battle_id, rectangle)
         end
+
       _ ->
         _no_match(state, "ADDSTARTRECT", data)
     end
+
     state
   end
 
@@ -700,12 +744,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
       team = int_parse(team)
       Battle.remove_start_rectangle(state.client.battle_id, team)
     end
+
     state
   end
 
   defp do_handle("SETSCRIPTTAGS", data, state) do
     if Battle.allow?("SETSCRIPTTAGS", state) do
-      tags = data
+      tags =
+        data
         |> String.split("\t")
         |> Map.new(fn t ->
           [k, v] = String.split(t, "=")
@@ -714,17 +760,20 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
       Battle.set_script_tags(state.client.battle_id, tags)
     end
+
     state
   end
 
   defp do_handle("REMOVESCRIPTTAGS", data, state) do
     if Battle.allow?("SETSCRIPTTAGS", state) do
-      keys = data
-        |> String.downcase
+      keys =
+        data
+        |> String.downcase()
         |> String.split("\t")
 
       Battle.remove_script_tags(state.client.battle_id, keys)
     end
+
     state
   end
 
@@ -735,9 +784,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
           userid = User.get_userid(username)
           Battle.kick_user_from_battle(userid, int_parse(battle_id))
         end
+
       _ ->
         _no_match(state, "KICKFROMBATTLE", data)
     end
+
     state
   end
 
@@ -749,9 +800,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
           new_client = %{state.client | team_number: int_parse(team_number)}
           Client.update(new_client, :client_updated_battlestatus)
         end
+
       _ ->
         _no_match(state, "FORCETEAMNO", data)
     end
+
     state
   end
 
@@ -763,9 +816,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
           new_client = %{state.client | ally_team_number: int_parse(ally_team_number)}
           Client.update(new_client, :client_updated_battlestatus)
         end
+
       _ ->
         _no_match(state, "FORCEALLYNO", data)
     end
+
     state
   end
 
@@ -777,9 +832,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
           new_client = %{state.client | team_colour: team_colour}
           Client.update(new_client, :client_updated_battlestatus)
         end
+
       _ ->
         _no_match(state, "FORCETEAMCOLOR", data)
     end
+
     state
   end
 
@@ -789,6 +846,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       new_client = %{state.client | spectator: true}
       Client.update(new_client, :client_updated_battlestatus)
     end
+
     state
   end
 
@@ -797,6 +855,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       units = String.split(data, " ")
       Battle.disable_units(state.client.battle_id, units)
     end
+
     state
   end
 
@@ -805,6 +864,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       units = String.split(data, " ")
       Battle.enable_units(state.client.battle_id, units)
     end
+
     state
   end
 
@@ -812,10 +872,12 @@ defmodule Teiserver.Protocols.SpringProtocol do
     if Battle.allow?("ENABLEALLUNITS", state) do
       Battle.enable_all_units(state.client.battle_id)
     end
+
     state
   end
 
   defp do_handle("PROMOTE", _, %{client: %{battle_id: nil}} = state), do: state
+
   defp do_handle("PROMOTE", _, state) do
     Logger.info("PROMOTE is not handled at this time as Chobby has no way to handle it - TODO")
     state
@@ -823,28 +885,38 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   # ADDBOT STAI(1) 4195458 0 STAI
   defp do_handle("ADDBOT", _msg, %{client: %{battle_id: nil}} = state), do: state
+
   defp do_handle("ADDBOT", data, state) do
     case Regex.run(~r/(\S+) (\d+) (\d+) (\S+)/, data) do
       [_, name, battlestatus, team_colour, ai_dll] ->
         if Battle.allow?("ADDBOT", state) do
-          Battle.add_bot_to_battle(state.client.battle_id, state.userid, {name, battlestatus, team_colour, ai_dll})
+          Battle.add_bot_to_battle(
+            state.client.battle_id,
+            state.userid,
+            {name, battlestatus, team_colour, ai_dll}
+          )
         end
+
       _ ->
         _no_match(state, "ADDBOT", data)
     end
+
     state
   end
 
   defp do_handle("UPDATEBOT", _msg, %{client: %{battle_id: nil}} = state), do: state
+
   defp do_handle("UPDATEBOT", data, state) do
     case Regex.run(~r/(\S+) (\d+) (\d+) (\S+)/, data) do
       [_, name, battlestatus, team_colour] ->
         if Battle.allow?("UPDATEBOT", state) do
           Battle.update_bot(state.client.battle_id, name, battlestatus, team_colour)
         end
+
       _ ->
         _no_match(state, "UPDATEBOT", data)
     end
+
     state
   end
 
@@ -854,6 +926,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     if Battle.allow?("SAYBATTLE", state) do
       Battle.say(state.userid, msg, state.client.battle_id)
     end
+
     state
   end
 
@@ -882,8 +955,9 @@ defmodule Teiserver.Protocols.SpringProtocol do
     new_client =
       case Regex.run(~r/(\S+) (.+)/, data) do
         [_, battlestatus, team_colour] ->
-          status_bits = BitParse.parse_bits(battlestatus, 32)
-            |> Enum.reverse
+          status_bits =
+            BitParse.parse_bits(battlestatus, 32)
+            |> Enum.reverse()
 
           [
             _,
@@ -1052,9 +1126,9 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
     passworded = if battle.password == nil, do: 0, else: 1
 
-    "BATTLEOPENED #{battle.id} #{type} #{nattype} #{battle.founder_name} #{battle.ip} #{battle.port} #{
-      battle.max_players
-    } #{passworded} #{battle.rank} #{battle.map_hash} #{battle.engine_name}\t#{
+    "BATTLEOPENED #{battle.id} #{type} #{nattype} #{battle.founder_name} #{battle.ip} #{
+      battle.port
+    } #{battle.max_players} #{passworded} #{battle.rank} #{battle.map_hash} #{battle.engine_name}\t#{
       battle.engine_version
     }\t#{battle.map_name}\t#{battle.name}\t#{battle.game_name}\ttest-15386-5c98cfa\n"
   end
@@ -1088,7 +1162,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(:add_script_tags, tags) do
-    tags = tags
+    tags =
+      tags
       |> Enum.map(fn {key, value} -> "#{key}=#{value}" end)
       |> Enum.join("\t")
 
@@ -1116,6 +1191,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_reply(:add_bot_to_battle, {battle_id, bot}) do
     status = create_battle_status(bot)
+
     "ADDBOT #{battle_id} #{bot.name} #{bot.owner_name} #{status} #{bot.team_colour} #{bot.ai_dll}\n"
   end
 
@@ -1239,12 +1315,13 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(atom, data) do
-    Logger.error("No match in spring.ex for atom: #{atom} and data: #{Kernel.inspect data}")
+    Logger.error("No match in spring.ex for atom: #{atom} and data: #{Kernel.inspect(data)}")
     ""
   end
 
   defp _no_match(state, cmd, data) do
-    data = data
+    data =
+      data
       |> String.replace("\t", "\\t")
 
     msg = "No match for #{cmd} with data '#{data}'"
@@ -1288,7 +1365,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     Logger.info("--> #{Kernel.inspect(socket)} #{TcpServer.format_log(msg)}")
     transport.send(socket, msg)
   end
-  
+
   defp deny(state) do
     reply(:servermsg, "You do not have permission to execute that command", state)
     state
@@ -1306,10 +1383,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
       if(client.moderator, do: 1, else: 0),
       if(client.bot, do: 1, else: 0)
     ]
-      |> Enum.reverse
-      |> Integer.undigits(2)
+    |> Enum.reverse()
+    |> Integer.undigits(2)
   end
-  
+
   defp create_battle_status(client) do
     [t1, t2, t3, t4] = BitParse.parse_bits("#{client.team_number}", 4)
     [a1, a2, a3, a4] = BitParse.parse_bits("#{client.ally_team_number}", 4)
@@ -1351,7 +1428,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       0,
       0
     ]
-      |> Enum.reverse
-      |> Integer.undigits(2)
+    |> Enum.reverse()
+    |> Integer.undigits(2)
   end
 end

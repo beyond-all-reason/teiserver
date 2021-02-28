@@ -6,34 +6,61 @@ defmodule Central.Helpers.DatePresets do
   import Central.Helpers.TimexHelper
 
   @presets [
-    "This week", "Last week", "Two weeks ago",
-    "This month", "Last month", "Two months ago",
-    "This year", "Last year",
-    "Last 3 months", "Last 6 months", "Last 12 months",
+    "This week",
+    "Last week",
+    "Two weeks ago",
+    "This month",
+    "Last month",
+    "Two months ago",
+    "This year",
+    "Last year",
+    "Last 3 months",
+    "Last 6 months",
+    "Last 12 months",
     "All time"
   ]
 
   @long_presets [
-    "This month", "Last month", "Two months ago",
-    "This year", "Last year",
+    "This month",
+    "Last month",
+    "Two months ago",
+    "This year",
+    "Last year",
     "All time"
   ]
 
   @short_ranges [
-    "This week", "Last week", "Two weeks ago",
-    "This month", "Last month", "Two months ago",
+    "This week",
+    "Last week",
+    "Two weeks ago",
+    "This month",
+    "Last month",
+    "Two months ago"
   ]
 
   @long_ranges [
-    "Last 3 months", "Last 6 months", "Last 12 months"
+    "Last 3 months",
+    "Last 6 months",
+    "Last 12 months"
   ]
 
   @past_dates [
-    "Today", "Yesterday", "Start of the week", "Start of the month", "Start of the quarter", "Start of the year", "Start of time"
+    "Today",
+    "Yesterday",
+    "Start of the week",
+    "Start of the month",
+    "Start of the quarter",
+    "Start of the year",
+    "Start of time"
   ]
 
   @future_dates [
-    "Tomorrow", "Start of next week", "Start of next month", "Start of next quarter", "Start of next year", "End of time"
+    "Tomorrow",
+    "Start of next week",
+    "Start of next month",
+    "Start of next quarter",
+    "Start of next year",
+    "End of time"
   ]
 
   @spec presets() :: list(String.t())
@@ -54,25 +81,34 @@ defmodule Central.Helpers.DatePresets do
   @spec future_dates() :: list(String.t())
   def future_dates(), do: @future_dates
 
-  @spec parse(String.t()) :: {Date.t, Date.t}
+  @spec parse(String.t()) :: {Date.t(), Date.t()}
   def parse("Today"), do: Timex.today()
   def parse("Yesterday"), do: Timex.today() |> Timex.shift(days: -1)
-  def parse("Start of the week"), do: Timex.today() |> Timex.beginning_of_week
-  def parse("Start of the month"), do: Timex.today() |> Timex.beginning_of_month
-  def parse("Start of the quarter"), do: Timex.today() |> Timex.beginning_of_quarter
-  def parse("Start of the year"), do: Timex.today() |> Timex.beginning_of_year
+  def parse("Start of the week"), do: Timex.today() |> Timex.beginning_of_week()
+  def parse("Start of the month"), do: Timex.today() |> Timex.beginning_of_month()
+  def parse("Start of the quarter"), do: Timex.today() |> Timex.beginning_of_quarter()
+  def parse("Start of the year"), do: Timex.today() |> Timex.beginning_of_year()
   def parse("Start of time"), do: Timex.to_date({1, 1, 1})
 
   def parse("Tomorrow"), do: Timex.today() |> Timex.shift(days: 1)
-  def parse("Start of next week"), do: Timex.today() |> Timex.beginning_of_week |> Timex.shift(weeks: 1)
-  def parse("Start of next month"), do: Timex.today() |> Timex.beginning_of_month |> Timex.shift(months: 1)
-  def parse("Start of next quarter"), do: Timex.today() |> Timex.beginning_of_quarter |> Timex.shift(months: 3)
-  def parse("Start of next year"), do: Timex.today() |> Timex.beginning_of_year |> Timex.shift(years: 1)
+
+  def parse("Start of next week"),
+    do: Timex.today() |> Timex.beginning_of_week() |> Timex.shift(weeks: 1)
+
+  def parse("Start of next month"),
+    do: Timex.today() |> Timex.beginning_of_month() |> Timex.shift(months: 1)
+
+  def parse("Start of next quarter"),
+    do: Timex.today() |> Timex.beginning_of_quarter() |> Timex.shift(months: 3)
+
+  def parse("Start of next year"),
+    do: Timex.today() |> Timex.beginning_of_year() |> Timex.shift(years: 1)
+
   def parse("End of time"), do: Timex.to_date({9999, 1, 1})
 
   def parse(period), do: parse(period, nil, nil)
 
-  @spec parse(String.t(), String.t(), String.t()) :: {Date.t, Date.t}
+  @spec parse(String.t(), String.t(), String.t()) :: {Date.t(), Date.t()}
   def parse(period_name, start_date, end_date) do
     if start_date == "" or end_date == "" do
       _parse_named_period(period_name)
@@ -80,8 +116,11 @@ defmodule Central.Helpers.DatePresets do
       today = Timex.today()
 
       {
-        (if start_date != "", do: parse_time_input(start_date), else: Timex.to_date({today.year, 1, 1})),
-        (if end_date != "", do: parse_time_input(end_date), else: Timex.shift(today, days: 1)),
+        if(start_date != "",
+          do: parse_time_input(start_date),
+          else: Timex.to_date({today.year, 1, 1})
+        ),
+        if(end_date != "", do: parse_time_input(end_date), else: Timex.shift(today, days: 1))
       }
     end
   end
@@ -96,8 +135,9 @@ defmodule Central.Helpers.DatePresets do
   def _parse_named_period("Last week") do
     today = Timex.today()
 
-    start = Timex.beginning_of_week(today)
-    |> Timex.shift(weeks: -1)
+    start =
+      Timex.beginning_of_week(today)
+      |> Timex.shift(weeks: -1)
 
     {start, Timex.shift(start, weeks: 1)}
   end
@@ -105,8 +145,9 @@ defmodule Central.Helpers.DatePresets do
   def _parse_named_period("Two weeks ago") do
     today = Timex.today()
 
-    start = Timex.beginning_of_week(today)
-    |> Timex.shift(weeks: -2)
+    start =
+      Timex.beginning_of_week(today)
+      |> Timex.shift(weeks: -2)
 
     {start, Timex.shift(start, weeks: 1)}
   end
@@ -121,8 +162,9 @@ defmodule Central.Helpers.DatePresets do
   def _parse_named_period("Last month") do
     today = Timex.today()
 
-    start = Timex.to_date({today.year, today.month, 1})
-    |> Timex.shift(months: -1)
+    start =
+      Timex.to_date({today.year, today.month, 1})
+      |> Timex.shift(months: -1)
 
     {start, Timex.shift(start, months: 1)}
   end
@@ -130,8 +172,9 @@ defmodule Central.Helpers.DatePresets do
   def _parse_named_period("Two months ago") do
     today = Timex.today()
 
-    start = Timex.to_date({today.year, today.month, 1})
-    |> Timex.shift(months: -2)
+    start =
+      Timex.to_date({today.year, today.month, 1})
+      |> Timex.shift(months: -2)
 
     {start, Timex.shift(start, months: 1)}
   end
@@ -146,8 +189,9 @@ defmodule Central.Helpers.DatePresets do
   def _parse_named_period("Last year") do
     today = Timex.today()
 
-    start = Timex.to_date({today.year, 1, 1})
-    |> Timex.shift(years: -1)
+    start =
+      Timex.to_date({today.year, 1, 1})
+      |> Timex.shift(years: -1)
 
     {start, Timex.shift(start, years: 1)}
   end
@@ -161,8 +205,9 @@ defmodule Central.Helpers.DatePresets do
   def _parse_named_period("Last 3 months") do
     today = Timex.today()
 
-    start = Timex.to_date({today.year, today.month, 1})
-    |> Timex.shift(months: -3)
+    start =
+      Timex.to_date({today.year, today.month, 1})
+      |> Timex.shift(months: -3)
 
     {start, Timex.shift(today, days: 1)}
   end
@@ -170,8 +215,9 @@ defmodule Central.Helpers.DatePresets do
   def _parse_named_period("Last 6 months") do
     today = Timex.today()
 
-    start = Timex.to_date({today.year, today.month, 1})
-    |> Timex.shift(months: -6)
+    start =
+      Timex.to_date({today.year, today.month, 1})
+      |> Timex.shift(months: -6)
 
     {start, Timex.shift(today, days: 1)}
   end
@@ -179,8 +225,9 @@ defmodule Central.Helpers.DatePresets do
   def _parse_named_period("Last 12 months") do
     today = Timex.today()
 
-    start = Timex.to_date({today.year, today.month, 1})
-    |> Timex.shift(months: -12)
+    start =
+      Timex.to_date({today.year, today.month, 1})
+      |> Timex.shift(months: -12)
 
     {start, Timex.shift(today, days: 1)}
   end

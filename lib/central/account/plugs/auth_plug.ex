@@ -9,19 +9,21 @@ defmodule Central.Account.AuthPlug do
   end
 
   def call(conn, _opts) do
-    user = case Guardian.resource_from_token(conn.cookies["guardian_default_token"]) do
-      {:ok, user, _claims} -> Account.get_user!(user.id)
-      _ -> nil
-    end
+    user =
+      case Guardian.resource_from_token(conn.cookies["guardian_default_token"]) do
+        {:ok, user, _claims} -> Account.get_user!(user.id)
+        _ -> nil
+      end
 
     user_id = if user, do: user.id, else: nil
 
-    user_token = if user do
-      Guardian.Plug.current_token(conn)
-      # Phoenix.Token.sign(conn, "user socket", user.id)
-    else
-      ""
-    end
+    user_token =
+      if user do
+        Guardian.Plug.current_token(conn)
+        # Phoenix.Token.sign(conn, "user socket", user.id)
+      else
+        ""
+      end
 
     conn
     |> Map.put(:current_user, user)
@@ -33,10 +35,12 @@ defmodule Central.Account.AuthPlug do
   end
 
   def live_call(socket, session) do
-    user = case Guardian.resource_from_token(session["guardian_default_token"]) do
-      {:ok, user, _claims} -> Account.get_user!(user.id)
-      _ -> nil
-    end
+    user =
+      case Guardian.resource_from_token(session["guardian_default_token"]) do
+        {:ok, user, _claims} -> Account.get_user!(user.id)
+        _ -> nil
+      end
+
     user_id = if user, do: user.id, else: nil
 
     socket

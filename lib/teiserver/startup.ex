@@ -2,40 +2,47 @@ defmodule Teiserver.Startup do
   use CentralWeb, :startup
 
   def startup do
-    add_permission_set "teiserver", "admin", ~w(account battle)
-    add_permission_set "teiserver", "player", ~w(account verified)
+    add_permission_set("teiserver", "admin", ~w(account battle))
+    add_permission_set("teiserver", "player", ~w(account verified))
 
     add_group_type("Bar team", %{fields: []})
 
-    umbrella_id = case Central.Account.get_group(nil, search: [name: "BAR umbrella group"]) do
-      nil ->
-        {:ok, group} = Central.Account.create_group(%{
-          "name" => "BAR umbrella group",
-          "active" => true,
-          "icon" => "fas fa-umbrella",
-          "colour" => "#00AA66",
-          "data" => %{}
-        })
-        group.id
-      group ->
-        group.id
+    umbrella_id =
+      case Central.Account.get_group(nil, search: [name: "BAR umbrella group"]) do
+        nil ->
+          {:ok, group} =
+            Central.Account.create_group(%{
+              "name" => "BAR umbrella group",
+              "active" => true,
+              "icon" => "fas fa-umbrella",
+              "colour" => "#00AA66",
+              "data" => %{}
+            })
 
-    end
+          group.id
 
-    group_id = case Central.Account.get_group(nil, search: [name: "BAR Users"]) do
-      nil ->
-        {:ok, group} = Central.Account.create_group(%{
-          "name" => "BAR Users",
-          "active" => true,
-          "icon" => "fas fa-robot",
-          "colour" => "#000000",
-          "data" => %{},
-          "super_group_id" => umbrella_id
-        })
-        group.id
-      group ->
-        group.id
-    end
+        group ->
+          group.id
+      end
+
+    group_id =
+      case Central.Account.get_group(nil, search: [name: "BAR Users"]) do
+        nil ->
+          {:ok, group} =
+            Central.Account.create_group(%{
+              "name" => "BAR Users",
+              "active" => true,
+              "icon" => "fas fa-robot",
+              "colour" => "#000000",
+              "data" => %{},
+              "super_group_id" => umbrella_id
+            })
+
+          group.id
+
+        group ->
+          group.id
+      end
 
     ConCache.put(:application_metadata_cache, "bar_umbrella_group", umbrella_id)
     ConCache.put(:application_metadata_cache, "bar_user_group", group_id)

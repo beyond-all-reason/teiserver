@@ -17,54 +17,63 @@ defmodule Central.Helpers.TimexHelper do
     end
   end
 
-  @spec date_to_str(DateTime.t) :: String.t()
-  @spec date_to_str(DateTime.t, List.t) :: String.t()
+  @spec date_to_str(DateTime.t()) :: String.t()
+  @spec date_to_str(DateTime.t(), List.t()) :: String.t()
   def date_to_str(the_time), do: date_to_str(the_time, [])
   def date_to_str(nil, _), do: ""
+
   def date_to_str(the_time, format) when is_atom(format) do
     date_to_str(the_time, format: format)
   end
-  def date_to_str(the_time, [format: :dmy_text]), do: dmy_text(the_time)
+
+  def date_to_str(the_time, format: :dmy_text), do: dmy_text(the_time)
+
   def date_to_str(the_time, args) do
     format = args[:format] || :dmy
     now = args[:now] || Timex.now()
     is_past = Timex.compare(now, the_time) == 1
-    until_id = case args[:until] do
-      true -> ""
-      false -> ""
-      nil -> ""
-      s -> s
-    end
+
+    until_id =
+      case args[:until] do
+        true -> ""
+        false -> ""
+        nil -> ""
+        s -> s
+      end
 
     the_time = convert(the_time)
 
-    time_str = case format do
-      :day_name -> Timex.format!(the_time, "{WDfull}")
-      :dmy -> Timex.format!(the_time, "{0D}/{0M}/{YYYY}")
-      :ymd -> Timex.format!(the_time, "{YYYY}-{0M}-{0D}")
-      :hms_dmy -> Timex.format!(the_time, "{h24}:{m}:{s} {0D}/{0M}/{YYYY}")
-      :ymd_hms -> Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}")
-      :hms -> Timex.format!(the_time, "{h24}:{m}:{s}")
-      :hm_dmy -> Timex.format!(the_time, "{h24}:{m} {0D}/{0M}/{YYYY}")
-      :clock24 -> Timex.format!(the_time, "{h24}{m}")
-      :html_input -> Timex.format!(the_time, "{YYYY}-{0M}-{0D}T{h24}:{m}")
-      :hms_or_hmsdmy -> _hms_or_hmsdmy(the_time, now)
-      :hms_or_dmy -> _hms_or_dmy(the_time, now)
-      :hm_or_dmy -> _hm_or_dmy(the_time, now)
-      :everything -> Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}, {WDfull}")
-    end
-
-    until_str = if args[:until] do
-      case time_until(the_time, now) do
-        "" -> ""
-        until_str ->
-          if is_past do
-            ", " <> until_str <> " ago"
-          else
-            ", in " <> until_str
-          end
+    time_str =
+      case format do
+        :day_name -> Timex.format!(the_time, "{WDfull}")
+        :dmy -> Timex.format!(the_time, "{0D}/{0M}/{YYYY}")
+        :ymd -> Timex.format!(the_time, "{YYYY}-{0M}-{0D}")
+        :hms_dmy -> Timex.format!(the_time, "{h24}:{m}:{s} {0D}/{0M}/{YYYY}")
+        :ymd_hms -> Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}")
+        :hms -> Timex.format!(the_time, "{h24}:{m}:{s}")
+        :hm_dmy -> Timex.format!(the_time, "{h24}:{m} {0D}/{0M}/{YYYY}")
+        :clock24 -> Timex.format!(the_time, "{h24}{m}")
+        :html_input -> Timex.format!(the_time, "{YYYY}-{0M}-{0D}T{h24}:{m}")
+        :hms_or_hmsdmy -> _hms_or_hmsdmy(the_time, now)
+        :hms_or_dmy -> _hms_or_dmy(the_time, now)
+        :hm_or_dmy -> _hm_or_dmy(the_time, now)
+        :everything -> Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}, {WDfull}")
       end
-    end
+
+    until_str =
+      if args[:until] do
+        case time_until(the_time, now) do
+          "" ->
+            ""
+
+          until_str ->
+            if is_past do
+              ", " <> until_str <> " ago"
+            else
+              ", in " <> until_str
+            end
+        end
+      end
 
     if until_id != "" do
       "#{time_str}<span id='#{until_id}'>#{until_str}</span>"
@@ -73,66 +82,64 @@ defmodule Central.Helpers.TimexHelper do
     end
   end
 
-  @spec time_until(DateTime.t) :: String.t
-  @spec time_until(DateTime.t, DateTime.t) :: String.t
+  @spec time_until(DateTime.t()) :: String.t()
+  @spec time_until(DateTime.t(), DateTime.t()) :: String.t()
   def time_until(the_time), do: time_until(the_time, Timex.now())
   def time_until(nil, _), do: nil
+
   def time_until(the_time, now) do
     the_duration = Timex.diff(now, the_time, :duration)
     is_past = Timex.compare(now, the_time) == 1
-    days = Timex.Duration.to_days the_duration
+    days = Timex.Duration.to_days(the_duration)
 
     # We need to do this as we need days rounded off in the correct
     # direction to get the number of hours left
-    hours = if is_past do
-      Timex.Duration.to_hours(the_duration) - (Float.floor(days) * 24)
-    else
-      Timex.Duration.to_hours(the_duration) - (Float.ceil(days) * 24)
-    end
+    hours =
+      if is_past do
+        Timex.Duration.to_hours(the_duration) - Float.floor(days) * 24
+      else
+        Timex.Duration.to_hours(the_duration) - Float.ceil(days) * 24
+      end
 
     days = abs(days)
     hours = abs(hours)
 
     cond do
       2 > days and days > 1 -> "1 day, #{round(hours)} hours"
-
       round(days) > 1 -> "#{round(days)} days"
-
       round(hours) > 1 -> "#{round(hours)} hours"
-
       days == 0 and hours == 0 -> ""
-
       true -> "#{Timex.format_duration(the_duration, :humanized)}"
     end
   end
 
-  @spec _hms_or_hmsdmy(DateTime.t, DateTime.t) :: String.t()
+  @spec _hms_or_hmsdmy(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_hmsdmy(the_time, today) do
     the_time = the_time |> convert
 
-    if Timex.compare(the_time |> Timex.to_date, today) == 0 do
+    if Timex.compare(the_time |> Timex.to_date(), today) == 0 do
       Timex.format!(the_time, "Today at {h24}:{m}:{s}")
     else
       Timex.format!(the_time, "{h24}:{m}:{s} {0D}/{0M}/{YYYY}")
     end
   end
 
-  @spec _hms_or_dmy(DateTime.t, DateTime.t) :: String.t()
+  @spec _hms_or_dmy(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_dmy(the_time, today) do
     the_time = the_time |> convert
 
-    if Timex.compare(the_time |> Timex.to_date, today) == 0 do
+    if Timex.compare(the_time |> Timex.to_date(), today) == 0 do
       Timex.format!(the_time, "Today at {h24}:{m}:{s}")
     else
       Timex.format!(the_time, "{0D}/{0M}/{YYYY}")
     end
   end
 
-  @spec _hm_or_dmy(DateTime.t, DateTime.t) :: String.t()
+  @spec _hm_or_dmy(DateTime.t(), DateTime.t()) :: String.t()
   defp _hm_or_dmy(the_time, today) do
     the_time = the_time |> convert
 
-    if Timex.compare(the_time |> Timex.to_date, today) == 0 do
+    if Timex.compare(the_time |> Timex.to_date(), today) == 0 do
       Timex.format!(the_time, "Today at {h24}:{m}")
     else
       Timex.format!(the_time, "{0D}/{0M}/{YYYY}")
@@ -152,11 +159,13 @@ defmodule Central.Helpers.TimexHelper do
   # end
 
   defp dmy_text(nil), do: nil
+
   defp dmy_text(the_time) do
-    suffix = the_time
-    |> Timex.format!("{D}")
-    |> String.to_integer
-    |> suffix
+    suffix =
+      the_time
+      |> Timex.format!("{D}")
+      |> String.to_integer()
+      |> suffix
 
     Timex.format!(the_time, "{D}#{suffix} {Mfull} {YYYY}")
   end
@@ -174,18 +183,21 @@ defmodule Central.Helpers.TimexHelper do
 
   def parse_dmy(nil), do: nil
   def parse_dmy(""), do: nil
+
   def parse_dmy(s) do
     Timex.parse!(s, "{0D}/{0M}/{YYYY}")
   end
 
   def parse_ymd(nil), do: nil
   def parse_ymd(""), do: nil
+
   def parse_ymd(s) do
     Timex.parse!(s, "{YYYY}-{M}-{D}")
   end
 
   def parse_ymd_hms(nil), do: nil
   def parse_ymd_hms(""), do: nil
+
   def parse_ymd_hms(s) do
     Timex.parse!(s, "{YYYY}-{M}-{D} {h24}:{m}:{s}")
   end

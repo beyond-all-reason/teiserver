@@ -12,6 +12,7 @@ defmodule Teiserver.TestData do
     # battles will be created by SPADS
     spads_user_id = 76
     spads_user_name = "SPADS EU-1"
+
     [
       %{
         type: :normal,

@@ -4,8 +4,9 @@ defmodule CentralWeb.Account.RegistrationController do
   alias Central.Account
   alias Central.Account.User
 
-  plug AssignPlug,
+  plug(AssignPlug,
     sidemenu_active: "account"
+  )
 
   def new(conn, _params) do
     changeset = Account.change_user(%User{})

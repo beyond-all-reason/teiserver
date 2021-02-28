@@ -11,11 +11,14 @@ defmodule Central.Config do
   def get_user_config_cache(%{assigns: %{current_user: nil}}, key) do
     get_user_config_default(key)
   end
+
   def get_user_config_cache(%{assigns: %{current_user: current_user}}, key) do
     get_user_config_cache(current_user.id, key)
   end
+
   def get_user_config_cache(user_id, key) do
     value = get_user_configs!(user_id)[key]
+
     if value do
       cast_user_config_value(key, value)
     else
@@ -23,7 +26,9 @@ defmodule Central.Config do
     end
   end
 
-  def set_user_config(%{assigns: %{current_user: current_user}}, key, value), do: set_user_config(current_user.id, key, value)
+  def set_user_config(%{assigns: %{current_user: current_user}}, key, value),
+    do: set_user_config(current_user.id, key, value)
+
   def set_user_config(user_id, key, nil) do
     user_configs = get_user_configs!(user_id)
 
@@ -32,6 +37,7 @@ defmodule Central.Config do
       |> delete_user_config
     end
   end
+
   def set_user_config(user_id, key, value) do
     user_configs = get_user_configs!(user_id)
 
@@ -64,23 +70,29 @@ defmodule Central.Config do
 
   """
   def get_user_configs!(nil), do: %{}
+
   def get_user_configs!(user_id) do
     ConCache.get_or_store(:config_user_cache, user_id, fn ->
-      query = from user_config in UserConfig,
-        where: user_config.user_id == ^user_id,
-        select: {user_config.key, user_config.value}
+      query =
+        from(user_config in UserConfig,
+          where: user_config.user_id == ^user_id,
+          select: {user_config.key, user_config.value}
+        )
 
       Repo.all(query)
-      |> Map.new
+      |> Map.new()
     end)
   end
 
   def get_user_config!(id), do: Repo.get!(UserConfig, id)
+
   def get_user_config!(user_id, key) do
-    query = from user_config in UserConfig,
-      where: user_config.user_id == ^user_id,
-      where: user_config.key == ^key,
-      limit: 1
+    query =
+      from(user_config in UserConfig,
+        where: user_config.user_id == ^user_id,
+        where: user_config.key == ^key,
+        limit: 1
+      )
 
     Repo.one(query)
   end
@@ -167,7 +179,7 @@ defmodule Central.Config do
 
   def get_grouped_configs() do
     ConCache.get(:config_type_cache, "all-config-types")
-    |> Map.values
+    |> Map.values()
     |> Enum.filter(fn c ->
       c.visible
     end)
@@ -175,7 +187,7 @@ defmodule Central.Config do
       c1.key <= c2.key
     end)
     |> Enum.group_by(fn c ->
-      hd String.split(c.key, ".")
+      hd(String.split(c.key, "."))
     end)
   end
 
@@ -206,9 +218,11 @@ defmodule Central.Config do
     default: Any, The default value used when the variable is not set,
   """
   require Logger
+
   def add_user_config_type(config) do
-    all_config_types = (ConCache.get(:config_type_cache, "all-config-types") || %{})
-    |> Map.put(config.key, config)
+    all_config_types =
+      (ConCache.get(:config_type_cache, "all-config-types") || %{})
+      |> Map.put(config.key, config)
 
     ConCache.put(:config_type_cache, "all-config-types", all_config_types)
     ConCache.put(:config_type_cache, config.key, config)
@@ -216,7 +230,7 @@ defmodule Central.Config do
 
   def get_user_config_default(key) do
     case get_config_type(key) do
-      nil -> throw "Invalid config key of #{key}"
+      nil -> throw("Invalid config key of #{key}")
       v -> Map.get(v, :default)
     end
   end
@@ -226,7 +240,7 @@ defmodule Central.Config do
 
     case type.type do
       "integer" -> Central.Helpers.NumberHelper.int_parse(value)
-      "boolean" -> (if value == "true", do: true, else: false)
+      "boolean" -> if value == "true", do: true, else: false
       "string" -> value
     end
   end

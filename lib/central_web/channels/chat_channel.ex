@@ -3,8 +3,9 @@ defmodule CentralWeb.Chat.Channel do
   alias Central.Communication
 
   def join("chat:" <> room_name, _params, socket) do
-    socket = socket
-    |> assign(:chat_room, Communication.get_chat_room!(room_name))
+    socket =
+      socket
+      |> assign(:chat_room, Communication.get_chat_room!(room_name))
 
     {:ok, socket}
   end

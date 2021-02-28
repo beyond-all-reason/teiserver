@@ -5,6 +5,6 @@ defmodule CentralWeb.Logging.PageViewLogView do
   def icon(), do: Central.Logging.PageViewLogLib.icon()
 
   def convert_load_time(load_time) do
-    round(load_time/10)/100
+    round(load_time / 10) / 100
   end
 end

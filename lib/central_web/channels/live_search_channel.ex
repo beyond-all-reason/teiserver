@@ -30,11 +30,11 @@ defmodule CentralWeb.LiveSearch.Channel do
     case dataset do
       "account_user" ->
         Account.list_users(search: [simple_search: search_term], order: "Name (A-Z)")
-        |> Account.user_as_json
+        |> Account.user_as_json()
 
       "account_group" ->
         Account.list_groups(search: [simple_search: search_term], order: "Name (A-Z)")
-        |> Account.group_as_json
+        |> Account.group_as_json()
     end
   end
 end

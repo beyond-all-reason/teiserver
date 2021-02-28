@@ -26,11 +26,12 @@ defmodule Teiserver.TestLib do
       nil ->
         {:ok, user} =
           User.user_register_params(name, "#{name}@email.com", "X03MO1qnZdYdgyfeuILPmQ==")
-          |> Account.create_user
+          |> Account.create_user()
 
         user
-          |> User.convert_user
-          |> User.add_user
+        |> User.convert_user()
+        |> User.add_user()
+
       _ ->
         new_user()
     end
@@ -70,6 +71,7 @@ defmodule Teiserver.TestLib do
     case :gen_tcp.recv(socket, 0, 500) do
       {:ok, reply} ->
         _recv_until(socket, acc <> to_string(reply))
+
       {:error, :timeout} ->
         acc
     end

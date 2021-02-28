@@ -3,23 +3,25 @@ defmodule CentralWeb.Communication.CommentController do
 
   alias Central.Communication
 
-  plug Bodyguard.Plug.Authorize,
+  plug(Bodyguard.Plug.Authorize,
     policy: Central.Communication.Comment,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
+  )
 
-  plug :add_breadcrumb, name: 'Blog', url: '/blog'
-  plug :add_breadcrumb, name: 'Posts', url: '/blog_admin/comments'
+  plug(:add_breadcrumb, name: 'Blog', url: '/blog')
+  plug(:add_breadcrumb, name: 'Posts', url: '/blog_admin/comments')
 
   def index(conn, _params) do
-    comments = Communication.list_comments(
-      search: [
-        # membership: conn,
-        # simple_search: Map.get(params, "s", "") |> String.trim,
-      ],
-      joins: [:post, :poster],
-      order_by: "Newest first"
-    )
+    comments =
+      Communication.list_comments(
+        search: [
+          # membership: conn,
+          # simple_search: Map.get(params, "s", "") |> String.trim,
+        ],
+        joins: [:post, :poster],
+        order_by: "Newest first"
+      )
 
     conn
     |> assign(:comments, comments)
@@ -27,9 +29,13 @@ defmodule CentralWeb.Communication.CommentController do
   end
 
   def show(conn, %{"id" => id}) do
-    comment = Communication.get_comment!(id, joins: [
-      :poster, :post
-    ])
+    comment =
+      Communication.get_comment!(id,
+        joins: [
+          :poster,
+          :post
+        ]
+      )
 
     conn
     |> assign(:comment, comment)

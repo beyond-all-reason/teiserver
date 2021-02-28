@@ -10,14 +10,15 @@ defmodule TeiserverWeb.BattleLive.Show do
 
   @impl true
   def mount(_params, session, socket) do
-    socket = socket
-    |> AuthPlug.live_call(session)
-    |> NotificationPlug.live_call
-    |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
-    |> add_breadcrumb(name: "Battles", url: "/teiserver/battles")
-    |> assign(:sidemenu_active, "teiserver")
-    |> assign(:colours, Central.Helpers.StylingHelper.colours(:primary2))
-    |> assign(:messages, [])
+    socket =
+      socket
+      |> AuthPlug.live_call(session)
+      |> NotificationPlug.live_call()
+      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
+      |> add_breadcrumb(name: "Battles", url: "/teiserver/battles")
+      |> assign(:sidemenu_active, "teiserver")
+      |> assign(:colours, Central.Helpers.StylingHelper.colours(:primary2))
+      |> assign(:messages, [])
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "bar_live.html"}}
   end
@@ -26,7 +27,7 @@ defmodule TeiserverWeb.BattleLive.Show do
   def handle_params(%{"id" => id}, _, socket) do
     PubSub.subscribe(Central.PubSub, "battle_updates:#{id}")
     PubSub.subscribe(Central.PubSub, "live_battle_updates:#{id}")
-    battle = Battle.get_battle!(id)    
+    battle = Battle.get_battle!(id)
     {users, clients} = get_user_and_clients(battle.players)
 
     {:noreply,
@@ -40,10 +41,14 @@ defmodule TeiserverWeb.BattleLive.Show do
   end
 
   defp get_user_and_clients(id_list) do
-    users = User.get_users(id_list)
+    users =
+      User.get_users(id_list)
       |> Map.new(fn u -> {u.id, u} end)
-    clients = Client.get_clients(id_list)
+
+    clients =
+      Client.get_clients(id_list)
       |> Map.new(fn c -> {c.userid, c} end)
+
     {users, clients}
   end
 

@@ -35,6 +35,7 @@ defmodule Central.Account.RecentlyUsedCache do
   def get_recently(%{assigns: %{current_user: current_user}}) do
     get_recently(current_user.id)
   end
+
   def get_recently(user_id) do
     case :ets.lookup(@table_name, user_id) do
       [{^user_id, data}] -> data
@@ -46,16 +47,18 @@ defmodule Central.Account.RecentlyUsedCache do
   def handle_cast({:insert, item}, table) do
     user_id = item.user_id
 
-    existing = case :ets.lookup(@table_name, item.user_id) do
-      [{^user_id, data}] -> data
-      [] -> []
-    end
+    existing =
+      case :ets.lookup(@table_name, item.user_id) do
+        [{^user_id, data}] -> data
+        [] -> []
+      end
 
-    new_items = existing
-    |> Enum.filter(fn r ->
-      r.item_id != item.item_id or r.item_type != item.item_type
-    end)
-    |> Enum.take(@recently_used_limit)
+    new_items =
+      existing
+      |> Enum.filter(fn r ->
+        r.item_id != item.item_id or r.item_type != item.item_type
+      end)
+      |> Enum.take(@recently_used_limit)
 
     :ets.insert(table, {item.user_id, [item] ++ new_items})
     {:noreply, table}
@@ -64,15 +67,17 @@ defmodule Central.Account.RecentlyUsedCache do
   def handle_cast({:remove, item}, table) do
     user_id = item.user_id
 
-    existing = case :ets.lookup(@table_name, item.user_id) do
-      [{^user_id, data}] -> data
-      [] -> []
-    end
+    existing =
+      case :ets.lookup(@table_name, item.user_id) do
+        [{^user_id, data}] -> data
+        [] -> []
+      end
 
-    new_items = existing
-    |> Enum.filter(fn r ->
-      r.item_id != item.item_id or r.item_type != item.item_type
-    end)
+    new_items =
+      existing
+      |> Enum.filter(fn r ->
+        r.item_id != item.item_id or r.item_type != item.item_type
+      end)
 
     :ets.insert(table, {item.user_id, new_items})
     {:noreply, table}

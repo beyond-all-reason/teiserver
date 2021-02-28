@@ -6,9 +6,30 @@ defmodule Central.AccountTest do
   describe "users" do
     alias Central.Account.User
 
-    @valid_attrs %{colour: "some colour", icon: "far fa-home", name: "some name", permissions: [], email: "some email", password: "some password"}
-    @update_attrs %{colour: "some updated colour", icon: "fas fa-wrench", permissions: [], name: "some updated name", email: "some updated email", password: "some updated password"}
-    @invalid_attrs %{colour: nil, icon: nil, name: nil, permissions: nil, email: nil, password: nil}
+    @valid_attrs %{
+      colour: "some colour",
+      icon: "far fa-home",
+      name: "some name",
+      permissions: [],
+      email: "some email",
+      password: "some password"
+    }
+    @update_attrs %{
+      colour: "some updated colour",
+      icon: "fas fa-wrench",
+      permissions: [],
+      name: "some updated name",
+      email: "some updated email",
+      password: "some updated password"
+    }
+    @invalid_attrs %{
+      colour: nil,
+      icon: nil,
+      name: nil,
+      permissions: nil,
+      email: nil,
+      password: nil
+    }
 
     def user_fixture(attrs \\ %{}) do
       {:ok, user} =
@@ -72,9 +93,48 @@ defmodule Central.AccountTest do
   describe "groups" do
     alias Central.Account.Group
 
-    @valid_attrs %{"colour" => "some colour", "icon" => "far fa-home", "name" => "some name", "data" => %{}, "active" => true, "group_type" => "", "see_group" => false, "see_members" => false, "invite_members" => false, "self_add_members" => false, "children_cache" => [], "supers_cache" => []}
-    @update_attrs %{"colour" => "some updated colour", "icon" => "fas fa-wrench", "name" => "some updated name", "data" => %{}, "active" => false, "group_type" => "", "see_group" => true, "see_members" => true, "invite_members" => true, "self_add_members" => true, "children_cache" => [], "supers_cache" => []}
-    @invalid_attrs %{"colour" => nil, "icon" => nil, "name" => nil, "data" => nil, "active" => nil, "group_type" => nil, "see_group" => nil, "see_members" => nil, "invite_members" => nil, "self_add_members" => nil, "children_cache" => nil, "supers_cache" => nil}
+    @valid_attrs %{
+      "colour" => "some colour",
+      "icon" => "far fa-home",
+      "name" => "some name",
+      "data" => %{},
+      "active" => true,
+      "group_type" => "",
+      "see_group" => false,
+      "see_members" => false,
+      "invite_members" => false,
+      "self_add_members" => false,
+      "children_cache" => [],
+      "supers_cache" => []
+    }
+    @update_attrs %{
+      "colour" => "some updated colour",
+      "icon" => "fas fa-wrench",
+      "name" => "some updated name",
+      "data" => %{},
+      "active" => false,
+      "group_type" => "",
+      "see_group" => true,
+      "see_members" => true,
+      "invite_members" => true,
+      "self_add_members" => true,
+      "children_cache" => [],
+      "supers_cache" => []
+    }
+    @invalid_attrs %{
+      "colour" => nil,
+      "icon" => nil,
+      "name" => nil,
+      "data" => nil,
+      "active" => nil,
+      "group_type" => nil,
+      "see_group" => nil,
+      "see_members" => nil,
+      "invite_members" => nil,
+      "self_add_members" => nil,
+      "children_cache" => nil,
+      "supers_cache" => nil
+    }
 
     def group_fixture(attrs \\ %{}) do
       {:ok, group} =

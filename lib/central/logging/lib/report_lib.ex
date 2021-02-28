@@ -9,11 +9,11 @@ defmodule CentralWeb.Logging.ReportLib do
 
   defp parse_params(params) do
     %{
-      start_date: parse_dmy(params["start_date"]) || Timex.shift(Timex.today, days: -31),
-      end_date: parse_dmy(params["start_date"]) || Timex.shift(Timex.today, days: 1),
-      account_user: (params["account_user"]) || nil,
-      no_root: (params["no_root"]) || nil,
-      split: params["split"] || "",
+      start_date: parse_dmy(params["start_date"]) || Timex.shift(Timex.today(), days: -31),
+      end_date: parse_dmy(params["start_date"]) || Timex.shift(Timex.today(), days: 1),
+      account_user: params["account_user"] || nil,
+      no_root: params["no_root"] || nil,
+      split: params["split"] || ""
     }
   end
 
@@ -21,41 +21,48 @@ defmodule CentralWeb.Logging.ReportLib do
     params = parse_params(params)
 
     # Get the log aggregates as {date, section, count}
-    logs = PageViewLogLib.get_page_view_logs()
-    |> PageViewLogLib.search([start_date: params[:start_date]])
-    |> PageViewLogLib.search([end_date: params[:end_date]])
-    |> PageViewLogLib.search([account_user: params[:account_user]])
-    |> PageViewLogLib.search([no_root: params[:no_root]])
-    |> aggregate_logs(:count, :daily, params[:split])
-    |> Repo.all
+    logs =
+      PageViewLogLib.get_page_view_logs()
+      |> PageViewLogLib.search(start_date: params[:start_date])
+      |> PageViewLogLib.search(end_date: params[:end_date])
+      |> PageViewLogLib.search(account_user: params[:account_user])
+      |> PageViewLogLib.search(no_root: params[:no_root])
+      |> aggregate_logs(:count, :daily, params[:split])
+      |> Repo.all()
 
     # Get the min and max dates
-    min_date = logs
-    |> Enum.take(1)
-    |> hd
-    |> elem(0)
+    min_date =
+      logs
+      |> Enum.take(1)
+      |> hd
+      |> elem(0)
 
-    max_date = logs
-    |> Enum.take(-1)
-    |> hd
-    |> elem(0)
-    |> Timex.shift(days: 1)
+    max_date =
+      logs
+      |> Enum.take(-1)
+      |> hd
+      |> elem(0)
+      |> Timex.shift(days: 1)
 
     # Arrange all the logs as %{section: %{date: count}}
     logs
-    |> Enum.group_by(fn {_, section, _} ->
-      section
-    end, fn {date, _, count} ->
-      {date, count}
-    end)
+    |> Enum.group_by(
+      fn {_, section, _} ->
+        section
+      end,
+      fn {date, _, count} ->
+        {date, count}
+      end
+    )
     |> Enum.map(fn {section, values} ->
       {
-        section || "Other", #This is to remove any empty line
+        # This is to remove any empty line
+        section || "Other",
         values
         |> Enum.map(fn {date, count} ->
           {date, count}
         end)
-        |> Map.new
+        |> Map.new()
       }
     end)
     |> Enum.map(fn {key, values} ->
@@ -85,7 +92,7 @@ defmodule CentralWeb.Logging.ReportLib do
     |> Enum.map(fn d ->
       {d, Map.get(series, d, 0)}
     end)
-    |> Map.new
+    |> Map.new()
   end
 
   defp make_nvd3_line_chart(key, values) do
@@ -100,7 +107,8 @@ defmodule CentralWeb.Logging.ReportLib do
 
     %{
       key: key,
-      values: values
+      values:
+        values
         |> Enum.map(fn {{y, m, d}, value} ->
           ["#{y}/#{m}/#{d}", value]
         end)
@@ -108,11 +116,10 @@ defmodule CentralWeb.Logging.ReportLib do
   end
 
   def table(_params) do
-
   end
 
   defp aggregate_logs(query, :count, :daily, "") do
-    from logs in query,
+    from(logs in query,
       group_by: fragment("date(?)", logs.inserted_at),
       order_by: [asc: fragment("date(?)", logs.inserted_at)],
       select: {
@@ -120,10 +127,11 @@ defmodule CentralWeb.Logging.ReportLib do
         "all",
         count(logs.id)
       }
+    )
   end
 
   defp aggregate_logs(query, :count, :daily, "section") do
-    from logs in query,
+    from(logs in query,
       group_by: logs.section,
       group_by: fragment("date(?)", logs.inserted_at),
       order_by: [asc: fragment("date(?)", logs.inserted_at)],
@@ -132,18 +140,21 @@ defmodule CentralWeb.Logging.ReportLib do
         logs.section,
         count(logs.id)
       }
+    )
   end
 
   # OLD STUFF
   def daily_count_by_section(start_date, end_date) do
-    from l in PageViewLog,
+    from(l in PageViewLog,
       where: l.inserted_at >= ^start_date,
       where: l.inserted_at <= ^end_date,
       where: l.section not in ["load_test"],
       group_by: l.section,
-      group_by: fragment("date(?)", l.inserted_at), #date(l.inserted_at),
+      # date(l.inserted_at),
+      group_by: fragment("date(?)", l.inserted_at),
       select: {fragment("date(?)", l.inserted_at), l.section, count(l.id)},
       order_by: [asc: l.section],
       order_by: [asc: fragment("date(?)", l.inserted_at)]
+    )
   end
 end

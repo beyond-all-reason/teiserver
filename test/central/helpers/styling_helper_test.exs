@@ -4,7 +4,22 @@ defmodule Central.General.StylingHelpersTest do
   alias Central.Helpers.StylingHelper
 
   test "colours" do
-    params = [:default, :report, :primary, :primary2, :info, :info2, :success, :success2, :warning, :warning2, :danger, :danger2, :negative, :negative2]
+    params = [
+      :default,
+      :report,
+      :primary,
+      :primary2,
+      :info,
+      :info2,
+      :success,
+      :success2,
+      :warning,
+      :warning2,
+      :danger,
+      :danger2,
+      :negative,
+      :negative2
+    ]
 
     for p <- params do
       {_, _, _} = StylingHelper.colours(p)

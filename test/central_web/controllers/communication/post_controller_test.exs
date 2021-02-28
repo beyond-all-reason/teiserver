@@ -5,12 +5,23 @@ defmodule CentralWeb.Communication.PostControllerTest do
   alias Central.CommunicationTestLib
 
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(~w(communication.blog))
   end
 
-  @create_attrs %{title: "some title", url_slug: "some url_slug", content: "some content", short_content: "some short_content"}
-  @update_attrs %{title: "some updated title", url_slug: "some updated url_slug", content: "some updated content", short_content: "some updated short_content"}
+  @create_attrs %{
+    title: "some title",
+    url_slug: "some url_slug",
+    content: "some content",
+    short_content: "some short_content"
+  }
+  @update_attrs %{
+    title: "some updated title",
+    url_slug: "some updated url_slug",
+    content: "some updated content",
+    short_content: "some updated short_content"
+  }
   @invalid_attrs %{title: nil}
 
   describe "index" do
@@ -32,7 +43,12 @@ defmodule CentralWeb.Communication.PostControllerTest do
   describe "create post" do
     test "redirects to show when data is valid", %{conn: conn} do
       category = CommunicationTestLib.category_fixture()
-      conn = post(conn, Routes.blog_post_path(conn, :create), post: Map.merge(@create_attrs, %{"category_id" => category.id}))
+
+      conn =
+        post(conn, Routes.blog_post_path(conn, :create),
+          post: Map.merge(@create_attrs, %{"category_id" => category.id})
+        )
+
       assert redirected_to(conn) =~ Routes.blog_post_path(conn, :index)
 
       new_post = Communication.list_posts(search: [title: @create_attrs.title])
@@ -53,17 +69,17 @@ defmodule CentralWeb.Communication.PostControllerTest do
     end
 
     test "renders show nil item", %{conn: conn} do
-      assert_error_sent 404, fn ->
+      assert_error_sent(404, fn ->
         get(conn, Routes.blog_post_path(conn, :show, -1))
-      end
+      end)
     end
   end
 
   describe "edit post" do
     test "renders form for editing nil", %{conn: conn} do
-      assert_error_sent 404, fn ->
+      assert_error_sent(404, fn ->
         get(conn, Routes.blog_post_path(conn, :edit, -1))
-      end
+      end)
     end
 
     test "renders form for editing chosen post", %{conn: conn} do
@@ -90,9 +106,9 @@ defmodule CentralWeb.Communication.PostControllerTest do
     end
 
     test "renders errors when nil object", %{conn: conn} do
-      assert_error_sent 404, fn ->
+      assert_error_sent(404, fn ->
         put(conn, Routes.blog_post_path(conn, :update, -1), post: @invalid_attrs)
-      end
+      end)
     end
   end
 
@@ -101,15 +117,16 @@ defmodule CentralWeb.Communication.PostControllerTest do
       post = CommunicationTestLib.post_fixture()
       conn = delete(conn, Routes.blog_post_path(conn, :delete, post))
       assert redirected_to(conn) == Routes.blog_post_path(conn, :index)
-      assert_error_sent 404, fn ->
+
+      assert_error_sent(404, fn ->
         get(conn, Routes.blog_post_path(conn, :show, post))
-      end
+      end)
     end
 
     test "renders error for deleting nil item", %{conn: conn} do
-      assert_error_sent 404, fn ->
+      assert_error_sent(404, fn ->
         delete(conn, Routes.blog_post_path(conn, :delete, -1))
-      end
+      end)
     end
   end
 end

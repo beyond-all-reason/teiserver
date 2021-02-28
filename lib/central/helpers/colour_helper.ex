@@ -5,9 +5,9 @@ defmodule Central.Helpers.ColourHelper do
   alias Central.Helpers.ColourHelper
 
   defstruct red: 0,
-    green: 0,
-    blue: 0,
-    alpha: 0
+            green: 0,
+            blue: 0,
+            alpha: 0
 
   defp hexc(v), do: String.to_integer(v, 16)
 
@@ -62,17 +62,20 @@ defmodule Central.Helpers.ColourHelper do
   # def new("negative2"), do: new("#777777")
 
   def new(rgb_string) do
-    rgb_list = rgb_string
-    |> String.replace("#", "")
-    |> String.split("", trim: true)
+    rgb_list =
+      rgb_string
+      |> String.replace("#", "")
+      |> String.split("", trim: true)
 
-    [r, rr, g, gg, b, bb] = case Enum.count(rgb_list) do
-      3 ->
-        [r, g, b] = rgb_list
-        [r, r, g, g, b, b]
-      6 ->
-        rgb_list
-    end
+    [r, rr, g, gg, b, bb] =
+      case Enum.count(rgb_list) do
+        3 ->
+          [r, g, b] = rgb_list
+          [r, r, g, g, b, b]
+
+        6 ->
+          rgb_list
+      end
 
     new("#{r}#{rr}", "#{g}#{gg}", "#{b}#{bb}")
   end
@@ -94,6 +97,7 @@ defmodule Central.Helpers.ColourHelper do
   end
 
   def rgba_css(nil), do: ""
+
   def rgba_css(colour, custom_alpha \\ 0.1) do
     colour
     |> new

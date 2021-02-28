@@ -5,7 +5,7 @@
     {:port, 8200},
     {:certfile, "/priv/certs/localhost.crt"},
     {:cacertfile, "/priv/certs/localhost.crt"},
-    {:keyfile, "/priv/certs/localhost.key"},
+    {:keyfile, "/priv/certs/localhost.key"}
   ],
   Teiserver.TcpServer,
   []

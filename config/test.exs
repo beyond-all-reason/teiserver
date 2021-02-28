@@ -15,7 +15,7 @@ config :central, Teiserver,
   certs: [
     keyfile: "priv/certs/localhost.key",
     certfile: "priv/certs/localhost.crt",
-    cacertfile: "priv/certs/localhost.crt",
+    cacertfile: "priv/certs/localhost.crt"
   ]
 
 # We don't run a server during test. If one is required,
@@ -29,5 +29,5 @@ config :logger, level: :warn
 
 config :central, Oban,
   queues: false,
-  plugins: :false,
+  plugins: false,
   crontab: false

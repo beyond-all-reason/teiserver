@@ -6,23 +6,22 @@ defmodule CentralWeb.Communication.BlogController do
 
   alias Central.Helpers.FileHelper
 
-  plug :add_breadcrumb, name: 'Blog', url: '/blog'
+  plug(:add_breadcrumb, name: 'Blog', url: '/blog')
 
-  plug :put_layout, "blank.html"
+  plug(:put_layout, "blank.html")
 
   def index(conn, _params) do
-    categories = Communication.list_categories(
-      search: [public: true]
-    )
+    categories = Communication.list_categories(search: [public: true])
 
-    posts = Communication.list_posts(
-      search: [
-        visible: true
-      ],
-      joins: [:poster, :category],
-      order_by: "Newest first",
-      limit: 10
-    )
+    posts =
+      Communication.list_posts(
+        search: [
+          visible: true
+        ],
+        joins: [:poster, :category],
+        order_by: "Newest first",
+        limit: 10
+      )
 
     conn
     |> assign(:posts, posts)
@@ -32,19 +31,18 @@ defmodule CentralWeb.Communication.BlogController do
   end
 
   def tag(conn, %{"tag" => the_tag}) do
-    categories = Communication.list_categories(
-      search: [public: true]
-    )
+    categories = Communication.list_categories(search: [public: true])
 
-    posts = Communication.list_posts(
-      search: [
-        visible: true,
-        tag: the_tag
-      ],
-      joins: [:poster, :category],
-      order_by: "Newest first",
-      limit: 10
-    )
+    posts =
+      Communication.list_posts(
+        search: [
+          visible: true,
+          tag: the_tag
+        ],
+        joins: [:poster, :category],
+        order_by: "Newest first",
+        limit: 10
+      )
 
     conn
     |> assign(:posts, posts)
@@ -54,19 +52,18 @@ defmodule CentralWeb.Communication.BlogController do
   end
 
   def category(conn, %{"category" => the_category}) do
-    categories = Communication.list_categories(
-      search: [public: true]
-    )
+    categories = Communication.list_categories(search: [public: true])
 
-    posts = Communication.list_posts(
-      search: [
-        visible: true,
-        category_name: the_category
-      ],
-      joins: [:poster, :category],
-      order_by: "Newest first",
-      limit: 10
-    )
+    posts =
+      Communication.list_posts(
+        search: [
+          visible: true,
+          category_name: the_category
+        ],
+        joins: [:poster, :category],
+        order_by: "Newest first",
+        limit: 10
+      )
 
     conn
     |> assign(:selected_category, the_category)
@@ -77,23 +74,29 @@ defmodule CentralWeb.Communication.BlogController do
   end
 
   def show(conn, params = %{"id" => url_id}) do
-    post = Communication.get_post_by_url_slug(url_id, joins: [
-      :category, :poster, :comments_with_posters
-    ])
+    post =
+      Communication.get_post_by_url_slug(url_id,
+        joins: [
+          :category,
+          :poster,
+          :comments_with_posters
+        ]
+      )
 
     if post do
       group_access = false
       post_key = PostLib.get_key(post.url_slug)
 
-      visibility = cond do
-        post.visible -> true
-        params["key"] == post_key -> true
-        conn.assigns[:current_user] == nil -> false
-        conn.assigns[:current_user].id == post.poster_id -> true
-        allow?(conn, "communications.blog.update") and group_access -> true
-        allow?(conn, "admin.admin.full") -> true
-        true -> false
-      end
+      visibility =
+        cond do
+          post.visible -> true
+          params["key"] == post_key -> true
+          conn.assigns[:current_user] == nil -> false
+          conn.assigns[:current_user].id == post.poster_id -> true
+          allow?(conn, "communications.blog.update") and group_access -> true
+          allow?(conn, "admin.admin.full") -> true
+          true -> false
+        end
 
       cond do
         visibility == false ->
@@ -158,14 +161,19 @@ defmodule CentralWeb.Communication.BlogController do
         conn
         |> put_resp_content_type("image/#{blog_file.file_ext}")
         |> send_file(200, blog_file.file_path)
+
       "Video" ->
         conn
         |> put_resp_content_type("video/#{blog_file.file_ext}")
         |> send_file(200, blog_file.file_path)
+
       _ ->
         conn
         |> put_resp_content_type("application/file")
-        |> put_resp_header("content-disposition", "attachment; filename=\"#{blog_file.name}.#{blog_file.file_ext}\"")
+        |> put_resp_header(
+          "content-disposition",
+          "attachment; filename=\"#{blog_file.name}.#{blog_file.file_ext}\""
+        )
         |> send_file(200, blog_file.file_path)
     end
   end

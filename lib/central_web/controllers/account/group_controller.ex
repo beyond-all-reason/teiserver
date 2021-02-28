@@ -4,19 +4,20 @@ defmodule CentralWeb.Account.GroupController do
   alias Central.Account
   alias Central.Account.GroupTypeLib
 
-  plug :add_breadcrumb, name: 'Account', url: '/account'
-  plug :add_breadcrumb, name: 'Groups', url: '/account/groups'
+  plug(:add_breadcrumb, name: 'Account', url: '/account')
+  plug(:add_breadcrumb, name: 'Groups', url: '/account/groups')
 
   def index(conn, params) do
-    groups = Account.list_groups(
-      search: [
-        active: "Active",
-        public: conn.assigns[:memberships],
-        simple_search: Map.get(params, "s", "")
-      ],
-      joins: [:super_group, :memberships],
-      order: "Name (A-Z)"
-    )
+    groups =
+      Account.list_groups(
+        search: [
+          active: "Active",
+          public: conn.assigns[:memberships],
+          simple_search: Map.get(params, "s", "")
+        ],
+        joins: [:super_group, :memberships],
+        order: "Name (A-Z)"
+      )
 
     conn
     |> assign(:groups, groups)
@@ -24,19 +25,21 @@ defmodule CentralWeb.Account.GroupController do
   end
 
   def show(conn, %{"id" => id}) do
-    group = Account.get_group(id,
-      joins: [:super_group, :members_and_memberships]
-    )
+    group =
+      Account.get_group(id,
+        joins: [:super_group, :members_and_memberships]
+      )
 
     group_memberships = Account.list_group_memberships(user_id: conn.current_user.id)
     group_access = GroupLib.access_policy(group, conn.current_user, group_memberships)
 
     if group_access[:see_group] do
-      member_lookup = if group do
-        GroupLib.membership_lookup(group.memberships)
-      else
-        []
-      end
+      member_lookup =
+        if group do
+          GroupLib.membership_lookup(group.memberships)
+        else
+          []
+        end
 
       child_groups = Account.list_groups(search: [id_list: group.children_cache])
       group_type = GroupTypeLib.get_group_type(group.group_type)
@@ -57,9 +60,10 @@ defmodule CentralWeb.Account.GroupController do
   end
 
   def edit(conn, %{"id" => id}) do
-    group = Account.get_group!(id,
-      joins: [:super_group, :members_and_memberships]
-    )
+    group =
+      Account.get_group!(id,
+        joins: [:super_group, :members_and_memberships]
+      )
 
     group_memberships = Account.list_group_memberships(user_id: conn.current_user.id)
     group_access = GroupLib.access_policy(group, conn.current_user, group_memberships)
@@ -95,12 +99,13 @@ defmodule CentralWeb.Account.GroupController do
     group_type = GroupTypeLib.get_group_type(group.group_type)
 
     if group_access[:admin] do
-      data = group_type.fields
-      |> Enum.with_index
-      |> Enum.map(fn {f, i} ->
-        {f.name, group_params["fields"]["#{i}"]}
-      end)
-      |> Map.new
+      data =
+        group_type.fields
+        |> Enum.with_index()
+        |> Enum.map(fn {f, i} ->
+          {f.name, group_params["fields"]["#{i}"]}
+        end)
+        |> Map.new()
 
       group_params = Map.put(group_params, "data", data)
 
@@ -142,11 +147,11 @@ defmodule CentralWeb.Account.GroupController do
     group_memberships = Account.list_group_memberships(user_id: conn.current_user.id)
     group_access = GroupLib.access_policy(group, conn.current_user, group_memberships)
 
-    access_allowed = (
-      (user_id == conn.user_id and group_access[:self_add_members])
-      or (user_id != conn.user_id and group_access[:invite_members] and GroupLib.access?(conn, group.id))
-      or (group_access[:admin])
-    )
+    access_allowed =
+      (user_id == conn.user_id and group_access[:self_add_members]) or
+        (user_id != conn.user_id and group_access[:invite_members] and
+           GroupLib.access?(conn, group.id)) or
+        group_access[:admin]
 
     if access_allowed do
       attrs = %{
@@ -155,7 +160,7 @@ defmodule CentralWeb.Account.GroupController do
         admin: false
       }
 
-      case Account.create_group_membership(attrs) do  
+      case Account.create_group_membership(attrs) do
         {:ok, membership} ->
           CentralWeb.Endpoint.broadcast(
             "recache:#{membership.user_id}",
@@ -166,6 +171,7 @@ defmodule CentralWeb.Account.GroupController do
           conn
           |> put_flash(:success, "User added to group.")
           |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
+
         {:error, _changeset} ->
           conn
           |> put_flash(:warning, "User was unable to be added to group.")
@@ -184,7 +190,7 @@ defmodule CentralWeb.Account.GroupController do
     group_memberships = Account.list_group_memberships(user_id: conn.current_user.id)
     group_access = GroupLib.access_policy(group, conn.current_user, group_memberships)
 
-    if user_id |> String.to_integer == conn.user_id or group_access[:admin] do
+    if user_id |> String.to_integer() == conn.user_id or group_access[:admin] do
       group_membership = Account.get_group_membership!(user_id, group_id)
       Account.delete_group_membership(group_membership)
 
@@ -213,16 +219,18 @@ defmodule CentralWeb.Account.GroupController do
     if group_access[:admin] do
       group_membership = Account.get_group_membership!(user_id, group_id)
 
-      new_params = case params["role"] do
-        "admin" -> %{"admin" => true}
-        _ -> %{"admin" => false}
-      end
+      new_params =
+        case params["role"] do
+          "admin" -> %{"admin" => true}
+          _ -> %{"admin" => false}
+        end
 
       case Account.update_group_membership(group_membership, new_params) do
         {:ok, _gm} ->
           conn
           |> put_flash(:info, "User membership updated successfully.")
           |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
+
         {:error, _changeset} ->
           conn
           |> put_flash(:danger, "We were unable to update the membership.")

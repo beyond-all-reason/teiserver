@@ -2,11 +2,11 @@ defmodule Central.Communication.Category do
   use CentralWeb, :schema
 
   schema "communication_categories" do
-    field :name, :string
-    field :colour, :string
-    field :icon, :string
+    field(:name, :string)
+    field(:colour, :string)
+    field(:icon, :string)
 
-    field :public, :boolean
+    field(:public, :boolean)
 
     timestamps()
   end
@@ -15,9 +15,10 @@ defmodule Central.Communication.Category do
   Builds a changeset based on the `struct` and `params`.
   """
   def changeset(struct, params \\ %{}) do
-    params = params
-    |> trim_strings([:name])
-    |> parse_checkboxes([:public])
+    params =
+      params
+      |> trim_strings([:name])
+      |> parse_checkboxes([:public])
 
     struct
     |> cast(params, [:name, :colour, :icon, :public])

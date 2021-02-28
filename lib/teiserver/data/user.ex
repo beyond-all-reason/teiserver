@@ -2,11 +2,27 @@ defmodule Teiserver.User do
   @moduledoc """
   Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their exepected use case is very different.
   """
+  alias Teiserver.Client
 
   @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulance cats dogs mice oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave)
 
   @keys [:id, :name, :email, :inserted_at]
-  @data_keys [:rank, :country, :lobbyid, :ip, :moderator, :bot, :friends, :friend_requests, :ignored, :verification_code, :verified, :password_reset_code, :email_change_code, :password_hash]
+  @data_keys [
+    :rank,
+    :country,
+    :lobbyid,
+    :ip,
+    :moderator,
+    :bot,
+    :friends,
+    :friend_requests,
+    :ignored,
+    :verification_code,
+    :verified,
+    :password_reset_code,
+    :email_change_code,
+    :password_hash
+  ]
 
   @default_data %{
     rank: 1,
@@ -47,13 +63,14 @@ defmodule Teiserver.User do
   def bar_user_group_id() do
     ConCache.get(:application_metadata_cache, "bar_user_group")
   end
-  
+
   def user_register_params(name, email, password_hash, extra_data \\ %{}) do
     name = clean_name(name)
     verification_code = :random.uniform(899_999) + 100_000
 
-    data = @default_data
-    |> Map.new(fn {k, v} -> {to_string(k), v} end)
+    data =
+      @default_data
+      |> Map.new(fn {k, v} -> {to_string(k), v} end)
 
     %{
       name: name,
@@ -63,17 +80,19 @@ defmodule Teiserver.User do
       icon: "fas fa-user",
       admin_group_id: bar_user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
-      data: data
-      |> Map.merge(%{
-        "password_hash" => password_hash,
-        "verification_code" => verification_code
-      })
-      |> Map.merge(extra_data)
+      data:
+        data
+        |> Map.merge(%{
+          "password_hash" => password_hash,
+          "verification_code" => verification_code
+        })
+        |> Map.merge(extra_data)
     }
   end
 
   def register_user(name, email, password_hash) do
     params = user_register_params(name, email, password_hash)
+
     case Account.create_user(params) do
       {:ok, user} ->
         Account.create_group_membership(%{
@@ -87,28 +106,40 @@ defmodule Teiserver.User do
         |> add_user
 
         # EmailHelper.send_email(to, subject, body)
-        Logger.debug("TODO: Verification email should be sent here with code #{user.data["verification_code"]}")
+        Logger.debug(
+          "TODO: Verification email should be sent here with code #{
+            user.data["verification_code"]
+          }"
+        )
+
         user
-      
+
       {:error, changeset} ->
-        Logger.error("Unable to create user with params #{Kernel.inspect params}\n#{Kernel.inspect changeset}")
+        Logger.error(
+          "Unable to create user with params #{Kernel.inspect(params)}\n#{
+            Kernel.inspect(changeset)
+          }"
+        )
     end
   end
 
   def register_bot(bot_name, bot_host_id) do
     existing_bot = get_user_by_name(bot_name)
+
     if existing_bot do
       existing_bot
     else
       host = get_user_by_id(bot_host_id)
 
-      params = user_register_params(bot_name, host.email, host.password_hash, %{
-        "bot" => true,
-        "verified" => true
-      })
-      |> Map.merge(%{
-        email: String.replace(host.email, "@", ".bot#{bot_name}@"),
-      })
+      params =
+        user_register_params(bot_name, host.email, host.password_hash, %{
+          "bot" => true,
+          "verified" => true
+        })
+        |> Map.merge(%{
+          email: String.replace(host.email, "@", ".bot#{bot_name}@")
+        })
+
       case Account.create_user(params) do
         {:ok, user} ->
           Account.create_group_membership(%{
@@ -122,7 +153,11 @@ defmodule Teiserver.User do
           |> add_user
 
         {:error, changeset} ->
-          Logger.error("Unable to create user with params #{Kernel.inspect params}\n#{Kernel.inspect changeset}")
+          Logger.error(
+            "Unable to create user with params #{Kernel.inspect(params)}\n#{
+              Kernel.inspect(changeset)
+            }"
+          )
       end
     end
   end
@@ -179,6 +214,7 @@ defmodule Teiserver.User do
 
       {:ok, new_value}
     end)
+
     user
   end
 
@@ -187,8 +223,9 @@ defmodule Teiserver.User do
   defp persist_user(user) do
     db_user = Account.get_user!(user.id)
 
-    data = @data_keys
-    |> Map.new(fn k -> {to_string(k), Map.get(user, k, @default_data[k])} end)
+    data =
+      @data_keys
+      |> Map.new(fn k -> {to_string(k), Map.get(user, k, @default_data[k])} end)
 
     Account.update_user(db_user, %{"data" => data})
   end
@@ -476,17 +513,22 @@ defmodule Teiserver.User do
   end
 
   def logout(nil), do: nil
+
   def logout(user_id) do
     user = get_user_by_id(user_id)
     # TODO In some tests it's possible for last_login to be nil, this is a temoparay workaround
-    new_ingame_seconds = user.ingame_seconds + (:erlang.system_time(:seconds) - (user.last_login || :erlang.system_time(:seconds)))
+    new_ingame_seconds =
+      user.ingame_seconds +
+        (:erlang.system_time(:seconds) - (user.last_login || :erlang.system_time(:seconds)))
+
     user = %{user | ingame_seconds: new_ingame_seconds}
     update_user(user, persist: true)
   end
 
   def convert_user(user) do
-    data = @data_keys
-    |> Map.new(fn k -> {k, Map.get(user.data || %{}, to_string(k), @default_data[k])} end)
+    data =
+      @data_keys
+      |> Map.new(fn k -> {k, Map.get(user.data || %{}, to_string(k), @default_data[k])} end)
 
     user
     |> Map.take(@keys)
@@ -508,11 +550,16 @@ defmodule Teiserver.User do
 
   def delete_user(userid) do
     user = get_user_by_id(userid)
+
     if user do
       Client.disconnect(userid)
       :timer.sleep(100)
 
       ConCache.delete(:users, userid)
+      ConCache.delete(:users_lookup_name_with_id, user.id)
+      ConCache.delete(:users_lookup_id_with_name, user.name)
+      ConCache.delete(:users_lookup_id_with_email, user.email)
+
       ConCache.update(:lists, :users, fn value ->
         new_value =
           value
@@ -527,15 +574,18 @@ defmodule Teiserver.User do
     group_id = bar_user_group_id()
     ConCache.insert_new(:lists, :users, [])
 
-    user_count = Account.list_users(search: [
-      admin_group: group_id
-    ])
-    |> Parallel.map(fn user ->
-      user
-      |> convert_user
-      |> add_user
-    end)
-    |> Enum.count
+    user_count =
+      Account.list_users(
+        search: [
+          admin_group: group_id
+        ]
+      )
+      |> Parallel.map(fn user ->
+        user
+        |> convert_user
+        |> add_user
+      end)
+      |> Enum.count()
 
     # This is mostly so I can see exactly when the restart happened and get logs from this point on
     Logger.info("----------------------------------------")

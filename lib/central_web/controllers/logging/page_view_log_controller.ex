@@ -3,23 +3,25 @@ defmodule CentralWeb.Logging.PageViewLogController do
 
   alias Central.Logging
 
-  plug :add_breadcrumb, name: 'Logging', url: '/logging'
-  plug :add_breadcrumb, name: 'Page views', url: '/logging/page_views'
+  plug(:add_breadcrumb, name: 'Logging', url: '/logging')
+  plug(:add_breadcrumb, name: 'Page views', url: '/logging/page_views')
 
-  plug Bodyguard.Plug.Authorize,
+  plug(Bodyguard.Plug.Authorize,
     policy: Central.Admin,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
+  )
 
   def index(conn, params) do
-    page_view_logs = Logging.list_page_view_logs(
-      search: [
-        user_id: params["user_id"]
-      ],
-      joins: [:user],
-      order: "Newest first",
-      limit: 50
-    )
+    page_view_logs =
+      Logging.list_page_view_logs(
+        search: [
+          user_id: params["user_id"]
+        ],
+        joins: [:user],
+        order: "Newest first",
+        limit: 50
+      )
 
     conn
     |> assign(:page_view_logs, page_view_logs)
@@ -33,18 +35,19 @@ defmodule CentralWeb.Logging.PageViewLogController do
   def search(conn, %{"search" => params}) do
     params = form_params(params)
 
-    page_view_logs = Logging.list_page_view_logs(
-      search: [
-        user_id: params["user_id"],
-        start_date: TimexHelper.parse_time_input(params["start_date"]),
-        end_date: TimexHelper.parse_time_input(params["end_date"]),
-        path: params["path"],
-        section: params["section"],
-      ],
-      joins: [:user],
-      order: params["order"],
-      limit: params["limit"]
-    )
+    page_view_logs =
+      Logging.list_page_view_logs(
+        search: [
+          user_id: params["user_id"],
+          start_date: TimexHelper.parse_time_input(params["start_date"]),
+          end_date: TimexHelper.parse_time_input(params["end_date"]),
+          path: params["path"],
+          section: params["section"]
+        ],
+        joins: [:user],
+        order: params["order"],
+        limit: params["limit"]
+      )
 
     conn
     |> assign(:params, params)
@@ -81,9 +84,8 @@ defmodule CentralWeb.Logging.PageViewLogController do
       "limit" => Map.get(params, "limit", "50"),
       "user_id" => Map.get(params, "account_user", "") |> get_hash_id,
       "account_user" => Map.get(params, "account_user", ""),
-
       "start_date" => Map.get(params, "start_date", ""),
-      "end_date" => Map.get(params, "end_date", ""),
+      "end_date" => Map.get(params, "end_date", "")
     }
   end
 

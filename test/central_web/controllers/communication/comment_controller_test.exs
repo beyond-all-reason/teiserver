@@ -3,6 +3,7 @@ defmodule CentralWeb.Communication.CommentControllerTest do
 
   alias Central.CommunicationTestLib
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(~w(communication.blog))
   end
@@ -24,9 +25,9 @@ defmodule CentralWeb.Communication.CommentControllerTest do
     end
 
     test "renders show nil item", %{conn: conn} do
-      assert_error_sent 404, fn ->
+      assert_error_sent(404, fn ->
         get(conn, Routes.blog_comment_path(conn, :show, -1))
-      end
+      end)
     end
   end
 
@@ -34,16 +35,19 @@ defmodule CentralWeb.Communication.CommentControllerTest do
     test "deletes chosen comment", %{conn: conn} do
       comment = CommunicationTestLib.comment_fixture()
       conn = delete(conn, Routes.blog_comment_path(conn, :delete, comment))
-      assert redirected_to(conn) == Routes.blog_post_path(conn, :show, comment.post_id) <> "#comments_tab"
-      assert_error_sent 404, fn ->
+
+      assert redirected_to(conn) ==
+               Routes.blog_post_path(conn, :show, comment.post_id) <> "#comments_tab"
+
+      assert_error_sent(404, fn ->
         get(conn, Routes.blog_comment_path(conn, :show, comment.id))
-      end
+      end)
     end
 
     test "renders error for deleting nil item", %{conn: conn} do
-      assert_error_sent 404, fn ->
+      assert_error_sent(404, fn ->
         delete(conn, Routes.blog_comment_path(conn, :delete, -1))
-      end
+      end)
     end
   end
 end

@@ -2,6 +2,7 @@ defmodule CentralWeb.Account.GeneralControllerTest do
   use CentralWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup([])
   end

@@ -17,7 +17,7 @@ defmodule Central.Logging do
   end
 
   defp audit_log_query(id, args) do
-    AuditLogLib.query_audit_logs
+    AuditLogLib.query_audit_logs()
     |> AuditLogLib.search(%{id: id})
     |> AuditLogLib.search(args[:search])
     |> AuditLogLib.preload(args[:joins])
@@ -37,7 +37,7 @@ defmodule Central.Logging do
   def list_audit_logs(args \\ []) do
     audit_log_query(args)
     |> QueryHelpers.limit_query(50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -56,15 +56,17 @@ defmodule Central.Logging do
   """
   def get_audit_log!(id) when not is_list(id) do
     audit_log_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_audit_log!(args) do
     audit_log_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_audit_log!(id, args) do
     audit_log_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @doc """
@@ -145,12 +147,12 @@ defmodule Central.Logging do
 
   """
   def list_error_logs(args \\ []) do
-    ErrorLogQueries.get_error_logs
+    ErrorLogQueries.get_error_logs()
     |> ErrorLogQueries.search(args[:search])
     |> ErrorLogQueries.preload(args[:joins])
     |> ErrorLogQueries.order(args[:order])
     |> QueryHelpers.limit_query(50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -168,11 +170,11 @@ defmodule Central.Logging do
 
   """
   def get_error_log!(id, args \\ []) do
-    ErrorLogQueries.get_error_logs
+    ErrorLogQueries.get_error_logs()
     |> ErrorLogQueries.search(%{id: id})
     |> ErrorLogQueries.search(args[:search])
     |> ErrorLogQueries.preload(args[:joins])
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @doc """
@@ -228,7 +230,7 @@ defmodule Central.Logging do
   end
 
   def delete_all_error_logs() do
-    ErrorLogQueries.get_error_logs
+    ErrorLogQueries.get_error_logs()
     |> Repo.delete_all()
   end
 
@@ -258,12 +260,12 @@ defmodule Central.Logging do
 
   """
   def list_page_view_logs(args \\ []) do
-    PageViewLogLib.get_page_view_logs
+    PageViewLogLib.get_page_view_logs()
     |> PageViewLogLib.search(args[:search])
     |> PageViewLogLib.preload(args[:joins])
     |> PageViewLogLib.order(args[:order])
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -281,12 +283,13 @@ defmodule Central.Logging do
 
   """
   def get_page_view_log!(id), do: Repo.get!(PageViewLog, id)
+
   def get_page_view_log!(id, args) do
-    PageViewLogLib.get_page_view_logs
+    PageViewLogLib.get_page_view_logs()
     |> PageViewLogLib.search(%{id: id})
     |> PageViewLogLib.search(args[:search])
     |> PageViewLogLib.preload(args[:joins])
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @doc """
@@ -367,29 +370,29 @@ defmodule Central.Logging do
 
   """
   def list_aggregate_view_logs(args \\ []) do
-    AggregateViewLogLib.get_logs
+    AggregateViewLogLib.get_logs()
     |> AggregateViewLogLib.search(args[:search])
     # |> AggregateViewLogLib.preload(args[:joins])
     |> AggregateViewLogLib.order(args[:order])
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
-  
+
   def get_last_aggregate_date() do
     AggregateViewLogLib.get_last_aggregate_date()
   end
-  
+
   def get_first_page_view_log_date() do
     AggregateViewLogLib.get_first_page_view_log_date()
   end
 
   def get_aggregate_view_log!(date, args \\ []) do
-    AggregateViewLogLib.get_logs
-    |> AggregateViewLogLib.search([date: date])
+    AggregateViewLogLib.get_logs()
+    |> AggregateViewLogLib.search(date: date)
     |> AggregateViewLogLib.search(args[:search])
     # |> AggregateViewLogLib.preload(args[:joins])
     |> AggregateViewLogLib.order(args[:order])
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.one!
+    |> Repo.one!()
   end
 end

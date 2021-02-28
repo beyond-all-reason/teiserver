@@ -3,10 +3,10 @@ defmodule Central.Account.GroupMembership do
 
   @primary_key false
   schema "account_group_memberships" do
-    field :admin, :boolean, default: false
+    field(:admin, :boolean, default: false)
 
-    belongs_to :user, Central.Account.User, primary_key: true
-    belongs_to :group, Central.Account.Group, primary_key: true
+    belongs_to(:user, Central.Account.User, primary_key: true)
+    belongs_to(:group, Central.Account.Group, primary_key: true)
 
     timestamps()
   end

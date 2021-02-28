@@ -5,6 +5,7 @@ defmodule CentralWeb.Communication.BlogView do
   def icon(), do: Central.Communication.BlogLib.icon()
 
   def get_key(url_slug), do: Central.Communication.PostLib.get_key(url_slug)
+
   def format_comment(c) do
     c
     |> String.replace("<", "&lt;")

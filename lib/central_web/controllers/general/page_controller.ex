@@ -3,6 +3,7 @@ defmodule CentralWeb.General.PageController do
 
   def index(conn, _params) do
     maybe_user = Guardian.Plug.current_resource(conn)
+
     if maybe_user do
       render(conn, "auth_index.html")
     else

@@ -8,14 +8,15 @@ defmodule TeiserverWeb.BattleLive.Index do
 
   @impl true
   def mount(_params, session, socket) do
-    socket = socket
-    |> AuthPlug.live_call(session)
-    |> NotificationPlug.live_call
-    |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
-    |> add_breadcrumb(name: "Battles", url: "/teiserver/battles")
-    |> assign(:sidemenu_active, "teiserver")
-    |> assign(:colours, BattleLib.colours())
-    |> assign(:battles, list_battles())
+    socket =
+      socket
+      |> AuthPlug.live_call(session)
+      |> NotificationPlug.live_call()
+      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
+      |> add_breadcrumb(name: "Battles", url: "/teiserver/battles")
+      |> assign(:sidemenu_active, "teiserver")
+      |> assign(:colours, BattleLib.colours())
+      |> assign(:battles, list_battles())
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "bar_live.html"}}
   end

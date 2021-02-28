@@ -4,23 +4,25 @@ defmodule CentralWeb.Communication.PostController do
   alias Central.Communication
   alias Central.Communication.Post
 
-  plug Bodyguard.Plug.Authorize,
+  plug(Bodyguard.Plug.Authorize,
     policy: Central.Communication.Post,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
+  )
 
-  plug :add_breadcrumb, name: 'Blog', url: '/blog'
-  plug :add_breadcrumb, name: 'Posts', url: '/blog_admin/posts'
+  plug(:add_breadcrumb, name: 'Blog', url: '/blog')
+  plug(:add_breadcrumb, name: 'Posts', url: '/blog_admin/posts')
 
   def index(conn, _params) do
-    posts = Communication.list_posts(
-      search: [
-        # membership: conn,
-        # simple_search: Map.get(params, "s", "") |> String.trim,
-      ],
-      joins: [:category, :poster],
-      order_by: "Newest first"
-    )
+    posts =
+      Communication.list_posts(
+        search: [
+          # membership: conn,
+          # simple_search: Map.get(params, "s", "") |> String.trim,
+        ],
+        joins: [:category, :poster],
+        order_by: "Newest first"
+      )
 
     conn
     |> assign(:posts, posts)
@@ -58,16 +60,18 @@ defmodule CentralWeb.Communication.PostController do
   def new(conn, _params) do
     categories = Communication.list_categories(order_by: "Name (A-Z)")
 
-    category_id = if Enum.count(categories) == 1 do
-      hd(categories).id
-    else
-      nil
-    end
+    category_id =
+      if Enum.count(categories) == 1 do
+        hd(categories).id
+      else
+        nil
+      end
 
-    changeset = Post.changeset(%Post{}, %{
-      "category_id" => category_id,
-      "live_from" => "today",
-    })
+    changeset =
+      Post.changeset(%Post{}, %{
+        "category_id" => category_id,
+        "live_from" => "today"
+      })
 
     conn
     |> assign(:changeset, changeset)
@@ -76,16 +80,18 @@ defmodule CentralWeb.Communication.PostController do
   end
 
   def create(conn, %{"post" => post_params}) do
-    post_params = Map.merge(post_params, %{
-      "poster_id" => conn.current_user.id,
-      "tags" => post_params["tags"] || [],
-    })
+    post_params =
+      Map.merge(post_params, %{
+        "poster_id" => conn.current_user.id,
+        "tags" => post_params["tags"] || []
+      })
 
-    post_params = if post_params["short_content"] == "" do
-      Map.put(post_params, "short_content", post_params["content"])
-    else
-      post_params
-    end
+    post_params =
+      if post_params["short_content"] == "" do
+        Map.put(post_params, "short_content", post_params["content"])
+      else
+        post_params
+      end
 
     case Communication.create_post(post_params) do
       {:ok, post} ->
@@ -95,6 +101,7 @@ defmodule CentralWeb.Communication.PostController do
 
       {:error, %Ecto.Changeset{} = changeset} ->
         categories = Communication.list_categories(order_by: "Name (A-Z)")
+
         conn
         |> assign(:changeset, changeset)
         |> assign(:categories, categories)
@@ -103,9 +110,14 @@ defmodule CentralWeb.Communication.PostController do
   end
 
   def show(conn, %{"id" => id}) do
-    post = Communication.get_post!(id, joins: [
-      :category, :poster, :comments_with_posters
-    ])
+    post =
+      Communication.get_post!(id,
+        joins: [
+          :category,
+          :poster,
+          :comments_with_posters
+        ]
+      )
 
     conn
     |> assign(:post, post)
@@ -130,9 +142,11 @@ defmodule CentralWeb.Communication.PostController do
 
   def update(conn, %{"id" => id, "post" => post_params}) do
     post = Communication.get_post!(id)
-    post_params = Map.merge(post_params, %{
-      "tags" => post_params["tags"] || [],
-    })
+
+    post_params =
+      Map.merge(post_params, %{
+        "tags" => post_params["tags"] || []
+      })
 
     case Communication.update_post(post, post_params) do
       {:ok, _post} ->
@@ -146,12 +160,17 @@ defmodule CentralWeb.Communication.PostController do
 
         if post_params["content_mode"] do
           conn
-          |> redirect(to: Routes.blog_post_path(conn, :edit, post) <> "?content_mode=true&row=#{post_params["row"]}&col=#{post_params["col"]}")
+          |> redirect(
+            to:
+              Routes.blog_post_path(conn, :edit, post) <>
+                "?content_mode=true&row=#{post_params["row"]}&col=#{post_params["col"]}"
+          )
         else
           conn
           |> put_flash(:info, "Post updated successfully.")
           |> redirect(to: Routes.blog_post_path(conn, :show, post))
         end
+
       {:error, %Ecto.Changeset{} = changeset} ->
         categories = Communication.list_categories(order_by: "Name (A-Z)")
 

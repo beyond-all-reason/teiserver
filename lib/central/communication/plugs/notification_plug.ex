@@ -15,14 +15,16 @@ defmodule Central.Communication.NotificationPlug do
   end
 
   def live_call(socket) do
-    notifications = socket.assigns.user_id
-    |> Communication.list_user_notifications(:unread)
+    notifications =
+      socket.assigns.user_id
+      |> Communication.list_user_notifications(:unread)
 
-    unread_count = notifications
-    |> Enum.filter(fn n ->
-      not n.read
-    end)
-    |> Enum.count
+    unread_count =
+      notifications
+      |> Enum.filter(fn n ->
+        not n.read
+      end)
+      |> Enum.count()
 
     socket
     |> Phoenix.LiveView.assign(:user_notifications, notifications)
@@ -35,14 +37,16 @@ defmodule Central.Communication.NotificationPlug do
   end
 
   defp assign_notificiations(conn, the_user) do
-    notifications = the_user.id
-    |> Communication.list_user_notifications(:unread)
+    notifications =
+      the_user.id
+      |> Communication.list_user_notifications(:unread)
 
-    unread_count = notifications
-    |> Enum.filter(fn n ->
-      not n.read
-    end)
-    |> Enum.count
+    unread_count =
+      notifications
+      |> Enum.filter(fn n ->
+        not n.read
+      end)
+      |> Enum.count()
 
     conn
     |> assign(:user_notifications, notifications)

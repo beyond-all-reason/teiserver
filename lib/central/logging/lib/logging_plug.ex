@@ -12,11 +12,12 @@ defmodule Central.Logging.LoggingPlug do
   def call(conn, _ops) do
     start_tick = :os.system_time(:micro_seconds)
 
-    ip = case List.keyfind(conn.req_headers, "x-real-ip", 0) do
-      {_, ip} -> convert_from_x_real_ip(ip)
-      nil     -> conn.remote_ip
-      _       -> "Error finding IP"
-    end
+    ip =
+      case List.keyfind(conn.req_headers, "x-real-ip", 0) do
+        {_, ip} -> convert_from_x_real_ip(ip)
+        nil -> conn.remote_ip
+        _ -> "Error finding IP"
+      end
 
     # conn = Map.put(conn, :remote_ip, ip)
     # new_peer = {ip, conn.peer |> elem(1)}
@@ -26,7 +27,7 @@ defmodule Central.Logging.LoggingPlug do
       if conn.status == 500 do
         # log_error(conn)
       else
-        log_view(conn, start_tick, ip |> Tuple.to_list |> Enum.join("."))
+        log_view(conn, start_tick, ip |> Tuple.to_list() |> Enum.join("."))
       end
 
       conn
@@ -51,7 +52,7 @@ defmodule Central.Logging.LoggingPlug do
   defp log_view(conn, start_tick, ip) do
     user_id = get_user_id(conn)
 
-    [_, section | path] =  String.split(conn.request_path, "/")
+    [_, section | path] = String.split(conn.request_path, "/")
 
     # Log as seconds
     # load_time = (:os.system_time(:micro_seconds) - start_tick)/1000000
@@ -60,17 +61,18 @@ defmodule Central.Logging.LoggingPlug do
     # load_time = (:os.system_time(:micro_seconds) - start_tick)/1000
 
     # Log as micro seconds
-    load_time = (:os.system_time(:micro_seconds) - start_tick)
+    load_time = :os.system_time(:micro_seconds) - start_tick
 
-    page_log = PageViewLog.changeset(%PageViewLog{}, %{
-      section: section,
-      path: Enum.join(path, "/") || "",
-      method: conn.method,
-      ip: ip,
-      load_time: load_time,
-      user_id: user_id,
-      status: conn.status,
-    })
+    page_log =
+      PageViewLog.changeset(%PageViewLog{}, %{
+        section: section,
+        path: Enum.join(path, "/") || "",
+        method: conn.method,
+        ip: ip,
+        load_time: load_time,
+        user_id: user_id,
+        status: conn.status
+      })
 
     if conn.assigns[:do_not_log] == nil do
       the_log = Repo.insert!(page_log)
@@ -82,7 +84,7 @@ defmodule Central.Logging.LoggingPlug do
           path: conn.request_path,
           ip: the_log.ip,
           log_id: the_log.id,
-          timestamp: Central.Helpers.TimexHelper.date_to_str(Timex.local(), :hms),
+          timestamp: Central.Helpers.TimexHelper.date_to_str(Timex.local(), :hms)
         }
 
         # Overwatch usage
@@ -111,5 +113,4 @@ defmodule Central.Logging.LoggingPlug do
       nil
     end
   end
-
 end

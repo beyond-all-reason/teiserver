@@ -7,13 +7,11 @@ defmodule Teiserver.BattleLib do
     %{
       type_colour: colours() |> elem(0),
       type_icon: icon(),
-
       item_id: battle.id,
       item_type: "teiserver_battle",
       item_colour: battle.colour,
       item_icon: battle.icon,
       item_label: "#{battle.name}",
-
       url: "/teiserver/battle/#{battle.id}"
     }
   end

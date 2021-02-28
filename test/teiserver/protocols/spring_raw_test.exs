@@ -61,6 +61,7 @@ defmodule Teiserver.SpringRawTest do
     reply = _recv_until(socket)
     [accepted | remainder] = String.split(reply, "\n")
     user = User.get_user_by_name(username)
+
     assert accepted == "ACCEPTED #{username}",
       message: "Bad password, gave X03MO1qnZdYdgyfeuILPmQ== but needed #{user.password_hash}"
 
@@ -70,7 +71,7 @@ defmodule Teiserver.SpringRawTest do
       |> Enum.uniq()
 
     # Due to things running concurrently it's possible either of these will be the case
-    assert (commands == [
+    assert commands == [
              "MOTD",
              "ADDUSER",
              "CLIENTSTATUS",
@@ -79,13 +80,14 @@ defmodule Teiserver.SpringRawTest do
              "JOINEDBATTLE",
              "LOGININFOEND",
              ""
-           ] or commands == [
-             "MOTD",
-             "ADDUSER",
-             "CLIENTSTATUS",
-             "LOGININFOEND",
-             ""
-           ])
+           ] or
+             commands == [
+               "MOTD",
+               "ADDUSER",
+               "CLIENTSTATUS",
+               "LOGININFOEND",
+               ""
+             ]
 
     _send(socket, "EXIT\n")
     _ = _recv(socket)

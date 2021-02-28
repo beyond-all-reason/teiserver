@@ -10,26 +10,25 @@ defmodule Teiserver.Account.UserLib do
     %{
       type_colour: colours() |> elem(0),
       type_icon: icon(),
-
       item_id: user.id,
       item_type: "teiserver_user",
       item_colour: user.colour,
       item_icon: user.icon,
       item_label: "#{user.name}",
-
       url: "/teiserver/admin/user/#{user.id}"
     }
   end
 
   # Queries  
-  @spec get_user() :: Ecto.Query.t
-  def get_user, do: UserQueries.get_users
+  @spec get_user() :: Ecto.Query.t()
+  def get_user, do: UserQueries.get_users()
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
@@ -38,12 +37,13 @@ defmodule Teiserver.Account.UserLib do
     UserQueries._search(query, key, value)
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
   def order_by(query, key), do: UserQueries.order(query, key)
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = UserQueries.preload(query, preloads)
 

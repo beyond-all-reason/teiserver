@@ -3,11 +3,11 @@ defmodule Central.Communication.ChatMembership do
 
   @primary_key false
   schema "communication_chat_memberships" do
-    field :role, :string
-    field :last_seen, :utc_datetime
+    field(:role, :string)
+    field(:last_seen, :utc_datetime)
 
-    belongs_to :user, Central.Account.User, primary_key: true
-    belongs_to :chat_room, Central.Communication.ChatRoom, primary_key: true
+    belongs_to(:user, Central.Account.User, primary_key: true)
+    belongs_to(:chat_room, Central.Communication.ChatRoom, primary_key: true)
 
     timestamps()
   end

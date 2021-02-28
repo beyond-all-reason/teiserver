@@ -9,12 +9,12 @@ defmodule Central.Admin.AdminPlug do
   @behaviour Plug
 
   def init(_) do
-
   end
 
   def call(conn, _ops) do
     conn
     |> assign(:error_log_count, 0)
+
     # TODO: Implement this correctly
 
     # cond do

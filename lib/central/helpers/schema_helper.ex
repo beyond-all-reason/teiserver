@@ -29,26 +29,33 @@ defmodule Central.Helpers.SchemaHelper do
     params
     |> Enum.map(fn {k, v} ->
       cond do
-        not Enum.member?(names, k) -> {k, v}
-        is_map(v) -> {k, v}
-        String.trim(v) == "" -> {k, v}
+        not Enum.member?(names, k) ->
+          {k, v}
+
+        is_map(v) ->
+          {k, v}
+
+        String.trim(v) == "" ->
+          {k, v}
+
         true ->
           cond do
             # Regex.match?(@date_timestamp, v) ->
             String.contains?(v, "T") ->
               d = Timex.parse!(v, "{YYYY}-{0M}-{0D}T{h24}:{m}")
               {k, make_datetime(d)}
+
             String.contains?(v, "/") ->
               d = Timex.parse!(v, "{h24}:{m}:{s} {0D}/{0M}/{YYYY}")
               {k, make_datetime(d)}
-            # TODO, regex never actually defined
-            # Regex.match?(@date_ymd_hms, v) ->
-            #   d = Timex.parse!(v, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}")
-            #   {k, make_datetime(d)}
+              # TODO, regex never actually defined
+              # Regex.match?(@date_ymd_hms, v) ->
+              #   d = Timex.parse!(v, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}")
+              #   {k, make_datetime(d)}
           end
       end
     end)
-    |> Map.new
+    |> Map.new()
   end
 
   # def parse_dates(params, names) do
@@ -121,15 +128,18 @@ defmodule Central.Helpers.SchemaHelper do
       case Enum.member?(names, k) do
         true ->
           case v do
-            nil -> {k, nil}
+            nil ->
+              {k, nil}
+
             _ ->
               {k, String.trim(v)}
           end
 
-        false -> {k, v}
+        false ->
+          {k, v}
       end
     end)
-    |> Map.new
+    |> Map.new()
   end
 
   def safe_strings(params, names) do
@@ -140,28 +150,34 @@ defmodule Central.Helpers.SchemaHelper do
       case Enum.member?(names, k) do
         true ->
           case v do
-            nil -> {k, nil}
+            nil ->
+              {k, nil}
+
             _ ->
               {
                 k,
                 v
                 |> String.replace(" ", "_")
-                |> String.downcase
+                |> String.downcase()
               }
           end
 
-        false -> {k, v}
+        false ->
+          {k, v}
       end
     end)
-    |> Map.new
+    |> Map.new()
   end
 
   def parse_checkboxes(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)
 
-    adjusted_params = names
-    |> Enum.map(fn k -> {k, (if params[k] == "true" or params[k] == true, do: true, else: false)} end)
-    |> Map.new
+    adjusted_params =
+      names
+      |> Enum.map(fn k ->
+        {k, if(params[k] == "true" or params[k] == true, do: true, else: false)}
+      end)
+      |> Map.new()
 
     Map.merge(params, adjusted_params)
   end
@@ -174,21 +190,25 @@ defmodule Central.Helpers.SchemaHelper do
       case Enum.member?(names, k) do
         true ->
           case v do
-            nil -> {k, nil}
+            nil ->
+              {k, nil}
+
             _ ->
               case HumanTime.relative(v) do
                 {:ok, ht_v} ->
                   {k, ht_v}
+
                 {:error, _} ->
                   # We need to do this replace to stop "invalid string" appearing multiple times
                   {k, String.replace(v, " - Invalid string", "") <> " - Invalid string"}
               end
           end
 
-        false -> {k, v}
+        false ->
+          {k, v}
       end
     end)
-    |> Map.new
+    |> Map.new()
   end
 
   # @spec validate_human_time(map, list | atom, Keyword.t) :: t
@@ -205,11 +225,20 @@ defmodule Central.Helpers.SchemaHelper do
           do: field
 
     case fields_with_errors do
-      [] -> %{changeset | required: fields ++ required}
-      _  ->
+      [] ->
+        %{changeset | required: fields ++ required}
+
+      _ ->
         new_errors = Enum.map(fields_with_errors, &{&1, {message, [human_time: :invalid]}})
         changes = Map.drop(changes, fields_with_errors)
-        %{changeset | changes: changes, required: fields ++ required, errors: new_errors ++ errors, valid?: false}
+
+        %{
+          changeset
+          | changes: changes,
+            required: fields ++ required,
+            errors: new_errors ++ errors,
+            valid?: false
+        }
     end
   end
 
@@ -217,12 +246,15 @@ defmodule Central.Helpers.SchemaHelper do
     unless Map.has_key?(types, field) do
       raise ArgumentError, "unknown field #{inspect(field)} in #{inspect(data)}"
     end
+
     true
   end
 
   defp ht_valid?(changeset, field) when is_atom(field) do
     case get_field(changeset, field) do
-      nil -> false
+      nil ->
+        false
+
       v ->
         case HumanTime.relative(v) do
           {:error, _} -> true

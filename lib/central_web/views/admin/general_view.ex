@@ -8,8 +8,8 @@ defmodule CentralWeb.Admin.GeneralView do
     @build_time_priv
   end
 
-  def colours(), do: Central.Admin.AdminLib.colours
-  def icon(), do: Central.Admin.AdminLib.icon
+  def colours(), do: Central.Admin.AdminLib.colours()
+  def icon(), do: Central.Admin.AdminLib.icon()
 
   def colours("user"), do: Central.Account.UserLib.colours()
   def colours("group"), do: Central.Account.GroupLib.colours()

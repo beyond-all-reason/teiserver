@@ -6,11 +6,11 @@ defmodule CentralWeb.UserSocket do
   ## Channels
   # channel "room:*", CentralWeb.RoomChannel
 
-  channel "load_test:*", CentralWeb.LoadTest.Channel
-  channel "live_search:*", CentralWeb.LiveSearch.Channel
-  channel "chat:*", CentralWeb.Chat.Channel
-  channel "communication_notification:*", CentralWeb.Communication.NotificationChannel
-  channel "communication_reloads:*", CentralWeb.Communication.NotificationChannel
+  channel("load_test:*", CentralWeb.LoadTest.Channel)
+  channel("live_search:*", CentralWeb.LiveSearch.Channel)
+  channel("chat:*", CentralWeb.Chat.Channel)
+  channel("communication_notification:*", CentralWeb.Communication.NotificationChannel)
+  channel("communication_reloads:*", CentralWeb.Communication.NotificationChannel)
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After
@@ -39,9 +39,11 @@ defmodule CentralWeb.UserSocket do
     case Guardian.resource_from_token(token) do
       {:error, _error} ->
         :error
+
       {:ok, user, _claims} ->
-        {:ok, socket
-        |> assign(:current_user, user)}
+        {:ok,
+         socket
+         |> assign(:current_user, user)}
     end
   end
 

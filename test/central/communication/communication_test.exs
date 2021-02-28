@@ -8,8 +8,20 @@ defmodule Central.CommunicationTest do
   describe "posts" do
     alias Central.Communication.Post
 
-    @valid_attrs %{"title" => "some title", "content" => "some content", "short_content" => "some short content", "tags" => ["Tag 1"], "url_slug" => "url_slug"}
-    @update_attrs %{"title" => "some updated title", "content" => "some updated content", "short_content" => "some updated short content", "tags" => ["Tag 2"], "url_slug" => "some updated url_slug"}
+    @valid_attrs %{
+      "title" => "some title",
+      "content" => "some content",
+      "short_content" => "some short content",
+      "tags" => ["Tag 1"],
+      "url_slug" => "url_slug"
+    }
+    @update_attrs %{
+      "title" => "some updated title",
+      "content" => "some updated content",
+      "short_content" => "some updated short content",
+      "tags" => ["Tag 2"],
+      "url_slug" => "some updated url_slug"
+    }
     @invalid_attrs %{"title" => nil, "content" => nil, "tags" => nil}
 
     test "list_posts/0 returns posts" do
@@ -25,7 +37,12 @@ defmodule Central.CommunicationTest do
     test "create_post/1 with valid data creates a post" do
       poster = GeneralTestLib.user_fixture()
       category = CommunicationTestLib.category_fixture()
-      assert {:ok, %Post{} = post} = Communication.create_post(Map.merge(@valid_attrs, %{"poster_id" => poster.id, "category_id" => category.id}))
+
+      assert {:ok, %Post{} = post} =
+               Communication.create_post(
+                 Map.merge(@valid_attrs, %{"poster_id" => poster.id, "category_id" => category.id})
+               )
+
       assert post.title == "some title"
       assert post.content == "some content"
     end
@@ -77,8 +94,11 @@ defmodule Central.CommunicationTest do
     end
 
     test "create_comment/1 with valid data creates a comment" do
-      post = CommunicationTestLib.post_fixture
-      assert {:ok, %Comment{} = comment} = Communication.create_comment(Map.merge(@valid_attrs, %{"post_id" => post.id}))
+      post = CommunicationTestLib.post_fixture()
+
+      assert {:ok, %Comment{} = comment} =
+               Communication.create_comment(Map.merge(@valid_attrs, %{"post_id" => post.id}))
+
       assert comment.content == "some content"
       assert comment.approved == true
     end
@@ -116,7 +136,11 @@ defmodule Central.CommunicationTest do
     alias Central.Communication.Category
 
     @valid_attrs %{"colour" => "some colour", "icon" => "far fa-home", "name" => "some name"}
-    @update_attrs %{"colour" => "some updated colour", "icon" => "fas fa-wrench", "name" => "some updated name"}
+    @update_attrs %{
+      "colour" => "some updated colour",
+      "icon" => "fas fa-wrench",
+      "name" => "some updated name"
+    }
     @invalid_attrs %{"colour" => nil, "icon" => nil, "name" => nil}
 
     test "list_categories/0 returns categories" do
@@ -142,7 +166,10 @@ defmodule Central.CommunicationTest do
 
     test "update_category/2 with valid data updates the category" do
       category = CommunicationTestLib.category_fixture()
-      assert {:ok, %Category{} = category} = Communication.update_category(category, @update_attrs)
+
+      assert {:ok, %Category{} = category} =
+               Communication.update_category(category, @update_attrs)
+
       assert category.colour == "some updated colour"
       assert category.icon == "fas fa-wrench"
       assert category.name == "some updated name"
@@ -195,13 +222,19 @@ defmodule Central.CommunicationTest do
 
     test "update_blog_file/2 with valid data updates the blog_file" do
       blog_file = CommunicationTestLib.blog_file_fixture()
-      assert {:ok, %BlogFile{} = blog_file} = Communication.update_blog_file(blog_file, @update_attrs)
+
+      assert {:ok, %BlogFile{} = blog_file} =
+               Communication.update_blog_file(blog_file, @update_attrs)
+
       assert blog_file.name == "some updated name"
     end
 
     test "update_blog_file/2 with invalid data returns error changeset" do
       blog_file = CommunicationTestLib.blog_file_fixture()
-      assert {:error, %Ecto.Changeset{}} = Communication.update_blog_file(blog_file, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Communication.update_blog_file(blog_file, @invalid_attrs)
+
       assert blog_file == Communication.get_blog_file!(blog_file.id)
     end
 
@@ -216,5 +249,4 @@ defmodule Central.CommunicationTest do
       assert %Ecto.Changeset{} = Communication.change_blog_file(blog_file)
     end
   end
-
 end

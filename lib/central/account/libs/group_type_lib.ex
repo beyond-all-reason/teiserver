@@ -1,4 +1,4 @@
-defmodule Central.Account.GroupTypeLib do  
+defmodule Central.Account.GroupTypeLib do
   # def colours(), do: {"#908", "#FEF", "primary2"}
   # def icon(), do: "fab fa-connectdevelop"
 
@@ -11,6 +11,7 @@ defmodule Central.Account.GroupTypeLib do
   end
 
   def get_group_type(nil), do: blank_type()
+
   def get_group_type(key) do
     r = ConCache.get(:group_type_cache, key)
     if r, do: r, else: blank_type()

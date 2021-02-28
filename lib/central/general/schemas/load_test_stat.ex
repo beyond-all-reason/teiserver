@@ -2,8 +2,8 @@ defmodule Central.General.LoadTestStat do
   use CentralWeb, :schema
 
   schema "load_test_stats" do
-    field :timeid, :utc_datetime
-    field :data, :map
+    field(:timeid, :utc_datetime)
+    field(:data, :map)
   end
 
   @doc false

@@ -3,6 +3,7 @@ defmodule CentralWeb.Communication.BlogControllerTest do
 
   alias Central.CommunicationTestLib
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(~w(communication.blog))
   end
@@ -39,14 +40,18 @@ defmodule CentralWeb.Communication.BlogControllerTest do
 
     test "renders show nil item", %{conn: conn} do
       resp = get(conn, Routes.blog_path(conn, :show, "___"))
-      assert html_response(resp, 200) =~ "Unfortunately it appears this post either doesn't exist or has yet to be published."
+
+      assert html_response(resp, 200) =~
+               "Unfortunately it appears this post either doesn't exist or has yet to be published."
     end
   end
 
   describe "comments" do
     test "submit for nil item", %{conn: conn} do
       resp = post(conn, Routes.blog_path(conn, :add_comment, -1), comment: "comment content")
-      assert html_response(resp, 200) =~ "Unfortunately it appears this post either doesn't exist or has yet to be published."
+
+      assert html_response(resp, 200) =~
+               "Unfortunately it appears this post either doesn't exist or has yet to be published."
     end
 
     test "renders form for editing chosen post", %{conn: conn} do
@@ -64,9 +69,9 @@ defmodule CentralWeb.Communication.BlogControllerTest do
     # end
 
     test "renders errors when nil object", %{conn: conn} do
-      assert_error_sent 404, fn ->
-        get conn, Routes.blog_path(conn, :show_file, "___")
-      end
+      assert_error_sent(404, fn ->
+        get(conn, Routes.blog_path(conn, :show_file, "___"))
+      end)
     end
   end
 end

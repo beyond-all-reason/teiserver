@@ -1,10 +1,11 @@
 defmodule Teiserver.Account do
   import Ecto.Query, warn: false
   alias Central.Repo
-  
+
   # Mostly a wrapper around Central.Account
   alias Central.Account.User
   alias Teiserver.Account.UserLib
+
   @doc """
   Returns the list of user.
 
@@ -15,11 +16,11 @@ defmodule Teiserver.Account do
 
   """
   def list_users(args \\ []) do
-    UserLib.get_user
+    UserLib.get_user()
     |> UserLib.search(args[:search])
     |> UserLib.preload(args[:joins])
     |> UserLib.order_by(args[:order_by])
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -37,11 +38,11 @@ defmodule Teiserver.Account do
 
   """
   def get_user!(id, args \\ []) do
-    UserLib.get_user
+    UserLib.get_user()
     |> UserLib.search(%{id: id})
     |> UserLib.search(args[:search])
     |> UserLib.preload(args[:joins])
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @doc """
@@ -108,7 +109,7 @@ defmodule Teiserver.Account do
   def change_user(%User{} = user) do
     User.changeset(user, %{})
   end
-  
+
   # Group stuff
   def create_group_membership(params),
     do: Central.Account.create_group_membership(params)

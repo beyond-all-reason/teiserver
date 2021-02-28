@@ -7,21 +7,23 @@ defmodule CentralWeb.Logging.AggregateViewLogController do
 
   alias Central.Helpers.TimexHelper
 
-  plug Bodyguard.Plug.Authorize,
+  plug(Bodyguard.Plug.Authorize,
     policy: Central.Admin,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
+  )
 
-  plug :add_breadcrumb, name: 'Logging', url: '/logging'
-  plug :add_breadcrumb, name: 'Aggregate', url: '/logging/aggregate_views'
+  plug(:add_breadcrumb, name: 'Logging', url: '/logging')
+  plug(:add_breadcrumb, name: 'Aggregate', url: '/logging/aggregate_views')
 
   def index(conn, _params) do
-    logs = Logging.list_aggregate_view_logs(
-      # search: [user_id: params["user_id"]],
-      # joins: [:user],
-      order: "Newest first",
-      limit: 31
-    )
+    logs =
+      Logging.list_aggregate_view_logs(
+        # search: [user_id: params["user_id"]],
+        # joins: [:user],
+        order: "Newest first",
+        limit: 31
+      )
 
     conn
     |> assign(:logs, logs)
@@ -33,8 +35,9 @@ defmodule CentralWeb.Logging.AggregateViewLogController do
 
     log = Logging.get_aggregate_view_log!(date)
 
-    users = [log]
-    |> AggregateViewLogLib.user_lookup
+    users =
+      [log]
+      |> AggregateViewLogLib.user_lookup()
 
     conn
     |> assign(:log, log)
@@ -45,21 +48,21 @@ defmodule CentralWeb.Logging.AggregateViewLogController do
   def perform_form(conn, _params) do
     last_date = AggregateViewLogLib.get_last_aggregate_date()
 
-    date = if last_date == nil do
-      AggregateViewLogLib.get_first_page_view_log_date()
-      |> Timex.to_date
-    else
-      last_date
-      |> Timex.shift(days: 1)
-    end
+    date =
+      if last_date == nil do
+        AggregateViewLogLib.get_first_page_view_log_date()
+        |> Timex.to_date()
+      else
+        last_date
+        |> Timex.shift(days: 1)
+      end
 
-    if Timex.compare(date, Timex.today) == 1 do
+    if Timex.compare(date, Timex.today()) == 1 do
       conn
       |> assign(:date, date)
       |> put_flash(:danger, "That date is in the future")
       |> render("perform_post.html")
     else
-
       conn
       |> assign(:date, date)
       |> assign(:keep_going, false)

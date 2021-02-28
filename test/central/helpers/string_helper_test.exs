@@ -39,7 +39,7 @@ defmodule Central.General.StringHelpersTest do
       {100.50, 100.5},
       {10000.50, "10,000.5"},
       {100_000, "100,000"},
-      {100_000_000_000_000, "100,000,000,000,000"},
+      {100_000_000_000_000, "100,000,000,000,000"}
     ]
 
     for {input, expected} <- params do
@@ -55,10 +55,12 @@ defmodule Central.General.StringHelpersTest do
       {"journey", "journeys"},
       {"ship", "ships"}
     ]
+
     for {singular, expected} <- pairs do
       result = StringHelper.pluralise(singular)
 
-      assert result == expected, message: "Input: #{singular}, Got: #{result}, Expected: #{expected}"
+      assert result == expected,
+        message: "Input: #{singular}, Got: #{result}, Expected: #{expected}"
     end
   end
 
@@ -73,7 +75,8 @@ defmodule Central.General.StringHelpersTest do
     for {singular, expected} <- pairs do
       result = StringHelper.singular(singular)
 
-      assert result == expected, message: "Input: #{singular}, Got: #{result}, Expected: #{expected}"
+      assert result == expected,
+        message: "Input: #{singular}, Got: #{result}, Expected: #{expected}"
     end
   end
 
@@ -82,7 +85,7 @@ defmodule Central.General.StringHelpersTest do
       {nil, nil},
       {"100", nil},
       {"#100", 100},
-      {"#100 name email", 100},
+      {"#100 name email", 100}
     ]
 
     for [name, expected] <- pairs do

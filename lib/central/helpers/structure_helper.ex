@@ -10,8 +10,10 @@ defmodule Central.Helpers.StructureHelper do
   @skip_import_fields ~w(id)
 
   defp query_obj(module, id) do
-    query = from objects in module,
-      where: objects.id == ^id
+    query =
+      from(objects in module,
+        where: objects.id == ^id
+      )
 
     Repo.one!(query)
   end
@@ -21,7 +23,9 @@ defmodule Central.Helpers.StructureHelper do
     object_module = association.queryable
 
     case association.relationship do
-      :parent -> :skip
+      :parent ->
+        :skip
+
       :child ->
         Repo.preload(object, field)
         |> Map.get(field)
@@ -30,15 +34,18 @@ defmodule Central.Helpers.StructureHelper do
   end
 
   defp cast_one(object, module) do
-    skip_fields = if Kernel.function_exported?(module, :structure_export_skips, 0) do
-      module.structure_export_skips()
-    else
-      []
-    end
+    skip_fields =
+      if Kernel.function_exported?(module, :structure_export_skips, 0) do
+        module.structure_export_skips()
+      else
+        []
+      end
 
     object
-    |> Map.from_struct
-    |> Enum.filter(fn {k, _} -> not Enum.member?(@skip_export_fields, k) and not Enum.member?(skip_fields, k) end)
+    |> Map.from_struct()
+    |> Enum.filter(fn {k, _} ->
+      not Enum.member?(@skip_export_fields, k) and not Enum.member?(skip_fields, k)
+    end)
     |> Enum.map(fn {k, v} ->
       cond do
         module.__schema__(:field_source, k) -> {k, v}
@@ -46,7 +53,7 @@ defmodule Central.Helpers.StructureHelper do
       end
     end)
     |> Enum.filter(fn {_, v} -> v != :skip end)
-    |> Map.new
+    |> Map.new()
   end
 
   def export(module, id) do
@@ -54,42 +61,48 @@ defmodule Central.Helpers.StructureHelper do
     |> cast_one(module)
   end
 
-
   defp import_assoc(parent_module, field, data, parent_id) when is_list(data) do
     field = String.to_existing_atom(field)
     assoc = parent_module.__schema__(:association, field)
-    
+
     data
     |> Enum.map(fn item_params ->
       import_assoc(assoc, item_params, parent_id)
     end)
   end
-  
+
   defp import_assoc(assoc, params, parent_id) when is_map(params) do
     key = assoc.related_key |> to_string
-    
-    params = Map.put(params, key, parent_id)
-    |> Enum.filter(fn {k, _} -> not Enum.member?(@skip_import_fields, k) end)
-    |> Map.new
-    
+
+    params =
+      Map.put(params, key, parent_id)
+      |> Enum.filter(fn {k, _} -> not Enum.member?(@skip_import_fields, k) end)
+      |> Map.new()
+
     module = assoc.queryable
 
-    {:ok, _new_object} = module.changeset(module.__struct__, params)
-    |> Repo.insert
+    {:ok, _new_object} =
+      module.changeset(module.__struct__, params)
+      |> Repo.insert()
   end
 
   # Given the root module and the data, this should create everything you need
   def import(module, data) do
-    assocs = module.__schema__(:associations)
-    |> Enum.map(&to_string/1)
+    assocs =
+      module.__schema__(:associations)
+      |> Enum.map(&to_string/1)
 
     # First, create and insert the core object
-    core_params = data
-    |> Enum.filter(fn {k, _} -> not Enum.member?(assocs, k) and not Enum.member?(@skip_import_fields, k) end)
-    |> Map.new()
-    
-    {:ok, core_object} = module.changeset(module.__struct__, core_params)
-    |> Repo.insert
+    core_params =
+      data
+      |> Enum.filter(fn {k, _} ->
+        not Enum.member?(assocs, k) and not Enum.member?(@skip_import_fields, k)
+      end)
+      |> Map.new()
+
+    {:ok, core_object} =
+      module.changeset(module.__struct__, core_params)
+      |> Repo.insert()
 
     # Now, lets add the assocs
     data

@@ -7,22 +7,24 @@ defmodule Central.Account.User do
   # import Central.Account.AuthLib, only: [allow?: 2]
 
   schema "account_users" do
-    field :name, :string
-    field :email, :string
-    field :password, :string
+    field(:name, :string)
+    field(:email, :string)
+    field(:password, :string)
 
-    field :icon, :string
-    field :colour, :string
+    field(:icon, :string)
+    field(:colour, :string)
 
-    field :data, :map, default: %{}
+    field(:data, :map, default: %{})
 
-    field :permissions, {:array, :string}, default: []
+    field(:permissions, {:array, :string}, default: [])
 
-    has_many :user_configs, Central.Config.UserConfig
-    belongs_to :admin_group, Central.Account.Group
+    has_many(:user_configs, Central.Config.UserConfig)
+    belongs_to(:admin_group, Central.Account.Group)
 
-    many_to_many :groups, Central.Account.Group, join_through: "account_group_memberships",
+    many_to_many(:groups, Central.Account.Group,
+      join_through: "account_group_memberships",
       join_keys: [user_id: :id, group_id: :id]
+    )
 
     timestamps()
   end
@@ -35,38 +37,56 @@ defmodule Central.Account.User do
       |> validate_required([:name, :email, :icon, :colour, :permissions])
     else
       user
-      |> cast(attrs, [:name, :email, :password, :icon, :colour, :permissions, :admin_group_id, :data])
+      |> cast(attrs, [
+        :name,
+        :email,
+        :password,
+        :icon,
+        :colour,
+        :permissions,
+        :admin_group_id,
+        :data
+      ])
       |> validate_required([:name, :email, :password, :icon, :colour, :permissions])
       |> put_password_hash()
     end
   end
+
   def changeset(struct, params, nil), do: changeset(struct, params)
+
   def changeset(struct, permissions, :permissions) do
     cast(struct, %{permissions: permissions}, [:permissions])
   end
+
   def changeset(user, attrs, :self_create) do
     user
     |> cast(attrs, [:name, :email])
     |> validate_required([:name, :email])
     |> change_password(attrs)
   end
+
   def changeset(user, attrs, :limited) do
     user
     |> cast(attrs, [:name, :email, :icon, :colour])
     |> validate_required([:name, :email, :icon, :colour])
   end
+
   def changeset(user, attrs, :limited_with_data) do
     user
     |> cast(attrs, [:name, :email, :icon, :colour, :data])
     |> validate_required([:name, :email, :icon, :colour])
   end
+
   def changeset(user, attrs, :user_form) do
     cond do
       attrs["password"] == nil or attrs["password"] == "" ->
         user
         |> cast(attrs, [:name, :email])
         |> validate_required([:name, :email])
-        |> add_error(:password_confirmation, "Please enter your password to change your account details.")
+        |> add_error(
+          :password_confirmation,
+          "Please enter your password to change your account details."
+        )
 
       verify_password(attrs["password"], user.password) == false ->
         user
@@ -80,14 +100,18 @@ defmodule Central.Account.User do
         |> validate_required([:name, :email])
     end
   end
+
   def changeset(user, attrs, :password) do
     cond do
       attrs["existing"] == nil or attrs["existing"] == "" ->
         user
         |> change_password(attrs)
-        |> add_error(:password_confirmation, "Please enter your existing password to change your password.")
+        |> add_error(
+          :password_confirmation,
+          "Please enter your existing password to change your password."
+        )
 
-      verify_password(attrs["existing"], user.password) == false ->  
+      verify_password(attrs["existing"], user.password) == false ->
         user
         |> change_password(attrs)
         |> add_error(:existing, "Incorrect password")
@@ -106,9 +130,12 @@ defmodule Central.Account.User do
     |> put_password_hash()
   end
 
-  defp put_password_hash(%Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset) do
+  defp put_password_hash(
+         %Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset
+       ) do
     change(changeset, password: Argon2.hash_pwd_salt(password))
   end
+
   defp put_password_hash(changeset), do: changeset
 
   def verify_password(plain_text_password, encrypted) do

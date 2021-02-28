@@ -15,6 +15,6 @@ defmodule Central.Helpers.ComponentHelper do
   end
 
   def component(template, assigns, do: block) do
-    CentralWeb.ComponentView.render(template <> ".html", Keyword.merge(assigns, [do: block]))
+    CentralWeb.ComponentView.render(template <> ".html", Keyword.merge(assigns, do: block))
   end
 end

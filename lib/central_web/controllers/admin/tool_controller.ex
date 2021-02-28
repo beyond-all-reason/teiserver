@@ -5,13 +5,14 @@ defmodule CentralWeb.Admin.ToolController do
   alias Central.Admin.CoverageLib
   alias Central.Admin.ToolLib
 
-  plug Bodyguard.Plug.Authorize,
+  plug(Bodyguard.Plug.Authorize,
     policy: Central.Dev,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
+  )
 
-  plug :add_breadcrumb, name: 'Admin', url: '/admin'
-  plug :add_breadcrumb, name: 'Tools', url: '/admin/tools'
+  plug(:add_breadcrumb, name: 'Admin', url: '/admin')
+  plug(:add_breadcrumb, name: 'Tools', url: '/admin/tools')
 
   # action_fallback CentralWeb.General.FallbackController
 
@@ -55,14 +56,16 @@ defmodule CentralWeb.Admin.ToolController do
   end
 
   def coverage_post(conn, params) do
-    coverage_path = "file:///home/teifion/programming/elixir/alacrity/apps/centaur/cover/excoveralls.html#"
+    coverage_path =
+      "file:///home/teifion/programming/elixir/alacrity/apps/centaur/cover/excoveralls.html#"
 
-    coverage_data = if params["results"] == "" do
-      "apps/centaur/cover/coverage_result"
-      |> File.read!
-    else
-      params["results"]
-    end
+    coverage_data =
+      if params["results"] == "" do
+        "apps/centaur/cover/coverage_result"
+        |> File.read!()
+      else
+        params["results"]
+      end
 
     results = CoverageLib.parse_coverage(coverage_data)
     overall_stats = CoverageLib.get_overall_stats(results)

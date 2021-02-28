@@ -36,45 +36,52 @@ defmodule Central.General.LoadTest.Server do
     {:reply, state, state}
   end
 
-  def handle_cast({:tester_broadcast, %{"text" => _text, "uid" => uid, "agent" => broadcast_agent}}, state) do
-    state = state
-    |> Enum.filter(fn {tester_id, _agent, last_seen} ->
-      (tester_id != uid) and (systime() - last_seen < @tester_timeout)
-    end)
-    |> List.insert_at(-1, {uid, broadcast_agent, systime()})
+  def handle_cast(
+        {:tester_broadcast, %{"text" => _text, "uid" => uid, "agent" => broadcast_agent}},
+        state
+      ) do
+    state =
+      state
+      |> Enum.filter(fn {tester_id, _agent, last_seen} ->
+        tester_id != uid and systime() - last_seen < @tester_timeout
+      end)
+      |> List.insert_at(-1, {uid, broadcast_agent, systime()})
 
-    spawn fn ->
+    spawn(fn ->
       rebroadcast(uid, state)
-    end
+    end)
 
     {:noreply, state}
   end
 
   def handle_cast({:new_stats, params}, state) do
-    total_ping = params.response_times
-    |> Enum.reduce(0, fn ({_, ping}, acc) -> acc + ping end)
+    total_ping =
+      params.response_times
+      |> Enum.reduce(0, fn {_, ping}, acc -> acc + ping end)
 
     message_count = Enum.count(params.response_times)
 
-    payload = Map.merge(params, %{
-      response_times: nil,
-      testers: Enum.count(params.testers),
-      average_ping: (if message_count == 0, do: 0, else: total_ping / message_count),
-      message_count: message_count,
-      ram: (params.ram * 1024) |> mem_normalize,
-      cpu: Enum.join(params.loads, ", ")
-    })
+    payload =
+      Map.merge(params, %{
+        response_times: nil,
+        testers: Enum.count(params.testers),
+        average_ping: if(message_count == 0, do: 0, else: total_ping / message_count),
+        message_count: message_count,
+        ram: (params.ram * 1024) |> mem_normalize,
+        cpu: Enum.join(params.loads, ", ")
+      })
 
-    spawn fn ->
+    spawn(fn ->
       send_stats(payload, state)
-    end
+    end)
 
     {:noreply, state}
   end
 
   def handle_cast({:register_tester, uid, agent}, state) do
-    state = state
-    |> List.insert_at(-1, {uid, agent, systime()})
+    state =
+      state
+      |> List.insert_at(-1, {uid, agent, systime()})
 
     {:noreply, state}
   end
@@ -98,7 +105,10 @@ defmodule Central.General.LoadTest.Server do
       CentralWeb.Endpoint.broadcast(
         "load_test:tester:#{tester_id}",
         "new message",
-        %{"sender" => uid, "message" => "#{tester_count} - That's how many testers there currently are!"}
+        %{
+          "sender" => uid,
+          "message" => "#{tester_count} - That's how many testers there currently are!"
+        }
       )
     end)
 

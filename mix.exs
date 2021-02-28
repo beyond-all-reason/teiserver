@@ -50,17 +50,14 @@ defmodule Central.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-
       {:logger_file_backend, "~> 0.0.10"},
       {:timex, "~> 3.6"},
       {:breadcrumble, "~> 1.0.0"},
-
       {:guardian, "~> 2.1"},
       {:argon2_elixir, "~> 2.3"},
       {:bodyguard, "~> 2.4"},
       {:human_time, "~> 0.2.4"},
       {:oban, "~> 2.3.4"},
-
       {:ranch, "~> 1.7"},
       {:parallel, "~> 0.0"},
       {:con_cache, "~> 0.13"},

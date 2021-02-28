@@ -31,34 +31,40 @@ defmodule CentralWeb.ErrorView do
 
   def render("500.html", %{reason: _} = error) do
     case error.reason do
-#       %Decimal.Error{message: "Error converting decimal value of " <> v} ->
-#         render "500_graceful.html", Map.merge(error, %{
-#           msg: "The system tried converting some text into a number: #{v}. Unfortunately the system isn't sure how to convert this. If you can spot the issue then hit the back button and try again.",
-#           info: """
-# error: #{error.reason |> Kernel.inspect}
-# value: #{v}
-# """
-#         })
+      #       %Decimal.Error{message: "Error converting decimal value of " <> v} ->
+      #         render "500_graceful.html", Map.merge(error, %{
+      #           msg: "The system tried converting some text into a number: #{v}. Unfortunately the system isn't sure how to convert this. If you can spot the issue then hit the back button and try again.",
+      #           info: """
+      # error: #{error.reason |> Kernel.inspect}
+      # value: #{v}
+      # """
+      #         })
 
       %Timex.Parse.ParseError{message: "Expected" <> _v} ->
-        render "500_graceful.html", Map.merge(error, %{
-          msg: "There was an issue trying to read in a date, please hit the back button and review the data being submitted.",
-          info: ""
-        })
+        render(
+          "500_graceful.html",
+          Map.merge(error, %{
+            msg:
+              "There was an issue trying to read in a date, please hit the back button and review the data being submitted.",
+            info: ""
+          })
+        )
 
       _ ->
-        db_username = Application.get_env(:central, Central.Repo)
-        |> Keyword.get(:username)
+        db_username =
+          Application.get_env(:central, Central.Repo)
+          |> Keyword.get(:username)
 
         # If in test mode we don't want to actually log errors since
         # there is an issue with converting the params into a map
-        error_log = if db_username != "teiserver_test" do
-          add_error_log(error)
-        else
-          %{}
-        end
+        error_log =
+          if db_username != "teiserver_test" do
+            add_error_log(error)
+          else
+            %{}
+          end
 
-        render "500_internal.html", Map.merge(error, %{error_log: error_log, error: error})
+        render("500_internal.html", Map.merge(error, %{error_log: error_log, error: error}))
     end
   end
 

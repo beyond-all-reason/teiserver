@@ -20,7 +20,7 @@ defmodule Central.ObanLogger do
       stack: meta.stack
     }
 
-    log = add_error_log(data);
+    log = add_error_log(data)
 
     error_str = Kernel.inspect(meta.error)
     Logger.error("[Oban] [failure] #{error_str} Logged as ##{log.id}")
@@ -39,7 +39,7 @@ defmodule Central.ObanLogger do
       stack: meta.stack
     }
 
-    log = add_error_log(data);
+    log = add_error_log(data)
 
     Logger.error("[Oban] [failure] {Logged as ##{log.id}}")
   end

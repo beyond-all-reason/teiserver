@@ -6,38 +6,41 @@ defmodule Central.Account.AuthLib do
   def icon(), do: "far fa-address-card"
 
   def get_all_permission_sets do
-    Server.get_all
+    Server.get_all()
   end
 
   def get_all_permissions do
-    Server.get_all
+    Server.get_all()
     |> Enum.map(fn {_, ps} -> ps end)
-    |> List.flatten
+    |> List.flatten()
     |> split_permissions
   end
 
   def split_permissions(permission_list) do
-    sections = permission_list
-    |> Enum.map(fn p ->
-      p
-      |> String.split(".")
-      |> Enum.take(2)
-      |> Enum.join(".")
-    end)
-    |> Enum.uniq
+    sections =
+      permission_list
+      |> Enum.map(fn p ->
+        p
+        |> String.split(".")
+        |> Enum.take(2)
+        |> Enum.join(".")
+      end)
+      |> Enum.uniq()
 
-    modules = permission_list
-    |> Enum.map(fn p -> p |> String.split(".") |> hd end)
-    |> Enum.uniq
+    modules =
+      permission_list
+      |> Enum.map(fn p -> p |> String.split(".") |> hd end)
+      |> Enum.uniq()
 
     permission_list ++ sections ++ modules
   end
 
   def add_permission_set(module, section, auths) do
-    permissions = auths
-    |> Enum.map(fn a ->
-      "#{module}.#{section}.#{a}"
-    end)
+    permissions =
+      auths
+      |> Enum.map(fn a ->
+        "#{module}.#{section}.#{a}"
+      end)
 
     Server.add(module, section, permissions)
   end
@@ -85,10 +88,12 @@ defmodule Central.Account.AuthLib do
         false
 
       # Developers always have permission
-      Enum.member?(permissions_held, "admin.dev.developer") && permission_required != "debug" -> true
+      Enum.member?(permissions_held, "admin.dev.developer") && permission_required != "debug" ->
+        true
 
       # Standard "do you have permission" response
-      Enum.member?(permissions_held, permission_required) -> true
+      Enum.member?(permissions_held, permission_required) ->
+        true
 
       # Default to not having permission
       true ->

@@ -20,10 +20,11 @@ defmodule Central.General.QuickAction.Cache do
 
   # GenServer callbacks
   def handle_cast({:add, items}, table) do
-    existing = case :ets.lookup(@table_name, :items) do
-      [] -> []
-      [{_, v}] -> v
-    end
+    existing =
+      case :ets.lookup(@table_name, :items) do
+        [] -> []
+        [{_, v}] -> v
+      end
 
     :ets.insert(table, {:items, existing ++ items})
     {:noreply, table}

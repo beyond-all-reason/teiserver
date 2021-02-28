@@ -2,24 +2,26 @@ defmodule CentralWeb.General.QuickAction.AjaxController do
   use CentralWeb, :controller
 
   def index(conn, _params) do
-    data = Central.General.QuickAction.get_items()
-    |> Enum.filter(fn r ->
-      if Map.get(r, :permissions, nil) do
-        allow?(conn, r.permissions)
-      else
-        true
-      end
-    end)
-    |> Enum.map(fn row ->
-      kw = Map.get(row, :keywords, [])
+    data =
+      Central.General.QuickAction.get_items()
+      |> Enum.filter(fn r ->
+        if Map.get(r, :permissions, nil) do
+          allow?(conn, r.permissions)
+        else
+          true
+        end
+      end)
+      |> Enum.map(fn row ->
+        kw = Map.get(row, :keywords, [])
 
-      extra_kw = row.label
-      |> String.downcase
-      |> String.split(" ")
+        extra_kw =
+          row.label
+          |> String.downcase()
+          |> String.split(" ")
 
-      Map.put(row, :keywords, kw ++ extra_kw ++ [row.label |> String.downcase])
-    end)
-    |> Enum.sort_by(fn row -> row.label end)
+        Map.put(row, :keywords, kw ++ extra_kw ++ [row.label |> String.downcase()])
+      end)
+      |> Enum.sort_by(fn row -> row.label end)
 
     search_item = %{
       icon: "fas fa-search",

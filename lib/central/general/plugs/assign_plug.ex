@@ -5,7 +5,7 @@ defmodule Central.General.AssignPlug do
 
   def call(conn, opts) do
     opts
-    |> Enum.reduce(conn, fn ({k, v}, c) ->
+    |> Enum.reduce(conn, fn {k, v}, c ->
       assign(c, k, v)
     end)
   end

@@ -14,12 +14,14 @@ defmodule Central.Admin.ToolLib do
       value < 100 -> :info
       true -> :success
     end
-    |> Central.Helpers.StylingHelper.colours
+    |> Central.Helpers.StylingHelper.colours()
   end
 
   def get_oban_jobs() do
-    query = from jobs in Oban.Job,
-      where: jobs.state in ["scheduled", "available"]
+    query =
+      from(jobs in Oban.Job,
+        where: jobs.state in ["scheduled", "available"]
+      )
 
     Repo.all(query)
   end

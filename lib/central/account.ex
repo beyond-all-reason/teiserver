@@ -20,7 +20,7 @@ defmodule Central.Account do
   end
 
   defp user_query(id, args) do
-    UserQueries.get_users
+    UserQueries.get_users()
     |> UserQueries.search(%{id: id})
     |> UserQueries.search(args[:search])
     |> UserQueries.preload(args[:joins])
@@ -28,7 +28,7 @@ defmodule Central.Account do
     |> QueryHelpers.select(args[:select])
   end
 
-    @doc """
+  @doc """
   Returns the list of users.
 
   ## Examples
@@ -40,7 +40,7 @@ defmodule Central.Account do
   def list_users(args \\ []) do
     user_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -60,16 +60,18 @@ defmodule Central.Account do
   def get_user!(id) when not is_list(id) do
     ConCache.get_or_store(:account_user_cache_bang, id, fn ->
       user_query(id, [])
-      |> Repo.one!
+      |> Repo.one!()
     end)
   end
+
   def get_user!(args) do
     user_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_user!(id, args) do
     user_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @doc """
@@ -89,32 +91,35 @@ defmodule Central.Account do
   def get_user(id) when not is_list(id) do
     ConCache.get_or_store(:account_user_cache, id, fn ->
       user_query(id, [])
-      |> Repo.one
+      |> Repo.one()
     end)
   end
+
   def get_user(args) do
     user_query(nil, args)
-    |> Repo.one
+    |> Repo.one()
   end
+
   def get_user(id, args) do
     user_query(id, args)
-    |> Repo.one
+    |> Repo.one()
   end
 
   def get_user_by_name(name) do
-    UserQueries.get_users
+    UserQueries.get_users()
     |> UserQueries.search(%{name: name})
-    |> Repo.one
+    |> Repo.one()
   end
 
   def get_user_by_email(email) do
-    UserQueries.get_users
+    UserQueries.get_users()
     |> UserQueries.search(%{email: email})
-    |> Repo.one
+    |> Repo.one()
   end
 
   def recache_user(nil), do: nil
   def recache_user(%User{} = user), do: recache_user(user.id)
+
   def recache_user(id) do
     ConCache.dirty_delete(:account_user_cache, id)
     ConCache.dirty_delete(:account_user_cache_bang, id)
@@ -148,10 +153,13 @@ defmodule Central.Account do
   end
 
   def merge_default_params(user_params) do
-    Map.merge(%{
-      "icon" => "fas fa-" <> Central.Helpers.StylingHelper.random_icon(),
-      "colour" => Central.Helpers.StylingHelper.random_colour()
-    }, user_params)
+    Map.merge(
+      %{
+        "icon" => "fas fa-" <> Central.Helpers.StylingHelper.random_icon(),
+        "colour" => Central.Helpers.StylingHelper.random_colour()
+      },
+      user_params
+    )
   end
 
   @doc """
@@ -168,6 +176,7 @@ defmodule Central.Account do
   """
   def update_user(%User{} = user, attrs, changeset_type \\ nil) do
     recache_user(user)
+
     user
     |> User.changeset(attrs, changeset_type)
     |> Repo.update()
@@ -206,17 +215,25 @@ defmodule Central.Account do
     if User.verify_password(plain_text_password, user.password) do
       {:ok, user}
     else
-      add_anonymous_audit_log(conn, "Account: Failed login", %{reason: "Bad password", user_id: user.id, email: user.email})
+      add_anonymous_audit_log(conn, "Account: Failed login", %{
+        reason: "Bad password",
+        user_id: user.id,
+        email: user.email
+      })
+
       {:error, "Invalid credentials"}
     end
   end
+
   def authenticate_user(conn, email, plain_text_password) do
-    query = from u in User, where: u.email == ^email
+    query = from(u in User, where: u.email == ^email)
+
     case Repo.one(query) do
       nil ->
         Argon2.no_user_verify()
         add_anonymous_audit_log(conn, "Account: Failed login", %{reason: "No user", email: email})
         {:error, "Invalid credentials"}
+
       user ->
         authenticate_user(conn, user, plain_text_password)
     end
@@ -234,9 +251,8 @@ defmodule Central.Account do
       email: user.email,
       icon: user.icon,
       colour: user.colour,
-
       html_label: "#{user.name} - #{user.email}",
-      html_value: "##{user.id}, #{user.name}",
+      html_value: "##{user.id}, #{user.name}"
     }
   end
 
@@ -248,7 +264,7 @@ defmodule Central.Account do
   end
 
   defp group_query(id, args) do
-    GroupLib.get_groups
+    GroupLib.get_groups()
     |> GroupLib.search(%{id: id})
     |> GroupLib.search(args[:search])
     |> GroupLib.preload(args[:joins])
@@ -268,7 +284,7 @@ defmodule Central.Account do
   def list_groups(args \\ []) do
     group_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -287,20 +303,22 @@ defmodule Central.Account do
   """
   def get_group!(id) when not is_list(id) do
     group_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_group!(args) do
     group_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_group!(id, args) do
     group_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   def get_group(id, args \\ []) when not is_list(id) do
     group_query(id, args)
-    |> Repo.one
+    |> Repo.one()
   end
 
   def create_group(attrs \\ %{}) do
@@ -373,9 +391,8 @@ defmodule Central.Account do
       name: group.name,
       icon: group.icon,
       colour: group.colour,
-
       html_label: "#{group.name}",
-      html_value: "##{group.id} - #{group.name}",
+      html_value: "##{group.id} - #{group.name}"
     }
   end
 
@@ -383,27 +400,29 @@ defmodule Central.Account do
   alias Central.Account.GroupMembershipLib
 
   def list_group_memberships([user_id: user_id] = args) do
-    GroupMembershipLib.get_group_memberships
-    |> GroupMembershipLib.search([user_id: user_id])
+    GroupMembershipLib.get_group_memberships()
+    |> GroupMembershipLib.search(user_id: user_id)
     |> GroupMembershipLib.search(args)
     |> GroupMembershipLib.preload(args[:joins])
     |> QueryHelpers.select(args[:select])
     # |> QueryHelpers.limit_query(50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   def list_group_memberships_cache(user_id) do
     ConCache.get_or_store(:account_membership_cache, user_id, fn ->
-      query = from ugm in GroupMembership,
-        join: ug in Group,
+      query =
+        from(ugm in GroupMembership,
+          join: ug in Group,
           on: ugm.group_id == ug.id,
-        where: ugm.user_id == ^user_id,
-        select: {ug.id, ug.children_cache}
+          where: ugm.user_id == ^user_id,
+          select: {ug.id, ug.children_cache}
+        )
 
       Repo.all(query)
       |> Enum.map(fn {g, gc} -> gc ++ [g] end)
-      |> List.flatten
-      |> Enum.uniq
+      |> List.flatten()
+      |> Enum.uniq()
     end)
   end
 
@@ -422,15 +441,17 @@ defmodule Central.Account do
 
   """
   def get_group_membership!(user_id, group_id) do
-    GroupMembershipLib.get_group_memberships
+    GroupMembershipLib.get_group_memberships()
     |> GroupMembershipLib.search(user_id: user_id, group_id: group_id)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   def create_group_membership(attrs \\ %{}) do
-    r = %GroupMembership{}
-    |> GroupMembership.changeset(attrs)
-    |> Repo.insert()
+    r =
+      %GroupMembership{}
+      |> GroupMembership.changeset(attrs)
+      |> Repo.insert()
+
     recache_user(attrs["user_id"])
     r
   end

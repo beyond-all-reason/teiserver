@@ -9,7 +9,6 @@ defmodule Central.Helpers.TimexHelperTest do
   test "date_to_str" do
     values = [
       {nil, :day_name, ""},
-
       {@from, :day_name, "Wednesday"},
       {@from, :dmy, "04/12/2013"},
       {@from, :ymd, "2013-12-04"},
@@ -23,15 +22,13 @@ defmodule Central.Helpers.TimexHelperTest do
       {@from, :hms, "06:20:05"},
       {@from, :clock24, "0620"},
       {@from, :html_input, "2013-12-04T06:20"},
-
       {Timex.shift(@from, hours: -1), :hms_or_dmy, "Today at 05:20:05"},
       {Timex.shift(@from, days: -14), :hms_or_dmy, "20/11/2013"},
       {Timex.shift(@from, days: 2), :hms_or_dmy, "06/12/2013"},
       {Timex.shift(@from, hours: -1), :hm_or_dmy, "Today at 05:20"},
       {Timex.shift(@from, days: -14), :hm_or_dmy, "20/11/2013"},
       {Timex.shift(@from, days: 2), :hm_or_dmy, "06/12/2013"},
-
-      {@from, :everything, "2013-12-04 06:20:05, Wednesday"},
+      {@from, :everything, "2013-12-04 06:20:05, Wednesday"}
     ]
 
     for {input_value, format, expected} <- values do
@@ -43,8 +40,11 @@ defmodule Central.Helpers.TimexHelperTest do
   end
 
   test "date_to_str until" do
-    assert TimexHelper.date_to_str(@from, format: :hms_dmy, now: @today, until: true) == "06:20:05 04/12/2013, in 6 hours"
-    assert TimexHelper.date_to_str(@from, format: :hms_dmy, now: @today, until: "until-span-id") == "06:20:05 04/12/2013<span id='until-span-id'>, in 6 hours</span>"
+    assert TimexHelper.date_to_str(@from, format: :hms_dmy, now: @today, until: true) ==
+             "06:20:05 04/12/2013, in 6 hours"
+
+    assert TimexHelper.date_to_str(@from, format: :hms_dmy, now: @today, until: "until-span-id") ==
+             "06:20:05 04/12/2013<span id='until-span-id'>, in 6 hours</span>"
   end
 
   test "time_until" do

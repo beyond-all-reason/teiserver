@@ -5,6 +5,6 @@ defmodule Central.Logging.LoggingLib do
   def icon(), do: "far fa-bars"
 
   def do_not_log(conn) do
-    assign(conn, :do_not_log, :true)
+    assign(conn, :do_not_log, true)
   end
 end

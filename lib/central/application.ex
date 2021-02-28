@@ -8,35 +8,34 @@ defmodule Central.Application do
 
   def start(_type, _args) do
     # List all child processes to be supervised
-    children = [
-      # Start phoenix pubsub
-      {Phoenix.PubSub, name: Central.PubSub},
+    children =
+      [
+        # Start phoenix pubsub
+        {Phoenix.PubSub, name: Central.PubSub},
 
-      # Start the Ecto repository
-      Central.Repo,
-      # Start the endpoint when the application starts
-      CentralWeb.Endpoint,
-      # Starts a worker by calling: Central.Worker.start_link(arg)
-      # {Central.Worker, arg}
-      CentralWeb.Presence,
-
-      CentralWeb.Telemetry,
-
-      {Central.Account.RecentlyUsedCache, name: Central.Account.RecentlyUsedCache},
-      {Central.Account.AuthGroups.Server, name: Central.Account.AuthGroups.Server},
-      {Central.General.QuickAction.Cache, name: Central.General.QuickAction.Cache},
-      concache_sup(:account_user_cache),
-      concache_sup(:account_user_cache_bang),
-      concache_sup(:account_membership_cache),
-      concache_perm_sup(:group_type_cache),
-      concache_perm_sup(:config_type_cache),
-      concache_perm_sup(:application_metadata_cache),
-      concache_sup(:config_user_cache),
-      concache_sup(:communication_user_notifications),
-      {Oban, oban_config()},
-    ]
-    ++ load_test_server()
-    ++ Teiserver.Application.children()
+        # Start the Ecto repository
+        Central.Repo,
+        # Start the endpoint when the application starts
+        CentralWeb.Endpoint,
+        # Starts a worker by calling: Central.Worker.start_link(arg)
+        # {Central.Worker, arg}
+        CentralWeb.Presence,
+        CentralWeb.Telemetry,
+        {Central.Account.RecentlyUsedCache, name: Central.Account.RecentlyUsedCache},
+        {Central.Account.AuthGroups.Server, name: Central.Account.AuthGroups.Server},
+        {Central.General.QuickAction.Cache, name: Central.General.QuickAction.Cache},
+        concache_sup(:account_user_cache),
+        concache_sup(:account_user_cache_bang),
+        concache_sup(:account_membership_cache),
+        concache_perm_sup(:group_type_cache),
+        concache_perm_sup(:config_type_cache),
+        concache_perm_sup(:application_metadata_cache),
+        concache_sup(:config_user_cache),
+        concache_sup(:communication_user_notifications),
+        {Oban, oban_config()}
+      ] ++
+        load_test_server() ++
+        Teiserver.Application.children()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -77,8 +76,9 @@ defmodule Central.Application do
   end
 
   defp load_test_server() do
-    env_flag = Application.get_env(:central, Central.General.LoadTestServer)
-    |> Keyword.get(:enable_loadtest)
+    env_flag =
+      Application.get_env(:central, Central.General.LoadTestServer)
+      |> Keyword.get(:enable_loadtest)
 
     if env_flag do
       [
@@ -92,7 +92,13 @@ defmodule Central.Application do
 
   def startup_sub_functions do
     # Oban logging
-    events = [[:oban, :job, :start], [:oban, :job, :stop], [:oban, :job, :exception], [:oban, :circuit, :trip]]
+    events = [
+      [:oban, :job, :start],
+      [:oban, :job, :stop],
+      [:oban, :job, :exception],
+      [:oban, :circuit, :trip]
+    ]
+
     :telemetry.attach_many("oban-logger", events, &Central.ObanLogger.handle_event/4, [])
 
     ~w(General Config Account Admin Logging)

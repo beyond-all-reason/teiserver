@@ -13,7 +13,6 @@ defmodule Central.Helpers.FileHelper do
       "Audio" -> {"fas fa-file-audio", "info"}
       "Video" -> {"fas fa-file-video", "info2"}
       "Code" -> {"fas fa-file-code", "default"}
-
       _type -> {"fas fa-file", "default"}
     end
   end
@@ -43,10 +42,11 @@ defmodule Central.Helpers.FileHelper do
   end
 
   def type_icon(file_type, size \\ "") do
-    {icon, colour} = file_type
-    |> icon_and_colour
+    {icon, colour} =
+      file_type
+      |> icon_and_colour
 
-    raw "<i class='fa-fw #{icon} #{size} text-#{colour}'></i>"
+    raw("<i class='fa-fw #{icon} #{size} text-#{colour}'></i>")
   end
 
   def ext_icon(ext, size \\ "") do
@@ -60,6 +60,6 @@ defmodule Central.Helpers.FileHelper do
 
   defp _mem_normalize(v) when v < 1_024, do: "#{v} bytes"
   defp _mem_normalize(v) when v < 1_048_576, do: "#{Float.round(v / 1024, 2)} KB"
-  defp _mem_normalize(v) when v < 1_073_741_824, do: "#{Float.round(v / 1048576, 2)} MB"
-  defp _mem_normalize(v), do: "#{Float.round(v / 1073741824, 2)} GB"
+  defp _mem_normalize(v) when v < 1_073_741_824, do: "#{Float.round(v / 1_048_576, 2)} MB"
+  defp _mem_normalize(v), do: "#{Float.round(v / 1_073_741_824, 2)} GB"
 end

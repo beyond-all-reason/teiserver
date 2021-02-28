@@ -5,6 +5,7 @@ defmodule CentralWeb.Communication.BlogFileControllerTest do
   alias Central.CommunicationTestLib
 
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(~w(communication.blog))
   end
@@ -52,17 +53,17 @@ defmodule CentralWeb.Communication.BlogFileControllerTest do
     end
 
     test "renders show nil item", %{conn: conn} do
-      assert_error_sent 404, fn ->
+      assert_error_sent(404, fn ->
         get(conn, Routes.blog_file_path(conn, :show, -1))
-      end
+      end)
     end
   end
 
   describe "edit blog_file" do
     test "renders form for editing nil", %{conn: conn} do
-      assert_error_sent 404, fn ->
+      assert_error_sent(404, fn ->
         get(conn, Routes.blog_file_path(conn, :edit, -1))
-      end
+      end)
     end
 
     test "renders form for editing chosen blog_file", %{conn: conn} do
@@ -89,9 +90,9 @@ defmodule CentralWeb.Communication.BlogFileControllerTest do
     end
 
     test "renders errors when nil object", %{conn: conn} do
-      assert_error_sent 404, fn ->
+      assert_error_sent(404, fn ->
         put(conn, Routes.blog_file_path(conn, :update, -1), blog_file: @invalid_attrs)
-      end
+      end)
     end
   end
 
@@ -100,15 +101,16 @@ defmodule CentralWeb.Communication.BlogFileControllerTest do
       blog_file = CommunicationTestLib.blog_file_fixture()
       conn = delete(conn, Routes.blog_file_path(conn, :delete, blog_file))
       assert redirected_to(conn) == Routes.blog_file_path(conn, :index)
-      assert_error_sent 404, fn ->
+
+      assert_error_sent(404, fn ->
         get(conn, Routes.blog_file_path(conn, :show, blog_file))
-      end
+      end)
     end
 
     test "renders error for deleting nil item", %{conn: conn} do
-      assert_error_sent 404, fn ->
+      assert_error_sent(404, fn ->
         delete(conn, Routes.blog_file_path(conn, :delete, -1))
-      end
+      end)
     end
   end
 end

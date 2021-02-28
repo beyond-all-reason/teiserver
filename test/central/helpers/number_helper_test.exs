@@ -9,7 +9,7 @@ defmodule Central.General.NumberHelperTest do
       {nil, 0},
       {1, 1},
       {1.4, 1},
-      {[1,2,3], [1,2,3]},
+      {[1, 2, 3], [1, 2, 3]},
       {"10", 10},
       {"102 ", 102}
     ]
@@ -30,7 +30,7 @@ defmodule Central.General.NumberHelperTest do
       {nil, 0},
       {1, 1.0},
       {1.4, 1.4},
-      {[1.1,2.2,3], [1.1,2.2,3.0]},
+      {[1.1, 2.2, 3], [1.1, 2.2, 3.0]},
       {"10", 10.0},
       {"11.2 ", 11.2}
     ]
@@ -58,5 +58,4 @@ defmodule Central.General.NumberHelperTest do
   #     assert result == expected
   #   end
   # end
-
 end

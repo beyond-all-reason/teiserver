@@ -4,22 +4,24 @@ defmodule CentralWeb.Communication.CategoryController do
   alias Central.Communication
   alias Central.Communication.Category
 
-  plug Bodyguard.Plug.Authorize,
+  plug(Bodyguard.Plug.Authorize,
     policy: Central.Communication.Category,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
+  )
 
-  plug :add_breadcrumb, name: 'Blog', url: '/blog'
-  plug :add_breadcrumb, name: 'Categories', url: '/blog_admin/categories'
+  plug(:add_breadcrumb, name: 'Blog', url: '/blog')
+  plug(:add_breadcrumb, name: 'Categories', url: '/blog_admin/categories')
 
   def index(conn, params) do
-    categories = Communication.list_categories(
-      search: [
-        # membership: conn,
-        simple_search: Map.get(params, "s", "") |> String.trim,
-      ],
-      order_by: "Name (A-Z)"
-    )
+    categories =
+      Communication.list_categories(
+        search: [
+          # membership: conn,
+          simple_search: Map.get(params, "s", "") |> String.trim()
+        ],
+        order_by: "Name (A-Z)"
+      )
 
     conn
     |> assign(:show_search, Map.has_key?(params, "search"))
@@ -29,13 +31,14 @@ defmodule CentralWeb.Communication.CategoryController do
   end
 
   def search(conn, %{"search" => params}) do
-    categories = Communication.list_categories(
-      search: [
-        membership: conn,
-        simple_search: Map.get(params, "s", "") |> String.trim,
-      ],
-      order_by: "Name (A-Z)"
-    )
+    categories =
+      Communication.list_categories(
+        search: [
+          membership: conn,
+          simple_search: Map.get(params, "s", "") |> String.trim()
+        ],
+        order_by: "Name (A-Z)"
+      )
 
     conn
     |> assign(:params, params)
@@ -46,11 +49,12 @@ defmodule CentralWeb.Communication.CategoryController do
   end
 
   def new(conn, _params) do
-    changeset = Category.changeset(%Category{
-      icon: "fas fa-" <> StylingHelper.random_icon(),
-      colour: StylingHelper.random_colour(),
-      public: true
-    })
+    changeset =
+      Category.changeset(%Category{
+        icon: "fas fa-" <> StylingHelper.random_icon(),
+        colour: StylingHelper.random_colour(),
+        public: true
+      })
 
     conn
     |> assign(:changeset, changeset)
@@ -88,6 +92,7 @@ defmodule CentralWeb.Communication.CategoryController do
         conn
         |> put_flash(:info, "Category updated successfully.")
         |> redirect(to: Routes.blog_category_path(conn, :index))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", category: category, changeset: changeset)
     end

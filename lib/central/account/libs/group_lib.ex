@@ -8,16 +8,17 @@ defmodule Central.Account.GroupLib do
   def icon(), do: "far fa-users"
   def index_icon(), do: "fad fa-users"
 
-  @spec get_groups() :: Ecto.Query.t
+  @spec get_groups() :: Ecto.Query.t()
   def get_groups do
-    from groups in Group
+    from(groups in Group)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
@@ -26,138 +27,163 @@ defmodule Central.Account.GroupLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :name, name) do
-    from groups in query,
+    from(groups in query,
       where: groups.name == ^name
+    )
   end
 
   def _search(query, :id, id) do
-    from groups in query,
+    from(groups in query,
       where: groups.id == ^id
+    )
   end
 
   def _search(query, :id_list, id_list) do
-    from groups in query,
+    from(groups in query,
       where: groups.id in ^id_list
+    )
   end
 
   def _search(query, :name_list, name_list) do
-    from groups in query,
+    from(groups in query,
       where: groups.name in ^name_list
+    )
   end
 
   def _search(query, :group_type, group_type) do
-    from groups in query,
+    from(groups in query,
       where: groups.group_type == ^group_type
+    )
   end
 
   def _search(query, :public, id_list) when is_list(id_list) do
-    from groups in query,
+    from(groups in query,
       where: groups.id in ^id_list or groups.see_group == true
+    )
   end
 
   def _search(query, :active, "All"), do: query
   def _search(query, :active, "Active"), do: _search(query, :active, true)
   def _search(query, :active, "Inactive"), do: _search(query, :active, false)
+
   def _search(query, :active, active) do
-    from groups in query,
+    from(groups in query,
       where: groups.active == ^active
+    )
   end
 
   def _search(query, :user_memberships, group_ids) when is_list(group_ids) do
-    from groups in query,
+    from(groups in query,
       where: groups.id in ^group_ids
+    )
   end
 
   def _search(query, :user_membership, user_id) do
-    membership_ids = user_id
-    |> load_user_memebership_ids(:with_children)
+    membership_ids =
+      user_id
+      |> load_user_memebership_ids(:with_children)
 
-    from groups in query,
+    from(groups in query,
       where: groups.id in ^membership_ids
+    )
   end
 
   def _search(query, :name_like, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
-    from groups in query,
-      where: (
-            ilike(groups.name, ^ref_like)
-        )
+    from(groups in query,
+      where: ilike(groups.name, ^ref_like)
+    )
   end
 
   def _search(query, :simple_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
-    from groups in query,
-      where: (
-            ilike(groups.name, ^ref_like)
-        )
+    from(groups in query,
+      where: ilike(groups.name, ^ref_like)
+    )
   end
 
-  @spec order(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order(query, nil), do: query
+
   def order(query, "Name (A-Z)") do
-    from groups in query,
+    from(groups in query,
       order_by: [asc: groups.name]
+    )
   end
 
   def order(query, "Name (Z-A)") do
-    from groups in query,
+    from(groups in query,
       order_by: [desc: groups.name]
+    )
   end
 
   def order(query, "Newest first") do
-    from groups in query,
+    from(groups in query,
       order_by: [desc: groups.inserted_at]
+    )
   end
 
   def order(query, "Oldest first") do
-    from groups in query,
+    from(groups in query,
       order_by: [asc: groups.inserted_at]
+    )
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :super_group in preloads, do: _preload_super_group(query), else: query
     query = if :memberships in preloads, do: _preload_memberships(query), else: query
     query = if :members in preloads, do: _preload_members(query), else: query
-    query = if :members_and_memberships in preloads, do: _preload_members_and_memberships(query), else: query
+
+    query =
+      if :members_and_memberships in preloads,
+        do: _preload_members_and_memberships(query),
+        else: query
 
     query
   end
 
   def _preload_super_group(query) do
-    from groups in query,
+    from(groups in query,
       left_join: super_groups in assoc(groups, :super_group),
       preload: [super_group: super_groups]
+    )
   end
 
   def _preload_memberships(query) do
-    from groups in query,
+    from(groups in query,
       left_join: memberships in assoc(groups, :memberships),
       preload: [memberships: memberships]
+    )
   end
 
   def _preload_members(query) do
-    from groups in query,
+    from(groups in query,
       left_join: members in assoc(groups, :members),
       order_by: [asc: members.name],
       preload: [members: members]
+    )
   end
 
   def _preload_members_and_memberships(query) do
-    from groups in query,
+    from(groups in query,
       left_join: memberships in assoc(groups, :memberships),
       left_join: users in assoc(memberships, :user),
       order_by: [asc: users.name],
       preload: [memberships: {memberships, user: users}]
+    )
   end
 
   def load_user_memebership_ids(user_id) when is_integer(user_id) do
-    query = from gm in GroupMembership,
-      where: gm.user_id == ^user_id,
-      select: gm.group_id
+    query =
+      from(gm in GroupMembership,
+        where: gm.user_id == ^user_id,
+        select: gm.group_id
+      )
 
     Repo.all(query)
   end
@@ -172,16 +198,18 @@ defmodule Central.Account.GroupLib do
   end
 
   def load_user_memebership_ids(user_id, :with_children) when is_integer(user_id) do
-    query = from ugm in GroupMembership,
-      join: ug in Group,
+    query =
+      from(ugm in GroupMembership,
+        join: ug in Group,
         on: ugm.group_id == ug.id,
-      where: ugm.user_id == ^user_id,
-      select: {ug.id, ug.children_cache}
+        where: ugm.user_id == ^user_id,
+        select: {ug.id, ug.children_cache}
+      )
 
     Repo.all(query)
     |> Enum.map(fn {g, gc} -> gc ++ [g] end)
-    |> List.flatten
-    |> Enum.uniq
+    |> List.flatten()
+    |> Enum.uniq()
   end
 
   # def load_user_memebership_ids(user_id, :with_supers) when is_integer(user_id) do
@@ -215,7 +243,7 @@ defmodule Central.Account.GroupLib do
     |> Enum.map(fn m ->
       {m.user_id, m}
     end)
-    |> Map.new
+    |> Map.new()
   end
 
   def access_policy(nil, _the_user, _memberships) do
@@ -228,48 +256,55 @@ defmodule Central.Account.GroupLib do
       admin: false
     ]
   end
+
   def access_policy(the_group, the_user, memberships) do
-    membership = memberships
-    |> Enum.filter(fn m ->
-      Enum.member?(the_group.supers_cache, m.group_id) or m.group_id == the_group.id
-    end)
-    |> Enum.reduce(nil, fn (m, acc) ->
-      cond do
-        acc == "admin" -> "admin"
-        m.admin -> "admin"
-        acc == "member" -> "member"
-        m -> "member"
-        true -> nil          
-      end
-    end)
+    membership =
+      memberships
+      |> Enum.filter(fn m ->
+        Enum.member?(the_group.supers_cache, m.group_id) or m.group_id == the_group.id
+      end)
+      |> Enum.reduce(nil, fn m, acc ->
+        cond do
+          acc == "admin" -> "admin"
+          m.admin -> "admin"
+          acc == "member" -> "member"
+          m -> "member"
+          true -> nil
+        end
+      end)
 
     is_member = membership != nil
 
-    membership = if allow?(the_user, "admin.group.update") do
-      "admin"
-    else
-      membership
-    end
+    membership =
+      if allow?(the_user, "admin.group.update") do
+        "admin"
+      else
+        membership
+      end
 
-    see_group = case the_group.see_group do
-      true -> true
-      false -> membership != nil
-    end
+    see_group =
+      case the_group.see_group do
+        true -> true
+        false -> membership != nil
+      end
 
-    see_members = case the_group.see_members do
-      true -> true
-      false -> membership != nil
-    end
+    see_members =
+      case the_group.see_members do
+        true -> true
+        false -> membership != nil
+      end
 
-    invite_members = case the_group.invite_members do
-      true -> true
-      false -> membership == "admin"
-    end
+    invite_members =
+      case the_group.invite_members do
+        true -> true
+        false -> membership == "admin"
+      end
 
-    self_add_members = case the_group.self_add_members do
-      true -> true
-      false -> membership == "admin"
-    end
+    self_add_members =
+      case the_group.self_add_members do
+        true -> true
+        false -> membership == "admin"
+      end
 
     [
       see_group: see_group,
@@ -281,17 +316,17 @@ defmodule Central.Account.GroupLib do
     ]
   end
 
-  @spec dropdown(Plug.Conn.t, String.t() | nil) :: list
+  @spec dropdown(Plug.Conn.t(), String.t() | nil) :: list
   def dropdown(%{assigns: %{memberships: memberships}}, group_type \\ nil) do
     get_groups()
     |> search(
-        group_type: group_type,
-        user_memberships: memberships,
-        active: "Active"
+      group_type: group_type,
+      user_memberships: memberships,
+      active: "Active"
     )
     |> Central.Helpers.QueryHelpers.select([:id, :name, :icon, :colour])
     |> order("Name (A-Z)")
-    |> Repo.all
+    |> Repo.all()
   end
 
   # # Functions for using the group system with other objects
@@ -311,15 +346,19 @@ defmodule Central.Account.GroupLib do
   # Takes a conn and either a group id or an object with a group_id
   def access?(nil, _), do: nil
   def access?(_, nil), do: nil
+
   def access?(%{assigns: %{memberships: memberships}}, group_id) do
     access?(memberships, group_id)
   end
+
   def access?(memberships, %{group_id: group_id}) do
     access?(memberships, group_id)
   end
+
   def access?(memberships, %Group{id: group_id}) do
     access?(memberships, group_id)
   end
+
   def access?(memberships, group_id) do
     Enum.member?(memberships, group_id)
   end
@@ -329,6 +368,7 @@ defmodule Central.Account.GroupLib do
     groups
     |> Enum.any?(fn group_id -> access?(memberships, group_id) end)
   end
+
   def access?(memberships, groups, :all) do
     groups
     |> Enum.all?(fn group_id -> access?(memberships, group_id) end)
@@ -337,9 +377,16 @@ defmodule Central.Account.GroupLib do
   # Called with a user and a chosen group
   # If the user has access to the group then the group ID is returned
   # if the user hasn't got access then their admin group ID is returned
-  def access_or_default(%{assigns: %{memberships: memberships, current_user: current_user}}, %{"group_id" => group_id}) do
-    _access_or_default(memberships, current_user, Central.Helpers.NumberHelper.int_parse(group_id))
+  def access_or_default(%{assigns: %{memberships: memberships, current_user: current_user}}, %{
+        "group_id" => group_id
+      }) do
+    _access_or_default(
+      memberships,
+      current_user,
+      Central.Helpers.NumberHelper.int_parse(group_id)
+    )
   end
+
   def _access_or_default(memberships, current_user, group_id) do
     if access?(memberships, group_id) do
       group_id

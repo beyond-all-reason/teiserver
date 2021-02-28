@@ -33,7 +33,7 @@ defmodule Central.Helpers.StylingHelper do
   def icon(:export), do: "fal fa-download"
   def icon(:structure), do: "fal fa-cubes"
   def icon(:documentation), do: "fas fa-book"
-  
+
   def icon(:overview), do: "fa-expand-alt"
   def icon(:detail), do: "fa-eye"
 
@@ -114,15 +114,24 @@ defmodule Central.Helpers.StylingHelper do
 
   def hex_colour_list() do
     [
-      "#AA3333", "#990505",
-      "#DD8833", "#572500", 
-      "#33AA33", "#009900",
-      "#3333AA", "#112299",
-      "#AA33AA", "#4E00A8", "#A80051",
-      "#33AACC", "#00978C",
-      "#000000", "#444455"
+      "#AA3333",
+      "#990505",
+      "#DD8833",
+      "#572500",
+      "#33AA33",
+      "#009900",
+      "#3333AA",
+      "#112299",
+      "#AA33AA",
+      "#4E00A8",
+      "#A80051",
+      "#33AACC",
+      "#00978C",
+      "#000000",
+      "#444455"
     ]
-  end  
+  end
+
   def random_colour() do
     Enum.random(hex_colour_list())
   end
@@ -133,6 +142,7 @@ defmodule Central.Helpers.StylingHelper do
       "colour" => random_colour()
     }
   end
+
   def random_styling(input_dict) do
     Map.merge(random_styling(), input_dict)
   end

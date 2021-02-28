@@ -44,11 +44,13 @@ defmodule Teiserver.Battle do
 
   def update_battle(battle, data \\ nil, reason \\ nil) do
     ConCache.put(:battles, battle.id, battle)
+
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle.id}",
       {:battle_updated, battle.id, data, reason}
     )
+
     # PubSub.broadcast(
     #   Central.PubSub,
     #   "all_battle_updates",
@@ -60,7 +62,7 @@ defmodule Teiserver.Battle do
   def get_battle!(id) do
     ConCache.get(:battles, int_parse(id))
   end
-  
+
   def get_battle(id) do
     ConCache.get(:battles, int_parse(id))
   end
@@ -81,12 +83,14 @@ defmodule Teiserver.Battle do
       "all_battle_updates",
       {:battle_opened, battle.id}
     )
+
     battle
   end
 
   def close_battle(battle_id) do
     battle = get_battle(battle_id)
     ConCache.delete(:battles, battle_id)
+
     ConCache.update(:lists, :battles, fn value ->
       new_value =
         value
@@ -120,32 +124,39 @@ defmodule Teiserver.Battle do
       team_colour: team_colour,
       ai_dll: ai_dll
     }
+
     battle = get_battle(battle_id)
     new_bots = Map.put(battle.bots, name, bot)
     new_battle = %{battle | bots: new_bots}
     ConCache.put(:battles, battle.id, new_battle)
+
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
       {:add_bot_to_battle, battle_id, bot}
     )
   end
-  
+
   def update_bot(battle_id, botname, "0", _), do: remove_bot(battle_id, botname)
+
   def update_bot(battle_id, botname, new_status, new_team_colour) do
     battle = get_battle(battle_id)
+
     case battle.bots[botname] do
       nil ->
         nil
 
       bot ->
-        new_bot = Map.merge(bot, %{
-          battlestatus: new_status,
-          team_colour: new_team_colour
-        })
+        new_bot =
+          Map.merge(bot, %{
+            battlestatus: new_status,
+            team_colour: new_team_colour
+          })
+
         new_bots = Map.put(battle.bots, botname, new_bot)
         new_battle = %{battle | bots: new_bots}
         ConCache.put(:battles, battle.id, new_battle)
+
         PubSub.broadcast(
           Central.PubSub,
           "battle_updates:#{battle_id}",
@@ -159,6 +170,7 @@ defmodule Teiserver.Battle do
     new_bots = Map.delete(battle.bots, botname)
     new_battle = %{battle | bots: new_bots}
     ConCache.put(:battles, battle.id, new_battle)
+
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
@@ -193,6 +205,7 @@ defmodule Teiserver.Battle do
 
   def remove_user_from_battle(userid, battle_id) do
     battle = get_battle(battle_id)
+
     if battle.founder_id == userid do
       close_battle(battle_id)
     else
@@ -248,7 +261,9 @@ defmodule Teiserver.Battle do
 
   def remove_start_rectangle(battle_id, team) do
     battle = get_battle(battle_id)
-    new_rectangles = battle.start_rectangles
+
+    new_rectangles =
+      battle.start_rectangles
       |> Enum.filter(fn [rteam | _] -> rteam != team end)
 
     new_battle = %{battle | start_rectangles: new_rectangles}
@@ -264,9 +279,12 @@ defmodule Teiserver.Battle do
 
   def enable_units(battle_id, units) do
     battle = get_battle(battle_id)
-    new_units = Enum.filter(battle.disabled_units, fn u ->
-      not Enum.member?(units, u)
-    end)
+
+    new_units =
+      Enum.filter(battle.disabled_units, fn u ->
+        not Enum.member?(units, u)
+      end)
+
     new_battle = %{battle | disabled_units: new_units}
     update_battle(new_battle, units, :enable_units)
   end
@@ -319,10 +337,17 @@ defmodule Teiserver.Battle do
     )
   end
 
-  def allow?(cmd, %{user: user, client: %{battle_id: battle_id}}), do: allow?(user, cmd, battle_id)
+  def allow?(cmd, %{user: user, client: %{battle_id: battle_id}}),
+    do: allow?(user, cmd, battle_id)
+
   def allow?(user, cmd, battle_id) do
     battle = get_battle(battle_id)
-    mod_command = Enum.member?(~w(HANDICAP ADDSTARTRECT REMOVESTARTRECT KICKFROMBATTLE FORCETEAMNO FORCEALLYNO FORCETEAMCOLOR FORCESPECTATORMODE DISABLEUNITS ENABLEUNITS ENABLEALLUNITS), cmd)
+
+    mod_command =
+      Enum.member?(
+        ~w(HANDICAP ADDSTARTRECT REMOVESTARTRECT KICKFROMBATTLE FORCETEAMNO FORCEALLYNO FORCETEAMCOLOR FORCESPECTATORMODE DISABLEUNITS ENABLEUNITS ENABLEALLUNITS),
+        cmd
+      )
 
     cond do
       battle == nil ->
@@ -342,7 +367,8 @@ defmodule Teiserver.Battle do
       # TODO: something about boss mode here?
 
       # Default to true
-      true -> true
+      true ->
+        true
     end
   end
 

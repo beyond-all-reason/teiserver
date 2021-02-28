@@ -3,7 +3,9 @@ defmodule Teiserver.SpringAuthTest do
   require Logger
   alias Teiserver.BitParse
   alias Teiserver.User
-  import Teiserver.TestLib, only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, _recv_until: 1, new_user: 0]
+
+  import Teiserver.TestLib,
+    only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, _recv_until: 1, new_user: 0]
 
   setup do
     %{socket: socket, user: user} = auth_setup()
@@ -29,7 +31,7 @@ defmodule Teiserver.SpringAuthTest do
     _send(socket, "#4 PING\n")
     reply = _recv(socket)
     assert reply == "#4 PONG\n"
-    
+
     _send(socket, "EXIT\n")
     _recv(socket)
   end
@@ -87,7 +89,7 @@ defmodule Teiserver.SpringAuthTest do
     assert reply == "SERVERMSG Password changed, you will need to use it next time you login\n"
     user = User.get_user_by_name(user.name)
     assert user.password_hash != "X03MO1qnZdYdgyfeuILPmQ=="
-    
+
     _send(socket, "EXIT\n")
     _recv(socket)
   end
@@ -209,10 +211,10 @@ FRIENDREQUESTLISTEND\n"
 
     reply = _recv(socket2)
     assert reply == :timeout
-    
+
     _send(socket1, "EXIT\n")
     _recv(socket1)
-    
+
     _send(socket2, "EXIT\n")
     _recv(socket2)
   end
@@ -258,96 +260,95 @@ ENDOFCHANNELS\n"
     _recv(socket)
   end
 
-#   test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket, user: user} do
-#     # Currently not working as no battles are present at this stage
-#     # TODO - Add battle
-#     _send(socket, "JOINBATTLE 1 empty 1683043765\n")
-#     # The remainder of this string is just the script tags, we'll assume it's correct for now
-#     reply = _recv_until(socket)
-#       |> String.split("\n")
+  #   test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket, user: user} do
+  #     # Currently not working as no battles are present at this stage
+  #     # TODO - Add battle
+  #     _send(socket, "JOINBATTLE 1 empty 1683043765\n")
+  #     # The remainder of this string is just the script tags, we'll assume it's correct for now
+  #     reply = _recv_until(socket)
+  #       |> String.split("\n")
 
-#     [
-#       join,
-#       _tags,
-#       client,
-#       rect1,
-#       rect2,
-#       battle_status,
-#       saidbattle,
-#       joinedbattle,
-#       clientstatus,
-#       ""
-#     ] = reply
+  #     [
+  #       join,
+  #       _tags,
+  #       client,
+  #       rect1,
+  #       rect2,
+  #       battle_status,
+  #       saidbattle,
+  #       joinedbattle,
+  #       clientstatus,
+  #       ""
+  #     ] = reply
 
-#     assert join == "JOINBATTLE 1 1683043765"
-#     assert client == "CLIENTBATTLESTATUS #{user.name} 0 0"
-#     assert rect1 == "ADDSTARTRECT 0 0 126 74 200"
-#     assert rect2 == "ADDSTARTRECT 1 126 0 200 74"
-#     assert battle_status == "REQUESTBATTLESTATUS"
+  #     assert join == "JOINBATTLE 1 1683043765"
+  #     assert client == "CLIENTBATTLESTATUS #{user.name} 0 0"
+  #     assert rect1 == "ADDSTARTRECT 0 0 126 74 200"
+  #     assert rect2 == "ADDSTARTRECT 1 126 0 200 74"
+  #     assert battle_status == "REQUESTBATTLESTATUS"
 
+  #     assert joinedbattle == "JOINEDBATTLE 1 #{user.name}"
+  #     assert clientstatus == "CLIENTSTATUS #{user.name} 4"
 
-#     assert joinedbattle == "JOINEDBATTLE 1 #{user.name}"
-#     assert clientstatus == "CLIENTSTATUS #{user.name} 4"
+  #     _send(socket, "SAYBATTLE Hello there!\n")
+  #     reply = _recv(socket)
+  #     assert reply == "SAIDBATTLE #{user.name} Hello there!\n"
 
-#     _send(socket, "SAYBATTLE Hello there!\n")
-#     reply = _recv(socket)
-#     assert reply == "SAIDBATTLE #{user.name} Hello there!\n"
+  #     _send(socket, "MYBATTLESTATUS 12 0\n")
+  #     reply = _recv(socket)
+  #     assert reply == "CLIENTBATTLESTATUS #{user.name} 0 0\n"
 
-#     _send(socket, "MYBATTLESTATUS 12 0\n")
-#     reply = _recv(socket)
-#     assert reply == "CLIENTBATTLESTATUS #{user.name} 0 0\n"
-    
-#     # Add a bot
-#     _send(socket, "ADDBOT STAI(1) 4195458 0 STAI\n")
-#     reply = _recv(socket)
-#     assert reply == "ADDBOT 1 STAI(1) #{user.name} 4195458 0 STAI\n"
-    
-#     # Promote?
-#     _send(socket, "PROMOTE\n")
-#     _ = _recv(socket)
+  #     # Add a bot
+  #     _send(socket, "ADDBOT STAI(1) 4195458 0 STAI\n")
+  #     reply = _recv(socket)
+  #     assert reply == "ADDBOT 1 STAI(1) #{user.name} 4195458 0 STAI\n"
 
-#     # Time to leave
-#     _send(socket, "LEAVEBATTLE\n")
-#     reply = _recv(socket)
-#     assert reply == "LEFTBATTLE 1 #{user.name}
-# CLIENTBATTLESTATUS #{user.name} 0 0\n"
+  #     # Promote?
+  #     _send(socket, "PROMOTE\n")
+  #     _ = _recv(socket)
 
-#     # These commands shouldn't work, they also shouldn't error
-#     _send(socket, "SAYBATTLE I'm not here anymore!\n")
-#     reply = _recv(socket)
-#     assert reply == :timeout
+  #     # Time to leave
+  #     _send(socket, "LEAVEBATTLE\n")
+  #     reply = _recv(socket)
+  #     assert reply == "LEFTBATTLE 1 #{user.name}
+  # CLIENTBATTLESTATUS #{user.name} 0 0\n"
 
-#     _send(socket, "MYBATTLESTATUS 12 0\n")
-#     reply = _recv(socket)
-#     assert reply == :timeout
+  #     # These commands shouldn't work, they also shouldn't error
+  #     _send(socket, "SAYBATTLE I'm not here anymore!\n")
+  #     reply = _recv(socket)
+  #     assert reply == :timeout
 
-#     _send(socket, "LEAVEBATTLE\n")
-#     reply = _recv(socket)
-#     assert reply == :timeout
-    
-#     _send(socket, "EXIT\n")
-#     _recv(socket)
-#   end
+  #     _send(socket, "MYBATTLESTATUS 12 0\n")
+  #     reply = _recv(socket)
+  #     assert reply == :timeout
 
-#   test "ring", %{socket: socket1, user: user} do
-#     user2 = new_user()
-#     %{socket: socket2} = auth_setup(user2)
-#     reply = _recv(socket1)
-#     assert reply =~ "ADDUSER #{user2.name} XX "
-#     assert reply =~ " LuaLobby Chobby\n"
+  #     _send(socket, "LEAVEBATTLE\n")
+  #     reply = _recv(socket)
+  #     assert reply == :timeout
 
-#     _send(socket2, "RING #{user.name}\n")
-#     _ = _recv(socket2)
+  #     _send(socket, "EXIT\n")
+  #     _recv(socket)
+  #   end
 
-#     reply = _recv(socket1)
-#     assert reply == "RING #{user2.name}\n"
-    
-#     _send(socket1, "EXIT\n")
-#     _recv(socket1)
-    
-#     _send(socket2, "EXIT\n")
-#     _recv(socket2)
-#   end
+  #   test "ring", %{socket: socket1, user: user} do
+  #     user2 = new_user()
+  #     %{socket: socket2} = auth_setup(user2)
+  #     reply = _recv(socket1)
+  #     assert reply =~ "ADDUSER #{user2.name} XX "
+  #     assert reply =~ " LuaLobby Chobby\n"
+
+  #     _send(socket2, "RING #{user.name}\n")
+  #     _ = _recv(socket2)
+
+  #     reply = _recv(socket1)
+  #     assert reply == "RING #{user2.name}\n"
+
+  #     _send(socket1, "EXIT\n")
+  #     _recv(socket1)
+
+  #     _send(socket2, "EXIT\n")
+  #     _recv(socket2)
+  #   end
 
   test "RENAMEACCOUNT", %{socket: socket} do
     _send(socket, "RENAMEACCOUNT rename_test_user\n")
@@ -386,7 +387,7 @@ ENDOFCHANNELS\n"
     new_user = User.get_user_by_id(user.id)
     assert new_user.email == "new_email@email.com"
     assert new_user.email_change_code == [nil, nil]
-    
+
     _send(socket, "EXIT\n")
     _recv(socket)
   end

@@ -33,7 +33,7 @@ defmodule Central.Account.AuthGroups.Server do
 
   def init(table_name) do
     table = :ets.new(table_name, [:named_table, read_concurrency: true])
-    permissions  = %{}
+    permissions = %{}
     {:ok, {table, permissions}}
   end
 end

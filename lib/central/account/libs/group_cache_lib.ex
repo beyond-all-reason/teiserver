@@ -8,6 +8,7 @@ defmodule Central.Account.GroupCacheLib do
   defp append_to_list(l1, l2), do: l1 ++ [l2]
 
   def update_caches(the_group), do: update_caches(the_group, nil)
+
   def update_caches(the_group, :delete) do
     # For each super group, remove this group from it's child list
     remove_from_child_lists(the_group.id)
@@ -65,13 +66,14 @@ defmodule Central.Account.GroupCacheLib do
     Account.list_groups(search: [id_list: super_group.supers_cache])
     |> append_to_list(super_group)
     |> Enum.map(fn sg ->
-      new_cache = sg.children_cache
-      |> Enum.filter(fn g -> g != the_group.id end)
-      |> Enum.filter(fn g -> ! Enum.member?(the_group.children_cache, g) end)
+      new_cache =
+        sg.children_cache
+        |> Enum.filter(fn g -> g != the_group.id end)
+        |> Enum.filter(fn g -> !Enum.member?(the_group.children_cache, g) end)
 
       sg
       |> Group.update_children_cache(new_cache)
-      |> Repo.update!
+      |> Repo.update!()
     end)
   end
 
@@ -83,22 +85,24 @@ defmodule Central.Account.GroupCacheLib do
     Account.list_groups(search: [id_list: super_group.supers_cache])
     |> append_to_list(super_group)
     |> Enum.map(fn sg ->
-      new_cache = sg.children_cache ++ [the_group.id] ++ the_group.children_cache
-      |> Enum.uniq
+      new_cache =
+        (sg.children_cache ++ [the_group.id] ++ the_group.children_cache)
+        |> Enum.uniq()
 
       sg
       |> Group.update_children_cache(new_cache)
-      |> Repo.update!
+      |> Repo.update!()
     end)
 
     # the_group needs to enuser it has it's super_group_id
     # and it's super_group supers_cache as it's own supers_cache
-    new_cache = super_group.supers_cache ++ [super_group.id]
-    |> Enum.uniq
+    new_cache =
+      (super_group.supers_cache ++ [super_group.id])
+      |> Enum.uniq()
 
     the_group
     |> Group.update_supers_cache(new_cache)
-    |> Repo.update!
+    |> Repo.update!()
 
     # If the_group has any children they need to have this new super_group updated
   end
@@ -106,48 +110,55 @@ defmodule Central.Account.GroupCacheLib do
   defp clear_own_cache(the_group) do
     the_group
     |> Group.update_supers_cache([])
-    |> Repo.update!
+    |> Repo.update!()
   end
 
   defp update_children_with_new_super(the_group, old_supers_cache) do
     Account.list_groups(search: [id_list: the_group.children_cache])
     |> Enum.map(fn child ->
-      new_cache = child.supers_cache
-      |> Enum.filter(fn sg ->
-        ! Enum.member?(old_supers_cache, sg)
-      end)
-      |> concatenate_lists(the_group.supers_cache)
-      |> append_to_list(the_group.id)
-      |> Enum.uniq
+      new_cache =
+        child.supers_cache
+        |> Enum.filter(fn sg ->
+          !Enum.member?(old_supers_cache, sg)
+        end)
+        |> concatenate_lists(the_group.supers_cache)
+        |> append_to_list(the_group.id)
+        |> Enum.uniq()
 
       child
       |> Group.update_supers_cache(new_cache)
-      |> Repo.update!
-    end) 
+      |> Repo.update!()
+    end)
   end
 
   defp remove_from_child_lists(group_id) do
-    query = from g in Group,
-      where: ^group_id in g.children_cache,
-      update: [set: [children_cache: array_remove(g.children_cache, ^group_id)]]
+    query =
+      from(g in Group,
+        where: ^group_id in g.children_cache,
+        update: [set: [children_cache: array_remove(g.children_cache, ^group_id)]]
+      )
 
     query
     |> Repo.update_all([])
   end
 
   defp removed_from_super_groups(group_id) do
-    query = from g in Group,
-      where: ^group_id in g.supers_cache,
-      update: [set: [supers_cache: array_remove(g.supers_cache, ^group_id)]]
+    query =
+      from(g in Group,
+        where: ^group_id in g.supers_cache,
+        update: [set: [supers_cache: array_remove(g.supers_cache, ^group_id)]]
+      )
 
     query
     |> Repo.update_all([])
   end
 
   defp reattach_direct_children(group_id, new_super_group_id) do
-    query = from g in Group,
-      where: g.super_group_id == ^group_id,
-      update: [set: [super_group_id: ^new_super_group_id]]
+    query =
+      from(g in Group,
+        where: g.super_group_id == ^group_id,
+        update: [set: [super_group_id: ^new_super_group_id]]
+      )
 
     query
     |> Repo.update_all([])

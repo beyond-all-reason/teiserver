@@ -6,16 +6,16 @@ defmodule Central.Admin.CoverageLib do
       (?<lines>[0-9]+)\s+
       (?<relevant>[0-9]+)\s+
       (?<missed>[0-9]+)/x
-    |> Regex.named_captures(
-      String.trim(s)
-    )
+    |> Regex.named_captures(String.trim(s))
   end
 
   defp add_section(m) do
     app = m["app"]
-    [section | _] = m["file"]
-    |> String.replace("web/", "")
-    |> String.split("/")
+
+    [section | _] =
+      m["file"]
+      |> String.replace("web/", "")
+      |> String.split("/")
 
     m |> Map.put("section", "#{app}/#{section}")
   end
@@ -23,11 +23,12 @@ defmodule Central.Admin.CoverageLib do
   defp sum_matches(match, acc) do
     s = Map.get(acc, match["section"])
 
-    s = s
-    |> Map.put(:lines, s[:lines] + String.to_integer(match["lines"]))
-    |> Map.put(:relevant, s[:relevant] + String.to_integer(match["relevant"]))
-    |> Map.put(:missed, s[:missed] + String.to_integer(match["missed"]))
-    |> Map.put(:files, s[:files] + 1)
+    s =
+      s
+      |> Map.put(:lines, s[:lines] + String.to_integer(match["lines"]))
+      |> Map.put(:relevant, s[:relevant] + String.to_integer(match["relevant"]))
+      |> Map.put(:missed, s[:missed] + String.to_integer(match["missed"]))
+      |> Map.put(:files, s[:files] + 1)
 
     Map.put(acc, match["section"], s)
   end
@@ -35,19 +36,20 @@ defmodule Central.Admin.CoverageLib do
   defp sum_section({section, data}) do
     %{
       section: section,
-      coverage: 100 * (1 - (data[:missed] / data[:relevant])),
+      coverage: 100 * (1 - data[:missed] / data[:relevant]),
       lines: data[:lines],
       missed: data[:missed],
       relevant: data[:relevant],
-      files: data[:files],
+      files: data[:files]
     }
   end
 
   defp headline_stats(parsed_data) do
-    sections = parsed_data
-    |> Enum.map(fn(m) -> m["section"] end)
-    |> Enum.uniq
-    |> Map.new(fn s -> {s, %{lines: 0, relevant: 0, missed: 0, cov: 0, files: 0}} end)
+    sections =
+      parsed_data
+      |> Enum.map(fn m -> m["section"] end)
+      |> Enum.uniq()
+      |> Map.new(fn s -> {s, %{lines: 0, relevant: 0, missed: 0, cov: 0, files: 0}} end)
 
     parsed_data
     |> Enum.reduce(sections, &sum_matches/2)
@@ -56,49 +58,57 @@ defmodule Central.Admin.CoverageLib do
   end
 
   defp project_stats(parsed_data) do
-    data = parsed_data
-    |> Enum.reduce(
-      %{lines: 0, relevant: 0, missed: 0, cov: 0, files: 0},
-      fn (match, acc) ->
-        %{
-          lines: acc[:lines] + String.to_integer(match["lines"]),
-          relevant: acc[:relevant] + String.to_integer(match["relevant"]),
-          missed: acc[:missed] + String.to_integer(match["missed"]),
-          files: acc[:files] + 1
-        }
-      end
-    )
+    data =
+      parsed_data
+      |> Enum.reduce(
+        %{lines: 0, relevant: 0, missed: 0, cov: 0, files: 0},
+        fn match, acc ->
+          %{
+            lines: acc[:lines] + String.to_integer(match["lines"]),
+            relevant: acc[:relevant] + String.to_integer(match["relevant"]),
+            missed: acc[:missed] + String.to_integer(match["missed"]),
+            files: acc[:files] + 1
+          }
+        end
+      )
 
-    Map.put(data, :coverage, 100 * (1 - (data[:missed] / max(data[:relevant], 1))))
+    Map.put(data, :coverage, 100 * (1 - data[:missed] / max(data[:relevant], 1)))
   end
 
   defp module_stats(parsed_data) do
-    sections = parsed_data
-    |> Enum.map(fn(m) -> m["section"] end)
-    |> Enum.uniq
-    |> Enum.map(fn s ->
-      section_data = parsed_data
-      |> Enum.filter(fn f ->
-        f["section"] == s and f["cov"] != "100.0" and f["missed"] != "0"
-      end)
-      |> Enum.map(fn f ->
-        {f["file"], String.to_float(f["cov"]), String.to_integer(f["missed"])}
-      end)
+    sections =
+      parsed_data
+      |> Enum.map(fn m -> m["section"] end)
+      |> Enum.uniq()
+      |> Enum.map(fn s ->
+        section_data =
+          parsed_data
+          |> Enum.filter(fn f ->
+            f["section"] == s and f["cov"] != "100.0" and f["missed"] != "0"
+          end)
+          |> Enum.map(fn f ->
+            {f["file"], String.to_float(f["cov"]), String.to_integer(f["missed"])}
+          end)
 
-      wp = section_data
-      |> Enum.sort_by(fn {_, c, _} ->
-        c
+        wp =
+          section_data
+          |> Enum.sort_by(fn {_, c, _} ->
+            c
+          end)
+          |> Enum.take(10)
+
+        mm =
+          section_data
+          |> Enum.sort_by(
+            fn {_, _, m} ->
+              m
+            end,
+            &>=/2
+          )
+          |> Enum.take(10)
+
+        %{name: s, worst_percentage: wp, most_missed: mm}
       end)
-      |> Enum.take(10)
-
-      mm = section_data
-      |> Enum.sort_by(fn {_, _, m} ->
-        m
-      end, &>=/2)
-      |> Enum.take(10)
-
-      %{name: s, worst_percentage: wp, most_missed: mm}
-    end)
 
     # Example line
     # %{"cov" => "100.0", "file" => "web/hindsight/models/template_tag.ex",
@@ -109,19 +119,20 @@ defmodule Central.Admin.CoverageLib do
   end
 
   def parse_coverage(data) do
-    parsed_data = data
-    |> String.split("\n")
-    |> Enum.map(&capture_parse/1)
-    |> Enum.filter(fn(m) -> m != nil end)
-    |> Enum.filter(fn(m) -> m["relevant"] != "0" end)
-    |> Enum.filter(fn(m) -> not String.contains?(m["file"], ["/coherence/"]) end)
-    |> Enum.filter(fn(m) -> not String.contains?(m["file"], ["/channels/"]) end)
-    |> Enum.map(&add_section/1)
+    parsed_data =
+      data
+      |> String.split("\n")
+      |> Enum.map(&capture_parse/1)
+      |> Enum.filter(fn m -> m != nil end)
+      |> Enum.filter(fn m -> m["relevant"] != "0" end)
+      |> Enum.filter(fn m -> not String.contains?(m["file"], ["/coherence/"]) end)
+      |> Enum.filter(fn m -> not String.contains?(m["file"], ["/channels/"]) end)
+      |> Enum.map(&add_section/1)
 
     [
       headline: headline_stats(parsed_data),
       project: project_stats(parsed_data),
-      module: module_stats(parsed_data),
+      module: module_stats(parsed_data)
     ]
   end
 
@@ -130,16 +141,16 @@ defmodule Central.Admin.CoverageLib do
       files: 0,
       lines: 0,
       missed: 0,
-      relevant: 0,
+      relevant: 0
     }
 
     results[:headline]
-    |> Enum.reduce(starting, fn (row, acc) ->
+    |> Enum.reduce(starting, fn row, acc ->
       %{
         files: row.files + acc.files,
         lines: row.lines + acc.lines,
         missed: row.missed + acc.missed,
-        relevant: row.relevant + acc.relevant,
+        relevant: row.relevant + acc.relevant
       }
     end)
   end

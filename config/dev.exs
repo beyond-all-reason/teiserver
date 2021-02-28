@@ -34,7 +34,7 @@ config :central, Teiserver,
   certs: [
     keyfile: "priv/certs/localhost.key",
     certfile: "priv/certs/localhost.crt",
-    cacertfile: "priv/certs/localhost.crt",
+    cacertfile: "priv/certs/localhost.crt"
   ]
 
 # ## SSL Support
@@ -70,7 +70,7 @@ config :central, CentralWeb.Endpoint,
       ~r{lib/central_web/views/.*(ex)$},
       ~r{lib/central_web/templates/.*(eex)$},
       ~r{lib/teiserver_web/views/.*(ex)$},
-      ~r{lib/teiserver_web/templates/.*(eex)$},
+      ~r{lib/teiserver_web/templates/.*(eex)$}
     ]
   ]
 
@@ -84,13 +84,12 @@ config :phoenix, :stacktrace_depth, 20
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
 
-config :central, Central.General.LoadTestServer,
-  enable_loadtest: true
+config :central, Central.General.LoadTestServer, enable_loadtest: true
 
-config :central, Central.Communication.BlogFile,
-  save_path: "/tmp/blog_files"
+config :central, Central.Communication.BlogFile, save_path: "/tmp/blog_files"
 
-config :logger, format: "[$level] $message\n",
+config :logger,
+  format: "[$level] $message\n",
   backends: [
     {LoggerFileBackend, :error_log},
     {LoggerFileBackend, :info_log},

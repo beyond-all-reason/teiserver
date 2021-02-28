@@ -17,19 +17,21 @@ defmodule Central.General.QuickAction do
 
     Cache.add_items(items)
   end
+
   def get_items(), do: Cache.get_items()
 
   defp convert_item(item) do
-    icons = Enum.map(item.icons, fn i ->
-      case i do
-        :list -> StylingHelper.icon(:list)
-        :new -> StylingHelper.icon(:new)
-        :edit -> StylingHelper.icon(:edit)
-        :delete -> StylingHelper.icon(:delete)
-        :report -> StylingHelper.icon(:report)
-        _ -> i
-      end
-    end)
+    icons =
+      Enum.map(item.icons, fn i ->
+        case i do
+          :list -> StylingHelper.icon(:list)
+          :new -> StylingHelper.icon(:new)
+          :edit -> StylingHelper.icon(:edit)
+          :delete -> StylingHelper.icon(:delete)
+          :report -> StylingHelper.icon(:report)
+          _ -> i
+        end
+      end)
 
     Map.merge(item, %{
       icons: icons

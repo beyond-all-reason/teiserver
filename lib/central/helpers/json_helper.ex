@@ -3,7 +3,7 @@ defmodule Central.Helpers.JsonHelper do
   def json_cast(object, fields) when is_list(fields) do
     fields
     |> Enum.map(fn f -> {f, Map.get(object, f)} end)
-    |> Map.new
+    |> Map.new()
   end
 
   def json_cast(objects, function) do
@@ -17,37 +17,42 @@ defmodule Central.Helpers.JsonHelper do
     original_keys = Map.keys(original) |> Enum.map(&to_string/1)
     new_keys = Map.keys(new || %{})
 
-    added_keys = new_keys
-    |> Enum.filter(fn k ->
-      (not Enum.member?(original_keys, k))
-      or Enum.member?([[], nil, ""], Map.get(original, k |> String.to_atom))
-    end)
+    added_keys =
+      new_keys
+      |> Enum.filter(fn k ->
+        not Enum.member?(original_keys, k) or
+          Enum.member?([[], nil, ""], Map.get(original, k |> String.to_atom()))
+      end)
 
-    deleted_keys = original_keys
-    |> Enum.filter(fn k -> not Enum.member?(new_keys, k) end)
+    deleted_keys =
+      original_keys
+      |> Enum.filter(fn k -> not Enum.member?(new_keys, k) end)
 
-    dual_keys = original_keys
-    |> Enum.filter(fn k -> Enum.member?(new_keys, k) end)
+    dual_keys =
+      original_keys
+      |> Enum.filter(fn k -> Enum.member?(new_keys, k) end)
 
     # Find changes in values
-    value_diffs = dual_keys
-    |> Enum.map(fn k ->
-      ok = Map.get(original, k |> String.to_atom)
-      nk = Map.get(new, k)
+    value_diffs =
+      dual_keys
+      |> Enum.map(fn k ->
+        ok = Map.get(original, k |> String.to_atom())
+        nk = Map.get(new, k)
 
-      {k, diff_key(ok, nk)}
-    end)
-    |> Map.new
+        {k, diff_key(ok, nk)}
+      end)
+      |> Map.new()
 
-    differences = value_diffs
-    |> Enum.map(fn {_k, is_diff} ->
-      if is_map(is_diff) do
-        is_diff.different
-      else
-        is_diff
-      end
-    end)
-    |> Enum.filter(fn d -> d end)
+    differences =
+      value_diffs
+      |> Enum.map(fn {_k, is_diff} ->
+        if is_map(is_diff) do
+          is_diff.different
+        else
+          is_diff
+        end
+      end)
+      |> Enum.filter(fn d -> d end)
 
     # Return our findings
     %{
@@ -55,10 +60,9 @@ defmodule Central.Helpers.JsonHelper do
       deleted_keys: deleted_keys,
       dual_keys: dual_keys,
       value_diffs: value_diffs,
-
       original: original,
       new: new,
-      different: ((Enum.count(added_keys) + Enum.count(deleted_keys) + Enum.count(differences)) > 0)
+      different: Enum.count(added_keys) + Enum.count(deleted_keys) + Enum.count(differences) > 0
     }
   end
 
@@ -79,15 +83,17 @@ defmodule Central.Helpers.JsonHelper do
       simple: true
     }
   end
+
   defp diff_key([], new) do
-    if is_map(hd new) do
+    if is_map(hd(new)) do
       diff_key_list_complex([], new)
     else
       diff_key_list_simple([], new)
     end
   end
+
   defp diff_key(original, new) when is_list(original) do
-    if is_map(hd original) do
+    if is_map(hd(original)) do
       diff_key_list_complex(original, new)
     else
       diff_key_list_simple(original, new)
@@ -100,32 +106,36 @@ defmodule Central.Helpers.JsonHelper do
 
   @spec diff_key_list_simple(map, map) :: list
   defp diff_key_list_simple(original, new) do
-    added_values = new
-    |> Enum.filter(fn k -> not Enum.member?(original, k) end)
+    added_values =
+      new
+      |> Enum.filter(fn k -> not Enum.member?(original, k) end)
 
-    deleted_values = original
-    |> Enum.filter(fn k -> not Enum.member?(new, k) end)
+    deleted_values =
+      original
+      |> Enum.filter(fn k -> not Enum.member?(new, k) end)
 
-    dual_values = original
-    |> Enum.filter(fn k -> Enum.member?(new, k) end)
+    dual_values =
+      original
+      |> Enum.filter(fn k -> Enum.member?(new, k) end)
 
     %{
       added_values: added_values,
       deleted_values: deleted_values,
       dual_values: dual_values,
-      different: (Enum.count(added_values) + Enum.count(deleted_values) > 0),
+      different: Enum.count(added_values) + Enum.count(deleted_values) > 0,
       simple: true
     }
   end
 
   @spec diff_key_list_complex(map, map) :: list
   defp diff_key_list_complex(original, new) do
-     converted_values = original
-     |> Enum.map(fn v ->
-       for {key, val} <- v, into: %{}, do: {to_string(key), val}
-     end)
+    converted_values =
+      original
+      |> Enum.map(fn v ->
+        for {key, val} <- v, into: %{}, do: {to_string(key), val}
+      end)
 
-     diff_key_list_simple(converted_values, new)
-     |> Map.put(:simple, false)
+    diff_key_list_simple(converted_values, new)
+    |> Map.put(:simple, false)
   end
 end

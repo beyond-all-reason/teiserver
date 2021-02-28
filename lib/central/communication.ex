@@ -37,17 +37,17 @@ defmodule Central.Communication do
 
   """
   def get_chat_room(args \\ []) do
-    ChatRoomLib.get_chat_rooms
+    ChatRoomLib.get_chat_rooms()
     |> ChatRoomLib.search(args[:search])
     |> ChatRoomLib.preload(args[:joins])
-    |> Repo.one
+    |> Repo.one()
   end
 
   def get_chat_room!(args) when is_list(args) do
-    ChatRoomLib.get_chat_rooms
+    ChatRoomLib.get_chat_rooms()
     |> ChatRoomLib.search(args[:search])
     |> ChatRoomLib.preload(args[:joins])
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   def get_chat_room!(room_name) do
@@ -140,11 +140,11 @@ defmodule Central.Communication do
   end
 
   def list_chat_contents(args) do
-    ChatContentLib.get_chat_contents
+    ChatContentLib.get_chat_contents()
     |> ChatContentLib.search(args[:search])
     |> ChatContentLib.preload(args[:joins])
     |> ChatContentLib.order(args[:order_by])
-    |> Repo.all
+    |> Repo.all()
   end
 
   # @doc """
@@ -190,24 +190,28 @@ defmodule Central.Communication do
     content = String.trim(content)
 
     if content != "" do
-      {:ok, message} = create_chat_content(%{
-        chat_room_id: chat_room.id,
-        user_id: user.id,
-        content: content,
-        metadata: metadata
-      })
+      {:ok, message} =
+        create_chat_content(%{
+          chat_room_id: chat_room.id,
+          user_id: user.id,
+          content: content,
+          metadata: metadata
+        })
 
-      new_message = %{message | user: %{
-        name: user.name,
-        colour: user.colour,
-        icon: user.icon,
-      }}
+      new_message = %{
+        message
+        | user: %{
+            name: user.name,
+            colour: user.colour,
+            icon: user.icon
+          }
+      }
 
       CentralWeb.Endpoint.broadcast(
         "chat:#{chat_room.name}",
         "new-message",
         Map.from_struct(new_message)
-          |> Map.drop([:__meta__, :chat_room])
+        |> Map.drop([:__meta__, :chat_room])
       )
     end
   end
@@ -274,9 +278,9 @@ defmodule Central.Communication do
   #   |> Repo.update()
   # end
   def list_chat_memberships(args \\ []) do
-    ChatMembershipLib.get_chat_memberships
+    ChatMembershipLib.get_chat_memberships()
     |> ChatMembershipLib.search(args[:search])
-    |> Repo.all
+    |> Repo.all()
   end
 
   def upsert_chat_membership(attrs \\ %{}) do
@@ -301,34 +305,40 @@ defmodule Central.Communication do
 
   """
   def list_notifications(args \\ []) do
-    NotificationLib.get_notifications
+    NotificationLib.get_notifications()
     |> NotificationLib.search(args[:search])
     |> NotificationLib.preload(args[:joins])
     |> NotificationLib.order(args[:order])
-    |> Repo.all
+    |> Repo.all()
   end
 
   def list_user_notifications(user_id) do
-    list_notifications(search: [
-      user_id: user_id
-    ])
+    list_notifications(
+      search: [
+        user_id: user_id
+      ]
+    )
   end
 
   def list_user_notifications(user_id, :unread) do
-    list_notifications(search: [
-      user_id: user_id,
-      read: false,
-      expired: false,
-      expires_after: Timex.local()
-    ])
+    list_notifications(
+      search: [
+        user_id: user_id,
+        read: false,
+        expired: false,
+        expires_after: Timex.local()
+      ]
+    )
   end
 
   def list_user_notifications(user_id, :expired) do
-    list_notifications(search: [
-      user_id: user_id,
-      read: false,
-      expired: true,
-    ])
+    list_notifications(
+      search: [
+        user_id: user_id,
+        read: false,
+        expired: true
+      ]
+    )
   end
 
   @doc """
@@ -346,11 +356,11 @@ defmodule Central.Communication do
 
   """
   def get_notification!(id, args \\ []) do
-    NotificationLib.get_notifications
+    NotificationLib.get_notifications()
     |> NotificationLib.search(%{id: id})
     |> NotificationLib.search(args[:search])
     |> NotificationLib.preload(args[:joins])
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @doc """
@@ -406,20 +416,18 @@ defmodule Central.Communication do
   end
 
   def delete_all_notifications(user_id) do
-    NotificationLib.get_notifications
-    |> NotificationLib.search(
-      user_id: user_id
-    )
-    |> Repo.delete_all
+    NotificationLib.get_notifications()
+    |> NotificationLib.search(user_id: user_id)
+    |> Repo.delete_all()
   end
 
   def delete_expired_notifications(user_id) do
-    NotificationLib.get_notifications
+    NotificationLib.get_notifications()
     |> NotificationLib.search(
       user_id: user_id,
       expired: true
     )
-    |> Repo.delete_all
+    |> Repo.delete_all()
   end
 
   @doc """
@@ -453,42 +461,52 @@ defmodule Central.Communication do
   end
 
   def notify(user_ids, data, expires, prevent_duplicates) do
-    user_skips = if prevent_duplicates do
-      query = from notifications in Notification,
-        where: notifications.user_id in ^user_ids,
-        where: notifications.read == false,
-        where: notifications.expires > ^Timex.now(),
-        where: notifications.title == ^data.title,
-        where: notifications.body == ^data.body,
-        select: notifications.user_id,
-        distinct: true
+    user_skips =
+      if prevent_duplicates do
+        query =
+          from(notifications in Notification,
+            where: notifications.user_id in ^user_ids,
+            where: notifications.read == false,
+            where: notifications.expires > ^Timex.now(),
+            where: notifications.title == ^data.title,
+            where: notifications.body == ^data.body,
+            select: notifications.user_id,
+            distinct: true
+          )
 
-      Repo.all(query)
-    else
-      []
-    end
+        Repo.all(query)
+      else
+        []
+      end
 
     user_ids
     |> Enum.filter(fn u -> not Enum.member?(user_skips, u) end)
     |> Enum.map(fn uid ->
       %Notification{}
       |> Notification.new_changeset(%{
-        "user_id"  => uid,
-        "title"    => data.title,
-        "body"     => data.body,
-        "icon"     => data.icon,
-        "colour"   => data.colour,
+        "user_id" => uid,
+        "title" => data.title,
+        "body" => data.body,
+        "icon" => data.icon,
+        "colour" => data.colour,
         "redirect" => data.redirect,
-
-        "expires" => expires,
+        "expires" => expires
       })
-      |> Repo.insert!
+      |> Repo.insert!()
     end)
     |> Enum.map(fn data ->
       CentralWeb.Endpoint.broadcast(
         "communication_notification:#{data.user_id}",
         "new communication notifictation",
-        %{id: data.id, title: data.title, body: data.body, icon: data.icon, colour: data.colour, redirect: data.redirect, expires: expires}
+        %{
+          id: data.id,
+          title: data.title,
+          body: data.body,
+          icon: data.icon,
+          colour: data.colour,
+          redirect: data.redirect,
+          expires: expires
+        }
       )
 
       data
@@ -497,29 +515,36 @@ defmodule Central.Communication do
 
   def notification_url(notification) do
     url = notification.redirect
+
     cond do
       String.contains?(url, "?") ->
         String.replace(url, "?", "?anid=#{notification.id}")
+
       String.contains?(url, "#") ->
         String.replace(url, "#", "?anid=#{notification.id}#")
+
       true ->
         url <> "?anid=#{notification.id}"
     end
   end
 
   def mark_all_notification_as_read(user_id) do
-    query = from n in Notification,
-      where: n.user_id == ^user_id,
-      update: [set: [read: true]]
+    query =
+      from(n in Notification,
+        where: n.user_id == ^user_id,
+        update: [set: [read: true]]
+      )
 
     Repo.update_all(query, [])
   end
 
   def mark_notification_as_read(user_id, notification_id) do
-    query = from n in Notification,
-      where: n.id == ^notification_id,
-      where: n.user_id == ^user_id,
-      update: [set: [read: true]]
+    query =
+      from(n in Notification,
+        where: n.id == ^notification_id,
+        where: n.user_id == ^user_id,
+        update: [set: [read: true]]
+      )
 
     Repo.update_all(query, [])
   end
@@ -527,6 +552,7 @@ defmodule Central.Communication do
   # Blog stuff
   alias Central.Communication.BlogFile
   alias Central.Communication.BlogFileLib
+
   @doc """
   Returns the list of blog_files.
 
@@ -537,11 +563,11 @@ defmodule Central.Communication do
 
   """
   def list_blog_files(args \\ []) do
-    BlogFileLib.get_blog_files
+    BlogFileLib.get_blog_files()
     |> BlogFileLib.search(args[:search])
     |> BlogFileLib.preload(args[:joins])
     |> BlogFileLib.order_by(args[:order_by])
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -559,17 +585,17 @@ defmodule Central.Communication do
 
   """
   def get_blog_file!(id, args \\ []) do
-    BlogFileLib.get_blog_files
+    BlogFileLib.get_blog_files()
     |> BlogFileLib.search(%{id: id})
     |> BlogFileLib.search(args[:search])
     |> BlogFileLib.preload(args[:joins])
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   def get_blog_file_by_url!(url, _args \\ []) do
-    BlogFileLib.get_blog_files
+    BlogFileLib.get_blog_files()
     |> BlogFileLib.search(%{url: url})
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @doc """
@@ -643,8 +669,9 @@ defmodule Central.Communication do
     BlogFile.changeset(blog_file, %{})
   end
 
-    alias Central.Communication.Category
+  alias Central.Communication.Category
   alias Central.Communication.CategoryLib
+
   @doc """
   Returns the list of categories.
 
@@ -655,11 +682,11 @@ defmodule Central.Communication do
 
   """
   def list_categories(args \\ []) do
-    CategoryLib.get_categories
+    CategoryLib.get_categories()
     |> CategoryLib.search(args[:search])
     |> CategoryLib.preload(args[:joins])
     |> CategoryLib.order_by(args[:order_by])
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -677,11 +704,11 @@ defmodule Central.Communication do
 
   """
   def get_category!(id, args \\ []) do
-    CategoryLib.get_categories
+    CategoryLib.get_categories()
     |> CategoryLib.search(%{id: id})
     |> CategoryLib.search(args[:search])
     |> CategoryLib.preload(args[:joins])
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @doc """
@@ -751,6 +778,7 @@ defmodule Central.Communication do
 
   alias Central.Communication.Comment
   alias Central.Communication.CommentLib
+
   @doc """
   Returns the list of comments.
 
@@ -761,11 +789,11 @@ defmodule Central.Communication do
 
   """
   def list_comments(args \\ []) do
-    CommentLib.get_comments
+    CommentLib.get_comments()
     |> CommentLib.search(args[:search])
     |> CommentLib.preload(args[:joins])
     |> CommentLib.order_by(args[:order_by])
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -783,11 +811,11 @@ defmodule Central.Communication do
 
   """
   def get_comment!(id, args \\ []) do
-    CommentLib.get_comments
+    CommentLib.get_comments()
     |> CommentLib.search(%{id: id})
     |> CommentLib.search(args[:search])
     |> CommentLib.preload(args[:joins])
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @doc """
@@ -857,6 +885,7 @@ defmodule Central.Communication do
 
   alias Central.Communication.Post
   alias Central.Communication.PostLib
+
   @doc """
   Returns the list of posts.
 
@@ -867,19 +896,19 @@ defmodule Central.Communication do
 
   """
   def list_posts(args \\ []) do
-    PostLib.get_posts
+    PostLib.get_posts()
     |> PostLib.search(args[:search])
     |> PostLib.preload(args[:joins])
     |> PostLib.order_by(args[:order_by])
-    |> Repo.all
+    |> Repo.all()
   end
 
   def get_post(id, args \\ []) do
-    PostLib.get_posts
+    PostLib.get_posts()
     |> PostLib.search(%{id: id})
     |> PostLib.search(args[:search])
     |> PostLib.preload(args[:joins])
-    |> Repo.one
+    |> Repo.one()
   end
 
   @doc """
@@ -897,19 +926,19 @@ defmodule Central.Communication do
 
   """
   def get_post!(id, args \\ []) do
-    PostLib.get_posts
+    PostLib.get_posts()
     |> PostLib.search(%{id: id})
     |> PostLib.search(args[:search])
     |> PostLib.preload(args[:joins])
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   def get_post_by_url_slug(url_slug, args \\ []) do
-    PostLib.get_posts
+    PostLib.get_posts()
     |> PostLib.search(%{url_slug: url_slug})
     |> PostLib.search(args[:search])
     |> PostLib.preload(args[:joins])
-    |> Repo.one
+    |> Repo.one()
   end
 
   @doc """
@@ -976,5 +1005,4 @@ defmodule Central.Communication do
   def change_post(%Post{} = post) do
     Post.changeset(post, %{})
   end
-
 end

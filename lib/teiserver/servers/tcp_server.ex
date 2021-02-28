@@ -32,12 +32,11 @@ defmodule Teiserver.TcpServer do
 
     # start_listener(Ref, Transport, TransOpts0, Protocol, ProtoOpts)
     if mode == :ranch_ssl do
-      {certfile, cacertfile, keyfile} = 
-        {
-          Application.get_env(:central, Teiserver)[:certs][:certfile],
-          Application.get_env(:central, Teiserver)[:certs][:cacertfile],
-          Application.get_env(:central, Teiserver)[:certs][:keyfile],
-        }
+      {certfile, cacertfile, keyfile} = {
+        Application.get_env(:central, Teiserver)[:certs][:certfile],
+        Application.get_env(:central, Teiserver)[:certs][:cacertfile],
+        Application.get_env(:central, Teiserver)[:certs][:keyfile]
+      }
 
       :ranch.start_listener(
         make_ref(),
@@ -46,7 +45,7 @@ defmodule Teiserver.TcpServer do
           {:port, Application.get_env(:central, Teiserver)[:ports][:tls]},
           {:certfile, certfile},
           {:cacertfile, cacertfile},
-          {:keyfile, keyfile},
+          {:keyfile, keyfile}
         ],
         __MODULE__,
         []
@@ -76,9 +75,11 @@ defmodule Teiserver.TcpServer do
 
     @default_protocol.welcome(socket, transport)
     {:ok, {ip, _}} = transport.peername(socket)
-    ip = ip
-    |> Tuple.to_list
-    |> Enum.join(".")
+
+    ip =
+      ip
+      |> Tuple.to_list()
+      |> Enum.join(".")
 
     Logger.info("New TCP connection #{Kernel.inspect(socket)}, IP: #{ip}")
 
@@ -180,20 +181,27 @@ defmodule Teiserver.TcpServer do
       case reason do
         :add_start_rectangle ->
           state.protocol.reply(:add_start_rectangle, data, state)
+
         :remove_start_rectangle ->
           state.protocol.reply(:remove_start_rectangle, data, state)
+
         :add_script_tags ->
           state.protocol.reply(:add_script_tags, data, state)
+
         :remove_script_tags ->
           state.protocol.reply(:remove_script_tags, data, state)
+
         :enable_all_units ->
           state.protocol.reply(:enable_all_units, data, state)
+
         :enable_units ->
           state.protocol.reply(:enable_units, data, state)
+
         :disable_units ->
           state.protocol.reply(:disable_units, data, state)
       end
     end
+
     {:noreply, state}
   end
 
@@ -266,6 +274,7 @@ defmodule Teiserver.TcpServer do
     if userid == state.userid and battle_id == state.client.battle_id do
       state.protocol.reply(:forcequit_battle, state)
     end
+
     new_state = state.protocol.reply(:remove_user_from_battle, {userid, battle_id}, state)
     {:noreply, new_state}
   end

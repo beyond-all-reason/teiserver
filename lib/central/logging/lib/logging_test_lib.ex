@@ -23,9 +23,9 @@ defmodule Central.Logging.LoggingTestLib do
       ip: data["ip"] || "127.0.0.1",
       load_time: data["load_time"] || 105,
       user_id: user.id,
-      status: data["status"] || 200,
+      status: data["status"] || 200
     })
-    |> Repo.insert!
+    |> Repo.insert!()
   end
 
   def fake_audit_log(user) do
@@ -33,67 +33,66 @@ defmodule Central.Logging.LoggingTestLib do
       action: "Fake log",
       ip: "127.0.0.1",
       details: %{},
-      user_id: user.id,
+      user_id: user.id
     })
-    |> Repo.insert!
+    |> Repo.insert!()
   end
 
   def fake_aggregate_log(date) do
     AggregateViewLog.changeset(%AggregateViewLog{}, %{
       "date" => date,
-
       "total_views" => 103,
       "total_uniques" => 13,
       "average_load_time" => 5678,
-
       "guest_view_count" => 13,
       "guest_unique_ip_count" => 4,
-
       "percentile_load_time_95" => 12445,
       "percentile_load_time_99" => 14788,
       "max_load_time" => 19871,
-
       "hourly_views" => 1..24 |> Enum.map(&(&1 * 4)),
       "hourly_uniques" => 1..24 |> Enum.map(&(&1 * 6)),
       "hourly_average_load_times" => 1..24 |> Enum.map(&(&1 * 1987)),
-
       "user_data" => %{},
-      "section_data" => %{},
+      "section_data" => %{}
     })
-    |> Repo.insert!
+    |> Repo.insert!()
   end
 
   def seed(existing) do
     users = existing[:users]
 
-    page_view_logs = users
-    |> Enum.map(fn u ->
-      1..6
-      |> Enum.map(fn _ ->
-        new_page_view_log(u)
+    page_view_logs =
+      users
+      |> Enum.map(fn u ->
+        1..6
+        |> Enum.map(fn _ ->
+          new_page_view_log(u)
+        end)
       end)
-    end)
 
-    audit_logs = users
-    |> Enum.map(fn u ->
-      1..6
-      |> Enum.map(fn _ ->
-        fake_audit_log(u)
+    audit_logs =
+      users
+      |> Enum.map(fn u ->
+        1..6
+        |> Enum.map(fn _ ->
+          fake_audit_log(u)
+        end)
       end)
-    end)
 
-    aggregate_logs = 4..14
-    |> Enum.map(fn i ->
-      Timex.beginning_of_day(Timex.now())
-      |> Timex.shift(days: -i)
-      |> fake_aggregate_log()
-    end)
+    aggregate_logs =
+      4..14
+      |> Enum.map(fn i ->
+        Timex.beginning_of_day(Timex.now())
+        |> Timex.shift(days: -i)
+        |> fake_aggregate_log()
+      end)
 
-    existing ++ [
-      page_view_logs: page_view_logs,
-      audit_logs: audit_logs,
-      aggregate_logs: aggregate_logs,
-    ]
+    existing ++
+      [
+        page_view_logs: page_view_logs,
+        audit_logs: audit_logs,
+        aggregate_logs: aggregate_logs
+      ]
   end
 
   @spec logging_setup(list) :: tuple
@@ -103,21 +102,25 @@ defmodule Central.Logging.LoggingTestLib do
 
     child_user = existing[:child_user]
 
-    aggregate_logs = if flags[:aggregate_logs] do
-      AggregateViewLogLib.get_logs
-      |> AggregateViewLogLib.order("Oldest first")
-      |> Repo.all
-    end
+    aggregate_logs =
+      if flags[:aggregate_logs] do
+        AggregateViewLogLib.get_logs()
+        |> AggregateViewLogLib.order("Oldest first")
+        |> Repo.all()
+      end
 
-    page_view_logs = if flags[:page_view_logs] do
-      PageViewLogLib.get_page_view_logs
-      |> PageViewLogLib.search([user_id: child_user.id])
-      |> Repo.all
-    end
+    page_view_logs =
+      if flags[:page_view_logs] do
+        PageViewLogLib.get_page_view_logs()
+        |> PageViewLogLib.search(user_id: child_user.id)
+        |> Repo.all()
+      end
 
-    {:ok, existing ++ [
-      aggregate_logs: aggregate_logs,
-      page_view_logs: page_view_logs,
-    ]}
+    {:ok,
+     existing ++
+       [
+         aggregate_logs: aggregate_logs,
+         page_view_logs: page_view_logs
+       ]}
   end
 end

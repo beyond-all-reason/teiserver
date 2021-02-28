@@ -4,11 +4,12 @@ defmodule CentralWeb.Config.UserConfigController do
   alias Central.Config
   alias Central.Config.UserConfig
 
-  plug :add_breadcrumb, name: 'User preferences', url: '/config/user'
+  plug(:add_breadcrumb, name: 'User preferences', url: '/config/user')
 
   def index(conn, _params) do
-    config_values = conn.user_id
-    |> Config.get_user_configs!()
+    config_values =
+      conn.user_id
+      |> Config.get_user_configs!()
 
     config_types = Config.get_grouped_configs()
 
@@ -30,9 +31,11 @@ defmodule CentralWeb.Config.UserConfigController do
 
   def create(conn, %{"user_config" => user_config_params}) do
     user_config_params = Map.put(user_config_params, "user_id", conn.user_id)
-    tab = user_config_params["key"]
-    |> String.split(".")
-    |> hd
+
+    tab =
+      user_config_params["key"]
+      |> String.split(".")
+      |> hd
 
     case Config.create_user_config(user_config_params) do
       {:ok, _user_config} ->
@@ -67,9 +70,11 @@ defmodule CentralWeb.Config.UserConfigController do
 
   def update(conn, %{"id" => id, "user_config" => user_config_params}) do
     user_config = Config.get_user_config!(id)
-    tab = user_config_params["key"]
-    |> String.split(".")
-    |> hd
+
+    tab =
+      user_config_params["key"]
+      |> String.split(".")
+      |> hd
 
     case Config.update_user_config(user_config, user_config_params) do
       {:ok, _user_config} ->

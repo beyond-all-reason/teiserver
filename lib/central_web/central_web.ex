@@ -42,7 +42,10 @@ defmodule CentralWeb do
       alias Central.Helpers.StylingHelper
 
       import Central.Config, only: [get_user_config_cache: 2, set_user_config: 3]
-      import Central.Account.RecentlyUsedCache, only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
+
+      import Central.Account.RecentlyUsedCache,
+        only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
+
       import Central.Account.AuthLib, only: [allow?: 2]
     end
   end
@@ -50,7 +53,8 @@ defmodule CentralWeb do
   def view_structure do
     quote do
       # Import convenience functions from controllers
-      import Phoenix.Controller, only: [get_csrf_token: 0, get_flash: 1, get_flash: 2, view_module: 1]
+      import Phoenix.Controller,
+        only: [get_csrf_token: 0, get_flash: 1, get_flash: 2, view_module: 1]
 
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML

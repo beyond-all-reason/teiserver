@@ -11,13 +11,11 @@ defmodule Central.Account.UserLib do
     %{
       type_colour: colours() |> elem(0),
       type_icon: icon(),
-
       item_id: user.id,
       item_type: "central_user",
       item_colour: user.colour,
       item_icon: user.icon,
       item_label: "#{user.name} - #{user.email}",
-
       url: "/admin/users/#{user.id}"
     }
   end
@@ -26,9 +24,11 @@ defmodule Central.Account.UserLib do
     if allow?(conn.permissions, "admin.admin.full") do
       {true, nil}
     else
-      query = from target_users in User,
-        where: target_users.id == ^target_user_id,
-        select: target_users.admin_group_id
+      query =
+        from(target_users in User,
+          where: target_users.id == ^target_user_id,
+          select: target_users.admin_group_id
+        )
 
       group_id = Repo.one(query)
 
@@ -37,11 +37,13 @@ defmodule Central.Account.UserLib do
   end
 
   def has_access(nil, _user), do: {false, :not_found}
+
   def has_access(target_user, conn) do
     if allow?(conn, "admin.admin.full") do
       {true, nil}
     else
       result = GroupLib.access?(conn, target_user.admin_group_id)
+
       case result do
         true -> {true, nil}
         false -> {false, :no_access}
@@ -53,5 +55,4 @@ defmodule Central.Account.UserLib do
     {result, _} = has_access(target_user, conn)
     result
   end
-
 end

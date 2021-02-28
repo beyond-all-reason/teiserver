@@ -2,14 +2,15 @@ defmodule CentralWeb.Communication.NotificationController do
   use CentralWeb, :controller
   alias Central.Communication
 
-  plug :add_breadcrumb, name: 'Notifications', url: '/communication/notifications'
+  plug(:add_breadcrumb, name: 'Notifications', url: '/communication/notifications')
 
   def index(conn, _params) do
-    notifications = Communication.list_notifications(
-      search: [user_id: conn.user_id],
-      order: ["Newest first"],
-      limit: 50
-    )
+    notifications =
+      Communication.list_notifications(
+        search: [user_id: conn.user_id],
+        order: ["Newest first"],
+        limit: 50
+      )
 
     conn
     |> assign(:notifications, notifications)
@@ -41,7 +42,7 @@ defmodule CentralWeb.Communication.NotificationController do
         body: params["body"],
         icon: params["icon"],
         colour: params["colour"],
-        redirect: params["url"],
+        redirect: params["url"]
       },
       3,
       false
@@ -53,12 +54,13 @@ defmodule CentralWeb.Communication.NotificationController do
   end
 
   def admin(conn, _params) do
-    notifications = Communication.list_notifications(
-      search: [user_id: conn.user_id],
-      order: ["Newest first"],
-      joins: [:user],
-      limit: 50
-    )
+    notifications =
+      Communication.list_notifications(
+        search: [user_id: conn.user_id],
+        order: ["Newest first"],
+        joins: [:user],
+        limit: 50
+      )
 
     conn
     |> assign(:notifications, notifications)

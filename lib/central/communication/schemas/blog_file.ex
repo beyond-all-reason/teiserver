@@ -2,11 +2,11 @@ defmodule Central.Communication.BlogFile do
   use CentralWeb, :schema
 
   schema "communication_blog_files" do
-    field :name, :string
-    field :url, :string
-    field :file_path, :string
-    field :file_ext, :string
-    field :file_size, :integer
+    field(:name, :string)
+    field(:url, :string)
+    field(:file_path, :string)
+    field(:file_ext, :string)
+    field(:file_size, :integer)
 
     timestamps()
   end
@@ -22,7 +22,11 @@ defmodule Central.Communication.BlogFile do
 
   def file_upload_changeset(blog_file, file_path, file_ext, file_size) do
     blog_file
-    |> cast(%{file_path: file_path, file_ext: file_ext, file_size: file_size}, [:file_path, :file_ext, :file_size])
+    |> cast(%{file_path: file_path, file_ext: file_ext, file_size: file_size}, [
+      :file_path,
+      :file_ext,
+      :file_size
+    ])
     |> validate_required([:file_path, :file_ext, :file_size])
   end
 

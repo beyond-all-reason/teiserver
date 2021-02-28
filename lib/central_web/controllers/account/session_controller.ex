@@ -17,7 +17,10 @@ defmodule CentralWeb.Account.SessionController do
         |> redirect(to: "/")
       end
     else
-      render(conn, "new.html", changeset: changeset, action: Routes.account_session_path(conn, :login))
+      render(conn, "new.html",
+        changeset: changeset,
+        action: Routes.account_session_path(conn, :login)
+      )
     end
   end
 

@@ -27,23 +27,28 @@ defmodule Central.General.LoadTest.Stats do
   # Currently trying to work out how best to handle testers and their user-agents since it's only registered when they first join. Currently thinking I need to track their agent along with their last seen and then have Server periodically send the list to Stats.
   def handle_info(:second_tick, state) do
     # Get loads
-    [_, l1, l5, l15] = ~r/load average: ([0-9\.]+), ([0-9\.]+), ([0-9\.]+)/
-    |> Regex.run(:os.cmd('uptime') |> to_string)
+    [_, l1, l5, l15] =
+      ~r/load average: ([0-9\.]+), ([0-9\.]+), ([0-9\.]+)/
+      |> Regex.run(:os.cmd('uptime') |> to_string)
 
     # Get RAM
-    [_, raw_ram] = ~r/([0-9]+) K used memory/
-    |> Regex.run(:os.cmd('vmstat -s') |> to_string)
+    [_, raw_ram] =
+      ~r/([0-9]+) K used memory/
+      |> Regex.run(:os.cmd('vmstat -s') |> to_string)
 
-    ram = raw_ram
-    |> int_parse
+    ram =
+      raw_ram
+      |> int_parse
+
     # |> (fn v -> v * 1024 end).()
     # |> mem_normalize
 
-    state = Map.merge(state, %{
-      loads: [l1, l5, l15],
-      ram: ram,
-      time: Timex.now()
-    })
+    state =
+      Map.merge(state, %{
+        loads: [l1, l5, l15],
+        ram: ram,
+        time: Timex.now()
+      })
 
     Server.new_stats(state)
     log_stats(state)
@@ -86,37 +91,41 @@ defmodule Central.General.LoadTest.Stats do
   end
 
   defp log_stats(state) do
-    [l1, l5, l15] = state.loads
-    |> Enum.map(fn l ->
-      {r, _} = Float.parse(l)
-      r
-    end)
+    [l1, l5, l15] =
+      state.loads
+      |> Enum.map(fn l ->
+        {r, _} = Float.parse(l)
+        r
+      end)
 
     # agent_lookup = state.testers
     # |> Enum.map(fn {uid, agent, _last_seen} -> {uid, agent} end)
     # |> Map.new
 
-    response_times = state.response_times
-    |> Enum.map(fn {_uid, t} -> t end)
+    response_times =
+      state.response_times
+      |> Enum.map(fn {_uid, t} -> t end)
 
-    agents = state.testers
-    |> Enum.map(fn {_uid, agent, _last_seen} -> agent end)
-    |> Enum.uniq
+    agents =
+      state.testers
+      |> Enum.map(fn {_uid, agent, _last_seen} -> agent end)
+      |> Enum.uniq()
 
-    attrs = Map.merge(state, %{
-      l1: l1,
-      l5: l5,
-      l15: l15,
-      tester_count: Enum.count(state.testers),
-      response_count: Enum.count(state.response_times),
-      response_times: response_times,
-      agents: agents
-    })
-    |> Map.drop([:loads, :testers, :time])
+    attrs =
+      Map.merge(state, %{
+        l1: l1,
+        l5: l5,
+        l15: l15,
+        tester_count: Enum.count(state.testers),
+        response_count: Enum.count(state.response_times),
+        response_times: response_times,
+        agents: agents
+      })
+      |> Map.drop([:loads, :testers, :time])
 
     if Enum.count(state.testers) > 0 do
       %LoadTestStat{}
-      |> LoadTestStat.changeset(%{timeid: Timex.now, data: attrs})
+      |> LoadTestStat.changeset(%{timeid: Timex.now(), data: attrs})
       |> Repo.insert()
     end
   end

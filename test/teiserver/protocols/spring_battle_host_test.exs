@@ -5,7 +5,9 @@ defmodule Teiserver.SpringBattleHostTest do
   # alias Teiserver.User
   alias Teiserver.Battle
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  import Teiserver.TestLib, only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, _recv_until: 1, new_user: 0]
+
+  import Teiserver.TestLib,
+    only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, _recv_until: 1, new_user: 0]
 
   setup do
     %{socket: socket, user: user} = auth_setup()
@@ -13,8 +15,13 @@ defmodule Teiserver.SpringBattleHostTest do
   end
 
   test "host battle test", %{socket: socket} do
-    _send(socket, "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName\n")
-    reply = _recv_until(socket)
+    _send(
+      socket,
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName\n"
+    )
+
+    reply =
+      _recv_until(socket)
       |> String.split("\n")
 
     [
@@ -30,10 +37,13 @@ defmodule Teiserver.SpringBattleHostTest do
 
     assert join =~ "JOINBATTLE "
     assert join =~ " gameHash"
-    battle_id = join
+
+    battle_id =
+      join
       |> String.replace("JOINBATTLE ", "")
       |> String.replace(" gameHash", "")
       |> int_parse
+
     assert battle_status == "REQUESTBATTLESTATUS"
 
     # Check the battle actually got created
@@ -80,7 +90,7 @@ defmodule Teiserver.SpringBattleHostTest do
     refute Map.has_key?(battle.tags, "custom/key2")
     _send(socket, "SETSCRIPTTAGS custom/key1=customValue\tcustom/key2=customValue2\n")
     reply = _recv(socket)
-    
+
     assert reply == "SETSCRIPTTAGS custom/key1=customValue\tcustom/key2=customValue2\n"
 
     battle = Battle.get_battle(battle_id)
@@ -89,9 +99,9 @@ defmodule Teiserver.SpringBattleHostTest do
 
     _send(socket, "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n")
     reply = _recv(socket)
-    
+
     assert reply == "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n"
-    
+
     battle = Battle.get_battle(battle_id)
     refute Map.has_key?(battle.tags, "custom/key1")
     # We never removed key2, it should still be there

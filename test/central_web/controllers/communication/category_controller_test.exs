@@ -5,6 +5,7 @@ defmodule CentralWeb.Communication.CategoryControllerTest do
   alias Central.CommunicationTestLib
 
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(~w(communication.blog))
   end
@@ -46,9 +47,9 @@ defmodule CentralWeb.Communication.CategoryControllerTest do
 
   describe "edit category" do
     test "renders form for editing nil", %{conn: conn} do
-      assert_error_sent 404, fn ->
+      assert_error_sent(404, fn ->
         get(conn, Routes.blog_category_path(conn, :edit, -1))
-      end
+      end)
     end
 
     test "renders form for editing chosen category", %{conn: conn} do
@@ -61,7 +62,10 @@ defmodule CentralWeb.Communication.CategoryControllerTest do
   describe "update category" do
     test "redirects when data is valid", %{conn: conn} do
       category = CommunicationTestLib.category_fixture()
-      conn = put(conn, Routes.blog_category_path(conn, :update, category), category: @update_attrs)
+
+      conn =
+        put(conn, Routes.blog_category_path(conn, :update, category), category: @update_attrs)
+
       assert redirected_to(conn) == Routes.blog_category_path(conn, :index)
 
       conn = get(conn, Routes.blog_category_path(conn, :edit, category))
@@ -70,14 +74,17 @@ defmodule CentralWeb.Communication.CategoryControllerTest do
 
     test "renders errors when data is invalid", %{conn: conn} do
       category = CommunicationTestLib.category_fixture()
-      conn = put(conn, Routes.blog_category_path(conn, :update, category), category: @invalid_attrs)
+
+      conn =
+        put(conn, Routes.blog_category_path(conn, :update, category), category: @invalid_attrs)
+
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
 
     test "renders errors when nil object", %{conn: conn} do
-      assert_error_sent 404, fn ->
+      assert_error_sent(404, fn ->
         put(conn, Routes.blog_category_path(conn, :update, -1), category: @invalid_attrs)
-      end
+      end)
     end
   end
 
@@ -86,15 +93,16 @@ defmodule CentralWeb.Communication.CategoryControllerTest do
       category = CommunicationTestLib.category_fixture()
       conn = delete(conn, Routes.blog_category_path(conn, :delete, category))
       assert redirected_to(conn) == Routes.blog_category_path(conn, :index)
-      assert_error_sent 404, fn ->
+
+      assert_error_sent(404, fn ->
         get(conn, Routes.blog_category_path(conn, :edit, category))
-      end
+      end)
     end
 
     test "renders error for deleting nil item", %{conn: conn} do
-      assert_error_sent 404, fn ->
+      assert_error_sent(404, fn ->
         delete(conn, Routes.blog_category_path(conn, :delete, -1))
-      end
+      end)
     end
   end
 end
