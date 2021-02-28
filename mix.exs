@@ -61,6 +61,8 @@ defmodule Central.MixProject do
       {:ranch, "~> 1.7"},
       {:parallel, "~> 0.0"},
       {:con_cache, "~> 0.13"},
+      {:bamboo, "~> 2.0"},
+      {:bamboo_smtp, "~> 3.1"},
       {:phoenix_pubsub, "~> 2.0"},
       {:excoveralls, "~> 0.12.3", only: :test},
       {:credo, "~> 1.2", only: [:dev, :test], runtime: false},
