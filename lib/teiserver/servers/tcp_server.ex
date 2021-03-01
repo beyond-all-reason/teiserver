@@ -73,17 +73,14 @@ defmodule Teiserver.TcpServer do
     :ok = :ranch.accept_ack(ref)
     :ok = transport.setopts(socket, [{:active, true}])
 
-    @default_protocol.welcome(socket, transport)
     {:ok, {ip, _}} = transport.peername(socket)
 
     ip =
       ip
       |> Tuple.to_list()
       |> Enum.join(".")
-
-    Logger.info("New TCP connection #{Kernel.inspect(socket)}, IP: #{ip}")
-
-    :gen_server.enter_loop(__MODULE__, [], %{
+    
+    state = %{
       userid: nil,
       name: nil,
       client: nil,
@@ -93,7 +90,12 @@ defmodule Teiserver.TcpServer do
       socket: socket,
       transport: transport,
       protocol: @default_protocol
-    })
+    }
+    state = @default_protocol.reply(:welcome, state)
+
+    Logger.info("New TCP connection #{Kernel.inspect(socket)}, IP: #{ip}")
+
+    :gen_server.enter_loop(__MODULE__, [], state)
   end
 
   def init(init_arg) do
@@ -110,7 +112,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:tcp, socket, data}, state) do
-    Logger.info("<-- #{Kernel.inspect(socket)}:TCP #{format_log(data)}")
+    Logger.info("<-- #{Kernel.inspect(socket)}:TCP #{state.name} - #{format_log(data)}")
 
     new_state =
       data
@@ -123,7 +125,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:ssl, socket, data}, state) do
-    Logger.info("<-- #{Kernel.inspect(socket)}:SSL #{format_log(data)}")
+    Logger.info("<-- #{Kernel.inspect(socket)}:SSL #{state.name} - #{format_log(data)}")
 
     new_state =
       data
@@ -147,13 +149,13 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:updated_client, new_client, :client_updated_status}, state) do
-    state.protocol.reply(:client_status, new_client, state)
-    {:noreply, state}
+    new_state = state.protocol.reply(:client_status, new_client, state)
+    {:noreply, new_state}
   end
 
   def handle_info({:updated_client, new_client, :client_updated_battlestatus}, state) do
-    state.protocol.reply(:client_battlestatus, new_client, state)
-    {:noreply, state}
+    new_state = state.protocol.reply(:client_battlestatus, new_client, state)
+    {:noreply, new_state}
   end
 
   def handle_info({:updated_client, new_client, _reason}, state) do
@@ -177,7 +179,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:battle_updated, battle_id, data, reason}, state) do
-    if state.client.battle_id == battle_id do
+    new_state = if state.client.battle_id == battle_id do
       case reason do
         :add_start_rectangle ->
           state.protocol.reply(:add_start_rectangle, data, state)
@@ -200,9 +202,21 @@ defmodule Teiserver.TcpServer do
         :disable_units ->
           state.protocol.reply(:disable_units, data, state)
       end
+    else
+      state
     end
 
-    {:noreply, state}
+    {:noreply, new_state}
+  end
+  
+  def handle_info({:all_battle_updated, battle_id, reason}, state) do
+    new_state = case reason do
+      :update_battle_info ->
+        state.protocol.reply(:update_battle, battle_id, state)
+
+    end
+
+    {:noreply, new_state}
   end
 
   # Commands
@@ -318,6 +332,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info(:terminate, state) do
+    Logger.info("Terminate connection #{Kernel.inspect(state.socket)}")
     {:stop, :normal, state}
   end
 

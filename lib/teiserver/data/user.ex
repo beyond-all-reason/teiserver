@@ -498,10 +498,10 @@ defmodule Teiserver.User do
     end
   end
 
-  defp do_login(user, state, ip, lobby) do
+  defp do_login(user, state, ip, lobbyid) do
     country = "GB"
     last_login = :erlang.system_time(:seconds)
-    user = %{user | ip: ip, lobbyid: lobby, country: country, last_login: last_login}
+    user = %{user | ip: ip, lobbyid: lobbyid, country: country, last_login: last_login}
     update_user(user, persist: true)
 
     proto = state.protocol

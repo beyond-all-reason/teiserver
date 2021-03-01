@@ -37,7 +37,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # in_BATTLEHOSTMSG
   # in_JOINBATTLEACCEPT
   # in_JOINBATTLEDENY
-  # in_UPDATEBATTLEINFO
   # in_CHANNELTOPIC
   # in_GETCHANNELMESSAGES
   # in_FORCETEAMNO
@@ -104,6 +103,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   def handle("", state), do: state
   def handle("\r\n", state), do: state
 
+  def handle(<<255, 244, 255, 253, 6>>, state), do: do_handle("EXIT", nil, state)
   def handle(data, state) do
     tuple =
       ~r/^(#[0-9]+ )?([A-Z0-9]+)(.*)?$/
@@ -132,13 +132,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # TODO
   # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
   defp do_handle("SLTS", _, state) do
-    _send("OK cmd=SLTS\n", state)
-    state
+    reply(:ok, "SLTS", state)
   end
 
   defp do_handle("STLS", _, state) do
-    _send("OK cmd=STLS\n", state)
-    state
+    reply(:ok, "STLS", state)
   end
 
   # Special handler to allow us to test more easily, it just accepts
@@ -631,10 +629,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
     case response do
       {:success, battle} ->
+        reply(:battle_opened, battle.id, state)
+        _send("OPENBATTLE #{battle.id}\n", state)
         PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
         Battle.add_user_to_battle(state.userid, battle.id)
 
-        _send("OPENBATTLE #{battle.id}\n", state)
         reply(:join_battle, battle, state)
         reply(:add_script_tags, battle.tags, state)
 
@@ -930,6 +929,28 @@ defmodule Teiserver.Protocols.SpringProtocol do
     state
   end
 
+  # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#UPDATEBATTLEINFO:client
+  defp do_handle("UPDATEBATTLEINFO", data, state) do
+    case Regex.run(~r/(\d+) (\d+) (\d+) (.+)$/, data) do
+      [_, spectator_count, locked, map_hash, map_name] ->
+        if Battle.allow?("UPDATEBATTLEINFO", state) do
+          battle = Battle.get_battle(state.client.battle_id)
+          new_battle = %{battle |
+            spectator_count: int_parse(spectator_count),
+            locked: (locked == "1"),
+            map_hash: map_hash,
+            map_name: map_name
+          }
+          Battle.update_battle(new_battle, {spectator_count, locked, map_hash, map_name}, :update_battle_info)
+        end
+
+      _ ->
+        _no_match(state, "UPDATEBATTLEINFO", data)
+    end
+
+    state
+  end
+
   defp do_handle("LEAVEBATTLE", _, %{client: %{battle_id: nil}} = state), do: state
 
   defp do_handle("LEAVEBATTLE", _, state) do
@@ -1065,6 +1086,18 @@ defmodule Teiserver.Protocols.SpringProtocol do
     |> Enum.join("")
   end
 
+  defp do_reply(:welcome, nil) do
+    "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
+  end
+
+  defp do_reply(:okay, cmd) do
+    if cmd do
+      "OK cmd=#{cmd}\n"
+    else
+      "OK\n"
+    end
+  end
+
   defp do_reply(:add_user, user) do
     "ADDUSER #{user.name} #{user.country} 0 #{user.id} #{user.lobbyid}\n"
   end
@@ -1141,12 +1174,13 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "BATTLECLOSED #{battle_id}\n"
   end
 
-  defp do_reply(:update_battle, battle) do
-    locked = battle.locked == 1
+  defp do_reply(:update_battle, battle) when is_map(battle) do
+    locked = if battle.locked, do: "1", else: "0"
 
-    "UPDATEBATTLEINFO #{battle.id} #{battle.spectator_count} #{locked} #{battle.map_hash} #{
-      battle.map_name
-    }\n"
+    "UPDATEBATTLEINFO #{battle.id} #{battle.spectator_count} #{locked} #{battle.map_hash} #{battle.map_name}\n"
+  end
+  defp do_reply(:update_battle, battle_id) do
+    do_reply(:update_battle, Battle.get_battle(battle_id))
   end
 
   defp do_reply(:join_battle, battle) do

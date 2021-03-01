@@ -36,7 +36,11 @@ defmodule Teiserver.Battle do
         ip: nil,
         tags: %{},
         disabled_units: [],
-        start_rectangles: []
+        start_rectangles: [],
+
+        # Expected to be overriden
+        map_hash: nil,
+        map_name: nil,
       },
       battle
     )
@@ -47,15 +51,9 @@ defmodule Teiserver.Battle do
 
     PubSub.broadcast(
       Central.PubSub,
-      "battle_updates:#{battle.id}",
-      {:battle_updated, battle.id, data, reason}
+      "all_battle_updates",
+      {:all_battle_updated, battle.id, reason}
     )
-
-    # PubSub.broadcast(
-    #   Central.PubSub,
-    #   "all_battle_updates",
-    #   {:battle_updated, battle.id, data, reason}
-    # )
     battle
   end
 
@@ -345,7 +343,7 @@ defmodule Teiserver.Battle do
 
     mod_command =
       Enum.member?(
-        ~w(HANDICAP ADDSTARTRECT REMOVESTARTRECT KICKFROMBATTLE FORCETEAMNO FORCEALLYNO FORCETEAMCOLOR FORCESPECTATORMODE DISABLEUNITS ENABLEUNITS ENABLEALLUNITS),
+        ~w(HANDICAP UPDATEBATTLEINFO ADDSTARTRECT REMOVESTARTRECT KICKFROMBATTLE FORCETEAMNO FORCEALLYNO FORCETEAMCOLOR FORCESPECTATORMODE DISABLEUNITS ENABLEUNITS ENABLEALLUNITS),
         cmd
       )
 
