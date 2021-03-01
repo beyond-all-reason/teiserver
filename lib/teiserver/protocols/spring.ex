@@ -637,8 +637,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
         reply(:add_script_tags, battle.tags, state)
 
         battle.start_rectangles
-        |> Enum.each(fn r ->
-          reply(:add_start_rectangle, r, state)
+        |> Enum.each(fn {team, r} ->
+          reply(:add_start_rectangle, {team, r}, state)
         end)
 
         _send("REQUESTBATTLESTATUS\n", state)
@@ -683,8 +683,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
         reply(:client_battlestatus, state.client, state)
 
         battle.start_rectangles
-        |> Enum.each(fn r ->
-          reply(:add_start_rectangle, r, state)
+        |> Enum.each(fn {team, r} ->
+          reply(:add_start_rectangle, {team, r}, state)
         end)
 
         _send("REQUESTBATTLESTATUS\n", state)
@@ -795,7 +795,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       [_, name, team_number] ->
         if Battle.allow?("FORCETEAMNO", state) do
           client = Client.get_client_by_name(name)
-          new_client = %{state.client | team_number: int_parse(team_number)}
+          new_client = %{client | team_number: int_parse(team_number)}
           Client.update(new_client, :client_updated_battlestatus)
         end
 
@@ -811,7 +811,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       [_, name, ally_team_number] ->
         if Battle.allow?("FORCEALLYNO", state) do
           client = Client.get_client_by_name(name)
-          new_client = %{state.client | ally_team_number: int_parse(ally_team_number)}
+          new_client = %{client | ally_team_number: int_parse(ally_team_number)}
           Client.update(new_client, :client_updated_battlestatus)
         end
 
@@ -827,7 +827,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       [_, name, team_colour] ->
         if Battle.allow?("FORCETEAMCOLOR", state) do
           client = Client.get_client_by_name(name)
-          new_client = %{state.client | team_colour: team_colour}
+          new_client = %{client | team_colour: team_colour}
           Client.update(new_client, :client_updated_battlestatus)
         end
 
@@ -841,7 +841,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("FORCESPECTATORMODE", name, state) do
     if Battle.allow?("FORCESPECTATORMODE", state) do
       client = Client.get_client_by_name(name)
-      new_client = %{state.client | spectator: true}
+      new_client = %{client | spectator: true}
       Client.update(new_client, :client_updated_battlestatus)
     end
 
@@ -1195,7 +1195,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "JOINBATTLE #{battle.id} #{battle.game_hash}\n"
   end
 
-  defp do_reply(:add_start_rectangle, [team, left, top, right, bottom]) do
+  defp do_reply(:add_start_rectangle, {team, [left, top, right, bottom]}) do
     "ADDSTARTRECT #{team} #{left} #{top} #{right} #{bottom}\n"
   end
 

@@ -36,7 +36,7 @@ defmodule Teiserver.Battle do
         ip: nil,
         tags: %{},
         disabled_units: [],
-        start_rectangles: [],
+        start_rectangles: %{},
 
         # Expected to be overriden
         map_hash: nil,
@@ -46,14 +46,22 @@ defmodule Teiserver.Battle do
     )
   end
 
-  def update_battle(battle, data \\ nil, reason \\ nil) do
+  def update_battle(battle, data, reason) do
     ConCache.put(:battles, battle.id, battle)
 
-    PubSub.broadcast(
-      Central.PubSub,
-      "all_battle_updates",
-      {:all_battle_updated, battle.id, reason}
-    )
+    if Enum.member?([:update_battle_info], reason) do
+      PubSub.broadcast(
+        Central.PubSub,
+        "all_battle_updates",
+        {:all_battle_updated, battle.id, reason}
+      )
+    else
+      PubSub.broadcast(
+        Central.PubSub,
+        "battle_updates:#{battle.id}",
+        {:battle_updated, battle.id, data, reason}
+      )
+    end
     battle
   end
 
@@ -250,19 +258,17 @@ defmodule Teiserver.Battle do
   end
 
   # Start rects
-  def add_start_rectangle(battle_id, [_, _, _, _, _] = rectangle) do
+  def add_start_rectangle(battle_id, [team, a, b, c, d]) do
     battle = get_battle(battle_id)
-    new_rectangles = battle.start_rectangles ++ [rectangle]
+    new_rectangles = Map.put(battle.start_rectangles, team, [a, b, c, d])
     new_battle = %{battle | start_rectangles: new_rectangles}
-    update_battle(new_battle, rectangle, :add_start_rectangle)
+    update_battle(new_battle, {team, [a, b, c, d]}, :add_start_rectangle)
   end
 
   def remove_start_rectangle(battle_id, team) do
     battle = get_battle(battle_id)
 
-    new_rectangles =
-      battle.start_rectangles
-      |> Enum.filter(fn [rteam | _] -> rteam != team end)
+    new_rectangles = Map.delete(battle.start_rectangles, team)
 
     new_battle = %{battle | start_rectangles: new_rectangles}
     update_battle(new_battle, team, :remove_start_rectangle)

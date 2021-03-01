@@ -25,7 +25,8 @@ defmodule Teiserver.SpringBattleHostTest do
       |> String.split("\n")
 
     [
-      _open,
+      opened,
+      open,
       join,
       _tags,
       battle_status,
@@ -35,6 +36,8 @@ defmodule Teiserver.SpringBattleHostTest do
       | _
     ] = reply
 
+    assert opened =~ "BATTLEOPENED "
+    assert open =~ "OPENBATTLE "
     assert join =~ "JOINBATTLE "
     assert join =~ " gameHash"
 
@@ -71,6 +74,11 @@ defmodule Teiserver.SpringBattleHostTest do
     _send(socket, "KICKFROMBATTLE #{battle_id} #{user2.name}\n")
     reply = _recv(socket2)
     assert reply == "FORCEQUITBATTLE\nLEFTBATTLE #{battle_id} #{user2.name}\n"
+
+    # Had a bug where the battle would be incorrectly closed
+    # after kicking a player
+    battle = Battle.get_battle(battle_id)
+    assert battle != nil
 
     # Adding start rectangles
     assert Enum.count(battle.start_rectangles) == 0

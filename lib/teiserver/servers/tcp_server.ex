@@ -201,6 +201,9 @@ defmodule Teiserver.TcpServer do
 
         :disable_units ->
           state.protocol.reply(:disable_units, data, state)
+
+      _ ->
+        Logger.error("No handler in tcp_server:battle_updated with reason #{reason}")
       end
     else
       state
@@ -213,7 +216,9 @@ defmodule Teiserver.TcpServer do
     new_state = case reason do
       :update_battle_info ->
         state.protocol.reply(:update_battle, battle_id, state)
-
+      
+      _ ->
+        Logger.error("No handler in tcp_server:all_battle_updated with reason #{reason}")
     end
 
     {:noreply, new_state}
