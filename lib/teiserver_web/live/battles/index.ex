@@ -35,6 +35,10 @@ defmodule TeiserverWeb.BattleLive.Index do
     {:noreply, assign(socket, :battles, list_battles())}
   end
 
+  def handle_info({:all_battle_updated, _battle_id, _reason}, socket) do
+    {:noreply, assign(socket, :battles, list_battles())}
+  end
+
   defp apply_action(socket, :index, _params) do
     :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
 

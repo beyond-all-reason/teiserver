@@ -577,7 +577,8 @@ defmodule Teiserver.User do
     user_count =
       Account.list_users(
         search: [
-          admin_group: group_id
+          # Get from the bar group or the admins
+          admin_group: [group_id, 1]
         ]
       )
       |> Parallel.map(fn user ->

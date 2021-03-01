@@ -32,7 +32,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # in_STLS - Technically implemented, won't work the same way due to TCP/TLS port different in ranch
   # in_PORTTEST
   # in_CONFIRMAGREEMENT
-  # in_SAYEX
   # in_SAYPRIVATEEX
   # in_BATTLEHOSTMSG
   # in_JOINBATTLEACCEPT
@@ -227,19 +226,19 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
         :timer.sleep(100)
 
-        # Client status messages
-        Client.list_clients()
-        |> Enum.map(fn client ->
-          reply(:client_status, client, state)
-        end)
-
-        :timer.sleep(100)
-
         Battle.list_battles()
         |> Enum.each(fn b ->
           reply(:battle_opened, b, state)
           reply(:update_battle, b, state)
           reply(:battle_players, b, state)
+        end)
+
+        :timer.sleep(100)
+
+        # Client status messages
+        Client.list_clients()
+        |> Enum.map(fn client ->
+          reply(:client_status, client, state)
         end)
 
         :timer.sleep(100)
@@ -544,6 +543,18 @@ defmodule Teiserver.Protocols.SpringProtocol do
     case Regex.run(~r/(\w+) (.+)/, data) do
       [_, room_name, msg] ->
         Room.send_message(state.userid, room_name, msg)
+
+      _ ->
+        _no_match(state, "SAY", data)
+    end
+
+    state
+  end
+
+  defp do_handle("SAYEX", data, state) do
+    case Regex.run(~r/(\w+) (.+)/, data) do
+      [_, room_name, msg] ->
+        Room.send_message_ex(state.userid, room_name, msg)
 
       _ ->
         _no_match(state, "SAY", data)
@@ -1314,6 +1325,13 @@ defmodule Teiserver.Protocols.SpringProtocol do
     if from_id not in (state_user.ignored || []) do
       from_name = User.get_username(from_id)
       "SAID #{room_name} #{from_name} #{msg}\n"
+    end
+  end
+
+  defp do_reply(:chat_message_ex, {from_id, room_name, msg, state_user}) do
+    if from_id not in (state_user.ignored || []) do
+      from_name = User.get_username(from_id)
+      "SAIDEX #{room_name} #{from_name} #{msg}\n"
     end
   end
 

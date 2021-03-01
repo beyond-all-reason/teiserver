@@ -23,7 +23,9 @@ defmodule Teiserver.TcpServer do
   """
 
   def format_log(s) do
-    String.replace(s, "\n", "\\n")
+    s
+    |> String.replace("\n", "\\n")
+    |> String.replace("\t", "~")
   end
 
   # Called at startup
@@ -154,8 +156,11 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:updated_client, new_client, :client_updated_battlestatus}, state) do
-    new_state = state.protocol.reply(:client_battlestatus, new_client, state)
-    {:noreply, new_state}
+    if state.client.battle_id != nil and state.client.battle_id == new_client.battle_id do
+      state.protocol.reply(:client_battlestatus, new_client, state)
+    end
+
+    {:noreply, state}
   end
 
   def handle_info({:updated_client, new_client, _reason}, state) do
@@ -167,13 +172,6 @@ defmodule Teiserver.TcpServer do
       else
         state
       end
-
-    {:noreply, new_state}
-  end
-
-  def handle_info({:new_battlestatus, userid, battlestatus, team_colour}, state) do
-    new_state =
-      state.protocol.reply(:client_battlestatus, {userid, battlestatus, team_colour}, state)
 
     {:noreply, new_state}
   end
@@ -258,6 +256,11 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  def handle_info({:new_message_ex, from, room_name, msg}, state) do
+    new_state = state.protocol.reply(:chat_message_ex, {from, room_name, msg, state.user}, state)
+    {:noreply, new_state}
+  end
+
   def handle_info({:add_user_to_room, userid, room_name}, state) do
     new_state = state.protocol.reply(:add_user_to_room, {userid, room_name}, state)
     {:noreply, new_state}
@@ -280,7 +283,11 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:add_user_to_battle, userid, battle_id}, state) do
-    new_state = state.protocol.reply(:add_user_to_battle, {userid, battle_id}, state)
+    new_state = if userid != state.userid do
+      state.protocol.reply(:add_user_to_battle, {userid, battle_id}, state)
+    else
+      state
+    end
     {:noreply, new_state}
   end
 

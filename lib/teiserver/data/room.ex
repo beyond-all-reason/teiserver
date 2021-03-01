@@ -115,4 +115,20 @@ defmodule Teiserver.Room do
         end
     end
   end
+
+  def send_message_ex(from, room_name, msg) do
+    case get_room(room_name) do
+      nil ->
+        nil
+
+      room ->
+        if from in room.members do
+          PubSub.broadcast(
+            Central.PubSub,
+            "room:#{room_name}",
+            {:new_message_ex, from, room_name, msg}
+          )
+        end
+    end
+  end
 end
