@@ -335,6 +335,14 @@ defmodule Teiserver.Battle do
     )
   end
 
+  def sayex(userid, msg, battle_id) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "battle_updates:#{battle_id}",
+      {:battle_message_ex, userid, msg, battle_id}
+    )
+  end
+
   def allow?(cmd, %{user: user, client: %{battle_id: battle_id}}),
     do: allow?(user, cmd, battle_id)
 

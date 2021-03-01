@@ -80,7 +80,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # in_FORCELEAVECHANNEL
   # in_SETCHANNELKEY
   # in_STARTTLS
-  # in_SAYBATTLEEX
   # in_SAYBATTLEPRIVATEEX
   # in_GETINGAMETIME
 
@@ -929,6 +928,15 @@ defmodule Teiserver.Protocols.SpringProtocol do
     state
   end
 
+  defp do_handle("SAYBATTLEEX", _msg, %{client: %{battle_id: nil}} = state), do: state  
+  defp do_handle("SAYBATTLEEX", msg, state) do
+    if Battle.allow?("SAYBATTLEEX", state) do
+      Battle.sayex(state.userid, msg, state.client.battle_id)
+    end
+
+    state
+  end
+
   # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#UPDATEBATTLEINFO:client
   defp do_handle("UPDATEBATTLEINFO", data, state) do
     case Regex.run(~r/(\d+) (\d+) (\d+) (.+)$/, data) do
@@ -1339,7 +1347,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "SAIDBATTLE #{username} #{msg}\n"
   end
 
-  defp do_reply(:battle_saidex, {userid, msg, _battle_id}) do
+  defp do_reply(:battle_message_ex, {userid, msg, _battle_id}) do
     username = User.get_username(userid)
     "SAIDBATTLEEX #{username} #{msg}\n"
   end

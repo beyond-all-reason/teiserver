@@ -298,6 +298,11 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  def handle_info({:battle_message_ex, userid, msg, battle_id}, state) do
+    new_state = state.protocol.reply(:battle_message_ex, {userid, msg, battle_id}, state)
+    {:noreply, new_state}
+  end
+
   def handle_info({:add_bot_to_battle, battleid, bot}, state) do
     new_state = state.protocol.reply(:add_bot_to_battle, {battleid, bot}, state)
     {:noreply, new_state}
