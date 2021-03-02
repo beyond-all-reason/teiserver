@@ -940,6 +940,16 @@ defmodule Teiserver.Protocols.SpringProtocol do
     state
   end
 
+  defp do_handle("REMOVEBOT", _msg, %{client: %{battle_id: nil}} = state), do: state
+
+  defp do_handle("REMOVEBOT", botname, state) do
+    if Battle.allow?("REMOVEBOT", state) do
+      Battle.remove_bot(state.client.battle_id, botname)
+    end
+
+    state
+  end
+
   defp do_handle("SAYBATTLE", _msg, %{client: %{battle_id: nil}} = state), do: state
 
   defp do_handle("SAYBATTLE", msg, state) do
