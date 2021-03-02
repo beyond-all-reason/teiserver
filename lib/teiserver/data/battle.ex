@@ -121,18 +121,9 @@ defmodule Teiserver.Battle do
     end)
   end
 
-  def add_bot_to_battle(battle_id, owner_id, {name, battlestatus, team_colour, ai_dll}) do
-    bot = %{
-      name: name,
-      owner_id: owner_id,
-      owner_name: User.get_user_by_id(owner_id).name,
-      battlestatus: battlestatus,
-      team_colour: team_colour,
-      ai_dll: ai_dll
-    }
-
+  def add_bot_to_battle(battle_id, bot) do
     battle = get_battle(battle_id)
-    new_bots = Map.put(battle.bots, name, bot)
+    new_bots = Map.put(battle.bots, bot.name, bot)
     new_battle = %{battle | bots: new_bots}
     ConCache.put(:battles, battle.id, new_battle)
 
@@ -145,7 +136,7 @@ defmodule Teiserver.Battle do
 
   def update_bot(battle_id, botname, "0", _), do: remove_bot(battle_id, botname)
 
-  def update_bot(battle_id, botname, new_status, new_team_colour) do
+  def update_bot(battle_id, botname, new_bot) do
     battle = get_battle(battle_id)
 
     case battle.bots[botname] do
@@ -154,10 +145,7 @@ defmodule Teiserver.Battle do
 
       bot ->
         new_bot =
-          Map.merge(bot, %{
-            battlestatus: new_status,
-            team_colour: new_team_colour
-          })
+          Map.merge(bot, new_bot)
 
         new_bots = Map.put(battle.bots, botname, new_bot)
         new_battle = %{battle | bots: new_bots}

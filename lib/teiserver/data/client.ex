@@ -19,7 +19,7 @@ defmodule Teiserver.Client do
         team_number: 0,
         team_colour: 0,
         ally_team_number: 0,
-        spectator: true,
+        player: false,
         handicap: 0,
         sync: 0,
         side: 0,
@@ -83,7 +83,7 @@ defmodule Teiserver.Client do
       client ->
         case Battle.get_battle(client.battle_id) do
           nil ->
-            nil
+            client
 
           _battle ->
             new_client =
@@ -93,6 +93,7 @@ defmodule Teiserver.Client do
               })
 
             ConCache.put(:clients, new_client.userid, new_client)
+            new_client
         end
     end
   end
@@ -105,7 +106,7 @@ defmodule Teiserver.Client do
       client ->
         case Battle.get_battle(client.battle_id) do
           nil ->
-            nil
+            client
 
           _battle ->
             Battle.remove_user_from_battle(userid, client.battle_id)
@@ -117,6 +118,7 @@ defmodule Teiserver.Client do
               })
 
             ConCache.put(:clients, new_client.userid, new_client)
+            new_client
         end
     end
   end

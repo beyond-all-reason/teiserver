@@ -330,25 +330,24 @@ ENDOFCHANNELS\n"
   #     _recv(socket)
   #   end
 
-  #   test "ring", %{socket: socket1, user: user} do
-  #     user2 = new_user()
-  #     %{socket: socket2} = auth_setup(user2)
-  #     reply = _recv(socket1)
-  #     assert reply =~ "ADDUSER #{user2.name} XX "
-  #     assert reply =~ " LuaLobby Chobby\n"
+    test "ring", %{socket: socket1, user: user} do
+      user2 = new_user()
+      %{socket: socket2} = auth_setup(user2)
+      reply = _recv(socket1)
+      assert reply =~ "ADDUSER #{user2.name} GB 0 #{user2.id} LuaLobby Chobby\n"
 
-  #     _send(socket2, "RING #{user.name}\n")
-  #     _ = _recv(socket2)
+      _send(socket2, "RING #{user.name}\n")
+      _ = _recv(socket2)
 
-  #     reply = _recv(socket1)
-  #     assert reply == "RING #{user2.name}\n"
+      reply = _recv(socket1)
+      assert reply == "RING #{user2.name}\n"
 
-  #     _send(socket1, "EXIT\n")
-  #     _recv(socket1)
+      _send(socket1, "EXIT\n")
+      _recv(socket1)
 
-  #     _send(socket2, "EXIT\n")
-  #     _recv(socket2)
-  #   end
+      _send(socket2, "EXIT\n")
+      _recv(socket2)
+    end
 
   test "RENAMEACCOUNT", %{socket: socket} do
     _send(socket, "RENAMEACCOUNT rename_test_user\n")

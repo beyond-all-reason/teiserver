@@ -38,10 +38,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # in_JOINBATTLEDENY
   # in_CHANNELTOPIC
   # in_GETCHANNELMESSAGES
-  # in_FORCETEAMNO
-  # in_FORCEALLYNO
-  # in_FORCETEAMCOLOR
-  # in_FORCESPECTATORMODE
   # in_GETUSERID
   # in_FINDIP
   # in_GETIP
@@ -808,7 +804,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("FORCETEAMNO", data, state) do
-    case Regex.run(~r/(\d+) (\S+)/, data) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
       [_, name, team_number] ->
         if Battle.allow?("FORCETEAMNO", state) do
           client = Client.get_client_by_name(name)
@@ -824,7 +820,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("FORCEALLYNO", data, state) do
-    case Regex.run(~r/(\d+) (\S+)/, data) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
       [_, name, ally_team_number] ->
         if Battle.allow?("FORCEALLYNO", state) do
           client = Client.get_client_by_name(name)
@@ -840,7 +836,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("FORCETEAMCOLOR", data, state) do
-    case Regex.run(~r/(\d+) (\S+)/, data) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
       [_, name, team_colour] ->
         if Battle.allow?("FORCETEAMCOLOR", state) do
           client = Client.get_client_by_name(name)
@@ -907,9 +903,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
         if Battle.allow?("ADDBOT", state) do
           Battle.add_bot_to_battle(
             state.client.battle_id,
-            state.userid,
             Map.merge(%{
               name: name,
+              owner_name: state.name,
+              owner_id: state.userid,
               team_colour: team_colour,
               ai_dll: ai_dll
             }, parse_battle_status(battlestatus))
@@ -926,10 +923,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("UPDATEBOT", _msg, %{client: %{battle_id: nil}} = state), do: state
 
   defp do_handle("UPDATEBOT", data, state) do
-    case Regex.run(~r/(\S+) (\d+) (\d+) (\S+)/, data) do
+    case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
       [_, name, battlestatus, team_colour] ->
         if Battle.allow?("UPDATEBOT", state) do
-          Battle.update_bot(state.client.battle_id, name, battlestatus, team_colour)
+          new_bot = Map.merge(%{
+            team_colour: team_colour,
+          }, parse_battle_status(battlestatus))
+          Battle.update_bot(state.client.battle_id, name, new_bot)
+
         end
 
       _ ->
@@ -989,16 +990,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
     %{state | client: new_client}
   end
 
-  # b0 = undefined (reserved for future use)
-  # b1 = ready (0=not ready, 1=ready)
-  # b2..b5 = team no. (from 0 to 15. b2 is LSB, b5 is MSB)
-  # b6..b9 = ally team no. (from 0 to 15. b6 is LSB, b9 is MSB)
-  # b10 = mode (0 = spectator, 1 = normal player)
-  # b11..b17 = handicap (7-bit number. Must be in range 0..100). Note: Only host can change handicap values of the players in the battle (with HANDICAP command). These 7 bits are always ignored in this command. They can only be changed using HANDICAP command.
-  # b18..b21 = reserved for future use (with pre 0.71 versions these bits were used for team color index)
-  # b22..b23 = sync status (0 = unknown, 1 = synced, 2 = unsynced)
-  # b24..b27 = side (e.g.: arm, core, tll, ... Side index can be between 0 and 15, inclusive)
-  # b28..b31 = undefined (reserved for future use)
   defp do_handle("MYBATTLESTATUS", _, %{client: %{battle_id: nil}} = state), do: state
 
   defp do_handle("MYBATTLESTATUS", data, state) do
@@ -1424,16 +1415,25 @@ defmodule Teiserver.Protocols.SpringProtocol do
     |> Integer.undigits(2)
   end
   
-  defp parse_battle_status(status) do
+  # b0 = undefined (reserved for future use)
+  # b1 = ready (0=not ready, 1=ready)
+  # b2..b5 = team no. (from 0 to 15. b2 is LSB, b5 is MSB)
+  # b6..b9 = ally team no. (from 0 to 15. b6 is LSB, b9 is MSB)
+  # b10 = mode (0 = spectator, 1 = normal player)
+  # b11..b17 = handicap (7-bit number. Must be in range 0..100). Note: Only host can change handicap values of the players in the battle (with HANDICAP command). These 7 bits are always ignored in this command. They can only be changed using HANDICAP command.
+  # b18..b21 = reserved for future use (with pre 0.71 versions these bits were used for team color index)
+  # b22..b23 = sync status (0 = unknown, 1 = synced, 2 = unsynced)
+  # b24..b27 = side (e.g.: arm, core, tll, ... Side index can be between 0 and 15, inclusive)
+  # b28..b31 = undefined (reserved for future use)
+  def parse_battle_status(status) do
     status_bits =
       BitParse.parse_bits(status, 32)
       |> Enum.reverse()
 
     [
-      _,
+      _,# Undefined
       ready,
-      # team number
-      t1,
+      t1,# team number
       t2,
       t3,
       t4,
@@ -1442,7 +1442,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       a2,
       a3,
       a4,
-      spectator,
+      player,
       # Handicap
       h1,
       h2,
@@ -1451,40 +1451,41 @@ defmodule Teiserver.Protocols.SpringProtocol do
       h5,
       h6,
       h7,
-      # Not used at this time?
-      _,
-      _,
-      _,
-      _,
+      _,# Undefined
+      _,# Undefined
+      _,# Undefined
+      _,# Undefined
       sync1,
       sync2,
       side1,
       side2,
       side3,
       side4,
-      _,
-      _,
-      _,
-      _
+      _,# Undefined
+      _,# Undefined
+      _,# Undefined
+      _# Undefined
     ] = status_bits
-    
+
+    # Team is the player
+    # Ally team is the team the player is on
     %{
       ready: ready == 1,
-      handicap: [h1, h2, h3, h4, h5, h6, h7] |> Integer.undigits(2),
-      team_number: [t1, t2, t3, t4] |> Integer.undigits(2),
-      ally_team_number: [a1, a2, a3, a4] |> Integer.undigits(2),
-      spectator: spectator == 1,
-      sync: [sync1, sync2] |> Integer.undigits(2),
-      side: [side1, side2, side3, side4] |> Integer.undigits(2)
+      handicap: [h7, h6, h5, h4, h3, h2, h1] |> Integer.undigits(2),
+      team_number: [t4, t3, t2, t1] |> Integer.undigits(2),
+      ally_team_number: [a4, a3, a2, a1] |> Integer.undigits(2),
+      player: player == 1,
+      sync: [sync2, sync1] |> Integer.undigits(2),
+      side: [side4, side3, side2, side1] |> Integer.undigits(2)
     }
   end
 
-  defp create_battle_status(client) do
-    [t1, t2, t3, t4] = BitParse.parse_bits("#{client.team_number}", 4)
-    [a1, a2, a3, a4] = BitParse.parse_bits("#{client.ally_team_number}", 4)
-    [h1, h2, h3, h4, h5, h6, h7] = BitParse.parse_bits("#{client.handicap}", 7)
-    [sync1, sync2] = BitParse.parse_bits("#{client.sync}", 2)
-    [side1, side2, side3, side4] = BitParse.parse_bits("#{client.side}", 4)
+  def create_battle_status(client) do
+    [t4, t3, t2, t1] = BitParse.parse_bits("#{client.team_number}", 4)
+    [a4, a3, a2, a1] = BitParse.parse_bits("#{client.ally_team_number}", 4)
+    [h7, h6, h5, h4, h3, h2, h1] = BitParse.parse_bits("#{client.handicap}", 7)
+    [sync2, sync1] = BitParse.parse_bits("#{client.sync}", 2)
+    [side4, side3, side2, side1] = BitParse.parse_bits("#{client.side}", 4)
 
     [
       0,
@@ -1497,7 +1498,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       a2,
       a3,
       a4,
-      if(client.spectator, do: 1, else: 0),
+      if(client.player, do: 1, else: 0),
       h1,
       h2,
       h3,
