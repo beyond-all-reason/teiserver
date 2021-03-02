@@ -74,7 +74,7 @@ defmodule Teiserver.SpringAuthTest do
     # And now we try for a bad mystatus command
     _send(socket, "MYSTATUS\n")
     reply = _recv(socket)
-    assert reply == "SERVERMSG No match for MYSTATUS with data ''\n"
+    assert reply == "SERVERMSG No incomming match for MYSTATUS with data ''\n"
 
     # Now change the password - incorrectly
     _send(socket, "CHANGEPASSWORD wrong_pass\tnew_pass\n")

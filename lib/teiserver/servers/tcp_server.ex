@@ -25,7 +25,7 @@ defmodule Teiserver.TcpServer do
   def format_log(s) do
     s
     |> String.replace("\n", "\\n")
-    |> String.replace("\t", "~")
+    |> String.replace("\t", "~~")
   end
 
   # Called at startup
@@ -83,6 +83,7 @@ defmodule Teiserver.TcpServer do
       |> Enum.join(".")
     
     state = %{
+      message_part: "",
       userid: nil,
       name: nil,
       client: nil,
@@ -116,12 +117,18 @@ defmodule Teiserver.TcpServer do
   def handle_info({:tcp, socket, data}, state) do
     Logger.info("<-- #{Kernel.inspect(socket)}:TCP #{state.name} - #{format_log(data)}")
 
-    new_state =
+    new_state = if String.ends_with?(data, "\n") do
+      data = state.message_part <> data
+
       data
       |> String.split("\n")
       |> Enum.reduce(state, fn data, acc ->
         state.protocol.handle(data, acc)
       end)
+      |> Map.put(:message_part, "")
+    else
+      %{state | message_part: state.message_part <> data}
+    end
 
     {:noreply, new_state}
   end
@@ -129,12 +136,16 @@ defmodule Teiserver.TcpServer do
   def handle_info({:ssl, socket, data}, state) do
     Logger.info("<-- #{Kernel.inspect(socket)}:SSL #{state.name} - #{format_log(data)}")
 
-    new_state =
+    new_state = if String.ends_with?(data, "\n") do
       data
       |> String.split("\n")
       |> Enum.reduce(state, fn data, acc ->
         state.protocol.handle(data, acc)
       end)
+      |> Map.put(:message_part, "")
+    else
+      %{state | message_part: state.message_part <> data}
+    end
 
     {:noreply, new_state}
   end

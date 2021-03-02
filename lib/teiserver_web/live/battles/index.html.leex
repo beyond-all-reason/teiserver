@@ -24,16 +24,18 @@
   </thead>
   <tbody id="battles">
     <%= for battle <- @battles do %>
-      <tr id="battle-<%= battle.id %>">
-        <td><%= battle.name %></td>
-        <td><%= Enum.count(battle.players) %></td>
+      <%= if battle != nil do %>
+        <tr id="battle-<%= battle.id %>">
+          <td><%= battle.name %></td>
+          <td><%= Enum.count(battle.players) %></td>
 
-        <td>
-          <span>
-            <%= live_redirect "Show", to: Routes.ts_battle_show_path(@socket, :show, battle.id), class: "btn btn-sm btn-#{bsname}" %>
-          </span>
-        </td>
-      </tr>
+          <td>
+            <span>
+              <%= live_redirect "Show", to: Routes.ts_battle_show_path(@socket, :show, battle.id), class: "btn btn-sm btn-#{bsname}" %>
+            </span>
+          </td>
+        </tr>
+      <% end %>
     <% end %>
   </tbody>
 </table>

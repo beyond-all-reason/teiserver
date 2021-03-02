@@ -156,7 +156,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("OB", _, state) do
     do_handle(
       "OPENBATTLE",
-      "0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName",
+      "0 0 * 52200 16 -1540855590 0 1565299817 spring\t104.0.1-1784-gf6173b4 BAR\tComet Catcher Remake 1.8\tEU - 00\tBeyond All Reason test-15649-709bfef",
+      # "0 0 * 52200 16 -1540855590 0 1565299817 spring~~104.0.1-1784-gf6173b4 BAR~~Comet Catcher Remake 1.8~~EU - 00~~Beyond All Reason test-15649-709bfef
       state
     )
   end
@@ -679,9 +680,9 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
     case response do
       {:success, battle} ->
-        Logger.debug("[command:joinbattle] success")
         PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
         Battle.add_user_to_battle(state.userid, battle.id)
+        Client.join_battle(state.userid, battle.id)
         reply(:join_battle, battle, state)
         reply(:add_script_tags, battle.tags, state)
 
@@ -762,6 +763,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
       tags =
         data
         |> String.split("\t")
+        |> Enum.filter(fn t ->
+          flag = String.contains?(t, "=")
+          if flag != true, do: Logger.error("error in SETSCRIPTTAGS, = not found in tag: #{data}")
+          flag
+        end)
         |> Map.new(fn t ->
           [k, v] = String.split(t, "=")
           {String.downcase(k), v}
@@ -902,7 +908,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
           Battle.add_bot_to_battle(
             state.client.battle_id,
             state.userid,
-            {name, battlestatus, team_colour, ai_dll}
+            Map.merge(%{
+              name: name,
+              team_colour: team_colour,
+              ai_dll: ai_dll
+            }, parse_battle_status(battlestatus))
           )
         end
 
@@ -950,7 +960,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#UPDATEBATTLEINFO:client
   defp do_handle("UPDATEBATTLEINFO", data, state) do
-    case Regex.run(~r/(\d+) (\d+) (\d+) (.+)$/, data) do
+    case Regex.run(~r/(\d+) (\d+) (\S+) (.+)$/, data) do
       [_, spectator_count, locked, map_hash, map_name] ->
         if Battle.allow?("UPDATEBATTLEINFO", state) do
           battle = Battle.get_battle(state.client.battle_id)
@@ -995,56 +1005,23 @@ defmodule Teiserver.Protocols.SpringProtocol do
     new_client =
       case Regex.run(~r/(\S+) (.+)/, data) do
         [_, battlestatus, team_colour] ->
-          status_bits =
-            BitParse.parse_bits(battlestatus, 32)
-            |> Enum.reverse()
+          updates = parse_battle_status(battlestatus)
+          |> Map.take([:ready, :team_number, :ally_team_number, :spectator, :sync, :side])
+          
+          new_client = state.client
+          |> Map.merge(updates)
+          |> Map.put(:team_colour, team_colour)
 
-          [
-            _,
-            ready,
-            t1,
-            t2,
-            t3,
-            t4,
-            a1,
-            a2,
-            a3,
-            a4,
-            spectator,
-            # Handicap, not set here
-            _h1,
-            _h2,
-            _h3,
-            _h4,
-            _h5,
-            _h6,
-            _h7,
-            _,
-            _,
-            _,
-            _,
-            sync1,
-            sync2,
-            side1,
-            side2,
-            side3,
-            side4,
-            _,
-            _,
-            _,
-            _
-          ] = status_bits
-
-          new_client =
-            Map.merge(state.client, %{
-              ready: ready == 1,
-              team_number: [t1, t2, t3, t4] |> Integer.undigits(2),
-              ally_team_number: [a1, a2, a3, a4] |> Integer.undigits(2),
-              spectator: spectator == 1,
-              sync: [sync1, sync2] |> Integer.undigits(2),
-              side: [side1, side2, side3, side4] |> Integer.undigits(2),
-              team_colour: team_colour
-            })
+          # new_client =
+          #   Map.merge(state.client, %{
+          #     ready: ready == 1,
+          #     team_number: [t1, t2, t3, t4] |> Integer.undigits(2),
+          #     ally_team_number: [a1, a2, a3, a4] |> Integer.undigits(2),
+          #     spectator: spectator == 1,
+          #     sync: [sync1, sync2] |> Integer.undigits(2),
+          #     side: [side1, side2, side3, side4] |> Integer.undigits(2),
+          #     team_colour: team_colour
+          #   })
 
           # This one needs a bit more nuance, for now we'll wrap it in this
           if Battle.allow?("MYBATTLESTATUS", state) do
@@ -1182,7 +1159,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       battle.port
     } #{battle.max_players} #{passworded} #{battle.rank} #{battle.map_hash} #{battle.engine_name}\t#{
       battle.engine_version
-    }\t#{battle.map_name}\t#{battle.name}\t#{battle.game_name}\ttest-15386-5c98cfa\n"
+    }\t#{battle.map_name}\t#{battle.name}\t#{battle.game_name}\n"
   end
 
   defp do_reply(:battle_opened, battle_id) do
@@ -1375,7 +1352,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(atom, data) do
-    Logger.error("No match in spring.ex for atom: #{atom} and data: #{Kernel.inspect(data)}")
+    Logger.error("No reply match in spring.ex for atom: #{atom} and data: #{Kernel.inspect(data)}")
     ""
   end
 
@@ -1384,8 +1361,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
       data
       |> String.replace("\t", "\\t")
 
-    msg = "No match for #{cmd} with data '#{data}'"
-    Logger.debug(msg)
+    msg = "No incomming match for #{cmd} with data '#{data}'"
+    Logger.error(msg)
     _send("SERVERMSG #{msg}\n", state)
     state
   end
@@ -1445,6 +1422,61 @@ defmodule Teiserver.Protocols.SpringProtocol do
     ]
     |> Enum.reverse()
     |> Integer.undigits(2)
+  end
+  
+  defp parse_battle_status(status) do
+    status_bits =
+      BitParse.parse_bits(status, 32)
+      |> Enum.reverse()
+
+    [
+      _,
+      ready,
+      # team number
+      t1,
+      t2,
+      t3,
+      t4,
+      # ally team number
+      a1,
+      a2,
+      a3,
+      a4,
+      spectator,
+      # Handicap
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6,
+      h7,
+      # Not used at this time?
+      _,
+      _,
+      _,
+      _,
+      sync1,
+      sync2,
+      side1,
+      side2,
+      side3,
+      side4,
+      _,
+      _,
+      _,
+      _
+    ] = status_bits
+    
+    %{
+      ready: ready == 1,
+      handicap: [h1, h2, h3, h4, h5, h6, h7] |> Integer.undigits(2),
+      team_number: [t1, t2, t3, t4] |> Integer.undigits(2),
+      ally_team_number: [a1, a2, a3, a4] |> Integer.undigits(2),
+      spectator: spectator == 1,
+      sync: [sync1, sync2] |> Integer.undigits(2),
+      side: [side1, side2, side3, side4] |> Integer.undigits(2)
+    }
   end
 
   defp create_battle_status(client) do

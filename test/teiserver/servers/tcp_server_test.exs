@@ -39,6 +39,25 @@ defmodule Teiserver.TcpServerTest do
     assert "ADDUSER" in commands
     assert "LOGININFOEND" in commands
 
+    # Try sending a multi-part message?
+    # Join a chat channel
+    _send(socket, "JOIN mpchan\n")
+    reply = _recv(socket)
+    assert reply =~ "JOIN mpchan\n"
+    assert reply =~ "JOINED mpchan #{username}\n"
+    assert reply =~ "CHANNELTOPIC mpchan #{username}\n"
+    assert reply =~ "CLIENTS mpchan #{username}\n"
+
+    # And send something very long
+    msg = 1..1800
+    |> Enum.map(fn _ -> "x" end)
+    |> Enum.join("")
+
+    # This is long enough it should trigger a splitting
+    _send(socket, "SAY mpchan #{msg}\n")
+    reply = _recv(socket)
+    assert reply =~ "SAID mpchan #{username} xxxxxxx"
+
     _send(socket, "EXIT\n")
     _ = _recv(socket)
     {:error, :closed} = :gen_tcp.recv(socket, 0, 1000)

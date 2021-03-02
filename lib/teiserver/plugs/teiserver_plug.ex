@@ -23,7 +23,7 @@ defmodule Teiserver.ServerUserPlug do
     |> assign(:server_user, nil)
   end
 
-  def live_call(%{assigns: %{current_user: current_user}} = socket, session) do
+  def live_call(%{assigns: %{current_user: current_user}} = socket, _session) do
     userid = current_user.id
     server_user = User.get_user_by_id(userid)
 

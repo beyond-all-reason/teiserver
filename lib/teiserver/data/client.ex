@@ -17,12 +17,13 @@ defmodule Teiserver.Client do
         # Battle stuff
         ready: false,
         team_number: 0,
+        team_colour: 0,
         ally_team_number: 0,
         spectator: true,
         handicap: 0,
         sync: 0,
         side: 0,
-        team_colour: 0,
+
         battle_id: nil
       },
       client
@@ -43,7 +44,7 @@ defmodule Teiserver.Client do
         in_game: false,
         ip: user.ip,
         country: user.country,
-        lobbyid: user.lobbyid
+        lobbyid: user.lobbyid,
       })
       |> add_client
 
@@ -74,6 +75,28 @@ defmodule Teiserver.Client do
     client
   end
 
+  def join_battle(userid, battle_id) do
+    case get_client_by_id(userid) do
+      nil ->
+        nil
+
+      client ->
+        case Battle.get_battle(client.battle_id) do
+          nil ->
+            nil
+
+          _battle ->
+            new_client =
+              Map.merge(client, %{
+                team_colour: 0,
+                battle_id: battle_id
+              })
+
+            ConCache.put(:clients, new_client.userid, new_client)
+        end
+    end
+  end
+
   def leave_battle(userid) do
     case get_client_by_id(userid) do
       nil ->
@@ -89,7 +112,6 @@ defmodule Teiserver.Client do
 
             new_client =
               Map.merge(client, %{
-                battlestatus: 0,
                 team_colour: 0,
                 battle_id: nil
               })
