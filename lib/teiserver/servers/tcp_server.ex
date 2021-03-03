@@ -114,8 +114,8 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:tcp, socket, data}, state) do
-    Logger.info("<-- #{Kernel.inspect(socket)}:TCP #{state.name} - #{format_log(data)}")
+  def handle_info({:tcp, _socket, data}, state) do
+    Logger.info("<-- #{state.name} - #{format_log(data)}")
 
     new_state = if String.ends_with?(data, "\n") do
       data = state.message_part <> data
@@ -133,8 +133,8 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:ssl, socket, data}, state) do
-    Logger.info("<-- #{Kernel.inspect(socket)}:SSL #{state.name} - #{format_log(data)}")
+  def handle_info({:ssl, _socket, data}, state) do
+    Logger.info("<-- #{state.name} - #{format_log(data)}")
 
     new_state = if String.ends_with?(data, "\n") do
       data

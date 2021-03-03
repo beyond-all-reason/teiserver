@@ -21,7 +21,8 @@ defmodule Teiserver.User do
     :verified,
     :password_reset_code,
     :email_change_code,
-    :password_hash
+    :password_hash,
+    :mmr
   ]
 
   @default_data %{
@@ -40,7 +41,8 @@ defmodule Teiserver.User do
     password_reset_code: nil,
     email_change_code: nil,
     last_login: nil,
-    ingame_seconds: 0
+    ingame_seconds: 0,
+    mmr: %{}
   }
 
   require Logger

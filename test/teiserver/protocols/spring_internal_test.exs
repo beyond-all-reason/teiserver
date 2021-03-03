@@ -18,7 +18,7 @@ defmodule Teiserver.SpringInternalTest do
   test "parse_battle_status" do
     # Test spectator
     player_status = ~w(4195330 4195418 4195462 4195402)
-    spectator_status = ~w(0 4194374 4194370)
+    spectator_status = ~w(0 4194374 4194370 4194304)
 
     for s <- player_status do
       result = SpringProtocol.parse_battle_status(s)
@@ -32,35 +32,39 @@ defmodule Teiserver.SpringInternalTest do
 
     # Ally team value, need to check these are actually right
     # since some of them seem to come up with different team numbers
-    # team1_status = ~w(4195330 4195330 4195334)
-    # team2_status = ~w(4195418 4195462 4195406 4195394)
-    # team3_status = ~w(4195402 4195470 4195458)
-    # team4_status = ~w(4195522)
+    team0_status = ~w(4195330)
+    team1_status = ~w(4195394)
+    team2_status = ~w(4195458)
+    team3_status = ~w(4195522)
 
-    # for s <- team1_status do
-    #   result = SpringProtocol.parse_battle_status(s)
-    #   IO.inspect {result.team_number, result.ally_team_number}
-    # end
+    for s <- team0_status do
+      result = SpringProtocol.parse_battle_status(s)
+      assert result.player == true, message: "Status #{s}"
+      assert result.ally_team_number == 0, message: "Status #{s}"
+    end
 
-    # for s <- team2_status do
-    #   result = SpringProtocol.parse_battle_status(s)
-    #   IO.inspect {result.team_number, result.ally_team_number}
-    # end
+    for s <- team1_status do
+      result = SpringProtocol.parse_battle_status(s)
+      assert result.player == true, message: "Status #{s}"
+      assert result.ally_team_number == 1, message: "Status #{s}"
+    end
 
-    # for s <- team3_status do
-    #   result = SpringProtocol.parse_battle_status(s)
-    #   IO.inspect {result.team_number, result.ally_team_number}
-    # end
+    for s <- team2_status do
+      result = SpringProtocol.parse_battle_status(s)
+      assert result.player == true, message: "Status #{s}"
+      assert result.ally_team_number == 2, message: "Status #{s}"
+    end
 
-    # for s <- team4_status do
-    #   result = SpringProtocol.parse_battle_status(s)
-    #   IO.inspect {result.team_number, result.ally_team_number}
-    # end
+    for s <- team3_status do
+      result = SpringProtocol.parse_battle_status(s)
+      assert result.player == true, message: "Status #{s}"
+      assert result.ally_team_number == 3, message: "Status #{s}"
+    end
 
     # Faction selector
     armarda_status = ~w(4195522 4195330)
-    core_status = ["20972546"]
-    random_status = ["37749760"]
+    core_status = ~w(20972546)
+    random_status = ~w(37749760)
 
     for s <- armarda_status do
       result = SpringProtocol.parse_battle_status(s)

@@ -854,7 +854,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("FORCESPECTATORMODE", name, state) do
     if Battle.allow?("FORCESPECTATORMODE", state) do
       client = Client.get_client_by_name(name)
-      new_client = %{client | spectator: true}
+      new_client = %{client | player: false}
       Client.update(new_client, :client_updated_battlestatus)
     end
 
@@ -1007,22 +1007,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
       case Regex.run(~r/(\S+) (.+)/, data) do
         [_, battlestatus, team_colour] ->
           updates = parse_battle_status(battlestatus)
-          |> Map.take([:ready, :team_number, :ally_team_number, :spectator, :sync, :side])
+          |> Map.take([:ready, :team_number, :ally_team_number, :player, :sync, :side])
           
           new_client = state.client
           |> Map.merge(updates)
           |> Map.put(:team_colour, team_colour)
-
-          # new_client =
-          #   Map.merge(state.client, %{
-          #     ready: ready == 1,
-          #     team_number: [t1, t2, t3, t4] |> Integer.undigits(2),
-          #     ally_team_number: [a1, a2, a3, a4] |> Integer.undigits(2),
-          #     spectator: spectator == 1,
-          #     sync: [sync1, sync2] |> Integer.undigits(2),
-          #     side: [side1, side2, side3, side4] |> Integer.undigits(2),
-          #     team_colour: team_colour
-          #   })
 
           # This one needs a bit more nuance, for now we'll wrap it in this
           if Battle.allow?("MYBATTLESTATUS", state) do
