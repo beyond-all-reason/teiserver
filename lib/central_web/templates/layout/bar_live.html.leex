@@ -34,6 +34,15 @@
           display: none;
         }
       }
+
+      <% {fg, bg, _bsname} = @colours %>
+      #breadcrumb-wrapper {
+        border-bottom: 1px solid <%= fg %> !important;
+        background-color: <%= bg %> !important;
+      }
+      #breadcrumb {
+        background-color: <%= bg %> !important;
+      }
     </style>
   </head>
   <body class="fixed-navbar fixed-sidebar">
@@ -43,7 +52,7 @@
         <div class="navbar-brand hide-sm" href="#">
           <i class="fas fa-fw fa-broadcast-tower" style="margin: -4px 20px 0 0px;" class="d-inline align-top"></i>
           <span id="page-title">
-            Metis
+            Teiserver
           </span>
         </div>
       </div>
@@ -83,7 +92,11 @@
     <div style="height: 47px;">&nbsp;</div>
 
     <!-- Page Content -->
-    <div id="page-content-wrapper">
+    <div id="page-content-wrapper" style="margin: 0; padding: 0;">
+      <%= if assigns[:breadcrumb_trails] do %>
+        <%= render CentralWeb.ComponentView, "breadcrumb.html", assigns %>
+      <% end %>
+
       <div id="flash-messages">
         <%= if live_flash(@flash, :danger) do %>
           <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger" phx-click="lv:clear-flash" phx-value-key="danger"><%= live_flash(@flash, :danger) %></p>

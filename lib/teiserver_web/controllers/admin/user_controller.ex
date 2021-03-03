@@ -187,25 +187,4 @@ defmodule TeiserverWeb.Admin.UserController do
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end
-
-  # def delete(conn, %{"id" => id}) do
-  #   user = Account.get_user!(id)
-
-  #   case Central.Account.UserLib.has_access(user, conn) do
-  #     {true, _} ->
-  #       user
-  #       |> UserLib.make_favourite
-  #       |> remove_recently(conn)
-
-  #       {:ok, _user} = Teiserver.delete_user(user)
-
-  #       conn
-  #       |> put_flash(:info, "User deleted successfully.")
-  #       |> redirect(to: Routes.ts_admin_user_path(conn, :index))
-  #     _ ->
-  #       conn
-  #       |> put_flash(:warning, "Unable to access this user")
-  #       |> redirect(to: Routes.ts_admin_user_path(conn, :index))
-  #   end
-  # end
 end

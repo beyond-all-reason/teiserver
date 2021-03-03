@@ -1,0 +1,55 @@
+<% {_fg, _bg, bsname} = @colours %>
+
+<div class="row">
+  <div class="col-md-12"> 
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+
+        <h4>
+          <%= if Enum.count(@clients) > 0 do %>
+            Clients - Row count: <%= Enum.count(@clients) %>
+          <% else %>
+            No clients found
+          <% end %>
+        </h4>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Bot</th>
+      <th>Mod</th>
+      <th>Verified</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="clients">
+    <%= for client <- @clients do %>
+      <% user = @users[client.userid] %>
+      <%= if client != nil do %>
+        <tr id="client-<%= client.userid %>">
+          <td><%= client.userid %></td>
+          <td><%= client.name %></td>
+
+          <td><%= if user.bot, do: "Bot" %></td>
+          <td><%= if user.moderator, do: "Mod" %></td>
+          <td><%= if user.verified, do: "Verified" %></td>
+
+          <td>
+            <span>
+              <%= live_redirect "Show", to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}" %>
+            </span>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>
+
+
+      </div>
+    </div>
+  </div>
+</div>

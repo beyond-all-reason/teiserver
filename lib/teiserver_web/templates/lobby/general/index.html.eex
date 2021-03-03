@@ -2,7 +2,7 @@
   <%= if @server_user do %>
     <%=
       component "menu_card",
-      icon: "fas fa-swords",
+      icon: Teiserver.BattleLib.icon(),
       name: "battles",
       text: "Battles",
       link: Routes.ts_battle_index_path(@conn, :index)
@@ -26,10 +26,10 @@
   <%= if allow?(@conn, "teiserver.admin.account") do %>
     <%=
       component "menu_card",
-      icon: "fas fa-plug",
+      icon: Teiserver.ClientLib.icon(),
       name: "client_admin",
       text: "Client admin",
-      link: Routes.ts_admin_client_path(@conn, :index)
+      link: Routes.ts_admin_client_index_path(@conn, :index)
     %>
 
     <%=

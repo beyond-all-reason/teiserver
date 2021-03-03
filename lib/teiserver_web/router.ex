@@ -26,10 +26,17 @@ defmodule TeiserverWeb.Router do
         live("/battle/:id", Show, :show)
       end
 
+      scope "/teiserver/admin", TeiserverWeb.ClientLive, as: :ts_admin do
+        pipe_through([:browser, :admin_layout, :protected])
+
+        live("/client", Index, :index)
+        live("/client/:id", Show, :show)
+      end
+
       scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
         pipe_through([:browser, :admin_layout, :protected])
 
-        resources("/client", ClientController)
+        get("/", GeneralController, :index)
 
         resources("/user", UserController)
         post("/user/reset_password/:id", UserController, :reset_password)
