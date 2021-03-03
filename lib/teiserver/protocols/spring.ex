@@ -4,7 +4,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html
   """
   require Logger
-  alias Regex
   alias Teiserver.Client
   alias Teiserver.Battle
   alias Teiserver.Room

@@ -502,7 +502,7 @@ defmodule Teiserver.User do
   end
 
   defp do_login(user, state, ip, lobbyid) do
-    country = "GB"
+    country = Teiserver.Geoip.get_flag(ip)
     last_login = :erlang.system_time(:seconds)
     user = %{user | ip: ip, lobbyid: lobbyid, country: country, last_login: last_login}
     update_user(user, persist: true)
