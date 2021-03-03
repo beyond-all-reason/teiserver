@@ -151,8 +151,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("OB", _, state) do
     do_handle(
       "OPENBATTLE",
-      "0 0 * 52200 16 -1540855590 0 1565299817 spring\t104.0.1-1784-gf6173b4 BAR\tComet Catcher Remake 1.8\tEU - 00\tBeyond All Reason test-15649-709bfef",
-      # "0 0 * 52200 16 -1540855590 0 1565299817 spring~~104.0.1-1784-gf6173b4 BAR~~Comet Catcher Remake 1.8~~EU - 00~~Beyond All Reason test-15649-709bfef
+      "0 0 * 52200 16 -1540855590 0 1565299817 spring\t104.0.1-1784-gf6173b4 BAR\tComet Catcher Remake 1.8\tEU - 00\tBeyond All Reason test-15658-85bf66d",
       state
     )
   end
@@ -1216,7 +1215,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_reply(:update_bot, {battle_id, bot}) do
     status = create_battle_status(bot)
-    "UPDATEBOT #{battle_id} #{bot.name} #{bot.owner_name} #{status} #{bot.team_colour}\n"
+    "UPDATEBOT #{battle_id} #{bot.name} #{status} #{bot.team_colour}\n"
   end
 
   defp do_reply(:battle_players, battle) do
