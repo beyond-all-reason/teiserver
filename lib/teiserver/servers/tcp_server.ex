@@ -162,8 +162,12 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:logged_out_client, userid, username}, state) do
-    new_state = state.protocol.reply(:logged_out_client, {userid, username}, state)
-    {:noreply, new_state}
+    if state.userid == userid do
+      {:stop, :normal, state}
+    else
+      new_state = state.protocol.reply(:logged_out_client, {userid, username}, state)
+      {:noreply, new_state}
+    end
   end
 
   def handle_info({:updated_client, new_client, :client_updated_status}, state) do

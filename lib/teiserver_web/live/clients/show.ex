@@ -23,13 +23,13 @@ defmodule TeiserverWeb.ClientLive.Show do
   end
 
   @impl true
-  def handle_params(%{"id" => id}, _, socket) do
+  def handle_params(%{"id" => id}, opts, socket) do
     id = int_parse(id)
     PubSub.subscribe(Central.PubSub, "all_client_updates")
     PubSub.subscribe(Central.PubSub, "user_updates:#{id}")
     client = Client.get_client_by_id(id)
     user = User.get_user_by_id(id)
-    
+
     {:noreply,
      socket
      |> assign(:page_title, page_title(socket.assigns.live_action))
@@ -43,6 +43,23 @@ defmodule TeiserverWeb.ClientLive.Show do
   @impl true
   def handle_info({:updated_client, new_client, _reason}, %{assigns: assigns} = socket) do
     {:noreply, assign(socket, :client, new_client)}
+  end
+
+  def handle_info({:logged_out_client, client_id, _name}, socket) do
+    if int_parse(client_id) == socket.assigns[:id] do
+      {:noreply,
+        socket
+        |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))
+      }
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event("force-disconnect", _event, socket) do
+    Client.disconnect(socket.assigns[:id])
+    {:noreply, socket}
   end
 
   defp page_title(:show), do: "Show Client"

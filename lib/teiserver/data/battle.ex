@@ -107,6 +107,12 @@ defmodule Teiserver.Battle do
 
     PubSub.broadcast(
       Central.PubSub,
+      "live_battle_updates:#{battle_id}",
+      {:battle_closed, battle_id}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
       "all_battle_updates",
       {:battle_closed, battle_id}
     )

@@ -95,6 +95,17 @@ defmodule TeiserverWeb.BattleLive.Show do
     {:noreply, assign(socket, :messages, new_messages)}
   end
 
+  def handle_info({:battle_closed, battle_id}, %{assigns: assigns} = socket) do
+    if int_parse(battle_id) == socket.assigns[:id] do
+      {:noreply,
+        socket
+        |> redirect(to: Routes.ts_battle_index_path(socket, :index))
+      }
+    else
+      {:noreply, socket}
+    end
+  end
+
   def handle_info({:add_bot_to_battle, _battleid, _bot}, %{assigns: assigns} = socket) do
     {:noreply, assign(socket, :battle, Battle.get_battle(assigns.id))}
   end

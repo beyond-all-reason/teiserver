@@ -31,6 +31,12 @@
 </div>
 <br />
 
+<div class="float-right">
+  <span class="btn btn-danger" phx-click="force-disconnect">
+    Force disconnect
+  </span>
+</div>
+
 <span>
   <%= live_redirect "Back", to: Routes.ts_admin_client_index_path(@socket, :index), class: "btn btn-#{bsname}" %>
 </span>
