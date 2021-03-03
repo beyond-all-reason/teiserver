@@ -97,7 +97,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   def handle("", state), do: state
   def handle("\r\n", state), do: state
 
-  def handle(<<255, 244, 255, 253, 6>>, state), do: do_handle("EXIT", nil, state)
   def handle(data, state) do
     tuple =
       ~r/^(#[0-9]+ )?([A-Z0-9]+)(.*)?$/

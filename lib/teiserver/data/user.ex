@@ -22,6 +22,7 @@ defmodule Teiserver.User do
     :password_reset_code,
     :email_change_code,
     :password_hash,
+    :ingame_seconds,
     :mmr
   ]
 

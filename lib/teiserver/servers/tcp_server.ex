@@ -114,6 +114,11 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  def handle_info({_, _socket, <<255, 244, 255, 253, 6>>}, state) do
+    new_state = state.protocol.handle("EXIT", state)
+    {:noreply, new_state}
+  end
+
   def handle_info({:tcp, _socket, data}, state) do
     Logger.info("<-- #{state.name} - #{format_log(data)}")
 

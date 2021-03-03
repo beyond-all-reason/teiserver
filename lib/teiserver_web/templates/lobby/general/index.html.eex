@@ -26,9 +26,17 @@
   <%= if allow?(@conn, "teiserver.admin.account") do %>
     <%=
       component "menu_card",
-      icon: "fas fa-power-off",
-      name: "admin",
-      text: "Admin",
+      icon: "fas fa-plug",
+      name: "client_admin",
+      text: "Client admin",
+      link: Routes.ts_admin_client_path(@conn, :index)
+    %>
+
+    <%=
+      component "menu_card",
+      icon: "fas fa-users",
+      name: "user_admin",
+      text: "User admin",
       link: Routes.ts_admin_user_path(@conn, :index)
     %>
   <% end %>
