@@ -136,6 +136,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # any login. As soon as we put password checking in place this will
   # stop working
   defp do_handle("LI", username, state) do
+    Logger.warn("Shortcut handler, should be removed for beta testing")
     do_handle(
       "LOGIN",
       # "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp",
@@ -145,10 +146,12 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("JB", bnum, state) do
+    Logger.warn("Shortcut handler, should be removed for beta testing")
     do_handle("JOINBATTLE", "#{bnum} empty 193322681", state)
   end
 
   defp do_handle("OB", _, state) do
+    Logger.warn("Shortcut handler, should be removed for beta testing")
     do_handle(
       "OPENBATTLE",
       "0 0 * 52200 16 -1540855590 0 1565299817 spring\t104.0.1-1784-gf6173b4 BAR\tComet Catcher Remake 1.8\tEU - 00\tBeyond All Reason test-15658-85bf66d",

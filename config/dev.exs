@@ -38,7 +38,9 @@ config :central, Teiserver,
   ]
 
 config :central, Central.Mailer,
-  adapter: Bamboo.LocalAdapter
+  adapter: Bamboo.LocalAdapter,
+  noreply_address: "noreply@devsite.co.uk",
+  contact_address: "info@devsite.co.uk"
 
 # ## SSL Support
 #

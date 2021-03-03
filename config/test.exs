@@ -33,4 +33,6 @@ config :central, Oban,
   crontab: false
 
 config :central, Central.Mailer,
-  adapter: Bamboo.TestAdapter
+  adapter: Bamboo.TestAdapter,
+  noreply_address: "noreply@testsite.co.uk",
+  contact_address: "info@testsite.co.uk"
