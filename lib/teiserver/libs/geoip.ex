@@ -1,3 +1,4 @@
+# To install: sudo apt-get install geoip-bin
 defmodule Teiserver.Geoip do
   def get_flag(ip) do
     {result, 0} = System.cmd("geoiplookup", [ip])

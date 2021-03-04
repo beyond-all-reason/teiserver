@@ -144,6 +144,35 @@ defmodule Teiserver.Protocols.SpringProtocol do
     )
   end
 
+  # This is intended purely for an experimental benchmark
+  defp do_handle("TMPLI", "TEST_" <> userid, state) do
+    username = "TEST_" <> userid
+    userid = 100000 + int_parse(userid)
+    User.add_user(%{
+      id: userid,
+      name: username,
+      email: "#{username}@#{username}",
+      rank: 1,
+      country: "??",
+      lobbyid: "Telnet",
+      ip: "default_ip",
+      moderator: false,
+      bot: false,
+      friends: [],
+      friend_requests: [],
+      ignored: [],
+      password_hash: "X03MO1qnZdYdgyfeuILPmQ==",
+      verification_code: nil,
+      verified: false,
+      password_reset_code: nil,
+      email_change_code: nil,
+      last_login: nil,
+      ingame_seconds: 0,
+      mmr: %{}
+    })
+    do_handle("LI", username, state)
+  end
+
   defp do_handle("JB", bnum, state) do
     Logger.warn("Shortcut handler, should be removed for beta testing")
     do_handle("JOINBATTLE", "#{bnum} empty 193322681", state)
@@ -688,6 +717,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
           reply(:client_battlestatus, client, state)
         end)
 
+        battle.bots
+        |> Enum.each(fn {botname, bot} ->
+          reply(:add_bot_to_battle, {battle.id, bot})
+        end)
+
         reply(:client_battlestatus, state.client, state)
 
         battle.start_rectangles
@@ -894,7 +928,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
     state
   end
 
-  # ADDBOT STAI(1) 4195458 0 STAI
   defp do_handle("ADDBOT", _msg, %{client: %{battle_id: nil}} = state), do: state
 
   defp do_handle("ADDBOT", data, state) do
@@ -1254,7 +1287,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   defp do_reply(:logged_in_client, {userid, _username}) do
     user = User.get_user_by_id(userid)
-    do_reply(:add_user, user)
+    [
+      do_reply(:add_user, user),
+      do_reply(:client_status, Client.get_client_by_id(userid))
+    ]
   end
 
   defp do_reply(:logged_out_client, {userid, username}) do

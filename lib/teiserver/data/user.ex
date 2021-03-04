@@ -28,7 +28,7 @@ defmodule Teiserver.User do
 
   @default_data %{
     rank: 1,
-    country: "XX",
+    country: "??",
     lobbyid: "LuaLobby Chobby",
     ip: "default_ip",
     moderator: false,
@@ -223,6 +223,7 @@ defmodule Teiserver.User do
 
   # Persists the changes into the database so they will
   # be pulled out next time the user is accessed/recached
+  defp persist_user(%{name: "TEST_" <> _}), do: nil
   defp persist_user(user) do
     db_user = Account.get_user!(user.id)
 

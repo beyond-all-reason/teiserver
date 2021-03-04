@@ -4,6 +4,7 @@ defmodule Teiserver.Client do
   alias Teiserver.Battle
   alias Teiserver.User
   alias Teiserver.Room
+  require Logger
 
   def create(client) do
     Map.merge(
@@ -132,15 +133,19 @@ defmodule Teiserver.Client do
     end)
   end
 
+  def get_client_by_name(nil), do: nil
+  def get_client_by_name(""), do: nil
   def get_client_by_name(name) do
     userid = User.get_userid(name)
     ConCache.get(:clients, userid)
   end
 
+  def get_client_by_id(nil), do: nil
   def get_client_by_id(userid) do
     ConCache.get(:clients, userid)
   end
 
+  def get_clients([]), do: []
   def get_clients(id_list) do
     id_list
     |> Enum.map(fn userid -> ConCache.get(:clients, userid) end)
@@ -174,9 +179,13 @@ defmodule Teiserver.Client do
   #   GenServer.call(pid, :get_state)
   # end
 
-  def disconnect(nil), do: nil
-
   def disconnect(userid) do
+    if get_client_by_id(userid) do
+      do_disconnect(userid)
+    end
+  end
+
+  defp do_disconnect(userid) do
     leave_battle(userid)
     leave_rooms(userid)
     User.logout(userid)
