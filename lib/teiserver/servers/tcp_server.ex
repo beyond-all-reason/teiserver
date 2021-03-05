@@ -335,14 +335,23 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:add_bot_to_battle, battleid, bot}, state) do
-    new_state = state.protocol.reply(:add_bot_to_battle, {battleid, bot}, state)
+  def handle_info({:add_bot_to_battle, battle_id, bot}, state) do
+    new_state = state.protocol.reply(:add_bot_to_battle, {battle_id, bot}, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:update_bot, battleid, bot}, state) do
-    new_state = state.protocol.reply(:update_bot, {battleid, bot}, state)
-    {:noreply, new_state}
+  def handle_info({:update_bot, battle_id, bot}, state) do
+    if state.client.battle_id == battle_id do
+      state.protocol.reply(:update_bot, {battle_id, bot}, state)
+    end
+    {:noreply, state}
+  end
+
+  def handle_info({:remove_bot_from_battle, battle_id, botname}, state) do
+    if state.client.battle_id == battle_id do
+      state.protocol.reply(:remove_bot_from_battle, {battle_id, botname}, state)
+    end
+    {:noreply, state}
   end
 
   # Connection

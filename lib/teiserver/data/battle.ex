@@ -174,7 +174,7 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
-      {:update_bot, battle_id, %{name: botname, battlestatus: 0, team_colour: "#000000"}}
+      {:remove_bot_from_battle, battle_id, botname}
     )
   end
 
@@ -209,6 +209,13 @@ defmodule Teiserver.Battle do
     if battle.founder_id == userid do
       close_battle(battle_id)
     else
+       battle.bots
+      |> Enum.each(fn {botname, bot} ->
+        if bot.owner_id == userid do
+          remove_bot(battle_id, botname)
+        end
+      end)
+
       ConCache.update(:battles, battle_id, fn battle_state ->
         new_state =
           if not Enum.member?(battle_state.players, userid) do

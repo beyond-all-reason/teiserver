@@ -688,8 +688,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("JOINBATTLE", data, state) do
     response =
       case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
-        [_, battleid, _password, _script_password] ->
-          Battle.can_join?(state.user, battleid)
+        [_, battle_id, _password, _script_password] ->
+          Battle.can_join?(state.user, battle_id)
 
         nil ->
           _no_match(state, "JOINBATTLE", data)
@@ -1237,6 +1237,10 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "ADDBOT #{battle_id} #{bot.name} #{bot.owner_name} #{status} #{bot.team_colour} #{bot.ai_dll}\n"
   end
 
+  defp do_reply(:remove_bot_from_battle, {battle_id, botname}) do
+    "REMOVEBOT #{battle_id} #{botname}\n"
+  end
+
   defp do_reply(:update_bot, {battle_id, bot}) do
     status = create_battle_status(bot)
     "UPDATEBOT #{battle_id} #{bot.name} #{status} #{bot.team_colour}\n"
@@ -1338,14 +1342,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "LEFT #{room_name} #{username}\n"
   end
 
-  defp do_reply(:add_user_to_battle, {userid, battleid}) do
+  defp do_reply(:add_user_to_battle, {userid, battle_id}) do
     username = User.get_username(userid)
-    "JOINEDBATTLE #{battleid} #{username}\n"
+    "JOINEDBATTLE #{battle_id} #{username}\n"
   end
 
-  defp do_reply(:remove_user_from_battle, {userid, battleid}) do
+  defp do_reply(:remove_user_from_battle, {userid, battle_id}) do
     username = User.get_username(userid)
-    "LEFTBATTLE #{battleid} #{username}\n"
+    "LEFTBATTLE #{battle_id} #{username}\n"
   end
 
   defp do_reply(:forcequit_battle, nil) do

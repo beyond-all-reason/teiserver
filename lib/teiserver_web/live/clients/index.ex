@@ -64,6 +64,18 @@ defmodule TeiserverWeb.ClientLive.Index do
     {:noreply, socket}
   end
 
+  def handle_info({:updated_client, new_client, _reason}, socket) do
+    # clients = socket.assigns[:clients]
+    #   |> Enum.filter(fn c -> c.userid != userid end)
+    # users = Map.delete(socket.assigns[:users], userid)
+
+    # socket = socket
+    #   |> assign(:clients, clients)
+    #   |> assign(:users, users)
+    
+    {:noreply, socket}
+  end
+
   defp apply_action(socket, :index, _params) do
     :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
 

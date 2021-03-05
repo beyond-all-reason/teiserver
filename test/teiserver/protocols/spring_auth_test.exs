@@ -260,94 +260,102 @@ ENDOFCHANNELS\n"
     _recv(socket)
   end
 
-  #   test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket, user: user} do
-  #     # Currently not working as no battles are present at this stage
-  #     # TODO - Add battle
-  #     _send(socket, "JOINBATTLE 1 empty 1683043765\n")
-  #     # The remainder of this string is just the script tags, we'll assume it's correct for now
-  #     reply = _recv_until(socket)
-  #       |> String.split("\n")
+  test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: user1} do
+    hash = "-1540855590"
+    _send(socket1, "OPENBATTLE 0 0 * 52200 16 #{hash} 0 1565299817 spring\t104.0.1-1784-gf6173b4 BAR\tComet Catcher Remake 1.8\tEU - 00\tBeyond All Reason test-15658-85bf66d\n")
+    reply = _recv_until(socket1)
 
-  #     [
-  #       join,
-  #       _tags,
-  #       client,
-  #       rect1,
-  #       rect2,
-  #       battle_status,
-  #       saidbattle,
-  #       joinedbattle,
-  #       clientstatus,
-  #       ""
-  #     ] = reply
+    assert reply =~ "BATTLEOPENED "
+    assert reply =~ "OPENBATTLE "
 
-  #     assert join == "JOINBATTLE 1 1683043765"
-  #     assert client == "CLIENTBATTLESTATUS #{user.name} 0 0"
-  #     assert rect1 == "ADDSTARTRECT 0 0 126 74 200"
-  #     assert rect2 == "ADDSTARTRECT 1 126 0 200 74"
-  #     assert battle_status == "REQUESTBATTLESTATUS"
+    [_, battle_id] = Regex.run(~r/OPENBATTLE ([0-9]+)\n/, reply)
+    battle_id = Central.Helpers.NumberHelper.int_parse(battle_id)
 
-  #     assert joinedbattle == "JOINEDBATTLE 1 #{user.name}"
-  #     assert clientstatus == "CLIENTSTATUS #{user.name} 4"
+    user2 = new_user()
+    %{socket: socket2} = auth_setup(user2)
+    _send(socket2, "JOINBATTLE 1 empty 1683043765\n")
+    # The remainder of this string is just the script tags, we'll assume it's correct for now
+    reply = _recv_until(socket2)
+      |> String.split("\n")
 
-  #     _send(socket, "SAYBATTLE Hello there!\n")
-  #     reply = _recv(socket)
-  #     assert reply == "SAIDBATTLE #{user.name} Hello there!\n"
+    [
+      joinedbattle,
+      tags,
+      client1,
+      client2,
+      battle_status,
+      client2b,
+      ""
+    ] = reply
 
-  #     _send(socket, "MYBATTLESTATUS 12 0\n")
-  #     reply = _recv(socket)
-  #     assert reply == "CLIENTBATTLESTATUS #{user.name} 0 0\n"
+    assert joinedbattle == "JOINBATTLE #{battle_id} #{hash}"
+    assert tags == "SETSCRIPTTAGS "
+    assert client1 == "CLIENTBATTLESTATUS #{user1.name} 0 0"
+    assert client2 == "CLIENTBATTLESTATUS #{user2.name} 0 0"
+    assert battle_status == "REQUESTBATTLESTATUS"
 
-  #     # Add a bot
-  #     _send(socket, "ADDBOT STAI(1) 4195458 0 STAI\n")
-  #     reply = _recv(socket)
-  #     assert reply == "ADDBOT 1 STAI(1) #{user.name} 4195458 0 STAI\n"
+    assert client2b == "CLIENTSTATUS #{user2.name} 16"
 
-  #     # Promote?
-  #     _send(socket, "PROMOTE\n")
-  #     _ = _recv(socket)
+    _send(socket2, "SAYBATTLE Hello there!\n")
+    reply = _recv(socket2)
+    assert reply == "SAIDBATTLE #{user2.name} Hello there!\n"
 
-  #     # Time to leave
-  #     _send(socket, "LEAVEBATTLE\n")
-  #     reply = _recv(socket)
-  #     assert reply == "LEFTBATTLE 1 #{user.name}
-  # CLIENTBATTLESTATUS #{user.name} 0 0\n"
+    _send(socket2, "MYBATTLESTATUS 12 0\n")
+    reply = _recv(socket2)
+    assert reply == "CLIENTBATTLESTATUS #{user2.name} 12 0\n"
 
-  #     # These commands shouldn't work, they also shouldn't error
-  #     _send(socket, "SAYBATTLE I'm not here anymore!\n")
-  #     reply = _recv(socket)
-  #     assert reply == :timeout
+    # Add a bot
+    _send(socket2, "ADDBOT STAI(1) 4195458 0 STAI\n")
+    reply = _recv(socket2)
+    assert reply == "ADDBOT 1 STAI(1) #{user2.name} 4195458 0 STAI\n"
 
-  #     _send(socket, "MYBATTLESTATUS 12 0\n")
-  #     reply = _recv(socket)
-  #     assert reply == :timeout
+    # Promote?
+    _send(socket2, "PROMOTE\n")
+    _ = _recv(socket2)
 
-  #     _send(socket, "LEAVEBATTLE\n")
-  #     reply = _recv(socket)
-  #     assert reply == :timeout
+    # Time to leave
+    _send(socket2, "LEAVEBATTLE\n")
+    reply = _recv(socket2)
+    assert reply == "LEFTBATTLE 1 #{user2.name}\n"
 
-  #     _send(socket, "EXIT\n")
-  #     _recv(socket)
-  #   end
+    # These commands shouldn't work, they also shouldn't error
+    _send(socket2, "SAYBATTLE I'm not here anymore!\n")
+    reply = _recv(socket2)
+    assert reply == :timeout
 
-    test "ring", %{socket: socket1, user: user} do
-      user2 = new_user()
-      %{socket: socket2} = auth_setup(user2)
-      reply = _recv(socket1)
-      assert reply =~ "ADDUSER #{user2.name} ?? 0 #{user2.id} LuaLobby Chobby\n"
+    _send(socket2, "MYBATTLESTATUS 12 0\n")
+    reply = _recv(socket2)
+    assert reply == :timeout
 
-      _send(socket2, "RING #{user.name}\n")
-      _ = _recv(socket2)
+    _send(socket2, "LEAVEBATTLE\n")
+    reply = _recv(socket2)
+    assert reply == :timeout
 
-      reply = _recv(socket1)
-      assert reply == "RING #{user2.name}\n"
+    _send(socket1, "EXIT\n")
+    _recv(socket1)
 
-      _send(socket1, "EXIT\n")
-      _recv(socket1)
+    _send(socket2, "EXIT\n")
+    _recv(socket2)
+  end
 
-      _send(socket2, "EXIT\n")
-      _recv(socket2)
-    end
+  test "ring", %{socket: socket1, user: user1} do
+    user2 = new_user()
+    %{socket: socket2} = auth_setup(user2)
+    reply = _recv(socket1)
+    assert reply =~ "ADDUSER #{user2.name} ?? 0 #{user2.id} LuaLobby Chobby\n"
+
+    _send(socket2, "RING #{user1.name}\n")
+    _ = _recv(socket2)
+
+    reply = _recv(socket1)
+    assert reply == "RING #{user2.name}\n"
+
+    _send(socket1, "EXIT\n")
+    _recv(socket1)
+
+    _send(socket2, "EXIT\n")
+    _recv(socket2)
+  end
 
   test "RENAMEACCOUNT", %{socket: socket} do
     _send(socket, "RENAMEACCOUNT rename_test_user\n")
