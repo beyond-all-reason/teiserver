@@ -94,7 +94,7 @@ defmodule Teiserver.TcpServer do
       transport: transport,
       protocol: @default_protocol
     }
-    state = @default_protocol.reply(:welcome, state)
+    state = @default_protocol.reply(:welcome, nil, state)
 
     Logger.info("New TCP connection #{Kernel.inspect(socket)}, IP: #{ip}")
 
@@ -318,7 +318,7 @@ defmodule Teiserver.TcpServer do
 
   def handle_info({:kick_user_from_battle, userid, battle_id}, state) do
     if userid == state.userid and battle_id == state.client.battle_id do
-      state.protocol.reply(:forcequit_battle, state)
+      state.protocol.reply(:forcequit_battle, nil, state)
     end
 
     new_state = state.protocol.reply(:remove_user_from_battle, {userid, battle_id}, state)

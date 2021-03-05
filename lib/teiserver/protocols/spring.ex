@@ -33,8 +33,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # in_CONFIRMAGREEMENT
   # in_SAYPRIVATEEX
   # in_BATTLEHOSTMSG
-  # in_JOINBATTLEACCEPT
-  # in_JOINBATTLEDENY
   # in_CHANNELTOPIC
   # in_GETCHANNELMESSAGES
   # in_GETUSERID
@@ -173,11 +171,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
     do_handle("LI", username, state)
   end
 
-  defp do_handle("JB", bnum, state) do
-    Logger.warn("Shortcut handler, should be removed for beta testing")
-    do_handle("JOINBATTLE", "#{bnum} empty 193322681", state)
-  end
-
   defp do_handle("OB", _, state) do
     Logger.warn("Shortcut handler, should be removed for beta testing")
     do_handle(
@@ -289,7 +282,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         case User.get_user_by_name(username) do
           nil ->
             User.register_user(username, email, password_hash)
-            reply(:registration_accepted, state)
+            reply(:registration_accepted, nil, state)
 
           _ ->
             reply(:registration_denied, "User already exists", state)
@@ -562,7 +555,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("CHANNELS", _, state) do
-    reply(:list_channels, state)
+    reply(:list_channels, nil, state)
   end
 
   defp do_handle("SAY", data, state) do
@@ -719,7 +712,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
         battle.bots
         |> Enum.each(fn {botname, bot} ->
-          reply(:add_bot_to_battle, {battle.id, bot})
+          reply(:add_bot_to_battle, {battle.id, bot}, state)
         end)
 
         reply(:client_battlestatus, state.client, state)
@@ -1088,10 +1081,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
     _send(msg, state)
     state
   end
-
-  # Two argument version of the above, just means the data is nil
-  @spec reply(Atom.t(), Map.t()) :: Map.t()
-  def reply(reply_type, state), do: reply(reply_type, nil, state)
 
   @spec do_reply(Atom.t(), String.t() | List.t()) :: String.t()
   defp do_reply(:login_accepted, user) do

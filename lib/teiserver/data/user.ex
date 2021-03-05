@@ -511,7 +511,7 @@ defmodule Teiserver.User do
     proto = state.protocol
 
     proto.reply(:login_accepted, user.name, state)
-    proto.reply(:motd, state)
+    proto.reply(:motd, nil, state)
 
     {:ok, user}
   end

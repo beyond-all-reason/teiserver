@@ -64,6 +64,7 @@ defmodule Teiserver.TestLib do
     case :gen_tcp.recv(socket, 0, 500) do
       {:ok, reply} -> reply |> to_string
       {:error, :timeout} -> :timeout
+      {:error, :closed} -> :closed
     end
   end
 

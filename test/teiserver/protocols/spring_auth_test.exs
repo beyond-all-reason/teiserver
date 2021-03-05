@@ -98,7 +98,7 @@ defmodule Teiserver.SpringAuthTest do
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
     reply = _recv(socket1)
-    assert reply =~ "ADDUSER #{user2.name} GB 0 #{user2.id} LuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} ?? 0 #{user2.id} LuaLobby Chobby\n"
     assert reply =~ " LuaLobby Chobby\n"
 
     _send(socket1, "#111 IGNORELIST\n")
@@ -152,7 +152,7 @@ IGNORELISTEND\n"
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
     reply = _recv(socket1)
-    assert reply =~ "ADDUSER #{user2.name} GB 0 #{user2.id} LuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} ?? 0 #{user2.id} LuaLobby Chobby\n"
     assert reply =~ " LuaLobby Chobby\n"
 
     _send(socket1, "#7 FRIENDLIST\n")
@@ -334,7 +334,7 @@ ENDOFCHANNELS\n"
       user2 = new_user()
       %{socket: socket2} = auth_setup(user2)
       reply = _recv(socket1)
-      assert reply =~ "ADDUSER #{user2.name} GB 0 #{user2.id} LuaLobby Chobby\n"
+      assert reply =~ "ADDUSER #{user2.name} ?? 0 #{user2.id} LuaLobby Chobby\n"
 
       _send(socket2, "RING #{user.name}\n")
       _ = _recv(socket2)
