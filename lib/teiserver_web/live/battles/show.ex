@@ -95,7 +95,7 @@ defmodule TeiserverWeb.BattleLive.Show do
     {:noreply, assign(socket, :messages, new_messages)}
   end
 
-  def handle_info({:battle_closed, battle_id}, %{assigns: assigns} = socket) do
+  def handle_info({:battle_closed, battle_id}, socket) do
     if int_parse(battle_id) == socket.assigns[:id] do
       {:noreply,
         socket

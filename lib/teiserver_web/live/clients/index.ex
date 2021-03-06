@@ -64,7 +64,7 @@ defmodule TeiserverWeb.ClientLive.Index do
     {:noreply, socket}
   end
 
-  def handle_info({:updated_client, new_client, _reason}, socket) do
+  def handle_info({:updated_client, _new_client, _reason}, socket) do
     # clients = socket.assigns[:clients]
     #   |> Enum.filter(fn c -> c.userid != userid end)
     # users = Map.delete(socket.assigns[:users], userid)

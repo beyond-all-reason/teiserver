@@ -260,7 +260,7 @@ ENDOFCHANNELS\n"
     _recv(socket)
   end
 
-  test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: user1} do
+  test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: _user1} do
     hash = "-1540855590"
     _send(socket1, "OPENBATTLE 0 0 * 52200 16 #{hash} 0 1565299817 spring\t104.0.1-1784-gf6173b4 BAR\tComet Catcher Remake 1.8\tEU - 00\tBeyond All Reason test-15658-85bf66d\n")
     reply = _recv_until(socket1)
@@ -279,22 +279,19 @@ ENDOFCHANNELS\n"
       |> String.split("\n")
 
     [
-      joinedbattle,
+      joinbattle,
       tags,
-      client1,
-      client2,
-      battle_status,
-      client2b,
+      bstatus,
+      request,
+      cstatus,
       ""
     ] = reply
 
-    assert joinedbattle == "JOINBATTLE #{battle_id} #{hash}"
+    assert joinbattle == "JOINBATTLE #{battle_id} #{hash}"
     assert tags == "SETSCRIPTTAGS "
-    assert client1 == "CLIENTBATTLESTATUS #{user1.name} 0 0"
-    assert client2 == "CLIENTBATTLESTATUS #{user2.name} 0 0"
-    assert battle_status == "REQUESTBATTLESTATUS"
-
-    assert client2b == "CLIENTSTATUS #{user2.name} 16"
+    assert bstatus == "CLIENTBATTLESTATUS #{user2.name} 0 0"
+    assert cstatus == "CLIENTSTATUS #{user2.name} 16"
+    assert request == "REQUESTBATTLESTATUS"
 
     _send(socket2, "SAYBATTLE Hello there!\n")
     reply = _recv(socket2)

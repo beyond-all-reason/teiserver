@@ -72,9 +72,6 @@ defmodule Teiserver.TcpServer do
   end
 
   def init(ref, socket, transport) do
-    :ok = :ranch.accept_ack(ref)
-    :ok = transport.setopts(socket, [{:active, true}])
-
     {:ok, {ip, _}} = transport.peername(socket)
 
     ip =
@@ -82,6 +79,12 @@ defmodule Teiserver.TcpServer do
       |> Tuple.to_list()
       |> Enum.join(".")
     
+    Logger.info("New connection attempt #{Kernel.inspect(socket)}, IP: #{ip}")
+    x = :ranch.accept_ack(ref)
+    Logger.info(":ranch.accept_ack = #{Kernel.inspect(x)} for #{Kernel.inspect(socket)}")
+    y = transport.setopts(socket, [{:active, true}])
+    Logger.info("transport.setopts = #{Kernel.inspect(y)} for #{Kernel.inspect(socket)}")
+
     state = %{
       message_part: "",
       userid: nil,

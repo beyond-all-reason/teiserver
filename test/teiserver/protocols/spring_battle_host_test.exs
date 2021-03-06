@@ -52,7 +52,7 @@ defmodule Teiserver.SpringBattleHostTest do
     # Check the battle actually got created
     battle = Battle.get_battle(battle_id)
     assert battle != nil
-    assert Enum.count(battle.players) == 1
+    assert Enum.count(battle.players) == 0
 
     # Now create a user to join the battle
     user2 = new_user()
@@ -69,9 +69,9 @@ defmodule Teiserver.SpringBattleHostTest do
 
     # Kick user2
     battle = Battle.get_battle(battle_id)
-    assert Enum.count(battle.players) == 2
+    assert Enum.count(battle.players) == 1
 
-    _send(socket, "KICKFROMBATTLE #{battle_id} #{user2.name}\n")
+    _send(socket, "KICKFROMBATTLE #{user2.name}\n")
     reply = _recv(socket2)
     assert reply == "FORCEQUITBATTLE\nLEFTBATTLE #{battle_id} #{user2.name}\n"
 

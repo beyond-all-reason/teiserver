@@ -583,7 +583,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("SAYPRIVATE", data, state) do
-    case Regex.run(~r/(\w+) (.+)/, data) do
+    case Regex.run(~r/(\S+) (.+)/, data) do
       [_, to_name, msg] ->
         User.send_direct_message(state.userid, User.get_userid(to_name), msg)
         _send("SAIDPRIVATE #{to_name} #{msg}\n", state)
@@ -661,7 +661,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         reply(:battle_opened, battle.id, state)
         _send("OPENBATTLE #{battle.id}\n", state)
         PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
-        Battle.add_user_to_battle(state.userid, battle.id)
+        # Battle.add_user_to_battle(state.userid, battle.id)
 
         reply(:join_battle, battle, state)
         reply(:add_script_tags, battle.tags, state)
@@ -711,7 +711,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         end)
 
         battle.bots
-        |> Enum.each(fn {botname, bot} ->
+        |> Enum.each(fn {_botname, bot} ->
           reply(:add_bot_to_battle, {battle.id, bot}, state)
         end)
 
@@ -728,6 +728,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           Map.put(state.client, :battle_id, battle.id)
           |> Client.update()
 
+        # %{state | client: Client.get_client_by_id(state.userid)}
         %{state | client: new_client}
 
       {:failure, reason} ->
@@ -815,18 +816,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
     state
   end
 
-  defp do_handle("KICKFROMBATTLE", data, state) do
-    case Regex.run(~r/(\d+) (\S+)/, data) do
-      [_, battle_id, username] ->
-        if Battle.allow?("KICKFROMBATTLE", state) do
-          userid = User.get_userid(username)
-          Battle.kick_user_from_battle(userid, int_parse(battle_id))
-        end
-
-      _ ->
-        _no_match(state, "KICKFROMBATTLE", data)
+  defp do_handle("KICKFROMBATTLE", username, state) do
+    if Battle.allow?("KICKFROMBATTLE", state) do
+      userid = User.get_userid(username)
+      Battle.kick_user_from_battle(userid, state.client.battle_id)
     end
-
     state
   end
 

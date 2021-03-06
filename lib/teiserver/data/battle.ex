@@ -3,7 +3,6 @@ defmodule Teiserver.Battle do
   alias Phoenix.PubSub
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.User
 
   defp next_id() do
     ConCache.isolated(:id_counters, :battle, fn ->
@@ -204,58 +203,61 @@ defmodule Teiserver.Battle do
   def remove_user_from_battle(_, nil), do: nil
 
   def remove_user_from_battle(userid, battle_id) do
-    battle = get_battle(battle_id)
-
-    if battle.founder_id == userid do
-      close_battle(battle_id)
-    else
-       battle.bots
-      |> Enum.each(fn {botname, bot} ->
-        if bot.owner_id == userid do
-          remove_bot(battle_id, botname)
-        end
-      end)
-
-      ConCache.update(:battles, battle_id, fn battle_state ->
-        new_state =
-          if not Enum.member?(battle_state.players, userid) do
-            # No change takes place, they've already left the battle
-            battle_state
-          else
-            PubSub.broadcast(
-              Central.PubSub,
-              "battle_updates:#{battle_id}",
-              {:remove_user_from_battle, userid, battle_id}
-            )
-
-            new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
-            Map.put(battle_state, :players, new_players)
-          end
-
-        {:ok, new_state}
-      end)
+    case do_remove_user_from_battle(userid, battle_id) do
+      :closed -> nil
+      :not_member -> nil
+      :removed ->
+        PubSub.broadcast(
+          Central.PubSub,
+          "battle_updates:#{battle_id}",
+          {:remove_user_from_battle, userid, battle_id}
+        )
     end
   end
 
   def kick_user_from_battle(userid, battle_id) do
-    ConCache.update(:battles, battle_id, fn battle_state ->
-      new_state =
-        if not Enum.member?(battle_state.players, userid) do
-          # No change takes place, they've already left the battle
-          battle_state
-        else
-          PubSub.broadcast(
-            Central.PubSub,
-            "battle_updates:#{battle_id}",
-            {:kick_user_from_battle, userid, battle_id}
-          )
+    case do_remove_user_from_battle(userid, battle_id) do
+      :closed -> nil
+      :not_member -> nil
+      :removed ->
+        PubSub.broadcast(
+          Central.PubSub,
+          "battle_updates:#{battle_id}",
+          {:kick_user_from_battle, userid, battle_id}
+        )
+    end
+  end
 
+  @spec do_remove_user_from_battle(Integer.t, Integer.t) ::
+    :closed | :removed | :not_member
+  defp do_remove_user_from_battle(userid, battle_id) do
+    battle = get_battle(battle_id)
+
+    if battle.founder_id == userid do
+      close_battle(battle_id)
+      :closed
+    else
+      if Enum.member?(battle.players, userid) do
+        # Remove all their bots
+        battle.bots
+        |> Enum.each(fn {botname, bot} ->
+          if bot.owner_id == userid do
+            remove_bot(battle_id, botname)
+          end
+        end)
+
+        # Now update the battle to remove the player
+        ConCache.update(:battles, battle_id, fn battle_state ->
           new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
-          Map.put(battle_state, :players, new_players)
-        end
+          new_state = Map.put(battle_state, :players, new_players)
 
-      {:ok, new_state}
-    end)
+          {:ok, new_state}
+        end)
+        :removed
+      else
+        :not_member
+      end
+    end
   end
 
   # Start rects

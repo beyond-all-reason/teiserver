@@ -23,7 +23,7 @@ defmodule TeiserverWeb.ClientLive.Show do
   end
 
   @impl true
-  def handle_params(%{"id" => id}, opts, socket) do
+  def handle_params(%{"id" => id}, _opts, socket) do
     id = int_parse(id)
     PubSub.subscribe(Central.PubSub, "all_client_updates")
     PubSub.subscribe(Central.PubSub, "user_updates:#{id}")
@@ -41,7 +41,7 @@ defmodule TeiserverWeb.ClientLive.Show do
   end
 
   @impl true
-  def handle_info({:updated_client, new_client, _reason}, %{assigns: assigns} = socket) do
+  def handle_info({:updated_client, new_client, _reason}, socket) do
     {:noreply, assign(socket, :client, new_client)}
   end
 
