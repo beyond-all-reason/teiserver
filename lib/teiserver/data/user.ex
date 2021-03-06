@@ -1,10 +1,11 @@
 defmodule Teiserver.User do
   @moduledoc """
-  Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their exepected use case is very different.
+  Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
   alias Teiserver.Client
+  alias Teiserver.EmailHelper
 
-  @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulance cats dogs mice oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave)
+  @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulence cats dogs mice eagle oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave sulphur tree tangerine melon watermelon obstreperous chlorine argon mercury jupiter saturn neptune ceres firefly slug sloth madness happiness ferrous oblique advantageous inefficient starling clouds rivers sunglasses)
 
   @keys [:id, :name, :email, :inserted_at]
   @data_keys [
@@ -70,6 +71,7 @@ defmodule Teiserver.User do
   def user_register_params(name, email, password_hash, extra_data \\ %{}) do
     name = clean_name(name)
     verification_code = :random.uniform(899_999) + 100_000
+    web_password = generate_random_password()
 
     data =
       @default_data
@@ -78,7 +80,7 @@ defmodule Teiserver.User do
     %{
       name: name,
       email: email,
-      password: "#{:random.uniform(999_999_999_999_999_999)}",
+      password: web_password,
       colour: "#AA0000",
       icon: "fas fa-user",
       admin_group_id: bar_user_group_id(),
@@ -89,12 +91,18 @@ defmodule Teiserver.User do
           "password_hash" => password_hash,
           "verification_code" => verification_code
         })
-        |> Map.merge(extra_data)
+        |> Map.merge(extra_data),
+
+      # This won't be stored as it's not part of @data_keys but
+      # we need it for the email
+      web_password: web_password
     }
   end
 
-  def register_user(name, email, password_hash) do
-    params = user_register_params(name, email, password_hash)
+  def register_user(name, email, password_hash, ip) do
+    params = user_register_params(name, email, password_hash, %{
+      "id" => ip
+    })
 
     case Account.create_user(params) do
       {:ok, user} ->
@@ -108,13 +116,7 @@ defmodule Teiserver.User do
         |> convert_user
         |> add_user
 
-        # EmailHelper.send_email(to, subject, body)
-        Logger.debug(
-          "TODO: Verification email should be sent here with code #{
-            user.data["verification_code"]
-          }"
-        )
-
+        EmailHelper.new_user(params)
         user
 
       {:error, changeset} ->
@@ -255,7 +257,7 @@ defmodule Teiserver.User do
     case code == user.password_reset_code do
       true ->
         {plain_password, encrypted_password} = generate_new_password()
-        EmailHelper.send_new_password(user, plain_password)
+        EmailHelper.password_reset(user, plain_password)
         update_user(%{user | password_reset_code: nil, password_hash: encrypted_password})
         :ok
 

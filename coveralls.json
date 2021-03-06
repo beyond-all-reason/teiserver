@@ -1,6 +1,8 @@
 {
   "skip_files": [
-    "lib/benchmark/*"
+    "lib/central/*",
+    "lib/central_web/*",
+    "lib/teiserver/benchmark/*"
   ],
 
   "custom_stop_words": [

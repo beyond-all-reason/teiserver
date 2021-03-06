@@ -281,7 +281,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       [_, username, password_hash, email] ->
         case User.get_user_by_name(username) do
           nil ->
-            User.register_user(username, email, password_hash)
+            User.register_user(username, email, password_hash, state.ip)
             reply(:registration_accepted, nil, state)
 
           _ ->

@@ -40,4 +40,5 @@ openssl s_client -connect localhost:8201
 ```
 
 ## Remote/Prod
-TODO
+- Not currently ready for production use
+- several things are currently hard coded to BAR/Teifion specifics (such as emails)

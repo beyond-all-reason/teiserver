@@ -357,6 +357,11 @@ defmodule Teiserver.TcpServer do
     {:noreply, state}
   end
 
+  # Email
+  def handle_info({:delivered_email, _email}, state) do
+    {:noreply, state}
+  end
+
   # Connection
   def handle_info({:tcp_closed, socket}, %{socket: socket, transport: transport} = state) do
     Logger.info("Closing TCP connection #{Kernel.inspect(socket)}")

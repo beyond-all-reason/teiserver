@@ -15,6 +15,9 @@ config :central, Teiserver,
   ports: [
     tcp: 8200,
     tls: 8201
+  ],
+  website: [
+    url: "https://teifion.co.uk"
   ]
 
 config :logger, :console,
