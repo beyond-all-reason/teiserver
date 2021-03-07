@@ -262,7 +262,12 @@ ENDOFCHANNELS\n"
 
   test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: _user1} do
     hash = "-1540855590"
-    _send(socket1, "OPENBATTLE 0 0 * 52200 16 #{hash} 0 1565299817 spring\t104.0.1-1784-gf6173b4 BAR\tComet Catcher Remake 1.8\tEU - 00\tBeyond All Reason test-15658-85bf66d\n")
+
+    _send(
+      socket1,
+      "OPENBATTLE 0 0 * 52200 16 #{hash} 0 1565299817 spring\t104.0.1-1784-gf6173b4 BAR\tComet Catcher Remake 1.8\tEU - 00\tBeyond All Reason test-15658-85bf66d\n"
+    )
+
     reply = _recv_until(socket1)
 
     assert reply =~ "BATTLEOPENED "
@@ -275,7 +280,8 @@ ENDOFCHANNELS\n"
     %{socket: socket2} = auth_setup(user2)
     _send(socket2, "JOINBATTLE 1 empty 1683043765\n")
     # The remainder of this string is just the script tags, we'll assume it's correct for now
-    reply = _recv_until(socket2)
+    reply =
+      _recv_until(socket2)
       |> String.split("\n")
 
     [

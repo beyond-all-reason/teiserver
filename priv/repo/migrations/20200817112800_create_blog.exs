@@ -11,6 +11,7 @@ defmodule Central.Repo.Migrations.CreateBlog do
 
       timestamps()
     end
+
     create index(:communication_categories, [:name])
 
     create table(:communication_posts) do
@@ -30,6 +31,7 @@ defmodule Central.Repo.Migrations.CreateBlog do
 
       timestamps()
     end
+
     create unique_index(:communication_posts, [:url_slug])
     create index(:communication_posts, [:category_id])
     create index(:communication_posts, [:poster_id])
@@ -46,6 +48,7 @@ defmodule Central.Repo.Migrations.CreateBlog do
 
       timestamps()
     end
+
     create index(:communication_comments, [:post_id])
     create index(:communication_comments, [:poster_id])
 
@@ -58,6 +61,7 @@ defmodule Central.Repo.Migrations.CreateBlog do
 
       timestamps()
     end
+
     create unique_index(:communication_blog_files, [:url])
   end
 end

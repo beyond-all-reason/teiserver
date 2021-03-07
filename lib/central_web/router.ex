@@ -79,10 +79,10 @@ defmodule CentralWeb.Router do
     get("/logout", SessionController, :logout)
     post("/logout", SessionController, :logout)
 
-    get "/forgot_password", SessionController, :forgot_password
-    post "/send_password_reset", SessionController, :send_password_reset
-    get "/password_reset/:value", SessionController, :password_reset_form
-    post "/password_reset/:value", SessionController, :password_reset_post
+    get("/forgot_password", SessionController, :forgot_password)
+    post("/send_password_reset", SessionController, :send_password_reset)
+    get("/password_reset/:value", SessionController, :password_reset_form)
+    post("/password_reset/:value", SessionController, :password_reset_post)
   end
 
   scope "/account", CentralWeb.Account, as: :account do

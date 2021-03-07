@@ -28,9 +28,10 @@ defmodule Central.Account.UserLib do
       {true, nil}
     else
       query =
-        from target_users in User,
+        from(target_users in User,
           where: target_users.id == ^target_user_id,
           select: target_users.admin_group_id
+        )
 
       group_id = Repo.one(query)
 
@@ -59,34 +60,36 @@ defmodule Central.Account.UserLib do
   end
 
   def reset_password_request(user) do
-    {:ok, code} = Account.create_code(%{
-      value: UUID.uuid4(),
-      purpose: "reset_password",
-      expires: Timex.now |> Timex.shift(hours: 24),
-      user_id: user.id
-    })
+    {:ok, code} =
+      Account.create_code(%{
+        value: UUID.uuid4(),
+        purpose: "reset_password",
+        expires: Timex.now() |> Timex.shift(hours: 24),
+        user_id: user.id
+      })
 
     site_title = "Teifion.co.uk"
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     url = "https://#{host}/password_reset/#{code.value}"
 
     html_body = """
-<p>A request for a password reset has been requested for you. To reset your password follow the link below. If you did not request this reset please ignore the email.</p>
+    <p>A request for a password reset has been requested for you. To reset your password follow the link below. If you did not request this reset please ignore the email.</p>
 
-<p><a href="#{url}">#{url}</a></p>
-"""
+    <p><a href="#{url}">#{url}</a></p>
+    """
+
     text_body = """
-A request for a password reset has been requested for you. To reset your password follow the link below. If you did not request this reset please ignore the email.
+    A request for a password reset has been requested for you. To reset your password follow the link below. If you did not request this reset please ignore the email.
 
-#{url}
-"""
+    #{url}
+    """
 
-    Email.new_email
+    Email.new_email()
     |> Email.to({user.name, user.email})
     |> Email.from({"Teifion.co.uk noreply", Mailer.noreply_address()})
     |> Email.subject("Teifion.co.uk - Password reset")
     |> Email.html_body(html_body)
     |> Email.text_body(text_body)
-    |> Mailer.deliver_now
+    |> Mailer.deliver_now()
   end
 end

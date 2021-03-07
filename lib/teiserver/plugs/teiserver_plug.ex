@@ -18,6 +18,7 @@ defmodule Teiserver.ServerUserPlug do
     conn
     |> assign(:server_user, server_user)
   end
+
   def call(conn, _opts) do
     conn
     |> assign(:server_user, nil)

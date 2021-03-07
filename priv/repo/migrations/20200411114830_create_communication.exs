@@ -17,6 +17,7 @@ defmodule Central.Repo.Migrations.CreateCommunication.Chat do
 
       timestamps()
     end
+
     create index(:communication_notifications, [:user_id])
 
     create table(:communication_chat_rooms) do
@@ -32,6 +33,7 @@ defmodule Central.Repo.Migrations.CreateCommunication.Chat do
 
       timestamps()
     end
+
     create index(:communication_chat_rooms, [:name])
 
     create table(:communication_chat_contents) do
@@ -45,7 +47,9 @@ defmodule Central.Repo.Migrations.CreateCommunication.Chat do
 
     create table(:communication_chat_memberships, primary_key: false) do
       add :user_id, references(:account_users, on_delete: :nothing), primary_key: true
-      add :chat_room_id, references(:communication_chat_rooms, on_delete: :nothing), primary_key: true
+
+      add :chat_room_id, references(:communication_chat_rooms, on_delete: :nothing),
+        primary_key: true
 
       add :role, :string
       add :last_seen, :utc_datetime

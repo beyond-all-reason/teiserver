@@ -226,7 +226,7 @@ defmodule Central.Account do
   end
 
   def authenticate_user(conn, email, plain_text_password) do
-    query = from u in User, where: u.email == ^email
+    query = from(u in User, where: u.email == ^email)
 
     case Repo.one(query) do
       nil ->
@@ -412,11 +412,12 @@ defmodule Central.Account do
   def list_group_memberships_cache(user_id) do
     ConCache.get_or_store(:account_membership_cache, user_id, fn ->
       query =
-        from ugm in GroupMembership,
+        from(ugm in GroupMembership,
           join: ug in Group,
           on: ugm.group_id == ug.id,
           where: ugm.user_id == ^user_id,
           select: {ug.id, ug.children_cache}
+        )
 
       Repo.all(query)
       |> Enum.map(fn {g, gc} -> gc ++ [g] end)
@@ -503,7 +504,6 @@ defmodule Central.Account do
     GroupMembership.changeset(group_membership, %{})
   end
 
-
   alias Central.Account.Code
   alias Central.Account.CodeLib
 
@@ -512,14 +512,14 @@ defmodule Central.Account do
   end
 
   def code_query(value, args) do
-    CodeLib.query_codes
+    CodeLib.query_codes()
     |> CodeLib.search(%{value: value})
     |> CodeLib.search(args[:search])
     |> CodeLib.preload(args[:preload])
     |> CodeLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
   end
-  
+
   @doc """
   Returns the list of codes.
 
@@ -532,7 +532,7 @@ defmodule Central.Account do
   def list_codes(args \\ []) do
     code_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -551,7 +551,7 @@ defmodule Central.Account do
   """
   def get_code(value, args \\ []) do
     code_query(value, args)
-    |> Repo.one
+    |> Repo.one()
   end
 
   # Uncomment this if needed, default files do not need this function

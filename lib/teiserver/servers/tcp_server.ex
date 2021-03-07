@@ -78,7 +78,7 @@ defmodule Teiserver.TcpServer do
       ip
       |> Tuple.to_list()
       |> Enum.join(".")
-    
+
     Logger.info("New connection attempt #{Kernel.inspect(socket)}, IP: #{ip}")
     x = :ranch.accept_ack(ref)
     Logger.info(":ranch.accept_ack = #{Kernel.inspect(x)} for #{Kernel.inspect(socket)}")
@@ -97,6 +97,7 @@ defmodule Teiserver.TcpServer do
       transport: transport,
       protocol: @default_protocol
     }
+
     state = @default_protocol.reply(:welcome, nil, state)
 
     Logger.info("New TCP connection #{Kernel.inspect(socket)}, IP: #{ip}")
@@ -125,18 +126,19 @@ defmodule Teiserver.TcpServer do
   def handle_info({:tcp, _socket, data}, state) do
     Logger.info("<-- #{state.name} - #{format_log(data)}")
 
-    new_state = if String.ends_with?(data, "\n") do
-      data = state.message_part <> data
+    new_state =
+      if String.ends_with?(data, "\n") do
+        data = state.message_part <> data
 
-      data
-      |> String.split("\n")
-      |> Enum.reduce(state, fn data, acc ->
-        state.protocol.handle(data, acc)
-      end)
-      |> Map.put(:message_part, "")
-    else
-      %{state | message_part: state.message_part <> data}
-    end
+        data
+        |> String.split("\n")
+        |> Enum.reduce(state, fn data, acc ->
+          state.protocol.handle(data, acc)
+        end)
+        |> Map.put(:message_part, "")
+      else
+        %{state | message_part: state.message_part <> data}
+      end
 
     {:noreply, new_state}
   end
@@ -144,16 +146,17 @@ defmodule Teiserver.TcpServer do
   def handle_info({:ssl, _socket, data}, state) do
     Logger.info("<-- #{state.name} - #{format_log(data)}")
 
-    new_state = if String.ends_with?(data, "\n") do
-      data
-      |> String.split("\n")
-      |> Enum.reduce(state, fn data, acc ->
-        state.protocol.handle(data, acc)
-      end)
-      |> Map.put(:message_part, "")
-    else
-      %{state | message_part: state.message_part <> data}
-    end
+    new_state =
+      if String.ends_with?(data, "\n") do
+        data
+        |> String.split("\n")
+        |> Enum.reduce(state, fn data, acc ->
+          state.protocol.handle(data, acc)
+        end)
+        |> Map.put(:message_part, "")
+      else
+        %{state | message_part: state.message_part <> data}
+      end
 
     {:noreply, new_state}
   end
@@ -200,47 +203,49 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:battle_updated, battle_id, data, reason}, state) do
-    new_state = if state.client.battle_id == battle_id do
-      case reason do
-        :add_start_rectangle ->
-          state.protocol.reply(:add_start_rectangle, data, state)
+    new_state =
+      if state.client.battle_id == battle_id do
+        case reason do
+          :add_start_rectangle ->
+            state.protocol.reply(:add_start_rectangle, data, state)
 
-        :remove_start_rectangle ->
-          state.protocol.reply(:remove_start_rectangle, data, state)
+          :remove_start_rectangle ->
+            state.protocol.reply(:remove_start_rectangle, data, state)
 
-        :add_script_tags ->
-          state.protocol.reply(:add_script_tags, data, state)
+          :add_script_tags ->
+            state.protocol.reply(:add_script_tags, data, state)
 
-        :remove_script_tags ->
-          state.protocol.reply(:remove_script_tags, data, state)
+          :remove_script_tags ->
+            state.protocol.reply(:remove_script_tags, data, state)
 
-        :enable_all_units ->
-          state.protocol.reply(:enable_all_units, data, state)
+          :enable_all_units ->
+            state.protocol.reply(:enable_all_units, data, state)
 
-        :enable_units ->
-          state.protocol.reply(:enable_units, data, state)
+          :enable_units ->
+            state.protocol.reply(:enable_units, data, state)
 
-        :disable_units ->
-          state.protocol.reply(:disable_units, data, state)
+          :disable_units ->
+            state.protocol.reply(:disable_units, data, state)
 
-      _ ->
-        Logger.error("No handler in tcp_server:battle_updated with reason #{reason}")
+          _ ->
+            Logger.error("No handler in tcp_server:battle_updated with reason #{reason}")
+        end
+      else
+        state
       end
-    else
-      state
-    end
 
     {:noreply, new_state}
   end
-  
+
   def handle_info({:all_battle_updated, battle_id, reason}, state) do
-    new_state = case reason do
-      :update_battle_info ->
-        state.protocol.reply(:update_battle, battle_id, state)
-      
-      _ ->
-        Logger.error("No handler in tcp_server:all_battle_updated with reason #{reason}")
-    end
+    new_state =
+      case reason do
+        :update_battle_info ->
+          state.protocol.reply(:update_battle, battle_id, state)
+
+        _ ->
+          Logger.error("No handler in tcp_server:all_battle_updated with reason #{reason}")
+      end
 
     {:noreply, new_state}
   end
@@ -306,11 +311,13 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:add_user_to_battle, userid, battle_id}, state) do
-    new_state = if userid != state.userid do
-      state.protocol.reply(:add_user_to_battle, {userid, battle_id}, state)
-    else
-      state
-    end
+    new_state =
+      if userid != state.userid do
+        state.protocol.reply(:add_user_to_battle, {userid, battle_id}, state)
+      else
+        state
+      end
+
     {:noreply, new_state}
   end
 
@@ -347,6 +354,7 @@ defmodule Teiserver.TcpServer do
     if state.client.battle_id == battle_id do
       state.protocol.reply(:update_bot, {battle_id, bot}, state)
     end
+
     {:noreply, state}
   end
 
@@ -354,6 +362,7 @@ defmodule Teiserver.TcpServer do
     if state.client.battle_id == battle_id do
       state.protocol.reply(:remove_bot_from_battle, {battle_id, botname}, state)
     end
+
     {:noreply, state}
   end
 

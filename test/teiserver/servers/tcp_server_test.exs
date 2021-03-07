@@ -49,9 +49,10 @@ defmodule Teiserver.TcpServerTest do
     assert reply =~ "CLIENTS mpchan #{username}\n"
 
     # And send something very long
-    msg = 1..1800
-    |> Enum.map(fn _ -> "x" end)
-    |> Enum.join("")
+    msg =
+      1..1800
+      |> Enum.map(fn _ -> "x" end)
+      |> Enum.join("")
 
     # This is long enough it should trigger a splitting
     _send(socket, "SAY mpchan #{msg}\n")

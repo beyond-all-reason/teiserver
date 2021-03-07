@@ -36,8 +36,7 @@ defmodule TeiserverWeb.ClientLive.Show do
      |> add_breadcrumb(name: client.name, url: "/teiserver/admin/clients/#{id}")
      |> assign(:id, id)
      |> assign(:client, client)
-     |> assign(:user, user)
-   }
+     |> assign(:user, user)}
   end
 
   @impl true
@@ -48,9 +47,8 @@ defmodule TeiserverWeb.ClientLive.Show do
   def handle_info({:logged_out_client, client_id, _name}, socket) do
     if int_parse(client_id) == socket.assigns[:id] do
       {:noreply,
-        socket
-        |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))
-      }
+       socket
+       |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
     else
       {:noreply, socket}
     end

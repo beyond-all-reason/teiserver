@@ -100,9 +100,10 @@ defmodule Teiserver.User do
   end
 
   def register_user(name, email, password_hash, ip) do
-    params = user_register_params(name, email, password_hash, %{
-      "id" => ip
-    })
+    params =
+      user_register_params(name, email, password_hash, %{
+        "id" => ip
+      })
 
     case Account.create_user(params) do
       {:ok, user} ->
@@ -226,6 +227,7 @@ defmodule Teiserver.User do
   # Persists the changes into the database so they will
   # be pulled out next time the user is accessed/recached
   defp persist_user(%{name: "TEST_" <> _}), do: nil
+
   defp persist_user(user) do
     db_user = Account.get_user!(user.id)
 

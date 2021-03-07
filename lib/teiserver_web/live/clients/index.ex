@@ -10,7 +10,9 @@ defmodule TeiserverWeb.ClientLive.Index do
   @impl true
   def mount(_params, session, socket) do
     clients = list_clients()
-    users = clients
+
+    users =
+      clients
       |> Map.new(fn c -> {c.userid, User.get_user_by_id(c.userid)} end)
 
     socket =
@@ -35,7 +37,8 @@ defmodule TeiserverWeb.ClientLive.Index do
 
   @impl true
   def handle_info({:logged_in_client, userid, _username}, socket) do
-    keys = socket.assigns[:clients]
+    keys =
+      socket.assigns[:clients]
       |> Enum.map(fn c -> c.userid end)
 
     if Enum.member?(keys, userid) do
@@ -43,8 +46,9 @@ defmodule TeiserverWeb.ClientLive.Index do
     else
       clients = socket.assigns[:clients] ++ [Client.get_client_by_id(userid)]
       users = Map.put(socket.assigns[:users], userid, User.get_user_by_id(userid))
-      
-      socket = socket
+
+      socket =
+        socket
         |> assign(:clients, clients)
         |> assign(:users, users)
 
@@ -53,11 +57,14 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   def handle_info({:logged_out_client, userid, _username}, socket) do
-    clients = socket.assigns[:clients]
+    clients =
+      socket.assigns[:clients]
       |> Enum.filter(fn c -> c.userid != userid end)
+
     users = Map.delete(socket.assigns[:users], userid)
 
-    socket = socket
+    socket =
+      socket
       |> assign(:clients, clients)
       |> assign(:users, users)
 
@@ -72,7 +79,7 @@ defmodule TeiserverWeb.ClientLive.Index do
     # socket = socket
     #   |> assign(:clients, clients)
     #   |> assign(:users, users)
-    
+
     {:noreply, socket}
   end
 

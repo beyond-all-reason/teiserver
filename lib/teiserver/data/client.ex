@@ -24,7 +24,6 @@ defmodule Teiserver.Client do
         handicap: 0,
         sync: 0,
         side: 0,
-
         battle_id: nil
       },
       client
@@ -45,7 +44,7 @@ defmodule Teiserver.Client do
         in_game: false,
         ip: user.ip,
         country: user.country,
-        lobbyid: user.lobbyid,
+        lobbyid: user.lobbyid
       })
       |> add_client
 
@@ -135,17 +134,20 @@ defmodule Teiserver.Client do
 
   def get_client_by_name(nil), do: nil
   def get_client_by_name(""), do: nil
+
   def get_client_by_name(name) do
     userid = User.get_userid(name)
     ConCache.get(:clients, userid)
   end
 
   def get_client_by_id(nil), do: nil
+
   def get_client_by_id(userid) do
     ConCache.get(:clients, userid)
   end
 
   def get_clients([]), do: []
+
   def get_clients(id_list) do
     id_list
     |> Enum.map(fn userid -> ConCache.get(:clients, userid) end)

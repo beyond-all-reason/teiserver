@@ -23,6 +23,7 @@ defmodule Central.Repo.Migrations.UserGroups do
 
       timestamps()
     end
+
     create index(:account_groups, [:super_group_id])
 
     create table(:account_group_memberships, primary_key: false) do
@@ -32,6 +33,7 @@ defmodule Central.Repo.Migrations.UserGroups do
 
       timestamps()
     end
+
     create index(:account_group_memberships, [:user_id])
     create index(:account_group_memberships, [:group_id])
 

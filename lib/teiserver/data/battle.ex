@@ -39,7 +39,7 @@ defmodule Teiserver.Battle do
 
         # Expected to be overriden
         map_hash: nil,
-        map_name: nil,
+        map_name: nil
       },
       battle
     )
@@ -61,6 +61,7 @@ defmodule Teiserver.Battle do
         {:battle_updated, battle.id, data, reason}
       )
     end
+
     battle
   end
 
@@ -149,8 +150,7 @@ defmodule Teiserver.Battle do
         nil
 
       bot ->
-        new_bot =
-          Map.merge(bot, new_bot)
+        new_bot = Map.merge(bot, new_bot)
 
         new_bots = Map.put(battle.bots, botname, new_bot)
         new_battle = %{battle | bots: new_bots}
@@ -204,8 +204,12 @@ defmodule Teiserver.Battle do
 
   def remove_user_from_battle(userid, battle_id) do
     case do_remove_user_from_battle(userid, battle_id) do
-      :closed -> nil
-      :not_member -> nil
+      :closed ->
+        nil
+
+      :not_member ->
+        nil
+
       :removed ->
         PubSub.broadcast(
           Central.PubSub,
@@ -217,8 +221,12 @@ defmodule Teiserver.Battle do
 
   def kick_user_from_battle(userid, battle_id) do
     case do_remove_user_from_battle(userid, battle_id) do
-      :closed -> nil
-      :not_member -> nil
+      :closed ->
+        nil
+
+      :not_member ->
+        nil
+
       :removed ->
         PubSub.broadcast(
           Central.PubSub,
@@ -228,8 +236,8 @@ defmodule Teiserver.Battle do
     end
   end
 
-  @spec do_remove_user_from_battle(Integer.t, Integer.t) ::
-    :closed | :removed | :not_member
+  @spec do_remove_user_from_battle(Integer.t(), Integer.t()) ::
+          :closed | :removed | :not_member
   defp do_remove_user_from_battle(userid, battle_id) do
     battle = get_battle(battle_id)
 
@@ -253,6 +261,7 @@ defmodule Teiserver.Battle do
 
           {:ok, new_state}
         end)
+
         :removed
       else
         :not_member

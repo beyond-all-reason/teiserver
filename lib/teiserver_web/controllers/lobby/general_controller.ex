@@ -6,7 +6,8 @@ defmodule TeiserverWeb.Lobby.GeneralController do
   plug(AssignPlug,
     sidemenu_active: "teiserver"
   )
-  plug Teiserver.ServerUserPlug
+
+  plug(Teiserver.ServerUserPlug)
 
   def index(conn, _params) do
     render(conn, "index.html")

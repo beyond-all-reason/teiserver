@@ -2,11 +2,12 @@ defmodule Central.Account.Code do
   use CentralWeb, :schema
 
   schema "account_codes" do
-    field :value, :string
-    field :purpose, :string# E.g. password reset
-    field :expires, :utc_datetime
+    field(:value, :string)
+    # E.g. password reset
+    field(:purpose, :string)
+    field(:expires, :utc_datetime)
 
-    belongs_to :user, Central.Account.User
+    belongs_to(:user, Central.Account.User)
 
     timestamps()
   end

@@ -6,10 +6,11 @@ defmodule Teiserver.SpringInternalTest do
     statuses = ~w(4195330 4195418 4195462 4195402)
 
     for s <- statuses do
-      result = s
-      |> SpringProtocol.parse_battle_status
-      |> SpringProtocol.create_battle_status
-      |> to_string
+      result =
+        s
+        |> SpringProtocol.parse_battle_status()
+        |> SpringProtocol.create_battle_status()
+        |> to_string
 
       assert s == result, message: "Status #{s}, got: #{result}"
     end
@@ -87,6 +88,7 @@ defmodule Teiserver.SpringInternalTest do
       {"4400130", 100},
       {"4240386", 22}
     ]
+
     for {s, expected} <- handicaps do
       result = SpringProtocol.parse_battle_status(s)
       assert result.handicap == expected, message: "Status #{s}"
