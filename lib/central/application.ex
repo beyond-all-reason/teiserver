@@ -24,6 +24,7 @@ defmodule Central.Application do
         {Central.Account.RecentlyUsedCache, name: Central.Account.RecentlyUsedCache},
         {Central.Account.AuthGroups.Server, name: Central.Account.AuthGroups.Server},
         {Central.General.QuickAction.Cache, name: Central.General.QuickAction.Cache},
+        concache_sup(:codes),
         concache_sup(:account_user_cache),
         concache_sup(:account_user_cache_bang),
         concache_sup(:account_membership_cache),

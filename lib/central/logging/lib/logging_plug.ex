@@ -86,28 +86,6 @@ defmodule Central.Logging.LoggingPlug do
           log_id: the_log.id,
           timestamp: Central.Helpers.TimexHelper.date_to_str(Timex.local(), :hms)
         }
-
-        # Overwatch usage
-        CentralWeb.Endpoint.broadcast(
-          "overwatch:usage:#{the_log.user_id}",
-          "page view",
-          data
-        )
-
-        CentralWeb.Endpoint.broadcast(
-          "overwatch:usage:all",
-          "page view",
-          data
-        )
-
-        # TODO: Have this pick up on party instead?
-        # if conn.assigns[:current_user].admin_group_id do
-        #   CentralWeb.Endpoint.broadcast(
-        #     "event:logging.Page view log:#{conn.assigns[:current_user].admin_group_id}",
-        #     "new data",
-        #     Map.put(data, :room, "logging.Page view log")
-        #   )
-        # end
       end
     else
       nil

@@ -6,9 +6,9 @@ defmodule CentralWeb.Communication.BlogController do
 
   alias Central.Helpers.FileHelper
 
-  plug(:add_breadcrumb, name: 'Blog', url: '/blog')
+  plug :add_breadcrumb, name: 'Blog', url: '/blog'
 
-  plug(:put_layout, "blank.html")
+  plug :put_layout, "landing_page.html"
 
   def index(conn, _params) do
     categories = Communication.list_categories(search: [public: true])

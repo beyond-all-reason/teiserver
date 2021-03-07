@@ -1,5 +1,7 @@
 defmodule CentralWeb.Account.SessionController do
   use CentralWeb, :controller
+  alias Central.Account
+  alias Central.Account.UserLib
 
   alias Central.{Account, Account.Guardian, Account.User}
 
@@ -49,5 +51,157 @@ defmodule CentralWeb.Account.SessionController do
     |> Guardian.Plug.sign_out(clear_remember_me: true)
     |> put_flash(:danger, to_string(reason))
     |> new(%{})
+  end
+  
+  def forgot_password(conn, _params) do
+    key = UUID.uuid4()
+    value = UUID.uuid4()
+    ConCache.put(:codes, key, value)
+
+    conn
+    |> assign(:key, key)
+    |> assign(:value, value)
+    |> render("forgot_password.html")
+  end
+
+  def send_password_reset(conn, %{"email" => email} = params) do
+    user = Account.get_user_by_email(email)
+    key = params["key"]
+    expected_value = ConCache.get(:codes, key)
+
+    existing_resets = Account.list_codes(where: [
+      user_id: user.id,
+      purpose: "reset_password"
+    ])
+
+    cond do
+      params["email2"] != "" ->
+        conn
+        |> redirect(to: "/")
+
+      not Enum.empty?(existing_resets) ->
+        conn
+        |> put_flash(:success, "Password reset sent out")
+        |> redirect(to: "/")
+
+      expected_value == nil ->
+        key = UUID.uuid4()
+        value = UUID.uuid4()
+        ConCache.put(:codes, key, value)
+
+        conn
+        |> assign(:key, key)
+        |> assign(:value, value)
+        |> put_flash(:info, "Form timeout")
+        |> render("forgot_password.html")
+
+      params[key] != expected_value ->
+        key = UUID.uuid4()
+        value = UUID.uuid4()
+        ConCache.put(:codes, key, value)
+
+        conn
+        |> assign(:key, key)
+        |> assign(:value, value)
+        |> put_flash(:info, "The form has timed out")
+        |> render("forgot_password.html")
+
+      user == nil ->
+        key = UUID.uuid4()
+        value = UUID.uuid4()
+        ConCache.put(:codes, key, value)
+
+        conn
+        |> assign(:key, key)
+        |> assign(:value, value)
+        |> put_flash(:info, "No user by that email")
+        |> render("forgot_password.html")
+
+      true ->
+        UserLib.reset_password_request(user)
+
+        conn
+        |> put_flash(:success, "Password reset sent out")
+        |> redirect(to: "/")
+    end
+  end
+
+  def password_reset_form(conn, %{"value" => value}) do
+    code = Account.get_code(value, preload: [:user])
+
+    cond do
+      code == nil ->
+        conn
+        |> put_flash(:warning, "Unable to find link")
+        |> redirect(to: "/")
+
+      code.purpose != "reset_password" ->
+        conn
+        |> put_flash(:warning, "Link cannot be found")
+        |> redirect(to: "/")
+
+      Timex.compare(Timex.now(), code.expires ) == 1 ->
+        conn
+        |> put_flash(:warning, "Link has expired")
+        |> redirect(to: "/")
+
+      true ->
+        conn
+        |> assign(:value, value)
+        |> render("password_reset_form.html")
+    end
+  end
+
+  def password_reset_post(conn, %{"value" => value, "pass1" => pass1, "pass2" => pass2}) do
+    code = Account.get_code(value, preload: [:user])
+
+    cond do
+      code == nil ->
+        conn
+        |> put_flash(:warning, "Unable to find link")
+        |> redirect(to: "/")
+
+      code.purpose != "reset_password" ->
+        conn
+        |> put_flash(:warning, "Link cannot be found")
+        |> redirect(to: "/")
+
+      Timex.compare(Timex.now(), code.expires ) == 1 ->
+        conn
+        |> put_flash(:warning, "Link has expired")
+        |> redirect(to: "/")
+
+      pass1 != pass2 ->
+        conn
+        |> assign(:value, value)
+        |> put_flash(:warning, "Passwords need to match")
+        |> render("password_reset_form.html")
+
+      true ->
+        # Teiserver related
+        new_data = (code.user.data || %{})
+        |> Map.put("password_hash", Teiserver.User.encrypt_password(pass1))
+        
+        user_params = %{
+          "password" => pass1,
+          "data" => new_data
+        }
+
+        case Account.update_user(code.user, user_params) do
+          {:ok, user} ->
+            Teiserver.User.recache_user(user.id)
+            Central.Logging.Helpers.add_anonymous_audit_log(conn, "Account: User password reset", %{
+              user: user.id,
+              notes: "Self reset"
+            })
+            
+            conn
+            |> put_flash(:success, "Your password has been reset.")
+            |> redirect(to: "/")
+
+          {:error, _changeset} ->
+            throw "Error updating user password from password reset form"
+        end
+    end
   end
 end

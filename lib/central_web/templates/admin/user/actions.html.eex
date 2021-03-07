@@ -6,16 +6,6 @@
       &nbsp;
       Page view logs
     </a>
-
-  <% end %>
-
-  <%= if allow?(@current_user, ~w(admin.user.show logging.page_view.show)) do %>
-    <%# TODO: Add overwatch %>
-    <a class="dropdown-item" href='<%#= overwatch_usage_path(@conn, :index) %>?user_id=<%= @user.id %>'>
-
-      &nbsp;
-      Overwatch
-    </a>
   <% end %>
 
 <%= if allow?(@current_user, "admin.admin.full") do %>
