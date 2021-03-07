@@ -19,6 +19,7 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 - Clans
 - Teiserver boss mode
 - Integration with Discord/other services
+- Reputation/Reporting system
 
 ### Contributing
 All contributors are welcome; if you spot an issue or bug with it message me directly on the BAR discord or open an issue in github.

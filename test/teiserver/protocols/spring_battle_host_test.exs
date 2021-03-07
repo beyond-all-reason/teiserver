@@ -14,7 +14,7 @@ defmodule Teiserver.SpringBattleHostTest do
     {:ok, socket: socket, user: user}
   end
 
-  test "host battle test", %{socket: socket} do
+  test "host battle test", %{socket: socket, user: user} do
     _send(
       socket,
       "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName\n"
@@ -116,6 +116,13 @@ defmodule Teiserver.SpringBattleHostTest do
     assert Map.has_key?(battle.tags, "custom/key2")
 
     # Leave the battle
+    _send(socket, "LEAVEBATTLE\n")
+    reply = _recv(socket)
+    assert reply =~ "LEFTBATTLE #{battle_id} #{user.name}\n"
+    assert reply =~ "BATTLECLOSED #{battle_id}\n"
+
+    # TODO - Add, update and remove multiple bots
+    # Forceteamno, allyno etc
 
     _send(socket, "EXIT\n")
     _recv(socket)
