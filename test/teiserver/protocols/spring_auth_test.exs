@@ -401,4 +401,60 @@ ENDOFCHANNELS\n"
     _send(socket, "EXIT\n")
     _recv(socket)
   end
+
+  test "CREATEBOTACCOUNT" do
+    flunk "Not tested"
+  end
+
+  test "SAYEX" do
+    flunk "Not tested"
+  end
+
+  test "HANDICAP" do
+    flunk "Not tested"
+  end
+
+  test "FORCETEAMNO" do
+    flunk "Not tested"
+  end
+
+  test "FORCEALLYNO" do
+    flunk "Not tested"
+  end
+
+  test "FORCETEAMCOLOR" do
+    flunk "Not tested"
+  end
+
+  test "FORCESPECTATORMODE" do
+    flunk "Not tested"
+  end
+
+  test "DISABLEUNITS" do
+    flunk "Not tested"
+  end
+
+  test "ENABLEUNITS" do
+    flunk "Not tested"
+  end
+
+  test "ENABLEALLUNITS" do
+    flunk "Not tested"
+  end
+
+  test "UPDATEBOT" do
+    flunk "Not tested"
+  end
+
+  test "REMOVEBOT" do
+    flunk "Not tested"
+  end
+
+  test "SAYBATTLEEX" do
+    flunk "Not tested"
+  end
+
+  test "UPDATEBATTLEINFO" do
+    flunk "Not tested"
+  end
 end

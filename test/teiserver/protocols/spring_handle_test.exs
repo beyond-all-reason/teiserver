@@ -31,7 +31,8 @@ defmodule Teiserver.SpringHandleTest do
   test "badly formed commands" do
     values = [
       "REGISTER name",
-      "LOGIN name"
+      "LOGIN name",
+      "",
     ]
 
     state = TestLib.mock_state_auth(SpringProtocol)

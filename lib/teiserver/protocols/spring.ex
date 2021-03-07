@@ -82,12 +82,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   ---------
   """
 
-  # The welcome message is sent to a client when they first connect
-  # to the server
-  def welcome(socket, transport) do
-    _send("TASSERVER 0.38-33-ga5f3b28 * 8201 0\n", socket, transport, nil)
-  end
-
   # The main entry point for the module and the wrapper around
   # parsing, processing and acting upon a player message
   @spec handle(String.t(), Map.t()) :: Map.t()
@@ -121,10 +115,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   # TODO
   # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
-  defp do_handle("SLTS", _, state) do
-    reply(:ok, "SLTS", state)
-  end
-
   defp do_handle("STLS", _, state) do
     reply(:ok, "STLS", state)
   end
@@ -1082,9 +1072,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     state
   end
 
-  # Not handled cacther
-  defp do_handle(nil, _, state), do: state
-
+  # Not handled catcher
   defp do_handle(cmd, data, state) do
     _no_match(state, cmd, data)
   end

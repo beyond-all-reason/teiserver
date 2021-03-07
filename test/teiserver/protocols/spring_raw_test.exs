@@ -156,4 +156,8 @@ defmodule Teiserver.SpringRawTest do
     assert user2.password_hash != user.password_hash
     assert user2.password_reset_code == nil
   end
+
+  test "STLS" do
+    flunk "Not tested"
+  end
 end
