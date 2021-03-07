@@ -402,59 +402,87 @@ ENDOFCHANNELS\n"
     _recv(socket)
   end
 
-  test "CREATEBOTACCOUNT" do
+  test "CREATEBOTACCOUNT", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 
-  test "SAYEX" do
+  test "SAYEX", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 
-  test "HANDICAP" do
+  test "HANDICAP", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 
-  test "FORCETEAMNO" do
+  test "FORCETEAMNO", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 
-  test "FORCEALLYNO" do
+  test "FORCEALLYNO", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 
-  test "FORCETEAMCOLOR" do
+  test "FORCETEAMCOLOR", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 
-  test "FORCESPECTATORMODE" do
+  test "FORCESPECTATORMODE", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 
-  test "DISABLEUNITS" do
+  test "DISABLEUNITS", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 
-  test "ENABLEUNITS" do
+  test "ENABLEUNITS", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 
-  test "ENABLEALLUNITS" do
+  test "ENABLEALLUNITS", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 
-  test "UPDATEBOT" do
+  test "UPDATEBOT", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 
-  test "REMOVEBOT" do
+  test "REMOVEBOT", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 
-  test "SAYBATTLEEX" do
+  test "SAYBATTLEEX", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 
-  test "UPDATEBATTLEINFO" do
+  test "UPDATEBATTLEINFO", %{socket: socket} do
+    _send(socket, "EXIT\n")
+    _recv(socket)
     flunk "Not tested"
   end
 end

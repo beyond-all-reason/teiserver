@@ -12,6 +12,19 @@ defmodule Teiserver.Battle do
     end)
   end
 
+  def new_bot(data) do
+    Map.merge(%{
+      ready: true,
+      team_number: 0,
+      team_colour: 0,
+      ally_team_number: 0,
+      player: true,
+      handicap: 0,
+      sync: 1,
+      side: 0
+    }, data)
+  end
+
   def create_battle(battle) do
     # Needs to be supplied a map with:
     # founder_id/name, ip, port, engine_version, map_hash, map_name, name, game_name, hash_code

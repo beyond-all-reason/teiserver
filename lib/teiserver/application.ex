@@ -20,17 +20,13 @@ defmodule Teiserver.Application do
       concache_perm_sup(:battles),
       concache_perm_sup(:rooms)
     ]
-    
+
     # Some stuff doesn't work with the tests
     # but we're not that fussed about having it automtically
     # tested
-    if Mix.env() != :test do
-      children ++ [
-        {Teiserver.HookServer, name: Teiserver.HookServer},
-      ]
-    else
-      children
-    end
+    children ++ [
+      {Teiserver.HookServer, name: Teiserver.HookServer},
+    ]
   end
 
   defp concache_perm_sup(name) do
