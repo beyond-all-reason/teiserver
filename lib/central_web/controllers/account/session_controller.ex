@@ -65,7 +65,10 @@ defmodule CentralWeb.Account.SessionController do
   end
 
   def send_password_reset(conn, %{"email" => email} = params) do
-    user = Account.get_user_by_email(email)
+    # We use the || %{} to allow for the user not existing
+    # If we let user be nil it messes up the existing_resets
+    # query
+    user = Account.get_user_by_email(email) || %{id: -1}
     key = params["key"]
     expected_value = ConCache.get(:codes, key)
 
@@ -109,7 +112,7 @@ defmodule CentralWeb.Account.SessionController do
         |> put_flash(:info, "The form has timed out")
         |> render("forgot_password.html")
 
-      user == nil ->
+      user.id == -1 ->
         key = UUID.uuid4()
         value = UUID.uuid4()
         ConCache.put(:codes, key, value)
@@ -122,6 +125,7 @@ defmodule CentralWeb.Account.SessionController do
 
       true ->
         UserLib.reset_password_request(user)
+        |> Central.Mailer.deliver_now()
 
         conn
         |> put_flash(:success, "Password reset sent out")
