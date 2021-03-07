@@ -2,7 +2,10 @@
   "skip_files": [
     "lib/central/*",
     "lib/central_web/*",
-    "lib/teiserver/benchmark/*"
+    "lib/teiserver/benchmark/*",
+    "^test/.*",
+    "^/.*_web.ex",
+    ".*_test_lib.ex"
   ],
 
   "custom_stop_words": [

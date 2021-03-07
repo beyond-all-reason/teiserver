@@ -24,6 +24,7 @@ defmodule Teiserver.HookServer do
     {:noreply, state}
   end
 
+  @impl true
   def init(_) do
     :ok = PubSub.subscribe(Central.PubSub, "account_hooks")
     {:ok, %{}}

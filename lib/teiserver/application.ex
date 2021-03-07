@@ -1,7 +1,7 @@
 defmodule Teiserver.Application do
   @moduledoc false
   def children() do
-    [
+    children = [
       %{
         id: Teiserver.SSLTcpServer,
         start: {Teiserver.TcpServer, :start_link, [[ssl: true]]}
@@ -10,7 +10,6 @@ defmodule Teiserver.Application do
         id: Teiserver.RawTcpServer,
         start: {Teiserver.TcpServer, :start_link, [[]]}
       },
-      {Teiserver.HookServer, name: Teiserver.HookServer},
       concache_perm_sup(:id_counters),
       concache_perm_sup(:lists),
       concache_perm_sup(:users_lookup_name_with_id),
@@ -21,6 +20,17 @@ defmodule Teiserver.Application do
       concache_perm_sup(:battles),
       concache_perm_sup(:rooms)
     ]
+    
+    # Some stuff doesn't work with the tests
+    # but we're not that fussed about having it automtically
+    # tested
+    if Mix.env() != :test do
+      children ++ [
+        {Teiserver.HookServer, name: Teiserver.HookServer},
+      ]
+    else
+      children
+    end
   end
 
   defp concache_perm_sup(name) do
