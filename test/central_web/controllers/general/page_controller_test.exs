@@ -3,8 +3,7 @@ defmodule CentralWeb.General.PageControllerTest do
 
   test "GET /", %{conn: conn} do
     conn = get(conn, "/")
-    # assert html_response(conn, 200) =~ "Teifion.co.uk - Landing Page"
-    assert redirected_to(conn) == "/login"
+    assert html_response(conn, 200) =~ "shards-landing-page--1"
   end
 
   test "GET /reache", %{conn: conn} do

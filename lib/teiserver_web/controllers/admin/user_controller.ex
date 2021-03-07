@@ -89,9 +89,7 @@ defmodule TeiserverWeb.Admin.UserController do
       })
 
     case Account.create_user(user_params) do
-      {:ok, user} ->
-        Teiserver.User.recache_user(user.id)
-
+      {:ok, _user} ->
         conn
         |> put_flash(:info, "User created successfully.")
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
@@ -138,8 +136,6 @@ defmodule TeiserverWeb.Admin.UserController do
       {true, _} ->
         case Account.update_user(user, user_params) do
           {:ok, _user} ->
-            Teiserver.User.recache_user(id)
-
             conn
             |> put_flash(:info, "User updated successfully.")
             |> redirect(to: Routes.ts_admin_user_path(conn, :index))
@@ -171,8 +167,6 @@ defmodule TeiserverWeb.Admin.UserController do
 
         case Account.update_user(user, user_params) do
           {:ok, _user} ->
-            Teiserver.User.recache_user(id)
-
             conn
             |> put_flash(:info, "Password changed to '#{plain_password}'.")
             |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))

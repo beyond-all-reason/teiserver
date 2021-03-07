@@ -3,7 +3,7 @@
   height: 100vh;
   min-height: 700px;
   /* Photo by Lukas Blazek on Unsplash */
-  background: url("../images/tjsoftware/laptop.jpg") no-repeat center center fixed;
+  background: url("../images/landing/laptop.jpg") no-repeat center center fixed;
   background-size: cover;
 }
 

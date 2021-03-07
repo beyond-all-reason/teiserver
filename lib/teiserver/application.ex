@@ -10,6 +10,7 @@ defmodule Teiserver.Application do
         id: Teiserver.RawTcpServer,
         start: {Teiserver.TcpServer, :start_link, [[]]}
       },
+      {Teiserver.HookServer, name: Teiserver.HookServer},
       concache_perm_sup(:id_counters),
       concache_perm_sup(:lists),
       concache_perm_sup(:users_lookup_name_with_id),

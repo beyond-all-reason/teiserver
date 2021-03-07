@@ -193,8 +193,6 @@ defmodule CentralWeb.Account.SessionController do
 
         case Account.update_user(code.user, user_params) do
           {:ok, user} ->
-            Teiserver.User.recache_user(user.id)
-
             Central.Logging.Helpers.add_anonymous_audit_log(
               conn,
               "Account: User password reset",

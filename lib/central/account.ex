@@ -121,6 +121,12 @@ defmodule Central.Account do
   def recache_user(%User{} = user), do: recache_user(user.id)
 
   def recache_user(id) do
+    CentralWeb.Endpoint.broadcast(
+      "account_hooks",
+      "update_user",
+      id
+    )
+
     ConCache.dirty_delete(:account_user_cache, id)
     ConCache.dirty_delete(:account_user_cache_bang, id)
     ConCache.dirty_delete(:account_membership_cache, id)
