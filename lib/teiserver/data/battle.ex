@@ -155,7 +155,7 @@ defmodule Teiserver.Battle do
 
   def update_bot(battle_id, botname, "0", _), do: remove_bot(battle_id, botname)
 
-  def update_bot(battle_id, botname, new_bot) do
+  def update_bot(battle_id, botname, new_data) do
     battle = get_battle(battle_id)
 
     case battle.bots[botname] do
@@ -163,7 +163,7 @@ defmodule Teiserver.Battle do
         nil
 
       bot ->
-        new_bot = Map.merge(bot, new_bot)
+        new_bot = Map.merge(bot, new_data)
 
         new_bots = Map.put(battle.bots, botname, new_bot)
         new_battle = %{battle | bots: new_bots}
@@ -172,7 +172,7 @@ defmodule Teiserver.Battle do
         PubSub.broadcast(
           Central.PubSub,
           "battle_updates:#{battle_id}",
-          {:update_bot, battle_id, bot}
+          {:update_bot, battle_id, new_bot}
         )
     end
   end
