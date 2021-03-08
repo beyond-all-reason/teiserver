@@ -159,6 +159,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
     do_handle("LI", username, state)
   end
 
+  defp do_handle("LISTBATTLES", _, state) do
+    battle_ids = Battle.list_battles()
+    |> Enum.map(fn b -> b.id end)
+    |> Enum.join(" ")
+    _send("BATTLEIDS #{battle_ids}\n", state)
+    state
+  end
+
   defp do_handle("OB", _, state) do
     Logger.warn("Shortcut handler, should be removed for beta testing")
 

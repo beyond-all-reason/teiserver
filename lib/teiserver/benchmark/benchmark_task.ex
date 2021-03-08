@@ -1,38 +1,37 @@
 defmodule Mix.Tasks.Benchmark do
-  @moduledoc false
+  @moduledoc """
+  Used to stress test a server. Will gradually spawn users until stopped.
+  
+  Usage:
+    
+    mix benchmark server port
+  
+  e.g.
+    
+    mix benchmark example.com 8200
+
+  """
   use Mix.Task
 
-  _ = """
-  :ranch.info()
-  :ranch.procs(:tcp_echo, :acceptors)
-  """
-
-  def spawn_run do
-    spawn(fn ->
-      run(nil)
-    end)
-  end
-
   @shortdoc "Starts the benchmark procecess for the server"
-  def run(_) do
+  def run([server, port]) do
     Mix.Task.run("app.start")
     Logger.configure(level: :info)
 
     children = [
       # Benchmark stuff
       {Registry, keys: :unique, name: Teiserver.Benchmark.UserRegistry},
-      {Registry, keys: :unique, name: Teiserver.Benchmark.SilentRegistry},
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Benchmark.UserSupervisor},
-      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Benchmark.SilentSupervisor},
-      {Teiserver.Benchmark.StatsClient, name: Central.Account.RecentlyUsedCache}
+      {Teiserver.Benchmark.StatsClient, name: Teiserver.Benchmark.StatsClient}
     ]
 
     opts = [strategy: :one_for_one, name: Teiserver.Benchmark.Supervisor]
     start_result = Supervisor.start_link(children, opts)
 
-    # Call all our sub function st
+    # Call all our sub function startup
     {:ok, t} = Task.start(fn -> startup() end)
     send(t, :begin)
+    send(Teiserver.Benchmark.StatsClient, {:begin, server, port})
 
     :timer.sleep(300_000)
 

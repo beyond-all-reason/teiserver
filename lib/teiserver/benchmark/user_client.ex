@@ -4,6 +4,7 @@ defmodule Teiserver.Benchmark.UserClient do
   noise on the server. This one though will report on it's
   ping and the like.
   """
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
   require Logger
   use GenServer
 
@@ -12,10 +13,11 @@ defmodule Teiserver.Benchmark.UserClient do
     _ = _recv(state.socket)
 
     msg_id = :random.uniform(8_999_999) + 1_000_000
-    _send(state.socket, "##{msg_id} PING\n")
-    ping = wait_for_reply(state.socket, "##{msg_id} PONG\n", :os.system_time(:millisecond))
+    _send(state.socket, "##{msg_id} LISTBATTLES\n")
+    {ping, reply} = wait_for_reply(state.socket, "##{msg_id} BATTLEIDS", :os.system_time(:millisecond))
 
-    send(state.stats, {:ping, ping})
+    # Now we get a list of those battles and randomly join one or none at all
+    
 
     {:noreply, state}
   end
@@ -28,7 +30,7 @@ defmodule Teiserver.Benchmark.UserClient do
         wait_for_reply(socket, msg_id, start_time)
 
       String.contains?(reply, msg_id) ->
-        :os.system_time(:millisecond) - start_time
+        {:os.system_time(:millisecond) - start_time, reply}
 
       true ->
         wait_for_reply(socket, msg_id, start_time)
@@ -52,13 +54,8 @@ defmodule Teiserver.Benchmark.UserClient do
   end
 
   def init(opts) do
-    {:ok, socket} = :gen_tcp.connect('localhost', 8200, active: false)
-    _send(socket, "REGISTER #{opts.id}\tpassword\temail\n")
-
-    _send(
-      socket,
-      "LOGIN #{opts.id} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
-    )
+    {:ok, socket} = :gen_tcp.connect(to_charlist(opts.server), int_parse(opts.port), active: false)
+    _send(socket, "TMPLI TEST_#{opts.id}\n")
 
     _ = _recv(socket)
 

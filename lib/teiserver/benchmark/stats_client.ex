@@ -4,9 +4,11 @@ defmodule Teiserver.Benchmark.StatsClient do
   """
 
   require Logger
-  @tick_interval 2_000
-  @users_per_tick 10
-  @silents_per_tick 40
+  @report_interval 15_000
+  @registration_interval 15_000
+  @user_action_interval 13_000
+
+  @users_per_tick 5
 
   use GenServer
 
@@ -16,41 +18,38 @@ defmodule Teiserver.Benchmark.StatsClient do
     {:noreply, new_state}
   end
 
-  def handle_info(:tick, state) do
-    add_connections(state)
-
+  def handle_info(:report, state) do
     average_ping = Enum.sum(state.pings) / max(Enum.count(state.pings), 1)
     users = Registry.count(Teiserver.Benchmark.UserRegistry)
-    silents = Registry.count(Teiserver.Benchmark.SilentRegistry)
-
-    {load, _} = System.cmd("uptime", [])
-
-    [_, l1, l5, l15] =
-      ~r/load average: ([0-9\.]+), ([0-9\.]+), ([0-9\.]+)/
-      |> Regex.run(load)
-
-    memory =
-      :erlang.system_info(:allocated_areas)
-      |> Enum.reduce(0, fn value, acc ->
-        acc +
-          case value do
-            {_key, v} -> v
-            {_key, v1, _v2} -> v1
-          end
-      end)
-
-    memory = Float.round(memory / 1_048_576, 2)
 
     # Print stats
-    IO.puts("Tick: #{state.tick}
-Connections: #{users + silents} (users: #{users}, silents: #{silents})
+    IO.puts("
+Users: #{users}
 Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)}
-Load: #{l1}, #{l5}, #{l15}
-Memory: #{Kernel.inspect(memory)}MB
 ")
 
     new_state = %{state | tick: state.tick + 1, pings: []}
     {:noreply, new_state}
+  end
+
+  def handle_info(:register, state) do
+    add_connections(state)
+    {:noreply, state}
+  end
+
+  def handle_info({:begin, server, port}, state) do
+    state = Map.merge(state, %{
+      server: server,
+      port: port
+    })
+
+    Logger.warn("Starting stats")
+    # :timer.send_interval(@registration_interval, self(), :register)
+    send(self(), :register)
+
+    :timer.send_interval(@report_interval, self(), :report)
+
+    {:noreply, state}
   end
 
   defp add_connections(state) do
@@ -65,26 +64,12 @@ Memory: #{Kernel.inspect(memory)}MB
           Teiserver.Benchmark.UserClient,
           name: via_user_tuple(id),
           data: %{
-            interval: 1000 + :random.uniform(1000),
+            interval: @user_action_interval + :random.uniform(1000),
             id: id,
             tick: state.tick,
-            stats: pid
-          }
-        })
-    end)
-
-    1..@silents_per_tick
-    |> Parallel.each(fn i ->
-      id = "silent_#{state.tick}_#{i}"
-
-      {:ok, _pid} =
-        DynamicSupervisor.start_child(Teiserver.Benchmark.SilentSupervisor, {
-          Teiserver.Benchmark.SilentClient,
-          name: via_silent_tuple(id),
-          data: %{
-            interval: 5_000 + :random.uniform(10_000),
-            id: id,
-            tick: state.tick
+            stats: pid,
+            server: state.server,
+            port: state.port
           }
         })
     end)
@@ -96,24 +81,15 @@ Memory: #{Kernel.inspect(memory)}MB
   end
 
   def init(_opts) do
-    Logger.warn("Starting stats")
-
-    :timer.send_interval(@tick_interval, self(), :tick)
-
     {:ok,
      %{
        tick: 1,
        users: 0,
-       silents: 0,
        pings: []
      }}
   end
 
   defp via_user_tuple(id) do
     {:via, Registry, {Teiserver.Benchmark.UserRegistry, id}}
-  end
-
-  defp via_silent_tuple(id) do
-    {:via, Registry, {Teiserver.Benchmark.SilentRegistry, id}}
   end
 end
