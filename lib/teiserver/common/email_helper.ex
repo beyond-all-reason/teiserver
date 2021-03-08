@@ -11,7 +11,7 @@ defmodule Teiserver.EmailHelper do
     html_body = """
     <p>Welcome to Beyond All Reason.</p>
 
-    <p>You will be asked for a verification code, it is: <span style="font-family: monospace">#{
+    <p>To verify your account you will need this code:: <span style="font-family: monospace">#{
       verification_code
     }</span>.<p>
 

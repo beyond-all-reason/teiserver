@@ -14,11 +14,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
 
-  # TODO - Setup/Account stuff
-  # CONFIRMAGREEMENT - Waiting to hear from Beherith on how he wants it to work
-  # RESENDVERIFICATION - See above
-  # LISTCOMPFLAGS
-
   # Bridge commands, may not be needed
   # in_BRIDGECLIENTFROM
   # in_UNBRIDGECLIENTFROM
@@ -30,7 +25,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # https://github.com/spring/uberserver/blob/cc4155c3b45e8189100d9dd9097a9aa04c0eb3ec/protocol/Protocol.py#L1109
   # in_STLS - Technically implemented, won't work the same way due to TCP/TLS port different in ranch
   # in_PORTTEST
-  # in_CONFIRMAGREEMENT
   # in_SAYPRIVATEEX
   # in_BATTLEHOSTMSG
   # in_CHANNELTOPIC
@@ -134,6 +128,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   # This is intended purely for an experimental benchmark
+  # the user won't be saved to the database
   defp do_handle("TMPLI", "TEST_" <> userid, state) do
     username = "TEST_" <> userid
     userid = 100_000 + int_parse(userid)
@@ -219,49 +214,12 @@ defmodule Teiserver.Protocols.SpringProtocol do
       end
 
     case response do
-      # {:ok, %{verified: false} = _user} ->
-      #   reason = "Account not verified"
-      #   Logger.debug("[command:login] denied with reason #{reason}")
-      #   _send("DENIED #{reason}\n", state)
-      #   state
+      {:error, "Unverified", userid} ->
+        reply(:agreement, nil, state)
+        Map.put(state, :unverified_id, userid)
 
       {:ok, user} ->
-        # Login the client
-        client = Client.login(user, self(), __MODULE__)
-
-        # Who is online?
-        # skip ourselves because that will result in a double ADDUSER
-        Client.list_client_ids()
-        |> Enum.map(fn userid ->
-          user = User.get_user_by_id(userid)
-          reply(:add_user, user, state)
-        end)
-
-        :timer.sleep(100)
-
-        Battle.list_battles()
-        |> Enum.each(fn b ->
-          reply(:battle_opened, b, state)
-          reply(:update_battle, b, state)
-          reply(:battle_players, b, state)
-        end)
-
-        :timer.sleep(100)
-
-        # Client status messages
-        Client.list_clients()
-        |> Enum.map(fn client ->
-          reply(:client_status, client, state)
-        end)
-
-        :timer.sleep(100)
-
-        _send("LOGININFOEND\n", state)
-        :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
-        :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
-        :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
-        :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
-        %{state | client: client, user: user, name: user.name, userid: user.id}
+        do_login_accepted(state, user)
 
       {:error, reason} ->
         Logger.debug("[command:login] denied with reason #{reason}")
@@ -289,12 +247,24 @@ defmodule Teiserver.Protocols.SpringProtocol do
     state
   end
 
-  # defp do_handle("CONFIRMAGREEMENT", code, state) do
-  #   case  do
-  #      ->
+  defp do_handle("CONFIRMAGREEMENT", code, %{unverified_id: userid} = state) do
+    case User.get_user_by_id(userid) do
+      nil ->
+        Logger.error("CONFIRMAGREEMENT - No user found for ID of '#{userid}'")
+        state
 
-  #   end
-  # end
+      user ->
+        case code == "#{user.verification_code}" do
+          true ->
+            User.verify_user(user)
+            state
+          false ->
+            _send("DENIED Incorrect code\n", state)
+            state
+        end
+    end
+  end
+  defp do_handle("CONFIRMAGREEMENT", _code, state), do: reply(:servermsg, "You need to login before you can confirm the agreement.", state)
 
   defp do_handle("CREATEBOTACCOUNT", _, %{user: %{moderator: false}} = state),
     do: deny(state)
@@ -1107,6 +1077,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
   end
 
+  defp do_reply(:agreement, nil) do
+    [
+      "AGREEMENT A verification code has been sent to your email address. Please read our terms of service and then enter your six digit code below.\n",
+      "AGREEMENT \n",
+      "AGREEMENTEND\n"
+    ]
+  end
+
   defp do_reply(:okay, cmd) do
     if cmd do
       "OK cmd=#{cmd}\n"
@@ -1436,6 +1414,45 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
     Logger.info("--> #{Kernel.inspect(socket)} #{TcpServer.format_log(msg)}")
     transport.send(socket, msg)
+  end
+
+  defp do_login_accepted(state, user) do
+    # Login the client
+    client = Client.login(user, self(), __MODULE__)
+
+    # Who is online?
+    # skip ourselves because that will result in a double ADDUSER
+    Client.list_client_ids()
+    |> Enum.map(fn userid ->
+      user = User.get_user_by_id(userid)
+      reply(:add_user, user, state)
+    end)
+
+    :timer.sleep(100)
+
+    Battle.list_battles()
+    |> Enum.each(fn b ->
+      reply(:battle_opened, b, state)
+      reply(:update_battle, b, state)
+      reply(:battle_players, b, state)
+    end)
+
+    :timer.sleep(100)
+
+    # Client status messages
+    Client.list_clients()
+    |> Enum.map(fn client ->
+      reply(:client_status, client, state)
+    end)
+
+    :timer.sleep(100)
+
+    _send("LOGININFOEND\n", state)
+    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
+    %{state | client: client, user: user, name: user.name, userid: user.id}
   end
 
   defp deny(state) do

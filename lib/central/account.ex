@@ -121,17 +121,21 @@ defmodule Central.Account do
   def recache_user(%User{} = user), do: recache_user(user.id)
 
   def recache_user(id) do
-    CentralWeb.Endpoint.broadcast(
-      "account_hooks",
-      "update_user",
-      id
-    )
-
     ConCache.dirty_delete(:account_user_cache, id)
     ConCache.dirty_delete(:account_user_cache_bang, id)
     ConCache.dirty_delete(:account_membership_cache, id)
     ConCache.dirty_delete(:communication_user_notifications, id)
     ConCache.dirty_delete(:config_user_cache, id)
+
+    # Timer is to allow time for the cache to be cleared
+    spawn fn ->
+      :timer.sleep(250)
+      CentralWeb.Endpoint.broadcast(
+        "account_hooks",
+        "update_user",
+        id
+      )
+    end
   end
 
   @doc """
@@ -157,6 +161,16 @@ defmodule Central.Account do
     |> User.changeset(attrs, :self_create)
     |> Repo.insert()
   end
+
+  defp broadcast_create_user({:ok, user}) do
+    CentralWeb.Endpoint.broadcast(
+      "account_hooks",
+      "create_user",
+      user.id
+    )
+    {:ok, user}
+  end
+  defp broadcast_create_user(v), do: v
 
   def merge_default_params(user_params) do
     Map.merge(
@@ -232,7 +246,7 @@ defmodule Central.Account do
   end
 
   def authenticate_user(conn, email, plain_text_password) do
-    query = from(u in User, where: u.email == ^email)
+    query = from u in User, where: u.email == ^email
 
     case Repo.one(query) do
       nil ->
@@ -418,12 +432,11 @@ defmodule Central.Account do
   def list_group_memberships_cache(user_id) do
     ConCache.get_or_store(:account_membership_cache, user_id, fn ->
       query =
-        from(ugm in GroupMembership,
+        from ugm in GroupMembership,
           join: ug in Group,
           on: ugm.group_id == ug.id,
           where: ugm.user_id == ^user_id,
           select: {ug.id, ug.children_cache}
-        )
 
       Repo.all(query)
       |> Enum.map(fn {g, gc} -> gc ++ [g] end)

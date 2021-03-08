@@ -490,6 +490,11 @@ defmodule Teiserver.User do
     password == existing_password
   end
 
+  def verify_user(user) do
+    user = %{user | verification_code: nil, verified: true}
+    |> update_user(persist: true)
+  end
+
   def try_login(username, password, state, ip, lobby) do
     case get_user_by_name(username) do
       nil ->
@@ -498,7 +503,13 @@ defmodule Teiserver.User do
       user ->
         case test_password(password, user) do
           true ->
-            do_login(user, state, ip, lobby)
+            case user.verified do
+              true ->
+                do_login(user, state, ip, lobby)
+
+              false ->
+                {:error, "Unverified", user.id}
+            end
 
           false ->
             {:error, "Invalid password"}

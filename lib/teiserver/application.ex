@@ -25,9 +25,9 @@ defmodule Teiserver.Application do
     # but we're not that fussed about having it automtically
     # tested
     children ++
-      [
-        {Teiserver.HookServer, name: Teiserver.HookServer}
-      ]
+    [
+      {Teiserver.HookServer, name: Teiserver.HookServer}
+    ]
   end
 
   defp concache_perm_sup(name) do
