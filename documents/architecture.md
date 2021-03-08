@@ -1,9 +1,9 @@
 ## Structure
 ```
-    Client <--> TcpServer <--> Protocol <--> Data store <--> Logic
-                    ^                            |
-                    |                            |
-                    -----------------------------
+    Client <--> TcpServer <--> Protocol <--> Cache <--> Database
+                    ^                          v
+                    |                          |
+                     --------------------------
 ```
 
 ## Code layout/placement

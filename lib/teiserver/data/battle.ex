@@ -13,16 +13,19 @@ defmodule Teiserver.Battle do
   end
 
   def new_bot(data) do
-    Map.merge(%{
-      ready: true,
-      team_number: 0,
-      team_colour: 0,
-      ally_team_number: 0,
-      player: true,
-      handicap: 0,
-      sync: 1,
-      side: 0
-    }, data)
+    Map.merge(
+      %{
+        ready: true,
+        team_number: 0,
+        team_colour: 0,
+        ally_team_number: 0,
+        player: true,
+        handicap: 0,
+        sync: 1,
+        side: 0
+      },
+      data
+    )
   end
 
   def create_battle(battle) do

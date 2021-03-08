@@ -32,7 +32,7 @@ defmodule Teiserver.SpringHandleTest do
     values = [
       "REGISTER name",
       "LOGIN name",
-      "",
+      ""
     ]
 
     state = TestLib.mock_state_auth(SpringProtocol)

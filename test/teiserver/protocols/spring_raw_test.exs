@@ -158,6 +158,6 @@ defmodule Teiserver.SpringRawTest do
   end
 
   test "STLS" do
-    flunk "Not tested"
+    flunk("Not tested")
   end
 end

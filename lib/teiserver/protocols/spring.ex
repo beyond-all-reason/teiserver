@@ -916,16 +916,19 @@ defmodule Teiserver.Protocols.SpringProtocol do
     case Regex.run(~r/(\S+) (\d+) (\d+) (\S+)/, data) do
       [_, name, battlestatus, team_colour, ai_dll] ->
         if Battle.allow?("ADDBOT", state) do
-          bot_data = Battle.new_bot(Map.merge(
-              %{
-                name: name,
-                owner_name: state.name,
-                owner_id: state.userid,
-                team_colour: team_colour,
-                ai_dll: ai_dll
-              },
-              parse_battle_status(battlestatus)
-            ))
+          bot_data =
+            Battle.new_bot(
+              Map.merge(
+                %{
+                  name: name,
+                  owner_name: state.name,
+                  owner_id: state.userid,
+                  team_colour: team_colour,
+                  ai_dll: ai_dll
+                },
+                parse_battle_status(battlestatus)
+              )
+            )
 
           Battle.add_bot_to_battle(
             state.client.battle_id,

@@ -62,18 +62,20 @@ defmodule Central.Account.UserLib do
     # should exist but at the same time we don't want
     # callers of this function to have to create the code
     # themselves
-    code = if code do
-      code
-    else
-      {:ok, code} =
+    code =
+      if code do
+        code
+      else
+        {:ok, code} =
           Account.create_code(%{
             value: UUID.uuid4(),
             purpose: "reset_password",
             expires: Timex.now() |> Timex.shift(hours: 24),
             user_id: user.id
           })
-      code
-    end
+
+        code
+      end
 
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     url = "https://#{host}/password_reset/#{code.value}"

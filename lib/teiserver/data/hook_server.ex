@@ -18,9 +18,9 @@ defmodule Teiserver.HookServer do
         Teiserver.User.recache_user(int_parse(payload))
 
       _ ->
-        throw "No HookServer account_hooks handler for event '#{event}'"
+        throw("No HookServer account_hooks handler for event '#{event}'")
     end
-    
+
     {:noreply, state}
   end
 
