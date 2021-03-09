@@ -8,7 +8,6 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 
 ### Roadmap to Beta:
 - Test coverage for all Spring commands
-- Web interface for admins
 
 ### Post parity todo (in no particular order)
 - Matchmaking

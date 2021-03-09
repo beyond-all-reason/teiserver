@@ -11,12 +11,20 @@
 %>
 
 <%= component "detail_line",
-  label: "Styling",
-  icon: %{
-    colour: @user.colour,
-    icon: @user.icon,
-  },
-  value: @user.colour
+  label: "Verified",
+  value: (if @user.data["verified"], do: "Verified")
 %>
 
-<textarea id="user_data" rows="20" class="form-control monospace"><%= Jason.encode! @user.data, pretty: true %></textarea>
+<%= component "detail_line",
+  label: "Bot",
+  value: (if @user.data["bot"], do: "Bot")
+%>
+
+<%= component "detail_line",
+  label: "Moderator",
+  value: (if @user.data["moderator"], do: "Moderator")
+%>
+
+<%= if allow?(@conn, "admin.dev.developer") do %>
+  <textarea id="user_data" rows="20" class="form-control monospace"><%= Jason.encode! @user.data, pretty: true %></textarea>
+<% end %>

@@ -20,6 +20,17 @@
         })
         %>
 
+        <%= if allow?(@conn, "admin.user") do %>
+          <div class="float-right">
+            <a href="<%= Routes.admin_user_path(@conn, :edit, @user) %>" class="btn btn-outline-<%= bsname %>" id="section-menu-new">
+              <i class="far fa-power-off"></i>
+              &nbsp;
+              Admin edit
+            </a>
+            &nbsp;&nbsp;
+          </div>
+        <% end %>
+
         <hr />
 
 <%= render "form.html", Map.put(assigns, :action, Routes.ts_admin_user_path(@conn, :update, @user)) %>
