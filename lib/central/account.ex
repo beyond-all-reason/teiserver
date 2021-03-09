@@ -154,12 +154,14 @@ defmodule Central.Account do
     %User{}
     |> User.changeset(attrs)
     |> Repo.insert()
+    |> broadcast_create_user
   end
 
   def self_create_user(attrs \\ %{}) do
     %User{}
     |> User.changeset(attrs, :self_create)
     |> Repo.insert()
+    |> broadcast_create_user
   end
 
   defp broadcast_create_user({:ok, user}) do

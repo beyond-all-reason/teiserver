@@ -1,5 +1,5 @@
 defmodule Teiserver.SpringBattleHostTest do
-  use Central.ServerCase
+  use Central.ServerCase, async: false
   require Logger
   # alias Teiserver.BitParse
   # alias Teiserver.User

@@ -92,7 +92,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
       case tuple do
         {command, data, msg_id} ->
           do_handle(command, data, %{state | msg_id: msg_id})
-
         nil ->
           Logger.debug("Bad match on command: '#{data}'")
           state
@@ -130,33 +129,37 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # This is intended purely for an experimental benchmark
   # the user won't be saved to the database
   defp do_handle("TMPLI", "TEST_" <> userid, state) do
-    username = "TEST_" <> userid
-    userid = 100_000 + int_parse(userid)
+    if Application.get_env(:central, Teiserver)[:enable_benchmark] do
+      username = "TEST_" <> userid
+      userid = 100_000 + int_parse(userid)
 
-    User.add_user(%{
-      id: userid,
-      name: username,
-      email: "#{username}@#{username}",
-      rank: 1,
-      country: "??",
-      lobbyid: "Telnet",
-      ip: "default_ip",
-      moderator: false,
-      bot: false,
-      friends: [],
-      friend_requests: [],
-      ignored: [],
-      password_hash: "X03MO1qnZdYdgyfeuILPmQ==",
-      verification_code: nil,
-      verified: false,
-      password_reset_code: nil,
-      email_change_code: nil,
-      last_login: nil,
-      ingame_seconds: 0,
-      mmr: %{}
-    })
+      User.add_user(%{
+        id: userid,
+        name: username,
+        email: "#{username}@#{username}",
+        rank: 1,
+        country: "??",
+        lobbyid: "Telnet",
+        ip: "default_ip",
+        moderator: false,
+        bot: false,
+        friends: [],
+        friend_requests: [],
+        ignored: [],
+        password_hash: "X03MO1qnZdYdgyfeuILPmQ==",
+        verification_code: nil,
+        verified: true,
+        password_reset_code: nil,
+        email_change_code: nil,
+        last_login: nil,
+        ingame_seconds: 60,
+        mmr: %{}
+      })
 
-    do_handle("LI", username, state)
+      do_handle("LI", username, state)
+    else
+      state
+    end
   end
 
   defp do_handle("LISTBATTLES", _, state) do
@@ -881,13 +884,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
     state
   end
 
-  defp do_handle("PROMOTE", _, %{client: %{battle_id: nil}} = state), do: state
-
-  defp do_handle("PROMOTE", _, state) do
-    Logger.info("PROMOTE is not handled at this time as Chobby has no way to handle it - TODO")
-    state
-  end
-
   defp do_handle("ADDBOT", _msg, %{client: %{battle_id: nil}} = state), do: state
 
   defp do_handle("ADDBOT", data, state) do
@@ -1420,7 +1416,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         msg
       end
 
-    Logger.info("--> #{Kernel.inspect(socket)} #{TcpServer.format_log(msg)}")
+    Logger.debug("--> #{Kernel.inspect(socket)} #{TcpServer.format_log(msg)}")
     transport.send(socket, msg)
   end
 

@@ -79,11 +79,11 @@ defmodule Teiserver.TcpServer do
       |> Tuple.to_list()
       |> Enum.join(".")
 
-    Logger.info("New connection attempt #{Kernel.inspect(socket)}, IP: #{ip}")
+    Logger.debug("New connection attempt #{Kernel.inspect(socket)}, IP: #{ip}")
     x = :ranch.accept_ack(ref)
-    Logger.info(":ranch.accept_ack = #{Kernel.inspect(x)} for #{Kernel.inspect(socket)}")
+    Logger.debug(":ranch.accept_ack = #{Kernel.inspect(x)} for #{Kernel.inspect(socket)}")
     y = transport.setopts(socket, [{:active, true}])
-    Logger.info("transport.setopts = #{Kernel.inspect(y)} for #{Kernel.inspect(socket)}")
+    Logger.debug("transport.setopts = #{Kernel.inspect(y)} for #{Kernel.inspect(socket)}")
 
     state = %{
       message_part: "",
@@ -124,7 +124,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:tcp, _socket, data}, state) do
-    Logger.info("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
+    Logger.debug("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
 
     new_state =
       if String.ends_with?(data, "\n") do
@@ -144,7 +144,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    Logger.info("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
+    Logger.debug("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
 
     new_state =
       if String.ends_with?(data, "\n") do

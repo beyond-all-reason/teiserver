@@ -491,7 +491,7 @@ defmodule Teiserver.User do
   end
 
   def verify_user(user) do
-    user = %{user | verification_code: nil, verified: true}
+    %{user | verification_code: nil, verified: true}
     |> update_user(persist: true)
   end
 

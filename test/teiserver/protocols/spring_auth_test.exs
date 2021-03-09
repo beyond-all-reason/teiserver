@@ -1,5 +1,5 @@
 defmodule Teiserver.SpringAuthTest do
-  use Central.ServerCase
+  use Central.ServerCase, async: false
   require Logger
   alias Teiserver.BitParse
   alias Teiserver.User
@@ -312,9 +312,9 @@ ENDOFCHANNELS\n"
     reply = _recv(socket2)
     assert reply == "ADDBOT 1 STAI(1) #{user2.name} 4195458 0 STAI\n"
 
-    # Promote?
-    _send(socket2, "PROMOTE\n")
-    _ = _recv(socket2)
+    # # Promote?
+    # _send(socket2, "PROMOTE\n")
+    # _ = _recv(socket2)
 
     # Time to leave
     _send(socket2, "LEAVEBATTLE\n")
