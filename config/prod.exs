@@ -76,7 +76,8 @@ config :central, Teiserver,
     keyfile: "/var/www/tls/privkey.pem",
     certfile: "/var/www/tls/cert.pem",
     cacertfile: "/var/www/tls/fullchain.pem"
-  ]
+  ],
+  enable_benchmark: false
 
 # Do not print debug messages in production
 config :logger, level: :info

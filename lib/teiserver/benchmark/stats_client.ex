@@ -8,7 +8,7 @@ defmodule Teiserver.Benchmark.StatsClient do
   @registration_interval 15_000
   @user_action_interval 13_000
 
-  @users_per_tick 5
+  @users_per_tick 50
 
   use GenServer
 
@@ -28,13 +28,12 @@ Users: #{users}
 Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)}
 ")
 
-    new_state = %{state | tick: state.tick + 1, pings: []}
-    {:noreply, new_state}
+    {:noreply, %{state | pings: []}}
   end
 
   def handle_info(:register, state) do
     add_connections(state)
-    {:noreply, state}
+    {:noreply, %{state | tick: state.tick + 1}}
   end
 
   def handle_info({:begin, server, port}, state) do
@@ -44,7 +43,7 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
     })
 
     Logger.warn("Starting stats")
-    # :timer.send_interval(@registration_interval, self(), :register)
+    :timer.send_interval(@registration_interval, self(), :register)
     send(self(), :register)
 
     :timer.send_interval(@report_interval, self(), :report)
@@ -56,15 +55,16 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
     pid = self()
 
     1..@users_per_tick
-    |> Parallel.each(fn i ->
-      id = "user_#{state.tick}_#{i}"
+    |> Enum.each(fn i ->
+      id = (state.tick * 1000) + i
 
       {:ok, _pid} =
         DynamicSupervisor.start_child(Teiserver.Benchmark.UserSupervisor, {
           Teiserver.Benchmark.UserClient,
           name: via_user_tuple(id),
           data: %{
-            interval: @user_action_interval + :random.uniform(1000),
+            interval: @user_action_interval,
+            delay: (:random.uniform(@user_action_interval)),
             id: id,
             tick: state.tick,
             stats: pid,

@@ -8,6 +8,12 @@ defmodule Teiserver.Benchmark.UserClient do
   require Logger
   use GenServer
 
+  @statuses ~w(4195330 4195394 4194374)
+
+  def handle_info(:startup, state) do
+    {:noreply, do_startup(state)}
+  end
+
   def handle_info(:tick, state) do
     _send(state.socket, "SAY tick_#{state.tick} this is a test message\n")
     _ = _recv(state.socket)
@@ -16,10 +22,31 @@ defmodule Teiserver.Benchmark.UserClient do
     _send(state.socket, "##{msg_id} LISTBATTLES\n")
     {ping, reply} = wait_for_reply(state.socket, "##{msg_id} BATTLEIDS", :os.system_time(:millisecond))
 
+    # Tell stats what the ping is
+    send(state.stats, {:ping, ping})
+
     # Now we get a list of those battles and randomly join one or none at all
-    
+    case Regex.run(~r/BATTLEIDS ([\d ]+)\n/, reply) do
+      [_, ids] ->
+        ids = ids
+        |> String.split(" ")
+        |> int_parse
+
+        join_battle(Enum.random(ids), state)
+
+      _ ->
+        state
+    end
 
     {:noreply, state}
+  end
+
+  defp join_battle(id, state) do
+    _send(state.socket, "LEAVEBATTLE\n")
+    _send(state.socket, "JOINBATTLE #{id} empty -1540855590\n")
+    _send(state.socket, "MYBATTLESTATUS #{Enum.random(@statuses)} 0\n")
+
+    %{state| battle_id: id}
   end
 
   defp wait_for_reply(socket, msg_id, start_time) do
@@ -52,23 +79,40 @@ defmodule Teiserver.Benchmark.UserClient do
   defp _send(socket, msg) do
     :gen_tcp.send(socket, msg)
   end
+  
+  defp do_startup(state) do
+    # Random start so we don't get them all at the same time
+    :timer.sleep(state.initial_delay)
 
-  def init(opts) do
-    {:ok, socket} = :gen_tcp.connect(to_charlist(opts.server), int_parse(opts.port), active: false)
-    _send(socket, "TMPLI TEST_#{opts.id}\n")
+    {:ok, socket} = :gen_tcp.connect(to_charlist(state.server), int_parse(state.port), active: false)
+    _send(socket, "TMPLI TEST_#{state.id}\n")
 
     _ = _recv(socket)
 
     _send(socket, "JOIN main\n")
-    _send(socket, "JOIN tick_#{opts.tick}\n")
+    _send(socket, "JOIN tick_#{state.tick}\n")
 
-    :timer.send_interval(opts.interval, self(), :tick)
+    :timer.send_interval(state.interval, self(), :tick)
+    send(self(), :tick)
+
+    %{state | socket: socket}
+  end
+
+  def init(opts) do
+    send(self(), :startup)
 
     {:ok,
      %{
-       socket: socket,
+       socket: nil,
+       id: opts.id,
        tick: opts.tick,
-       stats: opts.stats
+       stats: opts.stats,
+       interval: opts.interval,
+       initial_delay: opts.delay,
+       server: opts.server,
+       port: opts.port,
+       battle_id: nil,
      }}
   end
 end
+# sudo systemctl restart central.service
