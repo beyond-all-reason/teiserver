@@ -1,0 +1,68 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+    $('#the_tabs a:first').tab('show');
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+  });
+</script>
+
+<%= render TeiserverWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "relationships"}) %>
+
+<div class="row page-row">
+  <div class="col-lg-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+
+        <%= render TeiserverWeb.Account.RelationshipsView, "section_menu.html",
+          conn: @conn,
+          permissions: @current_user.permissions,
+          show_search: false,
+          quick_search: "",
+          active: ""
+        %>
+
+        <hr />
+
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+          <li>
+            <a href="#friends_tab" role="tab" class="nav-link" data-toggle="tab">
+              <%= component "icon", icon: Teiserver.icon(:friend) %>
+              Friends
+            </a>
+          </li>
+
+          <li>
+            <a href="#requests_tab" role="tab" class="nav-link" data-toggle="tab">
+              <%= component "icon", icon: Teiserver.icon(:friend_request) %>
+              Pending requests
+            </a>
+          </li>
+
+          <li>
+            <a href="#muted_tab" role="tab" class="nav-link" data-toggle="tab">
+              <%= component "icon", icon: Teiserver.icon(:ignore) %>
+              Muted
+            </a>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <div class="tab-pane" id="friends_tab">
+            <%= render "tab_friends.html", assigns %>
+          </div>
+
+          <div class="tab-pane" id="requests_tab">
+            <%= render "tab_requests.html", assigns %>
+          </div>
+
+          <div class="tab-pane" id="muted_tab">
+            <%= render "tab_muted.html", assigns %>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

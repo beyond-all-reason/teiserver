@@ -16,6 +16,11 @@ defmodule TeiserverWeb.Router do
       scope "/teiserver/account", TeiserverWeb.Account, as: :ts_account do
         pipe_through([:browser, :admin_layout, :protected])
 
+        get("/relationships", RelationshipsController, :index)
+        post("/relationships/create/:action/:target", RelationshipsController, :create)
+        put("/relationships/update/:action/:target", RelationshipsController, :update)
+        delete("/relationships/delete/:action/:target", RelationshipsController, :delete)
+
         get("/", GeneralController, :index)
       end
 
@@ -41,17 +46,6 @@ defmodule TeiserverWeb.Router do
         resources("/user", UserController)
         post("/user/reset_password/:id", UserController, :reset_password)
       end
-
-      # scope "/teiserver", TeiserverWeb.AdminLive, as: :ts do
-      #   pipe_through [:browser, :admin_layout, :protected]
-
-      #   live "/admin", Index, :index
-      #   live "/admin/new", Index, :new
-      #   live "/admin/:id/edit", Index, :edit
-
-      #   live "/admin/:id", Show, :show
-      #   live "/admin/:id/show/edit", Show, :edit
-      # end
     end
   end
 end

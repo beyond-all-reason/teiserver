@@ -190,7 +190,7 @@ defmodule Teiserver.User do
     ConCache.get(:users, int_parse(id))
   end
 
-  def get_users(id_list) do
+  def list_users(id_list) do
     id_list
     |> Enum.map(fn userid -> ConCache.get(:users, userid) end)
   end

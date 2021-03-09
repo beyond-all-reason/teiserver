@@ -42,7 +42,7 @@ defmodule TeiserverWeb.BattleLive.Show do
 
   defp get_user_and_clients(id_list) do
     users =
-      User.get_users(id_list)
+      User.list_users(id_list)
       |> Map.new(fn u -> {u.id, u} end)
 
     clients =

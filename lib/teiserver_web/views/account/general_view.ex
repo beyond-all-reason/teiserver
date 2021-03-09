@@ -3,4 +3,6 @@ defmodule TeiserverWeb.Account.GeneralView do
 
   def colours(), do: StylingHelper.colours(:success)
   def icon(), do: StylingHelper.icon(:success)
+
+  def colours("relationships"), do: StylingHelper.colours(:info)
 end
