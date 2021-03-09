@@ -17,6 +17,7 @@ defmodule TeiserverWeb.Router do
         pipe_through([:browser, :admin_layout, :protected])
 
         get("/relationships", RelationshipsController, :index)
+        post("/relationships/find/", RelationshipsController, :find)
         post("/relationships/create/:action/:target", RelationshipsController, :create)
         put("/relationships/update/:action/:target", RelationshipsController, :update)
         delete("/relationships/delete/:action/:target", RelationshipsController, :delete)

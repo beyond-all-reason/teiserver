@@ -29,28 +29,48 @@ defmodule TeiserverWeb.Account.RelationshipsController do
     |> assign(:user_lookup, user_lookup)
     |> render("index.html")
   end
+  
+  def find(conn, params) do
+    target_id = Teiserver.User.get_userid(params["target_name"])
+
+    if target_id do
+      case params["mode"] do
+        "create" ->
+          do_create(conn, %{"action" => params["action"], "target" => target_id})
+        "delete" ->
+          do_delete(conn, %{"action" => params["action"], "target" => target_id})
+      end
+    else
+      conn
+      |> put_flash(:warning, "No user found with the name '#{params["target_name"]}'")
+      |> redirect(to: Routes.ts_account_relationships_path(conn, :index))
+    end
+  end
 
   def create(conn, %{"action" => action, "target" => target}) do
+    do_create(conn, %{"action" => action, "target" => target})
+  end
+
+  defp do_create(conn, %{"action" => action, "target" => target}) do
     target_id = int_parse(target)
 
-    msg = case action do
+    {msg, tab} = case action do
       "friend" ->
         Teiserver.User.create_friend_request(conn.user_id, target_id)
-        "Friend request sent"
+        {"Friend request sent", "friends"}
 
       "friend_request" ->
         Teiserver.User.accept_friend_request(target_id, conn.user_id)
-        "Friend request accepted"
+        {"Friend request accepted", "requests"}
 
       "muted" ->
         Teiserver.User.ignore_user(conn.user_id, target_id)
-        "User muted"
+        {"User muted", "muted"}
     end
-    
 
     conn
     |> put_flash(:success, msg)
-    |> redirect(to: Routes.ts_account_relationships_path(conn, :index))
+    |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "##{tab}")
   end
 
   # Not in use yet....
@@ -59,24 +79,28 @@ defmodule TeiserverWeb.Account.RelationshipsController do
   end
 
   def delete(conn, %{"action" => action, "target" => target}) do
+    do_delete(conn, %{"action" => action, "target" => target})
+  end
+  
+  defp do_delete(conn, %{"action" => action, "target" => target}) do
     target_id = int_parse(target)
 
-    msg = case action do
+    {msg, tab} = case action do
       "friend" ->
         Teiserver.User.remove_friend(conn.user_id, target_id)
-        "Friend removed"
+        {"Friend removed", "#friends"}
 
       "friend_request" ->
         Teiserver.User.decline_friend_request(target_id, conn.user_id)
-        "Friend request declined"
+        {"Friend request declined", "requests"}
 
       "muted" ->
         Teiserver.User.unignore_user(conn.user_id, target_id)
-        "User unmuted"
+        {"User unmuted", "muted"}
     end
 
     conn
     |> put_flash(:success, msg)
-    |> redirect(to: Routes.ts_account_relationships_path(conn, :index))
+    |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "##{tab}")
   end
 end
