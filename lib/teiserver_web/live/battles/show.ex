@@ -14,6 +14,7 @@ defmodule TeiserverWeb.BattleLive.Show do
       socket
       |> AuthPlug.live_call(session)
       |> NotificationPlug.live_call()
+      |> Teiserver.ServerUserPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battles")
       |> assign(:sidemenu_active, "teiserver")

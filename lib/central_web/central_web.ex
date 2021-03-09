@@ -98,6 +98,7 @@ defmodule CentralWeb do
 
       use Breadcrumble
       alias Central.Account.AuthPlug
+      import Central.Account.AuthLib, only: [allow?: 2]
       alias Central.Communication.NotificationPlug
 
       unquote(view_helpers())

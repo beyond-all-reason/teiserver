@@ -23,8 +23,12 @@
 <table class="table">
   <thead>
     <tr>
+      <th width="100">&nbsp;</th>
       <th>Name</th>
-      <th>Stuff</th>
+      <th>Bonus</th>
+      <th>Team</th>
+      <th>Faction</th>
+      <th>Colour</th>
     </tr>
   </thead>
   <tbody>
@@ -32,21 +36,46 @@
       <%
         user = @users[p]
         client = @clients[p]
+
+        friend = Enum.member?(@server_user.friends, p)
+        ignored = Enum.member?(@server_user.ignored, p)
       %>
       <%= if user do %>
         <tr>
+          <td width="100">
+            <%= if friend do %>
+              <i class="text-success fa-fw <%= Teiserver.icon(:friend) %>"></i>
+            <% end %>
+            <%= if ignored do %>
+              <i class="text-danger fa-fw <%= Teiserver.icon(:ignore) %>"></i>
+            <% end %>
+          </td>
           <td><%= user.name %></td>
-          <td><%= Kernel.inspect client %></td>
+          <td><%= client.handicap %></td>
+          <td><%= client.ally_team_number %></td>
+          <td><%= client.side %></td>
+          <td><%= client.team_colour %></td>
         </tr>
       <% end %>
     <% end %>
   </tbody>
 </table>
 
-<pre>
-  <%= Kernel.inspect @battle, pretty: true, limit: :infinity %>
-</pre>
+<table class="table">
+  <tbody>
+    <tr>
+      <td>Game name</td>
+      <td><%= @battle.game_name %></td>
+    </tr>
+  </tbody>
+</table>
+
+<%= if allow?(@current_user, "admin.dev.developer") do %>
+  <pre>
+    <%= Kernel.inspect @battle, pretty: true, limit: :infinity %>
+  </pre>
 <br />
+<% end %>
 
 <span>
   <%= live_redirect "Back", to: Routes.ts_battle_index_path(@socket, :index), class: "btn btn-#{bsname}" %>
