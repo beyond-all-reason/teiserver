@@ -114,6 +114,9 @@ defmodule Teiserver.SpringBattleHostTest do
     # We never removed key2, it should still be there
     assert Map.has_key?(battle.tags, "custom/key2")
 
+    # TODO
+    # ENABLEALLUNITS, ENABLEUNITS, DISABLEUNITS
+
     # BOT TIME
     _send(socket, "ADDBOT bot1 4195330 0 ai_dll\n")
     # Gives time for pubsub to send out
