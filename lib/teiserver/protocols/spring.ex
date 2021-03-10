@@ -1391,7 +1391,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   # Sends a message to the client. The function takes into account message ID and well warn if a message without a newline ending is sent.
-  @spec _send(String.t | list(), map) :: any()
+  @spec _send(String.t() | list(), map) :: any()
   defp _send(msg, state) do
     _send(msg, state.socket, state.transport, state.msg_id)
   end

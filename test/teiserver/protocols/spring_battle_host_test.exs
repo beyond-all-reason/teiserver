@@ -116,17 +116,20 @@ defmodule Teiserver.SpringBattleHostTest do
 
     # BOT TIME
     _send(socket, "ADDBOT bot1 4195330 0 ai_dll\n")
-    :timer.sleep(100)# Gives time for pubsub to send out
+    # Gives time for pubsub to send out
+    :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "ADDBOT 1 bot1 #{user.name} 4195330 0 ai_dll\n"
 
     _send(socket, "UPDATEBOT bot1 4195394 2\n")
-    :timer.sleep(100)# Gives time for pubsub to send out
+    # Gives time for pubsub to send out
+    :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "UPDATEBOT 1 bot1 4195394 2\n"
 
     _send(socket, "REMOVEBOT bot1\n")
-    :timer.sleep(100)# Gives time for pubsub to send out
+    # Gives time for pubsub to send out
+    :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "REMOVEBOT 1 bot1\n"
 

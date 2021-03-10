@@ -574,9 +574,9 @@ defmodule CentralWeb.Admin.UserController do
 
         # Next up, configs
         Config.list_user_configs(user.id)
-          |> Enum.each(fn ugm ->
-            Config.delete_user_config(ugm)
-          end)
+        |> Enum.each(fn ugm ->
+          Config.delete_user_config(ugm)
+        end)
 
         # Now remove the user
         Account.delete_user(user)
