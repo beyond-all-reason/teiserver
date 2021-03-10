@@ -2,6 +2,7 @@ defmodule Teiserver.TcpServerTest do
   use Central.ServerCase, async: false
 
   alias Teiserver.User
+
   import Teiserver.TestLib,
     only: [raw_setup: 0, _send: 2, _recv: 1, _recv_until: 1, new_user_name: 0]
 
@@ -29,7 +30,10 @@ defmodule Teiserver.TcpServerTest do
 
     reply = _recv_until(socket)
     [agreement_full, agreement_empty, agreement_end | _] = String.split(reply, "\n")
-    assert agreement_full == "AGREEMENT A verification code has been sent to your email address. Please read our terms of service and then enter your six digit code below."
+
+    assert agreement_full ==
+             "AGREEMENT A verification code has been sent to your email address. Please read our terms of service and then enter your six digit code below."
+
     assert agreement_empty == "AGREEMENT "
     assert agreement_end == "AGREEMENTEND"
 
@@ -48,6 +52,7 @@ defmodule Teiserver.TcpServerTest do
       socket,
       "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
     )
+
     reply = _recv_until(socket)
 
     [accepted | remainder] = String.split(reply, "\n")

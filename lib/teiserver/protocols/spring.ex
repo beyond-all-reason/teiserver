@@ -92,6 +92,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
       case tuple do
         {command, data, msg_id} ->
           do_handle(command, data, %{state | msg_id: msg_id})
+
         nil ->
           Logger.debug("Bad match on command: '#{data}'")
           state
@@ -163,9 +164,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_handle("LISTBATTLES", _, state) do
-    battle_ids = Battle.list_battles()
-    |> Enum.map(fn b -> b.id end)
-    |> Enum.join(" ")
+    battle_ids =
+      Battle.list_battles()
+      |> Enum.map(fn b -> b.id end)
+      |> Enum.join(" ")
+
     _send("BATTLEIDS #{battle_ids}\n", state)
     state
   end
@@ -269,13 +272,16 @@ defmodule Teiserver.Protocols.SpringProtocol do
           true ->
             User.verify_user(user)
             state
+
           false ->
             _send("DENIED Incorrect code\n", state)
             state
         end
     end
   end
-  defp do_handle("CONFIRMAGREEMENT", _code, state), do: reply(:servermsg, "You need to login before you can confirm the agreement.", state)
+
+  defp do_handle("CONFIRMAGREEMENT", _code, state),
+    do: reply(:servermsg, "You need to login before you can confirm the agreement.", state)
 
   defp do_handle("CREATEBOTACCOUNT", _, %{user: %{moderator: false}} = state),
     do: deny(state)

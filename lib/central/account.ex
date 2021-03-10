@@ -128,14 +128,15 @@ defmodule Central.Account do
     ConCache.dirty_delete(:config_user_cache, id)
 
     # Timer is to allow time for the cache to be cleared
-    spawn fn ->
+    spawn(fn ->
       :timer.sleep(250)
+
       CentralWeb.Endpoint.broadcast(
         "account_hooks",
         "update_user",
         id
       )
-    end
+    end)
   end
 
   @doc """
@@ -170,8 +171,10 @@ defmodule Central.Account do
       "create_user",
       user.id
     )
+
     {:ok, user}
   end
+
   defp broadcast_create_user(v), do: v
 
   def merge_default_params(user_params) do

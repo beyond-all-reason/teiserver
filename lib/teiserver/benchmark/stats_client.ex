@@ -37,10 +37,11 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
   end
 
   def handle_info({:begin, server, port}, state) do
-    state = Map.merge(state, %{
-      server: server,
-      port: port
-    })
+    state =
+      Map.merge(state, %{
+        server: server,
+        port: port
+      })
 
     Logger.warn("Starting stats")
     :timer.send_interval(@registration_interval, self(), :register)
@@ -56,7 +57,7 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
 
     1..@users_per_tick
     |> Enum.each(fn i ->
-      id = (state.tick * 1000) + i
+      id = state.tick * 1000 + i
 
       {:ok, _pid} =
         DynamicSupervisor.start_child(Teiserver.Benchmark.UserSupervisor, {
@@ -64,7 +65,7 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
           name: via_user_tuple(id),
           data: %{
             interval: @user_action_interval,
-            delay: (:random.uniform(@user_action_interval)),
+            delay: :random.uniform(@user_action_interval),
             id: id,
             tick: state.tick,
             stats: pid,

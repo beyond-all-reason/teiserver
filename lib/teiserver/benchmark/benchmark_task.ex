@@ -1,11 +1,11 @@
 defmodule Mix.Tasks.Benchmark do
   @moduledoc """
   Used to stress test a server. Will gradually spawn users until stopped.
-  
+
   Usage:
     
     mix benchmark server port
-  
+
   e.g.
     
     mix benchmark example.com 8200

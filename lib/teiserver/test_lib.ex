@@ -31,7 +31,7 @@ defmodule Teiserver.TestLib do
         user
         |> User.convert_user()
         |> User.add_user()
-        |> User.verify_user
+        |> User.verify_user()
 
       _ ->
         new_user()

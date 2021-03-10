@@ -9,6 +9,7 @@ defmodule TeiserverWeb.Account.RelationshipsController do
   plug(AssignPlug,
     sidemenu_active: "teiserver"
   )
+
   plug(Teiserver.ServerUserPlug)
 
   def index(conn, _params) do
@@ -29,7 +30,7 @@ defmodule TeiserverWeb.Account.RelationshipsController do
     |> assign(:user_lookup, user_lookup)
     |> render("index.html")
   end
-  
+
   def find(conn, params) do
     target_id = Teiserver.User.get_userid(params["target_name"])
 
@@ -37,6 +38,7 @@ defmodule TeiserverWeb.Account.RelationshipsController do
       case params["mode"] do
         "create" ->
           do_create(conn, %{"action" => params["action"], "target" => target_id})
+
         "delete" ->
           do_delete(conn, %{"action" => params["action"], "target" => target_id})
       end
@@ -54,19 +56,20 @@ defmodule TeiserverWeb.Account.RelationshipsController do
   defp do_create(conn, %{"action" => action, "target" => target}) do
     target_id = int_parse(target)
 
-    {msg, tab} = case action do
-      "friend" ->
-        Teiserver.User.create_friend_request(conn.user_id, target_id)
-        {"Friend request sent", "friends"}
+    {msg, tab} =
+      case action do
+        "friend" ->
+          Teiserver.User.create_friend_request(conn.user_id, target_id)
+          {"Friend request sent", "friends"}
 
-      "friend_request" ->
-        Teiserver.User.accept_friend_request(target_id, conn.user_id)
-        {"Friend request accepted", "requests"}
+        "friend_request" ->
+          Teiserver.User.accept_friend_request(target_id, conn.user_id)
+          {"Friend request accepted", "requests"}
 
-      "muted" ->
-        Teiserver.User.ignore_user(conn.user_id, target_id)
-        {"User muted", "muted"}
-    end
+        "muted" ->
+          Teiserver.User.ignore_user(conn.user_id, target_id)
+          {"User muted", "muted"}
+      end
 
     conn
     |> put_flash(:success, msg)
@@ -74,30 +77,31 @@ defmodule TeiserverWeb.Account.RelationshipsController do
   end
 
   # Not in use yet....
-  def update(conn, %{"action" => action, "target" => target}) do
-    
-  end
+  # def update(conn, %{"action" => action, "target" => target}) do
+
+  # end
 
   def delete(conn, %{"action" => action, "target" => target}) do
     do_delete(conn, %{"action" => action, "target" => target})
   end
-  
+
   defp do_delete(conn, %{"action" => action, "target" => target}) do
     target_id = int_parse(target)
 
-    {msg, tab} = case action do
-      "friend" ->
-        Teiserver.User.remove_friend(conn.user_id, target_id)
-        {"Friend removed", "#friends"}
+    {msg, tab} =
+      case action do
+        "friend" ->
+          Teiserver.User.remove_friend(conn.user_id, target_id)
+          {"Friend removed", "#friends"}
 
-      "friend_request" ->
-        Teiserver.User.decline_friend_request(target_id, conn.user_id)
-        {"Friend request declined", "requests"}
+        "friend_request" ->
+          Teiserver.User.decline_friend_request(target_id, conn.user_id)
+          {"Friend request declined", "requests"}
 
-      "muted" ->
-        Teiserver.User.unignore_user(conn.user_id, target_id)
-        {"User unmuted", "muted"}
-    end
+        "muted" ->
+          Teiserver.User.unignore_user(conn.user_id, target_id)
+          {"User unmuted", "muted"}
+      end
 
     conn
     |> put_flash(:success, msg)

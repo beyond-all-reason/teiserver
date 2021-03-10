@@ -25,6 +25,7 @@ central-*.tar
 
 *.sublime-project
 *.sublime-workspace
+*.code-workspace
 
 # Temporary files for e.g. tests
 /tmp

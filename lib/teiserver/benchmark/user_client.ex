@@ -20,7 +20,9 @@ defmodule Teiserver.Benchmark.UserClient do
 
     msg_id = :random.uniform(8_999_999) + 1_000_000
     _send(state.socket, "##{msg_id} LISTBATTLES\n")
-    {ping, reply} = wait_for_reply(state.socket, "##{msg_id} BATTLEIDS", :os.system_time(:millisecond))
+
+    {ping, reply} =
+      wait_for_reply(state.socket, "##{msg_id} BATTLEIDS", :os.system_time(:millisecond))
 
     # Tell stats what the ping is
     send(state.stats, {:ping, ping})
@@ -28,9 +30,10 @@ defmodule Teiserver.Benchmark.UserClient do
     # Now we get a list of those battles and randomly join one or none at all
     case Regex.run(~r/BATTLEIDS ([\d ]+)\n/, reply) do
       [_, ids] ->
-        ids = ids
-        |> String.split(" ")
-        |> int_parse
+        ids =
+          ids
+          |> String.split(" ")
+          |> int_parse
 
         join_battle(Enum.random(ids), state)
 
@@ -46,7 +49,7 @@ defmodule Teiserver.Benchmark.UserClient do
     _send(state.socket, "JOINBATTLE #{id} empty -1540855590\n")
     _send(state.socket, "MYBATTLESTATUS #{Enum.random(@statuses)} 0\n")
 
-    %{state| battle_id: id}
+    %{state | battle_id: id}
   end
 
   defp wait_for_reply(socket, msg_id, start_time) do
@@ -79,12 +82,14 @@ defmodule Teiserver.Benchmark.UserClient do
   defp _send(socket, msg) do
     :gen_tcp.send(socket, msg)
   end
-  
+
   defp do_startup(state) do
     # Random start so we don't get them all at the same time
     :timer.sleep(state.initial_delay)
 
-    {:ok, socket} = :gen_tcp.connect(to_charlist(state.server), int_parse(state.port), active: false)
+    {:ok, socket} =
+      :gen_tcp.connect(to_charlist(state.server), int_parse(state.port), active: false)
+
     _send(socket, "TMPLI TEST_#{state.id}\n")
 
     _ = _recv(socket)
@@ -111,8 +116,9 @@ defmodule Teiserver.Benchmark.UserClient do
        initial_delay: opts.delay,
        server: opts.server,
        port: opts.port,
-       battle_id: nil,
+       battle_id: nil
      }}
   end
 end
+
 # sudo systemctl restart central.service
