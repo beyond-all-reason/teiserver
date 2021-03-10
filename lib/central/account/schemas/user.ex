@@ -25,8 +25,6 @@ defmodule Central.Account.User do
       join_through: "account_group_memberships",
       join_keys: [user_id: :id, group_id: :id]
 
-    many_to_many :horizon_skills, Central.Horizon.Skill, join_through: "horizon_user_skills"
-
     timestamps()
   end
 
