@@ -462,18 +462,6 @@ ENDOFCHANNELS\n"
     flunk("Not tested")
   end
 
-  test "UPDATEBOT", %{socket: socket} do
-    _send(socket, "EXIT\n")
-    _recv(socket)
-    flunk("Not tested")
-  end
-
-  test "REMOVEBOT", %{socket: socket} do
-    _send(socket, "EXIT\n")
-    _recv(socket)
-    flunk("Not tested")
-  end
-
   test "SAYBATTLEEX", %{socket: socket} do
     _send(socket, "EXIT\n")
     _recv(socket)

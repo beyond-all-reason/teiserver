@@ -107,13 +107,28 @@ defmodule Teiserver.SpringBattleHostTest do
 
     _send(socket, "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n")
     reply = _recv(socket)
-
     assert reply == "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n"
 
     battle = Battle.get_battle(battle_id)
     refute Map.has_key?(battle.tags, "custom/key1")
     # We never removed key2, it should still be there
     assert Map.has_key?(battle.tags, "custom/key2")
+
+    # BOT TIME
+    _send(socket, "ADDBOT bot1 4195330 0 ai_dll\n")
+    :timer.sleep(100)# Gives time for pubsub to send out
+    reply = _recv_until(socket)
+    assert reply == "ADDBOT 1 bot1 #{user.name} 4195330 0 ai_dll\n"
+
+    _send(socket, "UPDATEBOT bot1 4195394 2\n")
+    :timer.sleep(100)# Gives time for pubsub to send out
+    reply = _recv_until(socket)
+    assert reply == "UPDATEBOT 1 bot1 4195394 2\n"
+
+    _send(socket, "REMOVEBOT bot1\n")
+    :timer.sleep(100)# Gives time for pubsub to send out
+    reply = _recv_until(socket)
+    assert reply == "REMOVEBOT 1 bot1\n"
 
     # Leave the battle
     _send(socket, "LEAVEBATTLE\n")
