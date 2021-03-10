@@ -18,7 +18,7 @@ defmodule Central.Helpers.TimexHelper do
   end
 
   @spec date_to_str(DateTime.t()) :: String.t()
-  @spec date_to_str(DateTime.t(), List.t()) :: String.t()
+  @spec date_to_str(DateTime.t(), list) :: String.t()
   def date_to_str(the_time), do: date_to_str(the_time, [])
   def date_to_str(nil, _), do: ""
 

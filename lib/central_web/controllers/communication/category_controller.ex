@@ -4,14 +4,13 @@ defmodule CentralWeb.Communication.CategoryController do
   alias Central.Communication
   alias Central.Communication.Category
 
-  plug(Bodyguard.Plug.Authorize,
+  plug Bodyguard.Plug.Authorize,
     policy: Central.Communication.Category,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
-  )
 
-  plug(:add_breadcrumb, name: 'Blog', url: '/blog')
-  plug(:add_breadcrumb, name: 'Categories', url: '/blog_admin/categories')
+  plug :add_breadcrumb, name: 'Blog', url: '/blog'
+  plug :add_breadcrumb, name: 'Categories', url: '/blog_admin/categories'
 
   def index(conn, params) do
     categories =

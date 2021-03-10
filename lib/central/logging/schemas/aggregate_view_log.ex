@@ -3,25 +3,25 @@ defmodule Central.Logging.AggregateViewLog do
 
   @primary_key false
   schema "aggregate_view_logs" do
-    field(:date, :date, primary_key: true)
+    field :date, :date, primary_key: true
 
-    field(:total_views, :integer)
-    field(:total_uniques, :integer)
-    field(:average_load_time, :integer)
+    field :total_views, :integer
+    field :total_uniques, :integer
+    field :average_load_time, :integer
 
-    field(:guest_view_count, :integer)
-    field(:guest_unique_ip_count, :integer)
+    field :guest_view_count, :integer
+    field :guest_unique_ip_count, :integer
 
-    field(:percentile_load_time_95, :integer)
-    field(:percentile_load_time_99, :integer)
-    field(:max_load_time, :integer)
+    field :percentile_load_time_95, :integer
+    field :percentile_load_time_99, :integer
+    field :max_load_time, :integer
 
-    field(:hourly_views, {:array, :integer})
-    field(:hourly_uniques, {:array, :integer})
-    field(:hourly_average_load_times, {:array, :integer})
+    field :hourly_views, {:array, :integer}
+    field :hourly_uniques, {:array, :integer}
+    field :hourly_average_load_times, {:array, :integer}
 
-    field(:user_data, :map)
-    field(:section_data, :map)
+    field :user_data, :map
+    field :section_data, :map
   end
 
   @doc false

@@ -14,7 +14,7 @@ defmodule Central.Communication.NotificationLib do
     from(notifications in Notification)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do
@@ -28,41 +28,35 @@ defmodule Central.Communication.NotificationLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :id, id) do
-    from(notifications in query,
+    from notifications in query,
       where: notifications.id == ^id
-    )
   end
 
   def _search(query, :user_id, user_id) do
-    from(notifications in query,
+    from notifications in query,
       where: notifications.user_id == ^user_id
-    )
   end
 
   def _search(query, :read, value) do
-    from(notifications in query,
+    from notifications in query,
       where: notifications.read == ^value
-    )
   end
 
   def _search(query, :expired, true) do
     now = Timex.now()
 
-    from(notifications in query,
+    from notifications in query,
       where: notifications.expired == true or notifications.expires < ^now
-    )
   end
 
   def _search(query, :expired, value) do
-    from(notifications in query,
+    from notifications in query,
       where: notifications.expired == ^value
-    )
   end
 
   def _search(query, :expires_after, time) do
-    from(notifications in query,
+    from notifications in query,
       where: notifications.expires > ^time
-    )
   end
 
   @spec order(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
@@ -76,18 +70,16 @@ defmodule Central.Communication.NotificationLib do
   end
 
   def _order(query, "Newest first") do
-    from(notifications in query,
+    from notifications in query,
       order_by: [desc: notifications.inserted_at]
-    )
   end
 
   def _order(query, "Oldest first") do
-    from(notifications in query,
+    from notifications in query,
       order_by: [asc: notifications.inserted_at]
-    )
   end
 
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec preload(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
   def preload(query, preloads) do
@@ -97,9 +89,8 @@ defmodule Central.Communication.NotificationLib do
   end
 
   def _preload_user(query) do
-    from(notifications in query,
+    from notifications in query,
       join: users in assoc(notifications, :user),
       preload: [user: users]
-    )
   end
 end

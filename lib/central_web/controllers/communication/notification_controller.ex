@@ -2,7 +2,7 @@ defmodule CentralWeb.Communication.NotificationController do
   use CentralWeb, :controller
   alias Central.Communication
 
-  plug(:add_breadcrumb, name: 'Notifications', url: '/communication/notifications')
+  plug :add_breadcrumb, name: 'Notifications', url: '/communication/notifications'
 
   def index(conn, _params) do
     notifications =

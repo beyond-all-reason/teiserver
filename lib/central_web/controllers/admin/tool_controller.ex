@@ -5,14 +5,13 @@ defmodule CentralWeb.Admin.ToolController do
   alias Central.Admin.CoverageLib
   alias Central.Admin.ToolLib
 
-  plug(Bodyguard.Plug.Authorize,
+  plug Bodyguard.Plug.Authorize,
     policy: Central.Dev,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
-  )
 
-  plug(:add_breadcrumb, name: 'Admin', url: '/admin')
-  plug(:add_breadcrumb, name: 'Tools', url: '/admin/tools')
+  plug :add_breadcrumb, name: 'Admin', url: '/admin'
+  plug :add_breadcrumb, name: 'Tools', url: '/admin/tools'
 
   # action_fallback CentralWeb.General.FallbackController
 

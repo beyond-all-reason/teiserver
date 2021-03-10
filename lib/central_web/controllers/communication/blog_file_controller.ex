@@ -6,14 +6,13 @@ defmodule CentralWeb.Communication.BlogFileController do
   alias Central.Communication.BlogFileLib
   alias Central.Helpers.StringHelper
 
-  plug(:add_breadcrumb, name: 'Blog', url: '/blog')
-  plug(:add_breadcrumb, name: 'Files', url: '/blog_admin/files')
+  plug :add_breadcrumb, name: 'Blog', url: '/blog'
+  plug :add_breadcrumb, name: 'Files', url: '/blog_admin/files'
 
-  plug(Bodyguard.Plug.Authorize,
+  plug Bodyguard.Plug.Authorize,
     policy: Central.Communication.BlogFile,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
-  )
 
   def index(conn, params) do
     blog_files =

@@ -81,7 +81,7 @@ defmodule Central.Helpers.DatePresets do
   @spec future_dates() :: list(String.t())
   def future_dates(), do: @future_dates
 
-  @spec parse(String.t()) :: {Date.t(), Date.t()}
+  @spec parse(String.t()) :: Date.t()
   def parse("Today"), do: Timex.today()
   def parse("Yesterday"), do: Timex.today() |> Timex.shift(days: -1)
   def parse("Start of the week"), do: Timex.today() |> Timex.beginning_of_week()

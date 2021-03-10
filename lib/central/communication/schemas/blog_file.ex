@@ -2,11 +2,11 @@ defmodule Central.Communication.BlogFile do
   use CentralWeb, :schema
 
   schema "communication_blog_files" do
-    field(:name, :string)
-    field(:url, :string)
-    field(:file_path, :string)
-    field(:file_ext, :string)
-    field(:file_size, :integer)
+    field :name, :string
+    field :url, :string
+    field :file_path, :string
+    field :file_ext, :string
+    field :file_size, :integer
 
     timestamps()
   end

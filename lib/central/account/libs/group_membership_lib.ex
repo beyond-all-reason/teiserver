@@ -11,7 +11,7 @@ defmodule Central.Account.GroupMembershipLib do
     from(group_memberships in GroupMembership)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do
@@ -25,18 +25,16 @@ defmodule Central.Account.GroupMembershipLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :user_id, user_id) do
-    from(group_memberships in query,
+    from group_memberships in query,
       where: group_memberships.user_id == ^user_id
-    )
   end
 
   def _search(query, :group_id, group_id) do
-    from(group_memberships in query,
+    from group_memberships in query,
       where: group_memberships.group_id == ^group_id
-    )
   end
 
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec preload(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
   def preload(query, _preloads) do

@@ -21,7 +21,7 @@ defmodule Central.Logging.MostRecentUsersReport do
     group_ids = conn.assigns[:memberships]
 
     query =
-      from(logs in PageViewLog,
+      from logs in PageViewLog,
         join: users in User,
         on: users.id == logs.user_id,
         where: users.admin_group_id in ^group_ids,
@@ -49,7 +49,6 @@ defmodule Central.Logging.MostRecentUsersReport do
           groups.colour,
           max(logs.inserted_at)
         }
-      )
 
     result = Repo.all(query)
 

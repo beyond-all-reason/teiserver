@@ -38,7 +38,7 @@ defmodule Central.Helpers.GeneralTestLib do
     {:ok, u} =
       Account.create_user(%{
         "name" => params["name"] || "Test",
-        "email" => params["email"] || "email@email#{:rand.uniform(999_999)}",
+        "email" => params["email"] || "email@email#{:rand.uniform(999_999_999_999)}",
         "colour" => params["colour"] || "#00AA00",
         "icon" => params["icon"] || "far fa-user",
         "permissions" => permissions,
@@ -86,7 +86,7 @@ defmodule Central.Helpers.GeneralTestLib do
   end
 
   def seeded?() do
-    r = Repo.one(from(g in Group, where: g.name == "unrelated group"))
+    r = Repo.one(from g in Group, where: g.name == "unrelated group")
     r != nil
   end
 
@@ -137,9 +137,9 @@ defmodule Central.Helpers.GeneralTestLib do
   end
 
   def data_setup(flags \\ []) do
-    parent_group = Repo.one(from(u in Group, where: u.name == "parent group"))
-    child_group = Repo.one(from(u in Group, where: u.name == "child group"))
-    main_group = Repo.one(from(u in Group, where: u.name == "main group"))
+    parent_group = Repo.one(from u in Group, where: u.name == "parent group")
+    child_group = Repo.one(from u in Group, where: u.name == "child group")
+    main_group = Repo.one(from u in Group, where: u.name == "main group")
 
     user =
       if :user in flags do
@@ -210,12 +210,12 @@ defmodule Central.Helpers.GeneralTestLib do
 
     child_user =
       if flags[:child_user] do
-        Repo.one(from(u in User, where: u.name == "child user"))
+        Repo.one(from u in User, where: u.name == "child user")
       end
 
     parent_user =
       if flags[:parent_user] do
-        Repo.one(from(u in User, where: u.name == "parent user"))
+        Repo.one(from u in User, where: u.name == "parent user")
       end
 
     socket =

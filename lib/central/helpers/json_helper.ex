@@ -104,7 +104,7 @@ defmodule Central.Helpers.JsonHelper do
     original != new
   end
 
-  @spec diff_key_list_simple(map, map) :: list
+  @spec diff_key_list_simple(map, map) :: map
   defp diff_key_list_simple(original, new) do
     added_values =
       new
@@ -127,7 +127,7 @@ defmodule Central.Helpers.JsonHelper do
     }
   end
 
-  @spec diff_key_list_complex(map, map) :: list
+  @spec diff_key_list_complex(map, map) :: map
   defp diff_key_list_complex(original, new) do
     converted_values =
       original

@@ -4,14 +4,13 @@ defmodule CentralWeb.Communication.PostController do
   alias Central.Communication
   alias Central.Communication.Post
 
-  plug(Bodyguard.Plug.Authorize,
+  plug Bodyguard.Plug.Authorize,
     policy: Central.Communication.Post,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
-  )
 
-  plug(:add_breadcrumb, name: 'Blog', url: '/blog')
-  plug(:add_breadcrumb, name: 'Posts', url: '/blog_admin/posts')
+  plug :add_breadcrumb, name: 'Blog', url: '/blog'
+  plug :add_breadcrumb, name: 'Posts', url: '/blog_admin/posts'
 
   def index(conn, _params) do
     posts =

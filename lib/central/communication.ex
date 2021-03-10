@@ -464,7 +464,7 @@ defmodule Central.Communication do
     user_skips =
       if prevent_duplicates do
         query =
-          from(notifications in Notification,
+          from notifications in Notification,
             where: notifications.user_id in ^user_ids,
             where: notifications.read == false,
             where: notifications.expires > ^Timex.now(),
@@ -472,7 +472,6 @@ defmodule Central.Communication do
             where: notifications.body == ^data.body,
             select: notifications.user_id,
             distinct: true
-          )
 
         Repo.all(query)
       else
@@ -530,21 +529,19 @@ defmodule Central.Communication do
 
   def mark_all_notification_as_read(user_id) do
     query =
-      from(n in Notification,
+      from n in Notification,
         where: n.user_id == ^user_id,
         update: [set: [read: true]]
-      )
 
     Repo.update_all(query, [])
   end
 
   def mark_notification_as_read(user_id, notification_id) do
     query =
-      from(n in Notification,
+      from n in Notification,
         where: n.id == ^notification_id,
         where: n.user_id == ^user_id,
         update: [set: [read: true]]
-      )
 
     Repo.update_all(query, [])
   end

@@ -7,24 +7,25 @@ defmodule Central.Account.User do
   # import Central.Account.AuthLib, only: [allow?: 2]
 
   schema "account_users" do
-    field(:name, :string)
-    field(:email, :string)
-    field(:password, :string)
+    field :name, :string
+    field :email, :string
+    field :password, :string
 
-    field(:icon, :string)
-    field(:colour, :string)
+    field :icon, :string
+    field :colour, :string
 
-    field(:data, :map, default: %{})
+    field :data, :map, default: %{}
 
-    field(:permissions, {:array, :string}, default: [])
+    field :permissions, {:array, :string}, default: []
 
-    has_many(:user_configs, Central.Config.UserConfig)
-    belongs_to(:admin_group, Central.Account.Group)
+    has_many :user_configs, Central.Config.UserConfig
+    belongs_to :admin_group, Central.Account.Group
 
-    many_to_many(:groups, Central.Account.Group,
+    many_to_many :groups, Central.Account.Group,
       join_through: "account_group_memberships",
       join_keys: [user_id: :id, group_id: :id]
-    )
+
+    many_to_many :horizon_skills, Central.Horizon.Skill, join_through: "horizon_user_skills"
 
     timestamps()
   end

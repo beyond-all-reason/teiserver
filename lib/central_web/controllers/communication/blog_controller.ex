@@ -6,10 +6,11 @@ defmodule CentralWeb.Communication.BlogController do
 
   alias Central.Helpers.FileHelper
 
-  plug(:add_breadcrumb, name: 'Blog', url: '/blog')
+  plug :add_breadcrumb, name: 'Blog', url: '/blog'
 
-  plug(:put_layout, "landing_page.html")
+  plug :put_layout, "landing_page.html"
 
+  @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, _params) do
     categories = Communication.list_categories(search: [public: true])
 
@@ -30,6 +31,7 @@ defmodule CentralWeb.Communication.BlogController do
     |> render("index.html")
   end
 
+  @spec tag(Plug.Conn.t(), map) :: Plug.Conn.t()
   def tag(conn, %{"tag" => the_tag}) do
     categories = Communication.list_categories(search: [public: true])
 
@@ -51,6 +53,7 @@ defmodule CentralWeb.Communication.BlogController do
     |> render("index.html")
   end
 
+  @spec category(Plug.Conn.t(), map) :: Plug.Conn.t()
   def category(conn, %{"category" => the_category}) do
     categories = Communication.list_categories(search: [public: true])
 
@@ -73,6 +76,7 @@ defmodule CentralWeb.Communication.BlogController do
     |> render("index.html")
   end
 
+  @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, params = %{"id" => url_id}) do
     post =
       Communication.get_post_by_url_slug(url_id,
@@ -84,7 +88,6 @@ defmodule CentralWeb.Communication.BlogController do
       )
 
     if post do
-      group_access = false
       post_key = PostLib.get_key(post.url_slug)
 
       visibility =
@@ -93,7 +96,6 @@ defmodule CentralWeb.Communication.BlogController do
           params["key"] == post_key -> true
           conn.assigns[:current_user] == nil -> false
           conn.assigns[:current_user].id == post.poster_id -> true
-          allow?(conn, "communications.blog.update") and group_access -> true
           allow?(conn, "admin.admin.full") -> true
           true -> false
         end
@@ -115,6 +117,7 @@ defmodule CentralWeb.Communication.BlogController do
     end
   end
 
+  @spec add_comment(Plug.Conn.t(), map) :: Plug.Conn.t()
   def add_comment(conn, %{"id" => id, "comment" => content}) do
     post = Communication.get_post(id)
 
@@ -153,6 +156,7 @@ defmodule CentralWeb.Communication.BlogController do
     end
   end
 
+  @spec show_file(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show_file(conn, %{"url_name" => url_name}) do
     blog_file = Communication.get_blog_file_by_url!(url_name)
 

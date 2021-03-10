@@ -4,9 +4,8 @@ defmodule CentralWeb.Account.RegistrationController do
   alias Central.Account
   alias Central.Account.User
 
-  plug(AssignPlug,
+  plug AssignPlug,
     sidemenu_active: "account"
-  )
 
   def new(conn, _params) do
     changeset = Account.change_user(%User{})
@@ -24,7 +23,6 @@ defmodule CentralWeb.Account.RegistrationController do
       {:ok, _user} ->
         conn
         |> put_flash(:info, "User created successfully.")
-        # |> redirect(to: Routes.play_general_path(conn, :index))
         |> redirect(to: "/")
 
       {:error, %Ecto.Changeset{} = changeset} ->

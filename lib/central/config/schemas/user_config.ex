@@ -3,9 +3,9 @@ defmodule Central.Config.UserConfig do
   import Ecto.Changeset
 
   schema "config_user" do
-    field(:key, :string)
-    field(:value, :string)
-    field(:user_id, :id)
+    field :key, :string
+    field :value, :string
+    field :user_id, :id
 
     timestamps()
   end

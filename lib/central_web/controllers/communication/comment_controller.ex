@@ -3,14 +3,13 @@ defmodule CentralWeb.Communication.CommentController do
 
   alias Central.Communication
 
-  plug(Bodyguard.Plug.Authorize,
+  plug Bodyguard.Plug.Authorize,
     policy: Central.Communication.Comment,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
-  )
 
-  plug(:add_breadcrumb, name: 'Blog', url: '/blog')
-  plug(:add_breadcrumb, name: 'Posts', url: '/blog_admin/comments')
+  plug :add_breadcrumb, name: 'Blog', url: '/blog'
+  plug :add_breadcrumb, name: 'Posts', url: '/blog_admin/comments'
 
   def index(conn, _params) do
     comments =

@@ -19,9 +19,8 @@ defmodule Central.Admin.ToolLib do
 
   def get_oban_jobs() do
     query =
-      from(jobs in Oban.Job,
+      from jobs in Oban.Job,
         where: jobs.state in ["scheduled", "available"]
-      )
 
     Repo.all(query)
   end

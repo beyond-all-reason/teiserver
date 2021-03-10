@@ -78,7 +78,7 @@ defmodule Central.Logging.LoggingPlug do
       the_log = Repo.insert!(page_log)
 
       if conn.assigns[:current_user] do
-        %{
+        data = %{
           username: conn.assigns[:current_user].name,
           user_id: the_log.user_id,
           path: conn.request_path,

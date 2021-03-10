@@ -2,11 +2,11 @@ defmodule Central.Communication.ChatContent do
   use CentralWeb, :schema
 
   schema "communication_chat_contents" do
-    field(:metadata, :map)
-    field(:content, :string)
+    field :metadata, :map
+    field :content, :string
 
-    belongs_to(:user, Central.Account.User)
-    belongs_to(:chat_room, Central.Communication.ChatRoom)
+    belongs_to :user, Central.Account.User
+    belongs_to :chat_room, Central.Communication.ChatRoom
 
     timestamps()
   end

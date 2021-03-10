@@ -2,14 +2,14 @@ defmodule Central.Logging.PageViewLog do
   use CentralWeb, :schema
 
   schema "page_view_logs" do
-    field(:path, :string)
-    field(:section, :string)
-    field(:method, :string)
-    field(:ip, :string)
-    field(:load_time, :integer)
-    field(:status, :integer)
+    field :path, :string
+    field :section, :string
+    field :method, :string
+    field :ip, :string
+    field :load_time, :integer
+    field :status, :integer
 
-    belongs_to(:user, Central.Account.User)
+    belongs_to :user, Central.Account.User
 
     timestamps()
   end

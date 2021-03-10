@@ -2,22 +2,22 @@ defmodule Central.Communication.Post do
   use CentralWeb, :schema
 
   schema "communication_posts" do
-    field(:url_slug, :string)
-    field(:title, :string)
-    field(:content, :string)
-    field(:short_content, :string)
+    field :url_slug, :string
+    field :title, :string
+    field :content, :string
+    field :short_content, :string
 
-    field(:live_from, :utc_datetime)
-    field(:allow_comments, :boolean, default: false)
+    field :live_from, :utc_datetime
+    field :allow_comments, :boolean, default: false
 
-    field(:tags, {:array, :string})
+    field :tags, {:array, :string}
 
-    field(:visible, :boolean, default: false)
+    field :visible, :boolean, default: false
 
-    belongs_to(:category, Central.Communication.Category)
-    belongs_to(:poster, Central.Account.User)
+    belongs_to :category, Central.Communication.Category
+    belongs_to :poster, Central.Account.User
 
-    has_many(:comments, Central.Communication.Comment)
+    has_many :comments, Central.Communication.Comment
 
     timestamps()
   end

@@ -10,14 +10,13 @@ defmodule CentralWeb.Admin.UserController do
 
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
-  plug(Bodyguard.Plug.Authorize,
+  plug Bodyguard.Plug.Authorize,
     policy: Central.Account.User,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
-  )
 
-  plug(:add_breadcrumb, name: 'Admin', url: '/admin')
-  plug(:add_breadcrumb, name: 'Users', url: '/admin/users')
+  plug :add_breadcrumb, name: 'Admin', url: '/admin'
+  plug :add_breadcrumb, name: 'Users', url: '/admin/users'
 
   def index(conn, params) do
     users =
@@ -549,6 +548,66 @@ defmodule CentralWeb.Admin.UserController do
         conn
         |> put_flash(:success, "User permissions copied successfully.")
         |> redirect(to: Routes.admin_user_path(conn, :show, user) <> "#permissions")
+    end
+  end
+
+  def delete(conn, %{"id" => id}) do
+    user = Account.get_user(id)
+
+    case UserLib.has_access(user, conn) do
+      {false, :not_found} ->
+        conn
+        |> put_flash(:danger, "Unable to find that user")
+        |> redirect(to: Routes.admin_user_path(conn, :index))
+
+      {false, :no_access} ->
+        conn
+        |> put_flash(:danger, "Unable to find that user")
+        |> redirect(to: Routes.admin_user_path(conn, :index))
+
+      {true, _} ->
+        # First we remove them from any groups
+        Account.list_group_memberships(user_id: user.id)
+        |> Enum.each(fn ugm ->
+          Account.delete_group_membership(ugm)
+        end)
+
+        # Next up, configs
+        Config.list_user_configs(user.id)
+          |> Enum.each(fn ugm ->
+            Config.delete_user_config(ugm)
+          end)
+
+        # Now remove the user
+        Account.delete_user(user)
+
+        # Tell Teiserver we've delete the user
+        Teiserver.User.delete_user(user.id)
+
+        conn
+        |> put_flash(:success, "User deleted")
+        |> redirect(to: Routes.admin_user_path(conn, :index))
+    end
+  end
+
+  def delete_check(conn, %{"id" => id}) do
+    user = Account.get_user(id)
+
+    case UserLib.has_access(user, conn) do
+      {false, :not_found} ->
+        conn
+        |> put_flash(:danger, "Unable to find that user")
+        |> redirect(to: Routes.admin_user_path(conn, :index))
+
+      {false, :no_access} ->
+        conn
+        |> put_flash(:danger, "Unable to find that user")
+        |> redirect(to: Routes.admin_user_path(conn, :index))
+
+      {true, _} ->
+        conn
+        |> assign(:user, user)
+        |> render("delete_check.html")
     end
   end
 

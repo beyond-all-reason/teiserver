@@ -13,7 +13,7 @@ defmodule Central.Account.GroupLib do
     from(groups in Group)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do
@@ -27,39 +27,33 @@ defmodule Central.Account.GroupLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :name, name) do
-    from(groups in query,
+    from groups in query,
       where: groups.name == ^name
-    )
   end
 
   def _search(query, :id, id) do
-    from(groups in query,
+    from groups in query,
       where: groups.id == ^id
-    )
   end
 
   def _search(query, :id_list, id_list) do
-    from(groups in query,
+    from groups in query,
       where: groups.id in ^id_list
-    )
   end
 
   def _search(query, :name_list, name_list) do
-    from(groups in query,
+    from groups in query,
       where: groups.name in ^name_list
-    )
   end
 
   def _search(query, :group_type, group_type) do
-    from(groups in query,
+    from groups in query,
       where: groups.group_type == ^group_type
-    )
   end
 
   def _search(query, :public, id_list) when is_list(id_list) do
-    from(groups in query,
+    from groups in query,
       where: groups.id in ^id_list or groups.see_group == true
-    )
   end
 
   def _search(query, :active, "All"), do: query
@@ -67,15 +61,13 @@ defmodule Central.Account.GroupLib do
   def _search(query, :active, "Inactive"), do: _search(query, :active, false)
 
   def _search(query, :active, active) do
-    from(groups in query,
+    from groups in query,
       where: groups.active == ^active
-    )
   end
 
   def _search(query, :user_memberships, group_ids) when is_list(group_ids) do
-    from(groups in query,
+    from groups in query,
       where: groups.id in ^group_ids
-    )
   end
 
   def _search(query, :user_membership, user_id) do
@@ -83,55 +75,48 @@ defmodule Central.Account.GroupLib do
       user_id
       |> load_user_memebership_ids(:with_children)
 
-    from(groups in query,
+    from groups in query,
       where: groups.id in ^membership_ids
-    )
   end
 
   def _search(query, :name_like, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
-    from(groups in query,
+    from groups in query,
       where: ilike(groups.name, ^ref_like)
-    )
   end
 
   def _search(query, :simple_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
-    from(groups in query,
+    from groups in query,
       where: ilike(groups.name, ^ref_like)
-    )
   end
 
   @spec order(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order(query, nil), do: query
 
   def order(query, "Name (A-Z)") do
-    from(groups in query,
+    from groups in query,
       order_by: [asc: groups.name]
-    )
   end
 
   def order(query, "Name (Z-A)") do
-    from(groups in query,
+    from groups in query,
       order_by: [desc: groups.name]
-    )
   end
 
   def order(query, "Newest first") do
-    from(groups in query,
+    from groups in query,
       order_by: [desc: groups.inserted_at]
-    )
   end
 
   def order(query, "Oldest first") do
-    from(groups in query,
+    from groups in query,
       order_by: [asc: groups.inserted_at]
-    )
   end
 
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec preload(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
   def preload(query, preloads) do
@@ -148,42 +133,37 @@ defmodule Central.Account.GroupLib do
   end
 
   def _preload_super_group(query) do
-    from(groups in query,
+    from groups in query,
       left_join: super_groups in assoc(groups, :super_group),
       preload: [super_group: super_groups]
-    )
   end
 
   def _preload_memberships(query) do
-    from(groups in query,
+    from groups in query,
       left_join: memberships in assoc(groups, :memberships),
       preload: [memberships: memberships]
-    )
   end
 
   def _preload_members(query) do
-    from(groups in query,
+    from groups in query,
       left_join: members in assoc(groups, :members),
       order_by: [asc: members.name],
       preload: [members: members]
-    )
   end
 
   def _preload_members_and_memberships(query) do
-    from(groups in query,
+    from groups in query,
       left_join: memberships in assoc(groups, :memberships),
       left_join: users in assoc(memberships, :user),
       order_by: [asc: users.name],
       preload: [memberships: {memberships, user: users}]
-    )
   end
 
   def load_user_memebership_ids(user_id) when is_integer(user_id) do
     query =
-      from(gm in GroupMembership,
+      from gm in GroupMembership,
         where: gm.user_id == ^user_id,
         select: gm.group_id
-      )
 
     Repo.all(query)
   end
@@ -199,12 +179,11 @@ defmodule Central.Account.GroupLib do
 
   def load_user_memebership_ids(user_id, :with_children) when is_integer(user_id) do
     query =
-      from(ugm in GroupMembership,
+      from ugm in GroupMembership,
         join: ug in Group,
         on: ugm.group_id == ug.id,
         where: ugm.user_id == ^user_id,
         select: {ug.id, ug.children_cache}
-      )
 
     Repo.all(query)
     |> Enum.map(fn {g, gc} -> gc ++ [g] end)

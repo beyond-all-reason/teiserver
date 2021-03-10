@@ -2,30 +2,29 @@ defmodule Central.Account.Group do
   use CentralWeb, :schema
 
   schema "account_groups" do
-    field(:name, :string)
-    field(:icon, :string)
-    field(:colour, :string)
-    field(:data, :map)
+    field :name, :string
+    field :icon, :string
+    field :colour, :string
+    field :data, :map
 
-    field(:active, :boolean, default: true)
-    field(:group_type, :string)
+    field :active, :boolean, default: true
+    field :group_type, :string
 
-    field(:see_group, :boolean)
-    field(:see_members, :boolean)
-    field(:self_add_members, :boolean)
-    field(:invite_members, :boolean)
+    field :see_group, :boolean
+    field :see_members, :boolean
+    field :self_add_members, :boolean
+    field :invite_members, :boolean
 
-    field(:children_cache, {:array, :integer}, default: [])
-    field(:supers_cache, {:array, :integer}, default: [])
+    field :children_cache, {:array, :integer}, default: []
+    field :supers_cache, {:array, :integer}, default: []
 
-    belongs_to(:super_group, Central.Account.Group)
+    belongs_to :super_group, Central.Account.Group
 
-    has_many(:memberships, Central.Account.GroupMembership, foreign_key: :group_id)
+    has_many :memberships, Central.Account.GroupMembership, foreign_key: :group_id
 
-    many_to_many(:members, Central.Account.User,
+    many_to_many :members, Central.Account.User,
       join_through: "account_group_memberships",
       join_keys: [group_id: :id, user_id: :id]
-    )
 
     timestamps()
   end

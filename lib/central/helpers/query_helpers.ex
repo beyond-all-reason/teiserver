@@ -70,7 +70,7 @@ defmodule Central.Helpers.QueryHelpers do
     |> limit(^amount)
   end
 
-  @spec limit_query(Ecto.Query.t(), Integer.t() | nil, Integer.t() | nil) :: Ecto.Query.t()
+  @spec limit_query(Ecto.Query.t(), integer() | nil, integer() | nil) :: Ecto.Query.t()
   def limit_query(query, nil, max_amount), do: limit_query(query, max_amount)
 
   def limit_query(query, amount, max_amount) when is_integer(amount) do
@@ -85,8 +85,7 @@ defmodule Central.Helpers.QueryHelpers do
   def select(query, nil), do: query
 
   def select(query, fields) do
-    from(stat_grids in query,
+    from stat_grids in query,
       select: ^fields
-    )
   end
 end

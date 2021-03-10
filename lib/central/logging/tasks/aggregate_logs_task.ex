@@ -71,9 +71,8 @@ defmodule Central.Logging.AggregateViewLogsTask do
 
     # Delete old log if it exists
     delete_query =
-      from(logs in AggregateViewLog,
+      from logs in AggregateViewLog,
         where: logs.date == ^(date |> Timex.to_date())
-      )
 
     Repo.delete_all(delete_query)
 
@@ -143,11 +142,10 @@ defmodule Central.Logging.AggregateViewLogsTask do
 
   defp get_hourly_views(logs) do
     logs =
-      from(logs in logs,
+      from logs in logs,
         select: {extract_hour(logs.inserted_at), count(logs.id)},
         group_by: [extract_hour(logs.inserted_at)],
         order_by: [asc: extract_hour(logs.inserted_at)]
-      )
 
     logs =
       Repo.all(logs)
@@ -159,11 +157,10 @@ defmodule Central.Logging.AggregateViewLogsTask do
 
   defp get_hourly_average_load_times(logs) do
     logs =
-      from(logs in logs,
+      from logs in logs,
         select: {extract_hour(logs.inserted_at), avg(logs.load_time)},
         group_by: [extract_hour(logs.inserted_at)],
         order_by: [asc: extract_hour(logs.inserted_at)]
-      )
 
     logs =
       Repo.all(logs)
@@ -175,11 +172,10 @@ defmodule Central.Logging.AggregateViewLogsTask do
 
   defp get_hourly_uniques(logs) do
     logs =
-      from(logs in logs,
+      from logs in logs,
         select: {extract_hour(logs.inserted_at), array_agg(logs.user_id)},
         group_by: [extract_hour(logs.inserted_at)],
         order_by: [asc: extract_hour(logs.inserted_at)]
-      )
 
     logs =
       Repo.all(logs)
@@ -212,7 +208,7 @@ defmodule Central.Logging.AggregateViewLogsTask do
 
   defp get_user_data(logs) do
     logs =
-      from(logs in logs,
+      from logs in logs,
         where: not is_nil(logs.user_id),
         select: {
           logs.user_id,
@@ -222,7 +218,6 @@ defmodule Central.Logging.AggregateViewLogsTask do
           array_agg(logs.ip)
         },
         group_by: [logs.user_id]
-      )
 
     logs
     |> Repo.all()
@@ -240,7 +235,7 @@ defmodule Central.Logging.AggregateViewLogsTask do
 
   defp get_section_data(logs) do
     logs =
-      from(logs in logs,
+      from logs in logs,
         select: {
           logs.section,
           count(logs.id),
@@ -248,7 +243,6 @@ defmodule Central.Logging.AggregateViewLogsTask do
           array_agg(logs.user_id)
         },
         group_by: [logs.section]
-      )
 
     logs
     |> Repo.all()

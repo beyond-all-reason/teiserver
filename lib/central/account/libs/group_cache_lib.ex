@@ -133,10 +133,9 @@ defmodule Central.Account.GroupCacheLib do
 
   defp remove_from_child_lists(group_id) do
     query =
-      from(g in Group,
+      from g in Group,
         where: ^group_id in g.children_cache,
         update: [set: [children_cache: array_remove(g.children_cache, ^group_id)]]
-      )
 
     query
     |> Repo.update_all([])
@@ -144,10 +143,9 @@ defmodule Central.Account.GroupCacheLib do
 
   defp removed_from_super_groups(group_id) do
     query =
-      from(g in Group,
+      from g in Group,
         where: ^group_id in g.supers_cache,
         update: [set: [supers_cache: array_remove(g.supers_cache, ^group_id)]]
-      )
 
     query
     |> Repo.update_all([])
@@ -155,10 +153,9 @@ defmodule Central.Account.GroupCacheLib do
 
   defp reattach_direct_children(group_id, new_super_group_id) do
     query =
-      from(g in Group,
+      from g in Group,
         where: g.super_group_id == ^group_id,
         update: [set: [super_group_id: ^new_super_group_id]]
-      )
 
     query
     |> Repo.update_all([])

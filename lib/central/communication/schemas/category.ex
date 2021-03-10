@@ -2,11 +2,11 @@ defmodule Central.Communication.Category do
   use CentralWeb, :schema
 
   schema "communication_categories" do
-    field(:name, :string)
-    field(:colour, :string)
-    field(:icon, :string)
+    field :name, :string
+    field :colour, :string
+    field :icon, :string
 
-    field(:public, :boolean)
+    field :public, :boolean
 
     timestamps()
   end

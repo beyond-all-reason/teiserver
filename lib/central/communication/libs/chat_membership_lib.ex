@@ -9,7 +9,7 @@ defmodule Central.Communication.ChatMembershipLib do
     from(chat_memberships in ChatMembership)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do
@@ -23,20 +23,17 @@ defmodule Central.Communication.ChatMembershipLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :user_id, user_id) do
-    from(chat_memberships in query,
+    from chat_memberships in query,
       where: chat_memberships.user_id == ^user_id
-    )
   end
 
   def _search(query, :chat_room_id, chat_room_id) when is_list(chat_room_id) do
-    from(chat_memberships in query,
+    from chat_memberships in query,
       where: chat_memberships.chat_room_id in ^chat_room_id
-    )
   end
 
   def _search(query, :chat_room_id, chat_room_id) do
-    from(chat_memberships in query,
+    from chat_memberships in query,
       where: chat_memberships.chat_room_id == ^chat_room_id
-    )
   end
 end

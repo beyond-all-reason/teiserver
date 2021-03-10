@@ -6,13 +6,13 @@ defmodule Central.Communication.CategoryLib do
   def colours(), do: {"#2A4", "#EFE", "success"}
   def icon(), do: "far fa-indent"
 
-  # Queries  
+  # Queries
   @spec get_categories() :: Ecto.Query.t()
   def get_categories do
     from(categories in Category)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do
@@ -26,21 +26,18 @@ defmodule Central.Communication.CategoryLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :id, id) do
-    from(categories in query,
+    from categories in query,
       where: categories.id == ^id
-    )
   end
 
   def _search(query, :name, name) do
-    from(categories in query,
+    from categories in query,
       where: categories.name == ^name
-    )
   end
 
   def _search(query, :public, public) do
-    from(categories in query,
+    from categories in query,
       where: categories.public == ^public
-    )
   end
 
   def _search(query, :membership, %{assigns: %{memberships: group_ids}}) do
@@ -48,53 +45,46 @@ defmodule Central.Communication.CategoryLib do
   end
 
   def _search(query, :membership, group_ids) do
-    from(categories in query,
+    from categories in query,
       where: categories.group_id in ^group_ids
-    )
   end
 
   def _search(query, :id_list, id_list) do
-    from(categories in query,
+    from categories in query,
       where: categories.id in ^id_list
-    )
   end
 
   def _search(query, :simple_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
-    from(categories in query,
+    from categories in query,
       where: ilike(categories.name, ^ref_like)
-    )
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 
   def order_by(query, "Name (A-Z)") do
-    from(categories in query,
+    from categories in query,
       order_by: [asc: categories.name]
-    )
   end
 
   def order_by(query, "Name (Z-A)") do
-    from(categories in query,
+    from categories in query,
       order_by: [desc: categories.name]
-    )
   end
 
   def order_by(query, "Newest first") do
-    from(categories in query,
+    from categories in query,
       order_by: [desc: categories.inserted_at]
-    )
   end
 
   def order_by(query, "Oldest first") do
-    from(categories in query,
+    from categories in query,
       order_by: [asc: categories.inserted_at]
-    )
   end
 
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec preload(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
   def preload(query, _preloads) do
@@ -141,21 +131,21 @@ defmodule Central.Communication.CategoryLib do
   #   name = "%" <> String.replace(name, "*", "%") <> "%"
 
   #   from categories in query,
-  #     where: ilike(categories.name, ^name) 
+  #     where: ilike(categories.name, ^name)
   # end
 
   # def search(query, :colour, colour) do
   #   colour = "%" <> String.replace(colour, "*", "%") <> "%"
 
   #   from categories in query,
-  #     where: ilike(categories.colour, ^colour) 
+  #     where: ilike(categories.colour, ^colour)
   # end
 
   # def search(query, :icon, icon) do
   #   icon = "%" <> String.replace(icon, "*", "%") <> "%"
 
   #   from categories in query,
-  #     where: ilike(categories.icon, ^icon) 
+  #     where: ilike(categories.icon, ^icon)
   # end
 
   # def search(query, :inserted_at_start, inserted_at_start) do

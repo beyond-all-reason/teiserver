@@ -2,12 +2,12 @@ defmodule Central.Logging.AuditLog do
   use CentralWeb, :schema
 
   schema "audit_logs" do
-    field(:action, :string)
-    field(:details, :map)
-    field(:ip, :string)
+    field :action, :string
+    field :details, :map
+    field :ip, :string
 
-    belongs_to(:group, Central.Account.Group)
-    belongs_to(:user, Central.Account.User)
+    belongs_to :group, Central.Account.Group
+    belongs_to :user, Central.Account.User
 
     timestamps()
   end

@@ -119,7 +119,7 @@ defmodule CentralWeb.Logging.ReportLib do
   end
 
   defp aggregate_logs(query, :count, :daily, "") do
-    from(logs in query,
+    from logs in query,
       group_by: fragment("date(?)", logs.inserted_at),
       order_by: [asc: fragment("date(?)", logs.inserted_at)],
       select: {
@@ -127,11 +127,10 @@ defmodule CentralWeb.Logging.ReportLib do
         "all",
         count(logs.id)
       }
-    )
   end
 
   defp aggregate_logs(query, :count, :daily, "section") do
-    from(logs in query,
+    from logs in query,
       group_by: logs.section,
       group_by: fragment("date(?)", logs.inserted_at),
       order_by: [asc: fragment("date(?)", logs.inserted_at)],
@@ -140,12 +139,11 @@ defmodule CentralWeb.Logging.ReportLib do
         logs.section,
         count(logs.id)
       }
-    )
   end
 
   # OLD STUFF
   def daily_count_by_section(start_date, end_date) do
-    from(l in PageViewLog,
+    from l in PageViewLog,
       where: l.inserted_at >= ^start_date,
       where: l.inserted_at <= ^end_date,
       where: l.section not in ["load_test"],
@@ -155,6 +153,5 @@ defmodule CentralWeb.Logging.ReportLib do
       select: {fragment("date(?)", l.inserted_at), l.section, count(l.id)},
       order_by: [asc: l.section],
       order_by: [asc: fragment("date(?)", l.inserted_at)]
-    )
   end
 end

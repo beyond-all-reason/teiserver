@@ -15,7 +15,7 @@ defmodule Central.Communication.ChatRoomLib do
     from(chat_rooms in ChatRoom)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do
@@ -29,18 +29,16 @@ defmodule Central.Communication.ChatRoomLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :id, id) do
-    from(chat_rooms in query,
+    from chat_rooms in query,
       where: chat_rooms.id == ^id
-    )
   end
 
   def _search(query, :name, name) do
-    from(chat_rooms in query,
+    from chat_rooms in query,
       where: chat_rooms.name == ^name
-    )
   end
 
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec preload(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
   def preload(query, preloads) do
@@ -51,17 +49,15 @@ defmodule Central.Communication.ChatRoomLib do
   end
 
   def _preload_full_content(query) do
-    from(chat_rooms in query,
+    from chat_rooms in query,
       left_join: contents in assoc(chat_rooms, :content),
       left_join: users in assoc(contents, :user),
       order_by: [desc: contents.inserted_at, desc: contents.id],
       preload: [content: {contents, user: users}]
-    )
   end
 
   def _preload_content(query) do
-    from(chat_rooms in _preload_full_content(query),
+    from chat_rooms in _preload_full_content(query),
       limit: 30
-    )
   end
 end

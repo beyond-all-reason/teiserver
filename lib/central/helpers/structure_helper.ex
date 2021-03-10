@@ -11,9 +11,8 @@ defmodule Central.Helpers.StructureHelper do
 
   defp query_obj(module, id) do
     query =
-      from(objects in module,
+      from objects in module,
         where: objects.id == ^id
-      )
 
     Repo.one!(query)
   end

@@ -6,15 +6,14 @@ defmodule CentralWeb.Logging.ErrorLogController do
 
   # alias Central.Logging.ErrorLogLib
 
-  plug(Bodyguard.Plug.Authorize,
+  plug Bodyguard.Plug.Authorize,
     policy: Central.Dev,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
-  )
 
-  plug(:add_breadcrumb, name: 'Admin', url: '/admin')
-  plug(:add_breadcrumb, name: 'Tools', url: '/admin/tools')
-  plug(:add_breadcrumb, name: 'Error logs', url: '/logging/error_logs')
+  plug :add_breadcrumb, name: 'Admin', url: '/admin'
+  plug :add_breadcrumb, name: 'Tools', url: '/admin/tools'
+  plug :add_breadcrumb, name: 'Error logs', url: '/logging/error_logs'
 
   def index(conn, _params) do
     logs =

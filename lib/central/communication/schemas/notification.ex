@@ -2,17 +2,17 @@ defmodule Central.Communication.Notification do
   use CentralWeb, :schema
 
   schema "communication_notifications" do
-    field(:title, :string)
-    field(:body, :string)
-    field(:icon, :string)
-    field(:colour, :string)
-    field(:redirect, :string)
+    field :title, :string
+    field :body, :string
+    field :icon, :string
+    field :colour, :string
+    field :redirect, :string
 
-    field(:read, :boolean, default: false)
-    field(:expired, :boolean, default: false)
-    field(:expires, :utc_datetime)
+    field :read, :boolean, default: false
+    field :expired, :boolean, default: false
+    field :expires, :utc_datetime
 
-    belongs_to(:user, Central.Account.User)
+    belongs_to :user, Central.Account.User
 
     timestamps()
   end

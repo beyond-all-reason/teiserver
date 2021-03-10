@@ -8,15 +8,15 @@ defmodule CentralWeb.Admin.GroupController do
   alias Central.Account.GroupCacheLib
   alias Central.Helpers.StylingHelper
 
-  plug(:add_breadcrumb, name: 'Admin', url: '/admin')
-  plug(:add_breadcrumb, name: 'Groups', url: '/admin/groups')
+  plug :add_breadcrumb, name: 'Admin', url: '/admin'
+  plug :add_breadcrumb, name: 'Groups', url: '/admin/groups'
 
-  plug(Bodyguard.Plug.Authorize,
+  plug Bodyguard.Plug.Authorize,
     policy: Central.Account.Group,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
-  )
 
+  @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
     memberships =
       case allow?(conn, "admin.group.show") do
@@ -43,6 +43,7 @@ defmodule CentralWeb.Admin.GroupController do
     |> render("index.html")
   end
 
+  @spec search(Plug.Conn.t(), map) :: Plug.Conn.t()
   def search(conn, %{"search" => params}) do
     params = search_params(params)
 
@@ -72,6 +73,7 @@ defmodule CentralWeb.Admin.GroupController do
     |> render("index.html")
   end
 
+  @spec new(Plug.Conn.t(), map) :: Plug.Conn.t()
   def new(conn, %{"select" => %{"type" => type_id}}) do
     group_type =
       if type_id != "" do
@@ -108,6 +110,7 @@ defmodule CentralWeb.Admin.GroupController do
     |> render("select.html")
   end
 
+  @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create(conn, %{"group" => group_params}) do
     group_type =
       if group_params["type_id"] != "" do
@@ -164,6 +167,7 @@ defmodule CentralWeb.Admin.GroupController do
     end
   end
 
+  @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     group =
       Account.get_group(id,
@@ -199,6 +203,7 @@ defmodule CentralWeb.Admin.GroupController do
     end
   end
 
+  @spec edit(Plug.Conn.t(), map) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     group =
       Account.get_group!(id,
@@ -240,6 +245,7 @@ defmodule CentralWeb.Admin.GroupController do
     end
   end
 
+  @spec update(Plug.Conn.t(), map) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "group" => group_params}) do
     group = Account.get_group!(id)
 
@@ -318,12 +324,12 @@ defmodule CentralWeb.Admin.GroupController do
   #       |> put_flash(:info, "User group deleted successfully.")
   #       |> redirect(to: Routes.admin_group_path(conn, :index))
 
-  #     group_access[:see_group] -> 
+  #     group_access[:see_group] ->
   #       conn
   #       |> put_flash(:danger, "You do not have edit access to that group")
   #       |> redirect(to: Routes.admin_group_path(conn, :show, group.id))
 
-  #     true -> 
+  #     true ->
   #       conn
   #       |> put_flash(:danger, "Unable to find that group")
   #       |> redirect(to: Routes.admin_group_path(conn, :index))
@@ -342,18 +348,19 @@ defmodule CentralWeb.Admin.GroupController do
   #       |> assign(:group, group)
   #       |> render("delete_check.html")
 
-  #     group_access[:see_group] -> 
+  #     group_access[:see_group] ->
   #       conn
   #       |> put_flash(:danger, "You do not have edit access to that group")
   #       |> redirect(to: Routes.admin_group_path(conn, :show, group.id))
 
-  #     true -> 
+  #     true ->
   #       conn
   #       |> put_flash(:danger, "Unable to find that group")
   #       |> redirect(to: Routes.admin_group_path(conn, :index))
   #   end
   # end
 
+  @spec create_membership(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create_membership(conn, params) do
     user_id = get_hash_id(params["account_user"])
     group_id = params["group_id"]
@@ -400,6 +407,7 @@ defmodule CentralWeb.Admin.GroupController do
     end
   end
 
+  @spec delete_membership(Plug.Conn.t(), map) :: Plug.Conn.t()
   def delete_membership(conn, %{"user_id" => user_id, "group_id" => group_id}) do
     group = Account.get_group!(group_id)
 
@@ -431,6 +439,7 @@ defmodule CentralWeb.Admin.GroupController do
     end
   end
 
+  @spec update_membership(Plug.Conn.t(), map) :: Plug.Conn.t()
   def update_membership(conn, params = %{"user_id" => user_id, "group_id" => group_id}) do
     group = Account.get_group!(group_id)
 

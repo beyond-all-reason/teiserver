@@ -4,7 +4,7 @@ defmodule CentralWeb.Config.UserConfigController do
   alias Central.Config
   alias Central.Config.UserConfig
 
-  plug(:add_breadcrumb, name: 'User preferences', url: '/config/user')
+  plug :add_breadcrumb, name: 'User preferences', url: '/config/user'
 
   def index(conn, _params) do
     config_values =

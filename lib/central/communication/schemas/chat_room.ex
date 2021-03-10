@@ -2,17 +2,17 @@ defmodule Central.Communication.ChatRoom do
   use CentralWeb, :schema
 
   schema "communication_chat_rooms" do
-    field(:name, :string)
-    field(:description, :string)
+    field :name, :string
+    field :description, :string
 
-    field(:colour, :string)
-    field(:icon, :string)
+    field :colour, :string
+    field :icon, :string
 
-    field(:current_content, :integer, default: 0)
-    field(:public, :boolean)
-    field(:rules, :map)
+    field :current_content, :integer, default: 0
+    field :public, :boolean
+    field :rules, :map
 
-    has_many(:content, Central.Communication.ChatContent)
+    has_many :content, Central.Communication.ChatContent
 
     timestamps()
   end

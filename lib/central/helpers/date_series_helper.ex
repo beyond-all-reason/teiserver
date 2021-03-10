@@ -153,7 +153,7 @@ defmodule Central.General.DateSeries do
   #   |> Timex.parse!("{D}/{M}/{YYYY}")
   # end
 
-  @spec pad(integer) :: String
+  @spec pad(integer) :: String.t()
   defp pad(number) do
     String.pad_leading("#{number}", 2, "0")
   end

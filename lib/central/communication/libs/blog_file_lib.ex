@@ -6,13 +6,13 @@ defmodule Central.Communication.BlogFileLib do
   def colours(), do: {"#CC4400", "#FFDDCC", "warning2"}
   def icon(), do: "far fa-file"
 
-  # Queries  
+  # Queries
   @spec get_blog_files() :: Ecto.Query.t()
   def get_blog_files do
     from(blog_files in BlogFile)
   end
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do
@@ -26,21 +26,18 @@ defmodule Central.Communication.BlogFileLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :id, id) do
-    from(blog_files in query,
+    from blog_files in query,
       where: blog_files.id == ^id
-    )
   end
 
   def _search(query, :name, name) do
-    from(blog_files in query,
+    from blog_files in query,
       where: blog_files.name == ^name
-    )
   end
 
   def _search(query, :url, url) do
-    from(blog_files in query,
+    from blog_files in query,
       where: blog_files.url == ^url
-    )
   end
 
   # def _search(query, :membership, %{assigns: %{memberships: group_ids}}) do
@@ -53,47 +50,41 @@ defmodule Central.Communication.BlogFileLib do
   # end
 
   def _search(query, :id_list, id_list) do
-    from(blog_files in query,
+    from blog_files in query,
       where: blog_files.id in ^id_list
-    )
   end
 
   def _search(query, :simple_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
-    from(blog_files in query,
+    from blog_files in query,
       where: ilike(blog_files.name, ^ref_like)
-    )
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 
   def order_by(query, "Name (A-Z)") do
-    from(blog_files in query,
+    from blog_files in query,
       order_by: [asc: blog_files.name]
-    )
   end
 
   def order_by(query, "Name (Z-A)") do
-    from(blog_files in query,
+    from blog_files in query,
       order_by: [desc: blog_files.name]
-    )
   end
 
   def order_by(query, "Newest first") do
-    from(blog_files in query,
+    from blog_files in query,
       order_by: [desc: blog_files.inserted_at]
-    )
   end
 
   def order_by(query, "Oldest first") do
-    from(blog_files in query,
+    from blog_files in query,
       order_by: [asc: blog_files.inserted_at]
-    )
   end
 
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec preload(Ecto.Query.t(), list | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
   def preload(query, _preloads) do

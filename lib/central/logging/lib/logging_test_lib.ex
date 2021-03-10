@@ -95,8 +95,8 @@ defmodule Central.Logging.LoggingTestLib do
       ]
   end
 
-  @spec logging_setup(list) :: tuple
-  @spec logging_setup(list, list) :: tuple
+  @spec logging_setup(list) :: {:ok, list}
+  @spec logging_setup(list, list) :: {:ok, list}
   def logging_setup(existing, flags \\ []) do
     {:ok, existing} = existing
 

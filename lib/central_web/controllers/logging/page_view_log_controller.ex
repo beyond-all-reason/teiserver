@@ -3,14 +3,13 @@ defmodule CentralWeb.Logging.PageViewLogController do
 
   alias Central.Logging
 
-  plug(:add_breadcrumb, name: 'Logging', url: '/logging')
-  plug(:add_breadcrumb, name: 'Page views', url: '/logging/page_views')
+  plug :add_breadcrumb, name: 'Logging', url: '/logging'
+  plug :add_breadcrumb, name: 'Page views', url: '/logging/page_views'
 
-  plug(Bodyguard.Plug.Authorize,
+  plug Bodyguard.Plug.Authorize,
     policy: Central.Admin,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
-  )
 
   def index(conn, params) do
     page_view_logs =

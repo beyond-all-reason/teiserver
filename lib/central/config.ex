@@ -74,10 +74,9 @@ defmodule Central.Config do
   def get_user_configs!(user_id) do
     ConCache.get_or_store(:config_user_cache, user_id, fn ->
       query =
-        from(user_config in UserConfig,
+        from user_config in UserConfig,
           where: user_config.user_id == ^user_id,
           select: {user_config.key, user_config.value}
-        )
 
       Repo.all(query)
       |> Map.new()
@@ -88,13 +87,23 @@ defmodule Central.Config do
 
   def get_user_config!(user_id, key) do
     query =
-      from(user_config in UserConfig,
+      from user_config in UserConfig,
         where: user_config.user_id == ^user_id,
         where: user_config.key == ^key,
         limit: 1
-      )
 
     Repo.one(query)
+  end
+
+  # This function exists solely to make deleting user configs easier
+  # typically you should be using the get_user_configs! function
+  # as it will take advantage of the cache
+  def list_user_configs(user_id) do
+    query =
+      from user_config in UserConfig,
+        where: user_config.user_id == ^user_id
+
+    Repo.all(query)
   end
 
   @doc """

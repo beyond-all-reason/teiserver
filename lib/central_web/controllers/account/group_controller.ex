@@ -4,8 +4,8 @@ defmodule CentralWeb.Account.GroupController do
   alias Central.Account
   alias Central.Account.GroupTypeLib
 
-  plug(:add_breadcrumb, name: 'Account', url: '/account')
-  plug(:add_breadcrumb, name: 'Groups', url: '/account/groups')
+  plug :add_breadcrumb, name: 'Account', url: '/account'
+  plug :add_breadcrumb, name: 'Groups', url: '/account/groups'
 
   def index(conn, params) do
     groups =

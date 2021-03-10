@@ -2,13 +2,13 @@ defmodule Central.Logging.ErrorLog do
   use CentralWeb, :schema
 
   schema "error_logs" do
-    field(:path, :string)
-    field(:method, :string)
-    field(:reason, :string)
-    field(:traceback, :string)
-    field(:hidden, :boolean, default: false)
-    field(:data, :map)
-    belongs_to(:user, Central.Account.User)
+    field :path, :string
+    field :method, :string
+    field :reason, :string
+    field :traceback, :string
+    field :hidden, :boolean, default: false
+    field :data, :map
+    belongs_to :user, Central.Account.User
 
     timestamps()
   end
