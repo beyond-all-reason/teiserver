@@ -14,6 +14,7 @@ defmodule TeiserverWeb.Admin.GeneralController do
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
 
+  @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, _params) do
     conn
     |> redirect(to: Routes.ts_lobby_general_path(conn, :index))

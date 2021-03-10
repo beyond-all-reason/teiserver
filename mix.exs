@@ -12,6 +12,7 @@ defmodule Central.MixProject do
       aliases: aliases(),
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
+      dialyzer: [plt_add_apps: [:ex_unit, :mix], ignore_warnings: "config/dialyzer_ignore.exs"],
       preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
@@ -65,9 +66,9 @@ defmodule Central.MixProject do
       {:bamboo_smtp, "~> 1.7"},
       {:phoenix_pubsub, "~> 2.0"},
       {:elixir_uuid, "~> 1.2"},
-      {:excoveralls, "~> 0.12.3", only: :test},
-      {:credo, "~> 1.2", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false}
+      {:excoveralls, "~> 0.14", only: :test},
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.1", only: [:dev], runtime: false}
     ]
   end
 

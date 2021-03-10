@@ -21,6 +21,7 @@ defmodule TeiserverWeb.Admin.UserController do
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
   plug(:add_breadcrumb, name: 'Users', url: '/teiserver/admin/user')
 
+  @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
     users =
       Account.list_users(
@@ -36,6 +37,7 @@ defmodule TeiserverWeb.Admin.UserController do
     |> render("index.html")
   end
 
+  @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     user = Account.get_user!(id)
 
@@ -57,6 +59,7 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
+  @spec new(Plug.Conn.t(), map) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset =
       Account.change_user(%User{
@@ -70,6 +73,7 @@ defmodule TeiserverWeb.Admin.UserController do
     |> render("new.html")
   end
 
+  @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create(conn, %{"user" => user_params}) do
     user_params =
       Map.merge(user_params, %{
@@ -99,6 +103,7 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
+  @spec edit(Plug.Conn.t(), map) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     user = Account.get_user!(id)
 
@@ -120,6 +125,7 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
+  @spec update(Plug.Conn.t(), map) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "user" => user_params}) do
     user = Account.get_user!(id)
 
@@ -151,6 +157,7 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
+  @spec reset_password(Plug.Conn.t(), map) :: Plug.Conn.t()
   def reset_password(conn, %{"id" => id}) do
     user = Account.get_user!(id)
 

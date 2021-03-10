@@ -481,7 +481,7 @@ defmodule Teiserver.User do
     :crypto.hash(:md5, password) |> Base.encode64()
   end
 
-  @spec test_password(String.t(), String.t() | Map.t()) :: boolean
+  @spec test_password(String.t(), String.t() | map) :: boolean
   def test_password(password, user) when is_map(user) do
     test_password(password, user.password_hash)
   end

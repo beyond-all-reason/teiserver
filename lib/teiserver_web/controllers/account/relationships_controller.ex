@@ -12,6 +12,7 @@ defmodule TeiserverWeb.Account.RelationshipsController do
 
   plug(Teiserver.ServerUserPlug)
 
+  @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, _params) do
     user = conn.assigns[:server_user]
 
@@ -31,6 +32,7 @@ defmodule TeiserverWeb.Account.RelationshipsController do
     |> render("index.html")
   end
 
+  @spec find(Plug.Conn.t(), map) :: Plug.Conn.t()
   def find(conn, params) do
     target_id = Teiserver.User.get_userid(params["target_name"])
 
@@ -49,10 +51,12 @@ defmodule TeiserverWeb.Account.RelationshipsController do
     end
   end
 
+  @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create(conn, %{"action" => action, "target" => target}) do
     do_create(conn, %{"action" => action, "target" => target})
   end
 
+  @spec do_create(Plug.Conn.t(), map) :: Plug.Conn.t()
   defp do_create(conn, %{"action" => action, "target" => target}) do
     target_id = int_parse(target)
 
@@ -77,14 +81,17 @@ defmodule TeiserverWeb.Account.RelationshipsController do
   end
 
   # Not in use yet....
+  # @spec update(Plug.Conn.t(), map) :: Plug.Conn.t()
   # def update(conn, %{"action" => action, "target" => target}) do
 
   # end
 
+  @spec delete(Plug.Conn.t(), map) :: Plug.Conn.t()
   def delete(conn, %{"action" => action, "target" => target}) do
     do_delete(conn, %{"action" => action, "target" => target})
   end
 
+  @spec do_delete(Plug.Conn.t(), map) :: Plug.Conn.t()
   defp do_delete(conn, %{"action" => action, "target" => target}) do
     target_id = int_parse(target)
 

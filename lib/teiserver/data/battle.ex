@@ -252,7 +252,7 @@ defmodule Teiserver.Battle do
     end
   end
 
-  @spec do_remove_user_from_battle(Integer.t(), Integer.t()) ::
+  @spec do_remove_user_from_battle(integer(), integer()) ::
           :closed | :removed | :not_member
   defp do_remove_user_from_battle(userid, battle_id) do
     battle = get_battle(battle_id)

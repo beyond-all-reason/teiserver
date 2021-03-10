@@ -78,7 +78,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   # The main entry point for the module and the wrapper around
   # parsing, processing and acting upon a player message
-  @spec handle(String.t(), Map.t()) :: Map.t()
+  @spec handle(String.t(), map) :: map
   def handle("", state), do: state
   def handle("\r\n", state), do: state
 
@@ -184,7 +184,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   # Specific handlers for different commands
-  @spec do_handle(String.t(), String.t(), Map.t()) :: Map.t()
+  @spec do_handle(String.t(), String.t(), map) :: map
   defp do_handle("MYSTATUS", data, state) do
     case Regex.run(~r/([0-9]+)/, data) do
       [_, new_value] ->
@@ -1064,14 +1064,14 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
   # Reply commands, these are things we are sending to the client
   # based on messages they sent us
-  @spec reply(Atom.t(), nil | String.t() | Tuple.t() | List.t(), Map.t()) :: Map.t()
+  @spec reply(atom(), nil | String.t() | tuple() | list(), map) :: map
   def reply(reply_type, data, state) do
     msg = do_reply(reply_type, data)
     _send(msg, state)
     state
   end
 
-  @spec do_reply(Atom.t(), String.t() | List.t()) :: String.t()
+  @spec do_reply(atom(), String.t() | list()) :: String.t()
   defp do_reply(:login_accepted, user) do
     "ACCEPTED #{user}\n"
   end
@@ -1391,6 +1391,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   # Sends a message to the client. The function takes into account message ID and well warn if a message without a newline ending is sent.
+  @spec _send(String.t | list(), map) :: any()
   defp _send(msg, state) do
     _send(msg, state.socket, state.transport, state.msg_id)
   end

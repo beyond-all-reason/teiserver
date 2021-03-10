@@ -19,11 +19,11 @@ defmodule Teiserver.Account.UserLib do
     }
   end
 
-  # Queries  
+  # Queries
   @spec get_user() :: Ecto.Query.t()
   def get_user, do: UserQueries.get_users()
 
-  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
 
   def search(query, params) do
@@ -41,7 +41,7 @@ defmodule Teiserver.Account.UserLib do
   def order_by(query, nil), do: query
   def order_by(query, key), do: UserQueries.order(query, key)
 
-  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  @spec preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
   def preload(query, preloads) do
