@@ -18,6 +18,15 @@ clan homebase - Raghna suggestion - it would be nice to eventually make clans fo
 and display on the website that a given map (worlds) now belongs to a given clan
 with other clans able to challenge the current inhabitants to win it over
 
+#### Brothers
+- Clan challenges, rewards/levels for completing them
+-  Stats, LOTS of stats
+
+#### Beherith
+- Home planets for clans and some form of clan wars would be epic indeed
+
+
+#### Planned DB structure
 Clan
 - name: String
 - tag: String
