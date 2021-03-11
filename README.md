@@ -8,19 +8,17 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 
 ### Roadmap to Beta:
 - Real player based test
-- Gathering v1.0 require
+- Gathering v1.0 requirements
 
 ### Post parity todo (in no particular order)
-- Matchmaking
-    + [Internal design document](documents/spring/matchmaking.md)
+- [Matchmaking](documents/spring/matchmaking.md)
     + [spring forum thread](https://springrts.com/phpbb/viewtopic.php?f=71&t=33072)
     + [uberserver commit](https://github.com/spring/uberserver/compare/master...gajop:master)
-- Parties
-    + [Internal design document](documents/spring/parties.md)
-- Clans
-- Teiserver boss mode
+- [Parties](documents/spring/parties.md)
+- [Clans](documents/designs/clans.md)
+- [Teiserver boss mode](documents/designs/teiserver_boss.md)
 - Integration with Discord/other services
-- Reputation/Reporting system
+- [Reputation/Reporting system](documents/designs/reputation.md)
 
 ### Contributing
 All contributors are welcome; if you spot an issue or bug with it message me directly on the BAR discord or open an issue in github.
