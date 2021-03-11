@@ -413,40 +413,4 @@ ENDOFCHANNELS\n"
     _recv(socket)
     flunk("Not tested")
   end
-
-  test "FORCETEAMNO", %{socket: socket} do
-    _send(socket, "EXIT\n")
-    _recv(socket)
-    flunk("Not tested")
-  end
-
-  test "FORCEALLYNO", %{socket: socket} do
-    _send(socket, "EXIT\n")
-    _recv(socket)
-    flunk("Not tested")
-  end
-
-  test "FORCETEAMCOLOR", %{socket: socket} do
-    _send(socket, "EXIT\n")
-    _recv(socket)
-    flunk("Not tested")
-  end
-
-  test "FORCESPECTATORMODE", %{socket: socket} do
-    _send(socket, "EXIT\n")
-    _recv(socket)
-    flunk("Not tested")
-  end
-
-  test "SAYBATTLEEX", %{socket: socket} do
-    _send(socket, "EXIT\n")
-    _recv(socket)
-    flunk("Not tested")
-  end
-
-  test "UPDATEBATTLEINFO", %{socket: socket} do
-    _send(socket, "EXIT\n")
-    _recv(socket)
-    flunk("Not tested")
-  end
 end
