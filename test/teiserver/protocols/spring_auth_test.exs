@@ -219,7 +219,7 @@ FRIENDREQUESTLISTEND\n"
     _recv(socket2)
   end
 
-  test "JOIN, LEAVE, SAY, CHANNELS", %{socket: socket, user: user} do
+  test "JOIN, LEAVE, SAY, CHANNELS, SAYEX", %{socket: socket, user: user} do
     _send(socket, "JOIN test_room\n")
     reply = _recv(socket)
     assert reply == "JOIN test_room
@@ -231,6 +231,11 @@ CLIENTS test_room #{user.name}\n"
     _send(socket, "SAY test_room Hello there\n")
     reply = _recv(socket)
     assert reply == "SAID test_room #{user.name} Hello there\n"
+
+    # Sayex
+    _send(socket, "SAYEX test_room A different message\n")
+    reply = _recv(socket)
+    assert reply == "SAIDEX test_room #{user.name} A different message\n"
 
     # Check for channel list
     _send(socket, "CHANNELS\n")
@@ -278,7 +283,7 @@ ENDOFCHANNELS\n"
 
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
-    _send(socket2, "JOINBATTLE 1 empty 1683043765\n")
+    _send(socket2, "JOINBATTLE #{battle_id} empty 1683043765\n")
     # The remainder of this string is just the script tags, we'll assume it's correct for now
     reply =
       _recv_until(socket2)
@@ -319,7 +324,7 @@ ENDOFCHANNELS\n"
     # Time to leave
     _send(socket2, "LEAVEBATTLE\n")
     reply = _recv(socket2)
-    assert reply == "LEFTBATTLE 1 #{user2.name}\n"
+    assert reply == "LEFTBATTLE #{battle_id} #{user2.name}\n"
 
     # These commands shouldn't work, they also shouldn't error
     _send(socket2, "SAYBATTLE I'm not here anymore!\n")
@@ -402,15 +407,21 @@ ENDOFCHANNELS\n"
     _recv(socket)
   end
 
-  test "CREATEBOTACCOUNT", %{socket: socket} do
-    _send(socket, "EXIT\n")
-    _recv(socket)
-    flunk("Not tested")
-  end
+  test "CREATEBOTACCOUNT - no mod", %{socket: socket, user: user} do
+    _send(socket, "CREATEBOTACCOUNT test_bot_account_no_mod #{user.name}\n")
+    reply = _recv(socket)
+    assert reply == "SERVERMSG You do not have permission to execute that command\n"
 
-  test "SAYEX", %{socket: socket} do
+    # Give mod access, recache the user
+    User.update_user(%{user | moderator: true})
+    :timer.sleep(100)
+    _send(socket, "RECACHE\n")
+
+    _send(socket, "CREATEBOTACCOUNT test_bot_account #{user.name}\n")
+    reply = _recv(socket)
+    assert reply == "SERVERMSG A new bot account test_bot_account has been created, with the same password as #{user.name}\n"
+
     _send(socket, "EXIT\n")
     _recv(socket)
-    flunk("Not tested")
   end
 end

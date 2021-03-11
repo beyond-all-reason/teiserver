@@ -209,6 +209,13 @@ defmodule Teiserver.Protocols.SpringProtocol do
     end
   end
 
+  defp do_handle("RECACHE", _, state) do
+    Map.merge(state, %{
+      user: User.get_user_by_id(state.userid),
+      client: Client.get_client_by_id(state.userid),
+    })
+  end
+
   defp do_handle("LOGIN", data, state) do
     regex_result =
       case Regex.run(~r/^(\S+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)?\t?([^\t]+)?\t?([^\t]+)?/, data) do

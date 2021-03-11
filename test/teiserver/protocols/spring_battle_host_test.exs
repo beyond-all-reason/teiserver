@@ -211,19 +211,21 @@ defmodule Teiserver.SpringBattleHostTest do
     # Gives time for pubsub to send out
     :timer.sleep(100)
     reply = _recv_until(socket)
-    assert reply == "ADDBOT 1 bot1 #{user.name} 4195330 0 ai_dll\n"
+    [_, botid] = Regex.run(~r/ADDBOT (\d+) bot1 #{user.name} 4195330 0 ai_dll/, reply)
+    botid = int_parse(botid)
+    assert reply =~ "ADDBOT #{botid} bot1 #{user.name} 4195330 0 ai_dll\n"
 
     _send(socket, "UPDATEBOT bot1 4195394 2\n")
     # Gives time for pubsub to send out
     :timer.sleep(100)
     reply = _recv_until(socket)
-    assert reply == "UPDATEBOT 1 bot1 4195394 2\n"
+    assert reply == "UPDATEBOT #{botid} bot1 4195394 2\n"
 
     _send(socket, "REMOVEBOT bot1\n")
     # Gives time for pubsub to send out
     :timer.sleep(100)
     reply = _recv_until(socket)
-    assert reply == "REMOVEBOT 1 bot1\n"
+    assert reply == "REMOVEBOT #{botid} bot1\n"
 
     # Leave the battle
     _send(socket, "LEAVEBATTLE\n")
