@@ -414,12 +414,6 @@ ENDOFCHANNELS\n"
     flunk("Not tested")
   end
 
-  test "HANDICAP", %{socket: socket} do
-    _send(socket, "EXIT\n")
-    _recv(socket)
-    flunk("Not tested")
-  end
-
   test "FORCETEAMNO", %{socket: socket} do
     _send(socket, "EXIT\n")
     _recv(socket)

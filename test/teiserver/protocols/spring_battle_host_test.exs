@@ -130,6 +130,12 @@ defmodule Teiserver.SpringBattleHostTest do
     reply = _recv_until(socket)
     assert reply == "ENABLEALLUNITS\n"
 
+    # Handicap
+    _send(socket, "HANDICAP #{user2.name} 87\n")
+    :timer.sleep(100)
+    reply = _recv_until(socket)
+    assert reply == "CLIENTBATTLESTATUS #{user2.name} 178176 0\n"
+
     # BOT TIME
     _send(socket, "ADDBOT bot1 4195330 0 ai_dll\n")
     # Gives time for pubsub to send out
