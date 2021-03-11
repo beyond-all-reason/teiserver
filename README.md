@@ -12,8 +12,6 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 
 ### Post parity todo (in no particular order)
 - [Matchmaking](documents/spring/matchmaking.md)
-    + [spring forum thread](https://springrts.com/phpbb/viewtopic.php?f=71&t=33072)
-    + [uberserver commit](https://github.com/spring/uberserver/compare/master...gajop:master)
 - [Parties](documents/spring/parties.md)
 - [Clans](documents/designs/clans.md)
 - [Teiserver boss mode](documents/designs/teiserver_boss.md)

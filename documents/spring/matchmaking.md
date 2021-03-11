@@ -1,5 +1,9 @@
 Matchmaking is where players join a matchmaking queue and the server gradually matches them up against other players in the same queue. Where possible the server will try to match them up against players of a similar skill but this must be balanced with wait times and queue size.
 
+#### Other resources
+- [sring forum thread](https://springrts.com/phpbb/viewtopic.php?f=71&t=33072)
+- [ubrserver commit](https://github.com/spring/uberserver/compare/master...gajop:master)
+
 ## Client to Server messages
 #### `c.mm.queue_list`
 Expects a response of `s.mm.queue_list`
