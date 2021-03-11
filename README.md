@@ -8,7 +8,7 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 
 ### Roadmap to Beta:
 - Real player based test
-- Gathering of requirements to mee
+- Gathering v1.0 require
 
 ### Post parity todo (in no particular order)
 - Matchmaking
