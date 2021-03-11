@@ -204,7 +204,7 @@ defmodule Teiserver.Battle do
         else
           PubSub.broadcast(
             Central.PubSub,
-            "battle_updates:#{battle_id}",
+            "all_battle_updates",
             {:add_user_to_battle, userid, battle_id}
           )
 
