@@ -1217,18 +1217,15 @@ defmodule Teiserver.Protocols.SpringProtocol do
   end
 
   defp do_reply(:enable_all_units, _units) do
-    # " " <> Enum.join(units, "\t") <> "\n"
-    nil
+    "ENABLEALLUNITS\n"
   end
 
-  defp do_reply(:enable_units, _units) do
-    # " " <> Enum.join(units, "\t") <> "\n"
-    nil
+  defp do_reply(:enable_units, units) do
+    "ENABLEUNITS " <> Enum.join(units, " ") <> "\n"
   end
 
-  defp do_reply(:disable_units, _units) do
-    # " " <> Enum.join(units, "\t") <> "\n"
-    nil
+  defp do_reply(:disable_units, units) do
+    "DISABLEUNITS " <> Enum.join(units, " ") <> "\n"
   end
 
   defp do_reply(:add_bot_to_battle, {battle_id, bot}) do

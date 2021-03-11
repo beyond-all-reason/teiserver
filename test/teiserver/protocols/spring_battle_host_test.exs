@@ -114,8 +114,21 @@ defmodule Teiserver.SpringBattleHostTest do
     # We never removed key2, it should still be there
     assert Map.has_key?(battle.tags, "custom/key2")
 
-    # TODO
-    # ENABLEALLUNITS, ENABLEUNITS, DISABLEUNITS
+    # Enable and disable units
+    _send(socket, "DISABLEUNITS unit1 unit2 unit3\n")
+    :timer.sleep(100)
+    reply = _recv_until(socket)
+    assert reply == "DISABLEUNITS unit1 unit2 unit3\n"
+
+    _send(socket, "ENABLEUNITS unit3\n")
+    :timer.sleep(100)
+    reply = _recv_until(socket)
+    assert reply == "ENABLEUNITS unit3\n"
+
+    _send(socket, "ENABLEALLUNITS\n")
+    :timer.sleep(100)
+    reply = _recv_until(socket)
+    assert reply == "ENABLEALLUNITS\n"
 
     # BOT TIME
     _send(socket, "ADDBOT bot1 4195330 0 ai_dll\n")

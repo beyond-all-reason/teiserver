@@ -444,24 +444,6 @@ ENDOFCHANNELS\n"
     flunk("Not tested")
   end
 
-  test "DISABLEUNITS", %{socket: socket} do
-    _send(socket, "EXIT\n")
-    _recv(socket)
-    flunk("Not tested")
-  end
-
-  test "ENABLEUNITS", %{socket: socket} do
-    _send(socket, "EXIT\n")
-    _recv(socket)
-    flunk("Not tested")
-  end
-
-  test "ENABLEALLUNITS", %{socket: socket} do
-    _send(socket, "EXIT\n")
-    _recv(socket)
-    flunk("Not tested")
-  end
-
   test "SAYBATTLEEX", %{socket: socket} do
     _send(socket, "EXIT\n")
     _recv(socket)
