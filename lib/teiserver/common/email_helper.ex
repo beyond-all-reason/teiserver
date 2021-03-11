@@ -5,6 +5,8 @@ defmodule Teiserver.EmailHelper do
   require Logger
 
   def new_user(user) do
+    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    website_url = "https://#{host}"
     verification_code = user.data["verification_code"]
 
     {:ok, code} =

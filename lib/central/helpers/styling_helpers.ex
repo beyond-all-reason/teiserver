@@ -22,6 +22,10 @@ defmodule Central.Helpers.StylingHelper do
   def colours(:negative), do: {"#", "#", "negative"}
   def colours(:negative2), do: {"#", "#", "negative2"}
 
+  def get_fg(colour), do: elem(colours(colour), 0)
+  def get_bg(colour), do: elem(colours(colour), 1)
+  def get_bsname(colour), do: elem(colours(colour), 2)
+
   def icon(:report), do: "fas fa-signal"
   def icon(:up), do: "fas fa-level-up"
   def icon(:back), do: "fas fa-arrow-left"

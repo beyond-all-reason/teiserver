@@ -2,8 +2,10 @@ defmodule Teiserver.User do
   @moduledoc """
   Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
+  alias Central.Communication
   alias Teiserver.Client
   alias Teiserver.EmailHelper
+  alias Central.Helpers.StylingHelper
 
   @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulence cats dogs mice eagle oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave sulphur tree tangerine melon watermelon obstreperous chlorine argon mercury jupiter saturn neptune ceres firefly slug sloth madness happiness ferrous oblique advantageous inefficient starling clouds rivers sunglasses)
 
@@ -226,6 +228,7 @@ defmodule Teiserver.User do
 
   # Persists the changes into the database so they will
   # be pulled out next time the user is accessed/recached
+  # The special case here is to prevent the benchmark users causing issues
   defp persist_user(%{name: "TEST_" <> _}), do: nil
 
   defp persist_user(user) do
@@ -299,8 +302,16 @@ defmodule Teiserver.User do
           friends: requester.friends ++ [accepter_id]
         })
 
-      update_user(new_accepter)
-      update_user(new_requester)
+      update_user(new_accepter, persist: true)
+      update_user(new_requester, persist: true)
+
+      Communication.notify(new_requester.id, %{
+        title: "#{new_accepter.name} accepted your friend request",
+        body: "#{new_accepter.name} accepted your friend request",
+        icon: Teiserver.icon(:friend),
+        colour: StylingHelper.get_fg(:success),
+        redirect: "/teiserver/account/relationships#friends"
+      }, 1, prevent_duplicates: true)
 
       # Now push out the updates
       PubSub.broadcast(
@@ -331,7 +342,7 @@ defmodule Teiserver.User do
           friend_requests: Enum.filter(decliner.friend_requests, fn f -> f != requester_id end)
         })
 
-      update_user(new_decliner)
+      update_user(new_decliner, persist: true)
 
       # Now push out the updates
       PubSub.broadcast(
@@ -356,7 +367,16 @@ defmodule Teiserver.User do
           friend_requests: potential.friend_requests ++ [requester_id]
         })
 
-      update_user(new_potential)
+      requester = get_user_by_id(requester_id)
+      update_user(new_potential, persist: true)
+
+      Communication.notify(new_potential.id, %{
+        title: "New friend request from #{requester.name}",
+        body: "New friend request from #{requester.name}",
+        icon: Teiserver.icon(:friend),
+        colour: StylingHelper.get_fg(:info),
+        redirect: "/teiserver/account/relationships#requests"
+      }, 1, prevent_duplicates: true)
 
       # Now push out the updates
       PubSub.broadcast(
@@ -381,7 +401,7 @@ defmodule Teiserver.User do
           ignored: ignorer.ignored ++ [ignored_id]
         })
 
-      update_user(new_ignorer)
+      update_user(new_ignorer, persist: true)
 
       # Now push out the updates
       PubSub.broadcast(
@@ -406,7 +426,7 @@ defmodule Teiserver.User do
           ignored: Enum.filter(unignorer.ignored, fn f -> f != unignored_id end)
         })
 
-      update_user(new_unignorer)
+      update_user(new_unignorer, persist: true)
 
       # Now push out the updates
       PubSub.broadcast(
@@ -438,8 +458,8 @@ defmodule Teiserver.User do
           friends: Enum.filter(removed.friends, fn f -> f != remover_id end)
         })
 
-      update_user(new_remover)
-      update_user(new_removed)
+      update_user(new_remover, persist: true)
+      update_user(new_removed, persist: true)
 
       # Now push out the updates
       PubSub.broadcast(
