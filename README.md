@@ -7,7 +7,8 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 - [Testing](documents/testing.md)
 
 ### Roadmap to Beta:
-- Test coverage for all Spring commands
+- Real player based test
+- Gathering of requirements to mee
 
 ### Post parity todo (in no particular order)
 - Matchmaking
