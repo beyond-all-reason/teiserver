@@ -3,6 +3,7 @@ defmodule Teiserver.SpringAuthTest do
   require Logger
   alias Teiserver.BitParse
   alias Teiserver.User
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TestLib,
     only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, _recv_until: 1, new_user: 0]
@@ -279,7 +280,7 @@ ENDOFCHANNELS\n"
     assert reply =~ "OPENBATTLE "
 
     [_, battle_id] = Regex.run(~r/OPENBATTLE ([0-9]+)\n/, reply)
-    battle_id = Central.Helpers.NumberHelper.int_parse(battle_id)
+    battle_id = int_parse(battle_id)
 
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
@@ -315,7 +316,9 @@ ENDOFCHANNELS\n"
     # Add a bot
     _send(socket2, "ADDBOT STAI(1) 4195458 0 STAI\n")
     reply = _recv(socket2)
-    assert reply == "ADDBOT 1 STAI(1) #{user2.name} 4195458 0 STAI\n"
+    [_, botid] = Regex.run(~r/ADDBOT (\d+) STAI\(1\) #{user2.name} 4195458 0 STAI/, reply)
+    botid = int_parse(botid)
+    assert reply == "ADDBOT #{botid} STAI(1) #{user2.name} 4195458 0 STAI\n"
 
     # # Promote?
     # _send(socket2, "PROMOTE\n")
