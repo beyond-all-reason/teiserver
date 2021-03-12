@@ -1,5 +1,3 @@
-<% {_, _, bsname} = colours() %>
-
 <table class="table" style="max-width: 600px;">
   <thead>
     <tr>

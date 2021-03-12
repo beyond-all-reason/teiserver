@@ -32,8 +32,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # in_GETUSERID
   # in_FINDIP
   # in_GETIP
-  # in_RENAMEACCOUNT
-  # in_CHANGEPASSWORD
   # in_SETBOTMODE
   # in_BROADCAST
   # in_BROADCASTEX
@@ -52,11 +50,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   # in_STATS
   # in_RELOAD
   # in_CLEANUP
-  # in_CHANGEEMAILREQUEST
-  # in_CHANGEEMAIL
-  # in_RESETPASSWORDREQUEST
-  # in_RESETPASSWORD
-  # in_RESETUSERPASSWORD
+  # in_RESETUSERPASSWORD - Webinterface replaces this?
   # in_DELETEACCOUNT
   # in_RESENDVERIFICATION
   # in_JSON
@@ -1282,7 +1276,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "CLIENTBATTLESTATUS #{client.name} #{status} #{client.team_colour}\n"
   end
 
-  defp do_reply(:logged_in_client, {userid, _username}) do
+  defp do_reply(:logged_in_user, {userid, _username}) do
     user = User.get_user_by_id(userid)
 
     [
@@ -1291,7 +1285,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     ]
   end
 
-  defp do_reply(:logged_out_client, {userid, username}) do
+  defp do_reply(:logged_out_user, {userid, username}) do
     do_reply(:remove_user, {userid, username})
   end
 
@@ -1427,7 +1421,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
         msg
       end
 
-    Logger.debug("--> #{Kernel.inspect(socket)} #{TcpServer.format_log(msg)}")
+    Logger.info("--> #{Kernel.inspect(socket)} #{TcpServer.format_log(msg)}")
     transport.send(socket, msg)
   end
 
@@ -1435,11 +1429,17 @@ defmodule Teiserver.Protocols.SpringProtocol do
     # Login the client
     client = Client.login(user, self(), __MODULE__)
 
+    :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
+
     # Who is online?
     # skip ourselves because that will result in a double ADDUSER
-    Client.list_client_ids()
-    |> Enum.map(fn userid ->
-      user = User.get_user_by_id(userid)
+    clients = Client.list_clients()
+
+    clients
+    |> Enum.map(fn client ->
+      user = User.get_user_by_id(client.userid)
       reply(:add_user, user, state)
     end)
 
@@ -1455,7 +1455,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     :timer.sleep(100)
 
     # Client status messages
-    Client.list_clients()
+    clients
     |> Enum.map(fn client ->
       reply(:client_status, client, state)
     end)
@@ -1463,9 +1463,6 @@ defmodule Teiserver.Protocols.SpringProtocol do
     :timer.sleep(100)
 
     _send("LOGININFOEND\n", state)
-    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
     :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
     %{state | client: client, user: user, name: user.name, userid: user.id}
   end

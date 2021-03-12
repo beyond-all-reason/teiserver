@@ -124,7 +124,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:tcp, _socket, data}, state) do
-    Logger.debug("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
+    Logger.info("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
 
     new_state =
       if String.ends_with?(data, "\n") do
@@ -144,7 +144,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    Logger.debug("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
+    Logger.info("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
 
     new_state =
       if String.ends_with?(data, "\n") do
@@ -162,16 +162,16 @@ defmodule Teiserver.TcpServer do
   end
 
   # Client updates
-  def handle_info({:logged_in_client, userid, username}, state) do
-    new_state = state.protocol.reply(:logged_in_client, {userid, username}, state)
+  def handle_info({:logged_in_user, userid, username}, state) do
+    new_state = state.protocol.reply(:logged_in_user, {userid, username}, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:logged_out_client, userid, username}, state) do
+  def handle_info({:logged_out_user, userid, username}, state) do
     if state.userid == userid do
       {:stop, :normal, state}
     else
-      new_state = state.protocol.reply(:logged_out_client, {userid, username}, state)
+      new_state = state.protocol.reply(:logged_out_user, {userid, username}, state)
       {:noreply, new_state}
     end
   end

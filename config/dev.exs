@@ -35,6 +35,10 @@ config :central, Teiserver,
     keyfile: "priv/certs/localhost.key",
     certfile: "priv/certs/localhost.crt",
     cacertfile: "priv/certs/localhost.crt"
+  ],
+  ports: [
+    tcp: 9200,
+    tls: 9201
   ]
 
 config :central, Central.Mailer,

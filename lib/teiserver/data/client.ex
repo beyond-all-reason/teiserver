@@ -50,8 +50,8 @@ defmodule Teiserver.Client do
 
     PubSub.broadcast(
       Central.PubSub,
-      "all_client_updates",
-      {:logged_in_client, user.id, user.name}
+      "all_user_updates",
+      {:logged_in_user, user.id, user.name}
     )
 
     client
@@ -203,6 +203,6 @@ defmodule Teiserver.Client do
     end)
 
     username = User.get_username(userid)
-    PubSub.broadcast(Central.PubSub, "all_client_updates", {:logged_out_client, userid, username})
+    PubSub.broadcast(Central.PubSub, "all_user_updates", {:logged_out_user, userid, username})
   end
 end

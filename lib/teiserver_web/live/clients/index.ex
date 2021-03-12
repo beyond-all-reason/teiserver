@@ -36,7 +36,7 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   @impl true
-  def handle_info({:logged_in_client, userid, _username}, socket) do
+  def handle_info({:logged_in_user, userid, _username}, socket) do
     keys =
       socket.assigns[:clients]
       |> Enum.map(fn c -> c.userid end)
@@ -56,7 +56,7 @@ defmodule TeiserverWeb.ClientLive.Index do
     end
   end
 
-  def handle_info({:logged_out_client, userid, _username}, socket) do
+  def handle_info({:logged_out_user, userid, _username}, socket) do
     clients =
       socket.assigns[:clients]
       |> Enum.filter(fn c -> c.userid != userid end)
@@ -84,6 +84,7 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
+    :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
     :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
 
     socket
