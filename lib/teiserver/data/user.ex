@@ -104,11 +104,12 @@ defmodule Teiserver.User do
   def register_user(name, email, password_hash, ip) do
     params =
       user_register_params(name, email, password_hash, %{
-        "id" => ip
+        "ip" => ip
       })
 
     case Account.create_user(params) do
       {:ok, user} ->
+
         Account.create_group_membership(%{
           user_id: user.id,
           group_id: bar_user_group_id()
@@ -119,7 +120,7 @@ defmodule Teiserver.User do
         |> convert_user
         |> add_user
 
-        EmailHelper.new_user(params)
+        EmailHelper.new_user(user)
         user
 
       {:error, changeset} ->

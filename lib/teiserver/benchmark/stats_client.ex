@@ -8,7 +8,7 @@ defmodule Teiserver.Benchmark.StatsClient do
   @registration_interval 15_000
   @user_action_interval 13_000
 
-  @users_per_tick 5
+  @users_per_tick 2
 
   use GenServer
 

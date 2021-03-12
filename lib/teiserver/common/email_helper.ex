@@ -1,5 +1,6 @@
 defmodule Teiserver.EmailHelper do
   @moduledoc false
+  alias Central.Account
   alias Central.Mailer
   alias Bamboo.Email
   require Logger
@@ -51,8 +52,11 @@ defmodule Teiserver.EmailHelper do
     |> Mailer.deliver_now()
   end
 
-  def password_reset(_user, _plain_password) do
-    Logger.error("password_reset not implemented at this time")
+  def password_reset(user, _plain_password) do
+    Central.Account.UserLib.reset_password_request(user)
+    |> Central.Mailer.deliver_now()
+
+    # Logger.error("password_reset not implemented at this time")
     # to = user.email
     # subject = "Password reset - Teiserver"
 

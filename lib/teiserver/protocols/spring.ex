@@ -1423,6 +1423,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
     Logger.info("--> #{Kernel.inspect(socket)} #{TcpServer.format_log(msg)}")
     transport.send(socket, msg)
+    # msg
+    # |> String.split("\n")
+    # |> Enum.map(fn part ->
+    #   transport.send(socket, part)
+    # end)
   end
 
   defp do_login_accepted(state, user) do

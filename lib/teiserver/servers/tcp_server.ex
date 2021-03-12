@@ -93,6 +93,7 @@ defmodule Teiserver.TcpServer do
       user: nil,
       msg_id: nil,
       ip: ip,
+      known_users: [],
       socket: socket,
       transport: transport,
       protocol: @default_protocol

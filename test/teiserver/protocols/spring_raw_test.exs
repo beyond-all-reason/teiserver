@@ -25,12 +25,12 @@ defmodule Teiserver.SpringRawTest do
     name = "TestUser_raw_register"
 
     # Failure first
-    _send(socket, "REGISTER #{existing.name} password email\n")
+    _send(socket, "REGISTER #{existing.name} password raw_register_email@email.com\n")
     reply = _recv(socket)
     assert reply =~ "REGISTRATIONDENIED User already exists\n"
 
     # Success second
-    _send(socket, "REGISTER #{name} password email\n")
+    _send(socket, "REGISTER #{name} password raw_register_email@email.com\n")
     reply = _recv(socket)
     assert reply =~ "REGISTRATIONACCEPTED\n"
     user = User.get_user_by_name(name)
