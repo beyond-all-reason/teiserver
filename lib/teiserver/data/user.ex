@@ -522,18 +522,18 @@ defmodule Teiserver.User do
         {:error, "No user found for '#{username}'"}
 
       user ->
-        case test_password(password, user) do
-          true ->
-            case user.verified do
-              true ->
-                do_login(user, state, ip, lobby)
+        cond do
+          Client.get_client_by_id(user.id) != nil ->
+            {:error, "Already logged in"}
 
-              false ->
-                {:error, "Unverified", user.id}
-            end
-
-          false ->
+          test_password(password, user) == false ->
             {:error, "Invalid password"}
+
+          user.verified == false ->
+            {:error, "Unverified", user.id}
+
+          true ->
+            do_login(user, state, ip, lobby)
         end
     end
   end
