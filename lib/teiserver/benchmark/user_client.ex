@@ -46,8 +46,11 @@ defmodule Teiserver.Benchmark.UserClient do
 
   defp join_battle(id, state) do
     _send(state.socket, "LEAVEBATTLE\n")
+    :timer.sleep(250)
     _send(state.socket, "JOINBATTLE #{id} empty -1540855590\n")
+    :timer.sleep(250)
     _send(state.socket, "MYBATTLESTATUS #{Enum.random(@statuses)} 0\n")
+    :timer.sleep(250)
 
     %{state | battle_id: id}
   end

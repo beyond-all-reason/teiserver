@@ -8,6 +8,8 @@ defmodule Teiserver.TcpServer do
   alias Teiserver.Client
   alias Teiserver.User
   alias Teiserver.Protocols.SpringProtocol
+  @heartbeat 30_000
+  @timeout 30
 
   @behaviour :ranch_protocol
   @default_protocol SpringProtocol
@@ -85,6 +87,7 @@ defmodule Teiserver.TcpServer do
     y = transport.setopts(socket, [{:active, true}])
     Logger.debug("transport.setopts = #{Kernel.inspect(y)} for #{Kernel.inspect(socket)}")
 
+    :timer.send_interval(@heartbeat, self(), :heartbeat)
     state = %{
       message_part: "",
       userid: nil,
@@ -94,6 +97,7 @@ defmodule Teiserver.TcpServer do
       msg_id: nil,
       ip: ip,
       known_users: [],
+      last_msg: System.system_time(:second),
       socket: socket,
       transport: transport,
       protocol: @default_protocol
@@ -125,7 +129,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:tcp, _socket, data}, state) do
-    Logger.info("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
+    Logger.debug("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
 
     new_state =
       if String.ends_with?(data, "\n") do
@@ -145,7 +149,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    Logger.info("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
+    Logger.debug("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
 
     new_state =
       if String.ends_with?(data, "\n") do
@@ -160,6 +164,15 @@ defmodule Teiserver.TcpServer do
       end
 
     {:noreply, new_state}
+  end
+
+  def handle_info(:heartbeat, state) do
+    diff = System.system_time(:second) - state.last_msg
+    if diff > @timeout do
+      {:stop, :normal, state}
+    else
+      {:noreply, state}
+    end
   end
 
   # Client updates
@@ -314,6 +327,7 @@ defmodule Teiserver.TcpServer do
   def handle_info({:add_user_to_battle, userid, battle_id}, state) do
     new_state =
       if userid != state.userid do
+        state.protocol.reply(:servermsg, "Adding user from battle #{userid}, #{battle_id} to #{state.name}", state)
         state.protocol.reply(:add_user_to_battle, {userid, battle_id}, state)
       else
         state
@@ -323,6 +337,7 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:remove_user_from_battle, userid, battle_id}, state) do
+    state.protocol.reply(:servermsg, "Removing user from battle #{userid}, #{battle_id} to #{state.name}", state)
     new_state = state.protocol.reply(:remove_user_from_battle, {userid, battle_id}, state)
     {:noreply, new_state}
   end
@@ -332,6 +347,7 @@ defmodule Teiserver.TcpServer do
       state.protocol.reply(:forcequit_battle, nil, state)
     end
 
+    state.protocol.reply(:servermsg, "Kicking user from battle #{userid}, #{battle_id} to #{state.name}", state)
     new_state = state.protocol.reply(:remove_user_from_battle, {userid, battle_id}, state)
     {:noreply, new_state}
   end

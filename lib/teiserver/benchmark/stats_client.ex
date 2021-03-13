@@ -6,9 +6,9 @@ defmodule Teiserver.Benchmark.StatsClient do
   require Logger
   @report_interval 15_000
   @registration_interval 15_000
-  @user_action_interval 13_000
+  @user_action_interval 3_000
 
-  @users_per_tick 2
+  @users_per_tick 4
 
   use GenServer
 
@@ -57,7 +57,7 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
 
     1..@users_per_tick
     |> Enum.each(fn i ->
-      id = state.tick * 1000 + i
+      id = (state.tick * 1000) + i
 
       {:ok, _pid} =
         DynamicSupervisor.start_child(Teiserver.Benchmark.UserSupervisor, {
@@ -65,7 +65,8 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
           name: via_user_tuple(id),
           data: %{
             interval: @user_action_interval,
-            delay: :random.uniform(@user_action_interval),
+            # delay: :random.uniform(@user_action_interval),
+            delay: (i * 1000),
             id: id,
             tick: state.tick,
             stats: pid,

@@ -3,11 +3,11 @@ defmodule Mix.Tasks.Benchmark do
   Used to stress test a server. Will gradually spawn users until stopped.
 
   Usage:
-    
+
     mix benchmark server port
 
   e.g.
-    
+
     mix benchmark example.com 8200
 
   """
@@ -33,7 +33,7 @@ defmodule Mix.Tasks.Benchmark do
     send(t, :begin)
     send(Teiserver.Benchmark.StatsClient, {:begin, server, port})
 
-    :timer.sleep(300_000)
+    :timer.sleep(300_000_000)
 
     start_result
   end

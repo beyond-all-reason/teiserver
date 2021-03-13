@@ -92,7 +92,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
           state
       end
 
-    %{state | msg_id: nil}
+    %{state | msg_id: nil, last_msg: System.system_time(:second)}
   end
 
   defp _clean(nil), do: nil
@@ -126,7 +126,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("TMPLI", "TEST_" <> userid, state) do
     if Application.get_env(:central, Teiserver)[:enable_benchmark] do
       username = "TEST_" <> userid
-      userid = 100_000 + int_parse(userid)
+      userid = int_parse(userid)
 
       User.add_user(%{
         id: userid,
@@ -667,6 +667,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     end
   end
 
+  defp do_handle("JOINBATTLE", _, %{client: %{battle_id: b}} = state) when is_integer(b), do: state
   defp do_handle("JOINBATTLE", data, state) do
     response =
       case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
@@ -1421,13 +1422,18 @@ defmodule Teiserver.Protocols.SpringProtocol do
         msg
       end
 
-    Logger.info("--> #{Kernel.inspect(socket)} #{TcpServer.format_log(msg)}")
-    transport.send(socket, msg)
-    # msg
-    # |> String.split("\n")
-    # |> Enum.map(fn part ->
-    #   transport.send(socket, part)
-    # end)
+    Logger.debug("--> #{Kernel.inspect(socket)} #{TcpServer.format_log(msg)}")
+    # transport.send(socket, msg)
+    msg
+    |> String.split("\n")
+    |> Enum.filter(fn part -> part != "" end)
+    |> Enum.map(fn part ->
+      case transport.send(socket, part <> "\n") do
+        :ok -> nil
+        v ->
+          Logger.error("Transport error, got #{Kernel.inspect v} when sending #{part}")
+      end
+    end)
   end
 
   defp do_login_accepted(state, user) do
