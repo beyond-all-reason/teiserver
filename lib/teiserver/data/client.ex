@@ -1,9 +1,9 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.Battle
   alias Teiserver.User
   alias Teiserver.Room
+  alias Teiserver.Battle
   require Logger
 
   def create(client) do
@@ -48,6 +48,7 @@ defmodule Teiserver.Client do
       })
       |> add_client
 
+    Logger.info("Logging user in #{client.userid} - PUBSUB")
     PubSub.broadcast(
       Central.PubSub,
       "all_user_updates",
@@ -100,11 +101,11 @@ defmodule Teiserver.Client do
     end
   end
 
-  def leave_rooms(client) do
+  def leave_rooms(userid) do
     Room.list_rooms()
     |> Enum.each(fn room ->
-      if client.userid in room.members do
-        Room.remove_user_from_room(client.userid, room.name)
+      if userid in room.members do
+        Room.remove_user_from_room(userid, room.name)
       end
     end)
   end
@@ -166,10 +167,13 @@ defmodule Teiserver.Client do
   end
 
   defp do_disconnect(client) do
-    leave_battle(client)
-    leave_rooms(client)
+    Battle.remove_user_from_any_battle(client.userid)
+    # leave_battle(client)
+    leave_rooms(client.userid)
     spawn(fn -> User.logout(client.userid) end)
 
+    Logger.info("Logging out user #{client.userid} - PUBSUB")
+    PubSub.broadcast(Central.PubSub, "all_user_updates", {:logged_out_user, client.userid, client.name})
     ConCache.delete(:clients, client.userid)
 
     ConCache.update(:lists, :clients, fn value ->
@@ -179,7 +183,5 @@ defmodule Teiserver.Client do
 
       {:ok, new_value}
     end)
-
-    PubSub.broadcast(Central.PubSub, "all_user_updates", {:logged_out_user, client.userid, client.name})
   end
 end

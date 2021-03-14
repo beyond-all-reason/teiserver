@@ -3,6 +3,7 @@ defmodule Teiserver.Battle do
   alias Phoenix.PubSub
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Teiserver.Client
 
   defp next_id() do
     ConCache.isolated(:id_counters, :battle, fn ->
@@ -193,7 +194,7 @@ defmodule Teiserver.Battle do
     )
   end
 
-  def add_user_to_battle(uid, nil), do: nil
+  def add_user_to_battle(_uid, nil), do: nil
 
   def add_user_to_battle(userid, battle_id) do
     ConCache.update(:battles, battle_id, fn battle_state ->
@@ -202,7 +203,7 @@ defmodule Teiserver.Battle do
           # No change takes place, they're already in the battle!
           battle_state
         else
-          Logger.info("add_user_to_battle(#{userid}, #{battle_id}) - PUBSUB")
+          # Logger.info("add_user_to_battle(#{userid}, #{battle_id}) - PUBSUB")
           PubSub.broadcast(
             Central.PubSub,
             "all_battle_updates",
@@ -217,21 +218,25 @@ defmodule Teiserver.Battle do
     end)
   end
 
-  def remove_user_from_battle(uid, nil), do: nil
+  def remove_user_from_battle(_uid, nil), do: nil
 
   def remove_user_from_battle(userid, battle_id) do
-    Client.join_battle(userid, battle_id)
+    Client.leave_battle(userid)
     case do_remove_user_from_battle(userid, battle_id) do
       :closed ->
-        Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - :closed")
+        # Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - :closed")
         nil
 
       :not_member ->
-        Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - :not_member")
+        # Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - :not_member")
+        nil
+
+      :no_battle ->
+        # Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - :no_battle")
         nil
 
       :removed ->
-        Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - PUBSUB")
+        # Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - PUBSUB")
         PubSub.broadcast(
           Central.PubSub,
           "all_battle_updates",
@@ -243,15 +248,19 @@ defmodule Teiserver.Battle do
   def kick_user_from_battle(userid, battle_id) do
     case do_remove_user_from_battle(userid, battle_id) do
       :closed ->
-        Logger.info("kick_user_from_battle(#{userid}, #{battle_id}) - :closed")
+        # Logger.info("kick_user_from_battle(#{userid}, #{battle_id}) - :closed")
         nil
 
       :not_member ->
-        Logger.info("kick_user_from_battle(#{userid}, #{battle_id}) - :not_member")
+        # Logger.info("kick_user_from_battle(#{userid}, #{battle_id}) - :not_member")
+        nil
+
+      :no_battle ->
+        # Logger.info("kick_user_from_battle(#{userid}, #{battle_id}) - :no_battle")
         nil
 
       :removed ->
-        Logger.info("kick_user_from_battle(#{userid}, #{battle_id}) - PUBSUB")
+        # Logger.info("kick_user_from_battle(#{userid}, #{battle_id}) - PUBSUB")
         PubSub.broadcast(
           Central.PubSub,
           "all_battle_updates",
@@ -260,38 +269,55 @@ defmodule Teiserver.Battle do
     end
   end
 
+  def remove_user_from_any_battle(userid) do
+    battles = list_battles()
+    |> Enum.filter(fn b -> b != nil end)
+    |> Enum.filter(fn b -> Enum.member?(b.players, userid) or b.founder_id == userid end)
+    |> Enum.map(fn b ->
+      remove_user_from_battle(userid, b.id)
+    end)
+
+    if Enum.count(battles) > 1 do
+      Logger.error("#{userid} is a member of #{Enum.count(battles)} battles")
+    end
+  end
+
   @spec do_remove_user_from_battle(integer(), integer()) ::
-          :closed | :removed | :not_member
+          :closed | :removed | :not_member | :no_battle
   defp do_remove_user_from_battle(userid, battle_id) do
-    Logger.info("do_remove_user_from_battle(#{userid}, #{battle_id})")
+    # Logger.info("do_remove_user_from_battle(#{userid}, #{battle_id})")
     battle = get_battle(battle_id)
-    Client.leave_battle(userid, battle_id)
+    Client.leave_battle(userid)
 
-    if battle.founder_id == userid do
-      close_battle(battle_id)
-      :closed
-    else
-      if Enum.member?(battle.players, userid) do
-        # Remove all their bots
-        battle.bots
-        |> Enum.each(fn {botname, bot} ->
-          if bot.owner_id == userid do
-            remove_bot(battle_id, botname)
-          end
-        end)
-
-        # Now update the battle to remove the player
-        ConCache.update(:battles, battle_id, fn battle_state ->
-          new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
-          new_state = Map.put(battle_state, :players, new_players)
-
-          {:ok, new_state}
-        end)
-
-        :removed
+    if battle do
+      if battle.founder_id == userid do
+        close_battle(battle_id)
+        :closed
       else
-        :not_member
+        if Enum.member?(battle.players, userid) do
+          # Remove all their bots
+          battle.bots
+          |> Enum.each(fn {botname, bot} ->
+            if bot.owner_id == userid do
+              remove_bot(battle_id, botname)
+            end
+          end)
+
+          # Now update the battle to remove the player
+          ConCache.update(:battles, battle_id, fn battle_state ->
+            new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
+            new_state = Map.put(battle_state, :players, new_players)
+
+            {:ok, new_state}
+          end)
+
+          :removed
+        else
+          :not_member
+        end
       end
+    else
+      :no_battle
     end
   end
 

@@ -44,7 +44,9 @@ defmodule TeiserverWeb.ClientLive.Index do
     if Enum.member?(keys, userid) do
       {:noreply, socket}
     else
-      clients = socket.assigns[:clients] ++ [Client.get_client_by_id(userid)]
+      clients = (socket.assigns[:clients] ++ [Client.get_client_by_id(userid)])
+      |> Enum.sort_by(fn c -> c.name end, &<=/2)
+
       users = Map.put(socket.assigns[:users], userid, User.get_user_by_id(userid))
 
       socket =
@@ -94,5 +96,6 @@ defmodule TeiserverWeb.ClientLive.Index do
 
   defp list_clients do
     Client.list_clients()
+    |> Enum.sort_by(fn c -> c.name end, &<=/2)
   end
 end
