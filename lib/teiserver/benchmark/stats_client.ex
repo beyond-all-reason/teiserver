@@ -6,9 +6,9 @@ defmodule Teiserver.Benchmark.StatsClient do
   require Logger
   @report_interval 15_000
   @registration_interval 15_000
-  @user_action_interval 3_000
+  @user_action_interval 2_000
 
-  @users_per_tick 4
+  @users_per_tick 5
 
   use GenServer
 

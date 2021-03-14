@@ -100,7 +100,6 @@ defmodule Teiserver.Battle do
       {:ok, new_value}
     end)
 
-    Logger.info("Creating battle #{battle.id} - PUBSUB")
     PubSub.broadcast(
       Central.PubSub,
       "all_battle_updates",
@@ -142,7 +141,6 @@ defmodule Teiserver.Battle do
         {:remove_user_from_battle, userid, battle_id}
       )
     end)
-    Logger.info("Closed battle #{battle_id} - PUBSUB")
   end
 
   def add_bot_to_battle(battle_id, bot) do
@@ -195,12 +193,9 @@ defmodule Teiserver.Battle do
     )
   end
 
-  def add_user_to_battle(uid, nil) do
-    Logger.info("add_user_to_battle(#{uid}, nil) - noop")
-  end
+  def add_user_to_battle(uid, nil), do: nil
 
   def add_user_to_battle(userid, battle_id) do
-    Logger.info("add_user_to_battle(#{userid}, #{battle_id}) - std call")
     ConCache.update(:battles, battle_id, fn battle_state ->
       new_state =
         if Enum.member?(battle_state.players, userid) do
@@ -222,12 +217,10 @@ defmodule Teiserver.Battle do
     end)
   end
 
-  def remove_user_from_battle(uid, nil) do
-    Logger.info("remove_user_from_battle(#{uid}, nil) - noop")
-  end
+  def remove_user_from_battle(uid, nil), do: nil
 
   def remove_user_from_battle(userid, battle_id) do
-    Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - std call")
+    Client.join_battle(userid, battle_id)
     case do_remove_user_from_battle(userid, battle_id) do
       :closed ->
         Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - :closed")
@@ -238,10 +231,9 @@ defmodule Teiserver.Battle do
         nil
 
       :removed ->
-        Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - :removed (PUBSUB)")
+        Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - PUBSUB")
         PubSub.broadcast(
           Central.PubSub,
-          # "battle_updates:#{battle_id}",
           "all_battle_updates",
           {:remove_user_from_battle, userid, battle_id}
         )
@@ -259,10 +251,9 @@ defmodule Teiserver.Battle do
         nil
 
       :removed ->
-        Logger.info("kick_user_from_battle(#{userid}, #{battle_id}) - :removed (PUBSUB)")
+        Logger.info("kick_user_from_battle(#{userid}, #{battle_id}) - PUBSUB")
         PubSub.broadcast(
           Central.PubSub,
-          # "battle_updates:#{battle_id}",
           "all_battle_updates",
           {:kick_user_from_battle, userid, battle_id}
         )
@@ -272,8 +263,9 @@ defmodule Teiserver.Battle do
   @spec do_remove_user_from_battle(integer(), integer()) ::
           :closed | :removed | :not_member
   defp do_remove_user_from_battle(userid, battle_id) do
-    Logger.info("do_remove_user_from_battle(#{userid}, #{battle_id}) - std call")
+    Logger.info("do_remove_user_from_battle(#{userid}, #{battle_id})")
     battle = get_battle(battle_id)
+    Client.leave_battle(userid, battle_id)
 
     if battle.founder_id == userid do
       close_battle(battle_id)

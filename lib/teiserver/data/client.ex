@@ -81,53 +81,30 @@ defmodule Teiserver.Client do
         nil
 
       client ->
-        case Battle.get_battle(client.battle_id) do
-          nil ->
-            client
-
-          _battle ->
-            new_client =
-              Map.merge(client, %{
-                team_colour: 0,
-                battle_id: battle_id
-              })
-
-            ConCache.put(:clients, new_client.userid, new_client)
-            new_client
-        end
+        new_client = %{client | team_colour: 0, battle_id: battle_id}
+        ConCache.put(:clients, new_client.userid, new_client)
+        new_client
     end
   end
 
+  def leave_battle(nil), do: nil
   def leave_battle(userid) do
     case get_client_by_id(userid) do
       nil ->
         nil
 
       client ->
-        case Battle.get_battle(client.battle_id) do
-          nil ->
-            client
-
-          _battle ->
-            Battle.remove_user_from_battle(userid, client.battle_id)
-
-            new_client =
-              Map.merge(client, %{
-                team_colour: 0,
-                battle_id: nil
-              })
-
-            ConCache.put(:clients, new_client.userid, new_client)
-            new_client
-        end
+        new_client = %{client | battle_id: nil}
+        ConCache.put(:clients, new_client.userid, new_client)
+        new_client
     end
   end
 
-  def leave_rooms(userid) do
+  def leave_rooms(client) do
     Room.list_rooms()
     |> Enum.each(fn room ->
-      if userid in room.members do
-        Room.remove_user_from_room(userid, room.name)
+      if client.userid in room.members do
+        Room.remove_user_from_room(client.userid, room.name)
       end
     end)
   end
@@ -182,27 +159,27 @@ defmodule Teiserver.Client do
   # end
 
   def disconnect(userid) do
-    if get_client_by_id(userid) do
-      do_disconnect(userid)
+    case get_client_by_id(userid) do
+      nil -> nil
+      client -> do_disconnect(client)
     end
   end
 
-  defp do_disconnect(userid) do
-    leave_battle(userid)
-    leave_rooms(userid)
-    User.logout(userid)
+  defp do_disconnect(client) do
+    leave_battle(client)
+    leave_rooms(client)
+    spawn(fn -> User.logout(client.userid) end)
 
-    ConCache.delete(:clients, userid)
+    ConCache.delete(:clients, client.userid)
 
     ConCache.update(:lists, :clients, fn value ->
       new_value =
         value
-        |> Enum.filter(fn v -> v != userid end)
+        |> Enum.filter(fn v -> v != client.userid end)
 
       {:ok, new_value}
     end)
 
-    username = User.get_username(userid)
-    PubSub.broadcast(Central.PubSub, "all_user_updates", {:logged_out_user, userid, username})
+    PubSub.broadcast(Central.PubSub, "all_user_updates", {:logged_out_user, client.userid, client.name})
   end
 end

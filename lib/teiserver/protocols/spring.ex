@@ -681,15 +681,15 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
     case response do
       {:success, battle} ->
+        Logger.info("JOINBATTLE - #{state.userid} joins #{battle.id}")
         PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
         Battle.add_user_to_battle(state.userid, battle.id)
-        Client.join_battle(state.userid, battle.id)
         reply(:join_battle, battle, state)
         reply(:add_script_tags, battle.tags, state)
 
         battle.players
-        |> Enum.each(fn username ->
-          client = Client.get_client_by_id(username)
+        |> Enum.each(fn id ->
+          client = Client.get_client_by_id(id)
           reply(:client_battlestatus, client, state)
         end)
 
@@ -707,9 +707,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
 
         _send("REQUESTBATTLESTATUS\n", state)
 
-        new_client =
-          Map.put(state.client, :battle_id, battle.id)
-          |> Client.update()
+        new_client = Client.get_client_by_id(state.userid)
 
         # %{state | client: Client.get_client_by_id(state.userid)}
         %{state | client: new_client}
@@ -1011,9 +1009,11 @@ defmodule Teiserver.Protocols.SpringProtocol do
   defp do_handle("LEAVEBATTLE", _, %{client: %{battle_id: nil}} = state), do: state
 
   defp do_handle("LEAVEBATTLE", _, state) do
+    Logger.info("LEAVEBATTLE - #{state.userid} left battle #{state.client.battle_id}")
     PubSub.unsubscribe(Central.PubSub, "battle_updates:#{state.client.battle_id}")
     reply(:remove_user_from_battle, {state.userid, state.client.battle_id}, state)
-    new_client = Client.leave_battle(state.userid)
+    Battle.remove_user_from_battle(state.userid, state.client.battle_id)
+    new_client = Client.get_client_by_id(state.userid)
     %{state | client: new_client}
   end
 
@@ -1272,6 +1272,7 @@ defmodule Teiserver.Protocols.SpringProtocol do
     "CLIENTBATTLESTATUS #{name} #{battlestatus} #{team_colour}\n"
   end
 
+  defp do_reply(:client_battlestatus, nil), do: nil
   defp do_reply(:client_battlestatus, client) do
     status = create_battle_status(client)
     "CLIENTBATTLESTATUS #{client.name} #{status} #{client.team_colour}\n"

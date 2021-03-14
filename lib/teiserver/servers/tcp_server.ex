@@ -392,27 +392,32 @@ defmodule Teiserver.TcpServer do
   def handle_info({:tcp_closed, socket}, %{socket: socket, transport: transport} = state) do
     Logger.info("Closing TCP connection #{Kernel.inspect(socket)}")
     transport.close(socket)
+    Client.disconnect(state.userid)
     {:stop, :normal, state}
   end
 
   def handle_info({:tcp_closed, socket}, state) do
     Logger.info("Closing TCP connection - no transport #{Kernel.inspect(socket)}")
+    Client.disconnect(state.userid)
     {:stop, :normal, state}
   end
 
   def handle_info({:ssl_closed, socket}, %{socket: socket, transport: transport} = state) do
     Logger.debug("Closing SSL connection #{Kernel.inspect(socket)}")
     transport.close(socket)
+    Client.disconnect(state.userid)
     {:stop, :normal, state}
   end
 
   def handle_info({:ssl_closed, socket}, state) do
     Logger.debug("Closing SSL connection - no transport #{Kernel.inspect(socket)}")
+    Client.disconnect(state.userid)
     {:stop, :normal, state}
   end
 
   def handle_info(:terminate, state) do
     Logger.info("Terminate connection #{Kernel.inspect(state.socket)}")
+    Client.disconnect(state.userid)
     {:stop, :normal, state}
   end
 

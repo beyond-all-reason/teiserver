@@ -13,9 +13,9 @@ defmodule Mix.Tasks.Benchmark do
   """
   use Mix.Task
 
-  @shortdoc "Starts the benchmark procecess for the server"
+  @shortdoc "Starts the benchmark processes for the server"
   def run([server, port]) do
-    Mix.Task.run("app.start")
+    # Mix.Task.run("app.start")
     Logger.configure(level: :info)
 
     children = [
