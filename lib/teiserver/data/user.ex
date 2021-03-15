@@ -495,7 +495,7 @@ defmodule Teiserver.User do
   end
 
   def ring(ringee_id, ringer_id) do
-    PubSub.broadcast(Central.PubSub, "user_updates:#{ringee_id}", {:ring, ringer_id})
+    PubSub.broadcast(Central.PubSub, "user_updates:#{ringee_id}", {:action, {:ring, ringer_id}})
   end
 
   def encrypt_password(password) do

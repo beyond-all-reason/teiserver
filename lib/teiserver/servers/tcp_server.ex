@@ -111,7 +111,7 @@ defmodule Teiserver.TcpServer do
 
     Logger.info("New TCP connection #{Kernel.inspect(socket)}, IP: #{ip}")
 
-    send(self(), {:msg, :welcome})
+    send(self(), {:action, {:welcome, nil}})
     :gen_server.enter_loop(__MODULE__, [], state)
   end
 
@@ -149,6 +149,11 @@ defmodule Teiserver.TcpServer do
     end
   end
 
+  def handle_info({:action, {action_type, data}}, state) do
+    new_state = do_action(action_type, data, state)
+    {:noreply, new_state}
+  end
+
   # Client updates
   def handle_info({:user_logged_in, userid}, state) do
     new_state = user_logged_in(userid, state)
@@ -174,12 +179,6 @@ defmodule Teiserver.TcpServer do
         client_battlestatus_update(new_client, state)
     end
 
-    {:noreply, new_state}
-  end
-
-  # Commands
-  def handle_info({:ring, ringer}, state) do
-    new_state = do_action(:ring, ringer, state)
     {:noreply, new_state}
   end
 
@@ -523,13 +522,16 @@ defmodule Teiserver.TcpServer do
   end
 
   # Actions
-  defp do_action(action, data, state) do
-    case action do
+  defp do_action(action_type, data, state) do
+    case action_type do
       :ring ->
         state.protocol_out.reply(:ring, {data, state.userid}, state)
 
-        _ ->
-          Logger.error("No handler in tcp_server:do_action with action #{action}")
+      :welcome ->
+        state.protocol_out.reply(:welcome, nil, state)
+
+      _ ->
+        Logger.error("No handler in tcp_server:do_action with action #{action_type}")
     end
     state
   end
