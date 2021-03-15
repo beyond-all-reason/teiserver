@@ -45,7 +45,7 @@ defmodule TeiserverWeb.ClientLive.Show do
     {:noreply, assign(socket, :client, new_client)}
   end
 
-  def handle_info({:logged_out_user, client_id, _name}, socket) do
+  def handle_info({:user_logged_out, client_id, _name}, socket) do
     if int_parse(client_id) == socket.assigns[:id] do
       {:noreply,
        socket

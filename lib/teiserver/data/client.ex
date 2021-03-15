@@ -52,7 +52,7 @@ defmodule Teiserver.Client do
     PubSub.broadcast(
       Central.PubSub,
       "all_user_updates",
-      {:logged_in_user, user.id, user.name}
+      {:user_logged_in, user.id, user.name}
     )
 
     client
@@ -173,7 +173,7 @@ defmodule Teiserver.Client do
     spawn(fn -> User.logout(client.userid) end)
 
     Logger.info("Logging out user #{client.userid} - PUBSUB")
-    PubSub.broadcast(Central.PubSub, "all_user_updates", {:logged_out_user, client.userid, client.name})
+    PubSub.broadcast(Central.PubSub, "all_user_updates", {:user_logged_out, client.userid, client.name})
     ConCache.delete(:clients, client.userid)
 
     ConCache.update(:lists, :clients, fn value ->

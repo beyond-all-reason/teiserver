@@ -69,7 +69,7 @@ defmodule Teiserver.Battle do
       PubSub.broadcast(
         Central.PubSub,
         "all_battle_updates",
-        {:all_battle_updated, battle.id, reason}
+        {:global_battle_updated, battle.id, reason}
       )
     else
       PubSub.broadcast(
@@ -104,7 +104,7 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "all_battle_updates",
-      {:battle_opened, battle.id}
+      {:global_battle_updated, battle.id, :battle_opened}
     )
 
     battle
@@ -125,7 +125,7 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "live_battle_updates:#{battle_id}",
-      {:battle_closed, battle_id}
+      {:global_battle_updated, battle_id, :battle_closed}
     )
 
     PubSub.broadcast(
@@ -153,7 +153,7 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
-      {:add_bot_to_battle, battle_id, bot}
+      {:battle_update, {battle_id, bot}, :add_bot_to_battle}
     )
   end
 
@@ -176,7 +176,7 @@ defmodule Teiserver.Battle do
         PubSub.broadcast(
           Central.PubSub,
           "battle_updates:#{battle_id}",
-          {:update_bot, battle_id, new_bot}
+          {:battle_update, {battle_id, new_bot}, :update_bot}
         )
     end
   end
@@ -190,7 +190,7 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
-      {:remove_bot_from_battle, battle_id, botname}
+      {:battle_update, {battle_id, botname}, :remove_bot_from_battle}
     )
   end
 
@@ -412,7 +412,7 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
-      {:battle_message, userid, msg, battle_id}
+      {:battle_updated, battle_id, {userid, msg}, :say}
     )
   end
 
@@ -420,7 +420,7 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
-      {:battle_message_ex, userid, msg, battle_id}
+      {:battle_updated, battle_id, {userid, msg}, :sayex}
     )
   end
 

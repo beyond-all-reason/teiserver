@@ -35,7 +35,7 @@ defmodule TeiserverWeb.BattleLive.Index do
     {:noreply, assign(socket, :battles, list_battles())}
   end
 
-  def handle_info({:all_battle_updated, _battle_id, _reason}, socket) do
+  def handle_info({:global_battle_updated, _battle_id, _reason}, socket) do
     {:noreply, assign(socket, :battles, list_battles())}
   end
 
