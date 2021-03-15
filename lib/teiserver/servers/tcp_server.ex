@@ -95,7 +95,6 @@ defmodule Teiserver.TcpServer do
       transport: transport,
       protocol_in: @default_protocol_in,
       protocol_out: @default_protocol_out,
-      msg_id: nil,
       ip: ip,
 
       # Client state
@@ -126,7 +125,7 @@ defmodule Teiserver.TcpServer do
 
   # If Ctrl + C is sent through it kills the connection, makes telnet debugging easier
   def handle_info({_, _socket, <<255, 244, 255, 253, 6>>}, state) do
-    new_state = state.protocol.handle("EXIT", state)
+    new_state = state.protocol_in.handle("EXIT", state)
     {:noreply, new_state}
   end
 
@@ -297,7 +296,7 @@ defmodule Teiserver.TcpServer do
         data
         |> String.split("\n")
         |> Enum.reduce(state, fn data, acc ->
-          state.protocol.handle(data, acc)
+          state.protocol_in.handle(data, acc)
         end)
         |> Map.put(:message_part, "")
       else
