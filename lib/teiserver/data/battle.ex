@@ -203,6 +203,7 @@ defmodule Teiserver.Battle do
           # No change takes place, they're already in the battle!
           battle_state
         else
+          Client.join_battle(userid, battle_id)
           # Logger.info("add_user_to_battle(#{userid}, #{battle_id}) - PUBSUB")
           PubSub.broadcast(
             Central.PubSub,
@@ -269,17 +270,21 @@ defmodule Teiserver.Battle do
     end
   end
 
+  @spec remove_user_from_any_battle(integer() | nil) :: list()
+  def remove_user_from_any_battle(nil), do: []
   def remove_user_from_any_battle(userid) do
-    battles = list_battles()
+    battle_ids = list_battles()
     |> Enum.filter(fn b -> b != nil end)
     |> Enum.filter(fn b -> Enum.member?(b.players, userid) or b.founder_id == userid end)
     |> Enum.map(fn b ->
       remove_user_from_battle(userid, b.id)
+      b.id
     end)
 
-    if Enum.count(battles) > 1 do
-      Logger.error("#{userid} is a member of #{Enum.count(battles)} battles")
+    if Enum.count(battle_ids) > 1 do
+      Logger.error("#{userid} is a member of #{Enum.count(battle_ids)} battles")
     end
+    battle_ids
   end
 
   @spec do_remove_user_from_battle(integer(), integer()) ::
@@ -305,8 +310,14 @@ defmodule Teiserver.Battle do
 
           # Now update the battle to remove the player
           ConCache.update(:battles, battle_id, fn battle_state ->
-            new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
-            new_state = Map.put(battle_state, :players, new_players)
+            # This is purely to prevent errors if the battle is in the process of shutting down
+            # mid function call
+            new_state = if battle_state != nil do
+              new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
+              Map.put(battle_state, :players, new_players)
+            else
+              nil
+            end
 
             {:ok, new_state}
           end)

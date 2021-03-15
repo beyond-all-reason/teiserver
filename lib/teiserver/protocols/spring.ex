@@ -177,6 +177,16 @@ defmodule Teiserver.Protocols.SpringProtocol do
     )
   end
 
+  defp do_handle("JB", battle_id, state) do
+    Logger.warn("Shortcut handler, should be removed for beta testing")
+
+    do_handle(
+      "JOINBATTLE",
+      "#{battle_id} empty -1540855590\n",
+      state
+    )
+  end
+
   # Specific handlers for different commands
   @spec do_handle(String.t(), String.t(), map) :: map
   defp do_handle("MYSTATUS", data, state) do
@@ -1006,7 +1016,15 @@ defmodule Teiserver.Protocols.SpringProtocol do
     state
   end
 
-  defp do_handle("LEAVEBATTLE", _, %{client: %{battle_id: nil}} = state), do: state
+  defp do_handle("LEAVEBATTLE", _, %{client: %{battle_id: nil}} = state) do
+    Battle.remove_user_from_any_battle(state.userid)
+    |> Enum.each(fn b ->
+      Logger.info("LEAVEBATTLE (noid) - #{state.userid} left battle #{b}")
+      PubSub.unsubscribe(Central.PubSub, "battle_updates:#{b}")
+    end)
+
+    state
+  end
 
   defp do_handle("LEAVEBATTLE", _, state) do
     Logger.info("LEAVEBATTLE - #{state.userid} left battle #{state.client.battle_id}")
@@ -1428,12 +1446,8 @@ defmodule Teiserver.Protocols.SpringProtocol do
     msg
     |> String.split("\n")
     |> Enum.filter(fn part -> part != "" end)
-    |> Enum.map(fn part ->
-      case transport.send(socket, part <> "\n") do
-        :ok -> nil
-        v ->
-          Logger.error("Transport error, got #{Kernel.inspect v} when sending #{part}")
-      end
+    |> Enum.each(fn part ->
+      transport.send(socket, part <> "\n")
     end)
   end
 
