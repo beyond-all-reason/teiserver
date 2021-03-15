@@ -1,14 +1,30 @@
 ## Structure
 ```
-    Client <--> TcpServer <--> Protocol <--> Cache <--> Database
-                    ^                          v
-                    |                          |
-                     --------------------------
+                                      Client                                
+                                (Chobby/Spring/SPADS)
+                                        ^
+                                        |
+                                        v
+                       Protocol ----> ranch --------> Protocol  ------------> Can message Client state
+                   (spring_out.ex)  (gen_tcp)     (spring_in.ex)
+                          ^                             |
+                          |                             |
+                          |                             v
+                   Client State <-------------------- State
+                     (Genserver)                  (ConCache/ETS)
+                                                        ^
+                                                        |
+                                                        v
+                                                     Storage
+                                                  (Ecto/Postgres)
 ```
+
+## Roles
+Protocol is split into an In and an Out module. Their sole purpose is to translate internal messages for the client, no state based logic should be present in them. Incomming commands can message the client state directly but cannot perform the update themselves.
 
 ## Code layout/placement
 - lib/protocols contains the interface for the protocols, these will interface with the TCP server and transform the input into function calls, protocols also handle sending messages back to the client
-- lib/data contains the main backend implementation and handling for logic. Ideally written in a protocol-free way
+- lib/data contains the main backend implementation and handling for logic. 
 
 ### Protocols
 A protocol (currently just the one) interfaces between the sever state logic and the client as shown above in the structure section. Protocols have a few common functions as defined in their MDoc property but loosely are:
