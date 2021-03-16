@@ -4,7 +4,8 @@ defmodule Teiserver.SpringBattleHostTest do
   # alias Teiserver.BitParse
   # alias Teiserver.User
   alias Teiserver.Battle
-  alias Teiserver.Protocols.SpringProtocol
+  alias Teiserver.Protocols.SpringLib
+  # alias Teiserver.Protocols.{SpringIn, SpringOut, SpringLib}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TestLib,
@@ -31,9 +32,7 @@ defmodule Teiserver.SpringBattleHostTest do
       join,
       _tags,
       battle_status,
-      _battle_opened,
-      _joinedbattle,
-      _clientstatus
+      _battle_opened
       | _
     ] = reply
 
@@ -77,7 +76,8 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == "FORCEQUITBATTLE\nLEFTBATTLE #{battle_id} #{user2.name}\n"
 
     # Had a bug where the battle would be incorrectly closed
-    # after kicking a player
+    # after kicking a player, it was caused by the host disconnecting
+    # and in the process closed out the battle
     battle = Battle.get_battle(battle_id)
     assert battle != nil
 
@@ -137,8 +137,22 @@ defmodule Teiserver.SpringBattleHostTest do
     :timer.sleep(100)
     _ = _recv(socket)
     reply = _recv(socket2)
+    # socket2 got kicked, they shouldn't get any result from this
+    assert reply == :timeout
+
+    # Now lets get them to rejoin the battle
+    _send(socket2, "JOINBATTLE #{battle_id} empty gameHash\n")
+    :timer.sleep(100)
+    _ = _recv(socket2)
+
+    # Now try the status again
+    _send(socket2, "MYBATTLESTATUS 4195330 600\n")
+    :timer.sleep(100)
+    _ = _recv(socket)
+    reply = _recv(socket2)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195330 600\n"
-    status = SpringProtocol.parse_battle_status("4195330")
+
+    status = SpringLib.parse_battle_status("4195330")
     assert status == %{
       ready: true,
       handicap: 0,
@@ -154,14 +168,14 @@ defmodule Teiserver.SpringBattleHostTest do
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4373506 600\n"
-    status = SpringProtocol.parse_battle_status("4373506")
+    status = SpringLib.parse_battle_status("4373506")
     assert status.handicap == 87
 
     _send(socket, "HANDICAP #{user2.name} 0\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195330 600\n"
-    status = SpringProtocol.parse_battle_status("4195330")
+    status = SpringLib.parse_battle_status("4195330")
     assert status.handicap == 0
 
     # Forceteamno
@@ -169,7 +183,7 @@ defmodule Teiserver.SpringBattleHostTest do
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195334 600\n"
-    status = SpringProtocol.parse_battle_status("4195334")
+    status = SpringLib.parse_battle_status("4195334")
     assert status.team_number == 1
 
     # Forceallyno
@@ -177,7 +191,7 @@ defmodule Teiserver.SpringBattleHostTest do
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195398 600\n"
-    status = SpringProtocol.parse_battle_status("4195398")
+    status = SpringLib.parse_battle_status("4195398")
     assert status.ally_team_number == 1
 
     # Forceteamcolour
@@ -191,7 +205,7 @@ defmodule Teiserver.SpringBattleHostTest do
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4194374 800\n"
-    status = SpringProtocol.parse_battle_status("4194374")
+    status = SpringLib.parse_battle_status("4194374")
     assert status.player == false
 
     # SAYBATTLEEX

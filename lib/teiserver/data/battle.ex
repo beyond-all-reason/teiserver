@@ -86,6 +86,7 @@ defmodule Teiserver.Battle do
     ConCache.get(:battles, int_parse(id))
   end
 
+  @spec get_battle(integer()) :: map() | nil
   def get_battle(id) do
     ConCache.get(:battles, int_parse(id))
   end
@@ -110,6 +111,7 @@ defmodule Teiserver.Battle do
     battle
   end
 
+  @spec close_battle(integer() | nil) :: :ok
   def close_battle(battle_id) do
     battle = get_battle(battle_id)
     ConCache.delete(:battles, battle_id)
@@ -131,7 +133,7 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "all_battle_updates",
-      {:battle_closed, battle_id}
+      {:global_battle_updated, battle_id, :battle_closed}
     )
 
     battle.players
@@ -153,7 +155,7 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
-      {:battle_update, {battle_id, bot}, :add_bot_to_battle}
+      {:battle_updated, battle_id, {battle_id, bot}, :add_bot_to_battle}
     )
   end
 
@@ -176,7 +178,7 @@ defmodule Teiserver.Battle do
         PubSub.broadcast(
           Central.PubSub,
           "battle_updates:#{battle_id}",
-          {:battle_update, {battle_id, new_bot}, :update_bot}
+          {:battle_updated, battle_id, {battle_id, new_bot}, :update_bot}
         )
     end
   end
@@ -190,7 +192,7 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
-      {:battle_update, {battle_id, botname}, :remove_bot_from_battle}
+      {:battle_updated, battle_id, {battle_id, botname}, :remove_bot_from_battle}
     )
   end
 
@@ -225,19 +227,15 @@ defmodule Teiserver.Battle do
     Client.leave_battle(userid)
     case do_remove_user_from_battle(userid, battle_id) do
       :closed ->
-        # Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - :closed")
         nil
 
       :not_member ->
-        # Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - :not_member")
         nil
 
       :no_battle ->
-        # Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - :no_battle")
         nil
 
       :removed ->
-        # Logger.info("remove_user_from_battle(#{userid}, #{battle_id}) - PUBSUB")
         PubSub.broadcast(
           Central.PubSub,
           "all_battle_updates",
@@ -249,19 +247,15 @@ defmodule Teiserver.Battle do
   def kick_user_from_battle(userid, battle_id) do
     case do_remove_user_from_battle(userid, battle_id) do
       :closed ->
-        # Logger.info("kick_user_from_battle(#{userid}, #{battle_id}) - :closed")
         nil
 
       :not_member ->
-        # Logger.info("kick_user_from_battle(#{userid}, #{battle_id}) - :not_member")
         nil
 
       :no_battle ->
-        # Logger.info("kick_user_from_battle(#{userid}, #{battle_id}) - :no_battle")
         nil
 
       :removed ->
-        # Logger.info("kick_user_from_battle(#{userid}, #{battle_id}) - PUBSUB")
         PubSub.broadcast(
           Central.PubSub,
           "all_battle_updates",
@@ -290,7 +284,6 @@ defmodule Teiserver.Battle do
   @spec do_remove_user_from_battle(integer(), integer()) ::
           :closed | :removed | :not_member | :no_battle
   defp do_remove_user_from_battle(userid, battle_id) do
-    # Logger.info("do_remove_user_from_battle(#{userid}, #{battle_id})")
     battle = get_battle(battle_id)
     Client.leave_battle(userid)
 
@@ -415,7 +408,7 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
-      {:battle_updated, battle_id, {userid, msg}, :say}
+      {:battle_updated, battle_id, {userid, msg, battle_id}, :say}
     )
   end
 
@@ -423,17 +416,17 @@ defmodule Teiserver.Battle do
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
-      {:battle_updated, battle_id, {userid, msg}, :sayex}
+      {:battle_updated, battle_id, {userid, msg, battle_id}, :sayex}
     )
   end
 
   def force_change_client(_, nil, _, _), do: nil
   def force_change_client(changer_id, client_id, field, new_value) do
     changer = Client.get_client_by_id(changer_id)
-    battle = get_battle(changer)
+    client = Client.get_client_by_id(client_id)
+    battle = get_battle(client.battle_id)
 
     if allow?(changer, field, battle) do
-      client = Client.get_client_by_id(client_id)
       change_client_battle_status(client, field, new_value)
     end
   end
@@ -470,7 +463,7 @@ defmodule Teiserver.Battle do
       battle == nil ->
         false
 
-      battle.founder_id == changer.id ->
+      battle.founder_id == changer.userid ->
         true
 
       founder_command == true ->
@@ -485,6 +478,10 @@ defmodule Teiserver.Battle do
         false
 
       # TODO: something about boss mode here?
+
+      # If they're not a member they can't do anything either
+      not Enum.member?(battle.players, changer.userid) ->
+        false
 
       # Default to true
       true ->

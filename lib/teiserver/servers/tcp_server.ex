@@ -407,7 +407,7 @@ defmodule Teiserver.TcpServer do
       :update_bot ->
         state.protocol_out.reply(:update_bot, data, nil, state)
 
-      :remove_bot ->
+      :remove_bot_from_battle ->
         state.protocol_out.reply(:remove_bot_from_battle, data, nil, state)
 
       _ ->
@@ -484,24 +484,15 @@ defmodule Teiserver.TcpServer do
   end
 
   defp user_kicked_from_battle(userid, battle_id, state) do
-    if state.battle_host do
-      cond do
-        state.known_users[userid] == nil ->
-          state.protocol_out.reply(:user_logged_in, userid, nil, state)
-          _blank_user(userid)
-
-        state.known_users[userid].battle_id == nil ->
-          # No change
-          state.known_users[userid]
-
-        true ->
-          # We don't care which battle we thought they are in, they're no longer in it
-          state.protocol_out.reply(:kick_user_from_battle, {userid, state.known_users[userid].battle_id}, nil, state)
-          %{state.known_users[userid] | battle_id: nil}
-      end
+    # If it's the user, we need to tell them the bad news
+    state = if userid == state.userid do
+      state.protocol_out.reply(:forcequit_battle, nil, nil, state)
+      %{state | battle_id: nil}
     else
-      user_leave_battle(userid, battle_id, state)
+      state
     end
+
+    user_leave_battle(userid, battle_id, state)
   end
 
   # Chat

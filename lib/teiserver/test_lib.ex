@@ -113,7 +113,7 @@ defmodule Teiserver.TestLib do
   def mock_state_auth(protocol_in, protocol_out, socket \\ nil) do
     socket = if socket, do: socket, else: mock_socket()
     user = new_user()
-    client = Client.login(user, self())
+    Client.login(user, self())
 
     %{
       # Connection state

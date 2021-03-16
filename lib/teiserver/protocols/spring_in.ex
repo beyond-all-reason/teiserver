@@ -198,7 +198,8 @@ defmodule Teiserver.Protocols.SpringIn do
         new_status = SpringLib.parse_client_status(new_value)
         |> Map.take([:in_game, :away])
 
-        new_client = Map.merge(state.client, new_status)
+        new_client = Client.get_client_by_id(state.userid)
+        |> Map.merge(new_status)
 
         # This just accepts it and updates the client
         Client.update(new_client, :client_updated_status)
@@ -608,10 +609,11 @@ defmodule Teiserver.Protocols.SpringIn do
               "2" -> :fixed
             end
 
+          client = Client.get_client_by_id(state.userid)
           battle =
             %{
               founder_id: state.userid,
-              founder_name: state.name,
+              founder_name: state.username,
               name: name,
               type: if(type == "0", do: :normal, else: :replay),
               nattype: nattype,
@@ -626,7 +628,7 @@ defmodule Teiserver.Protocols.SpringIn do
               engine_version: engine_version,
               map_name: map_name,
               game_name: game_name,
-              ip: state.client.ip
+              ip: client.ip
             }
             |> Battle.create_battle()
             |> Battle.add_battle()
@@ -644,7 +646,7 @@ defmodule Teiserver.Protocols.SpringIn do
         reply(:open_battle_success, battle.id, msg_id, state)
         PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
 
-        reply(:join_battle, battle, msg_id, state)
+        reply(:join_battle_success, battle, msg_id, state)
 
         # Send information about the battle to them
         reply(:add_script_tags, battle.tags, msg_id, state)
@@ -698,7 +700,8 @@ defmodule Teiserver.Protocols.SpringIn do
           reply(:add_bot_to_battle, {battle.id, bot}, msg_id, state)
         end)
 
-        reply(:client_battlestatus, state.client, msg_id, state)
+        client = Client.get_client_by_id(state.userid)
+        reply(:client_battlestatus, client, msg_id, state)
 
         battle.start_rectangles
         |> Enum.each(fn {team, r} ->
@@ -1005,11 +1008,12 @@ defmodule Teiserver.Protocols.SpringIn do
           |> Map.take([:ready, :team_number, :ally_team_number, :player, :sync, :side])
 
         new_client =
-          state.client
+          Client.get_client_by_id(state.userid)
           |> Map.merge(updates)
           |> Map.put(:team_colour, team_colour)
 
         # This one needs a bit more nuance, for now we'll wrap it in this
+        # later it's possible we don't want players updating their status
         if Battle.allow?(state.userid, :mybattlestatus, state.battle_id) do
           Client.update(new_client, :client_updated_battlestatus)
         end
