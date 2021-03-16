@@ -22,12 +22,16 @@ defmodule Teiserver.Application do
     ]
 
     # Some stuff doesn't work with the tests
-    # but we're not that fussed about having it automtically
+    # but we're not that fussed about having it automatically
     # tested
-    children ++
-      [
-        {Teiserver.HookServer, name: Teiserver.HookServer}
-      ]
+    if Application.get_env(:central, Teiserver)[:enable_hooks] do
+      children ++
+        [
+          # {Teiserver.HookServer, name: Teiserver.HookServer}
+        ]
+    else
+      children
+    end
   end
 
   defp concache_perm_sup(name) do

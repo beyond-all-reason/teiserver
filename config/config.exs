@@ -19,7 +19,8 @@ config :central, Teiserver,
   website: [
     url: "https://teifion.co.uk"
   ],
-  enable_benchmark: false
+  enable_benchmark: false,
+  enable_hooks: true
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

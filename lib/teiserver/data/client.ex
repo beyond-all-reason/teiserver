@@ -51,7 +51,7 @@ defmodule Teiserver.Client do
     PubSub.broadcast(
       Central.PubSub,
       "all_user_updates",
-      {:user_logged_in, user.id, user.name}
+      {:user_logged_in, user.id}
     )
 
     client

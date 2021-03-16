@@ -85,36 +85,55 @@ defmodule Teiserver.TestLib do
     }
   end
 
-  def mock_state_raw(protocol, socket \\ nil) do
+  def mock_state_raw(protocol_in, protocol_out, socket \\ nil) do
     socket = if socket, do: socket, else: mock_socket()
 
     %{
-      userid: nil,
-      name: nil,
-      client: nil,
-      user: nil,
-      msg_id: nil,
-      ip: "127.0.0.1",
+      # Connection state
+      message_part: "",
+      last_msg: System.system_time(:second) - 5,
       socket: socket,
       transport: socket.transport,
-      protocol: protocol
+      protocol_in: protocol_in,
+      protocol_out: protocol_out,
+      ip: "127.0.0.1",
+
+      # Client state
+      userid: nil,
+      username: nil,
+      battle_host: false,
+      user: nil,
+
+      # Connection microstate
+      battle_id: nil,
+      known_users: %{}
     }
   end
 
-  def mock_state_auth(protocol, socket \\ nil) do
+  def mock_state_auth(protocol_in, protocol_out, socket \\ nil) do
     socket = if socket, do: socket, else: mock_socket()
     user = new_user()
     client = Client.login(user, self())
 
     %{
-      userid: user.id,
-      name: user.name,
-      client: client,
-      user: user,
+      # Connection state
+      message_part: "",
+      last_msg: System.system_time(:second) - 5,
       socket: socket,
-      msg_id: nil,
       transport: socket.transport,
-      protocol: protocol
+      protocol_in: protocol_in,
+      protocol_out: protocol_out,
+      ip: "127.0.0.1",
+
+      # Client state
+      userid: user.id,
+      username: user.name,
+      battle_host: false,
+      user: user,
+
+      # Connection microstate
+      battle_id: nil,
+      known_users: %{}
     }
   end
 end
