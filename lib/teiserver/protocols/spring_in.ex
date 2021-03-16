@@ -1,0 +1,1104 @@
+defmodule Teiserver.Protocols.SpringIn do
+  @moduledoc """
+  In component of the Spring protocol
+
+  Protocol definition:
+  https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html
+  """
+  require Logger
+  alias Teiserver.Client
+  alias Teiserver.Battle
+  alias Teiserver.Room
+  alias Teiserver.User
+  alias Phoenix.PubSub
+  alias Teiserver.BitParse
+  alias Teiserver.TcpServer
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
+  import Teiserver.Protocols.SpringOut, only: [reply: 4]
+  alias Teiserver.Protocols.SpringLib
+
+  # Bridge commands, may not be needed
+  # in_BRIDGECLIENTFROM
+  # in_UNBRIDGECLIENTFROM
+  # in_JOINFROM
+  # in_LEAVEFROM
+  # in_SAYFROM
+
+  # Checklist against uberserver Protocol.py
+  # https://github.com/spring/uberserver/blob/cc4155c3b45e8189100d9dd9097a9aa04c0eb3ec/protocol/Protocol.py#L1109
+  # in_STLS - Technically implemented, won't work the same way due to TCP/TLS port different in ranch
+  # in_PORTTEST
+  # in_SAYPRIVATEEX
+  # in_BATTLEHOSTMSG
+  # in_CHANNELTOPIC
+  # in_GETCHANNELMESSAGES
+  # in_GETUSERID
+  # in_FINDIP
+  # in_GETIP
+  # in_SETBOTMODE
+  # in_BROADCAST
+  # in_BROADCASTEX
+  # in_ADMINBROADCAST
+  # in_SETMINSPRINGVERSION
+  # in_LISTCOMPFLAGS
+  # in_KICK
+  # in_BAN
+  # in_BANSPECIFIC
+  # in_UNBAN
+  # in_BLACKLIST
+  # in_UNBLACKLIST
+  # in_LISTBANS
+  # in_LISTBLACKLIST
+  # in_SETACCESS
+  # in_STATS
+  # in_RELOAD
+  # in_CLEANUP
+  # in_RESETUSERPASSWORD - Webinterface replaces this?
+  # in_DELETEACCOUNT
+  # in_RESENDVERIFICATION
+  # in_JSON
+  # in_MUTE
+  # in_UNMUTE
+  # in_MUTELIST
+  # in_FORCELEAVECHANNEL
+  # in_SETCHANNELKEY
+  # in_STARTTLS
+  # in_SAYBATTLEPRIVATEEX
+  # in_GETINGAMETIME
+
+  # The main entry point for the module and the wrapper around
+  # parsing, processing and acting upon a player message
+  @spec handle(string(), string(), map) :: map
+  def handle("", msg_id, state), do: state
+  def handle("\r\n", msg_id, state), do: state
+
+  def handle(data, msg_id, state) do
+    tuple =
+      ~r/^(#[0-9]+ )?([A-Z0-9]+)(.*)?$/
+      |> Regex.run(data)
+      |> _clean
+
+    state =
+      case tuple do
+        {command, data, msg_id} ->
+          do_handle(command, data, msg_id, state)
+
+        nil ->
+          Logger.debug("Bad match on command: '#{data}'")
+          state
+      end
+
+    if state == nil do
+      throw "nil state returned while handling: #{data}"
+    end
+
+    %{state | msg_id: nil, last_msg: System.system_time(:second)}
+  end
+
+  defp _clean(nil), do: nil
+
+  defp _clean([_, msg_id, command, data]) do
+    {command, String.trim(data), String.trim(msg_id)}
+  end
+
+  # TODO
+  # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
+  defp do_handle("STLS", _, msg_id, state) do
+    Logger.warn("TODO: Not implemented yet")
+    reply(:ok, "STLS", msg_id, state)
+  end
+
+  # Special handler to allow us to test more easily, it just accepts
+  # any login. As soon as we put password checking in place this will
+  # stop working
+  defp do_handle("LI", username, msg_id, state) do
+    Logger.warn("Shortcut handler, should be removed for beta testing")
+
+    do_handle(
+      "LOGIN",
+      # "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp",
+      "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * bop",
+      msg_id,
+      state
+    )
+  end
+
+  # This is intended purely for an experimental benchmark
+  # the user won't be saved to the database
+  defp do_handle("TMPLI", "TEST_" <> userid, msg_id, state) do
+    if Application.get_env(:central, Teiserver)[:enable_benchmark] do
+      username = "TEST_" <> userid
+      userid = int_parse(userid)
+
+      User.add_user(%{
+        id: userid,
+        name: username,
+        email: "#{username}@#{username}",
+        rank: 1,
+        country: "??",
+        lobbyid: "Telnet",
+        ip: "default_ip",
+        moderator: false,
+        bot: false,
+        friends: [],
+        friend_requests: [],
+        ignored: [],
+        password_hash: "X03MO1qnZdYdgyfeuILPmQ==",
+        verification_code: nil,
+        verified: true,
+        password_reset_code: nil,
+        email_change_code: nil,
+        last_login: nil,
+        ingame_seconds: 60,
+        mmr: %{}
+      })
+
+      do_handle("LI", username, msg_id, state)
+    else
+      state
+    end
+  end
+
+  defp do_handle("LISTBATTLES", _, msg_id, state) do
+    battle_ids =
+      Battle.list_battles()
+      |> Enum.map(fn b -> b.id end)
+      |> Enum.join(" ")
+
+    reply(:list_battles, battle_ids, msg_id, state)
+    state
+  end
+
+  defp do_handle("OB", _, msg_id, state) do
+    Logger.warn("Shortcut handler, should be removed for beta testing")
+
+    do_handle(
+      "OPENBATTLE",
+      "0 0 * 52200 16 -1540855590 0 1565299817 spring\t104.0.1-1784-gf6173b4 BAR\tComet Catcher Remake 1.8\tEU - 00\tBeyond All Reason test-15658-85bf66d",
+      state
+    )
+  end
+
+  defp do_handle("JB", battle_id, msg_id, state) do
+    Logger.warn("Shortcut handler, should be removed for beta testing")
+
+    do_handle(
+      "JOINBATTLE",
+      "#{battle_id} empty -1540855590\n",
+      state
+    )
+  end
+
+  # Specific handlers for different commands
+  @spec do_handle(String.t(), String.t(), map) :: map
+  defp do_handle("MYSTATUS", data, msg_id, state) do
+    case Regex.run(~r/([0-9]+)/, data) do
+      [_, new_value] ->
+        new_status = SpringLib.parse_client_status(new_value)
+        |> Map.take([:in_game, :away])
+
+        new_client = Map.merge(state.client, new_status)
+
+        # This just accepts it and updates the client
+        Client.update(new_client, :client_updated_status)
+      nil ->
+        _no_match(state, "MYSTATUS", msg_id, data)
+    end
+    state
+  end
+
+  defp do_handle("LOGIN", data, msg_id, state) do
+    regex_result =
+      case Regex.run(~r/^(\S+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)?\t?([^\t]+)?\t?([^\t]+)?/, data) do
+        nil -> nil
+        result -> result ++ ["", "", "", "", ""]
+      end
+
+    response =
+      case regex_result do
+        [_, username, password, _cpu, _ip, lobby, _userid, _modes | _] ->
+          username = User.clean_name(username)
+          User.try_login(username, password, state, state.ip, lobby)
+
+        nil ->
+          _no_match(state, "LOGIN", msg_id, data)
+          {:error, "Invalid details format"}
+      end
+
+    case response do
+      {:error, "Unverified", userid} ->
+        reply(:agreement, nil, msg_id, state)
+        Map.put(state, :unverified_id, userid)
+
+      {:ok, user} ->
+        do_login_accepted(state, user, msg_id)
+
+      {:error, reason} ->
+        Logger.debug("[command:login] denied with reason #{reason}")
+        reply(:denied, reason, msg_id, state)
+        state
+    end
+  end
+
+  defp do_handle("REGISTER", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
+      [_, username, password_hash, email] ->
+        case User.get_user_by_name(username) do
+          nil ->
+            User.register_user(username, email, password_hash, state.ip)
+            reply(:registration_accepted, nil, msg_id, state)
+
+          _ ->
+            reply(:registration_denied, "User already exists", msg_id, state)
+        end
+
+      _ ->
+        _no_match(state, "REGISTER", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("CONFIRMAGREEMENT", code, msg_id, %{unverified_id: userid} = state) do
+    case User.get_user_by_id(userid) do
+      nil ->
+        Logger.error("CONFIRMAGREEMENT - No user found for ID of '#{userid}'")
+        state
+
+      user ->
+        case code == "#{user.verification_code}" do
+          true ->
+            User.verify_user(user)
+            state
+
+          false ->
+            reply(:denied, "Incorrect code", msg_id, state)
+            state
+        end
+    end
+  end
+
+  defp do_handle("CONFIRMAGREEMENT", _code, msg_id, state),
+    do: reply(:servermsg, "You need to login before you can confirm the agreement.", msg_id, state)
+
+  defp do_handle("CREATEBOTACCOUNT", _, msg_id, %{user: %{moderator: false}} = state),
+    do: deny(state, msg_id)
+
+  defp do_handle("CREATEBOTACCOUNT", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
+      [_, botname, _owner_name] ->
+        User.register_bot(botname, state.userid)
+
+        reply(
+          :servermsg,
+          "A new bot account #{botname} has been created, with the same password as #{state.name}",
+          msg_id,
+          state
+        )
+
+      _ ->
+        _no_match(state, "CREATEBOTACCOUNT", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("RENAMEACCOUNT", new_name, msg_id, state) do
+    User.rename_user(state.user, new_name)
+    reply(:servermsg, "Username changed, please log back in", msg_id, state)
+    send(self(), :terminate)
+    state
+  end
+
+  defp do_handle("RESETPASSWORDREQUEST", email, msg_id, state) do
+    case state.user == nil or email == state.user.email do
+      true ->
+        user = User.get_user_by_email(email)
+
+        case user do
+          nil ->
+            reply(:reset_password_request_denied, "user error", msg_id, state)
+
+          _ ->
+            User.request_password_reset(user)
+            reply(:reset_password_request_accepted, nil, msg_id, state)
+        end
+
+      false ->
+        # They have requested a password reset for a different user?
+        reply(:reset_password_request_denied, "data error", msg_id, state)
+    end
+
+    state
+  end
+
+  defp do_handle("RESETPASSWORD", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
+      [_, email, code] ->
+        user = User.get_user_by_email(email)
+
+        cond do
+          user == nil ->
+            reply(:reset_password_actual_denied, "no_user", msg_id, state)
+
+          user.password_reset_code == nil ->
+            reply(:reset_password_actual_denied, "no_code", msg_id, state)
+
+          state.userid != nil and state.userid != user.id ->
+            reply(:reset_password_actual_denied, "wrong_user", msg_id, state)
+
+          true ->
+            case User.reset_password(user, code) do
+              :ok ->
+                reply(:reset_password_actual_accepted, "no_code", msg_id, state)
+
+              :error ->
+                reply(:reset_password_actual_denied, "wrong_code", msg_id, state)
+            end
+        end
+
+      _ ->
+        _no_match(state, "RESETPASSWORD", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("CHANGEEMAILREQUEST", new_email, msg_id, state) do
+    new_user = User.request_email_change(state.user, new_email)
+    case new_user do
+      nil ->
+        reply(:change_email_request_denied, "no user", msg_id, state)
+        state
+
+      _ ->
+        reply(:change_email_request_accepted, nil, msg_id, state)
+        %{state | user: new_user}
+    end
+  end
+
+  defp do_handle("CHANGEEMAIL", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
+      [_, new_email, supplied_code] ->
+        [correct_code, expected_email] = state.user.email_change_code
+
+        cond do
+          correct_code != supplied_code ->
+            reply(:change_email_request_denied, "bad code", msg_id, state)
+            state
+
+          new_email != expected_email ->
+            reply(:change_email_request_denied, "bad email", msg_id, state)
+            state
+
+          true ->
+            new_user = User.change_email(state.user, new_email)
+            reply(:change_email_request_accepted, nil, msg_id, state)
+            %{state | user: new_user}
+        end
+
+      _ ->
+        _no_match(state, "CHANGEEMAIL", msg_id, data)
+    end
+  end
+
+  defp do_handle("EXIT", _reason, msg_id, state) do
+    Client.disconnect(state.userid)
+    send(self(), :terminate)
+    state
+  end
+
+  defp do_handle("GETUSERINFO", _, msg_id, state) do
+    ingame_hours = state.user.ingame_seconds
+
+    [
+      "Registration date: #{date_to_str(state.user.inserted_at, :ymd_hms)}",
+      "Email address: #{state.user.email}",
+      "Ingame time: #{ingame_hours}"
+    ]
+    |> Enum.each(fn msg ->
+      reply(:servermsg, msg, msg_id, state)
+    end)
+
+    state
+  end
+
+  defp do_handle("CHANGEPASSWORD", data, msg_id, state) do
+    case Regex.run(~r/(\w+)\t(\w+)/, data) do
+      [_, plain_old_password, plain_new_password] ->
+        case User.test_password(
+               User.encrypt_password(plain_old_password),
+               state.user.password_hash
+             ) do
+          false ->
+            reply(:servermsg, "Current password entered incorrectly", msg_id, state)
+
+          true ->
+            encrypted_new_password = User.encrypt_password(plain_new_password)
+            new_user = %{state.user | password_hash: encrypted_new_password}
+            User.update_user(new_user)
+
+            reply(
+              :servermsg,
+              "Password changed, you will need to use it next time you login",
+              msg_id,
+              state
+            )
+        end
+
+      _ ->
+        _no_match(state, "CHANGEPASSWORD", msg_id, data)
+    end
+
+    state
+  end
+
+  # Friend list
+  defp do_handle("FRIENDLIST", _, msg_id, state), do: reply(:friendlist, state.user, msg_id, state)
+  defp do_handle("FRIENDREQUESTLIST", _, msg_id, state), do: reply(:friendlist_request, state.user, msg_id, state)
+
+  defp do_handle("UNFRIEND", data, msg_id, state) do
+    [_, username] = String.split(data, "=")
+    new_user = User.remove_friend(state.userid, User.get_userid(username))
+    %{state | user: new_user}
+  end
+
+  defp do_handle("ACCEPTFRIENDREQUEST", data, msg_id, state) do
+    [_, username] = String.split(data, "=")
+    new_user = User.accept_friend_request(User.get_userid(username), state.userid)
+    %{state | user: new_user}
+  end
+
+  defp do_handle("DECLINEFRIENDREQUEST", data, msg_id, state) do
+    [_, username] = String.split(data, "=")
+    new_user = User.decline_friend_request(User.get_userid(username), state.userid)
+    %{state | user: new_user}
+  end
+
+  defp do_handle("FRIENDREQUEST", data, msg_id, state) do
+    [_, username] = String.split(data, "=")
+    User.create_friend_request(state.userid, User.get_userid(username))
+    state
+  end
+
+  defp do_handle("IGNORE", data, msg_id, state) do
+    [_, username] = String.split(data, "=")
+    User.ignore_user(state.userid, User.get_userid(username))
+    state
+  end
+
+  defp do_handle("UNIGNORE", data, msg_id, state) do
+    [_, username] = String.split(data, "=")
+    User.unignore_user(state.userid, User.get_userid(username))
+    state
+  end
+
+  defp do_handle("IGNORELIST", _, msg_id, state), do: reply(:ignorelist, state.user, msg_id, state)
+
+  # Chat related
+  defp do_handle("JOIN", data, msg_id, state) do
+    case Regex.run(~r/(\w+)(?:\t)?(\w+)?/, data) do
+      [_, room_name] ->
+        room = Room.get_or_make_room(room_name, state.userid)
+        Room.add_user_to_room(state.userid, room_name)
+        reply(:join_success, room_name, msg_id, state)
+        reply(:joined_room, {state.username, room_name}, msg_id, state)
+
+        author_name = User.get_username(room.author_id)
+        reply(:channel_topic, {room_name, author_name}, msg_id, state)
+
+        members =
+          room.members
+          |> Enum.map(fn m -> User.get_username(m) end)
+          |> List.insert_at(0, state.username)
+          |> Enum.join(" ")
+
+        reply(:channel_members, {members, room_name}, msg_id, state)
+
+        :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
+
+      [_, room_name, _key] ->
+        reply(:join_failure, {room_name, "Locked"}, msg_id, state)
+
+      _ ->
+        _no_match(state, "JOIN", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("LEAVE", room_name, msg_id, state) do
+    PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
+    reply(:left_room, {state.username, room_name}, msg_id, state)
+    Room.remove_user_from_room(state.userid, room_name)
+    state
+  end
+
+  defp do_handle("CHANNELS", _, msg_id, state) do
+    reply(:list_channels, nil, msg_id, state)
+  end
+
+  defp do_handle("SAY", data, msg_id, state) do
+    case Regex.run(~r/(\w+) (.+)/, data) do
+      [_, room_name, msg] ->
+        Room.send_message(state.userid, room_name, msg)
+
+      _ ->
+        _no_match(state, "SAY", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("SAYEX", data, msg_id, state) do
+    case Regex.run(~r/(\w+) (.+)/, data) do
+      [_, room_name, msg] ->
+        Room.send_message_ex(state.userid, room_name, msg)
+
+      _ ->
+        _no_match(state, "SAY", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("SAYPRIVATE", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (.+)/, data) do
+      [_, to_name, msg] ->
+        reply(:direct_message, {state.userid, msg, state.user}, msg_id, state)
+
+      _ ->
+        _no_match(state, "SAYPRIVATE", msg_id, data)
+    end
+
+    state
+  end
+
+  # Battles
+  # OPENBATTLE type natType password port maxPlayers gameHash rank mapHash {engineName} {engineVersion} {map} {title} {gameName}
+  defp do_handle("OPENBATTLE", data, msg_id, state) do
+    response =
+      case Regex.run(
+             ~r/^(\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) ([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t(.+)$/,
+             data
+           ) do
+        [
+          _,
+          type,
+          nattype,
+          _password,
+          port,
+          max_players,
+          game_hash,
+          _rank,
+          map_hash,
+          engine_name,
+          engine_version,
+          map_name,
+          name,
+          game_name
+        ] ->
+          nattype =
+            case nattype do
+              "0" -> :none
+              "1" -> :holepunch
+              "2" -> :fixed
+            end
+
+          battle =
+            %{
+              founder_id: state.userid,
+              founder_name: state.name,
+              name: name,
+              type: if(type == "0", do: :normal, else: :replay),
+              nattype: nattype,
+              port: port,
+              max_players: int_parse(max_players),
+              game_hash: game_hash,
+              map_hash: map_hash,
+              password: nil,
+              rank: 0,
+              locked: false,
+              engine_name: engine_name,
+              engine_version: engine_version,
+              map_name: map_name,
+              game_name: game_name,
+              ip: state.client.ip
+            }
+            |> Battle.create_battle()
+            |> Battle.add_battle()
+
+          {:success, battle}
+
+        nil ->
+          _no_match(state, "OPENBATTLE", msg_id, data)
+          {:failure, "No match"}
+      end
+
+    case response do
+      {:success, battle} ->
+        reply(:battle_opened, battle.id, msg_id, state)
+        reply(:open_battle_success, battle.id, msg_id, state)
+        PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
+
+        reply(:join_battle, battle, msg_id, state)
+
+        # Send information about the battle to them
+        reply(:add_script_tags, battle.tags, msg_id, state)
+        battle.start_rectangles
+        |> Enum.each(fn {team, r} ->
+          reply(:add_start_rectangle, {team, r}, msg_id, state)
+        end)
+
+        # They are offered the chance to give a battle status
+        reply(:request_battle_status, nil, msg_id, state)
+
+        # Update the client
+        Client.join_battle(state.userid, battle.id)
+
+        # Update local state to point to this battle and say
+        # we are the host
+        %{state | battle_id: battle.id, battle_host: true}
+
+      {:failure, reason} ->
+        reply(:open_battle_failure, reason, msg_id, state)
+        state
+    end
+  end
+
+  defp do_handle("JOINBATTLE", data, msg_id, state) do
+    response =
+      case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
+        [_, battle_id, _password, _script_password] ->
+          Battle.can_join?(state.user, battle_id)
+
+        nil ->
+          {:failure, "No match"}
+      end
+
+    case response do
+      {:success, battle} ->
+        Logger.info("JOINBATTLE - #{state.userid} joins #{battle.id}")
+        PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
+        Battle.add_user_to_battle(state.userid, battle.id)
+        reply(:join_battle_success, battle, msg_id, state)
+        reply(:add_script_tags, battle.tags, msg_id, state)
+
+        battle.players
+        |> Enum.each(fn id ->
+          client = Client.get_client_by_id(id)
+          reply(:client_battlestatus, client, msg_id, state)
+        end)
+
+        battle.bots
+        |> Enum.each(fn {_botname, bot} ->
+          reply(:add_bot_to_battle, {battle.id, bot}, msg_id, state)
+        end)
+
+        reply(:client_battlestatus, state.client, msg_id, state)
+
+        battle.start_rectangles
+        |> Enum.each(fn {team, r} ->
+          reply(:add_start_rectangle, {team, r}, msg_id, state)
+        end)
+
+        reply(:request_battle_status, nil, msg_id, state)
+
+        %{state | battle_id: battle.id}
+
+      {:failure, "No match"} ->
+        _no_match(state, "JOINBATTLE", msg_id, data)
+
+      {:failure, reason} ->
+        reply(:join_battle_failure, reason, msg_id, state)
+        state
+    end
+  end
+
+  defp do_handle("HANDICAP", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (\d+)/, data) do
+      [_, username, value] ->
+        client_id = User.get_userid(username)
+        value = int_parse(value)
+        result = Battle.force_change_client(state.userid, client_id, :handicap, value)
+
+      _ ->
+        _no_match(state, "HANDICAP", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("ADDSTARTRECT", data, msg_id, state) do
+    case Regex.run(~r/(\d+) (\d+) (\d+) (\d+) (\d+)/, data) do
+      [_, team, left, top, right, bottom] ->
+        if Battle.allow?(state.userid, :addstartrect, state.battle_id) do
+          Battle.add_start_rectangle(state.battle_id, [team, left, top, right, bottom])
+        end
+
+      _ ->
+        _no_match(state, "ADDSTARTRECT", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("REMOVESTARTRECT", team, msg_id, state) do
+    if Battle.allow?(state.userid, :removestartrect, state.battle_id) do
+      Battle.remove_start_rectangle(state.battle_id, team)
+    end
+    state
+  end
+
+  defp do_handle("SETSCRIPTTAGS", data, msg_id, state) do
+    if Battle.allow?(state.userid, :setscripttags, state.battle_id) do
+      tags =
+        data
+        |> String.split("\t")
+        |> Enum.filter(fn t ->
+          flag = String.contains?(t, "=")
+          if flag != true, do: Logger.error("error in SETSCRIPTTAGS, = not found in tag: #{data}")
+          flag
+        end)
+        |> Map.new(fn t ->
+          [k, v] = String.split(t, "=")
+          {String.downcase(k), v}
+        end)
+
+      Battle.set_script_tags(state.battle_id, tags)
+    end
+
+    state
+  end
+
+  defp do_handle("REMOVESCRIPTTAGS", data, msg_id, state) do
+    if Battle.allow?(state.userid, :setscripttags, state.battle_id) do
+      keys =
+        data
+        |> String.downcase()
+        |> String.split("\t")
+
+      Battle.remove_script_tags(state.battle_id, keys)
+    end
+
+    state
+  end
+
+  defp do_handle("KICKFROMBATTLE", username, msg_id, state) do
+    if Battle.allow?(state.userid, :kickfrombattle, state.battle_id) do
+      userid = User.get_userid(username)
+      Battle.kick_user_from_battle(userid, state.battle_id)
+    end
+
+    state
+  end
+
+  defp do_handle("FORCETEAMNO", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
+      [_, username, team_number] ->
+        client_id = User.get_userid(username)
+        value = int_parse(team_number)
+        result = Battle.force_change_client(state.userid, client_id, :team_number, value)
+
+      _ ->
+        _no_match(state, "FORCETEAMNO", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("FORCEALLYNO", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
+      [_, username, ally_team_number] ->
+        client_id = User.get_userid(username)
+        value = int_parse(ally_team_number)
+        result = Battle.force_change_client(state.userid, client_id, :ally_team_number, value)
+
+      _ ->
+        _no_match(state, "FORCEALLYNO", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("FORCETEAMCOLOR", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
+      [_, username, team_colour] ->
+        client_id = User.get_userid(username)
+        value = int_parse(team_colour)
+        result = Battle.force_change_client(state.userid, client_id, :team_colour, value)
+
+      _ ->
+        _no_match(state, "FORCETEAMCOLOR", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("FORCESPECTATORMODE", username, msg_id, state) do
+    client_id = User.get_userid(username)
+    result = Battle.force_change_client(state.userid, client_id, :player, false)
+
+    state
+  end
+
+  defp do_handle("DISABLEUNITS", data, msg_id, state) do
+    if Battle.allow?(state.userid, :disableunits, state.battle_id) do
+      units = String.split(data, " ")
+      Battle.disable_units(state.battle_id, units)
+    end
+
+    state
+  end
+
+  defp do_handle("ENABLEUNITS", data, msg_id, state) do
+    if Battle.allow?(state.userid, :enableunits, state.battle_id) do
+      units = String.split(data, " ")
+      Battle.enable_units(state.battle_id, units)
+    end
+
+    state
+  end
+
+  defp do_handle("ENABLEALLUNITS", _data, msg_id, state) do
+    if Battle.allow?(state.userid, :enableallunits, state.battle_id) do
+      Battle.enable_all_units(state.battle_id)
+    end
+
+    state
+  end
+
+  defp do_handle("ADDBOT", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (\d+) (\d+) (\S+)/, data) do
+      [_, name, battlestatus, team_colour, ai_dll] ->
+        if Battle.allow?(state.userid, :add_bot, state.battle_id) do
+          bot_data =
+            Battle.new_bot(
+              Map.merge(
+                %{
+                  name: name,
+                  owner_name: state.username,
+                  owner_id: state.userid,
+                  team_colour: team_colour,
+                  ai_dll: ai_dll
+                },
+                SpringLib.parse_battle_status(battlestatus)
+              )
+            )
+
+          Battle.add_bot_to_battle(
+            state.battle_id,
+            bot_data
+          )
+        end
+
+      _ ->
+        _no_match(state, "ADDBOT", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("UPDATEBOT", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
+      [_, name, battlestatus, team_colour] ->
+        if Battle.allow?(state.userid, :update_bot, state.battle_id) do
+          new_bot =
+            Map.merge(
+              %{
+                team_colour: team_colour
+              },
+              SpringLib.parse_battle_status(battlestatus)
+            )
+
+          Battle.update_bot(state.battle_id, name, new_bot)
+        end
+
+      _ ->
+        _no_match(state, "UPDATEBOT", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("REMOVEBOT", botname, msg_id, state) do
+    if Battle.allow?(state.userid, :remove_bot, state.battle_id) do
+      Battle.remove_bot(state.battle_id, botname)
+    end
+
+    state
+  end
+
+  defp do_handle("SAYBATTLE", msg, msg_id, state) do
+    if Battle.allow?(state.userid, :saybattle, state.battle_id) do
+      Battle.say(state.userid, msg, state.battle_id)
+    end
+
+    state
+  end
+
+  defp do_handle("SAYBATTLEEX", msg, msg_id, state) do
+    if Battle.allow?(state.userid, :saybattleex, state.battle_id) do
+      Battle.sayex(state.userid, msg, state.battle_id)
+    end
+
+    state
+  end
+
+  # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#UPDATEBATTLEINFO:client
+  defp do_handle("UPDATEBATTLEINFO", data, msg_id, state) do
+    case Regex.run(~r/(\d+) (\d+) (\S+) (.+)$/, data) do
+      [_, spectator_count, locked, map_hash, map_name] ->
+        if Battle.allow?(state.userid, :updatebattleinfo, state.battle_id) do
+          battle = Battle.get_battle(state.battle_id)
+
+          new_battle = %{
+            battle
+            | spectator_count: int_parse(spectator_count),
+              locked: locked == "1",
+              map_hash: map_hash,
+              map_name: map_name
+          }
+
+          Battle.update_battle(
+            new_battle,
+            {spectator_count, locked, map_hash, map_name},
+            :update_battle_info
+          )
+        end
+
+      _ ->
+        _no_match(state, "UPDATEBATTLEINFO", msg_id, data)
+    end
+
+    state
+  end
+
+  defp do_handle("LEAVEBATTLE", _, msg_id, %{client: %{battle_id: nil}} = state) do
+    Battle.remove_user_from_any_battle(state.userid)
+    |> Enum.each(fn b ->
+      Logger.info("LEAVEBATTLE (noid) - #{state.userid} left battle #{b}")
+      PubSub.unsubscribe(Central.PubSub, "battle_updates:#{b}")
+    end)
+
+    %{state | battle_host: false}
+  end
+
+  defp do_handle("LEAVEBATTLE", _, msg_id, state) do
+    Logger.info("LEAVEBATTLE - #{state.userid} left battle #{state.battle_id}")
+    PubSub.unsubscribe(Central.PubSub, "battle_updates:#{state.battle_id}")
+    reply(:remove_user_from_battle, {state.userid, state.battle_id}, msg_id, state)
+    Battle.remove_user_from_battle(state.userid, state.battle_id)
+    %{state | battle_host: false}
+  end
+
+  defp do_handle("MYBATTLESTATUS", _, %{client: %{battle_id: nil}} = state), do: state
+
+  defp do_handle("MYBATTLESTATUS", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (.+)/, data) do
+      [_, battlestatus, team_colour] ->
+        updates =
+          SpringLib.parse_battle_status(battlestatus)
+          |> Map.take([:ready, :team_number, :ally_team_number, :player, :sync, :side])
+
+        new_client =
+          state.client
+          |> Map.merge(updates)
+          |> Map.put(:team_colour, team_colour)
+
+        # This one needs a bit more nuance, for now we'll wrap it in this
+        if Battle.allow?(state.userid, :mybattlestatus, state.battle_id) do
+          Client.update(new_client, :client_updated_battlestatus)
+        end
+
+      _ ->
+        _no_match(state, "MYBATTLESTATUS", msg_id, data)
+    end
+
+    state
+  end
+
+  # MISC
+  defp do_handle("PING", _, msg_id, state) do
+    reply(:pong, nil, msg_id, state)
+    state
+  end
+
+  defp do_handle("RING", username, msg_id, state) do
+    userid = User.get_userid(username)
+    User.ring(userid, state.userid)
+    state
+  end
+
+  # Not handled catcher
+  defp do_handle(cmd, data, msg_id, state) do
+    _no_match(state, cmd, msg_id, data)
+  end
+
+  @spec _no_match(map(), string(), string(), map()) :: map()
+  defp _no_match(state, cmd, msg_id, data) do
+    data =
+      data
+      |> String.replace("\t", "\\t")
+
+    msg = "No incomming match for #{cmd} with data '#{data}'"
+    Logger.error(msg)
+    reply(:servermsg, msg, msg_id, state)
+    state
+  end
+
+  @spec do_login_accepted(map(), map(), string() | nil) :: map()
+  defp do_login_accepted(state, user, msg_id) do
+    # Login the client
+    client = Client.login(user, self())
+
+    :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
+
+    # Who is online?
+    # skip ourselves because that will result in a double ADDUSER
+    clients = Client.list_client_ids()
+
+    # ADDUSER entries
+    clients
+    |> Enum.each(fn userid ->
+      send(self(), {:user_logged_in, userid})
+    end)
+
+    # Battle entry commands
+    # Once we know this is stable we can consider optimising it to not
+    # need to send() to self a few dozen times
+    Battle.list_battle_ids()
+    |> Enum.each(fn battle_id ->
+      send(self(), {:global_battle_updated, battle_id, :battle_opened})
+      send(self(), {:global_battle_updated, battle_id, :update_battle_info})
+
+      battle = Battle.get_battle(battle_id)
+      battle.players
+      |> Enum.each(fn player_id ->
+        send(self(), {:add_user_to_battle, player_id, battle_id})
+      end)
+    end)
+
+    # Client status messages
+    clients
+    |> Enum.map(fn client_id ->
+      send(self(), {:updated_client, Client.get_client(client_id), :client_updated_status})
+    end)
+
+    reply(:login_end, nil, msg_id, state)
+    :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
+    %{state |
+      user: user,
+      username: user.name,
+      userid: user.id}
+  end
+
+  @spec deny(map(), string()) :: map()
+  defp deny(state, msg_id) do
+    reply(:servermsg, "You do not have permission to execute that command", msg_id, state)
+    state
+  end
+end

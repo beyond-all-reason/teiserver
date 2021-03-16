@@ -334,19 +334,22 @@ defmodule Teiserver.Battle do
 
   # Start rects
   def add_start_rectangle(battle_id, [team, a, b, c, d]) do
+    [team, a, b, c, d] = int_parse([team, a, b, c, d])
+
     battle = get_battle(battle_id)
     new_rectangles = Map.put(battle.start_rectangles, team, [a, b, c, d])
     new_battle = %{battle | start_rectangles: new_rectangles}
     update_battle(new_battle, {team, [a, b, c, d]}, :add_start_rectangle)
   end
 
-  def remove_start_rectangle(battle_id, team) do
+  def remove_start_rectangle(battle_id, team_id) do
     battle = get_battle(battle_id)
+    team_id = int_parse(team_id)
 
-    new_rectangles = Map.delete(battle.start_rectangles, team)
+    new_rectangles = Map.delete(battle.start_rectangles, team_id)
 
     new_battle = %{battle | start_rectangles: new_rectangles}
-    update_battle(new_battle, team, :remove_start_rectangle)
+    update_battle(new_battle, team_id, :remove_start_rectangle)
   end
 
   # Unit enabling
@@ -424,15 +427,42 @@ defmodule Teiserver.Battle do
     )
   end
 
-  def allow?(cmd, %{user: user, client: %{battle_id: battle_id}}),
-    do: allow?(user, cmd, battle_id)
+  def force_change_client(_, nil, _, _), do: nil
+  def force_change_client(changer_id, client_id, field, new_value) do
+    changer = Client.get_client_by_id(changer_id)
+    battle = get_battle(changer)
 
-  def allow?(user, cmd, battle_id) do
-    battle = get_battle(battle_id)
+    if allow?(changer, field, battle) do
+      client = Client.get_client_by_id(client_id)
+      change_client_battle_status(client, field, new_value)
+    end
+  end
 
-    mod_command =
-      Enum.member?(
-        ~w(HANDICAP UPDATEBATTLEINFO ADDSTARTRECT REMOVESTARTRECT KICKFROMBATTLE FORCETEAMNO FORCEALLYNO FORCETEAMCOLOR FORCESPECTATORMODE DISABLEUNITS ENABLEUNITS ENABLEALLUNITS),
+  def change_client_battle_status(nil, _, _), do: nil
+  def change_client_battle_status(client, field, new_value) do
+    client = Map.put(client, field, new_value)
+    Client.update(client, :client_updated_battlestatus)
+  end
+
+  def allow?(nil, _, _), do: false
+  def allow?(_, nil, _), do: false
+  def allow?(_, _, nil), do: false
+  def allow?(changer, field, battle_id) when is_integer(battle_id), do:
+    allow?(changer, field, get_battle(battle_id))
+
+  def allow?(changer_id, field, battle) when is_integer(changer_id), do:
+    allow?(Client.get_client_by_id(changer_id), field, battle)
+
+  def allow?(changer, cmd, battle) do
+   mod_command =
+      Enum.member?([
+        :handicap, :updatebattleinfo, :addstartrect, :removestartrect, :kickfrombattle, :team_number, :ally_team_number, :team_number, :player, :disableunits, :enableunits, :enableallunits],
+        cmd
+      )
+
+    founder_command = Enum.member?([
+          :updatebattleinfo
+        ],
         cmd
       )
 
@@ -440,10 +470,13 @@ defmodule Teiserver.Battle do
       battle == nil ->
         false
 
-      battle.founder_id == user.id ->
+      battle.founder_id == changer.id ->
         true
 
-      user.moderator == true ->
+      founder_command == true ->
+        false
+
+      changer.moderator == true ->
         true
 
       # If they're not a moderator/founder then they can't
@@ -457,6 +490,10 @@ defmodule Teiserver.Battle do
       true ->
         true
     end
+  end
+
+  def list_battle_ids() do
+    ConCache.get(:lists, :battles)
   end
 
   def list_battles() do

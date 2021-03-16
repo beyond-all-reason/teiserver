@@ -418,7 +418,6 @@ ENDOFCHANNELS\n"
     # Give mod access, recache the user
     User.update_user(%{user | moderator: true})
     :timer.sleep(100)
-    _send(socket, "RECACHE\n")
 
     _send(socket, "CREATEBOTACCOUNT test_bot_account #{user.name}\n")
     reply = _recv(socket)

@@ -48,3 +48,7 @@ If all players ready up the game is created. If any players fail to ready up in 
 - name: String
 - team size: Integer
 - maps: List(String)
+
+### Other features to consider
+- ZK and FAF have the ability to let you know you'd instant match with someone in a queue. Sort of like a passive search with the ability to make it active and resolve instantly.
+- 

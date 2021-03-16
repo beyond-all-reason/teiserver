@@ -10,6 +10,9 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 - Real player based test
 - Gathering v1.0 requirements
 
+### Roadmap to v1.0
+- Convert chat rooms to use the new per-client Genserver cache for member
+
 ### Post parity todo (in no particular order)
 - [Matchmaking](documents/spring/matchmaking.md)
 - [Parties](documents/spring/parties.md)

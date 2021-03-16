@@ -30,13 +30,12 @@ defmodule Teiserver.Client do
     )
   end
 
-  def login(user, pid, protocol) do
+  def login(user, pid) do
     client =
       create(%{
         userid: user.id,
         name: user.name,
         pid: pid,
-        protocol: protocol,
         rank: user.rank,
         moderator: user.moderator,
         bot: user.bot,
@@ -76,13 +75,13 @@ defmodule Teiserver.Client do
     client
   end
 
-  def join_battle(userid, battle_id) do
+  def join_battle(userid, battle_id, colour \\ 0) do
     case get_client_by_id(userid) do
       nil ->
         nil
 
       client ->
-        new_client = %{client | team_colour: 0, battle_id: battle_id}
+        new_client = %{client | team_colour: colour, battle_id: battle_id}
         ConCache.put(:clients, new_client.userid, new_client)
         new_client
     end
