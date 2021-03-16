@@ -118,7 +118,7 @@ defmodule Teiserver.SpringRawTest do
     )
 
     reply = _recv(socket)
-    assert reply =~ "RESETPASSWORDREQUESTDENIED error\n"
+    assert reply =~ "RESETPASSWORDREQUESTDENIED user error\n"
 
     # Send the correct request
     _send(

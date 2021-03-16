@@ -266,7 +266,7 @@ defmodule Teiserver.Protocols.SpringOut do
     "CLIENTBATTLESTATUS #{client.name} #{status} #{client.team_colour}\n"
   end
 
-  defp do_reply(:user_logged_in, {userid, _username}) do
+  defp do_reply(:user_logged_in, userid) do
     user = User.get_user_by_id(userid)
 
     [
@@ -430,7 +430,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(atom, data) do
     Logger.error(
-      "No reply match in spring.ex for atom: #{atom} and data: #{Kernel.inspect(data)}"
+      "No reply match in spring_out.ex for atom: #{atom} and data: #{Kernel.inspect(data)}"
     )
 
     ""

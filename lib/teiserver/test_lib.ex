@@ -104,7 +104,7 @@ defmodule Teiserver.TestLib do
   def mock_state_auth(protocol, socket \\ nil) do
     socket = if socket, do: socket, else: mock_socket()
     user = new_user()
-    client = Client.login(user, self(), protocol)
+    client = Client.login(user, self())
 
     %{
       userid: user.id,

@@ -232,7 +232,7 @@ defmodule Teiserver.Protocols.SpringIn do
         Map.put(state, :unverified_id, userid)
 
       {:ok, user} ->
-        do_login_accepted(state, user, msg_id)
+        do_login_accepted(state, user)
 
       {:error, reason} ->
         Logger.debug("[command:login] denied with reason #{reason}")
@@ -351,7 +351,7 @@ defmodule Teiserver.Protocols.SpringIn do
           true ->
             case User.reset_password(user, code) do
               :ok ->
-                reply(:reset_password_actual_accepted, "no_code", msg_id, state)
+                reply(:reset_password_actual_accepted, nil, msg_id, state)
 
               :error ->
                 reply(:reset_password_actual_denied, "wrong_code", msg_id, state)
@@ -1050,8 +1050,8 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
-  @spec do_login_accepted(map(), map(), String.t() | nil) :: map()
-  defp do_login_accepted(state, user, msg_id) do
+  @spec do_login_accepted(map(), map()) :: map()
+  defp do_login_accepted(state, user) do
     # Login the client
     _client = Client.login(user, self())
 
@@ -1085,12 +1085,13 @@ defmodule Teiserver.Protocols.SpringIn do
     end)
 
     # Client status messages
-    clients
-    |> Enum.map(fn client_id ->
-      send(self(), {:updated_client, Client.get_client_by_id(client_id), :client_updated_status})
-    end)
+    # Currently handled by the :user_logged_in send earlier, might need to refactor slightly
+    # clients
+    # |> Enum.map(fn client_id ->
+    #   send(self(), {:updated_client, Client.get_client_by_id(client_id), :client_updated_status})
+    # end)
 
-    reply(:login_end, nil, msg_id, state)
+    send(self(), {:action, {:login_end, nil}})
     :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
     %{state |
       user: user,

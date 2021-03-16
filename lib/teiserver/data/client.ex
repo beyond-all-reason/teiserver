@@ -172,6 +172,8 @@ defmodule Teiserver.Client do
     spawn(fn -> User.logout(client.userid) end)
 
     Logger.info("Logging out user #{client.userid} - PUBSUB")
+    # Typically we would only send the username but it is possible they just changed their username
+    # and as such we need to tell the system what username is logging out
     PubSub.broadcast(Central.PubSub, "all_user_updates", {:user_logged_out, client.userid, client.name})
     ConCache.delete(:clients, client.userid)
 

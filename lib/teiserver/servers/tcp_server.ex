@@ -140,6 +140,11 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  # Email, when an email is sent we get a message, we don't care about that for the most part (yet)
+  def handle_info({:delivered_email, _email}, state) do
+    {:noreply, state}
+  end
+
   # Heartbeat allows us to kill stale connections
   def handle_info(:heartbeat, state) do
     diff = System.system_time(:second) - state.last_msg
@@ -162,11 +167,11 @@ defmodule Teiserver.TcpServer do
   end
 
   # Some logic because if we're the one logged out we need to disconnect
-  def handle_info({:user_logged_out, userid}, state) do
+  def handle_info({:user_logged_out, userid, username}, state) do
     if state.userid == userid do
       {:stop, :normal, state}
     else
-      new_state = user_logged_out(userid, state)
+      new_state = user_logged_out({userid, username}, state)
       {:noreply, new_state}
     end
   end
@@ -310,23 +315,23 @@ defmodule Teiserver.TcpServer do
 
   # User updates
   defp user_logged_in(userid, state) do
-    known_users = case Enum.member?(userid, state.known_users) do
-      false ->
+    known_users = case state.known_users[userid] do
+      nil ->
         state.protocol_out.reply(:user_logged_in, userid, nil, state)
         Map.put(state.known_users, userid, _blank_user(userid))
-      true ->
+      _ ->
         state.known_users
     end
     %{state | known_users: known_users}
   end
 
   defp user_logged_out(userid, state) do
-    known_users = case Enum.member?(userid, state.known_users) do
-      true ->
+    known_users = case state.known_users[userid] do
+      nil ->
+        state.known_users
+      _ ->
         state.protocol_out.reply(:user_logged_out, userid, nil, state)
         Map.put(state.known_users, userid, _blank_user(userid))
-      false ->
-        state.known_users
     end
     %{state | known_users: known_users}
   end
@@ -530,6 +535,9 @@ defmodule Teiserver.TcpServer do
 
       :welcome ->
         state.protocol_out.reply(:welcome, nil, nil, state)
+
+      :login_end ->
+        state.protocol_out.reply(:login_end, nil, nil, state)
 
       _ ->
         Logger.error("No handler in tcp_server:do_action with action #{action_type}")

@@ -544,10 +544,10 @@ defmodule Teiserver.User do
     user = %{user | ip: ip, lobbyid: lobbyid, country: country, last_login: last_login}
     update_user(user, persist: true)
 
-    proto = state.protocol
+    proto = state.protocol_out
 
-    proto.reply(:login_accepted, user.name, state)
-    proto.reply(:motd, nil, state)
+    proto.reply(:login_accepted, user.name, nil, state)
+    proto.reply(:motd, nil, nil, state)
 
     {:ok, user}
   end
