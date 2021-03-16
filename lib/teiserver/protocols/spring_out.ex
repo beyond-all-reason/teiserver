@@ -10,11 +10,7 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Teiserver.Battle
   alias Teiserver.Room
   alias Teiserver.User
-  alias Phoenix.PubSub
-  alias Teiserver.BitParse
   alias Teiserver.TcpServer
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   alias Teiserver.Protocols.SpringLib
 
   @motd """
@@ -24,7 +20,7 @@ defmodule Teiserver.Protocols.SpringOut do
   ---------
   """
 
-  @spec reply(atom(), nil | String.t() | tuple() | list(), string(), map) :: map
+  @spec reply(atom(), nil | String.t() | tuple() | list(), String.t(), map) :: map
   def reply(reply_cmd, data, msg_id, state) do
     msg = do_reply(reply_cmd, data)
     _send(msg, msg_id, state)
@@ -362,6 +358,11 @@ defmodule Teiserver.Protocols.SpringOut do
     |> Enum.join("")
   end
 
+  defp do_reply(:sent_direct_message, {to_id, msg}) do
+    to_name = User.get_username(to_id)
+    "SAYPRIVATE #{to_name} #{msg}\n"
+  end
+
   defp do_reply(:direct_message, {from_id, msg, state_user}) do
     if from_id not in (state_user.ignored || []) do
       from_name = User.get_username(from_id)
@@ -436,7 +437,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   # This sends a message to the self to send out a message
-  @spec _send(String.t() | list(), string(), map) :: any()
+  @spec _send(String.t() | list(), String.t(), map) :: any()
   defp _send(msg, msg_id, state) do
     _send(msg, state.socket, state.transport, msg_id)
   end

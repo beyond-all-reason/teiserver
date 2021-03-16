@@ -131,11 +131,13 @@ defmodule Teiserver.TcpServer do
 
   # Main source of data ingress
   def handle_info({:tcp, _socket, data}, state) do
-    data_in(data, state)
+    new_state = data_in(data, state)
+    {:noreply, new_state}
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    data_in(data, state)
+    new_state = data_in(data, state)
+    {:noreply, new_state}
   end
 
   # Heartbeat allows us to kill stale connections
@@ -310,7 +312,7 @@ defmodule Teiserver.TcpServer do
   defp user_logged_in(userid, state) do
     known_users = case Enum.member?(userid, state.known_users) do
       false ->
-        state.protocol_out.reply(:user_logged_in, userid, state)
+        state.protocol_out.reply(:user_logged_in, userid, nil, state)
         Map.put(state.known_users, userid, _blank_user(userid))
       true ->
         state.known_users
@@ -321,7 +323,7 @@ defmodule Teiserver.TcpServer do
   defp user_logged_out(userid, state) do
     known_users = case Enum.member?(userid, state.known_users) do
       true ->
-        state.protocol_out.reply(:user_logged_out, userid, state)
+        state.protocol_out.reply(:user_logged_out, userid, nil, state)
         Map.put(state.known_users, userid, _blank_user(userid))
       false ->
         state.known_users
@@ -337,11 +339,11 @@ defmodule Teiserver.TcpServer do
     |> Enum.each(fn field ->
       case field do
         :friends ->
-          state.protocol_out.reply(:friendlist, new_user, state)
+          state.protocol_out.reply(:friendlist, new_user, nil, state)
         :friend_requests ->
-          state.protocol_out.reply(:friendlist_request, new_user, state)
+          state.protocol_out.reply(:friendlist_request, new_user, nil, state)
         :ignored ->
-          state.protocol_out.reply(:ignorelist, new_user, state)
+          state.protocol_out.reply(:ignorelist, new_user, nil, state)
         _ ->
           Logger.error("No handler in tcp_server:user_updated with field #{field}")
       end
@@ -351,13 +353,13 @@ defmodule Teiserver.TcpServer do
 
   # Client updates
   defp client_status_update(new_client, state) do
-    state.protocol_out.reply(:client_status, new_client, state)
+    state.protocol_out.reply(:client_status, new_client, nil, state)
     state
   end
 
   defp client_battlestatus_update(new_client, state) do
     if state.battle_id != nil and state.battle_id == new_client.battle_id do
-      state.protocol_out.reply(:client_battlestatus, new_client, state)
+      state.protocol_out.reply(:client_battlestatus, new_client, nil, state)
     end
     state
   end
@@ -366,42 +368,42 @@ defmodule Teiserver.TcpServer do
   defp battle_update(data, reason, state) do
     case reason do
       :add_start_rectangle ->
-        state.protocol_out.reply(:add_start_rectangle, data, state)
+        state.protocol_out.reply(:add_start_rectangle, data, nil, state)
 
       :remove_start_rectangle ->
-        state.protocol_out.reply(:remove_start_rectangle, data, state)
+        state.protocol_out.reply(:remove_start_rectangle, data, nil, state)
 
       :add_script_tags ->
-        state.protocol_out.reply(:add_script_tags, data, state)
+        state.protocol_out.reply(:add_script_tags, data, nil, state)
 
       :remove_script_tags ->
-        state.protocol_out.reply(:remove_script_tags, data, state)
+        state.protocol_out.reply(:remove_script_tags, data, nil, state)
 
       :enable_all_units ->
-        state.protocol_out.reply(:enable_all_units, data, state)
+        state.protocol_out.reply(:enable_all_units, data, nil, state)
 
       :enable_units ->
-        state.protocol_out.reply(:enable_units, data, state)
+        state.protocol_out.reply(:enable_units, data, nil, state)
 
       :disable_units ->
-        state.protocol_out.reply(:disable_units, data, state)
+        state.protocol_out.reply(:disable_units, data, nil, state)
 
       :say ->
-        state.protocol_out.reply(:battle_message, data, state)
+        state.protocol_out.reply(:battle_message, data, nil, state)
 
       :sayex ->
-        state.protocol_out.reply(:battle_message_ex, data, state)
+        state.protocol_out.reply(:battle_message_ex, data, nil, state)
 
       # TODO: Check we can't get an out of sync server-client state
       # with the bot commands
       :add_bot_to_battle ->
-        state.protocol_out.reply(:add_bot_to_battle, data, state)
+        state.protocol_out.reply(:add_bot_to_battle, data, nil, state)
 
       :update_bot ->
-        state.protocol_out.reply(:update_bot, data, state)
+        state.protocol_out.reply(:update_bot, data, nil, state)
 
       :remove_bot ->
-        state.protocol_out.reply(:remove_bot_from_battle, data, state)
+        state.protocol_out.reply(:remove_bot_from_battle, data, nil, state)
 
       _ ->
         Logger.error("No handler in tcp_server:battle_update with reason #{reason}")
@@ -413,13 +415,13 @@ defmodule Teiserver.TcpServer do
     if state.battle_id == battle_id do
       case reason do
         :update_battle_info ->
-          state.protocol_out.reply(:update_battle, battle_id, state)
+          state.protocol_out.reply(:update_battle, battle_id, nil, state)
 
         :battle_opened ->
-          state.protocol_out.reply(:battle_opened, battle_id, state)
+          state.protocol_out.reply(:battle_opened, battle_id, nil, state)
 
         :battle_closed ->
-          state.protocol_out.reply(:battle_closed, battle_id, state)
+          state.protocol_out.reply(:battle_closed, battle_id, nil, state)
 
         _ ->
           Logger.error("No handler in tcp_server:global_battle_update with reason #{reason}")
@@ -434,17 +436,17 @@ defmodule Teiserver.TcpServer do
   defp user_join_battle(userid, battle_id, state) do
     new_user = cond do
       state.known_users[userid] == nil ->
-        state.protocol_out.reply(:user_logged_in, userid, state)
-        state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, state)
+        state.protocol_out.reply(:user_logged_in, userid, nil, state)
+        state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
         _blank_user(userid, %{battle_id: battle_id})
 
       state.known_users[userid].battle_id == nil ->
-        state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, state)
+        state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
         %{state.known_users[userid] | battle_id: battle_id}
 
       state.known_users[userid].battle_id != battle_id ->
-        state.protocol_out.reply(:remove_user_from_battle, {userid, battle_id}, state)
-        state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, state)
+        state.protocol_out.reply(:remove_user_from_battle, {userid, battle_id}, nil, state)
+        state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
         %{state.known_users[userid] | battle_id: battle_id}
 
       state.known_users[userid].battle_id == battle_id ->
@@ -459,7 +461,7 @@ defmodule Teiserver.TcpServer do
   defp user_leave_battle(userid, _battle_id, state) do
     new_user = cond do
       state.known_users[userid] == nil ->
-        state.protocol_out.reply(:user_logged_in, userid, state)
+        state.protocol_out.reply(:user_logged_in, userid, nil, state)
         _blank_user(userid)
 
       state.known_users[userid].battle_id == nil ->
@@ -468,7 +470,7 @@ defmodule Teiserver.TcpServer do
 
       true ->
         # We don't care which battle we thought they are in, they're no longer in it
-        state.protocol_out.reply(:remove_user_from_battle, {userid, state.known_users[userid].battle_id}, state)
+        state.protocol_out.reply(:remove_user_from_battle, {userid, state.known_users[userid].battle_id}, nil, state)
         %{state.known_users[userid] | battle_id: nil}
     end
 
@@ -480,7 +482,7 @@ defmodule Teiserver.TcpServer do
     if state.battle_host do
       cond do
         state.known_users[userid] == nil ->
-          state.protocol_out.reply(:user_logged_in, userid, state)
+          state.protocol_out.reply(:user_logged_in, userid, nil, state)
           _blank_user(userid)
 
         state.known_users[userid].battle_id == nil ->
@@ -489,7 +491,7 @@ defmodule Teiserver.TcpServer do
 
         true ->
           # We don't care which battle we thought they are in, they're no longer in it
-          state.protocol_out.reply(:kick_user_from_battle, {userid, state.known_users[userid].battle_id}, state)
+          state.protocol_out.reply(:kick_user_from_battle, {userid, state.known_users[userid].battle_id}, nil, state)
           %{state.known_users[userid] | battle_id: nil}
       end
     else
@@ -501,22 +503,22 @@ defmodule Teiserver.TcpServer do
   defp new_chat_message(type, from, room_name, msg, state) do
     case type do
       :direct_message ->
-        state.protocol_out.reply(:direct_message, {from, msg, state.user}, state)
+        state.protocol_out.reply(:direct_message, {from, msg, state.user}, nil, state)
       :chat_message ->
-        state.protocol_out.reply(:chat_message, {from, room_name, msg, state.user}, state)
+        state.protocol_out.reply(:chat_message, {from, room_name, msg, state.user}, nil, state)
       :chat_message_ex ->
-        state.protocol_out.reply(:chat_message_ex, {from, room_name, msg, state.user}, state)
+        state.protocol_out.reply(:chat_message_ex, {from, room_name, msg, state.user}, nil, state)
     end
     state
   end
 
   defp user_join_chat_room(userid, room_name, state) do
-    state.protocol_out.reply(:add_user_to_room, {userid, room_name}, state)
+    state.protocol_out.reply(:add_user_to_room, {userid, room_name}, nil, state)
     state
   end
 
   defp user_leave_chat_room(userid, room_name, state) do
-    state.protocol_out.reply(:remove_user_from_room, {userid, room_name}, state)
+    state.protocol_out.reply(:remove_user_from_room, {userid, room_name}, nil, state)
     state
   end
 
@@ -524,10 +526,10 @@ defmodule Teiserver.TcpServer do
   defp do_action(action_type, data, state) do
     case action_type do
       :ring ->
-        state.protocol_out.reply(:ring, {data, state.userid}, state)
+        state.protocol_out.reply(:ring, {data, state.userid}, nil, state)
 
       :welcome ->
-        state.protocol_out.reply(:welcome, nil, state)
+        state.protocol_out.reply(:welcome, nil, nil, state)
 
       _ ->
         Logger.error("No handler in tcp_server:do_action with action #{action_type}")
