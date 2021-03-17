@@ -440,6 +440,9 @@ defmodule Teiserver.TcpServer do
   # genserver is incorrect and needs to alter its state accordingly
   defp user_join_battle(userid, battle_id, state) do
     new_user = cond do
+      state.userid == userid ->
+        _blank_user(userid, %{battle_id: battle_id})
+
       state.known_users[userid] == nil ->
         state.protocol_out.reply(:user_logged_in, userid, nil, state)
         state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
@@ -465,10 +468,6 @@ defmodule Teiserver.TcpServer do
 
   defp user_leave_battle(userid, _battle_id, state) do
     new_user = cond do
-      state.known_users[userid] == nil ->
-        state.protocol_out.reply(:user_logged_in, userid, nil, state)
-        _blank_user(userid)
-
       state.known_users[userid].battle_id == nil ->
         # No change
         state.known_users[userid]
@@ -522,7 +521,7 @@ defmodule Teiserver.TcpServer do
   defp do_action(action_type, data, state) do
     case action_type do
       :ring ->
-        state.protocol_out.reply(:ring, {data, state.userid}, nil, state)
+        state.protocol_out.reply(:ring, {data, state.user}, nil, state)
 
       :welcome ->
         state.protocol_out.reply(:welcome, nil, nil, state)

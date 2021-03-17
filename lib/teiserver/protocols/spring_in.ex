@@ -283,20 +283,23 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("CONFIRMAGREEMENT", _code, msg_id, state),
     do: reply(:servermsg, "You need to login before you can confirm the agreement.", msg_id, state)
 
-  defp do_handle("CREATEBOTACCOUNT", _, msg_id, %{user: %{moderator: false}} = state),
-    do: deny(state, msg_id)
-
   defp do_handle("CREATEBOTACCOUNT", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_, botname, _owner_name] ->
-        User.register_bot(botname, state.userid)
+        resp = User.register_bot(botname, state.userid)
 
-        reply(
-          :servermsg,
-          "A new bot account #{botname} has been created, with the same password as #{state.name}",
-          msg_id,
-          state
-        )
+        case resp do
+          {:error, _reason} ->
+            deny(state, msg_id)
+
+          _ ->
+            reply(
+              :servermsg,
+              "A new bot account #{botname} has been created, with the same password as #{state.username}",
+              msg_id,
+              state
+            )
+        end
 
       _ ->
         _no_match(state, "CREATEBOTACCOUNT", msg_id, data)
@@ -386,16 +389,16 @@ defmodule Teiserver.Protocols.SpringIn do
 
         cond do
           correct_code != supplied_code ->
-            reply(:change_email_request_denied, "bad code", msg_id, state)
+            reply(:change_email_denied, "bad code", msg_id, state)
             state
 
           new_email != expected_email ->
-            reply(:change_email_request_denied, "bad email", msg_id, state)
+            reply(:change_email_denied, "bad email", msg_id, state)
             state
 
           true ->
             new_user = User.change_email(state.user, new_email)
-            reply(:change_email_request_accepted, nil, msg_id, state)
+            reply(:change_email_accepted, nil, msg_id, state)
             %{state | user: new_user}
         end
 
@@ -687,6 +690,7 @@ defmodule Teiserver.Protocols.SpringIn do
         PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
         Battle.add_user_to_battle(state.userid, battle.id)
         reply(:join_battle_success, battle, msg_id, state)
+        reply(:add_user_to_battle, {state.userid, battle.id}, msg_id, state)
         reply(:add_script_tags, battle.tags, msg_id, state)
 
         battle.players
@@ -990,10 +994,9 @@ defmodule Teiserver.Protocols.SpringIn do
     %{state | battle_host: false}
   end
 
-  defp do_handle("LEAVEBATTLE", _, msg_id, state) do
+  defp do_handle("LEAVEBATTLE", _, _msg_id, state) do
     Logger.info("LEAVEBATTLE - #{state.userid} left battle #{state.battle_id}")
     PubSub.unsubscribe(Central.PubSub, "battle_updates:#{state.battle_id}")
-    reply(:remove_user_from_battle, {state.userid, state.battle_id}, msg_id, state)
     Battle.remove_user_from_battle(state.userid, state.battle_id)
     %{state | battle_host: false}
   end

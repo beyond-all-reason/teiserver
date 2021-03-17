@@ -244,7 +244,7 @@ defmodule Teiserver.SpringBattleHostTest do
     # Leave the battle
     _send(socket, "LEAVEBATTLE\n")
     reply = _recv(socket)
-    assert reply =~ "LEFTBATTLE #{battle_id} #{user.name}\n"
+    # assert reply =~ "LEFTBATTLE #{battle_id} #{user.name}\n"
     assert reply =~ "BATTLECLOSED #{battle_id}\n"
 
     _send(socket, "EXIT\n")

@@ -135,39 +135,44 @@ defmodule Teiserver.User do
   def register_bot(bot_name, bot_host_id) do
     existing_bot = get_user_by_name(bot_name)
 
-    if existing_bot do
-      existing_bot
-    else
-      host = get_user_by_id(bot_host_id)
+    cond do
+      allow?(bot_host_id, :moderator) == false ->
+        {:error, "no permission"}
 
-      params =
-        user_register_params(bot_name, host.email, host.password_hash, %{
-          "bot" => true,
-          "verified" => true
-        })
-        |> Map.merge(%{
-          email: String.replace(host.email, "@", ".bot#{bot_name}@")
-        })
+      existing_bot != nil ->
+        existing_bot
 
-      case Account.create_user(params) do
-        {:ok, user} ->
-          Account.create_group_membership(%{
-            user_id: user.id,
-            group_id: bar_user_group_id()
+      true ->
+        host = get_user_by_id(bot_host_id)
+
+        params =
+          user_register_params(bot_name, host.email, host.password_hash, %{
+            "bot" => true,
+            "verified" => true
+          })
+          |> Map.merge(%{
+            email: String.replace(host.email, "@", ".bot#{bot_name}@")
           })
 
-          # Now add them to the cache
-          user
-          |> convert_user
-          |> add_user
+        case Account.create_user(params) do
+          {:ok, user} ->
+            Account.create_group_membership(%{
+              user_id: user.id,
+              group_id: bar_user_group_id()
+            })
 
-        {:error, changeset} ->
-          Logger.error(
-            "Unable to create user with params #{Kernel.inspect(params)}\n#{
-              Kernel.inspect(changeset)
-            }"
-          )
-      end
+            # Now add them to the cache
+            user
+            |> convert_user
+            |> add_user
+
+          {:error, changeset} ->
+            Logger.error(
+              "Unable to create user with params #{Kernel.inspect(params)}\n#{
+                Kernel.inspect(changeset)
+              } in register_bot(#{bot_name}, #{bot_host_id})"
+            )
+        end
     end
   end
 
@@ -607,6 +612,17 @@ defmodule Teiserver.User do
 
         {:ok, new_value}
       end)
+    end
+  end
+
+  def allow?(userid, permission) do
+    user = get_user_by_id(userid)
+
+    case permission do
+      :moderator ->
+        user.moderator
+      _ ->
+        false
     end
   end
 

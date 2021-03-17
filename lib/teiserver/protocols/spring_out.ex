@@ -336,7 +336,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:left_room, {username, room_name}) do
-    "JOINED #{room_name} #{username}\n"
+    "LEFT #{room_name} #{username}\n"
   end
 
   defp do_reply(:channel_topic, {room_name, author_name}) do

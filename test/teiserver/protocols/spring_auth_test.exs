@@ -292,17 +292,17 @@ ENDOFCHANNELS\n"
 
     [
       joinbattle,
+      joinedbattle,
       tags,
       bstatus,
       request,
-      cstatus,
       ""
     ] = reply
 
     assert joinbattle == "JOINBATTLE #{battle_id} #{hash}"
+    assert joinedbattle == "JOINEDBATTLE #{battle_id} #{user2.name}"
     assert tags == "SETSCRIPTTAGS "
     assert bstatus == "CLIENTBATTLESTATUS #{user2.name} 0 0"
-    assert cstatus == "CLIENTSTATUS #{user2.name} 16"
     assert request == "REQUESTBATTLESTATUS"
 
     _send(socket2, "SAYBATTLE Hello there!\n")
