@@ -10,7 +10,7 @@ defmodule Teiserver.TcpServer do
   alias Teiserver.Protocols.SpringIn
   alias Teiserver.Protocols.SpringOut
   @heartbeat 30_000
-  @timeout 30
+  @timeout 45
 
   @behaviour :ranch_protocol
   @default_protocol_in SpringIn
@@ -417,20 +417,20 @@ defmodule Teiserver.TcpServer do
   end
 
   defp global_battle_update(battle_id, reason, state) do
-    if state.battle_id == battle_id do
-      case reason do
-        :update_battle_info ->
-          state.protocol_out.reply(:update_battle, battle_id, nil, state)
+    case reason do
+      :update_battle_info ->
+        state.protocol_out.reply(:update_battle, battle_id, nil, state)
 
-        :battle_opened ->
+      :battle_opened ->
+        if state.battle_host == false or state.battle_id != battle_id do
           state.protocol_out.reply(:battle_opened, battle_id, nil, state)
+        end
 
-        :battle_closed ->
-          state.protocol_out.reply(:battle_closed, battle_id, nil, state)
+      :battle_closed ->
+        state.protocol_out.reply(:battle_closed, battle_id, nil, state)
 
-        _ ->
-          Logger.error("No handler in tcp_server:global_battle_update with reason #{reason}")
-      end
+      _ ->
+        Logger.error("No handler in tcp_server:global_battle_update with reason #{reason}")
     end
     state
   end

@@ -36,7 +36,7 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   @impl true
-  def handle_info({:user_logged_in, userid, _username}, socket) do
+  def handle_info({:user_logged_in, userid}, socket) do
     keys =
       socket.assigns[:clients]
       |> Enum.map(fn c -> c.userid end)

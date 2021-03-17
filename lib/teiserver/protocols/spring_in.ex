@@ -1045,7 +1045,7 @@ defmodule Teiserver.Protocols.SpringIn do
     _no_match(state, cmd, msg_id, data)
   end
 
-  @spec _no_match(map(), String.t(), String.t(), map()) :: map()
+  @spec _no_match(map(), String.t(), String.t(), map()) :: Map.t()
   defp _no_match(state, cmd, msg_id, data) do
     data =
       data
