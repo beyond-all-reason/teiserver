@@ -206,7 +206,6 @@ defmodule Teiserver.Battle do
           battle_state
         else
           Client.join_battle(userid, battle_id)
-          # Logger.info("add_user_to_battle(#{userid}, #{battle_id}) - PUBSUB")
           PubSub.broadcast(
             Central.PubSub,
             "all_battle_updates",

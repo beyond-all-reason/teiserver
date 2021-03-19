@@ -15,8 +15,8 @@ defmodule Teiserver.Benchmark.UserClient do
   end
 
   def handle_info(:tick, state) do
-    _send(state.socket, "SAY tick_#{state.tick} this is a test message\n")
-    _ = _recv(state.socket)
+    # _send(state.socket, "SAY tick_#{state.tick} this is a test message\n")
+    # _ = _recv(state.socket)
 
     msg_id = :random.uniform(8_999_999) + 1_000_000
     _send(state.socket, "##{msg_id} LISTBATTLES\n")

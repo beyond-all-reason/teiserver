@@ -681,7 +681,6 @@ defmodule Teiserver.Protocols.SpringIn do
 
     case response do
       {:success, battle} ->
-        Logger.info("JOINBATTLE - #{state.userid} joins #{battle.id}")
         PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
         Battle.add_user_to_battle(state.userid, battle.id)
         reply(:join_battle_success, battle, msg_id, state)
@@ -982,7 +981,6 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("LEAVEBATTLE", _, _msg_id, %{client: %{battle_id: nil}} = state) do
     Battle.remove_user_from_any_battle(state.userid)
     |> Enum.each(fn b ->
-      Logger.info("LEAVEBATTLE (noid) - #{state.userid} left battle #{b}")
       PubSub.unsubscribe(Central.PubSub, "battle_updates:#{b}")
     end)
 
@@ -990,7 +988,6 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("LEAVEBATTLE", _, _msg_id, state) do
-    Logger.info("LEAVEBATTLE - #{state.userid} left battle #{state.battle_id}")
     PubSub.unsubscribe(Central.PubSub, "battle_updates:#{state.battle_id}")
     Battle.remove_user_from_battle(state.userid, state.battle_id)
     %{state | battle_host: false}

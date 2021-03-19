@@ -5,10 +5,10 @@ defmodule Teiserver.Benchmark.StatsClient do
 
   require Logger
   @report_interval 15_000
-  @registration_interval 60_000
-  @user_action_interval 3_000
+  @registration_interval 10_000
+  @user_action_interval 30_000
 
-  @users_per_tick 60
+  @users_per_tick 20
 
   use GenServer
 
@@ -44,7 +44,7 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
       })
 
     Logger.warn("Starting stats")
-    # :timer.send_interval(@registration_interval, self(), :register)
+    :timer.send_interval(@registration_interval, self(), :register)
     send(self(), :register)
 
     :timer.send_interval(@report_interval, self(), :report)
