@@ -12,6 +12,8 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 
 ### Roadmap to v1.0
 - Convert chat rooms to use the new per-client Genserver cache for member
+- User ranks calculations
+- Persist user changes to database when altering friends
 
 ### Post parity todo (in no particular order)
 - [Matchmaking](documents/spring/matchmaking.md)

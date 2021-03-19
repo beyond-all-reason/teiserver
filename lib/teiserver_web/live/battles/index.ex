@@ -39,6 +39,18 @@ defmodule TeiserverWeb.BattleLive.Index do
     {:noreply, assign(socket, :battles, list_battles())}
   end
 
+  def handle_info({:add_user_to_battle, _user_id, _battle_id}, socket) do
+    {:noreply, assign(socket, :battles, list_battles())}
+  end
+
+  def handle_info({:remove_user_from_battle, _user_id, _battle_id}, socket) do
+    {:noreply, assign(socket, :battles, list_battles())}
+  end
+
+  def handle_info({:kick_user_from_battle, _user_id, _battle_id}, socket) do
+    {:noreply, assign(socket, :battles, list_battles())}
+  end
+
   defp apply_action(socket, :index, _params) do
     :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
 
