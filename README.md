@@ -6,9 +6,7 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 - [Architecture](documents/architecture.md)
 - [Testing](documents/testing.md)
 
-### Roadmap to Beta:
-- Real player based test
-- Gathering v1.0 requirements
+
 
 ### Roadmap to v1.0
 - Convert chat rooms to use the new per-client Genserver cache for member
