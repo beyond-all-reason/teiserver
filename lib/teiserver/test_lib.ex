@@ -19,13 +19,13 @@ defmodule Teiserver.TestLib do
     "new_test_user_#{:random.uniform(99_999_999) + 1_000_000}"
   end
 
-  def new_user(name \\ nil) do
+  def new_user(name \\ nil, params \\ %{}) do
     name = name || new_user_name()
 
     case User.get_user_by_name(name) do
       nil ->
         {:ok, user} =
-          User.user_register_params(name, "#{name}@email.com", "X03MO1qnZdYdgyfeuILPmQ==")
+          User.user_register_params(name, "#{name}@email.com", "X03MO1qnZdYdgyfeuILPmQ==", params)
           |> Account.create_user()
 
         user

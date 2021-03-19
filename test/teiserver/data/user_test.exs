@@ -8,7 +8,7 @@ defmodule Teiserver.Data.UserTest do
     # field for users. As such it is possible for there to be a clash.
 
     # This is our base user that will create other users
-    base_user = TestLib.new_user("twobot_test_base1")
+    base_user = TestLib.new_user("twobot_test_base1", %{"moderator" => true})
 
     user1 = User.register_bot("twobot_test_base1[01]", base_user.id)
     user2 = User.register_bot("twobot_test_base1[02]", base_user.id)

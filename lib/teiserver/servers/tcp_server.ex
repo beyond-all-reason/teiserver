@@ -105,7 +105,8 @@ defmodule Teiserver.TcpServer do
 
       # Connection microstate
       battle_id: nil,
-      known_users: %{}
+      known_users: %{},
+      extra_logging: false
     }
 
     Logger.info("New TCP connection #{Kernel.inspect(socket)}, IP: #{ip}")
@@ -118,7 +119,11 @@ defmodule Teiserver.TcpServer do
     {:ok, init_arg}
   end
 
-  def handle_cast({:put, key, value}, _from, state) do
+  def handle_call({:get, key}, _from, state) do
+    {:reply, Map.get(state, key), state}
+  end
+
+  def handle_info({:put, key, value}, state) do
     new_state = Map.put(state, key, value)
     {:noreply, new_state}
   end
@@ -171,7 +176,7 @@ defmodule Teiserver.TcpServer do
     if state.userid == userid do
       {:stop, :normal, state}
     else
-      new_state = user_logged_out({userid, username}, state)
+      new_state = user_logged_out(userid, username, state)
       {:noreply, new_state}
     end
   end
@@ -325,13 +330,13 @@ defmodule Teiserver.TcpServer do
     %{state | known_users: known_users}
   end
 
-  defp user_logged_out(userid, state) do
+  defp user_logged_out(userid, username, state) do
     known_users = case state.known_users[userid] do
       nil ->
         state.known_users
       _ ->
-        state.protocol_out.reply(:user_logged_out, userid, nil, state)
-        Map.put(state.known_users, userid, _blank_user(userid))
+        state.protocol_out.reply(:user_logged_out, {userid, username}, nil, state)
+        Map.delete(state.known_users, userid)
     end
     %{state | known_users: known_users}
   end
@@ -453,7 +458,7 @@ defmodule Teiserver.TcpServer do
         %{state.known_users[userid] | battle_id: battle_id}
 
       state.known_users[userid].battle_id != battle_id ->
-        state.protocol_out.reply(:remove_user_from_battle, {userid, battle_id}, nil, state)
+        state.protocol_out.reply(:remove_user_from_battle, {userid, state.known_users[userid].battle_id}, nil, state)
         state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
         %{state.known_users[userid] | battle_id: battle_id}
 

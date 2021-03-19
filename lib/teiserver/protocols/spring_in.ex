@@ -159,12 +159,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("LISTBATTLES", _, msg_id, state) do
-    battle_ids =
-      Battle.list_battles()
-      |> Enum.map(fn b -> b.id end)
-      |> Enum.join(" ")
-
-    reply(:list_battles, battle_ids, msg_id, state)
+    reply(:list_battles, Battle.list_battle_ids(), msg_id, state)
     state
   end
 

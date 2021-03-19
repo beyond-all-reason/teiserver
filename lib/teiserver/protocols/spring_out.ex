@@ -72,9 +72,9 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:list_battles, battle_ids) do
-    battle_ids
-    |> Enum.map(fn b -> b.id end)
+    ids = battle_ids
     |> Enum.join(" ")
+    "BATTLEIDS #{ids}\n"
   end
 
   defp do_reply(:add_user, user) do
@@ -470,12 +470,12 @@ defmodule Teiserver.Protocols.SpringOut do
       end
 
     Logger.debug("--> #{Kernel.inspect(socket)} #{TcpServer.format_log(msg)}")
-    # transport.send(socket, msg)
-    msg
-    |> String.split("\n")
-    |> Enum.filter(fn part -> part != "" end)
-    |> Enum.each(fn part ->
-      transport.send(socket, part <> "\n")
-    end)
+    transport.send(socket, msg)
+    # msg
+    # |> String.split("\n")
+    # |> Enum.filter(fn part -> part != "" end)
+    # |> Enum.each(fn part ->
+    #   transport.send(socket, part <> "\n")
+    # end)
   end
 end

@@ -2,9 +2,11 @@ defmodule Teiserver.TcpServerTest do
   use Central.ServerCase, async: false
 
   alias Teiserver.User
+  alias Teiserver.Client
+  require Logger
 
   import Teiserver.TestLib,
-    only: [raw_setup: 0, _send: 2, _recv: 1, _recv_until: 1, new_user_name: 0]
+    only: [raw_setup: 0, _send: 2, _recv: 1, _recv_until: 1, new_user_name: 0, auth_setup: 0]
 
   setup do
     %{socket: socket} = raw_setup()
@@ -90,5 +92,91 @@ defmodule Teiserver.TcpServerTest do
     _send(socket, "EXIT\n")
     _ = _recv(socket)
     {:error, :closed} = :gen_tcp.recv(socket, 0, 1000)
+  end
+
+  test "bad sequences" do
+    %{socket: socket, user: user} = auth_setup()
+    %{socket: s1, user: u1} = auth_setup()
+    # %{socket: s2, user: u2} = auth_setup()
+    # %{socket: s3, user: u3} = auth_setup()
+
+    # Flush the message queues
+    _ = _recv(socket)
+    _ = _recv(s1)
+    # _ = _recv(s2)
+    # _ = _recv(s3)
+
+    client = Client.get_client_by_name(user.name)
+    pid = client.pid
+
+    # Enable logging
+    # send(pid, {:put, :extra_logging, true})
+
+    # Lets start with the same user logging in multiple times
+    # first ourselves, shouldn't see anything here
+    send(pid, {:user_logged_in, user.id})
+    r = _recv(socket)
+    assert r == :timeout
+
+    # Now u1, already logged in
+    send(pid, {:user_logged_in, u1.id})
+    r = _recv(socket)
+    assert r == :timeout
+
+    # Log out u1, should work
+    send(pid, {:user_logged_out, u1.id, u1.name})
+    r = _recv(socket)
+    assert r == "REMOVEUSER #{u1.name}\n"
+
+    # Repeat, should not do anything
+    send(pid, {:user_logged_out, u1.id, u1.name})
+    r = _recv(socket)
+    assert r == :timeout
+
+    # Logs back in
+    send(pid, {:user_logged_in, u1.id})
+    r = _recv(socket)
+    assert r == "ADDUSER #{u1.name} ?? 0 #{u1.id} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 16\n"
+
+    # Now do battles
+    battle_id = 111
+    send(pid, {:add_user_to_battle, u1.id, battle_id})
+    r = _recv(socket)
+    assert r == "JOINEDBATTLE #{battle_id} #{u1.name}\n"
+
+    # Duplicate user in battle
+    send(pid, {:add_user_to_battle, u1.id, battle_id})
+    r = _recv(socket)
+    assert r == :timeout
+
+    # User moves to a different battle (without leave command)
+    send(pid, {:add_user_to_battle, u1.id, battle_id+1})
+    r = _recv(socket)
+    assert r == "LEFTBATTLE #{battle_id} #{u1.name}\nJOINEDBATTLE #{battle_id+1} #{u1.name}\n"
+
+    # Same battle again
+    send(pid, {:add_user_to_battle, u1.id, battle_id + 1})
+    r = _recv(socket)
+    assert r == :timeout
+
+    # Log the user out and then get them to join a battle
+    send(pid, {:user_logged_out, u1.id, u1.name})
+    r = _recv(socket)
+    assert r == "REMOVEUSER #{u1.name}\n"
+
+    # Now they join, should get a login and then a join battle command
+    send(pid, {:add_user_to_battle, u1.id, battle_id+1})
+    r = _recv(socket)
+    assert r == "ADDUSER #{u1.name} ?? 0 #{u1.id} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 16\nJOINEDBATTLE #{battle_id+1} #{u1.name}\n"
+
+    _send(socket, "EXIT\n")
+    _send(s1, "EXIT\n")
+    # _send(s2, "EXIT\n")
+    # _send(s3, "EXIT\n")
+    _ = _recv(socket)
+    _ = _recv(s1)
+    # _ = _recv(s2)
+    # _ = _recv(s3)
+
   end
 end
