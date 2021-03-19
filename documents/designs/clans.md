@@ -37,7 +37,7 @@ Clan
 ClanMember
 - user: UserID
 - clan: ClanID
-- role: String
+- role: String (admin, mod, member, p)
 
 ClanMemberRequest
 - user: UserID

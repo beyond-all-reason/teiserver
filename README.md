@@ -7,7 +7,6 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 - [Testing](documents/testing.md)
 
 
-
 ### Roadmap to v1.0
 - Convert chat rooms to use the new per-client Genserver cache for member
 - User ranks calculations
