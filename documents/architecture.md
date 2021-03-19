@@ -1,22 +1,22 @@
 ## Structure
 ```
-                                      Client                                
-                                (Chobby/Spring/SPADS)
-                                        ^
-                                        |
-                                        v
-                     Protocol ------> ranch --------> Protocol  ------------> Can message Client state
-                 (spring_out.ex)    (gen_tcp)     (spring_in.ex)
-                        ^                               |
-                        |                               |
-                        |                               v
-                 Client State <--------------------- State
-                   (Genserver)                  (ConCache/ETS)
-                                                        ^
-                                                        |
-                                                        v
-                                                     Storage
-                                                  (Ecto/Postgres)
+                                    Client                                
+                              (Chobby/Spring/SPADS)
+                                      ^
+                                      |
+                                      v
+                   Protocol ------> ranch --------> Protocol  ------------> Can message Client state
+               (spring_out.ex)    (gen_tcp)     (spring_in.ex)
+                      ^                               |
+                      |                               |
+                      |                               v
+               Client State <--------------------- State
+                 (Genserver)                  (ConCache/ETS)
+                                                      ^
+                                                      |
+                                                      v
+                                                   Storage
+                                                (Ecto/Postgres)
 ```
 
 ## Roles
