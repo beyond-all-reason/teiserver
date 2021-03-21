@@ -1,7 +1,17 @@
 <% {_fg, _bg, bsname} = @colours %>
 
+<%
+  result = Enum.group_by(@battle.players, fn p ->
+    client = @clients[p]
+    client.player
+  end)
+
+  players = Map.get(result, true, [])
+  spectators = Map.get(result, false, [])
+%>
+
 <div class="row">
-  <div class="col-md-12"> 
+  <div class="col-md-12">
     <div class="card border-<%= bsname %> page-card">
       <div class="card-body">
 
@@ -29,10 +39,11 @@
       <th>Team</th>
       <th>Faction</th>
       <th>Colour</th>
+      <th>&nbsp;</th>
     </tr>
   </thead>
   <tbody>
-    <%= for p <- @battle.players do %>
+    <%= for p <- players do %>
       <%
         user = @users[p]
         client = @clients[p]
@@ -55,6 +66,10 @@
           <td><%= client.ally_team_number %></td>
           <td><%= client.side %></td>
           <td><%= client.team_colour %></td>
+
+          <td>
+            <%= live_redirect "Show", to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}" %>
+          </td>
         </tr>
       <% end %>
     <% end %>

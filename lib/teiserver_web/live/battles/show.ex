@@ -26,8 +26,9 @@ defmodule TeiserverWeb.BattleLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
-    PubSub.subscribe(Central.PubSub, "battle_updates:#{id}")
-    PubSub.subscribe(Central.PubSub, "live_battle_updates:#{id}")
+    :ok = PubSub.subscribe(Central.PubSub, "battle_updates:#{id}")
+    :ok = PubSub.subscribe(Central.PubSub, "live_battle_updates:#{id}")
+    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
     battle = Battle.get_battle!(id)
     {users, clients} = get_user_and_clients(battle.players)
 
@@ -82,12 +83,20 @@ defmodule TeiserverWeb.BattleLive.Show do
     {:noreply, assign(socket, :clients, new_clients)}
   end
 
-  def handle_info({:add_user_to_battle, userid, _battle_id}, socket) do
-    {:noreply, add_user(socket, userid)}
+  def handle_info({:add_user_to_battle, userid, battle_id}, socket) do
+    if battle_id == socket.assigns[:id] do
+      {:noreply, add_user(socket, userid)}
+    else
+      {:noreply, socket}
+    end
   end
 
-  def handle_info({:remove_user_from_battle, userid, _battle_id}, socket) do
-    {:noreply, remove_user(socket, userid)}
+  def handle_info({:remove_user_from_battle, userid, battle_id}, socket) do
+    if battle_id == socket.assigns[:id] do
+      {:noreply, remove_user(socket, userid)}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_info({:battle_message, userid, msg, _battle_id}, %{assigns: assigns} = socket) do
