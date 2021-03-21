@@ -20,7 +20,9 @@ config :central, Teiserver,
     url: "https://teifion.co.uk"
   ],
   enable_benchmark: false,
-  enable_hooks: true
+  enable_hooks: true,
+  heartbeart_interval: 30_000,
+  heartbeart_timeout: 45_000
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

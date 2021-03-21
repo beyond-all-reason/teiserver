@@ -39,7 +39,8 @@ config :central, Teiserver,
   ports: [
     tcp: 8200,
     tls: 8201
-  ]
+  ],
+  heartbeat: nil
 
 config :central, Central.Mailer,
   adapter: Bamboo.LocalAdapter,

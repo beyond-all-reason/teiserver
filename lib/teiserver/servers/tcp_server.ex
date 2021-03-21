@@ -9,8 +9,6 @@ defmodule Teiserver.TcpServer do
   alias Teiserver.User
   alias Teiserver.Protocols.SpringIn
   alias Teiserver.Protocols.SpringOut
-  @heartbeat 30_000
-  @timeout 45
 
   @behaviour :ranch_protocol
   @default_protocol_in SpringIn
@@ -86,7 +84,10 @@ defmodule Teiserver.TcpServer do
     :ranch.accept_ack(ref)
     transport.setopts(socket, [{:active, true}])
 
-    :timer.send_interval(@heartbeat, self(), :heartbeat)
+    heartbeat = Application.get_env(:central, Teiserver)[:heartbeat_interval]
+    if heartbeat do
+      :timer.send_interval(heartbeat, self(), :heartbeat)
+    end
     state = %{
       # Connection state
       message_part: "",
@@ -153,7 +154,7 @@ defmodule Teiserver.TcpServer do
   # Heartbeat allows us to kill stale connections
   def handle_info(:heartbeat, state) do
     diff = System.system_time(:second) - state.last_msg
-    if diff > @timeout do
+    if diff > Application.get_env(:central, Teiserver)[:heartbeat_timeout] do
       {:stop, :normal, state}
     else
       {:noreply, state}
