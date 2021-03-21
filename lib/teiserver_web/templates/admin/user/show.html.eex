@@ -49,11 +49,22 @@
             Details
           </a>
         </li>
+
+        <li>
+          <a href="#moderation_tab" role="tab" class="nav-link" data-toggle="tab">
+            <%= component "icon", icon: StylingHelper.icon(:moderation) %>
+            Moderation
+          </a>
+        </li>
       </ul>
 
       <div class="tab-content">
         <div class="tab-pane" id="details_tab" style="padding:5px;">
           <%= render "tab_details.html", assigns %>
+        </div>
+
+        <div class="tab-pane" id="moderation_tab" style="padding:5px;">
+          <%= render "tab_moderation.html", assigns %>
         </div>
       </div>
       <%# END OF TABS %>

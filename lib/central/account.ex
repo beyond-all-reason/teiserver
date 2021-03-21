@@ -121,18 +121,36 @@ defmodule Central.Account do
   def recache_user(%User{} = user), do: recache_user(user.id)
 
   def recache_user(id) do
-    CentralWeb.Endpoint.broadcast(
-      "account_hooks",
-      "update_user",
-      id
-    )
-
     ConCache.dirty_delete(:account_user_cache, id)
     ConCache.dirty_delete(:account_user_cache_bang, id)
     ConCache.dirty_delete(:account_membership_cache, id)
     ConCache.dirty_delete(:communication_user_notifications, id)
     ConCache.dirty_delete(:config_user_cache, id)
   end
+
+  def broadcast_create_user({:ok, user}) do
+    CentralWeb.Endpoint.broadcast(
+      "account_hooks",
+      "create_user",
+      user.id
+    )
+
+    {:ok, user}
+  end
+
+  def broadcast_create_user(v), do: v
+
+  def broadcast_update_user({:ok, user}) do
+    CentralWeb.Endpoint.broadcast(
+      "account_hooks",
+      "update_user",
+      user.id
+    )
+
+    {:ok, user}
+  end
+
+  def broadcast_update_user(v), do: v
 
   @doc """
   Creates a user.
@@ -160,18 +178,6 @@ defmodule Central.Account do
     |> broadcast_create_user
   end
 
-  defp broadcast_create_user({:ok, user}) do
-    CentralWeb.Endpoint.broadcast(
-      "account_hooks",
-      "create_user",
-      user.id
-    )
-
-    {:ok, user}
-  end
-
-  defp broadcast_create_user(v), do: v
-
   def merge_default_params(user_params) do
     Map.merge(
       %{
@@ -195,11 +201,12 @@ defmodule Central.Account do
 
   """
   def update_user(%User{} = user, attrs, changeset_type \\ nil) do
-    recache_user(user)
+    recache_user(user.id)
 
     user
     |> User.changeset(attrs, changeset_type)
     |> Repo.update()
+    |> broadcast_update_user
   end
 
   @doc """

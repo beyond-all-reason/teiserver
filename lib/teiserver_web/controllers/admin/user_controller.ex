@@ -188,4 +188,38 @@ defmodule TeiserverWeb.Admin.UserController do
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end
+
+  @spec perform_action(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def perform_action(conn, %{"id" => id, "action" => action} = params) do
+    user = Account.get_user!(id)
+
+    case Central.Account.UserLib.has_access(user, conn) do
+      {true, _} ->
+        new_data = case action do
+          "permanent_ban" ->
+            %{"banned" => true}
+
+          "temporary_ban" ->
+            ban_expires = params["ban_expires"]
+            %{"banned_until" => ban_expires}
+        end
+
+        user_params = %{"data" => Map.merge(user.data || %{}, new_data)}
+
+        case Account.update_user(user, user_params) do
+          {:ok, _user} ->
+            conn
+            |> put_flash(:info, "Action performed.")
+            |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            render(conn, "edit.html", user: user, changeset: changeset)
+        end
+
+      _ ->
+        conn
+        |> put_flash(:warning, "Unable to access this user")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
+  end
 end

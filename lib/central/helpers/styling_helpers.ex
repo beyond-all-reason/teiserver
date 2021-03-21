@@ -1,6 +1,7 @@
 defmodule Central.Helpers.StylingHelper do
   alias HTMLIcons
 
+  @spec colours(atom) :: {String.t(), String.t(), String.t()}
   def colours(:default), do: {"#555555", "#E5E5E5", "secondary"}
   def colours(:report), do: {"#843534", "#f2dede", "danger"}
 
@@ -22,10 +23,14 @@ defmodule Central.Helpers.StylingHelper do
   def colours(:negative), do: {"#", "#", "negative"}
   def colours(:negative2), do: {"#", "#", "negative2"}
 
+  @spec get_fg(atom) :: String.t()
   def get_fg(colour), do: elem(colours(colour), 0)
+  @spec get_bg(atom) :: String.t()
   def get_bg(colour), do: elem(colours(colour), 1)
+  @spec get_bsname(atom) :: String.t()
   def get_bsname(colour), do: elem(colours(colour), 2)
 
+  @spec icon(atom) :: String.t()
   def icon(:report), do: "fas fa-signal"
   def icon(:up), do: "fas fa-level-up"
   def icon(:back), do: "fas fa-arrow-left"
@@ -37,6 +42,9 @@ defmodule Central.Helpers.StylingHelper do
   def icon(:export), do: "fal fa-download"
   def icon(:structure), do: "fal fa-cubes"
   def icon(:documentation), do: "fas fa-book"
+
+  def icon(:admin), do: "fas fa-user-crown"
+  def icon(:moderation), do: "fas fa-gavel"
 
   def icon(:overview), do: "fa-expand-alt"
   def icon(:detail), do: "fa-eye"

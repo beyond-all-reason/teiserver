@@ -27,7 +27,7 @@ defmodule Teiserver.Application do
     if Application.get_env(:central, Teiserver)[:enable_hooks] do
       children ++
         [
-          # {Teiserver.HookServer, name: Teiserver.HookServer}
+          {Teiserver.HookServer, name: Teiserver.HookServer}
         ]
     else
       children

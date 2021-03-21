@@ -46,6 +46,7 @@ defmodule TeiserverWeb.Router do
 
         resources("/user", UserController)
         post("/user/reset_password/:id", UserController, :reset_password)
+        put("/user/action/:id/:action", UserController, :perform_action)
       end
     end
   end

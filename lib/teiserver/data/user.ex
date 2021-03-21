@@ -6,6 +6,7 @@ defmodule Teiserver.User do
   alias Teiserver.Client
   alias Teiserver.EmailHelper
   alias Central.Helpers.StylingHelper
+  alias Central.Helpers.TimexHelper
 
   @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulence cats dogs mice eagle oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave sulphur tree tangerine melon watermelon obstreperous chlorine argon mercury jupiter saturn neptune ceres firefly slug sloth madness happiness ferrous oblique advantageous inefficient starling clouds rivers sunglasses)
 
@@ -26,7 +27,9 @@ defmodule Teiserver.User do
     :email_change_code,
     :password_hash,
     :ingame_seconds,
-    :mmr
+    :mmr,
+    :banned,
+    :banned_until
   ]
 
   @default_data %{
@@ -46,7 +49,9 @@ defmodule Teiserver.User do
     email_change_code: nil,
     last_login: nil,
     ingame_seconds: 0,
-    mmr: %{}
+    mmr: %{},
+    banned: false,
+    banned_until: nil
   }
 
   @rank_levels [
@@ -531,12 +536,20 @@ defmodule Teiserver.User do
         {:error, "No user found for '#{username}'"}
 
       user ->
+        banned_until_dt = TimexHelper.parse_ymd_hms(user.banned_until)
+
         cond do
-          Client.get_client_by_id(user.id) != nil ->
-            {:error, "Already logged in"}
+          user.banned ->
+            {:error, "Banned"}
 
           test_password(password, user) == false ->
             {:error, "Invalid password"}
+
+          banned_until_dt != nil and Timex.compare(Timex.now(), banned_until_dt) != 1 ->
+            {:error, "Temporarily banned"}
+
+          Client.get_client_by_id(user.id) != nil ->
+            {:error, "Already logged in"}
 
           user.verified == false ->
             {:error, "Unverified", user.id}

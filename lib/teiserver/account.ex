@@ -61,6 +61,7 @@ defmodule Teiserver.Account do
     %User{}
     |> User.changeset(attrs)
     |> Repo.insert()
+    |> Central.Account.broadcast_create_user
   end
 
   @doc """
@@ -76,9 +77,12 @@ defmodule Teiserver.Account do
 
   """
   def update_user(%User{} = user, attrs) do
+    Central.Account.recache_user(user.id)
+
     user
     |> User.changeset(attrs, :limited_with_data)
     |> Repo.update()
+    |> Central.Account.broadcast_update_user()
   end
 
   @doc """
