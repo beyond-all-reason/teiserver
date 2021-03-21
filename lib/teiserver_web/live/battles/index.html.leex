@@ -1,7 +1,7 @@
 <% {_fg, _bg, bsname} = @colours %>
 
 <div class="row">
-  <div class="col-md-12"> 
+  <div class="col-md-12">
     <div class="card border-<%= bsname %> page-card">
       <div class="card-body">
 
@@ -27,7 +27,7 @@
       <%= if battle != nil do %>
         <tr id="battle-<%= battle.id %>">
           <td><%= battle.name %></td>
-          <td><%= Enum.count(battle.players) %></td>
+          <td><%= battle.player_count %></td>
 
           <td>
             <span>

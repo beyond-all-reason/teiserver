@@ -16,7 +16,7 @@ defmodule TeiserverWeb.BattleLive.Index do
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battles")
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, BattleLib.colours())
-      |> assign(:battles, list_battles())
+      |> assign(:battles, Battle.list_battles())
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "bar_live.html"}}
   end
@@ -27,28 +27,72 @@ defmodule TeiserverWeb.BattleLive.Index do
   end
 
   @impl true
-  def handle_info({:battle_opened, _battle_id}, socket) do
-    {:noreply, assign(socket, :battles, list_battles())}
+  def handle_info({:battle_opened, battle_id}, socket) do
+    new_battle = Battle.get_battle(battle_id)
+    battles = socket.assigns[:battles] ++ [new_battle]
+
+    {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:battle_closed, _battle_id}, socket) do
-    {:noreply, assign(socket, :battles, list_battles())}
+  def handle_info({:battle_closed, battle_id}, socket) do
+    battles = socket.assigns[:battles]
+      |> Enum.filter(fn b -> b.id != battle_id end)
+
+    {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:global_battle_updated, _battle_id, _reason}, socket) do
-    {:noreply, assign(socket, :battles, list_battles())}
+  def handle_info({:global_battle_updated, battle_id, _reason}, socket) do
+    battles = socket.assigns[:battles]
+      |> Enum.map(fn battle ->
+        if battle.id == battle_id do
+          Battle.get_battle(battle_id)
+        else
+          battle
+        end
+      end)
+
+    {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:add_user_to_battle, _user_id, _battle_id}, socket) do
-    {:noreply, assign(socket, :battles, list_battles())}
+  def handle_info({:add_user_to_battle, user_id, battle_id}, socket) do
+    battles = socket.assigns[:battles]
+      |> Enum.map(fn battle ->
+        if battle.id == battle_id do
+          %{battle | player_count: battle.player_count + 1, players: battle.players ++ [user_id]}
+        else
+          battle
+        end
+      end)
+
+    {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:remove_user_from_battle, _user_id, _battle_id}, socket) do
-    {:noreply, assign(socket, :battles, list_battles())}
+  def handle_info({:remove_user_from_battle, user_id, battle_id}, socket) do
+    battles = socket.assigns[:battles]
+      |> Enum.map(fn battle ->
+        if battle.id == battle_id do
+          new_players = Enum.filter(battle.players, fn p -> p != user_id end)
+          %{battle | player_count: battle.player_count - 1, players: new_players}
+        else
+          battle
+        end
+      end)
+
+    {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:kick_user_from_battle, _user_id, _battle_id}, socket) do
-    {:noreply, assign(socket, :battles, list_battles())}
+  def handle_info({:kick_user_from_battle, user_id, battle_id}, socket) do
+    battles = socket.assigns[:battles]
+      |> Enum.map(fn battle ->
+        if battle.id == battle_id do
+          new_players = Enum.filter(battle.players, fn p -> p != user_id end)
+          %{battle | player_count: battle.player_count - 1, players: new_players}
+        else
+          battle
+        end
+      end)
+
+    {:noreply, assign(socket, :battles, battles)}
   end
 
   defp apply_action(socket, :index, _params) do
@@ -57,9 +101,5 @@ defmodule TeiserverWeb.BattleLive.Index do
     socket
     |> assign(:page_title, "Listing Battles")
     |> assign(:battle, nil)
-  end
-
-  defp list_battles do
-    Battle.list_battles()
   end
 end
