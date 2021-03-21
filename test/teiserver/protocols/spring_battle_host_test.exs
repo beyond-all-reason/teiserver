@@ -65,7 +65,7 @@ defmodule Teiserver.SpringBattleHostTest do
     reply = _recv_until(socket)
     assert reply =~ "ADDUSER #{user2.name} ?? 0 #{user2.id} LuaLobby Chobby\n"
     assert reply =~ "JOINEDBATTLE #{battle_id} #{user2.name}\n"
-    assert reply =~ "CLIENTSTATUS #{user2.name} 16\n"
+    assert reply =~ "CLIENTSTATUS #{user2.name} 0\n"
 
     # Kick user2
     battle = Battle.get_battle(battle_id)

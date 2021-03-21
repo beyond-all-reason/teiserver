@@ -136,7 +136,7 @@ defmodule Teiserver.TcpServerTest do
     # Logs back in
     send(pid, {:user_logged_in, u1.id})
     r = _recv(socket)
-    assert r == "ADDUSER #{u1.name} ?? 0 #{u1.id} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 16\n"
+    assert r == "ADDUSER #{u1.name} ?? 0 #{u1.id} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\n"
 
     # Now do battles
     battle_id = 111
@@ -167,7 +167,7 @@ defmodule Teiserver.TcpServerTest do
     # Now they join, should get a login and then a join battle command
     send(pid, {:add_user_to_battle, u1.id, battle_id+1})
     r = _recv(socket)
-    assert r == "ADDUSER #{u1.name} ?? 0 #{u1.id} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 16\nJOINEDBATTLE #{battle_id+1} #{u1.name}\n"
+    assert r == "ADDUSER #{u1.name} ?? 0 #{u1.id} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\nJOINEDBATTLE #{battle_id+1} #{u1.name}\n"
 
     _send(socket, "EXIT\n")
     _send(s1, "EXIT\n")

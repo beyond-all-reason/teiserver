@@ -6,7 +6,7 @@ defmodule Teiserver.SpringAuthTest do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TestLib,
-    only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, _recv_until: 1, new_user: 0]
+    only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, _recv_until: 1, new_user: 0, new_user: 2]
 
   setup do
     %{socket: socket, user: user} = auth_setup()
@@ -53,7 +53,7 @@ defmodule Teiserver.SpringAuthTest do
     # stuff we can't set. We should be rank 1, not a bot but are a mod
     _send(socket, "MYSTATUS 127\n")
     reply = _recv(socket)
-    assert reply =~ "CLIENTSTATUS #{user.name} 19\n"
+    assert reply =~ "CLIENTSTATUS #{user.name} 3\n"
     reply_bits = BitParse.parse_bits("100", 7)
 
     # Lets make sure it's coming back the way we expect
@@ -61,13 +61,13 @@ defmodule Teiserver.SpringAuthTest do
     [1, 1, 0, 0, 1, 0, 0] = reply_bits
 
     # Lets check we can correctly in-game
-    new_status = Integer.undigits(Enum.reverse([0, 1, 0, 0, 1, 0, 0]), 2)
+    new_status = Integer.undigits(Enum.reverse([0, 1, 0, 0, 0, 0, 0]), 2)
     _send(socket, "MYSTATUS #{new_status}\n")
     reply = _recv(socket)
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
 
     # And now the away flag
-    new_status = Integer.undigits(Enum.reverse([0, 0, 0, 0, 1, 0, 0]), 2)
+    new_status = Integer.undigits(Enum.reverse([0, 0, 0, 0, 0, 0, 0]), 2)
     _send(socket, "MYSTATUS #{new_status}\n")
     reply = _recv(socket)
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
@@ -425,5 +425,16 @@ ENDOFCHANNELS\n"
 
     _send(socket, "EXIT\n")
     _recv(socket)
+  end
+
+  test "Ranks" do
+    user = new_user("rank_test", %{"ingame_seconds" => 3600 * 200, "rank" => 5})
+    %{socket: socket} = auth_setup(user)
+
+    # [in_game, away, r1, r2, r3, mod, bot]
+    new_status = Integer.undigits(Enum.reverse([0, 1, 1, 0, 0, 0, 0]), 2)
+    _send(socket, "MYSTATUS #{new_status}\n")
+    reply = _recv(socket)
+    assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
   end
 end

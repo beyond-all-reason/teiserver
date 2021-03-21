@@ -49,6 +49,10 @@ defmodule Teiserver.User do
     mmr: %{}
   }
 
+  @rank_levels [
+    5, 15, 30, 100, 300, 1000, 3000
+  ]
+
   require Logger
   alias Phoenix.PubSub
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -546,7 +550,13 @@ defmodule Teiserver.User do
   defp do_login(user, state, ip, lobbyid) do
     country = Teiserver.Geoip.get_flag(ip)
     last_login = :erlang.system_time(:seconds)
-    user = %{user | ip: ip, lobbyid: lobbyid, country: country, last_login: last_login}
+
+    ingame_hours = user.ingame_seconds / 3600
+    rank = @rank_levels
+    |> Enum.filter(fn r -> r < ingame_hours end)
+    |> Enum.count
+
+    user = %{user | ip: ip, lobbyid: lobbyid, country: country, last_login: last_login, rank: rank}
     update_user(user, persist: true)
 
     proto = state.protocol_out
