@@ -1,9 +1,13 @@
 <% {_fg, _bg, bsname} = @colours %>
 
 <div class="row">
-  <div class="col-md-12"> 
+  <div class="col-md-12">
     <div class="card border-<%= bsname %> page-card">
       <div class="card-body">
+
+<a href="<%= Routes.ts_admin_user_path(@socket, :edit, @user.id) %>" class="float-right btn btn-<%= bsname %>">
+  Edit account
+</a>
 
 <h3>
   <%= @user.name %>

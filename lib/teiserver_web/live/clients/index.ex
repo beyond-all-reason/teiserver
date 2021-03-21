@@ -73,7 +73,7 @@ defmodule TeiserverWeb.ClientLive.Index do
     {:noreply, socket}
   end
 
-  def handle_info({:updated_client, _new_client, _reason}, socket) do
+  def handle_info({:updated_client, new_client, reason}, socket) do
     # clients = socket.assigns[:clients]
     #   |> Enum.filter(fn c -> c.userid != userid end)
     # users = Map.delete(socket.assigns[:users], userid)
@@ -85,9 +85,61 @@ defmodule TeiserverWeb.ClientLive.Index do
     {:noreply, socket}
   end
 
+  def handle_info({:add_user_to_battle, user_id, battle_id}, socket) do
+    clients = socket.assigns[:clients]
+      |> Enum.map(fn client ->
+        if client.userid == user_id do
+          %{client | battle_id: battle_id}
+        else
+          client
+        end
+      end)
+
+    {:noreply, assign(socket, :clients, clients)}
+  end
+
+  def handle_info({:remove_user_from_battle, user_id, _battle_id}, socket) do
+    clients = socket.assigns[:clients]
+      |> Enum.map(fn client ->
+        if client.userid == user_id do
+          %{client | battle_id: nil}
+        else
+          client
+        end
+      end)
+
+    {:noreply, assign(socket, :clients, clients)}
+  end
+
+  def handle_info({:kick_user_from_battle, user_id, _battle_id}, socket) do
+    clients = socket.assigns[:clients]
+      |> Enum.map(fn client ->
+        if client.userid == user_id do
+          %{client | battle_id: nil}
+        else
+          client
+        end
+      end)
+
+    {:noreply, assign(socket, :clients, clients)}
+  end
+
+  def handle_info({:battle_opened, _battle_id}, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_info({:battle_closed, _battle_id}, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_info({:global_battle_updated, _battle_id, _reason}, socket) do
+    {:noreply, socket}
+  end
+
   defp apply_action(socket, :index, _params) do
     :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
     :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
 
     socket
     |> assign(:page_title, "Listing Clients")
