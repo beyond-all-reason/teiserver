@@ -6,6 +6,7 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Account.UserLib
   alias Central.Account.GroupLib
   import Teiserver.User, only: [bar_user_group_id: 0]
+  alias Central.Helpers.TimexHelper
 
   plug(AssignPlug,
     sidemenu_active: "teiserver"
@@ -195,26 +196,39 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        new_data = case action do
+        result = case action do
           "permanent_ban" ->
-            %{"banned" => true}
+            {:ok, %{"banned" => true}}
 
           "temporary_ban" ->
-            ban_expires = params["ban_expires"]
-            %{"banned_until" => ban_expires}
+            case HumanTime.relative(params["until"]) do
+              {:ok, v} ->
+                {:ok, %{"banned_until" => TimexHelper.date_to_str(v, :ymd_hms)}}
+
+              {:error, _} ->
+                {:error, "Unable to understand date"}
+            end
         end
 
-        user_params = %{"data" => Map.merge(user.data || %{}, new_data)}
+        case result do
+          {:ok, new_data} ->
+            user_params = %{"data" => Map.merge(user.data || %{}, new_data)}
+            case Account.update_user(user, user_params) do
+              {:ok, _user} ->
+                conn
+                |> put_flash(:info, "Action performed.")
+                |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
 
-        case Account.update_user(user, user_params) do
-          {:ok, _user} ->
+              {:error, %Ecto.Changeset{} = changeset} ->
+                render(conn, "edit.html", user: user, changeset: changeset)
+            end
+
+          {:error, msg} ->
             conn
-            |> put_flash(:info, "Action performed.")
+            |> put_flash(:warning, "There was an error: #{msg}")
             |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
-
-          {:error, %Ecto.Changeset{} = changeset} ->
-            render(conn, "edit.html", user: user, changeset: changeset)
         end
+
 
       _ ->
         conn

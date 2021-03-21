@@ -1,10 +1,26 @@
 <% {_fg, _bg, bsname} = colours() %>
 
-<form action='<%= Routes.ts_admin_user_path(@conn, :perform_action, @user, "permanent_ban") %>' method="POST" data-confirm="Are you sure">
-  <input type="hidden" name="_method" value="PUT" />
-  <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+<div class="row section-menu">
+  <div class="col-md-6">
+    <form action='<%= Routes.ts_admin_user_path(@conn, :perform_action, @user, "temporary_ban") %>' method="POST">
+      <input type="hidden" name="_method" value="PUT" />
+      <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
 
-  <button type='submit' class='btn btn-<%= bsname %> float-right'>
-    Permanently ban
-  </button>
-</form>
+      <input type="text" name="until" value="" placeholder="" placeholder="Say when they are banned until" />
+
+      <button type='submit' class='btn btn-warning float-right' data-confirm="Are you sure">
+        Temporary ban
+      </button>
+    </form>
+  </div>
+  <div class="col-md-6">
+    <form action='<%= Routes.ts_admin_user_path(@conn, :perform_action, @user, "permanent_ban") %>' method="POST">
+      <input type="hidden" name="_method" value="PUT" />
+      <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+
+      <button type='submit' class='btn btn-danger float-right' data-confirm="Are you sure">
+        Permanent ban
+      </button>
+    </form>
+  </div>
+</div>
