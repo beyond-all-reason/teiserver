@@ -27,7 +27,7 @@ defmodule Teiserver.Protocols.SpringOut do
     state
   end
 
-  @spec do_reply(atom(), String.t() | list()) :: String.t()
+  @spec do_reply(atom(), String.t() | list()) :: String.t() | List.t()
   defp do_reply(:login_accepted, user) do
     "ACCEPTED #{user}\n"
   end
@@ -442,7 +442,6 @@ defmodule Teiserver.Protocols.SpringOut do
     _send(msg, state.socket, state.transport, msg_id)
   end
 
-  defp _send(nil, _, _, _), do: nil
   defp _send("", _, _, _), do: nil
   defp _send([], _, _, _), do: nil
 
