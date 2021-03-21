@@ -427,7 +427,7 @@ ENDOFCHANNELS\n"
     _recv(socket)
   end
 
-  test "Ranks" do
+  test "Ranks", %{socket: socket_orig} do
     user = new_user("rank_test", %{"ingame_seconds" => 3600 * 200, "rank" => 5})
     %{socket: socket} = auth_setup(user)
 
@@ -436,5 +436,11 @@ ENDOFCHANNELS\n"
     _send(socket, "MYSTATUS #{new_status}\n")
     reply = _recv(socket)
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
+
+    _send(socket, "EXIT\n")
+    _recv(socket)
+
+    _send(socket_orig, "EXIT\n")
+    _recv(socket_orig)
   end
 end

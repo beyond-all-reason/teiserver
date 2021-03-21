@@ -138,7 +138,7 @@ defmodule Teiserver.TcpServerTest do
     r = _recv(socket)
     assert r == "ADDUSER #{u1.name} ?? 0 #{u1.id} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\n"
 
-    # Now do battles
+    # ---- BATTLES ----
     battle_id = 111
     send(pid, {:add_user_to_battle, u1.id, battle_id})
     r = _recv(socket)
@@ -168,6 +168,24 @@ defmodule Teiserver.TcpServerTest do
     send(pid, {:add_user_to_battle, u1.id, battle_id+1})
     r = _recv(socket)
     assert r == "ADDUSER #{u1.name} ?? 0 #{u1.id} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\nJOINEDBATTLE #{battle_id+1} #{u1.name}\n"
+
+    # ---- Chat rooms ----
+    send(pid, {:add_user_to_room, u1.id, "roomname"})
+    r = _recv(socket)
+    assert r == "JOINED roomname #{u1.name}\n"
+
+    send(pid, {:add_user_to_room, u1.id, "roomname"})
+    r = _recv(socket)
+    assert r == :timeout
+
+    # Remove
+    send(pid, {:remove_user_from_room, u1.id, "roomname"})
+    r = _recv(socket)
+    assert r == "LEFT roomname #{u1.name}\n"
+
+    send(pid, {:remove_user_from_room, u1.id, "roomname"})
+    r = _recv(socket)
+    assert r == :timeout
 
     _send(socket, "EXIT\n")
     _send(s1, "EXIT\n")

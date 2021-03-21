@@ -106,6 +106,7 @@ defmodule Teiserver.TcpServer do
 
       # Connection microstate
       battle_id: nil,
+      room_member_cache: %{},
       known_users: %{},
       extra_logging: false
     }
@@ -514,13 +515,27 @@ defmodule Teiserver.TcpServer do
   end
 
   defp user_join_chat_room(userid, room_name, state) do
-    state.protocol_out.reply(:add_user_to_room, {userid, room_name}, nil, state)
-    state
+    new_members = if not Enum.member?(state.room_member_cache[room_name] || [], userid) do
+      state.protocol_out.reply(:add_user_to_room, {userid, room_name}, nil, state)
+      state.room_member_cache[room_name] || [] ++ [userid]
+    else
+      state.room_member_cache[room_name] || []
+    end
+
+    new_cache = Map.put(state.room_member_cache, room_name, new_members)
+    %{state | room_member_cache: new_cache}
   end
 
   defp user_leave_chat_room(userid, room_name, state) do
-    state.protocol_out.reply(:remove_user_from_room, {userid, room_name}, nil, state)
-    state
+    new_members = if Enum.member?(state.room_member_cache[room_name] || [], userid) do
+      state.protocol_out.reply(:remove_user_from_room, {userid, room_name}, nil, state)
+      state.room_member_cache[room_name] |> Enum.filter(fn m -> m != userid end)
+    else
+      state.room_member_cache[room_name] || []
+    end
+
+    new_cache = Map.put(state.room_member_cache, room_name, new_members)
+    %{state | room_member_cache: new_cache}
   end
 
   # Actions
