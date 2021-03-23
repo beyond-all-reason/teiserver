@@ -664,4 +664,160 @@ defmodule Central.Account do
   def change_code(%Code{} = code) do
     Code.changeset(code, %{})
   end
+
+  alias Central.Account.Report
+  alias Central.Account.ReportLib
+
+  def report_query(args) do
+    report_query(nil, args)
+  end
+
+  def report_query(id, args) do
+    ReportLib.query_reports
+    |> ReportLib.search(%{id: id})
+    |> ReportLib.search(args[:search])
+    |> ReportLib.preload(args[:preload])
+    |> ReportLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of reports.
+
+  ## Examples
+
+      iex> list_reports()
+      [%Report{}, ...]
+
+  """
+  def list_reports(args \\ []) do
+    report_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Gets a single report.
+
+  Raises `Ecto.NoResultsError` if the Report does not exist.
+
+  ## Examples
+
+      iex> get_report!(123)
+      %Report{}
+
+      iex> get_report!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_report!(id) when not is_list(id) do
+    report_query(id, [])
+    |> Repo.one!
+  end
+  def get_report!(args) do
+    report_query(nil, args)
+    |> Repo.one!
+  end
+  def get_report!(id, args) do
+    report_query(id, args)
+    |> Repo.one!
+  end
+
+  # Uncomment this if needed, default files do not need this function
+  # @doc """
+  # Gets a single report.
+
+  # Returns `nil` if the Report does not exist.
+
+  # ## Examples
+
+  #     iex> get_report(123)
+  #     %Report{}
+
+  #     iex> get_report(456)
+  #     nil
+
+  # """
+  # def get_report(id, args \\ []) when not is_list(id) do
+  #   report_query(id, args)
+  #   |> Repo.one
+  # end
+
+  @doc """
+  Creates a report.
+
+  ## Examples
+
+      iex> create_report(%{field: value})
+      {:ok, %Report{}}
+
+      iex> create_report(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_report(attrs \\ %{}) do
+    %Report{}
+    |> Report.create_changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a report.
+
+  ## Examples
+
+      iex> update_report(report, %{field: new_value})
+      {:ok, %Report{}}
+
+      iex> update_report(report, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_report(%Report{} = report, attrs) do
+    report
+    |> Report.respond_changeset(attrs)
+    |> Repo.update()
+    |> broadcast_update_report
+  end
+
+  def broadcast_update_report({:ok, report}) do
+    CentralWeb.Endpoint.broadcast(
+      "account_hooks",
+      "update_report",
+      report.id
+    )
+
+    {:ok, report}
+  end
+
+  def broadcast_update_report(v), do: v
+
+  @doc """
+  Deletes a Report.
+
+  ## Examples
+
+      iex> delete_report(report)
+      {:ok, %Report{}}
+
+      iex> delete_report(report)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_report(%Report{} = report) do
+    Repo.delete(report)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking report changes.
+
+  ## Examples
+
+      iex> change_report(report)
+      %Ecto.Changeset{source: %Report{}}
+
+  """
+  def change_report(%Report{} = report) do
+    Report.changeset(report, %{})
+  end
 end

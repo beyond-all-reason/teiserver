@@ -12,6 +12,7 @@ config :central, Extensions,
 
 config :central, Central,
   site_title: "Teifion.co.uk",
+  site_icon: "fad fa-robot",
   enable_blog: true,
   blog_title: "Teifion's blog",
   # This is used for the coverage tool

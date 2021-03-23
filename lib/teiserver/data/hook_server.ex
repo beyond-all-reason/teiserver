@@ -17,6 +17,9 @@ defmodule Teiserver.HookServer do
       "update_user" ->
         Teiserver.User.recache_user(int_parse(payload))
 
+      "update_report" ->
+        Teiserver.User.new_report(int_parse(payload))
+
       _ ->
         throw("No HookServer account_hooks handler for event '#{event}'")
     end

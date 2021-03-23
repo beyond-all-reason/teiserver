@@ -30,6 +30,8 @@ defmodule Central.Account.RecentlyUsedCache do
       user_id: conn.assigns[:current_user].id
     })
     |> insert_recently
+
+    item
   end
 
   def get_recently(%{assigns: %{current_user: current_user}}) do

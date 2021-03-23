@@ -146,9 +146,11 @@ defmodule Central.General.Startup do
     })
 
     add_permission_set("admin", "debug", ~w(debug))
-    add_permission_set("admin", "user", ~w(show create update delete report))
     add_permission_set("admin", "dev", ~w(developer structure))
-    add_permission_set("admin", "group", ~w(show create update delete report config))
     add_permission_set("admin", "admin", ~w(limited full))
+    add_permission_set("admin", "report", ~w(show update delete report))
+    add_permission_set("admin", "user", ~w(show create update delete report))
+    add_permission_set("admin", "group", ~w(show create update delete report config))
+
   end
 end

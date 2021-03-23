@@ -68,12 +68,14 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="<%= Routes.blog_path(@conn, :index) %>">
-              <i class="fa-fw <%= Central.Communication.BlogLib.icon() %>"></i>
-              Blog
-            </a>
-          </li>
+          <%= if Application.get_env(:central, Central)[:enable_blog] do %>
+            <li class="nav-item">
+              <a class="nav-link" href="<%= Routes.blog_path(@conn, :index) %>">
+                <i class="fa-fw <%= Central.Communication.BlogLib.icon() %>"></i>
+                Blog
+              </a>
+            </li>
+          <% end %>
 
           <%= if @current_user == nil do %>
             <li class="nav-item">

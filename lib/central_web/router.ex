@@ -103,6 +103,9 @@ defmodule CentralWeb.Router do
 
     get("/groups/:group_id/settings", GroupController, :show_settings)
     post("/groups/:group_id/settings/:key", GroupController, :update_settings)
+
+    get("/report/new/:target_id", ReportController, :new)
+    post("/report/create", ReportController, :create)
   end
 
   scope "/config", CentralWeb.Config do
@@ -227,6 +230,13 @@ defmodule CentralWeb.Router do
     get("/users/reset_password/:id", UserController, :reset_password)
     get("/users/search", UserController, :index)
     post("/users/search", UserController, :search)
+
+    # User reports
+    resources("/reports", ReportController,
+      only: [:index, :show]
+    )
+    get("/reports/:id/respond", ReportController, :respond_form)
+    put("/reports/:id/respond", ReportController, :respond_post)
 
     # Groups
     post("/groups/create_membership", GroupController, :create_membership)

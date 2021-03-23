@@ -604,6 +604,10 @@ defmodule Teiserver.User do
     |> Map.merge(data)
   end
 
+  def new_report(report_id) do
+    # TODO: Handle reports
+  end
+
   def recache_user(id) do
     if get_user_by_id(id) do
       Account.get_user!(id)

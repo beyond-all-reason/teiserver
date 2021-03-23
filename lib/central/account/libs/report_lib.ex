@@ -1,0 +1,130 @@
+defmodule Central.Account.ReportLib do
+  use CentralWeb, :library
+  alias Central.Account.Report
+
+  # Functions
+  def icon, do: "fas fa-flag"
+  def colours, do: Central.Helpers.StylingHelper.colours(:warning)
+
+  def make_favourite(report) do
+    %{
+      type_colour: colours() |> elem(0),
+      type_icon: icon(),
+
+      item_id: report.id,
+      item_type: "central_account_report",
+      item_colour: colours() |> elem(0),
+      item_icon: Central.Account.ReportLib.icon(),
+      item_label: "#{report.reporter.name} -> #{report.target.name}",
+
+      url: "/account/reports/#{report.id}"
+    }
+  end
+
+  def response_actions() do
+    [
+      "Ignore report",
+      "Mute",
+      "Ban"
+    ]
+  end
+
+  def perform_action(_report, "Ignore report", _data) do
+    {:ok, nil}
+  end
+
+  def perform_action(report, _, "never"), do: {:ok, nil}
+  def perform_action(report, _, "Never"), do: {:ok, nil}
+
+  def perform_action(report, "Mute", data) do
+    case HumanTime.relative(data) do
+      {:ok, banned_until} ->
+        {:ok, banned_until}
+
+      err ->
+        err
+    end
+  end
+
+  def perform_action(report, "Ban", _data) do
+    {:ok, nil}
+  end
+
+  # Queries
+  @spec query_reports() :: Ecto.Query.t
+  def query_reports do
+    from reports in Report
+  end
+
+  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  def search(query, nil), do: query
+  def search(query, params) do
+    params
+    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+      _search(query_acc, key, value)
+    end)
+  end
+
+  def _search(query, _, ""), do: query
+  def _search(query, _, nil), do: query
+
+  def _search(query, :id, id) do
+    from reports in query,
+      where: reports.id == ^id
+  end
+
+  def _search(query, :id_list, id_list) do
+    from reports in query,
+      where: reports.id in ^id_list
+  end
+
+  def _search(query, :filter, "all"), do: query
+  def _search(query, :filter, "open") do
+    from reports in query,
+      where: is_nil(reports.responder_id)
+  end
+
+  def _search(query, :filter, "closed") do
+    from reports in query,
+      where: not is_nil(reports.responder_id)
+  end
+
+  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  def order_by(query, nil), do: query
+  def order_by(query, "Newest first") do
+    from reports in query,
+      order_by: [desc: reports.inserted_at]
+  end
+
+  def order_by(query, "Oldest first") do
+    from reports in query,
+      order_by: [asc: reports.inserted_at]
+  end
+
+  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  def preload(query, nil), do: query
+  def preload(query, preloads) do
+    query = if :reporter in preloads, do: _preload_reporter(query), else: query
+    query = if :target in preloads, do: _preload_target(query), else: query
+    query = if :responder in preloads, do: _preload_responder(query), else: query
+    query
+  end
+
+  def _preload_reporter(query) do
+    from reports in query,
+      left_join: reporters in assoc(reports, :reporter),
+      preload: [reporter: reporters]
+  end
+
+  def _preload_target(query) do
+    from reports in query,
+      left_join: targets in assoc(reports, :target),
+      preload: [target: targets]
+  end
+
+  def _preload_responder(query) do
+    from reports in query,
+      left_join: responders in assoc(reports, :responder),
+      preload: [responder: responders]
+  end
+end

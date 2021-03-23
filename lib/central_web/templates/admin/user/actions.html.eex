@@ -8,6 +8,13 @@
     </a>
   <% end %>
 
+  <a class="dropdown-item" href='<%= Routes.account_report_path(@conn, :new, @user.id) %>'>
+    <%= component "icon", icon: StylingHelper.icon(:new), class: "fas" %>
+    <%= component "icon", icon: Central.Account.ReportLib.icon() %>
+    &nbsp;
+    Add report
+  </a>
+
 <%= if allow?(@current_user, "admin.admin.full") do %>
 <div class="dropdown-divider"></div>
 
