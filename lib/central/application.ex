@@ -35,8 +35,15 @@ defmodule Central.Application do
         concache_sup(:communication_user_notifications),
         {Oban, oban_config()}
       ] ++
-        load_test_server() ++
-        Teiserver.Application.children()
+        load_test_server()
+
+    extended_children = Application.get_env(:central, Extensions)[:applications]
+    |> Enum.map(fn m ->
+      m.children()
+    end)
+    |> List.flatten
+
+    children = children ++ extended_children
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -105,7 +112,11 @@ defmodule Central.Application do
     ~w(General Config Account Admin Logging)
     |> Enum.map(&env_startup/1)
 
-    Teiserver.Application.startup_sub_functions()
+    Application.get_env(:central, Extensions)[:startups]
+    |> Enum.each(fn m ->
+      m.startup()
+    end)
+
   end
 
   defp env_startup(module) do

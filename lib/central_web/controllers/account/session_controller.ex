@@ -185,14 +185,8 @@ defmodule CentralWeb.Account.SessionController do
         |> render("password_reset_form.html")
 
       true ->
-        # Teiserver related
-        new_data =
-          (code.user.data || %{})
-          |> Map.put("password_hash", Teiserver.User.encrypt_password(pass1))
-
         user_params = %{
           "password" => pass1,
-          "data" => new_data
         }
 
         case Account.update_user(code.user, user_params) do

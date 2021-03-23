@@ -27,7 +27,7 @@ defmodule CentralWeb.Communication.BlogController do
     conn
     |> assign(:posts, posts)
     |> assign(:categories, categories)
-    |> assign(:title, "Teifion.co.uk - Blog")
+    |> assign(:title, "#{Application.get_env(:central, Central)[:site_title]} - Blog")
     |> render("index.html")
   end
 
@@ -49,7 +49,7 @@ defmodule CentralWeb.Communication.BlogController do
     conn
     |> assign(:posts, posts)
     |> assign(:categories, categories)
-    |> assign(:title, "Teifion.co.uk - Blog")
+    |> assign(:title, "#{Application.get_env(:central, Central)[:site_title]} - Blog")
     |> render("index.html")
   end
 
@@ -72,7 +72,7 @@ defmodule CentralWeb.Communication.BlogController do
     |> assign(:selected_category, the_category)
     |> assign(:posts, posts)
     |> assign(:categories, categories)
-    |> assign(:title, "Teifion.co.uk - Blog")
+    |> assign(:title, "#{Application.get_env(:central, Central)[:site_title]} - Blog")
     |> render("index.html")
   end
 
@@ -107,7 +107,7 @@ defmodule CentralWeb.Communication.BlogController do
 
         true ->
           conn
-          |> assign(:title, "Teifion.co.uk - " <> post.title)
+          |> assign(:title, "#{Application.get_env(:central, Central)[:site_title]} - " <> post.title)
           |> assign(:post, post)
           |> render("show.html")
       end

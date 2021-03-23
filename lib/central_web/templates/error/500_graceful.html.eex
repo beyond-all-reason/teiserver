@@ -61,7 +61,7 @@
         <br /><br />
 
         <%= if @info != "" do %>
-          If you think this error should not have happened (i.e. you think you did everything correctly and the issue is in the application) then please email Teifion directly and copy + paste the information below into the email:
+          If you think this error should not have happened (i.e. you think you did everything correctly and the issue is in the application) then please contact your site admin and copy + paste the information below into the email:
           <br />
           <textarea rows="8" class="form-control" style="font-family: monospace;"><%= @info %></textarea>
         <% end %>

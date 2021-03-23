@@ -21,12 +21,6 @@ defmodule CentralWeb.Admin.ToolController do
   end
 
   def test_page(conn, _params) do
-    # CentralWeb.TJSoftware.NewSignupTask.welcome_email(%{
-    #   "name" => "Teifion Jordan",
-    #   "company" => "ACME Solutions",
-    #   "email" => "sarkalian@gmail.com",
-    # })
-
     conn
     |> put_flash(:success, "Example flash message success")
     |> put_flash(:info, "Example flash message info")
@@ -55,8 +49,9 @@ defmodule CentralWeb.Admin.ToolController do
   end
 
   def coverage_post(conn, params) do
+    file_path = Application.get_env(:central, Central)[:file_path]
     coverage_path =
-      "file:///home/teifion/programming/elixir/alacrity/apps/centaur/cover/excoveralls.html#"
+      "file:///#{file_path}/cover/excoveralls.html#"
 
     coverage_data =
       if params["results"] == "" do

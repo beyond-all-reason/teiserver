@@ -11,6 +11,7 @@
     </a>
   </li>
 
+<%= if Application.get_env(:central, Central)[:enable_blog] do %>
   <li id="sidebar_blog">
     <a href="<%= Routes.blog_path(@conn, :index) %>">
       <%= component "icon", icon: Central.Communication.BlogLib.icon(), class: "fa-lg" %>
@@ -18,6 +19,7 @@
       Blog
     </a>
   </li>
+<% end %>
 
   <%= if allow?(@current_user, "admin") do %>
     <li id="sidebar_admin">
@@ -41,7 +43,9 @@
 
   <%= small_divider %>
 
-  <%= render TeiserverWeb.Lobby.GeneralView, "side_menu.html", assigns %>
+  <%= for view <- Application.get_env(:central, Extensions)[:side_views] do %>
+    <%= render view, "sidemenu.html", assigns %>
+  <% end %>
 
   <%= component "sidemenu_item",
     name: "account",

@@ -3,8 +3,8 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark pt-4 px-0">
       <a class="navbar-brand" href="<%= Routes.general_page_path(@conn, :index) %>">
-        <img src='<%= Routes.static_path(@conn, "/images/logo/square_logo.svg") %>' width="30" class="mr-2" alt="Teifion.co.uk - Landing Page">
-        Teifion.co.uk
+        <img src='<%= Routes.static_path(@conn, "/images/logo/square_logo.svg") %>' width="30" class="mr-2" alt="Landing Page">
+        <%= Application.get_env(:central, Central)[:site_title] %>
       </a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -77,7 +77,7 @@
       <div class="col-md-12">
         <a href="<%= Routes.blog_path(@conn, :index) %>">
           <h1 class="welcome-heading text-white">
-            Teifion's blog
+            <%= Application.get_env(:central, Central)[:blog_title] %>
           </h1>
         </a>
       </div>

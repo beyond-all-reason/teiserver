@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title><%= assigns[:title] || "Teifion.co.uk" %></title>
+    <title><%= assigns[:title] || Application.get_env(:central, Central)[:site_title] %></title>
     <link rel="stylesheet" href='<%= Routes.static_path(@socket, "/css/bootstrap.min.css") %>'>
     <link rel="stylesheet" href='<%= Routes.static_path(@socket, "/css/shards.css") %>'>
     <link rel="stylesheet" href='<%= Routes.static_path(@socket, "/css/layout.css") %>'>
@@ -84,7 +84,7 @@
         <div class="navbar-brand hide-sm" href="#">
           <i class="fas fa-fw fa-broadcast-tower" style="margin: -4px 20px 0 0px;" class="d-inline align-top"></i>
           <span id="page-title">
-            Teiserver
+            <%= assigns[:page_title] || Application.get_env(:central, Central)[:site_title] %> %>
           </span>
         </div>
 
@@ -160,7 +160,7 @@
 
         <footer class="main-footer d-flex p-2 px-3 bg-white border-top">
           <span class="float-right">
-            Created by Teifion Jordan
+            Created by <%= Application.get_env(:central, Central)[:credit] %>
           </span>
         </footer>
       </div>

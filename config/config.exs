@@ -3,6 +3,21 @@ use Mix.Config
 config :central,
   ecto_repos: [Central.Repo]
 
+config :central, Extensions,
+  applications: [Teiserver.Application],
+  startups: [Teiserver.Startup],
+  routers: [TeiserverWeb.Router],
+  index_views: [TeiserverWeb.General.CentralView],
+  side_views: [TeiserverWeb.General.CentralView]
+
+config :central, Central,
+  site_title: "Teifion.co.uk",
+  enable_blog: true,
+  blog_title: "Teifion's blog",
+  # This is used for the coverage tool
+  file_path: "~/programming/elixir/barserver/",
+  credit: "Teifion Jordan"
+
 # Configures the endpoint
 config :central, CentralWeb.Endpoint,
   url: [host: "localhost"],
@@ -49,6 +64,11 @@ config :central, Oban,
     # Every day at 2am
     {"0 2 * * *", Central.Logging.AggregateViewLogsTask}
   ]
+
+config :central, Central.Mailer,
+  noreply_name: "Teiserver Noreply",
+  noreply_name: "Teiserver Contact",
+  adapter: Bamboo.SMTPAdapter
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

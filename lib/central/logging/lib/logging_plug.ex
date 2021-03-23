@@ -75,20 +75,7 @@ defmodule Central.Logging.LoggingPlug do
       })
 
     if conn.assigns[:do_not_log] == nil do
-      the_log = Repo.insert!(page_log)
-
-      if conn.assigns[:current_user] do
-        data = %{
-          username: conn.assigns[:current_user].name,
-          user_id: the_log.user_id,
-          path: conn.request_path,
-          ip: the_log.ip,
-          log_id: the_log.id,
-          timestamp: Central.Helpers.TimexHelper.date_to_str(Timex.local(), :hms)
-        }
-      end
-    else
-      nil
+      Repo.insert!(page_log)
     end
   end
 end

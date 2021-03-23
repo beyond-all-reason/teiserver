@@ -239,10 +239,7 @@ defmodule Central.Communication.BlogFileLib do
       the_file
       |> Repo.delete()
 
-      {:error,
-       "There was an error uploading the file. Please report the issue to Teifion with the following numbers and a copy of the file you were uploading.  moved_stat: #{
-         moved_stat
-       }, upload_stat: #{upload_stat}"}
+      {:error, "There was an error uploading the file."}
     end
   end
 

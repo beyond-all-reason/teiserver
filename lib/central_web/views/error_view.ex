@@ -58,10 +58,10 @@ defmodule CentralWeb.ErrorView do
         # If in test mode we don't want to actually log errors since
         # there is an issue with converting the params into a map
         error_log =
-          if db_username != "teiserver_test" do
-            add_error_log(error)
-          else
+          if db_username =~ "_test" do
             %{}
+          else
+            add_error_log(error)
           end
 
         render("500_internal.html", Map.merge(error, %{error_log: error_log, error: error}))

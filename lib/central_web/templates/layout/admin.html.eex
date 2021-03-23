@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <%= csrf_meta_tag() %>
 
-    <title><%= assigns[:title] || "Teifion.co.uk" %></title>
+    <title><%= assigns[:title] || Application.get_env(:central, Central)[:site_title] %></title>
     <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/bootstrap.min.css") %>'>
     <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/shards.css") %>'>
     <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/layout.css") %>'>
@@ -119,7 +119,7 @@
         <div class="navbar-brand hide-sm" href="#">
           <i class="fas fa-fw fa-broadcast-tower" style="margin: -4px 20px 0 0px;" class="d-inline align-top"></i>
           <span id="page-title">
-            Teiserver
+            <%= assigns[:page_title] || Application.get_env(:central, Central)[:site_title] %>
           </span>
         </div>
 
@@ -137,7 +137,7 @@
       <div class="navbar-collapse collapse" id="collapsingNavbar">
         <%# Right side %>
         <ul class="navbar-nav ml-auto">
-          <%# 
+          <%#
             TODO
              - Site search menu
              - Error log count for dev
@@ -203,7 +203,7 @@
 
         <footer class="main-footer d-flex p-2 px-3 bg-white border-top">
           <span class="float-right">
-            Created by Teifion Jordan
+            Created by <%= Application.get_env(:central, Central)[:credit] %>
           </span>
         </footer>
       </div>

@@ -1,4 +1,4 @@
-<% {fg, bg, bsname} = colours() %>
+<% {_fg, _bg, bsname} = colours() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -37,7 +37,7 @@
   <%= render CentralWeb.Admin.UserView, "search.html", assigns %>
 
 <div class="row">
-  <div class="col-md-12"> 
+  <div class="col-md-12">
     <div class="card border-<%= bsname %> page-card">
       <div class="card-body">
 <% else %>

@@ -28,22 +28,24 @@
 &nbsp;
 
 <div class="row">
-  <%= if allow?(@current_user, "communication.blog") do %>
-    <%=
-      component "menu_card",
-        icon: Central.Communication.BlogLib.icon(),
-        name: "blog",
-        text: "Blog posts",
-        link: Routes.blog_post_path(@conn, :index)
-    %>
-  <% else %>
-    <%=
-      component "menu_card",
-        icon: Central.Communication.BlogLib.icon(),
-        name: "blog",
-        text: "Blog",
-        link: Routes.blog_path(@conn, :index)
-    %>
+  <%= if Application.get_env(:central, Central)[:enable_blog] do %>
+    <%= if allow?(@current_user, "communication.blog") do %>
+      <%=
+        component "menu_card",
+          icon: Central.Communication.BlogLib.icon(),
+          name: "blog",
+          text: "Blog posts",
+          link: Routes.blog_post_path(@conn, :index)
+      %>
+    <% else %>
+      <%=
+        component "menu_card",
+          icon: Central.Communication.BlogLib.icon(),
+          name: "blog",
+          text: "Blog",
+          link: Routes.blog_path(@conn, :index)
+      %>
+    <% end %>
   <% end %>
 
   <%= if allow?(@current_user, "admin") do %>
@@ -59,17 +61,9 @@
 
 &nbsp;
 
-<div class="row">
-  <%= if allow?(@current_user, "teiserver") do %>
-    <%=
-      component "menu_card",
-      icon: Teiserver.icon(),
-      name: "teiserver",
-      text: "Teiserver",
-      link: Routes.ts_lobby_general_path(@conn, :index)
-    %>
-  <% end %>
-</div>
+<%= for view <- Application.get_env(:central, Extensions)[:index_views] do %>
+  <%= render view, "index.html", assigns %>
+<% end %>
 
 &nbsp;
 

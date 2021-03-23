@@ -581,9 +581,6 @@ defmodule CentralWeb.Admin.UserController do
         # Now remove the user
         Account.delete_user(user)
 
-        # Tell Teiserver we've delete the user
-        Teiserver.User.delete_user(user.id)
-
         conn
         |> put_flash(:success, "User deleted")
         |> redirect(to: Routes.admin_user_path(conn, :index))

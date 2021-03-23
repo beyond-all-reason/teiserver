@@ -61,5 +61,14 @@ defmodule Teiserver.Startup do
     #   opts: [],
     #   default: false,
     # }
+
+    ConCache.put(:lists, :clients, [])
+    ConCache.put(:lists, :rooms, [])
+    ConCache.insert_new(:lists, :battles, [])
+
+    ConCache.put(:id_counters, :battle, 0)
+    ConCache.put(:id_counters, :user, 0)
+
+    Teiserver.User.pre_cache_users()
   end
 end
