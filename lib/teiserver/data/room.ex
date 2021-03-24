@@ -1,7 +1,9 @@
 defmodule Teiserver.Room do
   @moduledoc false
   require Logger
+  alias Teiserver.User
   alias Phoenix.PubSub
+  alias Central.Helpers.TimexHelper
 
   def create_room(%{name: _} = room) do
     Map.merge(
@@ -100,35 +102,56 @@ defmodule Teiserver.Room do
     |> Enum.map(fn room_name -> ConCache.get(:rooms, room_name) end)
   end
 
-  def send_message(from, room_name, msg) do
-    case get_room(room_name) do
-      nil ->
-        nil
+  def send_message(from_id, room_name, msg) do
+    if allow?(from_id, room_name) do
+      case get_room(room_name) do
+        nil ->
+          nil
 
-      room ->
-        if from in room.members do
-          PubSub.broadcast(
-            Central.PubSub,
-            "room:#{room_name}",
-            {:new_message, from, room_name, msg}
-          )
-        end
+        room ->
+          if from_id in room.members do
+            PubSub.broadcast(
+              Central.PubSub,
+              "room:#{room_name}",
+              {:new_message, from_id, room_name, msg}
+            )
+          end
+      end
     end
   end
 
-  def send_message_ex(from, room_name, msg) do
-    case get_room(room_name) do
-      nil ->
-        nil
+  def send_message_ex(from_id, room_name, msg) do
+    if allow?(from_id, room_name) do
+      case get_room(room_name) do
+        nil ->
+          nil
 
-      room ->
-        if from in room.members do
-          PubSub.broadcast(
-            Central.PubSub,
-            "room:#{room_name}",
-            {:new_message_ex, from, room_name, msg}
-          )
-        end
+        room ->
+          if from_id in room.members do
+            PubSub.broadcast(
+              Central.PubSub,
+              "room:#{room_name}",
+              {:new_message_ex, from_id, room_name, msg}
+            )
+          end
+      end
+    end
+  end
+
+  @spec allow?(Map.t(), String.t()) :: boolean()
+  def allow?(user_id, _room_name) do
+    user = User.get_user_by_id(user_id)
+    muted_until_dt = TimexHelper.parse_ymd_hms(user.muted_until)
+
+    cond do
+      user.muted ->
+        false
+
+      muted_until_dt != nil and Timex.compare(Timex.now(), muted_until_dt) != 1 ->
+        false
+
+      true ->
+        true
     end
   end
 end

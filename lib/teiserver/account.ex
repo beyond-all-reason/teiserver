@@ -117,4 +117,8 @@ defmodule Teiserver.Account do
   # Group stuff
   def create_group_membership(params),
     do: Central.Account.create_group_membership(params)
+
+
+  # Reports
+  def get_report!(id), do: Central.Account.get_report!(id)
 end

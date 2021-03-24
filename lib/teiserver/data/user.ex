@@ -5,6 +5,7 @@ defmodule Teiserver.User do
   alias Central.Communication
   alias Teiserver.Client
   alias Teiserver.EmailHelper
+  alias Teiserver.Account
   alias Central.Helpers.StylingHelper
   alias Central.Helpers.TimexHelper
 
@@ -29,7 +30,9 @@ defmodule Teiserver.User do
     :ingame_seconds,
     :mmr,
     :banned,
-    :banned_until
+    :muted,
+    :banned_until,
+    :muted_until
   ]
 
   @default_data %{
@@ -51,7 +54,9 @@ defmodule Teiserver.User do
     ingame_seconds: 0,
     mmr: %{},
     banned: false,
-    banned_until: nil
+    muted: false,
+    banned_until: nil,
+    muted_until: nil
   }
 
   @rank_levels [
@@ -205,11 +210,6 @@ defmodule Teiserver.User do
 
   def get_user_by_id(id) do
     ConCache.get(:users, int_parse(id))
-  end
-
-  def list_users(id_list) do
-    id_list
-    |> Enum.map(fn userid -> ConCache.get(:users, userid) end)
   end
 
   def rename_user(user, new_name) do
@@ -503,10 +503,19 @@ defmodule Teiserver.User do
     )
   end
 
-  def list_users() do
+   @spec list_users :: list
+   def list_users() do
     ConCache.get(:lists, :users)
     |> Enum.map(fn userid -> ConCache.get(:users, userid) end)
   end
+
+  @spec list_users(list) :: list
+  def list_users(id_list) do
+    id_list
+    |> Enum.map(fn userid -> ConCache.get(:users, userid) end)
+  end
+
+
 
   def ring(ringee_id, ringer_id) do
     PubSub.broadcast(Central.PubSub, "user_updates:#{ringee_id}", {:action, {:ring, ringer_id}})
@@ -604,8 +613,35 @@ defmodule Teiserver.User do
     |> Map.merge(data)
   end
 
+  @spec new_report(Integer.t()) :: :ok
   def new_report(report_id) do
-    # TODO: Handle reports
+    report = Account.get_report!(report_id)
+    user = get_user_by_id(report.target_id)
+
+    changes = case {report.response_action, report.expires} do
+      {"Mute", nil} ->
+        %{muted: true}
+
+      {"Mute", expires} ->
+        %{muted_until: expires}
+
+      {"Ban", nil} ->
+        %{banned: true}
+
+      {"Ban", expires} ->
+        %{banned_until: expires}
+
+      {"Ignore report", nil} ->
+        %{}
+
+      {action, _} ->
+        throw "No handler for action type '#{action}' in #{__MODULE__}"
+    end
+
+    Map.merge(user, changes)
+    |> update_user(persist: true)
+
+    :ok
   end
 
   def recache_user(id) do
