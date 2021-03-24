@@ -8,7 +8,6 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 
 
 ### Roadmap to v1.0 (remaining items, not full list)
-- Persist user changes to database when altering friends
 - Ability to rename battles in web interface
 
 ### Post parity todo (in no particular order)
