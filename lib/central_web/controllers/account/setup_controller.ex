@@ -16,17 +16,17 @@ defmodule CentralWeb.Account.SetupController do
 
         if users == [] do
           {:ok, group} = Account.create_group(%{
-            name: "Root group",
-            colour: "#AA0000",
-            icon: "far fa-info",
-            active: true,
-            group_type: nil,
-            data: %{},
-            see_group: false,
-            see_members: false,
-            invite_members: false,
-            self_add_members: false,
-            super_group_id: nil
+            "name" => "Root group",
+            "colour" => "#AA0000",
+            "icon" => "far fa-info",
+            "active" => true,
+            "group_type" => nil,
+            "data" => %{},
+            "see_group" => false,
+            "see_members" => false,
+            "invite_members" => false,
+            "self_add_members" => false,
+            "super_group_id" => nil
           })
 
           {:ok, user} = Account.create_user(%{

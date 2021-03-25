@@ -1,5 +1,8 @@
 use Mix.Config
 
+config :central, Central.Setup,
+  key: "dev_key"
+
 # Configure your database
 config :central, Central.Repo,
   username: "postgres",
