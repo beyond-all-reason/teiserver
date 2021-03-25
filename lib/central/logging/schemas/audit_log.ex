@@ -16,6 +16,6 @@ defmodule Central.Logging.AuditLog do
   def changeset(struct, params) do
     struct
     |> cast(params, [:action, :details, :ip, :user_id, :group_id])
-    |> validate_required([:action, :details, :ip, :user_id])
+    |> validate_required([:action, :details, :ip])
   end
 end

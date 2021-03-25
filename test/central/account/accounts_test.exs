@@ -190,4 +190,104 @@ defmodule Central.AccountTest do
       assert %Ecto.Changeset{} = Account.change_group(group)
     end
   end
+
+  describe "reports" do
+    alias Central.Account.Report
+
+    @valid_attrs %{"name" => "some name"}
+    @update_attrs %{"name" => "some updated name"}
+    @invalid_attrs %{"name" => nil}
+
+    test "list_reports/0 returns reports" do
+      AccountTestLib.report_fixture(1)
+      assert Account.list_reports() != []
+    end
+
+    test "get_report!/1 returns the report with given id" do
+      report = AccountTestLib.report_fixture(1)
+      assert Account.get_report!(report.id) == report
+    end
+
+    test "create_report/1 with valid data creates a report" do
+      assert {:ok, %Report{} = report} = Account.create_report(@valid_attrs)
+      assert report.name == "some name"
+    end
+
+    test "create_report/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Account.create_report(@invalid_attrs)
+    end
+
+    test "update_report/2 with valid data updates the report" do
+      report = AccountTestLib.report_fixture(1)
+      assert {:ok, %Report{} = report} = Account.update_report(report, @update_attrs)
+      assert report.name == "some updated name"
+    end
+
+    test "update_report/2 with invalid data returns error changeset" do
+      report = AccountTestLib.report_fixture(1)
+      assert {:error, %Ecto.Changeset{}} = Account.update_report(report, @invalid_attrs)
+      assert report == Account.get_report!(report.id)
+    end
+
+    test "delete_report/1 deletes the report" do
+      report = AccountTestLib.report_fixture(1)
+      assert {:ok, %Report{}} = Account.delete_report(report)
+      assert_raise Ecto.NoResultsError, fn -> Account.get_report!(report.id) end
+    end
+
+    test "change_report/1 returns a report changeset" do
+      report = AccountTestLib.report_fixture(1)
+      assert %Ecto.Changeset{} = Account.change_report(report)
+    end
+  end
+
+  describe "report_responses" do
+    alias Central.Account.ReportResponse
+
+    @valid_attrs %{"name" => "some name"}
+    @update_attrs %{"name" => "some updated name"}
+    @invalid_attrs %{"name" => nil}
+
+    test "list_report_responses/0 returns report_responses" do
+      AccountTestLib.report_response_fixture(1)
+      assert Account.list_report_responses() != []
+    end
+
+    test "get_report_response!/1 returns the report_response with given id" do
+      report_response = AccountTestLib.report_response_fixture(1)
+      assert Account.get_report_response!(report_response.id) == report_response
+    end
+
+    test "create_report_response/1 with valid data creates a report_response" do
+      assert {:ok, %ReportResponse{} = report_response} = Account.create_report_response(@valid_attrs)
+      assert report_response.name == "some name"
+    end
+
+    test "create_report_response/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Account.create_report_response(@invalid_attrs)
+    end
+
+    test "update_report_response/2 with valid data updates the report_response" do
+      report_response = AccountTestLib.report_response_fixture(1)
+      assert {:ok, %ReportResponse{} = report_response} = Account.update_report_response(report_response, @update_attrs)
+      assert report_response.name == "some updated name"
+    end
+
+    test "update_report_response/2 with invalid data returns error changeset" do
+      report_response = AccountTestLib.report_response_fixture(1)
+      assert {:error, %Ecto.Changeset{}} = Account.update_report_response(report_response, @invalid_attrs)
+      assert report_response == Account.get_report_response!(report_response.id)
+    end
+
+    test "delete_report_response/1 deletes the report_response" do
+      report_response = AccountTestLib.report_response_fixture(1)
+      assert {:ok, %ReportResponse{}} = Account.delete_report_response(report_response)
+      assert_raise Ecto.NoResultsError, fn -> Account.get_report_response!(report_response.id) end
+    end
+
+    test "change_report_response/1 returns a report_response changeset" do
+      report_response = AccountTestLib.report_response_fixture(1)
+      assert %Ecto.Changeset{} = Account.change_report_response(report_response)
+    end
+  end
 end

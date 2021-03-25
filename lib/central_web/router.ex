@@ -83,6 +83,8 @@ defmodule CentralWeb.Router do
     post("/send_password_reset", SessionController, :send_password_reset)
     get("/password_reset/:value", SessionController, :password_reset_form)
     post("/password_reset/:value", SessionController, :password_reset_post)
+
+    get("/initial_setup/:key", SetupController, :setup)
   end
 
   scope "/account", CentralWeb.Account, as: :account do

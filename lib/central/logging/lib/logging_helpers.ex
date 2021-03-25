@@ -7,7 +7,7 @@ defmodule Central.Logging.Helpers do
 
   def add_anonymous_audit_log(conn, action, details) do
     attrs = %{
-      user_id: if(conn.assigns[:current_user], do: conn.assigns[:current_user].id, else: 1),
+      user_id: if(conn.assigns[:current_user], do: conn.assigns[:current_user].id, else: nil),
       action: action,
       details: details,
       ip: conn.remote_ip |> Tuple.to_list() |> Enum.join(".")

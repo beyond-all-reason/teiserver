@@ -13,21 +13,21 @@ defmodule CentralWeb.Communication.BlogControllerTest do
       _ = CommunicationTestLib.post_fixture()
       _ = CommunicationTestLib.post_fixture()
       conn = get(conn, Routes.blog_path(conn, :index))
-      assert html_response(conn, 200) =~ "Teifion's blog"
+      assert html_response(conn, 200) =~ "blog"
     end
 
     test "list by tag", %{conn: conn} do
       _ = CommunicationTestLib.post_fixture()
       _ = CommunicationTestLib.post_fixture()
       conn = get(conn, Routes.blog_path(conn, :tag, "Tag 1"))
-      assert html_response(conn, 200) =~ "Teifion's blog"
+      assert html_response(conn, 200) =~ "blog"
     end
 
     test "list by category", %{conn: conn} do
       p1 = CommunicationTestLib.post_fixture()
       _ = CommunicationTestLib.post_fixture()
       conn = get(conn, Routes.blog_path(conn, :category, p1.category_id))
-      assert html_response(conn, 200) =~ "Teifion's blog"
+      assert html_response(conn, 200) =~ "blog"
     end
   end
 
