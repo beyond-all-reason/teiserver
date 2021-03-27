@@ -27,7 +27,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> assign(:clients, clients)
       |> assign(:users, users)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "bar_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end
 
   @impl true

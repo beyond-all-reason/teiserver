@@ -428,7 +428,7 @@ ENDOFCHANNELS\n"
   end
 
   test "Ranks", %{socket: socket_orig} do
-    user = new_user("rank_test", %{"ingame_seconds" => 3600 * 200, "rank" => 5})
+    user = new_user("rank_test", %{"ingame_minutes" => 60 * 200, "rank" => 5})
     %{socket: socket} = auth_setup(user)
 
     # [in_game, away, r1, r2, r3, mod, bot]

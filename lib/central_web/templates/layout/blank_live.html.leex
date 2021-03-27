@@ -28,6 +28,7 @@
       function tint_page (fore_colour, back_colour) {}
     </script>
 
+    <% {fg, bg, _bsname} = @colours %>
     <style type="text/css">
       @media print {
         #menu, #header, #navigation {
@@ -35,7 +36,6 @@
         }
       }
 
-      <% {fg, bg, _bsname} = @colours %>
       #breadcrumb-wrapper {
         border-bottom: 1px solid <%= fg %> !important;
         background-color: <%= bg %> !important;
@@ -50,7 +50,7 @@
 
       <div class="flex-row d-flex">
         <div class="navbar-brand hide-sm" href="#">
-          <i class="fas fa-fw fa-broadcast-tower" style="margin: -4px 20px 0 0px;" class="d-inline align-top"></i>
+          <i class="<%= Application.get_env(:central, Central)[:site_icon] %>" style="margin: -4px 20px 0 0px;" class="d-inline align-top"></i>
           <span id="page-title">
 
           </span>

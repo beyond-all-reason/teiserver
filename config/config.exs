@@ -13,7 +13,7 @@ config :central, Extensions,
 config :central, Central,
   site_title: "Teifion.co.uk",
   site_icon: "fad fa-robot",
-  enable_blog: true,
+  enable_blog: false,
   blog_title: "Teifion's blog",
   # This is used for the coverage tool
   file_path: "~/programming/elixir/barserver/",

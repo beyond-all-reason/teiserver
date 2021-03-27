@@ -3,7 +3,8 @@ defmodule Teiserver.Startup do
 
   def startup do
     add_permission_set("teiserver", "admin", ~w(account battle))
-    add_permission_set("teiserver", "player", ~w(account verified))
+    add_permission_set("teiserver", "moderator", ~w(account battle))
+    add_permission_set("teiserver", "player", ~w(account))
 
     add_group_type("Bar team", %{fields: []})
 

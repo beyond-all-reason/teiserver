@@ -27,7 +27,7 @@ defmodule Teiserver.User do
     :password_reset_code,
     :email_change_code,
     :password_hash,
-    :ingame_seconds,
+    :ingame_minutes,
     :mmr,
     :banned,
     :muted,
@@ -51,7 +51,7 @@ defmodule Teiserver.User do
     password_reset_code: nil,
     email_change_code: nil,
     last_login: nil,
-    ingame_seconds: 0,
+    ingame_minutes: 0,
     mmr: %{},
     banned: false,
     muted: false,
@@ -105,13 +105,10 @@ defmodule Teiserver.User do
         data
         |> Map.merge(%{
           "password_hash" => password_hash,
-          "verification_code" => verification_code
+          "verification_code" => verification_code,
+          "verified" => false
         })
-        |> Map.merge(extra_data),
-
-      # This won't be stored as it's not part of @data_keys but
-      # we need it for the email
-      web_password: web_password
+        |> Map.merge(extra_data)
     }
   end
 
@@ -571,9 +568,9 @@ defmodule Teiserver.User do
 
   defp do_login(user, state, ip, lobbyid) do
     country = Teiserver.Geoip.get_flag(ip)
-    last_login = :erlang.system_time(:seconds)
+    last_login = round(:erlang.system_time(:seconds)/60)
 
-    ingame_hours = user.ingame_seconds / 3600
+    ingame_hours = user.ingame_minutes / 60
     rank = @rank_levels
     |> Enum.filter(fn r -> r < ingame_hours end)
     |> Enum.count
@@ -594,11 +591,12 @@ defmodule Teiserver.User do
   def logout(user_id) do
     user = get_user_by_id(user_id)
     # TODO In some tests it's possible for last_login to be nil, this is a temporary workaround
-    new_ingame_seconds =
-      user.ingame_seconds +
-        (:erlang.system_time(:seconds) - (user.last_login || :erlang.system_time(:seconds)))
+    system_minutes = round(:erlang.system_time(:seconds)/60)
+    new_ingame_minutes =
+      user.ingame_minutes +
+        (system_minutes - (user.last_login || system_minutes))
 
-    user = %{user | ingame_seconds: new_ingame_seconds}
+    user = %{user | ingame_minutes: new_ingame_minutes}
     update_user(user, persist: true)
   end
 
@@ -696,8 +694,8 @@ defmodule Teiserver.User do
     user_count =
       Account.list_users(
         search: [
-          # Get from the bar group or the admins
-          admin_group: [group_id, 1]
+          # Get from the bar group or the admins, admins are group 3
+          admin_group: [group_id, 3]
         ]
       )
       |> Parallel.map(fn user ->

@@ -30,7 +30,8 @@ defmodule TeiserverWeb.Admin.UserController do
           admin_group: conn,
           simple_search: Map.get(params, "s", "") |> String.trim()
         ],
-        order_by: "Name (A-Z)"
+        order_by: "Name (A-Z)",
+        limit: 50
       )
 
     conn

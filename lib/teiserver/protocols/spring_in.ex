@@ -148,7 +148,7 @@ defmodule Teiserver.Protocols.SpringIn do
         password_reset_code: nil,
         email_change_code: nil,
         last_login: nil,
-        ingame_seconds: 60,
+        ingame_minutes: 1,
         mmr: %{}
       })
 
@@ -409,7 +409,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("GETUSERINFO", _, msg_id, state) do
-    ingame_hours = state.user.ingame_seconds
+    ingame_hours = round(state.user.ingame_minutes/60)
 
     [
       "Registration date: #{date_to_str(state.user.inserted_at, :ymd_hms)}",

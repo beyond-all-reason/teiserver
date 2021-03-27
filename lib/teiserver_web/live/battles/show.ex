@@ -21,7 +21,7 @@ defmodule TeiserverWeb.BattleLive.Show do
       |> assign(:colours, Central.Helpers.StylingHelper.colours(:primary2))
       |> assign(:messages, [])
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "bar_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end
 
   @impl true

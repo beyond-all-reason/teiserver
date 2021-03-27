@@ -5,6 +5,7 @@ defmodule Teiserver.Account do
   # Mostly a wrapper around Central.Account
   alias Central.Account.User
   alias Teiserver.Account.UserLib
+  alias Central.Helpers.QueryHelpers
 
   @doc """
   Returns the list of user.
@@ -20,6 +21,7 @@ defmodule Teiserver.Account do
     |> UserLib.search(args[:search])
     |> UserLib.preload(args[:joins])
     |> UserLib.order_by(args[:order_by])
+    |> QueryHelpers.limit_query(args[:limit] || 50)
     |> Repo.all()
   end
 
@@ -121,4 +123,12 @@ defmodule Teiserver.Account do
 
   # Reports
   def get_report!(id), do: Central.Account.get_report!(id)
+
+
+
+  def script_add_user(attrs) do
+    %User{}
+    |> User.script_quick_changeset(attrs)
+    |> Repo.insert()
+  end
 end

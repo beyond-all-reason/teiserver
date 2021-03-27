@@ -56,3 +56,4 @@ Dockerfile
 example_output
 test_auth
 /bin
+lib/teiserver/account/account_import.ex

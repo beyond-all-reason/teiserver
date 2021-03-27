@@ -28,6 +28,21 @@ defmodule Central.Account.User do
     timestamps()
   end
 
+  def script_quick_changeset(user, attrs \\ %{}) do
+    user
+    |> cast(attrs, [
+      :name,
+      :email,
+      :password,
+      :icon,
+      :colour,
+      :permissions,
+      :admin_group_id,
+      :data
+    ])
+    |> validate_required([:name, :email])
+  end
+
   @doc false
   def changeset(user, attrs \\ %{}) do
     if attrs["password"] == "" do

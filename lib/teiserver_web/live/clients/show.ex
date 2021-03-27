@@ -19,7 +19,7 @@ defmodule TeiserverWeb.ClientLive.Show do
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, Central.Helpers.StylingHelper.colours(:primary2))
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "bar_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end
 
   @impl true

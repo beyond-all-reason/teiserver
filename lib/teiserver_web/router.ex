@@ -11,6 +11,7 @@ defmodule TeiserverWeb.Router do
         pipe_through([:browser, :admin_layout, :protected])
 
         get("/", GeneralController, :index)
+        get("/accimp", GeneralController, :accimp)
       end
 
       scope "/teiserver/account", TeiserverWeb.Account, as: :ts_account do

@@ -18,7 +18,7 @@ defmodule TeiserverWeb.BattleLive.Index do
       |> assign(:colours, BattleLib.colours())
       |> assign(:battles, Battle.list_battles())
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "bar_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end
 
   @impl true
