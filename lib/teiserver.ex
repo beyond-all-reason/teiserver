@@ -1,6 +1,7 @@
 defmodule Teiserver do
   @moduledoc false
-  def icon(), do: "fad fa-robot"
+  # def icon(), do: "fad fa-robot"
+  def icon(), do: "fad fa-server"
 
   @spec icon(:friend | :friend_request | :ignore | :relationship) :: String.t()
   def icon(:relationship), do: "fas fa-users"

@@ -52,7 +52,7 @@
         <div class="navbar-brand hide-sm" href="#">
           <i class="<%= Application.get_env(:central, Central)[:site_icon] %>" style="margin: -4px 20px 0 0px;" class="d-inline align-top"></i>
           <span id="page-title">
-
+            <%= assigns[:page_title] || Application.get_env(:central, Central)[:site_title] %>
           </span>
         </div>
       </div>
@@ -65,7 +65,7 @@
 
       <div class="navbar-collapse collapse" id="collapsingNavbar">
         <%= if assigns[:current_user] do %>
-          <a href="/" class="btn btn-outline-primary">
+          <a href='<%= assigns[:menu_override] || "/" %>' class="btn btn-outline-primary">
             <i class="fas fa-fw fa-th"></i>
             Main menu
           </a>

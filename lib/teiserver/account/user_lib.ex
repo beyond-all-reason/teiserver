@@ -3,9 +3,13 @@ defmodule Teiserver.Account.UserLib do
   alias Central.Account.UserQueries
 
   # Functions
-  def icon, do: "far fa-user-tie"
+  @spec icon :: String.t()
+  def icon, do: "far fa-user-robot"
+
+  @spec colours :: {String.t(), String.t(), String.t()}
   def colours, do: Central.Helpers.StylingHelper.colours(:success)
 
+  @spec make_favourite(Account.User.t()) :: Map.t()
   def make_favourite(user) do
     %{
       type_colour: colours() |> elem(0),

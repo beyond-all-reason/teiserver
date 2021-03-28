@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Central.Helpers.TimexHelper
 
   plug(AssignPlug,
-    sidemenu_active: "teiserver"
+    sidemenu_active: ["teiserver", "teiserver_admin"]
   )
 
   plug(Bodyguard.Plug.Authorize,

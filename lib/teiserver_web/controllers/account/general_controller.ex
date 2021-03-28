@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Account.GeneralController do
   plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
 
   plug(AssignPlug,
-    sidemenu_active: "teiserver"
+    sidemenu_active: ["teiserver", "teiserver_account"]
   )
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()

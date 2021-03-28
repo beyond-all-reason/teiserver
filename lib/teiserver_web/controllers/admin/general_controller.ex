@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Admin.GeneralController do
   use CentralWeb, :controller
 
   plug(AssignPlug,
-    sidemenu_active: "teiserver"
+    sidemenu_active: ["teiserver", "teiserver_admin"]
   )
 
   plug(Bodyguard.Plug.Authorize,
@@ -16,7 +16,6 @@ defmodule TeiserverWeb.Admin.GeneralController do
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, _params) do
-    conn
-    |> redirect(to: Routes.ts_lobby_general_path(conn, :index))
+    render(conn, "index.html")
   end
 end

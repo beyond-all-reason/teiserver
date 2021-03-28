@@ -6,4 +6,26 @@
     lib: Teiserver,
     url: Routes.ts_lobby_general_path(@conn, :index)
   %>
+
+  <%= component "sidemenu_item",
+    name: "teiserver_account",
+    label: "Account",
+    active: assigns[:sidemenu_active],
+    lib: Teiserver.Account.UserLib,
+    icon_class: "fad",
+    url: Routes.ts_account_general_path(@conn, :index)
+  %>
 <% end %>
+
+<%= if allow?(@conn, "teiserver.admin.account") do %>
+  <%= component "sidemenu_item",
+    name: "teiserver_admin",
+    label: "Admin",
+    active: assigns[:sidemenu_active],
+    lib: Central.Admin.AdminLib,
+    icon_class: "fad",
+    url: Routes.ts_admin_general_path(@conn, :index)
+  %>
+<% end %>
+
+<li style='height: 5px; border-bottom: 1px solid #DDD;'>&nbsp;</li>

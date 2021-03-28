@@ -509,10 +509,10 @@ defmodule Teiserver.User do
   @spec list_users(list) :: list
   def list_users(id_list) do
     id_list
-    |> Enum.map(fn userid -> ConCache.get(:users, userid) end)
+    |> Enum.map(fn userid ->
+      ConCache.get(:users, userid)
+    end)
   end
-
-
 
   def ring(ringee_id, ringer_id) do
     PubSub.broadcast(Central.PubSub, "user_updates:#{ringee_id}", {:action, {:ring, ringer_id}})
@@ -696,7 +696,8 @@ defmodule Teiserver.User do
         search: [
           # Get from the bar group or the admins, admins are group 3
           admin_group: [group_id, 3]
-        ]
+        ],
+        limit: :infinity
       )
       |> Parallel.map(fn user ->
         user

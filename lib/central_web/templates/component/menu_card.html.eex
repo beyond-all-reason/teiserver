@@ -7,10 +7,12 @@
   else
     assigns[:icon]
   end
+
+  disabled = if assigns[:disabled], do: "color: #888; cursor: default;"
 %>
 
 <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 menu-card">
-  <a href="<%= assigns[:link] %>" class="block-link" id="sub-menu-<%= assigns[:name] %>">
+  <a href="<%= assigns[:link] %>" class="block-link" id="sub-menu-<%= assigns[:name] %>" style="<%= disabled %>">
     <i class="fa-fw <%= the_icon %> fa-3x"></i><br />
     <%= assigns[:text] %>
   </a>

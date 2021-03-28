@@ -1,0 +1,63 @@
+<% {fg, _bg, _bsname} = colours(@active) %>
+
+<style>
+  .sub-menu-icon a:hover {
+    border-bottom: 5px solid <%= fg %>;
+    color: <%= fg %>;
+  }
+
+  .sub-menu-icon .active {
+    border-bottom-color: <%= fg %>;
+  }
+
+  .sub-menu .active, .sub-menu .active:hover {
+    color: <%= fg %>;
+  }
+</style>
+
+<div class="row sub-menu">
+  <div class="col-md-12">
+    <div class="card card-default">
+      <div class="card-body" style="padding: 0 15px;">
+
+        <div class="row">
+          <%= component "sub_menu_icon",
+            name: "users",
+            label: "Users",
+            active: @active,
+            url: Routes.ts_admin_user_path(@conn, :index),
+            lib: %{icon: "far fa-users"}
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "parties",
+            label: "Parties",
+            active: @active,
+            url: "",
+            lib: Teiserver.Game.PartyLib,
+            disabled: true
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "clans",
+            label: "Clans",
+            active: @active,
+            url: "",
+            lib: Teiserver.Game.ClanLib,
+            disabled: true
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "queues",
+            label: "Queues",
+            active: @active,
+            url: "",
+            lib: Teiserver.Game.QueueLib,
+            disabled: true
+          %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

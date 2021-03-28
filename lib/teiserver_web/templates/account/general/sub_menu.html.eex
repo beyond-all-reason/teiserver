@@ -25,8 +25,26 @@
             name: "relationships",
             label: "Relationships",
             active: @active,
-            url: Routes.account_group_path(@conn, :index),
+            url: Routes.ts_account_relationships_path(@conn, :index),
             lib: %{icon: Teiserver.icon(:relationship)}
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "clans",
+            label: "Clans",
+            active: @active,
+            url: "",
+            lib: Teiserver.Game.ClanLib,
+            disabled: true
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "tournaments",
+            label: "Tournaments",
+            active: @active,
+            url: "",
+            lib: Teiserver.Game.TournamentLib,
+            disabled: true
           %>
         </div>
 

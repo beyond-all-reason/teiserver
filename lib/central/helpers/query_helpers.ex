@@ -65,6 +65,7 @@ defmodule Central.Helpers.QueryHelpers do
     |> offset(^amount)
   end
 
+  def limit_query(query, :infinity), do: query
   def limit_query(query, amount) do
     query
     |> limit(^amount)

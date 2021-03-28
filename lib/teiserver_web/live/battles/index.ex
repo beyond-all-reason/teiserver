@@ -17,6 +17,7 @@ defmodule TeiserverWeb.BattleLive.Index do
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, BattleLib.colours())
       |> assign(:battles, Battle.list_battles())
+      |> assign(:menu_override, Routes.ts_lobby_general_path(socket, :index))
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end

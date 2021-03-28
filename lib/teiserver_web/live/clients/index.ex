@@ -26,6 +26,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> assign(:colours, ClientLib.colours())
       |> assign(:clients, clients)
       |> assign(:users, users)
+      |> assign(:menu_override, Routes.ts_admin_general_path(socket, :index))
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end

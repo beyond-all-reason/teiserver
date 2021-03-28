@@ -49,7 +49,7 @@
 
   <%= component "sidemenu_item",
     name: "account",
-    label: "Account",
+    label: "Site account",
     active: assigns[:sidemenu_active],
     lib: Central.Account,
     url: Routes.account_general_path(@conn, :index)

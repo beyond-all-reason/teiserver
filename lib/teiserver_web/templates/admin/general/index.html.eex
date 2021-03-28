@@ -1,4 +1,55 @@
-Stuff related to your Teiserver account will go here.
-<br /><br />
+<div class="row page-row">
+  <%= if allow?(@conn, "teiserver.admin.account") do %>
+    <%=
+      component "menu_card",
+      icon: Teiserver.ClientLib.icon(),
+      name: "client_admin",
+      text: "Client admin",
+      icon_class: "fas",
+      link: Routes.ts_admin_client_index_path(@conn, :index)
+    %>
 
-<%= component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_lobby_general_path(@conn, :index) %>
+    <%=
+      component "menu_card",
+      icon: "far fa-users",
+      name: "user_admin",
+      text: "User admin",
+      icon_class: "fas",
+      link: Routes.ts_admin_user_path(@conn, :index)
+    %>
+
+    <%=
+      component "menu_card",
+      icon: Teiserver.Game.PartyLib.icon(),
+      name: "party",
+      text: "Parties",
+      icon_class: "fas",
+      link: "",
+      disabled: true
+    %>
+
+    <%=
+      component "menu_card",
+      icon: Teiserver.Game.ClanLib.icon(),
+      name: "clan_admin",
+      text: "Clan admin",
+      icon_class: "fas",
+      link: "",
+      disabled: true
+    %>
+
+    <%=
+      component "menu_card",
+      icon: Teiserver.Game.QueueLib.icon(),
+      name: "queue",
+      text: "Queues",
+      icon_class: "fas",
+      link: "",
+      disabled: true
+    %>
+  <% end %>
+</div>
+
+<div class="row page-row">
+  <%= component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_lobby_general_path(@conn, :index) %>
+</div>
