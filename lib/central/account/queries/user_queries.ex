@@ -20,6 +20,7 @@ defmodule Central.Account.UserQueries do
     end)
   end
 
+  @spec _search(Ecto.Query.t(), atom, any) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -115,6 +116,9 @@ defmodule Central.Account.UserQueries do
     query = if :admin_group in preloads, do: _preload_admin_group(query), else: query
     query = if :user_configs in preloads, do: _preload_user_configs(query), else: query
     query = if :groups in preloads, do: _preload_groups(query), else: query
+    query = if :reports_against in preloads, do: _preload_reports_against(query), else: query
+    query = if :reports_made in preloads, do: _preload_reports_made(query), else: query
+    query = if :reports_responded in preloads, do: _preload_reports_responded(query), else: query
 
     query
   end
@@ -135,6 +139,24 @@ defmodule Central.Account.UserQueries do
     from users in query,
       left_join: groups in assoc(users, :groups),
       preload: [groups: groups]
+  end
+
+  def _preload_reports_against(query) do
+    from users in query,
+      left_join: reports_against in assoc(users, :reports_against),
+      preload: [reports_against: reports_against]
+  end
+
+  def _preload_reports_made(query) do
+    from users in query,
+      left_join: reports_made in assoc(users, :reports_made),
+      preload: [reports_made: reports_made]
+  end
+
+  def _preload_reports_responded(query) do
+    from users in query,
+      left_join: reports_responded in assoc(users, :reports_responded),
+      preload: [reports_responded: reports_responded]
   end
 
   # @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t

@@ -10,6 +10,7 @@
     $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
 
     page_quick_actions = [
+      {label: "User reports", icon: "<%= Central.Account.ReportLib.icon() %>", url: "<%= Routes.admin_report_path(@conn, :user_show, @user) %>", keywords: ["report"]},
       {label: "Edit user", icon: "<%= icon() %>", url: "<%= Routes.admin_user_path(@conn, :edit, @user) %>", keywords: ["edit", "user", "edit user"]},
     ];
   });
@@ -101,8 +102,13 @@
               <%= render "tab_settings.html", assigns %>
             </div>
           <% end %>
-
         </div>
+
+        <hr />
+        <a href="<%= Routes.admin_report_path(@conn, :user_show, @user) %>" class="btn btn-outline-<%= bsname %>">
+          <%= component "icon", icon: Central.Account.ReportLib.icon() %>
+          Reports
+        </a>
       </div>
     </div>
   </div>

@@ -60,11 +60,13 @@ defmodule Central.Helpers.QueryHelpers do
     Repo.aggregate(table, :count, :id)
   end
 
+  @spec offset_query(Ecto.Query.t(), Integer.t()) :: Ecto.Query.t()
   def offset_query(query, amount) do
     query
     |> offset(^amount)
   end
 
+  @spec limit_query(Ecto.Query.t(), Integer.t() | :infinity) :: Ecto.Query.t()
   def limit_query(query, :infinity), do: query
   def limit_query(query, amount) do
     query

@@ -1,0 +1,39 @@
+<table class='table'>
+  <tbody>
+    <%= if @report.responder do %>
+      <tr>
+        <td>Responded to by</td>
+        <td><%= @report.responder.name %></td>
+      </tr>
+      <tr>
+        <td>Action:</td>
+        <td><%= @report.response_action %></td>
+      </tr>
+      <tr>
+        <td>Text:</td>
+        <td><%= @report.response_text %></td>
+      </tr>
+      <tr>
+        <td>Expires:</td>
+        <td><%= date_to_str(@report.expires, :ymd_hms) %></td>
+      </tr>
+      <tr>
+        <td colspan="2">&nbsp;</td>
+      </tr>
+    <% end %>
+
+    <tr>
+      <td>Source:</td>
+      <td><%= @report.location %>:<%= @report.location_id %></td>
+    </tr>
+    <tr>
+      <td>Reason:</td>
+      <td><%= @report.reason %></td>
+    </tr>
+    <tr>
+      <td>Report date:</td>
+      <td><%= date_to_str(@report.inserted_at, :ymd_hms) %></td>
+    </tr>
+
+  </tbody>
+</table>

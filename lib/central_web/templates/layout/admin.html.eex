@@ -74,15 +74,14 @@
       });
     </script>
 
-    <style type="text/css">
-      @media print {
-        #menu, #header, #navigation {
-          display: none;
+    <%= if Kernel.function_exported?(@conn.private.phoenix_view, :colours, 0) do %>
+      <% {fg, bg, _bsname} = @conn.private.phoenix_view.colours() %>
+      <style type="text/css">
+        @media print {
+          #menu, #header, #navigation {
+            display: none;
+          }
         }
-      }
-
-      <%= if Kernel.function_exported?(@conn.private.phoenix_view, :colours, 0) do %>
-        <% {fg, bg, _bsname} = @conn.private.phoenix_view.colours() %>
 
         #breadcrumb-wrapper {
           border-bottom: 1px solid <%= fg %> !important;
@@ -109,8 +108,8 @@
         .line-card a:hover {
           background-color: <%= bg %> !important;
         }
-      <% end %>
     </style>
+    <% end %>
   </head>
   <body class="fixed-navbar fixed-sidebar">
     <nav class="navbar fixed-top navbar-expand-md mb-3" id="top-nav" style="padding-top: 0; padding-bottom: 0;">

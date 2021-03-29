@@ -29,14 +29,30 @@ defmodule Central.Account.ReportLib do
     ]
   end
 
+  @spec action_icon(String.t() | nil) :: String.t()
+  def action_icon(nil), do: ""
+  def action_icon("Ignore report"), do: "fas fa-check-circle"
+  def action_icon("Mute"), do: "fas fa-microphone-slash"
+  def action_icon("Ban"), do: "fas fa-ban"
+
   def perform_action(_report, "Ignore report", _data) do
     {:ok, nil}
   end
 
-  def perform_action(report, _, "never"), do: {:ok, nil}
-  def perform_action(report, _, "Never"), do: {:ok, nil}
+  def perform_action(_report, _, "never"), do: {:ok, nil}
+  def perform_action(_report, _, "Never"), do: {:ok, nil}
 
-  def perform_action(report, "Mute", data) do
+  def perform_action(_report, "Mute", data) do
+    case HumanTime.relative(data) do
+      {:ok, muted_until} ->
+        {:ok, muted_until}
+
+      err ->
+        err
+    end
+  end
+
+  def perform_action(_report, "Ban", data) do
     case HumanTime.relative(data) do
       {:ok, banned_until} ->
         {:ok, banned_until}
@@ -44,10 +60,6 @@ defmodule Central.Account.ReportLib do
       err ->
         err
     end
-  end
-
-  def perform_action(report, "Ban", _data) do
-    {:ok, nil}
   end
 
   # Queries
@@ -78,6 +90,13 @@ defmodule Central.Account.ReportLib do
       where: reports.id in ^id_list
   end
 
+  def _search(query, :user_id, user_id) do
+    from reports in query,
+      where: reports.reporter_id == ^user_id
+        or reports.target_id == ^user_id
+        or reports.responder_id == ^user_id
+  end
+
   def _search(query, :filter, "all"), do: query
   def _search(query, :filter, "open") do
     from reports in query,
@@ -87,6 +106,20 @@ defmodule Central.Account.ReportLib do
   def _search(query, :filter, "closed") do
     from reports in query,
       where: not is_nil(reports.responder_id)
+  end
+
+  def _search(query, :filter, {"all", _}), do: query
+  def _search(query, :filter, {"target", user_id}) do
+    from reports in query,
+      where: reports.target_id == ^user_id
+  end
+  def _search(query, :filter, {"reporter", user_id}) do
+    from reports in query,
+      where: reports.reporter_id == ^user_id
+  end
+  def _search(query, :filter, {"responder", user_id}) do
+    from reports in query,
+      where: reports.responder_id == ^user_id
   end
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t

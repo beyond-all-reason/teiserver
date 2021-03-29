@@ -42,3 +42,4 @@ openssl s_client -connect localhost:8201
 ## Remote/Prod
 - Not currently ready for production use
 - several things are currently hard coded to BAR/Teifion specifics (such as emails)
+- If you want to run this in prod please let me know and I'll put priority work into fixing this; at the current time I'm not aware of anybody else looking to use this in prod and as such it's not a priority

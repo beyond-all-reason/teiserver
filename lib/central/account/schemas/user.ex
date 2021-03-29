@@ -19,6 +19,12 @@ defmodule Central.Account.User do
     field :permissions, {:array, :string}, default: []
 
     has_many :user_configs, Central.Config.UserConfig
+    has_many :reports_against, Central.Account.Report, foreign_key: :target_id
+    has_many :reports_made, Central.Account.Report, foreign_key: :reporter_id
+    has_many :reports_responded, Central.Account.Report, foreign_key: :responder_id
+
+    # Extra user.ex relations go here
+
     belongs_to :admin_group, Central.Account.Group
 
     many_to_many :groups, Central.Account.Group,
@@ -26,21 +32,6 @@ defmodule Central.Account.User do
       join_keys: [user_id: :id, group_id: :id]
 
     timestamps()
-  end
-
-  def script_quick_changeset(user, attrs \\ %{}) do
-    user
-    |> cast(attrs, [
-      :name,
-      :email,
-      :password,
-      :icon,
-      :colour,
-      :permissions,
-      :admin_group_id,
-      :data
-    ])
-    |> validate_required([:name, :email])
   end
 
   @doc false
@@ -152,10 +143,12 @@ defmodule Central.Account.User do
 
   defp put_password_hash(changeset), do: changeset
 
+  @spec verify_password(String.t(), String.t()) :: boolean
   def verify_password(plain_text_password, encrypted) do
     Argon2.verify_pass(plain_text_password, encrypted)
   end
 
+  @spec authorize(any, Plug.Conn.t(), atom) :: boolean
   def authorize(_, conn, _), do: allow?(conn, "admin.user")
   # def authorize(_, _, _), do: false
 end

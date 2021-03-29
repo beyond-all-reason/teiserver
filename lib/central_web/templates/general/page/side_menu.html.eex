@@ -22,13 +22,13 @@
 <% end %>
 
   <%= if allow?(@current_user, "admin") do %>
-    <li id="sidebar_admin">
-      <a href="<%= Routes.admin_general_path(@conn, :index) %>">
-        <%= component "icon", icon: Central.Admin.icon(), class: "fa-lg" %>
-        &nbsp;
-        Admin
-      </a>
-    </li>
+    <%= component "sidemenu_item",
+      name: "admin",
+      label: "Admin",
+      active: assigns[:sidemenu_active],
+      lib: Central.Admin,
+      url: Routes.admin_general_path(@conn, :index)
+    %>
   <% end %>
 
   <%= if allow?(@current_user, "logging") do %>

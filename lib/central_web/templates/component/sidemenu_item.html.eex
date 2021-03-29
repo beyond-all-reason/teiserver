@@ -1,12 +1,10 @@
 <%
-  is_active = if is_list(@active) do
+    is_active = if is_list(@active) do
     Enum.member?(@active, @name)
   else
     @active == @name
   end
-
   active_class = if is_active, do: "active side-menu-active"
-  disabled = if assigns[:disabled], do: "color: #888; cursor: default;"
 
   the_icon = if assigns[:icon_class] do
     @lib.icon()
@@ -19,7 +17,7 @@
 %>
 
 <li id="sidebar_<%= @name %>" class="<%= active_class %>">
-  <a href="<%= @url %>" style="<%= disabled %>">
+  <a href="<%= @url %>">
     <i class="fa-fw fa-lg <%= the_icon %>"></i>
     &nbsp;
     <%= @label %>

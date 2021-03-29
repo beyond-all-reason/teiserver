@@ -30,27 +30,33 @@ defmodule Teiserver.TcpServer do
     |> String.replace("\t", "~~")
   end
 
+  def get_ssl_opts() do
+    {certfile, cacertfile, keyfile} = {
+      Application.get_env(:central, Teiserver)[:certs][:certfile],
+      Application.get_env(:central, Teiserver)[:certs][:cacertfile],
+      Application.get_env(:central, Teiserver)[:certs][:keyfile]
+    }
+
+    [
+      {:port, Application.get_env(:central, Teiserver)[:ports][:tls]},
+      {:certfile, certfile},
+      {:cacertfile, cacertfile},
+      {:keyfile, keyfile}
+    ]
+  end
+
   # Called at startup
   def start_link(opts) do
     mode = if opts[:ssl], do: :ranch_ssl, else: :ranch_tcp
 
     # start_listener(Ref, Transport, TransOpts0, Protocol, ProtoOpts)
     if mode == :ranch_ssl do
-      {certfile, cacertfile, keyfile} = {
-        Application.get_env(:central, Teiserver)[:certs][:certfile],
-        Application.get_env(:central, Teiserver)[:certs][:cacertfile],
-        Application.get_env(:central, Teiserver)[:certs][:keyfile]
-      }
 
+      ssl_opts = get_ssl_opts()
       :ranch.start_listener(
         make_ref(),
         :ranch_ssl,
-        [
-          {:port, Application.get_env(:central, Teiserver)[:ports][:tls]},
-          {:certfile, certfile},
-          {:cacertfile, cacertfile},
-          {:keyfile, keyfile}
-        ],
+        ssl_opts,
         __MODULE__,
         []
       )
@@ -301,7 +307,9 @@ defmodule Teiserver.TcpServer do
   # Internal functions
   # #############################
   defp data_in(data, state) do
-    Logger.debug("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
+    if state.extra_logging do
+      Logger.info("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
+    end
 
     new_state =
       if String.ends_with?(data, "\n") do
@@ -473,7 +481,12 @@ defmodule Teiserver.TcpServer do
     %{state | known_users: new_knowns}
   end
 
-  defp user_leave_battle(userid, _battle_id, state) do
+  defp user_leave_battle(userid, battle_id, state) do
+    # If they are kicked then it's possible they won't be unsubbed
+    if userid == state.userid do
+      Phoenix.PubSub.unsubscribe(Central.PubSub, "battle_updates:#{battle_id}")
+    end
+
     new_user = cond do
       state.known_users[userid].battle_id == nil ->
         # No change
@@ -554,6 +567,17 @@ defmodule Teiserver.TcpServer do
         Logger.error("No handler in tcp_server:do_action with action #{action_type}")
     end
     state
+  end
+
+  def upgrade_connection(socket) do
+    ssl_opts = get_ssl_opts()
+    case :ranch_ssl.handshake(socket, ssl_opts, 5000) do
+      {:ok, new_socket} ->
+        new_socket
+      err ->
+        Logger.error("Error upgrading connection - #{Kernel.inspect err}")
+        socket
+    end
   end
 
   # Other functions

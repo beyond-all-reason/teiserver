@@ -24,8 +24,8 @@
     <script src='<%= Routes.static_path(@socket, "/js/app.js") %>'></script>
 
     <%= if assigns[:colours] do %>
+    <% {fg, bg, _bsname} = @colours %>
     <style type="text/css">
-      <% {fg, bg, _bsname} = @colours %>
       #breadcrumb-wrapper {
         border-bottom: 1px solid <%= fg %> !important;
         background-color: <%= bg %> !important;

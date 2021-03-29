@@ -198,6 +198,10 @@ defmodule TeiserverWeb.Admin.UserController do
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         result = case action do
+          "recache" ->
+            Teiserver.User.recache_user(user.id)
+            {:ok, nil}
+
           "permanent_ban" ->
             {:ok, %{"banned" => true}}
 
@@ -212,6 +216,11 @@ defmodule TeiserverWeb.Admin.UserController do
         end
 
         case result do
+          {:ok, nil} ->
+            conn
+              |> put_flash(:info, "Action performed.")
+              |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
+
           {:ok, new_data} ->
             user_params = %{"data" => Map.merge(user.data || %{}, new_data)}
             case Account.update_user(user, user_params) do

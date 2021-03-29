@@ -18,6 +18,9 @@ defmodule CentralWeb.Admin.UserController do
   plug :add_breadcrumb, name: 'Admin', url: '/admin'
   plug :add_breadcrumb, name: 'Users', url: '/admin/users'
 
+  plug AssignPlug,
+    sidemenu_active: "admin"
+
   def index(conn, params) do
     users =
       Account.list_users(

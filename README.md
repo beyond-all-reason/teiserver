@@ -17,6 +17,7 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 - [Teiserver boss mode](documents/designs/teiserver_boss.md)
 - Integration with Discord/other services
 - [Reputation/Reporting system](documents/designs/reputation.md)
+- Ability for players to hide their flag
 
 ### Contributing
 All contributors are welcome; if you spot an issue or bug with it message me directly on the BAR discord or open an issue in github.

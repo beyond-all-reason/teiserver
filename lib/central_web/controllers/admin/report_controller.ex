@@ -16,6 +16,7 @@ defmodule CentralWeb.Admin.ReportController do
   plug :add_breadcrumb, name: 'Account', url: '/central'
   plug :add_breadcrumb, name: 'Reports', url: '/central/reports'
 
+  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
     reports = Account.list_reports(
       search: [
@@ -34,6 +35,28 @@ defmodule CentralWeb.Admin.ReportController do
     |> render("index.html")
   end
 
+  @spec user_show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def user_show(conn, %{"id" => user_id} = params) do
+    reports = Account.list_reports(
+      search: [
+        user_id: user_id,
+        filter: {(params["filter"] || "all"), user_id}
+      ],
+      preload: [
+        :reporter, :target, :responder
+      ],
+      order_by: "Newest first"
+    )
+    user = Account.get_user!(user_id)
+
+    conn
+    |> assign(:filter, (params["filter"] || "all"))
+    |> assign(:reports, reports)
+    |> assign(:user, user)
+    |> render("filtered.html")
+  end
+
+  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     report = Account.get_report!(id,
       preload: [
@@ -51,6 +74,7 @@ defmodule CentralWeb.Admin.ReportController do
     |> render("show.html")
   end
 
+  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset = Account.change_report(%Report{})
 
@@ -60,6 +84,7 @@ defmodule CentralWeb.Admin.ReportController do
     |> render("new.html")
   end
 
+  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def create(conn, %{"report" => report_params}) do
     case Account.create_report(report_params) do
       {:ok, _report} ->
@@ -74,6 +99,7 @@ defmodule CentralWeb.Admin.ReportController do
     end
   end
 
+  @spec respond_form(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def respond_form(conn, %{"id" => id}) do
     report = Account.get_report!(id,
       preload: [
@@ -93,6 +119,7 @@ defmodule CentralWeb.Admin.ReportController do
     |> render("respond.html")
   end
 
+  @spec respond_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def respond_post(conn, %{"id" => id, "report" => report_params}) do
     report = Account.get_report!(id)
 

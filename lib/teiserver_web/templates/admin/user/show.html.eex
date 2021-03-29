@@ -30,6 +30,16 @@
         <hr />
 
         <div class="float-right">
+          <form action='<%= Routes.ts_admin_user_path(@conn, :perform_action, @user, "recache") %>' method="POST" style="display: inline-block;">
+            <input type="hidden" name="_method" value="PUT" />
+            <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+
+            <button type='submit' class='btn btn-outline-<%= bsname %>'>
+              <i class='fa-fw far fa-sync'></i>
+              Recache
+            </button>
+          </form>
+
           <a href="<%= Routes.ts_admin_user_path(@conn, :edit, @user) %>" class="btn btn-outline-<%= bsname %>">
             <i class="far fa-fw fa-wrench"></i>
             Edit user

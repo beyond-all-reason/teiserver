@@ -1,31 +1,71 @@
 <% {_fg, _bg, bsname} = colours() %>
 
-<%= component "section_menu_button",
-  name: "open",
-  label: "Open",
-  active: @active,
-  icon: "far fa-list",
-  bsname: bsname,
-  url: Routes.admin_report_path(@conn, :index) <> "?filter=open"
-%>
+<%= case assigns[:filters] || "standard" do %>
+  <% "standard" -> %>
+    <%= component "section_menu_button",
+      name: "open",
+      label: "Open",
+      active: @active,
+      icon: "far fa-list",
+      bsname: bsname,
+      url: Routes.admin_report_path(@conn, :index) <> "?filter=open"
+    %>
 
-<%= component "section_menu_button",
-  name: "closed",
-  label: "Closed",
-  active: @active,
-  icon: "far fa-ellipsis-v",
-  bsname: bsname,
-  url: Routes.admin_report_path(@conn, :index) <> "?filter=closed"
-%>
+    <%= component "section_menu_button",
+      name: "closed",
+      label: "Closed",
+      active: @active,
+      icon: "far fa-ellipsis-v",
+      bsname: bsname,
+      url: Routes.admin_report_path(@conn, :index) <> "?filter=closed"
+    %>
 
-<%= component "section_menu_button",
-  name: "all",
-  label: "All",
-  active: @active,
-  icon: "far fa-bars",
-  bsname: bsname,
-  url: Routes.admin_report_path(@conn, :index) <> "?filter=all"
-%>
+    <%= component "section_menu_button",
+      name: "all",
+      label: "All",
+      active: @active,
+      icon: "far fa-bars",
+      bsname: bsname,
+      url: Routes.admin_report_path(@conn, :index) <> "?filter=all"
+    %>
+
+  <% "user" -> %>
+    <%= component "section_menu_button",
+      name: "all",
+      label: "All",
+      active: @active,
+      icon: "far fa-list",
+      bsname: bsname,
+      url: Routes.admin_report_path(@conn, :user_show, @user) <> "?filter=all"
+    %>
+
+    <%= component "section_menu_button",
+      name: "target",
+      label: "Target",
+      active: @active,
+      icon: "far fa-bullseye",
+      bsname: bsname,
+      url: Routes.admin_report_path(@conn, :user_show, @user) <> "?filter=target"
+    %>
+
+    <%= component "section_menu_button",
+      name: "reporter",
+      label: "Reporter",
+      active: @active,
+      icon: "far fa-whistle",
+      bsname: bsname,
+      url: Routes.admin_report_path(@conn, :user_show, @user) <> "?filter=reporter"
+    %>
+
+    <%= component "section_menu_button",
+      name: "responder",
+      label: "Responder",
+      active: @active,
+      icon: "far fa-reply",
+      bsname: bsname,
+      url: Routes.admin_report_path(@conn, :user_show, @user) <> "?filter=responder"
+    %>
+<% end %>
 
 <form action="<%= Routes.admin_report_path(@conn, :index) %>" method="get" class="float-right form-inline d-none d-md-block">
   <div class="input-group">

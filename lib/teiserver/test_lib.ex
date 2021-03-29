@@ -106,7 +106,9 @@ defmodule Teiserver.TestLib do
 
       # Connection microstate
       battle_id: nil,
-      known_users: %{}
+      room_member_cache: %{},
+      known_users: %{},
+      extra_logging: false
     }
   end
 
@@ -133,7 +135,9 @@ defmodule Teiserver.TestLib do
 
       # Connection microstate
       battle_id: nil,
-      known_users: %{}
+      room_member_cache: %{},
+      known_users: %{},
+      extra_logging: false
     }
   end
 end

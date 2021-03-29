@@ -25,31 +25,39 @@
         <hr />
 
         <div class="float-right">
-          <a href="<%= Routes.admin_report_path(@conn, :respond_form, @report) %>" class="btn btn-outline-<%= bsname %>">
-            <i class="far fa-fw fa-reply"></i>
-            Respond
-          </a>
+          <%= if @report.responder_id == nil do %>
+            <a href="<%= Routes.admin_report_path(@conn, :respond_form, @report) %>" class="btn btn-outline-<%= bsname %>">
+              <i class="far fa-fw fa-reply"></i>
+              Respond
+            </a>
+          <% end %>
         </div>
 
-      <h3>
-        <%= @report.reason %>
-      </h3>
-      <br />
-      <ul class="nav nav-tabs" role="tablist" id="the_tabs">
-        <li>
-          <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
-            <%= component "icon", icon: "fas fa-file-alt" %>
-            Details
-          </a>
-        </li>
-      </ul>
+        <h3>
+          <%= @report.reporter.name %> reported <%= @report.target.name %>
+        </h3>
+        <br />
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+          <li>
+            <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
+              <%= component "icon", icon: "fas fa-file-alt" %>
+              Details
+            </a>
+          </li>
+        </ul>
 
-      <div class="tab-content">
-        <div class="tab-pane" id="details_tab" style="padding:5px;">
-          <%= render "tab_details.html", assigns %>
+        <div class="tab-content">
+          <div class="tab-pane" id="details_tab" style="padding:5px;">
+            <%= render "tab_details.html", assigns %>
+          </div>
         </div>
-      </div>
-      <%# END OF TABS %>
+        <%# END OF TABS %>
+
+        <hr />
+        <a href="<%= Routes.admin_report_path(@conn, :user_show, @report.target_id) %>?filter=target" class="btn btn-outline-<%= bsname %>">
+          <%= component "icon", icon: Central.Account.ReportLib.icon() %>
+          More reports of this user
+        </a>
 
       </div>
     </div>

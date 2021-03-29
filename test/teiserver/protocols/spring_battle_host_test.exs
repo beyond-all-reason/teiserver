@@ -75,6 +75,24 @@ defmodule Teiserver.SpringBattleHostTest do
     reply = _recv(socket2)
     assert reply == "FORCEQUITBATTLE\nLEFTBATTLE #{battle_id} #{user2.name}\n"
 
+    # Add user 3
+    user3 = new_user()
+    %{socket: socket3} = auth_setup(user3)
+
+    _send(socket2, "JOINBATTLE #{battle_id} empty gameHash\n")
+    _ = _recv(socket2)
+
+    # User 3 join the battle
+    _send(socket3, "JOINBATTLE #{battle_id} empty gameHash\n")
+    reply = _recv(socket2)
+    assert reply == "JOINEDBATTLE #{battle_id} #{user3.name}\n"
+
+    # Now kick both
+    _send(socket, "KICKFROMBATTLE #{user2.name}\n")
+    _send(socket, "KICKFROMBATTLE #{user3.name}\n")
+    _ = _recv(socket2)
+    _ = _recv(socket3)
+
     # Had a bug where the battle would be incorrectly closed
     # after kicking a player, it was caused by the host disconnecting
     # and in the process closed out the battle
@@ -252,5 +270,8 @@ defmodule Teiserver.SpringBattleHostTest do
 
     _send(socket2, "EXIT\n")
     _recv(socket2)
+
+    _send(socket3, "EXIT\n")
+    _recv(socket3)
   end
 end

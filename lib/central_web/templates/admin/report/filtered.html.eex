@@ -2,17 +2,24 @@
 
 <%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
 
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+
+  });
+</script>
+
 <div class="row section-menu">
   <div class="col-md-12">
     <div class="card border-<%= bsname %>">
       <div class="card-body">
         <%= render CentralWeb.Admin.ReportView, "section_menu.html", Map.merge(assigns, %{
             show_search: false,
-            active: (@filter || "open")
+            active: (@filter || "all"),
+            filters: "user"
         }) %>
         <br /><br />
 
-<h4>Listing Reports</h4>
+<h4>Listing Reports for <%= @user.name %></h4>
 
 <table class="table table-sm">
   <thead>

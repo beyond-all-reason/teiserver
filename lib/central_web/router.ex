@@ -225,10 +225,6 @@ defmodule CentralWeb.Router do
       only: [:index, :new, :create, :show, :edit, :update, :delete]
     )
 
-    get("/users/unlock/:id", UserController, :unlock)
-    get("/users/lock/:id", UserController, :lock)
-    post("/users/activate/:id", UserController, :activate)
-    post("/users/deactivate/:id", UserController, :deactivate)
     get("/users/reset_password/:id", UserController, :reset_password)
     get("/users/search", UserController, :index)
     post("/users/search", UserController, :search)
@@ -237,8 +233,10 @@ defmodule CentralWeb.Router do
     resources("/reports", ReportController,
       only: [:index, :show]
     )
+    get("/reports/user/:id", ReportController, :user_show)
     get("/reports/:id/respond", ReportController, :respond_form)
     put("/reports/:id/respond", ReportController, :respond_post)
+
 
     # Groups
     post("/groups/create_membership", GroupController, :create_membership)

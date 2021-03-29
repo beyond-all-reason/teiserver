@@ -23,6 +23,9 @@ defmodule Teiserver.Protocols.SpringOut do
   @spec reply(atom(), nil | String.t() | tuple() | list(), String.t(), map) :: map
   def reply(reply_cmd, data, msg_id, state) do
     msg = do_reply(reply_cmd, data)
+    if state.extra_logging do
+      Logger.info("--> #{Kernel.inspect(state.socket)} #{TcpServer.format_log(msg)}")
+    end
     _send(msg, msg_id, state)
     state
   end
@@ -181,8 +184,8 @@ defmodule Teiserver.Protocols.SpringOut do
     "JOINBATTLE #{battle.id} #{battle.game_hash}\n"
   end
 
-  defp do_reply(:join_battle_failure, battle) do
-    "JOINBATTLE #{battle.id} #{battle.game_hash}\n"
+  defp do_reply(:join_battle_failure, reason) do
+    "JOINBATTLE #{reason}\n"
   end
 
   defp do_reply(:add_start_rectangle, {team, [left, top, right, bottom]}) do
@@ -469,7 +472,6 @@ defmodule Teiserver.Protocols.SpringOut do
         msg
       end
 
-    Logger.debug("--> #{Kernel.inspect(socket)} #{TcpServer.format_log(msg)}")
     transport.send(socket, msg)
     # msg
     # |> String.split("\n")

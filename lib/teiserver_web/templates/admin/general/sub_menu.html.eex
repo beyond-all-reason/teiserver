@@ -22,6 +22,14 @@
 
         <div class="row">
           <%= component "sub_menu_icon",
+            name: "clients",
+            label: "Clients",
+            active: @active,
+            url: Routes.ts_admin_client_index_path(@conn, :index),
+            lib: Teiserver.ClientLib
+          %>
+
+          <%= component "sub_menu_icon",
             name: "users",
             label: "Users",
             active: @active,
