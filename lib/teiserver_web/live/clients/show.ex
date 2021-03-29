@@ -31,13 +31,20 @@ defmodule TeiserverWeb.ClientLive.Show do
     client = Client.get_client_by_id(id)
     user = User.get_user_by_id(id)
 
-    {:noreply,
-     socket
-     |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> add_breadcrumb(name: client.name, url: "/teiserver/admin/clients/#{id}")
-     |> assign(:id, id)
-     |> assign(:client, client)
-     |> assign(:user, user)}
+    case client do
+      nil ->
+        {:noreply,
+        socket
+        |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
+      _ ->
+        {:noreply,
+          socket
+          |> assign(:page_title, page_title(socket.assigns.live_action))
+          |> add_breadcrumb(name: client.name, url: "/teiserver/admin/clients/#{id}")
+          |> assign(:id, id)
+          |> assign(:client, client)
+          |> assign(:user, user)}
+    end
   end
 
   @impl true

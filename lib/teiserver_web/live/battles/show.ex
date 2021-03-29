@@ -30,16 +30,24 @@ defmodule TeiserverWeb.BattleLive.Show do
     :ok = PubSub.subscribe(Central.PubSub, "live_battle_updates:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
     battle = Battle.get_battle!(id)
-    {users, clients} = get_user_and_clients(battle.players)
 
-    {:noreply,
-     socket
-     |> assign(:page_title, page_title(socket.assigns.live_action))
-     |> add_breadcrumb(name: battle.name, url: "/teiserver/battles/#{battle.id}")
-     |> assign(:id, int_parse(id))
-     |> assign(:battle, battle)
-     |> assign(:users, users)
-     |> assign(:clients, clients)}
+    case battle do
+      nil ->
+        {:noreply,
+        socket
+        |> redirect(to: Routes.ts_battle_index_path(socket, :index))}
+      _ ->
+        {users, clients} = get_user_and_clients(battle.players)
+
+        {:noreply,
+        socket
+        |> assign(:page_title, page_title(socket.assigns.live_action))
+        |> add_breadcrumb(name: battle.name, url: "/teiserver/battles/#{battle.id}")
+        |> assign(:id, int_parse(id))
+        |> assign(:battle, battle)
+        |> assign(:users, users)
+        |> assign(:clients, clients)}
+    end
   end
 
   defp get_user_and_clients(id_list) do
