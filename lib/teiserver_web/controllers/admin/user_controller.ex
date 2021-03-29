@@ -45,12 +45,23 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
+        reports = Central.Account.list_reports(
+          search: [
+            filter: {"target", user.id}
+          ],
+          preload: [
+            :reporter, :target, :responder
+          ],
+          order_by: "Newest first"
+        )
+
         user
         |> UserLib.make_favourite()
         |> insert_recently(conn)
 
         conn
         |> assign(:user, user)
+        |> assign(:reports, reports)
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
 
@@ -239,6 +250,76 @@ defmodule TeiserverWeb.Admin.UserController do
             |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
         end
 
+
+      _ ->
+        conn
+        |> put_flash(:warning, "Unable to access this user")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
+  end
+
+  @spec respond_form(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def respond_form(conn, %{"id" => id}) do
+    report = Central.Account.get_report!(id,
+      preload: [
+        :reporter, :target, :responder
+      ]
+    )
+
+    case Central.Account.UserLib.has_access(report.target, conn) do
+      {true, _} ->
+        changeset = Central.Account.change_report(report)
+
+        fav = report
+        |> Central.Account.ReportLib.make_favourite
+
+        conn
+        |> assign(:report, report)
+        |> assign(:changeset, changeset)
+        |> add_breadcrumb(name: "Edit: #{fav.item_label}", url: conn.request_path)
+        |> render("respond.html")
+
+      _ ->
+        conn
+        |> put_flash(:warning, "Unable to access this user")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
+  end
+
+  @spec respond_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def respond_post(conn, %{"id" => id, "report" => report_params}) do
+    report = Central.Account.get_report!(id, preload: [:target])
+
+    case Central.Account.UserLib.has_access(report.target, conn) do
+      {true, _} ->
+        case Central.Account.ReportLib.perform_action(report, report_params["response_action"], report_params["response_data"]) do
+          {:ok, expires} ->
+            report_params = Map.merge(report_params, %{
+              "expires" => expires,
+              "responder_id" => conn.user_id
+            })
+
+            case Central.Account.update_report(report, report_params) do
+              {:ok, _report} ->
+                conn
+                |> put_flash(:success, "Report updated.")
+                |> redirect(to: Routes.ts_admin_user_path(conn, :show, report.target_id))
+              {:error, %Ecto.Changeset{} = changeset} ->
+                conn
+                |> assign(:report, report)
+                |> assign(:changeset, changeset)
+                |> render("respond.html")
+            end
+
+          {:error, error} ->
+            changeset = Central.Account.change_report(report)
+
+            conn
+            |> assign(:error, error)
+            |> assign(:report, report)
+            |> assign(:changeset, changeset)
+            |> render("respond.html")
+        end
 
       _ ->
         conn

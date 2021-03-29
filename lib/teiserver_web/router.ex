@@ -45,9 +45,11 @@ defmodule TeiserverWeb.Router do
 
         get("/", GeneralController, :index)
 
-        resources("/user", UserController)
         post("/user/reset_password/:id", UserController, :reset_password)
         put("/user/action/:id/:action", UserController, :perform_action)
+        get("/user/reports/:id/respond", UserController, :respond_form)
+        put("/user/reports/:id/respond", UserController, :respond_post)
+        resources("/user", UserController)
       end
     end
   end

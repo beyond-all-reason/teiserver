@@ -30,6 +30,15 @@
         <hr />
 
         <div class="float-right">
+          <%= if allow?(@conn, "admin.user") do %>
+            <a href="<%= Routes.admin_user_path(@conn, :show, @user) %>" class="btn btn-outline-<%= bsname %>" id="section-menu-new">
+              <i class="far fa-power-off"></i>
+              &nbsp;
+              Admin show
+            </a>
+            &nbsp;&nbsp;
+          <% end %>
+
           <form action='<%= Routes.ts_admin_user_path(@conn, :perform_action, @user, "recache") %>' method="POST" style="display: inline-block;">
             <input type="hidden" name="_method" value="PUT" />
             <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
@@ -39,6 +48,7 @@
               Recache
             </button>
           </form>
+          &nbsp;&nbsp;
 
           <a href="<%= Routes.ts_admin_user_path(@conn, :edit, @user) %>" class="btn btn-outline-<%= bsname %>">
             <i class="far fa-fw fa-wrench"></i>
@@ -61,6 +71,13 @@
         </li>
 
         <li>
+          <a href="#reports_tab" role="tab" class="nav-link" data-toggle="tab">
+            <%= component "icon", icon: Central.Account.ReportLib.icon() %>
+            Reports
+          </a>
+        </li>
+
+        <li>
           <a href="#moderation_tab" role="tab" class="nav-link" data-toggle="tab">
             <%= component "icon", icon: StylingHelper.icon(:moderation) %>
             Moderation
@@ -71,6 +88,10 @@
       <div class="tab-content">
         <div class="tab-pane" id="details_tab" style="padding:5px;">
           <%= render "tab_details.html", assigns %>
+        </div>
+
+        <div class="tab-pane" id="reports_tab" style="padding:5px;">
+          <%= render "tab_reports.html", assigns %>
         </div>
 
         <div class="tab-pane" id="moderation_tab" style="padding:5px;">
