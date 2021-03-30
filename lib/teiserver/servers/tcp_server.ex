@@ -38,7 +38,6 @@ defmodule Teiserver.TcpServer do
     }
 
     [
-      {:port, Application.get_env(:central, Teiserver)[:ports][:tls]},
       {:certfile, certfile},
       {:cacertfile, cacertfile},
       {:keyfile, keyfile}
@@ -51,12 +50,13 @@ defmodule Teiserver.TcpServer do
 
     # start_listener(Ref, Transport, TransOpts0, Protocol, ProtoOpts)
     if mode == :ranch_ssl do
-
       ssl_opts = get_ssl_opts()
       :ranch.start_listener(
         make_ref(),
         :ranch_ssl,
-        ssl_opts,
+        ssl_opts ++ [
+          {:port, Application.get_env(:central, Teiserver)[:ports][:tls]}
+        ],
         __MODULE__,
         []
       )
@@ -569,15 +569,20 @@ defmodule Teiserver.TcpServer do
     state
   end
 
-  def upgrade_connection(socket) do
-    ssl_opts = get_ssl_opts()
-    case :ranch_ssl.handshake(socket, ssl_opts, 5000) do
+  def upgrade_connection(state) do
+    :ok = state.transport.setopts(state.socket, [{:active, false}])
+    ssl_opts = get_ssl_opts() ++ [
+      {:verify, :verify_none}
+    ]
+    new_socket = case :ranch_ssl.handshake(state.socket, ssl_opts, 5000) do
       {:ok, new_socket} ->
+        :ok = state.transport.setopts(new_socket, [{:active, true}])
         new_socket
       err ->
-        Logger.error("Error upgrading connection - #{Kernel.inspect err}")
-        socket
+        Logger.error("Error upgrading connection - #{Kernel.inspect err}\nssl_opts: #{Kernel.inspect ssl_opts}")
+        state.socket
     end
+    %{state | socket: new_socket}
   end
 
   # Other functions
