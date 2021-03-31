@@ -53,4 +53,4 @@ If all players ready up the game is created. If any players fail to ready up in 
 
 ### Other features to consider
 - ZK and FAF have the ability to let you know you'd instant match with someone in a queue. Sort of like a passive search with the ability to make it active and resolve instantly. I think this is a feature that should be added after the main MM situation is sorted as it will be easier to write once the MM system is stabilised.
-
+- Jazzcash: suggestion: 1v1 challenge queue mode. people opt-in to the queue and players at the top of the queue 1v1. losing player goes back to bottom of queue and the next player in the queue plays next. could have a superfluous "winstreak" counter for everybody

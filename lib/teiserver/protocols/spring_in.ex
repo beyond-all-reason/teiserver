@@ -75,7 +75,7 @@ defmodule Teiserver.Protocols.SpringIn do
     tuple =
       ~r/^(#[0-9]+ )?([A-Z0-9]+)(.*)?$/
       |> Regex.run(data)
-      |> _clean
+      |> _clean()
 
     state =
       case tuple do
@@ -100,14 +100,16 @@ defmodule Teiserver.Protocols.SpringIn do
     {command, String.trim(data), String.trim(msg_id)}
   end
 
+  defp do_handle("STARTTLS", _, msg_id, state) do
+    do_handle("STLS", nil, msg_id, state)
+  end
+
   # TODO
   # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
   defp do_handle("STLS", _, msg_id, state) do
-    new_socket = Teiserver.TcpServer.upgrade_connection(state.socket)
-
     reply(:okay, "STLS", msg_id, state)
-
-    %{state | socket: new_socket}
+    new_state = Teiserver.TcpServer.upgrade_connection(state)
+    reply(:welcome, nil, msg_id, new_state)
   end
 
   # Special handler to allow us to test more easily, it just accepts
@@ -118,7 +120,6 @@ defmodule Teiserver.Protocols.SpringIn do
 
     do_handle(
       "LOGIN",
-      # "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp",
       "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * bop",
       msg_id,
       state

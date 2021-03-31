@@ -13,6 +13,20 @@ defmodule Teiserver.TcpServerTest do
     {:ok, socket: socket}
   end
 
+  # test "ssl upgrade", %{socket: socket} do
+  #   reply = _recv(socket)
+  #   assert reply == "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
+
+  #   _send(socket, "STLS\n")
+  #   reply = _recv(socket)
+  #   assert reply == "OK cmd=STLS\n"
+
+  #   :timer.sleep(5500)
+
+  #   _send(socket, "EXIT\n")
+  #   _ = _recv(socket)
+  # end
+
   test "tcp startup and exit", %{socket: socket} do
     password = "X03MO1qnZdYdgyfeuILPmQ=="
     username = new_user_name() <> "_tcp"

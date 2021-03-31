@@ -7,7 +7,7 @@
       <input type="text" name="until" value="" placeholder="" placeholder="Say when they are banned until" />
 
       <button type='submit' class='btn btn-warning float-right' style="width: 200px;" data-confirm="Are you sure">
-        <i class='fa-fw <%= Central.Account.ReportLib.action_icon("Ban") %>'></i>
+        <i class='fa-fw <%= Central.Account.ReportLib.action_icon("Mute") %>'></i>
         Temporary mute
       </button>
     </form>
@@ -18,7 +18,7 @@
       <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
 
       <button type='submit' class='btn btn-danger float-right' style="width: 200px;" data-confirm="Are you sure">
-      <i class='fa-fw <%= Central.Account.ReportLib.action_icon("Ban") %>'></i>
+      <i class='fa-fw <%= Central.Account.ReportLib.action_icon("Mute") %>'></i>
         Permanent mute
       </button>
     </form>

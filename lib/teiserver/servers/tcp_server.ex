@@ -569,20 +569,26 @@ defmodule Teiserver.TcpServer do
     state
   end
 
+  # Example of how gen-smtp handles upgrading the connection
+  # https://github.com/gen-smtp/gen_smtp/blob/master/src/gen_smtp_server_session.erl#L683-L720
+  @spec upgrade_connection(Map.t()) :: Map.t()
   def upgrade_connection(state) do
     :ok = state.transport.setopts(state.socket, [{:active, false}])
+
     ssl_opts = get_ssl_opts() ++ [
-      {:verify, :verify_none}
+      {:packet, :line},
+      {:mode, :list},
+      {:verify, :verify_none},
+      {:ssl_imp, :new}
     ]
-    new_socket = case :ranch_ssl.handshake(state.socket, ssl_opts, 5000) do
+    case :ranch_ssl.handshake(state.socket, ssl_opts, 5000) do
       {:ok, new_socket} ->
-        :ok = state.transport.setopts(new_socket, [{:active, true}])
-        new_socket
+        :ok = :ranch_ssl.setopts(new_socket, [{:active, true}])
+        %{state | socket: new_socket, transport: :ranch_ssl}
       err ->
-        Logger.error("Error upgrading connection - #{Kernel.inspect err}\nssl_opts: #{Kernel.inspect ssl_opts}")
-        state.socket
+        Logger.error("Error upgrading connection\nError: #{Kernel.inspect err}\nssl_opts: #{Kernel.inspect ssl_opts}")
+        state
     end
-    %{state | socket: new_socket}
   end
 
   # Other functions
