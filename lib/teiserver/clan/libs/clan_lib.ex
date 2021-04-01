@@ -1,0 +1,102 @@
+defmodule Teiserver.Clan.ClanLib do
+  use CentralWeb, :library
+  alias Teiserver.Clan.Clan
+
+  # Functions
+  @spec icon :: String.t()
+  def icon, do: "far fa-???"
+  @spec colours :: {String.t(), String.t(), String.t()}
+  def colours, do: Central.Helpers.StylingHelper.colours(:default)
+
+  def make_favourite(clan) do
+    %{
+      type_colour: colours() |> elem(0),
+      type_icon: icon(),
+
+      item_id: clan.id,
+      item_type: "teiserver_clan_clan",
+      item_colour: clan.colour,
+      item_icon: clan.icon,
+      item_label: "#{clan.name}",
+
+      url: "/clan/clans/#{clan.id}"
+    }
+  end
+
+  # Queries
+  @spec query_clans() :: Ecto.Query.t
+  def query_clans do
+    from clans in Clan
+  end
+
+  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  def search(query, nil), do: query
+  def search(query, params) do
+    params
+    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+      _search(query_acc, key, value)
+    end)
+  end
+
+  def _search(query, _, ""), do: query
+  def _search(query, _, nil), do: query
+
+  def _search(query, :id, id) do
+    from clans in query,
+      where: clans.id == ^id
+  end
+
+  def _search(query, :name, name) do
+    from clans in query,
+      where: clans.name == ^name
+  end
+
+  def _search(query, :id_list, id_list) do
+    from clans in query,
+      where: clans.id in ^id_list
+  end
+
+  def _search(query, :simple_search, ref) do
+    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
+
+    from clans in query,
+      where: (
+            ilike(clans.name, ^ref_like)
+        )
+  end
+
+  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  def order_by(query, nil), do: query
+  def order_by(query, "Name (A-Z)") do
+    from clans in query,
+      order_by: [asc: clans.name]
+  end
+
+  def order_by(query, "Name (Z-A)") do
+    from clans in query,
+      order_by: [desc: clans.name]
+  end
+
+  def order_by(query, "Newest first") do
+    from clans in query,
+      order_by: [desc: clans.inserted_at]
+  end
+
+  def order_by(query, "Oldest first") do
+    from clans in query,
+      order_by: [asc: clans.inserted_at]
+  end
+
+  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  def preload(query, nil), do: query
+  def preload(query, _preloads) do
+    # query = if :things in preloads, do: _preload_things(query), else: query
+    query
+  end
+
+  # def _preload_things(query) do
+  #   from clans in query,
+  #     left_join: things in assoc(clans, :things),
+  #     preload: [things: things]
+  # end
+end

@@ -123,12 +123,4 @@ defmodule Teiserver.Account do
 
   # Reports
   def get_report!(id), do: Central.Account.get_report!(id)
-
-
-
-  def script_add_user(attrs) do
-    %User{}
-    |> User.script_quick_changeset(attrs)
-    |> Repo.insert()
-  end
 end
