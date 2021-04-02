@@ -6,7 +6,6 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 - [Architecture](documents/architecture.md)
 - [Testing](documents/testing.md)
 
-
 ### Roadmap to v1.0 (remaining items, not full list)
 - Ability to rename battles in web interface
 
@@ -20,4 +19,4 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 - Ability for players to hide their flag
 
 ### Contributing
-All contributors are welcome; if you spot an issue or bug with it message me directly on the BAR discord or open an issue in github.
+All contributors are welcome; if you spot an issue or bug with it message me directly on the [BAR discord](https://discord.gg/N968ddE) or open an issue in this repo.

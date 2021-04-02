@@ -1,5 +1,14 @@
 use Mix.Config
 
+config :central, Central,
+  site_title: "Teifion.co.uk",
+  site_icon: "fad fa-robot",
+  enable_blog: false,
+  blog_title: "Teifion's blog",
+  # This is used for the coverage tool
+  file_path: "~/programming/elixir/barserver/",
+  credit: "Teifion Jordan"
+
 config :central,
   ecto_repos: [Central.Repo]
 
@@ -9,15 +18,6 @@ config :central, Extensions,
   routers: [TeiserverWeb.Router],
   index_views: [TeiserverWeb.General.CentralView],
   side_views: [TeiserverWeb.General.CentralView]
-
-config :central, Central,
-  site_title: "Teifion.co.uk",
-  site_icon: "fad fa-robot",
-  enable_blog: false,
-  blog_title: "Teifion's blog",
-  # This is used for the coverage tool
-  file_path: "~/programming/elixir/barserver/",
-  credit: "Teifion Jordan"
 
 # Configures the endpoint
 config :central, CentralWeb.Endpoint,
