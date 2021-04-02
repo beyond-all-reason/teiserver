@@ -32,3 +32,6 @@ Currently SPADS executes changes to the battle lobby based on commands from play
 
 #### Stage 4
 - Multiple choice voting
+
+### References
+- [SPADS command list](http://planetspads.free.fr/spads/doc/spadsDoc_All.html)

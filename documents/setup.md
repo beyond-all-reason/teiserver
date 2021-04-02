@@ -67,8 +67,6 @@ The site makes liberal use of [FontAwesome](https://fontawesome.com/) so if you 
 If you want to use the blog you will also need to place [ace.js](https://ace.c9.io/) folder in the same place.
 
 ### Configuration
-To add a favicon to the site place `favicon.ico` and `favicon.png` (I found it was easier to do both) in `assets/static`. You can also update the `robots.txt` here.
-
 Most of the configuration takes place in [config/config.exs](config/config.exs) with the other config files overriding for specific environments. The first block of `config.exs` contains a bunch of keys and values, which you can update.
 
 ### Connecting to the spring party of your server locally
