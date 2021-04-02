@@ -1,9 +1,12 @@
-If you've not already setup your server you might want to check out [documents/production_setup.md](documents/production_setup.md).
+If you've not already setup your server you might want to check out [documents/production_setup.md](/documents/production_setup.md).
 
 ### Requirements
 - A production server setup
 - Locally running Elixir
 - Docker installed on your computer
+
+### prod.secret.exs
+`config/prod.secret.exs` is ignored in the gitignore for obvious reasons. This means you will need to create your own one. Luckily I [made a template for you](/documents/prod/example_prod_secret.exs).
 
 #### Dockerfile
 ```

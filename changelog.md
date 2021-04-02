@@ -1,8 +1,8 @@
 ### V1.0 (in progress)
 - Parity with Uberserver as required by Chobby
 - Admin web interface improvements to Client and Battle screens
-- [Design documents](documents/designs) for Clans, Reputation, Teiserver Bossmode Tournaments
-- [Protocol proposal](documents/spring) for Matchmaking and Parties
+- [Design documents](/documents/designs) for Clans, Reputation, Teiserver Bossmode Tournaments
+- [Protocol proposal](/documents/spring) for Matchmaking and Parties
 
 ### [Beta](https://github.com/Teifion/teiserver/releases/tag/beta)
 - Web interface
