@@ -40,6 +40,9 @@ central-*.tar
 /priv/certs/
 
 # Other
+/assets/static/images/landing/laptop.jpg
+/assets/static/images/logo/*
+/assets/static/favicon.*
 /assets/static/js/fontawesome.js
 /assets/static/js/ace
 /backups/
