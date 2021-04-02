@@ -8,5 +8,6 @@ defmodule TeiserverWeb.Admin.GeneralView do
 
   @spec colours(String.t()) :: {String.t(), String.t(), String.t()}
   def colours("clients"), do: Teiserver.ClientLib.colours()
+  def colours("clans"), do: Teiserver.Clans.ClanLib.colours()
   def colours("users"), do: Teiserver.Account.UserLib.colours()
 end

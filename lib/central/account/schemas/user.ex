@@ -24,6 +24,7 @@ defmodule Central.Account.User do
     has_many :reports_responded, Central.Account.Report, foreign_key: :responder_id
 
     # Extra user.ex relations go here
+    belongs_to :clan, Teiserver.Clans.Clan
 
     belongs_to :admin_group, Central.Account.Group
 

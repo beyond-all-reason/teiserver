@@ -2,7 +2,7 @@ defmodule Teiserver.ClanTest do
   use Central.DataCase
 
   describe "clans" do
-    alias Teiserver.Clan.Clan
+    alias Teiserver.Clans.Clan
 
     @valid_attrs %{"colour" => "some colour", "icon" => "far fa-home", "name" => "some name"}
     @update_attrs %{"colour" => "some updated colour", "icon" => "fas fa-wrench", "name" => "some updated name"}

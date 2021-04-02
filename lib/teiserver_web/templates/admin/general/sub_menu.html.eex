@@ -34,7 +34,7 @@
             label: "Users",
             active: @active,
             url: Routes.ts_admin_user_path(@conn, :index),
-            lib: %{icon: "far fa-users"}
+            lib: %{icon: "fas fa-users"}
           %>
 
           <%= component "sub_menu_icon",
@@ -50,9 +50,8 @@
             name: "clans",
             label: "Clans",
             active: @active,
-            url: "",
-            lib: Teiserver.Game.ClanLib,
-            disabled: true
+            url: Routes.ts_admin_clan_path(@conn, :index),
+            lib: Teiserver.Clans.ClanLib
           %>
 
           <%= component "sub_menu_icon",

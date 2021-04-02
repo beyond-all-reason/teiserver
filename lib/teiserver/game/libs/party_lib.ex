@@ -1,6 +1,6 @@
 defmodule Teiserver.Game.PartyLib do
   @spec icon :: String.t()
-  def icon, do: "far fa-user-friends"
+  def icon, do: "fas fa-user-friends"
 
   @spec colours :: {String.t(), String.t(), String.t()}
   def colours, do: Central.Helpers.StylingHelper.colours(:info)

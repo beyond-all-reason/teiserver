@@ -1,4 +1,4 @@
-defmodule Teiserver.Clan do
+defmodule Teiserver.Clans do
   @moduledoc """
   The Account context.
   """
@@ -7,8 +7,8 @@ defmodule Teiserver.Clan do
   alias Central.Helpers.QueryHelpers
   alias Central.Repo
 
-  alias Teiserver.Clan.Clan
-  alias Teiserver.Clan.ClanLib
+  alias Teiserver.Clans.Clan
+  alias Teiserver.Clans.ClanLib
 
   def clan_query(args) do
     clan_query(nil, args)
@@ -150,8 +150,8 @@ defmodule Teiserver.Clan do
     Clan.changeset(clan, %{})
   end
 
-    alias Teiserver.Clan.ClanInvite
-  alias Teiserver.Clan.ClanInviteLib
+    alias Teiserver.Clans.ClanInvite
+  alias Teiserver.Clans.ClanInviteLib
   @doc """
   Returns the list of clan_invites.
 
@@ -275,8 +275,8 @@ defmodule Teiserver.Clan do
     ClanInvite.changeset(clan_invite, %{})
   end
 
-  alias Teiserver.Clan.ClanMembership
-  alias Teiserver.Clan.ClanMembershipLib
+  alias Teiserver.Clans.ClanMembership
+  alias Teiserver.Clans.ClanMembershipLib
   @doc """
   Returns the list of clan_memberships.
 

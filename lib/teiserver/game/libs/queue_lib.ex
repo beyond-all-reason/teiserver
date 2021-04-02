@@ -1,6 +1,6 @@
 defmodule Teiserver.Game.QueueLib do
   @spec icon :: String.t()
-  def icon, do: "far fa-list-alt"
+  def icon, do: "fas fa-list-alt"
 
   @spec colours :: {String.t(), String.t(), String.t()}
   def colours, do: Central.Helpers.StylingHelper.colours(:info)

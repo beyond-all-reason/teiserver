@@ -1,12 +1,12 @@
 <% {_fg, _bg, bsname} = colours() %>
 
-<%= render TeiserverWeb.Clan.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "clans"}) %>
+<%= render TeiserverWeb.Clans.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "clans"}) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class="card border-<%= bsname %>">
       <div class="card-body">
-        <%= render TeiserverWeb.Clan.ClanView, "section_menu.html", Map.merge(assigns, %{
+        <%= render TeiserverWeb.Clans.ClanView, "section_menu.html", Map.merge(assigns, %{
           quick_search: "",
           show_search: false,
           active: "new"
@@ -15,7 +15,7 @@
 
         <hr />
 
-<%= render "form.html", Map.put(assigns, :action, Routes.teiserver_clan_path(@conn, :create)) %>
+<%= render "form.html", Map.put(assigns, :action, Routes.ts_admin_clan_path(@conn, :create)) %>
 
       </div>
     </div>

@@ -1,23 +1,20 @@
-defmodule TeiserverWeb.Clan.ClanController do
+defmodule TeiserverWeb.Admin.ClanController do
   use CentralWeb, :controller
 
-  alias Teiserver.Clan
-  alias Teiserver.Clan.Clan
-  alias Teiserver.Clan.ClanLib
+  alias Teiserver.Clans
+  alias Teiserver.Clans.Clan
+  alias Teiserver.Clans.ClanLib
 
-  plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Clan.Clan,
-    action: {Phoenix.Controller, :action_name},
-    user: {Central.Account.AuthLib, :current_user}
+  plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
+  plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
+  plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin/clans')
 
-  plug AssignPlug,
-    sidemenu_active: "clan"
-
-  plug :add_breadcrumb, name: 'Clan', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Clans', url: '/teiserver/clans'
+  plug(AssignPlug,
+    sidemenu_active: ["teiserver", "teiserver_admin"]
+  )
 
   def index(conn, params) do
-    clans = Clan.list_clans(
+    clans = Clans.list_clans(
       search: [
         simple_search: Map.get(params, "s", "") |> String.trim,
       ],
@@ -30,7 +27,7 @@ defmodule TeiserverWeb.Clan.ClanController do
   end
 
   def show(conn, %{"id" => id}) do
-    clan = Clan.get_clan!(id, [
+    clan = Clans.get_clan!(id, [
       joins: [],
     ])
 
@@ -47,7 +44,8 @@ defmodule TeiserverWeb.Clan.ClanController do
   def new(conn, _params) do
     changeset = Clan.change_clan(%Clan{
       icon: "fas fa-" <> StylingHelper.random_icon(),
-      colour: StylingHelper.random_colour()
+      colour1: StylingHelper.random_colour(),
+      colour2: StylingHelper.random_colour()
     })
 
     conn
@@ -61,7 +59,7 @@ defmodule TeiserverWeb.Clan.ClanController do
       {:ok, _clan} ->
         conn
         |> put_flash(:info, "Clan created successfully.")
-        |> redirect(to: Routes.teiserver_clan_path(conn, :index))
+        |> redirect(to: Routes.teiserver_clans_path(conn, :index))
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -71,7 +69,7 @@ defmodule TeiserverWeb.Clan.ClanController do
   end
 
   def edit(conn, %{"id" => id}) do
-    clan = Clan.get_clan!(id)
+    clan = Clans.get_clan!(id)
 
     changeset = Clan.change_clan(clan)
 
@@ -83,13 +81,13 @@ defmodule TeiserverWeb.Clan.ClanController do
   end
 
   def update(conn, %{"id" => id, "clan" => clan_params}) do
-    clan = Clan.get_clan!(id)
+    clan = Clans.get_clan!(id)
 
     case Clan.update_clan(clan, clan_params) do
       {:ok, _clan} ->
         conn
         |> put_flash(:info, "Clan updated successfully.")
-        |> redirect(to: Routes.teiserver_clan_path(conn, :index))
+        |> redirect(to: Routes.teiserver_clans_path(conn, :index))
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> assign(:clan, clan)
@@ -99,7 +97,7 @@ defmodule TeiserverWeb.Clan.ClanController do
   end
 
   def delete(conn, %{"id" => id}) do
-    clan = Clan.get_clan!(id)
+    clan = Clans.get_clan!(id)
 
     clan
     |> ClanLib.make_favourite
@@ -109,6 +107,6 @@ defmodule TeiserverWeb.Clan.ClanController do
 
     conn
     |> put_flash(:info, "Clan deleted successfully.")
-    |> redirect(to: Routes.teiserver_clan_path(conn, :index))
+    |> redirect(to: Routes.teiserver_clans_path(conn, :index))
   end
 end

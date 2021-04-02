@@ -3,7 +3,7 @@ defmodule Teiserver.ClientLib do
   @spec colours() :: {String.t(), String.t(), String.t()}
   def colours, do: Central.Helpers.StylingHelper.colours(:primary2)
   @spec icon() :: String.t()
-  def icon, do: "far fa-plug"
+  def icon, do: "fas fa-plug"
 
   @spec make_favourite(Map.t()) :: Map.t()
   def make_favourite(battle) do

@@ -14,6 +14,7 @@ defmodule TeiserverWeb.Router do
         get("/accimp", GeneralController, :accimp)
       end
 
+      # ts_account_X_path
       scope "/teiserver/account", TeiserverWeb.Account, as: :ts_account do
         pipe_through([:browser, :admin_layout, :protected])
 
@@ -24,6 +25,14 @@ defmodule TeiserverWeb.Router do
         delete("/relationships/delete/:action/:target", RelationshipsController, :delete)
 
         get("/", GeneralController, :index)
+      end
+
+      # ts_clans_X_path
+      scope "/teiserver/clans", TeiserverWeb.Clans, as: :ts_clans do
+        pipe_through([:browser, :admin_layout, :protected])
+
+        get("/", ClanController, :index)
+        get("/:name", ClanController, :show)
       end
 
       scope "/teiserver", TeiserverWeb.BattleLive, as: :ts do
@@ -44,6 +53,8 @@ defmodule TeiserverWeb.Router do
         pipe_through([:browser, :admin_layout, :protected])
 
         get("/", GeneralController, :index)
+
+        resources("/clans", ClanController)
 
         post("/user/reset_password/:id", UserController, :reset_password)
         put("/user/action/:id/:action", UserController, :perform_action)

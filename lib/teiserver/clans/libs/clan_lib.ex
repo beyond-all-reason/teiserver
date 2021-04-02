@@ -1,12 +1,12 @@
-defmodule Teiserver.Clan.ClanLib do
+defmodule Teiserver.Clans.ClanLib do
   use CentralWeb, :library
-  alias Teiserver.Clan.Clan
+  alias Teiserver.Clans.Clan
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "far fa-???"
+  def icon, do: "fas fa-globe"
   @spec colours :: {String.t(), String.t(), String.t()}
-  def colours, do: Central.Helpers.StylingHelper.colours(:default)
+  def colours, do: Central.Helpers.StylingHelper.colours(:info2)
 
   def make_favourite(clan) do
     %{
@@ -14,12 +14,12 @@ defmodule Teiserver.Clan.ClanLib do
       type_icon: icon(),
 
       item_id: clan.id,
-      item_type: "teiserver_clan_clan",
-      item_colour: clan.colour,
+      item_type: "teiserver_clans_clan",
+      item_colour: clan.colour1,
       item_icon: clan.icon,
       item_label: "#{clan.name}",
 
-      url: "/clan/clans/#{clan.id}"
+      url: "/clans/#{clan.id}"
     }
   end
 

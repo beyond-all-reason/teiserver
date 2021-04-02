@@ -6,7 +6,7 @@
   active: @active,
   icon: "far fa-bars",
   bsname: bsname,
-  url: Routes.teiserver_clan_path(@conn, :index)
+  url: Routes.ts_admin_clan_path(@conn, :index)
 %>
 
 <%= component "section_menu_button",
@@ -15,10 +15,10 @@
   active: @active,
   icon: "far fa-plus",
   bsname: bsname,
-  url: Routes.teiserver_clan_path(@conn, :new)
+  url: Routes.ts_admin_clan_path(@conn, :new)
 %>
 
-<form action="<%= Routes.teiserver_clan_path(@conn, :index) %>" method="get" class="float-right form-inline d-none d-md-block">
+<form action="<%= Routes.ts_admin_clan_path(@conn, :index) %>" method="get" class="float-right form-inline d-none d-md-block">
   <div class="input-group">
     <input type="text" name="s" id="quick_search" value="<%= assigns[:quick_search] || @conn.params["s"] %>" placeholder="Quick search" class="form-control" style="width: 150px; display: inline-block;" />
     &nbsp;

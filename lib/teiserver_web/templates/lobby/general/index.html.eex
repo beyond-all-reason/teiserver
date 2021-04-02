@@ -20,12 +20,11 @@
 
     <%=
       component "menu_card",
-      icon: Teiserver.Game.ClanLib.icon(),
-      name: "clan",
-      text: "Clan",
+      icon: Teiserver.Clans.ClanLib.icon(),
+      name: "clans",
+      text: "Clans",
       icon_class: "fas",
-      link: "",
-      disabled: true
+      link: Routes.ts_clans_clan_path(@conn, :index)
     %>
 
     <%=
@@ -78,12 +77,11 @@
 
       <%=
         component "menu_card",
-        icon: Teiserver.Game.ClanLib.icon(),
+        icon: Teiserver.Clans.ClanLib.icon(),
         name: "clan_admin",
         text: "Clan admin",
         icon_class: "fas",
-        link: "",
-        disabled: true
+        link: Routes.ts_admin_clan_path(@conn, :index)
       %>
 
       <%=

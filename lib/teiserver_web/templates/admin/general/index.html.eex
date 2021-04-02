@@ -30,7 +30,7 @@
 
     <%=
       component "menu_card",
-      icon: Teiserver.Game.ClanLib.icon(),
+      icon: Teiserver.Clans.ClanLib.icon(),
       name: "clan_admin",
       text: "Clan admin",
       icon_class: "fas",
