@@ -2,7 +2,6 @@ defmodule TeiserverWeb.Clans.ClanController do
   use CentralWeb, :controller
 
   alias Teiserver.Clans
-  alias Teiserver.Clans.Clan
   alias Teiserver.Clans.ClanLib
 
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')

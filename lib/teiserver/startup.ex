@@ -8,7 +8,7 @@ defmodule Teiserver.Startup do
 
     add_group_type("Bar team", %{fields: []})
 
-    umbrella_id =
+    umbrella =
       case Central.Account.get_group(nil, search: [name: "BAR umbrella group"]) do
         nil ->
           {:ok, group} =
@@ -20,13 +20,13 @@ defmodule Teiserver.Startup do
               "data" => %{}
             })
 
-          group.id
+          group
 
         group ->
-          group.id
+          group
       end
 
-    group_id =
+    group =
       case Central.Account.get_group(nil, search: [name: "BAR Users"]) do
         nil ->
           {:ok, group} =
@@ -36,32 +36,51 @@ defmodule Teiserver.Startup do
               "icon" => "fas fa-robot",
               "colour" => "#000000",
               "data" => %{},
-              "super_group_id" => umbrella_id
+              "super_group_id" => umbrella.id
             })
 
-          group.id
+          group
 
         group ->
-          group.id
+          group
       end
 
-    ConCache.put(:application_metadata_cache, "bar_umbrella_group", umbrella_id)
-    ConCache.put(:application_metadata_cache, "bar_user_group", group_id)
+    ConCache.put(:application_metadata_cache, "bar_umbrella_group", umbrella.id)
+    ConCache.put(:application_metadata_cache, "bar_user_group", group.id)
 
-    # QuickAction.add_items([
-    #   %{label: "Battles", icons: [Teiserver.BattleLib.icon(), :list], input: "s", method: "get", placeholder: "Search battle name", url: "/teiserver/battle", permissions: "teiserver"},
-    # ])
+    Central.Account.GroupCacheLib.update_caches(umbrella)
+    Central.Account.GroupCacheLib.update_caches(group)
 
-    # add_user_config_type %{
-    #   key: "metis.Hide readme",
-    #   section: "Metis",
-    #   type: "boolean",
-    #   visible: false,
-    #   permissions: ["metis"],
-    #   description: "Hides the readme when starting an event",
-    #   opts: [],
-    #   default: false,
-    # }
+    # Quick actions
+    QuickAction.add_items([
+      # General pages
+      %{label: "Relationships", icons: [Teiserver.icon(:relationship), :list], url: "/teiserver/account/relationships", permissions: "teiserver"},
+      %{label: "Clans", icons: [Teiserver.Clans.ClanLib.icon(), :list], url: "/teiserver/account/clans", permissions: "teiserver"},
+      %{label: "Battles", icons: [Teiserver.BattleLib.icon(), :list], url: "/teiserver/battle", permissions: "teiserver"},
+      # %{label: "Tournaments", icons: [Teiserver.Game.TournamentLib.icon(), :list], url: "/teiserver/tournaments", permissions: "teiserver"},
+
+      # Mod pages
+      %{label: "Clients", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/client", permissions: "teiserver.moderator"},
+      %{label: "Teiserver users", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/user", permissions: "teiserver.moderator"},
+      # %{label: "Parties", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/admin/parties", permissions: "teiserver.moderator"},
+      %{label: "Clan admin", icons: [Teiserver.Clans.ClanLib.icon(), :list], url: "/teiserver/admin/clans", permissions: "teiserver.moderator"},
+      # %{label: "Queue admin", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/admin/queues", permissions: "teiserver.moderator"},
+      # %{label: "Tournament admin", icons: [Teiserver.Game.TournamentLib.icon(), :list], url: "/teiserver/admin/tournaments", permissions: "teiserver.moderator"},
+
+      # Admin pages
+    ])
+
+    # User configs
+    add_user_config_type %{
+      key: "teiserver.Show flag",
+      section: "Teiserver account",
+      type: "boolean",
+      visible: true,
+      permissions: ["teiserver"],
+      description: "When checked the flag associated with your IP will be displayed. If unchecked your flag will be blank. This will take effect next time you login with your client.",
+      opts: [],
+      default: false,
+    }
 
     ConCache.put(:lists, :clients, [])
     ConCache.put(:lists, :rooms, [])

@@ -2,6 +2,19 @@
 
 <%= render TeiserverWeb.Clans.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "clans"}) %>
 
+<style type="text/css">
+  .clan-box {
+    width: 300px;
+    height: 300px;
+    border: 1px solid #AAA;
+    display: inline-block;
+  }
+
+  .clan-box h4 {
+    text-align: center;
+  }
+</style>
+
 <div class="row section-menu">
   <div class="col-md-12">
     <div class="card border-<%= bsname %>">

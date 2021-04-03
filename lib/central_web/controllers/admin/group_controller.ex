@@ -110,7 +110,7 @@ defmodule CentralWeb.Admin.GroupController do
     |> render("select.html")
   end
 
-  @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
+  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def create(conn, %{"group" => group_params}) do
     group_type =
       if group_params["type_id"] != "" do

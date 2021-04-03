@@ -15,6 +15,7 @@ defmodule Teiserver.User do
   @data_keys [
     :rank,
     :country,
+    :country_override,
     :lobbyid,
     :ip,
     :moderator,
@@ -38,6 +39,7 @@ defmodule Teiserver.User do
   @default_data %{
     rank: 1,
     country: "??",
+    country_override: nil,
     lobbyid: "LuaLobby Chobby",
     ip: "default_ip",
     moderator: false,
@@ -567,7 +569,16 @@ defmodule Teiserver.User do
   end
 
   defp do_login(user, state, ip, lobbyid) do
-    country = Teiserver.Geoip.get_flag(ip)
+    # If they don't want a flag shown, don't show it, otherwise check for an override before trying geoip
+    country = cond do
+      Central.Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
+        "??"
+      user.country_override != nil ->
+        user.country_override
+      true ->
+        Teiserver.Geoip.get_flag(ip)
+    end
+
     last_login = round(:erlang.system_time(:seconds)/60)
 
     ingame_hours = user.ingame_minutes / 60

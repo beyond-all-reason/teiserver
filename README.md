@@ -1,5 +1,5 @@
 # Teiserver
-An Elixir implementation of Uberserver. Currently implementing only the Spring protocol but later I plan to create a new and more modern protocol.
+An Elixir implementation of Uberserver. Currently implementing only the Spring protocol but later I plan to create a new and more modern protocol. Being written in Elixir it takes full advantage of the Erlang OTP for a very concurrent application.
 
 ## Documentation
 - [Local setup](/documents/guides/local_setup.md)
@@ -7,12 +7,9 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 - [Architecture](/documents/architecture.md)
 - [Testing](/documents/guides/testing.md)
 
-These are just the highlights, full documentation in the documentation folder.
+These are just the highlights, full documentation can be found in the documentation folder.
 
-### Roadmap to v1.0 (remaining items, not full list)
-- Ability to rename battles in web interface
-
-### Post parity todo (in no particular order)
+### High level TODO list (no particular order)
 - [Matchmaking](/documents/spring/matchmaking.md)
 - [Parties](/documents/spring/parties.md)
 - [Clans](/documents/designs/clans.md)
