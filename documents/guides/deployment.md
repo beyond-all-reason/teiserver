@@ -1,4 +1,4 @@
-If you've not already setup your server you might want to check out [documents/production_setup.md](/documents/production_setup.md).
+If you've not already setup your server you might want to check out [documents/guides/production_setup.md](/documents/guides/production_setup.md).
 
 ### Requirements
 - A production server setup

@@ -2,9 +2,12 @@
 An Elixir implementation of Uberserver. Currently implementing only the Spring protocol but later I plan to create a new and more modern protocol.
 
 ## Documentation
-- [Setup instructions](/documents/setup.md)
+- [Local setup](/documents/guides/local_setup.md)
+- [Prod setup linux](/documents/guides/production_setup_linux.md)/[Prod setup windows](/documents/guides/production_setup_windows.md)
 - [Architecture](/documents/architecture.md)
-- [Testing](/documents/testing.md)
+- [Testing](/documents/guides/testing.md)
+
+These are just the highlights, full documentation in the documentation folder.
 
 ### Roadmap to v1.0 (remaining items, not full list)
 - Ability to rename battles in web interface
@@ -19,4 +22,4 @@ An Elixir implementation of Uberserver. Currently implementing only the Spring p
 - Ability for players to hide their flag
 
 ### Contributing
-All contributors are welcome; if you spot an issue or bug with it message me directly on the [BAR discord](https://discord.gg/N968ddE) or open an issue in this repo.
+All contributors are welcome; if you spot an issue or bug with it mention me on the [BAR discord](https://discord.gg/N968ddE) (@teifion) or open an issue in this repo. Pull requests are also welcome; even if it's just a matter of spelling mistake.
