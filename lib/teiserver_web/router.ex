@@ -24,6 +24,8 @@ defmodule TeiserverWeb.Router do
         put("/relationships/update/:action/:target", RelationshipsController, :update)
         delete("/relationships/delete/:action/:target", RelationshipsController, :delete)
 
+        resources("/preferences", PreferencesController, only: [:index, :edit, :update, :new, :create])
+
         get("/", GeneralController, :index)
       end
 

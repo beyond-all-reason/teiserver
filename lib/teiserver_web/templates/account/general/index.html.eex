@@ -1,5 +1,6 @@
 <div class="row page-row">
-  <%= component "menu_card", icon_class: "fas", name: "", icon: Teiserver.icon(:relationship), text: "Relationships", link: Routes.ts_account_relationships_path(@conn, :index) %>
+  <%= component "menu_card", icon_class: "fad", name: "", icon: Teiserver.icon(:relationship), text: "Relationships", link: Routes.ts_account_relationships_path(@conn, :index) %>
+  <%= component "menu_card", icon_class: "fad", name: "", icon: Central.Config.UserConfigLib.icon(), text: "Preferences", link: Routes.ts_account_preferences_path(@conn, :index) %>
 </div>
 
 <div class="row page-row">

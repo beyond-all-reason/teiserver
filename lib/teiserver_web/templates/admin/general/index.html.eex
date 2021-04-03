@@ -5,7 +5,7 @@
       icon: Teiserver.ClientLib.icon(),
       name: "client_admin",
       text: "Client admin",
-      icon_class: "fas",
+      icon_class: "fad",
       link: Routes.ts_admin_client_index_path(@conn, :index)
     %>
 
@@ -14,7 +14,7 @@
       icon: "far fa-users",
       name: "user_admin",
       text: "User admin",
-      icon_class: "fas",
+      icon_class: "fad",
       link: Routes.ts_admin_user_path(@conn, :index)
     %>
 
@@ -23,7 +23,7 @@
       icon: Teiserver.Game.PartyLib.icon(),
       name: "party",
       text: "Parties",
-      icon_class: "fas",
+      icon_class: "fad",
       link: "",
       disabled: true
     %>
@@ -33,7 +33,7 @@
       icon: Teiserver.Clans.ClanLib.icon(),
       name: "clan_admin",
       text: "Clan admin",
-      icon_class: "fas",
+      icon_class: "fad",
       link: Routes.ts_admin_clan_path(@conn, :index)
     %>
 
@@ -42,7 +42,7 @@
       icon: Teiserver.Game.QueueLib.icon(),
       name: "queue",
       text: "Queues",
-      icon_class: "fas",
+      icon_class: "fad",
       link: "",
       disabled: true
     %>

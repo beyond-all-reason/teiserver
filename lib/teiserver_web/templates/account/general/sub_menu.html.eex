@@ -45,6 +45,14 @@
             lib: Teiserver.Game.TournamentLib,
             disabled: true
           %>
+
+          <%= component "sub_menu_icon",
+            name: "preferences",
+            label: "Preferences",
+            active: @active,
+            url: Routes.ts_account_preferences_path(@conn, :index),
+            lib: %{icon: Central.Config.UserConfigLib.icon()}
+          %>
         </div>
 
       </div>
