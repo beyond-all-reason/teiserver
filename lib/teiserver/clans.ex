@@ -150,7 +150,7 @@ defmodule Teiserver.Clans do
     Clan.changeset(clan, %{})
   end
 
-    alias Teiserver.Clans.ClanInvite
+  alias Teiserver.Clans.ClanInvite
   alias Teiserver.Clans.ClanInviteLib
   @doc """
   Returns the list of clan_invites.

@@ -7,7 +7,7 @@
     $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
 
     page_quick_actions = [
-      {label: "Edit clan", icon: "<%= icon() %>", url: "<%= Routes.teiserver_clans_path(@conn, :edit, @clan) %>", keywords: ["edit", "clan", "edit clan"]},
+      {label: "Edit clan", icon: "<%= icon() %>", url: "<%= Routes.ts_clans_clan_path(@conn, :edit, @clan) %>", keywords: ["edit", "clan", "edit clan"]},
     ];
   });
 </script>
@@ -19,7 +19,7 @@
     <div class="card border-<%= bsname %>">
       <div class="card-body">
         <div class="float-right">
-          <a href="<%= Routes.teiserver_clans_path(@conn, :edit, @clan) %>" class="btn btn-outline-<%= bsname %>">
+          <a href="<%= Routes.ts_clans_clan_path(@conn, :edit, @clan) %>" class="btn btn-outline-<%= bsname %>">
             <i class="far fa-fw fa-wrench"></i>
             Edit clan
           </a>
