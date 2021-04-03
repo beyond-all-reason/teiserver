@@ -42,7 +42,7 @@ defmodule TeiserverWeb.Admin.ClanController do
   end
 
   def new(conn, _params) do
-    changeset = Clan.change_clan(%Clan{
+    changeset = Clans.change_clan(%Clan{
       icon: "fas fa-" <> StylingHelper.random_icon(),
       colour1: StylingHelper.random_colour(),
       colour2: StylingHelper.random_colour()
@@ -55,11 +55,11 @@ defmodule TeiserverWeb.Admin.ClanController do
   end
 
   def create(conn, %{"clan" => clan_params}) do
-    case Clan.create_clan(clan_params) do
+    case Clans.create_clan(clan_params) do
       {:ok, _clan} ->
         conn
         |> put_flash(:info, "Clan created successfully.")
-        |> redirect(to: Routes.teiserver_clans_path(conn, :index))
+        |> redirect(to: Routes.ts_admin_clan_path(conn, :index))
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -71,7 +71,7 @@ defmodule TeiserverWeb.Admin.ClanController do
   def edit(conn, %{"id" => id}) do
     clan = Clans.get_clan!(id)
 
-    changeset = Clan.change_clan(clan)
+    changeset = Clans.change_clan(clan)
 
     conn
     |> assign(:clan, clan)
@@ -83,11 +83,11 @@ defmodule TeiserverWeb.Admin.ClanController do
   def update(conn, %{"id" => id, "clan" => clan_params}) do
     clan = Clans.get_clan!(id)
 
-    case Clan.update_clan(clan, clan_params) do
+    case Clans.update_clan(clan, clan_params) do
       {:ok, _clan} ->
         conn
         |> put_flash(:info, "Clan updated successfully.")
-        |> redirect(to: Routes.teiserver_clans_path(conn, :index))
+        |> redirect(to: Routes.ts_admin_clan_path(conn, :index))
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> assign(:clan, clan)
@@ -103,10 +103,10 @@ defmodule TeiserverWeb.Admin.ClanController do
     |> ClanLib.make_favourite
     |> remove_recently(conn)
 
-    {:ok, _clan} = Clan.delete_clan(clan)
+    {:ok, _clan} = Clans.delete_clan(clan)
 
     conn
     |> put_flash(:info, "Clan deleted successfully.")
-    |> redirect(to: Routes.teiserver_clans_path(conn, :index))
+    |> redirect(to: Routes.ts_admin_clan_path(conn, :index))
   end
 end

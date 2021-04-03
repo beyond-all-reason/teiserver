@@ -12,6 +12,7 @@ defmodule Central.Helpers.SchemaHelper do
   #   }
   # end
 
+  @spec make_datetime(Datetime.t()) :: Map.t()
   defp make_datetime(d) do
     %{
       "second" => Integer.to_string(d.second),
@@ -23,11 +24,12 @@ defmodule Central.Helpers.SchemaHelper do
     }
   end
 
+  @spec parse_datetimes(Map.t(), List.t()) :: Map.t()
   def parse_datetimes(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end) ++ names
 
     params
-    |> Enum.map(fn {k, v} ->
+    |> Map.new(fn {k, v} ->
       cond do
         not Enum.member?(names, k) ->
           {k, v}
@@ -55,7 +57,6 @@ defmodule Central.Helpers.SchemaHelper do
           end
       end
     end)
-    |> Map.new()
   end
 
   # def parse_dates(params, names) do
@@ -120,11 +121,12 @@ defmodule Central.Helpers.SchemaHelper do
   #   |> Map.new
   # end
 
+  @spec trim_strings(Map.t(), List.t()) :: Map.t()
   def trim_strings(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)
 
     params
-    |> Enum.map(fn {k, v} ->
+    |> Map.new(fn {k, v} ->
       case Enum.member?(names, k) do
         true ->
           case v do
@@ -139,14 +141,48 @@ defmodule Central.Helpers.SchemaHelper do
           {k, v}
       end
     end)
-    |> Map.new()
   end
 
+  @doc """
+  Given a list of fields and a list of patterns, will apply Regex.replace for every
+  pattern to each field.
+  """
+  @spec remove_characters(Map.t(), List.t(), List.t()) :: Map.t()
+  def remove_characters(params, names, patterns) do
+    names = Enum.map(names, fn n -> Atom.to_string(n) end)
+
+    params
+    |> Map.new(fn {k, v} ->
+      case Enum.member?(names, k) do
+        true ->
+          case v do
+            nil ->
+              {k, nil}
+
+            _ ->
+              new_value = patterns
+              |> Enum.reduce(v, fn (pattern, acc) ->
+                Regex.replace(pattern, acc, "")
+              end)
+
+              {
+                k,
+                new_value
+              }
+          end
+
+        false ->
+          {k, v}
+      end
+    end)
+  end
+
+  @spec safe_strings(Map.t(), List.t()) :: Map.t()
   def safe_strings(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)
 
     params
-    |> Enum.map(fn {k, v} ->
+    |> Map.new(fn {k, v} ->
       case Enum.member?(names, k) do
         true ->
           case v do
@@ -166,7 +202,6 @@ defmodule Central.Helpers.SchemaHelper do
           {k, v}
       end
     end)
-    |> Map.new()
   end
 
   def parse_checkboxes(params, names) do
@@ -186,7 +221,7 @@ defmodule Central.Helpers.SchemaHelper do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)
 
     params
-    |> Enum.map(fn {k, v} ->
+    |> Map.new(fn {k, v} ->
       case Enum.member?(names, k) do
         true ->
           case v do
@@ -208,7 +243,6 @@ defmodule Central.Helpers.SchemaHelper do
           {k, v}
       end
     end)
-    |> Map.new()
   end
 
   # @spec validate_human_time(map, list | atom, Keyword.t) :: t

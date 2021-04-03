@@ -13,10 +13,20 @@
       <%= text_input f, :name, class: "form-control", autofocus: :autofocus %>
       <%= error_tag f, :name %>
     </div>
+
+    <div class="col-lg-6">
+      <%= label f, :tag, class: "control-label" %>
+      <%= text_input f, :tag, class: "form-control" %>
+      <%= error_tag f, :tag %>
+    </div>
   </div>
 
   <div class="form-group">
-    <%= input_with_type f, :colour, "color" %>
+    <%= input_with_type f, :colour1, "color" %>
+  </div>
+
+  <div class="form-group">
+    <%= input_with_type f, :colour2, "color" %>
   </div>
 
   <div class="form-group">

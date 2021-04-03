@@ -34,8 +34,7 @@
       name: "clan_admin",
       text: "Clan admin",
       icon_class: "fas",
-      link: "",
-      disabled: true
+      link: Routes.ts_admin_clan_path(@conn, :index)
     %>
 
     <%=
