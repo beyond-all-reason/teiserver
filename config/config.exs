@@ -38,7 +38,9 @@ config :central, Teiserver,
   enable_benchmark: false,
   enable_hooks: true,
   heartbeart_interval: 30_000,
-  heartbeart_timeout: 45_000
+  heartbeart_timeout: 45_000,
+  game_name: "Spring game",
+  discord: nil
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

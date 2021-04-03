@@ -9,6 +9,10 @@ secret_key_base = "mix phx.gen.secret"
 config :central, Central.Setup,
   key: "---- random string of alpha numeric characters ----"
 
+config :central, Teiserver,
+  game_name: "My game name",
+  discord: "My discord link"# Set to nil to not have link
+
 config :central, Central.Repo,
   username: "teiserver_prod",
   password: "mix phx.gen.secret",
