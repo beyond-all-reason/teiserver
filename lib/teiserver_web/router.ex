@@ -56,6 +56,10 @@ defmodule TeiserverWeb.Router do
 
         get("/", GeneralController, :index)
 
+        get("/tools", ToolController, :index)
+        get("/tools/convert", ToolController, :convert_form)
+        post("/tools/convert_post", ToolController, :convert_post)
+
         resources("/clans", ClanController)
 
         post("/user/reset_password/:id", UserController, :reset_password)

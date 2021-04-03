@@ -12,12 +12,4 @@ defmodule TeiserverWeb.Lobby.GeneralController do
   def index(conn, _params) do
     render(conn, "index.html")
   end
-
-  def accimp(conn, _params) do
-    if allow?(conn, "dev") do
-      Teiserver.AccountImport.run()
-
-      render(conn, "index.html")
-    end
-  end
 end

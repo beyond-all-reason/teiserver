@@ -1,8 +1,11 @@
 defmodule Central.Admin.ToolLib do
   use CentralWeb, :library
 
+  @spec colours :: {String.t(), String.t(), String.t()}
   def colours(), do: Central.Helpers.StylingHelper.colours(:info)
-  def icon(), do: "far fa-cog"
+
+  @spec icon :: String.t()
+  def icon(), do: "far fa-tools"
 
   def coverage_colours(value) do
     cond do

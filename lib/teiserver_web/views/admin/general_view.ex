@@ -10,4 +10,5 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def colours("clients"), do: Teiserver.ClientLib.colours()
   def colours("clans"), do: Teiserver.Clans.ClanLib.colours()
   def colours("users"), do: Teiserver.Account.UserLib.colours()
+  def colours("tools"), do: Central.Admin.ToolLib.colours()
 end

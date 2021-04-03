@@ -62,6 +62,14 @@
             lib: Teiserver.Game.QueueLib,
             disabled: true
           %>
+
+          <%= component "sub_menu_icon",
+            name: "tools",
+            label: "Tools",
+            active: @active,
+            url: Routes.ts_admin_tool_path(@conn, :index),
+            lib: Central.Admin.ToolLib
+          %>
         </div>
 
       </div>

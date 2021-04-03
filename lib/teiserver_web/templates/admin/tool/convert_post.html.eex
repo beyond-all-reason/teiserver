@@ -1,0 +1,10 @@
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "tools"}) %>
+
+<br /><br />
+<div class="alert alert-info">
+  Conversion process is underway as a background job.
+</div>
+
+<div class="row page-row">
+  <%= component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_admin_tool_path(@conn, :index) %>
+</div>

@@ -66,6 +66,13 @@ defmodule Teiserver.Account do
     |> Central.Account.broadcast_create_user
   end
 
+  def script_create_user(attrs \\ %{}) do
+    %User{}
+    |> User.changeset(attrs, :script)
+    |> Repo.insert()
+    |> Central.Account.broadcast_create_user
+  end
+
   @doc """
   Updates a user.
 
