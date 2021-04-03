@@ -1,6 +1,8 @@
 defmodule Teiserver.UberserverConvert do
   use Oban.Worker, queue: :teiserver
 
+  alias Teiserver.User
+
   @impl Oban.Worker
   def perform(%{args: %{"body" => body}}) do
     create_conversion_job(body)
@@ -47,7 +49,7 @@ defmodule Teiserver.UberserverConvert do
     bar_user_group = ConCache.get(:application_metadata_cache, "bar_user_group")
 
     {verified, code} = case raw_data["verification_code"] do
-      "" -> {true, nil}
+      nil -> {true, nil}
       c -> {false, c}
     end
 
@@ -76,7 +78,7 @@ defmodule Teiserver.UberserverConvert do
       colour: "#AA0000",
       icon: "fas fa-user",
       data: %{
-        "password_hash" => raw_data["password"],
+        "password_hash" => User.encrypt_password(raw_data["password"]),
         "ingame_minutes" => raw_data["ingame_time"],
         "bot" => (raw_data["bot"] == "1"),
         "moderator" => is_mod,

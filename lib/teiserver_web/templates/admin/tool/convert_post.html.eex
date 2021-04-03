@@ -2,7 +2,7 @@
 
 <br /><br />
 <div class="alert alert-info">
-  Conversion process is underway as a background job.
+  Conversion process is underway as a background job. Depending on the number of users this could take some time as each one needs to have their password encrypted.
 </div>
 
 <div class="row page-row">

@@ -80,7 +80,7 @@ def get_users(users_query):
         "username": username,
         "password": password[1:-1],
         "last_ip": last_ip[1:-1],
-        "ingame_time": ingame_time,
+        "ingame_time": int(ingame_time),
         "access": access[1:-1],
         "email": email,
         "bot": bot,

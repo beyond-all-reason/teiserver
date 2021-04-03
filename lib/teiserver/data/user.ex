@@ -8,6 +8,7 @@ defmodule Teiserver.User do
   alias Teiserver.Account
   alias Central.Helpers.StylingHelper
   alias Central.Helpers.TimexHelper
+  alias Argon2
 
   @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulence cats dogs mice eagle oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave sulphur tree tangerine melon watermelon obstreperous chlorine argon mercury jupiter saturn neptune ceres firefly slug sloth madness happiness ferrous oblique advantageous inefficient starling clouds rivers sunglasses)
 
@@ -86,6 +87,14 @@ defmodule Teiserver.User do
     ConCache.get(:application_metadata_cache, "bar_user_group")
   end
 
+  def encrypt_password(password) do
+    Argon2.hash_pwd_salt(password)
+  end
+
+  def spring_encrypt_password(password) do
+    :crypto.hash(:md5, password) |> Base.encode64()
+  end
+
   def user_register_params(name, email, password_hash, extra_data \\ %{}) do
     name = clean_name(name)
     verification_code = :random.uniform(899_999) + 100_000
@@ -106,7 +115,7 @@ defmodule Teiserver.User do
       data:
         data
         |> Map.merge(%{
-          "password_hash" => password_hash,
+          "password_hash" => encrypt_password(password_hash),
           "verification_code" => verification_code,
           "verified" => false
         })
@@ -268,16 +277,16 @@ defmodule Teiserver.User do
 
   def generate_new_password() do
     new_plain_password = generate_random_password()
-    new_encrypted_password = encrypt_password(new_plain_password)
-    {new_plain_password, new_encrypted_password}
+    new_hash = spring_encrypt_password(new_plain_password)
+    {new_plain_password, new_hash}
   end
 
   def reset_password(user, code) do
     case code == user.password_reset_code do
       true ->
-        {plain_password, encrypted_password} = generate_new_password()
+        {plain_password, new_hash} = generate_new_password()
         EmailHelper.password_reset(user, plain_password)
-        update_user(%{user | password_reset_code: nil, password_hash: encrypted_password})
+        update_user(%{user | password_reset_code: nil, password_hash: encrypt_password(new_hash)})
         :ok
 
       false ->
@@ -520,17 +529,13 @@ defmodule Teiserver.User do
     PubSub.broadcast(Central.PubSub, "user_updates:#{ringee_id}", {:action, {:ring, ringer_id}})
   end
 
-  def encrypt_password(password) do
-    :crypto.hash(:md5, password) |> Base.encode64()
-  end
-
   @spec test_password(String.t(), String.t() | map) :: boolean
   def test_password(password, user) when is_map(user) do
     test_password(password, user.password_hash)
   end
 
   def test_password(password, existing_password) do
-    password == existing_password
+    Argon2.verify_pass(password, existing_password)
   end
 
   def verify_user(user) do
