@@ -39,11 +39,6 @@ defmodule TeiserverWeb.Account.PreferencesController do
   def create(conn, %{"user_config" => user_config_params}) do
     user_config_params = Map.put(user_config_params, "user_id", conn.user_id)
 
-    tab =
-      user_config_params["key"]
-      |> String.split(".")
-      |> hd
-
     case Config.create_user_config(user_config_params) do
       {:ok, _user_config} ->
         conn
@@ -77,11 +72,6 @@ defmodule TeiserverWeb.Account.PreferencesController do
 
   def update(conn, %{"id" => id, "user_config" => user_config_params}) do
     user_config = Config.get_user_config!(id)
-
-    tab =
-      user_config_params["key"]
-      |> String.split(".")
-      |> hd
 
     case Config.update_user_config(user_config, user_config_params) do
       {:ok, _user_config} ->
