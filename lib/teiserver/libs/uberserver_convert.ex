@@ -10,8 +10,14 @@ defmodule Teiserver.UberserverConvert do
     :ok
   end
 
-  def spawn_run(body) do
+  @spec spawn_run(String.t(), Plug.Conn.t()) :: :ok
+  def spawn_run(body, conn) do
+    id = UUID.uuid4()
+    start_time = :erlang.system_time(:seconds)
+    Central.Logging.Helpers.add_audit_log(conn, "Teiserver.UberserverConvert started", %{id: id})
     create_conversion_job(body)
+    time_taken = :erlang.system_time(:seconds) - start_time
+    Central.Logging.Helpers.add_audit_log(conn, "Teiserver.UberserverConvert completed", %{id: id, time_taken: time_taken})
   end
 
   defp create_conversion_job(body) do
@@ -34,15 +40,12 @@ defmodule Teiserver.UberserverConvert do
     end)
     |> Map.new
 
-    :timer.sleep(1000)
-    IO.puts "\n\n\n\n"
-
     data
     |> Enum.map(fn {ubid, user_data} ->
       second_pass_update(user_lookup, ubid, user_data)
     end)
 
-    user_lookup
+    :ok
   end
 
   defp convert_data(raw_data) do

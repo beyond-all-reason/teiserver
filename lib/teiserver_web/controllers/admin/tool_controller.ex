@@ -39,7 +39,7 @@ defmodule TeiserverWeb.Admin.ToolController do
     case File.read(file_upload.path) do
       {:ok, body} ->
         spawn(fn ->
-          Teiserver.UberserverConvert.spawn_run(body)
+          Teiserver.UberserverConvert.spawn_run(body, conn)
         end)
       error ->
         throw error
