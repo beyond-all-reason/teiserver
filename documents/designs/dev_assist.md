@@ -1,0 +1,1 @@
+Intended to be a set of functionality to help with lobby development. Ideally it would simulate behaviour on the server constantly in the background so lobby developers can point at it for development and even automated tests.
