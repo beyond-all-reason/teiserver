@@ -10,9 +10,10 @@
 <div class="row page-row">
   <%=
     component "menu_card",
-    icon: Central.Account.GroupLib.index_icon(),
+    icon: Central.Account.GroupLib.icon(),
     name: "groups",
     text: "Groups",
+    icon_class: "fad",
     link: Routes.account_group_path(@conn, :index)
   %>
   <%=
@@ -20,6 +21,7 @@
     icon: "fad fa-cog",
     name: "settings",
     text: "Preferences",
+    icon_class: "fad",
     link: Routes.user_config_path(@conn, :index)
   %>
 
@@ -28,6 +30,7 @@
     icon: Central.Account.icon(),
     name: "account",
     text: "Account details",
+    icon_class: "fad",
     link: Routes.account_registration_path(@conn, :edit_details)
   %>
 
@@ -36,6 +39,7 @@
     icon: "fad fa-lock",
     name: "password",
     text: "Password",
+    icon_class: "fad",
     link: Routes.account_registration_path(@conn, :edit_password)
   %>
 </div>

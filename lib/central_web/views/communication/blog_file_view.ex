@@ -3,6 +3,9 @@ defmodule CentralWeb.Communication.BlogFileView do
 
   import Central.Helpers.FileHelper, only: [file_type: 1, ext_icon: 2, mem_normalize: 1]
 
+  @spec colours :: {String.t(), String.t(), String.t()}
   def colours(), do: Central.Communication.BlogFileLib.colours()
+
+  @spec icon :: String.t()
   def icon(), do: Central.Communication.BlogFileLib.icon()
 end

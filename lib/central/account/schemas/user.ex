@@ -122,6 +122,27 @@ defmodule Central.Account.User do
     end
   end
 
+  def changeset(user, attrs, :password) do
+    cond do
+      attrs["existing"] == nil or attrs["existing"] == "" ->
+        user
+        |> change_password(attrs)
+        |> add_error(
+          :password_confirmation,
+          "Please enter your existing password to change your password."
+        )
+
+      verify_password(attrs["existing"], user.password) == false ->
+        user
+        |> change_password(attrs)
+        |> add_error(:existing, "Incorrect password")
+
+      true ->
+        user
+        |> change_password(attrs)
+    end
+  end
+
   defp change_password(user, attrs) do
     user
     |> cast(attrs, [:password])

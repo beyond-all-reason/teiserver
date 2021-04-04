@@ -40,6 +40,7 @@ defmodule Central.Logging.AggregateViewLogsTask do
     :ok
   end
 
+  @spec run(Date.t(), boolean()) :: :ok
   def run(date, cleanup \\ false) do
     logs = get_logs(date)
 
@@ -60,11 +61,6 @@ defmodule Central.Logging.AggregateViewLogsTask do
       "section_data" => get_section_data(logs)
     }
 
-    # IO.puts ""
-    # IO.inspect data
-    # IO.puts ""
-    # throw "X"
-
     if cleanup do
       clean_up_logs(date)
     end
@@ -78,6 +74,8 @@ defmodule Central.Logging.AggregateViewLogsTask do
 
     AggregateViewLog.changeset(%AggregateViewLog{}, data)
     |> Repo.insert!()
+
+    :ok
   end
 
   defp get_logs(date) do

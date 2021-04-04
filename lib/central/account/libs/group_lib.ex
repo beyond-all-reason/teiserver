@@ -4,9 +4,11 @@ defmodule Central.Account.GroupLib do
   alias Central.Account.Group
   alias Central.Account.GroupMembership
 
-  def colours(), do: {"#908", "#FEF", "primary2"}
+  @spec colours :: {String.t(), String.t(), String.t()}
+  def colours(), do: Central.Helpers.StylingHelper.colours(:primary2)
+
+  @spec icon :: String.t()
   def icon(), do: "far fa-users"
-  def index_icon(), do: "fad fa-users"
 
   @spec get_groups() :: Ecto.Query.t()
   def get_groups do
@@ -141,6 +143,7 @@ defmodule Central.Account.GroupLib do
   def _preload_memberships(query) do
     from groups in query,
       left_join: memberships in assoc(groups, :memberships),
+      limit: 50,
       preload: [memberships: memberships]
   end
 
@@ -148,6 +151,7 @@ defmodule Central.Account.GroupLib do
     from groups in query,
       left_join: members in assoc(groups, :members),
       order_by: [asc: members.name],
+      limit: 50,
       preload: [members: members]
   end
 
@@ -156,6 +160,7 @@ defmodule Central.Account.GroupLib do
       left_join: memberships in assoc(groups, :memberships),
       left_join: users in assoc(memberships, :user),
       order_by: [asc: users.name],
+      limit: 50,
       preload: [memberships: {memberships, user: users}]
   end
 
