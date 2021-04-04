@@ -23,7 +23,7 @@ S > s.matchmaking.your_queue_list queue1 queue2
 Expects a response of `s.matchmaking.queue_info`
 ```
 C > c.matchmaking.get_queue_info
-S > s.matchmaking.queue_info queue1 --TODO--
+S > s.matchmaking.queue_info queue1 current_search_time current_size --TODO--
 ```
 
 #### `c.matchmaking.join_queue queue_name`
@@ -81,7 +81,7 @@ S > s.matchmaking.your_queue_list queue1 queue2
 Gives more detailed info about the queue. Currently not sure exactly what info will need to be contained but it feels like this might be needed as things are fleshed out.
 ```
 C > c.matchmaking.get_queue_info
-S > s.matchmaking.queue_info queue1 --TODO--
+S > s.matchmaking.queue_info queue1 current_search_time current_size --TODO--
 ```
 
 #### `s.matchmaking.ready_check queue_name`

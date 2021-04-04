@@ -18,6 +18,7 @@ These are just the highlights, full documentation can be found in the documentat
 - Integration with Discord/other services
 - [Reputation/Reporting system](/documents/designs/reputation.md)
 - Ability for players to hide their flag
+- [Metrics](/documents/designs/metrics.md)
 
 ### Contributing
 All contributors are welcome; if you spot an issue or bug with it mention me on the [BAR discord](https://discord.gg/N968ddE) (@teifion) or open an issue in this repo. Pull requests are also welcome; even if it's just a matter of spelling mistake.

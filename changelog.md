@@ -2,6 +2,7 @@
 - Parity with Uberserver as required by Chobby
 - Admin web interface improvements to Client and Battle screens
 - Flag overrides can be set by moderators and players can choose not to display any flag
+- Password hashes are stored in an encrypted manner
 - [Guides](/documents/guides) for local and production
 - [Design documents](/documents/designs) for Clans, Reputation, Teiserver Bossmode Tournaments
 - [Protocol proposal](/documents/spring) for Matchmaking and Parties
