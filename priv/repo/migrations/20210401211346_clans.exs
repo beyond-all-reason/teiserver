@@ -17,7 +17,7 @@ defmodule Central.Repo.Migrations.Clans do
     create index(:teiserver_clans, [:name])
     create index(:teiserver_clans, [:tag])
 
-    create table(:teiserver_clan_memberships) do
+    create table(:teiserver_clan_memberships, primary_key: false) do
       add :user_id, references(:account_users, on_delete: :nothing), primary_key: true
       add :clan_id, references(:teiserver_clans, on_delete: :nothing), primary_key: true
       add :role, :string
@@ -25,7 +25,7 @@ defmodule Central.Repo.Migrations.Clans do
       timestamps()
     end
 
-    create table(:teiserver_clan_invites) do
+    create table(:teiserver_clan_invites, primary_key: false) do
       add :user_id, references(:account_users, on_delete: :nothing), primary_key: true
       add :clan_id, references(:teiserver_clans, on_delete: :nothing), primary_key: true
       add :response, :string

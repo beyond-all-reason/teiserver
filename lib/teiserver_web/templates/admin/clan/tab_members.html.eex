@@ -1,0 +1,63 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= component "picker_script",
+  module: Central.Account.UserLib,
+  name: "account_user",
+  title: "User search"
+%>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Role</th>
+      <th colspan="3">&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for m <- @clan.memberships do %>
+    <%
+      u = m.user
+    %>
+    <tr>
+      <td><%= u.name %></td>
+      <td><%= m.role %></td>
+      <td>
+        <%= if m.role != "Admin" do %>
+          <%= link raw("<i class='fa-fw far fa-arrow-up'></i> Promote"), to: Routes.ts_admin_clan_path(@conn, :promote, @clan.id, u.id), method: :put, data: [confirm: "Are you sure?"], class: "btn btn-outline-#{bsname} btn-sm" %>
+        <% end %>
+
+        <%= if m.role != "Member" do %>
+          <%= link raw("<i class='fa-fw far fa-arrow-down'></i> Demote"), to: Routes.ts_admin_clan_path(@conn, :demote, @clan.id, u.id), method: :put, data: [confirm: "Are you sure?"], class: "btn btn-outline-#{bsname} btn-sm" %>
+        <% end %>
+      </td>
+      <td>
+        <%= link "Remove", to: Routes.ts_admin_clan_path(@conn, :delete_membership, @clan.id, u.id), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-sm" %>
+      </td>
+
+      <%= if allow?(@current_user, "teiserver.admin") do %>
+        <td>
+          <a href="<%= Routes.ts_admin_user_path(@conn, :show, u.id) %>" class="btn btn-outline-secondary btn-sm">
+            <i class="far fa-fw fa-user"></i>
+            Show user
+          </a>
+        </td>
+      <% end %>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<form action="<%= Routes.ts_admin_clan_path(@conn, :create_membership) %>" method="post" class="form-horizontal">
+  <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+  <input type="hidden" name="clan_id" value="<%= @clan.id %>" />
+
+  <div class="row">
+    <div class="col-sm-8">
+      <%= render CentralWeb.Account.UserView, "picker.html" %>
+    </div>
+    <div class="col-sm-4">
+      <input type="submit" value="Add member" name="form.submitted" class="btn btn-<%= bsname %> btn-block" />
+    </div>
+  </div>
+</form>

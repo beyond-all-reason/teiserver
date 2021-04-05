@@ -1,7 +1,7 @@
 use Mix.Config
 
 config :central, Central,
-  site_title: "Beyond all Reason - Teiserver",
+  site_title: "BAR - Teiserver",
   site_description: "",
   site_icon: "fad fa-robot",
   enable_blog: false,

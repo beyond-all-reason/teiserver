@@ -23,6 +23,8 @@ defmodule Teiserver.Clans.ClanLib do
     }
   end
 
+  def ranks, do: ~w(Admin Moderator Member)
+
   # Queries
   @spec query_clans() :: Ecto.Query.t
   def query_clans do
@@ -89,9 +91,37 @@ defmodule Teiserver.Clans.ClanLib do
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
-  def preload(query, _preloads) do
-    # query = if :things in preloads, do: _preload_things(query), else: query
+  def preload(query, preloads) do
+    query = if :members in preloads, do: _preload_members(query), else: query
+    query = if :members_and_memberships in preloads, do: _preload_members_and_memberships(query), else: query
+    query = if :invites_and_invitees in preloads, do: _preload_invites_and_invitees(query), else: query
     query
+  end
+
+  def _preload_members(query) do
+    from clans in query,
+      left_join: members in assoc(clans, :members),
+      order_by: [asc: members.name],
+      limit: 50,
+      preload: [members: members]
+  end
+
+  def _preload_members_and_memberships(query) do
+    from clans in query,
+      left_join: memberships in assoc(clans, :memberships),
+      left_join: users in assoc(memberships, :user),
+      order_by: [asc: users.name],
+      limit: 50,
+      preload: [memberships: {memberships, user: users}]
+  end
+
+  def _preload_invites_and_invitees(query) do
+    from clans in query,
+      left_join: invites in assoc(clans, :invites),
+      left_join: users in assoc(invites, :user),
+      order_by: [asc: users.name],
+      limit: 50,
+      preload: [invites: {invites, user: users}]
   end
 
   # def _preload_things(query) do

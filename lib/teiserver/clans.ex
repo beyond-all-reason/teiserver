@@ -296,9 +296,9 @@ defmodule Teiserver.Clans do
     |> Repo.all
   end
 
-  def list_clan_memberships_by_membership(membership_id, args \\ []) do
+  def list_clan_memberships_by_membership(user_id, args \\ []) do
     ClanMembershipLib.get_clan_memberships
-    |> ClanMembershipLib.search([membership_id: membership_id])
+    |> ClanMembershipLib.search([user_id: user_id])
     |> ClanMembershipLib.search(args[:search])
     |> ClanMembershipLib.preload(args[:joins])
     |> ClanMembershipLib.order_by(args[:order_by])
@@ -320,9 +320,9 @@ defmodule Teiserver.Clans do
       ** (Ecto.NoResultsError)
 
   """
-  def get_clan_membership!(clan_id, membership_id) do
+  def get_clan_membership!(clan_id, user_id) do
     ClanMembershipLib.get_clan_memberships
-    |> ClanMembershipLib.search(%{clan_id: clan_id, membership_id: membership_id})
+    |> ClanMembershipLib.search(%{clan_id: clan_id, user_id: user_id})
     |> Repo.one!
   end
 
@@ -344,11 +344,11 @@ defmodule Teiserver.Clans do
     |> Repo.insert()
   end
 
-  def create_clan_membership(clan_id, membership_id) do
+  def create_clan_membership(clan_id, user_id) do
     %ClanMembership{}
     |> ClanMembership.changeset(%{
       clan_id: clan_id,
-      membership_id: membership_id
+      user_id: user_id
     })
     |> Repo.insert()
   end

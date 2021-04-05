@@ -1,9 +1,12 @@
 defmodule TeiserverWeb.Admin.ClanController do
   use CentralWeb, :controller
 
+  alias Teiserver.Account
   alias Teiserver.Clans
   alias Teiserver.Clans.Clan
   alias Teiserver.Clans.ClanLib
+
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
@@ -13,6 +16,7 @@ defmodule TeiserverWeb.Admin.ClanController do
     sidemenu_active: ["teiserver", "teiserver_admin"]
   )
 
+  @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
     clans = Clans.list_clans(
       search: [
@@ -26,9 +30,10 @@ defmodule TeiserverWeb.Admin.ClanController do
     |> render("index.html")
   end
 
+  @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     clan = Clans.get_clan!(id, [
-      joins: [],
+      preload: [:members_and_memberships, :invites_and_invitees],
     ])
 
     clan
@@ -41,6 +46,7 @@ defmodule TeiserverWeb.Admin.ClanController do
     |> render("show.html")
   end
 
+  @spec new(Plug.Conn.t(), map) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset = Clans.change_clan(%Clan{
       icon: "fas fa-" <> StylingHelper.random_icon(),
@@ -54,6 +60,7 @@ defmodule TeiserverWeb.Admin.ClanController do
     |> render("new.html")
   end
 
+  @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create(conn, %{"clan" => clan_params}) do
     case Clans.create_clan(clan_params) do
       {:ok, _clan} ->
@@ -68,6 +75,7 @@ defmodule TeiserverWeb.Admin.ClanController do
     end
   end
 
+  @spec edit(Plug.Conn.t(), map) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     clan = Clans.get_clan!(id)
 
@@ -80,6 +88,7 @@ defmodule TeiserverWeb.Admin.ClanController do
     |> render("edit.html")
   end
 
+  @spec update(Plug.Conn.t(), map) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "clan" => clan_params}) do
     clan = Clans.get_clan!(id)
 
@@ -96,6 +105,7 @@ defmodule TeiserverWeb.Admin.ClanController do
     end
   end
 
+  @spec delete(Plug.Conn.t(), map) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     clan = Clans.get_clan!(id)
 
@@ -108,5 +118,103 @@ defmodule TeiserverWeb.Admin.ClanController do
     conn
     |> put_flash(:info, "Clan deleted successfully.")
     |> redirect(to: Routes.ts_admin_clan_path(conn, :index))
+  end
+
+  @spec create_membership(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def create_membership(conn, params) do
+    user_id = get_hash_id(params["account_user"])
+    clan_id = params["clan_id"]
+
+    attrs = %{
+      user_id: user_id,
+      clan_id: clan_id,
+      role: "Member"
+    }
+
+    case Clans.create_clan_membership(attrs) do
+      {:ok, _membership} ->
+        conn
+        |> put_flash(:success, "User added to clan.")
+        |> redirect(to: Routes.ts_admin_clan_path(conn, :show, clan_id) <> "#members")
+
+      {:error, _changeset} ->
+        conn
+        |> put_flash(:danger, "User was unable to be added to clan.")
+        |> redirect(to: Routes.ts_admin_clan_path(conn, :show, clan_id) <> "#members")
+    end
+  end
+
+  @spec delete_membership(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def delete_membership(conn, %{"clan_id" => clan_id, "user_id" => user_id}) do
+    clan_id = int_parse(clan_id)
+    clan_membership = Clans.get_clan_membership!(clan_id, user_id)
+    Clans.delete_clan_membership(clan_membership)
+
+    user = Account.get_user!(user_id)
+    if user.clan_id == clan_id do
+      # Remove user clan_id
+
+      CentralWeb.Endpoint.broadcast(
+        "recache:#{user_id}",
+        "recache",
+        %{}
+      )
+    end
+
+    conn
+    |> put_flash(:info, "User clan membership deleted successfully.")
+    |> redirect(to: Routes.ts_admin_clan_path(conn, :show, clan_id) <> "#members")
+  end
+
+  @spec promote(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def promote(conn, %{"clan_id" => clan_id, "user_id" => user_id}) do
+    clan_membership = Clans.get_clan_membership!(clan_id, user_id)
+
+    new_role = case clan_membership.role do
+      "Member" -> "Moderator"
+      "Moderator" -> "Admin"
+    end
+
+    new_params = %{
+      "role" => new_role
+    }
+
+    case Clans.update_clan_membership(clan_membership, new_params) do
+      {:ok, _clan} ->
+        conn
+        |> put_flash(:info, "User promoted.")
+        |> redirect(to: Routes.ts_admin_clan_path(conn, :show, clan_id) <> "#members")
+
+      {:error, _changeset} ->
+        conn
+        |> put_flash(:danger, "We were unable to update the membership.")
+        |> redirect(to: Routes.ts_admin_clan_path(conn, :show, clan_id) <> "#members")
+    end
+  end
+
+  @spec demote(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def demote(conn, %{"clan_id" => clan_id, "user_id" => user_id}) do
+    clan_membership = Clans.get_clan_membership!(clan_id, user_id)
+
+    new_role = case clan_membership.role do
+      "Admin" -> "Moderator"
+      "Moderator" -> "Member"
+    end
+
+    new_params = %{
+      "role" => new_role
+    }
+
+    case Clans.update_clan_membership(clan_membership, new_params) do
+      {:ok, _clan} ->
+        conn
+        |> put_flash(:info, "User demoted.")
+        |> redirect(to: Routes.ts_admin_clan_path(conn, :show, clan_id) <> "#members")
+
+      {:error, _changeset} ->
+        conn
+        |> put_flash(:danger, "We were unable to update the membership.")
+        |> redirect(to: Routes.ts_admin_clan_path(conn, :show, clan_id) <> "#members")
+    end
   end
 end

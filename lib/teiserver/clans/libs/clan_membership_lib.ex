@@ -25,8 +25,8 @@ defmodule Teiserver.Clans.ClanMembershipLib do
       where: clan_memberships.clan_id == ^clan_id
   end
 
-  def _search(query, :membership_id, membership_id) do
+  def _search(query, :user_id, user_id) do
     from clan_memberships in query,
-      where: clan_memberships.membership_id == ^membership_id
+      where: clan_memberships.user_id == ^user_id
   end
 end

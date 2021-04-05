@@ -7,11 +7,15 @@ defmodule TeiserverWeb.Router do
 
   defmacro teiserver_routes() do
     quote do
+      scope "/", TeiserverWeb.Lobby, as: :ts_lobby do
+        pipe_through([:browser, :blank_layout])
+        get("/spass", GeneralController, :spass)
+      end
+
       scope "/teiserver", TeiserverWeb.Lobby, as: :ts_lobby do
         pipe_through([:browser, :admin_layout, :protected])
 
         get("/", GeneralController, :index)
-        get("/accimp", GeneralController, :accimp)
       end
 
       # ts_account_X_path
@@ -60,6 +64,10 @@ defmodule TeiserverWeb.Router do
         get("/tools/convert", ToolController, :convert_form)
         post("/tools/convert_post", ToolController, :convert_post)
 
+        post("/clans/create_membership", ClanController, :create_membership)
+        delete("/clans/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)
+        put("/clans/promote/:clan_id/:user_id", ClanController, :promote)
+        put("/clans/demote/:clan_id/:user_id", ClanController, :demote)
         resources("/clans", ClanController)
 
         post("/user/reset_password/:id", UserController, :reset_password)

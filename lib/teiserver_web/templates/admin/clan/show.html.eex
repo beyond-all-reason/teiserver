@@ -44,11 +44,33 @@
             Details
           </a>
         </li>
+
+        <li>
+          <a href="#members_tab" role="tab" class="nav-link" data-toggle="tab">
+            <%= component "icon", icon: "fas fa-users" %>
+            Members
+          </a>
+        </li>
+
+        <li>
+          <a href="#invites_tab" role="tab" class="nav-link" data-toggle="tab">
+            <%= component "icon", icon: "fas fa-envelope" %>
+            Invites
+          </a>
+        </li>
       </ul>
 
       <div class="tab-content">
         <div class="tab-pane" id="details_tab" style="padding:5px;">
           <%= render "tab_details.html", assigns %>
+        </div>
+
+        <div class="tab-pane" id="members_tab" style="padding:5px;">
+          <%= render "tab_members.html", assigns %>
+        </div>
+
+        <div class="tab-pane" id="invites_tab" style="padding:5px;">
+          <%= render "tab_invites.html", assigns %>
         </div>
       </div>
       <%# END OF TABS %>
