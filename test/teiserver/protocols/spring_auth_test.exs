@@ -82,14 +82,15 @@ defmodule Teiserver.SpringAuthTest do
     reply = _recv(socket)
     assert reply == "SERVERMSG Current password entered incorrectly\n"
     user = User.get_user_by_name(user.name)
-    assert user.password_hash == "X03MO1qnZdYdgyfeuILPmQ=="
+    assert User.test_password("X03MO1qnZdYdgyfeuILPmQ==", user.password_hash)
 
     # Change it correctly
-    _send(socket, "CHANGEPASSWORD password\tnew_pass\n")
+    _send(socket, "CHANGEPASSWORD X03MO1qnZdYdgyfeuILPmQ==\tnew_pass\n")
+    :timer.sleep(1000)
     reply = _recv(socket)
     assert reply == "SERVERMSG Password changed, you will need to use it next time you login\n"
     user = User.get_user_by_name(user.name)
-    assert user.password_hash != "X03MO1qnZdYdgyfeuILPmQ=="
+    assert User.test_password("new_pass", user.password_hash)
 
     _send(socket, "EXIT\n")
     _recv(socket)

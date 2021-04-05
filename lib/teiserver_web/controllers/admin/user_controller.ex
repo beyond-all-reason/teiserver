@@ -172,34 +172,35 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec reset_password(Plug.Conn.t(), map) :: Plug.Conn.t()
   def reset_password(conn, %{"id" => id}) do
-    user = Account.get_user!(id)
+    # This will get replaced by a password reset email
+    # user = Account.get_user!(id)
 
-    case Central.Account.UserLib.has_access(user, conn) do
-      {true, _} ->
-        {plain_password, encrypted_password} = Teiserver.User.generate_new_password()
+    # case Central.Account.UserLib.has_access(user, conn) do
+    #   {true, _} ->
+    #     {plain_password, encrypted_password} = Teiserver.User.generate_new_password()
 
-        data =
-          Map.merge(user.data || %{}, %{
-            "password_hash" => encrypted_password
-          })
+    #     data =
+    #       Map.merge(user.data || %{}, %{
+    #         "password_hash" => encrypted_password
+    #       })
 
-        user_params = %{"data" => data}
+    #     user_params = %{"data" => data}
 
-        case Account.update_user(user, user_params) do
-          {:ok, _user} ->
-            conn
-            |> put_flash(:info, "Password changed to '#{plain_password}'.")
-            |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
+    #     case Account.update_user(user, user_params) do
+    #       {:ok, _user} ->
+    #         conn
+    #         |> put_flash(:info, "Password changed to '#{plain_password}'.")
+    #         |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
 
-          {:error, %Ecto.Changeset{} = changeset} ->
-            render(conn, "edit.html", user: user, changeset: changeset)
-        end
+    #       {:error, %Ecto.Changeset{} = changeset} ->
+    #         render(conn, "edit.html", user: user, changeset: changeset)
+    #     end
 
-      _ ->
-        conn
-        |> put_flash(:warning, "Unable to access this user")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
-    end
+    #   _ ->
+    #     conn
+    #     |> put_flash(:warning, "Unable to access this user")
+    #     |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    # end
   end
 
   @spec perform_action(Plug.Conn.t(), map) :: Plug.Conn.t()

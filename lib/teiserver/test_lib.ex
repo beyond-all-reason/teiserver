@@ -15,6 +15,11 @@ defmodule Teiserver.TestLib do
     %{socket: socket}
   end
 
+  def tls_setup() do
+    {:ok, socket} = :ssl.connect(@host, 8201, active: false)
+    %{socket: socket}
+  end
+
   def new_user_name() do
     "new_test_user_#{:random.uniform(99_999_999) + 1_000_000}"
   end
@@ -56,11 +61,22 @@ defmodule Teiserver.TestLib do
     %{socket: socket, user: user}
   end
 
+  def _send(socket = {:sslsocket, _, _}, msg) do
+    :ok = :ssl.send(socket, msg)
+    :timer.sleep(100)
+  end
   def _send(socket, msg) do
     :ok = :gen_tcp.send(socket, msg)
     :timer.sleep(100)
   end
 
+  def _recv(socket = {:sslsocket, _, _}) do
+    case :ssl.recv(socket, 0, 500) do
+      {:ok, reply} -> reply |> to_string
+      {:error, :timeout} -> :timeout
+      {:error, :closed} -> :closed
+    end
+  end
   def _recv(socket) do
     case :gen_tcp.recv(socket, 0, 500) do
       {:ok, reply} -> reply |> to_string

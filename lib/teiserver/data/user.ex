@@ -9,6 +9,7 @@ defmodule Teiserver.User do
   alias Central.Helpers.StylingHelper
   alias Central.Helpers.TimexHelper
   alias Argon2
+  alias Central.Account.Guardian
 
   @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulence cats dogs mice eagle oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave sulphur tree tangerine melon watermelon obstreperous chlorine argon mercury jupiter saturn neptune ceres firefly slug sloth madness happiness ferrous oblique advantageous inefficient starling clouds rivers sunglasses)
 
@@ -91,14 +92,14 @@ defmodule Teiserver.User do
     Argon2.hash_pwd_salt(password)
   end
 
-  def spring_encrypt_password(password) do
+  def spring_md5_password(password) do
     :crypto.hash(:md5, password) |> Base.encode64()
   end
 
-  def user_register_params(name, email, password_hash, extra_data \\ %{}) do
+  def user_register_params(name, email, md5_password, extra_data \\ %{}) do
     name = clean_name(name)
     verification_code = :random.uniform(899_999) + 100_000
-    web_password = generate_random_password()
+    encrypted_password = encrypt_password(md5_password)
 
     data =
       @default_data
@@ -107,7 +108,7 @@ defmodule Teiserver.User do
     %{
       name: name,
       email: email,
-      password: web_password,
+      password: encrypted_password,
       colour: "#AA0000",
       icon: "fas fa-user",
       admin_group_id: bar_user_group_id(),
@@ -115,7 +116,7 @@ defmodule Teiserver.User do
       data:
         data
         |> Map.merge(%{
-          "password_hash" => encrypt_password(password_hash),
+          "password_hash" => encrypted_password,
           "verification_code" => verification_code,
           "verified" => false
         })
@@ -123,13 +124,13 @@ defmodule Teiserver.User do
     }
   end
 
-  def register_user(name, email, password_hash, ip) do
+  def register_user(name, email, md5_password, ip) do
     params =
-      user_register_params(name, email, password_hash, %{
+      user_register_params(name, email, md5_password, %{
         "ip" => ip
       })
 
-    case Account.create_user(params) do
+    case Account.script_create_user(params) do
       {:ok, user} ->
 
         Account.create_group_membership(%{
@@ -170,13 +171,14 @@ defmodule Teiserver.User do
         params =
           user_register_params(bot_name, host.email, host.password_hash, %{
             "bot" => true,
-            "verified" => true
+            "verified" => true,
+            "password_hash" => host.password_hash
           })
           |> Map.merge(%{
             email: String.replace(host.email, "@", ".bot#{bot_name}@")
           })
 
-        case Account.create_user(params) do
+        case Account.script_create_user(params) do
           {:ok, user} ->
             Account.create_group_membership(%{
               user_id: user.id,
@@ -273,25 +275,6 @@ defmodule Teiserver.User do
   def request_password_reset(user) do
     code = :random.uniform(899_999) + 100_000
     update_user(%{user | password_reset_code: "#{code}"})
-  end
-
-  def generate_new_password() do
-    new_plain_password = generate_random_password()
-    new_hash = spring_encrypt_password(new_plain_password)
-    {new_plain_password, new_hash}
-  end
-
-  def reset_password(user, code) do
-    case code == user.password_reset_code do
-      true ->
-        {plain_password, new_hash} = generate_new_password()
-        EmailHelper.password_reset(user, plain_password)
-        update_user(%{user | password_reset_code: nil, password_hash: encrypt_password(new_hash)})
-        :ok
-
-      false ->
-        :error
-    end
   end
 
   def request_email_change(nil, _), do: nil
@@ -529,13 +512,9 @@ defmodule Teiserver.User do
     PubSub.broadcast(Central.PubSub, "user_updates:#{ringee_id}", {:action, {:ring, ringer_id}})
   end
 
-  @spec test_password(String.t(), String.t() | map) :: boolean
-  def test_password(password, user) when is_map(user) do
-    test_password(password, user.password_hash)
-  end
-
-  def test_password(password, existing_password) do
-    Argon2.verify_pass(password, existing_password)
+  @spec test_password(String.t(), String.t()) :: boolean
+  def test_password(plain_password, encrypted_password) do
+    Argon2.verify_pass(plain_password, encrypted_password)
   end
 
   def verify_user(user) do
@@ -543,7 +522,40 @@ defmodule Teiserver.User do
     |> update_user(persist: true)
   end
 
-  def try_login(username, password, state, ip, lobby) do
+  @spec create_token(Central.Account.User.t()) :: String.t()
+  def create_token(user) do
+    {:ok, jwt, _} = Guardian.encode_and_sign(user)
+    jwt
+  end
+
+  def try_login(token, state, ip, lobby) do
+    case Guardian.resource_from_token(token) do
+      {:error, _bad_token} ->
+        {:error, "token_login_failed"}
+      {:ok, db_user, _claims} ->
+        user = get_user_by_id(db_user.id)
+        banned_until_dt = TimexHelper.parse_ymd_hms(user.banned_until)
+
+        cond do
+          user.banned ->
+            {:error, "Banned"}
+
+          banned_until_dt != nil and Timex.compare(Timex.now(), banned_until_dt) != 1 ->
+            {:error, "Temporarily banned"}
+
+          Client.get_client_by_id(user.id) != nil ->
+            {:error, "Already logged in"}
+
+          user.verified == false ->
+            {:error, "Unverified", user.id}
+
+          true ->
+            do_login(user, state, ip, lobby)
+        end
+    end
+  end
+
+  def try_md5_login(username, md5_password, state, ip, lobby) do
     case get_user_by_name(username) do
       nil ->
         {:error, "No user found for '#{username}'"}
@@ -555,7 +567,7 @@ defmodule Teiserver.User do
           user.banned ->
             {:error, "Banned"}
 
-          test_password(password, user) == false ->
+          test_password(md5_password, user.password_hash) == false ->
             {:error, "Invalid password"}
 
           banned_until_dt != nil and Timex.compare(Timex.now(), banned_until_dt) != 1 ->
@@ -658,6 +670,35 @@ defmodule Teiserver.User do
     :ok
   end
 
+  # Tied to spring's PASSWORDRESET which requires the password to be
+  # created and emailed to the user
+  def generate_new_password() do
+    new_plain_password = generate_random_password()
+    new_hash = spring_md5_password(new_plain_password)
+    {new_plain_password, new_hash}
+  end
+
+  def spring_reset_password(user, code) do
+    case code == user.password_reset_code do
+      true ->
+        {plain_password, md5_password} = generate_new_password()
+        encrypted_password = encrypt_password(md5_password)
+
+        EmailHelper.spring_password_reset(user, plain_password)
+        update_user(%{user | password_reset_code: nil, password_hash: encrypted_password}, persist: true)
+
+        # Now update the DB user too
+        db_user = Account.get_user!(user.id)
+        Account.script_update_user(db_user, %{"password" => encrypted_password})
+
+        :ok
+
+      false ->
+        :error
+    end
+  end
+
+  @spec recache_user(Integer.t()) :: :ok
   def recache_user(id) do
     if get_user_by_id(id) do
       Account.get_user!(id)
@@ -668,6 +709,7 @@ defmodule Teiserver.User do
       |> convert_user
       |> add_user
     end
+    :ok
   end
 
   def delete_user(userid) do

@@ -1,8 +1,6 @@
 defmodule Teiserver.UberserverConvert do
   use Oban.Worker, queue: :teiserver
 
-  alias Teiserver.User
-
   @impl Oban.Worker
   def perform(%{args: %{"body" => body}}) do
     create_conversion_job(body)
@@ -20,6 +18,7 @@ defmodule Teiserver.UberserverConvert do
     Central.Logging.Helpers.add_audit_log(conn, "Teiserver.UberserverConvert completed", %{id: id, time_taken: time_taken})
   end
 
+  @spec create_conversion_job(String.t()) :: :ok
   defp create_conversion_job(body) do
     existing_user_emails = Central.Account.list_users(
       select: [:email],
@@ -40,6 +39,7 @@ defmodule Teiserver.UberserverConvert do
     end)
     |> Map.new
 
+    # Now update the users
     data
     |> Enum.map(fn {ubid, user_data} ->
       second_pass_update(user_lookup, ubid, user_data)
@@ -75,13 +75,12 @@ defmodule Teiserver.UberserverConvert do
     %{
       name: raw_data["username"],
       email: raw_data["email"],
-      password: "",
+      password: raw_data["password"],
       permissions: permissions,
       admin_group_id: bar_user_group,
       colour: "#AA0000",
       icon: "fas fa-user",
       data: %{
-        "password_hash" => User.encrypt_password(raw_data["password"]),
         "ingame_minutes" => raw_data["ingame_time"],
         "bot" => (raw_data["bot"] == "1"),
         "moderator" => is_mod,
@@ -95,7 +94,7 @@ defmodule Teiserver.UberserverConvert do
     bar_user_group = ConCache.get(:application_metadata_cache, "bar_user_group")
     data = convert_data(raw_data)
 
-    {:ok, user} = Teiserver.Account.script_create_user(data)
+    {:ok, user} = Teiserver.Account.create_user(data)
 
     Central.Account.create_group_membership(%{
       user_id: user.id,
@@ -142,6 +141,7 @@ defmodule Teiserver.UberserverConvert do
     userid = user_map[ubid]
     user = Teiserver.Account.get_user!(userid)
     new_data = Map.merge(user.data, %{
+      "password_hash" => user.password,
       "friends" => convert_ids(user_map, user_data["friends"]),
       "friend_requests" => convert_ids(user_map, user_data["friend_requests"]),
       "ignored" => convert_ids(user_map, user_data["ignored"]),

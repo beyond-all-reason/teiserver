@@ -18,6 +18,11 @@ While many of the web pages are standard ones, things like battles and client (a
 #### Password security (Argon2 vs md5)
 Passwords in Uberserver are stored as md5 converted into base64. This is because the spring protocol requires it. While I can't change spring protocol the passwords stored in Teiserver make use of Argon2 (encryption rather than hashing) and would represent a significantly harder target than md5 should the database be compromised.
 
+In addition to storing spring-md5 passwords more securely, Teiserver allows for tokenised logins. Tokens can be requested over a secure connection and used in the future to login meaning the password doesn't need to be stored locally either.
+
+#### Extended protocol
+Teiserver is [implementing some additional commands](/documents/spring/extensions.md) as it seeks to add features beyond Uberserver. In the future a new protocol designed to prevent the O(n^2) problem is going to be implemented.
+
 ### Technical differences
 #### Elixir (OTP) instead of Twisted Python
 Python is notoriously bad at multithreading, Twisted is an attempt to improve this and was a wise choice in writing Uberserver. Elixir is built on top of Erlang which was designed precisely for this sort of middleware server. The inclusion of the OTP framework allows incredibly concurrent programs to be created.

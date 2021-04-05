@@ -44,7 +44,8 @@ defmodule Central.Helpers.GeneralTestLib do
         "permissions" => permissions,
         "password" => params["password"] || "password",
         "password_confirmation" => params["password"] || "password",
-        "admin_group_id" => params["admin_group_id"] || nil
+        "admin_group_id" => params["admin_group_id"] || nil,
+        "data" => params["data"] || %{}
       })
 
     u

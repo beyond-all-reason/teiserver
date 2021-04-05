@@ -73,7 +73,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   def handle(data, state) do
     tuple =
-      ~r/^(#[0-9]+ )?([A-Z0-9]+)(.*)?$/
+      ~r/^(#[0-9]+ )?([a-z_A-Z0-9\.]+)(.*)?$/
       |> Regex.run(data)
       |> _clean()
 
@@ -162,7 +162,7 @@ defmodule Teiserver.Protocols.SpringIn do
     end
   end
 
-  defp do_handle("LISTBATTLES", _, msg_id, state) do
+  defp do_handle("c.battles.list_ids", _, msg_id, state) do
     reply(:list_battles, Battle.list_battle_ids(), msg_id, state)
     state
   end
@@ -208,6 +208,75 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
+  defp do_handle("c.user.get_token_by_email", _data, msg_id, %{transport: :ranch_tcp} = state) do
+    reply(:no, {"c.user.get_token_by_email", "cannot get token over insecure connection"}, msg_id, state)
+  end
+  defp do_handle("c.user.get_token_by_email", data, msg_id, state) do
+    [email, plain_text_password] = String.split(data, "\t")
+
+    user = Central.Account.get_user_by_email(email)
+    response = if user do
+      Central.Account.User.verify_password(plain_text_password, user.password)
+    else
+      false
+    end
+
+    if response do
+      token = User.create_token(user)
+      reply(:user_token, {email, token}, msg_id, state)
+    else
+      reply(:no, {"c.user.get_token_by_email", "invalid credentials"}, msg_id, state)
+    end
+  end
+
+  defp do_handle("c.user.get_token_by_name", _data, msg_id, %{transport: :ranch_tcp} = state) do
+    reply(:no, {"c.user.get_token_by_name", "cannot get token over insecure connection"}, msg_id, state)
+  end
+  defp do_handle("c.user.get_token_by_name", data, msg_id, state) do
+    [name, plain_text_password] = String.split(data, "\t")
+
+    user = Central.Account.get_user_by_name(name)
+    response = if user do
+      Central.Account.User.verify_password(plain_text_password, user.password)
+    else
+      false
+    end
+
+    if response do
+      token = User.create_token(user)
+      reply(:user_token, {name, token}, msg_id, state)
+    else
+      reply(:no, {"c.user.get_token_by_name", "invalid credentials"}, msg_id, state)
+    end
+  end
+
+  defp do_handle("c.user.login", data, msg_id, state) do
+    # Flags are optional hence the weird case statement
+    [token, lobby, _flags] = case String.split(data, "\t") do
+      [token, lobby, flags] -> [token, lobby, String.split(flags, " ")]
+      [token, lobby] -> [token, lobby, []]
+    end
+
+    # Now try to login using a token
+    response = User.try_login(token, state, state.ip, lobby)
+
+    case response do
+      {:error, "Unverified", userid} ->
+        reply(:agreement, nil, msg_id, state)
+        Map.put(state, :unverified_id, userid)
+
+      {:ok, user} ->
+        do_login_accepted(state, user)
+
+      {:error, reason} ->
+        Logger.debug("[command:login] denied with reason #{reason}")
+        reply(:denied, reason, msg_id, state)
+        state
+    end
+
+    state
+  end
+
   defp do_handle("LOGIN", data, msg_id, state) do
     regex_result =
       case Regex.run(~r/^(\S+) (\S+) (0) ([0-9\.\*]+) ([^\t]+)?\t?([^\t]+)?\t?([^\t]+)?/, data) do
@@ -219,7 +288,7 @@ defmodule Teiserver.Protocols.SpringIn do
       case regex_result do
         [_, username, password, _cpu, _ip, lobby, _userid, _modes | _] ->
           username = User.clean_name(username)
-          User.try_login(username, password, state, state.ip, lobby)
+          User.try_md5_login(username, password, state, state.ip, lobby)
 
         nil ->
           _no_match(state, "LOGIN", msg_id, data)
@@ -352,7 +421,7 @@ defmodule Teiserver.Protocols.SpringIn do
             reply(:reset_password_actual_denied, "wrong_user", msg_id, state)
 
           true ->
-            case User.reset_password(user, code) do
+            case User.spring_reset_password(user, code) do
               :ok ->
                 reply(:reset_password_actual_accepted, nil, msg_id, state)
 
@@ -364,7 +433,6 @@ defmodule Teiserver.Protocols.SpringIn do
       _ ->
         _no_match(state, "RESETPASSWORD", msg_id, data)
     end
-
     state
   end
 
@@ -428,19 +496,19 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("CHANGEPASSWORD", data, msg_id, state) do
-    case Regex.run(~r/(\w+)\t(\w+)/, data) do
-      [_, plain_old_password, plain_new_password] ->
+    case Regex.run(~r/(\S+)\t(\S+)/, data) do
+      [_, md5_old_password, md5_new_password] ->
         case User.test_password(
-               User.encrypt_password(plain_old_password),
+               md5_old_password,
                state.user.password_hash
              ) do
           false ->
             reply(:servermsg, "Current password entered incorrectly", msg_id, state)
 
           true ->
-            encrypted_new_password = User.encrypt_password(plain_new_password)
+            encrypted_new_password = User.encrypt_password(md5_new_password)
             new_user = %{state.user | password_hash: encrypted_new_password}
-            User.update_user(new_user)
+            User.update_user(new_user, persist: true)
 
             reply(
               :servermsg,

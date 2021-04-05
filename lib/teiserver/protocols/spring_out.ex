@@ -66,6 +66,10 @@ defmodule Teiserver.Protocols.SpringOut do
     ]
   end
 
+  defp do_reply(:user_token, {email, token}) do
+    "s.user.user_token #{email}\t#{token}\n"
+  end
+
   defp do_reply(:okay, cmd) do
     if cmd do
       "OK cmd=#{cmd}\n"
@@ -74,10 +78,22 @@ defmodule Teiserver.Protocols.SpringOut do
     end
   end
 
+  defp do_reply(:okay_tab, cmd) do
+    if cmd do
+      "OK\tcmd=#{cmd}\n"
+    else
+      "OK\n"
+    end
+  end
+
+  defp do_reply(:no, {cmd, msg}) do
+    "NO cmd=#{cmd}\t#{msg}\n"
+  end
+
   defp do_reply(:list_battles, battle_ids) do
     ids = battle_ids
-    |> Enum.join(" ")
-    "BATTLEIDS #{ids}\n"
+    |> Enum.join("\t")
+    "s.battles.id_list #{ids}\n"
   end
 
   defp do_reply(:add_user, user) do

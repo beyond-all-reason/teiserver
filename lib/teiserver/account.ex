@@ -94,6 +94,15 @@ defmodule Teiserver.Account do
     |> Central.Account.broadcast_update_user()
   end
 
+  def script_update_user(%User{} = user, attrs) do
+    Central.Account.recache_user(user.id)
+
+    user
+    |> User.changeset(attrs, :script)
+    |> Repo.update()
+    |> Central.Account.broadcast_update_user()
+  end
+
   @doc """
   Deletes a User.
 
