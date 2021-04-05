@@ -3,9 +3,12 @@ defmodule Central.Account.ReportLib do
   alias Central.Account.Report
 
   # Functions
+  @spec icon :: String.t()
   def icon, do: "fas fa-flag"
+  @spec colours :: {String.t(), String.t(), String.t()}
   def colours, do: Central.Helpers.StylingHelper.colours(:warning)
 
+  @spec make_favourite(Report.t()) :: Map.t()
   def make_favourite(report) do
     %{
       type_colour: colours() |> elem(0),

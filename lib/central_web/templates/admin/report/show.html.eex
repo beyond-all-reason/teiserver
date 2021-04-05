@@ -7,7 +7,7 @@
     $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
 
     page_quick_actions = [
-      {label: "Respond", icon: "<%= icon() %>", url: "<%= Routes.admin_report_path(@conn, :respond_form, @report) %>", keywords: ["respond", "report", "respond report"]},
+      {label: "Respond", icons: ["<%= icon() %>"], url: "<%= Routes.admin_report_path(@conn, :respond_form, @report) %>", keywords: ["respond", "report", "respond report"]},
     ];
   });
 </script>

@@ -15,7 +15,14 @@
     Add report
   </a>
 
-<%= if allow?(@current_user, "admin.admin.full") do %>
+  <a class="dropdown-item" href='<%= Routes.admin_user_path(@conn, :reset_password, @user.id) %>'>
+    <%= component "icon", icon: "fas fa-undo" %>
+    <%= component "icon", icon: "fas fa-shield-alt" %>
+    &nbsp;
+    Reset password
+  </a>
+
+  <%= if allow?(@current_user, "admin.admin.full") do %>
 <div class="dropdown-divider"></div>
 
   <a class="dropdown-item" href='<%= Routes.admin_user_path(@conn, :delete_check, @user) %>?user_id=<%= @user.id %>'>

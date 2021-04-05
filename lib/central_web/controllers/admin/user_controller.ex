@@ -21,6 +21,7 @@ defmodule CentralWeb.Admin.UserController do
   plug AssignPlug,
     sidemenu_active: "admin"
 
+  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
     users =
       Account.list_users(
@@ -45,6 +46,7 @@ defmodule CentralWeb.Admin.UserController do
     end
   end
 
+  @spec search(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def search(conn, %{"search" => params}) do
     params = Map.merge(search_defaults(conn), params)
 
@@ -75,6 +77,7 @@ defmodule CentralWeb.Admin.UserController do
     end
   end
 
+  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset =
       Account.change_user(%User{
@@ -93,6 +96,7 @@ defmodule CentralWeb.Admin.UserController do
     |> render("new.html", changeset: changeset)
   end
 
+  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def create(conn, %{"user" => user_params}) do
     admin_group_id = user_params["admin_group_id"] |> int_parse
 
@@ -128,6 +132,7 @@ defmodule CentralWeb.Admin.UserController do
     end
   end
 
+  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     user = Account.get_user(id, joins: [:admin_group, :groups, :user_configs])
 
@@ -178,6 +183,7 @@ defmodule CentralWeb.Admin.UserController do
     end
   end
 
+  @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     user = Account.get_user(id, joins: [:user_configs])
 
@@ -229,6 +235,7 @@ defmodule CentralWeb.Admin.UserController do
     end
   end
 
+  @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "user" => user_params}) do
     user = Account.get_user(id, joins: [:user_configs])
 
@@ -291,6 +298,7 @@ defmodule CentralWeb.Admin.UserController do
     end
   end
 
+  @spec reset_password(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def reset_password(conn, %{"id" => id}) do
     user = Account.get_user(id)
 
@@ -306,42 +314,12 @@ defmodule CentralWeb.Admin.UserController do
         |> redirect(to: Routes.admin_user_path(conn, :index))
 
       {true, _} ->
-        user_params = %{
-          "password" => "pass"
-        }
+        UserLib.reset_password_request(user)
+        |> Central.Mailer.deliver_now()
 
-        case Account.update_user(user, user_params) do
-          {:ok, user} ->
-            add_audit_log(conn, "Account: User password reset", %{
-              user: user.id,
-              notes: "Basic reset"
-            })
-
-            # Set the config for this user to insecure
-            # id
-            # |> UserConfigLib.get_user_config("general.Insecure password")
-            # |> Repo.delete_all
-
-            # config_changeset = UserConfig.changeset(%UserConfig{}, %{key: "general.Insecure password", value: "true", user_id: id})
-            # case Repo.insert(config_changeset) do
-            #   {:ok, _user_config} ->
-            #     conn
-            #     |> put_flash(:success, "Password reset to 'pass'.")
-            #     |> redirect(to: Routes.admin_user_path(conn, :edit, user))
-            #   {:error, config_changeset} ->
-            #     conn
-            #     |> put_flash(:danger, "Error adding user config")
-            #     |> redirect(to: Routes.admin_user_path(conn, :edit, id))
-            # end
-
-            conn
-            |> put_flash(:success, "Password reset to 'pass'.")
-            |> redirect(to: Routes.admin_user_path(conn, :edit, user))
-
-          {:error, _changeset} ->
-            conn
-            |> redirect(to: Routes.admin_user_path(conn, :edit, user))
-        end
+        conn
+        |> put_flash(:success, "Password reset email sent to user")
+        |> redirect(to: Routes.admin_user_path(conn, :index))
     end
   end
 
@@ -379,6 +357,7 @@ defmodule CentralWeb.Admin.UserController do
   #   end
   # end
 
+  @spec config_delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def config_delete(conn, %{"user_id" => user_id, "key" => key}) do
     user = Account.get_user(user_id)
 
@@ -404,6 +383,7 @@ defmodule CentralWeb.Admin.UserController do
     end
   end
 
+  @spec edit_permissions(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def edit_permissions(conn, %{"id" => id}) do
     user = Account.get_user(id, search: [], joins: [])
 
@@ -434,6 +414,7 @@ defmodule CentralWeb.Admin.UserController do
     end
   end
 
+  @spec update_permissions(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def update_permissions(conn, %{"id" => id, "permissions" => permissions}) do
     permissions =
       Map.values(permissions)
@@ -501,6 +482,7 @@ defmodule CentralWeb.Admin.UserController do
     update_permissions(conn, %{"id" => id, "permissions" => %{}})
   end
 
+  @spec copy_permissions(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def copy_permissions(conn, %{"id" => id, "account_user" => from_id}) do
     user = Account.get_user(id, search: [], joins: [])
 
@@ -554,6 +536,7 @@ defmodule CentralWeb.Admin.UserController do
     end
   end
 
+  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     user = Account.get_user(id)
 
@@ -590,6 +573,7 @@ defmodule CentralWeb.Admin.UserController do
     end
   end
 
+  @spec delete_check(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def delete_check(conn, %{"id" => id}) do
     user = Account.get_user(id)
 
@@ -653,6 +637,7 @@ defmodule CentralWeb.Admin.UserController do
   #   }
   # end
 
+  @spec search_defaults(Plug.Conn.t()) :: Map.t()
   defp search_defaults(_conn) do
     %{
       "limit" => 50

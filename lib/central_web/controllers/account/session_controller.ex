@@ -5,6 +5,7 @@ defmodule CentralWeb.Account.SessionController do
 
   alias Central.{Account, Account.Guardian, Account.User}
 
+  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _) do
     changeset = Account.change_user(%User{})
     maybe_user = Guardian.Plug.current_resource(conn)
@@ -26,12 +27,14 @@ defmodule CentralWeb.Account.SessionController do
     end
   end
 
+  @spec login(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def login(conn, %{"user" => %{"email" => email, "password" => password}}) do
     conn
     |> Account.authenticate_user(email, password)
     |> login_reply(conn)
   end
 
+  @spec logout(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def logout(conn, _) do
     conn
     |> Guardian.Plug.sign_out(clear_remember_me: true)
@@ -53,6 +56,7 @@ defmodule CentralWeb.Account.SessionController do
     |> new(%{})
   end
 
+  @spec forgot_password(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def forgot_password(conn, _params) do
     key = UUID.uuid4()
     value = UUID.uuid4()
@@ -64,6 +68,7 @@ defmodule CentralWeb.Account.SessionController do
     |> render("forgot_password.html")
   end
 
+  @spec send_password_reset(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def send_password_reset(conn, %{"email" => email} = params) do
     # We use the || %{} to allow for the user not existing
     # If we let user be nil it messes up the existing_resets
@@ -133,6 +138,7 @@ defmodule CentralWeb.Account.SessionController do
     end
   end
 
+  @spec password_reset_form(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def password_reset_form(conn, %{"value" => value}) do
     code = Account.get_code(value, preload: [:user])
 
@@ -159,6 +165,7 @@ defmodule CentralWeb.Account.SessionController do
     end
   end
 
+  @spec password_reset_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def password_reset_post(conn, %{"value" => value, "pass1" => pass1, "pass2" => pass2}) do
     code = Account.get_code(value, preload: [:user])
 
