@@ -36,7 +36,7 @@
           <li>
             <a href="#requests_tab" role="tab" class="nav-link" data-toggle="tab">
               <%= component "icon", icon: Teiserver.icon(:friend_request) %>
-              Pending requests
+              Pending requests (<%= Enum.count(@received_requests) %>)
             </a>
           </li>
 
@@ -44,6 +44,13 @@
             <a href="#muted_tab" role="tab" class="nav-link" data-toggle="tab">
               <%= component "icon", icon: Teiserver.icon(:ignore) %>
               Muted
+            </a>
+          </li>
+
+          <li>
+            <a href="#clan_invites_tab" role="tab" class="nav-link" data-toggle="tab">
+              <%= component "icon", icon: Teiserver.Clans.ClanLib.icon() %>
+              Clan invites
             </a>
           </li>
         </ul>
@@ -59,6 +66,10 @@
 
           <div class="tab-pane" id="muted_tab">
             <%= render "tab_muted.html", assigns %>
+          </div>
+
+          <div class="tab-pane" id="clan_invites_tab">
+            <%= render "tab_clan_invites.html", assigns %>
           </div>
 
         </div>

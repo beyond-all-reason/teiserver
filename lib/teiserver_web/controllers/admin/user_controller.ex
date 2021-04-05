@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Admin.UserController do
   )
 
   plug(Bodyguard.Plug.Authorize,
-    policy: Teiserver.Account.Auth,
+    policy: Teiserver.Admin,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
   )

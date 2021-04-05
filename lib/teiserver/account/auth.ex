@@ -3,3 +3,21 @@ defmodule Teiserver.Account.Auth do
   import Central.Account.AuthLib, only: [allow?: 2]
   def authorize(_, conn, _), do: allow?(conn, "teiserver.admin.account")
 end
+
+defmodule Teiserver.Admin do
+  @behaviour Bodyguard.Policy
+  import Central.Account.AuthLib, only: [allow?: 2]
+  def authorize(_, conn, _), do: allow?(conn, "teiserver.admin")
+end
+
+defmodule Teiserver.Moderator do
+  @behaviour Bodyguard.Policy
+  import Central.Account.AuthLib, only: [allow?: 2]
+  def authorize(_, conn, _), do: allow?(conn, "teiserver.moderator")
+end
+
+defmodule Teiserver.Auth do
+  @behaviour Bodyguard.Policy
+  import Central.Account.AuthLib, only: [allow?: 2]
+  def authorize(_, conn, _), do: allow?(conn, "teiserver")
+end

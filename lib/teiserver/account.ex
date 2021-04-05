@@ -132,6 +132,26 @@ defmodule Teiserver.Account do
     User.changeset(user, %{})
   end
 
+  def user_as_json(users) when is_list(users) do
+    users
+    |> Enum.map(&user_as_json/1)
+  end
+
+  def user_as_json(user) do
+    %{
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      icon: user.icon,
+      colour: user.colour,
+      html_label: "#{user.name}",
+      html_value: "##{user.id}, #{user.name}"
+    }
+  end
+
+
+
+
   # Group stuff
   def create_group_membership(params),
     do: Central.Account.create_group_membership(params)

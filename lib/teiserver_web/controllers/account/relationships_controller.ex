@@ -2,6 +2,8 @@ defmodule TeiserverWeb.Account.RelationshipsController do
   use CentralWeb, :controller
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
+  alias Teiserver.Clans
+
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Account', url: '/teiserver/account')
   plug(:add_breadcrumb, name: 'Relationships', url: '/teiserver/account/relationships')
@@ -19,6 +21,7 @@ defmodule TeiserverWeb.Account.RelationshipsController do
     friends = user.friends
     received_requests = user.friend_requests
     muted = user.ignored
+    clan_invites = Clans.list_clan_invites_by_user(conn.user_id, joins: [:clan])
 
     user_lookup =
       Teiserver.User.list_users(friends ++ received_requests ++ muted)
@@ -28,6 +31,7 @@ defmodule TeiserverWeb.Account.RelationshipsController do
     |> assign(:friends, friends)
     |> assign(:received_requests, received_requests)
     |> assign(:muted, muted)
+    |> assign(:clan_invites, clan_invites)
     |> assign(:user_lookup, user_lookup)
     |> render("index.html")
   end

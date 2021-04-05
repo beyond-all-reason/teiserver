@@ -8,6 +8,7 @@ defmodule Teiserver.Clans.ClanLib do
   @spec colours :: {String.t(), String.t(), String.t()}
   def colours, do: Central.Helpers.StylingHelper.colours(:info2)
 
+  @spec make_favourite(Clan.t()) :: Map.t()
   def make_favourite(clan) do
     %{
       type_colour: colours() |> elem(0),
@@ -23,6 +24,7 @@ defmodule Teiserver.Clans.ClanLib do
     }
   end
 
+  @spec ranks :: [String.t()]
   def ranks, do: ~w(Admin Moderator Member)
 
   # Queries

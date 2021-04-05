@@ -16,6 +16,12 @@ defmodule TeiserverWeb.Admin.ClanController do
     sidemenu_active: ["teiserver", "teiserver_admin"]
   )
 
+  plug(Bodyguard.Plug.Authorize,
+    policy: Teiserver.Moderator,
+    action: {Phoenix.Controller, :action_name},
+    user: {Central.Account.AuthLib, :current_user}
+  )
+
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
     clans = Clans.list_clans(

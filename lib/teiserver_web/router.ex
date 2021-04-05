@@ -39,6 +39,11 @@ defmodule TeiserverWeb.Router do
 
         get("/", ClanController, :index)
         get("/:name", ClanController, :show)
+
+        post("/clans/create_membership", ClanController, :create_membership)
+        delete("/clans/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)
+        put("/clans/promote/:clan_id/:user_id", ClanController, :promote)
+        put("/clans/demote/:clan_id/:user_id", ClanController, :demote)
       end
 
       scope "/teiserver", TeiserverWeb.BattleLive, as: :ts do

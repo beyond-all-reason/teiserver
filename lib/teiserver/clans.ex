@@ -166,17 +166,17 @@ defmodule Teiserver.Clans do
     |> ClanInviteLib.search([clan_id: clan_id])
     |> ClanInviteLib.search(args[:search])
     |> ClanInviteLib.preload(args[:joins])
-    |> ClanInviteLib.order_by(args[:order_by])
+    # |> ClanInviteLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
     |> Repo.all
   end
 
-  def list_clan_invites_by_invite(invite_id, args \\ []) do
+  def list_clan_invites_by_user(user_id, args \\ []) do
     ClanInviteLib.get_clan_invites
-    |> ClanInviteLib.search([invite_id: invite_id])
+    |> ClanInviteLib.search([user_id: user_id])
     |> ClanInviteLib.search(args[:search])
     |> ClanInviteLib.preload(args[:joins])
-    |> ClanInviteLib.order_by(args[:order_by])
+    # |> ClanInviteLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
     |> Repo.all
   end
@@ -195,9 +195,9 @@ defmodule Teiserver.Clans do
       ** (Ecto.NoResultsError)
 
   """
-  def get_clan_invite!(clan_id, invite_id) do
+  def get_clan_invite!(clan_id, user_id) do
     ClanInviteLib.get_clan_invites
-    |> ClanInviteLib.search(%{clan_id: clan_id, invite_id: invite_id})
+    |> ClanInviteLib.search(%{clan_id: clan_id, user_id: user_id})
     |> Repo.one!
   end
 
@@ -219,11 +219,11 @@ defmodule Teiserver.Clans do
     |> Repo.insert()
   end
 
-  def create_clan_invite(clan_id, invite_id) do
+  def create_clan_invite(clan_id, user_id) do
     %ClanInvite{}
     |> ClanInvite.changeset(%{
       clan_id: clan_id,
-      invite_id: invite_id
+      user_id: user_id
     })
     |> Repo.insert()
   end
@@ -291,17 +291,17 @@ defmodule Teiserver.Clans do
     |> ClanMembershipLib.search([clan_id: clan_id])
     |> ClanMembershipLib.search(args[:search])
     |> ClanMembershipLib.preload(args[:joins])
-    |> ClanMembershipLib.order_by(args[:order_by])
+    # |> ClanMembershipLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
     |> Repo.all
   end
 
-  def list_clan_memberships_by_membership(user_id, args \\ []) do
+  def list_clan_memberships_by_user(user_id, args \\ []) do
     ClanMembershipLib.get_clan_memberships
     |> ClanMembershipLib.search([user_id: user_id])
     |> ClanMembershipLib.search(args[:search])
     |> ClanMembershipLib.preload(args[:joins])
-    |> ClanMembershipLib.order_by(args[:order_by])
+    # |> ClanMembershipLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
     |> Repo.all
   end
@@ -324,6 +324,14 @@ defmodule Teiserver.Clans do
     ClanMembershipLib.get_clan_memberships
     |> ClanMembershipLib.search(%{clan_id: clan_id, user_id: user_id})
     |> Repo.one!
+  end
+
+
+  @spec get_clan_membership(Integer.t(), Integer.t()) :: ClanMembership.t() | nil
+  def get_clan_membership(clan_id, user_id) do
+    ClanMembershipLib.get_clan_memberships
+    |> ClanMembershipLib.search(%{clan_id: clan_id, user_id: user_id})
+    |> Repo.one
   end
 
   @doc """

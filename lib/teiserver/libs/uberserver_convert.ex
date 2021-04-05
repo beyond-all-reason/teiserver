@@ -108,6 +108,18 @@ defmodule Teiserver.UberserverConvert do
     {ubid, user.id}
   end
 
+  # TODO
+  # Useful for performing quick updates across the users when I make a mistake
+  # I'm leaving it here for now but it'll be removed at some point
+  # defp update_user({ubid, raw_data}) do
+  #   user_data = convert_data(raw_data)
+  #   |> Map.drop([:password])
+
+  #   user = Central.Account.get_user_by_email(user_data.email)
+
+  #   {ubid, user.id}
+  # end
+
   defp update_user({ubid, raw_data}) do
     # Get the data as if it's a fresh user, drop the password
     user_data = convert_data(raw_data)
@@ -145,7 +157,7 @@ defmodule Teiserver.UberserverConvert do
     userid = user_map[ubid]
     user = Teiserver.Account.get_user!(userid)
     new_data = Map.merge(user.data, %{
-      "password_hash" => user.password,
+      "password_hash" => user.password |> String.replace("\"", ""),
       "friends" => convert_ids(user_map, user_data["friends"]),
       "friend_requests" => convert_ids(user_map, user_data["friend_requests"]),
       "ignored" => convert_ids(user_map, user_data["ignored"]),

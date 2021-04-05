@@ -39,7 +39,7 @@ defmodule Central.Account.User do
   def changeset(user, attrs \\ %{}) do
     if attrs["password"] == "" do
       user
-      |> cast(attrs, [:name, :email, :icon, :colour, :permissions, :admin_group_id, :data])
+      |> cast(attrs, [:name, :email, :icon, :colour, :permissions, :admin_group_id, :data, :clan_id])
       |> validate_required([:name, :email, :icon, :colour, :permissions])
     else
       user
@@ -51,7 +51,7 @@ defmodule Central.Account.User do
         :colour,
         :permissions,
         :admin_group_id,
-        :data
+        :data, :clan_id
       ])
       |> validate_required([:name, :email, :password, :icon, :colour, :permissions])
       |> put_password_hash()
@@ -68,7 +68,7 @@ defmodule Central.Account.User do
       :colour,
       :permissions,
       :admin_group_id,
-      :data
+      :data, :clan_id
     ])
     |> validate_required([:name, :email, :icon, :colour, :permissions])
   end
@@ -94,7 +94,7 @@ defmodule Central.Account.User do
 
   def changeset(user, attrs, :limited_with_data) do
     user
-    |> cast(attrs, [:name, :email, :icon, :colour, :data])
+    |> cast(attrs, [:name, :email, :icon, :colour, :data, :clan_id])
     |> validate_required([:name, :email, :icon, :colour])
   end
 
