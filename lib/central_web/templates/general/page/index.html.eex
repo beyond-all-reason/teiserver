@@ -102,12 +102,12 @@
   <!-- Inner Wrapper -->
   <div class="inner-wrapper mt-auto mb-auto container">
     <div class="row">
-      <div class="col-md-7">
+      <div class="col-md-12">
           <h1 class="welcome-heading display-4 text-white">
             <%= Application.get_env(:central, Central)[:site_title] %>
           </h1>
           <p class="text-white">
-            <%# Software solutions that work for you. %>
+            <%= Application.get_env(:central, Central)[:site_description] %>
           </p>
           <a href="<%= Routes.account_session_path(@conn, :new) %>" class="btn btn-lg btn-outline-white btn-pill align-self-center">
             Login
