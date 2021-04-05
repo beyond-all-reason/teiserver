@@ -40,7 +40,9 @@ defmodule TeiserverWeb.Router do
         get("/", ClanController, :index)
         get("/:name", ClanController, :show)
 
-        post("/clans/create_membership", ClanController, :create_membership)
+        post("/clans/create_invite", ClanController, :create_invite)
+        delete("/clans/delete_invite/:clan_id/:user_id", ClanController, :delete_invite)
+        put("/clans/respond_to_invite/:clan_id/:user_id", ClanController, :respond_to_invite)
         delete("/clans/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)
         put("/clans/promote/:clan_id/:user_id", ClanController, :promote)
         put("/clans/demote/:clan_id/:user_id", ClanController, :demote)

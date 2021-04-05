@@ -201,6 +201,12 @@ defmodule Teiserver.Clans do
     |> Repo.one!
   end
 
+  def get_clan_invite(clan_id, user_id) do
+    ClanInviteLib.get_clan_invites
+    |> ClanInviteLib.search(%{clan_id: clan_id, user_id: user_id})
+    |> Repo.one
+  end
+
   @doc """
   Creates a clan_invite.
 
@@ -325,7 +331,6 @@ defmodule Teiserver.Clans do
     |> ClanMembershipLib.search(%{clan_id: clan_id, user_id: user_id})
     |> Repo.one!
   end
-
 
   @spec get_clan_membership(Integer.t(), Integer.t()) :: ClanMembership.t() | nil
   def get_clan_membership(clan_id, user_id) do

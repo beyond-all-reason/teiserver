@@ -1,6 +1,7 @@
 defmodule TeiserverWeb.Clans.ClanController do
   use CentralWeb, :controller
 
+  alias Central.Communication
   alias Teiserver.Account
   alias Teiserver.Clans
   alias Teiserver.Clans.ClanLib
@@ -51,6 +52,82 @@ defmodule TeiserverWeb.Clans.ClanController do
     |> render("show.html")
   end
 
+  @spec create_invite(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def create_invite(conn, params) do
+    user_id = get_hash_id(params["teiserver_user"])
+    clan_id = params["clan_id"]
+
+    role = Clans.get_clan_membership(clan_id, conn.user_id)
+    |> Map.get(:role)
+
+    clan = Clans.get_clan!(clan_id)
+
+    cond do
+      role not in ~w(Admin Moderator) ->
+        conn
+        |> put_flash(:danger, "User was unable to be added to clan.")
+        |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites")
+
+      Clans.get_clan_membership(clan_id, user_id) != nil ->
+        conn
+        |> put_flash(:warning, "User already in clan.")
+        |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites")
+
+      Clans.get_clan_invite(clan_id, user_id) != nil ->
+        conn
+        |> put_flash(:warning, "User already invited to clan.")
+        |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites")
+
+      true ->
+        attrs = %{
+          user_id: user_id,
+          clan_id: clan_id
+        }
+
+        case Clans.create_clan_invite(attrs) do
+          {:ok, _invite} ->
+            Communication.notify(user_id, %{
+              title: "Clan invite",
+              body: "Invite to clan #{clan.name}",
+              icon: ClanLib.icon,
+              colour: (ClanLib.colours() |> elem(2)),
+              redirect: (Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+            }, 1, true)
+
+            conn
+            |> put_flash(:success, "User invited to clan.")
+            |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites")
+
+          {:error, _changeset} ->
+            conn
+            |> put_flash(:danger, "User was unable to be added to clan.")
+            |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites")
+        end
+    end
+  end
+
+  @spec delete_invite(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def delete_invite(conn, %{"clan_id" => clan_id, "user_id" => user_id}) do
+    clan_id = int_parse(clan_id)
+    clan_invite = Clans.get_clan_invite!(clan_id, user_id)
+
+    role = Clans.get_clan_membership(clan_id, conn.user_id)
+    |> Map.get(:role)
+
+    clan = Clans.get_clan!(clan_id)
+
+    if role in ~w(Admin Moderator) do
+      Clans.delete_clan_invite(clan_invite)
+
+      conn
+      |> put_flash(:info, "Clan invite deleted successfully.")
+      |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites")
+    else
+      conn
+      |> put_flash(:danger, "User was unable to be removed from clan.")
+      |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites")
+    end
+  end
 
   @spec delete_membership(Plug.Conn.t(), map) :: Plug.Conn.t()
   def delete_membership(conn, %{"clan_id" => clan_id, "user_id" => user_id}) do

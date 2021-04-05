@@ -1,11 +1,5 @@
 <% {_fg, _bg, bsname} = colours() %>
 
-<%= component "picker_script",
-  module: Teiserver.Account.UserLib,
-  name: "teiserver_user",
-  title: "User search"
-%>
-
 <table class="table">
   <thead>
     <tr>
