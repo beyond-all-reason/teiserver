@@ -1,5 +1,6 @@
 defmodule Teiserver.UberserverConvert do
   use Oban.Worker, queue: :teiserver
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @impl Oban.Worker
   def perform(%{args: %{"body" => body}}) do
@@ -26,8 +27,11 @@ defmodule Teiserver.UberserverConvert do
     )
     |> Enum.map(fn u -> u.email end)
 
+    # Json has to store keys as strings. This is a problem since they're ids
+    # and we want to see them as integers
     data = Jason.decode!(body)
     |> Map.get("users")
+    |> Map.new(fn {k, v} -> {int_parse(k), v} end)
 
     user_lookup = data
     |> Enum.map(fn {ubid, user_data} ->
