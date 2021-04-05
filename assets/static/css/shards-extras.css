@@ -15,8 +15,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  opacity: .8;
-  background: #007bff;
+  /* opacity: .8; */
+  /* background: #007bff; */
 }
 
 @media (max-width: 767.98px) {
