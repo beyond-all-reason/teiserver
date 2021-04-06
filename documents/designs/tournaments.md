@@ -7,4 +7,4 @@
 
 ### Ideas - Extra
 - Predicitons
-
+- Ability for people to sign up as standins should people drop out
