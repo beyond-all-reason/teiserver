@@ -158,7 +158,7 @@ defmodule TeiserverWeb.Admin.ClanController do
 
     user = Account.get_user!(user_id)
     if user.clan_id == clan_id do
-      # Remove user clan_id
+      Account.update_user(user, %{"clan_id" => nil})
 
       CentralWeb.Endpoint.broadcast(
         "recache:#{user_id}",
@@ -170,6 +170,18 @@ defmodule TeiserverWeb.Admin.ClanController do
     conn
     |> put_flash(:info, "User clan membership deleted successfully.")
     |> redirect(to: Routes.ts_admin_clan_path(conn, :show, clan_id) <> "#members")
+  end
+
+  @spec delete_invite(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def delete_invite(conn, %{"clan_id" => clan_id, "user_id" => user_id}) do
+    clan_id = int_parse(clan_id)
+    clan_invite = Clans.get_clan_invite!(clan_id, user_id)
+
+    Clans.delete_clan_invite(clan_invite)
+
+    conn
+    |> put_flash(:info, "Clan invite deleted successfully.")
+    |> redirect(to: Routes.ts_admin_clan_path(conn, :show, clan_id) <> "#invites")
   end
 
   @spec promote(Plug.Conn.t(), map) :: Plug.Conn.t()

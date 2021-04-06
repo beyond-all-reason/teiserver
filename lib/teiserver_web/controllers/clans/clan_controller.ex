@@ -52,6 +52,110 @@ defmodule TeiserverWeb.Clans.ClanController do
     |> render("show.html")
   end
 
+  @spec set_default(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def set_default(conn, %{"id" => id}) do
+    clan = Clans.get_clan!(id)
+
+    membership = Clans.get_clan_membership(clan.id, conn.user_id)
+
+    if membership do
+      user = Account.get_user!(conn.user_id)
+      Account.update_user(user, %{"clan_id" => clan.id})
+
+      CentralWeb.Endpoint.broadcast(
+        "recache:#{conn.user_id}",
+        "recache",
+        %{}
+      )
+    end
+
+    conn
+    |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name))
+  end
+
+  @spec respond_to_invite(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def respond_to_invite(conn, %{"clan_id" => clan_id, "response" => "accept"}) do
+    invite = Clans.get_clan_invite(clan_id, conn.user_id)
+    membership = Clans.get_clan_membership(clan_id, conn.user_id)
+
+    cond do
+      invite == nil ->
+        conn
+        |> put_flash(:warning, "There is no invite to accept")
+        |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+
+      membership != nil ->
+        Clans.delete_clan_invite(invite)
+
+        conn
+        |> put_flash(:success, "Invite accepted")
+        |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+
+      true ->
+        attrs = %{
+          user_id: conn.user_id,
+          clan_id: clan_id,
+          role: "Member"
+        }
+
+        case Clans.create_clan_membership(attrs) do
+          {:ok, _membership} ->
+            Clans.delete_clan_invite(invite)
+
+            conn
+            |> put_flash(:success, "Invite accepted")
+            |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+
+          {:error, _changeset} ->
+            conn
+            |> put_flash(:warning, "There was an error accepting the invite")
+            |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+        end
+    end
+  end
+
+  def respond_to_invite(conn, %{"clan_id" => clan_id, "response" => "decline"}) do
+    invite = Clans.get_clan_invite(clan_id, conn.user_id)
+
+    cond do
+      invite == nil ->
+        conn
+        |> put_flash(:success, "Invite declined")
+        |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+
+      true ->
+        Clans.delete_clan_invite(invite)
+
+        conn
+        |> put_flash(:success, "Invite declined")
+        |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+    end
+  end
+
+  def respond_to_invite(conn, %{"clan_id" => clan_id, "response" => "block"}) do
+    invite = Clans.get_clan_invite(clan_id, conn.user_id)
+
+    cond do
+      invite == nil ->
+        conn
+        |> put_flash(:success, "Invite declined")
+        |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+
+      true ->
+        case Clans.update_clan_invite(invite, %{response: "block"}) do
+          {:ok, _clan} ->
+            conn
+            |> put_flash(:success, "Invite blocked.")
+            |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+
+          {:error, _changeset} ->
+            conn
+            |> put_flash(:success, "Invite unable to be blocked, if this persists please contact an admin.")
+            |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+        end
+    end
+  end
+
   @spec create_invite(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create_invite(conn, params) do
     user_id = get_hash_id(params["teiserver_user"])
@@ -75,7 +179,7 @@ defmodule TeiserverWeb.Clans.ClanController do
 
       Clans.get_clan_invite(clan_id, user_id) != nil ->
         conn
-        |> put_flash(:warning, "User already invited to clan.")
+        |> put_flash(:warning, "User already invited to clan (or has blocked further invites).")
         |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites")
 
       true ->
@@ -144,7 +248,7 @@ defmodule TeiserverWeb.Clans.ClanController do
 
       user = Account.get_user!(user_id)
       if user.clan_id == clan_id do
-        # Remove user clan_id
+        Account.update_user(user, %{"clan_id" => nil})
 
         CentralWeb.Endpoint.broadcast(
           "recache:#{user_id}",

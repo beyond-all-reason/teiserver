@@ -14,6 +14,13 @@
   <div class="col-md-12">
     <div class="card border-<%= bsname %>">
       <div class="card-body">
+        <div class="float-right">
+          <%= if @current_user.clan_id != @clan.id and @membership != nil do %>
+            <a href="<%= Routes.ts_clans_clan_path(@conn, :set_default, @clan.id) %>" class="btn btn-<%= bsname %>">
+              Set as preferred Clan
+            </a>
+          <% end %>
+        </div>
 
       <h3 style="color: <%= @clan.colour1 %>; background-color: <%= @clan.colour2 %>; display: inline-block; padding: 5px;">
         <%= @clan.name %>

@@ -6,6 +6,8 @@ defmodule Central.Account.User do
 
   # import Central.Account.AuthLib, only: [allow?: 2]
 
+  @extra_fields [:clan_id]
+
   schema "account_users" do
     field :name, :string
     field :email, :string
@@ -39,7 +41,7 @@ defmodule Central.Account.User do
   def changeset(user, attrs \\ %{}) do
     if attrs["password"] == "" do
       user
-      |> cast(attrs, [:name, :email, :icon, :colour, :permissions, :admin_group_id, :data, :clan_id])
+      |> cast(attrs, [:name, :email, :icon, :colour, :permissions, :admin_group_id, :data] ++ @extra_fields)
       |> validate_required([:name, :email, :icon, :colour, :permissions])
     else
       user
@@ -51,8 +53,8 @@ defmodule Central.Account.User do
         :colour,
         :permissions,
         :admin_group_id,
-        :data, :clan_id
-      ])
+        :data
+      ] ++ @extra_fields)
       |> validate_required([:name, :email, :password, :icon, :colour, :permissions])
       |> put_password_hash()
     end
@@ -68,8 +70,8 @@ defmodule Central.Account.User do
       :colour,
       :permissions,
       :admin_group_id,
-      :data, :clan_id
-    ])
+      :data
+    ] ++ @extra_fields)
     |> validate_required([:name, :email, :icon, :colour, :permissions])
   end
 
@@ -88,13 +90,13 @@ defmodule Central.Account.User do
 
   def changeset(user, attrs, :limited) do
     user
-    |> cast(attrs, [:name, :email, :icon, :colour])
+    |> cast(attrs, [:name, :email, :icon, :colour] ++ @extra_fields)
     |> validate_required([:name, :email, :icon, :colour])
   end
 
   def changeset(user, attrs, :limited_with_data) do
     user
-    |> cast(attrs, [:name, :email, :icon, :colour, :data, :clan_id])
+    |> cast(attrs, [:name, :email, :icon, :colour, :data] ++ @extra_fields)
     |> validate_required([:name, :email, :icon, :colour])
   end
 
