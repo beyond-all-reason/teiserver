@@ -14,6 +14,10 @@ Currently a selection of notes and "things to keep in mind" when writing a new p
 - [users](users.md)
 - [misc](misc.md)
 
+
+#### New features we'd like to bring about
+- Some form of battle telementry (basic updates every 10 seconds or so?)
+
 #### Global messages
 The main issue with the current spring protocol is it currently sends everybody messages about everybody; creating an O(n^2) problem. Currently the following commands are global in nature:
 - User logged in
