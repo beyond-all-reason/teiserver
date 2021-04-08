@@ -11,7 +11,7 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Teiserver.Room
   alias Teiserver.User
   alias Teiserver.TcpServer
-  alias Teiserver.Protocols.SpringLib
+  alias Teiserver.Protocols.Spring
 
   @motd """
   Message of the day
@@ -238,7 +238,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:add_bot_to_battle, {battle_id, bot}) do
-    status = SpringLib.create_battle_status(bot)
+    status = Spring.create_battle_status(bot)
 
     "ADDBOT #{battle_id} #{bot.name} #{bot.owner_name} #{status} #{bot.team_colour} #{bot.ai_dll}\n"
   end
@@ -248,7 +248,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:update_bot, {battle_id, bot}) do
-    status = SpringLib.create_battle_status(bot)
+    status = Spring.create_battle_status(bot)
     "UPDATEBOT #{battle_id} #{bot.name} #{status} #{bot.team_colour}\n"
   end
 
@@ -270,7 +270,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:client_status, client) do
-    status = SpringLib.create_client_status(client)
+    status = Spring.create_client_status(client)
     "CLIENTSTATUS #{client.name} #{status}\n"
   end
 
@@ -281,7 +281,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:client_battlestatus, nil), do: nil
   defp do_reply(:client_battlestatus, client) do
-    status = SpringLib.create_battle_status(client)
+    status = Spring.create_battle_status(client)
     "CLIENTBATTLESTATUS #{client.name} #{status} #{client.team_colour}\n"
   end
 

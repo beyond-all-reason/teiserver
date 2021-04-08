@@ -41,7 +41,8 @@ config :central, Teiserver,
   heartbeart_interval: 30_000,
   heartbeart_timeout: 45_000,
   game_name: "Spring game",
-  discord: nil
+  discord: nil,
+  default_protocol: Teiserver.Protocols.Spring
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

@@ -14,7 +14,7 @@ defmodule Teiserver.Protocols.SpringIn do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
-  alias Teiserver.Protocols.SpringLib
+  alias Teiserver.Protocols.Spring
 
   # Bridge commands, may not be needed
   # in_BRIDGECLIENTFROM
@@ -194,7 +194,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("MYSTATUS", data, msg_id, state) do
     case Regex.run(~r/([0-9]+)/, data) do
       [_, new_value] ->
-        new_status = SpringLib.parse_client_status(new_value)
+        new_status = Spring.parse_client_status(new_value)
         |> Map.take([:in_game, :away])
 
         new_client = Client.get_client_by_id(state.userid)
@@ -958,7 +958,7 @@ defmodule Teiserver.Protocols.SpringIn do
                   team_colour: team_colour,
                   ai_dll: ai_dll
                 },
-                SpringLib.parse_battle_status(battlestatus)
+                Spring.parse_battle_status(battlestatus)
               )
             )
 
@@ -984,7 +984,7 @@ defmodule Teiserver.Protocols.SpringIn do
               %{
                 team_colour: team_colour
               },
-              SpringLib.parse_battle_status(battlestatus)
+              Spring.parse_battle_status(battlestatus)
             )
 
           Battle.update_bot(state.battle_id, name, new_bot)
@@ -1071,7 +1071,7 @@ defmodule Teiserver.Protocols.SpringIn do
     case Regex.run(~r/(\S+) (.+)/, data) do
       [_, battlestatus, team_colour] ->
         updates =
-          SpringLib.parse_battle_status(battlestatus)
+          Spring.parse_battle_status(battlestatus)
           |> Map.take([:ready, :team_number, :ally_team_number, :player, :sync, :side])
 
         new_client =

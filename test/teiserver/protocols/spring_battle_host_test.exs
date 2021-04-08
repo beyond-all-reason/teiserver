@@ -4,8 +4,8 @@ defmodule Teiserver.SpringBattleHostTest do
   # alias Teiserver.BitParse
   # alias Teiserver.User
   alias Teiserver.Battle
-  alias Teiserver.Protocols.SpringLib
-  # alias Teiserver.Protocols.{SpringIn, SpringOut, SpringLib}
+  alias Teiserver.Protocols.Spring
+  # alias Teiserver.Protocols.{SpringIn, SpringOut, Spring}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TestLib,
@@ -170,7 +170,7 @@ defmodule Teiserver.SpringBattleHostTest do
     reply = _recv(socket2)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195330 600\n"
 
-    status = SpringLib.parse_battle_status("4195330")
+    status = Spring.parse_battle_status("4195330")
     assert status == %{
       ready: true,
       handicap: 0,
@@ -186,14 +186,14 @@ defmodule Teiserver.SpringBattleHostTest do
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4373506 600\n"
-    status = SpringLib.parse_battle_status("4373506")
+    status = Spring.parse_battle_status("4373506")
     assert status.handicap == 87
 
     _send(socket, "HANDICAP #{user2.name} 0\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195330 600\n"
-    status = SpringLib.parse_battle_status("4195330")
+    status = Spring.parse_battle_status("4195330")
     assert status.handicap == 0
 
     # Forceteamno
@@ -201,7 +201,7 @@ defmodule Teiserver.SpringBattleHostTest do
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195334 600\n"
-    status = SpringLib.parse_battle_status("4195334")
+    status = Spring.parse_battle_status("4195334")
     assert status.team_number == 1
 
     # Forceallyno
@@ -209,7 +209,7 @@ defmodule Teiserver.SpringBattleHostTest do
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195398 600\n"
-    status = SpringLib.parse_battle_status("4195398")
+    status = Spring.parse_battle_status("4195398")
     assert status.ally_team_number == 1
 
     # Forceteamcolour
@@ -223,7 +223,7 @@ defmodule Teiserver.SpringBattleHostTest do
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4194374 800\n"
-    status = SpringLib.parse_battle_status("4194374")
+    status = Spring.parse_battle_status("4194374")
     assert status.player == false
 
     # SAYBATTLEEX

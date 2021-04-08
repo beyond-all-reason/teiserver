@@ -7,12 +7,8 @@ defmodule Teiserver.TcpServer do
 
   alias Teiserver.Client
   alias Teiserver.User
-  alias Teiserver.Protocols.SpringIn
-  alias Teiserver.Protocols.SpringOut
 
   @behaviour :ranch_protocol
-  @default_protocol_in SpringIn
-  @default_protocol_out SpringOut
 
   _ = """
   -- Testing locally
@@ -100,8 +96,8 @@ defmodule Teiserver.TcpServer do
       last_msg: System.system_time(:second),
       socket: socket,
       transport: transport,
-      protocol_in: @default_protocol_in,
-      protocol_out: @default_protocol_out,
+      protocol_in: Application.get_env(:central, Teiserver)[:default_protocol].protocol_in(),
+      protocol_out: Application.get_env(:central, Teiserver)[:default_protocol].protocol_out(),
       ip: ip,
 
       # Client state

@@ -1,16 +1,21 @@
-defmodule Teiserver.Protocols.SpringLib do
-  @moduledoc """
-
-  """
+defmodule Teiserver.Protocols.Spring do
   alias Teiserver.BitParse
+  alias Teiserver.Protocols.SpringIn
+  alias Teiserver.Protocols.SpringOut
 
+  @spec protocol_in :: Teiserver.Protocols.SpringIn
+  def protocol_in(), do: SpringIn
+
+  @spec protocol_out :: Teiserver.Protocols.SpringOut
+  def protocol_out(), do: SpringOut
+
+  @spec parse_client_status(String.t()) :: Map.t()
   def parse_client_status(status_str) do
     status_bits =
       BitParse.parse_bits(status_str, 7)
       |> Enum.reverse()
 
     [in_game, away, r1, r2, r3, mod, bot] = status_bits
-
 
     %{
       in_game: in_game == 1,
@@ -21,6 +26,7 @@ defmodule Teiserver.Protocols.SpringLib do
     }
   end
 
+  @spec create_client_status(Map.t()) :: Integer.t()
   def create_client_status(client) do
     [r1, r2, r3] = BitParse.parse_bits("#{client.rank || 1}", 3)
 
@@ -47,6 +53,7 @@ defmodule Teiserver.Protocols.SpringLib do
   # b22..b23 = sync status (0 = unknown, 1 = synced, 2 = unsynced)
   # b24..b27 = side (e.g.: arm, core, tll, ... Side index can be between 0 and 15, inclusive)
   # b28..b31 = undefined (reserved for future use)
+  @spec parse_battle_status(String.t()) :: Map.t()
   def parse_battle_status(status) do
     status_bits =
       BitParse.parse_bits(status, 32)
@@ -112,6 +119,7 @@ defmodule Teiserver.Protocols.SpringLib do
     }
   end
 
+  @spec create_battle_status(Map.t()) :: Integer.t()
   def create_battle_status(client) do
     [t4, t3, t2, t1] = BitParse.parse_bits("#{client.team_number}", 4)
     [a4, a3, a2, a1] = BitParse.parse_bits("#{client.ally_team_number}", 4)
