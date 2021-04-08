@@ -6,6 +6,7 @@ defmodule Teiserver.Client do
   alias Teiserver.Battle
   require Logger
 
+  @spec create(Map.t()) :: Map.t()
   def create(client) do
     Map.merge(
       %{
@@ -24,7 +25,15 @@ defmodule Teiserver.Client do
         handicap: 0,
         sync: 0,
         side: 0,
-        battle_id: nil
+        battle_id: nil,
+
+        # Metrics stuff
+        # current_state: {:logged_out, :erlang.system_time(:seconds)},
+        # time_in_state: %{
+        #   menu: 0,
+        #   lobby: 0,
+        #   battle: 0
+        # }
       },
       client
     )
@@ -53,13 +62,29 @@ defmodule Teiserver.Client do
       {:user_logged_in, user.id}
     )
 
+    change_state(user.id, :menu)
     client
   end
 
+  @doc """
+  Allows us to tell the system a client state has changed and metrics are able to use this. Currently a stub
+  function until we know how we want metrics to work.
+  """
+  @spec change_state(Integer.t(), :menu | :battle_lobby | :battle_player | :battle_spectator) :: :ok
+  def change_state(_client_id, new_state) do
+    # TODO implement metrics here
+    Logger.info("New state for client: #{new_state}")
+    :ok
+  end
+
+  @spec update(Map.t()) :: Map.t()
+  @spec update(Map.t(), Atom.t() | nil) :: Map.t()
   def update(client, reason \\ nil) do
     client =
       client
       |> add_client
+
+    # TODO If reason is :client_updated_status then metric on change?
 
     PubSub.broadcast(Central.PubSub, "all_client_updates", {:updated_client, client, reason})
 
@@ -74,6 +99,7 @@ defmodule Teiserver.Client do
     client
   end
 
+  @spec join_battle(Integer.t(), Integer.t(), Integer.t()) :: nil | Map.t()
   def join_battle(userid, battle_id, colour \\ 0) do
     case get_client_by_id(userid) do
       nil ->
@@ -82,10 +108,12 @@ defmodule Teiserver.Client do
       client ->
         new_client = %{client | team_colour: colour, battle_id: battle_id}
         ConCache.put(:clients, new_client.userid, new_client)
+        change_state(userid, :battle_lobby)
         new_client
     end
   end
 
+  @spec leave_battle(Integer.t() | nil) :: Map.t() | nil
   def leave_battle(nil), do: nil
   def leave_battle(userid) do
     case get_client_by_id(userid) do
@@ -95,10 +123,12 @@ defmodule Teiserver.Client do
       client ->
         new_client = %{client | battle_id: nil}
         ConCache.put(:clients, new_client.userid, new_client)
+        change_state(userid, :menu)
         new_client
     end
   end
 
+  @spec leave_rooms(Integer.t()) :: List.t()
   def leave_rooms(userid) do
     Room.list_rooms()
     |> Enum.each(fn room ->
@@ -108,6 +138,8 @@ defmodule Teiserver.Client do
     end)
   end
 
+  @spec get_client_by_name(nil) :: nil
+  @spec get_client_by_name(String.t()) :: nil | Map.t()
   def get_client_by_name(nil), do: nil
   def get_client_by_name(""), do: nil
 
@@ -116,19 +148,22 @@ defmodule Teiserver.Client do
     ConCache.get(:clients, userid)
   end
 
+  @spec get_client_by_id(nil) :: nil
+  @spec get_client_by_id(Integer.t()) :: nil | Map.t()
   def get_client_by_id(nil), do: nil
 
   def get_client_by_id(userid) do
     ConCache.get(:clients, userid)
   end
 
+  @spec get_clients(List.t()) :: List.t()
   def get_clients([]), do: []
-
   def get_clients(id_list) do
     id_list
     |> Enum.map(fn userid -> ConCache.get(:clients, userid) end)
   end
 
+  @spec add_client(Map.t()) :: Map.t()
   def add_client(client) do
     ConCache.put(:clients, client.userid, client)
 
@@ -143,10 +178,12 @@ defmodule Teiserver.Client do
     client
   end
 
+  @spec list_client_ids() :: List.t()
   def list_client_ids() do
     ConCache.get(:lists, :clients)
   end
 
+  @spec list_clients() :: List.t()
   def list_clients() do
     ConCache.get(:lists, :clients)
     |> Enum.map(fn c -> get_client_by_id(c) end)
