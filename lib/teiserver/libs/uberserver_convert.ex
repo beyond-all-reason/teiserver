@@ -1,10 +1,16 @@
 defmodule Teiserver.UberserverConvert do
   use Oban.Worker, queue: :teiserver
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Central.Logging.Helpers
 
   @impl Oban.Worker
   def perform(%{args: %{"body" => body}}) do
+    id = UUID.uuid4()
+    start_time = :erlang.system_time(:seconds)
+    Helpers.add_anonymous_audit_log("Teiserver.UberserverConvert started", %{id: id})
     create_conversion_job(body)
+    time_taken = :erlang.system_time(:seconds) - start_time
+    Helpers.add_anonymous_audit_log("Teiserver.UberserverConvert completed", %{id: id, time_taken: time_taken})
 
     :ok
   end
@@ -13,10 +19,10 @@ defmodule Teiserver.UberserverConvert do
   def spawn_run(body, conn) do
     id = UUID.uuid4()
     start_time = :erlang.system_time(:seconds)
-    Central.Logging.Helpers.add_audit_log(conn, "Teiserver.UberserverConvert started", %{id: id})
+    Helpers.add_audit_log(conn, "Teiserver.UberserverConvert started", %{id: id})
     create_conversion_job(body)
     time_taken = :erlang.system_time(:seconds) - start_time
-    Central.Logging.Helpers.add_audit_log(conn, "Teiserver.UberserverConvert completed", %{id: id, time_taken: time_taken})
+    Helpers.add_audit_log(conn, "Teiserver.UberserverConvert completed", %{id: id, time_taken: time_taken})
   end
 
   @spec create_conversion_job(String.t()) :: :ok

@@ -75,9 +75,6 @@ telnet localhost 8200
 openssl s_client -connect localhost:8201
 ```
 
-## Prod
-This section is very much still under construction. If you want to run this in prod please let me know and I'll put priority work into fixing this; at the current time I'm not aware of anybody else looking to use this in prod and as such it's not a priority
-
 ### Main 3rd party dependencies
 The main dependencies of the project are:
 - [Phoenix framework](https://www.phoenixframework.org/), a web framework with a role similar to Django or Rails.

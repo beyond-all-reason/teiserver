@@ -6,3 +6,4 @@
 - Number of battles for each MM queue
 - Number of tourney battles
 - Number of new accounts created
+- Lobby types

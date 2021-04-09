@@ -109,6 +109,10 @@ config :logger,
     :console
   ]
 
+config :central, Oban,
+  queues: false,
+  crontab: false
+
 config :logger, :error_log,
   path: "/tmp/barserver_error.log",
   level: :error
