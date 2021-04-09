@@ -46,14 +46,6 @@
           %>
 
           <%= component "sub_menu_icon",
-            name: "logging",
-            label: "Logging",
-            active: @active,
-            url: Routes.logging_general_path(@conn, :index),
-            lib: Central.Logging.LoggingLib
-          %>
-
-          <%= component "sub_menu_icon",
             name: "tool",
             label: "Tools",
             active: @active,

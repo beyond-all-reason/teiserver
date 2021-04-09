@@ -24,7 +24,6 @@ defmodule Central.Account.ReportLib do
     }
   end
 
-  @spec response_actions :: [String.t()]
   def response_actions() do
     [
       "Ignore report",

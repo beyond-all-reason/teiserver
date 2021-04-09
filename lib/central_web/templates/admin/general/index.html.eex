@@ -34,10 +34,6 @@
     <%= component "menu_card", icon_class: "fas", name: "", icon: Central.Account.ReportLib.icon, text: "Reports", link: Routes.admin_report_path(@conn, :index) %>
   <% end %>
 
-  <%= if allow?(@current_user, "logging") do %>
-    <%= component "menu_card", icon_class: "fas", name: "", icon: Central.Logging.LoggingLib.icon, text: "Logging", link: Routes.logging_general_path(@conn, :index) %>
-  <% end %>
-
   <%= if allow?(@current_user, "admin.dev") do %>
     <%= component "menu_card", icon_class: "fas", name: "", icon: Central.Admin.ToolLib.icon, text: "Tools", link: Routes.admin_tool_path(@conn, :index) %>
   <% end %>

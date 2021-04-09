@@ -19,5 +19,5 @@
 </div>
 
 <div class="row page-row">
-  <%= component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.admin_general_path(@conn, :index) %>
+  <%= component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: "/" %>
 </div>

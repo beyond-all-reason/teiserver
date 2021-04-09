@@ -19,4 +19,8 @@ defmodule Central.Logging.ErrorLog do
     |> cast(params, [:path, :reason, :method, :traceback, :hidden, :data, :user_id])
     |> validate_required([:path, :reason, :traceback, :hidden, :data])
   end
+
+  @spec authorize(any, Plug.Conn.t(), atom) :: boolean
+  def authorize(_, conn, :delete), do: allow?(conn, "logging.error.delete")
+  def authorize(_, conn, _), do: allow?(conn, "logging.error")
 end

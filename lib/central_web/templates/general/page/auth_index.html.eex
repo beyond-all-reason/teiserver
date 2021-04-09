@@ -57,6 +57,16 @@
       link: Routes.admin_general_path(@conn, :index)
     %>
   <% end %>
+
+  <%= if allow?(@current_user, "logging") do %>
+    <%=
+      component "menu_card",
+      icon: Central.Logging.icon(),
+      name: "logging",
+      text: "Logging",
+      link: Routes.logging_general_path(@conn, :index)
+    %>
+  <% end %>
 </div>
 
 &nbsp;

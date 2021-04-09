@@ -8,7 +8,7 @@ defmodule CentralWeb.Logging.AggregateViewLogController do
   alias Central.Helpers.TimexHelper
 
   plug Bodyguard.Plug.Authorize,
-    policy: Central.Admin,
+    policy: Central.Logging.AggregateViewLog,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 

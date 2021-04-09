@@ -59,6 +59,16 @@
             %>
           <% end %>
 
+          <%= if allow?(@current_user, "logging.error") do %>
+            <%= component "sub_menu_icon",
+              name: "error",
+              label: "Error",
+              active: @active,
+              url: Routes.logging_error_log_path(@conn, :index),
+              lib: Central.Logging.ErrorLogLib
+            %>
+          <% end %>
+
           <%= component "sub_menu_icon",
             name: "report",
             label: "Reports",

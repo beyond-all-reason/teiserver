@@ -7,7 +7,7 @@ defmodule CentralWeb.Logging.ErrorLogController do
   # alias Central.Logging.ErrorLogLib
 
   plug Bodyguard.Plug.Authorize,
-    policy: Central.Dev,
+    policy: Central.Logging.ErrorLog,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 

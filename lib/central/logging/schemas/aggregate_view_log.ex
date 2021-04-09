@@ -60,4 +60,8 @@ defmodule Central.Logging.AggregateViewLog do
       :section_data
     ])
   end
+
+  @spec authorize(any, Plug.Conn.t(), atom) :: boolean
+  def authorize(_, conn, :delete), do: allow?(conn, "logging.aggregate.delete")
+  def authorize(_, conn, _), do: allow?(conn, "logging.aggregate")
 end

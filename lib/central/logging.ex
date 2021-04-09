@@ -3,6 +3,7 @@ defmodule Central.Logging do
   The Logging context.
   """
 
+  @spec icon() :: String.t()
   def icon(), do: "fas fa-bars"
 
   import Ecto.Query, warn: false

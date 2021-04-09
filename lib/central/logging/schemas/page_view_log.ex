@@ -20,4 +20,8 @@ defmodule Central.Logging.PageViewLog do
     |> cast(params, [:path, :section, :method, :ip, :load_time, :user_id, :status])
     |> validate_required([:method, :ip, :load_time, :status])
   end
+
+  @spec authorize(any, Plug.Conn.t(), atom) :: boolean
+  def authorize(_, conn, :delete), do: allow?(conn, "logging.page_view.delete")
+  def authorize(_, conn, _), do: allow?(conn, "logging.page_view")
 end

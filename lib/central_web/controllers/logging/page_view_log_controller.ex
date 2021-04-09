@@ -7,7 +7,7 @@ defmodule CentralWeb.Logging.PageViewLogController do
   plug :add_breadcrumb, name: 'Page views', url: '/logging/page_views'
 
   plug Bodyguard.Plug.Authorize,
-    policy: Central.Admin,
+    policy: Central.Logging.PageViewLog,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 

@@ -9,7 +9,7 @@ defmodule CentralWeb.Logging.AuditLogController do
   plug :add_breadcrumb, name: 'Audit', url: '/logging/audit'
 
   plug Bodyguard.Plug.Authorize,
-    policy: Central.Admin,
+    policy: Central.Logging.AuditLog,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
