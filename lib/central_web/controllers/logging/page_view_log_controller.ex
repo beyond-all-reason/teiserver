@@ -6,11 +6,15 @@ defmodule CentralWeb.Logging.PageViewLogController do
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
   plug :add_breadcrumb, name: 'Page views', url: '/logging/page_views'
 
+  plug AssignPlug,
+    sidemenu_active: "logging"
+
   plug Bodyguard.Plug.Authorize,
     policy: Central.Logging.PageViewLog,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
+  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
     page_view_logs =
       Logging.list_page_view_logs(
@@ -31,6 +35,7 @@ defmodule CentralWeb.Logging.PageViewLogController do
     |> render("index.html")
   end
 
+  @spec search(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def search(conn, %{"search" => params}) do
     params = form_params(params)
 
@@ -56,12 +61,14 @@ defmodule CentralWeb.Logging.PageViewLogController do
     |> render("index.html")
   end
 
+  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     page_view_log = Logging.get_page_view_log!(id, joins: [:user])
 
     render(conn, "show.html", page_view_log: page_view_log)
   end
 
+  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     page_view_log = Logging.get_page_view_log!(id)
 
@@ -74,6 +81,7 @@ defmodule CentralWeb.Logging.PageViewLogController do
     |> redirect(to: Routes.logging_page_view_log_path(conn, :index))
   end
 
+  @spec form_params(Map.t()) :: Map.t()
   defp form_params(params \\ %{}) do
     %{
       "section" => Map.get(params, "section", "any"),
@@ -88,6 +96,7 @@ defmodule CentralWeb.Logging.PageViewLogController do
     }
   end
 
+  @spec search_dropdowns(Plag.Conn.t()) :: Plug.Conn.t()
   def search_dropdowns(conn) do
     conn
     |> assign(:groups, GroupLib.dropdown(conn))

@@ -45,8 +45,7 @@
   }
 </style>
 
-<%= render CentralWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "audit"})
-%>
+<%= render CentralWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "audit"}) %>
 
 <div class="row section-menu">
   <div class="col-md-12">

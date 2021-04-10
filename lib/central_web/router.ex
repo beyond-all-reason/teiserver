@@ -1,6 +1,20 @@
 defmodule CentralWeb.Router do
   use CentralWeb, :router
 
+  pipeline :dev_auth do
+    plug Bodyguard.Plug.Authorize,
+      policy: Central.Dev,
+      action: :dev_auth,
+      user: {Central.Account.AuthLib, :current_user}
+  end
+
+  pipeline :admin_auth do
+    plug Bodyguard.Plug.Authorize,
+      policy: Central.Admin.AdminLib,
+      action: :admin_auth,
+      user: {Central.Account.AuthLib, :current_user}
+  end
+
   pipeline :browser do
     plug(:accepts, ["html"])
     plug(:fetch_session)
@@ -267,7 +281,8 @@ defmodule CentralWeb.Router do
   import Phoenix.LiveDashboard.Router
 
   scope "/admin", CentralWeb.Admin, as: :admin do
-    pipe_through([:browser, :protected, :admin_layout])
+    pipe_through([:browser, :protected, :admin_layout, :admin_auth])
+
     live_dashboard("/dashboard", metrics: CentralWeb.Telemetry)
   end
 

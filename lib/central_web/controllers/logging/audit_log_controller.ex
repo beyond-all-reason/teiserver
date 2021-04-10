@@ -16,6 +16,7 @@ defmodule CentralWeb.Logging.AuditLogController do
   plug AssignPlug,
     sidemenu_active: "logging"
 
+  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
     logs = Logging.list_audit_logs(order: "Newest first")
     # |> AuditLogLib.search(:groups, conn.assigns[:memberships])
@@ -29,6 +30,7 @@ defmodule CentralWeb.Logging.AuditLogController do
     |> render("index.html")
   end
 
+  @spec search(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def search(conn, %{"search" => params}) do
     params = form_params(params)
 
@@ -59,6 +61,7 @@ defmodule CentralWeb.Logging.AuditLogController do
     |> render("index.html")
   end
 
+  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     log = Logging.get_audit_log!(id, joins: [:user, :group])
 
@@ -67,6 +70,7 @@ defmodule CentralWeb.Logging.AuditLogController do
     |> render("show.html")
   end
 
+  @spec form_params(Map.t()) :: Map.t()
   defp form_params(params \\ %{}) do
     %{
       "action" => Map.get(params, "action", ""),

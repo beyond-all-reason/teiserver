@@ -15,6 +15,10 @@ defmodule CentralWeb.Logging.AggregateViewLogController do
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
   plug :add_breadcrumb, name: 'Aggregate', url: '/logging/aggregate_views'
 
+  plug AssignPlug,
+    sidemenu_active: "logging"
+
+  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do
     logs =
       Logging.list_aggregate_view_logs(
@@ -29,6 +33,7 @@ defmodule CentralWeb.Logging.AggregateViewLogController do
     |> render("index.html")
   end
 
+  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"date" => date}) do
     date = TimexHelper.parse_ymd(date)
 
@@ -44,6 +49,7 @@ defmodule CentralWeb.Logging.AggregateViewLogController do
     |> render("show.html")
   end
 
+  @spec perform_form(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def perform_form(conn, _params) do
     last_date = AggregateViewLogLib.get_last_aggregate_date()
 
@@ -69,6 +75,7 @@ defmodule CentralWeb.Logging.AggregateViewLogController do
     end
   end
 
+  @spec perform_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def perform_post(conn, _params) do
     AggregateViewLogsTask.perform(%{})
 

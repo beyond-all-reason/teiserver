@@ -473,6 +473,7 @@ defmodule CentralWeb.Admin.GroupController do
     end
   end
 
+  @spec search_params(Map.t()) :: Map.t()
   defp search_params(params \\ %{}) do
     %{
       name: Map.get(params, "name", ""),
@@ -482,6 +483,7 @@ defmodule CentralWeb.Admin.GroupController do
     }
   end
 
+  @spec group_dropdown(Plug.Conn.t()) :: [{String.t(), Integer.t()}]
   defp group_dropdown(conn) do
     Account.list_groups(
       search: [user_membership: conn.user_id, active: true],
@@ -491,6 +493,7 @@ defmodule CentralWeb.Admin.GroupController do
     |> Enum.map(fn g -> {g.name, g.id} end)
   end
 
+  @spec group_type_dropdown() :: [String.t()]
   defp group_type_dropdown() do
     GroupTypeLib.get_all_group_types()
     |> Enum.map(fn gt -> gt.name end)

@@ -39,22 +39,6 @@
         </div>
         <br /><br />
 
-        <div class="row">
-          <div class="col-md-12">
-            <h4>
-              <%= component "icon", icon: Central.Logging.AggregateViewLogLib.icon() %>
-              Aggregate views
-            </h4>
-          </div>
-
-          <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 line-card">
-            <a href='<%= Routes.logging_report_path(@conn, :show, "aggregate_page_views") %>'>
-              <i class="far fa-fw fa-hourglass fa-lg"></i>
-              Historic stats
-            </a>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>

@@ -4,16 +4,21 @@ defmodule CentralWeb.Logging.ReportController do
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
   plug :add_breadcrumb, name: 'Reports', url: '/logging/reports'
 
+  plug AssignPlug,
+    sidemenu_active: "logging"
+
   plug Bodyguard.Plug.Authorize,
     policy: Central.Logging.LoggingLib,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
+  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do
     conn
     |> render("index.html")
   end
 
+  @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, params) do
     name = params["name"]
 

@@ -15,11 +15,13 @@ defmodule CentralWeb.Admin.ToolController do
 
   # action_fallback CentralWeb.General.FallbackController
 
+  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do
     conn
     |> render("index.html")
   end
 
+  @spec test_page(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def test_page(conn, _params) do
     conn
     |> put_flash(:success, "Example flash message success")
@@ -31,6 +33,7 @@ defmodule CentralWeb.Admin.ToolController do
     |> render("test_page.html")
   end
 
+  @spec test_error(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def test_error(_conn, params) do
     # raise CentralWeb.General.Forbidden, message: "You need to be a team admin"
 
@@ -42,12 +45,14 @@ defmodule CentralWeb.Admin.ToolController do
     # {:error, "msg here"}
   end
 
+  @spec coverage_form(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def coverage_form(conn, _) do
     conn
     |> add_breadcrumb(name: 'Coverage', url: '#')
     |> render("coverage_form.html")
   end
 
+  @spec coverage_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def coverage_post(conn, params) do
     file_path = Application.get_env(:central, Central)[:file_path]
     coverage_path =
@@ -74,11 +79,13 @@ defmodule CentralWeb.Admin.ToolController do
   end
 
   # List of font awesome icons
+  @spec falist(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def falist(conn, _params) do
     conn
     |> render("falist.html")
   end
 
+  @spec oban_dashboard(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def oban_dashboard(conn, _params) do
     jobs = ToolLib.get_oban_jobs()
 
@@ -87,6 +94,7 @@ defmodule CentralWeb.Admin.ToolController do
     |> render("oban_dashboard.html")
   end
 
+  @spec conn_params(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def conn_params(conn, _) do
     conn_params = Kernel.inspect(conn)
     user_configs = Config.get_user_configs!(conn.current_user.id)

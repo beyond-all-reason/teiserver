@@ -21,14 +21,6 @@
       <div class="card-body" style="padding: 0 15px;">
 
         <div class="row">
-          <%= component "sub_menu_icon",
-            name: "logging",
-            label: "Logging",
-            active: @active,
-            url: Routes.logging_general_path(@conn, :index),
-            lib: Central.Logging
-          %>
-
           <%= if allow?(@current_user, "logging.page_view") do %>
             <%= component "sub_menu_icon",
               name: "page_view",
