@@ -60,7 +60,11 @@ defmodule TeiserverWeb.Clans.ClanController do
 
     if membership do
       user = Account.get_user!(conn.user_id)
-      Account.update_user(user, %{"clan_id" => clan.id})
+      Account.update_user(user, %{
+        "colour" => clan.colour1,
+        "icon" => clan.icon,
+        "clan_id" => clan.id
+      })
 
       CentralWeb.Endpoint.broadcast(
         "recache:#{conn.user_id}",

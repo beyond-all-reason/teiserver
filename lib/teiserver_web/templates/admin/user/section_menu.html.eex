@@ -17,6 +17,12 @@
   List
 </a>
 
+<a href="<%= Routes.ts_admin_user_path(@conn, :index) %>?search=true" class="btn btn-outline-<%= bsname %>" id="section-menu-search">
+  <i class="far fa-search"></i>
+  &nbsp;
+  Advanced search
+</a>
+
 <a href="<%= Routes.ts_admin_user_path(@conn, :new) %>" class="btn btn-outline-<%= bsname %>" id="section-menu-new">
   <i class="far fa-plus"></i>
   &nbsp;

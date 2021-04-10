@@ -37,6 +37,36 @@ defmodule Teiserver.Account.UserLib do
     end)
   end
 
+  @spec _search(Ecto.Query.t(), atom, any) :: Ecto.Query.t()
+  def _search(query, _, "Any"), do: query
+
+  def _search(query, :bot, "Person") do
+    from users in query,
+      where: fragment("? ->> ? = ?", users.data, "bot", "false")
+  end
+  def _search(query, :bot, "Robot") do
+    from users in query,
+      where: fragment("? ->> ? = ?", users.data, "bot", "true")
+  end
+
+  def _search(query, :moderator, "User") do
+    from users in query,
+      where: fragment("? ->> ? = ?", users.data, "moderator", "false")
+  end
+  def _search(query, :moderator, "Moderator") do
+    from users in query,
+      where: fragment("? ->> ? = ?", users.data, "moderator", "true")
+  end
+
+  def _search(query, :verified, "Unverified") do
+    from users in query,
+      where: fragment("? ->> ? = ?", users.data, "verified", "false")
+  end
+  def _search(query, :verified, "Verified") do
+    from users in query,
+      where: fragment("? ->> ? = ?", users.data, "verified", "true")
+  end
+
   def _search(query, key, value) do
     UserQueries._search(query, key, value)
   end

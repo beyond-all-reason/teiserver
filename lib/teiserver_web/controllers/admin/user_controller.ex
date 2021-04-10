@@ -34,9 +34,45 @@ defmodule TeiserverWeb.Admin.UserController do
         limit: 50
       )
 
-    conn
-    |> assign(:users, users)
-    |> render("index.html")
+    if Enum.count(users) == 1 do
+      conn
+      |> redirect(to: Routes.ts_admin_user_path(conn, :show, hd(users).id))
+    else
+      conn
+      |> add_breadcrumb(name: "List users", url: conn.request_path)
+      |> assign(:users, users)
+      |> assign(:params, search_defaults(conn))
+      |> render("index.html")
+    end
+  end
+
+  @spec search(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def search(conn, %{"search" => params}) do
+    params = Map.merge(search_defaults(conn), params)
+
+    users =
+      Account.list_users(
+        search: [
+          admin_group: conn,
+          simple_search: params["name"] |> String.trim(),
+          bot: params["bot"],
+          moderator: params["moderator"],
+          verified: params["verified"]
+        ],
+        limit: params["limit"] || 50,
+        order: params["order"] || "Name (A-Z)"
+      )
+
+    if Enum.count(users) == 1 do
+      conn
+      |> redirect(to: Routes.ts_admin_user_path(conn, :show, hd(users).id))
+    else
+      conn
+      |> add_breadcrumb(name: "User search", url: conn.request_path)
+      |> assign(:params, params)
+      |> assign(:users, users)
+      |> render("index.html")
+    end
   end
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -342,5 +378,13 @@ defmodule TeiserverWeb.Admin.UserController do
         |> put_flash(:warning, "Unable to access this user")
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
+  end
+
+
+  @spec search_defaults(Plug.Conn.t()) :: Map.t()
+  defp search_defaults(_conn) do
+    %{
+      "limit" => 50
+    }
   end
 end

@@ -22,6 +22,7 @@ defmodule Teiserver.Account do
     |> UserLib.preload(args[:joins])
     |> UserLib.order_by(args[:order_by])
     |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> IO.inspect
     |> Repo.all()
   end
 

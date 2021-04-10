@@ -1,5 +1,18 @@
 <% {_fg, _bg, bsname} = colours() %>
 
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    <%= if @conn.params["search"] != nil do %>
+      show_search();
+    <% end %>
+  });
+
+  function show_search() {
+    $("#search-box-shower").hide();
+    $("#search-box").show(350);
+  }
+</script>
+
 <%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
 
 <div class="row section-menu">
@@ -14,7 +27,22 @@
               true -> "index"
             end)
         }) %>
-        <br /><br />
+
+<%= if @conn.params["search"] != nil do %>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <%= render TeiserverWeb.Admin.UserView, "search.html", assigns %>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+<% else %>
+  <br /><br />
+<% end %>
 
 <h4>Listing Users</h4>
 
