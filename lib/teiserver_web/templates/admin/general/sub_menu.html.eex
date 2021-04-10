@@ -21,55 +21,65 @@
       <div class="card-body" style="padding: 0 15px;">
 
         <div class="row">
-          <%= component "sub_menu_icon",
-            name: "clients",
-            label: "Clients",
-            active: @active,
-            url: Routes.ts_admin_client_index_path(@conn, :index),
-            lib: Teiserver.ClientLib
-          %>
+          <%= if allow?(@conn, "teiserver.moderator.account") do %>
+            <%= component "sub_menu_icon",
+              name: "clients",
+              label: "Clients",
+              active: @active,
+              url: Routes.ts_admin_client_index_path(@conn, :index),
+              lib: Teiserver.ClientLib
+            %>
 
-          <%= component "sub_menu_icon",
-            name: "users",
-            label: "Users",
-            active: @active,
-            url: Routes.ts_admin_user_path(@conn, :index),
-            lib: %{icon: "fas fa-users"}
-          %>
+            <%= component "sub_menu_icon",
+              name: "users",
+              label: "Users",
+              active: @active,
+              url: Routes.ts_admin_user_path(@conn, :index),
+              lib: %{icon: "fas fa-users"}
+            %>
+          <% end %>
 
-          <%= component "sub_menu_icon",
-            name: "parties",
-            label: "Parties",
-            active: @active,
-            url: "",
-            lib: Teiserver.Game.PartyLib,
-            disabled: true
-          %>
+          <%= if allow?(@conn, "teiserver.moderator.party") do %>
+            <%= component "sub_menu_icon",
+              name: "parties",
+              label: "Parties",
+              active: @active,
+              url: "",
+              lib: Teiserver.Game.PartyLib,
+              disabled: true
+            %>
+          <% end %>
 
-          <%= component "sub_menu_icon",
-            name: "clans",
-            label: "Clans",
-            active: @active,
-            url: Routes.ts_admin_clan_path(@conn, :index),
-            lib: Teiserver.Clans.ClanLib
-          %>
+          <%= if allow?(@conn, "teiserver.moderator.clan") do %>
+            <%= component "sub_menu_icon",
+              name: "clans",
+              label: "Clans",
+              active: @active,
+              url: Routes.ts_admin_clan_path(@conn, :index),
+              lib: Teiserver.Clans.ClanLib
+            %>
+          <% end %>
 
-          <%= component "sub_menu_icon",
-            name: "queues",
-            label: "Queues",
-            active: @active,
-            url: "",
-            lib: Teiserver.Game.QueueLib,
-            disabled: true
-          %>
+          <%= if allow?(@conn, "teiserver.moderator.queue") do %>
+            <%= component "sub_menu_icon",
+              name: "queues",
+              label: "Queues",
+              active: @active,
+              url: "",
+              lib: Teiserver.Game.QueueLib,
+              disabled: true
+            %>
+          <% end %>
 
-          <%= component "sub_menu_icon",
-            name: "tools",
-            label: "Tools",
-            active: @active,
-            url: Routes.ts_admin_tool_path(@conn, :index),
-            lib: Central.Admin.ToolLib
-          %>
+          <%= if allow?(@conn, "teiserver.admin") do %>
+            <%= component "sub_menu_icon",
+              name: "tools",
+              label: "Tools",
+              active: @active,
+              url: Routes.ts_admin_tool_path(@conn, :index),
+              lib: Central.Admin.ToolLib
+            %>
+          <% end %>
         </div>
 
       </div>

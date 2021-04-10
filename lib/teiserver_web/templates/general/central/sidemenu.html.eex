@@ -15,9 +15,18 @@
     icon_class: "fad",
     url: Routes.ts_account_general_path(@conn, :index)
   %>
+
+  <%= component "sidemenu_item",
+    name: "teiserver_clans",
+    label: "Clans",
+    active: assigns[:sidemenu_active],
+    lib: Teiserver.Clans.ClanLib,
+    icon_class: "fad",
+    url: Routes.ts_clans_clan_path(@conn, :index)
+  %>
 <% end %>
 
-<%= if allow?(@conn, "teiserver.admin.account") do %>
+<%= if allow?(@conn, "teiserver.moderator") do %>
   <%= component "sidemenu_item",
     name: "teiserver_admin",
     label: "Admin",

@@ -1,8 +1,41 @@
+<form action='<%= Routes.ts_admin_user_path(@conn, :perform_action, @user, "report_action") %>' method="POST">
+  <div class="row section-menu">
+    <input type="hidden" name="_method" value="PUT" />
+    <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+
+    <div class="col-md-3">
+      <input type="text" name="reason" value="" placeholder="Reason" class="form-control" />
+    </div>
+    <div class="col-md-3">
+      <input type="text" name="until" value="" placeholder="Expires" class="form-control" />
+    </div>
+
+    <div class="col-md-4">
+      <select class="form-control" name="report_response_action" id="report_response_action" autofocus="autofocus">
+        <%= for opt <- Central.Account.ReportLib.response_actions() do %>
+          <%= if opt not in ["Ignore report"] do %>
+            <option value="<%= opt %>">
+              <%= opt %>
+            </option>
+          <% end %>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="col-md-2">
+      <button type='submit' class='btn btn-warning btn-block' data-confirm="Are you sure">
+        <i class='fa-fw <%= Central.Helpers.StylingHelper.icon(:new) %>'></i>
+        Add
+      </button>
+    </div>
+  </div>
+</form>
+<br /><br />
+
+<h4>Previous reports/actions</h4>
 <table class="table table-sm">
   <thead>
     <tr>
-      <th>Target</th>
-
       <th>Reason</th>
       <th>Reported by</th>
       <th>Reported from</th>
@@ -17,7 +50,6 @@
   <tbody>
 <%= for report <- @reports do %>
     <tr>
-      <td><%= report.target.name %></td>
       <td><%= report.reason %></td>
       <td><%= report.reporter.name %></td>
       <td><%= report.location %>:<%= report.location_id %></td>
@@ -29,7 +61,7 @@
           <%= report.response_action %>
         </td>
         <td><%= report.response_text %></td>
-        <td><%= time_until(report.expires) %></td>
+        <td><%= time_until(report.expires) || "Never" %></td>
       <% else %>
         <td colspan="4">No response</td>
       <% end %>

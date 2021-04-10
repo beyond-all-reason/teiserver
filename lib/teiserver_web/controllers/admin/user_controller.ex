@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Admin.UserController do
   )
 
   plug(Bodyguard.Plug.Authorize,
-    policy: Teiserver.Admin,
+    policy: Teiserver.Account.Auth,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
   )
@@ -204,7 +204,7 @@ defmodule TeiserverWeb.Admin.UserController do
   end
 
   @spec perform_action(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def perform_action(conn, %{"id" => id, "action" => action} = params) do
+  def perform_action(conn, %{"id" => id, "action" => action, "reason" => reason} = params) do
     user = Account.get_user!(id)
 
     case Central.Account.UserLib.has_access(user, conn) do
@@ -214,16 +214,37 @@ defmodule TeiserverWeb.Admin.UserController do
             Teiserver.User.recache_user(user.id)
             {:ok, nil}
 
-          "permanent_ban" ->
-            {:ok, %{"banned" => true}}
+          "report_action" ->
+            action = params["report_response_action"]
 
-          "temporary_ban" ->
-            case HumanTime.relative(params["until"]) do
-              {:ok, v} ->
-                {:ok, %{"banned_until" => TimexHelper.date_to_str(v, :ymd_hms)}}
+            case Central.Account.ReportLib.perform_action(%{}, action, params["until"]) do
+              {:ok, expires} ->
+                new_data = case params["report_response_action"] do
+                  "Mute" ->
+                    %{"muted_until" => expires, "muted" => true}
+                  "Ban" ->
+                    %{"banned_until" => expires, "banned" => true}
+                end
 
-              {:error, _} ->
-                {:error, "Unable to understand date"}
+                %Central.Account.Report{}
+                |> Central.Account.Report.changeset(%{
+                  "location" => "web-admin-instant",
+                  "location_id" => nil,
+                  "reason" => reason,
+                  "reporter_id" => conn.user_id,
+                  "target_id" => user.id,
+
+                  "response_text" => "instant-action",
+                  "response_action" => params["report_response_action"],
+                  "expires" => expires,
+                  "responder_id" => conn.user_id
+                })
+                |> Central.Repo.insert()
+
+                {:ok, new_data}
+
+              err ->
+                err
             end
         end
 

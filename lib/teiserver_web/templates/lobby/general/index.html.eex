@@ -43,10 +43,10 @@
   <% end %>
 </div>
 
-<%= if allow?(@conn, "teiserver.admin") do %>
+<%= if allow?(@conn, "teiserver.moderator") do %>
   <div style="height: 50px;">&nbsp;</div>
   <div class="row page-row">
-    <%= if allow?(@conn, "teiserver.admin.account") do %>
+    <%= if allow?(@conn, "teiserver.moderator.account") do %>
       <%=
         component "menu_card",
         icon: Teiserver.ClientLib.icon(),
@@ -64,7 +64,9 @@
         icon_class: "fad",
         link: Routes.ts_admin_user_path(@conn, :index)
       %>
+    <% end %>
 
+    <%= if allow?(@conn, "teiserver.moderator.party") do %>
       <%=
         component "menu_card",
         icon: Teiserver.Game.PartyLib.icon(),
@@ -74,7 +76,9 @@
         link: "",
         disabled: true
       %>
+    <% end %>
 
+    <%= if allow?(@conn, "teiserver.moderator.clan") do %>
       <%=
         component "menu_card",
         icon: Teiserver.Clans.ClanLib.icon(),
@@ -83,7 +87,9 @@
         icon_class: "fad",
         link: Routes.ts_admin_clan_path(@conn, :index)
       %>
+    <% end %>
 
+    <%= if allow?(@conn, "teiserver.moderator.queue") do %>
       <%=
         component "menu_card",
         icon: Teiserver.Game.QueueLib.icon(),
@@ -93,7 +99,9 @@
         link: "",
         disabled: true
       %>
+    <% end %>
 
+    <%= if allow?(@conn, "teiserver.admin") do %>
       <%=
         component "menu_card",
         icon: Central.Admin.ToolLib.icon(),

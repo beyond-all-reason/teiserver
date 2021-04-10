@@ -55,6 +55,11 @@ defmodule Central.Account.AuthLib do
     allow?(conn.assigns[:current_user], permission_required)
   end
 
+  # This allows us to use a modified liveview socket
+  def allow?(%{permissions: permissions}, permission_required) do
+    allow?(permissions, permission_required)
+  end
+
   # Handle users
   def allow?(%{} = user, permission_required) do
     allow?(user.permissions, permission_required)

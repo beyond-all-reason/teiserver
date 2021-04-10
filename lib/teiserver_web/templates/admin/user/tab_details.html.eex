@@ -1,9 +1,11 @@
 <br />
 
-<%= component "detail_line",
-  label: "Email",
-  value: @user.email
-%>
+<%= if allow?(@conn, "teiserver.admin.user") do %>
+  <%= component "detail_line",
+    label: "Email",
+    value: @user.email
+  %>
+<% end %>
 
 <%= component "detail_line",
   label: "Created",
@@ -25,6 +27,6 @@
   value: (if @user.data["moderator"], do: "Moderator")
 %>
 
-<%= if allow?(@conn, "admin.dev.developer") do %>
-  <textarea id="user_data" rows="20" class="form-control monospace"><%= Jason.encode! @user.data, pretty: true %></textarea>
+<%= if allow?(@conn, "teiserver.admin.user") do %>
+  <textarea id="user_data" rows="20" class="form-control monospace"><%= Jason.encode! Map.drop(@user.data, ["password_hash", "ip"]), pretty: true %></textarea>
 <% end %>

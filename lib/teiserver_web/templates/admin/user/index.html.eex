@@ -26,7 +26,11 @@
       <th>Status</th>
       <th>Bot</th>
       <th>Mod</th>
-      <th colspan="2">&nbsp;</th>
+      <%= if allow?(@conn, "teiserver.admin.account") do %>
+        <th colspan="2">&nbsp;</th>
+      <% else %>
+        <th>&nbsp;</th>
+      <% end %>
     </tr>
   </thead>
   <tbody>
@@ -60,11 +64,13 @@
         </a>
       </td>
 
-      <td>
-        <a href="<%= Routes.ts_admin_user_path(@conn, :edit, user.id) %>" class="btn btn-secondary btn-sm">
-          Edit
-        </a>
-      </td>
+      <%= if allow?(@conn, "teiserver.admin.account") do %>
+        <td>
+          <a href="<%= Routes.ts_admin_user_path(@conn, :edit, user.id) %>" class="btn btn-secondary btn-sm">
+            Edit
+          </a>
+        </td>
+      <% end %>
     </tr>
 <% end %>
   </tbody>

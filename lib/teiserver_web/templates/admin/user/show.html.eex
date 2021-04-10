@@ -50,10 +50,12 @@
           </form>
           &nbsp;&nbsp;
 
-          <a href="<%= Routes.ts_admin_user_path(@conn, :edit, @user) %>" class="btn btn-outline-<%= bsname %>">
-            <i class="far fa-fw fa-wrench"></i>
-            Edit user
-          </a>
+          <%= if allow?(@conn, "teiserver.admin.account") do %>
+            <a href="<%= Routes.ts_admin_user_path(@conn, :edit, @user) %>" class="btn btn-outline-<%= bsname %>">
+              <i class="far fa-fw fa-wrench"></i>
+              Edit user
+            </a>
+          <% end %>
         </div>
 
       <h3 style="color: <%= @user.colour %>">
@@ -76,13 +78,6 @@
             Reports
           </a>
         </li>
-
-        <li>
-          <a href="#moderation_tab" role="tab" class="nav-link" data-toggle="tab">
-            <%= component "icon", icon: StylingHelper.icon(:moderation) %>
-            Moderation
-          </a>
-        </li>
       </ul>
 
       <div class="tab-content">
@@ -92,10 +87,6 @@
 
         <div class="tab-pane" id="reports_tab" style="padding:5px;">
           <%= render "tab_reports.html", assigns %>
-        </div>
-
-        <div class="tab-pane" id="moderation_tab" style="padding:5px;">
-          <%= render "tab_moderation.html", assigns %>
         </div>
       </div>
       <%# END OF TABS %>

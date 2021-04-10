@@ -1,6 +1,6 @@
 <% {_fg, _bg, bsname} = @colours %>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "clients", conn: @socket}) %>
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{active: "clients", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
 
 <div class="row">
   <div class="col-md-12">
