@@ -71,7 +71,7 @@
             %>
           <% end %>
 
-          <%= if allow?(@conn, "teiserver.admin") do %>
+          <%= if allow?(@conn, "admin.dev") do %>
             <%= component "sub_menu_icon",
               name: "tools",
               label: "Tools",

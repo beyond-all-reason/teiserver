@@ -664,6 +664,10 @@ defmodule Teiserver.User do
         throw "No handler for action type '#{action}' in #{__MODULE__}"
     end
 
+    IO.puts "NEW REPORT"
+    IO.inspect changes
+    IO.puts ""
+
     Map.merge(user, changes)
     |> update_user(persist: true)
 

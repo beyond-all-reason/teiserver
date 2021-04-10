@@ -204,7 +204,7 @@ defmodule TeiserverWeb.Admin.UserController do
   end
 
   @spec perform_action(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def perform_action(conn, %{"id" => id, "action" => action, "reason" => reason} = params) do
+  def perform_action(conn, %{"id" => id, "action" => action} = params) do
     user = Account.get_user!(id)
 
     case Central.Account.UserLib.has_access(user, conn) do
@@ -212,36 +212,30 @@ defmodule TeiserverWeb.Admin.UserController do
         result = case action do
           "recache" ->
             Teiserver.User.recache_user(user.id)
-            {:ok, nil}
+            {:ok, nil, ""}
 
           "report_action" ->
             action = params["report_response_action"]
+            reason = params["reason"]
 
             case Central.Account.ReportLib.perform_action(%{}, action, params["until"]) do
               {:ok, expires} ->
-                new_data = case params["report_response_action"] do
-                  "Mute" ->
-                    %{"muted_until" => expires, "muted" => true}
-                  "Ban" ->
-                    %{"banned_until" => expires, "banned" => true}
-                end
-
-                %Central.Account.Report{}
-                |> Central.Account.Report.changeset(%{
+                {:ok, report} = Central.Account.create_report(%{
                   "location" => "web-admin-instant",
                   "location_id" => nil,
                   "reason" => reason,
                   "reporter_id" => conn.user_id,
                   "target_id" => user.id,
+                })
 
+                Central.Account.update_report(report, %{
                   "response_text" => "instant-action",
                   "response_action" => params["report_response_action"],
                   "expires" => expires,
                   "responder_id" => conn.user_id
                 })
-                |> Central.Repo.insert()
 
-                {:ok, new_data}
+                {:ok, nil, "#reports_tab"}
 
               err ->
                 err
@@ -249,22 +243,22 @@ defmodule TeiserverWeb.Admin.UserController do
         end
 
         case result do
-          {:ok, nil} ->
+          {:ok, nil, tab} ->
             conn
               |> put_flash(:info, "Action performed.")
-              |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
+              |> redirect(to: Routes.ts_admin_user_path(conn, :show, user) <> tab)
 
-          {:ok, new_data} ->
-            user_params = %{"data" => Map.merge(user.data || %{}, new_data)}
-            case Account.update_user(user, user_params) do
-              {:ok, _user} ->
-                conn
-                |> put_flash(:info, "Action performed.")
-                |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
+          # {:ok, new_data, tab} ->
+          #   user_params = %{"data" => Map.merge(user.data || %{}, new_data)}
+          #   case Account.update_user(user, user_params) do
+          #     {:ok, _user} ->
+          #       conn
+          #       |> put_flash(:info, "Action performed.")
+          #       |> redirect(to: Routes.ts_admin_user_path(conn, :show, user) <> tab)
 
-              {:error, %Ecto.Changeset{} = changeset} ->
-                render(conn, "edit.html", user: user, changeset: changeset)
-            end
+          #     {:error, %Ecto.Changeset{} = changeset} ->
+          #       render(conn, "edit.html", user: user, changeset: changeset)
+          #   end
 
           {:error, msg} ->
             conn
