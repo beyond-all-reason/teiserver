@@ -1,6 +1,6 @@
 defmodule Teiserver.Clans do
   @moduledoc """
-  The Account context.
+  The Clans context.
   """
 
   import Ecto.Query, warn: false
