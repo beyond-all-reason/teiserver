@@ -759,15 +759,10 @@ defmodule Teiserver.User do
   end
 
   def pre_cache_users() do
-    group_id = bar_user_group_id()
     ConCache.insert_new(:lists, :users, [])
 
     user_count =
       Account.list_users(
-        search: [
-          # Get from the bar group or the admins, admins are group 3
-          admin_group: [group_id, 3]
-        ],
         limit: :infinity
       )
       |> Parallel.map(fn user ->
@@ -777,9 +772,6 @@ defmodule Teiserver.User do
       end)
       |> Enum.count()
 
-    # This is mostly so I can see exactly when the restart happened and get logs from this point on
-    Logger.info("----------------------------------------")
     Logger.info("pre_cache_users, got #{user_count} users")
-    Logger.info("----------------------------------------")
   end
 end

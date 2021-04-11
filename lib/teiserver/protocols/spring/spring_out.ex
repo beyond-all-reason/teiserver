@@ -12,6 +12,7 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Teiserver.User
   alias Teiserver.TcpServer
   alias Teiserver.Protocols.Spring
+  alias Teiserver.Protocols.Spring.{MatchmakingOut}
 
   @motd """
   Message of the day
@@ -22,7 +23,16 @@ defmodule Teiserver.Protocols.SpringOut do
 
   @spec reply(atom(), nil | String.t() | tuple() | list(), String.t(), map) :: map
   def reply(reply_cmd, data, msg_id, state) do
-    msg = do_reply(reply_cmd, data)
+    reply(:spring, reply_cmd, data, msg_id, state)
+  end
+
+  @spec reply(atom(), atom(), nil | String.t() | tuple() | list(), String.t(), map) :: map
+  def reply(namespace, reply_cmd, data, msg_id, state) do
+    msg = case namespace do
+      :matchmaking -> MatchmakingOut.do_reply(reply_cmd, data)
+      :spring -> do_reply(reply_cmd, data)
+    end
+
     if state.extra_logging do
       Logger.info("--> #{Kernel.inspect(state.socket)} #{TcpServer.format_log(msg)}")
     end

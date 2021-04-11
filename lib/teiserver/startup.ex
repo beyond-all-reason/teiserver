@@ -1,5 +1,6 @@
 defmodule Teiserver.Startup do
   use CentralWeb, :startup
+  require Logger
 
   def startup do
     add_permission_set("teiserver", "admin", ~w(account battle clan party queue tournament))
@@ -87,8 +88,10 @@ defmodule Teiserver.Startup do
     ConCache.insert_new(:lists, :battles, [])
 
     ConCache.put(:id_counters, :battle, 0)
-    ConCache.put(:id_counters, :user, 0)
 
     Teiserver.User.pre_cache_users()
+    Teiserver.Data.Matchmaking.pre_cache_queues()
+
+    Logger.info("Teiserver startup complete")
   end
 end

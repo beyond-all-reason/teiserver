@@ -18,6 +18,7 @@ defmodule Teiserver.Application do
       concache_perm_sup(:users),
       concache_perm_sup(:clients),
       concache_perm_sup(:battles),
+      concache_perm_sup(:queues),
       concache_perm_sup(:rooms)
     ]
 
