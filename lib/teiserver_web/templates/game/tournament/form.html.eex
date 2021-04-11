@@ -25,7 +25,7 @@
 
   <div class="form-group">
     <%= if @changeset.data.id do %>
-      <a href="<%= Routes.teiserver_tournament_path(@conn, :show, @tournament) %>" class="btn btn-secondary btn-outline">
+      <a href="<%= Routes.ts_game_tournament_path(@conn, :show, @tournament) %>" class="btn btn-secondary btn-outline">
         Cancel
       </a>
 

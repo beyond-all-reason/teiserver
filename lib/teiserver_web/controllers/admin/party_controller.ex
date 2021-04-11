@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Game.PartyController do
+defmodule TeiserverWeb.Admin.PartyController do
   use CentralWeb, :controller
 
   alias Teiserver.Game
@@ -65,7 +65,7 @@ defmodule TeiserverWeb.Game.PartyController do
       {:ok, _party} ->
         conn
         |> put_flash(:info, "Party created successfully.")
-        |> redirect(to: Routes.teiserver_party_path(conn, :index))
+        |> redirect(to: Routes.ts_admin_party_path(conn, :index))
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -95,7 +95,7 @@ defmodule TeiserverWeb.Game.PartyController do
       {:ok, _party} ->
         conn
         |> put_flash(:info, "Party updated successfully.")
-        |> redirect(to: Routes.teiserver_party_path(conn, :index))
+        |> redirect(to: Routes.ts_admin_party_path(conn, :index))
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> assign(:party, party)
@@ -116,6 +116,6 @@ defmodule TeiserverWeb.Game.PartyController do
 
     conn
     |> put_flash(:info, "Party deleted successfully.")
-    |> redirect(to: Routes.teiserver_party_path(conn, :index))
+    |> redirect(to: Routes.ts_admin_party_path(conn, :index))
   end
 end

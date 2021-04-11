@@ -250,9 +250,9 @@ DefaultLimitNOFILE=65535
 ```
 
 ### Database migrations
-[Not tested yet, based on this](https://hexdocs.pm/phoenix/releases.html#ecto-migrations-and-custom-commands)
+Once the app is deployed you should be able to run migrations like so. I've not had a chance to test if this works on a fresh install; it is possible the fresh install would have startup errors due to some tables being missing.
 ```
-central eval "Central.Release.migrate"
+centralapp eval "Central.Release.migrate"
 ```
 
 ### Deployment

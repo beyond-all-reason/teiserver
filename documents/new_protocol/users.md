@@ -1,5 +1,6 @@
 #### Other users
 - Mute/unmute
+- List of past aliases
 
 #### Friends
 - List friends

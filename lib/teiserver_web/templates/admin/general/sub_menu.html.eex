@@ -65,9 +65,8 @@
               name: "queues",
               label: "Queues",
               active: @active,
-              url: "",
-              lib: Teiserver.Game.QueueLib,
-              disabled: true
+              url: Routes.ts_admin_queue_path(@conn, :index),
+              lib: Teiserver.Game.QueueLib
             %>
           <% end %>
 

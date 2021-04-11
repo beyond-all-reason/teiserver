@@ -1,10 +1,16 @@
 defmodule Teiserver.Game.Queue do
   use CentralWeb, :schema
 
-  schema "game_queues" do
+  schema "teiserver_game_queues" do
     field :name, :string
+    field :team_size, :integer
+
     field :icon, :string
     field :colour, :string
+
+    field :conditions, :map
+    field :settings, :map
+    field :map_list, {:array, :string}
 
     timestamps()
   end
@@ -18,10 +24,10 @@ defmodule Teiserver.Game.Queue do
     |> trim_strings([:name])
 
     struct
-    |> cast(params, [:name, :icon, :colour])
-    |> validate_required([:name, :icon, :colour])
+    |> cast(params, [:name, :icon, :colour, :team_size, :conditions, :settings, :map_list])
+    |> validate_required([:name, :icon, :colour, :team_size, :map_list])
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
-  def authorize(_action, conn, _params), do: allow?(conn, "game")
+  def authorize(_action, conn, _params), do: allow?(conn, "teiserver.admin.queue")
 end

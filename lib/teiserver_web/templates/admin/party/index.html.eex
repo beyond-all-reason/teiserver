@@ -1,12 +1,12 @@
 <% {_fg, _bg, bsname} = colours() %>
 
-<%= render TeiserverWeb.Game.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "parties"}) %>
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "parties"}) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class="card border-<%= bsname %>">
       <div class="card-body">
-        <%= render TeiserverWeb.Game.PartyView, "section_menu.html", Map.merge(assigns, %{
+        <%= render TeiserverWeb.Admin.PartyView, "section_menu.html", Map.merge(assigns, %{
             show_search: false,
             active: (cond do
               @conn.params["search"] != nil -> "search"
@@ -34,13 +34,13 @@
       <td><%= party.name %></td>
 
       <td>
-        <a href="<%= Routes.teiserver_party_path(@conn, :show, party.id) %>" class="btn btn-secondary btn-sm">
+        <a href="<%= Routes.ts_admin_party_path(@conn, :show, party.id) %>" class="btn btn-secondary btn-sm">
           Show
         </a>
       </td>
-      
+
       <td>
-        <a href="<%= Routes.teiserver_party_path(@conn, :edit, party.id) %>" class="btn btn-secondary btn-sm">
+        <a href="<%= Routes.ts_admin_party_path(@conn, :edit, party.id) %>" class="btn btn-secondary btn-sm">
           Edit
         </a>
       </td>

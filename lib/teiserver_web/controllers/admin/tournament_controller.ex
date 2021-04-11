@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Game.TournamentController do
+defmodule TeiserverWeb.Admin.TournamentController do
   use CentralWeb, :controller
 
   alias Teiserver.Game

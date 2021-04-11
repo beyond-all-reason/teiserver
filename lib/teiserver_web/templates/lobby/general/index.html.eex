@@ -75,6 +75,7 @@
         icon_class: "fad",
         link: "",
         disabled: true
+        # link: Routes.ts_admin_party_path(@conn, :index)
       %>
     <% end %>
 
@@ -96,8 +97,7 @@
         name: "queue",
         text: "Queues",
         icon_class: "fad",
-        link: "",
-        disabled: true
+        link: Routes.ts_admin_queue_path(@conn, :index)
       %>
     <% end %>
 

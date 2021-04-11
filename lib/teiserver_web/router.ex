@@ -49,6 +49,10 @@ defmodule TeiserverWeb.Router do
         put("/clans/demote/:clan_id/:user_id", ClanController, :demote)
       end
 
+      scope "/teiserver/games", TeiserverWeb.Game, as: :ts_game do
+        resources("/tournaments", TournamentController)
+      end
+
       scope "/teiserver", TeiserverWeb.BattleLive, as: :ts do
         pipe_through([:browser, :admin_layout, :protected])
 
@@ -78,6 +82,15 @@ defmodule TeiserverWeb.Router do
         put("/clans/promote/:clan_id/:user_id", ClanController, :promote)
         put("/clans/demote/:clan_id/:user_id", ClanController, :demote)
         resources("/clans", ClanController)
+
+
+        resources("/parties", PartyController)
+
+
+        resources("/queues", QueueController)
+
+
+        # resources("/tournaments", TournamentController)
 
         post("/user/reset_password/:id", UserController, :reset_password)
         put("/user/action/:id/:action", UserController, :perform_action)

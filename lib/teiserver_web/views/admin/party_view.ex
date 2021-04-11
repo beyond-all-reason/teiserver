@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Game.PartyView do
+defmodule TeiserverWeb.Admin.PartyView do
   use TeiserverWeb, :view
 
   @spec colours() :: {String.t(), String.t(), String.t()}

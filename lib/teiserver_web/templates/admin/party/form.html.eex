@@ -25,7 +25,7 @@
 
   <div class="form-group">
     <%= if @changeset.data.id do %>
-      <a href="<%= Routes.teiserver_queue_path(@conn, :show, @queue) %>" class="btn btn-secondary btn-outline">
+      <a href="<%= Routes.ts_admin_party_path(@conn, :show, @party) %>" class="btn btn-secondary btn-outline">
         Cancel
       </a>
 

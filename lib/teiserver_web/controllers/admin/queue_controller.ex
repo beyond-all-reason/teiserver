@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Game.QueueController do
+defmodule TeiserverWeb.Admin.QueueController do
   use CentralWeb, :controller
 
   alias Teiserver.Game
@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Game.QueueController do
     user: {Central.Account.AuthLib, :current_user}
 
   plug AssignPlug,
-    sidemenu_active: "game"
+    sidemenu_active: ["teiserver", "teiserver_admin"]
 
   plug :add_breadcrumb, name: 'Game', url: '/teiserver'
   plug :add_breadcrumb, name: 'Queues', url: '/teiserver/queues'
@@ -61,11 +61,17 @@ defmodule TeiserverWeb.Game.QueueController do
 
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def create(conn, %{"queue" => queue_params}) do
+    queue_params = Map.merge(queue_params, %{
+      "conditions" => Jason.decode!(queue_params["conditions"]),
+      "settings" => Jason.decode!(queue_params["settings"]),
+      "map_list" => String.split(queue_params["map_list"], "\n")
+    })
+
     case Game.create_queue(queue_params) do
       {:ok, _queue} ->
         conn
         |> put_flash(:info, "Queue created successfully.")
-        |> redirect(to: Routes.teiserver_queue_path(conn, :index))
+        |> redirect(to: Routes.ts_admin_queue_path(conn, :index))
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -91,11 +97,17 @@ defmodule TeiserverWeb.Game.QueueController do
   def update(conn, %{"id" => id, "queue" => queue_params}) do
     queue = Game.get_queue!(id)
 
+    queue_params = Map.merge(queue_params, %{
+      "conditions" => Jason.decode!(queue_params["conditions"]),
+      "settings" => Jason.decode!(queue_params["settings"]),
+      "map_list" => String.split(queue_params["map_list"], "\n")
+    })
+
     case Game.update_queue(queue, queue_params) do
       {:ok, _queue} ->
         conn
         |> put_flash(:info, "Queue updated successfully.")
-        |> redirect(to: Routes.teiserver_queue_path(conn, :index))
+        |> redirect(to: Routes.ts_admin_queue_path(conn, :index))
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> assign(:queue, queue)
@@ -116,6 +128,6 @@ defmodule TeiserverWeb.Game.QueueController do
 
     conn
     |> put_flash(:info, "Queue deleted successfully.")
-    |> redirect(to: Routes.teiserver_queue_path(conn, :index))
+    |> redirect(to: Routes.ts_admin_queue_path(conn, :index))
   end
 end
