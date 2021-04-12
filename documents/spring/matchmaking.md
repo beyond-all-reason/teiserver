@@ -70,7 +70,7 @@ C > c.matchmaking.decline
 
 ## Server to Client messages
 #### `s.matchmaking.full_queue_list`
-Lists all the queues currently active along with basic information about each queue such as player count and expected wait time.
+Lists all the queues currently active.
 ```
 C > c.matchmaking.list_all_queues
 S > s.matchmaking.full_queue_list 1:queue1 2:queue2

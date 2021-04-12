@@ -4,7 +4,7 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
   def do_handle("list_all_queues", _, msg_id, state) do
-    queues = Matchmaking.list_queues
+    queues = Matchmaking.list_queues()
     reply(:matchmaking, :full_queue_list, queues, msg_id, state)
   end
 

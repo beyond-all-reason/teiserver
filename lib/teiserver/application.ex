@@ -19,7 +19,9 @@ defmodule Teiserver.Application do
       concache_perm_sup(:clients),
       concache_perm_sup(:battles),
       concache_perm_sup(:queues),
-      concache_perm_sup(:rooms)
+      concache_perm_sup(:rooms),
+
+      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},
     ]
 
     # Some stuff doesn't work with the tests

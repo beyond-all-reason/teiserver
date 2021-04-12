@@ -6,6 +6,7 @@
 - Track bat
 - Admin functionality, maybe something like they temporarily have "friends list" like interactions with all players?
 - Challonge API https://api.challonge.com/v1
+- Don't allow spectators in tourney games except mods/organisers (as an option)
 
 ### Ideas - Extra
 - Predicitons

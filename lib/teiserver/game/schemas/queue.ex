@@ -22,6 +22,7 @@ defmodule Teiserver.Game.Queue do
   def changeset(struct, params \\ %{}) do
     params = params
     |> trim_strings([:name])
+    |> remove_characters([:name], [~r/[:]/])
 
     struct
     |> cast(params, [:name, :icon, :colour, :team_size, :conditions, :settings, :map_list])

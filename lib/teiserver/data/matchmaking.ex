@@ -1,9 +1,9 @@
 # A struct representing the in-memory version of Teiserver.Game.DBQueue
 defmodule Teiserver.Data.QueueStruct do
-  @enforce_keys [:name, :team_size, :icon, :colour, :settings, :conditions, :map_list]
+  @enforce_keys [:id, :name, :team_size, :icon, :colour, :settings, :conditions, :map_list]
   defstruct [
-    :name, :team_size, :icon, :colour, :settings, :conditions, :map_list,
-    current_search_time: 0, current_size: 0, contents: []
+    :id, :name, :team_size, :icon, :colour, :settings, :conditions, :map_list,
+    current_search_time: 0, current_size: 0, contents: [], pid: nil
   ]
 end
 
@@ -11,6 +11,7 @@ defmodule Teiserver.Data.Matchmaking do
   require Logger
   alias Teiserver.Game
   alias Teiserver.Data.QueueStruct
+  alias Teiserver.Game.QueueServer
 
   @spec get_queue(Integer.t()) :: QueueStruct.t() | nil
   def get_queue(id) do
@@ -27,7 +28,13 @@ defmodule Teiserver.Data.Matchmaking do
       {:ok, new_value}
     end)
 
-    update_queue(queue)
+    {:ok, pid} =
+      DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
+        QueueServer,
+        data: %{queue: queue}
+      })
+
+    update_queue(%{queue | pid: pid})
   end
 
   @spec update_queue(QueueStruct.t()) :: :ok
@@ -49,9 +56,22 @@ defmodule Teiserver.Data.Matchmaking do
     end)
   end
 
+  @spec add_player_to_queue(Integer.t(), Integer.t()) :: :ok
+  def add_player_to_queue(queue_id, player_id) do
+    pid = get_queue(queue_id).pid
+    send(pid, {:add_player, player_id})
+  end
+
+  @spec remove_player_to_queue(Integer.t(), Integer.t()) :: :ok
+  def remove_player_to_queue(queue_id, player_id) do
+    pid = get_queue(queue_id).pid
+    send(pid, {:remove_player, player_id})
+  end
+
   @spec convert_queue(Game.Queue.t()) :: QueueStruct.t()
   defp convert_queue(queue) do
     %QueueStruct{
+      id: queue.id,
       name: queue.name,
       team_size: queue.team_size,
       icon: queue.icon,
