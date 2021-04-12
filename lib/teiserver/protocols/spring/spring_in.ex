@@ -15,55 +15,7 @@ defmodule Teiserver.Protocols.SpringIn do
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
   alias Teiserver.Protocols.Spring
-
-  # Bridge commands, may not be needed
-  # in_BRIDGECLIENTFROM
-  # in_UNBRIDGECLIENTFROM
-  # in_JOINFROM
-  # in_LEAVEFROM
-  # in_SAYFROM
-
-  # Checklist against uberserver Protocol.py
-  # https://github.com/spring/uberserver/blob/cc4155c3b45e8189100d9dd9097a9aa04c0eb3ec/protocol/Protocol.py#L1109
-  # in_STLS - Technically implemented, won't work the same way due to TCP/TLS port different in ranch
-  # in_PORTTEST
-  # in_SAYPRIVATEEX
-  # in_BATTLEHOSTMSG
-  # in_CHANNELTOPIC
-  # in_GETCHANNELMESSAGES
-  # in_GETUSERID
-  # in_FINDIP
-  # in_GETIP
-  # in_SETBOTMODE
-  # in_BROADCAST
-  # in_BROADCASTEX
-  # in_ADMINBROADCAST
-  # in_SETMINSPRINGVERSION
-  # in_LISTCOMPFLAGS
-  # in_KICK
-  # in_BAN
-  # in_BANSPECIFIC
-  # in_UNBAN
-  # in_BLACKLIST
-  # in_UNBLACKLIST
-  # in_LISTBANS
-  # in_LISTBLACKLIST
-  # in_SETACCESS
-  # in_STATS
-  # in_RELOAD
-  # in_CLEANUP
-  # in_RESETUSERPASSWORD - Webinterface replaces this?
-  # in_DELETEACCOUNT
-  # in_RESENDVERIFICATION
-  # in_JSON
-  # in_MUTE
-  # in_UNMUTE
-  # in_MUTELIST
-  # in_FORCELEAVECHANNEL
-  # in_SETCHANNELKEY
-  # in_STARTTLS
-  # in_SAYBATTLEPRIVATEEX
-  # in_GETINGAMETIME
+  alias Teiserver.Protocols.Spring.MatchmakingIn
 
   # The main entry point for the module and the wrapper around
   # parsing, processing and acting upon a player message
@@ -98,6 +50,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp _clean([_, msg_id, command, data]) do
     {command, String.trim(data), String.trim(msg_id)}
+  end
+
+  defp do_handle("c.matchmaking." <> cmd, data, msg_id, state) do
+    MatchmakingIn.do_handle(cmd, data, msg_id, state)
   end
 
   defp do_handle("STARTTLS", _, msg_id, state) do
@@ -1110,7 +1066,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   @spec _no_match(Map.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
-  defp _no_match(state, cmd, msg_id, data) do
+  def _no_match(state, cmd, msg_id, data) do
     data =
       data
       |> String.replace("\t", "\\t")
