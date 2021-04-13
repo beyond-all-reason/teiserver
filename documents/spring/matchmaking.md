@@ -3,7 +3,7 @@ Matchmaking is where players join a matchmaking queue and the server gradually m
 As per the [new protocol](/documents/new_protocol) work I will be doing all arguments are separated by tabs rather than spaces.
 
 #### IDs vs Names
-Whenever talking to the server, it will expect the IDs of queues to be given. When the server sends messages to the clients it will send IDs and Names so the names can be displayed to the users. The ID/Name combo will always take the form "id:name" (e.g. "13:queue name"). Queue names are not allowed to contain colons.
+Whenever talking to the server, it will expect the IDs of queues to be given. When the server sends messages to the clients it will send IDs except when the protocol explicitly says it will send a name (e.g. queue info or listing queues).
 
 #### Other resources
 - [spring forum thread](https://springrts.com/phpbb/viewtopic.php?f=71&t=33072)
@@ -36,8 +36,8 @@ S > s.matchmaking.queue_info 1 queue1 34 5
 Tells the server to add the player to the MM queue. A player can be part of multiple queues at the same time (provided they and their party meet all criteria of the queues such as party size). Expects either a `OK cmd=c.matchmaking.join_queue id:queue_name` or `NO cmd=c.matchmaking.join_queue id:queue_name`.
 ```
 C > c.matchmaking.join_queue 1
-S > OK cmd=c.matchmaking.join_queue 1:queue1
-S > NO cmd=c.matchmaking.join_queue 1:queue1
+S > OK cmd=c.matchmaking.join_queue 1
+S > NO cmd=c.matchmaking.join_queue 1
 ```
 
 #### `c.matchmaking.leave_queue queue_id`
@@ -56,15 +56,15 @@ C > c.matchmaking.leave_all_queues
 #### `c.matchmaking.ready`
 Tells the server the player is ready to participate in the MM game. Sent in response to a ready_check. It is possible others will not ready up, in which case a `s.matchmaking.match_cancelled` will be sent.
 ```
-S > s.matchmaking.ready_check 1:queue1
+S > s.matchmaking.ready_check 1
 C > c.matchmaking.ready
-S > s.matchmaking.match_cancelled 1:queue1
+S > s.matchmaking.match_cancelled 1
 ```
 
 #### `c.matchmaking.decline`
 Tells the server the player is not ready to participate in the MM game. This will result in the player being removed from all MM queues as if they'd sent `c.matchmaking.leave_all_queues`.
 ```
-S > s.matchmaking.ready_check 1:queue1
+S > s.matchmaking.ready_check 1
 C > c.matchmaking.decline
 ```
 
@@ -73,14 +73,14 @@ C > c.matchmaking.decline
 Lists all the queues currently active.
 ```
 C > c.matchmaking.list_all_queues
-S > s.matchmaking.full_queue_list 1:queue1 2:queue2
+S > s.matchmaking.full_queue_list 1 2
 ```
 
 #### `s.matchmaking.your_queue_list`
 Identical to `s.matchmaking.full_queue_list` but filtered to only include queues the player is a member of.
 ```
 C > c.matchmaking.list_my_queues
-S > s.matchmaking.your_queue_list 1:queue1 2:queue2
+S > s.matchmaking.your_queue_list 1 2
 ```
 
 #### `s.matchmaking.queue_info`
@@ -96,7 +96,7 @@ When an MM game is ready the player is placed into a special "readyup" state whe
 
 If all players ready up the game is created. If any players fail to ready up in the time frame or decline those players are removed from all matchmaking queues (they can rejoin though a timeout could be applied) and the players that did ready up are placed back in the queue in their previous positions (the readyup state is removed).
 ```
-S > s.matchmaking.ready_check 1:queue1
+S > s.matchmaking.ready_check 1
 C > c.matchmaking.ready
 C > c.matchmaking.decline
 ```
@@ -104,7 +104,7 @@ C > c.matchmaking.decline
 #### `s.matchmaking.match_cancelled id:name`
 When one or more of the other players selected for a match cancel, this message is sent to all others that were selected as potentials for this match. It informs the client they are still in the queue and retain their place in the queue. No client response is expected.
 ```
-S > s.matchmaking.match_cancelled 1:queue1
+S > s.matchmaking.match_cancelled 1
 ```
 
 ## Structure of a queue on server

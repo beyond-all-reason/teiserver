@@ -2,14 +2,38 @@ defmodule Teiserver.Game.QueueServer do
   use GenServer
   require Logger
 
-  def handle_info({:add_player, userid}, state) do
-    new_state = %{state | players: state.players ++ [{userid, :erlang.system_time(:seconds)}]}
-    {:noreply, new_state}
+  def handle_call({:add_player, userid}, _from, state) when is_integer(userid) do
+    {resp, new_state} = case Enum.member?(state.players, userid) do
+      true ->
+        {:duplicate, state}
+      false ->
+        player_item = :erlang.system_time(:seconds)
+        new_state = %{state | players: state.players ++ [userid], player_map: Map.put(state.player_map, userid, player_item)}
+        {:ok, new_state}
+    end
+    {:reply, resp, new_state}
   end
 
-  def handle_info({:remove_player, userid}, state) do
-    new_state = %{state | players: Enum.reject(state.players, fn {u, _} -> u == userid end)}
-    {:noreply, new_state}
+  def handle_call({:remove_player, userid}, _from, state) when is_integer(userid) do
+    {resp, new_state} = case Enum.member?(state.players, userid) do
+      true ->
+        new_state = %{state |
+          players: Enum.reject(state.players, fn u -> u == userid end),
+          player_map: Map.drop(state.player_map, [userid])
+        }
+        {:ok, new_state}
+      false ->
+        {:missing, state}
+    end
+    {:reply, resp, new_state}
+  end
+
+  def handle_call(:get_info, _from, state) do
+    resp = %{
+      last_wait_time: state.last_wait_time,
+      player_count: Enum.count(state.players)
+    }
+    {:reply, resp, state}
   end
 
   def handle_info(:tick, state) do
@@ -29,6 +53,7 @@ defmodule Teiserver.Game.QueueServer do
   def init(opts) do
     {:ok, %{
       players: [],
+      player_map: %{},
       last_wait_time: 0,
       id: opts.queue.id,
       map_list: opts.queue.map_list,

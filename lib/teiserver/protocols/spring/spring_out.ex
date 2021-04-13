@@ -34,7 +34,14 @@ defmodule Teiserver.Protocols.SpringOut do
     end
 
     if state.extra_logging do
-      Logger.info("--> #{Kernel.inspect(state.socket)} #{TcpServer.format_log(msg)}")
+      if is_list(msg) do
+        msg
+        |> Enum.map(fn m ->
+          Logger.info("--> #{Kernel.inspect(state.socket)} #{TcpServer.format_log(m)}")
+        end)
+      else
+        Logger.info("--> #{Kernel.inspect(state.socket)} #{TcpServer.format_log(msg)}")
+      end
     end
     _send(msg, msg_id, state)
     state
@@ -58,6 +65,10 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:welcome, nil) do
     "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
+  end
+
+  defp do_reply(:compflags, nil) do
+    "COMPFLAGS matchmaking\n"
   end
 
   defp do_reply(:pong, nil) do
@@ -98,6 +109,10 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:no, {cmd, msg}) do
     "NO cmd=#{cmd}\t#{msg}\n"
+  end
+
+  defp do_reply(:no, cmd) do
+    "NO cmd=#{cmd}\n"
   end
 
   defp do_reply(:list_battles, battle_ids) do

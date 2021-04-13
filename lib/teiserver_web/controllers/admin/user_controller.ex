@@ -207,7 +207,7 @@ defmodule TeiserverWeb.Admin.UserController do
   end
 
   @spec reset_password(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def reset_password(conn, %{"id" => id}) do
+  def reset_password(conn, %{"id" => _id}) do
     # This will get replaced by a password reset email
     # user = Account.get_user!(id)
 
@@ -233,9 +233,9 @@ defmodule TeiserverWeb.Admin.UserController do
     #     end
 
     #   _ ->
-    #     conn
-    #     |> put_flash(:warning, "Unable to access this user")
-    #     |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+        conn
+        |> put_flash(:warning, "This feature is currently disabled")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     # end
   end
 

@@ -18,6 +18,13 @@ defmodule Teiserver.Data.Matchmaking do
     ConCache.get(:queues, id)
   end
 
+  @spec get_queue_and_info(Integer.t()) :: {QueueStruct.t(), Map.t()}
+  def get_queue_and_info(id) do
+    queue = ConCache.get(:queues, id)
+    info = GenServer.call(queue.pid, :get_info)
+    {queue, info}
+  end
+
   @spec add_queue(QueueStruct.t()) :: :ok
   def add_queue(queue) do
     ConCache.update(:lists, :queues, fn value ->
@@ -56,16 +63,16 @@ defmodule Teiserver.Data.Matchmaking do
     end)
   end
 
-  @spec add_player_to_queue(Integer.t(), Integer.t()) :: :ok
+  @spec add_player_to_queue(Integer.t(), Integer.t()) :: :ok | :duplicate | :failed
   def add_player_to_queue(queue_id, player_id) do
     pid = get_queue(queue_id).pid
-    send(pid, {:add_player, player_id})
+    GenServer.call(pid, {:add_player, player_id})
   end
 
-  @spec remove_player_to_queue(Integer.t(), Integer.t()) :: :ok
+  @spec remove_player_to_queue(Integer.t(), Integer.t()) :: :ok | :missing
   def remove_player_to_queue(queue_id, player_id) do
     pid = get_queue(queue_id).pid
-    send(pid, {:remove_player, player_id})
+    GenServer.call(pid, {:remove_player, player_id})
   end
 
   @spec convert_queue(Game.Queue.t()) :: QueueStruct.t()

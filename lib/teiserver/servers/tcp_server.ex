@@ -105,6 +105,7 @@ defmodule Teiserver.TcpServer do
       username: nil,
       battle_host: false,
       user: nil,
+      queues: [],
 
       # Connection microstate
       battle_id: nil,

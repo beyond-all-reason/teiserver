@@ -60,6 +60,11 @@ defmodule Teiserver.Protocols.SpringIn do
     do_handle("STLS", nil, msg_id, state)
   end
 
+  defp do_handle("LISTCOMPFLAGS", _, msg_id, state) do
+    reply(:compflags, nil, msg_id, state)
+    state
+  end
+
   # TODO
   # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
   defp do_handle("STLS", _, msg_id, state) do
