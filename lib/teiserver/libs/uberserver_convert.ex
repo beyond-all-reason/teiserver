@@ -2,8 +2,10 @@ defmodule Teiserver.UberserverConvert do
   use Oban.Worker, queue: :teiserver
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Central.Logging.Helpers
+  require Logger
 
   @impl Oban.Worker
+  @spec perform(Map.t()) :: :ok
   def perform(%{args: %{"body" => body}}) do
     id = UUID.uuid4()
     start_time = :erlang.system_time(:seconds)
@@ -13,16 +15,6 @@ defmodule Teiserver.UberserverConvert do
     Helpers.add_anonymous_audit_log("Teiserver.UberserverConvert completed", %{id: id, time_taken: time_taken})
 
     :ok
-  end
-
-  @spec spawn_run(String.t(), Plug.Conn.t()) :: :ok
-  def spawn_run(body, conn) do
-    id = UUID.uuid4()
-    start_time = :erlang.system_time(:seconds)
-    Helpers.add_audit_log(conn, "Teiserver.UberserverConvert started", %{id: id})
-    create_conversion_job(body)
-    time_taken = :erlang.system_time(:seconds) - start_time
-    Helpers.add_audit_log(conn, "Teiserver.UberserverConvert completed", %{id: id, time_taken: time_taken})
   end
 
   @spec create_conversion_job(String.t()) :: :ok
@@ -39,6 +31,11 @@ defmodule Teiserver.UberserverConvert do
     |> Map.get("users")
     |> Map.new(fn {k, v} -> {int_parse(k), v} end)
 
+    user_count = Central.Account.list_users(select: [:id], limit: :infinity)
+      |> Enum.count()
+
+    Logger.info("UberserverConvert data parsed, user count = #{user_count}")
+
     user_lookup = data
     |> Enum.map(fn {ubid, user_data} ->
       if Enum.member?(existing_user_emails, user_data["email"]) do
@@ -49,11 +46,18 @@ defmodule Teiserver.UberserverConvert do
     end)
     |> Map.new
 
+    user_count = Central.Account.list_users(select: [:id], limit: :infinity)
+      |> Enum.count()
+
+    Logger.info("UberserverConvert userlookup created of length #{Enum.count(user_lookup)}, user_count = #{user_count}")
+
     # Now update the users
     data
     |> Enum.map(fn {ubid, user_data} ->
       second_pass_update(user_lookup, ubid, user_data)
     end)
+
+    Logger.info("UberserverConvert second pass performed")
 
     :ok
   end

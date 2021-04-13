@@ -25,22 +25,11 @@ defmodule TeiserverWeb.Admin.ToolController do
 
   @spec convert_post(Plug.Conn.t(), map) :: Plug.Conn.t()
   def convert_post(conn, %{"file_upload" => file_upload}) do
-    # For some reason this wasn't working in dev so I'm opting
-    # to just spawn a process for now
-    # {:ok, job} = case File.read(file_upload.path) do
-    #   {:ok, body} ->
-    #     %{body: body}
-    #     |> Teiserver.UberserverConvert.new()
-    #     |> Oban.insert()
-    #   error ->
-    #     throw error
-    # end
-
-    case File.read(file_upload.path) do
+    {:ok, _job} = case File.read(file_upload.path) do
       {:ok, body} ->
-        spawn(fn ->
-          Teiserver.UberserverConvert.spawn_run(body, conn)
-        end)
+        %{body: body}
+        |> Teiserver.UberserverConvert.new()
+        |> Oban.insert()
       error ->
         throw error
     end
