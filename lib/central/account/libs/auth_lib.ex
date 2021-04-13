@@ -1,14 +1,18 @@
 defmodule Central.Account.AuthLib do
   require Logger
 
+  alias Central.Account.User
   alias Central.Account.AuthGroups.Server
 
+  @spec icon :: String.t()
   def icon(), do: "far fa-address-card"
 
+  @spec get_all_permission_sets() :: Map.t()
   def get_all_permission_sets do
     Server.get_all()
   end
 
+  @spec get_all_permissions() :: [String.t()]
   def get_all_permissions do
     Server.get_all()
     |> Enum.map(fn {_, ps} -> ps end)
@@ -16,6 +20,7 @@ defmodule Central.Account.AuthLib do
     |> split_permissions
   end
 
+  @spec split_permissions([String.t()]) :: [String.t()]
   def split_permissions(permission_list) do
     sections =
       permission_list
@@ -46,6 +51,7 @@ defmodule Central.Account.AuthLib do
   end
 
   # If you don't need permissions then lets not bother checking
+  @spec allow?(Map.t() | Plug.Conn.t() | [String.t()], String.t() | [String.t()]) :: boolean
   def allow?(_, nil), do: true
   def allow?(_, ""), do: true
   def allow?(_, []), do: true
@@ -105,9 +111,5 @@ defmodule Central.Account.AuthLib do
         Logger.debug("AuthLib.allow?() -> Permission not found: #{permission_required}")
         false
     end
-  end
-
-  def current_user(conn) do
-    conn.current_user
   end
 end

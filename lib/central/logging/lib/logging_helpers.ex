@@ -10,7 +10,7 @@ defmodule Central.Logging.Helpers do
       user_id: nil,
       action: action,
       details: details,
-      ip: ""
+      ip: "-"
     }
 
     {:ok, the_log} = Logging.create_audit_log(attrs)

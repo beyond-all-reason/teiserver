@@ -18,6 +18,7 @@ defmodule Central.Account.CodeLib do
     end)
   end
 
+  @spec _search(Ecto.Query.t(), atom, any) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -57,6 +58,7 @@ defmodule Central.Account.CodeLib do
     query
   end
 
+  @spec _preload_user(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_user(query) do
     from codes in query,
       left_join: users in assoc(codes, :user),

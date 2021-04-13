@@ -1,10 +1,12 @@
 defmodule Central.Helpers.NumberHelper do
+  @spec int_parse(String.t() | nil | number() | List.t()) :: Integer.t() | List.t()
   def int_parse(""), do: 0
   def int_parse(nil), do: 0
   def int_parse(i) when is_number(i), do: round(i)
   def int_parse(l) when is_list(l), do: Enum.map(l, &int_parse/1)
   def int_parse(s), do: String.trim(s) |> String.to_integer()
 
+  @spec float_parse(String.t() | nil | number() | List.t()) :: Float.t() | List.t()
   def float_parse(""), do: 0.0
   def float_parse(nil), do: 0.0
   def float_parse(i) when is_number(i), do: i / 1
