@@ -77,6 +77,7 @@ config :central, Teiserver,
     certfile: "/var/www/tls/cert.pem",
     cacertfile: "/var/www/tls/fullchain.pem"
   ],
+  autologin: false,
   enable_benchmark: false
 
 # Do not print debug messages in production

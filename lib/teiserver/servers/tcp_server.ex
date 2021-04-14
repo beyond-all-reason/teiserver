@@ -204,6 +204,11 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  # Matchmaking
+  def handle_info({:matchmaking, data}, state) do
+    new_state = matchmaking_update(data, state)
+    {:noreply, new_state}
+  end
 
   # Chat
   def handle_info({:direct_message, from, msg}, state) do
@@ -290,11 +295,6 @@ defmodule Teiserver.TcpServer do
     {:stop, :normal, state}
   end
 
-  # def handle_info(other, state) do
-  #   Logger.error("No handler: #{other}")
-  #   {:noreply, state}
-  # end
-
   def terminate(reason, state) do
     Logger.debug("disconnect because #{Kernel.inspect(reason)}")
     Client.disconnect(state.userid)
@@ -377,6 +377,19 @@ defmodule Teiserver.TcpServer do
   defp client_battlestatus_update(new_client, state) do
     if state.battle_id != nil and state.battle_id == new_client.battle_id do
       state.protocol_out.reply(:client_battlestatus, new_client, nil, state)
+    end
+    state
+  end
+
+  # Matchmaking
+  defp matchmaking_update({cmd, data}, state) do
+    case cmd do
+      :match_ready ->
+        state.protocol_out.reply(:matchmaking, :match_ready, data, nil, state)
+      :match_cancel ->
+        :ok
+      :dequeue ->
+        :ok
     end
     state
   end

@@ -259,7 +259,14 @@ defmodule Teiserver.Game do
     %Queue{}
     |> Queue.changeset(attrs)
     |> Repo.insert()
+    |> cache_new_queue
   end
+
+  defp cache_new_queue({:ok, queue}) do
+    Teiserver.Data.Matchmaking.add_queue(queue)
+    {:ok, queue}
+  end
+  defp cache_new_queue(v), do: v
 
   @doc """
   Updates a queue.
@@ -462,5 +469,4 @@ defmodule Teiserver.Game do
   def change_tournament(%Tournament{} = tournament) do
     Tournament.changeset(tournament, %{})
   end
-
 end

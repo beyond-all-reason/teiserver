@@ -101,6 +101,16 @@ C > c.matchmaking.ready
 C > c.matchmaking.decline
 ```
 
+#### TODO - Ready up cancelled
+```
+S > s.matchmaking.ready_cancel queue_id
+```
+
+#### TODO - Player removed from queue by server
+```
+S > s.matchmaking.removed_by_server queue_id
+```
+
 #### `s.matchmaking.match_cancelled id:name`
 When one or more of the other players selected for a match cancel, this message is sent to all others that were selected as potentials for this match. It informs the client they are still in the queue and retain their place in the queue. No client response is expected.
 ```

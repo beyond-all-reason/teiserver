@@ -22,11 +22,15 @@ defmodule Teiserver.Protocols.Spring.MatchmakingOut do
     "s.matchmaking.queue_info #{parts}\n"
   end
 
-  def do_reply(:ready_check, _data) do
+  def do_reply(:match_ready, queue_id) when is_integer(queue_id) do
+    "s.matchmaking.ready_check #{queue_id}\n"
+  end
+
+  def do_reply(:match_cancelled, queue_id) when is_integer(queue_id) do
     ""
   end
 
-  def do_reply(:match_cancelled, _data) do
+  def do_reply(:dequeued, queue_id) when is_integer(queue_id) do
     ""
   end
 

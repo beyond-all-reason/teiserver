@@ -537,6 +537,10 @@ defmodule Teiserver.User do
         banned_until_dt = TimexHelper.parse_ymd_hms(user.banned_until)
 
         cond do
+          # Used for testing, this should never be enabled in production
+          Application.get_env(:central, Teiserver)[:autologin] ->
+            do_login(user, state, ip, lobby)
+
           user.banned ->
             {:error, "Banned"}
 
@@ -564,6 +568,10 @@ defmodule Teiserver.User do
         banned_until_dt = TimexHelper.parse_ymd_hms(user.banned_until)
 
         cond do
+          # Used for testing, this should never be enabled in production
+          Application.get_env(:central, Teiserver)[:autologin] ->
+            do_login(user, state, ip, lobby)
+
           user.banned ->
             {:error, "Banned"}
 

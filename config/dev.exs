@@ -43,7 +43,8 @@ config :central, Teiserver,
     tcp: 8200,
     tls: 8201
   ],
-  heartbeat: nil
+  heartbeat: nil,
+  autologin: true
 
 config :central, Central.Mailer,
   adapter: Bamboo.LocalAdapter,

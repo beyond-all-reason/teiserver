@@ -63,10 +63,10 @@ defmodule Teiserver.Data.Matchmaking do
     end)
   end
 
-  @spec add_player_to_queue(Integer.t(), Integer.t()) :: :ok | :duplicate | :failed
-  def add_player_to_queue(queue_id, player_id) do
-    pid = get_queue(queue_id).pid
-    GenServer.call(pid, {:add_player, player_id})
+  @spec add_player_to_queue(Integer.t(), Integer.t(), pid()) :: :ok | :duplicate | :failed
+  def add_player_to_queue(queue_id, player_id, pid) do
+    queue_pid = get_queue(queue_id).pid
+    GenServer.call(queue_pid, {:add_player, player_id, pid})
   end
 
   @spec remove_player_to_queue(Integer.t(), Integer.t()) :: :ok | :missing
