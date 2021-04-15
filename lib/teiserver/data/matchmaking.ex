@@ -65,14 +65,28 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec add_player_to_queue(Integer.t(), Integer.t(), pid()) :: :ok | :duplicate | :failed
   def add_player_to_queue(queue_id, player_id, pid) do
-    queue_pid = get_queue(queue_id).pid
-    GenServer.call(queue_pid, {:add_player, player_id, pid})
+    case get_queue(queue_id) do
+      nil ->
+        :failed
+      queue ->
+        GenServer.call(queue.pid, {:add_player, player_id, pid})
+    end
   end
 
   @spec remove_player_to_queue(Integer.t(), Integer.t()) :: :ok | :missing
   def remove_player_to_queue(queue_id, player_id) do
-    pid = get_queue(queue_id).pid
-    GenServer.call(pid, {:remove_player, player_id})
+    case get_queue(queue_id) do
+      nil ->
+        :failed
+      queue ->
+        GenServer.call(queue.pid, {:remove_player, player_id})
+    end
+  end
+
+  @spec add_queue_from_db(Game.Queue.t()) :: :ok
+  def add_queue_from_db(queue) do
+    convert_queue(queue)
+    |> add_queue()
   end
 
   @spec convert_queue(Game.Queue.t()) :: QueueStruct.t()

@@ -106,6 +106,7 @@ defmodule Teiserver.TcpServer do
       battle_host: false,
       user: nil,
       queues: [],
+      ready_queue_id: nil,
 
       # Connection microstate
       battle_id: nil,
@@ -386,12 +387,12 @@ defmodule Teiserver.TcpServer do
     case cmd do
       :match_ready ->
         state.protocol_out.reply(:matchmaking, :match_ready, data, nil, state)
+        %{state | ready_queue_id: data}
       :match_cancel ->
-        :ok
+        %{state | ready_queue_id: nil}
       :dequeue ->
-        :ok
+        state
     end
-    state
   end
 
   # Battle updates

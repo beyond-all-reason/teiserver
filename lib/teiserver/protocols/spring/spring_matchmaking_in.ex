@@ -34,7 +34,7 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
     case joined do
       true ->
         new_state = %{state | queues: Enum.uniq(state.queues ++ [queue_id])}
-        reply(:spring, :okay, "c.matchmaking.join_queue\t1", msg_id, new_state)
+        reply(:spring, :okay, "c.matchmaking.join_queue\t#{queue_id}", msg_id, new_state)
       false ->
         reply(:spring, :no, {"c.matchmaking.join_queue", "#{queue_id}"}, msg_id, state)
     end
@@ -43,7 +43,7 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
   def do_handle("leave_queue", queue_id, _msg_id, state) do
     queue_id = int_parse(queue_id)
     Matchmaking.remove_player_to_queue(queue_id, state.userid)
-    %{state | queues: Enum.reject(state.queues, fn u -> u == state.userid end)}
+    %{state | queues: List.delete(state.queues, state.userid)}
   end
 
   def do_handle("leave_all_queues", _msg, _msg_id, state) do
@@ -51,7 +51,14 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
   end
 
   def do_handle("ready", _msg, _msg_id, state) do
-    state
+    case state.ready_queue_id do
+      nil ->
+        state
+      queue_id ->
+        queue = Matchmaking.get_queue(queue_id)
+        send(queue.pid, {:player_accept, state.userid})
+        state
+    end
   end
 
   def do_handle("decline", _msg, _msg_id, state) do

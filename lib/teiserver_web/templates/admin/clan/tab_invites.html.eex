@@ -1,5 +1,3 @@
-<% {_fg, _bg, bsname} = colours() %>
-
 <table class="table">
   <thead>
     <tr>

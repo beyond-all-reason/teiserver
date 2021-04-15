@@ -6,7 +6,6 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Account.UserLib
   alias Central.Account.GroupLib
   import Teiserver.User, only: [bar_user_group_id: 0]
-  alias Central.Helpers.TimexHelper
 
   plug(AssignPlug,
     sidemenu_active: ["teiserver", "teiserver_admin"]

@@ -263,7 +263,7 @@ defmodule Teiserver.Game do
   end
 
   defp cache_new_queue({:ok, queue}) do
-    Teiserver.Data.Matchmaking.add_queue(queue)
+    Teiserver.Data.Matchmaking.add_queue_from_db(queue)
     {:ok, queue}
   end
   defp cache_new_queue(v), do: v
