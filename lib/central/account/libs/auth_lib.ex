@@ -1,7 +1,6 @@
 defmodule Central.Account.AuthLib do
   require Logger
 
-  alias Central.Account.User
   alias Central.Account.AuthGroups.Server
 
   @spec icon :: String.t()
@@ -111,5 +110,11 @@ defmodule Central.Account.AuthLib do
         Logger.debug("AuthLib.allow?() -> Permission not found: #{permission_required}")
         false
     end
+  end
+
+  # This is used as part of the permission system getting the current user
+  @spec current_user(Plug.Conn.t()) :: User.t() | nil
+  def current_user(conn) do
+    conn.assigns[:current_user]
   end
 end
