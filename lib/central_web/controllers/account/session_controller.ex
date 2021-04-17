@@ -79,9 +79,10 @@ defmodule CentralWeb.Account.SessionController do
 
     existing_resets =
       Account.list_codes(
-        where: [
+        search: [
           user_id: user.id,
-          purpose: "reset_password"
+          purpose: "reset_password",
+          expired: false
         ]
       )
 
@@ -92,7 +93,7 @@ defmodule CentralWeb.Account.SessionController do
 
       not Enum.empty?(existing_resets) ->
         conn
-        |> put_flash(:success, "Password reset sent out")
+        |> put_flash(:success, "Existing password reset already sent out")
         |> redirect(to: "/")
 
       expected_value == nil ->
