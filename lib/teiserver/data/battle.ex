@@ -1,3 +1,11 @@
+# defmodule Teiserver.Data.BattleStruct do
+#   @enforce_keys [:id, :founder_id, :founder_name]
+#   defstruct [
+#     :id, :founder_id, :founder_name,
+#     :type, :nattype, :max_players, :password, :rank, :locked, :engine_name, :players, :player_count, :spectator_count, :bot_count, :bots, :ip, :tags, :disabled_units, :start_rectangles, :map_hash, :map_name
+#   ]
+# end
+
 defmodule Teiserver.Battle do
   @moduledoc false
   alias Phoenix.PubSub
@@ -244,6 +252,7 @@ defmodule Teiserver.Battle do
     end
   end
 
+  @spec kick_user_from_battle(Integer.t(), Integer.t()) :: nil | :ok | {:error, any}
   def kick_user_from_battle(userid, battle_id) do
     case do_remove_user_from_battle(userid, battle_id) do
       :closed ->
@@ -279,6 +288,17 @@ defmodule Teiserver.Battle do
       Logger.error("#{userid} is a member of #{Enum.count(battle_ids)} battles")
     end
     battle_ids
+  end
+
+  @spec find_empty_battle() :: Map.t()
+  def find_empty_battle() do
+    empties = list_battles()
+    |> Enum.filter(fn b -> b.players == [] end)
+
+    case empties do
+      [] -> nil
+      _ -> Enum.random(empties)
+    end
   end
 
   @spec do_remove_user_from_battle(integer(), integer()) ::

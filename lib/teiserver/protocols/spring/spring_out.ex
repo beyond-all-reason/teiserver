@@ -6,6 +6,7 @@ defmodule Teiserver.Protocols.SpringOut do
   https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html
   """
   require Logger
+  alias Phoenix.PubSub
   alias Teiserver.Client
   alias Teiserver.Battle
   alias Teiserver.Room
@@ -478,6 +479,87 @@ defmodule Teiserver.Protocols.SpringOut do
     )
 
     ""
+  end
+
+  @spec do_join_battle(map(), map()) :: map()
+  def do_join_battle(state, battle) do
+    PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
+    Battle.add_user_to_battle(state.userid, battle.id)
+    reply(:join_battle_success, battle, nil, state)
+    reply(:add_user_to_battle, {state.userid, battle.id}, nil, state)
+    reply(:add_script_tags, battle.tags, nil, state)
+
+    battle.players
+    |> Enum.each(fn id ->
+      client = Client.get_client_by_id(id)
+      reply(:client_battlestatus, client, nil, state)
+    end)
+
+    battle.bots
+    |> Enum.each(fn {_botname, bot} ->
+      reply(:add_bot_to_battle, {battle.id, bot}, nil, state)
+    end)
+
+    client = Client.get_client_by_id(state.userid)
+    reply(:client_battlestatus, client, nil, state)
+
+    battle.start_rectangles
+    |> Enum.each(fn {team, r} ->
+      reply(:add_start_rectangle, {team, r}, nil, state)
+    end)
+
+    reply(:request_battle_status, nil, nil, state)
+
+    %{state | battle_id: battle.id}
+  end
+
+  @spec do_login_accepted(map(), map()) :: map()
+  def do_login_accepted(state, user) do
+    # Login the client
+    _client = Client.login(user, self())
+
+    :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
+
+    # Who is online?
+    # skip ourselves because that will result in a double ADDUSER
+    clients = Client.list_client_ids()
+
+    # ADDUSER entries
+    clients
+    |> Enum.each(fn userid ->
+      send(self(), {:user_logged_in, userid})
+    end)
+
+    # Battle entry commands
+    # Once we know this is stable we can consider optimising it to not
+    # need to send() to self a few dozen times
+    Battle.list_battle_ids()
+    |> Enum.each(fn battle_id ->
+      send(self(), {:global_battle_updated, battle_id, :battle_opened})
+      send(self(), {:global_battle_updated, battle_id, :update_battle_info})
+
+      battle = Battle.get_battle(battle_id)
+      battle.players
+      |> Enum.each(fn player_id ->
+        send(self(), {:add_user_to_battle, player_id, battle_id})
+      end)
+    end)
+
+    # Client status messages
+    # Currently handled by the :user_logged_in send earlier, might need to refactor slightly
+    # clients
+    # |> Enum.map(fn client_id ->
+    #   send(self(), {:updated_client, Client.get_client_by_id(client_id), :client_updated_status})
+    # end)
+
+    send(self(), {:action, {:login_end, nil}})
+    :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
+    %{state |
+      user: user,
+      username: user.name,
+      userid: user.id}
   end
 
   # This sends a message to the self to send out a message

@@ -1,6 +1,7 @@
 defmodule Teiserver.Game.QueueServer do
   use GenServer
   require Logger
+  alias Teiserver.Battle
 
   @tick_interval 5_000
 
@@ -58,33 +59,19 @@ defmodule Teiserver.Game.QueueServer do
         new_waiting_for_players = List.delete(state.waiting_for_players, player_id)
         new_players_accepted = state.players_accepted ++ [player_id]
 
+        interim_state = %{state |
+          waiting_for_players: new_waiting_for_players,
+          players_accepted: new_players_accepted
+        }
+
         case Enum.empty?(new_waiting_for_players) do
           # That was the last one, go-time
           true ->
-            # Send out the new battle stuff
-            game_id = 1
-            new_players_accepted
-            |> Enum.each(fn userid ->
-              player = state.player_map[userid]
-              send(player.pid, {:matchmaking, {:join_battle, game_id}})
-            end)
-
-            midway_state = remove_players(state, new_players_accepted)
-
-            %{midway_state |
-              unmatched_players: [],
-              matched_players: [],
-              waiting_for_players: [],
-              ready_started_at: nil,
-              players_accepted: []
-            }
+            try_setup_battle(interim_state)
 
           # Not ready quite yet, still waiting for at least one more
           false ->
-            %{state |
-              waiting_for_players: new_waiting_for_players,
-              players_accepted: new_players_accepted
-            }
+            interim_state
         end
 
       # We're not waiting for this player to accept, ignore it for now
@@ -95,7 +82,11 @@ defmodule Teiserver.Game.QueueServer do
   end
 
   def handle_info({:player_decline, player_id}, state) when is_integer(player_id) do
-    {:noreply, state}
+    new_state = %{state |
+      finding_battle: false
+    }
+
+    {:noreply, new_state}
   end
 
   def handle_info(:tick, state) do
@@ -103,6 +94,10 @@ defmodule Teiserver.Game.QueueServer do
     # but for this test of concept stage we're going to just assume we need two players
 
     new_state = cond do
+      # Trying to find a battle, not doing standard tick stuff
+      state.finding_battle == true ->
+        try_setup_battle(state)
+
       # This means we are not waiting for players, we can instead find some
       state.ready_started_at == nil ->
         # First make sure we have enough players...
@@ -162,6 +157,34 @@ defmodule Teiserver.Game.QueueServer do
     }
   end
 
+  # Try to setup a battle with the players currently readied up
+  defp try_setup_battle(state) do
+    # Send out the new battle stuff
+    empty_battle = Battle.find_empty_battle()
+
+    case empty_battle do
+      nil ->
+        %{state | finding_battle: true}
+      battle ->
+        state.players_accepted
+        |> Enum.each(fn userid ->
+          player = state.player_map[userid]
+          send(player.pid, {:matchmaking, {:join_battle, battle.id}})
+        end)
+
+        midway_state = remove_players(state, state.players_accepted)
+
+        %{midway_state |
+          finding_battle: false,
+          unmatched_players: [],
+          matched_players: [],
+          waiting_for_players: [],
+          ready_started_at: nil,
+          players_accepted: []
+        }
+    end
+  end
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -176,6 +199,7 @@ defmodule Teiserver.Game.QueueServer do
       waiting_for_players: [],
       players_accepted: [],
       ready_started_at: nil,
+      finding_battle: false,
 
       matchups: [],
       matched_players: [],

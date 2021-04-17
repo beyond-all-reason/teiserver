@@ -3,9 +3,10 @@ defmodule Teiserver.SpringMatchmakingTest do
   require Logger
   alias Teiserver.Game
   alias Teiserver.Data.Matchmaking
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TestLib,
-    only: [auth_setup: 0, _send: 2, _recv: 1, _recv_until: 1, new_user: 0, new_user: 2]
+    only: [auth_setup: 0, _send: 2, _recv: 1]
 
   setup do
     %{socket: socket, user: user} = auth_setup()
@@ -25,6 +26,7 @@ defmodule Teiserver.SpringMatchmakingTest do
     queue = Matchmaking.get_queue(queue.id)
 
     %{socket: socket2, user: user2} = auth_setup()
+    %{socket: battle_socket} = auth_setup()
 
     # Clear both sockets
     _recv(socket1)
@@ -79,6 +81,7 @@ defmodule Teiserver.SpringMatchmakingTest do
 
     # Lets see what the state of the queue_server is
     state = GenServer.call(queue.pid, :get_state)
+    assert state.finding_battle == false
     assert state.unmatched_players == []
     assert state.matched_players == [user1.id, user2.id]
     assert state.players_accepted == [user1.id]
@@ -90,14 +93,52 @@ defmodule Teiserver.SpringMatchmakingTest do
     assert reply == :timeout
 
     state = GenServer.call(queue.pid, :get_state)
-    IO.puts ""
-    IO.inspect state
-    IO.puts ""
+    assert state.finding_battle == true
+    assert state.unmatched_players == []
+    assert state.matched_players == [user1.id, user2.id]
+    assert state.players_accepted == [user1.id, user2.id]
+    assert state.waiting_for_players == []
+
+    # Tick, it shouldn't result in a change since there's no battles open
+    send(queue.pid, :tick)
+    state2 = GenServer.call(queue.pid, :get_state)
+    assert state == state2
+
+    # Now lets create a battle
+    _recv(battle_socket)
+    _send(
+      battle_socket,
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName\n"
+    )
+    # We know the battle is being opened, don't need to worry about it
+    _recv(socket1)
+    _recv(socket2)
+
+    reply = _recv(battle_socket)
+    [_all, battle_id] = Regex.run(~r/BATTLEOPENED ([0-9]+) [0-9]/, reply)
+    battle_id = int_parse(battle_id)
+
+    # Now we have a battle open, tick should matter
+    send(queue.pid, :tick)
+    state = GenServer.call(queue.pid, :get_state)
+    assert state.finding_battle == false
+    assert state.matched_players == []
+    assert state.player_count == 0
+    assert state.ready_started_at == nil
+
+    # Commands should be sent to user1 and user2
+    reply = _recv(socket1)
+    assert reply =~ "JOINBATTLE #{battle_id} gameHash\n"
+    reply = _recv(socket2)
+    assert reply =~ "JOINBATTLE #{battle_id} gameHash\n"
 
     _send(socket1, "EXIT\n")
     _recv(socket1)
 
     _send(socket2, "EXIT\n")
     _recv(socket2)
+
+    _send(battle_socket, "EXIT\n")
+    _recv(battle_socket)
   end
 end

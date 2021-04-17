@@ -7,6 +7,7 @@ defmodule Teiserver.TcpServer do
 
   alias Teiserver.Client
   alias Teiserver.User
+  alias Teiserver.Battle
 
   @behaviour :ranch_protocol
 
@@ -390,6 +391,9 @@ defmodule Teiserver.TcpServer do
         %{state | ready_queue_id: data}
       :match_cancel ->
         %{state | ready_queue_id: nil}
+      :join_battle ->
+        battle = Battle.get_battle(data)
+        state.protocol_out.do_join_battle(state, battle)
       :dequeue ->
         state
     end
