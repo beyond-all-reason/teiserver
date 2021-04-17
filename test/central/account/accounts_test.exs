@@ -2,6 +2,7 @@ defmodule Central.AccountTest do
   use Central.DataCase
 
   alias Central.Account
+  alias Central.Account.AccountTestLib
 
   describe "users" do
     alias Central.Account.User
@@ -31,21 +32,12 @@ defmodule Central.AccountTest do
       password: nil
     }
 
-    def user_fixture(attrs \\ %{}) do
-      {:ok, user} =
-        attrs
-        |> Enum.into(@valid_attrs)
-        |> Account.create_user()
-
-      user
-    end
-
     test "list_users/0 returns users" do
       assert Account.list_users() != []
     end
 
     test "get_user!/1 returns the user with given id" do
-      user = user_fixture()
+      user = AccountTestLib.user_fixture()
       assert Account.get_user!(user.id) == user
     end
 
@@ -63,7 +55,7 @@ defmodule Central.AccountTest do
     end
 
     test "update_user/2 with valid data updates the user" do
-      user = user_fixture()
+      user = AccountTestLib.user_fixture()
       assert {:ok, %User{} = user} = Account.update_user(user, @update_attrs)
       assert user.colour == "some updated colour"
       assert user.icon == "fas fa-wrench"
@@ -73,19 +65,19 @@ defmodule Central.AccountTest do
     end
 
     test "update_user/2 with invalid data returns error changeset" do
-      user = user_fixture()
+      user = AccountTestLib.user_fixture()
       assert {:error, %Ecto.Changeset{}} = Account.update_user(user, @invalid_attrs)
       assert user == Account.get_user!(user.id)
     end
 
     test "delete_user/1 deletes the user" do
-      user = user_fixture()
+      user = AccountTestLib.user_fixture()
       assert {:ok, %User{}} = Account.delete_user(user)
       assert_raise Ecto.NoResultsError, fn -> Account.get_user!(user.id) end
     end
 
     test "change_user/1 returns a user changeset" do
-      user = user_fixture()
+      user = AccountTestLib.user_fixture()
       assert %Ecto.Changeset{} = Account.change_user(user)
     end
   end
@@ -194,23 +186,28 @@ defmodule Central.AccountTest do
   describe "reports" do
     alias Central.Account.Report
 
-    @valid_attrs %{"name" => "some name"}
-    @update_attrs %{"name" => "some updated name"}
-    @invalid_attrs %{"name" => nil}
+    @valid_attrs %{"reason" => "some reason"}
+    @update_attrs %{"reason" => "some updated reason"}
+    @invalid_attrs %{"reason" => nil}
 
     test "list_reports/0 returns reports" do
-      AccountTestLib.report_fixture(1)
+      AccountTestLib.report_fixture()
       assert Account.list_reports() != []
     end
 
     test "get_report!/1 returns the report with given id" do
-      report = AccountTestLib.report_fixture(1)
+      report = AccountTestLib.report_fixture()
       assert Account.get_report!(report.id) == report
     end
 
     test "create_report/1 with valid data creates a report" do
-      assert {:ok, %Report{} = report} = Account.create_report(@valid_attrs)
-      assert report.name == "some name"
+      reporter = AccountTestLib.user_fixture()
+      target = AccountTestLib.user_fixture()
+      assert {:ok, %Report{} = report} = Account.create_report(Map.merge(@valid_attrs, %{
+        "reporter_id" => reporter.id,
+        "target_id" => target.id
+      }))
+      assert report.reason == "some reason"
     end
 
     test "create_report/1 with invalid data returns error changeset" do
@@ -218,76 +215,36 @@ defmodule Central.AccountTest do
     end
 
     test "update_report/2 with valid data updates the report" do
-      report = AccountTestLib.report_fixture(1)
-      assert {:ok, %Report{} = report} = Account.update_report(report, @update_attrs)
-      assert report.name == "some updated name"
+      reporter = AccountTestLib.user_fixture()
+      target = AccountTestLib.user_fixture()
+      responder = AccountTestLib.user_fixture()
+      report = AccountTestLib.report_fixture(%{"reason" => "some reason"})
+      assert {:ok, %Report{} = report} = Account.update_report(report, Map.merge(@update_attrs, %{
+        "reporter_id" => reporter.id,
+        "target_id" => target.id,
+        "responder_id" => responder.id,
+        "response_text" => "Response text",
+        "response_action" => "Ignore",
+        "reason" => "updated reason"# This should not be saved, it is set at creation
+      }))
+      assert report.reason == "some reason"
     end
 
     test "update_report/2 with invalid data returns error changeset" do
-      report = AccountTestLib.report_fixture(1)
+      report = AccountTestLib.report_fixture()
       assert {:error, %Ecto.Changeset{}} = Account.update_report(report, @invalid_attrs)
       assert report == Account.get_report!(report.id)
     end
 
     test "delete_report/1 deletes the report" do
-      report = AccountTestLib.report_fixture(1)
+      report = AccountTestLib.report_fixture()
       assert {:ok, %Report{}} = Account.delete_report(report)
       assert_raise Ecto.NoResultsError, fn -> Account.get_report!(report.id) end
     end
 
     test "change_report/1 returns a report changeset" do
-      report = AccountTestLib.report_fixture(1)
+      report = AccountTestLib.report_fixture()
       assert %Ecto.Changeset{} = Account.change_report(report)
-    end
-  end
-
-  describe "report_responses" do
-    alias Central.Account.ReportResponse
-
-    @valid_attrs %{"name" => "some name"}
-    @update_attrs %{"name" => "some updated name"}
-    @invalid_attrs %{"name" => nil}
-
-    test "list_report_responses/0 returns report_responses" do
-      AccountTestLib.report_response_fixture(1)
-      assert Account.list_report_responses() != []
-    end
-
-    test "get_report_response!/1 returns the report_response with given id" do
-      report_response = AccountTestLib.report_response_fixture(1)
-      assert Account.get_report_response!(report_response.id) == report_response
-    end
-
-    test "create_report_response/1 with valid data creates a report_response" do
-      assert {:ok, %ReportResponse{} = report_response} = Account.create_report_response(@valid_attrs)
-      assert report_response.name == "some name"
-    end
-
-    test "create_report_response/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Account.create_report_response(@invalid_attrs)
-    end
-
-    test "update_report_response/2 with valid data updates the report_response" do
-      report_response = AccountTestLib.report_response_fixture(1)
-      assert {:ok, %ReportResponse{} = report_response} = Account.update_report_response(report_response, @update_attrs)
-      assert report_response.name == "some updated name"
-    end
-
-    test "update_report_response/2 with invalid data returns error changeset" do
-      report_response = AccountTestLib.report_response_fixture(1)
-      assert {:error, %Ecto.Changeset{}} = Account.update_report_response(report_response, @invalid_attrs)
-      assert report_response == Account.get_report_response!(report_response.id)
-    end
-
-    test "delete_report_response/1 deletes the report_response" do
-      report_response = AccountTestLib.report_response_fixture(1)
-      assert {:ok, %ReportResponse{}} = Account.delete_report_response(report_response)
-      assert_raise Ecto.NoResultsError, fn -> Account.get_report_response!(report_response.id) end
-    end
-
-    test "change_report_response/1 returns a report_response changeset" do
-      report_response = AccountTestLib.report_response_fixture(1)
-      assert %Ecto.Changeset{} = Account.change_report_response(report_response)
     end
   end
 end

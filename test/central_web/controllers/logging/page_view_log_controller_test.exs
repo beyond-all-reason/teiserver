@@ -7,7 +7,7 @@ defmodule CentralWeb.Logging.PageViewLogControllerTest do
   alias Central.Logging.LoggingTestLib
 
   setup do
-    GeneralTestLib.conn_setup(~w(admin), child_user: true)
+    GeneralTestLib.conn_setup(~w(logging.page_view.show), child_user: true)
     |> LoggingTestLib.logging_setup(page_view_logs: true)
   end
 

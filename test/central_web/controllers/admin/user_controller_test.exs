@@ -93,8 +93,8 @@ defmodule CentralWeb.Admin.UserControllerTest do
   describe "edit user" do
     test "reset password", %{conn: conn, user: user} do
       conn = get(conn, Routes.admin_user_path(conn, :reset_password, user))
-      assert conn.private[:phoenix_flash]["success"] == "Password reset to 'pass'."
-      assert redirected_to(conn) == Routes.admin_user_path(conn, :edit, user)
+      assert conn.private[:phoenix_flash]["success"] == "Password reset email sent to user"
+      assert redirected_to(conn) == Routes.admin_user_path(conn, :index)
     end
 
     test "renders form for editing nil", %{conn: conn} do

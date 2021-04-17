@@ -7,7 +7,7 @@ defmodule CentralWeb.Logging.ReportControllerTest do
   alias Central.Logging.LoggingTestLib
 
   setup do
-    GeneralTestLib.conn_setup(~w(admin))
+    GeneralTestLib.conn_setup(~w(logging.page_view.report))
     |> LoggingTestLib.logging_setup()
   end
 

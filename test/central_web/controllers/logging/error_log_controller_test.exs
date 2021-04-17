@@ -6,7 +6,7 @@ defmodule CentralWeb.Logging.ErrorLogControllerTest do
   alias Central.Helpers.GeneralTestLib
 
   setup do
-    GeneralTestLib.conn_setup(~w(admin.dev))
+    GeneralTestLib.conn_setup(~w(logging.error.show admin.dev))
   end
 
   defp create_test_error(conn) do

@@ -693,10 +693,14 @@ defmodule Teiserver.User do
   # Used to reset the spring password of the user when the site password is updated
   def set_new_spring_password(userid, new_password) do
     user = get_user_by_id(userid)
-    md5_password = spring_md5_password(new_password)
-    encrypted_password = encrypt_password(md5_password)
+    case user do
+      nil -> nil
+      _ ->
+        md5_password = spring_md5_password(new_password)
+        encrypted_password = encrypt_password(md5_password)
 
-    update_user(%{user | password_reset_code: nil, password_hash: encrypted_password}, persist: true)
+        update_user(%{user | password_reset_code: nil, password_hash: encrypted_password}, persist: true)
+    end
   end
 
   def spring_reset_password(user, code) do

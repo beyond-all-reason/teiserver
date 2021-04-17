@@ -39,7 +39,7 @@ defmodule Central.Account.CodeLib do
 
   def _search(query, :user_id, user_id) do
     from codes in query,
-      where: codes.id == ^user_id
+      where: codes.user_id == ^user_id
   end
 
   def _search(query, :purpose, purpose) do
@@ -50,6 +50,11 @@ defmodule Central.Account.CodeLib do
   def _search(query, :expired, false) do
     from codes in query,
       where: codes.expires > ^Timex.now()
+  end
+
+  def _search(query, :expired, true) do
+    from codes in query,
+      where: codes.expires < ^Timex.now()
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()

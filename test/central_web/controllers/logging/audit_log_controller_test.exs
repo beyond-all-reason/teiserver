@@ -10,7 +10,7 @@ defmodule CentralWeb.Logging.AuditLogControllerTest do
   alias Central.Logging.LoggingTestLib
 
   setup do
-    GeneralTestLib.conn_setup(~w(admin))
+    GeneralTestLib.conn_setup(~w(logging.audit.show))
     |> LoggingTestLib.logging_setup()
   end
 
