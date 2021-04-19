@@ -1,5 +1,5 @@
 defmodule CentralWeb.Logging.PageViewLogControllerTest do
-  use CentralWeb.ConnCase, async: false
+  use CentralWeb.ConnCase#, async: true
 
   alias Central.Logging
 

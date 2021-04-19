@@ -1,3 +1,12 @@
+# defmodule Teiserver.Data.ClientStruct do
+#   @enforce_keys [:in_game, :away, :rank, :moderator, :bot]
+#   defstruct [
+#     :id, :name, :team_size, :icon, :colour, :settings, :conditions, :map_list,
+#     current_search_time: 0, current_size: 0, contents: [], pid: nil
+#   ]
+# end
+
+
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
@@ -148,8 +157,7 @@ defmodule Teiserver.Client do
     ConCache.get(:clients, userid)
   end
 
-  @spec get_client_by_id(nil) :: nil
-  @spec get_client_by_id(Integer.t()) :: nil | Map.t()
+  @spec get_client_by_id(Integer.t() | nil) :: nil | Map.t()
   def get_client_by_id(nil), do: nil
 
   def get_client_by_id(userid) do
@@ -201,11 +209,19 @@ defmodule Teiserver.Client do
     end
   end
 
+  # If it's a test user, don't worry about actually disconnecting it
   defp do_disconnect(client) do
+    is_test_user = String.contains?(client.name, "new_test_user_")
+
     Battle.remove_user_from_any_battle(client.userid)
-    # leave_battle(client)
     leave_rooms(client.userid)
-    spawn(fn -> User.logout(client.userid) end)
+
+    # If it's a test user then it can mean the db connection is closed
+    # we don't actually care about logging out most of them and the
+    # ones we do won't be called new_test_user_
+    if not is_test_user do
+      spawn(fn -> User.logout(client.userid) end)
+    end
 
     # Typically we would only send the username but it is possible they just changed their username
     # and as such we need to tell the system what username is logging out

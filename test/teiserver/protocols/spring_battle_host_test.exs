@@ -19,7 +19,7 @@ defmodule Teiserver.SpringBattleHostTest do
   test "host battle test", %{socket: socket, user: user} do
     _send(
       socket,
-      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName\n"
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tbattle_host_test\tgameTitle\tgameName\n"
     )
 
     reply =
@@ -87,12 +87,6 @@ defmodule Teiserver.SpringBattleHostTest do
     reply = _recv(socket2)
     assert reply == "JOINEDBATTLE #{battle_id} #{user3.name}\n"
 
-    # Now kick both
-    _send(socket, "KICKFROMBATTLE #{user2.name}\n")
-    _send(socket, "KICKFROMBATTLE #{user3.name}\n")
-    _ = _recv(socket2)
-    _ = _recv(socket3)
-
     # Had a bug where the battle would be incorrectly closed
     # after kicking a player, it was caused by the host disconnecting
     # and in the process closed out the battle
@@ -148,6 +142,12 @@ defmodule Teiserver.SpringBattleHostTest do
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "ENABLEALLUNITS\n"
+
+    # Now kick both 2 and 3
+    _send(socket, "KICKFROMBATTLE #{user2.name}\n")
+    _send(socket, "KICKFROMBATTLE #{user3.name}\n")
+    _ = _recv(socket2)
+    _ = _recv(socket3)
 
     # Mybattle status
     _ = _recv(socket2)# Clear out a bunch of things we've tested for socket1

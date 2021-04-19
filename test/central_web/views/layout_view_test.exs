@@ -1,3 +1,3 @@
 defmodule CentralWeb.LayoutViewTest do
-  use CentralWeb.ConnCase, async: false
+  use CentralWeb.ConnCase#, async: true
 end

@@ -80,7 +80,7 @@ defmodule Teiserver.Startup do
       permissions: ["teiserver"],
       description: "When checked the flag associated with your IP will be displayed. If unchecked your flag will be blank. This will take effect next time you login with your client.",
       opts: [],
-      default: false,
+      default: true,
     }
 
     ConCache.put(:lists, :clients, [])

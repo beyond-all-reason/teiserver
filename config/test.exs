@@ -9,7 +9,8 @@ config :central, Central.Repo,
   timeout: 120_000,
   queue_target: 5000,
   queue_interval: 100_000,
-  pool: Ecto.Adapters.SQL.Sandbox
+  pool: Ecto.Adapters.SQL.Sandbox,
+  pool_size: 50
 
 config :central, Teiserver,
   certs: [

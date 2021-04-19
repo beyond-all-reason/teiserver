@@ -272,7 +272,7 @@ ENDOFCHANNELS\n"
 
     _send(
       socket1,
-      "OPENBATTLE 0 0 * 52200 16 #{hash} 0 1565299817 spring\t104.0.1-1784-gf6173b4 BAR\tComet Catcher Remake 1.8\tEU - 00\tBeyond All Reason test-15658-85bf66d\n"
+      "OPENBATTLE 0 0 * 52200 16 #{hash} 0 1565299817 spring\t104.0.1-1784-gf6173b4 BAR\tauth_joinbattle_test\tEU - 00\tBeyond All Reason test-15658-85bf66d\n"
     )
 
     reply = _recv_until(socket1)

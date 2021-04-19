@@ -1,5 +1,5 @@
 defmodule CentralWeb.Admin.GeneralControllerTest do
-  use CentralWeb.ConnCase, async: false
+  use CentralWeb.ConnCase#, async: true
 
   alias Central.Helpers.GeneralTestLib
 
