@@ -1,5 +1,5 @@
 defmodule Central.General.NumberHelperTest do
-  use Central.DataCase, async: true
+  use Central.DataCase, async: false
 
   alias Central.Helpers.NumberHelper
 
