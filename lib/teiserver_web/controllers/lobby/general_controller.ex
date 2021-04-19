@@ -9,10 +9,12 @@ defmodule TeiserverWeb.Lobby.GeneralController do
 
   plug(Teiserver.ServerUserPlug)
 
+  @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do
     render(conn, "index.html")
   end
 
+  @spec spass(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def spass(conn, %{"p" => p}) do
     p = Teiserver.User.spring_md5_password(p)
     conn
@@ -20,6 +22,7 @@ defmodule TeiserverWeb.Lobby.GeneralController do
     |> render("spass.html")
   end
 
+  @spec spass(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def spass(conn, _params) do
     conn
     |> assign(:p, nil)

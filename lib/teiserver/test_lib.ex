@@ -156,4 +156,33 @@ defmodule Teiserver.TestLib do
       extra_logging: false
     }
   end
+
+  @spec conn_setup({:ok, List.t()}) :: {:ok, List.t()}
+  def conn_setup({:ok, data}) do
+    user = data[:user]
+    Teiserver.User.recache_user(user.id)
+
+    {:ok, data}
+  end
+
+  @spec admin_permissions() :: [String.t()]
+  def admin_permissions do
+    permissions = ~w(account battle clan party queue tournament)
+    |> Enum.map(fn p -> "teiserver.admin.#{p}" end)
+
+    permissions ++ moderator_permissions()
+  end
+
+  @spec moderator_permissions() :: [String.t()]
+  def moderator_permissions do
+    permissions = ~w(account battle clan party queue tournament)
+    |> Enum.map(fn p -> "teiserver.moderator.#{p}" end)
+
+    permissions ++ player_permissions()
+  end
+
+  @spec player_permissions() :: [String.t()]
+  def player_permissions do
+    ["teiserver.player.account"]
+  end
 end

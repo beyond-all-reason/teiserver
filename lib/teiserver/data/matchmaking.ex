@@ -83,7 +83,7 @@ defmodule Teiserver.Data.Matchmaking do
     end
   end
 
-  @spec add_queue_from_db(Game.Queue.t()) :: :ok
+  @spec add_queue_from_db(Map.t()) :: :ok
   def add_queue_from_db(queue) do
     convert_queue(queue)
     |> add_queue()
