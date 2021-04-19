@@ -73,8 +73,8 @@ defmodule Teiserver.Data.Matchmaking do
     end
   end
 
-  @spec remove_player_to_queue(Integer.t(), Integer.t()) :: :ok | :missing
-  def remove_player_to_queue(queue_id, player_id) do
+  @spec remove_player_from_queue(Integer.t(), Integer.t()) :: :ok | :missing
+  def remove_player_from_queue(queue_id, player_id) do
     case get_queue(queue_id) do
       nil ->
         :failed

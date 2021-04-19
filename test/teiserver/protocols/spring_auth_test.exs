@@ -23,18 +23,12 @@ defmodule Teiserver.SpringAuthTest do
     _send(socket, "#4 PING\n")
     reply = _recv(socket)
     assert reply == "#4 PONG\n"
-
-    _send(socket, "EXIT\n")
-    _recv(socket)
   end
 
   test "PING", %{socket: socket} do
     _send(socket, "#4 PING\n")
     reply = _recv(socket)
     assert reply == "#4 PONG\n"
-
-    _send(socket, "EXIT\n")
-    _recv(socket)
   end
 
   test "GETUSERINFO", %{socket: socket, user: user} do
@@ -43,9 +37,6 @@ defmodule Teiserver.SpringAuthTest do
     assert reply =~ "SERVERMSG Registration date: "
     assert reply =~ "SERVERMSG Email address: #{user.email}"
     assert reply =~ "SERVERMSG Ingame time: "
-
-    _send(socket, "EXIT\n")
-    _recv(socket)
   end
 
   test "MYSTATUS", %{socket: socket, user: user} do
@@ -91,9 +82,6 @@ defmodule Teiserver.SpringAuthTest do
     assert reply == "SERVERMSG Password changed, you will need to use it next time you login\n"
     user = User.get_user_by_name(user.name)
     assert User.test_password("new_pass", user.password_hash)
-
-    _send(socket, "EXIT\n")
-    _recv(socket)
   end
 
   test "IGNORELIST, IGNORE, UNIGNORE, SAYPRIVATE", %{socket: socket1, user: user} do
@@ -139,12 +127,6 @@ IGNORELISTEND\n"
     _send(socket2, "SAYPRIVATE #{user.name} What about now?\n")
     reply = _recv(socket1)
     assert reply == "SAIDPRIVATE #{user2.name} What about now?\n"
-
-    _send(socket1, "EXIT\n")
-    _recv(socket1)
-
-    _send(socket2, "EXIT\n")
-    _recv(socket2)
   end
 
   test "FRIENDLIST, ADDFRIEND, REMOVEFRIEIND, ACCEPTFRIENDREQUEST, DECLINEFRIENDREQUEST", %{
@@ -213,12 +195,6 @@ FRIENDREQUESTLISTEND\n"
 
     reply = _recv(socket2)
     assert reply == :timeout
-
-    _send(socket1, "EXIT\n")
-    _recv(socket1)
-
-    _send(socket2, "EXIT\n")
-    _recv(socket2)
   end
 
   test "JOIN, LEAVE, SAY, CHANNELS, SAYEX", %{socket: socket, user: user} do
@@ -262,9 +238,6 @@ ENDOFCHANNELS\n"
     _send(socket, "SAY test_room Second test\n")
     reply = _recv(socket)
     assert reply == :timeout
-
-    _send(socket, "EXIT\n")
-    _recv(socket)
   end
 
   test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: _user1} do
@@ -342,12 +315,6 @@ ENDOFCHANNELS\n"
     _send(socket2, "LEAVEBATTLE\n")
     reply = _recv(socket2)
     assert reply == :timeout
-
-    _send(socket1, "EXIT\n")
-    _recv(socket1)
-
-    _send(socket2, "EXIT\n")
-    _recv(socket2)
   end
 
   test "ring", %{socket: socket1, user: user1} do
@@ -361,12 +328,18 @@ ENDOFCHANNELS\n"
 
     reply = _recv(socket1)
     assert reply == "RING #{user2.name}\n"
+  end
 
-    _send(socket1, "EXIT\n")
-    _recv(socket1)
+  test "LISTCOMPFLAGS", %{socket: socket} do
+    _send(socket, "LISTCOMPFLAGS\n")
+    reply = _recv(socket)
+    assert reply == "COMPFLAGS matchmaking\n"
+  end
 
-    _send(socket2, "EXIT\n")
-    _recv(socket2)
+  test "c.battles.list_ids", %{socket: socket} do
+    _send(socket, "c.battles.list_ids\n")
+    reply = _recv(socket)
+    assert reply =~ "s.battles.id_list "
   end
 
   test "RENAMEACCOUNT", %{socket: socket} do
@@ -406,9 +379,6 @@ ENDOFCHANNELS\n"
     new_user = User.get_user_by_id(user.id)
     assert new_user.email == "new_email@email.com"
     assert new_user.email_change_code == [nil, nil]
-
-    _send(socket, "EXIT\n")
-    _recv(socket)
   end
 
   test "CREATEBOTACCOUNT - no mod", %{socket: socket, user: user} do
@@ -423,12 +393,9 @@ ENDOFCHANNELS\n"
     _send(socket, "CREATEBOTACCOUNT test_bot_account #{user.name}\n")
     reply = _recv(socket)
     assert reply == "SERVERMSG A new bot account test_bot_account has been created, with the same password as #{user.name}\n"
-
-    _send(socket, "EXIT\n")
-    _recv(socket)
   end
 
-  test "Ranks", %{socket: socket_orig} do
+  test "Ranks" do
     user = new_user("rank_test", %{"ingame_minutes" => 60 * 200, "rank" => 5})
     %{socket: socket} = auth_setup(user)
 
@@ -437,11 +404,5 @@ ENDOFCHANNELS\n"
     _send(socket, "MYSTATUS #{new_status}\n")
     reply = _recv(socket)
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
-
-    _send(socket, "EXIT\n")
-    _recv(socket)
-
-    _send(socket_orig, "EXIT\n")
-    _recv(socket_orig)
   end
 end

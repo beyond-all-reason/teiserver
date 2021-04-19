@@ -42,8 +42,8 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
 
   def do_handle("leave_queue", queue_id, _msg_id, state) do
     queue_id = int_parse(queue_id)
-    Matchmaking.remove_player_to_queue(queue_id, state.userid)
-    %{state | queues: List.delete(state.queues, state.userid)}
+    Matchmaking.remove_player_from_queue(queue_id, state.userid)
+    %{state | queues: List.delete(state.queues, queue_id)}
   end
 
   def do_handle("leave_all_queues", _msg, _msg_id, state) do

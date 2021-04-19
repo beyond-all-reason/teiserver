@@ -16,6 +16,16 @@ defmodule Teiserver.SpringBattleHostTest do
     {:ok, socket: socket, user: user}
   end
 
+  test "battle commands when not in a battle", %{socket: socket} do
+    _send(socket, "LEAVEBATTLE\n")
+    reply = _recv(socket)
+    assert reply == :timeout
+
+    _send(socket, "MYBATTLESTATUS 123 123\n")
+    reply = _recv(socket)
+    assert reply == :timeout
+  end
+
   test "host battle test", %{socket: socket, user: user} do
     _send(
       socket,

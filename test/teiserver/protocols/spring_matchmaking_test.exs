@@ -41,12 +41,47 @@ defmodule Teiserver.SpringMatchmakingTest do
     reply = _recv(socket2)
     assert reply == "s.matchmaking.full_queue_list #{queue.id}:test_queue\n"
 
+    # List my queues, should be empty
+    _send(socket1, "c.matchmaking.list_my_queues\n")
+    reply = _recv(socket1)
+    assert reply == "s.matchmaking.your_queue_list \n"
+
+    # Tell me about this queue
+    _send(socket1, "c.matchmaking.get_queue_info #{queue.id}\n")
+    reply = _recv(socket1)
+    assert reply == "s.matchmaking.queue_info #{queue.id}\ttest_queue\t0\t0\n"
+
     # Join a queue that doesn't exist
     _send(socket1, "c.matchmaking.join_queue 0\n")
     reply = _recv(socket1)
     assert reply == "NO cmd=c.matchmaking.join_queue\t0\n"
 
     # Join the queue (just the first player)
+    _send(socket1, "c.matchmaking.join_queue #{queue.id}\n")
+    reply = _recv(socket1)
+    assert reply == "OK cmd=c.matchmaking.join_queue\t#{queue.id}\n"
+
+    # List my queues, should have this one queue
+    _send(socket1, "c.matchmaking.list_my_queues\n")
+    reply = _recv(socket1)
+    assert reply == "s.matchmaking.your_queue_list #{queue.id}:test_queue\n"
+
+    # Leave the queue
+    _send(socket1, "c.matchmaking.leave_queue #{queue.id}\n")
+    reply = _recv(socket1)
+    assert reply == :timeout
+
+    # List my queues, should be empty
+    _send(socket1, "c.matchmaking.list_my_queues\n")
+    reply = _recv(socket1)
+    assert reply == "s.matchmaking.your_queue_list \n"
+
+    # Tell me about this queue, it's different now
+    _send(socket1, "c.matchmaking.get_queue_info #{queue.id}\n")
+    reply = _recv(socket1)
+    assert reply == "s.matchmaking.queue_info #{queue.id}\ttest_queue\t0\t0\n"
+
+    # And rejoin
     _send(socket1, "c.matchmaking.join_queue #{queue.id}\n")
     reply = _recv(socket1)
     assert reply == "OK cmd=c.matchmaking.join_queue\t#{queue.id}\n"
@@ -131,14 +166,5 @@ defmodule Teiserver.SpringMatchmakingTest do
     assert reply =~ "JOINBATTLE #{battle_id} gameHash\n"
     reply = _recv(socket2)
     assert reply =~ "JOINBATTLE #{battle_id} gameHash\n"
-
-    _send(socket1, "EXIT\n")
-    _recv(socket1)
-
-    _send(socket2, "EXIT\n")
-    _recv(socket2)
-
-    _send(battle_socket, "EXIT\n")
-    _recv(battle_socket)
   end
 end
