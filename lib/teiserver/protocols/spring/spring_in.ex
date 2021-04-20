@@ -173,20 +173,23 @@ defmodule Teiserver.Protocols.SpringIn do
     reply(:no, {"c.user.get_token_by_email", "cannot get token over insecure connection"}, msg_id, state)
   end
   defp do_handle("c.user.get_token_by_email", data, msg_id, state) do
-    [email, plain_text_password] = String.split(data, "\t")
+    case String.split(data, "\t") do
+      [email, plain_text_password] ->
+        user = Central.Account.get_user_by_email(email)
+        response = if user do
+          Central.Account.User.verify_password(plain_text_password, user.password)
+        else
+          false
+        end
 
-    user = Central.Account.get_user_by_email(email)
-    response = if user do
-      Central.Account.User.verify_password(plain_text_password, user.password)
-    else
-      false
-    end
-
-    if response do
-      token = User.create_token(user)
-      reply(:user_token, {email, token}, msg_id, state)
-    else
-      reply(:no, {"c.user.get_token_by_email", "invalid credentials"}, msg_id, state)
+        if response do
+          token = User.create_token(user)
+          reply(:user_token, {email, token}, msg_id, state)
+        else
+          reply(:no, {"c.user.get_token_by_email", "invalid credentials"}, msg_id, state)
+        end
+      _ ->
+        reply(:no, {"c.user.get_token_by_email", "bad format"}, msg_id, state)
     end
   end
 
@@ -194,20 +197,23 @@ defmodule Teiserver.Protocols.SpringIn do
     reply(:no, {"c.user.get_token_by_name", "cannot get token over insecure connection"}, msg_id, state)
   end
   defp do_handle("c.user.get_token_by_name", data, msg_id, state) do
-    [name, plain_text_password] = String.split(data, "\t")
+    case String.split(data, "\t") do
+      [name, plain_text_password] ->
+        user = Central.Account.get_user_by_name(name)
+        response = if user do
+          Central.Account.User.verify_password(plain_text_password, user.password)
+        else
+          false
+        end
 
-    user = Central.Account.get_user_by_name(name)
-    response = if user do
-      Central.Account.User.verify_password(plain_text_password, user.password)
-    else
-      false
-    end
-
-    if response do
-      token = User.create_token(user)
-      reply(:user_token, {name, token}, msg_id, state)
-    else
-      reply(:no, {"c.user.get_token_by_name", "invalid credentials"}, msg_id, state)
+        if response do
+          token = User.create_token(user)
+          reply(:user_token, {name, token}, msg_id, state)
+        else
+          reply(:no, {"c.user.get_token_by_name", "invalid credentials"}, msg_id, state)
+        end
+      _ ->
+        reply(:no, {"c.user.get_token_by_name", "bad format"}, msg_id, state)
     end
   end
 
