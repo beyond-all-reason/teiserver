@@ -307,7 +307,7 @@ defmodule Teiserver.TcpServer do
   # #############################
   defp data_in(data, state) do
     if state.extra_logging do
-      Logger.info("<-- #{Kernel.inspect(state.socket)} #{format_log(data)}")
+      Logger.info("<-- #{Kernel.inspect(state.username)}:#{Kernel.inspect(state.userid)} #{format_log(data)}")
     end
 
     new_state =

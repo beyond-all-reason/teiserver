@@ -40,10 +40,10 @@ defmodule Teiserver.Protocols.SpringOut do
       if is_list(msg) do
         msg
         |> Enum.map(fn m ->
-          Logger.info("--> #{Kernel.inspect(state.socket)} #{TcpServer.format_log(m)}")
+          Logger.info("--> #{Kernel.inspect(state.username)}:#{Kernel.inspect(state.userid)} #{TcpServer.format_log(m)}")
         end)
       else
-        Logger.info("--> #{Kernel.inspect(state.socket)} #{TcpServer.format_log(msg)}")
+        Logger.info("--> #{Kernel.inspect(state.username)}:#{Kernel.inspect(state.userid)} #{TcpServer.format_log(msg)}")
       end
     end
     _send(msg, msg_id, state)
