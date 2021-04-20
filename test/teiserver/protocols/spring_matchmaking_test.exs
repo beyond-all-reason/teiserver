@@ -94,7 +94,7 @@ defmodule Teiserver.SpringMatchmakingTest do
     # Now get the second user to join
     _send(socket2, "c.matchmaking.join_queue #{queue.id}\n")
     reply = _recv(socket2)
-    assert reply == "OK cmd=c.matchmaking.join_queue\t#{queue.id}\n"
+    assert reply =~ "OK cmd=c.matchmaking.join_queue\t#{queue.id}\n"
 
     # Check server state
     state = GenServer.call(queue.pid, :get_state)

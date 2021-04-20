@@ -7,11 +7,6 @@ defmodule TeiserverWeb.Router do
 
   defmacro teiserver_routes() do
     quote do
-      scope "/", TeiserverWeb.Lobby, as: :ts_lobby do
-        pipe_through([:browser, :blank_layout])
-        get("/spass", GeneralController, :spass)
-      end
-
       scope "/teiserver", TeiserverWeb.Lobby, as: :ts_lobby do
         pipe_through([:browser, :admin_layout, :protected])
 

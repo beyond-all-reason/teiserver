@@ -22,6 +22,8 @@ defmodule Teiserver.Protocols.SpringOut do
   ---------
   """
 
+  @compflags "teiserver matchmaking token-auth"
+
   @spec reply(atom(), nil | String.t() | tuple() | list(), String.t(), map) :: map
   def reply(reply_cmd, data, msg_id, state) do
     reply(:spring, reply_cmd, data, msg_id, state)
@@ -69,7 +71,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:compflags, nil) do
-    "COMPFLAGS matchmaking\n"
+    "COMPFLAGS #{@compflags}\n"
   end
 
   defp do_reply(:pong, nil) do

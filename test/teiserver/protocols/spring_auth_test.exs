@@ -333,7 +333,10 @@ ENDOFCHANNELS\n"
   test "LISTCOMPFLAGS", %{socket: socket} do
     _send(socket, "LISTCOMPFLAGS\n")
     reply = _recv(socket)
-    assert reply == "COMPFLAGS matchmaking\n"
+    assert reply =~ "COMPFLAGS "
+    assert reply =~ "matchmaking"
+    assert reply =~ "teiserver"
+    assert reply =~ "token-auth"
   end
 
   test "c.battles.list_ids", %{socket: socket} do

@@ -13,19 +13,4 @@ defmodule TeiserverWeb.Lobby.GeneralController do
   def index(conn, _params) do
     render(conn, "index.html")
   end
-
-  @spec spass(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def spass(conn, %{"p" => p}) do
-    p = Teiserver.User.spring_md5_password(p)
-    conn
-    |> assign(:p, p)
-    |> render("spass.html")
-  end
-
-  @spec spass(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def spass(conn, _params) do
-    conn
-    |> assign(:p, nil)
-    |> render("spass.html")
-  end
 end
