@@ -2,7 +2,21 @@ defmodule Teiserver.SpringInternalTest do
   use Central.DataCase, async: true
   alias Teiserver.Protocols.Spring
 
-  test "parse and create loop" do
+  test "parse and create loop - clientstatus" do
+    statuses = ~w(1 4 16 25)
+
+    for s <- statuses do
+      result =
+        s
+        |> Spring.parse_client_status()
+        |> Spring.create_client_status()
+        |> to_string
+
+      assert s == result, message: "Status #{s}, got: #{result}"
+    end
+  end
+
+  test "parse and create loop - battlestatus" do
     statuses = ~w(4195330 4195418 4195462 4195402)
 
     for s <- statuses do

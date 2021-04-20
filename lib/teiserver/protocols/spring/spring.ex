@@ -33,9 +33,9 @@ defmodule Teiserver.Protocols.Spring do
     [
       if(client.in_game, do: 1, else: 0),
       if(client.away, do: 1, else: 0),
-      r1,
-      r2,
       r3,
+      r2,
+      r1,
       if(client.moderator, do: 1, else: 0),
       if(client.bot, do: 1, else: 0)
     ]
