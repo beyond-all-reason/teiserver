@@ -43,7 +43,8 @@ config :central, Teiserver,
     tcp: 8200,
     tls: 8201
   ],
-  heartbeat: nil,
+  heartbeat_interval: nil,
+  heartbeat_timeout: nil,
   autologin: true
 
 config :central, Central.Mailer,
