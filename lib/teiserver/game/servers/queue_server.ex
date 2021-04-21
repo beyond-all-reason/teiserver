@@ -3,7 +3,7 @@ defmodule Teiserver.Game.QueueServer do
   require Logger
   alias Teiserver.Battle
 
-  @tick_interval 5_000
+  @default_tick_interval 5_000
 
   @ready_wait_time 15
 
@@ -192,7 +192,8 @@ defmodule Teiserver.Game.QueueServer do
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
-    :timer.send_interval(@tick_interval, self(), :tick)
+    tick_interval = Map.get(opts.queue.settings, "tick_interval", @default_tick_interval)
+    :timer.send_interval(tick_interval, self(), :tick)
 
     {:ok, %{
       # Match ready stuff

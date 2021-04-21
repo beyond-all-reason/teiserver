@@ -71,10 +71,14 @@ defmodule TeiserverWeb.Clans.ClanController do
         "recache",
         %{}
       )
-    end
 
-    conn
-    |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name))
+      conn
+      |> put_flash(:success, "This is now your selected clan")
+      |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name))
+    else
+      conn
+      |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name))
+    end
   end
 
   @spec respond_to_invite(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

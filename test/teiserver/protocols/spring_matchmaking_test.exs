@@ -21,7 +21,9 @@ defmodule Teiserver.SpringMatchmakingTest do
       "colour" => "#112233",
       "map_list" => ["map1"],
       "conditions" => %{},
-      "settings" => %{},
+      "settings" => %{
+        "tick_interval" => 60_000
+      },
     })
     queue = Matchmaking.get_queue(queue.id)
 

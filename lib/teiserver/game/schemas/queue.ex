@@ -1,4 +1,12 @@
 defmodule Teiserver.Game.Queue do
+  @moduledoc """
+  Settings:
+    tick_interval: The interval at which the queue will check for matches, primarily used in testing to ensure
+      the queue doesn't tick too fast
+
+  Conditions:
+
+  """
   use CentralWeb, :schema
 
   schema "teiserver_game_queues" do

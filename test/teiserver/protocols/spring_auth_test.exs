@@ -399,11 +399,11 @@ ENDOFCHANNELS\n"
   end
 
   test "Ranks" do
-    user = new_user("rank_test", %{"ingame_minutes" => 60 * 200, "rank" => 5})
+    user = new_user("new_test_user_rank_test", %{"ingame_minutes" => 60 * 200, "rank" => 5})
     %{socket: socket} = auth_setup(user)
 
-    # [in_game, away, r1, r2, r3, mod, bot]
-    new_status = Integer.undigits(Enum.reverse([0, 1, 1, 0, 0, 0, 0]), 2)
+    # [in_game, away, r3, r2, r1, mod, bot]
+    new_status = Integer.undigits(Enum.reverse([0, 1, 0, 0, 1, 0, 0]), 2)
     _send(socket, "MYSTATUS #{new_status}\n")
     reply = _recv(socket)
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"

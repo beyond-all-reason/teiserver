@@ -229,7 +229,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:join_battle_failure, reason) do
-    "JOINBATTLE #{reason}\n"
+    "JOINBATTLEFAILED #{reason}\n"
   end
 
   defp do_reply(:add_start_rectangle, {team, [left, top, right, bottom]}) do
@@ -280,13 +280,14 @@ defmodule Teiserver.Protocols.SpringOut do
     "UPDATEBOT #{battle_id} #{bot.name} #{status} #{bot.team_colour}\n"
   end
 
-  defp do_reply(:battle_players, battle) do
-    battle.players
-    |> Parallel.map(fn player_id ->
-      pname = User.get_username(player_id)
-      "JOINEDBATTLE #{battle.id} #{pname}\n"
-    end)
-  end
+  # Not actually used
+  # defp do_reply(:battle_players, battle) do
+  #   battle.players
+  #   |> Parallel.map(fn player_id ->
+  #     pname = User.get_username(player_id)
+  #     "JOINEDBATTLE #{battle.id} #{pname}\n"
+  #   end)
+  # end
 
   # Client
   defp do_reply(:registration_accepted, nil) do
@@ -300,11 +301,6 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:client_status, client) do
     status = Spring.create_client_status(client)
     "CLIENTSTATUS #{client.name} #{status}\n"
-  end
-
-  defp do_reply(:client_battlestatus, {userid, battlestatus, team_colour}) do
-    name = User.get_username(userid)
-    "CLIENTBATTLESTATUS #{name} #{battlestatus} #{team_colour}\n"
   end
 
   defp do_reply(:client_battlestatus, nil), do: nil

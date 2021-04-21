@@ -20,6 +20,7 @@ defmodule Teiserver.TestLib do
     %{socket: socket}
   end
 
+  @spec new_user_name :: String.t()
   def new_user_name() do
     "new_test_user_#{:random.uniform(99_999_999) + 1_000_000}"
   end
@@ -184,5 +185,31 @@ defmodule Teiserver.TestLib do
   @spec player_permissions() :: [String.t()]
   def player_permissions do
     ["teiserver.player.account"]
+  end
+
+  @spec make_clan(String.t(), Map.t()) :: Teiserver.Clans.Clan.t()
+  def make_clan(name, params \\ %{}) do
+    {:ok, c} =
+      Teiserver.Clans.create_clan(Map.merge(%{
+        "name" => name,
+        "tag" => "[#{name}]",
+        "icon" => "fa far-house",
+        "colour1" => "#001122",
+        "colour2" => "#551122",
+        "data" => %{}
+      }, params))
+    c
+  end
+
+  @spec make_clan_membership(Integer.t(), Integer.t(), Map.t()) :: Teiserver.Clans.ClanMembership.t()
+  def make_clan_membership(clan_id, user_id, data \\ %{}) do
+    {:ok, gm} =
+      Teiserver.Clans.create_clan_membership(%{
+        "clan_id" => clan_id,
+        "user_id" => user_id,
+        "role" => data["role"] || "Member"
+      })
+
+    gm
   end
 end

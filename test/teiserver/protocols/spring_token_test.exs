@@ -6,14 +6,21 @@ defmodule Teiserver.SpringTokenTest do
   import Teiserver.TestLib,
     only: [tls_setup: 0, raw_setup: 0, _send: 2, _recv: 1]
 
-  test "c.user.get_token_by_email - insecure" do
+  test "c.user.get_token - insecure" do
     %{socket: socket} = raw_setup()
     _welcome = _recv(socket)
 
+    # Get by email
     _send(socket, "c.user.get_token_by_email token_test_user@\ttoken_password\n")
     reply = _recv(socket)
 
     assert reply == "NO cmd=c.user.get_token_by_email\tcannot get token over insecure connection\n"
+
+    # Now get by name
+    _send(socket, "c.user.get_token_by_name token_test_user@\ttoken_password\n")
+    reply = _recv(socket)
+
+    assert reply == "NO cmd=c.user.get_token_by_name\tcannot get token over insecure connection\n"
 
     _send(socket, "EXIT\n")
     _recv(socket)
@@ -68,14 +75,13 @@ defmodule Teiserver.SpringTokenTest do
 
     _send(socket, "c.user.login #{token}\tLobby Name\n")
     reply = _recv(socket)
-
     assert reply =~ "ACCEPTED token_test_user\n"
 
     _send(socket, "EXIT\n")
     _recv(socket)
   end
 
-  test "c.user.get_token_by_email - bad token" do
+  test "c.user.login - bad token" do
     %{socket: socket} = raw_setup()
     _welcome = _recv(socket)
 
@@ -83,10 +89,32 @@ defmodule Teiserver.SpringTokenTest do
 
     _send(socket, "c.user.login #{token}\tLobby Name\n")
     reply = _recv(socket)
-
     assert reply == "DENIED token_login_failed\n"
+  end
 
-    _send(socket, "EXIT\n")
-    _recv(socket)
+  test "c.user.get_token_by_email - incorrect" do
+    %{socket: socket} = tls_setup()
+    _welcome = _recv(socket)
+
+    _send(socket, "c.user.get_token_by_email nouser@\ttoken_password\n")
+    reply = _recv(socket)
+    assert reply == "NO cmd=c.user.get_token_by_email\tinvalid credentials\n"
+
+    _send(socket, "c.user.get_token_by_email nouser@ token_password\n")
+    reply = _recv(socket)
+    assert reply == "NO cmd=c.user.get_token_by_email\tbad format\n"
+  end
+
+  test "c.user.get_token_by_name - incorrect" do
+    %{socket: socket} = tls_setup()
+    _welcome = _recv(socket)
+
+    _send(socket, "c.user.get_token_by_name nouser\ttoken_password\n")
+    reply = _recv(socket)
+    assert reply == "NO cmd=c.user.get_token_by_name\tinvalid credentials\n"
+
+    _send(socket, "c.user.get_token_by_name nouser token_password\n")
+    reply = _recv(socket)
+    assert reply == "NO cmd=c.user.get_token_by_name\tbad format\n"
   end
 end

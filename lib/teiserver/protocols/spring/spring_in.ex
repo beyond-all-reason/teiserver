@@ -65,7 +65,6 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
-  # TODO
   # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
   defp do_handle("STLS", _, msg_id, state) do
     reply(:okay, "STLS", msg_id, state)
@@ -73,81 +72,9 @@ defmodule Teiserver.Protocols.SpringIn do
     reply(:welcome, nil, msg_id, new_state)
   end
 
-  # Special handler to allow us to test more easily, it just accepts
-  # any login. As soon as we put password checking in place this will
-  # stop working
-  defp do_handle("LI", username, msg_id, state) do
-    Logger.warn("Shortcut handler, should be removed for beta testing")
-
-    do_handle(
-      "LOGIN",
-      "#{username} X03MO1qnZdYdgyfeuILPmQ== 0 * bop",
-      msg_id,
-      state
-    )
-  end
-
-  # This is intended purely for an experimental benchmark
-  # the user won't be saved to the database
-  defp do_handle("TMPLI", "TEST_" <> userid, msg_id, state) do
-    if Application.get_env(:central, Teiserver)[:enable_benchmark] do
-      username = "TEST_" <> userid
-      userid = int_parse(userid)
-
-      User.add_user(%{
-        id: userid,
-        name: username,
-        email: "#{username}@#{username}",
-        rank: 1,
-        country: "??",
-        lobbyid: "Telnet",
-        ip: "default_ip",
-        moderator: false,
-        bot: false,
-        friends: [],
-        friend_requests: [],
-        ignored: [],
-        password_hash: "X03MO1qnZdYdgyfeuILPmQ==",
-        verification_code: nil,
-        verified: true,
-        password_reset_code: nil,
-        email_change_code: nil,
-        last_login: nil,
-        ingame_minutes: 1,
-        mmr: %{}
-      })
-
-      do_handle("LI", username, msg_id, state)
-    else
-      state
-    end
-  end
-
   defp do_handle("c.battles.list_ids", _, msg_id, state) do
     reply(:list_battles, Battle.list_battle_ids(), msg_id, state)
     state
-  end
-
-  defp do_handle("OB", _, _msg_id, state) do
-    Logger.warn("Shortcut handler, should be removed for beta testing")
-
-    do_handle(
-      "OPENBATTLE",
-      "0 0 * 52200 16 -1540855590 0 1565299817 spring\t104.0.1-1784-gf6173b4 BAR\tComet Catcher Remake 1.8\tEU - 00\tBeyond All Reason test-15658-85bf66d",
-      "",
-      state
-    )
-  end
-
-  defp do_handle("JB", battle_id, _msg_id, state) do
-    Logger.warn("Shortcut handler, should be removed for beta testing")
-
-    do_handle(
-      "JOINBATTLE",
-      "#{battle_id} empty -1540855590\n",
-      "",
-      state
-    )
   end
 
   # Specific handlers for different commands
@@ -990,7 +917,7 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
-  defp do_handle("LEAVEBATTLE", _, _msg_id, %{client: %{battle_id: nil}} = state) do
+  defp do_handle("LEAVEBATTLE", _, _msg_id, %{battle_id: nil} = state) do
     Battle.remove_user_from_any_battle(state.userid)
     |> Enum.each(fn b ->
       PubSub.unsubscribe(Central.PubSub, "battle_updates:#{b}")
@@ -1005,7 +932,7 @@ defmodule Teiserver.Protocols.SpringIn do
     %{state | battle_host: false}
   end
 
-  defp do_handle("MYBATTLESTATUS", _, _, %{client: %{battle_id: nil}} = state), do: state
+  defp do_handle("MYBATTLESTATUS", _, _, %{battle_id: nil} = state), do: state
 
   defp do_handle("MYBATTLESTATUS", data, msg_id, state) do
     case Regex.run(~r/(\S+) (.+)/, data) do
