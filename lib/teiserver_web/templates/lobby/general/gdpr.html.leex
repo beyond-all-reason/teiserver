@@ -1,0 +1,72 @@
+<div class="row" style="padding-top: 5vh; font-size: 1.1em;">
+  <div class="col-sm-12">
+    <div style="max-width: 800px; margin: 0 auto;">
+      <div class="card card-default" style="background-color: transparent;">
+        <div class="card-header" style="background-color: transparent;">
+          <h3 class="card-title">
+            <img src='<%= Routes.static_path(@conn, "/images/logo/logo favicon.png") %>'
+            height="42" style="margin-right: 5px;" class="d-inline align-top"
+          />
+
+            Data collection and privacy policy
+          </h3>
+        </div>
+        <div class="card-body">
+
+<p>This Statement of Privacy applies to the official <%= @game_name %> (<%= @game_name_short %>) lobby server as hosted under <%= @website_url %>. Under the GDPR, we’re required to notify you about the legal basis on which we process User Personal Information. When registering an account and playing <%= @game_name %>, some identifying information is stored on the server database. This document serves as a notice about what data is collected, what part of it is public/visible to admins and how it is handled. By registering a new account you hereby consent to the terms stated in this Privacy Policy.</p>
+
+<p>If you have any concerns about how <%= @game_name_short %> is handling your User Personal Information, please let us know immediately at (email?).</p>
+
+<h5>This information is used to provide with such services as:</h5>
+<ul>
+  <li>In-game lobby client with all its functionality</li>
+  <li>Replay browser as seen at <a href="https://www.beyondallreason.info/replays">https://www.beyondallreason.info/replays</a></li>
+  <li>Active battles viewer as seen at <a href="https://www.beyondallreason.info/active-battles">https://www.beyondallreason.info/active-battles</a></li>
+  <li>Leaderboards as seen at <a href="https://www.beyondallreason.info/leaderboards">https://www.beyondallreason.info/leaderboards</a></li>
+</ul>
+<br />
+
+<h4>Data Collection:</h4>
+<h5>Visible publicly:</h5>
+<ul>
+  <li>Username</li>
+  <li>User aliases used in the past on official battlerooms (history of renames)</li>
+  <li>Nationality/country flag (possible to be hidden optionally)</li>
+  <li>TrueSkill rating</li>
+  <li>Player rank/level based on ingame time</li>
+  <li>Chat logs from public lobby chat channels</li>
+  <li>History of game matches played online in non-private battlerooms (including the full setup, results, ingame actions over time, and chat including ingame messages)</li>
+</ul>
+<br />
+
+<h5>Non-public data, visible to admins:</h5>
+<ul>
+  <li>Client hardware specification</li>
+  <li>Email address</li>
+  <li>Game lobby client used</li>
+  <li>Login dates and a log of actions taken while being online</li>
+  <li>History of moderator/administrator action concerning the account</li>
+  <li>History of abuse reports (both filed and received by the user)</li>
+  <li>Direct messages exchanged between players?</li>
+</ul>
+<br />
+
+<h5>Not visible to anyone (stored as a one-way hashed representation):</h5>
+<ul>
+  <li>password</li>
+  <li>IP address</li>
+  <li>MAC address?</li>
+</ul>
+
+<p>Additional disclaimer about sharing/passing the data to live services? I reckon they are stored on other servers?</p>
+
+<h5>Open source</h5>
+<p>The entire source code for this server is <a href="<%= @github_repo %>">available on Github</a>.</p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<br />
+<br />

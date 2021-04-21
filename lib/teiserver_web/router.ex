@@ -7,6 +7,13 @@ defmodule TeiserverWeb.Router do
 
   defmacro teiserver_routes() do
     quote do
+      scope "/", TeiserverWeb.Lobby, as: :ts_lobby do
+        pipe_through([:browser, :blank_layout])
+
+        get("/gdpr", GeneralController, :gdpr)
+        get("/privacy_policy", GeneralController, :gdpr)
+      end
+
       scope "/teiserver", TeiserverWeb.Lobby, as: :ts_lobby do
         pipe_through([:browser, :admin_layout, :protected])
 

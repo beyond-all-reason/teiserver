@@ -42,8 +42,11 @@ config :central, Teiserver,
   heartbeat_interval: 30_000,
   heartbeat_timeout: 45_000,
   game_name: "Spring game",
+  game_name_short: "SG",
+  main_website: "https://site.com",
   discord: nil,
-  default_protocol: Teiserver.Protocols.Spring
+  default_protocol: Teiserver.Protocols.Spring,
+  github_repo: "https://github.com/Teifion/teiserver"
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

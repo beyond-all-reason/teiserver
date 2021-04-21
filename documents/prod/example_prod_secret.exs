@@ -11,6 +11,8 @@ config :central, Central.Setup,
 
 config :central, Teiserver,
   game_name: "My game name",
+  game_name_short: "GN",
+  main_website: "https://site.com",
   discord: "My discord link"# Set to nil to not have link
 
 config :central, Central.Repo,
