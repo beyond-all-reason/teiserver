@@ -265,6 +265,7 @@ At some stage you'll probably want to do these things, no rush though.
 ### Maintenance
 I've made use of the following scripts to perform maintenance/backups as needed.
 
+
 #### get_backup
 ```
 #!/usr/bin/env bash
@@ -284,6 +285,32 @@ ssh -i ~/.ssh/identity deploy@yourdomain.com <<'ENDSSH'
   rm /tmp/backup.db
   echo 'Remote backup removed'
 ENDSSH
+```
+
+### Usage stats
+One of the packages you installed at the start is sysstat. It can be configured to track the CPU, memory etc stats of the server.
+```sudo vi /etc/default/sysstat```
+
+Change `ENABLED="false"` to `ENABLED="true"`.
+
+There's also a script I use to automatically download the output and open a firefox browser to something which can build nice graphs out of it.
+
+```
+#!/usr/bin/env bash
+
+# Generate file
+ssh -i  ~/.ssh/identity deploy@yourdomain.com <<'ENDSSH'
+  ls /var/log/sysstat/sa?? | xargs -i sar -A -f {} > /tmp/sar_teiserver.txt
+ENDSSH
+
+# Download the file
+scp -i  ~/.ssh/identity deploy@yourdomain.com:/tmp/sar_teiserver.txt ~/Downloads/sar.txt
+
+# Linux mint file manager, on Mac you can use "open" and other linux distros have their own file managers
+nemo ~/Downloads
+
+# Replace with browser of choice
+firefox --new-tab "https://sarchart.dotsuresh.com/"
 ```
 
 ### FAQ
