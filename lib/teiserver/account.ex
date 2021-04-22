@@ -47,6 +47,14 @@ defmodule Teiserver.Account do
     |> Repo.one!()
   end
 
+  def get_user(id, args \\ []) do
+    UserLib.get_user()
+    |> UserLib.search(%{id: id})
+    |> UserLib.search(args[:search])
+    |> UserLib.preload(args[:joins])
+    |> Repo.one()
+  end
+
   @doc """
   Creates a user.
 

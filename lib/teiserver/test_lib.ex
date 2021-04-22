@@ -212,4 +212,19 @@ defmodule Teiserver.TestLib do
 
     gm
   end
+
+  @spec make_queue(String.t(), Map.t()) :: Teiserver.Game.Queue.t()
+  def make_queue(name, params \\ %{}) do
+    {:ok, q} =
+      Teiserver.Game.create_queue(Map.merge(%{
+        "name" => name,
+        "team_size" => 1,
+        "icon" => "fa far-house",
+        "colour" => "#112233",
+        "settings" => %{},
+        "conditions" => %{},
+        "map_list" => []
+      }, params))
+    q
+  end
 end

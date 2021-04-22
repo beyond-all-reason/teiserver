@@ -11,6 +11,8 @@ defmodule TeiserverWeb.Clans.ClanControllerTest do
 
   describe "index" do
     test "lists all clans", %{conn: conn} do
+      TestLib.make_clan("user_index_clan1")
+      TestLib.make_clan("user_index_clan2")
       conn = get(conn, Routes.ts_clans_clan_path(conn, :index))
       assert html_response(conn, 200) =~ "Clans"
     end

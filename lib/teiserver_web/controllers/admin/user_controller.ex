@@ -76,7 +76,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    user = Account.get_user!(id)
+    user = Account.get_user(id)
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
@@ -153,7 +153,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec edit(Plug.Conn.t(), map) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
-    user = Account.get_user!(id)
+    user = Account.get_user(id)
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->

@@ -29,7 +29,7 @@
 <%= render "form.html", Map.put(assigns, :action, Routes.ts_admin_user_path(@conn, :update, @user)) %>
 <hr />
 
-<form action="<%= Routes.ts_admin_user_path(@conn, :reset_password, @user) %>" method="POST" class="form-horizontal" style="padding-right: 15px;">
+<form action="<%= Routes.ts_admin_user_path(@conn, :reset_password, @user) %>" method="POST" class="form-horizontal" style="padding-right: 15px; display:none;">
   <input type="hidden" name="_method" value="POST">
 
   <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
