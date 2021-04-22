@@ -42,13 +42,13 @@ defmodule TeiserverWeb.Router do
         get("/", ClanController, :index)
         get("/:name", ClanController, :show)
 
-        get("/clans/set_default/:id", ClanController, :set_default)
-        post("/clans/create_invite", ClanController, :create_invite)
-        delete("/clans/delete_invite/:clan_id/:user_id", ClanController, :delete_invite)
-        put("/clans/respond_to_invite/:clan_id/:response", ClanController, :respond_to_invite)
-        delete("/clans/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)
-        put("/clans/promote/:clan_id/:user_id", ClanController, :promote)
-        put("/clans/demote/:clan_id/:user_id", ClanController, :demote)
+        get("/set_default/:id", ClanController, :set_default)
+        post("/create_invite", ClanController, :create_invite)
+        delete("/delete_invite/:clan_id/:user_id", ClanController, :delete_invite)
+        put("/respond_to_invite/:clan_id/:response", ClanController, :respond_to_invite)
+        delete("/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)
+        put("/promote/:clan_id/:user_id", ClanController, :promote)
+        put("/demote/:clan_id/:user_id", ClanController, :demote)
       end
 
       scope "/teiserver/games", TeiserverWeb.Game, as: :ts_game do

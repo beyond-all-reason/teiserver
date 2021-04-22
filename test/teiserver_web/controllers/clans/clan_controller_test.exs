@@ -55,4 +55,88 @@ defmodule TeiserverWeb.Clans.ClanControllerTest do
       end
     end
   end
+
+  describe "creating invites" do
+    test "create invite - success", %{conn: conn, user: user} do
+      clan = TestLib.make_clan("clans_default_clan_success")
+      TestLib.make_clan_membership(clan.id, user.id, %{"role" => "Admin"})
+      user2 = GeneralTestLib.make_user()
+      conn = post(conn, Routes.ts_clans_clan_path(conn, :create_invite), %{
+        "teiserver_user" => "##{user2.id}",
+        "clan_id" => clan.id
+      })
+      assert redirected_to(conn) == Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites"
+      assert conn.private[:phoenix_flash]["success"] == "User invited to clan."
+    end
+
+    test "create invite - you're not a mod/admin", %{conn: conn, user: user} do
+      clan = TestLib.make_clan("clans_default_clan_success")
+      TestLib.make_clan_membership(clan.id, user.id, %{"role" => "Member"})
+      user2 = GeneralTestLib.make_user()
+      conn = post(conn, Routes.ts_clans_clan_path(conn, :create_invite), %{
+        "teiserver_user" => "##{user2.id}",
+        "clan_id" => clan.id
+      })
+      assert redirected_to(conn) == Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites"
+      assert conn.private[:phoenix_flash]["danger"] == "You cannot send out invites for this clan."
+    end
+
+    test "create invite - you're not a member", %{conn: conn} do
+      clan = TestLib.make_clan("clans_default_clan_success")
+      user2 = GeneralTestLib.make_user()
+      conn = post(conn, Routes.ts_clans_clan_path(conn, :create_invite), %{
+        "teiserver_user" => "##{user2.id}",
+        "clan_id" => clan.id
+      })
+      assert redirected_to(conn) == "/"
+      assert conn.private[:phoenix_flash]["danger"] == "You are not a member of this clan."
+    end
+  end
+
+  describe "removing invites" do
+
+  end
+
+  describe "responding to invites" do
+
+  end
+
+  describe "promote member" do
+    test "promote member - success", %{conn: conn, user: user} do
+      clan = TestLib.make_clan("clans_default_clan_success")
+      TestLib.make_clan_membership(clan.id, user.id, %{"role" => "Admin"})
+      user2 = GeneralTestLib.make_user()
+      TestLib.make_clan_membership(clan.id, user2.id, %{"role" => "Member"})
+      conn = put(conn, Routes.ts_clans_clan_path(conn, :promote, clan.id, user2.id))
+      assert redirected_to(conn) == Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#members"
+      assert conn.private[:phoenix_flash]["info"] == "User promoted."
+    end
+
+    test "promote member - you're not a mod/admin", %{conn: conn, user: user} do
+      clan = TestLib.make_clan("clans_default_clan_success")
+      TestLib.make_clan_membership(clan.id, user.id, %{"role" => "Member"})
+      user2 = GeneralTestLib.make_user()
+      TestLib.make_clan_membership(clan.id, user2.id, %{"role" => "Member"})
+      conn = put(conn, Routes.ts_clans_clan_path(conn, :promote, clan.id, user2.id))
+      assert redirected_to(conn) == Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#members"
+      assert conn.private[:phoenix_flash]["danger"] == "No permissions."
+    end
+
+    test "promote member - you're not a member", %{conn: conn} do
+      clan = TestLib.make_clan("clans_default_clan_success")
+      user2 = GeneralTestLib.make_user()
+      TestLib.make_clan_membership(clan.id, user2.id, %{"role" => "Member"})
+      conn = put(conn, Routes.ts_clans_clan_path(conn, :promote, clan.id, user2.id))
+      assert redirected_to(conn) == "/"
+      assert conn.private[:phoenix_flash]["danger"] == "You are not a member of this clan."
+    end
+  end
+
+  describe "demote member" do
+
+  end
+
+  describe "remove member" do
+
+  end
 end
