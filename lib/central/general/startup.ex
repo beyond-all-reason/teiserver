@@ -151,6 +151,5 @@ defmodule Central.General.Startup do
     add_permission_set("admin", "report", ~w(show update delete report))
     add_permission_set("admin", "user", ~w(show create update delete report))
     add_permission_set("admin", "group", ~w(show create update delete report config))
-
   end
 end

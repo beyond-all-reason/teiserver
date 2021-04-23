@@ -94,7 +94,10 @@ defmodule Central.Account.UserLib do
 
     Email.new_email()
     |> Email.to({user.name, user.email})
-    |> Email.from({Application.get_env(:central, Central.Mailer)[:noreply_name], Central.Mailer.noreply_address()})
+    |> Email.from(
+      {Application.get_env(:central, Central.Mailer)[:noreply_name],
+       Central.Mailer.noreply_address()}
+    )
     |> Email.subject(Application.get_env(:central, Central)[:site_title])
     |> Email.html_body(html_body)
     |> Email.text_body(text_body)

@@ -203,10 +203,15 @@ defmodule Central.AccountTest do
     test "create_report/1 with valid data creates a report" do
       reporter = AccountTestLib.user_fixture()
       target = AccountTestLib.user_fixture()
-      assert {:ok, %Report{} = report} = Account.create_report(Map.merge(@valid_attrs, %{
-        "reporter_id" => reporter.id,
-        "target_id" => target.id
-      }))
+
+      assert {:ok, %Report{} = report} =
+               Account.create_report(
+                 Map.merge(@valid_attrs, %{
+                   "reporter_id" => reporter.id,
+                   "target_id" => target.id
+                 })
+               )
+
       assert report.reason == "some reason"
     end
 
@@ -219,14 +224,21 @@ defmodule Central.AccountTest do
       target = AccountTestLib.user_fixture()
       responder = AccountTestLib.user_fixture()
       report = AccountTestLib.report_fixture(%{"reason" => "some reason"})
-      assert {:ok, %Report{} = report} = Account.update_report(report, Map.merge(@update_attrs, %{
-        "reporter_id" => reporter.id,
-        "target_id" => target.id,
-        "responder_id" => responder.id,
-        "response_text" => "Response text",
-        "response_action" => "Ignore",
-        "reason" => "updated reason"# This should not be saved, it is set at creation
-      }))
+
+      assert {:ok, %Report{} = report} =
+               Account.update_report(
+                 report,
+                 Map.merge(@update_attrs, %{
+                   "reporter_id" => reporter.id,
+                   "target_id" => target.id,
+                   "responder_id" => responder.id,
+                   "response_text" => "Response text",
+                   "response_action" => "Ignore",
+                   # This should not be saved, it is set at creation
+                   "reason" => "updated reason"
+                 })
+               )
+
       assert report.reason == "some reason"
     end
 

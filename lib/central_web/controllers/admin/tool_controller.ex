@@ -33,7 +33,6 @@ defmodule CentralWeb.Admin.ToolController do
     |> render("test_page.html")
   end
 
-  @spec test_error(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def test_error(_conn, params) do
     # raise CentralWeb.General.Forbidden, message: "You need to be a team admin"
 
@@ -55,8 +54,7 @@ defmodule CentralWeb.Admin.ToolController do
   @spec coverage_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def coverage_post(conn, params) do
     file_path = Application.get_env(:central, Central)[:file_path]
-    coverage_path =
-      "file:///#{file_path}/cover/excoveralls.html#"
+    coverage_path = "file:///#{file_path}/cover/excoveralls.html#"
 
     coverage_data =
       if params["results"] == "" do

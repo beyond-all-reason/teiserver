@@ -160,10 +160,11 @@ defmodule Central.Helpers.SchemaHelper do
               {k, nil}
 
             _ ->
-              new_value = patterns
-              |> Enum.reduce(v, fn (pattern, acc) ->
-                Regex.replace(pattern, acc, "")
-              end)
+              new_value =
+                patterns
+                |> Enum.reduce(v, fn pattern, acc ->
+                  Regex.replace(pattern, acc, "")
+                end)
 
               {
                 k,

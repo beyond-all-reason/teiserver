@@ -41,11 +41,36 @@ defmodule Central.Account.User do
   def changeset(user, attrs \\ %{}) do
     if attrs["password"] == "" do
       user
-      |> cast(attrs, [:name, :email, :icon, :colour, :permissions, :admin_group_id, :data] ++ @extra_fields)
+      |> cast(
+        attrs,
+        [:name, :email, :icon, :colour, :permissions, :admin_group_id, :data] ++ @extra_fields
+      )
       |> validate_required([:name, :email, :icon, :colour, :permissions])
     else
       user
-      |> cast(attrs, [
+      |> cast(
+        attrs,
+        [
+          :name,
+          :email,
+          :password,
+          :icon,
+          :colour,
+          :permissions,
+          :admin_group_id,
+          :data
+        ] ++ @extra_fields
+      )
+      |> validate_required([:name, :email, :password, :icon, :colour, :permissions])
+      |> put_password_hash()
+    end
+  end
+
+  def changeset(user, attrs, :script) do
+    user
+    |> cast(
+      attrs,
+      [
         :name,
         :email,
         :password,
@@ -54,24 +79,8 @@ defmodule Central.Account.User do
         :permissions,
         :admin_group_id,
         :data
-      ] ++ @extra_fields)
-      |> validate_required([:name, :email, :password, :icon, :colour, :permissions])
-      |> put_password_hash()
-    end
-  end
-
-  def changeset(user, attrs, :script) do
-    user
-    |> cast(attrs, [
-      :name,
-      :email,
-      :password,
-      :icon,
-      :colour,
-      :permissions,
-      :admin_group_id,
-      :data
-    ] ++ @extra_fields)
+      ] ++ @extra_fields
+    )
     |> validate_required([:name, :email, :icon, :colour, :permissions])
   end
 

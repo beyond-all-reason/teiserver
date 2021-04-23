@@ -22,17 +22,29 @@ defmodule Central.Account.Report do
   Builds a changeset based on the `struct` and `params`.
   """
   def changeset(struct, params \\ %{}) do
-    params = params
-    |> trim_strings([:location, :reason, :response_text, :response_action])
+    params =
+      params
+      |> trim_strings([:location, :reason, :response_text, :response_action])
 
     struct
-    |> cast(params, [:location, :location_id, :reason, :reporter_id, :target_id, :response_text, :response_action, :responder_id, :expires])
+    |> cast(params, [
+      :location,
+      :location_id,
+      :reason,
+      :reporter_id,
+      :target_id,
+      :response_text,
+      :response_action,
+      :responder_id,
+      :expires
+    ])
     |> validate_required([:reporter_id, :target_id])
   end
 
   def create_changeset(struct, params \\ %{}) do
-    params = params
-    |> trim_strings([:location, :reason])
+    params =
+      params
+      |> trim_strings([:location, :reason])
 
     struct
     |> cast(params, [:location, :location_id, :reason, :reporter_id, :target_id])
@@ -40,8 +52,9 @@ defmodule Central.Account.Report do
   end
 
   def respond_changeset(struct, params \\ %{}) do
-    params = params
-    |> trim_strings([:response_text, :response_action])
+    params =
+      params
+      |> trim_strings([:response_text, :response_action])
 
     struct
     |> cast(params, [:response_text, :response_action, :responder_id, :expires])

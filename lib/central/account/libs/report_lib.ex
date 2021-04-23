@@ -13,13 +13,11 @@ defmodule Central.Account.ReportLib do
     %{
       type_colour: colours() |> elem(0),
       type_icon: icon(),
-
       item_id: report.id,
       item_type: "central_account_report",
       item_colour: colours() |> elem(0),
       item_icon: Central.Account.ReportLib.icon(),
       item_label: "#{report.reporter.name} -> #{report.target.name}",
-
       url: "/account/reports/#{report.id}"
     }
   end
@@ -67,16 +65,17 @@ defmodule Central.Account.ReportLib do
   end
 
   # Queries
-  @spec query_reports() :: Ecto.Query.t
+  @spec query_reports() :: Ecto.Query.t()
   def query_reports do
-    from reports in Report
+    from(reports in Report)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
@@ -96,12 +95,14 @@ defmodule Central.Account.ReportLib do
 
   def _search(query, :user_id, user_id) do
     from reports in query,
-      where: reports.reporter_id == ^user_id
-        or reports.target_id == ^user_id
-        or reports.responder_id == ^user_id
+      where:
+        reports.reporter_id == ^user_id or
+          reports.target_id == ^user_id or
+          reports.responder_id == ^user_id
   end
 
   def _search(query, :filter, "all"), do: query
+
   def _search(query, :filter, "open") do
     from reports in query,
       where: is_nil(reports.responder_id)
@@ -113,21 +114,25 @@ defmodule Central.Account.ReportLib do
   end
 
   def _search(query, :filter, {"all", _}), do: query
+
   def _search(query, :filter, {"target", user_id}) do
     from reports in query,
       where: reports.target_id == ^user_id
   end
+
   def _search(query, :filter, {"reporter", user_id}) do
     from reports in query,
       where: reports.reporter_id == ^user_id
   end
+
   def _search(query, :filter, {"responder", user_id}) do
     from reports in query,
       where: reports.responder_id == ^user_id
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Newest first") do
     from reports in query,
       order_by: [desc: reports.inserted_at]
@@ -138,8 +143,9 @@ defmodule Central.Account.ReportLib do
       order_by: [asc: reports.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :reporter in preloads, do: _preload_reporter(query), else: query
     query = if :target in preloads, do: _preload_target(query), else: query

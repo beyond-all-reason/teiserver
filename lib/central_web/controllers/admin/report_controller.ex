@@ -18,39 +18,46 @@ defmodule CentralWeb.Admin.ReportController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    reports = Account.list_reports(
-      search: [
-        simple_search: Map.get(params, "s", "") |> String.trim,
-        filter: (params["filter"] || "all")
-      ],
-      preload: [
-        :reporter, :target, :responder
-      ],
-      order_by: "Newest first"
-    )
+    reports =
+      Account.list_reports(
+        search: [
+          simple_search: Map.get(params, "s", "") |> String.trim(),
+          filter: params["filter"] || "all"
+        ],
+        preload: [
+          :reporter,
+          :target,
+          :responder
+        ],
+        order_by: "Newest first"
+      )
 
     conn
-    |> assign(:filter, (params["filter"] || "all"))
+    |> assign(:filter, params["filter"] || "all")
     |> assign(:reports, reports)
     |> render("index.html")
   end
 
   @spec user_show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def user_show(conn, %{"id" => user_id} = params) do
-    reports = Account.list_reports(
-      search: [
-        user_id: user_id,
-        filter: {(params["filter"] || "all"), user_id}
-      ],
-      preload: [
-        :reporter, :target, :responder
-      ],
-      order_by: "Newest first"
-    )
+    reports =
+      Account.list_reports(
+        search: [
+          user_id: user_id,
+          filter: {params["filter"] || "all", user_id}
+        ],
+        preload: [
+          :reporter,
+          :target,
+          :responder
+        ],
+        order_by: "Newest first"
+      )
+
     user = Account.get_user!(user_id)
 
     conn
-    |> assign(:filter, (params["filter"] || "all"))
+    |> assign(:filter, params["filter"] || "all")
     |> assign(:reports, reports)
     |> assign(:user, user)
     |> render("filtered.html")
@@ -58,15 +65,19 @@ defmodule CentralWeb.Admin.ReportController do
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    report = Account.get_report!(id,
-      preload: [
-        :reporter, :target, :responder
-      ]
-    )
+    report =
+      Account.get_report!(id,
+        preload: [
+          :reporter,
+          :target,
+          :responder
+        ]
+      )
 
-    fav = report
-    |> ReportLib.make_favourite
-    |> insert_recently(conn)
+    fav =
+      report
+      |> ReportLib.make_favourite()
+      |> insert_recently(conn)
 
     conn
     |> assign(:report, report)
@@ -101,16 +112,20 @@ defmodule CentralWeb.Admin.ReportController do
 
   @spec respond_form(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def respond_form(conn, %{"id" => id}) do
-    report = Account.get_report!(id,
-      preload: [
-        :reporter, :target, :responder
-      ]
-    )
+    report =
+      Account.get_report!(id,
+        preload: [
+          :reporter,
+          :target,
+          :responder
+        ]
+      )
 
     changeset = Account.change_report(report)
 
-    fav = report
-    |> ReportLib.make_favourite
+    fav =
+      report
+      |> ReportLib.make_favourite()
 
     conn
     |> assign(:report, report)
@@ -123,18 +138,24 @@ defmodule CentralWeb.Admin.ReportController do
   def respond_post(conn, %{"id" => id, "report" => report_params}) do
     report = Account.get_report!(id)
 
-    case ReportLib.perform_action(report, report_params["response_action"], report_params["response_data"]) do
+    case ReportLib.perform_action(
+           report,
+           report_params["response_action"],
+           report_params["response_data"]
+         ) do
       {:ok, expires} ->
-        report_params = Map.merge(report_params, %{
-          "expires" => expires,
-          "responder_id" => conn.user_id
-        })
+        report_params =
+          Map.merge(report_params, %{
+            "expires" => expires,
+            "responder_id" => conn.user_id
+          })
 
         case Account.update_report(report, report_params) do
           {:ok, _report} ->
             conn
             |> put_flash(:success, "Report updated.")
             |> redirect(to: Routes.admin_report_path(conn, :index))
+
           {:error, %Ecto.Changeset{} = changeset} ->
             conn
             |> assign(:report, report)

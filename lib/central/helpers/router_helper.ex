@@ -4,15 +4,15 @@ defmodule Central.RouterHelper do
   defmacro use_routers() do
     routers = Application.get_env(:central, Extensions)[:routers]
 
-    IO.puts ""
-    IO.inspect routers
-    IO.puts ""
+    IO.puts("")
+    IO.inspect(routers)
+    IO.puts("")
 
     for mod <- routers do
       quote do
-        IO.puts ""
-        IO.inspect unquote(mod)
-        IO.puts ""
+        IO.puts("")
+        IO.inspect(unquote(mod))
+        IO.puts("")
         unquote(mod)
       end
     end

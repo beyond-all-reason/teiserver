@@ -107,7 +107,10 @@ defmodule CentralWeb.Communication.BlogController do
 
         true ->
           conn
-          |> assign(:title, "#{Application.get_env(:central, Central)[:site_title]} - " <> post.title)
+          |> assign(
+            :title,
+            "#{Application.get_env(:central, Central)[:site_title]} - " <> post.title
+          )
           |> assign(:post, post)
           |> render("show.html")
       end

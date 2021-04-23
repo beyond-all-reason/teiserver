@@ -1,4 +1,5 @@
 defmodule Central.NestedMaps do
+  @spec get(Map.t(), [String.t() | atom]) :: any
   def get(map, [k | []]) do
     map[k]
   end
@@ -7,6 +8,7 @@ defmodule Central.NestedMaps do
     get(map[k], keys)
   end
 
+  @spec put(Map.t(), [String.t() | atom], any) :: Map.t()
   def put(map, [k | []], value) do
     Map.put(map, k, value)
   end

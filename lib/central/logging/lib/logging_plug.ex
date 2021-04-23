@@ -9,6 +9,7 @@ defmodule Central.Logging.LoggingPlug do
     %{}
   end
 
+  @spec call(Plug.Conn.t(), List.t()) :: Plug.Conn.t()
   def call(conn, _ops) do
     start_tick = :os.system_time(:micro_seconds)
 
@@ -34,6 +35,7 @@ defmodule Central.Logging.LoggingPlug do
     end)
   end
 
+  @spec convert_from_x_real_ip(String.t()) :: Tuple.t()
   defp convert_from_x_real_ip(ip) do
     ip
     |> String.split(".")
@@ -41,6 +43,7 @@ defmodule Central.Logging.LoggingPlug do
     |> List.to_tuple()
   end
 
+  @spec get_user_id(Plug.Conn.t()) :: nil | Integer.t()
   defp get_user_id(conn) do
     if conn.assigns[:current_user] == nil do
       nil
@@ -66,7 +69,7 @@ defmodule Central.Logging.LoggingPlug do
     page_log =
       PageViewLog.changeset(%PageViewLog{}, %{
         section: section,
-        path: Enum.join(path, "/") || "",
+        path: Enum.join(path, "/"),
         method: conn.method,
         ip: ip,
         load_time: load_time,

@@ -20,11 +20,15 @@ defmodule CentralWeb.Account.ReportController do
   end
 
   def create(conn, %{"report" => params}) do
-    params = Map.merge(%{
-      "location" => "default-controller",
-      "location_id" => nil,
-      "reporter_id" => conn.user_id
-    }, params)
+    params =
+      Map.merge(
+        %{
+          "location" => "default-controller",
+          "location_id" => nil,
+          "reporter_id" => conn.user_id
+        },
+        params
+      )
 
     case Account.create_report(params) do
       {:ok, _report} ->

@@ -37,11 +37,12 @@ defmodule Central.Application do
       ] ++
         load_test_server()
 
-    extended_children = Application.get_env(:central, Extensions)[:applications]
-    |> Enum.map(fn m ->
-      m.children()
-    end)
-    |> List.flatten
+    extended_children =
+      Application.get_env(:central, Extensions)[:applications]
+      |> Enum.map(fn m ->
+        m.children()
+      end)
+      |> List.flatten()
 
     children = children ++ extended_children
 
@@ -116,7 +117,6 @@ defmodule Central.Application do
     |> Enum.each(fn m ->
       m.startup()
     end)
-
   end
 
   defp env_startup(module) do
@@ -133,5 +133,15 @@ defmodule Central.Application do
   def config_change(changed, _new, removed) do
     CentralWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  def prep_stop(state) do
+    CentralWeb.Endpoint.broadcast(
+      "application",
+      "prep_stop",
+      %{}
+    )
+
+    state
   end
 end

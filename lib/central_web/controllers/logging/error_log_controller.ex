@@ -15,7 +15,7 @@ defmodule CentralWeb.Logging.ErrorLogController do
     sidemenu_active: "logging"
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-    def index(conn, _params) do
+  def index(conn, _params) do
     logs =
       Logging.list_error_logs(
         joins: [:users],

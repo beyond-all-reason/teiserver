@@ -8,12 +8,16 @@ defmodule Central.Account.AccountTestLib do
   def user_fixture(data \\ %{}) do
     r = :rand.uniform(999_999_999)
 
-    User.changeset(%User{}, %{
-      name: data["name"] || "name_#{r}",
-      email: data["email"] || "email_#{r}",
-      colour: data["colour"] || "colour",
-      icon: data["icon"] || "icon",
-    }, :script)
+    User.changeset(
+      %User{},
+      %{
+        name: data["name"] || "name_#{r}",
+        email: data["email"] || "email_#{r}",
+        colour: data["colour"] || "colour",
+        icon: data["icon"] || "icon"
+      },
+      :script
+    )
     |> Repo.insert!()
   end
 
@@ -25,7 +29,7 @@ defmodule Central.Account.AccountTestLib do
       name: data["name"] || "name",
       reason: data["reason"] || "reason",
       target_id: target_id,
-      reporter_id: reporter_id,
+      reporter_id: reporter_id
     })
     |> Repo.insert!()
   end

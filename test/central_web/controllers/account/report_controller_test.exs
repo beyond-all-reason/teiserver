@@ -4,6 +4,7 @@ defmodule CentralWeb.Account.ReportControllerTest do
   alias Central.Account.AccountTestLib
 
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(~w(admin.report))
   end

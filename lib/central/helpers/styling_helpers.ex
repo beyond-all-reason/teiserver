@@ -120,10 +120,12 @@ defmodule Central.Helpers.StylingHelper do
       bullhorn spa tree-palm
       cloud moon snowflake umbrella volcano sun-haze)
 
+  @spec random_icon() :: String.t()
   def random_icon() do
     Enum.random(@random_icons)
   end
 
+  @spec hex_colour_list() :: [String.t()]
   def hex_colour_list() do
     [
       "#AA3333",
@@ -144,10 +146,12 @@ defmodule Central.Helpers.StylingHelper do
     ]
   end
 
+  @spec random_colour() :: String.t()
   def random_colour() do
     Enum.random(hex_colour_list())
   end
 
+  @spec random_styling() :: Map.t()
   def random_styling() do
     %{
       "icon" => "far fa-" <> random_icon(),
@@ -155,6 +159,7 @@ defmodule Central.Helpers.StylingHelper do
     }
   end
 
+  @spec random_styling(Map.t()) :: Map.t()
   def random_styling(input_dict) do
     Map.merge(random_styling(), input_dict)
   end

@@ -244,13 +244,10 @@ defmodule CentralWeb.Router do
     post("/users/search", UserController, :search)
 
     # User reports
-    resources("/reports", ReportController,
-      only: [:index, :show]
-    )
+    resources("/reports", ReportController, only: [:index, :show])
     get("/reports/user/:id", ReportController, :user_show)
     get("/reports/:id/respond", ReportController, :respond_form)
     put("/reports/:id/respond", ReportController, :respond_post)
-
 
     # Groups
     post("/groups/create_membership", GroupController, :create_membership)

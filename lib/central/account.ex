@@ -673,7 +673,7 @@ defmodule Central.Account do
   end
 
   def report_query(id, args) do
-    ReportLib.query_reports
+    ReportLib.query_reports()
     |> ReportLib.search(%{id: id})
     |> ReportLib.search(args[:search])
     |> ReportLib.preload(args[:preload])
@@ -693,7 +693,7 @@ defmodule Central.Account do
   def list_reports(args \\ []) do
     report_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -712,15 +712,17 @@ defmodule Central.Account do
   """
   def get_report!(id) when not is_list(id) do
     report_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_report!(args) do
     report_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_report!(id, args) do
     report_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function

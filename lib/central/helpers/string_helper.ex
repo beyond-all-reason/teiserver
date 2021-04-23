@@ -2,11 +2,13 @@ defmodule Central.Helpers.StringHelper do
   @moduledoc """
   """
 
+  @spec remove_spaces(String.t()) :: String.t()
   def remove_spaces(the_string) do
     the_string
     |> String.replace(" ", "_")
   end
 
+  @spec safe_name(String.t() | nil) :: String.t()
   def safe_name(nil), do: ""
 
   def safe_name(name) do
@@ -19,6 +21,7 @@ defmodule Central.Helpers.StringHelper do
     |> String.downcase()
   end
 
+  @spec html_safe(String.t()) :: String.t()
   def html_safe(s) do
     s
     |> String.replace("&", "&amp;")

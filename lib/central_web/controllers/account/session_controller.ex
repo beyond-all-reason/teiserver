@@ -194,7 +194,7 @@ defmodule CentralWeb.Account.SessionController do
 
       true ->
         user_params = %{
-          "password" => pass1,
+          "password" => pass1
         }
 
         case Account.update_user(code.user, user_params) do
