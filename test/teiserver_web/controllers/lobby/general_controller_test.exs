@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Lobby.GeneralControllerTest do
 
   setup do
     GeneralTestLib.conn_setup(Teiserver.TestLib.player_permissions())
-    |> Teiserver.TestLib.conn_setup
+    |> Teiserver.TestLib.conn_setup()
   end
 
   test "index", %{conn: conn} do

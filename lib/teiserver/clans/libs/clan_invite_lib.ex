@@ -3,16 +3,17 @@ defmodule Teiserver.Clans.ClanInviteLib do
   alias Teiserver.Clans.ClanInvite
 
   # Queries
-  @spec get_clan_invites() :: Ecto.Query.t
+  @spec get_clan_invites() :: Ecto.Query.t()
   def get_clan_invites do
-    from clan_invites in ClanInvite
+    from(clan_invites in ClanInvite)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end

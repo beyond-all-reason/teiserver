@@ -14,17 +14,19 @@ defmodule Teiserver.SpringMatchmakingTest do
   end
 
   test "Test queuing", %{socket: socket1, user: user1} do
-    {:ok, queue} = Game.create_queue(%{
-      "name" => "test_queue",
-      "team_size" => 1,
-      "icon" => "far fa-home",
-      "colour" => "#112233",
-      "map_list" => ["map1"],
-      "conditions" => %{},
-      "settings" => %{
-        "tick_interval" => 60_000
-      },
-    })
+    {:ok, queue} =
+      Game.create_queue(%{
+        "name" => "test_queue",
+        "team_size" => 1,
+        "icon" => "far fa-home",
+        "colour" => "#112233",
+        "map_list" => ["map1"],
+        "conditions" => %{},
+        "settings" => %{
+          "tick_interval" => 60_000
+        }
+      })
+
     queue = Matchmaking.get_queue(queue.id)
 
     %{socket: socket2, user: user2} = auth_setup()
@@ -143,10 +145,12 @@ defmodule Teiserver.SpringMatchmakingTest do
 
     # Now lets create a battle
     _recv(battle_socket)
+
     _send(
       battle_socket,
       "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName\n"
     )
+
     # We know the battle is being opened, don't need to worry about it
     _recv(socket1)
     _recv(socket2)

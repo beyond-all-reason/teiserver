@@ -206,6 +206,7 @@ defmodule Teiserver.Battle do
 
   @spec add_user_to_battle(Integer.t(), Integer.t() | nil) :: nil
   def add_user_to_battle(_uid, nil), do: nil
+
   def add_user_to_battle(userid, battle_id) do
     ConCache.update(:battles, battle_id, fn battle_state ->
       new_state =
@@ -214,6 +215,7 @@ defmodule Teiserver.Battle do
           battle_state
         else
           Client.join_battle(userid, battle_id)
+
           PubSub.broadcast(
             Central.PubSub,
             "all_battle_updates",
@@ -226,6 +228,7 @@ defmodule Teiserver.Battle do
 
       {:ok, new_state}
     end)
+
     nil
   end
 
@@ -233,6 +236,7 @@ defmodule Teiserver.Battle do
 
   def remove_user_from_battle(userid, battle_id) do
     Client.leave_battle(userid)
+
     case do_remove_user_from_battle(userid, battle_id) do
       :closed ->
         nil
@@ -275,25 +279,29 @@ defmodule Teiserver.Battle do
 
   @spec remove_user_from_any_battle(integer() | nil) :: list()
   def remove_user_from_any_battle(nil), do: []
+
   def remove_user_from_any_battle(userid) do
-    battle_ids = list_battles()
-    |> Enum.filter(fn b -> b != nil end)
-    |> Enum.filter(fn b -> Enum.member?(b.players, userid) or b.founder_id == userid end)
-    |> Enum.map(fn b ->
-      remove_user_from_battle(userid, b.id)
-      b.id
-    end)
+    battle_ids =
+      list_battles()
+      |> Enum.filter(fn b -> b != nil end)
+      |> Enum.filter(fn b -> Enum.member?(b.players, userid) or b.founder_id == userid end)
+      |> Enum.map(fn b ->
+        remove_user_from_battle(userid, b.id)
+        b.id
+      end)
 
     if Enum.count(battle_ids) > 1 do
       Logger.error("#{userid} is a member of #{Enum.count(battle_ids)} battles")
     end
+
     battle_ids
   end
 
   @spec find_empty_battle() :: Map.t()
   def find_empty_battle() do
-    empties = list_battles()
-    |> Enum.filter(fn b -> b.players == [] end)
+    empties =
+      list_battles()
+      |> Enum.filter(fn b -> b.players == [] end)
 
     case empties do
       [] -> nil
@@ -325,12 +333,13 @@ defmodule Teiserver.Battle do
           ConCache.update(:battles, battle_id, fn battle_state ->
             # This is purely to prevent errors if the battle is in the process of shutting down
             # mid function call
-            new_state = if battle_state != nil do
-              new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
-              Map.put(battle_state, :players, new_players)
-            else
-              nil
-            end
+            new_state =
+              if battle_state != nil do
+                new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
+                Map.put(battle_state, :players, new_players)
+              else
+                nil
+              end
 
             {:ok, new_state}
           end)
@@ -441,6 +450,7 @@ defmodule Teiserver.Battle do
   end
 
   def force_change_client(_, nil, _, _), do: nil
+
   def force_change_client(changer_id, client_id, field, new_value) do
     changer = Client.get_client_by_id(changer_id)
     client = Client.get_client_by_id(client_id)
@@ -452,6 +462,7 @@ defmodule Teiserver.Battle do
   end
 
   def change_client_battle_status(nil, _, _), do: nil
+
   def change_client_battle_status(client, field, new_value) do
     client = Map.put(client, field, new_value)
     Client.update(client, :client_updated_battlestatus)
@@ -460,20 +471,36 @@ defmodule Teiserver.Battle do
   def allow?(nil, _, _), do: false
   def allow?(_, nil, _), do: false
   def allow?(_, _, nil), do: false
-  def allow?(changer, field, battle_id) when is_integer(battle_id), do:
-    allow?(changer, field, get_battle(battle_id))
 
-  def allow?(changer_id, field, battle) when is_integer(changer_id), do:
-    allow?(Client.get_client_by_id(changer_id), field, battle)
+  def allow?(changer, field, battle_id) when is_integer(battle_id),
+    do: allow?(changer, field, get_battle(battle_id))
+
+  def allow?(changer_id, field, battle) when is_integer(changer_id),
+    do: allow?(Client.get_client_by_id(changer_id), field, battle)
 
   def allow?(changer, cmd, battle) do
-   mod_command =
-      Enum.member?([
-        :handicap, :updatebattleinfo, :addstartrect, :removestartrect, :kickfrombattle, :team_number, :ally_team_number, :team_number, :player, :disableunits, :enableunits, :enableallunits],
+    mod_command =
+      Enum.member?(
+        [
+          :handicap,
+          :updatebattleinfo,
+          :addstartrect,
+          :removestartrect,
+          :kickfrombattle,
+          :team_number,
+          :ally_team_number,
+          :team_number,
+          :player,
+          :disableunits,
+          :enableunits,
+          :enableallunits
+        ],
         cmd
       )
 
-    founder_command = Enum.member?([
+    founder_command =
+      Enum.member?(
+        [
           :updatebattleinfo
         ],
         cmd

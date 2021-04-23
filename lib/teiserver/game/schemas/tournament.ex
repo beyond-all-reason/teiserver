@@ -14,8 +14,9 @@ defmodule Teiserver.Game.Tournament do
   """
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    params = params
-    |> trim_strings([:name])
+    params =
+      params
+      |> trim_strings([:name])
 
     struct
     |> cast(params, [:name, :icon, :colour])

@@ -18,12 +18,13 @@ defmodule TeiserverWeb.Game.TournamentController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    tournaments = Game.list_tournaments(
-      search: [
-        simple_search: Map.get(params, "s", "") |> String.trim,
-      ],
-      order_by: "Name (A-Z)"
-    )
+    tournaments =
+      Game.list_tournaments(
+        search: [
+          simple_search: Map.get(params, "s", "") |> String.trim()
+        ],
+        order_by: "Name (A-Z)"
+      )
 
     conn
     |> assign(:tournaments, tournaments)
@@ -32,12 +33,13 @@ defmodule TeiserverWeb.Game.TournamentController do
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    tournament = Game.get_tournament!(id, [
-      joins: [],
-    ])
+    tournament =
+      Game.get_tournament!(id,
+        joins: []
+      )
 
     tournament
-    |> TournamentLib.make_favourite
+    |> TournamentLib.make_favourite()
     |> insert_recently(conn)
 
     conn
@@ -48,10 +50,11 @@ defmodule TeiserverWeb.Game.TournamentController do
 
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _params) do
-    changeset = Game.change_tournament(%Tournament{
-      icon: "fas fa-" <> StylingHelper.random_icon(),
-      colour: StylingHelper.random_colour()
-    })
+    changeset =
+      Game.change_tournament(%Tournament{
+        icon: "fas fa-" <> StylingHelper.random_icon(),
+        colour: StylingHelper.random_colour()
+      })
 
     conn
     |> assign(:changeset, changeset)
@@ -96,6 +99,7 @@ defmodule TeiserverWeb.Game.TournamentController do
         conn
         |> put_flash(:info, "Tournament updated successfully.")
         |> redirect(to: Routes.ts_game_tournament_path(conn, :index))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> assign(:tournament, tournament)
@@ -109,7 +113,7 @@ defmodule TeiserverWeb.Game.TournamentController do
     tournament = Game.get_tournament!(id)
 
     tournament
-    |> TournamentLib.make_favourite
+    |> TournamentLib.make_favourite()
     |> remove_recently(conn)
 
     {:ok, _tournament} = Game.delete_tournament(tournament)

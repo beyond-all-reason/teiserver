@@ -34,16 +34,17 @@ defmodule TeiserverWeb.ClientLive.Show do
     case client do
       nil ->
         {:noreply,
-        socket
-        |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
+         socket
+         |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
+
       _ ->
         {:noreply,
-          socket
-          |> assign(:page_title, page_title(socket.assigns.live_action))
-          |> add_breadcrumb(name: client.name, url: "/teiserver/admin/clients/#{id}")
-          |> assign(:id, id)
-          |> assign(:client, client)
-          |> assign(:user, user)}
+         socket
+         |> assign(:page_title, page_title(socket.assigns.live_action))
+         |> add_breadcrumb(name: client.name, url: "/teiserver/admin/clients/#{id}")
+         |> assign(:id, id)
+         |> assign(:client, client)
+         |> assign(:user, user)}
     end
   end
 

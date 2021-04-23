@@ -4,9 +4,10 @@ defmodule TeiserverWeb.Clans.ClanControllerTest do
   alias Teiserver.TestLib
 
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(Teiserver.TestLib.player_permissions())
-    |> Teiserver.TestLib.conn_setup
+    |> Teiserver.TestLib.conn_setup()
   end
 
   describe "index" do
@@ -61,11 +62,16 @@ defmodule TeiserverWeb.Clans.ClanControllerTest do
       clan = TestLib.make_clan("clans_default_clan_success")
       TestLib.make_clan_membership(clan.id, user.id, %{"role" => "Admin"})
       user2 = GeneralTestLib.make_user()
-      conn = post(conn, Routes.ts_clans_clan_path(conn, :create_invite), %{
-        "teiserver_user" => "##{user2.id}",
-        "clan_id" => clan.id
-      })
-      assert redirected_to(conn) == Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites"
+
+      conn =
+        post(conn, Routes.ts_clans_clan_path(conn, :create_invite), %{
+          "teiserver_user" => "##{user2.id}",
+          "clan_id" => clan.id
+        })
+
+      assert redirected_to(conn) ==
+               Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites"
+
       assert conn.private[:phoenix_flash]["success"] == "User invited to clan."
     end
 
@@ -73,32 +79,39 @@ defmodule TeiserverWeb.Clans.ClanControllerTest do
       clan = TestLib.make_clan("clans_default_clan_success")
       TestLib.make_clan_membership(clan.id, user.id, %{"role" => "Member"})
       user2 = GeneralTestLib.make_user()
-      conn = post(conn, Routes.ts_clans_clan_path(conn, :create_invite), %{
-        "teiserver_user" => "##{user2.id}",
-        "clan_id" => clan.id
-      })
-      assert redirected_to(conn) == Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites"
-      assert conn.private[:phoenix_flash]["danger"] == "You cannot send out invites for this clan."
+
+      conn =
+        post(conn, Routes.ts_clans_clan_path(conn, :create_invite), %{
+          "teiserver_user" => "##{user2.id}",
+          "clan_id" => clan.id
+        })
+
+      assert redirected_to(conn) ==
+               Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites"
+
+      assert conn.private[:phoenix_flash]["danger"] ==
+               "You cannot send out invites for this clan."
     end
 
     test "create invite - you're not a member", %{conn: conn} do
       clan = TestLib.make_clan("clans_default_clan_success")
       user2 = GeneralTestLib.make_user()
-      conn = post(conn, Routes.ts_clans_clan_path(conn, :create_invite), %{
-        "teiserver_user" => "##{user2.id}",
-        "clan_id" => clan.id
-      })
+
+      conn =
+        post(conn, Routes.ts_clans_clan_path(conn, :create_invite), %{
+          "teiserver_user" => "##{user2.id}",
+          "clan_id" => clan.id
+        })
+
       assert redirected_to(conn) == "/"
       assert conn.private[:phoenix_flash]["danger"] == "You are not a member of this clan."
     end
   end
 
   describe "removing invites" do
-
   end
 
   describe "responding to invites" do
-
   end
 
   describe "promote member" do
@@ -108,7 +121,10 @@ defmodule TeiserverWeb.Clans.ClanControllerTest do
       user2 = GeneralTestLib.make_user()
       TestLib.make_clan_membership(clan.id, user2.id, %{"role" => "Member"})
       conn = put(conn, Routes.ts_clans_clan_path(conn, :promote, clan.id, user2.id))
-      assert redirected_to(conn) == Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#members"
+
+      assert redirected_to(conn) ==
+               Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#members"
+
       assert conn.private[:phoenix_flash]["info"] == "User promoted."
     end
 
@@ -118,7 +134,10 @@ defmodule TeiserverWeb.Clans.ClanControllerTest do
       user2 = GeneralTestLib.make_user()
       TestLib.make_clan_membership(clan.id, user2.id, %{"role" => "Member"})
       conn = put(conn, Routes.ts_clans_clan_path(conn, :promote, clan.id, user2.id))
-      assert redirected_to(conn) == Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#members"
+
+      assert redirected_to(conn) ==
+               Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#members"
+
       assert conn.private[:phoenix_flash]["danger"] == "No permissions."
     end
 
@@ -133,10 +152,8 @@ defmodule TeiserverWeb.Clans.ClanControllerTest do
   end
 
   describe "demote member" do
-
   end
 
   describe "remove member" do
-
   end
 end

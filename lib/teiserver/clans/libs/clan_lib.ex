@@ -13,13 +13,11 @@ defmodule Teiserver.Clans.ClanLib do
     %{
       type_colour: colours() |> elem(0),
       type_icon: icon(),
-
       item_id: clan.id,
       item_type: "teiserver_clans_clan",
       item_colour: clan.colour1,
       item_icon: clan.icon,
       item_label: "#{clan.name}",
-
       url: "/clans/#{clan.id}"
     }
   end
@@ -28,16 +26,17 @@ defmodule Teiserver.Clans.ClanLib do
   def ranks, do: ~w(Admin Moderator Member)
 
   # Queries
-  @spec query_clans() :: Ecto.Query.t
+  @spec query_clans() :: Ecto.Query.t()
   def query_clans do
-    from clans in Clan
+    from(clans in Clan)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
@@ -64,13 +63,12 @@ defmodule Teiserver.Clans.ClanLib do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from clans in query,
-      where: (
-            ilike(clans.name, ^ref_like)
-        )
+      where: ilike(clans.name, ^ref_like)
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from clans in query,
       order_by: [asc: clans.name]
@@ -91,12 +89,20 @@ defmodule Teiserver.Clans.ClanLib do
       order_by: [asc: clans.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, preloads) do
     query = if :members in preloads, do: _preload_members(query), else: query
-    query = if :members_and_memberships in preloads, do: _preload_members_and_memberships(query), else: query
-    query = if :invites_and_invitees in preloads, do: _preload_invites_and_invitees(query), else: query
+
+    query =
+      if :members_and_memberships in preloads,
+        do: _preload_members_and_memberships(query),
+        else: query
+
+    query =
+      if :invites_and_invitees in preloads, do: _preload_invites_and_invitees(query), else: query
+
     query
   end
 

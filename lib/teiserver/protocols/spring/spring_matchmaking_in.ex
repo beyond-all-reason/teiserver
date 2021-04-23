@@ -25,16 +25,18 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
     queue_id = int_parse(queue_id)
     resp = Matchmaking.add_player_to_queue(queue_id, state.userid, self())
 
-    joined = case resp do
-      :ok -> true
-      :duplicate -> true
-      :failed -> false
-    end
+    joined =
+      case resp do
+        :ok -> true
+        :duplicate -> true
+        :failed -> false
+      end
 
     case joined do
       true ->
         new_state = %{state | queues: Enum.uniq(state.queues ++ [queue_id])}
         reply(:spring, :okay, "c.matchmaking.join_queue\t#{queue_id}", msg_id, new_state)
+
       false ->
         reply(:spring, :no, {"c.matchmaking.join_queue", "#{queue_id}"}, msg_id, state)
     end
@@ -54,6 +56,7 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
     case state.ready_queue_id do
       nil ->
         state
+
       queue_id ->
         queue = Matchmaking.get_queue(queue_id)
         send(queue.pid, {:player_accept, state.userid})

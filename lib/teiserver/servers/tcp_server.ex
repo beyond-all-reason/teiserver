@@ -48,12 +48,14 @@ defmodule Teiserver.TcpServer do
     # start_listener(Ref, Transport, TransOpts0, Protocol, ProtoOpts)
     if mode == :ranch_ssl do
       ssl_opts = get_ssl_opts()
+
       :ranch.start_listener(
         make_ref(),
         :ranch_ssl,
-        ssl_opts ++ [
-          {:port, Application.get_env(:central, Teiserver)[:ports][:tls]}
-        ],
+        ssl_opts ++
+          [
+            {:port, Application.get_env(:central, Teiserver)[:ports][:tls]}
+          ],
         __MODULE__,
         []
       )
@@ -88,9 +90,11 @@ defmodule Teiserver.TcpServer do
     transport.setopts(socket, [{:active, true}])
 
     heartbeat = Application.get_env(:central, Teiserver)[:heartbeat_interval]
+
     if heartbeat do
       :timer.send_interval(heartbeat, self(), :heartbeat)
     end
+
     state = %{
       # Connection state
       message_part: "",
@@ -160,6 +164,7 @@ defmodule Teiserver.TcpServer do
   # Heartbeat allows us to kill stale connections
   def handle_info(:heartbeat, state) do
     diff = System.system_time(:second) - state.last_msg
+
     if diff > Application.get_env(:central, Teiserver)[:heartbeat_timeout] do
       {:stop, :normal, state}
     else
@@ -189,13 +194,14 @@ defmodule Teiserver.TcpServer do
   end
 
   def handle_info({:updated_client, new_client, reason}, state) do
-    new_state = case reason do
-      :client_updated_status ->
-        client_status_update(new_client, state)
+    new_state =
+      case reason do
+        :client_updated_status ->
+          client_status_update(new_client, state)
 
-      :client_updated_battlestatus ->
-        client_battlestatus_update(new_client, state)
-    end
+        :client_updated_battlestatus ->
+          client_battlestatus_update(new_client, state)
+      end
 
     {:noreply, new_state}
   end
@@ -307,7 +313,9 @@ defmodule Teiserver.TcpServer do
   # #############################
   defp data_in(data, state) do
     if state.extra_logging do
-      Logger.info("<-- #{Kernel.inspect(state.username)}:#{Kernel.inspect(state.userid)} #{format_log(data)}")
+      Logger.info(
+        "<-- #{Kernel.inspect(state.username)}:#{Kernel.inspect(state.userid)} #{format_log(data)}"
+      )
     end
 
     new_state =
@@ -329,24 +337,30 @@ defmodule Teiserver.TcpServer do
 
   # User updates
   defp user_logged_in(userid, state) do
-    known_users = case state.known_users[userid] do
-      nil ->
-        state.protocol_out.reply(:user_logged_in, userid, nil, state)
-        Map.put(state.known_users, userid, _blank_user(userid))
-      _ ->
-        state.known_users
-    end
+    known_users =
+      case state.known_users[userid] do
+        nil ->
+          state.protocol_out.reply(:user_logged_in, userid, nil, state)
+          Map.put(state.known_users, userid, _blank_user(userid))
+
+        _ ->
+          state.known_users
+      end
+
     %{state | known_users: known_users}
   end
 
   defp user_logged_out(userid, username, state) do
-    known_users = case state.known_users[userid] do
-      nil ->
-        state.known_users
-      _ ->
-        state.protocol_out.reply(:user_logged_out, {userid, username}, nil, state)
-        Map.delete(state.known_users, userid)
-    end
+    known_users =
+      case state.known_users[userid] do
+        nil ->
+          state.known_users
+
+        _ ->
+          state.protocol_out.reply(:user_logged_out, {userid, username}, nil, state)
+          Map.delete(state.known_users, userid)
+      end
+
     %{state | known_users: known_users}
   end
 
@@ -359,14 +373,18 @@ defmodule Teiserver.TcpServer do
       case field do
         :friends ->
           state.protocol_out.reply(:friendlist, new_user, nil, state)
+
         :friend_requests ->
           state.protocol_out.reply(:friendlist_request, new_user, nil, state)
+
         :ignored ->
           state.protocol_out.reply(:ignorelist, new_user, nil, state)
+
         _ ->
           Logger.error("No handler in tcp_server:user_updated with field #{field}")
       end
     end)
+
     new_state
   end
 
@@ -380,6 +398,7 @@ defmodule Teiserver.TcpServer do
     if state.battle_id != nil and state.battle_id == new_client.battle_id do
       state.protocol_out.reply(:client_battlestatus, new_client, nil, state)
     end
+
     state
   end
 
@@ -389,11 +408,14 @@ defmodule Teiserver.TcpServer do
       :match_ready ->
         state.protocol_out.reply(:matchmaking, :match_ready, data, nil, state)
         %{state | ready_queue_id: data}
+
       :match_cancel ->
         %{state | ready_queue_id: nil}
+
       :join_battle ->
         battle = Battle.get_battle(data)
         state.protocol_out.do_join_battle(state, battle)
+
       :dequeue ->
         state
     end
@@ -443,6 +465,7 @@ defmodule Teiserver.TcpServer do
       _ ->
         Logger.error("No handler in tcp_server:battle_update with reason #{reason}")
     end
+
     state
   end
 
@@ -462,6 +485,7 @@ defmodule Teiserver.TcpServer do
       _ ->
         Logger.error("No handler in tcp_server:global_battle_update with reason #{reason}")
     end
+
     state
   end
 
@@ -469,28 +493,35 @@ defmodule Teiserver.TcpServer do
   # we will send a selection of commands on the assumption this
   # genserver is incorrect and needs to alter its state accordingly
   defp user_join_battle(userid, battle_id, state) do
-    new_user = cond do
-      state.userid == userid ->
-        _blank_user(userid, %{battle_id: battle_id})
+    new_user =
+      cond do
+        state.userid == userid ->
+          _blank_user(userid, %{battle_id: battle_id})
 
-      state.known_users[userid] == nil ->
-        state.protocol_out.reply(:user_logged_in, userid, nil, state)
-        state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
-        _blank_user(userid, %{battle_id: battle_id})
+        state.known_users[userid] == nil ->
+          state.protocol_out.reply(:user_logged_in, userid, nil, state)
+          state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
+          _blank_user(userid, %{battle_id: battle_id})
 
-      state.known_users[userid].battle_id == nil ->
-        state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
-        %{state.known_users[userid] | battle_id: battle_id}
+        state.known_users[userid].battle_id == nil ->
+          state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
+          %{state.known_users[userid] | battle_id: battle_id}
 
-      state.known_users[userid].battle_id != battle_id ->
-        state.protocol_out.reply(:remove_user_from_battle, {userid, state.known_users[userid].battle_id}, nil, state)
-        state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
-        %{state.known_users[userid] | battle_id: battle_id}
+        state.known_users[userid].battle_id != battle_id ->
+          state.protocol_out.reply(
+            :remove_user_from_battle,
+            {userid, state.known_users[userid].battle_id},
+            nil,
+            state
+          )
 
-      state.known_users[userid].battle_id == battle_id ->
-        # No change
-        state.known_users[userid]
-    end
+          state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
+          %{state.known_users[userid] | battle_id: battle_id}
+
+        state.known_users[userid].battle_id == battle_id ->
+          # No change
+          state.known_users[userid]
+      end
 
     new_knowns = Map.put(state.known_users, userid, new_user)
     %{state | known_users: new_knowns}
@@ -502,16 +533,23 @@ defmodule Teiserver.TcpServer do
       Phoenix.PubSub.unsubscribe(Central.PubSub, "battle_updates:#{battle_id}")
     end
 
-    new_user = cond do
-      state.known_users[userid].battle_id == nil ->
-        # No change
-        state.known_users[userid]
+    new_user =
+      cond do
+        state.known_users[userid].battle_id == nil ->
+          # No change
+          state.known_users[userid]
 
-      true ->
-        # We don't care which battle we thought they are in, they're no longer in it
-        state.protocol_out.reply(:remove_user_from_battle, {userid, state.known_users[userid].battle_id}, nil, state)
-        %{state.known_users[userid] | battle_id: nil}
-    end
+        true ->
+          # We don't care which battle we thought they are in, they're no longer in it
+          state.protocol_out.reply(
+            :remove_user_from_battle,
+            {userid, state.known_users[userid].battle_id},
+            nil,
+            state
+          )
+
+          %{state.known_users[userid] | battle_id: nil}
+      end
 
     new_knowns = Map.put(state.known_users, userid, new_user)
     %{state | known_users: new_knowns}
@@ -519,12 +557,13 @@ defmodule Teiserver.TcpServer do
 
   defp user_kicked_from_battle(userid, battle_id, state) do
     # If it's the user, we need to tell them the bad news
-    state = if userid == state.userid do
-      state.protocol_out.reply(:forcequit_battle, nil, nil, state)
-      %{state | battle_id: nil}
-    else
-      state
-    end
+    state =
+      if userid == state.userid do
+        state.protocol_out.reply(:forcequit_battle, nil, nil, state)
+        %{state | battle_id: nil}
+      else
+        state
+      end
 
     user_leave_battle(userid, battle_id, state)
   end
@@ -534,33 +573,38 @@ defmodule Teiserver.TcpServer do
     case type do
       :direct_message ->
         state.protocol_out.reply(:direct_message, {from, msg, state.user}, nil, state)
+
       :chat_message ->
         state.protocol_out.reply(:chat_message, {from, room_name, msg, state.user}, nil, state)
+
       :chat_message_ex ->
         state.protocol_out.reply(:chat_message_ex, {from, room_name, msg, state.user}, nil, state)
     end
+
     state
   end
 
   defp user_join_chat_room(userid, room_name, state) do
-    new_members = if not Enum.member?(state.room_member_cache[room_name] || [], userid) do
-      state.protocol_out.reply(:add_user_to_room, {userid, room_name}, nil, state)
-      state.room_member_cache[room_name] || [] ++ [userid]
-    else
-      state.room_member_cache[room_name] || []
-    end
+    new_members =
+      if not Enum.member?(state.room_member_cache[room_name] || [], userid) do
+        state.protocol_out.reply(:add_user_to_room, {userid, room_name}, nil, state)
+        state.room_member_cache[room_name] || [] ++ [userid]
+      else
+        state.room_member_cache[room_name] || []
+      end
 
     new_cache = Map.put(state.room_member_cache, room_name, new_members)
     %{state | room_member_cache: new_cache}
   end
 
   defp user_leave_chat_room(userid, room_name, state) do
-    new_members = if Enum.member?(state.room_member_cache[room_name] || [], userid) do
-      state.protocol_out.reply(:remove_user_from_room, {userid, room_name}, nil, state)
-      state.room_member_cache[room_name] |> Enum.filter(fn m -> m != userid end)
-    else
-      state.room_member_cache[room_name] || []
-    end
+    new_members =
+      if Enum.member?(state.room_member_cache[room_name] || [], userid) do
+        state.protocol_out.reply(:remove_user_from_room, {userid, room_name}, nil, state)
+        state.room_member_cache[room_name] |> Enum.filter(fn m -> m != userid end)
+      else
+        state.room_member_cache[room_name] || []
+      end
 
     new_cache = Map.put(state.room_member_cache, room_name, new_members)
     %{state | room_member_cache: new_cache}
@@ -581,6 +625,7 @@ defmodule Teiserver.TcpServer do
       _ ->
         Logger.error("No handler in tcp_server:do_action with action #{action_type}")
     end
+
     state
   end
 
@@ -590,27 +635,39 @@ defmodule Teiserver.TcpServer do
   def upgrade_connection(state) do
     :ok = state.transport.setopts(state.socket, [{:active, false}])
 
-    ssl_opts = get_ssl_opts() ++ [
-      {:packet, :line},
-      {:mode, :list},
-      {:verify, :verify_none},
-      {:ssl_imp, :new}
-    ]
+    ssl_opts =
+      get_ssl_opts() ++
+        [
+          {:packet, :line},
+          {:mode, :list},
+          {:verify, :verify_none},
+          {:ssl_imp, :new}
+        ]
+
     case :ranch_ssl.handshake(state.socket, ssl_opts, 5000) do
       {:ok, new_socket} ->
         :ok = :ranch_ssl.setopts(new_socket, [{:active, true}])
         %{state | socket: new_socket, transport: :ranch_ssl}
+
       err ->
-        Logger.error("Error upgrading connection\nError: #{Kernel.inspect err}\nssl_opts: #{Kernel.inspect ssl_opts}")
+        Logger.error(
+          "Error upgrading connection\nError: #{Kernel.inspect(err)}\nssl_opts: #{
+            Kernel.inspect(ssl_opts)
+          }"
+        )
+
         state
     end
   end
 
   # Other functions
   defp _blank_user(userid, defaults \\ %{}) do
-    Map.merge(%{
-      userid: userid,
-      battle_id: nil
-    }, defaults)
+    Map.merge(
+      %{
+        userid: userid,
+        battle_id: nil
+      },
+      defaults
+    )
   end
 end

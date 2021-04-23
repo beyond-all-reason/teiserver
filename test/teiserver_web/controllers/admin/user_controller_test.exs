@@ -43,7 +43,9 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     end
 
     test "search with redirect", %{conn: conn} do
-      conn = post(conn, Routes.ts_admin_user_path(conn, :search), search: %{"name" => "main user"})
+      conn =
+        post(conn, Routes.ts_admin_user_path(conn, :search), search: %{"name" => "main user"})
+
       assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, 1)
     end
   end

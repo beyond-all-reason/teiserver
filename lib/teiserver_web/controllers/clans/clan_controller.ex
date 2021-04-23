@@ -16,15 +16,17 @@ defmodule TeiserverWeb.Clans.ClanController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    clans = Clans.list_clans(
-      search: [
-        simple_search: Map.get(params, "s", "") |> String.trim,
-      ],
-      order_by: "Name (A-Z)"
-    )
+    clans =
+      Clans.list_clans(
+        search: [
+          simple_search: Map.get(params, "s", "") |> String.trim()
+        ],
+        order_by: "Name (A-Z)"
+      )
 
-    memberships = Clans.list_clan_memberships_by_user(conn.user_id)
-    |> Enum.map(fn cm -> cm.clan_id end)
+    memberships =
+      Clans.list_clan_memberships_by_user(conn.user_id)
+      |> Enum.map(fn cm -> cm.clan_id end)
 
     conn
     |> assign(:clans, clans)
@@ -34,15 +36,16 @@ defmodule TeiserverWeb.Clans.ClanController do
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"name" => name}) do
-    clan = Clans.get_clan!(nil, [
-      search: [name: name],
-      preload: [:members_and_memberships, :invites_and_invitees],
-    ])
+    clan =
+      Clans.get_clan!(nil,
+        search: [name: name],
+        preload: [:members_and_memberships, :invites_and_invitees]
+      )
 
     membership = Clans.get_clan_membership(clan.id, conn.user_id)
 
     clan
-    |> ClanLib.make_favourite
+    |> ClanLib.make_favourite()
     |> insert_recently(conn)
 
     conn
@@ -60,6 +63,7 @@ defmodule TeiserverWeb.Clans.ClanController do
 
     if membership do
       user = Account.get_user!(conn.user_id)
+
       Account.update_user(user, %{
         "colour" => clan.colour1,
         "icon" => clan.icon,
@@ -112,12 +116,16 @@ defmodule TeiserverWeb.Clans.ClanController do
 
             conn
             |> put_flash(:success, "Invite accepted")
-            |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+            |> redirect(
+              to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab"
+            )
 
           {:error, _changeset} ->
             conn
             |> put_flash(:warning, "There was an error accepting the invite")
-            |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+            |> redirect(
+              to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab"
+            )
         end
     end
   end
@@ -154,12 +162,19 @@ defmodule TeiserverWeb.Clans.ClanController do
           {:ok, _clan} ->
             conn
             |> put_flash(:success, "Invite blocked.")
-            |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+            |> redirect(
+              to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab"
+            )
 
           {:error, _changeset} ->
             conn
-            |> put_flash(:success, "Invite unable to be blocked, if this persists please contact an admin.")
-            |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
+            |> put_flash(
+              :success,
+              "Invite unable to be blocked, if this persists please contact an admin."
+            )
+            |> redirect(
+              to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab"
+            )
         end
     end
   end
@@ -169,16 +184,21 @@ defmodule TeiserverWeb.Clans.ClanController do
     user_id = get_hash_id(params["teiserver_user"])
     clan_id = params["clan_id"]
 
-    role = case Clans.get_clan_membership(clan_id, conn.user_id) do
-      nil -> nil
-      membership -> Map.get(membership, :role)
-    end
+    role =
+      case Clans.get_clan_membership(clan_id, conn.user_id) do
+        nil -> nil
+        membership -> Map.get(membership, :role)
+      end
 
     clan = Clans.get_clan!(clan_id)
 
     cond do
       role == nil ->
-        add_audit_log(conn, "teiserver.clans.create_invite", %{clan_id: clan_id, user_id: user_id, auth: true})
+        add_audit_log(conn, "teiserver.clans.create_invite", %{
+          clan_id: clan_id,
+          user_id: user_id,
+          auth: true
+        })
 
         conn
         |> put_flash(:danger, "You are not a member of this clan.")
@@ -207,13 +227,19 @@ defmodule TeiserverWeb.Clans.ClanController do
 
         case Clans.create_clan_invite(attrs) do
           {:ok, _invite} ->
-            Communication.notify(user_id, %{
-              title: "Clan invite",
-              body: "Invite to clan #{clan.name}",
-              icon: ClanLib.icon,
-              colour: (ClanLib.colours() |> elem(2)),
-              redirect: (Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
-            }, 1, true)
+            Communication.notify(
+              user_id,
+              %{
+                title: "Clan invite",
+                body: "Invite to clan #{clan.name}",
+                icon: ClanLib.icon(),
+                colour: ClanLib.colours() |> elem(2),
+                redirect:
+                  Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab"
+              },
+              1,
+              true
+            )
 
             conn
             |> put_flash(:success, "User invited to clan.")
@@ -232,10 +258,11 @@ defmodule TeiserverWeb.Clans.ClanController do
     clan_id = int_parse(clan_id)
     clan_invite = Clans.get_clan_invite!(clan_id, user_id)
 
-    role = case Clans.get_clan_membership(clan_id, conn.user_id) do
-      nil -> nil
-      membership -> Map.get(membership, :role)
-    end
+    role =
+      case Clans.get_clan_membership(clan_id, conn.user_id) do
+        nil -> nil
+        membership -> Map.get(membership, :role)
+      end
 
     clan = Clans.get_clan!(clan_id)
 
@@ -257,10 +284,11 @@ defmodule TeiserverWeb.Clans.ClanController do
     clan_id = int_parse(clan_id)
     clan_membership = Clans.get_clan_membership!(clan_id, user_id)
 
-    role = case Clans.get_clan_membership(clan_id, conn.user_id) do
-      nil -> nil
-      membership -> Map.get(membership, :role)
-    end
+    role =
+      case Clans.get_clan_membership(clan_id, conn.user_id) do
+        nil -> nil
+        membership -> Map.get(membership, :role)
+      end
 
     clan = Clans.get_clan!(clan_id)
 
@@ -268,6 +296,7 @@ defmodule TeiserverWeb.Clans.ClanController do
       Clans.delete_clan_membership(clan_membership)
 
       user = Account.get_user!(user_id)
+
       if user.clan_id == clan_id do
         Account.update_user(user, %{"clan_id" => nil})
 
@@ -292,24 +321,31 @@ defmodule TeiserverWeb.Clans.ClanController do
   def promote(conn, %{"clan_id" => clan_id, "user_id" => user_id}) do
     clan_membership = Clans.get_clan_membership!(clan_id, user_id)
 
-    new_role = case clan_membership.role do
-      "Member" -> "Moderator"
-      "Moderator" -> "Admin"
-    end
+    new_role =
+      case clan_membership.role do
+        "Member" -> "Moderator"
+        "Moderator" -> "Admin"
+      end
 
     new_params = %{
       "role" => new_role
     }
+
     clan = Clans.get_clan!(clan_id)
 
-    role = case Clans.get_clan_membership(clan_id, conn.user_id) do
-      nil -> nil
-      membership -> Map.get(membership, :role)
-    end
+    role =
+      case Clans.get_clan_membership(clan_id, conn.user_id) do
+        nil -> nil
+        membership -> Map.get(membership, :role)
+      end
 
     cond do
       role == nil ->
-        add_audit_log(conn, "teiserver.clans.promote", %{clan_id: clan_id, user_id: user_id, auth: true})
+        add_audit_log(conn, "teiserver.clans.promote", %{
+          clan_id: clan_id,
+          user_id: user_id,
+          auth: true
+        })
 
         conn
         |> put_flash(:danger, "You are not a member of this clan.")
@@ -339,20 +375,23 @@ defmodule TeiserverWeb.Clans.ClanController do
   def demote(conn, %{"clan_id" => clan_id, "user_id" => user_id}) do
     clan_membership = Clans.get_clan_membership!(clan_id, user_id)
 
-    new_role = case clan_membership.role do
-      "Admin" -> "Moderator"
-      "Moderator" -> "Member"
-    end
+    new_role =
+      case clan_membership.role do
+        "Admin" -> "Moderator"
+        "Moderator" -> "Member"
+      end
 
     new_params = %{
       "role" => new_role
     }
+
     clan = Clans.get_clan!(clan_id)
 
-    role = case Clans.get_clan_membership(clan_id, conn.user_id) do
-      nil -> nil
-      membership -> Map.get(membership, :role)
-    end
+    role =
+      case Clans.get_clan_membership(clan_id, conn.user_id) do
+        nil -> nil
+        membership -> Map.get(membership, :role)
+      end
 
     if role in ~w(Admin) do
       case Clans.update_clan_membership(clan_membership, new_params) do

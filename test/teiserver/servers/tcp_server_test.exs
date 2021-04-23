@@ -164,9 +164,9 @@ defmodule Teiserver.TcpServerTest do
     assert r == :timeout
 
     # User moves to a different battle (without leave command)
-    send(pid, {:add_user_to_battle, u1.id, battle_id+1})
+    send(pid, {:add_user_to_battle, u1.id, battle_id + 1})
     r = _recv(socket)
-    assert r == "LEFTBATTLE #{battle_id} #{u1.name}\nJOINEDBATTLE #{battle_id+1} #{u1.name}\n"
+    assert r == "LEFTBATTLE #{battle_id} #{u1.name}\nJOINEDBATTLE #{battle_id + 1} #{u1.name}\n"
 
     # Same battle again
     send(pid, {:add_user_to_battle, u1.id, battle_id + 1})
@@ -179,9 +179,13 @@ defmodule Teiserver.TcpServerTest do
     assert r == "REMOVEUSER #{u1.name}\n"
 
     # Now they join, should get a login and then a join battle command
-    send(pid, {:add_user_to_battle, u1.id, battle_id+1})
+    send(pid, {:add_user_to_battle, u1.id, battle_id + 1})
     r = _recv(socket)
-    assert r == "ADDUSER #{u1.name} ?? 0 #{u1.id} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\nJOINEDBATTLE #{battle_id+1} #{u1.name}\n"
+
+    assert r ==
+             "ADDUSER #{u1.name} ?? 0 #{u1.id} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\nJOINEDBATTLE #{
+               battle_id + 1
+             } #{u1.name}\n"
 
     # ---- Chat rooms ----
     send(pid, {:add_user_to_room, u1.id, "roomname"})
@@ -209,6 +213,5 @@ defmodule Teiserver.TcpServerTest do
     _ = _recv(s1)
     # _ = _recv(s2)
     # _ = _recv(s3)
-
   end
 end

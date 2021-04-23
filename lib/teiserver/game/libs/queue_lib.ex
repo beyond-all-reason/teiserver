@@ -13,33 +13,32 @@ defmodule Teiserver.Game.QueueLib do
     %{
       type_colour: colours() |> elem(0),
       type_icon: icon(),
-
       item_id: queue.id,
       item_type: "teiserver_game_queue",
       item_colour: queue.colour,
       item_icon: queue.icon,
       item_label: "#{queue.name}",
-
       url: "/teiserver/admin/queues/#{queue.id}"
     }
   end
 
   # Queries
-  @spec query_queues() :: Ecto.Query.t
+  @spec query_queues() :: Ecto.Query.t()
   def query_queues do
-    from queues in Queue
+    from(queues in Queue)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -62,13 +61,12 @@ defmodule Teiserver.Game.QueueLib do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from queues in query,
-      where: (
-            ilike(queues.name, ^ref_like)
-        )
+      where: ilike(queues.name, ^ref_like)
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from queues in query,
       order_by: [asc: queues.name]
@@ -89,8 +87,9 @@ defmodule Teiserver.Game.QueueLib do
       order_by: [asc: queues.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, _preloads) do
     # query = if :things in preloads, do: _preload_things(query), else: query
     query

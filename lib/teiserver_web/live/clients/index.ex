@@ -45,8 +45,9 @@ defmodule TeiserverWeb.ClientLive.Index do
     if Enum.member?(keys, userid) do
       {:noreply, socket}
     else
-      clients = (socket.assigns[:clients] ++ [Client.get_client_by_id(userid)])
-      |> Enum.sort_by(fn c -> c.name end, &<=/2)
+      clients =
+        (socket.assigns[:clients] ++ [Client.get_client_by_id(userid)])
+        |> Enum.sort_by(fn c -> c.name end, &<=/2)
 
       users = Map.put(socket.assigns[:users], userid, User.get_user_by_id(userid))
 
@@ -87,7 +88,8 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   def handle_info({:add_user_to_battle, user_id, battle_id}, socket) do
-    clients = socket.assigns[:clients]
+    clients =
+      socket.assigns[:clients]
       |> Enum.map(fn client ->
         if client.userid == user_id do
           %{client | battle_id: battle_id}
@@ -100,7 +102,8 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   def handle_info({:remove_user_from_battle, user_id, _battle_id}, socket) do
-    clients = socket.assigns[:clients]
+    clients =
+      socket.assigns[:clients]
       |> Enum.map(fn client ->
         if client.userid == user_id do
           %{client | battle_id: nil}
@@ -113,7 +116,8 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   def handle_info({:kick_user_from_battle, user_id, _battle_id}, socket) do
-    clients = socket.assigns[:clients]
+    clients =
+      socket.assigns[:clients]
       |> Enum.map(fn client ->
         if client.userid == user_id do
           %{client | battle_id: nil}

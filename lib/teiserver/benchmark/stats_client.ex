@@ -57,7 +57,7 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
 
     1..@users_per_tick
     |> Enum.each(fn i ->
-      id = (state.tick * 1000) + i
+      id = state.tick * 1000 + i
 
       {:ok, _pid} =
         DynamicSupervisor.start_child(Teiserver.Benchmark.UserSupervisor, {
@@ -66,7 +66,7 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
           data: %{
             interval: @user_action_interval,
             # delay: :random.uniform(@user_action_interval),
-            delay: (i * 1000),
+            delay: i * 1000,
             id: id,
             tick: state.tick,
             stats: pid,

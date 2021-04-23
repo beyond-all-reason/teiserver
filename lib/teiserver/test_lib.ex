@@ -66,6 +66,7 @@ defmodule Teiserver.TestLib do
     :ok = :ssl.send(socket, msg)
     :timer.sleep(100)
   end
+
   def _send(socket, msg) do
     :ok = :gen_tcp.send(socket, msg)
     :timer.sleep(100)
@@ -78,6 +79,7 @@ defmodule Teiserver.TestLib do
       {:error, :closed} -> :closed
     end
   end
+
   def _recv(socket) do
     case :gen_tcp.recv(socket, 0, 500) do
       {:ok, reply} -> reply |> to_string
@@ -168,16 +170,18 @@ defmodule Teiserver.TestLib do
 
   @spec admin_permissions() :: [String.t()]
   def admin_permissions do
-    permissions = ~w(account battle clan party queue tournament)
-    |> Enum.map(fn p -> "teiserver.admin.#{p}" end)
+    permissions =
+      ~w(account battle clan party queue tournament)
+      |> Enum.map(fn p -> "teiserver.admin.#{p}" end)
 
     permissions ++ moderator_permissions()
   end
 
   @spec moderator_permissions() :: [String.t()]
   def moderator_permissions do
-    permissions = ~w(account battle clan party queue tournament)
-    |> Enum.map(fn p -> "teiserver.moderator.#{p}" end)
+    permissions =
+      ~w(account battle clan party queue tournament)
+      |> Enum.map(fn p -> "teiserver.moderator.#{p}" end)
 
     permissions ++ player_permissions()
   end
@@ -190,18 +194,25 @@ defmodule Teiserver.TestLib do
   @spec make_clan(String.t(), Map.t()) :: Teiserver.Clans.Clan.t()
   def make_clan(name, params \\ %{}) do
     {:ok, c} =
-      Teiserver.Clans.create_clan(Map.merge(%{
-        "name" => name,
-        "tag" => "[#{name}]",
-        "icon" => "fa far-house",
-        "colour1" => "#001122",
-        "colour2" => "#551122",
-        "data" => %{}
-      }, params))
+      Teiserver.Clans.create_clan(
+        Map.merge(
+          %{
+            "name" => name,
+            "tag" => "[#{name}]",
+            "icon" => "fa far-house",
+            "colour1" => "#001122",
+            "colour2" => "#551122",
+            "data" => %{}
+          },
+          params
+        )
+      )
+
     c
   end
 
-  @spec make_clan_membership(Integer.t(), Integer.t(), Map.t()) :: Teiserver.Clans.ClanMembership.t()
+  @spec make_clan_membership(Integer.t(), Integer.t(), Map.t()) ::
+          Teiserver.Clans.ClanMembership.t()
   def make_clan_membership(clan_id, user_id, data \\ %{}) do
     {:ok, gm} =
       Teiserver.Clans.create_clan_membership(%{
@@ -216,15 +227,21 @@ defmodule Teiserver.TestLib do
   @spec make_queue(String.t(), Map.t()) :: Teiserver.Game.Queue.t()
   def make_queue(name, params \\ %{}) do
     {:ok, q} =
-      Teiserver.Game.create_queue(Map.merge(%{
-        "name" => name,
-        "team_size" => 1,
-        "icon" => "fa far-house",
-        "colour" => "#112233",
-        "settings" => %{},
-        "conditions" => %{},
-        "map_list" => []
-      }, params))
+      Teiserver.Game.create_queue(
+        Map.merge(
+          %{
+            "name" => name,
+            "team_size" => 1,
+            "icon" => "fa far-house",
+            "colour" => "#112233",
+            "settings" => %{},
+            "conditions" => %{},
+            "map_list" => []
+          },
+          params
+        )
+      )
+
     q
   end
 end

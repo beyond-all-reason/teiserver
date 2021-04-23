@@ -36,14 +36,16 @@ defmodule TeiserverWeb.BattleLive.Index do
   end
 
   def handle_info({:battle_closed, battle_id}, socket) do
-    battles = socket.assigns[:battles]
+    battles =
+      socket.assigns[:battles]
       |> Enum.filter(fn b -> b.id != battle_id end)
 
     {:noreply, assign(socket, :battles, battles)}
   end
 
   def handle_info({:global_battle_updated, battle_id, _reason}, socket) do
-    battles = socket.assigns[:battles]
+    battles =
+      socket.assigns[:battles]
       |> Enum.map(fn battle ->
         if battle.id == battle_id do
           Battle.get_battle(battle_id)
@@ -56,7 +58,8 @@ defmodule TeiserverWeb.BattleLive.Index do
   end
 
   def handle_info({:add_user_to_battle, user_id, battle_id}, socket) do
-    battles = socket.assigns[:battles]
+    battles =
+      socket.assigns[:battles]
       |> Enum.map(fn battle ->
         if battle.id == battle_id do
           %{battle | player_count: battle.player_count + 1, players: battle.players ++ [user_id]}
@@ -69,7 +72,8 @@ defmodule TeiserverWeb.BattleLive.Index do
   end
 
   def handle_info({:remove_user_from_battle, user_id, battle_id}, socket) do
-    battles = socket.assigns[:battles]
+    battles =
+      socket.assigns[:battles]
       |> Enum.map(fn battle ->
         if battle.id == battle_id do
           new_players = Enum.filter(battle.players, fn p -> p != user_id end)
@@ -83,7 +87,8 @@ defmodule TeiserverWeb.BattleLive.Index do
   end
 
   def handle_info({:kick_user_from_battle, user_id, battle_id}, socket) do
-    battles = socket.assigns[:battles]
+    battles =
+      socket.assigns[:battles]
       |> Enum.map(fn battle ->
         if battle.id == battle_id do
           new_players = Enum.filter(battle.players, fn p -> p != user_id end)

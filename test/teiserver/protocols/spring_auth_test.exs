@@ -6,7 +6,15 @@ defmodule Teiserver.SpringAuthTest do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TestLib,
-    only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, _recv_until: 1, new_user: 0, new_user: 2]
+    only: [
+      auth_setup: 0,
+      auth_setup: 1,
+      _send: 2,
+      _recv: 1,
+      _recv_until: 1,
+      new_user: 0,
+      new_user: 2
+    ]
 
   setup do
     %{socket: socket, user: user} = auth_setup()
@@ -395,7 +403,11 @@ ENDOFCHANNELS\n"
 
     _send(socket, "CREATEBOTACCOUNT test_bot_account #{user.name}\n")
     reply = _recv(socket)
-    assert reply == "SERVERMSG A new bot account test_bot_account has been created, with the same password as #{user.name}\n"
+
+    assert reply ==
+             "SERVERMSG A new bot account test_bot_account has been created, with the same password as #{
+               user.name
+             }\n"
   end
 
   test "Ranks" do

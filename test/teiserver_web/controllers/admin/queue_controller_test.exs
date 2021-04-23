@@ -5,13 +5,30 @@ defmodule TeiserverWeb.Admin.QueueControllerTest do
   alias Teiserver.TestLib
 
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(Teiserver.TestLib.admin_permissions())
-    |> Teiserver.TestLib.conn_setup
+    |> Teiserver.TestLib.conn_setup()
   end
 
-  @create_attrs %{colour: "some colour", icon: "far fa-home", name: "some name", team_size: 1, map_list: [], conditions: %{}, settings: %{}}
-  @update_attrs %{colour: "some updated colour", icon: "fas fa-wrench", name: "some updated name", team_size: 2, map_list: ["map2"], conditions: %{}, settings: %{}}
+  @create_attrs %{
+    colour: "some colour",
+    icon: "far fa-home",
+    name: "some name",
+    team_size: 1,
+    map_list: [],
+    conditions: %{},
+    settings: %{}
+  }
+  @update_attrs %{
+    colour: "some updated colour",
+    icon: "fas fa-wrench",
+    name: "some updated name",
+    team_size: 2,
+    map_list: ["map2"],
+    conditions: %{},
+    settings: %{}
+  }
   @invalid_attrs %{colour: nil, icon: nil, name: nil, team_size: nil, map_list: nil}
 
   describe "index" do
@@ -32,11 +49,16 @@ defmodule TeiserverWeb.Admin.QueueControllerTest do
 
   describe "create queue" do
     test "redirects to show when data is valid", %{conn: conn} do
-      conn = post(conn, Routes.ts_admin_queue_path(conn, :create), queue: Map.merge(@create_attrs, %{
-        settings: "{}",
-        conditions: "{}",
-        map_list: "{}"
-      }))
+      conn =
+        post(conn, Routes.ts_admin_queue_path(conn, :create),
+          queue:
+            Map.merge(@create_attrs, %{
+              settings: "{}",
+              conditions: "{}",
+              map_list: "{}"
+            })
+        )
+
       assert redirected_to(conn) == Routes.ts_admin_queue_path(conn, :index)
 
       new_queue = Game.list_queues(search: [name: @create_attrs.name])
@@ -44,11 +66,16 @@ defmodule TeiserverWeb.Admin.QueueControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.ts_admin_queue_path(conn, :create), queue: Map.merge(@invalid_attrs, %{
-        settings: "{}",
-        conditions: "{}",
-        map_list: "{}"
-      }))
+      conn =
+        post(conn, Routes.ts_admin_queue_path(conn, :create),
+          queue:
+            Map.merge(@invalid_attrs, %{
+              settings: "{}",
+              conditions: "{}",
+              map_list: "{}"
+            })
+        )
+
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
   end
@@ -84,11 +111,17 @@ defmodule TeiserverWeb.Admin.QueueControllerTest do
   describe "update queue" do
     test "redirects when data is valid", %{conn: conn} do
       queue = TestLib.make_queue("update_redirect")
-      conn = put(conn, Routes.ts_admin_queue_path(conn, :update, queue), queue: Map.merge(@update_attrs, %{
-        settings: "{}",
-        conditions: "{}",
-        map_list: "{}"
-      }))
+
+      conn =
+        put(conn, Routes.ts_admin_queue_path(conn, :update, queue),
+          queue:
+            Map.merge(@update_attrs, %{
+              settings: "{}",
+              conditions: "{}",
+              map_list: "{}"
+            })
+        )
+
       assert redirected_to(conn) == Routes.ts_admin_queue_path(conn, :index)
 
       conn = get(conn, Routes.ts_admin_queue_path(conn, :show, queue))
@@ -97,11 +130,17 @@ defmodule TeiserverWeb.Admin.QueueControllerTest do
 
     test "renders errors when data is invalid", %{conn: conn} do
       queue = TestLib.make_queue("update_invalid")
-      conn = put(conn, Routes.ts_admin_queue_path(conn, :update, queue), queue: Map.merge(@invalid_attrs, %{
-        settings: "{}",
-        conditions: "{}",
-        map_list: "{}"
-      }))
+
+      conn =
+        put(conn, Routes.ts_admin_queue_path(conn, :update, queue),
+          queue:
+            Map.merge(@invalid_attrs, %{
+              settings: "{}",
+              conditions: "{}",
+              map_list: "{}"
+            })
+        )
+
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
 
@@ -117,6 +156,7 @@ defmodule TeiserverWeb.Admin.QueueControllerTest do
       queue = TestLib.make_queue("delete")
       conn = delete(conn, Routes.ts_admin_queue_path(conn, :delete, queue))
       assert redirected_to(conn) == Routes.ts_admin_queue_path(conn, :index)
+
       assert_error_sent 404, fn ->
         get(conn, Routes.ts_admin_queue_path(conn, :show, queue))
       end

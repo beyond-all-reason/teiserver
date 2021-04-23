@@ -16,32 +16,41 @@ defmodule Teiserver.Game.QueueServer do
   end
 
   def handle_call({:add_player, userid, pid}, _from, state) when is_integer(userid) do
-    {resp, new_state} = case Enum.member?(state.unmatched_players ++ state.matched_players, userid) do
-      true ->
-        {:duplicate, state}
-      false ->
-        player_item = %{
-          join_time: :erlang.system_time(:seconds),
-          pid: pid
-        }
-        new_state = %{state |
-          unmatched_players: state.unmatched_players ++ [userid],
-          player_count: state.player_count + 1,
-          player_map: Map.put(state.player_map, userid, player_item
-        )}
-        {:ok, new_state}
-    end
+    {resp, new_state} =
+      case Enum.member?(state.unmatched_players ++ state.matched_players, userid) do
+        true ->
+          {:duplicate, state}
+
+        false ->
+          player_item = %{
+            join_time: :erlang.system_time(:seconds),
+            pid: pid
+          }
+
+          new_state = %{
+            state
+            | unmatched_players: state.unmatched_players ++ [userid],
+              player_count: state.player_count + 1,
+              player_map: Map.put(state.player_map, userid, player_item)
+          }
+
+          {:ok, new_state}
+      end
+
     {:reply, resp, new_state}
   end
 
   def handle_call({:remove_player, userid}, _from, state) when is_integer(userid) do
-    {resp, new_state} = case Enum.member?(state.unmatched_players ++ state.matched_players, userid) do
-      true ->
-        new_state = remove_players(state, [userid])
-        {:ok, new_state}
-      false ->
-        {:missing, state}
-    end
+    {resp, new_state} =
+      case Enum.member?(state.unmatched_players ++ state.matched_players, userid) do
+        true ->
+          new_state = remove_players(state, [userid])
+          {:ok, new_state}
+
+        false ->
+          {:missing, state}
+      end
+
     {:reply, resp, new_state}
   end
 
@@ -50,41 +59,43 @@ defmodule Teiserver.Game.QueueServer do
       last_wait_time: state.last_wait_time,
       player_count: state.player_count
     }
+
     {:reply, resp, state}
   end
 
   def handle_info({:player_accept, player_id}, state) when is_integer(player_id) do
-    new_state = case player_id in state.matched_players do
-      true ->
-        new_waiting_for_players = List.delete(state.waiting_for_players, player_id)
-        new_players_accepted = state.players_accepted ++ [player_id]
+    new_state =
+      case player_id in state.matched_players do
+        true ->
+          new_waiting_for_players = List.delete(state.waiting_for_players, player_id)
+          new_players_accepted = state.players_accepted ++ [player_id]
 
-        interim_state = %{state |
-          waiting_for_players: new_waiting_for_players,
-          players_accepted: new_players_accepted
-        }
+          interim_state = %{
+            state
+            | waiting_for_players: new_waiting_for_players,
+              players_accepted: new_players_accepted
+          }
 
-        case Enum.empty?(new_waiting_for_players) do
-          # That was the last one, go-time
-          true ->
-            try_setup_battle(interim_state)
+          case Enum.empty?(new_waiting_for_players) do
+            # That was the last one, go-time
+            true ->
+              try_setup_battle(interim_state)
 
-          # Not ready quite yet, still waiting for at least one more
-          false ->
-            interim_state
-        end
+            # Not ready quite yet, still waiting for at least one more
+            false ->
+              interim_state
+          end
 
-      # We're not waiting for this player to accept, ignore it for now
-      false ->
-        state
-    end
+        # We're not waiting for this player to accept, ignore it for now
+        false ->
+          state
+      end
+
     {:noreply, new_state}
   end
 
   def handle_info({:player_decline, player_id}, state) when is_integer(player_id) do
-    new_state = %{state |
-      finding_battle: false
-    }
+    new_state = %{state | finding_battle: false}
 
     {:noreply, new_state}
   end
@@ -93,53 +104,59 @@ defmodule Teiserver.Game.QueueServer do
     # Typically we need to check things like team size and the like
     # but for this test of concept stage we're going to just assume we need two players
 
-    new_state = cond do
-      # Trying to find a battle, not doing standard tick stuff
-      state.finding_battle == true ->
-        try_setup_battle(state)
+    new_state =
+      cond do
+        # Trying to find a battle, not doing standard tick stuff
+        state.finding_battle == true ->
+          try_setup_battle(state)
 
-      # This means we are not waiting for players, we can instead find some
-      state.ready_started_at == nil ->
-        # First make sure we have enough players...
-        if Enum.count(state.unmatched_players) >= 2 and state.waiting_for_players == [] and state.players_accepted == [] do
-          # Now grab the players
-          [p1, p2 | new_unmatched_players] = state.unmatched_players
-          player1 = state.player_map[p1]
-          player2 = state.player_map[p2]
+        # This means we are not waiting for players, we can instead find some
+        state.ready_started_at == nil ->
+          # First make sure we have enough players...
+          if Enum.count(state.unmatched_players) >= 2 and state.waiting_for_players == [] and
+               state.players_accepted == [] do
+            # Now grab the players
+            [p1, p2 | new_unmatched_players] = state.unmatched_players
+            player1 = state.player_map[p1]
+            player2 = state.player_map[p2]
 
-          # Count them as matched up
-          new_matched_players = state.matched_players ++ [p1, p2]
+            # Count them as matched up
+            new_matched_players = state.matched_players ++ [p1, p2]
 
-          # Send them ready up commands
-          send(player1.pid, {:matchmaking, {:match_ready, state.id}})
-          send(player2.pid, {:matchmaking, {:match_ready, state.id}})
+            # Send them ready up commands
+            send(player1.pid, {:matchmaking, {:match_ready, state.id}})
+            send(player2.pid, {:matchmaking, {:match_ready, state.id}})
 
-          %{state |
-            unmatched_players: new_unmatched_players,
-            matched_players: new_matched_players,
-            waiting_for_players: new_matched_players,
-            ready_started_at: :erlang.system_time(:seconds),
-            players_accepted: []
-          }
-        else
+            %{
+              state
+              | unmatched_players: new_unmatched_players,
+                matched_players: new_matched_players,
+                waiting_for_players: new_matched_players,
+                ready_started_at: :erlang.system_time(:seconds),
+                players_accepted: []
+            }
+          else
+            state
+          end
+
+        # Waiting but haven't been waiting too long yet
+        :erlang.system_time(:seconds) - state.ready_started_at < @ready_wait_time ->
           state
-        end
 
-      # Waiting but haven't been waiting too long yet
-      (:erlang.system_time(:seconds) - state.ready_started_at) < @ready_wait_time ->
-        state
-
-      # Need to cancel waiting
-      (:erlang.system_time(:seconds) - state.ready_started_at) > @ready_wait_time ->
-        throw "TODO"
-        state
-    end
+        # Need to cancel waiting
+        :erlang.system_time(:seconds) - state.ready_started_at > @ready_wait_time ->
+          throw("TODO")
+          state
+      end
 
     {:noreply, new_state}
   end
 
-  def handle_info({:update, :settings, new_list}, state), do: {:noreply, %{state | settings: new_list}}
-  def handle_info({:update, :map_list, new_list}, state), do: {:noreply, %{state | map_list: new_list}}
+  def handle_info({:update, :settings, new_list}, state),
+    do: {:noreply, %{state | settings: new_list}}
+
+  def handle_info({:update, :map_list, new_list}, state),
+    do: {:noreply, %{state | map_list: new_list}}
 
   # Used to remove players from all aspects of the queue, either because
   # they left or their game started
@@ -149,11 +166,12 @@ defmodule Teiserver.Game.QueueServer do
     new_matched = Enum.reject(state.matched_players, fn u -> u in userids end)
     new_player_map = Map.drop(state.player_map, userids)
 
-    %{state |
-      unmatched_players: new_umatched,
-      matched_players: new_matched,
-      player_map: new_player_map,
-      player_count: Enum.count(new_player_map)
+    %{
+      state
+      | unmatched_players: new_umatched,
+        matched_players: new_matched,
+        player_map: new_player_map,
+        player_count: Enum.count(new_player_map)
     }
   end
 
@@ -165,6 +183,7 @@ defmodule Teiserver.Game.QueueServer do
     case empty_battle do
       nil ->
         %{state | finding_battle: true}
+
       battle ->
         state.players_accepted
         |> Enum.each(fn userid ->
@@ -174,13 +193,14 @@ defmodule Teiserver.Game.QueueServer do
 
         midway_state = remove_players(state, state.players_accepted)
 
-        %{midway_state |
-          finding_battle: false,
-          unmatched_players: [],
-          matched_players: [],
-          waiting_for_players: [],
-          ready_started_at: nil,
-          players_accepted: []
+        %{
+          midway_state
+          | finding_battle: false,
+            unmatched_players: [],
+            matched_players: [],
+            waiting_for_players: [],
+            ready_started_at: nil,
+            players_accepted: []
         }
     end
   end
@@ -195,24 +215,23 @@ defmodule Teiserver.Game.QueueServer do
     tick_interval = Map.get(opts.queue.settings, "tick_interval", @default_tick_interval)
     :timer.send_interval(tick_interval, self(), :tick)
 
-    {:ok, %{
-      # Match ready stuff
-      waiting_for_players: [],
-      players_accepted: [],
-      ready_started_at: nil,
-      finding_battle: false,
-
-      matchups: [],
-      matched_players: [],
-      unmatched_players: [],
-      player_count: 0,
-      player_map: %{},
-      last_wait_time: 0,
-      id: opts.queue.id,
-      team_size: opts.queue.team_size,
-      map_list: opts.queue.map_list,
-      settings: opts.queue.settings
-    }}
+    {:ok,
+     %{
+       # Match ready stuff
+       waiting_for_players: [],
+       players_accepted: [],
+       ready_started_at: nil,
+       finding_battle: false,
+       matchups: [],
+       matched_players: [],
+       unmatched_players: [],
+       player_count: 0,
+       player_map: %{},
+       last_wait_time: 0,
+       id: opts.queue.id,
+       team_size: opts.queue.team_size,
+       map_list: opts.queue.map_list,
+       settings: opts.queue.settings
+     }}
   end
-
 end

@@ -24,12 +24,13 @@ defmodule TeiserverWeb.Admin.ClanController do
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
-    clans = Clans.list_clans(
-      search: [
-        simple_search: Map.get(params, "s", "") |> String.trim,
-      ],
-      order_by: "Name (A-Z)"
-    )
+    clans =
+      Clans.list_clans(
+        search: [
+          simple_search: Map.get(params, "s", "") |> String.trim()
+        ],
+        order_by: "Name (A-Z)"
+      )
 
     conn
     |> assign(:clans, clans)
@@ -38,12 +39,13 @@ defmodule TeiserverWeb.Admin.ClanController do
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    clan = Clans.get_clan!(id, [
-      preload: [:members_and_memberships, :invites_and_invitees],
-    ])
+    clan =
+      Clans.get_clan!(id,
+        preload: [:members_and_memberships, :invites_and_invitees]
+      )
 
     clan
-    |> ClanLib.make_favourite
+    |> ClanLib.make_favourite()
     |> insert_recently(conn)
 
     conn
@@ -54,11 +56,12 @@ defmodule TeiserverWeb.Admin.ClanController do
 
   @spec new(Plug.Conn.t(), map) :: Plug.Conn.t()
   def new(conn, _params) do
-    changeset = Clans.change_clan(%Clan{
-      icon: "fas fa-" <> StylingHelper.random_icon(),
-      colour1: StylingHelper.random_colour(),
-      colour2: StylingHelper.random_colour()
-    })
+    changeset =
+      Clans.change_clan(%Clan{
+        icon: "fas fa-" <> StylingHelper.random_icon(),
+        colour1: StylingHelper.random_colour(),
+        colour2: StylingHelper.random_colour()
+      })
 
     conn
     |> assign(:changeset, changeset)
@@ -103,6 +106,7 @@ defmodule TeiserverWeb.Admin.ClanController do
         conn
         |> put_flash(:info, "Clan updated successfully.")
         |> redirect(to: Routes.ts_admin_clan_path(conn, :index))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> assign(:clan, clan)
@@ -116,7 +120,7 @@ defmodule TeiserverWeb.Admin.ClanController do
     clan = Clans.get_clan!(id)
 
     clan
-    |> ClanLib.make_favourite
+    |> ClanLib.make_favourite()
     |> remove_recently(conn)
 
     {:ok, _clan} = Clans.delete_clan(clan)
@@ -157,6 +161,7 @@ defmodule TeiserverWeb.Admin.ClanController do
     Clans.delete_clan_membership(clan_membership)
 
     user = Account.get_user!(user_id)
+
     if user.clan_id == clan_id do
       Account.update_user(user, %{"clan_id" => nil})
 
@@ -188,10 +193,11 @@ defmodule TeiserverWeb.Admin.ClanController do
   def promote(conn, %{"clan_id" => clan_id, "user_id" => user_id}) do
     clan_membership = Clans.get_clan_membership!(clan_id, user_id)
 
-    new_role = case clan_membership.role do
-      "Member" -> "Moderator"
-      "Moderator" -> "Admin"
-    end
+    new_role =
+      case clan_membership.role do
+        "Member" -> "Moderator"
+        "Moderator" -> "Admin"
+      end
 
     new_params = %{
       "role" => new_role
@@ -214,10 +220,11 @@ defmodule TeiserverWeb.Admin.ClanController do
   def demote(conn, %{"clan_id" => clan_id, "user_id" => user_id}) do
     clan_membership = Clans.get_clan_membership!(clan_id, user_id)
 
-    new_role = case clan_membership.role do
-      "Admin" -> "Moderator"
-      "Moderator" -> "Member"
-    end
+    new_role =
+      case clan_membership.role do
+        "Admin" -> "Moderator"
+        "Moderator" -> "Member"
+      end
 
     new_params = %{
       "role" => new_role

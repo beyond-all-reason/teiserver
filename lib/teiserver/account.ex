@@ -71,14 +71,14 @@ defmodule Teiserver.Account do
     %User{}
     |> User.changeset(attrs)
     |> Repo.insert()
-    |> Central.Account.broadcast_create_user
+    |> Central.Account.broadcast_create_user()
   end
 
   def script_create_user(attrs \\ %{}) do
     %User{}
     |> User.changeset(attrs, :script)
     |> Repo.insert()
-    |> Central.Account.broadcast_create_user
+    |> Central.Account.broadcast_create_user()
   end
 
   @doc """
@@ -157,13 +157,9 @@ defmodule Teiserver.Account do
     }
   end
 
-
-
-
   # Group stuff
   def create_group_membership(params),
     do: Central.Account.create_group_membership(params)
-
 
   # Reports
   def get_report!(id), do: Central.Account.get_report!(id)

@@ -5,13 +5,26 @@ defmodule TeiserverWeb.Admin.ClanControllerTest do
   alias Teiserver.Clans
 
   alias Central.Helpers.GeneralTestLib
+
   setup do
     GeneralTestLib.conn_setup(Teiserver.TestLib.admin_permissions())
-    |> Teiserver.TestLib.conn_setup
+    |> Teiserver.TestLib.conn_setup()
   end
 
-  @create_attrs %{colour1: "some colour1", colour2: "some colour2", icon: "far fa-home", name: "some name", tag: "some tag"}
-  @update_attrs %{colour1: "some updated colour1", colour2: "some updated colour2", icon: "fas fa-wrench", name: "some updated name", tag: "some updated tag"}
+  @create_attrs %{
+    colour1: "some colour1",
+    colour2: "some colour2",
+    icon: "far fa-home",
+    name: "some name",
+    tag: "some tag"
+  }
+  @update_attrs %{
+    colour1: "some updated colour1",
+    colour2: "some updated colour2",
+    icon: "fas fa-wrench",
+    name: "some updated name",
+    tag: "some updated tag"
+  }
   @invalid_attrs %{colour1: nil, colour2: nil, icon: nil, name: nil, tag: nil}
 
   describe "index" do
@@ -101,6 +114,7 @@ defmodule TeiserverWeb.Admin.ClanControllerTest do
       clan = TestLib.make_clan("admin_delete_clan")
       conn = delete(conn, Routes.ts_admin_clan_path(conn, :delete, clan))
       assert redirected_to(conn) == Routes.ts_admin_clan_path(conn, :index)
+
       assert_error_sent 404, fn ->
         get(conn, Routes.ts_admin_clan_path(conn, :show, clan))
       end

@@ -80,15 +80,18 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        reports = Central.Account.list_reports(
-          search: [
-            filter: {"target", user.id}
-          ],
-          preload: [
-            :reporter, :target, :responder
-          ],
-          order_by: "Newest first"
-        )
+        reports =
+          Central.Account.list_reports(
+            search: [
+              filter: {"target", user.id}
+            ],
+            preload: [
+              :reporter,
+              :target,
+              :responder
+            ],
+            order_by: "Newest first"
+          )
 
         user
         |> UserLib.make_favourite()
@@ -232,9 +235,10 @@ defmodule TeiserverWeb.Admin.UserController do
     #     end
 
     #   _ ->
-        conn
-        |> put_flash(:warning, "This feature is currently disabled")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    conn
+    |> put_flash(:warning, "This feature is currently disabled")
+    |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+
     # end
   end
 
@@ -244,44 +248,46 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        result = case action do
-          "recache" ->
-            Teiserver.User.recache_user(user.id)
-            {:ok, nil, ""}
+        result =
+          case action do
+            "recache" ->
+              Teiserver.User.recache_user(user.id)
+              {:ok, nil, ""}
 
-          "report_action" ->
-            action = params["report_response_action"]
-            reason = params["reason"]
+            "report_action" ->
+              action = params["report_response_action"]
+              reason = params["reason"]
 
-            case Central.Account.ReportLib.perform_action(%{}, action, params["until"]) do
-              {:ok, expires} ->
-                {:ok, report} = Central.Account.create_report(%{
-                  "location" => "web-admin-instant",
-                  "location_id" => nil,
-                  "reason" => reason,
-                  "reporter_id" => conn.user_id,
-                  "target_id" => user.id,
-                })
+              case Central.Account.ReportLib.perform_action(%{}, action, params["until"]) do
+                {:ok, expires} ->
+                  {:ok, report} =
+                    Central.Account.create_report(%{
+                      "location" => "web-admin-instant",
+                      "location_id" => nil,
+                      "reason" => reason,
+                      "reporter_id" => conn.user_id,
+                      "target_id" => user.id
+                    })
 
-                Central.Account.update_report(report, %{
-                  "response_text" => "instant-action",
-                  "response_action" => params["report_response_action"],
-                  "expires" => expires,
-                  "responder_id" => conn.user_id
-                })
+                  Central.Account.update_report(report, %{
+                    "response_text" => "instant-action",
+                    "response_action" => params["report_response_action"],
+                    "expires" => expires,
+                    "responder_id" => conn.user_id
+                  })
 
-                {:ok, nil, "#reports_tab"}
+                  {:ok, nil, "#reports_tab"}
 
-              err ->
-                err
-            end
-        end
+                err ->
+                  err
+              end
+          end
 
         case result do
           {:ok, nil, tab} ->
             conn
-              |> put_flash(:info, "Action performed.")
-              |> redirect(to: Routes.ts_admin_user_path(conn, :show, user) <> tab)
+            |> put_flash(:info, "Action performed.")
+            |> redirect(to: Routes.ts_admin_user_path(conn, :show, user) <> tab)
 
           # {:ok, new_data, tab} ->
           #   user_params = %{"data" => Map.merge(user.data || %{}, new_data)}
@@ -301,7 +307,6 @@ defmodule TeiserverWeb.Admin.UserController do
             |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
         end
 
-
       _ ->
         conn
         |> put_flash(:warning, "Unable to access this user")
@@ -311,18 +316,22 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec respond_form(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def respond_form(conn, %{"id" => id}) do
-    report = Central.Account.get_report!(id,
-      preload: [
-        :reporter, :target, :responder
-      ]
-    )
+    report =
+      Central.Account.get_report!(id,
+        preload: [
+          :reporter,
+          :target,
+          :responder
+        ]
+      )
 
     case Central.Account.UserLib.has_access(report.target, conn) do
       {true, _} ->
         changeset = Central.Account.change_report(report)
 
-        fav = report
-        |> Central.Account.ReportLib.make_favourite
+        fav =
+          report
+          |> Central.Account.ReportLib.make_favourite()
 
         conn
         |> assign(:report, report)
@@ -343,18 +352,24 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(report.target, conn) do
       {true, _} ->
-        case Central.Account.ReportLib.perform_action(report, report_params["response_action"], report_params["response_data"]) do
+        case Central.Account.ReportLib.perform_action(
+               report,
+               report_params["response_action"],
+               report_params["response_data"]
+             ) do
           {:ok, expires} ->
-            report_params = Map.merge(report_params, %{
-              "expires" => expires,
-              "responder_id" => conn.user_id
-            })
+            report_params =
+              Map.merge(report_params, %{
+                "expires" => expires,
+                "responder_id" => conn.user_id
+              })
 
             case Central.Account.update_report(report, report_params) do
               {:ok, _report} ->
                 conn
                 |> put_flash(:success, "Report updated.")
                 |> redirect(to: Routes.ts_admin_user_path(conn, :show, report.target_id))
+
               {:error, %Ecto.Changeset{} = changeset} ->
                 conn
                 |> assign(:report, report)
@@ -378,7 +393,6 @@ defmodule TeiserverWeb.Admin.UserController do
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end
-
 
   @spec search_defaults(Plug.Conn.t()) :: Map.t()
   defp search_defaults(_conn) do

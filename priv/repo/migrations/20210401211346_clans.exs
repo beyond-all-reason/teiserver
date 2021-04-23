@@ -14,6 +14,7 @@ defmodule Central.Repo.Migrations.Clans do
 
       timestamps()
     end
+
     create index(:teiserver_clans, [:name])
     create index(:teiserver_clans, [:tag])
 

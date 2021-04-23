@@ -30,9 +30,10 @@ defmodule Teiserver.Clans.Clan do
   Builds a changeset based on the `struct` and `params`.
   """
   def changeset(struct, params \\ %{}) do
-    params = params
-    |> trim_strings([:name, :tag, :icon, :colour1, :colour2])
-    |> remove_characters([:tag], [~r/[\[\]]/])
+    params =
+      params
+      |> trim_strings([:name, :tag, :icon, :colour1, :colour2])
+      |> remove_characters([:tag], [~r/[\[\]]/])
 
     struct
     |> cast(params, [:name, :tag, :icon, :colour1, :colour2, :rating, :homepage])

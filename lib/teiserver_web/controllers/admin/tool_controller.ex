@@ -25,14 +25,16 @@ defmodule TeiserverWeb.Admin.ToolController do
 
   @spec convert_post(Plug.Conn.t(), map) :: Plug.Conn.t()
   def convert_post(conn, %{"file_upload" => file_upload}) do
-    {:ok, _job} = case File.read(file_upload.path) do
-      {:ok, body} ->
-        %{body: body}
-        |> Teiserver.UberserverConvert.new()
-        |> Oban.insert()
-      error ->
-        throw error
-    end
+    {:ok, _job} =
+      case File.read(file_upload.path) do
+        {:ok, body} ->
+          %{body: body}
+          |> Teiserver.UberserverConvert.new()
+          |> Oban.insert()
+
+        error ->
+          throw(error)
+      end
 
     render(conn, "convert_post.html")
   end

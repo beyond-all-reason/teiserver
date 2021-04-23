@@ -17,7 +17,7 @@ defmodule Teiserver.Game do
 
   @spec party_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def party_query(id, args) do
-    PartyLib.query_parties
+    PartyLib.query_parties()
     |> PartyLib.search(%{id: id})
     |> PartyLib.search(args[:search])
     |> PartyLib.preload(args[:preload])
@@ -38,7 +38,7 @@ defmodule Teiserver.Game do
   def list_parties(args \\ []) do
     party_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -59,15 +59,17 @@ defmodule Teiserver.Game do
   @spec get_party!(Integer.t(), List.t()) :: Party.t()
   def get_party!(id) when not is_list(id) do
     party_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_party!(args) do
     party_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_party!(id, args) do
     party_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -159,7 +161,7 @@ defmodule Teiserver.Game do
     Party.changeset(party, %{})
   end
 
-    alias Teiserver.Game.Queue
+  alias Teiserver.Game.Queue
   alias Teiserver.Game.QueueLib
 
   @spec queue_query(List.t()) :: Ecto.Query.t()
@@ -169,7 +171,7 @@ defmodule Teiserver.Game do
 
   @spec queue_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def queue_query(id, args) do
-    QueueLib.query_queues
+    QueueLib.query_queues()
     |> QueueLib.search(%{id: id})
     |> QueueLib.search(args[:search])
     |> QueueLib.preload(args[:preload])
@@ -190,7 +192,7 @@ defmodule Teiserver.Game do
   def list_queues(args \\ []) do
     queue_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -211,15 +213,17 @@ defmodule Teiserver.Game do
   @spec get_queue!(Integer.t(), List.t()) :: Queue.t()
   def get_queue!(id) when not is_list(id) do
     queue_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_queue!(args) do
     queue_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_queue!(id, args) do
     queue_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -266,6 +270,7 @@ defmodule Teiserver.Game do
     Teiserver.Data.Matchmaking.add_queue_from_db(queue)
     {:ok, queue}
   end
+
   defp cache_new_queue(v), do: v
 
   @doc """
@@ -318,7 +323,7 @@ defmodule Teiserver.Game do
     Queue.changeset(queue, %{})
   end
 
-    alias Teiserver.Game.Tournament
+  alias Teiserver.Game.Tournament
   alias Teiserver.Game.TournamentLib
 
   @spec tournament_query(List.t()) :: Ecto.Query.t()
@@ -328,7 +333,7 @@ defmodule Teiserver.Game do
 
   @spec tournament_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def tournament_query(id, args) do
-    TournamentLib.query_tournaments
+    TournamentLib.query_tournaments()
     |> TournamentLib.search(%{id: id})
     |> TournamentLib.search(args[:search])
     |> TournamentLib.preload(args[:preload])
@@ -349,7 +354,7 @@ defmodule Teiserver.Game do
   def list_tournaments(args \\ []) do
     tournament_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -370,15 +375,17 @@ defmodule Teiserver.Game do
   @spec get_tournament!(Integer.t(), List.t()) :: Tournament.t()
   def get_tournament!(id) when not is_list(id) do
     tournament_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_tournament!(args) do
     tournament_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_tournament!(id, args) do
     tournament_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -432,7 +439,8 @@ defmodule Teiserver.Game do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_tournament(Tournament.t(), Map.t()) :: {:ok, Tournament.t()} | {:error, Ecto.Changeset.t()}
+  @spec update_tournament(Tournament.t(), Map.t()) ::
+          {:ok, Tournament.t()} | {:error, Ecto.Changeset.t()}
   def update_tournament(%Tournament{} = tournament, attrs) do
     tournament
     |> Tournament.changeset(attrs)

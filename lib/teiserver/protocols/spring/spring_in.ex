@@ -40,7 +40,7 @@ defmodule Teiserver.Protocols.SpringIn do
       end
 
     if state == nil do
-      throw "nil state returned while handling: #{data}"
+      throw("nil state returned while handling: #{data}")
     end
 
     %{state | last_msg: System.system_time(:second)}
@@ -82,32 +82,44 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("MYSTATUS", data, msg_id, state) do
     case Regex.run(~r/([0-9]+)/, data) do
       [_, new_value] ->
-        new_status = Spring.parse_client_status(new_value)
-        |> Map.take([:in_game, :away])
+        new_status =
+          Spring.parse_client_status(new_value)
+          |> Map.take([:in_game, :away])
 
-        new_client = Client.get_client_by_id(state.userid)
-        |> Map.merge(new_status)
+        new_client =
+          Client.get_client_by_id(state.userid)
+          |> Map.merge(new_status)
 
         # This just accepts it and updates the client
         Client.update(new_client, :client_updated_status)
+
       nil ->
         _no_match(state, "MYSTATUS", msg_id, data)
     end
+
     state
   end
 
   defp do_handle("c.user.get_token_by_email", _data, msg_id, %{transport: :ranch_tcp} = state) do
-    reply(:no, {"c.user.get_token_by_email", "cannot get token over insecure connection"}, msg_id, state)
+    reply(
+      :no,
+      {"c.user.get_token_by_email", "cannot get token over insecure connection"},
+      msg_id,
+      state
+    )
   end
+
   defp do_handle("c.user.get_token_by_email", data, msg_id, state) do
     case String.split(data, "\t") do
       [email, plain_text_password] ->
         user = Central.Account.get_user_by_email(email)
-        response = if user do
-          Central.Account.User.verify_password(plain_text_password, user.password)
-        else
-          false
-        end
+
+        response =
+          if user do
+            Central.Account.User.verify_password(plain_text_password, user.password)
+          else
+            false
+          end
 
         if response do
           token = User.create_token(user)
@@ -115,23 +127,32 @@ defmodule Teiserver.Protocols.SpringIn do
         else
           reply(:no, {"c.user.get_token_by_email", "invalid credentials"}, msg_id, state)
         end
+
       _ ->
         reply(:no, {"c.user.get_token_by_email", "bad format"}, msg_id, state)
     end
   end
 
   defp do_handle("c.user.get_token_by_name", _data, msg_id, %{transport: :ranch_tcp} = state) do
-    reply(:no, {"c.user.get_token_by_name", "cannot get token over insecure connection"}, msg_id, state)
+    reply(
+      :no,
+      {"c.user.get_token_by_name", "cannot get token over insecure connection"},
+      msg_id,
+      state
+    )
   end
+
   defp do_handle("c.user.get_token_by_name", data, msg_id, state) do
     case String.split(data, "\t") do
       [name, plain_text_password] ->
         user = Central.Account.get_user_by_name(name)
-        response = if user do
-          Central.Account.User.verify_password(plain_text_password, user.password)
-        else
-          false
-        end
+
+        response =
+          if user do
+            Central.Account.User.verify_password(plain_text_password, user.password)
+          else
+            false
+          end
 
         if response do
           token = User.create_token(user)
@@ -139,6 +160,7 @@ defmodule Teiserver.Protocols.SpringIn do
         else
           reply(:no, {"c.user.get_token_by_name", "invalid credentials"}, msg_id, state)
         end
+
       _ ->
         reply(:no, {"c.user.get_token_by_name", "bad format"}, msg_id, state)
     end
@@ -146,10 +168,11 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("c.user.login", data, msg_id, state) do
     # Flags are optional hence the weird case statement
-    [token, lobby, _flags] = case String.split(data, "\t") do
-      [token, lobby, flags] -> [token, lobby, String.split(flags, " ")]
-      [token, lobby] -> [token, lobby, []]
-    end
+    [token, lobby, _flags] =
+      case String.split(data, "\t") do
+        [token, lobby, flags] -> [token, lobby, String.split(flags, " ")]
+        [token, lobby] -> [token, lobby, []]
+      end
 
     # Now try to login using a token
     response = User.try_login(token, state, state.ip, lobby)
@@ -243,7 +266,8 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("CONFIRMAGREEMENT", _code, msg_id, state),
-    do: reply(:servermsg, "You need to login before you can confirm the agreement.", msg_id, state)
+    do:
+      reply(:servermsg, "You need to login before you can confirm the agreement.", msg_id, state)
 
   defp do_handle("CREATEBOTACCOUNT", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
@@ -257,7 +281,9 @@ defmodule Teiserver.Protocols.SpringIn do
           _ ->
             reply(
               :servermsg,
-              "A new bot account #{botname} has been created, with the same password as #{state.username}",
+              "A new bot account #{botname} has been created, with the same password as #{
+                state.username
+              }",
               msg_id,
               state
             )
@@ -327,11 +353,13 @@ defmodule Teiserver.Protocols.SpringIn do
       _ ->
         _no_match(state, "RESETPASSWORD", msg_id, data)
     end
+
     state
   end
 
   defp do_handle("CHANGEEMAILREQUEST", new_email, msg_id, state) do
     new_user = User.request_email_change(state.user, new_email)
+
     case new_user do
       nil ->
         reply(:change_email_request_denied, "no user", msg_id, state)
@@ -375,7 +403,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("GETUSERINFO", _, msg_id, state) do
-    ingame_hours = round(state.user.ingame_minutes/60)
+    ingame_hours = round(state.user.ingame_minutes / 60)
 
     [
       "Registration date: #{date_to_str(state.user.inserted_at, :ymd_hms)}",
@@ -420,8 +448,11 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   # Friend list
-  defp do_handle("FRIENDLIST", _, msg_id, state), do: reply(:friendlist, state.user, msg_id, state)
-  defp do_handle("FRIENDREQUESTLIST", _, msg_id, state), do: reply(:friendlist_request, state.user, msg_id, state)
+  defp do_handle("FRIENDLIST", _, msg_id, state),
+    do: reply(:friendlist, state.user, msg_id, state)
+
+  defp do_handle("FRIENDREQUESTLIST", _, msg_id, state),
+    do: reply(:friendlist_request, state.user, msg_id, state)
 
   defp do_handle("UNFRIEND", data, _msg_id, state) do
     [_, username] = String.split(data, "=")
@@ -459,7 +490,8 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
-  defp do_handle("IGNORELIST", _, msg_id, state), do: reply(:ignorelist, state.user, msg_id, state)
+  defp do_handle("IGNORELIST", _, msg_id, state),
+    do: reply(:ignorelist, state.user, msg_id, state)
 
   # Chat related
   defp do_handle("JOIN", data, msg_id, state) do
@@ -574,6 +606,7 @@ defmodule Teiserver.Protocols.SpringIn do
             end
 
           client = Client.get_client_by_id(state.userid)
+
           battle =
             %{
               founder_id: state.userid,
@@ -614,6 +647,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
         # Send information about the battle to them
         reply(:add_script_tags, battle.tags, msg_id, state)
+
         battle.start_rectangles
         |> Enum.each(fn {team, r} ->
           reply(:add_start_rectangle, {team, r}, msg_id, state)
@@ -690,6 +724,7 @@ defmodule Teiserver.Protocols.SpringIn do
     if Battle.allow?(state.userid, :removestartrect, state.battle_id) do
       Battle.remove_start_rectangle(state.battle_id, team)
     end
+
     state
   end
 

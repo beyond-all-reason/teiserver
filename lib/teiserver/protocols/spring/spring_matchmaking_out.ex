@@ -1,5 +1,4 @@
 defmodule Teiserver.Protocols.Spring.MatchmakingOut do
-
   @spec do_reply(atom(), nil | String.t() | tuple() | list()) :: String.t()
   def do_reply(:full_queue_list, queues) when is_list(queues) do
     names = queue_list(queues)
@@ -12,13 +11,15 @@ defmodule Teiserver.Protocols.Spring.MatchmakingOut do
   end
 
   def do_reply(:queue_info, {the_queue, info}) do
-    parts = [
-      the_queue.id,
-      the_queue.name,
-      info.last_wait_time,
-      info.player_count
-    ]
+    parts =
+      [
+        the_queue.id,
+        the_queue.name,
+        info.last_wait_time,
+        info.player_count
+      ]
       |> Enum.join("\t")
+
     "s.matchmaking.queue_info #{parts}\n"
   end
 

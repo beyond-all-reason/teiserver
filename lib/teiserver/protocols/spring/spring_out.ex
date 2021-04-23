@@ -31,21 +31,31 @@ defmodule Teiserver.Protocols.SpringOut do
 
   @spec reply(atom(), atom(), nil | String.t() | tuple() | list(), String.t(), map) :: map
   def reply(namespace, reply_cmd, data, msg_id, state) do
-    msg = case namespace do
-      :matchmaking -> MatchmakingOut.do_reply(reply_cmd, data)
-      :spring -> do_reply(reply_cmd, data)
-    end
+    msg =
+      case namespace do
+        :matchmaking -> MatchmakingOut.do_reply(reply_cmd, data)
+        :spring -> do_reply(reply_cmd, data)
+      end
 
     if state.extra_logging do
       if is_list(msg) do
         msg
         |> Enum.map(fn m ->
-          Logger.info("--> #{Kernel.inspect(state.username)}:#{Kernel.inspect(state.userid)} #{TcpServer.format_log(m)}")
+          Logger.info(
+            "--> #{Kernel.inspect(state.username)}:#{Kernel.inspect(state.userid)} #{
+              TcpServer.format_log(m)
+            }"
+          )
         end)
       else
-        Logger.info("--> #{Kernel.inspect(state.username)}:#{Kernel.inspect(state.userid)} #{TcpServer.format_log(msg)}")
+        Logger.info(
+          "--> #{Kernel.inspect(state.username)}:#{Kernel.inspect(state.userid)} #{
+            TcpServer.format_log(msg)
+          }"
+        )
       end
     end
+
     _send(msg, msg_id, state)
     state
   end
@@ -119,8 +129,10 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:list_battles, battle_ids) do
-    ids = battle_ids
-    |> Enum.join("\t")
+    ids =
+      battle_ids
+      |> Enum.join("\t")
+
     "s.battles.id_list #{ids}\n"
   end
 
@@ -304,6 +316,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:client_battlestatus, nil), do: nil
+
   defp do_reply(:client_battlestatus, client) do
     status = Spring.create_battle_status(client)
     "CLIENTBATTLESTATUS #{client.name} #{status} #{client.team_colour}\n"
@@ -363,7 +376,6 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:change_email_request_denied, reason) do
     "CHANGEEMAILREQUESTDENIED #{reason}\n"
   end
-
 
   # Chat
   defp do_reply(:join_success, room_name) do
@@ -539,6 +551,7 @@ defmodule Teiserver.Protocols.SpringOut do
       send(self(), {:global_battle_updated, battle_id, :update_battle_info})
 
       battle = Battle.get_battle(battle_id)
+
       battle.players
       |> Enum.each(fn player_id ->
         send(self(), {:add_user_to_battle, player_id, battle_id})
@@ -554,10 +567,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
     send(self(), {:action, {:login_end, nil}})
     :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
-    %{state |
-      user: user,
-      username: user.name,
-      userid: user.id}
+    %{state | user: user, username: user.name, userid: user.id}
   end
 
   # This sends a message to the self to send out a message

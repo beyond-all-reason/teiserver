@@ -28,9 +28,10 @@ defmodule Teiserver.Game.Queue do
   """
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
-    params = params
-    |> trim_strings([:name])
-    |> remove_characters([:name], [~r/[:]/])
+    params =
+      params
+      |> trim_strings([:name])
+      |> remove_characters([:name], [~r/[:]/])
 
     struct
     |> cast(params, [:name, :icon, :colour, :team_size, :conditions, :settings, :map_list])

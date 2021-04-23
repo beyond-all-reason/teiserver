@@ -18,12 +18,13 @@ defmodule TeiserverWeb.Admin.QueueController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    queues = Game.list_queues(
-      search: [
-        simple_search: Map.get(params, "s", "") |> String.trim,
-      ],
-      order_by: "Name (A-Z)"
-    )
+    queues =
+      Game.list_queues(
+        search: [
+          simple_search: Map.get(params, "s", "") |> String.trim()
+        ],
+        order_by: "Name (A-Z)"
+      )
 
     conn
     |> assign(:queues, queues)
@@ -32,12 +33,13 @@ defmodule TeiserverWeb.Admin.QueueController do
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    queue = Game.get_queue!(id, [
-      joins: [],
-    ])
+    queue =
+      Game.get_queue!(id,
+        joins: []
+      )
 
     queue
-    |> QueueLib.make_favourite
+    |> QueueLib.make_favourite()
     |> insert_recently(conn)
 
     conn
@@ -48,10 +50,11 @@ defmodule TeiserverWeb.Admin.QueueController do
 
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _params) do
-    changeset = Game.change_queue(%Queue{
-      icon: "fas fa-" <> StylingHelper.random_icon(),
-      colour: StylingHelper.random_colour()
-    })
+    changeset =
+      Game.change_queue(%Queue{
+        icon: "fas fa-" <> StylingHelper.random_icon(),
+        colour: StylingHelper.random_colour()
+      })
 
     conn
     |> assign(:changeset, changeset)
@@ -61,11 +64,12 @@ defmodule TeiserverWeb.Admin.QueueController do
 
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def create(conn, %{"queue" => queue_params}) do
-    queue_params = Map.merge(queue_params, %{
-      "conditions" => Jason.decode!(queue_params["conditions"]),
-      "settings" => Jason.decode!(queue_params["settings"]),
-      "map_list" => String.split(queue_params["map_list"], "\n")
-    })
+    queue_params =
+      Map.merge(queue_params, %{
+        "conditions" => Jason.decode!(queue_params["conditions"]),
+        "settings" => Jason.decode!(queue_params["settings"]),
+        "map_list" => String.split(queue_params["map_list"], "\n")
+      })
 
     case Game.create_queue(queue_params) do
       {:ok, _queue} ->
@@ -97,17 +101,19 @@ defmodule TeiserverWeb.Admin.QueueController do
   def update(conn, %{"id" => id, "queue" => queue_params}) do
     queue = Game.get_queue!(id)
 
-    queue_params = Map.merge(queue_params, %{
-      "conditions" => Jason.decode!(queue_params["conditions"]),
-      "settings" => Jason.decode!(queue_params["settings"]),
-      "map_list" => String.split(queue_params["map_list"], "\n")
-    })
+    queue_params =
+      Map.merge(queue_params, %{
+        "conditions" => Jason.decode!(queue_params["conditions"]),
+        "settings" => Jason.decode!(queue_params["settings"]),
+        "map_list" => String.split(queue_params["map_list"], "\n")
+      })
 
     case Game.update_queue(queue, queue_params) do
       {:ok, _queue} ->
         conn
         |> put_flash(:info, "Queue updated successfully.")
         |> redirect(to: Routes.ts_admin_queue_path(conn, :index))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> assign(:queue, queue)
@@ -121,7 +127,7 @@ defmodule TeiserverWeb.Admin.QueueController do
     queue = Game.get_queue!(id)
 
     queue
-    |> QueueLib.make_favourite
+    |> QueueLib.make_favourite()
     |> remove_recently(conn)
 
     {:ok, _queue} = Game.delete_queue(queue)

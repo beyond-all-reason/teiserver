@@ -2,8 +2,18 @@
 defmodule Teiserver.Data.QueueStruct do
   @enforce_keys [:id, :name, :team_size, :icon, :colour, :settings, :conditions, :map_list]
   defstruct [
-    :id, :name, :team_size, :icon, :colour, :settings, :conditions, :map_list,
-    current_search_time: 0, current_size: 0, contents: [], pid: nil
+    :id,
+    :name,
+    :team_size,
+    :icon,
+    :colour,
+    :settings,
+    :conditions,
+    :map_list,
+    current_search_time: 0,
+    current_size: 0,
+    contents: [],
+    pid: nil
   ]
 end
 
@@ -50,7 +60,7 @@ defmodule Teiserver.Data.Matchmaking do
   end
 
   @spec list_queues :: [QueueStruct.t() | nil]
-   def list_queues() do
+  def list_queues() do
     ConCache.get(:lists, :queues)
     |> Enum.map(fn queue_id -> ConCache.get(:queues, queue_id) end)
   end
@@ -68,6 +78,7 @@ defmodule Teiserver.Data.Matchmaking do
     case get_queue(queue_id) do
       nil ->
         :failed
+
       queue ->
         GenServer.call(queue.pid, {:add_player, player_id, pid})
     end
@@ -78,6 +89,7 @@ defmodule Teiserver.Data.Matchmaking do
     case get_queue(queue_id) do
       nil ->
         :failed
+
       queue ->
         GenServer.call(queue.pid, {:remove_player, player_id})
     end
@@ -108,9 +120,7 @@ defmodule Teiserver.Data.Matchmaking do
     ConCache.insert_new(:lists, :queues, [])
 
     queue_count =
-      Game.list_queues(
-        limit: :infinity
-      )
+      Game.list_queues(limit: :infinity)
       |> Parallel.map(fn queue ->
         queue
         |> convert_queue

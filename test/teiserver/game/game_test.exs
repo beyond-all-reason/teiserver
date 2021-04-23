@@ -1,7 +1,6 @@
 # defmodule Teiserver.GameTest do
 #   use Central.DataCase
 
-
 #   describe "parties" do
 #     alias Teiserver.Game.Party
 
@@ -56,7 +55,6 @@
 #     end
 #   end
 
-
 #   describe "queues" do
 #     alias Teiserver.Game.Queue
 
@@ -110,7 +108,6 @@
 #       assert %Ecto.Changeset{} = Game.change_queue(queue)
 #     end
 #   end
-
 
 #   describe "tournaments" do
 #     alias Teiserver.Game.Tournament

@@ -160,7 +160,8 @@ defmodule Teiserver.SpringBattleHostTest do
     _ = _recv(socket3)
 
     # Mybattle status
-    _ = _recv(socket2)# Clear out a bunch of things we've tested for socket1
+    # Clear out a bunch of things we've tested for socket1
+    _ = _recv(socket2)
     _send(socket2, "MYBATTLESTATUS 4195330 600\n")
     :timer.sleep(100)
     _ = _recv(socket)
@@ -181,15 +182,16 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195330 600\n"
 
     status = Spring.parse_battle_status("4195330")
+
     assert status == %{
-      ready: true,
-      handicap: 0,
-      team_number: 0,
-      ally_team_number: 0,
-      player: true,
-      sync: 1,
-      side: 0
-    }
+             ready: true,
+             handicap: 0,
+             team_number: 0,
+             ally_team_number: 0,
+             player: true,
+             sync: 1,
+             side: 0
+           }
 
     # Handicap
     _send(socket, "HANDICAP #{user2.name} 87\n")

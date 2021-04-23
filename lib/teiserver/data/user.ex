@@ -64,7 +64,13 @@ defmodule Teiserver.User do
   }
 
   @rank_levels [
-    5, 15, 30, 100, 300, 1000, 3000
+    5,
+    15,
+    30,
+    100,
+    300,
+    1000,
+    3000
   ]
 
   require Logger
@@ -132,7 +138,6 @@ defmodule Teiserver.User do
 
     case Account.script_create_user(params) do
       {:ok, user} ->
-
         Account.create_group_membership(%{
           user_id: user.id,
           group_id: bar_user_group_id()
@@ -311,13 +316,18 @@ defmodule Teiserver.User do
       update_user(new_accepter, persist: true)
       update_user(new_requester, persist: true)
 
-      Communication.notify(new_requester.id, %{
-        title: "#{new_accepter.name} accepted your friend request",
-        body: "#{new_accepter.name} accepted your friend request",
-        icon: Teiserver.icon(:friend),
-        colour: StylingHelper.get_fg(:success),
-        redirect: "/teiserver/account/relationships#friends"
-      }, 1, prevent_duplicates: true)
+      Communication.notify(
+        new_requester.id,
+        %{
+          title: "#{new_accepter.name} accepted your friend request",
+          body: "#{new_accepter.name} accepted your friend request",
+          icon: Teiserver.icon(:friend),
+          colour: StylingHelper.get_fg(:success),
+          redirect: "/teiserver/account/relationships#friends"
+        },
+        1,
+        prevent_duplicates: true
+      )
 
       # Now push out the updates
       PubSub.broadcast(
@@ -376,13 +386,18 @@ defmodule Teiserver.User do
       requester = get_user_by_id(requester_id)
       update_user(new_potential, persist: true)
 
-      Communication.notify(new_potential.id, %{
-        title: "New friend request from #{requester.name}",
-        body: "New friend request from #{requester.name}",
-        icon: Teiserver.icon(:friend),
-        colour: StylingHelper.get_fg(:info),
-        redirect: "/teiserver/account/relationships#requests"
-      }, 1, prevent_duplicates: true)
+      Communication.notify(
+        new_potential.id,
+        %{
+          title: "New friend request from #{requester.name}",
+          body: "New friend request from #{requester.name}",
+          icon: Teiserver.icon(:friend),
+          colour: StylingHelper.get_fg(:info),
+          redirect: "/teiserver/account/relationships#requests"
+        },
+        1,
+        prevent_duplicates: true
+      )
 
       # Now push out the updates
       PubSub.broadcast(
@@ -494,8 +509,8 @@ defmodule Teiserver.User do
     )
   end
 
-   @spec list_users :: list
-   def list_users() do
+  @spec list_users :: list
+  def list_users() do
     ConCache.get(:lists, :users)
     |> Enum.map(fn userid -> ConCache.get(:users, userid) end)
   end
@@ -532,6 +547,7 @@ defmodule Teiserver.User do
     case Guardian.resource_from_token(token) do
       {:error, _bad_token} ->
         {:error, "token_login_failed"}
+
       {:ok, db_user, _claims} ->
         user = get_user_by_id(db_user.id)
         banned_until_dt = TimexHelper.parse_ymd_hms(user.banned_until)
@@ -595,23 +611,36 @@ defmodule Teiserver.User do
 
   defp do_login(user, state, ip, lobbyid) do
     # If they don't want a flag shown, don't show it, otherwise check for an override before trying geoip
-    country = cond do
-      Central.Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
-        "??"
-      user.country_override != nil ->
-        user.country_override
-      true ->
-        Teiserver.Geoip.get_flag(ip)
-    end
+    country =
+      cond do
+        Central.Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
+          "??"
 
-    last_login = round(:erlang.system_time(:seconds)/60)
+        user.country_override != nil ->
+          user.country_override
+
+        true ->
+          Teiserver.Geoip.get_flag(ip)
+      end
+
+    last_login = round(:erlang.system_time(:seconds) / 60)
 
     ingame_hours = user.ingame_minutes / 60
-    rank = @rank_levels
-    |> Enum.filter(fn r -> r < ingame_hours end)
-    |> Enum.count
 
-    user = %{user | ip: ip, lobbyid: lobbyid, country: country, last_login: last_login, rank: rank}
+    rank =
+      @rank_levels
+      |> Enum.filter(fn r -> r < ingame_hours end)
+      |> Enum.count()
+
+    user = %{
+      user
+      | ip: ip,
+        lobbyid: lobbyid,
+        country: country,
+        last_login: last_login,
+        rank: rank
+    }
+
     update_user(user, persist: true)
 
     proto = state.protocol_out
@@ -627,7 +656,8 @@ defmodule Teiserver.User do
   def logout(user_id) do
     user = get_user_by_id(user_id)
     # TODO In some tests it's possible for last_login to be nil, this is a temporary workaround
-    system_minutes = round(:erlang.system_time(:seconds)/60)
+    system_minutes = round(:erlang.system_time(:seconds) / 60)
+
     new_ingame_minutes =
       user.ingame_minutes +
         (system_minutes - (user.last_login || system_minutes))
@@ -652,29 +682,30 @@ defmodule Teiserver.User do
     report = Account.get_report!(report_id)
     user = get_user_by_id(report.target_id)
 
-    changes = case {report.response_action, report.expires} do
-      {"Mute", nil} ->
-        %{muted: true}
+    changes =
+      case {report.response_action, report.expires} do
+        {"Mute", nil} ->
+          %{muted: true}
 
-      {"Mute", expires} ->
-        %{muted_until: expires}
+        {"Mute", expires} ->
+          %{muted_until: expires}
 
-      {"Ban", nil} ->
-        %{banned: true}
+        {"Ban", nil} ->
+          %{banned: true}
 
-      {"Ban", expires} ->
-        %{banned_until: expires}
+        {"Ban", expires} ->
+          %{banned_until: expires}
 
-      {"Ignore report", nil} ->
-        %{}
+        {"Ignore report", nil} ->
+          %{}
 
-      {action, _} ->
-        throw "No handler for action type '#{action}' in #{__MODULE__}"
-    end
+        {action, _} ->
+          throw("No handler for action type '#{action}' in #{__MODULE__}")
+      end
 
-    IO.puts "NEW REPORT"
-    IO.inspect changes
-    IO.puts ""
+    IO.puts("NEW REPORT")
+    IO.inspect(changes)
+    IO.puts("")
 
     Map.merge(user, changes)
     |> update_user(persist: true)
@@ -693,13 +724,18 @@ defmodule Teiserver.User do
   # Used to reset the spring password of the user when the site password is updated
   def set_new_spring_password(userid, new_password) do
     user = get_user_by_id(userid)
+
     case user do
-      nil -> nil
+      nil ->
+        nil
+
       _ ->
         md5_password = spring_md5_password(new_password)
         encrypted_password = encrypt_password(md5_password)
 
-        update_user(%{user | password_reset_code: nil, password_hash: encrypted_password}, persist: true)
+        update_user(%{user | password_reset_code: nil, password_hash: encrypted_password},
+          persist: true
+        )
     end
   end
 
@@ -710,7 +746,10 @@ defmodule Teiserver.User do
         encrypted_password = encrypt_password(md5_password)
 
         EmailHelper.spring_password_reset(user, plain_password)
-        update_user(%{user | password_reset_code: nil, password_hash: encrypted_password}, persist: true)
+
+        update_user(%{user | password_reset_code: nil, password_hash: encrypted_password},
+          persist: true
+        )
 
         # Now update the DB user too
         db_user = Account.get_user!(user.id)
@@ -734,6 +773,7 @@ defmodule Teiserver.User do
       |> convert_user
       |> add_user
     end
+
     :ok
   end
 
@@ -765,6 +805,7 @@ defmodule Teiserver.User do
     case permission do
       :moderator ->
         user.moderator
+
       _ ->
         false
     end
@@ -774,9 +815,7 @@ defmodule Teiserver.User do
     ConCache.insert_new(:lists, :users, [])
 
     user_count =
-      Account.list_users(
-        limit: :infinity
-      )
+      Account.list_users(limit: :infinity)
       |> Parallel.map(fn user ->
         user
         |> convert_user

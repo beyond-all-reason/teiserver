@@ -58,12 +58,16 @@ defmodule Teiserver.SpringRawTest do
       socket,
       "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
     )
+
     reply = _recv_until(socket)
     [accepted | remainder] = String.split(reply, "\n")
     user = User.get_user_by_name(username)
 
     assert accepted == "ACCEPTED #{username}",
-      message: "Bad password, gave X03MO1qnZdYdgyfeuILPmQ== but needed #{user.password_hash}. Accepted message is #{accepted}"
+      message:
+        "Bad password, gave X03MO1qnZdYdgyfeuILPmQ== but needed #{user.password_hash}. Accepted message is #{
+          accepted
+        }"
 
     commands =
       remainder

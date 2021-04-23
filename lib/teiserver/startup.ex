@@ -55,16 +55,46 @@ defmodule Teiserver.Startup do
     # Quick actions
     QuickAction.add_items([
       # General pages
-      %{label: "Relationships", icons: [Teiserver.icon(:relationship), :list], url: "/teiserver/account/relationships", permissions: "teiserver"},
-      %{label: "Clans", icons: [Teiserver.Clans.ClanLib.icon(), :list], url: "/teiserver/account/clans", permissions: "teiserver"},
-      %{label: "Battles", icons: [Teiserver.BattleLib.icon(), :list], url: "/teiserver/battle", permissions: "teiserver"},
+      %{
+        label: "Relationships",
+        icons: [Teiserver.icon(:relationship), :list],
+        url: "/teiserver/account/relationships",
+        permissions: "teiserver"
+      },
+      %{
+        label: "Clans",
+        icons: [Teiserver.Clans.ClanLib.icon(), :list],
+        url: "/teiserver/account/clans",
+        permissions: "teiserver"
+      },
+      %{
+        label: "Battles",
+        icons: [Teiserver.BattleLib.icon(), :list],
+        url: "/teiserver/battle",
+        permissions: "teiserver"
+      },
       # %{label: "Tournaments", icons: [Teiserver.Game.TournamentLib.icon(), :list], url: "/teiserver/tournaments", permissions: "teiserver"},
 
       # Mod pages
-      %{label: "Clients", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/client", permissions: "teiserver.moderator"},
-      %{label: "Teiserver users", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/user", permissions: "teiserver.moderator"},
+      %{
+        label: "Clients",
+        icons: [Teiserver.ClientLib.icon(), :list],
+        url: "/teiserver/client",
+        permissions: "teiserver.moderator"
+      },
+      %{
+        label: "Teiserver users",
+        icons: [Teiserver.ClientLib.icon(), :list],
+        url: "/teiserver/user",
+        permissions: "teiserver.moderator"
+      },
       # %{label: "Parties", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/admin/parties", permissions: "teiserver.moderator"},
-      %{label: "Clan admin", icons: [Teiserver.Clans.ClanLib.icon(), :list], url: "/teiserver/admin/clans", permissions: "teiserver.moderator"},
+      %{
+        label: "Clan admin",
+        icons: [Teiserver.Clans.ClanLib.icon(), :list],
+        url: "/teiserver/admin/clans",
+        permissions: "teiserver.moderator"
+      }
       # %{label: "Queue admin", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/admin/queues", permissions: "teiserver.moderator"},
       # %{label: "Tournament admin", icons: [Teiserver.Game.TournamentLib.icon(), :list], url: "/teiserver/admin/tournaments", permissions: "teiserver.moderator"},
 
@@ -72,16 +102,17 @@ defmodule Teiserver.Startup do
     ])
 
     # User configs
-    add_user_config_type %{
+    add_user_config_type(%{
       key: "teiserver.Show flag",
       section: "Teiserver account",
       type: "boolean",
       visible: true,
       permissions: ["teiserver"],
-      description: "When checked the flag associated with your IP will be displayed. If unchecked your flag will be blank. This will take effect next time you login with your client.",
+      description:
+        "When checked the flag associated with your IP will be displayed. If unchecked your flag will be blank. This will take effect next time you login with your client.",
       opts: [],
-      default: true,
-    }
+      default: true
+    })
 
     ConCache.put(:lists, :clients, [])
     ConCache.put(:lists, :rooms, [])

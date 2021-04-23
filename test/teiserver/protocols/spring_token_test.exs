@@ -14,7 +14,8 @@ defmodule Teiserver.SpringTokenTest do
     _send(socket, "c.user.get_token_by_email token_test_user@\ttoken_password\n")
     reply = _recv(socket)
 
-    assert reply == "NO cmd=c.user.get_token_by_email\tcannot get token over insecure connection\n"
+    assert reply ==
+             "NO cmd=c.user.get_token_by_email\tcannot get token over insecure connection\n"
 
     # Now get by name
     _send(socket, "c.user.get_token_by_name token_test_user@\ttoken_password\n")
@@ -27,14 +28,16 @@ defmodule Teiserver.SpringTokenTest do
   end
 
   test "c.user.get_token_by_email - correct" do
-    user = GeneralTestLib.make_user(%{
-      "name" => "token_test_user",
-      "email" => "token_test_user@",
-      "password" => "token_password",
-      "data" => %{
-        "verified" => true
-      }
-    })
+    user =
+      GeneralTestLib.make_user(%{
+        "name" => "token_test_user",
+        "email" => "token_test_user@",
+        "password" => "token_password",
+        "data" => %{
+          "verified" => true
+        }
+      })
+
     Teiserver.User.recache_user(user.id)
 
     %{socket: socket} = tls_setup()
@@ -44,8 +47,10 @@ defmodule Teiserver.SpringTokenTest do
     reply = _recv(socket)
     assert reply =~ "s.user.user_token token_test_user@\t"
 
-    token = String.replace(reply, "s.user.user_token token_test_user@\t", "")
+    token =
+      String.replace(reply, "s.user.user_token token_test_user@\t", "")
       |> String.replace("\n", "")
+
     assert token != ""
 
     # Now do it by name and check results
@@ -53,8 +58,10 @@ defmodule Teiserver.SpringTokenTest do
     reply = _recv(socket)
     assert reply =~ "s.user.user_token token_test_user\t"
 
-    token2 = String.replace(reply, "s.user.user_token token_test_user\t", "")
+    token2 =
+      String.replace(reply, "s.user.user_token token_test_user\t", "")
       |> String.replace("\n", "")
+
     assert token2 != ""
 
     # Token 1 and 2 will almost certainly be different, instead we

@@ -6,7 +6,6 @@
 #   ]
 # end
 
-
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
@@ -36,7 +35,7 @@ defmodule Teiserver.Client do
         handicap: 0,
         sync: 0,
         side: 0,
-        battle_id: nil,
+        battle_id: nil
 
         # Metrics stuff
         # current_state: {:logged_out, :erlang.system_time(:seconds)},
@@ -81,7 +80,8 @@ defmodule Teiserver.Client do
   Allows us to tell the system a client state has changed and metrics are able to use this. Currently a stub
   function until we know how we want metrics to work.
   """
-  @spec change_state(T.client_id(), :menu | :battle_lobby | :battle_player | :battle_spectator) :: :ok
+  @spec change_state(T.client_id(), :menu | :battle_lobby | :battle_player | :battle_spectator) ::
+          :ok
   def change_state(_client_id, new_state) do
     # TODO implement metrics here
     Logger.info("New state for client: #{new_state}")
@@ -126,6 +126,7 @@ defmodule Teiserver.Client do
 
   @spec leave_battle(Integer.t() | nil) :: Map.t() | nil
   def leave_battle(nil), do: nil
+
   def leave_battle(userid) do
     case get_client_by_id(userid) do
       nil ->
@@ -168,6 +169,7 @@ defmodule Teiserver.Client do
 
   @spec get_clients(List.t()) :: List.t()
   def get_clients([]), do: []
+
   def get_clients(id_list) do
     id_list
     |> Enum.map(fn userid -> ConCache.get(:clients, userid) end)
@@ -227,7 +229,12 @@ defmodule Teiserver.Client do
 
     # Typically we would only send the username but it is possible they just changed their username
     # and as such we need to tell the system what username is logging out
-    PubSub.broadcast(Central.PubSub, "all_user_updates", {:user_logged_out, client.userid, client.name})
+    PubSub.broadcast(
+      Central.PubSub,
+      "all_user_updates",
+      {:user_logged_out, client.userid, client.name}
+    )
+
     ConCache.delete(:clients, client.userid)
 
     ConCache.update(:lists, :clients, fn value ->

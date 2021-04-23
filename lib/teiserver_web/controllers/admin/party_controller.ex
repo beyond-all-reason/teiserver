@@ -18,12 +18,13 @@ defmodule TeiserverWeb.Admin.PartyController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    parties = Game.list_parties(
-      search: [
-        simple_search: Map.get(params, "s", "") |> String.trim,
-      ],
-      order_by: "Name (A-Z)"
-    )
+    parties =
+      Game.list_parties(
+        search: [
+          simple_search: Map.get(params, "s", "") |> String.trim()
+        ],
+        order_by: "Name (A-Z)"
+      )
 
     conn
     |> assign(:parties, parties)
@@ -32,12 +33,13 @@ defmodule TeiserverWeb.Admin.PartyController do
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    party = Game.get_party!(id, [
-      joins: [],
-    ])
+    party =
+      Game.get_party!(id,
+        joins: []
+      )
 
     party
-    |> PartyLib.make_favourite
+    |> PartyLib.make_favourite()
     |> insert_recently(conn)
 
     conn
@@ -48,10 +50,11 @@ defmodule TeiserverWeb.Admin.PartyController do
 
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _params) do
-    changeset = Game.change_party(%Party{
-      icon: "fas fa-" <> StylingHelper.random_icon(),
-      colour: StylingHelper.random_colour()
-    })
+    changeset =
+      Game.change_party(%Party{
+        icon: "fas fa-" <> StylingHelper.random_icon(),
+        colour: StylingHelper.random_colour()
+      })
 
     conn
     |> assign(:changeset, changeset)
@@ -96,6 +99,7 @@ defmodule TeiserverWeb.Admin.PartyController do
         conn
         |> put_flash(:info, "Party updated successfully.")
         |> redirect(to: Routes.ts_admin_party_path(conn, :index))
+
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> assign(:party, party)
@@ -109,7 +113,7 @@ defmodule TeiserverWeb.Admin.PartyController do
     party = Game.get_party!(id)
 
     party
-    |> PartyLib.make_favourite
+    |> PartyLib.make_favourite()
     |> remove_recently(conn)
 
     {:ok, _party} = Game.delete_party(party)

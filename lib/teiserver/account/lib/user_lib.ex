@@ -44,6 +44,7 @@ defmodule Teiserver.Account.UserLib do
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "bot", "false")
   end
+
   def _search(query, :bot, "Robot") do
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "bot", "true")
@@ -53,6 +54,7 @@ defmodule Teiserver.Account.UserLib do
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "moderator", "false")
   end
+
   def _search(query, :moderator, "Moderator") do
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "moderator", "true")
@@ -62,6 +64,7 @@ defmodule Teiserver.Account.UserLib do
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "verified", "false")
   end
+
   def _search(query, :verified, "Verified") do
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "verified", "true")

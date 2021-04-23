@@ -15,7 +15,7 @@ defmodule Teiserver.Clans do
   end
 
   def clan_query(id, args) do
-    ClanLib.query_clans
+    ClanLib.query_clans()
     |> ClanLib.search(%{id: id})
     |> ClanLib.search(args[:search])
     |> ClanLib.preload(args[:preload])
@@ -35,7 +35,7 @@ defmodule Teiserver.Clans do
   def list_clans(args \\ []) do
     clan_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -54,15 +54,17 @@ defmodule Teiserver.Clans do
   """
   def get_clan!(id) when not is_list(id) do
     clan_query(id, [])
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_clan!(args) do
     clan_query(nil, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
+
   def get_clan!(id, args) do
     clan_query(id, args)
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function
@@ -152,6 +154,7 @@ defmodule Teiserver.Clans do
 
   alias Teiserver.Clans.ClanInvite
   alias Teiserver.Clans.ClanInviteLib
+
   @doc """
   Returns the list of clan_invites.
 
@@ -162,23 +165,23 @@ defmodule Teiserver.Clans do
 
   """
   def list_clan_invites_by_clan(clan_id, args \\ []) do
-    ClanInviteLib.get_clan_invites
-    |> ClanInviteLib.search([clan_id: clan_id])
+    ClanInviteLib.get_clan_invites()
+    |> ClanInviteLib.search(clan_id: clan_id)
     |> ClanInviteLib.search(args[:search])
     |> ClanInviteLib.preload(args[:joins])
     # |> ClanInviteLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
-    |> Repo.all
+    |> Repo.all()
   end
 
   def list_clan_invites_by_user(user_id, args \\ []) do
-    ClanInviteLib.get_clan_invites
-    |> ClanInviteLib.search([user_id: user_id])
+    ClanInviteLib.get_clan_invites()
+    |> ClanInviteLib.search(user_id: user_id)
     |> ClanInviteLib.search(args[:search])
     |> ClanInviteLib.preload(args[:joins])
     # |> ClanInviteLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -196,15 +199,15 @@ defmodule Teiserver.Clans do
 
   """
   def get_clan_invite!(clan_id, user_id) do
-    ClanInviteLib.get_clan_invites
+    ClanInviteLib.get_clan_invites()
     |> ClanInviteLib.search(%{clan_id: clan_id, user_id: user_id})
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   def get_clan_invite(clan_id, user_id) do
-    ClanInviteLib.get_clan_invites
+    ClanInviteLib.get_clan_invites()
     |> ClanInviteLib.search(%{clan_id: clan_id, user_id: user_id})
-    |> Repo.one
+    |> Repo.one()
   end
 
   @doc """
@@ -283,6 +286,7 @@ defmodule Teiserver.Clans do
 
   alias Teiserver.Clans.ClanMembership
   alias Teiserver.Clans.ClanMembershipLib
+
   @doc """
   Returns the list of clan_memberships.
 
@@ -293,23 +297,23 @@ defmodule Teiserver.Clans do
 
   """
   def list_clan_memberships_by_clan(clan_id, args \\ []) do
-    ClanMembershipLib.get_clan_memberships
-    |> ClanMembershipLib.search([clan_id: clan_id])
+    ClanMembershipLib.get_clan_memberships()
+    |> ClanMembershipLib.search(clan_id: clan_id)
     |> ClanMembershipLib.search(args[:search])
     |> ClanMembershipLib.preload(args[:joins])
     # |> ClanMembershipLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
-    |> Repo.all
+    |> Repo.all()
   end
 
   def list_clan_memberships_by_user(user_id, args \\ []) do
-    ClanMembershipLib.get_clan_memberships
-    |> ClanMembershipLib.search([user_id: user_id])
+    ClanMembershipLib.get_clan_memberships()
+    |> ClanMembershipLib.search(user_id: user_id)
     |> ClanMembershipLib.search(args[:search])
     |> ClanMembershipLib.preload(args[:joins])
     # |> ClanMembershipLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
-    |> Repo.all
+    |> Repo.all()
   end
 
   @doc """
@@ -327,16 +331,16 @@ defmodule Teiserver.Clans do
 
   """
   def get_clan_membership!(clan_id, user_id) do
-    ClanMembershipLib.get_clan_memberships
+    ClanMembershipLib.get_clan_memberships()
     |> ClanMembershipLib.search(%{clan_id: clan_id, user_id: user_id})
-    |> Repo.one!
+    |> Repo.one!()
   end
 
   @spec get_clan_membership(Integer.t(), Integer.t()) :: ClanMembership.t() | nil
   def get_clan_membership(clan_id, user_id) do
-    ClanMembershipLib.get_clan_memberships
+    ClanMembershipLib.get_clan_memberships()
     |> ClanMembershipLib.search(%{clan_id: clan_id, user_id: user_id})
-    |> Repo.one
+    |> Repo.one()
   end
 
   @doc """

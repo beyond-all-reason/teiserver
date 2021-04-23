@@ -30,7 +30,9 @@ defmodule TeiserverWeb.Router do
         put("/relationships/update/:action/:target", RelationshipsController, :update)
         delete("/relationships/delete/:action/:target", RelationshipsController, :delete)
 
-        resources("/preferences", PreferencesController, only: [:index, :edit, :update, :new, :create])
+        resources("/preferences", PreferencesController,
+          only: [:index, :edit, :update, :new, :create]
+        )
 
         get("/", GeneralController, :index)
       end
@@ -85,12 +87,9 @@ defmodule TeiserverWeb.Router do
         put("/clans/demote/:clan_id/:user_id", ClanController, :demote)
         resources("/clans", ClanController)
 
-
         resources("/parties", PartyController)
 
-
         resources("/queues", QueueController)
-
 
         # resources("/tournaments", TournamentController)
 

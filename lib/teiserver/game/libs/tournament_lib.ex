@@ -13,33 +13,32 @@ defmodule Teiserver.Game.TournamentLib do
     %{
       type_colour: colours() |> elem(0),
       type_icon: icon(),
-
       item_id: tournament.id,
       item_type: "teiserver_game_tournament",
       item_colour: tournament.colour,
       item_icon: tournament.icon,
       item_label: "#{tournament.name}",
-
       url: "/teiserver/admin/tournaments/#{tournament.id}"
     }
   end
 
   # Queries
-  @spec query_tournaments() :: Ecto.Query.t
+  @spec query_tournaments() :: Ecto.Query.t()
   def query_tournaments do
-    from tournaments in Tournament
+    from(tournaments in Tournament)
   end
 
-  @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
   def search(query, nil), do: query
+
   def search(query, params) do
     params
-    |> Enum.reduce(query, fn ({key, value}, query_acc) ->
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
       _search(query_acc, key, value)
     end)
   end
 
-  @spec _search(Ecto.Query.t, Atom.t(), any()) :: Ecto.Query.t
+  @spec _search(Ecto.Query.t(), Atom.t(), any()) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -62,13 +61,12 @@ defmodule Teiserver.Game.TournamentLib do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from tournaments in query,
-      where: (
-            ilike(tournaments.name, ^ref_like)
-        )
+      where: ilike(tournaments.name, ^ref_like)
   end
 
-  @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
   def order_by(query, "Name (A-Z)") do
     from tournaments in query,
       order_by: [asc: tournaments.name]
@@ -89,8 +87,9 @@ defmodule Teiserver.Game.TournamentLib do
       order_by: [asc: tournaments.inserted_at]
   end
 
-  @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
+
   def preload(query, _preloads) do
     # query = if :things in preloads, do: _preload_things(query), else: query
     query
