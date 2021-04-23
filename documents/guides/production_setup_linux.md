@@ -99,17 +99,18 @@ sudo apt-get install -y certbot python-certbot-nginx -t stretch-backports
 # Redirect: 2, redirect everything
 sudo certbot --nginx
 
+# This will place your certs in /etc/letsencrypt/live/yourdomain.com
+# We'll point the site directly here but also the TLS instance of ranch
+# As a result we'll need to tweak the permissions
+sudo chmod 0755 /etc/letsencrypt/{live,archive}
+
+# Lets make sure everything is hunky-dory
 sudo certbot renew --dry-run
 
+# Now we create our dh file used for ciphers
 mkdir -p /var/www/tls
 sudo chown -R deploy:deploy /var/www/tls
 chmod -R o+r /var/www/tls
-
-cd /var/www/tls
-sudo cp /etc/letsencrypt/live/tarianmetis.com/privkey.pem /var/www/tls/privkey.pem
-sudo cp /etc/letsencrypt/live/tarianmetis.com/cert.pem /var/www/tls/cert.pem
-sudo cp /etc/letsencrypt/live/tarianmetis.com/chain.pem /var/www/tls/chain.pem
-sudo cp /etc/letsencrypt/live/tarianmetis.com/fullchain.pem /var/www/tls/fullchain.pem
 
 cd /var/www/tls/
 openssl dhparam -out dh-params.pem 2048

@@ -10,15 +10,14 @@ use Mix.Config
 # which you should run after static files are built and
 # before starting your production server.
 config :central, CentralWeb.Endpoint,
-  url: [host: "teifion.co.uk"],
-  # url: [host: "teifion.co.uk", port: 443, scheme: "https"],
+  url: [host: "yourdomain.com"],
   https: [
     port: 8888,
     otp_app: :central,
     keyfile: "/var/www/tls/privkey.pem",
     certfile: "/var/www/tls/cert.pem",
     cacertfile: "/var/www/tls/fullchain.pem",
-    versions: [:"tlsv1.2", :"tlsv1.1", :tlsv1],
+    versions: [:"tlsv1.3", :"tlsv1.2", :"tlsv1.1", :tlsv1],
     dhfile: '/var/www/tls/dh-params.pem',
     ciphers: [
       'ECDHE-ECDSA-AES256-GCM-SHA384',
@@ -68,7 +67,7 @@ config :central, CentralWeb.Endpoint,
   root: ".",
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true,
-  check_origin: ["//teifion.co.uk", "//*.teifion.co.uk"],
+  check_origin: ["//yourdomain.com", "//*.yourdomain.com"],
   version: Mix.Project.config()[:version]
 
 config :central, Teiserver,

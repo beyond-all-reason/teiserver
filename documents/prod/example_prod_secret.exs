@@ -9,11 +9,27 @@ secret_key_base = "mix phx.gen.secret"
 config :central, Central.Setup,
   key: "---- random string of alpha numeric characters ----"
 
+# This can be part of your standard prod.exs but I wanted it to
+# default to not going into a github repo
+config :central, CentralWeb.Endpoint,
+  url: [host: "yourdomain.com"],
+  https: [
+    keyfile: "/etc/letsencrypt/live/yourdomain.com/privkey.pem",
+    certfile: "/etc/letsencrypt/live/yourdomain.com/cert.pem",
+    cacertfile: "/etc/letsencrypt/live/yourdomain.com/fullchain.pem"
+  ],
+  check_origin: ["//yourdomain.com", "//*.yourdomain.com"]
+
 config :central, Teiserver,
   game_name: "My game name",
   game_name_short: "GN",
   main_website: "https://site.com",
-  discord: "My discord link"# Set to nil to not have link
+  discord: "My discord link"# Set to nil to not have link,
+  certs: [
+    keyfile: "/etc/letsencrypt/live/yourdomain.com/privkey.pem",
+    certfile: "/etc/letsencrypt/live/yourdomain.com/cert.pem",
+    cacertfile: "/etc/letsencrypt/live/yourdomain.com/fullchain.pem"
+  ]
 
 config :central, Central.Repo,
   username: "teiserver_prod",
