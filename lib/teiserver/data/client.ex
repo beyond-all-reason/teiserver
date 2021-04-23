@@ -15,6 +15,8 @@ defmodule Teiserver.Client do
   alias Teiserver.Battle
   require Logger
 
+  alias Teiserver.Data.Types, as: T
+
   @spec create(Map.t()) :: Map.t()
   def create(client) do
     Map.merge(
@@ -79,7 +81,7 @@ defmodule Teiserver.Client do
   Allows us to tell the system a client state has changed and metrics are able to use this. Currently a stub
   function until we know how we want metrics to work.
   """
-  @spec change_state(Integer.t(), :menu | :battle_lobby | :battle_player | :battle_spectator) :: :ok
+  @spec change_state(T.client_id(), :menu | :battle_lobby | :battle_player | :battle_spectator) :: :ok
   def change_state(_client_id, new_state) do
     # TODO implement metrics here
     Logger.info("New state for client: #{new_state}")
@@ -108,7 +110,7 @@ defmodule Teiserver.Client do
     client
   end
 
-  @spec join_battle(Integer.t(), Integer.t(), Integer.t()) :: nil | Map.t()
+  @spec join_battle(T.client_id(), Integer.t(), Integer.t()) :: nil | Map.t()
   def join_battle(userid, battle_id, colour \\ 0) do
     case get_client_by_id(userid) do
       nil ->
