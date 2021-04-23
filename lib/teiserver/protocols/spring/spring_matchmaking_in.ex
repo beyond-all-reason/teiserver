@@ -49,7 +49,12 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
   end
 
   def do_handle("leave_all_queues", _msg, _msg_id, state) do
-    state
+    state.queues
+    |> Enum.each(fn queue_id ->
+      Matchmaking.remove_player_from_queue(queue_id, state.userid)
+    end)
+
+    %{state | queues: []}
   end
 
   def do_handle("ready", _msg, _msg_id, state) do

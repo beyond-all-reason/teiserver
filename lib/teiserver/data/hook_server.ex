@@ -27,9 +27,25 @@ defmodule Teiserver.HookServer do
     {:noreply, state}
   end
 
+  def handle_info(%{event: event, topic: "application", payload: _payload}, state) do
+    case event do
+      "prep_stop" ->
+        # Currently we don't do anything but we will
+        # later want to tell each client everything is stopping for a
+        # minute or two
+        :ok
+
+      _ ->
+        throw("No HookServer application handler for event '#{event}'")
+    end
+
+    {:noreply, state}
+  end
+
   @impl true
   def init(_) do
     :ok = PubSub.subscribe(Central.PubSub, "account_hooks")
+    :ok = PubSub.subscribe(Central.PubSub, "application")
     {:ok, %{}}
   end
 end
