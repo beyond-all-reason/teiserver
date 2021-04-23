@@ -578,7 +578,6 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp _send("", _, _, _), do: nil
   defp _send(nil, _, _, _), do: nil
-  defp _send([], _, _, _), do: nil
 
   defp _send(msg, socket, transport, msg_id) when is_list(msg) do
     _send(Enum.join(msg, ""), socket, transport, msg_id)

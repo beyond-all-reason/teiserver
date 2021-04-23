@@ -9,7 +9,7 @@ defmodule Teiserver.Account.UserLib do
   @spec colours :: {String.t(), String.t(), String.t()}
   def colours, do: Central.Helpers.StylingHelper.colours(:success)
 
-  @spec make_favourite(Account.User.t()) :: Map.t()
+  @spec make_favourite(Central.Account.User.t()) :: Map.t()
   def make_favourite(user) do
     %{
       type_colour: colours() |> elem(0),

@@ -23,6 +23,6 @@ defmodule Teiserver.Game.Party do
     |> validate_required([:name, :icon, :colour])
   end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
+  @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
   def authorize(_action, conn, _params), do: allow?(conn, "teiserver.admin.party")
 end

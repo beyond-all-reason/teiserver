@@ -89,7 +89,7 @@ defmodule Teiserver.Client do
   end
 
   @spec update(Map.t()) :: Map.t()
-  @spec update(Map.t(), Atom.t() | nil) :: Map.t()
+  @spec update(Map.t(), atom | nil) :: Map.t()
   def update(client, reason \\ nil) do
     client =
       client
