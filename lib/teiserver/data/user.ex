@@ -563,11 +563,13 @@ defmodule Teiserver.User do
           banned_until_dt != nil and Timex.compare(Timex.now(), banned_until_dt) != 1 ->
             {:error, "Temporarily banned"}
 
-          Client.get_client_by_id(user.id) != nil ->
-            {:error, "Already logged in"}
-
           user.verified == false ->
             {:error, "Unverified", user.id}
+
+          Client.get_client_by_id(user.id) != nil ->
+            # {:error, "Already logged in"}
+            Client.disconnect(user.id)
+            do_login(user, state, ip, lobby)
 
           true ->
             do_login(user, state, ip, lobby)
@@ -597,11 +599,13 @@ defmodule Teiserver.User do
           banned_until_dt != nil and Timex.compare(Timex.now(), banned_until_dt) != 1 ->
             {:error, "Temporarily banned"}
 
-          Client.get_client_by_id(user.id) != nil ->
-            {:error, "Already logged in"}
-
           user.verified == false ->
             {:error, "Unverified", user.id}
+
+          Client.get_client_by_id(user.id) != nil ->
+            # {:error, "Already logged in"}
+            Client.disconnect(user.id)
+            do_login(user, state, ip, lobby)
 
           true ->
             do_login(user, state, ip, lobby)

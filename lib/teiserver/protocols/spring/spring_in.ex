@@ -994,6 +994,16 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
+  # JSON/Gzip test
+  defp do_handle("JSON", data, msg_id, state) do
+    case data do
+      "gzip" -> reply(:gzip, nil, msg_id, state)
+      "gzip64" -> reply(:gzip64, nil, msg_id, state)
+    end
+
+    state
+  end
+
   # MISC
   defp do_handle("PING", _, msg_id, state) do
     reply(:pong, nil, msg_id, state)
