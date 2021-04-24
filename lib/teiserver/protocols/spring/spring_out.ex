@@ -136,6 +136,7 @@ defmodule Teiserver.Protocols.SpringOut do
     "s.battles.id_list #{ids}\n"
   end
 
+  defp do_reply(:add_user, nil), do: ""
   defp do_reply(:add_user, user) do
     "ADDUSER #{user.name} #{user.country} 0 #{user.id} #{user.lobbyid}\n"
   end
@@ -483,28 +484,28 @@ defmodule Teiserver.Protocols.SpringOut do
     "SERVERMSG #{msg}\n"
   end
 
-  @json_object %{
-    int: 123,
-    str: "Message here",
-    list: [1,2,"a"],
-    dict: %{"1": "A", "2": "B"},
-    bool: true
-  }
   defp do_reply(:gzip, _msg) do
-    resp = @json_object
+    resp = Battle.list_battles()
     |> Jason.encode!
     |> :zlib.gzip
-    |> to_string
 
     length = String.length(resp)
 
-    "#{length}::#{resp}::\n"
+    "#{length}\t#{resp}\t\n"
   end
 
   defp do_reply(:gzip64, _msg) do
-    resp = @json_object
+    resp = Battle.list_battles()
     |> Jason.encode!
     |> :zlib.gzip
+    |> Base.encode64()
+
+    "#{resp}\n"
+  end
+
+  defp do_reply(:just64, _msg) do
+    resp = Battle.list_battles()
+    |> Jason.encode!
     |> Base.encode64()
 
     "#{resp}\n"

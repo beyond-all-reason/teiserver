@@ -999,6 +999,7 @@ defmodule Teiserver.Protocols.SpringIn do
     case data do
       "gzip" -> reply(:gzip, nil, msg_id, state)
       "gzip64" -> reply(:gzip64, nil, msg_id, state)
+      "just64" -> reply(:just64, nil, msg_id, state)
     end
 
     state

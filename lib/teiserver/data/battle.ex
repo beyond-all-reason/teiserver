@@ -13,6 +13,14 @@ defmodule Teiserver.Battle do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Client
 
+  defp next_id() do
+    ConCache.isolated(:id_counters, :battle, fn ->
+      new_value = ConCache.get(:id_counters, :battle) + 1
+      ConCache.put(:id_counters, :battle, new_value)
+      new_value
+    end)
+  end
+
   def new_bot(data) do
     Map.merge(
       %{
@@ -34,7 +42,7 @@ defmodule Teiserver.Battle do
     # founder_id/name, ip, port, engine_version, map_hash, map_name, name, game_name, hash_code
     Map.merge(
       %{
-        id: nil,
+        id: next_id(),
         founder_id: nil,
         founder_name: nil,
         type: :normal,

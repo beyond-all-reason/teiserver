@@ -4,6 +4,7 @@ defmodule Teiserver.User do
   """
   alias Central.Communication
   alias Teiserver.Client
+  alias Teiserver.Clans
   alias Teiserver.EmailHelper
   alias Teiserver.Account
   alias Central.Helpers.StylingHelper
@@ -13,7 +14,7 @@ defmodule Teiserver.User do
 
   @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulence cats dogs mice eagle oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave sulphur tree tangerine melon watermelon obstreperous chlorine argon mercury jupiter saturn neptune ceres firefly slug sloth madness happiness ferrous oblique advantageous inefficient starling clouds rivers sunglasses)
 
-  @keys [:id, :name, :email, :inserted_at]
+  @keys [:id, :name, :email, :inserted_at, :clan_id]
   @data_keys [
     :rank,
     :country,
@@ -79,19 +80,45 @@ defmodule Teiserver.User do
   alias Teiserver.EmailHelper
   alias Teiserver.Account
 
+  @spec generate_random_password :: String.t()
   def generate_random_password() do
     @wordlist
     |> Enum.take_random(3)
     |> Enum.join(" ")
   end
 
+  @spec clean_name(String.t()) :: String.t()
   def clean_name(name) do
     ~r/([^a-zA-Z0-9_\-\[\]]|\s)/
     |> Regex.replace(name, "")
   end
 
+  @spec bar_user_group_id() :: integer()
   def bar_user_group_id() do
     ConCache.get(:application_metadata_cache, "bar_user_group")
+  end
+
+  @spec apply_user_clan(Map.t()) :: Map.t()
+  def apply_user_clan(%{bot: true} = user), do: user
+  def apply_user_clan(user) do
+    new_name = user.name
+    |> String.replace("[", "{")
+    |> String.replace("]", "}")
+
+    clan_name = case user.clan_id do
+      nil -> new_name
+      clan_id ->
+        clan = Clans.get_clan!(clan_id, [select: [:tag]])
+
+        if String.contains?(new_name, "{tag}") do
+          # String.replace(new_name, "{tag}", "[#{clan.tag}]", [global: false])
+          "[#{clan.tag}]" <> new_name
+        else
+          "[#{clan.tag}]" <> new_name
+        end
+    end
+
+    %{user | name: clan_name}
   end
 
   def encrypt_password(password) do
@@ -613,6 +640,7 @@ defmodule Teiserver.User do
     end
   end
 
+  @spec do_login(Map.t(), Map.t(), String.t(), String.t()) :: {:ok, Map.t()}
   defp do_login(user, state, ip, lobbyid) do
     # If they don't want a flag shown, don't show it, otherwise check for an override before trying geoip
     country =
@@ -644,6 +672,7 @@ defmodule Teiserver.User do
         last_login: last_login,
         rank: rank
     }
+    |> apply_user_clan()
 
     update_user(user, persist: true)
 
@@ -707,9 +736,10 @@ defmodule Teiserver.User do
           throw("No handler for action type '#{action}' in #{__MODULE__}")
       end
 
-    IO.puts("NEW REPORT")
-    IO.inspect(changes)
-    IO.puts("")
+    # TODO: Implement something here?
+    # IO.puts("NEW REPORT")
+    # IO.inspect(changes)
+    # IO.puts("")
 
     Map.merge(user, changes)
     |> update_user(persist: true)
