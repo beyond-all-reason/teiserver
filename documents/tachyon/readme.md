@@ -8,7 +8,3 @@ Tachyon is a protocol designed for a client-server architecture for computer gam
 - [Users](users.md)
 - [Communication](communication.md)
 - [Misc](misc.md)
-
-#### Special thanks
-- Beherith for extensive help with the autohosts
-- Skynet for finding those hard to spot bits of the protocol I'd missed, check out his [Skylobby](https://github.com/skynet-gh/skylobby) project
