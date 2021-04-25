@@ -574,7 +574,7 @@ defmodule Teiserver.User do
 
   @spec wait_for_precache() :: :ok
   defp wait_for_precache() do
-    if ConCache.get(:id_counters, :startup) == 0 do
+    if ConCache.get(:id_counters, :startup) != 1 do
       :timer.sleep(@timer_sleep)
       wait_for_precache()
     else

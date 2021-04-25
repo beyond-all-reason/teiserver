@@ -12,6 +12,7 @@ defmodule Teiserver.Battle do
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Client
+  alias Teiserver.Data.Types
 
   defp next_id() do
     ConCache.isolated(:id_counters, :battle, fn ->
@@ -61,6 +62,7 @@ defmodule Teiserver.Battle do
         tags: %{},
         disabled_units: [],
         start_rectangles: %{},
+        director_mode: false,
 
         # Expected to be overriden
         map_hash: nil,
@@ -70,6 +72,11 @@ defmodule Teiserver.Battle do
     )
   end
 
+  @spec update_battle(Map.t(), nil | atom, any) :: Map.t()
+  def update_battle(battle, nil, _) do
+    ConCache.put(:battles, battle.id, battle)
+    battle
+  end
   def update_battle(battle, data, reason) do
     ConCache.put(:battles, battle.id, battle)
 
@@ -455,6 +462,18 @@ defmodule Teiserver.Battle do
     :ok
   end
 
+  @spec say(Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
+  # These two implementations are a temporary method to ensure the system works as expected
+  # userid 1 is my main account, nobody will be able to enable it by mistake but
+  # anybody will be able to disable it if there's any issue
+  def say(1, "!director start", battle_id) do
+    start_director_mode(battle_id)
+  end
+
+  def say(userid, "!director stop", battle_id) do
+    start_director_mode(battle_id)
+    sayex(userid, "!director stop", battle_id)
+  end
 
   def say(userid, msg, battle_id) do
     PubSub.broadcast(
@@ -464,12 +483,27 @@ defmodule Teiserver.Battle do
     )
   end
 
+  @spec sayex(Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
   def sayex(userid, msg, battle_id) do
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
       {:battle_updated, battle_id, {userid, msg, battle_id}, :sayex}
     )
+  end
+
+  @spec start_director_mode(Types.battle_id()) :: :ok
+  def start_director_mode(battle_id) do
+    battle = get_battle!(battle_id)
+    update_battle(%{battle | director_mode: true}, nil, nil)
+    :ok
+  end
+
+  @spec stop_director_mode(Types.battle_id()) :: :ok
+  def stop_director_mode(battle_id) do
+    battle = get_battle!(battle_id)
+    update_battle(%{battle | director_mode: false}, nil, nil)
+    :ok
   end
 
   def force_change_client(_, nil, _, _), do: nil

@@ -58,7 +58,7 @@ defmodule Teiserver.Startup do
     QuickAction.add_items([
       # General pages
       %{
-        label: "Relationships",
+        label: "Friends/Mutes/Invites",
         icons: [Teiserver.icon(:relationship), :list],
         url: "/teiserver/account/relationships",
         permissions: "teiserver"
@@ -81,13 +81,13 @@ defmodule Teiserver.Startup do
       %{
         label: "Clients",
         icons: [Teiserver.ClientLib.icon(), :list],
-        url: "/teiserver/client",
+        url: "/teiserver/admin/client",
         permissions: "teiserver.moderator"
       },
       %{
         label: "Teiserver users",
         icons: [Teiserver.ClientLib.icon(), :list],
-        url: "/teiserver/user",
+        url: "/teiserver/admin/users",
         permissions: "teiserver.moderator"
       },
       # %{label: "Parties", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/admin/parties", permissions: "teiserver.moderator"},
