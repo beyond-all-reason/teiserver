@@ -681,9 +681,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
     case response do
       # {:success, battle} ->
-      #   SpringOut.do_join_battle(state, battle, script_password)
+      #   SpringOut.do_join_battle(state, battle_id, script_password)
 
       {:waiting_on_host, script_password} ->
+        Logger.info("Setting script password for userid:#{state.userid} of #{script_password}")
         %{state | script_password: script_password}
 
       {:failure, "No match"} ->
