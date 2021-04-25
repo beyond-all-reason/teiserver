@@ -265,8 +265,8 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:add_user_to_battle, userid, battle_id}, state) do
-    new_state = user_join_battle(userid, battle_id, state)
+  def handle_info({:add_user_to_battle, userid, battle_id, script_password}, state) do
+    new_state = user_join_battle(userid, battle_id, script_password, state)
     {:noreply, new_state}
   end
 
@@ -423,7 +423,9 @@ defmodule Teiserver.TcpServer do
         %{state | ready_queue_id: nil}
 
       :join_battle ->
-        state.protocol_out.do_join_battle(state, data)
+        # TODO: Make it so we know what the script password is because normally it's sent
+        # by the client, maybe update the MM protocol so when you join a queue it's there?
+        state.protocol_out.do_join_battle(state, data, state.script_password)
 
       :dequeue ->
         state
@@ -510,7 +512,7 @@ defmodule Teiserver.TcpServer do
   defp join_battle_request_response(battle_id, response, reason, state) do
     case response do
       :accept ->
-        state.protocol_out.do_join_battle(state, battle_id)
+        state.protocol_out.do_join_battle(state, battle_id, state.script_password)
 
       :deny ->
         state.protocol_out.reply(:join_battle_failure, reason, nil, state)
@@ -521,7 +523,9 @@ defmodule Teiserver.TcpServer do
   # Depending on our current understanding of where the user is
   # we will send a selection of commands on the assumption this
   # genserver is incorrect and needs to alter its state accordingly
-  defp user_join_battle(userid, battle_id, state) do
+  defp user_join_battle(userid, battle_id, script_password, state) do
+    script_password = if state.battle_host, do: script_password, else: nil
+
     new_user =
       cond do
         state.userid == userid ->
@@ -529,11 +533,11 @@ defmodule Teiserver.TcpServer do
 
         state.known_users[userid] == nil ->
           state.protocol_out.reply(:user_logged_in, userid, nil, state)
-          state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
+          state.protocol_out.reply(:add_user_to_battle, {userid, battle_id, script_password}, nil, state)
           _blank_user(userid, %{battle_id: battle_id})
 
         state.known_users[userid].battle_id == nil ->
-          state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
+          state.protocol_out.reply(:add_user_to_battle, {userid, battle_id, script_password}, nil, state)
           %{state.known_users[userid] | battle_id: battle_id}
 
         state.known_users[userid].battle_id != battle_id ->
@@ -544,7 +548,7 @@ defmodule Teiserver.TcpServer do
             state
           )
 
-          state.protocol_out.reply(:add_user_to_battle, {userid, battle_id}, nil, state)
+          state.protocol_out.reply(:add_user_to_battle, {userid, battle_id, script_password}, nil, state)
           %{state.known_users[userid] | battle_id: battle_id}
 
         state.known_users[userid].battle_id == battle_id ->

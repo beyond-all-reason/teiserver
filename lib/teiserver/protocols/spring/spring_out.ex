@@ -456,7 +456,7 @@ defmodule Teiserver.Protocols.SpringOut do
     "LEFT #{room_name} #{username}\n"
   end
 
-  defp do_reply(:add_user_to_battle, {userid, battle_id}) do
+  defp do_reply(:add_user_to_battle, {userid, battle_id, nil}) do
     username = User.get_username(userid)
     "JOINEDBATTLE #{battle_id} #{username}\n"
   end
@@ -529,13 +529,13 @@ defmodule Teiserver.Protocols.SpringOut do
     ""
   end
 
-  @spec do_join_battle(map(), integer()) :: map()
-  def do_join_battle(state, battle_id) do
+  @spec do_join_battle(map(), integer(), String.t()) :: map()
+  def do_join_battle(state, battle_id, script_password) do
     battle = Battle.get_battle(battle_id)
     PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
-    Battle.add_user_to_battle(state.userid, battle.id)
+    Battle.add_user_to_battle(state.userid, battle.id, script_password)
     reply(:join_battle_success, battle, nil, state)
-    reply(:add_user_to_battle, {state.userid, battle.id}, nil, state)
+    reply(:add_user_to_battle, {state.userid, battle.id, nil}, nil, state)
     reply(:add_script_tags, battle.tags, nil, state)
 
     battle.players
@@ -593,7 +593,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
       battle.players
       |> Enum.each(fn player_id ->
-        send(self(), {:add_user_to_battle, player_id, battle_id})
+        send(self(), {:add_user_to_battle, player_id, battle_id, nil})
       end)
     end)
 

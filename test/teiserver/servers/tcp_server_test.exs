@@ -154,22 +154,22 @@ defmodule Teiserver.TcpServerTest do
 
     # ---- BATTLES ----
     battle_id = 111
-    send(pid, {:add_user_to_battle, u1.id, battle_id})
+    send(pid, {:add_user_to_battle, u1.id, battle_id, "script_password"})
     r = _recv(socket)
     assert r == "JOINEDBATTLE #{battle_id} #{u1.name}\n"
 
     # Duplicate user in battle
-    send(pid, {:add_user_to_battle, u1.id, battle_id})
+    send(pid, {:add_user_to_battle, u1.id, battle_id, "script_password"})
     r = _recv(socket)
     assert r == :timeout
 
     # User moves to a different battle (without leave command)
-    send(pid, {:add_user_to_battle, u1.id, battle_id + 1})
+    send(pid, {:add_user_to_battle, u1.id, battle_id + 1, "script_password"})
     r = _recv(socket)
     assert r == "LEFTBATTLE #{battle_id} #{u1.name}\nJOINEDBATTLE #{battle_id + 1} #{u1.name}\n"
 
     # Same battle again
-    send(pid, {:add_user_to_battle, u1.id, battle_id + 1})
+    send(pid, {:add_user_to_battle, u1.id, battle_id + 1, "script_password"})
     r = _recv(socket)
     assert r == :timeout
 
@@ -179,7 +179,7 @@ defmodule Teiserver.TcpServerTest do
     assert r == "REMOVEUSER #{u1.name}\n"
 
     # Now they join, should get a login and then a join battle command
-    send(pid, {:add_user_to_battle, u1.id, battle_id + 1})
+    send(pid, {:add_user_to_battle, u1.id, battle_id + 1, "script_password"})
     r = _recv(socket)
 
     assert r ==

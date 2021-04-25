@@ -87,7 +87,7 @@ defmodule TeiserverWeb.ClientLive.Index do
     {:noreply, socket}
   end
 
-  def handle_info({:add_user_to_battle, user_id, battle_id}, socket) do
+  def handle_info({:add_user_to_battle, user_id, battle_id, _script_password}, socket) do
     clients =
       socket.assigns[:clients]
       |> Enum.map(fn client ->

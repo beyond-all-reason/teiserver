@@ -92,7 +92,7 @@ defmodule TeiserverWeb.BattleLive.Show do
     {:noreply, assign(socket, :clients, new_clients)}
   end
 
-  def handle_info({:add_user_to_battle, userid, battle_id}, socket) do
+  def handle_info({:add_user_to_battle, userid, battle_id, _script_password}, socket) do
     if battle_id == socket.assigns[:id] do
       {:noreply, add_user(socket, userid)}
     else

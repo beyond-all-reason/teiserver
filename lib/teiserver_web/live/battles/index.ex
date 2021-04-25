@@ -57,7 +57,7 @@ defmodule TeiserverWeb.BattleLive.Index do
     {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:add_user_to_battle, user_id, battle_id}, socket) do
+  def handle_info({:add_user_to_battle, user_id, battle_id, _script_password}, socket) do
     battles =
       socket.assigns[:battles]
       |> Enum.map(fn battle ->

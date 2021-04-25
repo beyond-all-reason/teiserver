@@ -207,6 +207,7 @@ defmodule Teiserver.Battle do
   @spec add_user_to_battle(Integer.t(), Integer.t() | nil) :: nil
   def add_user_to_battle(_uid, nil), do: nil
 
+  @spec add_user_to_battle(integer(), integer(), String.t()) :: nil
   def add_user_to_battle(userid, battle_id, script_password) do
     ConCache.update(:battles, battle_id, fn battle_state ->
       new_state =

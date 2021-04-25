@@ -14,6 +14,8 @@ defmodule Teiserver.User do
 
   @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulence cats dogs mice eagle oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave sulphur tree tangerine melon watermelon obstreperous chlorine argon mercury jupiter saturn neptune ceres firefly slug sloth madness happiness ferrous oblique advantageous inefficient starling clouds rivers sunglasses)
 
+  @timer_sleep 500
+
   @keys [:id, :name, :email, :inserted_at, :clan_id]
   @data_keys [
     :rank,
@@ -570,7 +572,19 @@ defmodule Teiserver.User do
     jwt
   end
 
+  @spec wait_for_precache() :: :ok
+  defp wait_for_precache() do
+    if ConCache.get(:id_counters, :startup) == 0 do
+      :timer.sleep(@timer_sleep)
+      wait_for_precache()
+    else
+      :ok
+    end
+  end
+
   def try_login(token, state, ip, lobby) do
+    wait_for_precache()
+
     case Guardian.resource_from_token(token) do
       {:error, _bad_token} ->
         {:error, "token_login_failed"}
@@ -605,6 +619,8 @@ defmodule Teiserver.User do
   end
 
   def try_md5_login(username, md5_password, state, ip, lobby) do
+    wait_for_precache()
+
     case get_user_by_name(username) do
       nil ->
         {:error, "No user found for '#{username}'"}
