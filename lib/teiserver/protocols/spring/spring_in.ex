@@ -672,16 +672,19 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("JOINBATTLE", data, msg_id, state) do
     response =
       case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
-        [_, battle_id, _password, _script_password] ->
-          Battle.can_join?(state.user, battle_id)
+        [_, battle_id, password, script_password] ->
+          Battle.can_join?(state.user, battle_id, password, script_password)
 
         nil ->
           {:failure, "No match"}
       end
 
     case response do
-      {:success, battle} ->
-        SpringOut.do_join_battle(state, battle)
+      # {:success, battle} ->
+      #   SpringOut.do_join_battle(state, battle)
+
+      {:waiting_on_host, script_password} ->
+        %{state | script_password: script_password}
 
       {:failure, "No match"} ->
         _no_match(state, "JOINBATTLE", msg_id, data)
@@ -690,6 +693,23 @@ defmodule Teiserver.Protocols.SpringIn do
         reply(:join_battle_failure, reason, msg_id, state)
         state
     end
+  end
+
+  defp do_handle("JOINBATTLEACCEPT", username, _msg_id, state) do
+    userid = User.get_userid(username)
+    Battle.accept_join_request(userid, state.battle_id)
+    state
+  end
+
+  defp do_handle("JOINBATTLEDENY", data, _msg_id, state) do
+    {username, reason} = case String.split(data, " ", parts: 2) do
+      [username, reason] -> {username, reason}
+      [username] -> {username, "no reason given"}
+    end
+
+    userid = User.get_userid(username)
+    Battle.deny_join_request(userid, state.battle_id, reason)
+    state
   end
 
   defp do_handle("HANDICAP", data, msg_id, state) do

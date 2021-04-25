@@ -7,7 +7,6 @@ defmodule Teiserver.TcpServer do
 
   alias Teiserver.Client
   alias Teiserver.User
-  alias Teiserver.Battle
 
   @behaviour :ranch_protocol
 
@@ -117,7 +116,8 @@ defmodule Teiserver.TcpServer do
       battle_id: nil,
       room_member_cache: %{},
       known_users: %{},
-      extra_logging: false
+      extra_logging: false,
+      script_password: nil
     }
 
     Logger.info("New TCP connection #{Kernel.inspect(socket)}, IP: #{ip}")
@@ -252,6 +252,16 @@ defmodule Teiserver.TcpServer do
 
   def handle_info({:global_battle_updated, battle_id, reason}, state) do
     new_state = global_battle_update(battle_id, reason, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info({:request_user_join_battle, userid}, state) do
+    new_state = request_user_join_battle(userid, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info({:join_battle_request_response, battle_id, response, reason}, state) do
+    new_state = join_battle_request_response(battle_id, response, reason, state)
     {:noreply, new_state}
   end
 
@@ -413,8 +423,7 @@ defmodule Teiserver.TcpServer do
         %{state | ready_queue_id: nil}
 
       :join_battle ->
-        battle = Battle.get_battle(data)
-        state.protocol_out.do_join_battle(state, battle)
+        state.protocol_out.do_join_battle(state, data)
 
       :dequeue ->
         state
@@ -486,6 +495,26 @@ defmodule Teiserver.TcpServer do
         Logger.error("No handler in tcp_server:global_battle_update with reason #{reason}")
     end
 
+    state
+  end
+
+  # This is the server asking the host if a client can join the battle
+  # the client is expected to reply with a yes or no
+  defp request_user_join_battle(userid, state) do
+    state.protocol_out.reply(:request_user_join_battle, userid, nil, state)
+    state
+  end
+
+  # This is the result of the host responding to the server asking if the client
+  # can join the battle
+  defp join_battle_request_response(battle_id, response, reason, state) do
+    case response do
+      :accept ->
+        state.protocol_out.do_join_battle(state, battle_id)
+
+      :deny ->
+        state.protocol_out.reply(:join_battle_failure, reason, nil, state)
+    end
     state
   end
 

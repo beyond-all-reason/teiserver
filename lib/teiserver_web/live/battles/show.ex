@@ -16,7 +16,7 @@ defmodule TeiserverWeb.BattleLive.Show do
       |> NotificationPlug.live_call()
       |> Teiserver.ServerUserPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
-      |> add_breadcrumb(name: "Battles", url: "/teiserver/battles")
+      |> add_breadcrumb(name: "Battles", url: "/teiserver/battle")
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, Central.Helpers.StylingHelper.colours(:primary2))
       |> assign(:messages, [])

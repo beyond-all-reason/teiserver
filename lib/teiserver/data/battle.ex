@@ -207,7 +207,7 @@ defmodule Teiserver.Battle do
   @spec add_user_to_battle(Integer.t(), Integer.t() | nil) :: nil
   def add_user_to_battle(_uid, nil), do: nil
 
-  def add_user_to_battle(userid, battle_id) do
+  def add_user_to_battle(userid, battle_id, script_password) do
     ConCache.update(:battles, battle_id, fn battle_state ->
       new_state =
         if Enum.member?(battle_state.players, userid) do
@@ -219,7 +219,7 @@ defmodule Teiserver.Battle do
           PubSub.broadcast(
             Central.PubSub,
             "all_battle_updates",
-            {:add_user_to_battle, userid, battle_id}
+            {:add_user_to_battle, userid, battle_id, script_password}
           )
 
           new_players = battle_state.players ++ [userid]
@@ -415,7 +415,8 @@ defmodule Teiserver.Battle do
     update_battle(new_battle, keys, :remove_script_tags)
   end
 
-  def can_join?(_user, battle_id, password \\ nil, _script_password \\ nil) do
+  @spec can_join?(Map.t(), integer(), String.t() | nil, String.t() | nil) :: {:failure, String.t()} | {:waiting_on_host, String.t()}
+  def can_join?(user, battle_id, password \\ nil, script_password \\ nil) do
     battle = get_battle(battle_id)
 
     cond do
@@ -429,9 +430,31 @@ defmodule Teiserver.Battle do
         {:failure, "Invalid password"}
 
       true ->
-        {:success, battle}
+        # Okay, so far so good, what about the host? Are they okay with it?
+        host_client = Client.get_client_by_id(battle.founder_id)
+
+        Logger.info("Requesting host permission to join: #{user.id} (#{user.name})")
+        send(host_client.pid, {:request_user_join_battle, user.id})
+
+        {:waiting_on_host, script_password}
+        # {:success, battle}
     end
   end
+
+  @spec accept_join_request(integer(), integer()) :: :ok
+  def accept_join_request(userid, battle_id) do
+    client = Client.get_client_by_id(userid)
+    send(client.pid, {:join_battle_request_response, battle_id, :accept, nil})
+    :ok
+  end
+
+  @spec deny_join_request(integer(), integer(), String.t()) :: :ok
+  def deny_join_request(userid, battle_id, reason) do
+    client = Client.get_client_by_id(userid)
+    send(client.pid, {:join_battle_request_response, battle_id, :deny, reason})
+    :ok
+  end
+
 
   def say(userid, msg, battle_id) do
     PubSub.broadcast(

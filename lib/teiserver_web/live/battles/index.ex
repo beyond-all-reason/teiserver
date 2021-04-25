@@ -13,7 +13,7 @@ defmodule TeiserverWeb.BattleLive.Index do
       |> AuthPlug.live_call(session)
       |> NotificationPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
-      |> add_breadcrumb(name: "Battles", url: "/teiserver/battles")
+      |> add_breadcrumb(name: "Battles", url: "/teiserver/battle")
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, BattleLib.colours())
       |> assign(:battles, Battle.list_battles())

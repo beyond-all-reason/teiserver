@@ -22,7 +22,7 @@ defmodule Teiserver.Protocols.SpringOut do
   ---------
   """
 
-  @compflags "teiserver matchmaking token-auth"
+  @compflags "sp teiserver matchmaking token-auth"
 
   @spec reply(atom(), nil | String.t() | tuple() | list(), String.t(), map) :: map
   def reply(reply_cmd, data, msg_id, state) do
@@ -446,6 +446,11 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   # Battle
+  defp do_reply(:request_user_join_battle, userid) do
+    user = User.get_user_by_id(userid)
+    "JOINBATTLEREQUEST #{user.name} #{user.ip}\n"
+  end
+
   defp do_reply(:remove_user_from_room, {userid, room_name}) do
     username = User.get_username(userid)
     "LEFT #{room_name} #{username}\n"
@@ -454,6 +459,11 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:add_user_to_battle, {userid, battle_id}) do
     username = User.get_username(userid)
     "JOINEDBATTLE #{battle_id} #{username}\n"
+  end
+
+  defp do_reply(:add_user_to_battle, {userid, battle_id, script_password}) do
+    username = User.get_username(userid)
+    "JOINEDBATTLE #{battle_id} #{username} #{script_password}\n"
   end
 
   defp do_reply(:remove_user_from_battle, {userid, battle_id}) do
@@ -519,8 +529,9 @@ defmodule Teiserver.Protocols.SpringOut do
     ""
   end
 
-  @spec do_join_battle(map(), map()) :: map()
-  def do_join_battle(state, battle) do
+  @spec do_join_battle(map(), integer()) :: map()
+  def do_join_battle(state, battle_id) do
+    battle = Battle.get_battle(battle_id)
     PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
     Battle.add_user_to_battle(state.userid, battle.id)
     reply(:join_battle_success, battle, nil, state)
