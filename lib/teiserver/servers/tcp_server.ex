@@ -116,7 +116,8 @@ defmodule Teiserver.TcpServer do
       battle_id: nil,
       room_member_cache: %{},
       known_users: %{},
-      extra_logging: false,
+      known_battles: [],
+      extra_logging: true,
       script_password: nil
     }
 
@@ -475,9 +476,8 @@ defmodule Teiserver.TcpServer do
 
       _ ->
         Logger.error("No handler in tcp_server:battle_update with reason #{reason}")
+        state
     end
-
-    state
   end
 
   defp global_battle_update(battle_id, reason, state) do
@@ -487,24 +487,33 @@ defmodule Teiserver.TcpServer do
 
       :battle_opened ->
         if state.battle_host == false or state.battle_id != battle_id do
-          state.protocol_out.reply(:battle_opened, battle_id, nil, state)
+          new_known_battles = state.known_battles ++ [battle_id]
+          new_state = %{state | known_battles: new_known_battles}
+          new_state.protocol_out.reply(:battle_opened, battle_id, nil, new_state)
+        else
+          state
         end
 
       :battle_closed ->
-        state.protocol_out.reply(:battle_closed, battle_id, nil, state)
+        if Enum.member?(state.known_battles, battle_id) do
+          new_known_battles = List.delete(state.known_battles, battle_id)
+          new_state = %{state | known_battles: new_known_battles}
+          new_state.protocol_out.reply(:battle_closed, battle_id, nil, new_state)
+        else
+          state
+        end
 
       _ ->
         Logger.error("No handler in tcp_server:global_battle_update with reason #{reason}")
+        state
     end
-
-    state
   end
 
   # This is the server asking the host if a client can join the battle
   # the client is expected to reply with a yes or no
   defp request_user_join_battle(userid, state) do
+    Logger.info("tcp_server.request_user_join_battle - {:request_user_join_battle, #{userid}}")
     state.protocol_out.reply(:request_user_join_battle, userid, nil, state)
-    state
   end
 
   # This is the result of the host responding to the server asking if the client
@@ -517,13 +526,15 @@ defmodule Teiserver.TcpServer do
       :deny ->
         state.protocol_out.reply(:join_battle_failure, reason, nil, state)
     end
-    state
   end
 
   # Depending on our current understanding of where the user is
   # we will send a selection of commands on the assumption this
   # genserver is incorrect and needs to alter its state accordingly
   defp user_join_battle(userid, battle_id, script_password, state) do
+    host = if state.battle_host, do: "host", else: "player"
+    Logger.info("user_join_battle userid:#{userid}, host:#{host}, password #{script_password}")
+
     script_password = if state.battle_host, do: script_password, else: nil
 
     new_user =

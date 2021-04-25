@@ -22,8 +22,8 @@ defmodule Teiserver.Protocols.SpringOut do
   ---------
   """
 
-  # @compflags "sp teiserver matchmaking token-auth"
-  @compflags "teiserver matchmaking token-auth"
+  @compflags "sp teiserver matchmaking token-auth"
+  # @compflags "teiserver matchmaking token-auth"
 
   @spec reply(atom(), nil | String.t() | tuple() | list(), String.t(), map) :: map
   def reply(reply_cmd, data, msg_id, state) do

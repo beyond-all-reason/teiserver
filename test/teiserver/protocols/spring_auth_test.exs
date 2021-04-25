@@ -3,6 +3,7 @@ defmodule Teiserver.SpringAuthTest do
   require Logger
   alias Teiserver.BitParse
   alias Teiserver.User
+  alias Teiserver.Battle
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TestLib,
@@ -248,7 +249,7 @@ ENDOFCHANNELS\n"
     assert reply == :timeout
   end
 
-  test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: _user1} do
+  test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: user1} do
     hash = "-1540855590"
 
     _send(
@@ -272,6 +273,10 @@ ENDOFCHANNELS\n"
       _recv_until(socket2)
       |> String.split("\n")
 
+    # The battle host gets pinged about it, lets assume they just said yes!
+    Battle.accept_join_request(user1.id, battle_id)
+
+    # Now stuff happens right?
     [
       joinbattle,
       joinedbattle,
