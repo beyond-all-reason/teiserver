@@ -3,7 +3,7 @@ defmodule Teiserver.SpringAuthTest do
   require Logger
   alias Teiserver.BitParse
   alias Teiserver.User
-  alias Teiserver.Battle
+  # alias Teiserver.Battle
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TestLib,
@@ -249,7 +249,7 @@ ENDOFCHANNELS\n"
     assert reply == :timeout
   end
 
-  test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: user1} do
+  test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: _user1} do
     hash = "-1540855590"
 
     _send(
@@ -267,15 +267,30 @@ ENDOFCHANNELS\n"
 
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
+    _ = _recv(socket1)
+
     _send(socket2, "JOINBATTLE #{battle_id} empty 1683043765\n")
-    # The remainder of this string is just the script tags, we'll assume it's correct for now
+    _ = _recv(socket2)
+
+    # User1 (host) should now get a message
+    reply = _recv(socket1)
+    assert reply == "JOINBATTLEREQUEST #{user2.name} 127.0.0.1\n"
+
+    # User1, reject it!
+    _send(socket1, "JOINBATTLEDENY #{user2.name} Because I said so\n")
+    reply = _recv(socket2)
+    assert reply == "JOINBATTLEFAILED Because I said so\n"
+
+    # Rejoin, this time accept
+    _send(socket2, "JOINBATTLE #{battle_id} empty 1683043765\n")
+    _send(socket1, "JOINBATTLEACCEPT #{user2.name}\n")
+    _ = _recv(socket1)
+
     reply =
       _recv_until(socket2)
       |> String.split("\n")
 
-    # The battle host gets pinged about it, lets assume they just said yes!
-    Battle.accept_join_request(user1.id, battle_id)
-
+    # The remainder of this string is just the script tags, we'll assume it's correct for now
     # Now stuff happens right?
     [
       joinbattle,

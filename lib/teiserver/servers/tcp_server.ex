@@ -512,7 +512,6 @@ defmodule Teiserver.TcpServer do
   # This is the server asking the host if a client can join the battle
   # the client is expected to reply with a yes or no
   defp request_user_join_battle(userid, state) do
-    Logger.info("tcp_server.request_user_join_battle - {:request_user_join_battle, #{userid}}")
     state.protocol_out.reply(:request_user_join_battle, userid, nil, state)
   end
 

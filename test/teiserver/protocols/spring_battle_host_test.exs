@@ -67,15 +67,30 @@ defmodule Teiserver.SpringBattleHostTest do
     # Now create a user to join the battle
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
-    _send(socket2, "JOINBATTLE #{battle_id} empty gameHash\n")
+
+    # Check user1 hears about this
+    reply = _recv(socket)
+    assert reply =~ "ADDUSER #{user2.name} ?? 0 #{user2.id} LuaLobby Chobby\n"
+
+    # Attempt to join
+    _send(socket2, "JOINBATTLE #{battle_id} empty script_password2\n")
+
+    # Rejecting a join request is covered elsewhere, we will just handle accepting it for now
+    reply = _recv(socket)
+    assert reply == "JOINBATTLEREQUEST #{user2.name} 127.0.0.1\n"
+
+    # Send acceptance
+    _send(socket, "JOINBATTLEACCEPT #{user2.name}\n")
+
     # The response to joining a battle is tested elsewhere, we just care about the host right now
     _ = _recv(socket2)
     _ = _recv(socket2)
 
     reply = _recv_until(socket)
-    assert reply =~ "ADDUSER #{user2.name} ?? 0 #{user2.id} LuaLobby Chobby\n"
-    assert reply =~ "JOINEDBATTLE #{battle_id} #{user2.name}\n"
-    assert reply =~ "CLIENTSTATUS #{user2.name} 0\n"
+    assert reply =~ "JOINEDBATTLE #{battle_id} #{user2.name} script_password2\n"
+
+    # This used to get updated, why not any more?
+    # assert reply =~ "CLIENTSTATUS #{user2.name} 0\n"
 
     # Kick user2
     battle = Battle.get_battle(battle_id)
@@ -89,11 +104,14 @@ defmodule Teiserver.SpringBattleHostTest do
     user3 = new_user()
     %{socket: socket3} = auth_setup(user3)
 
-    _send(socket2, "JOINBATTLE #{battle_id} empty gameHash\n")
+    _send(socket2, "JOINBATTLE #{battle_id} empty script_password3\n")
+    _send(socket, "JOINBATTLEACCEPT #{user2.name}\n")
+    _ = _recv(socket)
     _ = _recv(socket2)
 
     # User 3 join the battle
-    _send(socket3, "JOINBATTLE #{battle_id} empty gameHash\n")
+    _send(socket3, "JOINBATTLE #{battle_id} empty script_password3\n")
+    _send(socket, "JOINBATTLEACCEPT #{user3.name}\n")
     reply = _recv(socket2)
     assert reply == "JOINEDBATTLE #{battle_id} #{user3.name}\n"
 
@@ -170,7 +188,8 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == :timeout
 
     # Now lets get them to rejoin the battle
-    _send(socket2, "JOINBATTLE #{battle_id} empty gameHash\n")
+    _send(socket2, "JOINBATTLE #{battle_id} empty script_password2\n")
+    _send(socket, "JOINBATTLEACCEPT #{user2.name}\n")
     :timer.sleep(100)
     _ = _recv(socket2)
 

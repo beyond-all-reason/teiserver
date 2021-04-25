@@ -661,7 +661,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
         # Update local state to point to this battle and say
         # we are the host
-        %{state | battle_id: battle.id, battle_host: true}
+        %{state | battle_id: battle.id, battle_host: true, known_battles: state.known_battles ++ [battle.id]}
 
       {:failure, reason} ->
         reply(:open_battle_failure, reason, msg_id, state)
@@ -680,9 +680,6 @@ defmodule Teiserver.Protocols.SpringIn do
       end
 
     case response do
-      # {:success, battle} ->
-      #   SpringOut.do_join_battle(state, battle_id, script_password)
-
       {:waiting_on_host, script_password} ->
         Logger.info("Setting script password for userid:#{state.userid} of #{script_password}")
         %{state | script_password: script_password}
@@ -989,7 +986,6 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("MYBATTLESTATUS", _, _, %{battle_id: nil} = state), do: state
-
   defp do_handle("MYBATTLESTATUS", data, msg_id, state) do
     case Regex.run(~r/(\S+) (.+)/, data) do
       [_, battlestatus, team_colour] ->
