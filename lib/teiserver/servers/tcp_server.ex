@@ -22,6 +22,7 @@ defmodule Teiserver.TcpServer do
 
   def format_log(s) do
     s
+    |> String.trim()
     |> String.replace("\n", "\\n")
     |> String.replace("\t", "~~")
   end
@@ -325,7 +326,7 @@ defmodule Teiserver.TcpServer do
   defp data_in(data, state) do
     if state.extra_logging do
       Logger.info(
-        "<-- #{Kernel.inspect(state.username)}:#{Kernel.inspect(state.userid)} #{format_log(data)}"
+        "<-- #{state.username}: #{format_log(data)}"
       )
     end
 
@@ -532,9 +533,12 @@ defmodule Teiserver.TcpServer do
   # genserver is incorrect and needs to alter its state accordingly
   defp user_join_battle(userid, battle_id, script_password, state) do
     host = if state.battle_host, do: "host", else: "player"
-    Logger.info("user_join_battle userid:#{userid}, host:#{host}, password #{script_password}")
 
-    script_password = if state.battle_host, do: script_password, else: nil
+    script_password = cond do
+      state.battle_host and state.battle_id == battle_id -> script_password
+      state.userid == userid -> script_password
+      true -> nil
+    end
 
     new_user =
       cond do

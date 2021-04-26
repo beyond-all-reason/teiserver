@@ -249,7 +249,7 @@ ENDOFCHANNELS\n"
     assert reply == :timeout
   end
 
-  test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: _user1} do
+  test "JOINBATTLE, SAYBATTLE, MYBATTLESTATUS, LEAVEBATTLE", %{socket: socket1, user: user1} do
     hash = "-1540855590"
 
     _send(
@@ -269,7 +269,7 @@ ENDOFCHANNELS\n"
     %{socket: socket2} = auth_setup(user2)
     _ = _recv(socket1)
 
-    _send(socket2, "JOINBATTLE #{battle_id} empty 1683043765\n")
+    _send(socket2, "JOINBATTLE #{battle_id} empty sPassword\n")
     _ = _recv(socket2)
 
     # User1 (host) should now get a message
@@ -282,7 +282,7 @@ ENDOFCHANNELS\n"
     assert reply == "JOINBATTLEFAILED Because I said so\n"
 
     # Rejoin, this time accept
-    _send(socket2, "JOINBATTLE #{battle_id} empty 1683043765\n")
+    _send(socket2, "JOINBATTLE #{battle_id} empty sPassword\n")
     _send(socket1, "JOINBATTLEACCEPT #{user2.name}\n")
     _ = _recv(socket1)
 
@@ -296,15 +296,17 @@ ENDOFCHANNELS\n"
       joinbattle,
       joinedbattle,
       tags,
+      host_bstatus,
       bstatus,
       request,
       ""
     ] = reply
 
     assert joinbattle == "JOINBATTLE #{battle_id} #{hash}"
-    assert joinedbattle == "JOINEDBATTLE #{battle_id} #{user2.name}"
+    assert joinedbattle == "JOINEDBATTLE #{battle_id} #{user2.name} sPassword"
     assert tags == "SETSCRIPTTAGS "
     assert bstatus == "CLIENTBATTLESTATUS #{user2.name} 0 0"
+    assert host_bstatus == "CLIENTBATTLESTATUS #{user1.name} 0 0"
     assert request == "REQUESTBATTLESTATUS"
 
     _send(socket2, "SAYBATTLE Hello there!\n")

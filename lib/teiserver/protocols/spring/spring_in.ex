@@ -681,7 +681,6 @@ defmodule Teiserver.Protocols.SpringIn do
 
     case response do
       {:waiting_on_host, script_password} ->
-        Logger.info("Setting script password for userid:#{state.userid} of #{script_password}")
         %{state | script_password: script_password}
 
       {:failure, "No match"} ->

@@ -672,7 +672,6 @@ defmodule Teiserver.User do
       end
 
     last_login = round(:erlang.system_time(:seconds) / 60)
-
     ingame_hours = user.ingame_minutes / 60
 
     rank =

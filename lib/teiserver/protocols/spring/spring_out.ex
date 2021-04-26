@@ -23,7 +23,6 @@ defmodule Teiserver.Protocols.SpringOut do
   """
 
   @compflags "sp teiserver matchmaking token-auth"
-  # @compflags "teiserver matchmaking token-auth"
 
   @spec reply(atom(), nil | String.t() | tuple() | list(), String.t(), map) :: map
   def reply(reply_cmd, data, msg_id, state) do
@@ -43,14 +42,14 @@ defmodule Teiserver.Protocols.SpringOut do
         msg
         |> Enum.map(fn m ->
           Logger.info(
-            "--> #{Kernel.inspect(state.username)}:#{Kernel.inspect(state.userid)} #{
+            "--> #{state.username}: #{
               TcpServer.format_log(m)
             }"
           )
         end)
       else
         Logger.info(
-          "--> #{Kernel.inspect(state.username)}:#{Kernel.inspect(state.userid)} #{
+          "--> #{state.username}: #{
             TcpServer.format_log(msg)
           }"
         )
@@ -533,13 +532,13 @@ defmodule Teiserver.Protocols.SpringOut do
   @spec do_join_battle(map(), integer(), String.t()) :: map()
   def do_join_battle(state, battle_id, script_password) do
     battle = Battle.get_battle(battle_id)
-    PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
     Battle.add_user_to_battle(state.userid, battle.id, script_password)
+    PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
     reply(:join_battle_success, battle, nil, state)
-    reply(:add_user_to_battle, {state.userid, battle.id, nil}, nil, state)
+    reply(:add_user_to_battle, {state.userid, battle.id, script_password}, nil, state)
     reply(:add_script_tags, battle.tags, nil, state)
 
-    battle.players
+    battle.players ++ [battle.founder_id]
     |> Enum.each(fn id ->
       client = Client.get_client_by_id(id)
       reply(:client_battlestatus, client, nil, state)
