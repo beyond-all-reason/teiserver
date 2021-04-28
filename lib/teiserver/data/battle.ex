@@ -473,7 +473,7 @@ defmodule Teiserver.Battle do
   end
 
   def say(userid, "!director stop", battle_id) do
-    start_director_mode(battle_id)
+    stop_director_mode(battle_id)
     sayex(userid, "!director stop", battle_id)
   end
 

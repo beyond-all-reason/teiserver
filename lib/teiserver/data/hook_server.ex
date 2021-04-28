@@ -10,7 +10,7 @@ defmodule Teiserver.HookServer do
   # GenServer callbacks
   @impl true
   def handle_info(%{event: event, topic: "account_hooks", payload: payload}, state) do
-    start_completed = (ConCache.get(:application_metadata_cache, "teiserver_startup_completed") == 1)
+    start_completed = (ConCache.get(:application_metadata_cache, "teiserver_startup_completed") == true)
     event = if start_completed, do: event, else: nil
 
     case event do

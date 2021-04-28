@@ -100,12 +100,17 @@ defmodule Teiserver.User do
     ConCache.get(:application_metadata_cache, "bar_user_group")
   end
 
+  @spec clan_name_alter(String.t()) :: String.t()
+  defp clan_name_alter(name) do
+    name
+      |> String.replace("[", "{")
+      |> String.replace("]", "}")
+  end
+
   @spec apply_user_clan(Map.t()) :: Map.t()
   def apply_user_clan(%{bot: true} = user), do: user
   def apply_user_clan(user) do
-    new_name = user.name
-    |> String.replace("[", "{")
-    |> String.replace("]", "}")
+    new_name = clan_name_alter(user.name)
 
     clan_name = case user.clan_id do
       nil -> new_name
@@ -576,7 +581,7 @@ defmodule Teiserver.User do
 
   @spec wait_for_precache() :: :ok
   defp wait_for_precache() do
-    if ConCache.get(:application_metadata_cache, "teiserver_startup_completed") != 1 do
+    if ConCache.get(:application_metadata_cache, "teiserver_startup_completed") != true do
       :timer.sleep(@timer_sleep)
       wait_for_precache()
     else
@@ -621,6 +626,7 @@ defmodule Teiserver.User do
   end
 
   def try_md5_login(username, md5_password, state, ip, lobby) do
+    username = clan_name_alter(username)
     wait_for_precache()
 
     case get_user_by_name(username) do

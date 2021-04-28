@@ -443,9 +443,9 @@ ENDOFCHANNELS\n"
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
   end
 
-  test "Clan name", %{socket: socket, user: user} do
+  test "Clan name", %{socket: socket} do
     clan_user = new_user("[CLAN]username", %{})
-    %{socket: clan_socket} = auth_setup(clan_user)
+    %{socket: _clan_socket} = auth_setup(clan_user)
 
     reply = _recv(socket)
     assert reply == "ADDUSER {CLAN}username ?? 0 #{clan_user.id} LuaLobby Chobby\nCLIENTSTATUS {CLAN}username 0\n"
