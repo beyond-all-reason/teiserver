@@ -626,10 +626,14 @@ defmodule Teiserver.User do
   end
 
   def try_md5_login(username, md5_password, state, ip, lobby) do
-    username = clan_name_alter(username)
+    clan_username = clan_name_alter(username)
     wait_for_precache()
 
-    case get_user_by_name(username) do
+    raw_user = get_user_by_name(username)
+    clan_user = get_user_by_name(clan_username)
+    the_user = if raw_user, do: raw_user, else: clan_user
+
+    case the_user do
       nil ->
         {:error, "No user found for '#{username}'"}
 
