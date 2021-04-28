@@ -53,8 +53,10 @@ defmodule Teiserver.Clans do
 
   """
   def get_clan!(id) when not is_list(id) do
-    clan_query(id, [])
-    |> Repo.one!()
+    ConCache.get_or_store(:teiserver_clan_cache_bang, id, fn ->
+      clan_query(id, [])
+      |> Repo.one!()
+    end)
   end
 
   def get_clan!(args) do

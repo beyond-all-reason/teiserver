@@ -118,7 +118,7 @@ defmodule Teiserver.TcpServer do
       room_member_cache: %{},
       known_users: %{},
       known_battles: [],
-      extra_logging: true,
+      extra_logging: false,
       script_password: nil
     }
 
@@ -532,8 +532,6 @@ defmodule Teiserver.TcpServer do
   # we will send a selection of commands on the assumption this
   # genserver is incorrect and needs to alter its state accordingly
   defp user_join_battle(userid, battle_id, script_password, state) do
-    host = if state.battle_host, do: "host", else: "player"
-
     script_password = cond do
       state.battle_host and state.battle_id == battle_id -> script_password
       state.userid == userid -> script_password

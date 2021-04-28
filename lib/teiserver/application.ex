@@ -20,6 +20,7 @@ defmodule Teiserver.Application do
       concache_perm_sup(:battles),
       concache_perm_sup(:queues),
       concache_perm_sup(:rooms),
+      concache_sup(:teiserver_clan_cache_bang),
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueMatchSupervisor}
     ]
@@ -35,6 +36,21 @@ defmodule Teiserver.Application do
     else
       children
     end
+  end
+
+  defp concache_sup(name) do
+    Supervisor.child_spec(
+      {
+        ConCache,
+        [
+          name: name,
+          ttl_check_interval: 10_000,
+          global_ttl: 60_000,
+          touch_on_read: true
+        ]
+      },
+      id: {ConCache, name}
+    )
   end
 
   defp concache_perm_sup(name) do

@@ -3,8 +3,6 @@ defmodule Teiserver.Startup do
   require Logger
 
   def startup do
-    ConCache.put(:id_counters, :startup, 0)
-
     add_permission_set("teiserver", "admin", ~w(account battle clan party queue tournament))
     add_permission_set("teiserver", "moderator", ~w(account battle clan party queue tournament))
     add_permission_set("teiserver", "player", ~w(account))
@@ -53,6 +51,40 @@ defmodule Teiserver.Startup do
 
     Central.Account.GroupCacheLib.update_caches(umbrella)
     Central.Account.GroupCacheLib.update_caches(group)
+
+    # Teiserver director user
+    director_user =
+      case Central.Account.get_user(nil, search: [name: "Teiserver director"]) do
+        nil ->
+          {:ok, user} =
+            Central.Account.create_user(%{
+              "name" => "Teiserver director",
+              "email" => "director@teiserver",
+              "password" => Argon2.hash_pwd_salt(UUID.uuid4()),
+              "icon" => "fas fa-hard-hat",
+              "colour" => "#000077",
+              "permissions" => [],
+              "data" => %{
+                "bot" => true,
+                "moderator" => true,
+                "verified" => true
+              },
+              "admin_group_id" => umbrella.id
+            })
+
+          Central.Account.create_group_membership(%{
+            "group_id" => umbrella.id,
+            "user_id" => user.id,
+            "admin" => false
+          })
+
+          user
+
+        user ->
+          user
+      end
+
+    ConCache.put(:application_metadata_cache, "teiserver_director_user", director_user.id)
 
     # Quick actions
     QuickAction.add_items([
@@ -125,7 +157,7 @@ defmodule Teiserver.Startup do
     Teiserver.User.pre_cache_users()
     Teiserver.Data.Matchmaking.pre_cache_queues()
 
-    ConCache.put(:id_counters, :startup, 1)
+    ConCache.put(:application_metadata_cache, "teiserver_startup_completed", true)
 
     Logger.info("Teiserver startup complete")
   end

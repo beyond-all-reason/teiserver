@@ -122,12 +122,16 @@ defmodule Teiserver.TestLib do
       username: nil,
       battle_host: false,
       user: nil,
+      queues: [],
+      ready_queue_id: nil,
 
       # Connection microstate
       battle_id: nil,
       room_member_cache: %{},
       known_users: %{},
-      extra_logging: false
+      known_battles: [],
+      extra_logging: false,
+      script_password: nil
     }
   end
 
@@ -156,7 +160,9 @@ defmodule Teiserver.TestLib do
       battle_id: nil,
       room_member_cache: %{},
       known_users: %{},
-      extra_logging: false
+      known_battles: [],
+      extra_logging: false,
+      script_password: nil
     }
   end
 

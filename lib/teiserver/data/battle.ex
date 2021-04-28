@@ -13,6 +13,7 @@ defmodule Teiserver.Battle do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Client
   alias Teiserver.Data.Types
+  alias Teiserver.Protocols.Director
 
   defp next_id() do
     ConCache.isolated(:id_counters, :battle, fn ->
@@ -63,6 +64,7 @@ defmodule Teiserver.Battle do
         disabled_units: [],
         start_rectangles: %{},
         director_mode: false,
+        director_pid: nil,
 
         # Expected to be overriden
         map_hash: nil,
@@ -476,6 +478,13 @@ defmodule Teiserver.Battle do
   end
 
   def say(userid, msg, battle_id) do
+    case Director.handle_in(userid, msg, battle_id) do
+      :say -> do_say(userid, msg, battle_id)
+      :handled -> :ok
+    end
+  end
+
+  defp do_say(userid, msg, battle_id) do
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",

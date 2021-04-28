@@ -91,7 +91,7 @@ defmodule Teiserver.User do
 
   @spec clean_name(String.t()) :: String.t()
   def clean_name(name) do
-    ~r/([^a-zA-Z0-9_\-\[\]]|\s)/
+    ~r/([^a-zA-Z0-9_\-\[\]\{\}]|\s)/
     |> Regex.replace(name, "")
   end
 
@@ -110,7 +110,9 @@ defmodule Teiserver.User do
     clan_name = case user.clan_id do
       nil -> new_name
       clan_id ->
-        clan = Clans.get_clan!(clan_id, [select: [:tag]])
+        # clan = Clans.get_clan!(clan_id, [select: [:tag]])
+        # We have a clan cache so we don't do a limited select
+        clan = Clans.get_clan!(clan_id)
 
         if String.contains?(new_name, "{tag}") do
           # String.replace(new_name, "{tag}", "[#{clan.tag}]", [global: false])
@@ -574,7 +576,7 @@ defmodule Teiserver.User do
 
   @spec wait_for_precache() :: :ok
   defp wait_for_precache() do
-    if ConCache.get(:id_counters, :startup) != 1 do
+    if ConCache.get(:application_metadata_cache, "teiserver_startup_completed") != 1 do
       :timer.sleep(@timer_sleep)
       wait_for_precache()
     else
@@ -723,6 +725,7 @@ defmodule Teiserver.User do
     |> Map.take(@keys)
     |> Map.merge(@default_data)
     |> Map.merge(data)
+    |> apply_user_clan
   end
 
   @spec new_report(Integer.t()) :: :ok
