@@ -250,4 +250,32 @@ defmodule Teiserver.TestLib do
 
     q
   end
+
+  @spec make_battle(Map.t()) :: Map.t()
+  def make_battle(params \\ %{}) do
+    id = :random.uniform(99_999_999) + 1_000_000
+
+    %{
+      founder_id: id,
+      founder_name: "TEST_USER_#{id}",
+      name: "BATTLE_#{id}",
+      type: :normal,
+      nattype: "",
+      port: "",
+      max_players: 4,
+      game_hash: "game_hash",
+      map_hash: "map_hash",
+      password: nil,
+      rank: 0,
+      locked: false,
+      engine_name: "engine_name",
+      engine_version: "engine_version",
+      map_name: "map_name",
+      game_name: "game_name",
+      ip: "127.0.0.1"
+    }
+      |> Map.merge(params)
+      |> Teiserver.Battle.create_battle()
+      |> Teiserver.Battle.add_battle()
+  end
 end

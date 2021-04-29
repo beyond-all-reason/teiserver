@@ -22,13 +22,16 @@ defmodule Teiserver.Protocols.Director do
 
   @spec parse_and_handle(Types.userid(), String.t(), Map.t()) :: :ok
   defp parse_and_handle(userid, msg, battle) do
-    [cmd, opts] = String.split(msg, " ", parts: 2)
+    [cmd, opts] = case String.split(msg, " ", parts: 2) do
+      [cmd] -> [cmd, []]
+      [cmd, parts] -> [cmd, String.split(parts, " ")]
+    end
     do_handle(userid, cmd, opts, battle)
     :ok
   end
 
-  @spec do_handle(Types.userid(), String.t(), [String.t()], Map.t()) :: :ok | :nomatch
-  defp do_handle(_userid, "start", _opts, battle) do
+  @spec do_handle(Types.userid(), String.t(), [String.t()], Map.t()) :: :nomatch | :ok
+  defp do_handle(_userid, "!start", _opts, battle) do
     send_to_host(battle, "!start")
   end
 
@@ -38,7 +41,7 @@ defmodule Teiserver.Protocols.Director do
     :nomatch
   end
 
-  # @spec send_to_host(Map.t(), String.t()) :: return
+  @spec send_to_host(Map.t(), String.t()) :: :ok
   defp send_to_host(battle, msg) do
     Logger.info("send_to_host - #{battle.id}, #{msg}")
     :ok

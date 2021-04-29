@@ -108,6 +108,7 @@ defmodule Teiserver.Battle do
     ConCache.get(:battles, int_parse(id))
   end
 
+  @spec add_battle(Map.t()) :: Map.t()
   def add_battle(battle) do
     ConCache.put(:battles, battle.id, battle)
 
@@ -484,7 +485,8 @@ defmodule Teiserver.Battle do
     end
   end
 
-  defp do_say(userid, msg, battle_id) do
+  @spec do_say(Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
+  def do_say(userid, msg, battle_id) do
     PubSub.broadcast(
       Central.PubSub,
       "battle_updates:#{battle_id}",
