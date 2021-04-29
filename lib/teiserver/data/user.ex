@@ -100,35 +100,39 @@ defmodule Teiserver.User do
     ConCache.get(:application_metadata_cache, "bar_user_group")
   end
 
-  @spec clan_name_alter(String.t()) :: String.t()
-  defp clan_name_alter(name) do
-    name
-      |> String.replace("[", "{")
-      |> String.replace("]", "}")
-  end
+  # Because there are issues with renaming people, might need to wait until the new protocol
+  def clan_name_alter(n), do: n
+  def apply_user_clan(user), do: user
 
-  @spec apply_user_clan(Map.t()) :: Map.t()
-  def apply_user_clan(%{bot: true} = user), do: user
-  def apply_user_clan(user) do
-    new_name = clan_name_alter(user.name)
+  # @spec clan_name_alter(String.t()) :: String.t()
+  # defp clan_name_alter(name) do
+  #   name
+  #     |> String.replace("[", "{")
+  #     |> String.replace("]", "}")
+  # end
 
-    clan_name = case user.clan_id do
-      nil -> new_name
-      clan_id ->
-        # clan = Clans.get_clan!(clan_id, [select: [:tag]])
-        # We have a clan cache so we don't do a limited select
-        clan = Clans.get_clan!(clan_id)
+  # @spec apply_user_clan(Map.t()) :: Map.t()
+  # def apply_user_clan(%{bot: true} = user), do: user
+  # def apply_user_clan(user) do
+  #   new_name = clan_name_alter(user.name)
 
-        if String.contains?(new_name, "{tag}") do
-          # String.replace(new_name, "{tag}", "[#{clan.tag}]", [global: false])
-          "[#{clan.tag}]" <> new_name
-        else
-          "[#{clan.tag}]" <> new_name
-        end
-    end
+  #   clan_name = case user.clan_id do
+  #     nil -> new_name
+  #     clan_id ->
+  #       # clan = Clans.get_clan!(clan_id, [select: [:tag]])
+  #       # We have a clan cache so we don't do a limited select
+  #       clan = Clans.get_clan!(clan_id)
 
-    %{user | name: clan_name}
-  end
+  #       if String.contains?(new_name, "{tag}") do
+  #         # String.replace(new_name, "{tag}", "[#{clan.tag}]", [global: false])
+  #         "[#{clan.tag}]" <> new_name
+  #       else
+  #         "[#{clan.tag}]" <> new_name
+  #       end
+  #   end
+
+  #   %{user | name: clan_name}
+  # end
 
   def encrypt_password(password) do
     Argon2.hash_pwd_salt(password)
@@ -626,14 +630,14 @@ defmodule Teiserver.User do
   end
 
   def try_md5_login(username, md5_password, state, ip, lobby) do
-    clan_username = clan_name_alter(username)
+    # clan_username = clan_name_alter(username)
     wait_for_precache()
 
-    raw_user = get_user_by_name(username)
-    clan_user = get_user_by_name(clan_username)
-    the_user = if raw_user, do: raw_user, else: clan_user
+    # raw_user = get_user_by_name(username)
+    # clan_user = get_user_by_name(clan_username)
+    # the_user = if raw_user, do: raw_user, else: clan_user
 
-    case the_user do
+    case get_user_by_name(username) do
       nil ->
         {:error, "No user found for '#{username}'"}
 
