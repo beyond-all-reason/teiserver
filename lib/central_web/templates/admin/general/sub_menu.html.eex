@@ -46,6 +46,14 @@
           %>
 
           <%= component "sub_menu_icon",
+            name: "codes",
+            label: "Codes",
+            active: @active,
+            url: Routes.admin_code_path(@conn, :index),
+            lib: Central.Account.CodeLib
+          %>
+
+          <%= component "sub_menu_icon",
             name: "tool",
             label: "Tools",
             active: @active,

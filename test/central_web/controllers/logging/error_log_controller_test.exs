@@ -1,6 +1,5 @@
 defmodule CentralWeb.Logging.ErrorLogControllerTest do
-  # , async: true
-  use CentralWeb.ConnCase
+  use CentralWeb.ConnCase#, async: true
 
   alias Central.Logging
 

@@ -57,6 +57,8 @@ defmodule Central.Account do
       ** (Ecto.NoResultsError)
 
   """
+  @spec get_user!(Integer.t() | List.t()) :: User.t()
+  @spec get_user!(Integer.t(), List.t()) :: User.t()
   def get_user!(id) when not is_list(id) do
     ConCache.get_or_store(:account_user_cache_bang, id, fn ->
       user_query(id, [])
@@ -88,6 +90,8 @@ defmodule Central.Account do
       nil
 
   """
+  @spec get_user(Integer.t() | List.t()) :: User.t() | nil
+  @spec get_user(Integer.t(), List.t()) :: User.t() | nil
   def get_user(id) when not is_list(id) do
     ConCache.get_or_store(:account_user_cache, id, fn ->
       user_query(id, [])
@@ -105,15 +109,17 @@ defmodule Central.Account do
     |> Repo.one()
   end
 
+  @spec get_user_by_name(String.t()) :: User.t() | nil
   def get_user_by_name(name) do
     UserQueries.get_users()
-    |> UserQueries.search(%{name: name})
+    |> UserQueries.search(%{name: String.trim(name)})
     |> Repo.one()
   end
 
+  @spec get_user_by_email(String.t()) :: User.t() | nil
   def get_user_by_email(email) do
     UserQueries.get_users()
-    |> UserQueries.search(%{email: email})
+    |> UserQueries.search(%{email: String.trim(email)})
     |> Repo.one()
   end
 
@@ -578,6 +584,11 @@ defmodule Central.Account do
   def get_code(value, args \\ []) do
     code_query(value, args)
     |> Repo.one()
+  end
+
+  def get_code!(value, args \\ []) do
+    code_query(value, args)
+    |> Repo.one!()
   end
 
   # Uncomment this if needed, default files do not need this function

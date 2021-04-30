@@ -61,6 +61,18 @@
             %>
           <% end %>
 
+          <%= if allow?(@current_user, "logging.live") do %>
+            <%= component "sub_menu_icon",
+              name: "live_dashboard",
+              label: "Live dashboard",
+              active: @active,
+              url: "/logging/live/dashboard",
+              lib: %{
+                icon: "far fa-tachometer-alt"
+              }
+            %>
+          <% end %>
+
           <%= component "sub_menu_icon",
             name: "report",
             label: "Reports",

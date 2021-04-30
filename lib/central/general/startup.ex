@@ -34,30 +34,6 @@ defmodule Central.General.Startup do
         permissions: "admin.admin.limited"
       },
       %{
-        label: "Error logs",
-        icons: [Central.Logging.ErrorLogLib.icon(), :list],
-        url: "/logging/error_logs",
-        permissions: "admin.dev.developer"
-      },
-      %{
-        label: "Audit logs",
-        icons: [Central.Logging.AuditLogLib.icon(), :list],
-        url: "/logging/audit",
-        permissions: "admin.dev.developer"
-      },
-      %{
-        label: "Aggregate logs",
-        icons: [Central.Logging.AggregateViewLogLib.icon(), :list],
-        url: "/logging/aggregate_views",
-        permissions: "admin.dev.developer"
-      },
-      %{
-        label: "Page view logs",
-        icons: [Central.Logging.PageViewLogLib.icon(), :list],
-        url: "/logging/page_views",
-        permissions: "admin.dev.developer"
-      },
-      %{
         label: "Coverage",
         icons: ["far fa-percent"],
         url: "/admin/tools/coverage",

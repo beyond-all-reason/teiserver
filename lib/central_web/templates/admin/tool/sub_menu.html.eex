@@ -30,14 +30,43 @@
               icon: "far fa-barcode-scan"
             }
           %>
+          <%= component "sub_menu_icon",
+            name: "test-page",
+            label: "Test page",
+            active: @active,
+            url: Routes.admin_tool_path(@conn, :test_page),
+            lib: %{
+              icon: "far fa-map-marker-question"
+            }
+          %>
 
           <%= component "sub_menu_icon",
-            name: "live_dashboard",
-            label: "Live dashboard",
+            name: "falist",
+            label: "FA List",
             active: @active,
-            url: "/admin/dashboard",
+            url: Routes.admin_tool_path(@conn, :falist),
             lib: %{
-              icon: "far fa-tachometer-alt"
+              icon: "fab fa-font-awesome"
+            }
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "oban",
+            label: "Oban",
+            active: @active,
+            url: Routes.admin_tool_path(@conn, :oban_dashboard),
+            lib: %{
+              icon: "far fa-circle-notch"
+            }
+          %>
+
+          <%= component "sub_menu_icon",
+            name: "conn-params",
+            label: "Conn params",
+            active: @active,
+            url: Routes.admin_tool_path(@conn, :conn_params),
+            lib: %{
+              icon: "far fa-brackets-curly"
             }
           %>
         </div>

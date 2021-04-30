@@ -1,6 +1,5 @@
 defmodule Central.Logging.AggregateViewLogsTaskTest do
-  # , async: true
-  use Central.DataCase
+  use Central.DataCase#, async: true
 
   alias Central.Logging.AggregateViewLogsTask
 

@@ -8,10 +8,10 @@ defmodule CentralWeb.Router do
       user: {Central.Account.AuthLib, :current_user}
   end
 
-  pipeline :admin_auth do
+  pipeline :logging_live_auth do
     plug Bodyguard.Plug.Authorize,
-      policy: Central.Admin.AdminLib,
-      action: :admin_auth,
+      policy: Central.Logging.LiveLib,
+      action: :live,
       user: {Central.Account.AuthLib, :current_user}
   end
 
@@ -262,6 +262,9 @@ defmodule CentralWeb.Router do
     get("/groups/:group_id/settings", GroupController, :show_settings)
     post("/groups/:group_id/settings/:key", GroupController, :update_settings)
 
+    # Codes
+    resources("/codes", CodeController)
+
     # Tools
     get("/tools", ToolController, :index)
     get("/tools/falist", ToolController, :falist)
@@ -277,8 +280,8 @@ defmodule CentralWeb.Router do
   # Live dashboard
   import Phoenix.LiveDashboard.Router
 
-  scope "/admin", CentralWeb.Admin, as: :admin do
-    pipe_through([:browser, :protected, :admin_layout, :admin_auth])
+  scope "/logging/live", CentralWeb, as: :logging_live do
+    pipe_through([:browser, :protected, :admin_layout, :logging_live_auth])
 
     live_dashboard("/dashboard", metrics: CentralWeb.Telemetry)
   end

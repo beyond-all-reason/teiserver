@@ -1,6 +1,5 @@
 defmodule CentralWeb.General.PageControllerTest do
-  # , async: true
-  use CentralWeb.ConnCase
+  use CentralWeb.ConnCase#, async: true
 
   test "GET /", %{conn: conn} do
     conn = get(conn, "/")

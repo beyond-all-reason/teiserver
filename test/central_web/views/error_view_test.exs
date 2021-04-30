@@ -1,6 +1,5 @@
 defmodule CentralWeb.ErrorViewTest do
-  # , async: true
-  use CentralWeb.ConnCase
+  use CentralWeb.ConnCase#, async: true
 
   alias Central.Helpers.GeneralTestLib
 

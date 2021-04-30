@@ -26,4 +26,7 @@ defmodule Central.Account.Code do
     ])
     |> validate_required([:value, :purpose, :expires, :user_id])
   end
+
+  @spec authorize(any, Plug.Conn.t(), atom) :: boolean
+  def authorize(_, conn, _), do: allow?(conn, "admin.dev")
 end

@@ -9,7 +9,6 @@
 
 <div class="row page-row">
   <%= component "menu_card", icon_class: "fas", name: "", icon: "far fa-barcode-scan", text: "Coverage", link: Routes.admin_tool_path(@conn, :coverage_form) %>
-  <%= component "menu_card", icon_class: "fas", name: "", icon: "far fa-tachometer-alt", text: "Live dashboard", link: "/admin/dashboard" %>
   <%= component "menu_card", icon_class: "fas", name: "", icon: "far fa-exclamation-triangle", text: "Test errors", link: Routes.admin_tool_path(@conn, :test_error) %>
   <%= component "menu_card", icon_class: "fas", name: "", icon: "far fa-map-marker-question", text: "Test page", link: Routes.admin_tool_path(@conn, :test_page) %>
   <%= component "menu_card", icon_class: "fas", name: "", icon: "fab fa-font-awesome", text: "FA List", link: Routes.admin_tool_path(@conn, :falist) %>

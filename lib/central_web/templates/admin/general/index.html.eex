@@ -35,6 +35,10 @@
   <% end %>
 
   <%= if allow?(@current_user, "admin.dev") do %>
+    <%= component "menu_card", icon_class: "fas", name: "", icon: Central.Account.CodeLib.icon, text: "Codes", link: Routes.admin_code_path(@conn, :index) %>
+  <% end %>
+
+  <%= if allow?(@current_user, "admin.dev") do %>
     <%= component "menu_card", icon_class: "fas", name: "", icon: Central.Admin.ToolLib.icon, text: "Tools", link: Routes.admin_tool_path(@conn, :index) %>
   <% end %>
 </div>
