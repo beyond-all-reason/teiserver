@@ -2,9 +2,33 @@
 Each request is encoded as JSON compressed with Gzip and then encoded into Base64 to be sent over a TLS connection. This is true for both the server and the client sending messages. A received message will need to be Base64 decoded, uncompressed with Gzip and then parsed into a JSON object. Below is an example of how this would look.
 
 ```
-{"command":"s.battles.list", "battles": [{"id":1,"name":"Battle 1","players":[1,2,3],"spectators":[11,12,13],"started":false,"locked":false,"tournament":false},{"id":2,"name":"Battle 2","players":[4,5],"spectators":[14,15,16,17,18,19,21],"started":true,"locked":false,"tournament":true}]}
+  Raw Base64 data
+H4sIAAAAAAAAA4WQyw6CQAxFf8V0fUPSEXyw9DeMi4pjYhwYnCkLQvh3eS1QF+6ak9t7mnZ0FVVnI+Xnjh43yhnkfPG0w3gXFy2oktJSTqcpuGEC1U5aG8YdhsH2Aoq1LVTUz5DBBjxxlaCrLvVNGPsqXVCPWWv+aM2HNkX2I03BGXgH3oMP4CMMrw/Q0Hz5R9IPkcKXpVRDhGKyfCN5NTa01L8Bu8SyUR8BAAA=
 
-H4sIAAAAAAAAA32OzQ6CMBCE7z4F2fOEZCv4w9HXIBwq1oRYKGmXgyG8uxU4oCYeZ/bLfDtS7dpWdzcqKKRXLWJNSG0ThJDQmqlIypGayDCo062J8GU+JUyg3uqn8ZEqGQr7ChR6U4sWt5QMVuC5F+3FxJ27tsGArKsfmyhu8O/5TtZqwqJV31r1oc2Q/0gzcA4+gI/gE/gMxdsHxA///W9gqqbdC0F8UM4hAQAA
+  Decoded, Decompressed, Parsed result
+{
+  "command": "s.battles.query",
+  "battles": [
+    {
+      "id": 1,
+      "name": "Battle 1",
+      "players": [1, 2, 3],
+      "spectators": [11, 12, 13],
+      "started": false,
+      "locked": false,
+      "tournament": false
+    },
+    {
+      "id": 2,
+      "name": "Battle 2",
+      "players": [4, 5],
+      "spectators": [14, 15, 16, 17, 18, 19, 21],
+      "started": true,
+      "locked": false,
+      "tournament": true
+    }
+  ]
+}
 ```
 
 ## Conventions
@@ -23,7 +47,7 @@ Below is the example structure of a command in the documentation.
 Here will be additional info about the different arguments where necessary. Especially important when there is a query type as these will vary from command to command.
 
 #### Response
-A section detailing the possible response(s) from this command. It may be as little as a type or additional information.
+A section detailing the possible response(s) from this command. It may be as little as a type or additional information. Some commands may not even have a response.
 
 #### Examples
 ```

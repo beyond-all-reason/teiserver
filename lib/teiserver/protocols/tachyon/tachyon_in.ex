@@ -18,25 +18,11 @@ defmodule Teiserver.Protocols.TachyonIn do
           state
       end
 
-    # state =
-    #   case tuple do
-    #     {command, data, msg_id} ->
-    #       do_handle(command, data, msg_id, state)
-
-    #     nil ->
-    #       Logger.debug("Bad match on command: '#{data}'")
-    #       state
-    #   end
-
-    # if state == nil do
-    #   throw("nil state returned while handling: #{data}")
-    # end
-
     %{new_state | last_msg: System.system_time(:second)}
   end
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
-  defp do_handle("PING", cmd, state) do
+  defp do_handle("c.system.ping", cmd, state) do
     reply(:misc, :pong, cmd, state)
     state
   end

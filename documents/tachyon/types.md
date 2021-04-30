@@ -59,6 +59,7 @@ A set of parameters used to filter, sort or limit information from a larger data
 * permissions :: list (string)
 * lobby :: string
 * bot :: boolean, default: false
+* clan_id :: Clan.id
 
 -- Not sure if these need to be included in the object since the client would never need to read them
 * friends :: list (User.id)
@@ -117,5 +118,27 @@ A queue used in matchmaking
 {
   "id": 1967,
   "name": "Casual 1v1"
+}
+```
+
+
+## Success
+A string with the word success
+
+#### Examples
+```
+{
+  "result": "success"
+}
+```
+
+## Failure
+A string with the word failure, will always be accompanied by a second field "reason" containing the reason for the failure.
+
+#### Examples
+```
+{
+  "result": "failure",
+  "reason": "Reason for failure"
 }
 ```
