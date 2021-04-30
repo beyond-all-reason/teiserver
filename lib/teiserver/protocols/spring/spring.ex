@@ -164,4 +164,12 @@ defmodule Teiserver.Protocols.Spring do
     |> Enum.reverse()
     |> Integer.undigits(2)
   end
+
+  @spec format_log(String.t()) :: String.t()
+  def format_log(s) do
+    s
+    |> String.trim()
+    |> String.replace("\n", "\\n")
+    |> String.replace("\t", "~~")
+  end
 end

@@ -17,6 +17,31 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Protocols.{Spring, SpringOut}
   alias Teiserver.Protocols.Spring.MatchmakingIn
 
+  @spec data_in(String.t(), Map.t()) :: Map.t()
+  def data_in(data, state) do
+    if state.extra_logging do
+      Logger.info(
+        "<-- #{state.username}: #{Spring.format_log(data)}"
+      )
+    end
+
+    new_state =
+      if String.ends_with?(data, "\n") do
+        data = state.message_part <> data
+
+        data
+        |> String.split("\n")
+        |> Enum.reduce(state, fn data, acc ->
+          handle(data, acc)
+        end)
+        |> Map.put(:message_part, "")
+      else
+        %{state | message_part: state.message_part <> data}
+      end
+
+    new_state
+  end
+
   # The main entry point for the module and the wrapper around
   # parsing, processing and acting upon a player message
   @spec handle(String.t(), map) :: map
@@ -70,6 +95,14 @@ defmodule Teiserver.Protocols.SpringIn do
     reply(:okay, "STLS", msg_id, state)
     new_state = Teiserver.TcpServer.upgrade_connection(state)
     reply(:welcome, nil, msg_id, new_state)
+  end
+
+  # Swap to the Tachyon protocol
+  defp do_handle("TACHYON", _, msg_id, state) do
+    reply(:okay, "TACHYON", msg_id, state)
+    %{state |
+      protocol_in: Teiserver.Protocols.Tachyon,
+      protocol_out: Teiserver.Protocols.Tachyon}
   end
 
   defp do_handle("c.battles.list_ids", _, msg_id, state) do

@@ -20,13 +20,7 @@ defmodule Teiserver.TcpServer do
   openssl s_client -connect bar.teifion.co.uk:8201
   """
 
-  def format_log(s) do
-    s
-    |> String.trim()
-    |> String.replace("\n", "\\n")
-    |> String.replace("\t", "~~")
-  end
-
+  @spec get_ssl_opts :: [{:cacertfile, String.t()} | {:certfile, String.t()} | {:keyfile, String.t()}]
   def get_ssl_opts() do
     {certfile, cacertfile, keyfile} = {
       Application.get_env(:central, Teiserver)[:certs][:certfile],
@@ -149,12 +143,12 @@ defmodule Teiserver.TcpServer do
 
   # Main source of data ingress
   def handle_info({:tcp, _socket, data}, state) do
-    new_state = data_in(data, state)
+    new_state = state.protocol_in.data_in(data, state)
     {:noreply, new_state}
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    new_state = data_in(data, state)
+    new_state = state.protocol_in.data_in(data, state)
     {:noreply, new_state}
   end
 
@@ -323,30 +317,6 @@ defmodule Teiserver.TcpServer do
   # #############################
   # Internal functions
   # #############################
-  defp data_in(data, state) do
-    if state.extra_logging do
-      Logger.info(
-        "<-- #{state.username}: #{format_log(data)}"
-      )
-    end
-
-    new_state =
-      if String.ends_with?(data, "\n") do
-        data = state.message_part <> data
-
-        data
-        |> String.split("\n")
-        |> Enum.reduce(state, fn data, acc ->
-          state.protocol_in.handle(data, acc)
-        end)
-        |> Map.put(:message_part, "")
-      else
-        %{state | message_part: state.message_part <> data}
-      end
-
-    new_state
-  end
-
   # User updates
   defp user_logged_in(userid, state) do
     known_users =

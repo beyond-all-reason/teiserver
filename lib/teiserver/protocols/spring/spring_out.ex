@@ -11,7 +11,6 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Teiserver.Battle
   alias Teiserver.Room
   alias Teiserver.User
-  alias Teiserver.TcpServer
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.{MatchmakingOut}
 
@@ -43,14 +42,14 @@ defmodule Teiserver.Protocols.SpringOut do
         |> Enum.map(fn m ->
           Logger.info(
             "--> #{state.username}: #{
-              TcpServer.format_log(m)
+              Spring.format_log(m)
             }"
           )
         end)
       else
         Logger.info(
           "--> #{state.username}: #{
-            TcpServer.format_log(msg)
+            Spring.format_log(msg)
           }"
         )
       end

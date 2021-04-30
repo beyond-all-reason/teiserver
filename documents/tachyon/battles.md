@@ -5,9 +5,12 @@
 #### Queryable fields
 `locked` - Boolean
 `started` - Boolean
-`players` - Integer, a count of the number of players in the battle
-`spectators` - Integer, a count of the number of spectators in the battle
-`users` - Integer, a count of the number of players and spectators in the battle
+`player_count` - Integer, a count of the number of players in the battle
+`spectator_count` - Integer, a count of the number of spectators in the battle
+`user_count` - Integer, a count of the number of players and spectators in the battle
+`player_list` - A list of player ids in the battle
+`spectator_list` - A list of spectator ids in the battle
+`user_list` - A list of player and spectator ids in the battle
 
 #### Response
 * battle_list :: List (Battle)

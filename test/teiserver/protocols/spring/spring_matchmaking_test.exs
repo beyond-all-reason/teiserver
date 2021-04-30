@@ -160,7 +160,9 @@ defmodule Teiserver.SpringMatchmakingTest do
     # List the queue
     _send(socket, "c.matchmaking.list_all_queues\n")
     reply = _recv(socket)
-    assert reply == "s.matchmaking.full_queue_list #{queue1.id}:test_queue_join_leave1\t#{queue2.id}:test_queue_join_leave2\n"
+    assert reply =~ "s.matchmaking.full_queue_list "
+    assert reply =~ "#{queue1.id}:test_queue_join_leave1"
+    assert reply =~ "#{queue2.id}:test_queue_join_leave2"
 
     # List my queues, should be empty
     _send(socket, "c.matchmaking.list_my_queues\n")
