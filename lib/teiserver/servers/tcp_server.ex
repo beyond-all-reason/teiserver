@@ -20,7 +20,9 @@ defmodule Teiserver.TcpServer do
   openssl s_client -connect bar.teifion.co.uk:8201
   """
 
-  @spec get_ssl_opts :: [{:cacertfile, String.t()} | {:certfile, String.t()} | {:keyfile, String.t()}]
+  @spec get_ssl_opts :: [
+          {:cacertfile, String.t()} | {:certfile, String.t()} | {:keyfile, String.t()}
+        ]
   def get_ssl_opts() do
     {certfile, cacertfile, keyfile} = {
       Application.get_env(:central, Teiserver)[:certs][:certfile],
@@ -502,11 +504,12 @@ defmodule Teiserver.TcpServer do
   # we will send a selection of commands on the assumption this
   # genserver is incorrect and needs to alter its state accordingly
   defp user_join_battle(userid, battle_id, script_password, state) do
-    script_password = cond do
-      state.battle_host and state.battle_id == battle_id -> script_password
-      state.userid == userid -> script_password
-      true -> nil
-    end
+    script_password =
+      cond do
+        state.battle_host and state.battle_id == battle_id -> script_password
+        state.userid == userid -> script_password
+        true -> nil
+      end
 
     new_user =
       cond do
@@ -515,11 +518,24 @@ defmodule Teiserver.TcpServer do
 
         state.known_users[userid] == nil ->
           state.protocol_out.reply(:user_logged_in, userid, nil, state)
-          state.protocol_out.reply(:add_user_to_battle, {userid, battle_id, script_password}, nil, state)
+
+          state.protocol_out.reply(
+            :add_user_to_battle,
+            {userid, battle_id, script_password},
+            nil,
+            state
+          )
+
           _blank_user(userid, %{battle_id: battle_id})
 
         state.known_users[userid].battle_id == nil ->
-          state.protocol_out.reply(:add_user_to_battle, {userid, battle_id, script_password}, nil, state)
+          state.protocol_out.reply(
+            :add_user_to_battle,
+            {userid, battle_id, script_password},
+            nil,
+            state
+          )
+
           %{state.known_users[userid] | battle_id: battle_id}
 
         state.known_users[userid].battle_id != battle_id ->
@@ -530,7 +546,13 @@ defmodule Teiserver.TcpServer do
             state
           )
 
-          state.protocol_out.reply(:add_user_to_battle, {userid, battle_id, script_password}, nil, state)
+          state.protocol_out.reply(
+            :add_user_to_battle,
+            {userid, battle_id, script_password},
+            nil,
+            state
+          )
+
           %{state.known_users[userid] | battle_id: battle_id}
 
         state.known_users[userid].battle_id == battle_id ->

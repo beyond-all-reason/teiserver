@@ -22,10 +22,12 @@ defmodule Teiserver.Protocols.Director do
 
   @spec parse_and_handle(Types.userid(), String.t(), Map.t()) :: :ok
   defp parse_and_handle(userid, msg, battle) do
-    [cmd, opts] = case String.split(msg, " ", parts: 2) do
-      [cmd] -> [cmd, []]
-      [cmd, parts] -> [cmd, String.split(parts, " ")]
-    end
+    [cmd, opts] =
+      case String.split(msg, " ", parts: 2) do
+        [cmd] -> [cmd, []]
+        [cmd, parts] -> [cmd, String.split(parts, " ")]
+      end
+
     do_handle(userid, cmd, opts, battle)
     :ok
   end

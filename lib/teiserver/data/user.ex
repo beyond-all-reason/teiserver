@@ -695,15 +695,16 @@ defmodule Teiserver.User do
       |> Enum.filter(fn r -> r < ingame_hours end)
       |> Enum.count()
 
-    user = %{
-      user
-      | ip: ip,
-        lobbyid: lobbyid,
-        country: country,
-        last_login: last_login,
-        rank: rank
-    }
-    |> apply_user_clan()
+    user =
+      %{
+        user
+        | ip: ip,
+          lobbyid: lobbyid,
+          country: country,
+          last_login: last_login,
+          rank: rank
+      }
+      |> apply_user_clan()
 
     update_user(user, persist: true)
 

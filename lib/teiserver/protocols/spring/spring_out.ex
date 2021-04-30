@@ -40,18 +40,10 @@ defmodule Teiserver.Protocols.SpringOut do
       if is_list(msg) do
         msg
         |> Enum.map(fn m ->
-          Logger.info(
-            "--> #{state.username}: #{
-              Spring.format_log(m)
-            }"
-          )
+          Logger.info("--> #{state.username}: #{Spring.format_log(m)}")
         end)
       else
-        Logger.info(
-          "--> #{state.username}: #{
-            Spring.format_log(msg)
-          }"
-        )
+        Logger.info("--> #{state.username}: #{Spring.format_log(msg)}")
       end
     end
 
@@ -136,6 +128,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:add_user, nil), do: ""
+
   defp do_reply(:add_user, user) do
     "ADDUSER #{user.name} #{user.country} 0 #{user.id} #{user.lobbyid}\n"
   end
@@ -494,9 +487,10 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:gzip, _msg) do
-    resp = Battle.list_battles()
-    |> Jason.encode!
-    |> :zlib.gzip
+    resp =
+      Battle.list_battles()
+      |> Jason.encode!()
+      |> :zlib.gzip()
 
     length = String.length(resp)
 
@@ -504,18 +498,20 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:gzip64, _msg) do
-    resp = Battle.list_battles()
-    |> Jason.encode!
-    |> :zlib.gzip
-    |> Base.encode64()
+    resp =
+      Battle.list_battles()
+      |> Jason.encode!()
+      |> :zlib.gzip()
+      |> Base.encode64()
 
     "#{resp}\n"
   end
 
   defp do_reply(:just64, _msg) do
-    resp = Battle.list_battles()
-    |> Jason.encode!
-    |> Base.encode64()
+    resp =
+      Battle.list_battles()
+      |> Jason.encode!()
+      |> Base.encode64()
 
     "#{resp}\n"
   end
@@ -537,7 +533,7 @@ defmodule Teiserver.Protocols.SpringOut do
     reply(:add_user_to_battle, {state.userid, battle.id, script_password}, nil, state)
     reply(:add_script_tags, battle.tags, nil, state)
 
-    battle.players ++ [battle.founder_id]
+    (battle.players ++ [battle.founder_id])
     |> Enum.each(fn id ->
       client = Client.get_client_by_id(id)
       reply(:client_battlestatus, client, nil, state)

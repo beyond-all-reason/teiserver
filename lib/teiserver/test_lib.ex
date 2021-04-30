@@ -274,8 +274,8 @@ defmodule Teiserver.TestLib do
       game_name: "game_name",
       ip: "127.0.0.1"
     }
-      |> Map.merge(params)
-      |> Teiserver.Battle.create_battle()
-      |> Teiserver.Battle.add_battle()
+    |> Map.merge(params)
+    |> Teiserver.Battle.create_battle()
+    |> Teiserver.Battle.add_battle()
   end
 end

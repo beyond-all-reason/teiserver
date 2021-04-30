@@ -18,36 +18,40 @@ defmodule Teiserver.Protocols.Director.SetupTest do
     assert battle.director_mode == true
 
     # Stop it
-    Battle.say(123456, "!director stop", id)
+    Battle.say(123_456, "!director stop", id)
 
     battle = Battle.get_battle!(id)
     assert battle.director_mode == false
   end
 
   test "create as director" do
-    battle = TestLib.make_battle(%{
-      director_mode: true
-    })
+    battle =
+      TestLib.make_battle(%{
+        director_mode: true
+      })
+
     assert battle.director_mode == true
   end
 
   test "test command vs no command" do
-    battle = TestLib.make_battle(%{
-      director_mode: true
-    })
+    battle =
+      TestLib.make_battle(%{
+        director_mode: true
+      })
+
     assert battle.director_mode == true
     listener = PubsubListener.new_listener(["battle_updates:#{battle.id}"])
 
     # No command
-    result = Battle.say(123456, "Test message", battle.id)
+    result = Battle.say(123_456, "Test message", battle.id)
     assert result == :ok
 
     :timer.sleep(@sleep)
     messages = PubsubListener.get(listener)
-    assert messages == [{:battle_updated, battle.id, {123456, "Test message", battle.id}, :say}]
+    assert messages == [{:battle_updated, battle.id, {123_456, "Test message", battle.id}, :say}]
 
     # Now command
-    result = Battle.say(123456, "!start", battle.id)
+    result = Battle.say(123_456, "!start", battle.id)
     assert result == :ok
 
     :timer.sleep(@sleep)

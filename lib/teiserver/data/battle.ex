@@ -79,6 +79,7 @@ defmodule Teiserver.Battle do
     ConCache.put(:battles, battle.id, battle)
     battle
   end
+
   def update_battle(battle, data, reason) do
     ConCache.put(:battles, battle.id, battle)
 
@@ -426,7 +427,8 @@ defmodule Teiserver.Battle do
     update_battle(new_battle, keys, :remove_script_tags)
   end
 
-  @spec can_join?(Map.t(), integer(), String.t() | nil, String.t() | nil) :: {:failure, String.t()} | {:waiting_on_host, String.t()}
+  @spec can_join?(Map.t(), integer(), String.t() | nil, String.t() | nil) ::
+          {:failure, String.t()} | {:waiting_on_host, String.t()}
   def can_join?(user, battle_id, password \\ nil, script_password \\ nil) do
     battle = get_battle(battle_id)
 
@@ -444,7 +446,12 @@ defmodule Teiserver.Battle do
         # Okay, so far so good, what about the host? Are they okay with it?
         host_client = Client.get_client_by_id(battle.founder_id)
 
-        Logger.info("Requesting host permission to join: #{user.id} (#{user.name}), host_userid:#{host_client.userid}")
+        Logger.info(
+          "Requesting host permission to join: #{user.id} (#{user.name}), host_userid:#{
+            host_client.userid
+          }"
+        )
+
         send(host_client.pid, {:request_user_join_battle, user.id})
 
         {:waiting_on_host, script_password}

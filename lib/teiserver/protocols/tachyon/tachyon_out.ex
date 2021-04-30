@@ -12,11 +12,7 @@ defmodule Teiserver.Protocols.TachyonOut do
       |> add_msg_id(data)
 
     if state.extra_logging do
-      Logger.info(
-        "--> #{state.username}: #{
-          Tachyon.format_log(msg)
-        }"
-      )
+      Logger.info("--> #{state.username}: #{Tachyon.format_log(msg)}")
     end
 
     _send(msg, state)

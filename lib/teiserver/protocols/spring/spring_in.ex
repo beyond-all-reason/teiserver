@@ -20,9 +20,7 @@ defmodule Teiserver.Protocols.SpringIn do
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
     if state.extra_logging do
-      Logger.info(
-        "<-- #{state.username}: #{Spring.format_log(data)}"
-      )
+      Logger.info("<-- #{state.username}: #{Spring.format_log(data)}")
     end
 
     new_state =
@@ -100,9 +98,7 @@ defmodule Teiserver.Protocols.SpringIn do
   # Swap to the Tachyon protocol
   defp do_handle("TACHYON", _, msg_id, state) do
     reply(:okay, "TACHYON", msg_id, state)
-    %{state |
-      protocol_in: Teiserver.Protocols.Tachyon,
-      protocol_out: Teiserver.Protocols.Tachyon}
+    %{state | protocol_in: Teiserver.Protocols.Tachyon, protocol_out: Teiserver.Protocols.Tachyon}
   end
 
   defp do_handle("c.battles.list_ids", _, msg_id, state) do
@@ -694,7 +690,12 @@ defmodule Teiserver.Protocols.SpringIn do
 
         # Update local state to point to this battle and say
         # we are the host
-        %{state | battle_id: battle.id, battle_host: true, known_battles: state.known_battles ++ [battle.id]}
+        %{
+          state
+          | battle_id: battle.id,
+            battle_host: true,
+            known_battles: state.known_battles ++ [battle.id]
+        }
 
       {:failure, reason} ->
         reply(:open_battle_failure, reason, msg_id, state)
@@ -732,10 +733,11 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("JOINBATTLEDENY", data, _msg_id, state) do
-    {username, reason} = case String.split(data, " ", parts: 2) do
-      [username, reason] -> {username, reason}
-      [username] -> {username, "no reason given"}
-    end
+    {username, reason} =
+      case String.split(data, " ", parts: 2) do
+        [username, reason] -> {username, reason}
+        [username] -> {username, "no reason given"}
+      end
 
     userid = User.get_userid(username)
     Battle.deny_join_request(userid, state.battle_id, reason)
@@ -1018,6 +1020,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("MYBATTLESTATUS", _, _, %{battle_id: nil} = state), do: state
+
   defp do_handle("MYBATTLESTATUS", data, msg_id, state) do
     case Regex.run(~r/(\S+) (.+)/, data) do
       [_, battlestatus, team_colour] ->

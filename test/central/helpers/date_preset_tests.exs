@@ -1,5 +1,6 @@
 defmodule Central.Helpers.DatePresetTest do
-  use Central.DataCase#, async: true
+  # , async: true
+  use Central.DataCase
   alias Central.Helpers.DatePresets
 
   test "test basic presets" do

@@ -9,9 +9,7 @@ defmodule Teiserver.Protocols.Tachyon do
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
     if state.extra_logging do
-      Logger.info(
-        "<-- #{state.username}: #{format_log(data)}"
-      )
+      Logger.info("<-- #{state.username}: #{format_log(data)}")
     end
 
     new_state =
@@ -34,8 +32,8 @@ defmodule Teiserver.Protocols.Tachyon do
   @spec encode(List.t() | Map.t()) :: String.t()
   def encode(data) do
     data
-    |> Jason.encode!
-    |> :zlib.gzip
+    |> Jason.encode!()
+    |> :zlib.gzip()
     |> Base.encode64()
   end
 
@@ -43,8 +41,7 @@ defmodule Teiserver.Protocols.Tachyon do
   def decode(data) do
     with {:ok, decoded64} <- Base.decode64(data),
          {:ok, unzipped} <- unzip(decoded64),
-         {:ok, object} <- Jason.decode(unzipped)
-    do
+         {:ok, object} <- Jason.decode(unzipped) do
       {:ok, object}
     else
       :error -> {:error, :base64_decode}

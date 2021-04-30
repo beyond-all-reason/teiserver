@@ -8,14 +8,15 @@ defmodule Teiserver.Protocols.TachyonIn do
   def handle("\r\n", state), do: state
 
   def handle(raw_data, state) do
-    new_state = case Tachyon.decode(raw_data) do
-      {:ok, data} ->
-        do_handle(data["cmd"], data, state)
+    new_state =
+      case Tachyon.decode(raw_data) do
+        {:ok, data} ->
+          do_handle(data["cmd"], data, state)
 
-      {:error, error_type} ->
-        reply(:misc, :error, %{location: "decode", error: error_type}, state)
-        state
-    end
+        {:error, error_type} ->
+          reply(:misc, :error, %{location: "decode", error: error_type}, state)
+          state
+      end
 
     # state =
     #   case tuple do

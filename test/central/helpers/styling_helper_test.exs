@@ -1,5 +1,6 @@
 defmodule Central.General.StylingHelpersTest do
-  use Central.DataCase#, async: true
+  # , async: true
+  use Central.DataCase
 
   alias Central.Helpers.StylingHelper
 

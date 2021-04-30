@@ -21,6 +21,7 @@ defmodule Teiserver.Common.PubsubListener do
 
   # Internal
   defp subscribe_to_item(items) when is_list(items), do: Enum.each(items, &subscribe_to_item/1)
+
   defp subscribe_to_item(item) do
     :ok = PubSub.subscribe(Central.PubSub, "#{item}")
   end
