@@ -6,7 +6,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
   import Teiserver.TestLib,
     only: [raw_setup: 0]
 
-  # alias Teiserver.Protocols.Tachyon
+  alias Teiserver.Protocols.Tachyon
   alias Central.Account
 
   setup do
