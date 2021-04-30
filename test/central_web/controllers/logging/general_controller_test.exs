@@ -5,7 +5,7 @@ defmodule CentralWeb.Logging.LoggingControllerTest do
   alias Central.Helpers.GeneralTestLib
 
   setup do
-    GeneralTestLib.conn_setup(~w(logging))
+    GeneralTestLib.conn_setup(~w(logging.error.show))
   end
 
   test "lists all entries on index", %{conn: conn} do

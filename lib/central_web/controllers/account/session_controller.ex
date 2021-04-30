@@ -211,6 +211,9 @@ defmodule CentralWeb.Account.SessionController do
               }
             )
 
+            # Now delete the code, it's been used
+            Account.delete_code(code)
+
             conn
             |> put_flash(:success, "Your password has been reset.")
             |> redirect(to: "/")

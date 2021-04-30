@@ -2,8 +2,6 @@ defmodule CentralWeb.Admin.CodeController do
   use CentralWeb, :controller
 
   alias Central.Account
-  alias Central.Account.Code
-  alias Central.Account.CodeLib
 
   plug Bodyguard.Plug.Authorize,
     policy: Central.Account.Code,
@@ -11,7 +9,7 @@ defmodule CentralWeb.Admin.CodeController do
     user: {Central.Account.AuthLib, :current_user}
 
   plug AssignPlug,
-    sidemenu_active: "account"
+    sidemenu_active: "admin"
 
   plug :add_breadcrumb, name: 'Account', url: '/central'
   plug :add_breadcrumb, name: 'Codes', url: '/central/codes'

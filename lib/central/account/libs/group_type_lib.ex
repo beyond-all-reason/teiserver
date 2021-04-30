@@ -6,8 +6,9 @@ defmodule Central.Account.GroupTypeLib do
     %{name: "No type", fields: []}
   end
 
+  @spec get_all_group_types :: List.t()
   def get_all_group_types do
-    ConCache.get(:group_type_cache, "-all")
+    ConCache.get(:group_type_cache, "-all") || []
   end
 
   def get_group_type(nil), do: blank_type()
