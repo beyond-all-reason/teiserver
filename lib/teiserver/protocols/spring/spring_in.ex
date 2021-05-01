@@ -330,7 +330,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("RENAMEACCOUNT", new_name, msg_id, state) do
-    reply(:servermsg, "Username changed, please log back in", msg_id, state)
+    reply(:servermsg, "Username change in progress, please log back in in 5 seconds", msg_id, state)
     User.rename_user(state.userid, new_name)
     send(self(), :terminate)
     state

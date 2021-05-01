@@ -236,24 +236,19 @@ defmodule Teiserver.User do
 
   def rename_user(userid, new_name) do
     user = get_user_by_id(userid)
-    update_user(%{user | rename_in_progress: true})
+    update_user(%{user | rename_in_progress: true}, persist: true)
 
     # We need to re-get the user to ensure we don't overwrite our rename_in_progress by mistake
     user = get_user_by_id(userid)
+    delete_user(user.id)
 
-    Client.disconnect(userid)
+    db_user = Account.get_user!(userid)
+    Account.update_user(db_user, %{"name" => new_name})
 
-    old_name = user.name
-    new_name = clean_name(new_name)
-    new_user = %{user | name: new_name}
-
-    ConCache.delete(:users_lookup_id_with_name, old_name)
-    ConCache.put(:users_lookup_name_with_id, user.id, new_name)
-    ConCache.put(:users_lookup_id_with_name, new_name, user.id)
-    ConCache.put(:users, user.id, new_user)
     :timer.sleep(5000)
-    update_user(%{new_user | rename_in_progress: false})
-    new_user
+    recache_user(userid)
+    user = get_user_by_id(userid)
+    update_user(%{user | rename_in_progress: false})
   end
 
   def add_user(user) do

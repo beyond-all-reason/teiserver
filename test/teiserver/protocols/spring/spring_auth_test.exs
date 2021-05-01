@@ -4,6 +4,7 @@ defmodule Teiserver.SpringAuthTest do
   alias Teiserver.BitParse
   alias Teiserver.User
   alias Teiserver.Client
+  alias Central.Account
   # alias Teiserver.Battle
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -382,20 +383,22 @@ ENDOFCHANNELS\n"
   end
 
   test "RENAMEACCOUNT", %{socket: socket, user: user} do
+    old_name = user.name
+    new_name = "rename_test_user"
+    userid = user.id
     %{socket: watcher} = auth_setup()
     _recv(socket)
 
     # Check our starting situation
-    new_user = User.get_user_by_name("rename_test_user")
-    assert new_user == nil
-
-    old_user = User.get_user_by_name(user.name)
-    assert old_user != nil
+    assert User.get_user_by_name(new_name) == nil
+    assert User.get_user_by_name(old_name) != nil
+    assert User.get_user_by_id(userid) != nil
+    assert Client.get_client_by_id(userid) != nil
 
     # Perform rename
-    _send(socket, "RENAMEACCOUNT rename*_test_user\n")
+    _send(socket, "RENAMEACCOUNT rename_test_user\n")
     reply = _recv(socket)
-    assert reply == "SERVERMSG Username changed, please log back in\n"
+    assert reply == "SERVERMSG Username change in progress, please log back in in 5 seconds\n"
 
     # Check they got logged out
     wreply = _recv(watcher)
@@ -404,12 +407,13 @@ ENDOFCHANNELS\n"
     # Give it a chance to perform some of the actions
     :timer.sleep(250)
 
-    new_user = User.get_user_by_name("rename_test_user")
-    assert new_user != nil
+    # User is removed and uncached, it should be nil
+    assert User.get_user_by_name(new_name) == nil
+    assert User.get_user_by_name(user.name) == nil
+    assert User.get_user_by_id(userid) == nil
+    assert Client.get_client_by_id(userid) == nil
 
-    old_user = User.get_user_by_name(user.name)
-    assert old_user == nil
-
+    # Lets be REAL sure
     client_ids = Client.list_client_ids()
     assert new_user.id not in client_ids
 
@@ -423,12 +427,16 @@ ENDOFCHANNELS\n"
     _ = _recv(socket)
     _send(
       socket,
-      "LOGIN #{new_user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+      "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
     )
 
     reply = _recv_until(socket)
     [accepted | _remainder] = String.split(reply, "\n")
-    assert accepted == "DENIED Rename in progress, wait 5 seconds"
+    assert accepted == "DENIED No user found for 'rename_test_user'"
+
+    # But the database should say the user exists
+    db_user = Account.get_user!(userid)
+    assert db_user.name == new_name
 
     # Didn't get re-added just yet
     wreply = _recv(watcher)
@@ -439,19 +447,19 @@ ENDOFCHANNELS\n"
 
     _send(
       socket,
-      "LOGIN #{new_user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+      "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
     )
 
     reply = _recv_until(socket)
     [accepted | _remainder] = String.split(reply, "\n")
-    assert accepted == "DENIED Rename in progress, wait 5 seconds"
+    assert accepted == "DENIED No user found for 'rename_test_user'"
 
     :timer.sleep(4000)
 
     # Now they can log in again
     _send(
       socket,
-      "LOGIN #{new_user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+      "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
     )
 
     reply = _recv_until(socket)
@@ -461,6 +469,11 @@ ENDOFCHANNELS\n"
     # Check they logged back in and got re-added with the correct name
     wreply = _recv(watcher)
     assert wreply == "ADDUSER rename_test_user ?? 0 #{user.id} LuaLobby Chobby\nCLIENTSTATUS rename_test_user 0\n"
+
+    # Next up, what if they update their status?
+    _send(socket, "MYSTATUS 127\n")
+    wreply = _recv(watcher)
+    assert wreply == "CLIENTSTATUS #{new_name} 3\n"
 
     _send(socket, "EXIT\n")
   end

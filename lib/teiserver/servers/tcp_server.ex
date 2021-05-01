@@ -281,39 +281,39 @@ defmodule Teiserver.TcpServer do
 
   # Connection
   def handle_info({:tcp_closed, socket}, %{socket: socket, transport: transport} = state) do
-    Logger.info("Closing TCP connection #{Kernel.inspect(socket)}")
+    Logger.error("Closing TCP connection #{Kernel.inspect(socket)} for #{state.username}")
     transport.close(socket)
     Client.disconnect(state.userid)
     {:stop, :normal, state}
   end
 
   def handle_info({:tcp_closed, socket}, state) do
-    Logger.info("Closing TCP connection - no transport #{Kernel.inspect(socket)}")
+    Logger.error("Closing TCP connection - no transport #{Kernel.inspect(socket)} for #{state.username}")
     Client.disconnect(state.userid)
     {:stop, :normal, state}
   end
 
   def handle_info({:ssl_closed, socket}, %{socket: socket, transport: transport} = state) do
-    Logger.debug("Closing SSL connection #{Kernel.inspect(socket)}")
+    Logger.debug("Closing SSL connection #{Kernel.inspect(socket)} for #{state.username}")
     transport.close(socket)
     Client.disconnect(state.userid)
     {:stop, :normal, state}
   end
 
   def handle_info({:ssl_closed, socket}, state) do
-    Logger.debug("Closing SSL connection - no transport #{Kernel.inspect(socket)}")
+    Logger.debug("Closing SSL connection - no transport #{Kernel.inspect(socket)} for #{state.username}")
     Client.disconnect(state.userid)
     {:stop, :normal, state}
   end
 
   def handle_info(:terminate, state) do
-    Logger.info("Terminate connection #{Kernel.inspect(state.socket)}")
+    Logger.error("Terminate connection #{Kernel.inspect(state.socket)} for #{state.username}")
     Client.disconnect(state.userid)
     {:stop, :normal, state}
   end
 
   def terminate(reason, state) do
-    Logger.debug("disconnect because #{Kernel.inspect(reason)}")
+    Logger.error("disconnect because #{Kernel.inspect(reason)} for #{state.username}")
     Client.disconnect(state.userid)
   end
 
