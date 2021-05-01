@@ -1,13 +1,13 @@
 defmodule Teiserver.Protocols.Director.SetupTest do
   use Central.ServerCase, async: false
-  alias Teiserver.TestLib
+  alias Teiserver.TeiserverTestLib
   alias Teiserver.Battle
   alias Teiserver.Common.PubsubListener
 
   @sleep 200
 
   test "start, stop" do
-    battle = TestLib.make_battle()
+    battle = TeiserverTestLib.make_battle()
     id = battle.id
     assert battle.director_mode == false
 
@@ -26,7 +26,7 @@ defmodule Teiserver.Protocols.Director.SetupTest do
 
   test "create as director" do
     battle =
-      TestLib.make_battle(%{
+      TeiserverTestLib.make_battle(%{
         director_mode: true
       })
 
@@ -35,7 +35,7 @@ defmodule Teiserver.Protocols.Director.SetupTest do
 
   test "test command vs no command" do
     battle =
-      TestLib.make_battle(%{
+      TeiserverTestLib.make_battle(%{
         director_mode: true
       })
 

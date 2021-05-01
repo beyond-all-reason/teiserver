@@ -1,8 +1,8 @@
 defmodule Teiserver.SpringRawTest do
   use Central.ServerCase, async: false
 
-  import Teiserver.TestLib,
-    only: [raw_setup: 0, _send: 2, _recv: 1, _recv_until: 1, new_user: 0, new_user: 2]
+  import Teiserver.TeiserverTestLib,
+    only: [raw_setup: 0, _send: 2, _recv: 1, _recv_until: 1, new_user: 0]
 
   alias Teiserver.User
   alias Central.Account
@@ -160,38 +160,6 @@ defmodule Teiserver.SpringRawTest do
     assert user2.password_hash != user.password_hash
     assert user2.password_reset_code == nil
   end
-
-  # test "clan username", %{socket: socket} do
-  #   # Normal user
-  #   username = "TEST_[CLAN]raw_user"
-  #   _ = new_user(username, %{})
-
-  #   _ = _recv(socket)
-
-  #   _send(
-  #     socket,
-  #     "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
-  #   )
-
-  #   reply = _recv_until(socket)
-  #   [accepted | _remainder] = String.split(reply, "\n")
-  #   assert accepted == "ACCEPTED TEST_{CLAN}raw_user"
-
-  #   # Bot user
-  #   bot_username = "TEST_[CLAN]bot_user"
-  #   _bot_user = new_user(bot_username, %{"bot" => true})
-
-  #   _ = _recv(socket)
-
-  #   _send(
-  #     socket,
-  #     "LOGIN #{bot_username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
-  #   )
-
-  #   reply = _recv_until(socket)
-  #   [accepted | _remainder] = String.split(reply, "\n")
-  #   assert accepted == "ACCEPTED TEST_[CLAN]bot_user"
-  # end
 
   # TODO - Implement STLS and find a way to test it
   # test "STLS" do

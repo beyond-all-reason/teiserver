@@ -28,14 +28,14 @@ defmodule TeiserverWeb.BattleLive.Index do
   end
 
   @impl true
-  def handle_info({:battle_opened, battle_id}, socket) do
+  def handle_info({:global_battle_updated, battle_id, :battle_opened}, socket) do
     new_battle = Battle.get_battle(battle_id)
     battles = socket.assigns[:battles] ++ [new_battle]
 
     {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:battle_closed, battle_id}, socket) do
+  def handle_info({:global_battle_updated, battle_id, :battle_closed}, socket) do
     battles =
       socket.assigns[:battles]
       |> Enum.filter(fn b -> b.id != battle_id end)

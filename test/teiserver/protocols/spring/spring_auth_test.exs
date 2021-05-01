@@ -6,7 +6,7 @@ defmodule Teiserver.SpringAuthTest do
   # alias Teiserver.Battle
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
-  import Teiserver.TestLib,
+  import Teiserver.TeiserverTestLib,
     only: [
       auth_setup: 0,
       auth_setup: 1,
@@ -442,12 +442,4 @@ ENDOFCHANNELS\n"
     reply = _recv(socket)
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
   end
-
-  # test "Clan name", %{socket: socket} do
-  #   clan_user = new_user("TEST_[CLAN]username", %{})
-  #   %{socket: _clan_socket} = auth_setup(clan_user)
-
-  #   reply = _recv(socket)
-  #   assert reply == "ADDUSER TEST_{CLAN}username ?? 0 #{clan_user.id} LuaLobby Chobby\nCLIENTSTATUS TEST_{CLAN}username 0\n"
-  # end
 end

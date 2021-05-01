@@ -1,14 +1,14 @@
 defmodule TeiserverWeb.Admin.ClanControllerTest do
   use CentralWeb.ConnCase
 
-  alias Teiserver.TestLib
+  alias Teiserver.TeiserverTestLib
   alias Teiserver.Clans
 
   alias Central.Helpers.GeneralTestLib
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TestLib.admin_permissions())
-    |> Teiserver.TestLib.conn_setup()
+    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
+    |> Teiserver.TeiserverTestLib.conn_setup()
   end
 
   @create_attrs %{
@@ -29,8 +29,8 @@ defmodule TeiserverWeb.Admin.ClanControllerTest do
 
   describe "index" do
     test "lists all clans", %{conn: conn} do
-      TestLib.make_clan("admin_clan_list1")
-      TestLib.make_clan("admin_clan_list2")
+      TeiserverTestLib.make_clan("admin_clan_list1")
+      TeiserverTestLib.make_clan("admin_clan_list2")
       conn = get(conn, Routes.ts_admin_clan_path(conn, :index))
       assert html_response(conn, 200) =~ "Listing Clans"
     end
@@ -60,7 +60,7 @@ defmodule TeiserverWeb.Admin.ClanControllerTest do
 
   describe "show clan" do
     test "renders show page", %{conn: conn} do
-      clan = TestLib.make_clan("admin_show_clan")
+      clan = TeiserverTestLib.make_clan("admin_show_clan")
       resp = get(conn, Routes.ts_admin_clan_path(conn, :show, clan))
       assert html_response(resp, 200) =~ "Edit clan"
     end
@@ -80,7 +80,7 @@ defmodule TeiserverWeb.Admin.ClanControllerTest do
     end
 
     test "renders form for editing chosen clan", %{conn: conn} do
-      clan = TestLib.make_clan("admin_edit_clan")
+      clan = TeiserverTestLib.make_clan("admin_edit_clan")
       conn = get(conn, Routes.ts_admin_clan_path(conn, :edit, clan))
       assert html_response(conn, 200) =~ "Save changes"
     end
@@ -88,7 +88,7 @@ defmodule TeiserverWeb.Admin.ClanControllerTest do
 
   describe "update clan" do
     test "redirects when data is valid", %{conn: conn} do
-      clan = TestLib.make_clan("admin_update_clan")
+      clan = TeiserverTestLib.make_clan("admin_update_clan")
       conn = put(conn, Routes.ts_admin_clan_path(conn, :update, clan), clan: @update_attrs)
       assert redirected_to(conn) == Routes.ts_admin_clan_path(conn, :index)
 
@@ -97,7 +97,7 @@ defmodule TeiserverWeb.Admin.ClanControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      clan = TestLib.make_clan("admin_update_clan_error")
+      clan = TeiserverTestLib.make_clan("admin_update_clan_error")
       conn = put(conn, Routes.ts_admin_clan_path(conn, :update, clan), clan: @invalid_attrs)
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
@@ -111,7 +111,7 @@ defmodule TeiserverWeb.Admin.ClanControllerTest do
 
   describe "delete clan" do
     test "deletes chosen clan", %{conn: conn} do
-      clan = TestLib.make_clan("admin_delete_clan")
+      clan = TeiserverTestLib.make_clan("admin_delete_clan")
       conn = delete(conn, Routes.ts_admin_clan_path(conn, :delete, clan))
       assert redirected_to(conn) == Routes.ts_admin_clan_path(conn, :index)
 

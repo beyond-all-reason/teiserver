@@ -2,13 +2,13 @@ defmodule TeiserverWeb.Admin.QueueControllerTest do
   use CentralWeb.ConnCase
 
   alias Teiserver.Game
-  alias Teiserver.TestLib
+  alias Teiserver.TeiserverTestLib
 
   alias Central.Helpers.GeneralTestLib
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TestLib.admin_permissions())
-    |> Teiserver.TestLib.conn_setup()
+    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
+    |> Teiserver.TeiserverTestLib.conn_setup()
   end
 
   @create_attrs %{
@@ -33,8 +33,8 @@ defmodule TeiserverWeb.Admin.QueueControllerTest do
 
   describe "index" do
     test "lists all queues", %{conn: conn} do
-      TestLib.make_queue("admin_index_queue1")
-      TestLib.make_queue("admin_index_queue2")
+      TeiserverTestLib.make_queue("admin_index_queue1")
+      TeiserverTestLib.make_queue("admin_index_queue2")
       conn = get(conn, Routes.ts_admin_queue_path(conn, :index))
       assert html_response(conn, 200) =~ "Listing Queues"
     end
@@ -82,7 +82,7 @@ defmodule TeiserverWeb.Admin.QueueControllerTest do
 
   describe "show queue" do
     test "renders show page", %{conn: conn} do
-      queue = TestLib.make_queue("admin_show")
+      queue = TeiserverTestLib.make_queue("admin_show")
       resp = get(conn, Routes.ts_admin_queue_path(conn, :show, queue))
       assert html_response(resp, 200) =~ "Edit queue"
     end
@@ -102,7 +102,7 @@ defmodule TeiserverWeb.Admin.QueueControllerTest do
     end
 
     test "renders form for editing chosen queue", %{conn: conn} do
-      queue = TestLib.make_queue("admin_edit_form")
+      queue = TeiserverTestLib.make_queue("admin_edit_form")
       conn = get(conn, Routes.ts_admin_queue_path(conn, :edit, queue))
       assert html_response(conn, 200) =~ "Save changes"
     end
@@ -110,7 +110,7 @@ defmodule TeiserverWeb.Admin.QueueControllerTest do
 
   describe "update queue" do
     test "redirects when data is valid", %{conn: conn} do
-      queue = TestLib.make_queue("update_redirect")
+      queue = TeiserverTestLib.make_queue("update_redirect")
 
       conn =
         put(conn, Routes.ts_admin_queue_path(conn, :update, queue),
@@ -129,7 +129,7 @@ defmodule TeiserverWeb.Admin.QueueControllerTest do
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      queue = TestLib.make_queue("update_invalid")
+      queue = TeiserverTestLib.make_queue("update_invalid")
 
       conn =
         put(conn, Routes.ts_admin_queue_path(conn, :update, queue),
@@ -153,7 +153,7 @@ defmodule TeiserverWeb.Admin.QueueControllerTest do
 
   describe "delete queue" do
     test "deletes chosen queue", %{conn: conn} do
-      queue = TestLib.make_queue("delete")
+      queue = TeiserverTestLib.make_queue("delete")
       conn = delete(conn, Routes.ts_admin_queue_path(conn, :delete, queue))
       assert redirected_to(conn) == Routes.ts_admin_queue_path(conn, :index)
 

@@ -8,7 +8,7 @@ defmodule Teiserver.SpringBattleHostTest do
   # alias Teiserver.Protocols.{SpringIn, SpringOut, Spring}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
-  import Teiserver.TestLib,
+  import Teiserver.TeiserverTestLib,
     only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, _recv_until: 1, new_user: 0]
 
   setup do

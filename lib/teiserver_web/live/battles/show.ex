@@ -65,13 +65,19 @@ defmodule TeiserverWeb.BattleLive.Show do
 
   defp add_user(%{assigns: assigns} = socket, id) do
     id = int_parse(id)
-    new_users = Map.put(assigns.users, id, User.get_user_by_id(id))
-    new_clients = Map.put(assigns.clients, id, Client.get_client_by_id(id))
+    client = Client.get_client_by_id(id)
 
-    socket
-    |> assign(:users, new_users)
-    |> assign(:clients, new_clients)
-    |> assign(:battle, Battle.get_battle(assigns.id))
+    if client do
+      new_users = Map.put(assigns.users, id, User.get_user_by_id(id))
+      new_clients = Map.put(assigns.clients, id, client)
+
+      socket
+      |> assign(:users, new_users)
+      |> assign(:clients, new_clients)
+      |> assign(:battle, Battle.get_battle(assigns.id))
+    else
+      socket
+    end
   end
 
   defp remove_user(%{assigns: assigns} = socket, id) do
@@ -114,7 +120,7 @@ defmodule TeiserverWeb.BattleLive.Show do
     {:noreply, assign(socket, :messages, new_messages)}
   end
 
-  def handle_info({:battle_closed, battle_id}, socket) do
+  def handle_info({:global_battle_updated, battle_id, :battle_closed}, socket) do
     if int_parse(battle_id) == socket.assigns[:id] do
       {:noreply,
        socket

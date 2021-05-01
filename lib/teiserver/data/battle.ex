@@ -121,7 +121,7 @@ defmodule Teiserver.Battle do
       {:ok, new_value}
     end)
 
-    PubSub.broadcast(
+    :ok = PubSub.broadcast(
       Central.PubSub,
       "all_battle_updates",
       {:global_battle_updated, battle.id, :battle_opened}

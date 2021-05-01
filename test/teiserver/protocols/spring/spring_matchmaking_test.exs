@@ -6,7 +6,7 @@ defmodule Teiserver.SpringMatchmakingTest do
   alias Teiserver.Data.Matchmaking
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
-  import Teiserver.TestLib,
+  import Teiserver.TeiserverTestLib,
     only: [auth_setup: 0, _send: 2, _recv: 1]
 
   setup do

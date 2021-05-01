@@ -1,7 +1,9 @@
 <% {_fg, _bg, bsname} = @colours %>
 
 <%
-  result = Enum.group_by(@battle.players, fn p ->
+  result = @battle.players
+  |> Enum.filter(fn p -> Map.has_key?(@clients, p) end)
+  |> Enum.group_by(fn p ->
     client = @clients[p]
     client.player
   end)

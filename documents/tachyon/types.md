@@ -66,7 +66,7 @@ A set of parameters used to filter, sort or limit information from a larger data
 * friend_requests :: list (User.id)
 * ignores :: list (User.id)
 * mmr/rank :: map :: (string -> integer)
-* icons :: map (string -> integer) # This will be where country flag goes
+* icons :: map (string -> integer) -- This will be where country flag, rank, role badges etc go
 * ip :: string
 
 #### Examples
@@ -140,5 +140,17 @@ A string with the word failure, will always be accompanied by a second field "re
 {
   "result": "failure",
   "reason": "Reason for failure"
+}
+```
+
+## Error
+Returned when an unexpected error is generated. The difference between an error and a failure is the failure is an expected possible outcome (e.g. login failing) while an error is unexpected (e.g. message cannot be decoded).
+
+#### Examples
+```
+{
+  "result": "error",
+  "error": "base64_decode",
+  "location": "decode"
 }
 ```

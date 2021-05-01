@@ -3,7 +3,7 @@ defmodule Teiserver.SpringTokenTest do
   require Logger
   alias Central.Helpers.GeneralTestLib
 
-  import Teiserver.TestLib,
+  import Teiserver.TeiserverTestLib,
     only: [tls_setup: 0, raw_setup: 0, _send: 2, _recv: 1]
 
   test "c.user.get_token - insecure" do

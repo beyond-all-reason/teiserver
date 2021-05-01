@@ -5,8 +5,8 @@ defmodule TeiserverWeb.Account.PreferencesControllerTest do
   alias Central.Helpers.GeneralTestLib
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TestLib.player_permissions())
-    |> Teiserver.TestLib.conn_setup()
+    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
+    |> Teiserver.TeiserverTestLib.conn_setup()
   end
 
   @key "teiserver.Show flag"

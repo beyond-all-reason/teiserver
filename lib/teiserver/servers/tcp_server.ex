@@ -114,7 +114,7 @@ defmodule Teiserver.TcpServer do
       room_member_cache: %{},
       known_users: %{},
       known_battles: [],
-      extra_logging: true,
+      extra_logging: false,
       script_password: nil
     }
 

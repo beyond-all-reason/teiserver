@@ -35,7 +35,11 @@
         <tr id="client-<%= client.userid %>">
           <td><%= client.userid %></td>
           <td><%= client.name %></td>
-          <td><%= client.battle_id %></td>
+          <td>
+            <%= if client.battle_id do %>
+              <%= live_redirect "Show #{client.battle_id}", to: Routes.ts_battle_show_path(@socket, :show, client.battle_id), class: "btn btn-sm btn-#{Teiserver.BattleLib.colours |> elem(2)}" %>
+            <% end %>
+          </td>
 
           <td><%= if user.bot, do: "Bot" %></td>
           <td><%= if user.moderator, do: "Mod" %></td>

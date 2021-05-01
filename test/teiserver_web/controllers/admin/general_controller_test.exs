@@ -4,8 +4,8 @@ defmodule TeiserverWeb.Admin.GeneralControllerTest do
   alias Central.Helpers.GeneralTestLib
 
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TestLib.admin_permissions())
-    |> Teiserver.TestLib.conn_setup()
+    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
+    |> Teiserver.TeiserverTestLib.conn_setup()
   end
 
   test "index", %{conn: conn} do

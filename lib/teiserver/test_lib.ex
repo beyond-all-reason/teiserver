@@ -3,13 +3,14 @@ defmodule Teiserver.FakeTransport do
   def send(_, _), do: nil
 end
 
-defmodule Teiserver.TestLib do
+defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
   alias Teiserver.User
   alias Teiserver.Client
   alias Teiserver.Account
   @host '127.0.0.1'
 
+  @spec raw_setup :: %{socket: port()}
   def raw_setup() do
     {:ok, socket} = :gen_tcp.connect(@host, 8200, active: false)
     %{socket: socket}
@@ -44,6 +45,7 @@ defmodule Teiserver.TestLib do
     end
   end
 
+  @spec auth_setup(nil | Map.t()) :: %{socket: port(), user: Map.t()}
   def auth_setup(user \\ nil) do
     user = if user, do: user, else: new_user()
 
@@ -260,7 +262,7 @@ defmodule Teiserver.TestLib do
       founder_name: "TEST_USER_#{id}",
       name: "BATTLE_#{id}",
       type: :normal,
-      nattype: "",
+      nattype: :none,
       port: "",
       max_players: 4,
       game_hash: "game_hash",

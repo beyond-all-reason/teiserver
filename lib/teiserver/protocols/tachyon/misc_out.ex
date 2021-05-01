@@ -8,9 +8,9 @@ defmodule Teiserver.Protocols.Tachyon.MiscOut do
 
   def do_reply(:error, data) do
     %{
-      cmd: "ERROR",
-      location: data.location,
-      error: data.error
+      result: "error",
+      error: data.error,
+      location: data.location
     }
   end
 end

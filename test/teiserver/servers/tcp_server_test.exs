@@ -5,7 +5,7 @@ defmodule Teiserver.TcpServerTest do
   alias Teiserver.Client
   require Logger
 
-  import Teiserver.TestLib,
+  import Teiserver.TeiserverTestLib,
     only: [raw_setup: 0, _send: 2, _recv: 1, _recv_until: 1, new_user_name: 0, auth_setup: 0]
 
   setup do
