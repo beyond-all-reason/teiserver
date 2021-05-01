@@ -433,6 +433,9 @@ defmodule Teiserver.Battle do
     battle = get_battle(battle_id)
 
     cond do
+      user == nil ->
+        {:failure, "You are not a user"}
+
       battle == nil ->
         {:failure, "No battle found"}
 
@@ -461,14 +464,18 @@ defmodule Teiserver.Battle do
   @spec accept_join_request(integer(), integer()) :: :ok
   def accept_join_request(userid, battle_id) do
     client = Client.get_client_by_id(userid)
-    send(client.pid, {:join_battle_request_response, battle_id, :accept, nil})
+    if client do
+      send(client.pid, {:join_battle_request_response, battle_id, :accept, nil})
+    end
     :ok
   end
 
   @spec deny_join_request(integer(), integer(), String.t()) :: :ok
   def deny_join_request(userid, battle_id, reason) do
     client = Client.get_client_by_id(userid)
-    send(client.pid, {:join_battle_request_response, battle_id, :deny, reason})
+    if client do
+      send(client.pid, {:join_battle_request_response, battle_id, :deny, reason})
+    end
     :ok
   end
 

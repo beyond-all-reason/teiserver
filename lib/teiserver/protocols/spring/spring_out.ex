@@ -103,14 +103,6 @@ defmodule Teiserver.Protocols.SpringOut do
     end
   end
 
-  defp do_reply(:okay_tab, cmd) do
-    if cmd do
-      "OK\tcmd=#{cmd}\n"
-    else
-      "OK\n"
-    end
-  end
-
   defp do_reply(:no, {cmd, msg}) do
     "NO cmd=#{cmd}\t#{msg}\n"
   end
@@ -484,36 +476,6 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:servermsg, msg) do
     "SERVERMSG #{msg}\n"
-  end
-
-  defp do_reply(:gzip, _msg) do
-    resp =
-      Battle.list_battles()
-      |> Jason.encode!()
-      |> :zlib.gzip()
-
-    length = String.length(resp)
-
-    "#{length}\t#{resp}\t\n"
-  end
-
-  defp do_reply(:gzip64, _msg) do
-    resp =
-      Battle.list_battles()
-      |> Jason.encode!()
-      |> :zlib.gzip()
-      |> Base.encode64()
-
-    "#{resp}\n"
-  end
-
-  defp do_reply(:just64, _msg) do
-    resp =
-      Battle.list_battles()
-      |> Jason.encode!()
-      |> Base.encode64()
-
-    "#{resp}\n"
   end
 
   defp do_reply(atom, data) do

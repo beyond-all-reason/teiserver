@@ -108,6 +108,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # Specific handlers for different commands
   @spec do_handle(String.t(), String.t(), String.t(), map) :: map
+  defp do_handle("MYSTATUS", _data, msg_id, %{userid: nil} = state) do
+    Logger.error("MYSTATUS call from userid nil - #{Kernel.inspect state}")
+    reply(:servermsg, "You need to login before you can set your status", msg_id, state)
+  end
   defp do_handle("MYSTATUS", data, msg_id, state) do
     case Regex.run(~r/([0-9]+)/, data) do
       [_, new_value] ->
@@ -326,8 +330,8 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("RENAMEACCOUNT", new_name, msg_id, state) do
-    User.rename_user(state.user, new_name)
     reply(:servermsg, "Username changed, please log back in", msg_id, state)
+    User.rename_user(state.user, new_name)
     send(self(), :terminate)
     state
   end
@@ -703,7 +707,18 @@ defmodule Teiserver.Protocols.SpringIn do
     end
   end
 
+  defp do_handle("JOINBATTLE", _data, msg_id, %{user: nil} = state) do
+    Logger.error("JOINBATTLE with no user - #{Kernel.inspect(state)}")
+    reply(:join_battle_failure, "No user detected", msg_id, state)
+  end
   defp do_handle("JOINBATTLE", data, msg_id, state) do
+    data = case Regex.run(~r/^(\S+)  (\S+)$/, data) do
+      [_, battle_id, script_password] ->
+        "#{battle_id} empty #{script_password}"
+      nil ->
+        data
+    end
+
     response =
       case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
         [_, battle_id, password, script_password] ->
@@ -1046,17 +1061,6 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
-  # JSON/Gzip test
-  defp do_handle("JSON", data, msg_id, state) do
-    case data do
-      "gzip" -> reply(:gzip, nil, msg_id, state)
-      "gzip64" -> reply(:gzip64, nil, msg_id, state)
-      "just64" -> reply(:just64, nil, msg_id, state)
-    end
-
-    state
-  end
-
   # MISC
   defp do_handle("PING", _, msg_id, state) do
     reply(:pong, nil, msg_id, state)
@@ -1081,7 +1085,7 @@ defmodule Teiserver.Protocols.SpringIn do
       |> String.replace("\t", "\\t")
 
     msg = "No incomming match for #{cmd} with data '#{data}'"
-    Logger.error(msg)
+    Logger.info(msg)
     reply(:servermsg, msg, msg_id, state)
     state
   end

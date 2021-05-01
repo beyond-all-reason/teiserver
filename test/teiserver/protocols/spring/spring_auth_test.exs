@@ -91,6 +91,11 @@ defmodule Teiserver.SpringAuthTest do
     assert reply == "SERVERMSG Password changed, you will need to use it next time you login\n"
     user = User.get_user_by_name(user.name)
     assert User.test_password("new_pass", user.password_hash)
+
+    # Test no match
+    _send(socket, "CHANGEPASSWORD nomatchname\n")
+    reply = _recv(socket)
+    assert reply == "SERVERMSG No incomming match for CHANGEPASSWORD with data 'nomatchname'\n"
   end
 
   test "IGNORELIST, IGNORE, UNIGNORE, SAYPRIVATE", %{socket: socket1, user: user} do
@@ -281,8 +286,8 @@ ENDOFCHANNELS\n"
     reply = _recv(socket2)
     assert reply == "JOINBATTLEFAILED Because I said so\n"
 
-    # Rejoin, this time accept
-    _send(socket2, "JOINBATTLE #{battle_id} empty sPassword\n")
+    # Rejoin, this time accept, also this time use the SpringLobby method of an actually empty password
+    _send(socket2, "JOINBATTLE #{battle_id}  sPassword\n")
     _send(socket1, "JOINBATTLEACCEPT #{user2.name}\n")
     _ = _recv(socket1)
 
@@ -430,6 +435,11 @@ ENDOFCHANNELS\n"
              "SERVERMSG A new bot account test_bot_account has been created, with the same password as #{
                user.name
              }\n"
+
+    # Test no match
+    _send(socket, "CREATEBOTACCOUNT nomatchname\n")
+    reply = _recv(socket)
+    assert reply == "SERVERMSG No incomming match for CREATEBOTACCOUNT with data 'nomatchname'\n"
   end
 
   test "Ranks" do
