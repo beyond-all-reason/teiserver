@@ -37,7 +37,8 @@ defmodule Teiserver.User do
     :banned,
     :muted,
     :banned_until,
-    :muted_until
+    :muted_until,
+    :rename_in_progress
   ]
 
   @default_data %{
@@ -62,7 +63,8 @@ defmodule Teiserver.User do
     banned: false,
     muted: false,
     banned_until: nil,
-    muted_until: nil
+    muted_until: nil,
+    rename_in_progress: false
   }
 
   @rank_levels [
@@ -232,12 +234,14 @@ defmodule Teiserver.User do
     ConCache.get(:users, int_parse(id))
   end
 
-  def rename_user(user, new_name) do
-    new_name = clean_name(new_name)
+  def rename_user(userid, new_name) do
+    user = get_user_by_id(userid)
+    update_user(%{user | rename_in_progress: true})
 
-    update_user(%{user | banned: true})
-    Client.disconnect(user.id)
-    :timer.sleep(100)
+    # We need to re-get the user to ensure we don't overwrite our rename_in_progress by mistake
+    user = get_user_by_id(userid)
+
+    Client.disconnect(userid)
 
     old_name = user.name
     new_name = clean_name(new_name)
@@ -247,7 +251,8 @@ defmodule Teiserver.User do
     ConCache.put(:users_lookup_name_with_id, user.id, new_name)
     ConCache.put(:users_lookup_id_with_name, new_name, user.id)
     ConCache.put(:users, user.id, new_user)
-    update_user(%{new_user | banned: false})
+    :timer.sleep(5000)
+    update_user(%{new_user | rename_in_progress: false})
     new_user
   end
 
@@ -270,7 +275,7 @@ defmodule Teiserver.User do
 
   # Persists the changes into the database so they will
   # be pulled out next time the user is accessed/recached
-  # The special case here is to prevent the benchmark users causing issues
+  # The special case here is to prevent the benchmark and test users causing issues
   defp persist_user(%{name: "TEST_" <> _}), do: nil
 
   defp persist_user(user) do
@@ -577,6 +582,9 @@ defmodule Teiserver.User do
         banned_until_dt = TimexHelper.parse_ymd_hms(user.banned_until)
 
         cond do
+          user.rename_in_progress ->
+            {:error, "Rename in progress, wait 5 seconds"}
+
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
             do_login(user, state, ip, lobby)
@@ -612,6 +620,9 @@ defmodule Teiserver.User do
         banned_until_dt = TimexHelper.parse_ymd_hms(user.banned_until)
 
         cond do
+          user.rename_in_progress ->
+            {:error, "Rename in progress, wait 5 seconds"}
+
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
             do_login(user, state, ip, lobby)

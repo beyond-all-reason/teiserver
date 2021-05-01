@@ -382,17 +382,27 @@ ENDOFCHANNELS\n"
   end
 
   test "RENAMEACCOUNT", %{socket: socket, user: user} do
-    _send(socket, "RENAMEACCOUNT rename*_test_user\n")
-    reply = _recv(socket)
-    assert reply == "SERVERMSG Username changed, please log back in\n"
+    %{socket: watcher} = auth_setup()
+    _recv(socket)
 
+    # Check our starting situation
     new_user = User.get_user_by_name("rename_test_user")
     assert new_user == nil
 
     old_user = User.get_user_by_name(user.name)
     assert old_user != nil
 
-    :timer.sleep(100)
+    # Perform rename
+    _send(socket, "RENAMEACCOUNT rename*_test_user\n")
+    reply = _recv(socket)
+    assert reply == "SERVERMSG Username changed, please log back in\n"
+
+    # Check they got logged out
+    wreply = _recv(watcher)
+    assert wreply == "REMOVEUSER #{user.name}\n"
+
+    # Give it a chance to perform some of the actions
+    :timer.sleep(250)
 
     new_user = User.get_user_by_name("rename_test_user")
     assert new_user != nil
@@ -403,9 +413,14 @@ ENDOFCHANNELS\n"
     client_ids = Client.list_client_ids()
     assert new_user.id not in client_ids
 
+    # Check they got logged out
+    wreply = _recv(watcher)
+    assert wreply == :timeout
+
     # No need to send an exit, it's already sorted out!
-    # we should try to login though
+    # we should try to login though, it should be rejected as rename in progress
     %{socket: socket} = Teiserver.TeiserverTestLib.raw_setup()
+    _ = _recv(socket)
     _send(
       socket,
       "LOGIN #{new_user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
@@ -413,8 +428,39 @@ ENDOFCHANNELS\n"
 
     reply = _recv_until(socket)
     [accepted | _remainder] = String.split(reply, "\n")
+    assert accepted == "DENIED Rename in progress, wait 5 seconds"
 
-    assert accepted == "ACCEPTED #{new_user.name}"
+    # Didn't get re-added just yet
+    wreply = _recv(watcher)
+    assert wreply == :timeout
+
+    # Lets try again, just incase!
+    :timer.sleep(1500)
+
+    _send(
+      socket,
+      "LOGIN #{new_user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+    )
+
+    reply = _recv_until(socket)
+    [accepted | _remainder] = String.split(reply, "\n")
+    assert accepted == "DENIED Rename in progress, wait 5 seconds"
+
+    :timer.sleep(4000)
+
+    # Now they can log in again
+    _send(
+      socket,
+      "LOGIN #{new_user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+    )
+
+    reply = _recv_until(socket)
+    [accepted | _remainder] = String.split(reply, "\n")
+    assert accepted == "ACCEPTED rename_test_user"
+
+    # Check they logged back in and got re-added with the correct name
+    wreply = _recv(watcher)
+    assert wreply == "ADDUSER rename_test_user ?? 0 #{user.id} LuaLobby Chobby\nCLIENTSTATUS rename_test_user 0\n"
 
     _send(socket, "EXIT\n")
   end
