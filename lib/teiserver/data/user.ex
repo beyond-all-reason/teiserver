@@ -233,7 +233,11 @@ defmodule Teiserver.User do
   end
 
   def rename_user(user, new_name) do
+    new_name = clean_name(new_name)
+
+    update_user(%{user | banned: true})
     Client.disconnect(user.id)
+    :timer.sleep(100)
 
     old_name = user.name
     new_name = clean_name(new_name)
@@ -243,6 +247,7 @@ defmodule Teiserver.User do
     ConCache.put(:users_lookup_name_with_id, user.id, new_name)
     ConCache.put(:users_lookup_id_with_name, new_name, user.id)
     ConCache.put(:users, user.id, new_user)
+    update_user(%{new_user | banned: false})
     new_user
   end
 

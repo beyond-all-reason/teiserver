@@ -3,6 +3,7 @@ defmodule Teiserver.SpringAuthTest do
   require Logger
   alias Teiserver.BitParse
   alias Teiserver.User
+  alias Teiserver.Client
   # alias Teiserver.Battle
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -380,15 +381,42 @@ ENDOFCHANNELS\n"
     assert reply =~ "s.battles.id_list "
   end
 
-  test "RENAMEACCOUNT", %{socket: socket} do
-    _send(socket, "RENAMEACCOUNT rename_test_user\n")
+  test "RENAMEACCOUNT", %{socket: socket, user: user} do
+    _send(socket, "RENAMEACCOUNT rename*_test_user\n")
     reply = _recv(socket)
     assert reply == "SERVERMSG Username changed, please log back in\n"
 
     new_user = User.get_user_by_name("rename_test_user")
+    assert new_user == nil
+
+    old_user = User.get_user_by_name(user.name)
+    assert old_user != nil
+
+    :timer.sleep(100)
+
+    new_user = User.get_user_by_name("rename_test_user")
     assert new_user != nil
 
+    old_user = User.get_user_by_name(user.name)
+    assert old_user == nil
+
+    client_ids = Client.list_client_ids()
+    assert new_user.id not in client_ids
+
     # No need to send an exit, it's already sorted out!
+    # we should try to login though
+    %{socket: socket} = Teiserver.TeiserverTestLib.raw_setup()
+    _send(
+      socket,
+      "LOGIN #{new_user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+    )
+
+    reply = _recv_until(socket)
+    [accepted | _remainder] = String.split(reply, "\n")
+
+    assert accepted == "ACCEPTED #{new_user.name}"
+
+    _send(socket, "EXIT\n")
   end
 
   test "CHANGEEMAIL", %{socket: socket, user: user} do

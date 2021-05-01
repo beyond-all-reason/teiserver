@@ -176,6 +176,7 @@ defmodule Teiserver.TcpServer do
   end
 
   # Client updates
+  def handle_info({:user_logged_in, nil}, state), do: {:noreply, state}
   def handle_info({:user_logged_in, userid}, state) do
     new_state = user_logged_in(userid, state)
     {:noreply, new_state}

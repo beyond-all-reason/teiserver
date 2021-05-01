@@ -26,6 +26,7 @@ defmodule Teiserver.TeiserverTestLib do
     "new_test_user_#{:random.uniform(99_999_999) + 1_000_000}"
   end
 
+  @spec new_user(any, any) :: atom | %{:id => any, optional(any) => any}
   def new_user(name \\ nil, params \\ %{}) do
     name = name || new_user_name()
 
