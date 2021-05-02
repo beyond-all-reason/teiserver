@@ -10,6 +10,7 @@ defmodule Teiserver.User do
   alias Central.Helpers.TimexHelper
   alias Argon2
   alias Central.Account.Guardian
+  alias Teiserver.Data.Types
 
   @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulence cats dogs mice eagle oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave sulphur tree tangerine melon watermelon obstreperous chlorine argon mercury jupiter saturn neptune ceres firefly slug sloth madness happiness ferrous oblique advantageous inefficient starling clouds rivers sunglasses)
 
@@ -92,7 +93,7 @@ defmodule Teiserver.User do
 
   @spec clean_name(String.t()) :: String.t()
   def clean_name(name) do
-    ~r/([^a-zA-Z0-9_\-\[\]\{\}]|\s)/
+    ~r/([^a-zA-Z0-9_\[\]\{\}]|\s)/
     |> Regex.replace(name, "")
   end
 
@@ -137,7 +138,31 @@ defmodule Teiserver.User do
     }
   end
 
+  @spec register_user(String.t(), String.t(), String.t(), String.t()) :: :success | {:error, String.t()}
   def register_user(name, email, md5_password, ip) do
+    cond do
+      clean_name(name) != name ->
+        {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
+
+      get_user_by_name(name) ->
+        {:error, "Username already taken"}
+
+      get_user_by_email(email) ->
+        {:error, "User already exists"}
+
+      true ->
+        case do_register_user(name, email, md5_password, ip) do
+          :ok ->
+            :success
+          :error ->
+            {:error, "Server error, please inform admin"}
+        end
+        :success
+    end
+  end
+
+  @spec do_register_user(String.t(), String.t(), String.t(), String.t()) :: :ok | :error
+  defp do_register_user(name, email, md5_password, ip) do
     params =
       user_register_params(name, email, md5_password, %{
         "ip" => ip
@@ -156,7 +181,7 @@ defmodule Teiserver.User do
         |> add_user
 
         EmailHelper.new_user(user)
-        user
+        :ok
 
       {:error, changeset} ->
         Logger.error(
@@ -164,6 +189,7 @@ defmodule Teiserver.User do
             Kernel.inspect(changeset)
           }"
         )
+        :error
     end
   end
 
@@ -234,7 +260,23 @@ defmodule Teiserver.User do
     ConCache.get(:users, int_parse(id))
   end
 
+  @spec rename_user(Types.userid(), String.t()) :: :success | {:error, String.t()}
   def rename_user(userid, new_name) do
+    cond do
+      clean_name(new_name) != new_name ->
+        {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
+
+      get_user_by_name(new_name) ->
+        {:error, "Username already taken"}
+
+      true ->
+        do_rename_user(userid, new_name)
+        :success
+    end
+  end
+
+  @spec do_rename_user(Types.userid(), String.t()) :: :ok
+  def do_rename_user(userid, new_name) do
     user = get_user_by_id(userid)
     update_user(%{user | rename_in_progress: true}, persist: true)
 
@@ -249,6 +291,7 @@ defmodule Teiserver.User do
     recache_user(userid)
     user = get_user_by_id(userid)
     update_user(%{user | rename_in_progress: false})
+    :ok
   end
 
   def add_user(user) do

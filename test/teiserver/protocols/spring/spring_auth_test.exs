@@ -386,7 +386,7 @@ ENDOFCHANNELS\n"
     old_name = user.name
     new_name = "rename_test_user"
     userid = user.id
-    %{socket: watcher} = auth_setup()
+    %{socket: watcher, user: watcher_user} = auth_setup()
     _recv(socket)
 
     # Check our starting situation
@@ -395,10 +395,21 @@ ENDOFCHANNELS\n"
     assert User.get_user_by_id(userid) != nil
     assert Client.get_client_by_id(userid) != nil
 
+    # Rename with an invalid name
+    _send(socket, "RENAMEACCOUNT Y--Y\n")
+    reply = _recv(socket)
+    assert reply == "SERVERMSG Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)\n"
+
+    # Rename with existng name
+    _send(socket, "RENAMEACCOUNT #{watcher_user.name}\n")
+    reply = _recv(socket)
+    assert reply == "SERVERMSG Username already taken\n"
+
     # Perform rename
     _send(socket, "RENAMEACCOUNT rename_test_user\n")
     reply = _recv(socket)
-    assert reply == "SERVERMSG Username change in progress, please log back in in 5 seconds\n"
+    # assert reply == "SERVERMSG Username change in progress, please log back in in 5 seconds\n"
+    assert reply == :timeout
 
     # Check they got logged out
     wreply = _recv(watcher)
@@ -415,7 +426,7 @@ ENDOFCHANNELS\n"
 
     # Lets be REAL sure
     client_ids = Client.list_client_ids()
-    assert new_user.id not in client_ids
+    assert user.id not in client_ids
 
     # Check they got logged out
     wreply = _recv(watcher)

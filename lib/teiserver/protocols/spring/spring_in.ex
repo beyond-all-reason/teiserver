@@ -267,13 +267,12 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("REGISTER", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
       [_, username, password_hash, email] ->
-        case User.get_user_by_name(username) do
-          nil ->
-            User.register_user(username, email, password_hash, state.ip)
+        case User.register_user(username, email, password_hash, state.ip) do
+          :success ->
             reply(:registration_accepted, nil, msg_id, state)
 
-          _ ->
-            reply(:registration_denied, "User already exists", msg_id, state)
+          {:error, reason} ->
+            reply(:registration_denied, reason, msg_id, state)
         end
 
       _ ->
@@ -334,9 +333,15 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("RENAMEACCOUNT", new_name, msg_id, state) do
-    reply(:servermsg, "Username change in progress, please log back in in 5 seconds", msg_id, state)
-    User.rename_user(state.userid, new_name)
-    send(self(), :terminate)
+    case User.rename_user(state.userid, new_name) do
+      :success ->
+        :ok
+        # send(self(), :terminate)
+
+      {:error, reason} ->
+        reply(:servermsg, reason, msg_id, state)
+    end
+
     state
   end
 
