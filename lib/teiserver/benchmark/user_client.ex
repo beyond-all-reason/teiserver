@@ -123,5 +123,3 @@ defmodule Teiserver.Benchmark.UserClient do
      }}
   end
 end
-
-# sudo systemctl restart central.service

@@ -133,16 +133,6 @@ defmodule Teiserver.Battle do
   @spec close_battle(integer() | nil) :: :ok
   def close_battle(battle_id) do
     battle = get_battle(battle_id)
-    ConCache.delete(:battles, battle_id)
-
-    ConCache.update(:lists, :battles, fn value ->
-      new_value =
-        value
-        |> Enum.filter(fn v -> v != battle_id end)
-
-      {:ok, new_value}
-    end)
-
     PubSub.broadcast(
       Central.PubSub,
       "live_battle_updates:#{battle_id}",
@@ -155,13 +145,23 @@ defmodule Teiserver.Battle do
       {:global_battle_updated, battle_id, :battle_closed}
     )
 
-    battle.players
+    battle.players ++ [battle.founder_id]
     |> Enum.each(fn userid ->
       PubSub.broadcast(
         Central.PubSub,
         "battle_updates:#{battle_id}",
         {:remove_user_from_battle, userid, battle_id}
       )
+    end)
+
+    ConCache.delete(:battles, battle_id)
+
+    ConCache.update(:lists, :battles, fn value ->
+      new_value =
+        value
+        |> Enum.filter(fn v -> v != battle_id end)
+
+      {:ok, new_value}
     end)
   end
 

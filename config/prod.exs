@@ -77,7 +77,8 @@ config :central, Teiserver,
     cacertfile: "/var/www/tls/fullchain.pem"
   ],
   autologin: false,
-  enable_benchmark: false
+  enable_benchmark: false,
+  enable_agent_mode: false
 
 # Do not print debug messages in production
 config :logger, level: :info

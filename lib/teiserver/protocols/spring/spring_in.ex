@@ -267,7 +267,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("REGISTER", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
       [_, username, password_hash, email] ->
-        case User.register_user(username, email, password_hash, state.ip) do
+        case User.register_user_with_md5(username, email, password_hash, state.ip) do
           :success ->
             reply(:registration_accepted, nil, msg_id, state)
 

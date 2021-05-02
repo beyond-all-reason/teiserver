@@ -138,8 +138,8 @@ defmodule Teiserver.User do
     }
   end
 
-  @spec register_user(String.t(), String.t(), String.t(), String.t()) :: :success | {:error, String.t()}
-  def register_user(name, email, md5_password, ip) do
+  @spec register_user_with_md5(String.t(), String.t(), String.t(), String.t()) :: :success | {:error, String.t()}
+  def register_user_with_md5(name, email, md5_password, ip) do
     cond do
       clean_name(name) != name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}

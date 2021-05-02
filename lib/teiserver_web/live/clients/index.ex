@@ -21,7 +21,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> NotificationPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
-      |> add_breadcrumb(name: "Clients", url: "/teiserver/admin/clients")
+      |> add_breadcrumb(name: "Clients", url: "/teiserver/admin/client")
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, ClientLib.colours())
       |> assign(:clients, clients)

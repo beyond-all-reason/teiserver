@@ -9,7 +9,7 @@ defmodule Teiserver.SpringBattleHostTest do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TeiserverTestLib,
-    only: [auth_setup: 0, auth_setup: 1, _send: 2, _recv: 1, _recv_until: 1, new_user: 0]
+    only: [auth_setup: 0, _send: 2, _recv: 1, _recv_until: 1]
 
   setup do
     %{socket: socket, user: user} = auth_setup()
@@ -24,6 +24,50 @@ defmodule Teiserver.SpringBattleHostTest do
     _send(socket, "MYBATTLESTATUS 123 123\n")
     reply = _recv(socket)
     assert reply == :timeout
+  end
+
+  test "!rehost bug test", %{socket: host_socket, user: host_user} do
+    %{socket: watcher_socket} = auth_setup()
+    %{socket: p1_socket, user: p1_user} = auth_setup()
+    %{socket: p2_socket, user: p2_user} = auth_setup()
+
+    # Open battle
+    _send(
+      host_socket,
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tbattle_host_test\tgameTitle\tgameName\n"
+    )
+
+    # Find battle ID
+    battle_id = Battle.list_battles
+    |> Enum.filter(fn b -> b.founder_id == host_user.id end)
+    |> hd
+    |> Map.get(:id)
+
+    # Clear watcher
+    _ = _recv_until(watcher_socket)
+
+    # Join
+    _send(p1_socket, "JOINBATTLE #{battle_id} empty script_password2\n")
+    _send(p2_socket, "JOINBATTLE #{battle_id} empty script_password2\n")
+
+    # Nobody has been accepted yet, should not see anything
+    reply = _recv(watcher_socket)
+    assert reply == :timeout
+
+    # Now accept
+    _send(host_socket, "JOINBATTLEACCEPT #{p1_user.name}\n")
+    _send(host_socket, "JOINBATTLEACCEPT #{p2_user.name}\n")
+
+    # Accept has happened, should see stuff
+    reply = _recv(watcher_socket)
+    assert reply == "JOINEDBATTLE #{battle_id} #{p1_user.name}\nJOINEDBATTLE #{battle_id} #{p2_user.name}\n"
+
+    # Now have the host leave
+    _send(host_socket, "LEAVEBATTLE\n")
+    :timer.sleep(500)
+
+    reply = _recv_until(watcher_socket)
+    assert reply == "BATTLECLOSED #{battle_id}\n"
   end
 
   test "host battle test", %{socket: socket, user: user} do
@@ -65,8 +109,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert Enum.count(battle.players) == 0
 
     # Now create a user to join the battle
-    user2 = new_user()
-    %{socket: socket2} = auth_setup(user2)
+    %{socket: socket2, user: user2} = auth_setup()
 
     # Check user1 hears about this
     reply = _recv(socket)
@@ -101,8 +144,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == "FORCEQUITBATTLE\nLEFTBATTLE #{battle_id} #{user2.name}\n"
 
     # Add user 3
-    user3 = new_user()
-    %{socket: socket3} = auth_setup(user3)
+    %{socket: socket3, user: user3} = auth_setup()
 
     _send(socket2, "JOINBATTLE #{battle_id} empty script_password3\n")
     _send(socket, "JOINBATTLEACCEPT #{user2.name}\n")

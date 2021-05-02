@@ -79,6 +79,7 @@ defmodule TeiserverWeb.Router do
         get("/tools", ToolController, :index)
         get("/tools/convert", ToolController, :convert_form)
         post("/tools/convert_post", ToolController, :convert_post)
+        get("/tools/agent_start", ToolController, :agent_start)
 
         post("/clans/create_membership", ClanController, :create_membership)
         delete("/clans/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)

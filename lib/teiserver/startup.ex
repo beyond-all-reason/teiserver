@@ -119,7 +119,7 @@ defmodule Teiserver.Startup do
       %{
         label: "Teiserver users",
         icons: [Teiserver.ClientLib.icon(), :list],
-        url: "/teiserver/admin/users",
+        url: "/teiserver/admin/users/search",
         permissions: "teiserver.moderator"
       },
       # %{label: "Parties", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/admin/parties", permissions: "teiserver.moderator"},
