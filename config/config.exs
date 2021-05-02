@@ -46,7 +46,8 @@ config :central, Teiserver,
   main_website: "https://site.com",
   discord: nil,
   default_protocol: Teiserver.Protocols.Spring,
-  github_repo: "https://github.com/Teifion/teiserver"
+  github_repo: "https://github.com/Teifion/teiserver",
+  extra_logging: false
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

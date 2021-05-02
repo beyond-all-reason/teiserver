@@ -20,7 +20,11 @@ defmodule Teiserver.Protocols.SpringIn do
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
     if state.extra_logging do
-      Logger.info("<-- #{state.username}: #{Spring.format_log(data)}")
+      if String.contains?(data, "c.user.get_token") or String.contains?(data, "LOGIN") do
+        Logger.info("<-- #{state.username}: LOGIN/c.user.get_token")
+      else
+        Logger.info("<-- #{state.username}: #{Spring.format_log(data)}")
+      end
     end
 
     new_state =
