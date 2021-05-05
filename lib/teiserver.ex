@@ -12,7 +12,7 @@ defmodule Teiserver do
   @doc """
   Activates agent mode (if allowed by config)
   """
-  @spec agent_mode() :: :ok | :failure
+  @spec agent_mode() :: :ok | {:failure, String.t()}
   def agent_mode() do
     Teiserver.Agents.AgentLib.start()
   end

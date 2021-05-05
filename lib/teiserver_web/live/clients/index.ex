@@ -26,14 +26,21 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> assign(:colours, ClientLib.colours())
       |> assign(:clients, clients)
       |> assign(:users, users)
-      |> assign(:menu_override, Routes.ts_admin_general_path(socket, :index))
+      |> assign(:menu_override, Routes.ts_lobby_general_path(socket, :index))
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end
 
   @impl true
   def handle_params(params, _url, socket) do
-    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+    case allow?(socket.assigns[:current_user], "teiserver.admin.account") do
+      true ->
+        {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+      false ->
+        {:noreply,
+         socket
+         |> redirect(to: Routes.general_page_path(socket, :index))}
+    end
   end
 
   @impl true

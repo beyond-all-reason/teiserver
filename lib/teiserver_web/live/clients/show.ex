@@ -24,27 +24,34 @@ defmodule TeiserverWeb.ClientLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _opts, socket) do
-    id = int_parse(id)
-    PubSub.subscribe(Central.PubSub, "all_user_updates")
-    PubSub.subscribe(Central.PubSub, "all_client_updates")
-    PubSub.subscribe(Central.PubSub, "user_updates:#{id}")
-    client = Client.get_client_by_id(id)
-    user = User.get_user_by_id(id)
+    case allow?(socket.assigns[:current_user], "teiserver.admin.account") do
+      true ->
+        id = int_parse(id)
+        PubSub.subscribe(Central.PubSub, "all_user_updates")
+        PubSub.subscribe(Central.PubSub, "all_client_updates")
+        PubSub.subscribe(Central.PubSub, "user_updates:#{id}")
+        client = Client.get_client_by_id(id)
+        user = User.get_user_by_id(id)
 
-    case client do
-      nil ->
+        case client do
+          nil ->
+            {:noreply,
+            socket
+            |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
+
+          _ ->
+            {:noreply,
+            socket
+            |> assign(:page_title, page_title(socket.assigns.live_action))
+            |> add_breadcrumb(name: client.name, url: "/teiserver/admin/clients/#{id}")
+            |> assign(:id, id)
+            |> assign(:client, client)
+            |> assign(:user, user)}
+      false ->
         {:noreply,
          socket
-         |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
-
-      _ ->
-        {:noreply,
-         socket
-         |> assign(:page_title, page_title(socket.assigns.live_action))
-         |> add_breadcrumb(name: client.name, url: "/teiserver/admin/clients/#{id}")
-         |> assign(:id, id)
-         |> assign(:client, client)
-         |> assign(:user, user)}
+         |> redirect(to: Routes.general_page_path(socket, :index))}
+    end
     end
   end
 

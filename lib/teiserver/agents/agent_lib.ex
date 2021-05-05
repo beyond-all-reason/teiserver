@@ -5,40 +5,38 @@ defmodule Teiserver.Agents.AgentLib do
 
   @localhost '127.0.0.1'
 
+  @spec colours :: {String.t(), String.t(), String.t()}
+  def colours(), do: Central.Helpers.StylingHelper.colours(:danger)
+
   @spec icon() :: String.t()
   def icon(), do: "far fa-user-robot"
 
   @spec do_start() :: :ok
   defp do_start() do
-    children = [
-      # Benchmark stuff
-      {Registry, keys: :unique, name: Teiserver.Agents.ServerRegistry},
-      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Agents.DynamicSupervisor}
-    ]
-
-    opts = [strategy: :one_for_one, name: Teiserver.Agents.Supervisor]
-    Supervisor.start_link(children, opts)
-
     # Start the supervisor server
     {:ok, supervisor_pid} =
-        DynamicSupervisor.start_child(Teiserver.Agents.DynamicSupervisor, {
-          Teiserver.Agents.SupervisorServer,
-          name: via_tuple(:supervisor),
-          data: %{}
-        })
+      DynamicSupervisor.start_child(Teiserver.Agents.DynamicSupervisor, {
+        Teiserver.Agents.SupervisorServer,
+        name: via_tuple(:supervisor),
+        data: %{}
+      })
 
     send(supervisor_pid, :begin)
     :ok
   end
 
-  @spec start() :: :ok | :failure
+  @spec start() :: :ok | {:failure, String.t()}
   def start() do
-    case Application.get_env(:central, Teiserver)[:enable_agent_mode] do
+    cond do
+      Application.get_env(:central, Teiserver)[:enable_agent_mode] != true ->
+        {:failure, "Agent mode not active"}
+
+      Supervisor.count_children(Teiserver.Agents.DynamicSupervisor)[:active] > 0 ->
+        {:failure, "Already started"}
+
       true ->
         do_start()
         :ok
-      false ->
-        :failure
     end
   end
 
@@ -60,7 +58,7 @@ defmodule Teiserver.Agents.AgentLib do
     socket
   end
 
-  @spec login(:sslsocket, Map.t()) :: :ok | :failure
+  @spec login({:sslsocket, any, any}, Map.t()) :: :ok | :failure
   def login(socket, data) do
     exists = cond do
       User.get_user_by_name(data.name) ->
@@ -116,13 +114,17 @@ defmodule Teiserver.Agents.AgentLib do
     end
   end
 
-  @spec post_agent_update(any) :: :ok
-  def post_agent_update(data) do
+  @spec post_agent_update(String.t(), String.t(), Map.t()) :: :ok
+  def post_agent_update(from, msg, data \\ %{}) do
     PubSub.broadcast(
       Central.PubSub,
       "agent_updates",
-      data
+      %{
+        from: from,
+        msg: msg,
+        data: data
+      }
     )
-    Logger.info("agent_updates - #{Kernel.inspect(data)}")
+    Logger.info("agent_updates - #{from} > #{msg}")
   end
 end

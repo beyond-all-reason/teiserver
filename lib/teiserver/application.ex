@@ -2,6 +2,7 @@ defmodule Teiserver.Application do
   @moduledoc false
   def children() do
     children = [
+      # Ranch servers
       %{
         id: Teiserver.SSLTcpServer,
         start: {Teiserver.TcpServer, :start_link, [[ssl: true]]}
@@ -10,6 +11,8 @@ defmodule Teiserver.Application do
         id: Teiserver.RawTcpServer,
         start: {Teiserver.TcpServer, :start_link, [[]]}
       },
+
+      # Caches
       concache_perm_sup(:id_counters),
       concache_perm_sup(:lists),
       concache_perm_sup(:users_lookup_name_with_id),
@@ -21,8 +24,14 @@ defmodule Teiserver.Application do
       concache_perm_sup(:queues),
       concache_perm_sup(:rooms),
       concache_sup(:teiserver_clan_cache_bang),
+
+      # Genservers for running the server
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},
-      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueMatchSupervisor}
+      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueMatchSupervisor},
+
+      # Agent mode
+      {Registry, keys: :unique, name: Teiserver.Agents.ServerRegistry},
+      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Agents.DynamicSupervisor}
     ]
 
     # Some stuff doesn't work with the tests

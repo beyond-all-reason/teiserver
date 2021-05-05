@@ -5,6 +5,8 @@ defmodule Teiserver.Agents.BattlehostServer do
   @tick_period 5000
 
   def handle_info(:startup, state) do
+    AgentLib.post_agent_update(state.id, "bhs startup")
+
     socket = AgentLib.get_socket()
     AgentLib.login(socket, %{
       name: "BattlehostServer_#{state.number}",
@@ -18,7 +20,7 @@ defmodule Teiserver.Agents.BattlehostServer do
   end
 
   def handle_info(:tick, state) do
-    AgentLib.post_agent_update({state.id, :tick})
+    AgentLib.post_agent_update(state.id, "tick")
     {:noreply, state}
   end
 

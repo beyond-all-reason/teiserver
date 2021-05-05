@@ -71,6 +71,13 @@ defmodule TeiserverWeb.Router do
         live("/client/:id", Show, :show)
       end
 
+      scope "/teiserver/admin", TeiserverWeb.AgentLive, as: :ts_admin do
+        pipe_through([:browser, :admin_layout, :protected])
+
+        live("/agent", Index, :index)
+        # live("/agent/:id", Show, :show)
+      end
+
       scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
         pipe_through([:browser, :admin_layout, :protected])
 
@@ -79,7 +86,6 @@ defmodule TeiserverWeb.Router do
         get("/tools", ToolController, :index)
         get("/tools/convert", ToolController, :convert_form)
         post("/tools/convert_post", ToolController, :convert_post)
-        get("/tools/agent_start", ToolController, :agent_start)
 
         post("/clans/create_membership", ClanController, :create_membership)
         delete("/clans/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)

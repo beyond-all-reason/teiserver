@@ -1,13 +1,13 @@
 defmodule Teiserver.Agents.SupervisorServer do
-  require Logger
   use GenServer
   alias Teiserver.Agents.AgentLib
 
   def handle_info(:begin, state) do
-    Logger.info("Starting agents supervisor")
+    AgentLib.post_agent_update(state.id, "Starting agents supervisor")
 
     add_servers("battlehost", 5)
 
+    AgentLib.post_agent_update(state.id, "Agent supervisor started")
     {:noreply, state}
   end
 
@@ -26,6 +26,7 @@ defmodule Teiserver.Agents.SupervisorServer do
             id: "#{type}-#{i}"
           }
         })
+
     end)
     :ok
   end
@@ -43,6 +44,8 @@ defmodule Teiserver.Agents.SupervisorServer do
   end
 
   def init(_opts) do
-    {:ok, %{}}
+    {:ok, %{
+      id: "agent_supervisor"
+    }}
   end
 end
