@@ -213,13 +213,18 @@ FRIENDREQUESTLISTEND\n"
     assert reply == :timeout
   end
 
-  test "JOIN, LEAVE, SAY, CHANNELS, SAYEX", %{socket: socket, user: user} do
+  test "JOIN, GETCHANNELMESSAGES, LEAVE, SAY, CHANNELS, SAYEX", %{socket: socket, user: user} do
     _send(socket, "JOIN test_room\n")
     reply = _recv(socket)
     assert reply == "JOIN test_room
 JOINED test_room #{user.name}
 CHANNELTOPIC test_room #{user.name}
 CLIENTS test_room #{user.name}\n"
+
+    # GETCHANNELMESSAGES
+    _send(socket, "GETCHANNELMESSAGES test_room 123\n")
+    reply = _recv(socket)
+    assert reply == :timeout
 
     # Say something
     _send(socket, "SAY test_room Hello there\n")

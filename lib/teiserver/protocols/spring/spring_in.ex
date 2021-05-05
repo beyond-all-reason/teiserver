@@ -602,6 +602,11 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
+  # This is meant get a chat history, we currently don't store a chat history
+  defp do_handle("GETCHANNELMESSAGES", _data, _msg_id, state) do
+    state
+  end
+
   defp do_handle("SAYPRIVATE", data, msg_id, state) do
     case Regex.run(~r/(\S+) (.+)/, data) do
       [_, to_name, msg] ->
