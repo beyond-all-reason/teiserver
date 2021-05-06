@@ -257,7 +257,7 @@ centralapp eval "Central.Release.migrate"
 ```
 
 ### Deployment
-[Deployment itself is located in a different file.](/documents/deployment.md)
+[Deployment itself is located in a different file.](/documents/guides/deployment.md)
 
 ### Things left for you to do at your leisure
 At some stage you'll probably want to do these things, no rush though.
