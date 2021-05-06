@@ -1,15 +1,16 @@
 defmodule Teiserver.Protocols.TachyonOut do
   require Logger
   alias Teiserver.Protocols.Tachyon
-  alias Teiserver.Protocols.Tachyon.{MiscOut}
+  alias Teiserver.Protocols.Tachyon.{AuthOut, SystemOut}
 
   @spec reply(atom(), atom(), Map.t(), Map.t()) :: Map.t()
   def reply(namespace, reply_cmd, data, state) do
     msg =
       case namespace do
-        :misc -> MiscOut.do_reply(reply_cmd, data)
+        :auth -> AuthOut.do_reply(reply_cmd, data)
+        :system -> SystemOut.do_reply(reply_cmd, data)
       end
-      |> add_msg_id(data)
+      |> add_msg_id(state)
 
     if state.extra_logging do
       Logger.info("--> #{state.username}: #{Tachyon.format_log(msg)}")
@@ -20,9 +21,9 @@ defmodule Teiserver.Protocols.TachyonOut do
   end
 
   @spec add_msg_id(Map.t(), Map.t()) :: Map.t()
-  defp add_msg_id(resp, original_data) do
-    if original_data["msg_id"] do
-      Map.put(resp, :msg_id, original_data["msg_id"])
+  defp add_msg_id(resp, state) do
+    if state.msg_id do
+      Map.put(resp, :msg_id, state.msg_id)
     else
       resp
     end

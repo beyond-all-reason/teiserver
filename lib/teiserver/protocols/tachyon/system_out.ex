@@ -1,5 +1,5 @@
-defmodule Teiserver.Protocols.Tachyon.MiscOut do
-  @spec do_reply(atom(), Map.t()) :: Map.t()
+defmodule Teiserver.Protocols.Tachyon.SystemOut do
+  @spec do_reply(atom(), any) :: Map.t()
   def do_reply(:pong, _data) do
     %{
       cmd: "s.system.pong"

@@ -2,6 +2,8 @@ defmodule Teiserver.Protocols.TachyonIn do
   require Logger
   alias Teiserver.Protocols.Tachyon
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Teiserver.Protocols.Tachyon.{AuthIn, SystemIn}
 
   @spec handle(String.t(), map) :: map
   def handle("", state), do: state
@@ -11,19 +13,45 @@ defmodule Teiserver.Protocols.TachyonIn do
     new_state =
       case Tachyon.decode(raw_data) do
         {:ok, data} ->
-          do_handle(data["cmd"], data, state)
+          dispatch(data["cmd"], data, state)
 
         {:error, error_type} ->
-          reply(:misc, :error, %{location: "decode", error: error_type}, state)
+          reply(:system, :error, %{location: "decode", error: error_type}, state)
           state
       end
 
     %{new_state | last_msg: System.system_time(:second)}
   end
 
-  @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
-  defp do_handle("c.system.ping", cmd, state) do
-    reply(:misc, :pong, cmd, state)
-    state
+  # If the data has a message id we add it to the state, saves us passing around
+  # an extra value all the time and might help with debugging at some point
+  @spec add_msg_id(Map.t(), Map.t()) :: Map.t()
+  defp add_msg_id(state, data) do
+    new_msg_id = if Map.has_key?(data, "msg_id") do
+      int_parse(data["msg_id"])
+    end
+    %{state | msg_id: new_msg_id}
   end
+
+  @spec dispatch(String.t(), Map.t(), Map.t()) :: Map.t()
+  defp dispatch(cmd, data, state) do
+    state = state
+      |> add_msg_id(data)
+
+    new_state = case String.split(cmd, ".") do
+      ["c", namespace, subcommand] ->
+        case namespace do
+          "auth" -> AuthIn.do_handle(subcommand, data, state)
+          "system" -> SystemIn.do_handle(subcommand, data, state)
+          _ -> reply(:system, :error, %{location: "dispatch", error: "No dispatch for namespace '#{namespace}'"}, state)
+        end
+      _ ->
+        reply(:system, :error, %{location: "parse", error: "Unable to parse cmd '#{cmd}'"}, state)
+    end
+
+    # And remove the msg_id, don't want that bleeding over
+    %{new_state | msg_id: nil}
+  end
+
+
 end

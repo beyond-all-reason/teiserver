@@ -1,6 +1,7 @@
 defmodule Teiserver.Protocols.TachyonRawTest do
   use Central.ServerCase, async: false
 
+  alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
 
   import Teiserver.TeiserverTestLib,
@@ -76,5 +77,41 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     assert resp == :ok
     reply = _recv(socket)
     assert reply == %{"result" => "error", "error" => "base64_decode", "location" => "decode"}
+  end
+
+  test "register and auth", %{socket: socket} do
+    # Swap to Tachyon
+    _ = TeiserverTestLib._recv(socket)
+    _send(socket, "TACHYON\n")
+    reply = TeiserverTestLib._recv(socket)
+    assert reply =~ "OK cmd=TACHYON\n"
+
+    # Not actually registering just yet since that's not implemented...
+
+    # Create the user manually for now
+    user =
+      GeneralTestLib.make_user(%{
+        "name" => "tachyon_token_test_user",
+        "email" => "tachyon_token_test_user@",
+        "password" => "token_password",
+        "data" => %{
+          "verified" => true
+        }
+      })
+
+    # Bad password but also test msg_id continuance
+    cmd = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}
+    data = Tachyon.encode(cmd)
+    _send(socket, data)
+    reply = _recv(socket)
+    assert reply == %{"cmd" => "s.auth.get_token", "outcome" => "failure", "reason" => "Invalid credentials", "msg_id" => 555}
+
+    # Good password
+    cmd = %{cmd: "c.auth.get_token", password: "token_password", email: user.email}
+    data = Tachyon.encode(cmd)
+    _send(socket, data)
+    reply = _recv(socket)
+    assert Map.has_key?(reply, "token")
+    assert reply == %{"cmd" => "s.auth.get_token", "outcome" => "success", "token" => reply["token"]}
   end
 end

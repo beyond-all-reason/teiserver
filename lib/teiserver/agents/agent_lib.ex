@@ -58,6 +58,43 @@ defmodule Teiserver.Agents.AgentLib do
     socket
   end
 
+  defp get_token(socket, user) do
+    _send(socket, "c.user.get_token_by_email #{user.email}\tpassword\n")
+    reply = _recv(socket, 1500)
+    token =
+      String.replace(reply, "s.user.user_token #{user.email}\t", "")
+      |> String.replace("\n", "")
+
+    case token do
+      nil -> {:error, :token}
+      "" -> {:error, :token}
+      _ -> {:ok, token}
+    end
+  end
+
+  defp do_login(socket, token, user) do
+    _send(socket, "c.user.login #{token}\tAgentLobby\n")
+    reply = _recv(socket)
+
+    if reply == "ACCEPTED #{user.name}\n" do
+      _welcome_msg = _recv(socket)
+      :ok
+    else
+      {:error, :login}
+    end
+  end
+
+  defp swap_to_tachyon(socket) do
+    _send(socket, "TACHYON\n")
+    reply = _recv(socket)
+
+    if reply == "OK cmd=TACHYON\n" do
+      :ok
+    else
+      {:error, :login}
+    end
+  end
+
   @spec login({:sslsocket, any, any}, Map.t()) :: :ok | :failure
   def login(socket, data) do
     exists = cond do
@@ -81,22 +118,16 @@ defmodule Teiserver.Agents.AgentLib do
 
     # Get the user
     user = User.get_user_by_name(data.name)
+    _welcome_msg = _recv(socket)
 
-    # Get token
-    _send(socket, "c.user.get_token_by_email #{user.email}\tpassword\n")
-    reply = _recv(socket, 1500)
-    token =
-      String.replace(reply, "s.user.user_token #{user.email}\t", "")
-      |> String.replace("\n", "")
-
-    # Perform login
-    _send(socket, "c.user.login #{token}\tLobby Name\n")
-    reply = _recv(socket)
-    expected_reply = "ACCEPTED #{user.name}\n"
-
-    case reply == expected_reply do
-      true -> :ok
-      false -> :failure
+    with :ok <- swap_to_tachyon(socket),
+        {:ok, token} <- get_token(socket, user),
+         :ok <- do_login(socket, token, user)
+      do
+        :success
+      else
+        {:error, :token} -> throw "Get token error"
+        {:error, :login} -> throw "Login error"
     end
   end
 

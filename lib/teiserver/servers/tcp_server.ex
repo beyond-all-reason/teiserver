@@ -110,6 +110,7 @@ defmodule Teiserver.TcpServer do
       ready_queue_id: nil,
 
       # Connection microstate
+      msg_id: nil,
       battle_id: nil,
       room_member_cache: %{},
       known_users: %{},
