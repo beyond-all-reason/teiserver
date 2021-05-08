@@ -1,10 +1,15 @@
 defmodule Teiserver.Protocols.Tachyon do
   require Logger
+  alias Teiserver.Client
+  alias Phoenix.PubSub
   alias Teiserver.Protocols.TachyonIn
+  alias Teiserver.Protocols.TachyonOut
 
   def format_log(s) do
     Kernel.inspect(s)
   end
+
+  def reply(namespace, reply_cmd, data, state), do: TachyonOut.reply(namespace, reply_cmd, data, state)
 
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
@@ -75,8 +80,13 @@ defmodule Teiserver.Protocols.Tachyon do
   end
 
   @spec do_login_accepted(Map.t(), Map.t()) :: Map.t()
-  def do_login_accepted(state, _user) do
-    state
+  def do_login_accepted(state, user) do
+    # Login the client
+    Client.login(user, self())
+
+    send(self(), {:action, {:login_end, nil}})
+    :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
+    %{state | user: user, username: user.name, userid: user.id}
   end
 
   defp unzip(data) do

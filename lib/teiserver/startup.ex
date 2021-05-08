@@ -159,6 +159,14 @@ defmodule Teiserver.Startup do
 
     ConCache.put(:application_metadata_cache, "teiserver_startup_completed", true)
 
+    # Purely for testing purposes
+    if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
+      spawn(fn ->
+        :timer.sleep(500)
+        Teiserver.agent_mode()
+      end)
+    end
+
     Logger.info("Teiserver startup complete")
   end
 end

@@ -4,6 +4,12 @@ defmodule Teiserver.Protocols.TachyonOut do
   alias Teiserver.Protocols.Tachyon.{AuthOut, SystemOut}
 
   @spec reply(atom(), atom(), Map.t(), Map.t()) :: Map.t()
+
+  # Stuff we have to use because spring used it
+  # TODO: Remove these with Spring
+  def reply(:login_end, nil, nil, state), do: state
+
+
   def reply(namespace, reply_cmd, data, state) do
     msg =
       case namespace do

@@ -45,7 +45,8 @@ config :central, Teiserver,
   heartbeat_interval: nil,
   heartbeat_timeout: nil,
   autologin: true,
-  extra_logging: false
+  extra_logging: false,
+  enable_agent_mode: true
 
 config :central, Central.Mailer,
   adapter: Bamboo.LocalAdapter,

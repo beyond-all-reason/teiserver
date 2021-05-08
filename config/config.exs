@@ -48,7 +48,7 @@ config :central, Teiserver,
   default_protocol: Teiserver.Protocols.Spring,
   github_repo: "https://github.com/Teifion/teiserver",
   extra_logging: false,
-  enable_agent_mode: true,
+  enable_agent_mode: false,
   user_agreement: "User agreement goes here."
 
 config :logger, :console,

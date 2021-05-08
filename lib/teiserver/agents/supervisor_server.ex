@@ -5,7 +5,7 @@ defmodule Teiserver.Agents.SupervisorServer do
   def handle_info(:begin, state) do
     AgentLib.post_agent_update(state.id, "Starting agents supervisor")
 
-    add_servers("battlehost", 1)
+    add_servers("battlehost", 5)
 
     AgentLib.post_agent_update(state.id, "Agent supervisor started")
     {:noreply, state}
