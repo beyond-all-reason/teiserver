@@ -3,7 +3,6 @@ defmodule TeiserverWeb.AgentLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.Agents.AgentLib
 
   @impl true
   def mount(_params, session, socket) do
@@ -25,7 +24,7 @@ defmodule TeiserverWeb.AgentLive.Index do
       |> assign(:filtered_logs, [])
       |> assign(:filters, %{})
       |> assign(:sidemenu_active, "teiserver")
-      |> assign(:colours, AgentLib.colours())
+      |> assign(:colours, Central.Admin.ToolLib.colours())
       |> assign(:menu_override, Routes.ts_lobby_general_path(socket, :index))
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}

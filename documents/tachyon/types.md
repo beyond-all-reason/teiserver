@@ -140,8 +140,6 @@ This represents a user who is logged in. A user who is logged out will not have 
 * id :: integer
 * name :: string
 * founder_id :: User.id
-* type :: string
-* max_players :: integer
 * password :: nil | string
 * locked :: string -- unlocked, friends, whitelist, locked
 * engine_name :: string
@@ -160,8 +158,6 @@ This represents a user who is logged in. A user who is logged out will not have 
   "id": 9556,
   "name": "EU 07 - 670",
   "founder_id": 1967,
-  "type": "team",
-  "max_players": 16,
   "password": nil,
   "locked": "unlocked",
   "engine_name": "BAR",
@@ -171,6 +167,8 @@ This represents a user who is logged in. A user who is logged out will not have 
   "bots": [900],
   "ip": "127.0.0.1",
   "settings": {
+    "max_players": 16,
+    "type": "team",
     "disabled_units": ["unit1", "unit2", "unit3"],
     "start_rectangles": [
       [0,0,100,100],

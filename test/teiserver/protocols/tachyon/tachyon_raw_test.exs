@@ -4,12 +4,12 @@ defmodule Teiserver.Protocols.TachyonRawTest do
   alias Central.Helpers.GeneralTestLib
 
   import Teiserver.TeiserverTestLib,
-    only: [raw_setup: 0, _send_raw: 2, _tachyon_send: 2, _recv_raw: 1, _tachyon_recv: 1]
+    only: [tls_setup: 0, _send_raw: 2, _tachyon_send: 2, _recv_raw: 1, _tachyon_recv: 1]
 
   alias Teiserver.Protocols.Tachyon
 
   setup do
-    %{socket: socket} = raw_setup()
+    %{socket: socket} = tls_setup()
     {:ok, socket: socket}
   end
 
@@ -122,6 +122,11 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     assert Map.has_key?(reply, "user")
     assert reply["user"]["id"] == user.id
     assert match?(%{"cmd" => "s.auth.verify", "result" => "success"}, reply)
+
+    # Disconnect
+    data = %{cmd: "c.auth.disconnect"}
+    _tachyon_send(socket, data)
+    _tachyon_recv(socket)
   end
 
   test "auth existing user", %{socket: socket} do
@@ -172,5 +177,10 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     assert Map.has_key?(reply, "user")
     assert reply["user"]["id"] == user.id
     assert match?(%{"cmd" => "s.auth.login", "result" => "success"}, reply)
+
+    # Now disconnect
+    data = %{cmd: "c.auth.disconnect"}
+    _tachyon_send(socket, data)
+    _tachyon_recv(socket)
   end
 end

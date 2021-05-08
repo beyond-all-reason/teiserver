@@ -5,4 +5,5 @@ Designed to be used to simulate a set of users using the server. Designed to aid
 The agents act as clients and interact with the system the same way any other client would.
 
 ### Agent list
+ * **idle** - Sits there and pings the server so it doesn't get disconnected.
  * **battlehost** - Every tick will open a battle lobby if not already in one. If already in one and there are no players, will randomly decide to keep it open or close it down.

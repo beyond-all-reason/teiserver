@@ -173,15 +173,15 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:battle_opened, battle) when is_map(battle) do
     type =
       case battle.type do
-        :normal -> 0
-        :replay -> 1
+        "normal" -> 0
+        "replay" -> 1
       end
 
     nattype =
       case battle.nattype do
-        :none -> 0
-        :holepunch -> 1
-        :fixed -> 2
+        "none" -> 0
+        "holepunch" -> 1
+        "fixed" -> 2
       end
 
     passworded = if battle.password == nil, do: 0, else: 1

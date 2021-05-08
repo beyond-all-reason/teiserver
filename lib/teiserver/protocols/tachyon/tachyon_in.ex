@@ -3,7 +3,7 @@ defmodule Teiserver.Protocols.TachyonIn do
   alias Teiserver.Protocols.Tachyon
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Protocols.Tachyon.{AuthIn, SystemIn}
+  alias Teiserver.Protocols.Tachyon.{AuthIn, BattleIn, SystemIn}
 
   @spec handle(String.t(), map) :: map
   def handle("", state), do: state
@@ -42,6 +42,7 @@ defmodule Teiserver.Protocols.TachyonIn do
       ["c", namespace, subcommand] ->
         case namespace do
           "auth" -> AuthIn.do_handle(subcommand, data, state)
+          "battle" -> BattleIn.do_handle(subcommand, data, state)
           "system" -> SystemIn.do_handle(subcommand, data, state)
           _ -> reply(:system, :error, %{location: "dispatch", error: "No dispatch for namespace '#{namespace}'"}, state)
         end

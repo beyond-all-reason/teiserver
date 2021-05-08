@@ -5,7 +5,7 @@ Given the correct email and password combination the server will send back a tok
 * name :: string
 * password :: string
 
-#### Response
+#### Successful response
 * token :: string
 
 #### Example input/output
@@ -35,8 +35,7 @@ Performs user authentication via a token obtained from `c.auth.token`.
 * lobby_name :: string
 * lobby_version :: string
 
-#### Response
-* result :: Success | Unverified | Failure
+#### Successful response
 * user :: User
 
 #### Example input/output
@@ -72,8 +71,7 @@ Confirms the accuracy of the user email address. Once successful the user will b
 * token :: string
 * verification_code :: string
 
-#### Response
-* result :: Success | Failure
+#### Successful response
 * user :: User
 
 #### Example input/output
@@ -96,3 +94,15 @@ Confirms the accuracy of the user email address. Once successful the user will b
   "reason": "bad code"
 }
 ```
+
+## `c.auth.disconnect`
+
+
+#### Successful response
+The connection will be terminated, there will be no response.
+
+#### Example input/output
+```
+{
+  "cmd": "c.auth.disconnect"
+}

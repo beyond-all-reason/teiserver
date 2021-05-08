@@ -1,9 +1,13 @@
 defmodule Teiserver.Protocols.Tachyon.AuthIn do
   alias Teiserver.User
+  alias Teiserver.Client
   alias Teiserver.Protocols.Tachyon
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
+  def do_handle("get_token", _, %{transport: :ranch_tcp} = state) do
+    reply(:auth, :user_token, {:failure, "Non-secured connection"}, state)
+  end
   def do_handle("get_token", %{"email" => email, "password" => plain_text_password}, state) do
     user = Central.Account.get_user_by_email(email)
     response =
@@ -51,6 +55,12 @@ defmodule Teiserver.Protocols.Tachyon.AuthIn do
         user = User.verify_user(user)
         reply(:auth, :verify, {:success, user}, state)
     end
+  end
+
+  def do_handle("disconnect", _data, state) do
+    Client.disconnect(state.userid)
+    send(self(), :terminate)
+    state
   end
 
   def do_handle(cmd, data, state) do

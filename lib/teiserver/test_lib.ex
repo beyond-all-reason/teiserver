@@ -17,6 +17,7 @@ defmodule Teiserver.TeiserverTestLib do
     %{socket: socket}
   end
 
+  @spec raw_setup :: %{socket: port()}
   def tls_setup() do
     {:ok, socket} = :ssl.connect(@host, 8201, active: false)
     %{socket: socket}
@@ -51,7 +52,7 @@ defmodule Teiserver.TeiserverTestLib do
   def auth_setup(user \\ nil) do
     user = if user, do: user, else: new_user()
 
-    {:ok, socket} = :gen_tcp.connect(@host, 8200, active: false)
+    %{socket: socket} = raw_setup()
     # Ignore the TASSERVER
     _ = _recv_raw(socket)
 
@@ -62,6 +63,27 @@ defmodule Teiserver.TeiserverTestLib do
     )
 
     _ = _recv_until(socket)
+
+    %{socket: socket, user: user}
+  end
+
+  @spec tachyon_auth_setup(nil | Map.t()) :: %{socket: port(), user: Map.t()}
+  def tachyon_auth_setup(user \\ nil) do
+    user = if user, do: user, else: new_user()
+    token = User.create_token(user)
+
+    %{socket: socket} = tls_setup()
+    # Ignore the TASSERVER
+    _recv_raw(socket)
+
+    # Swap to Tachyon
+    _send_raw(socket, "TACHYON\n")
+    _recv_raw(socket)
+
+    # Now do our login
+    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a"}
+    _tachyon_send(socket, data)
+    _tachyon_recv(socket)
 
     %{socket: socket, user: user}
   end
@@ -104,14 +126,13 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _tachyon_send(socket, data) do
     msg = Tachyon.encode(data)
-    :ok = :gen_tcp.send(socket, msg <> "\n")
-    :timer.sleep(100)
+    _send_raw(socket, msg <> "\n")
   end
 
   def _tachyon_recv(socket) do
     case _recv_raw(socket) do
-      :timeout ->
-        :timeout
+      :timeout -> :timeout
+      :closed -> :closed
 
       resp ->
         case Tachyon.decode(resp) do

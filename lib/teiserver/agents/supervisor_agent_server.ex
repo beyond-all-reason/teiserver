@@ -1,4 +1,4 @@
-defmodule Teiserver.Agents.SupervisorServer do
+defmodule Teiserver.Agents.SupervisorAgentServer do
   use GenServer
   alias Teiserver.Agents.AgentLib
 
@@ -6,6 +6,7 @@ defmodule Teiserver.Agents.SupervisorServer do
     AgentLib.post_agent_update(state.id, "Starting agents supervisor")
 
     add_servers("battlehost", 5)
+    add_servers("idle", 5)
 
     AgentLib.post_agent_update(state.id, "Agent supervisor started")
     {:noreply, state}
@@ -34,7 +35,8 @@ defmodule Teiserver.Agents.SupervisorServer do
   @spec lookup_module(String.t()) :: any()
   defp lookup_module(type) do
     case type do
-      "battlehost" -> Teiserver.Agents.BattlehostServer
+      "battlehost" -> Teiserver.Agents.BattlehostAgentServer
+      "idle" -> Teiserver.Agents.IdleAgentServer
     end
   end
 

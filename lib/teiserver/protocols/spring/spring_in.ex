@@ -647,9 +647,9 @@ defmodule Teiserver.Protocols.SpringIn do
         ] ->
           nattype =
             case nattype do
-              "0" -> :none
-              "1" -> :holepunch
-              "2" -> :fixed
+              "0" -> "none"
+              "1" -> "holepunch"
+              "2" -> "fixed"
             end
 
           client = Client.get_client_by_id(state.userid)
@@ -659,7 +659,7 @@ defmodule Teiserver.Protocols.SpringIn do
               founder_id: state.userid,
               founder_name: state.username,
               name: name,
-              type: if(type == "0", do: :normal, else: :replay),
+              type: if(type == "0", do: "normal", else: "replay"),
               nattype: nattype,
               port: port,
               max_players: int_parse(max_players),

@@ -1,7 +1,7 @@
 defmodule Teiserver.Protocols.TachyonOut do
   require Logger
   alias Teiserver.Protocols.Tachyon
-  alias Teiserver.Protocols.Tachyon.{AuthOut, SystemOut}
+  alias Teiserver.Protocols.Tachyon.{AuthOut, BattleOut, SystemOut}
 
   @spec reply(atom(), atom(), Map.t(), Map.t()) :: Map.t()
 
@@ -14,6 +14,7 @@ defmodule Teiserver.Protocols.TachyonOut do
     msg =
       case namespace do
         :auth -> AuthOut.do_reply(reply_cmd, data)
+        :battle -> BattleOut.do_reply(reply_cmd, data)
         :system -> SystemOut.do_reply(reply_cmd, data)
       end
       |> add_msg_id(state)

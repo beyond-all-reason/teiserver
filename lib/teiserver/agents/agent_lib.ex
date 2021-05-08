@@ -17,7 +17,7 @@ defmodule Teiserver.Agents.AgentLib do
     # Start the supervisor server
     {:ok, supervisor_pid} =
       DynamicSupervisor.start_child(Teiserver.Agents.DynamicSupervisor, {
-        Teiserver.Agents.SupervisorServer,
+        Teiserver.Agents.SupervisorAgentServer,
         name: via_tuple(:supervisor),
         data: %{}
       })
@@ -42,7 +42,7 @@ defmodule Teiserver.Agents.AgentLib do
   end
 
   def via_tuple(:supervisor) do
-    via_tuple(Teiserver.Agents.SupervisorServer, 1)
+    via_tuple(Teiserver.Agents.SupervisorAgentServer, 1)
   end
   def via_tuple(id) do
     {:via, Registry, {Teiserver.Agents.ServerRegistry, id}}
