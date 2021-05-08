@@ -289,7 +289,7 @@ defmodule Teiserver.Protocols.SpringIn do
         state
 
       user ->
-        case code == "#{user.verification_code}" do
+        case code == user.verification_code do
           true ->
             User.verify_user(user)
             state

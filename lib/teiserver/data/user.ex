@@ -113,6 +113,7 @@ defmodule Teiserver.User do
   def user_register_params(name, email, md5_password, extra_data \\ %{}) do
     name = clean_name(name)
     verification_code = :random.uniform(899_999) + 100_000
+      |> to_string
     encrypted_password = encrypt_password(md5_password)
 
     data =
@@ -254,6 +255,16 @@ defmodule Teiserver.User do
   def get_user_by_email(email) do
     id = ConCache.get(:users_lookup_id_with_email, email)
     ConCache.get(:users, id)
+  end
+
+  def get_user_by_token(token) do
+    case Guardian.resource_from_token(token) do
+      {:error, _bad_token} ->
+        nil
+
+      {:ok, db_user, _claims} ->
+        get_user_by_id(db_user.id)
+    end
   end
 
   def get_user_by_id(id) do
