@@ -18,7 +18,8 @@ config :central, Teiserver,
     certfile: "priv/certs/localhost.crt",
     cacertfile: "priv/certs/localhost.crt"
   ],
-  enable_hooks: false
+  enable_hooks: false,
+  user_agreement: "User agreement goes here."
 
 # We don't run a server during test. If one is required,
 # you can enable the server option below.

@@ -53,10 +53,10 @@ defmodule Teiserver.TeiserverTestLib do
 
     {:ok, socket} = :gen_tcp.connect(@host, 8200, active: false)
     # Ignore the TASSERVER
-    _ = _recv(socket)
+    _ = _recv_raw(socket)
 
     # Now do our login
-    _send(
+    _send_raw(
       socket,
       "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
     )
@@ -66,17 +66,17 @@ defmodule Teiserver.TeiserverTestLib do
     %{socket: socket, user: user}
   end
 
-  def _send(socket = {:sslsocket, _, _}, msg) do
+  def _send_raw(socket = {:sslsocket, _, _}, msg) do
     :ok = :ssl.send(socket, msg)
     :timer.sleep(100)
   end
 
-  def _send(socket, msg) do
+  def _send_raw(socket, msg) do
     :ok = :gen_tcp.send(socket, msg)
     :timer.sleep(100)
   end
 
-  def _recv(socket = {:sslsocket, _, _}) do
+  def _recv_raw(socket = {:sslsocket, _, _}) do
     case :ssl.recv(socket, 0, 500) do
       {:ok, reply} -> reply |> to_string
       {:error, :timeout} -> :timeout
@@ -84,7 +84,7 @@ defmodule Teiserver.TeiserverTestLib do
     end
   end
 
-  def _recv(socket) do
+  def _recv_raw(socket) do
     case :gen_tcp.recv(socket, 0, 500) do
       {:ok, reply} -> reply |> to_string
       {:error, :timeout} -> :timeout
@@ -109,7 +109,7 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   def _tachyon_recv(socket) do
-    case _recv(socket) do
+    case _recv_raw(socket) do
       :timeout ->
         :timeout
 

@@ -4,7 +4,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
   alias Central.Helpers.GeneralTestLib
 
   import Teiserver.TeiserverTestLib,
-    only: [raw_setup: 0, _send: 2, _tachyon_send: 2, _recv: 1, _tachyon_recv: 1]
+    only: [raw_setup: 0, _send_raw: 2, _tachyon_send: 2, _recv_raw: 1, _tachyon_recv: 1]
 
   alias Teiserver.Protocols.Tachyon
 
@@ -15,22 +15,22 @@ defmodule Teiserver.Protocols.TachyonRawTest do
 
   test "swap to tachyon", %{socket: socket} do
     # Test it swaps to it
-    _ = _recv(socket)
-    _send(socket, "TACHYON\n")
-    reply = _recv(socket)
+    _ = _recv_raw(socket)
+    _send_raw(socket, "TACHYON\n")
+    reply = _recv_raw(socket)
     assert reply =~ "OK cmd=TACHYON\n"
 
     # Now test we can ping it
     cmd = %{cmd: "c.system.ping"}
     data = Tachyon.encode(cmd)
-    _send(socket, data <> "\n")
+    _send_raw(socket, data <> "\n")
     reply = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.system.pong"}
 
     # With msg_id
     cmd = %{cmd: "c.system.ping", msg_id: 123_456}
     data = Tachyon.encode(cmd)
-    _send(socket, data <> "\n")
+    _send_raw(socket, data <> "\n")
     reply = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.system.pong", "msg_id" => 123_456}
 
@@ -40,7 +40,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
       |> :zlib.gzip()
       |> Base.encode64()
 
-    resp = _send(socket, data <> "\n")
+    resp = _send_raw(socket, data <> "\n")
     assert resp == :ok
     reply = _tachyon_recv(socket)
     assert reply == %{"result" => "error", "error" => "bad_json", "location" => "decode"}
@@ -49,13 +49,13 @@ defmodule Teiserver.Protocols.TachyonRawTest do
       "This is not gzipped"
       |> Base.encode64()
 
-    resp = _send(socket, data <> "\n")
+    resp = _send_raw(socket, data <> "\n")
     assert resp == :ok
     reply = _tachyon_recv(socket)
     assert reply == %{"result" => "error", "error" => "gzip_decompress", "location" => "decode"}
 
     data = "This is probably not base64"
-    resp = _send(socket, data <> "\n")
+    resp = _send_raw(socket, data <> "\n")
     assert resp == :ok
     reply = _tachyon_recv(socket)
     assert reply == %{"result" => "error", "error" => "base64_decode", "location" => "decode"}
@@ -63,9 +63,9 @@ defmodule Teiserver.Protocols.TachyonRawTest do
 
   test "register and auth", %{socket: socket} do
     # Swap to Tachyon
-    _ = _recv(socket)
-    _send(socket, "TACHYON\n")
-    reply = _recv(socket)
+    _ = _recv_raw(socket)
+    _send_raw(socket, "TACHYON\n")
+    reply = _recv_raw(socket)
     assert reply =~ "OK cmd=TACHYON\n"
 
     # Not actually registering just yet since that's not implemented...
@@ -126,9 +126,9 @@ defmodule Teiserver.Protocols.TachyonRawTest do
 
   test "auth existing user", %{socket: socket} do
     # Swap to Tachyon
-    _ = _recv(socket)
-    _send(socket, "TACHYON\n")
-    reply = _recv(socket)
+    _ = _recv_raw(socket)
+    _send_raw(socket, "TACHYON\n")
+    reply = _recv_raw(socket)
     assert reply =~ "OK cmd=TACHYON\n"
 
     # Not actually registering just yet since that's not implemented...

@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Live.BattleTest do
 
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
-  import Teiserver.TeiserverTestLib, only: [_send: 2, _recv_until: 1]
+  import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1]
   alias Teiserver.Battle
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Live.BattleTest do
     test "show - valid battle", %{conn: conn} do
       # Lets create a battle
       %{socket: host_socket, user: host_user} = TeiserverTestLib.auth_setup()
-      _send(
+      _send_raw(
         host_socket,
         "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tSpeed metal\tLiveBattleShow\tgameName\n"
       )
@@ -112,25 +112,25 @@ defmodule TeiserverWeb.Live.BattleTest do
       %{user: user2, socket: socket2} = TeiserverTestLib.auth_setup()
       %{user: user3, socket: socket3} = TeiserverTestLib.auth_setup()
 
-      _send(socket1, "JOINBATTLE #{battle_id} empty script_password\n")
-      _send(socket2, "JOINBATTLE #{battle_id} empty script_password\n")
-      _send(socket3, "JOINBATTLE #{battle_id} empty script_password\n")
+      _send_raw(socket1, "JOINBATTLE #{battle_id} empty script_password\n")
+      _send_raw(socket2, "JOINBATTLE #{battle_id} empty script_password\n")
+      _send_raw(socket3, "JOINBATTLE #{battle_id} empty script_password\n")
 
       # Accept them
-      _send(host_socket, "JOINBATTLEACCEPT #{user1.name}\n")
-      _send(host_socket, "JOINBATTLEACCEPT #{user2.name}\n")
-      _send(host_socket, "JOINBATTLEACCEPT #{user3.name}\n")
+      _send_raw(host_socket, "JOINBATTLEACCEPT #{user1.name}\n")
+      _send_raw(host_socket, "JOINBATTLEACCEPT #{user2.name}\n")
+      _send_raw(host_socket, "JOINBATTLEACCEPT #{user3.name}\n")
 
       # Currently we don't show spectators, we just want to ensure it doesn't crash
       _html = render(view)
       # TODO: handle showing of spectators
 
       # # Team 0
-      _send(socket1, "MYBATTLESTATUS 4195330 123456\n")
-      _send(socket2, "MYBATTLESTATUS 4195330 123456\n")
+      _send_raw(socket1, "MYBATTLESTATUS 4195330 123456\n")
+      _send_raw(socket2, "MYBATTLESTATUS 4195330 123456\n")
 
       # # Team 1
-      _send(socket3, "MYBATTLESTATUS 4195394 123456\n")
+      _send_raw(socket3, "MYBATTLESTATUS 4195394 123456\n")
 
       :timer.sleep(250)
 

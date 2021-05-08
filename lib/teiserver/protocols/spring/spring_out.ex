@@ -89,7 +89,8 @@ defmodule Teiserver.Protocols.SpringOut do
     |> Enum.map(fn s -> "AGREEMENT #{s}" end)
     |> Enum.join("\n")
 
-    agreement_rows ++ [
+    [agreement_rows <> "\n"] ++ [
+      "AGREEMENT \n",
       "AGREEMENTEND\n"
     ]
   end

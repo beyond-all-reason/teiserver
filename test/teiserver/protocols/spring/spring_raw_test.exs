@@ -2,7 +2,7 @@ defmodule Teiserver.SpringRawTest do
   use Central.ServerCase, async: false
 
   import Teiserver.TeiserverTestLib,
-    only: [raw_setup: 0, _send: 2, _recv: 1, _recv_until: 1, new_user: 0]
+    only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, new_user: 0]
 
   alias Teiserver.User
   alias Central.Account
@@ -13,35 +13,35 @@ defmodule Teiserver.SpringRawTest do
   end
 
   test "ping", %{socket: socket} do
-    _ = _recv(socket)
-    _send(socket, "#4 PING\n")
-    reply = _recv(socket)
+    _ = _recv_raw(socket)
+    _send_raw(socket, "#4 PING\n")
+    reply = _recv_raw(socket)
     assert reply =~ "#4 PONG\n"
   end
 
   test "REGISTER", %{socket: socket} do
-    _ = _recv(socket)
+    _ = _recv_raw(socket)
     existing = new_user()
     name = "TestUser_raw_register"
 
     # Failure first - bad name
-    _send(socket, "REGISTER bad-name password raw_register_email@email.com\n")
-    reply = _recv(socket)
+    _send_raw(socket, "REGISTER bad-name password raw_register_email@email.com\n")
+    reply = _recv_raw(socket)
     assert reply =~ "REGISTRATIONDENIED Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)\n"
 
     # Failure first - existing name
-    _send(socket, "REGISTER #{existing.name} password raw_register_email@email.com\n")
-    reply = _recv(socket)
+    _send_raw(socket, "REGISTER #{existing.name} password raw_register_email@email.com\n")
+    reply = _recv_raw(socket)
     assert reply =~ "REGISTRATIONDENIED Username already taken\n"
 
     # Failure first - existing email
-    _send(socket, "REGISTER new_name_here password #{existing.email}\n")
-    reply = _recv(socket)
+    _send_raw(socket, "REGISTER new_name_here password #{existing.email}\n")
+    reply = _recv_raw(socket)
     assert reply =~ "REGISTRATIONDENIED User already exists\n"
 
     # Success second
-    _send(socket, "REGISTER #{name} password raw_register_email@email.com\n")
-    reply = _recv(socket)
+    _send_raw(socket, "REGISTER #{name} password raw_register_email@email.com\n")
+    reply = _recv_raw(socket)
     assert reply =~ "REGISTRATIONACCEPTED\n"
     user = User.get_user_by_name(name)
     assert user != nil
@@ -55,16 +55,16 @@ defmodule Teiserver.SpringRawTest do
     username = "raw_new_user_test"
 
     # We expect to be greeted by a welcome message
-    reply = _recv(socket)
+    reply = _recv_raw(socket)
     assert reply == "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
 
-    _send(socket, "REGISTER #{username} X03MO1qnZdYdgyfeuILPmQ== #{username}@email\n")
-    _ = _recv(socket)
+    _send_raw(socket, "REGISTER #{username} X03MO1qnZdYdgyfeuILPmQ== #{username}@email\n")
+    _ = _recv_raw(socket)
     user = User.get_user_by_name(username)
     assert user != nil
     User.update_user(%{user | verified: true})
 
-    _send(
+    _send_raw(
       socket,
       "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
     )
@@ -103,8 +103,8 @@ defmodule Teiserver.SpringRawTest do
                ""
              ]
 
-    _send(socket, "EXIT\n")
-    _ = _recv(socket)
+    _send_raw(socket, "EXIT\n")
+    _ = _recv_raw(socket)
 
     # Is it actually killed?
     {:error, :enotconn} = :gen_tcp.recv(socket, 0, 1000)
@@ -113,29 +113,29 @@ defmodule Teiserver.SpringRawTest do
   # test "CONFIRMAGREEMENT", %{socket: socket} do
   #   user = new_user()
   #   user = User.update_user(%{user | verification_code: 123456, verified: false})
-  #   _ = _recv(socket)
+  #   _ = _recv_raw(socket)
 
   #   # If we try to login as them we should get a specific failure
-  #   _send(socket, "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
-  #   reply = _recv(socket)
+  #   _send_raw(socket, "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
+  #   reply = _recv_raw(socket)
   #   assert reply =~ "DENIED Account not verified\n"
   # end
 
   test "RESETPASSWORDREQUEST", %{socket: socket} do
     user = new_user()
-    _ = _recv(socket)
+    _ = _recv_raw(socket)
 
     # Send the wrong request
-    _send(
+    _send_raw(
       socket,
       "RESETPASSWORDREQUEST not_an_email\n"
     )
 
-    reply = _recv(socket)
+    reply = _recv_raw(socket)
     assert reply =~ "RESETPASSWORDREQUESTDENIED user error\n"
 
     # Send the correct request
-    _send(
+    _send_raw(
       socket,
       "RESETPASSWORDREQUEST #{user.email}\n"
     )
@@ -143,28 +143,28 @@ defmodule Teiserver.SpringRawTest do
     assert user.password_reset_code == nil
     user2 = User.get_user_by_id(user.id)
     assert user2.password_reset_code != nil
-    reply = _recv(socket)
+    reply = _recv_raw(socket)
     assert reply =~ "RESETPASSWORDREQUESTACCEPTED\n"
     user = user2
 
     # Now verify badly
-    _send(
+    _send_raw(
       socket,
       "RESETPASSWORD #{user.email} the_wrong_code\n"
     )
 
-    reply = _recv(socket)
+    reply = _recv_raw(socket)
     assert reply =~ "RESETPASSWORDDENIED wrong_code\n"
     user2 = User.get_user_by_id(user.id)
     assert user2.password_hash == user.password_hash
 
     # Now verify correctly
-    _send(
+    _send_raw(
       socket,
       "RESETPASSWORD #{user.email} #{user.password_reset_code}\n"
     )
 
-    reply = _recv(socket)
+    reply = _recv_raw(socket)
     assert reply == "RESETPASSWORDACCEPTED\n"
     user2 = User.get_user_by_id(user.id)
     assert user2.password_hash != user.password_hash

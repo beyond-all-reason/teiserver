@@ -9,7 +9,7 @@ defmodule Teiserver.SpringBattleHostTest do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TeiserverTestLib,
-    only: [auth_setup: 0, _send: 2, _recv: 1, _recv_until: 1]
+    only: [auth_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1]
 
   setup do
     %{socket: socket, user: user} = auth_setup()
@@ -17,12 +17,12 @@ defmodule Teiserver.SpringBattleHostTest do
   end
 
   test "battle commands when not in a battle", %{socket: socket} do
-    _send(socket, "LEAVEBATTLE\n")
-    reply = _recv(socket)
+    _send_raw(socket, "LEAVEBATTLE\n")
+    reply = _recv_raw(socket)
     assert reply == :timeout
 
-    _send(socket, "MYBATTLESTATUS 123 123\n")
-    reply = _recv(socket)
+    _send_raw(socket, "MYBATTLESTATUS 123 123\n")
+    reply = _recv_raw(socket)
     assert reply == :timeout
   end
 
@@ -32,7 +32,7 @@ defmodule Teiserver.SpringBattleHostTest do
     %{socket: p2_socket, user: p2_user} = auth_setup()
 
     # Open battle
-    _send(
+    _send_raw(
       host_socket,
       "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tbattle_host_test\tgameTitle\tgameName\n"
     )
@@ -47,23 +47,23 @@ defmodule Teiserver.SpringBattleHostTest do
     _ = _recv_until(watcher_socket)
 
     # Join
-    _send(p1_socket, "JOINBATTLE #{battle_id} empty script_password2\n")
-    _send(p2_socket, "JOINBATTLE #{battle_id} empty script_password2\n")
+    _send_raw(p1_socket, "JOINBATTLE #{battle_id} empty script_password2\n")
+    _send_raw(p2_socket, "JOINBATTLE #{battle_id} empty script_password2\n")
 
     # Nobody has been accepted yet, should not see anything
-    reply = _recv(watcher_socket)
+    reply = _recv_raw(watcher_socket)
     assert reply == :timeout
 
     # Now accept
-    _send(host_socket, "JOINBATTLEACCEPT #{p1_user.name}\n")
-    _send(host_socket, "JOINBATTLEACCEPT #{p2_user.name}\n")
+    _send_raw(host_socket, "JOINBATTLEACCEPT #{p1_user.name}\n")
+    _send_raw(host_socket, "JOINBATTLEACCEPT #{p2_user.name}\n")
 
     # Accept has happened, should see stuff
-    reply = _recv(watcher_socket)
+    reply = _recv_raw(watcher_socket)
     assert reply == "JOINEDBATTLE #{battle_id} #{p1_user.name}\nJOINEDBATTLE #{battle_id} #{p2_user.name}\n"
 
     # Now have the host leave
-    _send(host_socket, "LEAVEBATTLE\n")
+    _send_raw(host_socket, "LEAVEBATTLE\n")
     :timer.sleep(500)
 
     reply = _recv_until(watcher_socket)
@@ -71,7 +71,7 @@ defmodule Teiserver.SpringBattleHostTest do
   end
 
   test "host battle test", %{socket: socket, user: user} do
-    _send(
+    _send_raw(
       socket,
       "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tbattle_host_test\tgameTitle\tgameName\n"
     )
@@ -112,22 +112,22 @@ defmodule Teiserver.SpringBattleHostTest do
     %{socket: socket2, user: user2} = auth_setup()
 
     # Check user1 hears about this
-    reply = _recv(socket)
+    reply = _recv_raw(socket)
     assert reply =~ "ADDUSER #{user2.name} ?? 0 #{user2.id} LuaLobby Chobby\n"
 
     # Attempt to join
-    _send(socket2, "JOINBATTLE #{battle_id} empty script_password2\n")
+    _send_raw(socket2, "JOINBATTLE #{battle_id} empty script_password2\n")
 
     # Rejecting a join request is covered elsewhere, we will just handle accepting it for now
-    reply = _recv(socket)
+    reply = _recv_raw(socket)
     assert reply == "JOINBATTLEREQUEST #{user2.name} 127.0.0.1\n"
 
     # Send acceptance
-    _send(socket, "JOINBATTLEACCEPT #{user2.name}\n")
+    _send_raw(socket, "JOINBATTLEACCEPT #{user2.name}\n")
 
     # The response to joining a battle is tested elsewhere, we just care about the host right now
-    _ = _recv(socket2)
-    _ = _recv(socket2)
+    _ = _recv_raw(socket2)
+    _ = _recv_raw(socket2)
 
     reply = _recv_until(socket)
     assert reply =~ "JOINEDBATTLE #{battle_id} #{user2.name} script_password2\n"
@@ -139,22 +139,22 @@ defmodule Teiserver.SpringBattleHostTest do
     battle = Battle.get_battle(battle_id)
     assert Enum.count(battle.players) == 1
 
-    _send(socket, "KICKFROMBATTLE #{user2.name}\n")
-    reply = _recv(socket2)
+    _send_raw(socket, "KICKFROMBATTLE #{user2.name}\n")
+    reply = _recv_raw(socket2)
     assert reply == "FORCEQUITBATTLE\nLEFTBATTLE #{battle_id} #{user2.name}\n"
 
     # Add user 3
     %{socket: socket3, user: user3} = auth_setup()
 
-    _send(socket2, "JOINBATTLE #{battle_id} empty script_password3\n")
-    _send(socket, "JOINBATTLEACCEPT #{user2.name}\n")
-    _ = _recv(socket)
-    _ = _recv(socket2)
+    _send_raw(socket2, "JOINBATTLE #{battle_id} empty script_password3\n")
+    _send_raw(socket, "JOINBATTLEACCEPT #{user2.name}\n")
+    _ = _recv_raw(socket)
+    _ = _recv_raw(socket2)
 
     # User 3 join the battle
-    _send(socket3, "JOINBATTLE #{battle_id} empty script_password3\n")
-    _send(socket, "JOINBATTLEACCEPT #{user3.name}\n")
-    reply = _recv(socket2)
+    _send_raw(socket3, "JOINBATTLE #{battle_id} empty script_password3\n")
+    _send_raw(socket, "JOINBATTLEACCEPT #{user3.name}\n")
+    reply = _recv_raw(socket2)
     assert reply == "JOINEDBATTLE #{battle_id} #{user3.name}\n"
 
     # Had a bug where the battle would be incorrectly closed
@@ -165,22 +165,22 @@ defmodule Teiserver.SpringBattleHostTest do
 
     # Adding start rectangles
     assert Enum.count(battle.start_rectangles) == 0
-    _send(socket, "ADDSTARTRECT 2 50 50 100 100\n")
-    _ = _recv(socket)
+    _send_raw(socket, "ADDSTARTRECT 2 50 50 100 100\n")
+    _ = _recv_raw(socket)
 
     battle = Battle.get_battle(battle_id)
     assert Enum.count(battle.start_rectangles) == 1
 
-    _send(socket, "REMOVESTARTRECT 2\n")
-    _ = _recv(socket)
+    _send_raw(socket, "REMOVESTARTRECT 2\n")
+    _ = _recv_raw(socket)
     battle = Battle.get_battle(battle_id)
     assert Enum.count(battle.start_rectangles) == 0
 
     # Add and remove script tags
     refute Map.has_key?(battle.tags, "custom/key1")
     refute Map.has_key?(battle.tags, "custom/key2")
-    _send(socket, "SETSCRIPTTAGS custom/key1=customValue\tcustom/key2=customValue2\n")
-    reply = _recv(socket)
+    _send_raw(socket, "SETSCRIPTTAGS custom/key1=customValue\tcustom/key2=customValue2\n")
+    reply = _recv_raw(socket)
 
     assert reply == "SETSCRIPTTAGS custom/key1=customValue\tcustom/key2=customValue2\n"
 
@@ -188,8 +188,8 @@ defmodule Teiserver.SpringBattleHostTest do
     assert Map.has_key?(battle.tags, "custom/key1")
     assert Map.has_key?(battle.tags, "custom/key2")
 
-    _send(socket, "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n")
-    reply = _recv(socket)
+    _send_raw(socket, "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n")
+    reply = _recv_raw(socket)
     assert reply == "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n"
 
     battle = Battle.get_battle(battle_id)
@@ -198,48 +198,48 @@ defmodule Teiserver.SpringBattleHostTest do
     assert Map.has_key?(battle.tags, "custom/key2")
 
     # Enable and disable units
-    _send(socket, "DISABLEUNITS unit1 unit2 unit3\n")
+    _send_raw(socket, "DISABLEUNITS unit1 unit2 unit3\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "DISABLEUNITS unit1 unit2 unit3\n"
 
-    _send(socket, "ENABLEUNITS unit3\n")
+    _send_raw(socket, "ENABLEUNITS unit3\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "ENABLEUNITS unit3\n"
 
-    _send(socket, "ENABLEALLUNITS\n")
+    _send_raw(socket, "ENABLEALLUNITS\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "ENABLEALLUNITS\n"
 
     # Now kick both 2 and 3
-    _send(socket, "KICKFROMBATTLE #{user2.name}\n")
-    _send(socket, "KICKFROMBATTLE #{user3.name}\n")
-    _ = _recv(socket2)
-    _ = _recv(socket3)
+    _send_raw(socket, "KICKFROMBATTLE #{user2.name}\n")
+    _send_raw(socket, "KICKFROMBATTLE #{user3.name}\n")
+    _ = _recv_raw(socket2)
+    _ = _recv_raw(socket3)
 
     # Mybattle status
     # Clear out a bunch of things we've tested for socket1
-    _ = _recv(socket2)
-    _send(socket2, "MYBATTLESTATUS 4195330 600\n")
+    _ = _recv_raw(socket2)
+    _send_raw(socket2, "MYBATTLESTATUS 4195330 600\n")
     :timer.sleep(100)
-    _ = _recv(socket)
-    reply = _recv(socket2)
+    _ = _recv_raw(socket)
+    reply = _recv_raw(socket2)
     # socket2 got kicked, they shouldn't get any result from this
     assert reply == :timeout
 
     # Now lets get them to rejoin the battle
-    _send(socket2, "JOINBATTLE #{battle_id} empty script_password2\n")
-    _send(socket, "JOINBATTLEACCEPT #{user2.name}\n")
+    _send_raw(socket2, "JOINBATTLE #{battle_id} empty script_password2\n")
+    _send_raw(socket, "JOINBATTLEACCEPT #{user2.name}\n")
     :timer.sleep(100)
-    _ = _recv(socket2)
+    _ = _recv_raw(socket2)
 
     # Now try the status again
-    _send(socket2, "MYBATTLESTATUS 4195330 600\n")
+    _send_raw(socket2, "MYBATTLESTATUS 4195330 600\n")
     :timer.sleep(100)
-    _ = _recv(socket)
-    reply = _recv(socket2)
+    _ = _recv_raw(socket)
+    reply = _recv_raw(socket2)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195330 600\n"
 
     status = Spring.parse_battle_status("4195330")
@@ -255,14 +255,14 @@ defmodule Teiserver.SpringBattleHostTest do
            }
 
     # Handicap
-    _send(socket, "HANDICAP #{user2.name} 87\n")
+    _send_raw(socket, "HANDICAP #{user2.name} 87\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4373506 600\n"
     status = Spring.parse_battle_status("4373506")
     assert status.handicap == 87
 
-    _send(socket, "HANDICAP #{user2.name} 0\n")
+    _send_raw(socket, "HANDICAP #{user2.name} 0\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195330 600\n"
@@ -270,7 +270,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert status.handicap == 0
 
     # Forceteamno
-    _send(socket, "FORCETEAMNO #{user2.name} 1\n")
+    _send_raw(socket, "FORCETEAMNO #{user2.name} 1\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195334 600\n"
@@ -278,7 +278,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert status.team_number == 1
 
     # Forceallyno
-    _send(socket, "FORCEALLYNO #{user2.name} 1\n")
+    _send_raw(socket, "FORCEALLYNO #{user2.name} 1\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195398 600\n"
@@ -286,13 +286,13 @@ defmodule Teiserver.SpringBattleHostTest do
     assert status.ally_team_number == 1
 
     # Forceteamcolour
-    _send(socket, "FORCETEAMCOLOR #{user2.name} 800\n")
+    _send_raw(socket, "FORCETEAMCOLOR #{user2.name} 800\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195398 800\n"
 
     # Forcespectator
-    _send(socket, "FORCESPECTATORMODE #{user2.name}\n")
+    _send_raw(socket, "FORCESPECTATORMODE #{user2.name}\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4194374 800\n"
@@ -300,19 +300,19 @@ defmodule Teiserver.SpringBattleHostTest do
     assert status.player == false
 
     # SAYBATTLEEX
-    _send(socket, "SAYBATTLEEX This is me saying something from somewhere else\n")
+    _send_raw(socket, "SAYBATTLEEX This is me saying something from somewhere else\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "SAIDBATTLEEX #{user.name} This is me saying something from somewhere else\n"
 
     # UPDATEBATTLEINFO
-    _send(socket, "UPDATEBATTLEINFO 1 0 123456 Map name here\n")
+    _send_raw(socket, "UPDATEBATTLEINFO 1 0 123456 Map name here\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "UPDATEBATTLEINFO #{battle.id} 1 0 123456 Map name here\n"
 
     # BOT TIME
-    _send(socket, "ADDBOT bot1 4195330 0 ai_dll\n")
+    _send_raw(socket, "ADDBOT bot1 4195330 0 ai_dll\n")
     # Gives time for pubsub to send out
     :timer.sleep(100)
     reply = _recv_until(socket)
@@ -320,31 +320,31 @@ defmodule Teiserver.SpringBattleHostTest do
     botid = int_parse(botid)
     assert reply =~ "ADDBOT #{botid} bot1 #{user.name} 4195330 0 ai_dll\n"
 
-    _send(socket, "UPDATEBOT bot1 4195394 2\n")
+    _send_raw(socket, "UPDATEBOT bot1 4195394 2\n")
     # Gives time for pubsub to send out
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "UPDATEBOT #{botid} bot1 4195394 2\n"
 
-    _send(socket, "REMOVEBOT bot1\n")
+    _send_raw(socket, "REMOVEBOT bot1\n")
     # Gives time for pubsub to send out
     :timer.sleep(100)
     reply = _recv_until(socket)
     assert reply == "REMOVEBOT #{botid} bot1\n"
 
     # Leave the battle
-    _send(socket, "LEAVEBATTLE\n")
-    reply = _recv(socket)
+    _send_raw(socket, "LEAVEBATTLE\n")
+    reply = _recv_raw(socket)
     # assert reply =~ "LEFTBATTLE #{battle_id} #{user.name}\n"
     assert reply =~ "BATTLECLOSED #{battle_id}\n"
 
-    _send(socket, "EXIT\n")
-    _recv(socket)
+    _send_raw(socket, "EXIT\n")
+    _recv_raw(socket)
 
-    _send(socket2, "EXIT\n")
-    _recv(socket2)
+    _send_raw(socket2, "EXIT\n")
+    _recv_raw(socket2)
 
-    _send(socket3, "EXIT\n")
-    _recv(socket3)
+    _send_raw(socket3, "EXIT\n")
+    _recv_raw(socket3)
   end
 end

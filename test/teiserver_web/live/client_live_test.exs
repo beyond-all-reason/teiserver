@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Live.ClientTest do
   alias Teiserver.Client
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
-  import Teiserver.TeiserverTestLib, only: [_send: 2]
+  import Teiserver.TeiserverTestLib, only: [_send_raw: 2]
 
   setup do
     GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
@@ -32,14 +32,14 @@ defmodule TeiserverWeb.Live.ClientTest do
       assert html =~ "#{user2.name}"
 
       # User 2 logs out
-      _send(socket2, "EXIT\n")
+      _send_raw(socket2, "EXIT\n")
       html = render(view)
       assert html =~ "Clients - Row count: "
       assert html =~ "#{user1.name}"
       refute html =~ "#{user2.name}"
 
       # And now user 1 too
-      _send(socket1, "EXIT\n")
+      _send_raw(socket1, "EXIT\n")
       html = render(view)
       # assert html =~ "No clients found"
       refute html =~ "#{user1.name}"
@@ -70,7 +70,7 @@ defmodule TeiserverWeb.Live.ClientTest do
       assert GenServer.call(client.pid, {:get, :extra_logging}) == false
 
       # Log out the user
-      _send(socket, "EXIT\n")
+      _send_raw(socket, "EXIT\n")
       assert_redirect(view, "/teiserver/admin/client", 250)
     end
 

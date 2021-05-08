@@ -7,7 +7,7 @@ defmodule Teiserver.SpringMatchmakingTest do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TeiserverTestLib,
-    only: [auth_setup: 0, _send: 2, _recv: 1]
+    only: [auth_setup: 0, _send_raw: 2, _recv_raw: 1]
 
   setup do
     %{socket: socket, user: user} = auth_setup()
@@ -34,22 +34,22 @@ defmodule Teiserver.SpringMatchmakingTest do
     %{socket: battle_socket} = auth_setup()
 
     # Clear both sockets
-    _recv(socket1)
-    _recv(socket2)
+    _recv_raw(socket1)
+    _recv_raw(socket2)
 
     # Join the queue
-    _send(socket1, "c.matchmaking.join_queue #{queue.id}\n")
-    reply = _recv(socket1)
+    _send_raw(socket1, "c.matchmaking.join_queue #{queue.id}\n")
+    reply = _recv_raw(socket1)
     assert reply == "OK cmd=c.matchmaking.join_queue\t#{queue.id}\n"
 
     # Trigger the queue server and see if anything happens
     send(queue.pid, :tick)
-    reply = _recv(socket1)
+    reply = _recv_raw(socket1)
     assert reply == :timeout
 
     # Now get the second user to join
-    _send(socket2, "c.matchmaking.join_queue #{queue.id}\n")
-    reply = _recv(socket2)
+    _send_raw(socket2, "c.matchmaking.join_queue #{queue.id}\n")
+    reply = _recv_raw(socket2)
     assert reply =~ "OK cmd=c.matchmaking.join_queue\t#{queue.id}\n"
 
     # Check server state
@@ -60,14 +60,14 @@ defmodule Teiserver.SpringMatchmakingTest do
 
     # Tick, we expect to be send a pair of ready checks
     send(queue.pid, :tick)
-    reply = _recv(socket1)
+    reply = _recv_raw(socket1)
     assert reply == "s.matchmaking.ready_check #{queue.id}\n"
-    reply = _recv(socket2)
+    reply = _recv_raw(socket2)
     assert reply == "s.matchmaking.ready_check #{queue.id}\n"
 
     # Accept the first
-    _send(socket1, "c.matchmaking.ready\n")
-    reply = _recv(socket1)
+    _send_raw(socket1, "c.matchmaking.ready\n")
+    reply = _recv_raw(socket1)
     assert reply == :timeout
 
     # Lets see what the state of the queue_server is
@@ -79,8 +79,8 @@ defmodule Teiserver.SpringMatchmakingTest do
     assert state.waiting_for_players == [user2.id]
 
     # And the second
-    _send(socket2, "c.matchmaking.ready\n")
-    reply = _recv(socket2)
+    _send_raw(socket2, "c.matchmaking.ready\n")
+    reply = _recv_raw(socket2)
     assert reply == :timeout
 
     state = GenServer.call(queue.pid, :get_state)
@@ -96,18 +96,18 @@ defmodule Teiserver.SpringMatchmakingTest do
     assert state == state2
 
     # Now lets create a battle
-    _recv(battle_socket)
+    _recv_raw(battle_socket)
 
-    _send(
+    _send_raw(
       battle_socket,
       "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName\n"
     )
 
     # We know the battle is being opened, don't need to worry about it
-    _recv(socket1)
-    _recv(socket2)
+    _recv_raw(socket1)
+    _recv_raw(socket2)
 
-    reply = _recv(battle_socket)
+    reply = _recv_raw(battle_socket)
     [_all, battle_id] = Regex.run(~r/BATTLEOPENED ([0-9]+) [0-9]/, reply)
     battle_id = int_parse(battle_id)
 
@@ -120,9 +120,9 @@ defmodule Teiserver.SpringMatchmakingTest do
     assert state.ready_started_at == nil
 
     # Commands should be sent to user1 and user2
-    reply = _recv(socket1)
+    reply = _recv_raw(socket1)
     assert reply =~ "JOINBATTLE #{battle_id} gameHash\n"
-    reply = _recv(socket2)
+    reply = _recv_raw(socket2)
     assert reply =~ "JOINBATTLE #{battle_id} gameHash\n"
   end
 
@@ -158,74 +158,74 @@ defmodule Teiserver.SpringMatchmakingTest do
     client_pid = Client.get_client_by_id(user.id).pid
 
     # List the queue
-    _send(socket, "c.matchmaking.list_all_queues\n")
-    reply = _recv(socket)
+    _send_raw(socket, "c.matchmaking.list_all_queues\n")
+    reply = _recv_raw(socket)
     assert reply =~ "s.matchmaking.full_queue_list "
     assert reply =~ "#{queue1.id}:test_queue_join_leave1"
     assert reply =~ "#{queue2.id}:test_queue_join_leave2"
 
     # List my queues, should be empty
-    _send(socket, "c.matchmaking.list_my_queues\n")
-    reply = _recv(socket)
+    _send_raw(socket, "c.matchmaking.list_my_queues\n")
+    reply = _recv_raw(socket)
     assert reply == "s.matchmaking.your_queue_list \n"
 
     # Tell me about this queue
-    _send(socket, "c.matchmaking.get_queue_info #{queue1.id}\n")
-    reply = _recv(socket)
+    _send_raw(socket, "c.matchmaking.get_queue_info #{queue1.id}\n")
+    reply = _recv_raw(socket)
     assert reply == "s.matchmaking.queue_info #{queue1.id}\ttest_queue_join_leave1\t0\t0\n"
 
     # Join a queue that doesn't exist
-    _send(socket, "c.matchmaking.join_queue 0\n")
-    reply = _recv(socket)
+    _send_raw(socket, "c.matchmaking.join_queue 0\n")
+    reply = _recv_raw(socket)
     assert reply == "NO cmd=c.matchmaking.join_queue\t0\n"
 
     # Join the queue (just the first player)
-    _send(socket, "c.matchmaking.join_queue #{queue1.id}\n")
-    reply = _recv(socket)
+    _send_raw(socket, "c.matchmaking.join_queue #{queue1.id}\n")
+    reply = _recv_raw(socket)
     assert reply == "OK cmd=c.matchmaking.join_queue\t#{queue1.id}\n"
 
     # List my queues, should have this one queue
-    _send(socket, "c.matchmaking.list_my_queues\n")
-    reply = _recv(socket)
+    _send_raw(socket, "c.matchmaking.list_my_queues\n")
+    reply = _recv_raw(socket)
     assert reply == "s.matchmaking.your_queue_list #{queue1.id}:test_queue_join_leave1\n"
 
     # Leave the queue
-    _send(socket, "c.matchmaking.leave_queue #{queue1.id}\n")
-    reply = _recv(socket)
+    _send_raw(socket, "c.matchmaking.leave_queue #{queue1.id}\n")
+    reply = _recv_raw(socket)
     assert reply == :timeout
 
     # List my queues, should be empty
-    _send(socket, "c.matchmaking.list_my_queues\n")
-    reply = _recv(socket)
+    _send_raw(socket, "c.matchmaking.list_my_queues\n")
+    reply = _recv_raw(socket)
     assert reply == "s.matchmaking.your_queue_list \n"
 
     user_queues = GenServer.call(client_pid, {:get, :queues})
     assert user_queues == []
 
     # Tell me about this queue, it's different now
-    _send(socket, "c.matchmaking.get_queue_info #{queue1.id}\n")
-    reply = _recv(socket)
+    _send_raw(socket, "c.matchmaking.get_queue_info #{queue1.id}\n")
+    reply = _recv_raw(socket)
     assert reply == "s.matchmaking.queue_info #{queue1.id}\ttest_queue_join_leave1\t0\t0\n"
 
     # And rejoin
-    _send(socket, "c.matchmaking.join_queue #{queue1.id}\n")
-    reply = _recv(socket)
+    _send_raw(socket, "c.matchmaking.join_queue #{queue1.id}\n")
+    reply = _recv_raw(socket)
     assert reply == "OK cmd=c.matchmaking.join_queue\t#{queue1.id}\n"
 
     user_queues = GenServer.call(client_pid, {:get, :queues})
     assert user_queues == [queue1.id]
 
     # Join queue 2
-    _send(socket, "c.matchmaking.join_queue #{queue2.id}\n")
-    reply = _recv(socket)
+    _send_raw(socket, "c.matchmaking.join_queue #{queue2.id}\n")
+    reply = _recv_raw(socket)
     assert reply == "OK cmd=c.matchmaking.join_queue\t#{queue2.id}\n"
 
     user_queues = GenServer.call(client_pid, {:get, :queues})
     assert user_queues == [queue1.id, queue2.id]
 
     # Now leave all queues
-    _send(socket, "c.matchmaking.leave_all_queues\n")
-    reply = _recv(socket)
+    _send_raw(socket, "c.matchmaking.leave_all_queues\n")
+    reply = _recv_raw(socket)
     assert reply == :timeout
 
     user_queues = GenServer.call(client_pid, {:get, :queues})
