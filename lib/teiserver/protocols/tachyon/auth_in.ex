@@ -1,5 +1,6 @@
 defmodule Teiserver.Protocols.Tachyon.AuthIn do
   alias Teiserver.User
+  alias Teiserver.Protocols.Tachyon
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
@@ -20,8 +21,35 @@ defmodule Teiserver.Protocols.Tachyon.AuthIn do
     end
   end
 
-  def do_handle("login", data, state) do
-    reply(:system, :pong, data, state)
+  def do_handle("login", %{"token" => token, "lobby_name" => lobby_name, "lobby_version" => lobby_version}, state) do
+    response = User.try_login(token, state, state.ip, "#{lobby_name} #{lobby_version}")
+
+    case response do
+      {:error, "Unverified", _userid} ->
+        reply(:auth, :user_agreement, nil, state)
+
+      {:ok, user} ->
+        Tachyon.do_login_accepted(state, user)
+
+      {:error, reason} ->
+        reply(:auth, :login_denied, reason, state)
+    end
+  end
+
+  def do_handle("verify", %{"token" => token, "code" => code}, state) do
+    user = User.get_user_by_token(token)
+
+    cond do
+      user == nil ->
+        reply(:auth, :verify, {:failure, "bad token"}, state)
+
+      user.verification_code != code ->
+        reply(:auth, :verify, {:failure, "bad code"}, state)
+
+      true ->
+        user = User.verify_user(user)
+        reply(:auth, :verify, {:success, user}, state)
+    end
   end
 
   def do_handle(cmd, data, state) do

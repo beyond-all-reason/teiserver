@@ -8,6 +8,7 @@ defmodule Teiserver.TeiserverTestLib do
   alias Teiserver.User
   alias Teiserver.Client
   alias Teiserver.Account
+  alias Teiserver.Protocols.Tachyon
   @host '127.0.0.1'
 
   @spec raw_setup :: %{socket: port()}
@@ -98,6 +99,25 @@ defmodule Teiserver.TeiserverTestLib do
 
       {:error, :timeout} ->
         acc
+    end
+  end
+
+  def _tachyon_send(socket, data) do
+    msg = Tachyon.encode(data)
+    :ok = :gen_tcp.send(socket, msg <> "\n")
+    :timer.sleep(100)
+  end
+
+  def _tachyon_recv(socket) do
+    case _recv(socket) do
+      :timeout ->
+        :timeout
+
+      resp ->
+        case Tachyon.decode(resp) do
+          {:ok, msg} -> msg
+          error -> error
+        end
     end
   end
 
