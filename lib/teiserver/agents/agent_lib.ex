@@ -59,21 +59,14 @@ defmodule Teiserver.Agents.AgentLib do
     socket
   end
 
-  defp do_login(socket, token, user) do
+  defp do_login(socket, token) do
     msg = %{cmd: "c.auth.login", token: token, lobby_name: "agent_lobby", lobby_version: "1"}
     _send(socket, msg)
     reply = _recv(socket)
 
-    IO.puts "reply"
-    IO.inspect reply
-    IO.puts ""
-
-
-    if reply == "ACCEPTED #{user.name}\n" do
-      _welcome_msg = _recv(socket)
-      :ok
-    else
-      {:error, :login}
+    case reply["result"] do
+      "success" -> :ok
+      "failure" -> {:error, :login}
     end
   end
 
@@ -115,7 +108,7 @@ defmodule Teiserver.Agents.AgentLib do
 
     with :ok <- swap_to_tachyon(socket),
          token <- User.create_token(user),
-         :ok <- do_login(socket, token, user)
+         :ok <- do_login(socket, token)
       do
         :success
       else
@@ -123,7 +116,7 @@ defmodule Teiserver.Agents.AgentLib do
     end
   end
 
-  @spec _send_raw({:sslsocket, any, any}, Map.t()) :: :ok
+  @spec _send({:sslsocket, any, any}, Map.t()) :: :ok
   def _send(socket = {:sslsocket, _, _}, data) do
     msg = Tachyon.encode(data)
     _send_raw(socket, msg <> "\n")
