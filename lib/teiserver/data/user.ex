@@ -619,7 +619,8 @@ defmodule Teiserver.User do
     end
   end
 
-  def try_login(token, state, ip, lobby) do
+  @spec try_login(String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()}
+  def try_login(token, ip, lobby) do
     wait_for_precache()
 
     case Guardian.resource_from_token(token) do
@@ -636,7 +637,7 @@ defmodule Teiserver.User do
 
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
-            do_login(user, state, ip, lobby)
+            do_login(user, ip, lobby)
 
           user.banned ->
             {:error, "Banned"}
@@ -650,15 +651,16 @@ defmodule Teiserver.User do
           Client.get_client_by_id(user.id) != nil ->
             # {:error, "Already logged in"}
             Client.disconnect(user.id)
-            do_login(user, state, ip, lobby)
+            do_login(user, ip, lobby)
 
           true ->
-            do_login(user, state, ip, lobby)
+            do_login(user, ip, lobby)
         end
     end
   end
 
-  def try_md5_login(username, md5_password, state, ip, lobby) do
+  @spec try_md5_login(String.t(), String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()}
+  def try_md5_login(username, md5_password, ip, lobby) do
     wait_for_precache()
 
     case get_user_by_name(username) do
@@ -674,7 +676,7 @@ defmodule Teiserver.User do
 
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
-            do_login(user, state, ip, lobby)
+            do_login(user, ip, lobby)
 
           user.banned ->
             {:error, "Banned"}
@@ -691,16 +693,16 @@ defmodule Teiserver.User do
           Client.get_client_by_id(user.id) != nil ->
             # {:error, "Already logged in"}
             Client.disconnect(user.id)
-            do_login(user, state, ip, lobby)
+            do_login(user, ip, lobby)
 
           true ->
-            do_login(user, state, ip, lobby)
+            do_login(user, ip, lobby)
         end
     end
   end
 
-  @spec do_login(Map.t(), Map.t(), String.t(), String.t()) :: {:ok, Map.t()}
-  defp do_login(user, state, ip, lobbyid) do
+  @spec do_login(Map.t(), String.t(), String.t()) :: {:ok, Map.t()}
+  defp do_login(user, ip, lobbyid) do
     # If they don't want a flag shown, don't show it, otherwise check for an override before trying geoip
     country =
       cond do
@@ -733,11 +735,6 @@ defmodule Teiserver.User do
       }
 
     update_user(user, persist: true)
-
-    proto = state.protocol_out
-
-    proto.reply(:login_accepted, user.name, nil, state)
-    proto.reply(:motd, nil, nil, state)
 
     {:ok, user}
   end

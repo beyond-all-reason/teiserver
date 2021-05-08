@@ -52,7 +52,8 @@ defmodule Teiserver.Protocols.Tachyon do
     |> Base.encode64()
   end
 
-  @spec decode(String.t()) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}
+  @spec decode(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}
+  def decode(:timeout), do: {:ok, nil}
   def decode(data) do
     with {:ok, decoded64} <- Base.decode64(data),
          {:ok, unzipped} <- unzip(decoded64),
@@ -62,6 +63,14 @@ defmodule Teiserver.Protocols.Tachyon do
       :error -> {:error, :base64_decode}
       {:error, :gzip_decompress} -> {:error, :gzip_decompress}
       {:error, %Jason.DecodeError{}} -> {:error, :bad_json}
+    end
+  end
+
+  @spec decode!(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}
+  def decode!(data) do
+    case decode(data) do
+      {:ok, result} -> result
+      {:error, reason} -> throw "Tachyon decode! error - #{reason}"
     end
   end
 

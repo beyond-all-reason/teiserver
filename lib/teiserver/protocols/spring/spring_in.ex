@@ -212,7 +212,7 @@ defmodule Teiserver.Protocols.SpringIn do
       end
 
     # Now try to login using a token
-    response = User.try_login(token, state, state.ip, lobby)
+    response = User.try_login(token, state.ip, lobby)
 
     case response do
       {:error, "Unverified", userid} ->
@@ -242,7 +242,7 @@ defmodule Teiserver.Protocols.SpringIn do
       case regex_result do
         [_, username, password, _cpu, _ip, lobby, _userid, _modes | _] ->
           username = User.clean_name(username)
-          User.try_md5_login(username, password, state, state.ip, lobby)
+          User.try_md5_login(username, password, state.ip, lobby)
 
         nil ->
           _no_match(state, "LOGIN", msg_id, data)

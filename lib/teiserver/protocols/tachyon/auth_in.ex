@@ -22,17 +22,18 @@ defmodule Teiserver.Protocols.Tachyon.AuthIn do
   end
 
   def do_handle("login", %{"token" => token, "lobby_name" => lobby_name, "lobby_version" => lobby_version}, state) do
-    response = User.try_login(token, state, state.ip, "#{lobby_name} #{lobby_version}")
+    response = User.try_login(token, state.ip, "#{lobby_name} #{lobby_version}")
 
     case response do
       {:error, "Unverified", _userid} ->
         reply(:auth, :user_agreement, nil, state)
 
       {:ok, user} ->
-        Tachyon.do_login_accepted(state, user)
+        new_state = Tachyon.do_login_accepted(state, user)
+        reply(:auth, :login, {:success, user}, new_state)
 
       {:error, reason} ->
-        reply(:auth, :login_denied, reason, state)
+        reply(:auth, :login, {:failure, reason}, state)
     end
   end
 

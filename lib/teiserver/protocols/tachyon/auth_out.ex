@@ -48,4 +48,22 @@ defmodule Teiserver.Protocols.Tachyon.AuthOut do
       "user" => Tachyon.convert_object(:user_extended, user)
     }
   end
+
+  ###########
+  # Login
+  def do_reply(:login, {:failure, reason}) do
+    %{
+      "cmd" => "s.auth.login",
+      "result" => "failure",
+      "reason" => reason
+    }
+  end
+
+  def do_reply(:login, {:success, user}) do
+    %{
+      "cmd" => "s.auth.login",
+      "result" => "success",
+      "user" => Tachyon.convert_object(:user_extended, user)
+    }
+  end
 end

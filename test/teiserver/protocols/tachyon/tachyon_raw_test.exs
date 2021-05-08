@@ -123,4 +123,54 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     assert reply["user"]["id"] == user.id
     assert match?(%{"cmd" => "s.auth.verify", "result" => "success"}, reply)
   end
+
+  test "auth existing user", %{socket: socket} do
+    # Swap to Tachyon
+    _ = _recv(socket)
+    _send(socket, "TACHYON\n")
+    reply = _recv(socket)
+    assert reply =~ "OK cmd=TACHYON\n"
+
+    # Not actually registering just yet since that's not implemented...
+
+    # Create the user manually for now
+    user =
+      GeneralTestLib.make_user(%{
+        "name" => "tachyon_token_test_user",
+        "email" => "tachyon_token_test_user@",
+        "password" => "token_password",
+        "data" => %{
+          "verified" => true
+        }
+      })
+    Teiserver.User.recache_user(user.id)
+
+    # Bad password but also test msg_id continuance
+    data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}
+    _tachyon_send(socket, data)
+    reply = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.auth.get_token", "result" => "failure", "reason" => "Invalid credentials", "msg_id" => 555}
+
+    # Good password
+    data = %{cmd: "c.auth.get_token", password: "token_password", email: user.email}
+    _tachyon_send(socket, data)
+    reply = _tachyon_recv(socket)
+    assert Map.has_key?(reply, "token")
+    token = reply["token"]
+    assert reply == %{"cmd" => "s.auth.get_token", "result" => "success", "token" => token}
+
+    # Login - bad token
+    data = %{cmd: "c.auth.login", token: "ab", lobby_name: "ex_test", lobby_version: "1a"}
+    _tachyon_send(socket, data)
+    reply = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.auth.login", "result" => "failure", "reason" => "token_login_failed"}
+
+    # Login - good token
+    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a"}
+    _tachyon_send(socket, data)
+    reply = _tachyon_recv(socket)
+    assert Map.has_key?(reply, "user")
+    assert reply["user"]["id"] == user.id
+    assert match?(%{"cmd" => "s.auth.login", "result" => "success"}, reply)
+  end
 end

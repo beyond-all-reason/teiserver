@@ -1,4 +1,5 @@
 defmodule Teiserver.Agents.AgentLib do
+  alias Teiserver.Protocols.Tachyon
   alias Teiserver.User
   alias Phoenix.PubSub
   require Logger
@@ -53,28 +54,20 @@ defmodule Teiserver.Agents.AgentLib do
   def get_socket() do
     {:ok, socket} =
       :ssl.connect(@localhost, Application.get_env(:central, Teiserver)[:ports][:tls], active: false)
-    _ = _recv(socket)
+    _ = _recv_raw(socket)
 
     socket
   end
 
-  defp get_token(socket, user) do
-    _send(socket, "c.user.get_token_by_email #{user.email}\tpassword\n")
-    reply = _recv(socket, 1500)
-    token =
-      String.replace(reply, "s.user.user_token #{user.email}\t", "")
-      |> String.replace("\n", "")
-
-    case token do
-      nil -> {:error, :token}
-      "" -> {:error, :token}
-      _ -> {:ok, token}
-    end
-  end
-
   defp do_login(socket, token, user) do
-    _send(socket, "c.user.login #{token}\tAgentLobby\n")
+    msg = %{cmd: "c.auth.login", token: token, lobby_name: "agent_lobby", lobby_version: "1"}
+    _send(socket, msg)
     reply = _recv(socket)
+
+    IO.puts "reply"
+    IO.inspect reply
+    IO.puts ""
+
 
     if reply == "ACCEPTED #{user.name}\n" do
       _welcome_msg = _recv(socket)
@@ -85,8 +78,8 @@ defmodule Teiserver.Agents.AgentLib do
   end
 
   defp swap_to_tachyon(socket) do
-    _send(socket, "TACHYON\n")
-    reply = _recv(socket)
+    _send_raw(socket, "TACHYON\n")
+    reply = _recv_raw(socket)
 
     if reply == "OK cmd=TACHYON\n" do
       :ok
@@ -121,23 +114,40 @@ defmodule Teiserver.Agents.AgentLib do
     _welcome_msg = _recv(socket)
 
     with :ok <- swap_to_tachyon(socket),
-        {:ok, token} <- get_token(socket, user),
+         token <- User.create_token(user),
          :ok <- do_login(socket, token, user)
       do
         :success
       else
-        {:error, :token} -> throw "Get token error"
         {:error, :login} -> throw "Login error"
     end
   end
 
-  @spec _send({:sslsocket, any, any}, String.t()) :: :ok
-  def _send(socket = {:sslsocket, _, _}, msg) do
+  @spec _send_raw({:sslsocket, any, any}, Map.t()) :: :ok
+  def _send(socket = {:sslsocket, _, _}, data) do
+    msg = Tachyon.encode(data)
+    _send_raw(socket, msg <> "\n")
+  end
+
+  @spec _send_raw({:sslsocket, any, any}, String.t()) :: :ok
+  def _send_raw(socket = {:sslsocket, _, _}, msg) do
     :ok = :ssl.send(socket, msg)
   end
 
+
   @spec _recv({:sslsocket, any, any}) :: String.t() | :timeout | :closed
   def _recv(socket = {:sslsocket, _, _}, timeout \\ 500) do
+    case _recv_raw(socket, timeout) do
+      :timeout ->
+        :timeout
+
+      resp ->
+        Tachyon.decode!(resp)
+    end
+  end
+
+  @spec _recv_raw({:sslsocket, any, any}) :: String.t() | :timeout | :closed
+  def _recv_raw(socket = {:sslsocket, _, _}, timeout \\ 500) do
     case :ssl.recv(socket, 0, timeout) do
       {:ok, reply} -> reply |> to_string
       {:error, :timeout} -> :timeout

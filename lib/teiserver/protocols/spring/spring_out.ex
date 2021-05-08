@@ -524,6 +524,9 @@ defmodule Teiserver.Protocols.SpringOut do
 
   @spec do_login_accepted(map(), map()) :: map()
   def do_login_accepted(state, user) do
+    reply(:login_accepted, user.name, nil, state)
+    reply(:motd, nil, nil, state)
+
     # Login the client
     _client = Client.login(user, self())
 
