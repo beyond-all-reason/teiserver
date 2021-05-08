@@ -56,24 +56,83 @@ A set of parameters used to filter, sort or limit information from a larger data
 ## User
 * id :: integer
 * name :: string
-* permissions :: list (string)
-* lobby :: string
 * bot :: boolean, default: false
-* clan_id :: Clan.id
+* clan_id :: Clan.id, default: nil
+* skill :: map :: (string -> integer)
+* icons :: map (string -> string) -- Badge type as the key, badge icon as the value (e.g. rank => level5)
 
--- Not sure if these need to be included in the object since the client would never need to read them
+### Private properties, only sent to the account in question or to special privileged commands
+* permissions :: list (string)
 * friends :: list (User.id)
-* friend_requests :: list (User.id)
+* friend_requests :: list (User.id) -- Users requesting this user to be their friend
 * ignores :: list (User.id)
-* mmr/rank :: map :: (string -> integer)
-* icons :: map (string -> integer) -- This will be where country flag, rank, role badges etc go
-* ip :: string
 
 #### Examples
 ```
 {
   "id": 1967,
-  "name": "Gerald Feinberg"
+  "name": "Gerald Feinberg",
+  "skill": {
+    "1v1": 500,
+    "2v2": 634,
+  },
+  "icons": {
+    "time_played": "400",
+    "current_season": "bertha",
+    "last_season": "korgoth",
+  }
+}
+
+{
+  "id": 1967,
+  "name": "Gerald Feinberg",
+  "skill": {
+    "1v1": 500,
+    "2v2": 634,
+  },
+  "icons": {
+    "time_played": "400",
+    "current_season": "bertha",
+    "last_season": "korgoth",
+  },
+  "permissions": ["moderator", "beta-tester"],
+  "friends": [1,2,3],
+  "friend_requests": [4,5,6],
+  "ignores": [7,8,9]
+}
+```
+
+## Client
+This represents a user who is logged in. A user who is logged out will not have a client object.
+* id :: User.id
+* in_game: boolean
+* away: boolean
+
+-- Game/Battle attributes
+* ready: boolean
+* team_number: integer
+* ally_team_number: 0 -- I want to replace these two with just team_number, it's a carryover from Spring we probably don't need
+* team_colour: colour
+* role: string -- player, spectator
+* bonus: integer, default: 0
+* synced: boolean
+* faction: string
+* battle_id: Battle.id
+
+#### Examples
+```
+{
+  {
+  "id": 1967,
+  "in_game": true,
+  "away": false,
+  "ready": true,
+  "team_number": 1,
+  "team_colour": "#AA9900",
+  "role": "player",
+  "synced": true,
+  "faction": "random",
+  "battle_id": 5
 }
 ```
 
@@ -83,23 +142,43 @@ A set of parameters used to filter, sort or limit information from a larger data
 * founder_id :: User.id
 * type :: string
 * max_players :: integer
-* passworded :: boolean, default: false
-* locked :: boolean, default: false
+* password :: nil | string
+* locked :: string -- unlocked, friends, whitelist, locked
 * engine_name :: string
 * engine_version :: string
 * players :: list (User.id)
 * spectators :: list (User.id)
 * bots :: list (User.id)
 * ip :: string
-* settings :: map :: (string -> string | integer | boolean) -- Replaces spring's scripttags, disabled units and start rectanges should go here I think
-* map_hash :: string
+* settings :: map :: (string -> any) -- Replaces spring's scripttags, disabled units and start rectanges should go here I think
 * map_name :: string
+* map_hash :: string
 
 #### Examples
 ```
 {
-  "id": 1967,
-  "name": "Battle 1967"
+  "id": 9556,
+  "name": "EU 07 - 670",
+  "founder_id": 1967,
+  "type": "team",
+  "max_players": 16,
+  "password": nil,
+  "locked": "unlocked",
+  "engine_name": "BAR",
+  "engine_version": "145.789-rc3",
+  "players": [1,2,3,4],
+  "spectators": [5,6,7],
+  "bots": [900],
+  "ip": "127.0.0.1",
+  "settings": {
+    "disabled_units": ["unit1", "unit2", "unit3"],
+    "start_rectangles": [
+      [0,0,100,100],
+      [300,300,400,400]
+    ]
+  },
+  "map_name": "koom valley",
+  "map_hash": "hash_string_here"
 }
 ```
 
@@ -117,34 +196,21 @@ A queue used in matchmaking
 ```
 {
   "id": 1967,
-  "name": "Casual 1v1"
-}
-```
-
-
-## Success
-A string with the word success
-
-#### Examples
-```
-{
-  "result": "success"
-}
-```
-
-## Failure
-A string with the word failure, will always be accompanied by a second field "reason" containing the reason for the failure.
-
-#### Examples
-```
-{
-  "result": "failure",
-  "reason": "Reason for failure"
+  "name": "Competitive 1v1",
+  "team_size": 1,
+  "conditions": {
+    
+  },
+  "settings": {
+    "allow_spectators": false,
+    "allow_pauses": false
+  },
+  "map_list": ["avalanche", "quicksilver"]
 }
 ```
 
 ## Error
-Returned when an unexpected error is generated. The difference between an error and a failure is the failure is an expected possible outcome (e.g. login failing) while an error is unexpected (e.g. message cannot be decoded).
+Returned when an unexpected error is generated. The difference between an error and a failure is the failure is an expected possible outcome (e.g. login failing) while an error is unexpected (e.g. message cannot be decoded). As such the error field will not always have the command being executed (though may sometimes).
 
 #### Examples
 ```

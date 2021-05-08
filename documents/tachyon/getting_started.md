@@ -75,3 +75,6 @@ A section detailing the possible response(s) from this command. It may be as lit
 
 ## Single source of truth
 At every stage the central server is considered to be the source of truth; if there is every client to client communication the client should always query the server for information.
+
+## Example and implementations
+No lobbies currently implement the protocol, when they do we will add links to them here. In the meantime Teiserver has unit tests for the Tachyon protocol and they can be found at [/test/teiserver/protocols/tachyon](/test/teiserver/protocols/tachyon). The server implementation for Tachyon is found at [/lib/teiserver/protocols/tachyon](/lib/teiserver/protocols/tachyon) though this is not expected to be overly helpful for lobby implementers.
