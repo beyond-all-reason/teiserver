@@ -84,9 +84,12 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:agreement, nil) do
-    [
-      "AGREEMENT A verification code has been sent to your email address. Please read our terms of service and then enter your six digit code below.\n",
-      "AGREEMENT \n",
+    agreement_rows = Application.get_env(:central, Teiserver)[:user_agreement]
+    |> String.split("\n")
+    |> Enum.map(fn s -> "AGREEMENT #{s}" end)
+    |> Enum.join("\n")
+
+    agreement_rows ++ [
       "AGREEMENTEND\n"
     ]
   end
