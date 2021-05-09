@@ -159,6 +159,6 @@ defmodule Teiserver.Agents.AgentLib do
         data: data
       }
     )
-    Logger.info("agent_updates - #{from} > #{msg}")
+    # Logger.info("agent_updates - #{from} > #{msg}")
   end
 end

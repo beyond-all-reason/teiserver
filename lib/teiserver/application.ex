@@ -31,7 +31,10 @@ defmodule Teiserver.Application do
 
       # Agent mode
       {Registry, keys: :unique, name: Teiserver.Agents.ServerRegistry},
-      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Agents.DynamicSupervisor}
+      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Agents.DynamicSupervisor},
+
+      # Telemetry
+      Teiserver.TelemetryServer,
     ]
 
     # Some stuff doesn't work with the tests
