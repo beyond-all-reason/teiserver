@@ -19,6 +19,7 @@ These are just the highlights, full documentation can be found in the documentat
 - [Reputation/Reporting system](/documents/designs/reputation.md)
 - [Metrics](/documents/designs/metrics.md)
 - [Agent mode/Lobby dev assist](/documents/designs/agent_mode.md)
+- [Tachyon](/documents/tachyon)
 
 ### Contributing
 All contributors are welcome; if you spot an issue or bug with it mention me on the [BAR discord](https://discord.gg/N968ddE) (@teifion) or open an issue in this repo. Pull requests are also welcome; even if it's just a matter of spelling mistake.
