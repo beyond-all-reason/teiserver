@@ -17,7 +17,7 @@ defmodule Teiserver.TeiserverTestLib do
     %{socket: socket}
   end
 
-  @spec raw_setup :: %{socket: port()}
+  @spec tls_setup :: %{socket: port()}
   def tls_setup() do
     {:ok, socket} = :ssl.connect(@host, 8201, active: false)
     %{socket: socket}
@@ -48,7 +48,7 @@ defmodule Teiserver.TeiserverTestLib do
     end
   end
 
-  @spec auth_setup(nil | Map.t()) :: %{socket: port(), user: Map.t()}
+  @spec auth_setup(nil | Map.t()) :: %{socket: port(), user: Map.t(), pid: pid()}
   def auth_setup(user \\ nil) do
     user = if user, do: user, else: new_user()
 
@@ -67,7 +67,7 @@ defmodule Teiserver.TeiserverTestLib do
     %{socket: socket, user: user, pid: pid}
   end
 
-  @spec tachyon_auth_setup(nil | Map.t()) :: %{socket: port(), user: Map.t()}
+  @spec tachyon_auth_setup(nil | Map.t()) :: %{socket: port(), user: Map.t(), pid: pid()}
   def tachyon_auth_setup(user \\ nil) do
     user = if user, do: user, else: new_user()
     token = User.create_token(user)
