@@ -34,6 +34,9 @@ defmodule Teiserver.Protocols.TachyonIn do
   end
 
   @spec dispatch(String.t(), Map.t(), Map.t()) :: Map.t()
+  defp dispatch(nil, data, state) do
+    reply(:system, :error, %{location: "dispatch", error: "cmd with nil value passed in with data '#{Kernel.inspect data}'"}, state)
+  end
   defp dispatch(cmd, data, state) do
     state = state
       |> add_msg_id(data)

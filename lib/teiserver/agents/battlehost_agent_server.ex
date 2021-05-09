@@ -39,6 +39,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
 
   defp open_battle(state) do
     cmd = %{
+      cmd: "c.battle.create",
       battle: %{
         cmd: "c.battles.create",
         name: "EU 01 - 123",
@@ -59,7 +60,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
     AgentLib._send(state.socket, cmd)
     reply = AgentLib._recv(state.socket)
     AgentLib.post_agent_update(state.id, "opened battle")
-    %{state | battle_id: reply["battle_id"]}
+    %{state | battle_id: reply["battle"]["id"]}
   end
 
   defp leave_battle(state) do
