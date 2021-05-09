@@ -283,7 +283,13 @@ defmodule CentralWeb.Router do
   scope "/logging/live", CentralWeb, as: :logging_live do
     pipe_through([:browser, :protected, :admin_layout, :logging_live_auth])
 
-    live_dashboard("/dashboard", metrics: CentralWeb.Telemetry)
+    live_dashboard("/dashboard",
+      metrics: CentralWeb.Telemetry,
+      ecto_repos: [Central.Repo],
+      additional_pages: [
+        # live_dashboard_additional_pages
+      ]
+    )
   end
 
   use TeiserverWeb.Router

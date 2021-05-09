@@ -201,7 +201,6 @@ defmodule CentralWeb.Account.SessionController do
           {:ok, user} ->
             # User password reset successfully
             Teiserver.User.set_new_spring_password(user.id, pass1)
-
             Central.Logging.Helpers.add_anonymous_audit_log(
               conn,
               "Account: User password reset",

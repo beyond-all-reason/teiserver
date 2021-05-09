@@ -1,6 +1,5 @@
 defmodule CentralWeb.Logging.AuditLogControllerTest do
-  # , async: true
-  use CentralWeb.ConnCase
+  use CentralWeb.ConnCase#, async: true
 
   # alias CentralWeb.Logging.AuditLog
   alias Central.Logging.Helpers

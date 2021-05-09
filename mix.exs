@@ -46,6 +46,7 @@ defmodule Central.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:phoenix_live_view, "~> 0.15"},
       {:phoenix_live_dashboard, "~> 0.2"},
+      {:ecto_psql_extras, "~> 0.2"},
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"},
       {:gettext, "~> 0.11"},

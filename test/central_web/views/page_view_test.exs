@@ -1,4 +1,3 @@
 defmodule CentralWeb.PageViewTest do
-  # , async: true
-  use CentralWeb.ConnCase
+  use CentralWeb.ConnCase#, async: true
 end
