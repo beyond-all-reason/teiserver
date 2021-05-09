@@ -27,10 +27,10 @@
 
 #### Other users
 - Mute/unmute
-- List of past aliases
+- Add note
 
 #### Friends
-- List friends
+- List friends (query?)
 - Add friend
 - Remove friend
 

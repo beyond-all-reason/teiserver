@@ -24,4 +24,20 @@ defmodule Teiserver.Protocols.Tachyon.BattleOut do
     }
   end
 
+  ###########
+  # Leave
+  def do_reply(:leave, {:success, nil}) do
+    %{
+      "cmd" => "s.battle.leave",
+      "result" => "success"
+    }
+  end
+
+  def do_reply(:leave, {:failure, reason}) do
+    %{
+      "cmd" => "s.battle.leave",
+      "result" => "failure",
+      "reason" => reason
+    }
+  end
 end

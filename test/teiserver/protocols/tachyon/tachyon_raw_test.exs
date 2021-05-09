@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.TachyonRawTest do
-  use Central.ServerCase, async: false
+  use Central.ServerCase
 
   alias Central.Helpers.GeneralTestLib
 

@@ -23,6 +23,16 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
       |> Battle.create_battle()
       |> Battle.add_battle()
 
-    reply(:battle, :create, {:success, battle}, state)
+    new_state = %{state | battle_id: battle.id, battle_host: true}
+    reply(:battle, :create, {:success, battle}, new_state)
+  end
+
+  def do_handle("leave", _, %{battle_id: nil} = state) do
+    reply(:battle, :leave, {:failure, "Not currently in a battle"}, state)
+  end
+
+  def do_handle("leave", _, state) do
+    new_state = %{state | battle_id: nil, battle_host: false}
+    reply(:battle, :leave, {:success, nil}, new_state)
   end
 end

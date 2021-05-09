@@ -63,8 +63,8 @@ defmodule Teiserver.TeiserverTestLib do
     )
 
     _ = _recv_until(socket)
-
-    %{socket: socket, user: user}
+    pid = Client.get_client_by_id(user.id).pid
+    %{socket: socket, user: user, pid: pid}
   end
 
   @spec tachyon_auth_setup(nil | Map.t()) :: %{socket: port(), user: Map.t()}
@@ -85,7 +85,8 @@ defmodule Teiserver.TeiserverTestLib do
     _tachyon_send(socket, data)
     _tachyon_recv(socket)
 
-    %{socket: socket, user: user}
+    pid = Client.get_client_by_id(user.id).pid
+    %{socket: socket, user: user, pid: pid}
   end
 
   def _send_raw(socket = {:sslsocket, _, _}, msg) do
