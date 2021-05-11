@@ -31,7 +31,7 @@
 
   .category {
     float: right;
-    padding: 
+    padding:
   }
 </style>
 
@@ -71,7 +71,7 @@
       <%= p.title %>
     </h4>
     <span class="post-author">
-      <%= p.poster.name %>, <%= date_to_str p.inserted_at, :dmy_text %> in <a href="<%= Routes.blog_path(@conn, :category, p.category.name) %>"><%= p.category.name %></a>
+      <%= p.poster.name %>, <%= date_to_str p.inserted_at, format: :dmy_text, tz: @tz %> in <a href="<%= Routes.blog_path(@conn, :category, p.category.name) %>"><%= p.category.name %></a>
     </span>
 
     <div class="post-short">

@@ -16,10 +16,24 @@
   </div>
 
   <div class="form-group">
-    <%= input_with_type f, :value, @config_info.type, @config_info.opts ++ [choices_arg: @conn] %>
+    <%= if @config_info.type == "select" do %>
+      <%= component "icon_dropdown_js", [] %>
+      <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
+      <script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
+      <%= component "icon_dropdown", %{
+                name: "user_config[value]",
+                id: "user_config_value",
+                selected: f.data.value || Map.get(@changeset.changes, :value, @config_info.default),
+                enumerable: (for v <- @config_info.opts[:choices], do: %{id: v, name: v, colour: "#AAFFFF", icon: "fas fa-square"})
+              } %>
+    <% else %>
+      <%= input_with_type f, :value, @config_info.type, @config_info.opts ++ [choices_arg: @conn] %>
+    <% end %>
   </div>
 
   <div class="form-group">
+    <a href="<%= Routes.user_config_path(@conn, :index) %>#<%= @config_info.section %>" class="btn btn-secondary">Cancel</a>
+
     <%= submit "Save changes", class: "btn btn-#{bsname} float-right" %>
   </div>
 <% end %>

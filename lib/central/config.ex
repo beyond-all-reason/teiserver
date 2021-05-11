@@ -223,6 +223,7 @@ defmodule Central.Config do
     description: String, Information presented to the user if they edit it on their settings page
 
     opts: List, used to define options for various data types. If set then only items from the list will be selectable
+      - If type is "select" then include a :choices key in your opts list
 
     default: Any, The default value used when the variable is not set,
   """
@@ -250,6 +251,7 @@ defmodule Central.Config do
     case type.type do
       "integer" -> Central.Helpers.NumberHelper.int_parse(value)
       "boolean" -> if value == "true", do: true, else: false
+      "select" -> value
       "string" -> value
     end
   end

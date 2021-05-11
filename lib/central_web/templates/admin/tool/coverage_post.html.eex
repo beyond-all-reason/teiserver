@@ -1,10 +1,7 @@
-<% {fg, bg, bsname} = colours() %>
+<% {_fg, _bg, bsname} = colours() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
-    sidebar_active('admin');
-    tint_page("<%= fg %>", "<%= bg %>");
-
     // $('.make-data-table').dataTable({
     //   pageLength: 50
     // });
@@ -70,12 +67,12 @@
     <div class="card page-card border-<%= bsname %>">
       <div class="card-body">
         <h4>
-          Headline stats - 
+          Headline stats -
           <span style="font-size: 0.8em;">
-            Coverage: <%= ((@overall_stats.relevant-@overall_stats.missed)/max(@overall_stats.relevant, 1))*100 |> round %>%, 
-            Files: <%= format_number @overall_stats.files %>, 
-            Lines: <%= format_number @overall_stats.lines %>, 
-            Relevant: <%= format_number @overall_stats.relevant %>, 
+            Coverage: <%= ((@overall_stats.relevant-@overall_stats.missed)/max(@overall_stats.relevant, 1))*100 |> round %>%,
+            Files: <%= format_number @overall_stats.files %>,
+            Lines: <%= format_number @overall_stats.lines %>,
+            Relevant: <%= format_number @overall_stats.relevant %>,
             Missed: <%= format_number @overall_stats.missed %>
           </span>
         </h4>

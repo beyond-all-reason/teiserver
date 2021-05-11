@@ -40,7 +40,7 @@
       <tbody>
     <%= for page_view_log <- @data do %>
         <tr>
-          <td><%= date_to_str page_view_log.inserted_at, :hms_dmy %></td>
+          <td><%= date_to_str page_view_log.inserted_at, format: :hms_dmy, tz: @tz %></td>
           <td>
             <%= page_view_log.user.name %> (<%= page_view_log.user.id %>)
             <a href="<%= Routes.admin_user_path(@conn, :edit, page_view_log.user) %>">

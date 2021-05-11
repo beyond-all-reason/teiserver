@@ -167,7 +167,7 @@
               <% end %>
 
               <td style='<%= if Timex.compare(now, notification.expires) == 1, do: "background-color: #FEE;" %>'>
-                <%= date_to_str notification.expires, :dmy %>
+                <%= date_to_str notification.expires, format: :dmy, tz: @tz %>
               </td>
               <td>
                 <a href="<%= Central.Communication.notification_url notification %>" class="btn btn-secondary btn-sm">

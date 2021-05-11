@@ -25,7 +25,7 @@
     <div class="card border-<%= bsname %> page-card">
       <div class="card-body">
         <h4>
-          Latest users - Server time: <%= date_to_str @server_time, :hms %>
+          Latest users - Server time: <%= date_to_str @server_time, format: :hms, tz: @tz %>
         </h4>
         <table class="table">
           <thead>
@@ -80,7 +80,7 @@
               end %>
 
               <td style="<%= style %>">
-                <%= date_to_str last_timestamp, :hms_or_dmy %>
+                <%= date_to_str last_timestamp, format: :hms_or_dmy, tz: @tz %>
               </td>
 
               <td>

@@ -15,7 +15,7 @@
       </tr>
       <tr>
         <td>Expires:</td>
-        <td><%= date_to_str(@report.expires, :ymd_hms) %></td>
+        <td><%= date_to_str(@report.expires, format: :ymd_hms, tz: @tz) %></td>
       </tr>
       <tr>
         <td colspan="2">&nbsp;</td>
@@ -32,7 +32,7 @@
     </tr>
     <tr>
       <td>Report date:</td>
-      <td><%= date_to_str(@report.inserted_at, :ymd_hms) %></td>
+      <td><%= date_to_str(@report.inserted_at, format: :ymd_hms, tz: @tz) %></td>
     </tr>
 
   </tbody>

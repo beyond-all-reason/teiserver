@@ -1,12 +1,3 @@
-<% {fg, bg, _bsname} = colours() %>
-
-<script type="text/javascript" charset="utf-8">
-  $(function() {
-    sidebar_active('admin');
-    tint_page("<%= fg %>", "<%= bg %>");
-  });
-</script>
-
 <div class="row page-row">
   <%= component "menu_card", icon_class: "fas", name: "", icon: "far fa-barcode-scan", text: "Coverage", link: Routes.admin_tool_path(@conn, :coverage_form) %>
   <%= component "menu_card", icon_class: "fas", name: "", icon: "far fa-exclamation-triangle", text: "Test errors", link: Routes.admin_tool_path(@conn, :test_error) %>

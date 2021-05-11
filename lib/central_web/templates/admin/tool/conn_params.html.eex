@@ -1,11 +1,4 @@
-<% {fg, bg, bsname} = colours() %>
-
-<script type="text/javascript" charset="utf-8">
-  $(function() {
-    sidebar_active('developer');
-    tint_page("<%= fg %>", "<%= bg %>");
-  });
-</script>
+<% {_fg, _bg, bsname} = colours() %>
 
 <%= render CentralWeb.Admin.ToolView, "sub_menu.html", Map.merge(assigns, %{active: "conn_params"})
 %>

@@ -6,7 +6,7 @@
     tint_page("<%= fg %>", "<%= bg %>");
 
     $('.datepicker').datepicker({
-      format: "dd/mm/yyyy" 
+      format: "dd/mm/yyyy"
     });
   });
 
@@ -74,7 +74,7 @@
                 <% end %>
               </td>
               <td class="d-lg-none d-xl-table-cell">
-                <%= date_to_str post.live_from, :ymd %>
+                <%= date_to_str post.live_from, format: :ymd, tz: @tz %>
               </td>
               <td><%= if post.allow_comments, do: "Allowed" %></td>
               <td><%= if post.visible, do: "Visible" %></td>

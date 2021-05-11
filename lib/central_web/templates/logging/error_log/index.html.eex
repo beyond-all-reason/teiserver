@@ -39,7 +39,7 @@
                   Guest
                 <% end %>
               </td>
-              <td><%= date_to_str error_log.inserted_at, :hm_dmy %></td>
+              <td><%= date_to_str error_log.inserted_at, format: :hm_dmy, tz: @tz %></td>
               <td><%= error_log.path %></td>
               <td><%= error_log.method %></td>
 

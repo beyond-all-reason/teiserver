@@ -10,6 +10,12 @@ config :central, Central,
   file_path: "~/programming/elixir/barserver/",
   credit: "Teifion Jordan"
 
+# Default configs
+config :central, Central.Config,
+  defaults: %{
+    tz: "UTC"
+  }
+
 config :central,
   ecto_repos: [Central.Repo]
 

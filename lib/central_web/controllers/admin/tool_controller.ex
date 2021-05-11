@@ -15,6 +15,9 @@ defmodule CentralWeb.Admin.ToolController do
 
   # action_fallback CentralWeb.General.FallbackController
 
+  plug AssignPlug,
+    sidemenu_active: "admin"
+
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do
     conn

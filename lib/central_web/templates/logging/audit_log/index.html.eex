@@ -119,7 +119,7 @@
                   <%= Jason.encode!(log.details) %>
                 </div>
               </td>
-              <td><%= date_to_str log.inserted_at, :hms_or_dmy %></td>
+              <td><%= date_to_str log.inserted_at, format: :hms_or_dmy, tz: @tz %></td>
 
               <%= if Ecto.assoc_loaded?(log.user) do %>
                 <td><%= log.user.name %>, <%= log.ip %></td>

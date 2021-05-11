@@ -8,7 +8,7 @@
 
 <%= component "detail_line",
   label: "Live from",
-  value: date_to_str @post.live_from, :dmy
+  value: date_to_str @post.live_from, format: :dmy, tz: @tz
 %>
 
 <%= component "detail_line",
@@ -52,10 +52,10 @@
 
 <%= component "detail_line",
   label: "Inserted",
-  value: date_to_str @post.inserted_at, :hms_dmy
+  value: date_to_str @post.inserted_at, format: :hms_dmy, tz: @tz
 %>
 
 <%= component "detail_line",
   label: "Updated",
-  value: date_to_str @post.updated_at, :hms_dmy
+  value: date_to_str @post.updated_at, format: :hms_dmy, tz: @tz
 %>

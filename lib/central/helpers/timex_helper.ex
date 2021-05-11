@@ -7,9 +7,8 @@ defmodule Central.Helpers.TimexHelper do
   # Was finding that in April it moved the time up an hour
   # every time I saved, turns out the issue was it was stored
   # as UTC but printed as +1 hour
-  defp convert(timestamp, tz \\ Local.lookup()) do
+  defp convert(timestamp, tz) do
     new_timestamp = timestamp |> Timezone.convert(tz)
-    # new_timestamp = timestamp |> Timezone.convert("UTC")
 
     case new_timestamp do
       %Timex.AmbiguousDateTime{} -> timestamp
@@ -26,7 +25,7 @@ defmodule Central.Helpers.TimexHelper do
     date_to_str(the_time, format: format)
   end
 
-  def date_to_str(the_time, format: :dmy_text), do: dmy_text(the_time)
+  def date_to_str(the_time, [format: :dmy_text, tz: tz]), do: dmy_text(the_time, tz)
 
   def date_to_str(the_time, args) do
     format = args[:format] || :dmy
@@ -41,7 +40,7 @@ defmodule Central.Helpers.TimexHelper do
         s -> s
       end
 
-    the_time = convert(the_time)
+    the_time = convert(the_time, args[:tz] || Local.lookup())
 
     time_str =
       case format do
@@ -52,6 +51,7 @@ defmodule Central.Helpers.TimexHelper do
         :ymd_hms -> Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}")
         :hms -> Timex.format!(the_time, "{h24}:{m}:{s}")
         :hm_dmy -> Timex.format!(the_time, "{h24}:{m} {0D}/{0M}/{YYYY}")
+        :hm -> Timex.format!(the_time, "{h24}:{m}")
         :clock24 -> Timex.format!(the_time, "{h24}{m}")
         :html_input -> Timex.format!(the_time, "{YYYY}-{0M}-{0D}T{h24}:{m}")
         :hms_or_hmsdmy -> _hms_or_hmsdmy(the_time, now)
@@ -115,8 +115,6 @@ defmodule Central.Helpers.TimexHelper do
 
   @spec _hms_or_hmsdmy(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_hmsdmy(the_time, today) do
-    the_time = the_time |> convert
-
     if Timex.compare(the_time |> Timex.to_date(), today) == 0 do
       Timex.format!(the_time, "Today at {h24}:{m}:{s}")
     else
@@ -126,8 +124,6 @@ defmodule Central.Helpers.TimexHelper do
 
   @spec _hms_or_dmy(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_dmy(the_time, today) do
-    the_time = the_time |> convert
-
     if Timex.compare(the_time |> Timex.to_date(), today) == 0 do
       Timex.format!(the_time, "Today at {h24}:{m}:{s}")
     else
@@ -137,8 +133,6 @@ defmodule Central.Helpers.TimexHelper do
 
   @spec _hm_or_dmy(DateTime.t(), DateTime.t()) :: String.t()
   defp _hm_or_dmy(the_time, today) do
-    the_time = the_time |> convert
-
     if Timex.compare(the_time |> Timex.to_date(), today) == 0 do
       Timex.format!(the_time, "Today at {h24}:{m}")
     else
@@ -158,11 +152,12 @@ defmodule Central.Helpers.TimexHelper do
   #   end
   # end
 
-  defp dmy_text(nil), do: nil
+  defp dmy_text(nil, _), do: nil
 
-  defp dmy_text(the_time) do
+  defp dmy_text(the_time, tz) do
     suffix =
       the_time
+      |> convert(tz || Local.lookup())
       |> Timex.format!("{D}")
       |> String.to_integer()
       |> suffix

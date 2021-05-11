@@ -21,7 +21,7 @@
   <%= for row <- @enumerable do %>
     <option value="<%= row.id %>"
       data-textcolour='<%= Map.get(row, :text_colour, "#FFFFFF") %>'
-      data-bgcolour='<%= Map.get(row, :colour, "#000000") %>'
+      <% if Map.has_key?(row, :colour), do: "data-bgcolour='#{row.colour}'" %>
       <%= if Map.has_key?(row, :icons) do %>
         data-icons='<%= Enum.join(row.icons, ",") %>'
       <% else %>

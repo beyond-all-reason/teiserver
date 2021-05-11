@@ -121,6 +121,38 @@ defmodule Central.General.Startup do
       default: false
     })
 
+    # Need to get the timezones
+    zones = 'timedatectl list-timezones'
+      |> :os.cmd()
+      |> to_string
+      |> String.split("\n")
+
+    add_user_config_type(%{
+      key: "general.Timezone",
+      section: "General",
+      type: "select",
+      visible: true,
+      permissions: [],
+      description:
+        "The timezone you are present in for conversion of timestamps.",
+      opts: [
+        choices: zones
+      ],
+      default: Application.get_env(:central, Central.Config)[:defaults].tz
+    })
+
+    add_user_config_type(%{
+      key: "general.Language",
+      section: "General",
+      type: "select",
+      visible: false,
+      permissions: [],
+      description:
+        "Language used on the site (currently only English).",
+      opts: ~w(English),
+      default: false
+    })
+
     add_permission_set("admin", "debug", ~w(debug))
     add_permission_set("admin", "dev", ~w(developer structure))
     add_permission_set("admin", "admin", ~w(limited full))

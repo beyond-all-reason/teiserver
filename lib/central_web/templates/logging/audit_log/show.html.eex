@@ -43,7 +43,7 @@
 
 <%= component "detail_line",
   label: "Timestamp",
-  value: date_to_str(@log.inserted_at, :hms_or_dmy)
+  value: date_to_str(@log.inserted_at, format: :hms_or_dmy, tz: @tz)
 %>
 
 <%= if @log.group_id do %>

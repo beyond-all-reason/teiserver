@@ -63,7 +63,7 @@
               <td><%= format_number log.guest_view_count %></td>
 
               <td>
-                <%= link "Show", to: Routes.logging_aggregate_view_log_path(@conn, :show, date_to_str(log.date, :ymd)), class: "btn btn-secondary btn-sm" %>
+                <%= link "Show", to: Routes.logging_aggregate_view_log_path(@conn, :show, date_to_str(log.date, format: :ymd, tz: @tz)), class: "btn btn-secondary btn-sm" %>
               </td>
             </tr>
 

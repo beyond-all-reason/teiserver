@@ -36,7 +36,7 @@
         if Timex.compare(code.expires, Timex.now()) != 1 do
           "Expired"
         else
-          date_to_str(code.expires, format: :hms_or_dmy)
+          date_to_str(code.expires, format: :hms_or_dmy, tz: @tz)
         end
       %></td>
       <td style="font-family:monospace;"><%= code.value %></td>

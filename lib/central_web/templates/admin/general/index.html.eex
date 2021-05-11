@@ -18,7 +18,7 @@
 <% end %>
 
 <h4 style="margin-top: 10px;">
-  Last build: <%= date_to_str build_time(), :hms_or_dmy  %>
+  Last build: <%= date_to_str build_time(), format: :hms_or_dmy, tz: @tz %>
 </h4>
 
 <div class="row page-row">

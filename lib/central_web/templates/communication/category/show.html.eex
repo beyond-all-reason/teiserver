@@ -85,14 +85,14 @@
   <span class="input-group-addon row-left">
     Inserted
   </span>
-  <input type="text" class="form-control" disabled="" value="<%= date_to_str @category.inserted_at, :hms_dmy %>" />
+  <input type="text" class="form-control" disabled="" value="<%= date_to_str @category.inserted_at, format: :hms_dmy, tz: @tz %>" />
 </div>
 
 <div class="input-group input-group-show">
   <span class="input-group-addon row-left">
     Updated
   </span>
-  <input type="text" class="form-control" disabled="" value="<%= date_to_str @category.updated_at, :hms_dmy %>" />
+  <input type="text" class="form-control" disabled="" value="<%= date_to_str @category.updated_at, format: :hms_dmy, tz: @tz %>" />
 </div>
 
           </div>

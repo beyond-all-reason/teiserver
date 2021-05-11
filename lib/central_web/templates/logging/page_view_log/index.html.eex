@@ -77,7 +77,7 @@
           <tbody>
         <%= for page_view_log <- @page_view_logs do %>
             <tr>
-              <td><%= date_to_str page_view_log.inserted_at, :hms_or_dmy %></td>
+              <td><%= date_to_str page_view_log.inserted_at, format: :hms_or_dmy, tz: @tz %></td>
               <td>
               <%= if page_view_log.user_id do %>
                 <%= page_view_log.user.name %> (<%= page_view_log.user.id %>)

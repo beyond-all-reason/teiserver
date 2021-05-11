@@ -16,11 +16,11 @@
           <tbody>
             <tr>
               <td><strong>Created</strong></td>
-              <td><%= date_to_str @notification.inserted_at, :hms_dmy %></td>
+              <td><%= date_to_str @notification.inserted_at, format: :hms_dmy, tz: @tz %></td>
             </tr>
             <tr>
               <td><strong>Expires</strong></td>
-              <td><%= date_to_str @notification.expires, :hms_dmy %></td>
+              <td><%= date_to_str @notification.expires, format: :hms_dmy, tz: @tz %></td>
             </tr>
           </tbody>
         </table>

@@ -86,7 +86,7 @@
 
         <h2 style="text-align: center;"><%= @post.title %></h2>
         <span class="post-author">
-          <%= @post.poster.name %>, <%= date_to_str @post.inserted_at, :dmy_text %> in <a href="<%= Routes.blog_path(@conn, :category, @post.category.name) %>"><%= @post.category.name %></a>
+          <%= @post.poster.name %>, <%= date_to_str @post.inserted_at, format: :dmy_text, tz: @tz %> in <a href="<%= Routes.blog_path(@conn, :category, @post.category.name) %>"><%= @post.category.name %></a>
         </span>
 
         <div class="post-content">
@@ -126,7 +126,7 @@
               <strong><%= c.poster.name %></strong>
               &nbsp;&nbsp;&nbsp;
               <a href="#comment-<%= c.id %>">
-                <%= date_to_str c.inserted_at, :hm_or_dmy %>
+                <%= date_to_str c.inserted_at, format: :hm_or_dmy, tz: @tz %>
               </a>
             </div>
             <div class="post-comment-content">

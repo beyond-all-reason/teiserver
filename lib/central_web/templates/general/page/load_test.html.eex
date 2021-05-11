@@ -87,7 +87,7 @@
 
         <h4>Your stats - Random ID #<%= @uid %></h4>
         <div>
-          <strong>Start time:</strong> <%= date_to_str(@start_time, :hms) %><br />
+          <strong>Start time:</strong> <%= date_to_str(@start_time, format: :hms, tz: @tz) %><br />
           <strong>Messages sent:</strong> <span id="messages-sent">0</span><br />
           <strong>Last message took:</strong> <span id="time-taken">N/A</span><br />
           <strong>Messages received:</strong> <span id="messages-rec">0</span><br />

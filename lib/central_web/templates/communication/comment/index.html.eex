@@ -57,7 +57,7 @@
               </td>
               <td><%= comment.content |> String.slice(0..100) %></td>
 
-              <td><%= date_to_str comment.inserted_at, :hms_or_dmy %></td>
+              <td><%= date_to_str comment.inserted_at, format: :hms_or_dmy, tz: @tz %></td>
 
               <td>
                 <a href="<%= Routes.blog_comment_path(@conn, :show, comment) %>" class="btn btn-secondary btn-sm">

@@ -46,10 +46,10 @@
 
 <%= component "detail_line",
   label: "Inserted at",
-  value: date_to_str @blog_file.inserted_at, :hms_or_dmy
+  value: date_to_str @blog_file.inserted_at, format: :hms_or_dmy, tz: @tz
 %>
 
 <%= component "detail_line",
   label: "Updated at",
-  value: date_to_str @blog_file.updated_at, :hms_or_dmy
+  value: date_to_str @blog_file.updated_at, format: :hms_or_dmy, tz: @tz
 %>

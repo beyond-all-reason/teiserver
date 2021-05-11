@@ -14,7 +14,7 @@
 
     <div class="card border-<%= bsname %>">
       <div class="card-header text-<%= bsname %>">
-        Logs - Server time: <%= date_to_str @server_time, :hms %>
+        Logs - Server time: <%= date_to_str @server_time, format: :hms, tz: @tz %>
       </div>
       <div class="card-body">
         <table class="table">
@@ -47,7 +47,7 @@
               end %>
 
               <td style="<%= style %>">
-                <%= date_to_str last_timestamp, :hms_dmy %>
+                <%= date_to_str last_timestamp, format: :hms_dmy, tz: @tz %>
               </td>
 
               <td>

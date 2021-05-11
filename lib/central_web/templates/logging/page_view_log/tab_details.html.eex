@@ -2,7 +2,7 @@
 
 <%= component "detail_line",
   label: "Timestamp",
-  value: date_to_str(@page_view_log.inserted_at, :hms_dmy)
+  value: date_to_str(@page_view_log.inserted_at, format: :hms_dmy, tz: @tz)
 %>
 
 <%= component "detail_line",

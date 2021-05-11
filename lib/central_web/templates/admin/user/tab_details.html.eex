@@ -7,7 +7,7 @@
 
 <%= component "detail_line",
   label: "Created",
-  value: date_to_str(@user.inserted_at, :hms_dmy)
+  value: date_to_str(@user.inserted_at, format: :hms_dmy, tz: @tz)
 %>
 
 <%= component "detail_line",

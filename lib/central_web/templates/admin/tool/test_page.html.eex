@@ -1,5 +1,3 @@
-<% {fg, bg, _bsname} = colours() %>
-
 <style type="text/css">
   .icon-test {
     margin: 4px 6px;
@@ -8,12 +6,14 @@
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
-    sidebar_active('admin');
-    tint_page("<%= fg %>", "<%= bg %>");
-
     var selected_tab = window.location.hash.substr(1).replace("_tab", "");
     $('#the_tabs a:first').tab('show');
     $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+
+    // They'll get hidden by the main theme but this will re-show them
+    setTimeout(function() {
+      $("#flash-messages").show();
+    }, 4200);
 
     do_icons();
   });
@@ -65,6 +65,7 @@
   <li><a href="#tables_tab" role="tab" class="nav-link" data-toggle="tab">Tables</a></li>
   <li><a href="#buttons_tab" role="tab" class="nav-link" data-toggle="tab">Buttons</a></li>
   <li><a href="#forms_tab" role="tab" class="nav-link" data-toggle="tab">Forms</a></li>
+  <li><a href="#calculations_tab" role="tab" class="nav-link" data-toggle="tab">Calculations</a></li>
 </ul>
 
 <div class="tab-content">
@@ -72,7 +73,7 @@
     <div class="row">
       <div class="col-md-6">
         One icon per row, no <code>fa-</code> prefix. Columns on the right are <code>far, fas, fal, fab, fad</code>.
-        <textarea name="icons" id="icons-area" rows="8" class="form-control" onchange="do_icons();"></textarea>
+        <textarea name="icons" id="icons-area" rows="8" class="form-control" onchange="do_icons();">house</textarea>
         <br />
         <div class="btn btn-primary">Update</div>
       </div>
@@ -178,19 +179,19 @@
             &nbsp;&nbsp;
           <% end %>
 
-          <h5>Outline</h5>  
+          <h5>Outline</h5>
           <%= for c <- colours do %>
             <div class="btn btn-outline-<%= c %>"><%= c |> String.capitalize %></div>
             &nbsp;&nbsp;
           <% end %>
 
-          <h5>Active</h5>  
+          <h5>Active</h5>
           <%= for c <- colours do %>
             <div class="btn active btn-<%= c %>"><%= c |> String.capitalize %></div>
             &nbsp;&nbsp;
           <% end %>
 
-          <h5>Disabled</h5>  
+          <h5>Disabled</h5>
           <%= for c <- colours do %>
             <div class="btn disabled btn-<%= c %>"><%= c |> String.capitalize %></div>
             &nbsp;&nbsp;
@@ -232,6 +233,27 @@
               <i class="fas fa-fw fa-link"></i>
             </a>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="calculations_tab" style="padding:5px;">
+    <div class="col-md-12">
+      <div class="card page-card card-default">
+        <div class="card-body">
+          <%
+            now = Timex.now()
+          %>
+          Server time is <%= now |> Kernel.inspect %><br /><br />
+
+          <pre>
+UTC conversion is <%= date_to_str(now, format: :ymd_hms, tz: "UTC") %>
+Your config conversion is <%= date_to_str(now, format: :ymd_hms, tz: @tz) %> (<%= @tz %>)
+
+GMT conversion is <%= date_to_str(now, format: :ymd_hms, tz: "Europe/London") %>
+New York conversion is <%= date_to_str(now, format: :ymd_hms, tz: "America/New_York") %>
+          </pre>
         </div>
       </div>
     </div>

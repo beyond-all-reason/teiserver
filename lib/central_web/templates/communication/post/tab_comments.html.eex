@@ -21,7 +21,7 @@
       </td>
 
       <td><%= c.content |> String.slice(0..40) %></td>
-      <td><%= date_to_str c.inserted_at, :hms_or_dmy %></td>
+      <td><%= date_to_str c.inserted_at, format: :hms_or_dmy, tz: @tz %></td>
 
       <td>
         <a href="<%= Routes.blog_comment_path(@conn, :show, c) %>" class="btn-sm btn btn-secondary">
