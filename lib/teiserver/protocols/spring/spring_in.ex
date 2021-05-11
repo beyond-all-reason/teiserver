@@ -448,7 +448,7 @@ defmodule Teiserver.Protocols.SpringIn do
     ingame_hours = round(state.user.ingame_minutes / 60)
 
     [
-      "Registration date: #{date_to_str(state.user.inserted_at, :ymd_hms)}",
+      "Registration date: #{date_to_str(state.user.inserted_at, format: :ymd_hms, tz: "UTC")}",
       "Email address: #{state.user.email}",
       "Ingame time: #{ingame_hours}"
     ]
