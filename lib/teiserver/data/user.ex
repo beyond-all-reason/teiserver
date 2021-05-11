@@ -313,7 +313,7 @@ defmodule Teiserver.User do
 
     ConCache.update(:lists, :users, fn value ->
       new_value =
-        (value ++ [user.id])
+        ([user.id | value])
         |> Enum.uniq()
 
       {:ok, new_value}
@@ -370,13 +370,13 @@ defmodule Teiserver.User do
       # Add to friends, remove from requests
       new_accepter =
         Map.merge(accepter, %{
-          friends: accepter.friends ++ [requester_id],
+          friends: [requester_id | accepter.friends],
           friend_requests: Enum.filter(accepter.friend_requests, fn f -> f != requester_id end)
         })
 
       new_requester =
         Map.merge(requester, %{
-          friends: requester.friends ++ [accepter_id]
+          friends: [accepter_id | requester.friends]
         })
 
       update_user(new_accepter, persist: true)
@@ -446,7 +446,7 @@ defmodule Teiserver.User do
       # Add to requests
       new_potential =
         Map.merge(potential, %{
-          friend_requests: potential.friend_requests ++ [requester_id]
+          friend_requests: [requester_id | potential.friend_requests]
         })
 
       requester = get_user_by_id(requester_id)
@@ -485,7 +485,7 @@ defmodule Teiserver.User do
       # Add to requests
       new_ignorer =
         Map.merge(ignorer, %{
-          ignored: ignorer.ignored ++ [ignored_id]
+          ignored: [ignored_id | ignorer.ignored]
         })
 
       update_user(new_ignorer, persist: true)

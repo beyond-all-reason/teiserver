@@ -54,7 +54,7 @@ defmodule Teiserver.SpringMatchmakingTest do
 
     # Check server state
     state = GenServer.call(queue.pid, :get_state)
-    assert state.unmatched_players == [user1.id, user2.id]
+    assert state.unmatched_players == [user2.id, user1.id]
     assert state.matched_players == []
     assert state.players_accepted == []
 
@@ -74,7 +74,7 @@ defmodule Teiserver.SpringMatchmakingTest do
     state = GenServer.call(queue.pid, :get_state)
     assert state.finding_battle == false
     assert state.unmatched_players == []
-    assert state.matched_players == [user1.id, user2.id]
+    assert state.matched_players == [user2.id, user1.id]
     assert state.players_accepted == [user1.id]
     assert state.waiting_for_players == [user2.id]
 
@@ -86,8 +86,8 @@ defmodule Teiserver.SpringMatchmakingTest do
     state = GenServer.call(queue.pid, :get_state)
     assert state.finding_battle == true
     assert state.unmatched_players == []
-    assert state.matched_players == [user1.id, user2.id]
-    assert state.players_accepted == [user1.id, user2.id]
+    assert state.matched_players == [user2.id, user1.id]
+    assert state.players_accepted == [user2.id, user1.id]
     assert state.waiting_for_players == []
 
     # Tick, it shouldn't result in a change since there's no battles open
@@ -221,7 +221,7 @@ defmodule Teiserver.SpringMatchmakingTest do
     assert reply == "OK cmd=c.matchmaking.join_queue\t#{queue2.id}\n"
 
     user_queues = GenServer.call(client_pid, {:get, :queues})
-    assert user_queues == [queue1.id, queue2.id]
+    assert user_queues == [queue2.id, queue1.id]
 
     # Now leave all queues
     _send_raw(socket, "c.matchmaking.leave_all_queues\n")

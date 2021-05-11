@@ -32,7 +32,7 @@ defmodule Central.Account.GroupTypeLib do
       group_type
     end)
 
-    new_all = (get_all_group_types() || []) ++ [group_type]
+    new_all = [group_type | (get_all_group_types() || [])]
     ConCache.put(:group_type_cache, "-all", new_all)
   end
 end

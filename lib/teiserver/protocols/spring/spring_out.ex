@@ -499,7 +499,7 @@ defmodule Teiserver.Protocols.SpringOut do
     reply(:add_user_to_battle, {state.userid, battle.id, script_password}, nil, state)
     reply(:add_script_tags, battle.tags, nil, state)
 
-    (battle.players ++ [battle.founder_id])
+    [battle.founder_id | battle.players]
     |> Enum.each(fn id ->
       client = Client.get_client_by_id(id)
       reply(:client_battlestatus, client, nil, state)

@@ -39,7 +39,7 @@ defmodule Teiserver.Data.Matchmaking do
   def add_queue(queue) do
     ConCache.update(:lists, :queues, fn value ->
       new_value =
-        (value ++ [queue.id])
+        ([queue.id | value])
         |> Enum.uniq()
 
       {:ok, new_value}

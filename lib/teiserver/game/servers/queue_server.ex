@@ -29,7 +29,7 @@ defmodule Teiserver.Game.QueueServer do
 
           new_state = %{
             state
-            | unmatched_players: state.unmatched_players ++ [userid],
+            | unmatched_players: [userid | state.unmatched_players],
               player_count: state.player_count + 1,
               player_map: Map.put(state.player_map, userid, player_item)
           }
@@ -68,7 +68,7 @@ defmodule Teiserver.Game.QueueServer do
       case player_id in state.matched_players do
         true ->
           new_waiting_for_players = List.delete(state.waiting_for_players, player_id)
-          new_players_accepted = state.players_accepted ++ [player_id]
+          new_players_accepted = [player_id | state.players_accepted]
 
           interim_state = %{
             state
@@ -121,7 +121,7 @@ defmodule Teiserver.Game.QueueServer do
             player2 = state.player_map[p2]
 
             # Count them as matched up
-            new_matched_players = state.matched_players ++ [p1, p2]
+            new_matched_players = [p1, p2 | state.matched_players]
 
             # Send them ready up commands
             send(player1.pid, {:matchmaking, {:match_ready, state.id}})

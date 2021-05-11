@@ -452,7 +452,7 @@ defmodule Central.Account do
           select: {ug.id, ug.children_cache}
 
       Repo.all(query)
-      |> Enum.map(fn {g, gc} -> gc ++ [g] end)
+      |> Enum.map(fn {g, gc} -> [g | gc] end)
       |> List.flatten()
       |> Enum.uniq()
     end)

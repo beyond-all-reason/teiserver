@@ -115,7 +115,7 @@ defmodule Teiserver.Battle do
 
     ConCache.update(:lists, :battles, fn value ->
       new_value =
-        (value ++ [battle.id])
+        ([battle.id | value])
         |> Enum.uniq()
 
       {:ok, new_value}
@@ -145,7 +145,7 @@ defmodule Teiserver.Battle do
       {:global_battle_updated, battle_id, :battle_closed}
     )
 
-    battle.players ++ [battle.founder_id]
+    [battle.founder_id | battle.players]
     |> Enum.each(fn userid ->
       PubSub.broadcast(
         Central.PubSub,
@@ -234,7 +234,7 @@ defmodule Teiserver.Battle do
             {:add_user_to_battle, userid, battle_id, script_password}
           )
 
-          new_players = battle_state.players ++ [userid]
+          new_players = [userid | battle_state.players]
           Map.put(battle_state, :players, new_players)
         end
 

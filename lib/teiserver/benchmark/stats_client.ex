@@ -14,7 +14,7 @@ defmodule Teiserver.Benchmark.StatsClient do
 
   # GenServer callbacks
   def handle_info({:ping, p}, state) do
-    new_state = %{state | pings: state.pings ++ [p]}
+    new_state = %{state | pings: [p | state.pings]}
     {:noreply, new_state}
   end
 

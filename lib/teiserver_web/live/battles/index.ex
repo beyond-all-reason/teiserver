@@ -30,7 +30,7 @@ defmodule TeiserverWeb.BattleLive.Index do
   @impl true
   def handle_info({:global_battle_updated, battle_id, :battle_opened}, socket) do
     new_battle = Battle.get_battle(battle_id)
-    battles = socket.assigns[:battles] ++ [new_battle]
+    battles = [new_battle | socket.assigns[:battles]]
 
     {:noreply, assign(socket, :battles, battles)}
   end
@@ -62,7 +62,7 @@ defmodule TeiserverWeb.BattleLive.Index do
       socket.assigns[:battles]
       |> Enum.map(fn battle ->
         if battle.id == battle_id do
-          %{battle | player_count: battle.player_count + 1, players: battle.players ++ [user_id]}
+          %{battle | player_count: battle.player_count + 1, players: [user_id | battle.players]}
         else
           battle
         end

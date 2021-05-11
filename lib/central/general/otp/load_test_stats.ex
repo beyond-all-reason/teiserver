@@ -56,13 +56,13 @@ defmodule Central.General.LoadTest.Stats do
   end
 
   def handle_cast({:register_tester, uid, agent}, state) do
-    state = Map.put(state, :testers, state.testers ++ [{uid, agent}])
+    state = Map.put(state, :testers, [{uid, agent} | state.testers])
 
     {:noreply, state}
   end
 
   def handle_cast({:log_tester_ping, uid, ping}, state) do
-    state = Map.put(state, :response_times, state.response_times ++ [{uid, ping}])
+    state = Map.put(state, :response_times, [{uid, ping} | state.response_times])
 
     {:noreply, state}
   end

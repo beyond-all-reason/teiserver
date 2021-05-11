@@ -191,7 +191,7 @@ defmodule Central.Account.GroupLib do
         select: {ug.id, ug.children_cache}
 
     Repo.all(query)
-    |> Enum.map(fn {g, gc} -> gc ++ [g] end)
+    |> Enum.map(fn {g, gc} -> [g | gc] end)
     |> List.flatten()
     |> Enum.uniq()
   end
@@ -204,7 +204,7 @@ defmodule Central.Account.GroupLib do
   #     select: {ug.id, ug.supers_cache}
 
   #   Repo.all(query)
-  #   |> Enum.map(fn {g, gs} -> gs ++ [g] end)
+  #   |> Enum.map(fn {g, gs} -> [g | gs] end)
   #   |> List.flatten
   #   |> Enum.uniq
   # end
@@ -217,7 +217,7 @@ defmodule Central.Account.GroupLib do
   #     select: {ug.id, ug.supers_cache, ug.children_cache}
 
   #   Repo.all(query)
-  #   |> Enum.map(fn {g, gs, gc} -> gs ++ gc ++ [g] end)
+  #   |> Enum.map(fn {g, gs, gc} -> [g | gs ++ gc] end)
   #   |> List.flatten
   #   |> Enum.uniq
   # end

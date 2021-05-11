@@ -33,7 +33,7 @@ defmodule Teiserver.Common.PubsubListener do
   end
 
   def handle_info(item, state) do
-    {:noreply, state ++ [item]}
+    {:noreply, [item | state]}
   end
 
   def handle_call(:get, _from, state) do

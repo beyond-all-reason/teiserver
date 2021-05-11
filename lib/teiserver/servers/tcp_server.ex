@@ -462,7 +462,7 @@ defmodule Teiserver.TcpServer do
 
       :battle_opened ->
         if state.battle_host == false or state.battle_id != battle_id do
-          new_known_battles = state.known_battles ++ [battle_id]
+          new_known_battles = [battle_id | state.known_battles]
           new_state = %{state | known_battles: new_known_battles}
           new_state.protocol_out.reply(:battle_opened, battle_id, nil, new_state)
         else
@@ -627,7 +627,7 @@ defmodule Teiserver.TcpServer do
     new_members =
       if not Enum.member?(state.room_member_cache[room_name] || [], userid) do
         state.protocol_out.reply(:add_user_to_room, {userid, room_name}, nil, state)
-        state.room_member_cache[room_name] || [] ++ [userid]
+        [userid | (state.room_member_cache[room_name] || [])]
       else
         state.room_member_cache[room_name] || []
       end

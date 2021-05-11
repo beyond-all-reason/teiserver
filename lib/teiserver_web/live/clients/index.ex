@@ -53,7 +53,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       {:noreply, socket}
     else
       clients =
-        (socket.assigns[:clients] ++ [Client.get_client_by_id(userid)])
+        ([Client.get_client_by_id(userid) | socket.assigns[:clients]])
         |> Enum.sort_by(fn c -> c.name end, &<=/2)
 
       users = Map.put(socket.assigns[:users], userid, User.get_user_by_id(userid))

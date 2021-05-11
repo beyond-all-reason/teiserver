@@ -35,7 +35,9 @@ defmodule Teiserver.Client do
         handicap: 0,
         sync: 0,
         side: 0,
-        battle_id: nil
+        battle_id: nil,
+
+        state: :menu
 
         # Metrics stuff
         # current_state: {:logged_out, :erlang.system_time(:seconds)},
@@ -181,7 +183,7 @@ defmodule Teiserver.Client do
 
     ConCache.update(:lists, :clients, fn value ->
       new_value =
-        (value ++ [client.userid])
+        ([client.userid | value])
         |> Enum.uniq()
 
       {:ok, new_value}

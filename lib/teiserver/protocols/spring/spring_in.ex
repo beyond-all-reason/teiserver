@@ -712,7 +712,7 @@ defmodule Teiserver.Protocols.SpringIn do
           state
           | battle_id: battle.id,
             battle_host: true,
-            known_battles: state.known_battles ++ [battle.id]
+            known_battles: [battle.id | state.known_battles]
         }
 
       {:failure, reason} ->

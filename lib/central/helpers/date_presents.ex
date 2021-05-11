@@ -63,6 +63,7 @@ defmodule Central.Helpers.DatePresets do
     "End of time"
   ]
 
+  # We use ++ here since the order matters
   @spec presets() :: list(String.t())
   def presets(), do: @presets ++ ["All time"]
 

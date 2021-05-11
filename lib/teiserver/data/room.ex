@@ -54,7 +54,7 @@ defmodule Teiserver.Room do
             {:add_user_to_room, user_id, room_name}
           )
 
-          new_members = room_state.members ++ [user_id]
+          new_members = [user_id | room_state.members]
           Map.put(room_state, :members, new_members)
         end
 
@@ -88,7 +88,7 @@ defmodule Teiserver.Room do
 
     ConCache.update(:lists, :rooms, fn value ->
       new_value =
-        (value ++ [room.name])
+        ([room.name | value])
         |> Enum.uniq()
 
       {:ok, new_value}

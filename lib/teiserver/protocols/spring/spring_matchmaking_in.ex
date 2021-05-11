@@ -34,7 +34,7 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
 
     case joined do
       true ->
-        new_state = %{state | queues: Enum.uniq(state.queues ++ [queue_id])}
+        new_state = %{state | queues: Enum.uniq([queue_id | state.queues])}
         reply(:spring, :okay, "c.matchmaking.join_queue\t#{queue_id}", msg_id, new_state)
 
       false ->

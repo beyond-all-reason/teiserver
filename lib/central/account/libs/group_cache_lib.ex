@@ -4,8 +4,9 @@ defmodule Central.Account.GroupCacheLib do
   alias Central.Account
   alias Central.Account.Group
 
+  # Only created so we can pipe
   defp concatenate_lists(l1, l2), do: l1 ++ l2
-  defp append_to_list(l1, l2), do: l1 ++ [l2]
+  defp prepend_to_list(l1, l2), do: [l2 | l1]
 
   def update_caches(the_group), do: update_caches(the_group, nil)
 
@@ -64,7 +65,7 @@ defmodule Central.Account.GroupCacheLib do
     # Each super group of the_group needs to ensure it removes
     # the_group in it's children_cache
     Account.list_groups(search: [id_list: super_group.supers_cache])
-    |> append_to_list(super_group)
+    |> prepend_to_list(super_group)
     |> Enum.map(fn sg ->
       new_cache =
         sg.children_cache
@@ -83,10 +84,10 @@ defmodule Central.Account.GroupCacheLib do
     # Each super group of the_group needs to ensure it has
     # the_group in it's children_cache
     Account.list_groups(search: [id_list: super_group.supers_cache])
-    |> append_to_list(super_group)
+    |> prepend_to_list(super_group)
     |> Enum.map(fn sg ->
       new_cache =
-        (sg.children_cache ++ [the_group.id] ++ the_group.children_cache)
+        ([the_group.id | sg.children_cache ++ the_group.children_cache])
         |> Enum.uniq()
 
       sg
@@ -97,7 +98,7 @@ defmodule Central.Account.GroupCacheLib do
     # the_group needs to enuser it has it's super_group_id
     # and it's super_group supers_cache as it's own supers_cache
     new_cache =
-      (super_group.supers_cache ++ [super_group.id])
+      ([super_group.id | super_group.supers_cache])
       |> Enum.uniq()
 
     the_group
@@ -122,7 +123,7 @@ defmodule Central.Account.GroupCacheLib do
           !Enum.member?(old_supers_cache, sg)
         end)
         |> concatenate_lists(the_group.supers_cache)
-        |> append_to_list(the_group.id)
+        |> prepend_to_list(the_group.id)
         |> Enum.uniq()
 
       child
