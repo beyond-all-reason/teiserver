@@ -174,29 +174,6 @@ host    all             all             ::1/128                 trust
 These changes will take effect on restart and you'll know they work if you can access the database using `psql -U central_prod` from the deploy user.
 Note: It is possible `sudo service postgresql restart` will also work, I've not yet tested this.
 
-
-### Elixir
-Follow the distro specific instructions at [https://elixir-lang.org/install.html](https://elixir-lang.org/install.html). They're different enough for each distro I feel it worth linking there.
-
-You can test if erlang and elixir are installed with the following:
-```
-$ iex
-Erlang/OTP 23 [erts-11.1] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [hipe]
-
-Interactive Elixir (1.11.2) - press Ctrl+C to exit (type h() ENTER for help)
-iex(1)> 
-
---------
-
-$ erl
-Erlang/OTP 23 [erts-11.1] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [hipe]
-
-Eshell V11.1  (abort with ^G)
-1> 
-```
-
-If one of the above doesn't work then it's likely something went wrong.
-
 ### Setting up some files and directories
 For this example I've put lots of stuff in the root directory. Feel free to relocate things.
 ```
