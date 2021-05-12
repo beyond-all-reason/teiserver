@@ -6,6 +6,7 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
     AgentLib.post_agent_update(state.id, "Starting agents supervisor")
 
     add_servers("battlehost", 5)
+    # add_servers("battlejoin", 5)
     add_servers("idle", 5)
 
     AgentLib.post_agent_update(state.id, "Agent supervisor started")
@@ -36,6 +37,7 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
   defp lookup_module(type) do
     case type do
       "battlehost" -> Teiserver.Agents.BattlehostAgentServer
+      "battlejoin" -> Teiserver.Agents.BattlejoinAgentServer
       "idle" -> Teiserver.Agents.IdleAgentServer
     end
   end

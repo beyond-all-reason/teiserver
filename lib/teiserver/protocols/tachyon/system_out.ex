@@ -6,6 +6,20 @@ defmodule Teiserver.Protocols.Tachyon.SystemOut do
     }
   end
 
+  def do_reply(:nouser, nil) do
+    %{
+      result: "error",
+      error: "not logged in"
+    }
+  end
+
+  def do_reply(:noauth, nil) do
+    %{
+      result: "error",
+      error: "no authorisation"
+    }
+  end
+
   def do_reply(:error, data) do
     %{
       result: "error",

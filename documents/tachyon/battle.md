@@ -54,8 +54,8 @@
 #### Example input/output
 ```
 {
+  "cmd": "c.battle.create",
   "battle": {
-    "cmd": "c.battle.create",
     "name": "EU 01 - 123",
     "nattype": "none",
     "password": "password2",
@@ -87,7 +87,58 @@
 
 ## Interacting
 ### TODO: `c.battle.join`
+Requests to join the battle, the host will be sent a message asking if the person can join or not. Based on that an accept/reject is sent. If there is a failure to join then it means the host wasn't even consulted as the joiner didn't qualify (e.g. didn't supply the password).
+```
+{
+  "cmd": "c.battle.join",
+  "battle_id": 123,
+  "password": "******" // Optional
+}
+
+// Stage 1
+{
+  "cmd": "s.battle.join",
+  "result": "success",
+  "outcome": "Waiting for host approval"
+}
+
+{
+  "cmd": "s.battle.join",
+  "result": "failure",
+  "reason": "Reason for failure"
+}
+
+
+// Stage 2
+{
+  "cmd": "s.battle.join",
+  "result": "approve",
+  "battle": Battle
+}
+
+{
+  "cmd": "s.battle.join",
+  "result": "reject",
+  "reason": "Reason for rejection"
+}
+```
+
 ### TODO: `c.battle.leave`
+No response
+```
+{
+  "cmd": "c.battle.leave"
+}
+
+{
+  "cmd": "s.battle.leave",
+  "result": "success"
+}
+```
+
+### TODO: `s.battle.join_request`
+### TODO: `c.battle.join_approve`
+### TODO: `c.battle.join_deny`
 
 ## Telemetry
 - Mid-battle updates?

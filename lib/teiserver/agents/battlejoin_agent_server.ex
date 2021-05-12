@@ -1,16 +1,16 @@
-defmodule Teiserver.Agents.BattlehostAgentServer do
+defmodule Teiserver.Agents.BattlejoinAgentServer do
   use GenServer
   alias Teiserver.Agents.AgentLib
   alias Teiserver.Battle
 
-  @tick_period 5000
+  @tick_period 7000
   @leave_chance 0.5
 
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
     AgentLib.login(socket, %{
-      name: "BattlehostAgentServer_#{state.number}",
-      email: "BattlehostAgentServer_#{state.number}@agent_email",
+      name: "BattlejoinAgentServer_#{state.number}",
+      email: "BattlejoinAgentServer_#{state.number}@agent_email",
       extra_data: %{}
     })
 
@@ -20,13 +20,11 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   end
 
   def handle_info(:tick, state) do
-    battle = Battle.get_battle(state.battle_id)
+    new_state = case state.battle_id do
+      nil ->
+        join_battle(state)
 
-    new_state = cond do
-      battle == nil ->
-        open_battle(state)
-
-      battle.player_count == 0 and battle.spectator_count == 0 ->
+      _ ->
         if :rand.uniform() <= @leave_chance do
           leave_battle(state)
         else
@@ -37,30 +35,21 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
     {:noreply, new_state}
   end
 
-  defp open_battle(state) do
+  defp join_battle(state) do
+    battle_id = Battle.list_battle_ids()
+      |> Enum.random()
+
     cmd = %{
-      cmd: "c.battle.create",
-      battle: %{
-        cmd: "c.battles.create",
-        name: "BH #{state.number} - #{:rand.uniform(9999)}",
-        nattype: "none",
-        password: "password2",
-        port: 1234,
-        game_hash: "string_of_characters",
-        map_hash: "string_of_characters",
-        map_name: "koom valley",
-        game_name: "BAR",
-        engine_name: "spring-105",
-        engine_version: "105.1.2.3",
-        settings: %{
-          max_players: 12
-        }
-      }
+      cmd: "c.battle.join",
+      battle_id: battle_id
     }
     AgentLib._send(state.socket, cmd)
     reply = AgentLib._recv(state.socket)
+
+    inspect(reply)
+
     AgentLib.post_agent_update(state.id, "opened battle")
-    %{state | battle_id: reply["battle"]["id"]}
+    %{state | battle_id: battle_id}
   end
 
   defp leave_battle(state) do

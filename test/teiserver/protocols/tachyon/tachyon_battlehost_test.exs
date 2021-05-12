@@ -1,5 +1,6 @@
 defmodule Teiserver.Protocols.TachyonBattleHostTest do
   use Central.ServerCase
+  alias Teiserver.Battle
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
@@ -11,7 +12,7 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
 
   test "battle host", %{socket: socket, pid: pid} do
     # Open the battle
-    battle = %{
+    battle_data = %{
       cmd: "c.battle.create",
       name: "EU 01 - 123",
       nattype: "none",
@@ -28,7 +29,7 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
       }
     }
 
-    data = %{cmd: "c.battle.create", battle: battle}
+    data = %{cmd: "c.battle.create", battle: battle_data}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
 
@@ -38,9 +39,11 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
 
     assert battle["name"] == "EU 01 - 123"
     assert battle["map_name"] == "koom valley"
+    battle_id = battle["id"]
 
-    assert GenServer.call(pid, {:get, :battle_id}) == battle["id"]
+    assert GenServer.call(pid, {:get, :battle_id}) == battle_id
     assert GenServer.call(pid, {:get, :battle_host}) == true
+    assert Battle.get_battle!(battle_id) != nil
 
     # Now leave the battle, closing it in the process
     data = %{cmd: "c.battle.leave"}
@@ -50,5 +53,6 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
 
     assert GenServer.call(pid, {:get, :battle_id}) == nil
     assert GenServer.call(pid, {:get, :battle_host}) == false
+    assert Battle.get_battle!(battle_id) == nil
   end
 end
