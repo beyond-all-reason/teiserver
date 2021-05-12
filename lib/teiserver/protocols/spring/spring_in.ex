@@ -100,9 +100,14 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   # Swap to the Tachyon protocol
-  defp do_handle("TACHYON", _, msg_id, state) do
+  defp do_handle("TACHYON", "", msg_id, state) do
     reply(:okay, "TACHYON", msg_id, state)
     %{state | protocol_in: Teiserver.Protocols.Tachyon, protocol_out: Teiserver.Protocols.Tachyon}
+  end
+
+  # Use the Tachyon protocol for a single command
+  defp do_handle("TACHYON", data, _msg_id, state) do
+    Teiserver.Protocols.Tachyon.data_in("#{data}\n", state)
   end
 
   defp do_handle("c.battles.list_ids", _, msg_id, state) do

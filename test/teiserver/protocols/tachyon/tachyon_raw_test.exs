@@ -13,6 +13,15 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     {:ok, socket: socket}
   end
 
+  test "spring tachyon interop command", %{socket: socket} do
+    _ = _recv_raw(socket)
+    cmd = %{cmd: "c.system.ping"}
+    data = Tachyon.encode(cmd)
+    _send_raw(socket, "TACHYON #{data}\n")
+    reply = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.system.pong"}
+  end
+
   test "swap to tachyon", %{socket: socket} do
     # Test it swaps to it
     _ = _recv_raw(socket)
