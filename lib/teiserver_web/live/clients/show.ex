@@ -47,11 +47,11 @@ defmodule TeiserverWeb.ClientLive.Show do
             |> assign(:id, id)
             |> assign(:client, client)
             |> assign(:user, user)}
+        end
       false ->
         {:noreply,
          socket
          |> redirect(to: Routes.general_page_path(socket, :index))}
-    end
     end
   end
 

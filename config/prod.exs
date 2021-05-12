@@ -60,8 +60,7 @@ config :central, CentralWeb.Endpoint,
     ],
     secure_renegotiate: true,
     reuse_sessions: true,
-    honor_cipher_order: true,
-    max_connections: :infinity
+    honor_cipher_order: true
   ],
   force_ssl: [hsts: true],
   root: ".",

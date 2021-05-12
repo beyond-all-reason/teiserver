@@ -37,14 +37,14 @@ defmodule Central.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:phoenix, "~> 1.5.4"},
+      {:phoenix, "~> 1.5.9"},
       {:phoenix_ecto, "~> 4.1"},
       {:ecto_sql, "~> 3.6.1"},
       {:postgrex, ">= 0.15.9"},
       {:floki, ">= 0.30.1", only: :test},
       {:phoenix_html, "~> 2.11"},
-      {:phoenix_live_reload, "~> 1.2", only: :dev},
-      {:phoenix_live_view, "~> 0.15"},
+      {:phoenix_live_reload, "~> 1.3", only: :dev},
+      {:phoenix_live_view, "~> 0.15.5"},
       {:phoenix_live_dashboard, "~> 0.2"},
       {:ecto_psql_extras, "~> 0.2"},
       {:telemetry_metrics, "~> 0.4"},
@@ -63,8 +63,8 @@ defmodule Central.MixProject do
       {:ranch, "~> 1.7.1"},
       {:parallel, "~> 0.0"},
       {:con_cache, "~> 1.0"},
-      {:bamboo, "~> 1.6"},
-      {:bamboo_smtp, "~> 1.7"},
+      {:bamboo, "~> 2.1"},
+      {:bamboo_smtp, "~> 4.0"},
       {:phoenix_pubsub, "~> 2.0"},
       {:elixir_uuid, "~> 1.2"},
       {:excoveralls, "~> 0.14", only: :test},

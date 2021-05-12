@@ -1,10 +1,10 @@
 defmodule Teiserver.Protocols.Tachyon.BattleIn do
   alias Teiserver.Battle
-  alias Teiserver.Protocols.Tachyon
+  # alias Teiserver.Protocols.Tachyon
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
-  def do_handle("create", %{"battle" => battle_dict}, %{userid: nil} = state) do
+  def do_handle("create", %{"battle" => _battle_dict}, %{userid: nil} = _state) do
     throw "Need to be logged in to do stuff with battles"
   end
 

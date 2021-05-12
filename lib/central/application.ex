@@ -50,6 +50,7 @@ defmodule Central.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Central.Supervisor]
     start_result = Supervisor.start_link(children, opts)
+    Logger.info("Central.Supervisor start result: #{Kernel.inspect start_result}")
 
     startup_sub_functions()
 
