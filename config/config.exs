@@ -80,6 +80,7 @@ config :central, Oban,
   queues: [logging: 1, cleanup: 1, teiserver: 10],
   crontab: [
     # Every day at 2am
+    {"0 2 * * *", Central.Admin.CleanupTask},
     {"0 2 * * *", Central.Logging.AggregateViewLogsTask}
   ]
 
