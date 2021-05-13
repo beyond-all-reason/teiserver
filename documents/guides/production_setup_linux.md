@@ -312,4 +312,4 @@ firefox --new-tab "https://sarchart.dotsuresh.com/"
 
 ### FAQ
 #### What is "central"?
-I've a few different projects all of which rely on a common core of functionality (users, groups etc). This is stored as the "central" folder which makes it easier to share code and the like between them. It does mean the application launched is called "central" though.
+I've a few different projects all of which rely on a common core of functionality (users, groups etc). This is stored as the "central" folder which makes it easier to share code and the like between them. It does mean the application launched is called "central" though. The main repo for Central is [https://github.com/Teifion/central](https://github.com/Teifion/central).

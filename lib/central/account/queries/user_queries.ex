@@ -46,8 +46,7 @@ defmodule Central.Account.UserQueries do
   def _search(query, :admin_group, group_ids) do
     from users in query,
       where: users.admin_group_id in ^group_ids
-
-    # or is_nil(users.admin_group_id)
+        or is_nil(users.admin_group_id)
   end
 
   def _search(query, :has_admin_group, "Either"), do: query
