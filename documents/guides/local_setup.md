@@ -46,13 +46,14 @@ mix.create
 To run the TLS server locally you will also need to create localhost certificates in `priv/certs` using the following commands
 
 ```
+mkdir -p priv/certs
+cd priv/certs
+openssl dhparam -out dh-params.pem 2048
 openssl req -x509 -out localhost.crt -keyout localhost.key \
   -newkey rsa:2048 -nodes -sha256 \
   -subj '/CN=localhost' -extensions EXT -config <( \
    printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
-mkdir -p priv/certs
-mv localhost.crt priv/certs/localhost.crt
-mv localhost.key priv/certs/localhost.key
+cd ../..
 ```
 
 ### Running it
