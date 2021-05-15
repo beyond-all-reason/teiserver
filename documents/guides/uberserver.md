@@ -5,6 +5,7 @@
 - [Deploy code](deployment.md)
 - Run [ubereserver_convert.py](../prod/uberserver_convert.py) on your database export
 - Import json into Teiserver at: https://yourdomain.com/teiserver/admin/tools/convert
+- Restart the server to recache the users right away
 
 #### Caveat
 Uberserver doesn't enforce unique email addresses while Teiserver does. In many cases bot accounts will have duplicate addresses and the conversion script will automatically mutate them (email + name combo) to allow the process to continue. A list of fund duplicates is included with the json output from the python converter. Some manual wiggling may be required.

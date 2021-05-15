@@ -253,7 +253,12 @@ centralapp eval "Central.Release.migrate"
 ```
 
 ### Deployment
-[Deployment itself is located in a different file.](/documents/guides/deployment.md)
+[Deployment itself is located in a different file.](/documents/guides/deployment.md), you will need to execute a deployment as part of the setup. There will be additional steps to take after your first deployment.
+
+#### Creating the first user
+To create your first root user make a note of `config :central, Central.Setup, key:` within `config/prod_secret.exs` as you will need that value here. Go to `https://domain.com/initial_setup/$KEY` where `$KEY` is replaced with the value in this config. This link will only work while a user with an email "root@localhost" has not been created. It is advised that once the user is created you set the initial_setup key to be an empty string which will disable the function entirely.
+
+A new user with developer level access will be created with the email `root@localhost` and a password identical to the setup key you just used. You can now login as that user, it is advised your first action should be to change/update the password and set the user details (name/email) to the ones you intend to use as admin.
 
 ### Things left for you to do at your leisure
 At some stage you'll probably want to do these things, no rush though.
