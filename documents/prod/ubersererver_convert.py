@@ -47,9 +47,10 @@ def find_duplicated_emails(rows):
 
   for row in rows:
     parts = row.replace("(", "").replace(")", "").split(",")
+    
     [_key, _username, _password, _salt, _register_date, _last_login,
-    _last_ip, _last_id, _ingame_time, _access, email, _bot] = parts
-
+     _last_ip, _last_id, _ingame_time, _access, email, _bot] = parts[:12]
+    
     email = email[1:-1]
     if email in all_emails:
       if email not in dupes:
@@ -69,7 +70,7 @@ def get_users(users_query):
   for row in rows:
     parts = row.replace("(", "").replace(")", "").split(",")
     [key, username, password, _salt, _register_date, _last_login,
-     last_ip, _last_id, ingame_time, access, email, bot] = parts
+     last_ip, _last_id, ingame_time, access, email, bot] = parts[:12]
 
     username = username[1:-1]
     email = email[1:-1]
@@ -118,7 +119,7 @@ def add_ignores(users, ignores_query):
 
   for row in rows:
     parts = row.split(",")
-    [_id, user, ignored, _reason, _time] = parts
+    [_id, user, ignored, _reason, _time] = parts[:5]
     user = int(user)
     ignored = int(ignored)
 
@@ -135,7 +136,7 @@ def add_friend_requests(users, requests_query):
 
   for row in rows:
     parts = row.split(",")
-    [_id, requester_id, requested_id, _msg, _time] = parts
+    [_id, requester_id, requested_id, _msg, _time] = parts[:5]
     requester_id = int(requester_id)
     requested_id = int(requested_id)
 

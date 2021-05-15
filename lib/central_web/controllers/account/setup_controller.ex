@@ -5,14 +5,19 @@ defmodule CentralWeb.Account.SetupController do
   def setup(conn, %{"key" => key}) do
     true_key = Application.get_env(:central, Central.Setup)[:key]
 
-    case key == true_key do
-      false ->
+    cond do
+      key == true_key ->
+        conn
+        |> put_flash(:danger, "Error.")
+        |> redirect(to: "/")
+
+      true_key == "" ->
         conn
         |> put_flash(:danger, "Error.")
         |> redirect(to: "/")
 
       true ->
-        users = Central.Account.list_users()
+        users = Central.Account.list_users(search: [email: "root@localhost"])
 
         if users == [] do
           {:ok, group} =
