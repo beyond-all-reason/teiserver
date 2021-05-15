@@ -86,22 +86,22 @@ defmodule Teiserver.Client do
   def telemetry_counter(action) do
     case action do
       :login ->
-        Teiserver.TelemetryServer.increase(:client, :menu)
+        Teiserver.Telemetry.TelemetryServer.increase(:client, :menu)
 
       :disconnect ->
-        Teiserver.TelemetryServer.decrease(:client, :menu)
+        Teiserver.Telemetry.TelemetryServer.decrease(:client, :menu)
 
       :create_battle ->
-        Teiserver.TelemetryServer.increase(:client, :battle)
-        Teiserver.TelemetryServer.decrease(:client, :menu)
+        Teiserver.Telemetry.TelemetryServer.increase(:client, :battle)
+        Teiserver.Telemetry.TelemetryServer.decrease(:client, :menu)
 
       :join_battle ->
-        Teiserver.TelemetryServer.increase(:client, :battle)
-        Teiserver.TelemetryServer.decrease(:client, :menu)
+        Teiserver.Telemetry.TelemetryServer.increase(:client, :battle)
+        Teiserver.Telemetry.TelemetryServer.decrease(:client, :menu)
 
       :leave_battle ->
-        Teiserver.TelemetryServer.decrease(:client, :battle)
-        Teiserver.TelemetryServer.increase(:client, :menu)
+        Teiserver.Telemetry.TelemetryServer.decrease(:client, :battle)
+        Teiserver.Telemetry.TelemetryServer.increase(:client, :menu)
     end
     :ok
   end

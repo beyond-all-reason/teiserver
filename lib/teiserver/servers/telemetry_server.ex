@@ -1,8 +1,7 @@
-defmodule Teiserver.TelemetryServer do
+defmodule Teiserver.Telemetry.TelemetryServer do
   use GenServer
 
   @tick_period 5_000
-  @db_cycles div(60_000, @tick_period)
 
   # Telemetry todo lists
   # TODO: Beherith: clients logged in, clients ingame, clients singpleplayer, clients afk, clients that are bots are not clients
@@ -19,19 +18,16 @@ defmodule Teiserver.TelemetryServer do
     GenServer.cast(__MODULE__, {:decrease, table, key})
   end
 
+  def get_state() do
+    GenServer.call(__MODULE__, :get_state)
+  end
+
   @impl true
   def handle_info(:tick, state) do
     state = get_totals(state)
     report_telemetry(state)
 
-    new_cycle = if state.cycle == 0 do
-      db_store_telemetry(state)
-      @db_cycles
-    else
-      state.cycle - 1
-    end
-
-    {:noreply, %{state | cycle: new_cycle}}
+    {:noreply, state}
   end
 
   @impl true
@@ -49,10 +45,9 @@ defmodule Teiserver.TelemetryServer do
     {:noreply, Map.put(state, table, new_table)}
   end
 
-  @spec db_store_telemetry(Map.t()) :: :ok
-  defp db_store_telemetry(_state) do
-    # Store telemetry in the database here
-    :ok
+  @impl true
+  def handle_call(:get_state, _from, state) do
+    {:reply, state, state}
   end
 
   @spec report_telemetry(Map.t()) :: :ok
@@ -98,8 +93,7 @@ defmodule Teiserver.TelemetryServer do
         total: 0,
         lobby: 0,
         in_progress: 0
-      },
-      cycle: @db_cycles
+      }
     }}
   end
 end

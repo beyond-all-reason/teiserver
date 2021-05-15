@@ -381,18 +381,18 @@ defmodule Teiserver.Battle do
   def telemetry_counter(action) do
     case action do
       :create ->
-        Teiserver.TelemetryServer.increase(:battle, :lobby)
+        Teiserver.Telemetry.TelemetryServer.increase(:battle, :lobby)
 
       :close ->
-        Teiserver.TelemetryServer.decrease(:battle, :lobby)
+        Teiserver.Telemetry.TelemetryServer.decrease(:battle, :lobby)
 
       :start ->
-        Teiserver.TelemetryServer.increase(:battle, :in_progress)
-        Teiserver.TelemetryServer.decrease(:battle, :lobby)
+        Teiserver.Telemetry.TelemetryServer.increase(:battle, :in_progress)
+        Teiserver.Telemetry.TelemetryServer.decrease(:battle, :lobby)
 
       :stop ->
-        Teiserver.TelemetryServer.decrease(:battle, :in_progress)
-        Teiserver.TelemetryServer.increase(:battle, :lobby)
+        Teiserver.Telemetry.TelemetryServer.decrease(:battle, :in_progress)
+        Teiserver.Telemetry.TelemetryServer.increase(:battle, :lobby)
     end
     :ok
   end

@@ -81,7 +81,10 @@ config :central, Oban,
   crontab: [
     # Every day at 2am
     {"0 2 * * *", Central.Admin.CleanupTask},
-    {"0 2 * * *", Central.Logging.AggregateViewLogsTask}
+    {"0 2 * * *", Central.Logging.AggregateViewLogsTask},
+
+    # Every minute
+    {"* * * * *", Teiserver.Tasks.PersistTelemetryTask}
   ]
 
 config :central, Central.Mailer,

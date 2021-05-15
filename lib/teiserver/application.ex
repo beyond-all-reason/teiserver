@@ -34,7 +34,7 @@ defmodule Teiserver.Application do
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Agents.DynamicSupervisor},
 
       # Telemetry
-      {Teiserver.TelemetryServer, name: Teiserver.TelemetryServer},
+      {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
     ]
 
     # Some stuff doesn't work with the tests
