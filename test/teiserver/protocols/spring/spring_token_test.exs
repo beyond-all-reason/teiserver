@@ -1,10 +1,10 @@
 defmodule Teiserver.SpringTokenTest do
-  use Central.ServerCase, async: true
+  use Central.ServerCase, async: false
   require Logger
   alias Central.Helpers.GeneralTestLib
 
   import Teiserver.TeiserverTestLib,
-    only: [tls_setup: 0, raw_setup: 0, _send_raw: 2, _recv_raw: 1]
+    only: [tls_setup: 0, raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1]
 
   test "c.user.get_token - insecure" do
     %{socket: socket} = raw_setup()
@@ -44,7 +44,7 @@ defmodule Teiserver.SpringTokenTest do
     _welcome = _recv_raw(socket)
 
     _send_raw(socket, "c.user.get_token_by_email token_test_user@\ttoken_password\n")
-    reply = _recv_raw(socket)
+    reply = _recv_until(socket)
     assert reply =~ "s.user.user_token token_test_user@\t"
 
     token =

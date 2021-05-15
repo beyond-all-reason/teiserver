@@ -70,7 +70,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
 
   defp leave_battle(state) do
     AgentLib._send(state.socket, %{cmd: "c.battle.leave"})
-    success = AgentLib._recv(state.socket)
+    _success = AgentLib._recv(state.socket)
 
     AgentLib.post_agent_update(state.id, "left battle")
     %{state | battle_id: nil}

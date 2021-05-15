@@ -110,18 +110,31 @@ defmodule Teiserver.TcpServerTest do
 
   test "bad sequences" do
     %{socket: socket, user: user} = auth_setup()
+    client = Client.get_client_by_name(user.name)
+    pid = client.pid
+
+    # Should be no users but ourselves
+    assert GenServer.call(pid, {:get, :known_users}) == %{
+      user.id => %{battle_id: nil, userid: user.id}
+    }
+
     %{socket: s1, user: u1} = auth_setup()
-    # %{socket: s2, user: u2} = auth_setup()
-    # %{socket: s3, user: u3} = auth_setup()
+    %{socket: _s2, user: u2} = auth_setup()
+    %{socket: _s3, user: u3} = auth_setup()
+
+    # They should now all be known
+    assert GenServer.call(pid, {:get, :known_users}) == %{
+      user.id => %{battle_id: nil, userid: user.id},
+      u1.id => %{battle_id: nil, userid: u1.id},
+      u2.id => %{battle_id: nil, userid: u2.id},
+      u3.id => %{battle_id: nil, userid: u3.id},
+    }
 
     # Flush the message queues
     _ = _recv_raw(socket)
     _ = _recv_raw(s1)
     # _ = _recv_raw(s2)
     # _ = _recv_raw(s3)
-
-    client = Client.get_client_by_name(user.name)
-    pid = client.pid
 
     # Enable logging
     # send(pid, {:put, :extra_logging, true})
@@ -142,31 +155,72 @@ defmodule Teiserver.TcpServerTest do
     r = _recv_raw(socket)
     assert r == "REMOVEUSER #{u1.name}\n"
 
+    assert GenServer.call(pid, {:get, :known_users}) == %{
+      user.id => %{battle_id: nil, userid: user.id},
+      u2.id => %{battle_id: nil, userid: u2.id},
+      u3.id => %{battle_id: nil, userid: u3.id},
+    }
+
     # Repeat, should not do anything
     send(pid, {:user_logged_out, u1.id, u1.name})
     r = _recv_raw(socket)
     assert r == :timeout
+
+    assert GenServer.call(pid, {:get, :known_users}) == %{
+      user.id => %{battle_id: nil, userid: user.id},
+      u2.id => %{battle_id: nil, userid: u2.id},
+      u3.id => %{battle_id: nil, userid: u3.id},
+    }
 
     # Logs back in
     send(pid, {:user_logged_in, u1.id})
     r = _recv_raw(socket)
     assert r == "ADDUSER #{u1.name} ?? 0 #{u1.id} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\n"
 
+    assert GenServer.call(pid, {:get, :known_users}) == %{
+      user.id => %{battle_id: nil, userid: user.id},
+      u1.id => %{battle_id: nil, userid: u1.id},
+      u2.id => %{battle_id: nil, userid: u2.id},
+      u3.id => %{battle_id: nil, userid: u3.id},
+    }
+
     # ---- BATTLES ----
     battle_id = 111
+    assert GenServer.call(pid, {:get, :known_battles}) == []
     send(pid, {:add_user_to_battle, u1.id, battle_id, "script_password"})
     r = _recv_raw(socket)
     assert r == "JOINEDBATTLE #{battle_id} #{u1.name}\n"
+
+    assert GenServer.call(pid, {:get, :known_users}) == %{
+      user.id => %{battle_id: nil, userid: user.id},
+      u1.id => %{battle_id: battle_id, userid: u1.id},
+      u2.id => %{battle_id: nil, userid: u2.id},
+      u3.id => %{battle_id: nil, userid: u3.id},
+    }
 
     # Duplicate user in battle
     send(pid, {:add_user_to_battle, u1.id, battle_id, "script_password"})
     r = _recv_raw(socket)
     assert r == :timeout
 
+    assert GenServer.call(pid, {:get, :known_users}) == %{
+      user.id => %{battle_id: nil, userid: user.id},
+      u1.id => %{battle_id: battle_id, userid: u1.id},
+      u2.id => %{battle_id: nil, userid: u2.id},
+      u3.id => %{battle_id: nil, userid: u3.id},
+    }
+
     # User moves to a different battle (without leave command)
     send(pid, {:add_user_to_battle, u1.id, battle_id + 1, "script_password"})
     r = _recv_raw(socket)
     assert r == "LEFTBATTLE #{battle_id} #{u1.name}\nJOINEDBATTLE #{battle_id + 1} #{u1.name}\n"
+
+    assert GenServer.call(pid, {:get, :known_users}) == %{
+      user.id => %{battle_id: nil, userid: user.id},
+      u1.id => %{battle_id: battle_id + 1, userid: u1.id},
+      u2.id => %{battle_id: nil, userid: u2.id},
+      u3.id => %{battle_id: nil, userid: u3.id},
+    }
 
     # Same battle again
     send(pid, {:add_user_to_battle, u1.id, battle_id + 1, "script_password"})
