@@ -4,6 +4,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   alias Teiserver.Battle
 
   @tick_period 5000
+  @inaction_chance 0.5
   @leave_chance 0.5
 
   def handle_info(:startup, state) do
@@ -23,6 +24,10 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
     battle = Battle.get_battle(state.battle_id)
 
     new_state = cond do
+      # Chance of doing nothing
+      :rand.uniform() <= @inaction_chance ->
+        state
+
       battle == nil ->
         open_battle(state)
 
@@ -65,7 +70,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
 
   defp leave_battle(state) do
     AgentLib._send(state.socket, %{cmd: "c.battle.leave"})
-    _success = AgentLib._recv(state.socket)
+    success = AgentLib._recv(state.socket)
 
     AgentLib.post_agent_update(state.id, "left battle")
     %{state | battle_id: nil}

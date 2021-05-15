@@ -121,6 +121,9 @@ defmodule Teiserver.Battle do
       {:ok, new_value}
     end)
 
+    Client.telemetry_counter(:create_battle)
+    telemetry_counter(:create)
+
     :ok = PubSub.broadcast(
       Central.PubSub,
       "all_battle_updates",
@@ -133,6 +136,8 @@ defmodule Teiserver.Battle do
   @spec close_battle(integer() | nil) :: :ok
   def close_battle(battle_id) do
     battle = get_battle(battle_id)
+    telemetry_counter(:close)
+
     PubSub.broadcast(
       Central.PubSub,
       "live_battle_updates:#{battle_id}",
@@ -251,6 +256,7 @@ defmodule Teiserver.Battle do
 
     case do_remove_user_from_battle(userid, battle_id) do
       :closed ->
+        Client.telemetry_counter(:leave_battle)
         nil
 
       :not_member ->
@@ -260,6 +266,7 @@ defmodule Teiserver.Battle do
         nil
 
       :removed ->
+        Client.telemetry_counter(:leave_battle)
         PubSub.broadcast(
           Central.PubSub,
           "all_battle_updates",
@@ -272,6 +279,7 @@ defmodule Teiserver.Battle do
   def kick_user_from_battle(userid, battle_id) do
     case do_remove_user_from_battle(userid, battle_id) do
       :closed ->
+        Client.telemetry_counter(:leave_battle)
         nil
 
       :not_member ->
@@ -281,6 +289,7 @@ defmodule Teiserver.Battle do
         nil
 
       :removed ->
+        Client.telemetry_counter(:leave_battle)
         PubSub.broadcast(
           Central.PubSub,
           "all_battle_updates",
@@ -364,6 +373,28 @@ defmodule Teiserver.Battle do
     else
       :no_battle
     end
+  end
+
+
+  @spec telemetry_counter(:create | :close | :start | :stop) ::
+          :ok
+  def telemetry_counter(action) do
+    case action do
+      :create ->
+        Teiserver.TelemetryServer.increase(:battle, :lobby)
+
+      :close ->
+        Teiserver.TelemetryServer.decrease(:battle, :lobby)
+
+      :start ->
+        Teiserver.TelemetryServer.increase(:battle, :in_progress)
+        Teiserver.TelemetryServer.decrease(:battle, :lobby)
+
+      :stop ->
+        Teiserver.TelemetryServer.decrease(:battle, :in_progress)
+        Teiserver.TelemetryServer.increase(:battle, :lobby)
+    end
+    :ok
   end
 
   # Start rects

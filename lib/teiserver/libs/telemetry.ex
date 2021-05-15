@@ -4,8 +4,13 @@ defmodule Teiserver.Telemetry do
   @spec metrics() :: List.t()
   def metrics() do
     [
-      last_value("teiserver.client.count"),
-      last_value("teiserver.battle.count"),
+      last_value("teiserver.client.total"),
+      last_value("teiserver.client.menu"),
+      last_value("teiserver.client.battle"),
+
+      last_value("teiserver.battle.total"),
+      last_value("teiserver.battle.lobby"),
+      last_value("teiserver.battle.in_progress"),
       # last_value("teiserver.ts.memory", unit: :byte),
       # last_value("teiserver.ts.message_queue_len"),
       # summary("teiserver.ts.call.stop.duration"),

@@ -33,8 +33,9 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     end
 
     test "lists all users - redirect", %{conn: conn} do
+      main_user = Central.Account.get_user_by_name("main user")
       conn = get(conn, Routes.ts_admin_user_path(conn, :index) <> "?s=main user")
-      assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, 1)
+      assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, main_user.id)
     end
 
     test "search", %{conn: conn} do
@@ -43,10 +44,11 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     end
 
     test "search with redirect", %{conn: conn} do
+      main_user = Central.Account.get_user_by_name("main user")
       conn =
         post(conn, Routes.ts_admin_user_path(conn, :search), search: %{"name" => "main user"})
 
-      assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, 1)
+      assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, main_user.id)
     end
   end
 
