@@ -703,8 +703,6 @@ defmodule Teiserver.User do
 
   @spec do_login(Map.t(), String.t(), String.t()) :: {:ok, Map.t()}
   defp do_login(user, ip, lobbyid) do
-    Client.telemetry_counter(:login)
-
     # If they don't want a flag shown, don't show it, otherwise check for an override before trying geoip
     country =
       cond do

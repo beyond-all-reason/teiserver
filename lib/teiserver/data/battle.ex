@@ -13,7 +13,7 @@ defmodule Teiserver.Battle do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Client
   alias Teiserver.Data.Types
-  alias Teiserver.Protocols.Director
+  alias Teiserver.Protocols
 
   defp next_id() do
     ConCache.isolated(:id_counters, :battle, fn ->
@@ -121,9 +121,6 @@ defmodule Teiserver.Battle do
       {:ok, new_value}
     end)
 
-    Client.telemetry_counter(:create_battle)
-    telemetry_counter(:create)
-
     :ok = PubSub.broadcast(
       Central.PubSub,
       "all_battle_updates",
@@ -136,7 +133,6 @@ defmodule Teiserver.Battle do
   @spec close_battle(integer() | nil) :: :ok
   def close_battle(battle_id) do
     battle = get_battle(battle_id)
-    telemetry_counter(:close)
 
     PubSub.broadcast(
       Central.PubSub,
@@ -256,7 +252,6 @@ defmodule Teiserver.Battle do
 
     case do_remove_user_from_battle(userid, battle_id) do
       :closed ->
-        Client.telemetry_counter(:leave_battle)
         nil
 
       :not_member ->
@@ -266,7 +261,6 @@ defmodule Teiserver.Battle do
         nil
 
       :removed ->
-        Client.telemetry_counter(:leave_battle)
         PubSub.broadcast(
           Central.PubSub,
           "all_battle_updates",
@@ -279,7 +273,6 @@ defmodule Teiserver.Battle do
   def kick_user_from_battle(userid, battle_id) do
     case do_remove_user_from_battle(userid, battle_id) do
       :closed ->
-        Client.telemetry_counter(:leave_battle)
         nil
 
       :not_member ->
@@ -289,7 +282,6 @@ defmodule Teiserver.Battle do
         nil
 
       :removed ->
-        Client.telemetry_counter(:leave_battle)
         PubSub.broadcast(
           Central.PubSub,
           "all_battle_updates",
@@ -373,28 +365,6 @@ defmodule Teiserver.Battle do
     else
       :no_battle
     end
-  end
-
-
-  @spec telemetry_counter(:create | :close | :start | :stop) ::
-          :ok
-  def telemetry_counter(action) do
-    case action do
-      :create ->
-        Teiserver.Telemetry.TelemetryServer.increase(:battle, :lobby)
-
-      :close ->
-        Teiserver.Telemetry.TelemetryServer.decrease(:battle, :lobby)
-
-      :start ->
-        Teiserver.Telemetry.TelemetryServer.increase(:battle, :in_progress)
-        Teiserver.Telemetry.TelemetryServer.decrease(:battle, :lobby)
-
-      :stop ->
-        Teiserver.Telemetry.TelemetryServer.decrease(:battle, :in_progress)
-        Teiserver.Telemetry.TelemetryServer.increase(:battle, :lobby)
-    end
-    :ok
   end
 
   # Start rects
@@ -524,7 +494,7 @@ defmodule Teiserver.Battle do
   end
 
   def say(userid, msg, battle_id) do
-    case Director.handle_in(userid, msg, battle_id) do
+    case Protocols.Director.handle_in(userid, msg, battle_id) do
       :say -> do_say(userid, msg, battle_id)
       :handled -> :ok
     end

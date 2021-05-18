@@ -128,11 +128,17 @@ defmodule Teiserver.Startup do
         icons: [Teiserver.Clans.ClanLib.icon(), :list],
         url: "/teiserver/admin/clans",
         permissions: "teiserver.moderator"
-      }
+      },
       # %{label: "Queue admin", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/admin/queues", permissions: "teiserver.moderator"},
       # %{label: "Tournament admin", icons: [Teiserver.Game.TournamentLib.icon(), :list], url: "/teiserver/admin/tournaments", permissions: "teiserver.moderator"},
 
       # Admin pages
+      %{
+        label: "Teiserver metrics",
+        icons: [Teiserver.Clans.ClanLib.icon(), :list],
+        url: "/logging/live/dashboard/metrics?nav=teiserver",
+        permissions: "logging.live.show"
+      }
     ])
 
     # User configs

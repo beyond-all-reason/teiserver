@@ -2,7 +2,6 @@ defmodule Teiserver.Tasks.PersistTelemetryTask do
   use Oban.Worker, queue: :teiserver
 
   alias Teiserver.Telemetry
-  alias Teiserver.Telemetry.TelemetryServer
 
   @impl Oban.Worker
   def perform(_) do
@@ -20,7 +19,7 @@ defmodule Teiserver.Tasks.PersistTelemetryTask do
   end
 
   defp perform_telemetry_persist(timestamp) do
-    data = TelemetryServer.get_state()
+    data = Telemetry.get_state()
       |> Map.drop([:cycle])
 
     Telemetry.create_telemetry_log(%{

@@ -77,35 +77,6 @@ defmodule Teiserver.Client do
     client
   end
 
-  @doc """
-  Allows us to tell the system a client state has changed and metrics are able to use this. Currently a stub
-  function until we know how we want metrics to work.
-  """
-  @spec telemetry_counter(:login | :disconnect | :create_battle | :join_battle | :leave_battle) ::
-          :ok
-  def telemetry_counter(action) do
-    case action do
-      :login ->
-        Teiserver.Telemetry.TelemetryServer.increase(:client, :menu)
-
-      :disconnect ->
-        Teiserver.Telemetry.TelemetryServer.decrease(:client, :menu)
-
-      :create_battle ->
-        Teiserver.Telemetry.TelemetryServer.increase(:client, :battle)
-        Teiserver.Telemetry.TelemetryServer.decrease(:client, :menu)
-
-      :join_battle ->
-        Teiserver.Telemetry.TelemetryServer.increase(:client, :battle)
-        Teiserver.Telemetry.TelemetryServer.decrease(:client, :menu)
-
-      :leave_battle ->
-        Teiserver.Telemetry.TelemetryServer.decrease(:client, :battle)
-        Teiserver.Telemetry.TelemetryServer.increase(:client, :menu)
-    end
-    :ok
-  end
-
   @spec update(Map.t()) :: Map.t()
   @spec update(Map.t(), atom | nil) :: Map.t()
   def update(client, reason \\ nil) do
@@ -137,7 +108,6 @@ defmodule Teiserver.Client do
       client ->
         new_client = %{client | team_colour: colour, battle_id: battle_id}
         ConCache.put(:clients, new_client.userid, new_client)
-        telemetry_counter(:join_battle)
         new_client
     end
   end
@@ -235,7 +205,6 @@ defmodule Teiserver.Client do
 
   # If it's a test user, don't worry about actually disconnecting it
   defp do_disconnect(client) do
-    telemetry_counter(:disconnect)
     is_test_user = String.contains?(client.name, "new_test_user_")
 
     Battle.remove_user_from_any_battle(client.userid)

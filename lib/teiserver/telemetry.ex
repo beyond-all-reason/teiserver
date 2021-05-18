@@ -5,8 +5,17 @@ defmodule Teiserver.Telemetry do
   alias Central.Helpers.QueryHelpers
   alias Central.Repo
 
+  alias Teiserver.Telemetry.TelemetryServer
   alias Teiserver.Telemetry.TelemetryLog
   alias Teiserver.Telemetry.TelemetryLogLib
+
+
+  # Telemetry todo lists
+  # TODO: Beherith: clients logged in, clients ingame, clients singpleplayer, clients afk, clients that are bots are not clients
+
+  def get_state() do
+    GenServer.call(TelemetryServer, :get_state)
+  end
 
   @spec metrics() :: List.t()
   def metrics() do
