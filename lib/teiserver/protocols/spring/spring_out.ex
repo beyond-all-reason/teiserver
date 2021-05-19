@@ -311,13 +311,16 @@ defmodule Teiserver.Protocols.SpringOut do
     "CLIENTBATTLESTATUS #{client.name} #{status} #{client.team_colour}\n"
   end
 
+  # It's possible for a user to log in and then out really fast and cause issues with this
   defp do_reply(:user_logged_in, userid) do
-    user = User.get_user_by_id(userid)
-
-    [
-      do_reply(:add_user, user),
-      do_reply(:client_status, Client.get_client_by_id(userid))
-    ]
+    case User.get_user_by_id(userid) do
+      nil -> nil
+      user ->
+        [
+          do_reply(:add_user, user),
+          do_reply(:client_status, Client.get_client_by_id(userid))
+        ]
+    end
   end
 
   defp do_reply(:user_logged_out, {userid, username}) do
