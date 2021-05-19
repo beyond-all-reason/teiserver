@@ -251,9 +251,9 @@ CLIENTS test_room #{user.name}\n"
     # Check for channel list
     _send_raw(socket, "CHANNELS\n")
     reply = _recv_raw(socket)
-    assert reply == "CHANNELS
-CHANNEL test_room 0
-ENDOFCHANNELS\n"
+    assert reply =~ "CHANNELS"
+    assert reply =~ "CHANNEL test_room 0"
+    assert reply =~ "ENDOFCHANNELS\n"
 
     # Say something
     _send_raw(socket, "SAY test_room Second test\n")

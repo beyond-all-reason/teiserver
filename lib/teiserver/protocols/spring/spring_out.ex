@@ -561,13 +561,6 @@ defmodule Teiserver.Protocols.SpringOut do
       end)
     end)
 
-    # Client status messages
-    # Currently handled by the :user_logged_in send earlier, might need to refactor slightly
-    # clients
-    # |> Enum.map(fn client_id ->
-    #   send(self(), {:updated_client, Client.get_client_by_id(client_id), :client_updated_status})
-    # end)
-
     send(self(), {:action, {:login_end, nil}})
     :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
     %{state | user: user, username: user.name, userid: user.id}
@@ -575,18 +568,18 @@ defmodule Teiserver.Protocols.SpringOut do
 
   # This sends a message to the self to send out a message
   @spec _send(String.t() | list() | nil, String.t(), map) :: any()
+  # defp _send(msg, msg_id, state) do
+  #   _send(msg, state.socket, state.transport, msg_id)
+  # end
+
+  defp _send("", _, _), do: nil
+  defp _send(nil, _, _), do: nil
+
+  defp _send(msg, msg_id, state) when is_list(msg) do
+    _send(Enum.join(msg, ""), msg_id, state)
+  end
+
   defp _send(msg, msg_id, state) do
-    _send(msg, state.socket, state.transport, msg_id)
-  end
-
-  defp _send("", _, _, _), do: nil
-  defp _send(nil, _, _, _), do: nil
-
-  defp _send(msg, socket, transport, msg_id) when is_list(msg) do
-    _send(Enum.join(msg, ""), socket, transport, msg_id)
-  end
-
-  defp _send(msg, socket, transport, msg_id) do
     # If no line return at the end we should warn about that
     # I've made the mistake of forgetting it and wondering
     # why stuff wasn't working so it's staying here
@@ -605,12 +598,16 @@ defmodule Teiserver.Protocols.SpringOut do
         msg
       end
 
-    transport.send(socket, msg)
-    # msg
-    # |> String.split("\n")
-    # |> Enum.filter(fn part -> part != "" end)
-    # |> Enum.each(fn part ->
-    #   transport.send(socket, part <> "\n")
-    # end)
+    _do_send(state, msg)
+  end
+
+  # We have this so we can do tests without having to use sockets for everything
+  # a mock socket has a custom function for sending of data
+  defp _do_send(%{mock: true} = state, msg) do
+    send(state.test_pid, msg)
+  end
+
+  defp _do_send(state, msg) do
+    state.transport.send(state.socket, msg)
   end
 end

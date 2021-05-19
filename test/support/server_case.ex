@@ -27,9 +27,12 @@ defmodule Central.ServerCase do
     end
   end
 
-  setup _tags do
+  setup tags do
     :ok = Ecto.Adapters.SQL.Sandbox.checkout(Central.Repo)
-    Ecto.Adapters.SQL.Sandbox.mode(Central.Repo, {:shared, self()})
+
+    unless tags[:async] do
+      Ecto.Adapters.SQL.Sandbox.mode(Central.Repo, {:shared, self()})
+    end
 
     :ok
   end

@@ -1,6 +1,6 @@
 defmodule Teiserver.FakeTransport do
   @moduledoc false
-  def send(_, _), do: nil
+  def send(_transport, _msg), do: nil
 end
 
 defmodule Teiserver.TeiserverTestLib do
@@ -48,6 +48,19 @@ defmodule Teiserver.TeiserverTestLib do
     end
   end
 
+  @spec async_auth_setup(module(), nil | Map.t()) :: %{user: Map.t(), state: Map.t()}
+  def async_auth_setup(protocol, user \\ nil) do
+    user = if user, do: user, else: new_user()
+
+    token = User.create_token(user)
+    User.try_login(token, "127.0.0.1", "AsyncTest")
+
+    Client.login(user, self())
+
+    state = mock_async_state(protocol.protocol_in(), protocol.protocol_out(), user)
+    %{user: user, state: state}
+  end
+
   @spec auth_setup(nil | Map.t()) :: %{socket: port(), user: Map.t(), pid: pid()}
   def auth_setup(user \\ nil) do
     user = if user, do: user, else: new_user()
@@ -89,6 +102,10 @@ defmodule Teiserver.TeiserverTestLib do
     %{socket: socket, user: user, pid: pid}
   end
 
+  def _send_lines(state = %{mock: true}, msg) do
+    state.protocol_in.data_in(msg, state)
+  end
+
   def _send_raw(socket = {:sslsocket, _, _}, msg) do
     :ok = :ssl.send(socket, msg)
     :timer.sleep(100)
@@ -97,6 +114,25 @@ defmodule Teiserver.TeiserverTestLib do
   def _send_raw(socket, msg) do
     :ok = :gen_tcp.send(socket, msg)
     :timer.sleep(100)
+  end
+
+  def _recv_lines(), do: _recv_lines(1)
+  def _recv_lines(:until_timeout), do: _recv_lines(99999)
+  def _recv_lines(lines) do
+    receive do
+      value ->
+        cond do
+          is_tuple(value) -> _recv_lines(lines)
+          true ->
+            case lines do
+              1 -> value
+              _ -> value <> _recv_lines(lines - 1)
+            end
+        end
+    after
+      500 ->
+        ""
+    end
   end
 
   def _recv_raw(socket = {:sslsocket, _, _}) do
@@ -156,6 +192,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   def mock_socket() do
     %{
+      mock: true,
       transport: Teiserver.FakeTransport
     }
   end
@@ -202,6 +239,48 @@ defmodule Teiserver.TeiserverTestLib do
       last_msg: System.system_time(:second) - 5,
       socket: socket,
       transport: socket.transport,
+      protocol_in: protocol_in,
+      protocol_out: protocol_out,
+      ip: "127.0.0.1",
+
+      # Client state
+      userid: user.id,
+      username: user.name,
+      battle_host: false,
+      user: user,
+
+      # Connection microstate
+      battle_id: nil,
+      room_member_cache: %{},
+      known_users: %{},
+      known_battles: [],
+      extra_logging: false,
+      script_password: nil
+    }
+  end
+
+  defp make_async_transport() do
+    send = fn (_x, _y) -> nil end
+
+    %{
+      send: send
+    }
+  end
+
+  def mock_async_state(protocol_in, protocol_out, user \\ nil) do
+    socket = mock_socket()
+    user = if user, do: user, else: new_user()
+
+    %{
+      # Testing specific
+      mock: true,
+      test_pid: self(),
+
+      # Connection state
+      message_part: "",
+      last_msg: System.system_time(:second) - 5,
+      socket: socket,
+      transport: make_async_transport(),
       protocol_in: protocol_in,
       protocol_out: protocol_out,
       ip: "127.0.0.1",
