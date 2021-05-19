@@ -118,7 +118,6 @@ defmodule Teiserver.Protocols.SpringIn do
   # Specific handlers for different commands
   @spec do_handle(String.t(), String.t(), String.t(), map) :: map
   defp do_handle("MYSTATUS", _data, msg_id, %{userid: nil} = state) do
-    Logger.error("MYSTATUS call from userid nil - #{Kernel.inspect state}")
     reply(:servermsg, "You need to login before you can set your status", msg_id, state)
   end
   defp do_handle("MYSTATUS", data, msg_id, state) do

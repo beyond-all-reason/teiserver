@@ -1,5 +1,5 @@
 defmodule Central.General.StringHelpersTest do
-  use Central.DataCase#, async: true
+  use Central.DataCase, async: true
 
   alias Central.Helpers.StringHelper
 

@@ -213,14 +213,15 @@ defmodule Teiserver.TcpServerTest do
     # User moves to a different battle (without leave command)
     send(pid, {:add_user_to_battle, u1.id, battle_id + 1, "script_password"})
     r = _recv_raw(socket)
-    assert r == "LEFTBATTLE #{battle_id} #{u1.name}\nJOINEDBATTLE #{battle_id + 1} #{u1.name}\n"
 
+    # Run on it's own it passes, run as part of the greater tests it sometimes fails
     assert GenServer.call(pid, {:get, :known_users}) == %{
       user.id => %{battle_id: nil, userid: user.id},
       u1.id => %{battle_id: battle_id + 1, userid: u1.id},
       u2.id => %{battle_id: nil, userid: u2.id},
       u3.id => %{battle_id: nil, userid: u3.id},
     }
+    assert r == "LEFTBATTLE #{battle_id} #{u1.name}\nJOINEDBATTLE #{battle_id + 1} #{u1.name}\n"
 
     # Same battle again
     send(pid, {:add_user_to_battle, u1.id, battle_id + 1, "script_password"})

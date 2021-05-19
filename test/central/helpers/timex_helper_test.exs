@@ -1,5 +1,5 @@
 defmodule Central.Helpers.TimexHelperTest do
-  use Central.DataCase#, async: true
+  use Central.DataCase, async: true
 
   alias Central.Helpers.TimexHelper
 
