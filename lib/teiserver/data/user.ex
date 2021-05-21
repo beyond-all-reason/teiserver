@@ -361,6 +361,8 @@ defmodule Teiserver.User do
     update_user(%{user | email: new_email, email_change_code: [nil, nil]})
   end
 
+  def accept_friend_request(nil, _), do: nil
+  def accept_friend_request(_, nil), do: nil
   def accept_friend_request(requester_id, accepter_id) do
     accepter = get_user_by_id(accepter_id)
 
@@ -414,6 +416,8 @@ defmodule Teiserver.User do
     end
   end
 
+  def decline_friend_request(nil, _), do: nil
+  def decline_friend_request(_, nil), do: nil
   def decline_friend_request(requester_id, decliner_id) do
     decliner = get_user_by_id(decliner_id)
 
@@ -439,6 +443,8 @@ defmodule Teiserver.User do
     end
   end
 
+  def create_friend_request(nil, _), do: nil
+  def create_friend_request(_, nil), do: nil
   def create_friend_request(requester_id, potential_id) do
     potential = get_user_by_id(potential_id)
 
@@ -478,6 +484,8 @@ defmodule Teiserver.User do
     end
   end
 
+  def ignore_user(nil, _), do: nil
+  def ignore_user(_, nil), do: nil
   def ignore_user(ignorer_id, ignored_id) do
     ignorer = get_user_by_id(ignorer_id)
 
@@ -503,6 +511,8 @@ defmodule Teiserver.User do
     end
   end
 
+  def unignore_user(nil, _), do: nil
+  def unignore_user(_, nil), do: nil
   def unignore_user(unignorer_id, unignored_id) do
     unignorer = get_user_by_id(unignorer_id)
 
@@ -528,6 +538,8 @@ defmodule Teiserver.User do
     end
   end
 
+  def remove_friend(nil, _), do: nil
+  def remove_friend(_, nil), do: nil
   def remove_friend(remover_id, removed_id) do
     remover = get_user_by_id(remover_id)
 

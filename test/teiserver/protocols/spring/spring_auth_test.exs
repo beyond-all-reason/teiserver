@@ -36,19 +36,19 @@ defmodule Teiserver.SpringAuthTest do
     assert reply == "#4 PONG\n"
   end
 
-  test "PING", %{socket: socket} do
-    _send_raw(socket, "#4 PING\n")
-    reply = _recv_raw(socket)
-    assert reply == "#4 PONG\n"
-  end
+  # test "PING", %{socket: socket} do
+  #   _send_raw(socket, "#4 PING\n")
+  #   reply = _recv_raw(socket)
+  #   assert reply == "#4 PONG\n"
+  # end
 
-  test "GETUSERINFO", %{socket: socket, user: user} do
-    _send_raw(socket, "GETUSERINFO\n")
-    reply = _recv_raw(socket)
-    assert reply =~ "SERVERMSG Registration date: "
-    assert reply =~ "SERVERMSG Email address: #{user.email}"
-    assert reply =~ "SERVERMSG Ingame time: "
-  end
+  # test "GETUSERINFO", %{socket: socket, user: user} do
+  #   _send_raw(socket, "GETUSERINFO\n")
+  #   reply = _recv_raw(socket)
+  #   assert reply =~ "SERVERMSG Registration date: "
+  #   assert reply =~ "SERVERMSG Email address: #{user.email}"
+  #   assert reply =~ "SERVERMSG Ingame time: "
+  # end
 
   test "MYSTATUS", %{socket: socket, user: user} do
     # Start by setting everything to 1, most of this
@@ -389,7 +389,7 @@ CLIENTS test_room #{user.name}\n"
 
   test "RENAMEACCOUNT", %{socket: socket, user: user} do
     old_name = user.name
-    new_name = "rename_test_user"
+    new_name = "new_test_user_rename"
     userid = user.id
     %{socket: watcher, user: watcher_user} = auth_setup()
     _recv_raw(socket)
@@ -411,7 +411,7 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "SERVERMSG Username already taken\n"
 
     # Perform rename
-    _send_raw(socket, "RENAMEACCOUNT rename_test_user\n")
+    _send_raw(socket, "RENAMEACCOUNT new_test_user_rename\n")
     reply = _recv_raw(socket)
     # assert reply == "SERVERMSG Username change in progress, please log back in in 5 seconds\n"
     assert reply == :timeout
@@ -448,7 +448,7 @@ CLIENTS test_room #{user.name}\n"
 
     reply = _recv_until(socket)
     [accepted | _remainder] = String.split(reply, "\n")
-    assert accepted == "DENIED No user found for 'rename_test_user'"
+    assert accepted == "DENIED No user found for 'new_test_user_rename'"
 
     # But the database should say the user exists
     db_user = Account.get_user!(userid)
@@ -468,7 +468,7 @@ CLIENTS test_room #{user.name}\n"
 
     reply = _recv_until(socket)
     [accepted | _remainder] = String.split(reply, "\n")
-    assert accepted == "DENIED No user found for 'rename_test_user'"
+    assert accepted == "DENIED No user found for 'new_test_user_rename'"
 
     :timer.sleep(4000)
 
@@ -480,11 +480,11 @@ CLIENTS test_room #{user.name}\n"
 
     reply = _recv_until(socket)
     [accepted | _remainder] = String.split(reply, "\n")
-    assert accepted == "ACCEPTED rename_test_user"
+    assert accepted == "ACCEPTED new_test_user_rename"
 
     # Check they logged back in and got re-added with the correct name
     wreply = _recv_raw(watcher)
-    assert wreply == "ADDUSER rename_test_user ?? 0 #{user.id} LuaLobby Chobby\nCLIENTSTATUS rename_test_user 0\n"
+    assert wreply == "ADDUSER new_test_user_rename ?? 0 #{user.id} LuaLobby Chobby\nCLIENTSTATUS new_test_user_rename 0\n"
 
     # Next up, what if they update their status?
     _send_raw(socket, "MYSTATUS 127\n")

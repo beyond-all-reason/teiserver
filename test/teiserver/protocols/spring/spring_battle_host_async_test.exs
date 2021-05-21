@@ -7,8 +7,7 @@ defmodule Teiserver.Protocols.Spring.SpringBattleHostAsyncTest do
     only: [
       async_auth_setup: 1,
       _send_lines: 2,
-      _recv_lines: 0,
-      # _recv_lines: 1
+      _recv_lines: 0
     ]
 
   setup do

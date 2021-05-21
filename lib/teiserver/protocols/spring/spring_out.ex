@@ -299,6 +299,7 @@ defmodule Teiserver.Protocols.SpringOut do
     "REGISTRATIONDENIED #{reason}\n"
   end
 
+  defp do_reply(:client_status, nil), do: ""
   defp do_reply(:client_status, client) do
     status = Spring.create_client_status(client)
     "CLIENTSTATUS #{client.name} #{status}\n"
@@ -312,6 +313,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   # It's possible for a user to log in and then out really fast and cause issues with this
+  defp do_reply(:user_logged_in, nil), do: nil
   defp do_reply(:user_logged_in, userid) do
     case User.get_user_by_id(userid) do
       nil -> nil

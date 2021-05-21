@@ -282,39 +282,34 @@ defmodule Teiserver.TcpServer do
 
   # Connection
   def handle_info({:tcp_closed, socket}, %{socket: socket, transport: transport} = state) do
-    Logger.error("Closing TCP connection #{Kernel.inspect(socket)} for #{state.username}")
     transport.close(socket)
     Client.disconnect(state.userid)
-    {:stop, :normal, state}
+    {:stop, :normal, %{state | userid: nil}}
   end
 
-  def handle_info({:tcp_closed, socket}, state) do
-    Logger.error("Closing TCP connection - no transport #{Kernel.inspect(socket)} for #{state.username}")
+  def handle_info({:tcp_closed, _socket}, state) do
     Client.disconnect(state.userid)
-    {:stop, :normal, state}
+    {:stop, :normal, %{state | userid: nil}}
   end
 
   def handle_info({:ssl_closed, socket}, %{socket: socket, transport: transport} = state) do
-    Logger.debug("Closing SSL connection #{Kernel.inspect(socket)} for #{state.username}")
     transport.close(socket)
     Client.disconnect(state.userid)
-    {:stop, :normal, state}
+    {:stop, :normal, %{state | userid: nil}}
   end
 
-  def handle_info({:ssl_closed, socket}, state) do
-    Logger.debug("Closing SSL connection - no transport #{Kernel.inspect(socket)} for #{state.username}")
+  def handle_info({:ssl_closed, _socket}, state) do
     Client.disconnect(state.userid)
-    {:stop, :normal, state}
+    {:stop, :normal, %{state | userid: nil}}
   end
 
   def handle_info(:terminate, state) do
-    Logger.error("Terminate connection #{Kernel.inspect(state.socket)} for #{state.username}")
     Client.disconnect(state.userid)
-    {:stop, :normal, state}
+    {:stop, :normal, %{state | userid: nil}}
   end
 
-  def terminate(reason, state) do
-    Logger.error("disconnect because #{Kernel.inspect(reason)} for #{state.username}")
+  def terminate(_reason, state) do
+    if state.username != nil and String.contains?(state.username, "new_test_user") == false, do: Logger.error("disconnect of #{state.username}")
     Client.disconnect(state.userid)
   end
 
@@ -518,6 +513,8 @@ defmodule Teiserver.TcpServer do
         state.userid == userid ->
           _blank_user(userid, %{battle_id: battle_id})
 
+        # User isn't known about so we say they've logged in
+        # Then we add them to the battle
         state.known_users[userid] == nil ->
           state.protocol_out.reply(:user_logged_in, userid, nil, state)
 
@@ -530,6 +527,8 @@ defmodule Teiserver.TcpServer do
 
           _blank_user(userid, %{battle_id: battle_id})
 
+        # User is known about and not in a battle, this is the ideal
+        # state
         state.known_users[userid].battle_id == nil ->
           state.protocol_out.reply(
             :add_user_to_battle,
@@ -540,6 +539,7 @@ defmodule Teiserver.TcpServer do
 
           %{state.known_users[userid] | battle_id: battle_id}
 
+        # User is known about but already in a battle
         state.known_users[userid].battle_id != battle_id ->
           state.protocol_out.reply(
             :remove_user_from_battle,
@@ -557,8 +557,9 @@ defmodule Teiserver.TcpServer do
 
           %{state.known_users[userid] | battle_id: battle_id}
 
+        # User is known about and in this battle already, no change
         state.known_users[userid].battle_id == battle_id ->
-          # No change
+          Logger.error("Case 4")
           state.known_users[userid]
       end
 

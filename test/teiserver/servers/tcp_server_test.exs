@@ -212,6 +212,7 @@ defmodule Teiserver.TcpServerTest do
 
     # User moves to a different battle (without leave command)
     send(pid, {:add_user_to_battle, u1.id, battle_id + 1, "script_password"})
+    :timer.sleep(250)
     r = _recv_raw(socket)
 
     # Run on it's own it passes, run as part of the greater tests it sometimes fails
