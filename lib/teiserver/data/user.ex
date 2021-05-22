@@ -7,7 +7,6 @@ defmodule Teiserver.User do
   alias Teiserver.EmailHelper
   alias Teiserver.Account
   alias Central.Helpers.StylingHelper
-  alias Central.Helpers.TimexHelper
   alias Argon2
   alias Central.Account.Guardian
   alias Teiserver.Data.Types
@@ -37,8 +36,6 @@ defmodule Teiserver.User do
     :mmr,
     :banned,
     :muted,
-    :banned_until,
-    :muted_until,
     :rename_in_progress
   ]
 
@@ -61,10 +58,8 @@ defmodule Teiserver.User do
     last_login: nil,
     ingame_minutes: 0,
     mmr: %{},
-    banned: false,
-    muted: false,
-    banned_until: nil,
-    muted_until: nil,
+    banned: [false, nil],
+    muted: [false, nil],
     rename_in_progress: false
   }
 
@@ -580,11 +575,14 @@ defmodule Teiserver.User do
   end
 
   def send_direct_message(from_id, to_id, msg) do
-    PubSub.broadcast(
-      Central.PubSub,
-      "user_updates:#{to_id}",
-      {:direct_message, from_id, msg}
-    )
+    sender = get_user_by_id(from_id)
+    if not is_muted?(sender) do
+      PubSub.broadcast(
+        Central.PubSub,
+        "user_updates:#{to_id}",
+        {:direct_message, from_id, msg}
+      )
+    end
   end
 
   @spec list_users :: list
@@ -631,7 +629,7 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec try_login(String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()}
+  @spec try_login(String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
   def try_login(token, ip, lobby) do
     wait_for_precache()
 
@@ -641,7 +639,6 @@ defmodule Teiserver.User do
 
       {:ok, db_user, _claims} ->
         user = get_user_by_id(db_user.id)
-        banned_until_dt = TimexHelper.parse_ymd_hms(user.banned_until)
 
         cond do
           user.rename_in_progress ->
@@ -651,11 +648,8 @@ defmodule Teiserver.User do
           Application.get_env(:central, Teiserver)[:autologin] ->
             do_login(user, ip, lobby)
 
-          user.banned ->
+          is_banned?(user) ->
             {:error, "Banned"}
-
-          banned_until_dt != nil and Timex.compare(Timex.now(), banned_until_dt) != 1 ->
-            {:error, "Temporarily banned"}
 
           user.verified == false ->
             {:error, "Unverified", user.id}
@@ -671,7 +665,7 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec try_md5_login(String.t(), String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()}
+  @spec try_md5_login(String.t(), String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
   def try_md5_login(username, md5_password, ip, lobby) do
     wait_for_precache()
 
@@ -680,8 +674,6 @@ defmodule Teiserver.User do
         {:error, "No user found for '#{username}'"}
 
       user ->
-        banned_until_dt = TimexHelper.parse_ymd_hms(user.banned_until)
-
         cond do
           user.rename_in_progress ->
             {:error, "Rename in progress, wait 5 seconds"}
@@ -690,14 +682,11 @@ defmodule Teiserver.User do
           Application.get_env(:central, Teiserver)[:autologin] ->
             do_login(user, ip, lobby)
 
-          user.banned ->
-            {:error, "Banned"}
-
           test_password(md5_password, user.password_hash) == false ->
             {:error, "Invalid password"}
 
-          banned_until_dt != nil and Timex.compare(Timex.now(), banned_until_dt) != 1 ->
-            {:error, "Temporarily banned"}
+          is_banned?(user) ->
+            {:error, "Banned"}
 
           user.verified == false ->
             {:error, "Unverified", user.id}
@@ -785,16 +774,16 @@ defmodule Teiserver.User do
     changes =
       case {report.response_action, report.expires} do
         {"Mute", nil} ->
-          %{muted: true}
+          %{muted: [true, nil]}
 
         {"Mute", expires} ->
-          %{muted_until: expires}
+          %{muted: [true, expires]}
 
         {"Ban", nil} ->
-          %{banned: true}
+          %{banned: [true, nil]}
 
         {"Ban", expires} ->
-          %{banned_until: expires}
+          %{banned: [true, expires]}
 
         {"Ignore report", nil} ->
           %{}
@@ -803,15 +792,34 @@ defmodule Teiserver.User do
           throw("No handler for action type '#{action}' in #{__MODULE__}")
       end
 
-    # TODO: Implement something here?
-    # IO.puts("NEW REPORT")
-    # IO.inspect(changes)
-    # IO.puts("")
-
-    Map.merge(user, changes)
+    user = Map.merge(user, changes)
     |> update_user(persist: true)
 
+    if is_banned?(user) do
+      Client.disconnect(user.id)
+    end
+
     :ok
+  end
+
+  @spec is_banned?(Integer.t() | Map.t()) :: boolean()
+  def is_banned?(userid) when is_integer(userid), do: is_banned?(get_user_by_id(userid))
+  def is_banned?(%{banned: banned}) do
+    case banned do
+      [false, _] -> false
+      [true, nil] -> true
+      [true, until] -> Timex.compare(Timex.now(), until) != 1
+    end
+  end
+
+  @spec is_muted?(Integer.t() | Map.t()) :: boolean()
+  def is_muted?(userid) when is_integer(userid), do: is_muted?(get_user_by_id(userid))
+  def is_muted?(%{muted: muted}) do
+    case muted do
+      [false, _] -> false
+      [true, nil] -> true
+      [true, until] -> Timex.compare(Timex.now(), until) != 1
+    end
   end
 
   # Tied to spring's PASSWORDRESET which requires the password to be

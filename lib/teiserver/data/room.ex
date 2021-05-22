@@ -141,13 +141,9 @@ defmodule Teiserver.Room do
   @spec allow?(Map.t(), String.t()) :: boolean()
   def allow?(user_id, _room_name) do
     user = User.get_user_by_id(user_id)
-    muted_until_dt = TimexHelper.parse_ymd_hms(user.muted_until)
 
     cond do
-      user.muted ->
-        false
-
-      muted_until_dt != nil and Timex.compare(Timex.now(), muted_until_dt) != 1 ->
+      User.is_muted?(user) ->
         false
 
       true ->

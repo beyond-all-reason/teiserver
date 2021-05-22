@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Central.Account.User
   alias Teiserver.Account.UserLib
   alias Central.Account.GroupLib
-  import Teiserver.User, only: [bar_user_group_id: 0]
+  import Teiserver.User, only: [bar_user_group_id: 0, new_report: 1]
 
   plug(AssignPlug,
     sidemenu_active: ["teiserver", "teiserver_admin"]
@@ -269,14 +269,15 @@ defmodule TeiserverWeb.Admin.UserController do
                       "target_id" => user.id
                     })
 
-                  Central.Account.update_report(report, %{
-                    "response_text" => "instant-action",
-                    "response_action" => params["report_response_action"],
-                    "expires" => expires,
-                    "responder_id" => conn.user_id
-                  })
+                    Central.Account.update_report(report, %{
+                      "response_text" => "instant-action",
+                      "response_action" => params["report_response_action"],
+                      "expires" => expires,
+                      "responder_id" => conn.user_id
+                    })
 
-                  {:ok, nil, "#reports_tab"}
+                    new_report(report.id)
+                    {:ok, nil, "#reports_tab"}
 
                 err ->
                   err
@@ -288,18 +289,6 @@ defmodule TeiserverWeb.Admin.UserController do
             conn
             |> put_flash(:info, "Action performed.")
             |> redirect(to: Routes.ts_admin_user_path(conn, :show, user) <> tab)
-
-          # {:ok, new_data, tab} ->
-          #   user_params = %{"data" => Map.merge(user.data || %{}, new_data)}
-          #   case Account.update_user(user, user_params) do
-          #     {:ok, _user} ->
-          #       conn
-          #       |> put_flash(:info, "Action performed.")
-          #       |> redirect(to: Routes.ts_admin_user_path(conn, :show, user) <> tab)
-
-          #     {:error, %Ecto.Changeset{} = changeset} ->
-          #       render(conn, "edit.html", user: user, changeset: changeset)
-          #   end
 
           {:error, msg} ->
             conn

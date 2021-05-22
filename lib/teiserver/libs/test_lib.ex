@@ -35,8 +35,13 @@ defmodule Teiserver.TeiserverTestLib do
     case User.get_user_by_name(name) do
       nil ->
         {:ok, user} =
-          User.user_register_params(name, "#{name}@email.com", "X03MO1qnZdYdgyfeuILPmQ==", params)
+          User.user_register_params(name, "#{name}@email.com", "X03MO1qnZdYdgyfeuILPmQ==", Map.merge(%{admin_group_id: User.bar_user_group_id()}, params))
           |> Account.create_user()
+
+        Account.create_group_membership(%{
+          user_id: user.id,
+          group_id: User.bar_user_group_id()
+        })
 
         user
         |> User.convert_user()
@@ -305,6 +310,11 @@ defmodule Teiserver.TeiserverTestLib do
   def conn_setup({:ok, data}) do
     user = data[:user]
     Teiserver.User.recache_user(user.id)
+
+    Account.create_group_membership(%{
+      user_id: user.id,
+      group_id: User.bar_user_group_id()
+    })
 
     {:ok, data}
   end

@@ -559,7 +559,6 @@ defmodule Teiserver.TcpServer do
 
         # User is known about and in this battle already, no change
         state.known_users[userid].battle_id == battle_id ->
-          Logger.error("Case 4")
           state.known_users[userid]
       end
 

@@ -11,6 +11,7 @@ defmodule Teiserver.Battle do
   alias Phoenix.PubSub
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Teiserver.User
   alias Teiserver.Client
   alias Teiserver.Data.Types
   alias Teiserver.Protocols
@@ -554,6 +555,9 @@ defmodule Teiserver.Battle do
   def allow?(nil, _, _), do: false
   def allow?(_, nil, _), do: false
   def allow?(_, _, nil), do: false
+
+  def allow?(userid, :saybattle, _), do: not User.is_muted?(userid)
+  def allow?(userid, :saybattleex, _), do: not User.is_muted?(userid)
 
   def allow?(changer, field, battle_id) when is_integer(battle_id),
     do: allow?(changer, field, get_battle(battle_id))
