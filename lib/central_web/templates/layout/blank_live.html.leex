@@ -64,11 +64,15 @@
       </button>
 
       <div class="navbar-collapse collapse" id="collapsingNavbar">
-        <%= if assigns[:current_user] do %>
+        <%= if assigns[:current_user] != nil and assigns[:menu_override] != :hidden do %>
           <a href='<%= assigns[:menu_override] || "/" %>' class="btn btn-outline-primary">
             <i class="fas fa-fw fa-th"></i>
             Main menu
           </a>
+        <% end %>
+
+        <%= if assigns[:extra_menu_content] do %>
+          <%= raw assigns[:extra_menu_content] %>
         <% end %>
 
         <%# Right side %>

@@ -6,18 +6,33 @@ defmodule TeiserverWeb.BattleLive.Index do
   alias Teiserver.Battle
   alias Teiserver.BattleLib
 
+  @extra_menu_content """
+  &nbsp;&nbsp;&nbsp;
+    <a href='/teiserver/admin/client' class="btn btn-outline-primary">
+      <i class="fas fa-fw fa-plug"></i>
+      Clients
+    </a>
+  """
+
   @impl true
   def mount(_params, session, socket) do
     socket =
       socket
       |> AuthPlug.live_call(session)
       |> NotificationPlug.live_call()
+
+    extra_content = if allow?(socket, "teiserver.admin.user") do
+      @extra_menu_content
+    end
+
+    socket = socket
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle")
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, BattleLib.colours())
       |> assign(:battles, Battle.list_battles())
       |> assign(:menu_override, Routes.ts_lobby_general_path(socket, :index))
+      |> assign(:extra_menu_content, extra_content)
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end

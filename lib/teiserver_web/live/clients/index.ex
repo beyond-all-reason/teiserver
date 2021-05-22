@@ -7,6 +7,14 @@ defmodule TeiserverWeb.ClientLive.Index do
   alias Teiserver.Client
   alias Teiserver.ClientLib
 
+  @extra_menu_content """
+  &nbsp;&nbsp;&nbsp;
+    <a href='/teiserver/battle' class="btn btn-outline-primary">
+      <i class="fas fa-fw fa-swords"></i>
+      Battles
+    </a>
+  """
+
   @impl true
   def mount(_params, session, socket) do
     clients = list_clients()
@@ -26,7 +34,9 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> assign(:colours, ClientLib.colours())
       |> assign(:clients, clients)
       |> assign(:users, users)
-      |> assign(:menu_override, Routes.ts_lobby_general_path(socket, :index))
+      # |> assign(:menu_override, Routes.ts_lobby_general_path(socket, :index))
+      |> assign(:menu_override, :hidden)
+      |> assign(:extra_menu_content, @extra_menu_content)
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end
