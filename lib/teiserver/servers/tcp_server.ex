@@ -280,6 +280,11 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  # Timeout error
+  def handle_info({:tcp_error, _port, :etimedout}, state) do
+    state
+  end
+
   # Connection
   def handle_info({:tcp_closed, socket}, %{socket: socket, transport: transport} = state) do
     transport.close(socket)
