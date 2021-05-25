@@ -579,6 +579,10 @@ defmodule Teiserver.TcpServer do
 
     new_user =
       cond do
+        state.known_users[userid] == nil ->
+          state.protocol_out.reply(:user_logged_in, userid, nil, state)
+          _blank_user(userid)
+
         state.known_users[userid].battle_id == nil ->
           # No change
           state.known_users[userid]

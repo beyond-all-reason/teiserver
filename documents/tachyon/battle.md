@@ -98,8 +98,7 @@ Requests to join the battle, the host will be sent a message asking if the perso
 // Stage 1
 {
   "cmd": "s.battle.join",
-  "result": "success",
-  "outcome": "Waiting for host approval"
+  "result": "waiting_for_host"
 }
 
 {
@@ -108,16 +107,36 @@ Requests to join the battle, the host will be sent a message asking if the perso
   "reason": "Reason for failure"
 }
 
-
 // Stage 2
+// Host approves/rejects the joiner
 {
-  "cmd": "s.battle.join",
+  "cmd": "s.battle.request_to_join",
+  "userid": 123
+}
+
+{
+  "cmd": "c.battle.respond_to_join_request",
+  "userid": 123,
+  "response": "approve"
+}
+
+{
+  "cmd": "c.battle.respond_to_join_request",
+  "userid": 123,
+  "response": "reject",
+  "reason": "Reason for rejection"
+}
+
+// Stage 3
+// Host response sent to prospective player
+{
+  "cmd": "s.battle.join_response",
   "result": "approve",
   "battle": Battle
 }
 
 {
-  "cmd": "s.battle.join",
+  "cmd": "s.battle.join_response",
   "result": "reject",
   "reason": "Reason for rejection"
 }

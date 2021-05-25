@@ -7,7 +7,11 @@ defmodule Teiserver.Protocols.TachyonOut do
 
   # Stuff we have to use because spring used it
   # TODO: Remove these with Spring
-  def reply(:login_end, nil, nil, state), do: state
+  def reply(:login_end, _data, _msg_id, state), do: state
+  def reply(:user_logged_in, _data, _msg_id, state), do: state
+  def reply(:request_user_join_battle, data, _msg_id, state), do: reply(:battle, :request_to_join, data, state)
+  def reply(:join_battle_failure, data, _msg_id, state), do: reply(:battle, :join_response, {:reject, data}, state)
+  # def reply(:join_battle_success, _data, _msg_id, state), do: reply(:battle, :join_response, {:approve, state.battle_id}, state)
 
 
   def reply(namespace, reply_cmd, data, state) do

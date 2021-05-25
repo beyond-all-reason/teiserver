@@ -3,6 +3,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   alias Teiserver.Agents.AgentLib
   alias Teiserver.Battle
 
+  @read_period 500
   @tick_period 7000
   @leave_chance 0.5
 
@@ -15,16 +16,24 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
     })
 
     :timer.send_interval(@tick_period, self(), :tick)
+    :timer.send_interval(@read_period, self(), :read)
 
     {:noreply, %{state | socket: socket}}
   end
 
-  def handle_info(:tick, state) do
-    new_state = case state.battle_id do
-      nil ->
-        join_battle(state)
+  def handle_info(:read, state) do
+    {:noreply, do_read(state)}
+  end
 
-      _ ->
+  def handle_info(:tick, state) do
+    new_state = case state.stage do
+      :no_battle ->
+        join_battle(state, Battle.list_battle_ids())
+
+      :waiting ->
+        state
+
+      :in_battle ->
         if :rand.uniform() <= @leave_chance do
           leave_battle(state)
         else
@@ -35,21 +44,37 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
     {:noreply, new_state}
   end
 
-  defp join_battle(state) do
-    battle_id = Battle.list_battle_ids()
-      |> Enum.random()
+  defp do_read(state) do
+    case AgentLib._recv(state.socket, 50) do
+      :timeout ->
+        state
+      msg ->
+        state = case msg do
+          %{"cmd" => "s.battle.join_response", "result" => "approve"} ->
+            %{state | stage: :in_battle}
+          msg ->
+            throw "No handler for msg: #{msg}"
+            state
+        end
+        do_read(state)
+    end
+    state
+  end
+
+  defp join_battle(state, []), do: state
+  defp join_battle(state, battle_ids) do
+    battle_id = Enum.random(battle_ids)
 
     cmd = %{
       cmd: "c.battle.join",
-      battle_id: battle_id
+      battle_id: battle_id,
+      password: "password2"
     }
     AgentLib._send(state.socket, cmd)
-    reply = AgentLib._recv(state.socket)
-
-    inspect(reply)
+    _ = AgentLib._recv(state.socket)
 
     AgentLib.post_agent_update(state.id, "opened battle")
-    %{state | battle_id: battle_id}
+    %{state | battle_id: battle_id, stage: :waiting}
   end
 
   defp leave_battle(state) do
@@ -57,7 +82,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
     _success = AgentLib._recv(state.socket)
 
     AgentLib.post_agent_update(state.id, "left battle")
-    %{state | battle_id: nil}
+    %{state | battle_id: nil, stage: :no_battle}
   end
 
   # Startup
@@ -73,6 +98,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
        id: opts.id,
        number: opts.number,
        battle_id: nil,
+       stage: :no_battle,
        socket: nil
      }}
   end

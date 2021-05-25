@@ -1,6 +1,7 @@
 defmodule Teiserver.Protocols.Tachyon do
   require Logger
   alias Teiserver.Client
+  alias Teiserver.Battle
   alias Phoenix.PubSub
   alias Teiserver.Protocols.TachyonIn
   alias Teiserver.Protocols.TachyonOut
@@ -71,7 +72,7 @@ defmodule Teiserver.Protocols.Tachyon do
     end
   end
 
-  @spec decode!(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}
+  @spec decode!(String.t() | :timeout) :: List.t() | Map.t()
   def decode!(data) do
     case decode(data) do
       {:ok, result} -> result
@@ -97,5 +98,40 @@ defmodule Teiserver.Protocols.Tachyon do
       _ ->
         {:error, :gzip_decompress}
     end
+  end
+
+
+  # Does the joining of a battle
+  @spec do_join_battle(map(), integer(), String.t()) :: map()
+  def do_join_battle(state, battle_id, script_password) do
+    # TODO: Change this function to be purely about sending info to the client
+    # the part where it calls Battle.add_user_to_battle should happen elsewhere
+    battle = Battle.get_battle(battle_id)
+    Battle.add_user_to_battle(state.userid, battle.id, script_password)
+    PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
+    TachyonOut.reply(:battle, :join_response, {:approve, battle}, state)
+
+    # [battle.founder_id | battle.players]
+    # |> Enum.each(fn id ->
+    #   client = Client.get_client_by_id(id)
+    #   TachyonOut.reply(:client_battlestatus, client, nil, state)
+    # end)
+
+    # battle.bots
+    # |> Enum.each(fn {_botname, bot} ->
+    #   TachyonOut.reply(:add_bot_to_battle, {battle.id, bot}, nil, state)
+    # end)
+
+    # client = Client.get_client_by_id(state.userid)
+    # TachyonOut.reply(:client_battlestatus, client, nil, state)
+
+    # battle.start_rectangles
+    # |> Enum.each(fn {team, r} ->
+    #   TachyonOut.reply(:add_start_rectangle, {team, r}, nil, state)
+    # end)
+
+    # TachyonOut.reply(:request_battle_status, nil, nil, state)
+
+    %{state | battle_id: battle.id}
   end
 end

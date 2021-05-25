@@ -130,6 +130,10 @@ defmodule TeiserverWeb.BattleLive.Show do
     end
   end
 
+  def handle_info({:global_battle_updated, _, :battle_opened}, socket) do
+    {:noreply, socket}
+  end
+
   def handle_info({:add_bot_to_battle, _battle_id, _bot}, %{assigns: assigns} = socket) do
     {:noreply, assign(socket, :battle, Battle.get_battle(assigns.id))}
   end

@@ -2,6 +2,7 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
   alias Teiserver.Battle
   # alias Teiserver.Protocols.Tachyon
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
@@ -26,9 +27,14 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
   end
 
   def do_handle("join", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
-  def do_handle("join", %{"battle_id" => _battle_id}, state) do
-    # TODO: Implement battle accept/reject dance
-    # Battle.can_join?(state.user, battle_id, password, script_password)
+  def do_handle("join", data, state) do
+    case Battle.can_join?(state.user, data["battle_id"], data["password"]) do
+      {:waiting_on_host, script_password} ->
+        reply(:battle, :join, :waiting, state)
+
+      {:failure, reason} ->
+        reply(:battle, :join, {:failure, reason}, state)
+    end
 
     # # Apply defaults
     # battle =
@@ -40,6 +46,18 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
 
     # new_state = %{state | battle_id: battle.id, battle_host: true}
     # reply(:battle, :create, {:success, battle}, new_state)
+  end
+
+  def do_handle("respond_to_join_request", data, %{battle_id: battle_id} = state) do
+    userid = int_parse(data["userid"])
+
+    case data["response"] do
+      "approve" ->
+        Battle.accept_join_request(userid, battle_id)
+
+      "reject" ->
+        Battle.deny_join_request(userid, battle_id, data["reason"])
+    end
     state
   end
 

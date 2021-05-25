@@ -45,6 +45,80 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
     assert GenServer.call(pid, {:get, :battle_host}) == true
     assert Battle.get_battle!(battle_id) != nil
 
+    # Now create a user to join the battle
+    %{socket: socket2, user: user2, pid: pid2} = tachyon_auth_setup()
+
+    # Bad password
+    data = %{cmd: "c.battle.join", battle_id: battle_id}
+    _tachyon_send(socket2, data)
+    reply = _tachyon_recv(socket2)
+
+    assert reply == %{
+      "cmd" => "s.battle.join",
+      "result" => "failure",
+      "reason" => "Invalid password"
+    }
+
+    # Good password
+    data = %{cmd: "c.battle.join", battle_id: battle_id, password: "password2"}
+    _tachyon_send(socket2, data)
+    reply = _tachyon_recv(socket2)
+
+    assert reply == %{
+      "cmd" => "s.battle.join",
+      "result" => "waiting_for_host"
+    }
+
+    # Host is expecting to see a request
+    reply = _tachyon_recv(socket)
+    assert reply == %{
+      "cmd" => "s.battle.request_to_join",
+      "userid" => user2.id
+    }
+
+    # Host can reject
+    data = %{cmd: "c.battle.respond_to_join_request", userid: user2.id, response: "reject", reason: "reason given"}
+    _tachyon_send(socket, data)
+    reply = _tachyon_recv(socket2)
+
+    assert reply == %{
+      "cmd" => "s.battle.join_response",
+      "result" => "reject",
+      "reason" => "reason given"
+    }
+
+    # Now request again but this time accept
+    data = %{cmd: "c.battle.join", battle_id: battle_id, password: "password2"}
+    _tachyon_send(socket2, data)
+    _tachyon_recv(socket2)
+    _tachyon_recv(socket)
+
+    assert GenServer.call(pid2, {:get, :battle_id}) == nil
+
+    data = %{cmd: "c.battle.respond_to_join_request", userid: user2.id, response: "approve"}
+    _tachyon_send(socket, data)
+    reply = _tachyon_recv(socket2)
+
+    assert reply["cmd"] == "s.battle.join_response"
+    assert reply["result"] == "approve"
+    assert reply["battle"]["id"] == battle_id
+
+    assert GenServer.call(pid2, {:get, :battle_id}) == battle_id
+
+
+
+
+    # # Expecting a request to join here
+    # data = %{cmd: "c.battle.join", battle_id: battle_id}
+    # _tachyon_send(socket2, data)
+    # reply = _tachyon_recv(socket2)
+
+    # # Lets see what happens now
+    # reply = _tachyon_recv(socket2)
+    # IO.puts ""
+    # IO.inspect reply
+    # IO.puts ""
+
     # Now leave the battle, closing it in the process
     data = %{cmd: "c.battle.leave"}
     _tachyon_send(socket, data)

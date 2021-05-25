@@ -127,8 +127,7 @@ defmodule Teiserver.Agents.AgentLib do
     :ok = :ssl.send(socket, msg)
   end
 
-
-  @spec _recv({:sslsocket, any, any}) :: String.t() | :timeout | :closed
+  @spec _recv({:sslsocket, any, any}) :: Map.t() | :timeout | :closed
   def _recv(socket = {:sslsocket, _, _}, timeout \\ 500) do
     case _recv_raw(socket, timeout) do
       :timeout ->

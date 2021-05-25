@@ -3,6 +3,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   alias Teiserver.Agents.AgentLib
   alias Teiserver.Battle
 
+  @read_period 500
   @tick_period 5000
   @inaction_chance 0.5
   @leave_chance 0.5
@@ -16,8 +17,13 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
     })
 
     :timer.send_interval(@tick_period, self(), :tick)
+    :timer.send_interval(@read_period, self(), :read)
 
     {:noreply, %{state | socket: socket}}
+  end
+
+  def handle_info(:read, state) do
+    {:noreply, do_read(state)}
   end
 
   def handle_info(:tick, state) do
@@ -40,6 +46,24 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
     end
 
     {:noreply, new_state}
+  end
+
+  defp do_read(state) do
+    case AgentLib._recv(state.socket, 50) do
+      :timeout ->
+        state
+      msg ->
+        state = case msg do
+          %{"cmd" => "s.battle.request_to_join", "userid" => userid} ->
+            cmd = %{cmd: "c.battle.respond_to_join_request", userid: userid, response: "approve"}
+            AgentLib._send(state.socket, cmd)
+            state
+          msg ->
+            throw "No handler for msg: #{msg}"
+            state
+        end
+        do_read(state)
+    end
   end
 
   defp open_battle(state) do
