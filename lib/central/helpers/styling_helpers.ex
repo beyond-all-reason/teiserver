@@ -113,7 +113,7 @@ defmodule Central.Helpers.StylingHelper do
       car truck plane paper-plane rocket ship truck-monster
       beer flask glass-martini wine-bottle paw-claws
       bed suitcase star badge shovel handshake shopping-cart camera cube hammer-war lightbulb
-      utensil-form utensil-knife utensil-spoon
+      utensil-fork utensil-knife utensil-spoon
       chess-pawn chess-bishop chess-knight chess-rook chess-king chess-queen
       hat-cowboy mitten
       apple-alt birthday-cake bread-slice carrot cheese drumstick gingerbread-man hamburger lemon salad taco ice-cream

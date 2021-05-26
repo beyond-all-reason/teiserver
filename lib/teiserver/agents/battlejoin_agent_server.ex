@@ -2,6 +2,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   use GenServer
   alias Teiserver.Agents.AgentLib
   alias Teiserver.Battle
+  require Logger
 
   @read_period 500
   @tick_period 7000
@@ -31,12 +32,15 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
         join_battle(state, Battle.list_battle_ids())
 
       :waiting ->
+        # Logger.warn("WAITING")
         state
 
       :in_battle ->
         if :rand.uniform() <= @leave_chance do
+          # Logger.warn("LEAVING")
           leave_battle(state)
         else
+          # Logger.warn("STAYING")
           state
         end
     end
@@ -51,14 +55,20 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
       msg ->
         state = case msg do
           %{"cmd" => "s.battle.join_response", "result" => "approve"} ->
+            # Logger.warn("JOINED")
+
             %{state | stage: :in_battle}
+
+          # This might be because the battle has closed
+          %{"cmd" => "s.battle.join_response", "result" => "reject"} ->
+            %{state | stage: :no_battle, battle_id: nil}
+
           msg ->
             throw "No handler for msg: #{msg}"
             state
         end
         do_read(state)
     end
-    state
   end
 
   defp join_battle(state, []), do: state

@@ -9,6 +9,8 @@ defmodule Central.General.CachePlug do
 
   def call(%{user_id: nil} = conn, _) do
     conn
+    |> assign(:memberships, [])
+    |> assign(:tz, Application.get_env(:central, Central.Config)[:defaults].tz)
   end
 
   def call(conn, _) do

@@ -118,12 +118,13 @@ defmodule Teiserver.Agents.AgentLib do
 
   @spec _send({:sslsocket, any, any}, Map.t()) :: :ok
   def _send(socket = {:sslsocket, _, _}, data) do
-    msg = Tachyon.encode(data)
-    _send_raw(socket, msg <> "\n")
+    msg = Tachyon.encode(data) <> "\n"
+    _send_raw(socket, msg)
   end
 
   @spec _send_raw({:sslsocket, any, any}, String.t()) :: :ok
   def _send_raw(socket = {:sslsocket, _, _}, msg) do
+    Logger.warn("send_raw #{msg}")
     :ok = :ssl.send(socket, msg)
   end
 
@@ -134,6 +135,8 @@ defmodule Teiserver.Agents.AgentLib do
         :timeout
 
       resp ->
+        # contents = String.split(resp, "\n")
+        # Logger.warn("CONTENTS: #{Kernel.inspect contents}")
         Tachyon.decode!(resp)
     end
   end
@@ -141,7 +144,11 @@ defmodule Teiserver.Agents.AgentLib do
   @spec _recv_raw({:sslsocket, any, any}) :: String.t() | :timeout | :closed
   def _recv_raw(socket = {:sslsocket, _, _}, timeout \\ 500) do
     case :ssl.recv(socket, 0, timeout) do
-      {:ok, reply} -> reply |> to_string
+      {:ok, reply} ->
+        r = reply |> to_string
+        Logger.warn("recv_raw #{Kernel.inspect reply}")
+
+        r
       {:error, :timeout} -> :timeout
       {:error, :closed} -> :closed
     end

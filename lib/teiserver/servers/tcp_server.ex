@@ -492,6 +492,9 @@ defmodule Teiserver.TcpServer do
 
   # This is the result of the host responding to the server asking if the client
   # can join the battle
+  defp join_battle_request_response(nil, _, _, state) do
+    state.protocol_out.reply(:join_battle_failure, "No battle", nil, state)
+  end
   defp join_battle_request_response(battle_id, response, reason, state) do
     case response do
       :accept ->

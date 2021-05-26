@@ -47,6 +47,7 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
 
     # Now create a user to join the battle
     %{socket: socket2, user: user2, pid: pid2} = tachyon_auth_setup()
+    %{socket: socket3, user: user3} = tachyon_auth_setup()
 
     # Bad password
     data = %{cmd: "c.battle.join", battle_id: battle_id}
@@ -60,8 +61,11 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
     }
 
     # Good password
+    # We send from both users to test for a bug found when making the agent system
+    # where two messages queued up might not be decoded correctly
     data = %{cmd: "c.battle.join", battle_id: battle_id, password: "password2"}
     _tachyon_send(socket2, data)
+    _tachyon_send(socket3, data)
     reply = _tachyon_recv(socket2)
 
     assert reply == %{
@@ -76,10 +80,21 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
       "userid" => user2.id
     }
 
+    # Here should be the next request
+    reply = _tachyon_recv(socket)
+    assert reply == %{
+      "cmd" => "s.battle.request_to_join",
+      "userid" => user3.id
+    }
+
     # Host can reject
     data = %{cmd: "c.battle.respond_to_join_request", userid: user2.id, response: "reject", reason: "reason given"}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket2)
+
+    # Reject user3 at the same time
+    data = %{cmd: "c.battle.respond_to_join_request", userid: user3.id, response: "reject", reason: "reason given"}
+    _tachyon_send(socket, data)
 
     assert reply == %{
       "cmd" => "s.battle.join_response",

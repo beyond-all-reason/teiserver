@@ -237,7 +237,7 @@ defmodule Teiserver.Battle do
           )
 
           new_players = [userid | battle_state.players]
-          Map.put(battle_state, :players, new_players)
+          %{battle_state | players: new_players, player_count: Enum.count(new_players)}
         end
 
       {:ok, new_state}
@@ -350,7 +350,7 @@ defmodule Teiserver.Battle do
             new_state =
               if battle_state != nil do
                 new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
-                Map.put(battle_state, :players, new_players)
+                %{battle_state | players: new_players, player_count: Enum.count(new_players)}
               else
                 nil
               end

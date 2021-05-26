@@ -48,6 +48,6 @@ defmodule Teiserver.Protocols.TachyonOut do
 
   defp _send(msg, socket, transport) do
     encoded_msg = Tachyon.encode(msg)
-    transport.send(socket, encoded_msg)
+    transport.send(socket, encoded_msg <> "\n")
   end
 end

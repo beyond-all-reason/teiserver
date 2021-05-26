@@ -2,6 +2,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   use GenServer
   alias Teiserver.Agents.AgentLib
   alias Teiserver.Battle
+  require Logger
 
   @read_period 500
   @tick_period 5000
@@ -11,8 +12,8 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
     AgentLib.login(socket, %{
-      name: "BattlehostAgentServer_#{state.number}",
-      email: "BattlehostAgentServer_#{state.number}@agent_email",
+      name: "BattlehostAgentServer_#{state.name}",
+      email: "BattlehostAgentServer_#{state.name}@agent_email",
       extra_data: %{}
     })
 
@@ -31,18 +32,28 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
 
     new_state = cond do
       # Chance of doing nothing
-      :rand.uniform() <= @inaction_chance ->
+      :rand.uniform() <= state.inaction_chance ->
         state
 
       battle == nil ->
+        Logger.warn("#{state.name} - opening")
         open_battle(state)
+
+      state.always_leave ->
+        Logger.warn("#{state.name} - leaving anyway")
+        leave_battle(state)
 
       battle.player_count == 0 and battle.spectator_count == 0 ->
         if :rand.uniform() <= @leave_chance do
+          Logger.warn("#{state.name} - leaving empty")
           leave_battle(state)
         else
           state
         end
+
+      # There are players in a battle, we do nothing
+      true ->
+        state
     end
 
     {:noreply, new_state}
@@ -58,6 +69,8 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
             cmd = %{cmd: "c.battle.respond_to_join_request", userid: userid, response: "approve"}
             AgentLib._send(state.socket, cmd)
             state
+          %{"cmd" => "s.battle.leave", "result" => "success"} ->
+            %{state | battle_id: nil}
           msg ->
             throw "No handler for msg: #{msg}"
             state
@@ -71,7 +84,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
       cmd: "c.battle.create",
       battle: %{
         cmd: "c.battles.create",
-        name: "BH #{state.number} - #{:rand.uniform(9999)}",
+        name: "BH #{state.name} - #{:rand.uniform(9999)}",
         nattype: "none",
         password: "password2",
         port: 1234,
@@ -112,8 +125,12 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
      %{
        id: opts.id,
        number: opts.number,
+       name: Map.get(opts, :name, opts.number),
        battle_id: nil,
-       socket: nil
+       socket: nil,
+       leave_chance: Map.get(opts, :leave_chance, @leave_chance),
+       inaction_chance: Map.get(opts, :leave_chance, @inaction_chance),
+       always_leave: Map.get(opts, :always_leave, false)
      }}
   end
 end

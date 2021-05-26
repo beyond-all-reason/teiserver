@@ -5,8 +5,10 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
   def handle_info(:begin, state) do
     AgentLib.post_agent_update(state.id, "Starting agents supervisor")
 
-    add_servers("battlehost", 5)
-    add_servers("battlejoin", 5)
+    add_servers("battlehost", 3)
+    add_servers("battlehost", 4, 4, %{name: "stable", number: 4, leave_chance: 0, inaction_chance: 0})
+    add_servers("battlehost", 5, 5, %{name: "unstable", number: 5, always_leave: true, leave_chance: 1, inaction_chance: 0})
+    add_servers("battlejoin", 15)
     add_servers("idle", 5)
 
     AgentLib.post_agent_update(state.id, "Agent supervisor started")
@@ -15,18 +17,27 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
 
   @spec add_servers(String.t(), Integer.t()) :: :ok
   defp add_servers(type, count) do
+    add_servers(
+      type,
+      1, count,
+      %{}
+    )
+  end
+
+  @spec add_servers(String.t(), Integer.t(), Integer.t(), Map.t()) :: :ok
+  defp add_servers(type, start_at, end_at, opts) do
     module = lookup_module(type)
 
-    1..count
+    start_at..end_at
     |> Enum.each(fn i ->
       {:ok, _pid} =
         DynamicSupervisor.start_child(Teiserver.Agents.DynamicSupervisor, {
           module,
           name: AgentLib.via_tuple(module, i),
-          data: %{
+          data: Map.merge(%{
             number: i,
             id: "#{type}-#{i}"
-          }
+          }, opts)
         })
 
     end)
