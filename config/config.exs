@@ -84,7 +84,10 @@ config :central, Oban,
     {"0 2 * * *", Central.Logging.AggregateViewLogsTask},
 
     # Every minute
-    {"* * * * *", Teiserver.Tasks.PersistTelemetryTask}
+    {"* * * * *", Teiserver.Tasks.PersistTelemetryMinuteTask},
+
+    # 2 am
+    # {"0 2 * * *", Teiserver.Tasks.PersistTelemetryDayTask},
   ]
 
 config :central, Central.Mailer,

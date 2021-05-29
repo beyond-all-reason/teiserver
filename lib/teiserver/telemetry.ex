@@ -6,15 +6,16 @@ defmodule Teiserver.Telemetry do
   alias Central.Repo
 
   alias Teiserver.Telemetry.TelemetryServer
-  alias Teiserver.Telemetry.TelemetryLog
-  alias Teiserver.Telemetry.TelemetryLogLib
-
+  alias Teiserver.Telemetry.TelemetryMinuteLog
+  alias Teiserver.Telemetry.TelemetryMinuteLogLib
+  alias Teiserver.Telemetry.TelemetryDayLog
+  alias Teiserver.Telemetry.TelemetryDayLogLib
 
   # Telemetry todo lists
   # TODO: Beherith: clients logged in, clients ingame, clients singpleplayer, clients afk, clients that are bots are not clients
 
-  def get_state() do
-    GenServer.call(TelemetryServer, :get_state)
+  def get_state_and_reset() do
+    GenServer.call(TelemetryServer, :get_state_and_reset)
   end
 
   @spec metrics() :: List.t()
@@ -43,15 +44,15 @@ defmodule Teiserver.Telemetry do
 
   # Telemetry logs - Database
 
-  defp telemetry_log_query(args) do
-    telemetry_log_query(nil, args)
+  defp telemetry_minute_log_query(args) do
+    telemetry_minute_log_query(nil, args)
   end
 
-  defp telemetry_log_query(timestamp, args) do
-    TelemetryLogLib.get_telemetry_logs()
-    |> TelemetryLogLib.search(%{timestamp: timestamp})
-    |> TelemetryLogLib.search(args[:search])
-    |> TelemetryLogLib.order_by(args[:order])
+  defp telemetry_minute_log_query(timestamp, args) do
+    TelemetryMinuteLogLib.get_telemetry_minute_logs()
+    |> TelemetryMinuteLogLib.search(%{timestamp: timestamp})
+    |> TelemetryMinuteLogLib.search(args[:search])
+    |> TelemetryMinuteLogLib.order_by(args[:order])
     |> QueryHelpers.select(args[:select])
   end
 
@@ -61,11 +62,11 @@ defmodule Teiserver.Telemetry do
   ## Examples
 
       iex> list_logging_logs()
-      [%TelemetryLog{}, ...]
+      [%TelemetryMinute{}, ...]
 
   """
-  def list_telemetry_logs(args \\ []) do
-    telemetry_log_query(args)
+  def list_telemetry_minute_logs(args \\ []) do
+    telemetry_minute_log_query(args)
     |> QueryHelpers.limit_query(50)
     |> Repo.all()
   end
@@ -73,29 +74,29 @@ defmodule Teiserver.Telemetry do
   @doc """
   Gets a single log.
 
-  Raises `Ecto.NoResultsError` if the TelemetryLog does not exist.
+  Raises `Ecto.NoResultsError` if the TelemetryMinute does not exist.
 
   ## Examples
 
       iex> get_log!(123)
-      %TelemetryLog{}
+      %TelemetryMinute{}
 
       iex> get_log!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_telemetry_log(timestamp) when not is_list(timestamp) do
-    telemetry_log_query(timestamp, [])
+  def get_telemetry_minute_log(timestamp) when not is_list(timestamp) do
+    telemetry_minute_log_query(timestamp, [])
     |> Repo.one()
   end
 
-  def get_telemetry_log(args) do
-    telemetry_log_query(nil, args)
+  def get_telemetry_minute_log(args) do
+    telemetry_minute_log_query(nil, args)
     |> Repo.one()
   end
 
-  def get_telemetry_log(timestamp, args) do
-    telemetry_log_query(timestamp, args)
+  def get_telemetry_minute_log(timestamp, args) do
+    telemetry_minute_log_query(timestamp, args)
     |> Repo.one()
   end
 
@@ -105,15 +106,15 @@ defmodule Teiserver.Telemetry do
   ## Examples
 
       iex> create_log(%{field: value})
-      {:ok, %TelemetryLog{}}
+      {:ok, %TelemetryMinute{}}
 
       iex> create_log(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_telemetry_log(attrs \\ %{}) do
-    %TelemetryLog{}
-    |> TelemetryLog.changeset(attrs)
+  def create_telemetry_minute_log(attrs \\ %{}) do
+    %TelemetryMinuteLog{}
+    |> TelemetryMinuteLog.changeset(attrs)
     |> Repo.insert()
   end
 
@@ -123,31 +124,31 @@ defmodule Teiserver.Telemetry do
   ## Examples
 
       iex> update_log(log, %{field: new_value})
-      {:ok, %TelemetryLog{}}
+      {:ok, %TelemetryMinuteLog{}}
 
       iex> update_log(log, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_telemetry_log(%TelemetryLog{} = log, attrs) do
+  def update_telemetry_minute_log(%TelemetryMinuteLog{} = log, attrs) do
     log
-    |> TelemetryLog.changeset(attrs)
+    |> TelemetryMinuteLog.changeset(attrs)
     |> Repo.update()
   end
 
   @doc """
-  Deletes a TelemetryLog.
+  Deletes a TelemetryMinuteLog.
 
   ## Examples
 
       iex> delete_log(log)
-      {:ok, %TelemetryLog{}}
+      {:ok, %TelemetryMinuteLog{}}
 
       iex> delete_log(log)
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_telemetry_log(%TelemetryLog{} = log) do
+  def delete_telemetry_minute_log(%TelemetryMinuteLog{} = log) do
     Repo.delete(log)
   end
 
@@ -157,10 +158,144 @@ defmodule Teiserver.Telemetry do
   ## Examples
 
       iex> change_log(log)
-      %Ecto.Changeset{source: %TelemetryLog{}}
+      %Ecto.Changeset{source: %TelemetryMinuteLog{}}
 
   """
-  def change_telemetry_log(%TelemetryLog{} = log) do
-    TelemetryLog.changeset(log, %{})
+  def change_telemetry_minute_log(%TelemetryMinuteLog{} = log) do
+    TelemetryMinuteLog.changeset(log, %{})
+  end
+
+  # Day logs
+
+
+  defp telemetry_day_log_query(args) do
+    telemetry_day_log_query(nil, args)
+  end
+
+  defp telemetry_day_log_query(timestamp, args) do
+    TelemetryDayLogLib.get_telemetry_day_logs()
+    |> TelemetryDayLogLib.search(%{timestamp: timestamp})
+    |> TelemetryDayLogLib.search(args[:search])
+    |> TelemetryDayLogLib.order_by(args[:order])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of logging_logs.
+
+  ## Examples
+
+      iex> list_logging_logs()
+      [%TelemetryDayLog{}, ...]
+
+  """
+  def list_telemetry_day_logs(args \\ []) do
+    telemetry_day_log_query(args)
+    |> QueryHelpers.limit_query(50)
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single log.
+
+  Raises `Ecto.NoResultsError` if the TelemetryDayLog does not exist.
+
+  ## Examples
+
+      iex> get_log!(123)
+      %TelemetryDayLog{}
+
+      iex> get_log!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_telemetry_day_log(timestamp) when not is_list(timestamp) do
+    telemetry_day_log_query(timestamp, [])
+    |> Repo.one()
+  end
+
+  def get_telemetry_day_log(args) do
+    telemetry_day_log_query(nil, args)
+    |> Repo.one()
+  end
+
+  def get_telemetry_day_log(timestamp, args) do
+    telemetry_day_log_query(timestamp, args)
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a log.
+
+  ## Examples
+
+      iex> create_log(%{field: value})
+      {:ok, %TelemetryDayLog{}}
+
+      iex> create_log(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_telemetry_day_log(attrs \\ %{}) do
+    %TelemetryDayLog{}
+    |> TelemetryDayLog.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a log.
+
+  ## Examples
+
+      iex> update_log(log, %{field: new_value})
+      {:ok, %TelemetryDayLog{}}
+
+      iex> update_log(log, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_telemetry_day_log(%TelemetryDayLog{} = log, attrs) do
+    log
+    |> TelemetryDayLog.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a TelemetryDayLog.
+
+  ## Examples
+
+      iex> delete_log(log)
+      {:ok, %TelemetryDayLog{}}
+
+      iex> delete_log(log)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_telemetry_day_log(%TelemetryDayLog{} = log) do
+    Repo.delete(log)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking log changes.
+
+  ## Examples
+
+      iex> change_log(log)
+      %Ecto.Changeset{source: %TelemetryDayLog{}}
+
+  """
+  def change_telemetry_day_log(%TelemetryDayLog{} = log) do
+    TelemetryDayLog.changeset(log, %{})
+  end
+
+  def get_last_telemtry_day_log() do
+    query =
+      from logs in TelemetryDayLog,
+        order_by: [desc: logs.date],
+        select: logs.date,
+        limit: 1
+
+    Repo.one(query)
   end
 end

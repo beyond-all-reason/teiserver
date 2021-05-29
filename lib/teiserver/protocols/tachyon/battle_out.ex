@@ -1,6 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.BattleOut do
   alias Teiserver.Protocols.Tachyon
-  alias Teiserver.Battle
 
   @spec do_reply(atom(), any) :: Map.t()
 

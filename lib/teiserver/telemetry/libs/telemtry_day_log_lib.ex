@@ -1,13 +1,17 @@
-defmodule Teiserver.Telemetry.TelemetryLogLib do
+defmodule Teiserver.Telemetry.TelemetryDayLogLib do
   use CentralWeb, :library
 
-  alias Teiserver.Telemetry.TelemetryLog
+  alias Teiserver.Telemetry.TelemetryDayLog
 
+  @spec colours :: {String.t(), String.t(), String.t()}
   def colours(), do: Central.Helpers.StylingHelper.colours(:warning2)
+
+  @spec icon() :: String.t()
   def icon(), do: "far fa-monitor-heart-rate"
 
-  def get_telemetry_logs() do
-    from(logs in TelemetryLog)
+  @spec get_telemetry_day_logs :: Ecto.Query.t()
+  def get_telemetry_day_logs() do
+    from(logs in TelemetryDayLog)
   end
 
   @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()
@@ -20,22 +24,23 @@ defmodule Teiserver.Telemetry.TelemetryLogLib do
     end)
   end
 
+  @spec _search(Ecto.Query.t(), atom, any) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
-  def _search(query, :timestamp, timestamp) do
+  def _search(query, :date, date) do
     from logs in query,
-      where: logs.timestamp == ^timestamp
+      where: logs.date == ^date
   end
 
-  def _search(query, :start_timestamp, timestamp) do
+  def _search(query, :start_date, date) do
     from logs in query,
-      where: logs.timestamp >= ^timestamp
+      where: logs.date >= ^date
   end
 
-  def _search(query, :end_timestamp, timestamp) do
+  def _search(query, :end_date, date) do
     from logs in query,
-      where: logs.timestamp <= ^timestamp
+      where: logs.date <= ^date
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
@@ -43,11 +48,11 @@ defmodule Teiserver.Telemetry.TelemetryLogLib do
 
   def order_by(query, "Newest first") do
     from logs in query,
-      order_by: [desc: logs.timestamp]
+      order_by: [desc: logs.date]
   end
 
   def order_by(query, "Oldest first") do
     from logs in query,
-      order_by: [asc: logs.timestamp]
+      order_by: [asc: logs.date]
   end
 end

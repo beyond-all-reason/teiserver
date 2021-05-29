@@ -3,7 +3,6 @@ defmodule Teiserver.Room do
   require Logger
   alias Teiserver.User
   alias Phoenix.PubSub
-  alias Central.Helpers.TimexHelper
 
   def create_room(%{name: _} = room) do
     Map.merge(

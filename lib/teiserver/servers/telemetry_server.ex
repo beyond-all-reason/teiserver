@@ -9,13 +9,18 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         total: 0,
         menu: 0,
         battle: 0,
-        # spectator: 0,
-        player: 0
+        spectator: 0,
+        player: 0,
+        ids: []
       },
       battle: %{
         total: 0,
         lobby: 0,
-        in_progress: 0
+        in_progress: 0,
+
+        # Battles completed as part of this tick, not a cumulative total
+        # reset when the reset command is sent
+        completed: 0
       }
     }
 
@@ -45,6 +50,10 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   @impl true
   def handle_call(:get_state, _from, state) do
     {:reply, state, state}
+  end
+
+  def handle_call(:get_state_and_reset, _from, state) do
+    {:reply, state, @default_state}
   end
 
   @spec report_telemetry(Map.t()) :: :ok
@@ -78,6 +87,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         total: total_clients,
         menu: total_clients - players - total_battles,
         battle: players + total_battles,
+        ids: client_ids
         # spectator: spectators,
         # player: players
       },
