@@ -24,7 +24,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       })
 
       html = render(view)
-      assert html =~ "Battles - Row count: 1"
+      assert html =~ "Battles - 1"
       assert html =~ "LiveBattleName"
 
       # Another
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       })
 
       html = render(view)
-      assert html =~ "Battles - Row count: 2"
+      assert html =~ "Battles - 2"
       assert html =~ "LiveBattleName"
       assert html =~ "SecondLiveBattle"
 
@@ -41,7 +41,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       Battle.close_battle(battle2.id)
 
       html = render(view)
-      assert html =~ "Battles - Row count: 1"
+      assert html =~ "Battles - 1"
       assert html =~ "LiveBattleName"
       refute html =~ "SecondLiveBattle"
       refute html =~ "<td>3</td>"
@@ -55,7 +55,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       Battle.add_user_to_battle(user3.id, battle1.id, "script_password")
 
       html = render(view)
-      assert html =~ "Battles - Row count: 1"
+      assert html =~ "Battles - 1"
       assert html =~ "LiveBattleName"
       assert html =~ "<td>3</td>"
 
@@ -63,7 +63,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       Battle.remove_user_from_battle(user3.id, battle1.id)
 
       html = render(view)
-      assert html =~ "Battles - Row count: 1"
+      assert html =~ "Battles - 1"
       assert html =~ "LiveBattleName"
       assert html =~ "<td>2</td>"
 

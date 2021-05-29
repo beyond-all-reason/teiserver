@@ -48,7 +48,7 @@ defmodule Teiserver.Battle do
         id: next_id(),
         founder_id: nil,
         founder_name: nil,
-        type: :normal,
+        type: "normal",
         nattype: :none,
         max_players: 16,
         password: nil,

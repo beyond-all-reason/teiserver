@@ -404,7 +404,7 @@ defmodule Teiserver.TeiserverTestLib do
       founder_id: id,
       founder_name: "TEST_USER_#{id}",
       name: "BATTLE_#{id}",
-      type: :normal,
+      type: "normal",
       nattype: :none,
       port: "",
       max_players: 4,

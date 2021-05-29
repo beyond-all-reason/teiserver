@@ -143,7 +143,7 @@ Requests to join the battle, the host will be sent a message asking if the perso
 ```
 
 ### TODO: `c.battle.leave`
-No response
+No server response.
 ```
 {
   "cmd": "c.battle.leave"
@@ -155,9 +155,31 @@ No response
 }
 ```
 
-### TODO: `s.battle.join_request`
-### TODO: `c.battle.join_approve`
-### TODO: `c.battle.join_deny`
+### TODO: `s.battle.request_to_join`
+Sent to the host when someone requests to join the battle. The host should send the server a `c.battle.respond_to_join_request` with their decision.
+```
+{
+  "cmd": "s.battle.request_to_join",
+  "userid": 123
+}
+```
+
+### TODO: `c.battle.respond_to_join_request`
+The response to a `s.battle.request_to_join` message informing the server if the request has been accepted or rejected. No server response.
+```
+{
+  "cmd": "c.battle.respond_to_join_request",
+  "response": "accept",
+  "userid": 123
+}
+
+{
+  "cmd": "c.battle.respond_to_join_request",
+  "response": "reject",
+  "reason": "reason given",
+  "userid": 123
+}
+```
 
 ## Telemetry
 - Mid-battle updates?

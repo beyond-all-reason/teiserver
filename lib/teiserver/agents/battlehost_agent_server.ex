@@ -30,17 +30,14 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
         state
 
       battle == nil ->
-        Logger.warn("#{state.name} - opening")
         open_battle(state)
         state
 
       state.always_leave ->
-        Logger.warn("#{state.name} - leaving anyway")
         leave_battle(state)
 
       battle.player_count == 0 and battle.spectator_count == 0 ->
         if :rand.uniform() <= @leave_chance do
-          Logger.warn("#{state.name} - leaving empty")
           leave_battle(state)
         else
           state
@@ -65,7 +62,12 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   end
 
   defp handle_msg(nil, state), do: state
-  defp handle_msg(%{"cmd" => "s.battle.request_to_join", "userid" => userid}, state) do
+  defp handle_msg(%{"cmd" => "s.battle.request_to_join", "userid" => userid}, %{reject: true} = state) do
+    cmd = %{cmd: "c.battle.respond_to_join_request", userid: userid, response: "reject", reason: "because"}
+    AgentLib._send(state.socket, cmd)
+    state
+  end
+  defp handle_msg(%{"cmd" => "s.battle.request_to_join", "userid" => userid}, %{reject: false} = state) do
     cmd = %{cmd: "c.battle.respond_to_join_request", userid: userid, response: "approve"}
     AgentLib._send(state.socket, cmd)
     state
@@ -121,6 +123,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
        name: Map.get(opts, :name, opts.number),
        battle_id: nil,
        socket: nil,
+       reject: Map.get(opts, :reject, false),
        leave_chance: Map.get(opts, :leave_chance, @leave_chance),
        inaction_chance: Map.get(opts, :leave_chance, @inaction_chance),
        always_leave: Map.get(opts, :always_leave, false)

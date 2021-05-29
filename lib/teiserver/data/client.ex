@@ -35,17 +35,7 @@ defmodule Teiserver.Client do
         handicap: 0,
         sync: 0,
         side: 0,
-        battle_id: nil,
-
-        state: :menu
-
-        # Metrics stuff
-        # current_state: {:logged_out, :erlang.system_time(:seconds)},
-        # time_in_state: %{
-        #   menu: 0,
-        #   lobby: 0,
-        #   battle: 0
-        # }
+        battle_id: nil
       },
       client
     )

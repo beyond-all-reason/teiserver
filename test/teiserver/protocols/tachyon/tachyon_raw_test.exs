@@ -82,8 +82,8 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     # Create the user manually for now
     user =
       GeneralTestLib.make_user(%{
-        "name" => "tachyon_token_test_user",
-        "email" => "tachyon_token_test_user@",
+        "name" => "new_test_user_tachyon_token",
+        "email" => "new_test_user_tachyon_token@",
         "password" => "token_password",
         "data" => %{
           "verified" => false,

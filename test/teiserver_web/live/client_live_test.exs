@@ -21,20 +21,20 @@ defmodule TeiserverWeb.Live.ClientTest do
       # Time to add a client
       %{socket: socket1, user: user1} = TeiserverTestLib.auth_setup()
       html = render(view)
-      assert html =~ "Clients - Row count: "
+      assert html =~ "Clients - "
       assert html =~ "#{user1.name}"
 
       # Another
       %{socket: socket2, user: user2} = TeiserverTestLib.auth_setup()
       html = render(view)
-      assert html =~ "Clients - Row count: "
+      assert html =~ "Clients - "
       assert html =~ "#{user1.name}"
       assert html =~ "#{user2.name}"
 
       # User 2 logs out
       _send_raw(socket2, "EXIT\n")
       html = render(view)
-      assert html =~ "Clients - Row count: "
+      assert html =~ "Clients - "
       assert html =~ "#{user1.name}"
       refute html =~ "#{user2.name}"
 

@@ -52,7 +52,7 @@ defmodule Teiserver.SpringRawTest do
   end
 
   test "LOGIN", %{socket: socket} do
-    username = "raw_new_user_test"
+    username = "new_test_user_raw"
 
     # We expect to be greeted by a welcome message
     reply = _recv_raw(socket)

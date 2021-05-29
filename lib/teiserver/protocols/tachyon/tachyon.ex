@@ -61,7 +61,7 @@ defmodule Teiserver.Protocols.Tachyon do
   @spec decode(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}
   def decode(:timeout), do: {:ok, nil}
   def decode(data) do
-    with {:ok, decoded64} <- Base.decode64(data),
+    with {:ok, decoded64} <- Base.decode64(data |> String.trim),
          {:ok, unzipped} <- unzip(decoded64),
          {:ok, object} <- Jason.decode(unzipped) do
       {:ok, object}

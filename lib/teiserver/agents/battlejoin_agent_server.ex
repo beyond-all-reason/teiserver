@@ -26,15 +26,12 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
         join_battle(state, Battle.list_battle_ids())
 
       :waiting ->
-        # Logger.warn("WAITING")
         state
 
       :in_battle ->
         if :rand.uniform() <= @leave_chance do
-          # Logger.warn("LEAVING")
           leave_battle(state)
         else
-          # Logger.warn("STAYING")
           state
         end
     end
@@ -55,6 +52,9 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   defp handle_msg(nil, state), do: state
   defp handle_msg(%{"cmd" => "s.battle.join", "result" => "waiting_for_host"}, state) do
     %{state | stage: :waiting}
+  end
+  defp handle_msg(%{"cmd" => "s.battle.join_response", "result" => "failure"}, state) do
+    %{state | stage: :no_battle, battle_id: nil}
   end
   defp handle_msg(%{"cmd" => "s.battle.join_response", "result" => "approve"}, state) do
     %{state | stage: :in_battle}
