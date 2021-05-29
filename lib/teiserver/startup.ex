@@ -96,6 +96,12 @@ defmodule Teiserver.Startup do
         permissions: "teiserver"
       },
       %{
+        label: "Teiserver live metrics",
+        icons: ["far fa-tachometer-alt", :list],
+        url: "/teiserver/admin/metrics",
+        permissions: "logging.live"
+      },
+      %{
         label: "Clans",
         icons: [Teiserver.Clans.ClanLib.icon(), :list],
         url: "/teiserver/account/clans",

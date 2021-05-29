@@ -65,28 +65,20 @@ defmodule Teiserver.Agents.AgentLib do
 
   defp swap_to_tachyon(socket) do
     _send_raw(socket, "TACHYON\n")
+    :timer.sleep(100)
     :ok
   end
 
   @spec login({:sslsocket, any, any}, Map.t()) :: :success
   def login(socket, data) do
-    exists = cond do
-      User.get_user_by_name(data.name) ->
-        true
-
-      User.get_user_by_email(data.email) ->
-        true
-
-      true ->
-        false
-    end
-
     # If no user, make it
-    if not exists do
+    if User.get_user_by_email(data.email) == nil do
       User.register_user_with_md5(data.name, data.email, "password", "127.0.0.1")
       user = User.get_user_by_name(data.name)
       user = %{user | verified: true}
       User.update_user(user, persist: true)
+      User.recache_user(user.id)
+      :timer.sleep(100)
     end
 
     # Get the user
@@ -115,6 +107,7 @@ defmodule Teiserver.Agents.AgentLib do
 
   def translate('OK cmd=TACHYON\n'), do: []
   def translate('TASSERVER 0.38-33-ga5f3b28 * 8201 0\n'), do: []
+  def translate('TASSERVER 0.38-33-ga5f3b28 * 8201 0\nOK cmd=TACHYON\n'), do: []
   def translate(raw) do
     raw
     |> to_string
