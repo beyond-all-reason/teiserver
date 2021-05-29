@@ -53,8 +53,7 @@ defmodule Teiserver.Agents.AgentLib do
 
   def get_socket() do
     {:ok, socket} =
-      :ssl.connect(@localhost, Application.get_env(:central, Teiserver)[:ports][:tls], active: false)
-    _ = _recv_raw(socket)
+      :ssl.connect(@localhost, Application.get_env(:central, Teiserver)[:ports][:tls], active: true)
 
     socket
   end
@@ -62,26 +61,14 @@ defmodule Teiserver.Agents.AgentLib do
   defp do_login(socket, token) do
     msg = %{cmd: "c.auth.login", token: token, lobby_name: "agent_lobby", lobby_version: "1"}
     _send(socket, msg)
-    reply = _recv(socket)
-
-    case reply["result"] do
-      "success" -> :ok
-      "failure" -> {:error, :login}
-    end
   end
 
   defp swap_to_tachyon(socket) do
     _send_raw(socket, "TACHYON\n")
-    reply = _recv_raw(socket)
-
-    if reply == "OK cmd=TACHYON\n" do
-      :ok
-    else
-      {:error, :login}
-    end
+    :ok
   end
 
-  @spec login({:sslsocket, any, any}, Map.t()) :: :ok | :failure
+  @spec login({:sslsocket, any, any}, Map.t()) :: :success
   def login(socket, data) do
     exists = cond do
       User.get_user_by_name(data.name) ->
@@ -104,7 +91,6 @@ defmodule Teiserver.Agents.AgentLib do
 
     # Get the user
     user = User.get_user_by_name(data.name)
-    _welcome_msg = _recv(socket)
 
     with :ok <- swap_to_tachyon(socket),
          token <- User.create_token(user),
@@ -124,33 +110,23 @@ defmodule Teiserver.Agents.AgentLib do
 
   @spec _send_raw({:sslsocket, any, any}, String.t()) :: :ok
   def _send_raw(socket = {:sslsocket, _, _}, msg) do
-    Logger.warn("send_raw #{msg}")
     :ok = :ssl.send(socket, msg)
   end
 
-  @spec _recv({:sslsocket, any, any}) :: Map.t() | :timeout | :closed
-  def _recv(socket = {:sslsocket, _, _}, timeout \\ 500) do
-    case _recv_raw(socket, timeout) do
-      :timeout ->
-        :timeout
-
-      resp ->
-        # contents = String.split(resp, "\n")
-        # Logger.warn("CONTENTS: #{Kernel.inspect contents}")
-        Tachyon.decode!(resp)
-    end
+  def translate('OK cmd=TACHYON\n'), do: []
+  def translate(raw) do
+    raw
+    |> to_string
+    |> String.split("\n")
+    |> Enum.map(&do_translate/1)
+    |> Enum.filter(fn r -> r != nil end)
   end
 
-  @spec _recv_raw({:sslsocket, any, any}) :: String.t() | :timeout | :closed
-  def _recv_raw(socket = {:sslsocket, _, _}, timeout \\ 500) do
-    case :ssl.recv(socket, 0, timeout) do
-      {:ok, reply} ->
-        r = reply |> to_string
-        Logger.warn("recv_raw #{Kernel.inspect reply}")
-
-        r
-      {:error, :timeout} -> :timeout
-      {:error, :closed} -> :closed
+  defp do_translate(""), do: nil
+  defp do_translate(line) do
+    case Tachyon.decode!(line) do
+      %{"cmd" => "s.auth.login"} -> nil
+      msg -> msg
     end
   end
 

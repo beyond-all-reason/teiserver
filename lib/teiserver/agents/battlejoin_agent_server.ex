@@ -4,7 +4,6 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   alias Teiserver.Battle
   require Logger
 
-  @read_period 500
   @tick_period 7000
   @leave_chance 0.5
 
@@ -17,13 +16,8 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
     })
 
     :timer.send_interval(@tick_period, self(), :tick)
-    :timer.send_interval(@read_period, self(), :read)
 
     {:noreply, %{state | socket: socket}}
-  end
-
-  def handle_info(:read, state) do
-    {:noreply, do_read(state)}
   end
 
   def handle_info(:tick, state) do
@@ -48,27 +42,28 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
     {:noreply, new_state}
   end
 
-  defp do_read(state) do
-    case AgentLib._recv(state.socket, 50) do
-      :timeout ->
-        state
-      msg ->
-        state = case msg do
-          %{"cmd" => "s.battle.join_response", "result" => "approve"} ->
-            # Logger.warn("JOINED")
+  def handle_info({:ssl, _socket, data}, state) do
+    new_state = data
+    |> AgentLib.translate
+    |> Enum.reduce(state, fn data, acc ->
+      handle_msg(data, acc)
+    end)
 
-            %{state | stage: :in_battle}
+    {:noreply, new_state}
+  end
 
-          # This might be because the battle has closed
-          %{"cmd" => "s.battle.join_response", "result" => "reject"} ->
-            %{state | stage: :no_battle, battle_id: nil}
-
-          msg ->
-            throw "No handler for msg: #{msg}"
-            state
-        end
-        do_read(state)
-    end
+  defp handle_msg(nil, state), do: state
+  defp handle_msg(%{"cmd" => "s.battle.join", "result" => "waiting_for_host"}, state) do
+    %{state | stage: :waiting}
+  end
+  defp handle_msg(%{"cmd" => "s.battle.join_response", "result" => "approve"}, state) do
+    %{state | stage: :in_battle}
+  end
+  defp handle_msg(%{"cmd" => "s.battle.join_response", "result" => "reject"}, state) do
+    %{state | stage: :no_battle, battle_id: nil}
+  end
+  defp handle_msg(%{"cmd" => "s.battle.leave", "result" => "success"}, state) do
+    %{state | battle_id: nil}
   end
 
   defp join_battle(state, []), do: state
@@ -81,7 +76,6 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
       password: "password2"
     }
     AgentLib._send(state.socket, cmd)
-    _ = AgentLib._recv(state.socket)
 
     AgentLib.post_agent_update(state.id, "opened battle")
     %{state | battle_id: battle_id, stage: :waiting}
@@ -89,7 +83,6 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
 
   defp leave_battle(state) do
     AgentLib._send(state.socket, %{cmd: "c.battle.leave"})
-    _success = AgentLib._recv(state.socket)
 
     AgentLib.post_agent_update(state.id, "left battle")
     %{state | battle_id: nil, stage: :no_battle}

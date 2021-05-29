@@ -82,6 +82,7 @@ defmodule TeiserverWeb.Router do
         pipe_through([:browser, :admin_layout, :protected])
 
         get("/", GeneralController, :index)
+        get("/metrics", GeneralController, :metrics)
 
         get("/tools", ToolController, :index)
         get("/tools/convert", ToolController, :convert_form)

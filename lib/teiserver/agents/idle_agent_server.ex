@@ -21,9 +21,23 @@ defmodule Teiserver.Agents.IdleAgentServer do
 
   def handle_info(:tick, state) do
     AgentLib._send(state.socket, %{cmd: "c.system.ping"})
-    _pong = AgentLib._recv(state.socket)
     AgentLib.post_agent_update(state.id, "idle pinged")
     {:noreply, state}
+  end
+
+  def handle_info({:ssl, _socket, data}, state) do
+    new_state = data
+    |> AgentLib.translate
+    |> Enum.reduce(state, fn data, acc ->
+      handle_msg(data, acc)
+    end)
+
+    {:noreply, new_state}
+  end
+
+  defp handle_msg(nil, state), do: state
+  defp handle_msg(%{"cmd" => "s.system.pong"}, state) do
+    state
   end
 
   # Startup
