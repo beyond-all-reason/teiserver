@@ -114,6 +114,7 @@ defmodule Teiserver.Agents.AgentLib do
   end
 
   def translate('OK cmd=TACHYON\n'), do: []
+  def translate('TASSERVER 0.38-33-ga5f3b28 * 8201 0\n'), do: []
   def translate(raw) do
     raw
     |> to_string
