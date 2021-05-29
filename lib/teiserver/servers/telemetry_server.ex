@@ -6,12 +6,10 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   @tick_period 9_000
   @default_state %{
       client: %{
-        total: 0,
-        menu: 0,
-        battle: 0,
-        spectator: 0,
-        player: 0,
-        ids: []
+        players: [],
+        spectators: [],
+        battle_lobbies: [],
+        menus: []
       },
       battle: %{
         total: 0,
@@ -32,21 +30,6 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     {:noreply, state}
   end
 
-  # @impl true
-  # def handle_cast({:increase, table, key}, state) do
-  #   new_table = Map.get(state, table)
-  #   |> Map.update!(key, &(&1 + 1))
-
-  #   {:noreply, Map.put(state, table, new_table)}
-  # end
-
-  # def handle_cast({:decrease, table, key}, state) do
-  #   new_table = Map.get(state, table)
-  #   |> Map.update!(key, &(&1 - 1))
-
-  #   {:noreply, Map.put(state, table, new_table)}
-  # end
-
   @impl true
   def handle_call(:get_state, _from, state) do
     {:reply, state, state}
@@ -66,48 +49,57 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   defp get_totals(_state) do
     battles = Battle.list_battles()
     client_ids = Client.list_client_ids()
+    clients = client_ids
+      |> Map.new(fn c -> {c, Client.get_client_by_id(c)} end)
 
-    # {players, spectators} = battles
-    #   |> Enum.reduce({0, 0}, fn (battle, {pcount, scount}) ->
-    #     {
-    #       pcount + Enum.count(battle.players),
-    #       scount + Enum.count(battle.spectators)
-    #     }
-    #   end)
-    players = battles
-      |> Enum.reduce(0, fn (battle, count) ->
-        count + Enum.count(battle.players)
+    # Battle stats
+    total_battles = Enum.count(battles)
+    battles_in_progress = battles
+      |> Enum.filter(fn battle ->
+        # If the host is in-game, the battle is in progress!
+        host = clients[battle.founder_id]
+        host.in_game
       end)
 
-    total_clients = Enum.count(client_ids)
-    total_battles = Enum.count(battles)
+    # Client stats
+    {player_ids, spectator_ids, lobby_ids, menu_ids} = clients
+      |> Enum.reduce({[], [], [], []}, fn ({userid, client}, {players, spectators, lobbies, menus}) ->
+        add_to = cond do
+          client == nil -> nil
+          client.battle_id == nil -> :menus
+
+          # Client is involved in a battle in some way
+          # In this case they are not in a game, they are in a battle lobby
+          client.in_game == false -> :lobbies
+
+          # User is in a game, are they a player or a spectator?
+          client.player == false -> :spectators
+          client.player == true -> :players
+        end
+
+        case add_to do
+          nil -> {players, spectators, lobbies, menus}
+          :players -> {[userid | players], spectators, lobbies, menus}
+          :spectators -> {players, [userid | spectators], lobbies, menus}
+          :lobbies -> {players, spectators, [userid | lobbies], menus}
+          :menus -> {players, spectators, lobbies, [userid | menus]}
+        end
+      end)
 
     %{
       client: %{
-        total: total_clients,
-        menu: total_clients - players - total_battles,
-        battle: players + total_battles,
-        ids: client_ids
-        # spectator: spectators,
-        # player: players
+        players: player_ids,
+        spectators: spectator_ids,
+        battle_lobbies: lobby_ids,
+        menus: menu_ids
       },
       battle: %{
         total: total_battles,
-        lobby: total_battles,
-        in_progress: 0
+        lobby: total_battles - Enum.count(battles_in_progress),
+        in_progress: Enum.count(battles_in_progress)
       }
     }
   end
-
-  # defp do_total(table) do
-  #   new_total = table
-  #   |> Enum.map(fn {k, v} ->
-  #     if k == :total, do: 0, else: v
-  #   end)
-  #   |> Enum.sum
-
-  #   %{table | total: new_total}
-  # end
 
   # Startup
   def start_link(opts \\ []) do
