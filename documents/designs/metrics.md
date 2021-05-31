@@ -26,46 +26,46 @@ These are built from the minute by minute logs each morning for the preceding da
 ```
 {
   # Average battle counts per segment
-  battles: %{
-    in_progress: segment_list(),
-    lobby: segment_list(),
-    total: segment_list(),
+  "battles": {
+    "in_progress": segment_list(),
+    "lobby": segment_list(),
+    "total": segment_list(),
   },
 
   # Daily totals
-  aggregates: %{
-    stats: %{
-      accounts_created: integer(),
-      unique_users: integer(),
-      unique_players: integer()
+  "aggregates": {
+    "stats": {
+      "accounts_created": integer(),
+      "unique_users": integer(),
+      "unique_players": integer()
     },
 
     # Total number of minutes spent doing that across all players that day
-    minutes: %{
-      player: integer(),
-      spectator: integer(),
-      lobby: integer(),
-      menu: integer(),
-      total: integer()
+    "minutes": {
+      "player": integer(),
+      "spectator": integer(),
+      "lobby": integer(),
+      "menu": integer(),
+      "total": integer()
     }
   },
 
   # The number of minutes users (combined) spent in that state during the segment
-  user_counts: %{
-    player: segment_list(),
-    spectator: segment_list(),
-    lobby: segment_list(),
-    menu: segment_list(),
-    total: segment_list()
+  "user_counts": {
+    "player": segment_list(),
+    "spectator": segment_list(),
+    "lobby": segment_list(),
+    "menu": segment_list(),
+    "total": segment_list()
   },
 
   # Per user minute counts for the day as a whole
-  minutes_per_user: %{
-    total: user_map(),
-    player: user_map(),
-    spectator: user_map(),
-    lobby: user_map(),
-    menu: user_map()
+  "minutes_per_user": {
+    "total": user_map(),
+    "player": user_map(),
+    "spectator": user_map(),
+    "lobby": user_map(),
+    "menu": user_map()
   }
 }
 ```
