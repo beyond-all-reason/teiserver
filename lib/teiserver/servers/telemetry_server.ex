@@ -6,10 +6,10 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   @tick_period 9_000
   @default_state %{
       client: %{
-        players: [],
-        spectators: [],
-        battle_lobbies: [],
-        menus: []
+        player: [],
+        spectator: [],
+        lobby: [],
+        menu: []
       },
       battle: %{
         total: 0,
@@ -55,43 +55,45 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     # Battle stats
     total_battles = Enum.count(battles)
     battles_in_progress = battles
-      |> Enum.filter(fn battle ->
+    |> Enum.filter(fn battle ->
         # If the host is in-game, the battle is in progress!
         host = clients[battle.founder_id]
-        host.in_game
+        host != nil and host.in_game
       end)
 
     # Client stats
     {player_ids, spectator_ids, lobby_ids, menu_ids} = clients
-      |> Enum.reduce({[], [], [], []}, fn ({userid, client}, {players, spectators, lobbies, menus}) ->
+      |> Enum.reduce({[], [], [], []}, fn ({userid, client}, {player, spectator, lobby, menu}) ->
         add_to = cond do
           client == nil -> nil
-          client.battle_id == nil -> :menus
+          client.bot == true -> nil
+          client.battle_id == nil -> :menu
 
           # Client is involved in a battle in some way
           # In this case they are not in a game, they are in a battle lobby
-          client.in_game == false -> :lobbies
+          client.in_game == false -> :lobby
 
           # User is in a game, are they a player or a spectator?
-          client.player == false -> :spectators
-          client.player == true -> :players
+          client.player == false -> :spectator
+          client.player == true -> :player
         end
 
         case add_to do
-          nil -> {players, spectators, lobbies, menus}
-          :players -> {[userid | players], spectators, lobbies, menus}
-          :spectators -> {players, [userid | spectators], lobbies, menus}
-          :lobbies -> {players, spectators, [userid | lobbies], menus}
-          :menus -> {players, spectators, lobbies, [userid | menus]}
+          nil -> {player, spectator, lobby, menu}
+          :player -> {[userid | player], spectator, lobby, menu}
+          :spectator -> {player, [userid | spectator], lobby, menu}
+          :lobby -> {player, spectator, [userid | lobby], menu}
+          :menu -> {player, spectator, lobby, [userid | menu]}
         end
       end)
 
     %{
       client: %{
-        players: player_ids,
-        spectators: spectator_ids,
-        battle_lobbies: lobby_ids,
-        menus: menu_ids
+        player: player_ids,
+        spectator: spectator_ids,
+        lobby: lobby_ids,
+        menu: menu_ids,
+        total: client_ids
       },
       battle: %{
         total: total_battles,

@@ -43,6 +43,12 @@ defmodule Teiserver.Telemetry.TelemetryMinuteLogLib do
       where: logs.timestamp <= ^timestamp
   end
 
+  def _search(query, :between, {start_timestamp, end_timestamp}) do
+    from logs in query,
+      where: logs.timestamp >= ^start_timestamp,
+      where: logs.timestamp < ^end_timestamp
+  end
+
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 

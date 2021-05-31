@@ -85,6 +85,16 @@ defmodule Central.Account.UserQueries do
           ilike(users.email, ^"%#{value}%")
   end
 
+  def _search(query, :inserted_after, timestamp) do
+    from users in query,
+      where: users.inserted_at >= ^timestamp
+  end
+
+  def _search(query, :inserted_before, timestamp) do
+    from users in query,
+      where: users.inserted_at < ^timestamp
+  end
+
   @spec order(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order(query, nil), do: query
 

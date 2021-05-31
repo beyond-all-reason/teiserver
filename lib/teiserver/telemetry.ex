@@ -67,7 +67,7 @@ defmodule Teiserver.Telemetry do
   """
   def list_telemetry_minute_logs(args \\ []) do
     telemetry_minute_log_query(args)
-    |> QueryHelpers.limit_query(50)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
     |> Repo.all()
   end
 
@@ -172,9 +172,9 @@ defmodule Teiserver.Telemetry do
     telemetry_day_log_query(nil, args)
   end
 
-  defp telemetry_day_log_query(timestamp, args) do
+  defp telemetry_day_log_query(date, args) do
     TelemetryDayLogLib.get_telemetry_day_logs()
-    |> TelemetryDayLogLib.search(%{timestamp: timestamp})
+    |> TelemetryDayLogLib.search(%{date: date})
     |> TelemetryDayLogLib.search(args[:search])
     |> TelemetryDayLogLib.order_by(args[:order])
     |> QueryHelpers.select(args[:select])
@@ -209,8 +209,8 @@ defmodule Teiserver.Telemetry do
       ** (Ecto.NoResultsError)
 
   """
-  def get_telemetry_day_log(timestamp) when not is_list(timestamp) do
-    telemetry_day_log_query(timestamp, [])
+  def get_telemetry_day_log(date) when not is_list(date) do
+    telemetry_day_log_query(date, [])
     |> Repo.one()
   end
 
@@ -219,8 +219,8 @@ defmodule Teiserver.Telemetry do
     |> Repo.one()
   end
 
-  def get_telemetry_day_log(timestamp, args) do
-    telemetry_day_log_query(timestamp, args)
+  def get_telemetry_day_log(date, args) do
+    telemetry_day_log_query(date, args)
     |> Repo.one()
   end
 
@@ -289,11 +289,23 @@ defmodule Teiserver.Telemetry do
     TelemetryDayLog.changeset(log, %{})
   end
 
+  @spec get_first_telemetry_minute_datetime() :: DateTime.t() | nil
+  def get_first_telemetry_minute_datetime() do
+    query =
+      from telemetry_logs in TelemetryMinuteLog,
+        order_by: [asc: telemetry_logs.timestamp],
+        select: telemetry_logs.timestamp,
+        limit: 1
+
+    Repo.one(query)
+  end
+
+  @spec get_last_telemtry_day_log() :: Date.t() | nil
   def get_last_telemtry_day_log() do
     query =
-      from logs in TelemetryDayLog,
-        order_by: [desc: logs.date],
-        select: logs.date,
+      from telemetry_logs in TelemetryDayLog,
+        order_by: [desc: telemetry_logs.date],
+        select: telemetry_logs.date,
         limit: 1
 
     Repo.one(query)
