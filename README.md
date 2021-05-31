@@ -10,6 +10,9 @@ An Elixir centralised/middleware game server. Originally an alternate implementa
 
 These are just the highlights, full documentation can be found in the documentation folder.
 
+### Feature documentation
+- [Metrics](/documents/designs/metrics.md)
+
 ### High level TODO list (no particular order)
 - [Matchmaking](/documents/spring/matchmaking.md)
 - [Parties](/documents/spring/parties.md)
@@ -17,12 +20,11 @@ These are just the highlights, full documentation can be found in the documentat
 - [Teiserver boss mode](/documents/designs/teiserver_boss.md)
 - Integration with Discord/other services
 - [Reputation/Reporting system](/documents/designs/reputation.md)
-- [Metrics](/documents/designs/metrics.md)
 - [Agent mode/Lobby dev assist](/documents/designs/agent_mode.md)
 - [Tachyon](/documents/tachyon)
 
 ### Contributing
-All contributors are welcome; if you spot an issue or bug with it mention me on the [BAR discord](https://discord.gg/N968ddE) (@teifion) or open an issue in this repo. Pull requests are also welcome; even if it's just a matter of spelling mistake.
+All contributors are welcome; if you spot an issue or bug with it mention me on the [BAR discord](https://discord.gg/N968ddE) (@teifion) or open an issue in this repo. Pull requests are also welcome; even if it's just a spelling mistake.
 
 #### Special thanks
 - Beherith for extensive help with the autohosts
