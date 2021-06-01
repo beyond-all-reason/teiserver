@@ -1,0 +1,21 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('#section-menu-<%= @active %>').addClass('active');
+    if (!$('#section-menu-<%= @active %> i').hasClass("fab")) {
+      $('#section-menu-<%= @active %> i').addClass('fas');
+      $('#section-menu-<%= @active %> i').removeClass('far');
+      $('#section-menu-<%= @active %> i').removeClass('fal');
+    }
+  });
+</script>
+
+<%= component "section_menu_button",
+  name: "day_metrics",
+  label: "Day metrics",
+  active: @active,
+  icon: Teiserver.Telemetry.TelemetryDayLogLib.icon(),
+  bsname: bsname,
+  url: Routes.ts_admin_tool_path(@conn, :day_metrics_list)
+%>

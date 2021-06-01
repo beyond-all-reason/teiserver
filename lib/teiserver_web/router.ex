@@ -88,10 +88,12 @@ defmodule TeiserverWeb.Router do
         get("/tools/convert", ToolController, :convert_form)
         post("/tools/convert_post", ToolController, :convert_post)
 
-        get("/tools/detailed_metrics", ToolController, :detailed_metrics)
-        post("/tools/detailed_metrics", ToolController, :detailed_metrics)
-        get("/tools/aggregate_metrics", ToolController, :aggregate_metrics)
-        post("/tools/aggregate_metrics", ToolController, :aggregate_metrics)
+        get("/tools/day_metrics/show/:date", ToolController, :day_metrics_show)
+        get("/tools/day_metrics", ToolController, :day_metrics_list)
+        post("/tools/day_metrics", ToolController, :day_metrics_list)
+
+        # get("/tools/minute_metrics/:y/:m/:d", ToolController, :minute_metrics)
+        # post("/tools/minute_metrics/:y/:m/:d", ToolController, :minute_metrics)
 
         post("/clans/create_membership", ClanController, :create_membership)
         delete("/clans/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)

@@ -1,5 +1,7 @@
 defmodule TeiserverWeb.Admin.ToolController do
   use CentralWeb, :controller
+  alias Teiserver.Telemetry
+  alias Central.Helpers.TimexHelper
 
   plug(AssignPlug,
     sidemenu_active: ["teiserver", "teiserver_admin"]
@@ -37,5 +39,41 @@ defmodule TeiserverWeb.Admin.ToolController do
       end
 
     render(conn, "convert_post.html")
+  end
+
+  @spec day_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def day_metrics_list(conn, _params) do
+    logs =
+      Telemetry.list_telemetry_day_logs(
+        # search: [user_id: params["user_id"]],
+        # joins: [:user],
+        order: "Newest first",
+        limit: 31
+      )
+
+    conn
+    |> assign(:logs, logs)
+    |> render("day_metrics_list.html")
+  end
+
+  @spec day_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def day_metrics_show(conn, %{"date" => date}) do
+    date = TimexHelper.parse_ymd(date)
+
+    log = Telemetry.get_telemetry_day_log(date)
+
+    IO.puts ""
+    IO.inspect log
+    IO.puts ""
+
+    users =
+      [log]
+      |> Telemetry.user_lookup()
+
+    conn
+    |> assign(:date, date)
+    |> assign(:data, log.data)
+    |> assign(:users, users)
+    |> render("day_metrics_show.html")
   end
 end

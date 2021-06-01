@@ -1,0 +1,28 @@
+<%= component "detail_line",
+  label: "Unique users",
+  value: format_number @data["aggregates"]["stats"]["unique_users"]
+%>
+
+<%= component "detail_line",
+  label: "Unique players",
+  value: format_number @data["aggregates"]["stats"]["unique_players"]
+%>
+
+<%= component "detail_line",
+  label: "User registrations",
+  value: format_number @data["aggregates"]["stats"]["accounts_created"]
+%>
+
+<hr />
+
+<%= component "detail_line",
+  label: "Total time",
+  value: represent_minutes(@data["aggregates"]["minutes"]["total"])
+%>
+
+<%= component "detail_line",
+  label: "Total play time",
+  value: represent_minutes(@data["aggregates"]["minutes"]["player"])
+%>
+
+<hr />

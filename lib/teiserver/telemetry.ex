@@ -310,4 +310,21 @@ defmodule Teiserver.Telemetry do
 
     Repo.one(query)
   end
+
+  def user_lookup(logs) do
+    user_ids =
+      logs
+      |> Enum.map(fn l -> l.data["user_counts"]["total"] end)
+      |> List.flatten()
+      |> Enum.uniq()
+
+    query =
+      from users in Central.Account.User,
+        where: users.id in ^user_ids
+
+    query
+    |> Repo.all()
+    |> Enum.map(fn u -> {u.id, u} end)
+    |> Map.new()
+  end
 end

@@ -7,10 +7,10 @@
     <div class="card border-<%= bsname %>">
       <div class="card-body">
         <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
-          quick_search: "",
-          show_search: false,
-          active: "new"
-        })
+            quick_search: "",
+            show_search: false,
+            active: "new"
+          })
         %>
 
         <%= if allow?(@conn, "admin.user") do %>
