@@ -89,11 +89,9 @@ defmodule TeiserverWeb.Router do
         post("/tools/convert_post", ToolController, :convert_post)
 
         get("/tools/day_metrics/show/:date", ToolController, :day_metrics_show)
+        get("/tools/day_metrics/export/:date", ToolController, :day_metrics_export)
         get("/tools/day_metrics", ToolController, :day_metrics_list)
         post("/tools/day_metrics", ToolController, :day_metrics_list)
-
-        # get("/tools/minute_metrics/:y/:m/:d", ToolController, :minute_metrics)
-        # post("/tools/minute_metrics/:y/:m/:d", ToolController, :minute_metrics)
 
         post("/clans/create_membership", ClanController, :create_membership)
         delete("/clans/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)

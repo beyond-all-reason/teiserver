@@ -314,7 +314,7 @@ defmodule Teiserver.Telemetry do
   def user_lookup(logs) do
     user_ids =
       logs
-      |> Enum.map(fn l -> l.data["user_counts"]["total"] end)
+      |> Enum.map(fn l -> Map.keys(l.data["minutes_per_user"]["total"]) end)
       |> List.flatten()
       |> Enum.uniq()
 
@@ -326,5 +326,9 @@ defmodule Teiserver.Telemetry do
     |> Repo.all()
     |> Enum.map(fn u -> {u.id, u} end)
     |> Map.new()
+  end
+
+  def export_logs(logs) do
+    logs
   end
 end

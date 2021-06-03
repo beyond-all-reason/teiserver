@@ -93,7 +93,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         spectator: spectator_ids,
         lobby: lobby_ids,
         menu: menu_ids,
-        total: client_ids
+        total: Enum.uniq(player_ids ++ spectator_ids ++ lobby_ids ++ menu_ids)
       },
       battle: %{
         total: total_battles,

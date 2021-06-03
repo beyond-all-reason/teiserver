@@ -57,14 +57,9 @@ defmodule TeiserverWeb.Admin.ToolController do
   end
 
   @spec day_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_show(conn, %{"date" => date}) do
-    date = TimexHelper.parse_ymd(date)
-
+  def day_metrics_show(conn, %{"date" => date_str}) do
+    date = TimexHelper.parse_ymd(date_str)
     log = Telemetry.get_telemetry_day_log(date)
-
-    IO.puts ""
-    IO.inspect log
-    IO.puts ""
 
     users =
       [log]
@@ -75,5 +70,16 @@ defmodule TeiserverWeb.Admin.ToolController do
     |> assign(:data, log.data)
     |> assign(:users, users)
     |> render("day_metrics_show.html")
+  end
+
+  @spec day_metrics_export(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def day_metrics_export(conn, params = %{"date" => date}) do
+    anonymous = params["anonymous"]
+
+    log = date
+      |> TimexHelper.parse_ymd
+      |> Telemetry.get_telemetry_day_log
+
+    conn
   end
 end

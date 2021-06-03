@@ -181,6 +181,10 @@ The response to a `s.battle.request_to_join` message informing the server if the
 }
 ```
 
+### TODO: `c.battle.send_invite`
+### TODO: `s.battle.invite_to_battle`
+### TODO: `c.battle.respond_to_invite`
+
 ## Telemetry
 - Mid-battle updates?
 

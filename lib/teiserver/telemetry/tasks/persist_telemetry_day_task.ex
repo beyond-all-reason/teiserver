@@ -148,7 +148,7 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
   end
 
   @spec run(%Date{}, boolean()) :: :ok
-  defp run(date, cleanup) do
+  def run(date, cleanup) do
     data = 0..@segment_count
     |> Enum.reduce(@empty_log, fn (segment_number, segment) ->
       logs = get_logs(date, segment_number)
@@ -281,21 +281,21 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
 
         # Total number of minutes spent doing that across all players that day
         minutes: %{
-          player: sum_counts(logs, ~w(client players)),
+          player: sum_counts(logs, ~w(client player)),
           spectator: sum_counts(logs, ~w(client spectator)),
           lobby: sum_counts(logs, ~w(client lobby)),
-          menu: sum_counts(logs, ~w(client menus)),
+          menu: sum_counts(logs, ~w(client menu)),
           total: sum_counts(logs, ~w(client total))
         }
       },
 
       # The number of minutes users (combined) spent in that state during the segment
       user_counts: %{
-        player: sum_counts(logs, ~w(client players)),
-        spectator: sum_counts(logs, ~w(client spectator)),
-        lobby: sum_counts(logs, ~w(client lobby)),
-        menu: sum_counts(logs, ~w(client menus)),
-        total: sum_counts(logs, ~w(client total))
+        player: sum_counts(logs, ~w(client players))/count,
+        spectator: sum_counts(logs, ~w(client spectator))/count,
+        lobby: sum_counts(logs, ~w(client lobby))/count,
+        menu: sum_counts(logs, ~w(client menu))/count,
+        total: sum_counts(logs, ~w(client total))/count
       },
 
       # Per user minute counts for the day as a whole
