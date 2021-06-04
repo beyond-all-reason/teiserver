@@ -139,7 +139,7 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
 
       if Timex.compare(new_date, Timex.today()) == -1 do
         %{}
-        |> Central.Logging.AggregateViewLogsTask.new()
+        |> Teiserver.Tasks.PersistTelemetryDayTask.new()
         |> Oban.insert()
       end
     end
