@@ -248,11 +248,11 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
     user_maps = logs
     |> Enum.reduce(empty_user_maps, fn (log, acc) ->
       %{
-        total: add_maps(acc.total, Map.new(log["client"]["total"], fn userid -> {userid, 1} end)),
-        player: add_maps(acc.player, Map.new(log["client"]["player"], fn userid -> {userid, 1} end)),
-        spectator: add_maps(acc.spectator, Map.new(log["client"]["spectator"], fn userid -> {userid, 1} end)),
-        lobby: add_maps(acc.lobby, Map.new(log["client"]["lobby"], fn userid -> {userid, 1} end)),
-        menu: add_maps(acc.menu, Map.new(log["client"]["menu"], fn userid -> {userid, 1} end))
+        total: add_maps(acc.total, Map.new(log["client"]["total"] || [], fn userid -> {userid, 1} end)),
+        player: add_maps(acc.player, Map.new(log["client"]["player"] || [], fn userid -> {userid, 1} end)),
+        spectator: add_maps(acc.spectator, Map.new(log["client"]["spectator"] || [], fn userid -> {userid, 1} end)),
+        lobby: add_maps(acc.lobby, Map.new(log["client"]["lobby"] || [], fn userid -> {userid, 1} end)),
+        menu: add_maps(acc.menu, Map.new(log["client"]["menu"] || [], fn userid -> {userid, 1} end))
       }
     end)
 
