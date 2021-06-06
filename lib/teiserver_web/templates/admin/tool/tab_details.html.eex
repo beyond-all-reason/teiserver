@@ -11,12 +11,12 @@
 
 <%= component "detail_line",
   label: "Peak total users",
-  value: format_number @data["aggregates"]["peak_user_counts"]["total"]
+  value: format_number @data["aggregates"]["stats"]["peak_user_counts"]["total"]
 %>
 
 <%= component "detail_line",
   label: "Peak players",
-  value: format_number @data["aggregates"]["peak_user_counts"]["player"]
+  value: format_number @data["aggregates"]["stats"]["peak_user_counts"]["player"]
 %>
 
 <%= component "detail_line",
