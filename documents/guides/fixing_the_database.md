@@ -1,4 +1,4 @@
-## How to reset the databas
+## How to reset the database
 It happens, you import the same data twice or in some way make a mistake. There are two things you can do next:
 
 #### 1 - Restore from backup

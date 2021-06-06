@@ -70,11 +70,6 @@ defmodule CentralWeb.Router do
     get("/browser_info", PageController, :browser_info)
     get("/", PageController, :index)
     get("/faq", PageController, :faq)
-    get("/human_time", PageController, :human_time)
-    post("/human_time", PageController, :human_time)
-    get("/some_text", PageController, :some_text)
-
-    get("/pixi", PixiController, :index)
 
     env_flag =
       Application.get_env(:central, Central.General.LoadTestServer)

@@ -6,14 +6,14 @@ defmodule CentralWeb.Account.SetupController do
     true_key = Application.get_env(:central, Central.Setup)[:key]
 
     cond do
-      key == true_key ->
+      key != true_key ->
         conn
-        |> put_flash(:danger, "Error.")
+        |> put_flash(:danger, "Key error.")
         |> redirect(to: "/")
 
-      true_key == "" ->
+      true_key == "" or true_key == nil ->
         conn
-        |> put_flash(:danger, "Error.")
+        |> put_flash(:danger, "Please ensure there is a setup key.")
         |> redirect(to: "/")
 
       true ->
