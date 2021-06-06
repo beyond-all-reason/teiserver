@@ -14,7 +14,7 @@ defmodule Teiserver.Battle do
   alias Teiserver.User
   alias Teiserver.Client
   alias Teiserver.Data.Types
-  alias Teiserver.Protocols
+  alias Teiserver.Director
 
   defp next_id() do
     ConCache.isolated(:id_counters, :battle, fn ->
@@ -134,6 +134,23 @@ defmodule Teiserver.Battle do
   @spec close_battle(integer() | nil) :: :ok
   def close_battle(battle_id) do
     battle = get_battle(battle_id)
+    ConCache.delete(:battles, battle_id)
+    ConCache.update(:lists, :battles, fn value ->
+      new_value =
+        value
+        |> Enum.filter(fn v -> v != battle_id end)
+
+      {:ok, new_value}
+    end)
+
+    [battle.founder_id | battle.players]
+    |> Enum.each(fn userid ->
+      PubSub.broadcast(
+        Central.PubSub,
+        "battle_updates:#{battle_id}",
+        {:remove_user_from_battle, userid, battle_id}
+      )
+    end)
 
     PubSub.broadcast(
       Central.PubSub,
@@ -146,25 +163,6 @@ defmodule Teiserver.Battle do
       "all_battle_updates",
       {:global_battle_updated, battle_id, :battle_closed}
     )
-
-    [battle.founder_id | battle.players]
-    |> Enum.each(fn userid ->
-      PubSub.broadcast(
-        Central.PubSub,
-        "battle_updates:#{battle_id}",
-        {:remove_user_from_battle, userid, battle_id}
-      )
-    end)
-
-    ConCache.delete(:battles, battle_id)
-
-    ConCache.update(:lists, :battles, fn value ->
-      new_value =
-        value
-        |> Enum.filter(fn v -> v != battle_id end)
-
-      {:ok, new_value}
-    end)
   end
 
   def add_bot_to_battle(battle_id, bot) do
@@ -489,7 +487,7 @@ defmodule Teiserver.Battle do
   end
 
   def say(userid, msg, battle_id) do
-    case Protocols.Director.handle_in(userid, msg, battle_id) do
+    case Teiserver.Director.handle_in(userid, msg, battle_id) do
       :say -> do_say(userid, msg, battle_id)
       :handled -> :ok
     end
@@ -517,6 +515,7 @@ defmodule Teiserver.Battle do
   def start_director_mode(battle_id) do
     battle = get_battle!(battle_id)
     update_battle(%{battle | director_mode: true}, nil, nil)
+    Director.add_to_battle(battle_id)
     :ok
   end
 
@@ -524,6 +523,7 @@ defmodule Teiserver.Battle do
   def stop_director_mode(battle_id) do
     battle = get_battle!(battle_id)
     update_battle(%{battle | director_mode: false}, nil, nil)
+    Director.remove_from_battle(battle_id)
     :ok
   end
 

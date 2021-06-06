@@ -549,12 +549,15 @@ defmodule Teiserver.TcpServer do
 
         # User is known about but already in a battle
         state.known_users[userid].battle_id != battle_id ->
-          state.protocol_out.reply(
-            :remove_user_from_battle,
-            {userid, state.known_users[userid].battle_id},
-            nil,
-            state
-          )
+          # If we don't know about the battle we don't need to remove the user from it first
+          if Enum.member?(state.known_battles, state.known_users[userid].battle_id) do
+            state.protocol_out.reply(
+              :remove_user_from_battle,
+              {userid, state.known_users[userid].battle_id},
+              nil,
+              state
+            )
+          end
 
           state.protocol_out.reply(
             :add_user_to_battle,
@@ -580,8 +583,19 @@ defmodule Teiserver.TcpServer do
       Phoenix.PubSub.unsubscribe(Central.PubSub, "battle_updates:#{battle_id}")
     end
 
+    # Do they know about the battle?
+    state = if not Enum.member?(state.known_battles, battle_id) do
+      state.protocol_out.reply(:battle_opened, battle_id, nil, state)
+    else
+      state
+    end
+
+    # Now the user
     new_user =
       cond do
+        Enum.member?(state.known_battles, battle_id) == false ->
+          state.known_users[userid]
+
         state.known_users[userid] == nil ->
           state.protocol_out.reply(:user_logged_in, userid, nil, state)
           _blank_user(userid)

@@ -33,9 +33,7 @@ defmodule TeiserverWeb.BattleLive.Show do
 
     case battle do
       nil ->
-        {:noreply,
-         socket
-         |> redirect(to: Routes.ts_battle_index_path(socket, :index))}
+        index_redirect(socket)
 
       _ ->
         {users, clients} = get_user_and_clients(battle.players)
@@ -75,6 +73,7 @@ defmodule TeiserverWeb.BattleLive.Show do
       |> assign(:users, new_users)
       |> assign(:clients, new_clients)
       |> assign(:battle, Battle.get_battle(assigns.id))
+      |> maybe_index_redirect
     else
       socket
     end
@@ -89,6 +88,7 @@ defmodule TeiserverWeb.BattleLive.Show do
     |> assign(:users, new_users)
     |> assign(:clients, new_clients)
     |> assign(:battle, Battle.get_battle(assigns.id))
+    |> maybe_index_redirect
   end
 
   @impl true
@@ -143,4 +143,15 @@ defmodule TeiserverWeb.BattleLive.Show do
   end
 
   defp page_title(:show), do: "Show Battle"
+  defp index_redirect(socket) do
+    {:noreply, socket |> redirect(to: Routes.ts_battle_index_path(socket, :index))}
+  end
+  defp maybe_index_redirect(socket) do
+    if socket.assigns[:battle] == nil do
+      socket
+        |> redirect(to: Routes.ts_battle_index_path(socket, :index))
+    else
+      socket
+    end
+  end
 end
