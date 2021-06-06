@@ -637,7 +637,7 @@ defmodule Teiserver.Protocols.SpringIn do
           _,
           type,
           nattype,
-          _password,
+          password,
           port,
           max_players,
           game_hash,
@@ -657,6 +657,7 @@ defmodule Teiserver.Protocols.SpringIn do
             end
 
           client = Client.get_client_by_id(state.userid)
+          password = if password == "empty", do: nil, else: password
 
           battle =
             %{
@@ -669,7 +670,7 @@ defmodule Teiserver.Protocols.SpringIn do
               max_players: int_parse(max_players),
               game_hash: game_hash,
               map_hash: map_hash,
-              password: nil,
+              password: password,
               rank: 0,
               locked: false,
               engine_name: engine_name,

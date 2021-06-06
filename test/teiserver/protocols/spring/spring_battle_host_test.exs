@@ -26,6 +26,20 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == :timeout
   end
 
+  test "battle with password", %{socket: socket, user: user} do
+    _send_raw(
+      socket,
+      "OPENBATTLE 0 0 password_test 322 16 gameHash 0 mapHash engineName\tengineVersion\tbattle_host_test\tgameTitle\tgameName\n"
+    )
+
+    # Find battle
+    battle = Battle.list_battles
+      |> Enum.filter(fn b -> b.founder_id == user.id end)
+      |> hd
+
+    assert battle.password == "password_test"
+  end
+
   test "!rehost bug test", %{socket: host_socket, user: host_user} do
     %{socket: watcher_socket} = auth_setup()
     %{socket: p1_socket, user: p1_user} = auth_setup()
