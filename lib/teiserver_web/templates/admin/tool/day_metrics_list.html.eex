@@ -28,6 +28,9 @@
 
               <th>Unique users</th>
               <th>Unique players</th>
+              <th>Peak users</th>
+              <th>Peak players</th>
+
               <th>Play time</th>
 
               <th>User registrations</th>
@@ -43,6 +46,8 @@
 
               <td><%= format_number log.data["aggregates"]["stats"]["unique_users"] %></td>
               <td><%= format_number log.data["aggregates"]["stats"]["unique_players"] %></td>
+              <td><%= format_number log.data["aggregates"]["peak_user_counts"]["total"] %></td>
+              <td><%= format_number log.data["aggregates"]["peak_user_counts"]["player"] %></td>
 
               <td><%= format_number log.data["aggregates"]["minutes"]["player"] %></td>
 

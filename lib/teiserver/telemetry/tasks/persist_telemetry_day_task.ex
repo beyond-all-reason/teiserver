@@ -11,6 +11,8 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
   @segment_length 60# Minutes
   @segment_count div(1440, @segment_length)-1
 
+  @client_states ~w(lobby menu player spectator total)a
+
   # [] List means 15 minute segments
   # %{} Dict means total for the day for that key
   # 0 Integer means sum or average
@@ -48,7 +50,15 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
     },
 
     # The number of minutes users (combined) spent in that state during the segment
-    user_counts: %{
+    average_user_counts: %{
+      player: [],
+      spectator: [],
+      lobby: [],
+      menu: [],
+      total: []
+    },
+
+    peak_user_counts: %{
       player: [],
       spectator: [],
       lobby: [],
@@ -100,7 +110,15 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
     },
 
     # The number of minutes users (combined) spent in that state during the segment
-    user_counts: %{
+    average_user_counts: %{
+      player: 0,
+      spectator: 0,
+      lobby: 0,
+      menu: 0,
+      total: 0
+    },
+
+    peak_user_counts: %{
       player: 0,
       spectator: 0,
       lobby: 0,
@@ -213,12 +231,20 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
       },
 
       # The number of minutes users (combined) spent in that state during the segment
-      user_counts: %{
-        player: segment.user_counts.player ++ [extend.user_counts.player],
-        spectator: segment.user_counts.spectator ++ [extend.user_counts.spectator],
-        lobby: segment.user_counts.lobby ++ [extend.user_counts.lobby],
-        menu: segment.user_counts.menu ++ [extend.user_counts.menu],
-        total: segment.user_counts.total ++ [extend.user_counts.total]
+      average_user_counts: %{
+        player: segment.average_user_counts.player ++ [extend.average_user_counts.player],
+        spectator: segment.average_user_counts.spectator ++ [extend.average_user_counts.spectator],
+        lobby: segment.average_user_counts.lobby ++ [extend.average_user_counts.lobby],
+        menu: segment.average_user_counts.menu ++ [extend.average_user_counts.menu],
+        total: segment.average_user_counts.total ++ [extend.average_user_counts.total]
+      },
+
+      peak_user_counts: %{
+        player: segment.peak_user_counts.player ++ [extend.peak_user_counts.player],
+        spectator: segment.peak_user_counts.spectator ++ [extend.peak_user_counts.spectator],
+        lobby: segment.peak_user_counts.lobby ++ [extend.peak_user_counts.lobby],
+        menu: segment.peak_user_counts.menu ++ [extend.peak_user_counts.menu],
+        total: segment.peak_user_counts.total ++ [extend.peak_user_counts.total]
       },
 
       # Per user minute counts for the day as a whole
@@ -290,12 +316,20 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
       },
 
       # The number of minutes users (combined) spent in that state during the segment
-      user_counts: %{
-        player: sum_counts(logs, ~w(client players))/count,
+      average_user_counts: %{
+        player: sum_counts(logs, ~w(client player))/count,
         spectator: sum_counts(logs, ~w(client spectator))/count,
         lobby: sum_counts(logs, ~w(client lobby))/count,
         menu: sum_counts(logs, ~w(client menu))/count,
         total: sum_counts(logs, ~w(client total))/count
+      },
+
+      peak_user_counts: %{
+        player: max_counts(logs, ~w(client player)),
+        spectator: max_counts(logs, ~w(client spectator)),
+        lobby: max_counts(logs, ~w(client lobby)),
+        menu: max_counts(logs, ~w(client menu)),
+        total: max_counts(logs, ~w(client total))
       },
 
       # Per user minute counts for the day as a whole
@@ -316,11 +350,19 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
     # TODO: Calculate number of battles that took place
     battles = 0
 
+    # Calculate peak users across the day
+    peak_user_counts = @client_states
+    |> Map.new(fn state_key ->
+      counts = data.peak_user_counts[state_key]
+      {state_key, Enum.max(counts)}
+    end)
+
     aggregate_stats = %{
       accounts_created: accounts_created,
       unique_users: data.tmp_reduction.unique_users |> Enum.uniq |> Enum.count,
       unique_players: data.tmp_reduction.unique_players |> Enum.uniq |> Enum.count,
-      battles: battles
+      battles: battles,
+      peak_user_counts: peak_user_counts
     }
 
     NestedMaps.put(data, ~w(aggregates stats)a, aggregate_stats)
@@ -358,6 +400,31 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
     items
     |> Enum.reduce([], fn (row, acc) ->
       acc ++ (NestedMaps.get(row, path) || [])
+    end)
+  end
+
+  # defp make_enum(items, path, extra_item \\ nil) do
+  #   result = items
+  #   |> Enum.reduce([], fn (row, acc) ->
+  #     item = NestedMaps.get(row, path)
+  #     if item do
+  #       acc ++ [item]
+  #     else
+  #       acc
+  #     end
+  #   end)
+
+  #   if extra_item != nil do
+  #     result ++ [extra_item]
+  #   else
+  #     result
+  #   end
+  # end
+
+  defp max_counts(items, path) do
+    items
+    |> Enum.reduce(0, fn (row, acc) ->
+      max(acc, Enum.count(NestedMaps.get(row, path) || []))
     end)
   end
 
