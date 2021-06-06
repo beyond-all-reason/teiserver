@@ -171,5 +171,6 @@ defmodule Teiserver.Protocols.Spring do
     |> String.trim()
     |> String.replace("\n", "\\n")
     |> String.replace("\t", "~~")
+    |> String.slice(0..100)
   end
 end

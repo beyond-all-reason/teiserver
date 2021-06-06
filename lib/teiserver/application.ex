@@ -29,13 +29,24 @@ defmodule Teiserver.Application do
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueMatchSupervisor},
 
-      # Agent mode
-      {Registry, keys: :unique, name: Teiserver.Agents.ServerRegistry},
-      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Agents.DynamicSupervisor},
+      # Director mode
+      concache_perm_sup(:teiserver_director),
+      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Director.DynamicSupervisor},
 
       # Telemetry
       {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
     ]
+
+    # Agent mode stuff, should not be enabled in prod
+    children = if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
+      children ++
+        [
+          {Registry, keys: :unique, name: Teiserver.Agents.ServerRegistry},
+          {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Agents.DynamicSupervisor},
+        ]
+    else
+      children
+    end
 
     # Some stuff doesn't work with the tests
     # but we're not that fussed about having it automatically

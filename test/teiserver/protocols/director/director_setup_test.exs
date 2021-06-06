@@ -6,6 +6,13 @@ defmodule Teiserver.Protocols.Director.SetupTest do
 
   @sleep 200
 
+  setup do
+    Teiserver.Director.start_director()
+    # Sleep to allow the director to be started up each time
+    :timer.sleep(100)
+    :ok
+  end
+
   test "start, stop" do
     battle = TeiserverTestLib.make_battle()
     id = battle.id
@@ -13,12 +20,16 @@ defmodule Teiserver.Protocols.Director.SetupTest do
 
     # Start it up!
     Battle.say(1, "!director start", id)
+    :timer.sleep(@sleep)
 
     battle = Battle.get_battle!(id)
     assert battle.director_mode == true
 
+    # TODO: Check the consul is created and assigned to this battle
+
     # Stop it
     Battle.say(123_456, "!director stop", id)
+    :timer.sleep(@sleep)
 
     battle = Battle.get_battle!(id)
     assert battle.director_mode == false

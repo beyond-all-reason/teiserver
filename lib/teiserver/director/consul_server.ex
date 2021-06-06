@@ -1,4 +1,6 @@
 defmodule Teiserver.Game.DirectorServer do
+  use GenServer
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -22,8 +24,7 @@ defmodule Teiserver.Game.DirectorServer do
   def init(opts) do
     {:ok,
      %{
-       battle_id: opts[:battle_id],
-       game_mode: "team"
+       # battle_id: opts[:battle_id],
      }}
   end
 end

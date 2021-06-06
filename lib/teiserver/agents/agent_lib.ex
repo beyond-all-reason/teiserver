@@ -41,6 +41,8 @@ defmodule Teiserver.Agents.AgentLib do
     end
   end
 
+  @spec via_tuple(integer() | :supervisor) :: {:via, Registry, {Teiserver.Agents.ServerRegistry, any}}
+  @spec via_tuple(Strsing.t(), integer()) :: {:via, Registry, {Teiserver.Agents.ServerRegistry, any}}
   def via_tuple(:supervisor) do
     via_tuple(Teiserver.Agents.SupervisorAgentServer, 1)
   end
@@ -49,6 +51,10 @@ defmodule Teiserver.Agents.AgentLib do
   end
   def via_tuple(service, number) do
     via_tuple("#{service}-#{number}")
+  end
+
+  def send_director() do
+    pid = Registry.lookup(Teiserver.Agents.ServerRegistry, "agent")
   end
 
   def get_socket() do

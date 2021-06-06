@@ -76,7 +76,7 @@ defmodule Teiserver.UberserverConvert do
   end
 
   defp convert_data(raw_data) do
-    bar_user_group = ConCache.get(:application_metadata_cache, "bar_user_group")
+    teiserver_user_group = ConCache.get(:application_metadata_cache, "teiserver_user_group")
 
     {verified, code} =
       case raw_data["verification_code"] do
@@ -112,7 +112,7 @@ defmodule Teiserver.UberserverConvert do
       email: raw_data["email"],
       password: raw_data["password"],
       permissions: permissions,
-      admin_group_id: bar_user_group,
+      admin_group_id: teiserver_user_group,
       colour: "#AA0000",
       icon: "fas fa-user",
       data: %{
@@ -126,14 +126,14 @@ defmodule Teiserver.UberserverConvert do
   end
 
   defp add_user({ubid, raw_data}) do
-    bar_user_group = ConCache.get(:application_metadata_cache, "bar_user_group")
+    teiserver_user_group = ConCache.get(:application_metadata_cache, "teiserver_user_group")
     data = convert_data(raw_data)
 
     {:ok, user} = Teiserver.Account.create_user(data)
 
     Central.Account.create_group_membership(%{
       user_id: user.id,
-      group_id: bar_user_group
+      group_id: teiserver_user_group
     })
 
     {ubid, user.id}
@@ -174,7 +174,7 @@ defmodule Teiserver.UberserverConvert do
     # Currently we're just going to assume they are already a member of this group
     # Central.Account.create_group_membership(%{
     #   user_id: user.id,
-    #   group_id: bar_user_group
+    #   group_id: teiserver_user_group
     # })
 
     {ubid, user.id}

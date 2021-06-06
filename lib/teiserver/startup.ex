@@ -7,16 +7,16 @@ defmodule Teiserver.Startup do
     add_permission_set("teiserver", "moderator", ~w(account battle clan party queue tournament))
     add_permission_set("teiserver", "player", ~w(account))
 
-    add_group_type("Bar team", %{fields: []})
+    add_group_type("Teiserver clan", %{fields: []})
 
-    umbrella =
-      case Central.Account.get_group(nil, search: [name: "BAR umbrella group"]) do
+    umbrella_group =
+      case Central.Account.get_group(nil, search: [name: "Teiserver umbrella group"]) do
         nil ->
           {:ok, group} =
             Central.Account.create_group(%{
-              "name" => "BAR umbrella group",
+              "name" => "Teiserver umbrella group",
               "active" => true,
-              "icon" => "fas fa-umbrella",
+              "icon" => "fa-duotone fa-umbrella",
               "colour" => "#00AA66",
               "data" => %{}
             })
@@ -27,17 +27,17 @@ defmodule Teiserver.Startup do
           group
       end
 
-    group =
-      case Central.Account.get_group(nil, search: [name: "BAR Users"]) do
+    player_group =
+      case Central.Account.get_group(nil, search: [name: "Teiserver Users"]) do
         nil ->
           {:ok, group} =
             Central.Account.create_group(%{
-              "name" => "BAR Users",
+              "name" => "Teiserver Users",
               "active" => true,
-              "icon" => "fas fa-robot",
-              "colour" => "#000000",
+              "icon" => "fa-duotone fa-robot",
+              "colour" => "#00AA00",
               "data" => %{},
-              "super_group_id" => umbrella.id
+              "super_group_id" => umbrella_group.id
             })
 
           group
@@ -46,45 +46,32 @@ defmodule Teiserver.Startup do
           group
       end
 
-    ConCache.put(:application_metadata_cache, "bar_umbrella_group", umbrella.id)
-    ConCache.put(:application_metadata_cache, "bar_user_group", group.id)
-
-    Central.Account.GroupCacheLib.update_caches(umbrella)
-    Central.Account.GroupCacheLib.update_caches(group)
-
-    # Teiserver director user
-    director_user =
-      case Central.Account.get_user(nil, search: [name: "Teiserver director"]) do
+    internal_group =
+      case Central.Account.get_group(nil, search: [name: "Teiserver Internal Processes"]) do
         nil ->
-          {:ok, user} =
-            Central.Account.create_user(%{
-              "name" => "Teiserver director",
-              "email" => "director@teiserver",
-              "password" => Argon2.hash_pwd_salt(UUID.uuid4()),
-              "icon" => "fas fa-hard-hat",
-              "colour" => "#000077",
-              "permissions" => [],
-              "data" => %{
-                "bot" => true,
-                "moderator" => true,
-                "verified" => true
-              },
-              "admin_group_id" => umbrella.id
+          {:ok, group} =
+            Central.Account.create_group(%{
+              "name" => "Teiserver Internal Processes",
+              "active" => true,
+              "icon" => "fa-duotone fa-microchip",
+              "colour" => "#660066",
+              "data" => %{},
+              "super_group_id" => umbrella_group.id
             })
 
-          Central.Account.create_group_membership(%{
-            "group_id" => umbrella.id,
-            "user_id" => user.id,
-            "admin" => false
-          })
+          group
 
-          user
-
-        user ->
-          user
+        group ->
+          group
       end
 
-    ConCache.put(:application_metadata_cache, "teiserver_director_user", director_user.id)
+    ConCache.put(:application_metadata_cache, "teiserver_umbrella_group", umbrella_group.id)
+    ConCache.put(:application_metadata_cache, "teiserver_user_group", player_group.id)
+    ConCache.put(:application_metadata_cache, "teiserver_internal_group", internal_group.id)
+
+    Central.Account.GroupCacheLib.update_caches(player_group)
+    Central.Account.GroupCacheLib.update_caches(internal_group)
+    Central.Account.GroupCacheLib.update_caches(umbrella_group)
 
     # Quick actions
     QuickAction.add_items([
@@ -141,9 +128,15 @@ defmodule Teiserver.Startup do
       # Admin pages
       %{
         label: "Teiserver metrics",
-        icons: [Teiserver.Clans.ClanLib.icon(), :list],
+        icons: ["fa-regular fa-tachometer-alt", :list],
         url: "/logging/live/dashboard/metrics?nav=teiserver",
         permissions: "logging.live.show"
+      },
+      %{
+        label: "Teiserver aggregate logs",
+        icons: ["fa-regular fa-layer-group", :list],
+        url: "/teiserver/admin/tools/day_metrics",
+        permissions: "teiserver.admin"
       }
     ])
 
@@ -171,11 +164,17 @@ defmodule Teiserver.Startup do
 
     ConCache.put(:application_metadata_cache, "teiserver_startup_completed", true)
 
-    # Purely for testing purposes
     if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
       spawn(fn ->
         :timer.sleep(500)
         Teiserver.agent_mode()
+      end)
+    end
+
+    if Application.get_env(:central, Teiserver)[:enable_director_mode] do
+      spawn(fn ->
+        :timer.sleep(500)
+        Teiserver.Director.start_director()
       end)
     end
 

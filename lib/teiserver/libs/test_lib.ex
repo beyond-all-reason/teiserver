@@ -9,6 +9,7 @@ defmodule Teiserver.TeiserverTestLib do
   alias Teiserver.Client
   alias Teiserver.Account
   alias Teiserver.Protocols.Tachyon
+  alias Teiserver.Director.CoordinatorServer
   @host '127.0.0.1'
 
   @spec raw_setup :: %{socket: port()}
@@ -35,12 +36,12 @@ defmodule Teiserver.TeiserverTestLib do
     case User.get_user_by_name(name) do
       nil ->
         {:ok, user} =
-          User.user_register_params(name, "#{name}@email.com", "X03MO1qnZdYdgyfeuILPmQ==", Map.merge(%{admin_group_id: User.bar_user_group_id()}, params))
+          User.user_register_params(name, "#{name}@email.com", "X03MO1qnZdYdgyfeuILPmQ==", Map.merge(%{admin_group_id: Teiserver.user_group_id()}, params))
           |> Account.create_user()
 
         Account.create_group_membership(%{
           user_id: user.id,
-          group_id: User.bar_user_group_id()
+          group_id: Teiserver.user_group_id()
         })
 
         user
@@ -313,7 +314,7 @@ defmodule Teiserver.TeiserverTestLib do
 
     Account.create_group_membership(%{
       user_id: user.id,
-      group_id: User.bar_user_group_id()
+      group_id: Teiserver.user_group_id()
     })
 
     {:ok, data}
@@ -422,5 +423,12 @@ defmodule Teiserver.TeiserverTestLib do
     |> Map.merge(params)
     |> Teiserver.Battle.create_battle()
     |> Teiserver.Battle.add_battle()
+  end
+
+  def seed() do
+    CoordinatorServer.get_coordinator_account()
+    CoordinatorServer.create_consul(1)
+    CoordinatorServer.create_consul(2)
+    CoordinatorServer.create_consul(3)
   end
 end

@@ -657,7 +657,7 @@ defmodule Teiserver.Protocols.SpringIn do
             end
 
           client = Client.get_client_by_id(state.userid)
-          password = if password == "empty", do: nil, else: password
+          password = if Enum.member?(["empty", "*"], password), do: nil, else: password
 
           battle =
             %{
@@ -756,7 +756,6 @@ defmodule Teiserver.Protocols.SpringIn do
 
       {:failure, reason} ->
         reply(:join_battle_failure, reason, msg_id, state)
-        state
     end
   end
 

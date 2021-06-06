@@ -92,11 +92,6 @@ defmodule Teiserver.User do
     |> Regex.replace(name, "")
   end
 
-  @spec bar_user_group_id() :: integer()
-  def bar_user_group_id() do
-    ConCache.get(:application_metadata_cache, "bar_user_group")
-  end
-
   def encrypt_password(password) do
     Argon2.hash_pwd_salt(password)
   end
@@ -121,7 +116,7 @@ defmodule Teiserver.User do
       password: encrypted_password,
       colour: "#AA0000",
       icon: "fas fa-user",
-      admin_group_id: bar_user_group_id(),
+      admin_group_id: Teiserver.user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
       data:
         data
@@ -174,7 +169,7 @@ defmodule Teiserver.User do
       {:ok, user} ->
         Account.create_group_membership(%{
           user_id: user.id,
-          group_id: bar_user_group_id()
+          group_id: Teiserver.user_group_id()
         })
 
         # Now add them to the cache
@@ -222,7 +217,7 @@ defmodule Teiserver.User do
           {:ok, user} ->
             Account.create_group_membership(%{
               user_id: user.id,
-              group_id: bar_user_group_id()
+              group_id: Teiserver.user_group_id()
             })
 
             # Now add them to the cache

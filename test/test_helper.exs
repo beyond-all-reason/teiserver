@@ -8,6 +8,7 @@ alias Central.Helpers.GeneralTestLib
 
 if not GeneralTestLib.seeded?() do
   GeneralTestLib.seed()
+  Teiserver.TeiserverTestLib.seed()
 end
 
 Ecto.Adapters.SQL.Sandbox.checkin(Repo)

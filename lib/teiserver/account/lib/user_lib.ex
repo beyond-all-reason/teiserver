@@ -40,6 +40,11 @@ defmodule Teiserver.Account.UserLib do
   @spec _search(Ecto.Query.t(), atom, any) :: Ecto.Query.t()
   def _search(query, _, "Any"), do: query
 
+  def _search(query, :exact_name, value) do
+    from users in query,
+      where: users.name == ^value
+  end
+
   def _search(query, :bot, "Person") do
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "bot", "false")
