@@ -512,6 +512,18 @@ defmodule Teiserver.Battle do
     )
   end
 
+  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
+  def sayprivateex(from_id, to_id, msg, battle_id) do
+    sender = User.get_user_by_id(from_id)
+    if not User.is_muted?(sender) do
+      PubSub.broadcast(
+        Central.PubSub,
+        "user_updates:#{to_id}",
+        {:battle_updated, battle_id, {from_id, msg, battle_id}, :sayex}
+      )
+    end
+  end
+
   @spec start_director_mode(Types.battle_id()) :: :ok
   def start_director_mode(battle_id) do
     battle = get_battle!(battle_id)

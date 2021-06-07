@@ -1008,6 +1008,22 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
+  # SAYBATTLEPRIVATEEX username
+  defp do_handle("SAYBATTLEPRIVATEEX", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (.+)/, data) do
+      [_, to_name, msg] ->
+        to_id = User.get_userid(to_name)
+
+        if Battle.allow?(state.userid, :saybattleprivateex, state.battle_id) do
+          Battle.sayprivateex(state.userid, to_id, msg, state.battle_id)
+        end
+
+      _ ->
+        _no_match(state, "SAYBATTLEPRIVATEEX", msg_id, data)
+    end
+    state
+  end
+
   # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#UPDATEBATTLEINFO:client
   defp do_handle("UPDATEBATTLEINFO", data, msg_id, state) do
     case Regex.run(~r/(\d+) (\d+) (\S+) (.+)$/, data) do

@@ -329,6 +329,11 @@ CLIENTS test_room #{user.name}\n"
     reply = _recv_raw(socket2)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 12 0\n"
 
+    # SAYBATTLEPRIVATEEX
+    _send_raw(socket1, "SAYBATTLEPRIVATEEX #{user2.name} This is a test priv battle msg\n")
+    reply = _recv_raw(socket2)
+    assert reply == "SAIDBATTLEEX #{user1.name} This is a test priv battle msg\n"
+
     # Add a bot
     _send_raw(socket2, "ADDBOT STAI(1) 4195458 0 STAI\n")
     reply = _recv_raw(socket2)
