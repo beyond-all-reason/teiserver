@@ -28,7 +28,7 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
 
   def do_handle("join", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
   def do_handle("join", data, state) do
-    case Battle.can_join?(state.user, data["battle_id"], data["password"]) do
+    case Battle.can_join?(state.userid, data["battle_id"], data["password"]) do
       {:waiting_on_host, _script_password} ->
         reply(:battle, :join, :waiting, state)
 

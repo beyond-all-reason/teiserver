@@ -110,16 +110,28 @@ defmodule Teiserver.SpringRawTest do
     {:error, :enotconn} = :gen_tcp.recv(socket, 0, 1000)
   end
 
-  # test "CONFIRMAGREEMENT", %{socket: socket} do
-  #   user = new_user()
-  #   user = User.update_user(%{user | verification_code: 123456, verified: false})
-  #   _ = _recv_raw(socket)
+  test "CONFIRMAGREEMENT", %{socket: socket} do
+    user = new_user()
+    user = User.update_user(%{user | verification_code: 123456, verified: false})
+    _ = _recv_raw(socket)
 
-  #   # If we try to login as them we should get a specific failure
-  #   _send_raw(socket, "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
-  #   reply = _recv_raw(socket)
-  #   assert reply =~ "DENIED Account not verified\n"
-  # end
+    # If we try to login as them we should get a specific failure
+    _send_raw(socket, "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
+    reply = _recv_raw(socket)
+    assert reply =~ "AGREEMENT User agreement goes here.\nAGREEMENT \nAGREEMENTEND\n"
+
+    # Verify user - bad code
+    _send_raw(socket, "CONFIRMAGREEMENT 000000000\n")
+    reply = _recv_raw(socket)
+    assert reply =~ "DENIED Incorrect code\n"
+
+    # Verify user - good code
+    _send_raw(socket, "CONFIRMAGREEMENT 123456\n")
+    reply = _recv_raw(socket)
+    assert reply =~ "ACCEPTED #{user.name}\n"
+    assert reply =~ "MOTD Message of the day\n"
+    assert reply =~ "LOGININFOEND\n"
+  end
 
   test "RESETPASSWORDREQUEST", %{socket: socket} do
     user = new_user()

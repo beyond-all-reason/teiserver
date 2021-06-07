@@ -293,10 +293,10 @@ defmodule Teiserver.Protocols.SpringIn do
         state
 
       user ->
-        case code == user.verification_code do
+        case code == to_string(user.verification_code) do
           true ->
             User.verify_user(user)
-            state
+            SpringOut.do_login_accepted(state, user)
 
           false ->
             reply(:denied, "Incorrect code", msg_id, state)
@@ -741,7 +741,7 @@ defmodule Teiserver.Protocols.SpringIn do
     response =
       case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
         [_, battle_id, password, script_password] ->
-          Battle.can_join?(state.user, battle_id, password, script_password)
+          Battle.can_join?(state.userid, battle_id, password, script_password)
 
         nil ->
           {:failure, "No match"}
