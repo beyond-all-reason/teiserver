@@ -3,6 +3,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   alias Teiserver.Battle
   alias Teiserver.Client
 
+  @client_states ~w(lobby menu player spectator total)a
   @tick_period 9_000
   @default_state %{
       client: %{
@@ -41,7 +42,12 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
   @spec report_telemetry(Map.t()) :: :ok
   defp report_telemetry(state) do
-    :telemetry.execute([:teiserver, :client], state.client, %{})
+    client = @client_states
+    |> Map.new(fn cstate ->
+      {cstate, state.client[cstate] |> Enum.count}
+    end)
+
+    :telemetry.execute([:teiserver, :client], client, %{})
     :telemetry.execute([:teiserver, :battle], state.battle, %{})
   end
 
