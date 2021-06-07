@@ -932,7 +932,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("ADDBOT", data, msg_id, state) do
-    case Regex.run(~r/(\S+) (\d+) (\d+) (\S+)/, data) do
+    case Regex.run(~r/(\S+) (\d+) (\d+) (.+)/, data) do
       [_, name, battlestatus, team_colour, ai_dll] ->
         if Battle.allow?(state.userid, :add_bot, state.battle_id) do
           bot_data =
