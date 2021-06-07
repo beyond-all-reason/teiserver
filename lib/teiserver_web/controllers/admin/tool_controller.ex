@@ -61,11 +61,6 @@ defmodule TeiserverWeb.Admin.ToolController do
     date = TimexHelper.parse_ymd(date_str)
     log = Telemetry.get_telemetry_day_log(date)
 
-    IO.puts ""
-    IO.inspect log.data["aggregates"]["stats"]["peak_user_counts"]["player"]
-    IO.puts ""
-    # ["aggregates"]["stats"]["peak_user_counts"]["player"]
-
     users =
       [log]
       |> Telemetry.user_lookup()
