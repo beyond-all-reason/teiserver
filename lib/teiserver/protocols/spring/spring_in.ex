@@ -231,8 +231,6 @@ defmodule Teiserver.Protocols.SpringIn do
         reply(:denied, reason, msg_id, state)
         state
     end
-
-    state
   end
 
   defp do_handle("LOGIN", data, msg_id, state) do

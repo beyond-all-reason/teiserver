@@ -2,6 +2,7 @@ defmodule Teiserver.SpringTokenTest do
   use Central.ServerCase, async: false
   require Logger
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Client
 
   import Teiserver.TeiserverTestLib,
     only: [tls_setup: 0, raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1]
@@ -83,6 +84,11 @@ defmodule Teiserver.SpringTokenTest do
     _send_raw(socket, "c.user.login #{token}\tLobby Name\n")
     reply = _recv_raw(socket)
     assert reply =~ "ACCEPTED token_test_user\n"
+    :timer.sleep(200)
+
+    pid = Client.get_client_by_id(user.id).pid
+    assert GenServer.call(pid, {:get, :userid}) == user.id
+    assert is_map(GenServer.call(pid, {:get, :user}))
 
     _send_raw(socket, "EXIT\n")
     _recv_raw(socket)
