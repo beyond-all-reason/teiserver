@@ -46,6 +46,7 @@ defmodule Teiserver.TeiserverTestLib do
 
         user
         |> User.convert_user()
+        |> Map.put(:springid, User.make_spring_id())
         |> User.add_user()
         |> User.verify_user()
 

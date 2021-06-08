@@ -61,7 +61,8 @@ defmodule Teiserver.User do
     mmr: %{},
     banned: [false, nil],
     muted: [false, nil],
-    rename_in_progress: false
+    rename_in_progress: false,
+    springid: nil
   }
 
   @rank_levels [
@@ -85,6 +86,11 @@ defmodule Teiserver.User do
     @wordlist
     |> Enum.take_random(3)
     |> Enum.join(" ")
+  end
+
+  @spec make_spring_id() :: integer()
+  def make_spring_id() do
+    :random.uniform(999_999_999-100_000) + 100_000
   end
 
   @spec clean_name(String.t()) :: String.t()
@@ -119,7 +125,7 @@ defmodule Teiserver.User do
       icon: "fas fa-user",
       admin_group_id: Teiserver.user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
-      springid: :random.uniform(899_999) + 100_000,
+      springid: make_spring_id(),
       data:
         data
         |> Map.merge(%{
@@ -728,6 +734,8 @@ defmodule Teiserver.User do
       |> Enum.filter(fn r -> r < ingame_hours end)
       |> Enum.count()
 
+    springid = if user.springid, do: user.springid, else: make_spring_id()
+
     user =
       %{
         user
@@ -735,7 +743,8 @@ defmodule Teiserver.User do
           lobbyid: lobbyid,
           country: country,
           last_login: last_login,
-          rank: rank
+          rank: rank,
+          springid: springid
       }
 
     update_user(user, persist: true)
