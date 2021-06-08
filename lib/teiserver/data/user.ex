@@ -36,7 +36,8 @@ defmodule Teiserver.User do
     :mmr,
     :banned,
     :muted,
-    :rename_in_progress
+    :rename_in_progress,
+    :springid
   ]
 
   @default_data %{
@@ -118,6 +119,7 @@ defmodule Teiserver.User do
       icon: "fas fa-user",
       admin_group_id: Teiserver.user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
+      springid: :random.uniform(899_999) + 100_000,
       data:
         data
         |> Map.merge(%{

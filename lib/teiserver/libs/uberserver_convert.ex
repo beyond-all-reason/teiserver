@@ -120,7 +120,8 @@ defmodule Teiserver.UberserverConvert do
         "bot" => raw_data["bot"] == "1",
         "moderator" => is_mod,
         "verified" => verified,
-        "verification_code" => code
+        "verification_code" => code,
+        "springid" => raw_data["springid"]
       }
     }
   end

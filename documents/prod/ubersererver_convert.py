@@ -88,7 +88,8 @@ def get_users(users_query):
         "friends": [],
         "ignores": [],
         "requests": [],
-        "verification_code": None
+        "verification_code": None,
+        "springid": key
     }
 
   return (results, duplicated_emails)

@@ -126,7 +126,7 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:add_user, nil), do: ""
 
   defp do_reply(:add_user, user) do
-    "ADDUSER #{user.name} #{user.country} 0 #{user.id} #{user.lobbyid}\n"
+    "ADDUSER #{user.name} #{user.country} 0 #{user.springid} #{user.lobbyid}\n"
   end
 
   defp do_reply(:remove_user, {_userid, username}) do
