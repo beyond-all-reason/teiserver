@@ -29,7 +29,7 @@
 <%= if allow?(@conn, "teiserver.moderator") do %>
   <%= component "sidemenu_item",
     name: "teiserver_admin",
-    label: "Admin",
+    label: "Teiserver Admin",
     active: assigns[:sidemenu_active],
     lib: Central.Admin.AdminLib,
     icon_class: "fad",

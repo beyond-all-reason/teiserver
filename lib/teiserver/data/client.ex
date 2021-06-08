@@ -41,6 +41,18 @@ defmodule Teiserver.Client do
     )
   end
 
+  @spec reset_battlestatus(Map.t()) :: Map.t()
+  def reset_battlestatus(client) do
+    %{client |
+      team_number: 0,
+      ally_team_number: 0,
+      player: false,
+      handicap: 0,
+      sync: 0,
+      battle_id: nil
+    }
+  end
+
   def login(user, pid) do
     client =
       create(%{
@@ -96,7 +108,8 @@ defmodule Teiserver.Client do
         nil
 
       client ->
-        new_client = %{client | team_colour: colour, battle_id: battle_id}
+        new_client = reset_battlestatus(client)
+        new_client = %{new_client | team_colour: colour, battle_id: battle_id}
         ConCache.put(:clients, new_client.userid, new_client)
         new_client
     end
@@ -114,7 +127,7 @@ defmodule Teiserver.Client do
         client
 
       client ->
-        new_client = %{client | battle_id: nil}
+        new_client = reset_battlestatus(client)
         ConCache.put(:clients, new_client.userid, new_client)
         new_client
     end

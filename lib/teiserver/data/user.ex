@@ -804,6 +804,7 @@ defmodule Teiserver.User do
   end
 
   @spec is_banned?(Integer.t() | Map.t()) :: boolean()
+  def is_banned?(nil), do: true
   def is_banned?(userid) when is_integer(userid), do: is_banned?(get_user_by_id(userid))
   def is_banned?(%{banned: banned}) do
     case banned do
@@ -814,6 +815,7 @@ defmodule Teiserver.User do
   end
 
   @spec is_muted?(Integer.t() | Map.t()) :: boolean()
+  def is_muted?(nil), do: true
   def is_muted?(userid) when is_integer(userid), do: is_muted?(get_user_by_id(userid))
   def is_muted?(%{muted: muted}) do
     case muted do
