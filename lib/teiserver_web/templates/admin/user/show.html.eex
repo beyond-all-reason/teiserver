@@ -50,7 +50,7 @@
           </form>
           &nbsp;&nbsp;
 
-          <%= if allow?(@conn, "teiserver.admin.account") do %>
+          <%= if allow?(@conn, "teiserver.moderator.account") do %>
             <a href="<%= Routes.ts_admin_user_path(@conn, :edit, @user) %>" class="btn btn-outline-<%= bsname %>">
               <i class="far fa-fw fa-wrench"></i>
               Edit user

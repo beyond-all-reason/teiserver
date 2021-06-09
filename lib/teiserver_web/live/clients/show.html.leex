@@ -24,34 +24,34 @@
   <% end %>
 </ul>
 
+<%= if allow?(@current_user, "admin.dev.developer") do %>
 <div class="row">
   <div class="col-md-6">
     <h4>Client</h4>
-    <%= if allow?(@current_user, "admin.dev.developer") do %>
-      <pre>
-        <%= Kernel.inspect @client, pretty: true, limit: :infinity %>
-      </pre>
-    <% end %>
+    <pre>
+      <%= Kernel.inspect @client, pretty: true, limit: :infinity %>
+    </pre>
   </div>
   <div class="col-md-6">
     <h4>User</h4>
-    <%= if allow?(@current_user, "admin.dev.developer") do %>
-      <pre>
-        <%= Kernel.inspect @user, pretty: true, limit: :infinity %>
-      </pre>
-    <% end %>
+    <pre>
+      <%= Kernel.inspect @user, pretty: true, limit: :infinity %>
+    </pre>
   </div>
 </div>
+<% end %>
 <br />
 
 <div class="float-right">
-  <span phx-click="action:less_logging" class="btn btn-outline-<%= bsname %>">
-    Less logging
-  </span>
+  <%= if allow?(@current_user, "admin.dev") do %>
+    <span phx-click="action:less_logging" class="btn btn-outline-<%= bsname %>">
+      Less logging
+    </span>
 
-  <span phx-click="action:extra_logging" class="btn btn-outline-<%= bsname %>">
-    Enable extra logging
-  </span>
+    <span phx-click="action:extra_logging" class="btn btn-outline-<%= bsname %>">
+      Enable extra logging
+    </span>
+  <% end %>
 
   <span class="btn btn-danger" phx-click="force-disconnect">
     Force disconnect

@@ -8,18 +8,33 @@ defmodule TeiserverWeb.BattleLive.Show do
   alias Teiserver.Client
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
+  @extra_menu_content """
+  &nbsp;&nbsp;&nbsp;
+    <a href='/teiserver/admin/client' class="btn btn-outline-primary">
+      <i class="fas fa-fw fa-plug"></i>
+      Clients
+    </a>
+  """
+
   @impl true
   def mount(_params, session, socket) do
     socket =
       socket
       |> AuthPlug.live_call(session)
       |> NotificationPlug.live_call()
+
+    extra_content = if allow?(socket, "teiserver.moderator.account") do
+      @extra_menu_content
+    end
+
+    socket = socket
       |> Teiserver.ServerUserPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle")
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, Central.Helpers.StylingHelper.colours(:primary2))
       |> assign(:messages, [])
+      |> assign(:extra_menu_content, extra_content)
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end

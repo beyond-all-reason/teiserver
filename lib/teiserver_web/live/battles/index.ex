@@ -21,7 +21,7 @@ defmodule TeiserverWeb.BattleLive.Index do
       |> AuthPlug.live_call(session)
       |> NotificationPlug.live_call()
 
-    extra_content = if allow?(socket, "teiserver.admin.user") do
+    extra_content = if allow?(socket, "teiserver.moderator.account") do
       @extra_menu_content
     end
 

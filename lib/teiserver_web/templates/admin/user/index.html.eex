@@ -1,4 +1,7 @@
-<% {_fg, _bg, bsname} = colours() %>
+<%
+  {_fg, _bg, bsname} = colours()
+  is_admin = allow?(@conn, "teiserver.admin.account")
+%>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -50,7 +53,7 @@
   <thead>
     <tr>
       <th colspan="2">Name</th>
-      <th>Email</th>
+      <%= if is_admin do %><th>Email</th><% end %>
       <th>Status</th>
       <th>Bot</th>
       <th>Mod</th>
@@ -68,7 +71,7 @@
         <%= component "icon", icon: user.icon %>
       </td>
       <td><%= user.name %></td>
-      <td><%= user.email %></td>
+      <%= if is_admin do %><td><%= user.email %></td><% end %>
 
       <td>
         <%= cond do %>
