@@ -3,8 +3,8 @@ defmodule TeiserverWeb.BattleLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.Battle
-  alias Teiserver.BattleLib
+  alias Teiserver.Battle.BattleLobby
+  alias Teiserver.Battle.BattleLobbyLib
 
   @extra_menu_content """
   &nbsp;&nbsp;&nbsp;
@@ -30,7 +30,7 @@ defmodule TeiserverWeb.BattleLive.Index do
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle")
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, BattleLib.colours())
-      |> assign(:battles, Battle.list_battles())
+      |> assign(:battles, BattleLobby.list_battles())
       |> assign(:menu_override, Routes.ts_lobby_general_path(socket, :index))
       |> assign(:extra_menu_content, extra_content)
 
@@ -44,7 +44,7 @@ defmodule TeiserverWeb.BattleLive.Index do
 
   @impl true
   def handle_info({:global_battle_updated, battle_id, :battle_opened}, socket) do
-    new_battle = Battle.get_battle(battle_id)
+    new_battle = BattleLobby.get_battle(battle_id)
     battles = [new_battle | socket.assigns[:battles]]
 
     {:noreply, assign(socket, :battles, battles)}
@@ -63,7 +63,7 @@ defmodule TeiserverWeb.BattleLive.Index do
       socket.assigns[:battles]
       |> Enum.map(fn battle ->
         if battle.id == battle_id do
-          Battle.get_battle(battle_id)
+          BattleLobby.get_battle(battle_id)
         else
           battle
         end

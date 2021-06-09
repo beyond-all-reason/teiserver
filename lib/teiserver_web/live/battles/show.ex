@@ -4,7 +4,7 @@ defmodule TeiserverWeb.BattleLive.Show do
   require Logger
 
   alias Teiserver.User
-  alias Teiserver.Battle
+  alias Teiserver.Battle.BattleLobby
   alias Teiserver.Client
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -44,7 +44,7 @@ defmodule TeiserverWeb.BattleLive.Show do
     :ok = PubSub.subscribe(Central.PubSub, "battle_updates:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "live_battle_updates:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
-    battle = Battle.get_battle!(id)
+    battle = BattleLobby.get_battle!(id)
 
     case battle do
       nil ->
@@ -87,7 +87,7 @@ defmodule TeiserverWeb.BattleLive.Show do
       socket
       |> assign(:users, new_users)
       |> assign(:clients, new_clients)
-      |> assign(:battle, Battle.get_battle(assigns.id))
+      |> assign(:battle, BattleLobby.get_battle(assigns.id))
       |> maybe_index_redirect
     else
       socket
@@ -102,7 +102,7 @@ defmodule TeiserverWeb.BattleLive.Show do
     socket
     |> assign(:users, new_users)
     |> assign(:clients, new_clients)
-    |> assign(:battle, Battle.get_battle(assigns.id))
+    |> assign(:battle, BattleLobby.get_battle(assigns.id))
     |> maybe_index_redirect
   end
 
@@ -147,7 +147,7 @@ defmodule TeiserverWeb.BattleLive.Show do
 
   def handle_info({:global_battle_updated, battle_id, :update_battle_info}, socket) do
     if int_parse(battle_id) == socket.assigns[:id] do
-      battle = Battle.get_battle!(battle_id)
+      battle = BattleLobby.get_battle!(battle_id)
       {:noreply,
        socket
        |> assign(:battle, battle)}
@@ -165,11 +165,11 @@ defmodule TeiserverWeb.BattleLive.Show do
   end
 
   def handle_info({:add_bot_to_battle, _battle_id, _bot}, %{assigns: assigns} = socket) do
-    {:noreply, assign(socket, :battle, Battle.get_battle(assigns.id))}
+    {:noreply, assign(socket, :battle, BattleLobby.get_battle(assigns.id))}
   end
 
   def handle_info({:update_bot, _battle_id, _bot}, %{assigns: assigns} = socket) do
-    {:noreply, assign(socket, :battle, Battle.get_battle(assigns.id))}
+    {:noreply, assign(socket, :battle, BattleLobby.get_battle(assigns.id))}
   end
 
   defp page_title(:show), do: "Show Battle"

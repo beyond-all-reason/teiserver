@@ -8,7 +8,7 @@ defmodule Teiserver.Protocols.SpringOut do
   require Logger
   alias Phoenix.PubSub
   alias Teiserver.Client
-  alias Teiserver.Battle
+  alias Teiserver.Battle.BattleLobby
   alias Teiserver.Room
   alias Teiserver.User
   alias Teiserver.Protocols.Spring
@@ -194,7 +194,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:battle_opened, battle_id) do
-    do_reply(:battle_opened, Battle.get_battle(battle_id))
+    do_reply(:battle_opened, BattleLobby.get_battle(battle_id))
   end
 
   defp do_reply(:open_battle_success, battle_id) do
@@ -222,7 +222,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:update_battle, battle_id) do
-    do_reply(:update_battle, Battle.get_battle(battle_id))
+    do_reply(:update_battle, BattleLobby.get_battle(battle_id))
   end
 
   defp do_reply(:join_battle_success, battle) do
@@ -497,8 +497,8 @@ defmodule Teiserver.Protocols.SpringOut do
 
   @spec do_join_battle(map(), integer(), String.t()) :: map()
   def do_join_battle(state, battle_id, script_password) do
-    battle = Battle.get_battle(battle_id)
-    Battle.add_user_to_battle(state.userid, battle.id, script_password)
+    battle = BattleLobby.get_battle(battle_id)
+    BattleLobby.add_user_to_battle(state.userid, battle.id, script_password)
     PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
     reply(:join_battle_success, battle, nil, state)
     reply(:add_user_to_battle, {state.userid, battle.id, script_password}, nil, state)
@@ -553,12 +553,12 @@ defmodule Teiserver.Protocols.SpringOut do
     # Battle entry commands
     # Once we know this is stable we can consider optimising it to not
     # need to send() to self a few dozen times
-    Battle.list_battle_ids()
+    BattleLobby.list_battle_ids()
     |> Enum.each(fn battle_id ->
       send(self(), {:global_battle_updated, battle_id, :battle_opened})
       send(self(), {:global_battle_updated, battle_id, :update_battle_info})
 
-      battle = Battle.get_battle(battle_id)
+      battle = BattleLobby.get_battle(battle_id)
 
       battle.players
       |> Enum.each(fn player_id ->

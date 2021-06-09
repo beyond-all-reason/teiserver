@@ -1,6 +1,6 @@
 defmodule Teiserver.Protocols.TachyonBattleHostTest do
   use Central.ServerCase
-  alias Teiserver.Battle
+  alias Teiserver.Battle.BattleLobby
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
@@ -43,7 +43,7 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
 
     assert GenServer.call(pid, {:get, :battle_id}) == battle_id
     assert GenServer.call(pid, {:get, :battle_host}) == true
-    assert Battle.get_battle!(battle_id) != nil
+    assert BattleLobby.get_battle!(battle_id) != nil
 
     # Now create a user to join the battle
     %{socket: socket2, user: user2, pid: pid2} = tachyon_auth_setup()
@@ -142,6 +142,6 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
 
     assert GenServer.call(pid, {:get, :battle_id}) == nil
     assert GenServer.call(pid, {:get, :battle_host}) == false
-    assert Battle.get_battle!(battle_id) == nil
+    assert BattleLobby.get_battle!(battle_id) == nil
   end
 end

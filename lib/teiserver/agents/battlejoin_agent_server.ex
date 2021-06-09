@@ -1,7 +1,7 @@
 defmodule Teiserver.Agents.BattlejoinAgentServer do
   use GenServer
   alias Teiserver.Agents.AgentLib
-  alias Teiserver.Battle
+  alias Teiserver.Battle.BattleLobby
   require Logger
 
   @tick_period 7000
@@ -23,7 +23,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   def handle_info(:tick, state) do
     new_state = case state.stage do
       :no_battle ->
-        join_battle(state, Battle.list_battle_ids())
+        join_battle(state, BattleLobby.list_battle_ids())
 
       :waiting ->
         state

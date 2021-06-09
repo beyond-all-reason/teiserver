@@ -64,6 +64,15 @@ defmodule TeiserverWeb.Router do
         live("/battle/:id", Show, :show)
       end
 
+
+      # API
+      scope "/teiserver/api", TeiserverWeb.API do
+        pipe_through :api
+        post "/login", SessionController, :login
+        post "/battle/create", BattleController, :create
+      end
+
+      # ADMIN
       scope "/teiserver/admin", TeiserverWeb.ClientLive, as: :ts_admin do
         pipe_through([:browser, :admin_layout, :protected])
 

@@ -1,12 +1,4 @@
-# defmodule Teiserver.Data.BattleStruct do
-#   @enforce_keys [:id, :founder_id, :founder_name]
-#   defstruct [
-#     :id, :founder_id, :founder_name,
-#     :type, :nattype, :max_players, :password, :rank, :locked, :engine_name, :players, :player_count, :spectator_count, :bot_count, :bots, :ip, :tags, :disabled_units, :start_rectangles, :map_hash, :map_name
-#   ]
-# end
-
-defmodule Teiserver.Battle do
+defmodule Teiserver.Battle.BattleLobby do
   @moduledoc false
   alias Phoenix.PubSub
   require Logger
@@ -15,6 +7,12 @@ defmodule Teiserver.Battle do
   alias Teiserver.Client
   alias Teiserver.Data.Types
   alias Teiserver.Director
+
+#   @enforce_keys [:id, :founder_id, :founder_name]
+#   defstruct [
+#     :id, :founder_id, :founder_name,
+#     :type, :nattype, :max_players, :password, :rank, :locked, :engine_name, :players, :player_count, :spectator_count, :bot_count, :bots, :ip, :tags, :disabled_units, :start_rectangles, :map_hash, :map_name
+#   ]
 
   defp next_id() do
     ConCache.isolated(:id_counters, :battle, fn ->

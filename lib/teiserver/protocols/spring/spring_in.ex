@@ -7,7 +7,7 @@ defmodule Teiserver.Protocols.SpringIn do
   """
   require Logger
   alias Teiserver.Client
-  alias Teiserver.Battle
+  alias Teiserver.Battle.BattleLobby
   alias Teiserver.Room
   alias Teiserver.User
   alias Phoenix.PubSub
@@ -111,7 +111,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("c.battles.list_ids", _, msg_id, state) do
-    reply(:list_battles, Battle.list_battle_ids(), msg_id, state)
+    reply(:list_battles, BattleLobby.list_battle_ids(), msg_id, state)
     state
   end
 
@@ -677,8 +677,8 @@ defmodule Teiserver.Protocols.SpringIn do
               game_name: game_name,
               ip: client.ip
             }
-            |> Battle.create_battle()
-            |> Battle.add_battle()
+            |> BattleLobby.create_battle()
+            |> BattleLobby.add_battle()
 
           {:success, battle}
 
@@ -739,7 +739,7 @@ defmodule Teiserver.Protocols.SpringIn do
     response =
       case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
         [_, battle_id, password, script_password] ->
-          Battle.can_join?(state.userid, battle_id, password, script_password)
+          BattleLobby.can_join?(state.userid, battle_id, password, script_password)
 
         nil ->
           {:failure, "No match"}
@@ -759,7 +759,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("JOINBATTLEACCEPT", username, _msg_id, state) do
     userid = User.get_userid(username)
-    Battle.accept_join_request(userid, state.battle_id)
+    BattleLobby.accept_join_request(userid, state.battle_id)
     state
   end
 
@@ -771,7 +771,7 @@ defmodule Teiserver.Protocols.SpringIn do
       end
 
     userid = User.get_userid(username)
-    Battle.deny_join_request(userid, state.battle_id, reason)
+    BattleLobby.deny_join_request(userid, state.battle_id, reason)
     state
   end
 
@@ -780,7 +780,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, username, value] ->
         client_id = User.get_userid(username)
         value = int_parse(value)
-        Battle.force_change_client(state.userid, client_id, :handicap, value)
+        BattleLobby.force_change_client(state.userid, client_id, :handicap, value)
 
       _ ->
         _no_match(state, "HANDICAP", msg_id, data)
@@ -792,8 +792,8 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("ADDSTARTRECT", data, msg_id, state) do
     case Regex.run(~r/(\d+) (\d+) (\d+) (\d+) (\d+)/, data) do
       [_, team, left, top, right, bottom] ->
-        if Battle.allow?(state.userid, :addstartrect, state.battle_id) do
-          Battle.add_start_rectangle(state.battle_id, [team, left, top, right, bottom])
+        if BattleLobby.allow?(state.userid, :addstartrect, state.battle_id) do
+          BattleLobby.add_start_rectangle(state.battle_id, [team, left, top, right, bottom])
         end
 
       _ ->
@@ -804,15 +804,15 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("REMOVESTARTRECT", team, _msg_id, state) do
-    if Battle.allow?(state.userid, :removestartrect, state.battle_id) do
-      Battle.remove_start_rectangle(state.battle_id, team)
+    if BattleLobby.allow?(state.userid, :removestartrect, state.battle_id) do
+      BattleLobby.remove_start_rectangle(state.battle_id, team)
     end
 
     state
   end
 
   defp do_handle("SETSCRIPTTAGS", data, _msg_id, state) do
-    if Battle.allow?(state.userid, :setscripttags, state.battle_id) do
+    if BattleLobby.allow?(state.userid, :setscripttags, state.battle_id) do
       tags =
         data
         |> String.split("\t")
@@ -826,29 +826,29 @@ defmodule Teiserver.Protocols.SpringIn do
           {String.downcase(k), v}
         end)
 
-      Battle.set_script_tags(state.battle_id, tags)
+      BattleLobby.set_script_tags(state.battle_id, tags)
     end
 
     state
   end
 
   defp do_handle("REMOVESCRIPTTAGS", data, _msg_id, state) do
-    if Battle.allow?(state.userid, :setscripttags, state.battle_id) do
+    if BattleLobby.allow?(state.userid, :setscripttags, state.battle_id) do
       keys =
         data
         |> String.downcase()
         |> String.split("\t")
 
-      Battle.remove_script_tags(state.battle_id, keys)
+      BattleLobby.remove_script_tags(state.battle_id, keys)
     end
 
     state
   end
 
   defp do_handle("KICKFROMBATTLE", username, _msg_id, state) do
-    if Battle.allow?(state.userid, :kickfrombattle, state.battle_id) do
+    if BattleLobby.allow?(state.userid, :kickfrombattle, state.battle_id) do
       userid = User.get_userid(username)
-      Battle.kick_user_from_battle(userid, state.battle_id)
+      BattleLobby.kick_user_from_battle(userid, state.battle_id)
     end
 
     state
@@ -859,7 +859,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, username, team_number] ->
         client_id = User.get_userid(username)
         value = int_parse(team_number)
-        Battle.force_change_client(state.userid, client_id, :team_number, value)
+        BattleLobby.force_change_client(state.userid, client_id, :team_number, value)
 
       _ ->
         _no_match(state, "FORCETEAMNO", msg_id, data)
@@ -873,7 +873,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, username, ally_team_number] ->
         client_id = User.get_userid(username)
         value = int_parse(ally_team_number)
-        Battle.force_change_client(state.userid, client_id, :ally_team_number, value)
+        BattleLobby.force_change_client(state.userid, client_id, :ally_team_number, value)
 
       _ ->
         _no_match(state, "FORCEALLYNO", msg_id, data)
@@ -887,7 +887,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, username, team_colour] ->
         client_id = User.get_userid(username)
         value = int_parse(team_colour)
-        Battle.force_change_client(state.userid, client_id, :team_colour, value)
+        BattleLobby.force_change_client(state.userid, client_id, :team_colour, value)
 
       _ ->
         _no_match(state, "FORCETEAMCOLOR", msg_id, data)
@@ -898,32 +898,32 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("FORCESPECTATORMODE", username, _msg_id, state) do
     client_id = User.get_userid(username)
-    Battle.force_change_client(state.userid, client_id, :player, false)
+    BattleLobby.force_change_client(state.userid, client_id, :player, false)
 
     state
   end
 
   defp do_handle("DISABLEUNITS", data, _msg_id, state) do
-    if Battle.allow?(state.userid, :disableunits, state.battle_id) do
+    if BattleLobby.allow?(state.userid, :disableunits, state.battle_id) do
       units = String.split(data, " ")
-      Battle.disable_units(state.battle_id, units)
+      BattleLobby.disable_units(state.battle_id, units)
     end
 
     state
   end
 
   defp do_handle("ENABLEUNITS", data, _msg_id, state) do
-    if Battle.allow?(state.userid, :enableunits, state.battle_id) do
+    if BattleLobby.allow?(state.userid, :enableunits, state.battle_id) do
       units = String.split(data, " ")
-      Battle.enable_units(state.battle_id, units)
+      BattleLobby.enable_units(state.battle_id, units)
     end
 
     state
   end
 
   defp do_handle("ENABLEALLUNITS", _data, _msg_id, state) do
-    if Battle.allow?(state.userid, :enableallunits, state.battle_id) do
-      Battle.enable_all_units(state.battle_id)
+    if BattleLobby.allow?(state.userid, :enableallunits, state.battle_id) do
+      BattleLobby.enable_all_units(state.battle_id)
     end
 
     state
@@ -932,9 +932,9 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("ADDBOT", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\d+) (\d+) (.+)/, data) do
       [_, name, battlestatus, team_colour, ai_dll] ->
-        if Battle.allow?(state.userid, :add_bot, state.battle_id) do
+        if BattleLobby.allow?(state.userid, :add_bot, state.battle_id) do
           bot_data =
-            Battle.new_bot(
+            BattleLobby.new_bot(
               Map.merge(
                 %{
                   name: name,
@@ -947,7 +947,7 @@ defmodule Teiserver.Protocols.SpringIn do
               )
             )
 
-          Battle.add_bot_to_battle(
+          BattleLobby.add_bot_to_battle(
             state.battle_id,
             bot_data
           )
@@ -963,7 +963,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("UPDATEBOT", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
       [_, name, battlestatus, team_colour] ->
-        if Battle.allow?(state.userid, :update_bot, state.battle_id) do
+        if BattleLobby.allow?(state.userid, :update_bot, state.battle_id) do
           new_bot =
             Map.merge(
               %{
@@ -972,7 +972,7 @@ defmodule Teiserver.Protocols.SpringIn do
               Spring.parse_battle_status(battlestatus)
             )
 
-          Battle.update_bot(state.battle_id, name, new_bot)
+          BattleLobby.update_bot(state.battle_id, name, new_bot)
         end
 
       _ ->
@@ -983,24 +983,24 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("REMOVEBOT", botname, _msg_id, state) do
-    if Battle.allow?(state.userid, :remove_bot, state.battle_id) do
-      Battle.remove_bot(state.battle_id, botname)
+    if BattleLobby.allow?(state.userid, :remove_bot, state.battle_id) do
+      BattleLobby.remove_bot(state.battle_id, botname)
     end
 
     state
   end
 
   defp do_handle("SAYBATTLE", msg, _msg_id, state) do
-    if Battle.allow?(state.userid, :saybattle, state.battle_id) do
-      Battle.say(state.userid, msg, state.battle_id)
+    if BattleLobby.allow?(state.userid, :saybattle, state.battle_id) do
+      BattleLobby.say(state.userid, msg, state.battle_id)
     end
 
     state
   end
 
   defp do_handle("SAYBATTLEEX", msg, _msg_id, state) do
-    if Battle.allow?(state.userid, :saybattleex, state.battle_id) do
-      Battle.sayex(state.userid, msg, state.battle_id)
+    if BattleLobby.allow?(state.userid, :saybattleex, state.battle_id) do
+      BattleLobby.sayex(state.userid, msg, state.battle_id)
     end
 
     state
@@ -1012,8 +1012,8 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, to_name, msg] ->
         to_id = User.get_userid(to_name)
 
-        if Battle.allow?(state.userid, :saybattleprivateex, state.battle_id) do
-          Battle.sayprivateex(state.userid, to_id, msg, state.battle_id)
+        if BattleLobby.allow?(state.userid, :saybattleprivateex, state.battle_id) do
+          BattleLobby.sayprivateex(state.userid, to_id, msg, state.battle_id)
         end
 
       _ ->
@@ -1026,8 +1026,8 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("UPDATEBATTLEINFO", data, msg_id, state) do
     case Regex.run(~r/(\d+) (\d+) (\S+) (.+)$/, data) do
       [_, spectator_count, locked, map_hash, map_name] ->
-        if Battle.allow?(state.userid, :updatebattleinfo, state.battle_id) do
-          battle = Battle.get_battle(state.battle_id)
+        if BattleLobby.allow?(state.userid, :updatebattleinfo, state.battle_id) do
+          battle = BattleLobby.get_battle(state.battle_id)
 
           new_battle = %{
             battle
@@ -1037,7 +1037,7 @@ defmodule Teiserver.Protocols.SpringIn do
               map_name: map_name
           }
 
-          Battle.update_battle(
+          BattleLobby.update_battle(
             new_battle,
             {spectator_count, locked, map_hash, map_name},
             :update_battle_info
@@ -1052,7 +1052,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("LEAVEBATTLE", _, _msg_id, %{battle_id: nil} = state) do
-    Battle.remove_user_from_any_battle(state.userid)
+    BattleLobby.remove_user_from_any_battle(state.userid)
     |> Enum.each(fn b ->
       PubSub.unsubscribe(Central.PubSub, "battle_updates:#{b}")
     end)
@@ -1062,7 +1062,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("LEAVEBATTLE", _, _msg_id, state) do
     PubSub.unsubscribe(Central.PubSub, "battle_updates:#{state.battle_id}")
-    Battle.remove_user_from_battle(state.userid, state.battle_id)
+    BattleLobby.remove_user_from_battle(state.userid, state.battle_id)
     %{state | battle_host: false}
   end
 
@@ -1082,7 +1082,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
         # This one needs a bit more nuance, for now we'll wrap it in this
         # later it's possible we don't want players updating their status
-        if Battle.allow?(state.userid, :mybattlestatus, state.battle_id) do
+        if BattleLobby.allow?(state.userid, :mybattlestatus, state.battle_id) do
           Client.update(new_client, :client_updated_battlestatus)
         end
 

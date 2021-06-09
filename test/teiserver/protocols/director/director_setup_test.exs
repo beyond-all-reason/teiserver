@@ -1,7 +1,7 @@
 defmodule Teiserver.Protocols.Director.SetupTest do
   use Central.ServerCase, async: false
   alias Teiserver.TeiserverTestLib
-  alias Teiserver.Battle
+  alias Teiserver.Battle.BattleLobby
   alias Teiserver.Common.PubsubListener
 
   @sleep 200
@@ -19,19 +19,19 @@ defmodule Teiserver.Protocols.Director.SetupTest do
     assert battle.director_mode == false
 
     # Start it up!
-    Battle.say(1, "!director start", id)
+    BattleLobby.say(1, "!director start", id)
     :timer.sleep(@sleep)
 
-    battle = Battle.get_battle!(id)
+    battle = BattleLobby.get_battle!(id)
     assert battle.director_mode == true
 
     # TODO: Check the consul is created and assigned to this battle
 
     # Stop it
-    Battle.say(123_456, "!director stop", id)
+    BattleLobby.say(123_456, "!director stop", id)
     :timer.sleep(@sleep)
 
-    battle = Battle.get_battle!(id)
+    battle = BattleLobby.get_battle!(id)
     assert battle.director_mode == false
   end
 
@@ -54,7 +54,7 @@ defmodule Teiserver.Protocols.Director.SetupTest do
     listener = PubsubListener.new_listener(["battle_updates:#{battle.id}"])
 
     # No command
-    result = Battle.say(123_456, "Test message", battle.id)
+    result = BattleLobby.say(123_456, "Test message", battle.id)
     assert result == :ok
 
     :timer.sleep(@sleep)
@@ -62,7 +62,7 @@ defmodule Teiserver.Protocols.Director.SetupTest do
     assert messages == [{:battle_updated, battle.id, {123_456, "Test message", battle.id}, :say}]
 
     # Now command
-    result = Battle.say(123_456, "!start", battle.id)
+    result = BattleLobby.say(123_456, "!start", battle.id)
     assert result == :ok
 
     :timer.sleep(@sleep)

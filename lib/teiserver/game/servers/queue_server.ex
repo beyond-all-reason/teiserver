@@ -1,7 +1,7 @@
 defmodule Teiserver.Game.QueueServer do
   use GenServer
   require Logger
-  alias Teiserver.Battle
+  alias Teiserver.Battle.BattleLobby
 
   @default_tick_interval 5_000
 
@@ -178,7 +178,7 @@ defmodule Teiserver.Game.QueueServer do
   # Try to setup a battle with the players currently readied up
   defp try_setup_battle(state) do
     # Send out the new battle stuff
-    empty_battle = Battle.find_empty_battle()
+    empty_battle = BattleLobby.find_empty_battle()
 
     case empty_battle do
       nil ->

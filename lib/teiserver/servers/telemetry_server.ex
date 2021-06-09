@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.TelemetryServer do
   use GenServer
-  alias Teiserver.Battle
+  alias Teiserver.Battle.BattleLobby
   alias Teiserver.Client
 
   @client_states ~w(lobby menu player spectator total)a
@@ -53,7 +53,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
   @spec get_totals(Map.t()) :: Map.t()
   defp get_totals(_state) do
-    battles = Battle.list_battles()
+    battles = BattleLobby.list_battles()
     client_ids = Client.list_client_ids()
     clients = client_ids
       |> Map.new(fn c -> {c, Client.get_client_by_id(c)} end)

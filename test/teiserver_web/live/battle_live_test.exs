@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Live.BattleTest do
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
   import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1]
-  alias Teiserver.Battle
+  alias Teiserver.Battle.BattleLobby
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   setup do
@@ -38,7 +38,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       assert html =~ "SecondLiveBattle"
 
       # Now close battle 2
-      Battle.close_battle(battle2.id)
+      BattleLobby.close_battle(battle2.id)
 
       html = render(view)
       assert html =~ "Battles - 1"
@@ -50,9 +50,9 @@ defmodule TeiserverWeb.Live.BattleTest do
       user1 = TeiserverTestLib.new_user()
       user2 = TeiserverTestLib.new_user()
       user3 = TeiserverTestLib.new_user()
-      Battle.add_user_to_battle(user1.id, battle1.id, "script_password")
-      Battle.add_user_to_battle(user2.id, battle1.id, "script_password")
-      Battle.add_user_to_battle(user3.id, battle1.id, "script_password")
+      BattleLobby.add_user_to_battle(user1.id, battle1.id, "script_password")
+      BattleLobby.add_user_to_battle(user2.id, battle1.id, "script_password")
+      BattleLobby.add_user_to_battle(user3.id, battle1.id, "script_password")
 
       html = render(view)
       assert html =~ "Battles - 1"
@@ -60,7 +60,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       assert html =~ "<td>3</td>"
 
       # One player leaves
-      Battle.remove_user_from_battle(user3.id, battle1.id)
+      BattleLobby.remove_user_from_battle(user3.id, battle1.id)
 
       html = render(view)
       assert html =~ "Battles - 1"
@@ -68,7 +68,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       assert html =~ "<td>2</td>"
 
       # Finally close battle1, just to ensure there's not some error when we go back to 0 battles
-      Battle.close_battle(battle1.id)
+      BattleLobby.close_battle(battle1.id)
 
       html = render(view)
       assert html =~ "No battles found"
@@ -140,7 +140,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       assert html =~ "#{user3.name}"
 
       # Battle closes
-      Battle.close_battle(battle_id)
+      BattleLobby.close_battle(battle_id)
       assert_redirect(view, "/teiserver/battle", 250)
     end
 

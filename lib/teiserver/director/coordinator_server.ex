@@ -132,7 +132,7 @@ defmodule Teiserver.Director.CoordinatorServer do
       password: make_password(),
       data: %{
         bot: true,
-        moderator: true,
+        moderator: false,
         verified: true,
         country_override: "GB",# TODO: Make this configurable
         lobbyid: "Teiserver Internal Process"

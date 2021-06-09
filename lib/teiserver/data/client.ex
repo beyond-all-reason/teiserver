@@ -11,7 +11,7 @@ defmodule Teiserver.Client do
   alias Phoenix.PubSub
   alias Teiserver.User
   alias Teiserver.Room
-  alias Teiserver.Battle
+  alias Teiserver.Battle.BattleLobby
   require Logger
 
   alias Teiserver.Data.Types, as: T
@@ -210,7 +210,7 @@ defmodule Teiserver.Client do
   defp do_disconnect(client) do
     is_test_user = String.contains?(client.name, "new_test_user_")
 
-    Battle.remove_user_from_any_battle(client.userid)
+    BattleLobby.remove_user_from_any_battle(client.userid)
     leave_rooms(client.userid)
 
     # If it's a test user then it can mean the db connection is closed

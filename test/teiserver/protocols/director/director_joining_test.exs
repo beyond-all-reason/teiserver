@@ -1,7 +1,7 @@
 # defmodule Teiserver.Protocols.Director.JoiningTest do
 #   use Central.ServerCase, async: false
 #   alias Teiserver.TeiserverTestLib
-#   alias Teiserver.Battle
+#   alias Teiserver.Battle.BattleLobby
 #   alias Teiserver.Common.PubsubListener
 #   alias Teiserver.Director
 
@@ -12,7 +12,7 @@
 #     :timer.sleep(100)
 
 #     battle = TeiserverTestLib.make_battle()
-#     Battle.say(1, "!director start", battle.id)
+#     BattleLobby.say(1, "!director start", battle.id)
 #     :timer.sleep(@sleep)
 
 #     {:ok, battle_id: battle.id}

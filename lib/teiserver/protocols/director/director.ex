@@ -1,5 +1,5 @@
 defmodule Teiserver.Director do
-  alias Teiserver.Battle
+  alias Teiserver.Battle.BattleLobby
   alias Teiserver.Data.Types
   require Logger
 
@@ -72,7 +72,7 @@ defmodule Teiserver.Director do
 
   @spec handle_in(Types.userid(), String.t(), Types.battle_id()) :: :say | :handled
   def handle_in(userid, msg, battle_id) do
-    battle = Battle.get_battle!(battle_id)
+    battle = BattleLobby.get_battle!(battle_id)
 
     cond do
       battle.director_mode == false ->

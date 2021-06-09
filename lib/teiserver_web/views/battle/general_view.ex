@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Battle.GeneralView do
+defmodule TeiserverWeb.BattleLobby.GeneralView do
   use TeiserverWeb, :view
 
   def colours(), do: StylingHelper.colours(:default)

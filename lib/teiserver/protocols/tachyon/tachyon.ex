@@ -1,7 +1,7 @@
 defmodule Teiserver.Protocols.Tachyon do
   require Logger
   alias Teiserver.Client
-  alias Teiserver.Battle
+  alias Teiserver.Battle.BattleLobby
   alias Phoenix.PubSub
   alias Teiserver.Protocols.TachyonIn
   alias Teiserver.Protocols.TachyonOut
@@ -106,9 +106,9 @@ defmodule Teiserver.Protocols.Tachyon do
   @spec do_join_battle(map(), integer(), String.t()) :: map()
   def do_join_battle(state, battle_id, script_password) do
     # TODO: Change this function to be purely about sending info to the client
-    # the part where it calls Battle.add_user_to_battle should happen elsewhere
-    battle = Battle.get_battle(battle_id)
-    Battle.add_user_to_battle(state.userid, battle.id, script_password)
+    # the part where it calls BattleLobby.add_user_to_battle should happen elsewhere
+    battle = BattleLobby.get_battle(battle_id)
+    BattleLobby.add_user_to_battle(state.userid, battle.id, script_password)
     PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
     TachyonOut.reply(:battle, :join_response, {:approve, battle}, state)
 

@@ -422,8 +422,8 @@ defmodule Teiserver.TeiserverTestLib do
       ip: "127.0.0.1"
     }
     |> Map.merge(params)
-    |> Teiserver.Battle.create_battle()
-    |> Teiserver.Battle.add_battle()
+    |> Teiserver.Battle.BattleLobby.create_battle()
+    |> Teiserver.Battle.BattleLobby.add_battle()
   end
 
   def seed() do

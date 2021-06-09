@@ -2,7 +2,7 @@
   <%= if @server_user do %>
     <%=
       component "menu_card",
-      icon: Teiserver.BattleLib.icon(),
+      icon: Teiserver.Battle.BattleLobbyLib.icon(),
       name: "battles",
       text: "Battles",
       icon_class: "fad",
