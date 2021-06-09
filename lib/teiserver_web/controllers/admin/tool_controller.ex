@@ -72,6 +72,21 @@ defmodule TeiserverWeb.Admin.ToolController do
     |> render("day_metrics_show.html")
   end
 
+  @spec day_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def day_metrics_today(conn, _params) do
+    data = Telemetry.get_todays_log()
+
+    users =
+      [%{data: data}]
+      |> Telemetry.user_lookup()
+
+    conn
+    |> assign(:date, Timex.today())
+    |> assign(:data, data)
+    |> assign(:users, users)
+    |> render("day_metrics_show.html")
+  end
+
   @spec day_metrics_export(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_export(conn, params = %{"date" => date}) do
     anonymous = params["anonymous"]

@@ -27,7 +27,7 @@
         <%= render TeiserverWeb.Admin.ToolView, "section_menu.html", Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
-            active: "day_metric_show"
+            active: "today"
           })
         %>
 
@@ -35,7 +35,11 @@
 
 <div class="row page-row">
   <div class="col-md-12">
-    <h3>Day to day metric: <%= Timex.format!(@date, "{0D}/{0M}/{YYYY}, {WDfull}") %></h3>
+    <%= if @date == Timex.today() do %>
+      <h3>Day to day metric: Today so far</h3>
+    <% else %>
+      <h3>Day to day metric: <%= Timex.format!(@date, "{YYYY}-{0M}-{0D}, {WDfull}") %></h3>
+    <% end %>
     <br /><br />
 
     <ul class="nav nav-tabs" role="tablist" id="the_tabs">

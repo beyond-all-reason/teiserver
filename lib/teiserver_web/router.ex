@@ -113,6 +113,7 @@ defmodule TeiserverWeb.Router do
         get("/tools/convert", ToolController, :convert_form)
         post("/tools/convert_post", ToolController, :convert_post)
 
+        get("/tools/day_metrics/today", ToolController, :day_metrics_today)
         get("/tools/day_metrics/show/:date", ToolController, :day_metrics_show)
         get("/tools/day_metrics/export/:date", ToolController, :day_metrics_export)
         get("/tools/day_metrics", ToolController, :day_metrics_list)

@@ -328,6 +328,24 @@ defmodule Teiserver.Telemetry do
     |> Map.new()
   end
 
+  def get_todays_log() do
+    last_time = ConCache.get(:application_metadata_cache, "teiserver_day_metrics_today_last_time")
+    recache = cond do
+      last_time == nil -> true
+      Timex.compare(Timex.now() |> Timex.shift(minutes: -15), last_time) == 1 -> true
+      true -> false
+    end
+
+    if recache do
+      data = Teiserver.Tasks.PersistTelemetryDayTask.today_so_far()
+      ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_cache", data)
+      ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", Timex.now())
+      data
+    else
+      ConCache.get(:application_metadata_cache, "teiserver_day_metrics_today_cache")
+    end
+  end
+
   def export_logs(logs) do
     logs
   end

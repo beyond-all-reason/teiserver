@@ -6,6 +6,9 @@ An API for uploading data about battles fought to Teiserver.
 **email:** the email of your account
 **password:** the password of your account for authorisation
 ```
+curl -X POST $SERVER_ADDR/teiserver/api/auth -H "Content-Type: application/json" -d '{"user": {"email": "email@email", "password": "password1"}}'
+
+## Example data
 {
   "user": {
     "email": "my_email@email.com",
@@ -31,13 +34,12 @@ An API for uploading data about battles fought to Teiserver.
 ```
 
 ### POST /teiserver/api/battles -- Uploads a battle
-**Battle** the battle being uploaded
-````
+```
+curl -X POST $SERVER_ADDR/teiserver/api/battle/create -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{--data goes here--}'
+
+## Example data
 {
   "outcome": "completed",
-  "players": [1,2,3],
-  "spectators": [4,5,6],
-  "team_count": 2,
-  "map": "ccr"
+  -- other stuff here, just needs to be marked as completed --
 }
 ```

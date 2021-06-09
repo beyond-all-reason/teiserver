@@ -193,6 +193,20 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
     :ok
   end
 
+  def today_so_far() do
+    date = Timex.today()
+
+    0..@segment_count
+    |> Enum.reduce(@empty_log, fn (segment_number, segment) ->
+      logs = get_logs(date, segment_number)
+      extend_segment(segment, logs)
+    end)
+    |> calculate_day_statistics(date)
+    |> Jason.encode!
+    |> Jason.decode!
+    # We encode and decode so it's the same format as in the database
+  end
+
   # Given an existing segment and a batch of logs, calculate the segment and add them together
   defp extend_segment(segment, logs) do
     extend = calculate_segment_parts(logs)

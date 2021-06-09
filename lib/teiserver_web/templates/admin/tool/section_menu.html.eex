@@ -19,3 +19,12 @@
   bsname: bsname,
   url: Routes.ts_admin_tool_path(@conn, :day_metrics_list)
 %>
+
+<%= component "section_menu_button",
+  name: "today",
+  label: "Today",
+  active: @active,
+  icon: Teiserver.Telemetry.TelemetryDayLogLib.icon(),
+  bsname: bsname,
+  url: Routes.ts_admin_tool_path(@conn, :day_metrics_today)
+%>
