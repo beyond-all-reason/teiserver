@@ -9,7 +9,7 @@ defmodule TeiserverWeb.ClientLive.Index do
 
   @extra_menu_content """
   &nbsp;&nbsp;&nbsp;
-    <a href='/teiserver/battle' class="btn btn-outline-primary">
+    <a href='/teiserver/battle/lobbies' class="btn btn-outline-primary">
       <i class="fas fa-fw fa-swords"></i>
       Battles
     </a>

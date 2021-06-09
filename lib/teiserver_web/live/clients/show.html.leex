@@ -18,7 +18,7 @@
   <li>Moderator: <%= @user.moderator %></li>
   <li>Verified: <%= @user.verified %></li>
   <li>Battle: <%= if @client.battle_id do %>
-    <%= live_redirect "Battle ##{@client.battle_id}", to: Routes.ts_battle_show_path(@socket, :show, @client.battle_id), class: "" %>
+    <%= live_redirect "Battle ##{@client.battle_id}", to: Routes.ts_battle_lobby_show_path(@socket, :show, @client.battle_id), class: "" %>
   <% else %>
     nil
   <% end %>

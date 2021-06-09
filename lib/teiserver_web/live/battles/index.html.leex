@@ -1,5 +1,7 @@
 <% {_fg, _bg, bsname} = @colours %>
 
+<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "battle_lobbies", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+
 <div class="row">
   <div class="col-md-12">
     <div class="card border-<%= bsname %> page-card">
@@ -31,7 +33,7 @@
 
           <td>
             <span>
-              <%= live_redirect "Show", to: Routes.ts_battle_show_path(@socket, :show, battle.id), class: "btn btn-sm btn-#{bsname}" %>
+              <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, battle.id), class: "btn btn-sm btn-#{bsname}" %>
             </span>
           </td>
         </tr>

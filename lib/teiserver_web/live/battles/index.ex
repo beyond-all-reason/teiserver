@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.BattleLive.Index do
+defmodule TeiserverWeb.Battle.BattleLobbyLive.Index do
   use TeiserverWeb, :live_view
   alias Phoenix.PubSub
 
@@ -27,9 +27,9 @@ defmodule TeiserverWeb.BattleLive.Index do
 
     socket = socket
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
-      |> add_breadcrumb(name: "Battles", url: "/teiserver/battle")
+      |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
       |> assign(:sidemenu_active, "teiserver")
-      |> assign(:colours, BattleLib.colours())
+      |> assign(:colours, BattleLobbyLib.colours())
       |> assign(:battles, BattleLobby.list_battles())
       |> assign(:menu_override, Routes.ts_lobby_general_path(socket, :index))
       |> assign(:extra_menu_content, extra_content)

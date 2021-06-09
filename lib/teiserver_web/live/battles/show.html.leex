@@ -12,6 +12,8 @@
   _spectators = Map.get(result, false, [])
 %>
 
+<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "battle_lobbies", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+
 <div class="row">
   <div class="col-md-12">
     <div class="card border-<%= bsname %> page-card">
@@ -95,7 +97,7 @@
 <% end %>
 
 <span>
-  <%= live_redirect "Back", to: Routes.ts_battle_index_path(@socket, :index), class: "btn btn-#{bsname}" %>
+  <%= live_redirect "Back", to: Routes.ts_battle_lobby_index_path(@socket, :index), class: "btn btn-#{bsname}" %>
 </span>
 
       </div>

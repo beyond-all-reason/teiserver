@@ -97,7 +97,7 @@ defmodule Teiserver.Startup do
       %{
         label: "Battles",
         icons: [Teiserver.Battle.BattleLobbyLib.icon(), :list],
-        url: "/teiserver/battle",
+        url: "/teiserver/battle/lobbies",
         permissions: "teiserver"
       },
       # %{label: "Tournaments", icons: [Teiserver.Game.TournamentLib.icon(), :list], url: "/teiserver/tournaments", permissions: "teiserver"},

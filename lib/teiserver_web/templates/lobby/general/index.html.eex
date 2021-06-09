@@ -6,7 +6,7 @@
       name: "battles",
       text: "Battles",
       icon_class: "fad",
-      link: Routes.ts_battle_index_path(@conn, :index)
+      link: Routes.ts_battle_general_path(@conn, :index)
     %>
 
     <%=

@@ -57,11 +57,23 @@ defmodule TeiserverWeb.Router do
         resources("/tournaments", TournamentController)
       end
 
-      scope "/teiserver", TeiserverWeb.BattleLive, as: :ts do
+      scope "/teiserver/battle", TeiserverWeb.Battle, as: :ts_battle do
         pipe_through([:browser, :admin_layout, :protected])
 
-        live("/battle", Index, :index)
-        live("/battle/:id", Show, :show)
+        get("/", GeneralController, :index)
+      end
+
+      scope "/teiserver/battle", TeiserverWeb.Battle, as: :ts do
+        pipe_through([:browser, :admin_layout, :protected])
+
+        resources("/logs", BattleLogController, only: [:index, :show, :delete])
+      end
+
+      scope "/teiserver/battle", TeiserverWeb.Battle.BattleLobbyLive, as: :ts do
+        pipe_through([:browser, :admin_layout, :protected])
+
+        live("/lobbies", Index, :index)
+        live("/lobbies/:id", Show, :show)
       end
 
 

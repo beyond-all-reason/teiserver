@@ -117,7 +117,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 * bonus: integer, default: 0
 * synced: boolean
 * faction: string
-* battle_id: Battle.id
+* battle_id: BattleLobby.id
 
 #### Examples
 ```

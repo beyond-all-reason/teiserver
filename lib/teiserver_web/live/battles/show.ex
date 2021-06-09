@@ -1,10 +1,11 @@
-defmodule TeiserverWeb.BattleLive.Show do
+defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   use TeiserverWeb, :live_view
   alias Phoenix.PubSub
   require Logger
 
   alias Teiserver.User
   alias Teiserver.Battle.BattleLobby
+  alias Teiserver.Battle.BattleLobbyLib
   alias Teiserver.Client
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -30,9 +31,9 @@ defmodule TeiserverWeb.BattleLive.Show do
     socket = socket
       |> Teiserver.ServerUserPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
-      |> add_breadcrumb(name: "Battles", url: "/teiserver/battle")
+      |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
       |> assign(:sidemenu_active, "teiserver")
-      |> assign(:colours, Central.Helpers.StylingHelper.colours(:primary2))
+      |> assign(:colours, BattleLobbyLib.colours())
       |> assign(:messages, [])
       |> assign(:extra_menu_content, extra_content)
 
@@ -56,7 +57,7 @@ defmodule TeiserverWeb.BattleLive.Show do
         {:noreply,
          socket
          |> assign(:page_title, page_title(socket.assigns.live_action))
-         |> add_breadcrumb(name: battle.name, url: "/teiserver/battles/#{battle.id}")
+         |> add_breadcrumb(name: battle.name, url: "/teiserver/battles/lobbies/#{battle.id}")
          |> assign(:id, int_parse(id))
          |> assign(:battle, battle)
          |> assign(:users, users)
@@ -139,7 +140,7 @@ defmodule TeiserverWeb.BattleLive.Show do
     if int_parse(battle_id) == socket.assigns[:id] do
       {:noreply,
        socket
-       |> redirect(to: Routes.ts_battle_index_path(socket, :index))}
+       |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
     else
       {:noreply, socket}
     end
@@ -174,12 +175,12 @@ defmodule TeiserverWeb.BattleLive.Show do
 
   defp page_title(:show), do: "Show Battle"
   defp index_redirect(socket) do
-    {:noreply, socket |> redirect(to: Routes.ts_battle_index_path(socket, :index))}
+    {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
   end
   defp maybe_index_redirect(socket) do
     if socket.assigns[:battle] == nil do
       socket
-        |> redirect(to: Routes.ts_battle_index_path(socket, :index))
+        |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))
     else
       socket
     end
