@@ -5,6 +5,7 @@ defmodule Teiserver.Startup do
   def startup do
     add_permission_set("teiserver", "admin", ~w(account battle clan party queue tournament))
     add_permission_set("teiserver", "moderator", ~w(account battle clan party queue tournament))
+    add_permission_set("teiserver", "api", ~w(battle))
     add_permission_set("teiserver", "player", ~w(account))
 
     add_group_type("Teiserver clan", %{fields: []})

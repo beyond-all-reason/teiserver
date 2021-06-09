@@ -51,16 +51,12 @@ defmodule CentralWeb.Router do
 
   pipeline :protected_api do
     plug(:accepts, ["json"])
-    plug(:fetch_session)
-    plug(:fetch_flash)
-    plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
     plug(Central.Logging.LoggingPlug)
     plug(Central.Account.AuthPipeline)
     plug(Central.Account.AuthPlug)
     plug(Central.General.CachePlug)
     plug(Guardian.Plug.EnsureAuthenticated)
-    plug(Central.Admin.AdminPlug)
   end
 
   scope "/", CentralWeb.General, as: :general do

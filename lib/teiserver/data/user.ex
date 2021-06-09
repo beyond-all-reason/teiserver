@@ -734,7 +734,7 @@ defmodule Teiserver.User do
       |> Enum.filter(fn r -> r < ingame_hours end)
       |> Enum.count()
 
-    springid = if user.springid, do: user.springid, else: make_spring_id()
+    springid = if user.springid != nil, do: user.springid, else: make_spring_id()
 
     user =
       %{

@@ -127,7 +127,7 @@ defmodule Teiserver.SpringBattleHostTest do
 
     # Check user1 hears about this
     reply = _recv_raw(socket)
-    assert reply =~ "ADDUSER #{user2.name} ?? 0 #{user2.springid} LuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} ?? #{user2.springid} LuaLobby Chobby\n"
 
     # Attempt to join
     _send_raw(socket2, "JOINBATTLE #{battle_id} empty script_password2\n")

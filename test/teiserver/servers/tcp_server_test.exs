@@ -169,7 +169,7 @@ defmodule Teiserver.TcpServerTest do
     # Logs back in
     send(pid, {:user_logged_in, u1.id})
     r = _recv_raw(socket)
-    assert r == "ADDUSER #{u1.name} ?? 0 #{u1.springid} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\n"
+    assert r == "ADDUSER #{u1.name} ?? #{u1.springid} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\n"
 
     assert GenServer.call(pid, {:get, :known_users}) == %{
       user.id => %{battle_id: nil, userid: user.id},
@@ -235,7 +235,7 @@ defmodule Teiserver.TcpServerTest do
     r = _recv_raw(socket)
 
     assert r ==
-             "ADDUSER #{u1.name} ?? 0 #{u1.springid} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\nJOINEDBATTLE #{
+             "ADDUSER #{u1.name} ?? #{u1.springid} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\nJOINEDBATTLE #{
                battle_id + 1
              } #{u1.name}\n"
 

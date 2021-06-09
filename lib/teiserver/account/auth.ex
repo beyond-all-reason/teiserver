@@ -3,6 +3,7 @@ defmodule Teiserver.Account.Auth do
   import Central.Account.AuthLib, only: [allow?: 2]
 
   def authorize(:index, conn, _), do: allow?(conn, "teiserver.moderator.account")
+  def authorize(:search, conn, _), do: allow?(conn, "teiserver.moderator.account")
   def authorize(:show, conn, _), do: allow?(conn, "teiserver.moderator.account")
   def authorize(:perform_action, conn, _), do: allow?(conn, "teiserver.moderator.account")
   def authorize(:edit, conn, _), do: allow?(conn, "teiserver.moderator.account")

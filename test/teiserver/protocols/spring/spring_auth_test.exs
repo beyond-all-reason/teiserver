@@ -104,7 +104,7 @@ defmodule Teiserver.SpringAuthTest do
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
     reply = _recv_raw(socket1)
-    assert reply =~ "ADDUSER #{user2.name} ?? 0 #{user2.springid} LuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} ?? #{user2.springid} LuaLobby Chobby\n"
     assert reply =~ " LuaLobby Chobby\n"
 
     _send_raw(socket1, "#111 IGNORELIST\n")
@@ -152,7 +152,7 @@ IGNORELISTEND\n"
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
     reply = _recv_raw(socket1)
-    assert reply =~ "ADDUSER #{user2.name} ?? 0 #{user2.springid} LuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} ?? #{user2.springid} LuaLobby Chobby\n"
     assert reply =~ " LuaLobby Chobby\n"
 
     _send_raw(socket1, "#7 FRIENDLIST\n")
@@ -375,7 +375,7 @@ CLIENTS test_room #{user.name}\n"
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
     reply = _recv_raw(socket1)
-    assert reply =~ "ADDUSER #{user2.name} ?? 0 #{user2.springid} LuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} ?? #{user2.springid} LuaLobby Chobby\n"
 
     _send_raw(socket2, "RING #{user1.name}\n")
     _ = _recv_raw(socket2)
@@ -496,7 +496,7 @@ CLIENTS test_room #{user.name}\n"
 
     # Check they logged back in and got re-added with the correct name
     wreply = _recv_raw(watcher)
-    assert wreply == "ADDUSER new_test_user_rename ?? 0 #{user.springid} LuaLobby Chobby\nCLIENTSTATUS new_test_user_rename 0\n"
+    assert wreply == "ADDUSER new_test_user_rename ?? #{user.springid} LuaLobby Chobby\nCLIENTSTATUS new_test_user_rename 0\n"
 
     # Next up, what if they update their status?
     _send_raw(socket, "MYSTATUS 127\n")

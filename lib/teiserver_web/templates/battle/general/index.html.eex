@@ -8,14 +8,16 @@
     link: Routes.ts_battle_lobby_index_path(@conn, :index)
   %>
 
-  <%=
-    component "menu_card",
-    icon: Teiserver.Battle.BattleLogLib.icon(),
-    name: "battle_logs",
-    text: "Battle logs",
-    icon_class: "fad",
-    link: Routes.ts_battle_log_path(@conn, :index)
-  %>
+  <%= if allow?(@conn, "admin.dev") do %>
+    <%=
+      component "menu_card",
+      icon: Teiserver.Battle.BattleLogLib.icon(),
+      name: "battle_logs",
+      text: "Battle logs",
+      icon_class: "fad",
+      link: Routes.ts_battle_log_path(@conn, :index)
+    %>
+  <% end %>
 </div>
 
 <div class="row page-row">
