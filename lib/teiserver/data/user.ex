@@ -90,7 +90,7 @@ defmodule Teiserver.User do
 
   @spec make_spring_id() :: integer()
   def make_spring_id() do
-    :random.uniform(999_999_999-100_000) + 100_000
+    :random.uniform(999_999-100_000) + 100_000
   end
 
   @spec clean_name(String.t()) :: String.t()
@@ -734,7 +734,7 @@ defmodule Teiserver.User do
       |> Enum.filter(fn r -> r < ingame_hours end)
       |> Enum.count()
 
-    springid = if user.springid != nil, do: user.springid, else: make_spring_id()
+    springid = if Map.get(user, :springid) != nil, do: user.springid, else: make_spring_id()
 
     user =
       %{

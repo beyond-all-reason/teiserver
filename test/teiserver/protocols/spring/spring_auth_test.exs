@@ -5,7 +5,6 @@ defmodule Teiserver.SpringAuthTest do
   alias Teiserver.User
   alias Teiserver.Client
   alias Central.Account
-  # alias Teiserver.Battle.BattleLobby
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TeiserverTestLib,
@@ -566,5 +565,27 @@ CLIENTS test_room #{user.name}\n"
     _send_raw(socket, "MYSTATUS #{new_status}\n")
     reply = _recv_raw(socket)
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
+  end
+
+  test "Bad springid ADDUSER", %{user: user, socket: socket} do
+    {:ok, bad_user} =
+      User.user_register_params("new_test_user_bad_springid", "new_test_user_bad_springid@email.com", "X03MO1qnZdYdgyfeuILPmQ==", %{admin_group_id: Teiserver.user_group_id()})
+      |> Central.Account.create_user()
+
+    Central.Account.create_group_membership(%{
+      user_id: bad_user.id,
+      group_id: Teiserver.user_group_id()
+    })
+
+    bad_user
+      |> User.convert_user()
+      |> User.add_user()
+      |> User.verify_user()
+
+    # Now see what happens when we add user
+    pid = Client.get_client_by_id(user.id).pid
+    send(pid, {:user_logged_in, bad_user.id})
+    reply = _recv_raw(socket)
+    assert reply == "ADDUSER new_test_user_bad_springid ?? #{bad_user.id} LuaLobby Chobby\n"
   end
 end

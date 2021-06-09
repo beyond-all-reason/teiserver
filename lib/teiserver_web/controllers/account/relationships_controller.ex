@@ -25,6 +25,7 @@ defmodule TeiserverWeb.Account.RelationshipsController do
 
     user_lookup =
       Teiserver.User.list_users(friends ++ received_requests ++ muted)
+      |> Enum.filter(fn u -> u != nil end)
       |> Map.new(fn u -> {u.id, u} end)
 
     conn
