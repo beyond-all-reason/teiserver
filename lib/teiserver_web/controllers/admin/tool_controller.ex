@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Admin.ToolController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Central.Dev,
+    policy: Teiserver.Account.Admin,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 

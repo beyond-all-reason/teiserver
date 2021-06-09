@@ -53,7 +53,7 @@
     %>
   <% end %>
 
-  <%= if allow?(@conn, "admin.dev") do %>
+  <%= if allow?(@conn, "teiserver.admin") do %>
     <%=
       component "menu_card",
       icon: Central.Admin.ToolLib.icon(),
