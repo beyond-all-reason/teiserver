@@ -1,7 +1,7 @@
 defmodule Teiserver.Director.CoordinatorServer do
   use GenServer
-  alias Teiserver.Account
-  alias Teiserver.User
+  alias Teiserver.{Account, User, Room}
+  alias Phoenix.PubSub
   require Logger
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
@@ -12,23 +12,31 @@ defmodule Teiserver.Director.CoordinatorServer do
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Director coordinator")
     account = get_coordinator_account()
+    {:ok, user} = User.internal_client_login(account.id)
 
-    consuls = case list_consuls() do
-      [] ->
-        new_consul = create_consul(1)
-        IO.puts ""
-        IO.inspect new_consul
-        IO.puts ""
-        [new_consul]
+    state = %{
+      ip: "127.0.0.1",
+      userid: user.id,
+      username: user.name,
+      battle_host: false,
+      user: user,
+      queues: [],
+      ready_queue_id: nil,
+      consuls: %{}
+    }
 
-      consul_list ->
-        consul_list
-    end
+    # Join two channels of interest
+    # ~w(main coordinator)
+    ~w(coordinator)
+    |> Enum.each(fn room_name ->
+      Room.get_or_make_room(room_name, user.id)
+      Room.add_user_to_room(user.id, room_name)
+      :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
+    end)
 
-    {:noreply, %{
-      account: account,
-      consuls: consuls |> Map.new(fn c -> {c.id, {nil, :disconnected}} end)
-    }}
+    :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
+
+    {:noreply, state}
   end
 
   def handle_info({:request_consul, battle_id}, state) do
@@ -51,6 +59,31 @@ defmodule Teiserver.Director.CoordinatorServer do
   end
 
   def handle_info({:remove_consul, battle_id}, state) do
+    {:noreply, state}
+  end
+
+  # Direct/Room messaging
+  def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
+
+  def handle_info({:new_message, userid, room_name, _message}, state) do
+    # If it's us sending it, don't reply
+    if userid != state.userid do
+      username = User.get_username(userid)
+      Room.send_message(state.userid, room_name, "I don't currently handle messages, sorry #{username}")
+    end
+    {:noreply, state}
+  end
+
+  def handle_info({:direct_message, userid, _message}, state) do
+    # If it's us sending it, don't reply
+    username = User.get_username(userid)
+    User.send_direct_message(state.userid, userid, "I don't currently handle messages, sorry #{username}")
+    {:noreply, state}
+  end
+
+  # Catchall handle_info
+  def handle_info(msg, state) do
+    Logger.error("Coordinator handle_info error. No handler for msg of #{Kernel.inspect msg}")
     {:noreply, state}
   end
 
@@ -119,45 +152,6 @@ defmodule Teiserver.Director.CoordinatorServer do
       account ->
         account
     end
-  end
-
-  @spec create_consul(integer()) :: Central.Account.User.t()
-  def create_consul(id) do
-    {:ok, account} = Account.create_user(%{
-      name: "Consul_#{id}",
-      email: "consul_#{id}@teiserver",
-      icon: "fa-solid fa-user-police",
-      colour: "#660066",
-      admin_group_id: Teiserver.internal_group_id(),
-      password: make_password(),
-      data: %{
-        bot: true,
-        moderator: false,
-        verified: true,
-        country_override: "GB",# TODO: Make this configurable
-        lobbyid: "Teiserver Internal Process"
-      }
-    })
-
-    Account.create_group_membership(%{
-      user_id: account.id,
-      group_id: Teiserver.internal_group_id()
-    })
-
-    User.recache_user(account.id)
-    account
-  end
-
-  @spec list_consuls() :: [Central.Account.User.t()]
-  defp list_consuls() do
-    Account.list_users(search: [
-      name_like: "Consul_",
-      bot: "Robot"
-    ], select: [:id])
-  end
-
-  defp login_consul(id) do
-
   end
 
   @spec make_password() :: String.t

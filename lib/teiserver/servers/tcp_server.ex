@@ -1,5 +1,3 @@
-# Stated with this
-# https://blog.oestrich.org/2017/07/using-ranch-with-elixir/
 defmodule Teiserver.TcpServer do
   @moduledoc false
   use GenServer
@@ -9,17 +7,6 @@ defmodule Teiserver.TcpServer do
   alias Teiserver.User
 
   @behaviour :ranch_protocol
-
-  _ = """
-  -- Testing locally
-  telnet localhost 8200
-  openssl s_client -connect localhost:8201
-
-  -- Testing on website
-  telnet bar.teifion.co.uk 8200
-  openssl s_client -connect bar.teifion.co.uk:8201
-  """
-
   @spec get_ssl_opts :: [
           {:cacertfile, String.t()} | {:certfile, String.t()} | {:keyfile, String.t()}
         ]

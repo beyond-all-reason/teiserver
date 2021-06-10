@@ -134,6 +134,7 @@ defmodule Teiserver.Protocols.SpringOut do
     "REMOVEUSER #{username}\n"
   end
 
+  defp do_reply(:friendlist, nil), do: "FRIENDLISTBEGIN\FRIENDLISTEND\n"
   defp do_reply(:friendlist, user) do
     friends =
       user.friends
@@ -146,6 +147,7 @@ defmodule Teiserver.Protocols.SpringOut do
     |> Enum.join("")
   end
 
+  defp do_reply(:friendlist_request, nil), do: "FRIENDLISTBEGIN\nFRIENDLISTEND\n"
   defp do_reply(:friendlist_request, user) do
     requests =
       user.friend_requests
@@ -158,6 +160,7 @@ defmodule Teiserver.Protocols.SpringOut do
     |> Enum.join("")
   end
 
+  defp do_reply(:ignorelist, nil), do: "IGNORELISTBEGIN\IGNORELISTEND\n"
   defp do_reply(:ignorelist, user) do
     ignored =
       user.ignored

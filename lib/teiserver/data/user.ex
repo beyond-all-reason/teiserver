@@ -642,6 +642,17 @@ defmodule Teiserver.User do
     end
   end
 
+  @spec internal_client_login(Map.t()) :: {:ok, Map.t()} | :error
+  def internal_client_login(userid) do
+    case get_user_by_id(userid) do
+      nil -> :error
+      user ->
+        do_login(user, "127.0.0.1", "Teiserver Internal Client")
+        Client.login(user, self())
+        {:ok, user}
+    end
+  end
+
   @spec try_login(String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
   def try_login(token, ip, lobby) do
     wait_for_precache()
