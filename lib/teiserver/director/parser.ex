@@ -1,5 +1,8 @@
 defmodule Teiserver.Director.Parser do
   require Logger
+  alias Teiserver.Director
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Battle.BattleLobby
 
   @spec handle_in(Types.userid(), String.t(), Types.battle_id()) :: :say | :handled
   def handle_in(userid, msg, battle_id) do
@@ -13,8 +16,12 @@ defmodule Teiserver.Director.Parser do
         :say
 
       true ->
-        parse_and_handle(userid, msg, battle)
-        :handled
+        case parse_and_handle(userid, msg, battle) do
+          :ok ->
+            :handled
+          :nomatch ->
+            :say
+        end
     end
   end
 
@@ -27,12 +34,12 @@ defmodule Teiserver.Director.Parser do
       end
 
     do_handle(userid, cmd, opts, battle)
-    :ok
   end
 
   @spec do_handle(Types.userid(), String.t(), [String.t()], Map.t()) :: :nomatch | :ok
-  defp do_handle(_userid, "!start", _opts, battle) do
-    send_to_host(battle, "!start")
+  defp do_handle(from_id, "!start", _opts, battle) do
+    send_to_host(from_id, battle, "!forcestart")
+    :ok
   end
 
   defp do_handle(_, cmd, opts, _) do
@@ -41,9 +48,9 @@ defmodule Teiserver.Director.Parser do
     :nomatch
   end
 
-  @spec send_to_host(Map.t(), String.t()) :: :ok
-  defp send_to_host(battle, msg) do
-    Logger.info("send_to_host - #{battle.id}, #{msg}")
+  @spec send_to_host(T.userid(), Map.t(), String.t()) :: :ok
+  defp send_to_host(from_id, battle, msg) do
+    Director.send_to_host(from_id, battle, msg)
     :ok
   end
 end

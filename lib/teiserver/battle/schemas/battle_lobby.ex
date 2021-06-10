@@ -63,7 +63,7 @@ defmodule Teiserver.Battle.BattleLobby do
         disabled_units: [],
         start_rectangles: %{},
         director_mode: false,
-        director_pid: nil,
+        consul_pid: nil,
 
         # Expected to be overriden
         map_hash: nil,
@@ -474,9 +474,9 @@ defmodule Teiserver.Battle.BattleLobby do
 
   @spec say(Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
   # These two implementations are a temporary method to ensure the system works as expected
-  # userid 1 is my main account, nobody will be able to enable it by mistake but
+  # userid 3 is my main account, nobody will be able to enable it by mistake but
   # anybody will be able to disable it if there's any issue
-  def say(1, "!director start", battle_id) do
+  def say(3, "!director start", battle_id) do
     start_director_mode(battle_id)
   end
 
@@ -524,6 +524,7 @@ defmodule Teiserver.Battle.BattleLobby do
 
   @spec start_director_mode(Types.battle_id()) :: :ok
   def start_director_mode(battle_id) do
+    Logger.debug("Starting director mode for #{battle_id}")
     battle = get_battle!(battle_id)
     update_battle(%{battle | director_mode: true}, nil, nil)
     Director.add_to_battle(battle_id)
@@ -532,6 +533,7 @@ defmodule Teiserver.Battle.BattleLobby do
 
   @spec stop_director_mode(Types.battle_id()) :: :ok
   def stop_director_mode(battle_id) do
+    Logger.debug("Stopping director mode for #{battle_id}")
     battle = get_battle!(battle_id)
     update_battle(%{battle | director_mode: false}, nil, nil)
     Director.remove_from_battle(battle_id)

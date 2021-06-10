@@ -1,6 +1,7 @@
 defmodule Teiserver.Director do
   alias Teiserver.Battle.BattleLobby
-  alias Teiserver.Data.Types
+  alias Teiserver.Client
+  alias Teiserver.Data.Types, as: T
   alias Teiserver.Director.Parser
   require Logger
 
@@ -73,5 +74,11 @@ defmodule Teiserver.Director do
 
   def handle_in(userid, msg, battle_id) do
     Parser.handle_in(userid, msg, battle_id)
+  end
+
+  def send_to_host(from_id, battle, msg) do
+    pid = Client.get_client_by_id(battle.founder_id).pid
+    send(pid, {:battle_updated, battle.id, {from_id, msg, battle.id}, :say})
+    Logger.info("send_to_host - #{battle.id}, #{msg}")
   end
 end

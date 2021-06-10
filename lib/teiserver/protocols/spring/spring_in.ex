@@ -729,6 +729,7 @@ defmodule Teiserver.Protocols.SpringIn do
     reply(:join_battle_failure, "No user detected", msg_id, state)
   end
   defp do_handle("JOINBATTLE", data, msg_id, state) do
+    # Double space is here as the hashcode isn't sent by Chobby
     data = case Regex.run(~r/^(\S+)  (\S+)$/, data) do
       [_, battle_id, script_password] ->
         "#{battle_id} empty #{script_password}"

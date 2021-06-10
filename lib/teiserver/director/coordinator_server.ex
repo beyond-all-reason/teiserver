@@ -64,6 +64,7 @@ defmodule Teiserver.Director.CoordinatorServer do
 
   # Direct/Room messaging
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
+  def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
   def handle_info({:new_message, userid, room_name, _message}, state) do
     # If it's us sending it, don't reply

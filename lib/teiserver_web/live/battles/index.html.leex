@@ -19,6 +19,7 @@
   <thead>
     <tr>
       <th>Name</th>
+      <th>Director</th>
       <th>Player count</th>
 
       <th></th>
@@ -29,6 +30,7 @@
       <%= if battle != nil do %>
         <tr id="battle-<%= battle.id %>">
           <td><%= battle.name %></td>
+          <td><%= if battle.director_mode, do: "Enabled" %></td>
           <td><%= battle.player_count %></td>
 
           <td>
