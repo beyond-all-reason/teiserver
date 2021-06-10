@@ -81,16 +81,19 @@ defmodule Teiserver.User do
   alias Teiserver.EmailHelper
   alias Teiserver.Account
 
+  def next_springid() do
+    ConCache.isolated(:id_counters, :springid, fn ->
+      new_value = ConCache.get(:id_counters, :springid) + 1
+      ConCache.put(:id_counters, :springid, new_value)
+      new_value
+    end)
+  end
+
   @spec generate_random_password :: String.t()
   def generate_random_password() do
     @wordlist
     |> Enum.take_random(3)
     |> Enum.join(" ")
-  end
-
-  @spec make_spring_id() :: integer()
-  def make_spring_id() do
-    :random.uniform(999_999-100_000) + 100_000
   end
 
   @spec clean_name(String.t()) :: String.t()
@@ -125,7 +128,7 @@ defmodule Teiserver.User do
       icon: "fas fa-user",
       admin_group_id: Teiserver.user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
-      springid: make_spring_id(),
+      springid: next_springid(),
       data:
         data
         |> Map.merge(%{
@@ -183,6 +186,7 @@ defmodule Teiserver.User do
         # Now add them to the cache
         user
         |> convert_user
+        |> Map.put(:springid, next_springid())
         |> add_user
 
         EmailHelper.new_user(user)
@@ -734,7 +738,8 @@ defmodule Teiserver.User do
       |> Enum.filter(fn r -> r < ingame_hours end)
       |> Enum.count()
 
-    springid = if Map.get(user, :springid) != nil, do: user.springid, else: make_spring_id()
+    springid = if Map.get(user, :springid) != nil, do: user.springid, else: next_springid()
+    |> Central.Helpers.NumberHelper.int_parse
 
     user =
       %{

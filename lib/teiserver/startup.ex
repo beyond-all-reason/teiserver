@@ -158,10 +158,29 @@ defmodule Teiserver.Startup do
     ConCache.put(:lists, :rooms, [])
     ConCache.insert_new(:lists, :battles, [])
 
-    ConCache.put(:id_counters, :battle, 0)
+    ConCache.put(:id_counters, :battle, :random.uniform(9999))
 
     Teiserver.User.pre_cache_users()
     Teiserver.Data.Matchmaking.pre_cache_queues()
+
+    current_springid = Teiserver.User.list_users()
+    # |> Enum.filter(fn u ->
+    #   Central.Helpers.NumberHelper.int_parse(u.springid) > 20000
+    # end)
+    |> Enum.map(fn u -> Central.Helpers.NumberHelper.int_parse(u.springid) end)
+    |> Enum.max()
+    # |> Enum.map(fn user ->
+    #   next_id = Teiserver.User.next_springid()
+    #   IO.puts "UPDATE account_users SET data = jsonb_set(account_users.data, '{springid}', '#{next_id}') WHERE id = #{user.id};"
+    # end)
+
+    # Max existing springid = 9998
+
+    # IO.puts ""
+    # IO.inspect current_springid
+    # IO.puts ""
+
+    ConCache.put(:id_counters, :springid, current_springid + 1)
 
     ConCache.put(:application_metadata_cache, "teiserver_startup_completed", true)
     ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", nil)

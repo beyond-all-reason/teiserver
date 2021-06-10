@@ -46,7 +46,7 @@ defmodule Teiserver.TeiserverTestLib do
 
         user
         |> User.convert_user()
-        |> Map.put(:springid, User.make_spring_id())
+        |> Map.put(:springid, User.next_springid())
         |> User.add_user()
         |> User.verify_user()
 
@@ -428,8 +428,5 @@ defmodule Teiserver.TeiserverTestLib do
 
   def seed() do
     CoordinatorServer.get_coordinator_account()
-    CoordinatorServer.create_consul(1)
-    CoordinatorServer.create_consul(2)
-    CoordinatorServer.create_consul(3)
   end
 end
