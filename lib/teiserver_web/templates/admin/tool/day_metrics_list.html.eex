@@ -49,7 +49,7 @@
               <td><%= format_number log.data["aggregates"]["stats"]["peak_user_counts"]["total"] %></td>
               <td><%= format_number log.data["aggregates"]["stats"]["peak_user_counts"]["player"] %></td>
 
-              <td><%= format_number log.data["aggregates"]["minutes"]["player"] %></td>
+              <td><%= represent_minutes log.data["aggregates"]["minutes"]["player"] %></td>
 
               <td><%= format_number log.data["aggregates"]["stats"]["accounts_created"] %></td>
 
