@@ -6,7 +6,7 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
     AgentLib.post_agent_update(state.id, "Starting agents supervisor")
 
     add_servers("battlehost", 3)
-    add_servers("battlehost", 4, 4, %{name: "stable", number: 4, leave_chance: 0, inaction_chance: 0})
+    add_servers("battlehost", 4, 4, %{name: "stable", number: 4, leave_chance: 0, inaction_chance: 0, password_chance: 0})
     add_servers("battlehost", 5, 5, %{name: "unstable", number: 5, always_leave: true, leave_chance: 1, inaction_chance: 0})
     add_servers("battlehost", 6, 6, %{name: "reject", number: 6, leave_chance: 0, reject: true})
     add_servers("battlejoin", 15)

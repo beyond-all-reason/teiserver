@@ -81,6 +81,8 @@
 ```
 
 ### TODO: `c.battle.update`
+### TODO: `s.battle.updated`
+
 ### TODO: `c.battle.start`
 ### TODO: `c.battle.end`
 ### TODO: `c.battle.close`
@@ -184,6 +186,12 @@ The response to a `s.battle.request_to_join` message informing the server if the
 ### TODO: `c.battle.send_invite`
 ### TODO: `s.battle.invite_to_battle`
 ### TODO: `c.battle.respond_to_invite`
+
+### TODO: `c.battle.message`
+### TODO: `s.battle.message`
+
+### TODO: `c.battle.announce` -- Previously sayex
+### TODO: `s.battle.announce`
 
 ## Telemetry
 - Mid-battle updates?

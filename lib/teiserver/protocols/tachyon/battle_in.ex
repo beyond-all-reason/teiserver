@@ -19,6 +19,8 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
       battle_keys
       |> Map.new(fn k -> {k, Map.get(battle_dict, to_string(k))} end)
       |> Map.put(:founder_id, state.userid)
+      |> Map.put(:founder_name, state.username)
+      |> Map.put(:ip, "127.0.0.1")
       |> BattleLobby.create_battle()
       |> BattleLobby.add_battle()
 

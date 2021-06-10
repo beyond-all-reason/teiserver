@@ -53,6 +53,9 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   defp handle_msg(%{"cmd" => "s.battle.join", "result" => "waiting_for_host"}, state) do
     %{state | stage: :waiting}
   end
+  defp handle_msg(%{"cmd" => "s.battle.join", "result" => "failure"}, state) do
+    %{state | stage: :no_battle, battle_id: nil}
+  end
   defp handle_msg(%{"cmd" => "s.battle.join_response", "result" => "failure"}, state) do
     %{state | stage: :no_battle, battle_id: nil}
   end
@@ -65,15 +68,19 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   defp handle_msg(%{"cmd" => "s.battle.leave", "result" => "success"}, state) do
     %{state | battle_id: nil}
   end
+  defp handle_msg(%{"cmd" => "s.communication.direct_message"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.battle.announce"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.battle.message"}, state), do: state
 
   defp join_battle(state, []), do: state
   defp join_battle(state, battle_ids) do
     battle_id = Enum.random(battle_ids)
+    battle = BattleLobby.get_battle!(battle_id)
 
     cmd = %{
       cmd: "c.battle.join",
       battle_id: battle_id,
-      password: "password2"
+      password: battle.password
     }
     AgentLib._send(state.socket, cmd)
 

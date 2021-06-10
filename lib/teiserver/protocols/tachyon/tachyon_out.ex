@@ -1,7 +1,7 @@
 defmodule Teiserver.Protocols.TachyonOut do
   require Logger
   alias Teiserver.Protocols.Tachyon
-  alias Teiserver.Protocols.Tachyon.{AuthOut, BattleOut, SystemOut}
+  alias Teiserver.Protocols.Tachyon.{AuthOut, BattleOut, CommunicationOut, SystemOut}
 
   @spec reply(atom(), atom(), Map.t(), Map.t()) :: Map.t()
 
@@ -11,8 +11,11 @@ defmodule Teiserver.Protocols.TachyonOut do
   def reply(:login_end, _data, _msg_id, state), do: state
   def reply(:user_logged_in, _data, _msg_id, state), do: state
   def reply(:battle_opened, _data, _msg_id, state), do: state
+  def reply(:battle_message_ex, {sender_id, msg, battle_id}, _msg_id, state), do: reply(:battle, :announce, {sender_id, msg, battle_id}, state)
   def reply(:request_user_join_battle, data, _msg_id, state), do: reply(:battle, :request_to_join, data, state)
   def reply(:join_battle_failure, data, _msg_id, state), do: reply(:battle, :join_response, {:reject, data}, state)
+  def reply(:battle_message, {sender_id, msg, battle_id}, _msg_id, state), do: reply(:battle, :message, {sender_id, msg, battle_id}, state)
+  def reply(:direct_message, {sender_id, msg, _user}, _msg_id, state), do: reply(:communication, :direct_message, {sender_id, msg}, state)
   # def reply(:join_battle_success, _data, _msg_id, state), do: reply(:battle, :join_response, {:approve, state.battle_id}, state)
 
 
@@ -21,6 +24,7 @@ defmodule Teiserver.Protocols.TachyonOut do
       case namespace do
         :auth -> AuthOut.do_reply(reply_cmd, data)
         :battle -> BattleOut.do_reply(reply_cmd, data)
+        :communication -> CommunicationOut.do_reply(reply_cmd, data)
         :system -> SystemOut.do_reply(reply_cmd, data)
       end
       |> add_msg_id(state)

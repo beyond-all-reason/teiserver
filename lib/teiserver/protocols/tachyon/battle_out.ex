@@ -84,4 +84,22 @@ defmodule Teiserver.Protocols.Tachyon.BattleOut do
       "reason" => reason
     }
   end
+
+  ###########
+  # Messages
+  def do_reply(:message, {sender_id, msg, _battle_id}) do
+    %{
+      "cmd" => "s.battle.message",
+      "sender" => sender_id,
+      "message" => msg
+    }
+  end
+
+  def do_reply(:announce, {sender_id, msg, _battle_id}) do
+    %{
+      "cmd" => "s.battle.announce",
+      "sender" => sender_id,
+      "message" => msg
+    }
+  end
 end

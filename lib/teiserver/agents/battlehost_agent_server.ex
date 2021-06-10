@@ -7,6 +7,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   @tick_period 5000
   @inaction_chance 0.5
   @leave_chance 0.5
+  @password_chance 0.5
 
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
@@ -37,7 +38,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
         leave_battle(state)
 
       battle.player_count == 0 and battle.spectator_count == 0 ->
-        if :rand.uniform() <= @leave_chance do
+        if :rand.uniform() <= state.leave_chance do
           leave_battle(state)
         else
           state
@@ -78,22 +79,27 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   defp handle_msg(%{"cmd" => "s.battle.create", "battle" => %{"id" => battle_id}}, state) do
     %{state | battle_id: battle_id}
   end
+  defp handle_msg(%{"cmd" => "s.communication.direct_message"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.battle.announce"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.battle.message"}, state), do: state
 
   defp open_battle(state) do
+    password = if :rand.uniform() <= state.password_chance, do: "password"
+
     cmd = %{
       cmd: "c.battle.create",
       battle: %{
         cmd: "c.battles.create",
         name: "BH #{state.name} - #{:rand.uniform(9999)}",
         nattype: "none",
-        password: "password2",
+        password: password,
         port: 1234,
-        game_hash: "string_of_characters",
-        map_hash: "string_of_characters",
-        map_name: "koom valley",
-        game_name: "BAR",
-        engine_name: "spring-105",
-        engine_version: "105.1.2.3",
+        game_hash: "394169363",
+        map_hash: "1565299817",
+        map_name: "Comet Catcher Remake 1.8",
+        game_name: "Beyond All Reason test-16430-8349f84",
+        engine_name: "spring",
+        engine_version: "104.0.1-1878-ge59d4e2 BAR",
         settings: %{
           max_players: 12
         }
@@ -126,7 +132,8 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
        reject: Map.get(opts, :reject, false),
        leave_chance: Map.get(opts, :leave_chance, @leave_chance),
        inaction_chance: Map.get(opts, :leave_chance, @inaction_chance),
-       always_leave: Map.get(opts, :always_leave, false)
+       always_leave: Map.get(opts, :always_leave, false),
+       password_chance: Map.get(opts, :password_chance, @password_chance)
      }}
   end
 end
