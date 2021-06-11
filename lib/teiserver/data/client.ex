@@ -199,15 +199,15 @@ defmodule Teiserver.Client do
   #   GenServer.call(pid, :get_state)
   # end
 
-  def disconnect(userid) do
+  def disconnect(userid, reason \\ nil) do
     case get_client_by_id(userid) do
       nil -> nil
-      client -> do_disconnect(client)
+      client -> do_disconnect(client, reason)
     end
   end
 
   # If it's a test user, don't worry about actually disconnecting it
-  defp do_disconnect(client) do
+  defp do_disconnect(client, reason) do
     is_test_user = String.contains?(client.name, "new_test_user_")
 
     BattleLobby.remove_user_from_any_battle(client.userid)
@@ -218,6 +218,13 @@ defmodule Teiserver.Client do
     # ones we do won't be called new_test_user_
     if not is_test_user do
       spawn(fn -> User.logout(client.userid) end)
+      if client.name != nil and String.contains?(client.name, "new_test_user") == false do
+        if reason do
+          Logger.error("disconnect of #{client.name} (#{reason})")
+        else
+          Logger.error("disconnect of #{client.name}")
+        end
+      end
     end
 
     # Typically we would only send the username but it is possible they just changed their username

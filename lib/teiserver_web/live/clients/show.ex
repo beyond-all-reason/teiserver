@@ -84,7 +84,7 @@ defmodule TeiserverWeb.ClientLive.Show do
 
   @impl true
   def handle_event("force-disconnect", _event, socket) do
-    Client.disconnect(socket.assigns[:id])
+    Client.disconnect(socket.assigns[:id], "force-disconnect from web")
     {:noreply, socket}
   end
 

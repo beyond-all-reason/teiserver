@@ -679,8 +679,7 @@ defmodule Teiserver.User do
             {:error, "Unverified", user.id}
 
           Client.get_client_by_id(user.id) != nil ->
-            # {:error, "Already logged in"}
-            Client.disconnect(user.id)
+            Client.disconnect(user.id, "Already logged in")
             do_login(user, ip, lobby)
 
           true ->
@@ -716,8 +715,7 @@ defmodule Teiserver.User do
             {:error, "Unverified", user.id}
 
           Client.get_client_by_id(user.id) != nil ->
-            # {:error, "Already logged in"}
-            Client.disconnect(user.id)
+            Client.disconnect(user.id, "Already logged in")
             do_login(user, ip, lobby)
 
           true ->
@@ -824,7 +822,7 @@ defmodule Teiserver.User do
     |> update_user(persist: true)
 
     if is_banned?(user) do
-      Client.disconnect(user.id)
+      Client.disconnect(user.id, "Banned")
     end
 
     :ok
@@ -920,7 +918,7 @@ defmodule Teiserver.User do
     user = get_user_by_id(userid)
 
     if user do
-      Client.disconnect(userid)
+      Client.disconnect(userid, "User deletion")
       :timer.sleep(100)
 
       ConCache.delete(:users, userid)

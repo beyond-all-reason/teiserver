@@ -275,34 +275,33 @@ defmodule Teiserver.TcpServer do
   # Connection
   def handle_info({:tcp_closed, socket}, %{socket: socket, transport: transport} = state) do
     transport.close(socket)
-    Client.disconnect(state.userid)
+    Client.disconnect(state.userid, ":tcp_closed with socket")
     {:stop, :normal, %{state | userid: nil}}
   end
 
   def handle_info({:tcp_closed, _socket}, state) do
-    Client.disconnect(state.userid)
+    Client.disconnect(state.userid, ":tcp_closed no socket")
     {:stop, :normal, %{state | userid: nil}}
   end
 
   def handle_info({:ssl_closed, socket}, %{socket: socket, transport: transport} = state) do
     transport.close(socket)
-    Client.disconnect(state.userid)
+    Client.disconnect(state.userid, ":ssl_closed with socket")
     {:stop, :normal, %{state | userid: nil}}
   end
 
   def handle_info({:ssl_closed, _socket}, state) do
-    Client.disconnect(state.userid)
+    Client.disconnect(state.userid, ":ssl_closed no socket")
     {:stop, :normal, %{state | userid: nil}}
   end
 
   def handle_info(:terminate, state) do
-    Client.disconnect(state.userid)
+    Client.disconnect(state.userid, "tcp_server :terminate")
     {:stop, :normal, %{state | userid: nil}}
   end
 
   def terminate(_reason, state) do
-    if state.username != nil and String.contains?(state.username, "new_test_user") == false, do: Logger.error("disconnect of #{state.username}")
-    Client.disconnect(state.userid)
+    Client.disconnect(state.userid, "tcp_server terminate")
   end
 
   # #############################

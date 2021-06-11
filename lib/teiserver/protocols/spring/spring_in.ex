@@ -441,7 +441,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("EXIT", _reason, _msg_id, state) do
-    Client.disconnect(state.userid)
+    Client.disconnect(state.userid, "Spring EXIT command")
     send(self(), :terminate)
     state
   end
@@ -725,7 +725,6 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("JOINBATTLE", _data, msg_id, %{user: nil} = state) do
-    Logger.error("JOINBATTLE with no user - #{Kernel.inspect(state)}")
     reply(:join_battle_failure, "No user detected", msg_id, state)
   end
   defp do_handle("JOINBATTLE", data, msg_id, state) do

@@ -58,7 +58,7 @@ defmodule Teiserver.Protocols.Tachyon.AuthIn do
   end
 
   def do_handle("disconnect", _data, state) do
-    Client.disconnect(state.userid)
+    Client.disconnect(state.userid, "Tachyon auth.disconnect")
     send(self(), :terminate)
     state
   end
