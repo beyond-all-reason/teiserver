@@ -1,5 +1,5 @@
 defmodule Teiserver.Director do
-  alias Teiserver.Battle.BattleLobby
+  # alias Teiserver.Battle.BattleLobby
   alias Teiserver.Client
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Director.Parser
@@ -15,61 +15,74 @@ defmodule Teiserver.Director do
         data: %{}
       })
 
-    ConCache.put(:teiserver_director, :coordinator, coordinator_pid)
+    ConCache.put(:teiserver_consuls, :coordinator, coordinator_pid)
     send(coordinator_pid, :begin)
     :ok
   end
 
-  @spec get_coordinator_pid() :: pid()
-  defp get_coordinator_pid() do
-    ConCache.get(:teiserver_director, :coordinator)
-  end
-
-  @spec get_consul_pid(Types.battle_id()) :: pid()
-  defp get_consul_pid(battle_id) do
-    ConCache.get(:teiserver_director, battle_id)
-  end
+  # @spec get_coordinator_pid() :: pid()
+  # defp get_coordinator_pid() do
+  #   ConCache.get(:teiserver_director, :coordinator)
+  # end
 
   @spec start_director() :: :ok | {:failure, String.t()}
   def start_director() do
     cond do
-      Supervisor.count_children(Teiserver.Director.DynamicSupervisor)[:active] > 0 ->
+      get_coordinator_userid() != nil ->
         {:failure, "Already started"}
 
       true ->
         do_start()
-        :ok
     end
   end
 
-  def start_consul() do
-    {:ok, coordinator_pid} =
+  @spec get_coordinator_userid() :: T.userid()
+  def get_coordinator_userid() do
+    ConCache.get(:application_metadata_cache, "teiserver_coordinator_userid")
+  end
+
+  @spec get_or_start_consul(T.battle_id()) :: pid()
+  def get_or_start_consul(battle_id) do
+    case ConCache.get(:teiserver_consuls, battle_id) do
+      nil -> start_consul(battle_id)
+      pid -> pid
+    end
+  end
+
+  @spec start_consul(T.battle_id()) :: pid()
+  defp start_consul(battle_id) do
+    {:ok, consul_pid} =
       DynamicSupervisor.start_child(Teiserver.Director.DynamicSupervisor, {
         Teiserver.Director.ConsulServer,
         name: Teiserver.Director.CoordinatorServer,
-        data: %{}
+        data: %{
+          battle_id: battle_id,
+        }
       })
 
-    ConCache.put(:teiserver_director, :coordinator, coordinator_pid)
-    send(coordinator_pid, :begin)
+    ConCache.put(:teiserver_consuls, battle_id, consul_pid)
+    send(consul_pid, :startup)
+    consul_pid
   end
 
-  @spec add_to_battle(integer()) :: :ok
-  def add_to_battle(battle_id) do
-    send(get_coordinator_pid(), {:request_consul, battle_id})
+  @spec cast_consul(T.battle_id(), any) :: :ok
+  def cast_consul(%{consul_pid: consul_pid}, msg) do
+    send(consul_pid, msg)
     :ok
   end
 
-  @spec remove_from_battle(integer()) :: :ok
-  def remove_from_battle(battle_id) do
-    send(get_coordinator_pid(), {:remove_consul, battle_id})
+  def cast_consul(battle_id, msg) do
+    send(get_or_start_consul(battle_id), msg)
     :ok
   end
 
-  @spec message_consul(Types.battle_id(), any) :: :ok
-  def message_consul(battle_id, msg) do
-    send(get_consul_pid(battle_id), msg)
-    :ok
+  @spec call_consul(pid() | T.battle_id(), any) :: any
+  def call_consul(%{consul_pid: consul_pid}, msg) do
+    GenServer.call(consul_pid, msg)
+  end
+
+  def call_consul(battle_id, msg) do
+    GenServer.call(get_or_start_consul(battle_id), msg)
   end
 
   def handle_in(userid, msg, battle_id) do

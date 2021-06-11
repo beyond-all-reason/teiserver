@@ -110,6 +110,8 @@ defmodule Teiserver.Battle.BattleLobby do
 
   @spec add_battle(Map.t()) :: Map.t()
   def add_battle(battle) do
+    consul_pid = Director.get_or_start_consul(battle.id)
+    battle = %{battle | consul_pid: consul_pid}
     ConCache.put(:battles, battle.id, battle)
 
     ConCache.update(:lists, :battles, fn value ->
@@ -225,6 +227,12 @@ defmodule Teiserver.Battle.BattleLobby do
           battle_state
         else
           Client.join_battle(userid, battle_id)
+
+          if battle_state.director_mode do
+            sayprivateex(battle_state.founder_id, userid, "Director mode enabled", battle_id)
+          end
+
+          Director.cast_consul(battle_state, {:user_joined, userid})
 
           PubSub.broadcast(
             Central.PubSub,
@@ -444,6 +452,9 @@ defmodule Teiserver.Battle.BattleLobby do
       battle.password != nil and password != battle.password and user.moderator == false ->
         {:failure, "Invalid password"}
 
+      Director.call_consul(battle, {:request_user_join_battle, userid}) == false ->
+        {:failure, "Denied by consul"}
+
       true ->
         # Okay, so far so good, what about the host? Are they okay with it?
         host_client = Client.get_client_by_id(battle.founder_id)
@@ -473,16 +484,12 @@ defmodule Teiserver.Battle.BattleLobby do
   end
 
   @spec say(Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
-  # These two implementations are a temporary method to ensure the system works as expected
-  # userid 3 is my main account, nobody will be able to enable it by mistake but
-  # anybody will be able to disable it if there's any issue
-  def say(3, "!director start", battle_id) do
-    start_director_mode(battle_id)
-  end
-
-  def say(userid, "!director stop", battle_id) do
-    stop_director_mode(battle_id)
-    sayex(userid, "!director stop", battle_id)
+  def say(userid, "!director start", battle_id) do
+    client = Client.get_client_by_id(userid)
+    if client.moderator do
+      start_director_mode(battle_id)
+    end
+    :ok
   end
 
   def say(userid, msg, battle_id) do
@@ -526,8 +533,8 @@ defmodule Teiserver.Battle.BattleLobby do
   def start_director_mode(battle_id) do
     Logger.debug("Starting director mode for #{battle_id}")
     battle = get_battle!(battle_id)
+    sayex(battle.founder_id, "Director mode enabled", battle_id)
     update_battle(%{battle | director_mode: true}, nil, nil)
-    Director.add_to_battle(battle_id)
     :ok
   end
 
@@ -535,8 +542,8 @@ defmodule Teiserver.Battle.BattleLobby do
   def stop_director_mode(battle_id) do
     Logger.debug("Stopping director mode for #{battle_id}")
     battle = get_battle!(battle_id)
+    sayex(battle.founder_id, "Director mode stopped", battle_id)
     update_battle(%{battle | director_mode: false}, nil, nil)
-    Director.remove_from_battle(battle_id)
     :ok
   end
 

@@ -86,8 +86,6 @@ defmodule Teiserver.Client do
       client
       |> add_client
 
-    # TODO If reason is :client_updated_status then metric on change?
-
     PubSub.broadcast(Central.PubSub, "all_client_updates", {:updated_client, client, reason})
 
     if client.battle_id,

@@ -3,10 +3,9 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.User
+  alias Teiserver.{Client, User, Director}
   alias Teiserver.Battle.BattleLobby
   alias Teiserver.Battle.BattleLobbyLib
-  alias Teiserver.Client
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """
@@ -54,12 +53,16 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
       _ ->
         {users, clients} = get_user_and_clients(battle.players)
 
+        bar_user = User.get_user_by_id(socket.assigns.current_user.id)
+
         {:noreply,
          socket
+         |> assign(:bar_user, bar_user)
          |> assign(:page_title, page_title(socket.assigns.live_action))
          |> add_breadcrumb(name: battle.name, url: "/teiserver/battles/lobbies/#{battle.id}")
          |> assign(:id, int_parse(id))
          |> assign(:battle, battle)
+         |> get_consul_state
          |> assign(:users, users)
          |> assign(:clients, clients)}
     end
@@ -89,6 +92,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
       |> assign(:users, new_users)
       |> assign(:clients, new_clients)
       |> assign(:battle, BattleLobby.get_battle(assigns.id))
+      |> get_consul_state
       |> maybe_index_redirect
     else
       socket
@@ -104,6 +108,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
     |> assign(:users, new_users)
     |> assign(:clients, new_clients)
     |> assign(:battle, BattleLobby.get_battle(assigns.id))
+    |> get_consul_state
     |> maybe_index_redirect
   end
 
@@ -171,6 +176,54 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
 
   def handle_info({:update_bot, _battle_id, _bot}, %{assigns: assigns} = socket) do
     {:noreply, assign(socket, :battle, BattleLobby.get_battle(assigns.id))}
+  end
+
+  @impl true
+  def handle_event("start-director", _event, %{assigns: %{id: id}} = socket) do
+    Logger.warn("Starting director mode")
+    BattleLobby.start_director_mode(id)
+    battle = %{socket.assigns.battle | director_mode: true}
+    {:noreply, assign(socket, :battle, battle)}
+  end
+
+  def handle_event("stop-director", _event, %{assigns: %{id: id}} = socket) do
+    Logger.warn("Stopping director mode")
+    BattleLobby.stop_director_mode(id)
+    battle = %{socket.assigns.battle | director_mode: false}
+    {:noreply, assign(socket, :battle, battle)}
+  end
+
+  def handle_event("force-spectator:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
+    # BattleLobby.force_change_client(bar_user.id, int_parse(target_id), :player, false)
+    Director.cast_consul(id, %{
+      command: "force-spectator",
+      remaining: target_id,
+      senderid: bar_user.id
+    })
+    {:noreply, socket}
+  end
+
+  def handle_event("kick:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
+    Director.cast_consul(id, %{
+      command: "kick",
+      remaining: int_parse(target_id),
+      senderid: bar_user.id
+    })
+    {:noreply, socket}
+  end
+
+  def handle_event("ban:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
+    Director.cast_consul(id, %{
+      command: "ban",
+      remaining: int_parse(target_id),
+      senderid: bar_user.id
+    })
+    {:noreply, socket}
+  end
+
+  defp get_consul_state(%{assigns: %{id: id}} = socket) do
+    socket
+    |> assign(:consul, Director.call_consul(id, :get_all))
   end
 
   defp page_title(:show), do: "Show Battle"

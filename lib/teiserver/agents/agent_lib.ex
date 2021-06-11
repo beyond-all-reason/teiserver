@@ -81,7 +81,7 @@ defmodule Teiserver.Agents.AgentLib do
     if User.get_user_by_email(data.email) == nil do
       User.register_user_with_md5(data.name, data.email, "password", "127.0.0.1")
       user = User.get_user_by_name(data.name)
-      user = %{user | verified: true}
+      user = %{user | verified: true, bot: data[:bot], moderator: data[:moderator]}
       User.update_user(user, persist: true)
       User.recache_user(user.id)
       :timer.sleep(100)

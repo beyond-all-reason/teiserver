@@ -158,45 +158,59 @@ defmodule Teiserver.Startup do
     ConCache.put(:lists, :rooms, [])
     ConCache.insert_new(:lists, :battles, [])
 
-    ConCache.put(:id_counters, :battle, :random.uniform(9999))
+    ConCache.put(:id_counters, :battle, :random.uniform(99999))
 
     Teiserver.User.pre_cache_users()
     Teiserver.Data.Matchmaking.pre_cache_queues()
 
-    current_springid = Teiserver.User.list_users()
-    # |> Enum.filter(fn u ->
-    #   Central.Helpers.NumberHelper.int_parse(u.springid) > 20000
-    # end)
+    springids = Teiserver.User.list_users()
     |> Enum.map(fn u -> Central.Helpers.NumberHelper.int_parse(u.springid) end)
-    |> Enum.max()
+
+    # We do this as a separate operation because a blank DB won't have any springids yet
+    current_springid = Enum.max([0] ++ springids)
+
+    ConCache.put(:id_counters, :springid, current_springid + 1)
+
+    # Temp code
+    ####################################################################
+    # susers = Teiserver.User.list_users()
+    # |> Enum.group_by(fn u -> u.springid end)
+
+    # ids = Map.keys(susers)
+
+    # dupes = susers
+    # |> Enum.filter(fn {_sid, ulist} ->
+    #   Enum.count(ulist) > 1
+    # end)
+
+    # IO.puts ""
+    # IO.inspect dupes
+    # IO.inspect current_springid
+    # IO.puts ""
+
+    # |> Enum.map(fn u -> {u.id, u.springid} end)
     # |> Enum.map(fn user ->
     #   next_id = Teiserver.User.next_springid()
     #   IO.puts "UPDATE account_users SET data = jsonb_set(account_users.data, '{springid}', '#{next_id}') WHERE id = #{user.id};"
     # end)
-
-    # Max existing springid = 9998
-
-    # IO.puts ""
-    # IO.inspect current_springid
-    # IO.puts ""
-
-    ConCache.put(:id_counters, :springid, current_springid + 1)
+    ####################################################################
 
     ConCache.put(:application_metadata_cache, "teiserver_startup_completed", true)
     ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", nil)
     ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_cache", true)
 
-    if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
-      spawn(fn ->
-        :timer.sleep(500)
-        Teiserver.agent_mode()
-      end)
-    end
-
     if Application.get_env(:central, Teiserver)[:enable_director_mode] do
       spawn(fn ->
         :timer.sleep(500)
         Teiserver.Director.start_director()
+      end)
+    end
+
+    # We want this to start up later than the coordinator
+    if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
+      spawn(fn ->
+        :timer.sleep(650)
+        Teiserver.agent_mode()
       end)
     end
 

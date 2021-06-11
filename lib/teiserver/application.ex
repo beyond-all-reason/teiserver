@@ -30,7 +30,7 @@ defmodule Teiserver.Application do
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueMatchSupervisor},
 
       # Director mode
-      concache_perm_sup(:teiserver_director),
+      concache_perm_sup(:teiserver_consuls),
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Director.DynamicSupervisor},
 
       # Telemetry

@@ -7,7 +7,7 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
   alias Central.Repo
   import Ecto.Query, warn: false
 
-  @log_keep_days 35
+  @log_keep_days 90
   @segment_length 60# Minutes
   @segment_count div(1440, @segment_length)-1
 

@@ -4,28 +4,31 @@ defmodule Teiserver.Protocols.Director.SetupTest do
   alias Teiserver.Battle.BattleLobby
   alias Teiserver.Common.PubsubListener
 
-  @sleep 200
+  import Teiserver.TeiserverTestLib,
+    only: [tachyon_auth_setup: 0]
+
+  @sleep 50
 
   setup do
-    Teiserver.Director.start_director()
-    # Sleep to allow the director to be started up each time
-    :timer.sleep(100)
-    :ok
+    %{socket: socket, user: user, pid: pid} = tachyon_auth_setup()
+    {:ok, socket: socket, user: user, pid: pid}
   end
 
-  test "start, stop" do
-    battle = TeiserverTestLib.make_battle()
+  test "start, stop", %{user: user} do
+    battle = TeiserverTestLib.make_battle(%{
+      founder_id: user.id,
+      founder_name: user.name
+    })
     id = battle.id
     assert battle.director_mode == false
+    assert ConCache.get(:teiserver_consuls, battle.id) != nil
 
     # Start it up!
-    BattleLobby.say(1, "!director start", id)
+    BattleLobby.say(3, "!director start", id)
     :timer.sleep(@sleep)
 
     battle = BattleLobby.get_battle!(id)
     assert battle.director_mode == true
-
-    # TODO: Check the consul is created and assigned to this battle
 
     # Stop it
     BattleLobby.say(123_456, "!director stop", id)
@@ -35,20 +38,15 @@ defmodule Teiserver.Protocols.Director.SetupTest do
     assert battle.director_mode == false
   end
 
-  test "create as director" do
-    battle =
-      TeiserverTestLib.make_battle(%{
-        director_mode: true
-      })
+  test "test command vs no command", %{user: user} do
+    battle = TeiserverTestLib.make_battle(%{
+      founder_id: user.id,
+      founder_name: user.name
+    })
+    assert battle.director_mode == false
 
-    assert battle.director_mode == true
-  end
-
-  test "test command vs no command" do
-    battle =
-      TeiserverTestLib.make_battle(%{
-        director_mode: true
-      })
+    BattleLobby.start_director_mode(battle.id)
+    battle = BattleLobby.get_battle!(battle.id)
 
     assert battle.director_mode == true
     listener = PubsubListener.new_listener(["battle_updates:#{battle.id}"])

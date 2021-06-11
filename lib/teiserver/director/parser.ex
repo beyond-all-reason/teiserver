@@ -27,24 +27,27 @@ defmodule Teiserver.Director.Parser do
 
   @spec parse_and_handle(Types.userid(), String.t(), Map.t()) :: :ok
   defp parse_and_handle(userid, msg, battle) do
-    [cmd, opts] =
-      case String.split(msg, " ", parts: 2) do
-        [cmd] -> [cmd, []]
-        [cmd, parts] -> [cmd, String.split(parts, " ")]
-      end
-
-    do_handle(userid, cmd, opts, battle)
+    parse_command(userid, msg)
+    |> do_handle(battle)
   end
 
-  @spec do_handle(Types.userid(), String.t(), [String.t()], Map.t()) :: :nomatch | :ok
-  defp do_handle(from_id, "!start", _opts, battle) do
-    send_to_host(from_id, battle, "!forcestart")
-    :ok
+  @spec do_handle(Map.t(), Map.t()) :: :nomatch | :ok
+  defp do_handle(%{command: nil}, _battle), do: :nomatch
+
+  defp do_handle(%{command: "forcestart"} = cmd, battle) do
+    send_to_host(cmd.sender, battle, "!forcestart")
   end
 
-  defp do_handle(_, cmd, opts, _) do
-    msg = "#{cmd}: #{Kernel.inspect(opts)}"
-    Logger.error("director handle error: #{msg}")
+  defp do_handle(%{command: "welcome-message"} = cmd, battle) do
+    send_to_consul(battle, cmd)
+  end
+
+  defp do_handle(%{command: "director"} = cmd, battle) do
+    send_to_consul(battle, cmd)
+  end
+
+  defp do_handle(%{command: command}, _battle) do
+    Logger.error("director no handler for cmd: #{command}")
     :nomatch
   end
 
@@ -52,5 +55,46 @@ defmodule Teiserver.Director.Parser do
   defp send_to_host(from_id, battle, msg) do
     Director.send_to_host(from_id, battle, msg)
     :ok
+  end
+
+  @spec send_to_consul(Map.t(), Map.t()) :: :ok
+  defp send_to_consul(battle, cmd) do
+    send(battle.consul_pid, cmd)
+    :ok
+  end
+
+  @spec parse_command(T.userid(), String.t()) :: Map.t()
+  def parse_command(userid, string) do
+    %{
+      raw: string,
+      remaining: string,
+      vote: false,
+      command: nil,
+      senderid: userid
+    }
+    |> parse_command_cv
+    |> parse_command_name
+  end
+
+  @spec parse_command_cv(Map.t()) :: Map.t()
+  defp parse_command_cv(%{remaining: string} = cmd) do
+    if String.slice(string, 0, 4) == "!cv " do
+      %{cmd | vote: true, remaining: "!" <> String.slice(string, 4, 1024)}
+    else
+      cmd
+    end
+  end
+
+  @spec parse_command_name(Map.t()) :: Map.t()
+  defp parse_command_name(%{remaining: string} = cmd) do
+    case Regex.run(~r/!([a-z0-9\-]+) /, string) do
+      [_, command_name] ->
+        %{cmd |
+          command: command_name,
+          remaining: String.slice(string, String.length(command_name) + 2, 999)
+        }
+      _ ->
+        cmd
+    end
   end
 end

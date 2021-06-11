@@ -8,8 +8,21 @@
     client.player
   end)
 
+  factions = %{
+    0 => "Armada",
+    1 => "Cortex",
+    2 => "Random"
+  }
+
   players = Map.get(result, true, [])
-  _spectators = Map.get(result, false, [])
+  |> Enum.map(fn p -> @clients[p] end)
+  |> Enum.sort_by(& {&1[:ally_team_number], &1[:name]})
+
+  spectators = Map.get(result, false, [])
+  |> Enum.map(fn p -> @clients[p] end)
+  |> Enum.sort_by(& &1[:name])
+
+  is_moderator = @bar_user.moderator
 %>
 
 <%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "battle_lobbies", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
@@ -47,13 +60,12 @@
     </tr>
   </thead>
   <tbody>
-    <%= for p <- players do %>
+    <%= for client <- players do %>
       <%
-        user = @users[p]
-        client = @clients[p]
+        user = @users[client.userid]
 
-        friend = Enum.member?(@server_user.friends, p)
-        ignored = Enum.member?(@server_user.ignored, p)
+        friend = Enum.member?(@server_user.friends, client)
+        ignored = Enum.member?(@server_user.ignored, client)
       %>
       <%= if user do %>
         <tr>
@@ -68,11 +80,83 @@
           <td><%= user.name %></td>
           <td><%= client.handicap %></td>
           <td><%= client.ally_team_number %></td>
-          <td><%= client.side %></td>
+          <td><%= factions[client.side] %></td>
           <td><%= client.team_colour %></td>
 
           <td>
             <%= live_redirect "Show", to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}" %>
+
+            <%= if is_moderator do %>
+              <span class="btn btn-sm btn-outline-<%= bsname %>" phx-click="force-spectator:<%= client.userid %>">
+                &nbsp;
+                <i class='fa-fw fas fa-glasses'></i>
+                &nbsp;
+              </span>
+
+              <span class="btn btn-sm btn-outline-<%= bsname %>" phx-click="kick:<%= client.userid %>">
+                &nbsp;
+                <i class='fa-fw fas fa-boot'></i>
+                &nbsp;
+              </span>
+
+              <span class="btn btn-sm btn-outline-<%= bsname %>" phx-click="ban:<%= client.userid %>">
+                &nbsp;
+                <i class='fa-fw fas fa-ban'></i>
+                &nbsp;
+              </span>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>
+
+<h4>Spectators</h4>
+<table class="table">
+  <thead>
+    <tr>
+      <th width="100">&nbsp;</th>
+      <th>Name</th>
+      <th>&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for client <- spectators do %>
+      <%
+        user = @users[client.userid]
+
+        friend = Enum.member?(@server_user.friends, client)
+        ignored = Enum.member?(@server_user.ignored, client)
+      %>
+      <%= if user do %>
+        <tr>
+          <td width="100">
+            <%= if friend do %>
+              <i class="text-success fa-fw <%= Teiserver.icon(:friend) %>"></i>
+            <% end %>
+            <%= if ignored do %>
+              <i class="text-danger fa-fw <%= Teiserver.icon(:ignore) %>"></i>
+            <% end %>
+          </td>
+          <td><%= user.name %></td>
+
+          <td>
+            <%= live_redirect "Show", to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}" %>
+
+            <%= if is_moderator do %>
+              <span class="btn btn-sm btn-outline-<%= bsname %>" phx-click="kick:<%= client.userid %>">
+                &nbsp;
+                <i class='fa-fw fas fa-boot'></i>
+                &nbsp;
+              </span>
+
+              <span class="btn btn-sm btn-outline-<%= bsname %>" phx-click="ban:<%= client.userid %>">
+                &nbsp;
+                <i class='fa-fw fas fa-ban'></i>
+                &nbsp;
+              </span>
+            <% end %>
           </td>
         </tr>
       <% end %>
@@ -89,11 +173,33 @@
   </tbody>
 </table>
 
+<%= if @battle.director_mode do %>
+  <span class="btn btn-outline-<%= bsname %>" phx-click="stop-director">
+    <i class='fa-fw fas fa-square'></i>
+    &nbsp;
+    Stop director
+  </span>
+<% else %>
+  <span class="btn btn-outline-<%= bsname %>" phx-click="start-director">
+    <i class='fa-fw fas fa-play'></i>
+    &nbsp;
+    Start director
+  </span>
+<% end %>
+
 <%= if allow?(@current_user, "admin.dev.developer") do %>
-  <pre>
-    <%= Kernel.inspect @battle, pretty: true, limit: :infinity %>
-  </pre>
-<br />
+<div class="row">
+  <div class="col-md-6">
+    <pre>
+      <%= Kernel.inspect @battle, pretty: true, limit: :infinity %>
+    </pre>
+  </div>
+  <div class="col-md-6">
+    <pre>
+      <%= Kernel.inspect @consul, pretty: true, limit: :infinity %>
+    </pre>
+  </div>
+</div>
 <% end %>
 
 <span>

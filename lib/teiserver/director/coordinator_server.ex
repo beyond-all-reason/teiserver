@@ -1,4 +1,8 @@
 defmodule Teiserver.Director.CoordinatorServer do
+  @moduledoc """
+  The coordinator server is the interface point for the Director system. Consuls are invisible (to the players) processes
+  performing their actions in the name of the coordinator
+  """
   use GenServer
   alias Teiserver.{Account, User, Room}
   alias Phoenix.PubSub
@@ -12,6 +16,7 @@ defmodule Teiserver.Director.CoordinatorServer do
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Director coordinator")
     account = get_coordinator_account()
+    ConCache.put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
     {:ok, user} = User.internal_client_login(account.id)
 
     state = %{
@@ -39,29 +44,6 @@ defmodule Teiserver.Director.CoordinatorServer do
     {:noreply, state}
   end
 
-  def handle_info({:request_consul, battle_id}, state) do
-    {consul_id, consul_state} = get_next_consul(state.consuls)
-
-    case consul_state do
-      :idle ->
-        nil
-
-      :disconnected ->
-        connect_consul(consul_id)
-
-      nil ->
-        # consul_id = create_consul()
-        # connect_consul(consul_id)
-        nil
-    end
-
-    {:noreply, state}
-  end
-
-  def handle_info({:remove_consul, battle_id}, state) do
-    {:noreply, state}
-  end
-
   # Direct/Room messaging
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
@@ -86,35 +68,6 @@ defmodule Teiserver.Director.CoordinatorServer do
   def handle_info(msg, state) do
     Logger.error("Coordinator handle_info error. No handler for msg of #{Kernel.inspect msg}")
     {:noreply, state}
-  end
-
-  @spec get_next_consul(Map.t()) :: {integer(), :idle | :disconnected} | {nil, nil}
-  defp get_next_consul(consuls) do
-    available = consuls
-    |> Enum.group_by(fn {_k, {_pid, c_state}} ->
-      c_state
-    end, fn {consul_id, _v} ->
-      consul_id
-    end)
-
-    cond do
-      Map.has_key?(available, :idle) ->
-        {hd(available[:idle]), :idle}
-
-      Map.has_key?(available, :disconnected) ->
-        {hd(available[:disconnected]), :disconnected}
-
-      true ->
-        {nil, nil}
-    end
-  end
-
-  defp connect_consul(id) do
-    db_user = Account.get_user!(id)
-    token = User.create_token(db_user)
-    {:ok, user} = User.try_login(token, "127.0.0.1", "Teiserver Internal Process")
-
-    :timer.sleep(1000)
   end
 
   @spec get_coordinator_account() :: Central.Account.User.t()
@@ -161,11 +114,7 @@ defmodule Teiserver.Director.CoordinatorServer do
   end
 
   @spec init(Map.t()) :: {:ok, Map.t()}
-  def init(opts) do
-    {:ok,
-     %{
-       battle_id: opts[:battle_id],
-       game_mode: "team"
-     }}
+  def init(_opts) do
+    {:ok, %{}}
   end
 end
