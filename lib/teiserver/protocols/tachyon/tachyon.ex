@@ -131,7 +131,7 @@ defmodule Teiserver.Protocols.Tachyon do
     #   TachyonOut.reply(:add_start_rectangle, {team, r}, nil, state)
     # end)
 
-    # TachyonOut.reply(:request_battle_status, nil, nil, state)
+    TachyonOut.reply(:battle, :request_status, nil, state)
 
     %{state | battle_id: battle.id}
   end

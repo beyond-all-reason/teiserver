@@ -1,6 +1,6 @@
 defmodule Teiserver.Protocols.Tachyon.BattleIn do
   alias Teiserver.Battle.BattleLobby
-  # alias Teiserver.Protocols.Tachyon
+  alias Teiserver.Client
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
@@ -37,17 +37,23 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
       {:failure, reason} ->
         reply(:battle, :join, {:failure, reason}, state)
     end
+  end
 
-    # # Apply defaults
-    # battle =
-    #   battle_keys
-    #   |> Map.new(fn k -> {k, Map.get(battle_dict, to_string(k))} end)
-    #   |> Map.put(:founder_id, state.userid)
-    #   |> BattleLobby.join_battle()
-    #   |> BattleLobby.add_battle()
+  def do_handle("update_status", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
+  def do_handle("update_status", new_status, state) do
+    updates =
+      new_status
+      |> Map.take(~w(ready team_number team_colour ally_team_number player sync side))
+      |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
 
-    # new_state = %{state | battle_id: battle.id, battle_host: true}
-    # reply(:battle, :create, {:success, battle}, new_state)
+    new_client =
+      Client.get_client_by_id(state.userid)
+      |> Map.merge(updates)
+
+    if BattleLobby.allow?(state.userid, :mybattlestatus, state.battle_id) do
+      Client.update(new_client, :client_updated_battlestatus)
+    end
+    state
   end
 
   def do_handle("respond_to_join_request", data, %{battle_id: battle_id} = state) do
@@ -59,6 +65,17 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
 
       "reject" ->
         BattleLobby.deny_join_request(userid, battle_id, data["reason"])
+    end
+    state
+  end
+
+  def do_handle("message", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
+  def do_handle("message", _, %{battle_id: nil} = state) do
+    reply(:battle, :message, {:failure, "Not currently in a battle"}, state)
+  end
+  def do_handle("message", %{"message" => msg}, state) do
+    if BattleLobby.allow?(state.userid, :saybattle, state.battle_id) do
+      BattleLobby.say(state.userid, msg, state.battle_id)
     end
     state
   end

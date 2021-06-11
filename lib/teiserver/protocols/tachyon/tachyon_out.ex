@@ -18,7 +18,6 @@ defmodule Teiserver.Protocols.TachyonOut do
   def reply(:direct_message, {sender_id, msg, _user}, _msg_id, state), do: reply(:communication, :direct_message, {sender_id, msg}, state)
   # def reply(:join_battle_success, _data, _msg_id, state), do: reply(:battle, :join_response, {:approve, state.battle_id}, state)
 
-
   def reply(namespace, reply_cmd, data, state) do
     msg =
       case namespace do

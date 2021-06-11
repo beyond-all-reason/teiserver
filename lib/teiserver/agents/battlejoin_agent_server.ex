@@ -68,24 +68,51 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   defp handle_msg(%{"cmd" => "s.battle.leave", "result" => "success"}, state) do
     %{state | battle_id: nil}
   end
+  defp handle_msg(%{"cmd" => "s.battle.request_status"}, state) do
+    update_battlestatus(state)
+  end
   defp handle_msg(%{"cmd" => "s.communication.direct_message"}, state), do: state
   defp handle_msg(%{"cmd" => "s.battle.announce"}, state), do: state
   defp handle_msg(%{"cmd" => "s.battle.message"}, state), do: state
 
+  defp update_battlestatus(state) do
+    data = if Enum.random([true, false]) do
+      %{
+        player: true,
+        sync: 1,
+        team_number: Enum.random(0..15),
+        ally_team_number: Enum.random([0, 1]),
+        side: Enum.random([0, 1, 2]),
+        team_colour: Enum.random(0..9322660)
+      }
+    else
+      %{
+        player: false
+      }
+    end
+
+    AgentLib._send(state.socket, Map.put(data, :cmd, "c.battle.update_status"))
+    state
+  end
+
   defp join_battle(state, []), do: state
   defp join_battle(state, battle_ids) do
     battle_id = Enum.random(battle_ids)
-    battle = BattleLobby.get_battle!(battle_id)
 
-    cmd = %{
-      cmd: "c.battle.join",
-      battle_id: battle_id,
-      password: battle.password
-    }
-    AgentLib._send(state.socket, cmd)
+    case BattleLobby.get_battle!(battle_id) do
+      nil ->
+        %{state | battle_id: nil, stage: :no_battle}
+      battle ->
+        cmd = %{
+          cmd: "c.battle.join",
+          battle_id: battle_id,
+          password: battle.password
+        }
+        AgentLib._send(state.socket, cmd)
 
-    AgentLib.post_agent_update(state.id, "opened battle")
-    %{state | battle_id: battle_id, stage: :waiting}
+        AgentLib.post_agent_update(state.id, "opened battle")
+        %{state | battle_id: battle_id, stage: :waiting}
+    end
   end
 
   defp leave_battle(state) do

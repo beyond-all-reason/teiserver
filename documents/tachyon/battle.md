@@ -187,6 +187,9 @@ The response to a `s.battle.request_to_join` message informing the server if the
 ### TODO: `s.battle.invite_to_battle`
 ### TODO: `c.battle.respond_to_invite`
 
+### TODO: `s.battle.request_status`
+### TODO: `c.battle.update_status`
+
 ### TODO: `c.battle.message`
 ### TODO: `s.battle.message`
 

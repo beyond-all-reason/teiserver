@@ -87,6 +87,14 @@ defmodule Teiserver.Protocols.Tachyon.BattleOut do
 
   ###########
   # Messages
+  def do_reply(:request_status, nil) do
+    %{
+      "cmd" => "s.battle.request_status"
+    }
+  end
+
+  ###########
+  # Messages
   def do_reply(:message, {sender_id, msg, _battle_id}) do
     %{
       "cmd" => "s.battle.message",
