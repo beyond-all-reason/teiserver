@@ -158,4 +158,26 @@ defmodule Teiserver.Battle do
   def change_battle_log(%BattleLog{} = battle_log) do
     BattleLog.changeset(battle_log, %{})
   end
+
+
+  alias Teiserver.Battle.BattleLobby
+
+  # Not to be confused with protocol related adding, this
+  # tells the battle lobby to proceed as if the user was just accepted into
+  # the battle. It should never be called directly from a protocol
+  # related command, only via things like matchmaking our tourneys
+  @spec add_player_to_battle(T.userid(), T.battle_id()) :: :ok | {:error, String.t()}
+  def add_player_to_battle(userid, battle_id) do
+    case Teiserver.Client.get_client_by_id(userid) do
+      nil ->
+        {:error, "no client"}
+      _ ->
+        case BattleLobby.get_battle(battle_id) do
+          nil ->
+            {:error, "no battle"}
+          _ ->
+            Teiserver.Battle.BattleLobby.accept_join_request(3, 444912)
+        end
+    end
+  end
 end
