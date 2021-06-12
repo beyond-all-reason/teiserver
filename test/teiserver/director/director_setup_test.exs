@@ -24,7 +24,7 @@ defmodule Teiserver.Protocols.Director.SetupTest do
     assert ConCache.get(:teiserver_consuls, battle.id) != nil
 
     # Start it up!
-    BattleLobby.say(3, "!director start", id)
+    BattleLobby.say(user.id, "!director start", id)
     :timer.sleep(@sleep)
 
     battle = BattleLobby.get_battle!(id)
@@ -65,6 +65,6 @@ defmodule Teiserver.Protocols.Director.SetupTest do
 
     :timer.sleep(@sleep)
     messages = PubsubListener.get(listener)
-    assert messages == []
+    assert messages == [{:battle_updated, battle.id, {123_456, "!start", battle.id}, :say}]
   end
 end

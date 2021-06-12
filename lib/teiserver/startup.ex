@@ -158,7 +158,14 @@ defmodule Teiserver.Startup do
     ConCache.put(:lists, :rooms, [])
     ConCache.insert_new(:lists, :battles, [])
 
-    ConCache.put(:id_counters, :battle, :random.uniform(99999))
+    # We were using :random.uniform() but it wasn't being random
+    # since we don't care about random random we're okay with this!
+    bid = :erlang.system_time()
+      |> to_string
+      |> String.reverse()
+      |> String.slice(0..5)
+      |> String.to_integer()
+    ConCache.put(:id_counters, :battle, bid)
 
     Teiserver.User.pre_cache_users()
     Teiserver.Data.Matchmaking.pre_cache_queues()

@@ -63,7 +63,6 @@ defmodule Teiserver.Battle.BattleLobby do
         disabled_units: [],
         start_rectangles: %{},
         director_mode: false,
-        consul_pid: nil,
 
         # Expected to be overriden
         map_hash: nil,
@@ -110,8 +109,7 @@ defmodule Teiserver.Battle.BattleLobby do
 
   @spec add_battle(Map.t()) :: Map.t()
   def add_battle(battle) do
-    consul_pid = Director.get_or_start_consul(battle.id)
-    battle = %{battle | consul_pid: consul_pid}
+    _consul_pid = Director.start_consul(battle.id)
     ConCache.put(:battles, battle.id, battle)
 
     ConCache.update(:lists, :battles, fn value ->
@@ -134,6 +132,7 @@ defmodule Teiserver.Battle.BattleLobby do
   @spec close_battle(integer() | nil) :: :ok
   def close_battle(battle_id) do
     battle = get_battle(battle_id)
+    Director.close_battle(battle_id)
     ConCache.delete(:battles, battle_id)
     ConCache.update(:lists, :battles, fn value ->
       new_value =
