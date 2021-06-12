@@ -84,7 +84,7 @@ defmodule TeiserverWeb.Router do
       end
 
       scope "/teiserver/api", TeiserverWeb.API do
-        pipe_through([:protected_api])
+        pipe_through([:token_api])
         post "/battle/create", BattleController, :create
       end
 

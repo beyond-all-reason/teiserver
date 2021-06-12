@@ -49,8 +49,20 @@ defmodule CentralWeb.Router do
     plug(:accepts, ["json"])
   end
 
+  pipeline :token_api do
+    plug(:accepts, ["json"])
+    plug(:put_secure_browser_headers)
+    plug(Central.Logging.LoggingPlug)
+    plug(Central.Account.AuthPipeline)
+    plug(Central.Account.AuthPlug)
+    plug(Central.General.CachePlug)
+    plug(Guardian.Plug.EnsureAuthenticated)
+  end
+
   pipeline :protected_api do
     plug(:accepts, ["json"])
+    plug(:fetch_session)
+    plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
     plug(Central.Logging.LoggingPlug)
     plug(Central.Account.AuthPipeline)
