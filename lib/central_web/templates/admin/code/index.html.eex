@@ -29,6 +29,14 @@
   </thead>
   <tbody>
 <%= for code <- @codes do %>
+<%
+  path = case code.purpose do
+    "reset_password" ->
+      Routes.account_session_path(@conn, :password_reset_form, code.value)
+    _ ->
+      ""
+  end
+%>
     <tr>
       <td><%= code.user.name %></td>
       <td><%= code.purpose %></td>
@@ -40,6 +48,13 @@
         end
       %></td>
       <td style="font-family:monospace;"><%= code.value %></td>
+
+      <td>
+        <a href="<%= path %>" class="btn btn-outline-secondary btn-sm">
+          <i class="fa fa-link"></i>
+          Link
+        </a>
+      </td>
 
       <td>
         <a href="<%= Routes.admin_user_path(@conn, :show, code.user_id) %>" class="btn btn-secondary btn-sm">
