@@ -197,7 +197,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
     # BattleLobby.force_change_client(bar_user.id, int_parse(target_id), :player, false)
     Director.cast_consul(id, %{
       command: "force-spectator",
-      remaining: target_id,
+      remaining: int_parse(target_id),
       senderid: bar_user.id
     })
     {:noreply, socket}

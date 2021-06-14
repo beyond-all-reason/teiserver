@@ -192,6 +192,23 @@ defmodule Teiserver.Client do
     |> Enum.map(fn c -> get_client_by_id(c) end)
   end
 
+  @spec refresh_client(T.userid()) :: Map.t()
+  def refresh_client(userid) do
+    user = User.get_user_by_id(userid)
+    client = get_client_by_id(userid)
+    %{client |
+      userid: user.id,
+      name: user.name,
+      rank: user.rank,
+      moderator: user.moderator,
+      bot: user.bot,
+      ip: user.ip,
+      country: user.country,
+      lobbyid: user.lobbyid
+    }
+    |> add_client
+  end
+
   # It appears this isn't used but I suspect it will be at a later stage
   # def get_client_state(pid) do
   #   GenServer.call(pid, :get_state)

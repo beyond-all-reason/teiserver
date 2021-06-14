@@ -120,9 +120,6 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
 
     assert GenServer.call(pid2, {:get, :battle_id}) == battle_id
 
-
-
-
     # # Expecting a request to join here
     # data = %{cmd: "c.battle.join", battle_id: battle_id}
     # _tachyon_send(socket2, data)

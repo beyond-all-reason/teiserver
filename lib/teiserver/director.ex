@@ -63,7 +63,7 @@ defmodule Teiserver.Director do
   end
 
   @spec cast_consul(T.battle_id(), any) :: any
-  def cast_consul(battle_id, msg) do
+  def cast_consul(battle_id, msg) when is_integer(battle_id) do
     case get_consul_pid(battle_id) do
       nil -> nil
       pid -> send(pid, msg)
@@ -71,7 +71,7 @@ defmodule Teiserver.Director do
   end
 
   @spec call_consul(pid() | T.battle_id(), any) :: any
-  def call_consul(battle_id, msg) do
+  def call_consul(battle_id, msg) when is_integer(battle_id) do
     case get_consul_pid(battle_id) do
       nil -> nil
       pid -> GenServer.call(pid, msg)

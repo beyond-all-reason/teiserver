@@ -1,6 +1,5 @@
 defmodule Teiserver.Protocols.Director.JoiningTest do
   use Central.ServerCase, async: false
-  alias Teiserver.TeiserverTestLib
   alias Teiserver.Battle.BattleLobby
   alias Teiserver.Common.PubsubListener
   alias Teiserver.Director
@@ -12,7 +11,7 @@ defmodule Teiserver.Protocols.Director.JoiningTest do
 
   setup do
     Teiserver.Director.start_director()
-    %{socket: socket, user: user, pid: pid} = tachyon_auth_setup()
+    %{socket: socket, user: user} = tachyon_auth_setup()
 
     battle_data = %{
       cmd: "c.battle.create",
@@ -35,30 +34,26 @@ defmodule Teiserver.Protocols.Director.JoiningTest do
     battle_id = reply["battle"]["id"]
 
     BattleLobby.start_director_mode(battle_id)
-    consul_pid = BattleLobby.get_battle!(battle_id).consul_pid
     listener = PubsubListener.new_listener(["battle_updates:#{battle_id}"])
 
-    {:ok, socket: socket, user: user, pid: pid, battle_id: battle_id, listener: listener, consul_pid: consul_pid}
+    {:ok, socket: socket, user: user, battle_id: battle_id, listener: listener}
   end
 
-  test "welcome message", %{socket: socket, user: user, battle_id: battle_id, listener: listener, consul_pid: consul_pid} do
-    consul_state = GenServer.call(consul_pid, :get_all)
+  test "welcome message", %{socket: socket, user: user, battle_id: battle_id, listener: listener} do
+    consul_state = Director.call_consul(battle_id, :get_all)
     assert consul_state.welcome_message == nil
 
     data = %{cmd: "c.battle.message", userid: user.id, message: "!welcome-message This is the welcome message"}
     _tachyon_send(socket, data)
 
-    # msg = "!welcome-message This is the welcome message"
-    # BattleLobby.say(user.id, msg, battle_id)
-
     messages = PubsubListener.get(listener)
     assert messages == []
 
-    consul_state = GenServer.call(consul_pid, :get_all)
+    consul_state = Director.call_consul(battle_id, :get_all)
     assert consul_state.welcome_message == "This is the welcome message"
 
     # Now a new user joins the battle
-    %{socket: socket2, user: user2, pid: pid2} = tachyon_auth_setup()
+    %{socket: socket2, user: user2} = tachyon_auth_setup()
     data = %{cmd: "c.battle.join", battle_id: battle_id}
     _tachyon_send(socket2, data)
 
@@ -73,6 +68,22 @@ defmodule Teiserver.Protocols.Director.JoiningTest do
     _tachyon_send(socket, data)
     _battle = _tachyon_recv(socket2)
 
+    # Request status message for the player
+    status_request = _tachyon_recv(socket2)
+    assert status_request["cmd"] == "s.battle.request_status"
+
+    # Send the battle status
+    data = %{
+      cmd: "c.battle.update_status",
+      player: true,
+      sync: 1,
+      team_number: 0,
+      ally_team_number: 0,
+      side: 0,
+      team_colour: 0
+    }
+    _tachyon_send(socket2, data)
+
     # Expect director mode announcement
     reply = _tachyon_recv(socket2)
     assert reply == %{
@@ -85,8 +96,16 @@ defmodule Teiserver.Protocols.Director.JoiningTest do
     reply = _tachyon_recv(socket2)
     assert reply == %{
       "cmd" => "s.battle.announce",
-      "message" => "This is the welcome message",
+      "message" => " #{user2.name} - This is the welcome message",
       "sender" => Director.get_coordinator_userid()
     }
+  end
+
+  test "blacklist" do
+
+  end
+
+  test "whitelist" do
+
   end
 end

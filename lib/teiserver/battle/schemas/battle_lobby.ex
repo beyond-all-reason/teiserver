@@ -231,7 +231,7 @@ defmodule Teiserver.Battle.BattleLobby do
             sayprivateex(battle_state.founder_id, userid, "Director mode enabled", battle_id)
           end
 
-          Director.cast_consul(battle_state, {:user_joined, userid})
+          Director.cast_consul(battle_id, {:user_joined, userid})
 
           PubSub.broadcast(
             Central.PubSub,
@@ -451,7 +451,7 @@ defmodule Teiserver.Battle.BattleLobby do
       battle.password != nil and password != battle.password and user.moderator == false ->
         {:failure, "Invalid password"}
 
-      Director.call_consul(battle, {:request_user_join_battle, userid}) == false ->
+      Director.call_consul(battle_id, {:request_user_join_battle, userid}) == false ->
         {:failure, "Denied by consul"}
 
       true ->

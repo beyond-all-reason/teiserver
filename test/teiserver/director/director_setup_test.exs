@@ -1,5 +1,6 @@
 defmodule Teiserver.Protocols.Director.SetupTest do
   use Central.ServerCase, async: false
+  alias Teiserver.{User, Client}
   alias Teiserver.TeiserverTestLib
   alias Teiserver.Battle.BattleLobby
   alias Teiserver.Common.PubsubListener
@@ -15,6 +16,10 @@ defmodule Teiserver.Protocols.Director.SetupTest do
   end
 
   test "start, stop", %{user: user} do
+    # User needs to be a moderator (at this time) to start/stop director mode
+    User.update_user(%{user | moderator: true})
+    Client.refresh_client(user.id)
+
     battle = TeiserverTestLib.make_battle(%{
       founder_id: user.id,
       founder_name: user.name
@@ -31,7 +36,7 @@ defmodule Teiserver.Protocols.Director.SetupTest do
     assert battle.director_mode == true
 
     # Stop it
-    BattleLobby.say(123_456, "!director stop", id)
+    BattleLobby.say(user.id, "!director stop", id)
     :timer.sleep(@sleep)
 
     battle = BattleLobby.get_battle!(id)
