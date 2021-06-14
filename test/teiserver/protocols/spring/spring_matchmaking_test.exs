@@ -1,8 +1,8 @@
 defmodule Teiserver.SpringMatchmakingTest do
   use Central.ServerCase, async: false
   require Logger
-  alias Teiserver.Game
-  alias Teiserver.Client
+  alias Teiserver.{Client, Game}
+  alias Teiserver.Battle.BattleLobby
   alias Teiserver.Data.Matchmaking
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -31,11 +31,13 @@ defmodule Teiserver.SpringMatchmakingTest do
     queue = Matchmaking.get_queue(queue.id)
 
     %{socket: socket2, user: user2} = auth_setup()
+    %{socket: socket3, user: user3} = auth_setup()
     %{socket: battle_socket} = auth_setup()
 
     # Clear both sockets
     _recv_raw(socket1)
     _recv_raw(socket2)
+    _recv_raw(socket3)
 
     # Join the queue
     _send_raw(socket1, "c.matchmaking.join_queue #{queue.id}\n")
@@ -58,12 +60,25 @@ defmodule Teiserver.SpringMatchmakingTest do
     assert state.matched_players == []
     assert state.players_accepted == []
 
+    # 3rd user to join, won't be playing the battle
+    _send_raw(socket3, "c.matchmaking.join_queue #{queue.id}\n")
+    reply = _recv_raw(socket3)
+    assert reply =~ "OK cmd=c.matchmaking.join_queue\t#{queue.id}\n"
+
+    # Check server state
+    state = GenServer.call(queue.pid, :get_state)
+    assert state.unmatched_players == [user3.id, user2.id, user1.id]
+    assert state.matched_players == []
+    assert state.players_accepted == []
+
     # Tick, we expect to be send a pair of ready checks
     send(queue.pid, :tick)
     reply = _recv_raw(socket1)
     assert reply == "s.matchmaking.ready_check #{queue.id}\n"
     reply = _recv_raw(socket2)
     assert reply == "s.matchmaking.ready_check #{queue.id}\n"
+    reply = _recv_raw(socket3)
+    assert reply == :timeout
 
     # Accept the first
     _send_raw(socket1, "c.matchmaking.ready\n")
@@ -73,8 +88,8 @@ defmodule Teiserver.SpringMatchmakingTest do
     # Lets see what the state of the queue_server is
     state = GenServer.call(queue.pid, :get_state)
     assert state.finding_battle == false
-    assert state.unmatched_players == []
-    assert state.matched_players == [user2.id, user1.id]
+    assert state.unmatched_players == [user3.id]
+    assert state.matched_players == [user1.id, user2.id]
     assert state.players_accepted == [user1.id]
     assert state.waiting_for_players == [user2.id]
 
@@ -85,8 +100,8 @@ defmodule Teiserver.SpringMatchmakingTest do
 
     state = GenServer.call(queue.pid, :get_state)
     assert state.finding_battle == true
-    assert state.unmatched_players == []
-    assert state.matched_players == [user2.id, user1.id]
+    assert state.unmatched_players == [user3.id]
+    assert state.matched_players == [user1.id, user2.id]
     assert state.players_accepted == [user2.id, user1.id]
     assert state.waiting_for_players == []
 
@@ -110,13 +125,16 @@ defmodule Teiserver.SpringMatchmakingTest do
     reply = _recv_raw(battle_socket)
     [_all, battle_id] = Regex.run(~r/BATTLEOPENED ([0-9]+) [0-9]/, reply)
     battle_id = int_parse(battle_id)
+    battle = BattleLobby.get_battle!(battle_id)
+    assert battle != nil
 
     # Now we have a battle open, tick should matter
     send(queue.pid, :tick)
     state = GenServer.call(queue.pid, :get_state)
     assert state.finding_battle == false
     assert state.matched_players == []
-    assert state.player_count == 0
+    assert state.unmatched_players == [user3.id]
+    assert state.player_count == 1
     assert state.ready_started_at == nil
 
     # Commands should be sent to user1 and user2
@@ -230,5 +248,75 @@ defmodule Teiserver.SpringMatchmakingTest do
 
     user_queues = GenServer.call(client_pid, {:get, :queues})
     assert user_queues == []
+  end
+
+  test "decline ready up", %{socket: socket1, user: user1} do
+    {:ok, queue} =
+      Game.create_queue(%{
+        "name" => "test_queue",
+        "team_size" => 1,
+        "icon" => "far fa-home",
+        "colour" => "#112233",
+        "map_list" => ["map1"],
+        "conditions" => %{},
+        "settings" => %{
+          "tick_interval" => 60_000
+        }
+      })
+
+    queue = Matchmaking.get_queue(queue.id)
+    %{socket: socket2, user: user2} = auth_setup()
+
+    # Clear both sockets
+    _recv_raw(socket1)
+    _recv_raw(socket2)
+
+    # Join the queue
+    _send_raw(socket1, "c.matchmaking.join_queue #{queue.id}\n")
+    reply = _recv_raw(socket1)
+    assert reply == "OK cmd=c.matchmaking.join_queue\t#{queue.id}\n"
+
+    # Now get the second user to join
+    _send_raw(socket2, "c.matchmaking.join_queue #{queue.id}\n")
+    reply = _recv_raw(socket2)
+    assert reply =~ "OK cmd=c.matchmaking.join_queue\t#{queue.id}\n"
+
+    # Check server state
+    state = GenServer.call(queue.pid, :get_state)
+    assert state.unmatched_players == [user2.id, user1.id]
+    assert state.matched_players == []
+    assert state.players_accepted == []
+
+    # Tick, we expect to be send a pair of ready checks
+    send(queue.pid, :tick)
+    reply = _recv_raw(socket1)
+    assert reply == "s.matchmaking.ready_check #{queue.id}\n"
+    reply = _recv_raw(socket2)
+    assert reply == "s.matchmaking.ready_check #{queue.id}\n"
+
+    # Accept the first
+    _send_raw(socket1, "c.matchmaking.ready\n")
+    reply = _recv_raw(socket1)
+    assert reply == :timeout
+
+    # Lets see what the state of the queue_server is
+    state = GenServer.call(queue.pid, :get_state)
+    assert state.finding_battle == false
+    assert state.unmatched_players == []
+    assert state.matched_players == [user1.id, user2.id]
+    assert state.players_accepted == [user1.id]
+    assert state.waiting_for_players == [user2.id]
+
+    # And the second gets rejected
+    _send_raw(socket2, "c.matchmaking.decline\n")
+    reply = _recv_raw(socket2)
+    assert reply == :timeout
+
+    state = GenServer.call(queue.pid, :get_state)
+    assert state.finding_battle == false
+    assert state.unmatched_players == [user1.id]
+    assert state.matched_players == []
+    assert state.players_accepted == []
+    assert state.waiting_for_players == []
   end
 end

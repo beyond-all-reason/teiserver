@@ -435,6 +435,7 @@ defmodule Teiserver.Battle.BattleLobby do
   @spec can_join?(Types.userid(), integer(), String.t() | nil, String.t() | nil) ::
           {:failure, String.t()} | {:waiting_on_host, String.t()}
   def can_join?(userid, battle_id, password \\ nil, script_password \\ nil) do
+    battle_id = int_parse(battle_id)
     battle = get_battle(battle_id)
     user = User.get_user_by_id(userid)
 
@@ -445,7 +446,7 @@ defmodule Teiserver.Battle.BattleLobby do
       battle == nil ->
         {:failure, "No battle found"}
 
-      battle.locked == true and user.moderator == false ->
+       battle.locked == true and user.moderator == false ->
         {:failure, "Battle locked"}
 
       battle.password != nil and password != battle.password and user.moderator == false ->

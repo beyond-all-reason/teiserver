@@ -70,7 +70,17 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
   end
 
   def do_handle("decline", _msg, _msg_id, state) do
-    state
+    case state.ready_queue_id do
+      nil ->
+        state
+
+      queue_id ->
+        queue = Matchmaking.get_queue(queue_id)
+        send(queue.pid, {:player_decline, state.userid})
+
+        # Player has declined to ready up, remove them from all other queues
+        do_handle("leave_all_queues", nil, nil, state)
+    end
   end
 
   def do_handle(cmd, data, msg_id, state) do

@@ -83,7 +83,13 @@ defmodule Teiserver.TeiserverTestLib do
     )
 
     _ = _recv_until(socket)
-    pid = Client.get_client_by_id(user.id).pid
+    pid = case Client.get_client_by_id(user.id) do
+      nil ->
+        :timer.sleep(250)
+        Client.get_client_by_id(user.id)
+      client ->
+        client.pid
+    end
     %{socket: socket, user: user, pid: pid}
   end
 

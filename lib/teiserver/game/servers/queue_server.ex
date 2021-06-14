@@ -95,8 +95,19 @@ defmodule Teiserver.Game.QueueServer do
   end
 
   def handle_info({:player_decline, player_id}, state) when is_integer(player_id) do
-    new_state = %{state | finding_battle: false}
+    matched_with_removal = Enum.reject(state.matched_players, fn u -> u == player_id end)
+    new_unmatched_players = matched_with_removal ++ state.unmatched_players
+    new_player_map = Map.delete(state.player_map, player_id)
 
+    new_state = %{state |
+        finding_battle: false,
+        unmatched_players: new_unmatched_players,
+        matched_players: [],
+        waiting_for_players: [],
+        ready_started_at: nil,
+        players_accepted: [],
+        player_map: new_player_map
+    }
     {:noreply, new_state}
   end
 
@@ -116,7 +127,7 @@ defmodule Teiserver.Game.QueueServer do
           if Enum.count(state.unmatched_players) >= 2 and state.waiting_for_players == [] and
                state.players_accepted == [] do
             # Now grab the players
-            [p1, p2 | new_unmatched_players] = state.unmatched_players
+            [p1, p2 | new_unmatched_players] = Enum.reverse(state.unmatched_players)
             player1 = state.player_map[p1]
             player2 = state.player_map[p2]
 
@@ -196,7 +207,6 @@ defmodule Teiserver.Game.QueueServer do
         %{
           midway_state
           | finding_battle: false,
-            unmatched_players: [],
             matched_players: [],
             waiting_for_players: [],
             ready_started_at: nil,
