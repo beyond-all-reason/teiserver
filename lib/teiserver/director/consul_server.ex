@@ -85,17 +85,23 @@ defmodule Teiserver.Director.ConsulServer do
     }
   """
   def handle_command(%{command: "welcome-message", remaining: remaining} = _cmd, state) do
-    case String.trim(remaining) do
+    new_state = case String.trim(remaining) do
       "" ->
         %{state | welcome_message: nil}
       msg ->
         %{state | welcome_message: msg}
     end
+    broadcast_update(new_state)
   end
 
   def handle_command(%{command: "start", senderid: senderid} = _cmd, state) do
     Director.send_to_host(senderid, state.battle, "!start")
     state
+  end
+
+  def handle_command(%{command: "reset"} = _cmd, state) do
+    empty_state(state.battle_id)
+    |> broadcast_update("lock-spectator")
   end
 
   def handle_command(%{command: "director", remaining: "stop"} = _cmd, state) do
@@ -113,7 +119,9 @@ defmodule Teiserver.Director.ConsulServer do
     target_id = int_parse(target_id)
     new_blacklist = Map.put(state.blacklist, target_id, :spectator)
     BattleLobby.force_change_client(state.coordinator_id, target_id, :player, false)
+
     %{state | blacklist: new_blacklist}
+    |> broadcast_update("lock-spectator")
   end
 
   def handle_command(%{command: "kick", remaining: target_id} = _cmd, state)
@@ -127,7 +135,9 @@ defmodule Teiserver.Director.ConsulServer do
     target_id = int_parse(target_id)
     new_blacklist = Map.put(state.blacklist, target_id, :banned)
     BattleLobby.kick_user_from_battle(target_id, state.battle_id)
+
     %{state | blacklist: new_blacklist}
+    |> broadcast_update("ban")
   end
 
   # Some commands expect remaining to be an integer, this is a catch for that
@@ -172,11 +182,20 @@ defmodule Teiserver.Director.ConsulServer do
     end
   end
 
+  defp broadcast_update(state, reason \\ nil) do
+    Phoenix.PubSub.broadcast(
+      Central.PubSub,
+      "live_battle_updates:#{state.battle_id}",
+      {:consul_server_updated, state.battle_id, reason}
+    )
+    state
+  end
+
   defp allow_cmd?(%{senderid: senderid} = _cmd, _state) do
-    client = Client.get_client_by_id(senderid)
+    user = User.get_user_by_id(senderid)
 
     cond do
-      client.moderator ->
+      user.moderator ->
         true
 
       true ->
@@ -184,18 +203,21 @@ defmodule Teiserver.Director.ConsulServer do
     end
   end
 
+  defp empty_state(battle_id) do
+    %{
+      coordinator_id: Director.get_coordinator_userid(),
+      battle_id: battle_id,
+      guard_mode: :blacklist,
+      blacklist: %{},
+      whitelist: %{
+        default: :player
+      },
+      welcome_message: nil
+    }
+  end
+
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
-    {:ok,
-     %{
-       coordinator_id: Director.get_coordinator_userid(),
-       battle_id: opts[:battle_id],
-       guard_mode: :blacklist,
-       blacklist: %{},
-       whitelist: %{
-         default: :player
-       },
-       welcome_message: nil
-     }}
+    {:ok, empty_state(opts[:battle_id])}
   end
 end

@@ -6,7 +6,6 @@
   <div class="col-md-12">
     <div class="card border-<%= bsname %> page-card">
       <div class="card-body">
-
         <h4>
           <%= if Enum.count(@battles) > 0 do %>
             Battles - <%= Enum.count(@battles) %>
@@ -19,8 +18,10 @@
   <thead>
     <tr>
       <th>Name</th>
+      <th>Map</th>
       <th>Director</th>
       <th>Player count</th>
+      <th>Spectator count</th>
 
       <th></th>
     </tr>
@@ -30,8 +31,10 @@
       <%= if battle != nil do %>
         <tr id="battle-<%= battle.id %>">
           <td><%= battle.name %></td>
+          <td><%= battle.map_name %></td>
           <td><%= if battle.director_mode, do: "Enabled" %></td>
           <td><%= battle.player_count %></td>
+          <td><%= battle.spectator_count %></td>
 
           <td>
             <span>

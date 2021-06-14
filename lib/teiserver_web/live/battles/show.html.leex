@@ -173,21 +173,35 @@
   </tbody>
 </table>
 
-<%= if @battle.director_mode do %>
-  <span class="btn btn-outline-<%= bsname %>" phx-click="stop-director">
-    <i class='fa-fw fas fa-square'></i>
+<%= if @bar_user.moderator do %>
+  <%= if @battle.director_mode do %>
+    <span class="btn btn-outline-<%= bsname %>" phx-click="stop-director">
+      <i class='fa-fw fas fa-square'></i>
+      &nbsp;
+      Stop director
+    </span>
+  <% else %>
+    <span class="btn btn-outline-<%= bsname %>" phx-click="start-director">
+      <i class='fa-fw fas fa-play'></i>
+      &nbsp;
+      Start director
+    </span>
+  <% end %>
+
+  <span class="btn btn-outline-<%= bsname %>" phx-click="reset-consul">
+    <i class='fa-fw fas fa-arrow-rotate-left'></i>
     &nbsp;
-    Stop director
+    Reset consul
   </span>
-<% else %>
-  <span class="btn btn-outline-<%= bsname %>" phx-click="start-director">
-    <i class='fa-fw fas fa-play'></i>
-    &nbsp;
-    Start director
-  </span>
+  <br /><br />
 <% end %>
 
+<span>
+  <%= live_redirect "Back", to: Routes.ts_battle_lobby_index_path(@socket, :index), class: "btn btn-#{bsname}" %>
+</span>
+
 <%= if allow?(@current_user, "admin.dev.developer") do %>
+<br /><br />
 <div class="row">
   <div class="col-md-6">
     <pre>
@@ -201,10 +215,6 @@
   </div>
 </div>
 <% end %>
-
-<span>
-  <%= live_redirect "Back", to: Routes.ts_battle_lobby_index_path(@socket, :index), class: "btn btn-#{bsname}" %>
-</span>
 
       </div>
     </div>

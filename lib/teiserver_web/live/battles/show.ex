@@ -113,6 +113,14 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   end
 
   @impl true
+  def handle_info({:consul_server_updated, battle_id, _reason}, socket) do
+    if battle_id == socket.assigns[:id] do
+      {:noreply, get_consul_state(socket)}
+    else
+      {:noreply, socket}
+    end
+  end
+
   def handle_info({:updated_client, new_client, _reason}, %{assigns: assigns} = socket) do
     new_clients = Map.put(assigns.clients, new_client.userid, new_client)
 
@@ -127,6 +135,13 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
     end
   end
 
+  def handle_info({:kick_user_from_battle, userid, battle_id}, socket) do
+    if battle_id == socket.assigns[:id] do
+      {:noreply, remove_user(socket, userid)}
+    else
+      {:noreply, socket}
+    end
+  end
   def handle_info({:remove_user_from_battle, userid, battle_id}, socket) do
     if battle_id == socket.assigns[:id] do
       {:noreply, remove_user(socket, userid)}
@@ -180,17 +195,23 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
 
   @impl true
   def handle_event("start-director", _event, %{assigns: %{id: id}} = socket) do
-    Logger.warn("Starting director mode")
     BattleLobby.start_director_mode(id)
     battle = %{socket.assigns.battle | director_mode: true}
     {:noreply, assign(socket, :battle, battle)}
   end
 
   def handle_event("stop-director", _event, %{assigns: %{id: id}} = socket) do
-    Logger.warn("Stopping director mode")
     BattleLobby.stop_director_mode(id)
     battle = %{socket.assigns.battle | director_mode: false}
     {:noreply, assign(socket, :battle, battle)}
+  end
+
+  def handle_event("reset-consul", _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
+    Director.cast_consul(id, %{
+      command: "reset",
+      senderid: bar_user.id
+    })
+    {:noreply, socket}
   end
 
   def handle_event("force-spectator:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
