@@ -86,7 +86,7 @@ S > s.matchmaking.your_queue_list 1 2
 #### `s.matchmaking.queue_info`
 Gives more detailed info about the queue. Currently not sure exactly what info will need to be contained but it feels like this might be needed as things are fleshed out.
 ```
-C > c.matchmaking.get_queue_info
+C > c.matchmaking.get_queue_info 1
 S > s.matchmaking.queue_info id name current_search_time current_size
 S > s.matchmaking.queue_info 1 queue1 34 5
 ```
