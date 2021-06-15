@@ -21,11 +21,12 @@ defmodule Teiserver.Application do
       concache_perm_sup(:users),
       concache_perm_sup(:clients),
       concache_perm_sup(:battles),
-      concache_perm_sup(:queues),
+      concache_perm_sup(:teiserver_queues),
       concache_perm_sup(:rooms),
       concache_sup(:teiserver_clan_cache_bang),
 
-      # Genservers for running the server
+      # Matchmaking
+      concache_perm_sup(:teiserver_queue_pids),
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueMatchSupervisor},
 

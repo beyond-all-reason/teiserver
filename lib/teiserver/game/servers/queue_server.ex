@@ -63,7 +63,7 @@ defmodule Teiserver.Game.QueueServer do
     {:reply, resp, state}
   end
 
-  def handle_info({:player_accept, player_id}, state) when is_integer(player_id) do
+  def handle_cast({:player_accept, player_id}, state) when is_integer(player_id) do
     new_state =
       case player_id in state.matched_players do
         true ->
@@ -94,7 +94,7 @@ defmodule Teiserver.Game.QueueServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:player_decline, player_id}, state) when is_integer(player_id) do
+  def handle_cast({:player_decline, player_id}, state) when is_integer(player_id) do
     matched_with_removal = Enum.reject(state.matched_players, fn u -> u == player_id end)
     new_unmatched_players = matched_with_removal ++ state.unmatched_players
     new_player_map = Map.delete(state.player_map, player_id)
@@ -154,10 +154,20 @@ defmodule Teiserver.Game.QueueServer do
         :erlang.system_time(:seconds) - state.ready_started_at <= state.ready_wait_time ->
           state
 
-        # Need to cancel waiting
+        # Need to cancel waiting, all players not yet matched decline
         :erlang.system_time(:seconds) - state.ready_started_at > state.ready_wait_time ->
-          throw("TODO")
-          state
+          new_unmatched_players = state.players_accepted ++ state.unmatched_players
+          new_player_map = Map.drop(state.player_map, state.waiting_for_players)
+
+          %{state |
+              finding_battle: false,
+              unmatched_players: new_unmatched_players,
+              matched_players: [],
+              waiting_for_players: [],
+              ready_started_at: nil,
+              players_accepted: [],
+              player_map: new_player_map
+          }
       end
 
     {:noreply, new_state}
@@ -224,6 +234,9 @@ defmodule Teiserver.Game.QueueServer do
   def init(opts) do
     tick_interval = Map.get(opts.queue.settings, "tick_interval", @default_tick_interval)
     :timer.send_interval(tick_interval, self(), :tick)
+
+    # Update the queue pids cache to point to this process
+    ConCache.put(:teiserver_queue_pids, opts.queue.id, self())
 
     {:ok,
      %{

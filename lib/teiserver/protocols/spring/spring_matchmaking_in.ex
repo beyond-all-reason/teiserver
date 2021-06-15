@@ -63,8 +63,7 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
         state
 
       queue_id ->
-        queue = Matchmaking.get_queue(queue_id)
-        send(queue.pid, {:player_accept, state.userid})
+        Matchmaking.player_accept(queue_id, state.userid)
         state
     end
   end
@@ -75,8 +74,7 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
         state
 
       queue_id ->
-        queue = Matchmaking.get_queue(queue_id)
-        send(queue.pid, {:player_decline, state.userid})
+        Matchmaking.player_decline(queue_id, state.userid)
 
         # Player has declined to ready up, remove them from all other queues
         do_handle("leave_all_queues", nil, nil, state)

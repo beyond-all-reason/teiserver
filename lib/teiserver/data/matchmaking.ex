@@ -12,8 +12,7 @@ defmodule Teiserver.Data.QueueStruct do
     :map_list,
     current_search_time: 0,
     current_size: 0,
-    contents: [],
-    pid: nil
+    contents: []
   ]
 end
 
@@ -25,13 +24,17 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec get_queue(Integer.t()) :: QueueStruct.t() | nil
   def get_queue(id) do
-    ConCache.get(:queues, id)
+    ConCache.get(:teiserver_queues, id)
+  end
+
+  def get_queue_pid(id) when is_integer(id) do
+    ConCache.get(:teiserver_queue_pids, id)
   end
 
   @spec get_queue_and_info(Integer.t()) :: {QueueStruct.t(), Map.t()}
-  def get_queue_and_info(id) do
-    queue = ConCache.get(:queues, id)
-    info = GenServer.call(queue.pid, :get_info)
+  def get_queue_and_info(id) when is_integer(id) do
+    queue = ConCache.get(:teiserver_queues, id)
+    info = GenServer.call(get_queue_pid(queue.id), :get_info)
     {queue, info}
   end
 
@@ -45,53 +48,75 @@ defmodule Teiserver.Data.Matchmaking do
       {:ok, new_value}
     end)
 
-    {:ok, pid} =
-      DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
-        QueueServer,
-        data: %{queue: queue}
-      })
-
-    update_queue(%{queue | pid: pid})
+    DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
+      QueueServer,
+      data: %{queue: queue}
+    })
+    update_queue(queue)
   end
 
   @spec update_queue(QueueStruct.t()) :: :ok
   def update_queue(queue) do
-    ConCache.put(:queues, queue.id, queue)
+    ConCache.put(:teiserver_queues, queue.id, queue)
   end
 
   @spec list_queues :: [QueueStruct.t() | nil]
   def list_queues() do
     ConCache.get(:lists, :queues)
-    |> Enum.map(fn queue_id -> ConCache.get(:queues, queue_id) end)
+    |> Enum.map(fn queue_id -> ConCache.get(:teiserver_queues, queue_id) end)
   end
 
   @spec list_queues([Integer.t()]) :: [QueueStruct.t() | nil]
   def list_queues(id_list) do
     id_list
     |> Enum.map(fn queue_id ->
-      ConCache.get(:queues, queue_id)
+      ConCache.get(:teiserver_queues, queue_id)
     end)
   end
 
   @spec add_player_to_queue(Integer.t(), Integer.t(), pid()) :: :ok | :duplicate | :failed
-  def add_player_to_queue(queue_id, player_id, pid) do
-    case get_queue(queue_id) do
+  def add_player_to_queue(queue_id, player_id, user_pid) do
+    case get_queue_pid(queue_id) do
       nil ->
         :failed
 
-      queue ->
-        GenServer.call(queue.pid, {:add_player, player_id, pid})
+      pid ->
+        GenServer.call(pid, {:add_player, player_id, user_pid})
     end
   end
 
   @spec remove_player_from_queue(Integer.t(), Integer.t()) :: :ok | :missing
   def remove_player_from_queue(queue_id, player_id) do
-    case get_queue(queue_id) do
+    case get_queue_pid(queue_id) do
       nil ->
         :failed
 
-      queue ->
-        GenServer.call(queue.pid, {:remove_player, player_id})
+      pid ->
+        GenServer.call(pid, {:remove_player, player_id})
+    end
+  end
+
+  @spec player_accept(Integer.t(), Integer.t()) :: :ok | :missing
+  def player_accept(queue_id, player_id) do
+    case get_queue_pid(queue_id) do
+      nil ->
+        :failed
+
+      pid ->
+        GenServer.cast(pid, {:player_accept, player_id})
+        :ok
+    end
+  end
+
+  @spec player_decline(Integer.t(), Integer.t()) :: :ok | :missing
+  def player_decline(queue_id, player_id) do
+    case get_queue_pid(queue_id) do
+      nil ->
+        :failed
+
+      pid ->
+        GenServer.cast(pid, {:player_decline, player_id})
+        :ok
     end
   end
 
