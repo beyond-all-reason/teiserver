@@ -151,11 +151,11 @@ defmodule Teiserver.Game.QueueServer do
           end
 
         # Waiting but haven't been waiting too long yet
-        :erlang.system_time(:seconds) - state.ready_started_at < @ready_wait_time ->
+        :erlang.system_time(:seconds) - state.ready_started_at <= state.ready_wait_time ->
           state
 
         # Need to cancel waiting
-        :erlang.system_time(:seconds) - state.ready_started_at > @ready_wait_time ->
+        :erlang.system_time(:seconds) - state.ready_started_at > state.ready_wait_time ->
           throw("TODO")
           state
       end
@@ -241,7 +241,8 @@ defmodule Teiserver.Game.QueueServer do
        id: opts.queue.id,
        team_size: opts.queue.team_size,
        map_list: opts.queue.map_list,
-       settings: opts.queue.settings
+       settings: opts.queue.settings,
+       ready_wait_time: opts.queue.settings["ready_wait_time"] || @ready_wait_time
      }}
   end
 end

@@ -14,7 +14,7 @@ defmodule Teiserver.SpringMatchmakingTest do
     {:ok, socket: socket, user: user}
   end
 
-  test "Test queue lifecycle", %{socket: socket1, user: user1} do
+  test "queue lifecycle", %{socket: socket1, user: user1} do
     {:ok, queue} =
       Game.create_queue(%{
         "name" => "test_queue",
@@ -318,5 +318,71 @@ defmodule Teiserver.SpringMatchmakingTest do
     assert state.matched_players == []
     assert state.players_accepted == []
     assert state.waiting_for_players == []
+  end
+
+  test "wait too long", %{socket: socket1, user: user1} do
+    {:ok, queue} =
+      Game.create_queue(%{
+        "name" => "test_queue",
+        "team_size" => 1,
+        "icon" => "far fa-home",
+        "colour" => "#112233",
+        "map_list" => ["map1"],
+        "conditions" => %{},
+        "settings" => %{
+          "tick_interval" => 60_000,
+          "ready_wait_time" => 1
+        }
+      })
+
+    queue = Matchmaking.get_queue(queue.id)
+    %{socket: socket2, user: user2} = auth_setup()
+
+    # Clear both sockets
+    _recv_raw(socket1)
+    _recv_raw(socket2)
+
+    # Join the queue
+    _send_raw(socket1, "c.matchmaking.join_queue #{queue.id}\n")
+    reply = _recv_raw(socket1)
+    assert reply == "OK cmd=c.matchmaking.join_queue\t#{queue.id}\n"
+
+    # Now get the second user to join
+    _send_raw(socket2, "c.matchmaking.join_queue #{queue.id}\n")
+    reply = _recv_raw(socket2)
+    assert reply =~ "OK cmd=c.matchmaking.join_queue\t#{queue.id}\n"
+
+    # Check server state
+    state = GenServer.call(queue.pid, :get_state)
+    assert state.unmatched_players == [user2.id, user1.id]
+    assert state.matched_players == []
+    assert state.players_accepted == []
+
+    # Tick, we expect to be send a pair of ready checks
+    send(queue.pid, :tick)
+    reply = _recv_raw(socket1)
+    assert reply == "s.matchmaking.ready_check #{queue.id}\n"
+    reply = _recv_raw(socket2)
+    assert reply == "s.matchmaking.ready_check #{queue.id}\n"
+
+    # Lets see what the state of the queue_server is
+    state = GenServer.call(queue.pid, :get_state)
+    assert state.finding_battle == false
+    assert state.unmatched_players == []
+    assert state.matched_players == [user1.id, user2.id]
+    assert state.players_accepted == []
+    assert state.waiting_for_players == [user1.id, user2.id]
+
+    # Wait for 1 second, tick
+    # Previously this caused a bug because we never looked at what happened if "time elapsed"
+    # was equal to the ready_wait_time
+    :timer.sleep(1000)
+    send(queue.pid, :tick)
+    state = GenServer.call(queue.pid, :get_state)
+    assert state.finding_battle == false
+    assert state.unmatched_players == []
+    assert state.matched_players == [user1.id, user2.id]
+    assert state.players_accepted == []
+    assert state.waiting_for_players == [user1.id, user2.id]
   end
 end
