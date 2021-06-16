@@ -15,7 +15,7 @@ defmodule Teiserver.Protocols.SpringIn do
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
   alias Teiserver.Protocols.{Spring, SpringOut}
-  alias Teiserver.Protocols.Spring.MatchmakingIn
+  alias Teiserver.Protocols.Spring.{MatchmakingIn, TelemetryIn}
 
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
@@ -81,6 +81,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("c.matchmaking." <> cmd, data, msg_id, state) do
     MatchmakingIn.do_handle(cmd, data, msg_id, state)
+  end
+
+  defp do_handle("c.telemetry." <> cmd, data, msg_id, state) do
+    TelemetryIn.do_handle(cmd, data, msg_id, state)
   end
 
   defp do_handle("STARTTLS", _, msg_id, state) do

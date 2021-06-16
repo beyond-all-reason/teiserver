@@ -349,4 +349,13 @@ defmodule Teiserver.Telemetry do
   def export_logs(logs) do
     logs
   end
+
+  require Logger
+  def log_client_event(data) do
+    Logger.error("log_client_event(#{Kernel.inspect data}")
+  end
+
+  def log_battle_event(data) do
+    Logger.error("log_battle_event(#{Kernel.inspect data}")
+  end
 end
