@@ -187,4 +187,22 @@ defmodule Teiserver.SpringRawTest do
   # test "STLS" do
   #   flunk("Not tested")
   # end
+
+  test "login flood protection", %{socket: socket} do
+    user = new_user()
+
+    # Update the login count
+    ConCache.put(:teiserver_login_count, user.id, 9999)
+
+    # Welcome message
+    _recv_raw(socket)
+
+    _send_raw(
+      socket,
+      "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+    )
+
+    reply = _recv_until(socket)
+    assert reply == "DENIED Flood protection\n"
+  end
 end

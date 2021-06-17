@@ -37,7 +37,8 @@ defmodule Teiserver.User do
     :banned,
     :muted,
     :rename_in_progress,
-    :springid
+    :springid,
+    :ip_list
   ]
 
   @default_data %{
@@ -62,7 +63,8 @@ defmodule Teiserver.User do
     banned: [false, nil],
     muted: [false, nil],
     rename_in_progress: false,
-    springid: nil
+    springid: nil,
+    ip_list: []
   }
 
   @rank_levels [
@@ -642,7 +644,19 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec internal_client_login(Map.t()) :: {:ok, Map.t()} | :error
+  @spec login_flood_check(integer()) :: :allow | :block
+  def login_flood_check(userid) do
+    login_count = ConCache.get(:teiserver_login_count, userid) || 0
+
+    if login_count > 3 do
+      :block
+    else
+      ConCache.put(:teiserver_login_count, userid, login_count + 1)
+      :allow
+    end
+  end
+
+  @spec internal_client_login(integer()) :: {:ok, Map.t()} | :error
   def internal_client_login(userid) do
     case get_user_by_id(userid) do
       nil -> :error
@@ -667,6 +681,9 @@ defmodule Teiserver.User do
         cond do
           user.rename_in_progress ->
             {:error, "Rename in progress, wait 5 seconds"}
+
+          login_flood_check(user.id) == :block ->
+            {:error, "Flood protection"}
 
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
@@ -700,6 +717,9 @@ defmodule Teiserver.User do
         cond do
           user.rename_in_progress ->
             {:error, "Rename in progress, wait 5 seconds"}
+
+          login_flood_check(user.id) == :block ->
+            {:error, "Flood protection"}
 
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
@@ -742,6 +762,8 @@ defmodule Teiserver.User do
     last_login = round(:erlang.system_time(:seconds) / 60)
     ingame_hours = user.ingame_minutes / 60
 
+    ip_list = [ip | user.ip_list] |> Enum.uniq
+
     rank =
       @rank_levels
       |> Enum.filter(fn r -> r < ingame_hours end)
@@ -758,7 +780,8 @@ defmodule Teiserver.User do
           country: country,
           last_login: last_login,
           rank: rank,
-          springid: springid
+          springid: springid,
+          ip_list: ip_list
       }
 
     update_user(user, persist: true)

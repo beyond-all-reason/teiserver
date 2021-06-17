@@ -195,6 +195,9 @@ defmodule Teiserver.Director.ConsulServer do
     user = User.get_user_by_id(senderid)
 
     cond do
+      user == nil ->
+        false
+
       user.moderator ->
         true
 

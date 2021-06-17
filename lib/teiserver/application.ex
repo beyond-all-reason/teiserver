@@ -24,6 +24,7 @@ defmodule Teiserver.Application do
       concache_perm_sup(:teiserver_queues),
       concache_perm_sup(:rooms),
       concache_sup(:teiserver_clan_cache_bang),
+      concache_sup(:teiserver_login_count),
 
       # Matchmaking
       concache_perm_sup(:teiserver_queue_pids),

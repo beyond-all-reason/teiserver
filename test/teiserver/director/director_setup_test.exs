@@ -44,6 +44,10 @@ defmodule Teiserver.Protocols.Director.SetupTest do
   end
 
   test "test command vs no command", %{user: user} do
+    # User needs to be a moderator (at this time) to start/stop director mode
+    User.update_user(%{user | moderator: true})
+    Client.refresh_client(user.id)
+
     battle = TeiserverTestLib.make_battle(%{
       founder_id: user.id,
       founder_name: user.name
