@@ -26,7 +26,7 @@ defmodule Teiserver.Protocols.Director.SetupTest do
     })
     id = battle.id
     assert battle.director_mode == false
-    assert ConCache.get(:teiserver_consuls, battle.id) != nil
+    assert ConCache.get(:teiserver_consul_pids, battle.id) != nil
 
     # Start it up!
     BattleLobby.say(user.id, "!director start", id)

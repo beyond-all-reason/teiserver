@@ -15,7 +15,7 @@ defmodule Teiserver.Director do
         data: %{}
       })
 
-    ConCache.put(:teiserver_consuls, :coordinator, coordinator_pid)
+    ConCache.put(:teiserver_consul_pids, :coordinator, coordinator_pid)
     send(coordinator_pid, :begin)
     :ok
   end
@@ -43,7 +43,7 @@ defmodule Teiserver.Director do
 
   @spec get_consul_pid(T.battle_id()) :: pid() | nil
   def get_consul_pid(battle_id) do
-    ConCache.get(:teiserver_consuls, battle_id)
+    ConCache.get(:teiserver_consul_pids, battle_id)
   end
 
   @spec start_consul(T.battle_id()) :: pid()
@@ -57,7 +57,6 @@ defmodule Teiserver.Director do
         }
       })
 
-    ConCache.put(:teiserver_consuls, battle_id, consul_pid)
     send(consul_pid, :startup)
     consul_pid
   end
@@ -86,7 +85,7 @@ defmodule Teiserver.Director do
     case get_consul_pid(battle_id) do
       nil -> nil
       pid ->
-        ConCache.delete(:teiserver_consuls, battle_id)
+        ConCache.delete(:teiserver_consul_pids, battle_id)
         DynamicSupervisor.terminate_child(Teiserver.Director.DynamicSupervisor, pid)
     end
   end

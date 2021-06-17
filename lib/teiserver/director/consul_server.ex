@@ -221,6 +221,11 @@ defmodule Teiserver.Director.ConsulServer do
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
-    {:ok, empty_state(opts[:battle_id])}
+    battle_id = opts[:battle_id]
+
+    # Update the queue pids cache to point to this process
+    ConCache.put(:teiserver_consul_pids, battle_id, self())
+
+    {:ok, empty_state(battle_id)}
   end
 end
