@@ -484,6 +484,8 @@ defmodule Teiserver.Battle.BattleLobby do
   end
 
   @spec say(Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
+  def say(userid, "!start", battle_id), do: say(userid, "!cv start", battle_id)
+
   def say(userid, "!director start", battle_id) do
     client = Client.get_client_by_id(userid)
     if client.moderator do
