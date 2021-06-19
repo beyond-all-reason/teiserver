@@ -7,7 +7,7 @@ defmodule Teiserver.Protocols.Tachyon.BattleOut do
   # Query
   def do_reply(:query, battle_list) do
     %{
-      "cmd" => "s.battle.get_token",
+      "cmd" => "s.battle.query",
       "result" => "success",
       "battles" => battle_list
         |> Enum.map(fn b -> Tachyon.convert_object(:battle, b) end)
