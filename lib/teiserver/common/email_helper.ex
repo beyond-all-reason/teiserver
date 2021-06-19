@@ -64,7 +64,7 @@ defmodule Teiserver.EmailHelper do
     |> Email.subject("BAR - New account")
     |> Email.html_body(html_body)
     |> Email.text_body(text_body)
-    |> Mailer.deliver_now()
+    |> Mailer.deliver_now(response: true)
   end
 
   def spring_password_reset(user, plain_password) do

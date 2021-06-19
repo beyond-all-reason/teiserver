@@ -553,11 +553,15 @@ defmodule Teiserver.Battle.BattleLobby do
 
   def force_change_client(changer_id, client_id, field, new_value) do
     changer = Client.get_client_by_id(changer_id)
-    client = Client.get_client_by_id(client_id)
-    battle = get_battle(client.battle_id)
+    case Client.get_client_by_id(client_id) do
+      nil ->
+        :ok
+      client ->
+        battle = get_battle(client.battle_id)
 
-    if allow?(changer, field, battle) do
-      change_client_battle_status(client, field, new_value)
+        if allow?(changer, field, battle) do
+          change_client_battle_status(client, field, new_value)
+        end
     end
   end
 
