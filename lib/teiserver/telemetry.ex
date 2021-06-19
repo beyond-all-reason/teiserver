@@ -13,6 +13,9 @@ defmodule Teiserver.Telemetry do
 
   # Telemetry todo lists
   # TODO: Beherith: clients logged in, clients ingame, clients singpleplayer, clients afk, clients that are bots are not clients
+  # TODO: Matchmaking telemetry
+  # TODO: In battle telemetry
+  # TODO: Client event telemetry
 
   def get_state_and_reset() do
     GenServer.call(TelemetryServer, :get_state_and_reset)
