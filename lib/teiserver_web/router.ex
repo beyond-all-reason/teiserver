@@ -96,6 +96,13 @@ defmodule TeiserverWeb.Router do
         live("/client/:id", Show, :show)
       end
 
+      scope "/teiserver/admin_live", TeiserverWeb.MatchmakingLive, as: :ts_admin do
+        pipe_through([:browser, :admin_layout, :protected])
+
+        live("/queues", Index, :index)
+        live("/queues/:id", Show, :show)
+      end
+
       scope "/teiserver/admin", TeiserverWeb.AgentLive, as: :ts_admin do
         pipe_through([:browser, :admin_layout, :protected])
 

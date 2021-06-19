@@ -16,4 +16,5 @@ Given the server is currently used primarily for the Spring protocol you will ne
 - [Clan](clan.md)
 - [User](user.md)
 - [Communication](communication.md)
+- [Matchmaking](matchmaking.md)
 - [System](system.md)

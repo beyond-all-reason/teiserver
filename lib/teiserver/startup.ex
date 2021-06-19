@@ -111,6 +111,12 @@ defmodule Teiserver.Startup do
         permissions: "teiserver.moderator"
       },
       %{
+        label: "Live queues",
+        icons: [Teiserver.Game.QueueLib.icon(), :list],
+        url: "/teiserver/admin_live/queues",
+        permissions: "teiserver.moderator"
+      },
+      %{
         label: "Teiserver users",
         icons: [Teiserver.ClientLib.icon(), :list],
         url: "/teiserver/admin/users/search",

@@ -2,6 +2,7 @@ defmodule Teiserver.Game.QueueServer do
   use GenServer
   require Logger
   alias Teiserver.Battle.BattleLobby
+  alias Phoenix.PubSub
 
   @default_tick_interval 5_000
 
@@ -34,6 +35,12 @@ defmodule Teiserver.Game.QueueServer do
               player_map: Map.put(state.player_map, userid, player_item)
           }
 
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_queue:#{state.id}",
+            {:add_player, userid}
+          )
+
           {:ok, new_state}
       end
 
@@ -45,6 +52,13 @@ defmodule Teiserver.Game.QueueServer do
       case Enum.member?(state.unmatched_players ++ state.matched_players, userid) do
         true ->
           new_state = remove_players(state, [userid])
+
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_queue:#{state.id}",
+            {:remove_player, userid}
+          )
+
           {:ok, new_state}
 
         false ->

@@ -1,0 +1,50 @@
+<% {_fg, _bg, bsname} = @colours %>
+
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{active: "queues", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+        <%= render TeiserverWeb.Admin.QueueView, "section_menu.html", Map.merge(assigns, %{
+            conn: @socket,
+            params: %{},
+            show_search: false,
+            active: "show"
+        }) %>
+        <br /><br />
+
+<h3>
+  <%= @queue.name %>
+</h3>
+
+<ul>
+
+</ul>
+
+<%= if allow?(@current_user, "admin.dev.developer") do %>
+  <div class="row">
+    <div class="col-md-6">
+      <h4>DB Queue</h4>
+      <pre>
+        <%= Kernel.inspect @queue, pretty: true, limit: :infinity %>
+      </pre>
+    </div>
+    <div class="col-md-6">
+      <h4>Queue state</h4>
+      <pre>
+        <%= Kernel.inspect @queue_state, pretty: true, limit: :infinity %>
+      </pre>
+    </div>
+  </div>
+<% end %>
+<br />
+
+<span>
+  <%= live_redirect "Back", to: Routes.ts_admin_queue_path(@socket, :index), class: "btn btn-#{bsname}" %>
+</span>
+
+      </div>
+    </div>
+  </div>
+</div>

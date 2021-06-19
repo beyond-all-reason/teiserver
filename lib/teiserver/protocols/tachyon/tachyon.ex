@@ -10,7 +10,10 @@ defmodule Teiserver.Protocols.Tachyon do
     Kernel.inspect(s)
   end
 
-  def reply(namespace, reply_cmd, data, state), do: TachyonOut.reply(namespace, reply_cmd, data, state)
+  def reply(namespace, reply_cmd, data, state),
+    do: TachyonOut.reply(namespace, reply_cmd, data, state)
+  def reply(namespace, reply_cmd, data, _msg_id, state),
+    do: TachyonOut.reply(namespace, reply_cmd, data, state)
 
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
@@ -40,9 +43,9 @@ defmodule Teiserver.Protocols.Tachyon do
   as there might be internal fields we don't want sent out (e.g. email).
   """
   @spec convert_object(:user | :user_extended | :client | :battle | :queue, Map.t()) :: Map.t()
-  def convert_object(:user, user), do: Map.take(user, [:id, :name, :bot, :clan_id, :skill, :icons])
+  def convert_object(:user, user), do: Map.take(user, [:id, :name, :bot, :clan_id, :skill, :icons, :springid])
   def convert_object(:user_extended, user), do: Map.take(user, [:id, :name, :bot, :clan_id, :skill, :icons, :permissions,
-                    :friends, :friend_requests, :ignores])
+                    :friends, :friend_requests, :ignores, :springid])
   def convert_object(:client, client), do: Map.take(client, [:id, :in_game, :away, :ready, :team_number, :ally_team_number,
                     :team_colour, :role, :bonus, :synced, :faction, :battle_id])
   def convert_object(:battle, battle), do: Map.take(battle, [:id, :name, :founder_id, :type, :max_players, :password,

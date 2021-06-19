@@ -191,7 +191,12 @@ defmodule Teiserver.User do
         |> Map.put(:springid, next_springid())
         |> add_user
 
-        EmailHelper.new_user(user)
+        case EmailHelper.new_user(user) do
+          {:error, error} ->
+            Logger.error("Error sending new user email - #{user.email} - #{error}")
+          {:ok, _email, response} ->
+            Logger.error("Email sent, response of #{Kernel.inspect response}")
+        end
         :ok
 
       {:error, changeset} ->

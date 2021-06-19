@@ -34,7 +34,7 @@
       <td><%= queue.name %></td>
 
       <td>
-        <a href="<%= Routes.ts_admin_queue_path(@conn, :show, queue.id) %>" class="btn btn-secondary btn-sm">
+        <a href="<%= Routes.ts_admin_matchmaking_show_path(@conn, :show, queue.id) %>" class="btn btn-secondary btn-sm">
           Show
         </a>
       </td>

@@ -31,10 +31,22 @@ defmodule Teiserver.Data.Matchmaking do
     ConCache.get(:teiserver_queue_pids, id)
   end
 
+  @spec call_queue(Integer.t(), any) :: any
+  def call_queue(id, msg) do
+    pid = get_queue_pid(id)
+    GenServer.call(pid, msg)
+  end
+
+  @spec cast_queue(Integer.t(), any) :: any
+  def cast_queue(id, msg) do
+    pid = get_queue_pid(id)
+    GenServer.cast(pid, msg)
+  end
+
   @spec get_queue_and_info(Integer.t()) :: {QueueStruct.t(), Map.t()}
   def get_queue_and_info(id) when is_integer(id) do
     queue = ConCache.get(:teiserver_queues, id)
-    info = GenServer.call(get_queue_pid(queue.id), :get_info)
+    info = call_queue(id, :get_info)
     {queue, info}
   end
 
