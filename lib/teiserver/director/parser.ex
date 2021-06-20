@@ -12,6 +12,9 @@ defmodule Teiserver.Director.Parser do
       battle.director_mode == false ->
         :say
 
+      String.slice(msg, 0..1) == "! " ->
+        :say
+
       String.slice(msg, 0..0) != "!" ->
         :say
 
@@ -36,7 +39,7 @@ defmodule Teiserver.Director.Parser do
   # defp do_handle(%{command: nil}, _battle), do: :nomatch
 
   # defp do_handle(%{command: "forcestart"} = cmd, battle) do
-  #   send_to_host(cmd.sender, battle, "!forcestart")
+  #   send_to_host(cmd.sender, battle.id, "!forcestart")
   # end
 
   # defp do_handle(%{command: "welcome-message"} = cmd, battle) do

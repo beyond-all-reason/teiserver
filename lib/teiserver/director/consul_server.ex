@@ -66,7 +66,7 @@ defmodule Teiserver.Director.ConsulServer do
   end
 
   def handle_info(cmd = %{command: _}, state) do
-    new_state = if allow_cmd?(cmd, state) do
+    new_state = if allow_command?(cmd, state) do
       handle_command(cmd, state)
     else
       state
@@ -94,9 +94,9 @@ defmodule Teiserver.Director.ConsulServer do
     broadcast_update(new_state)
   end
 
-  def handle_command(%{command: "start", senderid: senderid} = _cmd, state) do
-    Director.send_to_host(senderid, state.battle, "!start")
-    state
+  def handle_command(%{command: "start", senderid: senderid} = cmd, state) do
+    Director.send_to_host(senderid, state.battle_id, "!start")
+    say_command(cmd, state)
   end
 
   def handle_command(%{command: "reset"} = _cmd, state) do
@@ -109,16 +109,32 @@ defmodule Teiserver.Director.ConsulServer do
     state
   end
 
+  def handle_command(%{command: "manual-autohost"} = _cmd, state) do
+    Director.send_to_host(state.coordinator_id, state.battle_id, "!autobalance off")
+    state
+  end
+
+  def handle_command(%{command: "change-map", remaining: map_name}, state) do
+    Director.send_to_host(state.coordinator_id, state.battle_id, "!map #{map_name}")
+    state
+  end
+
   def handle_command(%{command: "force-spectator", remaining: target_id}, state)
       when is_integer(target_id) do
-    BattleLobby.force_change_client(state.coordinator_id, target_id, :player, false)
+    BattleLobby.force_change_client(state.coordinator_id, target_id, %{player: false})
+    state
+  end
+
+  def handle_command(%{command: "change-battlestatus", target_id: target_id, status: new_status}, state)
+      when is_integer(target_id) do
+    BattleLobby.force_change_client(state.coordinator_id, target_id, new_status)
     state
   end
 
   def handle_command(%{command: "lock-spectator", remaining: target_id} = _cmd, state) do
     target_id = int_parse(target_id)
     new_blacklist = Map.put(state.blacklist, target_id, :spectator)
-    BattleLobby.force_change_client(state.coordinator_id, target_id, :player, false)
+    BattleLobby.force_change_client(state.coordinator_id, target_id, %{player: false})
 
     %{state | blacklist: new_blacklist}
     |> broadcast_update("lock-spectator")
@@ -191,10 +207,13 @@ defmodule Teiserver.Director.ConsulServer do
     state
   end
 
-  defp allow_cmd?(%{senderid: senderid} = _cmd, _state) do
+  defp allow_command?(%{senderid: senderid} = _cmd, state) do
     user = User.get_user_by_id(senderid)
 
     cond do
+      senderid == state.coordinator_id ->
+        true
+
       user == nil ->
         false
 
@@ -204,6 +223,17 @@ defmodule Teiserver.Director.ConsulServer do
       true ->
         true
     end
+  end
+
+  @spec say_command(Map.t(), Map.t()) :: Map.t()
+  defp say_command(cmd, state) do
+    vote = if cmd.vote, do: "cv ", else: ""
+    remaining = if cmd.remaining, do: " #{cmd.remaining}", else: ""
+
+    msg = "! #{vote}#{cmd.command}#{remaining}"
+      |> String.trim
+    BattleLobby.say(cmd.senderid, msg, state.battle_id)
+    state
   end
 
   defp empty_state(battle_id) do

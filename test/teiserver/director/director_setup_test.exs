@@ -6,7 +6,7 @@ defmodule Teiserver.Protocols.Director.SetupTest do
   alias Teiserver.Common.PubsubListener
 
   import Teiserver.TeiserverTestLib,
-    only: [tachyon_auth_setup: 0]
+    only: [tachyon_auth_setup: 0, _tachyon_recv: 1]
 
   @sleep 50
 
@@ -43,7 +43,7 @@ defmodule Teiserver.Protocols.Director.SetupTest do
     assert battle.director_mode == false
   end
 
-  test "test command vs no command", %{user: user} do
+  test "test command vs no command", %{user: user, socket: socket} do
     # User needs to be a moderator (at this time) to start/stop director mode
     User.update_user(%{user | moderator: true})
     Client.refresh_client(user.id)
@@ -61,19 +61,23 @@ defmodule Teiserver.Protocols.Director.SetupTest do
     listener = PubsubListener.new_listener(["battle_updates:#{battle.id}"])
 
     # No command
-    result = BattleLobby.say(123_456, "Test message", battle.id)
+    result = BattleLobby.say(user.id, "Test message", battle.id)
     assert result == :ok
 
     :timer.sleep(@sleep)
     messages = PubsubListener.get(listener)
-    assert messages == [{:battle_updated, battle.id, {123_456, "Test message", battle.id}, :say}]
+    assert messages == [{:battle_updated, battle.id, {user.id, "Test message", battle.id}, :say}]
 
     # Now command
-    result = BattleLobby.say(123_456, "!start", battle.id)
+    result = BattleLobby.say(user.id, "!start", battle.id)
     assert result == :ok
 
     :timer.sleep(@sleep)
+    reply = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.battle.message", "message" => "!start", "sender" => user.id}
+
+    # Converted message should appear here
     messages = PubsubListener.get(listener)
-    assert messages == [{:battle_updated, battle.id, {123_456, "!start", battle.id}, :say}]
+    assert messages == [{:battle_updated, battle.id, {user.id, "! cv start", battle.id}, :say}]
   end
 end

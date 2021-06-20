@@ -784,7 +784,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, username, value] ->
         client_id = User.get_userid(username)
         value = int_parse(value)
-        BattleLobby.force_change_client(state.userid, client_id, :handicap, value)
+        BattleLobby.force_change_client(state.userid, client_id, %{handicap: value})
 
       _ ->
         _no_match(state, "HANDICAP", msg_id, data)
@@ -863,7 +863,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, username, team_number] ->
         client_id = User.get_userid(username)
         value = int_parse(team_number)
-        BattleLobby.force_change_client(state.userid, client_id, :team_number, value)
+        BattleLobby.force_change_client(state.userid, client_id, %{team_number: value})
 
       _ ->
         _no_match(state, "FORCETEAMNO", msg_id, data)
@@ -877,7 +877,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, username, ally_team_number] ->
         client_id = User.get_userid(username)
         value = int_parse(ally_team_number)
-        BattleLobby.force_change_client(state.userid, client_id, :ally_team_number, value)
+        BattleLobby.force_change_client(state.userid, client_id, %{ally_team_number: value})
 
       _ ->
         _no_match(state, "FORCEALLYNO", msg_id, data)
@@ -891,7 +891,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, username, team_colour] ->
         client_id = User.get_userid(username)
         value = int_parse(team_colour)
-        BattleLobby.force_change_client(state.userid, client_id, :team_colour, value)
+        BattleLobby.force_change_client(state.userid, client_id, %{team_colour: value})
 
       _ ->
         _no_match(state, "FORCETEAMCOLOR", msg_id, data)
@@ -902,7 +902,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("FORCESPECTATORMODE", username, _msg_id, state) do
     client_id = User.get_userid(username)
-    BattleLobby.force_change_client(state.userid, client_id, :player, false)
+    BattleLobby.force_change_client(state.userid, client_id, %{player: false})
 
     state
   end

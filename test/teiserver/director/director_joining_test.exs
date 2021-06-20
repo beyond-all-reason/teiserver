@@ -7,8 +7,6 @@ defmodule Teiserver.Protocols.Director.JoiningTest do
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
-  @sleep 50
-
   setup do
     Teiserver.Director.start_director()
     %{socket: socket, user: user} = tachyon_auth_setup()

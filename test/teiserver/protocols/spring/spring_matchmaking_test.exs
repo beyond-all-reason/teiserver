@@ -7,9 +7,10 @@ defmodule Teiserver.SpringMatchmakingTest do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TeiserverTestLib,
-    only: [auth_setup: 0, _send_raw: 2, _recv_raw: 1]
+    only: [auth_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1]
 
   setup do
+    Teiserver.Director.start_director()
     %{socket: socket, user: user} = auth_setup()
     {:ok, socket: socket, user: user}
   end
@@ -32,7 +33,7 @@ defmodule Teiserver.SpringMatchmakingTest do
 
     %{socket: socket2, user: user2} = auth_setup()
     %{socket: socket3, user: user3} = auth_setup()
-    %{socket: battle_socket} = auth_setup()
+    %{socket: battle_socket, user: host_user} = auth_setup()
 
     # Clear both sockets
     _recv_raw(socket1)
@@ -142,6 +143,28 @@ defmodule Teiserver.SpringMatchmakingTest do
     assert reply =~ "JOINBATTLE #{battle_id} gameHash\n"
     reply = _recv_raw(socket2)
     assert reply =~ "JOINBATTLE #{battle_id} gameHash\n"
+
+    # :timer.sleep(500)
+
+    # Next up, we are expecting the battle to get setup
+    reply = _recv_until(battle_socket)
+    assert reply =~ "SAIDBATTLEEX #{host_user.name} Director mode enabled"
+    assert reply =~ "JOINEDBATTLE #{battle_id} #{user1.name}"
+    assert reply =~ "JOINEDBATTLE #{battle_id} #{user2.name}"
+    assert reply =~ "SAIDBATTLE Coordinator !autobalance off"
+    assert reply =~ "SAIDBATTLE Coordinator !map map1"
+
+    # Lets make sure the clients got updated too though!
+    client1 = Client.get_client_by_id(user1.id)
+    client2 = Client.get_client_by_id(user2.id)
+    client3 = Client.get_client_by_id(user3.id)
+
+    assert client1.player == true
+    assert client2.player == true
+    assert client3.player == false
+
+    assert client1.team_number != client2.team_number
+    assert client1.ally_team_number != client2.ally_team_number
   end
 
   test "joining and leaving all queues", %{socket: socket, user: user} do

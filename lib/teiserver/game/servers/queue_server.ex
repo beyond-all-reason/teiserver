@@ -3,6 +3,7 @@ defmodule Teiserver.Game.QueueServer do
   require Logger
   alias Teiserver.Battle.BattleLobby
   alias Phoenix.PubSub
+  alias Teiserver.Director
 
   @default_tick_interval 5_000
 
@@ -228,6 +229,37 @@ defmodule Teiserver.Game.QueueServer do
 
         midway_state = remove_players(state, state.players_accepted)
 
+        # Director sets up the battle
+        map_name = state.map_list |> Enum.random()
+        BattleLobby.start_director_mode(battle.id)
+        Director.cast_consul(battle.id, %{command: "manual-autohost", senderid: state.coordinator_id})
+        Director.cast_consul(battle.id, %{command: "change-map", remaining: map_name, senderid: state.coordinator_id})
+
+        # Now put the players on their teams, for now we're assuming every game is just a 1v1
+        [p1, p2] = state.players_accepted
+        Director.cast_consul(battle.id, %{command: "change-battlestatus", target_id: p1, senderid: state.coordinator_id,
+          status: %{
+            team_number: 0,
+            ally_team_number: 0,
+            player: true,
+            bonus: 0,
+            ready: true
+          }
+        })
+        Director.cast_consul(battle.id, %{command: "change-battlestatus", target_id: p2, senderid: state.coordinator_id,
+          status: %{
+            team_number: 1,
+            ally_team_number: 1,
+            player: true,
+            bonus: 0,
+            ready: true
+          }
+        })
+
+        # Give things time to propogate before we start
+        :timer.sleep(250)
+        Director.cast_consul(battle.id, %{command: "forcestart", remaining: map_name, senderid: state.coordinator_id})
+
         %{
           midway_state
           | finding_battle: false,
@@ -266,6 +298,7 @@ defmodule Teiserver.Game.QueueServer do
        player_map: %{},
        last_wait_time: 0,
        id: opts.queue.id,
+       coordinator_id: Director.get_coordinator_userid(),
        team_size: opts.queue.team_size,
        map_list: opts.queue.map_list,
        settings: opts.queue.settings,

@@ -2,7 +2,7 @@ defmodule Teiserver.Protocols.Director.CommandsTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.BattleLobby
   alias Teiserver.Common.PubsubListener
-  alias Teiserver.{Client, Director, User}
+  alias Teiserver.{Client, User}
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]

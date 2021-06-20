@@ -5,7 +5,7 @@ defmodule Teiserver.Battle.BattleLobby do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.User
   alias Teiserver.Client
-  alias Teiserver.Data.Types
+  alias Teiserver.Data.Types, as: T
   alias Teiserver.Director
 
 #   @enforce_keys [:id, :founder_id, :founder_name]
@@ -549,9 +549,10 @@ defmodule Teiserver.Battle.BattleLobby do
     :ok
   end
 
-  def force_change_client(_, nil, _, _), do: nil
+  @spec force_change_client(T.userid(), T.userid(), Map.t()) :: :ok
+  def force_change_client(_, nil, _), do: nil
 
-  def force_change_client(changer_id, client_id, field, new_value) do
+  def force_change_client(changer_id, client_id, new_values) do
     changer = Client.get_client_by_id(changer_id)
     case Client.get_client_by_id(client_id) do
       nil ->
@@ -559,16 +560,22 @@ defmodule Teiserver.Battle.BattleLobby do
       client ->
         battle = get_battle(client.battle_id)
 
-        if allow?(changer, field, battle) do
-          change_client_battle_status(client, field, new_value)
-        end
+        new_values = new_values
+        |> Enum.filter(fn {field, _} ->
+          allow?(changer, field, battle)
+        end)
+        |> Map.new(fn {k, v} -> {k, v} end)
+
+        change_client_battle_status(client, new_values)
     end
   end
 
-  def change_client_battle_status(nil, _, _), do: nil
+  @spec change_client_battle_status(Map.t(), Map.t()) :: Map.t()
+  def change_client_battle_status(nil, _), do: nil
+  def change_client_battle_status(_, values) when values == %{}, do: nil
 
-  def change_client_battle_status(client, field, new_value) do
-    client = Map.put(client, field, new_value)
+  def change_client_battle_status(client, new_values) do
+    client = Map.merge(client, new_values)
     Client.update(client, :client_updated_battlestatus)
   end
 
@@ -617,14 +624,14 @@ defmodule Teiserver.Battle.BattleLobby do
       battle == nil ->
         false
 
+      changer.moderator == true ->
+        true
+
       battle.founder_id == changer.userid ->
         true
 
       founder_command == true ->
         false
-
-      changer.moderator == true ->
-        true
 
       # If they're not a moderator/founder then they can't
       # do moderator commands
