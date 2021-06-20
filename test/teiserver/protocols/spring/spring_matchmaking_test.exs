@@ -148,13 +148,24 @@ defmodule Teiserver.SpringMatchmakingTest do
 
     # Next up, we are expecting the battle to get setup
     reply = _recv_until(battle_socket)
-    assert reply =~ "SAIDBATTLEEX #{host_user.name} Director mode enabled"
-    assert reply =~ "JOINEDBATTLE #{battle_id} #{user1.name}"
-    assert reply =~ "JOINEDBATTLE #{battle_id} #{user2.name}"
-    assert reply =~ "SAIDBATTLE Coordinator !autobalance off"
-    assert reply =~ "SAIDBATTLE Coordinator !map map1"
 
-    # Lets make sure the clients got updated too though!
+    # In the middle of the messages will be the client status messages
+    # we cannot be sure of their order or exact values so we do their test later
+    assert reply =~ """
+SAIDBATTLEEX #{host_user.name} Director mode enabled
+JOINEDBATTLE #{battle_id} #{user2.name}
+JOINEDBATTLE #{battle_id} #{user1.name}
+SAIDPRIVATE Coordinator !autobalance off
+SAIDPRIVATE Coordinator !map map1
+SAIDBATTLE Coordinator ! change-map map1
+"""
+
+    assert reply =~ """
+SAIDPRIVATE Coordinator !forcestart
+SAIDBATTLE Coordinator ! forcestart
+"""
+
+    # Lets make sure the clients got updated
     client1 = Client.get_client_by_id(user1.id)
     client2 = Client.get_client_by_id(user2.id)
     client3 = Client.get_client_by_id(user3.id)

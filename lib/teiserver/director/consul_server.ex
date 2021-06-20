@@ -99,24 +99,29 @@ defmodule Teiserver.Director.ConsulServer do
     say_command(cmd, state)
   end
 
+  def handle_command(%{command: "forcestart", senderid: senderid} = cmd, state) do
+    Director.send_to_host(senderid, state.battle_id, "!forcestart")
+    say_command(cmd, state)
+  end
+
   def handle_command(%{command: "reset"} = _cmd, state) do
     empty_state(state.battle_id)
-    |> broadcast_update("lock-spectator")
+    |> broadcast_update("reset")
   end
 
-  def handle_command(%{command: "director", remaining: "stop"} = _cmd, state) do
+  def handle_command(%{command: "director", remaining: "stop"} = cmd, state) do
     BattleLobby.stop_director_mode(state.battle_id)
-    state
+    say_command(cmd, state)
   end
 
-  def handle_command(%{command: "manual-autohost"} = _cmd, state) do
+  def handle_command(%{command: "manual-autohost"}, state) do
     Director.send_to_host(state.coordinator_id, state.battle_id, "!autobalance off")
     state
   end
 
-  def handle_command(%{command: "change-map", remaining: map_name}, state) do
+  def handle_command(%{command: "change-map", remaining: map_name} = cmd, state) do
     Director.send_to_host(state.coordinator_id, state.battle_id, "!map #{map_name}")
-    state
+    say_command(cmd, state)
   end
 
   def handle_command(%{command: "force-spectator", remaining: target_id}, state)
@@ -227,8 +232,8 @@ defmodule Teiserver.Director.ConsulServer do
 
   @spec say_command(Map.t(), Map.t()) :: Map.t()
   defp say_command(cmd, state) do
-    vote = if cmd.vote, do: "cv ", else: ""
-    remaining = if cmd.remaining, do: " #{cmd.remaining}", else: ""
+    vote = if Map.get(cmd, :vote), do: "cv ", else: ""
+    remaining = if Map.get(cmd, :remaining), do: " #{cmd.remaining}", else: ""
 
     msg = "! #{vote}#{cmd.command}#{remaining}"
       |> String.trim

@@ -258,7 +258,7 @@ defmodule Teiserver.Game.QueueServer do
 
         # Give things time to propogate before we start
         :timer.sleep(250)
-        Director.cast_consul(battle.id, %{command: "forcestart", remaining: map_name, senderid: state.coordinator_id})
+        Director.cast_consul(battle.id, %{command: "forcestart", senderid: state.coordinator_id})
 
         %{
           midway_state
