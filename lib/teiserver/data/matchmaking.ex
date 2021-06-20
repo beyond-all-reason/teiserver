@@ -138,6 +138,10 @@ defmodule Teiserver.Data.Matchmaking do
     |> add_queue()
   end
 
+  def refresh_queue_from_db(queue) do
+    cast_queue(queue.id, {:refresh_from_db, queue})
+  end
+
   @spec convert_queue(Game.Queue.t()) :: QueueStruct.t()
   defp convert_queue(queue) do
     %QueueStruct{

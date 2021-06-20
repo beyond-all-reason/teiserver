@@ -78,6 +78,10 @@ defmodule Teiserver.Game.QueueServer do
     {:reply, resp, state}
   end
 
+  def handle_cast({:refresh_from_db, db_queue}, state) do
+    update_state_from_db(state, db_queue)
+  end
+
   def handle_cast({:player_accept, player_id}, state) when is_integer(player_id) do
     new_state =
       case player_id in state.matched_players do
@@ -276,6 +280,15 @@ defmodule Teiserver.Game.QueueServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
+  defp update_state_from_db(state, db_queue) do
+    Map.merge(state, %{
+      id: db_queue.id,
+      team_size: db_queue.team_size,
+      map_list: db_queue.map_list |> Enum.map(fn m -> String.trim(m) end),
+      settings: db_queue.settings,
+    })
+  end
+
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
     tick_interval = Map.get(opts.queue.settings, "tick_interval", @default_tick_interval)
@@ -284,8 +297,7 @@ defmodule Teiserver.Game.QueueServer do
     # Update the queue pids cache to point to this process
     ConCache.put(:teiserver_queue_pids, opts.queue.id, self())
 
-    {:ok,
-     %{
+    state = update_state_from_db(%{
        # Match ready stuff
        waiting_for_players: [],
        players_accepted: [],
@@ -297,12 +309,10 @@ defmodule Teiserver.Game.QueueServer do
        player_count: 0,
        player_map: %{},
        last_wait_time: 0,
-       id: opts.queue.id,
        coordinator_id: Director.get_coordinator_userid(),
-       team_size: opts.queue.team_size,
-       map_list: opts.queue.map_list,
-       settings: opts.queue.settings,
        ready_wait_time: opts.queue.settings["ready_wait_time"] || @ready_wait_time
-     }}
+     }, opts.queue)
+
+    {:ok, state}
   end
 end

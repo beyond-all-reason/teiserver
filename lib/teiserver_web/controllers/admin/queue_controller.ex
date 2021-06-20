@@ -4,6 +4,7 @@ defmodule TeiserverWeb.Admin.QueueController do
   alias Teiserver.Game
   alias Teiserver.Game.Queue
   alias Teiserver.Game.QueueLib
+  alias Teiserver.Data.Matchmaking
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Game.Queue,
@@ -72,7 +73,9 @@ defmodule TeiserverWeb.Admin.QueueController do
       })
 
     case Game.create_queue(queue_params) do
-      {:ok, _queue} ->
+      {:ok, queue} ->
+        Matchmaking.add_queue_from_db(queue)
+
         conn
         |> put_flash(:info, "Queue created successfully.")
         |> redirect(to: Routes.ts_admin_queue_path(conn, :index))
@@ -109,7 +112,9 @@ defmodule TeiserverWeb.Admin.QueueController do
       })
 
     case Game.update_queue(queue, queue_params) do
-      {:ok, _queue} ->
+      {:ok, queue} ->
+        Matchmaking.add_queue_from_db(queue)
+
         conn
         |> put_flash(:info, "Queue updated successfully.")
         |> redirect(to: Routes.ts_admin_queue_path(conn, :index))
