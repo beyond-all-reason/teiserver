@@ -3,7 +3,7 @@
 <script type="text/javascript" charset="utf-8">
   $(function() {
     $('.datepicker').datepicker({
-      format: "dd/mm/yyyy" 
+      format: "dd/mm/yyyy"
     });
 
     $('select').select2({
@@ -12,7 +12,7 @@
   });
 </script>
 
-<%= component "icon_dropdown_js", [] %>
+<%= central_component "icon_dropdown_js", [] %>
 
 <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
 <script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
@@ -38,7 +38,7 @@
             <%= if allow?(@current_user, "admin.admin.full") do %>
               <div class="col-md-4 col-xl-2 search-form-input">
                 <label for="search_admin_group" class="control-label">Admin group: </label>
-                <%= component "icon_dropdown", %{
+                <%= central_component "icon_dropdown", %{
                   name: "search[admin_group_id]",
                   id: "search_admin_group_id",
                   insert_blank: %{id: "", name: "All groups", icon: "far far far fa-th", colour: fg},
@@ -49,7 +49,7 @@
 
               <div class="col-md-4 col-xl-2 search-form-input">
                 <label for="search_has_admin_group" class="control-label">Has admin group: </label>
-                <%= component "icon_dropdown", %{
+                <%= central_component "icon_dropdown", %{
                   name: "search[has_admin_group]",
                   id: "search_has_admin_group",
                   selected: @params["has_admin_group"],
@@ -69,7 +69,7 @@
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="search_order" class="control-label">Order by: </label>
-              <%= component "icon_dropdown", %{
+              <%= central_component "icon_dropdown", %{
                 name: "search[order]",
                 id: "search_order",
                 selected: @params["order"],

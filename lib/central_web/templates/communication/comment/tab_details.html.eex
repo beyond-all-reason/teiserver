@@ -1,17 +1,17 @@
 <% {_fg, _bg, _bsname} = colours() %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Content",
   value: @comment.content,
   type: "textarea"
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Inserted",
   value: date_to_str @comment.inserted_at, format: :hms_dmy, tz: @tz
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Updated",
   value: date_to_str @comment.updated_at, format: :hms_dmy, tz: @tz
 %>

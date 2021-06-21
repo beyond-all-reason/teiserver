@@ -14,7 +14,7 @@
 <%= if Application.get_env(:central, Central)[:enable_blog] do %>
   <li id="sidebar_blog">
     <a href="<%= Routes.blog_path(@conn, :index) %>">
-      <%= component "icon", icon: Central.Communication.BlogLib.icon(), class: "fa-lg" %>
+      <%= central_component "icon", icon: Central.Communication.BlogLib.icon(), class: "fa-lg" %>
       &nbsp;
       Blog
     </a>
@@ -22,7 +22,7 @@
 <% end %>
 
   <%= if allow?(@current_user, "admin") do %>
-    <%= component "sidemenu_item",
+    <%= central_component "sidemenu_item",
       name: "admin",
       label: "Admin",
       active: assigns[:sidemenu_active],
@@ -32,7 +32,7 @@
   <% end %>
 
   <%= if allow?(@current_user, "logging") do %>
-    <%= component "sidemenu_item",
+    <%= central_component "sidemenu_item",
       name: "logging",
       label: "Logging",
       active: assigns[:sidemenu_active],
@@ -47,7 +47,7 @@
     <%= render view, "sidemenu.html", assigns %>
   <% end %>
 
-  <%= component "sidemenu_item",
+  <%= central_component "sidemenu_item",
     name: "account",
     label: "Site account",
     active: assigns[:sidemenu_active],

@@ -1,23 +1,23 @@
 <div class="dropdown-menu">
   <%= if allow?(@current_user, "logging.page_view.show") do %>
     <a class="dropdown-item" href='<%= Routes.logging_page_view_log_path(@conn, :index) %>?user_id=<%= @user.id %>'>
-      <%= component "icon", icon: Central.Logging.LoggingLib.icon() %>
-      <%= component "icon", icon: Central.Logging.PageViewLogLib.icon() %>
+      <%= central_component "icon", icon: Central.Logging.LoggingLib.icon() %>
+      <%= central_component "icon", icon: Central.Logging.PageViewLogLib.icon() %>
       &nbsp;
       Page view logs
     </a>
   <% end %>
 
   <a class="dropdown-item" href='<%= Routes.account_report_path(@conn, :new, @user.id) %>'>
-    <%= component "icon", icon: StylingHelper.icon(:new), class: "fas" %>
-    <%= component "icon", icon: Central.Account.ReportLib.icon() %>
+    <%= central_component "icon", icon: StylingHelper.icon(:new), class: "fas" %>
+    <%= central_component "icon", icon: Central.Account.ReportLib.icon() %>
     &nbsp;
     Add report
   </a>
 
   <a class="dropdown-item" href='<%= Routes.admin_user_path(@conn, :reset_password, @user.id) %>'>
-    <%= component "icon", icon: "fas fa-undo" %>
-    <%= component "icon", icon: "fas fa-shield-alt" %>
+    <%= central_component "icon", icon: "fas fa-undo" %>
+    <%= central_component "icon", icon: "fas fa-shield-alt" %>
     &nbsp;
     Reset password
   </a>
@@ -26,7 +26,7 @@
 <div class="dropdown-divider"></div>
 
   <a class="dropdown-item" href='<%= Routes.admin_user_path(@conn, :delete_check, @user) %>?user_id=<%= @user.id %>'>
-    <%= component "icon", icon: Central.Account.UserLib.icon() %>
+    <%= central_component "icon", icon: Central.Account.UserLib.icon() %>
     <i class="far fa-fw fa-trash"></i>
     &nbsp;
     Check deletion

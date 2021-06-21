@@ -21,7 +21,7 @@
       <div class="card-body" style="padding: 0 15px;">
 
         <div class="row">
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "blog",
             label: "Blog",
             active: @active,
@@ -29,7 +29,7 @@
             lib: Central.Communication.BlogLib
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "posts",
             label: "Posts",
             active: @active,
@@ -37,7 +37,7 @@
             lib: Central.Communication.PostLib
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "categories",
             label: "Categories",
             active: @active,
@@ -45,7 +45,7 @@
             lib: Central.Communication.CategoryLib
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "comments",
             label: "Comments",
             active: @active,
@@ -53,7 +53,7 @@
             lib: Central.Communication.CommentLib
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "files",
             label: "Files",
             active: @active,

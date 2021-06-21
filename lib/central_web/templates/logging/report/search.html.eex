@@ -1,6 +1,6 @@
 <% {_fg, _bg, bsname} = colours() %>
 
-<%= component "picker_script",
+<%= central_component "picker_script",
   module: Central.Account.UserLib,
   name: "account_user",
   title: "User search"

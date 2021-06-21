@@ -1,6 +1,6 @@
 <% {_fg, _bg, bsname} = colours() %>
 
-<%= component "section_menu_button",
+<%= central_component "section_menu_button",
   name: "index",
   label: "List",
   active: @active,
@@ -9,7 +9,7 @@
   url: Routes.ts_admin_clan_path(@conn, :index)
 %>
 
-<%= component "section_menu_button",
+<%= central_component "section_menu_button",
   name: "new",
   label: "New",
   active: @active,

@@ -17,10 +17,10 @@
 
   <div class="form-group">
     <%= if @config_info.type == "select" do %>
-      <%= component "icon_dropdown_js", [] %>
+      <%= central_component "icon_dropdown_js", [] %>
       <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
       <script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
-      <%= component "icon_dropdown", %{
+      <%= central_component "icon_dropdown", %{
                 name: "user_config[value]",
                 id: "user_config_value",
                 selected: f.data.value || Map.get(@changeset.changes, :value, @config_info.default),

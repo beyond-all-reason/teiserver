@@ -9,15 +9,15 @@ defmodule CentralWeb.LiveHelpers do
 
   ## Examples
 
-      <%= live_modal @socket, CentralWeb.UserLive.FormComponent,
+      <%= live_modal CentralWeb.UserLive.FormComponent,
         id: @user.id || :new,
         action: @live_action,
         user: @user,
         return_to: Routes.user_index_path(@socket, :index) %>
   """
-  def live_modal(socket, component, opts) do
+  def live_modal(component, opts) do
     path = Keyword.fetch!(opts, :return_to)
     modal_opts = [id: :modal, return_to: path, component: component, opts: opts]
-    live_component(socket, CentralWeb.ModalComponent, modal_opts)
+    live_component(CentralWeb.ModalComponent, modal_opts)
   end
 end

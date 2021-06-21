@@ -1,16 +1,16 @@
 <br />
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Email",
   value: @user.email
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Created",
   value: date_to_str(@user.inserted_at, format: :hms_dmy, tz: @tz)
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Styling",
   icon: %{
     colour: @user.colour,
@@ -20,7 +20,7 @@
 %>
 
 <%= if @user.admin_group do %>
-  <%= component "detail_line",
+  <%= central_component "detail_line",
     label: "Admin group",
     icon: %{
       colour: @user.admin_group.colour,
@@ -34,7 +34,7 @@
     }
   %>
 <% else %>
-  <%= component "detail_line",
+  <%= central_component "detail_line",
     label: "Admin group",
     value: "None"
   %>

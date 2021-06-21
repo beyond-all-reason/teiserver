@@ -14,7 +14,7 @@
   <%= if allow?(@current_user, "admin") do %>
     <li id="sidebar_admin">
       <a href="<%= Routes.admin_general_path(@conn, :index) %>">
-        <%= component "icon", icon: Central.Admin.icon(), class: "fa-lg" %>
+        <%= central_component "icon", icon: Central.Admin.icon(), class: "fa-lg" %>
         &nbsp;
         Admin
       </a>
@@ -24,7 +24,7 @@
   <%= if allow?(@current_user, "logging") do %>
     <li id="sidebar_logging">
       <a href="<%= Routes.logging_general_path(@conn, :index) %>">
-        <%= component "icon", icon: Central.Logging.icon(), class: "fa-lg" %>
+        <%= central_component "icon", icon: Central.Logging.icon(), class: "fa-lg" %>
         &nbsp;
         Logging
       </a>

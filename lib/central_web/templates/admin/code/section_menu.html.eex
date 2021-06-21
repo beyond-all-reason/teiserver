@@ -1,6 +1,6 @@
 <% {_fg, _bg, bsname} = colours() %>
 
-<%= component "section_menu_button",
+<%= central_component "section_menu_button",
   name: "index",
   label: "List",
   active: @active,

@@ -49,12 +49,12 @@
 <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
 <script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
 
-<%= component "icon_dropdown_js", [] %>
+<%= central_component "icon_dropdown_js", [] %>
 
 <%#= render CentralWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "notifications"})
 %>
 
-<%= component "picker_script",
+<%= central_component "picker_script",
   module: Central.Account.UserLib,
   name: "account_user",
   title: "User search"
@@ -75,12 +75,12 @@
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
-              <%= component "fa5_icon_picker", %{form: :f, field: :icon, short_link: true, default: "fa-exclamation"} %>
+              <%= central_component "fa5_icon_picker", %{form: :f, field: :icon, short_link: true, default: "fa-exclamation"} %>
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="f_colour" class="control-label">Colour:</label>
-              <%= component "icon_dropdown", %{
+              <%= central_component "icon_dropdown", %{
                   name: "f[colour]",
                   id: "f_colour",
                   enumerable: [
@@ -150,7 +150,7 @@
                 </a>
               </td>
               <td style="color: <%= notification.colour %>">
-                <%= component "icon", icon: notification.icon %>
+                <%= central_component "icon", icon: notification.icon %>
                 &nbsp;
                 <%= notification.title %>
               </td>

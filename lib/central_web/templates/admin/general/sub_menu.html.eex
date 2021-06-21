@@ -21,7 +21,7 @@
       <div class="card-body" style="padding: 0 15px;">
 
         <div class="row">
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "user",
             label: "Users",
             active: @active,
@@ -29,7 +29,7 @@
             lib: Central.Account.UserLib
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "group",
             label: "Groups",
             active: @active,
@@ -37,7 +37,7 @@
             lib: Central.Account.GroupLib
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "reports",
             label: "Reports",
             active: @active,
@@ -45,7 +45,7 @@
             lib: Central.Account.ReportLib
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "codes",
             label: "Codes",
             active: @active,
@@ -53,7 +53,7 @@
             lib: Central.Account.CodeLib
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "tool",
             label: "Tools",
             active: @active,

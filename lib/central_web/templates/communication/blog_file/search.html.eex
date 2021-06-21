@@ -3,7 +3,7 @@
 <script type="text/javascript" charset="utf-8">
   $(function() {
     $('.datepicker').datepicker({
-      format: "dd/mm/yyyy" 
+      format: "dd/mm/yyyy"
     });
 
     $('select').select2({
@@ -12,7 +12,7 @@
   });
 </script>
 
-<%= component "icon_dropdown_js", [] %>
+<%= central_component "icon_dropdown_js", [] %>
 
 <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
 <script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
@@ -37,7 +37,7 @@
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="group" class="control-label">Group: </label>
-              <%= component "icon_dropdown", %{
+              <%= central_component "icon_dropdown", %{
                 name: "search[group]",
                 id: "search_group",
                 insert_blank: %{id: "", name: "All groups", icon: "fas fa-th", colour: fg},

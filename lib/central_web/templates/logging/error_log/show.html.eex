@@ -15,7 +15,7 @@
         <h4>Error log #<%= @log.id %></h4>
         <br />
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Reason",
   value: @log.reason,
   type: "textarea",
@@ -25,7 +25,7 @@
 %>
 
 <%= if @log.user_id do %>
-  <%= component "detail_line",
+  <%= central_component "detail_line",
     label: "User",
     icon: %{
       colour: @log.user.colour,
@@ -39,13 +39,13 @@
     }
   %>
 <% else %>
-  <%= component "detail_line",
+  <%= central_component "detail_line",
     label: "User",
     value: @log.user_id
   %>
 <% end %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Path",
   value: @log.path,
   disabled: false,
@@ -56,7 +56,7 @@
   }
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Method",
   value: @log.method
 %>
@@ -64,7 +64,7 @@
 <hr />
 <h4>Params</h4>
 <%= for {k,v} <- @log.data["params"] do %>
-  <%= component "detail_line",
+  <%= central_component "detail_line",
     label: k,
     value: v,
     type: "textarea",

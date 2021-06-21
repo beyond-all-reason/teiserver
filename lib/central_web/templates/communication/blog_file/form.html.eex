@@ -6,7 +6,7 @@
   });
 </script>
 
-<%= component "icon_dropdown_js", [] %>
+<%= central_component "icon_dropdown_js", [] %>
 
 <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
 <script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>

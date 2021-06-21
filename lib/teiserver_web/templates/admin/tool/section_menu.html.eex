@@ -11,7 +11,7 @@
   });
 </script>
 
-<%= component "section_menu_button",
+<%= central_component "section_menu_button",
   name: "day_metrics",
   label: "Day metrics",
   active: @active,
@@ -20,7 +20,7 @@
   url: Routes.ts_admin_tool_path(@conn, :day_metrics_list)
 %>
 
-<%= component "section_menu_button",
+<%= central_component "section_menu_button",
   name: "today",
   label: "Today",
   active: @active,

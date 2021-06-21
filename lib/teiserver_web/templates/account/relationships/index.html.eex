@@ -28,28 +28,28 @@
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li>
             <a href="#friends_tab" role="tab" class="nav-link" data-toggle="tab">
-              <%= component "icon", icon: Teiserver.icon(:friend) %>
+              <%= central_component "icon", icon: Teiserver.icon(:friend) %>
               Friends
             </a>
           </li>
 
           <li>
             <a href="#requests_tab" role="tab" class="nav-link" data-toggle="tab">
-              <%= component "icon", icon: Teiserver.icon(:friend_request) %>
+              <%= central_component "icon", icon: Teiserver.icon(:friend_request) %>
               Pending requests (<%= Enum.count(@received_requests) %>)
             </a>
           </li>
 
           <li>
             <a href="#muted_tab" role="tab" class="nav-link" data-toggle="tab">
-              <%= component "icon", icon: Teiserver.icon(:ignore) %>
+              <%= central_component "icon", icon: Teiserver.icon(:ignore) %>
               Muted
             </a>
           </li>
 
           <li>
             <a href="#clan_invites_tab" role="tab" class="nav-link" data-toggle="tab">
-              <%= component "icon", icon: Teiserver.Clans.ClanLib.icon() %>
+              <%= central_component "icon", icon: Teiserver.Clans.ClanLib.icon() %>
               Clan invites
             </a>
           </li>

@@ -22,7 +22,7 @@
 
         <div class="row">
           <%= if allow?(@conn, "teiserver.moderator.account") do %>
-            <%= component "sub_menu_icon",
+            <%= central_component "sub_menu_icon",
               name: "clients",
               label: "Clients",
               active: @active,
@@ -30,7 +30,7 @@
               lib: Teiserver.ClientLib
             %>
 
-            <%= component "sub_menu_icon",
+            <%= central_component "sub_menu_icon",
               name: "users",
               label: "Users",
               active: @active,
@@ -40,7 +40,7 @@
           <% end %>
 
           <%= if allow?(@conn, "teiserver.moderator.party") do %>
-            <%= component "sub_menu_icon",
+            <%= central_component "sub_menu_icon",
               name: "parties",
               label: "Parties",
               active: @active,
@@ -51,7 +51,7 @@
           <% end %>
 
           <%= if allow?(@conn, "teiserver.moderator.clan") do %>
-            <%= component "sub_menu_icon",
+            <%= central_component "sub_menu_icon",
               name: "clans",
               label: "Clans",
               active: @active,
@@ -61,7 +61,7 @@
           <% end %>
 
           <%= if allow?(@conn, "teiserver.moderator.queue") do %>
-            <%= component "sub_menu_icon",
+            <%= central_component "sub_menu_icon",
               name: "queues",
               label: "Queues",
               active: @active,
@@ -71,7 +71,7 @@
           <% end %>
 
           <%= if allow?(@conn, "teiserver.admin") do %>
-            <%= component "sub_menu_icon",
+            <%= central_component "sub_menu_icon",
               name: "tools",
               label: "Tools",
               active: @active,

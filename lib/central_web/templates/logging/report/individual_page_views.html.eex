@@ -1,5 +1,5 @@
 <% {fg, _bg, bsname} = colours() %>
-<%= component "picker_script",
+<%= central_component "picker_script",
   module: Central.Account.UserLib,
   name: "account_user",
   title: "User search"
@@ -17,7 +17,7 @@
   });
 </script>
 
-<%= component "icon_dropdown_js", [] %>
+<%= central_component "icon_dropdown_js", [] %>
 
 <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
 <script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
@@ -39,7 +39,7 @@
           <div class="row">
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="report_mode" class="control-label">Mode:</label>
-              <%= component "icon_dropdown", %{
+              <%= central_component "icon_dropdown", %{
                 name: "report[mode]",
                 id: "report_mode",
                 selected: @params["mode"],
@@ -67,7 +67,7 @@
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="report_mode" class="control-label">Group:</label>
-              <%= component "icon_dropdown", %{
+              <%= central_component "icon_dropdown", %{
                 name: "report[group]",
                 id: "report_group",
                 insert_blank: %{id: "", name: "All", icon: "fas fa-th", colour: fg},
@@ -78,7 +78,7 @@
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="report_metric" class="control-label">Section:</label>
-              <%= component "icon_dropdown", %{
+              <%= central_component "icon_dropdown", %{
                 name: "report[section]",
                 id: "report_section",
                 selected: @params["section"],

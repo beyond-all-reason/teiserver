@@ -10,7 +10,7 @@
   <%= if assigns[:icon] do %>
   <span class="input-group-prepend">
     <span class="input-group-text" style="background-color: <%= @icon.colour %>; color: #FFF;">
-      <%= component "icon", icon: @icon.icon %>
+      <%= central_component "icon", icon: @icon.icon %>
     </span>
   </span>
   <% end %>
@@ -38,7 +38,7 @@
     <span class="input-group-append">
       <a class="input-group-text btn btn-<%= @link.bsname %> btn-sm" href="<%= @link.path %>">
         <%= if @link.icon do %>
-          <%= component "icon", icon: @link.icon %>
+          <%= central_component "icon", icon: @link.icon %>
           &nbsp;
         <% end %>
         <i class="fas fa-fw fa-link"></i>

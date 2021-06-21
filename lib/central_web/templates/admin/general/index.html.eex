@@ -23,26 +23,26 @@
 
 <div class="row page-row">
   <%= if allow?(@current_user, "admin.user") do %>
-    <%= component "menu_card", icon_class: "fas", name: "", icon: Central.Account.UserLib.icon, text: "Users", link: Routes.admin_user_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fas", name: "", icon: Central.Account.UserLib.icon, text: "Users", link: Routes.admin_user_path(@conn, :index) %>
   <% end %>
 
   <%= if allow?(@current_user, "admin.group") do %>
-    <%= component "menu_card", icon_class: "fas", name: "", icon: Central.Account.GroupLib.icon, text: "Groups", link: Routes.admin_group_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fas", name: "", icon: Central.Account.GroupLib.icon, text: "Groups", link: Routes.admin_group_path(@conn, :index) %>
   <% end %>
 
   <%= if allow?(@current_user, "admin.report") do %>
-    <%= component "menu_card", icon_class: "fas", name: "", icon: Central.Account.ReportLib.icon, text: "Reports", link: Routes.admin_report_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fas", name: "", icon: Central.Account.ReportLib.icon, text: "Reports", link: Routes.admin_report_path(@conn, :index) %>
   <% end %>
 
   <%= if allow?(@current_user, "admin.dev") do %>
-    <%= component "menu_card", icon_class: "fas", name: "", icon: Central.Account.CodeLib.icon, text: "Codes", link: Routes.admin_code_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fas", name: "", icon: Central.Account.CodeLib.icon, text: "Codes", link: Routes.admin_code_path(@conn, :index) %>
   <% end %>
 
   <%= if allow?(@current_user, "admin.dev") do %>
-    <%= component "menu_card", icon_class: "fas", name: "", icon: Central.Admin.ToolLib.icon, text: "Tools", link: Routes.admin_tool_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fas", name: "", icon: Central.Admin.ToolLib.icon, text: "Tools", link: Routes.admin_tool_path(@conn, :index) %>
   <% end %>
 </div>
 
 <div class="row page-row">
-  <%= component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.general_page_path(@conn, :index) %>
+  <%= central_component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.general_page_path(@conn, :index) %>
 </div>

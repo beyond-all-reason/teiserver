@@ -27,7 +27,7 @@
 </table>
 
 <%= if @membership.role in ~w(Admin Moderator) do %>
-  <%= component "picker_script",
+  <%= central_component "picker_script",
     module: Teiserver.Account.UserLib,
     name: "teiserver_user",
     title: "User search"

@@ -29,7 +29,7 @@
 <%= for party <- @parties do %>
     <tr>
       <td style="background-color: <%= party.colour %>; color: #FFF;" width="22">
-        <%= component "icon", icon: party.icon %>
+        <%= central_component "icon", icon: party.icon %>
       </td>
       <td><%= party.name %></td>
 

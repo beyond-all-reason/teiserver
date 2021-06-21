@@ -40,7 +40,7 @@
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li>
             <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
-              <%= component "icon", icon: "fas fa-file-alt" %>
+              <%= central_component "icon", icon: "fas fa-file-alt" %>
               Details
             </a>
           </li>
@@ -55,7 +55,7 @@
 
         <hr />
         <a href="<%= Routes.admin_report_path(@conn, :user_show, @report.target_id) %>?filter=target" class="btn btn-outline-<%= bsname %>">
-          <%= component "icon", icon: Central.Account.ReportLib.icon() %>
+          <%= central_component "icon", icon: Central.Account.ReportLib.icon() %>
           More reports of this user
         </a>
 

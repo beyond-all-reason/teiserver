@@ -14,7 +14,7 @@
 %>
 
 <a href="<%= @url %>" class="btn btn-outline-<%= @bsname %> <%= active_class %>" id="section-menu-<%= @name %>">
-  <%= component "icon", icon: icon %>
+  <%= central_component "icon", icon: icon %>
   &nbsp;
   <%= @label %>
 </a>

@@ -21,7 +21,7 @@
       <div class="card-body" style="padding: 0 15px;">
 
         <div class="row">
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "coverage",
             label: "Coverage",
             active: @active,
@@ -30,7 +30,7 @@
               icon: "far fa-barcode-scan"
             }
           %>
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "test-page",
             label: "Test page",
             active: @active,
@@ -40,7 +40,7 @@
             }
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "falist",
             label: "FA List",
             active: @active,
@@ -50,7 +50,7 @@
             }
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "oban",
             label: "Oban",
             active: @active,
@@ -60,7 +60,7 @@
             }
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "conn-params",
             label: "Conn params",
             active: @active,

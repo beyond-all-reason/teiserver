@@ -14,7 +14,7 @@
 <%= render CentralWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "groups"})
 %>
 
-<%= component "picker_script",
+<%= central_component "picker_script",
   module: Central.Account.UserLib,
   name: "account_user",
   title: "User search"
@@ -54,7 +54,7 @@
         <h4>
           <div style="border: 1px solid <%= @group.colour %>; display: inline-block; padding-right: 6px;">
             <div style="color: #FFF; background-color: <%= @group.colour %>; padding: 2px 6px; display: inline-block;">
-              <%= component "icon", icon: @group.icon %>
+              <%= central_component "icon", icon: @group.icon %>
             </div>
             <%= @group.name %>
           </div>
@@ -64,7 +64,7 @@
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item">
             <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
-              <%= component "icon", icon: icon() %>
+              <%= central_component "icon", icon: icon() %>
               Details
             </a>
           </li>
@@ -72,7 +72,7 @@
           <%= if @group_access[:see_members] do %>
             <li class="nav-item">
               <a href="#members_tab" role="tab" class="nav-link" data-toggle="tab">
-                <%= component "icon", icon: "fas fa-users" %>
+                <%= central_component "icon", icon: "fas fa-users" %>
                 Members (<%= Enum.count(@group.memberships) %>)
               </a>
             </li>
@@ -80,7 +80,7 @@
 
           <li class="nav-item">
             <a href="#family_tab" role="tab" class="nav-link" data-toggle="tab">
-              <%= component "icon", icon: "fas fa-sitemap" %>
+              <%= central_component "icon", icon: "fas fa-sitemap" %>
               Family
             </a>
           </li>

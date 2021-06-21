@@ -3,7 +3,7 @@
 <script type="text/javascript" charset="utf-8">
   $(function() {
     $('.datepicker').datepicker({
-      format: "dd/mm/yyyy" 
+      format: "dd/mm/yyyy"
     });
   });
 </script>
@@ -30,7 +30,7 @@
   </div>
 
   <div class="form-group">
-    <%= component "fa5_icon_picker", %{form: f, field: :icon} %>
+    <%= central_component "fa5_icon_picker", %{form: f, field: :icon} %>
   </div>
 
   <div class="form-group">

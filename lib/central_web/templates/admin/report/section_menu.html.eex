@@ -2,7 +2,7 @@
 
 <%= case assigns[:filters] || "standard" do %>
   <% "standard" -> %>
-    <%= component "section_menu_button",
+    <%= central_component "section_menu_button",
       name: "open",
       label: "Open",
       active: @active,
@@ -11,7 +11,7 @@
       url: Routes.admin_report_path(@conn, :index) <> "?filter=open"
     %>
 
-    <%= component "section_menu_button",
+    <%= central_component "section_menu_button",
       name: "closed",
       label: "Closed",
       active: @active,
@@ -20,7 +20,7 @@
       url: Routes.admin_report_path(@conn, :index) <> "?filter=closed"
     %>
 
-    <%= component "section_menu_button",
+    <%= central_component "section_menu_button",
       name: "all",
       label: "All",
       active: @active,
@@ -30,7 +30,7 @@
     %>
 
   <% "user" -> %>
-    <%= component "section_menu_button",
+    <%= central_component "section_menu_button",
       name: "all",
       label: "All",
       active: @active,
@@ -39,7 +39,7 @@
       url: Routes.admin_report_path(@conn, :user_show, @user) <> "?filter=all"
     %>
 
-    <%= component "section_menu_button",
+    <%= central_component "section_menu_button",
       name: "target",
       label: "Target",
       active: @active,
@@ -48,7 +48,7 @@
       url: Routes.admin_report_path(@conn, :user_show, @user) <> "?filter=target"
     %>
 
-    <%= component "section_menu_button",
+    <%= central_component "section_menu_button",
       name: "reporter",
       label: "Reporter",
       active: @active,
@@ -57,7 +57,7 @@
       url: Routes.admin_report_path(@conn, :user_show, @user) <> "?filter=reporter"
     %>
 
-    <%= component "section_menu_button",
+    <%= central_component "section_menu_button",
       name: "responder",
       label: "Responder",
       active: @active,

@@ -9,7 +9,7 @@
   });
 </script>
 
-<%= component "icon_dropdown_js", [] %>
+<%= central_component "icon_dropdown_js", [] %>
 
 <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
 <script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
@@ -105,7 +105,7 @@
     </a>
 
     <a href="<%= Routes.blog_path(@conn, :show, @post.url_slug) %>?key=<%= get_key @post.url_slug %>" class="btn btn-outline-<%= bsname %>">
-      <%= component "icon", icon: Central.Communication.BlogLib.icon() %>
+      <%= central_component "icon", icon: Central.Communication.BlogLib.icon() %>
       &nbsp;
       View post
     </a>
@@ -124,7 +124,7 @@
   <div class="row page-row not-content-group">
     <div class="col-md-4 col-xl-3">
       <label for="post_category_id" class="control-label">Category</label>
-      <%= component "icon_dropdown", %{
+      <%= central_component "icon_dropdown", %{
         name: "post[category_id]",
         id: "post_category_id",
         selected: f.data.category_id || Map.get(@changeset.changes, :category_id),

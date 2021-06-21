@@ -7,7 +7,7 @@
 <div class="row">
   <%= if @current_user == nil do %>
     <%=
-      component "menu_card",
+      central_component "menu_card",
       icon: "fas fa-sign-in-alt",
       name: "signin",
       text: "Sign in",
@@ -31,7 +31,7 @@
   <%= if Application.get_env(:central, Central)[:enable_blog] do %>
     <%= if allow?(@current_user, "communication.blog") do %>
       <%=
-        component "menu_card",
+        central_component "menu_card",
           icon: Central.Communication.BlogLib.icon(),
           name: "blog",
           text: "Blog posts",
@@ -39,7 +39,7 @@
       %>
     <% else %>
       <%=
-        component "menu_card",
+        central_component "menu_card",
           icon: Central.Communication.BlogLib.icon(),
           name: "blog",
           text: "Blog",
@@ -50,7 +50,7 @@
 
   <%= if allow?(@current_user, "admin") do %>
     <%=
-      component "menu_card",
+      central_component "menu_card",
       icon: Central.Admin.icon(),
       name: "admin",
       text: "Admin",
@@ -60,7 +60,7 @@
 
   <%= if allow?(@current_user, "logging") do %>
     <%=
-      component "menu_card",
+      central_component "menu_card",
       icon: Central.Logging.icon(),
       name: "logging",
       text: "Logging",
@@ -89,7 +89,7 @@
 
     <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 menu-card">
       <a href="<%= Routes.communication_notification_path(@conn, :index) %>">
-        <%= component "icon", icon: notification_icon, class: "fa-3x" %>
+        <%= central_component "icon", icon: notification_icon, class: "fa-3x" %>
         <%= if @user_notifications_unread_count > 0 do %>
           <div class="badge badge-pill badge-<%= Central.Communication.NotificationLib.colours() |> elem(2) %>"
             id="communication-notifications-badge"
@@ -104,7 +104,7 @@
     </div>
 
     <%=
-      component "menu_card",
+      central_component "menu_card",
       icon: Central.Account.icon(),
       name: "account",
       text: "Account",

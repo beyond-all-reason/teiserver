@@ -47,7 +47,7 @@
 
       <li>
         <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
-          <%= component "icon", icon: icon() %>
+          <%= central_component "icon", icon: icon() %>
           Details
         </a>
       </li>
@@ -61,7 +61,7 @@
 
       <li>
         <a href="#user_tab" role="tab" class="nav-link" data-toggle="tab">
-          <%= component "icon", icon: Central.Account.UserLib.icon() %>
+          <%= central_component "icon", icon: Central.Account.UserLib.icon() %>
           User data
         </a>
       </li>

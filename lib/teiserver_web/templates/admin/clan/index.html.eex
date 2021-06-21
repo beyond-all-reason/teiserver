@@ -30,7 +30,7 @@
 <%= for clan <- @clans do %>
     <tr>
       <td style="background-color: <%= clan.colour2 %>; color: <%= clan.colour1 %>;" width="22">
-        <%= component "icon", icon: clan.icon %>
+        <%= central_component "icon", icon: clan.icon %>
       </td>
       <td><%= clan.name %></td>
       <td><%= clan.tag %></td>

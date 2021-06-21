@@ -1,7 +1,7 @@
 <div class="row">
   <%= if allow?(@current_user, "teiserver") do %>
     <%=
-      component "menu_card",
+      central_component "menu_card",
       icon: Teiserver.icon(),
       name: "teiserver",
       text: "Teiserver",

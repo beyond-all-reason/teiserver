@@ -1,12 +1,12 @@
 <div class="row page-row">
-  <%= component "menu_card", icon_class: "fas", name: "", icon: "far fa-barcode-scan", text: "Coverage", link: Routes.admin_tool_path(@conn, :coverage_form) %>
-  <%= component "menu_card", icon_class: "fas", name: "", icon: "far fa-exclamation-triangle", text: "Test errors", link: Routes.admin_tool_path(@conn, :test_error) %>
-  <%= component "menu_card", icon_class: "fas", name: "", icon: "far fa-map-marker-question", text: "Test page", link: Routes.admin_tool_path(@conn, :test_page) %>
-  <%= component "menu_card", icon_class: "fas", name: "", icon: "fab fa-font-awesome", text: "FA List", link: Routes.admin_tool_path(@conn, :falist) %>
-  <%= component "menu_card", icon_class: "fas", name: "", icon: "far fa-circle-notch", text: "Oban dashboard", link: Routes.admin_tool_path(@conn, :oban_dashboard) %>
-  <%= component "menu_card", icon_class: "fas", name: "", icon: "far fa-brackets-curly", text: "Conn params", link: Routes.admin_tool_path(@conn, :conn_params) %>
+  <%= central_component "menu_card", icon_class: "fas", name: "", icon: "far fa-barcode-scan", text: "Coverage", link: Routes.admin_tool_path(@conn, :coverage_form) %>
+  <%= central_component "menu_card", icon_class: "fas", name: "", icon: "far fa-exclamation-triangle", text: "Test errors", link: Routes.admin_tool_path(@conn, :test_error) %>
+  <%= central_component "menu_card", icon_class: "fas", name: "", icon: "far fa-map-marker-question", text: "Test page", link: Routes.admin_tool_path(@conn, :test_page) %>
+  <%= central_component "menu_card", icon_class: "fas", name: "", icon: "fab fa-font-awesome", text: "FA List", link: Routes.admin_tool_path(@conn, :falist) %>
+  <%= central_component "menu_card", icon_class: "fas", name: "", icon: "far fa-circle-notch", text: "Oban dashboard", link: Routes.admin_tool_path(@conn, :oban_dashboard) %>
+  <%= central_component "menu_card", icon_class: "fas", name: "", icon: "far fa-brackets-curly", text: "Conn params", link: Routes.admin_tool_path(@conn, :conn_params) %>
 </div>
 
 <div class="row page-row">
-  <%= component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.admin_general_path(@conn, :index) %>
+  <%= central_component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.admin_general_path(@conn, :index) %>
 </div>

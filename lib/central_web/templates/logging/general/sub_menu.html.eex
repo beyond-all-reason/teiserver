@@ -22,7 +22,7 @@
 
         <div class="row">
           <%= if allow?(@current_user, "logging.page_view") do %>
-            <%= component "sub_menu_icon",
+            <%= central_component "sub_menu_icon",
               name: "page_view",
               label: "Page view",
               active: @active,
@@ -32,7 +32,7 @@
           <% end %>
 
           <%= if allow?(@current_user, "logging.aggregate") do %>
-            <%= component "sub_menu_icon",
+            <%= central_component "sub_menu_icon",
               name: "aggregate",
               label: "Aggregate",
               active: @active,
@@ -42,7 +42,7 @@
           <% end %>
 
           <%= if allow?(@current_user, "logging.audit") do %>
-            <%= component "sub_menu_icon",
+            <%= central_component "sub_menu_icon",
               name: "audit",
               label: "Audit",
               active: @active,
@@ -52,7 +52,7 @@
           <% end %>
 
           <%= if allow?(@current_user, "logging.error") do %>
-            <%= component "sub_menu_icon",
+            <%= central_component "sub_menu_icon",
               name: "error",
               label: "Error",
               active: @active,
@@ -62,7 +62,7 @@
           <% end %>
 
           <%= if allow?(@current_user, "logging.live") do %>
-            <%= component "sub_menu_icon",
+            <%= central_component "sub_menu_icon",
               name: "live_dashboard",
               label: "Live dashboard",
               active: @active,
@@ -73,7 +73,7 @@
             %>
           <% end %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "report",
             label: "Reports",
             active: @active,

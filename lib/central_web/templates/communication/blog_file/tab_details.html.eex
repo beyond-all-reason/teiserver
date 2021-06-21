@@ -1,12 +1,12 @@
 <% {_fg, _bg, bsname} = colours() %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Name",
   value: @blog_file.name,
   type: "text"
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Url",
   value: Routes.blog_file_path(@conn, :public_show, @blog_file.url),
   type: "text",
@@ -17,24 +17,24 @@
   }
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "File path",
   value: @blog_file.file_path,
   type: "text"
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "File ext",
   value: @blog_file.file_ext,
   type: "text"
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "File size",
   value: mem_normalize @blog_file.file_size
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "File type",
   value: @blog_file.file_type,
   type: "text"
@@ -44,12 +44,12 @@
 
 <hr />
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Inserted at",
   value: date_to_str @blog_file.inserted_at, format: :hms_or_dmy, tz: @tz
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Updated at",
   value: date_to_str @blog_file.updated_at, format: :hms_or_dmy, tz: @tz
 %>

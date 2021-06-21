@@ -1,5 +1,5 @@
 <% {fg, _bg, bsname} = colours() %>
-<%= component "picker_script",
+<%= central_component "picker_script",
   module: Central.Account.UserLib,
   name: "account_user",
   title: "User search"
@@ -17,7 +17,7 @@
   });
 </script>
 
-<%= component "icon_dropdown_js", [] %>
+<%= central_component "icon_dropdown_js", [] %>
 
 <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
 <script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
@@ -49,7 +49,7 @@
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="search_section" class="control-label">Section: </label>
-              <%= component "icon_dropdown", %{
+              <%= central_component "icon_dropdown", %{
                 name: "search[section]",
                 id: "search_section",
                 selected: @params["section"],
@@ -63,7 +63,7 @@
             <%= if allow?(@permissions, "admin.admin.full") do %>
               <div class="col-md-4 col-xl-2 search-form-input">
                 <label for="search_admin_group" class="control-label">Admin group: </label>
-                <%= component "icon_dropdown", %{
+                <%= central_component "icon_dropdown", %{
                   name: "search[admin_group_id]",
                   id: "search_admin_group_id",
                   insert_blank: %{id: "", name: "All groups", icon: "fas fa-th", colour: fg},
@@ -92,7 +92,7 @@
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="search_order_by" class="control-label">Order by: </label>
-              <%= component "icon_dropdown", %{
+              <%= central_component "icon_dropdown", %{
                 name: "search[order]",
                 id: "search_search_group",
                 selected: @params["order"],

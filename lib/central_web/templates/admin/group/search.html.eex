@@ -3,7 +3,7 @@
 <script type="text/javascript" charset="utf-8">
   $(function() {
     $('.datepicker').datepicker({
-      format: "dd/mm/yyyy" 
+      format: "dd/mm/yyyy"
     });
 
     $('select').select2({
@@ -12,7 +12,7 @@
   });
 </script>
 
-<%= component "icon_dropdown_js", [] %>
+<%= central_component "icon_dropdown_js", [] %>
 
 <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/select2.css") %>'>
 <script src='<%= Routes.static_path(@conn, "/js/select2.js") %>'></script>
@@ -37,7 +37,7 @@
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="search_active" class="control-label">Active: </label>
-              <%= component "icon_dropdown", %{
+              <%= central_component "icon_dropdown", %{
                 name: "search[active]",
                 id: "search_active",
                 selected: @params[:active],
@@ -51,7 +51,7 @@
 
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="search_order" class="control-label">Order by: </label>
-              <%= component "icon_dropdown", %{
+              <%= central_component "icon_dropdown", %{
                 name: "search[order]",
                 id: "search_group",
                 selected: @params[:order],

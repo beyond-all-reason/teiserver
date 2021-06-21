@@ -1,28 +1,28 @@
 <br />
 
 <%= if allow?(@conn, "teiserver.admin.account") do %>
-  <%= component "detail_line",
+  <%= central_component "detail_line",
     label: "Email",
     value: @user.email
   %>
 <% end %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Created",
   value: date_to_str(@user.inserted_at, format: :hms_dmy, tz: @tz)
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Verified",
   value: (if @user.data["verified"], do: "Verified")
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Bot",
   value: (if @user.data["bot"], do: "Bot")
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Moderator",
   value: (if @user.data["moderator"], do: "Moderator")
 %>

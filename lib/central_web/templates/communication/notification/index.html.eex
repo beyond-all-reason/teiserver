@@ -58,7 +58,7 @@
                 &nbsp;
               </td>
               <td style="color: <%= notification.colour %>">
-                <%= component "icon", icon: notification.icon %>
+                <%= central_component "icon", icon: notification.icon %>
                 <%= notification.title %>
               </td>
               <td><%= notification.body %></td>

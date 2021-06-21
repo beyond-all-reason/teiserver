@@ -29,7 +29,7 @@
 <%= for tournament <- @tournaments do %>
     <tr>
       <td style="background-color: <%= tournament.colour %>; color: #FFF;" width="22">
-        <%= component "icon", icon: tournament.icon %>
+        <%= central_component "icon", icon: tournament.icon %>
       </td>
       <td><%= tournament.name %></td>
 

@@ -28,7 +28,7 @@
         &nbsp;&nbsp;&nbsp;
 
         <a href="<%= Routes.admin_group_path(@conn, :show, @group) %>" class="btn btn-outline-<%= bsname %>">
-          <%= component "icon", icon: icon() %>
+          <%= central_component "icon", icon: icon() %>
           Group details
         </a>
 

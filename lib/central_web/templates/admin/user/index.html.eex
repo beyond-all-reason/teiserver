@@ -76,14 +76,14 @@
               <td class="d-lg-none d-xl-table-cell"><%= user.id %></td>
 
               <td style="background-color: <%= user.colour %>; color: #FFF;" width="22">
-                <%= component "icon", icon: user.icon %>
+                <%= central_component "icon", icon: user.icon %>
               </td>
               <td style="background-color: <%= rgba_css user.colour %>;"><%= user.name %></td>
               <td>&nbsp;</td>
 
               <%= if user.admin_group do %>
                 <td style="background-color: <%= user.admin_group.colour %>; color: #FFF;" width="22">
-                  <%= component "icon", icon: user.admin_group.icon %>
+                  <%= central_component "icon", icon: user.admin_group.icon %>
                 </td>
                 <td style="background-color: <%= rgba_css user.admin_group.colour %>;"><%= user.admin_group.name %></td>
               <% else %>

@@ -9,7 +9,7 @@
 
 <div class="row page-row">
   <%=
-    component "menu_card",
+    central_component "menu_card",
     icon: Central.Account.GroupLib.icon(),
     name: "groups",
     text: "Groups",
@@ -17,7 +17,7 @@
     link: Routes.account_group_path(@conn, :index)
   %>
   <%=
-    component "menu_card",
+    central_component "menu_card",
     icon: "fad fa-cog",
     name: "settings",
     text: "Preferences",
@@ -26,7 +26,7 @@
   %>
 
   <%=
-    component "menu_card",
+    central_component "menu_card",
     icon: Central.Account.icon(),
     name: "account",
     text: "Account details",
@@ -35,7 +35,7 @@
   %>
 
   <%=
-    component "menu_card",
+    central_component "menu_card",
     icon: "fad fa-lock",
     name: "password",
     text: "Password",
@@ -45,5 +45,5 @@
 </div>
 
 <div class="row page-row">
-  <%= component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.general_page_path(@conn, :index) %>
+  <%= central_component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.general_page_path(@conn, :index) %>
 </div>

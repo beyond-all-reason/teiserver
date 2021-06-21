@@ -5,16 +5,16 @@ defmodule Central.Helpers.ComponentHelper do
   # http://blog.danielberkompas.com/2017/01/17/reusable-templates-in-phoenix.html
   #
   # Example usage:
-  # <%= component "tabs" do %>
-  #   <%= component "tab", name: "All Products" %>
-  #   <%= component "tab", name: "Featured" %>
+  # <%= central_component "tabs" do %>
+  #   <%= central_component "tab", name: "All Products" %>
+  #   <%= central_component "tab", name: "Featured" %>
   # <% end %>
 
-  def component(template, assigns \\ %{}) do
+  def central_component(template, assigns \\ %{}) do
     CentralWeb.ComponentView.render(template <> ".html", assigns)
   end
 
-  def component(template, assigns, do: block) do
+  def central_component(template, assigns, do: block) do
     CentralWeb.ComponentView.render(template <> ".html", Keyword.merge(assigns, do: block))
   end
 end

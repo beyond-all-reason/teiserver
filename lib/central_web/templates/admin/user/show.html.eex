@@ -55,7 +55,7 @@
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li>
             <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
-              <%= component "icon", icon: icon() %>
+              <%= central_component "icon", icon: icon() %>
               Details
             </a>
           </li>
@@ -63,21 +63,21 @@
           <%= if @edit_access do %>
             <li>
               <a href="#groups_tab" role="tab" class="nav-link" data-toggle="tab">
-                <%= component "icon", icon: Central.Account.GroupLib.icon() %>
+                <%= central_component "icon", icon: Central.Account.GroupLib.icon() %>
                 Groups (<%= Enum.count(@user.groups) %>)
               </a>
             </li>
 
             <li>
               <a href="#permissions_tab" role="tab" class="nav-link" data-toggle="tab">
-                <%= component "icon", icon: Central.Account.AuthLib.icon() %>
+                <%= central_component "icon", icon: Central.Account.AuthLib.icon() %>
                 Permissions
               </a>
             </li>
 
             <li>
               <a href="#settings_tab" role="tab" class="nav-link" data-toggle="tab">
-                <%= component "icon", icon: Central.Config.UserConfigLib.icon() %>
+                <%= central_component "icon", icon: Central.Config.UserConfigLib.icon() %>
                 Settings
               </a>
             </li>
@@ -106,7 +106,7 @@
 
         <hr />
         <a href="<%= Routes.admin_report_path(@conn, :user_show, @user) %>" class="btn btn-outline-<%= bsname %>">
-          <%= component "icon", icon: Central.Account.ReportLib.icon() %>
+          <%= central_component "icon", icon: Central.Account.ReportLib.icon() %>
           Reports
         </a>
       </div>

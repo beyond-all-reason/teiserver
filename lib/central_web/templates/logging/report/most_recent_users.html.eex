@@ -49,7 +49,7 @@
               %>
 
               <td width="22" style="background-color: <%= rgb %>; color: #FFF;">
-                <%= component "icon", icon: usericon %>
+                <%= central_component "icon", icon: usericon %>
               </td>
               <td style="background-color: <%= rgba %>;"><%= name %></td>
               <td class="d-lg-none d-xl-table-cell"><%= email %></td>
@@ -62,7 +62,7 @@
               %>
 
               <td width="22" style="background-color: <%= rgb %>; color: #FFF;">
-                <%= component "icon", icon: groupicon %>
+                <%= central_component "icon", icon: groupicon %>
               </td>
               <td style="background-color: <%= rgba %>;"><%= groupname %></td>
 

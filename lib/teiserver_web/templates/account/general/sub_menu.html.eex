@@ -21,7 +21,7 @@
       <div class="card-body" style="padding: 0 15px;">
 
         <div class="row">
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "relationships",
             label: "Relationships",
             active: @active,
@@ -29,7 +29,7 @@
             lib: %{icon: Teiserver.icon(:relationship)}
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "clans",
             label: "Clans",
             active: @active,
@@ -37,7 +37,7 @@
             lib: Teiserver.Clans.ClanLib
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "tournaments",
             label: "Tournaments",
             active: @active,
@@ -46,7 +46,7 @@
             disabled: true
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "preferences",
             label: "Preferences",
             active: @active,

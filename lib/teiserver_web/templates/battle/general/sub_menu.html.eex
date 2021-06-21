@@ -21,7 +21,7 @@
       <div class="card-body" style="padding: 0 15px;">
 
         <div class="row">
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "battle_lobbies",
             label: "Lobbies",
             active: @active,
@@ -30,7 +30,7 @@
           %>
 
           <%= if allow?(@conn, "admin.dev") do %>
-            <%= component "sub_menu_icon",
+            <%= central_component "sub_menu_icon",
               name: "battle_logs",
               label: "Battle logs",
               active: @active,

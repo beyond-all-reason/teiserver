@@ -1,25 +1,25 @@
 <h4>Headline stats</h4>
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Unique users",
   value: format_number @data["aggregates"]["stats"]["unique_users"]
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Unique players",
   value: format_number @data["aggregates"]["stats"]["unique_players"]
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Peak total users",
   value: format_number @data["aggregates"]["stats"]["peak_user_counts"]["total"]
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Peak players",
   value: format_number @data["aggregates"]["stats"]["peak_user_counts"]["player"]
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "User registrations",
   value: format_number @data["aggregates"]["stats"]["accounts_created"]
 %>
@@ -27,27 +27,27 @@
 <hr />
 
 <h4>Time spent by state</h4>
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Player",
   value: represent_minutes(@data["aggregates"]["minutes"]["player"])
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Spectator",
   value: represent_minutes(@data["aggregates"]["minutes"]["spectator"])
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Lobby",
   value: represent_minutes(@data["aggregates"]["minutes"]["lobby"])
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Menu",
   value: represent_minutes(@data["aggregates"]["minutes"]["menu"])
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Total",
   value: represent_minutes(@data["aggregates"]["minutes"]["total"])
 %>

@@ -1,5 +1,5 @@
 <%= if @group.super_group do %>
-  <%= component "detail_line",
+  <%= central_component "detail_line",
     label: "Super group",
     value: @group.super_group.name,
     icon: %{
@@ -9,7 +9,7 @@
   %>
 <% end %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Type",
   value: (if @group_type, do: @group_type.name, else: 'None')
 %>
@@ -19,7 +19,7 @@
 <%= if @group_type do %>
   <%= for f <- @group_type.fields do %>
 
-    <%= component "detail_line",
+    <%= central_component "detail_line",
       label: f.name,
       value: @group.data[f.name]
     %>

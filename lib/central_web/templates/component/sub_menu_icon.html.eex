@@ -16,7 +16,7 @@
 
 <div class="col-6 col-sm-3 col-md-2 col-lg-2 col-xl-2 sub-menu-icon">
   <a href="<%= @url %>" class="block-link <%= active_class %>" id="sub-menu-<%= @name %>" style="<%= disabled %>">
-    <%= component "icon", icon: icon, class: "fa-2x" %><br />
+    <%= central_component "icon", icon: icon, class: "fa-2x" %><br />
     <%= @label %>
   </a>
 </div>

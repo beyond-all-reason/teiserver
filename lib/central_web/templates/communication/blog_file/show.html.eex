@@ -34,7 +34,7 @@
         <i class="fa-fw fas fa-eye"></i>
         Show
       </a>
-      
+
       <a href="<%= Routes.blog_file_path(@conn, :edit, @blog_file) %>" class="btn btn-outline-<%= bsname %>">
         <i class="far fa-fw fa-wrench"></i>
         Edit blog file
@@ -50,12 +50,12 @@
     </h4>
 
     <br /><br />
-    <%= component "detail_line",
+    <%= central_component "detail_line",
       label: "URL",
       value: Routes.blog_path(@conn, :show_file, @blog_file.url)
     %>
 
-    <%= component "detail_line",
+    <%= central_component "detail_line",
       label: "Type",
       value: @blog_file.file_ext <> " / " <> file_type(@blog_file.file_ext)
     %>

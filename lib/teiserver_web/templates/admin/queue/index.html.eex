@@ -29,7 +29,7 @@
 <%= for queue <- @queues do %>
     <tr>
       <td style="background-color: <%= queue.colour %>; color: #FFF;" width="22">
-        <%= component "icon", icon: queue.icon %>
+        <%= central_component "icon", icon: queue.icon %>
       </td>
       <td><%= queue.name %></td>
 

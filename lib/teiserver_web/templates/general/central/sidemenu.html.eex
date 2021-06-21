@@ -1,5 +1,5 @@
 <%= if allow?(@current_user, "teiserver") do %>
-  <%= component "sidemenu_item",
+  <%= central_component "sidemenu_item",
     name: "teiserver",
     label: "Teiserver",
     active: assigns[:sidemenu_active],
@@ -7,7 +7,7 @@
     url: Routes.ts_lobby_general_path(@conn, :index)
   %>
 
-  <%= component "sidemenu_item",
+  <%= central_component "sidemenu_item",
     name: "teiserver_account",
     label: "Account",
     active: assigns[:sidemenu_active],
@@ -16,7 +16,7 @@
     url: Routes.ts_account_general_path(@conn, :index)
   %>
 
-  <%= component "sidemenu_item",
+  <%= central_component "sidemenu_item",
     name: "teiserver_clans",
     label: "Clans",
     active: assigns[:sidemenu_active],
@@ -27,7 +27,7 @@
 <% end %>
 
 <%= if allow?(@conn, "teiserver.moderator") do %>
-  <%= component "sidemenu_item",
+  <%= central_component "sidemenu_item",
     name: "teiserver_admin",
     label: "Teiserver Admin",
     active: assigns[:sidemenu_active],

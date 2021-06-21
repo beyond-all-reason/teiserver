@@ -9,7 +9,7 @@
   });
 </script>
 
-<%= component "icon_dropdown_js", [] %>
+<%= central_component "icon_dropdown_js", [] %>
 
 <%= form_for @changeset, @action, fn f -> %>
   <%= if @changeset.action do %>
@@ -32,7 +32,7 @@
 
   <div class="form-group">
     <%= label f, :admin_group_id, class: "control-label" %>
-    <%= component "icon_dropdown", %{
+    <%= central_component "icon_dropdown", %{
       name: "user[admin_group_id]",
       id: "user_admin_group_id",
       selected: f.data.admin_group_id || Map.get(@changeset.changes, :admin_group_id, @current_user.admin_group_id),
@@ -46,7 +46,7 @@
   </div>
 
   <div class="form-group">
-    <%= component "fa5_icon_picker", %{form: f, field: :icon} %>
+    <%= central_component "fa5_icon_picker", %{form: f, field: :icon} %>
   </div>
 
   <hr />
@@ -82,10 +82,10 @@
     <textarea id="user_data" name="user[data]" rows="8" class="form-control monospace"><%= Jason.encode! data, pretty: true %></textarea>
     <%= error_tag f, :data %>
   </div>
-  
-  <%# 
+
+  <%#
   changes: Map.get(@changeset.changes, :default_options, %{})[@option.name],
-  data: 
+  data:
   description: @option.description
   %>
 

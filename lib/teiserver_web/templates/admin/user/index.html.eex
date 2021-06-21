@@ -68,7 +68,7 @@
 <%= for user <- @users do %>
     <tr>
       <td style="background-color: <%= user.colour %>; color: #FFF;" width="22">
-        <%= component "icon", icon: user.icon %>
+        <%= central_component "icon", icon: user.icon %>
       </td>
       <td><%= user.name %></td>
       <%= if is_admin do %><td><%= user.email %></td><% end %>

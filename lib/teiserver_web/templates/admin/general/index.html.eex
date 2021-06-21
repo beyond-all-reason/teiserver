@@ -1,7 +1,7 @@
 <div class="row page-row">
   <%= if allow?(@conn, "teiserver.moderator.account") do %>
     <%=
-      component "menu_card",
+      central_component "menu_card",
       icon: Teiserver.ClientLib.icon(),
       name: "client_admin",
       text: "Client admin",
@@ -10,7 +10,7 @@
     %>
 
     <%=
-      component "menu_card",
+      central_component "menu_card",
       icon: "far fa-users",
       name: "user_admin",
       text: "User admin",
@@ -21,7 +21,7 @@
 
   <%= if allow?(@conn, "teiserver.moderator.party") do %>
     <%=
-      component "menu_card",
+      central_component "menu_card",
       icon: Teiserver.Game.PartyLib.icon(),
       name: "party",
       text: "Parties",
@@ -33,7 +33,7 @@
 
   <%= if allow?(@conn, "teiserver.moderator.clan") do %>
     <%=
-      component "menu_card",
+      central_component "menu_card",
       icon: Teiserver.Clans.ClanLib.icon(),
       name: "clan_admin",
       text: "Clan admin",
@@ -44,7 +44,7 @@
 
   <%= if allow?(@conn, "teiserver.moderator.queue") do %>
     <%=
-      component "menu_card",
+      central_component "menu_card",
       icon: Teiserver.Game.QueueLib.icon(),
       name: "queue",
       text: "Queues",
@@ -55,7 +55,7 @@
 
   <%= if allow?(@conn, "teiserver.admin") do %>
     <%=
-      component "menu_card",
+      central_component "menu_card",
       icon: Central.Admin.ToolLib.icon(),
       name: "tools",
       text: "Tools",
@@ -66,5 +66,5 @@
 </div>
 
 <div class="row page-row">
-  <%= component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_lobby_general_path(@conn, :index) %>
+  <%= central_component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_lobby_general_path(@conn, :index) %>
 </div>

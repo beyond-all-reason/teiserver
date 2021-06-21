@@ -21,7 +21,7 @@
       <div class="card-body" style="padding: 0 15px;">
 
         <div class="row">
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "groups",
             label: "Groups",
             active: @active,
@@ -29,7 +29,7 @@
             lib: Central.Account.GroupLib
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "user_configs",
             label: "Preferences",
             active: @active,
@@ -37,7 +37,7 @@
             lib: Central.Config.UserConfigLib
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "details",
             label: "Account details",
             active: @active,
@@ -45,7 +45,7 @@
             lib: Central.Account
           %>
 
-          <%= component "sub_menu_icon",
+          <%= central_component "sub_menu_icon",
             name: "password",
             label: "Password",
             active: @active,

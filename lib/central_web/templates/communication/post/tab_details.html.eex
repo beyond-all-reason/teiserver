@@ -1,22 +1,22 @@
 <% {_fg, _bg, _bsname} = colours() %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Short content",
   value: @post.short_content,
   type: "textarea"
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Live from",
   value: date_to_str @post.live_from, format: :dmy, tz: @tz
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Comments",
   value: if @post.comments, do: "Comments enabled", else: "Comments not enabled"
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Visible",
   value: (if @post.visible, do: "Post is visible", else: "Post is not visible"),
   link: %{
@@ -34,7 +34,7 @@
 
 <hr />
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Poster",
   icon: %{
     colour: @post.poster.colour,
@@ -50,12 +50,12 @@
 
 <hr />
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Inserted",
   value: date_to_str @post.inserted_at, format: :hms_dmy, tz: @tz
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Updated",
   value: date_to_str @post.updated_at, format: :hms_dmy, tz: @tz
 %>

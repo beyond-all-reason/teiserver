@@ -31,23 +31,23 @@
 
 <h2>Audit log #<%= @log.id %></h2>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Action",
   value: @log.action
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "IP",
   value: @log.ip
 %>
 
-<%= component "detail_line",
+<%= central_component "detail_line",
   label: "Timestamp",
   value: date_to_str(@log.inserted_at, format: :hms_or_dmy, tz: @tz)
 %>
 
 <%= if @log.group_id do %>
-  <%= component "detail_line",
+  <%= central_component "detail_line",
     label: "Group",
     icon: %{
       colour: @log.group.colour,
@@ -61,14 +61,14 @@
     # }
   %>
 <% else %>
-  <%= component "detail_line",
+  <%= central_component "detail_line",
     label: "Group",
     value: "none"
   %>
 <% end %>
 
 <%= if @log.group_id do %>
-  <%= component "detail_line",
+  <%= central_component "detail_line",
     label: "User",
     icon: %{
       colour: @log.user.colour,
@@ -82,7 +82,7 @@
     }
   %>
 <% else %>
-  <%= component "detail_line",
+  <%= central_component "detail_line",
     label: "User",
     value: "none"
   %>
