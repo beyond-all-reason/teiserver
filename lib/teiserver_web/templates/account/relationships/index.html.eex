@@ -50,7 +50,7 @@
           <li>
             <a href="#clan_invites_tab" role="tab" class="nav-link" data-toggle="tab">
               <%= central_component "icon", icon: Teiserver.Clans.ClanLib.icon() %>
-              Clan invites
+              Clan invites (<%= Enum.count(@clan_invites) %>)
             </a>
           </li>
         </ul>
