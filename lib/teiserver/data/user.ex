@@ -27,12 +27,13 @@ defmodule Teiserver.User do
     :friends,
     :friend_requests,
     :ignored,
+    :password_hash,
     :verification_code,
     :verified,
     :password_reset_code,
     :email_change_code,
-    :password_hash,
     :ingame_minutes,
+    :last_login,
     :mmr,
     :banned,
     :muted,
@@ -57,8 +58,8 @@ defmodule Teiserver.User do
     verified: false,
     password_reset_code: nil,
     email_change_code: nil,
-    last_login: nil,
     ingame_minutes: 0,
+    last_login: nil,
     mmr: %{},
     banned: [false, nil],
     muted: [false, nil],
@@ -114,7 +115,7 @@ defmodule Teiserver.User do
 
   def user_register_params(name, email, md5_password, extra_data \\ %{}) do
     name = clean_name(name)
-    verification_code = :random.uniform(899_999) + 100_000
+    verification_code = :rand.uniform(899_999) + 100_000
       |> to_string
     encrypted_password = encrypt_password(md5_password)
 
@@ -360,14 +361,14 @@ defmodule Teiserver.User do
   end
 
   def request_password_reset(user) do
-    code = :random.uniform(899_999) + 100_000
+    code = :rand.uniform(899_999) + 100_000
     update_user(%{user | password_reset_code: "#{code}"})
   end
 
   def request_email_change(nil, _), do: nil
 
   def request_email_change(user, new_email) do
-    code = :random.uniform(899_999) + 100_000
+    code = :rand.uniform(899_999) + 100_000
     update_user(%{user | email_change_code: ["#{code}", new_email]})
   end
 
