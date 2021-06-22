@@ -65,7 +65,7 @@ Avg ping: #{round(average_ping * 100) / 100}ms, Pings: #{Enum.count(state.pings)
           name: via_user_tuple(id),
           data: %{
             interval: @user_action_interval,
-            # delay: :random.uniform(@user_action_interval),
+            # delay: :rand.uniform(@user_action_interval),
             delay: i * 1000,
             id: id,
             tick: state.tick,

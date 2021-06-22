@@ -35,9 +35,9 @@ config :central, CentralWeb.Endpoint,
 
 config :central, Teiserver,
   certs: [
-    keyfile: "priv/certs/localhost.key",
-    certfile: "priv/certs/localhost.crt",
-    cacertfile: "priv/certs/localhost.crt"
+    keyfile: "priv/cert/selfsigned_key.pem",
+    certfile: "priv/cert/selfsigned.pem",
+    cacertfile: "priv/cert/selfsigned.pem"
   ],
   ports: [
     tcp: 8200,
@@ -47,7 +47,7 @@ config :central, Teiserver,
   heartbeat_timeout: nil,
   autologin: true,
   extra_logging: false,
-  enable_agent_mode: true
+  enable_agent_mode: false
 
 config :central, Central.Mailer,
   adapter: Bamboo.LocalAdapter,

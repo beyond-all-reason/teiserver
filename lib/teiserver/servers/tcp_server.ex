@@ -18,9 +18,9 @@ defmodule Teiserver.TcpServer do
     }
 
     [
-      {:certfile, certfile},
-      {:cacertfile, cacertfile},
-      {:keyfile, keyfile}
+      certfile: certfile,
+      cacertfile: cacertfile,
+      keyfile: keyfile
     ]
   end
 

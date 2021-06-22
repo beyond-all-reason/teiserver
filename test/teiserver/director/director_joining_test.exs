@@ -13,7 +13,7 @@ defmodule Teiserver.Protocols.Director.JoiningTest do
 
     battle_data = %{
       cmd: "c.battle.create",
-      name: "Director #{:random.uniform(999_999_999)}",
+      name: "Director #{:rand.uniform(999_999_999)}",
       nattype: "none",
       port: 1234,
       game_hash: "string_of_characters",

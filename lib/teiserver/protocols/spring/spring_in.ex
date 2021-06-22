@@ -228,7 +228,16 @@ defmodule Teiserver.Protocols.SpringIn do
         Map.put(state, :unverified_id, userid)
 
       {:ok, user} ->
-        SpringOut.do_login_accepted(state, user)
+        new_state = SpringOut.do_login_accepted(state, user)
+
+        # Do we have a clan?
+        if user.clan_id do
+          :timer.sleep(200)
+          clan = Teiserver.Clans.get_clan!(user.clan_id)
+          room_name = Room.clan_room_name(clan.name)
+          SpringOut.do_join_room(new_state, room_name)
+        end
+        new_state
 
       {:error, reason} ->
         Logger.debug("[command:login] denied with reason #{reason}")
@@ -261,7 +270,16 @@ defmodule Teiserver.Protocols.SpringIn do
         Map.put(state, :unverified_id, userid)
 
       {:ok, user} ->
-        SpringOut.do_login_accepted(state, user)
+        new_state = SpringOut.do_login_accepted(state, user)
+
+        # Do we have a clan?
+        if user.clan_id do
+          :timer.sleep(200)
+          clan = Teiserver.Clans.get_clan!(user.clan_id)
+          room_name = Room.clan_room_name(clan.name)
+          SpringOut.do_join_room(new_state, room_name)
+        end
+        new_state
 
       {:error, reason} ->
         Logger.debug("[command:login] denied with reason #{reason}")
@@ -298,7 +316,16 @@ defmodule Teiserver.Protocols.SpringIn do
         case code == to_string(user.verification_code) do
           true ->
             User.verify_user(user)
-            SpringOut.do_login_accepted(state, user)
+            new_state = SpringOut.do_login_accepted(state, user)
+
+            # Do we have a clan?
+            if user.clan_id do
+              :timer.sleep(200)
+              clan = Teiserver.Clans.get_clan!(user.clan_id)
+              room_name = Room.clan_room_name(clan.name)
+              SpringOut.do_join_room(new_state, room_name)
+            end
+            new_state
 
           false ->
             reply(:denied, "Incorrect code", msg_id, state)
@@ -545,23 +572,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("JOIN", data, msg_id, state) do
     case Regex.run(~r/(\w+)(?:\t)?(\w+)?/, data) do
       [_, room_name] ->
-        room = Room.get_or_make_room(room_name, state.userid)
-        Room.add_user_to_room(state.userid, room_name)
-        reply(:join_success, room_name, msg_id, state)
-        reply(:joined_room, {state.username, room_name}, msg_id, state)
-
-        author_name = User.get_username(room.author_id)
-        reply(:channel_topic, {room_name, author_name}, msg_id, state)
-
-        members =
-          room.members
-          |> Enum.map(fn m -> User.get_username(m) end)
-          |> List.insert_at(0, state.username)
-          |> Enum.join(" ")
-
-        reply(:channel_members, {members, room_name}, msg_id, state)
-
-        :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
+        SpringOut.do_join_room(state, room_name)
 
       [_, room_name, _key] ->
         reply(:join_failure, {room_name, "Locked"}, msg_id, state)

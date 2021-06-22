@@ -18,6 +18,8 @@ defmodule Teiserver.TeiserverTestLib do
     %{socket: socket}
   end
 
+  # Looks like we might want to use https://erlang.org/documentation/doc-12.0/lib/ssl-10.4/doc/html/ssl.html#connect-2
+  # and upgrade the connection instead?
   @spec tls_setup :: %{socket: port()}
   def tls_setup() do
     {:ok, socket} = :ssl.connect(@host, 8201, active: false)
@@ -26,7 +28,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   @spec new_user_name :: String.t()
   def new_user_name() do
-    "new_test_user_#{:random.uniform(99_999_999) + 1_000_000}"
+    "new_test_user_#{:rand.uniform(99_999_999) + 1_000_000}"
   end
 
   @spec new_user(any, any) :: atom | %{:id => any, optional(any) => any}
@@ -406,7 +408,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   @spec make_battle(Map.t()) :: Map.t()
   def make_battle(params \\ %{}) do
-    id = :random.uniform(99_999_999) + 1_000_000
+    id = :rand.uniform(99_999_999) + 1_000_000
 
     %{
       founder_id: id,

@@ -164,7 +164,7 @@ defmodule Teiserver.Startup do
     ConCache.put(:lists, :rooms, [])
     ConCache.insert_new(:lists, :battles, [])
 
-    # We were using :random.uniform() but it wasn't being random
+    # We were using :rand.uniform() but it wasn't being random
     # since we don't care about random random we're okay with this!
     bid = :erlang.system_time()
       |> to_string
