@@ -571,8 +571,32 @@ defmodule Teiserver.Protocols.SpringOut do
     end)
 
     send(self(), {:action, {:login_end, nil}})
+
     :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
     %{state | user: user, username: user.name, userid: user.id}
+  end
+
+  @spec do_login_accepted(map(), String.t()) :: map()
+  def do_join_room(state, room_name) do
+    room = Room.get_or_make_room(room_name, state.userid)
+    Room.add_user_to_room(state.userid, room_name)
+    reply(:join_success, room_name, nil, state)
+    reply(:joined_room, {state.username, room_name}, nil, state)
+
+    author_name = User.get_username(room.author_id)
+    reply(:channel_topic, {room_name, author_name}, nil, state)
+
+    members =
+      room.members
+      |> Enum.map(fn m -> User.get_username(m) end)
+      |> Enum.filter(fn n -> n != nil end)
+      |> List.insert_at(0, state.username)
+      |> Enum.join(" ")
+
+    reply(:channel_members, {members, room_name}, nil, state)
+
+    :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
+    state
   end
 
   # This sends a message to the self to send out a message

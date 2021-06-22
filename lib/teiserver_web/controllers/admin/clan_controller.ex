@@ -143,6 +143,16 @@ defmodule TeiserverWeb.Admin.ClanController do
 
     case Clans.create_clan_membership(attrs) do
       {:ok, _membership} ->
+        user = Account.get_user!(user_id)
+
+        Account.update_user(user, %{"clan_id" => clan_id})
+
+        CentralWeb.Endpoint.broadcast(
+          "recache:#{user_id}",
+          "recache",
+          %{}
+        )
+
         conn
         |> put_flash(:success, "User added to clan.")
         |> redirect(to: Routes.ts_admin_clan_path(conn, :show, clan_id) <> "#members")

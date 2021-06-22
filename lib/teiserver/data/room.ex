@@ -3,6 +3,7 @@ defmodule Teiserver.Room do
   require Logger
   alias Teiserver.User
   alias Phoenix.PubSub
+  alias Teiserver.Data.Types, as: T
 
   def create_room(%{name: _} = room) do
     Map.merge(
@@ -14,25 +15,31 @@ defmodule Teiserver.Room do
     )
   end
 
-  def create_room(room_name, author_id) do
+  @spec create_room(String.t(), T.userid()) :: Map.t()
+  @spec create_room(String.t(), T.userid(), T.clan_id()) :: Map.t()
+  def create_room(room_name, author_id, clan_id \\ nil) do
     %{
       name: room_name,
       members: [],
       author_id: author_id,
       topic: "topic",
-      password: ""
+      password: "",
+      clan_id: clan_id
     }
   end
 
+  @spec get_room(String.t()) :: Map.t()
   def get_room(name) do
     ConCache.get(:rooms, name)
   end
 
-  def get_or_make_room(name, author_id) do
+  @spec get_or_make_room(String.t(), T.userid()) :: Map.t()
+  @spec get_or_make_room(String.t(), T.userid(), T.clan_id()) :: Map.t()
+  def get_or_make_room(name, author_id, clan_id \\ nil) do
     case ConCache.get(:rooms, name) do
       nil ->
         # No room, we need to make one!
-        create_room(name, author_id)
+        create_room(name, author_id, clan_id)
         |> add_room
 
       room ->
@@ -40,20 +47,20 @@ defmodule Teiserver.Room do
     end
   end
 
-  def add_user_to_room(user_id, room_name) do
+  def add_user_to_room(userid, room_name) do
     ConCache.update(:rooms, room_name, fn room_state ->
       new_state =
-        if Enum.member?(room_state.members, user_id) do
+        if Enum.member?(room_state.members, userid) do
           # No change takes place, they're already in the room!
           room_state
         else
           PubSub.broadcast(
             Central.PubSub,
             "room:#{room_name}",
-            {:add_user_to_room, user_id, room_name}
+            {:add_user_to_room, userid, room_name}
           )
 
-          new_members = [user_id | room_state.members]
+          new_members = [userid | room_state.members]
           Map.put(room_state, :members, new_members)
         end
 
@@ -61,25 +68,45 @@ defmodule Teiserver.Room do
     end)
   end
 
-  def remove_user_from_room(user_id, room_name) do
+  def remove_user_from_room(userid, room_name) do
     ConCache.update(:rooms, room_name, fn room_state ->
       new_state =
-        if not Enum.member?(room_state.members, user_id) do
+        if not Enum.member?(room_state.members, userid) do
           # No change takes place, they've already left the room
           room_state
         else
           PubSub.broadcast(
             Central.PubSub,
             "room:#{room_name}",
-            {:remove_user_from_room, user_id, room_name}
+            {:remove_user_from_room, userid, room_name}
           )
 
-          new_members = Enum.filter(room_state.members, fn m -> m != user_id end)
+          new_members = Enum.filter(room_state.members, fn m -> m != userid end)
           Map.put(room_state, :members, new_members)
         end
 
       {:ok, new_state}
     end)
+  end
+
+  @spec remove_user_from_any_room(integer() | nil) :: list()
+  def remove_user_from_any_room(nil), do: []
+
+  def remove_user_from_any_room(userid) do
+    list_rooms()
+    |> Enum.filter(fn r -> r != nil end)
+    |> Enum.filter(fn r -> Enum.member?(r.members, userid) end)
+    |> Enum.map(fn r ->
+      remove_user_from_room(userid, r.name)
+      r.name
+    end)
+  end
+
+  @spec clan_room_name(String.t()) :: String.t()
+  def clan_room_name(clan_name) do
+    clan_name
+    |> String.replace(" ", "")
+    |> String.replace("-", "")
   end
 
   def add_room(room) do
@@ -138,8 +165,8 @@ defmodule Teiserver.Room do
   end
 
   @spec allow?(Map.t(), String.t()) :: boolean()
-  def allow?(user_id, _room_name) do
-    user = User.get_user_by_id(user_id)
+  def allow?(userid, _room_name) do
+    user = User.get_user_by_id(userid)
 
     cond do
       User.is_muted?(user) ->

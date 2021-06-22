@@ -4,7 +4,7 @@ defmodule Teiserver.Director.CoordinatorServer do
   performing their actions in the name of the coordinator
   """
   use GenServer
-  alias Teiserver.{Account, User, Room}
+  alias Teiserver.{Account, User, Clans, Room}
   alias Phoenix.PubSub
   require Logger
 
@@ -39,6 +39,15 @@ defmodule Teiserver.Director.CoordinatorServer do
       :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
     end)
 
+    # Now join the clan channels
+    Clans.list_clans()
+    |> Enum.each(fn clan ->
+      room_name = Room.clan_room_name(clan.name)
+      Room.get_or_make_room(room_name, user.id, clan.id)
+      Room.add_user_to_room(user.id, room_name)
+      :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
+    end)
+
     :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
 
     {:noreply, state}
@@ -48,13 +57,16 @@ defmodule Teiserver.Director.CoordinatorServer do
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
-  def handle_info({:new_message, userid, room_name, _message}, state) do
+  def handle_info({:new_message, userid, "coordinator", _message}, state) do
     # If it's us sending it, don't reply
     if userid != state.userid do
       username = User.get_username(userid)
-      Room.send_message(state.userid, room_name, "I don't currently handle messages, sorry #{username}")
+      Room.send_message(state.userid, "coordinator", "I don't currently handle messages, sorry #{username}")
     end
     {:noreply, state}
+  end
+  def handle_info({:new_message, _userid, _room_name, _message}, state) do
+    state
   end
 
   def handle_info({:direct_message, userid, _message}, state) do

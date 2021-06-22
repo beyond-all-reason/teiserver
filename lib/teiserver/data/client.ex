@@ -226,6 +226,7 @@ defmodule Teiserver.Client do
     is_test_user = String.contains?(client.name, "new_test_user_")
 
     BattleLobby.remove_user_from_any_battle(client.userid)
+    Room.remove_user_from_any_room(client.userid)
     leave_rooms(client.userid)
 
     # If it's a test user then it can mean the db connection is closed
