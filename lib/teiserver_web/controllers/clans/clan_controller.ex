@@ -112,6 +112,14 @@ defmodule TeiserverWeb.Clans.ClanController do
 
         case Clans.create_clan_membership(attrs) do
           {:ok, _membership} ->
+            user = Account.get_user!(conn.user_id)
+            Account.update_user(user, %{"clan_id" => clan_id})
+            CentralWeb.Endpoint.broadcast(
+              "recache:#{conn.user_id}",
+              "recache",
+              %{}
+            )
+
             Clans.delete_clan_invite(invite)
 
             conn

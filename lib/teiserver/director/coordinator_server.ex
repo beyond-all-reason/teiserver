@@ -42,7 +42,7 @@ defmodule Teiserver.Director.CoordinatorServer do
     # Now join the clan channels
     Clans.list_clans()
     |> Enum.each(fn clan ->
-      room_name = Room.clan_room_name(clan.name)
+      room_name = Room.clan_room_name(clan.tag)
       Room.get_or_make_room(room_name, user.id, clan.id)
       Room.add_user_to_room(user.id, room_name)
       :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")

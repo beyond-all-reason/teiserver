@@ -5,18 +5,20 @@ defmodule Teiserver.Room do
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
+  @spec create_room(Map.t()) :: Map.t()
+  @spec create_room(String.t(), T.userid()) :: Map.t()
+  @spec create_room(String.t(), T.userid(), T.clan_id()) :: Map.t()
   def create_room(%{name: _} = room) do
     Map.merge(
       %{
         members: [],
-        password: ""
+        password: "",
+        clan_id: nil
       },
       room
     )
   end
 
-  @spec create_room(String.t(), T.userid()) :: Map.t()
-  @spec create_room(String.t(), T.userid(), T.clan_id()) :: Map.t()
   def create_room(room_name, author_id, clan_id \\ nil) do
     %{
       name: room_name,
@@ -31,6 +33,22 @@ defmodule Teiserver.Room do
   @spec get_room(String.t()) :: Map.t()
   def get_room(name) do
     ConCache.get(:rooms, name)
+  end
+
+  @spec can_join_room?(T.userid(), String.t()) :: true | {false, String.t()}
+  def can_join_room?(userid, room_name) do
+    room = get_room(room_name)
+    user = User.get_user_by_id(userid)
+    cond do
+      user.moderator ->
+        true
+
+      room.clan_id ->
+        if user.clan_id == room.clan_id, do: true, else: {false, "Clan room"}
+
+      true ->
+        true
+    end
   end
 
   @spec get_or_make_room(String.t(), T.userid()) :: Map.t()
@@ -104,9 +122,11 @@ defmodule Teiserver.Room do
 
   @spec clan_room_name(String.t()) :: String.t()
   def clan_room_name(clan_name) do
-    clan_name
+    safe_name = clan_name
     |> String.replace(" ", "")
     |> String.replace("-", "")
+
+    "clan_#{safe_name}"
   end
 
   def add_room(room) do

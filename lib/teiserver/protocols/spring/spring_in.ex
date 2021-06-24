@@ -234,7 +234,7 @@ defmodule Teiserver.Protocols.SpringIn do
         if user.clan_id do
           :timer.sleep(200)
           clan = Teiserver.Clans.get_clan!(user.clan_id)
-          room_name = Room.clan_room_name(clan.name)
+          room_name = Room.clan_room_name(clan.tag)
           SpringOut.do_join_room(new_state, room_name)
         end
         new_state
@@ -276,7 +276,7 @@ defmodule Teiserver.Protocols.SpringIn do
         if user.clan_id do
           :timer.sleep(200)
           clan = Teiserver.Clans.get_clan!(user.clan_id)
-          room_name = Room.clan_room_name(clan.name)
+          room_name = Room.clan_room_name(clan.tag)
           SpringOut.do_join_room(new_state, room_name)
         end
         new_state
@@ -322,7 +322,7 @@ defmodule Teiserver.Protocols.SpringIn do
             if user.clan_id do
               :timer.sleep(200)
               clan = Teiserver.Clans.get_clan!(user.clan_id)
-              room_name = Room.clan_room_name(clan.name)
+              room_name = Room.clan_room_name(clan.tag)
               SpringOut.do_join_room(new_state, room_name)
             end
             new_state
@@ -570,15 +570,29 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # Chat related
   defp do_handle("JOIN", data, msg_id, state) do
-    case Regex.run(~r/(\w+)(?:\t)?(\w+)?/, data) do
+    regex_result = case Regex.run(~r/(\w+)(?:\t)?(\w+)?/, data) do
       [_, room_name] ->
-        SpringOut.do_join_room(state, room_name)
+        {room_name, ""}
 
-      [_, room_name, _key] ->
-        reply(:join_failure, {room_name, "Locked"}, msg_id, state)
+      [_, room_name, key] ->
+        {room_name, key}
 
       _ ->
+        :nomatch
+    end
+
+    case regex_result do
+      :nomatch ->
         _no_match(state, "JOIN", msg_id, data)
+
+      {room_name, _key} ->
+        case Room.can_join_room?(state.userid, room_name) do
+          true ->
+            SpringOut.do_join_room(state, room_name)
+
+          {false, reason} ->
+            reply(:join_failure, {room_name, reason}, msg_id, state)
+        end
     end
 
     state
