@@ -6,14 +6,35 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
   def do_handle("log_client_event", data, _msg_id, state) do
-    # Do Base64 -> Gzip -> JSON decode?
-    Telemetry.log_client_event(data)
+    case Regex.run(~r/(\S+) (\S+)/, data) do
+      [_, event, value] ->
+        Telemetry.log_client_event(state.userid, event, value)
+
+      nil ->
+        :ok
+    end
+    state
+  end
+
+  def do_handle("update_client_property", data, _msg_id, state) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
+      [_, event, value] ->
+        Telemetry.update_client_property(state.userid, event, value)
+
+      nil ->
+        :ok
+    end
     state
   end
 
   def do_handle("log_battle_event", data, _msg_id, state) do
-    # Do Base64 -> Gzip -> JSON decode?
-    Telemetry.log_battle_event(data)
+    case Regex.run(~r/(\S+) (\S+)/, data) do
+      [_, event, value] ->
+        Telemetry.log_battle_event(state.userid, event, value)
+
+      nil ->
+        :ok
+    end
     state
   end
 

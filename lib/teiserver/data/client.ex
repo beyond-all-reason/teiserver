@@ -35,7 +35,9 @@ defmodule Teiserver.Client do
         handicap: 0,
         sync: 0,
         side: 0,
-        battle_id: nil
+        # TODO: Change client:battle_id to be client:battle_lobby_id
+        battle_id: nil,
+        current_battle_id: nil
       },
       client
     )
@@ -49,7 +51,8 @@ defmodule Teiserver.Client do
       player: false,
       handicap: 0,
       sync: 0,
-      battle_id: nil
+      battle_id: nil,
+      current_battle_id: nil
     }
   end
 

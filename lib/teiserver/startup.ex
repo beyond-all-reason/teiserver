@@ -184,33 +184,11 @@ defmodule Teiserver.Startup do
 
     ConCache.put(:id_counters, :springid, current_springid + 1)
 
-    # Temp code
-    ####################################################################
-    # susers = Teiserver.User.list_users()
-    # |> Enum.group_by(fn u -> u.springid end)
-
-    # ids = Map.keys(susers)
-
-    # dupes = susers
-    # |> Enum.filter(fn {_sid, ulist} ->
-    #   Enum.count(ulist) > 1
-    # end)
-
-    # IO.puts ""
-    # IO.inspect dupes
-    # IO.inspect current_springid
-    # IO.puts ""
-
-    # |> Enum.map(fn u -> {u.id, u.springid} end)
-    # |> Enum.map(fn user ->
-    #   next_id = Teiserver.User.next_springid()
-    #   IO.puts "UPDATE account_users SET data = jsonb_set(account_users.data, '{springid}', '#{next_id}') WHERE id = #{user.id};"
-    # end)
-    ####################################################################
-
     ConCache.put(:application_metadata_cache, "teiserver_startup_completed", true)
     ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", nil)
     ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_cache", true)
+
+    Teiserver.Telemetry.startup()
 
     if Application.get_env(:central, Teiserver)[:enable_director_mode] do
       spawn(fn ->

@@ -11,6 +11,8 @@ defmodule Teiserver.Telemetry do
   alias Teiserver.Telemetry.TelemetryDayLog
   alias Teiserver.Telemetry.TelemetryDayLogLib
 
+  alias Teiserver.Telemetry.{Event, ClientEvent, ClientProperty, BattleEvent}
+
   # Telemetry todo lists
   # TODO: Beherith: clients logged in, clients ingame, clients singpleplayer, clients afk, clients that are bots are not clients
   # TODO: Matchmaking telemetry
@@ -353,12 +355,73 @@ defmodule Teiserver.Telemetry do
     logs
   end
 
-  require Logger
-  def log_client_event(data) do
-    Logger.error("log_client_event(#{Kernel.inspect data}")
+  def log_client_event(userid, event_name, value) do
+    event_id = get_or_add_event(event_name)
+    %ClientEvent{}
+      |> ClientEvent.changeset(%{
+        event_id: event_id,
+        user_id: userid,
+        value: value,
+        timestamp: Timex.now()
+      })
+      |> Repo.insert()
   end
 
-  def log_battle_event(data) do
-    Logger.error("log_battle_event(#{Kernel.inspect data}")
+  def update_client_property(userid, value_name, value) do
+    event_id = get_or_add_event(value_name)
+
+    # Delete existing ones first
+    query = from properties in ClientProperty,
+      where: properties.user_id == ^userid
+        and properties.event_id == ^event_id
+    property = Repo.one(query)
+    if property do
+      Repo.delete(property)
+    end
+
+    %ClientProperty{}
+      |> ClientProperty.changeset(%{
+        event_id: event_id,
+        user_id: userid,
+        value: value,
+        last_updated: Timex.now()
+      })
+      |> Repo.insert()
+  end
+
+  def log_battle_event(userid, event_name, value) do
+    event_id = get_or_add_event(event_name)
+    %BattleEvent{}
+      |> BattleEvent.changeset(%{
+        battle_id: 0,
+        event_id: event_id,
+        user_id: userid,
+        value: value,
+        timestamp: Timex.now()
+      })
+      |> Repo.insert()
+  end
+
+  def get_or_add_event(name) do
+    case ConCache.get(:teiserver_telemetry_events, name) do
+      nil ->
+        {:ok, event} = %Event{}
+          |> Event.changeset(%{name: name})
+          |> Repo.insert()
+
+        ConCache.put(:teiserver_telemetry_events, event.name, event.id)
+        event.id
+      event_id ->
+        event_id
+    end
+  end
+
+  def startup() do
+    query = from events in Event
+
+    Repo.all(query)
+    |> Enum.map(fn event ->
+      ConCache.put(:teiserver_telemetry_events, event.name, event.id)
+    end)
   end
 end
