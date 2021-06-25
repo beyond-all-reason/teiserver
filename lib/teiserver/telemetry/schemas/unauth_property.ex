@@ -1,13 +1,13 @@
-defmodule Teiserver.Telemetry.ClientEvent do
+defmodule Teiserver.Telemetry.UnauthProperty do
   use CentralWeb, :schema
 
-  schema "teiserver_telemetry_client_events" do
-    belongs_to :user, Central.Account.User
-    belongs_to :event, Teiserver.Telemetry.Event
+  @primary_key false
+  schema "teiserver_telemetry_unauth_properties" do
+    field :hash, :string, primary_key: true
+    belongs_to :event, Teiserver.Telemetry.Event, primary_key: true
 
-    field :timestamp, :utc_datetime
+    field :last_updated, :utc_datetime
     field :value, :string
-    field :hash, :string
   end
 
   @doc """
@@ -16,8 +16,8 @@ defmodule Teiserver.Telemetry.ClientEvent do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:user_id, :event_id, :timestamp, :value, :hash])
-    |> validate_required([:event_id, :timestamp, :value, :hash])
+    |> cast(params, [:event_id, :last_updated, :value, :hash])
+    |> validate_required([:event_id, :last_updated, :value, :hash])
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

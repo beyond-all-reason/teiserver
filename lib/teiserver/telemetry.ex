@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry do
   alias Teiserver.Telemetry.TelemetryDayLog
   alias Teiserver.Telemetry.TelemetryDayLogLib
 
-  alias Teiserver.Telemetry.{Event, ClientEvent, ClientProperty, BattleEvent}
+  alias Teiserver.Telemetry.{Event, ClientEvent, ClientProperty, UnauthProperty, BattleEvent}
 
   # Telemetry todo lists
   # TODO: Beherith: clients logged in, clients ingame, clients singpleplayer, clients afk, clients that are bots are not clients
@@ -355,19 +355,42 @@ defmodule Teiserver.Telemetry do
     logs
   end
 
-  def log_client_event(userid, event_name, value) do
+  def log_client_event(userid, event_name, value, hash) do
     event_id = get_or_add_event(event_name)
     %ClientEvent{}
       |> ClientEvent.changeset(%{
         event_id: event_id,
         user_id: userid,
         value: value,
-        timestamp: Timex.now()
+        timestamp: Timex.now(),
+        hash: hash
       })
       |> Repo.insert()
   end
 
-  def update_client_property(userid, value_name, value) do
+  def update_client_property(nil, value_name, value, hash) do
+    event_id = get_or_add_event(value_name)
+
+    # Delete existing ones first
+    query = from properties in UnauthProperty,
+      where: properties.event_id == ^event_id
+        and properties.hash == ^hash
+    property = Repo.one(query)
+    if property do
+      Repo.delete(property)
+    end
+
+    %UnauthProperty{}
+      |> UnauthProperty.changeset(%{
+        event_id: event_id,
+        value: value,
+        last_updated: Timex.now(),
+        hash: hash
+      })
+      |> Repo.insert()
+  end
+
+  def update_client_property(userid, value_name, value, hash) do
     event_id = get_or_add_event(value_name)
 
     # Delete existing ones first
@@ -384,12 +407,13 @@ defmodule Teiserver.Telemetry do
         event_id: event_id,
         user_id: userid,
         value: value,
-        last_updated: Timex.now()
+        last_updated: Timex.now(),
+        hash: hash
       })
       |> Repo.insert()
   end
 
-  def log_battle_event(userid, event_name, value) do
+  def log_battle_event(userid, event_name, value, hash) do
     event_id = get_or_add_event(event_name)
     %BattleEvent{}
       |> BattleEvent.changeset(%{
@@ -397,7 +421,8 @@ defmodule Teiserver.Telemetry do
         event_id: event_id,
         user_id: userid,
         value: value,
-        timestamp: Timex.now()
+        timestamp: Timex.now(),
+        hash: hash
       })
       |> Repo.insert()
   end
