@@ -37,10 +37,13 @@ defmodule Teiserver.Room do
 
   @spec can_join_room?(T.userid(), String.t()) :: true | {false, String.t()}
   def can_join_room?(userid, room_name) do
-    room = get_room(room_name)
+    room = get_or_make_room(room_name, userid)
     user = User.get_user_by_id(userid)
     cond do
-      user.moderator ->
+      user == nil ->
+        false
+
+      user.moderator == true ->
         true
 
       room.clan_id ->
