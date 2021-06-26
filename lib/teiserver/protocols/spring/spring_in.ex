@@ -493,7 +493,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("CHANGEPASSWORD", data, msg_id, state) do
-    case Regex.run(~r/(\S+)\t(\S+)/, data) do
+    case Regex.run(~r/(\S+) (\S+)/, data) do
       [_, md5_old_password, md5_new_password] ->
         case User.test_password(
                md5_old_password,

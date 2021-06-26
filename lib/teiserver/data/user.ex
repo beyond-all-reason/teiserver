@@ -361,8 +361,10 @@ defmodule Teiserver.User do
   end
 
   def request_password_reset(user) do
-    code = :rand.uniform(899_999) + 100_000
-    update_user(%{user | password_reset_code: "#{code}"})
+    db_user = Account.get_user!(user.id)
+
+    Central.Account.UserLib.reset_password_request(db_user)
+    |> Central.Mailer.deliver_now()
   end
 
   def request_email_change(nil, _), do: nil
