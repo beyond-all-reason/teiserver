@@ -14,22 +14,21 @@ defmodule Central.Repo.Migrations.ClientTelemetry do
       add :value, :string
     end
 
-    create table(:teiserver_telemetry_client_events) do
-      add :user_id, references(:account_users, on_delete: :nothing)
-      add :timestamp, :utc_datetime
-
-      add :event_id, references(:teiserver_telemetry_events, on_delete: :nothing)
-      add :value, :string
-      add :hash, :string
-    end
-
     create table(:teiserver_telemetry_client_properties, primary_key: false) do
       add :user_id, references(:account_users, on_delete: :nothing), primary_key: true
       add :last_updated, :utc_datetime
 
       add :event_id, references(:teiserver_telemetry_events, on_delete: :nothing), primary_key: true
       add :value, :string
-      add :hash, :string
+    end
+
+    create table(:teiserver_telemetry_client_events) do
+      add :user_id, references(:account_users, on_delete: :nothing)
+      add :timestamp, :utc_datetime
+
+      add :event_id, references(:teiserver_telemetry_events, on_delete: :nothing)
+      add :value, :string
+      add :hash, :jsonb
     end
 
     create table(:teiserver_telemetry_battle_events) do
@@ -38,8 +37,7 @@ defmodule Central.Repo.Migrations.ClientTelemetry do
       add :timestamp, :utc_datetime
 
       add :event_id, references(:teiserver_telemetry_events, on_delete: :nothing)
-      add :value, :string
-      add :hash, :string
+      add :value, :jsonb
     end
   end
 end

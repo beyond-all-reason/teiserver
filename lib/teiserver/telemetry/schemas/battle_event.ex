@@ -8,7 +8,7 @@ defmodule Teiserver.Telemetry.BattleEvent do
     belongs_to :event, Teiserver.Telemetry.Event
 
     field :timestamp, :utc_datetime
-    field :value, :string
+    field :value, :map
     field :hash, :string
   end
 
