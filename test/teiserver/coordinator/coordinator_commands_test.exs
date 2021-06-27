@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Director.CommandsTest do
+defmodule Teiserver.Protocols.Coordinator.CommandsTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.BattleLobby
   alias Teiserver.Common.PubsubListener
@@ -8,17 +8,17 @@ defmodule Teiserver.Protocols.Director.CommandsTest do
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
   setup do
-    Teiserver.Director.start_director()
+    Teiserver.Coordinator.start_coordinator()
     %{socket: hsocket, user: host} = tachyon_auth_setup()
     %{socket: psocket, user: player} = tachyon_auth_setup()
 
-    # User needs to be a moderator (at this time) to start/stop director mode
+    # User needs to be a moderator (at this time) to start/stop Coordinator mode
     User.update_user(%{host | moderator: true})
     Client.refresh_client(host.id)
 
     battle_data = %{
       cmd: "c.battle.create",
-      name: "Director #{:rand.uniform(999_999_999)}",
+      name: "Coordinator #{:rand.uniform(999_999_999)}",
       nattype: "none",
       port: 1234,
       game_hash: "string_of_characters",
@@ -36,7 +36,7 @@ defmodule Teiserver.Protocols.Director.CommandsTest do
     reply = _tachyon_recv(hsocket)
     battle_id = reply["battle"]["id"]
 
-    BattleLobby.start_director_mode(battle_id)
+    BattleLobby.start_coordinator_mode(battle_id)
     listener = PubsubListener.new_listener(["battle_updates:#{battle_id}"])
 
     # Player needs to be added to the battle

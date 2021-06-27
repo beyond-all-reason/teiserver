@@ -1,4 +1,4 @@
-defmodule Teiserver.Director.ConsulServer do
+defmodule Teiserver.Coordinator.ConsulServer do
   @moduledoc """
   One consul server is created for each battle. It acts as a battle supervisor in addition to any
   host.
@@ -19,7 +19,7 @@ defmodule Teiserver.Director.ConsulServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Director, Client, User}
+  alias Teiserver.{Coordinator, Client, User}
   alias Teiserver.Battle.BattleLobby
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -84,23 +84,24 @@ defmodule Teiserver.Director.ConsulServer do
       senderid: userid
     }
   """
-  def handle_command(%{command: "welcome-message", remaining: remaining} = _cmd, state) do
+  def handle_command(%{command: "welcome-message", remaining: remaining} = cmd, state) do
     new_state = case String.trim(remaining) do
       "" ->
         %{state | welcome_message: nil}
       msg ->
+        BattleLobby.say(cmd.senderid, "New welcome message set to: #{msg}", state.battle_id)
         %{state | welcome_message: msg}
     end
     broadcast_update(new_state)
   end
 
   def handle_command(%{command: "start", senderid: senderid} = cmd, state) do
-    Director.send_to_host(senderid, state.battle_id, "!start")
+    Coordinator.send_to_host(senderid, state.battle_id, "!start")
     say_command(cmd, state)
   end
 
   def handle_command(%{command: "forcestart", senderid: senderid} = cmd, state) do
-    Director.send_to_host(senderid, state.battle_id, "!forcestart")
+    Coordinator.send_to_host(senderid, state.battle_id, "!forcestart")
     say_command(cmd, state)
   end
 
@@ -109,18 +110,18 @@ defmodule Teiserver.Director.ConsulServer do
     |> broadcast_update("reset")
   end
 
-  def handle_command(%{command: "director", remaining: "stop"} = cmd, state) do
-    BattleLobby.stop_director_mode(state.battle_id)
+  def handle_command(%{command: "coordinator", remaining: "stop"} = cmd, state) do
+    BattleLobby.stop_coordinator_mode(state.battle_id)
     say_command(cmd, state)
   end
 
   def handle_command(%{command: "manual-autohost"}, state) do
-    Director.send_to_host(state.coordinator_id, state.battle_id, "!autobalance off")
+    Coordinator.send_to_host(state.coordinator_id, state.battle_id, "!autobalance off")
     state
   end
 
   def handle_command(%{command: "change-map", remaining: map_name} = cmd, state) do
-    Director.send_to_host(state.coordinator_id, state.battle_id, "!map #{map_name}")
+    Coordinator.send_to_host(state.coordinator_id, state.battle_id, "!map #{map_name}")
     say_command(cmd, state)
   end
 
@@ -243,7 +244,7 @@ defmodule Teiserver.Director.ConsulServer do
 
   defp empty_state(battle_id) do
     %{
-      coordinator_id: Director.get_coordinator_userid(),
+      coordinator_id: Coordinator.get_coordinator_userid(),
       battle_id: battle_id,
       guard_mode: :blacklist,
       blacklist: %{},

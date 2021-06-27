@@ -19,7 +19,7 @@
     <tr>
       <th>Name</th>
       <th>Map</th>
-      <th>Director</th>
+      <th>Coordinator</th>
       <th>Player count</th>
       <th>Spectator count</th>
 
@@ -32,7 +32,7 @@
         <tr id="battle-<%= battle.id %>">
           <td><%= battle.name %></td>
           <td><%= battle.map_name %></td>
-          <td><%= if battle.director_mode, do: "Enabled" %></td>
+          <td><%= if battle.coordinator_mode, do: "Enabled" %></td>
           <td><%= battle.player_count %></td>
           <td><%= battle.spectator_count %></td>
 

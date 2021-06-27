@@ -9,6 +9,7 @@ defmodule Teiserver.TcpServerTest do
     only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, new_user_name: 0, auth_setup: 0]
 
   setup do
+    Teiserver.Coordinator.start_coordinator()
     %{socket: socket} = raw_setup()
     {:ok, socket: socket}
   end
@@ -106,10 +107,12 @@ defmodule Teiserver.TcpServerTest do
     %{socket: socket, user: user} = auth_setup()
     client = Client.get_client_by_name(user.name)
     pid = client.pid
+    coordinator_userid = Teiserver.Coordinator.get_coordinator_userid()
 
     # Should be no users but ourselves
     assert GenServer.call(pid, {:get, :known_users}) == %{
-      user.id => %{battle_id: nil, userid: user.id}
+      user.id => %{battle_id: nil, userid: user.id},
+      coordinator_userid => %{battle_id: nil, userid: coordinator_userid},
     }
 
     %{socket: s1, user: u1} = auth_setup()
@@ -122,6 +125,7 @@ defmodule Teiserver.TcpServerTest do
       u1.id => %{battle_id: nil, userid: u1.id},
       u2.id => %{battle_id: nil, userid: u2.id},
       u3.id => %{battle_id: nil, userid: u3.id},
+      coordinator_userid => %{battle_id: nil, userid: coordinator_userid},
     }
 
     # Flush the message queues
@@ -153,6 +157,7 @@ defmodule Teiserver.TcpServerTest do
       user.id => %{battle_id: nil, userid: user.id},
       u2.id => %{battle_id: nil, userid: u2.id},
       u3.id => %{battle_id: nil, userid: u3.id},
+      coordinator_userid => %{battle_id: nil, userid: coordinator_userid},
     }
 
     # Repeat, should not do anything
@@ -164,6 +169,7 @@ defmodule Teiserver.TcpServerTest do
       user.id => %{battle_id: nil, userid: user.id},
       u2.id => %{battle_id: nil, userid: u2.id},
       u3.id => %{battle_id: nil, userid: u3.id},
+      coordinator_userid => %{battle_id: nil, userid: coordinator_userid},
     }
 
     # Logs back in
@@ -176,6 +182,7 @@ defmodule Teiserver.TcpServerTest do
       u1.id => %{battle_id: nil, userid: u1.id},
       u2.id => %{battle_id: nil, userid: u2.id},
       u3.id => %{battle_id: nil, userid: u3.id},
+      coordinator_userid => %{battle_id: nil, userid: coordinator_userid},
     }
 
     # ---- BATTLES ----
@@ -190,6 +197,7 @@ defmodule Teiserver.TcpServerTest do
       u1.id => %{battle_id: battle_id, userid: u1.id},
       u2.id => %{battle_id: nil, userid: u2.id},
       u3.id => %{battle_id: nil, userid: u3.id},
+      coordinator_userid => %{battle_id: nil, userid: coordinator_userid},
     }
 
     # Duplicate user in battle
@@ -202,6 +210,7 @@ defmodule Teiserver.TcpServerTest do
       u1.id => %{battle_id: battle_id, userid: u1.id},
       u2.id => %{battle_id: nil, userid: u2.id},
       u3.id => %{battle_id: nil, userid: u3.id},
+      coordinator_userid => %{battle_id: nil, userid: coordinator_userid},
     }
 
     # User moves to a different battle (without leave command)
@@ -215,6 +224,7 @@ defmodule Teiserver.TcpServerTest do
       u1.id => %{battle_id: battle_id + 1, userid: u1.id},
       u2.id => %{battle_id: nil, userid: u2.id},
       u3.id => %{battle_id: nil, userid: u3.id},
+      coordinator_userid => %{battle_id: nil, userid: coordinator_userid},
     }
     assert r == "JOINEDBATTLE #{battle_id + 1} #{u1.name}\n"
     # TODO: Find out why the below doesn't happen

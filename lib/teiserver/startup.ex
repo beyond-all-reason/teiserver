@@ -190,10 +190,10 @@ defmodule Teiserver.Startup do
 
     Teiserver.Telemetry.startup()
 
-    if Application.get_env(:central, Teiserver)[:enable_director_mode] do
+    if Application.get_env(:central, Teiserver)[:enable_coordinator_mode] do
       spawn(fn ->
         :timer.sleep(500)
-        Teiserver.Director.start_director()
+        Teiserver.Coordinator.start_coordinator()
       end)
     end
 

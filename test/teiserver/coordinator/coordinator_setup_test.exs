@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Director.SetupTest do
+defmodule Teiserver.Protocols.Coordinator.SetupTest do
   use Central.ServerCase, async: false
   alias Teiserver.{User, Client}
   alias Teiserver.TeiserverTestLib
@@ -16,7 +16,7 @@ defmodule Teiserver.Protocols.Director.SetupTest do
   end
 
   test "start, stop", %{user: user} do
-    # User needs to be a moderator (at this time) to start/stop director mode
+    # User needs to be a moderator (at this time) to start/stop Coordinator mode
     User.update_user(%{user | moderator: true})
     Client.refresh_client(user.id)
 
@@ -25,26 +25,26 @@ defmodule Teiserver.Protocols.Director.SetupTest do
       founder_name: user.name
     })
     id = battle.id
-    assert battle.director_mode == false
+    assert battle.coordinator_mode == false
     assert ConCache.get(:teiserver_consul_pids, battle.id) != nil
 
     # Start it up!
-    BattleLobby.say(user.id, "!director start", id)
+    BattleLobby.say(user.id, "!coordinator start", id)
     :timer.sleep(@sleep)
 
     battle = BattleLobby.get_battle!(id)
-    assert battle.director_mode == true
+    assert battle.coordinator_mode == true
 
     # Stop it
-    BattleLobby.say(user.id, "!director stop", id)
+    BattleLobby.say(user.id, "!coordinator stop", id)
     :timer.sleep(@sleep)
 
     battle = BattleLobby.get_battle!(id)
-    assert battle.director_mode == false
+    assert battle.coordinator_mode == false
   end
 
   test "test command vs no command", %{user: user, socket: socket} do
-    # User needs to be a moderator (at this time) to start/stop director mode
+    # User needs to be a moderator (at this time) to start/stop Coordinator mode
     User.update_user(%{user | moderator: true})
     Client.refresh_client(user.id)
 
@@ -52,12 +52,12 @@ defmodule Teiserver.Protocols.Director.SetupTest do
       founder_id: user.id,
       founder_name: user.name
     })
-    assert battle.director_mode == false
+    assert battle.coordinator_mode == false
 
-    BattleLobby.start_director_mode(battle.id)
+    BattleLobby.start_coordinator_mode(battle.id)
     battle = BattleLobby.get_battle!(battle.id)
 
-    assert battle.director_mode == true
+    assert battle.coordinator_mode == true
     listener = PubsubListener.new_listener(["battle_updates:#{battle.id}"])
 
     # No command
@@ -74,7 +74,7 @@ defmodule Teiserver.Protocols.Director.SetupTest do
 
     :timer.sleep(@sleep)
     reply = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.battle.message", "message" => "!start", "sender" => user.id}
+    assert reply == %{"cmd" => "s.communication.direct_message", "message" => "!start", "sender" => user.id}
 
     # Converted message should appear here
     messages = PubsubListener.get(listener)

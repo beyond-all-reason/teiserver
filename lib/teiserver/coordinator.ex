@@ -1,18 +1,18 @@
-defmodule Teiserver.Director do
+defmodule Teiserver.Coordinator do
   alias Teiserver.Battle.BattleLobby
   alias Teiserver.User
-  alias Teiserver.Client
+  # alias Teiserver.Client
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Director.Parser
+  alias Teiserver.Coordinator.Parser
   require Logger
 
   @spec do_start() :: :ok
   defp do_start() do
     # Start the supervisor server
     {:ok, coordinator_pid} =
-      DynamicSupervisor.start_child(Teiserver.Director.DynamicSupervisor, {
-        Teiserver.Director.CoordinatorServer,
-        name: Teiserver.Director.CoordinatorServer,
+      DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
+        Teiserver.Coordinator.CoordinatorServer,
+        name: Teiserver.Coordinator.CoordinatorServer,
         data: %{}
       })
 
@@ -23,11 +23,11 @@ defmodule Teiserver.Director do
 
   # @spec get_coordinator_pid() :: pid()
   # defp get_coordinator_pid() do
-  #   ConCache.get(:teiserver_director, :coordinator)
+  #   ConCache.get(:teiserver_coordinator, :coordinator)
   # end
 
-  @spec start_director() :: :ok | {:failure, String.t()}
-  def start_director() do
+  @spec start_coordinator() :: :ok | {:failure, String.t()}
+  def start_coordinator() do
     cond do
       get_coordinator_userid() != nil ->
         {:failure, "Already started"}
@@ -50,9 +50,9 @@ defmodule Teiserver.Director do
   @spec start_consul(T.battle_id()) :: pid()
   def start_consul(battle_id) do
     {:ok, consul_pid} =
-      DynamicSupervisor.start_child(Teiserver.Director.DynamicSupervisor, {
-        Teiserver.Director.ConsulServer,
-        name: Teiserver.Director.CoordinatorServer,
+      DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
+        Teiserver.Coordinator.ConsulServer,
+        name: Teiserver.Coordinator.CoordinatorServer,
         data: %{
           battle_id: battle_id,
         }
@@ -87,7 +87,7 @@ defmodule Teiserver.Director do
       nil -> nil
       pid ->
         ConCache.delete(:teiserver_consul_pids, battle_id)
-        DynamicSupervisor.terminate_child(Teiserver.Director.DynamicSupervisor, pid)
+        DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, pid)
     end
   end
 

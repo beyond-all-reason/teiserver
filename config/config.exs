@@ -55,7 +55,7 @@ config :central, Teiserver,
   github_repo: "https://github.com/Teifion/teiserver",
   extra_logging: false,
   enable_agent_mode: false,
-  enable_director_mode: true,
+  enable_coordinator_mode: true,
   user_agreement: "User agreement goes here."
 
 config :logger, :console,

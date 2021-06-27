@@ -174,17 +174,17 @@
 </table>
 
 <%= if @bar_user.moderator do %>
-  <%= if @battle.director_mode do %>
-    <span class="btn btn-outline-<%= bsname %>" phx-click="stop-director">
+  <%= if @battle.coordinator_mode do %>
+    <span class="btn btn-outline-<%= bsname %>" phx-click="stop-Coordinator">
       <i class='fa-fw fas fa-square'></i>
       &nbsp;
-      Stop director
+      Stop Coordinator
     </span>
   <% else %>
-    <span class="btn btn-outline-<%= bsname %>" phx-click="start-director">
+    <span class="btn btn-outline-<%= bsname %>" phx-click="start-Coordinator">
       <i class='fa-fw fas fa-play'></i>
       &nbsp;
-      Start director
+      Start Coordinator
     </span>
   <% end %>
 

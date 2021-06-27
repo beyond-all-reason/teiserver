@@ -6,7 +6,7 @@ defmodule Teiserver.Battle.BattleLobby do
   alias Teiserver.User
   alias Teiserver.Client
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Director
+  alias Teiserver.Coordinator
 
 #   @enforce_keys [:id, :founder_id, :founder_name]
 #   defstruct [
@@ -62,7 +62,7 @@ defmodule Teiserver.Battle.BattleLobby do
         tags: %{},
         disabled_units: [],
         start_rectangles: %{},
-        director_mode: false,
+        coordinator_mode: false,
 
         # Expected to be overriden
         map_hash: nil,
@@ -109,7 +109,7 @@ defmodule Teiserver.Battle.BattleLobby do
 
   @spec add_battle(Map.t()) :: Map.t()
   def add_battle(battle) do
-    _consul_pid = Director.start_consul(battle.id)
+    _consul_pid = Coordinator.start_consul(battle.id)
     ConCache.put(:battles, battle.id, battle)
 
     ConCache.update(:lists, :battles, fn value ->
@@ -132,7 +132,7 @@ defmodule Teiserver.Battle.BattleLobby do
   @spec close_battle(integer() | nil) :: :ok
   def close_battle(battle_id) do
     battle = get_battle(battle_id)
-    Director.close_battle(battle_id)
+    Coordinator.close_battle(battle_id)
     ConCache.delete(:battles, battle_id)
     ConCache.update(:lists, :battles, fn value ->
       new_value =
@@ -227,11 +227,11 @@ defmodule Teiserver.Battle.BattleLobby do
         else
           Client.join_battle(userid, battle_id)
 
-          if battle_state.director_mode do
-            sayprivateex(battle_state.founder_id, userid, "Director mode enabled", battle_id)
+          if battle_state.coordinator_mode do
+            sayprivateex(battle_state.founder_id, userid, "Coordinator mode enabled", battle_id)
           end
 
-          Director.cast_consul(battle_id, {:user_joined, userid})
+          Coordinator.cast_consul(battle_id, {:user_joined, userid})
 
           PubSub.broadcast(
             Central.PubSub,
@@ -452,8 +452,8 @@ defmodule Teiserver.Battle.BattleLobby do
       battle.password != nil and password != battle.password and user.moderator == false ->
         {:failure, "Invalid password"}
 
-      Director.call_consul(battle_id, {:request_user_join_battle, userid}) == false ->
-        {:failure, "Denied by consul"}
+      Coordinator.call_consul(battle_id, {:request_user_join_battle, userid}) == false ->
+        {:failure, "Denied by Coordinator"}
 
       true ->
         # Okay, so far so good, what about the host? Are they okay with it?
@@ -486,16 +486,16 @@ defmodule Teiserver.Battle.BattleLobby do
   @spec say(Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
   def say(userid, "!start", battle_id), do: say(userid, "!cv start", battle_id)
 
-  def say(userid, "!director start", battle_id) do
+  def say(userid, "!coordinator start", battle_id) do
     client = Client.get_client_by_id(userid)
     if client.moderator do
-      start_director_mode(battle_id)
+      start_coordinator_mode(battle_id)
     end
     :ok
   end
 
   def say(userid, msg, battle_id) do
-    case Teiserver.Director.handle_in(userid, msg, battle_id) do
+    case Teiserver.Coordinator.handle_in(userid, msg, battle_id) do
       :say -> do_say(userid, msg, battle_id)
       :handled -> :ok
     end
@@ -531,21 +531,21 @@ defmodule Teiserver.Battle.BattleLobby do
     end
   end
 
-  @spec start_director_mode(Types.battle_id()) :: :ok
-  def start_director_mode(battle_id) do
-    Logger.debug("Starting director mode for #{battle_id}")
+  @spec start_coordinator_mode(Types.battle_id()) :: :ok
+  def start_coordinator_mode(battle_id) do
+    Logger.debug("Starting Coordinator mode for #{battle_id}")
     battle = get_battle!(battle_id)
-    sayex(battle.founder_id, "Director mode enabled", battle_id)
-    update_battle(%{battle | director_mode: true}, nil, nil)
+    sayex(battle.founder_id, "Coordinator mode enabled", battle_id)
+    update_battle(%{battle | coordinator_mode: true}, nil, nil)
     :ok
   end
 
-  @spec stop_director_mode(Types.battle_id()) :: :ok
-  def stop_director_mode(battle_id) do
-    Logger.debug("Stopping director mode for #{battle_id}")
+  @spec stop_coordinator_mode(Types.battle_id()) :: :ok
+  def stop_coordinator_mode(battle_id) do
+    Logger.debug("Stopping Coordinator mode for #{battle_id}")
     battle = get_battle!(battle_id)
-    sayex(battle.founder_id, "Director mode stopped", battle_id)
-    update_battle(%{battle | director_mode: false}, nil, nil)
+    sayex(battle.founder_id, "Coordinator mode stopped", battle_id)
+    update_battle(%{battle | coordinator_mode: false}, nil, nil)
     :ok
   end
 

@@ -9,7 +9,7 @@ defmodule Teiserver.TeiserverTestLib do
   alias Teiserver.Client
   alias Teiserver.Account
   alias Teiserver.Protocols.Tachyon
-  alias Teiserver.Director.CoordinatorServer
+  alias Teiserver.Coordinator.CoordinatorServer
   @host '127.0.0.1'
 
   @spec raw_setup :: %{socket: port()}

@@ -19,7 +19,7 @@ config :central, Teiserver,
     cacertfile: "priv/certs/localhost.crt"
   ],
   enable_hooks: false,
-  enable_director_mode: false,
+  enable_coordinator_mode: false,
   user_agreement: "User agreement goes here."
 
 # We don't run a server during test. If one is required,

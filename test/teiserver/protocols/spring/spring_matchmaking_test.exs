@@ -10,7 +10,7 @@ defmodule Teiserver.SpringMatchmakingTest do
     only: [auth_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1]
 
   setup do
-    Teiserver.Director.start_director()
+    Teiserver.Coordinator.start_coordinator()
     %{socket: socket, user: user} = auth_setup()
     {:ok, socket: socket, user: user}
   end
@@ -152,7 +152,7 @@ defmodule Teiserver.SpringMatchmakingTest do
     # In the middle of the messages will be the client status messages
     # we cannot be sure of their order or exact values so we do their test later
     assert reply =~ """
-SAIDBATTLEEX #{host_user.name} Director mode enabled
+SAIDBATTLEEX #{host_user.name} Coordinator mode enabled
 JOINEDBATTLE #{battle_id} #{user2.name}
 JOINEDBATTLE #{battle_id} #{user1.name}
 SAIDPRIVATE Coordinator !autobalance off

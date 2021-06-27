@@ -79,9 +79,9 @@ defmodule TeiserverWeb.MatchmakingLive.Show do
   end
 
   # @impl true
-  # def handle_event("start-director", _event, %{assigns: %{id: id}} = socket) do
-  #   BattleLobby.start_director_mode(id)
-  #   battle = %{socket.assigns.battle | director_mode: true}
+  # def handle_event("start-Coordinator", _event, %{assigns: %{id: id}} = socket) do
+  #   BattleLobby.start_coordinator_mode(id)
+  #   battle = %{socket.assigns.battle | coordinator_mode: true}
   #   {:noreply, assign(socket, :battle, battle)}
   # end
 

@@ -3,7 +3,7 @@ defmodule Teiserver.Game.QueueServer do
   require Logger
   alias Teiserver.Battle.BattleLobby
   alias Phoenix.PubSub
-  alias Teiserver.Director
+  alias Teiserver.Coordinator
 
   @default_tick_interval 5_000
 
@@ -233,15 +233,15 @@ defmodule Teiserver.Game.QueueServer do
 
         midway_state = remove_players(state, state.players_accepted)
 
-        # Director sets up the battle
+        # Coordinator sets up the battle
         map_name = state.map_list |> Enum.random()
-        BattleLobby.start_director_mode(battle.id)
-        Director.cast_consul(battle.id, %{command: "manual-autohost", senderid: state.coordinator_id})
-        Director.cast_consul(battle.id, %{command: "change-map", remaining: map_name, senderid: state.coordinator_id})
+        BattleLobby.start_coordinator_mode(battle.id)
+        Coordinator.cast_consul(battle.id, %{command: "manual-autohost", senderid: state.coordinator_id})
+        Coordinator.cast_consul(battle.id, %{command: "change-map", remaining: map_name, senderid: state.coordinator_id})
 
         # Now put the players on their teams, for now we're assuming every game is just a 1v1
         [p1, p2] = state.players_accepted
-        Director.cast_consul(battle.id, %{command: "change-battlestatus", target_id: p1, senderid: state.coordinator_id,
+        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", target_id: p1, senderid: state.coordinator_id,
           status: %{
             team_number: 0,
             ally_team_number: 0,
@@ -250,7 +250,7 @@ defmodule Teiserver.Game.QueueServer do
             ready: true
           }
         })
-        Director.cast_consul(battle.id, %{command: "change-battlestatus", target_id: p2, senderid: state.coordinator_id,
+        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", target_id: p2, senderid: state.coordinator_id,
           status: %{
             team_number: 1,
             ally_team_number: 1,
@@ -262,7 +262,7 @@ defmodule Teiserver.Game.QueueServer do
 
         # Give things time to propogate before we start
         :timer.sleep(250)
-        Director.cast_consul(battle.id, %{command: "forcestart", senderid: state.coordinator_id})
+        Coordinator.cast_consul(battle.id, %{command: "forcestart", senderid: state.coordinator_id})
 
         %{
           midway_state
@@ -309,7 +309,7 @@ defmodule Teiserver.Game.QueueServer do
        player_count: 0,
        player_map: %{},
        last_wait_time: 0,
-       coordinator_id: Director.get_coordinator_userid(),
+       coordinator_id: Coordinator.get_coordinator_userid(),
        ready_wait_time: opts.queue.settings["ready_wait_time"] || @ready_wait_time
      }, opts.queue)
 

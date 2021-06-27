@@ -1,6 +1,6 @@
-defmodule Teiserver.Director.CoordinatorServer do
+defmodule Teiserver.Coordinator.CoordinatorServer do
   @moduledoc """
-  The coordinator server is the interface point for the Director system. Consuls are invisible (to the players) processes
+  The coordinator server is the interface point for the Coordinator system. Consuls are invisible (to the players) processes
   performing their actions in the name of the coordinator
   """
   use GenServer
@@ -14,7 +14,7 @@ defmodule Teiserver.Director.CoordinatorServer do
   end
 
   def handle_info(:begin, _state) do
-    Logger.debug("Starting up Director coordinator")
+    Logger.debug("Starting up Coordinator coordinator")
     account = get_coordinator_account()
     ConCache.put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
     {:ok, user} = User.internal_client_login(account.id)

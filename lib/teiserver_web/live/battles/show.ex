@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{Client, User, Director}
+  alias Teiserver.{Client, User, Coordinator}
   alias Teiserver.Battle.BattleLobby
   alias Teiserver.Battle.BattleLobbyLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -194,20 +194,20 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   end
 
   @impl true
-  def handle_event("start-director", _event, %{assigns: %{id: id}} = socket) do
-    BattleLobby.start_director_mode(id)
-    battle = %{socket.assigns.battle | director_mode: true}
+  def handle_event("start-Coordinator", _event, %{assigns: %{id: id}} = socket) do
+    BattleLobby.start_coordinator_mode(id)
+    battle = %{socket.assigns.battle | coordinator_mode: true}
     {:noreply, assign(socket, :battle, battle)}
   end
 
-  def handle_event("stop-director", _event, %{assigns: %{id: id}} = socket) do
-    BattleLobby.stop_director_mode(id)
-    battle = %{socket.assigns.battle | director_mode: false}
+  def handle_event("stop-Coordinator", _event, %{assigns: %{id: id}} = socket) do
+    BattleLobby.stop_coordinator_mode(id)
+    battle = %{socket.assigns.battle | coordinator_mode: false}
     {:noreply, assign(socket, :battle, battle)}
   end
 
   def handle_event("reset-consul", _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
-    Director.cast_consul(id, %{
+    Coordinator.cast_consul(id, %{
       command: "reset",
       senderid: bar_user.id
     })
@@ -216,7 +216,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
 
   def handle_event("force-spectator:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
     # BattleLobby.force_change_client(bar_user.id, int_parse(target_id), :player, false)
-    Director.cast_consul(id, %{
+    Coordinator.cast_consul(id, %{
       command: "force-spectator",
       remaining: int_parse(target_id),
       senderid: bar_user.id
@@ -225,7 +225,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   end
 
   def handle_event("kick:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
-    Director.cast_consul(id, %{
+    Coordinator.cast_consul(id, %{
       command: "kick",
       remaining: int_parse(target_id),
       senderid: bar_user.id
@@ -234,7 +234,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   end
 
   def handle_event("ban:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
-    Director.cast_consul(id, %{
+    Coordinator.cast_consul(id, %{
       command: "ban",
       remaining: int_parse(target_id),
       senderid: bar_user.id
@@ -244,7 +244,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
 
   defp get_consul_state(%{assigns: %{id: id}} = socket) do
     socket
-    |> assign(:consul, Director.call_consul(id, :get_all))
+    |> assign(:consul, Coordinator.call_consul(id, :get_all))
   end
 
   defp page_title(:show), do: "Show Battle"

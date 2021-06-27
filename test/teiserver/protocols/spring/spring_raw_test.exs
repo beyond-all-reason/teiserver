@@ -152,35 +152,36 @@ defmodule Teiserver.SpringRawTest do
       "RESETPASSWORDREQUEST #{user.email}\n"
     )
 
-    assert user.password_reset_code == nil
-    user2 = User.get_user_by_id(user.id)
-    assert user2.password_reset_code != nil
+    # We now send an email instead of using the password reset code
+    # assert user.password_reset_code == nil
+    # user2 = User.get_user_by_id(user.id)
+    # assert user2.password_reset_code != nil
     reply = _recv_raw(socket)
     assert reply =~ "RESETPASSWORDREQUESTACCEPTED\n"
-    user = user2
+    # user = user2
 
-    # Now verify badly
-    _send_raw(
-      socket,
-      "RESETPASSWORD #{user.email} the_wrong_code\n"
-    )
+    # # Now verify badly
+    # _send_raw(
+    #   socket,
+    #   "RESETPASSWORD #{user.email} the_wrong_code\n"
+    # )
 
-    reply = _recv_raw(socket)
-    assert reply =~ "RESETPASSWORDDENIED wrong_code\n"
-    user2 = User.get_user_by_id(user.id)
-    assert user2.password_hash == user.password_hash
+    # reply = _recv_raw(socket)
+    # assert reply =~ "RESETPASSWORDDENIED wrong_code\n"
+    # user2 = User.get_user_by_id(user.id)
+    # assert user2.password_hash == user.password_hash
 
-    # Now verify correctly
-    _send_raw(
-      socket,
-      "RESETPASSWORD #{user.email} #{user.password_reset_code}\n"
-    )
+    # # Now verify correctly
+    # _send_raw(
+    #   socket,
+    #   "RESETPASSWORD #{user.email} #{user.password_reset_code}\n"
+    # )
 
-    reply = _recv_raw(socket)
-    assert reply == "RESETPASSWORDACCEPTED\n"
-    user2 = User.get_user_by_id(user.id)
-    assert user2.password_hash != user.password_hash
-    assert user2.password_reset_code == nil
+    # reply = _recv_raw(socket)
+    # assert reply == "RESETPASSWORDACCEPTED\n"
+    # user2 = User.get_user_by_id(user.id)
+    # assert user2.password_hash != user.password_hash
+    # assert user2.password_reset_code == nil
   end
 
   # TODO - Implement STLS and find a way to test it

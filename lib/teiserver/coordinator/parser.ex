@@ -1,6 +1,6 @@
-defmodule Teiserver.Director.Parser do
+defmodule Teiserver.Coordinator.Parser do
   require Logger
-  alias Teiserver.Director
+  alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle.BattleLobby
 
@@ -9,7 +9,7 @@ defmodule Teiserver.Director.Parser do
     battle = BattleLobby.get_battle!(battle_id)
 
     cond do
-      battle.director_mode == false ->
+      battle.coordinator_mode == false ->
         :say
 
       String.slice(msg, 0..1) == "! " ->
@@ -31,7 +31,7 @@ defmodule Teiserver.Director.Parser do
   @spec parse_and_handle(Types.userid(), String.t(), Map.t()) :: :ok
   defp parse_and_handle(userid, msg, battle) do
     cmd = parse_command(userid, msg)
-    Director.cast_consul(battle.id, cmd)
+    Coordinator.cast_consul(battle.id, cmd)
     :ok
   end
 
@@ -46,12 +46,12 @@ defmodule Teiserver.Director.Parser do
   #   cast_to_consul(battle, cmd)
   # end
 
-  # defp do_handle(%{command: "director"} = cmd, battle) do
+  # defp do_handle(%{command: "Coordinator"} = cmd, battle) do
   #   cast_to_consul(battle, cmd)
   # end
 
   # defp do_handle(%{command: command}, _battle) do
-  #   Logger.error("director no handler for cmd: #{command}")
+  #   Logger.error("Coordinator no handler for cmd: #{command}")
   #   :nomatch
   # end
 
