@@ -691,7 +691,7 @@ defmodule Teiserver.User do
           user.rename_in_progress ->
             {:error, "Rename in progress, wait 5 seconds"}
 
-          login_flood_check(user.id) == :block ->
+          user.bot == false and login_flood_check(user.id) == :block ->
             {:error, "Flood protection"}
 
           # Used for testing, this should never be enabled in production
@@ -727,7 +727,7 @@ defmodule Teiserver.User do
           user.rename_in_progress ->
             {:error, "Rename in progress, wait 5 seconds"}
 
-          login_flood_check(user.id) == :block ->
+          user.bot == false and login_flood_check(user.id) == :block ->
             {:error, "Flood protection"}
 
           # Used for testing, this should never be enabled in production
