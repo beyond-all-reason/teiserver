@@ -3,6 +3,7 @@ defmodule Teiserver.Protocols.Coordinator.CommandsTest do
   alias Teiserver.Battle.BattleLobby
   alias Teiserver.Common.PubsubListener
   alias Teiserver.{Client, User}
+  alias Teiserver.Coordinator
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
@@ -60,7 +61,7 @@ defmodule Teiserver.Protocols.Coordinator.CommandsTest do
     assert player_client.player == false
   end
 
-  test "kick", %{host: host, player: player, hsocket: hsocket} do
+  test "kick by name", %{host: host, player: player, hsocket: hsocket} do
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
 
@@ -71,7 +72,18 @@ defmodule Teiserver.Protocols.Coordinator.CommandsTest do
     assert player_client.battle_id == nil
   end
 
-  test "ban", %{host: host, player: player, hsocket: hsocket} do
+  test "kick by id", %{host: host, player: player, hsocket: hsocket} do
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.player == true
+
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!kick ##{player.id}"}
+    _tachyon_send(hsocket, data)
+
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.battle_id == nil
+  end
+
+  test "ban by name", %{host: host, player: player, hsocket: hsocket} do
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
 
@@ -80,5 +92,110 @@ defmodule Teiserver.Protocols.Coordinator.CommandsTest do
 
     player_client = Client.get_client_by_id(player.id)
     assert player_client.battle_id == nil
+  end
+
+  test "ban by partial name", %{host: host, player: player, hsocket: hsocket} do
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.player == true
+
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!ban #{player.name |> String.slice(0, 17)}"}
+    _tachyon_send(hsocket, data)
+
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.battle_id == nil
+  end
+
+  test "blacklist", %{battle_id: battle_id, host: host, player: player, hsocket: hsocket} do
+    blacklist = Coordinator.call_consul(battle_id, {:get, :blacklist})
+    assert blacklist == %{}
+
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!blacklist ##{player.id} banned"}
+    _tachyon_send(hsocket, data)
+    blacklist = Coordinator.call_consul(battle_id, {:get, :blacklist})
+    assert blacklist == %{
+      player.id => :banned
+    }
+
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!blacklist ##{player.id} spectator"}
+    _tachyon_send(hsocket, data)
+    blacklist = Coordinator.call_consul(battle_id, {:get, :blacklist})
+    assert blacklist == %{
+      player.id => :spectator
+    }
+
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!blacklist ##{player.id} player"}
+    _tachyon_send(hsocket, data)
+    blacklist = Coordinator.call_consul(battle_id, {:get, :blacklist})
+    assert blacklist == %{}
+  end
+
+  test "whitelist", %{battle_id: battle_id, host: host, player: player, hsocket: hsocket} do
+    whitelist = Coordinator.call_consul(battle_id, {:get, :whitelist})
+    assert whitelist == %{
+      :default => :player
+    }
+
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!whitelist ##{player.id} spectator"}
+    _tachyon_send(hsocket, data)
+    whitelist = Coordinator.call_consul(battle_id, {:get, :whitelist})
+    assert whitelist == %{
+      player.id => :spectator,
+      :default => :player
+    }
+
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!whitelist ##{player.id} player"}
+    _tachyon_send(hsocket, data)
+    whitelist = Coordinator.call_consul(battle_id, {:get, :whitelist})
+    assert whitelist == %{
+      player.id => :player,
+      :default => :player
+    }
+
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!whitelist ##{player.id} banned"}
+    _tachyon_send(hsocket, data)
+    whitelist = Coordinator.call_consul(battle_id, {:get, :whitelist})
+    assert whitelist == %{
+      :default => :player
+    }
+
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!whitelist default banned"}
+    _tachyon_send(hsocket, data)
+    whitelist = Coordinator.call_consul(battle_id, {:get, :whitelist})
+    assert whitelist == %{
+      :default => :banned
+    }
+  end
+
+  test "whitelist player-as-is", %{battle_id: battle_id, player: player1, host: host, hsocket: hsocket} do
+    %{user: player2} = tachyon_auth_setup()
+    %{user: _player3} = tachyon_auth_setup()
+
+    # Add player2 to the battle but as a spectator
+    # player3 is not touched, they should not appear on this list
+    BattleLobby.add_user_to_battle(player2.id, battle_id, "script_password")
+    player_client = Client.get_client_by_id(player2.id)
+    Client.update(%{player_client |
+      player: false
+    }, :client_updated_battlestatus)
+
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!whitelist player-as-is"}
+    _tachyon_send(hsocket, data)
+
+    whitelist = Coordinator.call_consul(battle_id, {:get, :whitelist})
+    assert whitelist == %{
+      player1.id => :player,
+      player2.id => :spectator,
+      :default => :spectator
+    }
+  end
+
+  test "status", %{battle_id: battle_id, host: host, hsocket: hsocket} do
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!status"}
+    _tachyon_send(hsocket, data)
+
+    reply = _tachyon_recv(hsocket)
+    assert reply["cmd"] == "s.communication.direct_message"
+    assert reply["sender"] == Coordinator.get_coordinator_userid()
+    assert reply["message"] == "Status for battle ##{battle_id}\nGatekeeper: blacklist"
   end
 end

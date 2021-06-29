@@ -22,6 +22,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.{Coordinator, Client, User}
   alias Teiserver.Battle.BattleLobby
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Teiserver.Data.Types, as: T
+
+  @always_allow ~w(status)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -66,10 +69,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(cmd = %{command: _}, state) do
-    new_state = if allow_command?(cmd, state) do
-      handle_command(cmd, state)
-    else
-      state
+    new_state = case allow_command?(cmd, state) do
+      :allow ->
+        handle_command(cmd, state)
+      :with_vote ->
+        handle_command(cmd, state)
+      :existing_vote ->
+        state
+      :disallow ->
+        state
     end
     {:noreply, new_state}
   end
@@ -93,6 +101,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
         %{state | welcome_message: msg}
     end
     broadcast_update(new_state)
+  end
+
+  def handle_command(%{command: "status", senderid: senderid} = cmd, state) do
+    status_msg = [
+      "Status for battle ##{state.battle_id}",
+      "Gatekeeper: #{state.gatekeeper}"
+    ] |> Enum.join("\n")
+    Coordinator.send_to_user(senderid, status_msg)
+    state
   end
 
   def handle_command(%{command: "start", senderid: senderid} = cmd, state) do
@@ -125,41 +142,169 @@ defmodule Teiserver.Coordinator.ConsulServer do
     say_command(cmd, state)
   end
 
-  def handle_command(%{command: "force-spectator", remaining: target_id}, state)
-      when is_integer(target_id) do
-    BattleLobby.force_change_client(state.coordinator_id, target_id, %{player: false})
-    state
+  def handle_command(%{command: "force-spectator", remaining: target}, state) do
+    case get_user(target, state) do
+      nil ->
+        state
+      target_id ->
+        BattleLobby.force_change_client(state.coordinator_id, target_id, %{player: false})
+        state
+    end
   end
 
-  def handle_command(%{command: "change-battlestatus", target_id: target_id, status: new_status}, state)
-      when is_integer(target_id) do
+  # Would need to be sent by internal since battlestatus isn't part of the command queue
+  def handle_command(%{command: "change-battlestatus", remaining: target_id, status: new_status}, state) do
     BattleLobby.force_change_client(state.coordinator_id, target_id, new_status)
     state
   end
 
-  def handle_command(%{command: "lock-spectator", remaining: target_id} = _cmd, state) do
-    target_id = int_parse(target_id)
-    new_blacklist = Map.put(state.blacklist, target_id, :spectator)
-    BattleLobby.force_change_client(state.coordinator_id, target_id, %{player: false})
+  def handle_command(%{command: "lock-spectator", remaining: target} = _cmd, state) do
+    case get_user(target, state) do
+      nil ->
+        state
+      target_id ->
+        new_blacklist = Map.put(state.blacklist, target_id, :spectator)
+        new_whitelist = Map.put(state.whitelist, target_id, :spectator)
+        BattleLobby.force_change_client(state.coordinator_id, target_id, %{player: false})
 
-    %{state | blacklist: new_blacklist}
-    |> broadcast_update("lock-spectator")
+        %{state | blacklist: new_blacklist, whitelist: new_whitelist}
+        |> broadcast_update("lock-spectator")
+    end
   end
 
-  def handle_command(%{command: "kick", remaining: target_id} = _cmd, state)
-      when is_integer(target_id) do
-    BattleLobby.kick_user_from_battle(int_parse(target_id), state.battle_id)
-    state
+  def handle_command(%{command: "kick", remaining: target} = _cmd, state) do
+    case get_user(target, state) do
+      nil ->
+        state
+      target_id ->
+        BattleLobby.kick_user_from_battle(int_parse(target_id), state.battle_id)
+        state
+    end
   end
 
-  def handle_command(%{command: "ban", remaining: target_id} = _cmd, state)
-      when is_integer(target_id) do
-    target_id = int_parse(target_id)
-    new_blacklist = Map.put(state.blacklist, target_id, :banned)
-    BattleLobby.kick_user_from_battle(target_id, state.battle_id)
+  def handle_command(%{command: "ban", remaining: target} = _cmd, state) do
+    case get_user(target, state) do
+      nil ->
+        state
+      target_id ->
+        new_blacklist = Map.put(state.blacklist, target_id, :banned)
+        new_whitelist = Map.delete(state.blacklist, target_id)
+        BattleLobby.kick_user_from_battle(target_id, state.battle_id)
 
-    %{state | blacklist: new_blacklist}
-    |> broadcast_update("ban")
+        %{state | blacklist: new_blacklist, whitelist: new_whitelist}
+        |> broadcast_update("ban")
+    end
+  end
+
+  def handle_command(%{command: "gatekeeper", remaining: mode} = cmd, state) do
+    state = case mode do
+      "blacklist" ->
+        %{state | gatekeeper: :blacklist}
+      "whitelist" ->
+        %{state | gatekeeper: :whitelist}
+      "friends" ->
+        %{state | gatekeeper: :friends}
+    end
+    say_command(cmd, state)
+  end
+
+  def handle_command(%{command: "blacklist", remaining: target_level} = _cmd, state) do
+    {target, level} = case String.split(target_level, " ") do
+      [target, level | _] ->
+        {target, get_level(level |> String.downcase())}
+      [target] ->
+        {target, :banned}
+    end
+
+    case get_user(target, state) do
+      nil ->
+        state
+      target_id ->
+        new_blacklist = if level == :player do
+          Map.delete(state.blacklist, target_id)
+        else
+          Map.put(state.blacklist, target_id, level)
+        end
+
+        case level do
+          :banned ->
+            BattleLobby.kick_user_from_battle(target_id, state.battle_id)
+          :spectator ->
+            BattleLobby.force_change_client(state.coordinator_id, target_id, %{player: false})
+          _ ->
+            nil
+        end
+
+        %{state | blacklist: new_blacklist}
+        |> broadcast_update("blacklist")
+    end
+  end
+
+  def handle_command(%{command: "whitelist", remaining: "player-as-is"} = _cmd, state) do
+    battle = BattleLobby.get_battle(state.battle_id)
+    new_whitelist = Client.list_clients(battle.players)
+      |> Map.new(fn %{userid: userid, player: player} ->
+        if player do
+          {userid, :player}
+        else
+          {userid, :spectator}
+        end
+      end)
+      |> Map.put(:default, :spectator)
+
+    %{state | whitelist: new_whitelist}
+    |> broadcast_update("whitelist")
+  end
+
+  def handle_command(%{command: "whitelist", remaining: "default " <> level} = _cmd, state) do
+    level = get_level(level |> String.downcase())
+
+    new_whitelist = Map.put(state.whitelist, :default, level)
+
+    # TODO: Implement this for every member of the battle based on the new default
+    # case level do
+    #   :banned ->
+    #     BattleLobby.kick_user_from_battle(target_id, state.battle_id)
+    #   :spectator ->
+    #     BattleLobby.force_change_client(state.coordinator_id, target_id, %{player: false})
+    #   _ ->
+    #     nil
+    # end
+
+    %{state | whitelist: new_whitelist}
+    |> broadcast_update("whitelist")
+  end
+
+  def handle_command(%{command: "whitelist", remaining: target_level} = _cmd, state) do
+    {target, level} = case String.split(target_level, " ") do
+      [target, level | _] ->
+        {target, get_level(level |> String.downcase())}
+      [target] ->
+        {target, :player}
+    end
+
+    case get_user(target, state) do
+      nil ->
+        state
+      target_id ->
+        new_whitelist = if level == :banned do
+          Map.delete(state.whitelist, target_id)
+        else
+          Map.put(state.whitelist, target_id, level)
+        end
+
+        case level do
+          :banned ->
+            BattleLobby.kick_user_from_battle(target_id, state.battle_id)
+          :spectator ->
+            BattleLobby.force_change_client(state.coordinator_id, target_id, %{player: false})
+          _ ->
+            nil
+        end
+
+        %{state | whitelist: new_whitelist}
+        |> broadcast_update("whitelist")
+    end
   end
 
   # Some commands expect remaining to be an integer, this is a catch for that
@@ -193,10 +338,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
       client.moderator ->
         true
 
-      state.guard_mode == :blacklist and get_blacklist(userid, state.blacklist) == :banned ->
+      state.gatekeeper == :friends ->
+        is_friend?(userid, state)
+
+      state.gatekeeper == :blacklist and get_blacklist(userid, state.blacklist) == :banned ->
         false
 
-      state.guard_mode == :blacklist and get_whitelist(userid, state.whitelist) == :banned ->
+      state.gatekeeper == :whitelist and get_whitelist(userid, state.whitelist) == :banned ->
         false
 
       true ->
@@ -213,47 +361,104 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state
   end
 
-  defp allow_command?(%{senderid: senderid} = _cmd, state) do
+  @spec allow_command?(Map.t(), Map.t()) :: :allow | :with_vote | :disallow | :existing_vote
+  defp allow_command?(%{senderid: senderid} = cmd, state) do
     user = User.get_user_by_id(senderid)
 
     cond do
+      Enum.member?(@always_allow, cmd.command) ->
+        :allow
+
       senderid == state.coordinator_id ->
-        true
+        :allow
 
       user == nil ->
-        false
+        :disallow
 
-      user.moderator ->
-        true
+      cmd.force == true and user.moderator == true ->
+        :allow
+
+      cmd.vote == true and state.current_vote != nil ->
+        :existing_vote
+
+      cmd.vote == true ->
+        :with_vote
 
       true ->
-        true
+        :with_vote
     end
+  end
+
+  @spec get_user(String.t() | integer(), Map.t()) :: integer() | nil
+  defp get_user(id, _) when is_integer(id), do: id
+  defp get_user("", _), do: nil
+  defp get_user("#" <> id, _), do: int_parse(id)
+  defp get_user(name, state) do
+    case User.get_userid(name) do
+      nil ->
+        # Try partial search of players in lobby
+        battle = BattleLobby.get_battle(state.battle_id)
+        found = Client.list_clients(battle.players)
+          |> Enum.filter(fn client ->
+            String.contains?(client.name, name)
+          end)
+
+        case found do
+          [first | _] ->
+            first.userid
+          _ ->
+            nil
+        end
+
+      user ->
+        user
+    end
+  end
+
+  @spec is_friend?(T.userid(), Map.t()) :: boolean()
+  defp is_friend?(_userid, _state) do
+    true
   end
 
   @spec say_command(Map.t(), Map.t()) :: Map.t()
   defp say_command(cmd, state) do
     vote = if Map.get(cmd, :vote), do: "cv ", else: ""
+    force = if Map.get(cmd, :force), do: "force ", else: ""
     remaining = if Map.get(cmd, :remaining), do: " #{cmd.remaining}", else: ""
 
-    msg = "! #{vote}#{cmd.command}#{remaining}"
+    msg = "! #{vote}#{force}#{cmd.command}#{remaining}"
       |> String.trim
     BattleLobby.say(cmd.senderid, msg, state.battle_id)
     state
   end
 
+  defp new_vote(cmd) do
+    %{
+      eligible: [],
+      yays: [],
+      nays: [],
+      abstains: [],
+      cmd: cmd
+    }
+  end
+
   defp empty_state(battle_id) do
     %{
+      current_vote: nil,
       coordinator_id: Coordinator.get_coordinator_userid(),
       battle_id: battle_id,
-      guard_mode: :blacklist,
+      gatekeeper: :blacklist,
       blacklist: %{},
       whitelist: %{
-        default: :player
+        :default => :player
       },
       welcome_message: nil
     }
   end
+
+  defp get_level("banned"), do: :banned
+  defp get_level("spectator"), do: :spectator
+  defp get_level("player"), do: :player
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do

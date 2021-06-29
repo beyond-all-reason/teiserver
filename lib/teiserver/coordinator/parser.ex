@@ -62,19 +62,28 @@ defmodule Teiserver.Coordinator.Parser do
       raw: string,
       remaining: string,
       vote: false,
+      force: false,
       command: nil,
       senderid: userid
     }
-    |> parse_command_cv
+    |> parse_command_mode
     |> parse_command_name
   end
 
-  @spec parse_command_cv(Map.t()) :: Map.t()
-  defp parse_command_cv(%{remaining: string} = cmd) do
-    if String.slice(string, 0, 4) == "!cv " do
-      %{cmd | vote: true, remaining: "!" <> String.slice(string, 4, 1024)}
-    else
-      cmd
+  @spec parse_command_mode(Map.t()) :: Map.t()
+  defp parse_command_mode(%{remaining: string} = cmd) do
+    cond do
+      String.slice(string, 0, 4) == "!cv " ->
+        %{cmd | vote: true, remaining: "!" <> String.slice(string, 4, 2048)}
+
+      String.slice(string, 0, 6) == "!vote " ->
+        %{cmd | vote: true, remaining: "!" <> String.slice(string, 6, 2048)}
+
+      String.slice(string, 0, 7) == "!force " ->
+        %{cmd | force: true, remaining: "!" <> String.slice(string, 7, 2048)}
+
+      true ->
+        cmd
     end
   end
 

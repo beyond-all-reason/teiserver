@@ -3,7 +3,6 @@ defmodule Teiserver.Protocols.Tachyon.MatchmakingIn do
   alias Teiserver.Data.Matchmaking
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Phoenix.PubSub
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
   def do_handle("query", %{"query" => _query}, state) do

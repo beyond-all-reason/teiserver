@@ -241,7 +241,7 @@ defmodule Teiserver.Game.QueueServer do
 
         # Now put the players on their teams, for now we're assuming every game is just a 1v1
         [p1, p2] = state.players_accepted
-        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", target_id: p1, senderid: state.coordinator_id,
+        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p1, senderid: state.coordinator_id,
           status: %{
             team_number: 0,
             ally_team_number: 0,
@@ -250,7 +250,7 @@ defmodule Teiserver.Game.QueueServer do
             ready: true
           }
         })
-        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", target_id: p2, senderid: state.coordinator_id,
+        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p2, senderid: state.coordinator_id,
           status: %{
             team_number: 1,
             ally_team_number: 1,

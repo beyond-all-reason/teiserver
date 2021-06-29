@@ -1,7 +1,6 @@
 defmodule Teiserver.Agents.MatchmakingAgentServer do
   use GenServer
   alias Teiserver.Agents.AgentLib
-  alias Teiserver.Battle.BattleLobby
   require Logger
 
   @tick_period 5000
@@ -91,11 +90,11 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
     state
   end
 
-  defp leave_battle(state) do
-    AgentLib._send(state.socket, %{cmd: "c.battle.leave"})
-    AgentLib.post_agent_update(state.id, "left battle")
-    %{state | battle_id: nil}
-  end
+  # defp leave_battle(state) do
+  #   AgentLib._send(state.socket, %{cmd: "c.battle.leave"})
+  #   AgentLib.post_agent_update(state.id, "left battle")
+  #   %{state | battle_id: nil}
+  # end
 
   # Startup
   def start_link(opts \\ []) do

@@ -98,4 +98,8 @@ defmodule Teiserver.Coordinator do
     # send(pid, {:battle_updated, battle_id, {from_id, msg, battle_id}, :say})
     Logger.info("send_to_host - #{battle.id}, #{msg}")
   end
+
+  def send_to_user(userid, msg) do
+    User.send_direct_message(get_coordinator_userid(), userid, msg)
+  end
 end

@@ -140,6 +140,7 @@ defmodule TeiserverWeb.Router do
         # resources("/tournaments", TournamentController)
 
         post("/user/reset_password/:id", UserController, :reset_password)
+        get("/user/action/:id/:action", UserController, :perform_action)
         put("/user/action/:id/:action", UserController, :perform_action)
         get("/user/reports/:id/respond", UserController, :respond_form)
         put("/user/reports/:id/respond", UserController, :respond_post)

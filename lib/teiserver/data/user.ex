@@ -260,10 +260,12 @@ defmodule Teiserver.User do
     ConCache.get(:users_lookup_name_with_id, int_parse(userid))
   end
 
+  @spec get_userid(String.t()) :: integer() | nil
   def get_userid(username) do
     ConCache.get(:users_lookup_id_with_name, username)
   end
 
+  @spec get_user_by_name(String.t()) :: Map.t() | nil
   def get_user_by_name(username) do
     id = ConCache.get(:users_lookup_id_with_name, username)
     ConCache.get(:users, id)
