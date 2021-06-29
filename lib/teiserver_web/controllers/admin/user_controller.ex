@@ -254,6 +254,10 @@ defmodule TeiserverWeb.Admin.UserController do
               Teiserver.User.recache_user(user.id)
               {:ok, nil, ""}
 
+            "reset_flood_protection" ->
+              ConCache.put(:teiserver_login_count, user.id, 0)
+              {:ok, nil, ""}
+
             "report_action" ->
               action = params["report_response_action"]
               reason = params["reason"]

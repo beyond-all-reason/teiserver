@@ -1,0 +1,13 @@
+<div class="dropdown-menu">
+  <a class="dropdown-item" href='<%= Routes.ts_admin_user_path(@conn, :perform_action, @user, "recache") %>'>
+    <%= central_component "icon", icon: "fas fa-sync" %>
+    &nbsp;
+    Recache
+  </a>
+
+  <a class="dropdown-item" href='<%= Routes.ts_admin_user_path(@conn, :perform_action, @user, "reset_flood_protection") %>'>
+    <%= central_component "icon", icon: "fas fa-water-arrow-down" %>
+    &nbsp;
+    Reset flood protection
+  </a>
+</div>

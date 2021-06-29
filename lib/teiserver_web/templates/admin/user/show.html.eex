@@ -30,6 +30,13 @@
         <hr />
 
         <div class="float-right">
+          <div class="dropdown" style="display: inline-block;">
+            <div class="btn btn-<%= bsname %> dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Actions
+            </div>
+            <%= render "actions.html", assigns %>
+          </div>
+
           <%= if allow?(@conn, "admin.user") do %>
             <a href="<%= Routes.admin_user_path(@conn, :show, @user) %>" class="btn btn-outline-<%= bsname %>" id="section-menu-new">
               <i class="far fa-power-off"></i>
@@ -38,17 +45,6 @@
             </a>
             &nbsp;&nbsp;
           <% end %>
-
-          <form action='<%= Routes.ts_admin_user_path(@conn, :perform_action, @user, "recache") %>' method="POST" style="display: inline-block;">
-            <input type="hidden" name="_method" value="PUT" />
-            <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
-
-            <button type='submit' class='btn btn-outline-<%= bsname %>'>
-              <i class='fa-fw far fa-sync'></i>
-              Recache
-            </button>
-          </form>
-          &nbsp;&nbsp;
 
           <%= if allow?(@conn, "teiserver.moderator.account") do %>
             <a href="<%= Routes.ts_admin_user_path(@conn, :edit, @user) %>" class="btn btn-outline-<%= bsname %>">
