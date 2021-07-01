@@ -110,6 +110,21 @@ defmodule TeiserverWeb.Router do
         # live("/agent/:id", Show, :show)
       end
 
+      scope "/teiserver/telemetry", TeiserverWeb.Telemetry, as: :ts_admin do
+        pipe_through([:browser, :admin_layout, :protected])
+
+        get("/day_metrics/today", MetricController, :day_metrics_today)
+        get("/day_metrics/show/:date", MetricController, :day_metrics_show)
+        get("/day_metrics/export/:date", MetricController, :day_metrics_export)
+        get("/day_metrics", MetricController, :day_metrics_list)
+        post("/day_metrics", MetricController, :day_metrics_list)
+
+        get("/client_events", ClientEventController, :index)
+        get("/client_events/export", ClientEventController, :export)
+        # post("/client_events", ClientEventController, :day_metrics_list)
+        # post("/client_events", ClientEventController, :day_metrics_list)
+      end
+
       scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
         pipe_through([:browser, :admin_layout, :protected])
 
@@ -119,12 +134,6 @@ defmodule TeiserverWeb.Router do
         get("/tools", ToolController, :index)
         get("/tools/convert", ToolController, :convert_form)
         post("/tools/convert_post", ToolController, :convert_post)
-
-        get("/tools/day_metrics/today", ToolController, :day_metrics_today)
-        get("/tools/day_metrics/show/:date", ToolController, :day_metrics_show)
-        get("/tools/day_metrics/export/:date", ToolController, :day_metrics_export)
-        get("/tools/day_metrics", ToolController, :day_metrics_list)
-        post("/tools/day_metrics", ToolController, :day_metrics_list)
 
         post("/clans/create_membership", ClanController, :create_membership)
         delete("/clans/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)

@@ -71,6 +71,7 @@ defmodule Central.MixProject do
       {:dialyxir, "~> 1.1", only: [:dev], runtime: false},
 
       # Teiserver libs
+      {:csv, "~> 2.4"},
       {:ranch, "~> 1.7.1"}
     ]
   end

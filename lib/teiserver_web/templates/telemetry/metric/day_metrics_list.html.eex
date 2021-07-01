@@ -54,7 +54,7 @@
               <td><%= format_number log.data["aggregates"]["stats"]["accounts_created"] %></td>
 
               <td>
-                <%= link "Show", to: Routes.ts_admin_tool_path(@conn, :day_metrics_show, date_to_str(log.date, format: :ymd)), class: "btn btn-secondary btn-sm" %>
+                <%= link "Show", to: Routes.ts_admin_metric_path(@conn, :day_metrics_show, date_to_str(log.date, format: :ymd)), class: "btn btn-secondary btn-sm" %>
               </td>
             </tr>
 

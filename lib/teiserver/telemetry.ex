@@ -355,6 +355,20 @@ defmodule Teiserver.Telemetry do
     logs
   end
 
+  def list_unauth_properties(args \\ []) do
+    query = from properties in UnauthProperty,
+      join: events in assoc(properties, :event),
+      preload: [event: events]
+    Repo.all(query)
+  end
+
+  def list_client_properties(args \\ []) do
+    query = from properties in ClientProperty,
+      join: events in assoc(properties, :event),
+      preload: [event: events]
+    Repo.all(query)
+  end
+
   def log_client_event(userid, event_name, value, hash) do
     event_id = get_or_add_event(event_name)
     %ClientEvent{}
@@ -407,8 +421,7 @@ defmodule Teiserver.Telemetry do
         event_id: event_id,
         user_id: userid,
         value: value,
-        last_updated: Timex.now(),
-        hash: hash
+        last_updated: Timex.now()
       })
       |> Repo.insert()
   end
@@ -421,8 +434,7 @@ defmodule Teiserver.Telemetry do
         event_id: event_id,
         user_id: userid,
         value: value,
-        timestamp: Timex.now(),
-        hash: hash
+        timestamp: Timex.now()
       })
       |> Repo.insert()
   end

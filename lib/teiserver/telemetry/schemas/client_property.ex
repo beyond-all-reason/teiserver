@@ -8,7 +8,6 @@ defmodule Teiserver.Telemetry.ClientProperty do
 
     field :last_updated, :utc_datetime
     field :value, :string
-    field :hash, :string
   end
 
   @doc """
@@ -17,8 +16,8 @@ defmodule Teiserver.Telemetry.ClientProperty do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:user_id, :event_id, :last_updated, :value, :hash])
-    |> validate_required([:user_id, :event_id, :last_updated, :value, :hash])
+    |> cast(params, [:user_id, :event_id, :last_updated, :value])
+    |> validate_required([:user_id, :event_id, :last_updated, :value])
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

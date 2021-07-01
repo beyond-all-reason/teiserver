@@ -17,14 +17,23 @@
   active: @active,
   icon: Teiserver.Telemetry.TelemetryDayLogLib.icon(),
   bsname: bsname,
-  url: Routes.ts_admin_tool_path(@conn, :day_metrics_list)
+  url: Routes.ts_admin_metric_path(@conn, :day_metrics_list)
 %>
 
 <%= central_component "section_menu_button",
   name: "today",
   label: "Today",
   active: @active,
-  icon: Teiserver.Telemetry.TelemetryDayLogLib.icon(),
+  icon: "far fa-waveform",
   bsname: bsname,
-  url: Routes.ts_admin_tool_path(@conn, :day_metrics_today)
+  url: Routes.ts_admin_metric_path(@conn, :day_metrics_today)
+%>
+
+<%= central_component "section_menu_button",
+  name: "client_event",
+  label: "Client events",
+  active: @active,
+  icon: Teiserver.Telemetry.ClientEventLib.icon(),
+  bsname: bsname,
+  url: Routes.ts_admin_client_event_path(@conn, :index)
 %>

@@ -85,16 +85,7 @@ defmodule Central.Account.AuthLib do
   end
 
   def allow?(permissions_held, permission_required) do
-    # If dev or test then check for non-existant permissions
-    # if Enum.member?([:test, :dev], Mix.env) do
-    #   # for p <- get_all_permissions() do
-    #   #   IO.puts p
-    #   # end
-
-    #   if not Enum.member?(get_all_permissions(), permission_required) do
-    #     raise "Permission required: '#{permission_required}' was not found"
-    #   end
-    # end
+    Logger.debug("Permission test, has: #{Kernel.inspect permissions_held}, needs: #{Kernel.inspect permission_required}")
 
     cond do
       # Enum.member?(Application.get_env(:centaur, CentralWeb)[:universal_permissions], permission_required) -> true

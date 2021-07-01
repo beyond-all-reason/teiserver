@@ -1,4 +1,4 @@
-defmodule Central.Repo.Migrations.ClientTelemetry do
+defmodule Central.Repo.Migrations.ClientEvent do
   use Ecto.Migration
 
   def change do
