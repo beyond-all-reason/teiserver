@@ -720,6 +720,7 @@ defmodule Teiserver.Protocols.SpringIn do
       {:success, battle} ->
         reply(:battle_opened, battle.id, msg_id, state)
         reply(:open_battle_success, battle.id, msg_id, state)
+        PubSub.unsubscribe(Central.PubSub, "battle_updates:#{battle.id}")
         PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
 
         reply(:join_battle_success, battle, msg_id, state)

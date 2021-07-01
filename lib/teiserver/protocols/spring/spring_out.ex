@@ -503,6 +503,7 @@ defmodule Teiserver.Protocols.SpringOut do
   def do_join_battle(state, battle_id, script_password) do
     battle = BattleLobby.get_battle(battle_id)
     BattleLobby.add_user_to_battle(state.userid, battle.id, script_password)
+    PubSub.unsubscribe(Central.PubSub, "battle_updates:#{battle.id}")
     PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
     reply(:join_battle_success, battle, nil, state)
     reply(:add_user_to_battle, {state.userid, battle.id, script_password}, nil, state)
@@ -572,7 +573,8 @@ defmodule Teiserver.Protocols.SpringOut do
 
     send(self(), {:action, {:login_end, nil}})
 
-    :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
+    PubSub.unsubscribe(Central.PubSub, "user_updates:#{user.id}")
+    PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
     %{state | user: user, username: user.name, userid: user.id}
   end
 
@@ -595,6 +597,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
     reply(:channel_members, {members, room_name}, nil, state)
 
+    PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
     :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
     state
   end

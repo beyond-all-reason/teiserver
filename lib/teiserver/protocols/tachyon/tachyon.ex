@@ -90,6 +90,7 @@ defmodule Teiserver.Protocols.Tachyon do
     Client.login(user, self())
 
     send(self(), {:action, {:login_end, nil}})
+    PubSub.unsubscribe(Central.PubSub, "user_updates:#{user.id}")
     :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
     %{state | user: user, username: user.name, userid: user.id}
   end
