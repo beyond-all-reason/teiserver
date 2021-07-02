@@ -416,6 +416,17 @@ defmodule Teiserver.Protocols.SpringOut do
     "SAYPRIVATE #{to_name} #{msg}\n"
   end
 
+  defp do_reply(:direct_message, {from_id, messages, state_user}) when is_list(messages) do
+    if from_id not in (state_user.ignored || []) do
+      from_name = User.get_username(from_id)
+      messages
+      |> Enum.map(fn msg ->
+        "SAIDPRIVATE #{from_name} #{msg}"
+      end)
+      |> Enum.join("\n")
+    end
+  end
+
   defp do_reply(:direct_message, {from_id, msg, state_user}) do
     if from_id not in (state_user.ignored || []) do
       from_name = User.get_username(from_id)

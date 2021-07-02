@@ -107,7 +107,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     status_msg = [
       "Status for battle ##{state.battle_id}",
       "Gatekeeper: #{state.gatekeeper}"
-    ] |> Enum.join("\n")
+    ]
     Coordinator.send_to_user(senderid, status_msg)
     state
   end
