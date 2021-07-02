@@ -18,7 +18,7 @@ defmodule Teiserver.Telemetry.BattleEvent do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:battle_id, :user_id, :event_id, :timestamp, :value])
-    |> validate_required([:event_id, :timestamp, :value])
+    |> validate_required([:battle_id, :user_id, :event_id, :timestamp, :value])
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

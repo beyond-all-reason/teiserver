@@ -4,7 +4,7 @@ config :central, Central,
   site_title: "BAR - Teiserver",
   site_description: "",
   site_icon: "fad fa-robot",
-  enable_blog: false,
+  enable_blog: true,
   blog_title: "BAR Blog",
   # This is used for the coverage tool
   file_path: "~/programming/elixir/barserver/",

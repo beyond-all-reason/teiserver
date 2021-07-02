@@ -31,7 +31,10 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> CSV.encode()
     |> Enum.to_list
 
-    result = Telemetry.list_unauth_properties()
+    result = Telemetry.list_unauth_properties(
+      preload: [:event],
+      limit: :infinity
+    )
     |> Enum.map(fn p ->
       [
         p.event.name,
@@ -52,7 +55,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> send_resp(200, data)
   end
 
-  def export(conn, %{"table" => "client_events"}) do
+  def export(conn, %{"table" => "client_properties"}) do
     headings = [[
       "Event",
       "Timestamp",
@@ -62,7 +65,10 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> CSV.encode()
     |> Enum.to_list
 
-    result = Telemetry.list_client_properties()
+    result = Telemetry.list_client_properties(
+      preload: [:event],
+      limit: :infinity
+    )
     |> Enum.map(fn p ->
       [
         p.event.name,
@@ -79,7 +85,41 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
 
     conn
     |> put_resp_content_type("text/csv")
-    |> put_resp_header("content-disposition", "attachment; filename=\"unauth_properties.csv\"")
+    |> put_resp_header("content-disposition", "attachment; filename=\"client_properties.csv\"")
+    |> send_resp(200, data)
+  end
+
+  def export(conn, %{"table" => "client_events"}) do
+    headings = [[
+      "Event",
+      "Timestamp",
+      "Value",
+      "Userid"
+    ]]
+    |> CSV.encode()
+    |> Enum.to_list
+
+    result = Telemetry.list_client_events(
+      preload: [:event],
+      limit: :infinity
+    )
+    |> Enum.map(fn p ->
+      [
+        p.event.name,
+        TimexHelper.date_to_str(p.last_updated, format: :ymd_hms),
+        p.value,
+        p.user_id
+      ]
+    end)
+    |> CSV.encode()
+    |> Enum.to_list
+
+    data = [headings] ++ result
+    |> to_string
+
+    conn
+    |> put_resp_content_type("text/csv")
+    |> put_resp_header("content-disposition", "attachment; filename=\"client_events.csv\"")
     |> send_resp(200, data)
   end
 

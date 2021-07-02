@@ -1,18 +1,17 @@
-defmodule Teiserver.Telemetry.ClientEventLib do
+defmodule Teiserver.Telemetry.EventLib do
   use CentralWeb, :library
-  alias Teiserver.Telemetry.ClientEvent
+  alias Teiserver.Telemetry.Event
 
   # Functions
+  @spec icon :: String.t()
+  def icon, do: "far fa-???"
   @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:info2)
-
-  @spec icon() :: String.t()
-  def icon(), do: "far fa-sliders-up"
+  def colours, do: Central.Helpers.StylingHelper.colours(:default)
 
   # Queries
-  @spec query_client_events() :: Ecto.Query.t
-  def query_client_events do
-    from client_events in ClientEvent
+  @spec query_events() :: Ecto.Query.t
+  def query_events do
+    from events in Event
   end
 
   @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
@@ -29,44 +28,49 @@ defmodule Teiserver.Telemetry.ClientEventLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :id, id) do
-    from client_events in query,
-      where: client_events.id == ^id
+    from events in query,
+      where: events.id == ^id
+  end
+
+  def _search(query, :name, name) do
+    from events in query,
+      where: events.name == ^name
   end
 
   def _search(query, :id_list, id_list) do
-    from client_events in query,
-      where: client_events.id in ^id_list
+    from events in query,
+      where: events.id in ^id_list
   end
 
   def _search(query, :simple_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
-    from client_events in query,
+    from events in query,
       where: (
-            ilike(client_events.name, ^ref_like)
+            ilike(events.name, ^ref_like)
         )
   end
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Name (A-Z)") do
-    from client_events in query,
-      order_by: [asc: client_events.name]
+    from events in query,
+      order_by: [asc: events.name]
   end
 
   def order_by(query, "Name (Z-A)") do
-    from client_events in query,
-      order_by: [desc: client_events.name]
+    from events in query,
+      order_by: [desc: events.name]
   end
 
   def order_by(query, "Newest first") do
-    from client_events in query,
-      order_by: [desc: client_events.inserted_at]
+    from events in query,
+      order_by: [desc: events.inserted_at]
   end
 
   def order_by(query, "Oldest first") do
-    from client_events in query,
-      order_by: [asc: client_events.inserted_at]
+    from events in query,
+      order_by: [asc: events.inserted_at]
   end
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
@@ -77,8 +81,8 @@ defmodule Teiserver.Telemetry.ClientEventLib do
   end
 
   # def _preload_things(query) do
-  #   from client_events in query,
-  #     left_join: things in assoc(client_events, :things),
+  #   from events in query,
+  #     left_join: things in assoc(events, :things),
   #     preload: [things: things]
   # end
 end

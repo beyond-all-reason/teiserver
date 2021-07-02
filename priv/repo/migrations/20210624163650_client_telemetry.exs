@@ -27,8 +27,7 @@ defmodule Central.Repo.Migrations.ClientEvent do
       add :timestamp, :utc_datetime
 
       add :event_id, references(:teiserver_telemetry_events, on_delete: :nothing)
-      add :value, :string
-      add :hash, :jsonb
+      add :value, :jsonb
     end
 
     create table(:teiserver_telemetry_battle_events) do

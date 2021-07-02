@@ -7,7 +7,6 @@ defmodule Teiserver.Telemetry.ClientEvent do
 
     field :timestamp, :utc_datetime
     field :value, :map
-    field :hash, :string
   end
 
   @doc """
@@ -16,8 +15,8 @@ defmodule Teiserver.Telemetry.ClientEvent do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:user_id, :event_id, :timestamp, :value, :hash])
-    |> validate_required([:event_id, :timestamp, :value, :hash])
+    |> cast(params, [:user_id, :event_id, :timestamp, :value])
+    |> validate_required([:user_id, :event_id, :timestamp, :value])
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

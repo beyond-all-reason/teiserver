@@ -15,7 +15,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           {:ok, value} = value
           {:ok, hash} = hash
 
-          Telemetry.update_client_property(state.userid, event, value, hash)
+          Telemetry.log_client_property(state.userid, event, value, hash)
         end
       nil ->
         :ok
@@ -33,7 +33,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           {:ok, value} = value
           {:ok, hash} = hash
 
-          Telemetry.log_client_event(state.userid, event, value |> to_string, hash |> to_string)
+          Telemetry.log_client_event(state.userid, event, value, hash)
         end
       nil ->
         :ok

@@ -19,6 +19,10 @@
         </a>
         &nbsp;&nbsp;&nbsp;
         <a href="<%= Routes.ts_admin_client_event_path(@conn, :export) %>?table=client_events" class="btn btn-outline-<%= bsname %>">
+          Client properties
+        </a>
+        &nbsp;&nbsp;&nbsp;
+        <a href="<%= Routes.ts_admin_client_event_path(@conn, :export) %>?table=client_properties" class="btn btn-outline-<%= bsname %>">
           Client events
         </a>
 

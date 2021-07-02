@@ -4,20 +4,13 @@ defmodule Teiserver.Telemetry do
   import Ecto.Query, warn: false
   alias Central.Helpers.QueryHelpers
   alias Central.Repo
+  alias Teiserver.Client
 
   alias Teiserver.Telemetry.TelemetryServer
   alias Teiserver.Telemetry.TelemetryMinuteLog
   alias Teiserver.Telemetry.TelemetryMinuteLogLib
   alias Teiserver.Telemetry.TelemetryDayLog
   alias Teiserver.Telemetry.TelemetryDayLogLib
-
-  alias Teiserver.Telemetry.{Event, ClientEvent, ClientProperty, UnauthProperty, BattleEvent}
-
-  # Telemetry todo lists
-  # TODO: Beherith: clients logged in, clients ingame, clients singpleplayer, clients afk, clients that are bots are not clients
-  # TODO: Matchmaking telemetry
-  # TODO: In battle telemetry
-  # TODO: Client event telemetry
 
   def get_state_and_reset() do
     GenServer.call(TelemetryServer, :get_state_and_reset)
@@ -355,34 +348,345 @@ defmodule Teiserver.Telemetry do
     logs
   end
 
-  def list_unauth_properties(args \\ []) do
-    query = from properties in UnauthProperty,
-      join: events in assoc(properties, :event),
-      preload: [event: events]
-    Repo.all(query)
+  alias Teiserver.Telemetry.Event
+  alias Teiserver.Telemetry.EventLib
+
+  @spec event_query(List.t()) :: Ecto.Query.t()
+  def event_query(args) do
+    event_query(nil, args)
   end
 
-  def list_client_properties(args \\ []) do
-    query = from properties in ClientProperty,
-      join: events in assoc(properties, :event),
-      preload: [event: events]
-    Repo.all(query)
+  @spec event_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def event_query(id, args) do
+    EventLib.query_events
+    |> EventLib.search(%{id: id})
+    |> EventLib.search(args[:search])
+    |> EventLib.preload(args[:preload])
+    |> EventLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
   end
+
+  @doc """
+  Returns the list of events.
+
+  ## Examples
+
+      iex> list_events()
+      [%Event{}, ...]
+
+  """
+  @spec list_events(List.t()) :: List.t()
+  def list_events(args \\ []) do
+    event_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Gets a single event.
+
+  Raises `Ecto.NoResultsError` if the Event does not exist.
+
+  ## Examples
+
+      iex> get_event!(123)
+      %Event{}
+
+      iex> get_event!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_event!(Integer.t() | List.t()) :: Event.t()
+  @spec get_event!(Integer.t(), List.t()) :: Event.t()
+  def get_event!(id) when not is_list(id) do
+    event_query(id, [])
+    |> Repo.one!
+  end
+  def get_event!(args) do
+    event_query(nil, args)
+    |> Repo.one!
+  end
+  def get_event!(id, args) do
+    event_query(id, args)
+    |> Repo.one!
+  end
+
+  @doc """
+  Creates a event.
+
+  ## Examples
+
+      iex> create_event(%{field: value})
+      {:ok, %Event{}}
+
+      iex> create_event(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_event(Map.t()) :: {:ok, Event.t()} | {:error, Ecto.Changeset.t()}
+  def create_event(attrs \\ %{}) do
+    %Event{}
+    |> Event.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Deletes a Event.
+
+  ## Examples
+
+      iex> delete_event(event)
+      {:ok, %Event{}}
+
+      iex> delete_event(event)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_event(Event.t()) :: {:ok, Event.t()} | {:error, Ecto.Changeset.t()}
+  def delete_event(%Event{} = event) do
+    Repo.delete(event)
+  end
+
+
+  alias Teiserver.Telemetry.UnauthProperty
+  alias Teiserver.Telemetry.UnauthPropertyLib
+
+  @spec unauth_property_query(List.t()) :: Ecto.Query.t()
+  def unauth_property_query(args) do
+    unauth_property_query(nil, args)
+  end
+
+  @spec unauth_property_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def unauth_property_query(_id, args) do
+    UnauthPropertyLib.query_unauth_properties
+    |> UnauthPropertyLib.search(args[:search])
+    |> UnauthPropertyLib.preload(args[:preload])
+    |> UnauthPropertyLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of unauth_properties.
+
+  ## Examples
+
+      iex> list_unauth_properties()
+      [%UnauthProperty{}, ...]
+
+  """
+  @spec list_unauth_properties(List.t()) :: List.t()
+  def list_unauth_properties(args \\ []) do
+    unauth_property_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Creates a unauth_property.
+
+  ## Examples
+
+      iex> create_unauth_property(%{field: value})
+      {:ok, %UnauthProperty{}}
+
+      iex> create_unauth_property(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_unauth_property(Map.t()) :: {:ok, UnauthProperty.t()} | {:error, Ecto.Changeset.t()}
+  def create_unauth_property(attrs \\ %{}) do
+    %UnauthProperty{}
+    |> UnauthProperty.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Deletes a UnauthProperty.
+
+  ## Examples
+
+      iex> delete_unauth_property(unauth_property)
+      {:ok, %UnauthProperty{}}
+
+      iex> delete_unauth_property(unauth_property)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_unauth_property(UnauthProperty.t()) :: {:ok, UnauthProperty.t()} | {:error, Ecto.Changeset.t()}
+  def delete_unauth_property(%UnauthProperty{} = unauth_property) do
+    Repo.delete(unauth_property)
+  end
+
+  alias Teiserver.Telemetry.ClientProperty
+  alias Teiserver.Telemetry.ClientPropertyLib
+
+  @spec client_property_query(List.t()) :: Ecto.Query.t()
+  def client_property_query(args) do
+    client_property_query(nil, args)
+  end
+
+  @spec client_property_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def client_property_query(_id, args) do
+    ClientPropertyLib.query_client_properties
+    |> ClientPropertyLib.search(args[:search])
+    |> ClientPropertyLib.preload(args[:preload])
+    |> ClientPropertyLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of client_properties.
+
+  ## Examples
+
+      iex> list_client_properties()
+      [%ClientProperty{}, ...]
+
+  """
+  @spec list_client_properties(List.t()) :: List.t()
+  def list_client_properties(args \\ []) do
+    client_property_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Creates a client_property.
+
+  ## Examples
+
+      iex> create_client_property(%{field: value})
+      {:ok, %ClientProperty{}}
+
+      iex> create_client_property(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_client_property(Map.t()) :: {:ok, ClientProperty.t()} | {:error, Ecto.Changeset.t()}
+  def create_client_property(attrs \\ %{}) do
+    %ClientProperty{}
+    |> ClientProperty.changeset(attrs)
+    |> Repo.insert()
+  end
+
+
+  alias Teiserver.Telemetry.ClientEvent
+  alias Teiserver.Telemetry.ClientEventLib
+
+  @spec client_event_query(List.t()) :: Ecto.Query.t()
+  def client_event_query(args) do
+    client_event_query(nil, args)
+  end
+
+  @spec client_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def client_event_query(_id, args) do
+    ClientEventLib.query_client_events
+    |> ClientEventLib.search(args[:search])
+    |> ClientEventLib.preload(args[:preload])
+    |> ClientEventLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of client_events.
+
+  ## Examples
+
+      iex> list_client_events()
+      [%ClientEvent{}, ...]
+
+  """
+  @spec list_client_events(List.t()) :: List.t()
+  def list_client_events(args \\ []) do
+    client_event_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Creates a client_event.
+
+  ## Examples
+
+      iex> create_client_event(%{field: value})
+      {:ok, %ClientEvent{}}
+
+      iex> create_client_event(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_client_event(Map.t()) :: {:ok, ClientEvent.t()} | {:error, Ecto.Changeset.t()}
+  def create_client_event(attrs \\ %{}) do
+    %ClientEvent{}
+    |> ClientEvent.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  alias Teiserver.Telemetry.BattleEvent
+  alias Teiserver.Telemetry.BattleEventLib
+
+  @spec battle_event_query(List.t()) :: Ecto.Query.t()
+  def battle_event_query(args) do
+    battle_event_query(nil, args)
+  end
+
+  @spec battle_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def battle_event_query(id, args) do
+    BattleEventLib.query_battle_events
+    |> BattleEventLib.search(%{id: id})
+    |> BattleEventLib.search(args[:search])
+    |> BattleEventLib.preload(args[:preload])
+    |> BattleEventLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of battle_events.
+
+  ## Examples
+
+      iex> list_battle_events()
+      [%BattleEvent{}, ...]
+
+  """
+  @spec list_battle_events(List.t()) :: List.t()
+  def list_battle_events(args \\ []) do
+    battle_event_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Creates a battle_event.
+
+  ## Examples
+
+      iex> create_battle_event(%{field: value})
+      {:ok, %BattleEvent{}}
+
+      iex> create_battle_event(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_battle_event(Map.t()) :: {:ok, BattleEvent.t()} | {:error, Ecto.Changeset.t()}
+  def create_battle_event(attrs \\ %{}) do
+    %BattleEvent{}
+    |> BattleEvent.changeset(attrs)
+    |> Repo.insert()
+  end
+
 
   def log_client_event(userid, event_name, value, hash) do
     event_id = get_or_add_event(event_name)
-    %ClientEvent{}
-      |> ClientEvent.changeset(%{
-        event_id: event_id,
-        user_id: userid,
-        value: value,
-        timestamp: Timex.now(),
-        hash: hash
-      })
-      |> Repo.insert()
+    create_client_event(%{
+      event_id: event_id,
+      user_id: userid,
+      value: value,
+      timestamp: Timex.now()
+    })
   end
 
-  def update_client_property(nil, value_name, value, hash) do
+  def log_client_property(nil, value_name, value, hash) do
     event_id = get_or_add_event(value_name)
 
     # Delete existing ones first
@@ -394,17 +698,15 @@ defmodule Teiserver.Telemetry do
       Repo.delete(property)
     end
 
-    %UnauthProperty{}
-      |> UnauthProperty.changeset(%{
-        event_id: event_id,
-        value: value,
-        last_updated: Timex.now(),
-        hash: hash
-      })
-      |> Repo.insert()
+    create_unauth_property(%{
+      event_id: event_id,
+      value: value,
+      last_updated: Timex.now(),
+      hash: hash
+    })
   end
 
-  def update_client_property(userid, value_name, value, hash) do
+  def log_client_property(userid, value_name, value, _hash) do
     event_id = get_or_add_event(value_name)
 
     # Delete existing ones first
@@ -416,27 +718,30 @@ defmodule Teiserver.Telemetry do
       Repo.delete(property)
     end
 
-    %ClientProperty{}
-      |> ClientProperty.changeset(%{
-        event_id: event_id,
-        user_id: userid,
-        value: value,
-        last_updated: Timex.now()
-      })
-      |> Repo.insert()
+    create_client_property(%{
+      event_id: event_id,
+      user_id: userid,
+      value: value,
+      last_updated: Timex.now()
+    })
   end
 
   def log_battle_event(userid, event_name, value, hash) do
-    event_id = get_or_add_event(event_name)
-    %BattleEvent{}
-      |> BattleEvent.changeset(%{
-        battle_id: 0,
-        event_id: event_id,
-        user_id: userid,
-        value: value,
-        timestamp: Timex.now()
-      })
-      |> Repo.insert()
+    case Client.get_client_by_id(userid) do
+      nil ->
+        nil
+
+      client ->
+        event_id = get_or_add_event(event_name)
+        _battle_id = client.battle_id
+        create_battle_event(%{
+          battle_id: nil,
+          event_id: event_id,
+          user_id: userid,
+          value: value,
+          timestamp: Timex.now()
+        })
+    end
   end
 
   def get_or_add_event(name) do
