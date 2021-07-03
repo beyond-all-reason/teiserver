@@ -82,9 +82,8 @@ defmodule Teiserver.Client do
     client
   end
 
-  @spec update(Map.t()) :: Map.t()
-  @spec update(Map.t(), atom | nil) :: Map.t()
-  def update(client, reason \\ nil) do
+  @spec update(Map.t(), :client_updated_status | :client_updated_battlestatus) :: Map.t()
+  def update(client, reason) do
     client =
       client
       |> add_client

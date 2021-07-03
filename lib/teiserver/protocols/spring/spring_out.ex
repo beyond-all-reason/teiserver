@@ -381,7 +381,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:join_failure, {room_name, reason}) do
-    "JOINFAILED #{room_name} #{reason}\n"
+    "JOINFAILED #{room_name}\t#{reason}\n"
   end
 
   defp do_reply(:joined_room, {username, room_name}) do
@@ -421,9 +421,9 @@ defmodule Teiserver.Protocols.SpringOut do
       from_name = User.get_username(from_id)
       messages
       |> Enum.map(fn msg ->
-        "SAIDPRIVATE #{from_name} #{msg}"
+        "SAIDPRIVATE #{from_name} #{msg}\n"
       end)
-      |> Enum.join("\n")
+      |> Enum.join("")
     end
   end
 

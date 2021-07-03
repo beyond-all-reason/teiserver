@@ -5,14 +5,13 @@ defmodule Central.MixProject do
     [
       app: :central,
       version: "0.1.0",
-      elixir: "~> 1.11",
+      elixir: "1.11.2",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
-      dialyzer: [plt_add_apps: [:ex_unit, :mix], ignore_warnings: "config/dialyzer_ignore.exs"],
       preferred_cli_env: [
         coveralls: :test,
         "coveralls.detail": :test,
