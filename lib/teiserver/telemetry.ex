@@ -569,6 +569,58 @@ defmodule Teiserver.Telemetry do
     |> Repo.insert()
   end
 
+  alias Teiserver.Telemetry.UnauthEvent
+  alias Teiserver.Telemetry.UnauthEventLib
+
+  @spec unauth_event_query(List.t()) :: Ecto.Query.t()
+  def unauth_event_query(args) do
+    unauth_event_query(nil, args)
+  end
+
+  @spec unauth_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def unauth_event_query(_id, args) do
+    UnauthEventLib.query_unauth_events
+    |> UnauthEventLib.search(args[:search])
+    |> UnauthEventLib.preload(args[:preload])
+    |> UnauthEventLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of unauth_events.
+
+  ## Examples
+
+      iex> list_unauth_events()
+      [%UnauthEvent{}, ...]
+
+  """
+  @spec list_unauth_events(List.t()) :: List.t()
+  def list_unauth_events(args \\ []) do
+    unauth_event_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Creates a unauth_event.
+
+  ## Examples
+
+      iex> create_unauth_event(%{field: value})
+      {:ok, %UnauthEvent{}}
+
+      iex> create_unauth_event(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_unauth_event(Map.t()) :: {:ok, UnauthEvent.t()} | {:error, Ecto.Changeset.t()}
+  def create_unauth_event(attrs \\ %{}) do
+    %UnauthEvent{}
+    |> UnauthEvent.changeset(attrs)
+    |> Repo.insert()
+  end
+
 
   alias Teiserver.Telemetry.ClientEvent
   alias Teiserver.Telemetry.ClientEventLib
@@ -676,7 +728,18 @@ defmodule Teiserver.Telemetry do
   end
 
 
-  def log_client_event(userid, event_name, value, hash) do
+  def log_client_event(nil, event_name, value, hash) do
+    event_id = get_or_add_event(event_name)
+    create_unauth_event(%{
+      event_id: event_id,
+      hash: hash,
+      value: value,
+      timestamp: Timex.now()
+    })
+  end
+
+
+  def log_client_event(userid, event_name, value, _hash) do
     event_id = get_or_add_event(event_name)
     create_client_event(%{
       event_id: event_id,
@@ -726,16 +789,20 @@ defmodule Teiserver.Telemetry do
     })
   end
 
-  def log_battle_event(userid, event_name, value, hash) do
+  def log_battle_event(userid, event_name, value) do
     case Client.get_client_by_id(userid) do
       nil ->
         nil
 
+      # No battle?
+      %{battle_id: nil} ->
+        nil
+
       client ->
         event_id = get_or_add_event(event_name)
-        _battle_id = client.battle_id
+        battle_id = client.battle_id
         create_battle_event(%{
-          battle_id: nil,
+          battle_id: battle_id,
           event_id: event_id,
           user_id: userid,
           value: value,

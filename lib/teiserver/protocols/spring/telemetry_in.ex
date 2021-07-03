@@ -1,23 +1,25 @@
 defmodule Teiserver.Protocols.Spring.TelemetryIn do
   alias Teiserver.Telemetry
   alias Teiserver.Protocols.SpringIn
+  require Logger
   # import Teiserver.Protocols.SpringOut, only: [reply: 5]
   # import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
   def do_handle("update_client_property", data, _msg_id, state) do
     case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
-      [_, event, json_value, json_hash] ->
-        value = Base.decode64(json_value)
-        hash = Base.decode64(json_hash)
+      [_, event, value64, hash] ->
+        value = Base.decode64(value64)
 
-        if value != :error and hash != :error do
+        if value != :error do
           {:ok, value} = value
-          {:ok, hash} = hash
 
           Telemetry.log_client_property(state.userid, event, value, hash)
+        else
+          Logger.error("update_client_property:bad value - #{data}")
         end
       nil ->
+        Logger.error("update_client_property:no match - #{data}")
         :ok
     end
     state
@@ -25,35 +27,37 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
 
   def do_handle("log_client_event", data, _msg_id, state) do
     case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
-      [_, event, json_value, json_hash] ->
-        value = decode_value(json_value)
-        hash = Base.decode64(json_hash)
+      [_, event, value64, hash] ->
+        value = decode_value(value64)
 
-        if value != :error and hash != :error do
+        if value != :error do
           {:ok, value} = value
-          {:ok, hash} = hash
 
           Telemetry.log_client_event(state.userid, event, value, hash)
+        else
+          Logger.error("log_client_event:bad value - #{data}")
         end
       nil ->
+        Logger.error("log_client_event:no match - #{data}")
         :ok
     end
     state
   end
 
   def do_handle("log_battle_event", data, _msg_id, state) do
-    case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
-      [_, event, json_value, json_hash] ->
-        value = decode_value(json_value)
-        hash = Base.decode64(json_hash)
+    case Regex.run(~r/(\S+) (\S+)/, data) do
+      [_, event, value64] ->
+        value = decode_value(value64)
 
-        if value != :error and hash != :error do
+        if value != :error do
           {:ok, value} = value
-          {:ok, hash} = hash
 
-          Telemetry.log_battle_event(state.userid, event, value, hash)
+          Telemetry.log_battle_event(state.userid, event, value)
+        else
+          Logger.error("log_battle_event:bad value - #{data}")
         end
       nil ->
+        Logger.error("log_battle_event:no match - #{data}")
         :ok
     end
     state
