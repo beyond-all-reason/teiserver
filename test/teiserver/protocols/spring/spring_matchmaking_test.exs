@@ -157,7 +157,7 @@ JOINEDBATTLE #{battle_id} #{user2.name}
 JOINEDBATTLE #{battle_id} #{user1.name}
 SAIDPRIVATE Coordinator !autobalance off
 SAIDPRIVATE Coordinator !map map1
-SAIDBATTLE Coordinator ! change-map map1
+SAIDBATTLE Coordinator ! map map1
 """
 
     assert reply =~ """

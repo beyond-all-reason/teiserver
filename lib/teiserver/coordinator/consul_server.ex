@@ -103,7 +103,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     broadcast_update(new_state)
   end
 
-  def handle_command(%{command: "status", senderid: senderid} = cmd, state) do
+  def handle_command(%{command: "status", senderid: senderid} = _cmd, state) do
     status_msg = [
       "Status for battle ##{state.battle_id}",
       "Gatekeeper: #{state.gatekeeper}"
@@ -137,7 +137,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state
   end
 
-  def handle_command(%{command: "change-map", remaining: map_name} = cmd, state) do
+  def handle_command(%{command: "map", remaining: map_name} = cmd, state) do
     Coordinator.send_to_host(state.coordinator_id, state.battle_id, "!map #{map_name}")
     say_command(cmd, state)
   end
@@ -307,16 +307,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  # Some commands expect remaining to be an integer, this is a catch for that
-  def handle_command(%{remaining: target_name} = cmd, state) do
-    case User.get_userid(target_name) do
-      nil -> state
-      userid -> handle_command(%{cmd | remaining: userid}, state)
-    end
-  end
-
-  def handle_command(%{command: command} = _cmd, state) do
-    Logger.error("No handler in consul_server for command type '#{command}'")
+  def handle_command(cmd, state) do
+    Logger.error("No handler in consul_server for command type '#{cmd.command}'")
+    BattleLobby.do_say(cmd.senderid, cmd.raw, state.battle_id)
     state
   end
 
@@ -452,6 +445,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
       whitelist: %{
         :default => :player
       },
+      temp_bans: %{},
+      temp_specs: %{},
+      mutes: [],
+      boss_mode: :player,
+      bosses: [],
       welcome_message: nil
     }
   end

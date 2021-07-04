@@ -14,10 +14,10 @@ These are just the highlights, full documentation can be found in the documentat
 - [Metrics](/documents/designs/metrics.md)
 
 ### High level TODO list (no particular order)
+- [Coordinator mode](/documents/designs/coordinator.md)
 - [Matchmaking](/documents/spring/matchmaking.md)
 - [Parties](/documents/spring/parties.md)
 - [Clans](/documents/designs/clans.md)
-- [Teiserver boss mode](/documents/designs/teiserver_boss.md)
 - Integration with Discord/other services
 - [Reputation/Reporting system](/documents/designs/reputation.md)
 - [Agent mode/Lobby dev assist](/documents/designs/agent_mode.md)

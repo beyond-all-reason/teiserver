@@ -196,6 +196,17 @@ defmodule Teiserver.Protocols.Coordinator.CommandsTest do
     reply = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.communication.direct_message"
     assert reply["sender"] == Coordinator.get_coordinator_userid()
-    assert reply["message"] == "Status for battle ##{battle_id}\nGatekeeper: blacklist"
+    assert reply["message"] == ["Status for battle ##{battle_id}", "Gatekeeper: blacklist"]
+  end
+
+  test "test passthrough", %{battle_id: battle_id, host: host, hsocket: hsocket, listener: listener} do
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!non-existing command"}
+    _tachyon_send(hsocket, data)
+
+    messages = PubsubListener.get(listener)
+    assert messages == [{:battle_updated, battle_id, {host.id, "!non-existing command", battle_id}, :say}]
+
+    reply = _tachyon_recv(hsocket)
+    assert reply == :timeout
   end
 end

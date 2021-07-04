@@ -237,7 +237,7 @@ defmodule Teiserver.Game.QueueServer do
         map_name = state.map_list |> Enum.random()
         BattleLobby.start_coordinator_mode(battle.id)
         Coordinator.cast_consul(battle.id, %{command: "manual-autohost", senderid: state.coordinator_id})
-        Coordinator.cast_consul(battle.id, %{command: "change-map", remaining: map_name, senderid: state.coordinator_id})
+        Coordinator.cast_consul(battle.id, %{command: "map", remaining: map_name, senderid: state.coordinator_id})
 
         # Now put the players on their teams, for now we're assuming every game is just a 1v1
         [p1, p2] = state.players_accepted
