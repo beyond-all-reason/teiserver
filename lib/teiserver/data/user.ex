@@ -15,6 +15,8 @@ defmodule Teiserver.User do
 
   @timer_sleep 500
 
+  def role_list(), do: ~w(Donor Contributor Dev Moderator Admin)
+
   @keys [:id, :name, :email, :inserted_at, :clan_id]
   @data_keys [
     :rank,
@@ -39,6 +41,7 @@ defmodule Teiserver.User do
     :muted,
     :rename_in_progress,
     :springid,
+    :roles,
     :ip_list
   ]
 
@@ -65,6 +68,7 @@ defmodule Teiserver.User do
     muted: [false, nil],
     rename_in_progress: false,
     springid: nil,
+    roles: [],
     ip_list: []
   }
 

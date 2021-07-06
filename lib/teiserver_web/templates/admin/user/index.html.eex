@@ -57,7 +57,10 @@
       <th>Status</th>
       <th>Bot</th>
       <th>Mod</th>
-      <%= if allow?(@conn, "teiserver.admin.account") do %>
+      <th>Donor</th>
+      <th>Contributor</th>
+      <th>Dev</th>
+      <%= if is_admin do %>
         <th colspan="2">&nbsp;</th>
       <% else %>
         <th>&nbsp;</th>
@@ -88,14 +91,22 @@
       <td>
         <%= if user.data["moderator"], do: "Mod" %>
       </td>
-
+      <td>
+        <%= if "Donor" in (user.data["roles"] || []), do: "Donor" %>
+      </td>
+      <td>
+        <%= if "Contributor" in (user.data["roles"] || []), do: "Contributor" %>
+      </td>
+      <td>
+        <%= if "Developer" in (user.data["roles"] || []), do: "Dev" %>
+      </td>
       <td>
         <a href="<%= Routes.ts_admin_user_path(@conn, :show, user.id) %>" class="btn btn-secondary btn-sm">
           Show
         </a>
       </td>
 
-      <%= if allow?(@conn, "teiserver.admin.account") do %>
+      <%= if is_admin do %>
         <td>
           <a href="<%= Routes.ts_admin_user_path(@conn, :edit, user.id) %>" class="btn btn-secondary btn-sm">
             Edit

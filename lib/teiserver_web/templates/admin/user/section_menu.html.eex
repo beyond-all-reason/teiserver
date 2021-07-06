@@ -23,11 +23,13 @@
   Advanced search
 </a>
 
+<!--
 <a href="<%= Routes.ts_admin_user_path(@conn, :new) %>" class="btn btn-outline-<%= bsname %>" id="section-menu-new">
   <i class="far fa-plus"></i>
   &nbsp;
   New
 </a>
+-->
 
 <form action="<%= Routes.ts_admin_user_path(@conn, :index) %>" method="get" class="float-right form-inline d-none d-md-block">
   <div class="input-group">

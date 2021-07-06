@@ -56,7 +56,10 @@ defmodule TeiserverWeb.Admin.UserController do
           simple_search: Map.get(params, "name", "") |> String.trim(),
           bot: params["bot"],
           moderator: params["moderator"],
-          verified: params["verified"]
+          verified: params["verified"],
+          donor: params["donor"],
+          contributor: params["contributor"],
+          developer: params["developer"],
         ],
         limit: params["limit"] || 50,
         order: params["order"] || "Name (A-Z)"
@@ -180,11 +183,21 @@ defmodule TeiserverWeb.Admin.UserController do
   def update(conn, %{"id" => id, "user" => user_params}) do
     user = Account.get_user!(id)
 
+    roles = [
+      (if user_params["moderator"] == "true", do: "Moderator"),
+      (if user_params["admin"] == "true", do: "Admin"),
+      (if user_params["donor"] == "true", do: "Donor"),
+      (if user_params["contributor"] == "true", do: "Contributor"),
+      (if user_params["developer"] == "true", do: "Developer"),
+    ]
+    |> Enum.filter(&(&1 != nil))
+
     data =
       Map.merge(user.data || %{}, %{
         "bot" => user_params["bot"] == "true",
         "moderator" => user_params["moderator"] == "true",
-        "verified" => user_params["verified"] == "true"
+        "verified" => user_params["verified"] == "true",
+        "roles" => roles
       })
 
     user_params = Map.put(user_params, "data", data)

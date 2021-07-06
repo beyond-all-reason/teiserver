@@ -23,33 +23,64 @@
     <% end %>
   </div>
 
-  <div class="form-group">
-    <%= central_component "checkbox",
-      id: "user_verified",
-      name: "user[verified]",
-      label: "Verified",
-      checked: @changeset.data.data["verified"],
-      changes: nil,
-      data: nil
-    %>
+  <div class="form-group row">
+    <div class="col-lg-6">
+      <%= central_component "checkbox",
+        id: "user_verified",
+        name: "user[verified]",
+        label: "Verified",
+        checked: @changeset.data.data["verified"],
+        changes: nil,
+        data: nil
+      %>
 
-    <%= central_component "checkbox",
-      id: "user_bot",
-      name: "user[bot]",
-      label: "Bot",
-      checked: @changeset.data.data["bot"],
-      changes: nil,
-      data: nil
-    %>
+      <%= central_component "checkbox",
+        id: "user_bot",
+        name: "user[bot]",
+        label: "Bot",
+        checked: @changeset.data.data["bot"],
+        changes: nil,
+        data: nil
+      %>
 
-    <%= central_component "checkbox",
-      id: "user_moderator",
-      name: "user[moderator]",
-      label: "Moderator",
-      checked: @changeset.data.data["moderator"],
-      changes: nil,
-      data: nil
-    %>
+      <%= central_component "checkbox",
+        id: "user_moderator",
+        name: "user[moderator]",
+        label: "Moderator",
+        checked: @changeset.data.data["moderator"],
+        changes: nil,
+        data: nil
+      %>
+    </div>
+
+    <div class="col-lg-6">
+      <%= central_component "checkbox",
+        id: "user_donor",
+        name: "user[donor]",
+        label: "Donor",
+        checked: ("Donor" in (@changeset.data.data["roles"] || [])),
+        changes: nil,
+        data: nil
+      %>
+
+      <%= central_component "checkbox",
+        id: "user_contributor",
+        name: "user[contributor]",
+        label: "Contributor",
+        checked: ("Contributor" in (@changeset.data.data["roles"] || [])),
+        changes: nil,
+        data: nil
+      %>
+
+      <%= central_component "checkbox",
+        id: "user_developer",
+        name: "user[developer]",
+        label: "Developer",
+        checked: ("Developer" in (@changeset.data.data["roles"] || [])),
+        changes: nil,
+        data: nil
+      %>
+    </div>
   </div>
 
   <hr />

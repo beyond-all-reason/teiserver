@@ -47,10 +47,10 @@
                 id: "search_order",
                 selected: @params["order"],
                 enumerable: [
-                  %{id: "Name (A-Z)", icon: "far far fa-sort-numeric-down", colour: fg},
-                  %{id: "Name (Z-A)", icon: "far far fa-sort-numeric-up", colour: fg},
-                  %{id: "Newest first", icon: "far far fa-sort-numeric-down", colour: fg},
-                  %{id: "Oldest first", icon: "far far fa-sort-numeric-up", colour: fg},
+                  %{id: "Name (A-Z)", icon: "fas fa-sort-numeric-down", colour: fg},
+                  %{id: "Name (Z-A)", icon: "fas fa-sort-numeric-up", colour: fg},
+                  %{id: "Newest first", icon: "fas fa-sort-numeric-down", colour: fg},
+                  %{id: "Oldest first", icon: "fas fa-sort-numeric-up", colour: fg},
                 ]
               } %>
             </div>
@@ -62,9 +62,9 @@
                 id: "search_verified",
                 selected: @params["verified"],
                 enumerable: [
-                  %{id: "Any", icon: "far far fa-square", colour: fg},
-                  %{id: "Verified", icon: "far far fa-check", colour: fg},
-                  %{id: "Unverified", icon: "far far fa-times", colour: fg},
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Verified", icon: "fas fa-check", colour: fg},
+                  %{id: "Unverified", icon: "fas fa-times", colour: fg},
                 ]
               } %>
             </div>
@@ -76,9 +76,9 @@
                 id: "search_bot",
                 selected: @params["bot"],
                 enumerable: [
-                  %{id: "Any", icon: "far far fa-square", colour: fg},
-                  %{id: "Person", icon: "far far fa-user", colour: fg},
-                  %{id: "Robot", icon: "far far fa-robot", colour: fg},
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Person", icon: "fas fa-user", colour: fg},
+                  %{id: "Robot", icon: "fas fa-robot", colour: fg},
                 ]
               } %>
             </div>
@@ -90,9 +90,51 @@
                 id: "search_moderator",
                 selected: @params["moderator"],
                 enumerable: [
-                  %{id: "Any", icon: "far far fa-square", colour: fg},
-                  %{id: "User", icon: "far far fa-user", colour: fg},
-                  %{id: "Moderator", icon: "far far fa-gavel", colour: fg},
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "User", icon: "fas fa-user", colour: fg},
+                  %{id: "Moderator", icon: "fas fa-gavel", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_donor" class="control-label">Donor: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[donor]",
+                id: "search_donor",
+                selected: @params["donor"],
+                enumerable: [
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Normal", icon: "fas fa-user", colour: fg},
+                  %{id: "Donor", icon: "fas fa-euro-sign", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_contributor" class="control-label">Contributor: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[contributor]",
+                id: "search_contributor",
+                selected: @params["contributor"],
+                enumerable: [
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Normal", icon: "fas fa-user", colour: fg},
+                  %{id: "Contributor", icon: "fas fa-handshake", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_developer" class="control-label">Developer: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[developer]",
+                id: "search_developer",
+                selected: @params["developer"],
+                enumerable: [
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Normal", icon: "fas fa-user", colour: fg},
+                  %{id: "Developer", icon: "fas fa-code", colour: fg},
                 ]
               } %>
             </div>
