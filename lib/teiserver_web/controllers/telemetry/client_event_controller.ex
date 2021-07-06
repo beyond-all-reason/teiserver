@@ -89,6 +89,40 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> send_resp(200, data)
   end
 
+  def export(conn, %{"table" => "unauth_events"}) do
+    headings = [[
+      "Event",
+      "Timestamp",
+      "Value",
+      "Hash"
+    ]]
+    |> CSV.encode()
+    |> Enum.to_list
+
+    result = Telemetry.list_unauth_events(
+      preload: [:event],
+      limit: :infinity
+    )
+    |> Enum.map(fn p ->
+      [
+        p.event.name,
+        TimexHelper.date_to_str(p.last_updated, format: :ymd_hms),
+        p.value,
+        p.hash
+      ]
+    end)
+    |> CSV.encode()
+    |> Enum.to_list
+
+    data = [headings] ++ result
+    |> to_string
+
+    conn
+    |> put_resp_content_type("text/csv")
+    |> put_resp_header("content-disposition", "attachment; filename=\"unauth_events.csv\"")
+    |> send_resp(200, data)
+  end
+
   def export(conn, %{"table" => "client_events"}) do
     headings = [[
       "Event",

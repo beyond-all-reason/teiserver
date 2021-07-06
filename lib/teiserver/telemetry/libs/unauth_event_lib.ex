@@ -71,14 +71,14 @@ defmodule Teiserver.Telemetry.UnauthEventLib do
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
-  def preload(query, _preloads) do
-    # query = if :things in preloads, do: _preload_things(query), else: query
+  def preload(query, preloads) do
+    query = if :event in preloads, do: _preload_events(query), else: query
     query
   end
 
-  # def _preload_things(query) do
-  #   from unauth_events in query,
-  #     left_join: things in assoc(unauth_events, :things),
-  #     preload: [things: things]
-  # end
+  def _preload_events(query) do
+    from unauth_events in query,
+      left_join: events in assoc(unauth_events, :event),
+      preload: [event: events]
+  end
 end

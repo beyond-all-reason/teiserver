@@ -18,11 +18,15 @@
           Unauthed properties
         </a>
         &nbsp;&nbsp;&nbsp;
-        <a href="<%= Routes.ts_admin_client_event_path(@conn, :export) %>?table=client_events" class="btn btn-outline-<%= bsname %>">
+        <a href="<%= Routes.ts_admin_client_event_path(@conn, :export) %>?table=client_properties" class="btn btn-outline-<%= bsname %>">
           Client properties
         </a>
+        <br />
+        <a href="<%= Routes.ts_admin_client_event_path(@conn, :export) %>?table=unauth_events" class="btn btn-outline-<%= bsname %>">
+          Unauthed events
+        </a>
         &nbsp;&nbsp;&nbsp;
-        <a href="<%= Routes.ts_admin_client_event_path(@conn, :export) %>?table=client_properties" class="btn btn-outline-<%= bsname %>">
+        <a href="<%= Routes.ts_admin_client_event_path(@conn, :export) %>?table=client_events" class="btn btn-outline-<%= bsname %>">
           Client events
         </a>
 

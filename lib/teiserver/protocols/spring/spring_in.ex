@@ -529,28 +529,44 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("FRIENDREQUESTLIST", _, msg_id, state),
     do: reply(:friendlist_request, state.user, msg_id, state)
 
-  defp do_handle("UNFRIEND", data, _msg_id, state) do
-    [_, username] = String.split(data, "=")
-    new_user = User.remove_friend(state.userid, User.get_userid(username))
-    %{state | user: new_user}
+  defp do_handle("UNFRIEND", data, msg_id, state) do
+    case String.split(data, "=") do
+      [_, username] ->
+        new_user = User.remove_friend(state.userid, User.get_userid(username))
+        %{state | user: new_user}
+      _ ->
+        _no_match(state, "UNFRIEND", msg_id, data)
+    end
   end
 
-  defp do_handle("ACCEPTFRIENDREQUEST", data, _msg_id, state) do
-    [_, username] = String.split(data, "=")
-    new_user = User.accept_friend_request(User.get_userid(username), state.userid)
-    %{state | user: new_user}
+  defp do_handle("ACCEPTFRIENDREQUEST", data, msg_id, state) do
+    case String.split(data, "=") do
+      [_, username] ->
+        new_user = User.accept_friend_request(User.get_userid(username), state.userid)
+        %{state | user: new_user}
+      _ ->
+        _no_match(state, "ACCEPTFRIENDREQUEST", msg_id, data)
+    end
   end
 
-  defp do_handle("DECLINEFRIENDREQUEST", data, _msg_id, state) do
-    [_, username] = String.split(data, "=")
-    new_user = User.decline_friend_request(User.get_userid(username), state.userid)
-    %{state | user: new_user}
-  end
+  defp do_handle("DECLINEFRIENDREQUEST", data, msg_id, state) do
+    case String.split(data, "=") do
+      [_, username] ->
+        new_user = User.decline_friend_request(User.get_userid(username), state.userid)
+        %{state | user: new_user}
+      _ ->
+        _no_match(state, "DECLINEFRIENDREQUEST", msg_id, data)
+      end
+    end
 
-  defp do_handle("FRIENDREQUEST", data, _msg_id, state) do
-    [_, username] = String.split(data, "=")
-    User.create_friend_request(state.userid, User.get_userid(username))
-    state
+  defp do_handle("FRIENDREQUEST", data, msg_id, state) do
+    case String.split(data, "=") do
+      [_, username] ->
+        User.create_friend_request(state.userid, User.get_userid(username))
+        state
+      _ ->
+        _no_match(state, "FRIENDREQUEST", msg_id, data)
+    end
   end
 
   defp do_handle("IGNORE", data, _msg_id, state) do
