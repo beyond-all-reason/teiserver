@@ -78,7 +78,7 @@ defmodule Teiserver.Telemetry.UnauthEventLib do
 
   def _preload_events(query) do
     from unauth_events in query,
-      left_join: events in assoc(unauth_events, :event),
-      preload: [event: events]
+      left_join: event_types in assoc(unauth_events, :event_type),
+      preload: [event_type: event_types]
   end
 end

@@ -1,12 +1,8 @@
-defmodule Teiserver.Telemetry.UnauthEvent do
+defmodule Teiserver.Telemetry.PropertyType do
   use CentralWeb, :schema
 
-  schema "teiserver_telemetry_unauth_events" do
-    field :hash, :string
-    belongs_to :event_type, Teiserver.Telemetry.EventType
-
-    field :timestamp, :utc_datetime
-    field :value, :map
+  schema "teiserver_telemetry_property_types" do
+    field :name, :string
   end
 
   @doc """
@@ -15,8 +11,8 @@ defmodule Teiserver.Telemetry.UnauthEvent do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:hash, :event_type_id, :timestamp, :value])
-    |> validate_required([:hash, :event_type_id, :timestamp, :value])
+    |> cast(params, [:name])
+    |> validate_required([:name])
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

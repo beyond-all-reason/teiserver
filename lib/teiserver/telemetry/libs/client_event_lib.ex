@@ -72,13 +72,13 @@ defmodule Teiserver.Telemetry.ClientEventLib do
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
   def preload(query, preloads) do
-    query = if :event in preloads, do: _preload_events(query), else: query
+    query = if :event_type in preloads, do: _preload_event_types(query), else: query
     query
   end
 
-  def _preload_events(query) do
+  def _preload_event_types(query) do
     from client_events in query,
-      left_join: events in assoc(client_events, :event),
-      preload: [event: events]
+      left_join: event_types in assoc(client_events, :event_type),
+      preload: [event_type: event_types]
   end
 end

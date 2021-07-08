@@ -76,13 +76,13 @@ defmodule Teiserver.Telemetry.UnauthPropertyLib do
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
   def preload(query, preloads) do
-    query = if :event in preloads, do: _preload_events(query), else: query
+    query = if :property_type in preloads, do: _preload_property_types(query), else: query
     query
   end
 
-  def _preload_events(query) do
-    from unauth_properties in query,
-      left_join: events in assoc(unauth_properties, :event),
-      preload: [event: events]
+  def _preload_property_types(query) do
+    from client_properties in query,
+      left_join: property_types in assoc(client_properties, :property_type),
+      preload: [property_type: property_types]
   end
 end

@@ -17,11 +17,14 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, _params) do
-    render(conn, "index.html")
+    conn
+    |> assign(:event_types, Telemetry.list_event_types)
+    |> assign(:property_types, Telemetry.list_property_types)
+    |> render("index.html")
   end
 
   @spec export(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def export(conn, %{"table" => "unauth_properties"}) do
+  def export(conn, %{"table_name" => "properties", "auth" => "unauth"}) do
     headings = [[
       "Event",
       "Timestamp",
@@ -32,12 +35,12 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> Enum.to_list
 
     result = Telemetry.list_unauth_properties(
-      preload: [:event],
+      preload: [:property_type],
       limit: :infinity
     )
     |> Enum.map(fn p ->
       [
-        p.event.name,
+        p.property_type.name,
         TimexHelper.date_to_str(p.last_updated, format: :ymd_hms),
         p.value,
         p.hash
@@ -55,7 +58,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> send_resp(200, data)
   end
 
-  def export(conn, %{"table" => "client_properties"}) do
+  def export(conn, %{"table_name" => "properties", "auth" => "auth"}) do
     headings = [[
       "Event",
       "Timestamp",
@@ -66,12 +69,12 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> Enum.to_list
 
     result = Telemetry.list_client_properties(
-      preload: [:event],
+      preload: [:property_type],
       limit: :infinity
     )
     |> Enum.map(fn p ->
       [
-        p.event.name,
+        p.property_type.name,
         TimexHelper.date_to_str(p.last_updated, format: :ymd_hms),
         p.value,
         p.user_id
@@ -89,7 +92,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> send_resp(200, data)
   end
 
-  def export(conn, %{"table" => "unauth_events"}) do
+  def export(conn, %{"table_name" => "events", "auth" => "unauth"}) do
     headings = [[
       "Event",
       "Timestamp",
@@ -100,14 +103,14 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> Enum.to_list
 
     result = Telemetry.list_unauth_events(
-      preload: [:event],
+      preload: [:event_type],
       limit: :infinity
     )
     |> Enum.map(fn p ->
       [
-        p.event.name,
-        TimexHelper.date_to_str(p.last_updated, format: :ymd_hms),
-        p.value,
+        p.event_type.name,
+        TimexHelper.date_to_str(p.timestamp, format: :ymd_hms),
+        Jason.encode!(p.value),
         p.hash
       ]
     end)
@@ -123,7 +126,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> send_resp(200, data)
   end
 
-  def export(conn, %{"table" => "client_events"}) do
+  def export(conn, %{"table_name" => "events", "auth" => "auth"}) do
     headings = [[
       "Event",
       "Timestamp",
@@ -134,14 +137,14 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> Enum.to_list
 
     result = Telemetry.list_client_events(
-      preload: [:event],
+      preload: [:event_type],
       limit: :infinity
     )
     |> Enum.map(fn p ->
       [
-        p.event.name,
-        TimexHelper.date_to_str(p.last_updated, format: :ymd_hms),
-        p.value,
+        p.event_type.name,
+        TimexHelper.date_to_str(p.timestamp, format: :ymd_hms),
+        Jason.encode!(p.value),
         p.user_id
       ]
     end)

@@ -4,7 +4,7 @@ defmodule Teiserver.Telemetry.UnauthProperty do
   @primary_key false
   schema "teiserver_telemetry_unauth_properties" do
     field :hash, :string, primary_key: true
-    belongs_to :event, Teiserver.Telemetry.Event, primary_key: true
+    belongs_to :property_type, Teiserver.Telemetry.PropertyType, primary_key: true
 
     field :last_updated, :utc_datetime
     field :value, :string
@@ -16,8 +16,8 @@ defmodule Teiserver.Telemetry.UnauthProperty do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:event_id, :last_updated, :value, :hash])
-    |> validate_required([:event_id, :last_updated, :value, :hash])
+    |> cast(params, [:property_type_id, :last_updated, :value, :hash])
+    |> validate_required([:property_type_id, :last_updated, :value, :hash])
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

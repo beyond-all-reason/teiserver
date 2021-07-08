@@ -4,7 +4,6 @@ defmodule Teiserver.Telemetry do
   import Ecto.Query, warn: false
   alias Central.Helpers.QueryHelpers
   alias Central.Repo
-  alias Teiserver.Client
 
   alias Teiserver.Telemetry.TelemetryServer
   alias Teiserver.Telemetry.TelemetryMinuteLog
@@ -348,105 +347,204 @@ defmodule Teiserver.Telemetry do
     logs
   end
 
-  alias Teiserver.Telemetry.Event
-  alias Teiserver.Telemetry.EventLib
+  alias Teiserver.Telemetry.EventType
+  alias Teiserver.Telemetry.EventTypeLib
 
-  @spec event_query(List.t()) :: Ecto.Query.t()
-  def event_query(args) do
-    event_query(nil, args)
+  @spec event_type_query(List.t()) :: Ecto.Query.t()
+  def event_type_query(args) do
+    event_type_query(nil, args)
   end
 
-  @spec event_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def event_query(id, args) do
-    EventLib.query_events
-    |> EventLib.search(%{id: id})
-    |> EventLib.search(args[:search])
-    |> EventLib.preload(args[:preload])
-    |> EventLib.order_by(args[:order_by])
+  @spec event_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def event_type_query(id, args) do
+    EventTypeLib.query_event_types
+    |> EventTypeLib.search(%{id: id})
+    |> EventTypeLib.search(args[:search])
+    |> EventTypeLib.preload(args[:preload])
+    |> EventTypeLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
   end
 
   @doc """
-  Returns the list of events.
+  Returns the list of event_types.
 
   ## Examples
 
-      iex> list_events()
-      [%Event{}, ...]
+      iex> list_event_types()
+      [%EventType{}, ...]
 
   """
-  @spec list_events(List.t()) :: List.t()
-  def list_events(args \\ []) do
-    event_query(args)
+  @spec list_event_types(List.t()) :: List.t()
+  def list_event_types(args \\ []) do
+    event_type_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
     |> Repo.all
   end
 
   @doc """
-  Gets a single event.
+  Gets a single event_type.
 
-  Raises `Ecto.NoResultsError` if the Event does not exist.
+  Raises `Ecto.NoResultsError` if the EventType does not exist.
 
   ## Examples
 
-      iex> get_event!(123)
-      %Event{}
+      iex> get_event_type!(123)
+      %EventType{}
 
-      iex> get_event!(456)
+      iex> get_event_type!(456)
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_event!(Integer.t() | List.t()) :: Event.t()
-  @spec get_event!(Integer.t(), List.t()) :: Event.t()
-  def get_event!(id) when not is_list(id) do
-    event_query(id, [])
+  @spec get_event_type!(Integer.t() | List.t()) :: EventType.t()
+  @spec get_event_type!(Integer.t(), List.t()) :: EventType.t()
+  def get_event_type!(id) when not is_list(id) do
+    event_type_query(id, [])
     |> Repo.one!
   end
-  def get_event!(args) do
-    event_query(nil, args)
+  def get_event_type!(args) do
+    event_type_query(nil, args)
     |> Repo.one!
   end
-  def get_event!(id, args) do
-    event_query(id, args)
+  def get_event_type!(id, args) do
+    event_type_query(id, args)
     |> Repo.one!
   end
 
   @doc """
-  Creates a event.
+  Creates a event_type.
 
   ## Examples
 
-      iex> create_event(%{field: value})
-      {:ok, %Event{}}
+      iex> create_event_type(%{field: value})
+      {:ok, %EventType{}}
 
-      iex> create_event(%{field: bad_value})
+      iex> create_event_type(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_event(Map.t()) :: {:ok, Event.t()} | {:error, Ecto.Changeset.t()}
-  def create_event(attrs \\ %{}) do
-    %Event{}
-    |> Event.changeset(attrs)
+  @spec create_event_type(Map.t()) :: {:ok, EventType.t()} | {:error, Ecto.Changeset.t()}
+  def create_event_type(attrs \\ %{}) do
+    %EventType{}
+    |> EventType.changeset(attrs)
     |> Repo.insert()
   end
 
   @doc """
-  Deletes a Event.
+  Deletes a EventType.
 
   ## Examples
 
-      iex> delete_event(event)
-      {:ok, %Event{}}
+      iex> delete_event_type(event_type)
+      {:ok, %EventType{}}
 
-      iex> delete_event(event)
+      iex> delete_event_type(event_type)
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_event(Event.t()) :: {:ok, Event.t()} | {:error, Ecto.Changeset.t()}
-  def delete_event(%Event{} = event) do
-    Repo.delete(event)
+  @spec delete_event_type(EventType.t()) :: {:ok, EventType.t()} | {:error, Ecto.Changeset.t()}
+  def delete_event_type(%EventType{} = event_type) do
+    Repo.delete(event_type)
   end
 
+
+    alias Teiserver.Telemetry.PropertyType
+  alias Teiserver.Telemetry.PropertyTypeLib
+
+  @spec property_type_query(List.t()) :: Ecto.Query.t()
+  def property_type_query(args) do
+    property_type_query(nil, args)
+  end
+
+  @spec property_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def property_type_query(id, args) do
+    PropertyTypeLib.query_property_types
+    |> PropertyTypeLib.search(%{id: id})
+    |> PropertyTypeLib.search(args[:search])
+    |> PropertyTypeLib.preload(args[:preload])
+    |> PropertyTypeLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of property_types.
+
+  ## Examples
+
+      iex> list_property_types()
+      [%PropertyType{}, ...]
+
+  """
+  @spec list_property_types(List.t()) :: List.t()
+  def list_property_types(args \\ []) do
+    property_type_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Gets a single property_type.
+
+  Raises `Ecto.NoResultsError` if the PropertyType does not exist.
+
+  ## Examples
+
+      iex> get_property_type!(123)
+      %PropertyType{}
+
+      iex> get_property_type!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_property_type!(Integer.t() | List.t()) :: PropertyType.t()
+  @spec get_property_type!(Integer.t(), List.t()) :: PropertyType.t()
+  def get_property_type!(id) when not is_list(id) do
+    property_type_query(id, [])
+    |> Repo.one!
+  end
+  def get_property_type!(args) do
+    property_type_query(nil, args)
+    |> Repo.one!
+  end
+  def get_property_type!(id, args) do
+    property_type_query(id, args)
+    |> Repo.one!
+  end
+
+  @doc """
+  Creates a property_type.
+
+  ## Examples
+
+      iex> create_property_type(%{field: value})
+      {:ok, %PropertyType{}}
+
+      iex> create_property_type(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_property_type(Map.t()) :: {:ok, PropertyType.t()} | {:error, Ecto.Changeset.t()}
+  def create_property_type(attrs \\ %{}) do
+    %PropertyType{}
+    |> PropertyType.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Deletes a PropertyType.
+
+  ## Examples
+
+      iex> delete_property_type(property_type)
+      {:ok, %PropertyType{}}
+
+      iex> delete_property_type(property_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_property_type(PropertyType.t()) :: {:ok, PropertyType.t()} | {:error, Ecto.Changeset.t()}
+  def delete_property_type(%PropertyType{} = property_type) do
+    Repo.delete(property_type)
+  end
 
   alias Teiserver.Telemetry.UnauthProperty
   alias Teiserver.Telemetry.UnauthPropertyLib
@@ -674,64 +772,11 @@ defmodule Teiserver.Telemetry do
     |> Repo.insert()
   end
 
-  alias Teiserver.Telemetry.BattleEvent
-  alias Teiserver.Telemetry.BattleEventLib
 
-  @spec battle_event_query(List.t()) :: Ecto.Query.t()
-  def battle_event_query(args) do
-    battle_event_query(nil, args)
-  end
-
-  @spec battle_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def battle_event_query(id, args) do
-    BattleEventLib.query_battle_events
-    |> BattleEventLib.search(%{id: id})
-    |> BattleEventLib.search(args[:search])
-    |> BattleEventLib.preload(args[:preload])
-    |> BattleEventLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
-  end
-
-  @doc """
-  Returns the list of battle_events.
-
-  ## Examples
-
-      iex> list_battle_events()
-      [%BattleEvent{}, ...]
-
-  """
-  @spec list_battle_events(List.t()) :: List.t()
-  def list_battle_events(args \\ []) do
-    battle_event_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
-  end
-
-  @doc """
-  Creates a battle_event.
-
-  ## Examples
-
-      iex> create_battle_event(%{field: value})
-      {:ok, %BattleEvent{}}
-
-      iex> create_battle_event(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec create_battle_event(Map.t()) :: {:ok, BattleEvent.t()} | {:error, Ecto.Changeset.t()}
-  def create_battle_event(attrs \\ %{}) do
-    %BattleEvent{}
-    |> BattleEvent.changeset(attrs)
-    |> Repo.insert()
-  end
-
-
-  def log_client_event(nil, event_name, value, hash) do
-    event_id = get_or_add_event(event_name)
+  def log_client_event(nil, event_type_name, value, hash) do
+    event_type_id = get_or_add_event_type(event_type_name)
     create_unauth_event(%{
-      event_id: event_id,
+      event_type_id: event_type_id,
       hash: hash,
       value: value,
       timestamp: Timex.now()
@@ -739,10 +784,10 @@ defmodule Teiserver.Telemetry do
   end
 
 
-  def log_client_event(userid, event_name, value, _hash) do
-    event_id = get_or_add_event(event_name)
+  def log_client_event(userid, event_type_name, value, _hash) do
+    event_type_id = get_or_add_event_type(event_type_name)
     create_client_event(%{
-      event_id: event_id,
+      event_type_id: event_type_id,
       user_id: userid,
       value: value,
       timestamp: Timex.now()
@@ -750,11 +795,11 @@ defmodule Teiserver.Telemetry do
   end
 
   def log_client_property(nil, value_name, value, hash) do
-    event_id = get_or_add_event(value_name)
+    property_type_id = get_or_add_property_type(value_name)
 
     # Delete existing ones first
     query = from properties in UnauthProperty,
-      where: properties.event_id == ^event_id
+      where: properties.property_type_id == ^property_type_id
         and properties.hash == ^hash
     property = Repo.one(query)
     if property do
@@ -762,7 +807,7 @@ defmodule Teiserver.Telemetry do
     end
 
     create_unauth_property(%{
-      event_id: event_id,
+      property_type_id: property_type_id,
       value: value,
       last_updated: Timex.now(),
       hash: hash
@@ -770,55 +815,47 @@ defmodule Teiserver.Telemetry do
   end
 
   def log_client_property(userid, value_name, value, _hash) do
-    event_id = get_or_add_event(value_name)
+    property_type_id = get_or_add_property_type(value_name)
 
     # Delete existing ones first
     query = from properties in ClientProperty,
       where: properties.user_id == ^userid
-        and properties.event_id == ^event_id
+        and properties.property_type_id == ^property_type_id
     property = Repo.one(query)
     if property do
       Repo.delete(property)
     end
 
     create_client_property(%{
-      event_id: event_id,
+      property_type_id: property_type_id,
       user_id: userid,
       value: value,
       last_updated: Timex.now()
     })
   end
 
-  def log_battle_event(userid, event_name, value) do
-    case Client.get_client_by_id(userid) do
+  def get_or_add_property_type(name) do
+    case ConCache.get(:teiserver_telemetry_property_types, name) do
       nil ->
-        nil
+        {:ok, property} = %PropertyType{}
+          |> PropertyType.changeset(%{name: name})
+          |> Repo.insert()
 
-      # No battle?
-      %{battle_id: nil} ->
-        nil
-
-      client ->
-        event_id = get_or_add_event(event_name)
-        battle_id = client.battle_id
-        create_battle_event(%{
-          battle_id: battle_id,
-          event_id: event_id,
-          user_id: userid,
-          value: value,
-          timestamp: Timex.now()
-        })
+        ConCache.put(:teiserver_telemetry_property_types, property.name, property.id)
+        property.id
+      property_id ->
+        property_id
     end
   end
 
-  def get_or_add_event(name) do
-    case ConCache.get(:teiserver_telemetry_events, name) do
+  def get_or_add_event_type(name) do
+    case ConCache.get(:teiserver_telemetry_event_types, name) do
       nil ->
-        {:ok, event} = %Event{}
-          |> Event.changeset(%{name: name})
+        {:ok, event} = %EventType{}
+          |> EventType.changeset(%{name: name})
           |> Repo.insert()
 
-        ConCache.put(:teiserver_telemetry_events, event.name, event.id)
+        ConCache.put(:teiserver_telemetry_event_types, event.name, event.id)
         event.id
       event_id ->
         event_id
@@ -826,11 +863,14 @@ defmodule Teiserver.Telemetry do
   end
 
   def startup() do
-    query = from events in Event
+    list_property_types(limit: :infinity)
+    |> Enum.map(fn property_type ->
+      ConCache.put(:teiserver_telemetry_property_types, property_type.name, property_type.id)
+    end)
 
-    Repo.all(query)
-    |> Enum.map(fn event ->
-      ConCache.put(:teiserver_telemetry_events, event.name, event.id)
+    list_event_types(limit: :infinity)
+    |> Enum.map(fn event_type ->
+      ConCache.put(:teiserver_telemetry_event_types, event_type.name, event_type.id)
     end)
   end
 end

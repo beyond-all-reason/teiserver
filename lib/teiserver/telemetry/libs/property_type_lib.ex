@@ -1,6 +1,6 @@
-defmodule Teiserver.Telemetry.EventLib do
+defmodule Teiserver.Telemetry.PropertyTypeLib do
   use CentralWeb, :library
-  alias Teiserver.Telemetry.Event
+  alias Teiserver.Telemetry.PropertyType
 
   # Functions
   @spec icon :: String.t()
@@ -9,9 +9,9 @@ defmodule Teiserver.Telemetry.EventLib do
   def colours, do: Central.Helpers.StylingHelper.colours(:default)
 
   # Queries
-  @spec query_events() :: Ecto.Query.t
-  def query_events do
-    from events in Event
+  @spec query_property_types() :: Ecto.Query.t
+  def query_property_types do
+    from property_types in PropertyType
   end
 
   @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
@@ -28,49 +28,49 @@ defmodule Teiserver.Telemetry.EventLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :id, id) do
-    from events in query,
-      where: events.id == ^id
+    from property_types in query,
+      where: property_types.id == ^id
   end
 
   def _search(query, :name, name) do
-    from events in query,
-      where: events.name == ^name
+    from property_types in query,
+      where: property_types.name == ^name
   end
 
   def _search(query, :id_list, id_list) do
-    from events in query,
-      where: events.id in ^id_list
+    from property_types in query,
+      where: property_types.id in ^id_list
   end
 
   def _search(query, :simple_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
-    from events in query,
+    from property_types in query,
       where: (
-            ilike(events.name, ^ref_like)
+            ilike(property_types.name, ^ref_like)
         )
   end
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Name (A-Z)") do
-    from events in query,
-      order_by: [asc: events.name]
+    from property_types in query,
+      order_by: [asc: property_types.name]
   end
 
   def order_by(query, "Name (Z-A)") do
-    from events in query,
-      order_by: [desc: events.name]
+    from property_types in query,
+      order_by: [desc: property_types.name]
   end
 
   def order_by(query, "Newest first") do
-    from events in query,
-      order_by: [desc: events.inserted_at]
+    from property_types in query,
+      order_by: [desc: property_types.inserted_at]
   end
 
   def order_by(query, "Oldest first") do
-    from events in query,
-      order_by: [asc: events.inserted_at]
+    from property_types in query,
+      order_by: [asc: property_types.inserted_at]
   end
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
@@ -81,8 +81,8 @@ defmodule Teiserver.Telemetry.EventLib do
   end
 
   # def _preload_things(query) do
-  #   from events in query,
-  #     left_join: things in assoc(events, :things),
+  #   from property_types in query,
+  #     left_join: things in assoc(property_types, :things),
   #     preload: [things: things]
   # end
 end

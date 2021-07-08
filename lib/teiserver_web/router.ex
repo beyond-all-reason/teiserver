@@ -120,7 +120,7 @@ defmodule TeiserverWeb.Router do
         post("/day_metrics", MetricController, :day_metrics_list)
 
         get("/client_events", ClientEventController, :index)
-        get("/client_events/export", ClientEventController, :export)
+        post("/client_events/export", ClientEventController, :export)
         # post("/client_events", ClientEventController, :day_metrics_list)
         # post("/client_events", ClientEventController, :day_metrics_list)
       end

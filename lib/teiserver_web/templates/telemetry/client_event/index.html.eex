@@ -1,6 +1,24 @@
-<% {_fg, bg, bsname} = colours() %>
+<% {_fg, _bg, bsname} = colours() %>
 
 <%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "tools"}) %>
+
+<script type="text/javascript" charset="utf-8">
+  function type_table() {
+    table_name = $("#table-name").val();
+
+    if (table_name == "events") {
+      $("#property-col").hide();
+      $("#event-col").show();
+    } else {
+      $("#event-col").hide();
+      $("#property-col").show();
+    }
+  }
+
+  $(function() {
+    type_table();
+  });
+</script>
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -14,21 +32,53 @@
         %>
         <br /><br />
 
-        <a href="<%= Routes.ts_admin_client_event_path(@conn, :export) %>?table=unauth_properties" class="btn btn-outline-<%= bsname %>">
-          Unauthed properties
-        </a>
-        &nbsp;&nbsp;&nbsp;
-        <a href="<%= Routes.ts_admin_client_event_path(@conn, :export) %>?table=client_properties" class="btn btn-outline-<%= bsname %>">
-          Client properties
-        </a>
-        <br />
-        <a href="<%= Routes.ts_admin_client_event_path(@conn, :export) %>?table=unauth_events" class="btn btn-outline-<%= bsname %>">
-          Unauthed events
-        </a>
-        &nbsp;&nbsp;&nbsp;
-        <a href="<%= Routes.ts_admin_client_event_path(@conn, :export) %>?table=client_events" class="btn btn-outline-<%= bsname %>">
-          Client events
-        </a>
+        <form action='<%= Routes.ts_admin_client_event_path(@conn, :export) %>' method='post' class=''>
+          <input type='hidden' name='_csrf_token' value='<%= get_csrf_token() %>' />
+          <div class='row'>
+            <div class='col-xl-4 col-lg-6 col-md-12'>
+              <label for='table-name' class='control-label'>Data type</label>
+              <select class="form-control" name="table_name" id="table-name" onchange="type_table()">
+                <option value="events">Events</option>
+                <option value="properties">Properties</option>
+              </select>
+            </div>
+
+            <div class='col-xl-4 col-lg-6 col-md-12' id="event-col">
+              <label for='event_type' class='control-label'>Event type (no effect at this time)</label>
+              <%= central_component "icon_dropdown",
+                name: "event_type",
+                id: "event_type",
+                enumerable: @event_types
+              %>
+            </div>
+
+            <div class='col-xl-4 col-lg-6 col-md-12' id="property-col" style="display: none;">
+              <label for='property_type' class='control-label'>Property type (no effect at this time)</label>
+              <%= central_component "icon_dropdown",
+                name: "property_type",
+                id: "property_type",
+                enumerable: @property_types
+              %>
+            </div>
+
+            <div class='col-xl-4 col-lg-6 col-md-12'>
+              <label for='auth-dropdown' class='control-label'>Auth type</label>
+              <select class="form-control" name="auth" id="auth-dropdown">
+                <%# <option value="auth">Both</option> %>
+                <option value="auth">Authenticated</option>
+                <option value="unauth">Unauthenticated</option>
+              </select>
+            </div>
+          </div>
+
+          <div class='row page-row'>
+            <div class='col-md-12'>
+              <button type='submit' class='btn btn-<%= bsname %> btn-block'>
+                Export data
+              </button>
+            </div>
+          </div>
+        </form>
 
       </div>
     </div>

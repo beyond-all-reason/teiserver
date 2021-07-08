@@ -44,25 +44,6 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
     state
   end
 
-  def do_handle("log_battle_event", data, _msg_id, state) do
-    case Regex.run(~r/(\S+) (\S+)/, data) do
-      [_, event, value64] ->
-        value = decode_value(value64)
-
-        if value != :error do
-          {:ok, value} = value
-
-          Telemetry.log_battle_event(state.userid, event, value)
-        else
-          Logger.error("log_battle_event:bad value - #{data}")
-        end
-      nil ->
-        Logger.error("log_battle_event:no match - #{data}")
-        :ok
-    end
-    state
-  end
-
   def do_handle(cmd, data, msg_id, state) do
     SpringIn._no_match(state, "c.telemetry." <> cmd, msg_id, data)
   end

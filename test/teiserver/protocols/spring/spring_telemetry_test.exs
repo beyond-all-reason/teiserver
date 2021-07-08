@@ -65,39 +65,4 @@ defmodule Teiserver.SpringTelemetryTest do
     assert Enum.count(Telemetry.list_unauth_properties()) == 1
     assert Enum.count(Telemetry.list_client_properties()) == 1
   end
-
-  test "test log_battle_event call", %{user: user, socket: socket} do
-    # Bad/malformed data
-    _send_raw(socket, "c.telemetry.log_battle_event battle_event_name e30=--\n")
-    reply = _recv_raw(socket)
-    assert reply == :timeout
-
-    assert Enum.count(Telemetry.list_battle_events()) == 0
-
-    # Client not in battle
-    _send_raw(socket, "c.telemetry.log_battle_event battle_event_name e30=\n")
-    reply = _recv_raw(socket)
-    assert reply == :timeout
-
-    assert Enum.count(Telemetry.list_battle_events()) == 0
-
-    # Client in battle
-    client = Client.get_client_by_id(user.id)
-    Client.update(%{client | battle_id: 1}, :client_updated_status)
-    _recv_raw(socket)# Client status update
-    _send_raw(socket, "c.telemetry.log_battle_event battle_event_name e30=\n")
-    reply = _recv_raw(socket)
-    assert reply == :timeout
-
-    assert Enum.count(Telemetry.list_battle_events()) == 1
-
-    # Unauth
-    %{socket: socket_raw} = raw_setup()
-    _recv_raw(socket_raw)
-    _send_raw(socket_raw, "c.telemetry.log_battle_event battle_event_name e30=\n")
-    reply = _recv_raw(socket_raw)
-    assert reply == :timeout
-
-    assert Enum.count(Telemetry.list_battle_events()) == 1
-  end
 end

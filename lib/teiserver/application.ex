@@ -23,7 +23,8 @@ defmodule Teiserver.Application do
       concache_perm_sup(:battles),
       concache_perm_sup(:teiserver_queues),
       concache_perm_sup(:rooms),
-      concache_perm_sup(:teiserver_telemetry_events),
+      concache_perm_sup(:teiserver_telemetry_event_types),
+      concache_perm_sup(:teiserver_telemetry_property_types),
       concache_sup(:teiserver_clan_cache_bang),
       concache_sup(:teiserver_login_count),
 

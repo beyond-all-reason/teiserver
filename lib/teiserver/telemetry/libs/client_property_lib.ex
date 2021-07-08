@@ -75,14 +75,14 @@ defmodule Teiserver.Telemetry.ClientPropertyLib do
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
-  def preload(query, _preloads) do
-    # query = if :things in preloads, do: _preload_things(query), else: query
+  def preload(query, preloads) do
+    query = if :property_type in preloads, do: _preload_property_types(query), else: query
     query
   end
 
-  # def _preload_things(query) do
-  #   from client_properties in query,
-  #     left_join: things in assoc(client_properties, :things),
-  #     preload: [things: things]
-  # end
+  def _preload_property_types(query) do
+    from client_properties in query,
+      left_join: property_types in assoc(client_properties, :property_type),
+      preload: [property_type: property_types]
+  end
 end

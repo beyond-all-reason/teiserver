@@ -1,7 +1,7 @@
-defmodule Teiserver.Telemetry.Event do
+defmodule Teiserver.Telemetry.EventType do
   use CentralWeb, :schema
 
-  schema "teiserver_telemetry_events" do
+  schema "teiserver_telemetry_event_types" do
     field :name, :string
   end
 
