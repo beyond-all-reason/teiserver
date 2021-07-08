@@ -39,13 +39,15 @@ defmodule Central.Account.User do
 
   @doc false
   def changeset(user, attrs \\ %{}) do
+    attrs = attrs
+      |> remove_whitespace([:email])
+
     if attrs["password"] == "" do
       user
       |> cast(
         attrs,
         [:name, :email, :icon, :colour, :permissions, :admin_group_id, :data] ++ @extra_fields
       )
-      |> remove_whitespace([:email])
       |> validate_required([:name, :email, :icon, :colour, :permissions])
     else
       user
@@ -62,13 +64,15 @@ defmodule Central.Account.User do
           :data
         ] ++ @extra_fields
       )
-      |> remove_whitespace([:email])
       |> validate_required([:name, :email, :password, :icon, :colour, :permissions])
       |> put_password_hash()
     end
   end
 
   def changeset(user, attrs, :script) do
+    attrs = attrs
+      |> remove_whitespace([:email])
+
     user
     |> cast(
       attrs,
@@ -83,7 +87,6 @@ defmodule Central.Account.User do
         :data
       ] ++ @extra_fields
     )
-    |> remove_whitespace([:email])
     |> validate_required([:name, :email, :icon, :colour, :permissions])
   end
 
@@ -94,34 +97,42 @@ defmodule Central.Account.User do
   end
 
   def changeset(user, attrs, :self_create) do
+    attrs = attrs
+      |> remove_whitespace([:email])
+
     user
     |> cast(attrs, [:name, :email])
     |> validate_required([:name, :email])
-    |> remove_whitespace([:email])
     |> change_password(attrs)
   end
 
   def changeset(user, attrs, :limited) do
+    attrs = attrs
+      |> remove_whitespace([:email])
+
     user
     |> cast(attrs, [:name, :email, :icon, :colour] ++ @extra_fields)
-    |> remove_whitespace([:email])
     |> validate_required([:name, :email, :icon, :colour])
   end
 
   def changeset(user, attrs, :limited_with_data) do
+    attrs = attrs
+      |> remove_whitespace([:email])
+
     user
     |> cast(attrs, [:name, :email, :icon, :colour, :data] ++ @extra_fields)
-    |> remove_whitespace([:email])
     |> validate_required([:name, :email, :icon, :colour])
   end
 
   def changeset(user, attrs, :user_form) do
+    attrs = attrs
+      |> remove_whitespace([:email])
+
     cond do
       attrs["password"] == nil or attrs["password"] == "" ->
         user
         |> cast(attrs, [:name, :email])
         |> validate_required([:name, :email])
-        |> remove_whitespace([:email])
         |> add_error(
           :password_confirmation,
           "Please enter your password to change your account details."
@@ -130,14 +141,12 @@ defmodule Central.Account.User do
       verify_password(attrs["password"], user.password) == false ->
         user
         |> cast(attrs, [:name, :email])
-        |> remove_whitespace([:email])
         |> validate_required([:name, :email])
         |> add_error(:password_confirmation, "Incorrect password")
 
       true ->
         user
         |> cast(attrs, [:name, :email])
-        |> remove_whitespace([:email])
         |> validate_required([:name, :email])
     end
   end
