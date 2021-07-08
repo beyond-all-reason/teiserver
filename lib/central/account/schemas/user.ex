@@ -45,6 +45,7 @@ defmodule Central.Account.User do
         attrs,
         [:name, :email, :icon, :colour, :permissions, :admin_group_id, :data] ++ @extra_fields
       )
+      |> remove_whitespace([:email])
       |> validate_required([:name, :email, :icon, :colour, :permissions])
     else
       user
@@ -61,6 +62,7 @@ defmodule Central.Account.User do
           :data
         ] ++ @extra_fields
       )
+      |> remove_whitespace([:email])
       |> validate_required([:name, :email, :password, :icon, :colour, :permissions])
       |> put_password_hash()
     end
@@ -81,6 +83,7 @@ defmodule Central.Account.User do
         :data
       ] ++ @extra_fields
     )
+    |> remove_whitespace([:email])
     |> validate_required([:name, :email, :icon, :colour, :permissions])
   end
 
@@ -94,18 +97,21 @@ defmodule Central.Account.User do
     user
     |> cast(attrs, [:name, :email])
     |> validate_required([:name, :email])
+    |> remove_whitespace([:email])
     |> change_password(attrs)
   end
 
   def changeset(user, attrs, :limited) do
     user
     |> cast(attrs, [:name, :email, :icon, :colour] ++ @extra_fields)
+    |> remove_whitespace([:email])
     |> validate_required([:name, :email, :icon, :colour])
   end
 
   def changeset(user, attrs, :limited_with_data) do
     user
     |> cast(attrs, [:name, :email, :icon, :colour, :data] ++ @extra_fields)
+    |> remove_whitespace([:email])
     |> validate_required([:name, :email, :icon, :colour])
   end
 
@@ -115,6 +121,7 @@ defmodule Central.Account.User do
         user
         |> cast(attrs, [:name, :email])
         |> validate_required([:name, :email])
+        |> remove_whitespace([:email])
         |> add_error(
           :password_confirmation,
           "Please enter your password to change your account details."
@@ -123,12 +130,14 @@ defmodule Central.Account.User do
       verify_password(attrs["password"], user.password) == false ->
         user
         |> cast(attrs, [:name, :email])
+        |> remove_whitespace([:email])
         |> validate_required([:name, :email])
         |> add_error(:password_confirmation, "Incorrect password")
 
       true ->
         user
         |> cast(attrs, [:name, :email])
+        |> remove_whitespace([:email])
         |> validate_required([:name, :email])
     end
   end

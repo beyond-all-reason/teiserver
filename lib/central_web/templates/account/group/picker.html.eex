@@ -16,7 +16,7 @@
 
 <div class="input-group">
   <span class="input-group-prepend">
-    <span class="input-group-addon btn-<%= bsname %> btn-outline btn" onclick="account_group_picker('#<%= input_name %>');">
+    <span class="input-group-addon btn-<%= bsname %> btn-outline btn" onclick="account_group_picker('#<%= input_id %>');">
       <i class="fa-fw <%= icon() %>"></i>
     </span>
   </span>

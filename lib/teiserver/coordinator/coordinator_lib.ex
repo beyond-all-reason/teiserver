@@ -97,9 +97,12 @@ TODO: gatekeeper (blacklist | whitelist | friends)
   sets the gatekeeper for this battle to whitelist, blacklist or friends method
   at battle lobby open the default is an empty blacklist
 
+TODO: pull <user>
+Pulls a given user into the battle, it will also remove them from the blacklist and add them to the whitelist
+as a player. If you are not a moderator then this only works on friends.
+
 Any commands not listed here, if called will passthrough to SPADS as if Coordinator mode wasn't active
 the only exception is a vote requirement may be added to them if you are not able to force them
 """
-
   end
 end

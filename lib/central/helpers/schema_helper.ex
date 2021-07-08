@@ -143,6 +143,34 @@ defmodule Central.Helpers.SchemaHelper do
     end)
   end
 
+  @spec remove_whitespace(Map.t(), List.t()) :: Map.t()
+  def remove_whitespace(params, names) do
+    names = Enum.map(names, fn n -> Atom.to_string(n) end)
+
+    params
+    |> Map.new(fn {k, v} ->
+      case Enum.member?(names, k) do
+        true ->
+          case v do
+            nil ->
+              {k, nil}
+
+            _ ->
+              {
+                k,
+                v
+                  |> String.replace(" ", "")
+                  |> String.replace("\t", "")
+                  |> String.replace("\n", "")
+              }
+          end
+
+        false ->
+          {k, v}
+      end
+    end)
+  end
+
   @doc """
   Given a list of fields and a list of patterns, will apply Regex.replace for every
   pattern to each field.
