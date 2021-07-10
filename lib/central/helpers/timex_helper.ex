@@ -197,6 +197,10 @@ defmodule Central.Helpers.TimexHelper do
     Timex.parse!(s, "{YYYY}-{M}-{D} {h24}:{m}:{s}")
   end
 
+  def parse_ymd_t_hms(s) do
+    Timex.parse!(s, "{YYYY}-{M}-{D}T{h24}:{m}:{s}")
+  end
+
   def parse_time_input(s) do
     cond do
       String.contains?(s, ":") -> parse_ymd_hms(s)

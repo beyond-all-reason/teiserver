@@ -10,6 +10,7 @@ defmodule Teiserver.User do
   alias Argon2
   alias Central.Account.Guardian
   alias Teiserver.Data.Types
+  import Central.Helpers.TimexHelper, only: [parse_ymd_t_hms: 1]
 
   @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulence cats dogs mice eagle oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave sulphur tree tangerine melon watermelon obstreperous chlorine argon mercury jupiter saturn neptune ceres firefly slug sloth madness happiness ferrous oblique advantageous inefficient starling clouds rivers sunglasses)
 
@@ -873,7 +874,9 @@ defmodule Teiserver.User do
     case banned do
       [false, _] -> false
       [true, nil] -> true
-      [true, until] -> Timex.compare(Timex.now(), until) != 1
+      [true, until_str] ->
+        until = parse_ymd_t_hms(until_str)
+        Timex.compare(Timex.now(), until) != 1
     end
   end
 
@@ -884,7 +887,9 @@ defmodule Teiserver.User do
     case muted do
       [false, _] -> false
       [true, nil] -> true
-      [true, until] -> Timex.compare(Timex.now(), until) != 1
+      [true, until_str] ->
+        until = parse_ymd_t_hms(until_str)
+        Timex.compare(Timex.now(), until) != 1
     end
   end
 
