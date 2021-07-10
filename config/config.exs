@@ -92,6 +92,9 @@ config :central, Oban,
 
         # Every minute
         {"* * * * *", Teiserver.Telemetry.Tasks.PersistTelemetryMinuteTask},
+
+        # 2:05 am every day
+        {"5 2 * * *", Teiserver.Telemetry.Tasks.PersistTelemetryDayTask},
       ]
     }
   ],

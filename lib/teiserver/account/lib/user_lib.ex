@@ -105,6 +105,12 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Developer\"")
   end
 
+  def _search(query, :mute_or_ban, _) do
+    from users in query,
+      where: fragment("? -> ? ->> 0 = 'true'", users.data, "muted")
+        or fragment("? -> ? ->> 0 = 'true'", users.data, "banned")
+  end
+
   def _search(query, key, value) do
     UserQueries._search(query, key, value)
   end

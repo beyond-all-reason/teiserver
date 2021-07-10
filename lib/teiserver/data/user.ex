@@ -857,10 +857,14 @@ defmodule Teiserver.User do
           throw("No handler for action type '#{action}' in #{__MODULE__}")
       end
 
-    user = Map.merge(user, changes)
+    Map.merge(user, changes)
     |> update_user(persist: true)
 
-    if is_banned?(user) do
+    # We recache because the json conversion process converts the date
+    # from a date to a string of the date
+    recache_user(user.id)
+
+    if is_banned?(user.id) do
       Client.disconnect(user.id, "Banned")
     end
 

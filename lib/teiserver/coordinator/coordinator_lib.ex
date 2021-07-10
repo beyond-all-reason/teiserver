@@ -81,6 +81,9 @@ TODO: unban <user>
 TODO: mute <user>
   mutes a user
 
+TODO: unmute <user>
+  unmutes a user
+
 TODO: readyup
   forces all players currently not readied to ready up in the next 5 seconds or be moved to spectators
 
