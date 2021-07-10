@@ -41,7 +41,7 @@ defmodule Teiserver.Room do
     user = User.get_user_by_id(userid)
     cond do
       user == nil ->
-        {false, "No user?"}
+        {false, "No user"}
 
       user.moderator == true ->
         true

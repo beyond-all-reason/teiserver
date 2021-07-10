@@ -592,6 +592,29 @@ defmodule Teiserver.Battle.BattleLobby do
   def allow?(changer_id, field, battle) when is_integer(changer_id),
     do: allow?(Client.get_client_by_id(changer_id), field, battle)
 
+  def allow?(changer, {:remove_bot, botname}, battle), do: allow?(changer, {:bot_command, botname}, battle)
+  def allow?(changer, {:update_bot, botname}, battle), do: allow?(changer, {:bot_command, botname}, battle)
+  def allow?(changer, {:bot_command, botname}, battle) do
+    bot = battle.bots[botname]
+
+    cond do
+      bot == nil ->
+        false
+
+      changer.moderator == true ->
+        true
+
+      battle.founder_id == changer.userid ->
+        true
+
+      bot.owner_id == changer.userid ->
+        true
+
+      true ->
+        false
+    end
+  end
+
   def allow?(changer, cmd, battle) do
     mod_command =
       Enum.member?(
@@ -621,9 +644,6 @@ defmodule Teiserver.Battle.BattleLobby do
       )
 
     cond do
-      battle == nil ->
-        false
-
       changer.moderator == true ->
         true
 

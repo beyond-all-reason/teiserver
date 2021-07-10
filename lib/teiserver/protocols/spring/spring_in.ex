@@ -1008,8 +1008,8 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("UPDATEBOT", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
-      [_, name, battlestatus, team_colour] ->
-        if BattleLobby.allow?(state.userid, :update_bot, state.battle_id) do
+      [_, botname, battlestatus, team_colour] ->
+        if BattleLobby.allow?(state.userid, {:update_bot, botname}, state.battle_id) do
           new_bot =
             Map.merge(
               %{
@@ -1018,7 +1018,7 @@ defmodule Teiserver.Protocols.SpringIn do
               Spring.parse_battle_status(battlestatus)
             )
 
-          BattleLobby.update_bot(state.battle_id, name, new_bot)
+          BattleLobby.update_bot(state.battle_id, botname, new_bot)
         end
 
       _ ->
@@ -1029,7 +1029,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("REMOVEBOT", botname, _msg_id, state) do
-    if BattleLobby.allow?(state.userid, :remove_bot, state.battle_id) do
+    if BattleLobby.allow?(state.userid, {:remove_bot, botname}, state.battle_id) do
       BattleLobby.remove_bot(state.battle_id, botname)
     end
 

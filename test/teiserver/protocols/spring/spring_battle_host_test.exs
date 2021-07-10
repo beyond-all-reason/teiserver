@@ -340,6 +340,21 @@ defmodule Teiserver.SpringBattleHostTest do
     reply = _recv_until(socket)
     assert reply == "UPDATEBOT #{botid} bot1 4195394 2\n"
 
+    # Test out non-hosts updating the bot
+    _recv_until(socket2)
+    _send_raw(socket2, "UPDATEBOT bot1 4195394 2\n")
+    # Gives time for pubsub to send out
+    :timer.sleep(100)
+    reply = _recv_until(socket2)
+    assert reply == ""
+
+    _send_raw(socket2, "REMOVEBOT bot1\n")
+    # Gives time for pubsub to send out
+    :timer.sleep(100)
+    reply = _recv_until(socket2)
+    assert reply == ""
+
+    # Now back to actually doing stuff
     _send_raw(socket, "REMOVEBOT bot1\n")
     # Gives time for pubsub to send out
     :timer.sleep(100)
