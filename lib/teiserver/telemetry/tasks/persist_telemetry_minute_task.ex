@@ -1,4 +1,4 @@
-defmodule Teiserver.Tasks.PersistTelemetryMinuteTask do
+defmodule Teiserver.Telemetry.Tasks.PersistTelemetryMinuteTask do
   use Oban.Worker, queue: :teiserver
 
   alias Teiserver.Telemetry

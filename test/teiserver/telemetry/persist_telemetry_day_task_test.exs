@@ -1,7 +1,7 @@
-defmodule Teiserver.Tasks.PersistTelemetryDayTaskTest do
+defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTaskTest do
   use Central.DataCase
   alias Teiserver.Telemetry
-  alias Teiserver.Tasks.PersistTelemetryDayTask
+  alias Teiserver.Telemetry.Tasks.PersistTelemetryDayTask
 
   test "perform task" do
     # Make some data

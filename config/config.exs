@@ -88,10 +88,10 @@ config :central, Oban,
         {"0 2 * * *", Central.Logging.AggregateViewLogsTask},
 
         # Every minute
-        {"* * * * *", Teiserver.Tasks.PersistTelemetryMinuteTask},
+        {"* * * * *", Teiserver.Account.Tasks.CleanupTask},
 
-        # 2:05 am every day
-        {"5 2 * * *", Teiserver.Tasks.PersistTelemetryDayTask},
+        # Every minute
+        {"* * * * *", Teiserver.Telemetry.Tasks.PersistTelemetryMinuteTask},
       ]
     }
   ],

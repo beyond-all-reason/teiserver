@@ -1,4 +1,4 @@
-defmodule Teiserver.Tasks.PersistTelemetryDayTask do
+defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
   use Oban.Worker, queue: :teiserver
   alias Teiserver.Telemetry
   alias Central.NestedMaps
@@ -157,7 +157,7 @@ defmodule Teiserver.Tasks.PersistTelemetryDayTask do
 
       if Timex.compare(new_date, Timex.today()) == -1 do
         %{}
-        |> Teiserver.Tasks.PersistTelemetryDayTask.new()
+        |> Teiserver.Telemetry.Tasks.PersistTelemetryDayTask.new()
         |> Oban.insert()
       end
     end

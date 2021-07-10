@@ -334,7 +334,7 @@ defmodule Teiserver.Telemetry do
     end
 
     if recache do
-      data = Teiserver.Tasks.PersistTelemetryDayTask.today_so_far()
+      data = Teiserver.Telemetry.Tasks.PersistTelemetryDayTask.today_so_far()
       ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_cache", data)
       ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", Timex.now())
       data
