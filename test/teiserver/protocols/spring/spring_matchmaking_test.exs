@@ -151,10 +151,10 @@ defmodule Teiserver.SpringMatchmakingTest do
 
     # In the middle of the messages will be the client status messages
     # we cannot be sure of their order or exact values so we do their test later
+    assert reply =~ "SAIDBATTLEEX #{host_user.name} Coordinator mode enabled"
+    assert reply =~ "JOINEDBATTLE #{battle_id} #{user2.name}"
+    assert reply =~ "JOINEDBATTLE #{battle_id} #{user1.name}"
     assert reply =~ """
-SAIDBATTLEEX #{host_user.name} Coordinator mode enabled
-JOINEDBATTLE #{battle_id} #{user2.name}
-JOINEDBATTLE #{battle_id} #{user1.name}
 SAIDPRIVATE Coordinator !autobalance off
 SAIDPRIVATE Coordinator !map map1
 SAIDBATTLE Coordinator ! map map1
