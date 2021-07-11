@@ -16,6 +16,7 @@ defmodule Teiserver.Protocols.SpringIn do
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
   alias Teiserver.Protocols.{Spring, SpringOut}
   alias Teiserver.Protocols.Spring.{MatchmakingIn, TelemetryIn}
+  alias Teiserver.Account
 
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
@@ -583,6 +584,27 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("IGNORELIST", _, msg_id, state),
     do: reply(:ignorelist, state.user, msg_id, state)
+
+  defp do_handle("c.moderation.report_user", data, msg_id, state) do
+    case String.split(data, "\t") do
+      [target_name, location_type, location_id, reason] ->
+        target = User.get_user_by_name(target_name) || %{id: nil}
+        location_id = if location_id == "nil", do: nil, else: location_id
+        result = Account.create_report(state.userid, target.id, location_type, location_id, reason)
+
+        case result do
+          {:ok, _} ->
+            reply(:okay, nil, msg_id, state)
+
+          {:error, reason} ->
+            reply(:no, {"c.moderation.report_user", reason}, msg_id, state)
+        end
+
+      _ ->
+        Logger.error(data)
+        reply(:no, {"c.moderation.report_user", "bad command format"}, msg_id, state)
+    end
+  end
 
   # Chat related
   defp do_handle("JOIN", data, msg_id, state) do

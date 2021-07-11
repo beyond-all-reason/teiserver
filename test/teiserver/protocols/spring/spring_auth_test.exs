@@ -556,6 +556,40 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "SERVERMSG No incomming match for CREATEBOTACCOUNT with data 'nomatchname'\n"
   end
 
+  test "c.moderation.report", %{socket: socket} do
+    _send_raw(socket, "c.moderation.report_user bad_name_here location_type nil reason with spaces\n")
+    reply = _recv_raw(socket)
+    assert reply == "NO cmd=c.moderation.report_user\tbad command format\n"
+
+    _send_raw(socket, "c.moderation.report_user bad_name_here\n")
+    reply = _recv_raw(socket)
+    assert reply == "NO cmd=c.moderation.report_user\tbad command format\n"
+
+    _send_raw(socket, "c.moderation.report_user bad_name_here\tlocation_type\tnil\treason with spaces\n")
+    reply = _recv_raw(socket)
+    assert reply == "NO cmd=c.moderation.report_user\tno target user\n"
+
+    # Now we do it correctly, first without a location id
+    target_user = new_user()
+    assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 0
+    _send_raw(socket, "c.moderation.report_user #{target_user.name}\tlocation_type\tnil\treason with spaces\n")
+    reply = _recv_raw(socket)
+    assert reply == "OK\n"
+    assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 1
+
+    # Next, with one
+    _send_raw(socket, "c.moderation.report_user #{target_user.name}\tlocation_type\t123\treason with spaces\n")
+    reply = _recv_raw(socket)
+    assert reply == "OK\n"
+    assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 2
+
+    # Finally, put in a bad location ID and expect to get a database error back
+    _send_raw(socket, "c.moderation.report_user #{target_user.name}\tlocation_type\tlocation_id\treason with spaces\n")
+    reply = _recv_raw(socket)
+    assert reply == "NO cmd=c.moderation.report_user\tdatabase error\n"
+    assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 2
+  end
+
   test "Ranks" do
     user = new_user("new_test_user_rank_test", %{"ingame_minutes" => 60 * 200, "rank" => 5})
     %{socket: socket} = auth_setup(user)

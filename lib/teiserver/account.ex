@@ -163,5 +163,22 @@ defmodule Teiserver.Account do
     do: Central.Account.create_group_membership(params)
 
   # Reports
+  def list_reports(args), do: Central.Account.list_reports(args)
   def get_report!(id), do: Central.Account.get_report!(id)
+
+  def create_report(_, nil, _, _, _), do: {:error, "no target user"}
+  def create_report(reporter_id, target_id, location, location_id, reason) do
+    params = %{
+      "reason" => reason,
+      "target_id" => target_id,
+      "location" => location,
+      "location_id" => location_id,
+      "reporter_id" => reporter_id
+    }
+
+    case Central.Account.create_report(params) do
+      {:ok, report} -> {:ok, report}
+      {:error, c} -> {:error, "database error"}
+    end
+  end
 end

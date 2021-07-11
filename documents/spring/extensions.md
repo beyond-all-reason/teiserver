@@ -28,6 +28,15 @@ ACCEPTED user_name
 DENIED token_login_failed
 ```
 
+#### `c.moderation.report_user`
+Adds a report of bad behaviour for the user. Location type should be something like "lobby", "battle" to give context to where the report happened. Location ID should be the specific numerical instance of that location. As chat rooms currently use names if you want to submit a report for a chat room the advised format is "chat:room_name" or just "chat". If you do not have a location_id then instead put "nil".
+```
+c.moderation.report_user target_name location_type location_id reason
+c.moderation.report_user user123 lobby 5 reason for report
+c.moderation.report_user user123 chat_room nil reason for report
+OK
+NO cmd=c.moderation.report_user reason_for_failure
+```
 
 #### `c.battles.list_ids`
 Sends a list of battle ids separated by tabs:
