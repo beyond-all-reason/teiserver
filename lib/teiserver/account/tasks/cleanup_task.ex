@@ -17,17 +17,19 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
       select: [:id]
     )
     |> Enum.each(fn %{id: userid} ->
-      User.get_user_by_id(userid)
-      |> check_muted()
-      |> check_banned()
-      |> Enum.filter(fn u -> u != nil end)
-      |> User.update_user(persist: true)
+      user = User.get_user_by_id(userid)
+
+      if user do
+        user
+        |> check_muted()
+        |> check_banned()
+        |> User.update_user(persist: true)
+      end
     end)
 
     :ok
   end
 
-  defp check_muted(nil), do: nil
   defp check_muted(user) do
     if User.is_muted?(user) do
       user
@@ -36,7 +38,6 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
     end
   end
 
-  defp check_banned(nil), do: nil
   defp check_banned(user) do
     if User.is_banned?(user) do
       user
