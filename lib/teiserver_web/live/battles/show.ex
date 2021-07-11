@@ -209,7 +209,9 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   def handle_event("reset-consul", _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
     Coordinator.cast_consul(id, %{
       command: "reset",
-      senderid: bar_user.id
+      senderid: bar_user.id,
+      force: true,
+      vote: false
     })
     {:noreply, socket}
   end
@@ -219,7 +221,9 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
     Coordinator.cast_consul(id, %{
       command: "force-spectator",
       remaining: int_parse(target_id),
-      senderid: bar_user.id
+      senderid: bar_user.id,
+      force: true,
+      vote: false
     })
     {:noreply, socket}
   end
@@ -228,7 +232,9 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
     Coordinator.cast_consul(id, %{
       command: "kick",
       remaining: int_parse(target_id),
-      senderid: bar_user.id
+      senderid: bar_user.id,
+      force: true,
+      vote: false
     })
     {:noreply, socket}
   end
@@ -237,7 +243,9 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
     Coordinator.cast_consul(id, %{
       command: "ban",
       remaining: int_parse(target_id),
-      senderid: bar_user.id
+      senderid: bar_user.id,
+      force: true,
+      vote: false
     })
     {:noreply, socket}
   end

@@ -5,6 +5,7 @@
     "lib/teiserver/benchmark/*",
     "lib/teiserver/libs/uberserver_convert.ex",
     "lib/teiserver/data/hook_server.ex",
+    "lib/teiserver/agents/*",
     "^test/.*",
     "^/.*_web.ex",
     ".*_test_lib.ex"

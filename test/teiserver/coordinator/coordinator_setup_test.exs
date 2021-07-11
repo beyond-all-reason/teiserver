@@ -74,7 +74,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
 
     :timer.sleep(@sleep)
     reply = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.communication.direct_message", "message" => "!start", "sender" => user.id}
+    assert reply == %{"cmd" => "s.communication.direct_message", "message" => "!cv start", "sender" => user.id}
 
     # Converted message should appear here
     messages = PubsubListener.get(listener)

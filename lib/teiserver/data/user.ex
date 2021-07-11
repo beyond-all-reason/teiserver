@@ -605,6 +605,7 @@ defmodule Teiserver.User do
     end
   end
 
+  def send_direct_message(from_id, to_id, "!start" <> _), do: send_direct_message(from_id, to_id, "!cv start")
   def send_direct_message(from_id, to_id, msg) do
     sender = get_user_by_id(from_id)
     if not is_muted?(sender) do
