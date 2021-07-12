@@ -35,6 +35,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
       |> assign(:colours, BattleLobbyLib.colours())
       |> assign(:messages, [])
       |> assign(:extra_menu_content, extra_content)
+      |> assign(:consul_command, "")
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end
@@ -194,6 +195,13 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   end
 
   @impl true
+  def handle_event("send-to-host", %{"msg" => msg}, %{assigns: assigns} = socket) do
+    from_id = Coordinator.get_coordinator_userid()
+    Coordinator.handle_in(from_id, msg, assigns.id)
+
+    {:noreply, socket}
+  end
+
   def handle_event("start-Coordinator", _event, %{assigns: %{id: id}} = socket) do
     BattleLobby.start_coordinator_mode(id)
     battle = %{socket.assigns.battle | coordinator_mode: true}

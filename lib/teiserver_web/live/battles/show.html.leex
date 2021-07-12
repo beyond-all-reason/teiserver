@@ -32,6 +32,13 @@
     <div class="card border-<%= bsname %> page-card">
       <div class="card-body">
 
+    <%= if @bar_user.moderator and @battle.coordinator_mode do %>
+      <form pphx-change="suggest" phx-submit="send-to-host" class="float-right" onsubmit="setTimeout(function() {$('#coordinator_msg').val('');}, 300);">
+        <input class="form-control" style="display: inline-block; width: 600px;" type="text" id="coordinator_msg" name="msg" value="<%= @consul_command %>" placeholder="Consul commands" autocomplete="off"/>
+        <button class="btn btn-<%= bsname %>" type="submit" phx-disable-with="Executing...">Execute</button>
+      </form>
+    <% end %>
+
 <h3>
   <%= @battle.name %>
   &nbsp;&nbsp;&nbsp;
