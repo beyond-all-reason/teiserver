@@ -36,6 +36,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
       |> assign(:messages, [])
       |> assign(:extra_menu_content, extra_content)
       |> assign(:consul_command, "")
+      |> assign(:subbed, true)
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end
@@ -44,7 +45,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   def handle_params(%{"id" => id}, _, socket) do
     :ok = PubSub.subscribe(Central.PubSub, "battle_updates:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "live_battle_updates:#{id}")
-    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
+    # :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
     battle = BattleLobby.get_battle!(id)
 
     case battle do
@@ -200,6 +201,35 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
     Coordinator.handle_in(from_id, msg, assigns.id)
 
     {:noreply, socket}
+  end
+
+  def handle_event("unsub", _, %{assigns: %{id: id}} = socket) do
+    :ok = PubSub.unsubscribe(Central.PubSub, "battle_updates:#{id}")
+    :ok = PubSub.unsubscribe(Central.PubSub, "live_battle_updates:#{id}")
+
+    {:noreply, assign(socket, :subbed, false)}
+  end
+
+  def handle_event("resub", _, %{assigns: %{id: id}} = socket) do
+    :ok = PubSub.unsubscribe(Central.PubSub, "battle_updates:#{id}")
+    :ok = PubSub.unsubscribe(Central.PubSub, "live_battle_updates:#{id}")
+
+    :ok = PubSub.subscribe(Central.PubSub, "battle_updates:#{id}")
+    :ok = PubSub.subscribe(Central.PubSub, "live_battle_updates:#{id}")
+
+    {:noreply, assign(socket, :subbed, true)}
+  end
+
+  def handle_event("force-update", _, %{assigns: %{id: id}} = socket) do
+    battle = BattleLobby.get_battle(id)
+    {users, clients} = get_user_and_clients(battle.players)
+
+    {:noreply,
+      socket
+      |> assign(:battle, battle)
+      |> get_consul_state
+      |> assign(:users, users)
+      |> assign(:clients, clients)}
   end
 
   def handle_event("start-Coordinator", _event, %{assigns: %{id: id}} = socket) do
