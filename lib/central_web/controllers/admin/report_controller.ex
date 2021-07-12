@@ -157,6 +157,15 @@ defmodule CentralWeb.Admin.ReportController do
             |> redirect(to: Routes.admin_report_path(conn, :index))
 
           {:error, %Ecto.Changeset{} = changeset} ->
+            report =
+              Account.get_report!(id,
+                preload: [
+                  :reporter,
+                  :target,
+                  :responder
+                ]
+              )
+
             conn
             |> assign(:report, report)
             |> assign(:changeset, changeset)
@@ -165,6 +174,15 @@ defmodule CentralWeb.Admin.ReportController do
 
       {:error, error} ->
         changeset = Account.change_report(report)
+
+        report =
+          Account.get_report!(id,
+            preload: [
+              :reporter,
+              :target,
+              :responder
+            ]
+          )
 
         conn
         |> assign(:error, error)
