@@ -94,12 +94,12 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
         nattype: "none",
         password: password,
         port: 1234,
-        game_hash: "394169363",
+        game_hash: "929778481",
         map_hash: "1565299817",
         map_name: "Comet Catcher Remake 1.8",
         game_name: "Beyond All Reason test-16430-8349f84",
         engine_name: "spring",
-        engine_version: "104.0.1-1878-ge59d4e2 BAR",
+        engine_version: "104.0.1-1956-g0092498 BAR",
         settings: %{
           max_players: 12
         }
