@@ -252,6 +252,11 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  def handle_info({:force_join_battle, battle_id, script_password}, state) do
+    new_state = force_join_battle(battle_id, script_password, state)
+    {:noreply, new_state}
+  end
+
   def handle_info({:add_user_to_battle, userid, battle_id, script_password}, state) do
     new_state = user_join_battle(userid, battle_id, script_password, state)
     {:noreply, new_state}
@@ -489,6 +494,12 @@ defmodule Teiserver.TcpServer do
       :deny ->
         state.protocol_out.reply(:join_battle_failure, reason, nil, state)
     end
+  end
+
+  # This is the result of being forced to join a battle
+  defp force_join_battle(battle_id, script_password, state) do
+    new_state = %{state | script_password: script_password}
+    state.protocol_out.do_join_battle(new_state, battle_id, script_password)
   end
 
   # Depending on our current understanding of where the user is

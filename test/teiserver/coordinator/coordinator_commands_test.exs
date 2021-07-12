@@ -199,6 +199,17 @@ defmodule Teiserver.Protocols.Coordinator.CommandsTest do
     assert reply["message"] == ["Status for battle ##{battle_id}", "Gatekeeper: blacklist"]
   end
 
+  test "pull user", %{battle_id: battle_id, host: host, hsocket: hsocket} do
+    %{user: player2, socket: psocket} = tachyon_auth_setup()
+
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!pull ##{player2.id}"}
+    _tachyon_send(hsocket, data)
+
+    reply = _tachyon_recv(psocket)
+    assert reply["cmd"] == "s.battle.join_response"
+    assert reply["battle"]["id"] == battle_id
+  end
+
   test "test passthrough", %{battle_id: battle_id, host: host, hsocket: hsocket, listener: listener} do
     data = %{cmd: "c.battle.message", userid: host.id, message: "!non-existing command"}
     _tachyon_send(hsocket, data)

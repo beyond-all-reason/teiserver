@@ -142,13 +142,24 @@ defmodule Teiserver.Coordinator.ConsulServer do
     say_command(cmd, state)
   end
 
-  def handle_command(%{command: "force-spectator", remaining: target}, state) do
+  def handle_command(%{command: "pull", remaining: target} = cmd, state) do
+    # TODO: Make this work for friends only if not a mod
     case get_user(target, state) do
       nil ->
-        state
+        say_command(%{cmd | error: "no user found"}, state)
+      target_id ->
+        BattleLobby.force_add_user_to_battle(target_id, state.battle_id)
+        say_command(cmd, state)
+    end
+  end
+
+  def handle_command(%{command: "force-spectator", remaining: target} = cmd, state) do
+    case get_user(target, state) do
+      nil ->
+        say_command(%{cmd | error: "no user found"}, state)
       target_id ->
         BattleLobby.force_change_client(state.coordinator_id, target_id, %{player: false})
-        state
+        say_command(cmd, state)
     end
   end
 
@@ -172,24 +183,26 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  def handle_command(%{command: "kick", remaining: target} = _cmd, state) do
+  def handle_command(%{command: "kick", remaining: target} = cmd, state) do
     case get_user(target, state) do
       nil ->
-        state
+        say_command(%{cmd | error: "no user found"}, state)
       target_id ->
         BattleLobby.kick_user_from_battle(int_parse(target_id), state.battle_id)
-        state
+        say_command(cmd, state)
     end
   end
 
-  def handle_command(%{command: "ban", remaining: target} = _cmd, state) do
+  def handle_command(%{command: "ban", remaining: target} = cmd, state) do
     case get_user(target, state) do
       nil ->
-        state
+        say_command(%{cmd | error: "no user found"}, state)
       target_id ->
         new_blacklist = Map.put(state.blacklist, target_id, :banned)
         new_whitelist = Map.delete(state.blacklist, target_id)
         BattleLobby.kick_user_from_battle(target_id, state.battle_id)
+
+        say_command(cmd, state)
 
         %{state | blacklist: new_blacklist, whitelist: new_whitelist}
         |> broadcast_update("ban")
@@ -208,7 +221,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     say_command(cmd, state)
   end
 
-  def handle_command(%{command: "blacklist", remaining: target_level} = _cmd, state) do
+  def handle_command(%{command: "blacklist", remaining: target_level} = cmd, state) do
     {target, level} = case String.split(target_level, " ") do
       [target, level | _] ->
         {target, get_level(level |> String.downcase())}
@@ -218,7 +231,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     case get_user(target, state) do
       nil ->
-        state
+        say_command(%{cmd | error: "no user found"}, state)
+
       target_id ->
         new_blacklist = if level == :player do
           Map.delete(state.blacklist, target_id)
@@ -235,12 +249,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
             nil
         end
 
+        say_command(cmd, state)
+
         %{state | blacklist: new_blacklist}
         |> broadcast_update("blacklist")
     end
   end
 
-  def handle_command(%{command: "whitelist", remaining: "player-as-is"} = _cmd, state) do
+  def handle_command(%{command: "whitelist", remaining: "player-as-is"} = cmd, state) do
     battle = BattleLobby.get_battle(state.battle_id)
     new_whitelist = Client.list_clients(battle.players)
       |> Map.new(fn %{userid: userid, player: player} ->
@@ -252,11 +268,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
       end)
       |> Map.put(:default, :spectator)
 
+    say_command(cmd, state)
+
     %{state | whitelist: new_whitelist}
     |> broadcast_update("whitelist")
   end
 
-  def handle_command(%{command: "whitelist", remaining: "default " <> level} = _cmd, state) do
+  def handle_command(%{command: "whitelist", remaining: "default " <> level} = cmd, state) do
     level = get_level(level |> String.downcase())
 
     new_whitelist = Map.put(state.whitelist, :default, level)
@@ -271,11 +289,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
     #     nil
     # end
 
+    say_command(cmd, state)
+
     %{state | whitelist: new_whitelist}
     |> broadcast_update("whitelist")
   end
 
-  def handle_command(%{command: "whitelist", remaining: target_level} = _cmd, state) do
+  def handle_command(%{command: "whitelist", remaining: target_level} = cmd, state) do
     {target, level} = case String.split(target_level, " ") do
       [target, level | _] ->
         {target, get_level(level |> String.downcase())}
@@ -285,7 +305,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     case get_user(target, state) do
       nil ->
-        state
+        say_command(%{cmd | error: "no user found"}, state)
+
       target_id ->
         new_whitelist = if level == :banned do
           Map.delete(state.whitelist, target_id)
@@ -301,6 +322,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
           _ ->
             nil
         end
+
+        say_command(cmd, state)
 
         %{state | whitelist: new_whitelist}
         |> broadcast_update("whitelist")
@@ -418,8 +441,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     vote = if Map.get(cmd, :vote), do: "cv ", else: ""
     force = if Map.get(cmd, :force), do: "force ", else: ""
     remaining = if Map.get(cmd, :remaining), do: " #{cmd.remaining}", else: ""
+    error = if Map.get(cmd, :error), do: " Error: #{cmd.error}", else: ""
 
-    msg = "! #{vote}#{force}#{cmd.command}#{remaining}"
+    msg = "! #{vote}#{force}#{cmd.command}#{remaining}#{error}"
       |> String.trim
     BattleLobby.say(cmd.senderid, msg, state.battle_id)
     state

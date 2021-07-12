@@ -214,6 +214,16 @@ defmodule Teiserver.Battle.BattleLobby do
     )
   end
 
+  # Used to send the user PID a join battle command
+  def force_add_user_to_battle(userid, battle_lobby_id) do
+    case Client.get_client_by_id(userid) do
+      nil ->
+        nil
+      client ->
+        send(client.pid, {:force_join_battle, battle_lobby_id, "scriptpass"})
+    end
+  end
+
   @spec add_user_to_battle(Integer.t(), Integer.t() | nil) :: nil
   def add_user_to_battle(_uid, nil), do: nil
 
