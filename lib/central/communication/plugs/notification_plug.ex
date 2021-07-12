@@ -6,6 +6,12 @@ defmodule Central.Communication.NotificationPlug do
     # %{}
   end
 
+  def call(%{user_id: nil} = conn, _) do
+    conn
+    |> assign(:user_notifications, [])
+    |> assign(:user_notifications_unread_count, 0)
+  end
+
   def call(conn, _ops) do
     if conn.params["anid"] do
       Communication.mark_notification_as_read(conn.assigns[:current_user].id, conn.params["anid"])
