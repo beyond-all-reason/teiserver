@@ -178,7 +178,7 @@ defmodule Teiserver.Account do
 
     case Central.Account.create_report(params) do
       {:ok, report} -> {:ok, report}
-      {:error, c} -> {:error, "database error"}
+      {:error, _} -> {:error, "database error"}
     end
   end
 end
