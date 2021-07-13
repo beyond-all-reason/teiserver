@@ -103,6 +103,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
     broadcast_update(new_state)
   end
 
+  def handle_command(%{command: "settag", remaining: remaining} = cmd, state) do
+    case String.split(remaining, " ") do
+      [key, value | _] ->
+        Logger.error("Attempting to set-tag #{key}=#{value}")
+        battle = BattleLobby.get_battle!(state.battle_id)
+        new_tags = Map.put(battle.tags, String.downcase(key), value)
+        BattleLobby.set_script_tags(state.battle_id, new_tags)
+        say_command(cmd, state)
+      _ ->
+        say_command(%{cmd | error: "no regex match"}, state)
+    end
+  end
+
   def handle_command(%{command: "status", senderid: senderid} = _cmd, state) do
     status_msg = [
       "Status for battle ##{state.battle_id}",

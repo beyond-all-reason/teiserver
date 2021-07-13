@@ -106,6 +106,8 @@ as a player. If you are not a moderator then this only works on friends.
 
 Any commands not listed here, if called will passthrough to SPADS as if Coordinator mode wasn't active
 the only exception is a vote requirement may be added to them if you are not able to force them
+
+TODO: settag key value
 """
   end
 end
