@@ -384,7 +384,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp broadcast_update(state, reason \\ nil) do
     Phoenix.PubSub.broadcast(
       Central.PubSub,
-      "live_battle_updates:#{state.battle_id}",
+      "teiserver_battle_lobby_updates:#{state.battle_id}",
       {:consul_server_updated, state.battle_id, reason}
     )
     state

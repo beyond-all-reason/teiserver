@@ -758,8 +758,8 @@ defmodule Teiserver.Protocols.SpringIn do
       {:success, battle} ->
         reply(:battle_opened, battle.id, msg_id, state)
         reply(:open_battle_success, battle.id, msg_id, state)
-        PubSub.unsubscribe(Central.PubSub, "battle_updates:#{battle.id}")
-        PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
+        PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
+        PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
 
         reply(:join_battle_success, battle, msg_id, state)
 
@@ -1122,14 +1122,14 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("LEAVEBATTLE", _, _msg_id, %{battle_id: nil} = state) do
     BattleLobby.remove_user_from_any_battle(state.userid)
     |> Enum.each(fn b ->
-      PubSub.unsubscribe(Central.PubSub, "battle_updates:#{b}")
+      PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{b}")
     end)
 
     %{state | battle_host: false}
   end
 
   defp do_handle("LEAVEBATTLE", _, _msg_id, state) do
-    PubSub.unsubscribe(Central.PubSub, "battle_updates:#{state.battle_id}")
+    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{state.battle_id}")
     BattleLobby.remove_user_from_battle(state.userid, state.battle_id)
     %{state | battle_host: false}
   end

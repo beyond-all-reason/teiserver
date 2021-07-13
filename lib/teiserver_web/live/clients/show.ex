@@ -27,9 +27,9 @@ defmodule TeiserverWeb.ClientLive.Show do
     case allow?(socket.assigns[:current_user], "teiserver.moderator.account") do
       true ->
         id = int_parse(id)
-        PubSub.subscribe(Central.PubSub, "all_user_updates")
-        PubSub.subscribe(Central.PubSub, "all_client_updates")
-        PubSub.subscribe(Central.PubSub, "user_updates:#{id}")
+        PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
+        PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
+        PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{id}")
         client = Client.get_client_by_id(id)
         user = User.get_user_by_id(id)
 

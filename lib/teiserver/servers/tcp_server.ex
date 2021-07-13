@@ -577,7 +577,7 @@ defmodule Teiserver.TcpServer do
   defp user_leave_battle(userid, battle_id, state) do
     # If they are kicked then it's possible they won't be unsubbed
     if userid == state.userid do
-      Phoenix.PubSub.unsubscribe(Central.PubSub, "battle_updates:#{battle_id}")
+      Phoenix.PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle_id}")
     end
 
     # Do they know about the battle?

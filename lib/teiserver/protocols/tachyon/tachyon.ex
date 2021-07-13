@@ -90,8 +90,8 @@ defmodule Teiserver.Protocols.Tachyon do
     Client.login(user, self())
 
     send(self(), {:action, {:login_end, nil}})
-    PubSub.unsubscribe(Central.PubSub, "user_updates:#{user.id}")
-    :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
+    PubSub.unsubscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
+    :ok = PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
     %{state | user: user, username: user.name, userid: user.id}
   end
 
@@ -113,7 +113,7 @@ defmodule Teiserver.Protocols.Tachyon do
     # the part where it calls BattleLobby.add_user_to_battle should happen elsewhere
     battle = BattleLobby.get_battle(battle_id)
     BattleLobby.add_user_to_battle(state.userid, battle.id, script_password)
-    PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
+    PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
     TachyonOut.reply(:battle, :join_response, {:approve, battle}, state)
 
     # [battle.founder_id | battle.players]

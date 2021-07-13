@@ -28,6 +28,10 @@ defmodule Teiserver.Application do
       concache_sup(:teiserver_clan_cache_bang),
       concache_sup(:teiserver_login_count),
 
+      # Liveview throttles
+      concache_sup(:teiserver_throttle_pids),
+      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Throttles.Supervisor},
+
       # Matchmaking
       concache_perm_sup(:teiserver_queue_pids),
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},

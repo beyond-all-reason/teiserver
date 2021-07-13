@@ -84,16 +84,22 @@ defmodule Teiserver.Battle.BattleLobby do
     if Enum.member?([:update_battle_info], reason) do
       PubSub.broadcast(
         Central.PubSub,
-        "all_battle_updates",
+        "legacy_all_battle_updates",
         {:global_battle_updated, battle.id, reason}
       )
     else
       PubSub.broadcast(
         Central.PubSub,
-        "battle_updates:#{battle.id}",
+        "legacy_battle_updates:#{battle.id}",
         {:battle_updated, battle.id, data, reason}
       )
     end
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_battle_lobby_updates:#{battle.id}",
+      {:battle_lobby_updated, battle.id, data, reason}
+    )
 
     battle
   end
@@ -107,9 +113,25 @@ defmodule Teiserver.Battle.BattleLobby do
     ConCache.get(:battles, int_parse(id))
   end
 
+  @spec get_battle_lobby_players!(T.battle_id()) :: [integer()]
+  def get_battle_lobby_players!(id) do
+    get_battle!(id).players
+  end
+
+  @spec start_battle_lobby_throttle(T.battle_id()) :: pid()
+  def start_battle_lobby_throttle(battle_lobby_id) do
+    Teiserver.Throttles.start_throttle(battle_lobby_id, Teiserver.Battle.BattleLobbyThrottle, "battle_lobby_throttle_#{battle_lobby_id}")
+  end
+
+  def stop_battle_lobby_throttle(battle_lobby_id) do
+    Teiserver.Throttles.stop_throttle({:battle_lobby, battle_lobby_id})
+  end
+
   @spec add_battle(Map.t()) :: Map.t()
   def add_battle(battle) do
     _consul_pid = Coordinator.start_consul(battle.id)
+    start_battle_lobby_throttle(battle.id)
+
     ConCache.put(:battles, battle.id, battle)
 
     ConCache.update(:lists, :battles, fn value ->
@@ -122,8 +144,14 @@ defmodule Teiserver.Battle.BattleLobby do
 
     :ok = PubSub.broadcast(
       Central.PubSub,
-      "all_battle_updates",
+      "legacy_all_battle_updates",
       {:global_battle_updated, battle.id, :battle_opened}
+    )
+
+    :ok = PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_global_battle_lobby_updates",
+      {:battle_lobby_opened, battle.id}
     )
 
     battle
@@ -146,22 +174,31 @@ defmodule Teiserver.Battle.BattleLobby do
     |> Enum.each(fn userid ->
       PubSub.broadcast(
         Central.PubSub,
-        "battle_updates:#{battle_id}",
+        "legacy_battle_updates:#{battle_id}",
         {:remove_user_from_battle, userid, battle_id}
       )
     end)
 
     PubSub.broadcast(
       Central.PubSub,
-      "live_battle_updates:#{battle_id}",
+      "legacy_all_battle_updates",
       {:global_battle_updated, battle_id, :battle_closed}
     )
 
-    PubSub.broadcast(
+    :ok = PubSub.broadcast(
       Central.PubSub,
-      "all_battle_updates",
-      {:global_battle_updated, battle_id, :battle_closed}
+      "teiserver_global_battle_lobby_updates",
+      {:battle_lobby_closed, battle.id}
     )
+
+    :ok = PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_battle_lobby_updates:#{battle.id}",
+      {:battle_lobby_closed, battle.id}
+    )
+
+
+    stop_battle_lobby_throttle(battle_id)
   end
 
   def add_bot_to_battle(battle_id, bot) do
@@ -172,8 +209,14 @@ defmodule Teiserver.Battle.BattleLobby do
 
     PubSub.broadcast(
       Central.PubSub,
-      "battle_updates:#{battle_id}",
+      "legacy_battle_updates:#{battle_id}",
       {:battle_updated, battle_id, {battle_id, bot}, :add_bot_to_battle}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_battle_lobby_updates:#{battle.id}",
+      {:add_bot_to_battle_lobby, battle.id, bot}
     )
   end
 
@@ -195,8 +238,14 @@ defmodule Teiserver.Battle.BattleLobby do
 
         PubSub.broadcast(
           Central.PubSub,
-          "battle_updates:#{battle_id}",
+          "legacy_battle_updates:#{battle_id}",
           {:battle_updated, battle_id, {battle_id, new_bot}, :update_bot}
+        )
+
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_battle_lobby_updates:#{battle.id}",
+          {:update_bot_in_battle_lobby, battle.id, botname, new_bot}
         )
     end
   end
@@ -209,8 +258,14 @@ defmodule Teiserver.Battle.BattleLobby do
 
     PubSub.broadcast(
       Central.PubSub,
-      "battle_updates:#{battle_id}",
+      "legacy_battle_updates:#{battle_id}",
       {:battle_updated, battle_id, {battle_id, botname}, :remove_bot_from_battle}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_battle_lobby_updates:#{battle.id}",
+      {:remove_bot_from_battle_lobby, battle.id, botname}
     )
   end
 
@@ -245,8 +300,14 @@ defmodule Teiserver.Battle.BattleLobby do
 
           PubSub.broadcast(
             Central.PubSub,
-            "all_battle_updates",
+            "legacy_all_battle_updates",
             {:add_user_to_battle, userid, battle_id, script_password}
+          )
+
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_battle_lobby_updates:#{battle_id}",
+            {:add_user_to_battle_lobby, battle_id, userid}
           )
 
           new_players = [userid | battle_state.players]
@@ -277,8 +338,14 @@ defmodule Teiserver.Battle.BattleLobby do
       :removed ->
         PubSub.broadcast(
           Central.PubSub,
-          "all_battle_updates",
+          "legacy_all_battle_updates",
           {:remove_user_from_battle, userid, battle_id}
+        )
+
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_battle_lobby_updates:#{battle_id}",
+          {:remove_user_from_battle_lobby, battle_id, userid}
         )
     end
   end
@@ -298,8 +365,14 @@ defmodule Teiserver.Battle.BattleLobby do
       :removed ->
         PubSub.broadcast(
           Central.PubSub,
-          "all_battle_updates",
+          "legacy_all_battle_updates",
           {:kick_user_from_battle, userid, battle_id}
+        )
+
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_battle_lobby_updates:#{battle_id}",
+          {:kick_user_from_battle_lobby, battle_id, userid}
         )
     end
   end
@@ -494,7 +567,9 @@ defmodule Teiserver.Battle.BattleLobby do
   end
 
   @spec say(Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
-  def say(userid, "!start" <> _, battle_id), do: say(userid, "!cv start", battle_id)
+  def say(userid, "!start" <> s, battle_id), do: say(userid, "!cv start" <> s, battle_id)
+  def say(userid, "!joinas spec", battle_id), do: say(userid, "!!joinas spec", battle_id)
+  def say(userid, "!joinas" <> s, battle_id), do: say(userid, "!cv joinas" <> s, battle_id)
 
   def say(userid, "!coordinator start", battle_id) do
     client = Client.get_client_by_id(userid)
@@ -505,6 +580,8 @@ defmodule Teiserver.Battle.BattleLobby do
   end
 
   def say(userid, msg, battle_id) do
+    msg = String.replace(msg, "!!joinas spec", "!joinas spec")
+
     case Teiserver.Coordinator.handle_in(userid, msg, battle_id) do
       :say -> do_say(userid, msg, battle_id)
       :handled -> :ok
@@ -515,8 +592,14 @@ defmodule Teiserver.Battle.BattleLobby do
   def do_say(userid, msg, battle_id) do
     PubSub.broadcast(
       Central.PubSub,
-      "battle_updates:#{battle_id}",
+      "legacy_battle_updates:#{battle_id}",
       {:battle_updated, battle_id, {userid, msg, battle_id}, :say}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_battle_lobby_chat:#{battle_id}",
+      {:battle_lobby_say, battle_id, userid, msg}
     )
   end
 
@@ -524,8 +607,14 @@ defmodule Teiserver.Battle.BattleLobby do
   def sayex(userid, msg, battle_id) do
     PubSub.broadcast(
       Central.PubSub,
-      "battle_updates:#{battle_id}",
+      "legacy_battle_updates:#{battle_id}",
       {:battle_updated, battle_id, {userid, msg, battle_id}, :sayex}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_battle_lobby_chat:#{battle_id}",
+      {:battle_lobby_sayex, battle_id, userid, msg}
     )
   end
 
@@ -535,7 +624,7 @@ defmodule Teiserver.Battle.BattleLobby do
     if not User.is_muted?(sender) do
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{to_id}",
+        "legacy_user_updates:#{to_id}",
         {:battle_updated, battle_id, {from_id, msg, battle_id}, :sayex}
       )
     end

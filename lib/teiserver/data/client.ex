@@ -75,7 +75,7 @@ defmodule Teiserver.Client do
 
     PubSub.broadcast(
       Central.PubSub,
-      "all_user_updates",
+      "legacy_all_user_updates",
       {:user_logged_in, user.id}
     )
 
@@ -88,15 +88,21 @@ defmodule Teiserver.Client do
       client
       |> add_client
 
-    PubSub.broadcast(Central.PubSub, "all_client_updates", {:updated_client, client, reason})
+    PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
 
-    if client.battle_id,
-      do:
-        PubSub.broadcast(
-          Central.PubSub,
-          "live_battle_updates:#{client.battle_id}",
-          {:updated_client, client, reason}
-        )
+    if client.battle_id do
+      PubSub.broadcast(
+        Central.PubSub,
+        "live_battle_updates:#{client.battle_id}",
+        {:updated_client, client, reason}
+      )
+
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_battle_lobby_updates:#{client.battle_id}",
+        {:updated_client_status, client, reason}
+      )
+    end
 
     client
   end
@@ -255,7 +261,7 @@ defmodule Teiserver.Client do
     # and as such we need to tell the system what username is logging out
     PubSub.broadcast(
       Central.PubSub,
-      "all_user_updates",
+      "legacy_all_user_updates",
       {:user_logged_out, client.userid, client.name}
     )
 

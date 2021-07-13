@@ -426,13 +426,13 @@ defmodule Teiserver.User do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{requester_id}",
+        "legacy_user_updates:#{requester_id}",
         {:this_user_updated, [:friends]}
       )
 
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{accepter_id}",
+        "legacy_user_updates:#{accepter_id}",
         {:this_user_updated, [:friends, :friend_requests]}
       )
 
@@ -459,7 +459,7 @@ defmodule Teiserver.User do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{decliner_id}",
+        "legacy_user_updates:#{decliner_id}",
         {:this_user_updated, [:friend_requests]}
       )
 
@@ -500,7 +500,7 @@ defmodule Teiserver.User do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{potential_id}",
+        "legacy_user_updates:#{potential_id}",
         {:this_user_updated, [:friend_requests]}
       )
 
@@ -527,7 +527,7 @@ defmodule Teiserver.User do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{ignorer_id}",
+        "legacy_user_updates:#{ignorer_id}",
         {:this_user_updated, [:ignored]}
       )
 
@@ -554,7 +554,7 @@ defmodule Teiserver.User do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{unignorer_id}",
+        "legacy_user_updates:#{unignorer_id}",
         {:this_user_updated, [:ignored]}
       )
 
@@ -589,13 +589,13 @@ defmodule Teiserver.User do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{remover_id}",
+        "legacy_user_updates:#{remover_id}",
         {:this_user_updated, [:friends]}
       )
 
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{removed_id}",
+        "legacy_user_updates:#{removed_id}",
         {:this_user_updated, [:friends]}
       )
 
@@ -605,13 +605,15 @@ defmodule Teiserver.User do
     end
   end
 
-  def send_direct_message(from_id, to_id, "!start" <> _), do: send_direct_message(from_id, to_id, "!cv start")
+  def send_direct_message(from_id, to_id, "!start" <> s), do: send_direct_message(from_id, to_id, "!cv start" <> s)
+  def send_direct_message(from_id, to_id, "!joinas" <> s), do: send_direct_message(from_id, to_id, "!cv joinas" <> s)
+
   def send_direct_message(from_id, to_id, msg) do
     sender = get_user_by_id(from_id)
     if not is_muted?(sender) do
       PubSub.broadcast(
         Central.PubSub,
-        "user_updates:#{to_id}",
+        "legacy_user_updates:#{to_id}",
         {:direct_message, from_id, msg}
       )
     end
@@ -632,7 +634,7 @@ defmodule Teiserver.User do
   end
 
   def ring(ringee_id, ringer_id) do
-    PubSub.broadcast(Central.PubSub, "user_updates:#{ringee_id}", {:action, {:ring, ringer_id}})
+    PubSub.broadcast(Central.PubSub, "legacy_user_updates:#{ringee_id}", {:action, {:ring, ringer_id}})
   end
 
   @spec test_password(String.t(), String.t()) :: boolean

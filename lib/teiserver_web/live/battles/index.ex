@@ -117,7 +117,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
 
     socket
     |> assign(:page_title, "Listing Battles")

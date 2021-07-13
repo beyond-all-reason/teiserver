@@ -86,7 +86,7 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
   end
 
   def do_handle("leave", _, state) do
-    PubSub.unsubscribe(Central.PubSub, "battle_updates:#{state.battle_id}")
+    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{state.battle_id}")
     BattleLobby.remove_user_from_battle(state.userid, state.battle_id)
     new_state = %{state | battle_id: nil, battle_host: false}
     reply(:battle, :leave, {:success, nil}, new_state)

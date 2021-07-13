@@ -160,9 +160,9 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
 
     socket
     |> assign(:page_title, "Listing Clients")

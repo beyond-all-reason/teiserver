@@ -48,7 +48,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
     end)
 
-    :ok = PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
+    :ok = PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
 
     {:noreply, state}
   end

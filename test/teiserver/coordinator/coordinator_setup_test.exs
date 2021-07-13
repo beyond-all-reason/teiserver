@@ -58,7 +58,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
     battle = BattleLobby.get_battle!(battle.id)
 
     assert battle.coordinator_mode == true
-    listener = PubsubListener.new_listener(["battle_updates:#{battle.id}"])
+    listener = PubsubListener.new_listener(["legacy_battle_updates:#{battle.id}"])
 
     # No command
     result = BattleLobby.say(user.id, "Test message", battle.id)

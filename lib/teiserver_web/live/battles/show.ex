@@ -43,9 +43,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
-    :ok = PubSub.subscribe(Central.PubSub, "battle_updates:#{id}")
-    :ok = PubSub.subscribe(Central.PubSub, "live_battle_updates:#{id}")
-    # :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_battle_lobby_updates:#{id}")
     battle = BattleLobby.get_battle!(id)
 
     case battle do
@@ -82,118 +80,149 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
     {users, clients}
   end
 
-  defp add_user(%{assigns: assigns} = socket, id) do
-    id = int_parse(id)
-    client = Client.get_client_by_id(id)
+  # defp add_user(%{assigns: assigns} = socket, id) do
+  #   id = int_parse(id)
+  #   client = Client.get_client_by_id(id)
 
-    if client do
-      new_users = Map.put(assigns.users, id, User.get_user_by_id(id))
-      new_clients = Map.put(assigns.clients, id, client)
+  #   if client do
+  #     new_users = Map.put(assigns.users, id, User.get_user_by_id(id))
+  #     new_clients = Map.put(assigns.clients, id, client)
 
-      socket
-      |> assign(:users, new_users)
-      |> assign(:clients, new_clients)
-      |> assign(:battle, BattleLobby.get_battle(assigns.id))
-      |> get_consul_state
-      |> maybe_index_redirect
-    else
-      socket
-    end
-  end
+  #     socket
+  #     |> assign(:users, new_users)
+  #     |> assign(:clients, new_clients)
+  #     |> assign(:battle, BattleLobby.get_battle(assigns.id))
+  #     |> get_consul_state
+  #     |> maybe_index_redirect
+  #   else
+  #     socket
+  #   end
+  # end
 
-  defp remove_user(%{assigns: assigns} = socket, id) do
-    id = int_parse(id)
-    new_users = Map.delete(assigns.users, id)
-    new_clients = Map.delete(assigns.clients, id)
+  # defp remove_user(%{assigns: assigns} = socket, id) do
+  #   id = int_parse(id)
+  #   new_users = Map.delete(assigns.users, id)
+  #   new_clients = Map.delete(assigns.clients, id)
 
-    socket
-    |> assign(:users, new_users)
-    |> assign(:clients, new_clients)
-    |> assign(:battle, BattleLobby.get_battle(assigns.id))
-    |> get_consul_state
-    |> maybe_index_redirect
-  end
+  #   socket
+  #   |> assign(:users, new_users)
+  #   |> assign(:clients, new_clients)
+  #   |> assign(:battle, BattleLobby.get_battle(assigns.id))
+  #   |> get_consul_state
+  #   |> maybe_index_redirect
+  # end
 
   @impl true
-  def handle_info({:consul_server_updated, battle_id, _reason}, socket) do
-    if battle_id == socket.assigns[:id] do
-      {:noreply, get_consul_state(socket)}
-    else
-      {:noreply, socket}
+  def handle_info({:battle_lobby_throttle, _battle_id}, socket) do
+    {:noreply,
+      socket
+      |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
+  end
+
+  def handle_info({:battle_lobby_throttle, _lobby_changes, player_changes}, %{assigns: assigns} = socket) do
+    battle = BattleLobby.get_battle(assigns.id)
+
+    socket = socket
+      |> assign(:battle, battle)
+      |> get_consul_state
+
+    # Players
+    # TODO: This can likely be optimised somewhat
+    socket = case player_changes do
+      [] ->
+        socket
+      _ ->
+        players = BattleLobby.get_battle_lobby_players!(assigns.id)
+        {users, clients} = get_user_and_clients(players)
+
+        socket
+          |> assign(:users, users)
+          |> assign(:clients, clients)
+
     end
-  end
 
-  def handle_info({:updated_client, new_client, _reason}, %{assigns: assigns} = socket) do
-    new_clients = Map.put(assigns.clients, new_client.userid, new_client)
-
-    {:noreply, assign(socket, :clients, new_clients)}
-  end
-
-  def handle_info({:add_user_to_battle, userid, battle_id, _script_password}, socket) do
-    if battle_id == socket.assigns[:id] do
-      {:noreply, add_user(socket, userid)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_info({:kick_user_from_battle, userid, battle_id}, socket) do
-    if battle_id == socket.assigns[:id] do
-      {:noreply, remove_user(socket, userid)}
-    else
-      {:noreply, socket}
-    end
-  end
-  def handle_info({:remove_user_from_battle, userid, battle_id}, socket) do
-    if battle_id == socket.assigns[:id] do
-      {:noreply, remove_user(socket, userid)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_info({:battle_message, userid, msg, _battle_id}, %{assigns: assigns} = socket) do
-    username = User.get_username(userid)
-    new_messages = assigns.messages ++ [{userid, username, msg}]
-    {:noreply, assign(socket, :messages, new_messages)}
-  end
-
-  def handle_info({:global_battle_updated, battle_id, :battle_closed}, socket) do
-    if int_parse(battle_id) == socket.assigns[:id] do
-      {:noreply,
-       socket
-       |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_info({:global_battle_updated, battle_id, :update_battle_info}, socket) do
-    if int_parse(battle_id) == socket.assigns[:id] do
-      battle = BattleLobby.get_battle!(battle_id)
-      {:noreply,
-       socket
-       |> assign(:battle, battle)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_info({:global_battle_updated, _, :battle_opened}, socket) do
     {:noreply, socket}
   end
 
-  def handle_info({:battle_updated, _battle_id, _data, _cmd}, socket) do
-    {:noreply, socket}
-  end
+  # def handle_info({:consul_server_updated, battle_id, _reason}, socket) do
+  #   if battle_id == socket.assigns[:id] do
+  #     {:noreply, get_consul_state(socket)}
+  #   else
+  #     {:noreply, socket}
+  #   end
+  # end
 
-  def handle_info({:add_bot_to_battle, _battle_id, _bot}, %{assigns: assigns} = socket) do
-    {:noreply, assign(socket, :battle, BattleLobby.get_battle(assigns.id))}
-  end
+  # def handle_info({:updated_client, new_client, _reason}, %{assigns: assigns} = socket) do
+  #   new_clients = Map.put(assigns.clients, new_client.userid, new_client)
 
-  def handle_info({:update_bot, _battle_id, _bot}, %{assigns: assigns} = socket) do
-    {:noreply, assign(socket, :battle, BattleLobby.get_battle(assigns.id))}
-  end
+  #   {:noreply, assign(socket, :clients, new_clients)}
+  # end
+
+  # def handle_info({:add_user_to_battle, userid, battle_id, _script_password}, socket) do
+  #   if battle_id == socket.assigns[:id] do
+  #     {:noreply, add_user(socket, userid)}
+  #   else
+  #     {:noreply, socket}
+  #   end
+  # end
+
+  # def handle_info({:kick_user_from_battle, userid, battle_id}, socket) do
+  #   if battle_id == socket.assigns[:id] do
+  #     {:noreply, remove_user(socket, userid)}
+  #   else
+  #     {:noreply, socket}
+  #   end
+  # end
+  # def handle_info({:remove_user_from_battle, userid, battle_id}, socket) do
+  #   if battle_id == socket.assigns[:id] do
+  #     {:noreply, remove_user(socket, userid)}
+  #   else
+  #     {:noreply, socket}
+  #   end
+  # end
+
+  # def handle_info({:battle_message, userid, msg, _battle_id}, %{assigns: assigns} = socket) do
+  #   username = User.get_username(userid)
+  #   new_messages = assigns.messages ++ [{userid, username, msg}]
+  #   {:noreply, assign(socket, :messages, new_messages)}
+  # end
+
+  # def handle_info({:global_battle_updated, battle_id, :battle_closed}, socket) do
+  #   if int_parse(battle_id) == socket.assigns[:id] do
+  #     {:noreply,
+  #      socket
+  #      |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
+  #   else
+  #     {:noreply, socket}
+  #   end
+  # end
+
+  # def handle_info({:global_battle_updated, battle_id, :update_battle_info}, socket) do
+  #   if int_parse(battle_id) == socket.assigns[:id] do
+  #     battle = BattleLobby.get_battle!(battle_id)
+  #     {:noreply,
+  #      socket
+  #      |> assign(:battle, battle)}
+  #   else
+  #     {:noreply, socket}
+  #   end
+  # end
+
+  # def handle_info({:global_battle_updated, _, :battle_opened}, socket) do
+  #   {:noreply, socket}
+  # end
+
+  # def handle_info({:battle_updated, _battle_id, _data, _cmd}, socket) do
+  #   {:noreply, socket}
+  # end
+
+  # def handle_info({:add_bot_to_battle, _battle_id, _bot}, %{assigns: assigns} = socket) do
+  #   {:noreply, assign(socket, :battle, BattleLobby.get_battle(assigns.id))}
+  # end
+
+  # def handle_info({:update_bot, _battle_id, _bot}, %{assigns: assigns} = socket) do
+  #   {:noreply, assign(socket, :battle, BattleLobby.get_battle(assigns.id))}
+  # end
 
   @impl true
   def handle_event("send-to-host", %{"msg" => msg}, %{assigns: assigns} = socket) do
@@ -201,23 +230,6 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
     Coordinator.handle_in(from_id, msg, assigns.id)
 
     {:noreply, socket}
-  end
-
-  def handle_event("unsub", _, %{assigns: %{id: id}} = socket) do
-    :ok = PubSub.unsubscribe(Central.PubSub, "battle_updates:#{id}")
-    :ok = PubSub.unsubscribe(Central.PubSub, "live_battle_updates:#{id}")
-
-    {:noreply, assign(socket, :subbed, false)}
-  end
-
-  def handle_event("resub", _, %{assigns: %{id: id}} = socket) do
-    :ok = PubSub.unsubscribe(Central.PubSub, "battle_updates:#{id}")
-    :ok = PubSub.unsubscribe(Central.PubSub, "live_battle_updates:#{id}")
-
-    :ok = PubSub.subscribe(Central.PubSub, "battle_updates:#{id}")
-    :ok = PubSub.subscribe(Central.PubSub, "live_battle_updates:#{id}")
-
-    {:noreply, assign(socket, :subbed, true)}
   end
 
   def handle_event("force-update", _, %{assigns: %{id: id}} = socket) do

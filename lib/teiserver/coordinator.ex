@@ -52,7 +52,7 @@ defmodule Teiserver.Coordinator do
     {:ok, consul_pid} =
       DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
         Teiserver.Coordinator.ConsulServer,
-        name: Teiserver.Coordinator.CoordinatorServer,
+        name: "consul_#{battle_id}",
         data: %{
           battle_id: battle_id,
         }

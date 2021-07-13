@@ -514,8 +514,8 @@ defmodule Teiserver.Protocols.SpringOut do
   def do_join_battle(state, battle_id, script_password) do
     battle = BattleLobby.get_battle(battle_id)
     BattleLobby.add_user_to_battle(state.userid, battle.id, script_password)
-    PubSub.unsubscribe(Central.PubSub, "battle_updates:#{battle.id}")
-    PubSub.subscribe(Central.PubSub, "battle_updates:#{battle.id}")
+    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
+    PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
     reply(:join_battle_success, battle, nil, state)
     reply(:add_user_to_battle, {state.userid, battle.id, script_password}, nil, state)
     reply(:add_script_tags, battle.tags, nil, state)
@@ -552,9 +552,9 @@ defmodule Teiserver.Protocols.SpringOut do
     # Login the client
     _client = Client.login(user, self())
 
-    :ok = PubSub.subscribe(Central.PubSub, "all_user_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "all_battle_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "all_client_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
 
     # Who is online?
     # skip ourselves because that will result in a double ADDUSER
@@ -584,8 +584,8 @@ defmodule Teiserver.Protocols.SpringOut do
 
     send(self(), {:action, {:login_end, nil}})
 
-    PubSub.unsubscribe(Central.PubSub, "user_updates:#{user.id}")
-    PubSub.subscribe(Central.PubSub, "user_updates:#{user.id}")
+    PubSub.unsubscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
+    PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
     %{state | user: user, username: user.name, userid: user.id}
   end
 

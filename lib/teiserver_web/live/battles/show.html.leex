@@ -201,25 +201,11 @@
     Reset consul
   </span>
 
-  <%= if @subbed do %>
-    <span class="btn btn-outline-<%= bsname %>" phx-click="unsub">
-      <i class='fa-fw fas fa-times'></i>
-      &nbsp;
-      Unsub
-    </span>
-  <% else %>
-    <span class="btn btn-outline-<%= bsname %>" phx-click="resub">
-      <i class='fa-fw fas fa-check'></i>
-      &nbsp;
-      Resub
-    </span>
-
-    <span class="btn btn-outline-<%= bsname %>" phx-click="force-update">
-      <i class='fa-fw fas fa-sync'></i>
-      &nbsp;
-      Force update
-    </span>
-  <% end %>
+  <span class="btn btn-outline-<%= bsname %>" phx-click="force-update">
+    <i class='fa-fw fas fa-sync'></i>
+    &nbsp;
+    Force update
+  </span>
 
   <br /><br />
 <% end %>

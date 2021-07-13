@@ -38,7 +38,7 @@ defmodule Teiserver.Protocols.Coordinator.CommandsTest do
     battle_id = reply["battle"]["id"]
 
     BattleLobby.start_coordinator_mode(battle_id)
-    listener = PubsubListener.new_listener(["battle_updates:#{battle_id}"])
+    listener = PubsubListener.new_listener(["legacy_battle_updates:#{battle_id}"])
 
     # Player needs to be added to the battle
     BattleLobby.add_user_to_battle(player.id, battle_id, "script_password")

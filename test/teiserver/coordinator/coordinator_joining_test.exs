@@ -32,7 +32,7 @@ defmodule Teiserver.Protocols.Coordinator.JoiningTest do
     battle_id = reply["battle"]["id"]
 
     BattleLobby.start_coordinator_mode(battle_id)
-    listener = PubsubListener.new_listener(["battle_updates:#{battle_id}"])
+    listener = PubsubListener.new_listener(["legacy_battle_updates:#{battle_id}"])
 
     {:ok, socket: socket, user: user, battle_id: battle_id, listener: listener}
   end
