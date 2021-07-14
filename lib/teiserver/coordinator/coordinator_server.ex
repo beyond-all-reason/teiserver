@@ -30,8 +30,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       consuls: %{}
     }
 
-    # Join two channels of interest
-    # ~w(main coordinator)
     ~w(coordinator)
     |> Enum.each(fn room_name ->
       Room.get_or_make_room(room_name, user.id)
@@ -66,7 +64,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, state}
   end
   def handle_info({:new_message, _userid, _room_name, _message}, state) do
-    state
+    {:noreply, state}
   end
 
   def handle_info({:direct_message, userid, _message}, state) do

@@ -47,7 +47,8 @@ config :central, Teiserver,
   heartbeat_timeout: nil,
   autologin: true,
   extra_logging: false,
-  enable_agent_mode: true
+  enable_discord_bridge: true,
+  enable_agent_mode: false
 
 config :central, Central.Mailer,
   adapter: Bamboo.LocalAdapter,
@@ -125,3 +126,5 @@ config :logger, :error_log,
 config :logger, :info_log,
   path: "/tmp/barserver_info.log",
   level: :info
+
+import_config "dev.secret.exs"

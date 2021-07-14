@@ -33,6 +33,9 @@ defmodule Teiserver.Application do
       Teiserver.Account.ClientIndexThrottle,
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Throttles.Supervisor},
 
+      # Bridge
+      Teiserver.Bridge.BridgeServer,
+
       # Matchmaking
       concache_perm_sup(:teiserver_queue_pids),
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},
@@ -46,6 +49,8 @@ defmodule Teiserver.Application do
       {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
       {Teiserver.Telemetry.SpringTelemetryServer, name: Teiserver.Telemetry.SpringTelemetryServer},
     ]
+
+    discord_start()
 
     # Agent mode stuff, should not be enabled in prod
     children = if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
@@ -68,6 +73,15 @@ defmodule Teiserver.Application do
         ]
     else
       children
+    end
+  end
+
+  defp discord_start do
+    if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
+      token = Application.get_env(:central, DiscordBridge)[:token]
+      {:ok, pid} = Alchemy.Client.start(token)
+      use Teiserver.Bridge.DiscordBridge
+      {:ok, pid}
     end
   end
 
