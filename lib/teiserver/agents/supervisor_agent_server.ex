@@ -10,6 +10,7 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
     add_servers("battlehost", 5, 5, %{name: "unstable", number: 5, always_leave: true, leave_chance: 1, inaction_chance: 0})
     add_servers("battlehost", 6, 6, %{name: "reject", number: 6, leave_chance: 0, reject: true})
     add_servers("battlejoin", 15)
+    add_servers("in_and_out", 3)
     add_servers("idle", 5)
 
     AgentLib.post_agent_update(state.id, "Agent supervisor started")
@@ -51,6 +52,7 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
       "battlehost" -> Teiserver.Agents.BattlehostAgentServer
       "battlejoin" -> Teiserver.Agents.BattlejoinAgentServer
       "idle" -> Teiserver.Agents.IdleAgentServer
+      "in_and_out" -> Teiserver.Agents.InOutServer
     end
   end
 

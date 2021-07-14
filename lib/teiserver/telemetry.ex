@@ -24,7 +24,11 @@ defmodule Teiserver.Telemetry do
 
       last_value("teiserver.battle.total"),
       last_value("teiserver.battle.lobby"),
-      last_value("teiserver.battle.in_progress")
+      last_value("teiserver.battle.in_progress"),
+
+      sum("teiserver.pubsub.legacy_all_battle_updates"),
+      sum("teiserver.pubsub.legacy_all_user_updates"),
+      sum("teiserver.pubsub.legacy_all_client_updates"),
     ]
   end
 

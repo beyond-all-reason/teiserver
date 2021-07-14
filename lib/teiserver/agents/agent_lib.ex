@@ -90,7 +90,7 @@ defmodule Teiserver.Agents.AgentLib do
          token <- User.create_token(user),
          :ok <- do_login(socket, token)
       do
-        :success
+        {:success, user}
       else
         {:error, :login} -> throw "Login error"
     end

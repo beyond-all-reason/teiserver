@@ -82,6 +82,7 @@ defmodule Teiserver.Battle.BattleLobby do
     ConCache.put(:battles, battle.id, battle)
 
     if Enum.member?([:update_battle_info], reason) do
+      :telemetry.execute([:teiserver, :pubsub], %{legacy_all_battle_updates: 1}, %{key: :global_battle_updated})
       PubSub.broadcast(
         Central.PubSub,
         "legacy_all_battle_updates",
@@ -142,6 +143,7 @@ defmodule Teiserver.Battle.BattleLobby do
       {:ok, new_value}
     end)
 
+    :telemetry.execute([:teiserver, :pubsub], %{count: 1}, %{chan: :legacy_all_battle_updates, key: :battle_opened})
     :ok = PubSub.broadcast(
       Central.PubSub,
       "legacy_all_battle_updates",
@@ -179,6 +181,7 @@ defmodule Teiserver.Battle.BattleLobby do
       )
     end)
 
+    :telemetry.execute([:teiserver, :pubsub], %{legacy_all_battle_updates: 1}, %{key: :battle_closed})
     PubSub.broadcast(
       Central.PubSub,
       "legacy_all_battle_updates",
@@ -298,6 +301,7 @@ defmodule Teiserver.Battle.BattleLobby do
 
           Coordinator.cast_consul(battle_id, {:user_joined, userid})
 
+          :telemetry.execute([:teiserver, :pubsub], %{legacy_all_battle_updates: 1}, %{key: :add_user_to_battle})
           PubSub.broadcast(
             Central.PubSub,
             "legacy_all_battle_updates",
@@ -336,6 +340,7 @@ defmodule Teiserver.Battle.BattleLobby do
         nil
 
       :removed ->
+        :telemetry.execute([:teiserver, :pubsub], %{legacy_all_battle_updates: 1}, %{key: :remove_user_from_battle})
         PubSub.broadcast(
           Central.PubSub,
           "legacy_all_battle_updates",
@@ -363,6 +368,7 @@ defmodule Teiserver.Battle.BattleLobby do
         nil
 
       :removed ->
+        :telemetry.execute([:teiserver, :pubsub], %{legacy_all_battle_updates: 1}, %{key: :kick_user_from_battle})
         PubSub.broadcast(
           Central.PubSub,
           "legacy_all_battle_updates",
