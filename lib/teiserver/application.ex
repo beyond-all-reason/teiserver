@@ -43,6 +43,7 @@ defmodule Teiserver.Application do
 
       # Telemetry
       {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
+      {Teiserver.Telemetry.SpringTelemetryServer, name: Teiserver.Telemetry.SpringTelemetryServer},
     ]
 
     # Agent mode stuff, should not be enabled in prod

@@ -73,7 +73,6 @@ defmodule Teiserver.Client do
       })
       |> add_client
 
-    :telemetry.execute([:teiserver, :pubsub], %{legacy_all_user_updates: 1}, %{key: :user_logged_in})
     PubSub.broadcast(
       Central.PubSub,
       "legacy_all_user_updates",
@@ -89,7 +88,6 @@ defmodule Teiserver.Client do
       client
       |> add_client
 
-    :telemetry.execute([:teiserver, :pubsub], %{legacy_all_client_updates: 1}, %{key: :updated_client})
     PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
 
     if client.battle_id do
@@ -261,7 +259,6 @@ defmodule Teiserver.Client do
 
     # Typically we would only send the username but it is possible they just changed their username
     # and as such we need to tell the system what username is logging out
-    :telemetry.execute([:teiserver, :pubsub], %{legacy_all_user_updates: 1}, %{key: :user_logged_out})
     PubSub.broadcast(
       Central.PubSub,
       "legacy_all_user_updates",

@@ -20,15 +20,27 @@ defmodule Teiserver.Telemetry do
     [
       last_value("teiserver.client.total"),
       last_value("teiserver.client.menu"),
-      last_value("teiserver.client.battle"),
+      last_value("teiserver.client.lobby"),
+      last_value("teiserver.client.spectator"),
+      last_value("teiserver.client.player"),
 
       last_value("teiserver.battle.total"),
       last_value("teiserver.battle.lobby"),
       last_value("teiserver.battle.in_progress"),
 
-      sum("teiserver.pubsub.legacy_all_battle_updates"),
-      sum("teiserver.pubsub.legacy_all_user_updates"),
-      sum("teiserver.pubsub.legacy_all_client_updates"),
+      # Spring legacy pubsub trackers
+      # User
+      last_value("spring.user_logged_in"),
+      last_value("spring.user_logged_out"),
+
+      # Client
+      last_value("spring.updated_client"),
+
+      # Battle
+      last_value("spring.global_battle_updated"),
+      last_value("spring.add_user_to_battle"),
+      last_value("spring.remove_user_from_battle"),
+      last_value("spring.kick_user_from_battle"),
     ]
   end
 
