@@ -30,6 +30,7 @@ defmodule Teiserver.Application do
 
       # Liveview throttles
       concache_sup(:teiserver_throttle_pids),
+      Teiserver.Account.ClientIndexThrottle,
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Throttles.Supervisor},
 
       # Matchmaking

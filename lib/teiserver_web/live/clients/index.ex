@@ -18,10 +18,11 @@ defmodule TeiserverWeb.ClientLive.Index do
   @impl true
   def mount(_params, session, socket) do
     clients = list_clients()
+      |> Map.new(fn c -> {c.userid, c} end)
 
     users =
       clients
-      |> Map.new(fn c -> {c.userid, User.get_user_by_id(c.userid)} end)
+      |> Map.new(fn {userid, _} -> {userid, User.get_user_by_id(userid)} end)
 
     socket =
       socket
@@ -33,10 +34,12 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, ClientLib.colours())
       |> assign(:clients, clients)
+      |> assign(:client_ids, Map.keys(clients))
       |> assign(:users, users)
-      # |> assign(:menu_override, Routes.ts_lobby_general_path(socket, :index))
       |> assign(:menu_override, :hidden)
       |> assign(:extra_menu_content, @extra_menu_content)
+      |> assign(:filters, [])
+      |> apply_filters
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end
@@ -54,115 +57,52 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   @impl true
-  def handle_info({:user_logged_in, userid}, socket) do
-    keys =
-      socket.assigns[:clients]
-      |> Enum.map(fn c -> c.userid end)
+  def handle_info({:client_index_throttle, new_clients, removed_clients}, %{assigns: assigns} = socket) do
+    clients = assigns.clients
+      |> Enum.filter(fn {userid, _} ->
+        not Enum.member?(removed_clients, userid)
+      end)
+      |> Map.new
+      |> Map.merge(new_clients)
 
-    if Enum.member?(keys, userid) do
-      {:noreply, socket}
-    else
-      clients =
-        ([Client.get_client_by_id(userid) | socket.assigns[:clients]])
-        |> Enum.filter(fn c -> c != nil end)
-        |> Enum.sort_by(fn c -> c.name end, &<=/2)
+    client_ids = Map.keys(clients)
 
-      users = Map.put(socket.assigns[:users], userid, User.get_user_by_id(userid))
+    users = client_ids
+      |> Enum.map(fn userid ->
+        if Map.has_key?(assigns.users, userid) do
+          assigns.users[userid]
+        else
+          User.get_user_by_id(userid)
+          |> limited_user
+        end
+      end)
+      |> Map.new(fn user -> {user.id, user} end)
 
-      socket =
-        socket
-        |> assign(:clients, clients)
-        |> assign(:users, users)
-
-      {:noreply, socket}
-    end
-  end
-
-  def handle_info({:user_logged_out, userid, _username}, socket) do
-    clients =
-      socket.assigns[:clients]
-      |> Enum.filter(fn c -> c.userid != userid end)
-
-    users = Map.delete(socket.assigns[:users], userid)
-
-    socket =
-      socket
+    socket = socket
       |> assign(:clients, clients)
       |> assign(:users, users)
+      |> apply_filters
 
     {:noreply, socket}
   end
 
-  def handle_info({:updated_client, _new_client, _reason}, socket) do
-    # clients = socket.assigns[:clients]
-    #   |> Enum.filter(fn c -> c.userid != userid end)
-    # users = Map.delete(socket.assigns[:users], userid)
+  @impl true
+  def handle_event("add-filter:" <> filter, _event, socket) do
+    new_filters = [filter | socket.assigns.filters]
+      |> Enum.uniq
 
-    # socket = socket
-    #   |> assign(:clients, clients)
-    #   |> assign(:users, users)
-
-    {:noreply, socket}
+    {:noreply, assign(socket, :filters, new_filters) |> apply_filters}
   end
 
-  def handle_info({:add_user_to_battle, user_id, battle_id, _script_password}, socket) do
-    clients =
-      socket.assigns[:clients]
-      |> Enum.map(fn client ->
-        if client.userid == user_id do
-          %{client | battle_id: battle_id}
-        else
-          client
-        end
-      end)
+  def handle_event("remove-filter:" <> filter, _event, socket) do
+    new_filters = socket.assigns.filters
+      |> List.delete(filter)
 
-    {:noreply, assign(socket, :clients, clients)}
-  end
-
-  def handle_info({:remove_user_from_battle, user_id, _battle_id}, socket) do
-    clients =
-      socket.assigns[:clients]
-      |> Enum.map(fn client ->
-        if client.userid == user_id do
-          %{client | battle_id: nil}
-        else
-          client
-        end
-      end)
-
-    {:noreply, assign(socket, :clients, clients)}
-  end
-
-  def handle_info({:kick_user_from_battle, user_id, _battle_id}, socket) do
-    clients =
-      socket.assigns[:clients]
-      |> Enum.map(fn client ->
-        if client.userid == user_id do
-          %{client | battle_id: nil}
-        else
-          client
-        end
-      end)
-
-    {:noreply, assign(socket, :clients, clients)}
-  end
-
-  def handle_info({:battle_opened, _battle_id}, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_info({:battle_closed, _battle_id}, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_info({:global_battle_updated, _battle_id, _reason}, socket) do
-    {:noreply, socket}
+    {:noreply, assign(socket, :filters, new_filters) |> apply_filters}
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_client_index_updates")
 
     socket
     |> assign(:page_title, "Listing Clients")
@@ -172,5 +112,32 @@ defmodule TeiserverWeb.ClientLive.Index do
   defp list_clients do
     Client.list_clients()
     |> Enum.sort_by(fn c -> c.name end, &<=/2)
+  end
+
+  defp apply_filters(%{assigns: assigns} = socket) do
+    filters = assigns.filters
+
+    client_ids = assigns.clients
+      |> Enum.filter(fn {_userid, client} ->
+        cond do
+          Enum.member?(filters, "people") and client.bot ->
+            false
+
+          Enum.member?(filters, "normal") and client.moderator ->
+            false
+
+          true ->
+            true
+        end
+      end)
+      |> Enum.sort_by(fn {_, client} -> String.downcase(client.name) end, &<=/2)
+      |> Enum.map(fn {key, _} -> key end)
+
+    socket
+      |> assign(:client_ids, client_ids)
+  end
+
+  defp limited_user(user) do
+    Map.take(user, ~w(id bot moderator verified)a)
   end
 end

@@ -18,14 +18,18 @@ defmodule TeiserverWeb.Live.ClientTest do
       # Sadly because other clients can still be logged in after their tests we can't actually test this bit...
       # assert html =~ "No clients found"
 
+      # Sleeps are to allow for the throttle server to update us
+
       # Time to add a client
       %{socket: socket1, user: user1} = TeiserverTestLib.auth_setup()
+      :timer.sleep(500)
       html = render(view)
       assert html =~ "Clients - "
       assert html =~ "#{user1.name}"
 
       # Another
       %{socket: socket2, user: user2} = TeiserverTestLib.auth_setup()
+      :timer.sleep(500)
       html = render(view)
       assert html =~ "Clients - "
       assert html =~ "#{user1.name}"
@@ -33,6 +37,7 @@ defmodule TeiserverWeb.Live.ClientTest do
 
       # User 2 logs out
       _send_raw(socket2, "EXIT\n")
+      :timer.sleep(500)
       html = render(view)
       assert html =~ "Clients - "
       assert html =~ "#{user1.name}"
@@ -40,6 +45,7 @@ defmodule TeiserverWeb.Live.ClientTest do
 
       # And now user 1 too
       _send_raw(socket1, "EXIT\n")
+      :timer.sleep(500)
       html = render(view)
       # assert html =~ "No clients found"
       refute html =~ "#{user1.name}"

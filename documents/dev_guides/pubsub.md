@@ -60,6 +60,9 @@ Information about a specific user such as friend related stuff.
 #### legacy_all_client_updates
 Overlaps with `legacy_all_user_updates` due to blurring of user vs client domain.
 
+#### teiserver_liveview_client_index_updates
+These are updates sent from the ClientIndex genserver (used to throttle/batch messages sent to the liveviews).
+
 ### Chat
 #### room:#{room_name}
 All updates about the room and content for the room. Likely to be kept as is and renamed as a teiserver channel due to its nature.

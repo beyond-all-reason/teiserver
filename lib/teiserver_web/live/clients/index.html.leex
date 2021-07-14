@@ -7,6 +7,29 @@
     <div class="card border-<%= bsname %> page-card">
       <div class="card-body">
 
+<div class="float-right">
+  <%= if Enum.member?(@filters, "people") do %>
+    <span class="btn btn-<%= bsname %> active" phx-click="remove-filter:people">
+      People only
+    </span>
+  <% else %>
+    <span class="btn btn-outline-<%= bsname %>" phx-click="add-filter:people">
+      People only
+    </span>
+  <% end %>
+
+  &nbsp;
+
+  <%= if Enum.member?(@filters, "normal") do %>
+    <span class="btn btn-<%= bsname %> active" phx-click="remove-filter:normal">
+      All users
+    </span>
+  <% else %>
+    <span class="btn btn-outline-<%= bsname %>" phx-click="add-filter:normal">
+      Non-mods only
+    </span>
+  <% end %>
+</div>
         <h4>
           <%= if Enum.count(@clients) > 0 do %>
             Clients - <%= Enum.count(@clients) %>
@@ -20,7 +43,8 @@
     <tr>
       <th>ID</th>
       <th>Name</th>
-      <th>Battle</th>
+      <th>Lobby</th>
+      <th>Status</th>
       <th>Bot</th>
       <th>Mod</th>
       <th>Verified</th>
@@ -29,28 +53,49 @@
     </tr>
   </thead>
   <tbody id="clients">
-    <%= for client <- @clients do %>
-      <% user = @users[client.userid] %>
-      <%= if client != nil do %>
-        <tr id="client-<%= client.userid %>">
-          <td><%= client.userid %></td>
-          <td><%= client.name %></td>
-          <td>
-            <%= if client.battle_id do %>
-              <%= live_redirect "Show #{client.battle_id}", to: Routes.ts_battle_lobby_show_path(@socket, :show, client.battle_id), class: "btn btn-sm btn-#{Teiserver.Battle.BattleLobbyLib.colours |> elem(2)}" %>
-            <% end %>
-          </td>
+    <%= for userid <- @client_ids do %>
+      <%= if Enum.member?(@client_ids, userid) do %>
+        <%
+          user = @users[userid]
+          client = @clients[userid]
+        %>
+        <%= if client != nil do %>
+          <tr>
+            <td><%= client.userid %></td>
+            <td><%= client.name %></td>
+            <td>
+              <%= if client.battle_id do %>
+                <%= live_redirect "Show #{client.battle_id}", to: Routes.ts_battle_lobby_show_path(@socket, :show, client.battle_id), class: "btn btn-sm btn-#{Teiserver.Battle.BattleLobbyLib.colours |> elem(2)}" %>
+              <% end %>
+            </td>
 
-          <td><%= if user.bot, do: "Bot" %></td>
-          <td><%= if user.moderator, do: "Mod" %></td>
-          <td><%= if user.verified, do: "Verified" %></td>
+            <td>
+              <%= cond do %>
+                <% client.in_game == true and client.player == true -> %>
+                  Player
 
-          <td>
-            <span>
-              <%= live_redirect "Show", to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}" %>
-            </span>
-          </td>
-        </tr>
+                <% client.in_game == true -> %>
+                  Spectator
+
+                <% client.battle_id != nil -> %>
+                  Lobby
+
+                <% true -> %>
+                  Menu
+              <% end %>
+            </td>
+
+            <td><%= if user.bot, do: "Bot" %></td>
+            <td><%= if user.moderator, do: "Mod" %></td>
+            <td><%= if user.verified, do: "Verified" %></td>
+
+            <td>
+              <span>
+                <%= live_redirect "Show", to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}" %>
+              </span>
+            </td>
+          </tr>
+        <% end %>
       <% end %>
     <% end %>
   </tbody>
