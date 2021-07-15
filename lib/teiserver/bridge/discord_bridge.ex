@@ -6,28 +6,35 @@ defmodule Teiserver.Bridge.DiscordBridge do
   require Logger
 
   Events.on_message(:inspect)
-  def inspect(%Alchemy.Message{author: %{username: "Teiserver Bridge"}}) do
-    # This is us, don't do anything
-    :ok
-  end
-
-  def inspect(%Alchemy.Message{author: author, content: content, channel_id: channel_id}) do
+  def inspect(%Alchemy.Message{author: author, channel_id: channel_id} = message) do
     room = bridge_channel_to_room(channel_id)
 
-    case room do
-      nil ->
-        Logger.debug("No room to send to")
-        :ok
+    cond do
+      author.username == Application.get_env(:central, DiscordBridge)[:bot_name] ->
+        nil
 
-      _ ->
-        Logger.debug("Sending to room")
-        from_id = BridgeServer.get_bridge_userid()
-        Room.send_message(from_id, room, "#{author.username}: #{content}")
+      room == nil ->
+        nil
+
+      true ->
+        do_reply(message)
     end
   end
 
   def inspect(event) do
     Logger.debug("Unhandled DiscordBridge event: #{Kernel.inspect event}")
+  end
+
+  defp do_reply(%Alchemy.Message{author: author, content: content, channel_id: channel_id, mentions: mentions}) do
+    # Mentions come through encoded in a way we don't want to preserve, this substitutes them
+    content = mentions
+    |> Enum.reduce(content, fn (m, acc) ->
+      String.replace(acc, "<@!#{m.id}>", m.username)
+    end)
+
+    from_id = BridgeServer.get_bridge_userid()
+    room = bridge_channel_to_room(channel_id)
+    Room.send_message(from_id, room, "#{author.username}: #{content}")
   end
 
   defp bridge_channel_to_room(channel_id) do

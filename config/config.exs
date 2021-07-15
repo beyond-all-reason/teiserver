@@ -54,7 +54,7 @@ config :central, Teiserver,
   default_protocol: Teiserver.Protocols.Spring,
   github_repo: "https://github.com/Teifion/teiserver",
   extra_logging: false,
-  enable_discord_bridge: true,
+  enable_discord_bridge: false,
   enable_agent_mode: false,
   enable_coordinator_mode: true,
   user_agreement: "User agreement goes here."
