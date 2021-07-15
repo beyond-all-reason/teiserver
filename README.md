@@ -12,16 +12,18 @@ These are just the highlights, full documentation can be found in the documentat
 
 ### Feature documentation
 - [Metrics](/documents/designs/metrics.md)
+- [Agent mode/Lobby dev assist](/documents/guides/discord_bot.md)
 
-### High level TODO list (no particular order)
+### In progress features
 - [Coordinator mode](/documents/designs/coordinator.md)
 - [Matchmaking](/documents/spring/matchmaking.md)
+- [Reputation/Reporting system](/documents/designs/reputation.md)
+- [Tachyon](/documents/tachyon)
+- [Agent mode/Lobby dev assist](/documents/designs/agent_mode.md)
+
+### Features planned but not started
 - [Parties](/documents/spring/parties.md)
 - [Clans](/documents/designs/clans.md)
-- Integration with Discord/other services
-- [Reputation/Reporting system](/documents/designs/reputation.md)
-- [Agent mode/Lobby dev assist](/documents/designs/agent_mode.md)
-- [Tachyon](/documents/tachyon)
 
 ### Contributing
 All contributors are welcome; if you spot an issue or bug with it mention me on the [BAR discord](https://discord.gg/N968ddE) (@teifion) or open an issue in this repo. Pull requests are also welcome; even if it's just a spelling mistake.
