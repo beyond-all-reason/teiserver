@@ -5,6 +5,7 @@ defmodule Central.Account.UserLib do
   alias Central.Account
   alias Central.Account.User
   alias Central.Account.GroupLib
+  alias Central.Helpers.TimexHelper
 
   @spec colours :: {String.t(), String.t(), String.t()}
   def colours(), do: Central.Helpers.StylingHelper.colours(:primary)
@@ -102,6 +103,7 @@ If you did not request this password reset then please ignore it. The code will 
 """
 
     subject = Application.get_env(:central, Central)[:site_title] <> " - Password reset"
+    date = TimexHelper.date_to_str(Timex.now(), format: :email_date)
 
     Email.new_email()
     |> Email.to({user.name, user.email})
@@ -110,6 +112,7 @@ If you did not request this password reset then please ignore it. The code will 
        Central.Mailer.noreply_address()}
     )
     |> Email.subject(subject)
+    |> Email.put_header("Date", date)
     |> Email.html_body(html_body)
     |> Email.text_body(text_body)
   end

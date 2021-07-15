@@ -54,6 +54,7 @@ defmodule Central.Helpers.TimexHelper do
         :hm -> Timex.format!(the_time, "{h24}:{m}")
         :clock24 -> Timex.format!(the_time, "{h24}{m}")
         :html_input -> Timex.format!(the_time, "{YYYY}-{0M}-{0D}T{h24}:{m}")
+        :email_date -> Timex.format!(the_time, "{WDshort}, {0D} {Mshort} {YYYY} {h24}:{m}:{s} {Z}")
         :hms_or_hmsdmy -> _hms_or_hmsdmy(the_time, now)
         :hms_or_dmy -> _hms_or_dmy(the_time, now)
         :hm_or_dmy -> _hm_or_dmy(the_time, now)

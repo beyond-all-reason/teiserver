@@ -3,6 +3,7 @@ defmodule Teiserver.EmailHelper do
   alias Central.Account
   alias Central.Mailer
   alias Bamboo.Email
+  alias Central.Helpers.TimexHelper
   require Logger
 
   def new_user(user) do
@@ -58,10 +59,13 @@ defmodule Teiserver.EmailHelper do
     #{discord}
     """
 
+    date = TimexHelper.date_to_str(Timex.now(), format: :email_date)
+
     Email.new_email()
     |> Email.to({user.name, user.email})
     |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
     |> Email.subject("BAR - New account")
+    |> Email.put_header("Date", date)
     |> Email.html_body(html_body)
     |> Email.text_body(text_body)
     |> Mailer.deliver_now(response: true)
@@ -80,10 +84,13 @@ defmodule Teiserver.EmailHelper do
     This password will also work on the main site
     """
 
+    date = TimexHelper.date_to_str(Timex.now(), format: :email_date)
+
     Email.new_email()
     |> Email.to({user.name, user.email})
     |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
     |> Email.subject("BAR - Spring password reset")
+    |> Email.put_header("Date", date)
     |> Email.html_body(html_body)
     |> Email.text_body(text_body)
     |> Mailer.deliver_now()
