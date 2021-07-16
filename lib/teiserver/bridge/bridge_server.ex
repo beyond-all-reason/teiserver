@@ -77,10 +77,8 @@ defmodule Teiserver.Bridge.BridgeServer do
       username: user.name,
       battle_host: false,
       user: user,
-      userid: account.id,
       rooms: rooms
     }
-
 
     Map.keys(rooms)
     |> Enum.each(fn room_name ->
@@ -96,11 +94,21 @@ defmodule Teiserver.Bridge.BridgeServer do
     Logger.debug("forwarding")
     author = User.get_username(from_id)
 
+    new_message = message
+      |> convert_emoticons
+
     Alchemy.Client.send_message(
       channel,
-      "**#{author}**: #{message}",
+      "**#{author}**: #{new_message}",
       []# Options
     )
+  end
+
+  defp convert_emoticons(message) do
+    emoticon_map = Teiserver.Bridge.DiscordBridge.get_text_to_emoticon_map()
+
+    message
+    |> String.replace(Map.keys(emoticon_map), fn text -> emoticon_map[text] end)
   end
 
   @spec get_bridge_account() :: Central.Account.User.t()
