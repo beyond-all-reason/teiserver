@@ -22,9 +22,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.{Coordinator, Client, User}
   alias Teiserver.Battle.BattleLobby
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
-  @always_allow ~w(status)
+  @always_allow ~w(status help)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -67,6 +68,21 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     {:noreply, state}
   end
+
+  # PubSub handlers
+  def handle_info({:battle_lobby_updated, _, _, _}, state), do: {:noreply, state}
+  def handle_info({:battle_lobby_closed, _}, state), do: {:noreply, state}
+  def handle_info({:add_bot_to_battle_lobby, _lobby_id, _bot}, state), do: {:noreply, state}
+  def handle_info({:update_bot_in_battle_lobby, _lobby_id, _botname, _new_bot}, state), do: {:noreply, state}
+  def handle_info({:remove_bot_from_battle_lobby, _lobby_id, _botname}, state), do: {:noreply, state}
+  def handle_info({:add_user_to_battle_lobby, _lobby_id, userid}, state), do: {:noreply, check_player_battlestatus(userid, :join_battle, state)}
+  def handle_info({:remove_user_from_battle_lobby, _lobby_id, _userid}, state), do: {:noreply, state}
+  def handle_info({:kick_user_from_battle_lobby, _lobby_id, _userid}, state), do: {:noreply, state}
+
+  def handle_info({:consul_server_updated, _, _}, state), do: {:noreply, state}
+
+  # Client
+  def handle_info({:updated_client_status, client, reason}, state), do: {:noreply, check_player_battlestatus(client, reason, state)}
 
   def handle_info(cmd = %{command: _}, state) do
     new_state = case allow_command?(cmd, state) do
@@ -116,6 +132,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
+  def handle_command(%{command: "help", senderid: senderid} = _cmd, state) do
+    status_msg = [
+      "Command list can currently be found at https://github.com/beyond-all-reason/teiserver/blob/master/lib/teiserver/coordinator/coordinator_lib.ex"
+    ]
+    Coordinator.send_to_user(senderid, status_msg)
+    state
+  end
+
   def handle_command(%{command: "status", senderid: senderid} = _cmd, state) do
     status_msg = [
       "Status for battle ##{state.battle_id}",
@@ -123,16 +147,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     ]
     Coordinator.send_to_user(senderid, status_msg)
     state
-  end
-
-  def handle_command(%{command: "start", senderid: senderid} = cmd, state) do
-    Coordinator.send_to_host(senderid, state.battle_id, "!start")
-    say_command(cmd, state)
-  end
-
-  def handle_command(%{command: "forcestart", senderid: senderid} = cmd, state) do
-    Coordinator.send_to_host(senderid, state.battle_id, "!forcestart")
-    say_command(cmd, state)
   end
 
   def handle_command(%{command: "reset"} = _cmd, state) do
@@ -150,10 +164,25 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state
   end
 
+  # Normally we'd have this as a passthrough but we use it as part of the matchmaking
+  # queue server to change the map.
+  # TODO: Find a way to make this a passthrough
   def handle_command(%{command: "map", remaining: map_name} = cmd, state) do
     Coordinator.send_to_host(state.coordinator_id, state.battle_id, "!map #{map_name}")
     say_command(cmd, state)
   end
+
+  def handle_command(%{command: "start", senderid: senderid} = cmd, state) do
+    Coordinator.send_to_host(senderid, state.battle_id, "!start")
+    say_command(cmd, state)
+  end
+
+  def handle_command(%{command: "forcestart", senderid: senderid} = cmd, state) do
+    Coordinator.send_to_host(senderid, state.battle_id, "!forcestart")
+    say_command(cmd, state)
+  end
+
+
 
   def handle_command(%{command: "pull", remaining: target} = cmd, state) do
     # TODO: Make this work for friends only if not a mod
@@ -219,6 +248,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
         %{state | blacklist: new_blacklist, whitelist: new_whitelist}
         |> broadcast_update("ban")
+    end
+  end
+
+  def handle_command(%{command: "unban", remaining: target} = cmd, state) do
+    case get_user(target, state) do
+      nil ->
+        say_command(%{cmd | error: "no user found"}, state)
+      target_id ->
+        new_blacklist = Map.delete(state.blacklist, target_id)
+        say_command(cmd, state)
+
+        %{state | blacklist: new_blacklist}
+        |> broadcast_update("unban")
     end
   end
 
@@ -349,6 +391,26 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state
   end
 
+  defp check_player_battlestatus(nil, _, state), do: state
+  defp check_player_battlestatus(_, :join_battle, state), do: state
+  defp check_player_battlestatus(%{userid: userid} = client, reason, state) do
+    # if client.userid == 3 do
+    #   IO.puts "check_player_battlestatus"
+    #   IO.puts reason
+    #   # IO.inspect client
+    #   IO.inspect get_blacklist(userid, state.blacklist)
+    #   IO.inspect get_whitelist(userid, state.whitelist)
+    #   IO.inspect on_friendlist?(userid, state.battle_id)
+    #   IO.puts ""
+
+    # end
+
+    state
+  end
+  defp check_player_battlestatus(userid, reason, state) do
+    check_player_battlestatus(Client.get_client_by_id(userid), reason, state)
+  end
+
   defp get_blacklist(userid, blacklist_map) do
     Map.get(blacklist_map, userid, :player)
   end
@@ -358,6 +420,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
       true -> Map.get(whitelist_map, userid)
       false -> Map.get(whitelist_map, :default)
     end
+  end
+
+  defp on_friendlist?(userid, battle_id) do
+    battle = BattleLobby.get_battle!(battle_id)
+    IO.puts ""
+    IO.inspect battle.players
+    IO.puts ""
+
+    true
   end
 
   defp allow_join?(userid, state) do
@@ -488,7 +559,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       mutes: [],
       boss_mode: :player,
       bosses: [],
-      welcome_message: nil
+      welcome_message: nil,
     }
   end
 
@@ -499,6 +570,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
     battle_id = opts[:battle_id]
+
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_battle_lobby_updates:#{battle_id}")
 
     # Update the queue pids cache to point to this process
     ConCache.put(:teiserver_consul_pids, battle_id, self())

@@ -6,7 +6,7 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
     """
 Commands
 TODO: status
-    status info about the specific battle
+    status info about the battle lobby
 
 TODO: help
   displays this help text
@@ -35,12 +35,6 @@ TODO: whitelist <user> [player | spectator | banned]
 welcome-message <message>
   Sets the welcome message sent to anybody joining the lobby
 
-start
-  starts the battle
-
-forcestart
-  forces the battle to start
-
 manual-autohost
   issues a set of commands to SPADS to remove autobalance
 
@@ -56,9 +50,6 @@ TODO: unlock
 
 reset
   resets the coordinator for this battle to the default state
-
-map <map>
-  changes the map
 
 force-spectator <user>
   sets a given user to be a spectator
@@ -77,6 +68,7 @@ TODO: temp-ban <user> <time>
 
 TODO: unban <user>
   unbans the user, if present in the blacklist also removes them from that
+  has no effect on the whitelist
 
 TODO: mute <user>
   mutes a user
@@ -99,18 +91,24 @@ TODO: unboss <user>
 TODO: gatekeeper (blacklist | whitelist | friends)
   sets the gatekeeper for this battle to whitelist, blacklist or friends method
   at battle lobby open the default is an empty blacklist
+  blacklist stops specific users from taking up specific roles
+  whitelist allows only specific users to take up specific roles
+  friends allows only friends of existing players to become players (but anybody can join)
+
+<--- Moderator only --->
+TODO: makeready <user>
+  sets a user to ready
 
 TODO: pull <user>
-Pulls a given user into the battle, it will also remove them from the blacklist and add them to the whitelist
-as a player. If you are not a moderator then this only works on friends.
+  Pulls a given user into the battle, it will also remove them from the blacklist and add them to the whitelist
+  as a player. If you are not a moderator then this only works on friends.
 
-Any commands not listed here, if called will passthrough to SPADS as if Coordinator mode wasn't active
-the only exception is a vote requirement may be added to them if you are not able to force them
+  Any commands not listed here, if called will passthrough to SPADS as if Coordinator mode wasn't active
+  the only exception is a vote requirement may be added to them if you are not able to force them
 
 TODO: settag key value
 
-
-£!command - Force consul to intercept even when off
+£!command - Force consul to intercept even when not in active mode
 %!command - Don't echo command back to chat
 £%!command - Both of the above
 """
