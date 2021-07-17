@@ -48,7 +48,7 @@ config :central, Teiserver,
   autologin: true,
   extra_logging: false,
   enable_discord_bridge: true,
-  enable_agent_mode: false
+  enable_agent_mode: true
 
 config :central, Central.Mailer,
   adapter: Bamboo.LocalAdapter,

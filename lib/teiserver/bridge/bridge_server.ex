@@ -36,6 +36,8 @@ defmodule Teiserver.Bridge.BridgeServer do
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
   def handle_info({:new_message, from_id, room_name, message}, state) do
+    room_name = if String.contains?(message, " player(s) needed for battle "), do: "promote", else: room_name
+
     cond do
       from_id == state.userid ->
         # It's us, ignore it
@@ -48,6 +50,10 @@ defmodule Teiserver.Bridge.BridgeServer do
         nil
     end
     {:noreply, state}
+  end
+
+  def handle_info({:new_message_ex, from_id, room_name, message}, state) do
+    handle_info({:new_message, from_id, room_name, message}, state)
   end
 
   def handle_info({:direct_message, userid, _message}, state) do

@@ -275,7 +275,13 @@ defmodule Teiserver.TcpServer do
   # Timeout error
   def handle_info({:tcp_error, _port, :etimedout}, %{socket: socket, transport: transport} = state) do
     transport.close(socket)
-    Client.disconnect(state.userid, ":tcp_closed with socket")
+    Client.disconnect(state.userid, ":tcp_closed with tcp_error :etimedout")
+    {:stop, :normal, %{state | userid: nil}}
+  end
+
+  def handle_info({:tcp_error, _port, :ehostunreach}, %{socket: socket, transport: transport} = state) do
+    transport.close(socket)
+    Client.disconnect(state.userid, ":tcp_closed with tcp_error :ehostunreach")
     {:stop, :normal, %{state | userid: nil}}
   end
 

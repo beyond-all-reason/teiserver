@@ -5,6 +5,8 @@ defmodule Teiserver.Bridge.DiscordBridge do
   alias Teiserver.Bridge.BridgeServer
   require Logger
 
+  # TODO: Images/Files
+
   @emoticon_map %{
     "🙂" => ":)",
     "😒" => ":s",
