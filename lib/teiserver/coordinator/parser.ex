@@ -9,6 +9,9 @@ defmodule Teiserver.Coordinator.Parser do
     battle = BattleLobby.get_battle!(battle_id)
 
     cond do
+      String.slice(msg, 0..0) == "£" ->
+        parse_and_handle(userid, msg, battle)
+
       battle.coordinator_mode == false ->
         :say
 
@@ -19,20 +22,15 @@ defmodule Teiserver.Coordinator.Parser do
         :say
 
       true ->
-        case parse_and_handle(userid, msg, battle) do
-          :ok ->
-            :handled
-          :nomatch ->
-            :say
-        end
+        parse_and_handle(userid, msg, battle)
     end
   end
 
-  @spec parse_and_handle(Types.userid(), String.t(), Map.t()) :: :ok
+  @spec parse_and_handle(Types.userid(), String.t(), Map.t()) :: :handled
   defp parse_and_handle(userid, msg, battle) do
     cmd = parse_command(userid, msg)
     Coordinator.cast_consul(battle.id, cmd)
-    :ok
+    :handled
   end
 
   # @spec do_handle(Map.t(), Map.t()) :: :nomatch | :ok
@@ -63,11 +61,32 @@ defmodule Teiserver.Coordinator.Parser do
       remaining: string,
       vote: false,
       force: false,
+      silent: false,
       command: nil,
       senderid: userid
     }
+    |> strip_force_consul
+    |> parse_silence
     |> parse_command_mode
     |> parse_command_name
+  end
+
+  defp strip_force_consul(%{remaining: remaining} = cmd) do
+    case String.slice(remaining, 0..0) == "£" do
+      true ->
+        %{cmd | remaining: String.slice(remaining, 1, 2048)}
+      false ->
+        cmd
+    end
+  end
+
+  defp parse_silence(%{remaining: remaining} = cmd) do
+    case String.slice(remaining, 0..1) == "%!" do
+      true ->
+        %{cmd | silent: true, remaining: String.slice(remaining, 1, 2048)}
+      false ->
+        cmd
+    end
   end
 
   @spec parse_command_mode(Map.t()) :: Map.t()

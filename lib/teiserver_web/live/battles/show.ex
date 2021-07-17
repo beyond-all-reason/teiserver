@@ -261,7 +261,8 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
       command: "reset",
       senderid: bar_user.id,
       force: true,
-      vote: false
+      vote: false,
+      silent: true
     })
     {:noreply, socket}
   end
@@ -273,7 +274,8 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
       remaining: int_parse(target_id),
       senderid: bar_user.id,
       force: true,
-      vote: false
+      vote: false,
+      silent: true
     })
     {:noreply, socket}
   end
@@ -284,7 +286,8 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
       remaining: int_parse(target_id),
       senderid: bar_user.id,
       force: true,
-      vote: false
+      vote: false,
+      silent: true
     })
     {:noreply, socket}
   end
@@ -295,7 +298,8 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
       remaining: int_parse(target_id),
       senderid: bar_user.id,
       force: true,
-      vote: false
+      vote: false,
+      silent: true
     })
     {:noreply, socket}
   end
@@ -308,13 +312,5 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   defp page_title(:show), do: "Show Battle"
   defp index_redirect(socket) do
     {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
-  end
-  defp maybe_index_redirect(socket) do
-    if socket.assigns[:battle] == nil do
-      socket
-        |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))
-    else
-      socket
-    end
   end
 end

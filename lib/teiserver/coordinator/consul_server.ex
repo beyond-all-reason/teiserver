@@ -450,6 +450,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   @spec say_command(Map.t(), Map.t()) :: Map.t()
+  defp say_command(%{silent: true}, state), do: state
   defp say_command(cmd, state) do
     vote = if Map.get(cmd, :vote), do: "cv ", else: ""
     force = if Map.get(cmd, :force), do: "force ", else: ""

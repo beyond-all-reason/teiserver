@@ -108,6 +108,11 @@ Any commands not listed here, if called will passthrough to SPADS as if Coordina
 the only exception is a vote requirement may be added to them if you are not able to force them
 
 TODO: settag key value
+
+
+£!command - Force consul to intercept even when off
+%!command - Don't echo command back to chat
+£%!command - Both of the above
 """
   end
 end
