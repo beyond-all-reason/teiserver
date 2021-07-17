@@ -60,10 +60,14 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end)
     |> String.replace(~r/<#[0-9]+> ?/, "")
     |> convert_emoticons
+    |> String.split("\n")
+    |> Enum.map(fn row ->
+      "#{author.username}: #{row}"
+    end)
 
     from_id = BridgeServer.get_bridge_userid()
     room = bridge_channel_to_room(channel_id)
-    Room.send_message(from_id, room, "#{author.username}: #{new_content}")
+    Room.send_message(from_id, room, new_content)
   end
 
   defp convert_emoticons(msg) do

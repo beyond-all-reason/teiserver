@@ -434,6 +434,17 @@ defmodule Teiserver.Protocols.SpringOut do
     end
   end
 
+  defp do_reply(:chat_message, {from_id, room_name, messages, state_user}) when is_list(messages) do
+    if from_id not in (state_user.ignored || []) do
+      from_name = User.get_username(from_id)
+      messages
+      |> Enum.map(fn msg ->
+        "SAID #{room_name} #{from_name} #{msg}\n"
+      end)
+      |> Enum.join("")
+    end
+  end
+
   defp do_reply(:chat_message, {from_id, room_name, msg, state_user}) do
     if from_id not in (state_user.ignored || []) do
       from_name = User.get_username(from_id)

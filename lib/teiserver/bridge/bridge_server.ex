@@ -36,14 +36,15 @@ defmodule Teiserver.Bridge.BridgeServer do
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
   def handle_info({:new_message, from_id, room_name, message}, state) do
-    room_name = if String.contains?(message, " player(s) needed for battle "), do: "promote", else: room_name
-
     cond do
       from_id == state.userid ->
         # It's us, ignore it
         nil
 
       Map.has_key?(state.rooms, room_name) ->
+        message = if is_list(message), do: Enum.join(message, "\n"), else: message
+
+        room_name = if String.contains?(message, " player(s) needed for battle "), do: "promote", else: room_name
         forward_to_discord(from_id, state.rooms[room_name], message)
 
       true ->
