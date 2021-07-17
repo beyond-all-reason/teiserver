@@ -60,6 +60,7 @@ defmodule TeiserverWeb.Admin.UserController do
           donor: params["donor"],
           contributor: params["contributor"],
           developer: params["developer"],
+          ip: params["ip"],
         ],
         limit: params["limit"] || 50,
         order: params["order"] || "Name (A-Z)"
