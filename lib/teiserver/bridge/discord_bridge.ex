@@ -5,8 +5,6 @@ defmodule Teiserver.Bridge.DiscordBridge do
   alias Teiserver.Bridge.BridgeServer
   require Logger
 
-  # TODO: Images/Files
-
   @emoticon_map %{
     "🙂" => ":)",
     "😒" => ":s",
@@ -28,7 +26,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
   def get_text_to_emoticon_map, do: @text_to_emoticon_map
 
   Events.on_message(:inspect)
-  def inspect(%Alchemy.Message{author: author, channel_id: channel_id} = message) do
+  def inspect(%Alchemy.Message{author: author, channel_id: channel_id, attachments: []} = message) do
     room = bridge_channel_to_room(channel_id)
 
     cond do
@@ -43,8 +41,15 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
   end
 
-  def inspect(event) do
-    Logger.debug("Unhandled DiscordBridge event: #{Kernel.inspect event}")
+  def inspect(message) do
+    cond do
+      message.attachments != [] ->
+        :ok
+
+      # We expected to be able to handle it but didn't, what's happening?
+      true ->
+        Logger.debug("Unhandled DiscordBridge event: #{Kernel.inspect message}")
+    end
   end
 
   defp do_reply(%Alchemy.Message{author: author, content: content, channel_id: channel_id, mentions: mentions}) do
