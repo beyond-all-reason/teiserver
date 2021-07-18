@@ -1,9 +1,10 @@
 defmodule Teiserver.Protocols.Tachyon.BattleIn do
   alias Teiserver.Battle.BattleLobby
-  alias Teiserver.Client
+  alias Teiserver.{Client, Coordinator}
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
+  require Logger
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
   def do_handle("query", %{"query" => _query}, state) do
@@ -40,6 +41,7 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
   end
 
   def do_handle("update_status", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
+  def do_handle("update_status", _, %{battle_id: nil} = state), do: reply(:system, :nobattle, nil, state)
   def do_handle("update_status", new_status, state) do
     updates =
       new_status
@@ -51,7 +53,9 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
       |> Map.merge(updates)
 
     if BattleLobby.allow?(state.userid, :mybattlestatus, state.battle_id) do
-      Client.update(new_client, :client_updated_battlestatus)
+      if Coordinator.allow_battlestatus_update?(new_client, state.battle_id) do
+        Client.update(new_client, :client_updated_battlestatus)
+      end
     end
     state
   end

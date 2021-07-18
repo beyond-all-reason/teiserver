@@ -78,6 +78,10 @@ defmodule Teiserver.Coordinator do
     end
   end
 
+  def allow_battlestatus_update?(client, battle_id) do
+    call_consul(battle_id, {:request_user_change_status, client})
+  end
+
   def handle_in(userid, msg, battle_id) do
     Parser.handle_in(userid, msg, battle_id)
   end

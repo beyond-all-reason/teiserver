@@ -6,10 +6,8 @@ defmodule Teiserver.Protocols.SpringIn do
   https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html
   """
   require Logger
-  alias Teiserver.Client
   alias Teiserver.Battle.BattleLobby
-  alias Teiserver.Room
-  alias Teiserver.User
+  alias Teiserver.{Coordinator, Room, User, Client}
   alias Phoenix.PubSub
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
@@ -1151,7 +1149,9 @@ defmodule Teiserver.Protocols.SpringIn do
         # This one needs a bit more nuance, for now we'll wrap it in this
         # later it's possible we don't want players updating their status
         if BattleLobby.allow?(state.userid, :mybattlestatus, state.battle_id) do
-          Client.update(new_client, :client_updated_battlestatus)
+          if Coordinator.allow_battlestatus_update?(new_client, state.battle_id) do
+            Client.update(new_client, :client_updated_battlestatus)
+          end
         end
 
       _ ->

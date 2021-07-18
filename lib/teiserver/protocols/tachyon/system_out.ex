@@ -13,6 +13,13 @@ defmodule Teiserver.Protocols.Tachyon.SystemOut do
     }
   end
 
+  def do_reply(:nobattle, nil) do
+    %{
+      result: "error",
+      error: "not in a battle"
+    }
+  end
+
   def do_reply(:noauth, nil) do
     %{
       result: "error",

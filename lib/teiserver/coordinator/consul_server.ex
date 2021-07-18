@@ -22,7 +22,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.{Coordinator, Client, User}
   alias Teiserver.Battle.BattleLobby
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Phoenix.PubSub
+  # alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
   @always_allow ~w(status help)
@@ -42,6 +42,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_call({:request_user_join_battle, userid}, _from, state) do
     {:reply, allow_join?(userid, state), state}
+  end
+
+  def handle_call({:request_user_change_status, userid}, _from, state) do
+    {:reply, allow_status_change?(userid, state), state}
   end
 
   # Infos
@@ -69,20 +73,20 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
-  # PubSub handlers
-  def handle_info({:battle_lobby_updated, _, _, _}, state), do: {:noreply, state}
-  def handle_info({:battle_lobby_closed, _}, state), do: {:noreply, state}
-  def handle_info({:add_bot_to_battle_lobby, _lobby_id, _bot}, state), do: {:noreply, state}
-  def handle_info({:update_bot_in_battle_lobby, _lobby_id, _botname, _new_bot}, state), do: {:noreply, state}
-  def handle_info({:remove_bot_from_battle_lobby, _lobby_id, _botname}, state), do: {:noreply, state}
-  def handle_info({:add_user_to_battle_lobby, _lobby_id, userid}, state), do: {:noreply, check_player_battlestatus(userid, :join_battle, state)}
-  def handle_info({:remove_user_from_battle_lobby, _lobby_id, _userid}, state), do: {:noreply, state}
-  def handle_info({:kick_user_from_battle_lobby, _lobby_id, _userid}, state), do: {:noreply, state}
+  # # PubSub handlers
+  # def handle_info({:battle_lobby_updated, _, _, _}, state), do: {:noreply, state}
+  # def handle_info({:battle_lobby_closed, _}, state), do: {:noreply, state}
+  # def handle_info({:add_bot_to_battle_lobby, _lobby_id, _bot}, state), do: {:noreply, state}
+  # def handle_info({:update_bot_in_battle_lobby, _lobby_id, _botname, _new_bot}, state), do: {:noreply, state}
+  # def handle_info({:remove_bot_from_battle_lobby, _lobby_id, _botname}, state), do: {:noreply, state}
+  # def handle_info({:add_user_to_battle_lobby, _lobby_id, userid}, state), do: {:noreply, check_player_battlestatus(userid, :join_battle, state)}
+  # def handle_info({:remove_user_from_battle_lobby, _lobby_id, _userid}, state), do: {:noreply, state}
+  # def handle_info({:kick_user_from_battle_lobby, _lobby_id, _userid}, state), do: {:noreply, state}
 
-  def handle_info({:consul_server_updated, _, _}, state), do: {:noreply, state}
+  # def handle_info({:consul_server_updated, _, _}, state), do: {:noreply, state}
 
-  # Client
-  def handle_info({:updated_client_status, client, reason}, state), do: {:noreply, check_player_battlestatus(client, reason, state)}
+  # # Client
+  # def handle_info({:updated_client_status, client, reason}, state), do: {:noreply, check_player_battlestatus(client, reason, state)}
 
   def handle_info(cmd = %{command: _}, state) do
     new_state = case allow_command?(cmd, state) do
@@ -391,25 +395,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state
   end
 
-  defp check_player_battlestatus(nil, _, state), do: state
-  defp check_player_battlestatus(_, :join_battle, state), do: state
-  defp check_player_battlestatus(%{userid: userid} = client, reason, state) do
-    # if client.userid == 3 do
-    #   IO.puts "check_player_battlestatus"
-    #   IO.puts reason
-    #   # IO.inspect client
-    #   IO.inspect get_blacklist(userid, state.blacklist)
-    #   IO.inspect get_whitelist(userid, state.whitelist)
-    #   IO.inspect on_friendlist?(userid, state.battle_id)
-    #   IO.puts ""
-
-    # end
-
-    state
+  defp allow_status_change?(userid, state) when is_integer(userid) do
+    client = Client.get_client_by_id(userid)
+    allow_status_change?(client, state)
   end
-  defp check_player_battlestatus(userid, reason, state) do
-    check_player_battlestatus(Client.get_client_by_id(userid), reason, state)
+  defp allow_status_change?(%{userid: userid} = client, state) do
+    list_status = get_list_status(userid, state)
+
+    cond do
+      list_status != :player and client.player == true -> false
+      true -> true
+    end
   end
+
 
   defp get_blacklist(userid, blacklist_map) do
     Map.get(blacklist_map, userid, :player)
@@ -422,13 +420,26 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  defp on_friendlist?(userid, battle_id) do
-    battle = BattleLobby.get_battle!(battle_id)
-    IO.puts ""
-    IO.inspect battle.players
-    IO.puts ""
+  defp on_friendlist?(_userid, _battle_id) do
+    # battle = BattleLobby.get_battle!(battle_id)
+    # IO.puts ""
+    # IO.inspect battle.players
+    # IO.puts ""
 
     true
+  end
+
+  defp get_list_status(userid, state) do
+    case state.gatekeeper do
+      :blacklist -> get_blacklist(userid, state.blacklist)
+      :whitelist -> get_whitelist(userid, state.whitelist)
+      :friends ->
+        if on_friendlist?(userid, state.battle_id) do
+          :player
+        else
+          :spectator
+        end
+    end
   end
 
   defp allow_join?(userid, state) do
@@ -571,7 +582,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def init(opts) do
     battle_id = opts[:battle_id]
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_battle_lobby_updates:#{battle_id}")
+    # :ok = PubSub.subscribe(Central.PubSub, "teiserver_battle_lobby_updates:#{battle_id}")
 
     # Update the queue pids cache to point to this process
     ConCache.put(:teiserver_consul_pids, battle_id, self())

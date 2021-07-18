@@ -38,6 +38,8 @@ defmodule Teiserver.Account.UserLib do
   end
 
   @spec _search(Ecto.Query.t(), atom, any) :: Ecto.Query.t()
+  def _search(query, _, ""), do: query
+  def _search(query, _, nil), do: query
   def _search(query, _, "Any"), do: query
 
   def _search(query, :exact_name, value) do

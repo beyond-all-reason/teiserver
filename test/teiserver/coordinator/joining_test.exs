@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Coordinator.JoiningTest do
+defmodule Teiserver.Coordinator.JoiningTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.BattleLobby
   alias Teiserver.Common.PubsubListener

@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Coordinator.CommandsTest do
+defmodule Teiserver.Coordinator.CommandsTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.BattleLobby
   alias Teiserver.Common.PubsubListener
@@ -197,6 +197,16 @@ defmodule Teiserver.Protocols.Coordinator.CommandsTest do
     assert reply["cmd"] == "s.communication.direct_message"
     assert reply["sender"] == Coordinator.get_coordinator_userid()
     assert reply["message"] == ["Status for battle ##{battle_id}", "Gatekeeper: blacklist"]
+  end
+
+  test "help", %{host: host, hsocket: hsocket} do
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!help"}
+    _tachyon_send(hsocket, data)
+
+    reply = _tachyon_recv(hsocket)
+    assert reply["cmd"] == "s.communication.direct_message"
+    assert reply["sender"] == Coordinator.get_coordinator_userid()
+    assert reply["message"] == ["Command list can currently be found at https://github.com/beyond-all-reason/teiserver/blob/master/lib/teiserver/coordinator/coordinator_lib.ex"]
   end
 
   test "pull user", %{battle_id: battle_id, host: host, hsocket: hsocket} do
