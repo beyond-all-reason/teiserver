@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
   alias Central.Helpers.TimexHelper
+  alias Teiserver.Telemetry.{ExportClientAuthEventsTask, ExportClientUnauthEventsTask, ExportClientAuthPropertiesTask, ExportClientUnauthPropertiesTask}
 
   plug(AssignPlug,
     sidemenu_active: ["teiserver", "teiserver_admin"]
@@ -126,38 +127,16 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> send_resp(200, data)
   end
 
-  def export(conn, %{"table_name" => "events", "auth" => "auth"}) do
-    headings = [[
-      "Event",
-      "Timestamp",
-      "Value",
-      "Userid"
-    ]]
-    |> CSV.encode()
-    |> Enum.to_list
+  def export(conn, %{"table_name" => "events", "auth" => "auth"} = params) do
+    params = Map.merge(params, %{"output-format" => "csv"})
 
-    result = Telemetry.list_client_events(
-      preload: [:event_type],
-      limit: :infinity
-    )
-    |> Enum.map(fn p ->
-      [
-        p.event_type.name,
-        TimexHelper.date_to_str(p.timestamp, format: :ymd_hms),
-        Jason.encode!(p.value),
-        p.user_id
-      ]
-    end)
-    |> CSV.encode()
-    |> Enum.to_list
-
-    data = [headings] ++ result
-    |> to_string
-
-    conn
-    |> put_resp_content_type("text/csv")
-    |> put_resp_header("content-disposition", "attachment; filename=\"client_events.csv\"")
-    |> send_resp(200, data)
+    case params["output-format"] do
+      "csv" ->
+        conn
+        |> put_resp_content_type("text/csv")
+        |> put_resp_header("content-disposition", "attachment; filename=\"client_events.csv\"")
+        |> send_resp(200, ExportClientAuthEventsTask.perform(params))
+    end
   end
 
   # @spec day_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()

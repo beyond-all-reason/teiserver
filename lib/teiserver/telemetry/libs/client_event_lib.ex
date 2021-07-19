@@ -38,6 +38,16 @@ defmodule Teiserver.Telemetry.ClientEventLib do
       where: client_events.id in ^id_list
   end
 
+  def _search(query, :between, {start_date, end_date}) do
+    from client_events in query,
+      where: between(client_events.timestamp, ^start_date, ^end_date)
+  end
+
+  def _search(query, :event_type_id, event_type_id) do
+    from client_events in query,
+      where: client_events.event_type_id == ^event_type_id
+  end
+
   def _search(query, :simple_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
@@ -73,6 +83,7 @@ defmodule Teiserver.Telemetry.ClientEventLib do
   def preload(query, nil), do: query
   def preload(query, preloads) do
     query = if :event_type in preloads, do: _preload_event_types(query), else: query
+    query = if :user in preloads, do: _preload_users(query), else: query
     query
   end
 
@@ -80,5 +91,11 @@ defmodule Teiserver.Telemetry.ClientEventLib do
     from client_events in query,
       left_join: event_types in assoc(client_events, :event_type),
       preload: [event_type: event_types]
+  end
+
+  def _preload_users(query) do
+    from client_events in query,
+      left_join: users in assoc(client_events, :user),
+      preload: [user: users]
   end
 end

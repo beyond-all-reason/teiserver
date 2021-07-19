@@ -1,0 +1,3 @@
+defmodule Teiserver.Telemetry.ExportClientAuthPropertiesTask do
+
+end

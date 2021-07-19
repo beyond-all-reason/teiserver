@@ -69,6 +69,23 @@
                 <option value="unauth">Unauthenticated</option>
               </select>
             </div>
+
+            <div class='col-xl-4 col-lg-6 col-md-12'>
+              <label for='timeframe' class='control-label'>Timeframe</label>
+              <%= central_component "icon_dropdown",
+                name: "timeframe",
+                id: "timeframe",
+                enumerable: (for p <- Central.Helpers.DatePresets.short_ranges(), do: %{id: p, name: p})
+              %>
+            </div>
+
+            <div class='col-xl-4 col-lg-6 col-md-12'>
+              <label for='output-format' class='control-label'>Output format</label>
+              <select class="form-control" name="output-format" id="output-format">
+                <!--<option value="graph">Graph</option>-->
+                <option value="export">File export</option>
+              </select>
+            </div>
           </div>
 
           <div class='row page-row'>
