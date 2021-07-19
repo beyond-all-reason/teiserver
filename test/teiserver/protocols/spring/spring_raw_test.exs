@@ -112,7 +112,10 @@ defmodule Teiserver.SpringRawTest do
 
   test "CONFIRMAGREEMENT", %{socket: socket} do
     user = new_user()
-    user = User.update_user(%{user | verification_code: 123456, verified: false})
+    user = User.update_user(%{user | verification_code: 123456, verified: false}, persist: true)
+    query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
+    Ecto.Adapters.SQL.query(Repo, query, [])
+    Teiserver.User.recache_user(user.id)
     _ = _recv_raw(socket)
 
     # If we try to login as them we should get a specific failure

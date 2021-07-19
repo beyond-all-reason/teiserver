@@ -696,6 +696,7 @@ defmodule Teiserver.User do
 
       {:ok, db_user, _claims} ->
         user = get_user_by_id(db_user.id)
+        user_age = Timex.diff(Timex.now(), user.inserted_at, :seconds)
 
         cond do
           user.rename_in_progress ->
@@ -711,7 +712,7 @@ defmodule Teiserver.User do
           is_banned?(user) ->
             {:error, "Banned"}
 
-          user.verified == false ->
+          user.verified == false and user_age > Application.get_env(:central, Teiserver)[:verification_holiday] ->
             {:error, "Unverified", user.id}
 
           Client.get_client_by_id(user.id) != nil ->
@@ -733,6 +734,8 @@ defmodule Teiserver.User do
         {:error, "No user found for '#{username}'"}
 
       user ->
+        user_age = Timex.diff(Timex.now(), user.inserted_at, :seconds)
+
         cond do
           user.rename_in_progress ->
             {:error, "Rename in progress, wait 5 seconds"}
@@ -750,7 +753,7 @@ defmodule Teiserver.User do
           is_banned?(user) ->
             {:error, "Banned"}
 
-          user.verified == false ->
+          user.verified == false and user_age > Application.get_env(:central, Teiserver)[:verification_holiday] ->
             {:error, "Unverified", user.id}
 
           Client.get_client_by_id(user.id) != nil ->

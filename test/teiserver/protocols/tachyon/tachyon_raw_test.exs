@@ -106,6 +106,51 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     token = reply["token"]
     assert reply == %{"cmd" => "s.auth.get_token", "result" => "success", "token" => token}
 
+    # Now do the login, it should work as we only just created the user
+    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a"}
+    _tachyon_send(socket, data)
+    reply = _tachyon_recv(socket)
+    assert match?(%{"cmd" => "s.auth.login", "result" => "success"}, reply)
+  end
+
+  test "register, verify and auth", %{socket: socket} do
+    # Swap to Tachyon
+    _ = _recv_raw(socket)
+    _send_raw(socket, "TACHYON\n")
+    reply = _recv_raw(socket)
+    assert reply =~ "OK cmd=TACHYON\n"
+
+    # Not actually registering just yet since that's not implemented...
+
+    # Create the user manually for now
+    user =
+      GeneralTestLib.make_user(%{
+        "name" => "new_test_user_tachyon_token",
+        "email" => "new_test_user_tachyon_token@",
+        "password" => "token_password",
+        "data" => %{
+          "verified" => false,
+          "verification_code" => 123456 |> to_string
+        }
+      })
+    query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
+    Ecto.Adapters.SQL.query(Repo, query, [])
+    Teiserver.User.recache_user(user.id)
+
+    # Bad password but also test msg_id continuance
+    data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}
+    _tachyon_send(socket, data)
+    reply = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.auth.get_token", "result" => "failure", "reason" => "Invalid credentials", "msg_id" => 555}
+
+    # Good password
+    data = %{cmd: "c.auth.get_token", password: "token_password", email: user.email}
+    _tachyon_send(socket, data)
+    reply = _tachyon_recv(socket)
+    assert Map.has_key?(reply, "token")
+    token = reply["token"]
+    assert reply == %{"cmd" => "s.auth.get_token", "result" => "success", "token" => token}
+
     # Now do the login
     data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a"}
     _tachyon_send(socket, data)

@@ -40,6 +40,11 @@ defmodule Teiserver.TcpServerTest do
     reply = _recv_raw(socket)
     assert reply == "REGISTRATIONACCEPTED\n"
 
+    user = User.get_user_by_name(username)
+    query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
+    Ecto.Adapters.SQL.query(Repo, query, [])
+    Teiserver.User.recache_user(user.id)
+
     _send_raw(
       socket,
       "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"

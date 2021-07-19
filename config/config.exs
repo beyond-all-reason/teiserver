@@ -45,8 +45,16 @@ config :central, Teiserver,
   enable_benchmark: false,
   enable_hooks: true,
   autologin: false,
+
+  # Heatbeat interval is ms
   heartbeat_interval: 30_000,
-  heartbeat_timeout: 45_000,
+  # Heartbeat timeout is seconds
+  heartbeat_timeout: 45,
+
+  # verification holiday is the time after registering during which a user can login without
+  # being verified. Measured in seconds
+  verification_holiday: (60 * 60) * 3, # 3 hours
+
   game_name: "Spring game",
   game_name_short: "SG",
   main_website: "https://site.com",
