@@ -85,6 +85,8 @@ defmodule TeiserverWeb.Router do
         get("/day_metrics/today", MetricController, :day_metrics_today)
         get("/day_metrics/show/:date", MetricController, :day_metrics_show)
         get("/day_metrics/export/:date", MetricController, :day_metrics_export)
+        get("/day_metrics/graph", MetricController, :day_metrics_graph)
+        post("/day_metrics/graph", MetricController, :day_metrics_graph)
         get("/day_metrics", MetricController, :day_metrics_list)
         post("/day_metrics", MetricController, :day_metrics_list)
 

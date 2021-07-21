@@ -17,3 +17,13 @@
   bsname: bsname,
   url: Routes.ts_reports_metric_path(@conn, :day_metrics_today)
 %>
+
+
+<%= central_component "section_menu_button",
+  name: "graph",
+  label: "Graph",
+  active: @active,
+  icon: "far fa-chart-line-up",
+  bsname: bsname,
+  url: Routes.ts_reports_metric_path(@conn, :day_metrics_graph)
+%>

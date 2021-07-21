@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Report.MetricController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
   alias Central.Helpers.TimexHelper
+  alias Teiserver.Telemetry.GraphDayLogsTask
 
   plug(AssignPlug,
     sidemenu_active: ["teiserver"]
@@ -76,5 +77,43 @@ defmodule TeiserverWeb.Report.MetricController do
       |> Telemetry.get_telemetry_day_log
 
     conn
+  end
+
+  def day_metrics_graph(conn, params) do
+    logs =
+      Telemetry.list_telemetry_day_logs(
+        # search: [user_id: params["user_id"]],
+        # joins: [:user],
+        order: "Newest first",
+        limit: 31
+      )
+      |> Enum.reverse()
+
+
+    field_list = case Map.get(params, "fields", "average_users") do
+      "average_users" ->
+        ["average_user_counts.player", "average_user_counts.spectator", "average_user_counts.lobby", "average_user_counts.menu", "average_user_counts.total"]
+
+      "peak_users" ->
+        ["peak_user_counts.player", "peak_user_counts.spectator", "peak_user_counts.lobby", "peak_user_counts.menu", "peak_user_counts.total"]
+
+      "unique_users" ->
+        ["aggregates.stats.unique_users", "aggregates.stats.unique_players"]
+
+      "minutes" ->
+        ["aggregates.minutes.player", "aggregates.minutes.spectator", "aggregates.minutes.lobby", "aggregates.minutes.menu", "aggregates.minutes.total"]
+
+      _ -> #"battles"
+        ["battles.in_progress", "battles.lobby", "battles.total"]
+    end
+
+    extra_params = %{"field_list" => field_list}
+
+    data = GraphDayLogsTask.perform(logs, Map.merge(params, extra_params))
+
+    conn
+    |> assign(:params, params)
+    |> assign(:data, data)
+    |> render("day_metrics_graph.html")
   end
 end

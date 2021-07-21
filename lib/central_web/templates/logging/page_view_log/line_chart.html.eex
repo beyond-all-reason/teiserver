@@ -6,7 +6,7 @@
     tint_page("<%= fg %>", "<%= bg %>");
 
     $('.datepicker').datepicker({
-      format: "dd/mm/yyyy" 
+      format: "dd/mm/yyyy"
     });
 
     $("#centaur-user-search").val('<%= @params["centaur_user"] %>');
