@@ -1,4 +1,4 @@
-defmodule Teiserver.Telemetry.ExportClientAuthEventsTask do
+defmodule Teiserver.Telemetry.ExportPropertiesTask do
   alias Teiserver.Telemetry
   alias Central.Helpers.{TimexHelper, DatePresets}
 

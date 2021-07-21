@@ -48,7 +48,8 @@
               <%= central_component "icon_dropdown",
                 name: "event_type",
                 id: "event_type",
-                enumerable: @event_types
+                enumerable: @event_types,
+                insert_blank: %{name: "All events", id: nil}
               %>
             </div>
 
@@ -57,14 +58,15 @@
               <%= central_component "icon_dropdown",
                 name: "property_type",
                 id: "property_type",
-                enumerable: @property_types
+                enumerable: @property_types,
+                insert_blank: %{name: "All properties", id: nil}
               %>
             </div>
 
             <div class='col-xl-4 col-lg-6 col-md-12'>
               <label for='auth-dropdown' class='control-label'>Auth type</label>
               <select class="form-control" name="auth" id="auth-dropdown">
-                <%# <option value="auth">Both</option> %>
+                <option value="combined">Combined</option>
                 <option value="auth">Authenticated</option>
                 <option value="unauth">Unauthenticated</option>
               </select>
@@ -83,7 +85,7 @@
               <label for='output-format' class='control-label'>Output format</label>
               <select class="form-control" name="output-format" id="output-format">
                 <!--<option value="graph">Graph</option>-->
-                <option value="export">File export</option>
+                <option value="file-export">File export</option>
               </select>
             </div>
           </div>
