@@ -5,7 +5,7 @@
       icon: Teiserver.Telemetry.ClientEventLib.icon(),
       name: "client_event",
       text: "Client events",
-      link: Routes.ts_reports_client_event_path(@conn, :index)
+      link: Routes.ts_reports_client_event_path(@conn, :summary)
     %>
 
     <%=

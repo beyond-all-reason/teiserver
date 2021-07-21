@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Lobby.GeneralControllerTest do
+defmodule TeiserverWeb.General.GeneralControllerTest do
   use CentralWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
