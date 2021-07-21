@@ -1,7 +1,6 @@
 defmodule TeiserverWeb.Report.ClientEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Central.Helpers.TimexHelper
   alias Teiserver.Telemetry.{ExportEventsTask, ExportPropertiesTask}
 
   plug(AssignPlug,
@@ -132,72 +131,16 @@ defmodule TeiserverWeb.Report.ClientEventController do
   end
 
   @spec export_post(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def export_post(conn, %{"table_name" => "properties", "auth" => "unauth"}) do
-    headings = [[
-      "Event",
-      "Timestamp",
-      "Value",
-      "Hash"
-    ]]
-    |> CSV.encode()
-    |> Enum.to_list
+  def export_post(conn, %{"table_name" => "properties"} = params) do
+    case params["output-format"] do
+      "file-export" ->
+        data = ExportPropertiesTask.perform(params)
 
-    result = Telemetry.list_unauth_properties(
-      preload: [:property_type],
-      limit: :infinity
-    )
-    |> Enum.map(fn p ->
-      [
-        p.property_type.name,
-        TimexHelper.date_to_str(p.last_updated, format: :ymd_hms),
-        p.value,
-        p.hash
-      ]
-    end)
-    |> CSV.encode()
-    |> Enum.to_list
-
-    data = [headings] ++ result
-    |> to_string
-
-    conn
-    |> put_resp_content_type("text/csv")
-    |> put_resp_header("content-disposition", "attachment; filename=\"unauth_properties.csv\"")
-    |> send_resp(200, data)
-  end
-
-  def export_post(conn, %{"table_name" => "properties", "auth" => "auth"}) do
-    headings = [[
-      "Event",
-      "Timestamp",
-      "Value",
-      "Userid"
-    ]]
-    |> CSV.encode()
-    |> Enum.to_list
-
-    result = Telemetry.list_client_properties(
-      preload: [:property_type],
-      limit: :infinity
-    )
-    |> Enum.map(fn p ->
-      [
-        p.property_type.name,
-        TimexHelper.date_to_str(p.last_updated, format: :ymd_hms),
-        p.value,
-        p.user_id
-      ]
-    end)
-    |> CSV.encode()
-    |> Enum.to_list
-
-    data = [headings] ++ result
-    |> to_string
-
-    conn
-    |> put_resp_content_type("text/csv")
-    |> put_resp_header("content-disposition", "attachment; filename=\"client_properties.csv\"")
-    |> send_resp(200, data)
+        conn
+        |> put_resp_content_type("text/csv")
+        |> put_resp_header("content-disposition", "attachment; filename=\"events.csv\"")
+        |> send_resp(200, data)
+    end
   end
 
   def export_post(conn, %{"table_name" => "events"} = params) do

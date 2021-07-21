@@ -2,56 +2,79 @@ defmodule Teiserver.Telemetry.ExportPropertiesTask do
   alias Teiserver.Telemetry
   alias Central.Helpers.{TimexHelper, DatePresets}
 
-  def csv_headings do
-    [[
-      "Event",
-      "Timestamp",
-      "Value",
-      "Userid"
-    ]]
-    |> CSV.encode()
-    |> Enum.to_list
-  end
-
-  # Example params
-  # %{
-  #   "auth" => "auth",
-  #   "event_type" => "1",
-  #   "output-format" => "graph",
-  #   "property_type" => "1",
-  #   "table_name" => "events",
-  #   "timeframe" => "This week"
-  # }
-
   def perform(params) do
     do_query(params)
     |> do_output(params)
+    |> add_csv_headings
   end
 
-  defp do_query(%{"event_type" => event_type, "timeframe" => timeframe}) do
+  defp add_csv_headings(output) do
+    headings = [[
+      "Username",
+      "Hash",
+      "Property",
+      "Last updated",
+      "Value"
+    ]]
+    |> CSV.encode()
+    |> Enum.to_list
+
+    headings ++ output
+  end
+
+  defp do_query(%{"property_type" => property_type, "timeframe" => timeframe, "auth" => auth}) do
     {start_date, end_date} = DatePresets.parse(timeframe, "", "")
 
     start_date = Timex.to_datetime(start_date)
     end_date = Timex.to_datetime(end_date)
 
-    Telemetry.list_client_events(
-      preload: [:event_type, :user],
+    case auth do
+      "auth" ->
+        query_auth(property_type, start_date, end_date)
+      "unauth" ->
+        query_unauth(property_type, start_date, end_date)
+      "combined" ->
+        query_auth(property_type, start_date, end_date) ++ query_unauth(property_type, start_date, end_date)
+    end
+  end
+
+  defp query_auth(property_type, start_date, end_date) do
+    Telemetry.list_client_properties(
+      preload: [:property_type, :user],
       search: [
         between: {start_date, end_date},
-        event_type_id: event_type
+        property_type_id: property_type
       ],
       limit: :infinity
     )
   end
 
-  defp do_output(data, %{"output-format" => "csv"}) do
+  defp query_unauth(property_type, start_date, end_date) do
+    Telemetry.list_unauth_properties(
+      preload: [:property_type],
+      search: [
+        between: {start_date, end_date},
+        property_type_id: property_type
+      ],
+      limit: :infinity
+    )
+  end
+
+  defp do_output(data, _params) do
     data
-    |> Stream.map(fn p ->
+    |> Stream.map(fn property ->
+      {username, hash} = if Map.has_key?(property, :user) do
+        {property.user.name, nil}
+      else
+        {nil, property.hash}
+      end
+
       [
-        p.user.name,
-        p.event_type.name,
-        TimexHelper.date_to_str(p.timestamp, format: :ymd_hms),
-        Jason.encode!(p.value)
+        username,
+        hash,
+        property.property_type.name,
+        TimexHelper.date_to_str(property.last_updated, format: :ymd_hms),
+        property.value
       ]
     end)
     |> CSV.encode()

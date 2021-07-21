@@ -87,6 +87,7 @@ defmodule Teiserver.Telemetry.ClientPropertyLib do
   def preload(query, nil), do: query
   def preload(query, preloads) do
     query = if :property_type in preloads, do: _preload_property_types(query), else: query
+    query = if :user in preloads, do: _preload_users(query), else: query
     query
   end
 
@@ -94,5 +95,11 @@ defmodule Teiserver.Telemetry.ClientPropertyLib do
     from client_properties in query,
       left_join: property_types in assoc(client_properties, :property_type),
       preload: [property_type: property_types]
+  end
+
+  def _preload_users(query) do
+    from client_properties in query,
+      left_join: users in assoc(client_properties, :user),
+      preload: [user: users]
   end
 end
