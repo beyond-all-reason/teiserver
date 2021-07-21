@@ -7,14 +7,14 @@ defmodule TeiserverWeb.Router do
 
   defmacro teiserver_routes() do
     quote do
-      scope "/", TeiserverWeb.Lobby, as: :ts_lobby do
+      scope "/", TeiserverWeb.General, as: :ts_general do
         pipe_through([:browser, :blank_layout])
 
         get("/gdpr", GeneralController, :gdpr)
         get("/privacy_policy", GeneralController, :gdpr)
       end
 
-      scope "/teiserver", TeiserverWeb.Lobby, as: :ts_lobby do
+      scope "/teiserver", TeiserverWeb.General, as: :ts_general do
         pipe_through([:browser, :admin_layout, :protected])
 
         get("/", GeneralController, :index)
@@ -76,6 +76,25 @@ defmodule TeiserverWeb.Router do
         live("/lobbies/:id", Show, :show)
       end
 
+      # REPORTING
+      scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
+        pipe_through([:browser, :admin_layout, :protected])
+
+        get("/", GeneralController, :index)
+
+        get("/day_metrics/today", MetricController, :day_metrics_today)
+        get("/day_metrics/show/:date", MetricController, :day_metrics_show)
+        get("/day_metrics/export/:date", MetricController, :day_metrics_export)
+        get("/day_metrics", MetricController, :day_metrics_list)
+        post("/day_metrics", MetricController, :day_metrics_list)
+
+        get("/client_events", ClientEventController, :export_form)
+        post("/client_events/export", ClientEventController, :export_post)
+        get("/client_events/summary", ClientEventController, :summary)
+
+        # post("/client_events", ClientEventController, :day_metrics_list)
+        # post("/client_events", ClientEventController, :day_metrics_list)
+      end
 
       # API
       scope "/teiserver/api", TeiserverWeb.API do
@@ -108,21 +127,6 @@ defmodule TeiserverWeb.Router do
 
         live("/agent", Index, :index)
         # live("/agent/:id", Show, :show)
-      end
-
-      scope "/teiserver/telemetry", TeiserverWeb.Telemetry, as: :ts_admin do
-        pipe_through([:browser, :admin_layout, :protected])
-
-        get("/day_metrics/today", MetricController, :day_metrics_today)
-        get("/day_metrics/show/:date", MetricController, :day_metrics_show)
-        get("/day_metrics/export/:date", MetricController, :day_metrics_export)
-        get("/day_metrics", MetricController, :day_metrics_list)
-        post("/day_metrics", MetricController, :day_metrics_list)
-
-        get("/client_events", ClientEventController, :index)
-        post("/client_events/export", ClientEventController, :export)
-        # post("/client_events", ClientEventController, :day_metrics_list)
-        # post("/client_events", ClientEventController, :day_metrics_list)
       end
 
       scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do

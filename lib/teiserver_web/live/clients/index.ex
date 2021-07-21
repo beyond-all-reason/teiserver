@@ -6,6 +6,7 @@ defmodule TeiserverWeb.ClientLive.Index do
   alias Teiserver.User
   alias Teiserver.Client
   alias Teiserver.ClientLib
+  alias Teiserver.Account.UserLib
 
   @extra_menu_content """
   &nbsp;&nbsp;&nbsp;
@@ -32,7 +33,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Clients", url: "/teiserver/admin/client")
       |> assign(:sidemenu_active, "teiserver")
-      |> assign(:colours, ClientLib.colours())
+      |> assign(:colours, UserLib.colours())
       |> assign(:clients, clients)
       |> assign(:client_ids, Map.keys(clients))
       |> assign(:users, users)

@@ -1,6 +1,6 @@
 <% {_fg, _bg, bsname} = @colours %>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{active: "clients", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{active: "users", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
 
 <div class="row">
   <div class="col-md-12">

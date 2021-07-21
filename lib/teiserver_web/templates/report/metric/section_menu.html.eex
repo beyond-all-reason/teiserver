@@ -1,0 +1,19 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= central_component "section_menu_button",
+  name: "day_metrics",
+  label: "Daily metrics",
+  active: @active,
+  icon: "far fa-bars",
+  bsname: bsname,
+  url: Routes.ts_reports_metric_path(@conn, :day_metrics_list)
+%>
+
+<%= central_component "section_menu_button",
+  name: "today",
+  label: "Todays metrics",
+  active: @active,
+  icon: "far fa-waveform",
+  bsname: bsname,
+  url: Routes.ts_reports_metric_path(@conn, :day_metrics_today)
+%>

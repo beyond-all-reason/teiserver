@@ -1,10 +1,10 @@
-defmodule TeiserverWeb.Telemetry.MetricController do
+defmodule TeiserverWeb.Report.MetricController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
   alias Central.Helpers.TimexHelper
 
   plug(AssignPlug,
-    sidemenu_active: ["teiserver", "teiserver_admin"]
+    sidemenu_active: ["teiserver"]
   )
 
   plug Bodyguard.Plug.Authorize,

@@ -152,6 +152,9 @@ defmodule Teiserver.TcpServer do
     diff = System.system_time(:second) - state.last_msg
 
     if diff > Application.get_env(:central, Teiserver)[:heartbeat_timeout] do
+      if state.username do
+        Logger.error("Heartbeat timeout for #{state.username}")
+      end
       {:stop, :normal, state}
     else
       {:noreply, state}

@@ -4,7 +4,7 @@
     label: "Teiserver",
     active: assigns[:sidemenu_active],
     lib: Teiserver,
-    url: Routes.ts_lobby_general_path(@conn, :index)
+    url: Routes.ts_general_general_path(@conn, :index)
   %>
 
   <%= central_component "sidemenu_item",

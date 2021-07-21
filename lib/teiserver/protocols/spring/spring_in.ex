@@ -599,7 +599,6 @@ defmodule Teiserver.Protocols.SpringIn do
         end
 
       _ ->
-        Logger.error(data)
         reply(:no, {"c.moderation.report_user", "bad command format"}, msg_id, state)
     end
   end

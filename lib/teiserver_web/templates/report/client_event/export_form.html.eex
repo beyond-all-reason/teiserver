@@ -1,6 +1,6 @@
 <% {_fg, _bg, bsname} = colours() %>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "tools"}) %>
+<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "client_events"}) %>
 
 <script type="text/javascript" charset="utf-8">
   function type_table() {
@@ -24,15 +24,15 @@
   <div class="col-md-12">
     <div class="card border-<%= bsname %>">
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.ToolView, "section_menu.html", Map.merge(assigns, %{
+        <%= render TeiserverWeb.Report.ClientEventView, "section_menu.html", Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
-            active: "client_event"
+            active: "export_form"
           })
         %>
         <br /><br />
 
-        <form action='<%= Routes.ts_admin_client_event_path(@conn, :export) %>' method='post' class=''>
+        <form action='<%= Routes.ts_reports_client_event_path(@conn, :export_post) %>' method='post' class=''>
           <input type='hidden' name='_csrf_token' value='<%= get_csrf_token() %>' />
           <div class='row'>
             <div class='col-xl-4 col-lg-6 col-md-12'>

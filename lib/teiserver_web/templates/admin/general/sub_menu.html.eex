@@ -23,14 +23,6 @@
         <div class="row">
           <%= if allow?(@conn, "teiserver.moderator.account") do %>
             <%= central_component "sub_menu_icon",
-              name: "clients",
-              label: "Clients",
-              active: @active,
-              url: Routes.ts_admin_client_index_path(@conn, :index),
-              lib: Teiserver.ClientLib
-            %>
-
-            <%= central_component "sub_menu_icon",
               name: "users",
               label: "Users",
               active: @active,

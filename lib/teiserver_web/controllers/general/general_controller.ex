@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Lobby.GeneralController do
+defmodule TeiserverWeb.General.GeneralController do
   use CentralWeb, :controller
 
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')

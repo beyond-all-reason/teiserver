@@ -1,4 +1,7 @@
-### V1.0 (in progress)
+###### Next version (in progress)
+
+
+### V1.0
 - Parity with Uberserver as required by Chobby
 - Admin web interface improvements to Client and Battle screens
 - Flag overrides can be set by moderators and players can choose not to display any flag
@@ -7,6 +10,9 @@
 - [Guides](/documents/guides) for local and production
 - [Design documents](/documents/designs) for Clans, Reputation, Teiserver Bossmode Tournaments
 - [Protocol proposal](/documents/spring) for Matchmaking and Parties
+- Discord bridge
+- Server metrics
+- Client telemetry
 
 ### [Beta](https://github.com/Teifion/teiserver/releases/tag/beta)
 - Web interface

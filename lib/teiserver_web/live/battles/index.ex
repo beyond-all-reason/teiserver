@@ -31,7 +31,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Index do
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, BattleLobbyLib.colours())
       |> assign(:battles, BattleLobby.list_battles())
-      |> assign(:menu_override, Routes.ts_lobby_general_path(socket, :index))
+      |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:extra_menu_content, extra_content)
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}

@@ -10,30 +10,3 @@
     }
   });
 </script>
-
-<%= central_component "section_menu_button",
-  name: "day_metrics",
-  label: "Day metrics",
-  active: @active,
-  icon: Teiserver.Telemetry.TelemetryDayLogLib.icon(),
-  bsname: bsname,
-  url: Routes.ts_admin_metric_path(@conn, :day_metrics_list)
-%>
-
-<%= central_component "section_menu_button",
-  name: "today",
-  label: "Today",
-  active: @active,
-  icon: "far fa-waveform",
-  bsname: bsname,
-  url: Routes.ts_admin_metric_path(@conn, :day_metrics_today)
-%>
-
-<%= central_component "section_menu_button",
-  name: "client_event",
-  label: "Client events",
-  active: @active,
-  icon: Teiserver.Telemetry.ClientEventLib.icon(),
-  bsname: bsname,
-  url: Routes.ts_admin_client_event_path(@conn, :index)
-%>

@@ -5,7 +5,7 @@
       icon: Teiserver.icon(),
       name: "teiserver",
       text: "Teiserver",
-      link: Routes.ts_lobby_general_path(@conn, :index)
+      link: Routes.ts_general_general_path(@conn, :index)
     %>
   <% end %>
 </div>

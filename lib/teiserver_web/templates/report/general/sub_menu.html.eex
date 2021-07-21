@@ -1,0 +1,47 @@
+<% {fg, _bg, _bsname} = colours(@active) %>
+
+<style>
+  .sub-menu-icon a:hover {
+    border-bottom: 5px solid <%= fg %>;
+    color: <%= fg %>;
+  }
+
+  .sub-menu-icon .active {
+    border-bottom-color: <%= fg %>;
+  }
+
+  .sub-menu .active, .sub-menu .active:hover {
+    color: <%= fg %>;
+  }
+</style>
+
+<div class="row sub-menu">
+  <div class="col-md-12">
+    <div class="card card-default">
+      <div class="card-body" style="padding: 0 15px;">
+
+        <div class="row">
+          <%= if allow?(@conn, "teiserver.admin") do %>
+            <%= central_component "sub_menu_icon",
+              name: "client_events",
+              label: "Client events",
+              active: @active,
+              url: Routes.ts_reports_client_event_path(@conn, :summary),
+              lib: Teiserver.Telemetry.ClientEventLib
+            %>
+
+
+            <%= central_component "sub_menu_icon",
+              name: "server_metrics",
+              label: "Server metrics",
+              active: @active,
+              url: Routes.ts_reports_metric_path(@conn, :day_metrics_list),
+              lib: Teiserver.Telemetry.TelemetryDayLogLib
+            %>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

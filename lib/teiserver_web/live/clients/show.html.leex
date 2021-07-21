@@ -1,11 +1,13 @@
 <% {_fg, _bg, bsname} = @colours %>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{active: "clients", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{active: "users", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
 
 <div class="row">
   <div class="col-md-12">
     <div class="card border-<%= bsname %> page-card">
       <div class="card-body">
+
+<%#= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{conn: @socket, active: "users"}) %>
 
 <a href="<%= Routes.ts_admin_user_path(@socket, :edit, @user.id) %>" class="float-right btn btn-<%= bsname %>">
   Edit account

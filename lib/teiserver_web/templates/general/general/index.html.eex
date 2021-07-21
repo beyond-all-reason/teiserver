@@ -36,6 +36,17 @@
       link: "",
       disabled: true
     %>
+
+    <%= if allow?(@conn, "teiserver.moderator") do %>
+      <%=
+        central_component "menu_card",
+        icon: Central.Helpers.StylingHelper.icon(:summary),
+        name: "reports",
+        text: "Reports",
+        icon_class: "fad",
+        link: Routes.ts_reports_general_path(@conn, :index)
+      %>
+    <% end %>
   <% else %>
     <div style="margin-left: 40px; height: 100px; font-size: 1.2em;">
       No server user detected, please login.
@@ -47,15 +58,6 @@
   <div style="height: 50px;">&nbsp;</div>
   <div class="row page-row">
     <%= if allow?(@conn, "teiserver.moderator.account") do %>
-      <%=
-        central_component "menu_card",
-        icon: Teiserver.ClientLib.icon(),
-        name: "client_admin",
-        text: "Client admin",
-        icon_class: "fad",
-        link: Routes.ts_admin_client_index_path(@conn, :index)
-      %>
-
       <%=
         central_component "menu_card",
         icon: "far fa-users",
@@ -112,6 +114,30 @@
       %>
     <% end %>
   </div>
+
+  <div style="height: 50px;">&nbsp;</div>
+  <div class="row page-row">
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Battle.BattleLobbyLib.icon(),
+      name: "battle_lobbies",
+      text: "Battle Lobbies",
+      icon_class: "fad",
+      link: Routes.ts_battle_lobby_index_path(@conn, :index)
+    %>
+
+    <%= if allow?(@conn, "teiserver.moderator.account") do %>
+      <%=
+        central_component "menu_card",
+        icon: Teiserver.ClientLib.icon(),
+        name: "live_client",
+        text: "Live clients",
+        icon_class: "fad",
+        link: Routes.ts_admin_client_index_path(@conn, :index)
+      %>
+    <% end %>
+  </div>
+
 <% end %>
 
 <div class="row page-row">

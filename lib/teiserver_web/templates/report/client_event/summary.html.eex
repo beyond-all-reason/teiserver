@@ -1,0 +1,20 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "client_events"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= render TeiserverWeb.Report.ClientEventView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "summary"
+          })
+        %>
+        <br /><br />
+
+      </div>
+    </div>
+  </div>
+</div>

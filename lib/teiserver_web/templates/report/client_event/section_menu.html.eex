@@ -1,0 +1,19 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= central_component "section_menu_button",
+  name: "summary",
+  label: "Summary",
+  active: @active,
+  icon: Central.Helpers.StylingHelper.icon(:summary),
+  bsname: bsname,
+  url: Routes.ts_reports_client_event_path(@conn, :summary)
+%>
+
+<%= central_component "section_menu_button",
+  name: "export",
+  label: "Export",
+  active: @active,
+  icon: Central.Helpers.StylingHelper.icon(:export),
+  bsname: bsname,
+  url: Routes.ts_reports_client_event_path(@conn, :export_form)
+%>

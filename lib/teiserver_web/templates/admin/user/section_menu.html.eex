@@ -11,6 +11,15 @@
   });
 </script>
 
+<%= central_component "section_menu_button",
+  name: "client_admin",
+  label: "Client admin",
+  active: @active,
+  icon: Teiserver.ClientLib.icon(),
+  bsname: bsname,
+  url: Routes.ts_admin_client_index_path(@conn, :index)
+%>
+
 <a href="<%= Routes.ts_admin_user_path(@conn, :index) %>" class="btn btn-outline-<%= bsname %>" id="section-menu-index">
   <i class="far fa-bars"></i>
   &nbsp;

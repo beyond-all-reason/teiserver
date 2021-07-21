@@ -6,6 +6,15 @@ defmodule TeiserverWeb.ClientLive.Show do
   alias Teiserver.User
   alias Teiserver.Client
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Teiserver.Account.UserLib
+
+  @extra_menu_content """
+  &nbsp;&nbsp;&nbsp;
+    <a href='/teiserver/battle/lobbies' class="btn btn-outline-primary">
+      <i class="fas fa-fw fa-swords"></i>
+      Battles
+    </a>
+  """
 
   @impl true
   def mount(_params, session, socket) do
@@ -17,7 +26,8 @@ defmodule TeiserverWeb.ClientLive.Show do
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Clients", url: "/teiserver/admin/client")
       |> assign(:sidemenu_active, "teiserver")
-      |> assign(:colours, Central.Helpers.StylingHelper.colours(:primary2))
+      |> assign(:colours, UserLib.colours())
+      |> assign(:extra_menu_content, @extra_menu_content)
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
   end

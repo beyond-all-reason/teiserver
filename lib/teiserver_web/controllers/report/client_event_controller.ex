@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.Telemetry.ClientEventController do
+defmodule TeiserverWeb.Report.ClientEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
   alias Central.Helpers.TimexHelper
   alias Teiserver.Telemetry.{ExportClientAuthEventsTask, ExportClientUnauthEventsTask, ExportClientAuthPropertiesTask, ExportClientUnauthPropertiesTask}
 
   plug(AssignPlug,
-    sidemenu_active: ["teiserver", "teiserver_admin"]
+    sidemenu_active: ["teiserver"]
   )
 
   plug Bodyguard.Plug.Authorize,
@@ -16,16 +16,22 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
 
-  @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def index(conn, _params) do
+  @spec summary(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def summary(conn, _params) do
+    conn
+    |> render("summary.html")
+  end
+
+  @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def export_form(conn, _params) do
     conn
     |> assign(:event_types, Telemetry.list_event_types)
     |> assign(:property_types, Telemetry.list_property_types)
-    |> render("index.html")
+    |> render("export_form.html")
   end
 
-  @spec export(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def export(conn, %{"table_name" => "properties", "auth" => "unauth"}) do
+  @spec export_post(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def export_post(conn, %{"table_name" => "properties", "auth" => "unauth"}) do
     headings = [[
       "Event",
       "Timestamp",
@@ -59,7 +65,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> send_resp(200, data)
   end
 
-  def export(conn, %{"table_name" => "properties", "auth" => "auth"}) do
+  def export_post(conn, %{"table_name" => "properties", "auth" => "auth"}) do
     headings = [[
       "Event",
       "Timestamp",
@@ -93,7 +99,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> send_resp(200, data)
   end
 
-  def export(conn, %{"table_name" => "events", "auth" => "unauth"}) do
+  def export_post(conn, %{"table_name" => "events", "auth" => "unauth"}) do
     headings = [[
       "Event",
       "Timestamp",
@@ -127,7 +133,7 @@ defmodule TeiserverWeb.Telemetry.ClientEventController do
     |> send_resp(200, data)
   end
 
-  def export(conn, %{"table_name" => "events", "auth" => "auth"} = params) do
+  def export_post(conn, %{"table_name" => "events", "auth" => "auth"} = params) do
     params = Map.merge(params, %{"output-format" => "csv"})
 
     case params["output-format"] do
