@@ -51,6 +51,16 @@ defmodule Teiserver.Telemetry.UnauthPropertyLib do
         )
   end
 
+  def _search(query, :property_type_id, property_type_id) do
+    from unauth_properties in query,
+      where: unauth_properties.property_type_id == ^property_type_id
+  end
+
+  def _search(query, :between, {start_date, end_date}) do
+    from unauth_properties in query,
+      where: between(unauth_properties.last_updated, ^start_date, ^end_date)
+  end
+
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Name (A-Z)") do

@@ -13,7 +13,8 @@ defmodule TeiserverWeb.Report.MetricController do
     user: {Central.Account.AuthLib, :current_user}
 
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
-  plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
+  plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports')
+  plug(:add_breadcrumb, name: 'Server metrics', url: '/teiserver/reports/day_metrics')
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, _params) do

@@ -47,6 +47,16 @@ defmodule Teiserver.Telemetry.UnauthEventLib do
         )
   end
 
+  def _search(query, :event_type_id, event_type_id) do
+    from unauth_events in query,
+      where: unauth_events.event_type_id == ^event_type_id
+  end
+
+  def _search(query, :between, {start_date, end_date}) do
+    from unauth_events in query,
+      where: between(unauth_events.timestamp, ^start_date, ^end_date)
+  end
+
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Name (A-Z)") do

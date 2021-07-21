@@ -631,6 +631,19 @@ defmodule Teiserver.Telemetry do
     Repo.delete(unauth_property)
   end
 
+  def get_unauth_properties_summary(args) do
+    query = from unauth_properties in UnauthProperty,
+      join: property_types in assoc(unauth_properties, :property_type),
+      group_by: property_types.name,
+      select: {property_types.name, count(unauth_properties.property_type_id)}
+
+    query = query
+    |> UnauthPropertyLib.search(args)
+
+    Repo.all(query)
+    |> Map.new()
+  end
+
   alias Teiserver.Telemetry.ClientProperty
   alias Teiserver.Telemetry.ClientPropertyLib
 
@@ -681,6 +694,19 @@ defmodule Teiserver.Telemetry do
     %ClientProperty{}
     |> ClientProperty.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def get_client_properties_summary(args) do
+    query = from client_properties in ClientProperty,
+      join: property_types in assoc(client_properties, :property_type),
+      group_by: property_types.name,
+      select: {property_types.name, count(client_properties.property_type_id)}
+
+    query = query
+    |> ClientPropertyLib.search(args)
+
+    Repo.all(query)
+    |> Map.new()
   end
 
   alias Teiserver.Telemetry.UnauthEvent
@@ -735,6 +761,19 @@ defmodule Teiserver.Telemetry do
     |> Repo.insert()
   end
 
+  def get_unauth_events_summary(args) do
+    query = from unauth_events in UnauthEvent,
+      join: event_types in assoc(unauth_events, :event_type),
+      group_by: event_types.name,
+      select: {event_types.name, count(unauth_events.event_type_id)}
+
+    query = query
+    |> UnauthEventLib.search(args)
+
+    Repo.all(query)
+    |> Map.new()
+  end
+
 
   alias Teiserver.Telemetry.ClientEvent
   alias Teiserver.Telemetry.ClientEventLib
@@ -786,6 +825,19 @@ defmodule Teiserver.Telemetry do
     %ClientEvent{}
     |> ClientEvent.changeset(attrs)
     |> Repo.insert()
+  end
+
+  def get_client_events_summary(args) do
+    query = from client_events in ClientEvent,
+      join: event_types in assoc(client_events, :event_type),
+      group_by: event_types.name,
+      select: {event_types.name, count(client_events.event_type_id)}
+
+    query = query
+    |> UnauthEventLib.search(args)
+
+    Repo.all(query)
+    |> Map.new()
   end
 
 

@@ -88,9 +88,11 @@ defmodule TeiserverWeb.Router do
         get("/day_metrics", MetricController, :day_metrics_list)
         post("/day_metrics", MetricController, :day_metrics_list)
 
-        get("/client_events", ClientEventController, :export_form)
-        post("/client_events/export", ClientEventController, :export_post)
+        get("/client_events/export/form", ClientEventController, :export_form)
+        post("/client_events/export/post", ClientEventController, :export_post)
         get("/client_events/summary", ClientEventController, :summary)
+        get("/client_events/property/:property_name/detail", ClientEventController, :property_detail)
+        get("/client_events/event/:event_name/detail", ClientEventController, :event_detail)
 
         # post("/client_events", ClientEventController, :day_metrics_list)
         # post("/client_events", ClientEventController, :day_metrics_list)
