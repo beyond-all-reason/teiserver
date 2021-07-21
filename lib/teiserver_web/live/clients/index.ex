@@ -5,7 +5,6 @@ defmodule TeiserverWeb.ClientLive.Index do
   alias Teiserver
   alias Teiserver.User
   alias Teiserver.Client
-  alias Teiserver.ClientLib
   alias Teiserver.Account.UserLib
 
   @extra_menu_content """

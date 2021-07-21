@@ -11,7 +11,6 @@ defmodule TeiserverWeb.Admin.GeneralControllerTest do
   test "index", %{conn: conn} do
     conn = get(conn, Routes.ts_admin_general_path(conn, :index))
 
-    assert html_response(conn, 200) =~ "Client admin"
     assert html_response(conn, 200) =~ "User admin"
     assert html_response(conn, 200) =~ "Parties"
     assert html_response(conn, 200) =~ "Clan admin"

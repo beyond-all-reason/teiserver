@@ -5,7 +5,6 @@ defmodule Teiserver.Battle.BattleLobbyThrottle do
   """
   use GenServer
   alias Phoenix.PubSub
-  alias Teiserver.Battle.BattleLobby
   require Logger
 
   @update_interval 200

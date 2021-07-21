@@ -1,5 +1,3 @@
-<% {_fg, _bg, bsname} = colours() %>
-
 <script type="text/javascript" charset="utf-8">
   $(function() {
     $('#section-menu-<%= @active %>').addClass('active');

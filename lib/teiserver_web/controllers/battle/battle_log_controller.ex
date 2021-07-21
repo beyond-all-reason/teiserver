@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Battle.BattleLogController do
   use CentralWeb, :controller
 
   alias Teiserver.Battle
-  alias Teiserver.Battle.BattleLog
+  # alias Teiserver.Battle.BattleLog
   alias Teiserver.Battle.BattleLogLib
 
   plug Bodyguard.Plug.Authorize,

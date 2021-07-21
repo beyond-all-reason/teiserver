@@ -383,7 +383,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
     |> Map.delete(:tmp_reduction)
   end
 
-  @spec get_logs(Date.t(), integer()) :: :ok
+  @spec get_logs(Date.t(), integer()) :: list()
   defp get_logs(date, segment_number) do
     start_time = Timex.shift(date |> Timex.to_datetime(), minutes: segment_number * @segment_length)
     end_time = Timex.shift(date |> Timex.to_datetime(), minutes: (segment_number + 1) * @segment_length)

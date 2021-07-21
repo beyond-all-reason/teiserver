@@ -86,15 +86,14 @@ defmodule TeiserverWeb.MatchmakingLive.Show do
   # end
 
   defp page_title(:show), do: "Show Queue"
-  defp index_redirect(socket) do
-    {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
-  end
-  defp maybe_index_redirect(socket) do
-    if socket.assigns[:battle] == nil do
-      socket
-        |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))
-    else
-      socket
-    end
-  end
+  # defp index_redirect(socket) do
+  #   {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
+  # end
+  # defp maybe_index_redirect(socket) do
+  #   if socket.assigns[:battle] == nil do
+  #     index_redirect(socket)
+  #   else
+  #     socket
+  #   end
+  # end
 end
