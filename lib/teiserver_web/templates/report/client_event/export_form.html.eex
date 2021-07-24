@@ -27,7 +27,7 @@
         <%= render TeiserverWeb.Report.ClientEventView, "section_menu.html", Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
-            active: "export_form"
+            active: "export"
           })
         %>
         <br /><br />
