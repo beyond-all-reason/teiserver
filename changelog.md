@@ -1,7 +1,8 @@
-###### Next version (in progress)
+## Next version (in progress)
+#### Tachyon
+- Added news commands
 
-
-### V1.0
+## V1.0
 - Parity with Uberserver as required by Chobby
 - Admin web interface improvements to Client and Battle screens
 - Flag overrides can be set by moderators and players can choose not to display any flag
@@ -14,12 +15,12 @@
 - Server metrics
 - Client telemetry
 
-### [Beta](https://github.com/Teifion/teiserver/releases/tag/beta)
+## [Beta](https://github.com/Teifion/teiserver/releases/tag/beta)
 - Web interface
 - Compliance with SPADS
 - Ability to play a game
 - Test coverage
 
-### [Alpha](https://github.com/Teifion/teiserver/releases/tag/alpha)
+## [Alpha](https://github.com/Teifion/teiserver/releases/tag/alpha)
 - 80-90% of commands required by Chobby
 - Basic (but buggy) lobbies for SPADS

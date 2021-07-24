@@ -42,7 +42,8 @@ defmodule Teiserver.Protocols.Tachyon do
   Used to convert objects into something that will be sent back over the wire. We use this
   as there might be internal fields we don't want sent out (e.g. email).
   """
-  @spec convert_object(:user | :user_extended | :client | :battle | :queue, Map.t()) :: Map.t()
+  @spec convert_object(:user | :user_extended | :client | :battle | :queue | :blog_post, Map.t() | nil) :: Map.t() | nil
+  def convert_object(_, nil), do: nil
   def convert_object(:user, user), do: Map.take(user, [:id, :name, :bot, :clan_id, :skill, :icons, :springid])
   def convert_object(:user_extended, user), do: Map.take(user, [:id, :name, :bot, :clan_id, :skill, :icons, :permissions,
                     :friends, :friend_requests, :ignores, :springid])
@@ -52,6 +53,7 @@ defmodule Teiserver.Protocols.Tachyon do
                     :locked, :engine_name, :engine_version, :players, :spectators, :bots, :ip, :settings, :map_name,
                     :map_hash])
   def convert_object(:queue, queue), do: Map.take(queue, [:id, :name, :team_size, :conditions, :settings, :map_list])
+  def convert_object(:blog_post, post), do: Map.take(post, ~w(id short_content content url tags live_from)a)
 
   @spec encode(List.t() | Map.t()) :: String.t()
   def encode(data) do

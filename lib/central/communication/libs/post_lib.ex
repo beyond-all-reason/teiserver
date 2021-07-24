@@ -50,6 +50,11 @@ defmodule Central.Communication.PostLib do
       where: categories.name == ^category_name
   end
 
+  def _search(query, :category_id, category_id) do
+    from posts in query,
+      where: posts.category_id == ^category_id
+  end
+
   def _search(query, :url_slug, url_slug) do
     from posts in query,
       where: posts.url_slug == ^url_slug

@@ -1,8 +1,13 @@
 defmodule Teiserver.Agents.IdleAgentServer do
+  @doc """
+  Logs on, waits around and sends a ping every @tick_ms
+  Also requests news and "new login" type information 5 seconds after login and every @info_ms after that
+  """
   use GenServer
   alias Teiserver.Agents.AgentLib
 
-  @tick_period 20000
+  @tick_ms 20000
+  @info_ms 60000
 
   def handle_info(:startup, state) do
     AgentLib.post_agent_update(state.id, "idle startup")
@@ -14,7 +19,10 @@ defmodule Teiserver.Agents.IdleAgentServer do
       extra_data: %{}
     })
 
-    :timer.send_interval(@tick_period, self(), :tick)
+    :timer.send_interval(@tick_ms, self(), :tick)
+    :timer.send_interval(@info_ms, self(), :info)
+
+    :timer.send_after(1000, self(), :info)
 
     {:noreply, %{state | socket: socket}}
   end
@@ -22,6 +30,11 @@ defmodule Teiserver.Agents.IdleAgentServer do
   def handle_info(:tick, state) do
     AgentLib._send(state.socket, %{cmd: "c.system.ping"})
     AgentLib.post_agent_update(state.id, "idle pinged")
+    {:noreply, state}
+  end
+
+  def handle_info(:info, state) do
+    AgentLib._send(state.socket, %{cmd: "c.news.get_latest_game_news", category: "Game news"})
     {:noreply, state}
   end
 
@@ -37,6 +50,10 @@ defmodule Teiserver.Agents.IdleAgentServer do
 
   defp handle_msg(nil, state), do: state
   defp handle_msg(%{"cmd" => "s.system.pong"}, state) do
+    state
+  end
+
+  defp handle_msg(%{"cmd" => "s.news.get_latest_game_news", "post" => post}, state) do
     state
   end
 

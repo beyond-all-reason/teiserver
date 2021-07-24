@@ -4,6 +4,7 @@ defmodule Central.Communication do
   """
 
   import Ecto.Query, warn: false
+  alias Central.Helpers.QueryHelpers
   alias Central.Repo
 
   alias Central.Communication.ChatRoom
@@ -700,6 +701,14 @@ defmodule Central.Communication do
       ** (Ecto.NoResultsError)
 
   """
+  def get_category(id, args \\ []) do
+    CategoryLib.get_categories()
+    |> CategoryLib.search(%{id: id})
+    |> CategoryLib.search(args[:search])
+    |> CategoryLib.preload(args[:joins])
+    |> Repo.one()
+  end
+
   def get_category!(id, args \\ []) do
     CategoryLib.get_categories()
     |> CategoryLib.search(%{id: id})
@@ -897,6 +906,7 @@ defmodule Central.Communication do
     |> PostLib.search(args[:search])
     |> PostLib.preload(args[:joins])
     |> PostLib.order_by(args[:order_by])
+    |> QueryHelpers.limit_query(args[:limit] || 50)
     |> Repo.all()
   end
 

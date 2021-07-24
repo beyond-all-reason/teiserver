@@ -141,6 +141,8 @@ defmodule TeiserverWeb.Live.BattleTest do
 
       # Battle closes
       BattleLobby.close_battle(battle_id)
+      :timer.sleep(250)
+
       assert_redirect(view, "/teiserver/battle/lobbies", 250)
     end
 

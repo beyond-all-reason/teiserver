@@ -208,6 +208,29 @@ A queue used in matchmaking
 }
 ```
 
+## BlogPost
+An item posted to the site blog
+
+* id :: integer
+* short_content :: string
+* content :: string *The full content of the post*
+* url :: string
+* tags :: list (string)
+* live_from :: timestamp
+
+Still thinking about how to best represent these:
+* poster
+* category
+* comment_count
+
+## BlogComment
+A comment attached to a blog post
+
+* content :: string
+* commenter :: user
+* timestamp :: timestamp
+
+
 ## Error
 Returned when an unexpected error is generated. The difference between an error and a failure is the failure is an expected possible outcome (e.g. login failing) while an error is unexpected (e.g. message cannot be decoded). As such the error field will not always have the command being executed (though may sometimes).
 

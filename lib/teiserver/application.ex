@@ -12,21 +12,33 @@ defmodule Teiserver.Application do
         start: {Teiserver.TcpServer, :start_link, [[]]}
       },
 
-      # Caches
+      # Caches - Meta
       concache_perm_sup(:id_counters),
       concache_perm_sup(:lists),
+
+      # Caches - User
       concache_perm_sup(:users_lookup_name_with_id),
       concache_perm_sup(:users_lookup_id_with_name),
       concache_perm_sup(:users_lookup_id_with_email),
       concache_perm_sup(:users),
       concache_perm_sup(:clients),
+      concache_sup(:teiserver_login_count),
+
+      # Caches - Battle/Queue/Clan
       concache_perm_sup(:battles),
       concache_perm_sup(:teiserver_queues),
+      concache_sup(:teiserver_clan_cache_bang),
+
+      # Caches - Chat
       concache_perm_sup(:rooms),
+
+      # Caches - Blog
+      concache_sup(:teiserver_blog_posts),
+      concache_sup(:teiserver_blog_categories),
+
+      # Caches - Telemetry
       concache_perm_sup(:teiserver_telemetry_event_types),
       concache_perm_sup(:teiserver_telemetry_property_types),
-      concache_sup(:teiserver_clan_cache_bang),
-      concache_sup(:teiserver_login_count),
 
       # Liveview throttles
       concache_sup(:teiserver_throttle_pids),
