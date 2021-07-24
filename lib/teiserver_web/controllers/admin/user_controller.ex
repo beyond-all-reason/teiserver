@@ -223,37 +223,28 @@ defmodule TeiserverWeb.Admin.UserController do
   end
 
   @spec reset_password(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def reset_password(conn, %{"id" => _id}) do
-    # This will get replaced by a password reset email
-    # user = Account.get_user!(id)
+  def reset_password(conn, %{"id" => id}) do
+    user = Account.get_user!(id)
 
-    # case Central.Account.UserLib.has_access(user, conn) do
-    #   {true, _} ->
-    #     {plain_password, encrypted_password} = Teiserver.User.generate_new_password()
+    case Central.Account.UserLib.has_access(user, conn) do
+      {false, :not_found} ->
+        conn
+        |> put_flash(:danger, "Unable to find that user")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
 
-    #     data =
-    #       Map.merge(user.data || %{}, %{
-    #         "password_hash" => encrypted_password
-    #       })
+      {false, :no_access} ->
+        conn
+        |> put_flash(:danger, "Unable to find that user")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
 
-    #     user_params = %{"data" => data}
+      {true, _} ->
+        Central.Account.UserLib.reset_password_request(user)
+        |> Central.Mailer.deliver_now()
 
-    #     case Account.update_user(user, user_params) do
-    #       {:ok, _user} ->
-    #         conn
-    #         |> put_flash(:info, "Password changed to '#{plain_password}'.")
-    #         |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
-
-    #       {:error, %Ecto.Changeset{} = changeset} ->
-    #         render(conn, "edit.html", user: user, changeset: changeset)
-    #     end
-
-    #   _ ->
-    conn
-    |> put_flash(:warning, "This feature is currently disabled")
-    |> redirect(to: Routes.ts_admin_user_path(conn, :index))
-
-    # end
+        conn
+        |> put_flash(:success, "Password reset email sent to user")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
   end
 
   @spec perform_action(Plug.Conn.t(), map) :: Plug.Conn.t()

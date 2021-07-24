@@ -923,7 +923,7 @@ defmodule Teiserver.User do
         md5_password = spring_md5_password(new_password)
         encrypted_password = encrypt_password(md5_password)
 
-        update_user(%{user | password_reset_code: nil, password_hash: encrypted_password},
+        update_user(%{user | password_reset_code: nil, password_hash: encrypted_password, verified: true},
           persist: true
         )
     end
