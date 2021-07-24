@@ -37,9 +37,9 @@
   <%= if assigns[:no_link] != true do %>
   <div class="col-md-12">
     <%= if assigns[:short_link] == true do %>
-      <label class="control-label"><a href="https://fontawesome.com/icons" target="_blank">fontawesome.com/icons</a></label>
+      <label class="control-label"><a href="https://fontawesome.com/v6.0/icons?d=gallery&p=1&s=solid" target="_blank">fontawesome.com/v6.0/icons</a></label>
     <% else %>
-      <%= label form, @field, class: "control-label" %> <em>For a list of icons see: <a href="https://fontawesome.com/icons<%= if free_only, do: '?d=gallery&m=free' %>" target="_blank">fontawesome.com/icons</a></em><br />
+      <%= label form, @field, class: "control-label" %> <em>For a list of icons see: <a href="https://fontawesome.com/v6.0/icons?d=gallery&p=1&s=solid<%= if free_only, do: '?d=gallery&m=free' %>" target="_blank">fontawesome.com/icons</a></em><br />
     <% end %>
   </div>
   <% end %>

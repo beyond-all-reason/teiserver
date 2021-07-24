@@ -71,6 +71,7 @@ defmodule Central.MixProject do
 
       # Teiserver libs
       {:csv, "~> 2.4"},
+      {:earmark, "~> 1.4"},
       {:ranch, "~> 1.7.1"},
       {:alchemy, "~> 0.7.0", hex: :discord_alchemy}
     ]

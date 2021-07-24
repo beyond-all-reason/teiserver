@@ -1,0 +1,11 @@
+<br />
+
+<%=
+
+  @clan.description
+  |> String.replace("<", "&lt;")
+  |> String.replace(">", "&gt;")
+  |> Earmark.as_html!(escape: true)
+  |> raw
+
+%>

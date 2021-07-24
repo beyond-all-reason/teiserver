@@ -48,11 +48,65 @@ defmodule TeiserverWeb.Clans.ClanController do
     |> ClanLib.make_favourite()
     |> insert_recently(conn)
 
+    changeset = cond do
+      membership == nil ->
+        nil
+      membership.role in ~w(Admin) ->
+        Clans.change_clan(clan)
+    end
+
     conn
+    |> assign(:changeset, changeset)
     |> assign(:membership, membership)
     |> assign(:clan, clan)
     |> add_breadcrumb(name: "Show: #{clan.name}", url: conn.request_path)
     |> render("show.html")
+  end
+
+  @spec update(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def update(conn, %{"clan_id" => id, "clan" => clan_params}) do
+    role =
+      case Clans.get_clan_membership(id, conn.user_id) do
+        nil -> nil
+        membership -> Map.get(membership, :role)
+      end
+
+    clan = Clans.get_clan!(id)
+
+    cond do
+      role == nil ->
+        add_audit_log(conn, "teiserver.clans.update", %{
+          clan_id: id,
+          auth: true
+        })
+
+        conn
+        |> put_flash(:danger, "You are not a member of this clan.")
+        |> redirect(to: "/")
+
+      role not in ~w(Admin) ->
+        conn
+        |> put_flash(:danger, "You cannot update this clan.")
+        |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name))
+
+      true ->
+        case Clans.update_clan(clan, clan_params) do
+          {:ok, _clan} ->
+            conn
+            |> put_flash(:info, "Clan updated successfully.")
+            |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#admin_tab")
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            membership = Clans.get_clan_membership(clan.id, conn.user_id)
+
+            conn
+            |> assign(:membership, membership)
+            |> assign(:clan, clan)
+            |> assign(:changeset, changeset)
+            |> add_breadcrumb(name: "Show: #{clan.name}", url: conn.request_path)
+            |> render("edit.html")
+        end
+    end
   end
 
   @spec set_default(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

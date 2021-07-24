@@ -18,7 +18,7 @@
 <div class="row sub-menu">
   <div class="col-md-12">
     <div class="card card-default">
-      <div class="card-body" style="padding: 0 15px;">
+      <div class="card-body" style="padding: 0 15px;" id="sub-menu-card">
 
         <div class="row">
           <%= central_component "sub_menu_icon",

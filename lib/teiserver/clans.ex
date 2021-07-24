@@ -120,6 +120,8 @@ defmodule Teiserver.Clans do
 
   """
   def update_clan(%Clan{} = clan, attrs) do
+    ConCache.dirty_delete(:teiserver_clan_cache_bang, clan.id)
+
     clan
     |> Clan.changeset(attrs)
     |> Repo.update()

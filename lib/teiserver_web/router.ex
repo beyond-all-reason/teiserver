@@ -43,6 +43,7 @@ defmodule TeiserverWeb.Router do
 
         get("/", ClanController, :index)
         get("/:name", ClanController, :show)
+        put("/update/:clan_id", ClanController, :update)
 
         get("/set_default/:id", ClanController, :set_default)
         post("/create_invite", ClanController, :create_invite)

@@ -5,15 +5,79 @@
     var selected_tab = window.location.hash.substr(1).replace("_tab", "");
     $('#the_tabs a:first').tab('show');
     $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+
+    <%= if get_user_config_cache(@conn, "general.Sidebar") != false do %>
+      $("#wrapper").toggleClass("toggled");
+      $("#dev-error-dropdown").hide();
+      $("#page-title").hide();
+      $(".navbar-brand").css("width", 20);
+    <% end %>
   });
 </script>
 
 <%= render TeiserverWeb.Clans.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "clans"}) %>
 
+<style type="text/css">
+  body,
+  #breadcrumb-wrapper,
+  #breadcrumb,
+  footer,
+  #main-card,
+  .colour2,
+  #sub-menu-card,
+  .line-card a:hover {
+    background-color: <%= @clan.colour2 %> !important
+  }
+
+  #breadcrumb-wrapper {
+    border-bottom: 1px solid <%= @clan.colour1 %> !important;
+  }
+
+  .side-menu-active a i,
+  .side-menu-active a,
+  .line-card a,
+
+  .breadcrumb-item a,
+  .nav-link,
+
+  .sub-menu-icon a:hover,
+  .sub-menu .active,
+  .sub-menu .active:hover,
+  .colour1,
+
+  footer {
+    color: <%= @clan.colour1 %> !important;
+  }
+  .side-menu-active a {
+    border-left-color: <%= @clan.colour1 %> !important;
+    background: linear-gradient(to right, <%= @clan.colour2 %>, rgba(0,0,0,0));
+  }
+
+  .sub-menu-icon a
+  {
+    border-bottom: 5px solid <%= @clan.colour2 %>;
+  }
+  .sub-menu-icon a:hover
+  {
+    border-bottom: 5px solid <%= @clan.colour1 %>;
+  }
+  .sub-menu-icon .active {
+    border-bottom-color: <%= @clan.colour1 %>;
+  }
+
+  #main-card,
+  #main-card .tab-pane,
+  #main-card table,
+  #sub-menu-card a
+  {
+    color: <%= @clan.text_colour %>;
+  }
+</style>
+
 <div class="row section-menu">
   <div class="col-md-12">
     <div class="card border-<%= bsname %>">
-      <div class="card-body">
+      <div class="card-body" id="main-card">
         <div class="float-right">
           <%= if @current_user.clan_id != @clan.id and @membership != nil do %>
             <a href="<%= Routes.ts_clans_clan_path(@conn, :set_default, @clan.id) %>" class="btn btn-<%= bsname %>">
@@ -22,7 +86,7 @@
           <% end %>
         </div>
 
-      <h3 style="color: <%= @clan.colour1 %>; background-color: <%= @clan.colour2 %>; display: inline-block; padding: 5px;">
+      <h3 style="display: inline-block; padding: 5px;" class="colour1">
         <%= @clan.name %>
         &nbsp;
         <i class="far fa-fw <%= @clan.icon %>"></i>
@@ -51,6 +115,15 @@
               Invites
             </a>
           </li>
+
+          <%= if @membership.role == "Admin" do %>
+            <li>
+              <a href="#admin_tab" role="tab" class="nav-link" data-toggle="tab">
+                <%= central_component "icon", icon: Central.Helpers.StylingHelper.icon(:admin) %>
+                Admin
+              </a>
+            </li>
+          <% end %>
         <% end %>
       </ul>
 
@@ -67,6 +140,12 @@
           <div class="tab-pane" id="invites_tab" style="padding:5px;">
             <%= render "tab_invites.html", assigns %>
           </div>
+
+          <%= if @membership.role == "Admin" do %>
+            <div class="tab-pane" id="admin_tab" style="padding:5px;">
+              <%= render "tab_admin.html", assigns %>
+            </div>
+          <% end %>
         <% end %>
       </div>
       <%# END OF TABS %>
