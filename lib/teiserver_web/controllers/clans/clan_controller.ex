@@ -44,18 +44,21 @@ defmodule TeiserverWeb.Clans.ClanController do
 
     membership = Clans.get_clan_membership(clan.id, conn.user_id)
 
+    role = case membership do
+      nil -> nil
+      _ -> membership.role
+    end
+
     clan
     |> ClanLib.make_favourite()
     |> insert_recently(conn)
 
-    changeset = cond do
-      membership == nil ->
-        nil
-      membership.role in ~w(Admin) ->
-        Clans.change_clan(clan)
+    changeset = if role in ~w(Admin) do
+      Clans.change_clan(clan)
     end
 
     conn
+    |> assign(:role, role)
     |> assign(:changeset, changeset)
     |> assign(:membership, membership)
     |> assign(:clan, clan)

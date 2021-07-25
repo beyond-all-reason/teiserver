@@ -87,7 +87,7 @@
         </div>
 
       <h3 style="display: inline-block; padding: 5px;" class="colour1">
-        <%= @clan.name %>
+        <%= @clan.name %> [<%= @clan.tag %>]
         &nbsp;
         <i class="far fa-fw <%= @clan.icon %>"></i>
       </h3>
@@ -101,14 +101,14 @@
           </a>
         </li>
 
-        <%= if @membership do %>
-          <li>
-            <a href="#members_tab" role="tab" class="nav-link" data-toggle="tab">
-              <%= central_component "icon", icon: "fas fa-users" %>
-              Members
-            </a>
-          </li>
+        <li>
+          <a href="#members_tab" role="tab" class="nav-link" data-toggle="tab">
+            <%= central_component "icon", icon: "fas fa-users" %>
+            Members
+          </a>
+        </li>
 
+        <%= if @membership do %>
           <li>
             <a href="#invites_tab" role="tab" class="nav-link" data-toggle="tab">
               <%= central_component "icon", icon: "fas fa-envelope" %>
@@ -132,11 +132,11 @@
           <%= render "tab_details.html", assigns %>
         </div>
 
-        <%= if @membership do %>
-          <div class="tab-pane" id="members_tab" style="padding:5px;">
-            <%= render "tab_members.html", assigns %>
-          </div>
+        <div class="tab-pane" id="members_tab" style="padding:5px;">
+          <%= render "tab_members.html", assigns %>
+        </div>
 
+        <%= if @membership do %>
           <div class="tab-pane" id="invites_tab" style="padding:5px;">
             <%= render "tab_invites.html", assigns %>
           </div>

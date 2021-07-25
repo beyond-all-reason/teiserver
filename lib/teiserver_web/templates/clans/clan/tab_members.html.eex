@@ -16,7 +16,7 @@
     <tr>
       <td><%= u.name %></td>
       <td><%= m.role %></td>
-      <%= if @membership.role == "Admin" do %>
+      <%= if @role == "Admin" do %>
         <td>
           <%= if m.role != "Admin" do %>
             <%= link raw("<i class='fa-fw far fa-arrow-up'></i> Promote"), to: Routes.ts_clans_clan_path(@conn, :promote, @clan.id, u.id), method: :put, data: [confirm: "Are you sure?"], class: "btn btn-outline-#{bsname} btn-sm" %>
