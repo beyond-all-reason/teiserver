@@ -362,6 +362,8 @@ defmodule Teiserver.TeiserverTestLib do
             "icon" => "fa far-house",
             "colour1" => "#001122",
             "colour2" => "#551122",
+            "text_colour" => "#FFFFFF",
+            "description" => "Description goes here",
             "data" => %{}
           },
           params

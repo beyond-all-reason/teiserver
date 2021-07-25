@@ -21,7 +21,7 @@ defmodule Teiserver.Protocols.TachyonNewsTest do
 
   test "latest post", %{socket: socket} do
     category = CommunicationTestLib.new_category(%{"name" => "GameNewsCategory"})
-    post = CommunicationTestLib.new_post(%{
+    CommunicationTestLib.new_post(%{
       "category_id" => category.id,
       "poster_id" => GeneralTestLib.make_user().id
     })
