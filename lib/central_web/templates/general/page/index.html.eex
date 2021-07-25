@@ -40,6 +40,10 @@
     background-color: rgba(200, 200, 200, 0.25)
   }
 
+  .navbar {
+    background-color: rgba(0, 0, 0, 0.7)
+  }
+
   .landing-header {
     height: 20vh;
     min-height: 300px;
@@ -59,42 +63,47 @@
   <div class="container">
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark pt-4 px-0">
-      <a class="navbar-brand" href="<%= Routes.general_page_path(@conn, :index) %>">
-        <img src='<%= Routes.static_path(@conn, "/images/logo/square_logo.svg") %>' width="30" class="mr-2">
-        <%= Application.get_env(:central, Central)[:site_title] %>
-      </a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNavDropdown">
-        <ul class="navbar-nav ml-auto">
-          <%= if Application.get_env(:central, Central)[:enable_blog] do %>
-            <li class="nav-item">
-              <a class="nav-link" href="<%= Routes.blog_path(@conn, :index) %>">
-                <i class="fa-fw <%= Central.Communication.BlogLib.icon() %>"></i>
-                Blog
-              </a>
-            </li>
-          <% end %>
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="<%= Application.get_env(:central, Teiserver)[:main_website] %>">
+            <i class="fa-fw fas fa-home"></i>
+            Main site
+          </a>
+        </li>
 
-          <%= if @current_user == nil do %>
-            <li class="nav-item">
-              <a class="nav-link" href="<%= Routes.account_session_path(@conn, :new) %>">
-                <i class="fas fa-fw fa-sign-in-alt"></i>
-                Login
-              </a>
-            </li>
-          <% else %>
-            <li class="nav-item">
-              <a class="nav-link" href="/">
-                <i class="fas fa-fw fa-bars"></i>
-                Menu screen
-              </a>
-            </li>
-          <% end %>
-        </ul>
+        <li class="nav-item">
+          <a class="nav-link" href="<%= Application.get_env(:central, Teiserver)[:discord] %>">
+            <i class="fa-fw fab fa-discord"></i>
+            Discord
+          </a>
+        </li>
 
-      </div>
+        <%= if Application.get_env(:central, Central)[:enable_blog] do %>
+          <li class="nav-item">
+            <a class="nav-link" href="<%= Routes.blog_path(@conn, :index) %>">
+              <i class="fa-fw <%= Central.Communication.BlogLib.icon() %>"></i>
+              Blog
+            </a>
+          </li>
+        <% end %>
+
+        <%= if @current_user == nil do %>
+          <li class="nav-item">
+            <a class="nav-link" href="<%= Routes.account_session_path(@conn, :new) %>">
+              <i class="fas fa-fw fa-sign-in-alt"></i>
+              Login
+            </a>
+          </li>
+        <% else %>
+          <li class="nav-item">
+            <a class="nav-link" href="/">
+              <i class="fas fa-fw fa-bars"></i>
+              Main menu
+            </a>
+          </li>
+        <% end %>
+      </ul>
+
     </nav>
     <!-- / Navigation -->
   </div>
