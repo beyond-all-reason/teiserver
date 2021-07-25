@@ -8,7 +8,9 @@ defmodule Central.Repo.Migrations.Clans do
       add :icon, :string
       add :colour1, :string
       add :colour2, :string
+      add :text_colour, :string
 
+      add :description, :text
       add :rating, :jsonb
       add :homepage, :jsonb
 
