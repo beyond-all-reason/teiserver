@@ -22,7 +22,7 @@ defmodule Teiserver.Application do
       concache_perm_sup(:users_lookup_id_with_email),
       concache_perm_sup(:users),
       concache_perm_sup(:clients),
-      concache_sup(:teiserver_login_count),
+      concache_sup(:teiserver_login_count, global_ttl: 10_000),
 
       # Caches - Battle/Queue/Clan
       concache_perm_sup(:battles),
@@ -97,14 +97,14 @@ defmodule Teiserver.Application do
     end
   end
 
-  defp concache_sup(name) do
+  defp concache_sup(name, opts \\ []) do
     Supervisor.child_spec(
       {
         ConCache,
         [
           name: name,
           ttl_check_interval: 10_000,
-          global_ttl: 60_000,
+          global_ttl: opts[:global_ttl] || 60_000,
           touch_on_read: true
         ]
       },

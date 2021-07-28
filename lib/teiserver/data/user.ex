@@ -703,7 +703,7 @@ defmodule Teiserver.User do
             {:error, "Rename in progress, wait 5 seconds"}
 
           user.bot == false and login_flood_check(user.id) == :block ->
-            {:error, "Flood protection"}
+            {:error, "Flood protection - Please wait 20 seconds and try again"}
 
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
@@ -741,7 +741,7 @@ defmodule Teiserver.User do
             {:error, "Rename in progress, wait 5 seconds"}
 
           user.bot == false and login_flood_check(user.id) == :block ->
-            {:error, "Flood protection"}
+            {:error, "Flood protection - Please wait 20 seconds and try again"}
 
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
