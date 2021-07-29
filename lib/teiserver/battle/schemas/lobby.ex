@@ -1,5 +1,34 @@
-defmodule Teiserver.Battle.BattleLobby do
+defmodule Teiserver.Battle.Lobby do
   @moduledoc false
+  use CentralWeb, :schema
+
+  schema "teiserver_battle_lobbies" do
+    field :name, :string
+    field :data, :map
+
+    field :engine_version, :string
+    field :game_version, :string
+
+    field :closed, :utc_datetime
+
+    has_many :matches, Teiserver.Battle.Match
+
+    timestamps()
+  end
+
+  @doc """
+  Builds a changeset based on the `struct` and `params`.
+  """
+  @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
+  def changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, ~w(name data engine_version game_version closed)a)
+    |> validate_required(~w(name data engine_version game_version)a)
+  end
+
+  @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
+  def authorize(_, conn, _), do: allow?(conn, "teiserver")
+
   alias Phoenix.PubSub
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -123,7 +152,7 @@ defmodule Teiserver.Battle.BattleLobby do
 
   @spec start_battle_lobby_throttle(T.battle_id()) :: pid()
   def start_battle_lobby_throttle(battle_lobby_id) do
-    Teiserver.Throttles.start_throttle(battle_lobby_id, Teiserver.Battle.BattleLobbyThrottle, "battle_lobby_throttle_#{battle_lobby_id}")
+    Teiserver.Throttles.start_throttle(battle_lobby_id, Teiserver.Battle.GameThrottle, "battle_lobby_throttle_#{battle_lobby_id}")
   end
 
   def stop_battle_lobby_throttle(battle_lobby_id) do

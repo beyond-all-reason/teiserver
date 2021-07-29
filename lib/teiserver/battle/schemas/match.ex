@@ -1,7 +1,7 @@
-defmodule Teiserver.Battle.BattleLog do
+defmodule Teiserver.Battle.Match do
   use CentralWeb, :schema
 
-  schema "teiserver_battle_logs" do
+  schema "teiserver_battle_matches" do
     field :map, :string
     field :data, :map
 
