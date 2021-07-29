@@ -97,6 +97,8 @@ defmodule Teiserver.Bridge.BridgeServer do
     state
   end
 
+  defp forward_to_discord(_, _, "!stats" <> _), do: nil
+  defp forward_to_discord(_, _, "!status" <> _), do: nil
   defp forward_to_discord(from_id, channel, message) do
     Logger.debug("forwarding")
     author = User.get_username(from_id)
