@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator do
-  alias Teiserver.Battle.BattleLobby
+  alias Teiserver.Battle.Lobby
   alias Teiserver.User
   # alias Teiserver.Client
   alias Teiserver.Data.Types, as: T
@@ -96,7 +96,7 @@ defmodule Teiserver.Coordinator do
   end
 
   def send_to_host(from_id, battle_id, msg) do
-    battle = BattleLobby.get_battle!(battle_id)
+    battle = Lobby.get_battle!(battle_id)
     # pid = Client.get_client_by_id(battle.founder_id).pid
     User.send_direct_message(from_id, battle.founder_id, msg)
     # send(pid, {:battle_updated, battle_id, {from_id, msg, battle_id}, :say})

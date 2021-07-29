@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.BattleIn do
-  alias Teiserver.Battle.BattleLobby
+  alias Teiserver.Battle.Lobby
   alias Teiserver.{Client, Coordinator}
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -22,8 +22,8 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
       |> Map.put(:founder_id, state.userid)
       |> Map.put(:founder_name, state.username)
       |> Map.put(:ip, "127.0.0.1")
-      |> BattleLobby.create_battle()
-      |> BattleLobby.add_battle()
+      |> Lobby.create_battle()
+      |> Lobby.add_battle()
 
     new_state = %{state | battle_id: battle.id, battle_host: true}
     reply(:battle, :create, {:success, battle}, new_state)
@@ -31,7 +31,7 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
 
   def do_handle("join", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
   def do_handle("join", data, state) do
-    case BattleLobby.can_join?(state.userid, data["battle_id"], data["password"]) do
+    case Lobby.can_join?(state.userid, data["battle_id"], data["password"]) do
       {:waiting_on_host, _script_password} ->
         reply(:battle, :join, :waiting, state)
 
@@ -52,7 +52,7 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
       Client.get_client_by_id(state.userid)
       |> Map.merge(updates)
 
-    if BattleLobby.allow?(state.userid, :mybattlestatus, state.battle_id) do
+    if Lobby.allow?(state.userid, :mybattlestatus, state.battle_id) do
       if Coordinator.allow_battlestatus_update?(new_client, state.battle_id) do
         Client.update(new_client, :client_updated_battlestatus)
       end
@@ -65,10 +65,10 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
 
     case data["response"] do
       "approve" ->
-        BattleLobby.accept_join_request(userid, battle_id)
+        Lobby.accept_join_request(userid, battle_id)
 
       "reject" ->
-        BattleLobby.deny_join_request(userid, battle_id, data["reason"])
+        Lobby.deny_join_request(userid, battle_id, data["reason"])
     end
     state
   end
@@ -78,8 +78,8 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
     reply(:battle, :message, {:failure, "Not currently in a battle"}, state)
   end
   def do_handle("message", %{"message" => msg}, state) do
-    if BattleLobby.allow?(state.userid, :saybattle, state.battle_id) do
-      BattleLobby.say(state.userid, msg, state.battle_id)
+    if Lobby.allow?(state.userid, :saybattle, state.battle_id) do
+      Lobby.say(state.userid, msg, state.battle_id)
     end
     state
   end
@@ -91,7 +91,7 @@ defmodule Teiserver.Protocols.Tachyon.BattleIn do
 
   def do_handle("leave", _, state) do
     PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{state.battle_id}")
-    BattleLobby.remove_user_from_battle(state.userid, state.battle_id)
+    Lobby.remove_user_from_battle(state.userid, state.battle_id)
     new_state = %{state | battle_id: nil, battle_host: false}
     reply(:battle, :leave, {:success, nil}, new_state)
   end

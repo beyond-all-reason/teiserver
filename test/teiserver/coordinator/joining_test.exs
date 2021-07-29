@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.JoiningTest do
   use Central.ServerCase, async: false
-  alias Teiserver.Battle.BattleLobby
+  alias Teiserver.Battle.Lobby
   alias Teiserver.Common.PubsubListener
   alias Teiserver.Coordinator
 
@@ -31,7 +31,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
     reply = _tachyon_recv(socket)
     battle_id = reply["battle"]["id"]
 
-    BattleLobby.start_coordinator_mode(battle_id)
+    Lobby.start_coordinator_mode(battle_id)
     listener = PubsubListener.new_listener(["legacy_battle_updates:#{battle_id}"])
 
     {:ok, socket: socket, user: user, battle_id: battle_id, listener: listener}

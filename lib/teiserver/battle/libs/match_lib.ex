@@ -1,6 +1,6 @@
-defmodule Teiserver.Battle.BattleLogLib do
+defmodule Teiserver.Battle.MatchLib do
   use CentralWeb, :library
-  alias Teiserver.Battle.BattleLog
+  alias Teiserver.Battle.Match
 
   # Functions
   @spec icon :: String.t()
@@ -10,25 +10,25 @@ defmodule Teiserver.Battle.BattleLogLib do
   def colours, do: Central.Helpers.StylingHelper.colours(:primary)
 
   @spec make_favourite(Map.t()) :: Map.t()
-  def make_favourite(battle_log) do
+  def make_favourite(match) do
     %{
       type_colour: colours() |> elem(0),
       type_icon: icon(),
 
-      item_id: battle_log.id,
-      item_type: "teiserver_battle_log",
+      item_id: match.id,
+      item_type: "teiserver_match",
       item_colour: colours() |> elem(0),
-      item_icon: Teiserver.Battle.BattleLogLib.icon(),
-      item_label: "#{battle_log.guid}",
+      item_icon: Teiserver.Battle.MatchLib.icon(),
+      item_label: "#{match.guid}",
 
-      url: "/teiserver/battle/logs/#{battle_log.id}"
+      url: "/teiserver/battle/logs/#{match.id}"
     }
   end
 
   # Queries
-  @spec query_battle_logs() :: Ecto.Query.t
-  def query_battle_logs do
-    from battle_logs in BattleLog
+  @spec query_matches() :: Ecto.Query.t
+  def query_matches do
+    from matches in Match
   end
 
   @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
@@ -45,39 +45,39 @@ defmodule Teiserver.Battle.BattleLogLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :id, id) do
-    from battle_logs in query,
-      where: battle_logs.id == ^id
+    from matches in query,
+      where: matches.id == ^id
   end
 
   def _search(query, :name, name) do
-    from battle_logs in query,
-      where: battle_logs.name == ^name
+    from matches in query,
+      where: matches.name == ^name
   end
 
   def _search(query, :id_list, id_list) do
-    from battle_logs in query,
-      where: battle_logs.id in ^id_list
+    from matches in query,
+      where: matches.id in ^id_list
   end
 
   def _search(query, :simple_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
-    from battle_logs in query,
+    from matches in query,
       where: (
-            ilike(battle_logs.name, ^ref_like)
+            ilike(matches.name, ^ref_like)
         )
   end
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Newest first") do
-    from battle_logs in query,
-      order_by: [desc: battle_logs.inserted_at]
+    from matches in query,
+      order_by: [desc: matches.inserted_at]
   end
 
   def order_by(query, "Oldest first") do
-    from battle_logs in query,
-      order_by: [asc: battle_logs.inserted_at]
+    from matches in query,
+      order_by: [asc: matches.inserted_at]
   end
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
@@ -88,8 +88,8 @@ defmodule Teiserver.Battle.BattleLogLib do
   end
 
   # def _preload_things(query) do
-  #   from battle_logs in query,
-  #     left_join: things in assoc(battle_logs, :things),
+  #   from matches in query,
+  #     left_join: things in assoc(matches, :things),
   #     preload: [things: things]
   # end
 end

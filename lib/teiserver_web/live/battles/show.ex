@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
+defmodule TeiserverWeb.Battle.LobbyLive.Show do
   use TeiserverWeb, :live_view
   alias Phoenix.PubSub
   require Logger
 
   alias Teiserver.{Client, User, Coordinator}
-  alias Teiserver.Battle.BattleLobby
-  alias Teiserver.Battle.BattleLobbyLib
+  alias Teiserver.Battle.Lobby
+  alias Teiserver.Battle.LobbyLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """
@@ -32,7 +32,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
       |> assign(:sidemenu_active, "teiserver")
-      |> assign(:colours, BattleLobbyLib.colours())
+      |> assign(:colours, LobbyLib.colours())
       |> assign(:messages, [])
       |> assign(:extra_menu_content, extra_content)
       |> assign(:consul_command, "")
@@ -44,7 +44,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_battle_lobby_updates:#{id}")
-    battle = BattleLobby.get_battle!(id)
+    battle = Lobby.get_battle!(id)
 
     case battle do
       nil ->
@@ -91,7 +91,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   #     socket
   #     |> assign(:users, new_users)
   #     |> assign(:clients, new_clients)
-  #     |> assign(:battle, BattleLobby.get_battle(assigns.id))
+  #     |> assign(:battle, Lobby.get_battle(assigns.id))
   #     |> get_consul_state
   #     |> maybe_index_redirect
   #   else
@@ -107,7 +107,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   #   socket
   #   |> assign(:users, new_users)
   #   |> assign(:clients, new_clients)
-  #   |> assign(:battle, BattleLobby.get_battle(assigns.id))
+  #   |> assign(:battle, Lobby.get_battle(assigns.id))
   #   |> get_consul_state
   #   |> maybe_index_redirect
   # end
@@ -120,7 +120,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   end
 
   def handle_info({:battle_lobby_throttle, _lobby_changes, player_changes}, %{assigns: assigns} = socket) do
-    battle = BattleLobby.get_battle(assigns.id)
+    battle = Lobby.get_battle(assigns.id)
 
     socket = socket
       |> assign(:battle, battle)
@@ -132,7 +132,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
       [] ->
         socket
       _ ->
-        players = BattleLobby.get_battle_lobby_players!(assigns.id)
+        players = Lobby.get_battle_lobby_players!(assigns.id)
         {users, clients} = get_user_and_clients(players)
 
         socket
@@ -199,7 +199,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
 
   # def handle_info({:global_battle_updated, battle_id, :update_battle_info}, socket) do
   #   if int_parse(battle_id) == socket.assigns[:id] do
-  #     battle = BattleLobby.get_battle!(battle_id)
+  #     battle = Lobby.get_battle!(battle_id)
   #     {:noreply,
   #      socket
   #      |> assign(:battle, battle)}
@@ -217,11 +217,11 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   # end
 
   # def handle_info({:add_bot_to_battle, _battle_id, _bot}, %{assigns: assigns} = socket) do
-  #   {:noreply, assign(socket, :battle, BattleLobby.get_battle(assigns.id))}
+  #   {:noreply, assign(socket, :battle, Lobby.get_battle(assigns.id))}
   # end
 
   # def handle_info({:update_bot, _battle_id, _bot}, %{assigns: assigns} = socket) do
-  #   {:noreply, assign(socket, :battle, BattleLobby.get_battle(assigns.id))}
+  #   {:noreply, assign(socket, :battle, Lobby.get_battle(assigns.id))}
   # end
 
   @impl true
@@ -233,7 +233,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   end
 
   def handle_event("force-update", _, %{assigns: %{id: id}} = socket) do
-    battle = BattleLobby.get_battle(id)
+    battle = Lobby.get_battle(id)
     {users, clients} = get_user_and_clients(battle.players)
 
     {:noreply,
@@ -245,13 +245,13 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   end
 
   def handle_event("start-Coordinator", _event, %{assigns: %{id: id}} = socket) do
-    BattleLobby.start_coordinator_mode(id)
+    Lobby.start_coordinator_mode(id)
     battle = %{socket.assigns.battle | coordinator_mode: true}
     {:noreply, assign(socket, :battle, battle)}
   end
 
   def handle_event("stop-Coordinator", _event, %{assigns: %{id: id}} = socket) do
-    BattleLobby.stop_coordinator_mode(id)
+    Lobby.stop_coordinator_mode(id)
     battle = %{socket.assigns.battle | coordinator_mode: false}
     {:noreply, assign(socket, :battle, battle)}
   end
@@ -268,7 +268,7 @@ defmodule TeiserverWeb.Battle.BattleLobbyLive.Show do
   end
 
   def handle_event("force-spectator:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
-    # BattleLobby.force_change_client(bar_user.id, int_parse(target_id), :player, false)
+    # Lobby.force_change_client(bar_user.id, int_parse(target_id), :player, false)
     Coordinator.cast_consul(id, %{
       command: "force-spectator",
       remaining: int_parse(target_id),

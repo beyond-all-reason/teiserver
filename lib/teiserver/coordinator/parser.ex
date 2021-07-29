@@ -2,11 +2,11 @@ defmodule Teiserver.Coordinator.Parser do
   require Logger
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Battle.BattleLobby
+  alias Teiserver.Battle.Lobby
 
   @spec handle_in(Types.userid(), String.t(), Types.battle_id()) :: :say | :handled
   def handle_in(userid, msg, battle_id) do
-    battle = BattleLobby.get_battle!(battle_id)
+    battle = Lobby.get_battle!(battle_id)
 
     cond do
       String.slice(msg, 0..0) == "£" ->

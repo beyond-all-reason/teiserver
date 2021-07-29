@@ -14,7 +14,7 @@ defmodule TeiserverWeb.Admin.ClanControllerTest do
   @create_attrs %{
     colour1: "some colour1",
     colour2: "some colour2",
-    text_color: "some colour",
+    text_colour: "some colour",
     description: "some description",
     icon: "far fa-home",
     name: "some name",
@@ -23,7 +23,7 @@ defmodule TeiserverWeb.Admin.ClanControllerTest do
   @update_attrs %{
     colour1: "some updated colour1",
     colour2: "some updated colour2",
-    text_color: "some updated colour",
+    text_colour: "some updated colour",
     description: "some updated description",
     icon: "fas fa-wrench",
     name: "some updated name",

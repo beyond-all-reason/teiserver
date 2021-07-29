@@ -1,7 +1,7 @@
 defmodule Teiserver.Agents.BattlehostAgentServer do
   use GenServer
   alias Teiserver.Agents.AgentLib
-  alias Teiserver.Battle.BattleLobby
+  alias Teiserver.Battle.Lobby
   require Logger
 
   @tick_period 5000
@@ -23,7 +23,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   end
 
   def handle_info(:tick, state) do
-    battle = BattleLobby.get_battle(state.battle_id)
+    battle = Lobby.get_battle(state.battle_id)
 
     new_state = cond do
       # Chance of doing nothing

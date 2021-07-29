@@ -1,12 +1,12 @@
-defmodule TeiserverWeb.Battle.BattleLogController do
+defmodule TeiserverWeb.Battle.MatchController do
   use CentralWeb, :controller
 
   alias Teiserver.Battle
-  # alias Teiserver.Battle.BattleLog
-  alias Teiserver.Battle.BattleLogLib
+  # alias Teiserver.Battle.Match
+  alias Teiserver.Battle.MatchLib
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Battle.BattleLog,
+    policy: Teiserver.Battle.Match,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
@@ -14,11 +14,11 @@ defmodule TeiserverWeb.Battle.BattleLogController do
     sidemenu_active: "battle"
 
   plug :add_breadcrumb, name: 'Battle', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Logs', url: '/teiserver/battle_logs'
+  plug :add_breadcrumb, name: 'Logs', url: '/teiserver/matches'
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    battle_logs = Battle.list_battle_logs(
+    matches = Battle.list_matches(
       search: [
         simple_search: Map.get(params, "s", "") |> String.trim,
       ],
@@ -26,38 +26,38 @@ defmodule TeiserverWeb.Battle.BattleLogController do
     )
 
     conn
-    |> assign(:battle_logs, battle_logs)
+    |> assign(:matches, matches)
     |> render("index.html")
   end
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
-    battle_log = Battle.get_battle_log!(id, [
+    match = Battle.get_match!(id, [
       joins: [],
     ])
 
-    battle_log
-    |> BattleLogLib.make_favourite
+    match
+    |> MatchLib.make_favourite
     |> insert_recently(conn)
 
     conn
-    |> assign(:battle_log, battle_log)
-    |> add_breadcrumb(name: "Show: #{battle_log.guid}", url: conn.request_path)
+    |> assign(:match, match)
+    |> add_breadcrumb(name: "Show: #{match.guid}", url: conn.request_path)
     |> render("show.html")
   end
 
   @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
-    battle_log = Battle.get_battle_log!(id)
+    match = Battle.get_match!(id)
 
-    battle_log
-    |> BattleLogLib.make_favourite
+    match
+    |> MatchLib.make_favourite
     |> remove_recently(conn)
 
-    {:ok, _battle_log} = Battle.delete_battle_log(battle_log)
+    {:ok, _match} = Battle.delete_match(match)
 
     conn
-    |> put_flash(:info, "BattleLog deleted successfully.")
-    |> redirect(to: Routes.ts_battle_log_path(conn, :index))
+    |> put_flash(:info, "Match deleted successfully.")
+    |> redirect(to: Routes.ts_battle_match_path(conn, :index))
   end
 end

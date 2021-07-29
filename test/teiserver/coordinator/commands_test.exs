@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.CommandsTest do
   use Central.ServerCase, async: false
-  alias Teiserver.Battle.BattleLobby
+  alias Teiserver.Battle.Lobby
   alias Teiserver.Common.PubsubListener
   alias Teiserver.{Client, User}
   alias Teiserver.Coordinator
@@ -37,11 +37,11 @@ defmodule Teiserver.Coordinator.CommandsTest do
     reply = _tachyon_recv(hsocket)
     battle_id = reply["battle"]["id"]
 
-    BattleLobby.start_coordinator_mode(battle_id)
+    Lobby.start_coordinator_mode(battle_id)
     listener = PubsubListener.new_listener(["legacy_battle_updates:#{battle_id}"])
 
     # Player needs to be added to the battle
-    BattleLobby.add_user_to_battle(player.id, battle_id, "script_password")
+    Lobby.add_user_to_battle(player.id, battle_id, "script_password")
     player_client = Client.get_client_by_id(player.id)
     Client.update(%{player_client |
       player: true
@@ -172,7 +172,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
 
     # Add player2 to the battle but as a spectator
     # player3 is not touched, they should not appear on this list
-    BattleLobby.add_user_to_battle(player2.id, battle_id, "script_password")
+    Lobby.add_user_to_battle(player2.id, battle_id, "script_password")
     player_client = Client.get_client_by_id(player2.id)
     Client.update(%{player_client |
       player: false

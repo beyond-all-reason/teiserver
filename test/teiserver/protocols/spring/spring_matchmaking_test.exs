@@ -2,7 +2,7 @@ defmodule Teiserver.SpringMatchmakingTest do
   use Central.ServerCase, async: false
   require Logger
   alias Teiserver.{Client, Game}
-  alias Teiserver.Battle.BattleLobby
+  alias Teiserver.Battle.Lobby
   alias Teiserver.Data.Matchmaking
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -126,7 +126,7 @@ defmodule Teiserver.SpringMatchmakingTest do
     reply = _recv_raw(battle_socket)
     [_all, battle_id] = Regex.run(~r/BATTLEOPENED ([0-9]+) [0-9]/, reply)
     battle_id = int_parse(battle_id)
-    battle = BattleLobby.get_battle!(battle_id)
+    battle = Lobby.get_battle!(battle_id)
     assert battle != nil
 
     # Now we have a battle open, tick should matter

@@ -2,7 +2,7 @@
   <%= if @server_user do %>
     <%=
       central_component "menu_card",
-      icon: Teiserver.Battle.BattleLobbyLib.icon(),
+      icon: Teiserver.Battle.LobbyLib.icon(),
       name: "battles",
       text: "Battles",
       icon_class: "fad",
@@ -119,7 +119,7 @@
   <div class="row page-row">
     <%=
       central_component "menu_card",
-      icon: Teiserver.Battle.BattleLobbyLib.icon(),
+      icon: Teiserver.Battle.LobbyLib.icon(),
       name: "battle_lobbies",
       text: "Battle Lobbies",
       icon_class: "fad",

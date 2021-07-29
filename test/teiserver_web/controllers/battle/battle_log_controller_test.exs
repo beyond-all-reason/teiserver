@@ -1,4 +1,4 @@
-# defmodule TeiserverWeb.Battle.BattleLogControllerTest do
+# defmodule TeiserverWeb.Battle.MatchControllerTest do
 #   use TeiserverWeb.ConnCase
 
 #   alias Teiserver.Battle
@@ -16,7 +16,7 @@
 #   describe "index" do
 #     test "lists all battle_logs", %{conn: conn} do
 #       conn = get(conn, Routes.battle_battle_log_path(conn, :index))
-#       assert html_response(conn, 200) =~ "Listing BattleLogs"
+#       assert html_response(conn, 200) =~ "Listing Matchs"
 #     end
 #   end
 

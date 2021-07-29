@@ -64,13 +64,13 @@ defmodule TeiserverWeb.Router do
         get("/", GeneralController, :index)
       end
 
-      scope "/teiserver/battle", TeiserverWeb.Battle, as: :ts do
+      scope "/teiserver/battle", TeiserverWeb.Battle, as: :ts_battle do
         pipe_through([:browser, :admin_layout, :protected])
 
-        resources("/logs", BattleLogController, only: [:index, :show, :delete])
+        resources("/matches", MatchController, only: [:index, :show, :delete])
       end
 
-      scope "/teiserver/battle", TeiserverWeb.Battle.BattleLobbyLive, as: :ts do
+      scope "/teiserver/battle", TeiserverWeb.Battle.LobbyLive, as: :ts_battle do
         pipe_through([:browser, :admin_layout, :protected])
 
         live("/lobbies", Index, :index)

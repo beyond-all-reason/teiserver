@@ -26,7 +26,7 @@
             label: "Lobbies",
             active: @active,
             url: Routes.ts_battle_lobby_index_path(@conn, :index),
-            lib: Teiserver.Battle.BattleLobbyLib
+            lib: Teiserver.Battle.LobbyLib
           %>
 
           <%= if allow?(@conn, "admin.dev") do %>
@@ -34,8 +34,8 @@
               name: "battle_logs",
               label: "Battle logs",
               active: @active,
-              url: Routes.ts_battle_log_path(@conn, :index),
-              lib: Teiserver.Battle.BattleLogLib
+              url: Routes.ts_battle_match_path(@conn, :index),
+              lib: Teiserver.Battle.MatchLib
             %>
           <% end %>
         </div>

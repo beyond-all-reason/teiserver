@@ -1,7 +1,7 @@
 defmodule Teiserver.Game.QueueServer do
   use GenServer
   require Logger
-  alias Teiserver.Battle.BattleLobby
+  alias Teiserver.Battle.Lobby
   alias Phoenix.PubSub
   alias Teiserver.Coordinator
 
@@ -218,7 +218,7 @@ defmodule Teiserver.Game.QueueServer do
   # Try to setup a battle with the players currently readied up
   defp try_setup_battle(state) do
     # Send out the new battle stuff
-    empty_battle = BattleLobby.find_empty_battle()
+    empty_battle = Lobby.find_empty_battle()
 
     case empty_battle do
       nil ->
@@ -235,7 +235,7 @@ defmodule Teiserver.Game.QueueServer do
 
         # Coordinator sets up the battle
         map_name = state.map_list |> Enum.random()
-        BattleLobby.start_coordinator_mode(battle.id)
+        Lobby.start_coordinator_mode(battle.id)
         Coordinator.cast_consul(battle.id, %{command: "manual-autohost", senderid: state.coordinator_id})
         Coordinator.cast_consul(battle.id, %{command: "map", remaining: map_name, senderid: state.coordinator_id})
 

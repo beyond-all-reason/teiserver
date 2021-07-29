@@ -97,7 +97,7 @@ defmodule Teiserver.Startup do
       },
       %{
         label: "Battles",
-        icons: [Teiserver.Battle.BattleLobbyLib.icon(), :list],
+        icons: [Teiserver.Battle.LobbyLib.icon(), :list],
         url: "/teiserver/battle/lobbies",
         permissions: "teiserver"
       },

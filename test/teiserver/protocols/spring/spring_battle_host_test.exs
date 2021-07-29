@@ -3,7 +3,7 @@ defmodule Teiserver.SpringBattleHostTest do
   require Logger
   # alias Teiserver.BitParse
   # alias Teiserver.User
-  alias Teiserver.Battle.BattleLobby
+  alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Spring
   # alias Teiserver.Protocols.{SpringIn, SpringOut, Spring}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -33,7 +33,7 @@ defmodule Teiserver.SpringBattleHostTest do
     )
 
     # Find battle
-    battle = BattleLobby.list_battles
+    battle = Lobby.list_battles
       |> Enum.filter(fn b -> b.founder_id == user.id end)
       |> hd
 
@@ -52,7 +52,7 @@ defmodule Teiserver.SpringBattleHostTest do
     )
 
     # Find battle ID
-    battle_id = BattleLobby.list_battles
+    battle_id = Lobby.list_battles
     |> Enum.filter(fn b -> b.founder_id == host_user.id end)
     |> hd
     |> Map.get(:id)
@@ -118,7 +118,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert battle_status == "REQUESTBATTLESTATUS"
 
     # Check the battle actually got created
-    battle = BattleLobby.get_battle(battle_id)
+    battle = Lobby.get_battle(battle_id)
     assert battle != nil
     assert Enum.count(battle.players) == 0
 
@@ -150,7 +150,7 @@ defmodule Teiserver.SpringBattleHostTest do
     # assert reply =~ "CLIENTSTATUS #{user2.name} 0\n"
 
     # Kick user2
-    battle = BattleLobby.get_battle(battle_id)
+    battle = Lobby.get_battle(battle_id)
     assert Enum.count(battle.players) == 1
 
     _send_raw(socket, "KICKFROMBATTLE #{user2.name}\n")
@@ -174,7 +174,7 @@ defmodule Teiserver.SpringBattleHostTest do
     # Had a bug where the battle would be incorrectly closed
     # after kicking a player, it was caused by the host disconnecting
     # and in the process closed out the battle
-    battle = BattleLobby.get_battle(battle_id)
+    battle = Lobby.get_battle(battle_id)
     assert battle != nil
 
     # Adding start rectangles
@@ -182,12 +182,12 @@ defmodule Teiserver.SpringBattleHostTest do
     _send_raw(socket, "ADDSTARTRECT 2 50 50 100 100\n")
     _ = _recv_raw(socket)
 
-    battle = BattleLobby.get_battle(battle_id)
+    battle = Lobby.get_battle(battle_id)
     assert Enum.count(battle.start_rectangles) == 1
 
     _send_raw(socket, "REMOVESTARTRECT 2\n")
     _ = _recv_raw(socket)
-    battle = BattleLobby.get_battle(battle_id)
+    battle = Lobby.get_battle(battle_id)
     assert Enum.count(battle.start_rectangles) == 0
 
     # Add and remove script tags
@@ -198,7 +198,7 @@ defmodule Teiserver.SpringBattleHostTest do
 
     assert reply == "SETSCRIPTTAGS custom/key1=customValue\tcustom/key2=customValue2\n"
 
-    battle = BattleLobby.get_battle(battle_id)
+    battle = Lobby.get_battle(battle_id)
     assert Map.has_key?(battle.tags, "custom/key1")
     assert Map.has_key?(battle.tags, "custom/key2")
 
@@ -206,7 +206,7 @@ defmodule Teiserver.SpringBattleHostTest do
     reply = _recv_raw(socket)
     assert reply == "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n"
 
-    battle = BattleLobby.get_battle(battle_id)
+    battle = Lobby.get_battle(battle_id)
     refute Map.has_key?(battle.tags, "custom/key1")
     # We never removed key2, it should still be there
     assert Map.has_key?(battle.tags, "custom/key2")

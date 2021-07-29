@@ -152,7 +152,7 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec start_battle_lobby_throttle(T.battle_id()) :: pid()
   def start_battle_lobby_throttle(battle_lobby_id) do
-    Teiserver.Throttles.start_throttle(battle_lobby_id, Teiserver.Battle.GameThrottle, "battle_lobby_throttle_#{battle_lobby_id}")
+    Teiserver.Throttles.start_throttle(battle_lobby_id, Teiserver.Battle.LobbyThrottle, "battle_lobby_throttle_#{battle_lobby_id}")
   end
 
   def stop_battle_lobby_throttle(battle_lobby_id) do

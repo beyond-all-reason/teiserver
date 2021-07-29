@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.BlacklistTest do
   use Central.ServerCase, async: false
-  alias Teiserver.Battle.BattleLobby
+  alias Teiserver.Battle.Lobby
   alias Teiserver.Common.PubsubListener
   alias Teiserver.{Client, User}
 
@@ -36,11 +36,11 @@ defmodule Teiserver.Coordinator.BlacklistTest do
     reply = _tachyon_recv(hsocket)
     battle_id = reply["battle"]["id"]
 
-    BattleLobby.start_coordinator_mode(battle_id)
+    Lobby.start_coordinator_mode(battle_id)
     listener = PubsubListener.new_listener(["legacy_battle_updates:#{battle_id}"])
 
     # Player needs to be added to the battle
-    BattleLobby.force_add_user_to_battle(player.id, battle_id)
+    Lobby.force_add_user_to_battle(player.id, battle_id)
     :timer.sleep(100)
     player_client = Client.get_client_by_id(player.id)
     Client.update(%{player_client |

@@ -1,7 +1,7 @@
 <div class="row page-row">
   <%=
     central_component "menu_card",
-    icon: Teiserver.Battle.BattleLobbyLib.icon(),
+    icon: Teiserver.Battle.LobbyLib.icon(),
     name: "lobbies",
     text: "Lobbies",
     icon_class: "fad",
@@ -11,11 +11,11 @@
   <%= if allow?(@conn, "admin.dev") do %>
     <%=
       central_component "menu_card",
-      icon: Teiserver.Battle.BattleLogLib.icon(),
+      icon: Teiserver.Battle.MatchLib.icon(),
       name: "battle_logs",
       text: "Battle logs",
       icon_class: "fad",
-      link: Routes.ts_battle_log_path(@conn, :index)
+      link: Routes.ts_battle_match_path(@conn, :index)
     %>
   <% end %>
 </div>

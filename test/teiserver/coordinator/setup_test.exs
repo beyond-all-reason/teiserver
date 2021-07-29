@@ -2,7 +2,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
   use Central.ServerCase, async: false
   alias Teiserver.{User, Client}
   alias Teiserver.TeiserverTestLib
-  alias Teiserver.Battle.BattleLobby
+  alias Teiserver.Battle.Lobby
   alias Teiserver.Common.PubsubListener
 
   import Teiserver.TeiserverTestLib,
@@ -29,17 +29,17 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
     assert ConCache.get(:teiserver_consul_pids, battle.id) != nil
 
     # Start it up!
-    BattleLobby.say(user.id, "!coordinator start", id)
+    Lobby.say(user.id, "!coordinator start", id)
     :timer.sleep(@sleep)
 
-    battle = BattleLobby.get_battle!(id)
+    battle = Lobby.get_battle!(id)
     assert battle.coordinator_mode == true
 
     # Stop it
-    BattleLobby.say(user.id, "!coordinator stop", id)
+    Lobby.say(user.id, "!coordinator stop", id)
     :timer.sleep(@sleep)
 
-    battle = BattleLobby.get_battle!(id)
+    battle = Lobby.get_battle!(id)
     assert battle.coordinator_mode == false
   end
 
@@ -54,14 +54,14 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
     })
     assert battle.coordinator_mode == false
 
-    BattleLobby.start_coordinator_mode(battle.id)
-    battle = BattleLobby.get_battle!(battle.id)
+    Lobby.start_coordinator_mode(battle.id)
+    battle = Lobby.get_battle!(battle.id)
 
     assert battle.coordinator_mode == true
     listener = PubsubListener.new_listener(["legacy_battle_updates:#{battle.id}"])
 
     # No command
-    result = BattleLobby.say(user.id, "Test message", battle.id)
+    result = Lobby.say(user.id, "Test message", battle.id)
     assert result == :ok
 
     :timer.sleep(@sleep)
@@ -69,7 +69,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
     assert messages == [{:battle_updated, battle.id, {user.id, "Test message", battle.id}, :say}]
 
     # Now command
-    result = BattleLobby.say(user.id, "!start", battle.id)
+    result = Lobby.say(user.id, "!start", battle.id)
     assert result == :ok
 
     :timer.sleep(@sleep)

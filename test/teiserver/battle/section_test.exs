@@ -1,6 +1,6 @@
 
   # describe "battle_logs" do
-  #   alias Teiserver.Battle.BattleLog
+  #   alias Teiserver.Battle.Match
 
   #   @valid_attrs %{"name" => "some name"}
   #   @update_attrs %{"name" => "some updated name"}
@@ -17,7 +17,7 @@
   #   end
 
   #   test "create_battle_log/1 with valid data creates a battle_log" do
-  #     assert {:ok, %BattleLog{} = battle_log} = Battle.create_battle_log(@valid_attrs)
+  #     assert {:ok, %Match{} = battle_log} = Battle.create_battle_log(@valid_attrs)
   #     assert battle_log.name == "some name"
   #   end
 
@@ -27,7 +27,7 @@
 
   #   test "update_battle_log/2 with valid data updates the battle_log" do
   #     battle_log = BattleTestLib.battle_log_fixture(1)
-  #     assert {:ok, %BattleLog{} = battle_log} = Battle.update_battle_log(battle_log, @update_attrs)
+  #     assert {:ok, %Match{} = battle_log} = Battle.update_battle_log(battle_log, @update_attrs)
   #     assert battle_log.name == "some updated name"
   #   end
 
@@ -39,7 +39,7 @@
 
   #   test "delete_battle_log/1 deletes the battle_log" do
   #     battle_log = BattleTestLib.battle_log_fixture(1)
-  #     assert {:ok, %BattleLog{}} = Battle.delete_battle_log(battle_log)
+  #     assert {:ok, %Match{}} = Battle.delete_battle_log(battle_log)
   #     assert_raise Ecto.NoResultsError, fn -> Battle.get_battle_log!(battle_log.id) end
   #   end
 

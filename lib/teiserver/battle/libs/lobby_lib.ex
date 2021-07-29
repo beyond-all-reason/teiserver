@@ -1,4 +1,4 @@
-defmodule Teiserver.Battle.BattleLobbyLib do
+defmodule Teiserver.Battle.LobbyLib do
   @spec icon :: String.t()
   def icon, do: "far fa-swords"
 

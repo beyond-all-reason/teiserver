@@ -207,6 +207,6 @@ defmodule Teiserver.SpringRawTest do
     )
 
     reply = _recv_until(socket)
-    assert reply == "DENIED Flood protection\n"
+    assert reply == "DENIED Flood protection - Please wait 20 seconds and try again\n"
   end
 end
