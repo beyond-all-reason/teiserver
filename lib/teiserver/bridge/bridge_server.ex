@@ -45,7 +45,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         message = if is_list(message), do: Enum.join(message, "\n"), else: message
 
         room_name = if String.contains?(message, " player(s) needed for battle "), do: "promote", else: room_name
-        forward_to_discord(from_id, state.rooms[room_name], message)
+        forward_to_discord(from_id, state.rooms[room_name], message, state)
 
       true ->
         nil
@@ -97,9 +97,11 @@ defmodule Teiserver.Bridge.BridgeServer do
     state
   end
 
-  defp forward_to_discord(_, _, "!stats" <> _), do: nil
-  defp forward_to_discord(_, _, "!status" <> _), do: nil
-  defp forward_to_discord(from_id, channel, message) do
+  defp forward_to_discord(sender_id, _, "!" <> _, state) do
+    User.send_direct_message(state.userid, sender_id, "Unfortunately the discord bridge bot doesn't have any ! commands. Yet.")
+  end
+
+  defp forward_to_discord(from_id, channel, message, _state) do
     Logger.debug("forwarding")
     author = User.get_username(from_id)
 
