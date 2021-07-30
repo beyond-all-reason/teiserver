@@ -189,6 +189,57 @@ defmodule Teiserver.Coordinator.CommandsTest do
     }
   end
 
+  test "makeready", %{battle_id: battle_id, player: player1, host: host, hsocket: hsocket} do
+    %{user: player2} = tachyon_auth_setup()
+
+    # Add player2 to the battle but as a spectator
+    Lobby.add_user_to_battle(player2.id, battle_id, "script_password")
+    player_client = Client.get_client_by_id(player2.id)
+    Client.update(%{player_client |
+      player: false,
+      ready: false
+    }, :client_updated_battlestatus)
+
+    readies = Lobby.get_battle!(battle_id)
+    |> Map.get(:players)
+    |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
+
+    assert readies == [false, false]
+
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!makeready"}
+    _tachyon_send(hsocket, data)
+
+    # Now we get the ready statuses
+    readies = Lobby.get_battle!(battle_id)
+    |> Map.get(:players)
+    |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
+
+    assert readies == [true, true]
+
+    # Unready both again
+    player_client = Client.get_client_by_id(player1.id)
+    Client.update(%{player_client | ready: false}, :client_updated_battlestatus)
+
+    player_client = Client.get_client_by_id(player2.id)
+    Client.update(%{player_client | ready: false}, :client_updated_battlestatus)
+
+    readies = Lobby.get_battle!(battle_id)
+    |> Map.get(:players)
+    |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
+
+    assert readies == [false, false]
+
+    # Now make one of them ready
+    data = %{cmd: "c.battle.message", userid: host.id, message: "!makeready ##{player1.id}"}
+    _tachyon_send(hsocket, data)
+
+    readies = Lobby.get_battle!(battle_id)
+    |> Map.get(:players)
+    |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
+
+    assert readies == [false, true]
+  end
+
   test "status", %{battle_id: battle_id, host: host, hsocket: hsocket} do
     data = %{cmd: "c.battle.message", userid: host.id, message: "!status"}
     _tachyon_send(hsocket, data)

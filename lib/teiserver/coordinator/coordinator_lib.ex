@@ -97,7 +97,7 @@ TODO: gatekeeper (blacklist | whitelist | friends)
 
 <--- Moderator only --->
 TODO: makeready <user>
-  sets a user to ready
+  sets a user to ready, when no user is specified all users are set to ready
 
 TODO: pull <user>
   Pulls a given user into the battle, it will also remove them from the blacklist and add them to the whitelist

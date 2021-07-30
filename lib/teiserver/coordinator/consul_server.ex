@@ -274,6 +274,28 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
+  # TODO: Find out if this making spectators ready is a problem, it won't give them a team so should be fine
+  def handle_command(%{command: "makeready", remaining: ""} = cmd, state) do
+    battle = Lobby.get_battle!(state.battle_id)
+
+    battle.players
+    |> Enum.each(fn player_id ->
+      Lobby.force_change_client(state.coordinator_id, player_id, %{ready: true})
+    end)
+
+    say_command(cmd, state)
+  end
+
+  def handle_command(%{command: "makeready", remaining: target} = cmd, state) do
+    case get_user(target, state) do
+      nil ->
+        say_command(%{cmd | error: "no user found"}, state)
+      target_id ->
+        Lobby.force_change_client(state.coordinator_id, target_id, %{ready: true})
+        say_command(cmd, state)
+    end
+  end
+
   def handle_command(%{command: "gatekeeper", remaining: mode} = cmd, state) do
     state = case mode do
       "blacklist" ->
