@@ -102,7 +102,6 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   defp forward_to_discord(from_id, channel, message, _state) do
-    Logger.debug("forwarding")
     author = User.get_username(from_id)
 
     new_message = message
