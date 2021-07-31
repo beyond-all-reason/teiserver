@@ -70,13 +70,7 @@ TODO: unban <user>
   unbans the user, if present in the blacklist also removes them from that
   has no effect on the whitelist
 
-TODO: mute <user>
-  mutes a user
-
-TODO: unmute <user>
-  unmutes a user
-
-TODO: readyup
+TODO: readyup -- Needs live test
   forces all players currently not readied to ready up in the next 5 seconds or be moved to spectators
 
 TODO: bossmode (dictator | autocrat)
@@ -88,25 +82,27 @@ TODO: addboss <user>
 TODO: unboss <user>
   removes a player as a boss
 
-TODO: gatekeeper (blacklist | whitelist | friends)
-  sets the gatekeeper for this battle to whitelist, blacklist or friends method
-  at battle lobby open the default is an empty blacklist
-  blacklist stops specific users from taking up specific roles
-  whitelist allows only specific users to take up specific roles
-  friends allows only friends of existing players to become players (but anybody can join)
+TODO: gatekeeper (blacklist | whitelist | friends | friendsstrict | clan)
+  sets the gatekeeper for this battle to whitelist, blacklist or friends method at battle lobby open the default is an empty blacklist
+  WORKS: blacklist stops specific users from taking up specific roles
+  WORKS: whitelist allows only specific users to take up specific roles
+  TODO: friends allows only friends of existing players to become players (but anybody can join)
+  TODO: friendsjoin allows only friends of existing battle members to join the battle, anybody in the battle can be a player
+  TODO: clan allows only members of an existing clan to join the game (enable after one member from each clan is present)
 
 <--- Moderator only --->
 TODO: makeready <user>
   sets a user to ready, when no user is specified all users are set to ready
 
-TODO: pull <user>
+pull <user>
   Pulls a given user into the battle, it will also remove them from the blacklist and add them to the whitelist
   as a player. If you are not a moderator then this only works on friends.
 
   Any commands not listed here, if called will passthrough to SPADS as if Coordinator mode wasn't active
   the only exception is a vote requirement may be added to them if you are not able to force them
 
-TODO: settag key value
+settag <key> <value>
+  Sets a battletag of <key> to <value>
 
 £!command - Force consul to intercept even when not in active mode
 %!command - Don't echo command back to chat

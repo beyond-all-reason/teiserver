@@ -304,6 +304,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
         %{state | gatekeeper: :whitelist}
       "friends" ->
         %{state | gatekeeper: :friends}
+      "friendsjoin" ->
+        %{state | gatekeeper: :friendsjoin}
+      "clan" ->
+        %{state | gatekeeper: :clan}
+      _ ->
+        state
     end
     say_command(cmd, state)
   end
@@ -344,8 +350,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_command(%{command: "whitelist", remaining: "player-as-is"} = cmd, state) do
-    battle = Lobby.get_battle(state.battle_id)
-    new_whitelist = Client.list_clients(battle.players)
+    battle = Lobby.get_battle!(state.battle_id)
+    new_whitelist = battle.players
+      |> Client.list_clients()
       |> Map.new(fn %{userid: userid, player: player} ->
         if player do
           {userid, :player}
@@ -363,18 +370,23 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_command(%{command: "whitelist", remaining: "default " <> level} = cmd, state) do
     level = get_level(level |> String.downcase())
+    battle = Lobby.get_battle!(state.battle_id)
 
     new_whitelist = Map.put(state.whitelist, :default, level)
 
-    # TODO: Implement this for every member of the battle based on the new default
-    # case level do
-    #   :banned ->
-    #     Lobby.kick_user_from_battle(target_id, state.battle_id)
-    #   :spectator ->
-    #     Lobby.force_change_client(state.coordinator_id, target_id, %{player: false})
-    #   _ ->
-    #     nil
-    # end
+    # Any players not already in the whitelist need to get added at their current level
+    extra_entries = battle.players
+      |> Enum.filter(fn userid -> not Map.has_key?(new_whitelist, userid) end)
+      |> Client.list_clients
+      |> Map.new(fn %{userid: userid, player: player} ->
+        if player do
+          {userid, :player}
+        else
+          {userid, :spectator}
+        end
+      end)
+
+    new_whitelist = Map.merge(extra_entries, new_whitelist)
 
     say_command(cmd, state)
 
@@ -427,6 +439,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     client = Client.get_client_by_id(userid)
     allow_status_change?(client, state)
   end
+  defp allow_status_change?(%{moderator: true}, _state), do: true
   defp allow_status_change?(%{userid: userid} = client, state) do
     list_status = get_list_status(userid, state)
 
@@ -435,7 +448,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       true -> true
     end
   end
-
 
   defp get_blacklist(userid, blacklist_map) do
     Map.get(blacklist_map, userid, :player)
@@ -448,25 +460,58 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  defp on_friendlist?(_userid, _battle_id) do
-    # battle = Lobby.get_battle!(battle_id)
-    # IO.puts ""
-    # IO.inspect battle.players
-    # IO.puts ""
-
-    true
-  end
-
   defp get_list_status(userid, state) do
     case state.gatekeeper do
       :blacklist -> get_blacklist(userid, state.blacklist)
       :whitelist -> get_whitelist(userid, state.whitelist)
       :friends ->
-        if on_friendlist?(userid, state.battle_id) do
+        if is_on_friendlist?(userid, state, :players) do
           :player
         else
           :spectator
         end
+
+      :friendsjoin ->
+        if is_on_friendlist?(userid, state, :all) do
+          :player
+        else
+          :banned
+        end
+
+      :clan ->
+        # TODO: Implement
+        :player
+    end
+  end
+
+  defp is_on_friendlist?(userid, state, :players) do
+    battle = Lobby.get_battle!(state.battle_id)
+    players = battle.players
+      |> Enum.map(&Client.get_client_by_id/1)
+      |> Enum.filter(fn c -> c.player end)
+      |> Enum.map(fn c -> c.userid end)
+
+    # If battle has no players it'll succeed regardless
+    case players do
+      [] -> true
+      _ ->
+        players
+          |> User.list_combined_friendslist
+          |> Enum.member?(userid)
+    end
+  end
+
+  defp is_on_friendlist?(userid, state, :all) do
+    battle = Lobby.get_battle!(state.battle_id)
+
+    # If battle has no members it'll succeed regardless
+    case battle do
+      %{players: []} -> true
+      _ ->
+        battle
+          |> Map.get(:players)
+          |> User.list_combined_friendslist
+          |> Enum.member?(userid)
     end
   end
 
@@ -477,7 +522,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
       client.moderator ->
         true
 
+      state.gatekeeper == :clan ->
+        true
+
       state.gatekeeper == :friends ->
+        true
+
+      state.gatekeeper == :friendsjoin ->
         is_friend?(userid, state)
 
       state.gatekeeper == :blacklist and get_blacklist(userid, state.blacklist) == :banned ->
@@ -573,15 +624,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state
   end
 
-  defp new_vote(cmd) do
-    %{
-      eligible: [],
-      yays: [],
-      nays: [],
-      abstains: [],
-      cmd: cmd
-    }
-  end
+  # defp new_vote(cmd) do
+  #   %{
+  #     eligible: [],
+  #     yays: [],
+  #     nays: [],
+  #     abstains: [],
+  #     cmd: cmd
+  #   }
+  # end
 
   defp empty_state(battle_id) do
     %{
@@ -595,7 +646,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       },
       temp_bans: %{},
       temp_specs: %{},
-      mutes: [],
       boss_mode: :player,
       bosses: [],
       welcome_message: nil,

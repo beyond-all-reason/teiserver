@@ -605,6 +605,15 @@ defmodule Teiserver.User do
     end
   end
 
+  def list_combined_friendslist(userids) do
+    friends = list_users(userids)
+      |> Enum.map(fn user -> Map.get(user, :friends) end)
+      |> List.flatten
+
+    # Combine friends and users, people are after all their own friends!
+    Enum.uniq(userids ++ friends)
+  end
+
   def send_direct_message(from_id, to_id, "!start" <> s), do: send_direct_message(from_id, to_id, "!cv start" <> s)
   def send_direct_message(from_id, to_id, "!joinas" <> s), do: send_direct_message(from_id, to_id, "!cv joinas" <> s)
 
