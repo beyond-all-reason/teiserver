@@ -158,14 +158,14 @@ defmodule Teiserver.Account.UserLib do
   def preload(query, preloads) do
     query = UserQueries.preload(query, preloads)
 
-    # query = if :skills in preloads, do: _preload_skills(query), else: query
+    query = if :user_stat in preloads, do: _preload_user_stat(query), else: query
 
     query
   end
 
-  # def _preload_skills(query) do
-  #   from user in query,
-  #     left_join: skills in assoc(user, :horizon_skills),
-  #     preload: [horizon_skills: skills]
-  # end
+  def _preload_user_stat(query) do
+    from user in query,
+      left_join: user_stats in assoc(user, :user_stat),
+      preload: [user_stat: user_stats]
+  end
 end

@@ -181,4 +181,98 @@ defmodule Teiserver.Account do
       {:error, _} -> {:error, "database error"}
     end
   end
+
+  # User stat table
+  alias Teiserver.Account.UserStat
+  alias Teiserver.Account.UserStatLib
+
+  def user_stat_query(args) do
+    user_stat_query(nil, args)
+  end
+
+  def user_stat_query(id, args) do
+    UserStatLib.query_user_stats()
+    |> UserStatLib.search(%{user_id: id})
+    |> UserStatLib.search(args[:search])
+  end
+
+  @doc """
+  Returns the list of user_stats.
+
+  ## Examples
+
+      iex> list_user_stats()
+      [%UserStat{}, ...]
+
+  """
+  def list_user_stats(args \\ []) do
+    user_stat_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
+  end
+
+  # @doc """
+  # Gets a single user_stat.
+
+  # Returns `nil` if the UserStat does not exist.
+
+  # ## Examples
+
+  #     iex> get_user_stat(123)
+  #     %UserStat{}
+
+  #     iex> get_user_stat(456)
+  #     nil
+
+  # """
+  def get_user_stat(id, args \\ []) when not is_list(id) do
+    user_stat_query(id, args)
+    |> Repo.one
+  end
+
+  def get_user_stat_data(userid) do
+    ConCache.get_or_store(:teiserver_user_stat_cache, userid, fn ->
+      case get_user_stat(userid) do
+        nil ->
+          %{}
+        user_stat ->
+          user_stat.data
+      end
+    end)
+  end
+
+  defp create_user_stat(attrs) do
+    %UserStat{}
+    |> UserStat.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a user_stat with data directly.
+
+  ## Examples
+
+      iex> update_user_stat(123, %{field: new_value})
+      :ok
+
+  """
+  def update_user_stat(userid, new_data) when is_integer(userid) do
+    case get_user_stat(userid) do
+      nil ->
+        create_user_stat(%{user_id: userid, data: new_data})
+      user_stat ->
+        ConCache.dirty_delete(:teiserver_user_stat_cache, userid)
+        new_data = Map.merge(user_stat.data, new_data)
+        update_user_stat(user_stat, %{data: new_data})
+    end
+  end
+  # Teiserver.Account.update_user_stat(3, %{"key1" => "valueXXXX"})
+  # Teiserver.Account.get_user_stat(3)
+
+  # This is the database call, typically you'd not need to use this
+  def update_user_stat(%UserStat{} = user_stat, attrs) do
+    user_stat
+    |> UserStat.changeset(attrs)
+    |> Repo.update()
+  end
 end
