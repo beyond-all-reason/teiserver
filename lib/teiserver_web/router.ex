@@ -97,8 +97,8 @@ defmodule TeiserverWeb.Router do
         get("/client_events/property/:property_name/detail", ClientEventController, :property_detail)
         get("/client_events/event/:event_name/detail", ClientEventController, :event_detail)
 
-        # post("/client_events", ClientEventController, :day_metrics_list)
-        # post("/client_events", ClientEventController, :day_metrics_list)
+        get("/show/:name", ReportController, :show)
+        post("/show/:name", ReportController, :show)
       end
 
       # API

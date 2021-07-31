@@ -1,0 +1,28 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= central_component "section_menu_button",
+  name: "active",
+  label: "Active",
+  active: @active,
+  icon: "far fa-satellite-dish",
+  bsname: bsname,
+  url: Routes.ts_reports_report_path(@conn, :show, "active")
+%>
+
+<%= central_component "section_menu_button",
+  name: "time_spent",
+  label: "Time spent",
+  active: @active,
+  icon: "far fa-watch",
+  bsname: bsname,
+  url: Routes.ts_reports_report_path(@conn, :show, "time_spent")
+%>
+
+<%= central_component "section_menu_button",
+  name: "ranks",
+  label: "Ranks",
+  active: @active,
+  icon: "far fa-chevrons-up",
+  bsname: bsname,
+  url: Routes.ts_reports_report_path(@conn, :show, "ranks")
+%>

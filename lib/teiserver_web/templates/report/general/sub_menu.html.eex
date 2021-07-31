@@ -30,13 +30,20 @@
               lib: Teiserver.Telemetry.ClientEventLib
             %>
 
-
             <%= central_component "sub_menu_icon",
               name: "server_metrics",
               label: "Server metrics",
               active: @active,
               url: Routes.ts_reports_metric_path(@conn, :day_metrics_list),
               lib: Teiserver.Telemetry.TelemetryDayLogLib
+            %>
+
+            <%= central_component "sub_menu_icon",
+              name: "reports",
+              label: "Reports",
+              active: @active,
+              url: Routes.ts_reports_general_path(@conn, :index),
+              lib: %{icon: Central.Helpers.StylingHelper.icon(:report)}
             %>
           <% end %>
         </div>

@@ -1,0 +1,74 @@
+<% {fg, _bg, bsname} = colours() %>
+
+<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "time_spent"
+          })
+        %>
+        <br /><br />
+
+        <form action='<%= Routes.ts_reports_report_path(@conn, :show, "time_spent") %>' method="post" class="form-horizontal">
+          <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+
+          <div class="row">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_mode" class="control-label">Mode:</label>
+              <%= central_component "icon_dropdown", %{
+                name: "report[mode]",
+                id: "report_mode",
+                selected: @params["mode"],
+                enumerable: [
+                  %{id: "User", icon: Central.Account.UserLib.icon(), colour: fg},
+                  %{id: "Group", icon: Central.Account.GroupLib.icon(), colour: fg},
+                  %{id: "Path (Full)", icon: "fa-sitemap", colour: fg},
+                  %{id: "Path (1 part)", icon: "fa-sitemap", colour: fg},
+                  %{id: "Path (2 parts)", icon: "fa-sitemap", colour: fg},
+                  %{id: "Path (3 parts)", icon: "fa-sitemap", colour: fg},
+                  %{id: "Path (4 parts)", icon: "fa-sitemap", colour: fg},
+                ]
+              } %>
+            </div>
+
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_date_preset" class="control-label">Date range:</label>
+              <%= select :report, :date_preset, @presets, class: "form-control", selected: @params["date_preset"] %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_start_date" class="control-label">Start date:</label>
+              <input type="text" id="report_start_date" name="report[start_date]" value='<%= @params["start_date"] %>' class="form-control datepicker" />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_end_date" class="control-label">End date:</label>
+              <input type="text" id="report_end_date" name="report[end_date]" value='<%= @params["end_date"] %>' class="form-control datepicker" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="offset-md-8 col-md-4 offset-xl-9 col-xl-3">
+              &nbsp;<br />
+              <input type="submit" value="Update report" name="form.submitted" class="btn btn-<%= bsname %> btn-block" />
+            </div>
+          </div>
+        </form>
+        <br /><br />
+
+        Currently doesn't do anything
+
+
+
+      </div>
+    </div>
+  </div>
+</div>

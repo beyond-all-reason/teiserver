@@ -47,6 +47,21 @@ defmodule Teiserver.Account.UserLib do
       where: users.name == ^value
   end
 
+  def _search(query, :data_equal, {field, value}) do
+    from users in query,
+      where: fragment("? ->> ? = ?", users.data, ^field, ^value)
+  end
+
+  def _search(query, :data_greater_than, {field, value}) do
+    from users in query,
+      where: fragment("? ->> ? > ?", users.data, ^field, ^value)
+  end
+
+  def _search(query, :data_less_than, {field, value}) do
+    from users in query,
+      where: fragment("? ->> ? < ?", users.data, ^field, ^value)
+  end
+
   def _search(query, :bot, "Person") do
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "bot", "false")
@@ -122,8 +137,19 @@ defmodule Teiserver.Account.UserLib do
     UserQueries._search(query, key, value)
   end
 
-  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
+  @spec order_by(Ecto.Query.t(), tuple() | String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
+
+  def order_by(query, {:data, field, :asc}) do
+    from users in query,
+      order_by: [asc: fragment("? -> ?", users.data, ^field)]
+  end
+
+  def order_by(query, {:data, field, :desc}) do
+    from users in query,
+      order_by: [desc: fragment("? -> ?", users.data, ^field)]
+  end
+
   def order_by(query, key), do: UserQueries.order(query, key)
 
   @spec preload(Ecto.Query.t(), list() | nil) :: Ecto.Query.t()

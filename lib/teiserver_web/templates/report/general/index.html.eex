@@ -18,6 +18,32 @@
   <% end %>
 </div>
 
+<div class="row">
+  <%=
+    central_component "menu_card",
+    icon: "fas fa-satellite-dish",
+    name: "active",
+    text: "Active",
+    link: Routes.ts_reports_report_path(@conn, :show, "active")
+  %>
+
+  <%=
+    central_component "menu_card",
+    icon: "fas fa-watch",
+    name: "time_spent",
+    text: "Time spent",
+    link: Routes.ts_reports_report_path(@conn, :show, "time_spent")
+  %>
+
+  <%=
+    central_component "menu_card",
+    icon: "fas fa-chevrons-up",
+    name: "ranks",
+    text: "Ranks",
+    link: Routes.ts_reports_report_path(@conn, :show, "ranks")
+  %>
+</div>
+
 <div class="row page-row">
   <%= central_component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_general_general_path(@conn, :index) %>
 </div>
