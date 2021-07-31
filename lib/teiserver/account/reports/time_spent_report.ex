@@ -1,5 +1,6 @@
 defmodule Teiserver.Account.TimeSpentReport do
   alias Central.Helpers.DatePresets
+  alias Teiserver.Account
 
   @spec icon() :: String.t()
   def icon(), do: "far fa-satellite-dish"
@@ -16,7 +17,25 @@ defmodule Teiserver.Account.TimeSpentReport do
         params["end_date"]
       )
 
-    data = %{}
+    start_date = (Timex.to_unix(start_date) / 60) |> round
+    end_date = (Timex.to_unix(end_date) / 60) |> round
+
+    data = Account.list_users(
+      search: [
+        data_greater_than: {"last_login", start_date |> to_string},
+        data_less_than: {"last_login", end_date |> to_string},
+        data_equal: {"bot", "false"}
+      ],
+      joins: [:user_stat],
+      order_by: {:data, "ingame_minutes", :desc},
+      limit: 100
+    )
+    |> Enum.sort(fn (user1, user2) ->
+      v1 = user1.user_stat.data[params["mode"]]
+      v2 = user2.user_stat.data[params["mode"]]
+      v1 >= v2
+    end)
+
     assigns = %{
       params: params,
       presets: DatePresets.presets()
@@ -30,7 +49,7 @@ defmodule Teiserver.Account.TimeSpentReport do
       "date_preset" => "This month",
       "start_date" => "",
       "end_date" => "",
-      "mode" => ""
+      "mode" => "player_minutes"
     }, params)
   end
 end

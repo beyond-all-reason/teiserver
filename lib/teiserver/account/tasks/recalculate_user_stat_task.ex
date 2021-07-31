@@ -34,6 +34,7 @@ defmodule Teiserver.Account.RecalculateUserStatTask do
         lobby_minutes: data.lobby,
         spectator_minutes: data.spectator,
         player_minutes: data.player,
+        total_minutes: data.menu + data.lobby + data.spectator + data.player
       })
     end)
 
