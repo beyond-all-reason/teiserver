@@ -24,6 +24,7 @@ config :central, Teiserver,
   game_name: "My game name",
   game_name_short: "GN",
   main_website: "https://site.com",
+  privacy_email: "privacy@site.com",
   discord: "My discord link"# Set to nil to not have link,
   certs: [
     keyfile: "/etc/letsencrypt/live/yourdomain.com/privkey.pem",

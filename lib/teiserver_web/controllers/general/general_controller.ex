@@ -26,7 +26,7 @@ defmodule TeiserverWeb.General.GeneralController do
     |> assign(:main_website, Application.get_env(:central, Teiserver)[:main_website])
     |> assign(:github_repo, Application.get_env(:central, Teiserver)[:github_repo])
     |> assign(:website_url, website_url)
-    |> assign(:privacy_email, privacy_email)
+    |> assign(:privacy_email, Application.get_env(:central, Teiserver)[:privacy_email])
     |> render("gdpr.html")
   end
 end
