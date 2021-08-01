@@ -67,6 +67,10 @@
               <th>Lobby</th>
               <th>Menu</th>
               <th>Total</th>
+              <th>Play %</th>
+              <th>Play & Spec %</th>
+              <th>Play vs Play & Spec %</th>
+              <th>Menu %</th>
            </tr>
           </thead>
           <tbody>
@@ -74,11 +78,16 @@
               <% stat = user.user_stat.data %>
               <tr>
                 <td><%= user.name %></td>
-                <td><%= stat["player_minutes"]/60 |> round %></td>
-                <td><%= stat["spectator_minutes"]/60 |> round %></td>
-                <td><%= stat["lobby_minutes"]/60 |> round %></td>
-                <td><%= stat["menu_minutes"]/60 |> round %></td>
-                <td><%= stat["total_minutes"]/60 |> round %></td>
+                <td><%= stat["player_minutes"] |> mins_to_hours %></td>
+                <td><%= stat["spectator_minutes"] |> mins_to_hours %></td>
+                <td><%= stat["lobby_minutes"] |> mins_to_hours %></td>
+                <td><%= stat["menu_minutes"] |> mins_to_hours %></td>
+                <td><%= stat["total_minutes"] |> mins_to_hours %></td>
+
+                <td><%= (stat["player_minutes"]/stat["total_minutes"]) |> percent %>%</td>
+                <td><%= ((stat["player_minutes"] + stat["spectator_minutes"]) / stat["total_minutes"]) |> percent %>%</td>
+                <td><%= stat["player_minutes"] / (max(stat["player_minutes"] + stat["spectator_minutes"], 1)) |> percent %>%</td>
+                <td><%= (stat["menu_minutes"]/stat["total_minutes"]) |> percent %>%</td>
               </tr>
             <% end %>
           </tbody>
