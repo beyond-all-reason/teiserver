@@ -18,6 +18,7 @@ defmodule TeiserverWeb.General.GeneralController do
   def gdpr(conn, _params) do
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     website_url = "https://#{host}"
+    privacy_email = "privacy@beyondallreason.info"
 
     conn
     |> assign(:game_name, Application.get_env(:central, Teiserver)[:game_name])
@@ -25,6 +26,7 @@ defmodule TeiserverWeb.General.GeneralController do
     |> assign(:main_website, Application.get_env(:central, Teiserver)[:main_website])
     |> assign(:github_repo, Application.get_env(:central, Teiserver)[:github_repo])
     |> assign(:website_url, website_url)
+    |> assign(:privacy_email, privacy_email)
     |> render("gdpr.html")
   end
 end
