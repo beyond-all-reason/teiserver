@@ -1,6 +1,6 @@
 Matchmaking is where players join a matchmaking queue and the server gradually matches them up against other players in the same queue. Where possible the server will try to match them up against players of a similar skill but this must be balanced with wait times and queue size.
 
-As per the [new protocol](/documents/new_protocol) work I will be doing all arguments are separated by tabs rather than spaces.
+As per the [spring extensions](/extensions.md) work I will be doing all arguments are separated by tabs rather than spaces.
 
 #### IDs vs Names
 Whenever talking to the server, it will expect the IDs of queues to be given. When the server sends messages to the clients it will send IDs except when the protocol explicitly says it will send a name (e.g. queue info or listing queues).
