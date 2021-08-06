@@ -1,4 +1,4 @@
-<div class="row" style="padding-top: 5vh; font-size: 1.1em;">
+<div class="row" style="padding-top: 5vh; font-size: 1.1em; margin-bottom: 40px">
   <div class="col-sm-12">
     <div style="max-width: 800px; margin: 0 auto;">
       <div class="card card-default" style="background-color: transparent;">
@@ -54,9 +54,9 @@
 <p>The information we collect is necessary for the functionality of the following services:</p>
 <ul>
   <li>In-game lobby client with all its functionality</li>
-  <li>Replay browser as seen at <a href="https://www.beyondallreason.info/replays">https://www.beyondallreason.info/replays</a></li>
-  <li>Active battles viewer as seen at <a href="https://www.beyondallreason.info/active-battles">https://www.beyondallreason.info/active-battles</a></li>
-  <li>Leaderboards as seen at <a href="https://www.beyondallreason.info/leaderboards">https://www.beyondallreason.info/leaderboards</a></li>
+  <li>Replay browser as seen at <a href="<%= @main_website %>replays"><%= @main_website %>/replays</a></li>
+  <li>Active battles viewer as seen at <a href="<%= @main_website %>active-battles"><%= @main_website %>/active-battles</a></li>
+  <li>Leaderboards as seen at <a href="<%= @main_website %>leaderboards"><%= @main_website %>/leaderboards</a></li>
 </ul>
 <p>The collected information is also used for moderation and analytical purposes, supporting the game development and tuning.</p>
 
@@ -71,10 +71,12 @@
 <h4>Open source</h4>
 <p>The entire source code for this server is <a href="<%= @github_repo %>">available on Github</a>.</p>
 
+<a href="/" class="btn btn-primary">
+  Back to homepage
+</a>
+
         </div>
       </div>
     </div>
   </div>
 </div>
-<br />
-<br />

@@ -40,8 +40,11 @@
 
   <div class="form-group">
     <div class="row">
-      <div class="col-md-12">
+      <div class="col-md-6">
         <a href="<%= Routes.account_session_path(@conn, :forgot_password) %>" class="btn btn-secondary btn-block">Forgotten password</a>
+      </div>
+      <div class="col-md-6">
+        <a href="<%= Routes.ts_general_general_path(@conn, :gdpr) %>" class="btn btn-outline-secondary btn-block">Privacy policy</a>
       </div>
     </div>
   </div>

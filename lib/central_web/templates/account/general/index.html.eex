@@ -42,6 +42,15 @@
     icon_class: "fad",
     link: Routes.account_registration_path(@conn, :edit_password)
   %>
+
+  <%=
+    central_component "menu_card",
+    icon: "fad fa-mask",
+    name: "privacy_policy",
+    text: "Privacy policy",
+    icon_class: "fad",
+    link: Routes.ts_general_general_path(@conn, :gdpr)
+  %>
 </div>
 
 <div class="row page-row">

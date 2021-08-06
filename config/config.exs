@@ -57,7 +57,7 @@ config :central, Teiserver,
 
   game_name: "Spring game",
   game_name_short: "SG",
-  main_website: "https://site.com",
+  main_website: "https://site.com/",
   discord: nil,
   default_protocol: Teiserver.Protocols.Spring,
   github_repo: "https://github.com/beyond-all-reason/teiserver",
