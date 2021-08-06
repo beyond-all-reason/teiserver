@@ -61,6 +61,16 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   # Doesn't do anything at this stage
   def handle_info(:startup, state) do
+    :timer.send_after(1000, :delayed_startup)
+    {:noreply, state}
+  end
+
+  def handle_info(:delayed_startup, state) do
+    uuid = UUID.uuid4()
+    battle = Lobby.get_battle!(state.battle_id)
+    new_tags = Map.put(battle.tags, "server/match/uuid", uuid)
+    Lobby.set_script_tags(state.battle_id, new_tags)
+
     {:noreply, state}
   end
 
@@ -132,7 +142,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_command(%{command: "settag", remaining: remaining} = cmd, state) do
     case String.split(remaining, " ") do
       [key, value | _] ->
-        Logger.error("Attempting to set-tag #{key}=#{value}")
         battle = Lobby.get_battle!(state.battle_id)
         new_tags = Map.put(battle.tags, String.downcase(key), value)
         Lobby.set_script_tags(state.battle_id, new_tags)
