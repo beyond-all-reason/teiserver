@@ -37,7 +37,8 @@ defmodule Teiserver.Client do
         side: 0,
         # TODO: Change client:battle_id to be client:battle_lobby_id
         battle_id: nil,
-        current_battle_id: nil
+        current_battle_id: nil,
+        extra_logging: false
       },
       client
     )
@@ -275,4 +276,24 @@ defmodule Teiserver.Client do
       {:ok, new_value}
     end)
   end
+
+  @spec enable_extra_logging(T.userid()) :: :ok
+  def enable_extra_logging(userid) do
+    client = get_client_by_id(userid)
+
+    send(client.pid, {:put, :extra_logging, true})
+    add_client(%{client | extra_logging: true})
+    :ok
+  end
+
+  @spec disable_extra_logging(T.userid()) :: :ok
+  def disable_extra_logging(userid) do
+    client = get_client_by_id(userid)
+
+    send(client.pid, {:put, :extra_logging, false})
+    add_client(%{client | extra_logging: false})
+    :ok
+  end
+
+
 end

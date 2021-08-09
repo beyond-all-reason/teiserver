@@ -78,7 +78,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     user = User.get_user_by_id(userid)
 
     if state.welcome_message do
+      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name} - ####################", state.battle_id)
       Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name} - " <> state.welcome_message, state.battle_id)
+      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name} - ####################", state.battle_id)
     end
 
     # If the client is muted, we need to tell the host

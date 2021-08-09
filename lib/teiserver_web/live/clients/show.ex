@@ -99,12 +99,12 @@ defmodule TeiserverWeb.ClientLive.Show do
   end
 
   def handle_event("action:extra_logging", _event, socket) do
-    send(socket.assigns[:client].pid, {:put, :extra_logging, true})
+    Client.enable_extra_logging(socket.assigns.current_user.id)
     {:noreply, socket}
   end
 
   def handle_event("action:less_logging", _event, socket) do
-    send(socket.assigns[:client].pid, {:put, :extra_logging, false})
+    Client.disable_extra_logging(socket.assigns.current_user.id)
     {:noreply, socket}
   end
 
