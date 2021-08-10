@@ -44,7 +44,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       Map.has_key?(state.rooms, room_name) ->
         message = if is_list(message), do: Enum.join(message, "\n"), else: message
 
-        room_name = if String.contains?(message, " player(s) needed for battle "), do: "promote", else: room_name
+        room_name = if String.contains?(message, " player(s) needed for battle"), do: "promote", else: room_name
         forward_to_discord(from_id, state.rooms[room_name], message, state)
 
       true ->
