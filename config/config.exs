@@ -65,6 +65,7 @@ config :central, Teiserver,
   enable_discord_bridge: false,
   enable_agent_mode: false,
   enable_coordinator_mode: true,
+  enable_match_monitor: true,
   user_agreement: "User agreement goes here."
 
 config :logger, :console,

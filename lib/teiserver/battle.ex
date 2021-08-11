@@ -181,4 +181,30 @@ defmodule Teiserver.Battle do
         end
     end
   end
+
+  alias Teiserver.Battle.MatchMonitorServer
+  require Logger
+
+  def start_match(match_id) do
+    Logger.error("start_match(#{match_id})")
+  end
+
+  def end_match(match_id) do
+    Logger.error("end_match(#{match_id})")
+  end
+
+  def save_match_stats(match_id, stats) do
+    Logger.error("save_match_stats(#{match_id}, #{stats})")
+  end
+
+  @spec start_match_monitor() :: :ok | {:failure, String.t()}
+  def start_match_monitor() do
+    cond do
+      MatchMonitorServer.get_match_monitor_userid() != nil ->
+        {:failure, "Already started"}
+
+      true ->
+        MatchMonitorServer.do_start()
+    end
+  end
 end
