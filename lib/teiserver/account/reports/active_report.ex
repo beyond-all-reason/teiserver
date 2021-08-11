@@ -9,7 +9,7 @@ defmodule Teiserver.Account.ActiveReport do
     params = apply_defaults(params)
 
     # Date range
-    {start_date, end_date} =
+    {_start_date, _end_date} =
       DatePresets.parse(
         params["date_preset"],
         params["start_date"],

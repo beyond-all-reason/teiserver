@@ -1,4 +1,4 @@
-<% {fg, bg, bsname} = colours() %>
+<% {_fg, _bg, bsname} = colours() %>
 
 <script src='<%= Routes.static_path(@conn, "/js/d3.js") %>'></script>
 <script src='<%= Routes.static_path(@conn, "/js/c3.min.js") %>'></script>

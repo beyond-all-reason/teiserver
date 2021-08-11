@@ -53,7 +53,7 @@ defmodule Teiserver.Agents.IdleAgentServer do
     state
   end
 
-  defp handle_msg(%{"cmd" => "s.news.get_latest_game_news", "post" => post}, state) do
+  defp handle_msg(%{"cmd" => "s.news.get_latest_game_news", "post" => _post}, state) do
     state
   end
 

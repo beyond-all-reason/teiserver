@@ -1,7 +1,6 @@
 defmodule Teiserver.Account.RanksReport do
   alias Central.Helpers.DatePresets
   alias Teiserver.Account
-  alias Central.Helpers.TimexHelper
 
   @spec icon() :: String.t()
   def icon(), do: "far fa-satellite-dish"

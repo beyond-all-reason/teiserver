@@ -11,7 +11,7 @@ defmodule Teiserver.Battle.Lobby do
 
     field :closed, :utc_datetime
 
-    has_many :matches, Teiserver.Battle.Match
+    # has_many :matches, Teiserver.Battle.Match
 
     timestamps()
   end
