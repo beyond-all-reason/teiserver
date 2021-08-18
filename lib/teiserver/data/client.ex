@@ -279,21 +279,23 @@ defmodule Teiserver.Client do
 
   @spec enable_extra_logging(T.userid()) :: :ok
   def enable_extra_logging(userid) do
-    client = get_client_by_id(userid)
-
-    send(client.pid, {:put, :extra_logging, true})
-    add_client(%{client | extra_logging: true})
-    :ok
+    case get_client_by_id(userid) do
+      nil -> :ok
+      client ->
+        send(client.pid, {:put, :extra_logging, true})
+        add_client(%{client | extra_logging: true})
+        :ok
+    end
   end
 
   @spec disable_extra_logging(T.userid()) :: :ok
   def disable_extra_logging(userid) do
-    client = get_client_by_id(userid)
-
-    send(client.pid, {:put, :extra_logging, false})
-    add_client(%{client | extra_logging: false})
-    :ok
+    case get_client_by_id(userid) do
+      nil -> :ok
+      client ->
+        send(client.pid, {:put, :extra_logging, false})
+        add_client(%{client | extra_logging: false})
+        :ok
+    end
   end
-
-
 end

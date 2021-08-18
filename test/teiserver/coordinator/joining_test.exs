@@ -94,7 +94,21 @@ defmodule Teiserver.Coordinator.JoiningTest do
     reply = _tachyon_recv(socket2)
     assert reply == %{
       "cmd" => "s.battle.announce",
-      "message" => " #{user2.name} - This is the welcome message",
+      "message" => " #{user2.name}: ####################",
+      "sender" => Coordinator.get_coordinator_userid()
+    }
+
+    reply = _tachyon_recv(socket2)
+    assert reply == %{
+      "cmd" => "s.battle.announce",
+      "message" => " #{user2.name}: This is the welcome message",
+      "sender" => Coordinator.get_coordinator_userid()
+    }
+
+    reply = _tachyon_recv(socket2)
+    assert reply == %{
+      "cmd" => "s.battle.announce",
+      "message" => " #{user2.name}: ####################",
       "sender" => Coordinator.get_coordinator_userid()
     }
   end

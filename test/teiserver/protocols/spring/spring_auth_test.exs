@@ -315,7 +315,7 @@ CLIENTS test_room #{user.name}\n"
 
     assert joinbattle == "JOINBATTLE #{battle_id} #{hash}"
     assert joinedbattle == "JOINEDBATTLE #{battle_id} #{user2.name} sPassword"
-    assert tags == "SETSCRIPTTAGS "
+    assert tags =~ "SETSCRIPTTAGS server/match/uuid="
     assert bstatus == "CLIENTBATTLESTATUS #{user2.name} 0 0"
     assert host_bstatus == "CLIENTBATTLESTATUS #{user1.name} 0 0"
     assert request == "REQUESTBATTLESTATUS"
