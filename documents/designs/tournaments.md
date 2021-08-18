@@ -17,14 +17,16 @@
 - Online checker for specific players
 
 ### Extensive ideas from Dubhdara
-Wants
-- Signup page
+- Signup within client
+- Signup within discord
+- Signup on website
 - Tourney rules page (specific to the tourney)
 - Support for single elimination
 - Match scheduling (automatic and manual)
 - Score reporting (Challonge API?)
 - Async and Synchronous support in terms of player (un)availability
 - Tourney page should have indicators of maps and settings for each game played and to-play
+- "Flake score" for players to indicate those that signup for and leave tourneys
 
 ### API suggestion from Dubhdara
 ```

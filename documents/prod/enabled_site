@@ -1,0 +1,49 @@
+# i
+upstream central {
+    server 127.0.0.1:8888;
+}
+# The following map statement is required
+# if you plan to support channels. See https://www.nginx.com/blog/websocket-nginx/
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+server {
+    client_max_body_size 0;
+    listen 443 ssl;
+    listen [::]:443;
+
+    server_name teifion.co.uk;
+    ssl_certificate /etc/letsencrypt/live/teifion.co.uk/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/teifion.co.uk/privkey.pem; # managed by Certbot
+
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    location /static {
+        alias /var/www/html/static;
+    }
+    
+    location = /favicon.ico {
+      alias /var/www/favicon.ico;
+    }
+    
+    location / {
+        try_files $uri @proxy;
+    }
+    
+    location @proxy {
+        include proxy_params;
+        proxy_redirect off;
+        proxy_pass https://central;
+        proxy_http_version 1.1;
+        proxy_headers_hash_max_size 512;
+        
+        # The following two headers need to be set in order
+        # to keep the websocket connection open. Otherwise you'll see
+        # HTTP 400's being returned from websocket connections.
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}

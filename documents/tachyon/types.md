@@ -112,7 +112,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 -- Game/Battle attributes
 * ready: boolean
 * team_number: integer
-* ally_team_number: 0 -- I want to replace these two with just team_number, it's a carryover from Spring we probably don't need
+* ally_team_number: 0 -- I want to replace these two with just team_number, it's only purpose seems to be to enable Archon mode
 * team_colour: colour
 * role: string -- player, spectator
 * bonus: integer, default: 0
