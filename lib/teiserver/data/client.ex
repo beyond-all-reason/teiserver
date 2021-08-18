@@ -28,9 +28,9 @@ defmodule Teiserver.Client do
 
         # Battle stuff
         ready: false,
-        team_number: 0,
+        team_number: 0,# Used for archon mode
         team_colour: 0,
-        ally_team_number: 0,
+        ally_team_number: 0,# Actual which team the player is on
         player: false,
         handicap: 0,
         sync: 0,

@@ -11,8 +11,12 @@ defmodule Teiserver.Telemetry do
   alias Teiserver.Telemetry.TelemetryDayLog
   alias Teiserver.Telemetry.TelemetryDayLogLib
 
-  def get_state_and_reset() do
-    GenServer.call(TelemetryServer, :get_state_and_reset)
+  def get_totals_and_reset() do
+    GenServer.call(TelemetryServer, :get_totals_and_reset)
+  end
+
+  def increment(key) do
+    send(TelemetryServer, {:increment, key})
   end
 
   @spec metrics() :: List.t()

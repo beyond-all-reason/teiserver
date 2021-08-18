@@ -6,6 +6,7 @@ defmodule Teiserver.Battle do
   import Ecto.Query, warn: false
   alias Central.Helpers.QueryHelpers
   alias Central.Repo
+  alias Teiserver.{Telemetry, Coordinator}
 
   alias Teiserver.Battle.Match
   alias Teiserver.Battle.MatchLib
@@ -183,14 +184,39 @@ defmodule Teiserver.Battle do
   end
 
   alias Teiserver.Battle.MatchMonitorServer
+  alias Teiserver.Battle.MatchLib
   require Logger
 
-  def start_match(match_id) do
-    Logger.error("start_match(#{match_id})")
+  def start_match(nil), do: :ok
+  def start_match(lobby_id) do
+    Telemetry.increment(:matches_started)
+
+    {match_params, members} = MatchLib.match_from_lobby(lobby_id)
+    case create_match(match_params) do
+      {:ok, match} ->
+        members
+        |> Enum.map(fn m ->
+          create_match_membership(Map.merge(m, %{
+            match_id: match.id
+          }))
+        end)
+      error ->
+        Logger.error("Error inserting match: #{Kernel.inspect error}")
+        :ok
+    end
+
+    Coordinator.cast_consul(lobby_id, :match_start)
   end
 
-  def end_match(match_id) do
-    Logger.error("end_match(#{match_id})")
+  def stop_match(nil), do: :ok
+  def stop_match(lobby_id) do
+    Telemetry.increment(:matches_stopped)
+    {uuid, params} = MatchLib.stop_match(lobby_id)
+
+    match = get_match!(nil, search: [uuid: uuid])
+    update_match(match, params)
+
+    Coordinator.cast_consul(lobby_id, :match_stop)
   end
 
   def save_match_stats(match_id, stats) do
@@ -206,5 +232,91 @@ defmodule Teiserver.Battle do
       true ->
         MatchMonitorServer.do_start()
     end
+  end
+
+  alias Teiserver.Battle.MatchMembership
+  # alias Teiserver.Battle.MatchMembershipLib
+
+  # def list_match_memberships([user_id: user_id] = args) do
+  #   MatchMembershipLib.get_match_memberships()
+  #   |> MatchMembershipLib.search(user_id: user_id)
+  #   |> MatchMembershipLib.search(args)
+  #   |> MatchMembershipLib.preload(args[:joins])
+  #   |> QueryHelpers.select(args[:select])
+  #   # |> QueryHelpers.limit_query(50)
+  #   |> Repo.all()
+  # end
+
+  @doc """
+  Gets a single match_membership.
+
+  Raises `Ecto.NoResultsError` if the MatchMembership does not exist.
+
+  ## Examples
+
+      iex> get_match_membership!(123)
+      %MatchMembership{}
+
+      iex> get_match_membership!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  # def get_match_membership!(user_id, match_id) do
+  #   MatchMembershipLib.get_match_memberships()
+  #   |> MatchMembershipLib.search(user_id: user_id, match_id: match_id)
+  #   |> Repo.one!()
+  # end
+
+  def create_match_membership(attrs \\ %{}) do
+    %MatchMembership{}
+    |> MatchMembership.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a match_membership.
+
+  ## Examples
+
+      iex> update_match_membership(match_membership, %{field: new_value})
+      {:ok, %MatchMembership{}}
+
+      iex> update_match_membership(match_membership, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_match_membership(%MatchMembership{} = match_membership, attrs) do
+    match_membership
+    |> MatchMembership.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a MatchMembership.
+
+  ## Examples
+
+      iex> delete_match_membership(match_membership)
+      {:ok, %MatchMembership{}}
+
+      iex> delete_match_membership(match_membership)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_match_membership(%MatchMembership{} = match_membership) do
+    Repo.delete(match_membership)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking match_membership changes.
+
+  ## Examples
+
+      iex> change_match_membership(match_membership)
+      %Ecto.Changeset{source: %MatchMembership{}}
+
+  """
+  def change_match_membership(%MatchMembership{} = match_membership) do
+    MatchMembership.changeset(match_membership, %{})
   end
 end

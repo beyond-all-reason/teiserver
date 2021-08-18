@@ -1,5 +1,6 @@
 defmodule Teiserver.Protocols.TachyonOut do
   require Logger
+  alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Tachyon
   alias Teiserver.Protocols.Tachyon.{AuthOut, BattleOut, CommunicationOut, MatchmakingOut, NewsOut, SystemOut}
 
@@ -11,8 +12,11 @@ defmodule Teiserver.Protocols.TachyonOut do
   def reply(:login_end, _data, _msg_id, state), do: state
   def reply(:user_logged_in, _data, _msg_id, state), do: state
   def reply(:battle_opened, _data, _msg_id, state), do: state
+  def reply(:battle_updated, {battle_id, _data, _reason}, _msg_id, state), do: reply(:battle, :updated, Lobby.get_battle(battle_id), state)
   def reply(:battle_message_ex, {sender_id, msg, battle_id}, _msg_id, state), do: reply(:battle, :announce, {sender_id, msg, battle_id}, state)
   def reply(:add_script_tags, _data, _msg_id, state), do: state
+  def reply(:add_bot_to_battle, _data, _msg_id, state), do: state
+  def reply(:remove_bot_from_battle, _data, _msg_id, state), do: state
   def reply(:set_script_tags, _data, _msg_id, state), do: state
   def reply(:remove_script_tags, _data, _msg_id, state), do: state
   def reply(:request_user_join_battle, data, _msg_id, state), do: reply(:battle, :request_to_join, data, state)

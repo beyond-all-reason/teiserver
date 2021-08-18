@@ -25,6 +25,15 @@ defmodule Teiserver.Protocols.Tachyon.BattleOut do
   end
 
   ###########
+  # Updated
+  def do_reply(:updated, battle) do
+    %{
+      "cmd" => "s.battle.updated",
+      "battle" => Tachyon.convert_object(:battle, battle)
+    }
+  end
+
+  ###########
   # Leave
   def do_reply(:leave, {:success, nil}) do
     %{

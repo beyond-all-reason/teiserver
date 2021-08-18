@@ -1,33 +1,33 @@
 defmodule Teiserver.Battle.Lobby do
-  @moduledoc false
-  use CentralWeb, :schema
+  # @moduledoc false
+  # use CentralWeb, :schema
 
-  schema "teiserver_battle_lobbies" do
-    field :name, :string
-    field :data, :map
+  # schema "teiserver_battle_lobbies" do
+  #   field :name, :string
+  #   field :data, :map
 
-    field :engine_version, :string
-    field :game_version, :string
+  #   field :engine_version, :string
+  #   field :game_version, :string
 
-    field :closed, :utc_datetime
+  #   field :closed, :utc_datetime
 
-    # has_many :matches, Teiserver.Battle.Match
+  #   # has_many :matches, Teiserver.Battle.Match
 
-    timestamps()
-  end
+  #   timestamps()
+  # end
 
-  @doc """
-  Builds a changeset based on the `struct` and `params`.
-  """
-  @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
-  def changeset(struct, params \\ %{}) do
-    struct
-    |> cast(params, ~w(name data engine_version game_version closed)a)
-    |> validate_required(~w(name data engine_version game_version)a)
-  end
+  # @doc """
+  # Builds a changeset based on the `struct` and `params`.
+  # """
+  # @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
+  # def changeset(struct, params \\ %{}) do
+  #   struct
+  #   |> cast(params, ~w(name data engine_version game_version closed)a)
+  #   |> validate_required(~w(name data engine_version game_version)a)
+  # end
 
-  @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
-  def authorize(_, conn, _), do: allow?(conn, "teiserver")
+  # @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
+  # def authorize(_, conn, _), do: allow?(conn, "teiserver")
 
   alias Phoenix.PubSub
   require Logger

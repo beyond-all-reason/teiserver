@@ -19,7 +19,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryMinuteTask do
   end
 
   defp perform_telemetry_persist(timestamp) do
-    data = Telemetry.get_state_and_reset()
+    data = Telemetry.get_totals_and_reset()
       |> Map.drop([:cycle])
 
     Telemetry.create_telemetry_minute_log(%{

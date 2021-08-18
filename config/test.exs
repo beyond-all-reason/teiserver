@@ -21,6 +21,7 @@ config :central, Teiserver,
   enable_hooks: false,
   enable_coordinator_mode: false,
   enable_discord_bridge: false,
+  enable_match_monitor: false,
   user_agreement: "User agreement goes here."
 
 # We don't run a server during test. If one is required,

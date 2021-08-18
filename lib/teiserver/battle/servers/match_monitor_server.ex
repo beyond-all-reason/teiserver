@@ -50,15 +50,15 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
-  def handle_info({:new_message, from_id, "autohosts", "Launching game..."}, state) do
+  def handle_info({:new_message, from_id, "autohosts", "* Launching game..."}, state) do
     client = Client.get_client_by_id(from_id)
     Battle.start_match(client.battle_id)
     {:noreply, state}
   end
 
-  def handle_info({:new_message, from_id, "autohosts", "Server stopped (running time" <> _}, state) do
+  def handle_info({:new_message, from_id, "autohosts", "* Server stopped (running time" <> _}, state) do
     client = Client.get_client_by_id(from_id)
-    Battle.end_match(client.battle_id)
+    Battle.stop_match(client.battle_id)
     {:noreply, state}
   end
 

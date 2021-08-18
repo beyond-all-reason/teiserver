@@ -2,33 +2,45 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   use GenServer
   alias Teiserver.Battle.Lobby
   alias Teiserver.Client
+  require Logger
 
   @client_states ~w(lobby menu player spectator total)a
   @tick_period 9_000
+  @counters ~w(matches_started matches_stopped)a
   @default_state %{
-      client: %{
-        player: [],
-        spectator: [],
-        lobby: [],
-        menu: []
-      },
-      battle: %{
-        total: 0,
-        lobby: 0,
-        in_progress: 0,
+    counters: Map.new(@counters, fn c -> {c, 0} end),
+    client: %{
+      player: [],
+      spectator: [],
+      lobby: [],
+      menu: []
+    },
+    battle: %{
+      total: 0,
+      lobby: 0,
+      in_progress: 0,
 
-        # Battles completed as part of this tick, not a cumulative total
-        # reset when the reset command is sent
-        completed: 0
-      }
+      # Battles completed as part of this tick, not a cumulative total
+      # reset when the reset command is sent
+      completed: 0
+    },
+    matchmaking: %{
+
     }
+  }
 
   @impl true
   def handle_info(:tick, state) do
-    state = get_totals(state)
-    report_telemetry(state)
+    totals = get_totals(state)
+    report_telemetry(totals)
 
     {:noreply, state}
+  end
+
+  def handle_info({:increment, counter}, state) do
+    current = Map.get(state.counters, counter, 0)
+    new_counters = Map.put(state.counters, counter, current + 1)
+    {:noreply, %{state | counters: new_counters}}
   end
 
   @impl true
@@ -36,8 +48,8 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     {:reply, state, state}
   end
 
-  def handle_call(:get_state_and_reset, _from, state) do
-    {:reply, state, @default_state}
+  def handle_call(:get_totals_and_reset, _from, state) do
+    {:reply, get_totals(state), @default_state}
   end
 
   @spec report_telemetry(Map.t()) :: :ok
@@ -52,7 +64,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   end
 
   @spec get_totals(Map.t()) :: Map.t()
-  defp get_totals(_state) do
+  defp get_totals(state) do
     battles = Lobby.list_battles()
     client_ids = Client.list_client_ids()
     clients = client_ids
@@ -93,6 +105,8 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         end
       end)
 
+    counters = state.counters
+
     %{
       client: %{
         player: player_ids,
@@ -104,9 +118,18 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       battle: %{
         total: total_battles,
         lobby: total_battles - Enum.count(battles_in_progress),
-        in_progress: Enum.count(battles_in_progress)
+        in_progress: Enum.count(battles_in_progress),
+        started: counters.matches_started,
+        stopped: counters.matches_stopped,
+      },
+      matchmaking: %{
+
       }
     }
+  end
+
+  defp reset_state(state) do
+    Map.merge(@default_state, Map.take(state, [:counters]))
   end
 
   # Startup
@@ -118,6 +141,6 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   def init(_opts) do
     :timer.send_interval(@tick_period, self(), :tick)
 
-    {:ok, @default_state}
+    {:ok, reset_state(%{})}
   end
 end

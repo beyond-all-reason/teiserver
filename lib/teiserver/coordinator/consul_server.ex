@@ -74,13 +74,26 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
+  def handle_info(:match_start, state) do
+    {:noreply, state}
+  end
+
+  def handle_info(:match_stop, state) do
+    uuid = UUID.uuid4()
+    battle = Lobby.get_battle!(state.battle_id)
+    new_tags = Map.put(battle.tags, "server/match/uuid", uuid)
+    Lobby.set_script_tags(state.battle_id, new_tags)
+
+    {:noreply, state}
+  end
+
   def handle_info({:user_joined, userid}, state) do
     user = User.get_user_by_id(userid)
 
     if state.welcome_message do
-      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name} - ####################", state.battle_id)
-      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name} - " <> state.welcome_message, state.battle_id)
-      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name} - ####################", state.battle_id)
+      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name}: ####################", state.battle_id)
+      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name}: " <> state.welcome_message, state.battle_id)
+      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name}: ####################", state.battle_id)
     end
 
     # If the client is muted, we need to tell the host
