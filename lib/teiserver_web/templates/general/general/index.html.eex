@@ -37,6 +37,17 @@
       disabled: true
     %>
 
+    <%= if allow?(@conn, "admin.dev") do %>
+      <%=
+        central_component "menu_card",
+        icon: Teiserver.Engine.UnitLib.icon(),
+        name: "units",
+        text: "Units",
+        icon_class: "fad",
+        link: Routes.ts_engine_unit_path(@conn, :index)
+      %>
+    <% end %>
+
     <%= if allow?(@conn, "teiserver.moderator") do %>
       <%=
         central_component "menu_card",

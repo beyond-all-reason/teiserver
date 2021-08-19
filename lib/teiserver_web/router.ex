@@ -101,6 +101,13 @@ defmodule TeiserverWeb.Router do
         post("/show/:name", ReportController, :show)
       end
 
+      # ts_engine_X_path
+      scope "/teiserver/engine", TeiserverWeb.Engine, as: :ts_engine do
+        pipe_through([:browser, :admin_layout, :protected])
+
+        resources("/unit", UnitController)
+      end
+
       # API
       scope "/teiserver/api", TeiserverWeb.API do
         pipe_through :api
