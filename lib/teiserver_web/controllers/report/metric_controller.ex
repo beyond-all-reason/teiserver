@@ -90,15 +90,12 @@ defmodule TeiserverWeb.Report.MetricController do
       |> Enum.reverse()
 
 
-    field_list = case Map.get(params, "fields", "average_users") do
-      "average_users" ->
-        ["average_user_counts.player", "average_user_counts.spectator", "average_user_counts.lobby", "average_user_counts.menu", "average_user_counts.total"]
-
-      "peak_users" ->
-        ["peak_user_counts.player", "peak_user_counts.spectator", "peak_user_counts.lobby", "peak_user_counts.menu", "peak_user_counts.total"]
-
+    field_list = case Map.get(params, "fields", "unique_users") do
       "unique_users" ->
         ["aggregates.stats.unique_users", "aggregates.stats.unique_players"]
+
+      "peak_users" ->
+        ["aggregates.stats.peak_user_counts.total", "aggregates.stats.peak_user_counts.player"]
 
       "minutes" ->
         ["aggregates.minutes.player", "aggregates.minutes.spectator", "aggregates.minutes.lobby", "aggregates.minutes.menu", "aggregates.minutes.total"]
