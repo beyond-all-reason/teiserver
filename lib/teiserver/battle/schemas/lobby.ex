@@ -805,11 +805,14 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   def list_battle_ids() do
-    ConCache.get(:lists, :battles)
+    case ConCache.get(:lists, :battles) do
+      nil -> []
+      ids -> ids
+    end
   end
 
   def list_battles() do
-    ConCache.get(:lists, :battles)
+    list_battle_ids()
     |> Enum.map(fn battle_id -> ConCache.get(:battles, battle_id) end)
   end
 end

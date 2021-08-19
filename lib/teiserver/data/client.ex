@@ -192,12 +192,15 @@ defmodule Teiserver.Client do
 
   @spec list_client_ids() :: [integer()]
   def list_client_ids() do
-    ConCache.get(:lists, :clients)
+    case ConCache.get(:lists, :clients) do
+      nil -> []
+      ids -> ids
+    end
   end
 
   @spec list_clients() :: [Map.t()]
   def list_clients() do
-    ConCache.get(:lists, :clients)
+    list_client_ids()
     |> list_clients()
   end
 
