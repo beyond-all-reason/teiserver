@@ -572,11 +572,14 @@ defmodule Teiserver.Battle.Lobby do
 
       true ->
         # Okay, so far so good, what about the host? Are they okay with it?
-        host_client = Client.get_client_by_id(battle.founder_id)
+        case Client.get_client_by_id(battle.founder_id) do
+          nil ->
+            {:failure, "Battle closed"}
 
-        send(host_client.pid, {:request_user_join_battle, userid})
-
-        {:waiting_on_host, script_password}
+          host_client ->
+            send(host_client.pid, {:request_user_join_battle, userid})
+            {:waiting_on_host, script_password}
+        end
     end
   end
 

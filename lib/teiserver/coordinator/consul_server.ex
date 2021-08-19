@@ -49,6 +49,22 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   # Infos
+  def handle_info(:tick, state) do
+    lobby = Lobby.get_battle!(state.battle_id)
+    case Map.get(lobby.tags, "server/match/uuid", nil) do
+      nil ->
+        Logger.warn("New UUID")
+        uuid = UUID.uuid4()
+        lobby = Lobby.get_battle!(state.battle_id)
+        new_tags = Map.put(lobby.tags, "server/match/uuid", uuid)
+        Lobby.set_script_tags(state.battle_id, new_tags)
+      _tag ->
+        nil
+    end
+
+    {:noreply, state}
+  end
+
   def handle_info({:put, key, value}, state) do
     new_state = Map.put(state, key, value)
     {:noreply, new_state}
@@ -543,6 +559,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     client = Client.get_client_by_id(userid)
 
     cond do
+      client == nil ->
+        false
+
       client.moderator ->
         true
 
@@ -688,7 +707,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     # Update the queue pids cache to point to this process
     ConCache.put(:teiserver_consul_pids, battle_id, self())
-
+    :timer.send_interval(10_000, :tick)
     {:ok, empty_state(battle_id)}
   end
 end

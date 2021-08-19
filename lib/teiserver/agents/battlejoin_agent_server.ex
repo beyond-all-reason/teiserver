@@ -39,6 +39,17 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
     {:noreply, new_state}
   end
 
+  # def handle_info({:ssl_closed, _data}, state) do
+  #   socket = AgentLib.get_socket()
+  #   AgentLib.login(socket, %{
+  #     name: "BattlejoinAgentServer_#{state.number}",
+  #     email: "BattlejoinAgentServer_#{state.number}@agent_email",
+  #     extra_data: %{}
+  #   })
+
+  #   {:noreply, %{state | socket: socket}}
+  # end
+
   def handle_info({:ssl, _socket, data}, state) do
     new_state = data
     |> AgentLib.translate
