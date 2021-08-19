@@ -817,6 +817,16 @@ defmodule Teiserver.User do
 
     update_user(user, persist: true)
 
+    # User stats
+    Account.update_user_stat(user.id, %{
+        bot: user.bot,
+        country: country,
+        last_login: last_login,
+        rank: rank,
+        lobby_id: lobbyid,
+        last_ip: ip
+      })
+
     {:ok, user}
   end
 
@@ -824,7 +834,7 @@ defmodule Teiserver.User do
 
   def logout(user_id) do
     user = get_user_by_id(user_id)
-    # TODO In some tests it's possible for last_login to be nil, this is a temporary workaround
+    # TODO: In some tests it's possible for last_login to be nil, this is a temporary workaround
     system_minutes = round(:erlang.system_time(:seconds) / 60)
 
     new_ingame_minutes =
