@@ -55,6 +55,15 @@
 
     <div class="col-lg-6">
       <%= central_component "checkbox",
+        id: "user_streamer",
+        name: "user[streamer]",
+        label: "Streamer",
+        checked: ("Streamer" in (@changeset.data.data["roles"] || [])),
+        changes: nil,
+        data: nil
+      %>
+
+      <%= central_component "checkbox",
         id: "user_donor",
         name: "user[donor]",
         label: "Donor",

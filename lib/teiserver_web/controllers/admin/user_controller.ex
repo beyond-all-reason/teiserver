@@ -57,6 +57,7 @@ defmodule TeiserverWeb.Admin.UserController do
           bot: params["bot"],
           moderator: params["moderator"],
           verified: params["verified"],
+          streamer: params["streamer"],
           donor: params["donor"],
           contributor: params["contributor"],
           developer: params["developer"],
@@ -187,6 +188,7 @@ defmodule TeiserverWeb.Admin.UserController do
     roles = [
       (if user_params["moderator"] == "true", do: "Moderator"),
       (if user_params["admin"] == "true", do: "Admin"),
+      (if user_params["streamer"] == "true", do: "Streamer"),
       (if user_params["donor"] == "true", do: "Donor"),
       (if user_params["contributor"] == "true", do: "Contributor"),
       (if user_params["developer"] == "true", do: "Developer"),

@@ -16,7 +16,7 @@ defmodule Teiserver.User do
 
   @timer_sleep 500
 
-  def role_list(), do: ~w(Donor Contributor Dev Moderator Admin)
+  def role_list(), do: ~w(Streamer Donor Contributor Dev Moderator Admin)
 
   @keys [:id, :name, :email, :inserted_at, :clan_id]
   @data_keys [
