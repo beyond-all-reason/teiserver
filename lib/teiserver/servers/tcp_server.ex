@@ -509,7 +509,8 @@ defmodule Teiserver.TcpServer do
 
   # This is the result of being forced to join a battle
   defp force_join_battle(battle_id, script_password, state) do
-    new_state = %{state | script_password: script_password}
+    new_state = state.protocol_out.do_leave_battle(state, battle_id)
+    new_state = %{new_state | script_password: script_password}
     state.protocol_out.do_join_battle(new_state, battle_id, script_password)
   end
 

@@ -107,6 +107,10 @@ defmodule Teiserver.Protocols.Tachyon do
     end
   end
 
+  def do_leave_battle(state, battle_id) do
+    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle_id}")
+    state
+  end
 
   # Does the joining of a battle
   @spec do_join_battle(map(), integer(), String.t()) :: map()
@@ -115,6 +119,7 @@ defmodule Teiserver.Protocols.Tachyon do
     # the part where it calls Lobby.add_user_to_battle should happen elsewhere
     battle = Lobby.get_battle(battle_id)
     Lobby.add_user_to_battle(state.userid, battle.id, script_password)
+    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
     PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
     TachyonOut.reply(:battle, :join_response, {:approve, battle}, state)
 

@@ -521,6 +521,11 @@ defmodule Teiserver.Protocols.SpringOut do
     ""
   end
 
+  def do_leave_battle(state, battle_id) do
+    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle_id}")
+    state
+  end
+
   @spec do_join_battle(map(), integer(), String.t()) :: map()
   def do_join_battle(state, battle_id, script_password) do
     battle = Lobby.get_battle(battle_id)
