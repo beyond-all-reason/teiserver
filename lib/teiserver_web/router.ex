@@ -169,6 +169,7 @@ defmodule TeiserverWeb.Router do
         put("/users/action/:id/:action", UserController, :perform_action)
         get("/users/reports/:id/respond", UserController, :respond_form)
         put("/users/reports/:id/respond", UserController, :respond_post)
+        get("/users/smurf_search/:id", UserController, :smurf_search)
         get("/users/search", UserController, :index)
         post("/users/search", UserController, :search)
         resources("/user", UserController)

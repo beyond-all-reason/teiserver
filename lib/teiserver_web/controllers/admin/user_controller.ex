@@ -394,6 +394,27 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
+  @spec smurf_search(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def smurf_search(conn, %{"id" => id}) do
+    user = Account.get_user(id)
+
+    case Central.Account.UserLib.has_access(user, conn) do
+      {true, _} ->
+        users = Account.smurf_search(conn, user)
+
+        conn
+        |> add_breadcrumb(name: "List possible smurfs", url: conn.request_path)
+        |> assign(:users, users)
+        |> assign(:params, search_defaults(conn))
+        |> render("index.html")
+
+      _ ->
+        conn
+        |> put_flash(:warning, "Unable to access this user")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
+  end
+
   @spec search_defaults(Plug.Conn.t()) :: Map.t()
   defp search_defaults(_conn) do
     %{

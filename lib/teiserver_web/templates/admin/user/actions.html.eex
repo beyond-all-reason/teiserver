@@ -16,4 +16,10 @@
     &nbsp;
     Reset flood protection
   </a>
+
+  <a class="dropdown-item" href='<%= Routes.ts_admin_user_path(@conn, :smurf_search, @user.id) %>'>
+    <%= central_component "icon", icon: "fas fa-face-angry-horns" %>
+    &nbsp;
+    Smurf search
+  </a>
 </div>

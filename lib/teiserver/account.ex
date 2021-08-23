@@ -158,6 +158,39 @@ defmodule Teiserver.Account do
     }
   end
 
+  @spec smurf_search(Plug.Conn.t, User.t()) :: list()
+  def smurf_search(conn, user) do
+    fragments = user.data["ip_list"]
+    |> Enum.map(fn ip ->
+      "u.data -> 'ip_list' ? '#{ip}'"
+    end)
+    |> Enum.join(" or ")
+
+    query = """
+    SELECT u.id
+    FROM account_users u
+    WHERE #{fragments}
+    """
+
+    ids =
+      case Ecto.Adapters.SQL.query(Repo, query, []) do
+        {:ok, results} ->
+          results.rows
+          |> List.flatten
+
+        {a, b} ->
+          raise "ERR: #{a}, #{b}"
+      end
+
+    list_users(search: [
+        admin_group: conn,
+        id_in: ids
+      ],
+      order_by: "Name (A-Z)",
+      limit: 50
+    )
+  end
+
   # Group stuff
   def create_group_membership(params),
     do: Central.Account.create_group_membership(params)
