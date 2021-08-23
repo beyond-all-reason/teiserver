@@ -1,6 +1,46 @@
+<%= if false and @client == nil do %>
+  <div class="alert alert-primary">
+    Login with your lobby client to enable additional functionality.
+  </div>
+<% end %>
+
+<%# Live services %>
+<div class="row page-row">
+  <%= if true or @client != nil do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Game.QueueLib.icon(),
+      name: "matchmaking_live",
+      text: "Matchmaking",
+      icon_class: "fad",
+      link: Routes.ts_game_queue_index_path(@conn, :index)
+    %>
+  <% end %>
+
+  <%=
+    central_component "menu_card",
+    icon: Teiserver.Battle.LobbyLib.icon(),
+    name: "battle_lobbies",
+    text: "Lobbies",
+    icon_class: "fad",
+    link: Routes.ts_battle_lobby_index_path(@conn, :index)
+  %>
+
+  <%= if allow?(@conn, "teiserver.moderator.account") do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.ClientLib.icon(),
+      name: "live_client",
+      text: "Live clients",
+      icon_class: "fad",
+      link: Routes.ts_admin_client_index_path(@conn, :index)
+    %>
+  <% end %>
+</div>
+
 <div class="row page-row">
   <%= if @server_user do %>
-    <%=
+    <%#=
       central_component "menu_card",
       icon: Teiserver.Battle.LobbyLib.icon(),
       name: "battles",
@@ -32,7 +72,7 @@
         central_component "menu_card",
         icon: Teiserver.Game.QueueLib.icon(),
         name: "queue",
-        text: "Matchmaking",
+        text: "MM Queues",
         icon_class: "fad",
         link: Routes.ts_game_queue_path(@conn, :index)
       %>
@@ -125,30 +165,6 @@
       %>
     <% end %>
   </div>
-
-  <div style="height: 50px;">&nbsp;</div>
-  <div class="row page-row">
-    <%=
-      central_component "menu_card",
-      icon: Teiserver.Battle.LobbyLib.icon(),
-      name: "battle_lobbies",
-      text: "Battle Lobbies",
-      icon_class: "fad",
-      link: Routes.ts_battle_lobby_index_path(@conn, :index)
-    %>
-
-    <%= if allow?(@conn, "teiserver.moderator.account") do %>
-      <%=
-        central_component "menu_card",
-        icon: Teiserver.ClientLib.icon(),
-        name: "live_client",
-        text: "Live clients",
-        icon_class: "fad",
-        link: Routes.ts_admin_client_index_path(@conn, :index)
-      %>
-    <% end %>
-  </div>
-
 <% end %>
 
 <div class="row page-row">

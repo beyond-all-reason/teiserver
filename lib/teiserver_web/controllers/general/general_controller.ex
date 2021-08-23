@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.General.GeneralController do
   use CentralWeb, :controller
+  alias Teiserver.Client
 
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
 
@@ -11,7 +12,11 @@ defmodule TeiserverWeb.General.GeneralController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do
-    render(conn, "index.html")
+    client = Client.get_client_by_id(conn.user_id)
+
+    conn
+    |> assign(:client, client)
+    |> render("index.html")
   end
 
   @spec gdpr(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

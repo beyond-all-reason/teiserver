@@ -36,7 +36,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> assign(:clients, clients)
       |> assign(:client_ids, Map.keys(clients))
       |> assign(:users, users)
-      |> assign(:menu_override, :hidden)
+      |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:extra_menu_content, @extra_menu_content)
       |> assign(:filters, [])
       |> apply_filters

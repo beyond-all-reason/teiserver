@@ -83,6 +83,7 @@ defmodule TeiserverWeb.Router do
       scope "/teiserver/game_live", TeiserverWeb.Matchmaking.QueueLive, as: :ts_game do
         pipe_through([:browser, :admin_layout, :protected])
 
+        live("/queues", Index, :index)
         live("/queues/:id", Show, :show)
       end
 

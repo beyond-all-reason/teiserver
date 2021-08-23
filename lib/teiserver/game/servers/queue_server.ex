@@ -141,6 +141,7 @@ defmodule Teiserver.Game.QueueServer do
           try_setup_battle(state)
 
         # This means we are not waiting for players, we can instead find some
+        # TODO: Currently this is hard coded to waiting for 2 players so only allows 1v1
         state.ready_started_at == nil ->
           # First make sure we have enough players...
           if Enum.count(state.unmatched_players) >= 2 and state.waiting_for_players == [] and
