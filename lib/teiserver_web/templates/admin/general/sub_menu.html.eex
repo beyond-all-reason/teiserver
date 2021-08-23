@@ -57,7 +57,7 @@
               name: "queues",
               label: "Queues",
               active: @active,
-              url: Routes.ts_admin_queue_path(@conn, :index),
+              url: Routes.ts_game_queue_path(@conn, :index),
               lib: Teiserver.Game.QueueLib
             %>
           <% end %>

@@ -55,7 +55,10 @@ defmodule TeiserverWeb.Router do
       end
 
       scope "/teiserver/games", TeiserverWeb.Game, as: :ts_game do
+        pipe_through([:browser, :admin_layout, :protected])
+
         resources("/tournaments", TournamentController)
+        resources("/queues", QueueController)
       end
 
       scope "/teiserver/battle", TeiserverWeb.Battle, as: :ts_battle do
@@ -76,6 +79,14 @@ defmodule TeiserverWeb.Router do
         live("/lobbies", Index, :index)
         live("/lobbies/:id", Show, :show)
       end
+
+      scope "/teiserver/game_live", TeiserverWeb.Matchmaking.QueueLive, as: :ts_game do
+        pipe_through([:browser, :admin_layout, :protected])
+
+        live("/queues/:id", Show, :show)
+      end
+
+
 
       # REPORTING
       scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
@@ -127,13 +138,6 @@ defmodule TeiserverWeb.Router do
         live("/client/:id", Show, :show)
       end
 
-      scope "/teiserver/admin_live", TeiserverWeb.MatchmakingLive, as: :ts_admin do
-        pipe_through([:browser, :admin_layout, :protected])
-
-        live("/queues", Index, :index)
-        live("/queues/:id", Show, :show)
-      end
-
       scope "/teiserver/admin", TeiserverWeb.AgentLive, as: :ts_admin do
         pipe_through([:browser, :admin_layout, :protected])
 
@@ -159,8 +163,6 @@ defmodule TeiserverWeb.Router do
         resources("/clans", ClanController)
 
         resources("/parties", PartyController)
-
-        resources("/queues", QueueController)
 
         # resources("/tournaments", TournamentController)
 

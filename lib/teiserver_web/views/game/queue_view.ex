@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Admin.QueueView do
+defmodule TeiserverWeb.Game.QueueView do
   use TeiserverWeb, :view
 
   @spec colours() :: {String.t(), String.t(), String.t()}

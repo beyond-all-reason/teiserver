@@ -27,7 +27,18 @@
       link: Routes.ts_clans_clan_path(@conn, :index)
     %>
 
-    <%=
+    <%= if allow?(@conn, "teiserver.account.verified") do %>
+      <%=
+        central_component "menu_card",
+        icon: Teiserver.Game.QueueLib.icon(),
+        name: "queue",
+        text: "Matchmaking",
+        icon_class: "fad",
+        link: Routes.ts_game_queue_path(@conn, :index)
+      %>
+    <% end %>
+
+    <%#=
       central_component "menu_card",
       icon: Teiserver.Game.TournamentLib.icon(),
       name: "tournament",
@@ -79,7 +90,7 @@
       %>
     <% end %>
 
-    <%= if allow?(@conn, "teiserver.moderator.party") do %>
+    <%= if false and allow?(@conn, "teiserver.moderator.party") do %>
       <%=
         central_component "menu_card",
         icon: Teiserver.Game.PartyLib.icon(),
@@ -100,17 +111,6 @@
         text: "Clan admin",
         icon_class: "fad",
         link: Routes.ts_admin_clan_path(@conn, :index)
-      %>
-    <% end %>
-
-    <%= if allow?(@conn, "teiserver.moderator.queue") do %>
-      <%=
-        central_component "menu_card",
-        icon: Teiserver.Game.QueueLib.icon(),
-        name: "queue",
-        text: "Queues",
-        icon_class: "fad",
-        link: Routes.ts_admin_queue_path(@conn, :index)
       %>
     <% end %>
 

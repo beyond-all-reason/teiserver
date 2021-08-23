@@ -36,6 +36,8 @@ defmodule Teiserver.Account.RecalculateUserStatTask do
         player_minutes: data.player,
         total_minutes: data.menu + data.lobby + data.spectator + data.player
       })
+
+      Account.update_user_roles(Account.get_user!(userid))
     end)
 
     :ok

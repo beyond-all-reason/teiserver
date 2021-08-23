@@ -70,6 +70,11 @@ All updates about the room and content for the room. Likely to be kept as is and
 ### Matchmaking
 #### teiserver_queue:#{queue_id}
 Sent from the queue server to update regarding it's status
+Valid events
+```
+{:add_player, userid}
+{:remove_player, userid}
+```
 
 
 ### Dev mode

@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Admin.QueueController do
+defmodule TeiserverWeb.Game.QueueController do
   use CentralWeb, :controller
 
   alias Teiserver.Game
@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Admin.QueueController do
     user: {Central.Account.AuthLib, :current_user}
 
   plug AssignPlug,
-    sidemenu_active: ["teiserver", "teiserver_admin"]
+    sidemenu_active: ["teiserver", "teiserver_matchmaking"]
 
   plug :add_breadcrumb, name: 'Game', url: '/teiserver'
   plug :add_breadcrumb, name: 'Queues', url: '/teiserver/queues'
@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Admin.QueueController do
 
         conn
         |> put_flash(:info, "Queue created successfully.")
-        |> redirect(to: Routes.ts_admin_queue_path(conn, :index))
+        |> redirect(to: Routes.ts_game_queue_path(conn, :index))
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -117,7 +117,7 @@ defmodule TeiserverWeb.Admin.QueueController do
 
         conn
         |> put_flash(:info, "Queue updated successfully.")
-        |> redirect(to: Routes.ts_admin_queue_path(conn, :index))
+        |> redirect(to: Routes.ts_game_queue_path(conn, :index))
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
@@ -139,6 +139,6 @@ defmodule TeiserverWeb.Admin.QueueController do
 
     conn
     |> put_flash(:info, "Queue deleted successfully.")
-    |> redirect(to: Routes.ts_admin_queue_path(conn, :index))
+    |> redirect(to: Routes.ts_game_queue_path(conn, :index))
   end
 end

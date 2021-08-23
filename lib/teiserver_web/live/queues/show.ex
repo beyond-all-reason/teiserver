@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.MatchmakingLive.Show do
+defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
   use TeiserverWeb, :live_view
   alias Phoenix.PubSub
   require Logger
@@ -10,9 +10,9 @@ defmodule TeiserverWeb.MatchmakingLive.Show do
 
   @extra_menu_content """
   &nbsp;&nbsp;&nbsp;
-    <a href='/teiserver/admin/client' class="btn btn-outline-primary">
-      <i class="fas fa-fw fa-plug"></i>
-      Clients
+    <a href='/teiserver/battle/lobbies' class="btn btn-outline-primary">
+      <i class="fas fa-fw fa-swords"></i>
+      Battles
     </a>
   """
 
@@ -23,14 +23,12 @@ defmodule TeiserverWeb.MatchmakingLive.Show do
       |> AuthPlug.live_call(session)
       |> NotificationPlug.live_call()
 
-    extra_content = if allow?(socket, "teiserver.moderator.account") do
-      @extra_menu_content
-    end
+    extra_content = @extra_menu_content
 
     socket = socket
       |> Teiserver.ServerUserPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
-      |> add_breadcrumb(name: "Queues", url: "/teiserver/admin/queues")
+      |> add_breadcrumb(name: "Queues", url: "/teiserver/game/queues")
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, QueueLib.colours())
       |> assign(:messages, [])
@@ -52,7 +50,7 @@ defmodule TeiserverWeb.MatchmakingLive.Show do
           nil ->
             {:noreply,
             socket
-            |> redirect(to: Routes.ts_admin_matchmaking_index_path(socket, :index))}
+            |> redirect(to: Routes.ts_game_queue_path(socket, :index))}
 
           _ ->
             {:noreply,

@@ -1,26 +1,32 @@
 <% {_fg, _bg, bsname} = @colours %>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{active: "queues", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+<%= render TeiserverWeb.Game.GeneralView, "sub_menu.html", %{active: "queues", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
 
 <div class="row">
   <div class="col-md-12">
     <div class="card border-<%= bsname %> page-card">
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.QueueView, "section_menu.html", Map.merge(assigns, %{
+        <%#= render TeiserverWeb.Game.QueueView, "section_menu.html", Map.merge(assigns, %{
             conn: @socket,
             params: %{},
             show_search: false,
             active: "show"
         }) %>
-        <br /><br />
+        <%# <br /><br /> %>
 
-<h3>
-  <%= @queue.name %>
-</h3>
-
-<ul>
-
-</ul>
+<div class="row">
+  <div class="col-md-12">
+    <h3><%= @queue.name %></h3>
+  </div>
+  <div class="col-md-6">
+    <h4>Map list</h4>
+    <ul>
+      <%= for m <- @queue.map_list do %>
+        <li><%= m %></li>
+      <% end %>
+    </ul>
+  </div>
+</div>
 
 <%= if allow?(@current_user, "admin.dev.developer") do %>
   <div class="row">
@@ -41,7 +47,7 @@
 <br />
 
 <span>
-  <%= live_redirect "Back", to: Routes.ts_admin_queue_path(@socket, :index), class: "btn btn-#{bsname}" %>
+  <%= live_redirect "Back", to: Routes.ts_game_queue_path(@socket, :index), class: "btn btn-#{bsname}" %>
 </span>
 
       </div>

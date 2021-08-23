@@ -10,6 +10,18 @@
     %>
   <% end %>
 
+  <%= if allow?(@conn, "teiserver.moderator.party") do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Game.PartyLib.icon(),
+      name: "party",
+      text: "Parties",
+      icon_class: "fad",
+      link: "",
+      disabled: true
+    %>
+  <% end %>
+
   <%= if allow?(@conn, "teiserver.moderator.clan") do %>
     <%=
       central_component "menu_card",
@@ -18,6 +30,17 @@
       text: "Clan admin",
       icon_class: "fad",
       link: Routes.ts_admin_clan_path(@conn, :index)
+    %>
+  <% end %>
+
+  <%= if allow?(@conn, "teiserver.moderator.queue") do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Game.QueueLib.icon(),
+      name: "queue",
+      text: "Queues",
+      icon_class: "fad",
+      link: Routes.ts_game_queue_path(@conn, :index)
     %>
   <% end %>
 
