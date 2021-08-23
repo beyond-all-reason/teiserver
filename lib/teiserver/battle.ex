@@ -71,25 +71,34 @@ defmodule Teiserver.Battle do
     |> Repo.one!
   end
 
-  # Uncomment this if needed, default files do not need this function
-  # @doc """
-  # Gets a single match.
+  @doc """
+  Gets a single match.
 
-  # Returns `nil` if the Match does not exist.
+  Returns `nil` if the Match does not exist.
 
-  # ## Examples
+  ## Examples
 
-  #     iex> get_match(123)
-  #     %Match{}
+      iex> get_match(123)
+      %Match{}
 
-  #     iex> get_match(456)
-  #     nil
+      iex> get_match(456)
+      nil
 
-  # """
-  # def get_match(id, args \\ []) when not is_list(id) do
-  #   match_query(id, args)
-  #   |> Repo.one
-  # end
+  """
+  @spec get_match(Integer.t() | List.t()) :: Match.t()
+  @spec get_match(Integer.t(), List.t()) :: Match.t()
+  def get_match(id) when not is_list(id) do
+    match_query(id, [])
+    |> Repo.one
+  end
+  def get_match(args) do
+    match_query(nil, args)
+    |> Repo.one
+  end
+  def get_match(id, args) do
+    match_query(id, args)
+    |> Repo.one
+  end
 
   @doc """
   Creates a match.
@@ -213,8 +222,12 @@ defmodule Teiserver.Battle do
     Telemetry.increment(:matches_stopped)
     {uuid, params} = MatchLib.stop_match(lobby_id)
 
-    match = get_match!(nil, search: [uuid: uuid])
-    update_match(match, params)
+    case get_match(nil, search: [uuid: uuid]) do
+      nil ->
+        :ok
+      match ->
+        update_match(match, params)
+    end
 
     Coordinator.cast_consul(lobby_id, :match_stop)
   end
