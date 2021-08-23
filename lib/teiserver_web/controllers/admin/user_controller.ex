@@ -105,6 +105,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
         conn
         |> assign(:user, user)
+        |> assign(:roles, Account.get_roles(user))
         |> assign(:reports, reports)
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
@@ -210,7 +211,9 @@ defmodule TeiserverWeb.Admin.UserController do
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
         case Account.update_user(user, user_params) do
-          {:ok, _user} ->
+          {:ok, user} ->
+            Account.update_user_roles(user)
+
             conn
             |> put_flash(:info, "User updated successfully.")
             |> redirect(to: Routes.ts_admin_user_path(conn, :index))

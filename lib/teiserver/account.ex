@@ -191,6 +191,41 @@ defmodule Teiserver.Account do
     )
   end
 
+  # Gets the the roles for the user based on their flags/data
+  @spec get_roles(User.t()) :: [String.t()]
+  def get_roles(user) do
+    [
+      (if user.data["moderator"] == true, do: "Moderator"),
+      (if user.data["bot"] == true, do: "Bot"),
+      (if user.data["verified"] == true, do: "Verified"),
+
+      (if "Streamer" in user.data["roles"], do: "Streamer"),
+      (if "Tester" in user.data["roles"], do: "Tester"),
+      (if "Donor" in user.data["roles"], do: "Donor"),
+      (if "Contributor" in user.data["roles"], do: "Contributor"),
+      (if "Developer" in user.data["roles"], do: "Developer"),
+    ]
+    |> Enum.filter(fn r -> r != nil end)
+    |> Enum.map(fn r -> String.downcase(r) end)
+  end
+
+  def update_user_roles(user) do
+    # First we remove all these permissions
+    remove_permissions = Teiserver.User.role_list()
+    |> Enum.map(fn r -> "teiserver.player.#{r}" end)
+
+    base_permissions = user.permissions
+    |> Enum.filter(fn r -> not Enum.member?(remove_permissions, r) end)
+
+    # Then we add back in the ones we want this person to have
+    add_permissions = get_roles(user)
+    |> Enum.map(fn r -> "teiserver.player.#{r}" end)
+
+    permissions = base_permissions ++ add_permissions
+
+    Central.Account.update_user(user, %{"permissions" => permissions})
+  end
+
   # Group stuff
   def create_group_membership(params),
     do: Central.Account.create_group_membership(params)

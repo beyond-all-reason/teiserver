@@ -2,11 +2,12 @@ defmodule Teiserver.Startup do
   use CentralWeb, :startup
   require Logger
 
+  @spec startup :: :ok
   def startup do
     add_permission_set("teiserver", "admin", ~w(account battle clan party queue tournament))
     add_permission_set("teiserver", "moderator", ~w(account battle clan party queue tournament))
     add_permission_set("teiserver", "api", ~w(battle))
-    add_permission_set("teiserver", "player", ~w(account))
+    add_permission_set("teiserver", "player", ~w(account tester contributor dev streamer donor verified bot moderator))
 
     add_group_type("Teiserver clan", %{fields: []})
 

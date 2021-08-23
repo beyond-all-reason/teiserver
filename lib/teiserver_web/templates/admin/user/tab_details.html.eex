@@ -10,7 +10,7 @@
 </style>
 
 <%
-  empty_badge = "<div class='role-badge'></div>"
+  empty_badge = "<div class='role-badge' style='height:0px;'></div>"
 %>
 
 <div class="row">
@@ -28,7 +28,7 @@
     %>
   </div>
   <div class="col-md-6">
-    <%= if @user.data["moderator"] do %>
+    <%= if "moderator" in @roles do %>
       <div class="role-badge">
         <i class='fa-fw fa-2x fas fa-gavel' style="color: #FFAA00" title="Moderator"></i>
         <br />
@@ -38,7 +38,7 @@
       <%= raw empty_badge %>
     <% end %>
 
-    <%= if true or @user.data["bot"] do %>
+    <%= if "bot" in @roles do %>
       <div class="role-badge">
         <i class='fa-fw fa-2x fas fa-robot' style="color: #333333" title="Bot"></i>
         <br />
@@ -48,7 +48,7 @@
       <%= raw empty_badge %>
     <% end %>
 
-    <%= if "Developer" in @user.data["roles"] do %>
+    <%= if "developer" in @roles do %>
       <div class="role-badge">
         <i class='fa-fw fa-2x fas fa-code-branch' style="color: #008800" title="Developer"></i>
         <br />
@@ -58,7 +58,7 @@
       <%= raw empty_badge %>
     <% end %>
 
-    <%= if "Contributor" in @user.data["roles"] do %>
+    <%= if "contributor" in @roles do %>
       <div class="role-badge">
         <i class='fa-fw fa-2x fas fa-code-commit' style="color: #00AA66" title="Contributor"></i>
         <br />
@@ -68,7 +68,7 @@
       <%= raw empty_badge %>
     <% end %>
 
-    <%= if "Tester" in @user.data["roles"] do %>
+    <%= if "tester" in @roles do %>
       <div class="role-badge">
         <i class='fa-fw fa-2x fas fa-vial' style="color: #00CCCC" title="Tester"></i>
         <br />
@@ -78,7 +78,7 @@
       <%= raw empty_badge %>
     <% end %>
 
-    <%= if "Donor" in @user.data["roles"] do %>
+    <%= if "donor" in @roles do %>
       <div class="role-badge">
         <i class='fa-fw fa-2x fas fa-euro' style="color: #0066AA" title="Donor"></i>
         <br />
@@ -88,7 +88,7 @@
       <%= raw empty_badge %>
     <% end %>
 
-    <%= if "Streamer" in @user.data["roles"] do %>
+    <%= if "streamer" in @roles do %>
       <div class="role-badge">
         <i class='fa-fw fa-2x fab fa-twitch' style="color: #AA00AA" title="Streamer"></i>
         <br />
@@ -98,7 +98,7 @@
       <%= raw empty_badge %>
     <% end %>
 
-    <%= if @user.data["verified"] do %>
+    <%= if "verified" in @roles do %>
       <div class="role-badge">
         <i class='fa-fw fa-2x fas fa-check' style="color: #777777" title="Verified"></i>
         <br />
