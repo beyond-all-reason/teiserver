@@ -10,7 +10,8 @@
 </style>
 
 <%
-  empty_badge = "<div class='role-badge' style='height:0px;'></div>"
+  #empty_badge = "<div class='role-badge' style='height:0px;'></div>"
+  empty_badge = ""
 %>
 
 <div class="row">
