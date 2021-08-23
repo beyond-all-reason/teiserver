@@ -45,7 +45,7 @@
           <%= report.response_action %>
         </td>
         <td><%= report.response_text %></td>
-        <td><%= time_until(report.expires) %></td>
+        <td><%= if report.expires != nil and Timex.compare(Timex.now(), report.expires) == -1, do: time_until(report.expires) %></td>
       <% else %>
         <td colspan="4">No response</td>
       <% end %>

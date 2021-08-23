@@ -14,8 +14,8 @@
         <td><%= @report.response_text %></td>
       </tr>
       <tr>
-        <td>Expires:</td>
-        <td><%= date_to_str(@report.expires, format: :ymd_hms, tz: @tz) %></td>
+        <td><%= if @report.expires != nil and Timex.compare(Timex.now(), @report.expires) == -1, do: "Expires", else: "Expired" %></td>
+        <td><%= date_to_str(@report.expires, format: :ymd_hms, tz: @tz) %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <%= time_until(@report.expires) %></td>
       </tr>
       <tr>
         <td colspan="2">&nbsp;</td>
