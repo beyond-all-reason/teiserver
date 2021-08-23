@@ -16,7 +16,8 @@ defmodule Teiserver.User do
 
   @timer_sleep 500
 
-  def role_list(), do: ~w(Streamer Donor Contributor Dev Moderator Admin)
+  @spec role_list :: [String.t()]
+  def role_list(), do: ~w(Tester Streamer Donor Contributor Dev Moderator Admin)
 
   @keys [:id, :name, :email, :inserted_at, :clan_id]
   @data_keys [

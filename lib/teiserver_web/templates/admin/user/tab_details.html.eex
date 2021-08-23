@@ -1,31 +1,115 @@
 <br />
 
-<%= if allow?(@conn, "teiserver.admin.account") do %>
-  <%= central_component "detail_line",
-    label: "Email",
-    value: @user.email
-  %>
-<% end %>
+<style type="text/css">
+  .role-badge {
+    width: 120px;
+    display: inline-block;
+    text-align: center;
+    font-size: 1.5em;
+  }
+</style>
 
-<%= central_component "detail_line",
-  label: "Created",
-  value: date_to_str(@user.inserted_at, format: :hms_dmy, tz: @tz)
+<%
+  empty_badge = "<div class='role-badge'></div>"
 %>
 
-<%= central_component "detail_line",
-  label: "Verified",
-  value: (if @user.data["verified"], do: "Verified")
-%>
+<div class="row">
+  <div class="col-md-6">
+    <%= if allow?(@conn, "teiserver.admin.account") do %>
+      <%= central_component "detail_line",
+        label: "Email",
+        value: @user.email
+      %>
+    <% end %>
 
-<%= central_component "detail_line",
-  label: "Bot",
-  value: (if @user.data["bot"], do: "Bot")
-%>
+    <%= central_component "detail_line",
+      label: "Created",
+      value: date_to_str(@user.inserted_at, format: :hms_dmy, tz: @tz)
+    %>
+  </div>
+  <div class="col-md-6">
+    <%= if @user.data["moderator"] do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-gavel' style="color: #FFAA00" title="Moderator"></i>
+        <br />
+        Moderator
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
 
-<%= central_component "detail_line",
-  label: "Moderator",
-  value: (if @user.data["moderator"], do: "Moderator")
-%>
+    <%= if true or @user.data["bot"] do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-robot' style="color: #333333" title="Bot"></i>
+        <br />
+        Bot
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if "Developer" in @user.data["roles"] do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-code-branch' style="color: #008800" title="Developer"></i>
+        <br />
+        Dev
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if "Contributor" in @user.data["roles"] do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-code-commit' style="color: #00AA66" title="Contributor"></i>
+        <br />
+        Contributor
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if "Tester" in @user.data["roles"] do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-vial' style="color: #00CCCC" title="Tester"></i>
+        <br />
+        Tester
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if "Donor" in @user.data["roles"] do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-euro' style="color: #0066AA" title="Donor"></i>
+        <br />
+        Donor
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if "Streamer" in @user.data["roles"] do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fab fa-twitch' style="color: #AA00AA" title="Streamer"></i>
+        <br />
+        Streamer
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if @user.data["verified"] do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-check' style="color: #777777" title="Verified"></i>
+        <br />
+        Verified
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+  </div>
+</div>
 
 <%= if allow?(@conn, "teiserver.admin.account") do %>
   <textarea id="user_data" rows="20" class="form-control monospace"><%= Jason.encode! Map.drop(@user.data, ["password_hash", "ip"]), pretty: true %></textarea>

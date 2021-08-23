@@ -98,6 +98,20 @@
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_tester" class="control-label">Tester: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[tester]",
+                id: "search_tester",
+                selected: @params["tester"],
+                enumerable: [
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Normal", icon: "fas fa-user", colour: fg},
+                  %{id: "Tester", icon: "fas fa-vial", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
               <label for="search_streamer" class="control-label">Streamer: </label>
               <%= central_component "icon_dropdown", %{
                 name: "search[streamer]",
