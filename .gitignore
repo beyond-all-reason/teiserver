@@ -52,7 +52,7 @@ central-*.tar
 /assets/static/js/ace
 /backups/
 /remote/
-/scripts/
+/zignore/
 /rel/
 /source_deploy
 /source_deploy.tar.gz
