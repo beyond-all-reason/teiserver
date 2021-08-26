@@ -72,8 +72,16 @@ All updates about the room and content for the room. Likely to be kept as is and
 Sent from the queue server to update regarding it's status
 Valid events
 ```
-{:add_player, userid}
-{:remove_player, userid}
+{:queue_add_player, queue_id, userid}
+{:queue_remove_player, queue_id, userid}
+{:match_made, queue_id, lobby_id}
+```
+
+#### teiserver_queue_all_queues
+Data for those watching all queues at the same time
+Valid events
+```
+{:queue_periodic_update, queue_id, queue_size, last_wait_time}
 ```
 
 

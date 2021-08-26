@@ -39,7 +39,7 @@ defmodule Teiserver.Game.QueueServer do
           PubSub.broadcast(
             Central.PubSub,
             "teiserver_queue:#{state.id}",
-            {:add_player, userid}
+            {:queue_add_player, state.id, userid}
           )
 
           {:ok, new_state}
@@ -57,7 +57,7 @@ defmodule Teiserver.Game.QueueServer do
           PubSub.broadcast(
             Central.PubSub,
             "teiserver_queue:#{state.id}",
-            {:remove_player, userid}
+            {:queue_remove_player, state.id, userid}
           )
 
           {:ok, new_state}
@@ -190,6 +190,12 @@ defmodule Teiserver.Game.QueueServer do
           }
       end
 
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_queue_all_queues",
+      {:queue_periodic_update, state.id, state.player_count, state.last_wait_time}
+    )
+
     {:noreply, new_state}
   end
 
@@ -261,9 +267,15 @@ defmodule Teiserver.Game.QueueServer do
           }
         })
 
-        # Give things time to propogate before we start
+        # Give things time to propagate before we start
         :timer.sleep(250)
         Coordinator.cast_consul(battle.id, %{command: "forcestart", senderid: state.coordinator_id})
+
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_queue:#{state.id}",
+          {:match_made, state.id, battle.id}
+        )
 
         %{
           midway_state

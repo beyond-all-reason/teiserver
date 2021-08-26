@@ -35,12 +35,20 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
       @base_extra_menu_content
     end
 
+    queues = Game.list_queues()
+    |> Map.new(fn queue ->
+      {queue.id, Map.merge(queue, %{
+        player_count: nil,
+        last_wait_time: nil
+      })}
+    end)
+
     socket = socket
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Matchmaking", url: "/teiserver/game_live/queues")
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, QueueLib.colours())
-      |> assign(:queues, Game.list_queues())
+      |> assign(:queues, queues)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:extra_menu_content, extra_content)
 
@@ -53,12 +61,23 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   end
 
   @impl true
-  def handle_info({:global_battle_updated, _battle_id, :battle_opened}, socket) do
-    {:noreply, socket}
+  def handle_info({:queue_periodic_update, queue_id, player_count, last_wait_time}, socket) do
+    update_data = %{
+      player_count: player_count,
+      last_wait_time: last_wait_time
+    }
+    new_queue = Map.merge(socket.assigns.queues[queue_id], update_data)
+    new_queues = Map.put(socket.assigns.queues, queue_id, new_queue)
+
+    {
+      :noreply,
+      socket
+        |> assign(:queues, new_queues)
+    }
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue_all_queues")
 
     socket
     |> assign(:page_title, "Listing Battles")

@@ -18,7 +18,7 @@ defmodule Teiserver.Protocols.Tachyon.MatchmakingIn do
   # def do_handle("get_queue_info", queue_id, msg_id, state) do
   #   queue_id = int_parse(queue_id)
   #   {queue, info} = Matchmaking.get_queue_and_info(queue_id)
-  #   reply(:matchmaking, :queue_info, {queue, info}, msg_id, state)
+  #   reply(:matchmaking, :queue_info, {queue, info}, state)
   # end
 
   def do_handle("join_queue", %{"queue_id" => queue_id}, state) do

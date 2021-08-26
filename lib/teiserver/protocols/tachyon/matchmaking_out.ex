@@ -23,6 +23,15 @@ defmodule Teiserver.Protocols.Tachyon.MatchmakingOut do
     }
   end
 
+  # def do_reply(:queue_info, {queue, info}) do
+  #   %{
+  #     "cmd" => "s.matchmaking.your_queue_list",
+  #     "result" => "success",
+  #     "queues" => queue_list
+  #       |> Enum.map(fn b -> Tachyon.convert_object(:queue, b) end)
+  #   }
+  # end
+
   # ###########
   # # Create
   # def do_reply(:create, {:success, queue}) do
