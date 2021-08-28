@@ -268,17 +268,17 @@ defmodule Teiserver.User do
 
   @spec get_userid(String.t()) :: integer() | nil
   def get_userid(username) do
-    ConCache.get(:users_lookup_id_with_name, username)
+    ConCache.get(:users_lookup_id_with_name, String.downcase(username))
   end
 
   @spec get_user_by_name(String.t()) :: Map.t() | nil
   def get_user_by_name(username) do
-    id = ConCache.get(:users_lookup_id_with_name, username)
+    id = get_userid(username)
     ConCache.get(:users, id)
   end
 
   def get_user_by_email(email) do
-    id = ConCache.get(:users_lookup_id_with_email, email)
+    id = ConCache.get(:users_lookup_id_with_email, String.downcase(email))
     ConCache.get(:users, id)
   end
 
@@ -333,8 +333,8 @@ defmodule Teiserver.User do
   def add_user(user) do
     update_user(user)
     ConCache.put(:users_lookup_name_with_id, user.id, user.name)
-    ConCache.put(:users_lookup_id_with_name, user.name, user.id)
-    ConCache.put(:users_lookup_id_with_email, user.email, user.id)
+    ConCache.put(:users_lookup_id_with_name, String.downcase(user.name), user.id)
+    ConCache.put(:users_lookup_id_with_email, String.downcase(user.email), user.id)
 
     ConCache.update(:lists, :users, fn value ->
       new_value =
@@ -383,8 +383,8 @@ defmodule Teiserver.User do
   end
 
   def change_email(user, new_email) do
-    ConCache.delete(:users_lookup_id_with_email, user.email)
-    ConCache.put(:users_lookup_id_with_email, new_email, user.id)
+    ConCache.delete(:users_lookup_id_with_email, String.downcase(user.email))
+    ConCache.put(:users_lookup_id_with_email, String.downcase(new_email), user.id)
     update_user(%{user | email: new_email, email_change_code: [nil, nil]})
   end
 
@@ -996,8 +996,8 @@ defmodule Teiserver.User do
 
       ConCache.delete(:users, userid)
       ConCache.delete(:users_lookup_name_with_id, user.id)
-      ConCache.delete(:users_lookup_id_with_name, user.name)
-      ConCache.delete(:users_lookup_id_with_email, user.email)
+      ConCache.delete(:users_lookup_id_with_name, String.downcase(user.name))
+      ConCache.delete(:users_lookup_id_with_email, String.downcase(user.email))
 
       ConCache.update(:lists, :users, fn value ->
         new_value =
