@@ -23,7 +23,7 @@ defmodule Teiserver.Protocols.Tachyon.MatchmakingIn do
 
   def do_handle("join_queue", %{"queue_id" => queue_id}, state) do
     queue_id = int_parse(queue_id)
-    resp = Matchmaking.add_player_to_queue(queue_id, state.userid, self())
+    resp = Matchmaking.add_player_to_queue(queue_id, state.userid)
 
     joined =
       case resp do

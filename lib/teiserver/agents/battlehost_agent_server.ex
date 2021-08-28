@@ -9,6 +9,11 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   @leave_chance 0.5
   @password_chance 0.5
 
+  @map_hash "1565299817"
+  @game_hash "-1321904802"
+  @game_name "Beyond All Reason test-17135-7661a24"
+  @engine_version "104.0.1-1977-g12700e0 BAR"
+
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
     AgentLib.login(socket, %{
@@ -94,12 +99,12 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
         nattype: "none",
         password: password,
         port: 1234,
-        game_hash: "929778481",
-        map_hash: "1565299817",
+        game_hash: @game_hash,
+        map_hash: @map_hash,
         map_name: "Comet Catcher Remake 1.8",
-        game_name: "Beyond All Reason test-16430-8349f84",
+        game_name: @game_name,
         engine_name: "spring",
-        engine_version: "104.0.1-1956-g0092498 BAR",
+        engine_version: @engine_version,
         settings: %{
           max_players: 12
         }

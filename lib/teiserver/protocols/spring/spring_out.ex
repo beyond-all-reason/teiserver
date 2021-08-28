@@ -571,6 +571,7 @@ defmodule Teiserver.Protocols.SpringOut do
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
 
     # Who is online?
     # skip ourselves because that will result in a double ADDUSER

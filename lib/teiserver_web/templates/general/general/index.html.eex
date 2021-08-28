@@ -6,15 +6,17 @@
 
 <%# Live services %>
 <div class="row page-row">
-  <%= if true or @client != nil do %>
-    <%=
-      central_component "menu_card",
-      icon: Teiserver.Game.QueueLib.icon(),
-      name: "matchmaking_live",
-      text: "Matchmaking",
-      icon_class: "fad",
-      link: Routes.ts_game_queue_index_path(@conn, :index)
-    %>
+  <%= if allow_any?(@conn, ["teiserver.player.tester", "teiserver.player.contributor", "teiserver.player.dev"]) do %>
+    <%= if @client != nil do %>
+      <%=
+        central_component "menu_card",
+        icon: Teiserver.Game.QueueLib.icon(),
+        name: "matchmaking_live",
+        text: "Matchmaking",
+        icon_class: "fad",
+        link: Routes.ts_game_queue_index_path(@conn, :index)
+      %>
+    <% end %>
   <% end %>
 
   <%=

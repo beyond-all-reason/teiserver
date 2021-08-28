@@ -49,6 +49,13 @@ defmodule Central.Account.AuthLib do
     Server.add(module, section, permissions)
   end
 
+  def allow_any?(conn, perms) do
+    Enum.any?(
+      perms
+      |> Enum.map(fn p -> allow?(conn, p) end)
+    )
+  end
+
   # If you don't need permissions then lets not bother checking
   @spec allow?(Map.t() | Plug.Conn.t() | [String.t()], String.t() | [String.t()]) :: boolean
   def allow?(_, nil), do: true

@@ -62,6 +62,35 @@ Overlaps with `legacy_all_user_updates` due to blurring of user vs client domain
 
 #### teiserver_liveview_client_index_updates
 These are updates sent from the ClientIndex genserver (used to throttle/batch messages sent to the liveviews).
+Valid events
+```
+  {:client_index_throttle, new_clients_map, removed_clients}
+```
+
+### teiserver_client_messages:#{userid}
+This is the channel for sending messages to the client. It allows the client on the web and lobby application to receive messages.
+General structure should be: `{:client_message, :topic, data}` to allow for easy matching and discarding as new items are added to the list
+```
+  {:client_message, :matchmaking, data}
+    {:match_ready, state.id}
+    {:join_battle, lobby_id}
+  
+```
+
+### teiserver_client_action_updates:#{userid}
+Information actions taken by a specific user
+Aside from connect/disconnect there should always be the structure of `{:client_action, :join_queue, userid, data}`
+```
+  {:client_action, :client_connect, userid}
+  {:client_action, :client_disconnect, userid}
+
+  {:client_action, :join_queue, userid, queue_id}
+  {:client_action, :leave_queue, userid, queue_id}
+
+  {:client_action, :join_lobby, userid, lobby_id}
+  {:client_action, :leave_lobby, userid, lobby_id}
+```
+
 
 ### Chat
 #### room:#{room_name}
@@ -72,16 +101,16 @@ All updates about the room and content for the room. Likely to be kept as is and
 Sent from the queue server to update regarding it's status
 Valid events
 ```
-{:queue_add_player, queue_id, userid}
-{:queue_remove_player, queue_id, userid}
-{:match_made, queue_id, lobby_id}
+  {:queue_add_player, queue_id, userid}
+  {:queue_remove_player, queue_id, userid}
+  {:match_made, queue_id, lobby_id}
 ```
 
 #### teiserver_queue_all_queues
 Data for those watching all queues at the same time
 Valid events
 ```
-{:queue_periodic_update, queue_id, queue_size, last_wait_time}
+  {:queue_periodic_update, queue_id, queue_size, last_wait_time}
 ```
 
 

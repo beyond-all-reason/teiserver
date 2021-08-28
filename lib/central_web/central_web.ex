@@ -46,7 +46,7 @@ defmodule CentralWeb do
       import Central.Account.RecentlyUsedCache,
         only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
 
-      import Central.Account.AuthLib, only: [allow?: 2]
+      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
     end
   end
 
@@ -74,7 +74,7 @@ defmodule CentralWeb do
       import CentralWeb.Gettext
       alias CentralWeb.Router.Helpers, as: Routes
 
-      import Central.Account.AuthLib, only: [allow?: 2]
+      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
       import Phoenix.LiveView
       import Phoenix.LiveView.Helpers
@@ -98,7 +98,7 @@ defmodule CentralWeb do
 
       use Breadcrumble
       alias Central.Account.AuthPlug
-      import Central.Account.AuthLib, only: [allow?: 2]
+      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
       alias Central.Communication.NotificationPlug
 
       unquote(view_helpers())
@@ -126,7 +126,7 @@ defmodule CentralWeb do
       alias Ecto.Multi
 
       import Central.Helpers.QueryHelpers
-      import Central.Account.AuthLib, only: [allow?: 2]
+      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
     end
   end
 
@@ -159,7 +159,7 @@ defmodule CentralWeb do
     quote do
       use Ecto.Schema
       import Ecto.Changeset
-      import Central.Account.AuthLib, only: [allow?: 2]
+      import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
       import Central.Helpers.SchemaHelper
     end
   end

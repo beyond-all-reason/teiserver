@@ -86,14 +86,14 @@ defmodule Teiserver.Data.Matchmaking do
     end)
   end
 
-  @spec add_player_to_queue(Integer.t(), Integer.t(), pid()) :: :ok | :duplicate | :failed
-  def add_player_to_queue(queue_id, player_id, user_pid) do
+  @spec add_player_to_queue(Integer.t(), Integer.t()) :: :ok | :duplicate | :failed
+  def add_player_to_queue(queue_id, player_id) do
     case get_queue_pid(queue_id) do
       nil ->
         :failed
 
       pid ->
-        GenServer.call(pid, {:add_player, player_id, user_pid})
+        GenServer.call(pid, {:add_player, player_id})
     end
   end
 

@@ -58,7 +58,6 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   describe "show user" do
     test "renders form", %{conn: conn, user: user} do
       conn = get(conn, Routes.ts_admin_user_path(conn, :show, user.id))
-      assert html_response(conn, 200) =~ "Verified"
       assert html_response(conn, 200) =~ "Reports"
     end
   end

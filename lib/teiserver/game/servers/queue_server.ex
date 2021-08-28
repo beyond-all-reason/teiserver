@@ -5,7 +5,8 @@ defmodule Teiserver.Game.QueueServer do
   alias Phoenix.PubSub
   alias Teiserver.Coordinator
 
-  @default_tick_interval 5_000
+  # @default_tick_interval 5_000
+  @default_tick_interval 1_000
 
   @ready_wait_time 15
 
@@ -17,7 +18,11 @@ defmodule Teiserver.Game.QueueServer do
     {:reply, state, state}
   end
 
-  def handle_call({:add_player, userid, pid}, _from, state) when is_integer(userid) do
+  def handle_call({:get, key}, _from, state) do
+    {:reply, Map.get(state, key), state}
+  end
+
+  def handle_call({:add_player, userid}, _from, state) when is_integer(userid) do
     {resp, new_state} =
       case Enum.member?(state.unmatched_players ++ state.matched_players, userid) do
         true ->
@@ -26,7 +31,7 @@ defmodule Teiserver.Game.QueueServer do
         false ->
           player_item = %{
             join_time: :erlang.system_time(:seconds),
-            pid: pid
+            last_heartbeart: :erlang.system_time(:seconds),
           }
 
           new_state = %{
@@ -40,6 +45,12 @@ defmodule Teiserver.Game.QueueServer do
             Central.PubSub,
             "teiserver_queue:#{state.id}",
             {:queue_add_player, state.id, userid}
+          )
+
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_client_action_updates:#{userid}",
+            {:client_action, :join_queue, userid, state.id}
           )
 
           {:ok, new_state}
@@ -58,6 +69,12 @@ defmodule Teiserver.Game.QueueServer do
             Central.PubSub,
             "teiserver_queue:#{state.id}",
             {:queue_remove_player, state.id, userid}
+          )
+
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_client_action_updates:#{userid}",
+            {:client_action, :leave_queue, userid, state.id}
           )
 
           {:ok, new_state}
@@ -148,15 +165,19 @@ defmodule Teiserver.Game.QueueServer do
                state.players_accepted == [] do
             # Now grab the players
             [p1, p2 | new_unmatched_players] = Enum.reverse(state.unmatched_players)
-            player1 = state.player_map[p1]
-            player2 = state.player_map[p2]
 
             # Count them as matched up
             new_matched_players = [p1, p2 | state.matched_players]
 
             # Send them ready up commands
-            send(player1.pid, {:matchmaking, {:match_ready, state.id}})
-            send(player2.pid, {:matchmaking, {:match_ready, state.id}})
+            [p1, p2]
+            |> Enum.each(fn userid ->
+              PubSub.broadcast(
+                Central.PubSub,
+                "teiserver_client_messages:#{userid}",
+                {:client_message, :matchmaking, {:match_ready, state.id}}
+              )
+            end)
 
             %{
               state
@@ -234,21 +255,24 @@ defmodule Teiserver.Game.QueueServer do
       battle ->
         state.players_accepted
         |> Enum.each(fn userid ->
-          player = state.player_map[userid]
-          send(player.pid, {:matchmaking, {:join_battle, battle.id}})
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_client_messages:#{userid}",
+            {:client_message, :matchmaking, {:join_battle, battle.id}}
+          )
         end)
 
         midway_state = remove_players(state, state.players_accepted)
 
         # Coordinator sets up the battle
         map_name = state.map_list |> Enum.random()
-        Lobby.start_coordinator_mode(battle.id)
-        Coordinator.cast_consul(battle.id, %{command: "manual-autohost", senderid: state.coordinator_id})
-        Coordinator.cast_consul(battle.id, %{command: "map", remaining: map_name, senderid: state.coordinator_id})
+        # Lobby.start_coordinator_mode(battle.id)
+        Coordinator.cast_consul(battle.id, %{command: "manual-autohost", senderid: Coordinator.get_coordinator_userid()})
+        Coordinator.cast_consul(battle.id, %{command: "map", remaining: map_name, senderid: Coordinator.get_coordinator_userid()})
 
         # Now put the players on their teams, for now we're assuming every game is just a 1v1
         [p1, p2] = state.players_accepted
-        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p1, senderid: state.coordinator_id,
+        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p1, senderid: Coordinator.get_coordinator_userid(),
           status: %{
             team_number: 0,
             ally_team_number: 0,
@@ -257,7 +281,7 @@ defmodule Teiserver.Game.QueueServer do
             ready: true
           }
         })
-        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p2, senderid: state.coordinator_id,
+        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p2, senderid: Coordinator.get_coordinator_userid(),
           status: %{
             team_number: 1,
             ally_team_number: 1,
@@ -269,7 +293,7 @@ defmodule Teiserver.Game.QueueServer do
 
         # Give things time to propagate before we start
         :timer.sleep(250)
-        Coordinator.cast_consul(battle.id, %{command: "forcestart", senderid: state.coordinator_id})
+        Coordinator.cast_consul(battle.id, %{command: "forcestart", senderid: Coordinator.get_coordinator_userid()})
 
         PubSub.broadcast(
           Central.PubSub,
@@ -322,7 +346,6 @@ defmodule Teiserver.Game.QueueServer do
        player_count: 0,
        player_map: %{},
        last_wait_time: 0,
-       coordinator_id: Coordinator.get_coordinator_userid(),
        ready_wait_time: opts.queue.settings["ready_wait_time"] || @ready_wait_time
      }, opts.queue)
 

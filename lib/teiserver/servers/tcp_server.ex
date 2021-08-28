@@ -166,6 +166,17 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
+  # Client channel messages
+  def handle_info({:client_message, :matchmaking, data}, state) do
+    new_state = matchmaking_update(data, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info({:client_message, topic, _data}, state) do
+    Logger.warn("No tcp_server handler for :client_message with topic #{topic}")
+    {:noreply, state}
+  end
+
   # Client updates
   def handle_info({:user_logged_in, nil}, state), do: {:noreply, state}
   def handle_info({:user_logged_in, userid}, state) do
@@ -203,10 +214,10 @@ defmodule Teiserver.TcpServer do
   end
 
   # Matchmaking
-  def handle_info({:matchmaking, data}, state) do
-    new_state = matchmaking_update(data, state)
-    {:noreply, new_state}
-  end
+  # def handle_info({:matchmaking, data}, state) do
+  #   new_state = matchmaking_update(data, state)
+  #   {:noreply, new_state}
+  # end
 
   # Chat
   def handle_info({:direct_message, from, msg}, state) do
