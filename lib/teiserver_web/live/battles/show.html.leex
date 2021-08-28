@@ -59,6 +59,7 @@
     <tr>
       <th width="100">&nbsp;</th>
       <th>Name</th>
+      <th>Ready</th>
       <th>Bonus</th>
       <th>Team</th>
       <th>Faction</th>
@@ -85,6 +86,7 @@
             <% end %>
           </td>
           <td><%= user.name %></td>
+          <td><%= if client.ready, do: "Ready" %></td>
           <td><%= client.handicap %></td>
           <td><%= client.ally_team_number %></td>
           <td><%= factions[client.side] %></td>

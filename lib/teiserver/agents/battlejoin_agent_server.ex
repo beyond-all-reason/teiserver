@@ -90,6 +90,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
     data = if Enum.random([true, false]) do
       %{
         player: true,
+        ready: Enum.random([true, false]),
         sync: 1,
         team_number: Enum.random(0..15),
         ally_team_number: Enum.random([0, 1]),
