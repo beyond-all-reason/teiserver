@@ -70,9 +70,6 @@ TODO: unban <user>
   unbans the user, if present in the blacklist also removes them from that
   has no effect on the whitelist
 
-TODO: readyup -- Needs live test
-  forces all players currently not readied to ready up in the next 5 seconds or be moved to spectators
-
 TODO: bossmode (dictator | autocrat)
   sets the boss mode
 
@@ -91,6 +88,9 @@ TODO: gatekeeper (blacklist | whitelist | friends | friendsstrict | clan)
   TODO: clan allows only members of an existing clan to join the game (enable after one member from each clan is present)
 
 <--- Moderator only --->
+TODO: specunready
+  specs all unready players
+
 TODO: makeready <user>
   sets a user to ready, when no user is specified all users are set to ready
 

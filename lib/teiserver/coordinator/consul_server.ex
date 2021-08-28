@@ -336,6 +336,20 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
+  def handle_command(%{command: "specunready"} = cmd, state) do
+    battle = Lobby.get_battle!(state.battle_id)
+
+    battle.players
+    |> Enum.each(fn player_id ->
+      client = Client.get_client_by_id(player_id)
+      if client.ready == false do
+        Lobby.force_change_client(state.coordinator_id, player_id, %{player: false})
+      end
+    end)
+
+    say_command(cmd, state)
+  end
+
   def handle_command(%{command: "gatekeeper", remaining: mode} = cmd, state) do
     state = case mode do
       "blacklist" ->
