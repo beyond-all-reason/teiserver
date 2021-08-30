@@ -1,22 +1,14 @@
-<%= if false and @client == nil do %>
-  <div class="alert alert-primary">
-    Login with your lobby client to enable additional functionality.
-  </div>
-<% end %>
-
 <%# Live services %>
 <div class="row page-row">
-  <%= if allow_any?(@conn, ["teiserver.player.tester", "teiserver.player.contributor", "teiserver.player.dev"]) do %>
-    <%= if @client != nil do %>
-      <%=
-        central_component "menu_card",
-        icon: Teiserver.Game.QueueLib.icon(),
-        name: "matchmaking_live",
-        text: "Matchmaking",
-        icon_class: "fad",
-        link: Routes.ts_game_queue_index_path(@conn, :index)
-      %>
-    <% end %>
+  <%= if @client != nil do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Game.QueueLib.icon(),
+      name: "matchmaking_live",
+      text: "Matchmaking",
+      icon_class: "fad",
+      link: Routes.ts_game_queue_index_path(@conn, :index)
+    %>
   <% end %>
 
   <%=

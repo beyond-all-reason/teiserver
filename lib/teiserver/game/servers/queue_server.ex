@@ -212,7 +212,7 @@ defmodule Teiserver.Game.QueueServer do
       end
 
     new_state = %{new_state |
-      player_count: Enum.count(state.player_map),
+      player_count: Enum.count(state.unmatched_players) + Enum.count(state.matched_players),
     }
 
     PubSub.broadcast(

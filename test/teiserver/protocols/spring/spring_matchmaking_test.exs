@@ -135,7 +135,6 @@ defmodule Teiserver.SpringMatchmakingTest do
     assert state.finding_battle == false
     assert state.matched_players == []
     assert state.unmatched_players == [user3.id]
-    assert state.player_count == 1
     assert state.ready_started_at == nil
 
     # Commands should be sent to user1 and user2
