@@ -254,7 +254,7 @@ defmodule CentralWeb.Admin.UserController do
         data =
           case Jason.decode(user_params["data"] || "") do
             {:ok, v} -> v || %{}
-            _ -> %{}
+            _ -> user.data
           end
 
         user_params = Map.put(user_params, "data", data)
