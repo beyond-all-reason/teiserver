@@ -211,10 +211,14 @@ defmodule Teiserver.Game.QueueServer do
           }
       end
 
+    new_state = %{new_state |
+      player_count: Enum.count(state.player_map),
+    }
+
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_queue_all_queues",
-      {:queue_periodic_update, state.id, state.player_count, state.last_wait_time}
+      {:queue_periodic_update, state.id, new_state.player_count, new_state.last_wait_time}
     )
 
     {:noreply, new_state}
@@ -269,6 +273,7 @@ defmodule Teiserver.Game.QueueServer do
         # Lobby.start_coordinator_mode(battle.id)
         Coordinator.cast_consul(battle.id, %{command: "manual-autohost", senderid: Coordinator.get_coordinator_userid()})
         Coordinator.cast_consul(battle.id, %{command: "map", remaining: map_name, senderid: Coordinator.get_coordinator_userid()})
+        :timer.sleep(250)
 
         # Now put the players on their teams, for now we're assuming every game is just a 1v1
         [p1, p2] = state.players_accepted

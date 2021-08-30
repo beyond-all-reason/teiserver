@@ -24,6 +24,13 @@ config :central, Teiserver,
   enable_match_monitor: false,
   user_agreement: "User agreement goes here."
 
+config :central, DiscordBridge,
+  token: nil,
+  bot_name: "Teiserver Bridge TEST",
+  bridges: [
+    {"bridge_test_room", nil}
+  ]
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :central, CentralWeb.Endpoint,
