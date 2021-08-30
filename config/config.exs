@@ -103,8 +103,9 @@ config :central, Oban,
         # Every minute
         {"* * * * *", Teiserver.Telemetry.Tasks.PersistTelemetryMinuteTask},
 
-        # 2:05 am every day
+        # 2:05 am and 11:05 am
         {"5 2 * * *", Teiserver.Telemetry.Tasks.PersistTelemetryDayTask},
+        {"11 2 * * *", Teiserver.Telemetry.Tasks.PersistTelemetryDayTask},
 
         # 3:05 am every day, gives time for multiple telemetry day tasks to run if needed
         {"5 3 * * *", Teiserver.Account.RecalculateUserStatTask},

@@ -358,7 +358,8 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
     accounts_created = Account.list_users(search: [
       inserted_after: date |> Timex.to_datetime,
       inserted_before: tomorrow |> Timex.to_datetime
-    ])
+    ],
+    limit: :infinity)
     |> Enum.count
 
     # TODO: Calculate number of battles that took place
