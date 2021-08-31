@@ -21,6 +21,7 @@ defmodule Teiserver.EmailHelper do
 
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     url = "https://#{host}/password_reset/#{code.value}"
+    message_id = UUID.uuid4()
 
     game_name = Application.get_env(:central, Teiserver)[:game_name]
 
@@ -70,6 +71,7 @@ defmodule Teiserver.EmailHelper do
     |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
     |> Email.subject("BAR - New account")
     |> Email.put_header("Date", date)
+    |> Email.put_header("Message-Id", message_id)
     |> Email.html_body(html_body)
     |> Email.text_body(text_body)
     |> Mailer.deliver_now(response: true)
