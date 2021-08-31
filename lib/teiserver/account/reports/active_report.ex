@@ -89,6 +89,6 @@ defmodule Teiserver.Account.ActiveReport do
       "start_date" => "",
       "end_date" => "",
       "mode" => ""
-    }, params)
+    }, Map.get(params, "report", %{}))
   end
 end

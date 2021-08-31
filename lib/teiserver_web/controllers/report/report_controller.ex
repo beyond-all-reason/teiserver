@@ -28,6 +28,9 @@ defmodule TeiserverWeb.Report.ReportController do
         "ranks" ->
           Teiserver.Account.RanksReport.run(conn, params)
 
+        "verified" ->
+          Teiserver.Account.VerifiedReport.run(conn, params)
+
         _ ->
           raise "No handler for name of '#{name}'"
       end

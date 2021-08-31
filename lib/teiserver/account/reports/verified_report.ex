@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.RanksReport do
+defmodule Teiserver.Account.VerifiedReport do
   alias Central.Helpers.DatePresets
   alias Teiserver.Account
 
@@ -10,32 +10,46 @@ defmodule Teiserver.Account.RanksReport do
     params = apply_defaults(params)
 
     # Date range
-    {start_date, end_date} =
+    {start_date, _end_date} =
       DatePresets.parse(
         params["date_preset"],
         params["start_date"],
         params["end_date"]
       )
 
-    start_date = (Timex.to_unix(start_date) / 60) |> round
-    end_date = (Timex.to_unix(end_date) / 60) |> round
+    start_date = Timex.to_datetime(start_date)
 
     data = Account.list_users(
       search: [
-        data_greater_than: {"last_login", start_date |> to_string},
-        data_less_than: {"last_login", end_date |> to_string},
-        data_equal: {"bot", "false"}
+        inserted_after: start_date,
       ],
-      order_by: {:data, "ingame_minutes", :desc},
-      limit: 100
+      limit: :infinity
     )
+    |> Enum.group_by(fn user ->
+      cond do
+        user.data["last_login"] == nil -> :never_logged_in
+        user.data["verified"] == false -> :unverified
+        true -> :verified
+      end
+    end, fn user ->
+      user.id
+    end)
+    |> Map.new(fn {k, v} -> {k, Enum.count(v)} end)
+
+    total = data
+    |> Enum.reduce(0, fn ({_, count}, acc) ->
+      acc + count
+    end)
 
     assigns = %{
       params: params,
-      presets: DatePresets.presets()
+      presets: DatePresets.short_ranges()
     }
 
-    {data, assigns}
+    {%{
+      rows: data,
+      total: total
+    }, assigns}
   end
 
   defp apply_defaults(params) do
@@ -43,7 +57,6 @@ defmodule Teiserver.Account.RanksReport do
       "date_preset" => "This month",
       "start_date" => "",
       "end_date" => "",
-      "mode" => ""
     }, Map.get(params, "report", %{}))
   end
 end

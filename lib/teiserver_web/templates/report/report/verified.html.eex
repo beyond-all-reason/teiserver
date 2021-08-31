@@ -1,0 +1,74 @@
+<% {fg, _bg, bsname} = colours() %>
+
+<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "time_spent"
+          })
+        %>
+        <br /><br />
+
+        <form action='<%= Routes.ts_reports_report_path(@conn, :show, "verified") %>' method="post" class="form-horizontal">
+          <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
+
+          <div class="row">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_date_preset" class="control-label">Date range:</label>
+              <%= select :report, :date_preset, @presets, class: "form-control", selected: @params["date_preset"] %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_start_date" class="control-label">Start date:</label>
+              <input type="text" id="report_start_date" name="report[start_date]" value='<%= @params["start_date"] %>' class="form-control datepicker" />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="report_end_date" class="control-label">End date:</label>
+              <input type="text" id="report_end_date" name="report[end_date]" value='<%= @params["end_date"] %>' class="form-control datepicker" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="offset-md-8 col-md-4 offset-xl-9 col-xl-3">
+              &nbsp;<br />
+              <input type="submit" value="Update report" name="form.submitted" class="btn btn-<%= bsname %> btn-block" />
+            </div>
+          </div>
+        </form>
+        <br /><br />
+
+        <table class='table table-sm table-striped'>
+          <thead>
+            <tr>
+              <th>Condition</th>
+              <th>Count</th>
+              <th>% of total</th>
+           </tr>
+          </thead>
+          <tbody>
+            <%= for {condition, count} <- @data.rows do %>
+              <tr>
+                <td><%= condition %></td>
+                <td><%= count %></td>
+                <td><%= round(100 * (count/@data.total)) %>%</td>
+              </tr>
+            <% end %>
+            <tr>
+              <td>Total</td>
+              <td><%= @data.total %></td>
+            </tr>
+          </tbody>
+        </table>
+
+
+
+      </div>
+    </div>
+  </div>
+</div>

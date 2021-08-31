@@ -5,7 +5,7 @@ defmodule Teiserver.Account.TimeSpentReport do
   @spec icon() :: String.t()
   def icon(), do: "far fa-satellite-dish"
 
-  @spec run(Plug.Conn.t(), map()) :: {map(), map()}
+  @spec run(Plug.Conn.t(), map()) :: {list(), map()}
   def run(_conn, params) do
     params = apply_defaults(params)
 
@@ -50,6 +50,6 @@ defmodule Teiserver.Account.TimeSpentReport do
       "start_date" => "",
       "end_date" => "",
       "mode" => "player_minutes"
-    }, params)
+    }, Map.get(params, "report", %{}))
   end
 end

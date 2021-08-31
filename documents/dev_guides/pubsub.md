@@ -3,6 +3,13 @@ Teiserver makes use of the Phoenix pubsub. This document is designed to list the
 Anything prefixed with "legacy" is something only present because of the nature of the spring protocol and is going to be removed as soon as we're able to.
 Anything prefixed with "teiserver" is something added after the spring protocol was implemented and follows better practices with clearer documentation.
 
+### Server
+#### teiserver_server
+Used for sending out global messages about server events
+```
+  {:server_event, :server_restart}
+```
+
 ### Battles
 #### legacy_all_battle_updates
 Information affecting all those not in a battle, such as a battle being created.
