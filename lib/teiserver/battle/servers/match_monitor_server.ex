@@ -4,6 +4,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   """
   use GenServer
   alias Teiserver.{Account, Room, Client, User, Battle}
+  alias Teiserver.Account.UserCache
   alias Phoenix.PubSub
   require Logger
 
@@ -75,7 +76,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   def handle_info({:direct_message, from_id, _message}, state) do
-    username = User.get_username(from_id)
+    username = UserCache.get_username(from_id)
     User.send_direct_message(state.userid, from_id, "I don't currently handle messages, sorry #{username}")
     {:noreply, state}
   end
@@ -145,7 +146,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           group_id: Teiserver.internal_group_id()
         })
 
-        User.recache_user(account.id)
+        UserCache.recache_user(account.id)
         account
 
       account ->

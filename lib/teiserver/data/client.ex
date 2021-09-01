@@ -9,8 +9,8 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.User
-  alias Teiserver.Room
+  alias Teiserver.{Room, User}
+  alias Teiserver.Account.UserCache
   alias Teiserver.Battle.Lobby
   require Logger
 
@@ -162,7 +162,7 @@ defmodule Teiserver.Client do
   def get_client_by_name(""), do: nil
 
   def get_client_by_name(name) do
-    userid = User.get_userid(name)
+    userid = UserCache.get_userid(name)
     ConCache.get(:clients, userid)
   end
 
@@ -218,7 +218,7 @@ defmodule Teiserver.Client do
 
   @spec refresh_client(T.userid()) :: Map.t()
   def refresh_client(userid) do
-    user = User.get_user_by_id(userid)
+    user = UserCache.get_user_by_id(userid)
     client = get_client_by_id(userid)
     %{client |
       userid: user.id,

@@ -20,10 +20,10 @@ defmodule Teiserver.HookServer do
         nil
 
       "create_user" ->
-        Teiserver.User.recache_user(int_parse(payload))
+        Teiserver.Account.UserCache.recache_user(int_parse(payload))
 
       "update_user" ->
-        Teiserver.User.recache_user(int_parse(payload))
+        Teiserver.Account.UserCache.recache_user(int_parse(payload))
 
       "update_report" ->
         Teiserver.User.new_report(int_parse(payload))

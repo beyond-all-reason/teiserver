@@ -41,8 +41,8 @@ defmodule Teiserver.AccountTest do
       Account.list_users(search: [
         exact_name: "",
         data_equal: {"field", "value"},
-        data_greater_than: {"field", 1},
-        data_less_than: {"field", 1},
+        data_greater_than: {"field", "123"},
+        data_less_than: {"field", "123"},
         ip: "123.456.789.123",
         mute_or_ban: nil,
 
@@ -66,8 +66,8 @@ defmodule Teiserver.AccountTest do
       # Flag filters as false
       Account.list_users(search: [
         bot: "Person",
-        moderator: "Normal",
-        verified: "Normal",
+        moderator: "User",
+        verified: "Unverified",
         tester: "Normal",
         streamer: "Normal",
         donor: "Normal",

@@ -1,6 +1,7 @@
 defmodule Teiserver.Protocols.Coordinator.SetupTest do
   use Central.ServerCase, async: false
-  alias Teiserver.{User, Client}
+  alias Teiserver.{Client}
+  alias Teiserver.Account.UserCache
   alias Teiserver.TeiserverTestLib
   alias Teiserver.Battle.Lobby
   alias Teiserver.Common.PubsubListener
@@ -17,7 +18,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
 
   test "start, stop", %{user: user} do
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
-    User.update_user(%{user | moderator: true})
+    UserCache.update_user(%{user | moderator: true})
     Client.refresh_client(user.id)
 
     battle = TeiserverTestLib.make_battle(%{
@@ -45,7 +46,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
 
   test "test command vs no command", %{user: user, socket: socket} do
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
-    User.update_user(%{user | moderator: true})
+    UserCache.update_user(%{user | moderator: true})
     Client.refresh_client(user.id)
 
     battle = TeiserverTestLib.make_battle(%{

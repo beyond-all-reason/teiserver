@@ -88,12 +88,12 @@ defmodule TeiserverWeb.Admin.ToolController do
   end
 
   @spec day_metrics_export(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_export(conn, params = %{"date" => date}) do
-    anonymous = params["anonymous"]
+  def day_metrics_export(conn, _params = %{"date" => _date}) do
+    # anonymous = params["anonymous"]
 
-    log = date
-      |> TimexHelper.parse_ymd
-      |> Telemetry.get_telemetry_day_log
+    # log = date
+    #   |> TimexHelper.parse_ymd
+    #   |> Telemetry.get_telemetry_day_log
 
     conn
   end

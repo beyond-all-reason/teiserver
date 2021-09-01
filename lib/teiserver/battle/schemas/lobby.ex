@@ -32,8 +32,8 @@ defmodule Teiserver.Battle.Lobby do
   alias Phoenix.PubSub
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.User
-  alias Teiserver.Client
+  alias Teiserver.{User, Client}
+  alias Teiserver.Account.UserCache
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator
 
@@ -552,7 +552,7 @@ defmodule Teiserver.Battle.Lobby do
   def can_join?(userid, battle_id, password \\ nil, script_password \\ nil) do
     battle_id = int_parse(battle_id)
     battle = get_battle(battle_id)
-    user = User.get_user_by_id(userid)
+    user = UserCache.get_user_by_id(userid)
 
     cond do
       user == nil ->
@@ -655,7 +655,7 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
   def sayprivateex(from_id, to_id, msg, battle_id) do
-    sender = User.get_user_by_id(from_id)
+    sender = UserCache.get_user_by_id(from_id)
     if not User.is_muted?(sender) do
       PubSub.broadcast(
         Central.PubSub,

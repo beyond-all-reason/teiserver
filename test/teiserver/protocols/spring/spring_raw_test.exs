@@ -4,7 +4,7 @@ defmodule Teiserver.SpringRawTest do
   import Teiserver.TeiserverTestLib,
     only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, new_user: 0]
 
-  alias Teiserver.User
+  alias Teiserver.Account.UserCache
   alias Central.Account
 
   setup do
@@ -43,7 +43,7 @@ defmodule Teiserver.SpringRawTest do
     _send_raw(socket, "REGISTER #{name} password raw_register_email@email.com\n")
     reply = _recv_raw(socket)
     assert reply =~ "REGISTRATIONACCEPTED\n"
-    user = User.get_user_by_name(name)
+    user = UserCache.get_user_by_name(name)
     assert user != nil
 
     # Now check the DB!
@@ -60,9 +60,9 @@ defmodule Teiserver.SpringRawTest do
 
     _send_raw(socket, "REGISTER #{username} X03MO1qnZdYdgyfeuILPmQ== #{username}@email\n")
     _ = _recv_raw(socket)
-    user = User.get_user_by_name(username)
+    user = UserCache.get_user_by_name(username)
     assert user != nil
-    User.update_user(%{user | verified: true})
+    UserCache.update_user(%{user | verified: true})
 
     _send_raw(
       socket,
@@ -71,7 +71,7 @@ defmodule Teiserver.SpringRawTest do
 
     reply = _recv_until(socket)
     [accepted | remainder] = String.split(reply, "\n")
-    user = User.get_user_by_name(username)
+    user = UserCache.get_user_by_name(username)
 
     assert accepted == "ACCEPTED #{username}",
       message:
@@ -112,10 +112,10 @@ defmodule Teiserver.SpringRawTest do
 
   test "CONFIRMAGREEMENT", %{socket: socket} do
     user = new_user()
-    user = User.update_user(%{user | verification_code: 123456, verified: false}, persist: true)
+    user = UserCache.update_user(%{user | verification_code: 123456, verified: false}, persist: true)
     query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
     Ecto.Adapters.SQL.query(Repo, query, [])
-    Teiserver.User.recache_user(user.id)
+    Teiserver.Account.UserCache.recache_user(user.id)
     _ = _recv_raw(socket)
 
     # If we try to login as them we should get a specific failure
@@ -157,7 +157,7 @@ defmodule Teiserver.SpringRawTest do
 
     # We now send an email instead of using the password reset code
     # assert user.password_reset_code == nil
-    # user2 = User.get_user_by_id(user.id)
+    # user2 = UserCache.get_user_by_id(user.id)
     # assert user2.password_reset_code != nil
     reply = _recv_raw(socket)
     assert reply =~ "RESETPASSWORDREQUESTACCEPTED\n"
@@ -171,7 +171,7 @@ defmodule Teiserver.SpringRawTest do
 
     # reply = _recv_raw(socket)
     # assert reply =~ "RESETPASSWORDDENIED wrong_code\n"
-    # user2 = User.get_user_by_id(user.id)
+    # user2 = UserCache.get_user_by_id(user.id)
     # assert user2.password_hash == user.password_hash
 
     # # Now verify correctly
@@ -182,7 +182,7 @@ defmodule Teiserver.SpringRawTest do
 
     # reply = _recv_raw(socket)
     # assert reply == "RESETPASSWORDACCEPTED\n"
-    # user2 = User.get_user_by_id(user.id)
+    # user2 = UserCache.get_user_by_id(user.id)
     # assert user2.password_hash != user.password_hash
     # assert user2.password_reset_code == nil
   end

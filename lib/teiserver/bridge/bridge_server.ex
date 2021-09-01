@@ -4,6 +4,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   """
   use GenServer
   alias Teiserver.{Account, Room, User}
+  alias Teiserver.Account.UserCache
   alias Phoenix.PubSub
   require Logger
 
@@ -58,7 +59,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   def handle_info({:direct_message, userid, _message}, state) do
-    username = User.get_username(userid)
+    username = UserCache.get_username(userid)
     User.send_direct_message(state.userid, userid, "I don't currently handle messages, sorry #{username}")
     {:noreply, state}
   end
@@ -102,7 +103,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   defp forward_to_discord(from_id, channel, message, _state) do
-    author = User.get_username(from_id)
+    author = UserCache.get_username(from_id)
 
     new_message = message
       |> convert_emoticons
@@ -151,7 +152,7 @@ defmodule Teiserver.Bridge.BridgeServer do
           group_id: Teiserver.internal_group_id()
         })
 
-        User.recache_user(account.id)
+        UserCache.recache_user(account.id)
         account
 
       account ->

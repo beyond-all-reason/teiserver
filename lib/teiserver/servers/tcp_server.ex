@@ -4,7 +4,7 @@ defmodule Teiserver.TcpServer do
   require Logger
 
   alias Teiserver.Client
-  alias Teiserver.User
+  alias Teiserver.Account.UserCache
 
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [
@@ -364,7 +364,7 @@ defmodule Teiserver.TcpServer do
   end
 
   defp user_updated(fields, state) do
-    new_user = User.get_user_by_id(state.userid)
+    new_user = UserCache.get_user_by_id(state.userid)
     new_state = %{state | user: new_user}
 
     fields

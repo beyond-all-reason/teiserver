@@ -3,9 +3,9 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{Client, User, Coordinator}
-  alias Teiserver.Battle.Lobby
-  alias Teiserver.Battle.LobbyLib
+  alias Teiserver.{Client, Coordinator}
+  alias Teiserver.Account.UserCache
+  alias Teiserver.Battle.{Lobby, LobbyLib}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @extra_menu_content """
@@ -53,7 +53,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       _ ->
         {users, clients} = get_user_and_clients(battle.players)
 
-        bar_user = User.get_user_by_id(socket.assigns.current_user.id)
+        bar_user = UserCache.get_user_by_id(socket.assigns.current_user.id)
 
         {:noreply,
          socket
@@ -70,7 +70,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   defp get_user_and_clients(id_list) do
     users =
-      User.list_users(id_list)
+      UserCache.list_users(id_list)
       |> Map.new(fn u -> {u.id, u} end)
 
     clients =
@@ -85,7 +85,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   #   client = Client.get_client_by_id(id)
 
   #   if client do
-  #     new_users = Map.put(assigns.users, id, User.get_user_by_id(id))
+  #     new_users = Map.put(assigns.users, id, UserCache.get_user_by_id(id))
   #     new_clients = Map.put(assigns.clients, id, client)
 
   #     socket
@@ -182,7 +182,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   # end
 
   # def handle_info({:battle_message, userid, msg, _battle_id}, %{assigns: assigns} = socket) do
-  #   username = User.get_username(userid)
+  #   username = UserCache.get_username(userid)
   #   new_messages = assigns.messages ++ [{userid, username, msg}]
   #   {:noreply, assign(socket, :messages, new_messages)}
   # end

@@ -2,15 +2,19 @@ defmodule Teiserver.User do
   @moduledoc """
   Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
-  alias Central.Communication
   alias Teiserver.Client
   alias Teiserver.EmailHelper
   alias Teiserver.Account
-  alias Central.Helpers.StylingHelper
+  alias Teiserver.Account.{UserCache, RelationsLib}
   alias Argon2
   alias Central.Account.Guardian
   alias Teiserver.Data.Types
   import Central.Helpers.TimexHelper, only: [parse_ymd_t_hms: 1]
+
+  require Logger
+  alias Phoenix.PubSub
+  alias Teiserver.EmailHelper
+  alias Teiserver.Account
 
   @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulence cats dogs mice eagle oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave sulphur tree tangerine melon watermelon obstreperous chlorine argon mercury jupiter saturn neptune ceres firefly slug sloth madness happiness ferrous oblique advantageous inefficient starling clouds rivers sunglasses)
 
@@ -20,6 +24,8 @@ defmodule Teiserver.User do
   def role_list(), do: ~w(Tester Streamer Donor Contributor Dev Moderator Admin)
 
   @keys [:id, :name, :email, :inserted_at, :clan_id]
+  def keys(), do: @keys
+
   @data_keys [
     :rank,
     :country,
@@ -46,6 +52,7 @@ defmodule Teiserver.User do
     :roles,
     :ip_list
   ]
+  def data_keys(), do: @data_keys
 
   @default_data %{
     rank: 1,
@@ -73,6 +80,7 @@ defmodule Teiserver.User do
     roles: [],
     ip_list: []
   }
+  def default_data(), do: @default_data
 
   @rank_levels [
     5,
@@ -83,12 +91,6 @@ defmodule Teiserver.User do
     1000,
     3000
   ]
-
-  require Logger
-  alias Phoenix.PubSub
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.EmailHelper
-  alias Teiserver.Account
 
   def next_springid() do
     ConCache.isolated(:id_counters, :springid, fn ->
@@ -158,10 +160,10 @@ defmodule Teiserver.User do
       clean_name(name) != name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
 
-      get_user_by_name(name) ->
+      UserCache.get_user_by_name(name) ->
         {:error, "Username already taken"}
 
-      get_user_by_email(email) ->
+      UserCache.get_user_by_email(email) ->
         {:error, "User already exists"}
 
       true ->
@@ -194,9 +196,9 @@ defmodule Teiserver.User do
 
         # Now add them to the cache
         user
-        |> convert_user
+        |> UserCache.convert_user
         |> Map.put(:springid, next_springid())
-        |> add_user
+        |> UserCache.add_user
 
         case EmailHelper.new_user(user) do
           {:error, error} ->
@@ -218,7 +220,7 @@ defmodule Teiserver.User do
   end
 
   def register_bot(bot_name, bot_host_id) do
-    existing_bot = get_user_by_name(bot_name)
+    existing_bot = UserCache.get_user_by_name(bot_name)
 
     cond do
       allow?(bot_host_id, :moderator) == false ->
@@ -228,7 +230,7 @@ defmodule Teiserver.User do
         existing_bot
 
       true ->
-        host = get_user_by_id(bot_host_id)
+        host = UserCache.get_user_by_id(bot_host_id)
 
         params =
           user_register_params(bot_name, host.email, host.password_hash, %{
@@ -249,8 +251,8 @@ defmodule Teiserver.User do
 
             # Now add them to the cache
             user
-            |> convert_user
-            |> add_user
+            |> UserCache.convert_user
+            |> UserCache.add_user
 
           {:error, changeset} ->
             Logger.error(
@@ -262,47 +264,13 @@ defmodule Teiserver.User do
     end
   end
 
-  def get_username(userid) do
-    ConCache.get(:users_lookup_name_with_id, int_parse(userid))
-  end
-
-  @spec get_userid(String.t()) :: integer() | nil
-  def get_userid(username) do
-    ConCache.get(:users_lookup_id_with_name, String.downcase(username))
-  end
-
-  @spec get_user_by_name(String.t()) :: Map.t() | nil
-  def get_user_by_name(username) do
-    id = get_userid(username)
-    ConCache.get(:users, id)
-  end
-
-  def get_user_by_email(email) do
-    id = ConCache.get(:users_lookup_id_with_email, String.downcase(email))
-    ConCache.get(:users, id)
-  end
-
-  def get_user_by_token(token) do
-    case Guardian.resource_from_token(token) do
-      {:error, _bad_token} ->
-        nil
-
-      {:ok, db_user, _claims} ->
-        get_user_by_id(db_user.id)
-    end
-  end
-
-  def get_user_by_id(id) do
-    ConCache.get(:users, int_parse(id))
-  end
-
   @spec rename_user(Types.userid(), String.t()) :: :success | {:error, String.t()}
   def rename_user(userid, new_name) do
     cond do
       clean_name(new_name) != new_name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
 
-      get_user_by_name(new_name) ->
+      UserCache.get_user_by_name(new_name) ->
         {:error, "Username already taken"}
 
       true ->
@@ -312,61 +280,24 @@ defmodule Teiserver.User do
   end
 
   @spec do_rename_user(Types.userid(), String.t()) :: :ok
-  def do_rename_user(userid, new_name) do
-    user = get_user_by_id(userid)
-    update_user(%{user | rename_in_progress: true}, persist: true)
+  defp do_rename_user(userid, new_name) do
+    user = UserCache.get_user_by_id(userid)
+    UserCache.update_user(%{user | rename_in_progress: true}, persist: true)
 
     # We need to re-get the user to ensure we don't overwrite our rename_in_progress by mistake
-    user = get_user_by_id(userid)
-    delete_user(user.id)
+    user = UserCache.get_user_by_id(userid)
+    UserCache.delete_user(user.id)
 
     db_user = Account.get_user!(userid)
     Account.update_user(db_user, %{"name" => new_name})
 
     :timer.sleep(5000)
-    recache_user(userid)
-    user = get_user_by_id(userid)
-    update_user(%{user | rename_in_progress: false})
+    UserCache.recache_user(userid)
+    user = UserCache.get_user_by_id(userid)
+    UserCache.update_user(%{user | rename_in_progress: false})
     :ok
   end
 
-  def add_user(user) do
-    update_user(user)
-    ConCache.put(:users_lookup_name_with_id, user.id, user.name)
-    ConCache.put(:users_lookup_id_with_name, String.downcase(user.name), user.id)
-    ConCache.put(:users_lookup_id_with_email, String.downcase(user.email), user.id)
-
-    ConCache.update(:lists, :users, fn value ->
-      new_value =
-        ([user.id | value])
-        |> Enum.uniq()
-
-      {:ok, new_value}
-    end)
-
-    user
-  end
-
-  # Persists the changes into the database so they will
-  # be pulled out next time the user is accessed/recached
-  # The special case here is to prevent the benchmark and test users causing issues
-  defp persist_user(%{name: "TEST_" <> _}), do: nil
-
-  defp persist_user(user) do
-    db_user = Account.get_user!(user.id)
-
-    data =
-      @data_keys
-      |> Map.new(fn k -> {to_string(k), Map.get(user, k, @default_data[k])} end)
-
-    Account.update_user(db_user, %{"data" => data})
-  end
-
-  def update_user(user, persist \\ false) do
-    ConCache.put(:users, user.id, user)
-    if persist, do: persist_user(user)
-    user
-  end
 
   def request_password_reset(user) do
     db_user = Account.get_user!(user.id)
@@ -379,247 +310,42 @@ defmodule Teiserver.User do
 
   def request_email_change(user, new_email) do
     code = :rand.uniform(899_999) + 100_000
-    update_user(%{user | email_change_code: ["#{code}", new_email]})
+    UserCache.update_user(%{user | email_change_code: ["#{code}", new_email]})
   end
 
   def change_email(user, new_email) do
     ConCache.delete(:users_lookup_id_with_email, String.downcase(user.email))
     ConCache.put(:users_lookup_id_with_email, String.downcase(new_email), user.id)
-    update_user(%{user | email: new_email, email_change_code: [nil, nil]})
+    UserCache.update_user(%{user | email: new_email, email_change_code: [nil, nil]})
   end
 
-  def accept_friend_request(nil, _), do: nil
-  def accept_friend_request(_, nil), do: nil
-  def accept_friend_request(requester_id, accepter_id) do
-    accepter = get_user_by_id(accepter_id)
+  # Friend related
+  @spec accept_friend_request(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  def accept_friend_request(requester, accepter), do: RelationsLib.accept_friend_request(requester, accepter)
 
-    if requester_id in accepter.friend_requests do
-      requester = get_user_by_id(requester_id)
+  @spec decline_friend_request(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  def decline_friend_request(requester, accepter), do: RelationsLib.decline_friend_request(requester, accepter)
 
-      # Add to friends, remove from requests
-      new_accepter =
-        Map.merge(accepter, %{
-          friends: [requester_id | accepter.friends],
-          friend_requests: Enum.filter(accepter.friend_requests, fn f -> f != requester_id end)
-        })
+  @spec create_friend_request(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  def create_friend_request(requester, accepter), do: RelationsLib.create_friend_request(requester, accepter)
 
-      new_requester =
-        Map.merge(requester, %{
-          friends: [accepter_id | requester.friends]
-        })
+  @spec ignore_user(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  def ignore_user(requester, accepter), do: RelationsLib.ignore_user(requester, accepter)
 
-      update_user(new_accepter, persist: true)
-      update_user(new_requester, persist: true)
+  @spec unignore_user(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  def unignore_user(requester, accepter), do: RelationsLib.unignore_user(requester, accepter)
 
-      Communication.notify(
-        new_requester.id,
-        %{
-          title: "#{new_accepter.name} accepted your friend request",
-          body: "#{new_accepter.name} accepted your friend request",
-          icon: Teiserver.icon(:friend),
-          colour: StylingHelper.get_fg(:success),
-          redirect: "/teiserver/account/relationships#friends"
-        },
-        1,
-        prevent_duplicates: true
-      )
+  @spec remove_friend(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  def remove_friend(requester, accepter), do: RelationsLib.remove_friend(requester, accepter)
 
-      # Now push out the updates
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_user_updates:#{requester_id}",
-        {:this_user_updated, [:friends]}
-      )
-
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_user_updates:#{accepter_id}",
-        {:this_user_updated, [:friends, :friend_requests]}
-      )
-
-      new_accepter
-    else
-      accepter
-    end
-  end
-
-  def decline_friend_request(nil, _), do: nil
-  def decline_friend_request(_, nil), do: nil
-  def decline_friend_request(requester_id, decliner_id) do
-    decliner = get_user_by_id(decliner_id)
-
-    if requester_id in decliner.friend_requests do
-      # Remove from requests
-      new_decliner =
-        Map.merge(decliner, %{
-          friend_requests: Enum.filter(decliner.friend_requests, fn f -> f != requester_id end)
-        })
-
-      update_user(new_decliner, persist: true)
-
-      # Now push out the updates
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_user_updates:#{decliner_id}",
-        {:this_user_updated, [:friend_requests]}
-      )
-
-      new_decliner
-    else
-      decliner
-    end
-  end
-
-  def create_friend_request(nil, _), do: nil
-  def create_friend_request(_, nil), do: nil
-  def create_friend_request(requester_id, potential_id) do
-    potential = get_user_by_id(potential_id)
-
-    if requester_id not in potential.friend_requests and requester_id not in potential.friends do
-      # Add to requests
-      new_potential =
-        Map.merge(potential, %{
-          friend_requests: [requester_id | potential.friend_requests]
-        })
-
-      requester = get_user_by_id(requester_id)
-      update_user(new_potential, persist: true)
-
-      Communication.notify(
-        new_potential.id,
-        %{
-          title: "New friend request from #{requester.name}",
-          body: "New friend request from #{requester.name}",
-          icon: Teiserver.icon(:friend),
-          colour: StylingHelper.get_fg(:info),
-          redirect: "/teiserver/account/relationships#requests"
-        },
-        1,
-        prevent_duplicates: true
-      )
-
-      # Now push out the updates
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_user_updates:#{potential_id}",
-        {:this_user_updated, [:friend_requests]}
-      )
-
-      new_potential
-    else
-      potential
-    end
-  end
-
-  def ignore_user(nil, _), do: nil
-  def ignore_user(_, nil), do: nil
-  def ignore_user(ignorer_id, ignored_id) do
-    ignorer = get_user_by_id(ignorer_id)
-
-    if ignored_id not in ignorer.ignored do
-      # Add to requests
-      new_ignorer =
-        Map.merge(ignorer, %{
-          ignored: [ignored_id | ignorer.ignored]
-        })
-
-      update_user(new_ignorer, persist: true)
-
-      # Now push out the updates
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_user_updates:#{ignorer_id}",
-        {:this_user_updated, [:ignored]}
-      )
-
-      new_ignorer
-    else
-      ignorer
-    end
-  end
-
-  def unignore_user(nil, _), do: nil
-  def unignore_user(_, nil), do: nil
-  def unignore_user(unignorer_id, unignored_id) do
-    unignorer = get_user_by_id(unignorer_id)
-
-    if unignored_id in unignorer.ignored do
-      # Add to requests
-      new_unignorer =
-        Map.merge(unignorer, %{
-          ignored: Enum.filter(unignorer.ignored, fn f -> f != unignored_id end)
-        })
-
-      update_user(new_unignorer, persist: true)
-
-      # Now push out the updates
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_user_updates:#{unignorer_id}",
-        {:this_user_updated, [:ignored]}
-      )
-
-      new_unignorer
-    else
-      unignorer
-    end
-  end
-
-  def remove_friend(nil, _), do: nil
-  def remove_friend(_, nil), do: nil
-  def remove_friend(remover_id, removed_id) do
-    remover = get_user_by_id(remover_id)
-
-    if removed_id in remover.friends do
-      # Add to requests
-      new_remover =
-        Map.merge(remover, %{
-          friends: Enum.filter(remover.friends, fn f -> f != removed_id end)
-        })
-
-      removed = get_user_by_id(removed_id)
-
-      new_removed =
-        Map.merge(removed, %{
-          friends: Enum.filter(removed.friends, fn f -> f != remover_id end)
-        })
-
-      update_user(new_remover, persist: true)
-      update_user(new_removed, persist: true)
-
-      # Now push out the updates
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_user_updates:#{remover_id}",
-        {:this_user_updated, [:friends]}
-      )
-
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_user_updates:#{removed_id}",
-        {:this_user_updated, [:friends]}
-      )
-
-      new_remover
-    else
-      remover
-    end
-  end
-
-  def list_combined_friendslist(userids) do
-    friends = list_users(userids)
-      |> Enum.map(fn user -> Map.get(user, :friends) end)
-      |> List.flatten
-
-    # Combine friends and users, people are after all their own friends!
-    Enum.uniq(userids ++ friends)
-  end
+  @spec list_combined_friendslist([T.userid()]) :: [User.t()]
+  def list_combined_friendslist(userids), do: RelationsLib.list_combined_friendslist(userids)
 
   def send_direct_message(from_id, to_id, "!start" <> s), do: send_direct_message(from_id, to_id, "!cv start" <> s)
   def send_direct_message(from_id, to_id, "!joinas" <> s), do: send_direct_message(from_id, to_id, "!cv joinas" <> s)
 
   def send_direct_message(from_id, to_id, msg) do
-    sender = get_user_by_id(from_id)
+    sender = UserCache.get_user_by_id(from_id)
     if not is_muted?(sender) do
       PubSub.broadcast(
         Central.PubSub,
@@ -627,20 +353,6 @@ defmodule Teiserver.User do
         {:direct_message, from_id, msg}
       )
     end
-  end
-
-  @spec list_users :: list
-  def list_users() do
-    ConCache.get(:lists, :users)
-    |> Enum.map(fn userid -> ConCache.get(:users, userid) end)
-  end
-
-  @spec list_users(list) :: list
-  def list_users(id_list) do
-    id_list
-    |> Enum.map(fn userid ->
-      ConCache.get(:users, userid)
-    end)
   end
 
   def ring(ringee_id, ringer_id) do
@@ -654,7 +366,7 @@ defmodule Teiserver.User do
 
   def verify_user(user) do
     %{user | verification_code: nil, verified: true}
-    |> update_user(persist: true)
+    |> UserCache.update_user(persist: true)
   end
 
   @spec create_token(Central.Account.User.t()) :: String.t()
@@ -687,7 +399,7 @@ defmodule Teiserver.User do
 
   @spec internal_client_login(integer()) :: {:ok, Map.t()} | :error
   def internal_client_login(userid) do
-    case get_user_by_id(userid) do
+    case UserCache.get_user_by_id(userid) do
       nil -> :error
       user ->
         do_login(user, "127.0.0.1", "Teiserver Internal Client")
@@ -705,7 +417,7 @@ defmodule Teiserver.User do
         {:error, "token_login_failed"}
 
       {:ok, db_user, _claims} ->
-        user = get_user_by_id(db_user.id)
+        user = UserCache.get_user_by_id(db_user.id)
         user_age = Timex.diff(Timex.now(), user.inserted_at, :seconds)
 
         cond do
@@ -739,7 +451,7 @@ defmodule Teiserver.User do
   def try_md5_login(username, md5_password, ip, lobby) do
     wait_for_precache()
 
-    case get_user_by_name(username) do
+    case UserCache.get_user_by_name(username) do
       nil ->
         {:error, "No user found for '#{username}'"}
 
@@ -816,7 +528,7 @@ defmodule Teiserver.User do
           ip_list: ip_list
       }
 
-    update_user(user, persist: true)
+    UserCache.update_user(user, persist: true)
 
     # User stats
     Account.update_user_stat(user.id, %{
@@ -834,7 +546,7 @@ defmodule Teiserver.User do
   def logout(nil), do: nil
 
   def logout(user_id) do
-    user = get_user_by_id(user_id)
+    user = UserCache.get_user_by_id(user_id)
     # TODO: In some tests it's possible for last_login to be nil, this is a temporary workaround
     system_minutes = round(:erlang.system_time(:seconds) / 60)
 
@@ -843,24 +555,15 @@ defmodule Teiserver.User do
         (system_minutes - (user.last_login || system_minutes))
 
     user = %{user | ingame_minutes: new_ingame_minutes}
-    update_user(user, persist: true)
+    UserCache.update_user(user, persist: true)
   end
 
-  def convert_user(user) do
-    data =
-      @data_keys
-      |> Map.new(fn k -> {k, Map.get(user.data || %{}, to_string(k), @default_data[k])} end)
 
-    user
-    |> Map.take(@keys)
-    |> Map.merge(@default_data)
-    |> Map.merge(data)
-  end
 
   @spec new_report(Integer.t()) :: :ok
   def new_report(report_id) do
     report = Account.get_report!(report_id)
-    user = get_user_by_id(report.target_id)
+    user = UserCache.get_user_by_id(report.target_id)
 
     changes =
       case {report.response_action, report.expires} do
@@ -884,11 +587,11 @@ defmodule Teiserver.User do
       end
 
     Map.merge(user, changes)
-    |> update_user(persist: true)
+    |> UserCache.update_user(persist: true)
 
     # We recache because the json conversion process converts the date
     # from a date to a string of the date
-    recache_user(user.id)
+    UserCache.recache_user(user.id)
 
     if is_banned?(user.id) do
       Client.disconnect(user.id, "Banned")
@@ -899,7 +602,7 @@ defmodule Teiserver.User do
 
   @spec is_banned?(Integer.t() | Map.t()) :: boolean()
   def is_banned?(nil), do: true
-  def is_banned?(userid) when is_integer(userid), do: is_banned?(get_user_by_id(userid))
+  def is_banned?(userid) when is_integer(userid), do: is_banned?(UserCache.get_user_by_id(userid))
   def is_banned?(%{banned: banned}) do
     case banned do
       [false, _] -> false
@@ -912,7 +615,7 @@ defmodule Teiserver.User do
 
   @spec is_muted?(Integer.t() | Map.t()) :: boolean()
   def is_muted?(nil), do: true
-  def is_muted?(userid) when is_integer(userid), do: is_muted?(get_user_by_id(userid))
+  def is_muted?(userid) when is_integer(userid), do: is_muted?(UserCache.get_user_by_id(userid))
   def is_muted?(%{muted: muted}) do
     case muted do
       [false, _] -> false
@@ -933,7 +636,7 @@ defmodule Teiserver.User do
 
   # Used to reset the spring password of the user when the site password is updated
   def set_new_spring_password(userid, new_password) do
-    user = get_user_by_id(userid)
+    user = UserCache.get_user_by_id(userid)
 
     case user do
       nil ->
@@ -943,7 +646,7 @@ defmodule Teiserver.User do
         md5_password = spring_md5_password(new_password)
         encrypted_password = encrypt_password(md5_password)
 
-        update_user(%{user | password_reset_code: nil, password_hash: encrypted_password, verified: true},
+        UserCache.update_user(%{user | password_reset_code: nil, password_hash: encrypted_password, verified: true},
           persist: true
         )
     end
@@ -957,7 +660,7 @@ defmodule Teiserver.User do
 
         EmailHelper.spring_password_reset(user, plain_password)
 
-        update_user(%{user | password_reset_code: nil, password_hash: encrypted_password},
+        UserCache.update_user(%{user | password_reset_code: nil, password_hash: encrypted_password},
           persist: true
         )
 
@@ -972,45 +675,8 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec recache_user(Integer.t()) :: :ok
-  def recache_user(id) do
-    if get_user_by_id(id) do
-      Account.get_user!(id)
-      |> convert_user
-      |> update_user
-    else
-      Account.get_user!(id)
-      |> convert_user
-      |> add_user
-    end
-
-    :ok
-  end
-
-  def delete_user(userid) do
-    user = get_user_by_id(userid)
-
-    if user do
-      Client.disconnect(userid, "User deletion")
-      :timer.sleep(100)
-
-      ConCache.delete(:users, userid)
-      ConCache.delete(:users_lookup_name_with_id, user.id)
-      ConCache.delete(:users_lookup_id_with_name, String.downcase(user.name))
-      ConCache.delete(:users_lookup_id_with_email, String.downcase(user.email))
-
-      ConCache.update(:lists, :users, fn value ->
-        new_value =
-          value
-          |> Enum.filter(fn v -> v != userid end)
-
-        {:ok, new_value}
-      end)
-    end
-  end
-
   def allow?(userid, permission) do
-    user = get_user_by_id(userid)
+    user = UserCache.get_user_by_id(userid)
 
     case permission do
       :moderator ->
@@ -1019,20 +685,5 @@ defmodule Teiserver.User do
       _ ->
         false
     end
-  end
-
-  def pre_cache_users() do
-    ConCache.insert_new(:lists, :users, [])
-
-    user_count =
-      Account.list_users(limit: :infinity)
-      |> Parallel.map(fn user ->
-        user
-        |> convert_user
-        |> add_user
-      end)
-      |> Enum.count()
-
-    Logger.info("pre_cache_users, got #{user_count} users")
   end
 end

@@ -1,7 +1,7 @@
 defmodule Teiserver.TcpServerTest do
   use Central.ServerCase, async: false
 
-  alias Teiserver.User
+  alias Teiserver.Account.UserCache
   alias Teiserver.Client
   require Logger
 
@@ -40,10 +40,10 @@ defmodule Teiserver.TcpServerTest do
     reply = _recv_raw(socket)
     assert reply == "REGISTRATIONACCEPTED\n"
 
-    user = User.get_user_by_name(username)
+    user = UserCache.get_user_by_name(username)
     query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
     Ecto.Adapters.SQL.query(Repo, query, [])
-    Teiserver.User.recache_user(user.id)
+    Teiserver.Account.UserCache.recache_user(user.id)
 
     _send_raw(
       socket,
@@ -65,7 +65,7 @@ defmodule Teiserver.TcpServerTest do
     assert reply == "DENIED Incorrect code\n"
 
     # Put in the correct code
-    user = User.get_user_by_name(username)
+    user = UserCache.get_user_by_name(username)
     _send_raw(socket, "CONFIRMAGREEMENT #{user.verification_code}\n")
 
     reply = _recv_until(socket)

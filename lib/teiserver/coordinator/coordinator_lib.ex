@@ -88,10 +88,10 @@ TODO: gatekeeper (blacklist | whitelist | friends | friendsstrict | clan)
   TODO: clan allows only members of an existing clan to join the game (enable after one member from each clan is present)
 
 <--- Moderator only --->
-TODO: specunready
+specunready
   specs all unready players
 
-TODO: makeready <user>
+makeready <user>
   sets a user to ready, when no user is specified all users are set to ready
 
 pull <user>

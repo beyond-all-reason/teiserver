@@ -90,7 +90,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
           "verification_code" => 123456 |> to_string
         }
       })
-    Teiserver.User.recache_user(user.id)
+    Teiserver.Account.UserCache.recache_user(user.id)
 
     # Bad password but also test msg_id continuance
     data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}
@@ -135,7 +135,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
       })
     query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
     Ecto.Adapters.SQL.query(Repo, query, [])
-    Teiserver.User.recache_user(user.id)
+    Teiserver.Account.UserCache.recache_user(user.id)
 
     # Bad password but also test msg_id continuance
     data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}
@@ -202,7 +202,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
           "verified" => true
         }
       })
-    Teiserver.User.recache_user(user.id)
+    Teiserver.Account.UserCache.recache_user(user.id)
 
     # Bad password but also test msg_id continuance
     data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}

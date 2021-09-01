@@ -3,6 +3,7 @@ defmodule Teiserver.SpringAuthTest do
   require Logger
   alias Teiserver.BitParse
   alias Teiserver.User
+  alias Teiserver.Account.UserCache
   alias Teiserver.Client
   alias Central.Account
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -82,7 +83,7 @@ defmodule Teiserver.SpringAuthTest do
     _send_raw(socket, "CHANGEPASSWORD wrong_pass new_pass\n")
     reply = _recv_raw(socket)
     assert reply == "SERVERMSG Current password entered incorrectly\n"
-    user = User.get_user_by_name(user.name)
+    user = UserCache.get_user_by_name(user.name)
     assert User.test_password("X03MO1qnZdYdgyfeuILPmQ==", user.password_hash)
 
     # Change it correctly
@@ -90,7 +91,7 @@ defmodule Teiserver.SpringAuthTest do
     :timer.sleep(1000)
     reply = _recv_raw(socket)
     assert reply == "SERVERMSG Password changed, you will need to use it next time you login\n"
-    user = User.get_user_by_name(user.name)
+    user = UserCache.get_user_by_name(user.name)
     assert User.test_password("new_pass", user.password_hash)
 
     # Test no match
@@ -406,9 +407,9 @@ CLIENTS test_room #{user.name}\n"
     _recv_raw(socket)
 
     # Check our starting situation
-    assert User.get_user_by_name(new_name) == nil
-    assert User.get_user_by_name(old_name) != nil
-    assert User.get_user_by_id(userid) != nil
+    assert UserCache.get_user_by_name(new_name) == nil
+    assert UserCache.get_user_by_name(old_name) != nil
+    assert UserCache.get_user_by_id(userid) != nil
     assert Client.get_client_by_id(userid) != nil
 
     # Rename with an invalid name
@@ -435,9 +436,9 @@ CLIENTS test_room #{user.name}\n"
     :timer.sleep(250)
 
     # User is removed and uncached, it should be nil
-    assert User.get_user_by_name(new_name) == nil
-    assert User.get_user_by_name(user.name) == nil
-    assert User.get_user_by_id(userid) == nil
+    assert UserCache.get_user_by_name(new_name) == nil
+    assert UserCache.get_user_by_name(user.name) == nil
+    assert UserCache.get_user_by_id(userid) == nil
     assert Client.get_client_by_id(userid) == nil
 
     # Lets be REAL sure
@@ -510,7 +511,7 @@ CLIENTS test_room #{user.name}\n"
     _send_raw(socket, "CHANGEEMAILREQUEST new_email@email.com\n")
     reply = _recv_raw(socket)
     assert reply == "CHANGEEMAILREQUESTACCEPTED\n"
-    new_user = User.get_user_by_id(user.id)
+    new_user = UserCache.get_user_by_id(user.id)
     [code, new_email] = new_user.email_change_code
     assert new_email == "new_email@email.com"
 
@@ -528,7 +529,7 @@ CLIENTS test_room #{user.name}\n"
     _send_raw(socket, "CHANGEEMAIL new_email@email.com #{code}\n")
     reply = _recv_raw(socket)
     assert reply == "CHANGEEMAILACCEPTED\n"
-    new_user = User.get_user_by_id(user.id)
+    new_user = UserCache.get_user_by_id(user.id)
     assert new_user.email == "new_email@email.com"
     assert new_user.email_change_code == [nil, nil]
   end
@@ -539,7 +540,7 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "SERVERMSG You do not have permission to execute that command\n"
 
     # Give mod access, recache the user
-    User.update_user(%{user | moderator: true})
+    UserCache.update_user(%{user | moderator: true})
     :timer.sleep(100)
 
     _send_raw(socket, "CREATEBOTACCOUNT test_bot_account #{user.name}\n")
@@ -612,8 +613,8 @@ CLIENTS test_room #{user.name}\n"
     })
 
     bad_user
-      |> User.convert_user()
-      |> User.add_user()
+      |> UserCache.convert_user()
+      |> UserCache.add_user()
       |> User.verify_user()
 
     # Now see what happens when we add user

@@ -1,6 +1,6 @@
 defmodule TeiserverWeb.API.BattleController do
   use CentralWeb, :controller
-  alias Teiserver.Battle
+  # alias Teiserver.Battle
 
   plug(Bodyguard.Plug.Authorize,
     policy: Teiserver.Battle.ApiAuth,
@@ -8,7 +8,7 @@ defmodule TeiserverWeb.API.BattleController do
     user: {Central.Account.AuthLib, :current_user}
   )
 
-  def create(conn, battle = %{"outcome" => "completed"}) do
+  def create(conn, _battle = %{"outcome" => "completed"}) do
     # {:ok, dbbattle} = Battle.create_battle_log(%{
     #   map: "map",
     #   data: battle,

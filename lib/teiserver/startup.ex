@@ -2,6 +2,8 @@ defmodule Teiserver.Startup do
   use CentralWeb, :startup
   require Logger
 
+  alias Teiserver.Account.UserCache
+
   @spec startup :: :ok
   def startup do
     add_permission_set("teiserver", "admin", ~w(account battle clan party queue tournament))
@@ -176,10 +178,10 @@ defmodule Teiserver.Startup do
     #   |> String.to_integer()
     ConCache.put(:id_counters, :battle, 1)
 
-    Teiserver.User.pre_cache_users()
+    UserCache.pre_cache_users()
     Teiserver.Data.Matchmaking.pre_cache_queues()
 
-    springids = Teiserver.User.list_users()
+    springids = UserCache.list_users()
     |> Enum.map(fn u -> Central.Helpers.NumberHelper.int_parse(u.springid) end)
 
     # We do this as a separate operation because a blank DB won't have any springids yet

@@ -2,7 +2,8 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.Lobby
   alias Teiserver.Common.PubsubListener
-  alias Teiserver.{Client, User, Coordinator}
+  alias Teiserver.Account.UserCache
+  alias Teiserver.{Client, Coordinator}
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
@@ -13,7 +14,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     %{socket: psocket, user: player} = tachyon_auth_setup()
 
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
-    User.update_user(%{host | moderator: true})
+    UserCache.update_user(%{host | moderator: true})
     Client.refresh_client(host.id)
 
     battle_data = %{

@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
   alias Teiserver
   alias Teiserver.Data.Matchmaking
-  alias Teiserver.{Client, Game}
+  alias Teiserver.{Game}
   alias Teiserver.Game.{QueueLib}
 
   import Central.Helpers.NumberHelper, only: [int_parse: 1]

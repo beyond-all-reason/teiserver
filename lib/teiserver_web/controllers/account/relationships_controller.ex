@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Account.RelationshipsController do
   use CentralWeb, :controller
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
+  alias Teiserver.Account.UserCache
   alias Teiserver.Clans
 
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
@@ -24,7 +25,7 @@ defmodule TeiserverWeb.Account.RelationshipsController do
     clan_invites = Clans.list_clan_invites_by_user(conn.user_id, joins: [:clan])
 
     user_lookup =
-      Teiserver.User.list_users(friends ++ received_requests ++ muted)
+      UserCache.list_users(friends ++ received_requests ++ muted)
       |> Enum.filter(fn u -> u != nil end)
       |> Map.new(fn u -> {u.id, u} end)
 
@@ -39,7 +40,7 @@ defmodule TeiserverWeb.Account.RelationshipsController do
 
   @spec find(Plug.Conn.t(), map) :: Plug.Conn.t()
   def find(conn, params) do
-    target_id = Teiserver.User.get_userid(params["target_name"])
+    target_id = UserCache.get_userid(params["target_name"])
 
     if target_id do
       case params["mode"] do

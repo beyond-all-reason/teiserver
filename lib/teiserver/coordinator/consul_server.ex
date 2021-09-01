@@ -20,6 +20,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   use GenServer
   require Logger
   alias Teiserver.{Coordinator, Client, User}
+  alias Teiserver.Account.UserCache
   alias Teiserver.Battle.Lobby
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   # alias Phoenix.PubSub
@@ -104,7 +105,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:user_joined, userid}, state) do
-    user = User.get_user_by_id(userid)
+    user = UserCache.get_user_by_id(userid)
 
     if state.welcome_message do
       Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name}: ####################", state.battle_id)
@@ -610,7 +611,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec allow_command?(Map.t(), Map.t()) :: :allow | :with_vote | :disallow | :existing_vote
   defp allow_command?(%{senderid: senderid} = cmd, state) do
-    user = User.get_user_by_id(senderid)
+    user = UserCache.get_user_by_id(senderid)
 
     cond do
       Enum.member?(@always_allow, cmd.command) ->
@@ -641,7 +642,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp get_user("", _), do: nil
   defp get_user("#" <> id, _), do: int_parse(id)
   defp get_user(name, state) do
-    case User.get_userid(name) do
+    case UserCache.get_userid(name) do
       nil ->
         # Try partial search of players in lobby
         battle = Lobby.get_battle(state.battle_id)

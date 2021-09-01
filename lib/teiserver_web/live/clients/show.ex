@@ -3,7 +3,7 @@ defmodule TeiserverWeb.ClientLive.Show do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.User
+  alias Teiserver.Account.UserCache
   alias Teiserver.Client
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Account.UserLib
@@ -41,7 +41,7 @@ defmodule TeiserverWeb.ClientLive.Show do
         PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
         PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{id}")
         client = Client.get_client_by_id(id)
-        user = User.get_user_by_id(id)
+        user = UserCache.get_user_by_id(id)
 
         case client do
           nil ->

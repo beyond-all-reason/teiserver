@@ -97,9 +97,19 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("? -> ? @> ?", users.data, "roles", "\"Tester\"")
   end
 
+  def _search(query, :tester, "Normal") do
+    from users in query,
+      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Tester\"")
+  end
+
   def _search(query, :streamer, "Streamer") do
     from users in query,
       where: fragment("? -> ? @> ?", users.data, "roles", "\"Streamer\"")
+  end
+
+  def _search(query, :streamer, "Normal") do
+    from users in query,
+      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Streamer\"")
   end
 
   def _search(query, :donor, "Donor") do

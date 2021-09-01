@@ -134,7 +134,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     test "apply temporary mute", %{conn: conn} do
       %{user: user} = TeiserverTestLib.tachyon_auth_setup()
 
-      cached_user = User.get_user_by_id(user.id)
+      cached_user = UserCache.get_user_by_id(user.id)
       assert cached_user.muted == [false, nil]
 
       conn = put(conn, Routes.ts_admin_user_path(conn, :perform_action, user.id, "report_action"), %{
@@ -144,7 +144,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       })
       assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, user.id) <> "#reports_tab"
 
-      cached_user = User.get_user_by_id(user.id)
+      cached_user = UserCache.get_user_by_id(user.id)
       [muted, until] = cached_user.muted
       assert muted == true
       assert until != nil
@@ -153,7 +153,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     test "apply permanent mute", %{conn: conn} do
       %{user: user} = TeiserverTestLib.tachyon_auth_setup()
 
-      cached_user = User.get_user_by_id(user.id)
+      cached_user = UserCache.get_user_by_id(user.id)
       assert cached_user.muted == [false, nil]
 
       conn = put(conn, Routes.ts_admin_user_path(conn, :perform_action, user.id, "report_action"), %{
@@ -163,7 +163,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       })
       assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, user.id) <> "#reports_tab"
 
-      cached_user = User.get_user_by_id(user.id)
+      cached_user = UserCache.get_user_by_id(user.id)
       [muted, until] = cached_user.muted
       assert muted == true
       assert until == nil
@@ -172,7 +172,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     test "apply temporary ban", %{conn: conn} do
       %{user: user} = TeiserverTestLib.tachyon_auth_setup()
 
-      cached_user = User.get_user_by_id(user.id)
+      cached_user = UserCache.get_user_by_id(user.id)
       assert cached_user.banned == [false, nil]
       assert Client.get_client_by_id(user.id)
 
@@ -183,7 +183,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       })
       assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, user.id) <> "#reports_tab"
 
-      cached_user = User.get_user_by_id(user.id)
+      cached_user = UserCache.get_user_by_id(user.id)
       [banned, until] = cached_user.banned
       assert banned == true
       assert until != nil
@@ -193,7 +193,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     test "apply permanent ban", %{conn: conn} do
       %{user: user} = TeiserverTestLib.tachyon_auth_setup()
 
-      cached_user = User.get_user_by_id(user.id)
+      cached_user = UserCache.get_user_by_id(user.id)
       assert cached_user.banned == [false, nil]
       assert Client.get_client_by_id(user.id)
 
@@ -204,7 +204,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
       })
       assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, user.id) <> "#reports_tab"
 
-      cached_user = User.get_user_by_id(user.id)
+      cached_user = UserCache.get_user_by_id(user.id)
       [banned, until] = cached_user.banned
       assert banned == true
       assert until == nil

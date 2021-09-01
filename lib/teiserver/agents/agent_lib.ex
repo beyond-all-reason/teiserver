@@ -1,6 +1,7 @@
 defmodule Teiserver.Agents.AgentLib do
   alias Teiserver.Protocols.Tachyon
   alias Teiserver.User
+  alias Teiserver.Account.UserCache
   alias Phoenix.PubSub
   require Logger
 
@@ -74,17 +75,17 @@ defmodule Teiserver.Agents.AgentLib do
   @spec login({:sslsocket, any, any}, Map.t()) :: :success
   def login(socket, data) do
     # If no user, make it
-    if User.get_user_by_email(data.email) == nil do
+    if UserCache.get_user_by_email(data.email) == nil do
       User.register_user_with_md5(data.name, data.email, "password", "127.0.0.1")
-      user = User.get_user_by_name(data.name)
+      user = UserCache.get_user_by_name(data.name)
       user = %{user | verified: true, bot: data[:bot], moderator: data[:moderator]}
-      User.update_user(user, persist: true)
-      User.recache_user(user.id)
+      UserCache.update_user(user, persist: true)
+      UserCache.recache_user(user.id)
       :timer.sleep(100)
     end
 
     # Get the user
-    user = User.get_user_by_name(data.name)
+    user = UserCache.get_user_by_name(data.name)
 
     with :ok <- swap_to_tachyon(socket),
          token <- User.create_token(user),
