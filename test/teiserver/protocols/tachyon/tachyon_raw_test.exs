@@ -2,6 +2,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
   use Central.ServerCase
 
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Account.UserCache
 
   import Teiserver.TeiserverTestLib,
     only: [tls_setup: 0, _send_raw: 2, _tachyon_send: 2, _recv_raw: 1, _tachyon_recv: 1]
@@ -86,11 +87,11 @@ defmodule Teiserver.Protocols.TachyonRawTest do
         "email" => "new_test_user_tachyon_token@",
         "password" => "token_password",
         "data" => %{
-          "verified" => false,
+          "verified" => true,
           "verification_code" => 123456 |> to_string
         }
       })
-    Teiserver.Account.UserCache.recache_user(user.id)
+    UserCache.recache_user(user.id)
 
     # Bad password but also test msg_id continuance
     data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}

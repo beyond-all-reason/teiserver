@@ -51,10 +51,6 @@ config :central, Teiserver,
   # Heartbeat timeout is seconds
   heartbeat_timeout: 45,
 
-  # verification holiday is the time after registering during which a user can login without
-  # being verified. Measured in seconds
-  verification_holiday: (60 * 60) * 3, # 3 hours
-
   game_name: "Spring game",
   game_name_short: "SG",
   main_website: "https://site.com/",
