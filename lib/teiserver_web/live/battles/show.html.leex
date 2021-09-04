@@ -27,7 +27,7 @@
 
 <%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "battle_lobbies", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
 
-<div class="row">
+<div class="row" id="main-content">
   <div class="col-md-12">
     <div class="card border-<%= bsname %> page-card">
       <div class="card-body">
@@ -54,7 +54,7 @@
 </ul>
 
 <h4>Players</h4>
-<table class="table">
+<table class="table" id="players-table">
   <thead>
     <tr>
       <th width="100">&nbsp;</th>
@@ -76,7 +76,7 @@
         ignored = Enum.member?(@server_user.ignored, client)
       %>
       <%= if user do %>
-        <tr>
+        <tr id="user-row-<%= user.id %>">
           <td width="100">
             <%= if friend do %>
               <i class="text-success fa-fw <%= Teiserver.icon(:friend) %>"></i>
@@ -122,7 +122,7 @@
 </table>
 
 <h4>Spectators</h4>
-<table class="table">
+<table class="table" id="spectators-table">
   <thead>
     <tr>
       <th width="100">&nbsp;</th>
@@ -139,7 +139,7 @@
         ignored = Enum.member?(@server_user.ignored, client)
       %>
       <%= if user do %>
-        <tr>
+        <tr id="user-row-<%= user.id %>">
           <td width="100">
             <%= if friend do %>
               <i class="text-success fa-fw <%= Teiserver.icon(:friend) %>"></i>
@@ -173,7 +173,7 @@
   </tbody>
 </table>
 
-<table class="table">
+<table class="table" id="data-table">
   <tbody>
     <tr>
       <td>Game name</td>
@@ -218,7 +218,7 @@
 
 <%= if allow?(@current_user, "admin.dev.developer") do %>
 <br /><br />
-<div class="row">
+<div class="row" id="admin-data">
   <div class="col-md-6">
     <pre>
       <%= Kernel.inspect @battle, pretty: true, limit: :infinity %>

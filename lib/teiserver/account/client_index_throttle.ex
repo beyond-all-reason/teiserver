@@ -7,7 +7,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
   alias Phoenix.PubSub
   alias Teiserver.Client
 
-  @update_interval 200
+  @update_interval 500
 
   # Lobby closed
   def handle_info({:battle_lobby_closed, _id}, state) do
