@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
 
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
-  alias Teiserver.User
+  alias Teiserver.Account.UserCache
   alias Teiserver.Client
 
   setup do

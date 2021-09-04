@@ -137,7 +137,6 @@ defmodule Teiserver.SpringRawTest do
   end
 
   test "RESETPASSWORDREQUEST", %{socket: socket} do
-    user = new_user()
     _ = _recv_raw(socket)
 
     # Send the wrong request
