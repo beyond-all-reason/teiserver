@@ -35,6 +35,9 @@ defmodule Teiserver.Account.TimeSpentReport do
       v2 = user2.user_stat.data[params["mode"]]
       v1 >= v2
     end)
+    |> Enum.filter(fn user ->
+      user.user_stat.data["total_minutes"] != nil
+    end)
 
     assigns = %{
       params: params,

@@ -26,3 +26,12 @@
   bsname: bsname,
   url: Routes.ts_reports_report_path(@conn, :show, "ranks")
 %>
+
+<%= central_component "section_menu_button",
+  name: "verified",
+  label: "Verified",
+  active: @active,
+  icon: "far fa-check",
+  bsname: bsname,
+  url: Routes.ts_reports_report_path(@conn, :show, "verified")
+%>

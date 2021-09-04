@@ -9,7 +9,7 @@
         <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
-            active: "time_spent"
+            active: "verified"
           })
         %>
         <br /><br />
