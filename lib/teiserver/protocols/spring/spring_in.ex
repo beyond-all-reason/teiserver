@@ -377,58 +377,11 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
-  defp do_handle("RESETPASSWORDREQUEST", email, msg_id, state) do
-    case state.user == nil or email == state.user.email do
-      true ->
-        user = UserCache.get_user_by_email(email)
+  defp do_handle("RESETPASSWORDREQUEST", _, msg_id, state) do
+    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    url = "https://#{host}/password_reset"
 
-        case user do
-          nil ->
-            reply(:reset_password_request_denied, "user error", msg_id, state)
-
-          _ ->
-            User.request_password_reset(user)
-            reply(:reset_password_request_accepted, nil, msg_id, state)
-        end
-
-      false ->
-        # They have requested a password reset for a different user?
-        reply(:reset_password_request_denied, "data error", msg_id, state)
-    end
-
-    state
-  end
-
-  defp do_handle("RESETPASSWORD", data, msg_id, state) do
-    case Regex.run(~r/(\S+) (\S+)/, data) do
-      [_, email, code] ->
-        user = UserCache.get_user_by_email(email)
-
-        cond do
-          user == nil ->
-            reply(:reset_password_actual_denied, "no_user", msg_id, state)
-
-          user.password_reset_code == nil ->
-            reply(:reset_password_actual_denied, "no_code", msg_id, state)
-
-          state.userid != nil and state.userid != user.id ->
-            reply(:reset_password_actual_denied, "wrong_user", msg_id, state)
-
-          true ->
-            case User.spring_reset_password(user, code) do
-              :ok ->
-                reply(:reset_password_actual_accepted, nil, msg_id, state)
-
-              :error ->
-                reply(:reset_password_actual_denied, "wrong_code", msg_id, state)
-            end
-        end
-
-      _ ->
-        _no_match(state, "RESETPASSWORD", msg_id, data)
-    end
-
-    state
+    reply(:okay, url, msg_id, state)
   end
 
   defp do_handle("CHANGEEMAILREQUEST", new_email, msg_id, state) do

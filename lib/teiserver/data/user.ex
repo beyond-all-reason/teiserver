@@ -623,14 +623,6 @@ defmodule Teiserver.User do
     end
   end
 
-  # Tied to spring's PASSWORDRESET which requires the password to be
-  # created and emailed to the user
-  def generate_new_password() do
-    new_plain_password = generate_random_password()
-    new_hash = spring_md5_password(new_plain_password)
-    {new_plain_password, new_hash}
-  end
-
   # Used to reset the spring password of the user when the site password is updated
   def set_new_spring_password(userid, new_password) do
     user = UserCache.get_user_by_id(userid)
@@ -646,29 +638,6 @@ defmodule Teiserver.User do
         UserCache.update_user(%{user | password_reset_code: nil, password_hash: encrypted_password, verified: true},
           persist: true
         )
-    end
-  end
-
-  def spring_reset_password(user, code) do
-    case code == user.password_reset_code do
-      true ->
-        {plain_password, md5_password} = generate_new_password()
-        encrypted_password = encrypt_password(md5_password)
-
-        EmailHelper.spring_password_reset(user, plain_password)
-
-        UserCache.update_user(%{user | password_reset_code: nil, password_hash: encrypted_password},
-          persist: true
-        )
-
-        # Now update the DB user too
-        db_user = Account.get_user!(user.id)
-        Account.script_update_user(db_user, %{"password" => encrypted_password})
-
-        :ok
-
-      false ->
-        :error
     end
   end
 
