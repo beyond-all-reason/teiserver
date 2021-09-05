@@ -1,35 +1,35 @@
-defmodule Teiserver.Protocols.Tachyon.BattleOut do
+defmodule Teiserver.Protocols.Tachyon.LobbyOut do
   alias Teiserver.Protocols.Tachyon
 
   @spec do_reply(atom(), any) :: Map.t()
 
   ###########
   # Query
-  def do_reply(:query, battle_list) do
+  def do_reply(:query, lobby_list) do
     %{
-      "cmd" => "s.battle.query",
+      "cmd" => "s.lobby.query",
       "result" => "success",
-      "battles" => battle_list
-        |> Enum.map(fn b -> Tachyon.convert_object(:battle, b) end)
+      "lobbys" => lobby_list
+        |> Enum.map(fn b -> Tachyon.convert_object(:lobby, b) end)
     }
   end
 
   ###########
   # Create
-  def do_reply(:create, {:success, battle}) do
+  def do_reply(:create, {:success, lobby}) do
     %{
-      "cmd" => "s.battle.create",
+      "cmd" => "s.lobby.create",
       "result" => "success",
-      "battle" => Tachyon.convert_object(:battle, battle)
+      "lobby" => Tachyon.convert_object(:lobby, lobby)
     }
   end
 
   ###########
   # Updated
-  def do_reply(:updated, battle) do
+  def do_reply(:updated, lobby) do
     %{
-      "cmd" => "s.battle.updated",
-      "battle" => Tachyon.convert_object(:battle, battle)
+      "cmd" => "s.lobby.updated",
+      "lobby" => Tachyon.convert_object(:lobby, lobby)
     }
   end
 
@@ -37,14 +37,14 @@ defmodule Teiserver.Protocols.Tachyon.BattleOut do
   # Leave
   def do_reply(:leave, {:success, nil}) do
     %{
-      "cmd" => "s.battle.leave",
+      "cmd" => "s.lobby.leave",
       "result" => "success"
     }
   end
 
   def do_reply(:leave, {:failure, reason}) do
     %{
-      "cmd" => "s.battle.leave",
+      "cmd" => "s.lobby.leave",
       "result" => "failure",
       "reason" => reason
     }
@@ -54,14 +54,14 @@ defmodule Teiserver.Protocols.Tachyon.BattleOut do
   # Join
   def do_reply(:join, :waiting) do
     %{
-      "cmd" => "s.battle.join",
+      "cmd" => "s.lobby.join",
       "result" => "waiting_for_host"
     }
   end
 
   def do_reply(:join, {:failure, reason}) do
     %{
-      "cmd" => "s.battle.join",
+      "cmd" => "s.lobby.join",
       "result" => "failure",
       "reason" => reason
     }
@@ -71,24 +71,24 @@ defmodule Teiserver.Protocols.Tachyon.BattleOut do
   # Join request
   def do_reply(:request_to_join, userid) do
     %{
-      "cmd" => "s.battle.request_to_join",
+      "cmd" => "s.lobby.request_to_join",
       "userid" => userid
     }
   end
 
   ###########
   # Join response
-  def do_reply(:join_response, {:approve, battle}) do
+  def do_reply(:join_response, {:approve, lobby}) do
     %{
-      "cmd" => "s.battle.join_response",
+      "cmd" => "s.lobby.join_response",
       "result" => "approve",
-      "battle" => Tachyon.convert_object(:battle, battle)
+      "lobby" => Tachyon.convert_object(:lobby, lobby)
     }
   end
 
   def do_reply(:join_response, {:reject, reason}) do
     %{
-      "cmd" => "s.battle.join_response",
+      "cmd" => "s.lobby.join_response",
       "result" => "reject",
       "reason" => reason
     }
@@ -98,23 +98,23 @@ defmodule Teiserver.Protocols.Tachyon.BattleOut do
   # Messages
   def do_reply(:request_status, nil) do
     %{
-      "cmd" => "s.battle.request_status"
+      "cmd" => "s.lobby.request_status"
     }
   end
 
   ###########
   # Messages
-  def do_reply(:message, {sender_id, msg, _battle_id}) do
+  def do_reply(:message, {sender_id, msg, _lobby_id}) do
     %{
-      "cmd" => "s.battle.message",
+      "cmd" => "s.lobby.message",
       "sender" => sender_id,
       "message" => msg
     }
   end
 
-  def do_reply(:announce, {sender_id, msg, _battle_id}) do
+  def do_reply(:announce, {sender_id, msg, _lobby_id}) do
     %{
-      "cmd" => "s.battle.announce",
+      "cmd" => "s.lobby.announce",
       "sender" => sender_id,
       "message" => msg
     }

@@ -12,7 +12,7 @@ Given the server is currently used primarily for the Spring protocol you will ne
 
 #### Command types
 - [Auth](auth.md)
-- [Battle](battle.md)
+- [Lobby](lobby.md)
 - [Clan](clan.md)
 - [User](user.md)
 - [Communication](communication.md)

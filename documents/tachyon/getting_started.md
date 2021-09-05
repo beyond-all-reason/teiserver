@@ -7,8 +7,8 @@ H4sIAAAAAAAAA4WQyw6CQAxFf8V0fUPSEXyw9DeMi4pjYhwYnCkLQvh3eS1QF+6ak9t7mnZ0FVVnI+Xn
 
   Decoded, Decompressed, Parsed result
 {
-  "command": "s.battles.query",
-  "battles": [
+  "command": "s.lobbies.query",
+  "lobbies": [
     {
       "id": 1,
       "name": "Battle 1",
@@ -34,7 +34,7 @@ H4sIAAAAAAAAA4WQyw6CQAxFf8V0fUPSEXyw9DeMi4pjYhwYnCkLQvh3eS1QF+6ak9t7mnZ0FVVnI+Xn
 ## Conventions
 All client -> server commands are namespaced with `c` while server to client is always namespaced with `s`. The command or response in question is always located in the mandatory `cmd` field of the json message.
 
-If the client json object contains a `msg_id` field, the server is expected to echo that back inside any json object responses in relation to that command. E.g. if the client requests a list of battles and include a `msg_id`, the battle list response should echo back the same `msg_id`.
+If the client json object contains a `msg_id` field, the server is expected to echo that back inside any json object responses in relation to that command. E.g. if the client requests a list of lobbies and include a `msg_id`, the lobby list response should echo back the same `msg_id`.
 
 ## Reading the documentation
 Below is the example structure of a command in the documentation.

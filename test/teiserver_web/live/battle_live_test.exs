@@ -8,6 +8,8 @@ defmodule TeiserverWeb.Live.BattleTest do
   alias Teiserver.Battle.Lobby
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
+  @throttle_wait 500 + 10
+
   setup do
     GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
     |> TeiserverTestLib.conn_setup()
@@ -132,7 +134,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       # # Team 1
       _send_raw(socket3, "MYBATTLESTATUS 4195394 123456\n")
 
-      :timer.sleep(250)
+      :timer.sleep(@throttle_wait)
 
       html = render(view)
       assert html =~ "#{user1.name}"
@@ -141,7 +143,7 @@ defmodule TeiserverWeb.Live.BattleTest do
 
       # Battle closes
       Lobby.close_battle(battle_id)
-      :timer.sleep(250)
+      :timer.sleep(@throttle_wait)
 
       assert_redirect(view, "/teiserver/battle/lobbies", 250)
     end

@@ -42,19 +42,19 @@ defmodule Teiserver.Coordinator do
     ConCache.get(:application_metadata_cache, "teiserver_coordinator_userid")
   end
 
-  @spec get_consul_pid(T.battle_id()) :: pid() | nil
-  def get_consul_pid(battle_id) do
-    ConCache.get(:teiserver_consul_pids, battle_id)
+  @spec get_consul_pid(T.lobby_id()) :: pid() | nil
+  def get_consul_pid(lobby_id) do
+    ConCache.get(:teiserver_consul_pids, lobby_id)
   end
 
-  @spec start_consul(T.battle_id()) :: pid()
-  def start_consul(battle_id) do
+  @spec start_consul(T.lobby_id()) :: pid()
+  def start_consul(lobby_id) do
     {:ok, consul_pid} =
       DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
         Teiserver.Coordinator.ConsulServer,
-        name: "consul_#{battle_id}",
+        name: "consul_#{lobby_id}",
         data: %{
-          battle_id: battle_id,
+          lobby_id: lobby_id,
         }
       })
 
@@ -62,44 +62,42 @@ defmodule Teiserver.Coordinator do
     consul_pid
   end
 
-  @spec cast_consul(T.battle_id(), any) :: any
-  def cast_consul(battle_id, msg) when is_integer(battle_id) do
-    case get_consul_pid(battle_id) do
+  @spec cast_consul(T.lobby_id(), any) :: any
+  def cast_consul(lobby_id, msg) when is_integer(lobby_id) do
+    case get_consul_pid(lobby_id) do
       nil -> nil
       pid -> send(pid, msg)
     end
   end
 
-  @spec call_consul(pid() | T.battle_id(), any) :: any
-  def call_consul(battle_id, msg) when is_integer(battle_id) do
-    case get_consul_pid(battle_id) do
+  @spec call_consul(pid() | T.lobby_id(), any) :: any
+  def call_consul(lobby_id, msg) when is_integer(lobby_id) do
+    case get_consul_pid(lobby_id) do
       nil -> nil
       pid -> GenServer.call(pid, msg)
     end
   end
 
-  def allow_battlestatus_update?(client, battle_id) do
-    call_consul(battle_id, {:request_user_change_status, client})
+  def allow_battlestatus_update?(client, lobby_id) do
+    call_consul(lobby_id, {:request_user_change_status, client})
   end
 
-  def handle_in(userid, msg, battle_id) do
-    Parser.handle_in(userid, msg, battle_id)
+  def handle_in(userid, msg, lobby_id) do
+    Parser.handle_in(userid, msg, lobby_id)
   end
 
-  def close_battle(battle_id) do
-    case get_consul_pid(battle_id) do
+  def close_battle(lobby_id) do
+    case get_consul_pid(lobby_id) do
       nil -> nil
       pid ->
-        ConCache.delete(:teiserver_consul_pids, battle_id)
+        ConCache.delete(:teiserver_consul_pids, lobby_id)
         DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, pid)
     end
   end
 
-  def send_to_host(from_id, battle_id, msg) do
-    battle = Lobby.get_battle!(battle_id)
-    # pid = Client.get_client_by_id(battle.founder_id).pid
+  def send_to_host(from_id, lobby_id, msg) do
+    battle = Lobby.get_battle!(lobby_id)
     User.send_direct_message(from_id, battle.founder_id, msg)
-    # send(pid, {:battle_updated, battle_id, {from_id, msg, battle_id}, :say})
     Logger.info("send_to_host - #{battle.id}, #{msg}")
   end
 

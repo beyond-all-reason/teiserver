@@ -13,7 +13,7 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
   test "battle host", %{socket: socket, pid: pid} do
     # Open the battle
     battle_data = %{
-      cmd: "c.battle.create",
+      cmd: "c.lobby.create",
       name: "EU 01 - 123",
       nattype: "none",
       password: "password2",
@@ -29,12 +29,12 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
       }
     }
 
-    data = %{cmd: "c.battle.create", battle: battle_data}
+    data = %{cmd: "c.lobby.create", battle: battle_data}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
 
     assert Map.has_key?(reply, "battle")
-    assert match?(%{"cmd" => "s.battle.create", "result" => "success"}, reply)
+    assert match?(%{"cmd" => "s.lobby.create", "result" => "success"}, reply)
     battle = reply["battle"]
 
     assert battle["name"] == "EU 01 - 123"
@@ -50,12 +50,12 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
     %{socket: socket3, user: user3} = tachyon_auth_setup()
 
     # Bad password
-    data = %{cmd: "c.battle.join", battle_id: battle_id}
+    data = %{cmd: "c.lobby.join", battle_id: battle_id}
     _tachyon_send(socket2, data)
     reply = _tachyon_recv(socket2)
 
     assert reply == %{
-      "cmd" => "s.battle.join",
+      "cmd" => "s.lobby.join",
       "result" => "failure",
       "reason" => "Invalid password"
     }
@@ -63,65 +63,65 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
     # Good password
     # We send from both users to test for a bug found when making the agent system
     # where two messages queued up might not be decoded correctly
-    data = %{cmd: "c.battle.join", battle_id: battle_id, password: "password2"}
+    data = %{cmd: "c.lobby.join", battle_id: battle_id, password: "password2"}
     _tachyon_send(socket2, data)
     _tachyon_send(socket3, data)
     reply = _tachyon_recv(socket2)
 
     assert reply == %{
-      "cmd" => "s.battle.join",
+      "cmd" => "s.lobby.join",
       "result" => "waiting_for_host"
     }
 
     # Host is expecting to see a request
     reply = _tachyon_recv(socket)
     assert reply == %{
-      "cmd" => "s.battle.request_to_join",
+      "cmd" => "s.lobby.request_to_join",
       "userid" => user2.id
     }
 
     # Here should be the next request
     reply = _tachyon_recv(socket)
     assert reply == %{
-      "cmd" => "s.battle.request_to_join",
+      "cmd" => "s.lobby.request_to_join",
       "userid" => user3.id
     }
 
     # Host can reject
-    data = %{cmd: "c.battle.respond_to_join_request", userid: user2.id, response: "reject", reason: "reason given"}
+    data = %{cmd: "c.lobby.respond_to_join_request", userid: user2.id, response: "reject", reason: "reason given"}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket2)
 
     # Reject user3 at the same time
-    data = %{cmd: "c.battle.respond_to_join_request", userid: user3.id, response: "reject", reason: "reason given"}
+    data = %{cmd: "c.lobby.respond_to_join_request", userid: user3.id, response: "reject", reason: "reason given"}
     _tachyon_send(socket, data)
 
     assert reply == %{
-      "cmd" => "s.battle.join_response",
+      "cmd" => "s.lobby.join_response",
       "result" => "reject",
       "reason" => "reason given"
     }
 
     # Now request again but this time accept
-    data = %{cmd: "c.battle.join", battle_id: battle_id, password: "password2"}
+    data = %{cmd: "c.lobby.join", battle_id: battle_id, password: "password2"}
     _tachyon_send(socket2, data)
     _tachyon_recv(socket2)
     _tachyon_recv(socket)
 
     assert GenServer.call(pid2, {:get, :battle_id}) == nil
 
-    data = %{cmd: "c.battle.respond_to_join_request", userid: user2.id, response: "approve"}
+    data = %{cmd: "c.lobby.respond_to_join_request", userid: user2.id, response: "approve"}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket2)
 
-    assert reply["cmd"] == "s.battle.join_response"
+    assert reply["cmd"] == "s.lobby.join_response"
     assert reply["result"] == "approve"
     assert reply["battle"]["id"] == battle_id
 
     assert GenServer.call(pid2, {:get, :battle_id}) == battle_id
 
     # # Expecting a request to join here
-    # data = %{cmd: "c.battle.join", battle_id: battle_id}
+    # data = %{cmd: "c.lobby.join", battle_id: battle_id}
     # _tachyon_send(socket2, data)
     # reply = _tachyon_recv(socket2)
 
@@ -132,10 +132,10 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
     # IO.puts ""
 
     # Now leave the battle, closing it in the process
-    data = %{cmd: "c.battle.leave"}
+    data = %{cmd: "c.lobby.leave"}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
-    assert match?(%{"cmd" => "s.battle.leave"}, reply)
+    assert match?(%{"cmd" => "s.lobby.leave"}, reply)
 
     assert GenServer.call(pid, {:get, :battle_id}) == nil
     assert GenServer.call(pid, {:get, :battle_host}) == false

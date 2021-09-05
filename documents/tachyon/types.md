@@ -109,7 +109,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 * in_game: boolean
 * away: boolean
 
--- Game/Battle attributes
+-- Game/Lobby attributes
 * ready: boolean
 * team_number: integer
 * ally_team_number: 0 -- I want to replace these two with just team_number, it's only purpose seems to be to enable Archon mode
@@ -118,7 +118,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 * bonus: integer, default: 0
 * synced: boolean
 * faction: string
-* battle_id: Lobby.id
+* battle_id: Lobby.id -- TODO: Replace with lobby_id
 
 #### Examples
 ```
@@ -137,7 +137,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 }
 ```
 
-## Battle
+## Lobby
 * id :: integer
 * name :: string
 * founder_id :: User.id

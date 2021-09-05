@@ -67,7 +67,17 @@ defmodule Teiserver.Battle.Lobby do
     )
   end
 
-  def create_battle(battle) do
+  # Refactor callbacks
+  def create_battle(battle), do: create_lobby(battle)
+  def update_battle(battle, data, reason), do: update_lobby(battle, data, reason)
+  def get_battle!(battle_id), do: get_lobby!(battle_id)
+  def get_battle(battle_id), do: get_lobby(battle_id)
+  def add_battle(battle), do: add_lobby(battle)
+  def close_battle(battle), do: close_lobby(battle)
+
+
+  @spec create_lobby(Map.t()) :: Map.t()
+  def create_lobby(lobby) do
     # Needs to be supplied a map with:
     # founder_id/name, ip, port, engine_version, map_hash, map_name, name, game_name, hash_code
     Map.merge(
@@ -100,17 +110,17 @@ defmodule Teiserver.Battle.Lobby do
         # Meta data
         in_progress: false,
       },
-      battle
+      lobby
     )
   end
 
-  @spec update_battle(Map.t(), nil | atom, any) :: Map.t()
-  def update_battle(battle, nil, _) do
+  @spec update_lobby(Map.t(), nil | atom, any) :: Map.t()
+  def update_lobby(battle, nil, _) do
     ConCache.put(:battles, battle.id, battle)
     battle
   end
 
-  def update_battle(battle, data, reason) do
+  def update_lobby(battle, data, reason) do
     ConCache.put(:battles, battle.id, battle)
 
     if Enum.member?([:update_battle_info], reason) do
@@ -136,12 +146,12 @@ defmodule Teiserver.Battle.Lobby do
     battle
   end
 
-  def get_battle!(id) do
+  def get_lobby!(id) do
     ConCache.get(:battles, int_parse(id))
   end
 
-  @spec get_battle(integer()) :: map() | nil
-  def get_battle(id) do
+  @spec get_lobby(integer()) :: map() | nil
+  def get_lobby(id) do
     ConCache.get(:battles, int_parse(id))
   end
 
@@ -159,8 +169,8 @@ defmodule Teiserver.Battle.Lobby do
     Teiserver.Throttles.stop_throttle({:battle_lobby, battle_lobby_id})
   end
 
-  @spec add_battle(Map.t()) :: Map.t()
-  def add_battle(battle) do
+  @spec add_lobby(Map.t()) :: Map.t()
+  def add_lobby(battle) do
     _consul_pid = Coordinator.start_consul(battle.id)
     start_battle_lobby_throttle(battle.id)
 
@@ -189,8 +199,8 @@ defmodule Teiserver.Battle.Lobby do
     battle
   end
 
-  @spec close_battle(integer() | nil) :: :ok
-  def close_battle(battle_id) do
+  @spec close_lobby(integer() | nil) :: :ok
+  def close_lobby(battle_id) do
     battle = get_battle(battle_id)
     Coordinator.close_battle(battle_id)
     ConCache.delete(:battles, battle_id)

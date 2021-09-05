@@ -12,7 +12,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
     %{socket: socket, user: user} = tachyon_auth_setup()
 
     battle_data = %{
-      cmd: "c.battle.create",
+      cmd: "c.lobby.create",
       name: "Coordinator #{:rand.uniform(999_999_999)}",
       nattype: "none",
       port: 1234,
@@ -26,53 +26,53 @@ defmodule Teiserver.Coordinator.JoiningTest do
         max_players: 12
       }
     }
-    data = %{cmd: "c.battle.create", battle: battle_data}
+    data = %{cmd: "c.lobby.create", lobby: battle_data}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
-    battle_id = reply["battle"]["id"]
+    lobby_id = reply["lobby"]["id"]
 
-    Lobby.start_coordinator_mode(battle_id)
-    listener = PubsubListener.new_listener(["legacy_battle_updates:#{battle_id}"])
+    Lobby.start_coordinator_mode(lobby_id)
+    listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby_id}"])
 
-    {:ok, socket: socket, user: user, battle_id: battle_id, listener: listener}
+    {:ok, socket: socket, user: user, lobby_id: lobby_id, listener: listener}
   end
 
-  test "welcome message", %{socket: socket, user: user, battle_id: battle_id, listener: listener} do
-    consul_state = Coordinator.call_consul(battle_id, :get_all)
+  test "welcome message", %{socket: socket, user: user, lobby_id: lobby_id, listener: listener} do
+    consul_state = Coordinator.call_consul(lobby_id, :get_all)
     assert consul_state.welcome_message == nil
 
-    data = %{cmd: "c.battle.message", userid: user.id, message: "!welcome-message This is the welcome message"}
+    data = %{cmd: "c.lobby.message", userid: user.id, message: "!welcome-message This is the welcome message"}
     _tachyon_send(socket, data)
 
     messages = PubsubListener.get(listener)
-    assert messages == [{:battle_updated, battle_id, {user.id, "New welcome message set to: This is the welcome message", battle_id}, :say}]
+    assert messages == [{:battle_updated, lobby_id, {user.id, "New welcome message set to: This is the welcome message", lobby_id}, :say}]
 
-    consul_state = Coordinator.call_consul(battle_id, :get_all)
+    consul_state = Coordinator.call_consul(lobby_id, :get_all)
     assert consul_state.welcome_message == "This is the welcome message"
 
     # Now a new user joins the battle
     %{socket: socket2, user: user2} = tachyon_auth_setup()
-    data = %{cmd: "c.battle.join", battle_id: battle_id}
+    data = %{cmd: "c.lobby.join", lobby_id: lobby_id}
     _tachyon_send(socket2, data)
 
     reply = _tachyon_recv(socket2)
     assert reply == %{
-      "cmd" => "s.battle.join",
+      "cmd" => "s.lobby.join",
       "result" => "waiting_for_host"
     }
 
     # Accept them
-    data = %{cmd: "c.battle.respond_to_join_request", userid: user2.id, response: "approve"}
+    data = %{cmd: "c.lobby.respond_to_join_request", userid: user2.id, response: "approve"}
     _tachyon_send(socket, data)
     _battle = _tachyon_recv(socket2)
 
     # Request status message for the player
     status_request = _tachyon_recv(socket2)
-    assert status_request["cmd"] == "s.battle.request_status"
+    assert status_request["cmd"] == "s.lobby.request_status"
 
     # Send the battle status
     data = %{
-      cmd: "c.battle.update_status",
+      cmd: "c.lobby.update_status",
       player: true,
       sync: 1,
       team_number: 0,
@@ -85,7 +85,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
     # Expect Coordinator mode announcement
     reply = _tachyon_recv(socket2)
     assert reply == %{
-      "cmd" => "s.battle.announce",
+      "cmd" => "s.lobby.announce",
       "message" => "Coordinator mode enabled",
       "sender" => user.id
     }
@@ -93,21 +93,21 @@ defmodule Teiserver.Coordinator.JoiningTest do
     # Expect welcome message
     reply = _tachyon_recv(socket2)
     assert reply == %{
-      "cmd" => "s.battle.announce",
+      "cmd" => "s.lobby.announce",
       "message" => " #{user2.name}: ####################",
       "sender" => Coordinator.get_coordinator_userid()
     }
 
     reply = _tachyon_recv(socket2)
     assert reply == %{
-      "cmd" => "s.battle.announce",
+      "cmd" => "s.lobby.announce",
       "message" => " #{user2.name}: This is the welcome message",
       "sender" => Coordinator.get_coordinator_userid()
     }
 
     reply = _tachyon_recv(socket2)
     assert reply == %{
-      "cmd" => "s.battle.announce",
+      "cmd" => "s.lobby.announce",
       "message" => " #{user2.name}: ####################",
       "sender" => Coordinator.get_coordinator_userid()
     }

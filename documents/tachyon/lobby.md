@@ -1,5 +1,5 @@
 ## Showing
-### `c.battle.query`
+### `c.lobby.query`
 * query :: Query
 
 #### Queryable fields
@@ -19,12 +19,12 @@
 #### Example input/output
 ```
 {
-  "cmd": "c.battle.query",
+  "cmd": "c.lobby.query",
   "query": Query
 }
 
 {
-  "cmd": "s.battle.query",
+  "cmd": "s.lobby.query",
   "battle_list": [
     Battle,
     Battle,
@@ -34,7 +34,7 @@
 ```
 
 ## Creation/Management
-### `c.battle.create`
+### `c.lobby.create`
 * battle ::
   * name :: string
   * nattype :: string (none | holepunch | fixed)
@@ -55,7 +55,7 @@
 #### Example input/output
 ```
 {
-  "cmd": "c.battle.create",
+  "cmd": "c.lobby.create",
   "battle": {
     "name": "EU 01 - 123",
     "nattype": "none",
@@ -75,37 +75,37 @@
 }
 
 {
-  "cmd": "s.battle.query",
+  "cmd": "s.lobby.query",
   "result": "success",
   "battle": Battle
 }
 ```
 
-### TODO: `c.battle.update`
-### TODO: `s.battle.updated`
+### TODO: `c.lobby.update`
+### TODO: `s.lobby.updated`
 
-### TODO: `c.battle.start`
-### TODO: `c.battle.end`
-### TODO: `c.battle.close`
+### TODO: `c.lobby.start`
+### TODO: `c.lobby.end`
+### TODO: `c.lobby.close`
 
 ## Interacting
-### TODO: `c.battle.join`
+### TODO: `c.lobby.join`
 Requests to join the battle, the host will be sent a message asking if the person can join or not. Based on that an accept/reject is sent. If there is a failure to join then it means the host wasn't even consulted as the joiner didn't qualify (e.g. didn't supply the password).
 ```
 {
-  "cmd": "c.battle.join",
+  "cmd": "c.lobby.join",
   "battle_id": 123,
   "password": "******" // Optional
 }
 
 // Stage 1
 {
-  "cmd": "s.battle.join",
+  "cmd": "s.lobby.join",
   "result": "waiting_for_host"
 }
 
 {
-  "cmd": "s.battle.join",
+  "cmd": "s.lobby.join",
   "result": "failure",
   "reason": "Reason for failure"
 }
@@ -113,18 +113,18 @@ Requests to join the battle, the host will be sent a message asking if the perso
 // Stage 2
 // Host approves/rejects the joiner
 {
-  "cmd": "s.battle.request_to_join",
+  "cmd": "s.lobby.request_to_join",
   "userid": 123
 }
 
 {
-  "cmd": "c.battle.respond_to_join_request",
+  "cmd": "c.lobby.respond_to_join_request",
   "userid": 123,
   "response": "approve"
 }
 
 {
-  "cmd": "c.battle.respond_to_join_request",
+  "cmd": "c.lobby.respond_to_join_request",
   "userid": 123,
   "response": "reject",
   "reason": "Reason for rejection"
@@ -133,69 +133,69 @@ Requests to join the battle, the host will be sent a message asking if the perso
 // Stage 3
 // Host response sent to prospective player
 {
-  "cmd": "s.battle.join_response",
+  "cmd": "s.lobby.join_response",
   "result": "approve",
   "battle": Battle
 }
 
 {
-  "cmd": "s.battle.join_response",
+  "cmd": "s.lobby.join_response",
   "result": "reject",
   "reason": "Reason for rejection"
 }
 ```
 
-### TODO: `c.battle.leave`
+### TODO: `c.lobby.leave`
 No server response.
 ```
 {
-  "cmd": "c.battle.leave"
+  "cmd": "c.lobby.leave"
 }
 
 {
-  "cmd": "s.battle.leave",
+  "cmd": "s.lobby.leave",
   "result": "success"
 }
 ```
 
-### TODO: `s.battle.request_to_join`
-Sent to the host when someone requests to join the battle. The host should send the server a `c.battle.respond_to_join_request` with their decision.
+### TODO: `s.lobby.request_to_join`
+Sent to the host when someone requests to join the battle. The host should send the server a `c.lobby.respond_to_join_request` with their decision.
 ```
 {
-  "cmd": "s.battle.request_to_join",
+  "cmd": "s.lobby.request_to_join",
   "userid": 123
 }
 ```
 
-### TODO: `c.battle.respond_to_join_request`
-The response to a `s.battle.request_to_join` message informing the server if the request has been accepted or rejected. No server response.
+### TODO: `c.lobby.respond_to_join_request`
+The response to a `s.lobby.request_to_join` message informing the server if the request has been accepted or rejected. No server response.
 ```
 {
-  "cmd": "c.battle.respond_to_join_request",
+  "cmd": "c.lobby.respond_to_join_request",
   "response": "accept",
   "userid": 123
 }
 
 {
-  "cmd": "c.battle.respond_to_join_request",
+  "cmd": "c.lobby.respond_to_join_request",
   "response": "reject",
   "reason": "reason given",
   "userid": 123
 }
 ```
 
-### TODO: `c.battle.send_invite`
-### TODO: `s.battle.invite_to_battle`
-### TODO: `c.battle.respond_to_invite`
+### TODO: `c.lobby.send_invite`
+### TODO: `s.lobby.invite_to_battle`
+### TODO: `c.lobby.respond_to_invite`
 
-### TODO: `s.battle.request_status`
-### TODO: `c.battle.update_status`
+### TODO: `s.lobby.request_status`
+### TODO: `c.lobby.update_status`
 
-### TODO: `c.battle.message`
-### TODO: `s.battle.message`
+### TODO: `c.lobby.message`
+### TODO: `s.lobby.message`
 
-### TODO: `c.battle.announce` -- Previously sayex
-### TODO: `s.battle.announce`
+### TODO: `c.lobby.announce` -- Previously sayex
+### TODO: `s.lobby.announce`
 
 ## Telemetry
 - Mid-battle updates?

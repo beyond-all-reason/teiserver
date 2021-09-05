@@ -3,7 +3,7 @@ defmodule Teiserver.Protocols.TachyonIn do
   alias Teiserver.Protocols.Tachyon
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Protocols.Tachyon.{AuthIn, BattleIn, CommunicationIn, MatchmakingIn, NewsIn, SystemIn, TelemetryIn}
+  alias Teiserver.Protocols.Tachyon.{AuthIn, LobbyIn, CommunicationIn, MatchmakingIn, NewsIn, SystemIn, TelemetryIn}
 
   @spec handle(String.t(), map) :: map
   def handle("", state), do: state
@@ -45,7 +45,7 @@ defmodule Teiserver.Protocols.TachyonIn do
       ["c", namespace, subcommand] ->
         case namespace do
           "auth" -> AuthIn.do_handle(subcommand, data, state)
-          "battle" -> BattleIn.do_handle(subcommand, data, state)
+          "lobby" -> LobbyIn.do_handle(subcommand, data, state)
           "communication" -> CommunicationIn.do_handle(subcommand, data, state)
           "matchmaking" -> MatchmakingIn.do_handle(subcommand, data, state)
           "news" -> NewsIn.do_handle(subcommand, data, state)

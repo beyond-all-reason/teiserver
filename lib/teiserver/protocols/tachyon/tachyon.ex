@@ -49,7 +49,7 @@ defmodule Teiserver.Protocols.Tachyon do
                     :friends, :friend_requests, :ignores, :springid])
   def convert_object(:client, client), do: Map.take(client, [:id, :in_game, :away, :ready, :team_number, :ally_team_number,
                     :team_colour, :role, :bonus, :synced, :faction, :battle_id])
-  def convert_object(:battle, battle), do: Map.take(battle, [:id, :name, :founder_id, :type, :max_players, :password,
+  def convert_object(:lobby, lobby), do: Map.take(lobby, [:id, :name, :founder_id, :type, :max_players, :password,
                     :locked, :engine_name, :engine_version, :players, :spectators, :bots, :ip, :settings, :map_name,
                     :map_hash])
   def convert_object(:queue, queue), do: Map.take(queue, [:id, :name, :team_size, :conditions, :settings, :map_list])
@@ -121,7 +121,7 @@ defmodule Teiserver.Protocols.Tachyon do
     Lobby.add_user_to_battle(state.userid, battle.id, script_password)
     PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
     PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
-    TachyonOut.reply(:battle, :join_response, {:approve, battle}, state)
+    TachyonOut.reply(:lobby, :join_response, {:approve, battle}, state)
 
     # [battle.founder_id | battle.players]
     # |> Enum.each(fn id ->
@@ -142,7 +142,7 @@ defmodule Teiserver.Protocols.Tachyon do
     #   TachyonOut.reply(:add_start_rectangle, {team, r}, nil, state)
     # end)
 
-    TachyonOut.reply(:battle, :request_status, nil, state)
+    TachyonOut.reply(:lobby, :request_status, nil, state)
 
     %{state | battle_id: battle.id}
   end

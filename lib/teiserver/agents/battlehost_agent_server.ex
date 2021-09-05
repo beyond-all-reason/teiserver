@@ -68,32 +68,32 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   end
 
   defp handle_msg(nil, state), do: state
-  defp handle_msg(%{"cmd" => "s.battle.request_to_join", "userid" => userid}, %{reject: true} = state) do
-    cmd = %{cmd: "c.battle.respond_to_join_request", userid: userid, response: "reject", reason: "because"}
+  defp handle_msg(%{"cmd" => "s.lobby.request_to_join", "userid" => userid}, %{reject: true} = state) do
+    cmd = %{cmd: "c.lobby.respond_to_join_request", userid: userid, response: "reject", reason: "because"}
     AgentLib._send(state.socket, cmd)
     state
   end
-  defp handle_msg(%{"cmd" => "s.battle.request_to_join", "userid" => userid}, %{reject: false} = state) do
-    cmd = %{cmd: "c.battle.respond_to_join_request", userid: userid, response: "approve"}
+  defp handle_msg(%{"cmd" => "s.lobby.request_to_join", "userid" => userid}, %{reject: false} = state) do
+    cmd = %{cmd: "c.lobby.respond_to_join_request", userid: userid, response: "approve"}
     AgentLib._send(state.socket, cmd)
     state
   end
-  defp handle_msg(%{"cmd" => "s.battle.leave", "result" => "success"}, state) do
+  defp handle_msg(%{"cmd" => "s.lobby.leave", "result" => "success"}, state) do
     %{state | battle_id: nil}
   end
-  defp handle_msg(%{"cmd" => "s.battle.create", "battle" => %{"id" => battle_id}}, state) do
+  defp handle_msg(%{"cmd" => "s.lobby.create", "lobby" => %{"id" => battle_id}}, state) do
     %{state | battle_id: battle_id}
   end
   defp handle_msg(%{"cmd" => "s.communication.direct_message"}, state), do: state
-  defp handle_msg(%{"cmd" => "s.battle.announce"}, state), do: state
-  defp handle_msg(%{"cmd" => "s.battle.message"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.announce"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.message"}, state), do: state
 
   defp open_battle(state) do
     password = if :rand.uniform() <= state.password_chance, do: "password"
 
     cmd = %{
-      cmd: "c.battle.create",
-      battle: %{
+      cmd: "c.lobby.create",
+      lobby: %{
         cmd: "c.battles.create",
         name: "BH #{state.name} - #{:rand.uniform(9999)}",
         nattype: "none",
@@ -114,7 +114,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   end
 
   defp leave_battle(state) do
-    AgentLib._send(state.socket, %{cmd: "c.battle.leave"})
+    AgentLib._send(state.socket, %{cmd: "c.lobby.leave"})
     AgentLib.post_agent_update(state.id, "left battle")
     %{state | battle_id: nil}
   end

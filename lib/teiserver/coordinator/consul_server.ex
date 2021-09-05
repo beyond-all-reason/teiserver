@@ -51,14 +51,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   # Infos
   def handle_info(:tick, state) do
-    lobby = Lobby.get_battle!(state.battle_id)
+    lobby = Lobby.get_lobby!(state.lobby_id)
     case Map.get(lobby.tags, "server/match/uuid", nil) do
       nil ->
         Logger.warn("New UUID")
         uuid = UUID.uuid4()
-        lobby = Lobby.get_battle!(state.battle_id)
+        lobby = Lobby.get_lobby!(state.lobby_id)
         new_tags = Map.put(lobby.tags, "server/match/uuid", uuid)
-        Lobby.set_script_tags(state.battle_id, new_tags)
+        Lobby.set_script_tags(state.lobby_id, new_tags)
       _tag ->
         nil
     end
@@ -84,9 +84,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info(:delayed_startup, state) do
     uuid = UUID.uuid4()
-    battle = Lobby.get_battle!(state.battle_id)
+    battle = Lobby.get_lobby!(state.lobby_id)
     new_tags = Map.put(battle.tags, "server/match/uuid", uuid)
-    Lobby.set_script_tags(state.battle_id, new_tags)
+    Lobby.set_script_tags(state.lobby_id, new_tags)
 
     {:noreply, state}
   end
@@ -97,9 +97,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info(:match_stop, state) do
     uuid = UUID.uuid4()
-    battle = Lobby.get_battle!(state.battle_id)
+    battle = Lobby.get_lobby!(state.lobby_id)
     new_tags = Map.put(battle.tags, "server/match/uuid", uuid)
-    Lobby.set_script_tags(state.battle_id, new_tags)
+    Lobby.set_script_tags(state.lobby_id, new_tags)
 
     {:noreply, state}
   end
@@ -108,14 +108,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
     user = UserCache.get_user_by_id(userid)
 
     if state.welcome_message do
-      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name}: ####################", state.battle_id)
-      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name}: " <> state.welcome_message, state.battle_id)
-      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name}: ####################", state.battle_id)
+      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name}: ####################", state.lobby_id)
+      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name}: " <> state.welcome_message, state.lobby_id)
+      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name}: ####################", state.lobby_id)
     end
 
     # If the client is muted, we need to tell the host
     if User.is_muted?(userid) do
-      Coordinator.send_to_host(state.coordinator_id, state.battle_id, "!mute #{user.name}")
+      Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{user.name}")
     end
 
     {:noreply, state}
@@ -165,7 +165,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       "" ->
         %{state | welcome_message: nil}
       msg ->
-        Lobby.say(cmd.senderid, "New welcome message set to: #{msg}", state.battle_id)
+        Lobby.say(cmd.senderid, "New welcome message set to: #{msg}", state.lobby_id)
         %{state | welcome_message: msg}
     end
     broadcast_update(new_state)
@@ -174,9 +174,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_command(%{command: "settag", remaining: remaining} = cmd, state) do
     case String.split(remaining, " ") do
       [key, value | _] ->
-        battle = Lobby.get_battle!(state.battle_id)
+        battle = Lobby.get_lobby!(state.lobby_id)
         new_tags = Map.put(battle.tags, String.downcase(key), value)
-        Lobby.set_script_tags(state.battle_id, new_tags)
+        Lobby.set_script_tags(state.lobby_id, new_tags)
         say_command(cmd, state)
       _ ->
         say_command(%{cmd | error: "no regex match"}, state)
@@ -193,7 +193,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_command(%{command: "status", senderid: senderid} = _cmd, state) do
     status_msg = [
-      "Status for battle ##{state.battle_id}",
+      "Status for battle ##{state.lobby_id}",
       "Gatekeeper: #{state.gatekeeper}"
     ]
     Coordinator.send_to_user(senderid, status_msg)
@@ -201,17 +201,17 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_command(%{command: "reset"} = _cmd, state) do
-    empty_state(state.battle_id)
+    empty_state(state.lobby_id)
     |> broadcast_update("reset")
   end
 
   def handle_command(%{command: "coordinator", remaining: "stop"} = cmd, state) do
-    Lobby.stop_coordinator_mode(state.battle_id)
+    Lobby.stop_coordinator_mode(state.lobby_id)
     say_command(cmd, state)
   end
 
   def handle_command(%{command: "manual-autohost"}, state) do
-    Coordinator.send_to_host(state.coordinator_id, state.battle_id, "!autobalance off")
+    Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!autobalance off")
     state
   end
 
@@ -219,17 +219,17 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # queue server to change the map.
   # TODO: Find a way to make this a passthrough
   def handle_command(%{command: "map", remaining: map_name} = cmd, state) do
-    Coordinator.send_to_host(state.coordinator_id, state.battle_id, "!map #{map_name}")
+    Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!map #{map_name}")
     say_command(cmd, state)
   end
 
   def handle_command(%{command: "start", senderid: senderid} = cmd, state) do
-    Coordinator.send_to_host(senderid, state.battle_id, "!start")
+    Coordinator.send_to_host(senderid, state.lobby_id, "!start")
     say_command(cmd, state)
   end
 
   def handle_command(%{command: "forcestart", senderid: senderid} = cmd, state) do
-    Coordinator.send_to_host(senderid, state.battle_id, "!forcestart")
+    Coordinator.send_to_host(senderid, state.lobby_id, "!forcestart")
     say_command(cmd, state)
   end
 
@@ -241,7 +241,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       nil ->
         say_command(%{cmd | error: "no user found"}, state)
       target_id ->
-        Lobby.force_add_user_to_battle(target_id, state.battle_id)
+        Lobby.force_add_user_to_battle(target_id, state.lobby_id)
         say_command(cmd, state)
     end
   end
@@ -281,7 +281,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       nil ->
         say_command(%{cmd | error: "no user found"}, state)
       target_id ->
-        Lobby.kick_user_from_battle(int_parse(target_id), state.battle_id)
+        Lobby.kick_user_from_battle(int_parse(target_id), state.lobby_id)
         say_command(cmd, state)
     end
   end
@@ -293,7 +293,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       target_id ->
         new_blacklist = Map.put(state.blacklist, target_id, :banned)
         new_whitelist = Map.delete(state.blacklist, target_id)
-        Lobby.kick_user_from_battle(target_id, state.battle_id)
+        Lobby.kick_user_from_battle(target_id, state.lobby_id)
 
         say_command(cmd, state)
 
@@ -317,7 +317,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   # TODO: Find out if this making spectators ready is a problem, it won't give them a team so should be fine
   def handle_command(%{command: "makeready", remaining: ""} = cmd, state) do
-    battle = Lobby.get_battle!(state.battle_id)
+    battle = Lobby.get_lobby!(state.lobby_id)
 
     battle.players
     |> Enum.each(fn player_id ->
@@ -338,7 +338,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_command(%{command: "specunready"} = cmd, state) do
-    battle = Lobby.get_battle!(state.battle_id)
+    battle = Lobby.get_lobby!(state.lobby_id)
 
     battle.players
     |> Enum.each(fn player_id ->
@@ -390,7 +390,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
         case level do
           :banned ->
-            Lobby.kick_user_from_battle(target_id, state.battle_id)
+            Lobby.kick_user_from_battle(target_id, state.lobby_id)
           :spectator ->
             Lobby.force_change_client(state.coordinator_id, target_id, %{player: false})
           _ ->
@@ -405,7 +405,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_command(%{command: "whitelist", remaining: "player-as-is"} = cmd, state) do
-    battle = Lobby.get_battle!(state.battle_id)
+    battle = Lobby.get_lobby!(state.lobby_id)
     new_whitelist = battle.players
       |> Client.list_clients()
       |> Map.new(fn %{userid: userid, player: player} ->
@@ -425,7 +425,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_command(%{command: "whitelist", remaining: "default " <> level} = cmd, state) do
     level = get_level(level |> String.downcase())
-    battle = Lobby.get_battle!(state.battle_id)
+    battle = Lobby.get_lobby!(state.lobby_id)
 
     new_whitelist = Map.put(state.whitelist, :default, level)
 
@@ -470,7 +470,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
         case level do
           :banned ->
-            Lobby.kick_user_from_battle(target_id, state.battle_id)
+            Lobby.kick_user_from_battle(target_id, state.lobby_id)
           :spectator ->
             Lobby.force_change_client(state.coordinator_id, target_id, %{player: false})
           _ ->
@@ -486,7 +486,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_command(cmd, state) do
     Logger.error("No handler in consul_server for command type '#{cmd.command}'")
-    Lobby.do_say(cmd.senderid, cmd.raw, state.battle_id)
+    Lobby.do_say(cmd.senderid, cmd.raw, state.lobby_id)
     state
   end
 
@@ -540,7 +540,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   defp is_on_friendlist?(userid, state, :players) do
-    battle = Lobby.get_battle!(state.battle_id)
+    battle = Lobby.get_lobby!(state.lobby_id)
     players = battle.players
       |> Enum.map(&Client.get_client_by_id/1)
       |> Enum.filter(fn c -> c.player end)
@@ -557,7 +557,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   defp is_on_friendlist?(userid, state, :all) do
-    battle = Lobby.get_battle!(state.battle_id)
+    battle = Lobby.get_lobby!(state.lobby_id)
 
     # If battle has no members it'll succeed regardless
     case battle do
@@ -603,8 +603,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp broadcast_update(state, reason \\ nil) do
     Phoenix.PubSub.broadcast(
       Central.PubSub,
-      "teiserver_battle_lobby_updates:#{state.battle_id}",
-      {:consul_server_updated, state.battle_id, reason}
+      "teiserver_battle_lobby_updates:#{state.lobby_id}",
+      {:consul_server_updated, state.lobby_id, reason}
     )
     state
   end
@@ -645,7 +645,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     case UserCache.get_userid(name) do
       nil ->
         # Try partial search of players in lobby
-        battle = Lobby.get_battle(state.battle_id)
+        battle = Lobby.get_battle(state.lobby_id)
         found = Client.list_clients(battle.players)
           |> Enum.filter(fn client ->
             String.contains?(client.name, name)
@@ -678,7 +678,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     msg = "! #{vote}#{force}#{cmd.command}#{remaining}#{error}"
       |> String.trim
-    Lobby.say(cmd.senderid, msg, state.battle_id)
+    Lobby.say(cmd.senderid, msg, state.lobby_id)
     state
   end
 
@@ -692,11 +692,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
   #   }
   # end
 
-  defp empty_state(battle_id) do
+  defp empty_state(lobby_id) do
     %{
       current_vote: nil,
       coordinator_id: Coordinator.get_coordinator_userid(),
-      battle_id: battle_id,
+      lobby_id: lobby_id,
       gatekeeper: :blacklist,
       blacklist: %{},
       whitelist: %{
@@ -716,13 +716,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
-    battle_id = opts[:battle_id]
+    lobby_id = opts[:lobby_id]
 
-    # :ok = PubSub.subscribe(Central.PubSub, "teiserver_battle_lobby_updates:#{battle_id}")
+    # :ok = PubSub.subscribe(Central.PubSub, "teiserver_battle_lobby_updates:#{lobby_id}")
 
     # Update the queue pids cache to point to this process
-    ConCache.put(:teiserver_consul_pids, battle_id, self())
+    ConCache.put(:teiserver_consul_pids, lobby_id, self())
     :timer.send_interval(10_000, :tick)
-    {:ok, empty_state(battle_id)}
+    {:ok, empty_state(lobby_id)}
   end
 end

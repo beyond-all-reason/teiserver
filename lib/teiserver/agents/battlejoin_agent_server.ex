@@ -61,30 +61,30 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   end
 
   defp handle_msg(nil, state), do: state
-  defp handle_msg(%{"cmd" => "s.battle.join", "result" => "waiting_for_host"}, state) do
+  defp handle_msg(%{"cmd" => "s.lobby.join", "result" => "waiting_for_host"}, state) do
     %{state | stage: :waiting}
   end
-  defp handle_msg(%{"cmd" => "s.battle.join", "result" => "failure"}, state) do
+  defp handle_msg(%{"cmd" => "s.lobby.join", "result" => "failure"}, state) do
     %{state | stage: :no_battle, battle_id: nil}
   end
-  defp handle_msg(%{"cmd" => "s.battle.join_response", "result" => "failure"}, state) do
+  defp handle_msg(%{"cmd" => "s.lobby.join_response", "result" => "failure"}, state) do
     %{state | stage: :no_battle, battle_id: nil}
   end
-  defp handle_msg(%{"cmd" => "s.battle.join_response", "result" => "approve"}, state) do
+  defp handle_msg(%{"cmd" => "s.lobby.join_response", "result" => "approve"}, state) do
     %{state | stage: :in_battle}
   end
-  defp handle_msg(%{"cmd" => "s.battle.join_response", "result" => "reject"}, state) do
+  defp handle_msg(%{"cmd" => "s.lobby.join_response", "result" => "reject"}, state) do
     %{state | stage: :no_battle, battle_id: nil}
   end
-  defp handle_msg(%{"cmd" => "s.battle.leave", "result" => "success"}, state) do
+  defp handle_msg(%{"cmd" => "s.lobby.leave", "result" => "success"}, state) do
     %{state | battle_id: nil}
   end
-  defp handle_msg(%{"cmd" => "s.battle.request_status"}, state) do
+  defp handle_msg(%{"cmd" => "s.lobby.request_status"}, state) do
     update_battlestatus(state)
   end
   defp handle_msg(%{"cmd" => "s.communication.direct_message"}, state), do: state
-  defp handle_msg(%{"cmd" => "s.battle.announce"}, state), do: state
-  defp handle_msg(%{"cmd" => "s.battle.message"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.announce"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.message"}, state), do: state
 
   defp update_battlestatus(state) do
     data = if Enum.random([true, false]) do
@@ -103,7 +103,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
       }
     end
 
-    AgentLib._send(state.socket, Map.put(data, :cmd, "c.battle.update_status"))
+    AgentLib._send(state.socket, Map.put(data, :cmd, "c.lobby.update_status"))
     state
   end
 
@@ -116,7 +116,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
         %{state | battle_id: nil, stage: :no_battle}
       battle ->
         cmd = %{
-          cmd: "c.battle.join",
+          cmd: "c.lobby.join",
           battle_id: battle_id,
           password: battle.password
         }
@@ -128,7 +128,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   end
 
   defp leave_battle(state) do
-    AgentLib._send(state.socket, %{cmd: "c.battle.leave"})
+    AgentLib._send(state.socket, %{cmd: "c.lobby.leave"})
 
     AgentLib.post_agent_update(state.id, "left battle")
     %{state | battle_id: nil, stage: :no_battle}
