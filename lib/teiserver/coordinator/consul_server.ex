@@ -156,9 +156,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
   """
   @spec create_vote(Map.t(), Map.t()) :: Map.t()
   def create_vote(cmd, state) do
-    IO.puts ""
-    IO.inspect cmd
-    IO.puts ""
+    username = UserCache.get_username(cmd.senderid)
+    command = command_as_message(cmd)
+
+    Lobby.sayex(state.coordinator_id, "#{username} called a vote for command \"#{command}\" [Vote !y, !n, !b]", state.lobby_id)
     state
   end
 
@@ -686,8 +687,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   # @spec say_message(T.userid(), String.t(), Map.t()) :: Map.t()
-  # defp say_message(sender_id, msg, state) do
-  #   Lobby.say(sender_id, msg, state.lobby_id)
+  # defp say_message(senderid, msg, state) do
+  #   Lobby.say(senderid, msg, state.lobby_id)
   #   state
   # end
 
@@ -695,15 +696,20 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec say_command(Map.t(), Map.t()) :: Map.t()
   defp say_command(%{silent: true}, state), do: state
   defp say_command(cmd, state) do
+    message = "! " <> command_as_message(cmd)
+    Lobby.say(cmd.senderid, message, state.lobby_id)
+    state
+  end
+
+  @spec command_as_message(Map.t()) :: String.t()
+  def command_as_message(cmd) do
     vote = if Map.get(cmd, :vote), do: "cv ", else: ""
     force = if Map.get(cmd, :force), do: "force ", else: ""
     remaining = if Map.get(cmd, :remaining), do: " #{cmd.remaining}", else: ""
     error = if Map.get(cmd, :error), do: " Error: #{cmd.error}", else: ""
 
-    msg = "! #{vote}#{force}#{cmd.command}#{remaining}#{error}"
+    "#{vote}#{force}#{cmd.command}#{remaining}#{error}"
       |> String.trim
-    Lobby.say(cmd.senderid, msg, state.lobby_id)
-    state
   end
 
   # defp new_vote(cmd) do

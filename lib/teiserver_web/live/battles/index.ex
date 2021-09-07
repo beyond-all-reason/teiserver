@@ -43,27 +43,27 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   @impl true
-  def handle_info({:global_battle_updated, battle_id, :battle_opened}, socket) do
-    new_battle = Lobby.get_battle(battle_id)
+  def handle_info({:global_battle_updated, lobby_id, :battle_opened}, socket) do
+    new_battle = Lobby.get_battle(lobby_id)
     battles = [new_battle | socket.assigns[:battles]]
 
     {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:global_battle_updated, battle_id, :battle_closed}, socket) do
+  def handle_info({:global_battle_updated, lobby_id, :battle_closed}, socket) do
     battles =
       socket.assigns[:battles]
-      |> Enum.filter(fn b -> b.id != battle_id end)
+      |> Enum.filter(fn b -> b.id != lobby_id end)
 
     {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:global_battle_updated, battle_id, _reason}, socket) do
+  def handle_info({:global_battle_updated, lobby_id, _reason}, socket) do
     battles =
       socket.assigns[:battles]
       |> Enum.map(fn battle ->
-        if battle.id == battle_id do
-          Lobby.get_battle(battle_id)
+        if battle.id == lobby_id do
+          Lobby.get_battle(lobby_id)
         else
           battle
         end
@@ -72,11 +72,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:add_user_to_battle, user_id, battle_id, _script_password}, socket) do
+  def handle_info({:add_user_to_battle, user_id, lobby_id, _script_password}, socket) do
     battles =
       socket.assigns[:battles]
       |> Enum.map(fn battle ->
-        if battle.id == battle_id do
+        if battle.id == lobby_id do
           %{battle | player_count: battle.player_count + 1, players: [user_id | battle.players]}
         else
           battle
@@ -86,11 +86,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:remove_user_from_battle, user_id, battle_id}, socket) do
+  def handle_info({:remove_user_from_battle, user_id, lobby_id}, socket) do
     battles =
       socket.assigns[:battles]
       |> Enum.map(fn battle ->
-        if battle.id == battle_id do
+        if battle.id == lobby_id do
           new_players = Enum.filter(battle.players, fn p -> p != user_id end)
           %{battle | player_count: battle.player_count - 1, players: new_players}
         else
@@ -101,11 +101,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:kick_user_from_battle, user_id, battle_id}, socket) do
+  def handle_info({:kick_user_from_battle, user_id, lobby_id}, socket) do
     battles =
       socket.assigns[:battles]
       |> Enum.map(fn battle ->
-        if battle.id == battle_id do
+        if battle.id == lobby_id do
           new_players = Enum.filter(battle.players, fn p -> p != user_id end)
           %{battle | player_count: battle.player_count - 1, players: new_players}
         else

@@ -124,9 +124,9 @@ defmodule Teiserver.SpringMatchmakingTest do
     _recv_raw(socket2)
 
     reply = _recv_raw(battle_socket)
-    [_all, battle_id] = Regex.run(~r/BATTLEOPENED ([0-9]+) [0-9]/, reply)
-    battle_id = int_parse(battle_id)
-    battle = Lobby.get_battle!(battle_id)
+    [_all, lobby_id] = Regex.run(~r/BATTLEOPENED ([0-9]+) [0-9]/, reply)
+    lobby_id = int_parse(lobby_id)
+    battle = Lobby.get_battle!(lobby_id)
     assert battle != nil
 
     # Now we have a battle open, tick should matter
@@ -139,9 +139,9 @@ defmodule Teiserver.SpringMatchmakingTest do
 
     # Commands should be sent to user1 and user2
     reply = _recv_raw(socket1)
-    assert reply =~ "JOINBATTLE #{battle_id} gameHash\n"
+    assert reply =~ "JOINBATTLE #{lobby_id} gameHash\n"
     reply = _recv_raw(socket2)
-    assert reply =~ "JOINBATTLE #{battle_id} gameHash\n"
+    assert reply =~ "JOINBATTLE #{lobby_id} gameHash\n"
 
     # :timer.sleep(500)
 
@@ -151,8 +151,8 @@ defmodule Teiserver.SpringMatchmakingTest do
     # In the middle of the messages will be the client status messages
     # we cannot be sure of their order or exact values so we do their test later
     # assert reply =~ "SAIDBATTLEEX #{host_user.name} Coordinator mode enabled"
-    assert reply =~ "JOINEDBATTLE #{battle_id} #{user2.name}"
-    assert reply =~ "JOINEDBATTLE #{battle_id} #{user1.name}"
+    assert reply =~ "JOINEDBATTLE #{lobby_id} #{user2.name}"
+    assert reply =~ "JOINEDBATTLE #{lobby_id} #{user1.name}"
     assert reply =~ "SAIDPRIVATE Coordinator !autobalance off"
     assert reply =~ "SAIDPRIVATE Coordinator !map map1"
     assert reply =~ "SAIDBATTLE Coordinator ! force changemap map1"

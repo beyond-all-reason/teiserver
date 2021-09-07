@@ -35,9 +35,9 @@ defmodule Teiserver.Client do
         handicap: 0,
         sync: 0,
         side: 0,
-        # TODO: Change client:battle_id to be client:battle_lobby_id
-        battle_id: nil,
-        current_battle_id: nil,
+        # TODO: Change client:lobby_id to be client:battle_lobby_id
+        lobby_id: nil,
+        current_lobby_id: nil,
         extra_logging: false
       },
       client
@@ -52,8 +52,8 @@ defmodule Teiserver.Client do
       player: false,
       handicap: 0,
       sync: 0,
-      battle_id: nil,
-      current_battle_id: nil
+      lobby_id: nil,
+      current_lobby_id: nil
     }
   end
 
@@ -97,16 +97,16 @@ defmodule Teiserver.Client do
 
     PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
 
-    if client.battle_id do
+    if client.lobby_id do
       PubSub.broadcast(
         Central.PubSub,
-        "live_battle_updates:#{client.battle_id}",
+        "live_battle_updates:#{client.lobby_id}",
         {:updated_client, client, reason}
       )
 
       PubSub.broadcast(
         Central.PubSub,
-        "teiserver_battle_lobby_updates:#{client.battle_id}",
+        "teiserver_battle_lobby_updates:#{client.lobby_id}",
         {:updated_client_status, client, reason}
       )
     end
@@ -115,14 +115,14 @@ defmodule Teiserver.Client do
   end
 
   @spec join_battle(T.client_id(), Integer.t(), Integer.t()) :: nil | Map.t()
-  def join_battle(userid, battle_id, colour \\ 0) do
+  def join_battle(userid, lobby_id, colour \\ 0) do
     case get_client_by_id(userid) do
       nil ->
         nil
 
       client ->
         new_client = reset_battlestatus(client)
-        new_client = %{new_client | team_colour: colour, battle_id: battle_id}
+        new_client = %{new_client | team_colour: colour, lobby_id: lobby_id}
         ConCache.put(:clients, new_client.userid, new_client)
         new_client
     end
@@ -136,7 +136,7 @@ defmodule Teiserver.Client do
       nil ->
         nil
 
-      %{battle_id: nil} = client ->
+      %{lobby_id: nil} = client ->
         client
 
       client ->

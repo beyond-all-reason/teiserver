@@ -35,26 +35,26 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     data = %{cmd: "c.lobby.create", lobby: battle_data}
     _tachyon_send(hsocket, data)
     reply = _tachyon_recv(hsocket)
-    battle_id = reply["lobby"]["id"]
+    lobby_id = reply["lobby"]["id"]
 
-    Lobby.start_coordinator_mode(battle_id)
-    listener = PubsubListener.new_listener(["legacy_battle_updates:#{battle_id}"])
+    Lobby.start_coordinator_mode(lobby_id)
+    listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby_id}"])
 
     # Player needs to be added to the battle
-    Lobby.force_add_user_to_battle(player.id, battle_id)
+    Lobby.force_add_user_to_battle(player.id, lobby_id)
     :timer.sleep(100)
     player_client = Client.get_client_by_id(player.id)
     Client.update(%{player_client |
       player: true
     }, :client_updated_battlestatus)
 
-    {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, battle_id: battle_id, listener: listener}
+    {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
   end
 
-  test "blacklist", %{host: host, player: player, hsocket: hsocket, psocket: psocket, battle_id: battle_id} do
+  test "blacklist", %{host: host, player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # Blacklist them to spectator
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "!force blacklist ##{player.id} spectator"})
@@ -62,7 +62,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     # Check it's worked
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == false
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # Try to change it
     _tachyon_send(psocket, %{cmd: "c.lobby.update_status", player: true})
@@ -70,7 +70,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     # Still working
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == false
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # Un-blacklist them
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "!force blacklist ##{player.id} player"})
@@ -82,27 +82,27 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     # Back to being allowed
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # Now we bring in player 2
     %{user: player2} = tachyon_auth_setup()
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "!force blacklist ##{player2.id} banned"})
 
-    assert Lobby.can_join?(player2.id, battle_id) == {:failure, "Denied by Coordinator"}
+    assert Lobby.can_join?(player2.id, lobby_id) == {:failure, "Denied by Coordinator"}
 
     # Un-ban
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "!force blacklist ##{player2.id} spectator"})
-    assert Lobby.can_join?(player2.id, battle_id) == {:waiting_on_host, nil}
+    assert Lobby.can_join?(player2.id, lobby_id) == {:waiting_on_host, nil}
   end
 
-  test "whitelist", %{host: host, player: player, hsocket: hsocket, psocket: psocket, battle_id: battle_id} do
+  test "whitelist", %{host: host, player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # If we set whitelist default to banned it should have everybody already in the game still allowed
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "!force whitelist default banned"})
-    whitelist = Coordinator.call_consul(battle_id, {:get, :whitelist})
+    whitelist = Coordinator.call_consul(lobby_id, {:get, :whitelist})
     assert whitelist == %{:default => :banned, player.id => :player}
 
     # Whitelist them to spectator but defaults to player
@@ -111,15 +111,15 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "!force whitelist default player"})
 
     # Check state
-    gatekeeper = Coordinator.call_consul(battle_id, {:get, :gatekeeper})
+    gatekeeper = Coordinator.call_consul(lobby_id, {:get, :gatekeeper})
     assert gatekeeper == :whitelist
-    whitelist = Coordinator.call_consul(battle_id, {:get, :whitelist})
+    whitelist = Coordinator.call_consul(lobby_id, {:get, :whitelist})
     assert whitelist == %{:default => :player, player.id => :spectator}
 
     # Check it's worked
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == false
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # Try to change it
     data = %{cmd: "c.lobby.update_status", player: true}
@@ -128,7 +128,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     # Still working
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == false
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # Un-whitelist them
     data = %{cmd: "c.lobby.message", userid: host.id, message: "!force whitelist ##{player.id} player"}
@@ -141,35 +141,35 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     # Back to being allowed
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # Now we bring in player 2
     %{user: player2} = tachyon_auth_setup()
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "!force whitelist default banned"})
-    assert Lobby.can_join?(player2.id, battle_id) == {:failure, "Denied by Coordinator"}
+    assert Lobby.can_join?(player2.id, lobby_id) == {:failure, "Denied by Coordinator"}
 
     # Un-ban
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "!force whitelist ##{player2.id} spectator"})
-    assert Lobby.can_join?(player2.id, battle_id) == {:waiting_on_host, nil}
+    assert Lobby.can_join?(player2.id, lobby_id) == {:waiting_on_host, nil}
   end
 
-  test "friends", %{host: host, player: player, hsocket: hsocket, psocket: psocket, battle_id: battle_id} do
+  test "friends", %{host: host, player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # Whitelist them to spectator but defaults to player
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "!force gatekeeper friends"})
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "!force force-spectator ##{player.id}"})
 
     # Check state
-    gatekeeper = Coordinator.call_consul(battle_id, {:get, :gatekeeper})
+    gatekeeper = Coordinator.call_consul(lobby_id, {:get, :gatekeeper})
     assert gatekeeper == :friends
 
     # Check it's worked
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == false
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # Try to change it
     data = %{cmd: "c.lobby.update_status", player: true}
@@ -178,42 +178,42 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     # No players, we should be able to become a player even though having no "friends" in the game
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # Now for player 2
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "!force gatekeeper friends"})
 
     # Now we bring in player 2, they should be allowed in
     %{user: player2, socket: psocket2} = tachyon_auth_setup()
-    assert Lobby.can_join?(player2.id, battle_id) == {:waiting_on_host, nil}
+    assert Lobby.can_join?(player2.id, lobby_id) == {:waiting_on_host, nil}
 
     # Okay, add them
-    Lobby.force_add_user_to_battle(player2.id, battle_id)
+    Lobby.force_add_user_to_battle(player2.id, lobby_id)
     data = %{cmd: "c.lobby.update_status", player: true}
     _tachyon_send(psocket2, data)
 
     player_client2 = Client.get_client_by_id(player2.id)
     assert player_client2.player == false
-    assert player_client2.battle_id == battle_id
+    assert player_client2.lobby_id == lobby_id
   end
 
-  test "friendsjoin", %{host: host, player: player, psocket: psocket, hsocket: hsocket, battle_id: battle_id} do
+  test "friendsjoin", %{host: host, player: player, psocket: psocket, hsocket: hsocket, lobby_id: lobby_id} do
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # Whitelist them to spectator but defaults to player
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "!force gatekeeper friendsjoin"})
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "!force force-spectator ##{player.id}"})
 
     # Check state
-    gatekeeper = Coordinator.call_consul(battle_id, {:get, :gatekeeper})
+    gatekeeper = Coordinator.call_consul(lobby_id, {:get, :gatekeeper})
     assert gatekeeper == :friendsjoin
 
     # They should still be here
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == false
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # Try to change it
     data = %{cmd: "c.lobby.update_status", player: true}
@@ -222,14 +222,14 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     # Change should be fine
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
-    assert player_client.battle_id == battle_id
+    assert player_client.lobby_id == lobby_id
 
     # Now we bring in player 2, they should not be allowed in
     %{user: player2} = tachyon_auth_setup()
-    assert Lobby.can_join?(player2.id, battle_id) == {:waiting_on_host, nil}
+    assert Lobby.can_join?(player2.id, lobby_id) == {:waiting_on_host, nil}
   end
 
-  # test "clan", %{host: host, player: player, hsocket: hsocket, psocket: psocket, battle_id: battle_id} do
+  # test "clan", %{host: host, player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
 
   # end
 end

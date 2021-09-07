@@ -113,7 +113,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   # end
 
   @impl true
-  def handle_info({:battle_lobby_throttle, _battle_id}, socket) do
+  def handle_info({:battle_lobby_throttle, _lobby_id}, socket) do
     {:noreply,
       socket
       |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
@@ -144,8 +144,8 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     {:noreply, socket}
   end
 
-  # def handle_info({:consul_server_updated, battle_id, _reason}, socket) do
-  #   if battle_id == socket.assigns[:id] do
+  # def handle_info({:consul_server_updated, lobby_id, _reason}, socket) do
+  #   if lobby_id == socket.assigns[:id] do
   #     {:noreply, get_consul_state(socket)}
   #   else
   #     {:noreply, socket}
@@ -158,37 +158,37 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   #   {:noreply, assign(socket, :clients, new_clients)}
   # end
 
-  # def handle_info({:add_user_to_battle, userid, battle_id, _script_password}, socket) do
-  #   if battle_id == socket.assigns[:id] do
+  # def handle_info({:add_user_to_battle, userid, lobby_id, _script_password}, socket) do
+  #   if lobby_id == socket.assigns[:id] do
   #     {:noreply, add_user(socket, userid)}
   #   else
   #     {:noreply, socket}
   #   end
   # end
 
-  # def handle_info({:kick_user_from_battle, userid, battle_id}, socket) do
-  #   if battle_id == socket.assigns[:id] do
+  # def handle_info({:kick_user_from_battle, userid, lobby_id}, socket) do
+  #   if lobby_id == socket.assigns[:id] do
   #     {:noreply, remove_user(socket, userid)}
   #   else
   #     {:noreply, socket}
   #   end
   # end
-  # def handle_info({:remove_user_from_battle, userid, battle_id}, socket) do
-  #   if battle_id == socket.assigns[:id] do
+  # def handle_info({:remove_user_from_battle, userid, lobby_id}, socket) do
+  #   if lobby_id == socket.assigns[:id] do
   #     {:noreply, remove_user(socket, userid)}
   #   else
   #     {:noreply, socket}
   #   end
   # end
 
-  # def handle_info({:battle_message, userid, msg, _battle_id}, %{assigns: assigns} = socket) do
+  # def handle_info({:battle_message, userid, msg, _lobby_id}, %{assigns: assigns} = socket) do
   #   username = UserCache.get_username(userid)
   #   new_messages = assigns.messages ++ [{userid, username, msg}]
   #   {:noreply, assign(socket, :messages, new_messages)}
   # end
 
-  # def handle_info({:global_battle_updated, battle_id, :battle_closed}, socket) do
-  #   if int_parse(battle_id) == socket.assigns[:id] do
+  # def handle_info({:global_battle_updated, lobby_id, :battle_closed}, socket) do
+  #   if int_parse(lobby_id) == socket.assigns[:id] do
   #     {:noreply,
   #      socket
   #      |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
@@ -197,9 +197,9 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   #   end
   # end
 
-  # def handle_info({:global_battle_updated, battle_id, :update_battle_info}, socket) do
-  #   if int_parse(battle_id) == socket.assigns[:id] do
-  #     battle = Lobby.get_battle!(battle_id)
+  # def handle_info({:global_battle_updated, lobby_id, :update_battle_info}, socket) do
+  #   if int_parse(lobby_id) == socket.assigns[:id] do
+  #     battle = Lobby.get_battle!(lobby_id)
   #     {:noreply,
   #      socket
   #      |> assign(:battle, battle)}
@@ -212,15 +212,15 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   #   {:noreply, socket}
   # end
 
-  # def handle_info({:battle_updated, _battle_id, _data, _cmd}, socket) do
+  # def handle_info({:battle_updated, _lobby_id, _data, _cmd}, socket) do
   #   {:noreply, socket}
   # end
 
-  # def handle_info({:add_bot_to_battle, _battle_id, _bot}, %{assigns: assigns} = socket) do
+  # def handle_info({:add_bot_to_battle, _lobby_id, _bot}, %{assigns: assigns} = socket) do
   #   {:noreply, assign(socket, :battle, Lobby.get_battle(assigns.id))}
   # end
 
-  # def handle_info({:update_bot, _battle_id, _bot}, %{assigns: assigns} = socket) do
+  # def handle_info({:update_bot, _lobby_id, _bot}, %{assigns: assigns} = socket) do
   #   {:noreply, assign(socket, :battle, Lobby.get_battle(assigns.id))}
   # end
 

@@ -232,7 +232,7 @@ defmodule Teiserver.TeiserverTestLib do
       ready_queue_id: nil,
 
       # Connection microstate
-      battle_id: nil,
+      lobby_id: nil,
       room_member_cache: %{},
       known_users: %{},
       known_battles: [],
@@ -263,7 +263,7 @@ defmodule Teiserver.TeiserverTestLib do
       user: user,
 
       # Connection microstate
-      battle_id: nil,
+      lobby_id: nil,
       room_member_cache: %{},
       known_users: %{},
       known_battles: [],
@@ -305,7 +305,7 @@ defmodule Teiserver.TeiserverTestLib do
       user: user,
 
       # Connection microstate
-      battle_id: nil,
+      lobby_id: nil,
       room_member_cache: %{},
       known_users: %{},
       known_battles: [],

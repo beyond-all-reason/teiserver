@@ -274,14 +274,14 @@ CLIENTS test_room #{user.name}\n"
     assert reply =~ "BATTLEOPENED "
     assert reply =~ "OPENBATTLE "
 
-    [_, battle_id] = Regex.run(~r/OPENBATTLE ([0-9]+)\n/, reply)
-    battle_id = int_parse(battle_id)
+    [_, lobby_id] = Regex.run(~r/OPENBATTLE ([0-9]+)\n/, reply)
+    lobby_id = int_parse(lobby_id)
 
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
     _ = _recv_raw(socket1)
 
-    _send_raw(socket2, "JOINBATTLE #{battle_id} empty sPassword\n")
+    _send_raw(socket2, "JOINBATTLE #{lobby_id} empty sPassword\n")
     _ = _recv_raw(socket2)
 
     # User1 (host) should now get a message
@@ -294,7 +294,7 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "JOINBATTLEFAILED Because I said so\n"
 
     # Rejoin, this time accept, also this time use the SpringLobby method of an actually empty password
-    _send_raw(socket2, "JOINBATTLE #{battle_id}  sPassword\n")
+    _send_raw(socket2, "JOINBATTLE #{lobby_id}  sPassword\n")
     _send_raw(socket1, "JOINBATTLEACCEPT #{user2.name}\n")
     _ = _recv_raw(socket1)
 
@@ -314,8 +314,8 @@ CLIENTS test_room #{user.name}\n"
       ""
     ] = reply
 
-    assert joinbattle == "JOINBATTLE #{battle_id} #{hash}"
-    assert joinedbattle == "JOINEDBATTLE #{battle_id} #{user2.name} sPassword"
+    assert joinbattle == "JOINBATTLE #{lobby_id} #{hash}"
+    assert joinedbattle == "JOINEDBATTLE #{lobby_id} #{user2.name} sPassword"
     assert tags =~ "SETSCRIPTTAGS server/match/uuid="
     assert bstatus == "CLIENTBATTLESTATUS #{user2.name} 0 0"
     assert host_bstatus == "CLIENTBATTLESTATUS #{user1.name} 0 0"
@@ -355,7 +355,7 @@ CLIENTS test_room #{user.name}\n"
     # Time to leave
     _send_raw(socket2, "LEAVEBATTLE\n")
     reply = _recv_raw(socket2)
-    assert reply == "LEFTBATTLE #{battle_id} #{user2.name}\n"
+    assert reply == "LEFTBATTLE #{lobby_id} #{user2.name}\n"
 
     # These commands shouldn't work, they also shouldn't error
     _send_raw(socket2, "SAYBATTLE I'm not here anymore!\n")

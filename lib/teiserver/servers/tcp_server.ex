@@ -98,7 +98,7 @@ defmodule Teiserver.TcpServer do
 
       # Connection microstate
       msg_id: nil,
-      battle_id: nil,
+      lobby_id: nil,
       room_member_cache: %{},
       known_users: %{},
       known_battles: [],
@@ -246,13 +246,13 @@ defmodule Teiserver.TcpServer do
   end
 
   # Battles
-  def handle_info({:battle_updated, _battle_id, data, reason}, state) do
+  def handle_info({:battle_updated, _lobby_id, data, reason}, state) do
     new_state = battle_update(data, reason, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:global_battle_updated, battle_id, reason}, state) do
-    new_state = global_battle_update(battle_id, reason, state)
+  def handle_info({:global_battle_updated, lobby_id, reason}, state) do
+    new_state = global_battle_update(lobby_id, reason, state)
     {:noreply, new_state}
   end
 
@@ -261,28 +261,28 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:join_battle_request_response, battle_id, response, reason}, state) do
-    new_state = join_battle_request_response(battle_id, response, reason, state)
+  def handle_info({:join_battle_request_response, lobby_id, response, reason}, state) do
+    new_state = join_battle_request_response(lobby_id, response, reason, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:force_join_battle, battle_id, script_password}, state) do
-    new_state = force_join_battle(battle_id, script_password, state)
+  def handle_info({:force_join_battle, lobby_id, script_password}, state) do
+    new_state = force_join_battle(lobby_id, script_password, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:add_user_to_battle, userid, battle_id, script_password}, state) do
-    new_state = user_join_battle(userid, battle_id, script_password, state)
+  def handle_info({:add_user_to_battle, userid, lobby_id, script_password}, state) do
+    new_state = user_join_battle(userid, lobby_id, script_password, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:remove_user_from_battle, userid, battle_id}, state) do
-    new_state = user_leave_battle(userid, battle_id, state)
+  def handle_info({:remove_user_from_battle, userid, lobby_id}, state) do
+    new_state = user_leave_battle(userid, lobby_id, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:kick_user_from_battle, userid, battle_id}, state) do
-    new_state = user_kicked_from_battle(userid, battle_id, state)
+  def handle_info({:kick_user_from_battle, userid, lobby_id}, state) do
+    new_state = user_kicked_from_battle(userid, lobby_id, state)
     {:noreply, new_state}
   end
 
@@ -394,7 +394,7 @@ defmodule Teiserver.TcpServer do
   end
 
   defp client_battlestatus_update(new_client, state) do
-    if state.battle_id != nil and state.battle_id == new_client.battle_id do
+    if state.lobby_id != nil and state.lobby_id == new_client.lobby_id do
       state.protocol_out.reply(:client_battlestatus, new_client, nil, state)
     end
 
@@ -468,25 +468,25 @@ defmodule Teiserver.TcpServer do
     end
   end
 
-  defp global_battle_update(battle_id, reason, state) do
+  defp global_battle_update(lobby_id, reason, state) do
     case reason do
       :update_battle_info ->
-        state.protocol_out.reply(:update_battle, battle_id, nil, state)
+        state.protocol_out.reply(:update_battle, lobby_id, nil, state)
 
       :battle_opened ->
-        if state.battle_host == false or state.battle_id != battle_id do
-          new_known_battles = [battle_id | state.known_battles]
+        if state.battle_host == false or state.lobby_id != lobby_id do
+          new_known_battles = [lobby_id | state.known_battles]
           new_state = %{state | known_battles: new_known_battles}
-          new_state.protocol_out.reply(:battle_opened, battle_id, nil, new_state)
+          new_state.protocol_out.reply(:battle_opened, lobby_id, nil, new_state)
         else
           state
         end
 
       :battle_closed ->
-        if Enum.member?(state.known_battles, battle_id) do
-          new_known_battles = List.delete(state.known_battles, battle_id)
+        if Enum.member?(state.known_battles, lobby_id) do
+          new_known_battles = List.delete(state.known_battles, lobby_id)
           new_state = %{state | known_battles: new_known_battles}
-          new_state.protocol_out.reply(:battle_closed, battle_id, nil, new_state)
+          new_state.protocol_out.reply(:battle_closed, lobby_id, nil, new_state)
         else
           state
         end
@@ -508,10 +508,10 @@ defmodule Teiserver.TcpServer do
   defp join_battle_request_response(nil, _, _, state) do
     state.protocol_out.reply(:join_battle_failure, "No battle", nil, state)
   end
-  defp join_battle_request_response(battle_id, response, reason, state) do
+  defp join_battle_request_response(lobby_id, response, reason, state) do
     case response do
       :accept ->
-        state.protocol_out.do_join_battle(state, battle_id, state.script_password)
+        state.protocol_out.do_join_battle(state, lobby_id, state.script_password)
 
       :deny ->
         state.protocol_out.reply(:join_battle_failure, reason, nil, state)
@@ -519,19 +519,19 @@ defmodule Teiserver.TcpServer do
   end
 
   # This is the result of being forced to join a battle
-  defp force_join_battle(battle_id, script_password, state) do
-    new_state = state.protocol_out.do_leave_battle(state, battle_id)
+  defp force_join_battle(lobby_id, script_password, state) do
+    new_state = state.protocol_out.do_leave_battle(state, lobby_id)
     new_state = %{new_state | script_password: script_password}
-    state.protocol_out.do_join_battle(new_state, battle_id, script_password)
+    state.protocol_out.do_join_battle(new_state, lobby_id, script_password)
   end
 
   # Depending on our current understanding of where the user is
   # we will send a selection of commands on the assumption this
   # genserver is incorrect and needs to alter its state accordingly
-  defp user_join_battle(userid, battle_id, script_password, state) do
+  defp user_join_battle(userid, lobby_id, script_password, state) do
     script_password =
       cond do
-        state.battle_host and state.battle_id == battle_id -> script_password
+        state.battle_host and state.lobby_id == lobby_id -> script_password
         state.userid == userid -> script_password
         true -> nil
       end
@@ -539,7 +539,7 @@ defmodule Teiserver.TcpServer do
     new_user =
       cond do
         state.userid == userid ->
-          _blank_user(userid, %{battle_id: battle_id})
+          _blank_user(userid, %{lobby_id: lobby_id})
 
         # User isn't known about so we say they've logged in
         # Then we add them to the battle
@@ -548,32 +548,32 @@ defmodule Teiserver.TcpServer do
 
           state.protocol_out.reply(
             :add_user_to_battle,
-            {userid, battle_id, script_password},
+            {userid, lobby_id, script_password},
             nil,
             state
           )
 
-          _blank_user(userid, %{battle_id: battle_id})
+          _blank_user(userid, %{lobby_id: lobby_id})
 
         # User is known about and not in a battle, this is the ideal
         # state
-        state.known_users[userid].battle_id == nil ->
+        state.known_users[userid].lobby_id == nil ->
           state.protocol_out.reply(
             :add_user_to_battle,
-            {userid, battle_id, script_password},
+            {userid, lobby_id, script_password},
             nil,
             state
           )
 
-          %{state.known_users[userid] | battle_id: battle_id}
+          %{state.known_users[userid] | lobby_id: lobby_id}
 
         # User is known about but already in a battle
-        state.known_users[userid].battle_id != battle_id ->
+        state.known_users[userid].lobby_id != lobby_id ->
           # If we don't know about the battle we don't need to remove the user from it first
-          if Enum.member?(state.known_battles, state.known_users[userid].battle_id) do
+          if Enum.member?(state.known_battles, state.known_users[userid].lobby_id) do
             state.protocol_out.reply(
               :remove_user_from_battle,
-              {userid, state.known_users[userid].battle_id},
+              {userid, state.known_users[userid].lobby_id},
               nil,
               state
             )
@@ -581,15 +581,15 @@ defmodule Teiserver.TcpServer do
 
           state.protocol_out.reply(
             :add_user_to_battle,
-            {userid, battle_id, script_password},
+            {userid, lobby_id, script_password},
             nil,
             state
           )
 
-          %{state.known_users[userid] | battle_id: battle_id}
+          %{state.known_users[userid] | lobby_id: lobby_id}
 
         # User is known about and in this battle already, no change
-        state.known_users[userid].battle_id == battle_id ->
+        state.known_users[userid].lobby_id == lobby_id ->
           state.known_users[userid]
       end
 
@@ -597,15 +597,15 @@ defmodule Teiserver.TcpServer do
     %{state | known_users: new_knowns}
   end
 
-  defp user_leave_battle(userid, battle_id, state) do
+  defp user_leave_battle(userid, lobby_id, state) do
     # If they are kicked then it's possible they won't be unsubbed
     if userid == state.userid do
-      Phoenix.PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle_id}")
+      Phoenix.PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{lobby_id}")
     end
 
     # Do they know about the battle?
-    state = if not Enum.member?(state.known_battles, battle_id) do
-      state.protocol_out.reply(:battle_opened, battle_id, nil, state)
+    state = if not Enum.member?(state.known_battles, lobby_id) do
+      state.protocol_out.reply(:battle_opened, lobby_id, nil, state)
     else
       state
     end
@@ -613,14 +613,14 @@ defmodule Teiserver.TcpServer do
     # Now the user
     new_user =
       cond do
-        Enum.member?(state.known_battles, battle_id) == false ->
+        Enum.member?(state.known_battles, lobby_id) == false ->
           state.known_users[userid]
 
         state.known_users[userid] == nil ->
           state.protocol_out.reply(:user_logged_in, userid, nil, state)
           _blank_user(userid)
 
-        state.known_users[userid].battle_id == nil ->
+        state.known_users[userid].lobby_id == nil ->
           # No change
           state.known_users[userid]
 
@@ -628,29 +628,29 @@ defmodule Teiserver.TcpServer do
           # We don't care which battle we thought they are in, they're no longer in it
           state.protocol_out.reply(
             :remove_user_from_battle,
-            {userid, state.known_users[userid].battle_id},
+            {userid, state.known_users[userid].lobby_id},
             nil,
             state
           )
 
-          %{state.known_users[userid] | battle_id: nil}
+          %{state.known_users[userid] | lobby_id: nil}
       end
 
     new_knowns = Map.put(state.known_users, userid, new_user)
     %{state | known_users: new_knowns}
   end
 
-  defp user_kicked_from_battle(userid, battle_id, state) do
+  defp user_kicked_from_battle(userid, lobby_id, state) do
     # If it's the user, we need to tell them the bad news
     state =
       if userid == state.userid do
         state.protocol_out.reply(:forcequit_battle, nil, nil, state)
-        %{state | battle_id: nil}
+        %{state | lobby_id: nil}
       else
         state
       end
 
-    user_leave_battle(userid, battle_id, state)
+    user_leave_battle(userid, lobby_id, state)
   end
 
   # Chat
@@ -750,7 +750,7 @@ defmodule Teiserver.TcpServer do
     Map.merge(
       %{
         userid: userid,
-        battle_id: nil
+        lobby_id: nil
       },
       defaults
     )

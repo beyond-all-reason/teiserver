@@ -41,7 +41,7 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
     assert lobby["map_name"] == "koom valley"
     lobby_id = lobby["id"]
 
-    assert GenServer.call(pid, {:get, :battle_id}) == lobby_id
+    assert GenServer.call(pid, {:get, :lobby_id}) == lobby_id
     assert GenServer.call(pid, {:get, :battle_host}) == true
     assert Lobby.get_lobby!(lobby_id) != nil
 
@@ -118,7 +118,7 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
     assert reply["result"] == "approve"
     assert reply["lobby"]["id"] == lobby_id
 
-    assert GenServer.call(pid2, {:get, :battle_id}) == lobby_id
+    assert GenServer.call(pid2, {:get, :lobby_id}) == lobby_id
 
     # # Expecting a request to join here
     # data = %{cmd: "c.lobby.join", lobby_id: lobby_id}
@@ -137,7 +137,7 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
     reply = _tachyon_recv(socket)
     assert match?(%{"cmd" => "s.lobby.leave"}, reply)
 
-    assert GenServer.call(pid, {:get, :battle_id}) == nil
+    assert GenServer.call(pid, {:get, :lobby_id}) == nil
     assert GenServer.call(pid, {:get, :battle_host}) == false
     assert Lobby.get_lobby!(lobby_id) == nil
   end

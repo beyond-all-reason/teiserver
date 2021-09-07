@@ -177,17 +177,17 @@ defmodule Teiserver.Battle do
   # the battle. It should never be called directly from a protocol
   # related command, only via things like matchmaking our tourneys
   # Teiserver.Battle.add_player_to_battle(3, 678371)
-  @spec add_player_to_battle(T.userid(), T.battle_id()) :: :ok | {:error, String.t()}
-  def add_player_to_battle(userid, battle_id) do
+  @spec add_player_to_battle(T.userid(), T.lobby_id()) :: :ok | {:error, String.t()}
+  def add_player_to_battle(userid, lobby_id) do
     case Teiserver.Client.get_client_by_id(userid) do
       nil ->
         {:error, "no client"}
       _ ->
-        case Lobby.get_battle(battle_id) do
+        case Lobby.get_battle(lobby_id) do
           nil ->
             {:error, "no battle"}
           _ ->
-            Teiserver.Battle.Lobby.accept_join_request(3, battle_id)
+            Teiserver.Battle.Lobby.accept_join_request(3, lobby_id)
         end
     end
   end

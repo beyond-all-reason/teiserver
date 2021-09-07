@@ -64,8 +64,8 @@
             <td><%= client.userid %></td>
             <td><%= client.name %></td>
             <td>
-              <%= if client.battle_id do %>
-                <%= live_redirect "Show #{client.battle_id}", to: Routes.ts_battle_lobby_show_path(@socket, :show, client.battle_id), class: "btn btn-sm btn-#{Teiserver.Battle.LobbyLib.colours |> elem(2)}" %>
+              <%= if client.lobby_id do %>
+                <%= live_redirect "Show #{client.lobby_id}", to: Routes.ts_battle_lobby_show_path(@socket, :show, client.lobby_id), class: "btn btn-sm btn-#{Teiserver.Battle.LobbyLib.colours |> elem(2)}" %>
               <% end %>
             </td>
 
@@ -77,7 +77,7 @@
                 <% client.in_game == true -> %>
                   Spectator
 
-                <% client.battle_id != nil -> %>
+                <% client.lobby_id != nil -> %>
                   Lobby
 
                 <% true -> %>

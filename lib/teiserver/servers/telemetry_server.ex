@@ -85,7 +85,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         add_to = cond do
           client == nil -> nil
           client.bot == true -> nil
-          client.battle_id == nil -> :menu
+          client.lobby_id == nil -> :menu
 
           # Client is involved in a battle in some way
           # In this case they are not in a game, they are in a battle lobby

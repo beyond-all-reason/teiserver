@@ -59,16 +59,16 @@ use Central.ServerCase, async: false
     assert reply == :timeout
   end
 
-  # test "vote on a new map", %{lobby_id: lobby_id, host: host, hsocket: hsocket} do
-  #   %{user: player2, socket: psocket} = tachyon_auth_setup()
+  test "vote on a new map", %{lobby_id: lobby_id, host: host, hsocket: hsocket} do
+    %{user: player2, socket: psocket} = tachyon_auth_setup()
 
-  #   battle = Lobby.get_battle!(lobby_id)
-  #   assert battle.coordinator_mode == true
+    battle = Lobby.get_battle!(lobby_id)
+    assert battle.coordinator_mode == true
 
-  #   data = %{cmd: "c.lobby.message", userid: host.id, message: "!changemap map_name"}
-  #   _tachyon_send(hsocket, data)
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "!changemap map_name"}
+    _tachyon_send(psocket, data)
 
-  #   reply = _tachyon_recv(psocket)
-  #   assert reply == :timeout
-  # end
+    reply = _tachyon_recv(psocket)
+    assert reply == :timeout
+  end
 end

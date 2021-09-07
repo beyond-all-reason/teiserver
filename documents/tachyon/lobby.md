@@ -94,7 +94,7 @@ Requests to join the battle, the host will be sent a message asking if the perso
 ```
 {
   "cmd": "c.lobby.join",
-  "battle_id": 123,
+  "lobby_id": 123,
   "password": "******" // Optional
 }
 

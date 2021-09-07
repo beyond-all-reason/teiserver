@@ -23,7 +23,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   def handle_info(:tick, state) do
     new_state = case state.stage do
       :no_battle ->
-        join_battle(state, Lobby.list_battle_ids())
+        join_battle(state, Lobby.list_lobby_ids())
 
       :waiting ->
         state
@@ -65,19 +65,19 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
     %{state | stage: :waiting}
   end
   defp handle_msg(%{"cmd" => "s.lobby.join", "result" => "failure"}, state) do
-    %{state | stage: :no_battle, battle_id: nil}
+    %{state | stage: :no_battle, lobby_id: nil}
   end
   defp handle_msg(%{"cmd" => "s.lobby.join_response", "result" => "failure"}, state) do
-    %{state | stage: :no_battle, battle_id: nil}
+    %{state | stage: :no_battle, lobby_id: nil}
   end
   defp handle_msg(%{"cmd" => "s.lobby.join_response", "result" => "approve"}, state) do
     %{state | stage: :in_battle}
   end
   defp handle_msg(%{"cmd" => "s.lobby.join_response", "result" => "reject"}, state) do
-    %{state | stage: :no_battle, battle_id: nil}
+    %{state | stage: :no_battle, lobby_id: nil}
   end
   defp handle_msg(%{"cmd" => "s.lobby.leave", "result" => "success"}, state) do
-    %{state | battle_id: nil}
+    %{state | lobby_id: nil}
   end
   defp handle_msg(%{"cmd" => "s.lobby.request_status"}, state) do
     update_battlestatus(state)
@@ -108,22 +108,22 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   end
 
   defp join_battle(state, []), do: state
-  defp join_battle(state, battle_ids) do
-    battle_id = Enum.random(battle_ids)
+  defp join_battle(state, lobby_ids) do
+    lobby_id = Enum.random(lobby_ids)
 
-    case Lobby.get_battle!(battle_id) do
+    case Lobby.get_battle!(lobby_id) do
       nil ->
-        %{state | battle_id: nil, stage: :no_battle}
+        %{state | lobby_id: nil, stage: :no_battle}
       battle ->
         cmd = %{
           cmd: "c.lobby.join",
-          battle_id: battle_id,
+          lobby_id: lobby_id,
           password: battle.password
         }
         AgentLib._send(state.socket, cmd)
 
         AgentLib.post_agent_update(state.id, "opened battle")
-        %{state | battle_id: battle_id, stage: :waiting}
+        %{state | lobby_id: lobby_id, stage: :waiting}
     end
   end
 
@@ -131,7 +131,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
     AgentLib._send(state.socket, %{cmd: "c.lobby.leave"})
 
     AgentLib.post_agent_update(state.id, "left battle")
-    %{state | battle_id: nil, stage: :no_battle}
+    %{state | lobby_id: nil, stage: :no_battle}
   end
 
   # Startup
@@ -146,7 +146,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
      %{
        id: opts.id,
        number: opts.number,
-       battle_id: nil,
+       lobby_id: nil,
        stage: :no_battle,
        socket: nil
      }}

@@ -70,8 +70,8 @@ defmodule Teiserver.Battle.Lobby do
   # Refactor callbacks
   def create_battle(battle), do: create_lobby(battle)
   def update_battle(battle, data, reason), do: update_lobby(battle, data, reason)
-  def get_battle!(battle_id), do: get_lobby!(battle_id)
-  def get_battle(battle_id), do: get_lobby(battle_id)
+  def get_battle!(lobby_id), do: get_lobby!(lobby_id)
+  def get_battle(lobby_id), do: get_lobby(lobby_id)
   def add_battle(battle), do: add_lobby(battle)
   def close_battle(battle), do: close_lobby(battle)
 
@@ -155,12 +155,12 @@ defmodule Teiserver.Battle.Lobby do
     ConCache.get(:battles, int_parse(id))
   end
 
-  @spec get_battle_lobby_players!(T.battle_id()) :: [integer()]
+  @spec get_battle_lobby_players!(T.lobby_id()) :: [integer()]
   def get_battle_lobby_players!(id) do
     get_battle!(id).players
   end
 
-  @spec start_battle_lobby_throttle(T.battle_id()) :: pid()
+  @spec start_battle_lobby_throttle(T.lobby_id()) :: pid()
   def start_battle_lobby_throttle(battle_lobby_id) do
     Teiserver.Throttles.start_throttle(battle_lobby_id, Teiserver.Battle.LobbyThrottle, "battle_lobby_throttle_#{battle_lobby_id}")
   end
@@ -200,14 +200,14 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   @spec close_lobby(integer() | nil) :: :ok
-  def close_lobby(battle_id) do
-    battle = get_battle(battle_id)
-    Coordinator.close_battle(battle_id)
-    ConCache.delete(:battles, battle_id)
+  def close_lobby(lobby_id) do
+    battle = get_battle(lobby_id)
+    Coordinator.close_battle(lobby_id)
+    ConCache.delete(:battles, lobby_id)
     ConCache.update(:lists, :battles, fn value ->
       new_value =
         value
-        |> Enum.filter(fn v -> v != battle_id end)
+        |> Enum.filter(fn v -> v != lobby_id end)
 
       {:ok, new_value}
     end)
@@ -216,15 +216,15 @@ defmodule Teiserver.Battle.Lobby do
     |> Enum.each(fn userid ->
       PubSub.broadcast(
         Central.PubSub,
-        "legacy_battle_updates:#{battle_id}",
-        {:remove_user_from_battle, userid, battle_id}
+        "legacy_battle_updates:#{lobby_id}",
+        {:remove_user_from_battle, userid, lobby_id}
       )
     end)
 
     PubSub.broadcast(
       Central.PubSub,
       "legacy_all_battle_updates",
-      {:global_battle_updated, battle_id, :battle_closed}
+      {:global_battle_updated, lobby_id, :battle_closed}
     )
 
     :ok = PubSub.broadcast(
@@ -240,19 +240,19 @@ defmodule Teiserver.Battle.Lobby do
     )
 
 
-    stop_battle_lobby_throttle(battle_id)
+    stop_battle_lobby_throttle(lobby_id)
   end
 
-  def add_bot_to_battle(battle_id, bot) do
-    battle = get_battle(battle_id)
+  def add_bot_to_battle(lobby_id, bot) do
+    battle = get_battle(lobby_id)
     new_bots = Map.put(battle.bots, bot.name, bot)
     new_battle = %{battle | bots: new_bots}
     ConCache.put(:battles, battle.id, new_battle)
 
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{battle_id}",
-      {:battle_updated, battle_id, {battle_id, bot}, :add_bot_to_battle}
+      "legacy_battle_updates:#{lobby_id}",
+      {:battle_updated, lobby_id, {lobby_id, bot}, :add_bot_to_battle}
     )
 
     PubSub.broadcast(
@@ -262,10 +262,10 @@ defmodule Teiserver.Battle.Lobby do
     )
   end
 
-  def update_bot(battle_id, botname, "0", _), do: remove_bot(battle_id, botname)
+  def update_bot(lobby_id, botname, "0", _), do: remove_bot(lobby_id, botname)
 
-  def update_bot(battle_id, botname, new_data) do
-    battle = get_battle(battle_id)
+  def update_bot(lobby_id, botname, new_data) do
+    battle = get_battle(lobby_id)
 
     case battle.bots[botname] do
       nil ->
@@ -280,8 +280,8 @@ defmodule Teiserver.Battle.Lobby do
 
         PubSub.broadcast(
           Central.PubSub,
-          "legacy_battle_updates:#{battle_id}",
-          {:battle_updated, battle_id, {battle_id, new_bot}, :update_bot}
+          "legacy_battle_updates:#{lobby_id}",
+          {:battle_updated, lobby_id, {lobby_id, new_bot}, :update_bot}
         )
 
         PubSub.broadcast(
@@ -292,16 +292,16 @@ defmodule Teiserver.Battle.Lobby do
     end
   end
 
-  def remove_bot(battle_id, botname) do
-    battle = get_battle(battle_id)
+  def remove_bot(lobby_id, botname) do
+    battle = get_battle(lobby_id)
     new_bots = Map.delete(battle.bots, botname)
     new_battle = %{battle | bots: new_bots}
     ConCache.put(:battles, battle.id, new_battle)
 
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{battle_id}",
-      {:battle_updated, battle_id, {battle_id, botname}, :remove_bot_from_battle}
+      "legacy_battle_updates:#{lobby_id}",
+      {:battle_updated, lobby_id, {lobby_id, botname}, :remove_bot_from_battle}
     )
 
     PubSub.broadcast(
@@ -325,31 +325,31 @@ defmodule Teiserver.Battle.Lobby do
   def add_user_to_battle(_uid, nil), do: nil
 
   @spec add_user_to_battle(integer(), integer(), String.t()) :: nil
-  def add_user_to_battle(userid, battle_id, script_password) do
-    ConCache.update(:battles, battle_id, fn battle_state ->
+  def add_user_to_battle(userid, lobby_id, script_password) do
+    ConCache.update(:battles, lobby_id, fn battle_state ->
       new_state =
         if Enum.member?(battle_state.players, userid) do
           # No change takes place, they're already in the battle!
           battle_state
         else
-          Client.join_battle(userid, battle_id)
+          Client.join_battle(userid, lobby_id)
 
           if battle_state.coordinator_mode do
-            sayprivateex(battle_state.founder_id, userid, "Coordinator mode enabled", battle_id)
+            sayprivateex(battle_state.founder_id, userid, "Coordinator mode enabled", lobby_id)
           end
 
-          Coordinator.cast_consul(battle_id, {:user_joined, userid})
+          Coordinator.cast_consul(lobby_id, {:user_joined, userid})
 
           PubSub.broadcast(
             Central.PubSub,
             "legacy_all_battle_updates",
-            {:add_user_to_battle, userid, battle_id, script_password}
+            {:add_user_to_battle, userid, lobby_id, script_password}
           )
 
           PubSub.broadcast(
             Central.PubSub,
-            "teiserver_battle_lobby_updates:#{battle_id}",
-            {:add_user_to_battle_lobby, battle_id, userid}
+            "teiserver_battle_lobby_updates:#{lobby_id}",
+            {:add_user_to_battle_lobby, lobby_id, userid}
           )
 
           new_players = [userid | battle_state.players]
@@ -364,10 +364,10 @@ defmodule Teiserver.Battle.Lobby do
 
   def remove_user_from_battle(_uid, nil), do: nil
 
-  def remove_user_from_battle(userid, battle_id) do
+  def remove_user_from_battle(userid, lobby_id) do
     Client.leave_battle(userid)
 
-    case do_remove_user_from_battle(userid, battle_id) do
+    case do_remove_user_from_battle(userid, lobby_id) do
       :closed ->
         nil
 
@@ -381,20 +381,20 @@ defmodule Teiserver.Battle.Lobby do
         PubSub.broadcast(
           Central.PubSub,
           "legacy_all_battle_updates",
-          {:remove_user_from_battle, userid, battle_id}
+          {:remove_user_from_battle, userid, lobby_id}
         )
 
         PubSub.broadcast(
           Central.PubSub,
-          "teiserver_battle_lobby_updates:#{battle_id}",
-          {:remove_user_from_battle_lobby, battle_id, userid}
+          "teiserver_battle_lobby_updates:#{lobby_id}",
+          {:remove_user_from_battle_lobby, lobby_id, userid}
         )
     end
   end
 
   @spec kick_user_from_battle(Integer.t(), Integer.t()) :: nil | :ok | {:error, any}
-  def kick_user_from_battle(userid, battle_id) do
-    case do_remove_user_from_battle(userid, battle_id) do
+  def kick_user_from_battle(userid, lobby_id) do
+    case do_remove_user_from_battle(userid, lobby_id) do
       :closed ->
         nil
 
@@ -408,13 +408,13 @@ defmodule Teiserver.Battle.Lobby do
         PubSub.broadcast(
           Central.PubSub,
           "legacy_all_battle_updates",
-          {:kick_user_from_battle, userid, battle_id}
+          {:kick_user_from_battle, userid, lobby_id}
         )
 
         PubSub.broadcast(
           Central.PubSub,
-          "teiserver_battle_lobby_updates:#{battle_id}",
-          {:kick_user_from_battle_lobby, battle_id, userid}
+          "teiserver_battle_lobby_updates:#{lobby_id}",
+          {:kick_user_from_battle_lobby, lobby_id, userid}
         )
     end
   end
@@ -423,7 +423,7 @@ defmodule Teiserver.Battle.Lobby do
   def remove_user_from_any_battle(nil), do: []
 
   def remove_user_from_any_battle(userid) do
-    battle_ids =
+    lobby_ids =
       list_battles()
       |> Enum.filter(fn b -> b != nil end)
       |> Enum.filter(fn b -> Enum.member?(b.players, userid) or b.founder_id == userid end)
@@ -432,11 +432,11 @@ defmodule Teiserver.Battle.Lobby do
         b.id
       end)
 
-    if Enum.count(battle_ids) > 1 do
-      Logger.error("#{userid} is a member of #{Enum.count(battle_ids)} battles")
+    if Enum.count(lobby_ids) > 1 do
+      Logger.error("#{userid} is a member of #{Enum.count(lobby_ids)} battles")
     end
 
-    battle_ids
+    lobby_ids
   end
 
   @spec find_empty_battle() :: Map.t()
@@ -453,13 +453,13 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec do_remove_user_from_battle(integer(), integer()) ::
           :closed | :removed | :not_member | :no_battle
-  defp do_remove_user_from_battle(userid, battle_id) do
-    battle = get_battle(battle_id)
+  defp do_remove_user_from_battle(userid, lobby_id) do
+    battle = get_battle(lobby_id)
     Client.leave_battle(userid)
 
     if battle do
       if battle.founder_id == userid do
-        close_battle(battle_id)
+        close_battle(lobby_id)
         :closed
       else
         if Enum.member?(battle.players, userid) do
@@ -467,12 +467,12 @@ defmodule Teiserver.Battle.Lobby do
           battle.bots
           |> Enum.each(fn {botname, bot} ->
             if bot.owner_id == userid do
-              remove_bot(battle_id, botname)
+              remove_bot(lobby_id, botname)
             end
           end)
 
           # Now update the battle to remove the player
-          ConCache.update(:battles, battle_id, fn battle_state ->
+          ConCache.update(:battles, lobby_id, fn battle_state ->
             # This is purely to prevent errors if the battle is in the process of shutting down
             # mid function call
             new_state =
@@ -497,17 +497,17 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   # Start rects
-  def add_start_rectangle(battle_id, [team, a, b, c, d]) do
+  def add_start_rectangle(lobby_id, [team, a, b, c, d]) do
     [team, a, b, c, d] = int_parse([team, a, b, c, d])
 
-    battle = get_battle(battle_id)
+    battle = get_battle(lobby_id)
     new_rectangles = Map.put(battle.start_rectangles, team, [a, b, c, d])
     new_battle = %{battle | start_rectangles: new_rectangles}
     update_battle(new_battle, {team, [a, b, c, d]}, :add_start_rectangle)
   end
 
-  def remove_start_rectangle(battle_id, team_id) do
-    battle = get_battle(battle_id)
+  def remove_start_rectangle(lobby_id, team_id) do
+    battle = get_battle(lobby_id)
     team_id = int_parse(team_id)
 
     new_rectangles = Map.delete(battle.start_rectangles, team_id)
@@ -517,14 +517,14 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   # Unit enabling
-  def enable_all_units(battle_id) do
-    battle = get_battle(battle_id)
+  def enable_all_units(lobby_id) do
+    battle = get_battle(lobby_id)
     new_battle = %{battle | disabled_units: []}
     update_battle(new_battle, [], :enable_all_units)
   end
 
-  def enable_units(battle_id, units) do
-    battle = get_battle(battle_id)
+  def enable_units(lobby_id, units) do
+    battle = get_battle(lobby_id)
 
     new_units =
       Enum.filter(battle.disabled_units, fn u ->
@@ -535,23 +535,23 @@ defmodule Teiserver.Battle.Lobby do
     update_battle(new_battle, units, :enable_units)
   end
 
-  def disable_units(battle_id, units) do
-    battle = get_battle(battle_id)
+  def disable_units(lobby_id, units) do
+    battle = get_battle(lobby_id)
     new_units = battle.disabled_units ++ units
     new_battle = %{battle | disabled_units: new_units}
     update_battle(new_battle, units, :disable_units)
   end
 
   # Script tags
-  def set_script_tags(battle_id, tags) do
-    battle = get_battle(battle_id)
+  def set_script_tags(lobby_id, tags) do
+    battle = get_battle(lobby_id)
     new_tags = Map.merge(battle.tags, tags)
     new_battle = %{battle | tags: new_tags}
     update_battle(new_battle, tags, :add_script_tags)
   end
 
-  def remove_script_tags(battle_id, keys) do
-    battle = get_battle(battle_id)
+  def remove_script_tags(lobby_id, keys) do
+    battle = get_battle(lobby_id)
     new_tags = Map.drop(battle.tags, keys)
     new_battle = %{battle | tags: new_tags}
     update_battle(new_battle, keys, :remove_script_tags)
@@ -559,9 +559,9 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec can_join?(Types.userid(), integer(), String.t() | nil, String.t() | nil) ::
           {:failure, String.t()} | {:waiting_on_host, String.t()}
-  def can_join?(userid, battle_id, password \\ nil, script_password \\ nil) do
-    battle_id = int_parse(battle_id)
-    battle = get_battle(battle_id)
+  def can_join?(userid, lobby_id, password \\ nil, script_password \\ nil) do
+    lobby_id = int_parse(lobby_id)
+    battle = get_battle(lobby_id)
     user = UserCache.get_user_by_id(userid)
 
     cond do
@@ -577,7 +577,7 @@ defmodule Teiserver.Battle.Lobby do
       battle.password != nil and password != battle.password and user.moderator == false ->
         {:failure, "Invalid password"}
 
-      Coordinator.call_consul(battle_id, {:request_user_join_battle, userid}) == false ->
+      Coordinator.call_consul(lobby_id, {:request_user_join_battle, userid}) == false ->
         {:failure, "Denied by Coordinator"}
 
       true ->
@@ -594,101 +594,101 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   @spec accept_join_request(integer(), integer()) :: :ok
-  def accept_join_request(userid, battle_id) do
+  def accept_join_request(userid, lobby_id) do
     client = Client.get_client_by_id(userid)
     if client do
-      send(client.pid, {:join_battle_request_response, battle_id, :accept, nil})
+      send(client.pid, {:join_battle_request_response, lobby_id, :accept, nil})
     end
     :ok
   end
 
   @spec deny_join_request(integer(), integer(), String.t()) :: :ok
-  def deny_join_request(userid, battle_id, reason) do
+  def deny_join_request(userid, lobby_id, reason) do
     client = Client.get_client_by_id(userid)
     if client do
-      send(client.pid, {:join_battle_request_response, battle_id, :deny, reason})
+      send(client.pid, {:join_battle_request_response, lobby_id, :deny, reason})
     end
     :ok
   end
 
-  @spec say(Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
-  def say(userid, "!start" <> s, battle_id), do: say(userid, "!cv start" <> s, battle_id)
-  def say(userid, "!joinas spec", battle_id), do: say(userid, "!!joinas spec", battle_id)
-  def say(userid, "!joinas" <> s, battle_id), do: say(userid, "!cv joinas" <> s, battle_id)
+  @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
+  def say(userid, "!start" <> s, lobby_id), do: say(userid, "!cv start" <> s, lobby_id)
+  def say(userid, "!joinas spec", lobby_id), do: say(userid, "!!joinas spec", lobby_id)
+  def say(userid, "!joinas" <> s, lobby_id), do: say(userid, "!cv joinas" <> s, lobby_id)
 
-  def say(userid, "!coordinator start", battle_id) do
+  def say(userid, "!coordinator start", lobby_id) do
     client = Client.get_client_by_id(userid)
     if client.moderator do
-      start_coordinator_mode(battle_id)
+      start_coordinator_mode(lobby_id)
     end
     :ok
   end
 
-  def say(userid, msg, battle_id) do
+  def say(userid, msg, lobby_id) do
     msg = String.replace(msg, "!!joinas spec", "!joinas spec")
 
-    case Teiserver.Coordinator.handle_in(userid, msg, battle_id) do
-      :say -> do_say(userid, msg, battle_id)
+    case Teiserver.Coordinator.handle_in(userid, msg, lobby_id) do
+      :say -> do_say(userid, msg, lobby_id)
       :handled -> :ok
     end
   end
 
-  @spec do_say(Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
-  def do_say(userid, msg, battle_id) do
+  @spec do_say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
+  def do_say(userid, msg, lobby_id) do
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{battle_id}",
-      {:battle_updated, battle_id, {userid, msg, battle_id}, :say}
+      "legacy_battle_updates:#{lobby_id}",
+      {:battle_updated, lobby_id, {userid, msg, lobby_id}, :say}
     )
 
     PubSub.broadcast(
       Central.PubSub,
-      "teiserver_battle_lobby_chat:#{battle_id}",
-      {:battle_lobby_say, battle_id, userid, msg}
-    )
-  end
-
-  @spec sayex(Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
-  def sayex(userid, msg, battle_id) do
-    PubSub.broadcast(
-      Central.PubSub,
-      "legacy_battle_updates:#{battle_id}",
-      {:battle_updated, battle_id, {userid, msg, battle_id}, :sayex}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_battle_lobby_chat:#{battle_id}",
-      {:battle_lobby_sayex, battle_id, userid, msg}
+      "teiserver_battle_lobby_chat:#{lobby_id}",
+      {:battle_lobby_say, lobby_id, userid, msg}
     )
   end
 
-  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.battle_id()) :: :ok | {:error, any}
-  def sayprivateex(from_id, to_id, msg, battle_id) do
+  @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
+  def sayex(userid, msg, lobby_id) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "legacy_battle_updates:#{lobby_id}",
+      {:battle_updated, lobby_id, {userid, msg, lobby_id}, :sayex}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_battle_lobby_chat:#{lobby_id}",
+      {:battle_lobby_sayex, lobby_id, userid, msg}
+    )
+  end
+
+  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
+  def sayprivateex(from_id, to_id, msg, lobby_id) do
     sender = UserCache.get_user_by_id(from_id)
     if not User.is_muted?(sender) do
       PubSub.broadcast(
         Central.PubSub,
         "legacy_user_updates:#{to_id}",
-        {:battle_updated, battle_id, {from_id, msg, battle_id}, :sayex}
+        {:battle_updated, lobby_id, {from_id, msg, lobby_id}, :sayex}
       )
     end
   end
 
-  @spec start_coordinator_mode(Types.battle_id()) :: :ok
-  def start_coordinator_mode(battle_id) do
-    Logger.debug("Starting Coordinator mode for #{battle_id}")
-    battle = get_battle!(battle_id)
-    sayex(battle.founder_id, "Coordinator mode enabled", battle_id)
+  @spec start_coordinator_mode(Types.lobby_id()) :: :ok
+  def start_coordinator_mode(lobby_id) do
+    Logger.debug("Starting Coordinator mode for #{lobby_id}")
+    battle = get_battle!(lobby_id)
+    sayex(battle.founder_id, "Coordinator mode enabled", lobby_id)
     update_battle(%{battle | coordinator_mode: true}, nil, nil)
     :ok
   end
 
-  @spec stop_coordinator_mode(Types.battle_id()) :: :ok
-  def stop_coordinator_mode(battle_id) do
-    Logger.debug("Stopping Coordinator mode for #{battle_id}")
-    battle = get_battle!(battle_id)
-    sayex(battle.founder_id, "Coordinator mode stopped", battle_id)
+  @spec stop_coordinator_mode(Types.lobby_id()) :: :ok
+  def stop_coordinator_mode(lobby_id) do
+    Logger.debug("Stopping Coordinator mode for #{lobby_id}")
+    battle = get_battle!(lobby_id)
+    sayex(battle.founder_id, "Coordinator mode stopped", lobby_id)
     update_battle(%{battle | coordinator_mode: false}, nil, nil)
     :ok
   end
@@ -702,7 +702,7 @@ defmodule Teiserver.Battle.Lobby do
       nil ->
         :ok
       client ->
-        battle = get_battle(client.battle_id)
+        battle = get_battle(client.lobby_id)
 
         new_values = new_values
         |> Enum.filter(fn {field, _} ->
@@ -730,8 +730,8 @@ defmodule Teiserver.Battle.Lobby do
   def allow?(userid, :saybattle, _), do: not User.is_muted?(userid)
   def allow?(userid, :saybattleex, _), do: not User.is_muted?(userid)
 
-  def allow?(changer, field, battle_id) when is_integer(battle_id),
-    do: allow?(changer, field, get_battle(battle_id))
+  def allow?(changer, field, lobby_id) when is_integer(lobby_id),
+    do: allow?(changer, field, get_battle(lobby_id))
 
   def allow?(changer_id, field, battle) when is_integer(changer_id),
     do: allow?(Client.get_client_by_id(changer_id), field, battle)
@@ -814,7 +814,7 @@ defmodule Teiserver.Battle.Lobby do
     end
   end
 
-  def list_battle_ids() do
+  def list_lobby_ids() do
     case ConCache.get(:lists, :battles) do
       nil -> []
       ids -> ids
@@ -822,7 +822,7 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   def list_battles() do
-    list_battle_ids()
-    |> Enum.map(fn battle_id -> ConCache.get(:battles, battle_id) end)
+    list_lobby_ids()
+    |> Enum.map(fn lobby_id -> ConCache.get(:battles, lobby_id) end)
   end
 end

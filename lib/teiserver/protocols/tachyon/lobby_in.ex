@@ -25,7 +25,7 @@ defmodule Teiserver.Protocols.Tachyon.LobbyIn do
       |> Lobby.create_lobby()
       |> Lobby.add_lobby()
 
-    new_state = %{state | battle_id: lobby.id, battle_host: true}
+    new_state = %{state | lobby_id: lobby.id, battle_host: true}
     reply(:lobby, :create, {:success, lobby}, new_state)
   end
 
@@ -52,15 +52,15 @@ defmodule Teiserver.Protocols.Tachyon.LobbyIn do
       Client.get_client_by_id(state.userid)
       |> Map.merge(updates)
 
-    if Lobby.allow?(state.userid, :mylobbystatus, state.battle_id) do
-      if Coordinator.allow_battlestatus_update?(new_client, state.battle_id) do
+    if Lobby.allow?(state.userid, :mylobbystatus, state.lobby_id) do
+      if Coordinator.allow_battlestatus_update?(new_client, state.lobby_id) do
         Client.update(new_client, :client_updated_lobbystatus)
       end
     end
     state
   end
 
-  def do_handle("respond_to_join_request", data, %{battle_id: lobby_id} = state) do
+  def do_handle("respond_to_join_request", data, %{lobby_id: lobby_id} = state) do
     userid = int_parse(data["userid"])
 
     case data["response"] do
@@ -74,25 +74,25 @@ defmodule Teiserver.Protocols.Tachyon.LobbyIn do
   end
 
   def do_handle("message", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
-  def do_handle("message", _, %{battle_id: nil} = state) do
+  def do_handle("message", _, %{lobby_id: nil} = state) do
     reply(:lobby, :message, {:failure, "Not currently in a lobby"}, state)
   end
   def do_handle("message", %{"message" => msg}, state) do
-    if Lobby.allow?(state.userid, :saylobby, state.battle_id) do
-      Lobby.say(state.userid, msg, state.battle_id)
+    if Lobby.allow?(state.userid, :saylobby, state.lobby_id) do
+      Lobby.say(state.userid, msg, state.lobby_id)
     end
     state
   end
 
   def do_handle("leave", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
-  def do_handle("leave", _, %{battle_id: nil} = state) do
+  def do_handle("leave", _, %{lobby_id: nil} = state) do
     reply(:lobby, :leave, {:failure, "Not currently in a lobby"}, state)
   end
 
   def do_handle("leave", _, state) do
-    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{state.battle_id}")
-    Lobby.remove_user_from_battle(state.userid, state.battle_id)
-    new_state = %{state | battle_id: nil, battle_host: false}
+    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{state.lobby_id}")
+    Lobby.remove_user_from_battle(state.userid, state.lobby_id)
+    new_state = %{state | lobby_id: nil, battle_host: false}
     reply(:lobby, :leave, {:success, nil}, new_state)
   end
 end

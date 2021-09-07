@@ -99,13 +99,13 @@ defmodule TeiserverWeb.Live.BattleTest do
         | _
       ] = reply
 
-      battle_id =
+      lobby_id =
         join
         |> String.replace("JOINBATTLE ", "")
         |> String.replace(" gameHash", "")
         |> int_parse
 
-      {:ok, view, html} = live(conn, "/teiserver/battle/lobbies/#{battle_id}")
+      {:ok, view, html} = live(conn, "/teiserver/battle/lobbies/#{lobby_id}")
       assert html =~ "LiveBattleShow"
       assert html =~ "Speed metal"
       assert html =~ "#{host_user.name}"
@@ -114,9 +114,9 @@ defmodule TeiserverWeb.Live.BattleTest do
       %{user: user2, socket: socket2} = TeiserverTestLib.auth_setup()
       %{user: user3, socket: socket3} = TeiserverTestLib.auth_setup()
 
-      _send_raw(socket1, "JOINBATTLE #{battle_id} empty script_password\n")
-      _send_raw(socket2, "JOINBATTLE #{battle_id} empty script_password\n")
-      _send_raw(socket3, "JOINBATTLE #{battle_id} empty script_password\n")
+      _send_raw(socket1, "JOINBATTLE #{lobby_id} empty script_password\n")
+      _send_raw(socket2, "JOINBATTLE #{lobby_id} empty script_password\n")
+      _send_raw(socket3, "JOINBATTLE #{lobby_id} empty script_password\n")
 
       # Accept them
       _send_raw(host_socket, "JOINBATTLEACCEPT #{user1.name}\n")
@@ -142,7 +142,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       assert html =~ "#{user3.name}"
 
       # Battle closes
-      Lobby.close_battle(battle_id)
+      Lobby.close_battle(lobby_id)
       :timer.sleep(@throttle_wait)
 
       assert_redirect(view, "/teiserver/battle/lobbies", 250)

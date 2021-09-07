@@ -12,8 +12,8 @@ defmodule Teiserver.Protocols.TachyonOut do
   def reply(:login_end, _data, _msg_id, state), do: state
   def reply(:user_logged_in, _data, _msg_id, state), do: state
   def reply(:battle_opened, _data, _msg_id, state), do: state
-  def reply(:battle_updated, {battle_id, _data, _reason}, _msg_id, state), do: reply(:lobby, :updated, Lobby.get_battle(battle_id), state)
-  def reply(:battle_message_ex, {sender_id, msg, battle_id}, _msg_id, state), do: reply(:lobby, :announce, {sender_id, msg, battle_id}, state)
+  def reply(:battle_updated, {lobby_id, _data, _reason}, _msg_id, state), do: reply(:lobby, :updated, Lobby.get_battle(lobby_id), state)
+  def reply(:battle_message_ex, {sender_id, msg, lobby_id}, _msg_id, state), do: reply(:lobby, :announce, {sender_id, msg, lobby_id}, state)
   def reply(:add_script_tags, _data, _msg_id, state), do: state
   def reply(:add_bot_to_battle, _data, _msg_id, state), do: state
   def reply(:remove_bot_from_battle, _data, _msg_id, state), do: state
@@ -21,9 +21,9 @@ defmodule Teiserver.Protocols.TachyonOut do
   def reply(:remove_script_tags, _data, _msg_id, state), do: state
   def reply(:request_user_join_battle, data, _msg_id, state), do: reply(:lobby, :request_to_join, data, state)
   def reply(:join_battle_failure, data, _msg_id, state), do: reply(:lobby, :join_response, {:reject, data}, state)
-  def reply(:battle_message, {sender_id, msg, battle_id}, _msg_id, state), do: reply(:lobby, :message, {sender_id, msg, battle_id}, state)
+  def reply(:battle_message, {sender_id, msg, lobby_id}, _msg_id, state), do: reply(:lobby, :message, {sender_id, msg, lobby_id}, state)
   def reply(:direct_message, {sender_id, msg, _user}, _msg_id, state), do: reply(:communication, :direct_message, {sender_id, msg}, state)
-  # def reply(:join_battle_success, _data, _msg_id, state), do: reply(:lobby, :join_response, {:approve, state.battle_id}, state)
+  # def reply(:join_battle_success, _data, _msg_id, state), do: reply(:lobby, :join_response, {:approve, state.lobby_id}, state)
 
   def reply(namespace, reply_cmd, data, state) do
     msg =

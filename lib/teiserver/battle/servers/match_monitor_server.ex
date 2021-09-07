@@ -53,13 +53,13 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   def handle_info({:new_message, from_id, "autohosts", "* Launching game..."}, state) do
     client = Client.get_client_by_id(from_id)
-    Battle.start_match(client.battle_id)
+    Battle.start_match(client.lobby_id)
     {:noreply, state}
   end
 
   def handle_info({:new_message, from_id, "autohosts", "* Server stopped (running time" <> _}, state) do
     client = Client.get_client_by_id(from_id)
-    Battle.stop_match(client.battle_id)
+    Battle.stop_match(client.lobby_id)
     {:noreply, state}
   end
 
@@ -71,7 +71,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   def handle_info({:direct_message, from_id, "endGameData " <> data}, state) do
     client = Client.get_client_by_id(from_id)
-    Battle.save_match_stats(client.battle_id, data)
+    Battle.save_match_stats(client.lobby_id, data)
     {:noreply, state}
   end
 

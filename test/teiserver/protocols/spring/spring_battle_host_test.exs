@@ -52,7 +52,7 @@ defmodule Teiserver.SpringBattleHostTest do
     )
 
     # Find battle ID
-    battle_id = Lobby.list_battles
+    lobby_id = Lobby.list_battles
     |> Enum.filter(fn b -> b.founder_id == host_user.id end)
     |> hd
     |> Map.get(:id)
@@ -61,8 +61,8 @@ defmodule Teiserver.SpringBattleHostTest do
     _ = _recv_until(watcher_socket)
 
     # Join
-    _send_raw(p1_socket, "JOINBATTLE #{battle_id} empty script_password2\n")
-    _send_raw(p2_socket, "JOINBATTLE #{battle_id} empty script_password2\n")
+    _send_raw(p1_socket, "JOINBATTLE #{lobby_id} empty script_password2\n")
+    _send_raw(p2_socket, "JOINBATTLE #{lobby_id} empty script_password2\n")
 
     # Nobody has been accepted yet, should not see anything
     reply = _recv_raw(watcher_socket)
@@ -74,14 +74,14 @@ defmodule Teiserver.SpringBattleHostTest do
 
     # Accept has happened, should see stuff
     reply = _recv_raw(watcher_socket)
-    assert reply == "JOINEDBATTLE #{battle_id} #{p1_user.name}\nJOINEDBATTLE #{battle_id} #{p2_user.name}\n"
+    assert reply == "JOINEDBATTLE #{lobby_id} #{p1_user.name}\nJOINEDBATTLE #{lobby_id} #{p2_user.name}\n"
 
     # Now have the host leave
     _send_raw(host_socket, "LEAVEBATTLE\n")
     :timer.sleep(500)
 
     reply = _recv_until(watcher_socket)
-    assert reply == "BATTLECLOSED #{battle_id}\n"
+    assert reply == "BATTLECLOSED #{lobby_id}\n"
   end
 
   test "host battle test", %{socket: socket, user: user} do
@@ -109,7 +109,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert join =~ "JOINBATTLE "
     assert join =~ " gameHash"
 
-    battle_id =
+    lobby_id =
       join
       |> String.replace("JOINBATTLE ", "")
       |> String.replace(" gameHash", "")
@@ -118,7 +118,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert battle_status == "REQUESTBATTLESTATUS"
 
     # Check the battle actually got created
-    battle = Lobby.get_battle(battle_id)
+    battle = Lobby.get_battle(lobby_id)
     assert battle != nil
     assert Enum.count(battle.players) == 0
 
@@ -130,7 +130,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply =~ "ADDUSER #{user2.name} ?? #{user2.springid} LuaLobby Chobby\n"
 
     # Attempt to join
-    _send_raw(socket2, "JOINBATTLE #{battle_id} empty script_password2\n")
+    _send_raw(socket2, "JOINBATTLE #{lobby_id} empty script_password2\n")
 
     # Rejecting a join request is covered elsewhere, we will just handle accepting it for now
     reply = _recv_raw(socket)
@@ -144,37 +144,37 @@ defmodule Teiserver.SpringBattleHostTest do
     _ = _recv_raw(socket2)
 
     reply = _recv_until(socket)
-    assert reply =~ "JOINEDBATTLE #{battle_id} #{user2.name} script_password2\n"
+    assert reply =~ "JOINEDBATTLE #{lobby_id} #{user2.name} script_password2\n"
 
     # This used to get updated, why not any more?
     # assert reply =~ "CLIENTSTATUS #{user2.name} 0\n"
 
     # Kick user2
-    battle = Lobby.get_battle(battle_id)
+    battle = Lobby.get_battle(lobby_id)
     assert Enum.count(battle.players) == 1
 
     _send_raw(socket, "KICKFROMBATTLE #{user2.name}\n")
     reply = _recv_raw(socket2)
-    assert reply == "FORCEQUITBATTLE\nLEFTBATTLE #{battle_id} #{user2.name}\n"
+    assert reply == "FORCEQUITBATTLE\nLEFTBATTLE #{lobby_id} #{user2.name}\n"
 
     # Add user 3
     %{socket: socket3, user: user3} = auth_setup()
 
-    _send_raw(socket2, "JOINBATTLE #{battle_id} empty script_password3\n")
+    _send_raw(socket2, "JOINBATTLE #{lobby_id} empty script_password3\n")
     _send_raw(socket, "JOINBATTLEACCEPT #{user2.name}\n")
     _ = _recv_raw(socket)
     _ = _recv_raw(socket2)
 
     # User 3 join the battle
-    _send_raw(socket3, "JOINBATTLE #{battle_id} empty script_password3\n")
+    _send_raw(socket3, "JOINBATTLE #{lobby_id} empty script_password3\n")
     _send_raw(socket, "JOINBATTLEACCEPT #{user3.name}\n")
     reply = _recv_raw(socket2)
-    assert reply == "JOINEDBATTLE #{battle_id} #{user3.name}\n"
+    assert reply == "JOINEDBATTLE #{lobby_id} #{user3.name}\n"
 
     # Had a bug where the battle would be incorrectly closed
     # after kicking a player, it was caused by the host disconnecting
     # and in the process closed out the battle
-    battle = Lobby.get_battle(battle_id)
+    battle = Lobby.get_battle(lobby_id)
     assert battle != nil
 
     # Adding start rectangles
@@ -182,12 +182,12 @@ defmodule Teiserver.SpringBattleHostTest do
     _send_raw(socket, "ADDSTARTRECT 2 50 50 100 100\n")
     _ = _recv_raw(socket)
 
-    battle = Lobby.get_battle(battle_id)
+    battle = Lobby.get_battle(lobby_id)
     assert Enum.count(battle.start_rectangles) == 1
 
     _send_raw(socket, "REMOVESTARTRECT 2\n")
     _ = _recv_raw(socket)
-    battle = Lobby.get_battle(battle_id)
+    battle = Lobby.get_battle(lobby_id)
     assert Enum.count(battle.start_rectangles) == 0
 
     # Add and remove script tags
@@ -198,7 +198,7 @@ defmodule Teiserver.SpringBattleHostTest do
 
     assert reply == "SETSCRIPTTAGS custom/key1=customValue\tcustom/key2=customValue2\n"
 
-    battle = Lobby.get_battle(battle_id)
+    battle = Lobby.get_battle(lobby_id)
     assert Map.has_key?(battle.tags, "custom/key1")
     assert Map.has_key?(battle.tags, "custom/key2")
 
@@ -206,7 +206,7 @@ defmodule Teiserver.SpringBattleHostTest do
     reply = _recv_raw(socket)
     assert reply == "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n"
 
-    battle = Lobby.get_battle(battle_id)
+    battle = Lobby.get_battle(lobby_id)
     refute Map.has_key?(battle.tags, "custom/key1")
     # We never removed key2, it should still be there
     assert Map.has_key?(battle.tags, "custom/key2")
@@ -244,7 +244,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == :timeout
 
     # Now lets get them to rejoin the battle
-    _send_raw(socket2, "JOINBATTLE #{battle_id} empty script_password2\n")
+    _send_raw(socket2, "JOINBATTLE #{lobby_id} empty script_password2\n")
     _send_raw(socket, "JOINBATTLEACCEPT #{user2.name}\n")
     :timer.sleep(100)
     _ = _recv_raw(socket2)
@@ -364,8 +364,8 @@ defmodule Teiserver.SpringBattleHostTest do
     # Leave the battle
     _send_raw(socket, "LEAVEBATTLE\n")
     reply = _recv_raw(socket)
-    # assert reply =~ "LEFTBATTLE #{battle_id} #{user.name}\n"
-    assert reply =~ "BATTLECLOSED #{battle_id}\n"
+    # assert reply =~ "LEFTBATTLE #{lobby_id} #{user.name}\n"
+    assert reply =~ "BATTLECLOSED #{lobby_id}\n"
 
     _send_raw(socket, "EXIT\n")
     _recv_raw(socket)

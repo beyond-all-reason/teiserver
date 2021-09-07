@@ -48,7 +48,7 @@ defmodule Teiserver.Protocols.Tachyon do
   def convert_object(:user_extended, user), do: Map.take(user, [:id, :name, :bot, :clan_id, :skill, :icons, :permissions,
                     :friends, :friend_requests, :ignores, :springid])
   def convert_object(:client, client), do: Map.take(client, [:id, :in_game, :away, :ready, :team_number, :ally_team_number,
-                    :team_colour, :role, :bonus, :synced, :faction, :battle_id])
+                    :team_colour, :role, :bonus, :synced, :faction, :lobby_id])
   def convert_object(:lobby, lobby), do: Map.take(lobby, [:id, :name, :founder_id, :type, :max_players, :password,
                     :locked, :engine_name, :engine_version, :players, :spectators, :bots, :ip, :settings, :map_name,
                     :map_hash])
@@ -107,17 +107,17 @@ defmodule Teiserver.Protocols.Tachyon do
     end
   end
 
-  def do_leave_battle(state, battle_id) do
-    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle_id}")
+  def do_leave_battle(state, lobby_id) do
+    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{lobby_id}")
     state
   end
 
   # Does the joining of a battle
   @spec do_join_battle(map(), integer(), String.t()) :: map()
-  def do_join_battle(state, battle_id, script_password) do
+  def do_join_battle(state, lobby_id, script_password) do
     # TODO: Change this function to be purely about sending info to the client
     # the part where it calls Lobby.add_user_to_battle should happen elsewhere
-    battle = Lobby.get_battle(battle_id)
+    battle = Lobby.get_battle(lobby_id)
     Lobby.add_user_to_battle(state.userid, battle.id, script_password)
     PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
     PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
@@ -144,6 +144,6 @@ defmodule Teiserver.Protocols.Tachyon do
 
     TachyonOut.reply(:lobby, :request_status, nil, state)
 
-    %{state | battle_id: battle.id}
+    %{state | lobby_id: battle.id}
   end
 end

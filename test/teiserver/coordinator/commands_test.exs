@@ -69,7 +69,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     _tachyon_send(hsocket, data)
 
     player_client = Client.get_client_by_id(player.id)
-    assert player_client.battle_id == nil
+    assert player_client.lobby_id == nil
   end
 
   test "kick by id", %{host: host, player: player, hsocket: hsocket} do
@@ -80,7 +80,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     _tachyon_send(hsocket, data)
 
     player_client = Client.get_client_by_id(player.id)
-    assert player_client.battle_id == nil
+    assert player_client.lobby_id == nil
   end
 
   test "error with no name", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
@@ -92,7 +92,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
 
     # They should not be kicked, we expect no other errors at this stage
     player_client = Client.get_client_by_id(player.id)
-    assert player_client.battle_id == lobby_id
+    assert player_client.lobby_id == lobby_id
   end
 
   test "ban by name", %{host: host, player: player, hsocket: hsocket} do
@@ -103,7 +103,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     _tachyon_send(hsocket, data)
 
     player_client = Client.get_client_by_id(player.id)
-    assert player_client.battle_id == nil
+    assert player_client.lobby_id == nil
   end
 
   test "ban by partial name", %{host: host, player: player, hsocket: hsocket} do
@@ -114,7 +114,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     _tachyon_send(hsocket, data)
 
     player_client = Client.get_client_by_id(player.id)
-    assert player_client.battle_id == nil
+    assert player_client.lobby_id == nil
   end
 
   test "blacklist", %{lobby_id: lobby_id, host: host, player: player, hsocket: hsocket} do

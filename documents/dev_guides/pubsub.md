@@ -37,7 +37,7 @@ Valid events:
   {:kick_user_from_battle_lobby, lobby_id, userid}
   
   # Coordinator
-  {:consul_server_updated, state.battle_id, reason}
+  {:consul_server_updated, state.lobby_id, reason}
 
   # Client
   {:updated_client_status, client, reason} # Yes, that's the full client object

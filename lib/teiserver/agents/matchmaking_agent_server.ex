@@ -78,7 +78,7 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
   #   state
   # end
   # defp handle_msg(%{"cmd" => "s.lobby.leave", "result" => "success"}, state) do
-  #   %{state | battle_id: nil}
+  #   %{state | lobby_id: nil}
   # end
   defp handle_msg(%{"cmd" => "s.communication.direct_message"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.announce"}, state), do: state
@@ -93,7 +93,7 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
   # defp leave_battle(state) do
   #   AgentLib._send(state.socket, %{cmd: "c.lobby.leave"})
   #   AgentLib.post_agent_update(state.id, "left battle")
-  #   %{state | battle_id: nil}
+  #   %{state | lobby_id: nil}
   # end
 
   # Startup

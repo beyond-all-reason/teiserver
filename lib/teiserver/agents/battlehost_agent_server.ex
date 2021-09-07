@@ -28,7 +28,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   end
 
   def handle_info(:tick, state) do
-    battle = Lobby.get_battle(state.battle_id)
+    battle = Lobby.get_battle(state.lobby_id)
 
     new_state = cond do
       # Chance of doing nothing
@@ -79,10 +79,10 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
     state
   end
   defp handle_msg(%{"cmd" => "s.lobby.leave", "result" => "success"}, state) do
-    %{state | battle_id: nil}
+    %{state | lobby_id: nil}
   end
-  defp handle_msg(%{"cmd" => "s.lobby.create", "lobby" => %{"id" => battle_id}}, state) do
-    %{state | battle_id: battle_id}
+  defp handle_msg(%{"cmd" => "s.lobby.create", "lobby" => %{"id" => lobby_id}}, state) do
+    %{state | lobby_id: lobby_id}
   end
   defp handle_msg(%{"cmd" => "s.communication.direct_message"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.announce"}, state), do: state
@@ -116,7 +116,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   defp leave_battle(state) do
     AgentLib._send(state.socket, %{cmd: "c.lobby.leave"})
     AgentLib.post_agent_update(state.id, "left battle")
-    %{state | battle_id: nil}
+    %{state | lobby_id: nil}
   end
 
   # Startup
@@ -132,7 +132,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
        id: opts.id,
        number: opts.number,
        name: Map.get(opts, :name, opts.number),
-       battle_id: nil,
+       lobby_id: nil,
        socket: nil,
        reject: Map.get(opts, :reject, false),
        leave_chance: Map.get(opts, :leave_chance, @leave_chance),

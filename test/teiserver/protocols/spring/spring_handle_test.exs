@@ -27,7 +27,7 @@ defmodule Teiserver.SpringHandleTest do
 
   test "LEAVEBATTLE" do
     state = TeiserverTestLib.mock_state_auth(SpringIn, SpringOut)
-    state = %{state | battle_id: 1}
+    state = %{state | lobby_id: 1}
     SpringIn.handle("LEAVEBATTLE", state)
   end
 
@@ -39,7 +39,7 @@ defmodule Teiserver.SpringHandleTest do
     ]
 
     state = TeiserverTestLib.mock_state_auth(SpringIn, SpringOut)
-    state = %{state | battle_id: 1}
+    state = %{state | lobby_id: 1}
 
     for v <- values do
       resp = SpringIn.handle(v, state)

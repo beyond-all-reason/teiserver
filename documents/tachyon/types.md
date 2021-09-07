@@ -118,7 +118,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 * bonus: integer, default: 0
 * synced: boolean
 * faction: string
-* battle_id: Lobby.id -- TODO: Replace with lobby_id
+* lobby_id: Lobby.id -- TODO: Replace with lobby_id
 
 #### Examples
 ```
@@ -133,7 +133,7 @@ This represents a user who is logged in. A user who is logged out will not have 
   "role": "player",
   "synced": true,
   "faction": "random",
-  "battle_id": 5
+  "lobby_id": 5
 }
 ```
 

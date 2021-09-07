@@ -114,9 +114,9 @@ defmodule Teiserver.Protocols.SpringOut do
     "NO cmd=#{cmd}\n"
   end
 
-  defp do_reply(:list_battles, battle_ids) do
+  defp do_reply(:list_battles, lobby_ids) do
     ids =
-      battle_ids
+      lobby_ids
       |> Enum.join("\t")
 
     "s.battles.id_list #{ids}\n"
@@ -196,20 +196,20 @@ defmodule Teiserver.Protocols.SpringOut do
     }\t#{battle.map_name}\t#{battle.name}\t#{battle.game_name}\n"
   end
 
-  defp do_reply(:battle_opened, battle_id) do
-    do_reply(:battle_opened, Lobby.get_battle(battle_id))
+  defp do_reply(:battle_opened, lobby_id) do
+    do_reply(:battle_opened, Lobby.get_battle(lobby_id))
   end
 
-  defp do_reply(:open_battle_success, battle_id) do
-    "OPENBATTLE #{battle_id}\n"
+  defp do_reply(:open_battle_success, lobby_id) do
+    "OPENBATTLE #{lobby_id}\n"
   end
 
   defp do_reply(:open_battle_failure, reason) do
     "OPENBATTLEFAILED #{reason}\n"
   end
 
-  defp do_reply(:battle_closed, battle_id) do
-    "BATTLECLOSED #{battle_id}\n"
+  defp do_reply(:battle_closed, lobby_id) do
+    "BATTLECLOSED #{lobby_id}\n"
   end
 
   defp do_reply(:request_battle_status, nil) do
@@ -224,8 +224,8 @@ defmodule Teiserver.Protocols.SpringOut do
     }\n"
   end
 
-  defp do_reply(:update_battle, battle_id) do
-    do_reply(:update_battle, Lobby.get_battle(battle_id))
+  defp do_reply(:update_battle, lobby_id) do
+    do_reply(:update_battle, Lobby.get_battle(lobby_id))
   end
 
   defp do_reply(:join_battle_success, battle) do
@@ -269,19 +269,19 @@ defmodule Teiserver.Protocols.SpringOut do
     "DISABLEUNITS " <> Enum.join(units, " ") <> "\n"
   end
 
-  defp do_reply(:add_bot_to_battle, {battle_id, bot}) do
+  defp do_reply(:add_bot_to_battle, {lobby_id, bot}) do
     status = Spring.create_battle_status(bot)
 
-    "ADDBOT #{battle_id} #{bot.name} #{bot.owner_name} #{status} #{bot.team_colour} #{bot.ai_dll}\n"
+    "ADDBOT #{lobby_id} #{bot.name} #{bot.owner_name} #{status} #{bot.team_colour} #{bot.ai_dll}\n"
   end
 
-  defp do_reply(:remove_bot_from_battle, {battle_id, botname}) do
-    "REMOVEBOT #{battle_id} #{botname}\n"
+  defp do_reply(:remove_bot_from_battle, {lobby_id, botname}) do
+    "REMOVEBOT #{lobby_id} #{botname}\n"
   end
 
-  defp do_reply(:update_bot, {battle_id, bot}) do
+  defp do_reply(:update_bot, {lobby_id, bot}) do
     status = Spring.create_battle_status(bot)
-    "UPDATEBOT #{battle_id} #{bot.name} #{status} #{bot.team_colour}\n"
+    "UPDATEBOT #{lobby_id} #{bot.name} #{status} #{bot.team_colour}\n"
   end
 
   # Not actually used
@@ -474,36 +474,36 @@ defmodule Teiserver.Protocols.SpringOut do
     "LEFT #{room_name} #{username}\n"
   end
 
-  defp do_reply(:add_user_to_battle, {userid, battle_id, nil}) do
+  defp do_reply(:add_user_to_battle, {userid, lobby_id, nil}) do
     username = UserCache.get_username(userid)
-    "JOINEDBATTLE #{battle_id} #{username}\n"
+    "JOINEDBATTLE #{lobby_id} #{username}\n"
   end
 
-  defp do_reply(:add_user_to_battle, {userid, battle_id, script_password}) do
+  defp do_reply(:add_user_to_battle, {userid, lobby_id, script_password}) do
     username = UserCache.get_username(userid)
-    "JOINEDBATTLE #{battle_id} #{username} #{script_password}\n"
+    "JOINEDBATTLE #{lobby_id} #{username} #{script_password}\n"
   end
 
-  defp do_reply(:remove_user_from_battle, {userid, battle_id}) do
+  defp do_reply(:remove_user_from_battle, {userid, lobby_id}) do
     username = UserCache.get_username(userid)
-    "LEFTBATTLE #{battle_id} #{username}\n"
+    "LEFTBATTLE #{lobby_id} #{username}\n"
   end
 
-  defp do_reply(:kick_user_from_battle, {userid, battle_id}) do
+  defp do_reply(:kick_user_from_battle, {userid, lobby_id}) do
     username = UserCache.get_username(userid)
-    "KICKFROMBATTLE #{battle_id} #{username}\n"
+    "KICKFROMBATTLE #{lobby_id} #{username}\n"
   end
 
   defp do_reply(:forcequit_battle, nil) do
     "FORCEQUITBATTLE\n"
   end
 
-  defp do_reply(:battle_message, {userid, msg, _battle_id}) do
+  defp do_reply(:battle_message, {userid, msg, _lobby_id}) do
     username = UserCache.get_username(userid)
     "SAIDBATTLE #{username} #{msg}\n"
   end
 
-  defp do_reply(:battle_message_ex, {userid, msg, _battle_id}) do
+  defp do_reply(:battle_message_ex, {userid, msg, _lobby_id}) do
     username = UserCache.get_username(userid)
     "SAIDBATTLEEX #{username} #{msg}\n"
   end
@@ -520,14 +520,14 @@ defmodule Teiserver.Protocols.SpringOut do
     ""
   end
 
-  def do_leave_battle(state, battle_id) do
-    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle_id}")
+  def do_leave_battle(state, lobby_id) do
+    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{lobby_id}")
     state
   end
 
   @spec do_join_battle(map(), integer(), String.t()) :: map()
-  def do_join_battle(state, battle_id, script_password) do
-    battle = Lobby.get_battle(battle_id)
+  def do_join_battle(state, lobby_id, script_password) do
+    battle = Lobby.get_battle(lobby_id)
     Lobby.add_user_to_battle(state.userid, battle.id, script_password)
     PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
     PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
@@ -556,7 +556,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
     reply(:request_battle_status, nil, nil, state)
 
-    %{state | battle_id: battle.id}
+    %{state | lobby_id: battle.id}
   end
 
   @spec do_login_accepted(map(), map()) :: map()
@@ -585,16 +585,16 @@ defmodule Teiserver.Protocols.SpringOut do
     # Battle entry commands
     # Once we know this is stable we can consider optimising it to not
     # need to send() to self a few dozen times
-    Lobby.list_battle_ids()
-    |> Enum.each(fn battle_id ->
-      send(self(), {:global_battle_updated, battle_id, :battle_opened})
-      send(self(), {:global_battle_updated, battle_id, :update_battle_info})
+    Lobby.list_lobby_ids()
+    |> Enum.each(fn lobby_id ->
+      send(self(), {:global_battle_updated, lobby_id, :battle_opened})
+      send(self(), {:global_battle_updated, lobby_id, :update_battle_info})
 
-      battle = Lobby.get_battle(battle_id)
+      battle = Lobby.get_battle(lobby_id)
 
       battle.players
       |> Enum.each(fn player_id ->
-        send(self(), {:add_user_to_battle, player_id, battle_id, nil})
+        send(self(), {:add_user_to_battle, player_id, lobby_id, nil})
       end)
     end)
 

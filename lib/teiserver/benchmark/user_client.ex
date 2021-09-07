@@ -52,7 +52,7 @@ defmodule Teiserver.Benchmark.UserClient do
     _send(state.socket, "MYBATTLESTATUS #{Enum.random(@statuses)} 0\n")
     :timer.sleep(250)
 
-    %{state | battle_id: id}
+    %{state | lobby_id: id}
   end
 
   defp wait_for_reply(socket, msg_id, start_time) do
@@ -119,7 +119,7 @@ defmodule Teiserver.Benchmark.UserClient do
        initial_delay: opts.delay,
        server: opts.server,
        port: opts.port,
-       battle_id: nil
+       lobby_id: nil
      }}
   end
 end
