@@ -63,6 +63,7 @@ defmodule Teiserver.Coordinator.Parser do
       force: false,
       silent: false,
       command: nil,
+      error: nil,
       senderid: userid
     }
     |> strip_force_consul

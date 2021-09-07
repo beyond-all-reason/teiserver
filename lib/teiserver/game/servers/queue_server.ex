@@ -271,13 +271,13 @@ defmodule Teiserver.Game.QueueServer do
         # Coordinator sets up the battle
         map_name = state.map_list |> Enum.random()
         # Lobby.start_coordinator_mode(battle.id)
-        Coordinator.cast_consul(battle.id, %{command: "manual-autohost", senderid: Coordinator.get_coordinator_userid()})
-        Coordinator.cast_consul(battle.id, %{command: "map", remaining: map_name, senderid: Coordinator.get_coordinator_userid()})
+        Coordinator.cast_consul(battle.id, %{force: true, command: "manual-autohost", senderid: Coordinator.get_coordinator_userid()})
+        Coordinator.cast_consul(battle.id, %{force: true, command: "changemap", remaining: map_name, senderid: Coordinator.get_coordinator_userid()})
         :timer.sleep(250)
 
         # Now put the players on their teams, for now we're assuming every game is just a 1v1
         [p1, p2] = state.players_accepted
-        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p1, senderid: Coordinator.get_coordinator_userid(),
+        Coordinator.cast_consul(battle.id, %{force: true, command: "change-battlestatus", remaining: p1, senderid: Coordinator.get_coordinator_userid(),
           status: %{
             team_number: 0,
             ally_team_number: 0,
@@ -286,7 +286,7 @@ defmodule Teiserver.Game.QueueServer do
             ready: true
           }
         })
-        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p2, senderid: Coordinator.get_coordinator_userid(),
+        Coordinator.cast_consul(battle.id, %{force: true, command: "change-battlestatus", remaining: p2, senderid: Coordinator.get_coordinator_userid(),
           status: %{
             team_number: 1,
             ally_team_number: 1,
@@ -298,7 +298,7 @@ defmodule Teiserver.Game.QueueServer do
 
         # Give things time to propagate before we start
         :timer.sleep(250)
-        Coordinator.cast_consul(battle.id, %{command: "forcestart", senderid: Coordinator.get_coordinator_userid()})
+        Coordinator.cast_consul(battle.id, %{force: true, command: "forcestart", senderid: Coordinator.get_coordinator_userid()})
 
         PubSub.broadcast(
           Central.PubSub,

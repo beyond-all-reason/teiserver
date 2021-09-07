@@ -10,8 +10,8 @@ defmodule TeiserverWeb.Router do
       scope "/", TeiserverWeb.General, as: :ts_general do
         pipe_through([:browser, :blank_layout])
 
-        get("/gdpr", GeneralController, :gdpr)
         get("/privacy_policy", GeneralController, :gdpr)
+        get("/gdpr", GeneralController, :gdpr)
       end
 
       scope "/teiserver", TeiserverWeb.General, as: :ts_general do

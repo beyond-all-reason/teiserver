@@ -4,12 +4,19 @@ defmodule Teiserver.Coordinator.JoiningTest do
   alias Teiserver.Common.PubsubListener
   alias Teiserver.Coordinator
 
+  alias Teiserver.Client
+  alias Teiserver.Account.UserCache
+
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
   setup do
     Teiserver.Coordinator.start_coordinator()
     %{socket: socket, user: user} = tachyon_auth_setup()
+
+    # User needs to be a moderator (at this time) to start/stop Coordinator mode
+    UserCache.update_user(%{user | moderator: true})
+    Client.refresh_client(user.id)
 
     battle_data = %{
       cmd: "c.lobby.create",
@@ -41,7 +48,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
     consul_state = Coordinator.call_consul(lobby_id, :get_all)
     assert consul_state.welcome_message == nil
 
-    data = %{cmd: "c.lobby.message", userid: user.id, message: "!welcome-message This is the welcome message"}
+    data = %{cmd: "c.lobby.message", userid: user.id, message: "!force welcome-message This is the welcome message"}
     _tachyon_send(socket, data)
 
     messages = PubsubListener.get(listener)

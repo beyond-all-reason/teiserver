@@ -155,9 +155,9 @@ defmodule Teiserver.SpringMatchmakingTest do
     assert reply =~ "JOINEDBATTLE #{battle_id} #{user1.name}"
     assert reply =~ "SAIDPRIVATE Coordinator !autobalance off"
     assert reply =~ "SAIDPRIVATE Coordinator !map map1"
-    assert reply =~ "SAIDBATTLE Coordinator ! map map1"
+    assert reply =~ "SAIDBATTLE Coordinator ! force changemap map1"
     assert reply =~ "SAIDPRIVATE Coordinator !forcestart"
-    assert reply =~ "SAIDBATTLE Coordinator ! forcestart"
+    assert reply =~ "SAIDBATTLE Coordinator ! force forcestart"
 
     # Lets make sure the clients got updated
     client1 = Client.get_client_by_id(user1.id)

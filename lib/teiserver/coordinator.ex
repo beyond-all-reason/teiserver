@@ -82,6 +82,7 @@ defmodule Teiserver.Coordinator do
     call_consul(lobby_id, {:request_user_change_status, client})
   end
 
+  @spec handle_in(T.userid(), String.t(), T.lobby_id()) :: :say | :handled
   def handle_in(userid, msg, lobby_id) do
     Parser.handle_in(userid, msg, lobby_id)
   end

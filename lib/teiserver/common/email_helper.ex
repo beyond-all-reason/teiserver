@@ -77,31 +77,6 @@ defmodule Teiserver.EmailHelper do
     |> Mailer.deliver_now(response: true)
   end
 
-  def spring_password_reset(user, plain_password) do
-    html_body = """
-    <p>As per the spring protocol your password is being emailed to you, it is: #{plain_password}.</p>
-
-    <p>This password will also work on the main site</p>
-    """
-
-    text_body = """
-    As per the spring protocol your password is being emailed to you, it is: #{plain_password}.
-
-    This password will also work on the main site
-    """
-
-    date = TimexHelper.date_to_str(Timex.now(), format: :email_date)
-
-    Email.new_email()
-    |> Email.to({user.name, user.email})
-    |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
-    |> Email.subject("BAR - Spring password reset")
-    |> Email.put_header("Date", date)
-    |> Email.html_body(html_body)
-    |> Email.text_body(text_body)
-    |> Mailer.deliver_now()
-  end
-
   def password_reset(user, _plain_password) do
     Central.Account.UserLib.reset_password_request(user)
     |> Central.Mailer.deliver_now()

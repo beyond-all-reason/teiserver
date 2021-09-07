@@ -27,6 +27,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Data.Types, as: T
 
   @always_allow ~w(status help)
+  @moderator_only ~w(pull specunready makeready settag)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -141,13 +142,24 @@ defmodule Teiserver.Coordinator.ConsulServer do
       :allow ->
         handle_command(cmd, state)
       :with_vote ->
-        handle_command(cmd, state)
+        create_vote(cmd, state)
       :existing_vote ->
         state
       :disallow ->
         state
     end
     {:noreply, new_state}
+  end
+
+  @doc """
+    Given a command it creates a new vote (if one is not already in progress)
+  """
+  @spec create_vote(Map.t(), Map.t()) :: Map.t()
+  def create_vote(cmd, state) do
+    IO.puts ""
+    IO.inspect cmd
+    IO.puts ""
+    state
   end
 
   @doc """
@@ -160,6 +172,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       senderid: userid
     }
   """
+  @spec handle_command(Map.t(), Map.t()) :: Map.t()
   def handle_command(%{command: "welcome-message", remaining: remaining} = cmd, state) do
     new_state = case String.trim(remaining) do
       "" ->
@@ -215,10 +228,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state
   end
 
-  # Normally we'd have this as a passthrough but we use it as part of the matchmaking
-  # queue server to change the map.
-  # TODO: Find a way to make this a passthrough
-  def handle_command(%{command: "map", remaining: map_name} = cmd, state) do
+  # TODO: Swap this back over to `map` once we have voting working etc
+  def handle_command(%{command: "changemap", remaining: map_name} = cmd, state) do
     Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!map #{map_name}")
     say_command(cmd, state)
   end
@@ -485,8 +496,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_command(cmd, state) do
-    Logger.error("No handler in consul_server for command type '#{cmd.command}'")
-    Lobby.do_say(cmd.senderid, cmd.raw, state.lobby_id)
+    if Map.has_key?(cmd, :raw) do
+      Lobby.do_say(cmd.senderid, cmd.raw, state.lobby_id)
+    else
+      Logger.error("No handler in consul_server for command #{Kernel.inspect cmd}")
+    end
     state
   end
 
@@ -626,6 +640,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
       cmd.force == true and user.moderator == true ->
         :allow
 
+      Enum.member?(@moderator_only, cmd.command) ->
+        :disallow
+
       cmd.vote == true and state.current_vote != nil ->
         :existing_vote
 
@@ -667,6 +684,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp is_friend?(_userid, _state) do
     true
   end
+
+  # @spec say_message(T.userid(), String.t(), Map.t()) :: Map.t()
+  # defp say_message(sender_id, msg, state) do
+  #   Lobby.say(sender_id, msg, state.lobby_id)
+  #   state
+  # end
+
 
   @spec say_command(Map.t(), Map.t()) :: Map.t()
   defp say_command(%{silent: true}, state), do: state

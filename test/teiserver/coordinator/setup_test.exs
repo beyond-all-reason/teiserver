@@ -37,7 +37,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
     assert battle.coordinator_mode == true
 
     # Stop it
-    Lobby.say(user.id, "!coordinator stop", id)
+    Lobby.say(user.id, "!force coordinator stop", id)
     :timer.sleep(@sleep)
 
     battle = Lobby.get_battle!(id)
@@ -70,15 +70,15 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
     assert messages == [{:battle_updated, battle.id, {user.id, "Test message", battle.id}, :say}]
 
     # Now command
-    result = Lobby.say(user.id, "!start", battle.id)
+    result = Lobby.say(user.id, "!force forcestart", battle.id)
     assert result == :ok
 
     :timer.sleep(@sleep)
     reply = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.communication.direct_message", "message" => "!cv start", "sender" => user.id}
+    assert reply == %{"cmd" => "s.communication.direct_message", "message" => "!forcestart", "sender" => user.id}
 
     # Converted message should appear here
     messages = PubsubListener.get(listener)
-    assert messages == [{:battle_updated, battle.id, {user.id, "! cv start", battle.id}, :say}]
+    assert messages == [{:battle_updated, battle.id, {user.id, "! force forcestart", battle.id}, :say}]
   end
 end
