@@ -31,7 +31,7 @@ defmodule Teiserver.EmailHelper do
           ""
 
         d ->
-          "If you have any questions please get in touch through the <a href=\"#{d}\">discord</a>."
+          "#{d}"
       end
 
     html_body = """
@@ -45,9 +45,9 @@ defmodule Teiserver.EmailHelper do
       url
     }">#{url}</a> which you will need to make use of to use the site. If you reset your password via this link it will also verify your user.<p>
 
-    Please also take time to read our <a href="#{website_url}privacy_policy">privacy policy</a>.
+    Please also take time to read our <a href="#{website_url}/privacy_policy">privacy policy</a>.
 
-    <p>#{discord}</p>
+    <p>If you have any questions please get in touch through the <a href="#{discord}">discord</a>.</p>
     """
 
     text_body = """
@@ -59,9 +59,9 @@ defmodule Teiserver.EmailHelper do
       url
     }. You will need to make use of it to use the site. If you reset your password via this link it will also verify your user.<p>
 
-    Please also take time to read our privacy policy at #{website_url}privacy_policy.
+    Please also take time to read our privacy policy at #{website_url}/privacy_policy.
 
-    #{discord}
+    If you have any questions please get in touch through the discord at #{discord}.
     """
 
     date = TimexHelper.date_to_str(Timex.now(), format: :email_date)
