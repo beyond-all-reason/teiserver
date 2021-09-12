@@ -5,7 +5,7 @@ defmodule Teiserver.TcpServer do
 
   alias Teiserver.Client
   alias Teiserver.Account.UserCache
-  alias Teiserver.Tcp.TcpChat
+  # alias Teiserver.Tcp.{TcpChat, TcpLobby}
 
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [
@@ -173,7 +173,7 @@ defmodule Teiserver.TcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:client_message, :lobby, _userid, data}, state) do
+  def handle_info({:client_message, :lobby, _userid, _data}, state) do
     # TODO: Handle these?
     {:noreply, state}
   end
