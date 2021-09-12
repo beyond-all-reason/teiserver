@@ -83,7 +83,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       ip: "127.0.0.1",
       userid: user.id,
       username: user.name,
-      battle_host: false,
+      lobby_host: false,
       user: user,
       rooms: rooms
     }
@@ -143,7 +143,7 @@ defmodule Teiserver.Bridge.BridgeServer do
             moderator: false,
             verified: true,
             country_override: "GB",# TODO: Make this configurable
-            lobbyid: "Teiserver Internal Process"
+            lobby_client: "Teiserver Internal Process"
           }
         })
 

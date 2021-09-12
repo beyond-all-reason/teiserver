@@ -123,25 +123,6 @@ defmodule Teiserver.Protocols.Tachyon do
     PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
     TachyonOut.reply(:lobby, :join_response, {:approve, battle}, state)
 
-    # [battle.founder_id | battle.players]
-    # |> Enum.each(fn id ->
-    #   client = Client.get_client_by_id(id)
-    #   TachyonOut.reply(:client_battlestatus, client, nil, state)
-    # end)
-
-    # battle.bots
-    # |> Enum.each(fn {_botname, bot} ->
-    #   TachyonOut.reply(:add_bot_to_battle, {battle.id, bot}, nil, state)
-    # end)
-
-    # client = Client.get_client_by_id(state.userid)
-    # TachyonOut.reply(:client_battlestatus, client, nil, state)
-
-    # battle.start_rectangles
-    # |> Enum.each(fn {team, r} ->
-    #   TachyonOut.reply(:add_start_rectangle, {team, r}, nil, state)
-    # end)
-
     TachyonOut.reply(:lobby, :request_status, nil, state)
 
     %{state | lobby_id: battle.id}

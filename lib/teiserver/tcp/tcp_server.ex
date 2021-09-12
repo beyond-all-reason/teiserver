@@ -5,6 +5,7 @@ defmodule Teiserver.TcpServer do
 
   alias Teiserver.Client
   alias Teiserver.Account.UserCache
+  alias Teiserver.Tcp.TcpChat
 
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [
@@ -91,7 +92,7 @@ defmodule Teiserver.TcpServer do
       # Client state
       userid: nil,
       username: nil,
-      battle_host: false,
+      lobby_host: false,
       user: nil,
       queues: [],
       ready_queue_id: nil,
@@ -167,12 +168,17 @@ defmodule Teiserver.TcpServer do
   end
 
   # Client channel messages
-  def handle_info({:client_message, :matchmaking, data}, state) do
+  def handle_info({:client_message, :matchmaking, _userid, data}, state) do
     new_state = matchmaking_update(data, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:client_message, topic, _data}, state) do
+  def handle_info({:client_message, :lobby, _userid, data}, state) do
+    # TODO: Handle these?
+    {:noreply, state}
+  end
+
+  def handle_info({:client_message, topic, _userid, _data}, state) do
     Logger.warn("No tcp_server handler for :client_message with topic #{topic}")
     {:noreply, state}
   end
@@ -183,6 +189,13 @@ defmodule Teiserver.TcpServer do
     new_state = user_logged_in(userid, state)
     {:noreply, new_state}
   end
+
+
+  # Lobby chat
+  # def handle_info({:lobby_chat, action, lobby_id, userid, msg}, state) do
+  #   {:noreply, TcpChat.do_handle({action, lobby_id, userid, msg}, state)}
+  # end
+
 
   # Some logic because if we're the one logged out we need to disconnect
   def handle_info({:user_logged_out, userid, username}, state) do
@@ -411,7 +424,7 @@ defmodule Teiserver.TcpServer do
       :match_cancel ->
         %{state | ready_queue_id: nil}
 
-      :join_battle ->
+      :join_lobby ->
         # TODO: Make it so we know what the script password is because normally it's sent
         # by the client, maybe update the MM protocol so when you join a queue it's there?
         state.protocol_out.do_join_battle(state, data, state.script_password)
@@ -474,7 +487,7 @@ defmodule Teiserver.TcpServer do
         state.protocol_out.reply(:update_battle, lobby_id, nil, state)
 
       :battle_opened ->
-        if state.battle_host == false or state.lobby_id != lobby_id do
+        if state.lobby_host == false or state.lobby_id != lobby_id do
           new_known_battles = [lobby_id | state.known_battles]
           new_state = %{state | known_battles: new_known_battles}
           new_state.protocol_out.reply(:battle_opened, lobby_id, nil, new_state)
@@ -521,7 +534,7 @@ defmodule Teiserver.TcpServer do
   # This is the result of being forced to join a battle
   defp force_join_battle(lobby_id, script_password, state) do
     new_state = state.protocol_out.do_leave_battle(state, lobby_id)
-    new_state = %{new_state | script_password: script_password}
+    new_state = %{new_state | lobby_id: lobby_id, script_password: script_password}
     state.protocol_out.do_join_battle(new_state, lobby_id, script_password)
   end
 
@@ -531,7 +544,7 @@ defmodule Teiserver.TcpServer do
   defp user_join_battle(userid, lobby_id, script_password, state) do
     script_password =
       cond do
-        state.battle_host and state.lobby_id == lobby_id -> script_password
+        state.lobby_host and state.lobby_id == lobby_id -> script_password
         state.userid == userid -> script_password
         true -> nil
       end

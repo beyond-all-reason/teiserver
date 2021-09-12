@@ -8,7 +8,6 @@ defmodule Teiserver.Throttles do
         data: %{id: id}
       })
 
-    send(throttle_pid, :startup)
     throttle_pid
   end
 

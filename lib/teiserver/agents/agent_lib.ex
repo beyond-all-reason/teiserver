@@ -16,14 +16,13 @@ defmodule Teiserver.Agents.AgentLib do
   @spec do_start() :: :ok
   defp do_start() do
     # Start the supervisor server
-    {:ok, supervisor_pid} =
+    {:ok, _supervisor_pid} =
       DynamicSupervisor.start_child(Teiserver.Agents.DynamicSupervisor, {
         Teiserver.Agents.SupervisorAgentServer,
         name: via_tuple(:supervisor),
         data: %{}
       })
 
-    send(supervisor_pid, :begin)
     :ok
   end
 

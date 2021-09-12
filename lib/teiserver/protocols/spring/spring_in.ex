@@ -732,7 +732,7 @@ defmodule Teiserver.Protocols.SpringIn do
         %{
           state
           | lobby_id: battle.id,
-            battle_host: true,
+            lobby_host: true,
             known_battles: [battle.id | state.known_battles]
         }
 
@@ -1076,13 +1076,13 @@ defmodule Teiserver.Protocols.SpringIn do
       PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{b}")
     end)
 
-    %{state | battle_host: false}
+    %{state | lobby_host: false}
   end
 
   defp do_handle("LEAVEBATTLE", _, _msg_id, state) do
     PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{state.lobby_id}")
     Lobby.remove_user_from_battle(state.userid, state.lobby_id)
-    %{state | battle_host: false}
+    %{state | lobby_host: false}
   end
 
   defp do_handle("MYBATTLESTATUS", _, _, %{lobby_id: nil} = state), do: state

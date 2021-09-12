@@ -13,7 +13,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
   def handle_info({:battle_lobby_closed, _id}, state) do
     :ok = PubSub.broadcast(
       Central.PubSub,
-      "teiserver_liveview_battle_lobby_updates:#{state.battle_lobby_id}",
+      "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
       {:battle_lobby_throttle, :closed}
     )
     {:noreply, state}
@@ -87,6 +87,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
   end
 
   def init(_opts) do
+    send(self(), :startup)
     :timer.send_interval(@update_interval, self(), :tick)
 
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")

@@ -43,7 +43,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_battle_lobby_updates:#{id}")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
     battle = Lobby.get_battle!(id)
 
     case battle do

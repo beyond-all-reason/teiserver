@@ -29,7 +29,7 @@ defmodule Teiserver.SpringBattleHostTest do
   test "battle with password", %{socket: socket, user: user} do
     _send_raw(
       socket,
-      "OPENBATTLE 0 0 password_test 322 16 gameHash 0 mapHash engineName\tengineVersion\tbattle_host_test\tgameTitle\tgameName\n"
+      "OPENBATTLE 0 0 password_test 322 16 gameHash 0 mapHash engineName\tengineVersion\tlobby_host_test\tgameTitle\tgameName\n"
     )
 
     # Find battle
@@ -48,7 +48,7 @@ defmodule Teiserver.SpringBattleHostTest do
     # Open battle
     _send_raw(
       host_socket,
-      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tbattle_host_test\tgameTitle\tgameName\n"
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tlobby_host_test\tgameTitle\tgameName\n"
     )
 
     # Find battle ID
@@ -87,7 +87,7 @@ defmodule Teiserver.SpringBattleHostTest do
   test "host battle test", %{socket: socket, user: user} do
     _send_raw(
       socket,
-      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tbattle_host_test\tgameTitle\tgameName\n"
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tlobby_host_test\tgameTitle\tgameName\n"
     )
 
     reply =

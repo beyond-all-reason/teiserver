@@ -19,11 +19,13 @@ Information affecting only those in this given battle, such as a player joining.
 
 #### teiserver_global_battle_lobby_updates
 Limited information pertaining to the creation/deletion of battles.
-Data is always of the format: `{:event, battle_lobby_id}`
-Valid events: `battle_lobby_opened`, `battle_lobby_closed`
+```
+  {:battle_lobby_opened, lobby_id}
+  {:battle_lobby_closed, lobby_id}
+```
 
-#### teiserver_battle_lobby_updates:#{battle_lobby_id}
-Information affecting only those in this given battle, such as a player joining. Identical to the above but specifically different to prevent spring systems getting double-pinged.
+#### teiserver_lobby_updates:#{battle_lobby_id}
+Information affecting only those in this given battle.
 Valid events:
 ```
   # BattleLobby
@@ -43,18 +45,18 @@ Valid events:
   {:updated_client_status, client, reason} # Yes, that's the full client object
 ```
 
-#### teiserver_battle_chat:#{battle_lobby_id}
+#### teiserver_lobby_chat:#{battle_lobby_id}
 Information specific to the chat in a battle lobby, state changes to the battle will never be in this channel.
 Valid events:
 ```
-  {:battle_lobby_say, lobby_id, userid, msg}
-  {:battle_lobby_sayex, lobby_id, userid, msg}
+  {:lobby_chat, :say, lobby_id, userid, msg}
+  {:lobby_chat, :sayex, lobby_id, userid, msg}
 ```
 
 #### live_battle_updates:#{battle_lobby_id}
-In the process of being phased out with the introduction of teiserver_liveview_battle_lobby_updates
+In the process of being phased out with the introduction of teiserver_liveview_lobby_updates
 
-#### teiserver_liveview_battle_lobby_updates:#{battle_lobby_id}
+#### teiserver_liveview_lobby_updates:#{battle_lobby_id}
 These are updates sent from the LiveBattle genservers (used to throttle/batch messages sent to the liveviews).
 
 ### User/Client
@@ -76,12 +78,13 @@ Valid events
 
 ### teiserver_client_messages:#{userid}
 This is the channel for sending messages to the client. It allows the client on the web and lobby application to receive messages.
-General structure should be: `{:client_message, :topic, data}` to allow for easy matching and discarding as new items are added to the list
+General structure should be: `{:client_message, :topic, userid, data}` to allow for easy matching and discarding as new items are added to the list
 ```
-  {:client_message, :matchmaking, data}
-    {:match_ready, state.id}
-    {:join_battle, lobby_id}
-  
+  {:client_message, :matchmaking, userid, {:match_ready, state.id}}
+  {:client_message, :matchmaking, userid, {:join_lobby, state.id}}
+
+  {:client_message, :lobby, userid, {:join_lobby, lobby_id}}
+  {:client_message, :lobby, userid, {:leave_lobby, lobby_id}}
 ```
 
 ### teiserver_client_action_updates:#{userid}

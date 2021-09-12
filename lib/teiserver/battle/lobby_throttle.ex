@@ -13,7 +13,7 @@ defmodule Teiserver.Battle.LobbyThrottle do
   def handle_info({:battle_lobby_closed, _id}, state) do
     :ok = PubSub.broadcast(
       Central.PubSub,
-      "teiserver_liveview_battle_lobby_updates:#{state.battle_lobby_id}",
+      "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
       {:battle_lobby_throttle, :closed}
     )
     {:noreply, state}
@@ -71,7 +71,7 @@ defmodule Teiserver.Battle.LobbyThrottle do
   defp broadcast(state) do
     :ok = PubSub.broadcast(
       Central.PubSub,
-      "teiserver_liveview_battle_lobby_updates:#{state.battle_lobby_id}",
+      "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
       {:battle_lobby_throttle, state.lobby_changes |> Enum.uniq, state.player_changes |> Enum.uniq}
     )
     %{state | lobby_changes: [], player_changes: []}
@@ -84,10 +84,12 @@ defmodule Teiserver.Battle.LobbyThrottle do
   end
 
   def init(opts) do
+    send(self(), :startup)
+
     battle_lobby_id = opts.id
     :timer.send_interval(@update_interval, self(), :tick)
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_battle_lobby_updates:#{battle_lobby_id}")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{battle_lobby_id}")
 
     ConCache.put(:teiserver_throttle_pids, {:battle_lobby, battle_lobby_id}, self())
 

@@ -9,15 +9,12 @@ defmodule Teiserver.Coordinator do
   @spec do_start() :: :ok
   defp do_start() do
     # Start the supervisor server
-    {:ok, coordinator_pid} =
+    {:ok, _coordinator_pid} =
       DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
         Teiserver.Coordinator.CoordinatorServer,
         name: Teiserver.Coordinator.CoordinatorServer,
         data: %{}
       })
-
-    ConCache.put(:teiserver_consul_pids, :coordinator, coordinator_pid)
-    send(coordinator_pid, :begin)
     :ok
   end
 
@@ -58,7 +55,6 @@ defmodule Teiserver.Coordinator do
         }
       })
 
-    send(consul_pid, :startup)
     consul_pid
   end
 

@@ -11,15 +11,13 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   @spec do_start() :: :ok
   def do_start() do
     # Start the supervisor server
-    {:ok, monitor_pid} =
+    {:ok, _monitor_pid} =
       DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
         Teiserver.Battle.MatchMonitorServer,
         name: Teiserver.Battle.MatchMonitorServer,
         data: %{}
       })
 
-    ConCache.put(:teiserver_consul_pids, :match_monitor, monitor_pid)
-    send(monitor_pid, :begin)
     :ok
   end
 
@@ -99,7 +97,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       ip: "127.0.0.1",
       userid: user.id,
       username: user.name,
-      battle_host: false,
+      lobby_host: false,
       user: user,
       rooms: rooms
     }
@@ -137,7 +135,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             moderator: false,
             verified: true,
             country_override: "GB",# TODO: Make this configurable
-            lobbyid: "Teiserver Internal Process"
+            lobby_client: "Teiserver Internal Process"
           }
         })
 
@@ -161,9 +159,8 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
-    if Application.get_env(:central, Teiserver)[:enable_discord_match_monitor] do
-      send(self(), :begin)
-    end
+    ConCache.put(:teiserver_consul_pids, :match_monitor, self())
+    send(self(), :begin)
 
     {:ok, %{}}
   end

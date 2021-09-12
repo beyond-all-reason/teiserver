@@ -203,6 +203,21 @@ defmodule Teiserver.TeiserverTestLib do
     end
   end
 
+  def _tachyon_recv_until(socket), do: _tachyon_recv_until(socket, [])
+  def _tachyon_recv_until(socket = {:sslsocket, _, _}, acc) do
+    case :ssl.recv(socket, 0, 500) do
+      {:ok, reply} ->
+        resp = case Tachyon.decode(to_string(reply)) do
+          {:ok, msg} -> msg
+          error -> {:error, error}
+        end
+        _tachyon_recv_until(socket, acc ++ [resp])
+
+      {:error, :timeout} ->
+        acc
+    end
+  end
+
   def mock_socket() do
     %{
       mock: true,
@@ -226,7 +241,7 @@ defmodule Teiserver.TeiserverTestLib do
       # Client state
       userid: nil,
       username: nil,
-      battle_host: false,
+      lobby_host: false,
       user: nil,
       queues: [],
       ready_queue_id: nil,
@@ -259,7 +274,7 @@ defmodule Teiserver.TeiserverTestLib do
       # Client state
       userid: user.id,
       username: user.name,
-      battle_host: false,
+      lobby_host: false,
       user: user,
 
       # Connection microstate
@@ -301,7 +316,7 @@ defmodule Teiserver.TeiserverTestLib do
       # Client state
       userid: user.id,
       username: user.name,
-      battle_host: false,
+      lobby_host: false,
       user: user,
 
       # Connection microstate

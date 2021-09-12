@@ -70,7 +70,7 @@ defmodule Teiserver.Client do
         in_game: false,
         ip: user.ip,
         country: user.country,
-        lobbyid: user.lobbyid
+        lobby_client: user.lobby_client
       })
       |> add_client
 
@@ -106,7 +106,7 @@ defmodule Teiserver.Client do
 
       PubSub.broadcast(
         Central.PubSub,
-        "teiserver_battle_lobby_updates:#{client.lobby_id}",
+        "teiserver_lobby_updates:#{client.lobby_id}",
         {:updated_client_status, client, reason}
       )
     end
@@ -228,7 +228,7 @@ defmodule Teiserver.Client do
       bot: user.bot,
       ip: user.ip,
       country: user.country,
-      lobbyid: user.lobbyid
+      lobby_client: user.lobby_client
     }
     |> add_client
   end

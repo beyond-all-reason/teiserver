@@ -24,15 +24,7 @@ defmodule Teiserver.EmailHelper do
     message_id = UUID.uuid4()
 
     game_name = Application.get_env(:central, Teiserver)[:game_name]
-
-    discord =
-      case Application.get_env(:central, Teiserver)[:discord] do
-        nil ->
-          ""
-
-        d ->
-          "#{d}"
-      end
+    discord = Application.get_env(:central, Teiserver)[:discord]
 
     html_body = """
     <p>Welcome to #{game_name}.</p>
@@ -75,18 +67,5 @@ defmodule Teiserver.EmailHelper do
     |> Email.html_body(html_body)
     |> Email.text_body(text_body)
     |> Mailer.deliver_now(response: true)
-  end
-
-  def password_reset(user, _plain_password) do
-    Central.Account.UserLib.reset_password_request(user)
-    |> Central.Mailer.deliver_now()
-
-    # Logger.error("password_reset not implemented at this time")
-    # to = user.email
-    # subject = "Password reset - Teiserver"
-
-    # body = """
-    #   Your code is XXX
-    # """
   end
 end

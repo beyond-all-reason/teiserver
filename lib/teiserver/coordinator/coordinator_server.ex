@@ -24,7 +24,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       ip: "127.0.0.1",
       userid: user.id,
       username: user.name,
-      battle_host: false,
+      lobby_host: false,
       user: user,
       queues: [],
       ready_queue_id: nil,
@@ -101,7 +101,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
             moderator: true,
             verified: true,
             country_override: "GB",# TODO: Make this configurable
-            lobbyid: "Teiserver Internal Process"
+            lobby_client: "Teiserver Internal Process"
           }
         })
 
@@ -125,6 +125,8 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
+    ConCache.put(:teiserver_consul_pids, :coordinator, self())
+    send(self(), :begin)
     {:ok, %{}}
   end
 end

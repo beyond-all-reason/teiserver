@@ -42,7 +42,7 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
     lobby_id = lobby["id"]
 
     assert GenServer.call(pid, {:get, :lobby_id}) == lobby_id
-    assert GenServer.call(pid, {:get, :battle_host}) == true
+    assert GenServer.call(pid, {:get, :lobby_host}) == true
     assert Lobby.get_lobby!(lobby_id) != nil
 
     # Now create a user to join the lobby
@@ -138,7 +138,7 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
     assert match?(%{"cmd" => "s.lobby.leave"}, reply)
 
     assert GenServer.call(pid, {:get, :lobby_id}) == nil
-    assert GenServer.call(pid, {:get, :battle_host}) == false
+    assert GenServer.call(pid, {:get, :lobby_host}) == false
     assert Lobby.get_lobby!(lobby_id) == nil
   end
 end

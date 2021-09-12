@@ -175,7 +175,7 @@ defmodule Teiserver.Game.QueueServer do
               PubSub.broadcast(
                 Central.PubSub,
                 "teiserver_client_messages:#{userid}",
-                {:client_message, :matchmaking, {:match_ready, state.id}}
+                {:client_message, :matchmaking, userid, {:match_ready, state.id}}
               )
             end)
 
@@ -262,7 +262,7 @@ defmodule Teiserver.Game.QueueServer do
           PubSub.broadcast(
             Central.PubSub,
             "teiserver_client_messages:#{userid}",
-            {:client_message, :matchmaking, {:join_battle, battle.id}}
+            {:client_message, :matchmaking, userid, {:join_lobby, battle.id}}
           )
         end)
 

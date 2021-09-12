@@ -30,7 +30,7 @@ defmodule Teiserver.User do
     :rank,
     :country,
     :country_override,
-    :lobbyid,
+    :lobby_client,
     :ip,
     :moderator,
     :bot,
@@ -58,7 +58,7 @@ defmodule Teiserver.User do
     rank: 1,
     country: "??",
     country_override: nil,
-    lobbyid: "LuaLobby Chobby",
+    lobby_client: "LuaLobby Chobby",
     ip: "default_ip",
     moderator: false,
     bot: false,
@@ -486,7 +486,7 @@ defmodule Teiserver.User do
   end
 
   @spec do_login(Map.t(), String.t(), String.t()) :: {:ok, Map.t()}
-  defp do_login(user, ip, lobbyid) do
+  defp do_login(user, ip, lobby_client) do
     # If they don't want a flag shown, don't show it, otherwise check for an override before trying geoip
     country =
       cond do
@@ -517,7 +517,7 @@ defmodule Teiserver.User do
       %{
         user
         | ip: ip,
-          lobbyid: lobbyid,
+          lobby_client: lobby_client,
           country: country,
           last_login: last_login,
           rank: rank,
@@ -533,7 +533,7 @@ defmodule Teiserver.User do
         country: country,
         last_login: last_login,
         rank: rank,
-        lobby_id: lobbyid,
+        lobby_client: lobby_client,
         last_ip: ip
       })
 

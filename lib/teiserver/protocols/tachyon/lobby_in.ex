@@ -25,7 +25,7 @@ defmodule Teiserver.Protocols.Tachyon.LobbyIn do
       |> Lobby.create_lobby()
       |> Lobby.add_lobby()
 
-    new_state = %{state | lobby_id: lobby.id, battle_host: true}
+    new_state = %{state | lobby_id: lobby.id, lobby_host: true}
     reply(:lobby, :create, {:success, lobby}, new_state)
   end
 
@@ -92,7 +92,7 @@ defmodule Teiserver.Protocols.Tachyon.LobbyIn do
   def do_handle("leave", _, state) do
     PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{state.lobby_id}")
     Lobby.remove_user_from_battle(state.userid, state.lobby_id)
-    new_state = %{state | lobby_id: nil, battle_host: false}
+    new_state = %{state | lobby_id: nil, lobby_host: false}
     reply(:lobby, :leave, {:success, nil}, new_state)
   end
 end

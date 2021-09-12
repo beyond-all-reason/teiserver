@@ -62,6 +62,8 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
   end
 
   def init(_opts) do
+    send(self(), :begin)
+
     {:ok, %{
       id: "agent_supervisor"
     }}

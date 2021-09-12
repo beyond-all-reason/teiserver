@@ -139,7 +139,7 @@ defmodule Teiserver.Battle.Lobby do
 
     PubSub.broadcast(
       Central.PubSub,
-      "teiserver_battle_lobby_updates:#{battle.id}",
+      "teiserver_lobby_updates:#{battle.id}",
       {:battle_lobby_updated, battle.id, data, reason}
     )
 
@@ -235,7 +235,7 @@ defmodule Teiserver.Battle.Lobby do
 
     :ok = PubSub.broadcast(
       Central.PubSub,
-      "teiserver_battle_lobby_updates:#{battle.id}",
+      "teiserver_lobby_updates:#{battle.id}",
       {:battle_lobby_closed, battle.id}
     )
 
@@ -257,7 +257,7 @@ defmodule Teiserver.Battle.Lobby do
 
     PubSub.broadcast(
       Central.PubSub,
-      "teiserver_battle_lobby_updates:#{battle.id}",
+      "teiserver_lobby_updates:#{battle.id}",
       {:add_bot_to_battle_lobby, battle.id, bot}
     )
   end
@@ -286,7 +286,7 @@ defmodule Teiserver.Battle.Lobby do
 
         PubSub.broadcast(
           Central.PubSub,
-          "teiserver_battle_lobby_updates:#{battle.id}",
+          "teiserver_lobby_updates:#{battle.id}",
           {:update_bot_in_battle_lobby, battle.id, botname, new_bot}
         )
     end
@@ -306,7 +306,7 @@ defmodule Teiserver.Battle.Lobby do
 
     PubSub.broadcast(
       Central.PubSub,
-      "teiserver_battle_lobby_updates:#{battle.id}",
+      "teiserver_lobby_updates:#{battle.id}",
       {:remove_bot_from_battle_lobby, battle.id, botname}
     )
   end
@@ -322,7 +322,7 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   @spec add_user_to_battle(Integer.t(), Integer.t() | nil) :: nil
-  def add_user_to_battle(_uid, nil), do: nil
+  def add_user_to_battle(_userid, nil), do: nil
 
   @spec add_user_to_battle(integer(), integer(), String.t()) :: nil
   def add_user_to_battle(userid, lobby_id, script_password) do
@@ -342,13 +342,19 @@ defmodule Teiserver.Battle.Lobby do
 
           PubSub.broadcast(
             Central.PubSub,
+            "teiserver_client_messages:#{userid}",
+            {:client_message, :lobby, userid, {:join_lobby, lobby_id}}
+          )
+
+          PubSub.broadcast(
+            Central.PubSub,
             "legacy_all_battle_updates",
             {:add_user_to_battle, userid, lobby_id, script_password}
           )
 
           PubSub.broadcast(
             Central.PubSub,
-            "teiserver_battle_lobby_updates:#{lobby_id}",
+            "teiserver_lobby_updates:#{lobby_id}",
             {:add_user_to_battle_lobby, lobby_id, userid}
           )
 
@@ -380,13 +386,19 @@ defmodule Teiserver.Battle.Lobby do
       :removed ->
         PubSub.broadcast(
           Central.PubSub,
+          "teiserver_client_messages:#{userid}",
+          {:client_message, :lobby, userid, {:leave_lobby, lobby_id}}
+        )
+
+        PubSub.broadcast(
+          Central.PubSub,
           "legacy_all_battle_updates",
           {:remove_user_from_battle, userid, lobby_id}
         )
 
         PubSub.broadcast(
           Central.PubSub,
-          "teiserver_battle_lobby_updates:#{lobby_id}",
+          "teiserver_lobby_updates:#{lobby_id}",
           {:remove_user_from_battle_lobby, lobby_id, userid}
         )
     end
@@ -413,7 +425,7 @@ defmodule Teiserver.Battle.Lobby do
 
         PubSub.broadcast(
           Central.PubSub,
-          "teiserver_battle_lobby_updates:#{lobby_id}",
+          "teiserver_lobby_updates:#{lobby_id}",
           {:kick_user_from_battle_lobby, lobby_id, userid}
         )
     end
@@ -643,8 +655,8 @@ defmodule Teiserver.Battle.Lobby do
 
     PubSub.broadcast(
       Central.PubSub,
-      "teiserver_battle_lobby_chat:#{lobby_id}",
-      {:battle_lobby_say, lobby_id, userid, msg}
+      "teiserver_lobby_chat:#{lobby_id}",
+      {:lobby_chat, :say, lobby_id, userid, msg}
     )
   end
 
@@ -658,8 +670,8 @@ defmodule Teiserver.Battle.Lobby do
 
     PubSub.broadcast(
       Central.PubSub,
-      "teiserver_battle_lobby_chat:#{lobby_id}",
-      {:battle_lobby_sayex, lobby_id, userid, msg}
+      "teiserver_lobby_chat:#{lobby_id}",
+      {:lobby_chat, :sayex, lobby_id, userid, msg}
     )
   end
 
