@@ -49,7 +49,7 @@ config :central, Teiserver,
   # Heatbeat interval is ms
   heartbeat_interval: 30_000,
   # Heartbeat timeout is seconds
-  heartbeat_timeout: 45,
+  heartbeat_timeout: 120,
 
   game_name: "Spring game",
   game_name_short: "SG",
