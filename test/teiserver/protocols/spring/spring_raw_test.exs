@@ -64,6 +64,14 @@ defmodule Teiserver.SpringRawTest do
     assert user != nil
     UserCache.update_user(%{user | verified: true})
 
+    # First try to login with a bad-case username
+    _send_raw(
+      socket,
+      "LOGIN #{String.upcase(username)} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+    )
+    reply = _recv_raw(socket)
+    assert reply == "DENIED Username is case sensitive\n"
+
     _send_raw(
       socket,
       "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
