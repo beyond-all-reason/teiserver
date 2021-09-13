@@ -25,24 +25,24 @@ Limited information pertaining to the creation/deletion of battles.
 ```
 
 #### teiserver_lobby_updates:#{battle_lobby_id}
-Information affecting only those in this given battle.
+Information affecting only those in this given battle. Chat is not sent via this channel.
 Valid events:
 ```
   # BattleLobby
-  {:battle_lobby_updated, lobby_id, data, update_reason}
-  {:battle_lobby_closed, lobby_id}
-  {:add_bot_to_battle_lobby, lobby_id, bot}
-  {:update_bot_in_battle_lobby, lobby_id, botname, new_bot}
-  {:remove_bot_from_battle_lobby, lobby_id, botname}
-  {:add_user_to_battle_lobby, lobby_id, userid}
-  {:remove_user_from_battle_lobby, lobby_id, userid}
-  {:kick_user_from_battle_lobby, lobby_id, userid}
+  {:lobby_update, :updated, lobby_id, update_reason}
+  {:lobby_update, :closed, lobby_id, reason}
+  {:lobby_update, :add_bot, lobby_id, botname}
+  {:lobby_update, :update_bot, lobby_id, botname}
+  {:lobby_update, :remove_bot, lobby_id, botname}
+  {:lobby_update, :add_user, lobby_id, userid}
+  {:lobby_update, :remove_user, lobby_id, userid}
+  {:lobby_update, :kick_user, lobby_id, userid}
   
   # Coordinator
-  {:consul_server_updated, state.lobby_id, reason}
+  {:lobby_update, :consul_server_updated, lobby_id, reason}
 
   # Client
-  {:updated_client_status, client, reason} # Yes, that's the full client object
+  {:lobby_update, :updated_client_status, lobby_id, {userid, reason}}
 ```
 
 #### teiserver_lobby_chat:#{battle_lobby_id}

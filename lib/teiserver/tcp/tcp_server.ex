@@ -5,7 +5,7 @@ defmodule Teiserver.TcpServer do
 
   alias Teiserver.Client
   alias Teiserver.Account.UserCache
-  # alias Teiserver.Tcp.{TcpChat, TcpLobby}
+  alias Teiserver.Tcp.{TcpChat, TcpLobby}
 
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [
@@ -169,19 +169,19 @@ defmodule Teiserver.TcpServer do
 
   # Client channel messages
   def handle_info({:client_message, :matchmaking, _userid, data}, state) do
-    new_state = matchmaking_update(data, state)
-    {:noreply, new_state}
+    {:noreply, matchmaking_update(data, state)}
   end
 
-  def handle_info({:client_message, :lobby, _userid, _data}, state) do
-    # TODO: Handle these?
-    {:noreply, state}
+  def handle_info({:client_message, :lobby, userid, data}, state) do
+    {:noreply, TcpLobby.handle_info({:client_message, :lobby, userid, data}, state)}
   end
 
   def handle_info({:client_message, topic, _userid, _data}, state) do
     Logger.warn("No tcp_server handler for :client_message with topic #{topic}")
     {:noreply, state}
   end
+
+  # teiserver_lobby_updates:#{lobby_id}
 
   # Client updates
   def handle_info({:user_logged_in, nil}, state), do: {:noreply, state}

@@ -512,6 +512,10 @@ defmodule Teiserver.Protocols.SpringOut do
     "SERVERMSG #{msg}\n"
   end
 
+  # defp do_reply(:tachyon, {namespace, function, data, state}) do
+  #   Teiserver.Protocols.TachyonOut.reply(namespace, function, data, state)
+  # end
+
   defp do_reply(atom, data) do
     Logger.error(
       "No reply match in spring_out.ex for atom: #{atom} and data: #{Kernel.inspect(data)}"

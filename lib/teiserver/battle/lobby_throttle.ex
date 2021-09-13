@@ -10,7 +10,7 @@ defmodule Teiserver.Battle.LobbyThrottle do
   @update_interval 500
 
   # Lobby closed
-  def handle_info({:battle_lobby_closed, _id}, state) do
+  def handle_info({:lobby_update, :closed, _id, _reason}, state) do
     :ok = PubSub.broadcast(
       Central.PubSub,
       "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
@@ -20,41 +20,41 @@ defmodule Teiserver.Battle.LobbyThrottle do
   end
 
   # BattleLobby
-  def handle_info({:battle_lobby_updated, _id, _data, _update_reason}, state) do
+  def handle_info({:lobby_update, :updated, _lobby_id, _update_reason}, state) do
     {:noreply, %{state | lobby_changes: [:battle_lobby | state.lobby_changes]}}
   end
 
-  def handle_info({:add_bot_to_battle_lobby, _id, _bot}, state) do
+  def handle_info({:lobby_update, :add_bot, _lobby_id, _botname}, state) do
     {:noreply, %{state | lobby_changes: [:bots | state.lobby_changes]}}
   end
 
-  def handle_info({:update_bot_in_battle_lobby, _id, _botname, _new_bot}, state) do
+  def handle_info({:lobby_update, :update_bot, _lobby_id, _botname}, state) do
     {:noreply, %{state | lobby_changes: [:bots | state.lobby_changes]}}
   end
 
-  def handle_info({:remove_bot_from_battle_lobby, _id, _botname}, state) do
+  def handle_info({:lobby_update, :remove_bot, _lobby_id, _botname}, state) do
     {:noreply, %{state | lobby_changes: [:bots | state.lobby_changes]}}
   end
 
-  def handle_info({:add_user_to_battle_lobby, _id, userid}, state) do
+  def handle_info({:lobby_update, :add_user, _lobby_id, userid}, state) do
     {:noreply, %{state | player_changes: [userid | state.player_changes]}}
   end
 
-  def handle_info({:remove_user_from_battle_lobby, _id, userid}, state) do
+  def handle_info({:lobby_update, :remove_user, _lobby_id, userid}, state) do
     {:noreply, %{state | player_changes: [userid | state.player_changes]}}
   end
 
-  def handle_info({:kick_user_from_battle_lobby, _id, userid}, state) do
+  def handle_info({:lobby_update, :kick_user, _lobby_id, userid}, state) do
     {:noreply, %{state | player_changes: [userid | state.player_changes]}}
   end
 
   # Coordinator
-  def handle_info({:consul_server_updated, _id, _reason}, state) do
+  def handle_info({:lobby_update, :consul_server_updated, _lobby_id, _reason}, state) do
     {:noreply, %{state | lobby_changes: [:consul | state.lobby_changes]}}
   end
 
   # Client
-  def handle_info({:updated_client_status, %{userid: userid} = _client, _reason}, state) do
+  def handle_info({:lobby_update, :updated_client_status, _lobby_id, {userid, _reason}}, state) do
     {:noreply, %{state | player_changes: [userid | state.player_changes]}}
   end
 

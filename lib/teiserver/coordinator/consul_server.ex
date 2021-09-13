@@ -124,21 +124,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
-  # # PubSub handlers
-  # def handle_info({:battle_lobby_updated, _, _, _}, state), do: {:noreply, state}
-  # def handle_info({:battle_lobby_closed, _}, state), do: {:noreply, state}
-  # def handle_info({:add_bot_to_battle_lobby, _lobby_id, _bot}, state), do: {:noreply, state}
-  # def handle_info({:update_bot_in_battle_lobby, _lobby_id, _botname, _new_bot}, state), do: {:noreply, state}
-  # def handle_info({:remove_bot_from_battle_lobby, _lobby_id, _botname}, state), do: {:noreply, state}
-  # def handle_info({:add_user_to_battle_lobby, _lobby_id, userid}, state), do: {:noreply, check_player_battlestatus(userid, :join_battle, state)}
-  # def handle_info({:remove_user_from_battle_lobby, _lobby_id, _userid}, state), do: {:noreply, state}
-  # def handle_info({:kick_user_from_battle_lobby, _lobby_id, _userid}, state), do: {:noreply, state}
-
-  # def handle_info({:consul_server_updated, _, _}, state), do: {:noreply, state}
-
-  # # Client
-  # def handle_info({:updated_client_status, client, reason}, state), do: {:noreply, check_player_battlestatus(client, reason, state)}
-
   def handle_info(cmd = %{command: _}, state) do
     new_state = case allow_command?(cmd, state) do
       :vote_command ->
@@ -271,7 +256,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     Phoenix.PubSub.broadcast(
       Central.PubSub,
       "teiserver_lobby_updates:#{state.lobby_id}",
-      {:consul_server_updated, state.lobby_id, reason}
+      {:lobby_update, :consul_server_updated, state.lobby_id, reason}
     )
     state
   end

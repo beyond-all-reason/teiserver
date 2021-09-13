@@ -95,10 +95,12 @@ use Central.ServerCase, async: false
     %{socket: psocket2, user: player2} = tachyon_auth_setup()
     %{socket: psocket3, user: player3} = tachyon_auth_setup()
     %{socket: psocket4, user: player4} = tachyon_auth_setup()
+    %{socket: ssocket1, user: spec1} = tachyon_auth_setup()
 
     Lobby.force_add_user_to_battle(player2.id, lobby_id)
     Lobby.force_add_user_to_battle(player3.id, lobby_id)
     Lobby.force_add_user_to_battle(player4.id, lobby_id)
+    Lobby.force_add_user_to_battle(spec1.id, lobby_id)
 
     _tachyon_recv_until(psocket2)
     _tachyon_recv_until(psocket3)
@@ -137,7 +139,7 @@ use Central.ServerCase, async: false
     # Check consul state
     current_vote = Coordinator.call_consul(lobby_id, {:get, :current_vote})
     assert current_vote.abstains == []
-    assert current_vote.yays == []
+    assert current_vote.yays == [player1.id]
     assert current_vote.nays == []
     assert current_vote.creator_id == player1.id
     assert current_vote.expires != nil
@@ -168,8 +170,11 @@ use Central.ServerCase, async: false
     current_vote = Coordinator.call_consul(lobby_id, {:get, :current_vote})
     assert current_vote == nil
 
+    # What happens if we try to vote on a vote that doesn't exist?
+    _tachyon_send(psocket1, %{cmd: "c.lobby.message", message: "!y"})
 
+    # Now do some voting
 
-
+    # _ = _tachyon_recv_until(psocket)
   end
 end

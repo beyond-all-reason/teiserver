@@ -107,7 +107,7 @@ defmodule Teiserver.Client do
       PubSub.broadcast(
         Central.PubSub,
         "teiserver_lobby_updates:#{client.lobby_id}",
-        {:updated_client_status, client, reason}
+        {:lobby_update, :updated_client_status, client.lobby_id, {client.userid, reason}}
       )
     end
 

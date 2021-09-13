@@ -140,7 +140,7 @@ defmodule Teiserver.Battle.Lobby do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_lobby_updates:#{battle.id}",
-      {:battle_lobby_updated, battle.id, data, reason}
+      {:lobby_update, :updated, battle.id, reason}
     )
 
     battle
@@ -199,8 +199,8 @@ defmodule Teiserver.Battle.Lobby do
     battle
   end
 
-  @spec close_lobby(integer() | nil) :: :ok
-  def close_lobby(lobby_id) do
+  @spec close_lobby(integer() | nil, atom) :: :ok
+  def close_lobby(lobby_id, reason \\ :closed) do
     battle = get_battle(lobby_id)
     Coordinator.close_battle(lobby_id)
     ConCache.delete(:battles, lobby_id)
@@ -236,9 +236,8 @@ defmodule Teiserver.Battle.Lobby do
     :ok = PubSub.broadcast(
       Central.PubSub,
       "teiserver_lobby_updates:#{battle.id}",
-      {:battle_lobby_closed, battle.id}
+      {:lobby_update, :closed, battle.id, reason}
     )
-
 
     stop_battle_lobby_throttle(lobby_id)
   end
@@ -258,7 +257,7 @@ defmodule Teiserver.Battle.Lobby do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_lobby_updates:#{battle.id}",
-      {:add_bot_to_battle_lobby, battle.id, bot}
+      {:lobby_update, :add_bot, battle.id, bot.name}
     )
   end
 
@@ -287,7 +286,7 @@ defmodule Teiserver.Battle.Lobby do
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_lobby_updates:#{battle.id}",
-          {:update_bot_in_battle_lobby, battle.id, botname, new_bot}
+          {:lobby_update, :update_bot, battle.id, botname}
         )
     end
   end
@@ -307,7 +306,7 @@ defmodule Teiserver.Battle.Lobby do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_lobby_updates:#{battle.id}",
-      {:remove_bot_from_battle_lobby, battle.id, botname}
+      {:lobby_update, :remove_bot, battle.id, botname}
     )
   end
 
@@ -355,7 +354,7 @@ defmodule Teiserver.Battle.Lobby do
           PubSub.broadcast(
             Central.PubSub,
             "teiserver_lobby_updates:#{lobby_id}",
-            {:add_user_to_battle_lobby, lobby_id, userid}
+            {:lobby_update, :add_user, lobby_id, userid}
           )
 
           new_players = [userid | battle_state.players]
@@ -399,7 +398,7 @@ defmodule Teiserver.Battle.Lobby do
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_lobby_updates:#{lobby_id}",
-          {:remove_user_from_battle_lobby, lobby_id, userid}
+          {:lobby_update, :remove_user, lobby_id, userid}
         )
     end
   end
@@ -426,7 +425,7 @@ defmodule Teiserver.Battle.Lobby do
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_lobby_updates:#{lobby_id}",
-          {:kick_user_from_battle_lobby, lobby_id, userid}
+          {:lobby_update, :kick_user, lobby_id, userid}
         )
     end
   end
