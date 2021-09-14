@@ -16,8 +16,6 @@ defmodule Teiserver.User do
   alias Teiserver.EmailHelper
   alias Teiserver.Account
 
-  @wordlist ~w(abacus rhombus square shape oblong rotund bag dice flatulence cats dogs mice eagle oranges apples pears neon lights electricity calculator harddrive cpu memory graphics monitor screen television radio microwave sulphur tree tangerine melon watermelon obstreperous chlorine argon mercury jupiter saturn neptune ceres firefly slug sloth madness happiness ferrous oblique advantageous inefficient starling clouds rivers sunglasses)
-
   @timer_sleep 500
 
   @spec role_list :: [String.t()]
@@ -98,13 +96,6 @@ defmodule Teiserver.User do
       ConCache.put(:id_counters, :springid, new_value)
       new_value
     end)
-  end
-
-  @spec generate_random_password :: String.t()
-  def generate_random_password() do
-    @wordlist
-    |> Enum.take_random(3)
-    |> Enum.join(" ")
   end
 
   @spec clean_name(String.t()) :: String.t()

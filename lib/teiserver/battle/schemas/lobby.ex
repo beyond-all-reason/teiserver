@@ -36,6 +36,14 @@ defmodule Teiserver.Battle.Lobby do
   alias Teiserver.Account.UserCache
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator
+  alias Teiserver.Battle.{LobbyChat, LobbyCache}
+
+
+  # LobbyChat
+  def say(userid, msg, lobby_id), do: LobbyChat.say(userid, msg, lobby_id)
+  def sayex(userid, msg, lobby_id), do: LobbyChat.sayex(userid, msg, lobby_id)
+  def sayprivateex(from_id, to_id, msg, lobby_id), do: LobbyChat.sayprivateex(from_id, to_id, msg, lobby_id)
+
 
 #   @enforce_keys [:id, :founder_id, :founder_name]
 #   defstruct [
@@ -66,14 +74,6 @@ defmodule Teiserver.Battle.Lobby do
       data
     )
   end
-
-  # Refactor callbacks
-  def create_battle(battle), do: create_lobby(battle)
-  def update_battle(battle, data, reason), do: update_lobby(battle, data, reason)
-  def get_battle!(lobby_id), do: get_lobby!(lobby_id)
-  def get_battle(lobby_id), do: get_lobby(lobby_id)
-  def add_battle(battle), do: add_lobby(battle)
-  def close_battle(battle), do: close_lobby(battle)
 
 
   @spec create_lobby(Map.t()) :: Map.t()
@@ -114,51 +114,22 @@ defmodule Teiserver.Battle.Lobby do
     )
   end
 
-  @spec update_lobby(Map.t(), nil | atom, any) :: Map.t()
-  def update_lobby(battle, nil, _) do
-    ConCache.put(:battles, battle.id, battle)
-    battle
-  end
+  # Cache callbacks
+  def update_lobby(lobby, data, reason), do: LobbyCache.update_lobby(lobby, data, reason)
+  def get_lobby!(id), do: LobbyCache.get_lobby!(id)
+  def get_lobby(id), do: LobbyCache.get_lobby(id)
+  def get_lobby_players!(id), do: LobbyCache.get_lobby_players!(id)
+  def add_lobby(lobby), do: LobbyCache.add_lobby(lobby)
+  def close_lobby(lobby_id, reason \\ :closed), do: LobbyCache.close_lobby(lobby_id, reason)
 
-  def update_lobby(battle, data, reason) do
-    ConCache.put(:battles, battle.id, battle)
+  # Refactor callbacks
+  def create_battle(battle), do: create_lobby(battle)
+  def update_battle(battle, data, reason), do: LobbyCache.update_lobby(battle, data, reason)
+  def get_battle!(lobby_id), do: LobbyCache.get_lobby!(lobby_id)
+  def get_battle(lobby_id), do: LobbyCache.get_lobby(lobby_id)
+  def add_battle(battle), do: LobbyCache.add_lobby(battle)
+  def close_battle(battle), do: LobbyCache.close_lobby(battle)
 
-    if Enum.member?([:update_battle_info], reason) do
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_all_battle_updates",
-        {:global_battle_updated, battle.id, reason}
-      )
-    else
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_battle_updates:#{battle.id}",
-        {:battle_updated, battle.id, data, reason}
-      )
-    end
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_lobby_updates:#{battle.id}",
-      {:lobby_update, :updated, battle.id, reason}
-    )
-
-    battle
-  end
-
-  def get_lobby!(id) do
-    ConCache.get(:battles, int_parse(id))
-  end
-
-  @spec get_lobby(integer()) :: map() | nil
-  def get_lobby(id) do
-    ConCache.get(:battles, int_parse(id))
-  end
-
-  @spec get_battle_lobby_players!(T.lobby_id()) :: [integer()]
-  def get_battle_lobby_players!(id) do
-    get_battle!(id).players
-  end
 
   @spec start_battle_lobby_throttle(T.lobby_id()) :: pid()
   def start_battle_lobby_throttle(battle_lobby_id) do
@@ -169,84 +140,11 @@ defmodule Teiserver.Battle.Lobby do
     Teiserver.Throttles.stop_throttle({:battle_lobby, battle_lobby_id})
   end
 
-  @spec add_lobby(Map.t()) :: Map.t()
-  def add_lobby(battle) do
-    _consul_pid = Coordinator.start_consul(battle.id)
-    start_battle_lobby_throttle(battle.id)
-
-    ConCache.put(:battles, battle.id, battle)
-
-    ConCache.update(:lists, :battles, fn value ->
-      new_value =
-        ([battle.id | value])
-        |> Enum.uniq()
-
-      {:ok, new_value}
-    end)
-
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "legacy_all_battle_updates",
-      {:global_battle_updated, battle.id, :battle_opened}
-    )
-
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_global_battle_lobby_updates",
-      {:battle_lobby_opened, battle.id}
-    )
-
-    battle
-  end
-
-  @spec close_lobby(integer() | nil, atom) :: :ok
-  def close_lobby(lobby_id, reason \\ :closed) do
-    battle = get_battle(lobby_id)
-    Coordinator.close_battle(lobby_id)
-    ConCache.delete(:battles, lobby_id)
-    ConCache.update(:lists, :battles, fn value ->
-      new_value =
-        value
-        |> Enum.filter(fn v -> v != lobby_id end)
-
-      {:ok, new_value}
-    end)
-
-    [battle.founder_id | battle.players]
-    |> Enum.each(fn userid ->
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_battle_updates:#{lobby_id}",
-        {:remove_user_from_battle, userid, lobby_id}
-      )
-    end)
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "legacy_all_battle_updates",
-      {:global_battle_updated, lobby_id, :battle_closed}
-    )
-
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_global_battle_lobby_updates",
-      {:battle_lobby_closed, battle.id}
-    )
-
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_lobby_updates:#{battle.id}",
-      {:lobby_update, :closed, battle.id, reason}
-    )
-
-    stop_battle_lobby_throttle(lobby_id)
-  end
-
   def add_bot_to_battle(lobby_id, bot) do
     battle = get_battle(lobby_id)
     new_bots = Map.put(battle.bots, bot.name, bot)
     new_battle = %{battle | bots: new_bots}
-    ConCache.put(:battles, battle.id, new_battle)
+    ConCache.put(:lobbies, battle.id, new_battle)
 
     PubSub.broadcast(
       Central.PubSub,
@@ -275,7 +173,7 @@ defmodule Teiserver.Battle.Lobby do
 
         new_bots = Map.put(battle.bots, botname, new_bot)
         new_battle = %{battle | bots: new_bots}
-        ConCache.put(:battles, battle.id, new_battle)
+        ConCache.put(:lobbies, battle.id, new_battle)
 
         PubSub.broadcast(
           Central.PubSub,
@@ -295,7 +193,7 @@ defmodule Teiserver.Battle.Lobby do
     battle = get_battle(lobby_id)
     new_bots = Map.delete(battle.bots, botname)
     new_battle = %{battle | bots: new_bots}
-    ConCache.put(:battles, battle.id, new_battle)
+    ConCache.put(:lobbies, battle.id, new_battle)
 
     PubSub.broadcast(
       Central.PubSub,
@@ -325,7 +223,7 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec add_user_to_battle(integer(), integer(), String.t()) :: nil
   def add_user_to_battle(userid, lobby_id, script_password) do
-    ConCache.update(:battles, lobby_id, fn battle_state ->
+    ConCache.update(:lobbies, lobby_id, fn battle_state ->
       new_state =
         if Enum.member?(battle_state.players, userid) do
           # No change takes place, they're already in the battle!
@@ -334,7 +232,7 @@ defmodule Teiserver.Battle.Lobby do
           Client.join_battle(userid, lobby_id)
 
           if battle_state.coordinator_mode do
-            sayprivateex(battle_state.founder_id, userid, "Coordinator mode enabled", lobby_id)
+            LobbyChat.sayprivateex(battle_state.founder_id, userid, "Coordinator mode enabled", lobby_id)
           end
 
           Coordinator.cast_consul(lobby_id, {:user_joined, userid})
@@ -483,7 +381,7 @@ defmodule Teiserver.Battle.Lobby do
           end)
 
           # Now update the battle to remove the player
-          ConCache.update(:battles, lobby_id, fn battle_state ->
+          ConCache.update(:lobbies, lobby_id, fn battle_state ->
             # This is purely to prevent errors if the battle is in the process of shutting down
             # mid function call
             new_state =
@@ -622,75 +520,11 @@ defmodule Teiserver.Battle.Lobby do
     :ok
   end
 
-  @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
-  def say(userid, "!start" <> s, lobby_id), do: say(userid, "!cv start" <> s, lobby_id)
-  def say(userid, "!joinas spec", lobby_id), do: say(userid, "!!joinas spec", lobby_id)
-  def say(userid, "!joinas" <> s, lobby_id), do: say(userid, "!cv joinas" <> s, lobby_id)
-
-  def say(userid, "!coordinator start", lobby_id) do
-    client = Client.get_client_by_id(userid)
-    if client.moderator do
-      start_coordinator_mode(lobby_id)
-    end
-    :ok
-  end
-
-  def say(userid, msg, lobby_id) do
-    msg = String.replace(msg, "!!joinas spec", "!joinas spec")
-
-    case Teiserver.Coordinator.handle_in(userid, msg, lobby_id) do
-      :say -> do_say(userid, msg, lobby_id)
-      :handled -> :ok
-    end
-  end
-
-  @spec do_say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
-  def do_say(userid, msg, lobby_id) do
-    PubSub.broadcast(
-      Central.PubSub,
-      "legacy_battle_updates:#{lobby_id}",
-      {:battle_updated, lobby_id, {userid, msg, lobby_id}, :say}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_lobby_chat:#{lobby_id}",
-      {:lobby_chat, :say, lobby_id, userid, msg}
-    )
-  end
-
-  @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
-  def sayex(userid, msg, lobby_id) do
-    PubSub.broadcast(
-      Central.PubSub,
-      "legacy_battle_updates:#{lobby_id}",
-      {:battle_updated, lobby_id, {userid, msg, lobby_id}, :sayex}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_lobby_chat:#{lobby_id}",
-      {:lobby_chat, :sayex, lobby_id, userid, msg}
-    )
-  end
-
-  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
-  def sayprivateex(from_id, to_id, msg, lobby_id) do
-    sender = UserCache.get_user_by_id(from_id)
-    if not User.is_muted?(sender) do
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_user_updates:#{to_id}",
-        {:battle_updated, lobby_id, {from_id, msg, lobby_id}, :sayex}
-      )
-    end
-  end
-
   @spec start_coordinator_mode(Types.lobby_id()) :: :ok
   def start_coordinator_mode(lobby_id) do
     Logger.debug("Starting Coordinator mode for #{lobby_id}")
     battle = get_battle!(lobby_id)
-    sayex(battle.founder_id, "Coordinator mode enabled", lobby_id)
+    LobbyChat.sayex(battle.founder_id, "Coordinator mode enabled", lobby_id)
     update_battle(%{battle | coordinator_mode: true}, nil, nil)
     :ok
   end
@@ -699,7 +533,7 @@ defmodule Teiserver.Battle.Lobby do
   def stop_coordinator_mode(lobby_id) do
     Logger.debug("Stopping Coordinator mode for #{lobby_id}")
     battle = get_battle!(lobby_id)
-    sayex(battle.founder_id, "Coordinator mode stopped", lobby_id)
+    LobbyChat.sayex(battle.founder_id, "Coordinator mode stopped", lobby_id)
     update_battle(%{battle | coordinator_mode: false}, nil, nil)
     :ok
   end
@@ -826,7 +660,7 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   def list_lobby_ids() do
-    case ConCache.get(:lists, :battles) do
+    case ConCache.get(:lists, :lobbies) do
       nil -> []
       ids -> ids
     end
@@ -834,6 +668,6 @@ defmodule Teiserver.Battle.Lobby do
 
   def list_battles() do
     list_lobby_ids()
-    |> Enum.map(fn lobby_id -> ConCache.get(:battles, lobby_id) end)
+    |> Enum.map(fn lobby_id -> ConCache.get(:lobbies, lobby_id) end)
   end
 end

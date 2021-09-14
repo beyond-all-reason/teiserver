@@ -1,12 +1,12 @@
 defmodule Teiserver.Coordinator.ConsulCommands do
   require Logger
   alias Teiserver.Coordinator.ConsulServer
-  alias Teiserver.{Coordinator, Client, User}
-  alias Teiserver.Account.UserCache
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.{Coordinator, Client}
+  # alias Teiserver.Account.UserCache
+  alias Teiserver.Battle.{Lobby, LobbyChat}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   # alias Phoenix.PubSub
-  alias Teiserver.Data.Types, as: T
+  # alias Teiserver.Data.Types, as: T
 
   @doc """
     Command has structure:
@@ -343,7 +343,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(cmd, state) do
     if Map.has_key?(cmd, :raw) do
-      Lobby.do_say(cmd.senderid, cmd.raw, state.lobby_id)
+      LobbyChat.do_say(cmd.senderid, cmd.raw, state.lobby_id)
     else
       Logger.error("No handler in consul_server for command #{Kernel.inspect cmd}")
     end

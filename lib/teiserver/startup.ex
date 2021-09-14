@@ -165,7 +165,7 @@ defmodule Teiserver.Startup do
 
     ConCache.put(:lists, :clients, [])
     ConCache.put(:lists, :rooms, [])
-    ConCache.insert_new(:lists, :battles, [])
+    ConCache.insert_new(:lists, :lobbies, [])
 
     # We tried having a random lobby id start number to help prevent people joining
     # ongoing games but it didn't work

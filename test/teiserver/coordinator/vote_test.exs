@@ -95,7 +95,7 @@ use Central.ServerCase, async: false
     %{socket: psocket2, user: player2} = tachyon_auth_setup()
     %{socket: psocket3, user: player3} = tachyon_auth_setup()
     %{socket: psocket4, user: player4} = tachyon_auth_setup()
-    %{socket: ssocket1, user: spec1} = tachyon_auth_setup()
+    %{socket: _ssocket1, user: spec1} = tachyon_auth_setup()
 
     Lobby.force_add_user_to_battle(player2.id, lobby_id)
     Lobby.force_add_user_to_battle(player3.id, lobby_id)

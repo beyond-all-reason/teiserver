@@ -132,7 +132,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       [] ->
         socket
       _ ->
-        players = Lobby.get_battle_lobby_players!(assigns.id)
+        players = Lobby.get_lobby_players!(assigns.id)
         {users, clients} = get_user_and_clients(players)
 
         socket
