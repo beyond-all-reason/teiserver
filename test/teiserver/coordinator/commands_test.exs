@@ -2,7 +2,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.Lobby
   alias Teiserver.Common.PubsubListener
-  alias Teiserver.{Client, Coordinator}
+  alias Teiserver.{User, Client, Coordinator}
   alias Teiserver.Account.UserCache
 
   import Teiserver.TeiserverTestLib,
@@ -281,6 +281,34 @@ defmodule Teiserver.Coordinator.CommandsTest do
     reply = _tachyon_recv(psocket)
     assert reply["cmd"] == "s.lobby.join_response"
     assert reply["lobby"]["id"] == lobby_id
+  end
+
+  test "modban", %{lobby_id: lobby_id, host: host, hsocket: hsocket, player: player, listener: listener} do
+    assert User.is_muted?(player.id) == false
+    assert User.is_banned?(player.id) == false
+
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "!modban #{player.name} 60 Spamming channel"}
+    _tachyon_send(hsocket, data)
+
+    messages = PubsubListener.get(listener)
+    assert messages == [{:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "#{player.name} banned for 60 minutes by #{host.name}, reason: Spamming channel", lobby_id}, :say}]
+
+    assert User.is_muted?(player.id) == false
+    assert User.is_banned?(player.id) == true
+  end
+
+  test "modmute", %{lobby_id: lobby_id, host: host, hsocket: hsocket, player: player, listener: listener} do
+    assert User.is_muted?(player.id) == false
+    assert User.is_banned?(player.id) == false
+
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "!modmute #{player.name} 60 Spamming channel"}
+    _tachyon_send(hsocket, data)
+
+    messages = PubsubListener.get(listener)
+    assert messages == [{:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "#{player.name} muted for 60 minutes by #{host.name}, reason: Spamming channel", lobby_id}, :say}]
+
+    assert User.is_muted?(player.id) == true
+    assert User.is_banned?(player.id) == false
   end
 
   test "test passthrough", %{lobby_id: lobby_id, host: host, hsocket: hsocket, listener: listener} do

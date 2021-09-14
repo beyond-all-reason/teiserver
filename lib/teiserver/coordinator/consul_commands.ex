@@ -1,8 +1,8 @@
 defmodule Teiserver.Coordinator.ConsulCommands do
   require Logger
   alias Teiserver.Coordinator.ConsulServer
-  alias Teiserver.{Coordinator, Client}
-  # alias Teiserver.Account.UserCache
+  alias Teiserver.{Coordinator, User, Client}
+  alias Teiserver.Account.UserCache
   alias Teiserver.Battle.{Lobby, LobbyChat}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   # alias Phoenix.PubSub
@@ -206,6 +206,80 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end)
 
     ConsulServer.say_command(cmd, state)
+  end
+
+  def handle_command(cmd = %{command: "modban", remaining: remaining}, state) do
+    [username, minutes | reason] = String.split(remaining, " ")
+    reason = Enum.join(reason, " ")
+
+    userid = ConsulServer.get_user(username, state)
+    until = "#{minutes} minutes"
+
+    case Central.Account.ReportLib.perform_action(%{}, "Ban", until) do
+      {:ok, expires} ->
+        {:ok, report} =
+          Central.Account.create_report(%{
+            "location" => "battle-lobby",
+            "location_id" => nil,
+            "reason" => reason,
+            "reporter_id" => cmd.senderid,
+            "target_id" => userid
+          })
+
+        Central.Account.update_report(report, %{
+          "response_text" => "instant-action",
+          "response_action" => "Ban",
+          "expires" => expires,
+          "responder_id" => cmd.senderid
+        })
+
+        User.new_report(report.id)
+
+        user = UserCache.get_user_by_id(userid)
+        sender = UserCache.get_user_by_id(cmd.senderid)
+        LobbyChat.say(state.coordinator_id, "#{user.name} banned for #{minutes} minutes by #{sender.name}, reason: #{reason}", state.lobby_id)
+      _ ->
+        LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "Unable to find a user by that name", state.lobby_id)
+    end
+
+    state
+  end
+
+  def handle_command(cmd = %{command: "modmute", remaining: remaining}, state) do
+    [username, minutes | reason] = String.split(remaining, " ")
+    reason = Enum.join(reason, " ")
+
+    userid = ConsulServer.get_user(username, state)
+    until = "#{minutes} minutes"
+
+    case Central.Account.ReportLib.perform_action(%{}, "Mute", until) do
+      {:ok, expires} ->
+        {:ok, report} =
+          Central.Account.create_report(%{
+            "location" => "battle-lobby",
+            "location_id" => nil,
+            "reason" => reason,
+            "reporter_id" => cmd.senderid,
+            "target_id" => userid
+          })
+
+        Central.Account.update_report(report, %{
+          "response_text" => "instant-action",
+          "response_action" => "Mute",
+          "expires" => expires,
+          "responder_id" => cmd.senderid
+        })
+
+        User.new_report(report.id)
+
+        user = UserCache.get_user_by_id(userid)
+        sender = UserCache.get_user_by_id(cmd.senderid)
+        LobbyChat.say(state.coordinator_id, "#{user.name} muted for #{minutes} minutes by #{sender.name}, reason: #{reason}", state.lobby_id)
+      _ ->
+        LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "Unable to find a user by that name", state.lobby_id)
+    end
+
+    state
   end
 
   def handle_command(%{command: "gatekeeper", remaining: mode} = cmd, state) do

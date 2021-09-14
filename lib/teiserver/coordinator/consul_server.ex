@@ -28,7 +28,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Coordinator.{ConsulVoting, ConsulCommands}
 
   @always_allow ~w(status help)
-  @moderator_only ~w(pull specunready makeready settag)
+  @moderator_only ~w(pull specunready makeready settag modmute modban)
   @vote_commands ~w(vote y yes n no b abstain ev)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
@@ -278,9 +278,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
       user == nil ->
         :disallow
 
+      Enum.member?(@moderator_only, cmd.command) and user.moderator ->
+        :allow
+
       cmd.force == true and user.moderator == true ->
         :allow
 
+      # If they are a moderator it got approved
       Enum.member?(@moderator_only, cmd.command) ->
         :disallow
 

@@ -104,6 +104,13 @@ pull <user>
 settag <key> <value>
   Sets a battletag of <key> to <value>
 
+modmute <user> <minutes> <reason>
+  Mutes the user for that many minutes and creates a report for them
+
+modban <user> <minutes> <reason>
+  Bans the user for that many minutes and creates a report for them
+
+
 £!command - Force consul to intercept even when not in active mode
 %!command - Don't echo command back to chat
 £%!command - Both of the above
