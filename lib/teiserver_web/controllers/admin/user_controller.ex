@@ -103,8 +103,14 @@ defmodule TeiserverWeb.Admin.UserController do
         |> UserLib.make_favourite()
         |> insert_recently(conn)
 
+        user_stats = case Account.get_user_stat(user.id) do
+          nil -> %{}
+          stats -> stats.data
+        end
+
         conn
         |> assign(:user, user)
+        |> assign(:user_stats, user_stats)
         |> assign(:roles, Account.get_roles(user))
         |> assign(:reports, reports)
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)

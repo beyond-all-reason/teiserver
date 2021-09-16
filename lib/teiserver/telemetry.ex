@@ -4,6 +4,7 @@ defmodule Teiserver.Telemetry do
   import Ecto.Query, warn: false
   alias Central.Helpers.QueryHelpers
   alias Central.Repo
+  alias Teiserver.Account
 
   alias Teiserver.Telemetry.TelemetryServer
   alias Teiserver.Telemetry.TelemetryMinuteLog
@@ -897,6 +898,8 @@ defmodule Teiserver.Telemetry do
     if property do
       Repo.delete(property)
     end
+
+    Account.update_user_stat(userid, %{value_name => value})
 
     create_client_property(%{
       property_type_id: property_type_id,

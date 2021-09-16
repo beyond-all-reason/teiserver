@@ -275,6 +275,12 @@ defmodule Teiserver.User do
     user = UserCache.get_user_by_id(userid)
     UserCache.update_user(%{user | rename_in_progress: true}, persist: true)
 
+    # Log the current name in their history
+    previous_names = Account.get_user_stat_data(userid)
+      |> Map.get("previous_names", [])
+
+    Account.update_user_stat(userid, %{"previous_names" => [user.name | previous_names]})
+
     # We need to re-get the user to ensure we don't overwrite our rename_in_progress by mistake
     user = UserCache.get_user_by_id(userid)
     UserCache.delete_user(user.id)

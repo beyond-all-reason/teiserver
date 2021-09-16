@@ -54,7 +54,7 @@ defmodule Teiserver.Protocols.Tachyon.LobbyIn do
 
     if Lobby.allow?(state.userid, :mylobbystatus, state.lobby_id) do
       if Coordinator.allow_battlestatus_update?(new_client, state.lobby_id) do
-        Client.update(new_client, :client_updated_lobbystatus)
+        Client.update(new_client, :client_updated_battlestatus)
       end
     end
     state

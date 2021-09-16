@@ -147,7 +147,7 @@ defmodule Teiserver.Account.UserCache do
     user = get_user_by_id(userid)
 
     if user do
-      Client.disconnect(userid, "User deletion")
+      Client.disconnect(userid, "User cache deletion")
       :timer.sleep(100)
 
       ConCache.delete(:users, userid)
