@@ -110,6 +110,8 @@ modmute <user> <minutes> <reason>
 modban <user> <minutes> <reason>
   Bans the user for that many minutes and creates a report for them
 
+banmult <users>
+  Bans all users separated by spaces (from the lobby, not the game)
 
 £!command - Force consul to intercept even when not in active mode
 %!command - Don't echo command back to chat

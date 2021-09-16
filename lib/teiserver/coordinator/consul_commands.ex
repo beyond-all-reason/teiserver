@@ -143,6 +143,25 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+  def handle_command(%{command: "banmult", remaining: targets} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+
+    String.split(targets, " ")
+    |> Enum.reduce(state, fn (target, acc) ->
+      case ConsulServer.get_user(target, acc) do
+        nil ->
+          acc
+        target_id ->
+          new_blacklist = Map.put(acc.blacklist, target_id, :banned)
+          new_whitelist = Map.delete(acc.blacklist, target_id)
+          Lobby.kick_user_from_battle(target_id, acc.lobby_id)
+
+          %{acc | blacklist: new_blacklist, whitelist: new_whitelist}
+          |> ConsulServer.broadcast_update("ban")
+      end
+    end)
+  end
+
   def handle_command(%{command: "ban", remaining: target} = cmd, state) do
     case ConsulServer.get_user(target, state) do
       nil ->

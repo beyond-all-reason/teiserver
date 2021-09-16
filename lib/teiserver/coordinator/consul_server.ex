@@ -28,7 +28,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Coordinator.{ConsulVoting, ConsulCommands}
 
   @always_allow ~w(status help)
-  @moderator_only ~w(pull specunready makeready settag modmute modban)
+  @moderator_only ~w(pull specunready makeready settag modmute modban banmult)
   @vote_commands ~w(vote y yes n no b abstain ev)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
