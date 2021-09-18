@@ -474,6 +474,25 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
+  # SLDB commands
+  defp do_handle("GETIP", data, msg_id, state) do
+    if User.allow?(state.userid, :bot) do
+      target = UserCache.get_user_by_name(data)
+      reply(:user_ip, {data, target.ip}, msg_id, state)
+    else
+      state
+    end
+  end
+
+  defp do_handle("GETUSERID", data, msg_id, state) do
+    if User.allow?(state.userid, :bot) do
+      target = UserCache.get_user_by_name(data)
+      reply(:user_id, {data, target.springid}, msg_id, state)
+    else
+      state
+    end
+  end
+
   # Friend list
   defp do_handle("FRIENDLIST", _, msg_id, state),
     do: reply(:friendlist, state.user, msg_id, state)

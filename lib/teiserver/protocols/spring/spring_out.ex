@@ -370,6 +370,15 @@ defmodule Teiserver.Protocols.SpringOut do
     "CHANGEEMAILREQUESTACCEPTED\n"
   end
 
+  # SLDB
+  defp do_reply(:user_ip, {username, ip}) do
+    "#{username} is currently bound to #{ip}\n"
+  end
+
+  defp do_reply(:user_id, {username, springid}) do
+    "The ID for #{username} is 0 #{springid}\n"
+  end
+
   defp do_reply(:change_email_request_denied, reason) do
     "CHANGEEMAILREQUESTDENIED #{reason}\n"
   end

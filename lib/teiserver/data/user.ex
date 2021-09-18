@@ -648,6 +648,9 @@ defmodule Teiserver.User do
       :moderator ->
         user.moderator
 
+      :bot ->
+        user.moderator or user.bot
+
       _ ->
         false
     end

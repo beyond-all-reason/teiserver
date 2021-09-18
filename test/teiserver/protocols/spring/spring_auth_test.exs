@@ -540,7 +540,7 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "SERVERMSG You do not have permission to execute that command\n"
 
     # Give mod access, recache the user
-    UserCache.update_user(%{user | moderator: true})
+    UserCache.update_user(%{user | moderator: true}, persist: false)
     :timer.sleep(100)
 
     _send_raw(socket, "CREATEBOTACCOUNT test_bot_account #{user.name}\n")
@@ -622,5 +622,43 @@ CLIENTS test_room #{user.name}\n"
     send(pid, {:user_logged_in, bad_user.id})
     reply = _recv_raw(socket)
     assert reply == "ADDUSER new_test_user_bad_springid ?? #{bad_user.id} LuaLobby Chobby\n"
+  end
+
+  test "GETIP", %{user: user, socket: socket} do
+    ip_user = new_user("test_ip_user", %{})
+    %{socket: _socket} = auth_setup(ip_user)
+    _recv_until(socket)
+
+    # Mod/Bot only so timeout to start with
+    _send_raw(socket, "GETIP test_ip_user\n")
+    reply = _recv_raw(socket)
+    assert reply == :timeout
+
+    UserCache.update_user(%{user | moderator: true}, persist: false)
+    :timer.sleep(500)
+    _recv_until(socket)
+
+    _send_raw(socket, "GETIP test_ip_user\n")
+    reply = _recv_raw(socket)
+    assert reply == "test_ip_user is currently bound to 127.0.0.1\n"
+  end
+
+  test "GETUSERID", %{user: user, socket: socket} do
+    ip_user = new_user("test_id_user", %{})
+    %{socket: _socket} = auth_setup(ip_user)
+    _recv_until(socket)
+
+    # Mod/Bot only so timeout to start with
+    _send_raw(socket, "GETUSERID test_id_user\n")
+    reply = _recv_raw(socket)
+    assert reply == :timeout
+
+    UserCache.update_user(%{user | moderator: true}, persist: false)
+    :timer.sleep(500)
+    _recv_until(socket)
+
+    _send_raw(socket, "GETUSERID test_id_user\n")
+    reply = _recv_raw(socket)
+    assert reply == "The ID for test_id_user is 0 5\n"
   end
 end
