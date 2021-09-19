@@ -9,12 +9,19 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.{Room, User}
+  alias Teiserver.{Room, User, Coordinator}
   alias Teiserver.Account.UserCache
   alias Teiserver.Battle.Lobby
+  alias Central.Helpers.TimexHelper
   require Logger
 
   alias Teiserver.Data.Types, as: T
+
+  @chat_flood_count_short 3
+  @chat_flood_time_short 1
+  @chat_flood_count_long 10
+  @chat_flood_time_long 5
+  @temp_mute_count_limit 3
 
   @spec create(Map.t()) :: Map.t()
   def create(client) do
@@ -35,10 +42,13 @@ defmodule Teiserver.Client do
         handicap: 0,
         sync: 0,
         side: 0,
+
         # TODO: Change client:lobby_id to be client:battle_lobby_id
         lobby_id: nil,
         current_lobby_id: nil,
-        extra_logging: false
+        extra_logging: false,
+        chat_times: [],
+        temp_mute_count: 0
       },
       client
     )
@@ -89,26 +99,28 @@ defmodule Teiserver.Client do
     client
   end
 
-  @spec update(Map.t(), :client_updated_status | :client_updated_battlestatus) :: Map.t()
+  @spec update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
   def update(client, reason) do
     client =
       client
       |> add_client
 
-    PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
+    if reason != :silent do
+      PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
 
-    if client.lobby_id do
-      PubSub.broadcast(
-        Central.PubSub,
-        "live_battle_updates:#{client.lobby_id}",
-        {:updated_client, client, reason}
-      )
+      if client.lobby_id do
+        PubSub.broadcast(
+          Central.PubSub,
+          "live_battle_updates:#{client.lobby_id}",
+          {:updated_client, client, reason}
+        )
 
-      PubSub.broadcast(
-        Central.PubSub,
-        "teiserver_lobby_updates:#{client.lobby_id}",
-        {:lobby_update, :updated_client_status, client.lobby_id, {client.userid, reason}}
-      )
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_lobby_updates:#{client.lobby_id}",
+          {:lobby_update, :updated_client_status, client.lobby_id, {client.userid, reason}}
+        )
+      end
     end
 
     client
@@ -291,6 +303,47 @@ defmodule Teiserver.Client do
       {:ok, new_value}
     end)
   end
+
+  @spec chat_flood_check(T.userid()) :: :ok
+  def chat_flood_check(userid) do
+    now = System.system_time(:second)
+    client = get_client_by_id(userid)
+    new_times = [now | client.chat_times] |> Enum.take(@chat_flood_count_long)
+
+    short_time = Enum.slice(new_times, @chat_flood_count_short - 1, 1) |> get_hd
+    long_time = Enum.slice(new_times, @chat_flood_count_long - 1, 1) |> get_hd
+
+    update(%{client | chat_times: new_times}, :silent)
+
+    take_action = cond do
+      client.bot -> false
+      # client.moderator -> false
+      now < (short_time + @chat_flood_time_short) -> true
+      now < (long_time + @chat_flood_time_long) -> true
+      true -> false
+    end
+
+    if take_action do
+      user = UserCache.get_user_by_id(userid)
+      if (client.temp_mute_count + 1) == @temp_mute_count_limit do
+        banned_until = HumanTime.relative!("300 seconds")
+        new_mute = [true, banned_until]
+        UserCache.update_user(%{user | banned: new_mute}, persist: true)
+        disconnect(userid, :chat_flood)
+
+      else
+        muted_until = TimexHelper.date_to_str(HumanTime.relative!("60 seconds"), :ymd_t_hms)
+        new_mute = [true, muted_until]
+        UserCache.update_user(%{user | muted: new_mute}, persist: true)
+        update(%{client | temp_mute_count: client.temp_mute_count + 1}, :silent)
+        Coordinator.send_to_user(userid, "Chat flood protection enabled, please wait before sending more messages. Persist and you'll be temporarily banned.")
+      end
+    end
+    :ok
+  end
+
+  defp get_hd([]), do: 0
+  defp get_hd(v), do: hd(v)
 
   @spec enable_extra_logging(T.userid()) :: :ok
   def enable_extra_logging(userid) do
