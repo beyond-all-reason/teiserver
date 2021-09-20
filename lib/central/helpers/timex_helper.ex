@@ -49,6 +49,7 @@ defmodule Central.Helpers.TimexHelper do
         :ymd -> Timex.format!(the_time, "{YYYY}-{0M}-{0D}")
         :hms_dmy -> Timex.format!(the_time, "{h24}:{m}:{s} {0D}/{0M}/{YYYY}")
         :ymd_hms -> Timex.format!(the_time, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}")
+        :ymd_t_hms -> Timex.format!(the_time, "{YYYY}-{M}-{D}T{h24}:{m}:{s}")
         :hms -> Timex.format!(the_time, "{h24}:{m}:{s}")
         :hm_dmy -> Timex.format!(the_time, "{h24}:{m} {0D}/{0M}/{YYYY}")
         :hm -> Timex.format!(the_time, "{h24}:{m}")

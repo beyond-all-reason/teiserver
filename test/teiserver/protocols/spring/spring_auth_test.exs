@@ -625,12 +625,12 @@ CLIENTS test_room #{user.name}\n"
   end
 
   test "GETIP", %{user: user, socket: socket} do
-    ip_user = new_user("test_ip_user", %{})
+    ip_user = new_user("new_test_user_ip_user", %{})
     %{socket: _socket} = auth_setup(ip_user)
     _recv_until(socket)
 
     # Mod/Bot only so timeout to start with
-    _send_raw(socket, "GETIP test_ip_user\n")
+    _send_raw(socket, "GETIP new_test_user_ip_user\n")
     reply = _recv_raw(socket)
     assert reply == :timeout
 
@@ -638,18 +638,18 @@ CLIENTS test_room #{user.name}\n"
     :timer.sleep(500)
     _recv_until(socket)
 
-    _send_raw(socket, "GETIP test_ip_user\n")
+    _send_raw(socket, "GETIP new_test_user_ip_user\n")
     reply = _recv_raw(socket)
-    assert reply == "test_ip_user is currently bound to 127.0.0.1\n"
+    assert reply == "new_test_user_ip_user is currently bound to 127.0.0.1\n"
   end
 
   test "GETUSERID", %{user: user, socket: socket} do
-    ip_user = new_user("test_id_user", %{})
+    ip_user = new_user("new_test_user_id_user", %{})
     %{socket: _socket} = auth_setup(ip_user)
     _recv_until(socket)
 
     # Mod/Bot only so timeout to start with
-    _send_raw(socket, "GETUSERID test_id_user\n")
+    _send_raw(socket, "GETUSERID new_test_user_id_user\n")
     reply = _recv_raw(socket)
     assert reply == :timeout
 
@@ -657,8 +657,8 @@ CLIENTS test_room #{user.name}\n"
     :timer.sleep(500)
     _recv_until(socket)
 
-    _send_raw(socket, "GETUSERID test_id_user\n")
+    _send_raw(socket, "GETUSERID new_test_user_id_user\n")
     reply = _recv_raw(socket)
-    assert reply == "The ID for test_id_user is 0 5\n"
+    assert reply == "The ID for new_test_user_id_user is 0 #{ip_user.springid}\n"
   end
 end

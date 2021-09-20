@@ -2,7 +2,7 @@ defmodule Teiserver.Room do
   @moduledoc false
   require Logger
   alias Teiserver.Account.UserCache
-  alias Teiserver.User
+  alias Teiserver.{User, Client, Chat}
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
@@ -160,11 +160,19 @@ defmodule Teiserver.Room do
 
         room ->
           if from_id in room.members do
+            Chat.create_room_message(%{
+              content: msg,
+              chat_room: room_name,
+              inserted_at: Timex.now(),
+              user: from_id,
+            })
+
             PubSub.broadcast(
               Central.PubSub,
               "room:#{room_name}",
               {:new_message, from_id, room_name, msg}
             )
+            Client.chat_flood_check(from_id)
           end
       end
     end
@@ -178,11 +186,19 @@ defmodule Teiserver.Room do
 
         room ->
           if from_id in room.members do
+            Chat.create_room_message(%{
+              content: msg,
+              chat_room: room_name,
+              inserted_at: Timex.now(),
+              user: from_id,
+            })
+
             PubSub.broadcast(
               Central.PubSub,
               "room:#{room_name}",
               {:new_message_ex, from_id, room_name, msg}
             )
+            Client.chat_flood_check(from_id)
           end
       end
     end
