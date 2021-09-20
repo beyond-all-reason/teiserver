@@ -1,16 +1,6 @@
 <%# Live services %>
+<%= if allow?(@conn, "teiserver.moderator") do %>
 <div class="row page-row">
-  <%= if @client != nil do %>
-    <%=
-      central_component "menu_card",
-      icon: Teiserver.Game.QueueLib.icon(),
-      name: "matchmaking_live",
-      text: "Matchmaking",
-      icon_class: "fad",
-      link: Routes.ts_game_queue_index_path(@conn, :index)
-    %>
-  <% end %>
-
   <%=
     central_component "menu_card",
     icon: Teiserver.Battle.LobbyLib.icon(),
@@ -31,18 +21,10 @@
     %>
   <% end %>
 </div>
+<% end %>
 
 <div class="row page-row">
   <%= if @server_user do %>
-    <%#=
-      central_component "menu_card",
-      icon: Teiserver.Battle.LobbyLib.icon(),
-      name: "battles",
-      text: "Battles",
-      icon_class: "fad",
-      link: Routes.ts_battle_general_path(@conn, :index)
-    %>
-
     <%=
       central_component "menu_card",
       icon: "far fa-user",
@@ -52,16 +34,7 @@
       link: Routes.ts_account_general_path(@conn, :index)
     %>
 
-    <%=
-      central_component "menu_card",
-      icon: Teiserver.Clans.ClanLib.icon(),
-      name: "clans",
-      text: "Clans",
-      icon_class: "fad",
-      link: Routes.ts_clans_clan_path(@conn, :index)
-    %>
-
-    <%= if allow?(@conn, "teiserver.account.verified") do %>
+    <%= if false and allow?(@conn, "teiserver.account.verified") do %>
       <%=
         central_component "menu_card",
         icon: Teiserver.Game.QueueLib.icon(),
@@ -69,27 +42,6 @@
         text: "MM Queues",
         icon_class: "fad",
         link: Routes.ts_game_queue_path(@conn, :index)
-      %>
-    <% end %>
-
-    <%#=
-      central_component "menu_card",
-      icon: Teiserver.Game.TournamentLib.icon(),
-      name: "tournament",
-      text: "Tournaments",
-      icon_class: "fad",
-      link: "",
-      disabled: true
-    %>
-
-    <%= if allow?(@conn, "admin.dev") do %>
-      <%=
-        central_component "menu_card",
-        icon: Teiserver.Engine.UnitLib.icon(),
-        name: "units",
-        text: "Units",
-        icon_class: "fad",
-        link: Routes.ts_engine_unit_path(@conn, :index)
       %>
     <% end %>
 
@@ -103,10 +55,6 @@
         link: Routes.ts_reports_general_path(@conn, :index)
       %>
     <% end %>
-  <% else %>
-    <div style="margin-left: 40px; height: 100px; font-size: 1.2em;">
-      No server user detected, please login.
-    </div>
   <% end %>
 </div>
 
@@ -137,7 +85,7 @@
       %>
     <% end %>
 
-    <%= if allow?(@conn, "teiserver.moderator.clan") do %>
+    <%= if false and allow?(@conn, "teiserver.moderator.clan") do %>
       <%=
         central_component "menu_card",
         icon: Teiserver.Clans.ClanLib.icon(),

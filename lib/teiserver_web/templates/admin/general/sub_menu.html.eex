@@ -31,27 +31,6 @@
             %>
           <% end %>
 
-          <%= if allow?(@conn, "teiserver.moderator.party") do %>
-            <%= central_component "sub_menu_icon",
-              name: "parties",
-              label: "Parties",
-              active: @active,
-              url: "",
-              lib: Teiserver.Game.PartyLib,
-              disabled: true
-            %>
-          <% end %>
-
-          <%= if allow?(@conn, "teiserver.moderator.clan") do %>
-            <%= central_component "sub_menu_icon",
-              name: "clans",
-              label: "Clans",
-              active: @active,
-              url: Routes.ts_admin_clan_path(@conn, :index),
-              lib: Teiserver.Clans.ClanLib
-            %>
-          <% end %>
-
           <%= if allow?(@conn, "teiserver.moderator.queue") do %>
             <%= central_component "sub_menu_icon",
               name: "queues",

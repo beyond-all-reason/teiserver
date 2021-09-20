@@ -659,6 +659,6 @@ CLIENTS test_room #{user.name}\n"
 
     _send_raw(socket, "GETUSERID new_test_user_id_user\n")
     reply = _recv_raw(socket)
-    assert reply == "The ID for new_test_user_id_user is 0 #{ip_user.springid}\n"
+    assert reply == "The ID for new_test_user_id_user is 1993717506 #{ip_user.springid}\n"
   end
 end

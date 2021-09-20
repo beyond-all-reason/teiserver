@@ -47,6 +47,7 @@ defmodule Teiserver.User do
     :muted,
     :rename_in_progress,
     :springid,
+    :lobby_hash,
     :roles,
     :ip_list
   ]
@@ -75,6 +76,7 @@ defmodule Teiserver.User do
     muted: [false, nil],
     rename_in_progress: false,
     springid: nil,
+    lobby_hash: "0",
     roles: [],
     ip_list: []
   }
@@ -399,7 +401,7 @@ defmodule Teiserver.User do
     case UserCache.get_user_by_id(userid) do
       nil -> :error
       user ->
-        do_login(user, "127.0.0.1", "Teiserver Internal Client")
+        do_login(user, "127.0.0.1", "Teiserver Internal Client", "IC")
         Client.login(user, self())
         {:ok, user}
     end
@@ -425,7 +427,7 @@ defmodule Teiserver.User do
 
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
-            do_login(user, ip, lobby)
+            do_login(user, ip, lobby, "token")
 
           is_banned?(user) ->
             {:error, "Banned"}
@@ -435,16 +437,16 @@ defmodule Teiserver.User do
 
           Client.get_client_by_id(user.id) != nil ->
             Client.disconnect(user.id, "Already logged in")
-            do_login(user, ip, lobby)
+            do_login(user, ip, lobby, "token")
 
           true ->
-            do_login(user, ip, lobby)
+            do_login(user, ip, lobby, "token")
         end
     end
   end
 
-  @spec try_md5_login(String.t(), String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
-  def try_md5_login(username, md5_password, ip, lobby) do
+  @spec try_md5_login(String.t(), String.t(), String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
+  def try_md5_login(username, md5_password, ip, lobby, lobby_hash) do
     wait_for_precache()
 
     case UserCache.get_user_by_name(username) do
@@ -464,7 +466,7 @@ defmodule Teiserver.User do
 
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
-            do_login(user, ip, lobby)
+            do_login(user, ip, lobby, lobby_hash)
 
           test_password(md5_password, user.password_hash) == false ->
             {:error, "Invalid password"}
@@ -477,16 +479,16 @@ defmodule Teiserver.User do
 
           Client.get_client_by_id(user.id) != nil ->
             Client.disconnect(user.id, "Already logged in")
-            do_login(user, ip, lobby)
+            do_login(user, ip, lobby, lobby_hash)
 
           true ->
-            do_login(user, ip, lobby)
+            do_login(user, ip, lobby, lobby_hash)
         end
     end
   end
 
-  @spec do_login(Map.t(), String.t(), String.t()) :: {:ok, Map.t()}
-  defp do_login(user, ip, lobby_client) do
+  @spec do_login(Map.t(), String.t(), String.t(), String.t()) :: {:ok, Map.t()}
+  defp do_login(user, ip, lobby_client, lobby_hash) do
     # If they don't want a flag shown, don't show it, otherwise check for an override before trying geoip
     country =
       cond do
@@ -522,6 +524,7 @@ defmodule Teiserver.User do
           last_login: last_login,
           rank: rank,
           springid: springid,
+          lobby_hash: lobby_hash,
           ip_list: ip_list
       }
 

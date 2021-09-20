@@ -6,24 +6,6 @@
     lib: Teiserver,
     url: Routes.ts_general_general_path(@conn, :index)
   %>
-
-  <%= central_component "sidemenu_item",
-    name: "teiserver_account",
-    label: "Account",
-    active: assigns[:sidemenu_active],
-    lib: Teiserver.Account.UserLib,
-    icon_class: "fad",
-    url: Routes.ts_account_general_path(@conn, :index)
-  %>
-
-  <%= central_component "sidemenu_item",
-    name: "teiserver_clans",
-    label: "Clans",
-    active: assigns[:sidemenu_active],
-    lib: Teiserver.Clans.ClanLib,
-    icon_class: "fad",
-    url: Routes.ts_clans_clan_path(@conn, :index)
-  %>
 <% end %>
 
 <%= if allow?(@conn, "teiserver.moderator") do %>

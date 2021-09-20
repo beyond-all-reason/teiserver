@@ -255,9 +255,9 @@ defmodule Teiserver.Protocols.SpringIn do
 
     response =
       case regex_result do
-        [_, username, password, _cpu, _ip, lobby, _userid, _modes | _] ->
+        [_, username, password, _cpu, _ip, lobby, spring_uid, _modes | _] ->
           username = User.clean_name(username)
-          User.try_md5_login(username, password, state.ip, lobby)
+          User.try_md5_login(username, password, state.ip, lobby, spring_uid)
 
         nil ->
           _no_match(state, "LOGIN", msg_id, data)
@@ -487,7 +487,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("GETUSERID", data, msg_id, state) do
     if User.allow?(state.userid, :bot) do
       target = UserCache.get_user_by_name(data)
-      reply(:user_id, {data, target.springid}, msg_id, state)
+      reply(:user_id, {data, target.lobby_hash, target.springid}, msg_id, state)
     else
       state
     end
