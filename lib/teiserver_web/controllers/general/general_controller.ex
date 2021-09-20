@@ -33,4 +33,10 @@ defmodule TeiserverWeb.General.GeneralController do
     |> assign(:privacy_email, Application.get_env(:central, Teiserver)[:privacy_email])
     |> render("gdpr.html")
   end
+
+  @spec code_of_conduct(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def code_of_conduct(conn, _params) do
+    conn
+    |> render("code_of_conduct.html")
+  end
 end
