@@ -407,8 +407,8 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec try_login(String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
-  def try_login(token, ip, lobby) do
+  @spec try_login(String.t(), String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
+  def try_login(token, ip, lobby, lobby_hash) do
     wait_for_precache()
 
     case Guardian.resource_from_token(token) do
@@ -427,7 +427,7 @@ defmodule Teiserver.User do
 
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
-            do_login(user, ip, lobby, "token")
+            do_login(user, ip, lobby, lobby_hash)
 
           is_banned?(user) ->
             {:error, "Banned"}
@@ -437,10 +437,10 @@ defmodule Teiserver.User do
 
           Client.get_client_by_id(user.id) != nil ->
             Client.disconnect(user.id, "Already logged in")
-            do_login(user, ip, lobby, "token")
+            do_login(user, ip, lobby, lobby_hash)
 
           true ->
-            do_login(user, ip, lobby, "token")
+            do_login(user, ip, lobby, lobby_hash)
         end
     end
   end

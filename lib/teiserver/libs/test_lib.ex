@@ -60,7 +60,7 @@ defmodule Teiserver.TeiserverTestLib do
     user = if user, do: user, else: new_user()
 
     token = User.create_token(user)
-    User.try_login(token, "127.0.0.1", "AsyncTest")
+    User.try_login(token, "127.0.0.1", "AsyncTest", "token")
 
     Client.login(user, self())
 
