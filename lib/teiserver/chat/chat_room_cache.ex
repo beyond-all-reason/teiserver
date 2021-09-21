@@ -6,6 +6,8 @@ defmodule Teiserver.Room do
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
+  @dont_log_room ~w(autohosts)
+
   @spec create_room(Map.t()) :: Map.t()
   @spec create_room(String.t(), T.userid()) :: Map.t()
   @spec create_room(String.t(), T.userid(), T.clan_id()) :: Map.t()
@@ -160,12 +162,14 @@ defmodule Teiserver.Room do
 
         room ->
           if from_id in room.members do
-            Chat.create_room_message(%{
-              content: msg,
-              chat_room: room_name,
-              inserted_at: Timex.now(),
-              user_id: from_id,
-            })
+            if not Enum.member?(@dont_log_room, room_name) do
+              Chat.create_room_message(%{
+                content: msg,
+                chat_room: room_name,
+                inserted_at: Timex.now(),
+                user_id: from_id,
+              })
+              end
 
             PubSub.broadcast(
               Central.PubSub,
@@ -186,12 +190,14 @@ defmodule Teiserver.Room do
 
         room ->
           if from_id in room.members do
-            Chat.create_room_message(%{
-              content: msg,
-              chat_room: room_name,
-              inserted_at: Timex.now(),
-              user_id: from_id,
-            })
+            if not Enum.member?(@dont_log_room, room_name) do
+              Chat.create_room_message(%{
+                content: msg,
+                chat_room: room_name,
+                inserted_at: Timex.now(),
+                user_id: from_id,
+              })
+            end
 
             PubSub.broadcast(
               Central.PubSub,
