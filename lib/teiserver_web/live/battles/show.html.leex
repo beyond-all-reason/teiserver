@@ -183,30 +183,16 @@
 </table>
 
 <%= if @bar_user.moderator do %>
-  <%= if @battle.coordinator_mode do %>
-    <span class="btn btn-outline-<%= bsname %>" phx-click="stop-Coordinator">
-      <i class='fa-fw fas fa-square'></i>
-      &nbsp;
-      Stop Coordinator
-    </span>
-  <% else %>
-    <span class="btn btn-outline-<%= bsname %>" phx-click="start-Coordinator">
-      <i class='fa-fw fas fa-play'></i>
-      &nbsp;
-      Start Coordinator
-    </span>
-  <% end %>
-
   <span class="btn btn-outline-<%= bsname %>" phx-click="reset-consul">
     <i class='fa-fw fas fa-arrow-rotate-left'></i>
     &nbsp;
-    Reset consul
+    Reset coordinator
   </span>
 
   <span class="btn btn-outline-<%= bsname %>" phx-click="force-update">
     <i class='fa-fw fas fa-sync'></i>
     &nbsp;
-    Force update
+    Force update page
   </span>
 
   <br /><br />
