@@ -1,7 +1,7 @@
 defmodule Teiserver.Chat.LobbyMessage do
   use CentralWeb, :schema
 
-  schema "chat_lobby_messages" do
+  schema "teiserver_lobby_messages" do
     field :content, :string
     field :lobby_guid, :string
     field :inserted_at, :utc_datetime

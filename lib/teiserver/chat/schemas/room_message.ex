@@ -1,7 +1,7 @@
 defmodule Teiserver.Chat.RoomMessage do
   use CentralWeb, :schema
 
-  schema "chat_room_messages" do
+  schema "teiserver_room_messages" do
     field :content, :string
     field :chat_room, :string
     field :inserted_at, :utc_datetime

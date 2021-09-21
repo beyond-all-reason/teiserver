@@ -164,7 +164,7 @@ defmodule Teiserver.Room do
               content: msg,
               chat_room: room_name,
               inserted_at: Timex.now(),
-              user: from_id,
+              user_id: from_id,
             })
 
             PubSub.broadcast(
@@ -190,7 +190,7 @@ defmodule Teiserver.Room do
               content: msg,
               chat_room: room_name,
               inserted_at: Timex.now(),
-              user: from_id,
+              user_id: from_id,
             })
 
             PubSub.broadcast(

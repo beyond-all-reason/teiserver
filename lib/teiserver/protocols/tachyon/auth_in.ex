@@ -25,8 +25,8 @@ defmodule Teiserver.Protocols.Tachyon.AuthIn do
     end
   end
 
-  def do_handle("login", %{"token" => token, "lobby_name" => lobby_name, "lobby_version" => lobby_version}, state) do
-    response = User.try_login(token, state.ip, "#{lobby_name} #{lobby_version}")
+  def do_handle("login", %{"token" => token, "lobby_name" => lobby_name, "lobby_version" => lobby_version, "lobby_hash" => lobby_hash}, state) do
+    response = User.try_login(token, state.ip, "#{lobby_name} #{lobby_version}", lobby_hash)
 
     case response do
       {:error, "Unverified", _userid} ->

@@ -32,12 +32,12 @@ defmodule Teiserver.Battle.LobbyChat do
     if not User.is_muted?(userid) do
       case Lobby.get_lobby(lobby_id) do
         nil -> nil
-        guid ->
+        lobby ->
           Chat.create_lobby_message(%{
             content: msg,
-            lobby_guid: guid,
+            lobby_guid: lobby.tags["server/match/uuid"],
             inserted_at: Timex.now(),
-            user: userid,
+            user_id: userid,
           })
       end
 
@@ -63,12 +63,12 @@ defmodule Teiserver.Battle.LobbyChat do
     if not User.is_muted?(userid) do
       case Lobby.get_lobby(lobby_id) do
         nil -> nil
-        guid ->
+        lobby ->
           Chat.create_lobby_message(%{
             content: msg,
-            lobby_guid: guid,
+            lobby_guid: lobby.tags["server/match/uuid"],
             inserted_at: Timex.now(),
-            user: userid,
+            user_id: userid,
           })
       end
 
