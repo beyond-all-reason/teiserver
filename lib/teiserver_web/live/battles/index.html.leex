@@ -19,7 +19,7 @@
     <tr>
       <th>Name</th>
       <th>Map</th>
-      <th>Coordinator</th>
+      <th>Locked</th>
       <th>Player count</th>
       <th>Spectator count</th>
 
@@ -27,18 +27,18 @@
     </tr>
   </thead>
   <tbody id="battles">
-    <%= for battle <- @battles do %>
-      <%= if battle != nil do %>
-        <tr id="battle-<%= battle.id %>">
-          <td><%= battle.name %></td>
-          <td><%= battle.map_name %></td>
-          <td><%= if battle.coordinator_mode, do: "Enabled" %></td>
-          <td><%= battle.player_count %></td>
-          <td><%= battle.spectator_count %></td>
+    <%= for lobby <- @battles do %>
+      <%= if lobby != nil do %>
+        <tr id="lobby-<%= lobby.id %>">
+          <td><%= lobby.name %></td>
+          <td><%= lobby.map_name %></td>
+          <td><%= if lobby.locked, do: "Locked" %></td>
+          <td><%= lobby.player_count %></td>
+          <td><%= lobby.spectator_count %></td>
 
           <td>
             <span>
-              <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, battle.id), class: "btn btn-sm btn-#{bsname}" %>
+              <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id), class: "btn btn-sm btn-#{bsname}" %>
             </span>
           </td>
         </tr>

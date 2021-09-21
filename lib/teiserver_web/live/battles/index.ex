@@ -30,7 +30,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, LobbyLib.colours())
-      |> assign(:battles, Lobby.list_battles())
+      |> assign(:battles, Lobby.list_battles() |> sort_lobbies)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:extra_menu_content, extra_content)
 
@@ -46,6 +46,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   def handle_info({:global_battle_updated, lobby_id, :battle_opened}, socket) do
     new_battle = Lobby.get_battle(lobby_id)
     battles = [new_battle | socket.assigns[:battles]]
+    |> sort_lobbies
 
     {:noreply, assign(socket, :battles, battles)}
   end
@@ -54,6 +55,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     battles =
       socket.assigns[:battles]
       |> Enum.filter(fn b -> b.id != lobby_id end)
+    |> sort_lobbies
 
     {:noreply, assign(socket, :battles, battles)}
   end
@@ -68,6 +70,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
           battle
         end
       end)
+    |> sort_lobbies
 
     {:noreply, assign(socket, :battles, battles)}
   end
@@ -82,6 +85,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
           battle
         end
       end)
+    |> sort_lobbies
 
     {:noreply, assign(socket, :battles, battles)}
   end
@@ -97,6 +101,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
           battle
         end
       end)
+    |> sort_lobbies
 
     {:noreply, assign(socket, :battles, battles)}
   end
@@ -112,8 +117,14 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
           battle
         end
       end)
+    |> sort_lobbies
 
     {:noreply, assign(socket, :battles, battles)}
+  end
+
+  defp sort_lobbies(lobbies) do
+    lobbies
+    |> Enum.sort_by(fn v -> v end, fn l1, l2 -> l1.name <= l2.name end)
   end
 
   defp apply_action(socket, :index, _params) do
