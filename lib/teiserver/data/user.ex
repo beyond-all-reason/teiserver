@@ -45,6 +45,7 @@ defmodule Teiserver.User do
     :mmr,
     :banned,
     :muted,
+    :warned,
     :rename_in_progress,
     :springid,
     :lobby_hash,
@@ -74,6 +75,7 @@ defmodule Teiserver.User do
     mmr: %{},
     banned: [false, nil],
     muted: [false, nil],
+    warned: [false, nil],
     rename_in_progress: false,
     springid: nil,
     lobby_hash: "0",
@@ -578,6 +580,9 @@ defmodule Teiserver.User do
 
         {"Ban", expires} ->
           %{banned: [true, expires]}
+
+        {"Warn", expires} ->
+          %{warned: [true, expires]}
 
         {"Ignore report", nil} ->
           %{}

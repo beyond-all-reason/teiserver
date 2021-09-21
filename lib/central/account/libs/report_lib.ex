@@ -26,6 +26,7 @@ defmodule Central.Account.ReportLib do
   def response_actions() do
     [
       "Ignore report",
+      "Warn",
       "Mute",
       "Ban"
     ]
@@ -34,6 +35,7 @@ defmodule Central.Account.ReportLib do
   @spec action_icon(String.t() | nil) :: String.t()
   def action_icon(nil), do: ""
   def action_icon("Ignore report"), do: "fas fa-check-circle"
+  def action_icon("Warn"), do: "fas fa-triangle-exclamation"
   def action_icon("Mute"), do: "fas fa-microphone-slash"
   def action_icon("Ban"), do: "fas fa-ban"
 
@@ -43,6 +45,16 @@ defmodule Central.Account.ReportLib do
 
   def perform_action(_report, _, "never"), do: {:ok, nil}
   def perform_action(_report, _, "Never"), do: {:ok, nil}
+
+  def perform_action(_report, "Warn", data) do
+    case HumanTime.relative(data) do
+      {:ok, warned_until} ->
+        {:ok, warned_until}
+
+      err ->
+        err
+    end
+  end
 
   def perform_action(_report, "Mute", data) do
     case HumanTime.relative(data) do
