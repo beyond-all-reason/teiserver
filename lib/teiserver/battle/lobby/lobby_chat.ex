@@ -29,16 +29,19 @@ defmodule Teiserver.Battle.LobbyChat do
 
   @spec do_say(Types.userid(), String.t(), Types.lobby_id()) :: :ok
   def do_say(userid, msg, lobby_id) do
-    if not User.is_muted?(userid) do
-      case Lobby.get_lobby(lobby_id) do
-        nil -> nil
-        lobby ->
-          Chat.create_lobby_message(%{
-            content: msg,
-            lobby_guid: lobby.tags["server/match/uuid"],
-            inserted_at: Timex.now(),
-            user_id: userid,
-          })
+    user = UserCache.get_user_by_id(userid)
+    if not User.is_muted?(user) do
+      if user.bot == false do
+        case Lobby.get_lobby(lobby_id) do
+          nil -> nil
+          lobby ->
+            Chat.create_lobby_message(%{
+              content: msg,
+              lobby_guid: lobby.tags["server/match/uuid"],
+              inserted_at: Timex.now(),
+              user_id: userid,
+            })
+        end
       end
 
       PubSub.broadcast(
@@ -60,16 +63,19 @@ defmodule Teiserver.Battle.LobbyChat do
 
   @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok
   def sayex(userid, msg, lobby_id) do
+    user = UserCache.get_user_by_id(userid)
     if not User.is_muted?(userid) do
-      case Lobby.get_lobby(lobby_id) do
-        nil -> nil
-        lobby ->
-          Chat.create_lobby_message(%{
-            content: msg,
-            lobby_guid: lobby.tags["server/match/uuid"],
-            inserted_at: Timex.now(),
-            user_id: userid,
-          })
+      if user.bot == false do
+        case Lobby.get_lobby(lobby_id) do
+          nil -> nil
+          lobby ->
+            Chat.create_lobby_message(%{
+              content: msg,
+              lobby_guid: lobby.tags["server/match/uuid"],
+              inserted_at: Timex.now(),
+              user_id: userid,
+            })
+        end
       end
 
       PubSub.broadcast(
