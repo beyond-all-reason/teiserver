@@ -69,6 +69,13 @@
         </li>
 
         <li>
+          <a href="#chat_tab" role="tab" class="nav-link" data-toggle="tab">
+            <%= central_component "icon", icon: Central.Communication.CommentLib.icon() %>
+            Chat
+          </a>
+        </li>
+
+        <li>
           <a href="#reports_tab" role="tab" class="nav-link" data-toggle="tab">
             <%= central_component "icon", icon: Central.Account.ReportLib.icon() %>
             Reports
@@ -79,6 +86,10 @@
       <div class="tab-content">
         <div class="tab-pane" id="details_tab" style="padding:5px;">
           <%= render "tab_details.html", assigns %>
+        </div>
+
+        <div class="tab-pane" id="chat_tab" style="padding:5px;">
+          <%= render "tab_chat.html", assigns %>
         </div>
 
         <div class="tab-pane" id="reports_tab" style="padding:5px;">

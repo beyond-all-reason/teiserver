@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.UserController do
   use CentralWeb, :controller
 
-  alias Teiserver.Account
+  alias Teiserver.{Account, Chat}
   alias Central.Account.User
   alias Teiserver.Account.UserLib
   alias Central.Account.GroupLib
@@ -108,11 +108,28 @@ defmodule TeiserverWeb.Admin.UserController do
           stats -> stats.data
         end
 
+        room_messages = Chat.list_room_messages(
+          search: [
+            user_id: user.id
+          ],
+          limit: 50,
+          order_by: "Newest first"
+        )
+        lobby_messages = Chat.list_lobby_messages(
+          search: [
+            user_id: user.id
+          ],
+          limit: 50,
+          order_by: "Newest first"
+        )
+
         conn
         |> assign(:user, user)
         |> assign(:user_stats, user_stats)
         |> assign(:roles, Account.get_roles(user))
         |> assign(:reports, reports)
+        |> assign(:room_messages, room_messages)
+        |> assign(:lobby_messages, lobby_messages)
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
 

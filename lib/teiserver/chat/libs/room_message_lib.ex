@@ -48,9 +48,9 @@ defmodule Teiserver.Chat.RoomMessageLib do
       where: room_messages.id == ^id
   end
 
-  def _search(query, :name, name) do
+  def _search(query, :user_id, user_id) do
     from room_messages in query,
-      where: room_messages.name == ^name
+      where: room_messages.user_id == ^user_id
   end
 
   def _search(query, :id_list, id_list) do
