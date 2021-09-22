@@ -631,6 +631,19 @@ defmodule Teiserver.User do
     end
   end
 
+  @spec is_warned?(Integer.t() | Map.t()) :: boolean()
+  def is_warned?(nil), do: true
+  def is_warned?(userid) when is_integer(userid), do: is_warned?(UserCache.get_user_by_id(userid))
+  def is_warned?(%{warned: warned}) do
+    case warned do
+      [false, _] -> false
+      [true, nil] -> true
+      [true, until_str] ->
+        until = parse_ymd_t_hms(until_str)
+        Timex.compare(Timex.now(), until) != 1
+    end
+  end
+
   # Used to reset the spring password of the user when the site password is updated
   def set_new_spring_password(userid, new_password) do
     user = UserCache.get_user_by_id(userid)

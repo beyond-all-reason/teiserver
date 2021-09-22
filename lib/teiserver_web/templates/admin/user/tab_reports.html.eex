@@ -7,7 +7,7 @@
       <input type="text" name="reason" value="" placeholder="Reason" class="form-control" />
     </div>
     <div class="col-md-3">
-      <input type="text" name="until" value="" placeholder="Expires" class="form-control" />
+      <input type="text" name="until" value="" placeholder="Expires (e.g. 60 minutes or 1 week), 'never' for a pemenant action" class="form-control" />
     </div>
 
     <div class="col-md-4">

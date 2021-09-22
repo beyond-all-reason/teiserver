@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   performing their actions in the name of the coordinator
   """
   use GenServer
-  alias Teiserver.{Account, User, Clans, Room}
+  alias Teiserver.{Account, User, Clans, Room, Coordinator}
   alias Teiserver.Account.UserCache
   alias Phoenix.PubSub
   require Logger
@@ -47,6 +47,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
     end)
 
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_inout")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
 
     {:noreply, state}
@@ -73,6 +74,16 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     User.send_direct_message(state.userid, userid, "I don't currently handle messages, sorry #{username}")
     {:noreply, state}
   end
+
+  # Client inout
+  def handle_info({:client_inout, :login, userid}, state) do
+    user = UserCache.get_user_by_id(userid)
+    if User.is_warned?(user) do
+      Coordinator.send_to_user(userid, "This is a reminder that you recently received a warning for misbehaving.")
+    end
+    {:noreply, state}
+  end
+  def handle_info({:client_inout, :disconnect, _userid, _reason}, state), do: {:noreply, state}
 
   # Catchall handle_info
   def handle_info(msg, state) do

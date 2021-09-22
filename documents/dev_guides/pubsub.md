@@ -69,6 +69,13 @@ Information about a specific user such as friend related stuff.
 #### legacy_all_client_updates
 Overlaps with `legacy_all_user_updates` due to blurring of user vs client domain.
 
+#### teiserver_client_inout
+A message every time a user logs in or logs out. Unlike legacy all_user_updates it does not give any status updates.
+```
+  {:client_inout, :login, userid}
+  {:client_inout, :disconnect, userid, reason}
+```
+
 #### teiserver_liveview_client_index_updates
 These are updates sent from the ClientIndex genserver (used to throttle/batch messages sent to the liveviews).
 Valid events

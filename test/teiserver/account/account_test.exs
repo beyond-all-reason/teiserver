@@ -44,7 +44,7 @@ defmodule Teiserver.AccountTest do
         data_greater_than: {"field", "123"},
         data_less_than: {"field", "123"},
         ip: "123.456.789.123",
-        mute_or_ban: nil,
+        warn_mute_or_ban: nil,
 
         # Tests the fallback to Central.UserQueries
         name_like: ""

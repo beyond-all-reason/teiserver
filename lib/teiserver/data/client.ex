@@ -92,6 +92,12 @@ defmodule Teiserver.Client do
 
     PubSub.broadcast(
       Central.PubSub,
+      "teiserver_client_inout",
+      {:client_inout, :login, user.id}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
       "teiserver_client_action_updates:#{user.id}",
       {:client_action, :client_connect, user.id}
     )
@@ -291,6 +297,12 @@ defmodule Teiserver.Client do
       Central.PubSub,
       "teiserver_client_action_updates:#{client.userid}",
       {:client_action, :client_disconnect, client.userid}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_client_inout",
+      {:client_inout, :disconnect, client.userid, reason}
     )
 
     ConCache.delete(:clients, client.userid)

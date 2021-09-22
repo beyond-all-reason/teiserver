@@ -12,7 +12,7 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
     # runs just after startup the users may not be in the cache
     Account.list_users(
       search: [
-        mute_or_ban: true
+        warn_mute_or_ban: true
       ],
       select: [:id]
     )
@@ -28,6 +28,14 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
     end)
 
     :ok
+  end
+
+  defp check_warned(user) do
+    if User.is_warned?(user) do
+      user
+    else
+      %{user | warned: [false, nil]}
+    end
   end
 
   defp check_muted(user) do

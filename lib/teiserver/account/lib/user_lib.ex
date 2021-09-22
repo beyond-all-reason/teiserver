@@ -147,9 +147,10 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("? -> ? @> ?", users.data, "ip_list", ^ip)
   end
 
-  def _search(query, :mute_or_ban, _) do
+  def _search(query, :warn_mute_or_ban, _) do
     from users in query,
-      where: fragment("? -> ? ->> 0 = 'true'", users.data, "muted")
+      where: fragment("? -> ? ->> 0 = 'true'", users.data, "warned")
+        or fragment("? -> ? ->> 0 = 'true'", users.data, "muted")
         or fragment("? -> ? ->> 0 = 'true'", users.data, "banned")
   end
 
