@@ -2,7 +2,7 @@ defmodule Teiserver.User do
   @moduledoc """
   Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
-  alias Teiserver.Client
+  alias Teiserver.{Client, Coordinator}
   alias Teiserver.EmailHelper
   alias Teiserver.Account
   alias Teiserver.Account.{UserCache, RelationsLib}
@@ -565,7 +565,10 @@ defmodule Teiserver.User do
     report = Account.get_report!(report_id)
     user = UserCache.get_user_by_id(report.target_id)
 
-    Teiserver.Bridge.DiscordBridge.moderator_action(report_id)
+    if Enum.member?(~w(Warn Mute Ban), report.response_action) do
+      Teiserver.Bridge.DiscordBridge.moderator_action(report_id)
+      Coordinator.new_report(user, report)
+    end
 
     changes =
       case {report.response_action, report.expires} do

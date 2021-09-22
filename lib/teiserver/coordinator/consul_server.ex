@@ -104,6 +104,16 @@ defmodule Teiserver.Coordinator.ConsulServer do
     new_tags = Map.put(battle.tags, "server/match/uuid", uuid)
     Lobby.set_script_tags(state.lobby_id, new_tags)
 
+    state.lobby_id
+    |> Lobby.get_lobby!()
+    |> Map.get(:players)
+    |> Enum.each(fn userid ->
+      if User.is_muted?(userid) do
+        name = UserCache.get_username(userid)
+        Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{name}")
+      end
+    end)
+
     {:noreply, state}
   end
 

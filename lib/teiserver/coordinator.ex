@@ -92,6 +92,15 @@ defmodule Teiserver.Coordinator do
     end
   end
 
+  def new_report(user, report) do
+    case report.response_action do
+      "Warn" ->
+        send_to_user(user.id, "You have just received a formal warning, reason: #{report.response_text}.")
+      _ ->
+        nil
+    end
+  end
+
   def send_to_host(from_id, lobby_id, msg) do
     battle = Lobby.get_battle!(lobby_id)
     User.send_direct_message(from_id, battle.founder_id, msg)

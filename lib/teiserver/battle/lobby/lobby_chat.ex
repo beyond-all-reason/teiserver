@@ -9,15 +9,6 @@ defmodule Teiserver.Battle.LobbyChat do
   def say(userid, "!joinas spec", lobby_id), do: say(userid, "!!joinas spec", lobby_id)
   def say(userid, "!joinas" <> s, lobby_id), do: say(userid, "!cv joinas" <> s, lobby_id)
 
-  # Currently disabled
-  # def say(userid, "!coordinator start", lobby_id) do
-  #   client = Client.get_client_by_id(userid)
-  #   if client.moderator do
-  #     Lobby.start_coordinator_mode(lobby_id)
-  #   end
-  #   :ok
-  # end
-
   def say(userid, msg, lobby_id) do
     msg = String.replace(msg, "!!joinas spec", "!joinas spec")
 

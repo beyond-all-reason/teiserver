@@ -79,7 +79,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info({:client_inout, :login, userid}, state) do
     user = UserCache.get_user_by_id(userid)
     if User.is_warned?(user) do
-      Coordinator.send_to_user(userid, "This is a reminder that you recently received a warning for misbehaving.")
+      Coordinator.send_to_user(userid, "This is a reminder that you recently received a formal warning for misbehaving.")
     end
     {:noreply, state}
   end

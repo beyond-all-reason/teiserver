@@ -41,5 +41,8 @@ config :central, Teiserver,
   enable_discord_bridge: true
 ```
 
+### Moderator actions
+If one of the bridge channels is called "moderators" then it will not bridge the normal way and instead be used for bridging moderator actions into a discord channel.
+
 ### Developing the bot
 If you are working on the bot in development then you'll need to create a 2nd bot account as above and link it to the relevant place for testing. Place the same config structure in `config/dev.secret.exs`, enable it and you should be good to go!
