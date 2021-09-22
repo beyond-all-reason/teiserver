@@ -107,7 +107,7 @@ defmodule Teiserver.TeiserverTestLib do
     _recv_raw(socket)
 
     # Now do our login
-    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a"}
+    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a", lobby_hash: "t1 t2"}
     _tachyon_send(socket, data)
     _tachyon_recv(socket)
 

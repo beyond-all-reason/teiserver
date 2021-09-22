@@ -108,7 +108,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     assert reply == %{"cmd" => "s.auth.get_token", "result" => "success", "token" => token}
 
     # Now do the login, it should work as we only just created the user
-    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a"}
+    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a", lobby_hash: "t1 t2"}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert match?(%{"cmd" => "s.auth.login", "result" => "success"}, reply)
@@ -153,7 +153,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     assert reply == %{"cmd" => "s.auth.get_token", "result" => "success", "token" => token}
 
     # Now do the login
-    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a"}
+    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a", lobby_hash: "t1 t2"}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.auth.login", "result" => "unverified", "agreement" => "User agreement goes here."}
@@ -220,13 +220,13 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     assert reply == %{"cmd" => "s.auth.get_token", "result" => "success", "token" => token}
 
     # Login - bad token
-    data = %{cmd: "c.auth.login", token: "ab", lobby_name: "ex_test", lobby_version: "1a"}
+    data = %{cmd: "c.auth.login", token: "ab", lobby_name: "ex_test", lobby_version: "1a", lobby_hash: "t1 t2"}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.auth.login", "result" => "failure", "reason" => "token_login_failed"}
 
     # Login - good token
-    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a"}
+    data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a", lobby_hash: "t1 t2"}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert Map.has_key?(reply, "user")
