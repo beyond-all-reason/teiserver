@@ -32,6 +32,13 @@ defmodule Central.Account.ReportLib do
     ]
   end
 
+  @spec past_tense(String.t() | nil) :: String.t()
+  def past_tense(nil), do: ""
+  def past_tense("Ignore report"), do: nil
+  def past_tense("Warn"), do: "Warned"
+  def past_tense("Mute"), do: "Muted"
+  def past_tense("Ban"), do: "Banned"
+
   @spec action_icon(String.t() | nil) :: String.t()
   def action_icon(nil), do: ""
   def action_icon("Ignore report"), do: "fas fa-check-circle"

@@ -315,7 +315,7 @@ defmodule TeiserverWeb.Admin.UserController do
                       "responder_id" => conn.user_id
                     })
 
-                    new_report(report.id)
+                    # new_report(report.id)
                     {:ok, nil, "#reports_tab"}
 
                 err ->

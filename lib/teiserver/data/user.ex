@@ -560,12 +560,12 @@ defmodule Teiserver.User do
     UserCache.update_user(user, persist: true)
   end
 
-
-
   @spec new_report(Integer.t()) :: :ok
   def new_report(report_id) do
     report = Account.get_report!(report_id)
     user = UserCache.get_user_by_id(report.target_id)
+
+    Teiserver.Bridge.DiscordBridge.moderator_action(report_id)
 
     changes =
       case {report.response_action, report.expires} do

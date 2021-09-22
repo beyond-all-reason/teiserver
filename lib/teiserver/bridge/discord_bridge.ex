@@ -1,7 +1,8 @@
 defmodule Teiserver.Bridge.DiscordBridge do
   # use Alchemy.Cogs
   use Alchemy.Events
-  alias Teiserver.{Room}
+  alias Teiserver.{Account, Room}
+  alias Central.Account.ReportLib
   alias Teiserver.Bridge.BridgeServer
   require Logger
 
@@ -26,6 +27,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
   def get_text_to_emoticon_map, do: @text_to_emoticon_map
 
   Events.on_message(:inspect)
+  @spec inspect(atom | %{:attachments => any, optional(any) => any}) :: nil | :ok
   def inspect(%Alchemy.Message{author: author, channel_id: channel_id, attachments: []} = message) do
     room = bridge_channel_to_room(channel_id)
 
@@ -34,6 +36,9 @@ defmodule Teiserver.Bridge.DiscordBridge do
         nil
 
       room == nil ->
+        nil
+
+      room == "moderators" ->
         nil
 
       true ->
@@ -49,6 +54,31 @@ defmodule Teiserver.Bridge.DiscordBridge do
       # We expected to be able to handle it but didn't, what's happening?
       true ->
         Logger.debug("Unhandled DiscordBridge event: #{Kernel.inspect message}")
+    end
+  end
+
+  def moderator_action(report_id) do
+    result = Application.get_env(:central, DiscordBridge)[:bridges]
+      |> Enum.filter(fn {_chan, room} -> room == "moderators" end)
+
+    chan = case result do
+      [{chan, _}] -> chan
+      _ -> nil
+    end
+
+    if chan do
+      report = Account.get_report!(report_id, preload: [:responder, :target])
+      past_tense = ReportLib.past_tense(report.response_action)
+
+      if past_tense != nil do
+        msg = "#{report.target.name} was #{past_tense} by #{report.responder.name} for reason #{report.reason}"
+
+        Alchemy.Client.send_message(
+          chan,
+          "Moderator action: #{msg}",
+          []# Options
+        )
+      end
     end
   end
 
