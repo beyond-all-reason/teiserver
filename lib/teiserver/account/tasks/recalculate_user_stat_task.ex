@@ -29,7 +29,12 @@ defmodule Teiserver.Account.RecalculateUserStatTask do
         combine_row(row, acc)
       end)
 
+      hw_fingerprint = Account.get_user_stat(userid)
+      |> Map.get(:data)
+      |> calculate_hw_fingerprint()
+
       Account.update_user_stat(userid, %{
+        hw_fingerprint: hw_fingerprint,
         menu_minutes: data.menu,
         lobby_minutes: data.lobby,
         spectator_minutes: data.spectator,
@@ -70,5 +75,19 @@ defmodule Teiserver.Account.RecalculateUserStatTask do
       player: row.player + acc.player,
       spectator: row.spectator + acc.spectator,
     }
+  end
+
+  def calculate_hw_fingerprint(data) do
+    base = ~w(hardware:cpuinfo hardware:gpuinfo hardware:osinfo hardware:raminfo)
+    |> Enum.map(fn hw_key -> Map.get(data, hw_key, "") end)
+    |> Enum.join("")
+
+    if base == "" do
+      ""
+    else
+      :crypto.hash(:md5, base)
+        |> Base.encode64()
+        |> String.trim
+    end
   end
 end

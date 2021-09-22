@@ -78,7 +78,7 @@ defmodule Teiserver.User do
     warned: [false, nil],
     rename_in_progress: false,
     springid: nil,
-    lobby_hash: "0",
+    lobby_hash: ["token1", "token2"],
     roles: [],
     ip_list: []
   }

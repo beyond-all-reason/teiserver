@@ -61,7 +61,7 @@ defmodule Teiserver.Agents.AgentLib do
   end
 
   defp do_login(socket, token) do
-    msg = %{cmd: "c.auth.login", token: token, lobby_name: "agent_lobby", lobby_version: "1", lobby_hash: "token"}
+    msg = %{cmd: "c.auth.login", token: token, lobby_name: "agent_lobby", lobby_version: "1", lobby_hash: "token1 token2"}
     _send(socket, msg)
   end
 

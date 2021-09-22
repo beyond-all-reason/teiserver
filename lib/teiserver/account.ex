@@ -158,9 +158,34 @@ defmodule Teiserver.Account do
     }
   end
 
-  @spec smurf_search(Plug.Conn.t, User.t()) :: list()
+  @spec smurf_search(Plug.Conn.t, User.t()) :: {list(), map()}
   def smurf_search(conn, user) do
-    fragments = user.data["ip_list"]
+    ip_ids = get_smurfs_by_ip(user)
+    hash_ids = get_smurfs_by_hash(user)
+    hw_ids = get_smurfs_by_hw(user)
+
+    reasons = %{
+      ip: ip_ids,
+      hash: hash_ids,
+      hw: hw_ids
+    }
+
+    ids = (ip_ids ++ hash_ids ++ hw_ids)
+    |> Enum.uniq
+
+    users = list_users(search: [
+        admin_group: conn,
+        id_in: ids
+      ],
+      order_by: "Name (A-Z)",
+      limit: 50
+    )
+
+    {users, reasons}
+  end
+
+  defp get_smurfs_by_ip(user) do
+    ip_fragments = user.data["ip_list"]
     |> Enum.map(fn ip ->
       "u.data -> 'ip_list' ? '#{ip}'"
     end)
@@ -169,26 +194,59 @@ defmodule Teiserver.Account do
     query = """
     SELECT u.id
     FROM account_users u
-    WHERE #{fragments}
-    """
+    WHERE #{ip_fragments}
+"""
 
-    ids =
-      case Ecto.Adapters.SQL.query(Repo, query, []) do
-        {:ok, results} ->
-          results.rows
-          |> List.flatten
+    case Ecto.Adapters.SQL.query(Repo, query, []) do
+      {:ok, results} ->
+        results.rows
+        |> List.flatten
 
-        {a, b} ->
-          raise "ERR: #{a}, #{b}"
-      end
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
+  end
 
-    list_users(search: [
-        admin_group: conn,
-        id_in: ids
-      ],
-      order_by: "Name (A-Z)",
-      limit: 50
-    )
+  defp get_smurfs_by_hash(user) do
+    lobby_hash = user.data["lobby_hash"]
+    lobby_hash_fragment = "u.data ->> 'lobby_hash' = '#{lobby_hash}'"
+
+    query = """
+    SELECT u.id
+    FROM account_users u
+    WHERE #{lobby_hash_fragment}
+"""
+
+    case Ecto.Adapters.SQL.query(Repo, query, []) do
+      {:ok, results} ->
+        results.rows
+        |> List.flatten
+
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
+  end
+
+  defp get_smurfs_by_hw(user) do
+    user_stats = get_user_stat(user.id).data
+
+    hw_fingerprint = user_stats["hw_fingerprint"]
+    hw_fragement = "u.data ->> 'hw_fingerprint' = '#{hw_fingerprint}'"
+
+    query = """
+    SELECT u.user_id
+    FROM teiserver_account_user_stats u
+    WHERE #{hw_fragement}
+"""
+
+    case Ecto.Adapters.SQL.query(Repo, query, []) do
+      {:ok, results} ->
+        results.rows
+        |> List.flatten
+
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
   end
 
   # Gets the the roles for the user based on their flags/data
