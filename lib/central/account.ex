@@ -785,6 +785,8 @@ defmodule Central.Account do
     {:ok, report}
   end
 
+  def broadcast_create_report(v), do: v
+
   @doc """
   Updates a report.
 
