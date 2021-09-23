@@ -216,8 +216,8 @@ defmodule Teiserver.Protocols.SpringIn do
     [token, lobby, lobby_hash, _flags] =
       case String.split(data, "\t") do
         [token, lobby, lobby_hash, flags] -> [token, lobby, lobby_hash, String.split(flags, " ")]
-        [token, lobby, flags] -> [token, lobby, "token", String.split(flags, " ")]
-        [token, lobby] -> [token, lobby, "token", []]
+        [token, lobby, flags] -> [token, lobby, "token token", String.split(flags, " ")]
+        [token, lobby] -> [token, lobby, "token token", []]
       end
 
     # Now try to login using a token
