@@ -488,7 +488,11 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("GETUSERID", data, msg_id, state) do
     if User.allow?(state.userid, :bot) do
       target = UserCache.get_user_by_name(data)
-      reply(:user_id, {data, Enum.join(target.lobby_hash, " "), target.springid}, msg_id, state)
+      hash = cond do
+        is_list(target.lobby_hash) -> Enum.join(target.lobby_hash, " ")
+        true -> target.lobby_hash
+      end
+      reply(:user_id, {data, hash, target.springid}, msg_id, state)
     else
       state
     end
