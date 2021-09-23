@@ -432,7 +432,13 @@ defmodule Teiserver.User do
             do_login(user, ip, lobby, lobby_hash)
 
           is_banned?(user) ->
-            {:error, "Banned"}
+            [_, until] = user.data.banned
+
+            if until == nil do
+              {:error, "Banned"}
+            else
+              {:error, "Banned until #{until}"}
+            end
 
           user.verified == false ->
             {:error, "Unverified", user.id}
@@ -562,7 +568,13 @@ defmodule Teiserver.User do
 
   @spec create_report(Integer.t()) :: :ok
   def create_report(report_id) do
-    Teiserver.Bridge.DiscordBridge.moderator_report(report_id)
+    report = Account.get_report!(report_id)
+
+    if report.response_text != nil do
+      update_report(report_id)
+    else
+      Teiserver.Bridge.DiscordBridge.moderator_report(report_id)
+    end
   end
 
   @spec update_report(Integer.t()) :: :ok
