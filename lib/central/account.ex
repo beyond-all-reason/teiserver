@@ -770,8 +770,19 @@ defmodule Central.Account do
   """
   def create_report(attrs \\ %{}) do
     %Report{}
-    |> Report.create_changeset(attrs)
+    |> Report.changeset(attrs)
     |> Repo.insert()
+    |> broadcast_create_report
+  end
+
+  def broadcast_create_report({:ok, report}) do
+    CentralWeb.Endpoint.broadcast(
+      "account_hooks",
+      "create_report",
+      report.id
+    )
+
+    {:ok, report}
   end
 
   @doc """
@@ -788,7 +799,7 @@ defmodule Central.Account do
   """
   def update_report(%Report{} = report, attrs) do
     report
-    |> Report.respond_changeset(attrs)
+    |> Report.changeset(attrs)
     |> Repo.update()
     |> broadcast_update_report
   end

@@ -3,6 +3,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
   use Alchemy.Events
   alias Teiserver.{Account, Room}
   alias Central.Account.ReportLib
+  alias Central.Helpers.TimexHelper
   alias Teiserver.Bridge.BridgeServer
   require Logger
 
@@ -38,7 +39,10 @@ defmodule Teiserver.Bridge.DiscordBridge do
       room == nil ->
         nil
 
-      room == "moderators" ->
+      room == "moderation-reports" ->
+        nil
+
+      room == "moderation-actions" ->
         nil
 
       true ->
@@ -57,9 +61,35 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
   end
 
+  def moderator_report(report_id) do
+    result = Application.get_env(:central, DiscordBridge)[:bridges]
+      |> Enum.filter(fn {_chan, room} -> room == "moderation-reports" end)
+
+    chan = case result do
+      [{chan, _}] -> chan
+      _ -> nil
+    end
+
+    if chan do
+      report = Account.get_report!(report_id, preload: [:reporter, :target])
+      if report.response_action == nil do
+        msg = "#{report.target.name} was reported by #{report.reporter.name} for reason #{report.reason}"
+
+        Alchemy.Client.send_message(
+          chan,
+          "Moderation report: #{msg}",
+          []# Options
+        )
+      else
+        # This was created as a whole thing
+        moderator_action(report_id)
+      end
+    end
+  end
+
   def moderator_action(report_id) do
     result = Application.get_env(:central, DiscordBridge)[:bridges]
-      |> Enum.filter(fn {_chan, room} -> room == "moderators" end)
+      |> Enum.filter(fn {_chan, room} -> room == "moderation-actions" end)
 
     chan = case result do
       [{chan, _}] -> chan
@@ -71,11 +101,17 @@ defmodule Teiserver.Bridge.DiscordBridge do
       past_tense = ReportLib.past_tense(report.response_action)
 
       if past_tense != nil do
-        msg = "#{report.target.name} was #{past_tense} by #{report.responder.name} for reason #{report.reason}"
+        until = if report.expires do
+          "until " <> TimexHelper.date_to_str(report.expires, format: :hms_dmy) <> " (UTC)"
+        else
+          "Permanent"
+        end
+
+        msg = "#{report.target.name} was #{past_tense} by #{report.responder.name} for reason #{report.reason}, #{until}"
 
         Alchemy.Client.send_message(
           chan,
-          "Moderator action: #{msg}",
+          "Moderation action: #{msg}",
           []# Options
         )
       end

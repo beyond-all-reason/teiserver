@@ -5,7 +5,6 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Central.Account.User
   alias Teiserver.Account.UserLib
   alias Central.Account.GroupLib
-  import Teiserver.User, only: [new_report: 1]
 
   plug(AssignPlug,
     sidemenu_active: ["teiserver", "teiserver_admin"]
@@ -305,17 +304,13 @@ defmodule TeiserverWeb.Admin.UserController do
                       "location_id" => nil,
                       "reason" => reason,
                       "reporter_id" => conn.user_id,
-                      "target_id" => user.id
-                    })
-
-                    Central.Account.update_report(report, %{
+                      "target_id" => user.id,
                       "response_text" => "instant-action",
                       "response_action" => params["report_response_action"],
                       "expires" => expires,
                       "responder_id" => conn.user_id
                     })
 
-                    # new_report(report.id)
                     {:ok, nil, "#reports_tab"}
 
                 err ->

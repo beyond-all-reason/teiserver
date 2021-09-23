@@ -78,7 +78,7 @@ defmodule Teiserver.Bridge.BridgeServer do
 
     rooms = Application.get_env(:central, DiscordBridge)[:bridges]
     |> Map.new(fn {chan, room} -> {room, chan} end)
-    |> Map.drop(["moderators"])
+    |> Map.drop(["moderation-reports", "moderation-actions"])
 
     state = %{
       ip: "127.0.0.1",

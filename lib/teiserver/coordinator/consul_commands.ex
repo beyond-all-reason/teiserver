@@ -242,17 +242,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             "location_id" => nil,
             "reason" => reason,
             "reporter_id" => cmd.senderid,
-            "target_id" => userid
-          })
-
-        Central.Account.update_report(report, %{
-          "response_text" => "instant-action",
-          "response_action" => "Ban",
-          "expires" => expires,
-          "responder_id" => cmd.senderid
+            "target_id" => userid,
+            "response_text" => "instant-action",
+            "response_action" => "Ban",
+            "expires" => expires,
+            "responder_id" => cmd.senderid
         })
-
-        User.new_report(report.id)
 
         user = UserCache.get_user_by_id(userid)
         sender = UserCache.get_user_by_id(cmd.senderid)
@@ -279,17 +274,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             "location_id" => nil,
             "reason" => reason,
             "reporter_id" => cmd.senderid,
-            "target_id" => userid
+            "target_id" => userid,
+            "response_text" => "instant-action",
+            "response_action" => "Mute",
+            "expires" => expires,
+            "responder_id" => cmd.senderid
           })
-
-        Central.Account.update_report(report, %{
-          "response_text" => "instant-action",
-          "response_action" => "Mute",
-          "expires" => expires,
-          "responder_id" => cmd.senderid
-        })
-
-        User.new_report(report.id)
 
         user = UserCache.get_user_by_id(userid)
         sender = UserCache.get_user_by_id(cmd.senderid)

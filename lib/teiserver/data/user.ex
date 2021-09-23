@@ -560,14 +560,19 @@ defmodule Teiserver.User do
     UserCache.update_user(user, persist: true)
   end
 
-  @spec new_report(Integer.t()) :: :ok
-  def new_report(report_id) do
+  @spec create_report(Integer.t()) :: :ok
+  def create_report(report_id) do
+    Teiserver.Bridge.DiscordBridge.moderator_report(report_id)
+  end
+
+  @spec update_report(Integer.t()) :: :ok
+  def update_report(report_id) do
     report = Account.get_report!(report_id)
     user = UserCache.get_user_by_id(report.target_id)
 
     if Enum.member?(~w(Warn Mute Ban), report.response_action) do
       Teiserver.Bridge.DiscordBridge.moderator_action(report_id)
-      Coordinator.new_report(user, report)
+      Coordinator.update_report(user, report)
     end
 
     changes =

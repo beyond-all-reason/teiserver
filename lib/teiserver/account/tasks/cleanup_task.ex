@@ -23,6 +23,7 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
         user
         |> check_muted()
         |> check_banned()
+        |> check_warned()
         |> UserCache.update_user(persist: true)
       end
     end)
