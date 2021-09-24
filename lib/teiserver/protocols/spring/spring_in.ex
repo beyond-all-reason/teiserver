@@ -8,7 +8,6 @@ defmodule Teiserver.Protocols.SpringIn do
   require Logger
   alias Teiserver.Battle.Lobby
   alias Teiserver.{Coordinator, Room, User, Client}
-  alias Teiserver.Account.UserCache
   alias Phoenix.PubSub
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
@@ -308,7 +307,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("CONFIRMAGREEMENT", code, msg_id, %{unverified_id: userid} = state) do
-    case UserCache.get_user_by_id(userid) do
+    case User.get_user_by_id(userid) do
       nil ->
         Logger.error("CONFIRMAGREEMENT - No user found for ID of '#{userid}'")
         state
@@ -458,7 +457,7 @@ defmodule Teiserver.Protocols.SpringIn do
           true ->
             encrypted_new_password = User.encrypt_password(md5_new_password)
             new_user = %{state.user | password_hash: encrypted_new_password}
-            UserCache.update_user(new_user, persist: true)
+            User.update_user(new_user, persist: true)
 
             reply(
               :servermsg,
@@ -478,7 +477,7 @@ defmodule Teiserver.Protocols.SpringIn do
   # SLDB commands
   defp do_handle("GETIP", data, msg_id, state) do
     if User.allow?(state.userid, :bot) do
-      target = UserCache.get_user_by_name(data)
+      target = User.get_user_by_name(data)
       reply(:user_ip, {data, target.ip}, msg_id, state)
     else
       state
@@ -487,7 +486,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("GETUSERID", data, msg_id, state) do
     if User.allow?(state.userid, :bot) do
-      target = UserCache.get_user_by_name(data)
+      target = User.get_user_by_name(data)
       hash = cond do
         is_list(target.lobby_hash) -> Enum.join(target.lobby_hash, " ")
         true -> target.lobby_hash
@@ -508,7 +507,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("UNFRIEND", data, msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        new_user = User.remove_friend(state.userid, UserCache.get_userid(username))
+        new_user = User.remove_friend(state.userid, User.get_userid(username))
         %{state | user: new_user}
       _ ->
         _no_match(state, "UNFRIEND", msg_id, data)
@@ -518,7 +517,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("ACCEPTFRIENDREQUEST", data, msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        new_user = User.accept_friend_request(UserCache.get_userid(username), state.userid)
+        new_user = User.accept_friend_request(User.get_userid(username), state.userid)
         %{state | user: new_user}
       _ ->
         _no_match(state, "ACCEPTFRIENDREQUEST", msg_id, data)
@@ -528,7 +527,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("DECLINEFRIENDREQUEST", data, msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        new_user = User.decline_friend_request(UserCache.get_userid(username), state.userid)
+        new_user = User.decline_friend_request(User.get_userid(username), state.userid)
         %{state | user: new_user}
       _ ->
         _no_match(state, "DECLINEFRIENDREQUEST", msg_id, data)
@@ -538,7 +537,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("FRIENDREQUEST", data, msg_id, state) do
     case String.split(data, "=") do
       [_, username] ->
-        User.create_friend_request(state.userid, UserCache.get_userid(username))
+        User.create_friend_request(state.userid, User.get_userid(username))
         state
       _ ->
         _no_match(state, "FRIENDREQUEST", msg_id, data)
@@ -547,13 +546,13 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("IGNORE", data, _msg_id, state) do
     [_, username] = String.split(data, "=")
-    User.ignore_user(state.userid, UserCache.get_userid(username))
+    User.ignore_user(state.userid, User.get_userid(username))
     state
   end
 
   defp do_handle("UNIGNORE", data, _msg_id, state) do
     [_, username] = String.split(data, "=")
-    User.unignore_user(state.userid, UserCache.get_userid(username))
+    User.unignore_user(state.userid, User.get_userid(username))
     state
   end
 
@@ -563,7 +562,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("c.moderation.report_user", data, msg_id, state) do
     case String.split(data, "\t") do
       [target_name, location_type, location_id, reason] ->
-        target = UserCache.get_user_by_name(target_name) || %{id: nil}
+        target = User.get_user_by_name(target_name) || %{id: nil}
         location_id = if location_id == "nil", do: nil, else: location_id
         result = Account.create_report(state.userid, target.id, location_type, location_id, reason)
 
@@ -653,7 +652,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("SAYPRIVATE", data, msg_id, state) do
     case Regex.run(~r/(\S+) (.+)/, data) do
       [_, to_name, msg] ->
-        to_id = UserCache.get_userid(to_name)
+        to_id = User.get_userid(to_name)
         User.send_direct_message(state.userid, to_id, msg)
         reply(:sent_direct_message, {to_id, msg}, msg_id, state)
 
@@ -801,7 +800,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("JOINBATTLEACCEPT", username, _msg_id, state) do
-    userid = UserCache.get_userid(username)
+    userid = User.get_userid(username)
     Lobby.accept_join_request(userid, state.lobby_id)
     state
   end
@@ -813,7 +812,7 @@ defmodule Teiserver.Protocols.SpringIn do
         [username] -> {username, "no reason given"}
       end
 
-    userid = UserCache.get_userid(username)
+    userid = User.get_userid(username)
     Lobby.deny_join_request(userid, state.lobby_id, reason)
     state
   end
@@ -821,7 +820,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("HANDICAP", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\d+)/, data) do
       [_, username, value] ->
-        client_id = UserCache.get_userid(username)
+        client_id = User.get_userid(username)
         value = int_parse(value)
         Lobby.force_change_client(state.userid, client_id, %{handicap: value})
 
@@ -890,7 +889,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("KICKFROMBATTLE", username, _msg_id, state) do
     if Lobby.allow?(state.userid, :kickfrombattle, state.lobby_id) do
-      userid = UserCache.get_userid(username)
+      userid = User.get_userid(username)
       Lobby.kick_user_from_battle(userid, state.lobby_id)
     end
 
@@ -900,7 +899,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("FORCETEAMNO", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_, username, team_number] ->
-        client_id = UserCache.get_userid(username)
+        client_id = User.get_userid(username)
         value = int_parse(team_number)
         Lobby.force_change_client(state.userid, client_id, %{team_number: value})
 
@@ -914,7 +913,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("FORCEALLYNO", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_, username, ally_team_number] ->
-        client_id = UserCache.get_userid(username)
+        client_id = User.get_userid(username)
         value = int_parse(ally_team_number)
         Lobby.force_change_client(state.userid, client_id, %{ally_team_number: value})
 
@@ -928,7 +927,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("FORCETEAMCOLOR", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_, username, team_colour] ->
-        client_id = UserCache.get_userid(username)
+        client_id = User.get_userid(username)
         value = int_parse(team_colour)
         Lobby.force_change_client(state.userid, client_id, %{team_colour: value})
 
@@ -940,7 +939,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("FORCESPECTATORMODE", username, _msg_id, state) do
-    client_id = UserCache.get_userid(username)
+    client_id = User.get_userid(username)
     Lobby.force_change_client(state.userid, client_id, %{player: false})
 
     state
@@ -1053,7 +1052,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("SAYBATTLEPRIVATEEX", data, msg_id, state) do
     case Regex.run(~r/(\S+) (.+)/, data) do
       [_, to_name, msg] ->
-        to_id = UserCache.get_userid(to_name)
+        to_id = User.get_userid(to_name)
 
         if Lobby.allow?(state.userid, :saybattleprivateex, state.lobby_id) do
           Lobby.sayprivateex(state.userid, to_id, msg, state.lobby_id)
@@ -1145,7 +1144,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("RING", username, _msg_id, state) do
-    userid = UserCache.get_userid(username)
+    userid = User.get_userid(username)
     User.ring(userid, state.userid)
     state
   end

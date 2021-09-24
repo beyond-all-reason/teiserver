@@ -10,7 +10,6 @@ defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
   alias Teiserver.{Room, User, Coordinator}
-  alias Teiserver.Account.UserCache
   alias Teiserver.Battle.Lobby
   alias Central.Helpers.TimexHelper
   require Logger
@@ -180,7 +179,7 @@ defmodule Teiserver.Client do
   def get_client_by_name(""), do: nil
 
   def get_client_by_name(name) do
-    userid = UserCache.get_userid(name)
+    userid = User.get_userid(name)
     ConCache.get(:clients, userid)
   end
 
@@ -236,7 +235,7 @@ defmodule Teiserver.Client do
 
   @spec refresh_client(T.userid()) :: Map.t()
   def refresh_client(userid) do
-    user = UserCache.get_user_by_id(userid)
+    user = User.get_user_by_id(userid)
     client = get_client_by_id(userid)
     %{client |
       userid: user.id,
@@ -336,17 +335,17 @@ defmodule Teiserver.Client do
     end
 
     if take_action do
-      user = UserCache.get_user_by_id(userid)
+      user = User.get_user_by_id(userid)
       if (client.temp_mute_count + 1) == @temp_mute_count_limit do
         banned_until = HumanTime.relative!("300 seconds")
         new_mute = [true, banned_until]
-        UserCache.update_user(%{user | banned: new_mute}, persist: true)
+        User.update_user(%{user | banned: new_mute}, persist: true)
         disconnect(userid, :chat_flood)
 
       else
         muted_until = TimexHelper.date_to_str(HumanTime.relative!("60 seconds"), :ymd_t_hms)
         new_mute = [true, muted_until]
-        UserCache.update_user(%{user | muted: new_mute}, persist: true)
+        User.update_user(%{user | muted: new_mute}, persist: true)
         update(%{client | temp_mute_count: client.temp_mute_count + 1}, :silent)
         Coordinator.send_to_user(userid, "Chat flood protection enabled, please wait before sending more messages. Persist and you'll be temporarily banned.")
       end

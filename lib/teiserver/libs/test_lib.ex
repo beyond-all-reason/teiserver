@@ -6,7 +6,6 @@ end
 defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
   alias Teiserver.{Client, User, Account}
-  alias Teiserver.Account.UserCache
   alias Teiserver.Protocols.Tachyon
   alias Teiserver.Coordinator.CoordinatorServer
   @host '127.0.0.1'
@@ -34,7 +33,7 @@ defmodule Teiserver.TeiserverTestLib do
   def new_user(name \\ nil, params \\ %{}) do
     name = name || new_user_name()
 
-    case UserCache.get_user_by_name(name) do
+    case User.get_user_by_name(name) do
       nil ->
         {:ok, user} =
           User.user_register_params(name, "#{name}@email.com", "X03MO1qnZdYdgyfeuILPmQ==", Map.merge(%{admin_group_id: Teiserver.user_group_id()}, params))
@@ -46,9 +45,9 @@ defmodule Teiserver.TeiserverTestLib do
         })
 
         user
-        |> UserCache.convert_user()
+        |> User.convert_user()
         |> Map.put(:springid, User.next_springid())
-        |> UserCache.add_user()
+        |> User.add_user()
         |> User.verify_user()
       _ ->
         new_user()
@@ -332,7 +331,7 @@ defmodule Teiserver.TeiserverTestLib do
   @spec conn_setup({:ok, List.t()}) :: {:ok, List.t()}
   def conn_setup({:ok, data}) do
     user = data[:user]
-    Teiserver.Account.UserCache.recache_user(user.id)
+    Teiserver.Account.User.recache_user(user.id)
 
     Account.create_group_membership(%{
       user_id: user.id,

@@ -7,9 +7,8 @@ defmodule Teiserver.Protocols.SpringOut do
   """
   require Logger
   alias Phoenix.PubSub
-  alias Teiserver.{Client, Room}
+  alias Teiserver.{User, Client, Room}
   alias Teiserver.Battle.Lobby
-  alias Teiserver.Account.UserCache
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.{MatchmakingOut}
 
@@ -138,7 +137,7 @@ defmodule Teiserver.Protocols.SpringOut do
     friends =
       user.friends
       |> Enum.map(fn f ->
-        name = UserCache.get_username(f)
+        name = User.get_username(f)
         "FRIENDLIST userName=#{name}\n"
       end)
 
@@ -151,7 +150,7 @@ defmodule Teiserver.Protocols.SpringOut do
     requests =
       user.friend_requests
       |> Enum.map(fn f ->
-        name = UserCache.get_username(f)
+        name = User.get_username(f)
         "FRIENDREQUESTLIST userName=#{name}\n"
       end)
 
@@ -164,7 +163,7 @@ defmodule Teiserver.Protocols.SpringOut do
     ignored =
       user.ignored
       |> Enum.map(fn f ->
-        name = UserCache.get_username(f)
+        name = User.get_username(f)
         "IGNORELIST userName=#{name}\n"
       end)
 
@@ -288,7 +287,7 @@ defmodule Teiserver.Protocols.SpringOut do
   # defp do_reply(:battle_players, battle) do
   #   battle.players
   #   |> Parallel.map(fn player_id ->
-  #     pname = UserCache.get_username(player_id)
+  #     pname = User.get_username(player_id)
   #     "JOINEDBATTLE #{battle.id} #{pname}\n"
   #   end)
   # end
@@ -318,7 +317,7 @@ defmodule Teiserver.Protocols.SpringOut do
   # It's possible for a user to log in and then out really fast and cause issues with this
   defp do_reply(:user_logged_in, nil), do: nil
   defp do_reply(:user_logged_in, userid) do
-    case UserCache.get_user_by_id(userid) do
+    case User.get_user_by_id(userid) do
       nil -> nil
       user ->
         [
@@ -335,7 +334,7 @@ defmodule Teiserver.Protocols.SpringOut do
   # Commands
   defp do_reply(:ring, {ringer_id, state_user}) do
     if ringer_id not in (state_user.ignored || []) do
-      ringer_name = UserCache.get_username(ringer_id)
+      ringer_name = User.get_username(ringer_id)
       "RING #{ringer_name}\n"
     end
   end
@@ -420,13 +419,13 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:sent_direct_message, {to_id, msg}) do
-    to_name = UserCache.get_username(to_id)
+    to_name = User.get_username(to_id)
     "SAYPRIVATE #{to_name} #{msg}\n"
   end
 
   defp do_reply(:direct_message, {from_id, messages, state_user}) when is_list(messages) do
     if from_id not in (state_user.ignored || []) do
-      from_name = UserCache.get_username(from_id)
+      from_name = User.get_username(from_id)
       messages
       |> Enum.map(fn msg ->
         "SAIDPRIVATE #{from_name} #{msg}\n"
@@ -437,14 +436,14 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:direct_message, {from_id, msg, state_user}) do
     if from_id not in (state_user.ignored || []) do
-      from_name = UserCache.get_username(from_id)
+      from_name = User.get_username(from_id)
       "SAIDPRIVATE #{from_name} #{msg}\n"
     end
   end
 
   defp do_reply(:chat_message, {from_id, room_name, messages, state_user}) when is_list(messages) do
     if from_id not in (state_user.ignored || []) do
-      from_name = UserCache.get_username(from_id)
+      from_name = User.get_username(from_id)
       messages
       |> Enum.map(fn msg ->
         "SAID #{room_name} #{from_name} #{msg}\n"
@@ -455,51 +454,51 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:chat_message, {from_id, room_name, msg, state_user}) do
     if from_id not in (state_user.ignored || []) do
-      from_name = UserCache.get_username(from_id)
+      from_name = User.get_username(from_id)
       "SAID #{room_name} #{from_name} #{msg}\n"
     end
   end
 
   defp do_reply(:chat_message_ex, {from_id, room_name, msg, state_user}) do
     if from_id not in (state_user.ignored || []) do
-      from_name = UserCache.get_username(from_id)
+      from_name = User.get_username(from_id)
       "SAIDEX #{room_name} #{from_name} #{msg}\n"
     end
   end
 
   defp do_reply(:add_user_to_room, {userid, room_name}) do
-    username = UserCache.get_username(userid)
+    username = User.get_username(userid)
     "JOINED #{room_name} #{username}\n"
   end
 
   # Battle
   defp do_reply(:request_user_join_battle, userid) do
-    user = UserCache.get_user_by_id(userid)
+    user = User.get_user_by_id(userid)
     "JOINBATTLEREQUEST #{user.name} #{user.ip}\n"
   end
 
   defp do_reply(:remove_user_from_room, {userid, room_name}) do
-    username = UserCache.get_username(userid)
+    username = User.get_username(userid)
     "LEFT #{room_name} #{username}\n"
   end
 
   defp do_reply(:add_user_to_battle, {userid, lobby_id, nil}) do
-    username = UserCache.get_username(userid)
+    username = User.get_username(userid)
     "JOINEDBATTLE #{lobby_id} #{username}\n"
   end
 
   defp do_reply(:add_user_to_battle, {userid, lobby_id, script_password}) do
-    username = UserCache.get_username(userid)
+    username = User.get_username(userid)
     "JOINEDBATTLE #{lobby_id} #{username} #{script_password}\n"
   end
 
   defp do_reply(:remove_user_from_battle, {userid, lobby_id}) do
-    username = UserCache.get_username(userid)
+    username = User.get_username(userid)
     "LEFTBATTLE #{lobby_id} #{username}\n"
   end
 
   defp do_reply(:kick_user_from_battle, {userid, lobby_id}) do
-    username = UserCache.get_username(userid)
+    username = User.get_username(userid)
     "KICKFROMBATTLE #{lobby_id} #{username}\n"
   end
 
@@ -508,12 +507,12 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:battle_message, {userid, msg, _lobby_id}) do
-    username = UserCache.get_username(userid)
+    username = User.get_username(userid)
     "SAIDBATTLE #{username} #{msg}\n"
   end
 
   defp do_reply(:battle_message_ex, {userid, msg, _lobby_id}) do
-    username = UserCache.get_username(userid)
+    username = User.get_username(userid)
     "SAIDBATTLEEX #{username} #{msg}\n"
   end
 
@@ -625,12 +624,12 @@ defmodule Teiserver.Protocols.SpringOut do
     reply(:join_success, room_name, nil, state)
     reply(:joined_room, {state.username, room_name}, nil, state)
 
-    author_name = UserCache.get_username(room.author_id)
+    author_name = User.get_username(room.author_id)
     reply(:channel_topic, {room_name, author_name}, nil, state)
 
     members =
       room.members
-      |> Enum.map(fn m -> UserCache.get_username(m) end)
+      |> Enum.map(fn m -> User.get_username(m) end)
       |> Enum.filter(fn n -> n != nil end)
       |> List.insert_at(0, state.username)
       |> Enum.join(" ")

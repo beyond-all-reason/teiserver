@@ -2,7 +2,6 @@ defmodule Teiserver.Coordinator.ConsulVoting do
   require Logger
   alias Teiserver.Coordinator.{ConsulServer, ConsulCommands}
   alias Teiserver.{Coordinator, Client, User}
-  alias Teiserver.Account.UserCache
   alias Teiserver.Battle.Lobby
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   # alias Phoenix.PubSub
@@ -38,7 +37,7 @@ defmodule Teiserver.Coordinator.ConsulVoting do
     if Enum.count(eligible) == 1 do
       ConsulCommands.handle_command(cmd, state)
     else
-      username = UserCache.get_username(cmd.senderid)
+      username = User.get_username(cmd.senderid)
       command = ConsulServer.command_as_message(cmd)
       Lobby.sayex(state.coordinator_id, "#{username} called a vote for command \"#{command}\" [Vote !y, !n, !b]", state.lobby_id)
       vote = %{@empty_vote |

@@ -3,8 +3,7 @@ defmodule Teiserver.TcpServer do
   use GenServer
   require Logger
 
-  alias Teiserver.Client
-  alias Teiserver.Account.UserCache
+  alias Teiserver.{User, Client}
   alias Teiserver.Tcp.{TcpChat, TcpLobby}
 
   @behaviour :ranch_protocol
@@ -377,7 +376,7 @@ defmodule Teiserver.TcpServer do
   end
 
   defp user_updated(fields, state) do
-    new_user = UserCache.get_user_by_id(state.userid)
+    new_user = User.get_user_by_id(state.userid)
     new_state = %{state | user: new_user}
 
     fields

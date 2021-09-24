@@ -33,7 +33,6 @@ defmodule Teiserver.Battle.Lobby do
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.{User, Client}
-  alias Teiserver.Account.UserCache
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator
   alias Teiserver.Battle.{LobbyChat, LobbyCache}
@@ -114,15 +113,15 @@ defmodule Teiserver.Battle.Lobby do
     )
   end
 
-  # Cache callbacks
-  def update_lobby(lobby, data, reason), do: LobbyCache.update_lobby(lobby, data, reason)
-  def get_lobby!(id), do: LobbyCache.get_lobby!(id)
-  def get_lobby(id), do: LobbyCache.get_lobby(id)
-  def get_lobby_players!(id), do: LobbyCache.get_lobby_players!(id)
-  def add_lobby(lobby), do: LobbyCache.add_lobby(lobby)
-  def close_lobby(lobby_id, reason \\ :closed), do: LobbyCache.close_lobby(lobby_id, reason)
+  # Cache functions
+  defdelegate update_lobby(lobby, data, reason), to: LobbyCache
+  defdelegate get_lobby!(id), to: LobbyCache
+  defdelegate get_lobby(id), to: LobbyCache
+  defdelegate get_lobby_players!(id), to: LobbyCache
+  defdelegate add_lobby(lobby), to: LobbyCache
+  defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyCache
 
-  # Refactor callbacks
+  # Refactor of above from when we called them battle
   def create_battle(battle), do: create_lobby(battle)
   def update_battle(battle, data, reason), do: LobbyCache.update_lobby(battle, data, reason)
   def get_battle!(lobby_id), do: LobbyCache.get_lobby!(lobby_id)
@@ -471,8 +470,7 @@ defmodule Teiserver.Battle.Lobby do
   def can_join?(userid, lobby_id, password \\ nil, script_password \\ nil) do
     lobby_id = int_parse(lobby_id)
     battle = get_battle(lobby_id)
-    user = UserCache.get_user_by_id(userid)
-
+    user = User.get_user_by_id(userid)
     cond do
       user == nil ->
         {:failure, "You are not a user"}

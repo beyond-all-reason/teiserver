@@ -2,7 +2,6 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
   use Oban.Worker, queue: :cleanup
 
   alias Teiserver.{User, Account}
-  alias Teiserver.Account.UserCache
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
@@ -17,14 +16,14 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
       select: [:id]
     )
     |> Enum.each(fn %{id: userid} ->
-      user = UserCache.get_user_by_id(userid)
+      user = User.get_user_by_id(userid)
 
       if user do
         user
         |> check_muted()
         |> check_banned()
         |> check_warned()
-        |> UserCache.update_user(persist: true)
+        |> User.update_user(persist: true)
       end
     end)
 

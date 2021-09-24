@@ -3,8 +3,9 @@ defmodule Teiserver.Battle.LobbyCache do
   alias Teiserver.Coordinator
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Battle.Lobby
+  alias Teiserver.Data.Types, as: T
 
-  @spec update_lobby(Map.t(), nil | atom, any) :: Map.t()
+  @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   def update_lobby(battle, nil, _) do
     ConCache.put(:lobbies, battle.id, battle)
     battle
@@ -36,11 +37,12 @@ defmodule Teiserver.Battle.LobbyCache do
     battle
   end
 
+  @spec get_lobby!(T.lobby_id() | nil) :: T.lobby() | nil
   def get_lobby!(id) do
     ConCache.get(:lobbies, int_parse(id))
   end
 
-  @spec get_lobby(integer()) :: map() | nil
+  @spec get_lobby(integer()) :: T.lobby() | nil
   def get_lobby(id) do
     ConCache.get(:lobbies, int_parse(id))
   end
@@ -50,16 +52,16 @@ defmodule Teiserver.Battle.LobbyCache do
     get_lobby!(id).players
   end
 
-  @spec add_lobby(Map.t()) :: Map.t()
-  def add_lobby(battle) do
-    _consul_pid = Coordinator.start_consul(battle.id)
-    Lobby.start_battle_lobby_throttle(battle.id)
+  @spec add_lobby(T.lobby()) :: T.lobby()
+  def add_lobby(lobby) do
+    _consul_pid = Coordinator.start_consul(lobby.id)
+    Lobby.start_battle_lobby_throttle(lobby.id)
 
-    ConCache.put(:lobbies, battle.id, battle)
+    ConCache.put(:lobbies, lobby.id, lobby)
 
     ConCache.update(:lists, :lobbies, fn value ->
       new_value =
-        ([battle.id | value])
+        ([lobby.id | value])
         |> Enum.uniq()
 
       {:ok, new_value}
@@ -68,16 +70,16 @@ defmodule Teiserver.Battle.LobbyCache do
     :ok = PubSub.broadcast(
       Central.PubSub,
       "legacy_all_battle_updates",
-      {:global_battle_updated, battle.id, :battle_opened}
+      {:global_battle_updated, lobby.id, :battle_opened}
     )
 
     :ok = PubSub.broadcast(
       Central.PubSub,
       "teiserver_global_battle_lobby_updates",
-      {:battle_lobby_opened, battle.id}
+      {:battle_lobby_opened, lobby.id}
     )
 
-    battle
+    lobby
   end
 
   @spec close_lobby(integer() | nil, atom) :: :ok

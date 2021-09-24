@@ -1,5 +1,4 @@
 defmodule Teiserver.Battle.LobbyChat do
-  alias Teiserver.Account.UserCache
   alias Teiserver.{User, Client, Chat}
   alias Teiserver.Battle.{Lobby}
   alias Phoenix.PubSub
@@ -20,7 +19,7 @@ defmodule Teiserver.Battle.LobbyChat do
 
   @spec do_say(Types.userid(), String.t(), Types.lobby_id()) :: :ok
   def do_say(userid, msg, lobby_id) do
-    user = UserCache.get_user_by_id(userid)
+    user = User.get_user_by_id(userid)
     if not User.is_muted?(user) do
       if user.bot == false do
         case Lobby.get_lobby(lobby_id) do
@@ -54,7 +53,7 @@ defmodule Teiserver.Battle.LobbyChat do
 
   @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok
   def sayex(userid, msg, lobby_id) do
-    user = UserCache.get_user_by_id(userid)
+    user = User.get_user_by_id(userid)
     if not User.is_muted?(userid) do
       if user.bot == false do
         case Lobby.get_lobby(lobby_id) do
@@ -88,7 +87,7 @@ defmodule Teiserver.Battle.LobbyChat do
 
   @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def sayprivateex(from_id, to_id, msg, lobby_id) do
-    sender = UserCache.get_user_by_id(from_id)
+    sender = User.get_user_by_id(from_id)
     if not User.is_muted?(sender) do
       PubSub.broadcast(
         Central.PubSub,

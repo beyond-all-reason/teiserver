@@ -5,7 +5,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   """
   use GenServer
   alias Teiserver.{Account, User, Clans, Room, Coordinator}
-  alias Teiserver.Account.UserCache
   alias Phoenix.PubSub
   require Logger
 
@@ -60,7 +59,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info({:new_message, userid, "coordinator", _message}, state) do
     # If it's us sending it, don't reply
     if userid != state.userid do
-      username = UserCache.get_username(userid)
+      username = User.get_username(userid)
       Room.send_message(state.userid, "coordinator", "I don't currently handle messages, sorry #{username}")
     end
     {:noreply, state}
@@ -70,14 +69,14 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   end
 
   def handle_info({:direct_message, userid, _message}, state) do
-    username = UserCache.get_username(userid)
+    username = User.get_username(userid)
     User.send_direct_message(state.userid, userid, "I don't currently handle messages, sorry #{username}")
     {:noreply, state}
   end
 
   # Client inout
   def handle_info({:client_inout, :login, userid}, state) do
-    user = UserCache.get_user_by_id(userid)
+    user = User.get_user_by_id(userid)
     if User.is_warned?(user) do
       Coordinator.send_to_user(userid, "This is a reminder that you recently received a formal warning for misbehaving.")
     end
@@ -121,7 +120,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           group_id: Teiserver.internal_group_id()
         })
 
-        UserCache.recache_user(account.id)
+        User.recache_user(account.id)
         account
 
       account ->

@@ -2,7 +2,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   require Logger
   alias Teiserver.Coordinator.ConsulServer
   alias Teiserver.{Coordinator, User, Client}
-  alias Teiserver.Account.UserCache
   alias Teiserver.Battle.{Lobby, LobbyChat}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   # alias Phoenix.PubSub
@@ -249,8 +248,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             "responder_id" => cmd.senderid
         })
 
-        user = UserCache.get_user_by_id(userid)
-        sender = UserCache.get_user_by_id(cmd.senderid)
+        user = User.get_user_by_id(userid)
+        sender = User.get_user_by_id(cmd.senderid)
         LobbyChat.say(state.coordinator_id, "#{user.name} banned for #{minutes} minutes by #{sender.name}, reason: #{reason}", state.lobby_id)
       _ ->
         LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "Unable to find a user by that name", state.lobby_id)
@@ -281,8 +280,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             "responder_id" => cmd.senderid
           })
 
-        user = UserCache.get_user_by_id(userid)
-        sender = UserCache.get_user_by_id(cmd.senderid)
+        user = User.get_user_by_id(userid)
+        sender = User.get_user_by_id(cmd.senderid)
         LobbyChat.say(state.coordinator_id, "#{user.name} muted for #{minutes} minutes by #{sender.name}, reason: #{reason}", state.lobby_id)
       _ ->
         LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "Unable to find a user by that name", state.lobby_id)

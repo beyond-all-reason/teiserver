@@ -1,7 +1,6 @@
 defmodule Teiserver.Room do
   @moduledoc false
   require Logger
-  alias Teiserver.Account.UserCache
   alias Teiserver.{User, Client, Chat}
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
@@ -41,7 +40,7 @@ defmodule Teiserver.Room do
   @spec can_join_room?(T.userid(), String.t()) :: true | {false, String.t()}
   def can_join_room?(userid, room_name) do
     room = get_or_make_room(room_name, userid)
-    user = UserCache.get_user_by_id(userid)
+    user = User.get_user_by_id(userid)
     cond do
       user == nil ->
         {false, "No user"}
@@ -212,7 +211,7 @@ defmodule Teiserver.Room do
 
   @spec allow?(Map.t(), String.t()) :: boolean()
   def allow?(userid, _room_name) do
-    user = UserCache.get_user_by_id(userid)
+    user = User.get_user_by_id(userid)
 
     cond do
       User.is_muted?(user) ->

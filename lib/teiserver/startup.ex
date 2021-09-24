@@ -1,8 +1,7 @@
 defmodule Teiserver.Startup do
   use CentralWeb, :startup
   require Logger
-
-  alias Teiserver.Account.UserCache
+  alias Teiserver.User
 
   @spec startup :: :ok
   def startup do
@@ -178,10 +177,10 @@ defmodule Teiserver.Startup do
     #   |> String.to_integer()
     ConCache.put(:id_counters, :battle, 1)
 
-    UserCache.pre_cache_users()
+    User.pre_cache_users()
     Teiserver.Data.Matchmaking.pre_cache_queues()
 
-    springids = UserCache.list_users()
+    springids = User.list_users()
     |> Enum.map(fn u -> Central.Helpers.NumberHelper.int_parse(u.springid) end)
 
     # We do this as a separate operation because a blank DB won't have any springids yet
