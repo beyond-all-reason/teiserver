@@ -539,36 +539,41 @@ defmodule Teiserver.Protocols.SpringOut do
 
   @spec do_join_battle(map(), integer(), String.t()) :: map()
   def do_join_battle(state, lobby_id, script_password) do
-    battle = Lobby.get_battle(lobby_id)
-    Lobby.add_user_to_battle(state.userid, battle.id, script_password)
-    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
-    PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
-    reply(:join_battle_success, battle, nil, state)
-    reply(:add_user_to_battle, {state.userid, battle.id, script_password}, nil, state)
-    reply(:add_script_tags, battle.tags, nil, state)
+    lobby = Lobby.get_lobby(lobby_id)
 
-    [battle.founder_id | battle.players]
-    |> Enum.each(fn id ->
-      client = Client.get_client_by_id(id)
+    if lobby do
+      Lobby.add_user_to_battle(state.userid, lobby.id, script_password)
+      PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{lobby.id}")
+      PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{lobby.id}")
+      reply(:join_battle_success, lobby, nil, state)
+      reply(:add_user_to_battle, {state.userid, lobby.id, script_password}, nil, state)
+      reply(:add_script_tags, lobby.tags, nil, state)
+
+      [lobby.founder_id | lobby.players]
+      |> Enum.each(fn id ->
+        client = Client.get_client_by_id(id)
+        reply(:client_battlestatus, client, nil, state)
+      end)
+
+      lobby.bots
+      |> Enum.each(fn {_botname, bot} ->
+        reply(:add_bot_to_battle, {lobby.id, bot}, nil, state)
+      end)
+
+      client = Client.get_client_by_id(state.userid)
       reply(:client_battlestatus, client, nil, state)
-    end)
 
-    battle.bots
-    |> Enum.each(fn {_botname, bot} ->
-      reply(:add_bot_to_battle, {battle.id, bot}, nil, state)
-    end)
+      lobby.start_rectangles
+      |> Enum.each(fn {team, r} ->
+        reply(:add_start_rectangle, {team, r}, nil, state)
+      end)
 
-    client = Client.get_client_by_id(state.userid)
-    reply(:client_battlestatus, client, nil, state)
+      reply(:request_battle_status, nil, nil, state)
 
-    battle.start_rectangles
-    |> Enum.each(fn {team, r} ->
-      reply(:add_start_rectangle, {team, r}, nil, state)
-    end)
-
-    reply(:request_battle_status, nil, nil, state)
-
-    %{state | lobby_id: battle.id}
+      %{state | lobby_id: lobby.id}
+    else
+      state
+    end
   end
 
   @spec do_login_accepted(map(), map()) :: map()
