@@ -12,7 +12,7 @@ defmodule Teiserver.SpringHandleTest do
     state = TeiserverTestLib.mock_state_raw(SpringIn, SpringOut)
 
     SpringIn.handle(
-      "LOGIN TestUser X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n",
+      "LOGIN TestUser X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n",
       state
     )
 

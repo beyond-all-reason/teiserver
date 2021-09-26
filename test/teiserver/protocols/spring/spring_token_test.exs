@@ -81,7 +81,7 @@ defmodule Teiserver.SpringTokenTest do
     %{socket: socket} = raw_setup()
     _welcome = _recv_raw(socket)
 
-    _send_raw(socket, "c.user.login #{token}\tLobby Name\n")
+    _send_raw(socket, "c.user.login #{token}\tLobby Name\ttoke1 toke2\ta b c\n")
     reply = _recv_raw(socket)
     assert reply =~ "ACCEPTED new_test_user_token_test_user\n"
     :timer.sleep(200)

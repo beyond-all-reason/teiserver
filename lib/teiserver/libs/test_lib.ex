@@ -59,7 +59,10 @@ defmodule Teiserver.TeiserverTestLib do
     user = if user, do: user, else: new_user()
 
     token = User.create_token(user)
-    User.try_login(token, "127.0.0.1", "AsyncTest", "token")
+    case User.try_login(token, "127.0.0.1", "AsyncTest", ["token1", "token2"]) do
+      {:ok, _user} -> :ok
+      value -> raise "Error setting up user - #{Kernel.inspect value}"
+    end
 
     Client.login(user, self())
 
@@ -78,7 +81,7 @@ defmodule Teiserver.TeiserverTestLib do
     # Now do our login
     _send_raw(
       socket,
-      "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+      "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
 
     _ = _recv_until(socket)
@@ -331,7 +334,7 @@ defmodule Teiserver.TeiserverTestLib do
   @spec conn_setup({:ok, List.t()}) :: {:ok, List.t()}
   def conn_setup({:ok, data}) do
     user = data[:user]
-    Teiserver.Account.User.recache_user(user.id)
+    User.recache_user(user.id)
 
     Account.create_group_membership(%{
       user_id: user.id,

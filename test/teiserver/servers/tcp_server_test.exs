@@ -47,7 +47,7 @@ defmodule Teiserver.TcpServerTest do
 
     _send_raw(
       socket,
-      "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+      "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
 
     reply = _recv_until(socket)

@@ -214,13 +214,12 @@ defmodule Teiserver.Protocols.SpringIn do
     # Flags are optional hence the weird case statement
     [token, lobby, lobby_hash, _flags] =
       case String.split(data, "\t") do
-        [token, lobby, lobby_hash, flags] -> [token, lobby, lobby_hash, String.split(flags, " ")]
-        [token, lobby, flags] -> [token, lobby, "token token", String.split(flags, " ")]
-        [token, lobby] -> [token, lobby, "token token", []]
+        [token, lobby, lobby_hash, flags] -> [token, lobby, String.split(lobby_hash, " "), String.split(flags, " ")]
+        [token, lobby | _] -> [token, lobby, "", ""]
       end
 
     # Now try to login using a token
-    response = User.try_login(token, state.ip, lobby, String.split(lobby_hash, " "))
+    response = User.try_login(token, state.ip, lobby, lobby_hash)
 
     case response do
       {:error, "Unverified", userid} ->
@@ -560,6 +559,7 @@ defmodule Teiserver.Protocols.SpringIn do
     do: reply(:ignorelist, state.user, msg_id, state)
 
   defp do_handle("c.moderation.report_user", data, msg_id, state) do
+    Logger.info("c.moderation.report_user - #{data}")
     case String.split(data, "\t") do
       [target_name, location_type, location_id, reason] ->
         target = User.get_user_by_name(target_name) || %{id: nil}

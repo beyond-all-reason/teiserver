@@ -455,7 +455,7 @@ CLIENTS test_room #{user.name}\n"
     _ = _recv_raw(socket)
     _send_raw(
       socket,
-      "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+      "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
 
     reply = _recv_until(socket)
@@ -475,7 +475,7 @@ CLIENTS test_room #{user.name}\n"
 
     _send_raw(
       socket,
-      "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+      "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
 
     reply = _recv_until(socket)
@@ -487,7 +487,7 @@ CLIENTS test_room #{user.name}\n"
     # Now they can log in again
     _send_raw(
       socket,
-      "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+      "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
 
     reply = _recv_until(socket)
@@ -659,6 +659,6 @@ CLIENTS test_room #{user.name}\n"
 
     _send_raw(socket, "GETUSERID new_test_user_id_user\n")
     reply = _recv_raw(socket)
-    assert reply == "The ID for new_test_user_id_user is 1993717506 #{ip_user.springid}\n"
+    assert reply == "The ID for new_test_user_id_user is 1993717506 0d04a635e200f308 #{ip_user.springid}\n"
   end
 end

@@ -78,7 +78,12 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info({:client_inout, :login, userid}, state) do
     user = User.get_user_by_id(userid)
     if User.is_warned?(user) do
-      Coordinator.send_to_user(userid, "This is a reminder that you recently received a formal warning for misbehaving.")
+      [_ | expires] = user.warned
+      if expires == nil do
+        Coordinator.send_to_user(userid, "This is a reminder that you received a formal warning for misbehaving. This is your last warning and this warning does not expire.")
+      else
+        Coordinator.send_to_user(userid, "This is a reminder that you recently received a formal warning for misbehaving, this warning will expire #{expires}.")
+      end
     end
     {:noreply, state}
   end

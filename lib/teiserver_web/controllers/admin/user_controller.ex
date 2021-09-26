@@ -285,7 +285,7 @@ defmodule TeiserverWeb.Admin.UserController do
         result =
           case action do
             "recache" ->
-              Teiserver.Account.UserCache.recache_user(user.id)
+              Teiserver.User.recache_user(user.id)
               {:ok, nil, ""}
 
             "reset_flood_protection" ->

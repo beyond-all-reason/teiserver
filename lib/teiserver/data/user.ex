@@ -471,6 +471,9 @@ defmodule Teiserver.User do
           user.bot == false and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
+          Enum.count(lobby_hash) != 2 and user.bot == false ->
+            {:error, "LobbyHash argument error (expected 2 parts, got #{Enum.count(lobby_hash)})"}
+
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
             do_login(user, ip, lobby, lobby_hash)
@@ -515,6 +518,9 @@ defmodule Teiserver.User do
 
           user.bot == false and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
+
+          Enum.count(lobby_hash) != 2 ->
+            {:error, "LobbyHash argument error (expected 2 parts, got #{Enum.count(lobby_hash)})"}
 
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->

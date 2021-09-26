@@ -67,14 +67,14 @@ defmodule Teiserver.SpringRawTest do
     # First try to login with a bad-case username
     _send_raw(
       socket,
-      "LOGIN #{String.upcase(username)} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+      "LOGIN #{String.upcase(username)} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
     reply = _recv_raw(socket)
     assert reply == "DENIED Username is case sensitive\n"
 
     _send_raw(
       socket,
-      "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+      "LOGIN #{username} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
 
     reply = _recv_until(socket)
@@ -127,7 +127,7 @@ defmodule Teiserver.SpringRawTest do
     _ = _recv_raw(socket)
 
     # If we try to login as them we should get a specific failure
-    _send_raw(socket, "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n")
+    _send_raw(socket, "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n")
     reply = _recv_raw(socket)
     assert reply =~ "AGREEMENT User agreement goes here.\nAGREEMENT \nAGREEMENTEND\n"
 
@@ -173,7 +173,7 @@ defmodule Teiserver.SpringRawTest do
 
     _send_raw(
       socket,
-      "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506\t0d04a635e200f308\tb sp\n"
+      "LOGIN #{user.name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
 
     reply = _recv_until(socket)
