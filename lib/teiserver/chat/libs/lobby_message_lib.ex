@@ -53,6 +53,11 @@ defmodule Teiserver.Chat.LobbyMessageLib do
       where: room_messages.user_id == ^user_id
   end
 
+  def _search(query, :lobby_guid, lobby_guid) do
+    from room_messages in query,
+      where: room_messages.lobby_guid == ^lobby_guid
+  end
+
   def _search(query, :id_list, id_list) do
     from lobby_messages in query,
       where: lobby_messages.id in ^id_list
@@ -91,14 +96,13 @@ defmodule Teiserver.Chat.LobbyMessageLib do
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
-  def preload(query, _preloads) do
-    # query = if :things in preloads, do: _preload_things(query), else: query
-    query
+  def preload(query, preloads) do
+    query = if :user in preloads, do: _preload_users(query), else: query
   end
 
-  # def _preload_things(query) do
-  #   from lobby_messages in query,
-  #     left_join: things in assoc(lobby_messages, :things),
-  #     preload: [things: things]
-  # end
+  def _preload_users(query) do
+    from lobby_messages in query,
+      left_join: users in assoc(lobby_messages, :user),
+      preload: [user: users]
+  end
 end

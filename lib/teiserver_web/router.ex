@@ -89,7 +89,6 @@ defmodule TeiserverWeb.Router do
       end
 
 
-
       # REPORTING
       scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
         pipe_through([:browser, :admin_layout, :protected])
@@ -177,6 +176,8 @@ defmodule TeiserverWeb.Router do
         get("/users/search", UserController, :index)
         post("/users/search", UserController, :search)
         resources("/user", UserController)
+
+        get("/lobbies/:id/chat", LobbyController, :chat)
       end
     end
   end

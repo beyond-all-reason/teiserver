@@ -1,0 +1,33 @@
+<div class="row">
+  <div class="col-md-12">
+    <h4>Lobby chat</h4>
+    <table class='table'>
+      <thead>
+        <tr>
+          <th>Poster</th>
+          <th>Message</th>
+          <th>When</th>
+       </tr>
+      </thead>
+      <tbody>
+        <%= for msg <- @lobby_messages do %>
+          <tr>
+            <td>
+              <a href="<%= Routes.ts_admin_user_path(@conn, :show, msg.user_id) %>">
+                <%= msg.user.name %>
+              </a>
+            </td>
+            <td><%= msg.content %></td>
+            <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+
+  <div class="col-md-12">
+  <textarea rows="8" cols="40" class="form-control"><%= for msg <- @lobby_messages do %>
+<%= msg.user.name %>: <%= msg.content %><% end %></textarea>
+  </div>
+</div>

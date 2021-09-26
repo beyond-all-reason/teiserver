@@ -35,7 +35,11 @@
       <tbody>
         <%= for msg <- @lobby_messages do %>
           <tr>
-            <td><%= msg.lobby_guid |> String.slice(0..7) %></td>
+            <td>
+              <a href="<%= Routes.ts_admin_lobby_path(@conn, :chat, msg.lobby_guid) %>">
+                <%= msg.lobby_guid |> String.slice(0..7) %>
+              </a>
+            </td>
             <td><%= msg.content %></td>
             <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
           </tr>
