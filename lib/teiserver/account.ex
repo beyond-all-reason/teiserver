@@ -184,6 +184,7 @@ defmodule Teiserver.Account do
     {users, reasons}
   end
 
+  defp get_smurfs_by_ip(%{data: %{"ip_list" => []}}), do: []
   defp get_smurfs_by_ip(user) do
     ip_fragments = user.data["ip_list"]
     |> Enum.map(fn ip ->
