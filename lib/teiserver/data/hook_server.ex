@@ -55,8 +55,10 @@ defmodule Teiserver.HookServer do
 
   @impl true
   def init(_) do
-    :ok = PubSub.subscribe(Central.PubSub, "account_hooks")
-    :ok = PubSub.subscribe(Central.PubSub, "application")
+    if Application.get_env(:central, Teiserver)[:enable_hooks] do
+      :ok = PubSub.subscribe(Central.PubSub, "account_hooks")
+      :ok = PubSub.subscribe(Central.PubSub, "application")
+    end
     {:ok, %{}}
   end
 end

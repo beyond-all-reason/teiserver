@@ -41,6 +41,8 @@ defmodule Teiserver.Application do
       concache_perm_sup(:teiserver_telemetry_event_types),
       concache_perm_sup(:teiserver_telemetry_property_types),
 
+      {Teiserver.HookServer, name: Teiserver.HookServer},
+
       # Liveview throttles
       concache_sup(:teiserver_throttle_pids),
       Teiserver.Account.ClientIndexThrottle,
@@ -76,17 +78,7 @@ defmodule Teiserver.Application do
       children
     end
 
-    # Some stuff doesn't work with the tests
-    # but we're not that fussed about having it automatically
-    # tested
-    if Application.get_env(:central, Teiserver)[:enable_hooks] do
-      children ++
-        [
-          {Teiserver.HookServer, name: Teiserver.HookServer}
-        ]
-    else
-      children
-    end
+    children
   end
 
   defp discord_start do

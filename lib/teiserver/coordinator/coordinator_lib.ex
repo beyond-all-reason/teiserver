@@ -32,9 +32,6 @@ TODO: whitelist <user> [player | spectator | banned]
   whitelisting allows the user to that specific role, defaults to player level
   sets the gatekeeper mode to whitelist
 
-welcome-message <message>
-  Sets the welcome message sent to anybody joining the lobby
-
 manual-autohost
   issues a set of commands to SPADS to remove autobalance
 
@@ -88,6 +85,9 @@ TODO: gatekeeper (blacklist | whitelist | friends | friendsstrict | clan)
   TODO: clan allows only members of an existing clan to join the game (enable after one member from each clan is present)
 
 <--- Moderator only --->
+welcome-message <message>
+  Sets the welcome message sent to anybody joining the lobby
+
 specunready
   specs all unready players
 
@@ -104,11 +104,17 @@ pull <user>
 settag <key> <value>
   Sets a battletag of <key> to <value>
 
-modmute <user> <minutes> <reason>
-  Mutes the user for that many minutes and creates a report for them
+modwarn <user> <hours> <reason>
+  Warns the user for that many hours and creates a report for them
 
-modban <user> <minutes> <reason>
-  Bans the user for that many minutes and creates a report for them
+modmute <user> <hours> <reason>
+  Mutes the user for that many hours and creates a report for them
+
+modban <user> <hours> <reason>
+  Bans the user for that many hours and creates a report for them
+
+lobbyban <user>
+  Bans the user from the lobby but not the server, will refresh on !rehost
 
 banmult <users>
   Bans all users separated by spaces (from the lobby, not the game)

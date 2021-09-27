@@ -98,6 +98,7 @@ defmodule Teiserver.Chat.LobbyMessageLib do
   def preload(query, nil), do: query
   def preload(query, preloads) do
     query = if :user in preloads, do: _preload_users(query), else: query
+    query
   end
 
   def _preload_users(query) do

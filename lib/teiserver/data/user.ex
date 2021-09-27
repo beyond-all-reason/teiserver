@@ -471,8 +471,8 @@ defmodule Teiserver.User do
           user.bot == false and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-          Enum.count(lobby_hash) != 2 and user.bot == false ->
-            {:error, "LobbyHash argument error (expected 2 parts, got #{Enum.count(lobby_hash)})"}
+          Enum.member?(["", "0", nil], lobby_hash) == true and user.bot == false ->
+            {:error, "LobbyHash/UserID missing in login"}
 
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
@@ -519,8 +519,8 @@ defmodule Teiserver.User do
           user.bot == false and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-          Enum.count(lobby_hash) != 2 ->
-            {:error, "LobbyHash argument error (expected 2 parts, got #{Enum.count(lobby_hash)})"}
+          Enum.member?(["", "0", nil], lobby_hash) == true and user.bot == false ->
+            {:error, "LobbyHash/UserID missing in login"}
 
           # Used for testing, this should never be enabled in production
           Application.get_env(:central, Teiserver)[:autologin] ->
