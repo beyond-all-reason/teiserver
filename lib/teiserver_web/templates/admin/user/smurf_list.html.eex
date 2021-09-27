@@ -57,6 +57,7 @@
       <th>IP</th>
       <th>Hash</th>
       <th>Hardware</th>
+      <th>Registered</th>
       <%= if is_admin do %>
         <th colspan="2">&nbsp;</th>
       <% else %>
@@ -89,6 +90,10 @@
         <%= if Enum.member?(@reasons.hw, user.id) do %>
           Hardware
         <% end %>
+      </td>
+
+      <td>
+        <%= date_to_str(user.inserted_at, format: :dmy) %>
       </td>
 
       <td>
