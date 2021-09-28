@@ -116,12 +116,12 @@ modban <user> <hours> <reason>
 lobbyban <user>
   Bans the user from the lobby but not the server, will refresh on !rehost
 
-banmult <users>
+lobbybanmult <users>
   Bans all users separated by spaces (from the lobby, not the game)
 
-£!command - Force consul to intercept even when not in active mode
-%!command - Don't echo command back to chat
-£%!command - Both of the above
+$command - Force consul to intercept even when not in active mode
+%command - Don't echo command back to chat
+$%command - Both of the above
 """
   end
 end

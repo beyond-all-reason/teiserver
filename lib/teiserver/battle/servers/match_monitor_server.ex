@@ -133,7 +133,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             bot: true,
             moderator: false,
             verified: true,
-            country_override: "GB",# TODO: Make this configurable
+            country_override: Application.get_env(:teiserver, :server_flag),
             lobby_client: "Teiserver Internal Process"
           }
         })
