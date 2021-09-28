@@ -485,7 +485,7 @@ defmodule Teiserver.Battle.Lobby do
         {:failure, "Invalid password"}
 
       Coordinator.call_consul(lobby_id, {:request_user_join_battle, userid}) == false ->
-        {:failure, "Denied by Coordinator"}
+        {:failure, "Rejected from lobby"}
 
       true ->
         # Okay, so far so good, what about the host? Are they okay with it?
