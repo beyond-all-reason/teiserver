@@ -76,13 +76,6 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
     }
   end
 
-  # @impl true
-  # def handle_event("start-Coordinator", _event, %{assigns: %{id: id}} = socket) do
-  #   Lobby.start_coordinator_mode(id)
-  #   battle = %{socket.assigns.battle | coordinator_mode: true}
-  #   {:noreply, assign(socket, :battle, battle)}
-  # end
-
   defp page_title(:show), do: "Show Queue"
   # defp index_redirect(socket) do
   #   {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}

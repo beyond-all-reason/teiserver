@@ -243,18 +243,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> assign(:clients, clients)}
   end
 
-  def handle_event("start-Coordinator", _event, %{assigns: %{id: id}} = socket) do
-    Lobby.start_coordinator_mode(id)
-    battle = %{socket.assigns.battle | coordinator_mode: true}
-    {:noreply, assign(socket, :battle, battle)}
-  end
-
-  def handle_event("stop-Coordinator", _event, %{assigns: %{id: id}} = socket) do
-    Lobby.stop_coordinator_mode(id)
-    battle = %{socket.assigns.battle | coordinator_mode: false}
-    {:noreply, assign(socket, :battle, battle)}
-  end
-
   def handle_event("reset-consul", _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
     Coordinator.cast_consul(id, %{
       command: "reset",

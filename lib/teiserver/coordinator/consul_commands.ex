@@ -63,11 +63,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     |> ConsulServer.broadcast_update("reset")
   end
 
-  def handle_command(%{command: "coordinator", remaining: "stop"} = cmd, state) do
-    Lobby.stop_coordinator_mode(state.lobby_id)
-    ConsulServer.say_command(cmd, state)
-  end
-
   def handle_command(%{command: "manual-autohost"}, state) do
     Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!autobalance off")
     state

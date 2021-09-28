@@ -9,20 +9,16 @@ defmodule Teiserver.Coordinator.Parser do
     battle = Lobby.get_battle!(lobby_id)
 
     cond do
-      String.slice(msg, 0..0) == "£" ->
+      # This instantly catches "saying" commands and means we don't need
+      # to parse them
+      String.slice(msg, 0..1) == "$ " ->
+        :say
+
+      String.slice(msg, 0..0) == "$" ->
         parse_and_handle(userid, msg, battle)
-
-      battle.coordinator_mode == false ->
-        :say
-
-      String.slice(msg, 0..1) == "! " ->
-        :say
-
-      String.slice(msg, 0..0) != "!" ->
-        :say
 
       true ->
-        parse_and_handle(userid, msg, battle)
+        :say
     end
   end
 
@@ -66,50 +62,22 @@ defmodule Teiserver.Coordinator.Parser do
       error: nil,
       senderid: userid
     }
-    |> strip_force_consul
     |> parse_silence
-    |> parse_command_mode
     |> parse_command_name
   end
 
-  defp strip_force_consul(%{remaining: remaining} = cmd) do
-    case String.slice(remaining, 0..0) == "£" do
-      true ->
-        %{cmd | remaining: String.slice(remaining, 1, 2048)}
-      false ->
-        cmd
-    end
-  end
-
   defp parse_silence(%{remaining: remaining} = cmd) do
-    case String.slice(remaining, 0..1) == "%!" do
+    case String.slice(remaining, 0..1) == "$%" do
       true ->
-        %{cmd | silent: true, remaining: String.slice(remaining, 1, 2048)}
+        %{cmd | silent: true, remaining: "$" <> String.slice(remaining, 1, 2048)}
       false ->
-        cmd
-    end
-  end
-
-  @spec parse_command_mode(Map.t()) :: Map.t()
-  defp parse_command_mode(%{remaining: string} = cmd) do
-    cond do
-      String.slice(string, 0, 4) == "!cv " ->
-        %{cmd | vote: true, remaining: "!" <> String.slice(string, 4, 2048)}
-
-      String.slice(string, 0, 6) == "!vote " ->
-        %{cmd | vote: true, remaining: "!" <> String.slice(string, 6, 2048)}
-
-      String.slice(string, 0, 7) == "!force " ->
-        %{cmd | force: true, remaining: "!" <> String.slice(string, 7, 2048)}
-
-      true ->
         cmd
     end
   end
 
   @spec parse_command_name(Map.t()) :: Map.t()
   defp parse_command_name(%{remaining: string} = cmd) do
-    case Regex.run(~r/!([a-z0-9\-]+) ?/, string) do
+    case Regex.run(~r/\$([a-z0-9\-]+) ?/, string) do
       [_, command_name] ->
         %{cmd |
           command: command_name,

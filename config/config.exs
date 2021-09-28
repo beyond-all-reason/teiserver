@@ -60,12 +60,9 @@ config :central, Teiserver,
   extra_logging: false,
   enable_discord_bridge: false,
   enable_agent_mode: false,
-  enable_coordinator_mode: true,
   enable_match_monitor: true,
-  user_agreement: "User agreement goes here."
-
-config :teiserver,
-    server_flag: "GB"
+  user_agreement: "User agreement goes here.",
+  server_flag: "GB"
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

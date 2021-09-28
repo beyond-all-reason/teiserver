@@ -36,7 +36,6 @@ defmodule Teiserver.Coordinator.CommandsTest do
     reply = _tachyon_recv(hsocket)
     lobby_id = reply["lobby"]["id"]
 
-    Lobby.start_coordinator_mode(lobby_id)
     listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby_id}"])
 
     # Player needs to be added to the battle

@@ -270,7 +270,6 @@ defmodule Teiserver.Game.QueueServer do
 
         # Coordinator sets up the battle
         map_name = state.map_list |> Enum.random()
-        # Lobby.start_coordinator_mode(battle.id)
         Coordinator.cast_consul(battle.id, %{force: true, command: "manual-autohost", senderid: Coordinator.get_coordinator_userid()})
         Coordinator.cast_consul(battle.id, %{force: true, command: "changemap", remaining: map_name, senderid: Coordinator.get_coordinator_userid()})
         :timer.sleep(250)
