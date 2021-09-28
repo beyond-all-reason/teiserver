@@ -13,73 +13,44 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
 
   setup do
     %{socket: socket, user: user, pid: pid} = tachyon_auth_setup()
-    {:ok, socket: socket, user: user, pid: pid}
-  end
 
-  # Coordinator no longer started with a command
-  # test "start, stop", %{user: user} do
-  #   # User needs to be a moderator (at this time) to start/stop Coordinator mode
-  #   UserCache.update_user(%{user | moderator: true})
-  #   Client.refresh_client(user.id)
-
-  #   battle = TeiserverTestLib.make_battle(%{
-  #     founder_id: user.id,
-  #     founder_name: user.name
-  #   })
-  #   id = battle.id
-  #   assert battle.coordinator_mode == false
-  #   assert ConCache.get(:teiserver_consul_pids, battle.id) != nil
-
-  #   # Start it up!
-  #   Lobby.say(user.id, "!coordinator start", id)
-  #   :timer.sleep(@sleep)
-
-  #   battle = Lobby.get_battle!(id)
-  #   assert battle.coordinator_mode == true
-
-  #   # Stop it
-  #   Lobby.say(user.id, "!force coordinator stop", id)
-  #   :timer.sleep(@sleep)
-
-  #   battle = Lobby.get_battle!(id)
-  #   assert battle.coordinator_mode == false
-  # end
-
-  test "test command vs no command", %{user: user, socket: socket} do
-    # User needs to be a moderator (at this time) to start/stop Coordinator mode
     UserCache.update_user(%{user | moderator: true})
     Client.refresh_client(user.id)
 
-    battle = TeiserverTestLib.make_battle(%{
+    {:ok, socket: socket, user: user, pid: pid}
+  end
+
+  test "test command vs no command", %{user: user, socket: socket} do
+    lobby = TeiserverTestLib.make_battle(%{
       founder_id: user.id,
       founder_name: user.name
     })
-    assert battle.coordinator_mode == false
 
-    Lobby.start_coordinator_mode(battle.id)
-    battle = Lobby.get_battle!(battle.id)
+    lobby = Lobby.get_battle!(lobby.id)
 
-    assert battle.coordinator_mode == true
-    listener = PubsubListener.new_listener(["legacy_battle_updates:#{battle.id}"])
+    listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby.id}"])
 
     # No command
-    result = Lobby.say(user.id, "Test message", battle.id)
+    result = Lobby.say(user.id, "Test message", lobby.id)
     assert result == :ok
 
     :timer.sleep(@sleep)
     messages = PubsubListener.get(listener)
-    assert messages == [{:battle_updated, battle.id, {user.id, "Test message", battle.id}, :say}]
+    assert messages == [{:battle_updated, lobby.id, {user.id, "Test message", lobby.id}, :say}]
 
     # Now command
-    result = Lobby.say(user.id, "!force forcestart", battle.id)
+    result = Lobby.say(user.id, "$settag tagname tagvalue", lobby.id)
     assert result == :ok
 
     :timer.sleep(@sleep)
     reply = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.communication.direct_message", "message" => "!forcestart", "sender" => user.id}
+    assert reply == :timeout
 
     # Converted message should appear here
     messages = PubsubListener.get(listener)
-    assert messages == [{:battle_updated, battle.id, {user.id, "! force forcestart", battle.id}, :say}]
+    assert messages == [
+      {:battle_updated, lobby.id, {user.id, "$ settag tagname tagvalue", lobby.id}, :say},
+      {:battle_updated, lobby.id, %{"tagname" => "tagvalue"}, :add_script_tags}
+    ]
   end
 end

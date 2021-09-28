@@ -27,8 +27,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Coordinator.{ConsulVoting, ConsulCommands}
 
   @always_allow ~w(status help)
-  @moderator_only ~w(pull specunready makeready settag modmute modban banmult)
-  @vote_commands ~w(vote y yes n no b abstain ev)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -56,7 +54,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     lobby = Lobby.get_lobby!(state.lobby_id)
     case Map.get(lobby.tags, "server/match/uuid", nil) do
       nil ->
-        Logger.warn("New UUID")
         uuid = UUID.uuid4()
         lobby = Lobby.get_lobby!(state.lobby_id)
         new_tags = Map.put(lobby.tags, "server/match/uuid", uuid)
@@ -134,29 +131,21 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(cmd = %{command: _}, state) do
-    new_state = case allow_command?(cmd, state) do
-      :vote_command ->
-        ConsulVoting.handle_vote_command(cmd, state)
-      :allow ->
-        ConsulCommands.handle_command(cmd, state)
-      :with_vote ->
-        ConsulVoting.create_vote(cmd, state)
-      :existing_vote ->
-        state
-      :disallow ->
-        state
+    if allow_command?(cmd) do
+      new_state = ConsulCommands.handle_command(cmd, state)
+      {:noreply, new_state}
+    else
+      {:noreply, state}
     end
-    {:noreply, new_state}
   end
 
-
-
-  def allow_status_change?(userid, state) when is_integer(userid) do
+  @spec allow_status_change?(T.userid() | T.user(), map()) :: boolean
+  defp allow_status_change?(userid, state) when is_integer(userid) do
     client = Client.get_client_by_id(userid)
     allow_status_change?(client, state)
   end
-  def allow_status_change?(%{moderator: true}, _state), do: true
-  def allow_status_change?(%{userid: userid} = client, state) do
+  defp allow_status_change?(%{moderator: true}, _state), do: true
+  defp allow_status_change?(%{userid: userid} = client, state) do
     list_status = get_list_status(userid, state)
 
     cond do
@@ -165,33 +154,24 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  def get_blacklist(userid, blacklist_map) do
-    Map.get(blacklist_map, userid, :player)
-  end
 
-  def get_whitelist(userid, whitelist_map) do
-    case Map.has_key?(whitelist_map, userid) do
-      true -> Map.get(whitelist_map, userid)
-      false -> Map.get(whitelist_map, :default)
-    end
-  end
-
-  def get_list_status(userid, state) do
+  # Checks against the relevant gatekeeper settings and banlist
+  # if the user can change their status
+  defp get_list_status(userid, state) do
+    ban_level = check_ban_state(userid, state.bans)
     case state.gatekeeper do
-      :blacklist -> get_blacklist(userid, state.blacklist)
-      :whitelist -> get_whitelist(userid, state.whitelist)
-      :friends ->
+      "default" ->
+        ban_level
+
+      # They are in the lobby, they can play
+      "friends" ->
+        :player
+
+      "friendsplay" ->
         if is_on_friendlist?(userid, state, :players) do
           :player
         else
           :spectator
-        end
-
-      :friendsjoin ->
-        if is_on_friendlist?(userid, state, :all) do
-          :player
-        else
-          :banned
         end
 
       :clan ->
@@ -233,6 +213,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def allow_join?(userid, state) do
     client = Client.get_client_by_id(userid)
+    ban_state = check_ban_state(userid, state.bans)
 
     cond do
       client == nil ->
@@ -241,20 +222,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
       client.moderator ->
         true
 
-      state.gatekeeper == :clan ->
-        true
-
-      state.gatekeeper == :friends ->
-        true
-
-      state.gatekeeper == :friendsjoin ->
-        is_friend?(userid, state)
-
-      state.gatekeeper == :blacklist and get_blacklist(userid, state.blacklist) == :banned ->
+      ban_state == :banned ->
         false
 
-      state.gatekeeper == :whitelist and get_whitelist(userid, state.whitelist) == :banned ->
-        false
+      state.gatekeeper == "friends" ->
+        is_on_friendlist?(userid, state, :all)
 
       true ->
         true
@@ -270,41 +242,23 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state
   end
 
-  @spec allow_command?(Map.t(), Map.t()) :: :vote_command | :allow | :with_vote | :disallow | :existing_vote
-  def allow_command?(%{senderid: senderid} = cmd, state) do
-    user = User.get_user_by_id(senderid)
+  @spec check_ban_state(T.userid(), map()) :: :player | :spectator | :banned
+  defp check_ban_state(userid, bans) do
+    case bans[userid] do
+      nil -> :player
+      user_ban -> user_ban.level
+    end
+  end
+
+  @spec allow_command?(Map.t()) :: boolean()
+  defp allow_command?(%{senderid: senderid} = cmd) do
+    client = Client.get_client_by_id(senderid)
 
     cond do
-      Enum.member?(@vote_commands, cmd.command) ->
-        :vote_command
-
-      Enum.member?(@always_allow, cmd.command) ->
-        :allow
-
-      senderid == state.coordinator_id ->
-        :allow
-
-      user == nil ->
-        :disallow
-
-      Enum.member?(@moderator_only, cmd.command) and user.moderator ->
-        :allow
-
-      cmd.force == true and user.moderator == true ->
-        :allow
-
-      # If they are a moderator it got approved
-      Enum.member?(@moderator_only, cmd.command) ->
-        :disallow
-
-      cmd.vote == true and state.current_vote != nil ->
-        :existing_vote
-
-      cmd.vote == true ->
-        :with_vote
-
-      true ->
-        :with_vote
+      client == nil -> false
+      Enum.member?(@always_allow, cmd.command) -> true
+      client.moderator == true -> true
+      true -> false
     end
   end
 
@@ -349,32 +303,35 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec say_command(Map.t(), Map.t()) :: Map.t()
   def say_command(%{silent: true}, state), do: state
   def say_command(cmd, state) do
-    message = "! " <> command_as_message(cmd)
+    message = "$ " <> command_as_message(cmd)
     Lobby.say(cmd.senderid, message, state.lobby_id)
     state
   end
 
   @spec command_as_message(Map.t()) :: String.t()
   def command_as_message(cmd) do
-    vote = if Map.get(cmd, :vote), do: "cv ", else: ""
-    force = if Map.get(cmd, :force), do: "force ", else: ""
     remaining = if Map.get(cmd, :remaining), do: " #{cmd.remaining}", else: ""
     error = if Map.get(cmd, :error), do: " Error: #{cmd.error}", else: ""
 
-    "#{vote}#{force}#{cmd.command}#{remaining}#{error}"
+    "#{cmd.command}#{remaining}#{error}"
       |> String.trim
+  end
+
+  defp new_ban(data, state) do
+    Map.merge(%{
+      by: state.coordinator_id,
+      reason: "None given",
+      # :player | :spectator | :banned
+      level: :banned
+    }, data)
   end
 
   def empty_state(lobby_id) do
     %{
-      current_vote: nil,
       coordinator_id: Coordinator.get_coordinator_userid(),
       lobby_id: lobby_id,
-      gatekeeper: :blacklist,
-      blacklist: %{},
-      whitelist: %{
-        :default => :player
-      },
+      gatekeeper: "default",
+      bans: %{},
       temp_bans: %{},
       temp_specs: %{},
       boss_mode: :player,
@@ -390,8 +347,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
     lobby_id = opts[:lobby_id]
-
-    # :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
 
     # Update the queue pids cache to point to this process
     ConCache.put(:teiserver_consul_pids, lobby_id, self())

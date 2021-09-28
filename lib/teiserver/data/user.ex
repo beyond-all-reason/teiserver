@@ -514,7 +514,7 @@ defmodule Teiserver.User do
             {:error, "Rename in progress, wait 5 seconds"}
 
           user.name != username ->
-            {:error, "Username is case sensitive"}
+            {:error, "Username is case sensitive, try '#{user.name}'"}
 
           user.bot == false and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}

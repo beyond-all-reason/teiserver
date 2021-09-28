@@ -100,7 +100,6 @@ defmodule Teiserver.Battle.Lobby do
         tags: %{},
         disabled_units: [],
         start_rectangles: %{},
-        coordinator_mode: false,
 
         # Expected to be overriden
         map_hash: nil,
@@ -229,10 +228,6 @@ defmodule Teiserver.Battle.Lobby do
           battle_state
         else
           Client.join_battle(userid, lobby_id)
-
-          if battle_state.coordinator_mode do
-            LobbyChat.sayprivateex(battle_state.founder_id, userid, "Coordinator mode enabled", lobby_id)
-          end
 
           Coordinator.cast_consul(lobby_id, {:user_joined, userid})
 
@@ -515,24 +510,6 @@ defmodule Teiserver.Battle.Lobby do
     if client do
       send(client.pid, {:join_battle_request_response, lobby_id, :deny, reason})
     end
-    :ok
-  end
-
-  @spec start_coordinator_mode(Types.lobby_id()) :: :ok
-  def start_coordinator_mode(lobby_id) do
-    Logger.debug("Starting Coordinator mode for #{lobby_id}")
-    battle = get_battle!(lobby_id)
-    LobbyChat.sayex(battle.founder_id, "Coordinator mode enabled", lobby_id)
-    update_battle(%{battle | coordinator_mode: true}, nil, nil)
-    :ok
-  end
-
-  @spec stop_coordinator_mode(Types.lobby_id()) :: :ok
-  def stop_coordinator_mode(lobby_id) do
-    Logger.debug("Stopping Coordinator mode for #{lobby_id}")
-    battle = get_battle!(lobby_id)
-    LobbyChat.sayex(battle.founder_id, "Coordinator mode stopped", lobby_id)
-    update_battle(%{battle | coordinator_mode: false}, nil, nil)
     :ok
   end
 
