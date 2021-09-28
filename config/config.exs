@@ -64,6 +64,9 @@ config :central, Teiserver,
   enable_match_monitor: true,
   user_agreement: "User agreement goes here."
 
+config :teiserver,
+    server_flag: "GB"
+
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]

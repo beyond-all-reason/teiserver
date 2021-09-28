@@ -17,7 +17,11 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     Logger.debug("Starting up Coordinator coordinator")
     account = get_coordinator_account()
     ConCache.put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
-    {:ok, user} = User.internal_client_login(account.id)
+
+    user = case User.internal_client_login(account.id) do
+      {:ok, user} -> user
+      :error -> throw "No coordinator user found"
+    end
 
     state = %{
       ip: "127.0.0.1",
@@ -115,7 +119,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
             bot: true,
             moderator: true,
             verified: true,
-            country_override: "GB",# TODO: Make this configurable
+            country_override: Application.get_env(:teiserver, :server_flag),
             lobby_client: "Teiserver Internal Process"
           }
         })
