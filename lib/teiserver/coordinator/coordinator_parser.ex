@@ -29,34 +29,11 @@ defmodule Teiserver.Coordinator.Parser do
     :handled
   end
 
-  # @spec do_handle(Map.t(), Map.t()) :: :nomatch | :ok
-  # defp do_handle(%{command: nil}, _battle), do: :nomatch
-
-  # defp do_handle(%{command: "forcestart"} = cmd, battle) do
-  #   send_to_host(cmd.sender, battle.id, "!forcestart")
-  # end
-
-  # defp do_handle(%{command: "welcome-message"} = cmd, battle) do
-  #   cast_to_consul(battle, cmd)
-  # end
-
-  # defp do_handle(%{command: "Coordinator"} = cmd, battle) do
-  #   cast_to_consul(battle, cmd)
-  # end
-
-  # defp do_handle(%{command: command}, _battle) do
-  #   Logger.error("Coordinator no handler for cmd: #{command}")
-  #   :nomatch
-  # end
-
-
   @spec parse_command(T.userid(), String.t()) :: Map.t()
   def parse_command(userid, string) do
     %{
       raw: string,
       remaining: string,
-      vote: false,
-      force: false,
       silent: false,
       command: nil,
       error: nil,
@@ -69,7 +46,7 @@ defmodule Teiserver.Coordinator.Parser do
   defp parse_silence(%{remaining: remaining} = cmd) do
     case String.slice(remaining, 0..1) == "$%" do
       true ->
-        %{cmd | silent: true, remaining: "$" <> String.slice(remaining, 1, 2048)}
+        %{cmd | silent: true, remaining: "$" <> String.slice(remaining, 2, 2048)}
       false ->
         cmd
     end
