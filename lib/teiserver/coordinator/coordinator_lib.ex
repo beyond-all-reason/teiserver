@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
     # Anything flagged as TODO is either not implemented or not fully tested
     """
 Commands
-# For everybody
+##### For everybody #####
 TODO: status
     status info about the battle lobby
 
@@ -18,7 +18,8 @@ TODO: splitlobby <message>
   or are following someone that voted yes are also moved to that lobby. Anybody who leaves the original lobby before
   the vote ends will not be moved.
 
-# Moderator only
+##### Moderator only #####
+### General commands
 TODO: gatekeeper (default | friends | friendsplay | clan)
   sets the gatekeeper for this battle
     default: no limitations
@@ -30,18 +31,19 @@ welcome-message <message>
   Sets the welcome message sent to anybody joining the lobby
 
 specunready
-  specs all unready players
+  specs all unready players, they are each sent a ring from the coordinator
 
 makeready <user>
   sets a user to ready, when no user is specified all users are set to ready
+  any user set to ready is sent a ring from the coordinator
 
 pull <user>
-  Pulls a given user into the battle, it will also remove them from the blacklist and add them to the whitelist
-  as a player.
+  Pulls a given user into the battle
 
 settag <key> <value>
   Sets a battletag of <key> to <value>
 
+### Moderation
 modwarn <user> <hours> <reason>
   Warns the user for that many hours and creates a report for them
 
@@ -51,6 +53,12 @@ modmute <user> <hours> <reason>
 modban <user> <hours> <reason>
   Bans the user for that many hours and creates a report for them
 
+speclock <user>
+  Locks the user into a spectator role. Can be reverted with the unban command.
+
+forceplay <user>
+  Forces the user into a player position
+
 lobbyban <user> <reason>
   Bans the user from the lobby but not the server, will refresh on !rehost
 
@@ -59,6 +67,14 @@ lobbybanmult [<user>]
 
 unban <user>
   Removes the user from the lobby banlist
+
+### System
+reset
+  Resets the coordinator bot for this lobby to the default
+
+##### Internal #####
+change-battlestatus
+  Changes the battlestatus of a player
 
 $command - Coordinator command
 $%command - Don't echo command back to chat

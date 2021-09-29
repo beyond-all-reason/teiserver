@@ -317,15 +317,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> String.trim
   end
 
-  defp new_ban(data, state) do
-    Map.merge(%{
-      by: state.coordinator_id,
-      reason: "None given",
-      # :player | :spectator | :banned
-      level: :banned
-    }, data)
-  end
-
   def empty_state(lobby_id) do
     %{
       coordinator_id: Coordinator.get_coordinator_userid(),

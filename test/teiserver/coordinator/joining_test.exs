@@ -47,7 +47,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
     consul_state = Coordinator.call_consul(lobby_id, :get_all)
     assert consul_state.welcome_message == nil
 
-    data = %{cmd: "c.lobby.message", userid: user.id, message: "!force welcome-message This is the welcome message"}
+    data = %{cmd: "c.lobby.message", userid: user.id, message: "$welcome-message This is the welcome message"}
     _tachyon_send(socket, data)
 
     messages = PubsubListener.get(listener)

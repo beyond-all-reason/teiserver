@@ -27,7 +27,6 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
     })
 
     lobby = Lobby.get_battle!(lobby.id)
-
     listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby.id}"])
 
     # No command

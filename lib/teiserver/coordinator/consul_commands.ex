@@ -12,12 +12,52 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     %{
       raw: string,
       remaining: string,
-      vote: boolean,
       command: nil | string,
       senderid: userid
     }
   """
   @spec handle_command(Map.t(), Map.t()) :: Map.t()
+
+  #################### For everybody
+  def handle_command(%{command: "status", senderid: senderid} = _cmd, state) do
+    status_msg = [
+      "Status for battle ##{state.lobby_id}",
+      "Gatekeeper: #{state.gatekeeper}"
+    ]
+    Coordinator.send_to_user(senderid, status_msg)
+    state
+  end
+
+  def handle_command(%{command: "help", senderid: senderid} = _cmd, state) do
+    status_msg = [
+      "Command list can currently be found at https://github.com/beyond-all-reason/teiserver/blob/master/lib/teiserver/coordinator/coordinator_lib.ex"
+    ]
+    Coordinator.send_to_user(senderid, status_msg)
+    state
+  end
+
+  # TODO: splitlobby command
+
+  #################### Moderator only
+  # ----------------- General commands
+  def handle_command(%{command: "gatekeeper", remaining: mode} = cmd, state) do
+    state = case mode do
+      "blacklist" ->
+        %{state | gatekeeper: :blacklist}
+      "whitelist" ->
+        %{state | gatekeeper: :whitelist}
+      "friends" ->
+        %{state | gatekeeper: :friends}
+      "friendsjoin" ->
+        %{state | gatekeeper: :friendsjoin}
+      "clan" ->
+        %{state | gatekeeper: :clan}
+      _ ->
+        state
+    end
+    ConsulServer.say_command(cmd, state)
+  end
+
   def handle_command(%{command: "welcome-message", remaining: remaining} = cmd, state) do
     new_state = case String.trim(remaining) do
       "" ->
@@ -27,6 +67,54 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{state | welcome_message: msg}
     end
     ConsulServer.broadcast_update(new_state)
+  end
+
+  def handle_command(%{command: "specunready"} = cmd, state) do
+    battle = Lobby.get_lobby!(state.lobby_id)
+
+    battle.players
+    |> Enum.each(fn player_id ->
+      client = Client.get_client_by_id(player_id)
+      if client.ready == false do
+        User.ring(player_id, state.coordinator_id)
+        Lobby.force_change_client(state.coordinator_id, player_id, %{player: false})
+      end
+    end)
+
+    ConsulServer.say_command(cmd, state)
+  end
+
+  def handle_command(%{command: "makeready", remaining: ""} = cmd, state) do
+    battle = Lobby.get_lobby!(state.lobby_id)
+
+    battle.players
+    |> Enum.each(fn player_id ->
+        User.ring(player_id, state.coordinator_id)
+      Lobby.force_change_client(state.coordinator_id, player_id, %{ready: true})
+    end)
+
+    ConsulServer.say_command(cmd, state)
+  end
+
+  def handle_command(%{command: "makeready", remaining: target} = cmd, state) do
+    case ConsulServer.get_user(target, state) do
+      nil ->
+        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
+      player_id ->
+        User.ring(player_id, state.coordinator_id)
+        Lobby.force_change_client(state.coordinator_id, player_id, %{ready: true})
+        ConsulServer.say_command(cmd, state)
+    end
+  end
+
+  def handle_command(%{command: "pull", remaining: target} = cmd, state) do
+    case ConsulServer.get_user(target, state) do
+      nil ->
+        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
+      target_id ->
+        Lobby.force_add_user_to_battle(target_id, state.lobby_id)
+        ConsulServer.say_command(cmd, state)
+    end
   end
 
   def handle_command(%{command: "settag", remaining: remaining} = cmd, state) do
@@ -41,217 +129,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  def handle_command(%{command: "help", senderid: senderid} = _cmd, state) do
-    status_msg = [
-      "Command list can currently be found at https://github.com/beyond-all-reason/teiserver/blob/master/lib/teiserver/coordinator/coordinator_lib.ex"
-    ]
-    Coordinator.send_to_user(senderid, status_msg)
-    state
-  end
-
-  def handle_command(%{command: "status", senderid: senderid} = _cmd, state) do
-    status_msg = [
-      "Status for battle ##{state.lobby_id}",
-      "Gatekeeper: #{state.gatekeeper}"
-    ]
-    Coordinator.send_to_user(senderid, status_msg)
-    state
-  end
-
-  def handle_command(%{command: "reset"} = _cmd, state) do
-    ConsulServer.empty_state(state.lobby_id)
-    |> ConsulServer.broadcast_update("reset")
-  end
-
-  def handle_command(%{command: "manual-autohost"}, state) do
-    Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!autobalance off")
-    state
-  end
-
-  # TODO: Swap this back over to `map` once we have voting working etc
-  def handle_command(%{command: "changemap", remaining: map_name} = cmd, state) do
-    Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!map #{map_name}")
-    ConsulServer.say_command(cmd, state)
-  end
-
-  def handle_command(%{command: "start", senderid: senderid} = cmd, state) do
-    Coordinator.send_to_host(senderid, state.lobby_id, "!start")
-    ConsulServer.say_command(cmd, state)
-  end
-
-  def handle_command(%{command: "forcestart", senderid: senderid} = cmd, state) do
-    Coordinator.send_to_host(senderid, state.lobby_id, "!forcestart")
-    ConsulServer.say_command(cmd, state)
-  end
-
-
-
-  def handle_command(%{command: "pull", remaining: target} = cmd, state) do
-    # TODO: Make this work for friends only if not a mod
-    case ConsulServer.get_user(target, state) do
-      nil ->
-        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
-      target_id ->
-        Lobby.force_add_user_to_battle(target_id, state.lobby_id)
-        ConsulServer.say_command(cmd, state)
-    end
-  end
-
-  def handle_command(%{command: "force-spectator", remaining: target} = cmd, state) do
-    case ConsulServer.get_user(target, state) do
-      nil ->
-        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
-      target_id ->
-        Lobby.force_change_client(state.coordinator_id, target_id, %{player: false})
-        ConsulServer.say_command(cmd, state)
-    end
-  end
-
-  # Would need to be sent by internal since battlestatus isn't part of the command queue
-  def handle_command(%{command: "change-battlestatus", remaining: target_id, status: new_status}, state) do
-    Lobby.force_change_client(state.coordinator_id, target_id, new_status)
-    state
-  end
-
-  def handle_command(%{command: "lock-spectator", remaining: target} = _cmd, state) do
-    case ConsulServer.get_user(target, state) do
-      nil ->
-        state
-      target_id ->
-        new_blacklist = Map.put(state.blacklist, target_id, :spectator)
-        new_whitelist = Map.put(state.whitelist, target_id, :spectator)
-        Lobby.force_change_client(state.coordinator_id, target_id, %{player: false})
-
-        %{state | blacklist: new_blacklist, whitelist: new_whitelist}
-        |> ConsulServer.broadcast_update("lock-spectator")
-    end
-  end
-
-  def handle_command(%{command: "kick", remaining: target} = cmd, state) do
-    case ConsulServer.get_user(target, state) do
-      nil ->
-        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
-      target_id ->
-        Lobby.kick_user_from_battle(int_parse(target_id), state.lobby_id)
-        ConsulServer.say_command(cmd, state)
-    end
-  end
-
-  def handle_command(%{command: "banmult", remaining: targets} = cmd, state) do
-    ConsulServer.say_command(cmd, state)
-
-    String.split(targets, " ")
-    |> Enum.reduce(state, fn (target, acc) ->
-      case ConsulServer.get_user(target, acc) do
-        nil ->
-          acc
-        target_id ->
-          new_blacklist = Map.put(acc.blacklist, target_id, :banned)
-          new_whitelist = Map.delete(acc.blacklist, target_id)
-          Lobby.kick_user_from_battle(target_id, acc.lobby_id)
-
-          %{acc | blacklist: new_blacklist, whitelist: new_whitelist}
-          |> ConsulServer.broadcast_update("ban")
-      end
-    end)
-  end
-
-  def handle_command(%{command: "ban", remaining: target} = cmd, state) do
-    case ConsulServer.get_user(target, state) do
-      nil ->
-        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
-      target_id ->
-        new_blacklist = Map.put(state.blacklist, target_id, :banned)
-        new_whitelist = Map.delete(state.blacklist, target_id)
-        Lobby.kick_user_from_battle(target_id, state.lobby_id)
-
-        ConsulServer.say_command(cmd, state)
-
-        %{state | blacklist: new_blacklist, whitelist: new_whitelist}
-        |> ConsulServer.broadcast_update("ban")
-    end
-  end
-
-  def handle_command(%{command: "unban", remaining: target} = cmd, state) do
-    case ConsulServer.get_user(target, state) do
-      nil ->
-        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
-      target_id ->
-        new_blacklist = Map.delete(state.blacklist, target_id)
-        ConsulServer.say_command(cmd, state)
-
-        %{state | blacklist: new_blacklist}
-        |> ConsulServer.broadcast_update("unban")
-    end
-  end
-
-  # TODO: Find out if this making spectators ready is a problem, it won't give them a team so should be fine
-  def handle_command(%{command: "makeready", remaining: ""} = cmd, state) do
-    battle = Lobby.get_lobby!(state.lobby_id)
-
-    battle.players
-    |> Enum.each(fn player_id ->
-      Lobby.force_change_client(state.coordinator_id, player_id, %{ready: true})
-    end)
-
-    ConsulServer.say_command(cmd, state)
-  end
-
-  def handle_command(%{command: "makeready", remaining: target} = cmd, state) do
-    case ConsulServer.get_user(target, state) do
-      nil ->
-        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
-      target_id ->
-        Lobby.force_change_client(state.coordinator_id, target_id, %{ready: true})
-        ConsulServer.say_command(cmd, state)
-    end
-  end
-
-  def handle_command(%{command: "specunready"} = cmd, state) do
-    battle = Lobby.get_lobby!(state.lobby_id)
-
-    battle.players
-    |> Enum.each(fn player_id ->
-      client = Client.get_client_by_id(player_id)
-      if client.ready == false do
-        Lobby.force_change_client(state.coordinator_id, player_id, %{player: false})
-      end
-    end)
-
-    ConsulServer.say_command(cmd, state)
-  end
-
-  def handle_command(cmd = %{command: "modban", remaining: remaining}, state) do
-    [username, minutes | reason] = String.split(remaining, " ")
-    reason = Enum.join(reason, " ")
-
-    userid = ConsulServer.get_user(username, state)
-    until = "#{minutes} minutes"
-
-    case Central.Account.ReportLib.perform_action(%{}, "Ban", until) do
-      {:ok, expires} ->
-        {:ok, report} =
-          Central.Account.create_report(%{
-            "location" => "battle-lobby",
-            "location_id" => nil,
-            "reason" => reason,
-            "reporter_id" => cmd.senderid,
-            "target_id" => userid,
-            "response_text" => "instant-action",
-            "response_action" => "Ban",
-            "expires" => expires,
-            "responder_id" => cmd.senderid
-        })
-
-        user = User.get_user_by_id(userid)
-        sender = User.get_user_by_id(cmd.senderid)
-        LobbyChat.say(state.coordinator_id, "#{user.name} banned for #{minutes} minutes by #{sender.name}, reason: #{reason}", state.lobby_id)
-      _ ->
-        LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "Unable to find a user by that name", state.lobby_id)
-    end
-
-    state
-  end
+  # ----------------- Moderation commands
+  # TODO: modwarn
 
   def handle_command(cmd = %{command: "modmute", remaining: remaining}, state) do
     [username, minutes | reason] = String.split(remaining, " ")
@@ -262,7 +141,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     case Central.Account.ReportLib.perform_action(%{}, "Mute", until) do
       {:ok, expires} ->
-        {:ok, report} =
+        {:ok, _report} =
           Central.Account.create_report(%{
             "location" => "battle-lobby",
             "location_id" => nil,
@@ -285,137 +164,122 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
-  def handle_command(%{command: "gatekeeper", remaining: mode} = cmd, state) do
-    state = case mode do
-      "blacklist" ->
-        %{state | gatekeeper: :blacklist}
-      "whitelist" ->
-        %{state | gatekeeper: :whitelist}
-      "friends" ->
-        %{state | gatekeeper: :friends}
-      "friendsjoin" ->
-        %{state | gatekeeper: :friendsjoin}
-      "clan" ->
-        %{state | gatekeeper: :clan}
+  def handle_command(cmd = %{command: "modban", remaining: remaining}, state) do
+    [username, minutes | reason] = String.split(remaining, " ")
+    reason = Enum.join(reason, " ")
+
+    userid = ConsulServer.get_user(username, state)
+    until = "#{minutes} minutes"
+
+    case Central.Account.ReportLib.perform_action(%{}, "Ban", until) do
+      {:ok, expires} ->
+        {:ok, _report} =
+          Central.Account.create_report(%{
+            "location" => "battle-lobby",
+            "location_id" => nil,
+            "reason" => reason,
+            "reporter_id" => cmd.senderid,
+            "target_id" => userid,
+            "response_text" => "instant-action",
+            "response_action" => "Ban",
+            "expires" => expires,
+            "responder_id" => cmd.senderid
+        })
+
+        user = User.get_user_by_id(userid)
+        sender = User.get_user_by_id(cmd.senderid)
+        LobbyChat.say(state.coordinator_id, "#{user.name} banned for #{minutes} minutes by #{sender.name}, reason: #{reason}", state.lobby_id)
       _ ->
-        state
+        LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "Unable to find a user by that name", state.lobby_id)
     end
-    ConsulServer.say_command(cmd, state)
+
+    state
   end
 
-  def handle_command(%{command: "blacklist", remaining: target_level} = cmd, state) do
-    {target, level} = case String.split(target_level, " ") do
-      [target, level | _] ->
-        {target, ConsulServer.get_level(level |> String.downcase())}
-      [target] ->
-        {target, :banned}
-    end
+  def handle_command(%{command: "speclock", remaining: target} = _cmd, state) do
+    case ConsulServer.get_user(target, state) do
+      nil ->
+        state
+      target_id ->
+        new_blacklist = Map.put(state.blacklist, target_id, :spectator)
+        new_whitelist = Map.put(state.whitelist, target_id, :spectator)
+        Lobby.force_change_client(state.coordinator_id, target_id, %{player: false})
 
+        %{state | blacklist: new_blacklist, whitelist: new_whitelist}
+        |> ConsulServer.broadcast_update("lock-spectator")
+    end
+  end
+
+  def handle_command(%{command: "forceplay", remaining: target} = cmd, state) do
+    case ConsulServer.get_user(target, state) do
+      nil ->
+        state
+      target_id ->
+        Lobby.force_change_client(state.coordinator_id, target_id, %{player: true})
+        ConsulServer.say_command(cmd, state)
+    end
+  end
+
+  def handle_command(%{command: "lobbyban", remaining: target} = cmd, state) do
     case ConsulServer.get_user(target, state) do
       nil ->
         ConsulServer.say_command(%{cmd | error: "no user found"}, state)
-
       target_id ->
-        new_blacklist = if level == :player do
-          Map.delete(state.blacklist, target_id)
-        else
-          Map.put(state.blacklist, target_id, level)
-        end
+        ban = new_ban(%{level: :banned}, state)
+        new_bans = Map.put(state.bans, target_id, ban)
 
-        case level do
-          :banned ->
-            Lobby.kick_user_from_battle(target_id, state.lobby_id)
-          :spectator ->
-            Lobby.force_change_client(state.coordinator_id, target_id, %{player: false})
-          _ ->
-            nil
-        end
+        Lobby.kick_user_from_battle(target_id, state.lobby_id)
 
+        ConsulServer.say_command(cmd, state)
+
+        %{state | bans: new_bans}
+        |> ConsulServer.broadcast_update("ban")
+    end
+  end
+
+  def handle_command(%{command: "lobbybanmult", remaining: targets} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+
+    String.split(targets, " ")
+    |> Enum.reduce(state, fn (target, acc) ->
+      case ConsulServer.get_user(target, acc) do
+        nil ->
+          acc
+        target_id ->
+          new_blacklist = Map.put(acc.blacklist, target_id, :banned)
+          new_whitelist = Map.delete(acc.blacklist, target_id)
+          Lobby.kick_user_from_battle(target_id, acc.lobby_id)
+
+          %{acc | blacklist: new_blacklist, whitelist: new_whitelist}
+          |> ConsulServer.broadcast_update("ban")
+      end
+    end)
+  end
+
+  def handle_command(%{command: "unban", remaining: target} = cmd, state) do
+    case ConsulServer.get_user(target, state) do
+      nil ->
+        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
+      target_id ->
+        new_blacklist = Map.delete(state.blacklist, target_id)
         ConsulServer.say_command(cmd, state)
 
         %{state | blacklist: new_blacklist}
-        |> ConsulServer.broadcast_update("blacklist")
+        |> ConsulServer.broadcast_update("unban")
     end
   end
 
-  def handle_command(%{command: "whitelist", remaining: "player-as-is"} = cmd, state) do
-    battle = Lobby.get_lobby!(state.lobby_id)
-    new_whitelist = battle.players
-      |> Client.list_clients()
-      |> Map.new(fn %{userid: userid, player: player} ->
-        if player do
-          {userid, :player}
-        else
-          {userid, :spectator}
-        end
-      end)
-      |> Map.put(:default, :spectator)
 
-    ConsulServer.say_command(cmd, state)
-
-    %{state | whitelist: new_whitelist}
-    |> ConsulServer.broadcast_update("whitelist")
+  def handle_command(%{command: "reset"} = _cmd, state) do
+    ConsulServer.empty_state(state.lobby_id)
+    |> ConsulServer.broadcast_update("reset")
   end
 
-  def handle_command(%{command: "whitelist", remaining: "default " <> level} = cmd, state) do
-    level = ConsulServer.get_level(level |> String.downcase())
-    battle = Lobby.get_lobby!(state.lobby_id)
-
-    new_whitelist = Map.put(state.whitelist, :default, level)
-
-    # Any players not already in the whitelist need to get added at their current level
-    extra_entries = battle.players
-      |> Enum.filter(fn userid -> not Map.has_key?(new_whitelist, userid) end)
-      |> Client.list_clients
-      |> Map.new(fn %{userid: userid, player: player} ->
-        if player do
-          {userid, :player}
-        else
-          {userid, :spectator}
-        end
-      end)
-
-    new_whitelist = Map.merge(extra_entries, new_whitelist)
-
-    ConsulServer.say_command(cmd, state)
-
-    %{state | whitelist: new_whitelist}
-    |> ConsulServer.broadcast_update("whitelist")
-  end
-
-  def handle_command(%{command: "whitelist", remaining: target_level} = cmd, state) do
-    {target, level} = case String.split(target_level, " ") do
-      [target, level | _] ->
-        {target, ConsulServer.get_level(level |> String.downcase())}
-      [target] ->
-        {target, :player}
-    end
-
-    case ConsulServer.get_user(target, state) do
-      nil ->
-        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
-
-      target_id ->
-        new_whitelist = if level == :banned do
-          Map.delete(state.whitelist, target_id)
-        else
-          Map.put(state.whitelist, target_id, level)
-        end
-
-        case level do
-          :banned ->
-            Lobby.kick_user_from_battle(target_id, state.lobby_id)
-          :spectator ->
-            Lobby.force_change_client(state.coordinator_id, target_id, %{player: false})
-          _ ->
-            nil
-        end
-
-        ConsulServer.say_command(cmd, state)
-
-        %{state | whitelist: new_whitelist}
-        |> ConsulServer.broadcast_update("whitelist")
-    end
+  #################### Internal commands
+  # Would need to be sent by internal since battlestatus isn't part of the command queue
+  def handle_command(%{command: "change-battlestatus", remaining: target_id, status: new_status}, state) do
+    Lobby.force_change_client(state.coordinator_id, target_id, new_status)
+    state
   end
 
   def handle_command(cmd, state) do
@@ -425,5 +289,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       Logger.error("No handler in consul_server for command #{Kernel.inspect cmd}")
     end
     state
+  end
+
+  defp new_ban(data, state) do
+    Map.merge(%{
+      by: state.coordinator_id,
+      reason: "None given",
+      # :player | :spectator | :banned
+      level: :banned
+    }, data)
   end
 end
