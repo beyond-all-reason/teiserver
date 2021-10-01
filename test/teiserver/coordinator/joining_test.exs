@@ -1,6 +1,5 @@
 defmodule Teiserver.Coordinator.JoiningTest do
   use Central.ServerCase, async: false
-  alias Teiserver.Battle.Lobby
   alias Teiserver.Common.PubsubListener
   alias Teiserver.Coordinator
 
@@ -88,14 +87,6 @@ defmodule Teiserver.Coordinator.JoiningTest do
     }
     _tachyon_send(socket2, data)
 
-    # Expect Coordinator mode announcement
-    reply = _tachyon_recv(socket2)
-    assert reply == %{
-      "cmd" => "s.lobby.announce",
-      "message" => "Coordinator mode enabled",
-      "sender" => user.id
-    }
-
     # Expect welcome message
     reply = _tachyon_recv(socket2)
     assert reply == %{
@@ -117,13 +108,5 @@ defmodule Teiserver.Coordinator.JoiningTest do
       "message" => " #{user2.name}: ####################",
       "sender" => Coordinator.get_coordinator_userid()
     }
-  end
-
-  test "blacklist" do
-
-  end
-
-  test "whitelist" do
-
   end
 end

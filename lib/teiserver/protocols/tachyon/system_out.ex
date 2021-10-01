@@ -6,6 +6,13 @@ defmodule Teiserver.Protocols.Tachyon.SystemOut do
     }
   end
 
+  def do_reply(:ring, ringer_id) do
+    %{
+      cmd: "s.system.ring",
+      ringer_id: ringer_id
+    }
+  end
+
   def do_reply(:nouser, nil) do
     %{
       result: "error",

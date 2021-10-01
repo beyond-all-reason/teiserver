@@ -42,16 +42,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   # ----------------- General commands
   def handle_command(%{command: "gatekeeper", remaining: mode} = cmd, state) do
     state = case mode do
-      "blacklist" ->
-        %{state | gatekeeper: :blacklist}
-      "whitelist" ->
-        %{state | gatekeeper: :whitelist}
       "friends" ->
         %{state | gatekeeper: :friends}
-      "friendsjoin" ->
-        %{state | gatekeeper: :friendsjoin}
+      "friendsplay" ->
+        %{state | gatekeeper: :friendsplay}
       "clan" ->
         %{state | gatekeeper: :clan}
+      "default" ->
+        %{state | gatekeeper: :default}
       _ ->
         state
     end
@@ -89,7 +87,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     battle.players
     |> Enum.each(fn player_id ->
-        User.ring(player_id, state.coordinator_id)
+      User.ring(player_id, state.coordinator_id)
       Lobby.force_change_client(state.coordinator_id, player_id, %{ready: true})
     end)
 
@@ -266,6 +264,17 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         %{state | blacklist: new_blacklist}
         |> ConsulServer.broadcast_update("unban")
+    end
+  end
+
+  # TODO: Remove this, it's currently only here to allow tests to pass
+  def handle_command(%{command: "force-spectator", remaining: target} = cmd, state) do
+    case ConsulServer.get_user(target, state) do
+      nil ->
+        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
+      target_id ->
+        Lobby.force_change_client(state.coordinator_id, target_id, %{player: false})
+        ConsulServer.say_command(cmd, state)
     end
   end
 

@@ -48,158 +48,21 @@ defmodule Teiserver.Coordinator.CommandsTest do
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
   end
 
-  # splitlobby
-  # gatekeeper
-  # welcome-message
-  # specunready
-  # makeready
-  # pull
-  # settag
-  # modwarn
-  # modmute
-  # modban
-  # lobbyban
-  # lobbybanmult
-  # unban
 
-  test "kick by name", %{host: host, player: player, hsocket: hsocket} do
-    player_client = Client.get_client_by_id(player.id)
-    assert player_client.player == true
+  test "splitlobby", %{host: _host, player: _player, hsocket: _hsocket} do
 
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$kick #{player.name}"}
-    _tachyon_send(hsocket, data)
-
-    player_client = Client.get_client_by_id(player.id)
-    assert player_client.lobby_id == nil
   end
 
-  test "kick by id", %{host: host, player: player, hsocket: hsocket} do
-    player_client = Client.get_client_by_id(player.id)
-    assert player_client.player == true
+  test "gatekeeper", %{host: _host, player: _player, hsocket: _hsocket} do
 
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$kick ##{player.id}"}
-    _tachyon_send(hsocket, data)
-
-    player_client = Client.get_client_by_id(player.id)
-    assert player_client.lobby_id == nil
   end
 
-  test "error with no name", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
-    player_client = Client.get_client_by_id(player.id)
-    assert player_client.player == true
+  test "welcome-message", %{host: _host, player: _player, hsocket: _hsocket} do
 
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$kick noname"}
-    _tachyon_send(hsocket, data)
-
-    # They should not be kicked, we expect no other errors at this stage
-    player_client = Client.get_client_by_id(player.id)
-    assert player_client.lobby_id == lobby_id
   end
 
-  test "ban by name", %{host: host, player: player, hsocket: hsocket} do
-    player_client = Client.get_client_by_id(player.id)
-    assert player_client.player == true
+  test "specunready", %{host: _host, player: _player, hsocket: _hsocket} do
 
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$ban #{player.name}"}
-    _tachyon_send(hsocket, data)
-
-    player_client = Client.get_client_by_id(player.id)
-    assert player_client.lobby_id == nil
-  end
-
-  test "ban by partial name", %{host: host, player: player, hsocket: hsocket} do
-    player_client = Client.get_client_by_id(player.id)
-    assert player_client.player == true
-
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$ban #{player.name |> String.slice(0, 17)}"}
-    _tachyon_send(hsocket, data)
-
-    player_client = Client.get_client_by_id(player.id)
-    assert player_client.lobby_id == nil
-  end
-
-  test "blacklist", %{lobby_id: lobby_id, host: host, player: player, hsocket: hsocket} do
-    blacklist = Coordinator.call_consul(lobby_id, {:get, :blacklist})
-    assert blacklist == %{}
-
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$blacklist ##{player.id} banned"}
-    _tachyon_send(hsocket, data)
-    blacklist = Coordinator.call_consul(lobby_id, {:get, :blacklist})
-    assert blacklist == %{
-      player.id => :banned
-    }
-
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$blacklist ##{player.id} spectator"}
-    _tachyon_send(hsocket, data)
-    blacklist = Coordinator.call_consul(lobby_id, {:get, :blacklist})
-    assert blacklist == %{
-      player.id => :spectator
-    }
-
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$blacklist ##{player.id} player"}
-    _tachyon_send(hsocket, data)
-    blacklist = Coordinator.call_consul(lobby_id, {:get, :blacklist})
-    assert blacklist == %{}
-  end
-
-  test "whitelist", %{lobby_id: lobby_id, host: host, player: player, hsocket: hsocket} do
-    whitelist = Coordinator.call_consul(lobby_id, {:get, :whitelist})
-    assert whitelist == %{
-      :default => :player
-    }
-
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$whitelist ##{player.id} spectator"}
-    _tachyon_send(hsocket, data)
-    whitelist = Coordinator.call_consul(lobby_id, {:get, :whitelist})
-    assert whitelist == %{
-      player.id => :spectator,
-      :default => :player
-    }
-
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$whitelist ##{player.id} player"}
-    _tachyon_send(hsocket, data)
-    whitelist = Coordinator.call_consul(lobby_id, {:get, :whitelist})
-    assert whitelist == %{
-      player.id => :player,
-      :default => :player
-    }
-
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$whitelist ##{player.id} banned"}
-    _tachyon_send(hsocket, data)
-    whitelist = Coordinator.call_consul(lobby_id, {:get, :whitelist})
-    assert whitelist == %{
-      :default => :player
-    }
-
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$whitelist default banned"}
-    _tachyon_send(hsocket, data)
-    whitelist = Coordinator.call_consul(lobby_id, {:get, :whitelist})
-    assert whitelist == %{
-      :default => :banned
-    }
-  end
-
-  test "whitelist player-as-is", %{lobby_id: lobby_id, player: player1, host: host, hsocket: hsocket} do
-    %{user: player2} = tachyon_auth_setup()
-    %{user: _player3} = tachyon_auth_setup()
-
-    # Add player2 to the battle but as a spectator
-    # player3 is not touched, they should not appear on this list
-    Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
-    player_client = Client.get_client_by_id(player2.id)
-    Client.update(%{player_client |
-      player: false
-    }, :client_updated_battlestatus)
-
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$whitelist player-as-is"}
-    _tachyon_send(hsocket, data)
-
-    whitelist = Coordinator.call_consul(lobby_id, {:get, :whitelist})
-    assert whitelist == %{
-      player1.id => :player,
-      player2.id => :spectator,
-      :default => :spectator
-    }
   end
 
   test "makeready", %{lobby_id: lobby_id, player: player1, host: host, hsocket: hsocket} do
@@ -253,26 +116,6 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert readies == [false, true]
   end
 
-  test "status", %{lobby_id: lobby_id, host: host, hsocket: hsocket} do
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$status"}
-    _tachyon_send(hsocket, data)
-
-    reply = _tachyon_recv(hsocket)
-    assert reply["cmd"] == "s.communication.direct_message"
-    assert reply["sender"] == Coordinator.get_coordinator_userid()
-    assert reply["message"] == ["Status for battle ##{lobby_id}", "Gatekeeper: blacklist"]
-  end
-
-  test "help", %{host: host, hsocket: hsocket} do
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$help"}
-    _tachyon_send(hsocket, data)
-
-    reply = _tachyon_recv(hsocket)
-    assert reply["cmd"] == "s.communication.direct_message"
-    assert reply["sender"] == Coordinator.get_coordinator_userid()
-    assert reply["message"] == ["Command list can currently be found at https://github.com/beyond-all-reason/teiserver/blob/master/lib/teiserver/coordinator/coordinator_lib.ex"]
-  end
-
   test "pull user", %{lobby_id: lobby_id, host: host, hsocket: hsocket} do
     %{user: player2, socket: psocket} = tachyon_auth_setup()
 
@@ -283,6 +126,9 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert reply["cmd"] == "s.lobby.join_response"
     assert reply["lobby"]["id"] == lobby_id
   end
+
+  # settag
+  # modwarn
 
   # Broken since we now propogate the action via the hook server which breaks in tests
   # test "modban", %{lobby_id: lobby_id, host: host, hsocket: hsocket, player: player, listener: listener} do
@@ -314,6 +160,66 @@ defmodule Teiserver.Coordinator.CommandsTest do
   #   assert User.is_muted?(player.id) == true
   #   assert User.is_banned?(player.id) == false
   # end
+
+
+
+  test "ban by name", %{host: host, player: player, hsocket: hsocket} do
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.player == true
+
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "$lobbyban #{player.name}"}
+    _tachyon_send(hsocket, data)
+
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.lobby_id == nil
+  end
+
+  test "ban by partial name", %{host: host, player: player, hsocket: hsocket} do
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.player == true
+
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "$lobbyban #{player.name |> String.slice(0, 17)}"}
+    _tachyon_send(hsocket, data)
+
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.lobby_id == nil
+  end
+
+  test "error with no name", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.player == true
+
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "$kick noname"}
+    _tachyon_send(hsocket, data)
+
+    # They should not be kicked, we expect no other errors at this stage
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.lobby_id == lobby_id
+  end
+
+  # lobbybanmult
+  # unban
+
+
+  test "status", %{lobby_id: lobby_id, host: host, hsocket: hsocket} do
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "$status"}
+    _tachyon_send(hsocket, data)
+
+    reply = _tachyon_recv(hsocket)
+    assert reply["cmd"] == "s.communication.direct_message"
+    assert reply["sender"] == Coordinator.get_coordinator_userid()
+    assert reply["message"] == ["Status for battle ##{lobby_id}", "Gatekeeper: default"]
+  end
+
+  test "help", %{host: host, hsocket: hsocket} do
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "$help"}
+    _tachyon_send(hsocket, data)
+
+    reply = _tachyon_recv(hsocket)
+    assert reply["cmd"] == "s.communication.direct_message"
+    assert reply["sender"] == Coordinator.get_coordinator_userid()
+    assert reply["message"] == ["Command list can currently be found at https://github.com/beyond-all-reason/teiserver/blob/master/lib/teiserver/coordinator/coordinator_lib.ex"]
+  end
 
   test "test passthrough", %{lobby_id: lobby_id, host: host, hsocket: hsocket, listener: listener} do
     data = %{cmd: "c.lobby.message", userid: host.id, message: "$non-existing command"}
