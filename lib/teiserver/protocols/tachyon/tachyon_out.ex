@@ -23,6 +23,7 @@ defmodule Teiserver.Protocols.TachyonOut do
   def reply(:join_battle_failure, data, _msg_id, state), do: reply(:lobby, :join_response, {:reject, data}, state)
   def reply(:battle_message, {sender_id, msg, lobby_id}, _msg_id, state), do: reply(:lobby, :message, {sender_id, msg, lobby_id}, state)
   def reply(:direct_message, {sender_id, msg, _user}, _msg_id, state), do: reply(:communication, :direct_message, {sender_id, msg}, state)
+  def reply(:ring, {ringer_id, _}, _msg_id, state), do: reply(:system, :ring, ringer_id, state)
   # def reply(:join_battle_success, _data, _msg_id, state), do: reply(:lobby, :join_response, {:approve, state.lobby_id}, state)
 
   def reply(namespace, reply_cmd, data, state) do

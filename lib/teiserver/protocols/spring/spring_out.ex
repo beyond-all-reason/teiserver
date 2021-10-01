@@ -332,8 +332,9 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   # Commands
-  defp do_reply(:ring, {ringer_id, state_user}) do
-    if ringer_id not in (state_user.ignored || []) do
+  defp do_reply(:ring, {ringer_id, state_userid}) do
+    user = User.get_user_by_id(state_userid)
+    if ringer_id not in (user.ignored || []) do
       ringer_name = User.get_username(ringer_id)
       "RING #{ringer_name}\n"
     end

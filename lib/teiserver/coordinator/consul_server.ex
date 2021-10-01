@@ -24,7 +24,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   # alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Coordinator.{ConsulVoting, ConsulCommands}
+  alias Teiserver.Coordinator.{ConsulCommands}
 
   @always_allow ~w(status help)
 
@@ -164,10 +164,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
         ban_level
 
       # They are in the lobby, they can play
-      "friends" ->
+      :friends ->
         :player
 
-      "friendsplay" ->
+      :friendsplay ->
         if is_on_friendlist?(userid, state, :players) do
           :player
         else

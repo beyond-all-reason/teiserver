@@ -711,7 +711,7 @@ defmodule Teiserver.TcpServer do
   defp do_action(action_type, data, state) do
     case action_type do
       :ring ->
-        state.protocol_out.reply(:ring, {data, state.user}, nil, state)
+        state.protocol_out.reply(:ring, {data, state.userid}, nil, state)
 
       :welcome ->
         state.protocol_out.reply(:welcome, nil, nil, state)
