@@ -421,7 +421,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
   @spec smurf_search(Plug.Conn.t(), map) :: Plug.Conn.t()
   def smurf_search(conn, %{"id" => id}) do
-    user = Account.get_user(id)
+    user = Account.get_user!(id)
 
     # Update their hw_key
     hw_fingerprint = Account.get_user_stat(user.id)
@@ -448,6 +448,31 @@ defmodule TeiserverWeb.Admin.UserController do
         |> put_flash(:warning, "Unable to access this user")
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
+  end
+
+  def banhash_form(conn, %{"id" => id}) do
+    user = Account.get_user!(id)
+
+    # Update their hw_key
+    hw_fingerprint = Account.get_user_stat(user.id)
+    |> Map.get(:data)
+    |> Teiserver.Account.RecalculateUserStatTask.calculate_hw_fingerprint()
+
+    Account.update_user_stat(user.id, %{
+      hw_fingerprint: hw_fingerprint
+    })
+
+    user_stats = case Account.get_user_stat(user.id) do
+      nil -> %{}
+      stats -> stats.data
+    end
+
+    conn
+    |> add_breadcrumb(name: "Add banhash form", url: conn.request_path)
+    |> assign(:user, user)
+    |> assign(:user_stats, user_stats)
+    |> assign(:userid, user.id)
+    |> render("banhash_form.html")
   end
 
   @spec search_defaults(Plug.Conn.t()) :: Map.t()

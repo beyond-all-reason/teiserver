@@ -385,13 +385,15 @@ defmodule Teiserver.Account do
       :ok
 
   """
-  def update_user_stat(userid, new_data) when is_integer(userid) do
+  def update_user_stat(userid, data) when is_integer(userid) do
+    data = Map.new(data, fn {k, v} -> {to_string(k), v} end)
+
     case get_user_stat(userid) do
       nil ->
-        create_user_stat(%{user_id: userid, data: new_data})
+        create_user_stat(%{user_id: userid, data: data})
       user_stat ->
         ConCache.dirty_delete(:teiserver_user_stat_cache, userid)
-        new_data = Map.merge(user_stat.data, new_data)
+        new_data = Map.merge(user_stat.data, data)
         update_user_stat(user_stat, %{data: new_data})
     end
   end
@@ -404,4 +406,158 @@ defmodule Teiserver.Account do
     |> UserStat.changeset(attrs)
     |> Repo.update()
   end
+
+
+  alias Teiserver.Account.BanHash
+  alias Teiserver.Account.BanHashLib
+
+  @spec ban_hash_query(List.t()) :: Ecto.Query.t()
+  def ban_hash_query(args) do
+    ban_hash_query(nil, args)
+  end
+
+  @spec ban_hash_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def ban_hash_query(id, args) do
+    BanHashLib.query_ban_hashes
+    |> BanHashLib.search(%{id: id})
+    |> BanHashLib.search(args[:search])
+    |> BanHashLib.preload(args[:preload])
+    |> BanHashLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of ban_hashes.
+
+  ## Examples
+
+      iex> list_ban_hashes()
+      [%BanHash{}, ...]
+
+  """
+  @spec list_ban_hashes(List.t()) :: List.t()
+  def list_ban_hashes(args \\ []) do
+    ban_hash_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Gets a single ban_hash.
+
+  Raises `Ecto.NoResultsError` if the BanHash does not exist.
+
+  ## Examples
+
+      iex> get_ban_hash!(123)
+      %BanHash{}
+
+      iex> get_ban_hash!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_ban_hash!(Integer.t() | List.t()) :: BanHash.t()
+  @spec get_ban_hash!(Integer.t(), List.t()) :: BanHash.t()
+  def get_ban_hash!(id) when not is_list(id) do
+    ban_hash_query(id, [])
+    |> Repo.one!
+  end
+  def get_ban_hash!(args) do
+    ban_hash_query(nil, args)
+    |> Repo.one!
+  end
+  def get_ban_hash!(id, args) do
+    ban_hash_query(id, args)
+    |> Repo.one!
+  end
+
+  # Uncomment this if needed, default files do not need this function
+  # @doc """
+  # Gets a single ban_hash.
+
+  # Returns `nil` if the BanHash does not exist.
+
+  # ## Examples
+
+  #     iex> get_ban_hash(123)
+  #     %BanHash{}
+
+  #     iex> get_ban_hash(456)
+  #     nil
+
+  # """
+  # def get_ban_hash(id, args \\ []) when not is_list(id) do
+  #   ban_hash_query(id, args)
+  #   |> Repo.one
+  # end
+
+  @doc """
+  Creates a ban_hash.
+
+  ## Examples
+
+      iex> create_ban_hash(%{field: value})
+      {:ok, %BanHash{}}
+
+      iex> create_ban_hash(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_ban_hash(Map.t()) :: {:ok, BanHash.t()} | {:error, Ecto.Changeset.t()}
+  def create_ban_hash(attrs \\ %{}) do
+    %BanHash{}
+    |> BanHash.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a ban_hash.
+
+  ## Examples
+
+      iex> update_ban_hash(ban_hash, %{field: new_value})
+      {:ok, %BanHash{}}
+
+      iex> update_ban_hash(ban_hash, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_ban_hash(BanHash.t(), Map.t()) :: {:ok, BanHash.t()} | {:error, Ecto.Changeset.t()}
+  def update_ban_hash(%BanHash{} = ban_hash, attrs) do
+    ban_hash
+    |> BanHash.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a BanHash.
+
+  ## Examples
+
+      iex> delete_ban_hash(ban_hash)
+      {:ok, %BanHash{}}
+
+      iex> delete_ban_hash(ban_hash)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_ban_hash(BanHash.t()) :: {:ok, BanHash.t()} | {:error, Ecto.Changeset.t()}
+  def delete_ban_hash(%BanHash{} = ban_hash) do
+    Repo.delete(ban_hash)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking ban_hash changes.
+
+  ## Examples
+
+      iex> change_ban_hash(ban_hash)
+      %Ecto.Changeset{source: %BanHash{}}
+
+  """
+  @spec change_ban_hash(BanHash.t()) :: Ecto.Changeset.t()
+  def change_ban_hash(%BanHash{} = ban_hash) do
+    BanHash.changeset(ban_hash, %{})
+  end
+
 end

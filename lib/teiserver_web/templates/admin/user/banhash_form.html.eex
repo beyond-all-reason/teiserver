@@ -1,0 +1,38 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %>">
+      <div class="card-body">
+        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "new"
+          })
+        %>
+
+        <hr />
+
+<form action='<%= Routes.ts_admin_ban_hash_path(@conn, :create) %>' method='post' style="display: inline-block;">
+  <input type='hidden' name='_csrf_token' value='<%= get_csrf_token() %>' />
+  <input type='hidden' name='ban_hash[user_id]' value='<%= @userid %>' />
+  <input type='hidden' name='ban_hash[type]' value='hardware' />
+  <input type='hidden' name='ban_hash[value]' value='<%= @user_stats["hw_fingerprint"] %>' />
+
+  <button type='submit' class='btn btn-<%= bsname %>'>
+    Hardware
+  </button>
+</form>
+<br /><br />
+
+<a href="<%= Routes.ts_admin_user_path(@conn, :show, @userid) %>" class="btn btn-secondary btn-outline">
+  Cancel
+</a>
+
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -13,4 +13,5 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def colours("parties"), do: Teiserver.Game.PartyLib.colours()
   def colours("telemetry"), do: Teiserver.Telemetry.TelemetryLib.colours()
   def colours("tools"), do: Central.Admin.ToolLib.colours()
+  def colours("ban_hashes"), do: Teiserver.Account.BanHashLib.colours()
 end

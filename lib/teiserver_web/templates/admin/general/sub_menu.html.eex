@@ -41,6 +41,16 @@
             %>
           <% end %>
 
+          <%= if allow?(@conn, "teiserver.moderator.account") do %>
+            <%= central_component "sub_menu_icon",
+              name: "ban_hashes",
+              label: "Ban hashes",
+              active: @active,
+              url: Routes.ts_admin_ban_hash_path(@conn, :index),
+              lib: Teiserver.Account.BanHashLib
+            %>
+          <% end %>
+
           <%= if allow?(@conn, "teiserver.admin") do %>
             <%= central_component "sub_menu_icon",
               name: "tools",

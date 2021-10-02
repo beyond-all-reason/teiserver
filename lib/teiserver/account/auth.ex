@@ -10,6 +10,7 @@ defmodule Teiserver.Account.Auth do
   def authorize(:respond_form, conn, _), do: allow?(conn, "teiserver.moderator.account")
   def authorize(:respond_post, conn, _), do: allow?(conn, "teiserver.moderator.account")
   def authorize(:smurf_search, conn, _), do: allow?(conn, "teiserver.moderator.account")
+  def authorize(:banhash_form, conn, _), do: allow?(conn, "teiserver.moderator.account")
   def authorize(:edit, conn, _), do: allow?(conn, "teiserver.moderator.account")
   def authorize(:update, conn, _), do: allow?(conn, "teiserver.moderator.account")
   def authorize(_, conn, _), do: allow?(conn, "teiserver.admin.account")

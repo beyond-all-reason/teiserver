@@ -621,7 +621,7 @@ CLIENTS test_room #{user.name}\n"
     pid = Client.get_client_by_id(user.id).pid
     send(pid, {:user_logged_in, bad_user.id})
     reply = _recv_raw(socket)
-    assert reply == "ADDUSER new_test_user_bad_springid ?? #{bad_user.id} LuaLobby Chobby\n"
+    assert reply == "ADDUSER new_test_user_bad_springid ?? #{bad_user.id} no client\n"
   end
 
   test "GETIP", %{user: user, socket: socket} do
