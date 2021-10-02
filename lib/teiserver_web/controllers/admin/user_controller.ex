@@ -65,7 +65,7 @@ defmodule TeiserverWeb.Admin.UserController do
           ip: params["ip"],
         ],
         limit: params["limit"] || 50,
-        order: params["order"] || "Name (A-Z)"
+        order_by: params["order"] || "Name (A-Z)"
       )
 
     if Enum.count(users) == 1 do
