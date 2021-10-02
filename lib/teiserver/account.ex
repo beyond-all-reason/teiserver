@@ -258,6 +258,7 @@ defmodule Teiserver.Account do
       (if user.data["bot"] == true, do: "Bot"),
       (if user.data["verified"] == true, do: "Verified"),
 
+      (if "Trusted" in (user.data["roles"] || []), do: "Trusted"),
       (if "Streamer" in (user.data["roles"] || []), do: "Streamer"),
       (if "Tester" in (user.data["roles"] || []), do: "Tester"),
       (if "Donor" in (user.data["roles"] || []), do: "Donor"),

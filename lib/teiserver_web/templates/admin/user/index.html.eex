@@ -93,6 +93,9 @@
         <%= if user.data["moderator"], do: "Mod" %>
       </td>
       <td>
+        <%= if "Trusted" in (user.data["roles"] || []), do: "Trusted" %>
+      </td>
+      <td>
         <%= if "Donor" in (user.data["roles"] || []), do: "Donor" %>
       </td>
       <td>
