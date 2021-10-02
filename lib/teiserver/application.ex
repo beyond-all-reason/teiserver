@@ -2,16 +2,6 @@ defmodule Teiserver.Application do
   @moduledoc false
   def children() do
     children = [
-      # Ranch servers
-      %{
-        id: Teiserver.SSLTcpServer,
-        start: {Teiserver.TcpServer, :start_link, [[ssl: true]]}
-      },
-      %{
-        id: Teiserver.RawTcpServer,
-        start: {Teiserver.TcpServer, :start_link, [[]]}
-      },
-
       # Caches - Meta
       concache_perm_sup(:id_counters),
       concache_perm_sup(:lists),
@@ -60,10 +50,21 @@ defmodule Teiserver.Application do
       # Coordinator mode
       concache_perm_sup(:teiserver_consul_pids),
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Coordinator.DynamicSupervisor},
+      {Teiserver.Coordinator.AutomodServer, name: Teiserver.Coordinator.AutomodServer},
 
       # Telemetry
       {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
       {Teiserver.Telemetry.SpringTelemetryServer, name: Teiserver.Telemetry.SpringTelemetryServer},
+
+      # Ranch servers
+      %{
+        id: Teiserver.SSLTcpServer,
+        start: {Teiserver.TcpServer, :start_link, [[ssl: true]]}
+      },
+      %{
+        id: Teiserver.RawTcpServer,
+        start: {Teiserver.TcpServer, :start_link, [[]]}
+      }
     ]
 
     discord_start()

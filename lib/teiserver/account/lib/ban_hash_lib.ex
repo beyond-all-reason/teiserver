@@ -49,6 +49,11 @@ defmodule Teiserver.Account.BanHashLib do
       where: ban_hashes.id == ^id
   end
 
+  def _search(query, :value, value) do
+    from ban_hashes in query,
+      where: ban_hashes.value == ^value
+  end
+
   def _search(query, :type, type) do
     from ban_hashes in query,
       where: ban_hashes.type == ^type

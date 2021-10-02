@@ -300,7 +300,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
               case Central.Account.ReportLib.perform_action(%{}, action, params["until"]) do
                 {:ok, expires} ->
-                  {:ok, report} =
+                  {:ok, _report} =
                     Central.Account.create_report(%{
                       "location" => "web-admin-instant",
                       "location_id" => nil,

@@ -92,7 +92,7 @@ defmodule Teiserver.Coordinator do
     end
   end
 
-  def create_report(user, report) do
+  def create_report(_user, _report) do
     # Do nothing
   end
 
@@ -105,12 +105,19 @@ defmodule Teiserver.Coordinator do
     end
   end
 
+  @spec send_to_host(T.userid(), String.t()) :: :ok
+  def send_to_host(lobby_id, msg) do
+    send_to_host(get_coordinator_userid(), lobby_id, msg)
+  end
+
+  @spec send_to_host(T.userid(), T.userid(), String.t()) :: :ok
   def send_to_host(from_id, lobby_id, msg) do
     battle = Lobby.get_battle!(lobby_id)
     User.send_direct_message(from_id, battle.founder_id, msg)
     Logger.info("send_to_host - #{battle.id}, #{msg}")
   end
 
+  @spec send_to_user(T.userid(), String.t()) :: :ok
   def send_to_user(userid, msg) do
     User.send_direct_message(get_coordinator_userid(), userid, msg)
   end
