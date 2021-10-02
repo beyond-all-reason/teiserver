@@ -167,6 +167,14 @@ defmodule Teiserver.TcpServer do
   end
 
   # Client channel messages
+  def handle_info({:client_message, :direct_message, _userid, {from_id, message}}, state) do
+    # TODO: Currently we seem to subscribe to multiple channels at once
+    # so if we uncomment this we get messages double up
+    # new_state = new_chat_message(:direct_message, from_id, nil, message, state)
+    # {:noreply, new_state}
+    {:noreply, state}
+  end
+
   def handle_info({:client_message, :matchmaking, _userid, data}, state) do
     {:noreply, matchmaking_update(data, state)}
   end

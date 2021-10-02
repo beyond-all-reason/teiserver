@@ -389,6 +389,7 @@ defmodule Teiserver.User do
   @spec list_combined_friendslist([T.userid()]) :: [User.t()]
   defdelegate list_combined_friendslist(userids), to: RelationsLib
 
+  @spec send_direct_message(T.userid(), T.userid(), String.t()) :: :ok
   def send_direct_message(from_id, to_id, "!start" <> s), do: send_direct_message(from_id, to_id, "!cv start" <> s)
   def send_direct_message(from_id, to_id, "!joinas" <> s), do: send_direct_message(from_id, to_id, "!cv joinas" <> s)
 
@@ -407,6 +408,7 @@ defmodule Teiserver.User do
         {:client_message, :direct_message, to_id, {from_id, message_content}}
       )
     end
+    :ok
   end
 
   @spec ring(T.userid(), T.userid()) :: :ok
@@ -726,11 +728,18 @@ defmodule Teiserver.User do
     end
   end
 
+  @spec is_shadowbanned?(T.userid() | T.user()) :: boolean()
+  def is_shadowbanned?(nil), do: true
+  def is_shadowbanned?(userid) when is_integer(userid), do: is_shadowbanned?(get_user_by_id(userid))
+  def is_shadowbanned?(%{shadowbanned: true}), do: true
+  def is_shadowbanned?(_), do: false
+
   @spec shadowban(T.userid() | T.user()) :: :ok
   def shadowban(nil), do: :ok
   def shadowban(userid) when is_integer(userid), do: shadowban(get_user_by_id(userid))
   def shadowban(user) do
     update_user(%{user | shadowbanned: true, muted: [true, nil]}, persist: true)
+    Client.shadowban(user.id)
     :ok
   end
 

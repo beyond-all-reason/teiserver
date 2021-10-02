@@ -47,7 +47,8 @@ defmodule Teiserver.Client do
         current_lobby_id: nil,
         extra_logging: false,
         chat_times: [],
-        temp_mute_count: 0
+        temp_mute_count: 0,
+        shadowbanned: false
       },
       client
     )
@@ -79,7 +80,8 @@ defmodule Teiserver.Client do
         in_game: false,
         ip: user.ip,
         country: user.country,
-        lobby_client: user.lobby_client
+        lobby_client: user.lobby_client,
+        shadowbanned: user.shadowbanned
       })
       |> add_client
 
@@ -350,6 +352,13 @@ defmodule Teiserver.Client do
         Coordinator.send_to_user(userid, "Chat flood protection enabled, please wait before sending more messages. Persist and you'll be temporarily banned.")
       end
     end
+    :ok
+  end
+
+  @spec shadowban(T.userid()) :: :ok
+  def shadowban(userid) do
+    client = get_client_by_id(userid)
+    update(%{client | shadowbanned: true}, :silent)
     :ok
   end
 

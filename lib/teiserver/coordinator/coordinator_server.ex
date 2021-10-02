@@ -5,6 +5,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   """
   use GenServer
   alias Teiserver.{Account, User, Clans, Room, Coordinator}
+  alias Teiserver.Coordinator.AutomodServer
   alias Phoenix.PubSub
   require Logger
 
@@ -34,7 +35,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       consuls: %{}
     }
 
-    ~w(coordinator)
+    ~w(coordinator moderators)
     |> Enum.each(fn room_name ->
       Room.get_or_make_room(room_name, user.id)
       Room.add_user_to_room(user.id, room_name)
@@ -60,16 +61,36 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
-  def handle_info({:new_message, userid, "coordinator", _message}, state) do
-    # If it's us sending it, don't reply
-    if userid != state.userid do
-      username = User.get_username(userid)
-      Room.send_message(state.userid, "coordinator", "I don't currently handle messages, sorry #{username}")
-    end
-    {:noreply, state}
-  end
+  # def handle_info({:new_message, userid, "coordinator", _message}, state) do
+  #   # If it's us sending it, don't reply
+  #   if userid != state.userid do
+  #     username = User.get_username(userid)
+  #     Room.send_message(state.userid, "coordinator", "I don't currently handle messages, sorry #{username}")
+  #   end
+  #   {:noreply, state}
+  # end
   def handle_info({:new_message, _userid, _room_name, _message}, state) do
     {:noreply, state}
+  end
+
+  def handle_info({:direct_message, fromid, "$" <> command}, state) do
+    new_state = case command do
+      "check " <> remaining ->
+        case User.get_userid(remaining) do
+          nil ->
+            User.send_direct_message(state.userid, fromid, "Unable to find a user with that name")
+          userid ->
+            result = AutomodServer.check_user(userid)
+            User.send_direct_message(state.userid, fromid, "Automod result: #{result}")
+        end
+        state
+
+      _ ->
+        username = User.get_username(fromid)
+        User.send_direct_message(state.userid, fromid, "I don't currently handle messages, sorry #{username}")
+        state
+    end
+    {:noreply, new_state}
   end
 
   def handle_info({:direct_message, userid, _message}, state) do

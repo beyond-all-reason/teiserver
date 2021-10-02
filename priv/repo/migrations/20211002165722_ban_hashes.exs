@@ -13,5 +13,6 @@ defmodule Central.Repo.Migrations.BanHashes do
 
       timestamps()
     end
+    create index(:teiserver_ban_hashes, [:value])
   end
 end
