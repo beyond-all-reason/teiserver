@@ -30,4 +30,19 @@ defmodule Teiserver.Account.UserStatLib do
     from user_stats in query,
       where: user_stats.user_id in ^id_list
   end
+
+  def _search(query, :data_equal, {field, value}) do
+    from user_stats in query,
+      where: fragment("? ->> ? = ?", user_stats.data, ^field, ^value)
+  end
+
+  def _search(query, :data_greater_than, {field, value}) do
+    from user_stats in query,
+      where: fragment("? ->> ? > ?", user_stats.data, ^field, ^value)
+  end
+
+  def _search(query, :data_less_than, {field, value}) do
+    from user_stats in query,
+      where: fragment("? ->> ? < ?", user_stats.data, ^field, ^value)
+  end
 end

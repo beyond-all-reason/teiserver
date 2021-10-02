@@ -13,7 +13,7 @@ defmodule Teiserver.Account.UserCache do
 
   @spec get_userid(String.t()) :: integer() | nil
   def get_userid(username) do
-    ConCache.get(:users_lookup_id_with_name, String.downcase(username))
+    ConCache.get(:users_lookup_id_with_name, cachename(username))
   end
 
   @spec get_user_by_name(String.t()) :: User.t() | nil
@@ -24,7 +24,7 @@ defmodule Teiserver.Account.UserCache do
 
   @spec get_user_by_email(String.t()) :: User.t() | nil
   def get_user_by_email(email) do
-    id = ConCache.get(:users_lookup_id_with_email, String.downcase(email))
+    id = ConCache.get(:users_lookup_id_with_email, cachename(email))
     ConCache.get(:users, id)
   end
 
@@ -105,8 +105,8 @@ defmodule Teiserver.Account.UserCache do
   def add_user(user) do
     update_user(user)
     ConCache.put(:users_lookup_name_with_id, user.id, user.name)
-    ConCache.put(:users_lookup_id_with_name, String.downcase(user.name), user.id)
-    ConCache.put(:users_lookup_id_with_email, String.downcase(user.email), user.id)
+    ConCache.put(:users_lookup_id_with_name, cachename(user.name), user.id)
+    ConCache.put(:users_lookup_id_with_email, cachename(user.email), user.id)
 
     ConCache.update(:lists, :users, fn value ->
       new_value =
@@ -152,8 +152,8 @@ defmodule Teiserver.Account.UserCache do
 
       ConCache.delete(:users, userid)
       ConCache.delete(:users_lookup_name_with_id, user.id)
-      ConCache.delete(:users_lookup_id_with_name, String.downcase(user.name))
-      ConCache.delete(:users_lookup_id_with_email, String.downcase(user.email))
+      ConCache.delete(:users_lookup_id_with_name, cachename(user.name))
+      ConCache.delete(:users_lookup_id_with_email, cachename(user.email))
 
       ConCache.update(:lists, :users, fn value ->
         new_value =
@@ -166,5 +166,11 @@ defmodule Teiserver.Account.UserCache do
     else
       :no_user
     end
+  end
+
+  defp cachename(str) do
+    str
+    |> String.trim
+    |> String.downcase
   end
 end

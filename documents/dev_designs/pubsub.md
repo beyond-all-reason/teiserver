@@ -92,6 +92,8 @@ General structure should be: `{:client_message, :topic, userid, data}` to allow 
 
   {:client_message, :lobby, userid, {:join_lobby, lobby_id}}
   {:client_message, :lobby, userid, {:leave_lobby, lobby_id}}
+  
+  {:client_message, :direct_message, userid, {from_id, message_content}}
 ```
 
 ### teiserver_client_action_updates:#{userid}
@@ -106,6 +108,12 @@ Aside from connect/disconnect there should always be the structure of `{:client_
 
   {:client_action, :join_lobby, userid, lobby_id}
   {:client_action, :leave_lobby, userid, lobby_id}
+```
+
+### teiserver_client_application:#{userid}
+Designed for lobby applications to display/perform various actions as opposed to internal agent clients or any web interfaces
+```
+  {:teiserver_client_application, :ring, userid, ringer_id}
 ```
 
 

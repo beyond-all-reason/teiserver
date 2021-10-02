@@ -101,7 +101,7 @@
 
     <%= if "trusted" in @roles do %>
       <div class="role-badge">
-        <i class='fa-fw fa-2x fas fa-check-double' style="color: #AA00AA" title="Trusted"></i>
+        <i class='fa-fw fa-2x fas fa-check-double' style="color: #66AAFF" title="Trusted"></i>
         <br />
         Trusted
       </div>
