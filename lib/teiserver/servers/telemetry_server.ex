@@ -3,6 +3,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   alias Teiserver.Battle.Lobby
   alias Teiserver.Client
   require Logger
+  alias Phoenix.PubSub
 
   @client_states ~w(lobby menu player spectator total)a
   @tick_period 9_000
@@ -61,6 +62,16 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
     :telemetry.execute([:teiserver, :client], client, %{})
     :telemetry.execute([:teiserver, :battle], state.battle, %{})
+
+    # TODO: Is there a way to hook into the above data for our liveviews?
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_telemetry",
+      {:teiserver_telemetry, %{
+        client: client,
+        battle: state.battle
+      }}
+    )
   end
 
   @spec get_totals(Map.t()) :: Map.t()

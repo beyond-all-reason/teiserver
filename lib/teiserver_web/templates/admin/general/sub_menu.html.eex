@@ -21,6 +21,14 @@
       <div class="card-body" style="padding: 0 15px;">
 
         <div class="row">
+          <%= central_component "sub_menu_icon",
+            name: "dashboard",
+            label: "TS Dashboard",
+            active: @active,
+            url: Routes.ts_admin_dash_index_path(@conn, :index),
+            lib: %{icon: "fas fa-gauge"}
+          %>
+
           <%= if allow?(@conn, "teiserver.moderator.account") do %>
             <%= central_component "sub_menu_icon",
               name: "users",

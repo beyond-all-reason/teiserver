@@ -1,4 +1,12 @@
 <div class="row page-row">
+  <%=
+    central_component "menu_card",
+    icon: "fad fa-gauge",
+    name: "ts_console",
+    text: "TS Dashboard",
+    link: Routes.ts_admin_dash_index_path(@conn, :index)
+  %>
+
   <%= if allow?(@conn, "teiserver.moderator.account") do %>
     <%=
       central_component "menu_card",
