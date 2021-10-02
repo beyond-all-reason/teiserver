@@ -57,10 +57,12 @@
       <th>Status</th>
       <th>Bot</th>
       <th>Mod</th>
+      <th>Trusted</th>
       <th>Donor</th>
       <th>Contributor</th>
       <th>Dev</th>
       <th>Registered</th>
+      <th>Status</th>
       <%= if is_admin do %>
         <th colspan="2">&nbsp;</th>
       <% else %>
@@ -78,9 +80,38 @@
       <%= if is_admin do %><td><%= user.email %></td><% end %>
 
       <td>
+        <%
+          unverified = user.data["verified"] != true
+
+          banned = case (user.data["banned"] || nil) do
+            [true, _] -> true
+            _ -> false
+          end
+
+          muted = case (user.data["muted"] || nil) do
+            [true, _] -> true
+            _ -> false
+          end
+
+          warned = case (user.data["warned"] || nil) do
+            [true, _] -> true
+            _ -> false
+          end
+        %>
+
         <%= cond do %>
-          <% user.data["verified"] != true -> %>
-            <span class="text-danger">Unverified</span>
+          <% banned -> %>
+            <i class='fa-fw text-danger <%= Central.Account.ReportLib.action_icon("Ban") %>'></i>
+
+          <% muted -> %>
+            <i class='fa-fw text-danger <%= Central.Account.ReportLib.action_icon("Mute") %>'></i>
+
+          <% warned -> %>
+            <i class='fa-fw text-warning <%= Central.Account.ReportLib.action_icon("Warn") %>'></i>
+
+          <% unverified -> %>
+            <i class='fa-fw text-info fas fa-square-question'></i>
+
           <% true -> %>
             &nbsp;
         <% end %>
