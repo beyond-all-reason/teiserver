@@ -44,6 +44,11 @@ defmodule Teiserver.HookServer do
         # Currently we don't do anything but we will
         # later want to tell each client everything is stopping for a
         # minute or two
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_server",
+          {:server_event, :server_restart}
+        )
         :ok
 
       _ ->

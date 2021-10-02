@@ -10,6 +10,12 @@ Used for sending out global messages about server events
   {:server_event, :server_restart}
 ```
 
+#### teiserver_telemetry
+Used for broadcasting internal telemetry for consumers (such as admin dashboard)
+```
+  {:teiserver_telemetry, data}
+```
+
 ### Battles
 #### legacy_all_battle_updates
 Information affecting all those not in a battle, such as a battle being created.
