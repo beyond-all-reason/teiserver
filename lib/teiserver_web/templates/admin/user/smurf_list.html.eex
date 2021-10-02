@@ -53,7 +53,7 @@
   <thead>
     <tr>
       <th colspan="2">Name</th>
-      <%= if is_admin do %><th>Email</th><% end %>
+      <%= if false and is_admin do %><th>Email</th><% end %>
       <th>IP</th>
       <th>Hash</th>
       <th>Hardware</th>
@@ -72,7 +72,7 @@
         <%= central_component "icon", icon: user.icon %>
       </td>
       <td><%= user.name %></td>
-      <%= if is_admin do %><td><%= user.email %></td><% end %>
+      <%= if false and is_admin do %><td><%= user.email %></td><% end %>
 
       <td>
         <%= if Enum.member?(@reasons.ip, user.id) do %>

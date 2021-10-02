@@ -46,6 +46,7 @@ defmodule Teiserver.User do
     :banned,
     :muted,
     :warned,
+    :shadowbanned,
     :rename_in_progress,
     :springid,
     :lobby_hash,
@@ -58,7 +59,7 @@ defmodule Teiserver.User do
     rank: 1,
     country: "??",
     country_override: nil,
-    lobby_client: "LuaLobby Chobby",
+    lobby_client: "no client",
     ip: "default_ip",
     moderator: false,
     bot: false,
@@ -76,12 +77,14 @@ defmodule Teiserver.User do
     banned: [false, nil],
     muted: [false, nil],
     warned: [false, nil],
+    shadowbanned: false,
     rename_in_progress: false,
     springid: nil,
     lobby_hash: [],
     roles: [],
     ip_list: []
   }
+
   def default_data(), do: @default_data
 
   @rank_levels [
@@ -684,7 +687,7 @@ defmodule Teiserver.User do
     :ok
   end
 
-  @spec is_banned?(Integer.t() | Map.t()) :: boolean()
+  @spec is_banned?(T.userid() | T.user()) :: boolean()
   def is_banned?(nil), do: true
   def is_banned?(userid) when is_integer(userid), do: is_banned?(get_user_by_id(userid))
   def is_banned?(%{banned: banned}) do
@@ -697,7 +700,7 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec is_muted?(Integer.t() | Map.t()) :: boolean()
+  @spec is_muted?(T.userid() | T.user()) :: boolean()
   def is_muted?(nil), do: true
   def is_muted?(userid) when is_integer(userid), do: is_muted?(get_user_by_id(userid))
   def is_muted?(%{muted: muted}) do
@@ -710,7 +713,7 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec is_warned?(Integer.t() | Map.t()) :: boolean()
+  @spec is_warned?(T.userid() | T.user()) :: boolean()
   def is_warned?(nil), do: true
   def is_warned?(userid) when is_integer(userid), do: is_warned?(get_user_by_id(userid))
   def is_warned?(%{warned: warned}) do
@@ -721,6 +724,14 @@ defmodule Teiserver.User do
         until = parse_ymd_t_hms(until_str)
         Timex.compare(Timex.now(), until) != 1
     end
+  end
+
+  @spec shadowban(T.userid() | T.user()) :: :ok
+  def shadowban(nil), do: :ok
+  def shadowban(userid) when is_integer(userid), do: shadowban(get_user_by_id(userid))
+  def shadowban(user) do
+    update_user(%{user | shadowbanned: true, muted: [true, nil]}, persist: true)
+    :ok
   end
 
   # Used to reset the spring password of the user when the site password is updated

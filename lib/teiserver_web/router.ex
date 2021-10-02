@@ -173,9 +173,12 @@ defmodule TeiserverWeb.Router do
         get("/users/reports/:id/respond", UserController, :respond_form)
         put("/users/reports/:id/respond", UserController, :respond_post)
         get("/users/smurf_search/:id", UserController, :smurf_search)
+        get("/users/banhash_form/:id", UserController, :banhash_form)
         get("/users/search", UserController, :index)
         post("/users/search", UserController, :search)
         resources("/user", UserController)
+
+        resources("/banhash", BanHashController, only: [:index, :show, :delete, :create])
 
         get("/lobbies/:id/chat", LobbyController, :chat)
       end

@@ -22,4 +22,10 @@
     &nbsp;
     Smurf search
   </a>
+
+  <a class="dropdown-item" href='<%= Routes.ts_admin_user_path(@conn, :banhash_form, @user.id) %>'>
+    <%= central_component "icon", icon: "fas fa-ban" %>
+    &nbsp;
+    Add ban hash
+  </a>
 </div>
