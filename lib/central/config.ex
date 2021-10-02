@@ -255,4 +255,63 @@ defmodule Central.Config do
       "string" -> value
     end
   end
+
+  alias Central.Config.SiteConfig
+
+  def list_site_configs() do
+    query =
+      from site_config in SiteConfig
+
+    Repo.all(query)
+  end
+
+  @spec get_site_config(String.t(), any) :: any
+  def get_site_config(key, default \\ nil) do
+    ConCache.get(:config_site_cache, key) || default
+  end
+
+  @spec update_site_config(String.t(), String.t()) :: :ok
+  def update_site_config(key, value) do
+    query =
+      from site_config in SiteConfig,
+        where: site_config.key == ^key,
+        limit: 1
+
+    # The key may or may not exist
+    case Repo.one(query) do
+      nil ->
+        %SiteConfig{}
+        |> SiteConfig.changeset(%{
+          key: key,
+          value: value
+        })
+        |> Repo.insert()
+
+      site_config ->
+        site_config
+        |> SiteConfig.changeset(%{value: value})
+        |> Repo.update()
+    end
+
+    ConCache.put(:config_site_cache, key, value)
+  end
+
+  def delete_site_config(key) do
+    query =
+      from site_config in SiteConfig,
+        where: site_config.key == ^key,
+        limit: 1
+
+    # The key may or may not exist
+    case Repo.one(query) do
+      nil ->
+        :ok
+
+      site_config ->
+        site_config
+        |> Repo.delete()
+    end
+
+    ConCache.delete(:config_site_cache, key)
+  end
 end
