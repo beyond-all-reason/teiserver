@@ -99,6 +99,16 @@
       <%= raw empty_badge %>
     <% end %>
 
+    <%= if "trusted" in @roles do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-check-double' style="color: #AA00AA" title="Trusted"></i>
+        <br />
+        Trusted
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
     <%= if "verified" in @roles do %>
       <div class="role-badge">
         <i class='fa-fw fa-2x fas fa-check' style="color: #777777" title="Verified"></i>
