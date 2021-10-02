@@ -57,7 +57,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
 
     # Whitelist them to spectator but defaults to player
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "$gatekeeper friendsplay"})
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "$force-spectator ##{player.id}"})
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "$forcespec ##{player.id}"})
 
     # Check state
     gatekeeper = Coordinator.call_consul(lobby_id, {:get, :gatekeeper})
@@ -101,7 +101,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
 
     # Whitelist them to spectator but defaults to player
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "$gatekeeper friends"})
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "$force-spectator ##{player.id}"})
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", userid: host.id, message: "$forcespec ##{player.id}"})
 
     # Check state
     gatekeeper = Coordinator.call_consul(lobby_id, {:get, :gatekeeper})

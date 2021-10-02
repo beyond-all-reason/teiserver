@@ -127,14 +127,44 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   # ----------------- Moderation commands
-  # TODO: modwarn
-
-  def handle_command(cmd = %{command: "modmute", remaining: remaining}, state) do
-    [username, minutes | reason] = String.split(remaining, " ")
+  def handle_command(cmd = %{command: "modwarn", remaining: remaining}, state) do
+    [username, hours | reason] = String.split(remaining, " ")
     reason = Enum.join(reason, " ")
 
     userid = ConsulServer.get_user(username, state)
-    until = "#{minutes} minutes"
+    until = "#{hours} hours"
+
+    case Central.Account.ReportLib.perform_action(%{}, "Warn", until) do
+      {:ok, expires} ->
+        {:ok, _report} =
+          Central.Account.create_report(%{
+            "location" => "battle-lobby",
+            "location_id" => nil,
+            "reason" => reason,
+            "reporter_id" => cmd.senderid,
+            "target_id" => userid,
+            "response_text" => "instant-action",
+            "response_action" => "Warn",
+            "expires" => expires,
+            "responder_id" => cmd.senderid
+          })
+
+        user = User.get_user_by_id(userid)
+        sender = User.get_user_by_id(cmd.senderid)
+        LobbyChat.say(state.coordinator_id, "#{user.name} warned for #{hours} hours by #{sender.name}, reason: #{reason}", state.lobby_id)
+      _ ->
+        LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "Unable to find a user by that name", state.lobby_id)
+    end
+
+    state
+  end
+
+  def handle_command(cmd = %{command: "modmute", remaining: remaining}, state) do
+    [username, hours | reason] = String.split(remaining, " ")
+    reason = Enum.join(reason, " ")
+
+    userid = ConsulServer.get_user(username, state)
+    until = "#{hours} hours"
 
     case Central.Account.ReportLib.perform_action(%{}, "Mute", until) do
       {:ok, expires} ->
@@ -153,7 +183,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         user = User.get_user_by_id(userid)
         sender = User.get_user_by_id(cmd.senderid)
-        LobbyChat.say(state.coordinator_id, "#{user.name} muted for #{minutes} minutes by #{sender.name}, reason: #{reason}", state.lobby_id)
+        LobbyChat.say(state.coordinator_id, "#{user.name} muted for #{hours} hours by #{sender.name}, reason: #{reason}", state.lobby_id)
       _ ->
         LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "Unable to find a user by that name", state.lobby_id)
     end
@@ -162,11 +192,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(cmd = %{command: "modban", remaining: remaining}, state) do
-    [username, minutes | reason] = String.split(remaining, " ")
+    [username, hours | reason] = String.split(remaining, " ")
     reason = Enum.join(reason, " ")
 
     userid = ConsulServer.get_user(username, state)
-    until = "#{minutes} minutes"
+    until = "#{hours} hours"
 
     case Central.Account.ReportLib.perform_action(%{}, "Ban", until) do
       {:ok, expires} ->
@@ -185,7 +215,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         user = User.get_user_by_id(userid)
         sender = User.get_user_by_id(cmd.senderid)
-        LobbyChat.say(state.coordinator_id, "#{user.name} banned for #{minutes} minutes by #{sender.name}, reason: #{reason}", state.lobby_id)
+        LobbyChat.say(state.coordinator_id, "#{user.name} banned for #{hours} hours by #{sender.name}, reason: #{reason}", state.lobby_id)
       _ ->
         LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "Unable to find a user by that name", state.lobby_id)
     end
@@ -193,17 +223,19 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
-  def handle_command(%{command: "speclock", remaining: target} = _cmd, state) do
+  def handle_command(%{command: "speclock", remaining: target} = cmd, state) do
     case ConsulServer.get_user(target, state) do
       nil ->
         state
       target_id ->
-        new_blacklist = Map.put(state.blacklist, target_id, :spectator)
-        new_whitelist = Map.put(state.whitelist, target_id, :spectator)
+        ban = new_ban(%{level: :spectator, by: cmd.senderid}, state)
+        new_bans = Map.put(state.bans, target_id, ban)
+
         Lobby.force_change_client(state.coordinator_id, target_id, %{player: false})
 
-        %{state | blacklist: new_blacklist, whitelist: new_whitelist}
-        |> ConsulServer.broadcast_update("lock-spectator")
+        ConsulServer.say_command(cmd, state)
+
+        %{state | bans: new_bans}
     end
   end
 
@@ -223,7 +255,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       nil ->
         ConsulServer.say_command(%{cmd | error: "no user found"}, state)
       target_id ->
-        ban = new_ban(%{level: :banned, by: cmd.senderid, reason: Enum.join(reason_list, " ")}, state)
+        reason = if reason_list == [], do: "None given", else: Enum.join(reason_list, " ")
+        ban = new_ban(%{level: :banned, by: cmd.senderid, reason: reason}, state)
         new_bans = Map.put(state.bans, target_id, ban)
 
         Lobby.kick_user_from_battle(target_id, state.lobby_id)
@@ -267,8 +300,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  # TODO: Remove this, it's currently only here to allow tests to pass
-  def handle_command(%{command: "force-spectator", remaining: target} = cmd, state) do
+  # This is here to make tests easier to run, it's not expected you'll use this and it's not in the docs
+  def handle_command(%{command: "forcespec", remaining: target} = cmd, state) do
     case ConsulServer.get_user(target, state) do
       nil ->
         ConsulServer.say_command(%{cmd | error: "no user found"}, state)

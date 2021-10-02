@@ -20,11 +20,11 @@ TODO: splitlobby <message>
 
 ##### Moderator only #####
 ### General commands
-TODO: gatekeeper (default | friends | friendsplay | clan)
+gatekeeper (default | friends | friendsplay | clan)
   sets the gatekeeper for this battle
     default: no limitations
-    TODO: friends allows only friends of existing members to join the lobby
-    TODO: friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)
+    friends allows only friends of existing members to join the lobby
+    friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)
     TODO: clan: allows only members of an existing clan to join the game (enable after one member from each clan is present)
 
 welcome-message <message>
@@ -67,6 +67,12 @@ lobbybanmult [<user>]
 
 unban <user>
   Removes the user from the lobby banlist
+
+forcespec <user>
+  Moves the user to spectators and bans them from becoming a player
+
+forceplay <user>
+  Moves the user to players
 
 ### System
 reset
