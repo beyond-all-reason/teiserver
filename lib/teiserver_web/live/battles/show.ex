@@ -253,10 +253,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     {:noreply, socket}
   end
 
-  def handle_event("force-spectator:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
+  def handle_event("forcespec:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
     # Lobby.force_change_client(bar_user.id, int_parse(target_id), :player, false)
     Coordinator.cast_consul(id, %{
-      command: "force-spectator",
+      command: "forcespec",
       remaining: int_parse(target_id),
       senderid: bar_user.id,
       vote: false,

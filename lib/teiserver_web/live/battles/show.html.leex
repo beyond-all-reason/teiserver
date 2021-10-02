@@ -96,7 +96,7 @@
             <%= live_redirect "Show", to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}" %>
 
             <%= if is_moderator do %>
-              <span class="btn btn-sm btn-outline-<%= bsname %>" phx-click="force-spectator:<%= client.userid %>">
+              <span class="btn btn-sm btn-outline-<%= bsname %>" phx-click="forcespec:<%= client.userid %>">
                 &nbsp;
                 <i class='fa-fw fas fa-glasses'></i>
                 &nbsp;
