@@ -2,7 +2,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.Lobby
   alias Teiserver.Common.PubsubListener
-  alias Teiserver.{User, Client, Coordinator}
+  alias Teiserver.{User, Client, Coordinator, Account}
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
@@ -53,16 +53,46 @@ defmodule Teiserver.Coordinator.CommandsTest do
 
   end
 
-  test "gatekeeper", %{host: _host, player: _player, hsocket: _hsocket} do
+  test "specunready", %{lobby_id: lobby_id, player: player1, host: host, hsocket: hsocket} do
+    %{user: player2} = tachyon_auth_setup()
 
-  end
+    # Add player2 to the battle but as a spectator
+    Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
+    player_client = Client.get_client_by_id(player2.id)
+    Client.update(%{player_client |
+      player: false,
+      ready: false
+    }, :client_updated_battlestatus)
 
-  test "welcome-message", %{host: _host, player: _player, hsocket: _hsocket} do
+    readies = Lobby.get_battle!(lobby_id)
+    |> Map.get(:players)
+    |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
 
-  end
+    assert readies == [false, false]
 
-  test "specunready", %{host: _host, player: _player, hsocket: _hsocket} do
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "$specunready"}
+    _tachyon_send(hsocket, data)
 
+    # Now we check they are ready or they're a spectator
+    readies = Lobby.get_battle!(lobby_id)
+    |> Map.get(:players)
+    |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
+    |> Enum.map(fn c -> c.player == false or c.ready == true end)
+
+    assert readies == [true, true]
+
+    # Unready both again
+    player_client = Client.get_client_by_id(player1.id)
+    Client.update(%{player_client | ready: false}, :client_updated_battlestatus)
+
+    player_client = Client.get_client_by_id(player2.id)
+    Client.update(%{player_client | ready: false}, :client_updated_battlestatus)
+
+    readies = Lobby.get_battle!(lobby_id)
+    |> Map.get(:players)
+    |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
+
+    assert readies == [false, false]
   end
 
   test "makeready", %{lobby_id: lobby_id, player: player1, host: host, hsocket: hsocket} do
@@ -131,50 +161,76 @@ defmodule Teiserver.Coordinator.CommandsTest do
   # modwarn
 
   # Broken since we now propogate the action via the hook server which breaks in tests
-  # test "modban", %{lobby_id: lobby_id, host: host, hsocket: hsocket, player: player, listener: listener} do
-  #   assert User.is_muted?(player.id) == false
-  #   assert User.is_banned?(player.id) == false
+  test "modban", %{lobby_id: lobby_id, host: host, hsocket: hsocket, player: player, listener: listener} do
+    assert User.is_muted?(player.id) == false
+    assert User.is_banned?(player.id) == false
 
-  #   data = %{cmd: "c.lobby.message", userid: host.id, message: "$modban #{player.name} 60 Spamming channel"}
-  #   _tachyon_send(hsocket, data)
-  #   :timer.sleep(500)
+    hook_listener = PubsubListener.new_listener(["account_hooks"])
 
-  #   messages = PubsubListener.get(listener)
-  #   assert messages == [{:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "#{player.name} banned for 60 minutes by #{host.name}, reason: Spamming channel", lobby_id}, :say}]
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "$modban #{player.name} 60 Spamming channel"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
 
-  #   assert User.is_muted?(player.id) == false
-  #   assert User.is_banned?(player.id) == true
-  # end
+    hook_message = PubsubListener.get(hook_listener) |> hd
+    %{payload: report_id} = hook_message
+    assert hook_message == %Phoenix.Socket.Broadcast{event: "create_report", payload: report_id, topic: "account_hooks"}
 
-  # test "modmute", %{lobby_id: lobby_id, host: host, hsocket: hsocket, player: player, listener: listener} do
-  #   assert User.is_muted?(player.id) == false
-  #   assert User.is_banned?(player.id) == false
+    # Ensure the report was created
+    assert Account.get_report!(report_id)
 
-  #   data = %{cmd: "c.lobby.message", userid: host.id, message: "$modmute #{player.name} 60 Spamming channel"}
-  #   _tachyon_send(hsocket, data)
-  #   :timer.sleep(500)
+    messages = PubsubListener.get(listener)
+    assert messages == [{:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "#{player.name} banned for 60 minutes by #{host.name}, reason: Spamming channel", lobby_id}, :say}]
 
-  #   messages = PubsubListener.get(listener)
-  #   assert messages == [{:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "#{player.name} muted for 60 minutes by #{host.name}, reason: Spamming channel", lobby_id}, :say}]
+    # Now propogate the broadcast the way the hook server would have
+    User.update_report(report_id)
 
-  #   assert User.is_muted?(player.id) == true
-  #   assert User.is_banned?(player.id) == false
-  # end
+    assert User.is_muted?(player.id) == false
+    assert User.is_banned?(player.id) == true
+  end
 
+  test "modmute", %{lobby_id: lobby_id, host: host, hsocket: hsocket, player: player, listener: listener} do
+    assert User.is_muted?(player.id) == false
+    assert User.is_banned?(player.id) == false
 
+    hook_listener = PubsubListener.new_listener(["account_hooks"])
 
-  test "ban by name", %{host: host, player: player, hsocket: hsocket} do
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "$modmute #{player.name} 60 Spamming channel"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    hook_message = PubsubListener.get(hook_listener) |> hd
+    %{payload: report_id} = hook_message
+    assert hook_message == %Phoenix.Socket.Broadcast{event: "create_report", payload: report_id, topic: "account_hooks"}
+
+    # Ensure the report was created
+    assert Account.get_report!(report_id)
+
+    messages = PubsubListener.get(listener)
+    assert messages == [{:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "#{player.name} muted for 60 minutes by #{host.name}, reason: Spamming channel", lobby_id}, :say}]
+
+    # Now propogate the broadcast the way the hook server would have
+    User.update_report(report_id)
+
+    assert User.is_muted?(player.id) == true
+    assert User.is_banned?(player.id) == false
+  end
+
+  test "ban by name", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
 
-    data = %{cmd: "c.lobby.message", userid: host.id, message: "$lobbyban #{player.name}"}
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "$lobbyban #{player.name} Because I said so"}
     _tachyon_send(hsocket, data)
 
     player_client = Client.get_client_by_id(player.id)
     assert player_client.lobby_id == nil
+
+    # Check ban state
+    bans = Coordinator.call_consul(lobby_id, {:get, :bans})
+    assert bans == %{player.id => %{by: host.id, level: :banned, reason: "Because I said so"}}
   end
 
-  test "ban by partial name", %{host: host, player: player, hsocket: hsocket} do
+  test "ban by partial name", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
 
@@ -183,6 +239,10 @@ defmodule Teiserver.Coordinator.CommandsTest do
 
     player_client = Client.get_client_by_id(player.id)
     assert player_client.lobby_id == nil
+
+    # Check ban state
+    bans = Coordinator.call_consul(lobby_id, {:get, :bans})
+    assert bans == %{player.id => %{by: host.id, level: :banned, reason: "None given"}}
   end
 
   test "error with no name", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
@@ -197,9 +257,45 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert player_client.lobby_id == lobby_id
   end
 
-  # lobbybanmult
-  # unban
+  test "ban multiple", %{host: host, player: player1, hsocket: hsocket, lobby_id: lobby_id} do
+    %{user: player2} = tachyon_auth_setup()
+    %{user: player3} = tachyon_auth_setup()
 
+    # Add player2 to the battle but not player 3
+    Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
+
+    player1_client = Client.get_client_by_id(player1.id)
+    player2_client = Client.get_client_by_id(player2.id)
+    assert player1_client.player == true
+    assert player1_client.lobby_id == lobby_id
+    assert player2_client.lobby_id == lobby_id
+
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "$lobbybanmult #{player1.name} #{player2.name} #{player3.name} no_player_of_this_name"}
+    _tachyon_send(hsocket, data)
+
+    player1_client = Client.get_client_by_id(player1.id)
+    player2_client = Client.get_client_by_id(player2.id)
+    assert player1_client.lobby_id == nil
+    assert player2_client.lobby_id == nil
+
+    # Check ban state
+    bans = Coordinator.call_consul(lobby_id, {:get, :bans})
+    assert bans == %{
+      player1.id => %{by: host.id, level: :banned, reason: "None given"},
+      player2.id => %{by: host.id, level: :banned, reason: "None given"},
+      player3.id => %{by: host.id, level: :banned, reason: "None given"},
+    }
+
+    # Now unban player 3
+    data = %{cmd: "c.lobby.message", userid: host.id, message: "$unban #{player3.name}"}
+    _tachyon_send(hsocket, data)
+
+    bans = Coordinator.call_consul(lobby_id, {:get, :bans})
+    assert bans == %{
+      player1.id => %{by: host.id, level: :banned, reason: "None given"},
+      player2.id => %{by: host.id, level: :banned, reason: "None given"}
+    }
+  end
 
   test "status", %{lobby_id: lobby_id, host: host, hsocket: hsocket} do
     data = %{cmd: "c.lobby.message", userid: host.id, message: "$status"}

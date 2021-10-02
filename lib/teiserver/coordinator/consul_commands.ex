@@ -3,7 +3,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Coordinator.ConsulServer
   alias Teiserver.{Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat}
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
   # alias Phoenix.PubSub
   # alias Teiserver.Data.Types, as: T
 
@@ -219,11 +218,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "lobbyban", remaining: target} = cmd, state) do
+    [target | reason_list] = String.split(target, " ")
     case ConsulServer.get_user(target, state) do
       nil ->
         ConsulServer.say_command(%{cmd | error: "no user found"}, state)
       target_id ->
-        ban = new_ban(%{level: :banned}, state)
+        ban = new_ban(%{level: :banned, by: cmd.senderid, reason: Enum.join(reason_list, " ")}, state)
         new_bans = Map.put(state.bans, target_id, ban)
 
         Lobby.kick_user_from_battle(target_id, state.lobby_id)
@@ -244,11 +244,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         nil ->
           acc
         target_id ->
-          new_blacklist = Map.put(acc.blacklist, target_id, :banned)
-          new_whitelist = Map.delete(acc.blacklist, target_id)
+          ban = new_ban(%{level: :banned, by: cmd.senderid}, acc)
+          new_bans = Map.put(acc.bans, target_id, ban)
           Lobby.kick_user_from_battle(target_id, acc.lobby_id)
 
-          %{acc | blacklist: new_blacklist, whitelist: new_whitelist}
+          %{acc | bans: new_bans}
           |> ConsulServer.broadcast_update("ban")
       end
     end)
@@ -259,10 +259,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       nil ->
         ConsulServer.say_command(%{cmd | error: "no user found"}, state)
       target_id ->
-        new_blacklist = Map.delete(state.blacklist, target_id)
+        new_bans = Map.drop(state.bans, [target_id])
         ConsulServer.say_command(cmd, state)
 
-        %{state | blacklist: new_blacklist}
+        %{state | bans: new_bans}
         |> ConsulServer.broadcast_update("unban")
     end
   end
