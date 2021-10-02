@@ -247,7 +247,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     Coordinator.cast_consul(id, %{
       command: "reset",
       senderid: bar_user.id,
-      force: true,
       vote: false,
       silent: true
     })
@@ -260,7 +259,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       command: "force-spectator",
       remaining: int_parse(target_id),
       senderid: bar_user.id,
-      force: true,
       vote: false,
       silent: true
     })
@@ -272,7 +270,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       command: "kick",
       remaining: int_parse(target_id),
       senderid: bar_user.id,
-      force: true,
       vote: false,
       silent: true
     })
@@ -284,7 +281,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       command: "ban",
       remaining: int_parse(target_id),
       senderid: bar_user.id,
-      force: true,
       vote: false,
       silent: true
     })
