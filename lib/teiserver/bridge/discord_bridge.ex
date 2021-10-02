@@ -7,6 +7,8 @@ defmodule Teiserver.Bridge.DiscordBridge do
   alias Teiserver.Bridge.BridgeServer
   require Logger
 
+  # Discord message ping: <@userid>
+
   @emoticon_map %{
     "🙂" => ":)",
     "😒" => ":s",
@@ -27,14 +29,30 @@ defmodule Teiserver.Bridge.DiscordBridge do
   @spec get_text_to_emoticon_map() :: Map.t()
   def get_text_to_emoticon_map, do: @text_to_emoticon_map
 
-  Events.on_message(:inspect)
-  @spec inspect(atom | %{:attachments => any, optional(any) => any}) :: nil | :ok
-  def inspect(%Alchemy.Message{author: author, channel_id: channel_id, attachments: []} = message) do
+  Events.on_DMChannel_create(:new_dm_channel)
+  Events.on_message(:recv_message)
+
+  def new_dm_channel(dm_channel) do
+    case dm_channel.recipients do
+      [recipient] ->
+        ConCache.put(:discord_bridge_dm_cache, dm_channel.id, recipient["id"])
+
+      _ -> nil
+    end
+    :ok
+  end
+
+  @spec recv_message(atom | %{:attachments => any, optional(any) => any}) :: nil | :ok
+  def recv_message(%Alchemy.Message{author: author, channel_id: channel_id, attachments: []} = message) do
     room = bridge_channel_to_room(channel_id)
+    dm_sender = ConCache.get(:discord_bridge_dm_cache, channel_id)
 
     cond do
       author.username == Application.get_env(:central, DiscordBridge)[:bot_name] ->
         nil
+
+      dm_sender != nil ->
+        receive_dm(message)
 
       room == nil ->
         nil
@@ -47,13 +65,14 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
       true ->
         do_reply(message)
+        :ok
     end
   end
 
-  def inspect(message) do
+  def recv_message(message) do
     cond do
       message.attachments != [] ->
-        :ok
+        nil
 
       # We expected to be able to handle it but didn't, what's happening?
       true ->
@@ -149,5 +168,13 @@ defmodule Teiserver.Bridge.DiscordBridge do
       [{_, room}] -> room
       _ -> nil
     end
+  end
+
+  def receive_dm(%Alchemy.Message{author: _author, channel_id: channel, content: _content, attachments: []} = _message) do
+    Alchemy.Client.send_message(
+      channel,
+      "Unfortunately I don't understand that command",
+      []# Options
+    )
   end
 end

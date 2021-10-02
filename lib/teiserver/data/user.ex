@@ -389,19 +389,28 @@ defmodule Teiserver.User do
   def send_direct_message(from_id, to_id, "!start" <> s), do: send_direct_message(from_id, to_id, "!cv start" <> s)
   def send_direct_message(from_id, to_id, "!joinas" <> s), do: send_direct_message(from_id, to_id, "!cv joinas" <> s)
 
-  def send_direct_message(from_id, to_id, msg) do
+  def send_direct_message(from_id, to_id, message_content) do
     sender = get_user_by_id(from_id)
     if not is_muted?(sender) do
       PubSub.broadcast(
         Central.PubSub,
         "legacy_user_updates:#{to_id}",
-        {:direct_message, from_id, msg}
+        {:direct_message, from_id, message_content}
+      )
+
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_client_messages:#{to_id}",
+        {:client_message, :direct_message, to_id, {from_id, message_content}}
       )
     end
   end
 
+  @spec ring(T.userid(), T.userid()) :: :ok
   def ring(ringee_id, ringer_id) do
     PubSub.broadcast(Central.PubSub, "legacy_user_updates:#{ringee_id}", {:action, {:ring, ringer_id}})
+    PubSub.broadcast(Central.PubSub, "teiserver_client_application:#{ringee_id}", {:teiserver_client_application, :ring, ringee_id, ringer_id})
+    :ok
   end
 
   @spec test_password(String.t(), String.t()) :: boolean

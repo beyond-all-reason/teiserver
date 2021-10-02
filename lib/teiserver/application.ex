@@ -50,6 +50,7 @@ defmodule Teiserver.Application do
 
       # Bridge
       Teiserver.Bridge.BridgeServer,
+      concache_sup(:discord_bridge_dm_cache),
 
       # Matchmaking
       concache_perm_sup(:teiserver_queue_pids),

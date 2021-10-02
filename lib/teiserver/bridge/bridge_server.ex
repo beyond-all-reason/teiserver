@@ -57,11 +57,13 @@ defmodule Teiserver.Bridge.BridgeServer do
     handle_info({:new_message, from_id, room_name, message}, state)
   end
 
-  def handle_info({:direct_message, userid, _message}, state) do
-    username = User.get_username(userid)
-    User.send_direct_message(state.userid, userid, "I don't currently handle messages, sorry #{username}")
+  def handle_info({:client_message, :direct_message, _userid, {from_id, _content}}, state) do
+    username = User.get_username(from_id)
+    User.send_direct_message(state.userid, from_id, "I don't currently handle messages, sorry #{username}")
     {:noreply, state}
   end
+
+  def handle_info({:client_message, _, _, _}, state), do: {:noreply, state}
 
   # Catchall handle_info
   def handle_info(msg, state) do
@@ -95,11 +97,9 @@ defmodule Teiserver.Bridge.BridgeServer do
       :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
     end)
 
-    state
-  end
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
 
-  defp forward_to_discord(sender_id, _, "!" <> _, state) do
-    User.send_direct_message(state.userid, sender_id, "Unfortunately the discord bridge bot doesn't have any ! commands. Yet.")
+    state
   end
 
   defp forward_to_discord(from_id, channel, message, _state) do
