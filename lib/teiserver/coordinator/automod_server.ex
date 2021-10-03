@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   performing their actions in the name of the coordinator
   """
   use GenServer
-  alias Teiserver.{Account, User, Coordinator}
+  alias Teiserver.{Account, User, Client, Coordinator}
   alias Phoenix.PubSub
   require Logger
   alias Teiserver.Data.Types, as: T
@@ -93,6 +93,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
     end
   end
 
+  # TODO: Refactor into a with statement for multiple types of hash
   @spec do_check(T.userid()) :: String.t()
   defp do_check(userid) do
     stats = case Account.get_user_stat(userid) do
@@ -123,9 +124,13 @@ defmodule Teiserver.Coordinator.AutomodServer do
         #   "expires" => nil,
         #   "responder_id" => coordinator_id
         # })
-        "Logged intended ban as part of test"
+        user = User.get_user_by_id(userid)
+        Account.update_user_stat(userid, %{"autoban" => "HW Hash ##{hashid}"})
+        User.update_user(%{user | banned: [true, nil]})
+        Client.disconnect(user.id, :banned)
+        Logger.error("Automod added ban action for userid: #{userid}, name: #{user.name}")
+        "Banned user"
       else
-        Logger.info("Automod found no hashes for #{userid}")
         "No action"
       end
     else

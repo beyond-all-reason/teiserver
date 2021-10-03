@@ -659,14 +659,23 @@ defmodule Teiserver.User do
         {"Mute", expires} ->
           %{muted: [true, expires]}
 
+        {"Unmute", _} ->
+          %{muted: [false, nil]}
+
         {"Ban", nil} ->
           %{banned: [true, nil]}
 
         {"Ban", expires} ->
           %{banned: [true, expires]}
 
+        {"Unban", _} ->
+          %{banned: [false, nil]}
+
         {"Warn", expires} ->
           %{warned: [true, expires]}
+
+        {"Unwarn", _} ->
+          %{warned: [false, nil]}
 
         {"Ignore report", nil} ->
           %{}
