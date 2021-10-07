@@ -502,6 +502,11 @@ defmodule Teiserver.User do
             end
 
           user.verified == false ->
+            Account.update_user_stat(user.id, %{
+              lobby_client: lobby,
+              lobby_hash: lobby_hash,
+              last_ip: ip
+            })
             {:error, "Unverified", user.id}
 
           Client.get_client_by_id(user.id) != nil ->
@@ -547,6 +552,11 @@ defmodule Teiserver.User do
             {:error, "Banned"}
 
           user.verified == false ->
+            Account.update_user_stat(user.id, %{
+              lobby_client: lobby,
+              lobby_hash: lobby_hash,
+              last_ip: ip
+            })
             {:error, "Unverified", user.id}
 
           Client.get_client_by_id(user.id) != nil ->
@@ -609,6 +619,7 @@ defmodule Teiserver.User do
         last_login: last_login,
         rank: rank,
         lobby_client: lobby_client,
+        lobby_hash: lobby_hash,
         last_ip: ip
       })
 
