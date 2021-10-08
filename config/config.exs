@@ -75,7 +75,7 @@ config :phoenix, :json_library, Jason
 # This secret key is overwritten in prod.secret.exs
 config :central, Central.Account.Guardian,
   issuer: "central",
-  secret_key: "8vJcJOYwsjdIQ9IhfOI5F9GQMykuNjBW58FY9S/TqMsq6gRdKgY05jscQAFVKfwa",
+  secret_key: "9vJcJOYwsjdIQ9IhfOI5F9GQMykuNjBW58FY9S/TqMsq6gRdKgY05jscQAFVKfwa",
   ttl: {30, :days}
 
 config :central, Central.General.LoadTestServer, enable_loadtest: false

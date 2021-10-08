@@ -130,6 +130,27 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
+  def handle_info(:cancel_split, state) do
+    {:noreply, %{state | split: nil}}
+  end
+
+  def handle_info({:do_split, _}, %{split: nil} = state) do
+    {:noreply, state}
+  end
+
+  def handle_info({:do_split, split_id}, %{split: split} = state) do
+    new_state = if split_id == split.split_id do
+      Logger.warn("DO SPLIT")
+      state
+
+    else
+      Logger.warn("BAD ID")
+      # Wrong it, this is a timed out message
+      state
+    end
+    {:noreply, new_state}
+  end
+
   def handle_info(cmd = %{command: _}, state) do
     if allow_command?(cmd) do
       new_state = ConsulCommands.handle_command(cmd, state)
@@ -323,10 +344,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       lobby_id: lobby_id,
       gatekeeper: "default",
       bans: %{},
-      temp_bans: %{},
-      temp_specs: %{},
-      boss_mode: :player,
-      bosses: [],
+      split: nil,
       welcome_message: nil,
     }
   end

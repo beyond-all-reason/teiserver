@@ -12,7 +12,7 @@ TODO: status
 TODO: help
   displays this help text
 
-TODO: splitlobby <message>
+splitlobby <message>
   Causes a "vote" to start where other players can elect to join you in splitting the lobby, follow someone
   of their choosing or remain in place. After 20 seconds you are moved to a new (empty) lobby and those that voted yes
   or are following someone that voted yes are also moved to that lobby. Anybody who leaves the original lobby before
@@ -26,6 +26,12 @@ gatekeeper (default | friends | friendsplay | clan)
     friends allows only friends of existing members to join the lobby
     friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)
     TODO: clan: allows only members of an existing clan to join the game (enable after one member from each clan is present)
+
+dosplit
+  Completes the lobby split now
+
+cancelsplit
+  Cancels the lobby split
 
 welcome-message <message>
   Sets the welcome message sent to anybody joining the lobby
