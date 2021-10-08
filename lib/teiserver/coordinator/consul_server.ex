@@ -152,7 +152,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(cmd = %{command: _}, state) do
-    if allow_command?(cmd) do
+    if allow_command?(cmd, state) do
       new_state = ConsulCommands.handle_command(cmd, state)
       {:noreply, new_state}
     else
@@ -271,14 +271,16 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  @spec allow_command?(Map.t()) :: boolean()
-  defp allow_command?(%{senderid: senderid} = cmd) do
+  @spec allow_command?(Map.t(), Map.t()) :: boolean()
+  defp allow_command?(%{senderid: senderid}, %{host_id: host_id}) when senderid == host_id, do: true
+  defp allow_command?(%{senderid: senderid} = cmd, _state) do
     client = Client.get_client_by_id(senderid)
 
     cond do
       client == nil -> false
       Enum.member?(@always_allow, cmd.command) -> true
       client.moderator == true -> true
+      # senderid == state.host_id -> true
       true -> false
     end
   end
@@ -339,9 +341,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def empty_state(lobby_id) do
+    lobby = Lobby.get_lobby!(lobby_id)
+
     %{
       coordinator_id: Coordinator.get_coordinator_userid(),
       lobby_id: lobby_id,
+      host_id: lobby.founder_id,
       gatekeeper: "default",
       bans: %{},
       split: nil,
