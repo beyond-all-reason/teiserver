@@ -3,16 +3,16 @@ An Elixir centralised/middleware game server. Originally an alternate implementa
 
 ## Documentation
 - [Architecture](/documents/architecture.md)
-- [Local setup](/documents/guides/local_setup.md)
-- [Prod setup linux](/documents/guides/production_setup_linux.md)/[Prod setup windows](/documents/guides/production_setup_windows.md)
-- [Testing](/documents/guides/testing.md)
-- [Uberserver, conversion process and differences](/documents/guides/uberserver.md)
+- [Local setup](/documents/dev_guides/local_setup.md)
+- [Prod setup linux](/documents/dev_guides/production_setup_linux.md)/[Prod setup windows](/documents/dev_guides/production_setup_windows.md)
+- [Testing](/documents/dev_guides/testing.md)
+- [Uberserver, conversion process and differences](/documents/dev_/uberserver.md)
 
 These are just the highlights, full documentation can be found in the documentation folder.
 
 ### Feature documentation
 - [Metrics](/documents/designs/metrics.md)
-- [Agent mode/Lobby dev assist](/documents/guides/discord_bot.md)
+- [Agent mode/Lobby dev assist](/documents/dev_/discord_bot.md)
 
 ### In progress features
 - [Coordinator mode](/documents/designs/coordinator.md)
