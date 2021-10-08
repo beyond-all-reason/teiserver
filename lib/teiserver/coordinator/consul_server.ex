@@ -341,12 +341,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def empty_state(lobby_id) do
+    # it's possible the lobby is nil before we even get to start this up (tests in particular)
+    # hence this defensive methodology
     lobby = Lobby.get_lobby!(lobby_id)
+    founder_id = if lobby, do: lobby.founder_id, else: nil
 
     %{
       coordinator_id: Coordinator.get_coordinator_userid(),
       lobby_id: lobby_id,
-      host_id: lobby.founder_id,
+      host_id: founder_id,
       gatekeeper: "default",
       bans: %{},
       split: nil,

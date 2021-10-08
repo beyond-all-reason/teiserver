@@ -54,10 +54,10 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec add_lobby(T.lobby()) :: T.lobby()
   def add_lobby(lobby) do
+    ConCache.put(:lobbies, lobby.id, lobby)
+
     _consul_pid = Coordinator.start_consul(lobby.id)
     Lobby.start_battle_lobby_throttle(lobby.id)
-
-    ConCache.put(:lobbies, lobby.id, lobby)
 
     ConCache.update(:lists, :lobbies, fn value ->
       new_value =
