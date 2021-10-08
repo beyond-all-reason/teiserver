@@ -36,9 +36,15 @@ defmodule Teiserver.Bridge.BridgeServer do
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
   def handle_info({:new_message, from_id, room_name, message}, state) do
+    user = User.get_user_by_id(from_id)
+
     cond do
       from_id == state.userid ->
         # It's us, ignore it
+        nil
+
+      Enum.member?((user.data["roles"] || []), "Non-bridged") ->
+        # Non-bridged user, ignore it
         nil
 
       Map.has_key?(state.rooms, room_name) ->

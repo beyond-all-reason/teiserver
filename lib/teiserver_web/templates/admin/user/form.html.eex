@@ -62,6 +62,15 @@
       %>
 
       <%= central_component "checkbox",
+        id: "user_non-bridged",
+        name: "user[non-bridged]",
+        label: "Non-bridged",
+        checked: ("Non-bridged" in (@changeset.data.data["roles"] || [])),
+        changes: nil,
+        data: nil
+      %>
+
+      <%= central_component "checkbox",
         id: "user_moderator",
         name: "user[moderator]",
         label: "Moderator",
