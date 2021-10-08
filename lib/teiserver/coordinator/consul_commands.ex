@@ -35,7 +35,29 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
-  # TODO: splitlobby command
+  def handle_command(%{command: "splitlobby", senderid: senderid} = cmd, %{split: nil} = state) do
+    sender_name = User.get_username(senderid)
+    LobbyChat.sayex(state.coordinator_id, "#{sender_name} is moving to a new lobby, to follow them say $y. If you want to follow someone else then say $follow <name> and you will follow that user. The split will take place in 15 seconds, you can change your mind at any time. Say $n to cancel your decision and stay here.", state.lobby_id)
+
+    LobbyChat.sayprivateex(state.coordinator_id, senderid, "Splitlobby sequence started. If you stay in this lobby you will be moved to a random empty lobby. If you choose a lobby yourself then anybody ", state.lobbyid)
+
+    split_id = UUID.uuid4()
+
+    new_split = %{
+      split_id: split_id,
+      splitter_id: senderid,
+      splits: %{}
+    }
+
+    :timer.send_after(3_000, {:do_split, split_id})
+    ConsulServer.say_command(cmd, state)
+    %{state | split: new_split}
+  end
+
+  def handle_command(%{command: "splitlobby", senderid: senderid} = _cmd, state) do
+    LobbyChat.sayprivateex(state.coordinator_id, senderid, "A split is already underway, you cannot start a new one yet", state.lobbyid)
+    state
+  end
 
   #################### Moderator only
   # ----------------- General commands
@@ -53,6 +75,26 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         state
     end
     ConsulServer.say_command(cmd, state)
+  end
+
+  def handle_command(%{command: "cancelsplit"}, %{split: nil} = state) do
+    state
+  end
+
+  def handle_command(%{command: "cancelsplit"} = cmd, state) do
+    :timer.send_after(50, :cancel_split)
+    ConsulServer.say_command(cmd, state)
+    state
+  end
+
+  def handle_command(%{command: "dosplit"}, %{split: nil} = state) do
+    state
+  end
+
+  def handle_command(%{command: "dosplit"} = cmd, %{split: split} = state) do
+    :timer.send_after(50, {:do_split, split.split_id})
+    ConsulServer.say_command(cmd, state)
+    state
   end
 
   def handle_command(%{command: "welcome-message", remaining: remaining} = cmd, state) do
