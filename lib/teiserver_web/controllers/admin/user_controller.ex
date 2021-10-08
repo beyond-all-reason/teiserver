@@ -216,6 +216,7 @@ defmodule TeiserverWeb.Admin.UserController do
       (if user_params["streamer"] == "true", do: "Streamer"),
       (if user_params["trusted"] == "true", do: "Trusted"),
       (if user_params["tester"] == "true", do: "Tester"),
+      (if user_params["non-bridged"] == "true", do: "Non-bridged"),
       (if user_params["donor"] == "true", do: "Donor"),
       (if user_params["contributor"] == "true", do: "Contributor"),
       (if user_params["developer"] == "true", do: "Developer"),
@@ -240,7 +241,8 @@ defmodule TeiserverWeb.Admin.UserController do
 
             conn
             |> put_flash(:info, "User updated successfully.")
-            |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+            # |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+            |> redirect(to: Routes.ts_admin_user_path(conn, :show, user.id))
 
           {:error, %Ecto.Changeset{} = changeset} ->
             render(conn, "edit.html", user: user, changeset: changeset)
