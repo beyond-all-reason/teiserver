@@ -232,21 +232,25 @@ defmodule Teiserver.Account do
     user_stats = get_user_stat(user.id).data
 
     hw_fingerprint = user_stats["hw_fingerprint"]
-    hw_fragement = "u.data ->> 'hw_fingerprint' = '#{hw_fingerprint}'"
+    if hw_fingerprint == "" do
+      []
+    else
+      hw_fragement = "u.data ->> 'hw_fingerprint' = '#{hw_fingerprint}'"
 
-    query = """
-    SELECT u.user_id
-    FROM teiserver_account_user_stats u
-    WHERE #{hw_fragement}
+      query = """
+      SELECT u.user_id
+      FROM teiserver_account_user_stats u
+      WHERE #{hw_fragement}
 """
 
-    case Ecto.Adapters.SQL.query(Repo, query, []) do
-      {:ok, results} ->
-        results.rows
-        |> List.flatten
+      case Ecto.Adapters.SQL.query(Repo, query, []) do
+        {:ok, results} ->
+          results.rows
+          |> List.flatten
 
-      {a, b} ->
-        raise "ERR: #{a}, #{b}"
+        {a, b} ->
+          raise "ERR: #{a}, #{b}"
+      end
     end
   end
 
