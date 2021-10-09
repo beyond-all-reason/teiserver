@@ -153,6 +153,37 @@ defmodule Central.General.Startup do
       default: false
     })
 
+
+    # Example site configs
+    # add_site_config_type(%{
+    #   key: "general.Allow site registrations",
+    #   section: "General",
+    #   type: "boolean",
+    #   permissions: ["admin.dev.developer"],
+    #   description: "Allow/disallow registrations via the main site page.",
+    #   opts: [],
+    #   default: true
+    # })
+    # add_site_config_type(%{
+    #   key: "general.Text test",
+    #   section: "General",
+    #   type: "string",
+    #   permissions: ["admin.dev.developer"],
+    #   description: "Allow/disallow registrations via the main site page.",
+    #   opts: [],
+    #   default: "abc"
+    # })
+    # add_site_config_type(%{
+    #   key: "general.Drop test",
+    #   section: "General",
+    #   type: "select",
+    #   permissions: ["admin.dev.developer"],
+    #   description: "Allow/disallow registrations via the main site page.",
+    #   opts: [choices: ["aaa", "bbb", "ccc"]],
+    #   default: "aaa"
+    # })
+
+
     add_permission_set("admin", "debug", ~w(debug))
     add_permission_set("admin", "dev", ~w(developer structure))
     add_permission_set("admin", "admin", ~w(limited full))

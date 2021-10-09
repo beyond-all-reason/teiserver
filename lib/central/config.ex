@@ -177,17 +177,17 @@ defmodule Central.Config do
     UserConfig.changeset(user_config, %{})
   end
 
-  # Types
-  def get_config_types() do
-    ConCache.get(:config_type_cache, "all-config-types")
+  # User Config Types
+  def get_user_config_types() do
+    ConCache.get(:config_user_type_cache, "all-config-types")
   end
 
-  def get_config_type(key) do
-    ConCache.get(:config_type_cache, key)
+  def get_user_config_type(key) do
+    ConCache.get(:config_user_type_cache, key)
   end
 
-  def get_grouped_configs() do
-    ConCache.get(:config_type_cache, "all-config-types")
+  def get_grouped_user_configs() do
+    ConCache.get(:config_user_type_cache, "all-config-types")
     |> Map.values()
     |> Enum.filter(fn c ->
       c.visible
@@ -200,9 +200,6 @@ defmodule Central.Config do
     end)
   end
 
-  # def update_user_config(user_id, key, value) do
-  #   Cache.add(user_id, key, value)
-  # end
 
   @doc """
   Expects a map with the following fields:
@@ -227,26 +224,25 @@ defmodule Central.Config do
 
     default: Any, The default value used when the variable is not set,
   """
-  require Logger
 
   def add_user_config_type(config) do
     all_config_types =
-      (ConCache.get(:config_type_cache, "all-config-types") || %{})
+      (ConCache.get(:config_user_type_cache, "all-config-types") || %{})
       |> Map.put(config.key, config)
 
-    ConCache.put(:config_type_cache, "all-config-types", all_config_types)
-    ConCache.put(:config_type_cache, config.key, config)
+    ConCache.put(:config_user_type_cache, "all-config-types", all_config_types)
+    ConCache.put(:config_user_type_cache, config.key, config)
   end
 
   def get_user_config_default(key) do
-    case get_config_type(key) do
+    case get_user_config_type(key) do
       nil -> throw("Invalid config key of #{key}")
       v -> Map.get(v, :default)
     end
   end
 
   def cast_user_config_value(type_key, value) do
-    type = get_config_type(type_key)
+    type = get_user_config_type(type_key)
 
     case type.type do
       "integer" -> Central.Helpers.NumberHelper.int_parse(value)
@@ -256,18 +252,27 @@ defmodule Central.Config do
     end
   end
 
+
   alias Central.Config.SiteConfig
 
-  def list_site_configs() do
-    query =
-      from site_config in SiteConfig
-
-    Repo.all(query)
+  def get_site_config_cache(key) do
+    ConCache.get_or_store(:config_site_cache, key, fn ->
+      case get_site_config(key) do
+        nil ->
+          default = get_site_config_default(key)
+          cast_site_config_value(key, default)
+        config -> cast_site_config_value(key, config.value)
+      end
+    end)
   end
 
-  @spec get_site_config(String.t(), any) :: any
-  def get_site_config(key, default \\ nil) do
-    ConCache.get(:config_site_cache, key) || default
+  @spec get_site_config(String.t()) :: SiteConfig.t() | nil
+  def get_site_config(key) do
+    query =
+      from site_config in SiteConfig,
+        where: site_config.key == ^key
+
+    Repo.one(query)
   end
 
   @spec update_site_config(String.t(), String.t()) :: :ok
@@ -313,5 +318,76 @@ defmodule Central.Config do
     end
 
     ConCache.delete(:config_site_cache, key)
+  end
+
+
+  # Site Config Types
+  def get_site_config_types() do
+    ConCache.get(:config_site_type_cache, "all-config-types")
+  end
+
+  def get_site_config_type(key) do
+    ConCache.get(:config_site_type_cache, key)
+  end
+
+  def get_grouped_site_configs() do
+    ConCache.get(:config_site_type_cache, "all-config-types")
+    |> Map.values()
+    |> Enum.sort(fn c1, c2 ->
+      c1.key <= c2.key
+    end)
+    |> Enum.group_by(fn c ->
+      hd(String.split(c.key, "."))
+    end)
+  end
+
+
+  @doc """
+  Expects a map with the following fields:
+
+    key: String, dot notation indicating namespace and name of config; spaces allowed
+      e.g. account.Allow registration
+
+    section: String, the tab it would appear under in an options menu. Does not need to be the same as the keyed namespace,
+      e.g. "Registrations"
+
+    type: String, choose from: string, boolean, array
+      array allows the picking of multiple options
+
+    permissions: Permission list required to edit this setting
+
+    description: String, Information presented to the user viewing or editing it
+
+    opts: List, used to define options for various data types. If set then only items from the list will be selectable
+      - If type is "select" then include a :choices key in your opts list
+
+    default: Any, The default value used when the variable is not set,
+  """
+
+  def add_site_config_type(config) do
+    all_config_types =
+      (ConCache.get(:config_site_type_cache, "all-config-types") || %{})
+      |> Map.put(config.key, config)
+
+    ConCache.put(:config_site_type_cache, "all-config-types", all_config_types)
+    ConCache.put(:config_site_type_cache, config.key, config)
+  end
+
+  def get_site_config_default(key) do
+    case get_site_config_type(key) do
+      nil -> throw("Invalid config key of #{key}")
+      v -> Map.get(v, :default)
+    end
+  end
+
+  def cast_site_config_value(type_key, value) do
+    type = get_site_config_type(type_key)
+
+    case type.type do
+      "integer" -> Central.Helpers.NumberHelper.int_parse(value)
+      "boolean" -> if value == "true", do: true, else: false
+      "select" -> value
+      "string" -> value
+    end
   end
 end

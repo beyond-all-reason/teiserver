@@ -18,5 +18,6 @@ defmodule CentralWeb.Admin.GeneralView do
   def colours("group"), do: Central.Account.GroupLib.colours()
   def colours("reports"), do: Central.Account.ReportLib.colours()
   def colours("codes"), do: Central.Account.CodeLib.colours()
+  def colours("site_config"), do: Central.Config.SiteConfigLib.colours()
   def colours("tool"), do: Central.Admin.ToolLib.colours()
 end

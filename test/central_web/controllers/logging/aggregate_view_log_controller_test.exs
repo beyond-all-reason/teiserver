@@ -1,7 +1,7 @@
 # defmodule CentralWeb.Logging.AggregateViewLogControllerTest do
 #   use CentralWeb.ConnCase, async: true
 
-#   alias CentaurWeb.General.TimexHelpers
+#   alias CentralWeb.General.TimexHelpers
 
 #   alias Central.Helpers.GeneralTestLib
 #   alias Central.Logging.LoggingTestLib

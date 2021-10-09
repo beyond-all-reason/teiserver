@@ -11,7 +11,7 @@ defmodule CentralWeb.Config.UserConfigController do
       conn.user_id
       |> Config.get_user_configs!()
 
-    config_types = Config.get_grouped_configs()
+    config_types = Config.get_grouped_user_configs()
 
     conn
     |> assign(:config_types, config_types)
@@ -20,7 +20,7 @@ defmodule CentralWeb.Config.UserConfigController do
   end
 
   def new(conn, %{"key" => key}) do
-    config_info = Config.get_config_type(key)
+    config_info = Config.get_user_config_type(key)
     changeset = UserConfig.creation_changeset(%UserConfig{}, config_info)
 
     conn
@@ -56,7 +56,7 @@ defmodule CentralWeb.Config.UserConfigController do
   end
 
   def edit(conn, %{"id" => key}) do
-    config_info = Config.get_config_type(key)
+    config_info = Config.get_user_config_type(key)
     user_config = Config.get_user_config!(conn.user_id, key)
 
     changeset = Config.change_user_config(user_config)

@@ -268,6 +268,9 @@ defmodule CentralWeb.Router do
     # Codes
     resources("/codes", CodeController)
 
+    # Config
+    resources("/site", SiteConfigController, only: [:index, :edit, :update, :delete])
+
     # Tools
     get("/tools", ToolController, :index)
     get("/tools/falist", ToolController, :falist)

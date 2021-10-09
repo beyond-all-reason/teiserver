@@ -22,7 +22,7 @@ defmodule Central.Admin.AdminPlug do
     #   allow?(conn, "admin.dev.developer") == false -> conn
     #   true ->
     #     conn
-    #     |> assign(:centaur_error_count, ErrorLogLib.get_error_log_count())
+    #     |> assign(:central_error_count, ErrorLogLib.get_error_log_count())
     # end
   end
 end

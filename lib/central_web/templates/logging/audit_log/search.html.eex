@@ -25,7 +25,7 @@
             </div>
 
             <div class="col-md-4 col-xl-2">
-              <label for="centaur-user-search" class="control-label">User: </label>
+              <label for="central-user-search" class="control-label">User: </label>
               <%= render CentralWeb.Account.UserView, "picker.html",
                 input_name: "search[account_user]",
                 value: @params["account_user"]

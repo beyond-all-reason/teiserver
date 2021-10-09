@@ -31,7 +31,7 @@
           </div>
 
           <div class="form-group">
-            <label for="centaur-user-search" class="col-md-2 control-label">Specific user: </label>
+            <label for="central-user-search" class="col-md-2 control-label">Specific user: </label>
             <div class="col-md-4">
               <%= render CentralWeb.Account.UserView, "picker.html" %>
             </div>
