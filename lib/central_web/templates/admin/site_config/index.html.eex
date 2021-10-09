@@ -1,0 +1,68 @@
+<% {fg, bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+    $('#the_tabs a:first').tab('show');
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+  });
+</script>
+
+<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "site_config"}) %>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card border-<%= bsname %> page-card">
+      <div class="card-body">
+        <h4>
+          Site settings
+        </h4>
+
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+          <%= for {group_name, _group_configs} <- @site_configs do %>
+            <li>
+              <a href="#<%= remove_spaces group_name %>_tab" role="tab" class="nav-link" data-toggle="tab"><%= String.capitalize group_name %>
+              </a>
+          </li>
+          <% end %>
+        </ul>
+
+        <div class="tab-content">
+          <%= for {group_name, group_configs} <- @site_configs do %>
+            <div class="tab-pane" id="<%= remove_spaces group_name %>_tab" style="padding:5px;">
+
+              <table class="table">
+                <tbody>
+                  <%= for the_config <- group_configs do %>
+                    <% value = get_site_config_cache(the_config.key) %>
+                    <tr>
+                      <td>
+                        <label>
+                          <%= config_name the_config.key %>
+                        </label>
+                      </td>
+                      <td>
+                        <%= value %>
+                      </td>
+
+                      <td style="min-width:50px;" tal:condition="input_type == 'boolean'">
+                        <%= link "Edit", to: Routes.admin_site_config_path(@conn, :edit, the_config.key), class: "btn btn-secondary btn-sm" %>
+                      </td>
+
+                      <td>
+                        <%= raw the_config.description %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+
+            </div>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

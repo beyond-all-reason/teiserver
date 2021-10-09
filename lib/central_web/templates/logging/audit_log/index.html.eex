@@ -6,7 +6,7 @@
       show_search();
     <% end %>
 
-    $("#centaur-user-search").val("<%= @params[:centaur_user] %>");
+    $("#central-user-search").val("<%= @params[:central_user] %>");
   });
 
   function show_all() {

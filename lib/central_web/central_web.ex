@@ -68,7 +68,7 @@ defmodule CentralWeb do
       import Central.Helpers.ComponentHelper
       import Central.Helpers.TimexHelper
 
-      import Central.Config, only: [get_user_config_cache: 2]
+      import Central.Config, only: [get_user_config_cache: 2, get_site_config_cache: 1]
 
       import CentralWeb.ErrorHelpers
       import CentralWeb.Gettext
@@ -149,7 +149,7 @@ defmodule CentralWeb do
       import Central.Account.AuthLib, only: [add_permission_set: 3]
       import Central.Account.GroupTypeLib, only: [add_group_type: 2]
 
-      import Central.Config, only: [add_user_config_type: 1]
+      import Central.Config, only: [add_user_config_type: 1, add_site_config_type: 1]
       import Central.Logging.AuditLogLib, only: [add_audit_types: 1]
       alias Central.General.QuickAction
     end

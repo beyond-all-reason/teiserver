@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title><%= Application.get_env(:centaur, CentralWeb)[:page_title] %></title>
+    <title><%= Application.get_env(:central, CentralWeb)[:page_title] %></title>
     <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/bootstrap.min.css") %>'>
     <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/shards.css") %>'>
     <link rel="stylesheet" href='<%= Routes.static_path(@conn, "/css/fontawesome/css/all.min.css") %>'>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title><%= Application.get_env(:centaur, CentaurWeb)[:page_title] %></title>
+    <title><%= Application.get_env(:central, CentralWeb)[:page_title] %></title>
 
     <script>
       window.userToken = "<%= assigns[:user_token] %>";

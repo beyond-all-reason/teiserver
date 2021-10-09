@@ -54,6 +54,14 @@
           %>
 
           <%= central_component "sub_menu_icon",
+            name: "site_config",
+            label: "Site config",
+            active: @active,
+            url: Routes.admin_site_config_path(@conn, :index),
+            lib: Central.Config.SiteConfigLib
+          %>
+
+          <%= central_component "sub_menu_icon",
             name: "tool",
             label: "Tools",
             active: @active,

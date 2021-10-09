@@ -61,7 +61,7 @@ defmodule CentralWeb.Admin.ToolController do
 
     coverage_data =
       if params["results"] == "" do
-        "apps/centaur/cover/coverage_result"
+        "apps/central/cover/coverage_result"
         |> File.read!()
       else
         params["results"]

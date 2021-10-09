@@ -158,7 +158,7 @@ defmodule CentralWeb.Admin.UserController do
         # |> Repo.all
 
         user_config_names =
-          Config.get_config_types()
+          Config.get_user_config_types()
           |> Enum.map(fn {key, _} ->
             [a, b] = String.split(key, ".")
             {"#{b} (#{a})", key}
@@ -206,7 +206,7 @@ defmodule CentralWeb.Admin.UserController do
         |> insert_recently(conn)
 
         user_config_names =
-          Config.get_config_types()
+          Config.get_user_config_types()
           |> Enum.map(fn {key, _} ->
             [a, b] = String.split(key, ".")
             {"#{b} (#{a})", key}
@@ -218,7 +218,7 @@ defmodule CentralWeb.Admin.UserController do
         # end)
 
         visible_configs =
-          Config.get_config_types()
+          Config.get_user_config_types()
           |> Enum.filter(fn {_, c} ->
             AuthLib.allow?(conn, c.permissions)
           end)
@@ -273,14 +273,14 @@ defmodule CentralWeb.Admin.UserController do
             user = Account.get_user(id, joins: [:user_configs])
 
             user_config_names =
-              Config.get_config_types()
+              Config.get_user_config_types()
               |> Enum.map(fn {key, _} ->
                 [a, b] = String.split(key, ".")
                 {"#{b} (#{a})", key}
               end)
 
             visible_configs =
-              Config.get_config_types()
+              Config.get_user_config_types()
               |> Enum.filter(fn {_, c} ->
                 AuthLib.allow?(conn, c.permissions)
               end)

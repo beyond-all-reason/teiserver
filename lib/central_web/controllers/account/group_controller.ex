@@ -264,7 +264,7 @@ defmodule CentralWeb.Account.GroupController do
   #     config_values = group_id
   #     |> UserGroupConfigLib.get_all_group_configs()
 
-  #     config_infos = UserGroupConfigLib.get_grouped_configs(group_access)
+  #     config_infos = UserGroupConfigLib.get_grouped_user_configs(group_access)
   #     |> Enum.map(fn {section, configs} ->
   #       {section, configs
   #       |> Enum.filter(fn c ->

@@ -23,7 +23,7 @@
             </div>
 
             <div class="col-md-4 col-xl-2">
-              <label for="centaur-user-search" class="control-label">Specific user: </label>
+              <label for="central-user-search" class="control-label">Specific user: </label>
               <%= render CentralWeb.Account.UserView, "picker.html" %>
             </div>
 

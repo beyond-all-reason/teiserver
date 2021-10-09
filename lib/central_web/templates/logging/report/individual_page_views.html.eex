@@ -56,7 +56,7 @@
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
-              <label for="centaur-user-search" class="control-label">User: </label>
+              <label for="central-user-search" class="control-label">User: </label>
               <%= render CentralWeb.Account.UserView, "picker.html" %>
             </div>
 

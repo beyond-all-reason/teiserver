@@ -25,7 +25,7 @@ defmodule CentralWeb.Logging.AuditLogControllerTest do
         search: %{
           name: "Test",
           action: "Bedrock object import",
-          centaur_user: "##{user.id}"
+          central_user: "##{user.id}"
         }
       )
 
@@ -38,7 +38,7 @@ defmodule CentralWeb.Logging.AuditLogControllerTest do
         search: %{
           name: "",
           action: "All",
-          centaur_user: ""
+          central_user: ""
         }
       )
 

@@ -15,8 +15,8 @@
 
           <div class="form-group">
             <div class="col-md-4 col-xl-2">
-              <label for="centaur-user-search" class="control-label">Specific user: </label>
-              <%#= Central.Account.UserLib.picker_input("search[centaur_user]") %>
+              <label for="central-user-search" class="control-label">Specific user: </label>
+              <%#= Central.Account.UserLib.picker_input("search[central_user]") %>
             </div>
           </div>
 
