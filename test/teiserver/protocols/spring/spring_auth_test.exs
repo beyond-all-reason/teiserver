@@ -596,7 +596,7 @@ CLIENTS test_room #{user.name}\n"
     %{socket: socket} = auth_setup(user)
 
     # [in_game, away, r3, r2, r1, mod, bot]
-    new_status = Integer.undigits(Enum.reverse([0, 1, 0, 0, 1, 0, 0]), 2)
+    new_status = Integer.undigits(Enum.reverse([0, 1, 0, 0, 0, 0, 0]), 2)
     _send_raw(socket, "MYSTATUS #{new_status}\n")
     reply = _recv_raw(socket)
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"

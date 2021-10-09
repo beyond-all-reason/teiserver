@@ -87,14 +87,25 @@ defmodule Teiserver.User do
 
   def default_data(), do: @default_data
 
+  # Based on total logged in time
+  # @rank_levels [
+  #   5,
+  #   15,
+  #   30,
+  #   100,
+  #   300,
+  #   1000,
+  #   3000
+  # ]
+
   @rank_levels [
-    5,
+    1,
+    3,
     15,
-    30,
+    40,
     100,
-    300,
-    1000,
-    3000
+    250,
+    500
   ]
 
   def next_springid() do
@@ -585,14 +596,11 @@ defmodule Teiserver.User do
       end
 
     last_login = round(:erlang.system_time(:seconds) / 60)
-    ingame_hours = user.ingame_minutes / 60
 
     ip_list = [ip | user.ip_list] |> Enum.uniq
 
-    rank =
-      @rank_levels
-      |> Enum.filter(fn r -> r < ingame_hours end)
-      |> Enum.count()
+    rank = calculate_rank(user)
+
 
     springid = if Map.get(user, :springid) != nil, do: user.springid, else: next_springid()
     |> Central.Helpers.NumberHelper.int_parse
@@ -761,6 +769,26 @@ defmodule Teiserver.User do
     update_user(%{user | shadowbanned: true, muted: [true, nil]}, persist: true)
     Client.shadowban(user.id)
     :ok
+  end
+
+  # Old method based on total logged in time
+  # def calculate_rank(user) do
+  #   ingame_hours = user.ingame_minutes / 60
+
+  #   @rank_levels
+  #     |> Enum.filter(fn r -> r < ingame_hours end)
+  #     |> Enum.count()
+  # end
+
+  # Based on actual ingame time
+  def calculate_rank(user) do
+    stats = Account.get_user_stat(user.id) || %{data: %{}}
+    ingame_minutes = (stats.data["player_minutes"] || 0) + ((stats.data["spectator_minutes"] || 0) * 0.5)
+    ingame_hours = ingame_minutes / 60
+
+    @rank_levels
+      |> Enum.filter(fn r -> r < ingame_hours end)
+      |> Enum.count()
   end
 
   # Used to reset the spring password of the user when the site password is updated
