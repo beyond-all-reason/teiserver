@@ -18,7 +18,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
       |> Config.get_user_configs!()
 
     group_configs =
-      Config.get_grouped_configs()
+      Config.get_grouped_user_configs()
       |> Map.get("teiserver")
 
     conn
@@ -28,7 +28,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
   end
 
   def new(conn, %{"key" => key}) do
-    config_info = Config.get_config_type(key)
+    config_info = Config.get_user_config_type(key)
     changeset = UserConfig.creation_changeset(%UserConfig{}, config_info)
 
     conn
@@ -59,7 +59,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
   end
 
   def edit(conn, %{"id" => key}) do
-    config_info = Config.get_config_type(key)
+    config_info = Config.get_user_config_type(key)
     user_config = Config.get_user_config!(conn.user_id, key)
 
     changeset = Config.change_user_config(user_config)
