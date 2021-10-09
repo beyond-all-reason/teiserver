@@ -247,12 +247,16 @@ defmodule Teiserver.TcpServerTest do
 
     # Now they join, should get a login and then a join battle command
     send(pid, {:add_user_to_battle, u1.id, lobby_id + 1, "script_password"})
+    :timer.sleep(500)
     r = _recv_raw(socket)
 
-    assert r ==
-             "ADDUSER #{u1.name} ?? #{u1.springid} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\nJOINEDBATTLE #{
+    # TODO: Sometimes this fails for no apparent reason, unable to reproduce since the above
+    # 500 sleep call but I seem to recall that previously not helping
+    expected = "ADDUSER #{u1.name} ?? #{u1.springid} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\nJOINEDBATTLE #{
                lobby_id + 1
              } #{u1.name}\n"
+    assert r == expected
+
 
     # ---- Chat rooms ----
     send(pid, {:add_user_to_room, u1.id, "roomname"})
