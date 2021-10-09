@@ -1,6 +1,6 @@
 defmodule Teiserver.Data.UserTest do
   use Central.ServerCase
-  alias Teiserver.User
+  alias Teiserver.{User, Account}
   alias Teiserver.TeiserverTestLib
 
   test "adding two bots with the same email" do
@@ -29,5 +29,26 @@ defmodule Teiserver.Data.UserTest do
 
     result = User.register_user_with_md5("non_dupe_name", "DUPE@email", "md5_password", "ip")
     assert result == {:error, "User already exists"}
+  end
+
+  test "calculate rank" do
+    user = TeiserverTestLib.new_user()
+    # Account.update_user_stat(user.id, %{
+    #   "player_minutes" => 60 * 60,
+    #   "spectator_minutes" => 60 * 60
+    # })
+    assert User.calculate_rank(user) == 0
+
+    Account.update_user_stat(user.id, %{
+      "player_minutes" => 60 * 1,
+      "spectator_minutes" => 60 * 1
+    })
+    assert User.calculate_rank(user) == 1
+
+    Account.update_user_stat(user.id, %{
+      "player_minutes" => 60 * 60,
+      "spectator_minutes" => 60 * 60
+    })
+    assert User.calculate_rank(user) == 4
   end
 end

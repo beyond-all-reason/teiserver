@@ -209,7 +209,7 @@ defmodule Teiserver.Telemetry do
   """
   def list_telemetry_day_logs(args \\ []) do
     telemetry_day_log_query(args)
-    |> QueryHelpers.limit_query(50)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
     |> Repo.all()
   end
 

@@ -15,7 +15,7 @@ defmodule Teiserver.Account.RecalculateUserStatTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    Telemetry.list_telemetry_day_logs()
+    Telemetry.list_telemetry_day_logs(limit: :infinity)
     |> Enum.map(&convert_to_user_log/1)
     |> List.flatten
     |> Enum.group_by(fn {userid, _} ->
@@ -29,7 +29,7 @@ defmodule Teiserver.Account.RecalculateUserStatTask do
         combine_row(row, acc)
       end)
 
-      hw_fingerprint = Account.get_user_stat(userid)
+      hw_fingerprint = (Account.get_user_stat(userid) || %{data: %{}})
       |> Map.get(:data)
       |> calculate_hw_fingerprint()
 
