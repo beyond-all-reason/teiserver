@@ -28,9 +28,9 @@ defmodule Teiserver.Telemetry.ClientEventLib do
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
-  def _search(query, :id, id) do
+  def _search(query, :user_id, user_id) do
     from client_events in query,
-      where: client_events.id == ^id
+      where: client_events.user_id == ^user_id
   end
 
   def _search(query, :id_list, id_list) do

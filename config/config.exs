@@ -97,6 +97,24 @@ config :central, Oban,
         # Every minute
         {"* * * * *", Teiserver.Account.Tasks.CleanupTask},
 
+        # 1:05 am
+        {"5 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+
+        # Temporarily running it far more often to get rid of some backlog
+        {"0 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+        {"5 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+        {"10 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+        {"15 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+        {"20 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+        {"25 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+        {"30 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+        {"35 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+        {"40 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+        {"45 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+        {"50 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+        {"55 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+
+
         # Every minute
         {"* * * * *", Teiserver.Telemetry.Tasks.PersistTelemetryMinuteTask},
 

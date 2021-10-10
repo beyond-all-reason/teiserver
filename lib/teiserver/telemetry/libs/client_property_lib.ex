@@ -27,9 +27,9 @@ defmodule Teiserver.Telemetry.ClientPropertyLib do
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
-  def _search(query, :id, id) do
+  def _search(query, :user_id, user_id) do
     from client_properties in query,
-      where: client_properties.id == ^id
+      where: client_properties.user_id == ^user_id
   end
 
   def _search(query, :name, name) do

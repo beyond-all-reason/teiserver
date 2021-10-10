@@ -248,17 +248,16 @@ defmodule Teiserver.Battle do
   end
 
   alias Teiserver.Battle.MatchMembership
-  # alias Teiserver.Battle.MatchMembershipLib
+  alias Teiserver.Battle.MatchMembershipLib
 
-  # def list_match_memberships([user_id: user_id] = args) do
-  #   MatchMembershipLib.get_match_memberships()
-  #   |> MatchMembershipLib.search(user_id: user_id)
-  #   |> MatchMembershipLib.search(args)
-  #   |> MatchMembershipLib.preload(args[:joins])
-  #   |> QueryHelpers.select(args[:select])
-  #   # |> QueryHelpers.limit_query(50)
-  #   |> Repo.all()
-  # end
+  def list_match_memberships(args) do
+    MatchMembershipLib.get_match_memberships()
+    |> MatchMembershipLib.search(args[:search])
+    |> MatchMembershipLib.preload(args[:joins])
+    |> QueryHelpers.select(args[:select])
+    # |> QueryHelpers.limit_query(50)
+    |> Repo.all()
+  end
 
   @doc """
   Gets a single match_membership.

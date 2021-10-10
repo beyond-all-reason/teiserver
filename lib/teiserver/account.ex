@@ -412,6 +412,12 @@ defmodule Teiserver.Account do
     |> Repo.update()
   end
 
+  @spec delete_user_stat(UserStat.t()) :: {:ok, UserStat.t()} | {:error, Ecto.Changeset.t()}
+  def delete_user_stat(%UserStat{} = user_stat) do
+    ConCache.dirty_delete(:teiserver_user_stat_cache, user_stat.user_id)
+    Repo.delete(user_stat)
+  end
+
 
   alias Teiserver.Account.BanHash
   alias Teiserver.Account.BanHashLib
