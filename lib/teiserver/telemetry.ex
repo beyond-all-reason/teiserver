@@ -714,6 +714,11 @@ defmodule Teiserver.Telemetry do
     |> Map.new()
   end
 
+  @spec delete_client_property(ClientProperty.t()) :: {:ok, ClientProperty.t()} | {:error, Ecto.Changeset.t()}
+  def delete_client_property(%ClientProperty{} = client_property) do
+    Repo.delete(client_property)
+  end
+
   alias Teiserver.Telemetry.UnauthEvent
   alias Teiserver.Telemetry.UnauthEventLib
 
@@ -830,6 +835,11 @@ defmodule Teiserver.Telemetry do
     %ClientEvent{}
     |> ClientEvent.changeset(attrs)
     |> Repo.insert()
+  end
+
+  @spec delete_client_event(ClientEvent.t()) :: {:ok, ClientEvent.t()} | {:error, Ecto.Changeset.t()}
+  def delete_client_event(%ClientEvent{} = client_event) do
+    Repo.delete(client_event)
   end
 
   def get_client_events_summary(args) do
