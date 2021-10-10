@@ -54,9 +54,10 @@
     <tr>
       <th colspan="2">Name</th>
       <%= if false and is_admin do %><th>Email</th><% end %>
-      <th>IP</th>
-      <th>Hash</th>
-      <th>Hardware</th>
+      <th style="text-align:center;" width="120">IP</th>
+      <th style="text-align:center;" width="120">Hash</th>
+      <th style="text-align:center;" width="120">Hardware</th>
+      <th>&nbsp;</th>
       <th>Registered</th>
       <%= if is_admin do %>
         <th colspan="2">&nbsp;</th>
@@ -74,23 +75,25 @@
       <td><%= user.name %></td>
       <%= if false and is_admin do %><td><%= user.email %></td><% end %>
 
-      <td>
+      <td style="text-align: center">
         <%= if Enum.member?(@reasons.ip, user.id) do %>
-          IP
+          <i class='fa-fw fas fa-circle-check text-danger fa-lg'></i>
         <% end %>
       </td>
 
-      <td>
+      <td style="text-align: center">
         <%= if Enum.member?(@reasons.hash, user.id) do %>
-          Hash
+          <i class='fa-fw fas fa-circle-check text-danger fa-lg'></i>
         <% end %>
       </td>
 
-      <td>
+      <td style="text-align: center">
         <%= if Enum.member?(@reasons.hw, user.id) do %>
-          Hardware
+          <i class='fa-fw fas fa-circle-check text-danger fa-lg'></i>
         <% end %>
       </td>
+
+      <td>&nbsp;</td>
 
       <td>
         <%= date_to_str(user.inserted_at, format: :dmy) %>

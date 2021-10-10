@@ -210,21 +210,25 @@ defmodule Teiserver.Account do
 
   defp get_smurfs_by_hash(user) do
     lobby_hash = user.data["lobby_hash"]
-    lobby_hash_fragment = "u.data ->> 'lobby_hash' = '#{lobby_hash}'"
+    if Enum.member?([nil, ""], lobby_hash) do
+      lobby_hash_fragment = "u.data ->> 'lobby_hash' = '#{lobby_hash}'"
 
-    query = """
-    SELECT u.id
-    FROM account_users u
-    WHERE #{lobby_hash_fragment}
-"""
+      query = """
+      SELECT u.id
+      FROM account_users u
+      WHERE #{lobby_hash_fragment}
+  """
 
-    case Ecto.Adapters.SQL.query(Repo, query, []) do
-      {:ok, results} ->
-        results.rows
-        |> List.flatten
+      case Ecto.Adapters.SQL.query(Repo, query, []) do
+        {:ok, results} ->
+          results.rows
+          |> List.flatten
 
-      {a, b} ->
-        raise "ERR: #{a}, #{b}"
+        {a, b} ->
+          raise "ERR: #{a}, #{b}"
+      end
+    else
+      []
     end
   end
 
