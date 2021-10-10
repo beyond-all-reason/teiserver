@@ -212,6 +212,7 @@ defmodule Teiserver.Battle.Lobby do
       nil ->
         nil
       client ->
+        remove_user_from_any_battle(userid)
         send(client.pid, {:force_join_battle, battle_lobby_id, "scriptpass"})
     end
   end

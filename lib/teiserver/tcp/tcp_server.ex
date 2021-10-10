@@ -4,7 +4,7 @@ defmodule Teiserver.TcpServer do
   require Logger
 
   alias Teiserver.{User, Client}
-  alias Teiserver.Tcp.{TcpChat, TcpLobby}
+  alias Teiserver.Tcp.{TcpLobby}
 
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [
@@ -167,7 +167,7 @@ defmodule Teiserver.TcpServer do
   end
 
   # Client channel messages
-  def handle_info({:client_message, :direct_message, _userid, {from_id, message}}, state) do
+  def handle_info({:client_message, :direct_message, _userid, {_from_id, _message}}, state) do
     # TODO: Currently we seem to subscribe to multiple channels at once
     # so if we uncomment this we get messages double up
     # new_state = new_chat_message(:direct_message, from_id, nil, message, state)
@@ -540,7 +540,7 @@ defmodule Teiserver.TcpServer do
 
   # This is the result of being forced to join a battle
   defp force_join_battle(lobby_id, script_password, state) do
-    new_state = state.protocol_out.do_leave_battle(state, lobby_id)
+    new_state = state.protocol_out.do_leave_battle(state, state.lobby_id)
     new_state = %{new_state | lobby_id: lobby_id, script_password: script_password}
     state.protocol_out.do_join_battle(new_state, lobby_id, script_password)
   end
