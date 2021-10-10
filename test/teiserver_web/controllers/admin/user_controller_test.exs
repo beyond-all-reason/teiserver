@@ -117,8 +117,8 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
         })
 
       conn = put(conn, Routes.ts_admin_user_path(conn, :update, user), user: @update_attrs)
-      # assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, user)
-      assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :index)
+      assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, user)
+      # assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :index)
 
       conn = get(conn, Routes.ts_admin_user_path(conn, :show, user))
       assert html_response(conn, 200) =~ "some updated colour"

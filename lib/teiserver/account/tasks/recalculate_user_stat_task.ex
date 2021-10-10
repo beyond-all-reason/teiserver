@@ -29,8 +29,7 @@ defmodule Teiserver.Account.RecalculateUserStatTask do
         combine_row(row, acc)
       end)
 
-      hw_fingerprint = (Account.get_user_stat(userid) || %{data: %{}})
-      |> Map.get(:data)
+      hw_fingerprint = Account.get_user_stat_data(userid)
       |> calculate_hw_fingerprint()
 
       Account.update_user_stat(userid, %{
