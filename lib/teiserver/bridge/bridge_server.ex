@@ -43,7 +43,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         # It's us, ignore it
         nil
 
-      Enum.member?((user.data["roles"] || []), "Non-bridged") ->
+      Enum.member?((user.roles || []), "Non-bridged") ->
         # Non-bridged user, ignore it
         nil
 

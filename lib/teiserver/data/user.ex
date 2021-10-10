@@ -87,25 +87,14 @@ defmodule Teiserver.User do
 
   def default_data(), do: @default_data
 
-  # Based on total logged in time
-  # @rank_levels [
-  #   5,
-  #   15,
-  #   30,
-  #   100,
-  #   300,
-  #   1000,
-  #   3000
-  # ]
-
   @rank_levels [
-    1,
-    3,
+    5,
     15,
-    40,
+    30,
     100,
-    250,
-    500
+    300,
+    1000,
+    3000
   ]
 
   def next_springid() do
