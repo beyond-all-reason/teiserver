@@ -45,7 +45,7 @@
               <%= central_component "icon_dropdown", %{
                 name: "search[order]",
                 id: "search_order",
-                selected: @params["order"],
+                selected: @params["order"] || "Newest first",
                 enumerable: [
                   %{id: "Name (A-Z)", icon: "fas fa-sort-numeric-down", colour: fg},
                   %{id: "Name (Z-A)", icon: "fas fa-sort-numeric-up", colour: fg},
