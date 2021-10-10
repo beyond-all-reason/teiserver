@@ -18,20 +18,13 @@ splitlobby <message>
   or are following someone that voted yes are also moved to that lobby. Anybody who leaves the original lobby before
   the vote ends will not be moved.
 
-##### Moderator only #####
-### General commands
+##### Hosts and Moderators #####
 gatekeeper (default | friends | friendsplay | clan)
   sets the gatekeeper for this battle
     default: no limitations
     friends allows only friends of existing members to join the lobby
     friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)
     TODO: clan: allows only members of an existing clan to join the game (enable after one member from each clan is present)
-
-dosplit
-  Completes the lobby split now
-
-cancelsplit
-  Cancels the lobby split
 
 welcome-message <message>
   Sets the welcome message sent to anybody joining the lobby
@@ -48,16 +41,6 @@ pull <user>
 
 settag <key> <value>
   Sets a battletag of <key> to <value>
-
-### Moderation
-modwarn <user> <hours> <reason>
-  Warns the user for that many hours and creates a report for them
-
-modmute <user> <hours> <reason>
-  Mutes the user for that many hours and creates a report for them
-
-modban <user> <hours> <reason>
-  Bans the user for that many hours and creates a report for them
 
 speclock <user>
   Locks the user into a spectator role. Can be reverted with the unban command.
@@ -79,6 +62,24 @@ forcespec <user>
 
 forceplay <user>
   Moves the user to players
+
+##### Moderator only #####
+### General commands
+dosplit
+  Completes the lobby split now
+
+cancelsplit
+  Cancels the lobby split
+
+### Moderation
+modwarn <user> <hours> <reason>
+  Warns the user for that many hours and creates a report for them
+
+modmute <user> <hours> <reason>
+  Mutes the user for that many hours and creates a report for them
+
+modban <user> <hours> <reason>
+  Bans the user for that many hours and creates a report for them
 
 ### System
 reset

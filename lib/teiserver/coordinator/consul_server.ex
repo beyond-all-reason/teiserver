@@ -27,6 +27,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Coordinator.{ConsulCommands}
 
   @always_allow ~w(status help)
+  @host_commands ~w(gatekeeper welcome-message specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -272,15 +273,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
-  defp allow_command?(%{senderid: senderid}, %{host_id: host_id}) when senderid == host_id, do: true
-  defp allow_command?(%{senderid: senderid} = cmd, _state) do
+  defp allow_command?(%{senderid: senderid} = cmd, state) do
     client = Client.get_client_by_id(senderid)
 
     cond do
       client == nil -> false
       Enum.member?(@always_allow, cmd.command) -> true
       client.moderator == true -> true
-      # senderid == state.host_id -> true
+      Enum.member?(@host_commands, cmd.command) and senderid == state.host_id -> true
       true -> false
     end
   end
