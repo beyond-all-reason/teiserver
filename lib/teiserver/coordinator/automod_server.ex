@@ -96,10 +96,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   # TODO: Refactor into a with statement for multiple types of hash
   @spec do_check(T.userid()) :: String.t()
   defp do_check(userid) do
-    stats = case Account.get_user_stat(userid) do
-      nil -> %{}
-      v -> v.data
-    end
+    stats = Account.get_user_stat_data(userid)
 
     hw_fingerprint = Teiserver.Account.RecalculateUserStatTask.calculate_hw_fingerprint(stats)
 

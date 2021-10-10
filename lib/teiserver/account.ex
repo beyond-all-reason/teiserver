@@ -368,6 +368,7 @@ defmodule Teiserver.Account do
     |> Repo.one
   end
 
+  @spec get_user_stat_data(integer()) :: Map.t()
   def get_user_stat_data(userid) do
     ConCache.get_or_store(:teiserver_user_stat_cache, userid, fn ->
       case get_user_stat(userid) do
@@ -406,8 +407,6 @@ defmodule Teiserver.Account do
         update_user_stat(user_stat, %{data: new_data})
     end
   end
-  # Teiserver.Account.update_user_stat(3, %{"key1" => "valueXXXX"})
-  # Teiserver.Account.get_user_stat(3)
 
   # This is the database call, typically you'd not need to use this
   def update_user_stat(%UserStat{} = user_stat, attrs) do

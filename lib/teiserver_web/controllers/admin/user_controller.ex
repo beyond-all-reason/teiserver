@@ -103,10 +103,7 @@ defmodule TeiserverWeb.Admin.UserController do
         |> UserLib.make_favourite()
         |> insert_recently(conn)
 
-        user_stats = case Account.get_user_stat(user.id) do
-          nil -> %{}
-          stats -> stats.data
-        end
+        user_stats = Account.get_user_stat_data(user.id)
 
         room_messages = Chat.list_room_messages(
           search: [
@@ -456,8 +453,7 @@ defmodule TeiserverWeb.Admin.UserController do
     user = Account.get_user!(id)
 
     # Update their hw_key
-    hw_fingerprint = Account.get_user_stat(user.id)
-    |> Map.get(:data)
+    hw_fingerprint = Account.get_user_stat_data(user.id)
     |> Teiserver.Account.RecalculateUserStatTask.calculate_hw_fingerprint()
 
     Account.update_user_stat(user.id, %{
