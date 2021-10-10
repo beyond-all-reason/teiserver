@@ -20,13 +20,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
   use GenServer
   require Logger
   alias Teiserver.{Coordinator, Client, User}
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Battle.{Lobby, LobbyChat}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   # alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Coordinator.{ConsulCommands}
+  alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib}
 
-  @always_allow ~w(status help)
+  @always_allow ~w(status help y n follow)
   @host_commands ~w(gatekeeper welcome-message specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
@@ -139,10 +139,41 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
-  def handle_info({:do_split, split_id}, %{split: split} = state) do
-    new_state = if split_id == split.split_id do
-      Logger.warn("DO SPLIT")
-      state
+  def handle_info({:do_split, split_uuid}, %{split: split} = state) do
+    new_state = if split_uuid == split.split_uuid do
+      players_to_move = Map.put(split.splitters, split.first_splitter_id, true)
+      |> CoordinatorLib.resolve_split()
+      |> Map.delete(split.first_splitter_id)
+      |> Map.keys
+
+      client = Client.get_client_by_id(split.first_splitter_id)
+      new_lobby = if client.lobby_id == state.lobby_id or client.lobby_id == nil do
+        # If the first splitter is still in this lobby, move them to a new one
+        Lobby.find_empty_battle()
+      else
+        %{id: client.lobby_id}
+      end
+
+      # If the first splitter is still in this lobby, move them to a new one
+      case new_lobby do
+        nil ->
+          LobbyChat.sayex(state.coordinator_id, "Split failed, unable to find empty lobby", state.lobby_id)
+
+        %{id: lobby_id} ->
+          if client.lobby_id != lobby_id do
+            Lobby.force_add_user_to_battle(split.first_splitter_id, lobby_id)
+          end
+
+          players_to_move
+          |> Enum.each(fn userid ->
+            Lobby.force_add_user_to_battle(userid, lobby_id)
+          end)
+
+          LobbyChat.sayex(state.coordinator_id, "Split completed.", state.lobby_id)
+      end
+
+
+      %{state | split: nil}
 
     else
       Logger.warn("BAD ID")
@@ -290,13 +321,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def get_user("", _), do: nil
   def get_user("#" <> id, _), do: int_parse(id)
   def get_user(name, state) do
+    name = String.downcase(name)
+
     case User.get_userid(name) do
       nil ->
         # Try partial search of players in lobby
         battle = Lobby.get_battle(state.lobby_id)
         found = Client.list_clients(battle.players)
           |> Enum.filter(fn client ->
-            String.contains?(client.name, name)
+            String.contains?(String.downcase(client.name), name)
           end)
 
         case found do

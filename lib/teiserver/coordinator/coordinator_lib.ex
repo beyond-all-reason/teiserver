@@ -15,8 +15,7 @@ TODO: help
 splitlobby <message>
   Causes a "vote" to start where other players can elect to join you in splitting the lobby, follow someone
   of their choosing or remain in place. After 20 seconds you are moved to a new (empty) lobby and those that voted yes
-  or are following someone that voted yes are also moved to that lobby. Anybody who leaves the original lobby before
-  the vote ends will not be moved.
+  or are following someone that voted yes are also moved to that lobby.
 
 ##### Hosts and Moderators #####
 gatekeeper (default | friends | friendsplay | clan)
@@ -92,5 +91,72 @@ change-battlestatus
 $command - Coordinator command
 $%command - Don't echo command back to chat
 """
+  end
+
+  @doc """
+  We call resolve_split to resolve the overall list of splits (y/n/follow). The issue
+  comes when we have multiple layers of people following each other. For this we recursively
+  call resolve_round.
+
+  When resolve_round finds circular references it drops them and they don't go anywhere.
+  """
+  @spec resolve_split(Map.t()) :: Map.t()
+  def resolve_split(split) do
+    case resolve_round(split) do
+      {:complete, result} -> result
+      {:incomplete, result} -> resolve_split(result)
+    end
+    |> Enum.filter(fn {_k, v} -> v end)
+    |> Map.new
+  end
+
+  @spec resolve_round(Map.t()) :: {:incomplete | :complete, Map.t()}
+  defp resolve_round(split) do
+    players = Map.keys(split)
+
+    result = players
+    |> Enum.reduce({false, true, split}, fn (player_id, {changes, complete, acc}) ->
+      # First find out what their target is, possibly by looking
+      # at their target's target
+      new_target = case acc[player_id] do
+        true -> true
+        nil -> nil
+        target_id ->
+          case split[target_id] do
+            true -> true
+            nil -> nil
+            targets_target -> targets_target
+          end
+      end
+      new_split = Map.put(acc, player_id, new_target)
+
+      # Now, are we still on for completion?
+      is_complete = complete and (not is_integer(new_target))
+
+      if new_target == split[player_id] do
+        {changes, is_complete, new_split}
+      else
+        {true, is_complete, new_split}
+      end
+    end)
+
+    case result do
+      {false, true, split} -> {:complete, split}
+      {false, false, split} -> {:complete, remove_circular(split)}
+      {true, _, split} -> {:incomplete, split}
+    end
+  end
+
+  @spec remove_circular(Map.t()) :: Map.t()
+  defp remove_circular(split) do
+    split
+    |> Map.new(fn {k, v} ->
+      new_v = case v do
+        true -> true
+        _ -> nil
+      end
+
+      {k, new_v}
+    end)
   end
 end

@@ -39,17 +39,17 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     sender_name = User.get_username(senderid)
     LobbyChat.sayex(state.coordinator_id, "#{sender_name} is moving to a new lobby, to follow them say $y. If you want to follow someone else then say $follow <name> and you will follow that user. The split will take place in 15 seconds, you can change your mind at any time. Say $n to cancel your decision and stay here.", state.lobby_id)
 
-    LobbyChat.sayprivateex(state.coordinator_id, senderid, "Splitlobby sequence started. If you stay in this lobby you will be moved to a random empty lobby. If you choose a lobby yourself then anybody ", state.lobbyid)
+    LobbyChat.sayprivateex(state.coordinator_id, senderid, "Splitlobby sequence started. If you stay in this lobby you will be moved to a random empty lobby. If you choose a lobby yourself then anybody ", state.lobby_id)
 
-    split_id = UUID.uuid4()
+    split_uuid = UUID.uuid4()
 
     new_split = %{
-      split_id: split_id,
-      splitter_id: senderid,
-      splits: %{}
+      split_uuid: split_uuid,
+      first_splitter_id: senderid,
+      splitters: %{}
     }
 
-    :timer.send_after(3_000, {:do_split, split_id})
+    :timer.send_after(20_000, {:do_split, split_uuid})
     ConsulServer.say_command(cmd, state)
     %{state | split: new_split}
   end
@@ -57,6 +57,43 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{command: "splitlobby", senderid: senderid} = _cmd, state) do
     LobbyChat.sayprivateex(state.coordinator_id, senderid, "A split is already underway, you cannot start a new one yet", state.lobbyid)
     state
+  end
+
+  # Split commands for when there is no split happening
+  def handle_command(%{command: "y"}, %{split: nil} = state), do: state
+  def handle_command(%{command: "n"}, %{split: nil} = state), do: state
+  def handle_command(%{command: "follow"}, %{split: nil} = state), do: state
+
+  # And for when it is
+  def handle_command(%{command: "n", senderid: senderid} = cmd, state) do
+    new_splitters = Map.delete(state.split.splitters, senderid)
+    new_split = %{state.split | splitters: new_splitters}
+    ConsulServer.say_command(cmd, state)
+    %{state | split: new_split}
+  end
+
+  def handle_command(%{command: "y", senderid: senderid} = cmd, state) do
+    new_splitters = Map.put(state.split.splitters, senderid, true)
+    new_split = %{state.split | splitters: new_splitters}
+    ConsulServer.say_command(cmd, state)
+    %{state | split: new_split}
+  end
+
+  def handle_command(%{command: "follow", remaining: target, senderid: senderid} = cmd, state) do
+    case ConsulServer.get_user(target, state) do
+      nil ->
+        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
+      player_id ->
+        new_splitters = if player_id == state.split.first_splitter_id do
+          Map.put(state.split.splitters, senderid, true)
+        else
+          Map.put(state.split.splitters, senderid, player_id)
+        end
+
+        new_split = %{state.split | splitters: new_splitters}
+        ConsulServer.say_command(cmd, state)
+        %{state | split: new_split}
+    end
   end
 
   #################### Moderator only
@@ -92,7 +129,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "dosplit"} = cmd, %{split: split} = state) do
-    :timer.send_after(50, {:do_split, split.split_id})
+    :timer.send_after(50, {:do_split, split.split_uuid})
     ConsulServer.say_command(cmd, state)
     state
   end
