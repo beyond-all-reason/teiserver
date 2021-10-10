@@ -61,6 +61,7 @@
       <th>Donor</th>
       <th>Contributor</th>
       <th>Dev</th>
+      <th>Lobby</th>
       <th>Registered</th>
       <th>Status</th>
       <%= if is_admin do %>
@@ -135,6 +136,8 @@
       <td>
         <%= if "Developer" in (user.data["roles"] || []), do: "Dev" %>
       </td>
+
+      <td><%= user.data["lobby_client"] %></td>
 
       <td>
         <%= date_to_str(user.inserted_at, format: :dmy) %>
