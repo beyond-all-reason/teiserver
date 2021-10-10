@@ -298,28 +298,33 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec kick_user_from_battle(Integer.t(), Integer.t()) :: nil | :ok | {:error, any}
   def kick_user_from_battle(userid, lobby_id) do
-    case do_remove_user_from_battle(userid, lobby_id) do
-      :closed ->
-        nil
+    user = User.get_user_by_id(userid)
+    if not user.moderator do
+      case do_remove_user_from_battle(userid, lobby_id) do
+        :closed ->
+          nil
 
-      :not_member ->
-        nil
+        :not_member ->
+          nil
 
-      :no_battle ->
-        nil
+        :no_battle ->
+          nil
 
-      :removed ->
-        PubSub.broadcast(
-          Central.PubSub,
-          "legacy_all_battle_updates",
-          {:kick_user_from_battle, userid, lobby_id}
-        )
+        :removed ->
+          PubSub.broadcast(
+            Central.PubSub,
+            "legacy_all_battle_updates",
+            {:kick_user_from_battle, userid, lobby_id}
+          )
 
-        PubSub.broadcast(
-          Central.PubSub,
-          "teiserver_lobby_updates:#{lobby_id}",
-          {:lobby_update, :kick_user, lobby_id, userid}
-        )
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_lobby_updates:#{lobby_id}",
+            {:lobby_update, :kick_user, lobby_id, userid}
+          )
+      end
+    else
+      :ok
     end
   end
 
