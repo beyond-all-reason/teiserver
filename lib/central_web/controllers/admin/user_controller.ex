@@ -552,20 +552,7 @@ defmodule CentralWeb.Admin.UserController do
         |> redirect(to: Routes.admin_user_path(conn, :index))
 
       {true, _} ->
-        # First we remove them from any groups
-        Account.list_group_memberships(user_id: user.id)
-        |> Enum.each(fn ugm ->
-          Account.delete_group_membership(ugm)
-        end)
-
-        # Next up, configs
-        Config.list_user_configs(user.id)
-        |> Enum.each(fn ugm ->
-          Config.delete_user_config(ugm)
-        end)
-
-        # Now remove the user
-        Account.delete_user(user)
+        Central.Admin.DeleteUserTask.delete_user(user)
 
         conn
         |> put_flash(:success, "User deleted")

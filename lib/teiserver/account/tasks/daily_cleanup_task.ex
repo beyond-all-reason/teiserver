@@ -15,20 +15,6 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
       limit: 20
     )
     |> Enum.each(fn user = %{id: userid} ->
-      User.delete_user(userid)
-
-      # Group memberships
-      Central.Account.list_group_memberships(user_id: userid)
-      |> Enum.each(fn ugm ->
-        Central.Account.delete_group_membership(ugm)
-      end)
-
-      # Next up, configs
-      Central.Config.list_user_configs(userid)
-      |> Enum.each(fn ugm ->
-        Central.Config.delete_user_config(ugm)
-      end)
-
       # Stats
       case Account.get_user_stat(userid) do
         nil -> :ok
@@ -52,20 +38,8 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
         Battle.delete_match_membership(membership)
       end)
 
-      # Notifications
-      Central.Communication.list_user_notifications(userid)
-      |> Enum.each(fn notification ->
-        Central.Communication.delete_notification(notification)
-      end)
-
-      # Page view logs
-      Central.Logging.list_page_view_logs(search: [user_id: userid])
-      |> Enum.each(fn log ->
-        Central.Logging.delete_page_view_log(log)
-      end)
-
-
-      Account.delete_user(user)
+      User.delete_user(userid)
+      Central.Admin.DeleteUserTask.delete_user(user)
     end)
 
     :ok
