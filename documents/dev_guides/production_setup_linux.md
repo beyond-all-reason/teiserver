@@ -13,10 +13,10 @@ Before you start I suggest setting up the DNS to point towards your server. It'l
 
 ### Fresh install time
 ```
-apt-get update
-apt-get -y install htop git-core ca-certificates vim sudo curl vnstat sysstat procinfo build-essential net-tools geoip-bin
-apt-get -y upgrade
-apt-get -y autoremove
+sudo apt-get update
+sudo apt-get -y install htop git-core ca-certificates vim sudo curl vnstat sysstat procinfo build-essential net-tools geoip-bin
+sudo apt-get -y upgrade
+sudo apt-get -y autoremove
 
 # Set timezone
 sudo dpkg-reconfigure tzdata
@@ -25,8 +25,8 @@ sudo dpkg-reconfigure tzdata
 #### Create our user
 We start by creating a user for running the deployments. Doing things as root is a bad practice!
 ```
-adduser deploy
-adduser deploy sudo
+sudo adduser deploy
+sudo adduser deploy sudo
 ```
 
 ### SSH key
@@ -89,6 +89,11 @@ sudo rm /etc/nginx/nginx.conf
 sudo vi /etc/nginx/nginx.conf
 ```
 
+#### Enable the site
+```
+sudo vi /etc/nginx/sites-enabled/central
+```
+
 #### SSL time
 We'll be using [letsencrypt](https://letsencrypt.org/) to get a free SSL certificate.
 ```
@@ -117,12 +122,12 @@ openssl dhparam -out dh-params.pem 2048
 ```
 
 ### Postgres
-This is written with postgres 12 as the intended version. If you need this guide to tell you how to install postgres you probably don't care if there's a newer version available.
+This is written with postgres 14 as the intended version. If you need this guide to tell you how to install postgres you probably don't care if there's a newer version available.
 ```
 sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 sudo apt-get update
-sudo apt-get -y install postgresql-12
+sudo apt-get -y install postgresql-14
 ```
 
 #### Setup central_prod database
@@ -141,7 +146,7 @@ EOF
 #### pg_stat_statements (optional)
 Following the guide at [pganalyze.com](https://pganalyze.com/docs/install/01_enabling_pg_stat_statements) we want to enable `pg_stat_statements` for our LiveDashboard. If we don't then that's okay but we won't get the full gamut of stats in the dashboard.
 ```
-sudo vi /etc/postgresql/12/main/postgresql.conf
+sudo vi /etc/postgresql/14/main/postgresql.conf
 ```
 
 Add the following at various points:
@@ -159,7 +164,7 @@ pg_stat_statements.track = all
 I've found it useful in the past to be able to access my postgres installation without having to put the password in. You may wish to update your pg_hba.conf to enable the same.
 
 ```
-sudo vi /etc/postgresql/12/main/pg_hba.conf
+sudo vi /etc/postgresql/14/main/pg_hba.conf
 ```
 
 Alter the bottom part to look like this, the specific change is we are using "trust" as the method for all local/host connections:
