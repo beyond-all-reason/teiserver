@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.RecalculateUserStatTask do
   use Oban.Worker, queue: :cleanup
 
-  alias Teiserver.{Account, Telemetry}
+  alias Teiserver.{User, Account, Telemetry}
 
   # Teiserver.Account.RecalculateUserStatTask.perform(%{})
 
@@ -22,6 +22,10 @@ defmodule Teiserver.Account.RecalculateUserStatTask do
       userid
     end, fn {_, user_data} ->
       user_data
+    end)
+    |> Enum.filter(fn {userid, _} ->
+      username = User.get_username(userid)
+      username != nil
     end)
     |> Enum.each(fn {userid, data_rows} ->
       data = data_rows
