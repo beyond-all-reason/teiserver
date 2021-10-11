@@ -49,6 +49,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       splitters: %{}
     }
 
+    Logger.warn("Started split lobby #{Kernel.inspect new_split}")
+
     :timer.send_after(20_000, {:do_split, split_uuid})
     ConsulServer.say_command(cmd, state)
     %{state | split: new_split}
@@ -66,6 +68,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   # And for when it is
   def handle_command(%{command: "n", senderid: senderid} = cmd, state) do
+    Logger.warn("Split.n from #{senderid}")
+
     new_splitters = Map.delete(state.split.splitters, senderid)
     new_split = %{state.split | splitters: new_splitters}
     ConsulServer.say_command(cmd, state)
@@ -73,6 +77,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "y", senderid: senderid} = cmd, state) do
+    Logger.warn("Split.y from #{senderid}")
+
     new_splitters = Map.put(state.split.splitters, senderid, true)
     new_split = %{state.split | splitters: new_splitters}
     ConsulServer.say_command(cmd, state)
@@ -84,6 +90,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       nil ->
         ConsulServer.say_command(%{cmd | error: "no user found"}, state)
       player_id ->
+        Logger.warn("Split.follow from #{senderid}")
+
         new_splitters = if player_id == state.split.first_splitter_id do
           Map.put(state.split.splitters, senderid, true)
         else

@@ -132,14 +132,18 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(:cancel_split, state) do
+    Logger.warn("Cancel split")
     {:noreply, %{state | split: nil}}
   end
 
   def handle_info({:do_split, _}, %{split: nil} = state) do
+    Logger.warn("dosplit with no split to do")
     {:noreply, state}
   end
 
   def handle_info({:do_split, split_uuid}, %{split: split} = state) do
+    Logger.warn("Doing split")
+
     new_state = if split_uuid == split.split_uuid do
       players_to_move = Map.put(split.splitters, split.first_splitter_id, true)
       |> CoordinatorLib.resolve_split()
@@ -177,7 +181,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     else
       Logger.warn("BAD ID")
-      # Wrong it, this is a timed out message
+      # Wrong id, this is a timed out message
       state
     end
     {:noreply, new_state}
