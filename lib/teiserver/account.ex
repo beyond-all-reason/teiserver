@@ -209,15 +209,19 @@ defmodule Teiserver.Account do
   end
 
   defp get_smurfs_by_hash(user) do
-    lobby_hash = user.data["lobby_hash"]
+    user_stats = get_user_stat_data(user.id)
+    lobby_hash = user_stats["lobby_hash"]
+
     if Enum.member?([nil, ""], lobby_hash) do
-      lobby_hash_fragment = "u.data ->> 'lobby_hash' = '#{lobby_hash}'"
+      []
+    else
+      hash_fragement = "u.data ->> 'lobby_hash' = '#{lobby_hash}'"
 
       query = """
-      SELECT u.id
-      FROM account_users u
-      WHERE #{lobby_hash_fragment}
-  """
+      SELECT u.user_id
+      FROM teiserver_account_user_stats u
+      WHERE #{hash_fragement}
+"""
 
       case Ecto.Adapters.SQL.query(Repo, query, []) do
         {:ok, results} ->
@@ -227,13 +231,11 @@ defmodule Teiserver.Account do
         {a, b} ->
           raise "ERR: #{a}, #{b}"
       end
-    else
-      []
     end
   end
 
   defp get_smurfs_by_hw(user) do
-    user_stats = get_user_stat(user.id).data
+    user_stats = get_user_stat_data(user.id)
 
     hw_fingerprint = user_stats["hw_fingerprint"]
     if hw_fingerprint == "" do
