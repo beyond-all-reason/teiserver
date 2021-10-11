@@ -5,12 +5,26 @@ defmodule Teiserver.Startup do
 
   @spec startup :: :ok
   def startup do
+    start_time = System.system_time(:millisecond)
+
     add_permission_set("teiserver", "admin", ~w(account battle clan party queue tournament))
     add_permission_set("teiserver", "moderator", ~w(account battle clan party queue tournament))
     add_permission_set("teiserver", "api", ~w(battle))
     add_permission_set("teiserver", "player", ~w(account tester contributor dev streamer donor verified bot moderator))
 
     add_group_type("Teiserver clan", %{fields: []})
+
+
+    # Example site configs
+    add_site_config_type(%{
+      key: "teiserver.Register with Chobby only",
+      section: "Registrations",
+      type: "boolean",
+      permissions: ["admin.dev.developer"],
+      description: "Prevents users registering with anything other than Chobby",
+      opts: [],
+      default: false
+    })
 
     umbrella_group =
       case Central.Account.get_group(nil, search: [name: "Teiserver umbrella group"]) do
@@ -216,6 +230,7 @@ defmodule Teiserver.Startup do
       end)
     end
 
-    Logger.info("Teiserver startup complete")
+    time_taken = System.system_time(:millisecond) - start_time
+    Logger.info("Teiserver startup complete, took #{time_taken}ms")
   end
 end

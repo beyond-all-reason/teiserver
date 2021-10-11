@@ -12,7 +12,7 @@ TODO: status
 TODO: help
   displays this help text
 
-splitlobby <message>
+splitlobby
   Causes a "vote" to start where other players can elect to join you in splitting the lobby, follow someone
   of their choosing or remain in place. After 20 seconds you are moved to a new (empty) lobby and those that voted yes
   or are following someone that voted yes are also moved to that lobby.
