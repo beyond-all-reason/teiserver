@@ -2,7 +2,6 @@ defmodule Teiserver.Coordinator.LockTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.Lobby
   alias Teiserver.Common.PubsubListener
-  alias Teiserver.Account.UserCache
   alias Teiserver.{Client, Coordinator}
 
   import Teiserver.TeiserverTestLib,
@@ -12,10 +11,6 @@ defmodule Teiserver.Coordinator.LockTest do
     Teiserver.Coordinator.start_coordinator()
     %{socket: hsocket, user: host} = tachyon_auth_setup()
     %{socket: psocket, user: player} = tachyon_auth_setup()
-
-    # User needs to be a moderator (at this time) to start/stop Coordinator mode
-    UserCache.update_user(%{host | moderator: true})
-    Client.refresh_client(host.id)
 
     battle_data = %{
       cmd: "c.lobby.create",
