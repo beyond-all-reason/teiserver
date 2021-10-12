@@ -9,7 +9,7 @@ defmodule Teiserver.TcpServer do
   # Duration refers to how long it will track commands for
   # Limit is the number of commands that can be sent in that time
   @cmd_flood_duration 10
-  @cmd_flood_limit 10
+  # @cmd_flood_limit 10
 
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [

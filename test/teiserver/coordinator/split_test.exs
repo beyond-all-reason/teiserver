@@ -95,7 +95,7 @@ defmodule Teiserver.Coordinator.SplitTest do
     send(Client.get_client_by_id(player5.id).pid, {:put, :lobby_id, lobby_id})
     send(Client.get_client_by_id(player6.id).pid, {:put, :lobby_id, lobby_id})
 
-    data = %{cmd: "c.lobby.message", userid: player1.id, message: "$splitlobby"}
+    data = %{cmd: "c.lobby.message", message: "$splitlobby"}
     _tachyon_send(psocket1, data)
 
     # Check what got sent
