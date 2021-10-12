@@ -71,7 +71,9 @@ defmodule Teiserver.Protocols.Tachyon do
          {:ok, object} <- Jason.decode(unzipped) do
       {:ok, object}
     else
-      :error -> {:error, :base64_decode}
+      :error ->
+        Logger.warn("Got #{data}")
+        {:error, :base64_decode}
       {:error, :gzip_decompress} -> {:error, :gzip_decompress}
       {:error, %Jason.DecodeError{}} -> {:error, :bad_json}
     end

@@ -50,7 +50,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
   end
 
-  test "friendsplay", %{host: host, player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
+  test "friendsplay", %{player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
     assert player_client.lobby_id == lobby_id
@@ -94,7 +94,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     assert player_client2.lobby_id == lobby_id
   end
 
-  test "friends", %{host: host, player: player, psocket: psocket, hsocket: hsocket, lobby_id: lobby_id} do
+  test "friends", %{player: player, psocket: psocket, hsocket: hsocket, lobby_id: lobby_id} do
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
     assert player_client.lobby_id == lobby_id
