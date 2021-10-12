@@ -53,7 +53,7 @@ defmodule Teiserver.Protocols.Tachyon.LobbyIn do
       |> Map.merge(updates)
 
     if Lobby.allow?(state.userid, :mylobbystatus, state.lobby_id) do
-      case Coordinator.allow_battlestatus_update?(new_client, state.lobby_id) do
+      case Coordinator.attempt_battlestatus_update(new_client, state.lobby_id) do
         {true, allowed_client} ->
           Client.update(allowed_client, :client_updated_battlestatus)
         {false, _} ->
