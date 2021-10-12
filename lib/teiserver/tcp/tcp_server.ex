@@ -6,6 +6,11 @@ defmodule Teiserver.TcpServer do
   alias Teiserver.{User, Client}
   alias Teiserver.Tcp.{TcpLobby}
 
+  # Duration refers to how long it will track commands for
+  # Limit is the number of commands that can be sent in that time
+  @cmd_flood_duration 10
+  @cmd_flood_limit 10
+
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [
           {:cacertfile, String.t()} | {:certfile, String.t()} | {:keyfile, String.t()}
@@ -103,7 +108,8 @@ defmodule Teiserver.TcpServer do
       known_users: %{},
       known_battles: [],
       extra_logging: Application.get_env(:central, Teiserver)[:extra_logging],
-      script_password: nil
+      script_password: nil,
+      cmd_timestamps: []
     }
 
     Logger.info("New TCP connection #{Kernel.inspect(socket)}, IP: #{ip}")
@@ -133,8 +139,19 @@ defmodule Teiserver.TcpServer do
 
   # Main source of data ingress
   def handle_info({:tcp, _socket, data}, state) do
+    now = System.system_time(:second)
+    limiter = now - @cmd_flood_duration
+
+    cmd_timestamps = [now | state.cmd_timestamps]
+    |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
+
+    case Client.get_client_by_id(state.userid) do
+      nil -> :ok
+      client -> Client.update(%{client | cmd_count: Enum.count(cmd_timestamps)}, :silent)
+    end
+
     new_state = state.protocol_in.data_in(data, state)
-    {:noreply, new_state}
+    {:noreply, %{new_state | cmd_timestamps: cmd_timestamps}}
   end
 
   def handle_info({:ssl, _socket, data}, state) do
