@@ -2,20 +2,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @moduledoc """
   One consul server is created for each battle. It acts as a battle supervisor in addition to any
   host.
-
-  ### State values
-    Blacklist is a map of userids linking to the level they're allowed to go:
-      :banned --> Cannot join the battle
-      :spectator --> Can only spectate
-      :player --> Can play the game (missing keys default to this)
-
-    Whitelist works on the level they are allowed to go
-      :spectator --> Can be a spectator
-      :player --> Can be a player
-
-      Whitelist also has a :default key, if you are not in the whitelist then you
-      are limited by the default key (e.g. only certain people can play, anybody can spectate)
-      if :default is set to :banned then by default anybody not on the whitelist cannot join the game
   """
   use GenServer
   require Logger
@@ -198,20 +184,39 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   # Says if a status change is allowed to happen. If it is then an allowed status
   # is included with it.
-  @spec request_user_change_status(T.userid() | T.user(), map()) :: {boolean, Map.t() | nil}
-  defp request_user_change_status(userid, state) when is_integer(userid) do
-    client = Client.get_client_by_id(userid)
-    request_user_change_status(client, state)
+  @spec request_user_change_status(T.client(), map()) :: {boolean, Map.t() | nil}
+  defp request_user_change_status(client, state) do
+    existing = Client.get_client_by_id(client.userid)
+    request_user_change_status(client, existing, state)
   end
-  defp request_user_change_status(%{moderator: true, ready: false} = client, _state), do: {true, %{client | player: false}}
-  defp request_user_change_status(%{moderator: true} = client, _state), do: {true, client}
-  defp request_user_change_status(%{userid: userid} = client, state) do
+
+  @spec request_user_change_status(T.client(), T.client(), map()) :: {boolean, Map.t() | nil}
+  defp request_user_change_status(new_client, %{moderator: true, ready: false}, _state), do: {true, %{new_client | player: false}}
+  defp request_user_change_status(new_client, %{moderator: true}, _state), do: {true, new_client}
+  defp request_user_change_status(new_client, %{userid: userid} = existing, state) do
     list_status = get_list_status(userid, state)
 
+    # Check locks
+    new_client = state.locks
+    |> Enum.reduce(new_client, fn (lock, acc) ->
+      case lock do
+        :team -> %{acc | ally_team_number: existing.ally_team_number}
+        :allyid -> %{acc | team_number: existing.team_number}
+        :side -> %{acc | side: existing.side}
+
+        :player ->
+          if not existing.player, do: %{acc | player: false}, else: acc
+
+        :spectator ->
+          if existing.player, do: %{acc | player: true}, else: acc
+      end
+    end)
+
+    # Now we apply modifiers (unready = spec)
     cond do
-      list_status != :player and client.player == true -> {false, nil}
-      client.ready == false -> {true, %{client | player: false}}
-      true -> {true, client}
+      list_status != :player and new_client.player == true -> {false, nil}
+      new_client.ready == false -> {true, %{new_client | player: false}}
+      true -> {true, new_client}
     end
   end
 
@@ -392,6 +397,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       lobby_id: lobby_id,
       host_id: founder_id,
       gatekeeper: "default",
+      locks: [],
       bans: %{},
       split: nil,
       welcome_message: nil,

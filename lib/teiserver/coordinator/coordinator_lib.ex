@@ -25,6 +25,20 @@ gatekeeper (default | friends | friendsplay | clan)
     friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)
     TODO: clan: allows only members of an existing clan to join the game (enable after one member from each clan is present)
 
+lock (team | player | spectator | side)
+  Engages a lock on that mode, when engaged members are unable to change that attribute about themselves.
+  Hosts and the server are the only thing that will be able to change it. Moderators are typically exempt
+  from these restrictions.
+  Multiple locks can be engaged at the same time
+  - Team: Prevents a member from changing their teamally value (Team 1, 2 etc)
+  - Allyid: Prevents a member from changing their team value (also called playerid)
+  - Player: Prevents spectators becoming players
+  - Spectator: Prevents players becoming spectators
+  - Side: Prevents players changing their side (faction)
+
+unlock (team | player | spectator)
+  Disengages the lock on that mode
+
 welcome-message <message>
   Sets the welcome message sent to anybody joining the lobby
 

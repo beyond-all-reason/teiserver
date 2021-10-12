@@ -19,8 +19,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   #################### For everybody
   def handle_command(%{command: "status", senderid: senderid} = _cmd, state) do
+    locks = state.locks
+    |> Enum.map(fn l -> to_string(l) end)
+    |> Enum.join(", ")
+
     status_msg = [
       "Status for battle ##{state.lobby_id}",
+      "Locks: #{locks}",
       "Gatekeeper: #{state.gatekeeper}"
     ]
     Coordinator.send_to_user(senderid, status_msg)
@@ -104,8 +109,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  #################### Moderator only
-  # ----------------- General commands
+  #################### Host and Moderator
   def handle_command(%{command: "gatekeeper", remaining: mode} = cmd, state) do
     state = case mode do
       "friends" ->
@@ -122,24 +126,24 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, state)
   end
 
-  def handle_command(%{command: "cancelsplit"}, %{split: nil} = state) do
-    state
+  def handle_command(%{command: "lock", remaining: remaining} = cmd, state) do
+    new_locks = case get_lock(remaining) do
+      nil -> state.locks
+      lock ->
+        ConsulServer.say_command(cmd, state)
+        [lock | state.locks] |> Enum.uniq
+    end
+    %{state | locks: new_locks}
   end
 
-  def handle_command(%{command: "cancelsplit"} = cmd, state) do
-    :timer.send_after(50, :cancel_split)
-    ConsulServer.say_command(cmd, state)
-    state
-  end
-
-  def handle_command(%{command: "dosplit"}, %{split: nil} = state) do
-    state
-  end
-
-  def handle_command(%{command: "dosplit"} = cmd, %{split: split} = state) do
-    :timer.send_after(50, {:do_split, split.split_uuid})
-    ConsulServer.say_command(cmd, state)
-    state
+  def handle_command(%{command: "unlock", remaining: remaining} = cmd, state) do
+    new_locks = case get_lock(remaining) do
+      nil -> state.locks
+      lock ->
+        ConsulServer.say_command(cmd, state)
+        List.delete(state.locks, lock)
+    end
+    %{state | locks: new_locks}
   end
 
   def handle_command(%{command: "welcome-message", remaining: remaining} = cmd, state) do
@@ -192,6 +196,28 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         Lobby.force_change_client(state.coordinator_id, player_id, %{ready: true})
         ConsulServer.say_command(cmd, state)
     end
+  end
+
+  #################### Moderator only
+  # ----------------- General commands
+  def handle_command(%{command: "cancelsplit"}, %{split: nil} = state) do
+    state
+  end
+
+  def handle_command(%{command: "cancelsplit"} = cmd, state) do
+    :timer.send_after(50, :cancel_split)
+    ConsulServer.say_command(cmd, state)
+    state
+  end
+
+  def handle_command(%{command: "dosplit"}, %{split: nil} = state) do
+    state
+  end
+
+  def handle_command(%{command: "dosplit"} = cmd, %{split: split} = state) do
+    :timer.send_after(50, {:do_split, split.split_uuid})
+    ConsulServer.say_command(cmd, state)
+    state
   end
 
   def handle_command(%{command: "pull", remaining: target} = cmd, state) do
@@ -430,5 +456,17 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       # :player | :spectator | :banned
       level: :banned
     }, data)
+  end
+
+  @spec get_lock(String.t()) :: atom | nil
+  defp get_lock(name) do
+    case name |> String.downcase |> String.trim do
+      "team" -> :team
+      "allyid" -> :allyid
+      "player" -> :player
+      "spectator" -> :spectator
+      "side" ->  :side
+      _ -> nil
+    end
   end
 end
