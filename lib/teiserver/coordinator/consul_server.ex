@@ -47,7 +47,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_call({:request_user_change_status, userid}, _from, state) do
-    {:reply, allow_status_change?(userid, state), state}
+    {:reply, request_user_change_status(userid, state), state}
   end
 
   # Infos
@@ -198,13 +198,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   # Says if a status change is allowed to happen. If it is then an allowed status
   # is included with it.
-  @spec allow_status_change?(T.userid() | T.user(), map()) :: {boolean, Map.t() | nil}
-  defp allow_status_change?(userid, state) when is_integer(userid) do
+  @spec request_user_change_status(T.userid() | T.user(), map()) :: {boolean, Map.t() | nil}
+  defp request_user_change_status(userid, state) when is_integer(userid) do
     client = Client.get_client_by_id(userid)
-    allow_status_change?(client, state)
+    request_user_change_status(client, state)
   end
-  defp allow_status_change?(%{moderator: true}, _state), do: true
-  defp allow_status_change?(%{userid: userid} = client, state) do
+  defp request_user_change_status(%{moderator: true, ready: false} = client, _state), do: {true, %{client | player: false}}
+  defp request_user_change_status(%{moderator: true} = client, _state), do: {true, client}
+  defp request_user_change_status(%{userid: userid} = client, state) do
     list_status = get_list_status(userid, state)
 
     cond do
