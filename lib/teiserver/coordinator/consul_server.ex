@@ -196,7 +196,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  @spec allow_status_change?(T.userid() | T.user(), map()) :: boolean
+  # Says if a status change is allowed to happen. If it is then an allowed status
+  # is included with it.
+  @spec allow_status_change?(T.userid() | T.user(), map()) :: {boolean, Map.t() | nil}
   defp allow_status_change?(userid, state) when is_integer(userid) do
     client = Client.get_client_by_id(userid)
     allow_status_change?(client, state)
@@ -206,8 +208,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     list_status = get_list_status(userid, state)
 
     cond do
-      list_status != :player and client.player == true -> false
-      true -> true
+      list_status != :player and client.player == true -> {false, nil}
+      client.ready == false -> {true, %{client | player: false}}
+      true -> {true, client}
     end
   end
 

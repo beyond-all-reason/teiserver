@@ -1122,8 +1122,11 @@ defmodule Teiserver.Protocols.SpringIn do
         # This one needs a bit more nuance, for now we'll wrap it in this
         # later it's possible we don't want players updating their status
         if Lobby.allow?(state.userid, :mybattlestatus, state.lobby_id) do
-          if Coordinator.allow_battlestatus_update?(new_client, state.lobby_id) do
-            Client.update(new_client, :client_updated_battlestatus)
+          case Coordinator.allow_battlestatus_update?(new_client, state.lobby_id) do
+            {true, allowed_client} ->
+              Client.update(allowed_client, :client_updated_battlestatus)
+            {false, _} ->
+              :ok
           end
         end
 
