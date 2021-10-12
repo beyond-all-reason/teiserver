@@ -13,7 +13,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib}
 
   @always_allow ~w(status help y n follow)
-  @host_commands ~w(gatekeeper welcome-message specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay)
+  @host_commands ~w(gatekeeper welcome-message specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
