@@ -74,6 +74,7 @@ defmodule Teiserver.Coordinator do
     end
   end
 
+  @spec allow_battlestatus_update?(T.client(), T.lobby_id()) :: {boolean, Map.t() | nil}
   def allow_battlestatus_update?(client, lobby_id) do
     call_consul(lobby_id, {:request_user_change_status, client})
   end
