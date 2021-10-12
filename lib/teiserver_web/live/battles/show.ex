@@ -265,20 +265,14 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     {:noreply, socket}
   end
 
-  def handle_event("kick:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
-    Coordinator.cast_consul(id, %{
-      command: "kick",
-      remaining: int_parse(target_id),
-      senderid: bar_user.id,
-      vote: false,
-      silent: true
-    })
+  def handle_event("kick:" <> target_id, _event, %{assigns: %{id: id, bar_user: _bar_user}} = socket) do
+    Lobby.kick_user_from_battle(int_parse(target_id), id)
     {:noreply, socket}
   end
 
   def handle_event("ban:" <> target_id, _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do
     Coordinator.cast_consul(id, %{
-      command: "ban",
+      command: "lobbyban",
       remaining: int_parse(target_id),
       senderid: bar_user.id,
       vote: false,

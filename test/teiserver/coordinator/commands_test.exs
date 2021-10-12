@@ -53,7 +53,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
 
   end
 
-  test "specunready", %{lobby_id: lobby_id, player: player1, host: host, hsocket: hsocket} do
+  test "specunready", %{lobby_id: lobby_id, player: player1, hsocket: hsocket} do
     %{user: player2} = tachyon_auth_setup()
 
     # Add player2 to the battle but as a spectator
@@ -95,7 +95,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert readies == [false, false]
   end
 
-  test "makeready", %{lobby_id: lobby_id, player: player1, host: host, hsocket: hsocket} do
+  test "makeready", %{lobby_id: lobby_id, player: player1, hsocket: hsocket} do
     %{user: player2} = tachyon_auth_setup()
 
     # Add player2 to the battle but as a spectator
@@ -146,7 +146,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert readies == [false, true]
   end
 
-  test "pull user", %{lobby_id: lobby_id, host: host, hsocket: hsocket} do
+  test "pull user", %{lobby_id: lobby_id, hsocket: hsocket} do
     %{user: player2, socket: psocket} = tachyon_auth_setup()
 
     data = %{cmd: "c.lobby.message", message: "$pull ##{player2.id}"}
@@ -245,7 +245,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert bans == %{player.id => %{by: host.id, level: :banned, reason: "None given"}}
   end
 
-  test "error with no name", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
+  test "error with no name", %{player: player, hsocket: hsocket, lobby_id: lobby_id} do
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true
 
@@ -297,17 +297,17 @@ defmodule Teiserver.Coordinator.CommandsTest do
     }
   end
 
-  test "status", %{lobby_id: lobby_id, host: host, hsocket: hsocket} do
+  test "status", %{lobby_id: lobby_id, hsocket: hsocket} do
     data = %{cmd: "c.lobby.message", message: "$status"}
     _tachyon_send(hsocket, data)
 
     reply = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.communication.direct_message"
     assert reply["sender"] == Coordinator.get_coordinator_userid()
-    assert reply["message"] == ["Status for battle ##{lobby_id}", "Gatekeeper: default"]
+    assert reply["message"] == ["Status for battle ##{lobby_id}", "Locks: ", "Gatekeeper: default"]
   end
 
-  test "help", %{host: host, hsocket: hsocket} do
+  test "help", %{hsocket: hsocket} do
     data = %{cmd: "c.lobby.message", message: "$help"}
     _tachyon_send(hsocket, data)
 

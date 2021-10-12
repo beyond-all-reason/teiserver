@@ -2,9 +2,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   use CentralWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.TeiserverTestLib
-  alias Teiserver.Account.UserCache
-  alias Teiserver.Client
+  # alias Teiserver.TeiserverTestLib
 
   setup do
     GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
