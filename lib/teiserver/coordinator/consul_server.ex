@@ -215,7 +215,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # Now we apply modifiers (unready = spec)
     cond do
       list_status != :player and new_client.player == true -> {false, nil}
-      new_client.ready == false -> {true, %{new_client | player: false}}
+      new_client.ready == false ->
+        LobbyChat.sayprivateex(state.coordinator_id, userid, "You have been spec'd as you are unready. Please disable auto-unready in your lobby settings to prevent this from happening.", state.lobby_id)
+        {true, %{new_client | player: false}}
       true -> {true, new_client}
     end
   end
