@@ -502,7 +502,6 @@ defmodule Teiserver.User do
             end
 
           user.verified == false ->
-            Logger.warn("Unverified login with #{lobby}")
             Account.update_user_stat(user.id, %{
               lobby_client: lobby,
               lobby_hash: lobby_hash,
@@ -553,7 +552,6 @@ defmodule Teiserver.User do
             {:error, "Banned"}
 
           user.verified == false ->
-            Logger.warn("Unverified login with #{lobby}")
             Account.update_user_stat(user.id, %{
               lobby_client: lobby,
               lobby_hash: lobby_hash,

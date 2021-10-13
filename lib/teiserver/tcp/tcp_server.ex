@@ -9,7 +9,7 @@ defmodule Teiserver.TcpServer do
   # Duration refers to how long it will track commands for
   # Limit is the number of commands that can be sent in that time
   @cmd_flood_duration 10
-  # @cmd_flood_limit 10
+  @cmd_flood_limit 10
 
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [
@@ -145,9 +145,8 @@ defmodule Teiserver.TcpServer do
     cmd_timestamps = [now | state.cmd_timestamps]
     |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
 
-    case Client.get_client_by_id(state.userid) do
-      nil -> :ok
-      client -> Client.update(%{client | cmd_count: Enum.count(cmd_timestamps)}, :silent)
+    if Enum.count(cmd_timestamps) > @cmd_flood_limit do
+      Logger.error("Command overflow from #{state.username}/#{state.userid} with #{Enum.count(cmd_timestamps)} commands")
     end
 
     new_state = state.protocol_in.data_in(data, state)
