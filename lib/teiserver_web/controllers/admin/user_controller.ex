@@ -473,6 +473,42 @@ defmodule TeiserverWeb.Admin.UserController do
     |> render("banhash_form.html")
   end
 
+  def full_chat(conn, params = %{"id" => id}) do
+    user = Account.get_user!(id)
+
+    mode = case params["mode"] do
+      "lobby" -> "lobby"
+      _ -> "room"
+    end
+
+    messages = case mode do
+      "lobby" ->
+        Chat.list_lobby_messages(
+          search: [
+            user_id: user.id
+          ],
+          limit: 250,
+          order_by: "Newest first"
+        )
+      "room" ->
+        Chat.list_room_messages(
+          search: [
+            user_id: user.id
+          ],
+          limit: 250,
+          order_by: "Newest first"
+        )
+    end
+
+    conn
+    |> assign(:user, user)
+    |> assign(:mode, mode)
+    |> assign(:messages, messages)
+    |> add_breadcrumb(name: "Show: #{user.name}", url: Routes.ts_admin_user_path(conn, :show, id))
+    |> add_breadcrumb(name: "Chat logs", url: conn.request_path)
+    |> render("full_chat.html")
+  end
+
   @spec search_defaults(Plug.Conn.t()) :: Map.t()
   defp search_defaults(_conn) do
     %{
