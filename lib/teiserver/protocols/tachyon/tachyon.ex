@@ -72,7 +72,9 @@ defmodule Teiserver.Protocols.Tachyon do
       {:ok, object}
     else
       :error ->
-        Logger.warn("Got #{data}")
+        # Previously got an error with data 'OK cmd=TACHYON' which suggests
+        # it was still in Spring mode
+        Logger.warn("Got '#{data}'")
         {:error, :base64_decode}
       {:error, :gzip_decompress} -> {:error, :gzip_decompress}
       {:error, %Jason.DecodeError{}} -> {:error, :bad_json}

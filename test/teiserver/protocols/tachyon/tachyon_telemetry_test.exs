@@ -13,7 +13,7 @@ defmodule Teiserver.Protocols.TachyonTelemetryTest do
   test "unauth properties" do
     %{socket: socket} = tls_setup()
     _send_raw(socket, "TACHYON\n")
-    _recv_raw(socket)
+    assert _recv_raw(socket) == "OK cmd=TACHYON\n"
 
     assert Enum.count(Telemetry.list_unauth_properties()) == 0
 

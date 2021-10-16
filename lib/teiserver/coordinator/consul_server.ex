@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Coordinator, Client, User}
+  alias Teiserver.{Coordinator, Client, User, Battle}
   alias Teiserver.Battle.{Lobby, LobbyChat}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   # alias Phoenix.PubSub
@@ -41,7 +41,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     lobby = Lobby.get_lobby!(state.lobby_id)
     case Map.get(lobby.tags, "server/match/uuid", nil) do
       nil ->
-        uuid = UUID.uuid4()
+        uuid = Battle.generate_lobby_uuid()
         lobby = Lobby.get_lobby!(state.lobby_id)
         new_tags = Map.put(lobby.tags, "server/match/uuid", uuid)
         Lobby.set_script_tags(state.lobby_id, new_tags)
@@ -69,7 +69,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(:delayed_startup, state) do
-    uuid = UUID.uuid4()
+    uuid = Battle.generate_lobby_uuid()
     battle = Lobby.get_lobby!(state.lobby_id)
     new_tags = Map.put(battle.tags, "server/match/uuid", uuid)
     Lobby.set_script_tags(state.lobby_id, new_tags)
@@ -82,7 +82,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(:match_stop, state) do
-    uuid = UUID.uuid4()
+    uuid = Battle.generate_lobby_uuid()
     battle = Lobby.get_lobby!(state.lobby_id)
     new_tags = Map.put(battle.tags, "server/match/uuid", uuid)
     Lobby.set_script_tags(state.lobby_id, new_tags)
