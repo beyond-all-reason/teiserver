@@ -21,8 +21,9 @@
   <% "lobby" -> %>
     <a class="btn btn-outline-secondary" href="<%= Routes.ts_admin_user_path(@conn, :full_chat, @user) %>?mode=room">Swap to Room chat</a>
 <% end %>
-
-
+&nbsp;&nbsp;&nbsp;
+Newest chat at the top of the list (read bottom to top).
+<br /><br />
 
 <%= case @mode do %>
   <% "room" -> %>
