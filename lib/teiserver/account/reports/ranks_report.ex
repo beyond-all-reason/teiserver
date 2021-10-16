@@ -26,7 +26,7 @@ defmodule Teiserver.Account.RanksReport do
         data_less_than: {"last_login", end_date |> to_string},
         data_equal: {"bot", "false"}
       ],
-      order_by: {:data, "ingame_minutes", :desc},
+      order_by: {:data, "rank", :desc},
       limit: 100
     )
 

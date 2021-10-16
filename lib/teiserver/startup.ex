@@ -17,7 +17,7 @@ defmodule Teiserver.Startup do
 
     # Example site configs
     add_site_config_type(%{
-      key: "teiserver.Register with Chobby only",
+      key: "teiserver.Require Chobby login",
       section: "Registrations",
       type: "boolean",
       permissions: ["admin.dev.developer"],

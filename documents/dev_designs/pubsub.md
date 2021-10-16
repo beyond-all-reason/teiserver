@@ -43,7 +43,7 @@ Valid events:
   {:lobby_update, :add_user, lobby_id, userid}
   {:lobby_update, :remove_user, lobby_id, userid}
   {:lobby_update, :kick_user, lobby_id, userid}
-  
+
   # Coordinator
   {:lobby_update, :consul_server_updated, lobby_id, reason}
 
@@ -58,9 +58,6 @@ Valid events:
   {:lobby_chat, :say, lobby_id, userid, msg}
   {:lobby_chat, :sayex, lobby_id, userid, msg}
 ```
-
-#### live_battle_updates:#{battle_lobby_id}
-In the process of being phased out with the introduction of teiserver_liveview_lobby_updates
 
 #### teiserver_liveview_lobby_updates:#{battle_lobby_id}
 These are updates sent from the LiveBattle genservers (used to throttle/batch messages sent to the liveviews).
