@@ -67,6 +67,15 @@ defmodule Teiserver.Chat.RoomMessageLib do
         )
   end
 
+  def _search(query, :term, ref) do
+    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
+
+    from room_messages in query,
+      where: (
+            ilike(room_messages.content, ^ref_like)
+        )
+  end
+
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Name (A-Z)") do
@@ -91,14 +100,14 @@ defmodule Teiserver.Chat.RoomMessageLib do
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
-  def preload(query, _preloads) do
-    # query = if :things in preloads, do: _preload_things(query), else: query
+  def preload(query, preloads) do
+    query = if :user in preloads, do: _preload_users(query), else: query
     query
   end
 
-  # def _preload_things(query) do
-  #   from room_messages in query,
-  #     left_join: things in assoc(room_messages, :things),
-  #     preload: [things: things]
-  # end
+  def _preload_users(query) do
+    from room_messages in query,
+      left_join: users in assoc(room_messages, :user),
+      preload: [user: users]
+  end
 end

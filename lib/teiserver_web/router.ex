@@ -187,6 +187,9 @@ defmodule TeiserverWeb.Router do
 
         resources("/banhash", BanHashController, only: [:index, :show, :delete, :create])
 
+        resources("/chat", ChatController, only: [:index])
+        post("/chat", ChatController, :index)
+
         get("/lobbies/:id/chat", LobbyController, :chat)
       end
     end

@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Admin.BanHashController do
     user: {Central.Account.AuthLib, :current_user}
 
   plug AssignPlug,
-    sidemenu_active: "account"
+    sidemenu_active: "teiserver_admin"
 
   plug :add_breadcrumb, name: 'Account', url: '/teiserver'
   plug :add_breadcrumb, name: 'BanHashes', url: '/teiserver/ban_hashes'
