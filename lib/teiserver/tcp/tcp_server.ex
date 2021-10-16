@@ -9,7 +9,7 @@ defmodule Teiserver.TcpServer do
   # Duration refers to how long it will track commands for
   # Limit is the number of commands that can be sent in that time
   @cmd_flood_duration 10
-  @cmd_flood_limit 10
+  @cmd_flood_limit 20
 
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [
@@ -109,6 +109,7 @@ defmodule Teiserver.TcpServer do
       known_battles: [],
       extra_logging: Application.get_env(:central, Teiserver)[:extra_logging],
       script_password: nil,
+      exempt_from_cmd_throttle: true,
       cmd_timestamps: []
     }
 
@@ -138,7 +139,7 @@ defmodule Teiserver.TcpServer do
   end
 
   # Main source of data ingress
-  def handle_info({:tcp, _socket, data}, state) do
+  def handle_info({:tcp, _socket, data}, %{exempt_from_cmd_throttle: false} = state) do
     now = System.system_time(:second)
     limiter = now - @cmd_flood_duration
 
@@ -151,6 +152,10 @@ defmodule Teiserver.TcpServer do
 
     new_state = state.protocol_in.data_in(data, state)
     {:noreply, %{new_state | cmd_timestamps: cmd_timestamps}}
+  end
+  def handle_info({:tcp, _socket, data}, %{exempt_from_cmd_throttle: true} = state) do
+    new_state = state.protocol_in.data_in(data, state)
+    {:noreply, new_state}
   end
 
   def handle_info({:ssl, _socket, data}, state) do

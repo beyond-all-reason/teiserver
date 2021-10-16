@@ -626,7 +626,13 @@ defmodule Teiserver.Protocols.SpringOut do
 
     PubSub.unsubscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
     PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
-    %{state | user: user, username: user.name, userid: user.id}
+
+    exempt_from_cmd_throttle = if user.moderator == true or user.bot == true do
+      true
+    else
+      false
+    end
+    %{state | user: user, username: user.name, userid: user.id, exempt_from_cmd_throttle: exempt_from_cmd_throttle}
   end
 
   @spec do_login_accepted(map(), String.t()) :: map()
