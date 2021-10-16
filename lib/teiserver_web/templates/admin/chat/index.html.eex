@@ -33,7 +33,11 @@
         <%= for msg <- @messages do %>
           <tr>
             <td><%= msg.chat_room %></td>
-            <td><%= msg.user.name %></td>
+            <td>
+              <a href='<%= Routes.ts_admin_user_path(@conn, :full_chat, msg.user.id) %>?mode=room'>
+                <%= msg.user.name %>
+              </a>
+            </td>
             <td><%= msg.content %></td>
             <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
           </tr>
@@ -60,7 +64,11 @@
                 <%= msg.lobby_guid |> String.slice(0..7) %>
               </a>
             </td>
-            <td><%= msg.user.name %></td>
+            <td>
+              <a href='<%= Routes.ts_admin_user_path(@conn, :full_chat, msg.user.id) %>?mode=lobby'>
+                <%= msg.user.name %>
+              </a>
+            </td>
             <td><%= msg.content %></td>
             <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
           </tr>
