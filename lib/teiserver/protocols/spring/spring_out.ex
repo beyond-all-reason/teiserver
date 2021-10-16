@@ -334,7 +334,8 @@ defmodule Teiserver.Protocols.SpringOut do
   # Commands
   defp do_reply(:ring, {ringer_id, state_userid}) do
     user = User.get_user_by_id(state_userid)
-    if ringer_id not in (user.ignored || []) do
+    ringer_user = User.get_user_by_id(ringer_id)
+    if ringer_id not in (user.ignored || []) or ringer_user.moderator == true or ringer_user.bot == true do
       ringer_name = User.get_username(ringer_id)
       "RING #{ringer_name}\n"
     end
@@ -425,7 +426,8 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:direct_message, {from_id, messages, state_user}) when is_list(messages) do
-    if from_id not in (state_user.ignored || []) do
+    from_user = User.get_user_by_id(from_id)
+    if from_id not in (state_user.ignored || []) or from_user.moderator == true or from_user.bot == true do
       from_name = User.get_username(from_id)
       messages
       |> Enum.map(fn msg ->
@@ -436,14 +438,16 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:direct_message, {from_id, msg, state_user}) do
-    if from_id not in (state_user.ignored || []) do
+    from_user = User.get_user_by_id(from_id)
+    if from_id not in (state_user.ignored || []) or from_user.moderator == true or from_user.bot == true do
       from_name = User.get_username(from_id)
       "SAIDPRIVATE #{from_name} #{msg}\n"
     end
   end
 
   defp do_reply(:chat_message, {from_id, room_name, messages, state_user}) when is_list(messages) do
-    if from_id not in (state_user.ignored || []) do
+    from_user = User.get_user_by_id(from_id)
+    if from_id not in (state_user.ignored || []) or from_user.moderator == true or from_user.bot == true do
       from_name = User.get_username(from_id)
       messages
       |> Enum.map(fn msg ->
@@ -454,14 +458,16 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:chat_message, {from_id, room_name, msg, state_user}) do
-    if from_id not in (state_user.ignored || []) do
+    from_user = User.get_user_by_id(from_id)
+    if from_id not in (state_user.ignored || []) or from_user.moderator == true or from_user.bot == true do
       from_name = User.get_username(from_id)
       "SAID #{room_name} #{from_name} #{msg}\n"
     end
   end
 
   defp do_reply(:chat_message_ex, {from_id, room_name, msg, state_user}) do
-    if from_id not in (state_user.ignored || []) do
+    from_user = User.get_user_by_id(from_id)
+    if from_id not in (state_user.ignored || []) or from_user.moderator == true or from_user.bot == true do
       from_name = User.get_username(from_id)
       "SAIDEX #{room_name} #{from_name} #{msg}\n"
     end
