@@ -118,12 +118,6 @@ defmodule Teiserver.Client do
       if client.lobby_id do
         PubSub.broadcast(
           Central.PubSub,
-          "live_battle_updates:#{client.lobby_id}",
-          {:updated_client, client, reason}
-        )
-
-        PubSub.broadcast(
-          Central.PubSub,
           "teiserver_lobby_updates:#{client.lobby_id}",
           {:lobby_update, :updated_client_status, client.lobby_id, {client.userid, reason}}
         )

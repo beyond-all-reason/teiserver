@@ -4,6 +4,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   performing their actions in the name of the coordinator
   """
   use GenServer
+  alias Central.Config
   alias Teiserver.{Account, User, Client, Coordinator}
   alias Phoenix.PubSub
   require Logger
@@ -110,6 +111,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
       if not Enum.empty?(hashes) do
         hashid = hd(hashes).id
         Logger.error("Automod found a hash matching hash##{hashid} for user #{userid}")
+        # TODO: Find a way to make this a silent report, maybe flag ban evasion differently?
         # coordinator_id = Coordinator.get_coordinator_userid()
         # Central.Account.create_report(%{
         #   "location" => "automod",
@@ -132,7 +134,22 @@ defmodule Teiserver.Coordinator.AutomodServer do
         "No action"
       end
     else
-      "User has no hw fingerpint"
+      handle_no_hash(userid)
+
     end
+  end
+
+  @spec handle_no_hash(T.userid()) :: String.t()
+  defp handle_no_hash(userid) do
+    # case Config.get_site_config_cache("teiserver.Require Chobby login") do
+    #   true ->
+
+    #   false ->
+
+    # end
+
+    user = User.get_user_by_id(userid)
+    Logger.warn("No HW hash from #{user.name}/#{userid}")
+    "User has no hw fingerpint"
   end
 end
