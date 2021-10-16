@@ -7,6 +7,7 @@ defmodule Teiserver.Battle do
   alias Central.Helpers.QueryHelpers
   alias Central.Repo
   alias Teiserver.{Telemetry, Coordinator}
+  alias Teiserver.Battle.Lobby
 
   alias Teiserver.Battle.Match
   alias Teiserver.Battle.MatchLib
@@ -230,6 +231,28 @@ defmodule Teiserver.Battle do
     end
 
     Coordinator.cast_consul(lobby_id, :match_stop)
+  end
+
+  def generate_lobby_uuid() do
+    uuid = UUID.uuid4()
+
+    # Check if this uuid is present in the current set of lobbies
+    active_lobbies = Lobby.list_battles()
+    |> Enum.filter(fn lobby -> lobby.tags["server/match/uuid"] == uuid end)
+
+    case Enum.empty?(active_lobbies) do
+      false ->
+        generate_lobby_uuid()
+
+      true ->
+        # Not in an active lobby, lets check the DB
+        case get_match(nil, search: [uuid: uuid]) do
+          nil ->
+            uuid
+          _ ->
+            generate_lobby_uuid()
+        end
+    end
   end
 
   def save_match_stats(match_id, stats) do

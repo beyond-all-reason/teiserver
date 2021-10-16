@@ -113,6 +113,8 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   # Cache functions
+  defdelegate list_lobby_ids(), to: LobbyCache
+  defdelegate list_battles(), to: LobbyCache
   defdelegate update_lobby(lobby, data, reason), to: LobbyCache
   defdelegate get_lobby!(id), to: LobbyCache
   defdelegate get_lobby(id), to: LobbyCache
@@ -639,17 +641,5 @@ defmodule Teiserver.Battle.Lobby do
       true ->
         true
     end
-  end
-
-  def list_lobby_ids() do
-    case ConCache.get(:lists, :lobbies) do
-      nil -> []
-      ids -> ids
-    end
-  end
-
-  def list_battles() do
-    list_lobby_ids()
-    |> Enum.map(fn lobby_id -> ConCache.get(:lobbies, lobby_id) end)
   end
 end
