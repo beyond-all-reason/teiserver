@@ -365,6 +365,25 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+  def handle_command(%{command: "timeout", remaining: target} = cmd, state) do
+    [target | reason_list] = String.split(target, " ")
+    case ConsulServer.get_user(target, state) do
+      nil ->
+        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
+      target_id ->
+        reason = if reason_list == [], do: "You have been given a timeout on the naughty step", else: Enum.join(reason_list, " ")
+        timeout = new_timeout(%{level: :banned, by: cmd.senderid, reason: reason}, state)
+        new_timeouts = Map.put(state.timeouts, target_id, timeout)
+
+        Lobby.kick_user_from_battle(target_id, state.lobby_id)
+
+        ConsulServer.say_command(cmd, state)
+
+        %{state | timeouts: new_timeouts}
+        |> ConsulServer.broadcast_update("timeout")
+    end
+  end
+
   def handle_command(%{command: "lobbyban", remaining: target} = cmd, state) do
     [target | reason_list] = String.split(target, " ")
     case ConsulServer.get_user(target, state) do
@@ -453,6 +472,15 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     Map.merge(%{
       by: state.coordinator_id,
       reason: "None given",
+      # :player | :spectator | :banned
+      level: :banned
+    }, data)
+  end
+
+  defp new_timeout(data, state) do
+    Map.merge(%{
+      by: state.coordinator_id,
+      reason: "You have been given a timeout on the naughty step",
       # :player | :spectator | :banned
       level: :banned
     }, data)
