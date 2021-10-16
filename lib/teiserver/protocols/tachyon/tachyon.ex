@@ -98,7 +98,13 @@ defmodule Teiserver.Protocols.Tachyon do
     send(self(), {:action, {:login_end, nil}})
     PubSub.unsubscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
-    %{state | user: user, username: user.name, userid: user.id}
+
+    exempt_from_cmd_throttle = if user.moderator == true or user.bot == true do
+      true
+    else
+      false
+    end
+    %{state | user: user, username: user.name, userid: user.id, exempt_from_cmd_throttle: exempt_from_cmd_throttle}
   end
 
   defp unzip(data) do

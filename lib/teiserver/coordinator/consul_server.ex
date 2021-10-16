@@ -360,8 +360,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
             nil
         end
 
-      user ->
-        user
+      userid ->
+        userid
     end
   end
 
