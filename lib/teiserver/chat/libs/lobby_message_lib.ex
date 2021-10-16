@@ -72,6 +72,15 @@ defmodule Teiserver.Chat.LobbyMessageLib do
         )
   end
 
+  def _search(query, :term, ref) do
+    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
+
+    from lobby_messages in query,
+      where: (
+            ilike(lobby_messages.content, ^ref_like)
+        )
+  end
+
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Name (A-Z)") do

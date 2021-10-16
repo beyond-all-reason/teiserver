@@ -21,6 +21,7 @@
 <table class="table table-sm">
   <thead>
     <tr>
+      <th>#</th>
       <th>Type</th>
       <th>Value</th>
       <th>Based on</th>
@@ -31,6 +32,7 @@
   <tbody>
 <%= for ban_hash <- @ban_hashes do %>
     <tr>
+      <td><%= ban_hash.id %></td>
       <td><%= ban_hash.type %></td>
       <td><%= ban_hash.value %></td>
       <td><%= ban_hash.user.name %></td>

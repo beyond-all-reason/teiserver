@@ -1,0 +1,10 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= central_component "section_menu_button",
+  name: "search",
+  label: "Search",
+  active: @active,
+  icon: Central.Communication.CommentLib.icon(),
+  bsname: bsname,
+  url: Routes.ts_admin_chat_path(@conn, :index)
+%>
