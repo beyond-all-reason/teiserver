@@ -112,12 +112,30 @@ defmodule Central.Account.ReportLib do
       where: reports.id in ^id_list
   end
 
+  def _search(query, :expired, false) do
+    now = Timex.now()
+    from reports in query,
+      where: reports.expires > ^now or is_nil(reports.expires)
+  end
+
+  def _search(query, :expired, true) do
+    now = Timex.now()
+    from reports in query,
+      where: reports.expires <= ^now
+  end
+
   def _search(query, :user_id, user_id) do
     from reports in query,
       where:
         reports.reporter_id == ^user_id or
           reports.target_id == ^user_id or
           reports.responder_id == ^user_id
+  end
+
+  def _search(query, :target_id, target_id) do
+    from reports in query,
+      where:
+        reports.target_id == ^target_id
   end
 
   def _search(query, :filter, "all"), do: query
