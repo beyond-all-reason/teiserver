@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Admin.BanHashController do
   plug :add_breadcrumb, name: 'BanHashes', url: '/teiserver/ban_hashes'
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def index(conn, params) do
+  def index(conn, _params) do
     ban_hashes = Account.list_ban_hashes(
       search: [
         # simple_search: Map.get(params, "s", "") |> String.trim,
