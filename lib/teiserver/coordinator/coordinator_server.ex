@@ -102,12 +102,42 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   # Client inout
   def handle_info({:client_inout, :login, userid}, state) do
     user = User.get_user_by_id(userid)
-    if User.is_warned?(user) do
-      [_ | expires] = user.warned
-      if expires == nil do
-        Coordinator.send_to_user(userid, "This is a reminder that you received a formal warning for misbehaving. This is your last warning and this warning does not expire.")
-      else
-        Coordinator.send_to_user(userid, "This is a reminder that you recently received a formal warning for misbehaving, this warning will expire #{expires}.")
+    if User.is_warned?(user) or User.is_muted?(user) do
+      reports = Account.list_reports(search: [
+        target_id: userid,
+        expired: false,
+        filter: "closed"
+      ])
+      |> Enum.group_by(fn report ->
+        report.response_action
+      end)
+
+      if User.is_warned?(user) do
+        reasons = reports["Warn"]
+        |> Enum.map(fn report -> " - " <> report.reason end)
+
+        [_, expires] = user.warned
+        if expires == nil do
+          msg = ["This is a reminder that you received one or more formal warnings for misbehaving as listed below. This is your last warning and this warning does not expire." | reasons]
+          Coordinator.send_to_user(userid, msg)
+        else
+          msg = ["This is a reminder that you recently received one or more formal warnings as listed below, the warnings expire #{expires}." | reasons]
+          Coordinator.send_to_user(userid, msg)
+        end
+      end
+
+      if User.is_muted?(user) do
+        reasons = reports["Mute"]
+        |> Enum.map(fn report -> " - " <> report.reason end)
+
+        [_, expires] = user.muted
+        if expires == nil do
+          # They're perma muted, we don't really need to say anything else to them tbh
+          nil
+        else
+          msg = ["This is a reminder that you are currently muted for reasons listed below, the muting will expire #{expires}." | reasons]
+          Coordinator.send_to_user(userid, msg)
+        end
       end
     end
     {:noreply, state}

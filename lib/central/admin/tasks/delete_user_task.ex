@@ -13,6 +13,12 @@ defmodule Central.Admin.DeleteUserTask do
   end
 
   defp do_delete_user(%{id: userid} = user) do
+    # Reports
+    Account.list_reports(search: [user_id: userid])
+    |> Enum.each(fn report ->
+      Account.delete_report(report)
+    end)
+
     # Group memberships
     Account.list_group_memberships(user_id: userid)
     |> Enum.each(fn ugm ->
