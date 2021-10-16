@@ -61,7 +61,10 @@ speclock <user>
 forceplay <user>
   Forces the user into a player position
 
-lobbyban <user> <reason>
+timeout <user> <reason, default: You have been given a timeout on the naughty step>
+  Bans the user from the lobby for 1 game, will expire once the game is over
+
+lobbyban <user> <reason, default: None given>
   Bans the user from the lobby but not the server, will refresh on !rehost
 
 lobbybanmult [<user>]

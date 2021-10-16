@@ -29,7 +29,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_call({:request_user_join_battle, userid}, _from, state) do
-    {:reply, allow_join?(userid, state), state}
+    {:reply, allow_join(userid, state), state}
   end
 
   def handle_call({:request_user_change_status, userid}, _from, state) do
@@ -97,7 +97,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       end
     end)
 
-    {:noreply, state}
+    {:noreply, %{state | timeouts: %{}}}
   end
 
   def handle_info({:user_joined, userid}, state) do
@@ -215,7 +215,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # Now we apply modifiers (unready = spec)
     cond do
       list_status != :player and new_client.player == true -> {false, nil}
-      new_client.ready == false ->
+      new_client.ready == false and new_client.player == true ->
         LobbyChat.sayprivateex(state.coordinator_id, userid, "You have been spec'd as you are unready. Please disable auto-unready in your lobby settings to prevent this from happening.", state.lobby_id)
         {true, %{new_client | player: false}}
       true -> {true, new_client}
@@ -226,7 +226,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # Checks against the relevant gatekeeper settings and banlist
   # if the user can change their status
   defp get_list_status(userid, state) do
-    ban_level = check_ban_state(userid, state.bans)
+    {ban_level, _reason} = check_ban_state(userid, state)
     case state.gatekeeper do
       "default" ->
         ban_level
@@ -279,25 +279,30 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  def allow_join?(userid, state) do
+  @spec allow_join(T.userid(), Map.t()) :: {true, nil} | {false, String.t()}
+  defp allow_join(userid, state) do
     client = Client.get_client_by_id(userid)
-    ban_state = check_ban_state(userid, state.bans)
+    {ban_state, reason} = check_ban_state(userid, state)
 
     cond do
       client == nil ->
-        false
+        {false, "No client"}
 
       client.moderator ->
-        true
+        {true, nil}
 
       ban_state == :banned ->
-        false
+        {false, reason}
 
       state.gatekeeper == "friends" ->
-        is_on_friendlist?(userid, state, :all)
+        if is_on_friendlist?(userid, state, :all) do
+          {true, nil}
+        else
+          {false, "Friends only gatekeeper"}
+        end
 
       true ->
-        true
+        {true, nil}
     end
   end
 
@@ -310,11 +315,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state
   end
 
-  @spec check_ban_state(T.userid(), map()) :: :player | :spectator | :banned
-  defp check_ban_state(userid, bans) do
-    case bans[userid] do
-      nil -> :player
-      user_ban -> user_ban.level
+  @spec check_ban_state(T.userid(), map()) :: {:player | :spectator | :banned, String.t()}
+  defp check_ban_state(userid, %{bans: bans, timeouts: timeouts}) do
+    cond do
+      bans[userid] == nil and timeouts[userid] == nil -> {:player, "Default"}
+      timeouts[userid] != nil -> {timeouts[userid].level, timeouts[userid].reason}
+      bans[userid] != nil -> {bans[userid].level, bans[userid].reason}
     end
   end
 
@@ -401,6 +407,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       gatekeeper: "default",
       locks: [],
       bans: %{},
+      timeouts: %{},
       split: nil,
       welcome_message: nil,
     }

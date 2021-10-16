@@ -215,6 +215,25 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert User.is_banned?(player.id) == false
   end
 
+  test "timeout", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.player == true
+
+    data = %{cmd: "c.lobby.message", message: "$timeout #{player.name} Because I said so"}
+    _tachyon_send(hsocket, data)
+
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.lobby_id == nil
+
+    # Check ban state (we added this after bans, don't want to get them confused)
+    bans = Coordinator.call_consul(lobby_id, {:get, :bans})
+    assert bans == %{}
+
+    # Check timeout state
+    timeouts = Coordinator.call_consul(lobby_id, {:get, :timeouts})
+    assert timeouts == %{player.id => %{by: host.id, level: :banned, reason: "Because I said so"}}
+  end
+
   test "ban by name", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
     player_client = Client.get_client_by_id(player.id)
     assert player_client.player == true

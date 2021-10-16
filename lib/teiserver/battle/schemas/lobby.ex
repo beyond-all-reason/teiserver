@@ -472,6 +472,7 @@ defmodule Teiserver.Battle.Lobby do
     lobby_id = int_parse(lobby_id)
     battle = get_battle(lobby_id)
     user = User.get_user_by_id(userid)
+    {consul_response, consul_reason} = Coordinator.call_consul(lobby_id, {:request_user_join_battle, userid})
     cond do
       user == nil ->
         {:failure, "You are not a user"}
@@ -485,8 +486,8 @@ defmodule Teiserver.Battle.Lobby do
       battle.password != nil and password != battle.password and user.moderator == false ->
         {:failure, "Invalid password"}
 
-      Coordinator.call_consul(lobby_id, {:request_user_join_battle, userid}) == false ->
-        {:failure, "Rejected from lobby"}
+      consul_response == false ->
+        {:failure, consul_reason}
 
       true ->
         # Okay, so far so good, what about the host? Are they okay with it?
