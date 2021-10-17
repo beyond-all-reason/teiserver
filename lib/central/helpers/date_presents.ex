@@ -39,6 +39,7 @@ defmodule Central.Helpers.DatePresets do
   ]
 
   @long_ranges [
+    "This month",
     "Last 3 months",
     "Last 6 months",
     "Last 12 months"

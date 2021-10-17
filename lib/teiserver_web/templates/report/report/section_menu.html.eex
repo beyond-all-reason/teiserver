@@ -35,3 +35,12 @@
   bsname: bsname,
   url: Routes.ts_reports_report_path(@conn, :show, "verified")
 %>
+
+<%= central_component "section_menu_button",
+  name: "retention",
+  label: "Retention",
+  active: @active,
+  icon: "far fa-campground",
+  bsname: bsname,
+  url: Routes.ts_reports_report_path(@conn, :show, "retention")
+%>
