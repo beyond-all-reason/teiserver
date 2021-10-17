@@ -474,7 +474,14 @@ defmodule Teiserver.Battle.Lobby do
     lobby_id = int_parse(lobby_id)
     battle = get_battle(lobby_id)
     user = User.get_user_by_id(userid)
-    {consul_response, consul_reason} = Coordinator.call_consul(lobby_id, {:request_user_join_battle, userid})
+
+    # In theory this would never happen but it's possible to see this at startup when
+    # not everything is loaded and ready, hence the case statement
+    {consul_response, consul_reason} = case Coordinator.call_consul(lobby_id, {:request_user_join_battle, userid}) do
+      {a, b} -> {a, b}
+      nil -> {true, nil}
+    end
+
     cond do
       user == nil ->
         {:failure, "You are not a user"}
