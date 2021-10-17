@@ -50,6 +50,14 @@
     text: "Verified",
     link: Routes.ts_reports_report_path(@conn, :show, "verified")
   %>
+
+  <%=
+    central_component "menu_card",
+    icon: "fas fa-campground",
+    name: "retention",
+    text: "Retention",
+    link: Routes.ts_reports_report_path(@conn, :show, "retention")
+  %>
 </div>
 
 <div class="row page-row">

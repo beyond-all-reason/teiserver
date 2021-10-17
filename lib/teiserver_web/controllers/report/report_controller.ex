@@ -31,6 +31,9 @@ defmodule TeiserverWeb.Report.ReportController do
         "verified" ->
           Teiserver.Account.VerifiedReport.run(conn, params)
 
+        "retention" ->
+          Teiserver.Account.RetentionReport.run(conn, params)
+
         _ ->
           raise "No handler for name of '#{name}'"
       end
