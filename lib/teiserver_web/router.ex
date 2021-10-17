@@ -103,6 +103,14 @@ defmodule TeiserverWeb.Router do
         get("/day_metrics", MetricController, :day_metrics_list)
         post("/day_metrics", MetricController, :day_metrics_list)
 
+        get("/month_metrics/today", MetricController, :month_metrics_today)
+        get("/month_metrics/show/:year/:month", MetricController, :month_metrics_show)
+        get("/month_metrics/export/:year/:month", MetricController, :month_metrics_export)
+        get("/month_metrics/graph", MetricController, :month_metrics_graph)
+        post("/month_metrics/graph", MetricController, :month_metrics_graph)
+        get("/month_metrics", MetricController, :month_metrics_list)
+        post("/month_metrics", MetricController, :month_metrics_list)
+
         get("/client_events/export/form", ClientEventController, :export_form)
         post("/client_events/export/post", ClientEventController, :export_post)
         get("/client_events/summary", ClientEventController, :summary)

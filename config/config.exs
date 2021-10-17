@@ -100,27 +100,13 @@ config :central, Oban,
         # 1:05 am
         {"5 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
 
-        # Temporarily running it far more often to get rid of some backlog
-        {"0 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-        {"5 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-        {"10 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-        {"15 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-        {"20 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-        {"25 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-        {"30 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-        {"35 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-        {"40 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-        {"45 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-        {"50 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-        {"55 * * * *", Teiserver.Account.Tasks.DailyCleanupTask},
-
-
         # Every minute
         {"* * * * *", Teiserver.Telemetry.Tasks.PersistTelemetryMinuteTask},
 
         # 2:05 am and 11:05 am
         {"5 2 * * *", Teiserver.Telemetry.Tasks.PersistTelemetryDayTask},
         {"5 11 * * *", Teiserver.Telemetry.Tasks.PersistTelemetryDayTask},
+        {"15 2 * * *", Teiserver.Telemetry.Tasks.PersistTelemetryMonthTask},
 
         # 3:05 am every day, gives time for multiple telemetry day tasks to run if needed
         {"5 3 * * *", Teiserver.Account.RecalculateUserStatTask},

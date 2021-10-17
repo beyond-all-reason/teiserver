@@ -103,6 +103,10 @@ defmodule Central.Application do
   end
 
   def startup_sub_functions do
+    # Do migrations as part of startup
+    path = Application.app_dir(:central, "priv/repo/migrations")
+    Ecto.Migrator.run(Central.Repo, path, :up, all: true)
+
     # Oban logging
     events = [
       [:oban, :job, :start],

@@ -139,7 +139,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    last_date = Telemetry.get_last_telemtry_day_log()
+    last_date = Telemetry.get_last_telemetry_day_log()
 
     date =
       if last_date == nil do
