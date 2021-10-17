@@ -12,7 +12,7 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
         verified: "Unverified",
         inserted_before: Timex.shift(Timex.now(), days: -14),
       ],
-      limit: 20
+      limit: :infinity
     )
     |> Enum.each(fn user = %{id: userid} ->
       # Stats

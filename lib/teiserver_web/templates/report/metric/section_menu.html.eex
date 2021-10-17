@@ -11,13 +11,12 @@
 
 <%= central_component "section_menu_button",
   name: "today",
-  label: "Todays metrics",
+  label: "Today",
   active: @active,
   icon: "far fa-waveform",
   bsname: bsname,
   url: Routes.ts_reports_metric_path(@conn, :day_metrics_today)
 %>
-
 
 <%= central_component "section_menu_button",
   name: "graph",
@@ -26,4 +25,35 @@
   icon: "far fa-chart-line-up",
   bsname: bsname,
   url: Routes.ts_reports_metric_path(@conn, :day_metrics_graph)
+%>
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;
+
+
+<%= central_component "section_menu_button",
+  name: "month_metrics",
+  label: "Monthly metrics",
+  active: @active,
+  icon: "far fa-bars",
+  bsname: bsname,
+  url: Routes.ts_reports_metric_path(@conn, :month_metrics_list)
+%>
+
+<%= central_component "section_menu_button",
+  name: "this_month",
+  label: "This month",
+  active: @active,
+  icon: "far fa-waveform",
+  bsname: bsname,
+  url: Routes.ts_reports_metric_path(@conn, :month_metrics_today)
+%>
+
+<%= central_component "section_menu_button",
+  name: "month_graph",
+  label: "Graph",
+  active: @active,
+  icon: "far fa-chart-line-up",
+  bsname: bsname,
+  url: Routes.ts_reports_metric_path(@conn, :month_metrics_graph)
 %>
