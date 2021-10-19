@@ -8,7 +8,7 @@ defmodule Teiserver.Startup do
     start_time = System.system_time(:millisecond)
 
     add_permission_set("teiserver", "admin", ~w(account battle clan party queue tournament))
-    add_permission_set("teiserver", "moderator", ~w(account battle clan party queue tournament))
+    add_permission_set("teiserver", "moderator", ~w(account battle clan party queue tournament telemetry))
     add_permission_set("teiserver", "api", ~w(battle))
     add_permission_set("teiserver", "player", ~w(account tester contributor dev streamer donor verified bot moderator))
 

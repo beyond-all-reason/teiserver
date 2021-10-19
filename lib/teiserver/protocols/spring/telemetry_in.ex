@@ -6,6 +6,41 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   # import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
+  def do_handle("upload_infolog", data, msg_id, state) do
+    case Regex.run(~r/(\S+) (\S+) (\S+) (\S+)/, data) do
+      [_, log_type, user_hash, metadata64, contents64] ->
+        case decode_value(metadata64) do
+          {:ok, metadata} ->
+            case Base.decode64(contents64) do
+              {:ok, contents} ->
+                params = %{
+                  user_hash: user_hash,
+                  user_id: state.userid,
+                  log_type: log_type,
+
+                  timestamp: Timex.now(),
+                  metadata: metadata,
+                  contents: contents
+                }
+                case Telemetry.create_infolog(params) do
+                  {:ok, infolog} ->
+                    reply(:spring, :okay, "upload_infolog - id:#{infolog.id}", msg_id, state)
+                  {:error, changeset} ->
+                    Logger.error(Kernel.inspect changeset)
+                    reply(:spring, :no, "upload_infolog - db error", msg_id, state)
+                end
+              _ ->
+                reply(:spring, :no, "upload_infolog - infolog decode error", msg_id, state)
+            end
+
+          {:error, reason} ->
+            reply(:spring, :no, "upload_infolog - metadata - #{reason}", msg_id, state)
+        end
+      nil ->
+        reply(:spring, :no, "upload_infolog - no match", msg_id, state)
+    end
+  end
+
   def do_handle("update_client_property", data, _msg_id, state) do
     client_property(data, state)
     state
