@@ -97,7 +97,8 @@ defmodule TeiserverWeb.Router do
 
         get("/day_metrics/today", MetricController, :day_metrics_today)
         get("/day_metrics/show/:date", MetricController, :day_metrics_show)
-        get("/day_metrics/export/:date", MetricController, :day_metrics_export)
+        get("/day_metrics/export_form", MetricController, :day_metrics_export_form)
+        post("/day_metrics/export_post", MetricController, :day_metrics_export_post)
         get("/day_metrics/graph", MetricController, :day_metrics_graph)
         post("/day_metrics/graph", MetricController, :day_metrics_graph)
         get("/day_metrics", MetricController, :day_metrics_list)
@@ -105,7 +106,6 @@ defmodule TeiserverWeb.Router do
 
         get("/month_metrics/today", MetricController, :month_metrics_today)
         get("/month_metrics/show/:year/:month", MetricController, :month_metrics_show)
-        get("/month_metrics/export/:year/:month", MetricController, :month_metrics_export)
         get("/month_metrics/graph", MetricController, :month_metrics_graph)
         post("/month_metrics/graph", MetricController, :month_metrics_graph)
         get("/month_metrics", MetricController, :month_metrics_list)
@@ -116,6 +116,9 @@ defmodule TeiserverWeb.Router do
         get("/client_events/summary", ClientEventController, :summary)
         get("/client_events/property/:property_name/detail", ClientEventController, :property_detail)
         get("/client_events/event/:event_name/detail", ClientEventController, :event_detail)
+
+        get("/infolog/download/:id", InfologController, :download)
+        resources("/infolog", InfologController, only: [:index, :show, :delete])
 
         get("/show/:name", ReportController, :show)
         post("/show/:name", ReportController, :show)

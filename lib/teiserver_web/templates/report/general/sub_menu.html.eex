@@ -37,7 +37,19 @@
               url: Routes.ts_reports_metric_path(@conn, :day_metrics_list),
               lib: Teiserver.Telemetry.TelemetryDayLogLib
             %>
+          <% end %>
 
+          <%= if allow?(@conn, "teiserver.moderator.telemetry") do %>
+            <%= central_component "sub_menu_icon",
+              name: "infologs",
+              label: "Infologs",
+              active: @active,
+              url: Routes.ts_reports_infolog_path(@conn, :index),
+              lib: Teiserver.Telemetry.InfologLib
+            %>
+          <% end %>
+
+          <%= if allow?(@conn, "teiserver.admin") do %>
             <%= central_component "sub_menu_icon",
               name: "reports",
               label: "Reports",
