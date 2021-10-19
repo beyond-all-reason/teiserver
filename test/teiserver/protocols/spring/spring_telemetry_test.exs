@@ -48,6 +48,20 @@ defmodule Teiserver.SpringTelemetryTest do
     assert infolog.log_type == "log_type"
     assert infolog.metadata == %{"key" => "value", "list" => [1,2,3]}
     assert infolog.contents == "Lorem ipsum\n\n''\\'^&&!"
+
+    # Unauth
+    %{socket: socket_raw} = raw_setup()
+    _recv_raw(socket_raw)
+    _send_raw(socket_raw, "c.telemetry.upload_infolog log_type user_hash #{metadata} #{contents}\n")
+    reply = _recv_raw(socket_raw)
+    assert reply =~ "OK cmd=upload_infolog - id:"
+    [_, _, _, s] = reply |> String.trim |> String.split(" ")
+    [_, id] = String.split(s, ":")
+
+    infolog = Telemetry.get_infolog(id)
+    assert infolog.log_type == "log_type"
+    assert infolog.metadata == %{"key" => "value", "list" => [1,2,3]}
+    assert infolog.contents == "Lorem ipsum\n\n''\\'^&&!"
   end
 
   test "log_client_event call", %{socket: socket} do

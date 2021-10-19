@@ -28,6 +28,11 @@ defmodule Teiserver.Telemetry.InfologLib do
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
+  def _search(query, :id, id) do
+    from infologs in query,
+      where: infologs.id == ^id
+  end
+
   def _search(query, :log_type, log_type) do
     from infologs in query,
       where: infologs.log_type == ^log_type
