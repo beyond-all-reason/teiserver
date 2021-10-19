@@ -1106,8 +1106,9 @@ defmodule Teiserver.Telemetry do
   end
 
   @spec infolog_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def infolog_query(_id, args) do
+  def infolog_query(id, args) do
     InfologLib.query_infologs
+    |> InfologLib.search(%{id: id})
     |> InfologLib.search(args[:search])
     |> InfologLib.preload(args[:preload])
     |> InfologLib.order_by(args[:order_by])
