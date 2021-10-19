@@ -937,8 +937,7 @@ defmodule Teiserver.Telemetry do
   end
 
 
-  alias Teiserver.Telemetry.ClientEvent
-  alias Teiserver.Telemetry.ClientEventLib
+  alias Teiserver.Telemetry.{ClientEvent, ClientEventLib}
 
   @spec client_event_query(List.t()) :: Ecto.Query.t()
   def client_event_query(args) do
@@ -1097,6 +1096,68 @@ defmodule Teiserver.Telemetry do
       event_id ->
         event_id
     end
+  end
+
+  alias Teiserver.Telemetry.{Infolog, InfologLib}
+
+  @spec infolog_query(List.t()) :: Ecto.Query.t()
+  def infolog_query(args) do
+    infolog_query(nil, args)
+  end
+
+  @spec infolog_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def infolog_query(_id, args) do
+    InfologLib.query_infologs
+    |> InfologLib.search(args[:search])
+    |> InfologLib.preload(args[:preload])
+    |> InfologLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of infologs.
+
+  ## Examples
+
+      iex> list_infologs()
+      [%Infolog{}, ...]
+
+  """
+  @spec list_infologs(List.t()) :: List.t()
+  def list_infologs(args \\ []) do
+    infolog_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @spec get_infolog(Integer.t(), List.t()) :: List.t()
+  def get_infolog(id, args \\ []) do
+    infolog_query(id, args)
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a infolog.
+
+  ## Examples
+
+      iex> create_infolog(%{field: value})
+      {:ok, %Infolog{}}
+
+      iex> create_infolog(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_infolog(Map.t()) :: {:ok, Infolog.t()} | {:error, Ecto.Changeset.t()}
+  def create_infolog(attrs \\ %{}) do
+    %Infolog{}
+    |> Infolog.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @spec delete_infolog(Infolog.t()) :: {:ok, Infolog.t()} | {:error, Ecto.Changeset.t()}
+  def delete_infolog(%Infolog{} = infolog) do
+    Repo.delete(infolog)
   end
 
   def startup() do
