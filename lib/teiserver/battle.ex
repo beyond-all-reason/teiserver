@@ -246,8 +246,8 @@ defmodule Teiserver.Battle do
 
       true ->
         # Not in an active lobby, lets check the DB
-        case get_match(nil, search: [uuid: uuid]) do
-          nil ->
+        case list_matches(search: [uuid: uuid]) do
+          [] ->
             uuid
           _ ->
             generate_lobby_uuid()

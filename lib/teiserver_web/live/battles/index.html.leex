@@ -19,6 +19,7 @@
     <tr>
       <th>Name</th>
       <th>Map</th>
+      <th>UUID</th>
       <th>Locked</th>
       <th>Player count</th>
       <th>Spectator count</th>
@@ -32,6 +33,7 @@
         <tr id="lobby-<%= lobby.id %>">
           <td><%= lobby.name %></td>
           <td><%= lobby.map_name %></td>
+          <td><%= lobby.tags["server/match/uuid"] %></td>
           <td><%= if lobby.locked, do: "Locked" %></td>
           <td><%= lobby.player_count %></td>
           <td><%= lobby.spectator_count %></td>
