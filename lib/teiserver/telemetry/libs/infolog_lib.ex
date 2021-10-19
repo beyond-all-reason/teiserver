@@ -4,10 +4,10 @@ defmodule Teiserver.Telemetry.InfologLib do
 
   # Functions
   @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:info2)
+  def colours(), do: Central.Helpers.StylingHelper.colours(:success2)
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-sliders-up"
+  def icon(), do: "far fa-barcode-scan"
 
   # Queries
   @spec query_infologs() :: Ecto.Query.t

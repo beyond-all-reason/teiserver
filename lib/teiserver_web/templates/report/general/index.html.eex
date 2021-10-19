@@ -16,48 +16,60 @@
       link: Routes.ts_reports_metric_path(@conn, :day_metrics_list)
     %>
   <% end %>
+
+  <%= if allow?(@current_user, "teiserver.moderator.telemetry") do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Telemetry.InfologLib.icon(),
+      name: "infolog",
+      text: "Infologs",
+      link: Routes.ts_reports_infolog_path(@conn, :index)
+    %>
+  <% end %>
 </div>
 
 <div class="row">
-  <%=
-    central_component "menu_card",
-    icon: "fas fa-satellite-dish",
-    name: "active",
-    text: "Active",
-    link: Routes.ts_reports_report_path(@conn, :show, "active")
-  %>
+  <%= if allow?(@current_user, "teiserver.admin") do %>
+    <%=
+      central_component "menu_card",
+      icon: "fas fa-satellite-dish",
+      name: "active",
+      text: "Active",
+      link: Routes.ts_reports_report_path(@conn, :show, "active")
+    %>
 
-  <%=
-    central_component "menu_card",
-    icon: "fas fa-watch",
-    name: "time_spent",
-    text: "Time spent",
-    link: Routes.ts_reports_report_path(@conn, :show, "time_spent")
-  %>
+    <%=
+      central_component "menu_card",
+      icon: "fas fa-watch",
+      name: "time_spent",
+      text: "Time spent",
+      link: Routes.ts_reports_report_path(@conn, :show, "time_spent")
+    %>
 
-  <%=
-    central_component "menu_card",
-    icon: "fas fa-chevrons-up",
-    name: "ranks",
-    text: "Ranks",
-    link: Routes.ts_reports_report_path(@conn, :show, "ranks")
-  %>
+    <%=
+      central_component "menu_card",
+      icon: "fas fa-chevrons-up",
+      name: "ranks",
+      text: "Ranks",
+      link: Routes.ts_reports_report_path(@conn, :show, "ranks")
+    %>
 
-  <%=
-    central_component "menu_card",
-    icon: "fas fa-check",
-    name: "verified",
-    text: "Verified",
-    link: Routes.ts_reports_report_path(@conn, :show, "verified")
-  %>
+    <%=
+      central_component "menu_card",
+      icon: "fas fa-check",
+      name: "verified",
+      text: "Verified",
+      link: Routes.ts_reports_report_path(@conn, :show, "verified")
+    %>
 
-  <%=
-    central_component "menu_card",
-    icon: "fas fa-campground",
-    name: "retention",
-    text: "Retention",
-    link: Routes.ts_reports_report_path(@conn, :show, "retention")
-  %>
+    <%=
+      central_component "menu_card",
+      icon: "fas fa-campground",
+      name: "retention",
+      text: "Retention",
+      link: Routes.ts_reports_report_path(@conn, :show, "retention")
+    %>
+  <% end %>
 </div>
 
 <div class="row page-row">

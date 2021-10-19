@@ -11,4 +11,5 @@ defmodule TeiserverWeb.Report.GeneralView do
   def colours("client_events"), do: Teiserver.Telemetry.ClientEventLib.colours()
   def colours("server_metrics"), do: Teiserver.Telemetry.TelemetryDayLogLib.colours()
   def colours("reports"), do: Central.Helpers.StylingHelper.colours(:report)
+  def colours("infologs"), do: Teiserver.Telemetry.InfologLib.colours()
 end
