@@ -5,6 +5,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   # import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
+  # TODO: Less nested hackyness
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
   def do_handle("upload_infolog", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+) (\S+) (\S+)/, data) do
@@ -12,25 +13,30 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
         case decode_value(metadata64) do
           {:ok, metadata} ->
             case Base.decode64(contents64) do
-              {:ok, contents} ->
-                params = %{
-                  user_hash: user_hash,
-                  user_id: state.userid,
-                  log_type: log_type,
+              {:ok, compressed_contents} ->
+                case unzip(compressed_contents) do
+                  {:ok, contents} ->
+                    params = %{
+                      user_hash: user_hash,
+                      user_id: state.userid,
+                      log_type: log_type,
 
-                  timestamp: Timex.now(),
-                  metadata: metadata,
-                  contents: contents
-                }
-                case Telemetry.create_infolog(params) do
-                  {:ok, infolog} ->
-                    reply(:spring, :okay, "upload_infolog - id:#{infolog.id}", msg_id, state)
-                  {:error, changeset} ->
-                    Logger.error(Kernel.inspect changeset)
-                    reply(:spring, :no, "upload_infolog - db error", msg_id, state)
+                      timestamp: Timex.now(),
+                      metadata: metadata,
+                      contents: contents
+                    }
+                    case Telemetry.create_infolog(params) do
+                      {:ok, infolog} ->
+                        reply(:spring, :okay, "upload_infolog - id:#{infolog.id}", msg_id, state)
+                      {:error, changeset} ->
+                        Logger.error(Kernel.inspect changeset)
+                        reply(:spring, :no, "upload_infolog - db error", msg_id, state)
+                    end
+                  {:error, _} ->
+                    reply(:spring, :no, "upload_infolog - infolog gzip error", msg_id, state)
                 end
               _ ->
-                reply(:spring, :no, "upload_infolog - infolog decode error", msg_id, state)
+                reply(:spring, :no, "upload_infolog - infolog decode64 error", msg_id, state)
             end
 
           {:error, reason} ->
@@ -115,6 +121,16 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
       nil ->
         Logger.error("update_client_property:no match - #{data}")
         "no match"
+    end
+  end
+
+  defp unzip(data) do
+    try do
+      result = :zlib.gunzip(data)
+      {:ok, result}
+    rescue
+      _ ->
+        {:error, :gzip_decompress}
     end
   end
 end
