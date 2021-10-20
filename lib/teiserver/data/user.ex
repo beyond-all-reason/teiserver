@@ -38,11 +38,9 @@ defmodule Teiserver.User do
     :password_hash,
     :verification_code,
     :verified,
-    :password_reset_code,
     :email_change_code,
     :ingame_minutes,
     :last_login,
-    :mmr,
     :banned,
     :muted,
     :warned,
@@ -50,8 +48,7 @@ defmodule Teiserver.User do
     :rename_in_progress,
     :springid,
     :lobby_hash,
-    :roles,
-    :ip_list
+    :roles
   ]
   def data_keys(), do: @data_keys
 
@@ -69,11 +66,9 @@ defmodule Teiserver.User do
     password_hash: nil,
     verification_code: nil,
     verified: false,
-    password_reset_code: nil,
     email_change_code: nil,
     ingame_minutes: 0,
     last_login: nil,
-    mmr: %{},
     banned: [false, nil],
     muted: [false, nil],
     warned: [false, nil],
@@ -81,8 +76,7 @@ defmodule Teiserver.User do
     rename_in_progress: false,
     springid: nil,
     lobby_hash: [],
-    roles: [],
-    ip_list: []
+    roles: []
   }
 
   def default_data(), do: @default_data
@@ -571,6 +565,8 @@ defmodule Teiserver.User do
 
   @spec do_login(Map.t(), String.t(), String.t(), String.t()) :: {:ok, Map.t()}
   defp do_login(user, ip, lobby_client, lobby_hash) do
+    stats = Account.get_user_stat_data(user.id)
+
     # If they don't want a flag shown, don't show it, otherwise check for an override before trying geoip
     country =
       cond do
@@ -586,7 +582,7 @@ defmodule Teiserver.User do
 
     last_login = round(:erlang.system_time(:seconds) / 60)
 
-    ip_list = [ip | user.ip_list] |> Enum.uniq
+    ip_list = [ip | (stats["ip_list"] || [])] |> Enum.uniq |> Enum.take(20)
 
     rank = calculate_rank(user)
 
@@ -602,8 +598,7 @@ defmodule Teiserver.User do
           last_login: last_login,
           rank: rank,
           springid: springid,
-          lobby_hash: lobby_hash,
-          ip_list: ip_list
+          lobby_hash: lobby_hash
       }
 
     update_user(user, persist: true)
@@ -616,7 +611,8 @@ defmodule Teiserver.User do
         rank: rank,
         lobby_client: lobby_client,
         lobby_hash: lobby_hash,
-        last_ip: ip
+        last_ip: ip,
+        ip_list: ip_list
       })
 
     {:ok, user}
@@ -791,7 +787,7 @@ defmodule Teiserver.User do
         md5_password = spring_md5_password(new_password)
         encrypted_password = encrypt_password(md5_password)
 
-        update_user(%{user | password_reset_code: nil, password_hash: encrypted_password, verified: true},
+        update_user(%{user | password_hash: encrypted_password, verified: true},
           persist: true
         )
     end

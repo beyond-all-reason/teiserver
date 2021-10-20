@@ -153,6 +153,10 @@ defmodule Teiserver.Bridge.BridgeServer do
           }
         })
 
+        Account.update_user_stat(account.id, %{
+          country_override: Application.get_env(:central, Teiserver)[:server_flag],
+        })
+
         Account.create_group_membership(%{
           user_id: account.id,
           group_id: Teiserver.internal_group_id()

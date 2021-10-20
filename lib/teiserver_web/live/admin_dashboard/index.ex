@@ -3,8 +3,8 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   alias Phoenix.PubSub
 
   alias Teiserver
-  alias Teiserver.{Client, User}
-  alias Teiserver.Account.UserLib
+  # alias Teiserver.{Client, User}
+  # alias Teiserver.Account.UserLib
 
   @impl true
   def mount(_params, session, socket) do

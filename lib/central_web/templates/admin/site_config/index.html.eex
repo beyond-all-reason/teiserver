@@ -1,4 +1,4 @@
-<% {fg, bg, bsname} = colours() %>
+<% {_fg, _bg, bsname} = colours() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
