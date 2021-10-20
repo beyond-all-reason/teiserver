@@ -28,14 +28,23 @@ defmodule Teiserver.SpringTelemetryTest do
     # Bad infolog base64
     _send_raw(socket, "c.telemetry.upload_infolog log_type user_hash e30= rXTrJC0nAdWUmCH8Q7+kWQ==--\n")
     reply = _recv_raw(socket)
-    assert reply == "NO cmd=upload_infolog - infolog decode error\n"
+    assert reply == "NO cmd=upload_infolog - infolog decode64 error\n"
 
-    # And finally the correct infolog format
+    # Bad gzip
     metadata = %{key: "value", list: [1,2,3]}
     |> Jason.encode!
     |> Base.encode64()
 
     contents = "Lorem ipsum\n\n''\\'^&&!"
+    |> Base.encode64()
+
+    _send_raw(socket, "c.telemetry.upload_infolog log_type user_hash #{metadata} #{contents}\n")
+    reply = _recv_raw(socket)
+    assert reply == "NO cmd=upload_infolog - infolog gzip error\n"
+
+    # And finally the correct infolog format
+    contents = "Lorem ipsum\n\n''\\'^&&!"
+    |> :zlib.gzip()
     |> Base.encode64()
 
     _send_raw(socket, "c.telemetry.upload_infolog log_type user_hash #{metadata} #{contents}\n")
