@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Report.MetricController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  alias Central.Helpers.TimexHelper
-  alias Teiserver.Telemetry.{GraphDayLogsTask, GraphMonthLogsTask}
+  alias Central.Helpers.{TimexHelper, DatePresets}
+  alias Teiserver.Telemetry.{GraphDayLogsTask, GraphMonthLogsTask, ExportServerMetricsTask}
 
   plug(AssignPlug,
     sidemenu_active: ["teiserver"]
@@ -73,15 +73,24 @@ defmodule TeiserverWeb.Report.MetricController do
     |> render("day_metrics_show.html")
   end
 
-  @spec day_metrics_export(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_export(conn, params = %{"date" => _date}) do
-    _anonymous = params["anonymous"]
+  @spec day_metrics_export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def day_metrics_export_form(conn, _params) do
+    conn
+    |> assign(:params, %{
+      "date_preset" => "All time"
+    })
+    |> assign(:presets, DatePresets.long_ranges)
+    |> render("day_metrics_export_form.html")
+  end
 
-    # log = date
-    #   |> TimexHelper.parse_ymd
-    #   |> Telemetry.get_telemetry_day_log
+  @spec day_metrics_export_post(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def day_metrics_export_post(conn, %{"report" => params}) do
+    data = ExportServerMetricsTask.perform(params)
 
     conn
+    |> put_resp_content_type("application/json")
+    |> put_resp_header("content-disposition", "attachment; filename=\"server_metrics.json\"")
+    |> send_resp(200, data)
   end
 
   def day_metrics_graph(conn, params) do
@@ -160,17 +169,6 @@ defmodule TeiserverWeb.Report.MetricController do
     |> assign(:data, data)
     |> add_breadcrumb(name: "Monthly metrics - Today (partial)", url: conn.request_path)
     |> render("month_metrics_show.html")
-  end
-
-  @spec month_metrics_export(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def month_metrics_export(conn, params = %{"date" => _date}) do
-    _anonymous = params["anonymous"]
-
-    # log = date
-    #   |> TimexHelper.parse_ymd
-    #   |> Telemetry.get_telemetry_month_log
-
-    conn
   end
 
   def month_metrics_graph(conn, params) do
