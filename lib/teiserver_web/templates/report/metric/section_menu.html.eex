@@ -27,6 +27,15 @@
   url: Routes.ts_reports_metric_path(@conn, :day_metrics_graph)
 %>
 
+<%= central_component "section_menu_button",
+  name: "download",
+  label: "Download",
+  active: @active,
+  icon: "far fa-download",
+  bsname: bsname,
+  url: Routes.ts_reports_metric_path(@conn, :day_metrics_export_form)
+%>
+
 
 &nbsp;&nbsp;&nbsp;&nbsp;
 
