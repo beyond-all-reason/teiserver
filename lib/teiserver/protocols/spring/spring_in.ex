@@ -255,6 +255,12 @@ defmodule Teiserver.Protocols.SpringIn do
     response =
       case regex_result do
         [_, username, password, _cpu, _ip, lobby, lobby_hash, _modes | _] ->
+          if String.trim(lobby) == "" do
+            msg_data = String.replace(data, " #{password} ", " password ")
+            |> Spring.format_log()
+            Logger.error("nil lobby from #{username} with data: #{msg_data}")
+          end
+
           username = User.clean_name(username)
           User.try_md5_login(username, password, state.ip, lobby, lobby_hash)
 
