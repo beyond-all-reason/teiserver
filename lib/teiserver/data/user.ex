@@ -590,7 +590,6 @@ defmodule Teiserver.User do
 
     rank = calculate_rank(user)
 
-
     springid = if Map.get(user, :springid) != nil, do: user.springid, else: next_springid()
     |> Central.Helpers.NumberHelper.int_parse
 

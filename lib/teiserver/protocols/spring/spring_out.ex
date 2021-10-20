@@ -635,7 +635,7 @@ defmodule Teiserver.Protocols.SpringOut do
     %{state | user: user, username: user.name, userid: user.id, exempt_from_cmd_throttle: exempt_from_cmd_throttle}
   end
 
-  @spec do_login_accepted(map(), String.t()) :: map()
+  @spec do_join_room(map(), String.t()) :: map()
   def do_join_room(state, room_name) do
     room = Room.get_or_make_room(room_name, state.userid)
     Room.add_user_to_room(state.userid, room_name)
