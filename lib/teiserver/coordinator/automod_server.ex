@@ -4,7 +4,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
   performing their actions in the name of the coordinator
   """
   use GenServer
-  alias Central.Config
   alias Teiserver.{Account, User, Client, Coordinator}
   alias Phoenix.PubSub
   require Logger

@@ -1,4 +1,4 @@
-<% {fg, bg, bsname} = colours() %>
+<% {_fg, _bg, bsname} = colours() %>
 
 <%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "site_config"}) %>
 

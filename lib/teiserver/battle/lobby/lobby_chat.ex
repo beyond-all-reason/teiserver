@@ -1,5 +1,5 @@
 defmodule Teiserver.Battle.LobbyChat do
-  alias Teiserver.{User, Client, Chat}
+  alias Teiserver.{User, Chat}
   alias Teiserver.Battle.{Lobby}
   alias Phoenix.PubSub
 
