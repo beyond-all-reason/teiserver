@@ -764,11 +764,17 @@ defmodule Teiserver.User do
   #     |> Enum.count()
   # end
 
-  # Based on actual ingame time
-  def calculate_rank(user) do
+  @spec rank_time(T.user()) :: non_neg_integer()
+  defp rank_time(user) do
     stats = Account.get_user_stat(user.id) || %{data: %{}}
     ingame_minutes = (stats.data["player_minutes"] || 0) + ((stats.data["spectator_minutes"] || 0) * 0.5)
-    ingame_hours = ingame_minutes / 60
+    round(ingame_minutes / 60)
+  end
+
+  # Based on actual ingame time
+  @spec calculate_rank(T.user()) :: non_neg_integer()
+  def calculate_rank(user) do
+    ingame_hours = rank_time(user)
 
     @rank_levels
       |> Enum.filter(fn r -> r < ingame_hours end)
