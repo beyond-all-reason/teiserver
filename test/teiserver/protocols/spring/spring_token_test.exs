@@ -12,14 +12,14 @@ defmodule Teiserver.SpringTokenTest do
     _welcome = _recv_raw(socket)
 
     # Get by email
-    _send_raw(socket, "c.user.get_token_by_email new_test_user_token_test_user@\ttoken_password\n")
+    _send_raw(socket, "c.user.get_token_by_email test_user_token_test_user@\ttoken_password\n")
     reply = _recv_raw(socket)
 
     assert reply ==
              "NO cmd=c.user.get_token_by_email\tcannot get token over insecure connection\n"
 
     # Now get by name
-    _send_raw(socket, "c.user.get_token_by_name new_test_user_token_test_user@\ttoken_password\n")
+    _send_raw(socket, "c.user.get_token_by_name test_user_token_test_user@\ttoken_password\n")
     reply = _recv_raw(socket)
 
     assert reply == "NO cmd=c.user.get_token_by_name\tcannot get token over insecure connection\n"
@@ -31,8 +31,8 @@ defmodule Teiserver.SpringTokenTest do
   test "c.user.get_token_by_email - correct" do
     user =
       GeneralTestLib.make_user(%{
-        "name" => "new_test_user_token_test_user",
-        "email" => "new_test_user_token_test_user@",
+        "name" => "test_user_token_test_user",
+        "email" => "test_user_token_test_user@",
         "password" => "token_password",
         "data" => %{
           "verified" => true
@@ -44,23 +44,23 @@ defmodule Teiserver.SpringTokenTest do
     %{socket: socket} = tls_setup()
     _welcome = _recv_raw(socket)
 
-    _send_raw(socket, "c.user.get_token_by_email new_test_user_token_test_user@\ttoken_password\n")
+    _send_raw(socket, "c.user.get_token_by_email test_user_token_test_user@\ttoken_password\n")
     reply = _recv_until(socket)
-    assert reply =~ "s.user.user_token new_test_user_token_test_user@\t"
+    assert reply =~ "s.user.user_token test_user_token_test_user@\t"
 
     token =
-      String.replace(reply, "s.user.user_token new_test_user_token_test_user@\t", "")
+      String.replace(reply, "s.user.user_token test_user_token_test_user@\t", "")
       |> String.replace("\n", "")
 
     assert token != ""
 
     # Now do it by name and check results
-    _send_raw(socket, "c.user.get_token_by_name new_test_user_token_test_user\ttoken_password\n")
+    _send_raw(socket, "c.user.get_token_by_name test_user_token_test_user\ttoken_password\n")
     reply = _recv_raw(socket)
-    assert reply =~ "s.user.user_token new_test_user_token_test_user\t"
+    assert reply =~ "s.user.user_token test_user_token_test_user\t"
 
     token2 =
-      String.replace(reply, "s.user.user_token new_test_user_token_test_user\t", "")
+      String.replace(reply, "s.user.user_token test_user_token_test_user\t", "")
       |> String.replace("\n", "")
 
     assert token2 != ""
@@ -83,7 +83,7 @@ defmodule Teiserver.SpringTokenTest do
 
     _send_raw(socket, "c.user.login #{token}\tLobby Name\ttoke1 toke2\ta b c\n")
     reply = _recv_raw(socket)
-    assert reply =~ "ACCEPTED new_test_user_token_test_user\n"
+    assert reply =~ "ACCEPTED test_user_token_test_user\n"
     :timer.sleep(200)
 
     pid = Client.get_client_by_id(user.id).pid

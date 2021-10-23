@@ -22,7 +22,7 @@ defmodule Teiserver.SpringRawTest do
   test "REGISTER", %{socket: socket} do
     _ = _recv_raw(socket)
     existing = new_user()
-    name = "TestUser_raw_register"
+    name = "TestUser_raw_reg"
 
     # Failure first - bad name
     _send_raw(socket, "REGISTER bad-name password raw_register_email@email.com\n")
@@ -39,6 +39,11 @@ defmodule Teiserver.SpringRawTest do
     reply = _recv_raw(socket)
     assert reply =~ "REGISTRATIONDENIED User already exists\n"
 
+    # Too long
+    _send_raw(socket, "REGISTER longnamelongnamelongname password raw_register_email@email.com\n")
+    reply = _recv_raw(socket)
+    assert reply =~ "REGISTRATIONDENIED Max length 20 characters\n"
+
     # Success second
     _send_raw(socket, "REGISTER #{name} password raw_register_email@email.com\n")
     reply = _recv_raw(socket)
@@ -52,7 +57,7 @@ defmodule Teiserver.SpringRawTest do
   end
 
   test "LOGIN", %{socket: socket} do
-    username = "new_test_user_raw"
+    username = "test_user_raw"
 
     # We expect to be greeted by a welcome message
     reply = _recv_raw(socket)
@@ -70,7 +75,7 @@ defmodule Teiserver.SpringRawTest do
       "LOGIN #{String.upcase(username)} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
     )
     reply = _recv_raw(socket)
-    assert reply == "DENIED Username is case sensitive, try 'new_test_user_raw'\n"
+    assert reply == "DENIED Username is case sensitive, try 'test_user_raw'\n"
 
     _send_raw(
       socket,

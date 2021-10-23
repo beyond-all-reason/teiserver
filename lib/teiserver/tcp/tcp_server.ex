@@ -140,14 +140,20 @@ defmodule Teiserver.TcpServer do
 
   # Main source of data ingress
   def handle_info({:tcp, _socket, data}, %{exempt_from_cmd_throttle: false} = state) do
-    now = System.system_time(:second)
-    limiter = now - @cmd_flood_duration
+    cmd_timestamps = if String.contains?(data, "\n") do
+      now = System.system_time(:second)
+      limiter = now - @cmd_flood_duration
 
-    cmd_timestamps = [now | state.cmd_timestamps]
-    |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
+      cmd_timestamps = [now | state.cmd_timestamps]
+      |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
 
-    if Enum.count(cmd_timestamps) > @cmd_flood_limit do
-      Logger.error("Command overflow from #{state.username}/#{state.userid} with #{Enum.count(cmd_timestamps)} commands")
+      if Enum.count(cmd_timestamps) > @cmd_flood_limit do
+        Logger.error("Command overflow from #{state.username}/#{state.userid} with #{Enum.count(cmd_timestamps)} commands")
+      end
+
+      cmd_timestamps
+    else
+      state.cmd_timestamps
     end
 
     new_state = state.protocol_in.data_in(data, state)

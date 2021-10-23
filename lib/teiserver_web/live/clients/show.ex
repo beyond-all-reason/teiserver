@@ -66,7 +66,7 @@ defmodule TeiserverWeb.ClientLive.Show do
 
   @impl true
   def handle_info({:updated_client, new_client, _reason}, socket) do
-    new_client = Client.get_client_by_id(new_client.id)
+    new_client = Client.get_client_by_id(new_client.userid)
     {:noreply, assign(socket, :client, new_client)}
   end
 

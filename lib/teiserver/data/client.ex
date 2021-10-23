@@ -260,7 +260,7 @@ defmodule Teiserver.Client do
 
   # If it's a test user, don't worry about actually disconnecting it
   defp do_disconnect(client, reason) do
-    is_test_user = String.contains?(client.name, "new_test_user_") or String.contains?(client.name, "InAndOutAgentServer_")
+    is_test_user = String.contains?(client.name, "test_user_") or String.contains?(client.name, "InAndOutAgentServer_")
 
     Lobby.remove_user_from_any_battle(client.userid)
     Room.remove_user_from_any_room(client.userid)
@@ -268,10 +268,10 @@ defmodule Teiserver.Client do
 
     # If it's a test user then it can mean the db connection is closed
     # we don't actually care about logging out most of them and the
-    # ones we do won't be called new_test_user_
+    # ones we do won't be called test_user_
     if not is_test_user do
       spawn(fn -> User.logout(client.userid) end)
-      if client.name != nil and String.contains?(client.name, "new_test_user") == false do
+      if client.name != nil and String.contains?(client.name, "test_user") == false do
         if reason do
           Logger.error("disconnect of #{client.name} (#{reason})")
         else
