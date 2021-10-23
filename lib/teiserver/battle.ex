@@ -223,18 +223,18 @@ defmodule Teiserver.Battle do
     Telemetry.increment(:matches_stopped)
     {uuid, params} = MatchLib.stop_match(lobby_id)
 
-    case get_match(nil, search: [uuid: uuid]) do
-      nil ->
-        :ok
-      match ->
+    case list_matches(search: [uuid: uuid]) do
+      [match] ->
         update_match(match, params)
+      _ ->
+        :ok
     end
 
     Coordinator.cast_consul(lobby_id, :match_stop)
   end
 
   def generate_lobby_uuid() do
-    uuid = UUID.uuid4()
+    uuid = UUID.uuid1()
 
     # Check if this uuid is present in the current set of lobbies
     active_lobbies = Lobby.list_battles()
