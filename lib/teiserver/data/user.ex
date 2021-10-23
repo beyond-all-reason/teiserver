@@ -17,6 +17,7 @@ defmodule Teiserver.User do
   alias Teiserver.Account
 
   @timer_sleep 500
+  @max_username_length 20
 
   @spec role_list :: [String.t()]
   def role_list(), do: ~w(Tester Streamer Donor Contributor Dev Moderator Admin)
@@ -48,7 +49,8 @@ defmodule Teiserver.User do
     :rename_in_progress,
     :springid,
     :lobby_hash,
-    :roles
+    :roles,
+    :preload
   ]
   def data_keys(), do: @data_keys
 
@@ -76,7 +78,8 @@ defmodule Teiserver.User do
     rename_in_progress: false,
     springid: nil,
     lobby_hash: [],
-    roles: []
+    roles: [],
+    preload: false
   }
 
   def default_data(), do: @default_data
@@ -105,6 +108,7 @@ defmodule Teiserver.User do
     |> Regex.replace(name, "")
   end
 
+  @spec encrypt_password(any) :: binary | {binary, binary, {any, any, any, any, any}}
   def encrypt_password(password) do
     Argon2.hash_pwd_salt(password)
   end
@@ -149,6 +153,9 @@ defmodule Teiserver.User do
     email = String.trim(email)
 
     cond do
+      clean_name(name) |> String.length() > @max_username_length ->
+        {:error, "Max length #{@max_username_length} characters"}
+
       clean_name(name) != name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
 
@@ -259,6 +266,9 @@ defmodule Teiserver.User do
   @spec rename_user(T.userid(), String.t()) :: :success | {:error, String.t()}
   def rename_user(userid, new_name) do
     cond do
+      clean_name(new_name) |> String.length() > @max_username_length ->
+        {:error, "Max length #{@max_username_length} characters"}
+
       clean_name(new_name) != new_name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
 
@@ -607,7 +617,7 @@ defmodule Teiserver.User do
     Account.update_user_stat(user.id, %{
         bot: user.bot,
         country: country,
-        last_login: last_login,
+        last_login: :erlang.system_time(:seconds),
         rank: rank,
         lobby_client: lobby_client,
         lobby_hash: lobby_hash,
