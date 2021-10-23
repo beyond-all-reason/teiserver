@@ -184,29 +184,31 @@ defmodule Teiserver.Account do
     {users, reasons}
   end
 
-  defp get_smurfs_by_ip(%{data: %{"ip_list" => []}}), do: []
-  defp get_smurfs_by_ip(user) do
-    ip_fragments = user.data["ip_list"]
-    |> Enum.map(fn ip ->
-      "u.data -> 'ip_list' ? '#{ip}'"
-    end)
-    |> Enum.join(" or ")
+  defp get_smurfs_by_ip(_), do: []
+#   defp get_smurfs_by_ip(%{data: %{"ip_list" => []}}), do: []
+#   defp get_smurfs_by_ip(user) do
+#     user_stats = get_user_stat_data(user.id)
+#     ip_fragments = (user_stats["ip_list"] || [])
+#     |> Enum.map(fn ip ->
+#       "u.data -> 'ip_list' ? '#{ip}'"
+#     end)
+#     |> Enum.join(" or ")
 
-    query = """
-    SELECT u.id
-    FROM account_users u
-    WHERE #{ip_fragments}
-"""
+#     query = """
+#     SELECT u.id
+#     FROM account_users u
+#     WHERE #{ip_fragments}
+# """
 
-    case Ecto.Adapters.SQL.query(Repo, query, []) do
-      {:ok, results} ->
-        results.rows
-        |> List.flatten
+#     case Ecto.Adapters.SQL.query(Repo, query, []) do
+#       {:ok, results} ->
+#         results.rows
+#         |> List.flatten
 
-      {a, b} ->
-        raise "ERR: #{a}, #{b}"
-    end
-  end
+#       {a, b} ->
+#         raise "ERR: #{a}, #{b}"
+#     end
+#   end
 
   defp get_smurfs_by_hash(user) do
     user_stats = get_user_stat_data(user.id)
