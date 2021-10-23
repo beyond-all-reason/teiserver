@@ -401,7 +401,7 @@ CLIENTS test_room #{user.name}\n"
 
   test "RENAMEACCOUNT", %{socket: socket, user: user} do
     old_name = user.name
-    new_name = "new_test_user_rename"
+    new_name = "test_user_rename"
     userid = user.id
     %{socket: watcher, user: watcher_user} = auth_setup()
     _recv_raw(socket)
@@ -423,7 +423,7 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "SERVERMSG Username already taken\n"
 
     # Perform rename
-    _send_raw(socket, "RENAMEACCOUNT new_test_user_rename\n")
+    _send_raw(socket, "RENAMEACCOUNT test_user_rename\n")
     reply = _recv_raw(socket)
     # assert reply == "SERVERMSG Username change in progress, please log back in in 5 seconds\n"
     assert reply == :timeout
@@ -460,7 +460,7 @@ CLIENTS test_room #{user.name}\n"
 
     reply = _recv_until(socket)
     [accepted | _remainder] = String.split(reply, "\n")
-    assert accepted == "DENIED No user found for 'new_test_user_rename'"
+    assert accepted == "DENIED No user found for 'test_user_rename'"
 
     # But the database should say the user exists
     db_user = Account.get_user!(userid)
@@ -480,7 +480,7 @@ CLIENTS test_room #{user.name}\n"
 
     reply = _recv_until(socket)
     [accepted | _remainder] = String.split(reply, "\n")
-    assert accepted == "DENIED No user found for 'new_test_user_rename'"
+    assert accepted == "DENIED No user found for 'test_user_rename'"
 
     :timer.sleep(4000)
 
@@ -492,11 +492,11 @@ CLIENTS test_room #{user.name}\n"
 
     reply = _recv_until(socket)
     [accepted | _remainder] = String.split(reply, "\n")
-    assert accepted == "ACCEPTED new_test_user_rename"
+    assert accepted == "ACCEPTED test_user_rename"
 
     # Check they logged back in and got re-added with the correct name
     wreply = _recv_raw(watcher)
-    assert wreply == "ADDUSER new_test_user_rename ?? #{user.springid} LuaLobby Chobby\nCLIENTSTATUS new_test_user_rename 0\n"
+    assert wreply == "ADDUSER test_user_rename ?? #{user.springid} LuaLobby Chobby\nCLIENTSTATUS test_user_rename 0\n"
 
     # Next up, what if they update their status?
     _send_raw(socket, "MYSTATUS 127\n")
@@ -592,7 +592,7 @@ CLIENTS test_room #{user.name}\n"
   end
 
   test "Ranks" do
-    user = new_user("new_test_user_rank_test", %{"ingame_minutes" => 60 * 200, "rank" => 5})
+    user = new_user("test_user_rank_test", %{"ingame_minutes" => 60 * 200, "rank" => 5})
     %{socket: socket} = auth_setup(user)
 
     # [in_game, away, r3, r2, r1, mod, bot]
@@ -604,7 +604,7 @@ CLIENTS test_room #{user.name}\n"
 
   test "Bad springid ADDUSER", %{user: user, socket: socket} do
     {:ok, bad_user} =
-      User.user_register_params("new_test_user_bad_springid", "new_test_user_bad_springid@email.com", "X03MO1qnZdYdgyfeuILPmQ==", %{admin_group_id: Teiserver.user_group_id()})
+      User.user_register_params("test_user_bad_springid", "test_user_bad_springid@email.com", "X03MO1qnZdYdgyfeuILPmQ==", %{admin_group_id: Teiserver.user_group_id()})
       |> Central.Account.create_user()
 
     Central.Account.create_group_membership(%{
@@ -621,16 +621,16 @@ CLIENTS test_room #{user.name}\n"
     pid = Client.get_client_by_id(user.id).pid
     send(pid, {:user_logged_in, bad_user.id})
     reply = _recv_raw(socket)
-    assert reply == "ADDUSER new_test_user_bad_springid ?? #{bad_user.id} no client\n"
+    assert reply == "ADDUSER test_user_bad_springid ?? #{bad_user.id} no client\n"
   end
 
   test "GETIP", %{user: user, socket: socket} do
-    ip_user = new_user("new_test_user_ip_user", %{})
+    ip_user = new_user("test_user_ip_user", %{})
     %{socket: _socket} = auth_setup(ip_user)
     _recv_until(socket)
 
     # Mod/Bot only so timeout to start with
-    _send_raw(socket, "GETIP new_test_user_ip_user\n")
+    _send_raw(socket, "GETIP test_user_ip_user\n")
     reply = _recv_raw(socket)
     assert reply == :timeout
 
@@ -638,18 +638,18 @@ CLIENTS test_room #{user.name}\n"
     :timer.sleep(500)
     _recv_until(socket)
 
-    _send_raw(socket, "GETIP new_test_user_ip_user\n")
+    _send_raw(socket, "GETIP test_user_ip_user\n")
     reply = _recv_raw(socket)
-    assert reply == "new_test_user_ip_user is currently bound to 127.0.0.1\n"
+    assert reply == "test_user_ip_user is currently bound to 127.0.0.1\n"
   end
 
   test "GETUSERID", %{user: user, socket: socket} do
-    ip_user = new_user("new_test_user_id_user", %{})
+    ip_user = new_user("test_user_id_user", %{})
     %{socket: _socket} = auth_setup(ip_user)
     _recv_until(socket)
 
     # Mod/Bot only so timeout to start with
-    _send_raw(socket, "GETUSERID new_test_user_id_user\n")
+    _send_raw(socket, "GETUSERID test_user_id_user\n")
     reply = _recv_raw(socket)
     assert reply == :timeout
 
@@ -657,8 +657,8 @@ CLIENTS test_room #{user.name}\n"
     :timer.sleep(500)
     _recv_until(socket)
 
-    _send_raw(socket, "GETUSERID new_test_user_id_user\n")
+    _send_raw(socket, "GETUSERID test_user_id_user\n")
     reply = _recv_raw(socket)
-    assert reply == "The ID for new_test_user_id_user is 1993717506 0d04a635e200f308 #{ip_user.springid}\n"
+    assert reply == "The ID for test_user_id_user is 1993717506 0d04a635e200f308 #{ip_user.springid}\n"
   end
 end

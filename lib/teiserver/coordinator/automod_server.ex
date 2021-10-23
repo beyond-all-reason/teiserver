@@ -148,7 +148,10 @@ defmodule Teiserver.Coordinator.AutomodServer do
     # end
 
     user = User.get_user_by_id(userid)
-    Logger.warn("No HW hash from #{user.name}/#{userid}")
+    is_test_user = String.contains?(user.name, "test_user_") or String.contains?(user.name, "InAndOutAgentServer_")
+    if not is_test_user do
+      Logger.warn("No HW hash from #{user.name}/#{userid}")
+    end
     "User has no hw fingerpint"
   end
 end

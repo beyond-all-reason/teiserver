@@ -6,7 +6,7 @@ defmodule Teiserver.TcpServerTest do
   require Logger
 
   import Teiserver.TeiserverTestLib,
-    only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, new_user_name: 0, auth_setup: 0]
+    only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, auth_setup: 0]
 
   setup do
     Teiserver.Coordinator.start_coordinator()
@@ -30,7 +30,7 @@ defmodule Teiserver.TcpServerTest do
 
   test "tcp startup and exit", %{socket: socket} do
     password = "X03MO1qnZdYdgyfeuILPmQ=="
-    username = new_user_name() <> "_tcp"
+    username = "test_user_tcpnew"
 
     # We expect to be greeted by a welcome message
     reply = _recv_raw(socket)
