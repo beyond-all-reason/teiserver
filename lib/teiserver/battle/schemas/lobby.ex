@@ -32,7 +32,7 @@ defmodule Teiserver.Battle.Lobby do
   alias Phoenix.PubSub
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.{User, Client}
+  alias Teiserver.{User, Client, Battle}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator
   alias Teiserver.Battle.{LobbyChat, LobbyCache}
@@ -97,7 +97,9 @@ defmodule Teiserver.Battle.Lobby do
         bot_count: 0,
         bots: %{},
         ip: nil,
-        tags: %{},
+        tags: %{
+          "server/match/uuid" => Battle.generate_lobby_uuid()
+        },
         disabled_units: [],
         start_rectangles: %{},
 

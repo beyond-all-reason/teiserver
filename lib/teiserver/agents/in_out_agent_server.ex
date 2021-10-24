@@ -51,8 +51,8 @@ defmodule Teiserver.Agents.InOutServer do
     socket = AgentLib.get_socket()
 
     {:success, user} = AgentLib.login(socket, %{
-      name: "InAndOutAgentServer_#{state.number}",
-      email: "InAndOutAgentServer_#{state.number}@agent_email",
+      name: "InAndOut_#{state.number}",
+      email: "InAndOut_#{state.number}@agent_email",
       extra_data: %{}
     })
 

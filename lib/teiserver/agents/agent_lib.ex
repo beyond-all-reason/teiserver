@@ -70,24 +70,27 @@ defmodule Teiserver.Agents.AgentLib do
     :ok
   end
 
-  @spec login({:sslsocket, any, any}, Map.t()) :: :success
+  @spec login({:sslsocket, any, any}, Map.t()) :: :success | :failure
   def login(socket, data) do
     # If no user, make it
     if User.get_user_by_email(data.email) == nil do
-      User.register_user_with_md5(data.name, data.email, "password", "127.0.0.1")
-      user = User.get_user_by_name(data.name)
-      user = %{user | verified: true, bot: data[:bot], moderator: data[:moderator]}
-      User.update_user(user, persist: true)
-      User.recache_user(user.id)
-      :timer.sleep(100)
+      case User.register_user_with_md5(data.name, data.email, "password", "127.0.0.1") do
+        :success ->
+          user = User.get_user_by_name(data.name)
+          user = %{user | verified: true, bot: data[:bot], moderator: data[:moderator]}
+          User.update_user(user, persist: true)
+          User.recache_user(user.id)
+          :timer.sleep(100)
+
+        {:error, error_message} ->
+          throw "Login error - #{error_message}, name: #{data.name}"
+      end
     end
 
-    # Get the user
     user = User.get_user_by_name(data.name)
-
     with :ok <- swap_to_tachyon(socket),
-         token <- User.create_token(user),
-         :ok <- do_login(socket, token)
+        token <- User.create_token(user),
+        :ok <- do_login(socket, token)
       do
         {:success, user}
       else

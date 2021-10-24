@@ -716,10 +716,7 @@ defmodule Teiserver.Protocols.SpringIn do
               engine_version: engine_version,
               map_name: map_name,
               game_name: game_name,
-              ip: client.ip,
-              tags: %{
-                "server/match/uuid" => Battle.generate_lobby_uuid()
-              }
+              ip: client.ip
             }
             |> Lobby.create_battle()
             |> Lobby.add_battle()
