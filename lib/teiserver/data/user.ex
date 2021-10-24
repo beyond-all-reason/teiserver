@@ -20,7 +20,7 @@ defmodule Teiserver.User do
   @max_username_length 20
 
   @spec role_list :: [String.t()]
-  def role_list(), do: ~w(Tester Streamer Donor Contributor Dev Moderator Admin)
+  def role_list(), do: ~w(Tester Streamer Donor Contributor Dev Moderator Admin Verified Bot)
 
   @keys [:id, :name, :email, :inserted_at, :clan_id]
   def keys(), do: @keys
@@ -232,7 +232,8 @@ defmodule Teiserver.User do
           user_register_params(bot_name, host.email, host.password_hash, %{
             "bot" => true,
             "verified" => true,
-            "password_hash" => host.password_hash
+            "password_hash" => host.password_hash,
+            "roles" => ["Bot", "Verified"]
           })
           |> Map.merge(%{
             email: String.replace(host.email, "@", ".bot#{bot_name}@")
@@ -422,7 +423,7 @@ defmodule Teiserver.User do
   end
 
   def verify_user(user) do
-    %{user | verification_code: nil, verified: true}
+    %{user | verification_code: nil, verified: true, roles: ["Verified" | user.roles]}
     |> update_user(persist: true)
   end
 
@@ -480,10 +481,10 @@ defmodule Teiserver.User do
           user.rename_in_progress ->
             {:error, "Rename in progress, wait 5 seconds"}
 
-          user.bot == false and login_flood_check(user.id) == :block ->
+          not is_bot?(user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-          Enum.member?(["", "0", nil], lobby_hash) == true and user.bot == false ->
+          Enum.member?(["", "0", nil], lobby_hash) == true and not is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
           # Used for testing, this should never be enabled in production
@@ -499,7 +500,7 @@ defmodule Teiserver.User do
               {:error, "Banned until #{until}"}
             end
 
-          user.verified == false ->
+          not is_verified?(user) ->
             Account.update_user_stat(user.id, %{
               lobby_client: lobby,
               lobby_hash: lobby_hash,
@@ -533,10 +534,10 @@ defmodule Teiserver.User do
           user.name != username ->
             {:error, "Username is case sensitive, try '#{user.name}'"}
 
-          user.bot == false and login_flood_check(user.id) == :block ->
+          not is_bot?(user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
-          Enum.member?(["", "0", nil], lobby_hash) == true and user.bot == false ->
+          Enum.member?(["", "0", nil], lobby_hash) == true and not is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
           # Used for testing, this should never be enabled in production
@@ -549,7 +550,7 @@ defmodule Teiserver.User do
           is_banned?(user) ->
             {:error, "Banned"}
 
-          user.verified == false ->
+          not is_verified?(user) ->
             Account.update_user_stat(user.id, %{
               lobby_client: lobby,
               lobby_hash: lobby_hash,
@@ -758,6 +759,27 @@ defmodule Teiserver.User do
     Client.shadowban(user.id)
     :ok
   end
+
+  @spec is_bot?(T.userid() | T.user()) :: boolean()
+  def is_bot?(nil), do: true
+  def is_bot?(userid) when is_integer(userid), do: is_bot?(get_user_by_id(userid))
+  def is_bot?(%{bot: true}), do: true# TODO: Remove this once the transition is complete
+  def is_bot?(%{roles: roles}), do: Enum.member?(roles, "Bot")
+  def is_bot?(_), do: false
+
+  @spec is_moderator?(T.userid() | T.user()) :: boolean()
+  def is_moderator?(nil), do: true
+  def is_moderator?(userid) when is_integer(userid), do: is_moderator?(get_user_by_id(userid))
+  def is_moderator?(%{moderator: true}), do: true# TODO: Remove this once the transition is complete
+  def is_moderator?(%{roles: roles}), do: Enum.member?(roles, "Moderator")
+  def is_moderator?(_), do: false
+
+  @spec is_verified?(T.userid() | T.user()) :: boolean()
+  def is_verified?(nil), do: true
+  def is_verified?(userid) when is_integer(userid), do: is_verified?(get_user_by_id(userid))
+  def is_verified?(%{verified: true}), do: true# TODO: Remove this once the transition is complete
+  def is_verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
+  def is_verified?(_), do: false
 
   # Old method based on total logged in time
   # def calculate_rank(user) do

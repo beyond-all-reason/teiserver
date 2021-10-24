@@ -14,7 +14,7 @@ defmodule Teiserver.Protocols.SpringIn do
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
   alias Teiserver.Protocols.{Spring, SpringOut}
   alias Teiserver.Protocols.Spring.{MatchmakingIn, TelemetryIn}
-  alias Teiserver.{Account, Battle}
+  alias Teiserver.{Account}
 
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
