@@ -27,7 +27,6 @@ defmodule Teiserver.User do
 
   @data_keys [
     :rank,
-    :lobby_client,
     :ip,
     :moderator,
     :bot,
@@ -51,7 +50,6 @@ defmodule Teiserver.User do
 
   @default_data %{
     rank: 1,
-    lobby_client: "no client",
     ip: "default_ip",
     moderator: false,
     bot: false,
@@ -585,7 +583,6 @@ defmodule Teiserver.User do
       %{
         user
         | ip: ip,
-          lobby_client: lobby_client,
           last_login: last_login,
           rank: rank,
           springid: springid,
