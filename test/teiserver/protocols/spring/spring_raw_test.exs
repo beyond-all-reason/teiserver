@@ -125,7 +125,8 @@ defmodule Teiserver.SpringRawTest do
 
   test "CONFIRMAGREEMENT", %{socket: socket} do
     user = new_user()
-    user = UserCache.update_user(%{user | verification_code: 123456, verified: false}, persist: true)
+    user = UserCache.update_user(%{user | verification_code: 123456, verified: false, roles: []}, persist: true)
+
     query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
     Ecto.Adapters.SQL.query(Repo, query, [])
     Teiserver.Account.UserCache.recache_user(user.id)
