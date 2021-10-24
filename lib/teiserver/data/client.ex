@@ -9,7 +9,7 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.{Room, User, Coordinator}
+  alias Teiserver.{Room, User, Coordinator, Account}
   alias Teiserver.Battle.Lobby
   alias Central.Helpers.TimexHelper
   require Logger
@@ -68,19 +68,21 @@ defmodule Teiserver.Client do
   end
 
   def login(user, pid) do
+    stats = Account.get_user_stat_data(user.id)
+
     client =
       create(%{
         userid: user.id,
         name: user.name,
         pid: pid,
         rank: user.rank,
-        moderator: user.moderator,
-        bot: user.bot,
+        moderator: User.is_moderator?(user),
+        bot: User.is_bot?(user),
         away: false,
         in_game: false,
-        ip: user.ip,
-        country: user.country,
-        lobby_client: user.lobby_client,
+        ip: stats["last_ip"],
+        country: stats["country"],
+        lobby_client: stats["lobby_client"],
         shadowbanned: user.shadowbanned
       })
       |> add_client
@@ -232,16 +234,18 @@ defmodule Teiserver.Client do
   @spec refresh_client(T.userid()) :: Map.t()
   def refresh_client(userid) do
     user = User.get_user_by_id(userid)
+    stats = Account.get_user_stat_data(user.id)
+
     client = get_client_by_id(userid)
     %{client |
       userid: user.id,
       name: user.name,
       rank: user.rank,
-      moderator: user.moderator,
-      bot: user.bot,
-      ip: user.ip,
-      country: user.country,
-      lobby_client: user.lobby_client
+      moderator: User.is_moderator?(user),
+      bot: User.is_bot?(user),
+      ip: stats["last_ip"],
+      country: stats["country"],
+      lobby_client: stats["lobby_client"]
     }
     |> add_client
   end

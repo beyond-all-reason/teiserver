@@ -142,7 +142,6 @@ defmodule TeiserverWeb.Admin.UserController do
         "password" => "pass",
         "data" => %{
           "rank" => 1,
-          "country" => "",
           "friends" => [],
           "friend_requests" => [],
           "ignored" => [],
