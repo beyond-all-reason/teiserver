@@ -46,10 +46,8 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
     assert reply == :timeout
 
     # Converted message should appear here
-    messages = PubsubListener.get(listener)
-    assert messages == [
-      {:battle_updated, lobby.id, {user.id, "$ settag tagname tagvalue", lobby.id}, :say},
-      {:battle_updated, lobby.id, %{"tagname" => "tagvalue"}, :add_script_tags}
-    ]
+    [m1, m2] = PubsubListener.get(listener)
+    assert m1 == {:battle_updated, lobby.id, {user.id, "$ settag tagname tagvalue", lobby.id}, :say}
+    {:battle_updated, _lobby_id, %{"tagname" => "tagvalue", "server/match/uuid" => _uuid}, :add_script_tags} = m2
   end
 end

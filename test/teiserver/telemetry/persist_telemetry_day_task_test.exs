@@ -1,7 +1,6 @@
 defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTaskTest do
   use Central.DataCase
-  alias Teiserver.Account.UserCache
-  alias Teiserver.Telemetry
+  alias Teiserver.{Telemetry, Account, User}
   alias Teiserver.Telemetry.Tasks.PersistTelemetryDayTask
 
   test "perform task" do
@@ -19,7 +18,11 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTaskTest do
   end
 
   defp create_minute_data() do
-    user_ids = UserCache.list_users()
+    all_ids = Account.list_users()
+      |> Enum.map(fn u -> u.id end)
+
+    user_ids = all_ids
+      |> User.list_users()
       |> Enum.filter(fn u -> u.bot == false end)
       |> Enum.map(fn u -> u.id end)
 

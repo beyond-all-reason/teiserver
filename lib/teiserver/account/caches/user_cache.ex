@@ -151,14 +151,6 @@ defmodule Teiserver.Account.UserCache do
       ConCache.delete(:users_lookup_name_with_id, user.id)
       ConCache.delete(:users_lookup_id_with_name, cachename(user.name))
       ConCache.delete(:users_lookup_id_with_email, cachename(user.email))
-
-      ConCache.update(:lists, :users, fn value ->
-        new_value =
-          value
-          |> Enum.filter(fn v -> v != userid end)
-
-        {:ok, new_value}
-      end)
       :ok
     else
       :no_user
