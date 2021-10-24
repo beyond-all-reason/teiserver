@@ -1,3 +1,5 @@
+<% {_fg, _bg, bsname} = colours() %>
+
 <br />
 
 <style type="text/css">
@@ -123,12 +125,30 @@
 </div>
 
 <%= if allow?(@conn, "teiserver.admin.account") do %>
-<div class="row">
-  <div class="col-md-6">
-    <textarea id="user_data" rows="20" class="form-control monospace"><%= Jason.encode! Map.drop(@user.data, ["password_hash", "ip"]), pretty: true %></textarea>
+  <div class="row">
+    <div class="col-md-6">
+      <textarea id="user_data" rows="28" class="form-control monospace"><%= Jason.encode! Map.drop(@user.data, ["password_hash", "ip"]), pretty: true %></textarea>
+    </div>
+    <div class="col-md-6">
+      <textarea id="user_stats" rows="20" class="form-control monospace"><%= Jason.encode! Map.drop(@user_stats, ["password_hash", "ip"]), pretty: true %></textarea>
+
+      <hr />
+      <form action='<%= Routes.ts_admin_user_path(@conn, :set_stat) %>' method='post' class=''>
+        <input type='hidden' name='_csrf_token' value='<%= get_csrf_token() %>' />
+        <input type='hidden' name='userid' value='<%= @user.id %>' />
+
+        <div class='row' style="padding: 10px;">
+          <input type='text' name='key' value='' class='form-control' placeholder="key" />
+        </div>
+
+        <div class='row' style="padding: 10px;">
+          <input type='text' name='value' value='' class='form-control' placeholder="value" />
+        </div>
+
+        <button type='submit' class='btn btn-<%= bsname %> float-right'>
+          Set stat
+        </button>
+      </form>
+    </div>
   </div>
-  <div class="col-md-6">
-    <textarea id="user_stats" rows="20" class="form-control monospace"><%= Jason.encode! Map.drop(@user_stats, ["password_hash", "ip"]), pretty: true %></textarea>
-  </div>
-</div>
 <% end %>
