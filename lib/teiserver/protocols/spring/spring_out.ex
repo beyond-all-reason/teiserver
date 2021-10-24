@@ -123,9 +123,10 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:add_user, nil), do: ""
 
-  defp do_reply(:add_user, user) do
+  defp do_reply(:add_user, client) do
+    user = User.get_user_by_id(client.userid)
     springid = if user.springid, do: user.springid, else: user.id
-    "ADDUSER #{user.name} #{user.country} #{springid} #{user.lobby_client}\n"
+    "ADDUSER #{client.name} #{client.country} #{springid} #{client.lobby_client}\n"
   end
 
   defp do_reply(:remove_user, {_userid, username}) do
@@ -317,12 +318,12 @@ defmodule Teiserver.Protocols.SpringOut do
   # It's possible for a user to log in and then out really fast and cause issues with this
   defp do_reply(:user_logged_in, nil), do: nil
   defp do_reply(:user_logged_in, userid) do
-    case User.get_user_by_id(userid) do
+    case Client.get_client_by_id(userid) do
       nil -> nil
-      user ->
+      client ->
         [
-          do_reply(:add_user, user),
-          do_reply(:client_status, Client.get_client_by_id(userid))
+          do_reply(:add_user, client),
+          do_reply(:client_status, client)
         ]
     end
   end

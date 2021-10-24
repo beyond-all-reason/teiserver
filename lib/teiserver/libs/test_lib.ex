@@ -44,6 +44,11 @@ defmodule Teiserver.TeiserverTestLib do
           group_id: Teiserver.user_group_id()
         })
 
+        Account.update_user_stat(user.id, %{
+          "country" => "??",
+          "lobby_client" => "LuaLobby Chobby"
+        })
+
         user
         |> User.convert_user()
         |> Map.put(:springid, User.next_springid())
