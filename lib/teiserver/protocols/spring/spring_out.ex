@@ -481,8 +481,8 @@ defmodule Teiserver.Protocols.SpringOut do
 
   # Battle
   defp do_reply(:request_user_join_battle, userid) do
-    user = User.get_user_by_id(userid)
-    "JOINBATTLEREQUEST #{user.name} #{user.ip}\n"
+    client = Client.get_client_by_id(userid)
+    "JOINBATTLEREQUEST #{client.name} #{client.ip}\n"
   end
 
   defp do_reply(:remove_user_from_room, {userid, room_name}) do

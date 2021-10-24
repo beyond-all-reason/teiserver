@@ -48,6 +48,9 @@ defmodule Teiserver.Client do
         extra_logging: false,
         chat_times: [],
         temp_mute_count: 0,
+        ip: nil,
+        country: nil,
+        lobby_client: nil,
         shadowbanned: false
       },
       client

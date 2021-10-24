@@ -478,10 +478,14 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   # SLDB commands
-  defp do_handle("GETIP", data, msg_id, state) do
+  defp do_handle("GETIP", username, msg_id, state) do
     if User.allow?(state.userid, :bot) do
-      target = User.get_user_by_name(data)
-      reply(:user_ip, {data, target.ip}, msg_id, state)
+      case Client.get_client_by_name(username) do
+        nil ->
+          reply(:no, "GETIP", msg_id, state)
+        client ->
+          reply(:user_ip, {username, client.ip}, msg_id, state)
+      end
     else
       state
     end
