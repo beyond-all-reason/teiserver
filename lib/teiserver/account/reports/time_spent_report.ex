@@ -27,7 +27,7 @@ defmodule Teiserver.Account.TimeSpentReport do
         data_equal: {"bot", "false"}
       ],
       joins: [:user_stat],
-      order_by: {:data, "ingame_minutes", :desc},
+      order_by: {:data, "rank", :desc},
       limit: 100
     )
     |> Enum.sort(fn (user1, user2) ->

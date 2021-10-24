@@ -592,7 +592,7 @@ CLIENTS test_room #{user.name}\n"
   end
 
   test "Ranks" do
-    user = new_user("test_user_rank_test", %{"ingame_minutes" => 60 * 200, "rank" => 5})
+    user = new_user("test_user_rank_test", %{"rank" => 5})
     %{socket: socket} = auth_setup(user)
 
     # [in_game, away, r3, r2, r1, mod, bot]

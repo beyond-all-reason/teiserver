@@ -40,7 +40,6 @@ defmodule Teiserver.User do
     :verification_code,
     :verified,
     :email_change_code,
-    :ingame_minutes,
     :last_login,
     :banned,
     :muted,
@@ -67,7 +66,6 @@ defmodule Teiserver.User do
     verification_code: nil,
     verified: false,
     email_change_code: nil,
-    ingame_minutes: 0,
     last_login: nil,
     banned: [false, nil],
     muted: [false, nil],
@@ -281,8 +279,6 @@ defmodule Teiserver.User do
   defp do_rename_user(userid, new_name) do
     user = get_user_by_id(userid)
     ban_time = Timex.now() |> Timex.shift(seconds: 15) |> date_to_str(format: :ymd_t_hms)
-    # "2021-10-24T13:41:28"
-    IO.puts ban_time
     update_user(%{user | banned: [true, ban_time]}, persist: true)
 
     # Log the current name in their history
@@ -584,7 +580,7 @@ defmodule Teiserver.User do
 
     ip_list = [ip | (stats["ip_list"] || [])] |> Enum.uniq |> Enum.take(20)
 
-    rank = calculate_rank(user)
+    rank = calculate_rank(user.id)
 
     springid = if Map.get(user, :springid) != nil, do: user.springid, else: next_springid()
     |> Central.Helpers.NumberHelper.int_parse
@@ -620,17 +616,9 @@ defmodule Teiserver.User do
 
   def logout(nil), do: nil
 
-  def logout(user_id) do
-    user = get_user_by_id(user_id)
-    # TODO: In some tests it's possible for last_login to be nil, this is a temporary workaround
-    system_minutes = round(:erlang.system_time(:seconds) / 60)
-
-    new_ingame_minutes =
-      user.ingame_minutes +
-        (system_minutes - (user.last_login || system_minutes))
-
-    user = %{user | ingame_minutes: new_ingame_minutes}
-    update_user(user, persist: true)
+  def logout(_user_id) do
+    # We used to calculate ingame_minutes here but we now use telemetry logs for that
+    nil
   end
 
   @spec create_report(Integer.t()) :: :ok
@@ -776,26 +764,17 @@ defmodule Teiserver.User do
   def is_verified?(%{roles: roles}), do: Enum.member?(roles, "Verified")
   def is_verified?(_), do: false
 
-  # Old method based on total logged in time
-  # def calculate_rank(user) do
-  #   ingame_hours = user.ingame_minutes / 60
-
-  #   @rank_levels
-  #     |> Enum.filter(fn r -> r < ingame_hours end)
-  #     |> Enum.count()
-  # end
-
-  @spec rank_time(T.user()) :: non_neg_integer()
-  defp rank_time(user) do
-    stats = Account.get_user_stat(user.id) || %{data: %{}}
+  @spec rank_time(T.userid()) :: non_neg_integer()
+  def rank_time(userid) do
+    stats = Account.get_user_stat(userid) || %{data: %{}}
     ingame_minutes = (stats.data["player_minutes"] || 0) + ((stats.data["spectator_minutes"] || 0) * 0.5)
     round(ingame_minutes / 60)
   end
 
   # Based on actual ingame time
-  @spec calculate_rank(T.user()) :: non_neg_integer()
-  def calculate_rank(user) do
-    ingame_hours = rank_time(user)
+  @spec calculate_rank(T.userid()) :: non_neg_integer()
+  def calculate_rank(userid) do
+    ingame_hours = rank_time(userid)
 
     @rank_levels
       |> Enum.filter(fn r -> r < ingame_hours end)
