@@ -9,7 +9,7 @@ defmodule Teiserver.User do
   alias Argon2
   alias Central.Account.Guardian
   alias Teiserver.Data.Types, as: T
-  import Central.Helpers.TimexHelper, only: [parse_ymd_t_hms: 1]
+  import Central.Helpers.TimexHelper, only: [parse_ymd_t_hms: 1, date_to_str: 2]
 
   require Logger
   alias Phoenix.PubSub
@@ -46,7 +46,6 @@ defmodule Teiserver.User do
     :muted,
     :warned,
     :shadowbanned,
-    :rename_in_progress,
     :springid,
     :lobby_hash,
     :roles
@@ -74,7 +73,6 @@ defmodule Teiserver.User do
     muted: [false, nil],
     warned: [false, nil],
     shadowbanned: false,
-    rename_in_progress: false,
     springid: nil,
     lobby_hash: [],
     roles: []
@@ -282,7 +280,10 @@ defmodule Teiserver.User do
   @spec do_rename_user(T.userid(), String.t()) :: :ok
   defp do_rename_user(userid, new_name) do
     user = get_user_by_id(userid)
-    update_user(%{user | rename_in_progress: true}, persist: true)
+    ban_time = Timex.now() |> Timex.shift(seconds: 15) |> date_to_str(format: :ymd_t_hms)
+    # "2021-10-24T13:41:28"
+    IO.puts ban_time
+    update_user(%{user | banned: [true, ban_time]}, persist: true)
 
     # Log the current name in their history
     previous_names = Account.get_user_stat_data(userid)
@@ -290,7 +291,7 @@ defmodule Teiserver.User do
 
     Account.update_user_stat(userid, %{"previous_names" => [user.name | previous_names]})
 
-    # We need to re-get the user to ensure we don't overwrite our rename_in_progress by mistake
+    # We need to re-get the user to ensure we don't overwrite our banned flag
     user = get_user_by_id(userid)
     delete_user(user.id)
 
@@ -300,7 +301,7 @@ defmodule Teiserver.User do
     :timer.sleep(5000)
     recache_user(userid)
     user = get_user_by_id(userid)
-    update_user(%{user | rename_in_progress: false})
+    update_user(%{user | banned: [false, nil]}, persist: true)
     :ok
   end
 
@@ -478,9 +479,6 @@ defmodule Teiserver.User do
         user = get_user_by_id(db_user.id)
 
         cond do
-          user.rename_in_progress ->
-            {:error, "Rename in progress, wait 5 seconds"}
-
           not is_bot?(user) and login_flood_check(user.id) == :block ->
             {:error, "Flood protection - Please wait 20 seconds and try again"}
 
@@ -528,9 +526,6 @@ defmodule Teiserver.User do
 
       user ->
         cond do
-          user.rename_in_progress ->
-            {:error, "Rename in progress, wait 5 seconds"}
-
           user.name != username ->
             {:error, "Username is case sensitive, try '#{user.name}'"}
 
