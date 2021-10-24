@@ -64,16 +64,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   # Doesn't do anything at this stage
   def handle_info(:startup, state) do
-    :timer.send_after(1000, :delayed_startup)
-    {:noreply, state}
-  end
-
-  def handle_info(:delayed_startup, state) do
-    # uuid = Battle.generate_lobby_uuid()
-    # battle = Lobby.get_lobby!(state.lobby_id)
-    # new_tags = Map.put(battle.tags, "server/match/uuid", uuid)
-    # Lobby.set_script_tags(state.lobby_id, new_tags)
-
     {:noreply, state}
   end
 

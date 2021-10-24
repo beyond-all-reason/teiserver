@@ -9,8 +9,8 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
     AgentLib.login(socket, %{
-      name: "MatchmakingAgentServer_#{state.name}",
-      email: "MatchmakingAgentServer_#{state.name}@agent_email",
+      name: "Matchmaking_#{state.name}",
+      email: "Matchmaking_#{state.name}@agent_email",
       bot: true
     })
 

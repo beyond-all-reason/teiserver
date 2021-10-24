@@ -49,8 +49,7 @@ defmodule Teiserver.User do
     :rename_in_progress,
     :springid,
     :lobby_hash,
-    :roles,
-    :preload
+    :roles
   ]
   def data_keys(), do: @data_keys
 
@@ -78,8 +77,7 @@ defmodule Teiserver.User do
     rename_in_progress: false,
     springid: nil,
     lobby_hash: [],
-    roles: [],
-    preload: false
+    roles: []
   }
 
   def default_data(), do: @default_data
@@ -172,7 +170,6 @@ defmodule Teiserver.User do
           :error ->
             {:error, "Server error, please inform admin"}
         end
-        :success
     end
   end
 
@@ -346,17 +343,14 @@ defmodule Teiserver.User do
   @spec get_user_by_id(T.userid()) :: User.t() | nil
   defdelegate get_user_by_id(id), to: UserCache
 
-  @spec list_users :: list
-  defdelegate list_users(), to: UserCache
-
   @spec list_users(list) :: list
   defdelegate list_users(id_list), to: UserCache
 
   @spec recache_user(Integer.t()) :: :ok
   defdelegate recache_user(id), to: UserCache
 
-  @spec pre_cache_users() :: :ok
-  defdelegate pre_cache_users(), to: UserCache
+  @spec pre_cache_users(atom) :: :ok
+  defdelegate pre_cache_users(type), to: UserCache
 
   @spec convert_user(User.t()) :: User.t()
   defdelegate convert_user(user), to: UserCache

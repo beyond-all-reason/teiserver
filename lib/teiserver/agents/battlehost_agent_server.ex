@@ -17,8 +17,8 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
     AgentLib.login(socket, %{
-      name: "BattlehostAgentServer_#{state.name}",
-      email: "BattlehostAgentServer_#{state.name}@agent_email",
+      name: "Battlehost_#{state.name}",
+      email: "Battlehost_#{state.name}@agent_email",
       bot: true
     })
 

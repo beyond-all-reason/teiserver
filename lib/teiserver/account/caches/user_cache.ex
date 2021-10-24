@@ -44,12 +44,6 @@ defmodule Teiserver.Account.UserCache do
     ConCache.get(:users, int_parse(id))
   end
 
-  @spec list_users :: list
-  def list_users() do
-    ConCache.get(:lists, :users)
-    |> Enum.map(fn userid -> ConCache.get(:users, userid) end)
-  end
-
   @spec list_users(list) :: list
   def list_users(id_list) do
     id_list
@@ -73,10 +67,8 @@ defmodule Teiserver.Account.UserCache do
     :ok
   end
 
-  @spec pre_cache_users() :: :ok
-  def pre_cache_users() do
-    ConCache.insert_new(:lists, :users, [])
-
+  @spec pre_cache_users(:active | :remaining) :: :ok
+  def pre_cache_users(:active) do
     user_count =
       Account.list_users(limit: :infinity)
       |> Parallel.map(fn user ->
@@ -86,8 +78,21 @@ defmodule Teiserver.Account.UserCache do
       end)
       |> Enum.count()
 
-    Logger.info("pre_cache_users, got #{user_count} users")
+    Logger.info("pre_cache_users:active, got #{user_count} users")
   end
+
+  # def pre_cache_users(:remaining) do
+  #   user_count =
+  #     Account.list_users(limit: :infinity)
+  #     |> Parallel.map(fn user ->
+  #       user
+  #       |> convert_user
+  #       |> add_user
+  #     end)
+  #     |> Enum.count()
+
+  #   Logger.info("pre_cache_users:remaining, got #{user_count} users")
+  # end
 
   @spec convert_user(User.t()) :: User.t()
   def convert_user(user) do
@@ -107,14 +112,6 @@ defmodule Teiserver.Account.UserCache do
     ConCache.put(:users_lookup_name_with_id, user.id, user.name)
     ConCache.put(:users_lookup_id_with_name, cachename(user.name), user.id)
     ConCache.put(:users_lookup_id_with_email, cachename(user.email), user.id)
-
-    ConCache.update(:lists, :users, fn value ->
-      new_value =
-        ([user.id | value])
-        |> Enum.uniq()
-
-      {:ok, new_value}
-    end)
 
     user
   end
