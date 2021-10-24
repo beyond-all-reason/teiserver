@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.UserLib do
   use CentralWeb, :library
   alias Central.Account.UserQueries
+  require Logger
 
   # Functions
   @spec icon :: String.t()
@@ -68,31 +69,37 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def _search(query, :bot, "Person") do
+    Logger.error("user.data['bot'] is being queried, this property is due to be depreciated")
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "bot", "false")
   end
 
   def _search(query, :bot, "Robot") do
+    Logger.error("user.data['bot'] is being queried, this property is due to be depreciated")
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "bot", "true")
   end
 
   def _search(query, :moderator, "User") do
+    Logger.error("user.data['verified'] is being queried, this property is due to be depreciated")
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "moderator", "false")
   end
 
   def _search(query, :moderator, "Moderator") do
+    Logger.error("user.data['moderator'] is being queried, this property is due to be depreciated")
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "moderator", "true")
   end
 
   def _search(query, :verified, "Unverified") do
+    Logger.error("user.data['verified'] is being queried, this property is due to be depreciated")
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "verified", "false")
   end
 
   def _search(query, :verified, "Verified") do
+    Logger.error("user.data['verified'] is being queried, this property is due to be depreciated")
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "verified", "true")
   end
@@ -153,6 +160,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def _search(query, :ip, ip) do
+    Logger.error("user.data['ip'] is being queried, this property is due to be depreciated")
     from users in query,
       where: fragment("? -> ? @> ?", users.data, "ip_list", ^ip)
   end

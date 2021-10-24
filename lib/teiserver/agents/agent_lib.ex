@@ -3,6 +3,7 @@ defmodule Teiserver.Agents.AgentLib do
   alias Teiserver.User
   alias Phoenix.PubSub
   require Logger
+  alias Teiserver.Data.Types, as: T
 
   @localhost '127.0.0.1'
 
@@ -70,7 +71,7 @@ defmodule Teiserver.Agents.AgentLib do
     :ok
   end
 
-  @spec login({:sslsocket, any, any}, Map.t()) :: :success | :failure
+  @spec login({:sslsocket, any, any}, Map.t()) :: {:success, T.user()}
   def login(socket, data) do
     # If no user, make it
     if User.get_user_by_email(data.email) == nil do
@@ -94,7 +95,8 @@ defmodule Teiserver.Agents.AgentLib do
       do
         {:success, user}
       else
-        {:error, :login} -> throw "Login error"
+        {:error, :login} ->
+          throw "Login error"
     end
   end
 
