@@ -433,7 +433,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("GETUSERINFO", _, msg_id, state) do
-    ingame_hours = round(state.user.ingame_minutes / 60)
+    ingame_hours = User.rank_time(state.userid)
 
     [
       "Registration date: #{date_to_str(state.user.inserted_at, format: :ymd_hms, tz: "UTC")}",

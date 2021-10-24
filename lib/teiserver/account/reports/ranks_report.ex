@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.RanksReport do
   alias Central.Helpers.DatePresets
-  alias Teiserver.Account
+  alias Teiserver.{Account, User}
 
   @spec icon() :: String.t()
   def icon(), do: "far fa-satellite-dish"
@@ -29,6 +29,12 @@ defmodule Teiserver.Account.RanksReport do
       order_by: {:data, "rank", :desc},
       limit: 100
     )
+    |> Enum.map(fn user ->
+      Map.merge(user, %{
+        stats: Account.get_user_stat_data(user.id),
+        rank_hours: User.rank_time(user.id)
+      })
+    end)
 
     assigns = %{
       params: params,

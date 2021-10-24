@@ -61,8 +61,10 @@
           <thead>
             <tr>
               <th>User</th>
-              <th>Rank</th>
-              <th>Hours</th>
+              <th>Rank level</th>
+              <th>Rank hours</th>
+              <th>Player hours</th>
+              <th>Spectator hours</th>
            </tr>
           </thead>
           <tbody>
@@ -70,7 +72,9 @@
               <tr>
                 <td><%= user.name %></td>
                 <td><%= user.data["rank"] %></td>
-                <td><%= user.data["ingame_minutes"]/60 |> round %></td>
+                <td><%= user.rank_hours %></td>
+                <td><%= (user.stats["player_minutes"] || 0)/60 |> round %></td>
+                <td><%= (user.stats["spectator_minutes"] || 0)/60 |> round %></td>
               </tr>
             <% end %>
           </tbody>

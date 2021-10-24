@@ -116,7 +116,6 @@ defmodule Teiserver.UberserverConvert do
       colour: "#AA0000",
       icon: "fas fa-user",
       data: %{
-        "ingame_minutes" => raw_data["ingame_time"],
         "bot" => raw_data["bot"] == "1",
         "moderator" => is_mod,
         "verified" => verified,

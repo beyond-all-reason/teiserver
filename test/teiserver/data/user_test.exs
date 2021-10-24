@@ -37,18 +37,18 @@ defmodule Teiserver.Data.UserTest do
       "player_minutes" => 60 * 60,
       "spectator_minutes" => 60 * 60
     })
-    assert User.calculate_rank(user) == 3
+    assert User.calculate_rank(user.id) == 3
 
     Account.update_user_stat(user.id, %{
       "player_minutes" => 60 * 1,
       "spectator_minutes" => 60 * 1
     })
-    assert User.calculate_rank(user) == 0
+    assert User.calculate_rank(user.id) == 0
 
     Account.update_user_stat(user.id, %{
       "player_minutes" => 60 * 240,
       "spectator_minutes" => 0
     })
-    assert User.calculate_rank(user) == 4
+    assert User.calculate_rank(user.id) == 4
   end
 end
