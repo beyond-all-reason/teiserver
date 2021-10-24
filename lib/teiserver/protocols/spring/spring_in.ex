@@ -14,7 +14,7 @@ defmodule Teiserver.Protocols.SpringIn do
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
   alias Teiserver.Protocols.{Spring, SpringOut}
   alias Teiserver.Protocols.Spring.{MatchmakingIn, TelemetryIn}
-  alias Teiserver.Account
+  alias Teiserver.{Account, Battle}
 
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
@@ -716,7 +716,10 @@ defmodule Teiserver.Protocols.SpringIn do
               engine_version: engine_version,
               map_name: map_name,
               game_name: game_name,
-              ip: client.ip
+              ip: client.ip,
+              tags: %{
+                "server/match/uuid" => Battle.generate_lobby_uuid()
+              }
             }
             |> Lobby.create_battle()
             |> Lobby.add_battle()
