@@ -572,6 +572,9 @@ defmodule Teiserver.User do
         user.country_override != nil ->
           user.country_override
 
+        stats["country_override"] != nil ->
+          stats["country_override"]
+
         true ->
           Teiserver.Geoip.get_flag(ip)
       end

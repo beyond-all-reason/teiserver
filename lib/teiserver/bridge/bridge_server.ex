@@ -150,7 +150,6 @@ defmodule Teiserver.Bridge.BridgeServer do
             bot: true,
             moderator: false,
             verified: true,
-            country_override: Application.get_env(:central, Teiserver)[:server_flag],
             lobby_client: "Teiserver Internal Process"
           }
         })
