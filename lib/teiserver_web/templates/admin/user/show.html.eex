@@ -69,16 +69,23 @@
         </li>
 
         <li>
-          <a href="#chat_tab" role="tab" class="nav-link" data-toggle="tab">
-            <%= central_component "icon", icon: Central.Communication.CommentLib.icon() %>
-            Chat
-          </a>
-        </li>
-
-        <li>
           <a href="#reports_tab" role="tab" class="nav-link" data-toggle="tab">
-            <%= central_component "icon", icon: Central.Account.ReportLib.icon() %>
-            Reports
+            <%
+              outstanding_reports = @reports
+                |> Enum.filter(fn r -> r.responder_id == nil end)
+                |> Enum.count
+            %>
+            <%= case outstanding_reports do %>
+              <% 0 -> %>
+                <%= central_component "icon", icon: Central.Account.ReportLib.icon() %>
+                Reports
+              <% 1 -> %>
+                <%= central_component "icon", icon: Central.Account.ReportLib.icon(), class: "text-danger fas" %>
+                1 Report outstanding
+              <% _ -> %>
+                <%= central_component "icon", icon: Central.Account.ReportLib.icon(), class: "text-danger fas" %>
+                <%= outstanding_reports %> Reports outstanding
+            <% end %>
           </a>
         </li>
       </ul>
@@ -86,10 +93,6 @@
       <div class="tab-content">
         <div class="tab-pane" id="details_tab" style="padding:5px;">
           <%= render "tab_details.html", assigns %>
-        </div>
-
-        <div class="tab-pane" id="chat_tab" style="padding:5px;">
-          <%= render "tab_chat.html", assigns %>
         </div>
 
         <div class="tab-pane" id="reports_tab" style="padding:5px;">
