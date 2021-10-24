@@ -170,7 +170,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
             bot: true,
             moderator: true,
             verified: true,
-            country_override: Application.get_env(:central, Teiserver)[:server_flag],
             lobby_client: "Teiserver Internal Process"
           }
         })
