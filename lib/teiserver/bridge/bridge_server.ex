@@ -35,6 +35,8 @@ defmodule Teiserver.Bridge.BridgeServer do
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
+  def handle_info({:new_message, from_id, room_name, "!" <> message}, state), do: {:noreply, state}
+  def handle_info({:new_message, from_id, room_name, "$" <> message}, state), do: {:noreply, state}
   def handle_info({:new_message, from_id, room_name, message}, state) do
     user = User.get_user_by_id(from_id)
 
