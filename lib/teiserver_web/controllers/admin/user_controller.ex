@@ -492,6 +492,17 @@ defmodule TeiserverWeb.Admin.UserController do
     |> render("full_chat.html")
   end
 
+  @spec set_stat(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def set_stat(conn, %{"userid" => userid, "key" => key, "value" => value}) do
+    user = Account.get_user!(userid)
+
+    Account.update_user_stat(user.id, %{key => value})
+
+    conn
+    |> put_flash(:success, "stat #{key} updated")
+    |> redirect(to: Routes.ts_admin_user_path(conn, :show, user.id))
+  end
+
   @spec search_defaults(Plug.Conn.t()) :: Map.t()
   defp search_defaults(_conn) do
     %{

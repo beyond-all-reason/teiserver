@@ -193,6 +193,7 @@ defmodule TeiserverWeb.Router do
         get("/users/banhash_form/:id", UserController, :banhash_form)
         get("/users/full_chat/:id", UserController, :full_chat)
         get("/users/search", UserController, :index)
+        post("/users/set_stat", UserController, :set_stat)
         post("/users/search", UserController, :search)
         resources("/user", UserController)
 
