@@ -28,7 +28,6 @@ defmodule Teiserver.User do
   @data_keys [
     :rank,
     :country,
-    :country_override,
     :lobby_client,
     :ip,
     :moderator,
@@ -54,7 +53,6 @@ defmodule Teiserver.User do
   @default_data %{
     rank: 1,
     country: "??",
-    country_override: nil,
     lobby_client: "no client",
     ip: "default_ip",
     moderator: false,
@@ -568,9 +566,6 @@ defmodule Teiserver.User do
       cond do
         Central.Config.get_user_config_cache(user.id, "teiserver.Show flag") == false ->
           "??"
-
-        user.country_override != nil ->
-          user.country_override
 
         stats["country_override"] != nil ->
           stats["country_override"]
