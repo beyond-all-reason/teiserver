@@ -352,7 +352,7 @@ defmodule Teiserver.TeiserverTestLib do
   @spec admin_permissions() :: [String.t()]
   def admin_permissions do
     permissions =
-      ~w(account battle clan party queue tournament)
+      ~w(account battle clan queue)
       |> Enum.map(fn p -> "teiserver.admin.#{p}" end)
 
     permissions ++ moderator_permissions()
@@ -361,7 +361,7 @@ defmodule Teiserver.TeiserverTestLib do
   @spec moderator_permissions() :: [String.t()]
   def moderator_permissions do
     permissions =
-      ~w(account battle clan party queue tournament)
+      ~w(account battle clan queue)
       |> Enum.map(fn p -> "teiserver.moderator.#{p}" end)
 
     permissions ++ player_permissions()

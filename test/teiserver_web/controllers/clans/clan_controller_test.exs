@@ -4,11 +4,23 @@ defmodule TeiserverWeb.Clans.ClanControllerTest do
   alias Teiserver.TeiserverTestLib
 
   alias Central.Helpers.GeneralTestLib
+  alias Teiserver.Clans
 
   setup do
     GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
     |> Teiserver.TeiserverTestLib.conn_setup()
   end
+
+  @update_attrs %{
+    colour1: "some updated colour1",
+    colour2: "some updated colour2",
+    text_colour: "some updated colour",
+    description: "some updated description",
+    icon: "fas fa-wrench",
+    name: "some_clan_updated_name",
+    tag: "some updated tag"
+  }
+  @invalid_attrs %{colour1: nil, colour2: nil, icon: nil, name: nil, tag: nil}
 
   describe "index" do
     test "lists all clans", %{conn: conn} do
@@ -108,7 +120,45 @@ defmodule TeiserverWeb.Clans.ClanControllerTest do
     end
   end
 
-  describe "removing invites" do
+  describe "update clan" do
+    test "redirects when data is valid", %{conn: conn, user: user} do
+      clan = TeiserverTestLib.make_clan("clan_update_clan")
+      TeiserverTestLib.make_clan_membership(clan.id, user.id, %{"role" => "Admin"})
+      conn = put(conn, Routes.ts_clans_clan_path(conn, :update, clan), clan: @update_attrs)
+      assert redirected_to(conn) == Routes.ts_clans_clan_path(conn, :show, "some_clan_updated_name") <> "#admin_tab"
+
+      conn = get(conn, Routes.ts_clans_clan_path(conn, :show, "some_clan_updated_name"))
+      assert html_response(conn, 200) =~ "some updated colour"
+    end
+
+    # TODO: We don't correctly handle edit.html for this mode
+    # test "renders errors when data is invalid", %{conn: conn, user: user} do
+    #   clan = TeiserverTestLib.make_clan("clan_update_clan_error")
+    #   TeiserverTestLib.make_clan_membership(clan.id, user.id, %{"role" => "Admin"})
+    #   conn = put(conn, Routes.ts_clans_clan_path(conn, :update, clan), clan: @invalid_attrs)
+    #   assert html_response(conn, 200) =~ "Oops, something went wrong!"
+    # end
+
+    test "renders errors when nil object", %{conn: conn} do
+      assert_error_sent 404, fn ->
+        put(conn, Routes.ts_clans_clan_path(conn, :update, -1), clan: @invalid_attrs)
+      end
+    end
+  end
+
+  describe "delete invite" do
+    test "delete invite", %{conn: conn} do
+      clan = TeiserverTestLib.make_clan("clan_delete_invite")
+      user2 = GeneralTestLib.make_user()
+
+      Clans.create_clan_invite(%{
+        clan_id: clan.id,
+        user_id: user2.id
+      })
+
+      conn = delete(conn, Routes.ts_clans_clan_path(conn, :delete_invite, clan.id, user2.id))
+      assert redirected_to(conn) == Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites"
+    end
   end
 
   describe "responding to invites" do

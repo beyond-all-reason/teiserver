@@ -7,8 +7,8 @@ defmodule Teiserver.Startup do
   def startup do
     start_time = System.system_time(:millisecond)
 
-    add_permission_set("teiserver", "admin", ~w(account battle clan party queue tournament))
-    add_permission_set("teiserver", "moderator", ~w(account battle clan party queue tournament telemetry))
+    add_permission_set("teiserver", "admin", ~w(account battle clan queue))
+    add_permission_set("teiserver", "moderator", ~w(account battle clan queue telemetry))
     add_permission_set("teiserver", "api", ~w(battle))
     add_permission_set("teiserver", "player", ~w(account tester contributor dev streamer donor verified bot moderator))
 
@@ -117,7 +117,6 @@ defmodule Teiserver.Startup do
         url: "/teiserver/battle/lobbies",
         permissions: "teiserver"
       },
-      # %{label: "Tournaments", icons: [Teiserver.Game.TournamentLib.icon(), :list], url: "/teiserver/tournaments", permissions: "teiserver"},
 
       # Mod pages
       %{
@@ -145,8 +144,6 @@ defmodule Teiserver.Startup do
         url: "/teiserver/admin/clans",
         permissions: "teiserver.moderator"
       },
-      # %{label: "Queue admin", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/admin/queues", permissions: "teiserver.moderator"},
-      # %{label: "Tournament admin", icons: [Teiserver.Game.TournamentLib.icon(), :list], url: "/teiserver/admin/tournaments", permissions: "teiserver.moderator"},
 
       # Admin pages
       %{

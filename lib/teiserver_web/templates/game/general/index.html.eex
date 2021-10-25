@@ -10,18 +10,6 @@
     %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.moderator.party") do %>
-    <%=
-      central_component "menu_card",
-      icon: Teiserver.Game.PartyLib.icon(),
-      name: "party",
-      text: "Parties",
-      icon_class: "fad",
-      link: "",
-      disabled: true
-    %>
-  <% end %>
-
   <%= if allow?(@conn, "teiserver.moderator.clan") do %>
     <%=
       central_component "menu_card",

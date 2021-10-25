@@ -94,7 +94,7 @@ defmodule TeiserverWeb.Clans.ClanController do
 
       true ->
         case Clans.update_clan(clan, clan_params) do
-          {:ok, _clan} ->
+          {:ok, clan} ->
             conn
             |> put_flash(:info, "Clan updated successfully.")
             |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#admin_tab")
