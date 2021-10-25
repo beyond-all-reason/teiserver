@@ -84,7 +84,7 @@ defmodule Teiserver.Client do
         away: false,
         in_game: false,
         ip: stats["last_ip"],
-        country: stats["country"],
+        country: stats["country"] || "??",
         lobby_client: stats["lobby_client"],
         shadowbanned: user.shadowbanned
       })

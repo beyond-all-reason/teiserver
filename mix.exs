@@ -50,6 +50,7 @@ defmodule Central.MixProject do
       {:telemetry_poller, "~> 0.4"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
+      {:cowboy, "~> 2.9"},
       {:plug_cowboy, "~> 2.0"},
       {:logger_file_backend, "~> 0.0.10"},
       {:timex, "~> 3.6"},
@@ -72,7 +73,7 @@ defmodule Central.MixProject do
       # Teiserver libs
       {:csv, "~> 2.4"},
       {:earmark, "~> 1.4"},
-      {:ranch, "~> 1.7.1"},
+      {:ranch, "~> 1.8"},
       {:alchemy, "~> 0.7.0", hex: :discord_alchemy}
     ]
   end
