@@ -88,39 +88,47 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   end
 
   defp client_event(data, state) do
-    case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
-      [_, event, value64, hash] ->
-        case decode_value(value64) do
-          {:ok, value} ->
-            Telemetry.log_client_event(state.userid, event, value, hash)
-            "success"
-          {:error, reason} ->
-            Logger.error("log_client_event:#{reason} - #{data}")
-            reason
-        end
-      nil ->
-        Logger.error("log_client_event:no match - #{data}")
-        "no match"
+    if String.length(data) < 1024 do
+      case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
+        [_, event, value64, hash] ->
+          case decode_value(value64) do
+            {:ok, value} ->
+              Telemetry.log_client_event(state.userid, event, value, hash)
+              "success"
+            {:error, reason} ->
+              Logger.error("log_client_event:#{reason} - #{data}")
+              reason
+          end
+        nil ->
+          Logger.error("log_client_event:no match - #{data}")
+          "no match"
+      end
+    else
+      "exceeds max_length"
     end
   end
 
   defp client_property(data, state) do
-    case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
-      [_, event, value64, hash] ->
-        value = Base.decode64(value64)
+    if String.length(data) < 1024 do
+      case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
+        [_, event, value64, hash] ->
+          value = Base.decode64(value64)
 
-        if value != :error do
-          {:ok, value} = value
+          if value != :error do
+            {:ok, value} = value
 
-          Telemetry.log_client_property(state.userid, event, value, hash)
-          "success"
-        else
-          Logger.error("update_client_property:bad base64 value - #{data}")
-          "bad base64 value"
-        end
-      nil ->
-        Logger.error("update_client_property:no match - #{data}")
-        "no match"
+            Telemetry.log_client_property(state.userid, event, value, hash)
+            "success"
+          else
+            Logger.error("update_client_property:bad base64 value - #{data}")
+            "bad base64 value"
+          end
+        nil ->
+          Logger.error("update_client_property:no match - #{data}")
+          "no match"
+      end
+    else
+      "exceeds max_length"
     end
   end
 
