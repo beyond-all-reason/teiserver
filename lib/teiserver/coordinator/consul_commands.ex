@@ -360,7 +360,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       nil ->
         state
       target_id ->
-        Lobby.force_change_client(state.coordinator_id, target_id, %{player: true})
+        Lobby.force_change_client(state.coordinator_id, target_id, %{player: true, ready: true})
         ConsulServer.say_command(cmd, state)
     end
   end
