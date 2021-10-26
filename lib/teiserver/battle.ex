@@ -256,7 +256,7 @@ defmodule Teiserver.Battle do
   end
 
   def save_match_stats(match_id, stats) do
-    Logger.error("save_match_stats(#{match_id}, #{stats})")
+    Logger.info("save_match_stats(#{match_id}, #{stats})")
   end
 
   @spec start_match_monitor() :: :ok | {:failure, String.t()}
