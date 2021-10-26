@@ -285,4 +285,56 @@ defmodule Teiserver.TcpServerTest do
     # _ = _recv_raw(s2)
     # _ = _recv_raw(s3)
   end
+
+  test "dud users mode" do
+    # Here we're testing if the user isn't even known
+    %{user: dud} = auth_setup()
+    %{socket: socket, user: user} = auth_setup()
+
+
+    client = Client.get_client_by_name(user.name)
+    pid = client.pid
+
+    # ---- Chat rooms ----
+    # Join chat room
+    send(pid, {:user_logged_out, dud.id, dud.name})
+    _recv_until(socket)
+    send(pid, {:add_user_to_room, dud.id, "roomname"})
+    r = _recv_until(socket)
+    assert r =~ "ADDUSER #{dud.name}"
+    assert r =~ "\nCLIENTSTATUS #{dud.name}"
+    assert r =~ "\nJOINED roomname #{dud.name}\n"
+
+    # Leave chat room
+    send(pid, {:user_logged_out, dud.id, dud.name})
+    _recv_until(socket)
+    send(pid, {:remove_user_from_room, dud.id, "roomname"})
+    r = _recv_until(socket)
+    assert r == ""
+
+    # Send chat message
+    send(pid, {:user_logged_out, dud.id, dud.name})
+    _recv_until(socket)
+    send(pid, {:direct_message, dud.id, "msgmsg"})
+    r = _recv_until(socket)
+    assert r =~ "ADDUSER #{dud.name}"
+    assert r =~ "\nCLIENTSTATUS #{dud.name}"
+    assert r =~ "\nSAIDPRIVATE #{dud.name} msgmsg\n"
+
+    send(pid, {:user_logged_out, dud.id, dud.name})
+    _recv_until(socket)
+    send(pid, {:new_message, dud.id, "roomname", "msgmsg"})
+    r = _recv_until(socket)
+    assert r =~ "ADDUSER #{dud.name}"
+    assert r =~ "\nCLIENTSTATUS #{dud.name}"
+    assert r =~ "\nSAID roomname #{dud.name} msgmsg\n"
+
+    send(pid, {:user_logged_out, dud.id, dud.name})
+    _recv_until(socket)
+    send(pid, {:new_message_ex, dud.id, "roomname", "msgmsg"})
+    r = _recv_until(socket)
+    assert r =~ "ADDUSER #{dud.name}"
+    assert r =~ "\nCLIENTSTATUS #{dud.name}"
+    assert r =~ "\nSAIDEX roomname #{dud.name} msgmsg\n"
+  end
 end

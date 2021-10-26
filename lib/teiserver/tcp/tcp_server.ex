@@ -706,6 +706,17 @@ defmodule Teiserver.TcpServer do
 
   # Chat
   defp new_chat_message(type, from, room_name, msg, state) do
+    # Do they know about the user?
+    state =
+      case Map.has_key?(state.known_users, from) do
+        false ->
+          state.protocol_out.reply(:user_logged_in, from, nil, state)
+          %{state | known_users: Map.put(state.known_users, from, _blank_user(from))}
+
+        true ->
+          state
+      end
+
     case type do
       :direct_message ->
         state.protocol_out.reply(:direct_message, {from, msg, state.user}, nil, state)
@@ -721,6 +732,17 @@ defmodule Teiserver.TcpServer do
   end
 
   defp user_join_chat_room(userid, room_name, state) do
+    # Do they know about the user?
+    state =
+      case Map.has_key?(state.known_users, userid) do
+        false ->
+          state.protocol_out.reply(:user_logged_in, userid, nil, state)
+          %{state | known_users: Map.put(state.known_users, userid, _blank_user(userid))}
+
+        true ->
+          state
+      end
+
     new_members =
       if not Enum.member?(state.room_member_cache[room_name] || [], userid) do
         state.protocol_out.reply(:add_user_to_room, {userid, room_name}, nil, state)
@@ -734,16 +756,23 @@ defmodule Teiserver.TcpServer do
   end
 
   defp user_leave_chat_room(userid, room_name, state) do
-    new_members =
-      if Enum.member?(state.room_member_cache[room_name] || [], userid) do
-        state.protocol_out.reply(:remove_user_from_room, {userid, room_name}, nil, state)
-        state.room_member_cache[room_name] |> Enum.filter(fn m -> m != userid end)
-      else
-        state.room_member_cache[room_name] || []
-      end
+    case Map.has_key?(state.known_users, userid) do
+      false ->
+        # We don't know who they are, we don't care they've left the chat room
+        state
 
-    new_cache = Map.put(state.room_member_cache, room_name, new_members)
-    %{state | room_member_cache: new_cache}
+      true ->
+        new_members =
+          if Enum.member?(state.room_member_cache[room_name] || [], userid) do
+            state.protocol_out.reply(:remove_user_from_room, {userid, room_name}, nil, state)
+            state.room_member_cache[room_name] |> Enum.filter(fn m -> m != userid end)
+          else
+            state.room_member_cache[room_name] || []
+          end
+
+        new_cache = Map.put(state.room_member_cache, room_name, new_members)
+        %{state | room_member_cache: new_cache}
+    end
   end
 
   # Actions
