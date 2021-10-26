@@ -10,12 +10,12 @@ defmodule Teiserver.Account.ClientIndexThrottle do
   @update_interval 500
 
   # Lobby closed
-  def handle_info({:battle_lobby_closed, _id}, state) do
-    :ok = PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
-      {:battle_lobby_throttle, :closed}
-    )
+  def handle_info({:global_battle_lobby, :closed, _lobby_id}, state) do
+    # :ok = PubSub.broadcast(
+    #   Central.PubSub,
+    #   "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
+    #   {:battle_lobby_throttle, :closed}
+    # )
     {:noreply, state}
   end
 

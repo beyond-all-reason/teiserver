@@ -4,37 +4,58 @@ defmodule Teiserver.Battle.LobbyCache do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Battle.Lobby
   alias Teiserver.Data.Types, as: T
+  require Logger
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
-  def update_lobby(battle, nil, _) do
-    ConCache.put(:lobbies, battle.id, battle)
-    battle
+  def update_lobby(lobby, nil, :silent) do
+    ConCache.put(:lobbies, lobby.id, lobby)
+    lobby
   end
 
-  def update_lobby(battle, data, reason) do
-    ConCache.put(:lobbies, battle.id, battle)
+  def update_lobby(lobby, nil, reason) do
+    ConCache.put(:lobbies, lobby.id, lobby)
 
-    if Enum.member?([:update_battle_info], reason) do
+    if Enum.member?([:rename], reason) do
       PubSub.broadcast(
         Central.PubSub,
-        "legacy_all_battle_updates",
-        {:global_battle_updated, battle.id, reason}
-      )
-    else
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_battle_updates:#{battle.id}",
-        {:battle_updated, battle.id, data, reason}
+        "teiserver_global_battle_lobby_updates",
+        {:global_battle_lobby, :rename, lobby.id}
       )
     end
 
     PubSub.broadcast(
       Central.PubSub,
-      "teiserver_lobby_updates:#{battle.id}",
-      {:lobby_update, :updated, battle.id, reason}
+      "teiserver_lobby_updates:#{lobby.id}",
+      {:lobby_update, :updated, lobby.id, reason}
     )
 
-    battle
+    lobby
+  end
+
+  def update_lobby(lobby, data, reason) do
+    ConCache.put(:lobbies, lobby.id, lobby)
+
+    if Enum.member?([:update_battle_info], reason) do
+      PubSub.broadcast(
+        Central.PubSub,
+        "legacy_all_battle_updates",
+        {:global_battle_updated, lobby.id, reason}
+      )
+    else
+      PubSub.broadcast(
+        Central.PubSub,
+        "legacy_battle_updates:#{lobby.id}",
+        {:battle_updated, lobby.id, data, reason}
+      )
+    end
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_lobby_updates:#{lobby.id}",
+      {:lobby_update, :updated, lobby.id, reason}
+    )
+
+    lobby
   end
 
   @spec get_lobby!(T.lobby_id() | nil) :: T.lobby() | nil
@@ -76,7 +97,7 @@ defmodule Teiserver.Battle.LobbyCache do
     :ok = PubSub.broadcast(
       Central.PubSub,
       "teiserver_global_battle_lobby_updates",
-      {:battle_lobby_opened, lobby.id}
+      {:global_battle_lobby, :opened, lobby.id}
     )
 
     lobby
@@ -113,7 +134,7 @@ defmodule Teiserver.Battle.LobbyCache do
     :ok = PubSub.broadcast(
       Central.PubSub,
       "teiserver_global_battle_lobby_updates",
-      {:battle_lobby_closed, battle.id}
+      {:global_battle_lobby, :closed, battle.id}
     )
 
     :ok = PubSub.broadcast(

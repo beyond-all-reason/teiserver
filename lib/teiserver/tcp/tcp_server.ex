@@ -210,6 +210,10 @@ defmodule Teiserver.TcpServer do
     {:noreply, TcpLobby.handle_info({:client_message, :lobby, userid, data}, state)}
   end
 
+  def handle_info({:global_battle_lobby, action, lobby_id}, state) do
+    {:noreply, TcpLobby.handle_info({:global_battle_lobby, action, lobby_id}, state)}
+  end
+
   def handle_info({:client_message, topic, _userid, _data}, state) do
     Logger.warn("No tcp_server handler for :client_message with topic #{topic}")
     {:noreply, state}
