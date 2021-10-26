@@ -10,7 +10,7 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Teiserver.{User, Client, Room}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Spring
-  alias Teiserver.Protocols.Spring.{MatchmakingOut}
+  alias Teiserver.Protocols.Spring.{MatchmakingOut, BattleOut}
 
   @motd """
   Message of the day
@@ -30,6 +30,7 @@ defmodule Teiserver.Protocols.SpringOut do
   def reply(namespace, reply_cmd, data, msg_id, state) do
     msg =
       case namespace do
+        :battle -> BattleOut.do_reply(reply_cmd, data)
         :matchmaking -> MatchmakingOut.do_reply(reply_cmd, data)
         :spring -> do_reply(reply_cmd, data)
       end
@@ -627,6 +628,9 @@ defmodule Teiserver.Protocols.SpringOut do
 
     PubSub.unsubscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
     PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
+
+    PubSub.unsubscribe(Central.PubSub, "teiserver_global_battle_lobby_updates")
+    PubSub.subscribe(Central.PubSub, "teiserver_global_battle_lobby_updates")
 
     exempt_from_cmd_throttle = if user.moderator == true or user.bot == true do
       true

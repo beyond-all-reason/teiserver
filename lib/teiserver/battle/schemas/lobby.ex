@@ -409,6 +409,17 @@ defmodule Teiserver.Battle.Lobby do
     end
   end
 
+  @spec rename_lobby(T.lobby_id(), String.t()) :: :ok
+  def rename_lobby(lobby_id, new_name) do
+    case get_lobby(lobby_id) do
+      nil -> nil
+      lobby ->
+        update_lobby(%{lobby | name: new_name}, nil, :rename)
+    end
+
+    :ok
+  end
+
   # Start rects
   def add_start_rectangle(lobby_id, [team, a, b, c, d]) do
     [team, a, b, c, d] = int_parse([team, a, b, c, d])

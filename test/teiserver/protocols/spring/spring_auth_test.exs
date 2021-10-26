@@ -624,7 +624,7 @@ CLIENTS test_room #{user.name}\n"
     pid = Client.get_client_by_id(user.id).pid
     send(pid, {:user_logged_in, bad_user.id})
     reply = _recv_raw(socket)
-    assert reply == "ADDUSER test_user_bad_springid  #{bad_user.id} \nCLIENTSTATUS test_user_bad_springid 4\n"
+    assert reply == "ADDUSER test_user_bad_springid ?? #{bad_user.id} \nCLIENTSTATUS test_user_bad_springid 4\n"
     Client.disconnect(bad_user.id)
   end
 

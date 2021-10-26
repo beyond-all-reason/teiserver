@@ -361,6 +361,12 @@ defmodule Teiserver.SpringBattleHostTest do
     reply = _recv_until(socket)
     assert reply == "REMOVEBOT #{botid} bot1\n"
 
+    # Rename the battle, should get a message about the rename very shortly afterwards
+    _send_raw(socket, "c.battle.update_lobby_title NewName 123\n")
+    :timer.sleep(1000)
+    reply = _recv_until(socket)
+    assert reply == "OK cmd=c.battle.update_lobby_title\ns.battle.update_lobby_title #{lobby_id} NewName 123\n"
+
     # Leave the battle
     _send_raw(socket, "LEAVEBATTLE\n")
     reply = _recv_raw(socket)

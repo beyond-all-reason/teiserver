@@ -26,8 +26,9 @@ Information affecting only those in this given battle, such as a player joining.
 #### teiserver_global_battle_lobby_updates
 Limited information pertaining to the creation/deletion of battles.
 ```
-  {:battle_lobby_opened, lobby_id}
-  {:battle_lobby_closed, lobby_id}
+  {:global_battle_lobby, :opened, lobby_id}
+  {:global_battle_lobby, :closed, lobby_id}
+  {:global_battle_lobby, :rename, lobby_id}
 ```
 
 #### teiserver_lobby_updates:#{battle_lobby_id}
