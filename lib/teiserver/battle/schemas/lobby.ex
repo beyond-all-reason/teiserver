@@ -631,7 +631,8 @@ defmodule Teiserver.Battle.Lobby do
     founder_command =
       Enum.member?(
         [
-          :updatebattleinfo
+          :updatebattleinfo,
+          :update_lobby
         ],
         cmd
       )
