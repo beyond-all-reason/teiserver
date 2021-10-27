@@ -606,13 +606,6 @@ defmodule Teiserver.User do
     {:ok, user}
   end
 
-  def logout(nil), do: nil
-
-  def logout(_user_id) do
-    # We used to calculate ingame_minutes here but we now use telemetry logs for that
-    nil
-  end
-
   @spec create_report(Integer.t()) :: :ok
   def create_report(report_id) do
     report = Account.get_report!(report_id)
