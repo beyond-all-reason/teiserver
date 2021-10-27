@@ -277,7 +277,6 @@ defmodule Teiserver.Client do
     # we don't actually care about logging out most of them and the
     # ones we do won't be called test_user_
     if not is_test_user do
-      spawn(fn -> User.logout(client.userid) end)
       if client.name != nil and String.contains?(client.name, "test_user") == false do
         if reason do
           Logger.error("disconnect of #{client.name} (#{reason})")
