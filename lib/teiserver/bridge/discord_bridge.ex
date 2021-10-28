@@ -92,7 +92,10 @@ defmodule Teiserver.Bridge.DiscordBridge do
     if chan do
       report = Account.get_report!(report_id, preload: [:reporter, :target])
       if report.response_action == nil do
-        msg = "#{report.target.name} was reported by #{report.reporter.name} for reason #{report.reason}"
+        host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+        url = "https://#{host}/teiserver/admin/user/#{report.target_id}#reports_tab"
+
+        msg = "#{report.target.name} was reported by #{report.reporter.name} for reason #{report.reason} - #{url}"
 
         Alchemy.Client.send_message(
           chan,
