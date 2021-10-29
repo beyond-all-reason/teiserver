@@ -7,6 +7,7 @@ defmodule Teiserver.Protocols.TachyonIn do
 
   @spec handle(String.t(), map) :: map
   def handle("", state), do: state
+  def handle("\n", state), do: state
   def handle("\r\n", state), do: state
 
   def handle(raw_data, state) do
