@@ -434,6 +434,12 @@ defmodule Teiserver.User do
     end
   end
 
+  @spec set_flood_level(T.userid(), Integer) :: :ok
+  def set_flood_level(userid, value \\ 10) do
+    ConCache.put(:teiserver_login_count, userid, value)
+    :ok
+  end
+
   @spec login_flood_check(integer()) :: :allow | :block
   def login_flood_check(userid) do
     login_count = ConCache.get(:teiserver_login_count, userid) || 0
