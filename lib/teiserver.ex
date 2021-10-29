@@ -25,4 +25,9 @@ defmodule Teiserver do
 
   @spec internal_group_id() :: integer()
   def internal_group_id(), do: ConCache.get(:application_metadata_cache, "teiserver_internal_group")
+
+  # Designed for debugging help
+  def tachyon(v) do
+    Teiserver.Protocols.Tachyon.decode(v)
+  end
 end

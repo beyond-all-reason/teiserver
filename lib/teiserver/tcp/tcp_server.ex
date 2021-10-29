@@ -134,8 +134,9 @@ defmodule Teiserver.TcpServer do
 
   # If Ctrl + C is sent through it kills the connection, makes telnet debugging easier
   def handle_info({_, _socket, <<255, 244, 255, 253, 6>>}, state) do
-    new_state = state.protocol_in.handle("EXIT", state)
-    {:noreply, new_state}
+    Client.disconnect(state.userid, "Spring EXIT command")
+    send(self(), :terminate)
+    {:noreply, state}
   end
 
   # Main source of data ingress
@@ -148,7 +149,9 @@ defmodule Teiserver.TcpServer do
       |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
 
       if Enum.count(cmd_timestamps) > @cmd_flood_limit do
-        Logger.error("Command overflow from #{state.username}/#{state.userid} with #{Enum.count(cmd_timestamps)} commands")
+        User.set_flood_level(state.userid, 10)
+        Client.disconnect(state.userid, :flood)
+        Logger.error("Command overflow from #{state.username}/#{state.userid} with #{Enum.count(cmd_timestamps)} commands. Disconnected and flood protection engaged.")
       end
 
       cmd_timestamps
