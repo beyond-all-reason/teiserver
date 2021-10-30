@@ -63,7 +63,8 @@ config :central, Teiserver,
   enable_agent_mode: false,
   enable_match_monitor: true,
   user_agreement: "User agreement goes here.",
-  server_flag: "GB"
+  server_flag: "GB",
+  use_geoip: true
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
