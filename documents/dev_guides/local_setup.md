@@ -4,12 +4,19 @@ This is still a work in progress but loosely the sequence of steps you will need
 ### Install services
 You will need to install:
 - [Elixir/Erlang installed](https://elixir-lang.org/install.html).
-- [Postresql](https://www.postgresql.org/download). 
+- [Postresql](https://www.postgresql.org/download).
 
 ### Clone repo
 ```
 git clone git@github.com:Teifion/teiserver.git
 cd teiserver
+```
+
+### Install build tools (gcc, g++, make)
+#### Ubuntu/Debian
+```
+sudo apt update
+sudo apt install build-essential
 ```
 
 ### Elixir/Node setup
