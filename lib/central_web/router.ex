@@ -78,14 +78,6 @@ defmodule CentralWeb.Router do
     get("/browser_info", PageController, :browser_info)
     get("/", PageController, :index)
     get("/faq", PageController, :faq)
-
-    env_flag =
-      Application.get_env(:central, Central.General.LoadTestServer)
-      |> Keyword.get(:enable_loadtest)
-
-    if env_flag do
-      get("/load_test", PageController, :load_test)
-    end
   end
 
   scope "/", CentralWeb.Account, as: :account do
