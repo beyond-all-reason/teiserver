@@ -6,7 +6,6 @@ defmodule CentralWeb.UserSocket do
   ## Channels
   # channel "room:*", CentralWeb.RoomChannel
 
-  channel("load_test:*", CentralWeb.LoadTest.Channel)
   channel("live_search:*", CentralWeb.LiveSearch.Channel)
   channel("chat:*", CentralWeb.Chat.Channel)
   channel("communication_notification:*", CentralWeb.Communication.NotificationChannel)
