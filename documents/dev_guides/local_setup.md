@@ -56,6 +56,12 @@ openssl req -x509 -out localhost.crt -keyout localhost.key \
 cd ../..
 ```
 
+#### Migrations
+Run the following from your directory to migrate the database.
+```
+mix ecto.migrate
+```
+
 ### Running it
 ```
 mix phx.server
