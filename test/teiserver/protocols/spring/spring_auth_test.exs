@@ -604,7 +604,7 @@ CLIENTS test_room #{user.name}\n"
 
   test "Bad springid ADDUSER", %{user: user, socket: socket} do
     {:ok, bad_user} =
-      User.user_register_params("test_user_bad_springid", "test_user_bad_springid@email.com", "X03MO1qnZdYdgyfeuILPmQ==", %{admin_group_id: Teiserver.user_group_id()})
+      User.user_register_params_with_md5("test_user_bad_springid", "test_user_bad_springid@email.com", "X03MO1qnZdYdgyfeuILPmQ==", %{admin_group_id: Teiserver.user_group_id()})
       |> Central.Account.create_user()
 
     Central.Account.create_group_membership(%{

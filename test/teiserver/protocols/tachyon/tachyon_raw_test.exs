@@ -1,11 +1,10 @@
 defmodule Teiserver.Protocols.TachyonRawTest do
   use Central.ServerCase
 
-  alias Central.Helpers.GeneralTestLib
-  alias Teiserver.Account.UserCache
+  alias Teiserver.User
 
   import Teiserver.TeiserverTestLib,
-    only: [tls_setup: 0, _send_raw: 2, _tachyon_send: 2, _recv_raw: 1, _tachyon_recv: 1]
+    only: [tls_setup: 0, _send_raw: 2, _tachyon_send: 2, _recv_raw: 1, _tachyon_recv: 1, new_user: 0, new_user_name: 0]
 
   alias Teiserver.Protocols.Tachyon
 
@@ -78,20 +77,30 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     reply = _recv_raw(socket)
     assert reply =~ "OK cmd=TACHYON\n"
 
-    # Not actually registering just yet since that's not implemented...
+    # Lets start with a bad register command
+    existing_user = new_user()
+    data = %{cmd: "c.auth.register", username: "test_name", email: existing_user.email, password: "password"}
+    _tachyon_send(socket, data)
+    reply = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.auth.register", "result" => "failure", "reason" => "User already exists"}
 
-    # Create the user manually for now
-    user =
-      GeneralTestLib.make_user(%{
-        "name" => "test_user_tachyon_token",
-        "email" => "test_user_tachyon_token@",
-        "password" => "token_password",
-        "data" => %{
-          "verified" => true,
-          "verification_code" => 123456 |> to_string
-        }
-      })
-    UserCache.recache_user(user.id)
+    # Now a good one
+    name = new_user_name()
+    data = %{cmd: "c.auth.register", username: name, email: "tachyon_register@example", password: "password"}
+    _tachyon_send(socket, data)
+    reply = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.auth.register", "result" => "success"}
+
+    db_user =  Teiserver.Account.get_user(nil, search: [email: "tachyon_register@example"])
+    assert db_user != nil
+
+    cache_user_email = User.get_user_by_email("tachyon_register@example")
+    cache_user_id = User.get_user_by_id(db_user.id)
+    assert cache_user_email == cache_user_id
+
+    User.verify_user(cache_user_id)
+    User.recache_user(db_user.id)
+    user = User.get_user_by_id(db_user.id)
 
     # Bad password but also test msg_id continuance
     data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}
@@ -100,7 +109,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     assert reply == %{"cmd" => "s.auth.get_token", "result" => "failure", "reason" => "Invalid credentials", "msg_id" => 555}
 
     # Good password
-    data = %{cmd: "c.auth.get_token", password: "token_password", email: user.email}
+    data = %{cmd: "c.auth.get_token", password: "password", email: user.email}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert Map.has_key?(reply, "token")
@@ -121,22 +130,15 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     reply = _recv_raw(socket)
     assert reply =~ "OK cmd=TACHYON\n"
 
-    # Not actually registering just yet since that's not implemented...
+    # Create the user
+    name = new_user_name()
+    data = %{cmd: "c.auth.register", username: name, email: "tachyon_verify@example", password: "password"}
+    _tachyon_send(socket, data)
+    reply = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.auth.register", "result" => "success"}
 
-    # Create the user manually for now
-    user =
-      GeneralTestLib.make_user(%{
-        "name" => "test_user_tachyon_token",
-        "email" => "test_user_tachyon_token@",
-        "password" => "token_password",
-        "data" => %{
-          "verified" => false,
-          "verification_code" => 123456 |> to_string
-        }
-      })
-    query = "UPDATE account_users SET inserted_at = '2020-01-01 01:01:01' WHERE id = #{user.id}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
-    Teiserver.Account.UserCache.recache_user(user.id)
+    user = User.get_user_by_email("tachyon_verify@example")
+    User.update_user(%{user | verification_code: "123456"})
 
     # Bad password but also test msg_id continuance
     data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}
@@ -145,7 +147,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     assert reply == %{"cmd" => "s.auth.get_token", "result" => "failure", "reason" => "Invalid credentials", "msg_id" => 555}
 
     # Good password
-    data = %{cmd: "c.auth.get_token", password: "token_password", email: user.email}
+    data = %{cmd: "c.auth.get_token", password: "password", email: user.email}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert Map.has_key?(reply, "token")
@@ -191,19 +193,15 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     reply = _recv_raw(socket)
     assert reply =~ "OK cmd=TACHYON\n"
 
-    # Not actually registering just yet since that's not implemented...
+    # Create the user
+    name = new_user_name()
+    data = %{cmd: "c.auth.register", username: name, email: "tachyon_existing@example", password: "token_password"}
+    _tachyon_send(socket, data)
+    reply = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.auth.register", "result" => "success"}
 
-    # Create the user manually for now
-    user =
-      GeneralTestLib.make_user(%{
-        "name" => "test_user_tachyon_token_exisitng",
-        "email" => "test_user_tachyon_token_exisitng@",
-        "password" => "token_password",
-        "data" => %{
-          "verified" => true
-        }
-      })
-    Teiserver.Account.UserCache.recache_user(user.id)
+    user = User.get_user_by_email("tachyon_existing@example")
+    User.verify_user(user)
 
     # Bad password but also test msg_id continuance
     data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}

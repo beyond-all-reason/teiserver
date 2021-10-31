@@ -105,7 +105,37 @@ defmodule Teiserver.User do
     :crypto.hash(:md5, password) |> Base.encode64()
   end
 
-  def user_register_params(name, email, md5_password, extra_data \\ %{}) do
+  def user_register_params(name, email, password, extra_data \\ %{}) do
+    name = clean_name(name)
+    verification_code = :rand.uniform(899_999) + 100_000
+      |> to_string
+    encrypted_password = encrypt_password(password)
+
+    data =
+      @default_data
+      |> Map.new(fn {k, v} -> {to_string(k), v} end)
+
+    %{
+      name: name,
+      email: email,
+      password: encrypted_password,
+      colour: "#AA0000",
+      icon: "fas fa-user",
+      admin_group_id: Teiserver.user_group_id(),
+      permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
+      springid: next_springid(),
+      data:
+        data
+        |> Map.merge(%{
+          "password_hash" => encrypted_password,
+          "verification_code" => verification_code,
+          "verified" => false
+        })
+        |> Map.merge(extra_data)
+    }
+  end
+
+  def user_register_params_with_md5(name, email, md5_password, extra_data \\ %{}) do
     name = clean_name(name)
     verification_code = :rand.uniform(899_999) + 100_000
       |> to_string
@@ -135,6 +165,34 @@ defmodule Teiserver.User do
     }
   end
 
+  @spec register_user(String.t(), String.t(), String.t()) :: :success | {:error, String.t()}
+  def register_user(name, email, password) do
+    name = String.trim(name)
+    email = String.trim(email)
+
+    cond do
+      clean_name(name) |> String.length() > @max_username_length ->
+        {:failure, "Max length #{@max_username_length} characters"}
+
+      clean_name(name) != name ->
+        {:failure, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
+
+      get_user_by_name(name) ->
+        {:failure, "Username already taken"}
+
+      get_user_by_email(email) ->
+        {:failure, "User already exists"}
+
+      true ->
+        case do_register_user(name, email, password) do
+          :ok ->
+            :success
+          :error ->
+            {:error, "Server error, please inform admin"}
+        end
+    end
+  end
+
   @spec register_user_with_md5(String.t(), String.t(), String.t(), String.t()) :: :success | {:error, String.t()}
   def register_user_with_md5(name, email, md5_password, ip) do
     name = String.trim(name)
@@ -154,7 +212,7 @@ defmodule Teiserver.User do
         {:error, "User already exists"}
 
       true ->
-        case do_register_user(name, email, md5_password, ip) do
+        case do_register_user_with_md5(name, email, md5_password, ip) do
           :ok ->
             :success
           :error ->
@@ -163,13 +221,53 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec do_register_user(String.t(), String.t(), String.t(), String.t()) :: :ok | :error
-  defp do_register_user(name, email, md5_password, ip) do
+  @spec do_register_user(String.t(), String.t(), String.t()) :: :ok | :error
+  defp do_register_user(name, email, password) do
     name = String.trim(name)
     email = String.trim(email)
 
     params =
-      user_register_params(name, email, md5_password, %{
+      user_register_params(name, email, password)
+
+    case Account.script_create_user(params) do
+      {:ok, user} ->
+        Account.create_group_membership(%{
+          user_id: user.id,
+          group_id: Teiserver.user_group_id()
+        })
+
+        # Now add them to the cache
+        user
+        |> convert_user
+        |> Map.put(:springid, next_springid())
+        |> add_user
+
+        case EmailHelper.new_user(user) do
+          {:error, error} ->
+            Logger.error("Error sending new user email - #{user.email} - #{error}")
+          {:ok, _email, _response} ->
+            :ok
+            # Logger.error("Email sent, response of #{Kernel.inspect response}")
+        end
+        :ok
+
+      {:error, changeset} ->
+        Logger.error(
+          "Unable to create user with params #{Kernel.inspect(params)}\n#{
+            Kernel.inspect(changeset)
+          }"
+        )
+        :error
+    end
+  end
+
+  @spec do_register_user_with_md5(String.t(), String.t(), String.t(), String.t()) :: :ok | :error
+  defp do_register_user_with_md5(name, email, md5_password, ip) do
+    name = String.trim(name)
+    email = String.trim(email)
+
+    params =
+      user_register_params_with_md5(name, email, md5_password, %{
         "ip" => ip
       })
 
@@ -219,7 +317,7 @@ defmodule Teiserver.User do
         host = get_user_by_id(bot_host_id)
 
         params =
-          user_register_params(bot_name, host.email, host.password_hash, %{
+          user_register_params_with_md5(bot_name, host.email, host.password_hash, %{
             "bot" => true,
             "verified" => true,
             "password_hash" => host.password_hash,

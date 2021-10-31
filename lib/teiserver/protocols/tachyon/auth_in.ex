@@ -8,10 +8,10 @@ defmodule Teiserver.Protocols.Tachyon.AuthIn do
     reply(:auth, :user_token, {:failure, "Non-secured connection"}, state)
   end
   def do_handle("get_token", %{"email" => email, "password" => plain_text_password}, state) do
-    user = Central.Account.get_user_by_email(email)
+    user = User.get_user_by_email(email)
     response =
       if user do
-        Central.Account.User.verify_password(plain_text_password, user.password)
+        Central.Account.User.verify_password(plain_text_password, user.password_hash)
       else
         false
       end
@@ -60,6 +60,11 @@ defmodule Teiserver.Protocols.Tachyon.AuthIn do
     Client.disconnect(state.userid, "Tachyon auth.disconnect")
     send(self(), :terminate)
     state
+  end
+
+  def do_handle("register", %{"username" => username, "email" => email, "password" => password}, state) do
+    response = User.register_user(username, email, password)
+    reply(:auth, :register, response, state)
   end
 
   def do_handle(cmd, data, state) do

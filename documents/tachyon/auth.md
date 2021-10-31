@@ -1,8 +1,7 @@
 ### `c.auth.get_token`
-Given the correct email and password combination the server will send back a token that can be used to login as that user. This command must be performed over a secure connection, if it is attempted over an insecure connection the server will send back an error. If the password and email do not match a failure result is returned. Only email or name is required; if both then email will be used.
+Given the correct email and password combination the server will send back a token that can be used to login as that user. This command must be performed over a secure connection, if it is attempted over an insecure connection the server will send back an error. If the password and email do not match a failure result is returned.
 
 * email :: string
-* name :: string
 * password :: string
 
 #### Successful response
@@ -106,3 +105,34 @@ The connection will be terminated, there will be no response.
 {
   "cmd": "c.auth.disconnect"
 }
+```
+
+## `c.auth.register`
+Requests the creation of a new user account on the server
+* username :: string
+* email :: email address
+* password :: string (this will be stored in a hashe
+
+#### Successful response
+You will receive a standard success response, if it fails you will receive a failure response. Once registered you can attempt to login though the server may require you to validate the account before the login can be successful.
+
+#### Example input/output
+```
+{
+  "cmd": "c.auth.register",
+  "username": "new_user_101",
+  "email": "new_user@101.example"
+  "password": "my_password"
+}
+
+{
+  "cmd": "s.auth.register",
+  "result": "success"
+}
+
+{
+  "cmd": "s.auth.register",
+  "result": "failure",
+  "reason": "email already exists"
+}
+```
