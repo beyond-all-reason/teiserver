@@ -7,8 +7,26 @@ defmodule Teiserver.Protocols.Tachyon.AuthIn do
   def do_handle("get_token", _, %{transport: :ranch_tcp} = state) do
     reply(:auth, :user_token, {:failure, "Non-secured connection"}, state)
   end
+
   def do_handle("get_token", %{"email" => email, "password" => plain_text_password}, state) do
     user = Central.Account.get_user_by_email(email)
+    response =
+      if user do
+        Central.Account.User.verify_password(plain_text_password, user.password)
+      else
+        false
+      end
+
+    if response do
+      token = User.create_token(user)
+      reply(:auth, :user_token, {:success, token}, state)
+    else
+      reply(:auth, :user_token, {:failure, "Invalid credentials"}, state)
+    end
+  end
+
+  def do_handle("get_token", %{"name" => name, "password" => plain_text_password}, state) do
+    user = Central.Account.get_user_by_name(name)
     response =
       if user do
         Central.Account.User.verify_password(plain_text_password, user.password)
