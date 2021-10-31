@@ -69,6 +69,7 @@ lobbyban <user> <reason, default: None given>
 
 lobbybanmult [<user>]
   Bans all users separated by spaces (from the lobby, not the game)
+  If you want to add a reason, add a `!!` to the end of the player list, anything after that will be the reason
 
 unban <user>
   Removes the user from the lobby banlist

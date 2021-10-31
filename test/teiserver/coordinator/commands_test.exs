@@ -300,9 +300,9 @@ defmodule Teiserver.Coordinator.CommandsTest do
     # Check ban state
     bans = Coordinator.call_consul(lobby_id, {:get, :bans})
     assert bans == %{
-      player1.id => %{by: host.id, level: :banned, reason: "None given"},
-      player2.id => %{by: host.id, level: :banned, reason: "None given"},
-      player3.id => %{by: host.id, level: :banned, reason: "None given"},
+      player1.id => %{by: host.id, level: :banned, reason: "Banned"},
+      player2.id => %{by: host.id, level: :banned, reason: "Banned"},
+      player3.id => %{by: host.id, level: :banned, reason: "Banned"},
     }
 
     # Now unban player 3
@@ -311,8 +311,20 @@ defmodule Teiserver.Coordinator.CommandsTest do
 
     bans = Coordinator.call_consul(lobby_id, {:get, :bans})
     assert bans == %{
-      player1.id => %{by: host.id, level: :banned, reason: "None given"},
-      player2.id => %{by: host.id, level: :banned, reason: "None given"}
+      player1.id => %{by: host.id, level: :banned, reason: "Banned"},
+      player2.id => %{by: host.id, level: :banned, reason: "Banned"}
+    }
+
+    # Now test it with a reason given
+    data = %{cmd: "c.lobby.message", message: "$lobbybanmult #{player1.name} #{player2.name} #{player3.name} no_player_of_this_name !! Reason given is xyz"}
+    _tachyon_send(hsocket, data)
+
+
+    bans = Coordinator.call_consul(lobby_id, {:get, :bans})
+    assert bans == %{
+      player1.id => %{by: host.id, level: :banned, reason: "Reason given is xyz"},
+      player2.id => %{by: host.id, level: :banned, reason: "Reason given is xyz"},
+      player3.id => %{by: host.id, level: :banned, reason: "Reason given is xyz"},
     }
   end
 

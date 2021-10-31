@@ -16,6 +16,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     }
   """
   @spec handle_command(Map.t(), Map.t()) :: Map.t()
+  @default_ban_reason "Banned"
 
   #################### For everybody
   def handle_command(%{command: "status", senderid: senderid} = _cmd, state) do
@@ -390,7 +391,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       nil ->
         ConsulServer.say_command(%{cmd | error: "no user found"}, state)
       target_id ->
-        reason = if reason_list == [], do: "None given", else: Enum.join(reason_list, " ")
+        reason = if reason_list == [], do: @default_ban_reason, else: Enum.join(reason_list, " ")
         ban = new_ban(%{level: :banned, by: cmd.senderid, reason: reason}, state)
         new_bans = Map.put(state.bans, target_id, ban)
 
@@ -404,6 +405,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "lobbybanmult", remaining: targets} = cmd, state) do
+    {targets, reason} = case String.split(targets, "!!") do
+      [t] -> {t, @default_ban_reason}
+      [t, r | _] -> {t, String.trim(r)}
+    end
     ConsulServer.say_command(cmd, state)
 
     String.split(targets, " ")
@@ -412,7 +417,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         nil ->
           acc
         target_id ->
-          ban = new_ban(%{level: :banned, by: cmd.senderid}, acc)
+          ban = new_ban(%{level: :banned, by: cmd.senderid, reason: reason}, acc)
           new_bans = Map.put(acc.bans, target_id, ban)
           Lobby.kick_user_from_battle(target_id, acc.lobby_id)
 
@@ -471,7 +476,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   defp new_ban(data, state) do
     Map.merge(%{
       by: state.coordinator_id,
-      reason: "None given",
+      reason: @default_ban_reason,
       # :player | :spectator | :banned
       level: :banned
     }, data)
