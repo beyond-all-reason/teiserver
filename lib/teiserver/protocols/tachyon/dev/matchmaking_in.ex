@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Tachyon.MatchmakingIn do
+defmodule Teiserver.Protocols.Tachyon.Dev.MatchmakingIn do
   # alias Teiserver.Client
   alias Teiserver.Data.Matchmaking
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]

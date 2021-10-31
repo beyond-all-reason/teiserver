@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Tachyon.LobbyIn do
+defmodule Teiserver.Protocols.Tachyon.Dev.LobbyIn do
   alias Teiserver.Battle.Lobby
   alias Teiserver.{Client, Coordinator}
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]

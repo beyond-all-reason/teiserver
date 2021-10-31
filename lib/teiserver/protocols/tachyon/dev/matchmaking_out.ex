@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Tachyon.MatchmakingOut do
+defmodule Teiserver.Protocols.Tachyon.Dev.MatchmakingOut do
   alias Teiserver.Protocols.Tachyon
 
   @spec do_reply(atom(), any) :: Map.t()

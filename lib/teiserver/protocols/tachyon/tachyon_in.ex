@@ -3,7 +3,7 @@ defmodule Teiserver.Protocols.TachyonIn do
   alias Teiserver.Protocols.Tachyon
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Protocols.Tachyon.{AuthIn, LobbyIn, CommunicationIn, MatchmakingIn, NewsIn, SystemIn, TelemetryIn}
+  alias Teiserver.Protocols.Tachyon.Dev.{AuthIn, LobbyIn, CommunicationIn, MatchmakingIn, NewsIn, SystemIn, TelemetryIn}
 
   @spec handle(String.t(), map) :: map
   def handle("", state), do: state

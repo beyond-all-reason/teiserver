@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Tachyon.SystemIn do
+defmodule Teiserver.Protocols.Tachyon.Dev.SystemIn do
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()

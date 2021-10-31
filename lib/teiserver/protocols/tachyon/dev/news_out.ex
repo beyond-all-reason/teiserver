@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Tachyon.NewsOut do
+defmodule Teiserver.Protocols.Tachyon.Dev.NewsOut do
   alias Teiserver.Protocols.Tachyon
 
   @spec do_reply(atom(), any) :: Map.t()

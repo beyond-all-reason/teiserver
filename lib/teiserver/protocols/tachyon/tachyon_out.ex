@@ -2,7 +2,7 @@ defmodule Teiserver.Protocols.TachyonOut do
   require Logger
   alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Tachyon
-  alias Teiserver.Protocols.Tachyon.{AuthOut, LobbyOut, CommunicationOut, MatchmakingOut, NewsOut, SystemOut}
+  alias Teiserver.Protocols.Tachyon.Dev.{AuthOut, LobbyOut, CommunicationOut, MatchmakingOut, NewsOut, SystemOut}
 
   @spec reply(atom(), atom(), Map.t(), Map.t()) :: Map.t()
 

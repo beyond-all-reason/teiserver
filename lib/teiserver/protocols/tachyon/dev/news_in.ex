@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Tachyon.NewsIn do
+defmodule Teiserver.Protocols.Tachyon.Dev.NewsIn do
   import Teiserver.Protocols.TachyonOut, only: [reply: 4]
   alias Teiserver.Communication
 

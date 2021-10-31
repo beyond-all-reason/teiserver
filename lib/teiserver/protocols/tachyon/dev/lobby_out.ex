@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Tachyon.LobbyOut do
+defmodule Teiserver.Protocols.Tachyon.Dev.LobbyOut do
   alias Teiserver.Protocols.Tachyon
 
   @spec do_reply(atom(), any) :: Map.t()
