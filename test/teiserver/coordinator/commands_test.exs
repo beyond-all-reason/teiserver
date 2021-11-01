@@ -261,7 +261,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
 
     # Check ban state
     bans = Coordinator.call_consul(lobby_id, {:get, :bans})
-    assert bans == %{player.id => %{by: host.id, level: :banned, reason: "None given"}}
+    assert bans == %{player.id => %{by: host.id, level: :banned, reason: "Banned"}}
   end
 
   test "error with no name", %{player: player, hsocket: hsocket, lobby_id: lobby_id} do
