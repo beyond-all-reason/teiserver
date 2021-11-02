@@ -3,30 +3,33 @@ This is designed to be a basic overview on how to get Teiserver working in produ
 Unless otherwise stated at the start of the code block, all commands are intended to be executed on the server.
 
 ### Requirements
-- A linux based host
+- A linux based host, we're using Debian 10 for our examples so you might need to tweak them
 - More cores the better, memory usage is pretty low (actual stats to be added at a later date)
 - A domain name pointing to the server IP address
 - The ability to use the terminal and a terminal editor such as [vim](https://www.vim.org)
 
 #### DNS
-Before you start I suggest setting up the DNS to point towards your server. It'll take time to propogate so doing it first will make things smoother to start with. Different registrars will have different interfaces (and documentation for them) so I'll not go over that here. You will also need to create an email account for your server to use.
+Before you start I suggest setting up the DNS to point towards your server. It'll take time to propagate so doing it first will make things smoother to start with. Different registrars will have different interfaces (and documentation for them) so I'll not go over that here. You will also need to create an email account for your server to use.
 
 ### Fresh install time
 ```
-sudo apt-get update
-sudo apt-get -y install htop git-core ca-certificates vim sudo curl vnstat sysstat procinfo build-essential net-tools geoip-bin
-sudo apt-get -y upgrade
-sudo apt-get -y autoremove
+apt-get update
+apt-get -y install htop git-core ca-certificates vim sudo curl vnstat sysstat procinfo build-essential net-tools geoip-bin libtinfo-dev aptitude lsb-release
+apt-get -y upgrade
+apt-get -y autoremove
+
+aptitude update
+aptitude upgrade
 
 # Set timezone
-sudo dpkg-reconfigure tzdata
+dpkg-reconfigure tzdata
 ```
 
 #### Create our user
 We start by creating a user for running the deployments. Doing things as root is a bad practice!
 ```
-sudo adduser deploy
-sudo adduser deploy sudo
+adduser deploy
+adduser deploy sudo
 ```
 
 ### SSH key
@@ -48,7 +51,7 @@ ssh-keygen
 scp ~/.ssh/identity.pub deploy@yourdomain.com:./identity.pub
 ```
 
-Now back on the server we make use of this
+Now back on the server (logged in as `deploy`) we make use of this
 ```
 cd ~
 mkdir .ssh
@@ -72,7 +75,7 @@ From now on we will be proceeding under the assumption you are logged in as the 
 Nginx is a webserver we'll be using to facilitate the webinterface portion of Teiserver. If you don't want to make use of the web interface you can skip this portion of the setup process. You will need to have your DNS setup ahead of this step or it will fail when you try to setup the SSL part.
 
 ```
-sudo apt-get install -y nginx
+sudo aptitude install -y nginx
 sudo chown -R deploy:deploy /var/www/
 sudo chmod +r /var/log/nginx
 
@@ -89,19 +92,14 @@ sudo rm /etc/nginx/nginx.conf
 sudo vi /etc/nginx/nginx.conf
 ```
 
-#### Enable the site
-```
-sudo vi /etc/nginx/sites-enabled/central
-```
-
 #### SSL time
 We'll be using [letsencrypt](https://letsencrypt.org/) to get a free SSL certificate.
 ```
 # This is a Debian version specific command, be sure to check the letsencrypt documentation
-sudo apt-get install -y certbot python-certbot-nginx -t stretch-backports
-
-# Domain: yourdomain.com
-# Redirect: 2, redirect everything
+sudo aptitude -y install snapd
+sudo snap install core; sudo snap refresh core
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
 sudo certbot --nginx
 
 # This will place your certs in /etc/letsencrypt/live/yourdomain.com
@@ -121,22 +119,29 @@ cd /var/www/tls/
 openssl dhparam -out dh-params.pem 2048
 ```
 
+#### Enable the site
+Has to be done after the cert!
+```
+sudo vi /etc/nginx/sites-enabled/central
+```
+
+
 ### Postgres
 This is written with postgres 14 as the intended version. If you need this guide to tell you how to install postgres you probably don't care if there's a newer version available.
 ```
 sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-sudo apt-get update
-sudo apt-get -y install postgresql-14
+sudo aptitude update
+sudo aptitude -y install postgresql-14
 ```
 
-#### Setup central_prod database
+#### Setup teiserver_prod database
 You will need to replace the `---------` with a new password, the same one you will place in your `config/prod.secret.exs`.
 
 ```
 sudo su postgres
 psql postgres postgres <<EOF
-CREATE USER teiserver_prod WITH PASSWORD '-------------';
+CREATE USER teiserver_prod WITH PASSWORD '---------';
 CREATE DATABASE teiserver_prod;
 GRANT ALL PRIVILEGES ON DATABASE teiserver_prod to teiserver_prod;
 ALTER USER teiserver_prod WITH SUPERUSER;
@@ -176,13 +181,19 @@ host    all             all             ::1/128                 trust
 ```
 
 #### Restart postgres
-These changes will take effect on restart and you'll know they work if you can access the database using `psql -U central_prod` from the deploy user.
-Note: It is possible `sudo service postgresql restart` will also work, I've not yet tested this.
+`sudo service postgresql restart`
+
+You can test the changes using `psql -U teiserver_prod` from the deploy user. If you connect to the database it's worked, if you get a permissions error it has not.
+
 
 ### Setting up some files and directories
 For this example I've put lots of stuff in the root directory. Feel free to relocate things.
 ```
 cd /
+
+# This is the directory it'll run from, we need it to exist or you'll get misleading errors
+sudo mkdir -p /etc/central
+sudo chown -R deploy:deploy /etc/central
 
 # This is where the app itself will live
 sudo mkdir -p /apps/central
