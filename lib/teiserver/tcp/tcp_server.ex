@@ -141,6 +141,8 @@ defmodule Teiserver.TcpServer do
 
   # Main source of data ingress
   def handle_info({:tcp, _socket, data}, %{exempt_from_cmd_throttle: false} = state) do
+    data = to_string(data)
+
     cmd_timestamps = if String.contains?(data, "\n") do
       now = System.system_time(:second)
       limiter = now - @cmd_flood_duration
@@ -163,12 +165,12 @@ defmodule Teiserver.TcpServer do
     {:noreply, %{new_state | cmd_timestamps: cmd_timestamps}}
   end
   def handle_info({:tcp, _socket, data}, %{exempt_from_cmd_throttle: true} = state) do
-    new_state = state.protocol_in.data_in(data, state)
+    new_state = state.protocol_in.data_in(to_string(data), state)
     {:noreply, new_state}
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    new_state = state.protocol_in.data_in(data, state)
+    new_state = state.protocol_in.data_in(to_string(data), state)
     {:noreply, new_state}
   end
 

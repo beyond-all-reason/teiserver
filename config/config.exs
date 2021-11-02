@@ -40,7 +40,7 @@ config :central, Teiserver,
     tls: 8201
   ],
   website: [
-    url: "https://teifion.co.uk"
+    url: "https://server2.beyondallreason.info"
   ],
   enable_benchmark: false,
   enable_hooks: true,

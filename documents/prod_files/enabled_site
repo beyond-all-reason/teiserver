@@ -13,9 +13,9 @@ server {
     listen 443 ssl;
     listen [::]:443;
 
-    server_name teifion.co.uk;
-    ssl_certificate /etc/letsencrypt/live/teifion.co.uk/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/teifion.co.uk/privkey.pem; # managed by Certbot
+    server_name yourdomain.com;
+    ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem; # managed by Certbot
 
     ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;
     ssl_ciphers         HIGH:!aNULL:!MD5;
