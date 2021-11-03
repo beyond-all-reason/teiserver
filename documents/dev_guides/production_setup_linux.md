@@ -279,10 +279,10 @@ A new user with developer level access will be created with the email `root@loca
 ### Things left for you to do at your leisure
 At some stage you'll probably want to do these things, no rush though.
 - Upload a favicon to `/var/www`
+`scp -i ~/.ssh/identity favicon.ico deploy@yourdomain.com:/var/www/`
 
 ### Maintenance
 I've made use of the following scripts to perform maintenance/backups as needed.
-
 
 #### get_backup
 ```
@@ -298,7 +298,7 @@ ENDSSH
 scp -i ~/.ssh/identity deploy@yourdomain.com:/tmp/backup.db ~/teiserever_backups/teiserver.db
 echo 'Backup downloaded'
 
-# Now delete the backup
+# Now delete the remote backup
 ssh -i ~/.ssh/identity deploy@yourdomain.com <<'ENDSSH'
   rm /tmp/backup.db
   echo 'Remote backup removed'
