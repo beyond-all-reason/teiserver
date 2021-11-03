@@ -2,7 +2,7 @@ defmodule Teiserver.TcpServerTest do
   use Central.ServerCase, async: false
 
   alias Teiserver.Account.UserCache
-  alias Teiserver.Client
+  alias Teiserver.{Client, Room}
   require Logger
 
   import Teiserver.TeiserverTestLib,
@@ -291,7 +291,6 @@ defmodule Teiserver.TcpServerTest do
     %{user: dud} = auth_setup()
     %{socket: socket, user: user} = auth_setup()
 
-
     client = Client.get_client_by_name(user.name)
     pid = client.pid
 
@@ -336,5 +335,19 @@ defmodule Teiserver.TcpServerTest do
     assert r =~ "ADDUSER #{dud.name}"
     assert r =~ "\nCLIENTSTATUS #{dud.name}"
     assert r =~ "\nSAIDEX roomname #{dud.name} msgmsg\n"
+
+    # Join room stuff
+    Room.get_or_make_room("dud_room", dud.id)
+    Room.add_user_to_room(dud.id, "dud_room")
+    send(pid, {:user_logged_out, dud.id, dud.name})
+    state = GenServer.call(pid, :get_state)
+    _recv_until(socket)
+
+    Teiserver.Protocols.SpringOut.do_join_room(state, "dud_room")
+    r = _recv_until(socket)
+    assert r =~ "JOIN dud_room\nJOINED dud_room #{user.name}\nCHANNELTOPIC dud_room #{dud.name}\n"
+    assert r =~ "ADDUSER #{dud.name}"
+    assert r =~ "\nCLIENTSTATUS #{dud.name}"
+    assert r =~ "CLIENTS dud_room #{user.name} #{dud.name}\n"
   end
 end

@@ -650,6 +650,33 @@ defmodule Teiserver.Protocols.SpringOut do
     author_name = User.get_username(room.author_id)
     reply(:channel_topic, {room_name, author_name}, nil, state)
 
+    # # Check for known users
+    state = room.members
+    |> Enum.reduce(state, fn (member_id, state_acc) ->
+      # member_id = User.get_userid(member)
+
+      new_state =
+        case Map.has_key?(state_acc.known_users, member_id) do
+          false ->
+            state_acc.protocol_out.reply(:user_logged_in, member_id, nil, state_acc)
+            %{state_acc | known_users: Map.put(state_acc.known_users, member_id, Teiserver.TcpServer._blank_user(member_id))}
+
+          true ->
+            state_acc
+        end
+
+      new_members =
+        if not Enum.member?(new_state.room_member_cache[room_name] || [], member_id) do
+          # new_state.protocol_out.reply(:add_user_to_room, {member_id, room_name}, nil, new_state)
+          [member_id | (new_state.room_member_cache[room_name] || [])]
+        else
+          new_state.room_member_cache[room_name] || []
+        end
+
+      new_cache = Map.put(state.room_member_cache, room_name, new_members)
+      %{new_state | room_member_cache: new_cache}
+    end)
+
     members =
       room.members
       |> Enum.map(fn m -> User.get_username(m) end)

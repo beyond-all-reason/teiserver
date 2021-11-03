@@ -123,6 +123,10 @@ defmodule Teiserver.TcpServer do
     {:ok, init_arg}
   end
 
+  def handle_call(:get_state, _from, state) do
+    {:reply, state, state}
+  end
+
   def handle_call({:get, key}, _from, state) do
     {:reply, Map.get(state, key), state}
   end
@@ -831,7 +835,7 @@ defmodule Teiserver.TcpServer do
   end
 
   # Other functions
-  defp _blank_user(userid, defaults \\ %{}) do
+  def _blank_user(userid, defaults \\ %{}) do
     Map.merge(
       %{
         userid: userid,
