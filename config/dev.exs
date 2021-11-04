@@ -47,7 +47,7 @@ config :central, Teiserver,
   heartbeat_timeout: nil,
   autologin: true,
   extra_logging: false,
-  enable_discord_bridge: true,
+  enable_discord_bridge: false,
   enable_agent_mode: true,
   use_geoip: true
 
@@ -126,4 +126,9 @@ config :logger, :info_log,
   path: "/tmp/barserver_info.log",
   level: :info
 
-import_config "dev.secret.exs"
+try do
+  import_config "dev.secret.exs"
+rescue
+  _ ->
+    nil
+end

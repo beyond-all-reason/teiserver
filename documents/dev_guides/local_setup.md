@@ -89,6 +89,32 @@ telnet localhost 8200
 openssl s_client -connect localhost:8201
 ```
 
+### config/dev.secret.exs
+If you want to do things like have a discord bot in development you don't want these details going into git. It is advisable to create a file `config/dev.secret.exs` where you can put these config details. I would suggest a file like so:
+```
+use Mix.Config
+
+config :central, Teiserver,
+  enable_discord_bridge: true,
+  enable_agent_mode: true
+
+config :central, DiscordBridge,
+  token: "------",
+  bot_name: "Teiserver Bridge DEV",
+  bridges: [
+    {"---", "main"},
+    {"---", "promote"},
+    {"---", "moderation-reports"},
+    {"---", "moderation-actions"}
+  ]
+
+# Comment the below block to enable background jobs to take place locally
+config :central, Oban,
+  queues: false,
+  crontab: false
+
+```
+
 ### Main 3rd party dependencies
 The main dependencies of the project are:
 - [Phoenix framework](https://www.phoenixframework.org/), a web framework with a role similar to Django or Rails.
