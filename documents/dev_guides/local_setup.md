@@ -46,7 +46,7 @@ exit
 
 # You should now be back in the teiserver folder as yourself
 # this next command will perform database migrations
-mix.create
+mix ecto.create
 ```
 
 #### Localhost certs
