@@ -10,7 +10,6 @@ import {LiveSocket, debug} from "phoenix_live_view"
 //
 // Local files can be imported directly using relative paths, for example:
 import socket from "./socket"
-import LoadTest from "./load_test"
 import LiveSearch from "./live_search"
 import ChatApp from "./chat"
 import CommunicationNotification from "./communication_notification"
