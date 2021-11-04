@@ -8,7 +8,7 @@ You will need to install:
 
 ### Clone repo
 ```
-git clone git@github.com:Teifion/teiserver.git
+git clone git@github.com:beyond-all-reason/teiserver.git
 cd teiserver
 ```
 
