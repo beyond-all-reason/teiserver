@@ -88,6 +88,9 @@ dosplit
 cancelsplit
   Cancels the lobby split
 
+rename <new name>
+  Renames the lobby to the name given
+
 ### Moderation
 modwarn <user> <hours> <reason>
   Warns the user for that many hours and creates a report for them

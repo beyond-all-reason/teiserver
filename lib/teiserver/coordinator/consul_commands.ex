@@ -208,7 +208,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{command: "cancelsplit"} = cmd, state) do
     :timer.send_after(50, :cancel_split)
     ConsulServer.say_command(cmd, state)
-    state
   end
 
   def handle_command(%{command: "dosplit"}, %{split: nil} = state) do
@@ -218,7 +217,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{command: "dosplit"} = cmd, %{split: split} = state) do
     :timer.send_after(50, {:do_split, split.split_uuid})
     ConsulServer.say_command(cmd, state)
-    state
+  end
+
+  def handle_command(%{command: "rename", remaining: new_name} = cmd, state) do
+    Lobby.rename_lobby(state.lobby_id, new_name)
+    ConsulServer.say_command(cmd, state)
   end
 
   def handle_command(%{command: "pull", remaining: target} = cmd, state) do
