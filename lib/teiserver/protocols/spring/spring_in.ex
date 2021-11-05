@@ -570,7 +570,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("c.moderation.report_user", data, msg_id, state) do
     case String.split(data, "\t") do
       [target_name, location_type, location_id, reason] ->
-        if String.trim(reason) == "" do
+        if String.trim(reason) == "" or String.trim(reason) == "None Given" do
           reply(:no, {"c.moderation.report_user", "no reason given"}, msg_id, state)
         else
           target = User.get_user_by_name(target_name) || %{id: nil}
