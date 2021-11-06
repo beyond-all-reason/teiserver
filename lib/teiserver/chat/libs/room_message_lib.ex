@@ -76,6 +76,16 @@ defmodule Teiserver.Chat.RoomMessageLib do
         )
   end
 
+  def _search(query, :inserted_after, timestamp) do
+    from room_messages in query,
+      where: room_messages.inserted_at >= ^timestamp
+  end
+
+  def _search(query, :inserted_before, timestamp) do
+    from room_messages in query,
+      where: room_messages.inserted_at < ^timestamp
+  end
+
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Name (A-Z)") do

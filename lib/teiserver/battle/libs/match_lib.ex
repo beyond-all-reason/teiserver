@@ -142,6 +142,21 @@ defmodule Teiserver.Battle.MatchLib do
         )
   end
 
+  def _search(query, :never_finished, _) do
+    from matches in query,
+      where: is_nil(matches.finished)
+  end
+
+  def _search(query, :inserted_after, timestamp) do
+    from matches in query,
+      where: matches.inserted_at >= ^timestamp
+  end
+
+  def _search(query, :inserted_before, timestamp) do
+    from matches in query,
+      where: matches.inserted_at < ^timestamp
+  end
+
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Name (A-Z)") do
