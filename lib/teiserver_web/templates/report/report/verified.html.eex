@@ -62,6 +62,7 @@
             <tr>
               <td>Total</td>
               <td><%= @data.total %></td>
+              <td>&nbsp;</td>
             </tr>
           </tbody>
         </table>
