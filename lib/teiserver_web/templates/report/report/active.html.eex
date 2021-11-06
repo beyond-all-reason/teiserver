@@ -1,4 +1,4 @@
-<% {fg, _bg, bsname} = colours() %>
+<% {_fg, _bg, bsname} = colours() %>
 
 <%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
 
@@ -16,27 +16,6 @@
 
         <form action='<%= Routes.ts_reports_report_path(@conn, :show, "active") %>' method="post" class="form-horizontal">
           <input type="hidden" name="_csrf_token" value="<%= get_csrf_token() %>" />
-
-          <div class="row">
-            <div class="col-md-4 col-xl-2 search-form-input">
-              <label for="report_mode" class="control-label">Mode:</label>
-              <%= central_component "icon_dropdown", %{
-                name: "report[mode]",
-                id: "report_mode",
-                selected: @params["mode"],
-                enumerable: [
-                  %{id: "User", icon: Central.Account.UserLib.icon(), colour: fg},
-                  %{id: "Group", icon: Central.Account.GroupLib.icon(), colour: fg},
-                  %{id: "Path (Full)", icon: "fa-sitemap", colour: fg},
-                  %{id: "Path (1 part)", icon: "fa-sitemap", colour: fg},
-                  %{id: "Path (2 parts)", icon: "fa-sitemap", colour: fg},
-                  %{id: "Path (3 parts)", icon: "fa-sitemap", colour: fg},
-                  %{id: "Path (4 parts)", icon: "fa-sitemap", colour: fg},
-                ]
-              } %>
-            </div>
-
-          </div>
 
           <div class="row">
             <div class="col-md-4 col-xl-2 search-form-input">
@@ -64,7 +43,25 @@
         </form>
         <br /><br />
 
-        Currently doesn't do anything
+        Date range: <%= @data.start_date %> to <%= @data.end_date %>
+        <table class='table' style="width: 600px;">
+          <thead>
+            <tr>
+              <th>Hours played</th>
+              <th>Player count</th>
+              <th>Cumulative Player count</th>
+           </tr>
+          </thead>
+          <tbody>
+            <%= for {hours, count} <- @data.player_counts do %>
+              <tr>
+                <td><%= hours %></td>
+                <td><%= format_number count %></td>
+                <td><%= format_number @data.cumulative_player_counts[hours] %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
 
       </div>
     </div>
