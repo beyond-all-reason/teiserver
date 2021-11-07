@@ -11,6 +11,7 @@ defmodule Teiserver.Battle do
 
   alias Teiserver.Battle.Match
   alias Teiserver.Battle.MatchLib
+  alias Teiserver.Data.Types, as: T
 
   @spec match_query(List.t()) :: Ecto.Query.t()
   def match_query(args) do
@@ -255,8 +256,16 @@ defmodule Teiserver.Battle do
     end
   end
 
-  def save_match_stats(match_id, stats) do
-    Logger.info("save_match_stats(#{match_id}, #{stats})")
+  @spec save_match_stats(T.lobby_id(), String.t()) :: :ok
+  def save_match_stats(_match_id, stats) do
+    # Logger.info("save_match_stats(#{match_id}, #{stats})")
+    case Base.decode64(stats) do
+      {:ok, _decoded64} ->
+        Logger.info("save_match_stats - good decode")
+      _ ->
+        Logger.info("save_match_stats - bad decode")
+    end
+    :ok
   end
 
   @spec start_match_monitor() :: :ok | {:failure, String.t()}
