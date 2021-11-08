@@ -49,7 +49,7 @@ defmodule Teiserver.User do
   def data_keys(), do: @data_keys
 
   @default_data %{
-    rank: 1,
+    rank: 0,
     ip: "default_ip",
     moderator: false,
     bot: false,
