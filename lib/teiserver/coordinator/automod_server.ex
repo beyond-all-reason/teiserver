@@ -102,6 +102,10 @@ defmodule Teiserver.Coordinator.AutomodServer do
     hw_fingerprint = Teiserver.Account.RecalculateUserStatTask.calculate_hw_fingerprint(stats)
 
     if hw_fingerprint != "" do
+      Account.update_user_stat(userid, %{
+        hw_fingerprint: hw_fingerprint
+      })
+
       hashes = Account.list_ban_hashes(search: [
         type: "hardware",
         value: hw_fingerprint
