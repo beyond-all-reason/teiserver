@@ -99,7 +99,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   defp do_check(userid) do
     stats = Account.get_user_stat_data(userid)
 
-    hw_fingerprint = Teiserver.Account.RecalculateUserStatTask.calculate_hw_fingerprint(stats)
+    hw_fingerprint = Teiserver.Account.RecalculateUserHWTask.calculate_hw_fingerprint(stats)
 
     if hw_fingerprint != "" do
       Account.update_user_stat(userid, %{

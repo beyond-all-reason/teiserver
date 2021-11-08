@@ -109,6 +109,7 @@ config :central, Oban,
         # 3:05 am every day, gives time for multiple telemetry day tasks to run if needed
         {"5 3 * * *", Teiserver.Account.RecalculateUserStatTask},
         {"5 12 * * *", Teiserver.Account.RecalculateUserStatTask},
+        {"5 4 * * *", Teiserver.Account.RecalculateUserHWTask},
       ]
     }
   ],
