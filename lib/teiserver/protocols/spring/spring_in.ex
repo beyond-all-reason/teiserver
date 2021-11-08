@@ -288,6 +288,10 @@ defmodule Teiserver.Protocols.SpringIn do
         end
         new_state
 
+      {:error, "Banned" <> _} ->
+        reply(:denied, "Banned, please see the discord channel #moderation-bot for more details", msg_id, state)
+        state
+
       {:error, reason} ->
         Logger.debug("[command:login] denied with reason #{reason}")
         reply(:denied, reason, msg_id, state)
