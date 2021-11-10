@@ -294,11 +294,40 @@ defmodule Teiserver.TcpServerTest do
 
     client = Client.get_client_by_name(user.name)
     pid = client.pid
+    coordinator_id = Client.get_client_by_name("Coordinator").userid
+
+    # --- User logs out
+    # At first it should be user, dud and coordinator
+    known = GenServer.call(pid, :get_state) |> Map.get(:known_users)
+    assert Map.keys(known) == [coordinator_id, dud.id, user.id]
+
+    send(pid, {:user_logged_out, dud.id, dud.name})
+    r = _recv_until(socket)
+    assert r == "REMOVEUSER #{dud.name}\n"
+    known = GenServer.call(pid, :get_state) |> Map.get(:known_users)
+    assert Map.keys(known) == [coordinator_id, user.id]
+
+    # Now what if they log out again?
+    send(pid, {:user_logged_out, dud.id, dud.name})
+    r = _recv_until(socket)
+    assert r == ""
+    known = GenServer.call(pid, :get_state) |> Map.get(:known_users)
+    assert Map.keys(known) == [coordinator_id, user.id]
+
+    # Now what if we find a userid that they don't have?
+    send(pid, {:user_logged_out, 0, "noname"})
+    r = _recv_until(socket)
+    assert r == ""
+    known = GenServer.call(pid, :get_state) |> Map.get(:known_users)
+    assert Map.keys(known) == [coordinator_id, user.id]
 
     # ---- Chat rooms ----
     # Join chat room
     send(pid, {:user_logged_out, dud.id, dud.name})
     _recv_until(socket)
+    known = GenServer.call(pid, :get_state) |> Map.get(:known_users)
+    assert Map.keys(known) == [coordinator_id, user.id]
+
     send(pid, {:add_user_to_room, dud.id, "roomname"})
     r = _recv_until(socket)
     assert r =~ "ADDUSER #{dud.name}"

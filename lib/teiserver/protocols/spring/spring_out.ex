@@ -130,10 +130,6 @@ defmodule Teiserver.Protocols.SpringOut do
     "ADDUSER #{client.name} #{client.country} #{springid} #{client.lobby_client}\n"
   end
 
-  defp do_reply(:remove_user, {_userid, username}) do
-    "REMOVEUSER #{username}\n"
-  end
-
   defp do_reply(:friendlist, nil), do: "FRIENDLISTBEGIN\FRIENDLISTEND\n"
   defp do_reply(:friendlist, user) do
     friends =
@@ -318,19 +314,15 @@ defmodule Teiserver.Protocols.SpringOut do
 
   # It's possible for a user to log in and then out really fast and cause issues with this
   defp do_reply(:user_logged_in, nil), do: nil
-  defp do_reply(:user_logged_in, userid) do
-    case Client.get_client_by_id(userid) do
-      nil -> nil
-      client ->
-        [
-          do_reply(:add_user, client),
-          do_reply(:client_status, client)
-        ]
-    end
+  defp do_reply(:user_logged_in, client) do
+    [
+      do_reply(:add_user, client),
+      do_reply(:client_status, client)
+    ]
   end
 
-  defp do_reply(:user_logged_out, {userid, username}) do
-    do_reply(:remove_user, {userid, username})
+  defp do_reply(:user_logged_out, {_userid, username}) do
+    "REMOVEUSER #{username}\n"
   end
 
   # Commands
@@ -658,7 +650,8 @@ defmodule Teiserver.Protocols.SpringOut do
       new_state =
         case Map.has_key?(state_acc.known_users, member_id) do
           false ->
-            state_acc.protocol_out.reply(:user_logged_in, member_id, nil, state_acc)
+            client = Client.get_client_by_id(member_id)
+            state_acc.protocol_out.reply(:user_logged_in, client, nil, state)
             %{state_acc | known_users: Map.put(state_acc.known_users, member_id, Teiserver.TcpServer._blank_user(member_id))}
 
           true ->

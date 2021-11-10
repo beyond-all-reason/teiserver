@@ -399,8 +399,12 @@ defmodule Teiserver.TcpServer do
     known_users =
       case state.known_users[userid] do
         nil ->
-          state.protocol_out.reply(:user_logged_in, userid, nil, state)
-          Map.put(state.known_users, userid, _blank_user(userid))
+          case Client.get_client_by_id(userid) do
+            nil -> state.known_users
+            client ->
+              state.protocol_out.reply(:user_logged_in, client, nil, state)
+              Map.put(state.known_users, userid, _blank_user(userid))
+          end
 
         _ ->
           state.known_users
@@ -604,7 +608,8 @@ defmodule Teiserver.TcpServer do
         # User isn't known about so we say they've logged in
         # Then we add them to the battle
         state.known_users[userid] == nil ->
-          state.protocol_out.reply(:user_logged_in, userid, nil, state)
+          client = Client.get_client_by_id(userid)
+          state.protocol_out.reply(:user_logged_in, client, nil, state)
 
           state.protocol_out.reply(
             :add_user_to_battle,
@@ -677,7 +682,8 @@ defmodule Teiserver.TcpServer do
           state.known_users[userid]
 
         state.known_users[userid] == nil ->
-          state.protocol_out.reply(:user_logged_in, userid, nil, state)
+          client = Client.get_client_by_id(userid)
+          state.protocol_out.reply(:user_logged_in, client, nil, state)
           _blank_user(userid)
 
         state.known_users[userid].lobby_id == nil ->
@@ -719,7 +725,8 @@ defmodule Teiserver.TcpServer do
     state =
       case Map.has_key?(state.known_users, from) do
         false ->
-          state.protocol_out.reply(:user_logged_in, from, nil, state)
+          client = Client.get_client_by_id(from)
+          state.protocol_out.reply(:user_logged_in, client, nil, state)
           %{state | known_users: Map.put(state.known_users, from, _blank_user(from))}
 
         true ->
@@ -745,7 +752,8 @@ defmodule Teiserver.TcpServer do
     state =
       case Map.has_key?(state.known_users, userid) do
         false ->
-          state.protocol_out.reply(:user_logged_in, userid, nil, state)
+          client = Client.get_client_by_id(userid)
+          state.protocol_out.reply(:user_logged_in, client, nil, state)
           %{state | known_users: Map.put(state.known_users, userid, _blank_user(userid))}
 
         true ->
