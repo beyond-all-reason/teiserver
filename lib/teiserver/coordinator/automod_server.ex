@@ -99,6 +99,17 @@ defmodule Teiserver.Coordinator.AutomodServer do
   defp do_check(userid) do
     stats = Account.get_user_stat_data(userid)
 
+    with nil <- do_hw_check(userid, stats),
+      nil <- do_lobby_hash_check(userid, stats)
+    do
+      "No action"
+    else
+      reason -> reason
+    end
+  end
+
+  @spec do_hw_check(T.userid(), map()) :: String.t() | nil
+  defp do_hw_check(userid, stats) do
     hw_fingerprint = Teiserver.Account.RecalculateUserHWTask.calculate_hw_fingerprint(stats)
 
     if hw_fingerprint != "" do
@@ -112,50 +123,46 @@ defmodule Teiserver.Coordinator.AutomodServer do
       ], limit: 1)
 
       if not Enum.empty?(hashes) do
-        hashid = hd(hashes).id
-        Logger.error("Automod found a hash matching hash##{hashid} for user #{userid}")
-        # TODO: Find a way to make this a silent report, maybe flag ban evasion differently?
-        # coordinator_id = Coordinator.get_coordinator_userid()
-        # Central.Account.create_report(%{
-        #   "location" => "automod",
-        #   "location_id" => nil,
-        #   "reason" => "Ban evasion",
-        #   "reporter_id" => coordinator_id,
-        #   "target_id" => userid,
-        #   "response_text" => "Hashmatch #{hashid}",
-        #   "response_action" => "Ban",
-        #   "expires" => nil,
-        #   "responder_id" => coordinator_id
-        # })
-        user = User.get_user_by_id(userid)
-        Account.update_user_stat(userid, %{"autoban" => "HW Hash ##{hashid}"})
-        User.update_user(%{user | banned: [true, nil]})
-        Client.disconnect(user.id, :banned)
-        Logger.error("Automod added ban action for userid: #{userid}, name: #{user.name}")
-        "Banned user"
+        banhash = hd(hashes)
+        do_ban(userid, banhash)
       else
-        "No action"
+        nil
       end
     else
-      handle_no_hash(userid)
-
+      nil
     end
   end
 
-  @spec handle_no_hash(T.userid()) :: String.t()
-  defp handle_no_hash(userid) do
-    # case Config.get_site_config_cache("teiserver.Require Chobby login") do
-    #   true ->
+  @spec do_lobby_hash_check(T.userid(), map()) :: String.t() | nil
+  defp do_lobby_hash_check(userid, stats) do
+    case stats["lobby_hash"] || nil do
+      nil ->
+        nil
+      hash ->
+        hashes = Account.list_ban_hashes(search: [
+          type: "lobby_hash",
+          value: hash
+        ], limit: 1)
 
-    #   false ->
+        if not Enum.empty?(hashes) do
+          banhash = hd(hashes)
+          # do_ban(userid, banhash)
 
-    # end
-
-    user = User.get_user_by_id(userid)
-    is_test_user = String.contains?(user.name, "test_user_") or String.contains?(user.name, "InAndOutAgentServer_")
-    if not is_test_user do
-      Logger.warn("No HW hash from #{user.name}/#{userid}")
+          user = User.get_user_by_id(userid)
+          Logger.error("BANHASH for lobby_hash #{banhash.id} - userid: #{userid}, name: #{user.name}, type: #{banhash.type}")
+          nil
+        else
+          nil
+        end
     end
-    "User has no hw fingerpint"
+  end
+
+  defp do_ban(userid, banhash) do
+    user = User.get_user_by_id(userid)
+    Account.update_user_stat(userid, %{"autoban_type" => banhash.type, "autoban_id" => banhash.id})
+    User.update_user(%{user | banned: [true, nil]})
+    Client.disconnect(user.id, :banned)
+    Logger.error("Automod added ban action for userid: #{userid}, name: #{user.name}, type: #{banhash.type}")
+    "Banned user"
   end
 end

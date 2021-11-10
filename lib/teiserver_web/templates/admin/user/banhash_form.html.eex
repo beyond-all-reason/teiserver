@@ -25,6 +25,17 @@
     Hardware
   </button>
 </form>
+
+<form action='<%= Routes.ts_admin_ban_hash_path(@conn, :create) %>' method='post' style="display: inline-block;">
+  <input type='hidden' name='_csrf_token' value='<%= get_csrf_token() %>' />
+  <input type='hidden' name='ban_hash[user_id]' value='<%= @userid %>' />
+  <input type='hidden' name='ban_hash[type]' value='lobby_hash' />
+  <input type='hidden' name='ban_hash[value]' value='<%= @user_stats["lobby_hash"] %>' />
+
+  <button type='submit' class='btn btn-<%= bsname %>'>
+    Lobby Hash
+  </button>
+</form>
 <br /><br />
 
 <a href="<%= Routes.ts_admin_user_path(@conn, :show, @userid) %>" class="btn btn-secondary btn-outline">
