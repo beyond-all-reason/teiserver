@@ -400,7 +400,10 @@ defmodule Teiserver.Account do
 
   """
   def update_user_stat(userid, data) when is_integer(userid) do
-    data = Map.new(data, fn {k, v} -> {to_string(k), v} end)
+    data = data
+    |> Enum.map(fn {k, v} -> {to_string(k), v} end)
+    |> Enum.filter(fn {_, v} -> v != nil end)
+    |> Map.new
 
     case get_user_stat(userid) do
       nil ->
