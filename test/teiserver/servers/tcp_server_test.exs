@@ -115,6 +115,7 @@ defmodule Teiserver.TcpServerTest do
     coordinator_userid = Teiserver.Coordinator.get_coordinator_userid()
 
     # Should be no users but ourselves
+    :timer.sleep(300)
     assert GenServer.call(pid, {:get, :known_users}) == %{
       user.id => %{lobby_id: nil, userid: user.id},
       coordinator_userid => %{lobby_id: nil, userid: coordinator_userid},

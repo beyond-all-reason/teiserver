@@ -70,7 +70,7 @@ defmodule Teiserver.Client do
     }
   end
 
-  def login(user, pid) do
+  def login(user, pid, ip \\ nil) do
     stats = Account.get_user_stat_data(user.id)
 
     client =
@@ -83,7 +83,7 @@ defmodule Teiserver.Client do
         bot: User.is_bot?(user),
         away: false,
         in_game: false,
-        ip: stats["last_ip"],
+        ip: ip || stats["last_ip"],
         country: stats["country"] || "??",
         lobby_client: stats["lobby_client"],
         shadowbanned: user.shadowbanned

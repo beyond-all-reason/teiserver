@@ -44,6 +44,7 @@ defmodule Teiserver.User do
     :shadowbanned,
     :springid,
     :lobby_hash,
+    :lobby_client,
     :roles
   ]
   def data_keys(), do: @data_keys
@@ -556,7 +557,7 @@ defmodule Teiserver.User do
       nil -> :error
       user ->
         do_login(user, "127.0.0.1", "Teiserver Internal Client", "IC")
-        Client.login(user, self())
+        Client.login(user, self(), "127.0.0.1")
         {:ok, user}
     end
   end
@@ -690,6 +691,7 @@ defmodule Teiserver.User do
           last_login: last_login,
           rank: rank,
           springid: springid,
+          lobby_client: lobby_client,
           lobby_hash: lobby_hash
       }
 

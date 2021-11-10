@@ -93,7 +93,7 @@ defmodule Teiserver.Protocols.Tachyon do
   @spec do_login_accepted(Map.t(), Map.t()) :: Map.t()
   def do_login_accepted(state, user) do
     # Login the client
-    Client.login(user, self())
+    Client.login(user, self(), state.ip)
 
     send(self(), {:action, {:login_end, nil}})
     PubSub.unsubscribe(Central.PubSub, "legacy_user_updates:#{user.id}")

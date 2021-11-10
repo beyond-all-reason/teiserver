@@ -618,13 +618,13 @@ CLIENTS test_room #{user.name}\n"
       |> User.verify_user()
 
     # Need to add it as a client for the :add_user command to work
-    Client.login(User.get_user_by_id(bad_user.id), self())
+    Client.login(User.get_user_by_id(bad_user.id), self(), "127.0.0.1")
 
     # Now see what happens when we add user
     pid = Client.get_client_by_id(user.id).pid
     send(pid, {:user_logged_in, bad_user.id})
     reply = _recv_raw(socket)
-    assert reply == "ADDUSER test_user_bad_springid ?? #{bad_user.id} \nCLIENTSTATUS test_user_bad_springid 4\n"
+    assert reply == "ADDUSER test_user_bad_springid ?? #{bad_user.id} \nCLIENTSTATUS test_user_bad_springid 0\n"
     Client.disconnect(bad_user.id)
   end
 

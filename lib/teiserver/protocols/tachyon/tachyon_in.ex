@@ -11,8 +11,11 @@ defmodule Teiserver.Protocols.TachyonIn do
   def handle("\r\n", state), do: state
 
   def handle(raw_data, state) do
+    clean_data = raw_data
+      |> String.trim
+
     new_state =
-      case Tachyon.decode(raw_data) do
+      case Tachyon.decode(clean_data) do
         {:ok, data} ->
           dispatch(data["cmd"], data, state)
 

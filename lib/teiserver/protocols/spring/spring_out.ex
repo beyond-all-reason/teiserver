@@ -591,7 +591,7 @@ defmodule Teiserver.Protocols.SpringOut do
     reply(:motd, nil, nil, state)
 
     # Login the client
-    _client = Client.login(user, self())
+    _client = Client.login(user, self(), state.ip)
 
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
