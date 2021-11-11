@@ -11,7 +11,7 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
     # runs just after startup the users may not be in the cache
     Account.list_users(
       search: [
-        warn_mute_or_ban: true
+        mod_action: "Any action"
       ],
       select: [:id]
     )
