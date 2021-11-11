@@ -97,17 +97,39 @@
             [true, _] -> true
             _ -> false
           end
+
+          until = cond do
+            banned -> user.data["banned"] |> List.last()
+            muted -> user.data["muted"] |> List.last()
+            warned -> user.data["warned"] |> List.last()
+            true -> nil
+          end
         %>
 
         <%= cond do %>
           <% banned -> %>
             <i class='fa-fw text-danger <%= Central.Account.ReportLib.action_icon("Ban") %>'></i>
+            <%= if until do %>
+              <%= until %>
+            <% else %>
+              <i class='fa-fw far fa-infinity'></i>
+            <% end %>
 
           <% muted -> %>
             <i class='fa-fw text-danger <%= Central.Account.ReportLib.action_icon("Mute") %>'></i>
+            <%= if until do %>
+              <%= until %>
+            <% else %>
+              <i class='fa-fw far fa-infinity'></i>
+            <% end %>
 
           <% warned -> %>
             <i class='fa-fw text-warning <%= Central.Account.ReportLib.action_icon("Warn") %>'></i>
+            <%= if until do %>
+              <%= until %>
+            <% else %>
+              <i class='fa-fw far fa-infinity'></i>
+            <% end %>
 
           <% unverified -> %>
             <i class='fa-fw text-info fas fa-square-question'></i>

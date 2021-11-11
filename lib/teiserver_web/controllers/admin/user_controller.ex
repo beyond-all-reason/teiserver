@@ -63,21 +63,22 @@ defmodule TeiserverWeb.Admin.UserController do
           contributor: params["contributor"],
           developer: params["developer"],
           ip: params["ip"],
+          mod_action: params["mod_action"],
         ],
         limit: params["limit"] || 50,
         order_by: params["order"] || "Name (A-Z)"
       )
 
-    if Enum.count(users) == 1 do
-      conn
-      |> redirect(to: Routes.ts_admin_user_path(conn, :show, hd(users).id))
-    else
+    # if Enum.count(users) == 1 do
+    #   conn
+    #   |> redirect(to: Routes.ts_admin_user_path(conn, :show, hd(users).id))
+    # else
       conn
       |> add_breadcrumb(name: "User search", url: conn.request_path)
       |> assign(:params, params)
       |> assign(:users, users)
       |> render("index.html")
-    end
+    # end
   end
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
