@@ -64,6 +64,7 @@ config :central, Teiserver,
   enable_match_monitor: true,
   user_agreement: "User agreement goes here.",
   server_flag: "GB",
+  post_login_delay: 100,
   use_geoip: true
 
 config :logger, :console,

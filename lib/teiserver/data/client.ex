@@ -108,6 +108,9 @@ defmodule Teiserver.Client do
       {:client_action, :client_connect, user.id}
     )
 
+    # Lets give everything a chance to propagate
+    :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
+
     client
   end
 

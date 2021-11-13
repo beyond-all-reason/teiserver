@@ -603,7 +603,8 @@ defmodule Teiserver.User do
 
           Client.get_client_by_id(user.id) != nil ->
             Client.disconnect(user.id, "Already logged in")
-            do_login(user, ip, lobby, lobby_hash)
+            {:error, "Existing session, please retry"}
+            # do_login(user, ip, lobby, lobby_hash)
 
           true ->
             do_login(user, ip, lobby, lobby_hash)

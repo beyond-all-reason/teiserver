@@ -64,7 +64,7 @@ defmodule Teiserver.TeiserverTestLib do
     user = if user, do: user, else: new_user()
 
     token = User.create_token(user)
-    case User.try_login(token, "127.0.0.1", "AsyncTest", ["token1", "token2"]) do
+    case User.try_login(token, "127.0.0.1", "AsyncTest", "token1 token2") do
       {:ok, _user} -> :ok
       value -> raise "Error setting up user - #{Kernel.inspect value}"
     end
