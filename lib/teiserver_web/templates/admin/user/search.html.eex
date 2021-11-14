@@ -185,6 +185,11 @@
             </div>
 
             <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_lobby_client" class="control-label">Lobby: </label>
+              <input type="text" name="search[lobby_client]" id="search_lobby" value='<%= @params["lobby_client"] %>' placeholder="" class="form-control" />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
               <label for="search_ip" class="control-label">IP: </label>
               <input type="text" name="search[ip]" id="search_ip" value='<%= @params["ip"] %>' placeholder="" class="form-control" />
             </div>

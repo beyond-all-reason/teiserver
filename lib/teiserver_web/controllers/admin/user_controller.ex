@@ -63,6 +63,7 @@ defmodule TeiserverWeb.Admin.UserController do
           contributor: params["contributor"],
           developer: params["developer"],
           ip: params["ip"],
+          lobby_client: params["lobby_client"],
           mod_action: params["mod_action"],
         ],
         limit: params["limit"] || 50,

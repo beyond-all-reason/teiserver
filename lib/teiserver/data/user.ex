@@ -685,6 +685,14 @@ defmodule Teiserver.User do
     springid = if Map.get(user, :springid) != nil, do: user.springid, else: next_springid()
     |> Central.Helpers.NumberHelper.int_parse
 
+    # We don't care about the lobby version so much as we do about the lobby itself
+    lobby_client = case Regex.run(~r/^[a-zA-Z\ ]+/, lobby_client) do
+      [match | _] ->
+        match
+      _ ->
+        lobby_client
+    end
+
     user =
       %{
         user

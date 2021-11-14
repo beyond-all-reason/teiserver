@@ -68,6 +68,12 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("? ->> ? != ?", users.data, ^field, ^value)
   end
 
+  # https://www.postgresql.org/docs/current/functions-json.html - Unable to find a function for this :(
+  # def _search(query, :data_contains, {field, value}) do
+  #   from users in query,
+  #     where: fragment("? ->> ? != ?", users.data, ^field, ^value)
+  # end
+
   def _search(query, :bot, "Person") do
     Logger.error("user.data['bot'] is being queried, this property is due to be depreciated")
     from users in query,
@@ -163,6 +169,11 @@ defmodule Teiserver.Account.UserLib do
     Logger.error("user.data['ip'] is being queried, this property is due to be depreciated")
     from users in query,
       where: fragment("? -> ? @> ?", users.data, "ip_list", ^ip)
+  end
+
+  def _search(query, :lobby_client, lobby_client) do
+    from users in query,
+      where: fragment("? ->> ? = ?", users.data, "lobby_client", ^lobby_client)
   end
 
   def _search(query, :mod_action, "Banned") do
