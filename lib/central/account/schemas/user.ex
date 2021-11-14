@@ -50,6 +50,7 @@ defmodule Central.Account.User do
         [:name, :email, :icon, :colour, :permissions, :admin_group_id, :data] ++ @extra_fields
       )
       |> validate_required([:name, :email, :icon, :colour, :permissions])
+      |> unique_constraint(:email)
     else
       user
       |> cast(
@@ -66,6 +67,7 @@ defmodule Central.Account.User do
         ] ++ @extra_fields
       )
       |> validate_required([:name, :email, :password, :icon, :colour, :permissions])
+    |> unique_constraint(:email)
       |> put_password_hash()
     end
   end
@@ -89,6 +91,7 @@ defmodule Central.Account.User do
       ] ++ @extra_fields
     )
     |> validate_required([:name, :email, :icon, :colour, :permissions])
+    |> unique_constraint(:email)
   end
 
   def changeset(struct, params, nil), do: changeset(struct, params)
@@ -104,6 +107,7 @@ defmodule Central.Account.User do
     user
     |> cast(attrs, [:name, :email])
     |> validate_required([:name, :email])
+    |> unique_constraint(:email)
     |> change_password(attrs)
   end
 
@@ -114,6 +118,7 @@ defmodule Central.Account.User do
     user
     |> cast(attrs, [:name, :email, :icon, :colour] ++ @extra_fields)
     |> validate_required([:name, :email, :icon, :colour])
+    |> unique_constraint(:email)
   end
 
   def changeset(user, attrs, :limited_with_data) do
@@ -123,6 +128,7 @@ defmodule Central.Account.User do
     user
     |> cast(attrs, [:name, :email, :icon, :colour, :data] ++ @extra_fields)
     |> validate_required([:name, :email, :icon, :colour])
+    |> unique_constraint(:email)
   end
 
   def changeset(user, attrs, :user_form) do
@@ -149,6 +155,7 @@ defmodule Central.Account.User do
         user
         |> cast(attrs, [:name, :email])
         |> validate_required([:name, :email])
+        |> unique_constraint(:email)
     end
   end
 
