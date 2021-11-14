@@ -599,6 +599,7 @@ defmodule Teiserver.Protocols.SpringOut do
     |> Enum.each(fn userid ->
       send(self(), {:user_logged_in, userid})
     end)
+    :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
 
     # Battle entry commands
     # Once we know this is stable we can consider optimising it to not
@@ -614,6 +615,7 @@ defmodule Teiserver.Protocols.SpringOut do
       |> Enum.each(fn player_id ->
         send(self(), {:add_user_to_battle, player_id, lobby_id, nil})
       end)
+      :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
     end)
 
     send(self(), {:action, {:login_end, nil}})
