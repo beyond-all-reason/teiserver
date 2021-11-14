@@ -100,7 +100,7 @@ defmodule Teiserver.Coordinator do
   def update_report(user, report) do
     case report.response_action do
       "Warn" ->
-        send_to_user(user.id, "You have just received a formal warning, reason: #{report.response_text}.")
+        send_to_user(user.id, "You have just received a formal warning, reason: #{report.reason}.")
       _ ->
         nil
     end
