@@ -27,7 +27,6 @@ defmodule Teiserver.User do
 
   @data_keys [
     :rank,
-    :ip,
     :moderator,
     :bot,
     :friends,
@@ -51,7 +50,6 @@ defmodule Teiserver.User do
 
   @default_data %{
     rank: 0,
-    ip: "default_ip",
     moderator: false,
     bot: false,
     friends: [],
@@ -269,7 +267,6 @@ defmodule Teiserver.User do
 
     params =
       user_register_params_with_md5(name, email, md5_password, %{
-        "ip" => ip
       })
 
     case Account.script_create_user(params) do
@@ -696,8 +693,7 @@ defmodule Teiserver.User do
     user =
       %{
         user
-        | ip: ip,
-          last_login: last_login,
+        | last_login: last_login,
           rank: rank,
           springid: springid,
           lobby_client: lobby_client,

@@ -54,7 +54,6 @@
     <tr>
       <th colspan="2">Name</th>
       <%= if false and is_admin do %><th>Email</th><% end %>
-      <th style="text-align:center;" width="120">IP</th>
       <th style="text-align:center;" width="120">Hash</th>
       <th style="text-align:center;" width="120">Hardware</th>
       <th>&nbsp;</th>
@@ -74,12 +73,6 @@
       </td>
       <td><%= user.name %></td>
       <%= if false and is_admin do %><td><%= user.email %></td><% end %>
-
-      <td style="text-align: center">
-        <%= if Enum.member?(@reasons.ip, user.id) do %>
-          <i class='fa-fw fas fa-circle-check text-danger fa-lg'></i>
-        <% end %>
-      </td>
 
       <td style="text-align: center">
         <%= if Enum.member?(@reasons.hash, user.id) do %>
