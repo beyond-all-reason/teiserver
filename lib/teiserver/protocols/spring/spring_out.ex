@@ -387,10 +387,6 @@ defmodule Teiserver.Protocols.SpringOut do
     "JOINFAILED #{room_name}\t#{reason}\n"
   end
 
-  defp do_reply(:joined_room, {username, room_name}) do
-    "JOINED #{room_name} #{username}\n"
-  end
-
   defp do_reply(:left_room, {username, room_name}) do
     "LEFT #{room_name} #{username}\n"
   end
@@ -639,7 +635,7 @@ defmodule Teiserver.Protocols.SpringOut do
     room = Room.get_or_make_room(room_name, state.userid)
     Room.add_user_to_room(state.userid, room_name)
     reply(:join_success, room_name, nil, state)
-    reply(:joined_room, {state.username, room_name}, nil, state)
+    reply(:add_user_to_room, {state.userid, room_name}, nil, state)
 
     author_name = User.get_username(room.author_id)
     reply(:channel_topic, {room_name, author_name}, nil, state)
