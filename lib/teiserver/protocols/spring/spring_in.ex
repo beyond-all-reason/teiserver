@@ -114,6 +114,13 @@ defmodule Teiserver.Protocols.SpringIn do
     %{state | protocol_in: m_in, protocol_out: m_out}
   end
 
+  defp do_handle("TACHYON", "dev", msg_id, state) do
+    reply(:okay, "TACHYON", msg_id, state)
+    {m_in, m_out} = Teiserver.Protocols.TachyonLib.get_modules("dev")
+
+    %{state | protocol_in: m_in, protocol_out: m_out}
+  end
+
   defp do_handle("TACHYON", "v" <> _ = version, msg_id, state) do
     reply(:okay, "TACHYON", msg_id, state)
     {m_in, m_out} = Teiserver.Protocols.TachyonLib.get_modules(version)

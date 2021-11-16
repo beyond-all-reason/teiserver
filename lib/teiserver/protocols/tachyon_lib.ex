@@ -1,17 +1,21 @@
 defmodule Teiserver.Protocols.TachyonLib do
   require Logger
 
-  @spec format_log(String.t()) :: String.t()
-  def format_log(s) do
-    Kernel.inspect(s)
-  end
-
   @spec get_modules :: {module(), module()}
   def get_modules(), do: get_modules("v1")
 
   @spec get_modules(String.t()) :: {module(), module()}
+  def get_modules("dev") do
+    {Teiserver.Protocols.Tachyon.V1.TachyonIn, Teiserver.Protocols.Tachyon.V1.TachyonOut}
+  end
+
   def get_modules("v1") do
     {Teiserver.Protocols.Tachyon.V1.TachyonIn, Teiserver.Protocols.Tachyon.V1.TachyonOut}
+  end
+
+  @spec format_log(String.t()) :: String.t()
+  def format_log(s) do
+    Kernel.inspect(s)
   end
 
   @spec encode(List.t() | Map.t()) :: String.t()
