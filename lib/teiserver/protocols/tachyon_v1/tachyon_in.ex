@@ -1,9 +1,32 @@
-defmodule Teiserver.Protocols.TachyonIn do
+defmodule Teiserver.Protocols.Tachyon.V1.TachyonIn do
   require Logger
-  alias Teiserver.Protocols.Tachyon
-  import Teiserver.Protocols.TachyonOut, only: [reply: 4]
+  alias Teiserver.Protocols.TachyonLib
+  import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Protocols.Tachyon.Dev.{AuthIn, LobbyIn, CommunicationIn, MatchmakingIn, NewsIn, SystemIn, TelemetryIn}
+  alias Teiserver.Protocols.Tachyon.V1.{AuthIn, LobbyIn, CommunicationIn, MatchmakingIn, NewsIn, SystemIn, TelemetryIn}
+
+  @spec data_in(String.t(), map()) :: map()
+  def data_in(data, state) do
+    if state.extra_logging do
+      Logger.info("<-- #{state.username}: #{TachyonLib.format_log(data)}")
+    end
+
+    new_state =
+      if String.ends_with?(data, "\n") do
+        data = state.message_part <> data
+
+        data
+        |> String.split("\n")
+        |> Enum.reduce(state, fn data, acc ->
+          handle(data, acc)
+        end)
+        |> Map.put(:message_part, "")
+      else
+        %{state | message_part: state.message_part <> data}
+      end
+
+    new_state
+  end
 
   @spec handle(String.t(), map) :: map
   def handle("", state), do: state
@@ -15,7 +38,7 @@ defmodule Teiserver.Protocols.TachyonIn do
       |> String.trim
 
     new_state =
-      case Tachyon.decode(clean_data) do
+      case TachyonLib.decode(clean_data) do
         {:ok, data} ->
           dispatch(data["cmd"], data, state)
 
@@ -29,7 +52,7 @@ defmodule Teiserver.Protocols.TachyonIn do
 
   # If the data has a message id we add it to the state, saves us passing around
   # an extra value all the time and might help with debugging at some point
-  @spec add_msg_id(Map.t(), Map.t()) :: Map.t()
+  @spec add_msg_id(map(), map()) :: map()
   defp add_msg_id(state, data) do
     new_msg_id = if Map.has_key?(data, "msg_id") do
       int_parse(data["msg_id"])
@@ -37,7 +60,7 @@ defmodule Teiserver.Protocols.TachyonIn do
     %{state | msg_id: new_msg_id}
   end
 
-  @spec dispatch(String.t(), Map.t(), Map.t()) :: Map.t()
+  @spec dispatch(String.t(), map(), map()) :: map()
   defp dispatch(nil, data, state) do
     reply(:system, :error, %{location: "dispatch", error: "cmd with nil value passed in with data '#{Kernel.inspect data}'"}, state)
   end
@@ -64,6 +87,4 @@ defmodule Teiserver.Protocols.TachyonIn do
     # And remove the msg_id, don't want that bleeding over
     %{new_state | msg_id: nil}
   end
-
-
 end

@@ -1,8 +1,8 @@
-defmodule Teiserver.Protocols.TachyonOut do
+defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
   require Logger
   alias Teiserver.Battle.Lobby
-  alias Teiserver.Protocols.Tachyon
-  alias Teiserver.Protocols.Tachyon.Dev.{AuthOut, LobbyOut, CommunicationOut, MatchmakingOut, NewsOut, SystemOut}
+  alias Teiserver.Protocols.TachyonLib
+  alias Teiserver.Protocols.Tachyon.V1.{Tachyon, AuthOut, LobbyOut, CommunicationOut, MatchmakingOut, NewsOut, SystemOut}
 
   @spec reply(atom(), atom(), Map.t(), Map.t()) :: Map.t()
 
@@ -42,7 +42,7 @@ defmodule Teiserver.Protocols.TachyonOut do
       |> add_msg_id(state)
 
     if state.extra_logging do
-      Logger.info("--> #{state.username}: #{Tachyon.format_log(msg)}")
+      Logger.info("--> #{state.username}: #{TachyonLib.format_log(msg)}")
     end
 
     _send(msg, state)
@@ -65,7 +65,10 @@ defmodule Teiserver.Protocols.TachyonOut do
   end
 
   defp _send(msg, socket, transport) do
-    encoded_msg = Tachyon.encode(msg)
+    encoded_msg = TachyonLib.encode(msg)
     transport.send(socket, encoded_msg <> "\n")
   end
+
+  def do_leave_battle(state, lobby_id), do: Tachyon.do_leave_battle(state, lobby_id)
+  def do_join_battle(state, lobby_id, script_password), do: Tachyon.do_join_battle(state, lobby_id, script_password)
 end

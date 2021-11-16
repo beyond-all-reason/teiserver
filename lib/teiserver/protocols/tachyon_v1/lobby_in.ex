@@ -1,7 +1,7 @@
-defmodule Teiserver.Protocols.Tachyon.Dev.LobbyIn do
+defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
   alias Teiserver.Battle.Lobby
   alias Teiserver.{Client, Coordinator}
-  import Teiserver.Protocols.TachyonOut, only: [reply: 4]
+  import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
   require Logger

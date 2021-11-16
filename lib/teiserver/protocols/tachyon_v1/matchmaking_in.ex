@@ -1,7 +1,7 @@
-defmodule Teiserver.Protocols.Tachyon.Dev.MatchmakingIn do
+defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
   # alias Teiserver.Client
   alias Teiserver.Data.Matchmaking
-  import Teiserver.Protocols.TachyonOut, only: [reply: 4]
+  import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()

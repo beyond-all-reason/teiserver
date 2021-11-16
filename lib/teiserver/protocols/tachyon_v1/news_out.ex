@@ -1,5 +1,5 @@
-defmodule Teiserver.Protocols.Tachyon.Dev.NewsOut do
-  alias Teiserver.Protocols.Tachyon
+defmodule Teiserver.Protocols.Tachyon.V1.NewsOut do
+  alias Teiserver.Protocols.Tachyon.V1.Tachyon
 
   @spec do_reply(atom(), any) :: Map.t()
   def do_reply(:get_latest_game_news, nil) do

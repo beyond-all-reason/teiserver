@@ -1,5 +1,5 @@
-defmodule Teiserver.Protocols.Tachyon.Dev.NewsIn do
-  import Teiserver.Protocols.TachyonOut, only: [reply: 4]
+defmodule Teiserver.Protocols.Tachyon.V1.NewsIn do
+  import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
   alias Teiserver.Communication
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()

@@ -1,5 +1,5 @@
 defmodule Teiserver.Agents.AgentLib do
-  alias Teiserver.Protocols.Tachyon
+  alias Teiserver.Protocols.TachyonLib
   alias Teiserver.User
   alias Phoenix.PubSub
   require Logger
@@ -66,7 +66,7 @@ defmodule Teiserver.Agents.AgentLib do
   end
 
   defp swap_to_tachyon(socket) do
-    _send_raw(socket, "TACHYON\n")
+    _send_raw(socket, "TACHYON v1\n")
     :timer.sleep(100)
     :ok
   end
@@ -102,7 +102,7 @@ defmodule Teiserver.Agents.AgentLib do
 
   @spec _send({:sslsocket, any, any}, Map.t()) :: :ok
   def _send(socket = {:sslsocket, _, _}, data) do
-    msg = Tachyon.encode(data) <> "\n"
+    msg = TachyonLib.encode(data) <> "\n"
     _send_raw(socket, msg)
   end
 
@@ -124,7 +124,7 @@ defmodule Teiserver.Agents.AgentLib do
 
   defp do_translate(""), do: nil
   defp do_translate(line) do
-    case Tachyon.decode!(line) do
+    case TachyonLib.decode!(line) do
       %{"cmd" => "s.auth.login"} -> nil
       msg -> msg
     end

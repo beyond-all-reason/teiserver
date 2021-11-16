@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Tachyon.Dev.TelemetryIn do
+defmodule Teiserver.Protocols.Tachyon.V1.TelemetryIn do
   alias Teiserver.Telemetry
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()

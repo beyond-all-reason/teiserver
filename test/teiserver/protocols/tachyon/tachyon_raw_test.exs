@@ -6,7 +6,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
   import Teiserver.TeiserverTestLib,
     only: [tls_setup: 0, _send_raw: 2, _tachyon_send: 2, _recv_raw: 1, _tachyon_recv: 1, new_user: 0, new_user_name: 0]
 
-  alias Teiserver.Protocols.Tachyon
+  alias Teiserver.Protocols.TachyonLib
 
   setup do
     %{socket: socket} = tls_setup()
@@ -16,7 +16,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
   test "spring tachyon interop command", %{socket: socket} do
     _ = _recv_raw(socket)
     cmd = %{cmd: "c.system.ping"}
-    data = Tachyon.encode(cmd)
+    data = TachyonLib.encode(cmd)
     _send_raw(socket, "TACHYON #{data}\n")
     reply = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.system.pong"}
@@ -31,14 +31,14 @@ defmodule Teiserver.Protocols.TachyonRawTest do
 
     # Now test we can ping it
     cmd = %{cmd: "c.system.ping"}
-    data = Tachyon.encode(cmd)
+    data = TachyonLib.encode(cmd)
     _send_raw(socket, data <> "\n")
     reply = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.system.pong"}
 
     # With msg_id
     cmd = %{cmd: "c.system.ping", msg_id: 123_456}
-    data = Tachyon.encode(cmd)
+    data = TachyonLib.encode(cmd)
     _send_raw(socket, data <> "\n")
     reply = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.system.pong", "msg_id" => 123_456}

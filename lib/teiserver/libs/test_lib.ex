@@ -6,7 +6,7 @@ end
 defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
   alias Teiserver.{Client, User, Account}
-  alias Teiserver.Protocols.Tachyon
+  alias Teiserver.Protocols.TachyonLib
   alias Teiserver.Coordinator.CoordinatorServer
   @host '127.0.0.1'
 
@@ -193,7 +193,7 @@ defmodule Teiserver.TeiserverTestLib do
   end
 
   def _tachyon_send(socket, data) do
-    msg = Tachyon.encode(data)
+    msg = TachyonLib.encode(data)
     _send_raw(socket, msg <> "\n")
   end
 
@@ -203,7 +203,7 @@ defmodule Teiserver.TeiserverTestLib do
       :closed -> :closed
 
       resp ->
-        case Tachyon.decode(resp) do
+        case TachyonLib.decode(resp) do
           {:ok, msg} -> msg
           error -> error
         end
@@ -214,7 +214,7 @@ defmodule Teiserver.TeiserverTestLib do
   def _tachyon_recv_until(socket = {:sslsocket, _, _}, acc) do
     case :ssl.recv(socket, 0, 500) do
       {:ok, reply} ->
-        resp = case Tachyon.decode(to_string(reply)) do
+        resp = case TachyonLib.decode(to_string(reply)) do
           {:ok, msg} -> msg
           error -> {:error, error}
         end

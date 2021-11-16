@@ -1,7 +1,7 @@
-defmodule Teiserver.Protocols.Tachyon.Dev.AuthIn do
+defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
   alias Teiserver.{User, Client}
-  alias Teiserver.Protocols.Tachyon
-  import Teiserver.Protocols.TachyonOut, only: [reply: 4]
+  alias Teiserver.Protocols.Tachyon.V1.Tachyon
+  import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
   def do_handle("get_token", _, %{transport: :ranch_tcp} = state) do

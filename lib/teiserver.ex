@@ -28,6 +28,6 @@ defmodule Teiserver do
 
   # Designed for debugging help
   def tachyon(v) do
-    Teiserver.Protocols.Tachyon.decode(v)
+    Teiserver.Protocols.TachyonLib.decode(v)
   end
 end

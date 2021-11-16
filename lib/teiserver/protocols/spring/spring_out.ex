@@ -518,7 +518,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   # defp do_reply(:tachyon, {namespace, function, data, state}) do
-  #   Teiserver.Protocols.TachyonOut.reply(namespace, function, data, state)
+  #   Teiserver.Protocols.Tachyon.V1.TachyonOut.reply(namespace, function, data, state)
   # end
 
   defp do_reply(atom, data) do
