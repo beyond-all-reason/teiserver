@@ -276,35 +276,6 @@ To create your first root user make a note of `config :central, Central.Setup, k
 
 A new user with developer level access will be created with the email `root@localhost` and a password identical to the setup key you just used. You can now login as that user, it is advised your first action should be to change/update the password and set the user details (name/email) to the ones you intend to use as admin.
 
-### Things left for you to do at your leisure
-At some stage you'll probably want to do these things, no rush though.
-- Upload a favicon to `/var/www`
-`scp -i ~/.ssh/identity favicon.ico deploy@yourdomain.com:/var/www/`
-
-### Maintenance
-I've made use of the following scripts to perform maintenance/backups as needed.
-
-#### get_backup
-```
-#!/usr/bin/env bash
-
-# Cause backup to be created
-ssh -i ~/.ssh/identity deploy@yourdomain.com <<'ENDSSH'
-  pg_dump --username=teiserver_prod --dbname=teiserver_prod --file=/tmp/backup.db
-  echo 'Backup created'
-ENDSSH
-
-# Download the file
-scp -i ~/.ssh/identity deploy@yourdomain.com:/tmp/backup.db ~/teiserever_backups/teiserver.db
-echo 'Backup downloaded'
-
-# Now delete the remote backup
-ssh -i ~/.ssh/identity deploy@yourdomain.com <<'ENDSSH'
-  rm /tmp/backup.db
-  echo 'Remote backup removed'
-ENDSSH
-```
-
 ### Usage stats
 One of the packages you installed at the start is sysstat. It can be configured to track the CPU, memory etc stats of the server.
 ```sudo vi /etc/default/sysstat```
@@ -331,6 +302,33 @@ nemo ~/Downloads
 firefox --new-tab "https://sarchart.dotsuresh.com/"
 ```
 
-### FAQ
+### Favicon
+At some stage you'll probably want to do these things, no rush though.
+- Upload a favicon to `/var/www`
+`scp -i ~/.ssh/identity favicon.ico deploy@yourdomain.com:/var/www/`
+
+### Backups
+This is a script I run locally to create and get the backup.
+
+```
+#!/usr/bin/env bash
+
+# Cause backup to be created
+ssh -i ~/.ssh/identity deploy@yourdomain.com <<'ENDSSH'
+  pg_dump --username=teiserver_prod --dbname=teiserver_prod --file=/tmp/backup.db
+  echo 'Backup created'
+ENDSSH
+
+# Download the file
+scp -i ~/.ssh/identity deploy@yourdomain.com:/tmp/backup.db ~/teiserever_backups/teiserver.db
+echo 'Backup downloaded'
+
+# Now delete the remote backup
+ssh -i ~/.ssh/identity deploy@yourdomain.com <<'ENDSSH'
+  rm /tmp/backup.db
+  echo 'Remote backup removed'
+ENDSSH
+```
+
 #### What is "central"?
 I've a few different projects all of which rely on a common core of functionality (users, groups etc). This is stored as the "central" folder which makes it easier to share code and the like between them. It does mean the application launched is called "central" though. The main repo for Central is [https://github.com/Teifion/central](https://github.com/Teifion/central).
