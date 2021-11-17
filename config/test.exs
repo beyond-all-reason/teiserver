@@ -23,6 +23,7 @@ config :central, Teiserver,
   enable_discord_bridge: false,
   enable_match_monitor: false,
   post_login_delay: 0,
+  spring_post_state_change_delay: 0,
   user_agreement: "User agreement goes here."
 
 config :central, DiscordBridge,

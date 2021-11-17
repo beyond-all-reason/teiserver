@@ -634,17 +634,20 @@ defmodule Teiserver.Protocols.SpringOut do
   def do_join_room(state, room_name) do
     room = Room.get_or_make_room(room_name, state.userid)
     Room.add_user_to_room(state.userid, room_name)
+
+    PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
+    :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
+
     reply(:join_success, room_name, nil, state)
     reply(:add_user_to_room, {state.userid, room_name}, nil, state)
 
     author_name = User.get_username(room.author_id)
     reply(:channel_topic, {room_name, author_name}, nil, state)
 
-    # # Check for known users
+    # Check for known users
     state = room.members
     |> Enum.reduce(state, fn (member_id, state_acc) ->
-      # member_id = User.get_userid(member)
-
+      # Does the user need to be added?
       new_state =
         case Map.has_key?(state_acc.known_users, member_id) do
           false ->
@@ -658,7 +661,6 @@ defmodule Teiserver.Protocols.SpringOut do
 
       new_members =
         if not Enum.member?(new_state.room_member_cache[room_name] || [], member_id) do
-          # new_state.protocol_out.reply(:add_user_to_room, {member_id, room_name}, nil, new_state)
           [member_id | (new_state.room_member_cache[room_name] || [])]
         else
           new_state.room_member_cache[room_name] || []
@@ -667,6 +669,8 @@ defmodule Teiserver.Protocols.SpringOut do
       new_cache = Map.put(state.room_member_cache, room_name, new_members)
       %{new_state | room_member_cache: new_cache}
     end)
+
+    :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
 
     members =
       room.members
@@ -677,8 +681,6 @@ defmodule Teiserver.Protocols.SpringOut do
 
     reply(:channel_members, {members, room_name}, nil, state)
 
-    PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
-    :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
     state
   end
 

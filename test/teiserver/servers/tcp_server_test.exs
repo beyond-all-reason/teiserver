@@ -6,7 +6,7 @@ defmodule Teiserver.TcpServerTest do
   require Logger
 
   import Teiserver.TeiserverTestLib,
-    only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, auth_setup: 0]
+    only: [raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1, auth_setup: 0, new_user: 0]
 
   setup do
     Teiserver.Coordinator.start_coordinator()
@@ -289,6 +289,7 @@ defmodule Teiserver.TcpServerTest do
 
   test "dud users mode" do
     # Here we're testing if the user isn't even known
+    non_user = new_user()
     %{user: dud} = auth_setup()
     %{socket: socket, user: user} = auth_setup()
 
@@ -314,6 +315,13 @@ defmodule Teiserver.TcpServerTest do
     known = GenServer.call(pid, :get_state) |> Map.get(:known_users)
     assert Map.keys(known) == [coordinator_id, user.id]
 
+    # Now what if non_user is logged out (they were never logged in to start with)
+    send(pid, {:user_logged_out, non_user.id, non_user.name})
+    r = _recv_until(socket)
+    assert r == ""
+    known = GenServer.call(pid, :get_state) |> Map.get(:known_users)
+    assert Map.keys(known) == [coordinator_id, user.id]
+
     # Now what if we find a userid that they don't have?
     send(pid, {:user_logged_out, 0, "noname"})
     r = _recv_until(socket)
@@ -330,9 +338,12 @@ defmodule Teiserver.TcpServerTest do
 
     send(pid, {:add_user_to_room, dud.id, "roomname"})
     r = _recv_until(socket)
-    assert r =~ "ADDUSER #{dud.name}"
-    assert r =~ "\nCLIENTSTATUS #{dud.name}"
-    assert r =~ "\nJOINED roomname #{dud.name}\n"
+    assert r == "ADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nJOINED roomname #{dud.name}\n"
+
+    # Now the non-user, should be nothing since they're not actually logged in
+    send(pid, {:add_user_to_room, non_user.id, "roomname"})
+    r = _recv_until(socket)
+    assert r == ""
 
     # Leave chat room
     send(pid, {:user_logged_out, dud.id, dud.name})
@@ -341,30 +352,42 @@ defmodule Teiserver.TcpServerTest do
     r = _recv_until(socket)
     assert r == ""
 
+    # Now the non-user, should be nothing since they're not actually logged in
+    send(pid, {:remove_user_from_room, non_user.id, "roomname"})
+    r = _recv_until(socket)
+    assert r == ""
+
     # Send chat message
     send(pid, {:user_logged_out, dud.id, dud.name})
     _recv_until(socket)
     send(pid, {:direct_message, dud.id, "msgmsg"})
     r = _recv_until(socket)
-    assert r =~ "ADDUSER #{dud.name}"
-    assert r =~ "\nCLIENTSTATUS #{dud.name}"
-    assert r =~ "\nSAIDPRIVATE #{dud.name} msgmsg\n"
+    assert r == "ADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAIDPRIVATE #{dud.name} msgmsg\n"
 
     send(pid, {:user_logged_out, dud.id, dud.name})
     _recv_until(socket)
     send(pid, {:new_message, dud.id, "roomname", "msgmsg"})
     r = _recv_until(socket)
-    assert r =~ "ADDUSER #{dud.name}"
-    assert r =~ "\nCLIENTSTATUS #{dud.name}"
-    assert r =~ "\nSAID roomname #{dud.name} msgmsg\n"
+    assert r == "ADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAID roomname #{dud.name} msgmsg\n"
 
     send(pid, {:user_logged_out, dud.id, dud.name})
     _recv_until(socket)
     send(pid, {:new_message_ex, dud.id, "roomname", "msgmsg"})
     r = _recv_until(socket)
-    assert r =~ "ADDUSER #{dud.name}"
-    assert r =~ "\nCLIENTSTATUS #{dud.name}"
-    assert r =~ "\nSAIDEX roomname #{dud.name} msgmsg\n"
+    assert r == "ADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAIDEX roomname #{dud.name} msgmsg\n"
+
+    # Now the non-user, should be nothing since they're not actually logged in
+    send(pid, {:direct_message, non_user.id, "msgmsg"})
+    r = _recv_until(socket)
+    assert r == ""
+
+    send(pid, {:new_message, non_user.id, "roomname", "msgmsg"})
+    r = _recv_until(socket)
+    assert r == ""
+
+    send(pid, {:new_message_ex, non_user.id, "roomname", "msgmsg"})
+    r = _recv_until(socket)
+    assert r == ""
 
     # Join room stuff
     Room.get_or_make_room("dud_room", dud.id)
@@ -373,11 +396,9 @@ defmodule Teiserver.TcpServerTest do
     state = GenServer.call(pid, :get_state)
     _recv_until(socket)
 
+    # Join a room when we don't know about dud_user
     Teiserver.Protocols.SpringOut.do_join_room(state, "dud_room")
     r = _recv_until(socket)
-    assert r =~ "JOIN dud_room\nJOINED dud_room #{user.name}\nCHANNELTOPIC dud_room #{dud.name}\n"
-    assert r =~ "ADDUSER #{dud.name}"
-    assert r =~ "\nCLIENTSTATUS #{dud.name}"
-    assert r =~ "CLIENTS dud_room #{user.name} #{dud.name}\n"
+    assert r == "JOIN dud_room\nJOINED dud_room #{user.name}\nCHANNELTOPIC dud_room #{dud.name}\nADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nCLIENTS dud_room #{user.name} #{dud.name}\n"
   end
 end

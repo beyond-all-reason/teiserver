@@ -259,6 +259,8 @@ defmodule Teiserver.TeiserverTestLib do
       known_users: %{},
       known_battles: [],
       extra_logging: false,
+      print_client_messages: false,
+      print_server_messages: false,
       script_password: nil
     }
   end
@@ -290,6 +292,8 @@ defmodule Teiserver.TeiserverTestLib do
       known_users: %{},
       known_battles: [],
       extra_logging: false,
+      print_client_messages: false,
+      print_server_messages: false,
       script_password: nil
     }
   end
@@ -332,6 +336,8 @@ defmodule Teiserver.TeiserverTestLib do
       known_users: %{},
       known_battles: [],
       extra_logging: false,
+      print_client_messages: false,
+      print_server_messages: false,
       script_password: nil
     }
   end
