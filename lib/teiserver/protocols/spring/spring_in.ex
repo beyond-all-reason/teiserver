@@ -18,7 +18,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
-    if state.extra_logging do
+    if state.print_client_messages do
       if String.contains?(data, "c.user.get_token") or String.contains?(data, "LOGIN") do
         Logger.info("<-- #{state.username}: LOGIN/c.user.get_token")
       else
@@ -638,6 +638,7 @@ defmodule Teiserver.Protocols.SpringIn do
             reply(:join_failure, {room_name, reason}, msg_id, state)
         end
     end
+    :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
 
     state
   end
@@ -646,6 +647,7 @@ defmodule Teiserver.Protocols.SpringIn do
     PubSub.unsubscribe(Central.PubSub, "room:#{room_name}")
     reply(:left_room, {state.username, room_name}, msg_id, state)
     Room.remove_user_from_room(state.userid, room_name)
+    :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
     state
   end
 
@@ -820,6 +822,7 @@ defmodule Teiserver.Protocols.SpringIn do
           {:failure, "No match"}
       end
 
+    :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
     case response do
       {:waiting_on_host, script_password} ->
         %{state | script_password: script_password}
@@ -1132,12 +1135,15 @@ defmodule Teiserver.Protocols.SpringIn do
       PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{b}")
     end)
 
+    :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
     %{state | lobby_host: false}
   end
 
   defp do_handle("LEAVEBATTLE", _, _msg_id, state) do
     PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{state.lobby_id}")
     Lobby.remove_user_from_battle(state.userid, state.lobby_id)
+
+    :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
     %{state | lobby_host: false}
   end
 

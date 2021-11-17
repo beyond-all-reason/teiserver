@@ -108,6 +108,8 @@ defmodule Teiserver.TcpServer do
       known_users: %{},
       known_battles: [],
       extra_logging: Application.get_env(:central, Teiserver)[:extra_logging],
+      print_client_messages: false,
+      print_server_messages: false,
       script_password: nil,
       exempt_from_cmd_throttle: true,
       cmd_timestamps: []

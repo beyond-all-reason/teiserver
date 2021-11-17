@@ -44,7 +44,9 @@ defmodule Teiserver.User do
     :springid,
     :lobby_hash,
     :lobby_client,
-    :roles
+    :roles,
+    :print_client_messages,
+    :print_server_messages
   ]
   def data_keys(), do: @data_keys
 
@@ -66,7 +68,9 @@ defmodule Teiserver.User do
     shadowbanned: false,
     springid: nil,
     lobby_hash: [],
-    roles: []
+    roles: [],
+    print_client_messages: false,
+    print_server_messages: false
   }
 
   def default_data(), do: @default_data

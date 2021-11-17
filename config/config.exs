@@ -65,6 +65,7 @@ config :central, Teiserver,
   user_agreement: "User agreement goes here.",
   server_flag: "GB",
   post_login_delay: 100,
+  spring_post_state_change_delay: 100,
   use_geoip: true
 
 config :logger, :console,

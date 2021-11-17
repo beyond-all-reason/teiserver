@@ -108,6 +108,15 @@ defmodule Teiserver.Client do
       {:client_action, :client_connect, user.id}
     )
 
+    # Message logging
+    if user.print_client_messages do
+      enable_client_message_print(user.id)
+    end
+
+    if user.print_server_messages do
+      enable_server_message_print(user.id)
+    end
+
     # Lets give everything a chance to propagate
     :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
 
@@ -386,6 +395,50 @@ defmodule Teiserver.Client do
       client ->
         send(client.pid, {:put, :extra_logging, false})
         add_client(%{client | extra_logging: false})
+        :ok
+    end
+  end
+
+  @spec enable_client_message_print(T.userid()) :: :ok
+  def enable_client_message_print(userid) do
+    case get_client_by_id(userid) do
+      nil -> :ok
+      client ->
+        send(client.pid, {:put, :print_client_messages, true})
+        add_client(%{client | print_client_messages: true})
+        :ok
+    end
+  end
+
+  @spec disable_client_message_print(T.userid()) :: :ok
+  def disable_client_message_print(userid) do
+    case get_client_by_id(userid) do
+      nil -> :ok
+      client ->
+        send(client.pid, {:put, :print_client_messages, false})
+        add_client(%{client | print_client_messages: false})
+        :ok
+    end
+  end
+
+  @spec enable_server_message_print(T.userid()) :: :ok
+  def enable_server_message_print(userid) do
+    case get_client_by_id(userid) do
+      nil -> :ok
+      client ->
+        send(client.pid, {:put, :print_server_messages, true})
+        # add_client(%{client | print_server_messages: true})
+        :ok
+    end
+  end
+
+  @spec disable_server_message_print(T.userid()) :: :ok
+  def disable_server_message_print(userid) do
+    case get_client_by_id(userid) do
+      nil -> :ok
+      client ->
+        send(client.pid, {:put, :print_server_messages, false})
+        # add_client(%{client | print_server_messages: false})
         :ok
     end
   end
