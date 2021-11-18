@@ -674,8 +674,9 @@ defmodule Teiserver.Protocols.SpringOut do
 
     members =
       room.members
-      |> Enum.map(fn m -> User.get_username(m) end)
-      |> Enum.filter(fn n -> n != nil end)
+      |> Enum.map(fn member_id -> Client.get_client_by_id(member_id) end)
+      |> Enum.filter(fn c -> c != nil end)
+      |> Enum.map(fn client -> client.name end)
       |> List.insert_at(0, state.username)
       |> Enum.join(" ")
 

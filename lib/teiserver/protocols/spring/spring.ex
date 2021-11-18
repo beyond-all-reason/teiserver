@@ -166,6 +166,7 @@ defmodule Teiserver.Protocols.Spring do
   end
 
   @spec format_log(String.t()) :: String.t()
+  def format_log(nil), do: ""
   def format_log(s) do
     s
     |> String.trim()
