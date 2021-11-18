@@ -193,8 +193,13 @@ defmodule Teiserver.Protocols.SpringOut do
     }\t#{battle.map_name}\t#{battle.name}\t#{battle.game_name}\n"
   end
 
-  defp do_reply(:battle_opened, lobby_id) do
+  defp do_reply(:battle_opened, lobby_id) when is_integer(lobby_id) do
     do_reply(:battle_opened, Lobby.get_battle(lobby_id))
+  end
+
+  defp do_reply(:battle_opened, lobby_id) do
+    Logger.error("spring_out :battle_opened reply without map or integer of '#{Kernel.inspect lobby_id}'")
+    ""
   end
 
   defp do_reply(:open_battle_success, lobby_id) do
