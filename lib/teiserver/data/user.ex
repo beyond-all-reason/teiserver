@@ -255,11 +255,6 @@ defmodule Teiserver.User do
         :ok
 
       {:error, changeset} ->
-        Logger.error(
-          "Unable to create user with params #{Kernel.inspect(params)}\n#{
-            Kernel.inspect(changeset)
-          }"
-        )
         :error
     end
   end
@@ -296,11 +291,6 @@ defmodule Teiserver.User do
         :ok
 
       {:error, changeset} ->
-        Logger.error(
-          "Unable to create user with params #{Kernel.inspect(params)}\n#{
-            Kernel.inspect(changeset)
-          }"
-        )
         :error
     end
   end
@@ -343,7 +333,7 @@ defmodule Teiserver.User do
 
           {:error, changeset} ->
             Logger.error(
-              "Unable to create user with params #{Kernel.inspect(params)}\n#{
+              "Unable to create bot with params #{Kernel.inspect(params)}\n#{
                 Kernel.inspect(changeset)
               } in register_bot(#{bot_name}, #{bot_host_id})"
             )
