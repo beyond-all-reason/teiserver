@@ -184,7 +184,7 @@ defmodule Teiserver.User do
         {:failure, "Username already taken"}
 
       get_user_by_email(email) ->
-        {:failure, "User already exists"}
+        {:failure, "Email already in use"}
 
       true ->
         case do_register_user(name, email, password) do
