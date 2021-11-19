@@ -146,11 +146,9 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
         if not Enum.empty?(hashes) do
           banhash = hd(hashes)
-          # do_ban(userid, banhash)
-
           user = User.get_user_by_id(userid)
           Logger.error("BANHASH for lobby_hash #{banhash.id} - userid: #{userid}, name: #{user.name}, type: #{banhash.type}")
-          nil
+          do_ban(userid, banhash)
         else
           nil
         end
