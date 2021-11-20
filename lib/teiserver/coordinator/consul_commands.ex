@@ -449,8 +449,15 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       nil ->
         ConsulServer.say_command(%{cmd | error: "no user found"}, state)
       target_id ->
+        ban = new_ban(%{level: :spectator, by: cmd.senderid, reason: "forcespec"}, state)
+        new_bans = Map.put(state.bans, target_id, ban)
+
         Lobby.force_change_client(state.coordinator_id, target_id, %{player: false})
+
         ConsulServer.say_command(cmd, state)
+
+        %{state | bans: new_bans}
+        |> ConsulServer.broadcast_update("ban")
     end
   end
 
