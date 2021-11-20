@@ -605,7 +605,9 @@ defmodule Teiserver.Protocols.SpringOut do
     |> Enum.each(fn userid ->
       send(self(), {:user_logged_in, userid})
     end)
-    :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
+    if not state.exempt_from_cmd_throttle do
+      :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
+    end
 
     # Battle entry commands
     # Once we know this is stable we can consider optimising it to not
@@ -621,7 +623,9 @@ defmodule Teiserver.Protocols.SpringOut do
       |> Enum.each(fn player_id ->
         send(self(), {:add_user_to_battle, player_id, lobby_id, nil})
       end)
-      :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
+      if not state.exempt_from_cmd_throttle do
+        :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
+      end
     end)
 
     send(self(), {:action, {:login_end, nil}})
@@ -680,7 +684,9 @@ defmodule Teiserver.Protocols.SpringOut do
       %{new_state | room_member_cache: new_cache}
     end)
 
-    :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
+    if not state.exempt_from_cmd_throttle do
+      :timer.sleep(Application.get_env(:central, Teiserver)[:spring_post_state_change_delay])
+    end
 
     members =
       room.members

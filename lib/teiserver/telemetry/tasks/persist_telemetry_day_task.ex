@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
   use Oban.Worker, queue: :teiserver
-  alias Teiserver.Telemetry
+  alias Teiserver.{Telemetry, Battle}
   alias Central.NestedMaps
   alias Central.Account
 
@@ -459,5 +459,91 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
 
   defp add_maps(m1, m2) do
     Map.merge(m1, m2, fn _k, v1, v2 -> v1 + v2 end)
+  end
+
+  @match_blank_acc %{
+    counts: %{
+      total: 0,
+      pve: 0,
+      scavengers: 0,
+      chicken: 0,
+      bots: 0,
+      duel: 0,
+      team: 0,
+      ffa: 0,
+      team_ffa: 0,
+      passworded: 0
+    },
+
+    maps: %{},
+    team_sizes: %{},
+
+
+    # Temp values, we drop them later
+    duration_total: 0
+  }
+  @drop_keys [:duration_total]
+
+  # Teiserver.Telemetry.Tasks.PersistTelemetryDayTask.get_battles_from_day()
+  def get_battles_from_day() do
+    the_date = Timex.today()
+      |> Timex.shift(days: -3)
+      |> Timex.to_date()
+      |> Timex.to_datetime()
+
+    day_stats = Battle.list_matches(
+      search: [
+        inserted_after: the_date,
+        inserted_before: Timex.shift(the_date, days: 1)
+      ],
+      limit: :infinity
+    )
+    |> Enum.filter(fn match ->
+      match.started != nil and match.finished != nil
+    end)
+    |> Enum.reduce(@match_blank_acc, &add_match/2)
+
+    if day_stats.counts[:total] > 0 do
+      Map.merge(day_stats, %{
+        average_duration: round(day_stats.duration_total / day_stats.counts[:total])
+      })
+    else
+      day_stats
+    end
+    |> Map.drop(@drop_keys)
+  end
+
+  defp add_match(match, acc) do
+    # First, we increment the game count
+    game_type = case match.game_type do
+      "PvE" -> :pve
+      "Scavengers" -> :scavengers
+      "Chicken" -> :chicken
+      "Bots" -> :bots
+      "Duel" -> :duel
+      "Team" -> :team
+      "FFA" -> :ffa
+      "Team FFA" -> :team_ffa
+    end
+
+    acc = Map.put(acc, :counts, Map.put(acc.counts, :total, acc.counts[:total] + 1))
+    acc = Map.put(acc, :counts, Map.put(acc.counts, game_type, acc.counts[game_type] + 1))
+
+    # If passworded increment that too
+    acc = if match.passworded do
+      Map.put(acc, :counts, Map.put(acc.counts, :passworded, acc.counts[:passworded] + 1))
+    else
+      acc
+    end
+
+    # Now the maps
+    acc = Map.put(acc, :maps, Map.put(acc.maps, match.map, Map.get(acc.maps, match.map, 0)+1))
+
+    # Team size counts
+    acc = Map.put(acc, :team_sizes, Map.put(acc.team_sizes, match.team_size, Map.get(acc.team_sizes, match.team_size, 0)+1))
+
+    # Durations
+    duration = Timex.diff(match.finished, match.started, :second)
+    acc = Map.put(acc, :duration_total, acc.duration_total + duration)
   end
 end
