@@ -7,6 +7,9 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
   alias Central.Repo
   import Ecto.Query, warn: false
 
+  # Teiserver.Telemetry.list_telemetry_day_logs(order: "Newest first", limit: 5) |> Enum.each(fn l -> Teiserver.Telemetry.delete_telemetry_day_log(l) end)
+  # Teiserver.Telemetry.Tasks.PersistTelemetryDayTask.perform(nil)
+
   @log_keep_days 90
   @segment_length 60# Minutes
   @segment_count div(1440, @segment_length)-1
@@ -173,6 +176,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
       extend_segment(segment, logs)
     end)
     |> calculate_day_statistics(date)
+    |> add_matches(date)
 
     if cleanup do
       clean_up_logs(date)
@@ -418,24 +422,6 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
     end)
   end
 
-  # defp make_enum(items, path, extra_item \\ nil) do
-  #   result = items
-  #   |> Enum.reduce([], fn (row, acc) ->
-  #     item = NestedMaps.get(row, path)
-  #     if item do
-  #       acc ++ [item]
-  #     else
-  #       acc
-  #     end
-  #   end)
-
-  #   if extra_item != nil do
-  #     result ++ [extra_item]
-  #   else
-  #     result
-  #   end
-  # end
-
   defp max_counts(items, path) do
     items
     |> Enum.reduce(0, fn (row, acc) ->
@@ -477,40 +463,60 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
 
     maps: %{},
     team_sizes: %{},
-
+    durations: %{},
 
     # Temp values, we drop them later
-    duration_total: 0
+    match_durations: []
   }
-  @drop_keys [:duration_total]
+  @drop_keys [:match_durations]
 
-  # Teiserver.Telemetry.Tasks.PersistTelemetryDayTask.get_battles_from_day()
-  def get_battles_from_day() do
-    the_date = Timex.today()
-      |> Timex.shift(days: -3)
-      |> Timex.to_date()
-      |> Timex.to_datetime()
+  defp add_matches(stats, date) do
+    Map.put(stats, :matches, get_matches_from_day(date))
+  end
 
-    day_stats = Battle.list_matches(
+  @spec get_matches_from_day(%Date{}) :: map()
+  defp get_matches_from_day(the_date) do
+    the_date = Timex.to_datetime(the_date)
+
+    Battle.list_matches(
       search: [
         inserted_after: the_date,
         inserted_before: Timex.shift(the_date, days: 1)
       ],
+      preload: [:members],
       limit: :infinity
     )
     |> Enum.filter(fn match ->
       match.started != nil and match.finished != nil
     end)
     |> Enum.reduce(@match_blank_acc, &add_match/2)
-
-    if day_stats.counts[:total] > 0 do
-      Map.merge(day_stats, %{
-        average_duration: round(day_stats.duration_total / day_stats.counts[:total])
-      })
-    else
-      day_stats
-    end
+    |> second_pass
     |> Map.drop(@drop_keys)
+    |> IO.inspect
+  end
+
+  defp second_pass(%{counts: %{total: 0}} = stats), do: stats
+  defp second_pass(stats) do
+    durations = stats.match_durations
+
+    Map.merge(stats, %{
+      durations: %{
+        total: Enum.sum(durations),
+        average: round(Enum.sum(durations) / stats.counts[:total]),
+        above_5: Enum.filter(durations, fn d -> d > (5 * 60) end) |> Enum.count,
+        above_10: Enum.filter(durations, fn d -> d > (10 * 60) end) |> Enum.count,
+        above_15: Enum.filter(durations, fn d -> d > (15 * 60) end) |> Enum.count,
+        above_20: Enum.filter(durations, fn d -> d > (20 * 60) end) |> Enum.count,
+        above_25: Enum.filter(durations, fn d -> d > (25 * 60) end) |> Enum.count,
+        above_30: Enum.filter(durations, fn d -> d > (30 * 60) end) |> Enum.count,
+        above_35: Enum.filter(durations, fn d -> d > (35 * 60) end) |> Enum.count,
+        above_40: Enum.filter(durations, fn d -> d > (40 * 60) end) |> Enum.count,
+        above_45: Enum.filter(durations, fn d -> d > (45 * 60) end) |> Enum.count,
+        above_50: Enum.filter(durations, fn d -> d > (50 * 60) end) |> Enum.count,
+        above_55: Enum.filter(durations, fn d -> d > (55 * 60) end) |> Enum.count,
+        above_60: Enum.filter(durations, fn d -> d > (60 * 60) end) |> Enum.count,
+      }
+    })
   end
 
   defp add_match(match, acc) do
@@ -544,6 +550,30 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
 
     # Durations
     duration = Timex.diff(match.finished, match.started, :second)
-    acc = Map.put(acc, :duration_total, acc.duration_total + duration)
+    acc = Map.put(acc, :match_durations, [duration | acc.match_durations])
+
+    # Skill
+    # skills = get_match_skill(match)
+
+
+
+    acc
   end
+
+  # defp get_match_skill(%{tags: tags, members: members} = match) do
+  #   member_ids = members
+  #   |> Enum.map(fn m -> m.user_id end)
+
+  #   tags
+  #   |> Enum.filter(fn {k, _v} ->
+  #     String.starts_with?(k, "game/players/") and String.ends_with?(k, "/skill")
+  #   end)
+  #   |> Enum.filter(fn {k, _v} ->
+  #     userid = k |> String.replace("game/players/", "") |> String.replace("/skill", "") |> User.get_userid()
+  #     Enum.member?(member_ids, userid)
+  #   end)
+  #   |> Enum.map(fn {_, v} ->
+  #     String.to_float(v)
+  #   end)
+  # end
 end

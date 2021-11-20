@@ -65,12 +65,14 @@
         </a>
       </li>
 
-      <li>
-        <a href="#battle_tab" role="tab" class="nav-link" data-toggle="tab">
-          <i class="far fa-fw fa-chart-pie"></i>
-          Battle data
-        </a>
-      </li>
+      <%= if Map.has_key?(@data, "matches") do %>
+        <li>
+          <a href="#match_tab" role="tab" class="nav-link" data-toggle="tab">
+            <i class="far fa-fw fa-chart-pie"></i>
+            Match data
+          </a>
+        </li>
+      <% end %>
     </ul>
 
     <div class="tab-content">
@@ -86,9 +88,11 @@
         <%= render "tab_user.html", assigns %>
       </div>
 
-      <div class="tab-pane" id="battle_tab" style="padding:5px;">
-        <%= render "tab_battle.html", assigns %>
-      </div>
+      <%= if Map.has_key?(@data, "matches") do %>
+        <div class="tab-pane" id="match_tab" style="padding:5px;">
+          <%= render "tab_match.html", assigns %>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>

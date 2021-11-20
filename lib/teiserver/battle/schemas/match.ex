@@ -21,6 +21,8 @@ defmodule Teiserver.Battle.Match do
     field :started, :utc_datetime
     field :finished, :utc_datetime
 
+    has_many :members, Teiserver.Battle.MatchMembership
+
     timestamps()
   end
 

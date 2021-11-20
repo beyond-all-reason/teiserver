@@ -19,6 +19,13 @@ defmodule TeiserverWeb.Report.MetricView do
     time_until(until, now)
   end
 
+  def represent_seconds(nil), do: ""
+  def represent_seconds(s) do
+    now = Timex.now()
+    until = Timex.shift(now, seconds: s)
+    time_until(until, now)
+  end
+
   def round(value, decimal_places) do
     dp_mult = :math.pow(10, decimal_places)
     round(value * dp_mult)/dp_mult
