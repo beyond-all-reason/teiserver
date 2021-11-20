@@ -12,7 +12,6 @@ defmodule Teiserver.Battle.MatchLib do
       |> Enum.max
 
     cond do
-      String.contains?(bot_names, "ScavengersAI") and String.contains?(bot_names, "Chicken") -> "PvE"
       String.contains?(bot_names, "ScavengersAI") -> "Scavengers"
       String.contains?(bot_names, "Chicken") -> "Chicken"
       Enum.empty?(lobby.bots) == false -> "Bots"
@@ -70,6 +69,10 @@ defmodule Teiserver.Battle.MatchLib do
     {tag, %{
       finished: Timex.now()
     }}
+  end
+
+  def post_stop_calculations(match_id) do
+
   end
 
   # Functions

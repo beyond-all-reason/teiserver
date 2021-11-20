@@ -1,0 +1,2 @@
+<h4>Raw data</h4>
+<textarea rows="30" class="form-control monospace"><%= Jason.encode! @data, pretty: true %></textarea>

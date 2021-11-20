@@ -43,11 +43,6 @@
       label: "Chickens",
       value: format_number matches["counts"]["chicken"]
     %>
-
-    <%= central_component "detail_line",
-      label: "PvE",
-      value: format_number matches["counts"]["pve"]
-    %>
   </div>
 
   <div class="col-md-6">

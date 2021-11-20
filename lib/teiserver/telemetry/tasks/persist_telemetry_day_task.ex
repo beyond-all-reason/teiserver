@@ -450,7 +450,6 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
   @match_blank_acc %{
     counts: %{
       total: 0,
-      pve: 0,
       scavengers: 0,
       chicken: 0,
       bots: 0,
@@ -522,7 +521,6 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
   defp add_match(match, acc) do
     # First, we increment the game count
     game_type = case match.game_type do
-      "PvE" -> :pve
       "Scavengers" -> :scavengers
       "Chicken" -> :chicken
       "Bots" -> :bots
