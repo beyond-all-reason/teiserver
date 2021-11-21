@@ -76,20 +76,20 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
     )
     |> Enum.each(&delete_match/1)
 
-    Battle.list_matches(search: [
-        inserted_before: Timex.shift(Timex.now(), days: -14)
-      ],
-      limit: :infinity)
-    |> Enum.each(fn match ->
-      duration = Timex.diff(match.finished, match.started, :second)
+    # Battle.list_matches(search: [
+    #     inserted_before: Timex.shift(Timex.now(), days: -14)
+    #   ],
+    #   limit: :infinity)
+    # |> Enum.each(fn match ->
+    #   duration = Timex.diff(match.finished, match.started, :second)
 
-      cond do
-        duration < 300 ->
-          delete_match(match)
-        true ->
-          Battle.update_match(match, %{"tags" => %{}})
-      end
-    end)
+    #   cond do
+    #     duration < 300 ->
+    #       delete_match(match)
+    #     true ->
+    #       Battle.update_match(match, %{"tags" => %{}})
+    #   end
+    # end)
   end
 
   defp delete_match(match) do
