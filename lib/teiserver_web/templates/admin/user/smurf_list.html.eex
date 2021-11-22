@@ -54,6 +54,7 @@
     <tr>
       <th colspan="2">Name</th>
       <%= if false and is_admin do %><th>Email</th><% end %>
+      <th>Status</th>
       <th style="text-align:center;" width="120">Hash</th>
       <th style="text-align:center;" width="120">Hardware</th>
       <th>&nbsp;</th>
@@ -73,6 +74,66 @@
       </td>
       <td><%= user.name %></td>
       <%= if false and is_admin do %><td><%= user.email %></td><% end %>
+
+      <td>
+        <%
+          unverified = user.data["verified"] != true
+
+          banned = case (user.data["banned"] || nil) do
+            [true, _] -> true
+            _ -> false
+          end
+
+          muted = case (user.data["muted"] || nil) do
+            [true, _] -> true
+            _ -> false
+          end
+
+          warned = case (user.data["warned"] || nil) do
+            [true, _] -> true
+            _ -> false
+          end
+
+          until = cond do
+            banned -> user.data["banned"] |> List.last()
+            muted -> user.data["muted"] |> List.last()
+            warned -> user.data["warned"] |> List.last()
+            true -> nil
+          end
+        %>
+
+        <%= cond do %>
+          <% banned -> %>
+            <i class='fa-fw text-danger <%= Central.Account.ReportLib.action_icon("Ban") %>'></i>
+            <%= if until do %>
+              <%= until %>
+            <% else %>
+              <i class='fa-fw far fa-infinity'></i>
+            <% end %>
+
+          <% muted -> %>
+            <i class='fa-fw text-danger <%= Central.Account.ReportLib.action_icon("Mute") %>'></i>
+            <%= if until do %>
+              <%= until %>
+            <% else %>
+              <i class='fa-fw far fa-infinity'></i>
+            <% end %>
+
+          <% warned -> %>
+            <i class='fa-fw text-warning <%= Central.Account.ReportLib.action_icon("Warn") %>'></i>
+            <%= if until do %>
+              <%= until %>
+            <% else %>
+              <i class='fa-fw far fa-infinity'></i>
+            <% end %>
+
+          <% unverified -> %>
+            <i class='fa-fw text-info fas fa-square-question'></i>
+
+          <% true -> %>
+            &nbsp;
+        <% end %>
+      </td>
 
       <td style="text-align: center">
         <%= if Enum.member?(@reasons.hash, user.id) do %>

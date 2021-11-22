@@ -66,6 +66,8 @@ defmodule Central.MixProject do
       {:bamboo_smtp, "~> 4.0"},
       {:phoenix_pubsub, "~> 2.0"},
       {:elixir_uuid, "~> 1.2"},
+      {:statistics, "~> 0.6.2"},
+
       {:excoveralls, "~> 0.14.1", only: :test},
       {:credo, "~> 1.5.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev], runtime: false},

@@ -2,6 +2,7 @@ defmodule Teiserver.Battle.MatchLib do
   use CentralWeb, :library
   alias Teiserver.Client
   alias Teiserver.Battle.{Match, Lobby}
+  alias Teiserver.Data.Types, as: T
 
   def game_type(lobby, teams) do
     bot_names = Map.keys(lobby.bots)
@@ -63,16 +64,13 @@ defmodule Teiserver.Battle.MatchLib do
     {match, members}
   end
 
+  @spec stop_match(T.lobby_id()) :: {String.t(), %{finished: DateTime.t()}}
   def stop_match(lobby_id) do
     lobby = Lobby.get_battle!(lobby_id)
     tag = lobby.tags["server/match/uuid"]
     {tag, %{
       finished: Timex.now()
     }}
-  end
-
-  def post_stop_calculations(match_id) do
-
   end
 
   # Functions
@@ -134,6 +132,13 @@ defmodule Teiserver.Battle.MatchLib do
   def _search(query, :id_list, id_list) do
     from matches in query,
       where: matches.id in ^id_list
+  end
+
+  def _search(query, :ready_for_post_process, _) do
+    from matches in query,
+      where: is_nil(matches.data),
+      where: not is_nil(matches.finished),
+      where: not is_nil(matches.started)
   end
 
   def _search(query, :simple_search, ref) do
