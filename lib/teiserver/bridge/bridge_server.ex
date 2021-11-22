@@ -49,6 +49,9 @@ defmodule Teiserver.Bridge.BridgeServer do
         # Non-bridged user, ignore it
         nil
 
+      Config.get_site_config_cache("teiserver.Bridge from server") == false ->
+        nil
+
       Map.has_key?(state.rooms, room_name) ->
         message = if is_list(message), do: Enum.join(message, "\n"), else: message
 

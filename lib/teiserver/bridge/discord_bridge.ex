@@ -2,6 +2,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
   # use Alchemy.Cogs
   use Alchemy.Events
   alias Teiserver.{Account, Room}
+  alias Central.Config
   alias Central.Account.ReportLib
   alias Central.Helpers.TimexHelper
   alias Teiserver.Bridge.BridgeServer
@@ -53,6 +54,9 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
       dm_sender != nil ->
         receive_dm(message)
+
+      Config.get_site_config_cache("teiserver.Bridge from discord") == false ->
+        nil
 
       room == nil ->
         nil
@@ -129,7 +133,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
           "Permanent"
         end
 
-        msg = "#{report.target.name} was #{past_tense} by #{report.responder.name} for reason #{report.reason}, #{until}"
+        msg = "#{report.target.name} was #{past_tense} by #{report.responder.name} for reason #{report.response_text}, #{until}"
 
         Alchemy.Client.send_message(
           chan,

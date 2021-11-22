@@ -26,6 +26,26 @@ defmodule Teiserver.Startup do
       default: false
     })
 
+    add_site_config_type(%{
+      key: "teiserver.Bridge from discord",
+      section: "Discord",
+      type: "boolean",
+      permissions: ["teiserver.moderator"],
+      description: "Enables bridging from discord to in-lobby channels",
+      opts: [],
+      default: true
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Bridge from server",
+      section: "Discord",
+      type: "boolean",
+      permissions: ["teiserver.moderator"],
+      description: "Enables bridging from in-lobby channels to discord",
+      opts: [],
+      default: true
+    })
+
     umbrella_group =
       case Central.Account.get_group(nil, search: [name: "Teiserver umbrella group"]) do
         nil ->
@@ -134,9 +154,13 @@ defmodule Teiserver.Startup do
       %{
         label: "Teiserver users",
         icons: [Teiserver.ClientLib.icon(), :list],
+        input: "s",
+        method: "get",
+        placeholder: "Search username",
         url: "/teiserver/admin/users/search",
         permissions: "teiserver.moderator"
       },
+
       # %{label: "Parties", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/admin/parties", permissions: "teiserver.moderator"},
       %{
         label: "Clan admin",

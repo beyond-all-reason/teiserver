@@ -261,7 +261,8 @@ defmodule Central.Config do
         nil ->
           default = get_site_config_default(key)
           cast_site_config_value(key, default)
-        config -> cast_site_config_value(key, config.value)
+        config ->
+          cast_site_config_value(key, config.value)
       end
     end)
   end
@@ -385,7 +386,7 @@ defmodule Central.Config do
 
     case type.type do
       "integer" -> Central.Helpers.NumberHelper.int_parse(value)
-      "boolean" -> if value == "true", do: true, else: false
+      "boolean" -> if value == "true" or value == true, do: true, else: false
       "select" -> value
       "string" -> value
     end
