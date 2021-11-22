@@ -8,14 +8,4 @@
       link: Routes.ts_general_general_path(@conn, :index)
     %>
   <% end %>
-
-  <%= if allow?(@current_user, "teiserver.moderator") do %>
-    <%=
-      central_component "menu_card",
-      icon: "fad fa-gauge",
-      name: "ts_console",
-      text: "TS Dashboard",
-      link: Routes.ts_admin_dash_index_path(@conn, :index)
-    %>
-  <% end %>
 </div>

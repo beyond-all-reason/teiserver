@@ -42,8 +42,8 @@
         id: "search_mode",
         selected: @params["mode"],
         enumerable: [
-          %{id: "Room", icon: Central.Communication.CommentLib.icon(), colour: fg},
           %{id: "Lobby", icon: Teiserver.Battle.LobbyLib.icon(), colour: fg},
+          %{id: "Room", icon: Central.Communication.CommentLib.icon(), colour: fg},
         ]
       } %>
     </div>

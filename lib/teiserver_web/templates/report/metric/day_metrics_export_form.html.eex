@@ -17,7 +17,7 @@
         <form action='<%= Routes.ts_reports_metric_path(@conn, :day_metrics_export_post) %>' method='post' class=''>
           <input type='hidden' name='_csrf_token' value='<%= get_csrf_token() %>' />
 
-          <div class="row" style="display: none;">
+          <div class="row">
             <div class="col-md-4 col-xl-2 search-form-input">
               <label for="report_date_preset" class="control-label">Date range:</label>
               <%= select :report, :date_preset, @presets, class: "form-control", selected: @params["date_preset"] %>

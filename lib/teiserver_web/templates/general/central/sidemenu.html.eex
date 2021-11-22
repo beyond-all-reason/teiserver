@@ -8,15 +8,4 @@
   %>
 <% end %>
 
-<%= if allow?(@conn, "teiserver.moderator") do %>
-  <%= central_component "sidemenu_item",
-    name: "teiserver_admin",
-    label: "Teiserver Admin",
-    active: assigns[:sidemenu_active],
-    lib: Central.Admin.AdminLib,
-    icon_class: "fad",
-    url: Routes.ts_admin_general_path(@conn, :index)
-  %>
-<% end %>
-
 <li style='height: 5px; border-bottom: 1px solid #DDD;'>&nbsp;</li>
