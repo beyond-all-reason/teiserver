@@ -203,6 +203,13 @@ defmodule Teiserver.Client do
     ConCache.get(:clients, userid)
   end
 
+  def get_client_by_pid(pid) do
+    list_clients()
+    |> Enum.filter(fn client ->
+      client.pid == pid
+    end)
+  end
+
   @spec get_clients(List.t()) :: List.t()
   def get_clients([]), do: []
 
