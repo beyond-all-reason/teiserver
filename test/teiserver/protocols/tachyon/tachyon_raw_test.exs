@@ -82,7 +82,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     data = %{cmd: "c.auth.register", username: "test_name", email: existing_user.email, password: "password"}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.auth.register", "result" => "failure", "reason" => "User already exists"}
+    assert reply == %{"cmd" => "s.auth.register", "result" => "failure", "reason" => "Email already in use"}
 
     # Now a good one
     name = new_user_name()

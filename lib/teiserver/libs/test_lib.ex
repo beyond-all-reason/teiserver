@@ -261,6 +261,7 @@ defmodule Teiserver.TeiserverTestLib do
       extra_logging: false,
       print_client_messages: false,
       print_server_messages: false,
+      exempt_from_cmd_throttle: true,
       script_password: nil
     }
   end
@@ -294,6 +295,7 @@ defmodule Teiserver.TeiserverTestLib do
       extra_logging: false,
       print_client_messages: false,
       print_server_messages: false,
+      exempt_from_cmd_throttle: true,
       script_password: nil
     }
   end
@@ -338,6 +340,7 @@ defmodule Teiserver.TeiserverTestLib do
       extra_logging: false,
       print_client_messages: false,
       print_server_messages: false,
+      exempt_from_cmd_throttle: true,
       script_password: nil
     }
   end
