@@ -5,6 +5,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   use GenServer
   alias Teiserver.{Account, Room, User}
   alias Phoenix.PubSub
+  alias Central.Config
   require Logger
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
