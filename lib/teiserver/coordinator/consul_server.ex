@@ -12,7 +12,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib}
 
-  @always_allow ~w(status help y n follow)
+  @always_allow ~w(status help y n follow joinq leaveq)
   @host_commands ~w(gatekeeper welcome-message specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
@@ -105,6 +105,16 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     {:noreply, state}
+  end
+
+  def handle_info({:dequeue_user, userid}, state) do
+    new_queue = state.join_queue |> List.delete(userid)
+    {:noreply, %{state | join_queue: new_queue}}
+  end
+
+  def handle_info({:user_left, userid}, state) do
+    new_queue = state.join_queue |> List.delete(userid)
+    {:noreply, %{state | join_queue: new_queue}}
   end
 
   def handle_info(:cancel_split, state) do
@@ -203,13 +213,21 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end)
 
     # Now we apply modifiers (unready = spec)
-    cond do
+    {change, new_status} = cond do
       list_status != :player and new_client.player == true -> {false, nil}
       new_client.ready == false and new_client.player == true ->
         LobbyChat.sayprivateex(state.coordinator_id, userid, "You have been spec'd as you are unready. Please disable auto-unready in your lobby settings to prevent this from happening.", state.lobby_id)
         {true, %{new_client | player: false}}
       true -> {true, new_client}
     end
+
+    # If they are moving from player to spectator, call this!
+    if existing.player == true and new_status.player == false do
+      player_count_changed(state)
+    end
+
+    # Now actually return the result
+    {change, new_status}
   end
 
 
@@ -327,6 +345,23 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
+  defp player_count_changed(%{join_queue: []} = state), do: state
+  defp player_count_changed(%{join_queue: join_queue} = state) do
+    [userid | new_queue] = join_queue
+
+    existing = Client.get_client_by_id(userid)
+    new_client = Map.merge(existing, %{player: true, ready: true})
+    case request_user_change_status(new_client, existing, state) do
+      {true, allowed_client} ->
+        send(self(), {:dequeue_user, userid})
+        Client.update(allowed_client, :client_updated_battlestatus)
+      {false, _} ->
+        :ok
+    end
+
+    %{state | join_queue: new_queue}
+  end
+
   @spec get_user(String.t() | integer(), Map.t()) :: integer() | nil
   def get_user(id, _) when is_integer(id), do: id
   def get_user("", _), do: nil
@@ -400,6 +435,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       timeouts: %{},
       split: nil,
       welcome_message: nil,
+      join_queue: [],
     }
   end
 

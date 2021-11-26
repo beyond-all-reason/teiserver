@@ -6,8 +6,14 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
     """
 Commands
 ##### For everybody #####
+joinq
+  Adds you to the queue to join when a space opens up, you will be automatically added to the game as a player. If already a member it has no effect.
+
+leaveq
+  Removes you from the join queue.
+
 TODO: status
-    status info about the battle lobby
+  status info about the battle lobby
 
 TODO: help
   displays this help text

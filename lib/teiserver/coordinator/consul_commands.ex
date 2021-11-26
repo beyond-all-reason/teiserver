@@ -110,6 +110,27 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+  def handle_command(%{command: "joinq", senderid: senderid} = cmd, state) do
+    new_state = case Enum.member?(state.join_queue, senderid) do
+      false ->
+        new_queue = state.join_queue ++ [senderid]
+
+        %{state | join_queue: new_queue}
+      true ->
+        state
+    end
+
+    ConsulServer.say_command(cmd, new_state)
+  end
+
+  def handle_command(%{command: "leaveq", senderid: senderid} = cmd, state) do
+    new_queue = List.delete(state.join_queue, senderid)
+    new_state = %{state | join_queue: new_queue}
+
+    ConsulServer.say_command(cmd, new_state)
+  end
+
+
   #################### Host and Moderator
   def handle_command(%{command: "gatekeeper", remaining: mode} = cmd, state) do
     state = case mode do

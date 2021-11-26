@@ -157,8 +157,8 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert reply["lobby"]["id"] == lobby_id
   end
 
-  # settag
-  # modwarn
+  # TODO: settag
+  # TODO: modwarn
 
   # Broken since we now propogate the action via the hook server which breaks in tests
   test "modban", %{lobby_id: lobby_id, host: host, hsocket: hsocket, player: player, listener: listener} do
@@ -348,7 +348,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert reply["message"] == ["Command list can currently be found at https://github.com/beyond-all-reason/teiserver/blob/master/lib/teiserver/coordinator/coordinator_lib.ex"]
   end
 
-  test "test passthrough", %{lobby_id: lobby_id, host: host, hsocket: hsocket, listener: listener} do
+  test "passthrough", %{lobby_id: lobby_id, host: host, hsocket: hsocket, listener: listener} do
     data = %{cmd: "c.lobby.message", message: "$non-existing command"}
     _tachyon_send(hsocket, data)
 
@@ -357,5 +357,71 @@ defmodule Teiserver.Coordinator.CommandsTest do
 
     reply = _tachyon_recv(hsocket)
     assert reply == :timeout
+  end
+
+  test "join_queue", %{lobby_id: lobby_id} do
+    # At the moment we are hard coding the join queue to 8v8s until we
+    # add something to get the player count limit
+    ps1 = tachyon_auth_setup()
+    ps2 = tachyon_auth_setup()
+    ps3 = tachyon_auth_setup()
+    ps4 = tachyon_auth_setup()
+    ps5 = tachyon_auth_setup()
+    ps6 = tachyon_auth_setup()
+    ps7 = tachyon_auth_setup()
+    ps8 = tachyon_auth_setup()
+    ps9 = tachyon_auth_setup()
+    ps10 = tachyon_auth_setup()
+    ps11 = tachyon_auth_setup()
+    ps12 = tachyon_auth_setup()
+    ps13 = tachyon_auth_setup()
+    ps14 = tachyon_auth_setup()
+    ps15 = tachyon_auth_setup()
+    ps16 = tachyon_auth_setup()
+
+    %{user: player17, socket: socket17} = tachyon_auth_setup()
+    %{user: player18, socket: socket18} = tachyon_auth_setup()
+    %{user: player19, socket: socket19} = tachyon_auth_setup()
+
+    [ps1, ps2, ps3, ps4, ps5, ps6, ps7, ps8, ps9, ps10, ps11, ps12, ps13, ps14, ps15, ps16]
+    |> Enum.each(fn %{user: user, socket: socket} ->
+      Lobby.force_add_user_to_battle(user.id, lobby_id)
+      _tachyon_send(socket, %{cmd: "c.lobby.update_status", player: true, ready: true})
+    end)
+
+    Lobby.force_add_user_to_battle(player17.id, lobby_id)
+    Lobby.force_add_user_to_battle(player18.id, lobby_id)
+    Lobby.force_add_user_to_battle(player19.id, lobby_id)
+
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == []
+
+    # # Add to the queue
+    _tachyon_send(socket17, %{cmd: "c.lobby.message", message: "$joinq"})
+    _tachyon_send(socket18, %{cmd: "c.lobby.message", message: "$joinq"})
+    _tachyon_send(socket19, %{cmd: "c.lobby.message", message: "$joinq"})
+
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == [player17.id, player18.id, player19.id]
+
+    # Now leave the queue
+    _tachyon_send(socket18, %{cmd: "c.lobby.message", message: "$leaveq"})
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == [player17.id, player19.id]
+
+    # And the battle
+    _tachyon_send(socket19, %{cmd: "c.lobby.leave"})
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == [player17.id]
+
+    # Now we need one of the players to become a spectator and open up a slot!
+    assert Client.get_client_by_id(player17.id).player == false
+    _tachyon_send(ps1.socket, %{cmd: "c.lobby.update_status", player: false})
+
+    :timer.sleep(50)
+
+    assert Client.get_client_by_id(player17.id).player == true
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == []
   end
 end

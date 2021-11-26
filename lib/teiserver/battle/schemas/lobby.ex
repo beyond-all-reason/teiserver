@@ -280,6 +280,8 @@ defmodule Teiserver.Battle.Lobby do
         nil
 
       :removed ->
+        Coordinator.cast_consul(lobby_id, {:user_left, userid})
+
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_client_messages:#{userid}",
@@ -315,6 +317,8 @@ defmodule Teiserver.Battle.Lobby do
           nil
 
         :removed ->
+          Coordinator.cast_consul(lobby_id, {:user_left, userid})
+
           PubSub.broadcast(
             Central.PubSub,
             "legacy_all_battle_updates",
