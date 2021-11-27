@@ -15,6 +15,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       senderid: userid
     }
   """
+  @split_delay 30_000
   @spec handle_command(Map.t(), Map.t()) :: Map.t()
   @default_ban_reason "Banned"
 
@@ -43,7 +44,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "splitlobby", senderid: senderid} = cmd, %{split: nil} = state) do
     sender_name = User.get_username(senderid)
-    LobbyChat.sayex(state.coordinator_id, "#{sender_name} is moving to a new lobby, to follow them say $y. If you want to follow someone else then say $follow <name> and you will follow that user. The split will take place in 15 seconds, you can change your mind at any time. Say $n to cancel your decision and stay here.", state.lobby_id)
+    LobbyChat.sayex(state.coordinator_id, "#{sender_name} is moving to a new lobby, to follow them say $y. If you want to follow someone else then say $follow <name> and you will follow that user. The split will take place in #{round(@split_delay/1_000)} seconds, you can change your mind at any time. Say $n to cancel your decision and stay here.", state.lobby_id)
 
     LobbyChat.sayprivateex(state.coordinator_id, senderid, "Splitlobby sequence started. If you stay in this lobby you will be moved to a random empty lobby. If you choose a lobby yourself then anybody ", state.lobby_id)
 
@@ -57,7 +58,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     Logger.warn("Started split lobby #{Kernel.inspect new_split}")
 
-    :timer.send_after(20_000, {:do_split, split_uuid})
+    :timer.send_after(@split_delay, {:do_split, split_uuid})
     ConsulServer.say_command(cmd, state)
     %{state | split: new_split}
   end

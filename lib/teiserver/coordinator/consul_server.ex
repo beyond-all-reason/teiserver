@@ -8,7 +8,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.{Coordinator, Client, User, Battle}
   alias Teiserver.Battle.{Lobby, LobbyChat}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  # alias Phoenix.PubSub
+  alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib}
 
@@ -182,6 +182,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
+  def handle_info({:lobby_update, :updated_client_status, _lobby_id, {_userid, _reason}}, state) do
+    player_count_changed(state)
+    {:noreply, state}
+  end
+
+  def handle_info({:lobby_update, _, _, _}, state), do: {:noreply, state}
+
   # Says if a status change is allowed to happen. If it is then an allowed status
   # is included with it.
   @spec request_user_change_status(T.client(), map()) :: {boolean, Map.t() | nil}
@@ -219,6 +226,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
         LobbyChat.sayprivateex(state.coordinator_id, userid, "You have been spec'd as you are unready. Please disable auto-unready in your lobby settings to prevent this from happening.", state.lobby_id)
         {true, %{new_client | player: false}}
       true -> {true, new_client}
+    end
+
+    # Take into account if they are waiting to join
+    # if they are not waiting to join and someone else is then
+    {change, new_status} = cond do
+      Enum.empty?(state.join_queue) ->
+        {change, new_status}
+
+      not Enum.member?(state.join_queue, userid) and new_client.player == true ->
+        {false, nil}
+
+      true ->
+        {change, new_status}
     end
 
     # If they are moving from player to spectator, call this!
@@ -345,21 +365,29 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  defp player_count_changed(%{join_queue: []} = state), do: state
+  defp player_count_changed(%{join_queue: []} = _state), do: nil
   defp player_count_changed(%{join_queue: join_queue} = state) do
-    [userid | new_queue] = join_queue
+    if get_player_count(state) < 16 do
+      [userid | _new_queue] = join_queue
 
-    existing = Client.get_client_by_id(userid)
-    new_client = Map.merge(existing, %{player: true, ready: true})
-    case request_user_change_status(new_client, existing, state) do
-      {true, allowed_client} ->
-        send(self(), {:dequeue_user, userid})
-        Client.update(allowed_client, :client_updated_battlestatus)
-      {false, _} ->
-        :ok
+      existing = Client.get_client_by_id(userid)
+      new_client = Map.merge(existing, %{player: true, ready: true})
+      case request_user_change_status(new_client, existing, state) do
+        {true, allowed_client} ->
+          send(self(), {:dequeue_user, userid})
+          Client.update(allowed_client, :client_updated_battlestatus)
+        {false, _} ->
+          :ok
+      end
     end
+  end
 
-    %{state | join_queue: new_queue}
+  defp get_player_count(state) do
+    lobby = Lobby.get_lobby!(state.lobby_id)
+    lobby.players
+    |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
+    |> Enum.filter(fn client -> client.player == true end)
+    |> Enum.count
   end
 
   @spec get_user(String.t() | integer(), Map.t()) :: integer() | nil
@@ -446,6 +474,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
     lobby_id = opts[:lobby_id]
+
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
 
     # Update the queue pids cache to point to this process
     ConCache.put(:teiserver_consul_pids, lobby_id, self())

@@ -359,7 +359,10 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert reply == :timeout
   end
 
-  test "join_queue", %{lobby_id: lobby_id} do
+  test "join_queue", %{lobby_id: lobby_id, host: _host, psocket: psocket, player: player} do
+    # We don't want to use the player we start with, we want to number our players specifcially
+    Lobby.remove_user_from_any_battle(player.id)
+
     # At the moment we are hard coding the join queue to 8v8s until we
     # add something to get the player count limit
     ps1 = tachyon_auth_setup()
