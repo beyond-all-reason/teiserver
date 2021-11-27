@@ -115,9 +115,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     new_state = case Enum.member?(state.join_queue, senderid) do
       false ->
         new_queue = state.join_queue ++ [senderid]
+        pos = get_queue_position(new_queue, senderid)
+        LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}", state.lobby_id)
 
         %{state | join_queue: new_queue}
       true ->
+        pos = get_queue_position(state.join_queue, senderid)
+        LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}", state.lobby_id)
         state
     end
 
@@ -128,6 +132,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     new_queue = List.delete(state.join_queue, senderid)
     new_state = %{state | join_queue: new_queue}
 
+    LobbyChat.sayprivateex(state.coordinator_id, senderid, "You have been removed from the join queue", state.lobby_id)
     ConsulServer.say_command(cmd, new_state)
   end
 
@@ -532,6 +537,17 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       "spectator" -> :spectator
       "side" ->  :side
       _ -> nil
+    end
+  end
+
+  defp get_queue_position(queue, userid) do
+    case Enum.member?(queue, userid) do
+      true ->
+        Enum.with_index(queue)
+        |> Map.new
+        |> Map.get(userid)
+      false ->
+        -1
     end
   end
 end
