@@ -20,6 +20,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   @default_ban_reason "Banned"
 
   #################### For everybody
+  def handle_command(%{command: "s"} = cmd, state), do: handle_command(Map.put(cmd, :command, "status"), state)
   def handle_command(%{command: "status", senderid: senderid} = _cmd, state) do
     locks = state.locks
     |> Enum.map(fn l -> to_string(l) end)
@@ -28,7 +29,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     status_msg = [
       "Status for battle ##{state.lobby_id}",
       "Locks: #{locks}",
-      "Gatekeeper: #{state.gatekeeper}"
+      "Gatekeeper: #{state.gatekeeper}",
+      "Join queue size: #{Enum.count(state.join_queue)}"
     ]
     Coordinator.send_to_user(senderid, status_msg)
     state
@@ -115,12 +117,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     new_state = case Enum.member?(state.join_queue, senderid) do
       false ->
         new_queue = state.join_queue ++ [senderid]
-        pos = get_queue_position(new_queue, senderid)
+        pos = get_queue_position(new_queue, senderid) + 1
         LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}", state.lobby_id)
 
         %{state | join_queue: new_queue}
       true ->
-        pos = get_queue_position(state.join_queue, senderid)
+        pos = get_queue_position(state.join_queue, senderid) + 1
         LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}", state.lobby_id)
         state
     end
