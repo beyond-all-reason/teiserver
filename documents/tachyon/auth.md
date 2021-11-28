@@ -41,8 +41,9 @@ Performs user authentication via a token obtained from `c.auth.token`.
 ```
 {
   "cmd": "c.auth.login",
-  "lobby_name": "Skylobby",
-  "lobby_version": "1.3.2"
+  "lobby_name": "Bar Lobby",
+  "lobby_version": "1.3.2",
+  "lobby_hash": "1234567890",
   "token": "long-string-of-digits-here"
 }
 
