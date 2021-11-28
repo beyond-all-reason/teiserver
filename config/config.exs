@@ -66,6 +66,7 @@ config :central, Teiserver,
   server_flag: "GB",
   post_login_delay: 100,
   spring_post_state_change_delay: 100,
+  user_agreement: "A verification code has been sent to your email address. Please read our terms of service at <<<site_url>>> and the code of conduct at <<<URL>>>. Then enter your six digit code below if you agree to the terms.",
   use_geoip: true
 
 config :logger, :console,
