@@ -38,6 +38,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   # Infos
   def handle_info(:tick, state) do
+    Logger.warn("TICK")
+
     lobby = Lobby.get_lobby!(state.lobby_id)
     case Map.get(lobby.tags, "server/match/uuid", nil) do
       nil ->
@@ -49,7 +51,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
         nil
     end
 
-    {:noreply, state}
+    new_state = check_queue_status(state)
+
+    {:noreply, new_state}
   end
 
   def handle_info({:put, key, value}, state) do
@@ -368,15 +372,20 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp player_count_changed(%{join_queue: []} = _state), do: nil
   defp player_count_changed(%{join_queue: join_queue} = state) do
     if get_player_count(state) < 16 do
+      count = get_player_count(state)
+      Logger.info("joinq - Player count #{count}, queue is #{Kernel.inspect join_queue}")
+
       [userid | _new_queue] = join_queue
 
       existing = Client.get_client_by_id(userid)
       new_client = Map.merge(existing, %{player: true, ready: true})
       case request_user_change_status(new_client, existing, state) do
         {true, allowed_client} ->
+          Logger.info("joinq - Dequeing #{userid}")
           send(self(), {:dequeue_user, userid})
           Client.update(allowed_client, :client_updated_battlestatus)
         {false, _} ->
+          Logger.info("joinq - No dequeue")
           :ok
       end
     end
@@ -470,6 +479,16 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def get_level("banned"), do: :banned
   def get_level("spectator"), do: :spectator
   def get_level("player"), do: :player
+
+  defp check_queue_status(%{join_queue: []} = state), do: state
+  defp check_queue_status(state) do
+    new_queue = state.join_queue
+    |> Enum.filter(fn userid ->
+      Client.get_client_by_id(userid).player == false
+    end)
+
+    %{state | join_queue: new_queue}
+  end
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do

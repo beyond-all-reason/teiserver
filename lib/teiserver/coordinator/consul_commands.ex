@@ -26,12 +26,26 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     |> Enum.map(fn l -> to_string(l) end)
     |> Enum.join(", ")
 
+    pos_str = case get_queue_position(state.join_queue, senderid) do
+      -1 ->
+        nil
+      pos ->
+        "You are position #{pos} in the queue"
+    end
+
+    queue_string = state.join_queue
+    |> Enum.map(&User.get_username/1)
+    |> Enum.join(", ")
+
     status_msg = [
       "Status for battle ##{state.lobby_id}",
       "Locks: #{locks}",
       "Gatekeeper: #{state.gatekeeper}",
-      "Join queue size: #{Enum.count(state.join_queue)}"
+      pos_str,
+      "Join queue: #{queue_string}",
     ]
+    |> Enum.filter(fn s -> s != nil end)
+
     Coordinator.send_to_user(senderid, status_msg)
     state
   end
@@ -114,20 +128,26 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "joinq", senderid: senderid} = cmd, state) do
-    new_state = case Enum.member?(state.join_queue, senderid) do
-      false ->
-        new_queue = state.join_queue ++ [senderid]
-        pos = get_queue_position(new_queue, senderid) + 1
-        LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}", state.lobby_id)
-
-        %{state | join_queue: new_queue}
-      true ->
-        pos = get_queue_position(state.join_queue, senderid) + 1
-        LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}", state.lobby_id)
+    case Client.get_client_by_id(senderid) do
+      %{player: true} ->
+        LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are already a player, you can't join the queue!", state.lobby_id)
         state
-    end
+      _ ->
+        new_state = case Enum.member?(state.join_queue, senderid) do
+          false ->
+            new_queue = state.join_queue ++ [senderid]
+            pos = get_queue_position(new_queue, senderid) + 1
+            LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}", state.lobby_id)
 
-    ConsulServer.say_command(cmd, new_state)
+            %{state | join_queue: new_queue}
+          true ->
+            pos = get_queue_position(state.join_queue, senderid) + 1
+            LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}", state.lobby_id)
+            state
+        end
+
+        ConsulServer.say_command(cmd, new_state)
+    end
   end
 
   def handle_command(%{command: "leaveq", senderid: senderid} = cmd, state) do

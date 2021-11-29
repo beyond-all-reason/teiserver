@@ -254,7 +254,7 @@ defmodule Teiserver.User do
         end
         :ok
 
-      {:error, changeset} ->
+      {:error, _changeset} ->
         :error
     end
   end
@@ -290,7 +290,7 @@ defmodule Teiserver.User do
         end
         :ok
 
-      {:error, changeset} ->
+      {:error, _changeset} ->
         :error
     end
   end

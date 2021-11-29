@@ -426,5 +426,30 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert Client.get_client_by_id(player17.id).player == true
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
     assert queue == []
+
+    # Now get users 18 and 19 back in
+    Lobby.force_add_user_to_battle(player18.id, lobby_id)
+    Lobby.force_add_user_to_battle(player19.id, lobby_id)
+
+    # Joinq again
+    _tachyon_send(socket17, %{cmd: "c.lobby.message", message: "$joinq"})
+    _tachyon_send(socket18, %{cmd: "c.lobby.message", message: "$joinq"})
+    _tachyon_send(socket19, %{cmd: "c.lobby.message", message: "$joinq"})
+
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == [player18.id, player19.id]
+
+    # Now make player18 a player
+    _tachyon_send(socket18, %{cmd: "c.lobby.update_status", player: true, ready: true})
+
+    # Queue won't update yet, only does so when a player leaves
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == [player18.id, player19.id]
+
+    # Call the tick function, 18 is now a player so should be removed from the queue
+    Coordinator.cast_consul(lobby_id, :tick)
+
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == [player19.id]
   end
 end

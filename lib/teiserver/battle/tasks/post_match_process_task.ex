@@ -1,7 +1,7 @@
 defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   use Oban.Worker, queue: :teiserver
 
-  alias Teiserver.{Battle, User, Account, Telemetry}
+  alias Teiserver.{Battle, User}
   alias Central.Helpers.NumberHelper
 
   # psql command to reset battles after upload
