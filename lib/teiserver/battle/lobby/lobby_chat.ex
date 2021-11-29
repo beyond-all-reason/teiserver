@@ -18,6 +18,7 @@ defmodule Teiserver.Battle.LobbyChat do
   end
 
   @spec do_say(Types.userid(), String.t(), Types.lobby_id()) :: :ok
+  def do_say(userid, "$ " <> msg, lobby_id), do: do_say(userid, "$#{msg}", lobby_id)
   def do_say(userid, msg, lobby_id) do
     user = User.get_user_by_id(userid)
     if not User.is_muted?(user) do
