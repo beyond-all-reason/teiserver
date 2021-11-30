@@ -47,7 +47,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
 
     # Converted message should appear here
     [m1, m2] = PubsubListener.get(listener)
-    assert m1 == {:battle_updated, lobby.id, {user.id, "$ settag tagname tagvalue", lobby.id}, :say}
+    assert m1 == {:battle_updated, lobby.id, {user.id, "$settag tagname tagvalue", lobby.id}, :say}
     {:battle_updated, _lobby_id, %{"tagname" => "tagvalue", "server/match/uuid" => _uuid}, :add_script_tags} = m2
   end
 end

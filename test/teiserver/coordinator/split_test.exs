@@ -101,7 +101,7 @@ defmodule Teiserver.Coordinator.SplitTest do
     # Check what got sent
     messages = PubsubListener.get(listener)
     assert messages == [
-      {:lobby_chat, :say, lobby_id, player1.id, "$ splitlobby"},
+      {:lobby_chat, :say, lobby_id, player1.id, "$splitlobby"},
       {:lobby_chat, :sayex, lobby_id, Coordinator.get_coordinator_userid(), "#{player1.name} is moving to a new lobby, to follow them say $y. If you want to follow someone else then say $follow <name> and you will follow that user. The split will take place in 15 seconds, you can change your mind at any time. Say $n to cancel your decision and stay here."}]
 
     # Check state
