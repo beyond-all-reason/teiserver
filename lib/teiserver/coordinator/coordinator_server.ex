@@ -74,8 +74,10 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   end
 
   def handle_info({:direct_message, fromid, "$" <> command}, state) do
-    new_state = case command do
-      "check " <> remaining ->
+    from = User.get_user_by_id(fromid)
+
+    new_state = case {command, from.moderator} do
+      {"check " <> remaining, true} ->
         case User.get_userid(remaining) do
           nil ->
             User.send_direct_message(state.userid, fromid, "Unable to find a user with that name")
@@ -83,6 +85,41 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
             result = AutomodServer.check_user(userid)
             User.send_direct_message(state.userid, fromid, "Automod result: #{result}")
         end
+        state
+
+      {"whois " <> remaining, true} ->
+        case User.get_user_by_name(remaining) do
+          nil ->
+            User.send_direct_message(state.userid, fromid, "Unable to find a user with that name")
+          user ->
+            stats = Account.get_user_stat_data(user.id)
+
+            player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
+            spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
+            rank_time = User.rank_time(user.id)
+
+            msg = [
+              "Found #{user.name}",
+              "Rank: #{user.rank} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}"
+            ]
+
+            User.send_direct_message(state.userid, fromid, msg)
+        end
+        state
+
+      {"whoami", _} ->
+        stats = Account.get_user_stat_data(fromid)
+
+        player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
+        spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
+        rank_time = User.rank_time(fromid)
+
+        msg = [
+          "You are #{from.name}",
+          "Rank: #{from.rank} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}"
+        ]
+
+        User.send_direct_message(state.userid, fromid, msg)
         state
 
       _ ->
@@ -93,7 +130,9 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:direct_message, userid, _message}, state) do
+  def handle_info({:direct_message, userid, message}, state) do
+    Logger.warn(message)
+
     username = User.get_username(userid)
     User.send_direct_message(state.userid, userid, "I don't currently handle messages, sorry #{username}")
     {:noreply, state}
