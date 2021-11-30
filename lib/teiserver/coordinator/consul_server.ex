@@ -38,8 +38,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   # Infos
   def handle_info(:tick, state) do
-    Logger.warn("TICK")
-
     lobby = Lobby.get_lobby!(state.lobby_id)
     case Map.get(lobby.tags, "server/match/uuid", nil) do
       nil ->
