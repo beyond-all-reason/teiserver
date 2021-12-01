@@ -35,7 +35,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       consuls: %{}
     }
 
-    ~w(coordinator moderators)
+    ~w(main coordinator moderators)
     |> Enum.each(fn room_name ->
       Room.get_or_make_room(room_name, user.id)
       Room.add_user_to_room(user.id, room_name)
@@ -69,6 +69,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   #   end
   #   {:noreply, state}
   # end
+
   def handle_info({:new_message, _userid, _room_name, _message}, state) do
     {:noreply, state}
   end

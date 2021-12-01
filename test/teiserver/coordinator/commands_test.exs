@@ -33,7 +33,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     }
     data = %{cmd: "c.lobby.create", lobby: lobby_data}
     _tachyon_send(hsocket, data)
-    reply = _tachyon_recv(hsocket)
+    [reply] = _tachyon_recv(hsocket)
     lobby_id = reply["lobby"]["id"]
 
     listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby_id}"])
@@ -152,7 +152,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     data = %{cmd: "c.lobby.message", message: "$pull ##{player2.id}"}
     _tachyon_send(hsocket, data)
 
-    reply = _tachyon_recv(psocket)
+    [reply] = _tachyon_recv(psocket)
     assert reply["cmd"] == "s.lobby.join_response"
     assert reply["lobby"]["id"] == lobby_id
   end
@@ -232,6 +232,21 @@ defmodule Teiserver.Coordinator.CommandsTest do
     # Check timeout state
     timeouts = Coordinator.call_consul(lobby_id, {:get, :timeouts})
     assert timeouts == %{player.id => %{by: host.id, level: :banned, reason: "Because I said so"}}
+  end
+
+  test "kick by name", %{player: player, hsocket: hsocket, lobby_id: lobby_id} do
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.player == true
+
+    data = %{cmd: "c.lobby.message", message: "$lobbykick #{player.name}"}
+    _tachyon_send(hsocket, data)
+
+    player_client = Client.get_client_by_id(player.id)
+    assert player_client.lobby_id == nil
+
+    # Check ban state
+    bans = Coordinator.call_consul(lobby_id, {:get, :bans})
+    assert bans == %{}
   end
 
   test "ban by name", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
@@ -332,17 +347,17 @@ defmodule Teiserver.Coordinator.CommandsTest do
     data = %{cmd: "c.lobby.message", message: "$status"}
     _tachyon_send(hsocket, data)
 
-    reply = _tachyon_recv(hsocket)
+    [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.communication.direct_message"
     assert reply["sender"] == Coordinator.get_coordinator_userid()
-    assert reply["message"] == ["Status for battle ##{lobby_id}", "Locks: ", "Gatekeeper: default"]
+    assert reply["message"] == ["Status for battle ##{lobby_id}", "Locks: ", "Gatekeeper: default", "Join queue: "]
   end
 
   test "help", %{hsocket: hsocket} do
     data = %{cmd: "c.lobby.message", message: "$help"}
     _tachyon_send(hsocket, data)
 
-    reply = _tachyon_recv(hsocket)
+    [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.communication.direct_message"
     assert reply["sender"] == Coordinator.get_coordinator_userid()
     assert reply["message"] == ["Command list can currently be found at https://github.com/beyond-all-reason/teiserver/blob/master/lib/teiserver/coordinator/coordinator_lib.ex"]
