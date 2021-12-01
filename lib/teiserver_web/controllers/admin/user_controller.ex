@@ -461,8 +461,8 @@ defmodule TeiserverWeb.Admin.UserController do
     user = Account.get_user!(id)
 
     mode = case params["mode"] do
-      "lobby" -> "lobby"
-      _ -> "room"
+      "room" -> "room"
+      _ -> "lobby"
     end
 
     messages = case mode do

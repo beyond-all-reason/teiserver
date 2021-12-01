@@ -14,6 +14,8 @@
         %>
         <hr />
 
+<a class="btn btn-outline-<%= bsname %> float-right" href="<%= Routes.ts_admin_user_path(@conn, :show, @user) %>">View user</a>
+
 <%= case @mode do %>
   <% "room" -> %>
     <a class="btn btn-outline-secondary" href="<%= Routes.ts_admin_user_path(@conn, :full_chat, @user) %>?mode=lobby">Swap to Lobby chat</a>

@@ -11,11 +11,13 @@
     Full chat
   </a>
 
-  <a class="dropdown-item" href='<%= Routes.ts_admin_user_path(@conn, :reset_password, @user.id) %>'>
-    <%= central_component "icon", icon: "fas fa-shield-alt" %>
+  <a class="dropdown-item" href='<%= Routes.ts_admin_user_path(@conn, :smurf_search, @user.id) %>'>
+    <%= central_component "icon", icon: "fas fa-face-angry-horns" %>
     &nbsp;
-    Send password reset email
+    Smurf search
   </a>
+
+  <hr />
 
   <a class="dropdown-item" href='<%= Routes.ts_admin_user_path(@conn, :perform_action, @user, "reset_flood_protection") %>'>
     <%= central_component "icon", icon: "fas fa-water-arrow-down" %>
@@ -23,10 +25,10 @@
     Reset flood protection
   </a>
 
-  <a class="dropdown-item" href='<%= Routes.ts_admin_user_path(@conn, :smurf_search, @user.id) %>'>
-    <%= central_component "icon", icon: "fas fa-face-angry-horns" %>
+  <a class="dropdown-item" href='<%= Routes.ts_admin_user_path(@conn, :reset_password, @user.id) %>'>
+    <%= central_component "icon", icon: "fas fa-shield-alt" %>
     &nbsp;
-    Smurf search
+    Send password reset email
   </a>
 
   <a class="dropdown-item" href='<%= Routes.ts_admin_user_path(@conn, :banhash_form, @user.id) %>'>
