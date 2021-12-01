@@ -16,7 +16,7 @@ defmodule Teiserver.Protocols.TachyonNewsTest do
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
 
-    assert reply == %{"cmd" => "s.news.get_latest_game_news", "post" => nil}
+    assert reply == [%{"cmd" => "s.news.get_latest_game_news", "post" => nil}]
   end
 
   test "latest post", %{socket: socket} do
@@ -28,7 +28,7 @@ defmodule Teiserver.Protocols.TachyonNewsTest do
 
     data = %{cmd: "c.news.get_latest_game_news", category: "GameNewsCategory"}
     _tachyon_send(socket, data)
-    reply = _tachyon_recv(socket)
+    [reply] = _tachyon_recv(socket)
 
     assert match?(%{"cmd" => "s.news.get_latest_game_news"}, reply)
     assert reply["post"]["content"] == "content\ncontent"

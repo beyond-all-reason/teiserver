@@ -530,7 +530,7 @@ defmodule Teiserver.User do
     :ok
   end
 
-  @spec login_flood_check(integer()) :: :allow | :block
+  @spec login_flood_check(T.userid()) :: :allow | :block
   def login_flood_check(userid) do
     login_count = ConCache.get(:teiserver_login_count, userid) || 0
 
@@ -542,7 +542,7 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec internal_client_login(integer()) :: {:ok, Map.t()} | :error
+  @spec internal_client_login(T.userid()) :: {:ok, T.user()} | :error
   def internal_client_login(userid) do
     case get_user_by_id(userid) do
       nil -> :error
@@ -553,7 +553,7 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec try_login(String.t(), String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
+  @spec try_login(String.t(), String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()} | {:error, String.t(), T.userid()}
   def try_login(token, ip, lobby, lobby_hash) do
     wait_for_precache()
 

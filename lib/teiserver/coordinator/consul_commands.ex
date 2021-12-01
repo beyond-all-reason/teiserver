@@ -437,6 +437,17 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+  def handle_command(%{command: "lobbykick", remaining: target} = cmd, state) do
+    case ConsulServer.get_user(target, state) do
+      nil ->
+        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
+      target_id ->
+        Lobby.kick_user_from_battle(target_id, state.lobby_id)
+
+        ConsulServer.say_command(cmd, state)
+    end
+  end
+
   def handle_command(%{command: "lobbyban", remaining: target} = cmd, state) do
     [target | reason_list] = String.split(target, " ")
     case ConsulServer.get_user(target, state) do

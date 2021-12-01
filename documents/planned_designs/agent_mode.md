@@ -13,8 +13,8 @@ The agents act as clients and interact with the system the same way any other cl
  * **TODO friender** - Periodically adds friends of people in the `#friender` chat channel
  * **TODO unfriender** - Periodically removes all it's friends
  * **TODO queue** - Joins matchmaking queues; if it ends up joining a lobby it will leave the lobby
- * **TODO party** - Accepts invites to parties and later leaves them
  * **TODO partyhost** - Periodically sends party invites to friends; later leaves the party
+ * **TODO partyjoin** - Accepts invites to parties and later leaves them
  
 ### Control
 The agents are controlled from [supervisor_agent_server.ex](lib/teiserver/agents/supervisor_agent_server.ex) in the `def handle_info(:begin, state) do` function. Here you can tweak which agents are started as per your needs.

@@ -28,6 +28,7 @@ defmodule Teiserver.Protocols.TachyonLib do
 
   @spec decode(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}
   def decode(:timeout), do: {:ok, nil}
+  def decode(""), do: {:ok, nil}
   def decode(data) do
     with {:ok, decoded64} <- Base.decode64(data |> String.trim),
          {:ok, unzipped} <- unzip(decoded64),
@@ -37,9 +38,11 @@ defmodule Teiserver.Protocols.TachyonLib do
       :error ->
         # Previously got an error with data 'OK cmd=TACHYON' which suggests
         # it was still in Spring mode
-        Logger.warn("Got '#{data}'")
+        Logger.warn("Base64 error, given '#{data}'")
         {:error, :base64_decode}
-      {:error, :gzip_decompress} -> {:error, :gzip_decompress}
+      {:error, :gzip_decompress} ->
+        Logger.warn("Gzip error, given '#{data}'")
+        {:error, :gzip_decompress}
       {:error, %Jason.DecodeError{}} -> {:error, :bad_json}
     end
   end

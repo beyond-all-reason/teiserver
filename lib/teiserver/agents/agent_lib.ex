@@ -55,7 +55,10 @@ defmodule Teiserver.Agents.AgentLib do
 
   def get_socket() do
     {:ok, socket} =
-      :ssl.connect(@localhost, Application.get_env(:central, Teiserver)[:ports][:tls], active: true)
+      :ssl.connect(@localhost, Application.get_env(:central, Teiserver)[:ports][:tls],
+        active: true,
+        verify: :verify_none
+      )
 
     socket
   end

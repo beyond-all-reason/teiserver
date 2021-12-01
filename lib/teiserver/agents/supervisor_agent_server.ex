@@ -12,11 +12,11 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
     add_servers("battlejoin", 15)
     add_servers("in_and_out", 3)
     add_servers("idle", 5)
-    # add_servers("friender", 3)
-    # add_servers("unfriender", 3)
-    # add_servers("queue", 5)
-    # add_servers("party", 3)
-    # add_servers("partyhost", 3)
+    add_servers("friender", 3)
+    add_servers("unfriender", 3)
+    add_servers("matchmaking", 5)
+    add_servers("partyjoin", 3)
+    add_servers("partyhost", 3)
 
     AgentLib.post_agent_update(state.id, "Agent supervisor started")
     {:noreply, state}
@@ -57,7 +57,12 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
       "battlehost" -> Teiserver.Agents.BattlehostAgentServer
       "battlejoin" -> Teiserver.Agents.BattlejoinAgentServer
       "idle" -> Teiserver.Agents.IdleAgentServer
-      "in_and_out" -> Teiserver.Agents.InOutServer
+      "in_and_out" -> Teiserver.Agents.InOutAgentServer
+      "friender" -> Teiserver.Agents.FrienderAgentServer
+      "unfriender" -> Teiserver.Agents.UnfrienderAgentServer
+      "matchmaking" -> Teiserver.Agents.MatchmakingAgentServer
+      "partyhost" -> Teiserver.Agents.PartyhostAgentServer
+      "partyjoin" -> Teiserver.Agents.PartyjoinAgentServer
     end
   end
 

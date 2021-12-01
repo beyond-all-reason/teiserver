@@ -20,7 +20,10 @@ defmodule Teiserver.TeiserverTestLib do
   # and upgrade the connection instead?
   @spec tls_setup :: %{socket: port()}
   def tls_setup() do
-    {:ok, socket} = :ssl.connect(@host, 8201, active: false)
+    {:ok, socket} = :ssl.connect(@host, 8201,
+      active: false,
+      verify: :verify_none
+    )
     %{socket: socket}
   end
 
@@ -203,10 +206,15 @@ defmodule Teiserver.TeiserverTestLib do
       :closed -> :closed
 
       resp ->
-        case TachyonLib.decode(resp) do
-          {:ok, msg} -> msg
-          error -> error
-        end
+        resp
+        |> String.split("\n")
+        |> Enum.map(fn line ->
+          case TachyonLib.decode(line) do
+            {:ok, msg} -> msg
+            error -> error
+          end
+        end)
+        |> Enum.filter(fn r -> r != nil end)
     end
   end
 
@@ -214,11 +222,16 @@ defmodule Teiserver.TeiserverTestLib do
   def _tachyon_recv_until(socket = {:sslsocket, _, _}, acc) do
     case :ssl.recv(socket, 0, 500) do
       {:ok, reply} ->
-        resp = case TachyonLib.decode(to_string(reply)) do
-          {:ok, msg} -> msg
-          error -> {:error, error}
-        end
-        _tachyon_recv_until(socket, acc ++ [resp])
+        resp = reply
+        |> String.split("\n")
+        |> Enum.map(fn line ->
+          case TachyonLib.decode(line) do
+            {:ok, msg} -> msg
+            error -> error
+          end
+        end)
+        |> Enum.filter(fn r -> r != nil end)
+        _tachyon_recv_until(socket, acc ++ resp)
 
       {:error, :timeout} ->
         acc

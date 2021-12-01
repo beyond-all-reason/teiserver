@@ -1,4 +1,4 @@
-defmodule Teiserver.Agents.InOutServer do
+defmodule Teiserver.Agents.InOutAgentServer do
   use GenServer
   alias Teiserver.Agents.AgentLib
   require Logger
