@@ -115,8 +115,6 @@ defmodule Teiserver.TcpServer do
       cmd_timestamps: []
     }
 
-    Logger.info("New TCP connection #{Kernel.inspect(socket)}, IP: #{ip}")
-
     send(self(), {:action, {:welcome, nil}})
     :gen_server.enter_loop(__MODULE__, [], state)
   end

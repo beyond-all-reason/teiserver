@@ -147,7 +147,7 @@ defmodule Central.Logging.AggregateViewLogsTask do
 
     logs =
       Repo.all(logs)
-      |> Enum.map(fn {h, c} -> {round(h), c} end)
+      |> Enum.map(fn {h, c} -> {round(h || 0), c} end)
       |> Map.new()
 
     Enum.map(0..24, fn h -> logs[h] || 0 end)
@@ -162,7 +162,7 @@ defmodule Central.Logging.AggregateViewLogsTask do
 
     logs =
       Repo.all(logs)
-      |> Enum.map(fn {h, lt} -> {round(h), lt |> Decimal.round() |> Decimal.to_integer()} end)
+      |> Enum.map(fn {h, lt} -> {round(h || 0), lt |> Decimal.round() |> Decimal.to_integer()} end)
       |> Map.new()
 
     Enum.map(0..24, fn h -> logs[h] || 0 end)
@@ -177,7 +177,7 @@ defmodule Central.Logging.AggregateViewLogsTask do
 
     logs =
       Repo.all(logs)
-      |> Enum.map(fn {h, users} -> {round(h), users |> Enum.uniq() |> Enum.count()} end)
+      |> Enum.map(fn {h, users} -> {round(h || 0), users |> Enum.uniq() |> Enum.count()} end)
       |> Map.new()
 
     Enum.map(0..24, fn h -> logs[h] || 0 end)

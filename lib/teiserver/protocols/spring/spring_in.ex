@@ -152,7 +152,7 @@ defmodule Teiserver.Protocols.SpringIn do
           |> Map.take([:in_game, :away])
 
         new_client =
-          Client.get_client_by_id(state.userid)
+          (Client.get_client_by_id(state.userid) || %{})
           |> Map.merge(new_status)
 
         # This just accepts it and updates the client
@@ -1168,7 +1168,7 @@ defmodule Teiserver.Protocols.SpringIn do
           |> Map.take([:ready, :team_number, :ally_team_number, :player, :sync, :side])
 
         new_client =
-          Client.get_client_by_id(state.userid)
+          (Client.get_client_by_id(state.userid) || %{})
           |> Map.merge(updates)
           |> Map.put(:team_colour, team_colour)
 

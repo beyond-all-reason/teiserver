@@ -34,7 +34,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     }
     data = %{cmd: "c.lobby.create", lobby: battle_data}
     _tachyon_send(hsocket, data)
-    reply = _tachyon_recv(hsocket)
+    [reply] = _tachyon_recv(hsocket)
     lobby_id = reply["lobby"]["id"]
 
     listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby_id}"])

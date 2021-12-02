@@ -202,6 +202,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec request_user_change_status(T.client(), T.client(), map()) :: {boolean, Map.t() | nil}
   # defp request_user_change_status(new_client, %{moderator: true, ready: false}, _state), do: {true, %{new_client | player: false}}
   # defp request_user_change_status(new_client, %{moderator: true}, _state), do: {true, new_client}
+  defp request_user_change_status(_new_client, nil, _state), do: {false, nil}
   defp request_user_change_status(new_client, %{userid: userid} = existing, state) do
     list_status = get_list_status(userid, state)
 

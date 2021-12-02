@@ -34,7 +34,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
     }
     data = %{cmd: "c.lobby.create", lobby: battle_data}
     _tachyon_send(socket, data)
-    reply = _tachyon_recv(socket)
+    [reply] = _tachyon_recv(socket)
     lobby_id = reply["lobby"]["id"]
 
     listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby_id}"])
@@ -60,7 +60,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
     data = %{cmd: "c.lobby.join", lobby_id: lobby_id}
     _tachyon_send(socket2, data)
 
-    reply = _tachyon_recv(socket2)
+    [reply] = _tachyon_recv(socket2)
     assert reply == %{
       "cmd" => "s.lobby.join",
       "result" => "waiting_for_host"
@@ -72,7 +72,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
     _battle = _tachyon_recv(socket2)
 
     # Request status message for the player
-    status_request = _tachyon_recv(socket2)
+    [status_request] = _tachyon_recv(socket2)
     assert status_request["cmd"] == "s.lobby.request_status"
 
     # Send the battle status
@@ -89,24 +89,24 @@ defmodule Teiserver.Coordinator.JoiningTest do
 
     # Expect welcome message
     reply = _tachyon_recv(socket2)
-    assert reply == %{
+    assert reply == [%{
       "cmd" => "s.lobby.announce",
       "message" => " #{user2.name}: ####################",
       "sender" => Coordinator.get_coordinator_userid()
-    }
+    }]
 
     reply = _tachyon_recv(socket2)
-    assert reply == %{
+    assert reply == [%{
       "cmd" => "s.lobby.announce",
       "message" => " #{user2.name}: This is the welcome message",
       "sender" => Coordinator.get_coordinator_userid()
-    }
+    }]
 
     reply = _tachyon_recv(socket2)
-    assert reply == %{
+    assert reply == [%{
       "cmd" => "s.lobby.announce",
       "message" => " #{user2.name}: ####################",
       "sender" => Coordinator.get_coordinator_userid()
-    }
+    }]
   end
 end

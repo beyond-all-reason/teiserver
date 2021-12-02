@@ -36,7 +36,7 @@ defmodule Teiserver.Coordinator.SplitTest do
     }
     data = %{cmd: "c.lobby.create", lobby: lobby_data}
     _tachyon_send(hsocket, data)
-    reply = _tachyon_recv(hsocket)
+    [reply] = _tachyon_recv(hsocket)
     lobby_id = reply["lobby"]["id"]
 
     listener = PubsubListener.new_listener(["teiserver_lobby_chat:#{lobby_id}"])
@@ -59,7 +59,7 @@ defmodule Teiserver.Coordinator.SplitTest do
     }
     data = %{cmd: "c.lobby.create", lobby: lobby_data}
     _tachyon_send(hsocket_empty, data)
-    reply = _tachyon_recv(hsocket_empty)
+    [reply] = _tachyon_recv(hsocket_empty)
     empty_lobby_id = reply["lobby"]["id"]
 
     # Player needs to be added to the battle
@@ -102,7 +102,7 @@ defmodule Teiserver.Coordinator.SplitTest do
     messages = PubsubListener.get(listener)
     assert messages == [
       {:lobby_chat, :say, lobby_id, player1.id, "$splitlobby"},
-      {:lobby_chat, :sayex, lobby_id, Coordinator.get_coordinator_userid(), "#{player1.name} is moving to a new lobby, to follow them say $y. If you want to follow someone else then say $follow <name> and you will follow that user. The split will take place in 15 seconds, you can change your mind at any time. Say $n to cancel your decision and stay here."}]
+      {:lobby_chat, :sayex, lobby_id, Coordinator.get_coordinator_userid(), "#{player1.name} is moving to a new lobby, to follow them say $y. If you want to follow someone else then say $follow <name> and you will follow that user. The split will take place in 30 seconds, you can change your mind at any time. Say $n to cancel your decision and stay here."}]
 
     # Check state
     split = Coordinator.call_consul(lobby_id, {:get, :split})
