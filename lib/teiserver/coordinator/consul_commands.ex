@@ -312,7 +312,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             "reason" => reason,
             "reporter_id" => cmd.senderid,
             "target_id" => userid,
-            "response_text" => "instant-action",
+            "response_text" => reason,
             "response_action" => "Warn",
             "expires" => expires,
             "responder_id" => cmd.senderid
@@ -344,7 +344,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             "reason" => reason,
             "reporter_id" => cmd.senderid,
             "target_id" => userid,
-            "response_text" => "instant-action",
+            "response_text" => reason,
             "response_action" => "Mute",
             "expires" => expires,
             "responder_id" => cmd.senderid
@@ -376,7 +376,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             "reason" => reason,
             "reporter_id" => cmd.senderid,
             "target_id" => userid,
-            "response_text" => "instant-action",
+            "response_text" => reason,
             "response_action" => "Ban",
             "expires" => expires,
             "responder_id" => cmd.senderid

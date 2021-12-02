@@ -290,7 +290,7 @@ defmodule TeiserverWeb.Admin.UserController do
                       "reason" => reason,
                       "reporter_id" => conn.user_id,
                       "target_id" => user.id,
-                      "response_text" => "instant-action",
+                      "response_text" => reason,
                       "response_action" => params["report_response_action"],
                       "expires" => expires,
                       "responder_id" => conn.user_id
