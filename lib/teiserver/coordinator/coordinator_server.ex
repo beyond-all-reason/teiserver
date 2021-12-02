@@ -141,6 +141,11 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   # Client inout
   def handle_info({:client_inout, :login, userid}, state) do
+    :timer.send_after(500, {:do_client_inout, :login, userid})
+    {:noreply, state}
+  end
+
+  def handle_info({:do_client_inout, :login, userid}, state) do
     user = User.get_user_by_id(userid)
     if User.is_warned?(user) or User.is_muted?(user) do
       reports = Account.list_reports(search: [
