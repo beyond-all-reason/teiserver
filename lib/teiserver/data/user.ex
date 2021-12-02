@@ -260,7 +260,7 @@ defmodule Teiserver.User do
   end
 
   @spec do_register_user_with_md5(String.t(), String.t(), String.t(), String.t()) :: :ok | :error
-  defp do_register_user_with_md5(name, email, md5_password, _ip) do
+  defp do_register_user_with_md5(name, email, md5_password, ip) do
     name = String.trim(name)
     email = String.trim(email)
 
@@ -273,6 +273,10 @@ defmodule Teiserver.User do
         Account.create_group_membership(%{
           user_id: user.id,
           group_id: Teiserver.user_group_id()
+        })
+
+        Account.update_user_stat(user.id, %{
+          "country" => Teiserver.Geoip.get_flag(ip)
         })
 
         # Now add them to the cache
