@@ -4,7 +4,7 @@ Given the correct email and password combination the server will send back a tok
 * email :: string
 * password :: string
 
-#### Successful response
+#### Success response
 * token :: string
 
 #### Example input/output
@@ -34,7 +34,7 @@ Performs user authentication via a token obtained from `c.auth.token`.
 * lobby_name :: string
 * lobby_version :: string
 
-#### Successful response
+#### Success response
 * user :: User
 
 #### Example input/output
@@ -71,7 +71,7 @@ Confirms the accuracy of the user email address. Once successful the user will b
 * token :: string
 * verification_code :: string
 
-#### Successful response
+#### Success response
 * user :: User
 
 #### Example input/output
@@ -98,7 +98,7 @@ Confirms the accuracy of the user email address. Once successful the user will b
 ## `c.auth.disconnect`
 
 
-#### Successful response
+#### Success response
 The connection will be terminated, there will be no response.
 
 #### Example input/output
@@ -114,7 +114,7 @@ Requests the creation of a new user account on the server
 * email :: email address
 * password :: string (this will be stored in a hashe
 
-#### Successful response
+#### Success response
 You will receive a standard success response, if it fails you will receive a failure response. Once registered you can attempt to login though the server may require you to validate the account before the login can be successful.
 
 #### Example input/output

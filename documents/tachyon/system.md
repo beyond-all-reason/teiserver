@@ -1,7 +1,7 @@
 ### `c.system.ping`
 No arguments
 
-#### Successful response
+#### Success response
 No response data
 
 #### Example input/output

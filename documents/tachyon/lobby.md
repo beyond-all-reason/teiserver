@@ -13,7 +13,7 @@
 `spectator_list` - List (User.id), A list of spectator ids in the battle
 `user_list` - List (User.id), A list of player and spectator ids in the battle
 
-#### Successful response
+#### Success response
 * battle_list :: List (Battle)
 
 #### Example input/output
@@ -49,7 +49,7 @@
   * ip :: string
   * settings :: map
 
-#### Successful response
+#### Success response
 * battle :: Battle
 
 #### Example input/output
@@ -150,11 +150,6 @@ No server response.
 ```
 {
   "cmd": "c.lobby.leave"
-}
-
-{
-  "cmd": "s.lobby.leave",
-  "result": "success"
 }
 ```
 

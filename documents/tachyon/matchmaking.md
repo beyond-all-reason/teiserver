@@ -5,7 +5,7 @@
 #### Queryable fields
 `id` - Integer (Battle ID)
 
-#### Successful response
+#### Success response
 * queue_list :: List (Queue)
 
 #### Example input/output
