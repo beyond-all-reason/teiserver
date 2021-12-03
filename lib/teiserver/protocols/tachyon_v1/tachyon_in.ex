@@ -7,10 +7,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonIn do
 
   @spec data_in(String.t(), map()) :: map()
   def data_in(data, state) do
-    if state.extra_logging do
-      Logger.info("<-- #{state.username}: #{TachyonLib.format_log(data)}")
-    end
-
     new_state =
       if String.ends_with?(data, "\n") do
         data = state.message_part <> data

@@ -70,9 +70,8 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   #   {:noreply, state}
   # end
 
-  def handle_info({:new_message, _userid, _room_name, _message}, state) do
-    {:noreply, state}
-  end
+  def handle_info({:new_message, _userid, _room_name, _message}, state), do: {:noreply, state}
+  def handle_info({:new_message_ex, _userid, _room_name, _message}, state), do: {:noreply, state}
 
   def handle_info({:direct_message, fromid, "$" <> command}, state) do
     from = User.get_user_by_id(fromid)
@@ -191,7 +190,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   # Catchall handle_info
   def handle_info(msg, state) do
-    Logger.error("Coordinator handle_info error. No handler for msg of #{Kernel.inspect msg}")
+    Logger.error("Coordinator server handle_info error. No handler for msg of #{Kernel.inspect msg}")
     {:noreply, state}
   end
 

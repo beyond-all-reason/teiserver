@@ -45,7 +45,8 @@ defmodule Teiserver.Client do
         # TODO: Change client:lobby_id to be client:battle_lobby_id
         lobby_id: nil,
         current_lobby_id: nil,
-        extra_logging: false,
+        print_client_messages: false,
+        print_server_messages: false,
         chat_times: [],
         temp_mute_count: 0,
         ip: nil,
@@ -383,28 +384,6 @@ defmodule Teiserver.Client do
 
   defp get_hd([]), do: 0
   defp get_hd(v), do: hd(v)
-
-  @spec enable_extra_logging(T.userid()) :: :ok
-  def enable_extra_logging(userid) do
-    case get_client_by_id(userid) do
-      nil -> :ok
-      client ->
-        send(client.pid, {:put, :extra_logging, true})
-        add_client(%{client | extra_logging: true})
-        :ok
-    end
-  end
-
-  @spec disable_extra_logging(T.userid()) :: :ok
-  def disable_extra_logging(userid) do
-    case get_client_by_id(userid) do
-      nil -> :ok
-      client ->
-        send(client.pid, {:put, :extra_logging, false})
-        add_client(%{client | extra_logging: false})
-        :ok
-    end
-  end
 
   @spec enable_client_message_print(T.userid()) :: :ok
   def enable_client_message_print(userid) do

@@ -107,7 +107,6 @@ defmodule Teiserver.TcpServer do
       room_member_cache: %{},
       known_users: %{},
       known_battles: [],
-      extra_logging: Application.get_env(:central, Teiserver)[:extra_logging],
       print_client_messages: false,
       print_server_messages: false,
       script_password: nil,

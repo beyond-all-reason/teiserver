@@ -98,15 +98,5 @@ defmodule TeiserverWeb.ClientLive.Show do
     {:noreply, socket}
   end
 
-  def handle_event("action:extra_logging", _event, socket) do
-    Client.enable_extra_logging(socket.assigns.id)
-    {:noreply, socket}
-  end
-
-  def handle_event("action:less_logging", _event, socket) do
-    Client.disable_extra_logging(socket.assigns.id)
-    {:noreply, socket}
-  end
-
   defp page_title(:show), do: "Show Client"
 end

@@ -63,18 +63,6 @@ defmodule TeiserverWeb.Live.ClientTest do
       assert html =~ "Verified: true"
       assert html =~ "Battle:"# The nil is on a newline with padding so don't worry about it
 
-      assert GenServer.call(client.pid, {:get, :extra_logging}) == false
-
-      render_click(view, "action:extra_logging", %{})
-      assert GenServer.call(client.pid, {:get, :extra_logging}) == true
-
-      # Do it twice to see if anything breaks
-      render_click(view, "action:extra_logging", %{})
-      assert GenServer.call(client.pid, {:get, :extra_logging}) == true
-
-      render_click(view, "action:less_logging", %{})
-      assert GenServer.call(client.pid, {:get, :extra_logging}) == false
-
       # Log out the user
       _send_raw(socket, "EXIT\n")
       assert_redirect(view, "/teiserver/admin/client", 250)

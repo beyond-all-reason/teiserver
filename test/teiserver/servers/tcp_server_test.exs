@@ -140,9 +140,6 @@ defmodule Teiserver.TcpServerTest do
     # _ = _recv_raw(s2)
     # _ = _recv_raw(s3)
 
-    # Enable logging
-    # send(pid, {:put, :extra_logging, true})
-
     # Lets start with the same user logging in multiple times
     # first ourselves, shouldn't see anything here
     send(pid, {:user_logged_in, user.id})

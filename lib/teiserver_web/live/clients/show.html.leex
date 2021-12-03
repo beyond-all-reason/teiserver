@@ -47,16 +47,6 @@
 <br />
 
 <div class="float-right">
-  <%= if allow?(@current_user, "admin.dev") do %>
-    <span phx-click="action:less_logging" class="btn btn-outline-<%= bsname %>">
-      Less logging
-    </span>
-
-    <span phx-click="action:extra_logging" class="btn btn-outline-<%= bsname %>">
-      Enable extra logging
-    </span>
-  <% end %>
-
   <span class="btn btn-danger" phx-click="force-disconnect">
     Force disconnect
   </span>
