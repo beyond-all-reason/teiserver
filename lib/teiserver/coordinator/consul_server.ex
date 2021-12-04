@@ -245,8 +245,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     # If they are moving from player to spectator, call this!
-    if existing.player == true and new_status.player == false do
-      player_count_changed(state)
+    if change do
+      if existing.player == true and new_status.player == false do
+        player_count_changed(state)
+      end
     end
 
     # Now actually return the result
