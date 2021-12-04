@@ -48,7 +48,10 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       Enum.member?(member_ids, userid)
     end)
     |> Enum.map(fn {_, v} ->
-      v = String.replace(v, "~", "")
+      v = v
+      |> String.replace("~", "")
+      |> String.replace("(", "")
+      |> String.replace(")", "")
       NumberHelper.float_parse(v)
     end)
 
