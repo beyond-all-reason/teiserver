@@ -647,7 +647,10 @@ defmodule Teiserver.User do
 
           Client.get_client_by_id(user.id) != nil ->
             Client.disconnect(user.id, "Already logged in")
-            do_login(user, ip, lobby, lobby_hash)
+            ConCache.put(:teiserver_login_count, user.id, 10)
+            {:error, "Existing session, please retry in 20 seconds to clear the cache"}
+            # Client.disconnect(user.id, "Already logged in")
+            # do_login(user, ip, lobby, lobby_hash)
 
           true ->
             do_login(user, ip, lobby, lobby_hash)
@@ -672,8 +675,6 @@ defmodule Teiserver.User do
           Teiserver.Geoip.get_flag(ip)
       end
 
-    last_login = round(:erlang.system_time(:seconds) / 60)
-
     ip_list = [ip | (stats["ip_list"] || [])] |> Enum.uniq |> Enum.take(20)
 
     rank = calculate_rank(user.id)
@@ -692,7 +693,7 @@ defmodule Teiserver.User do
     user =
       %{
         user
-        | last_login: last_login,
+        | last_login: round(:erlang.system_time(:seconds) / 60),
           rank: rank,
           springid: springid,
           lobby_client: lobby_client,
@@ -703,15 +704,15 @@ defmodule Teiserver.User do
 
     # User stats
     Account.update_user_stat(user.id, %{
-        bot: user.bot,
-        country: country,
-        last_login: :erlang.system_time(:seconds),
-        rank: rank,
-        lobby_client: lobby_client,
-        lobby_hash: lobby_hash,
-        last_ip: ip,
-        ip_list: ip_list
-      })
+      bot: user.bot,
+      country: country,
+      last_login: :erlang.system_time(:seconds),
+      rank: rank,
+      lobby_client: lobby_client,
+      lobby_hash: lobby_hash,
+      last_ip: ip,
+      ip_list: ip_list
+    })
 
     {:ok, user}
   end

@@ -36,9 +36,6 @@ central-*.tar
 # Secrets
 /config/*.secret.exs
 
-# Script output
-/documents/prod/uberserver_export.json
-
 # Static
 /assets/node_modules/
 /priv/static/

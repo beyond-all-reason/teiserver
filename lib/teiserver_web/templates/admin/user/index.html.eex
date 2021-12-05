@@ -54,6 +54,7 @@
     <tr>
       <th colspan="2">Name</th>
       <%= if is_admin do %><th>Email</th><% end %>
+      <th>Client</th>
       <th>Status</th>
       <th>Bot</th>
       <th>Mod</th>
@@ -77,6 +78,7 @@
         <%= central_component "icon", icon: user.icon %>
       </td>
       <td><%= user.name %></td>
+      <td><%= user.data["lobby_client"] %></td>
       <%= if is_admin do %><td><%= user.email %></td><% end %>
 
       <td>
