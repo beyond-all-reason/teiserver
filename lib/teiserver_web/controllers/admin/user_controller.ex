@@ -252,8 +252,8 @@ defmodule TeiserverWeb.Admin.UserController do
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
 
       {true, _} ->
-        Central.Account.UserLib.reset_password_request(user)
-        |> Central.Mailer.deliver_now()
+        Central.Account.Emails.password_reset(user)
+        |> Central.Mailer.deliver()
 
         conn
         |> put_flash(:success, "Password reset email sent to user")

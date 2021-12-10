@@ -178,7 +178,7 @@ defmodule Teiserver.TcpServer do
   end
 
   # Email, when an email is sent we get a message, we don't care about that for the most part (yet)
-  def handle_info({:delivered_email, _email}, state) do
+  def handle_info({:email, _email}, state) do
     {:noreply, state}
   end
 

@@ -54,7 +54,7 @@ defmodule TeiserverWeb.Live.ClientTest do
 
     test "show - valid client", %{conn: conn} do
       %{socket: socket, user: user} = TeiserverTestLib.auth_setup()
-      client = Client.get_client_by_id(user.id)
+      # client = Client.get_client_by_id(user.id)
 
       {:ok, view, html} = live(conn, "/teiserver/admin/client/#{user.id}")
       assert html =~ user.name

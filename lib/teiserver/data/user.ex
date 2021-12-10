@@ -248,7 +248,7 @@ defmodule Teiserver.User do
         case EmailHelper.new_user(user) do
           {:error, error} ->
             Logger.error("Error sending new user email - #{user.email} - #{error}")
-          {:ok, _email, _response} ->
+          {:ok, _} ->
             :ok
             # Logger.error("Email sent, response of #{Kernel.inspect response}")
         end
@@ -288,9 +288,8 @@ defmodule Teiserver.User do
         case EmailHelper.new_user(user) do
           {:error, error} ->
             Logger.error("Error sending new user email - #{user.email} - #{Kernel.inspect error}")
-          {:ok, _email, _response} ->
+          {:ok, _} ->
             :ok
-            # Logger.error("Email sent, response of #{Kernel.inspect response}")
         end
         :ok
 
@@ -393,8 +392,8 @@ defmodule Teiserver.User do
   def request_password_reset(user) do
     db_user = Account.get_user!(user.id)
 
-    Central.Account.UserLib.reset_password_request(db_user)
-    |> Central.Mailer.deliver_now()
+    Central.Account.Emails.password_reset(db_user)
+    |> Central.Mailer.deliver()
   end
 
   def request_email_change(nil, _), do: nil
