@@ -1,0 +1,87 @@
+<div class="welcome d-flex justify-content-center flex-column" style="height: 250px; min-height: 250px;">
+  <div class="container">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark pt-4 px-0">
+      <a class="navbar-brand" href={Routes.general_page_path(@conn, :index)}>
+        <img src={Routes.static_path(@conn, "/images/logo/square_logo.svg")} width="30" class="mr-2" alt="Landing Page">
+        <%= Application.get_env(:central, Central)[:site_title] %>
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav ml-auto">
+          <%= if @current_user == nil do %>
+            <li class="nav-item">
+              <a class="nav-link" href={Routes.blog_path(@conn, :index)}>
+                <i class={"fa-fw #{Central.Communication.BlogLib.icon()}"}></i>
+                Blog
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" href={Routes.account_session_path(@conn, :new)}>
+                <i class="fas fa-fw fa-sign-in-alt"></i>
+                Login
+              </a>
+            </li>
+          <% else %>
+            <%= if allow?(@conn, "communication.blog") do %>
+              <li class="nav-item">
+                <a class="nav-link" href={Routes.blog_post_path(@conn, :new)}>
+                  <i class="fa-fw fas fa-plus"></i>
+                  New post
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" href={Routes.blog_post_path(@conn, :index)}>
+                  <i class={"fa-fw #{Central.Communication.PostLib.icon()}"}></i>
+                  Posts
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" href={Routes.blog_category_path(@conn, :index)}>
+                  <i class={"fa-fw #{Central.Communication.CategoryLib.icon()}"}></i>
+                  Categories
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link" href={Routes.blog_file_path(@conn, :index)}>
+                  <i class={"fa-fw #{Central.Communication.BlogFileLib.icon()}"}></i>
+                  Files
+                </a>
+              </li>
+
+            <% else %>
+              <li class="nav-item">
+                <a class="nav-link" href="/">
+                  <i class="fas fa-fw fa-bars"></i>
+                  Menu screen
+                </a>
+              </li>
+            <% end %>
+          <% end %>
+        </ul>
+
+      </div>
+    </nav>
+    <!-- / Navigation -->
+  </div>
+
+  <!-- Inner Wrapper -->
+  <div class="inner-wrapper mt-auto mb-auto container">
+    <div class="row">
+      <div class="col-md-12">
+        <a href={Routes.blog_path(@conn, :index)}>
+          <h1 class="welcome-heading text-white">
+            <%= Application.get_env(:central, Central)[:blog_title] %>
+          </h1>
+        </a>
+      </div>
+    </div>
+  </div>
+  <!-- / Inner Wrapper -->
+</div>

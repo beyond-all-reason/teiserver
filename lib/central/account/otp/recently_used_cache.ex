@@ -1,4 +1,5 @@
 defmodule Central.Account.RecentlyUsedCache do
+  @moduledoc false
   use GenServer
 
   @table_name :central_recently_used_cache

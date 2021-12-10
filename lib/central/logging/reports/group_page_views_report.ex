@@ -1,4 +1,5 @@
 defmodule CentralWeb.Logging.GroupPageViewsReport do
+  @moduledoc false
   use CentralWeb, :library
 
   # alias Central.Account.User
@@ -63,8 +64,7 @@ defmodule CentralWeb.Logging.GroupPageViewsReport do
         )
       ]
       |> Enum.filter(fn r -> r != nil end)
-      |> Enum.map(fn w -> "AND " <> w end)
-      |> Enum.join("    ")
+      |> Enum.map_join("    ", fn w -> "AND " <> w end)
 
     joins =
       [

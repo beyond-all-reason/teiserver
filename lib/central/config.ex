@@ -332,7 +332,7 @@ defmodule Central.Config do
   end
 
   def get_grouped_site_configs() do
-    ConCache.get(:config_site_type_cache, "all-config-types")
+    (ConCache.get(:config_site_type_cache, "all-config-types") || %{})
     |> Map.values()
     |> Enum.sort(fn c1, c2 ->
       c1.key <= c2.key

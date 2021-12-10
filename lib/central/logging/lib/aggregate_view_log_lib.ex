@@ -1,4 +1,5 @@
 defmodule Central.Logging.AggregateViewLogLib do
+  @moduledoc false
   use CentralWeb, :library
 
   alias Central.Account.User

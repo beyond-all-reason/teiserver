@@ -1,4 +1,5 @@
 defmodule Central.Communication.CategoryLib do
+  @moduledoc false
   use CentralWeb, :library
 
   alias Central.Communication.Category
@@ -91,74 +92,4 @@ defmodule Central.Communication.CategoryLib do
     # query = if :things in preloads, do: _preload_things(query), else: query
     query
   end
-
-  # def _preload_things(query) do
-  #   from categories in query,
-  #     left_join: things in assoc(categories, :things),
-  #     preload: [things: things]
-  # end
-
-  # @spec get_category(integer) :: Ecto.Query.t
-  # def get_category(category_id) do
-  #   from categories in Category,
-  #     where: categories.id == ^category_id
-  # end
-
-  # @spec get_categories() :: Ecto.Query.t
-  # def get_categories() do
-  #   from categories in Category
-  # end
-
-  # @spec search(Ecto.Query.t, atom, nil) :: Ecto.Query.t
-  # @spec search(Ecto.Query.t, atom, String.t()) :: Ecto.Query.t
-  # def search(query, _, nil), do: query
-  # def search(query, _, ""), do: query
-
-  # def search(query, :simple_search, value) do
-  #   value_like = "%" <> String.replace(value, "*", "%") <> "%"
-
-  #   # TODO from blueprints
-  #   # Put in the simple-search strings here
-
-  #   from categories in query,
-  #     where: (
-  #            ilike(categories.str1, ^value_like)
-  #         or ilike(categories.str2, ^value_like)
-  #       )
-  # end
-
-  # def search(query, :name, name) do
-  #   name = "%" <> String.replace(name, "*", "%") <> "%"
-
-  #   from categories in query,
-  #     where: ilike(categories.name, ^name)
-  # end
-
-  # def search(query, :colour, colour) do
-  #   colour = "%" <> String.replace(colour, "*", "%") <> "%"
-
-  #   from categories in query,
-  #     where: ilike(categories.colour, ^colour)
-  # end
-
-  # def search(query, :icon, icon) do
-  #   icon = "%" <> String.replace(icon, "*", "%") <> "%"
-
-  #   from categories in query,
-  #     where: ilike(categories.icon, ^icon)
-  # end
-
-  # def search(query, :inserted_at_start, inserted_at_start) do
-  #   inserted_at_start = Timex.parse!(inserted_at_start, "{0D}/{0M}/{YYYY}")
-
-  #   from p in query,
-  #     where: p.inserted_at > ^inserted_at_start
-  # end
-
-  # def search(query, :inserted_at_end, inserted_at_end) do
-  #   inserted_at_end = Timex.parse!(inserted_at_end, "{0D}/{0M}/{YYYY}")
-
-  #   from p in query,
-  #     where: p.inserted_at < ^inserted_at_end
-  # end
 end

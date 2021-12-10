@@ -1,4 +1,5 @@
 defmodule Central.Communication.BlogFile do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "communication_blog_files" do

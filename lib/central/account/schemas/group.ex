@@ -1,4 +1,5 @@
 defmodule Central.Account.Group do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "account_groups" do

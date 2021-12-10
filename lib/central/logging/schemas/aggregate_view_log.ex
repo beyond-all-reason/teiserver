@@ -1,4 +1,5 @@
 defmodule Central.Logging.AggregateViewLog do
+  @moduledoc false
   use CentralWeb, :schema
 
   @primary_key false

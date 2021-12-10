@@ -2,7 +2,7 @@ defmodule Teiserver.EmailHelper do
   @moduledoc false
   alias Central.Account
   alias Central.Mailer
-  alias Bamboo.Email
+  import Swoosh.Email
   alias Central.Helpers.TimexHelper
   require Logger
 

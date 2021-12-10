@@ -1,4 +1,5 @@
 defmodule Central.Admin.Startup do
+  @moduledoc false
   use CentralWeb, :startup
 
   def startup do

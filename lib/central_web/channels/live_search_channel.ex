@@ -1,4 +1,5 @@
 defmodule CentralWeb.LiveSearch.Channel do
+  @moduledoc false
   use Phoenix.Channel
 
   alias Central.Account

@@ -1,4 +1,5 @@
 defmodule Central.Communication.ChatResponse do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "communication_chat_responses" do

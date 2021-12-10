@@ -104,7 +104,7 @@ defmodule CentralWeb.Config.UserConfigControllerTest do
       assert redirected_to(conn) == Routes.user_config_path(conn, :index) <> "#general"
 
       configs = Config.get_user_configs!(user.id)
-      assert Enum.count(configs) == 0
+      assert Enum.empty?(configs)
     end
   end
 end

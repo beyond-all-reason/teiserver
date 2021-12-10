@@ -1,4 +1,5 @@
 defmodule Central.Config.UserConfig do
+  @moduledoc false
   use Ecto.Schema
   import Ecto.Changeset
 

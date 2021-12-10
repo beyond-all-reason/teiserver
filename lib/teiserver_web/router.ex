@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Router do
   defmacro teiserver_routes() do
     quote do
       scope "/", TeiserverWeb.General, as: :ts_general do
-        pipe_through([:browser, :blank_layout])
+        pipe_through([:browser, :nomenu_layout])
 
         get("/code_of_conduct", GeneralController, :code_of_conduct)
         get("/privacy_policy", GeneralController, :gdpr)

@@ -1,7 +1,5 @@
 defmodule Central.Helpers.DatePresets do
-  @moduledoc """
-
-  """
+  @moduledoc false
 
   import Central.Helpers.TimexHelper
 

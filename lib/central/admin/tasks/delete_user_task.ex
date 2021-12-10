@@ -1,4 +1,5 @@
 defmodule Central.Admin.DeleteUserTask do
+  @moduledoc false
   alias Central.{Account, Config, Communication, Logging}
 
   def delete_user(userid) when is_integer(userid) do

@@ -1,4 +1,5 @@
 defmodule Central.Helpers.JsonHelper do
+  @moduledoc false
   @spec json_cast(map, list) :: map
   def json_cast(object, fields) when is_list(fields) do
     fields

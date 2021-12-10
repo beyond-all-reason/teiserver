@@ -1,4 +1,5 @@
 defmodule Central.Logging.LoggingPlug do
+  @moduledoc false
   alias Plug.Conn
   alias Central.Logging.PageViewLog
   alias Central.Repo

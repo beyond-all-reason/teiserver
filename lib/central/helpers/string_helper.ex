@@ -1,6 +1,5 @@
 defmodule Central.Helpers.StringHelper do
-  @moduledoc """
-  """
+  @moduledoc false
 
   @spec remove_spaces(String.t()) :: String.t()
   def remove_spaces(the_string) do

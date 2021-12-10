@@ -28,7 +28,7 @@ defmodule TeiserverWeb.ClientLive.Show do
       |> assign(:colours, UserLib.colours())
       |> assign(:extra_menu_content, @extra_menu_content)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "nomenu_live.html"}}
   end
 
   @impl true

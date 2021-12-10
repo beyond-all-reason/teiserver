@@ -1,4 +1,5 @@
 defmodule Central.Communication.Category do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "communication_categories" do

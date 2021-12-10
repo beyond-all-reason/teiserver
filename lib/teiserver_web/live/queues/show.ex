@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
       |> assign(:messages, [])
       |> assign(:extra_menu_content, extra_content)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "nomenu_live.html"}}
   end
 
   @impl true

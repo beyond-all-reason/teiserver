@@ -1,4 +1,5 @@
 defmodule Central.Account.AuthPipeline do
+  @moduledoc false
   use Guardian.Plug.Pipeline,
     otp_app: :central,
     error_handler: Central.Account.ErrorHandler,

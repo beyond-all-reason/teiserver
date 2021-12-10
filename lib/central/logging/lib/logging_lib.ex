@@ -1,4 +1,5 @@
 defmodule Central.Logging.LoggingLib do
+  @moduledoc false
   import Plug.Conn, only: [assign: 3]
 
   @spec colours() :: {String.t(), String.t(), String.t()}

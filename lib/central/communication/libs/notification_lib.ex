@@ -1,4 +1,5 @@
 defmodule Central.Communication.NotificationLib do
+  @moduledoc false
   use CentralWeb, :library
   alias Central.Communication.Notification
 

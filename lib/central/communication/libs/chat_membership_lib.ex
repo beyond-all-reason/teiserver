@@ -1,4 +1,5 @@
 defmodule Central.Communication.ChatMembershipLib do
+  @moduledoc false
   use CentralWeb, :library
 
   alias Central.Communication.ChatMembership

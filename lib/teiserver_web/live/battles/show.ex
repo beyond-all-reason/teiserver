@@ -37,7 +37,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> assign(:consul_command, "")
       |> assign(:subbed, true)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "nomenu_live.html"}}
   end
 
   @impl true

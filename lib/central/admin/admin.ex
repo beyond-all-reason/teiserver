@@ -1,4 +1,5 @@
 defmodule Central.Admin do
+  @moduledoc false
   @behaviour Bodyguard.Policy
 
   import Central.Account.AuthLib, only: [allow?: 2]

@@ -1,4 +1,5 @@
 defmodule Central.ObanLogger do
+  @moduledoc false
   require Logger
 
   import Central.Logging.Helpers, only: [add_error_log: 1]

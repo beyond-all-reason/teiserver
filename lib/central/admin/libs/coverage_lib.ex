@@ -1,4 +1,5 @@
 defmodule Central.Admin.CoverageLib do
+  @moduledoc false
   defp capture_parse(s) do
     ~r/(?<cov>[0-9\.]+)%\s+lib\/
       (?<app>[_a-zA-Z]+?)\/
@@ -123,10 +124,15 @@ defmodule Central.Admin.CoverageLib do
       data
       |> String.split("\n")
       |> Enum.map(&capture_parse/1)
-      |> Enum.filter(fn m -> m != nil end)
-      |> Enum.filter(fn m -> m["relevant"] != "0" end)
-      |> Enum.filter(fn m -> not String.contains?(m["file"], ["/coherence/"]) end)
-      |> Enum.filter(fn m -> not String.contains?(m["file"], ["/channels/"]) end)
+      |> Enum.filter(fn m ->
+        cond do
+          m == nil -> false
+          m["relevant"] == "0" -> false
+          String.contains?(m["file"], ["/coherence/"]) -> false
+          String.contains?(m["file"], ["/channels/"]) -> false
+          true -> true
+        end
+      end)
       |> Enum.map(&add_section/1)
 
     [

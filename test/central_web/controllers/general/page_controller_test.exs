@@ -3,7 +3,7 @@ defmodule CentralWeb.General.PageControllerTest do
 
   test "GET /", %{conn: conn} do
     conn = get(conn, "/")
-    assert html_response(conn, 200) =~ "shards-landing-page--1"
+    assert html_response(conn, 200) =~ "<body class=\"fixed-navbar fixed-sidebar\">"
   end
 
   test "GET /reache", %{conn: conn} do

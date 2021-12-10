@@ -1,4 +1,5 @@
 defmodule Central.Account.User do
+  @moduledoc false
   use CentralWeb, :schema
   @behaviour Bodyguard.Policy
 
@@ -67,7 +68,7 @@ defmodule Central.Account.User do
         ] ++ @extra_fields
       )
       |> validate_required([:name, :email, :password, :icon, :colour, :permissions])
-    |> unique_constraint(:email)
+      |> unique_constraint(:email)
       |> put_password_hash()
     end
   end

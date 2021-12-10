@@ -1,4 +1,5 @@
 defmodule Central.Account.Report do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "account_reports" do

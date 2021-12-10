@@ -1,0 +1,244 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    // $('.make-data-table').dataTable({
+    //   pageLength: 50
+    // });
+  });
+
+  function show_module(mname) {
+    body_name = '#module-' + mname + '-body';
+    shower_name = '#module-' + mname + '-shower';
+
+    $(shower_name).hide();
+    $(body_name).show();
+  }
+
+  function hide_module(mname) {
+    body_name = '#module-' + mname + '-body';
+    shower_name = '#module-' + mname + '-shower';
+
+    $(body_name).hide();
+    $(shower_name).show();
+  }
+
+  // $(function() {
+  //   show_module("bedrock");
+  // });
+</script>
+
+<style type="text/css">
+  .module-row {
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dotted #AAA;
+  }
+
+  .module-body {
+    display: none;
+  }
+
+  .module-button {
+/*width: 200px;*/
+  }
+
+  .coverage-link {
+    display: none;
+    color: #34699e;
+  }
+
+  .module-button {
+    min-width: 175px;
+  }
+
+  .final-row, .final-row td {
+    color: #000;
+    font-weight: bold;
+    font-size: 1.05em;
+  }
+</style>
+
+<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "tool"})
+%>
+
+<div class="row">
+  <div class="col-lg-12 col-xl-6">
+    <div class={"card page-card border-#{bsname}"}>
+      <div class="card-body">
+        <h4>
+          Headline stats -
+          <span style="font-size: 0.8em;">
+            Coverage: <%= ((@overall_stats.relevant-@overall_stats.missed)/max(@overall_stats.relevant, 1))*100 |> round %>%,
+            Files: <%= format_number @overall_stats.files %>,
+            Lines: <%= format_number @overall_stats.lines %>,
+            Relevant: <%= format_number @overall_stats.relevant %>,
+            Missed: <%= format_number @overall_stats.missed %>
+          </span>
+        </h4>
+
+        <span class="btn btn-primary" onclick="$('.cov-100').hide();">
+          Hide 100%
+        </span>
+        <br />
+
+        <table class="table table-hover make-data-table">
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Coverage</th>
+              <th>Files</th>
+              <th>Lines</th>
+              <th>Relevant</th>
+              <th>Missed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for row <- @results[:headline] do %>
+              <%
+                {cfg, cbg, _cbsname} = Central.Admin.ToolLib.coverage_colours(row.coverage)
+                section_id = String.replace(row.section, "/", "__")
+              %>
+
+              <tr class={"cov-#{round(row.coverage)}"}>
+                <td style={"color: #333; border-left: 10px solid #{cfg}; background-color: #{cbg};"}>
+                  <%= row.section %>
+
+                  <%= if row.missed > 0 do %>
+                    <a class="btn btn-sm btn-secondary float-right" href={"#module-#{section_id}"} onclick={"show_module('#{section_id}')"}>
+                      &nbsp;
+                      Show
+                      &nbsp;
+                    </a>
+                  <% end %>
+                </td>
+                <td style={"color: #333; background-color: #{cbg};"}>
+                  <%= Float.round row.coverage, 2 %>%
+                </td>
+                <td><%= format_number row.files %></td>
+                <td><%= format_number row.lines %></td>
+                <td><%= format_number row.relevant %></td>
+                <td><%= format_number row.missed %></td>
+              </tr>
+            <% end %>
+
+            <tr class="final-row">
+              <% {cfg, cbg, _cbsname} = Central.Admin.ToolLib.coverage_colours(@results[:project].coverage) %>
+
+              <td style={"color: #333; border-left: 10px solid #{cfg}; background-color: #{cbg};"}>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                Project
+              </td>
+              <td style={"color: #333; background-color: #{cbg};"}>
+                <%= Float.round @results[:project].coverage, 2 %>%
+              </td>
+              <td><%= format_number @results[:project].files %></td>
+              <td><%= format_number @results[:project].lines %></td>
+              <td><%= format_number @results[:project].relevant %></td>
+              <td><%= format_number @results[:project].missed %></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-12 col-xl-6">
+    <div class={"card page-card border-#{bsname}"}>
+      <div class="card-body">
+        <h4>
+          Module stats
+        </h4>
+
+        <div class="module-row row">
+          <div class="col-md-12">
+            <div class="btn btn-secondary" onclick="
+              $('.module-shower').hide();
+              $('.module-body').show();
+            ">Show all</div>
+
+            &nbsp;&nbsp;
+
+            <div class="btn btn-secondary" onclick="
+              $('.module-shower').show();
+              $('.module-body').hide();
+            ">Hide all</div>
+          </div>
+          <br /><br />
+
+          <form action={Routes.admin_tool_path(@conn, :coverage_post)} method="post"  style="width: 100%;">
+            <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+            <div class="row">
+              <div class="col-md-10">
+                <textarea name="results" rows="1" class="form-control" style="font-family: monospace; background-color: #EEF;"></textarea>
+              </div>
+              <div class="col-md-2">
+                <input type="submit" value="Submit" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+              </div>
+            </div>
+          </form>
+          <br /><br />
+        </div>
+
+        <%= for m <- @results[:module] do %>
+          <% module_id = String.replace(m.name, "/", "__") %>
+          <%= if m.worst_percentage != [] do %>
+            <div class="module-row row" id={"module-#{module_id}"}>
+              <div class="col-md-12">
+
+                <div class="module-shower" id={"module-#{module_id}-shower"}>
+                  <div class="btn btn-primary module-button" onclick={"show_module('#{module_id}')"}>
+                    <i class="fa fa-eye fa-fw"></i>
+                    &nbsp;
+                    <%= m.name %>
+                  </div>
+                </div>
+
+                <div class="module-body" id={"module-#{module_id}-body"}>
+                  <div class="btn btn-secondary module-button" onclick={"hide_module('#{module_id}')"}>
+                    <i class="fa fa-eye-slash fa-fw"></i>
+                    &nbsp;
+                    Hide <%= m.name %>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-6">
+                      <h4>Worst coverage</h4>
+                      <ul>
+                        <%= for {f, cov, miss} <- m.worst_percentage do %>
+                          <li>
+                            <%= cov %>%: <%= f %> (miss: <%= miss %>)
+                            <a href={@path <> f} class="coverage-link">
+                              <i class="far fa-fw fa-dot-circle-o"></i>
+                            </a>
+                          </li>
+                        <% end %>
+                      </ul>
+                    </div>
+
+                    <div class="col-md-6">
+                      <h4>Most missed</h4>
+                      <ul>
+                        <%= for {f, cov, miss} <- m.most_missed do %>
+                          <li>
+                            <%= miss %>: <%= f %> (cov: <%= cov %>%)
+                            <a href={@path <> f} class="coverage-link">
+                              <i class="far fa-fw fa-dot-circle-o"></i>
+                            </a>
+                          </li>
+                        <% end %>
+                      </ul>
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

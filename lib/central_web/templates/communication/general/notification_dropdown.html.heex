@@ -1,0 +1,52 @@
+<li class="nav-item dropdown" id="communication-notifications-wrapper" data-user-id={@current_user.id}>
+  <a class="nav-link dropdown-toggle dropdown-toggle-icon-only" href="#" id="communication-notifications-menu-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    <div id="communication-notifications-icon-wrapper">
+      <%= if @user_notifications_unread_count > 0 do %>
+        <i class="fas fa-bell fa-fw fa-lg text-primary align-middle" id="communication-notifications-icon"></i>
+        <div class="badge badge-pill badge-outline-primary slow-blink-outline-primary"
+          id="communication-notifications-badge"
+          style="margin-left:-15px; font-weight: bold; display: inline-block;">
+          <%= @user_notifications_unread_count %>
+        </div>
+      <% else %>
+        <i class="far fa-bell fa-fw fa-lg align-middle" id="communication-notifications-icon"></i>
+        <div class="badge badge-pill badge-outline-primary"
+          id="communication-notifications-badge"
+          style="margin-left:-15px; font-weight: bold; background-color: #FFF; display: inline-block;">
+          0
+        </div>
+      <% end %>
+    </div>
+  </a>
+
+  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="communication-notifications-menu-link" id="communication-notifications-dropdown-list" style="min-width: 300px; max-width: 500px;">
+    <%= if Enum.count(@user_notifications) == 0 do %>
+      <a href="#" class="dropdown-item" id="communication-notifications-empty-marker">You have no unread notifications</a>
+    <% end %>
+
+    <%= if Enum.count(@user_notifications) > 15 do %>
+      <a href={Routes.communication_notification_path(@conn, :index)} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
+        <i class='far fa-fw fa-bars' style='color: #000;'></i>
+        &nbsp;
+        Showing first 15 notifications, click here to view all notifications
+      </a>
+    <% end %>
+
+    <%= for n <- Enum.take(@user_notifications, 15) do %>
+      <a class="dropdown-item" id={"communication-notifications-li-#{n.id}"} href={Central.Communication.notification_url n}>
+        <i class={"fa-fw #{n.icon}"} style={"color: #{n.colour}"}></i>
+        <strong style={"color:#{n.colour}"}><%= n.title %></strong><br />
+
+        <%= n.body %>
+      </a>
+    <% end %>
+
+    <%= if Enum.count(@user_notifications) <= 15 do %>
+      <a href={Routes.communication_notification_path(@conn, :index)} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
+        <i class='far fa-fw fa-bars' style='color: #000;'></i>
+        &nbsp;
+        View all notifications
+      </a>
+    <% end %>
+  </div>
+</li>

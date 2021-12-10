@@ -1,4 +1,5 @@
 defmodule Central.Helpers.GeneralTestLib do
+  @moduledoc false
   import Phoenix.ConnTest, only: [build_conn: 0, post: 3]
 
   import Ecto.Query
@@ -176,7 +177,9 @@ defmodule Central.Helpers.GeneralTestLib do
     r = :rand.uniform(999_999_999)
 
     {user, jwt} =
-      unless :no_user in flags do
+      if :no_user in flags do
+        {nil, nil}
+      else
         user =
           make_user(%{
             "name" => "Current user",
@@ -192,8 +195,6 @@ defmodule Central.Helpers.GeneralTestLib do
         {:ok, jwt, _} = Guardian.encode_and_sign(user)
         {:ok, user, _claims} = Guardian.resource_from_token(jwt)
         {user, jwt}
-      else
-        {nil, nil}
       end
 
     # Connection and socket stuff

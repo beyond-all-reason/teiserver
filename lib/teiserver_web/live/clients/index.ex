@@ -40,7 +40,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> assign(:filters, [])
       |> apply_filters
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "nomenu_live.html"}}
   end
 
   @impl true

@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :central, Central.Setup, key: "dev_key"
 
@@ -18,18 +18,12 @@ config :central, Central.Repo,
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :central, CentralWeb.Endpoint,
-  http: [port: 4000],
+  http: [ip: {127, 0, 0, 1}, port: 4000],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
   watchers: [
-    node: [
-      "node_modules/webpack/bin/webpack.js",
-      "--mode",
-      "development",
-      "--watch-stdin",
-      cd: Path.expand("../assets", __DIR__)
-    ]
+    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
   ]
 
 
@@ -49,11 +43,6 @@ config :central, Teiserver,
   enable_discord_bridge: false,
   enable_agent_mode: true,
   use_geoip: true
-
-config :central, Central.Mailer,
-  adapter: Bamboo.LocalAdapter,
-  noreply_address: "noreply@devsite.co.uk",
-  contact_address: "info@devsite.co.uk"
 
 # ## SSL Support
 #
@@ -83,12 +72,12 @@ config :central, Central.Mailer,
 config :central, CentralWeb.Endpoint,
   live_reload: [
     patterns: [
-      ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
-      ~r{priv/gettext/.*(po)$},
-      ~r{lib/central_web/views/.*(ex)$},
-      ~r{lib/central_web/templates/.*(eex)$},
-      ~r{lib/teiserver_web/views/.*(ex)$},
-      ~r{lib/teiserver_web/templates/.*(eex)$}
+      ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
+      ~r"priv/gettext/.*(po)$",
+      ~r"lib/central_web/(live|views)/.*(ex)$",
+      ~r"lib/central_web/templates/.*(eex)$",
+      ~r"lib/teiserver_web/(live|views)/.*(ex)$",
+      ~r"lib/teiserver_web/templates/.*(eex)$"
     ]
   ]
 

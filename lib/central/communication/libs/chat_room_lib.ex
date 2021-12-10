@@ -1,4 +1,5 @@
 defmodule Central.Communication.ChatRoomLib do
+  @moduledoc false
   use CentralWeb, :library
 
   alias Central.Communication.ChatRoom

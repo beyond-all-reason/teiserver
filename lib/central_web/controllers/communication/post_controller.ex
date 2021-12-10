@@ -123,7 +123,7 @@ defmodule CentralWeb.Communication.PostController do
     |> render("show.html")
   end
 
-  def edit(conn, params = %{"id" => id}) do
+  def edit(conn, %{"id" => id} = params) do
     post = Communication.get_post!(id)
     changeset = Post.changeset(post)
 

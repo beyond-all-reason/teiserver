@@ -188,7 +188,11 @@ defmodule Central.AccountTest do
 
     @valid_attrs %{"reason" => "some reason"}
     @update_attrs %{"reason" => "some updated reason"}
-    @invalid_attrs %{"reason" => nil}
+    @invalid_attrs %{
+      "reason" => nil,
+      "target_id" => nil,
+      "reporter_id" => nil
+    }
 
     test "list_reports/0 returns reports" do
       AccountTestLib.report_fixture()
@@ -233,13 +237,11 @@ defmodule Central.AccountTest do
                    "target_id" => target.id,
                    "responder_id" => responder.id,
                    "response_text" => "Response text",
-                   "response_action" => "Ignore",
-                   # This should not be saved, it is set at creation
-                   "reason" => "updated reason"
+                   "response_action" => "Ignore"
                  })
                )
 
-      assert report.reason == "some reason"
+      assert report.reason == "some updated reason"
     end
 
     test "update_report/2 with invalid data returns error changeset" do

@@ -1,4 +1,5 @@
 defmodule CentralWeb.Communication.NotificationChannel do
+  @moduledoc false
   use Phoenix.Channel
 
   def join("communication_notification:" <> user_id, _params, socket) do

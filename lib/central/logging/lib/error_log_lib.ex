@@ -1,4 +1,5 @@
 defmodule Central.Logging.ErrorLogLib do
+  @moduledoc false
   use CentralWeb, :library
 
   alias Central.Logging.ErrorLog
@@ -60,11 +61,5 @@ defmodule Central.Logging.ErrorLogLib do
   def order(query, "Newest first") do
     from logs in query,
       order_by: [desc: logs.id]
-  end
-
-  def get_error_log_count do
-    get_logs()
-    |> search(:hidden, false)
-    |> count
   end
 end

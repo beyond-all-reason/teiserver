@@ -1,0 +1,100 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    <%= if @conn.params["search"] != nil do %>
+      show_search();
+    <% end %>
+  });
+
+  function show_search() {
+    $("#search-box-shower").hide();
+    $("#search-box").show(350);
+  }
+</script>
+
+<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "user"}) %>
+
+<div class="row page-row">
+  <div class="col-md-12">
+
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render CentralWeb.Admin.UserView, "section_menu.html",
+          conn: @conn,
+          permissions: @current_user.permissions,
+          show_search: false,
+          quick_search: @conn.params["s"],
+          active: if @conn.params["search"] != nil, do: "search", else: "index"
+        %>
+
+<%= if @conn.params["search"] != nil do %>
+  <%= render CentralWeb.Admin.UserView, "search.html", assigns %>
+<% else %>
+  <br /><br />
+<% end %>
+
+        <h4>
+          <%= if Enum.count(@users) > 0 do %>
+            Users - Row count: <%= Enum.count(@users) %>
+          <% else %>
+            No users found
+          <% end %>
+        </h4>
+        <table class="table table-hover table-sm">
+          <thead>
+            <tr>
+              <th class="d-lg-none d-xl-table-cell">ID</th>
+              <th colspan="3">Name</th>
+              <th colspan="2">Group</th>
+              <th>Email</th>
+
+              <th colspan="2"></th>
+            </tr>
+          </thead>
+          <tbody>
+
+        <%= for user <- @users do %>
+          <%
+            style = cond do
+              # user.inactive -> "background-color: #F77;"
+              # user.locked_at -> "background-color: #FCC;"
+              true -> ""
+            end
+          %>
+            <tr style={style}>
+              <td class="d-lg-none d-xl-table-cell"><%= user.id %></td>
+
+              <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
+                <%= central_component "icon", icon: user.icon %>
+              </td>
+              <td style={"background-color: #{rgba_css user.colour};"}><%= user.name %></td>
+              <td>&nbsp;</td>
+
+              <%= if user.admin_group do %>
+                <td style={"background-color: #{user.admin_group.colour}; color: #FFF;"} width="22">
+                  <%= central_component "icon", icon: user.admin_group.icon %>
+                </td>
+                <td style={"background-color: #{rgba_css user.admin_group.colour};"}><%= user.admin_group.name %></td>
+              <% else %>
+                <td colspan="2">&nbsp;</td>
+              <% end %>
+
+              <td><%= user.email %></td>
+
+              <td class="text-right">
+                <a href={Routes.admin_user_path(@conn, :show, user)} class="btn btn-secondary btn-sm">
+                  <i class="fa fa-eye"></i>
+                  Show
+                </a>
+              </td>
+            </tr>
+        <% end %>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

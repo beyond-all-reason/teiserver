@@ -1,4 +1,5 @@
 defmodule Central.General.QuickAction do
+  @moduledoc false
   alias Central.General.QuickAction.Cache
   alias Central.Helpers.StylingHelper
 
@@ -9,7 +10,7 @@ defmodule Central.General.QuickAction do
   Optionally you can include a few other options like so:
     %{label: "Preferences", icon: "far fa-cog", url: "/config/user", keywords: ["Settings"], permissions: "user-settings"},
 
-  If you want to make a two part form you can use something like: 
+  If you want to make a two part form you can use something like:
     %{label: "List users", icon: Central.Account.UserLib.icon(), input: "s", method: "get", placeholder: "Search username and/or email", url: "/admin/users", permissions: "admin.admin.limited"},
   """
   def add_items(items) do

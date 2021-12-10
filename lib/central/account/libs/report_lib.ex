@@ -1,4 +1,5 @@
 defmodule Central.Account.ReportLib do
+  @moduledoc false
   use CentralWeb, :library
   alias Central.Account.Report
 

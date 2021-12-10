@@ -1,4 +1,5 @@
 defmodule CentralWeb.Chat.Channel do
+  @moduledoc false
   use Phoenix.Channel
   alias Central.Communication
 

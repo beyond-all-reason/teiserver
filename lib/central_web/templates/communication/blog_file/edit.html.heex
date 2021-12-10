@@ -1,0 +1,23 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= render CentralWeb.Communication.GeneralView, "sub_menu.html", Map.put(assigns, :active, "files") %>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class={"card card-#{bsname} page-card"}>
+      <div class="card-body">
+        <%= render CentralWeb.Communication.BlogFileView, "section_menu.html",
+          conn: @conn,
+          permissions: @current_user.permissions,
+          show_search: true,
+          quick_search: "",
+          active: ""
+        %>
+
+        <hr />
+
+        <%= render "form.html", Map.put(assigns, :action, Routes.blog_file_path(@conn, :update, @blog_file)) %>
+      </div>
+    </div>
+  </div>
+</div>

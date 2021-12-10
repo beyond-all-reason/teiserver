@@ -1,0 +1,168 @@
+<%= render CentralWeb.Communication.BlogView, "sub_menu.html", assigns %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    var selected_comment = window.location.hash.substr(1).replace("comment-", "");
+    $("#comment-" + selected_comment).addClass("active");
+  });
+</script>
+
+<style type="text/css">
+  .post-author {
+    color: #AAA;
+    font-size: 0.9em;
+    text-align: center;
+  }
+
+  .post-content {
+    padding: 20px 0;
+  }
+
+  .post-tags {
+    float: right;
+  }
+
+  .post-comment {
+    margin: 15px 0 10px;
+  }
+
+  .post-comment.active {
+    padding: 10px;
+    background-color: #F5F5FF;
+  }
+
+  .image-link {
+    margin: 10px 5px;
+  }
+
+  .image-link img {
+    max-width: 100%;
+  }
+
+  code {
+    padding: 0;
+    color: #08A;
+  }
+</style>
+
+<%= if allow?(@current_user, "communications.blog.create") or @post.visible == false do %>
+  <div id="communications-reload" data-key={"post##{@post.id}"}></div>
+<% end %>
+
+<div id="" class="py-4">
+  <div class="container">
+
+    <div class="card">
+      <%= if @post.visible == false do %>
+        <div class="card-header alert-warning">
+
+          <%= if allow?(@current_user, "communications.post.create") do %>
+            <div class="float-right">
+              <a href={"#{Routes.blog_path(@conn, :show, @post.url_slug)}?key=#{get_key @post.url_slug}"} class="btn btn-warning2 btn-sm" style="margin-top: -3px;">
+                <i class="far fa-fw fa-eye"></i>
+                &nbsp;
+                Preview link
+              </a>
+
+              &nbsp;
+
+              <a href={Routes.blog_post_path(@conn, :edit, @post)} class="btn btn-warning2 btn-sm" style="margin-top: -3px;">
+                <i class="far fa-fw fa-wrench"></i>
+                &nbsp;
+                Edit post
+              </a>
+            </div>
+          <% end %>
+
+          This post is not yet published
+        </div>
+      <% end %>
+
+      <div class="card-body">
+        <a class="btn btn-sm float-right" style={"color: #FFF; background-color: #{@post.category.colour};"} href={Routes.blog_path(@conn, :category, @post.category.name)}>
+          <i class={"fa-fw #{@post.category.icon}"}></i>
+          <%= @post.category.name %>
+        </a>
+
+        <h2 style="text-align: center;"><%= @post.title %></h2>
+        <span class="post-author">
+          <%= @post.poster.name %>, <%= date_to_str @post.inserted_at, format: :dmy_text, tz: @tz %> in <a href={Routes.blog_path(@conn, :category, @post.category.name)}><%= @post.category.name %></a>
+        </span>
+
+        <div class="post-content">
+          <%= raw @post.content %>
+        </div>
+
+        <br /><br />
+        <div class="post-tags">
+          <%= for t <- @post.tags do %>
+            <a href={Routes.blog_path(@conn, :tag, t)} class="btn btn-outline-secondary">
+              <i class="far fa-fw fa-tag"></i>
+              <%= t %>
+            </a>
+          <% end %>
+        </div>
+
+        <div style="clear: both; padding-top: 5px;" id="comments">
+          <hr />
+        </div>
+
+        <%= cond do %>
+          <% @post.allow_comments == false -> %>
+
+          <% Enum.empty?(@post.comments) -> %>
+            <h5>No comments</h5>
+          <% Enum.count(@post.comments) == 1 -> %>
+            <h5>1 comment</h5>
+          <% true -> %>
+            <h5><%= Enum.count(@post.comments) %> comments</h5>
+        <% end %>
+
+        <%= for c <- @post.comments do %>
+          <div class="post-comment" id={"comment-#{c.id}"}>
+            <div class="post-comment-author" style={"color: #{c.poster.colour}"}>
+              <i class={"fa-fw #{c.poster.icon}"}></i>
+              &nbsp;
+              <strong><%= c.poster.name %></strong>
+              &nbsp;&nbsp;&nbsp;
+              <a href={"#comment-#{c.id}"}>
+                <%= date_to_str c.inserted_at, format: :hm_or_dmy, tz: @tz %>
+              </a>
+            </div>
+            <div class="post-comment-content">
+              <%= format_comment c.content %>
+            </div>
+          </div>
+        <% end %>
+        <br />
+
+        <%= if @post.allow_comments do %>
+          <%= if @current_user do %>
+            <hr />
+            <h5>Add comment</h5>
+            <form action={Routes.blog_path(@conn, :add_comment, @post)} method="post">
+              <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+              <div class="row">
+                <div class="col-sm-12">
+                  <textarea name="comment" id="comment_content" rows="8" class="form-control"></textarea>
+                  <br />
+
+                  <button type="submit" class={"btn btn-#{Central.Communication.CommentLib.colours() |> elem(2)} float-right"} style="padding-left: 40px; padding-right: 40px;">
+                    Add comment
+                  </button>
+                </div>
+              </div>
+            </form>
+          <% else %>
+            <a href={Routes.account_session_path(@conn, :new)} class="btn btn-primary">
+              Log in to comment
+            </a>
+          <% end %>
+        <% else %>
+          <h5>Comments are disabled for this post</h5>
+        <% end %>
+
+      </div>
+    </div>
+  </div>
+</div>

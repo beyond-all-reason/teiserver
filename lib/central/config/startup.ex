@@ -1,4 +1,5 @@
 defmodule Central.Config.Startup do
+  @moduledoc false
   use CentralWeb, :startup
 
   def startup do

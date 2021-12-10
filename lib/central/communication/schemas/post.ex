@@ -1,4 +1,5 @@
 defmodule Central.Communication.Post do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "communication_posts" do

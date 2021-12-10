@@ -1,4 +1,5 @@
 defmodule Central.Account.Guardian do
+  @moduledoc false
   use Guardian, otp_app: :central
 
   alias Central.Account

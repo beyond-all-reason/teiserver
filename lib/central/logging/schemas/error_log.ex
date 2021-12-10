@@ -1,4 +1,5 @@
 defmodule Central.Logging.ErrorLog do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "error_logs" do

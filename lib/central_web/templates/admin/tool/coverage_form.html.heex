@@ -1,0 +1,25 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= render CentralWeb.Admin.ToolView, "sub_menu.html", Map.merge(assigns, %{active: "coverage"})
+%>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+        <h4>
+          Coverage parser
+        </h4>
+
+        <form action={Routes.admin_tool_path(@conn, :coverage_post)} method="post" class="form-horizontal">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <textarea name="results" rows="8" class="form-control" style="font-family: monospace;" autofocus=""></textarea>
+          <br />
+
+          <input type="submit" value="Submit" name="form.submitted" class={"btn btn-#{bsname} float-right"} />
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

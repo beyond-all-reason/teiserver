@@ -1,4 +1,5 @@
 defmodule Central.Communication.ChatMembership do
+  @moduledoc false
   use CentralWeb, :schema
 
   @primary_key false

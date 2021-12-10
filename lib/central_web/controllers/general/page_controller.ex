@@ -8,7 +8,7 @@ defmodule CentralWeb.General.PageController do
       render(conn, "auth_index.html")
     else
       conn
-      |> put_layout("landing_page.html")
+      |> put_layout("unauth.html")
       |> render("index.html")
     end
   end

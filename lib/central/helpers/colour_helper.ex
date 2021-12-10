@@ -1,6 +1,5 @@
 defmodule Central.Helpers.ColourHelper do
-  @moduledoc """
-  """
+  @moduledoc false
 
   alias Central.Helpers.ColourHelper
 

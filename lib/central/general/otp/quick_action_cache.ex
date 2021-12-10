@@ -1,4 +1,5 @@
 defmodule Central.General.QuickAction.Cache do
+  @moduledoc false
   use GenServer
 
   @table_name :quick_action_cache

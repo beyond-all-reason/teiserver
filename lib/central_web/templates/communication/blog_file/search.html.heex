@@ -1,0 +1,61 @@
+<% {fg, _bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('.datepicker').datepicker({
+      format: "dd/mm/yyyy"
+    });
+
+    $('select').select2({
+      width: "100%",
+    });
+  });
+</script>
+
+<%= central_component "icon_dropdown_js", [] %>
+
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
+<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+
+<div class="row page-row">
+  <div class="col-md-12">
+    <div class={"card card-#{bsname}"}>
+      <div class="card-body">
+        <div class={"btn btn-outline btn-#{bsname}"} onclick="show_search();" id="search-box-shower">
+          <i class="far fa-fw fa-search"></i>
+          Show search form
+        </div>
+
+        <form action={Routes.blog_file_path(@conn, :search)} method="post" class="form-horizontal" id="search-box" style="display: none;">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <div class="row">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="title" class="control-label">Title: </label>
+              <input type="text" name="search[title]" id="title" value={@params[:title]} placeholder="" class="form-control" />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="group" class="control-label">Group: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[group]",
+                id: "search_group",
+                insert_blank: %{id: "", name: "All groups", icon: "fas fa-th", colour: fg},
+                selected: @params[:group],
+                enumerable: @groups
+              } %>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
+              &nbsp;<br />
+              <input type="submit" value="Search" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+            </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>

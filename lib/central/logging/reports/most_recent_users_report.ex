@@ -1,4 +1,5 @@
 defmodule Central.Logging.MostRecentUsersReport do
+  @moduledoc false
   use CentralWeb, :library
 
   alias Central.Account.User

@@ -1,4 +1,5 @@
 defmodule Central.Config.SiteConfig do
+  @moduledoc false
   use CentralWeb, :schema
 
   @primary_key false

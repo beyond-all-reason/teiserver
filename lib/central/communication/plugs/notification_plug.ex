@@ -1,4 +1,5 @@
 defmodule Central.Communication.NotificationPlug do
+  @moduledoc false
   import Plug.Conn
   alias Central.Communication
 

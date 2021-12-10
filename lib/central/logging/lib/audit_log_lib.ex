@@ -1,4 +1,5 @@
 defmodule Central.Logging.AuditLogLib do
+  @moduledoc false
   use CentralWeb, :library
 
   alias Central.Logging.AuditLog

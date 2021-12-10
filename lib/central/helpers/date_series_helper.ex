@@ -1,5 +1,5 @@
 defmodule Central.General.DateSeries do
-  @doc """
+  @moduledoc """
   Designed to take postgres date truncs and make a series from them
 
   Structure is {{year, month, day}, {hour, minute, second, millisecond}}

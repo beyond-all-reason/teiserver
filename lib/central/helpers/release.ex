@@ -1,4 +1,5 @@
 defmodule Central.Release do
+  @moduledoc false
   # centralapp eval "Central.Release.migrate"
   @app :central
 

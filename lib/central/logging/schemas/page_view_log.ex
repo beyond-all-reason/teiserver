@@ -1,4 +1,5 @@
 defmodule Central.Logging.PageViewLog do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "page_view_logs" do

@@ -22,7 +22,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> assign(:telemetry_battle, nil)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "nomenu_live.html"}}
   end
 
   @impl true

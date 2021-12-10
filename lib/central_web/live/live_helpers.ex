@@ -1,4 +1,5 @@
 defmodule CentralWeb.LiveHelpers do
+  @moduledoc false
   import Phoenix.LiveView.Helpers
 
   @doc """

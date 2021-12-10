@@ -6,7 +6,7 @@ defmodule CentralWeb.Logging.AggregateViewLogView do
   def icon(), do: Central.Logging.AggregateViewLogLib.icon()
 
   def convert_load_time(load_time) do
-    CentralWeb.Logging.PageViewLogView.convert_load_time(load_time)
+    round(load_time / 10) / 100
     |> to_string
   end
 
@@ -18,14 +18,13 @@ defmodule CentralWeb.Logging.AggregateViewLogView do
       105 + (150 - percentage * 150),
       50
     ]
-    |> Enum.map(fn colour ->
+    |> Enum.map_join(fn colour ->
       colour
       |> round
       |> Integer.to_string(16)
       |> to_string
       |> String.pad_leading(2, "0")
     end)
-    |> Enum.join("")
   end
 
   def heatmap(value, maximum, "red-green") do
@@ -36,14 +35,13 @@ defmodule CentralWeb.Logging.AggregateViewLogView do
       105 + percentage * 150,
       50
     ]
-    |> Enum.map(fn colour ->
+    |> Enum.map_join(fn colour ->
       colour
       |> round
       |> Integer.to_string(16)
       |> to_string
       |> String.pad_leading(2, "0")
     end)
-    |> Enum.join("")
   end
 
   def heatmap(value, maximum, "white-green") do
@@ -54,13 +52,12 @@ defmodule CentralWeb.Logging.AggregateViewLogView do
       255,
       255 - percentage * 200
     ]
-    |> Enum.map(fn colour ->
+    |> Enum.map_join(fn colour ->
       colour
       |> round
       |> Integer.to_string(16)
       |> to_string
       |> String.pad_leading(2, "0")
     end)
-    |> Enum.join("")
   end
 end

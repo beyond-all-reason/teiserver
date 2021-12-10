@@ -1,6 +1,5 @@
 defmodule Central.Helpers.TimexHelper do
-  @moduledoc """
-  """
+  @moduledoc false
 
   alias Timex.{Timezone, Timezone.Local}
 

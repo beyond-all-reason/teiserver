@@ -1,0 +1,115 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+    $('#the_tabs a:first').tab('show');
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+
+    page_quick_actions = [
+      {label: "User reports", icons: ["far fa-bars", "<%= Central.Account.ReportLib.icon() %>"], url: "<%= Routes.admin_report_path(@conn, :user_show, @user) %>", keywords: ["report"]},
+      {label: "Add report", icons: ["far fa-plus", "<%= Central.Account.ReportLib.icon() %>"], url: "<%= Routes.logging_page_view_log_path(@conn, :index) %>?user_id=<%= @user.id %>", keywords: ["add", "report"]},
+      {label: "Edit user", icons: ["far fa-wrench", "<%= icon() %>"], url: "<%= Routes.admin_user_path(@conn, :edit, @user) %>", keywords: ["edit", "user", "edit user"]},
+      {label: "Password reset", icons: ["far fa-shield-alt", "far fa-undo"], url: "<%= Routes.admin_user_path(@conn, :reset_password, @user.id) %>", keywords: ["reset", "password"]},
+
+    ];
+  });
+</script>
+
+<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "user"}) %>
+
+<div class="row page-row">
+  <div class="col-lg-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+
+        <%= render CentralWeb.Admin.UserView, "section_menu.html",
+          conn: @conn,
+          permissions: @current_user.permissions,
+          show_search: false,
+          quick_search: "",
+          active: ""
+        %>
+
+        <hr />
+
+        <%= if @edit_access do %>
+          <div class="float-right">
+            <div class="dropdown" style="display: inline-block;">
+              <div class={"btn btn-#{bsname} dropdown-toggle"} data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Actions
+              </div>
+              <%= render "actions.html", assigns %>
+            </div>
+
+            <a href={Routes.admin_user_path(@conn, :edit, @user)} class={"btn btn-outline-#{bsname}"}>
+              <i class="far fa-fw fa-wrench"></i>
+              Edit user
+            </a>
+          </div>
+        <% end %>
+
+        <h3><%= @user.name %></h3>
+        <br />
+
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+          <li>
+            <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
+              <%= central_component "icon", icon: icon() %>
+              Details
+            </a>
+          </li>
+
+          <%= if @edit_access do %>
+            <li>
+              <a href="#groups_tab" role="tab" class="nav-link" data-toggle="tab">
+                <%= central_component "icon", icon: Central.Account.GroupLib.icon() %>
+                Groups (<%= Enum.count(@user.groups) %>)
+              </a>
+            </li>
+
+            <li>
+              <a href="#permissions_tab" role="tab" class="nav-link" data-toggle="tab">
+                <%= central_component "icon", icon: Central.Account.AuthLib.icon() %>
+                Permissions
+              </a>
+            </li>
+
+            <li>
+              <a href="#settings_tab" role="tab" class="nav-link" data-toggle="tab">
+                <%= central_component "icon", icon: Central.Config.UserConfigLib.icon() %>
+                Settings
+              </a>
+            </li>
+          <% end %>
+        </ul>
+
+        <div class="tab-content">
+          <div class="tab-pane" id="details_tab">
+            <%= render "tab_details.html", assigns %>
+          </div>
+
+          <%= if @edit_access do %>
+            <div class="tab-pane" id="groups_tab">
+              <%= render "tab_groups.html", assigns %>
+            </div>
+
+            <div class="tab-pane" id="permissions_tab">
+              <%= render "tab_permissions.html", assigns %>
+            </div>
+
+            <div class="tab-pane" id="settings_tab">
+              <%= render "tab_settings.html", assigns %>
+            </div>
+          <% end %>
+        </div>
+
+        <hr />
+        <a href={Routes.admin_report_path(@conn, :user_show, @user)} class={"btn btn-outline-#{bsname}"}>
+          <%= central_component "icon", icon: Central.Account.ReportLib.icon() %>
+          Reports
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

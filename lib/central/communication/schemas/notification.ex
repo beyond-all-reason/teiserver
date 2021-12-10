@@ -1,4 +1,5 @@
 defmodule Central.Communication.Notification do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "communication_notifications" do

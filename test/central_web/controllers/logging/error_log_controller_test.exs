@@ -56,6 +56,6 @@ defmodule CentralWeb.Logging.ErrorLogControllerTest do
 
     conn = post(conn, Routes.logging_error_log_path(conn, :delete_all_post))
     assert redirected_to(conn) == Routes.logging_error_log_path(conn, :index)
-    assert Enum.count(Logging.list_error_logs()) == 0
+    assert Enum.empty?(Logging.list_error_logs())
   end
 end

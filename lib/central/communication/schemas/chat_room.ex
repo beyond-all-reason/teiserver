@@ -1,4 +1,5 @@
 defmodule Central.Communication.ChatRoom do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "communication_chat_rooms" do

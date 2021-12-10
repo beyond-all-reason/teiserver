@@ -1,6 +1,5 @@
 defmodule Central.Helpers.InputHelper do
-  @moduledoc """
-  """
+  @moduledoc false
 
   use Phoenix.HTML
   alias Phoenix.HTML.Form

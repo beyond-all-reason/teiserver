@@ -1,4 +1,5 @@
 defmodule Central.Communication.CommentLib do
+  @moduledoc false
   use CentralWeb, :library
   alias Central.Communication.Comment
 

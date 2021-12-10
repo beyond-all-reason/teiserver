@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <%= csrf_meta_tag() %>
+    <%= live_title_tag assigns[:page_title] || "New16", suffix: " · Phoenix Framework" %>
+    <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/app.css")}/>
+    <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/css/bootstrap.min.css")}/>
+    <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/css/shards.css")}/>
+    <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/css/layout.css")}/>
+    <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/css/styles.css")}/>
+    
+    <script>
+      window.userToken = "<%= assigns[:user_token] %>";
+    </script>
+     
+    <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
+    <script phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/js/jquery.min.js")}></script>
+    <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/js/bootstrap.min.js")}></script>
+    <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/js/fontawesome.js")}></script>
+    
+    <%# popper? %>
+    
+  </head>
+  <body class="fixed-navbar fixed-sidebar">
+    <%= @inner_content %>
+  </body>
+</html>

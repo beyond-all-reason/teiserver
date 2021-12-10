@@ -37,9 +37,10 @@ central-*.tar
 /config/*.secret.exs
 
 # Static
+/assets/static
 /assets/node_modules/
-/priv/static/
 /priv/certs/
+
 
 # Other
 /assets/static/images/landing/*

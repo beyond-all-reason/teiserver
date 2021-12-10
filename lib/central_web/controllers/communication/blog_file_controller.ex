@@ -139,45 +139,44 @@ defmodule CentralWeb.Communication.BlogFileController do
           end
         end
 
-        cond do
-          blog_file_params["file_upload"] != nil ->
-            storage_result =
-              BlogFileLib.store_file(
-                blog_file,
-                blog_file_params["file_upload"].path,
-                blog_file_params["file_upload"].filename
-              )
+        if blog_file_params["file_upload"] != nil do
+          storage_result =
+            BlogFileLib.store_file(
+              blog_file,
+              blog_file_params["file_upload"].path,
+              blog_file_params["file_upload"].filename
+            )
 
-            case storage_result do
-              {:ok, ext_path, file_size} ->
-                file_ext =
-                  try do
-                    ~r/\.([a-zA-Z0-9_]+)$/
-                    |> Regex.run(ext_path |> String.trim())
-                    |> Enum.fetch!(1)
-                    |> String.downcase()
-                  catch
-                    :error, _e ->
-                      "no ext found"
-                  end
+          case storage_result do
+            {:ok, ext_path, file_size} ->
+              file_ext =
+                try do
+                  ~r/\.([a-zA-Z0-9_]+)$/
+                  |> Regex.run(ext_path |> String.trim())
+                  |> Enum.fetch!(1)
+                  |> String.downcase()
+                catch
+                  :error, _e ->
+                    "no ext found"
+                end
 
-                blog_file
-                |> Communication.update_blog_file_upload(ext_path, file_ext, file_size)
+              blog_file
+              |> Communication.update_blog_file_upload(ext_path, file_ext, file_size)
 
-                conn
-                |> put_flash(:info, "File updated successfully.")
-                |> redirect(to: Routes.blog_file_path(conn, :show, blog_file))
+              conn
+              |> put_flash(:info, "File updated successfully.")
+              |> redirect(to: Routes.blog_file_path(conn, :show, blog_file))
 
-              {:error, msg} ->
-                conn
-                |> put_flash(:danger, msg)
-                |> render("new.html")
-            end
+            {:error, msg} ->
+              conn
+              |> put_flash(:danger, msg)
+              |> render("new.html")
+          end
 
-          true ->
-            conn
-            |> put_flash(:info, "File updated successfully.")
-            |> redirect(to: Routes.blog_file_path(conn, :edit, blog_file))
+        else
+          conn
+          |> put_flash(:info, "File updated successfully.")
+          |> redirect(to: Routes.blog_file_path(conn, :edit, blog_file))
         end
 
       {:error, %Ecto.Changeset{} = changeset} ->

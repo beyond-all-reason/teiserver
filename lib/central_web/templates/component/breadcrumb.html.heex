@@ -1,0 +1,16 @@
+<nav class="breadcrumb-wrapper" id="breadcrumb-wrapper" aria-label="breadcrumb">
+  <%= if assigns[:breadcrumb_extra] do %> 
+    <div id="breadcrumb-right">
+      <%= assigns[:breadcrumb_extra] %>
+    </div>
+  <% end %>
+  <%= for breadcrumb_trail <- @breadcrumb_trails do %>
+    <ol class="breadcrumb" id="breadcrumb">
+      <%= for breadcrumb <- breadcrumb_trail do %>
+        <li class="breadcrumb-item">
+          <a href={breadcrumb[:url]}><%= breadcrumb[:name] %></a>
+        </li>
+      <% end %>
+    </ol>
+  <% end %>
+</nav>

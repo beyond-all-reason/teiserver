@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :central, Central,
   site_title: "BAR - Teiserver",
@@ -32,7 +32,17 @@ config :central, CentralWeb.Endpoint,
   secret_key_base: "6FN12Jv4ZITAK1fq7ehD0MTRvbLsXYWj+wLY3ifkzzlcUIcpUJK7aG/ptrJSemAy",
   live_view: [signing_salt: "wZVVigZo"],
   render_errors: [view: CentralWeb.ErrorView, accepts: ~w(html json)],
+  # render_errors: [view: CentralWeb.ErrorView, accepts: ~w(html json), layout: false],
   pubsub_server: Central.PubSub
+
+config :esbuild,
+  version: "0.12.18",
+  default: [
+    args:
+      ~w(js/app.js --bundle --target=es2016 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
+    cd: Path.expand("../assets", __DIR__),
+    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+  ]
 
 config :central, Teiserver,
   ports: [
@@ -119,10 +129,13 @@ config :central, Oban,
   queues: [logging: 1, cleanup: 1, teiserver: 10]
 
 config :central, Central.Mailer,
+  adapter: Swoosh.Adapters.Local,
   noreply_name: "Teiserver Noreply",
-  noreply_name: "Teiserver Contact",
-  adapter: Bamboo.SMTPAdapter
+  noreply_address: "noreply@domain",
+  contact_address: "contact@domain"
+
+config :swoosh, :api_client, false
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
-import_config "#{Mix.env()}.exs"
+import_config "#{config_env()}.exs"

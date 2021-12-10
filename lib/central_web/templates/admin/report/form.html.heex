@@ -1,0 +1,29 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= form_for @changeset, @action, fn f -> %>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+  <% end %>
+
+  <div class="form-group row">
+    <div class="col-lg-6">
+      <%= label f, :name, class: "control-label" %>
+      <%= text_input f, :name, class: "form-control", autofocus: :autofocus %>
+      <%= error_tag f, :name %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <%= if @changeset.data.id do %>
+      <a href={Routes.admin_report_path(@conn, :show, @report)} class="btn btn-secondary btn-outline">
+        Cancel
+      </a>
+
+      <input type="submit" value="Save changes" name="form.submitted" class={"btn btn-#{bsname} float-right"} />
+    <% else %>
+      <input type="submit" value="Create" name="form.submitted" class={"btn btn-#{bsname} float-right"} />
+    <% end %>
+  </div>
+<% end %>

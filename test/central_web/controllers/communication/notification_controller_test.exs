@@ -39,7 +39,7 @@ defmodule CentralWeb.Communication.NotificationControllerTest do
       user.id
       |> Communication.list_user_notifications()
 
-    assert Enum.count(notifications) == 0
+    assert Enum.empty?(notifications)
   end
 
   test "create test notififcation", %{conn: conn, user: user} do
@@ -48,7 +48,7 @@ defmodule CentralWeb.Communication.NotificationControllerTest do
       user.id
       |> Communication.list_user_notifications()
 
-    assert Enum.count(notifications) == 0
+    assert Enum.empty?(notifications)
 
     conn =
       post(conn, Routes.communication_notification_path(conn, :quick_new),
@@ -171,7 +171,7 @@ defmodule CentralWeb.Communication.NotificationControllerTest do
       user.id
       |> Communication.list_user_notifications()
 
-    assert Enum.count(notifications) == 0
+    assert Enum.empty?(notifications)
   end
 
   test "mark all as read", %{conn: conn, user: user} do

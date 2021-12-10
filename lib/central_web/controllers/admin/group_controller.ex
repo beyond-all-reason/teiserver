@@ -440,7 +440,7 @@ defmodule CentralWeb.Admin.GroupController do
   end
 
   @spec update_membership(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def update_membership(conn, params = %{"user_id" => user_id, "group_id" => group_id}) do
+  def update_membership(conn, %{"user_id" => user_id, "group_id" => group_id} = params) do
     group = Account.get_group!(group_id)
 
     group_memberships = Account.list_group_memberships(user_id: conn.current_user.id)

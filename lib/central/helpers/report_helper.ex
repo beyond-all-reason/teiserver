@@ -1,6 +1,7 @@
 defmodule Central.Helpers.ReportHelper do
+  @moduledoc false
   # The intent here was for a function to fill in empty weeks with 0's
-  # for now though we're allowing empty weeks 
+  # for now though we're allowing empty weeks
 
   # # Given a start and an end, it will fill in all weekly segments with zeroes
   # def fill_in_segments(data, "weekly", default \\ 0) do

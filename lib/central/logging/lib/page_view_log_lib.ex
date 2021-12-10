@@ -1,4 +1,5 @@
 defmodule Central.Logging.PageViewLogLib do
+  @moduledoc false
   use CentralWeb, :library
 
   def colours(), do: {"#22AACC", "#EEFAFF", "info"}

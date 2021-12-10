@@ -1,4 +1,5 @@
 defmodule Central.Communication.Comment do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "communication_comments" do

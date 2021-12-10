@@ -1,0 +1,24 @@
+<% {_fg, _bg, bsname} = colours() %>
+<%
+  input_id = assigns[:input_id] || "account_group_picker_input"
+  input_name = assigns[:input_name] || "account_group"
+%>
+<script type="text/javascript">
+  $(function () {
+    $("#<%= input_id %>").keyup(function() {
+      if ($("#<%= input_id %>").val() == "?") {
+        $("#<%= input_id %>").val("");
+        account_group_picker('#<%= input_id %>');
+      }
+    });
+  });
+</script>
+
+<div class="input-group">
+  <span class="input-group-prepend">
+    <span class={"input-group-addon btn-#{bsname} btn-outline btn"} onclick={"account_group_picker('#{input_id}');"}>
+      <i class={"fa-fw #{icon()}"}></i>
+    </span>
+  </span>
+  <input type="text" class="form-control picker-input" id={input_id} name={input_name} placeholder="Type a ? or click the icon to the left to search" value={assigns[:value]} />
+</div>

@@ -1,4 +1,5 @@
 defmodule Central.Account.Code do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "account_codes" do

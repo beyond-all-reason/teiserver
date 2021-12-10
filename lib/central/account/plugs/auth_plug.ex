@@ -1,4 +1,5 @@
 defmodule Central.Account.AuthPlug do
+  @moduledoc false
   import Plug.Conn
 
   alias Central.Account

@@ -1,0 +1,120 @@
+<style type="text/css">
+  .blue-icon {
+    fill: #007bff;
+
+    -webkit-filter: drop-shadow( 1px 1px 2px #AAF );
+            filter: drop-shadow( 1px 1px 2px #AAF );
+  }
+
+  .card-svg-icon {
+    height: 120px;
+    padding: 20px 20px 0;
+    margin: 0 auto;
+  }
+
+  /* Nav */
+  .navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+  }
+
+  .navbar-dark .navbar-nav .nav-link:hover, .navbar-dark .navbar-nav .nav-link:focus {
+    color: rgba(255, 255, 255, 1);
+    font-size: 1.1rem;
+  }
+
+  #navbarNavDropdown .navbar-left .nav-link {
+    -webkit-transition: all 300ms linear;
+    -moz-transition: all 300ms linear;
+    -o-transition: all 300ms linear;
+    -ms-transition: all 300ms linear;
+    transition: all 300ms linear;
+
+    /*border-bottom: 1px solid #47C;*/
+    margin: 3px 5px;
+    padding: 5px 15px;
+  }
+
+  #navbarNavDropdown .navbar-left .nav-link:hover, #navbarNavDropdown .navbar-left .active {
+    /*border-bottom: 1px solid #FFF;*/
+    background-color: rgba(200, 200, 200, 0.25)
+  }
+
+  .landing-header {
+    height: 20vh;
+    min-height: 300px;
+  }
+
+  .codedirection {unicode-bidi:bidi-override; direction: rtl;}
+  .displaynone {display:none;}
+
+  footer {
+    color: #AAA;
+  }
+
+</style>
+
+<!-- Welcome Section -->
+<div class="welcome d-flex justify-content-center flex-column">
+  <div class="container">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light pt-4 px-0">
+      <a class="navbar-brand" href={Routes.general_page_path(@conn, :index)}>
+        <img src={Routes.static_path(@conn, "/images/logo/square_logo.svg")} width="30" class="mr-2">
+        <%= Application.get_env(:central, Central)[:site_title] %>
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav ml-auto">
+          <%= if Application.get_env(:central, Central)[:enable_blog] do %>
+            <li class="nav-item">
+              <a class="nav-link" href={Routes.blog_path(@conn, :index)}>
+                <i class={"fa-fw #{Central.Communication.BlogLib.icon()}"}></i>
+                Blog
+              </a>
+            </li>
+          <% end %>
+
+          <%= if @current_user == nil do %>
+            <li class="nav-item">
+              <a class="nav-link" href={Routes.account_session_path(@conn, :new)}>
+                <i class="fas fa-fw fa-sign-in-alt"></i>
+                Login
+              </a>
+            </li>
+          <% else %>
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="fas fa-fw fa-bars"></i>
+                Menu screen
+              </a>
+            </li>
+          <% end %>
+        </ul>
+
+      </div>
+    </nav>
+    <!-- / Navigation -->
+  </div>
+
+  <!-- Inner Wrapper -->
+  <div class="inner-wrapper mt-auto mb-auto container">
+    <div class="row">
+      <div class="col-md-12">
+          <h1 class="welcome-heading display-4">
+            <%= Application.get_env(:central, Central)[:site_title] %>
+          </h1>
+          <p class="">
+            <%= Application.get_env(:central, Central)[:site_description] %>
+          </p>
+          <a href={Routes.account_session_path(@conn, :new)} class="btn btn-lg btn-outline-primary btn-pill align-self-center">
+            Login
+          </a>
+      </div>
+    </div>
+  </div>
+  <!-- / Inner Wrapper -->
+</div>
+<!-- / Welcome Section -->

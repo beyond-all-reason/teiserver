@@ -24,17 +24,6 @@ defmodule CentralWeb.General.QuickAction.AjaxController do
       end)
       |> Enum.sort_by(fn row -> row.label end)
 
-    # TODO add site search
-    # search_item = %{
-    #   icons: ["fas fa-search"],
-    #   keywords: "search",
-    #   label: "Site search",
-    #   permissions: [],
-    #   input: "s",
-    #   method: "get",
-    #   url: "/search"
-    # }
-
     conn
     |> put_status(:ok)
     |> put_resp_content_type("application/json")

@@ -8,6 +8,10 @@ defmodule CentralWeb.Admin.GeneralController do
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
+  plug(AssignPlug,
+    sidemenu_active: ["admin"]
+  )
+
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do
     conn

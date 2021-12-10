@@ -1,0 +1,131 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    <%= if @show_search == true do %>
+      show_search();
+    <% end %>
+
+    $("#central-user-search").val("<%= @params[:central_user] %>");
+  });
+
+  function show_all() {
+    $(".show-button").hide();
+    $(".hide-button").show();
+    $(".json_details").show();
+  }
+
+  function hide_all() {
+    $(".show-button").show();
+    $(".hide-button").hide();
+    $(".json_details").hide();
+  }
+
+  function show_details(id) {
+    $("#show-" + id).hide();
+    $("#hide-" + id).show();
+    $("#details-" + id).show();
+  }
+
+  function hide_details(id) {
+    $("#hide-" + id).hide();
+    $("#show-" + id).show();
+    $("#details-" + id).hide();
+  }
+
+  function show_search() {
+    $("#search-box-shower").hide();
+    $("#search-box").show(350);
+  }
+</script>
+
+<style type="text/css">
+  .json_details {
+    display: none;
+  }
+</style>
+
+<%= render CentralWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "audit"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render CentralWeb.Logging.AuditLogView, "section_menu.html",
+          conn: @conn,
+          show_search: @show_search,
+          active: if @show_search, do: "search", else: "index"
+        %>
+
+        <div class="float-right">
+          <span class={"btn btn-#{bsname} btn-outline"} onclick="hide_all();">
+            Hide all
+          </span>
+
+          &nbsp;&nbsp;&nbsp;
+
+          <span class={"btn btn-#{bsname} btn-outline"} onclick="show_all();">
+            Show all
+          </span>
+        </div>
+
+<%= if @show_search do %>
+  <%= render CentralWeb.Logging.AuditLogView, "search.html",
+    conn: @conn,
+    params: @params,
+    actions: @actions,
+    permissions: @current_user.permissions
+  %>
+<% else %>
+  <br /><br />
+<% end %>
+
+        <h4>
+          Audit logs - Row count: <%= Enum.count(@logs) %>
+        </h4>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Details</th>
+              <th>Timestamp</th>
+              <th>Ip</th>
+
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+        <%= for log <- @logs do %>
+            <tr>
+              <td><%= log.action %></td>
+              <td>
+                <div class={"btn btn-outline-#{bsname} btn-sm show-button"} id={"show-#{log.id}"} onclick={"show_details(#{log.id});"}>
+                  <i class="far fa-fw fa-plus"></i>
+                </div>
+                <div class={"btn btn-outline-#{bsname} btn-sm hide-button"} id={"hide-#{log.id}"} onclick={"hide_details(#{log.id});"} style="display: none;">
+                  <i class="far fa-fw fa-minus"></i>
+                </div>
+
+                <div class="json_details" id={"details-#{log.id}"}>
+                  <%= Jason.encode!(log.details) %>
+                </div>
+              </td>
+              <td><%= date_to_str log.inserted_at, format: :hms_or_dmy, tz: @tz %></td>
+
+              <%= if Ecto.assoc_loaded?(log.user) do %>
+                <td><%= log.user.name %>, <%= log.ip %></td>
+              <% else %>
+                <td>&nbsp;</td>
+              <% end %>
+
+              <td class="text-right">
+                <%= link "Show", to: Routes.logging_audit_log_path(@conn, :show, log), class: "btn btn-secondary btn-sm" %>
+              </td>
+            </tr>
+        <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

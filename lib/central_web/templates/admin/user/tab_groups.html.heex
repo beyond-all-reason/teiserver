@@ -1,0 +1,19 @@
+<br />
+
+<table class="table table-striped">
+  <tbody>
+    <%= for group <- @user.groups do %>
+      <tr>
+        <td style={"background-color: #{group.colour}; color: #FFF;"}>
+          <i class={"fa-fw #{group.icon}"}></i>
+        </td>
+        <td><%= group.name %></td>
+        <td>
+          <a href={Routes.admin_group_path(@conn, :show, group.id)} class={"btn btn-sm btn-outline btn-#{elem(Central.Account.GroupLib.colours(), 2)}"}>
+            Show
+          </a>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

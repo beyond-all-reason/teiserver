@@ -24,8 +24,6 @@ defmodule CentralWeb.ErrorView do
   end
 
   def render("404.html", assigns) do
-    # TODO: Enable this
-    # add_error_log(error)
     render("404_not_found.html", assigns)
   end
 

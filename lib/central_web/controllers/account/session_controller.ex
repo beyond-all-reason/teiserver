@@ -1,7 +1,6 @@
 defmodule CentralWeb.Account.SessionController do
   use CentralWeb, :controller
   alias Central.Account
-  alias Central.Account.UserLib
 
   alias Central.{Account, Account.Guardian, Account.User}
 
@@ -58,8 +57,8 @@ defmodule CentralWeb.Account.SessionController do
 
   @spec forgot_password(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def forgot_password(conn, _params) do
-    key = UUID.uuid4()
-    value = UUID.uuid4()
+    key = UUID.uuid1()
+    value = UUID.uuid1()
     ConCache.put(:codes, key, value)
 
     conn
@@ -97,8 +96,8 @@ defmodule CentralWeb.Account.SessionController do
         |> redirect(to: "/")
 
       expected_value == nil ->
-        key = UUID.uuid4()
-        value = UUID.uuid4()
+        key = UUID.uuid1()
+        value = UUID.uuid1()
         ConCache.put(:codes, key, value)
 
         conn
@@ -108,8 +107,8 @@ defmodule CentralWeb.Account.SessionController do
         |> render("forgot_password.html")
 
       params[key] != expected_value ->
-        key = UUID.uuid4()
-        value = UUID.uuid4()
+        key = UUID.uuid1()
+        value = UUID.uuid1()
         ConCache.put(:codes, key, value)
 
         conn
@@ -119,8 +118,8 @@ defmodule CentralWeb.Account.SessionController do
         |> render("forgot_password.html")
 
       user.id == -1 ->
-        key = UUID.uuid4()
-        value = UUID.uuid4()
+        key = UUID.uuid1()
+        value = UUID.uuid1()
         ConCache.put(:codes, key, value)
 
         conn
@@ -130,8 +129,8 @@ defmodule CentralWeb.Account.SessionController do
         |> render("forgot_password.html")
 
       true ->
-        UserLib.reset_password_request(user)
-        |> Central.Mailer.deliver_now()
+        Central.Account.Emails.password_reset(user)
+        |> Central.Mailer.deliver()
 
         conn
         |> put_flash(:success, "Password reset sent out")

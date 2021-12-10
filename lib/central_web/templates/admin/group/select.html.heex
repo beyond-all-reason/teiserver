@@ -1,0 +1,36 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "user"}) %>
+
+<div class="row page-row">
+  <div class="col-md-12 col-lg-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render CentralWeb.Admin.GroupView, "section_menu.html", Map.merge(assigns, %{
+          quick_search: "",
+          show_search: false,
+          active: "new"
+        })
+        %>
+        <hr />
+
+        <div class="row">
+          <div class="col-md-6 offset-md-3">
+
+        <h4>Select type (optional)</h4>
+        <form action={Routes.admin_group_path(@conn, :new)} method="get" class="form-horizontal">
+          <div class="form-group" style="margin: 0 5px;">
+            <%= select :select, :type, @types, class: "form-control" %>
+          </div>
+          <br />
+
+          <input type="submit" value="Use type" class={"btn btn-#{bsname} float-right"} />
+        </form>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

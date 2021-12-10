@@ -1,4 +1,5 @@
 defmodule Central.CommunicationTestLib do
+  @moduledoc false
   alias Central.Communication
   alias Central.Helpers.GeneralTestLib
 
@@ -72,7 +73,7 @@ defmodule Central.CommunicationTestLib do
           "name" => "Name",
           "url" => "some_url#{:rand.uniform(999_999)}",
           "file_ext" => "png",
-          "file_size" => 1024_000_000
+          "file_size" => 1_024_000_000
         },
         params
       )

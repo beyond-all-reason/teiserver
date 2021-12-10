@@ -1,0 +1,152 @@
+<%
+{fg, bg, bsname} = assigns[:module].colours()
+# icon = assigns[:module].icon()
+uid = Enum.random(100000..999999) |> to_string
+%>
+
+<style type="text/css">
+  .<%= assigns[:name] %>-picker-row {
+    padding: 4px 5px;
+    cursor: pointer;
+    /*border-bottom: 1px solid #FFF;*/
+  }
+
+  .<%= assigns[:name] %>-picker-row:hover {
+    background-color: <%= bg %>;
+    /*border-bottom: 1px solid <%= fg %>;*/
+  }
+</style>
+
+<script type="text/javascript">
+  var timer = null;
+
+  $(function () {
+    $('[data-toggle="popover"]').popover();
+
+    $('#<%= assigns[:name] %>-picker-modal').on('shown.bs.modal', function (e) {
+      $('#<%= assigns[:name] %>-picker-ref').focus();
+    })
+
+    $("#<%= assigns[:name] %>-picker-ref").keyup(function() {
+      if (timer) {clearTimeout(timer);}
+
+      timer = setTimeout(function () {
+        <%= assigns[:name] %>_picker_search();
+      }, 300);
+    });
+  });
+
+  var <%= assigns[:name] %>_picker_target = "";
+
+  function <%= assigns[:name] %>_picker (new_target) {
+    <%= assigns[:name] %>_picker_target = $(new_target);
+
+    $('#<%= assigns[:name] %>-picker-ref').val('');
+    $('#<%= assigns[:name] %>-picker-modal-results').html('');
+    $('#<%= assigns[:name] %>-picker-modal').modal({});
+  }
+
+  function <%= assigns[:name] %>_picker_select (selection) {
+    $('#<%= assigns[:name] %>-picker-ref').val('');
+    $('#<%= assigns[:name] %>-picker-modal-results').html('');
+
+    <%= assigns[:name] %>_picker_target.val(selection);
+    $('#<%= assigns[:name] %>-picker-modal').modal('hide');
+
+    // To prevent scroll on close, add this to your css
+    // body.modal-open {
+    //     overflow: visible;
+    // }
+  }
+
+  function <%= assigns[:name] %>_picker_display (results) {
+    // if (results == "" && results != []) {return;}
+    $('#<%= assigns[:name] %>-picker-modal-results').html('');
+
+    var new_html = "";
+    var value = "";
+    var label = "";
+
+    for (var i = 0; i < results.length; i++) {
+      value = "" + results[i].html_value;
+      label = "" + results[i].html_label;
+      icon = "";
+
+      if (results[i].icon != null) {
+        icon = "<i class='fa-fw " + results[i].icon + "' style='color:" + results[i].colour + "'></i> "
+      }
+
+      new_html += '<div class={"#{assigns[:name]}-picker-row"} onclick="<%= assigns[:name] %>_picker_select(\'' + value.replace("'", "\\'") + '\');">' + icon + label + '</div>';
+    }
+
+    if (results.length == 0) {
+      new_html = "No results found";
+    }
+
+    $('#<%= assigns[:name] %>-picker-modal-results').html(new_html);
+  }
+
+  function <%= assigns[:name] %>_picker_search () {
+    search_term = $('#<%= assigns[:name] %>-picker-ref').val();
+    dataset = "<%= assigns[:name] %>";
+    uid = "<%= uid %>";
+
+    if (search_term.length < 3) {{return;}}
+
+    // $.ajax({
+    //   url: "<%= assigns[:path] %>",
+    //   data: {"ref": search_term}
+    // }).done(
+    //   <%= assigns[:name] %>_picker_display
+    // );
+    let live_search_channel = $("body").data("live_search_channel")
+
+    live_search_channel.push("search", {dataset: dataset, search_term: search_term, uid: uid})
+        .receive("error", e => console.log(e))
+  }
+
+  function live_search_results(results) {
+    <%= assigns[:name] %>_picker_display(results.results);
+  }
+</script>
+
+<div id="live-search-element" data-uid={uid}></div>
+
+<div class="modal fade" id={"#{assigns[:name]}-picker-modal"} tabindex="-1" role="dialog">
+  <div class="modal-lg modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header" style={"border-color: #{fg};"}>
+
+        <h4 class={"modal-title text-#{bsname}"}>
+          <i class="fa-fw icon %>"></i>
+          &nbsp;
+          <%= assigns[:title] %>
+        </h4>
+
+        <button type="button" class="picker-modal-close close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+
+      </div>
+
+      <div class="modal-body">
+        <form action="#" method="post" class="form-horizontal" onsubmit={"#{assigns[:name]}_picker_search(); return false;"}>
+          <div class="form-group">
+            <div class="col-sm-12">
+              <input type="text" name="username" id={"#{assigns[:name]}-picker-ref"} value="" placeholder="Start typing and the search will start automatically (3 or more characters needed)" class={"form-control text-#{bsname}"} autocomplete="off" />
+            </div>
+          </div>
+
+        </form>
+
+        <div id={"#{assigns[:name]}-picker-modal-results"}>
+
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Cancel</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

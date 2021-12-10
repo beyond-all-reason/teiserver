@@ -1,4 +1,5 @@
 defmodule Central.Logging.LoggingTestLib do
+  @moduledoc false
   use CentralWeb, :library
 
   alias Central.Logging.PageViewLog
@@ -46,9 +47,9 @@ defmodule Central.Logging.LoggingTestLib do
       "average_load_time" => 5678,
       "guest_view_count" => 13,
       "guest_unique_ip_count" => 4,
-      "percentile_load_time_95" => 12445,
-      "percentile_load_time_99" => 14788,
-      "max_load_time" => 19871,
+      "percentile_load_time_95" => 12_445,
+      "percentile_load_time_99" => 14_788,
+      "max_load_time" => 19_871,
       "hourly_views" => 1..24 |> Enum.map(&(&1 * 4)),
       "hourly_uniques" => 1..24 |> Enum.map(&(&1 * 6)),
       "hourly_average_load_times" => 1..24 |> Enum.map(&(&1 * 1987)),

@@ -1,4 +1,5 @@
 defmodule Central.Helpers.StylingHelper do
+  @moduledoc false
   alias HTMLIcons
 
   @spec colours(atom) :: {String.t(), String.t(), String.t()}

@@ -1,0 +1,92 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<style type="text/css">
+  .post-block {
+    display: block;
+    margin: 10px 0;
+    padding-bottom: 20px;
+    width: 100%;
+    border-bottom: 1px solid #EEE;
+  }
+
+  .post-short {
+    padding: 20px 0;
+  }
+
+  .post-author {
+    color: #AAA;
+  }
+
+  .post-block {
+    color: #333;
+  }
+
+  .post-block h4 {
+    color: #000;
+  }
+
+  .post-tags {
+    float: right;
+  }
+
+  .category {
+    float: right;
+    padding:
+  }
+</style>
+
+<%= render CentralWeb.Communication.BlogView, "sub_menu.html", Map.merge(assigns, %{active: "locations"}) %>
+
+<div id="" class="py-4">
+  <div class="container">
+
+    <div class="card flex-md-row mb-4 box-shadow h-md-250">
+      <div class="card-body d-flex flex-column align-items-start">
+
+<div class="post-block" style="margin-top: 0; padding-top: 0;">
+  <%= for category <- @categories do %>
+    <% btn_class = if assigns[:selected_category] != category.name, do: "-outline" %>
+    <a href={Routes.blog_path(@conn, :category, category.name)} class={"btn btn#{btn_class}-primary"}>
+      <i class={"fa-fw #{category.icon}"}></i>
+      &nbsp;
+      <%= category.name %>
+    </a>
+  <% end %>
+</div>
+
+<%= for p <- @posts do %>
+  <div class="post-block">
+    <div class="post-tags">
+      <%= for t <- p.tags do %>
+        <a href={Routes.blog_path(@conn, :tag, t)} class="badge badge-pill badge-outline-secondary">
+          <i class="far fa-fw fa-tag"></i>
+          <%= t %>
+        </a>
+      <% end %>
+    </div>
+
+    <h4>
+      <i class={"fa-fw #{p.category.icon}"} style={"color: #{p.category.colour}"}></i>
+      &nbsp;
+      <%= p.title %>
+    </h4>
+    <span class="post-author">
+      <%= p.poster.name %>, <%= date_to_str p.inserted_at, format: :dmy_text, tz: @tz %> in <a href={Routes.blog_path(@conn, :category, p.category.name)}><%= p.category.name %></a>
+    </span>
+
+    <div class="post-short">
+      <%= raw p.short_content %>
+    </div>
+
+    <a href={Routes.blog_path(@conn, :show, p.url_slug)} class={"btn btn-outline-#{bsname}"}>
+      &nbsp;&nbsp;&nbsp;
+      Continue reading
+      &nbsp;&nbsp;&nbsp;
+    </a>
+  </div>
+<% end %>
+
+      </div>
+    </div>
+  </div>
+</div>

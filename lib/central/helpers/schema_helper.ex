@@ -4,13 +4,13 @@ defmodule Central.Helpers.SchemaHelper do
   # import Central.Helpers.NumberHelper, only: [dec_parse: 1]
   import Ecto.Changeset, only: [get_field: 2]
 
-  # defp make_date(d) do
-  #   %{
-  #     "day" => Integer.to_string(d.day),
-  #     "month" => Integer.to_string(d.month),
-  #     "year" => Integer.to_string(d.year)
-  #   }
-  # end
+  defp make_date(d) do
+    %{
+      "day" => Integer.to_string(d.day),
+      "month" => Integer.to_string(d.month),
+      "year" => Integer.to_string(d.year)
+    }
+  end
 
   @spec make_datetime(Datetime.t()) :: Map.t()
   defp make_datetime(d) do
@@ -50,39 +50,39 @@ defmodule Central.Helpers.SchemaHelper do
             String.contains?(v, "/") ->
               d = Timex.parse!(v, "{h24}:{m}:{s} {0D}/{0M}/{YYYY}")
               {k, make_datetime(d)}
-              # TODO, regex never actually defined
-              # Regex.match?(@date_ymd_hms, v) ->
-              #   d = Timex.parse!(v, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}")
-              #   {k, make_datetime(d)}
+
+            String.contains?(v, "-") ->
+              d = Timex.parse!(v, "{YYYY}-{0M}-{0D} {h24}:{m}:{s}")
+              {k, make_datetime(d)}
           end
       end
     end)
   end
 
-  # def parse_dates(params, names) do
-  #   names = Enum.map(names, fn n -> Atom.to_string(n) end) ++ names
+  def parse_dates(params, names) do
+    names = Enum.map(names, fn n -> Atom.to_string(n) end) ++ names
 
-  #   params
-  #   |> Enum.map(fn {k, v} ->
-  #     cond do
-  #       Enum.member?(names, k) and is_map(v) ->
-  #         {k, v}
-  #       Enum.member?(names, k) and v == nil ->
-  #         {k, v}
-  #       Enum.member?(names, k) and String.trim(v) == "" ->
-  #         {k, v}
-  #       Enum.member?(names, k) ->
-  #         d = case String.length(v) do
-  #           8 -> Timex.parse!(v, "{0D}/{0M}/{YY}")
-  #           _ -> Timex.parse!(v, "{0D}/{0M}/{YYYY}")
-  #         end
-  #         {k, make_date(d)}
-  #       true ->
-  #         {k, v}
-  #     end
-  #   end)
-  #   |> Map.new
-  # end
+    params
+    |> Enum.map(fn {k, v} ->
+      cond do
+        Enum.member?(names, k) and is_map(v) ->
+          {k, v}
+        Enum.member?(names, k) and v == nil ->
+          {k, v}
+        Enum.member?(names, k) and String.trim(v) == "" ->
+          {k, v}
+        Enum.member?(names, k) ->
+          d = case String.length(v) do
+            8 -> Timex.parse!(v, "{0D}/{0M}/{YY}")
+            _ -> Timex.parse!(v, "{0D}/{0M}/{YYYY}")
+          end
+          {k, make_date(d)}
+        true ->
+          {k, v}
+      end
+    end)
+    |> Map.new
+  end
 
   # def parse_currency(params, names) do
   #   names = Enum.map(names, fn n -> Atom.to_string(n) end)

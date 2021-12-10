@@ -1,0 +1,31 @@
+<li class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle dropdown-toggle-icon-only" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="user-dropdown-link">
+    <i class="fas fa-user fa-fw fa-lg"></i>
+  </a>
+  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="user-dropdown-link" style="min-width: 300px; max-width: 500px;">
+    <a class="dropdown-item" href={Routes.account_general_path(@conn, :index)}>
+      <i class={"fa-fw #{Central.Account.icon()}"}></i>
+      &nbsp;
+      Account
+    </a>
+
+    <a class="dropdown-item" href={Routes.general_page_path(@conn, :recache)}>
+      <i class="far fa-sync fa-fw"></i>
+      &nbsp;
+      Refresh session cache
+    </a>
+
+    <hr style="margin: 0;" />
+
+    <form action={Routes.account_session_path(@conn, :logout)} method="post" class="link" id="signout-form" style="margin: 0;">
+      <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+      <a class="dropdown-item" data-submit="parent" href="#" rel="nofollow" onclick="$('#signout-form').submit();" id="signout-link">
+        <i class="far fa-sign-out fa-fw"></i>
+        &nbsp;
+        Sign out <%= @current_user.name %>
+      </a>
+    </form>
+
+  </div>
+</li>

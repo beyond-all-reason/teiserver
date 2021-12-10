@@ -1,4 +1,5 @@
 defmodule Central.Logging.Helpers do
+  @moduledoc false
   alias Central.Repo
   use Timex
 
@@ -56,10 +57,9 @@ defmodule Central.Logging.Helpers do
     traceback =
       try do
         error.stack
-        |> Enum.map(fn {module, function, arity, kwlist} ->
+        |> Enum.map_join("\n", fn {module, function, arity, kwlist} ->
           "#{kwlist[:file]}:#{kwlist[:line]}: #{module}.#{function}/#{arity}"
         end)
-        |> Enum.join("\n")
       catch
         :error, _e ->
           "Error converting traceback #{error.stack |> Kernel.inspect() |> String.slice(0, 4096)}"

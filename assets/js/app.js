@@ -1,71 +1,56 @@
-// We need to import the CSS so that webpack will load it.
-// The MiniCssExtractPlugin is used to separate it out into
-// its own CSS file.
-import "phoenix_html"
-import {Socket} from "phoenix"
-import NProgress from "nprogress"
-import {LiveSocket, debug} from "phoenix_live_view"
+// We import the CSS which is extracted to its own file by esbuild.
+// Remove this line if you add a your own CSS build pipeline (e.g postcss).
+import "../css/app.css"
 
-// Import local files
+// If you want to use Phoenix channels, run `mix help phx.gen.channel`
+// to get started and then uncomment the line below.
+// import "./user_socket.js"
+
+// You can include dependencies in two ways.
 //
-// Local files can be imported directly using relative paths, for example:
+// The simplest option is to put them in assets/vendor and
+// import them using relative paths:
+//
+//     import "./vendor/some-package.js"
+//
+// Alternatively, you can `npm install some-package` and import
+// them using a path starting with the package name:
+//
+//     import "some-package"
+//
+
+// Include phoenix_html to handle method=PUT/DELETE in forms and buttons.
+import "phoenix_html"
+// Establish Phoenix Socket and LiveView configuration.
+import {Socket} from "phoenix"
+import {LiveSocket} from "phoenix_live_view"
+import topbar from "../vendor/topbar"
+
+// Local files
 import socket from "./socket"
 import LiveSearch from "./live_search"
 import ChatApp from "./chat"
 import CommunicationNotification from "./communication_notification"
 
-$(function() {
-  LoadTest.init(socket);
+$(function () {
   LiveSearch.init(socket);
   ChatApp.init(socket);
   CommunicationNotification.init(socket);
 });
 
-let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
-// let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}});
+let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+let liveSocket = new LiveSocket("/live", Socket, {params: {_csrf_token: csrfToken}})
 
-let liveSocket = new LiveSocket("/live", Socket, {
-  params: {_csrf_token: csrfToken},
-  metadata: {
-    click: (e, el) => {
-      return {
-        altKey: e.altKey,
-        shiftKey: e.shiftKey,
-        ctrlKey: e.ctrlKey,
-        metaKey: e.metaKey,
-        x: e.x || e.clientX,
-        y: e.y || e.clientY,
-        pageX: e.pageX,
-        pageY: e.pageY,
-        screenX: e.screenX,
-        screenY: e.screenY,
-        offsetX: e.offsetX,
-        offsetY: e.offsetY,
-        detail: e.detail || 1,
-      }
-    },
-    keydown: (e, el) => {
-      return {
-        altGraphKey: e.altGraphKey,
-        altKey: e.altKey,
-        code: e.code,
-        ctrlKey: e.ctrlKey,
-        key: e.key,
-        keyIdentifier: e.keyIdentifier,
-        keyLocation: e.keyLocation,
-        location: e.location,
-        metaKey: e.metaKey,
-        repeat: e.repeat,
-        shiftKey: e.shiftKey
-      }
-    }
-  }
-})
+// Show progress bar on live navigation and form submits
+topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
+window.addEventListener("phx:page-loading-start", info => topbar.show())
+window.addEventListener("phx:page-loading-stop", info => topbar.hide())
 
-window.addEventListener("phx:page-loading-start", info => NProgress.start())
-window.addEventListener("phx:page-loading-stop", info => NProgress.done())
-
-
-// let liveSocket = new LiveSocket("/live", Socket)
+// connect if there are any LiveViews on the page
 liveSocket.connect()
+
+// expose liveSocket on window for web console debug logs and latency simulation:
+// >> liveSocket.enableDebug()
+// >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
+// >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket

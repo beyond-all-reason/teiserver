@@ -25,7 +25,25 @@ defmodule CentralWeb.Admin.ToolController do
   end
 
   @spec test_page(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def test_page(conn, _params) do
+  def test_page(conn, params) do
+    layout = case params["layout"] do
+      "unauth" -> "unauth.html"
+      "empty" -> "empty.html"
+      "nomenu" -> "nomenu.html"
+      "nomenu_live" -> "nomenu_live.html"
+      "admin_live" -> "admin_live.html"
+      _ -> "admin.html"
+    end
+
+    # This is for the live pages
+    flash = %{
+      success: "Example flash message success",
+      info: "Example flash message info",
+      primary: "Example flash message primary",
+      warning: "Example flash message warning",
+      danger: "Example flash message danger",
+    }
+
     conn
     |> put_flash(:success, "Example flash message success")
     |> put_flash(:info, "Example flash message info")
@@ -33,6 +51,9 @@ defmodule CentralWeb.Admin.ToolController do
     |> put_flash(:warning, "Example flash message warning")
     |> put_flash(:danger, "Example flash message danger")
     |> add_breadcrumb(name: 'Test page', url: '#')
+    |> assign(:socket, conn)
+    |> assign(:flash, flash)
+    |> put_layout(layout)
     |> render("test_page.html")
   end
 

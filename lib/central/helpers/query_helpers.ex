@@ -1,4 +1,5 @@
 defmodule Central.Helpers.QueryHelpers do
+  @moduledoc false
   alias Central.Repo
   import Ecto.Query, warn: false
 

@@ -1,4 +1,5 @@
 defmodule Central.Logging.AuditLog do
+  @moduledoc false
   use CentralWeb, :schema
 
   schema "audit_logs" do

@@ -1,4 +1,5 @@
 defmodule Central.Account.GroupMembershipLib do
+  @moduledoc false
   use CentralWeb, :library
 
   alias Central.Account.GroupMembership

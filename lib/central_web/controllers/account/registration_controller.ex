@@ -12,7 +12,7 @@ defmodule CentralWeb.Account.RegistrationController do
 
     conn
     |> assign(:changeset, changeset)
-    |> put_layout("general.html")
+    |> put_layout("empty.html")
     |> render("new.html")
   end
 
@@ -28,7 +28,7 @@ defmodule CentralWeb.Account.RegistrationController do
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
         |> assign(:changeset, changeset)
-        |> put_layout("general.html")
+        |> put_layout("empty.html")
         |> render("new.html")
     end
   end

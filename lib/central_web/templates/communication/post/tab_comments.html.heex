@@ -1,0 +1,35 @@
+<%# {_fg, _bg, _bsname} = Central.Communication.CommentLib.colours() %>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th colspan="2">Poster</th>
+      <th>Content</th>
+      <th>Timestamp</th>
+      <th>&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for c <- @post.comments do %>
+    <tr>
+      <td style={"background-color: #{c.poster.colour}; color: #FFF;"} width="22">
+        <i class={"fa-fw #{c.poster.icon}"}></i>
+      </td>
+      <td style={"background-color: #{rgba_css c.poster.colour};"}>
+        &nbsp;
+        <%= c.poster.name %>
+      </td>
+
+      <td><%= c.content |> String.slice(0..40) %></td>
+      <td><%= date_to_str c.inserted_at, format: :hms_or_dmy, tz: @tz %></td>
+
+      <td>
+        <a href={Routes.blog_comment_path(@conn, :show, c)} class="btn-sm btn btn-secondary">
+          <i class="far fa-fw fa-eye"></i>
+          Show
+        </a>
+      </td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>

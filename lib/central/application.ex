@@ -6,6 +6,7 @@ defmodule Central.Application do
   use Application
   require Logger
 
+  @impl true
   def start(_type, _args) do
     # List all child processes to be supervised
     children =
@@ -102,7 +103,7 @@ defmodule Central.Application do
     :telemetry.attach_many("oban-logger", events, &Central.ObanLogger.handle_event/4, [])
 
     ~w(General Config Account Admin Logging Communication)
-    |> Enum.map(&env_startup/1)
+    |> Enum.each(&env_startup/1)
 
     Application.get_env(:central, Extensions)[:startups]
     |> Enum.each(fn m ->
@@ -121,11 +122,13 @@ defmodule Central.Application do
 
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
+  @impl true
   def config_change(changed, _new, removed) do
     CentralWeb.Endpoint.config_change(changed, removed)
     :ok
   end
 
+  @impl true
   def prep_stop(state) do
     CentralWeb.Endpoint.broadcast(
       "application",

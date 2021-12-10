@@ -1,4 +1,5 @@
 defmodule Central.Communication.BlogFileLib do
+  @moduledoc false
   use CentralWeb, :library
 
   alias Central.Communication.BlogFile
@@ -92,124 +93,6 @@ defmodule Central.Communication.BlogFileLib do
     query
   end
 
-  # def _preload_things(query) do
-  #   from blog_files in query,
-  #     left_join: things in assoc(blog_files, :things),
-  #     preload: [things: things]
-  # end
-
-  # @spec get_blog_file(integer) :: Ecto.Query.t
-  # def get_blog_file(blog_file_id) do
-  #   from blog_files in BlogFile,
-  #     where: blog_files.id == ^blog_file_id
-  # end
-
-  # @spec get_blog_file_from_slug(String.t()) :: BlogFile.t
-  # def get_blog_file_from_slug(slug) do
-  #   query = from blog_files in BlogFile,
-  #     where: blog_files.url == ^slug
-
-  #   Repo.one(query)
-  # end
-
-  # @spec get_blog_files() :: Ecto.Query.t
-  # def get_blog_files() do
-  #   from blog_files in BlogFile
-  # end
-
-  # @spec search(Ecto.Query.t, atom, nil) :: Ecto.Query.t
-  # @spec search(Ecto.Query.t, atom, String.t()) :: Ecto.Query.t
-  # def search(query, _, nil), do: query
-  # def search(query, _, ""), do: query
-
-  # def search(query, :simple_search, value) do
-  #   value_like = "%" <> String.replace(value, "*", "%") <> "%"
-
-  #   # TODO from blueprints
-  #   # Put in the simple-search strings here
-
-  #   from blog_files in query,
-  #     where: (
-  #            ilike(blog_files.str1, ^value_like)
-  #         or ilike(blog_files.str2, ^value_like)
-  #       )
-  # end
-
-  # # def search(query, :groups, groups) do
-  # #   from blog_files in query,
-  # #     where: blog_files.group_id in ^groups
-  # # end
-
-  # def search(query, :name, name) do
-  #   name = "%" <> String.replace(name, "*", "%") <> "%"
-
-  #   from blog_files in query,
-  #     where: ilike(blog_files.name, ^name)
-  # end
-
-  # def search(query, :url, url) do
-  #   url = "%" <> String.replace(url, "*", "%") <> "%"
-
-  #   from blog_files in query,
-  #     where: ilike(blog_files.url, ^url)
-  # end
-
-  # def search(query, :file_path, file_path) do
-  #   file_path = "%" <> String.replace(file_path, "*", "%") <> "%"
-
-  #   from blog_files in query,
-  #     where: ilike(blog_files.file_path, ^file_path)
-  # end
-
-  # def search(query, :file_ext, file_ext) do
-  #   file_ext = "%" <> String.replace(file_ext, "*", "%") <> "%"
-
-  #   from blog_files in query,
-  #     where: ilike(blog_files.file_ext, ^file_ext)
-  # end
-
-  # def search(query, :file_size, file_size) do
-  #   from blog_files in query,
-  #     where: blog_files.file_size == ^file_size
-  # end
-
-  # def search(query, :file_type, file_type) do
-  #   file_type = "%" <> String.replace(file_type, "*", "%") <> "%"
-
-  #   from blog_files in query,
-  #     where: ilike(blog_files.file_type, ^file_type)
-  # end
-
-  # def search(query, :ids, ids) do
-  #   from blog_files in query,
-  #     where: blog_files.id in ^ids
-  # end
-
-  # def search(query, :inserted_at_start, inserted_at_start) do
-  #   inserted_at_start = Timex.parse!(inserted_at_start, "{0D}/{0M}/{YYYY}")
-
-  #   from blog_files in query,
-  #     where: blog_files.inserted_at > ^inserted_at_start
-  # end
-
-  # def search(query, :inserted_at_end, inserted_at_end) do
-  #   inserted_at_end = Timex.parse!(inserted_at_end, "{0D}/{0M}/{YYYY}")
-
-  #   from blog_files in query,
-  #     where: blog_files.inserted_at < ^inserted_at_end
-  # end
-
-  # @spec order(Ecto.Query.t, String.t()) :: Ecto.Query.t
-  # def order(query, "Newest first") do
-  #   from blog_files in query,
-  #     order_by: [desc: blog_files.inserted_at]
-  # end
-
-  # def order(query, "Oldest first") do
-  #   from blog_files in query,
-  #     order_by: [asc: blog_files.inserted_at]
-  # end
-
   def build_filename(the_file, filename) do
     "i#{the_file.id}_#{filename}"
     |> String.replace("'", "")
@@ -221,17 +104,17 @@ defmodule Central.Communication.BlogFileLib do
       |> Keyword.get(:save_path)
 
     # Stat the upload
-    upload_stat = :os.cmd('stat --printf="%s" #{upload_path}')
+    {upload_stat, _} = System.cmd("stat", ["--printf=\"%s\"", upload_path])
 
     upload_path = upload_path
     filename = build_filename(the_file, filename)
     new_path = "#{the_file_save_path}/#{filename}"
 
     # Now move it
-    :os.cmd('mv "#{upload_path}" "#{new_path}";')
+    System.cmd("mv", [upload_path, new_path])
 
     # Stat the moved file
-    moved_stat = :os.cmd('stat --printf="%s" "#{new_path}"')
+    {moved_stat, _} = System.cmd("stat", ["--printf=\"%s\"", new_path])
 
     if moved_stat == upload_stat do
       {:ok, new_path, moved_stat |> to_string}
@@ -254,14 +137,13 @@ defmodule Central.Communication.BlogFileLib do
     actual_path = "#{base_path}#{file_name}"
 
     moved_stat =
-      'stat --printf="%s" "#{actual_path}"'
-      |> :os.cmd()
-      |> to_string
+      System.cmd("stat", ["--printf=\"%s\"", actual_path])
+      |> elem(0)
       |> String.slice(0..17)
 
     if moved_stat != "stat: cannot stat " do
       # Do delete
-      :os.cmd('rm "#{actual_path}"')
+      System.cmd("rm", [actual_path])
 
       # Re-call this function
       delete_file(file)

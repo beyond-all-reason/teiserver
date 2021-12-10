@@ -1,4 +1,5 @@
 defmodule Central.General.Startup do
+  @moduledoc false
   use CentralWeb, :startup
 
   def startup do
@@ -122,9 +123,10 @@ defmodule Central.General.Startup do
     })
 
     # Need to get the timezones
-    zones = 'timedatectl list-timezones'
-      |> :os.cmd()
-      |> to_string
+    zones = "timedatectl"
+      |> System.cmd(["list-timezones"])
+      |> elem(0)
+      |> String.trim
       |> String.split("\n")
 
     add_user_config_type(%{

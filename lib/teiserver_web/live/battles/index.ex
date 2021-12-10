@@ -34,7 +34,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:extra_menu_content, extra_content)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "blank_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "nomenu_live.html"}}
   end
 
   @impl true

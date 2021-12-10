@@ -1,0 +1,39 @@
+<%# {fg, bg, bsname} = colours() %>
+
+<div class="row page-row">
+  <div class="col-md-12 col-lg-6">
+    <h4>Super groups</h4>
+    <table class="table">
+      <tbody>
+        <%= for g <- @super_groups do %>
+        <tr>
+          <td><%= g.name %></td>
+          <td>
+            <a href={Routes.admin_group_path(@conn, :show, g.id)} class="btn btn-secondary btn-sm">
+              Show
+            </a>
+          </td>
+        </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col-md-12 col-lg-6">
+    <h4>Child groups</h4>
+    <table class="table">
+      <tbody>
+        <%= for g <- @child_groups do %>
+        <tr>
+          <td><%= g.name %></td>
+          <td>
+            <a href={Routes.admin_group_path(@conn, :show, g.id)} class="btn btn-secondary btn-sm">
+              Show
+            </a>
+          </td>
+        </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

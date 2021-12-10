@@ -1,4 +1,5 @@
 defmodule Central.Admin.ToolLib do
+  @moduledoc false
   use CentralWeb, :library
 
   @spec colours :: {String.t(), String.t(), String.t()}

@@ -1,4 +1,5 @@
 defmodule Central.Account.GroupCacheLib do
+  @moduledoc false
   use CentralWeb, :library
 
   alias Central.Account
@@ -69,8 +70,9 @@ defmodule Central.Account.GroupCacheLib do
     |> Enum.map(fn sg ->
       new_cache =
         sg.children_cache
-        |> Enum.filter(fn g -> g != the_group.id end)
-        |> Enum.filter(fn g -> !Enum.member?(the_group.children_cache, g) end)
+        |> Enum.filter(fn g ->
+          g != the_group.id and not Enum.member?(the_group.children_cache, g)
+        end)
 
       sg
       |> Group.update_children_cache(new_cache)
@@ -85,7 +87,7 @@ defmodule Central.Account.GroupCacheLib do
     # the_group in it's children_cache
     Account.list_groups(search: [id_list: super_group.supers_cache])
     |> prepend_to_list(super_group)
-    |> Enum.map(fn sg ->
+    |> Enum.each(fn sg ->
       new_cache =
         ([the_group.id | sg.children_cache ++ the_group.children_cache])
         |> Enum.uniq()

@@ -4,7 +4,7 @@
       <div class="card card-default" style="background-color: transparent;">
         <div class="card-header" style="background-color: transparent;">
           <h3 class="card-title">
-            <img src='<%= Routes.static_path(@conn, "/images/logo/logo favicon.png") %>'
+            <img src='<%= Routes.static_path(@conn, "/images/logo/logo_favicon.png") %>'
             height="42" style="margin-right: 5px;" class="d-inline align-top"
           />
             Code of Conduct

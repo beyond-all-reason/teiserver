@@ -8,7 +8,7 @@ defmodule CentralWeb.Communication.BlogController do
 
   plug :add_breadcrumb, name: 'Blog', url: '/blog'
 
-  plug :put_layout, "landing_page.html"
+  plug :put_layout, "unauth.html"
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, _params) do
@@ -77,7 +77,7 @@ defmodule CentralWeb.Communication.BlogController do
   end
 
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def show(conn, params = %{"id" => url_id}) do
+  def show(conn, %{"id" => url_id} = params) do
     post =
       Communication.get_post_by_url_slug(url_id,
         joins: [
@@ -100,19 +100,19 @@ defmodule CentralWeb.Communication.BlogController do
           true -> false
         end
 
-      cond do
-        visibility == false ->
-          conn
-          |> render("not_found.html")
 
-        true ->
-          conn
-          |> assign(
-            :title,
-            "#{Application.get_env(:central, Central)[:site_title]} - " <> post.title
-          )
-          |> assign(:post, post)
-          |> render("show.html")
+      if visibility == false do
+        conn
+        |> render("not_found.html")
+
+      else
+        conn
+        |> assign(
+          :title,
+          "#{Application.get_env(:central, Central)[:site_title]} - " <> post.title
+        )
+        |> assign(:post, post)
+        |> render("show.html")
       end
     else
       conn

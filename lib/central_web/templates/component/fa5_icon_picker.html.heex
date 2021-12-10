@@ -1,0 +1,64 @@
+<%
+  form = if is_atom(@form) do
+    %{id: @form, name: @form, data: Map.new([{@field, assigns[:default] || ""}])}
+  else
+    @form
+  end
+
+  onchange = assigns[:onchange] || ""
+  free_only = assigns[:free_only] || false
+
+  field_id = "#{form.name}_#{@field}"
+
+  {thickness, the_icon} = case (Map.get(form.data, @field) || "") |> String.split(" ") do
+    [a, b] -> {a, b}
+    [the_icon] -> {"fas", the_icon}
+  end
+%>
+
+<script type="text/javascript">
+  function icon_updated_<%= field_id %>() {
+    thickness = $('#<%= "#{field_id}_thickness" %>').val();
+    icon = $('#<%= "#{field_id}_icon" %>').val();
+
+    $('#<%= field_id %>').val(thickness + ' ' + icon);
+
+    $('#<%= "#{field_id}_preview" %>').html("<i class='fa-2x fa-fw " + thickness + " " + icon + "'></i>");
+  }
+
+  $(function() {
+    $('#<%= "#{field_id}_thickness" %>').val('<%= thickness %>');
+    $('#<%= "#{field_id}_icon" %>').val('<%= the_icon %>');
+    icon_updated_<%= field_id %>();
+  });
+</script>
+
+<div class="row">
+  <%= if assigns[:no_link] != true do %>
+  <div class="col-md-12">
+    <%= if assigns[:short_link] == true do %>
+      <label class="control-label"><a href="https://fontawesome.com/icons" target="_blank">fontawesome.com/icons</a></label>
+    <% else %>
+      <%= label form, @field, class: "control-label" %> <em>For a list of icons see: <a href={"https://fontawesome.com/icons#{if free_only, do: '?d=gallery&m=free'}"} target="_blank">fontawesome.com/icons</a></em><br />
+    <% end %>
+  </div>
+  <% end %>
+
+  <input type="hidden" name={"#{form.name}[#{@field}]"} id={field_id} value={Map.get(form.data, @field)} />
+
+  <div class="col-md-4">
+    <select class="form-control" id={"#{field_id}_thickness"} onchange={"icon_updated_#{field_id}(); #{onchange}"}>
+      <option value="far">Regular (far)</option>
+      <option value="fal">Light (fal)</option>
+      <option value="fas">Solid (fas)</option>
+      <option value="fab">Brand (fab)</option>
+      <option value="fad">Duotone (fad)</option>
+    </select>
+  </div>
+  <div class="col-md-6">
+    <input type="text" id={"#{field_id}_icon"} value="" placeholder="" class="form-control" onchange={"icon_updated_#{field_id}(); #{onchange}"} onkeyup={"icon_updated_#{field_id}();"} />
+  </div>
+  <div class="col-md-2" id={"#{field_id}_preview"}>
+    &nbsp;
+  </div>
+</div>

@@ -1,4 +1,5 @@
 defmodule Central.Helpers.FileHelper do
+  @moduledoc false
   import Phoenix.HTML, only: [raw: 1]
 
   def icon_and_colour(type) do
