@@ -4,7 +4,7 @@ defmodule Central.MixProject do
   def project do
     [
       app: :central,
-      version: "0.1.0",
+      version: "1.1.0",
       elixir: "1.12.2",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
