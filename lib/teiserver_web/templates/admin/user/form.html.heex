@@ -1,0 +1,141 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= form_for @changeset, @action, fn f -> %>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+  <% end %>
+
+  <div class="form-group row">
+    <div class="col-lg-6">
+      <%= label f, :name, class: "control-label" %>
+      <%= text_input f, :name, class: "form-control", disabled: "disabled" %>
+      <%= error_tag f, :name %>
+    </div>
+
+    <%= if allow?(@conn, "teiserver.admin.account") do %>
+      <div class="col-lg-6">
+        <%= label f, :email, class: "control-label" %>
+        <%= text_input f, :email, class: "form-control" %>
+        <%= error_tag f, :email %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="form-group row">
+    <div class="col-lg-6">
+      <%= central_component "checkbox",
+        id: "user_verified",
+        name: "user[verified]",
+        label: "Verified",
+        checked: @changeset.data.data["verified"],
+        changes: nil,
+        data: nil
+      %>
+
+      <%= central_component "checkbox",
+        id: "user_bot",
+        name: "user[bot]",
+        label: "Bot",
+        checked: @changeset.data.data["bot"],
+        changes: nil,
+        data: nil
+      %>
+
+      <%= central_component "checkbox",
+        id: "user_trusted",
+        name: "user[trusted]",
+        label: "Trusted",
+        checked: ("Trusted" in (@changeset.data.data["roles"] || [])),
+        changes: nil,
+        data: nil
+      %>
+
+      <%= central_component "checkbox",
+        id: "user_tester",
+        name: "user[tester]",
+        label: "Tester",
+        checked: ("Tester" in (@changeset.data.data["roles"] || [])),
+        changes: nil,
+        data: nil
+      %>
+
+      <%= central_component "checkbox",
+        id: "user_non-bridged",
+        name: "user[non-bridged]",
+        label: "Non-bridged",
+        checked: ("Non-bridged" in (@changeset.data.data["roles"] || [])),
+        changes: nil,
+        data: nil
+      %>
+
+      <%= central_component "checkbox",
+        id: "user_moderator",
+        name: "user[moderator]",
+        label: "Moderator",
+        checked: @changeset.data.data["moderator"],
+        changes: nil,
+        data: nil
+      %>
+    </div>
+
+    <div class="col-lg-6">
+      <%= central_component "checkbox",
+        id: "user_streamer",
+        name: "user[streamer]",
+        label: "Streamer",
+        checked: ("Streamer" in (@changeset.data.data["roles"] || [])),
+        changes: nil,
+        data: nil
+      %>
+
+      <%= central_component "checkbox",
+        id: "user_donor",
+        name: "user[donor]",
+        label: "Donor",
+        checked: ("Donor" in (@changeset.data.data["roles"] || [])),
+        changes: nil,
+        data: nil
+      %>
+
+      <%= central_component "checkbox",
+        id: "user_contributor",
+        name: "user[contributor]",
+        label: "Contributor",
+        checked: ("Contributor" in (@changeset.data.data["roles"] || [])),
+        changes: nil,
+        data: nil
+      %>
+
+      <%= central_component "checkbox",
+        id: "user_developer",
+        name: "user[developer]",
+        label: "Developer",
+        checked: ("Developer" in (@changeset.data.data["roles"] || [])),
+        changes: nil,
+        data: nil
+      %>
+    </div>
+  </div>
+
+  <hr />
+
+  <div class="form-group">
+    <%= input_with_type f, :colour, "color" %>
+  </div>
+
+  <div class="form-group">
+    <%= central_component "fa5_icon_picker", %{form: f, field: :icon} %>
+  </div>
+
+  <div class="form-group">
+    <%= if @changeset.data.id do %>
+      <a href={Routes.ts_admin_user_path(@conn, :show, @user)} class="btn btn-secondary btn-outline">
+        Cancel
+      </a>
+    <% end %>
+
+    <input type="submit" value="Save changes" name="form.submitted" class={"btn btn-#{bsname} float-right"} />
+  </div>
+<% end %>

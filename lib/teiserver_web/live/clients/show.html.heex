@@ -1,0 +1,62 @@
+<% {_fg, _bg, bsname} = @colours %>
+
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", %{active: "users", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+
+<%#= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{conn: @socket, active: "users"}) %>
+
+<a href={Routes.ts_admin_user_path(@socket, :edit, @user.id)} class={"float-right btn btn-#{bsname}"}>
+  Edit account
+</a>
+
+<h3>
+  <%= @user.name %>
+</h3>
+
+<ul>
+  <li>Bot: <%= @user.bot %></li>
+  <li>Moderator: <%= @user.moderator %></li>
+  <li>Verified: <%= @user.verified %></li>
+  <li>Battle: <%= if @client.lobby_id do %>
+    <%= live_redirect "Battle ##{@client.lobby_id}", to: Routes.ts_battle_lobby_show_path(@socket, :show, @client.lobby_id), class: "" %>
+  <% else %>
+    nil
+  <% end %></li>
+</ul>
+
+<%= if allow?(@current_user, "admin.dev.developer") do %>
+<div class="row">
+  <div class="col-md-6">
+    <h4>Client</h4>
+    <pre>
+      <%= Kernel.inspect @client, pretty: true, limit: :infinity %>
+    </pre>
+  </div>
+  <div class="col-md-6">
+    <h4>User</h4>
+    <pre>
+      <%= Kernel.inspect @user, pretty: true, limit: :infinity %>
+    </pre>
+  </div>
+</div>
+<% end %>
+<br />
+
+<div class="float-right">
+  <span class="btn btn-danger" phx-click="force-disconnect">
+    Force disconnect
+  </span>
+</div>
+
+<span>
+  <%= live_redirect "Back", to: Routes.ts_admin_client_index_path(@socket, :index), class: "btn btn-#{bsname}" %>
+</span>
+
+      </div>
+    </div>
+  </div>
+</div>

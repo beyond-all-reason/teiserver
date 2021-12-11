@@ -1,0 +1,39 @@
+<% {_, _, bsname} = colours() %>
+
+<table class="table" style="max-width: 600px;">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for userid <- @muted do %>
+      <% user = @user_lookup[userid] %>
+      <tr>
+        <td><%= user.name %></td>
+        <td>
+          <%= link raw("<i class='fas fa-fw fa-volume-up'></i> Unmute"), to: Routes.ts_account_relationships_path(@conn, :delete, "muted", userid), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-sm btn-danger btn-outline" %>
+        </td>
+      </tr>
+    <% end %>
+    <tr>
+      <form action={Routes.ts_account_relationships_path(@conn, :find)} method="post">
+        <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+        <input type="hidden" name="mode" value="create" />
+        <input type="hidden" name="action" value="muted" />
+
+        <td>
+          <input type="text" name="target_name" value="" placeholder="Enter user name here" class="form-control" />
+        </td>
+
+        <td>
+          <button type="submit" class={"btn btn-#{bsname} btn-block"}>
+            <i class="fa-fw fas fa-plus"></i>
+            Mute user
+          </button>
+        </td>
+      </form>
+    </tr>
+  </tbody>
+</table>

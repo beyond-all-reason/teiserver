@@ -1,0 +1,43 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "new"
+          })
+        %>
+
+        <%= if allow?(@conn, "admin.user") do %>
+          <div class="float-right">
+            <a href={Routes.admin_user_path(@conn, :edit, @user)} class={"btn btn-outline-#{bsname}"} id="section-menu-new">
+              <i class="far fa-power-off"></i>
+              &nbsp;
+              Admin edit
+            </a>
+            &nbsp;&nbsp;
+          </div>
+        <% end %>
+
+        <hr />
+
+<%= render "form.html", Map.put(assigns, :action, Routes.ts_admin_user_path(@conn, :update, @user)) %>
+<hr />
+
+<form action={Routes.ts_admin_user_path(@conn, :reset_password, @user)} method="POST" class="form-horizontal" style="padding-right: 15px; display:none;">
+  <input type="hidden" name="_method" value="POST">
+
+  <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+  <input type="submit" value="Reset password" name="form.submitted" class="btn btn-danger float-right" data-confirm="Are you sure?" />
+</form>
+
+      </div>
+    </div>
+  </div>
+</div>

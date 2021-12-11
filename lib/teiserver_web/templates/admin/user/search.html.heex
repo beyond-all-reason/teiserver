@@ -1,0 +1,198 @@
+<% {fg, _bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('.datepicker').datepicker({
+      format: "dd/mm/yyyy"
+    });
+
+    $('select').select2({
+      width: "100%",
+    });
+  });
+</script>
+
+<%= central_component "icon_dropdown_js", [] %>
+
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
+<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+
+<div class="search-row">
+        <div class={"btn btn-outline-#{bsname}"} onclick="show_search();" id="search-box-shower">
+          <i class="far fa-fw fa-search"></i>
+          Show search form
+        </div>
+
+        <form action={Routes.ts_admin_user_path(@conn, :search)} method="post" class="form-horizontal" id="search-box" style="display: none;">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <div class="row">
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_name" class="control-label">Name/Email: </label>
+              <input type="text" name="search[name]" id="search_name" value={@params["name"]} placeholder="" class="form-control" />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_limit" class="control-label">Limit: </label>
+              <input type="text" name="search[limit]" id="search_limit" value={@params["limit"]} placeholder="" class="form-control" />
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_order" class="control-label">Order by: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[order]",
+                id: "search_order",
+                selected: @params["order"] || "Newest first",
+                enumerable: [
+                  %{id: "Name (A-Z)", icon: "fas fa-sort-numeric-down", colour: fg},
+                  %{id: "Name (Z-A)", icon: "fas fa-sort-numeric-up", colour: fg},
+                  %{id: "Newest first", icon: "fas fa-sort-numeric-down", colour: fg},
+                  %{id: "Oldest first", icon: "fas fa-sort-numeric-up", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_verified" class="control-label">Verified: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[verified]",
+                id: "search_verified",
+                selected: @params["verified"],
+                enumerable: [
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Verified", icon: "fas fa-check", colour: fg},
+                  %{id: "Unverified", icon: "fas fa-times", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_bot" class="control-label">Bot: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[bot]",
+                id: "search_bot",
+                selected: @params["bot"],
+                enumerable: [
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Person", icon: "fas fa-user", colour: fg},
+                  %{id: "Robot", icon: "fas fa-robot", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_moderator" class="control-label">Moderator: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[moderator]",
+                id: "search_moderator",
+                selected: @params["moderator"],
+                enumerable: [
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "User", icon: "fas fa-user", colour: fg},
+                  %{id: "Moderator", icon: "fas fa-gavel", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_tester" class="control-label">Tester: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[tester]",
+                id: "search_tester",
+                selected: @params["tester"],
+                enumerable: [
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Normal", icon: "fas fa-user", colour: fg},
+                  %{id: "Tester", icon: "fas fa-vial", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_streamer" class="control-label">Streamer: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[streamer]",
+                id: "search_streamer",
+                selected: @params["streamer"],
+                enumerable: [
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Normal", icon: "fas fa-user", colour: fg},
+                  %{id: "Streamer", icon: "fab fa-twitch", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_donor" class="control-label">Donor: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[donor]",
+                id: "search_donor",
+                selected: @params["donor"],
+                enumerable: [
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Normal", icon: "fas fa-user", colour: fg},
+                  %{id: "Donor", icon: "fas fa-euro-sign", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_contributor" class="control-label">Contributor: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[contributor]",
+                id: "search_contributor",
+                selected: @params["contributor"],
+                enumerable: [
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Normal", icon: "fas fa-user", colour: fg},
+                  %{id: "Contributor", icon: "fas fa-handshake", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_developer" class="control-label">Developer: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[developer]",
+                id: "search_developer",
+                selected: @params["developer"],
+                enumerable: [
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Normal", icon: "fas fa-user", colour: fg},
+                  %{id: "Developer", icon: "fas fa-code", colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_mod_action" class="control-label">Mod action: </label>
+              <%= central_component "icon_dropdown", %{
+                name: "search[mod_action]",
+                id: "search_mod_action",
+                selected: @params["mod_action"],
+                enumerable: [
+                  %{id: "Any", icon: "fas fa-square", colour: fg},
+                  %{id: "Any action", icon: "fas fa-gavel", colour: fg},
+                  %{id: "None", icon: Central.Account.ReportLib.action_icon("Ignore report"), colour: fg},
+                  %{id: "Banned", icon: Central.Account.ReportLib.action_icon("Ban"), colour: fg},
+                  %{id: "Muted", icon: Central.Account.ReportLib.action_icon("Mute"), colour: fg},
+                  %{id: "Warned", icon: Central.Account.ReportLib.action_icon("Warn"), colour: fg},
+                ]
+              } %>
+            </div>
+
+            <div class="col-md-4 col-xl-2 search-form-input">
+              <label for="search_lobby_client" class="control-label">Lobby: </label>
+              <input type="text" name="search[lobby_client]" id="search_lobby" value={@params["lobby_client"]} placeholder="" class="form-control" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
+              &nbsp;<br />
+              <input type="submit" value="Search" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+            </div>
+          </div>
+        </form>
+
+</div>

@@ -1,0 +1,56 @@
+<% {_fg, _bg, bsname} = @colours %>
+
+<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "battle_lobbies", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+        <h4>
+          <%= if Enum.count(@battles) > 0 do %>
+            Battles - <%= Enum.count(@battles) %>
+          <% else %>
+            No battles found
+          <% end %>
+        </h4>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Map</th>
+      <th>UUID</th>
+      <th>Locked</th>
+      <th>Player count</th>
+      <th>Spectator count</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody id="battles">
+    <%= for lobby <- @battles do %>
+      <%= if lobby != nil do %>
+        <tr id={"lobby-#{lobby.id}"}>
+          <td><%= lobby.name %></td>
+          <td><%= lobby.map_name %></td>
+          <td><%= lobby.tags["server/match/uuid"] %></td>
+          <td><%= if lobby.locked, do: "Locked" %></td>
+          <td><%= lobby.player_count %></td>
+          <td><%= lobby.spectator_count %></td>
+
+          <td>
+            <span>
+              <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id), class: "btn btn-sm btn-#{bsname}" %>
+            </span>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>
+
+
+      </div>
+    </div>
+  </div>
+</div>

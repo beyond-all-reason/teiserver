@@ -1,0 +1,125 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+    $('#the_tabs a:first').tab('show');
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+  });
+</script>
+
+<style type="text/css">
+  .row-left {
+    width: 150px;
+  }
+
+  .heatmap-td {
+    color: #000;
+  }
+</style>
+
+<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "server_metrics"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Report.MetricView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "today"
+          })
+        %>
+
+        <hr />
+
+<div class="row page-row">
+  <div class="col-md-12">
+    <%= if @date == Timex.today() do %>
+      <h3>Day to day metric: Today so far</h3>
+    <% else %>
+      <h3>Day to day metric: <%= Timex.format!(@date, "{YYYY}-{0M}-{0D}, {WDfull}") %></h3>
+    <% end %>
+    <br /><br />
+
+    <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+
+      <li>
+        <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
+          <%= central_component "icon", icon: icon() %>
+          Details
+        </a>
+      </li>
+
+      <li>
+        <a href="#hourly_tab" role="tab" class="nav-link" data-toggle="tab">
+          <i class="far fa-fw fa-hourglass"></i>
+          Hourly
+        </a>
+      </li>
+
+      <li>
+        <a href="#user_tab" role="tab" class="nav-link" data-toggle="tab">
+          <%= central_component "icon", icon: Central.Account.UserLib.icon() %>
+          Users
+        </a>
+      </li>
+
+      <%= if Map.has_key?(@data, "matches") do %>
+        <li>
+          <a href="#match_tab" role="tab" class="nav-link" data-toggle="tab">
+            <%= central_component "icon", icon: Teiserver.Battle.MatchLib.icon() %>
+            Matches
+          </a>
+        </li>
+      <% end %>
+
+      <li>
+        <a href="#raw_tab" role="tab" class="nav-link" data-toggle="tab">
+          <i class="far fa-fw fa-code"></i>
+          Raw data
+        </a>
+      </li>
+
+      <li>
+        <a href="#anon_raw_tab" role="tab" class="nav-link" data-toggle="tab">
+          <i class="far fa-fw fa-user-secret"></i>
+          Anon data
+        </a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <div class="tab-pane" id="details_tab" style="padding:5px;">
+        <%= render "tab_details.html", assigns %>
+      </div>
+
+      <div class="tab-pane" id="hourly_tab" style="padding:5px;">
+        <%= render "tab_hourly.html", assigns %>
+      </div>
+
+      <div class="tab-pane" id="user_tab" style="padding:5px;">
+        <%= render "tab_user.html", assigns %>
+      </div>
+
+      <%= if Map.has_key?(@data, "matches") do %>
+        <div class="tab-pane" id="match_tab" style="padding:5px;">
+          <%= render "tab_match.html", assigns %>
+        </div>
+      <% end %>
+
+      <div class="tab-pane" id="raw_tab" style="padding:5px;">
+        <%= render "tab_raw.html", assigns %>
+      </div>
+
+      <div class="tab-pane" id="anon_raw_tab" style="padding:5px;">
+        <%= render "tab_anon_raw.html", assigns %>
+      </div>
+    </div>
+  </div>
+</div>
+
+      </div>
+    </div>
+  </div>
+</div>
