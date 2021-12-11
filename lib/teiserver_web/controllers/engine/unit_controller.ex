@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Engine.UnitController do
     user: {Central.Account.AuthLib, :current_user}
 
   plug AssignPlug,
-    sidemenu_active: "engine"
+    sidemenu_active: "teiserver"
 
   plug :add_breadcrumb, name: 'Engine', url: '/teiserver'
   plug :add_breadcrumb, name: 'Units', url: '/teiserver/units'

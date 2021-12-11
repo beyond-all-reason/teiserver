@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Battle.MatchController do
     user: {Central.Account.AuthLib, :current_user}
 
   plug AssignPlug,
-    sidemenu_active: "battle"
+    sidemenu_active: "teiserver"
 
   plug :add_breadcrumb, name: 'Battle', url: '/teiserver'
   plug :add_breadcrumb, name: 'Logs', url: '/teiserver/matches'

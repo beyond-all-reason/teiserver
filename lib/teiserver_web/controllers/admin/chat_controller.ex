@@ -8,8 +8,9 @@ defmodule TeiserverWeb.Admin.ChatController do
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
-  plug AssignPlug,
-    sidemenu_active: "teiserver_admin"
+  plug(AssignPlug,
+    sidemenu_active: ["teiserver", "teiserver_admin"]
+  )
 
   plug :add_breadcrumb, name: 'Account', url: '/teiserver'
   plug :add_breadcrumb, name: 'BanHashes', url: '/teiserver/ban_hashes'
