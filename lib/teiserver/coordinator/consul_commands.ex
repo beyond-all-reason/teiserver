@@ -51,10 +51,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "help", senderid: senderid} = _cmd, state) do
-    status_msg = [
-      "Command list can currently be found at https://github.com/beyond-all-reason/teiserver/blob/master/lib/teiserver/coordinator/coordinator_lib.ex"
-    ]
-    Coordinator.send_to_user(senderid, status_msg)
+    user = User.get_user_by_id(senderid)
+    lobby = Lobby.get_lobby!(state.lobby_id)
+
+    messages = Teiserver.Coordinator.CoordinatorLib.help(user, lobby.founder_id == senderid)
+    |> String.split("\n")
+
+    Coordinator.send_to_user(senderid, messages)
     state
   end
 
