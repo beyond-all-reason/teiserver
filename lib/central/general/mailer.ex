@@ -1,6 +1,6 @@
 defmodule Central.Mailer do
   @moduledoc false
-  use Swoosh.Mailer, otp_app: :central
+  use Bamboo.Mailer, otp_app: :central
 
   def noreply_address do
     Application.get_env(:central, Central.Mailer)[:noreply_address]

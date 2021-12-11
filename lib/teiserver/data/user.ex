@@ -393,7 +393,7 @@ defmodule Teiserver.User do
     db_user = Account.get_user!(user.id)
 
     Central.Account.Emails.password_reset(db_user)
-    |> Central.Mailer.deliver()
+    |> Central.Mailer.deliver_now()
   end
 
   def request_email_change(nil, _), do: nil

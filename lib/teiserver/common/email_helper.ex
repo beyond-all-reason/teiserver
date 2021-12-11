@@ -2,7 +2,7 @@ defmodule Teiserver.EmailHelper do
   @moduledoc false
   alias Central.Account
   alias Central.Mailer
-  import Swoosh.Email
+  alias Bamboo.Email
   alias Central.Helpers.TimexHelper
   require Logger
 
@@ -58,14 +58,14 @@ defmodule Teiserver.EmailHelper do
 
     date = TimexHelper.date_to_str(Timex.now(), format: :email_date)
 
-    new()
-    |> to({user.name, user.email})
-    |> from({"BAR Teiserver", Mailer.noreply_address()})
-    |> subject("BAR - New account")
-    |> header("Date", date)
-    |> header("Message-Id", message_id)
-    |> html_body(html_body)
-    |> text_body(text_body)
-    |> Central.Mailer.deliver()
+    Email.new_email()
+    |> Email.to({user.name, user.email})
+    |> Email.from({"BAR Teiserver", Mailer.noreply_address()})
+    |> Email.subject("BAR - New account")
+    |> Email.put_header("Date", date)
+    |> Email.put_header("Message-Id", message_id)
+    |> Email.html_body(html_body)
+    |> Email.text_body(text_body)
+    |> Central.Mailer.deliver_now()
   end
 end

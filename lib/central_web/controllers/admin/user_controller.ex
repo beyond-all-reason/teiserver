@@ -315,7 +315,7 @@ defmodule CentralWeb.Admin.UserController do
 
       {true, _} ->
         Central.Account.Emails.password_reset(user)
-        |> Central.Mailer.deliver()
+        |> Central.Mailer.deliver_now()
 
         conn
         |> put_flash(:success, "Password reset email sent to user")

@@ -128,14 +128,6 @@ config :central, Oban,
   ],
   queues: [logging: 1, cleanup: 1, teiserver: 10]
 
-config :central, Central.Mailer,
-  adapter: Swoosh.Adapters.Local,
-  noreply_name: "Teiserver Noreply",
-  noreply_address: "noreply@domain",
-  contact_address: "contact@domain"
-
-config :swoosh, :api_client, false
-
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

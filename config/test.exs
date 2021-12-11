@@ -47,4 +47,7 @@ config :central, Oban,
   plugins: false,
   crontab: false
 
-config :central, Central.Mailer, adapter: Swoosh.Adapters.Test
+config :central, Central.Mailer,
+  adapter: Bamboo.TestAdapter,
+  noreply_address: "noreply@testsite.co.uk",
+  contact_address: "info@testsite.co.uk"

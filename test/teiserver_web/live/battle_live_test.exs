@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Live.BattleTest do
   alias Teiserver.Battle.Lobby
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
-  @throttle_wait 500 + 10
+  @throttle_wait 500 + 100
 
   setup do
     GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
