@@ -238,7 +238,7 @@ defmodule Teiserver.Battle do
     uuid = UUID.uuid1()
 
     # Check if this uuid is present in the current set of lobbies
-    active_lobbies = Lobby.list_battles()
+    active_lobbies = Lobby.list_lobbies()
     |> Enum.filter(fn lobby -> lobby.tags["server/match/uuid"] == uuid end)
 
     case Enum.empty?(active_lobbies) do

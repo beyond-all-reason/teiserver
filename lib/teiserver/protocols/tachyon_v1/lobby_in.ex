@@ -2,13 +2,26 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
   alias Teiserver.Battle.Lobby
   alias Teiserver.{Client, Coordinator}
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
+  alias Teiserver.Protocols.TachyonLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Phoenix.PubSub
   require Logger
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
-  def do_handle("query", %{"query" => _query}, state) do
-    state
+  def do_handle("query", %{"query" => query}, state) do
+    lobby_list = Lobby.list_lobbies()
+    |> TachyonLib.query(:id, query["id"])
+    |> TachyonLib.query(:locked, query["locked"])
+    |> TachyonLib.query(:in_progress, query["in_progress"])
+
+    reply(:lobby, :query, lobby_list, state)
+
+    # `player_count` - Integer, a count of the number of players in the battle
+    # `spectator_count` - Integer, a count of the number of spectators in the battle
+    # `user_count` - Integer, a count of the number of players and spectators in the battle
+    # `player_list` - List (User.id), A list of player ids in the battle
+    # `spectator_list` - List (User.id), A list of spectator ids in the battle
+    # `user_list` - List (User.id), A list of player and spectator ids in the battle
   end
 
   def do_handle("create", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)

@@ -30,7 +30,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
       |> assign(:sidemenu_active, "teiserver")
       |> assign(:colours, LobbyLib.colours())
-      |> assign(:battles, Lobby.list_battles() |> sort_lobbies)
+      |> assign(:battles, Lobby.list_lobbies() |> sort_lobbies)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:extra_menu_content, extra_content)
 

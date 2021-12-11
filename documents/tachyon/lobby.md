@@ -5,7 +5,7 @@
 #### Queryable fields
 `id` - Integer (Battle ID)
 `locked` - Boolean
-`started` - Boolean
+`in_progress` - Boolean
 `player_count` - Integer, a count of the number of players in the battle
 `spectator_count` - Integer, a count of the number of spectators in the battle
 `user_count` - Integer, a count of the number of players and spectators in the battle
@@ -20,7 +20,9 @@
 ```
 {
   "cmd": "c.lobby.query",
-  "query": Query
+  "query": %{
+    "locked": false
+  }
 }
 
 {

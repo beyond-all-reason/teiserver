@@ -76,7 +76,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
   @spec get_totals(Map.t()) :: Map.t()
   defp get_totals(state) do
-    battles = Lobby.list_battles()
+    battles = Lobby.list_lobbies()
     client_ids = Client.list_client_ids()
     clients = client_ids
       |> Map.new(fn c -> {c, Client.get_client_by_id(c)} end)

@@ -116,7 +116,7 @@ defmodule Teiserver.Battle.Lobby do
 
   # Cache functions
   defdelegate list_lobby_ids(), to: LobbyCache
-  defdelegate list_battles(), to: LobbyCache
+  defdelegate list_lobbies(), to: LobbyCache
   defdelegate update_lobby(lobby, data, reason), to: LobbyCache
   defdelegate get_lobby!(id), to: LobbyCache
   defdelegate get_lobby(id), to: LobbyCache
@@ -341,7 +341,7 @@ defmodule Teiserver.Battle.Lobby do
 
   def remove_user_from_any_battle(userid) do
     lobby_ids =
-      list_battles()
+      list_lobbies()
       |> Enum.filter(fn b -> b != nil end)
       |> Enum.filter(fn b -> Enum.member?(b.players, userid) or b.founder_id == userid end)
       |> Enum.map(fn b ->
@@ -359,7 +359,7 @@ defmodule Teiserver.Battle.Lobby do
   @spec find_empty_battle() :: Map.t()
   def find_empty_battle() do
     empties =
-      list_battles()
+      list_lobbies()
       |> Enum.filter(fn b -> b.players == [] end)
 
     case empties do

@@ -65,4 +65,18 @@ defmodule Teiserver.Protocols.TachyonLib do
         throw "Tachyon decode! error: #{reason}, data: #{data}"
     end
   end
+
+
+  def query(list, nil, _), do: list
+  def query(list, field, value) when is_atom(field) do
+    list
+    |> Enum.filter(fn item -> Map.get(item, field) == value end)
+  end
+
+  # def query(list, _, func) when is_function(func) do
+  #   list
+  #   |> Enum.filter(fn item ->
+  #     func.(item)
+  #   end)
+  # end
 end
