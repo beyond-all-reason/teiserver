@@ -29,6 +29,8 @@ sh scripts/generate_release.sh
 
 scp -i ~/.ssh/id_rsa rel/artifacts/teiserver.tar.gz deploy@yourdomain.com:/releases/teiserver.tar.gz
 
+mix phx.digest.clean --all
+
 echo "ssh into your server and run dodeploy"
 ```
 
