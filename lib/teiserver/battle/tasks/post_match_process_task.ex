@@ -44,15 +44,18 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       String.starts_with?(k, "game/players/") and String.ends_with?(k, "/skill")
     end)
     |> Enum.filter(fn {k, _v} ->
-      userid = k |> String.replace("game/players/", "") |> String.replace("/skill", "") |> User.get_userid()
+      userid = k
+        |> String.replace("game/players/", "")
+        |> String.replace("/skill", "")
+        |> User.get_userid()
       Enum.member?(member_ids, userid)
     end)
     |> Enum.map(fn {_, v} ->
-      v = v
+      v
       |> String.replace("~", "")
       |> String.replace("(", "")
       |> String.replace(")", "")
-      NumberHelper.float_parse(v)
+      |> NumberHelper.float_parse
     end)
 
     if Enum.empty?(skills) do
