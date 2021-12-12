@@ -34,8 +34,16 @@
               name: "server_metrics",
               label: "Server metrics",
               active: @active,
-              url: Routes.ts_reports_metric_path(@conn, :day_metrics_list),
+              url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_list),
               lib: Teiserver.Telemetry.TelemetryDayLogLib
+            %>
+
+            <%= central_component "sub_menu_icon",
+              name: "match_metrics",
+              label: "Match metrics",
+              active: @active,
+              url: Routes.ts_reports_match_metric_path(@conn, :day_metrics_list),
+              lib: Teiserver.Battle.MatchLib
             %>
           <% end %>
 

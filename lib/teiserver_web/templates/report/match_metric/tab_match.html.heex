@@ -1,0 +1,176 @@
+<%
+  matches = @data["matches"]
+%>
+<div class="row">
+  <div class="col-md-6">
+    <h4>Counts</h4>
+    <%= central_component "detail_line",
+      label: "Total completed",
+      value: format_number matches["counts"]["total"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Duel",
+      value: format_number matches["counts"]["duel"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "FFA",
+      value: format_number matches["counts"]["ffa"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Team",
+      value: format_number matches["counts"]["team"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Team FFA",
+      value: format_number matches["counts"]["team_ffa"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Bots",
+      value: format_number matches["counts"]["bots"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Scavengers",
+      value: format_number matches["counts"]["scavengers"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Chickens",
+      value: format_number matches["counts"]["chicken"]
+    %>
+  </div>
+
+  <div class="col-md-6">
+    <h4>Durations</h4>
+    <%= central_component "detail_line",
+      label: "Average duration",
+      value: represent_seconds matches["durations"]["average"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Above 5 minutes",
+      value: format_number matches["durations"]["above_5"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Above 10 minutes",
+      value: format_number matches["durations"]["above_10"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Above 15 minutes",
+      value: format_number matches["durations"]["above_15"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Above 20 minutes",
+      value: format_number matches["durations"]["above_20"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Above 25 minutes",
+      value: format_number matches["durations"]["above_25"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Above 30 minutes",
+      value: format_number matches["durations"]["above_30"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Above 35 minutes",
+      value: format_number matches["durations"]["above_35"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Above 40 minutes",
+      value: format_number matches["durations"]["above_40"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Above 45 minutes",
+      value: format_number matches["durations"]["above_45"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Above 50 minutes",
+      value: format_number matches["durations"]["above_50"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Above 55 minutes",
+      value: format_number matches["durations"]["above_55"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Above 60 minutes",
+      value: format_number matches["durations"]["above_60"]
+    %>
+  </div>
+</div>
+<hr />
+
+<div class="row">
+  <div class="col-md-6">
+    <h4>Maps</h4>
+    <%
+      maps = matches["maps"]
+        |> Enum.sort(fn ({_, v1}, {_, v2}) -> v1 >= v2 end)
+    %>
+    <%= for {name, count} <- maps do %>
+      <%= central_component "detail_line",
+        label: name,
+        value: format_number(count),
+        width: 350
+      %>
+    <% end %>
+  </div>
+  <div class="col-md-6">
+    <h4>Team sizes</h4>
+
+    <%= central_component "detail_line",
+      label: "1",
+      value: format_number matches["team_sizes"]["1"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "2",
+      value: format_number matches["team_sizes"]["2"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "3",
+      value: format_number matches["team_sizes"]["3"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "4",
+      value: format_number matches["team_sizes"]["4"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "5",
+      value: format_number matches["team_sizes"]["5"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "6",
+      value: format_number matches["team_sizes"]["6"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "7",
+      value: format_number matches["team_sizes"]["7"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "8",
+      value: format_number matches["team_sizes"]["8"]
+    %>
+  </div>
+</div>

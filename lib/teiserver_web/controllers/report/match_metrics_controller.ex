@@ -1,8 +1,8 @@
-defmodule TeiserverWeb.Report.MetricController do
+defmodule TeiserverWeb.Report.MatchMetricController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
   alias Central.Helpers.{TimexHelper, DatePresets}
-  alias Teiserver.Telemetry.{GraphDayLogsTask, GraphMonthLogsTask, ExportServerMetricsTask}
+  alias Teiserver.Battle.{ExportRawMatchMetricsTask, ExportAggregateMatchMetricsTask}
 
   plug(AssignPlug,
     sidemenu_active: ["teiserver"]
@@ -15,13 +15,7 @@ defmodule TeiserverWeb.Report.MetricController do
 
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Reports', url: '/teiserver/reports')
-  plug(:add_breadcrumb, name: 'Server metrics', url: '/teiserver/reports/day_metrics')
-
-  @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def index(conn, _params) do
-    render(conn, "index.html")
-  end
-
+  plug(:add_breadcrumb, name: 'Match metrics', url: '/teiserver/reports/match/day_metrics')
 
   # DAILY METRICS
   @spec day_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -73,25 +67,34 @@ defmodule TeiserverWeb.Report.MetricController do
     |> render("day_metrics_show.html")
   end
 
-  @spec day_metrics_export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_export_form(conn, _params) do
+  @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def export_form(conn, _params) do
     conn
     |> assign(:params, %{
       "date_preset" => "All time"
     })
     |> assign(:presets, DatePresets.long_ranges)
-    |> render("day_metrics_export_form.html")
+    |> render("export_form.html")
   end
 
-  @spec day_metrics_export_post(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_export_post(conn, %{"report" => params}) do
-    data = ExportServerMetricsTask.perform(params)
+  @spec export_post(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def export_post(conn, %{"report" => %{"export_type" => "Raw data"} = params}) do
+    data = ExportRawMatchMetricsTask.perform(params)
 
     conn
     |> put_resp_content_type("application/json")
-    |> put_resp_header("content-disposition", "attachment; filename=\"server_metrics.json\"")
+    |> put_resp_header("content-disposition", "attachment; filename=\"match_metrics.json\"")
     |> send_resp(200, data)
   end
+
+  # def export_post(conn, %{"report" => params}) do
+  #   data = ExportMatchMetricsTask.perform(params)
+
+  #   conn
+  #   |> put_resp_content_type("application/json")
+  #   |> put_resp_header("content-disposition", "attachment; filename=\"match_metrics.json\"")
+  #   |> send_resp(200, data)
+  # end
 
   def day_metrics_graph(conn, params) do
     logs =

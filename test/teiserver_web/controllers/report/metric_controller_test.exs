@@ -1,4 +1,4 @@
-defmodule TeiserverWeb.Report.MetricControllerTest do
+defmodule TeiserverWeb.Report.ServerMetricControllerTest do
   use CentralWeb.ConnCase
 
   alias Central.Helpers.GeneralTestLib
@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Report.MetricControllerTest do
   end
 
   test "index", %{conn: conn} do
-    conn = get(conn, Routes.ts_reports_metric_path(conn, :day_metrics_list))
+    conn = get(conn, Routes.ts_reports_server_metric_path(conn, :day_metrics_list))
 
     assert html_response(conn, 200)
   end

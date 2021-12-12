@@ -1,0 +1,33 @@
+<table class="table table-striped table-hover table-sm make-data-table">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Total</th>
+      <th>Player</th>
+      <th>Spectator</th>
+      <th>Lobby</th>
+      <th>Menu</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for {uid, total} <- @data["minutes_per_user"]["total"] do %>
+    <% user = Map.fetch!(@users, uid |> String.to_integer) %>
+    <tr>
+      <td><%= user.name %></td>
+      <td><%= represent_minutes total %></td>
+      <td><%= represent_minutes @data["minutes_per_user"]["player"][uid] %></td>
+      <td><%= represent_minutes @data["minutes_per_user"]["spectator"][uid] %></td>
+      <td><%= represent_minutes @data["minutes_per_user"]["lobby"][uid] %></td>
+      <td><%= represent_minutes @data["minutes_per_user"]["menu"][uid] %></td>
+    </tr>
+    <% end %>
+    <tr>
+      <td><strong>Total:</strong></td>
+      <td><%= represent_minutes @data["aggregates"]["minutes"]["total"] %></td>
+      <td><%= represent_minutes @data["aggregates"]["minutes"]["player"] %></td>
+      <td><%= represent_minutes @data["aggregates"]["minutes"]["spectator"] %></td>
+      <td><%= represent_minutes @data["aggregates"]["minutes"]["lobby"] %></td>
+      <td><%= represent_minutes @data["aggregates"]["minutes"]["menu"] %></td>
+    </tr>
+  </tbody>
+</table>

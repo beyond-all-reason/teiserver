@@ -93,22 +93,42 @@ defmodule TeiserverWeb.Router do
 
         get("/", GeneralController, :index)
 
-        get("/day_metrics/today", MetricController, :day_metrics_today)
-        get("/day_metrics/show/:date", MetricController, :day_metrics_show)
-        get("/day_metrics/export_form", MetricController, :day_metrics_export_form)
-        post("/day_metrics/export_post", MetricController, :day_metrics_export_post)
-        get("/day_metrics/graph", MetricController, :day_metrics_graph)
-        post("/day_metrics/graph", MetricController, :day_metrics_graph)
-        get("/day_metrics", MetricController, :day_metrics_list)
-        post("/day_metrics", MetricController, :day_metrics_list)
+        # Server metrics
+        get("/server/day_metrics/today", ServerMetricController, :day_metrics_today)
+        get("/server/day_metrics/show/:date", ServerMetricController, :day_metrics_show)
+        get("/server/day_metrics/export_form", ServerMetricController, :day_metrics_export_form)
+        post("/server/day_metrics/export_post", ServerMetricController, :day_metrics_export_post)
+        get("/server/day_metrics/graph", ServerMetricController, :day_metrics_graph)
+        post("/server/day_metrics/graph", ServerMetricController, :day_metrics_graph)
+        get("/server/day_metrics", ServerMetricController, :day_metrics_list)
+        post("/server/day_metrics", ServerMetricController, :day_metrics_list)
 
-        get("/month_metrics/today", MetricController, :month_metrics_today)
-        get("/month_metrics/show/:year/:month", MetricController, :month_metrics_show)
-        get("/month_metrics/graph", MetricController, :month_metrics_graph)
-        post("/month_metrics/graph", MetricController, :month_metrics_graph)
-        get("/month_metrics", MetricController, :month_metrics_list)
-        post("/month_metrics", MetricController, :month_metrics_list)
+        get("/server/month_metrics/today", ServerMetricController, :month_metrics_today)
+        get("/server/month_metrics/show/:year/:month", ServerMetricController, :month_metrics_show)
+        get("/server/month_metrics/graph", ServerMetricController, :month_metrics_graph)
+        post("/server/month_metrics/graph", ServerMetricController, :month_metrics_graph)
+        get("/server/month_metrics", ServerMetricController, :month_metrics_list)
+        post("/server/month_metrics", ServerMetricController, :month_metrics_list)
 
+        # Match metrics
+        get("/match/day_metrics/today", MatchMetricController, :day_metrics_today)
+        get("/match/day_metrics/show/:date", MatchMetricController, :day_metrics_show)
+        get("/match/day_metrics/graph", MatchMetricController, :day_metrics_graph)
+        post("/match/day_metrics/graph", MatchMetricController, :day_metrics_graph)
+        get("/match/day_metrics", MatchMetricController, :day_metrics_list)
+        post("/match/day_metrics", MatchMetricController, :day_metrics_list)
+        get("/match/export_form", MatchMetricController, :export_form)
+        post("/match/export_post", MatchMetricController, :export_post)
+
+
+        get("/match/month_metrics/today", MatchMetricController, :month_metrics_today)
+        get("/match/month_metrics/show/:year/:month", MatchMetricController, :month_metrics_show)
+        get("/match/month_metrics/graph", MatchMetricController, :month_metrics_graph)
+        post("/match/month_metrics/graph", MatchMetricController, :month_metrics_graph)
+        get("/match/month_metrics", MatchMetricController, :month_metrics_list)
+        post("/match/month_metrics", MatchMetricController, :month_metrics_list)
+
+        # Client events
         get("/client_events/export/form", ClientEventController, :export_form)
         post("/client_events/export/post", ClientEventController, :export_post)
         get("/client_events/summary", ClientEventController, :summary)

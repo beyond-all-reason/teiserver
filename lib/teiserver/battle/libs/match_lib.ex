@@ -4,6 +4,12 @@ defmodule Teiserver.Battle.MatchLib do
   alias Teiserver.Battle.{Match, Lobby}
   alias Teiserver.Data.Types, as: T
 
+  @spec icon :: String.t()
+  def icon, do: "far fa-swords"
+
+  @spec colours :: {String.t(), String.t(), String.t()}
+  def colours, do: Central.Helpers.StylingHelper.colours(:success2)
+
   def game_type(lobby, teams) do
     bot_names = Map.keys(lobby.bots)
       |> Enum.join(" ")
@@ -73,12 +79,6 @@ defmodule Teiserver.Battle.MatchLib do
     }}
   end
 
-  # Functions
-  @spec icon :: String.t()
-  def icon, do: "far fa-clipboard"
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours, do: Central.Helpers.StylingHelper.colours(:default)
-
   @spec make_favourite(Map.t()) :: Map.t()
   def make_favourite(match) do
     %{
@@ -141,6 +141,11 @@ defmodule Teiserver.Battle.MatchLib do
       where: not is_nil(matches.started)
   end
 
+  def _search(query, :processed, true) do
+    from matches in query,
+      where: not is_nil(matches.data)
+  end
+
   def _search(query, :simple_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
@@ -163,6 +168,26 @@ defmodule Teiserver.Battle.MatchLib do
   def _search(query, :inserted_before, timestamp) do
     from matches in query,
       where: matches.inserted_at < ^timestamp
+  end
+
+  def _search(query, :started_after, timestamp) do
+    from matches in query,
+      where: matches.started >= ^timestamp
+  end
+
+  def _search(query, :started_before, timestamp) do
+    from matches in query,
+      where: matches.started < ^timestamp
+  end
+
+  def _search(query, :finished_after, timestamp) do
+    from matches in query,
+      where: matches.finished >= ^timestamp
+  end
+
+  def _search(query, :finished_before, timestamp) do
+    from matches in query,
+      where: matches.finished < ^timestamp
   end
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t

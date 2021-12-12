@@ -13,7 +13,15 @@
       icon: Teiserver.Telemetry.TelemetryDayLogLib.icon(),
       name: "server_metric",
       text: "Server metrics",
-      link: Routes.ts_reports_metric_path(@conn, :day_metrics_list)
+      link: Routes.ts_reports_server_metric_path(@conn, :day_metrics_list)
+    %>
+
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Battle.MatchLib.icon(),
+      name: "match_metrics",
+      text: "Match metrics",
+      link: Routes.ts_reports_match_metric_path(@conn, :day_metrics_list)
     %>
   <% end %>
 

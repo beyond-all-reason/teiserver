@@ -10,6 +10,7 @@ defmodule TeiserverWeb.Report.GeneralView do
   @spec colours(String.t()) :: {String.t(), String.t(), String.t()}
   def colours("client_events"), do: Teiserver.Telemetry.ClientEventLib.colours()
   def colours("server_metrics"), do: Teiserver.Telemetry.TelemetryDayLogLib.colours()
+  def colours("match_metrics"), do: Teiserver.Battle.MatchLib.colours()
   def colours("reports"), do: Central.Helpers.StylingHelper.colours(:report)
   def colours("infologs"), do: Teiserver.Telemetry.InfologLib.colours()
 end

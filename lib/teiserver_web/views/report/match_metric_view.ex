@@ -1,11 +1,11 @@
-defmodule TeiserverWeb.Report.MetricView do
+defmodule TeiserverWeb.Report.MatchMetricView do
   use TeiserverWeb, :view
 
   @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Teiserver.Telemetry.TelemetryDayLogLib.colours()
+  def colours(), do: Teiserver.Battle.MatchLib.colours()
 
   @spec icon() :: String.t()
-  def icon(), do: Teiserver.Telemetry.TelemetryDayLogLib.icon()
+  def icon(), do: Teiserver.Battle.MatchLib.icon()
 
   # For the detail view in day metrics
   def heatmap(value, maximum, colour) do

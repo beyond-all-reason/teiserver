@@ -1,0 +1,105 @@
+<div class="d-none d-xl-block col-md-12">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>&nbsp;</th>
+
+        <%= for i <- 0..23 do %>
+          <th><%= i %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Avg users</td>
+        <% maximum = Enum.reduce(@data["average_user_counts"]["total"], 0, &max/2) %>
+        <%= for i <- 0..23 do %>
+          <td class="hourly-view-td" style={"background-color: ##{heatmap(Enum.fetch!(@data["average_user_counts"]["total"], i), maximum, "white-green")};"}><%= Enum.fetch!(@data["average_user_counts"]["total"], i) |> round(2) %></td>
+        <% end %>
+      </tr>
+      <tr>
+        <td>Avg players</td>
+        <% maximum = Enum.reduce(@data["average_user_counts"]["player"], 0, &max/2) %>
+        <%= for i <- 0..23 do %>
+          <td class="hourly-view-td" style={"background-color: ##{heatmap(Enum.fetch!(@data["average_user_counts"]["player"], i), maximum, "white-green")};"}><%= Enum.fetch!(@data["average_user_counts"]["player"], i) |> round(2) %></td>
+        <% end %>
+      </tr>
+      <tr>
+        <td>Avg spectators</td>
+        <% maximum = Enum.reduce(@data["average_user_counts"]["spectator"], 0, &max/2) %>
+        <%= for i <- 0..23 do %>
+          <td class="hourly-view-td" style={"background-color: ##{heatmap(Enum.fetch!(@data["average_user_counts"]["spectator"], i), maximum, "white-green")};"}><%= Enum.fetch!(@data["average_user_counts"]["spectator"], i) |> round(2) %></td>
+        <% end %>
+      </tr>
+      <tr>
+        <td>Avg lobbies</td>
+        <% maximum = Enum.reduce(@data["average_user_counts"]["lobby"], 0, &max/2) %>
+        <%= for i <- 0..23 do %>
+          <td class="hourly-view-td" style={"background-color: ##{heatmap(Enum.fetch!(@data["average_user_counts"]["lobby"], i), maximum, "white-green")};"}><%= Enum.fetch!(@data["average_user_counts"]["lobby"], i) |> round(2) %></td>
+        <% end %>
+      </tr>
+      <tr>
+        <td>Avg menus</td>
+        <% maximum = Enum.reduce(@data["average_user_counts"]["menu"], 0, &max/2) %>
+        <%= for i <- 0..23 do %>
+          <td class="hourly-view-td" style={"background-color: ##{heatmap(Enum.fetch!(@data["average_user_counts"]["menu"], i), maximum, "white-green")};"}><%= Enum.fetch!(@data["average_user_counts"]["menu"], i) |> round(2) %></td>
+        <% end %>
+      </tr>
+
+      <tr>
+        <td colspan="25">&nbsp;</td>
+      </tr>
+
+      <tr>
+        <td>Peak users</td>
+        <% maximum = Enum.reduce(@data["peak_user_counts"]["total"], 0, &max/2) %>
+        <%= for i <- 0..23 do %>
+          <td class="hourly-view-td" style={"background-color: ##{heatmap(Enum.fetch!(@data["peak_user_counts"]["total"], i), maximum, "white-green")};"}><%= Enum.fetch!(@data["peak_user_counts"]["total"], i) %></td>
+        <% end %>
+      </tr>
+      <tr>
+        <td>Peak players</td>
+        <% maximum = Enum.reduce(@data["peak_user_counts"]["player"], 0, &max/2) %>
+        <%= for i <- 0..23 do %>
+          <td class="hourly-view-td" style={"background-color: ##{heatmap(Enum.fetch!(@data["peak_user_counts"]["player"], i), maximum, "white-green")};"}><%= Enum.fetch!(@data["peak_user_counts"]["player"], i) %></td>
+        <% end %>
+      </tr>
+      <tr>
+        <td>Peak spectators</td>
+        <% maximum = Enum.reduce(@data["peak_user_counts"]["spectator"], 0, &max/2) %>
+        <%= for i <- 0..23 do %>
+          <td class="hourly-view-td" style={"background-color: ##{heatmap(Enum.fetch!(@data["peak_user_counts"]["spectator"], i), maximum, "white-green")};"}><%= Enum.fetch!(@data["peak_user_counts"]["spectator"], i) %></td>
+        <% end %>
+      </tr>
+      <tr>
+        <td>Peak lobbies</td>
+        <% maximum = Enum.reduce(@data["peak_user_counts"]["lobby"], 0, &max/2) %>
+        <%= for i <- 0..23 do %>
+          <td class="hourly-view-td" style={"background-color: ##{heatmap(Enum.fetch!(@data["peak_user_counts"]["lobby"], i), maximum, "white-green")};"}><%= Enum.fetch!(@data["peak_user_counts"]["lobby"], i) %></td>
+        <% end %>
+      </tr>
+      <tr>
+        <td>Peak menus</td>
+        <% maximum = Enum.reduce(@data["peak_user_counts"]["menu"], 0, &max/2) %>
+        <%= for i <- 0..23 do %>
+          <td class="hourly-view-td" style={"background-color: ##{heatmap(Enum.fetch!(@data["peak_user_counts"]["menu"], i), maximum, "white-green")};"}><%= Enum.fetch!(@data["peak_user_counts"]["menu"], i) %></td>
+        <% end %>
+      </tr>
+
+      <tr>
+        <td colspan="25">&nbsp;</td>
+      </tr>
+
+      <tr>
+        <td>Avg battles</td>
+        <% maximum = Enum.reduce(@data["battles"]["in_progress"], 0, &max/2) %>
+
+        <%= for i <- 0..23 do %>
+          <td class="hourly-load-td" style={"background-color: ##{heatmap(Enum.fetch!(@data["battles"]["in_progress"], i), maximum, "white-green")};"}>
+            <%= Enum.fetch!(@data["battles"]["in_progress"], i) |> round(2) %>
+          </td>
+        <% end %>
+      </tr>
+    </tbody>
+  </table>
+</div>
