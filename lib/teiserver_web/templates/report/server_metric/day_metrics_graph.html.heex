@@ -26,17 +26,17 @@ $(function() {
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Report.MetricView, "section_menu.html", Map.merge(assigns, %{
+        <%= render TeiserverWeb.Report.ServerMetricView, "section_menu.html", Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
-            active: "month_graph"
+            active: "graph"
           })
         %>
         <br /><br />
 
 <div class="row">
   <div class="col-md-12">
-    <form action={Routes.ts_reports_metric_path(@conn, :month_metrics_graph)} method='post' class=''>
+    <form action={Routes.ts_reports_server_metric_path(@conn, :day_metrics_graph)} method='post' class=''>
       <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
       <div class='row'>
         <div class='col-xl-4 col-lg-6 col-md-12'>

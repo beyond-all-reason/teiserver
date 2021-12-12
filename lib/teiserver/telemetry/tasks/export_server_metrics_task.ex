@@ -1,4 +1,4 @@
-defmodule Teiserver.Telemetry.ExportServerMetricsTask do
+defmodule Teiserver.Telemetry.ExportMatchMetricsTask do
   alias Teiserver.Telemetry
   alias Central.Helpers.{DatePresets}
 

@@ -6,7 +6,7 @@
   active: @active,
   icon: "far fa-bars",
   bsname: bsname,
-  url: Routes.ts_reports_metric_path(@conn, :day_metrics_list)
+  url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_list)
 %>
 
 <%= central_component "section_menu_button",
@@ -15,7 +15,7 @@
   active: @active,
   icon: "far fa-waveform",
   bsname: bsname,
-  url: Routes.ts_reports_metric_path(@conn, :day_metrics_today)
+  url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_today)
 %>
 
 <%= central_component "section_menu_button",
@@ -24,7 +24,7 @@
   active: @active,
   icon: "far fa-chart-line-up",
   bsname: bsname,
-  url: Routes.ts_reports_metric_path(@conn, :day_metrics_graph)
+  url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_graph)
 %>
 
 <%= central_component "section_menu_button",
@@ -33,7 +33,7 @@
   active: @active,
   icon: "far fa-download",
   bsname: bsname,
-  url: Routes.ts_reports_metric_path(@conn, :day_metrics_export_form)
+  url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_export_form)
 %>
 
 
@@ -46,7 +46,7 @@
   active: @active,
   icon: "far fa-bars",
   bsname: bsname,
-  url: Routes.ts_reports_metric_path(@conn, :month_metrics_list)
+  url: Routes.ts_reports_server_metric_path(@conn, :month_metrics_list)
 %>
 
 <%= central_component "section_menu_button",
@@ -55,7 +55,7 @@
   active: @active,
   icon: "far fa-waveform",
   bsname: bsname,
-  url: Routes.ts_reports_metric_path(@conn, :month_metrics_today)
+  url: Routes.ts_reports_server_metric_path(@conn, :month_metrics_today)
 %>
 
 <%= central_component "section_menu_button",
@@ -64,5 +64,5 @@
   active: @active,
   icon: "far fa-chart-line-up",
   bsname: bsname,
-  url: Routes.ts_reports_metric_path(@conn, :month_metrics_graph)
+  url: Routes.ts_reports_server_metric_path(@conn, :month_metrics_graph)
 %>
