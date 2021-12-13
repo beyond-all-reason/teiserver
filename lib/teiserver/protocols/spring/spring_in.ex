@@ -1213,7 +1213,7 @@ defmodule Teiserver.Protocols.SpringIn do
       data
       |> String.replace("\t", "\\t")
 
-    msg = "No incomming match for #{cmd} with data '#{data}'"
+    msg = "No incomming match for #{cmd} with data '#{data}'. Userid #{state.userid}"
     Logger.info(msg)
     reply(:servermsg, msg, msg_id, state)
     state
