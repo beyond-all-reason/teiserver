@@ -596,10 +596,15 @@ defmodule Teiserver.User do
             {:error, "Unverified", user.id}
 
           Client.get_client_by_id(user.id) != nil ->
+            client = Client.get_client_by_id(user.id)
             Client.disconnect(user.id, "Already logged in")
-            ConCache.put(:teiserver_login_count, user.id, 10)
-            {:error, "Existing session, please retry in 20 seconds to clear the cache"}
-            # do_login(user, ip, lobby, lobby_hash)
+            if not client.bot do
+              ConCache.put(:teiserver_login_count, user.id, 10)
+              {:error, "Existing session, please retry in 20 seconds to clear the cache"}
+            else
+              :timer.sleep(1000)
+              do_login(user, ip, lobby, lobby_hash)
+            end
 
           true ->
             do_login(user, ip, lobby, lobby_hash)
