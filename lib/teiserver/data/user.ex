@@ -556,7 +556,7 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec try_login(String.t(), String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()} | {:error, String.t(), T.userid()}
+  @spec try_login(String.t(), String.t(), String.t(), String.t()) :: {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), T.userid()}
   def try_login(token, ip, lobby, lobby_hash) do
     wait_for_precache()
 
