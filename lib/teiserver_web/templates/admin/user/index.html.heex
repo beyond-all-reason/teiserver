@@ -26,6 +26,7 @@
             show_search: false,
             active: (cond do
               @conn.params["search"] != nil -> "search"
+              assigns[:data_search] != nil -> "data_search"
               # @filter != nil -> @filter
               true -> "index"
             end)
@@ -34,7 +35,11 @@
 <%= if @conn.params["search"] != nil do %>
   <%= render TeiserverWeb.Admin.UserView, "search.html", assigns %>
 <% else %>
-  <br /><br />
+  <%= if assigns[:data_search] != nil do %>
+    <%= render TeiserverWeb.Admin.UserView, "data_search.html", assigns %>
+  <% else %>
+    <br /><br />
+  <% end %>
 <% end %>
 
 <h4>Listing Users</h4>

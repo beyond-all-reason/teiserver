@@ -32,6 +32,14 @@
   Advanced search
 </a>
 
+<%= if allow?(@current_user, "admin") do %>
+  <a href={"#{Routes.ts_admin_user_path(@conn, :data_search)}"} class={"btn btn-outline-#{bsname}"} id="section-menu-data_search">
+    <i class="far fa-print-magnifying-glass"></i>
+    &nbsp;
+    Data search
+  </a>
+<% end %>
+
 <!--
 <a href={Routes.ts_admin_user_path(@conn, :new)} class={"btn btn-outline-#{bsname}"} id="section-menu-new">
   <i class="far fa-plus"></i>

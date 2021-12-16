@@ -82,6 +82,31 @@ defmodule TeiserverWeb.Admin.UserController do
     # end
   end
 
+  @spec data_search(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def data_search(conn, params) do
+    users = if params["data_search"] == nil do
+      []
+    else
+      id_list = Teiserver.Account.list_user_stats(limit: :infinity)
+      |> Teiserver.Account.UserStatLib.field_contains("hardware:gpuinfo", params["data_search"]["gpu"])
+      |> Teiserver.Account.UserStatLib.field_contains("hardware:cpuinfo", params["data_search"]["cpu"])
+      |> Teiserver.Account.UserStatLib.field_contains("hardware:osinfo", params["data_search"]["os"])
+      |> Teiserver.Account.UserStatLib.field_contains("hardware:raminfo", params["data_search"]["ram"])
+      |> Stream.map(fn stats -> stats.user_id end)
+      |> Stream.take(50)
+      |> Enum.to_list
+
+      Account.list_users(search: [id_in: id_list])
+    end
+
+    conn
+    |> add_breadcrumb(name: "Data search", url: conn.request_path)
+    |> assign(:params, params["data_search"])
+    |> assign(:data_search, true)
+    |> assign(:users, users)
+    |> render("index.html")
+  end
+
   @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     user = Account.get_user(id)

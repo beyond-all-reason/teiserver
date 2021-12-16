@@ -208,6 +208,8 @@ defmodule TeiserverWeb.Router do
         get("/users/full_chat/:id", UserController, :full_chat)
         get("/users/search", UserController, :index)
         post("/users/set_stat", UserController, :set_stat)
+        get("/users/data_search", UserController, :data_search)
+        post("/users/data_search", UserController, :data_search)
         post("/users/search", UserController, :search)
         resources("/user", UserController)
 
