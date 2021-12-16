@@ -14,9 +14,14 @@ defmodule Teiserver.Battle.MatchLib do
     bot_names = Map.keys(lobby.bots)
       |> Enum.join(" ")
 
-    max_team_size = teams
-      |> Enum.map(fn {_, team} -> Enum.count(team) end)
-      |> Enum.max
+    # It is possible for it to be purely bots v bots which will make it appear to be empty teams
+    # this would cause an error with Enum.max, hence the case statement
+    max_team_size = case Enum.map(teams, fn {_, team} -> Enum.count(team) end) do
+      [] ->
+        0
+      counts ->
+        Enum.max(counts)
+    end
 
     cond do
       String.contains?(bot_names, "ScavengersAI") -> "Scavengers"
