@@ -1,10 +1,10 @@
 defmodule Teiserver.Protocols.TachyonRawTest do
   use Central.ServerCase
 
-  alias Teiserver.User
+  alias Teiserver.{User, Account}
 
   import Teiserver.TeiserverTestLib,
-    only: [tls_setup: 0, _send_raw: 2, _tachyon_send: 2, _recv_raw: 1, _tachyon_recv: 1, new_user: 0, new_user_name: 0]
+    only: [tls_setup: 0, raw_setup: 0, _send_raw: 2, _tachyon_send: 2, _recv_raw: 1, _tachyon_recv: 1, new_user: 0, new_user_name: 0, _recv_until: 1]
 
   alias Teiserver.Protocols.TachyonLib
 
@@ -91,7 +91,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.register", "result" => "success"}]
 
-    db_user =  Teiserver.Account.get_user(nil, search: [email: "tachyon_register@example"])
+    db_user =  Account.get_user(nil, search: [email: "tachyon_register@example"])
     assert db_user != nil
 
     cache_user_email = User.get_user_by_email("tachyon_register@example")
@@ -235,5 +235,131 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     data = %{cmd: "c.auth.disconnect"}
     _tachyon_send(socket, data)
     _tachyon_recv(socket)
+  end
+
+  test "existing spring user" do
+    md5_pass = User.spring_md5_password("password")
+
+    # Create the user
+    username = new_user_name()
+    {:ok, user} = Account.create_user(%{
+      name: username,
+      email: "#{username}@email",
+      password: md5_pass,
+      permissions: [],
+      admin_group_id: Teiserver.user_group_id(),
+      colour: "#AA0000",
+      icon: "fas fa-user",
+      data: %{
+        "bot" => false,
+        "moderator" => false,
+        "verified" => true,
+        "springid" => 123,
+      }
+    })
+    userid = user.id
+    user = Account.get_user!(userid)
+
+    new_data =
+      Map.merge(user.data, %{
+        "password_hash" => user.password |> String.replace("\"", ""),
+        "spring_password" => true
+      })
+    Account.update_user(user, %{data: new_data})
+    User.recache_user(userid)
+
+    # Lets save the md5'd password
+    old_db_hash = user.password
+
+    # First login with spring to make sure we're doing it right
+    %{socket: raw_socket} = raw_setup()
+
+    # We expect to be greeted by a welcome message
+    reply = _recv_raw(raw_socket)
+    assert reply == "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
+
+    _send_raw(
+      raw_socket,
+      "LOGIN #{username} #{md5_pass} 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
+    )
+
+    reply = _recv_until(raw_socket)
+    [accepted | _remainder] = String.split(reply, "\n")
+
+    assert accepted == "ACCEPTED #{username}",
+      message:
+        "Bad password, gave X03MO1qnZdYdgyfeuILPmQ== but needed #{user.data["password_hash"]}. Accepted message is #{
+          accepted
+        }"
+
+    # Check the user password hasn't changed
+    user = Account.get_user!(userid)
+    assert user.password == old_db_hash
+    assert user.data["password_hash"] == old_db_hash
+    assert user.data["spring_password"] == true
+
+    # Disconnect
+    _send_raw(raw_socket, "EXIT\n")
+
+    # Swap to Tachyon
+    %{socket: tls_socket} = tls_setup()
+    _ = _recv_raw(tls_socket)
+    _send_raw(tls_socket, "TACHYON\n")
+    reply = _recv_raw(tls_socket)
+    assert reply =~ "OK cmd=TACHYON\n"
+
+    # Now auth via Tachyon
+    # Good password
+    _tachyon_send(tls_socket, %{cmd: "c.auth.get_token", password: "password", email: user.email})
+    [reply] = _tachyon_recv(tls_socket)
+    assert Map.has_key?(reply, "token")
+    token = reply["token"]
+    assert reply == %{"cmd" => "s.auth.get_token", "result" => "success", "token" => token}
+
+    # Check the user password has changed but their password_hash in the data field hasn't
+    user = Account.get_user!(userid)
+    assert user.password != old_db_hash
+    assert user.data["password_hash"] == old_db_hash
+    assert user.data["spring_password"] == false
+
+    # Disconnect
+    _tachyon_send(tls_socket, %{cmd: "c.auth.disconnect"})
+
+    # Can we reconnect? It should no longer be a spring password
+    %{socket: tls_socket} = tls_setup()
+    _ = _recv_raw(tls_socket)
+    _send_raw(tls_socket, "TACHYON\n")
+    reply = _recv_raw(tls_socket)
+    assert reply =~ "OK cmd=TACHYON\n"
+
+    _tachyon_send(tls_socket, %{cmd: "c.auth.get_token", password: "password", email: user.email})
+    [reply] = _tachyon_recv(tls_socket)
+    assert Map.has_key?(reply, "token")
+    token = reply["token"]
+    assert reply == %{"cmd" => "s.auth.get_token", "result" => "success", "token" => token}
+
+    # # Disconnect
+    _tachyon_send(tls_socket, %{cmd: "c.auth.disconnect"})
+
+    # What about with spring?
+    %{socket: raw_socket} = raw_setup()
+
+    # We expect to be greeted by a welcome message
+    reply = _recv_raw(raw_socket)
+    assert reply == "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
+
+    _send_raw(
+      raw_socket,
+      "LOGIN #{username} #{md5_pass} 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
+    )
+
+    reply = _recv_until(raw_socket)
+    [accepted | _remainder] = String.split(reply, "\n")
+
+    assert accepted == "ACCEPTED #{username}",
+      message:
+        "Bad password, gave X03MO1qnZdYdgyfeuILPmQ== but needed #{user.data["password_hash"]}. Accepted message is #{
+          accepted
+        }"
   end
 end

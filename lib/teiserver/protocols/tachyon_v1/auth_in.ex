@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
-  alias Teiserver.{User, Client}
+  alias Teiserver.{User, Client, Account}
   alias Teiserver.Protocols.Tachyon.V1.Tachyon
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
 
@@ -12,12 +12,36 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
       nil ->
         reply(:auth, :user_token, {:failure, "Incorrect credentials"}, state)
       user ->
-        case Central.Account.User.verify_password(plain_text_password, user.password_hash) do
+        # Are they an md5 conversion user?
+        case user.spring_password do
           true ->
-            token = User.create_token(user)
-            reply(:auth, :user_token, {:success, token}, state)
+            db_user = Account.get_user!(user.id)
+
+            # Yes, we can test and update their password accordingly!
+            md5_password = User.spring_md5_password(plain_text_password)
+
+            case User.test_password(md5_password, user.password_hash) do
+              true ->
+                # Update the db user then the cached user
+                Central.Account.update_user(db_user, %{"password" => plain_text_password})
+                User.recache_user(user.id)
+                User.update_user(%{user | spring_password: false}, persist: true)
+
+                token = User.create_token(user)
+                reply(:auth, :user_token, {:success, token}, state)
+              false ->
+                reply(:auth, :user_token, {:failure, "Invalid credentials."}, state)
+            end
+
           false ->
-            reply(:auth, :user_token, {:failure, "Invalid credentials"}, state)
+            db_user = Account.get_user!(user.id)
+            case Central.Account.User.verify_password(plain_text_password, db_user.password) do
+              true ->
+                token = User.create_token(user)
+                reply(:auth, :user_token, {:success, token}, state)
+              false ->
+                reply(:auth, :user_token, {:failure, "Invalid credentials"}, state)
+            end
         end
     end
   end
