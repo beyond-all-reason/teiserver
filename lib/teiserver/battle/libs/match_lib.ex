@@ -151,6 +151,13 @@ defmodule Teiserver.Battle.MatchLib do
       where: not is_nil(matches.data)
   end
 
+  def _search(query, :of_interest, true) do
+    from matches in query,
+      where: not is_nil(matches.data),
+      where: not is_nil(matches.finished),
+      where: not is_nil(matches.started)
+  end
+
   def _search(query, :simple_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 

@@ -360,7 +360,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.communication.direct_message"
     assert reply["sender"] == Coordinator.get_coordinator_userid()
-    assert reply["message"] == ["Command list can currently be found at https://github.com/beyond-all-reason/teiserver/blob/master/lib/teiserver/coordinator/coordinator_lib.ex"]
+    assert reply["message"] |> Enum.count > 5
   end
 
   test "passthrough", %{lobby_id: lobby_id, host: host, hsocket: hsocket, listener: listener} do

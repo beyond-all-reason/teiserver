@@ -37,17 +37,14 @@ defmodule TeiserverWeb.Report.MatchMetricController do
   @spec day_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_show(conn, %{"date" => date_str}) do
     date = TimexHelper.parse_ymd(date_str)
+    breakdown = Teiserver.Battle.Tasks.BreakdownMatchDataTask.perform(date)
     log = Telemetry.get_telemetry_day_log(date)
-
-    users =
-      [log]
-      |> Telemetry.user_lookup()
 
     conn
     |> assign(:date, date)
-    |> assign(:data, log.data)
-    |> assign(:users, users)
-    |> add_breadcrumb(name: "Daily metrics - #{date_str}", url: conn.request_path)
+    |> assign(:log_data, log.data["matches"])
+    |> assign(:breakdown, breakdown)
+    |> add_breadcrumb(name: "Daily - #{date_str}", url: conn.request_path)
     |> render("day_metrics_show.html")
   end
 
@@ -63,7 +60,7 @@ defmodule TeiserverWeb.Report.MatchMetricController do
     |> assign(:date, Timex.today())
     |> assign(:data, data)
     |> assign(:users, users)
-    |> add_breadcrumb(name: "Daily metrics - Today (partial)", url: conn.request_path)
+    |> add_breadcrumb(name: "Daily - Today (partial)", url: conn.request_path)
     |> render("day_metrics_show.html")
   end
 
@@ -128,7 +125,7 @@ defmodule TeiserverWeb.Report.MatchMetricController do
     conn
     |> assign(:params, params)
     |> assign(:data, data)
-    |> add_breadcrumb(name: "Daily metrics - Graph", url: conn.request_path)
+    |> add_breadcrumb(name: "Daily - Graph", url: conn.request_path)
     |> render("day_metrics_graph.html")
   end
 

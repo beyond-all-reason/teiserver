@@ -77,7 +77,7 @@ defmodule Teiserver.SpringAuthTest do
     # And now we try for a bad mystatus command
     _send_raw(socket, "MYSTATUS\n")
     reply = _recv_raw(socket)
-    assert reply == "SERVERMSG No incomming match for MYSTATUS with data ''\n"
+    assert reply == "SERVERMSG No incomming match for MYSTATUS with data ''. Userid #{user.id}\n"
 
     # Now change the password - incorrectly
     _send_raw(socket, "CHANGEPASSWORD wrong_pass new_pass\n")
@@ -554,7 +554,7 @@ CLIENTS test_room #{user.name}\n"
     # Test no match
     _send_raw(socket, "CREATEBOTACCOUNT nomatchname\n")
     reply = _recv_raw(socket)
-    assert reply == "SERVERMSG No incomming match for CREATEBOTACCOUNT with data 'nomatchname'\n"
+    assert reply == "SERVERMSG No incomming match for CREATEBOTACCOUNT with data 'nomatchname'. Userid #{user.id}\n"
   end
 
   test "c.moderation.report", %{socket: socket} do

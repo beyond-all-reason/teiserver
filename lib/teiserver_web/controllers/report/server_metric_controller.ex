@@ -30,7 +30,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
     conn
     |> assign(:logs, logs)
-    |> add_breadcrumb(name: "Daily metrics", url: conn.request_path)
+    |> add_breadcrumb(name: "Daily", url: conn.request_path)
     |> render("day_metrics_list.html")
   end
 
@@ -47,7 +47,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     |> assign(:date, date)
     |> assign(:data, log.data)
     |> assign(:users, users)
-    |> add_breadcrumb(name: "Daily metrics - #{date_str}", url: conn.request_path)
+    |> add_breadcrumb(name: "Daily - #{date_str}", url: conn.request_path)
     |> render("day_metrics_show.html")
   end
 
@@ -63,7 +63,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     |> assign(:date, Timex.today())
     |> assign(:data, data)
     |> assign(:users, users)
-    |> add_breadcrumb(name: "Daily metrics - Today (partial)", url: conn.request_path)
+    |> add_breadcrumb(name: "Daily - Today (partial)", url: conn.request_path)
     |> render("day_metrics_show.html")
   end
 
@@ -119,7 +119,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     conn
     |> assign(:params, params)
     |> assign(:data, data)
-    |> add_breadcrumb(name: "Daily metrics - Graph", url: conn.request_path)
+    |> add_breadcrumb(name: "Daily - Graph", url: conn.request_path)
     |> render("day_metrics_graph.html")
   end
 
@@ -137,7 +137,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
     conn
     |> assign(:logs, logs)
-    |> add_breadcrumb(name: "Monthly metrics", url: conn.request_path)
+    |> add_breadcrumb(name: "Monthly", url: conn.request_path)
     |> render("month_metrics_list.html")
   end
 
@@ -149,7 +149,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     |> assign(:year, year)
     |> assign(:month, month)
     |> assign(:data, log.data)
-    |> add_breadcrumb(name: "Monthly metrics - #{month}/#{year}", url: conn.request_path)
+    |> add_breadcrumb(name: "Monthly - #{month}/#{year}", url: conn.request_path)
     |> render("month_metrics_show.html")
   end
 
@@ -161,7 +161,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     |> assign(:year, Timex.today().year)
     |> assign(:month, Timex.today().month)
     |> assign(:data, data)
-    |> add_breadcrumb(name: "Monthly metrics - Today (partial)", url: conn.request_path)
+    |> add_breadcrumb(name: "Monthly - This month (partial)", url: conn.request_path)
     |> render("month_metrics_show.html")
   end
 
@@ -197,7 +197,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     conn
     |> assign(:params, params)
     |> assign(:data, data)
-    |> add_breadcrumb(name: "Monthly metrics - Graph", url: conn.request_path)
+    |> add_breadcrumb(name: "Monthly - Graph", url: conn.request_path)
     |> render("month_metrics_graph.html")
   end
 end

@@ -35,6 +35,11 @@
 
 <div class="row page-row">
   <div class="col-md-12">
+    <a href={Routes.ts_reports_server_metric_path(@conn, :day_metrics_show, date_to_str(@date, format: :ymd))} class={"btn float-right btn-outline-#{TeiserverWeb.Report.ServerMetricView.colours |> elem(2)}"}>
+      <%= central_component "icon", icon: TeiserverWeb.Report.ServerMetricView.icon %>
+      &nbsp;
+      Server detail
+    </a>
     <%= if @date == Timex.today() do %>
       <h3>Day to day metric: Today so far</h3>
     <% else %>
@@ -52,68 +57,64 @@
       </li>
 
       <li>
-        <a href="#hourly_tab" role="tab" class="nav-link" data-toggle="tab">
-          <i class="far fa-fw fa-hourglass"></i>
-          Hourly
+        <a href="#duel_tab" role="tab" class="nav-link" data-toggle="tab">
+          <i class="far fa-fw fa-dice-d4"></i>
+          Duel
         </a>
       </li>
 
       <li>
-        <a href="#user_tab" role="tab" class="nav-link" data-toggle="tab">
-          <%= central_component "icon", icon: Central.Account.UserLib.icon() %>
-          Users
-        </a>
-      </li>
-
-      <%= if Map.has_key?(@data, "matches") do %>
-        <li>
-          <a href="#match_tab" role="tab" class="nav-link" data-toggle="tab">
-            <%= central_component "icon", icon: Teiserver.Battle.MatchLib.icon() %>
-            Matches
-          </a>
-        </li>
-      <% end %>
-
-      <li>
-        <a href="#raw_tab" role="tab" class="nav-link" data-toggle="tab">
-          <i class="far fa-fw fa-code"></i>
-          Raw data
+        <a href="#team_tab" role="tab" class="nav-link" data-toggle="tab">
+          <i class="far fa-fw fa-dice-d20"></i>
+          Team
         </a>
       </li>
 
       <li>
-        <a href="#anon_raw_tab" role="tab" class="nav-link" data-toggle="tab">
-          <i class="far fa-fw fa-user-secret"></i>
-          Anon data
+        <a href="#ffa_tab" role="tab" class="nav-link" data-toggle="tab">
+          <i class="far fa-fw fa-recycle"></i>
+          FFA
+        </a>
+      </li>
+
+      <li>
+        <a href="#scavenger_tab" role="tab" class="nav-link" data-toggle="tab">
+          <i class="far fa-fw fa-user-robot"></i>
+          Scavenger
+        </a>
+      </li>
+
+      <li>
+        <a href="#chicken_tab" role="tab" class="nav-link" data-toggle="tab">
+          <i class="far fa-fw fa-drumstick"></i>
+          Chicken
         </a>
       </li>
     </ul>
 
     <div class="tab-content">
       <div class="tab-pane" id="details_tab" style="padding:5px;">
-        <%= render "tab_details.html", assigns %>
+        <%= render "tab_details.html", %{log_data: @log_data} %>
       </div>
 
-      <div class="tab-pane" id="hourly_tab" style="padding:5px;">
-        <%= render "tab_hourly.html", assigns %>
+      <div class="tab-pane" id="duel_tab" style="padding:5px;">
+        <%= render "tab_duel.html", %{data: @breakdown.duel} %>
       </div>
 
-      <div class="tab-pane" id="user_tab" style="padding:5px;">
-        <%= render "tab_user.html", assigns %>
+      <div class="tab-pane" id="team_tab" style="padding:5px;">
+        <%= render "tab_team.html", %{data: @breakdown.team} %>
       </div>
 
-      <%= if Map.has_key?(@data, "matches") do %>
-        <div class="tab-pane" id="match_tab" style="padding:5px;">
-          <%= render "tab_match.html", assigns %>
-        </div>
-      <% end %>
-
-      <div class="tab-pane" id="raw_tab" style="padding:5px;">
-        <%= render "tab_raw.html", assigns %>
+      <div class="tab-pane" id="ffa_tab" style="padding:5px;">
+        <%= render "tab_ffa.html", %{data: @breakdown.ffa} %>
       </div>
 
-      <div class="tab-pane" id="anon_raw_tab" style="padding:5px;">
-        <%= render "tab_anon_raw.html", assigns %>
+      <div class="tab-pane" id="scavenger_tab" style="padding:5px;">
+        <%= render "tab_scavenger.html", %{data: @breakdown.scavenger} %>
+      </div>
+
+      <div class="tab-pane" id="chicken_tab" style="padding:5px;">
+        <%= render "tab_chicken.html", %{data: @breakdown.chicken} %>
       </div>
     </div>
   </div>

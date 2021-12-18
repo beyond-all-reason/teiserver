@@ -33,7 +33,7 @@ defmodule Teiserver.SpringBattleHostTest do
     )
 
     # Find battle
-    battle = Lobby.list_battles
+    battle = Lobby.list_lobbies
       |> Enum.filter(fn b -> b.founder_id == user.id end)
       |> hd
 
@@ -52,7 +52,7 @@ defmodule Teiserver.SpringBattleHostTest do
     )
 
     # Find battle ID
-    lobby_id = Lobby.list_battles
+    lobby_id = Lobby.list_lobbies
     |> Enum.filter(fn b -> b.founder_id == host_user.id end)
     |> hd
     |> Map.get(:id)

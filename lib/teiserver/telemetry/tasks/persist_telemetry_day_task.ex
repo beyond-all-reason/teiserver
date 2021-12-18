@@ -477,12 +477,13 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
     Battle.list_matches(
       search: [
         inserted_after: the_date,
-        inserted_before: Timex.shift(the_date, days: 1)
+        inserted_before: Timex.shift(the_date, days: 1),
+        of_interest: true
       ],
       limit: :infinity
     )
-    |> Enum.filter(fn match ->
-      match.started != nil and match.finished != nil and Timex.diff(match.finished, match.started, :second) >= 300
+    |> Stream.filter(fn match ->
+      Timex.diff(match.finished, match.started, :second) >= 300
     end)
     |> Enum.reduce(@match_blank_acc, &add_match/2)
     |> second_pass
