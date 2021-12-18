@@ -245,6 +245,8 @@ defmodule Teiserver.User do
         user
         |> convert_user
         |> Map.put(:springid, next_springid())
+        |> Map.put(:password_hash, spring_md5_password(password))
+        |> Map.put(:spring_password, false)
         |> add_user
 
         case EmailHelper.new_user(user) do

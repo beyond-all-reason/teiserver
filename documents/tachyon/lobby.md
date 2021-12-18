@@ -83,8 +83,11 @@
 }
 ```
 
-### TODO: `c.lobby.update`
-### TODO: `s.lobby.updated`
+### TODO: `c.lobby.update_status`
+### TODO: `s.lobby.updated_status`
+
+### TODO: `c.lobby.update_host_state`
+### TODO: `s.lobby.updated_host_state`
 
 ### TODO: `c.lobby.start`
 ### TODO: `c.lobby.end`

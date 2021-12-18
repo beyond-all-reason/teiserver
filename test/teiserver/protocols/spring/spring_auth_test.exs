@@ -97,7 +97,7 @@ defmodule Teiserver.SpringAuthTest do
     # Test no match
     _send_raw(socket, "CHANGEPASSWORD nomatchname\n")
     reply = _recv_raw(socket)
-    assert reply == "SERVERMSG No incomming match for CHANGEPASSWORD with data 'nomatchname'\n"
+    assert reply == "SERVERMSG No incomming match for CHANGEPASSWORD with data 'nomatchname'. Userid #{user.id}\n"
   end
 
   test "IGNORELIST, IGNORE, UNIGNORE, SAYPRIVATE", %{socket: socket1, user: user} do

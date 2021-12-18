@@ -121,17 +121,17 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(:cancel_split, state) do
-    Logger.warn("Cancel split")
+    Logger.info("Cancel split")
     {:noreply, %{state | split: nil}}
   end
 
   def handle_info({:do_split, _}, %{split: nil} = state) do
-    Logger.warn("dosplit with no split to do")
+    Logger.info("dosplit with no split to do")
     {:noreply, state}
   end
 
   def handle_info({:do_split, split_uuid}, %{split: split} = state) do
-    Logger.warn("Doing split")
+    Logger.info("Doing split")
 
     new_state = if split_uuid == split.split_uuid do
       players_to_move = Map.put(split.splitters, split.first_splitter_id, true)
@@ -169,7 +169,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       %{state | split: nil}
 
     else
-      Logger.warn("BAD ID")
+      Logger.info("BAD ID")
       # Wrong id, this is a timed out message
       state
     end
@@ -194,9 +194,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info({:host_update, userid, host_data}, state) do
     if state.host_id == userid do
-      host_data = Map.take(host_data, [:host_boss, :host_preset, :host_teamsize, :host_nbteams])
+      host_data = host_data
+        |> Map.take([:host_boss, :host_preset, :host_teamsize, :host_teamcount])
+        |> Enum.filter(fn {_k, v} -> v != nil and v != 0 end)
+        |> Map.new
+
       new_state = state
-      |> Map.merge(host_data)
+        |> Map.merge(host_data)
+
       player_count_changed(new_state)
       {:noreply, new_state}
     else
@@ -380,7 +385,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     cond do
       client == nil -> false
       Enum.member?(@always_allow, cmd.command) -> true
-      # client.moderator == true -> true
+      client.moderator == true -> true
       Enum.member?(@host_commands, cmd.command) and is_host -> true
       Enum.member?(@boss_commands, cmd.command) and (is_host or is_boss) -> true
       true -> false
@@ -389,7 +394,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   defp player_count_changed(%{join_queue: []} = _state), do: nil
   defp player_count_changed(%{join_queue: join_queue} = state) do
-    if get_player_count(state) < (state.host_nbteams * state.host_teamsize) do
+    if get_player_count(state) < get_max_player_count(state) do
       count = get_player_count(state)
       Logger.info("joinq - Player count #{count}, queue is #{Kernel.inspect join_queue}")
 
@@ -407,6 +412,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
           :ok
       end
     end
+  end
+
+  defp get_max_player_count(%{host_teamcount: nil}), do: 16
+  defp get_max_player_count(%{host_teamsize: nil}), do: 16
+  defp get_max_player_count(state) do
+    state.host_teamcount * state.host_teamsize
   end
 
   defp get_player_count(state) do
@@ -494,8 +505,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       host_boss: nil,
       host_preset: nil,
-      host_teamsize: nil,
-      host_nbteams: nil
+      host_teamsize: 4,
+      host_teamcount: 2
     }
   end
 

@@ -2,7 +2,7 @@ defmodule Teiserver.SpringBattleHostTest do
   use Central.ServerCase, async: false
   require Logger
   # alias Teiserver.BitParse
-  # alias Teiserver.User
+  alias Teiserver.Coordinator
   alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Spring
   # alias Teiserver.Protocols.{SpringIn, SpringOut, Spring}
@@ -366,6 +366,18 @@ defmodule Teiserver.SpringBattleHostTest do
     :timer.sleep(1000)
     reply = _recv_until(socket)
     assert reply == "OK cmd=c.battle.update_lobby_title\ns.battle.update_lobby_title #{lobby_id} NewName 123\n"
+
+    # Update the host settings
+    state = Coordinator.call_consul(lobby_id, :get_all)
+    assert state.host_teamcount == 2
+    assert state.host_teamsize == 4
+    _send_raw(socket, "c.battle.update_host {\"teamSize\": \"8\", \"nbTeams\": \"5\"}\n")
+    :timer.sleep(100)
+    reply = _recv_raw(socket)
+    assert reply == :timeout
+    state = Coordinator.call_consul(lobby_id, :get_all)
+    assert state.host_teamcount == 5
+    assert state.host_teamsize == 8
 
     # Leave the battle
     _send_raw(socket, "LEAVEBATTLE\n")

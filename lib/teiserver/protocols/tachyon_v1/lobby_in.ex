@@ -54,7 +54,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
   end
 
   def do_handle("update_status", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
-  def do_handle("update_status", _, %{battle: nil} = state), do: reply(:system, :nolobby, nil, state)
+  def do_handle("update_status", _, %{lobby_id: nil} = state), do: reply(:system, :nolobby, nil, state)
   def do_handle("update_status", new_status, state) do
     updates =
       new_status
@@ -72,6 +72,20 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
         {false, _} ->
           :ok
       end
+    end
+    state
+  end
+
+  def do_handle("update_host_status", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
+  def do_handle("update_host_status", _, %{lobby_id: nil} = state), do: reply(:system, :nolobby, nil, state)
+  def do_handle("update_host_status", new_status, state) do
+    host_data =
+      new_status
+      |> Map.take(~w(boss teamsize teamcount))
+      |> Map.new(fn {k, v} -> {String.to_atom("host_" <> k), int_parse(v)} end)
+
+    if Lobby.allow?(state.userid, :update_host_status, state.lobby_id) do
+      Coordinator.cast_consul(state.lobby_id, {:host_update, state.userid, host_data})
     end
     state
   end

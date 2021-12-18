@@ -636,7 +636,8 @@ defmodule Teiserver.Battle.Lobby do
       Enum.member?(
         [
           :updatebattleinfo,
-          :update_lobby
+          :update_lobby,
+          :update_host_status
         ],
         cmd
       )
