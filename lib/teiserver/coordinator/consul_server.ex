@@ -13,7 +13,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib}
 
   @always_allow ~w(status help y n follow joinq leaveq)
-  @host_commands ~w(gatekeeper welcome-message specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
+  @boss_commands ~w(gatekeeper welcome-message)
+  @host_commands ~w(specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -191,6 +192,18 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info({:lobby_update, _, _, _}, state), do: {:noreply, state}
 
+  def handle_info({:host_update, userid, host_data}, state) do
+    if state.host_id == userid do
+      host_data = Map.take(host_data, [:host_boss, :host_preset, :host_teamsize, :host_nbteams])
+      new_state = state
+      |> Map.merge(host_data)
+      player_count_changed(new_state)
+      {:noreply, new_state}
+    else
+      {:noreply, state}
+    end
+  end
+
   # Says if a status change is allowed to happen. If it is then an allowed status
   # is included with it.
   @spec request_user_change_status(T.client(), map()) :: {boolean, Map.t() | nil}
@@ -361,18 +374,22 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp allow_command?(%{senderid: senderid} = cmd, state) do
     client = Client.get_client_by_id(senderid)
 
+    is_host = senderid == state.host_id
+    is_boss = senderid == state.host_boss
+
     cond do
       client == nil -> false
       Enum.member?(@always_allow, cmd.command) -> true
-      client.moderator == true -> true
-      Enum.member?(@host_commands, cmd.command) and senderid == state.host_id -> true
+      # client.moderator == true -> true
+      Enum.member?(@host_commands, cmd.command) and is_host -> true
+      Enum.member?(@boss_commands, cmd.command) and (is_host or is_boss) -> true
       true -> false
     end
   end
 
   defp player_count_changed(%{join_queue: []} = _state), do: nil
   defp player_count_changed(%{join_queue: join_queue} = state) do
-    if get_player_count(state) < 16 do
+    if get_player_count(state) < (state.host_nbteams * state.host_teamsize) do
       count = get_player_count(state)
       Logger.info("joinq - Player count #{count}, queue is #{Kernel.inspect join_queue}")
 
@@ -474,6 +491,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
       split: nil,
       welcome_message: nil,
       join_queue: [],
+
+      host_boss: nil,
+      host_preset: nil,
+      host_teamsize: nil,
+      host_nbteams: nil
     }
   end
 

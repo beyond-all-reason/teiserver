@@ -20,16 +20,21 @@ $splitlobby
 Causes a "vote" to start where other players can elect to join you in splitting the lobby, follow someone
 of their choosing or remain in place. After 20 seconds you are moved to a new (empty) lobby and those that voted yes
 or are following someone that voted yes are also moved to that lobby.
-"""
 
-    hosts = """
+The following are available to the boss (and battle host)
+
+$welcome-message <message>
+Sets the welcome message sent to anybody joining the lobby
+
 $gatekeeper (default | friends | friendsplay | clan)
 sets the gatekeeper for this battle
 > default: no limitations
 > friends allows only friends of existing members to join the lobby
 > friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)
 > TODO: clan: allows only members of an existing clan to join the game (enable after one member from each clan is present)
+"""
 
+    hosts = """
 $lock (team | player | spectator | side)
 Engages a lock on that mode, when engaged members are unable to change that attribute about themselves.
 Hosts and the server are the only thing that will be able to change it. Moderators are typically exempt
@@ -43,9 +48,6 @@ Multiple locks can be engaged at the same time
 
 $unlock (team | player | spectator)
 Disengages the lock on that mode
-
-$welcome-message <message>
-Sets the welcome message sent to anybody joining the lobby
 
 $specunready
 specs all unready players, they are each sent a ring from the coordinator

@@ -162,7 +162,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
 
-  #################### Host and Moderator
+  #################### Boss
   def handle_command(%{command: "gatekeeper", remaining: mode} = cmd, state) do
     state = case mode do
       "friends" ->
@@ -179,6 +179,19 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, state)
   end
 
+  def handle_command(%{command: "welcome-message", remaining: remaining} = cmd, state) do
+    new_state = case String.trim(remaining) do
+      "" ->
+        %{state | welcome_message: nil}
+      msg ->
+        Lobby.say(cmd.senderid, "New welcome message set to: #{msg}", state.lobby_id)
+        %{state | welcome_message: msg}
+    end
+    ConsulServer.broadcast_update(new_state)
+  end
+
+
+  #################### Host and Moderator
   def handle_command(%{command: "lock", remaining: remaining} = cmd, state) do
     new_locks = case get_lock(remaining) do
       nil -> state.locks
@@ -197,17 +210,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         List.delete(state.locks, lock)
     end
     %{state | locks: new_locks}
-  end
-
-  def handle_command(%{command: "welcome-message", remaining: remaining} = cmd, state) do
-    new_state = case String.trim(remaining) do
-      "" ->
-        %{state | welcome_message: nil}
-      msg ->
-        Lobby.say(cmd.senderid, "New welcome message set to: #{msg}", state.lobby_id)
-        %{state | welcome_message: msg}
-    end
-    ConsulServer.broadcast_update(new_state)
   end
 
   def handle_command(%{command: "specunready"} = cmd, state) do
