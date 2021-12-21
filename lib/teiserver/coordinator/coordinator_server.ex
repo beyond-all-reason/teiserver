@@ -75,6 +75,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   def handle_info({:direct_message, fromid, "$" <> command}, state) do
     from = User.get_user_by_id(fromid)
+    command = String.trim(command)
 
     new_state = case {command, from.moderator} do
       {"check " <> remaining, true} ->
@@ -131,8 +132,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   end
 
   def handle_info({:direct_message, userid, message}, state) do
-    Logger.warn(message)
-
     username = User.get_username(userid)
     User.send_direct_message(state.userid, userid, "I don't currently handle messages, sorry #{username}")
     {:noreply, state}

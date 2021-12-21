@@ -13,6 +13,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib}
 
   @always_allow ~w(status help y n follow joinq leaveq)
+  @coordinator_bot ~w(whoami whois check)
   @boss_commands ~w(gatekeeper welcome-message)
   @host_commands ~w(specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
@@ -176,12 +177,18 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, new_state}
   end
 
-  def handle_info(cmd = %{command: _}, state) do
-    if allow_command?(cmd, state) do
-      new_state = ConsulCommands.handle_command(cmd, state)
-      {:noreply, new_state}
-    else
-      {:noreply, state}
+  def handle_info(cmd = %{command: command}, state) do
+    cond do
+      Enum.member?(@coordinator_bot, command) ->
+        forward_to_coordinator(cmd)
+        {:noreply, state}
+
+      allow_command?(cmd, state) ->
+        new_state = ConsulCommands.handle_command(cmd, state)
+        {:noreply, new_state}
+
+      true ->
+        {:noreply, state}
     end
   end
 
@@ -513,6 +520,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def get_level("banned"), do: :banned
   def get_level("spectator"), do: :spectator
   def get_level("player"), do: :player
+
+  defp forward_to_coordinator(%{command: command, remaining: remaining, senderid: senderid}) do
+    User.send_direct_message(senderid, Coordinator.get_coordinator_userid(), "$#{command} #{remaining}")
+  end
 
   defp check_queue_status(%{join_queue: []} = state), do: state
   defp check_queue_status(state) do
