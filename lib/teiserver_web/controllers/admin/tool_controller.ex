@@ -44,7 +44,7 @@ defmodule TeiserverWeb.Admin.ToolController do
   @spec day_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_list(conn, _params) do
     logs =
-      Telemetry.list_telemetry_day_logs(
+      Telemetry.list_server_day_logs(
         # search: [user_id: params["user_id"]],
         # joins: [:user],
         order: "Newest first",
@@ -59,7 +59,7 @@ defmodule TeiserverWeb.Admin.ToolController do
   @spec day_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_show(conn, %{"date" => date_str}) do
     date = TimexHelper.parse_ymd(date_str)
-    log = Telemetry.get_telemetry_day_log(date)
+    log = Telemetry.get_server_day_log(date)
 
     users =
       [log]
@@ -93,7 +93,7 @@ defmodule TeiserverWeb.Admin.ToolController do
 
     # log = date
     #   |> TimexHelper.parse_ymd
-    #   |> Telemetry.get_telemetry_day_log
+    #   |> Telemetry.get_server_day_log
 
     conn
   end

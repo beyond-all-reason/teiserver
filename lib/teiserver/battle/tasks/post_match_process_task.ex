@@ -4,9 +4,6 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   alias Teiserver.{Battle, User}
   alias Central.Helpers.NumberHelper
 
-  # psql command to reset battles after upload
-  # UPDATE teiserver_battle_matches SET data = null;
-
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do

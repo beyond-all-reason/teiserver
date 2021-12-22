@@ -29,7 +29,7 @@ defmodule Teiserver.Account.RetentionReport do
 
     start_datetime = Timex.to_datetime(start_date)
 
-    day_logs = Telemetry.list_telemetry_day_logs(search: [start_date: start_date], order: "Newest first", limit: :infinity)
+    day_logs = Telemetry.list_server_day_logs(search: [start_date: start_date], order: "Newest first", limit: :infinity)
 
     # Get the accounts then calculate their last played time
     accounts = Account.list_users(

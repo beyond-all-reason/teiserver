@@ -45,7 +45,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    log = case Telemetry.get_last_telemetry_month_log() do
+    log = case Telemetry.get_last_server_month_log() do
       nil ->
         perform_first_time()
 
@@ -66,7 +66,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
   # For when there are no existing logs
   # we need to ensure the earliest log is from last month, not this month
   defp perform_first_time() do
-    first_logs = Telemetry.list_telemetry_day_logs(
+    first_logs = Telemetry.list_server_day_logs(
       order: "Oldest first",
       limit: 1
     )
@@ -97,12 +97,12 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
   def run(year, month) do
     now = Timex.Date.new!(year, month, 1)
 
-    Telemetry.list_telemetry_day_logs(search: [
+    Telemetry.list_server_day_logs(search: [
       start_date: Timex.beginning_of_month(now),
       end_date: Timex.end_of_month(now)
     ])
 
-    data = Telemetry.list_telemetry_day_logs(search: [
+    data = Telemetry.list_server_day_logs(search: [
       start_date: Timex.beginning_of_month(now),
       end_date: Timex.end_of_month(now)
     ])
@@ -111,7 +111,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
     end)
     |> calculate_month_statistics()
 
-    Telemetry.create_telemetry_month_log(%{
+    Telemetry.create_server_month_log(%{
       year: year,
       month: month,
       data: data
@@ -123,7 +123,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
   def month_so_far() do
     now = Timex.now()
 
-    Telemetry.list_telemetry_day_logs(search: [
+    Telemetry.list_server_day_logs(search: [
       start_date: Timex.beginning_of_month(now)
     ])
     |> Enum.reduce(@empty_log, fn (log, acc) ->

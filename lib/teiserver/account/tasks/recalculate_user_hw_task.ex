@@ -8,7 +8,7 @@ defmodule Teiserver.Account.RecalculateUserHWTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    Telemetry.list_telemetry_day_logs(limit: :infinity)
+    Telemetry.list_server_day_logs(limit: :infinity)
     |> Enum.map(fn log ->
       Map.keys(log.data["minutes_per_user"]["total"])
     end)

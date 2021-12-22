@@ -13,7 +13,7 @@ defmodule Teiserver.Battle.ExportAggregateMatchMetricsTask do
     start_date = Timex.to_datetime(start_date)
     end_date = Timex.to_datetime(end_date)
 
-    Telemetry.list_telemetry_day_logs(
+    Telemetry.list_server_day_logs(
       search: [
         start_date: start_date,
         end_date: end_date

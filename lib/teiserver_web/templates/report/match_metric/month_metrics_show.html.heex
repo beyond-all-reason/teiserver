@@ -36,69 +36,86 @@
 <div class="row page-row">
   <div class="col-md-12">
 
+    <a href={Routes.ts_reports_server_metric_path(@conn, :month_metrics_show, @year, @month)} class={"btn float-right btn-outline-#{TeiserverWeb.Report.ServerMetricView.colours |> elem(2)}"}>
+      <%= central_component "icon", icon: TeiserverWeb.Report.ServerMetricView.icon %>
+      &nbsp;
+      Server detail
+    </a>
     <h4>Headline stats - <%= @month %>/<%= @year %></h4>
+    
     <div class="row">
       <div class="col-md-6">
+        <h4>Counts</h4>
         <%= central_component "detail_line",
-          label: "Unique users",
-          value: format_number @data["aggregates"]["stats"]["unique_users"]
+          label: "Total completed",
+          value: format_number @data["totals"]["aggregate"]["total_count"]
         %>
 
         <%= central_component "detail_line",
-          label: "Peak total users",
-          value: format_number @data["aggregates"]["stats"]["peak_users"]
+          label: "Duel",
+          value: format_number @data["duel"]["aggregate"]["total_count"]
         %>
 
         <%= central_component "detail_line",
-          label: "User registrations",
-          value: format_number @data["aggregates"]["stats"]["accounts_created"]
+          label: "FFA",
+          value: format_number @data["ffa"]["aggregate"]["total_count"]
+        %>
+
+        <%= central_component "detail_line",
+          label: "Team",
+          value: format_number @data["team"]["aggregate"]["total_count"]
+        %>
+
+        <%= central_component "detail_line",
+          label: "Scavengers",
+          value: format_number @data["scavenger"]["aggregate"]["total_count"]
+        %>
+
+        <%= central_component "detail_line",
+          label: "Chickens",
+          value: format_number @data["chicken"]["aggregate"]["total_count"]
         %>
       </div>
-      <div class="col-md-6">
-        <%= central_component "detail_line",
-          label: "Unique players",
-          value: format_number @data["aggregates"]["stats"]["unique_players"]
-        %>
 
+      <div class="col-md-6">
+        <h4>Durations</h4>
         <%= central_component "detail_line",
-          label: "Peak players",
-          value: format_number @data["aggregates"]["stats"]["peak_players"]
+          label: "Mean duration",
+          value: represent_seconds @data["totals"]["aggregate"]["mean_duration_seconds"]
         %>
+        <%= for t <- ~w(5 10 15 20 25 30 35 40 45 50 55 60) do %>
+          <%= central_component "detail_line",
+            label: "#{t} minutes",
+            value: format_number @data["totals"]["duration"][t]
+          %>
+        <% end %>
       </div>
     </div>
-
     <hr />
 
-    <h4>Time spent by state</h4>
     <div class="row">
       <div class="col-md-6">
-        <%= central_component "detail_line",
-          label: "Player",
-          value: represent_minutes(@data["aggregates"]["minutes"]["player"])
+        <h4>Map</h4>
+        <%
+          maps = @data["totals"]["maps"]
+            |> Enum.sort(fn ({_, v1}, {_, v2}) -> v1 >= v2 end)
         %>
-
-        <%= central_component "detail_line",
-          label: "Spectator",
-          value: represent_minutes(@data["aggregates"]["minutes"]["spectator"])
-        %>
-
-        <%= central_component "detail_line",
-          label: "Lobby",
-          value: represent_minutes(@data["aggregates"]["minutes"]["lobby"])
-        %>
-
-        <%= central_component "detail_line",
-          label: "Menu",
-          value: represent_minutes(@data["aggregates"]["minutes"]["menu"])
-        %>
-
-        <%= central_component "detail_line",
-          label: "Total",
-          value: represent_minutes(@data["aggregates"]["minutes"]["total"])
-        %>
+        <%= for {name, count} <- maps do %>
+          <%= central_component "detail_line",
+            label: name,
+            value: format_number(count),
+            width: 350
+          %>
+        <% end %>
       </div>
       <div class="col-md-6">
-
+        <h4>Team size</h4>
+        <%= for t <- 1..8 do %>
+          <%= central_component "detail_line",
+            label: t,
+            value: format_number (@data["totals"]["team_sizes"]["#{t}"] || 0)
+          %>
+        <% end %>
       </div>
     </div>
 

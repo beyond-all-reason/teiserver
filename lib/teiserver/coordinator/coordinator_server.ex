@@ -131,7 +131,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:direct_message, userid, message}, state) do
+  def handle_info({:direct_message, userid, _message}, state) do
     username = User.get_username(userid)
     User.send_direct_message(state.userid, userid, "I don't currently handle messages, sorry #{username}")
     {:noreply, state}

@@ -139,7 +139,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    last_date = Telemetry.get_last_telemetry_day_log()
+    last_date = Telemetry.get_last_server_day_log()
 
     date =
       if last_date == nil do
@@ -186,7 +186,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
 
     Repo.delete_all(delete_query)
 
-    Telemetry.create_telemetry_day_log(%{
+    Telemetry.create_server_day_log(%{
       date: date,
       data: data
     })
@@ -390,7 +390,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
     start_time = Timex.shift(date |> Timex.to_datetime(), minutes: segment_number * @segment_length)
     end_time = Timex.shift(date |> Timex.to_datetime(), minutes: (segment_number + 1) * @segment_length)
 
-    Telemetry.list_telemetry_minute_logs(
+    Telemetry.list_server_minute_logs(
       search: [
         between: {start_time, end_time}
       ],

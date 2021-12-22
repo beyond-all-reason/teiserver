@@ -15,7 +15,7 @@ defmodule Teiserver.Account.RecalculateUserStatTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    Telemetry.list_telemetry_day_logs(limit: :infinity)
+    Telemetry.list_server_day_logs(limit: :infinity)
     |> Enum.map(&convert_to_user_log/1)
     |> List.flatten
     |> Enum.group_by(fn {userid, _} ->

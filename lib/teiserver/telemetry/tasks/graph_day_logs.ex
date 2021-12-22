@@ -1,7 +1,10 @@
 defmodule Teiserver.Telemetry.GraphDayLogsTask do
   def perform(logs, %{"field_list" => field_list} = _params) do
     field_list
-    |> Enum.map(fn field_name ->
+    |> Enum.map(fn
+    {name, path} ->
+      [name | build_line(logs, path)]
+    field_name ->
       name = String.split(field_name, ".")
       |> Enum.reverse()
       |> hd

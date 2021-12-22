@@ -1,4 +1,7 @@
 defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
+  @doc """
+  Provides aggregate data about matches which took place within a given timeframe
+  """
   alias Teiserver.Battle
 
   @spec perform(%Date{}) :: map()
@@ -19,9 +22,9 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
       ffa: get_subset_data(matches, "FFA"),
       scavenger: get_subset_data(matches, "Scavengers"),
       chicken: get_subset_data(matches, "Chicken"),
+      totals: get_subset_data(matches, nil),
     }
   end
-
 
   @spec get_matches(%Date{}, %Date{}) :: [map()]
   defp get_matches(start_date, end_date) do
@@ -38,6 +41,12 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
     )
   end
 
+  defp get_subset_data(matches, nil) do
+    matches
+    |> Stream.map(fn m -> Map.drop(m, ~w(tags)a) end)
+    |> do_get_subset_data
+  end
+
   defp get_subset_data(matches, game_type) do
     matches
     |> Stream.filter(fn m -> m.game_type == game_type end)
@@ -49,14 +58,17 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
     maps = matches
     |> Stream.map(fn m -> m.map end)
     |> Enum.frequencies()
-    |> Enum.map(fn {k, v} -> {k, v} end)
-    |> Enum.sort_by(fn {_, v} -> v end, &>=/2)
+    |> Map.new
+    # |> Enum.map(fn {k, v} -> {k, v} end)
+    # |> Enum.sort_by(fn {_, v} -> v end, &>=/2)
 
     mean_skill = matches
+    |> Stream.filter(fn m -> m.data["skills"] != %{} end)
     |> Stream.map(fn m -> m.data["skills"]["mean"] |> round end)
     |> Enum.frequencies()
-    |> Enum.map(fn {k, v} -> {k, v} end)
-    |> Enum.sort_by(fn {k, _} -> k end, &>=/2)
+    |> Map.new
+    # |> Enum.map(fn {k, v} -> {k, v} end)
+    # |> Enum.sort_by(fn {k, _} -> k end, &>=/2)
 
     duration = matches
     |> Stream.map(fn match ->
@@ -65,43 +77,37 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
       |> round
     end)
     |> Enum.frequencies()
-    |> Enum.map(fn {k, v} -> {k, v} end)
-    |> Enum.sort_by(fn {k, _} -> k end, &>=/2)
+    |> Map.new
+
+    total_duration = matches
+    |> Stream.map(fn match ->
+      Timex.diff(match.finished, match.started, :second)
+    end)
+    |> Enum.sum
+
+    matches_per_hour = matches
+    |> Stream.map(fn match -> match.started.hour end)
+    |> Enum.frequencies()
+    |> Map.new
+    # |> Enum.map(fn {k, v} -> {k, v} end)
+    # |> Enum.sort_by(fn {k, _} -> k end, &>=/2)
+
+    team_sizes = matches
+    |> Stream.map(fn match -> match.team_size end)
+    |> Enum.frequencies()
+    |> Map.new
 
     %{
       maps: maps,
       mean_skill: mean_skill,
-      duration: duration
+      duration: duration,
+      matches_per_hour: matches_per_hour,
+      team_sizes: team_sizes,
+      aggregate: %{
+        total_count: Enum.count(matches),
+        total_duration_seconds: total_duration,
+        mean_duration_seconds: total_duration/max(Enum.count(matches), 1) |> round
+      }
     }
   end
-
-#   %Teiserver.Battle.Match{
-#   __meta__: #Ecto.Schema.Metadata<:loaded, "teiserver_battle_matches">,
-#   bots: %{},
-#   data: %{
-#     "skills" => %{
-#       "maximum" => 26.03,
-#       "mean" => 17.02,
-#       "median" => 17.02,
-#       "minimum" => 8.01,
-#       "range" => 18.020000000000003,
-#       "stdev" => 9.01
-#     }
-#   },
-#   finished: ~U[2021-12-15 18:35:25Z],
-#   founder: #Ecto.Association.NotLoaded<association :founder is not loaded>,
-#   founder_id: 3411,
-#   game_type: "Duel",
-#   id: 25353,
-#   inserted_at: ~N[2021-12-15 18:07:05],
-#   map: "Altair_Crossing_V4",
-#   members: #Ecto.Association.NotLoaded<association :members is not loaded>,
-#   passworded: false,
-#   started: ~U[2021-12-15 18:07:05Z],
-#   team_count: 2,
-#   team_size: 1,
-#   updated_at: ~N[2021-12-15 18:36:00],
-#   uuid: "5f0cff5c-5dce-11ec-bfc7-00163ce514e4"
-# }
-
 end

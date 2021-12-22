@@ -1,6 +1,5 @@
 defmodule Teiserver.Protocols.Spring.MatchmakingIn do
   alias Teiserver.Data.Matchmaking
-  alias Teiserver.{Coordinator}
   alias Teiserver.Protocols.SpringIn
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]

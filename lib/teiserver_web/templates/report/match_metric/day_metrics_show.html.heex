@@ -94,27 +94,27 @@
 
     <div class="tab-content">
       <div class="tab-pane" id="details_tab" style="padding:5px;">
-        <%= render "tab_details.html", %{log_data: @log_data} %>
+        <%= render "tab_details.html", %{data: @data} %>
       </div>
 
       <div class="tab-pane" id="duel_tab" style="padding:5px;">
-        <%= render "tab_duel.html", %{data: @breakdown.duel} %>
+        <%= render "tab_duel.html", %{data: @data["duel"]} %>
       </div>
 
       <div class="tab-pane" id="team_tab" style="padding:5px;">
-        <%= render "tab_team.html", %{data: @breakdown.team} %>
+        <%= render "tab_team.html", %{data: @data["team"]} %>
       </div>
 
       <div class="tab-pane" id="ffa_tab" style="padding:5px;">
-        <%= render "tab_ffa.html", %{data: @breakdown.ffa} %>
+        <%= render "tab_ffa.html", %{data: @data["ffa"]} %>
       </div>
 
       <div class="tab-pane" id="scavenger_tab" style="padding:5px;">
-        <%= render "tab_scavenger.html", %{data: @breakdown.scavenger} %>
+        <%= render "tab_scavenger.html", %{data: @data["scavenger"]} %>
       </div>
 
       <div class="tab-pane" id="chicken_tab" style="padding:5px;">
-        <%= render "tab_chicken.html", %{data: @breakdown.chicken} %>
+        <%= render "tab_chicken.html", %{data: @data["chicken"]} %>
       </div>
     </div>
   </div>

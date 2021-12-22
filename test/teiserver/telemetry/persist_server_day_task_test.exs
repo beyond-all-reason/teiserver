@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTaskTest do
     assert :ok == PersistServerDayTask.perform(%{})
 
     # Now ensure it ran
-    log = Telemetry.get_telemetry_day_log(Timex.to_date({2021, 1, 1}))
+    log = Telemetry.get_server_day_log(Timex.to_date({2021, 1, 1}))
 
     assert log.date == Timex.to_date({2021, 1, 1})
     assert is_integer(log.data["aggregates"]["minutes"]["lobby"])
@@ -84,7 +84,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTaskTest do
       }
     ]
     |> Enum.map(fn params ->
-      Telemetry.create_telemetry_minute_log(params)
+      Telemetry.create_server_minute_log(params)
     end)
   end
 end

@@ -36,7 +36,13 @@
 <div class="row page-row">
   <div class="col-md-12">
 
+    <a href={Routes.ts_reports_match_metric_path(@conn, :month_metrics_show, @year, @month)} class={"btn float-right btn-outline-#{TeiserverWeb.Report.MatchMetricView.colours |> elem(2)}"}>
+      <%= central_component "icon", icon: TeiserverWeb.Report.MatchMetricView.icon %>
+      &nbsp;
+      Match detail
+    </a>
     <h4>Headline stats - <%= @month %>/<%= @year %></h4>
+    <br />
     <div class="row">
       <div class="col-md-6">
         <%= central_component "detail_line",

@@ -1,17 +1,17 @@
-defmodule Teiserver.Telemetry.ServerMinuteLogLib do
+defmodule Teiserver.Telemetry.ServerDayLogLib do
   use CentralWeb, :library
 
-  alias Teiserver.Telemetry.ServerMinuteLog
+  alias Teiserver.Telemetry.ServerDayLog
 
   @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:warning2)
+  def colours(), do: Central.Helpers.StylingHelper.colours(:warning)
 
   @spec icon() :: String.t()
   def icon(), do: "far fa-monitor-heart-rate"
 
-  @spec get_telemetry_minute_logs :: Ecto.Query.t()
-  def get_telemetry_minute_logs() do
-    from(logs in ServerMinuteLog)
+  @spec get_server_day_logs :: Ecto.Query.t()
+  def get_server_day_logs() do
+    from(logs in ServerDayLog)
   end
 
   @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()
@@ -28,25 +28,19 @@ defmodule Teiserver.Telemetry.ServerMinuteLogLib do
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
-  def _search(query, :timestamp, timestamp) do
+  def _search(query, :date, date) do
     from logs in query,
-      where: logs.timestamp == ^timestamp
+      where: logs.date == ^date
   end
 
-  def _search(query, :start_timestamp, timestamp) do
+  def _search(query, :start_date, date) do
     from logs in query,
-      where: logs.timestamp >= ^timestamp
+      where: logs.date >= ^date
   end
 
-  def _search(query, :end_timestamp, timestamp) do
+  def _search(query, :end_date, date) do
     from logs in query,
-      where: logs.timestamp <= ^timestamp
-  end
-
-  def _search(query, :between, {start_timestamp, end_timestamp}) do
-    from logs in query,
-      where: logs.timestamp >= ^start_timestamp,
-      where: logs.timestamp < ^end_timestamp
+      where: logs.date <= ^date
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
@@ -54,11 +48,11 @@ defmodule Teiserver.Telemetry.ServerMinuteLogLib do
 
   def order_by(query, "Newest first") do
     from logs in query,
-      order_by: [desc: logs.timestamp]
+      order_by: [desc: logs.date]
   end
 
   def order_by(query, "Oldest first") do
     from logs in query,
-      order_by: [asc: logs.timestamp]
+      order_by: [asc: logs.date]
   end
 end

@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   @spec day_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_list(conn, _params) do
     logs =
-      Telemetry.list_telemetry_day_logs(
+      Telemetry.list_server_day_logs(
         # search: [user_id: params["user_id"]],
         # joins: [:user],
         order: "Newest first",
@@ -37,7 +37,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   @spec day_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_show(conn, %{"date" => date_str}) do
     date = TimexHelper.parse_ymd(date_str)
-    log = Telemetry.get_telemetry_day_log(date)
+    log = Telemetry.get_server_day_log(date)
 
     users =
       [log]
@@ -89,7 +89,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
   def day_metrics_graph(conn, params) do
     logs =
-      Telemetry.list_telemetry_day_logs(
+      Telemetry.list_server_day_logs(
         # search: [user_id: params["user_id"]],
         # joins: [:user],
         order: "Newest first",
@@ -128,7 +128,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   @spec month_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()
   def month_metrics_list(conn, _params) do
     logs =
-      Telemetry.list_telemetry_month_logs(
+      Telemetry.list_server_month_logs(
         # search: [user_id: params["user_id"]],
         # joins: [:user],
         order: "Newest first",
@@ -143,7 +143,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
   @spec month_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def month_metrics_show(conn, %{"year" => year, "month" => month}) do
-    log = Telemetry.get_telemetry_month_log({year, month})
+    log = Telemetry.get_server_month_log({year, month})
 
     conn
     |> assign(:year, year)
@@ -167,7 +167,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
   def month_metrics_graph(conn, params) do
     logs =
-      Telemetry.list_telemetry_month_logs(
+      Telemetry.list_server_month_logs(
         # search: [user_id: params["user_id"]],
         # joins: [:user],
         order: "Newest first",

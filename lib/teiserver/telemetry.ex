@@ -520,6 +520,335 @@ defmodule Teiserver.Telemetry do
     end
   end
 
+  # Match logs
+    # Day logs
+  alias Teiserver.Telemetry.{MatchDayLog, MatchDayLogLib}
+
+  defp match_day_log_query(args) do
+    match_day_log_query(nil, args)
+  end
+
+  defp match_day_log_query(date, args) do
+    MatchDayLogLib.get_match_day_logs()
+    |> MatchDayLogLib.search(%{date: date})
+    |> MatchDayLogLib.search(args[:search])
+    |> MatchDayLogLib.order_by(args[:order])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of logging_logs.
+
+  ## Examples
+
+      iex> list_logging_logs()
+      [%MatchDayLog{}, ...]
+
+  """
+  def list_match_day_logs(args \\ []) do
+    match_day_log_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single log.
+
+  Raises `Ecto.NoResultsError` if the MatchDayLog does not exist.
+
+  ## Examples
+
+      iex> get_log!(123)
+      %MatchDayLog{}
+
+      iex> get_log!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_match_day_log(date) when not is_list(date) do
+    match_day_log_query(date, [])
+    |> Repo.one()
+  end
+
+  def get_match_day_log(args) do
+    match_day_log_query(nil, args)
+    |> Repo.one()
+  end
+
+  def get_match_day_log(date, args) do
+    match_day_log_query(date, args)
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a log.
+
+  ## Examples
+
+      iex> create_log(%{field: value})
+      {:ok, %MatchDayLog{}}
+
+      iex> create_log(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_match_day_log(attrs \\ %{}) do
+    %MatchDayLog{}
+    |> MatchDayLog.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a log.
+
+  ## Examples
+
+      iex> update_log(log, %{field: new_value})
+      {:ok, %MatchDayLog{}}
+
+      iex> update_log(log, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_match_day_log(%MatchDayLog{} = log, attrs) do
+    log
+    |> MatchDayLog.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a MatchDayLog.
+
+  ## Examples
+
+      iex> delete_log(log)
+      {:ok, %MatchDayLog{}}
+
+      iex> delete_log(log)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_match_day_log(%MatchDayLog{} = log) do
+    Repo.delete(log)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking log changes.
+
+  ## Examples
+
+      iex> change_log(log)
+      %Ecto.Changeset{source: %MatchDayLog{}}
+
+  """
+  def change_match_day_log(%MatchDayLog{} = log) do
+    MatchDayLog.changeset(log, %{})
+  end
+
+  @spec get_last_match_day_log() :: Date.t() | nil
+  def get_last_match_day_log() do
+    query =
+      from telemetry_logs in MatchDayLog,
+        order_by: [desc: telemetry_logs.date],
+        select: telemetry_logs.date,
+        limit: 1
+
+    Repo.one(query)
+  end
+
+  def user_lookup(logs) do
+    user_ids =
+      logs
+      |> Enum.map(fn l -> Map.keys(l.data["minutes_per_user"]["total"]) end)
+      |> List.flatten()
+      |> Enum.uniq()
+
+    query =
+      from users in Central.Account.User,
+        where: users.id in ^user_ids
+
+    query
+    |> Repo.all()
+    |> Enum.map(fn u -> {u.id, u} end)
+    |> Map.new()
+  end
+
+  def get_todays_log() do
+    last_time = ConCache.get(:application_metadata_cache, "teimatch_day_metrics_today_last_time")
+    recache = cond do
+      last_time == nil -> true
+      Timex.compare(Timex.now() |> Timex.shift(minutes: -15), last_time) == 1 -> true
+      true -> false
+    end
+
+    if recache do
+      data = Teiserver.Telemetry.Tasks.PersistMatchDayTask.today_so_far()
+      ConCache.put(:application_metadata_cache, "teimatch_day_metrics_today_cache", data)
+      ConCache.put(:application_metadata_cache, "teimatch_day_metrics_today_last_time", Timex.now())
+      data
+    else
+      ConCache.get(:application_metadata_cache, "teimatch_day_metrics_today_cache")
+    end
+  end
+
+  # Month logs
+  alias Teiserver.Telemetry.{MatchMonthLog, MatchMonthLogLib}
+
+  defp match_month_log_query(args) do
+    match_month_log_query(nil, args)
+  end
+
+  defp match_month_log_query(date, args) do
+    MatchMonthLogLib.get_match_month_logs()
+    |> MatchMonthLogLib.search(%{date: date})
+    |> MatchMonthLogLib.search(args[:search])
+    |> MatchMonthLogLib.order_by(args[:order])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of logging_logs.
+
+  ## Examples
+
+      iex> list_logging_logs()
+      [%MatchMonthLog{}, ...]
+
+  """
+  def list_match_month_logs(args \\ []) do
+    match_month_log_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets a single log.
+
+  Raises `Ecto.NoResultsError` if the MatchMonthLog does not exist.
+
+  ## Examples
+
+      iex> get_log!(123)
+      %MatchMonthLog{}
+
+      iex> get_log!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_match_month_log(date) when not is_list(date) do
+    match_month_log_query(date, [])
+    |> Repo.one()
+  end
+
+  def get_match_month_log(args) do
+    match_month_log_query(nil, args)
+    |> Repo.one()
+  end
+
+  def get_match_month_log(date, args) do
+    match_month_log_query(date, args)
+    |> Repo.one()
+  end
+
+  @doc """
+  Creates a log.
+
+  ## Examples
+
+      iex> create_log(%{field: value})
+      {:ok, %MatchMonthLog{}}
+
+      iex> create_log(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_match_month_log(attrs \\ %{}) do
+    %MatchMonthLog{}
+    |> MatchMonthLog.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a log.
+
+  ## Examples
+
+      iex> update_log(log, %{field: new_value})
+      {:ok, %MatchMonthLog{}}
+
+      iex> update_log(log, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_match_month_log(%MatchMonthLog{} = log, attrs) do
+    log
+    |> MatchMonthLog.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a MatchMonthLog.
+
+  ## Examples
+
+      iex> delete_log(log)
+      {:ok, %MatchMonthLog{}}
+
+      iex> delete_log(log)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_match_month_log(%MatchMonthLog{} = log) do
+    Repo.delete(log)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking log changes.
+
+  ## Examples
+
+      iex> change_log(log)
+      %Ecto.Changeset{source: %MatchMonthLog{}}
+
+  """
+  def change_match_month_log(%MatchMonthLog{} = log) do
+    MatchMonthLog.changeset(log, %{})
+  end
+
+  @spec get_last_match_month_log() :: {integer(), integer()} | nil
+  def get_last_match_month_log() do
+    query =
+      from telemetry_logs in MatchMonthLog,
+        order_by: [desc: telemetry_logs.year, desc: telemetry_logs.month],
+        select: [telemetry_logs.year, telemetry_logs.month],
+        limit: 1
+
+    case Repo.one(query) do
+      [year, month] ->
+        {year, month}
+      nil ->
+        nil
+    end
+  end
+
+  def get_this_months_log() do
+    last_time = ConCache.get(:application_metadata_cache, "teimatch_month_metrics_last_time")
+    recache = cond do
+      last_time == nil -> true
+      Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
+      true -> false
+    end
+
+    if recache do
+      data = Teiserver.Telemetry.Tasks.PersistMatchMonthTask.month_so_far()
+      ConCache.put(:application_metadata_cache, "teimatch_month_metrics_cache", data)
+      ConCache.put(:application_metadata_cache, "teimatch_month_metrics_last_time", Timex.now())
+      data
+    else
+      ConCache.get(:application_metadata_cache, "teimatch_month_metrics_cache")
+    end
+  end
+
   alias Teiserver.Telemetry.EventType
   alias Teiserver.Telemetry.EventTypeLib
 

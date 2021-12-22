@@ -7,7 +7,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMinuteTask do
   def perform(_) do
     now = Timex.now() |> Timex.set([microsecond: 0])
 
-    case Telemetry.get_telemetry_minute_log(now) do
+    case Telemetry.get_server_minute_log(now) do
       nil ->
         perform_telemetry_persist(now)
         :ok
@@ -22,7 +22,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMinuteTask do
     data = Telemetry.get_totals_and_reset()
       |> Map.drop([:cycle])
 
-    Telemetry.create_telemetry_minute_log(%{
+    Telemetry.create_server_minute_log(%{
       timestamp: timestamp,
       data: data
     })

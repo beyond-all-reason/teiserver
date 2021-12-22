@@ -13,7 +13,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTaskTest do
     assert :ok == PersistServerMonthTask.perform(%{})
 
     # Now ensure it ran
-    log = Telemetry.get_telemetry_month_log({2021, 1})
+    log = Telemetry.get_server_month_log({2021, 1})
 
     assert log.year == 2021
     assert log.month == 1
@@ -87,7 +87,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTaskTest do
       }
     ]
     |> Enum.map(fn params ->
-      Telemetry.create_telemetry_minute_log(params)
+      Telemetry.create_server_minute_log(params)
     end)
 
     # Now create the day data

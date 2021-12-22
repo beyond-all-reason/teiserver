@@ -2,7 +2,8 @@ defmodule TeiserverWeb.Report.MatchMetricController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
   alias Central.Helpers.{TimexHelper, DatePresets}
-  alias Teiserver.Battle.{ExportRawMatchMetricsTask, ExportAggregateMatchMetricsTask}
+  alias Teiserver.Battle.{ExportRawMatchMetricsTask}
+  alias Teiserver.Telemetry.GraphDayLogsTask
 
   plug(AssignPlug,
     sidemenu_active: ["teiserver"]
@@ -21,9 +22,7 @@ defmodule TeiserverWeb.Report.MatchMetricController do
   @spec day_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_list(conn, _params) do
     logs =
-      Telemetry.list_telemetry_day_logs(
-        # search: [user_id: params["user_id"]],
-        # joins: [:user],
+      Telemetry.list_match_day_logs(
         order: "Newest first",
         limit: 31
       )
@@ -37,30 +36,12 @@ defmodule TeiserverWeb.Report.MatchMetricController do
   @spec day_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_show(conn, %{"date" => date_str}) do
     date = TimexHelper.parse_ymd(date_str)
-    breakdown = Teiserver.Battle.Tasks.BreakdownMatchDataTask.perform(date)
-    log = Telemetry.get_telemetry_day_log(date)
+    log = Telemetry.get_match_day_log(date)
 
     conn
     |> assign(:date, date)
-    |> assign(:log_data, log.data["matches"])
-    |> assign(:breakdown, breakdown)
+    |> assign(:data, log.data)
     |> add_breadcrumb(name: "Daily - #{date_str}", url: conn.request_path)
-    |> render("day_metrics_show.html")
-  end
-
-  @spec day_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_today(conn, _params) do
-    data = Telemetry.get_todays_log()
-
-    users =
-      [%{data: data}]
-      |> Telemetry.user_lookup()
-
-    conn
-    |> assign(:date, Timex.today())
-    |> assign(:data, data)
-    |> assign(:users, users)
-    |> add_breadcrumb(name: "Daily - Today (partial)", url: conn.request_path)
     |> render("day_metrics_show.html")
   end
 
@@ -95,27 +76,18 @@ defmodule TeiserverWeb.Report.MatchMetricController do
 
   def day_metrics_graph(conn, params) do
     logs =
-      Telemetry.list_telemetry_day_logs(
-        # search: [user_id: params["user_id"]],
-        # joins: [:user],
+      Telemetry.list_match_day_logs(
         order: "Newest first",
         limit: 31
       )
       |> Enum.reverse()
 
+    field_list = case Map.get(params, "fields", "total_matches") do
+      "total_matches" ->
+        [{"Duel", "duel.aggregate.total_count"}, {"Team", "team.aggregate.total_count"}, {"FFA", "ffa.aggregate.total_count"}, {"Chickens", "chicken.aggregate.total_count"}, {"Scavengers", "scavenger.aggregate.total_count"}]
 
-    field_list = case Map.get(params, "fields", "unique_users") do
-      "unique_users" ->
-        ["aggregates.stats.unique_users", "aggregates.stats.unique_players"]
-
-      "peak_users" ->
-        ["aggregates.stats.peak_user_counts.total", "aggregates.stats.peak_user_counts.player"]
-
-      "minutes" ->
-        ["aggregates.minutes.player", "aggregates.minutes.spectator", "aggregates.minutes.lobby", "aggregates.minutes.menu", "aggregates.minutes.total"]
-
-      _ -> #"battles"
-        ["battles.in_progress", "battles.lobby", "battles.total"]
+      _ -> # just default to the above
+        [{"Duel", "duel.aggregate.total_count"}, {"Team", "team.aggregate.total_count"}, {"FFA", "ffa.aggregate.total_count"}, {"Chickens", "chicken.aggregate.total_count"}, {"Scavengers", "scavenger.aggregate.total_count"}]
     end
 
     extra_params = %{"field_list" => field_list}
@@ -134,7 +106,7 @@ defmodule TeiserverWeb.Report.MatchMetricController do
   @spec month_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()
   def month_metrics_list(conn, _params) do
     logs =
-      Telemetry.list_telemetry_month_logs(
+      Telemetry.list_match_month_logs(
         # search: [user_id: params["user_id"]],
         # joins: [:user],
         order: "Newest first",
@@ -149,7 +121,7 @@ defmodule TeiserverWeb.Report.MatchMetricController do
 
   @spec month_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def month_metrics_show(conn, %{"year" => year, "month" => month}) do
-    log = Telemetry.get_telemetry_month_log({year, month})
+    log = Telemetry.get_match_month_log({year, month})
 
     conn
     |> assign(:year, year)
@@ -173,7 +145,7 @@ defmodule TeiserverWeb.Report.MatchMetricController do
 
   def month_metrics_graph(conn, params) do
     logs =
-      Telemetry.list_telemetry_month_logs(
+      Telemetry.list_match_month_logs(
         # search: [user_id: params["user_id"]],
         # joins: [:user],
         order: "Newest first",

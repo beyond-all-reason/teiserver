@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.Tasks.PersistServerMinuteTaskTest do
   use Central.DataCase
-  alias Teiserver.{Telemetry, Account, User}
+  alias Teiserver.{Telemetry}
   alias Teiserver.Telemetry.Tasks.PersistServerMinuteTask
 
   test "perform task" do
@@ -9,7 +9,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMinuteTaskTest do
     now = Timex.now() |> Timex.set([microsecond: 0])
 
     # Now ensure it ran
-    log = Telemetry.get_telemetry_minute_log(now)
+    log = Telemetry.get_server_minute_log(now)
 
     assert Map.has_key?(log.data, "battle")
     assert Map.has_key?(log.data, "client")

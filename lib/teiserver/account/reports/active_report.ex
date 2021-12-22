@@ -17,7 +17,7 @@ defmodule Teiserver.Account.ActiveReport do
         params["end_date"]
       )
 
-    player_counts = Telemetry.list_telemetry_day_logs(search: [start_date: start_date, end_date: end_date], order: "Newest first", limit: :infinity)
+    player_counts = Telemetry.list_server_day_logs(search: [start_date: start_date, end_date: end_date], order: "Newest first", limit: :infinity)
     |> Enum.reduce(%{}, fn (log, players_acc) ->
       log.data["minutes_per_user"]["player"]
       |> Enum.reduce(players_acc, fn ({player_id, minutes}, acc) ->
