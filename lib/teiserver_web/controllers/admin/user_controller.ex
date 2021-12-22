@@ -48,6 +48,14 @@ defmodule TeiserverWeb.Admin.UserController do
   def search(conn, %{"search" => params}) do
     params = Map.merge(search_defaults(conn), params)
 
+    id_list = Account.list_user_stats(
+      search: [
+        data_contains: {"previous_names", params["previous_names"]}
+      ],
+      select: [:user_id]
+    )
+    |> Enum.map(fn s -> s.user_id end)
+
     users =
       Account.list_users(
         search: [
@@ -64,11 +72,14 @@ defmodule TeiserverWeb.Admin.UserController do
           developer: params["developer"],
           ip: params["ip"],
           lobby_client: params["lobby_client"],
-          mod_action: params["mod_action"],
+          previous_names: params["previous_names"],
+          mod_action: params["mod_action"]
         ],
         limit: params["limit"] || 50,
         order_by: params["order"] || "Name (A-Z)"
       )
+      ++ Account.list_users(search: [id_in: id_list])
+      |> Enum.uniq
 
     # if Enum.count(users) == 1 do
     #   conn

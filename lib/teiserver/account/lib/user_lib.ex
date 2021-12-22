@@ -170,6 +170,13 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("? ->> ? = ?", users.data, "lobby_client", ^lobby_client)
   end
 
+  def _search(query, :previous_names, name) do
+    uname = "%" <> name <> "%"
+
+    from users in query,
+      where: ilike(users.name, ^uname)
+  end
+
   def _search(query, :mod_action, "Banned") do
     from users in query,
       where: fragment("? -> ? ->> 0 = 'true'", users.data, "banned")

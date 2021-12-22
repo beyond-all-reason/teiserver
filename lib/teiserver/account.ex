@@ -328,6 +328,7 @@ defmodule Teiserver.Account do
   alias Teiserver.Account.UserStat
   alias Teiserver.Account.UserStatLib
 
+  @spec user_stat_query(nil | maybe_improper_list | map) :: Ecto.Query.t()
   def user_stat_query(args) do
     user_stat_query(nil, args)
   end
@@ -336,6 +337,7 @@ defmodule Teiserver.Account do
     UserStatLib.query_user_stats()
     |> UserStatLib.search(%{user_id: id})
     |> UserStatLib.search(args[:search])
+    |> QueryHelpers.select(args[:select])
   end
 
   @doc """

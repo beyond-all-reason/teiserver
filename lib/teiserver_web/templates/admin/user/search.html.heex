@@ -183,7 +183,12 @@
 
       <div class="col-md-4 col-xl-2 search-form-input">
         <label for="search_lobby_client" class="control-label">Lobby: </label>
-        <input type="text" name="search[lobby_client]" id="search_lobby" value={@params["lobby_client"]} placeholder="" class="form-control" />
+        <input type="text" name="search[lobby_client]" id="search_lobby_client" value={@params["lobby_client"]} placeholder="" class="form-control" />
+      </div>
+
+      <div class="col-md-4 col-xl-2 search-form-input">
+        <label for="search_previous_names" class="control-label">Current/Previons names: (case sensitive)</label>
+        <input type="text" name="search[previous_names]" id="search_previous_names" value={@params["previous_names"]} placeholder="" class="form-control" />
       </div>
     </div>
 
