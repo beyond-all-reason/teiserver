@@ -1,8 +1,8 @@
-defmodule Teiserver.Telemetry.TelemetryDayLog do
+defmodule Teiserver.Telemetry.ServerDayLog do
   use CentralWeb, :schema
 
   @primary_key false
-  schema "teiserver_telemetry_day_logs" do
+  schema "teiserver_server_day_logs" do
     field :date, :date, primary_key: true
     field :data, :map
   end

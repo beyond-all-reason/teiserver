@@ -1,7 +1,7 @@
-defmodule Teiserver.Telemetry.TelemetryMinuteLogLib do
+defmodule Teiserver.Telemetry.ServerMinuteLogLib do
   use CentralWeb, :library
 
-  alias Teiserver.Telemetry.TelemetryMinuteLog
+  alias Teiserver.Telemetry.ServerMinuteLog
 
   @spec colours :: {String.t(), String.t(), String.t()}
   def colours(), do: Central.Helpers.StylingHelper.colours(:warning2)
@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.TelemetryMinuteLogLib do
 
   @spec get_telemetry_minute_logs :: Ecto.Query.t()
   def get_telemetry_minute_logs() do
-    from(logs in TelemetryMinuteLog)
+    from(logs in ServerMinuteLog)
   end
 
   @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()

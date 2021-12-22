@@ -35,7 +35,7 @@
               label: "Server metrics",
               active: @active,
               url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_list),
-              lib: Teiserver.Telemetry.TelemetryDayLogLib
+              lib: Teiserver.Telemetry.ServerDayLogLib
             %>
 
             <%= central_component "sub_menu_icon",

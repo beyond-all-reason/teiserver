@@ -1,4 +1,4 @@
-defmodule Teiserver.Telemetry.Tasks.PersistTelemetryMonthTask do
+defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
   use Oban.Worker, queue: :teiserver
   alias Teiserver.Telemetry
   alias Central.NestedMaps
@@ -56,7 +56,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryMonthTask do
 
     if log != nil do
       %{}
-      |> Teiserver.Telemetry.Tasks.PersistTelemetryMonthTask.new()
+      |> Teiserver.Telemetry.Tasks.PersistServerMonthTask.new()
       |> Oban.insert()
     end
 

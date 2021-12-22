@@ -1,8 +1,8 @@
-defmodule Teiserver.Telemetry.TelemetryMinuteLog do
+defmodule Teiserver.Telemetry.ServerMinuteLog do
   use CentralWeb, :schema
 
   @primary_key false
-  schema "teiserver_telemetry_minute_logs" do
+  schema "teiserver_server_minute_logs" do
     field :timestamp, :utc_datetime, primary_key: true
     field :data, :map
   end

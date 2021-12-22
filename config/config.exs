@@ -112,12 +112,12 @@ config :central, Oban,
         {"5 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
 
         # Every minute
-        {"* * * * *", Teiserver.Telemetry.Tasks.PersistTelemetryMinuteTask},
+        {"* * * * *", Teiserver.Telemetry.Tasks.PersistServerMinuteTask},
         {"* * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},
 
         # 2:05 am and 2:15 am
-        {"5 2 * * *", Teiserver.Telemetry.Tasks.PersistTelemetryDayTask},
-        {"15 2 * * *", Teiserver.Telemetry.Tasks.PersistTelemetryMonthTask},
+        {"5 2 * * *", Teiserver.Telemetry.Tasks.PersistServerDayTask},
+        {"15 2 * * *", Teiserver.Telemetry.Tasks.PersistServerMonthTask},
 
         # 3:05 am every day, gives time for multiple telemetry day tasks to run if needed
         {"5 3 * * *", Teiserver.Account.RecalculateUserStatTask},

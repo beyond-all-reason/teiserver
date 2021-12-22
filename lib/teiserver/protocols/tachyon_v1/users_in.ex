@@ -1,6 +1,6 @@
 defmodule Teiserver.Protocols.Tachyon.V1.UsersIn do
   # alias Teiserver.{User, Client}
-  alias Teiserver.Protocols.Tachyon.V1.Tachyon
+  # alias Teiserver.Protocols.Tachyon.V1.Tachyon
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()

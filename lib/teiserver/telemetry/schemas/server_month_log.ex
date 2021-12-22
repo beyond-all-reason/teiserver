@@ -1,8 +1,8 @@
-defmodule Teiserver.Telemetry.TelemetryMonthLog do
+defmodule Teiserver.Telemetry.ServerMonthLog do
   use CentralWeb, :schema
 
   @primary_key false
-  schema "teiserver_telemetry_month_logs" do
+  schema "teiserver_server_month_logs" do
     field :year, :integer, primary_key: true
     field :month, :integer, primary_key: true
     field :data, :map

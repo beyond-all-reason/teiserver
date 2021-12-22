@@ -1,4 +1,4 @@
-defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
+defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
   use Oban.Worker, queue: :teiserver
   alias Teiserver.{Telemetry, Battle}
   alias Central.NestedMaps
@@ -157,7 +157,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
 
       if Timex.compare(new_date, Timex.today()) == -1 do
         %{}
-        |> Teiserver.Telemetry.Tasks.PersistTelemetryDayTask.new()
+        |> Teiserver.Telemetry.Tasks.PersistServerDayTask.new()
         |> Oban.insert()
       end
     end
@@ -181,7 +181,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
 
     # Delete old log if it exists
     delete_query =
-      from logs in Teiserver.Telemetry.TelemetryDayLog,
+      from logs in Teiserver.Telemetry.ServerDayLog,
         where: logs.date == ^(date |> Timex.to_date())
 
     Repo.delete_all(delete_query)
@@ -406,7 +406,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistTelemetryDayTask do
     timestamp = Timex.shift(date, days: -@log_keep_days) |> Timex.to_datetime
 
     delete_query =
-      from logs in Teiserver.Telemetry.TelemetryMinuteLog,
+      from logs in Teiserver.Telemetry.ServerMinuteLog,
         where: logs.timestamp < ^timestamp
 
     Repo.delete_all(delete_query)

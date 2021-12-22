@@ -1,7 +1,7 @@
-defmodule Teiserver.Telemetry.TelemetryMonthLogLib do
+defmodule Teiserver.Telemetry.ServerMonthLogLib do
   use CentralWeb, :library
 
-  alias Teiserver.Telemetry.TelemetryMonthLog
+  alias Teiserver.Telemetry.ServerMonthLog
 
   @spec colours :: {String.t(), String.t(), String.t()}
   def colours(), do: Central.Helpers.StylingHelper.colours(:warning2)
@@ -11,7 +11,7 @@ defmodule Teiserver.Telemetry.TelemetryMonthLogLib do
 
   @spec get_telemetry_month_logs :: Ecto.Query.t()
   def get_telemetry_month_logs() do
-    from(logs in TelemetryMonthLog)
+    from(logs in ServerMonthLog)
   end
 
   @spec search(Ecto.Query.t(), map | nil) :: Ecto.Query.t()
