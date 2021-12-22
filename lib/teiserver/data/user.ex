@@ -646,6 +646,9 @@ defmodule Teiserver.User do
             {:error, "Banned"}
 
           not is_verified?(user) ->
+            # Log them in to save some details we'd not otherwise get
+            do_login(user, ip, lobby, lobby_hash)
+
             Account.update_user_stat(user.id, %{
               lobby_client: lobby,
               lobby_hash: lobby_hash,
