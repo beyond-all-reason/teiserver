@@ -37,13 +37,23 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     |> Enum.map(&User.get_username/1)
     |> Enum.join(", ")
 
+    # Put other settings in here
+    other_settings = [
+      (if state.welcome_message, do: "Welcome message: #{state.welcome_message}"),
+      "Team size set to #{state.host_teamsize}",
+      "Team count set to #{state.host_teamcount}"
+    ]
+    |> Enum.filter(fn v -> v != nil end)
+
     status_msg = [
       "Status for battle ##{state.lobby_id}",
       "Locks: #{locks}",
       "Gatekeeper: #{state.gatekeeper}",
       pos_str,
       "Join queue: #{queue_string}",
+      other_settings,
     ]
+    |> List.flatten
     |> Enum.filter(fn s -> s != nil end)
 
     Coordinator.send_to_user(senderid, status_msg)

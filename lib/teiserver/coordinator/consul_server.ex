@@ -492,6 +492,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> String.trim
   end
 
+  @spec empty_state(T.lobby_id()) :: map()
   def empty_state(lobby_id) do
     # it's possible the lobby is nil before we even get to start this up (tests in particular)
     # hence this defensive methodology
