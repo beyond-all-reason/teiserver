@@ -278,7 +278,6 @@ defmodule Teiserver.Protocols.SpringIn do
         [_, username, password, _cpu, _ip, lobby, lobby_hash, _modes | _] ->
           msg_data = String.replace(data, " #{password} ", " password ")
             |> Spring.format_log()
-          Logger.info("Lobby from #{username} of '#{lobby}' with data #{msg_data}")
 
           username = User.clean_name(username)
           User.try_md5_login(username, password, state.ip, lobby, lobby_hash)

@@ -258,8 +258,7 @@ defmodule Teiserver.Battle do
 
   @spec save_match_stats(T.lobby_id(), String.t()) :: :ok
   def save_match_stats(_match_id, stats) do
-    # Logger.info("save_match_stats(#{match_id}, #{stats})")
-    case Base.url_decode64(stats) do
+    case Base.decode64(stats) do
       {:ok, _decoded64} ->
         Logger.info("save_match_stats - good decode")
       _ ->
