@@ -4,6 +4,9 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
   @spec help(T.user(), boolean()) :: String.t()
   def help(user, host) do
     everybody = """
+$whoami
+Sends back information about who you are
+
 $joinq
 Adds you to the queue to join when a space opens up, you will be automatically added to the game as a player. If already a member it has no effect.
 
@@ -89,6 +92,12 @@ Moves the user to players
 """
 
     moderators = """
+$whois <user>
+Sends back information about the user specified
+
+$check <user>
+Performs a smurf check against the user mentioned and sends you the result
+
 $pull <user>
 Pulls a given user into the battle
 
