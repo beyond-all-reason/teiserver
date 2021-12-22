@@ -44,7 +44,7 @@ defmodule Teiserver.SpringTelemetryTest do
 
     # And finally the correct infolog format
     contents = "Lorem ipsum\n\n''\\'^&&!"
-    |> :zlib.gzip()
+    |> :zlib.compress()
     |> Base.url_encode64()
 
     _send_raw(socket, "c.telemetry.upload_infolog log_type user_hash #{metadata} #{contents}\n")

@@ -134,11 +134,11 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
 
   defp unzip(data) do
     try do
-      result = :zlib.gunzip(data)
+      result = :zlib.uncompress(data)
       {:ok, result}
     rescue
       _ ->
-        {:error, :gzip_decompress}
+        {:error, :unzip_decompress}
     end
   end
 end

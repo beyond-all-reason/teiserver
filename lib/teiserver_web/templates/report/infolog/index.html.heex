@@ -41,6 +41,8 @@
     <tr>
       <th colspan="2">User</th>
       <th>Type</th>
+      <th>Engine</th>
+      <th>Game</th>
       <th>Timestamp</th>
 
       <th colspan="2">&nbsp;</th>
@@ -59,6 +61,8 @@
       <% end %>
 
       <td><%= log.log_type %></td>
+      <td><%= log.metadata["engineversion"] %></td>
+      <td><%= log.metadata["gameversion"] %></td>
       <td><%= date_to_str(log.timestamp, format: :ymd_hms) %></td>
 
       <td>
