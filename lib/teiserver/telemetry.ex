@@ -656,41 +656,6 @@ defmodule Teiserver.Telemetry do
     Repo.one(query)
   end
 
-  def user_lookup(logs) do
-    user_ids =
-      logs
-      |> Enum.map(fn l -> Map.keys(l.data["minutes_per_user"]["total"]) end)
-      |> List.flatten()
-      |> Enum.uniq()
-
-    query =
-      from users in Central.Account.User,
-        where: users.id in ^user_ids
-
-    query
-    |> Repo.all()
-    |> Enum.map(fn u -> {u.id, u} end)
-    |> Map.new()
-  end
-
-  def get_todays_log() do
-    last_time = ConCache.get(:application_metadata_cache, "teimatch_day_metrics_today_last_time")
-    recache = cond do
-      last_time == nil -> true
-      Timex.compare(Timex.now() |> Timex.shift(minutes: -15), last_time) == 1 -> true
-      true -> false
-    end
-
-    if recache do
-      data = Teiserver.Telemetry.Tasks.PersistMatchDayTask.today_so_far()
-      ConCache.put(:application_metadata_cache, "teimatch_day_metrics_today_cache", data)
-      ConCache.put(:application_metadata_cache, "teimatch_day_metrics_today_last_time", Timex.now())
-      data
-    else
-      ConCache.get(:application_metadata_cache, "teimatch_day_metrics_today_cache")
-    end
-  end
-
   # Month logs
   alias Teiserver.Telemetry.{MatchMonthLog, MatchMonthLogLib}
 
@@ -828,24 +793,6 @@ defmodule Teiserver.Telemetry do
         {year, month}
       nil ->
         nil
-    end
-  end
-
-  def get_this_months_log() do
-    last_time = ConCache.get(:application_metadata_cache, "teimatch_month_metrics_last_time")
-    recache = cond do
-      last_time == nil -> true
-      Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
-      true -> false
-    end
-
-    if recache do
-      data = Teiserver.Telemetry.Tasks.PersistMatchMonthTask.month_so_far()
-      ConCache.put(:application_metadata_cache, "teimatch_month_metrics_cache", data)
-      ConCache.put(:application_metadata_cache, "teimatch_month_metrics_last_time", Timex.now())
-      data
-    else
-      ConCache.get(:application_metadata_cache, "teimatch_month_metrics_cache")
     end
   end
 

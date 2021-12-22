@@ -131,17 +131,17 @@ defmodule TeiserverWeb.Report.MatchMetricController do
     |> render("month_metrics_show.html")
   end
 
-  @spec month_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def month_metrics_today(conn, _params) do
-    data = Telemetry.get_this_months_log()
+  # @spec month_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
+  # def month_metrics_today(conn, _params) do
+  #   data = Telemetry.get_this_months_log()
 
-    conn
-    |> assign(:year, Timex.today().year)
-    |> assign(:month, Timex.today().month)
-    |> assign(:data, data)
-    |> add_breadcrumb(name: "Monthly metrics - Today (partial)", url: conn.request_path)
-    |> render("month_metrics_show.html")
-  end
+  #   conn
+  #   |> assign(:year, Timex.today().year)
+  #   |> assign(:month, Timex.today().month)
+  #   |> assign(:data, data)
+  #   |> add_breadcrumb(name: "Monthly metrics - Today (partial)", url: conn.request_path)
+  #   |> render("month_metrics_show.html")
+  # end
 
   def month_metrics_graph(conn, params) do
     logs =
