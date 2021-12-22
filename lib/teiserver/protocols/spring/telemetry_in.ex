@@ -12,7 +12,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
       [_, log_type, user_hash, metadata64, contents64] ->
         case decode_value(metadata64) do
           {:ok, metadata} ->
-            case Base.decode64(contents64) do
+            case Base.url_decode64(contents64) do
               {:ok, compressed_contents} ->
                 case unzip(compressed_contents) do
                   {:ok, contents} ->
@@ -36,7 +36,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
                     reply(:spring, :no, "upload_infolog - infolog gzip error", msg_id, state)
                 end
               _ ->
-                reply(:spring, :no, "upload_infolog - infolog decode64 error", msg_id, state)
+                reply(:spring, :no, "upload_infolog - infolog url_decode64 error", msg_id, state)
             end
 
           {:error, reason} ->
@@ -73,7 +73,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
 
   @spec decode_value(String.t()) :: {:ok, any} | {:error, String.t()}
   defp decode_value(raw) do
-    case Base.decode64(raw) do
+    case Base.url_decode64(raw) do
       {:ok, string} ->
         case Jason.decode(string) do
           {:ok, json} ->
@@ -112,7 +112,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
     if String.length(data) < 1024 do
       case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
         [_, event, value64, hash] ->
-          value = Base.decode64(value64)
+          value = Base.url_decode64(value64)
 
           if value != :error do
             {:ok, value} = value
