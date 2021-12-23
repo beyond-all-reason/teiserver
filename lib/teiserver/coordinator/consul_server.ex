@@ -231,6 +231,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp request_user_change_status(new_client, %{userid: userid} = existing, state) do
     list_status = get_list_status(userid, state)
 
+    # Level to play?
+    new_client = if existing.rank >= state.level_to_play do
+      new_client
+    else
+      %{new_client | player: false}
+    end
+
     # Check locks
     new_client = state.locks
     |> Enum.reduce(new_client, fn (lock, acc) ->
