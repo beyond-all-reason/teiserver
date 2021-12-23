@@ -504,6 +504,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
       lobby_id: lobby_id,
       host_id: founder_id,
       gatekeeper: "default",
+      level_to_play: 0,
+      level_to_spectate: 0,
       locks: [],
       bans: %{},
       timeouts: %{},

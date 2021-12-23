@@ -3,6 +3,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Coordinator.ConsulServer
   alias Teiserver.{Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat}
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
   # alias Phoenix.PubSub
   # alias Teiserver.Data.Types, as: T
 
@@ -41,7 +42,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     other_settings = [
       (if state.welcome_message, do: "Welcome message: #{state.welcome_message}"),
       "Team size set to #{state.host_teamsize}",
-      "Team count set to #{state.host_teamcount}"
+      "Team count set to #{state.host_teamcount}",
+      "Level required to play is #{state.level_to_play}",
+      "Level required to spectate is #{state.level_to_spectate}",
     ]
     |> Enum.filter(fn v -> v != nil end)
 
@@ -202,6 +205,26 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
 
   #################### Host and Moderator
+  def handle_command(%{command: "leveltoplay", remaining: remaining} = cmd, state) do
+    case Integer.parse(remaining |> String.trim) do
+      :error ->
+        state
+      {level, _} ->
+        ConsulServer.say_command(cmd, state)
+        %{state | level_to_play: level}
+    end
+  end
+
+  def handle_command(%{command: "leveltospectate", remaining: remaining} = cmd, state) do
+    case Integer.parse(remaining |> String.trim) do
+      :error ->
+        state
+      {level, _} ->
+        ConsulServer.say_command(cmd, state)
+        %{state | level_to_spectate: level}
+    end
+  end
+
   def handle_command(%{command: "lock", remaining: remaining} = cmd, state) do
     new_locks = case get_lock(remaining) do
       nil -> state.locks

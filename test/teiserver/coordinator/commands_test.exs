@@ -160,6 +160,44 @@ defmodule Teiserver.Coordinator.CommandsTest do
   # TODO: settag
   # TODO: modwarn
 
+  test "leveltoplay", %{lobby_id: lobby_id, hsocket: hsocket} do
+    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_play})
+    assert setting == 0
+
+    data = %{cmd: "c.lobby.message", message: "$leveltoplay 3"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_play})
+    assert setting == 3
+
+    data = %{cmd: "c.lobby.message", message: "$leveltoplay Xy"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_play})
+    assert setting == 3
+  end
+
+  test "leveltospectate", %{lobby_id: lobby_id, hsocket: hsocket} do
+    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_spectate})
+    assert setting == 0
+
+    data = %{cmd: "c.lobby.message", message: "$leveltospectate 3"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_spectate})
+    assert setting == 3
+
+    data = %{cmd: "c.lobby.message", message: "$leveltospectate Xy"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_spectate})
+    assert setting == 3
+  end
+
   # Broken since we now propogate the action via the hook server which breaks in tests
   test "modban", %{lobby_id: lobby_id, host: host, hsocket: hsocket, player: player, listener: listener} do
     assert User.is_muted?(player.id) == false
@@ -350,7 +388,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.communication.direct_message"
     assert reply["sender"] == Coordinator.get_coordinator_userid()
-    assert reply["message"] == ["Status for battle ##{lobby_id}", "Locks: ", "Gatekeeper: default", "Join queue: "]
+    assert reply["message"] |> Enum.slice(0, 4) == ["Status for battle ##{lobby_id}", "Locks: ", "Gatekeeper: default", "Join queue: "]
   end
 
   test "help", %{hsocket: hsocket} do
