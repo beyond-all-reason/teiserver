@@ -2,6 +2,7 @@
 
 ### Conversion process
 - Setup server [Linux](production_setup_linux.md)/[Windows](production_setup_windows.md)
+- Update your config.exs and change `enable_uberserver_convert: false,` to `enable_uberserver_convert: true,`
 - [Deploy code](deployment.md)
 - Run [ubereserver_convert.py](../prod/uberserver_convert.py) on your database export
 - Import json into Teiserver at: https://yourdomain.com/teiserver/admin/tools/convert
