@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   """
   use GenServer
   alias Teiserver.{Account, User, Clans, Room, Coordinator}
-  alias Teiserver.Coordinator.AutomodServer
+  alias Teiserver.Coordinator.{AutomodServer, CoordinatorCommands}
   alias Phoenix.PubSub
   require Logger
 
@@ -101,7 +101,8 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
             msg = [
               "Found #{user.name}",
-              "Rank: #{user.rank} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}"
+              "Rank: #{user.rank} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
+              "They currently have no accolades"
             ]
 
             User.send_direct_message(state.userid, fromid, msg)
@@ -117,7 +118,8 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
         msg = [
           "You are #{from.name}",
-          "Rank: #{from.rank} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}"
+          "Rank: #{from.rank} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
+          "You currently have no accolades"
         ]
 
         User.send_direct_message(state.userid, fromid, msg)

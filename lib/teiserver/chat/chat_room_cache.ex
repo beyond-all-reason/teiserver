@@ -1,7 +1,7 @@
 defmodule Teiserver.Room do
   @moduledoc false
   require Logger
-  alias Teiserver.{User, Client, Chat}
+  alias Teiserver.{User, Client, Chat, Coordinator}
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
@@ -151,6 +151,10 @@ defmodule Teiserver.Room do
   def list_rooms() do
     ConCache.get(:lists, :rooms)
     |> Enum.map(fn room_name -> ConCache.get(:rooms, room_name) end)
+  end
+
+  def send_message(from_id, _room_name, "$" <> msg) do
+    User.send_direct_message(from_id, Coordinator.get_coordinator_userid(), "$" <> msg)
   end
 
   def send_message(from_id, room_name, msg) do
