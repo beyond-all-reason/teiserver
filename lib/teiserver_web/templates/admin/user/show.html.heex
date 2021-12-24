@@ -62,6 +62,13 @@
       <br />
       <ul class="nav nav-tabs" role="tablist" id="the_tabs">
         <li>
+          <a href="#overview_tab" role="tab" class="nav-link" data-toggle="tab">
+            <%= central_component "icon", icon: Central.Helpers.StylingHelper.icon(:overview), class: "fas" %>
+            Overview
+          </a>
+        </li>
+
+        <li>
           <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
             <%= central_component "icon", icon: "fas fa-file-alt" %>
             Details
@@ -91,6 +98,10 @@
       </ul>
 
       <div class="tab-content">
+        <div class="tab-pane" id="overview_tab" style="padding:5px;">
+          <%= render "tab_overview.html", assigns %>
+        </div>
+
         <div class="tab-pane" id="details_tab" style="padding:5px;">
           <%= render "tab_details.html", assigns %>
         </div>

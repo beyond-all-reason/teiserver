@@ -129,4 +129,111 @@ defmodule Teiserver.AccountTest do
       assert %Ecto.Changeset{} = Account.change_user(user)
     end
   end
+
+
+  # describe "accolades" do
+  #   alias Teiserver.Account.Accolade
+
+  #   @valid_attrs %{"name" => "some name"}
+  #   @update_attrs %{"name" => "some updated name"}
+  #   @invalid_attrs %{"name" => nil}
+
+  #   test "list_accolades/0 returns accolades" do
+  #     AccountTestLib.accolade_fixture(1)
+  #     assert Account.list_accolades() != []
+  #   end
+
+  #   test "get_accolade!/1 returns the accolade with given id" do
+  #     accolade = AccountTestLib.accolade_fixture(1)
+  #     assert Account.get_accolade!(accolade.id) == accolade
+  #   end
+
+  #   test "create_accolade/1 with valid data creates a accolade" do
+  #     assert {:ok, %Accolade{} = accolade} = Account.create_accolade(@valid_attrs)
+  #     assert accolade.name == "some name"
+  #   end
+
+  #   test "create_accolade/1 with invalid data returns error changeset" do
+  #     assert {:error, %Ecto.Changeset{}} = Account.create_accolade(@invalid_attrs)
+  #   end
+
+  #   test "update_accolade/2 with valid data updates the accolade" do
+  #     accolade = AccountTestLib.accolade_fixture(1)
+  #     assert {:ok, %Accolade{} = accolade} = Account.update_accolade(accolade, @update_attrs)
+  #     assert accolade.name == "some updated name"
+  #   end
+
+  #   test "update_accolade/2 with invalid data returns error changeset" do
+  #     accolade = AccountTestLib.accolade_fixture(1)
+  #     assert {:error, %Ecto.Changeset{}} = Account.update_accolade(accolade, @invalid_attrs)
+  #     assert accolade == Account.get_accolade!(accolade.id)
+  #   end
+
+  #   test "delete_accolade/1 deletes the accolade" do
+  #     accolade = AccountTestLib.accolade_fixture(1)
+  #     assert {:ok, %Accolade{}} = Account.delete_accolade(accolade)
+  #     assert_raise Ecto.NoResultsError, fn -> Account.get_accolade!(accolade.id) end
+  #   end
+
+  #   test "change_accolade/1 returns a accolade changeset" do
+  #     accolade = AccountTestLib.accolade_fixture(1)
+  #     assert %Ecto.Changeset{} = Account.change_accolade(accolade)
+  #   end
+  # end
+
+
+  # describe "badge_types" do
+  #   alias Teiserver.Account.BadgeType
+
+  #   @valid_attrs %{"colour" => "some colour", "icon" => "far fa-home", "name" => "some name"}
+  #   @update_attrs %{"colour" => "some updated colour", "icon" => "fas fa-wrench", "name" => "some updated name"}
+  #   @invalid_attrs %{"colour" => nil, "icon" => nil, "name" => nil}
+
+  #   test "list_badge_types/0 returns badge_types" do
+  #     AccountTestLib.badge_type_fixture(1)
+  #     assert Account.list_badge_types() != []
+  #   end
+
+  #   test "get_badge_type!/1 returns the badge_type with given id" do
+  #     badge_type = AccountTestLib.badge_type_fixture(1)
+  #     assert Account.get_badge_type!(badge_type.id) == badge_type
+  #   end
+
+  #   test "create_badge_type/1 with valid data creates a badge_type" do
+  #     assert {:ok, %BadgeType{} = badge_type} = Account.create_badge_type(@valid_attrs)
+  #     assert badge_type.colour == "some colour"
+  #     assert badge_type.icon == "far fa-home"
+  #     assert badge_type.name == "some name"
+  #   end
+
+  #   test "create_badge_type/1 with invalid data returns error changeset" do
+  #     assert {:error, %Ecto.Changeset{}} = Account.create_badge_type(@invalid_attrs)
+  #   end
+
+  #   test "update_badge_type/2 with valid data updates the badge_type" do
+  #     badge_type = AccountTestLib.badge_type_fixture(1)
+  #     assert {:ok, %BadgeType{} = badge_type} = Account.update_badge_type(badge_type, @update_attrs)
+  #     assert badge_type.colour == "some updated colour"
+  #     assert badge_type.icon == "fas fa-wrench"
+  #     assert badge_type.name == "some updated name"
+  #   end
+
+  #   test "update_badge_type/2 with invalid data returns error changeset" do
+  #     badge_type = AccountTestLib.badge_type_fixture(1)
+  #     assert {:error, %Ecto.Changeset{}} = Account.update_badge_type(badge_type, @invalid_attrs)
+  #     assert badge_type == Account.get_badge_type!(badge_type.id)
+  #   end
+
+  #   test "delete_badge_type/1 deletes the badge_type" do
+  #     badge_type = AccountTestLib.badge_type_fixture(1)
+  #     assert {:ok, %BadgeType{}} = Account.delete_badge_type(badge_type)
+  #     assert_raise Ecto.NoResultsError, fn -> Account.get_badge_type!(badge_type.id) end
+  #   end
+
+  #   test "change_badge_type/1 returns a badge_type changeset" do
+  #     badge_type = AccountTestLib.badge_type_fixture(1)
+  #     assert %Ecto.Changeset{} = Account.change_badge_type(badge_type)
+  #   end
+  # end
+
 end

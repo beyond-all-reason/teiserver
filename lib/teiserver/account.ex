@@ -583,4 +583,308 @@ defmodule Teiserver.Account do
     BanHash.changeset(ban_hash, %{})
   end
 
+    alias Teiserver.Account.Accolade
+  alias Teiserver.Account.AccoladeLib
+
+  @spec accolade_query(List.t()) :: Ecto.Query.t()
+  def accolade_query(args) do
+    accolade_query(nil, args)
+  end
+
+  @spec accolade_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def accolade_query(id, args) do
+    AccoladeLib.query_accolades
+    |> AccoladeLib.search(%{id: id})
+    |> AccoladeLib.search(args[:search])
+    |> AccoladeLib.preload(args[:preload])
+    |> AccoladeLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of accolades.
+
+  ## Examples
+
+      iex> list_accolades()
+      [%Accolade{}, ...]
+
+  """
+  @spec list_accolades(List.t()) :: List.t()
+  def list_accolades(args \\ []) do
+    accolade_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Gets a single accolade.
+
+  Raises `Ecto.NoResultsError` if the Accolade does not exist.
+
+  ## Examples
+
+      iex> get_accolade!(123)
+      %Accolade{}
+
+      iex> get_accolade!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_accolade!(Integer.t() | List.t()) :: Accolade.t()
+  @spec get_accolade!(Integer.t(), List.t()) :: Accolade.t()
+  def get_accolade!(id) when not is_list(id) do
+    accolade_query(id, [])
+    |> Repo.one!
+  end
+  def get_accolade!(args) do
+    accolade_query(nil, args)
+    |> Repo.one!
+  end
+  def get_accolade!(id, args) do
+    accolade_query(id, args)
+    |> Repo.one!
+  end
+
+  # Uncomment this if needed, default files do not need this function
+  # @doc """
+  # Gets a single accolade.
+
+  # Returns `nil` if the Accolade does not exist.
+
+  # ## Examples
+
+  #     iex> get_accolade(123)
+  #     %Accolade{}
+
+  #     iex> get_accolade(456)
+  #     nil
+
+  # """
+  # def get_accolade(id, args \\ []) when not is_list(id) do
+  #   accolade_query(id, args)
+  #   |> Repo.one
+  # end
+
+  @doc """
+  Creates a accolade.
+
+  ## Examples
+
+      iex> create_accolade(%{field: value})
+      {:ok, %Accolade{}}
+
+      iex> create_accolade(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_accolade(Map.t()) :: {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
+  def create_accolade(attrs \\ %{}) do
+    %Accolade{}
+    |> Accolade.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a accolade.
+
+  ## Examples
+
+      iex> update_accolade(accolade, %{field: new_value})
+      {:ok, %Accolade{}}
+
+      iex> update_accolade(accolade, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_accolade(Accolade.t(), Map.t()) :: {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
+  def update_accolade(%Accolade{} = accolade, attrs) do
+    accolade
+    |> Accolade.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a Accolade.
+
+  ## Examples
+
+      iex> delete_accolade(accolade)
+      {:ok, %Accolade{}}
+
+      iex> delete_accolade(accolade)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_accolade(Accolade.t()) :: {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
+  def delete_accolade(%Accolade{} = accolade) do
+    Repo.delete(accolade)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking accolade changes.
+
+  ## Examples
+
+      iex> change_accolade(accolade)
+      %Ecto.Changeset{source: %Accolade{}}
+
+  """
+  @spec change_accolade(Accolade.t()) :: Ecto.Changeset.t()
+  def change_accolade(%Accolade{} = accolade) do
+    Accolade.changeset(accolade, %{})
+  end
+
+    alias Teiserver.Account.BadgeType
+  alias Teiserver.Account.BadgeTypeLib
+
+  @spec badge_type_query(List.t()) :: Ecto.Query.t()
+  def badge_type_query(args) do
+    badge_type_query(nil, args)
+  end
+
+  @spec badge_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def badge_type_query(id, args) do
+    BadgeTypeLib.query_badge_types
+    |> BadgeTypeLib.search(%{id: id})
+    |> BadgeTypeLib.search(args[:search])
+    |> BadgeTypeLib.preload(args[:preload])
+    |> BadgeTypeLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of badge_types.
+
+  ## Examples
+
+      iex> list_badge_types()
+      [%BadgeType{}, ...]
+
+  """
+  @spec list_badge_types(List.t()) :: List.t()
+  def list_badge_types(args \\ []) do
+    badge_type_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Gets a single badge_type.
+
+  Raises `Ecto.NoResultsError` if the BadgeType does not exist.
+
+  ## Examples
+
+      iex> get_badge_type!(123)
+      %BadgeType{}
+
+      iex> get_badge_type!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_badge_type!(Integer.t() | List.t()) :: BadgeType.t()
+  @spec get_badge_type!(Integer.t(), List.t()) :: BadgeType.t()
+  def get_badge_type!(id) when not is_list(id) do
+    badge_type_query(id, [])
+    |> Repo.one!
+  end
+  def get_badge_type!(args) do
+    badge_type_query(nil, args)
+    |> Repo.one!
+  end
+  def get_badge_type!(id, args) do
+    badge_type_query(id, args)
+    |> Repo.one!
+  end
+
+  # Uncomment this if needed, default files do not need this function
+  # @doc """
+  # Gets a single badge_type.
+
+  # Returns `nil` if the BadgeType does not exist.
+
+  # ## Examples
+
+  #     iex> get_badge_type(123)
+  #     %BadgeType{}
+
+  #     iex> get_badge_type(456)
+  #     nil
+
+  # """
+  # def get_badge_type(id, args \\ []) when not is_list(id) do
+  #   badge_type_query(id, args)
+  #   |> Repo.one
+  # end
+
+  @doc """
+  Creates a badge_type.
+
+  ## Examples
+
+      iex> create_badge_type(%{field: value})
+      {:ok, %BadgeType{}}
+
+      iex> create_badge_type(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_badge_type(Map.t()) :: {:ok, BadgeType.t()} | {:error, Ecto.Changeset.t()}
+  def create_badge_type(attrs \\ %{}) do
+    %BadgeType{}
+    |> BadgeType.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a badge_type.
+
+  ## Examples
+
+      iex> update_badge_type(badge_type, %{field: new_value})
+      {:ok, %BadgeType{}}
+
+      iex> update_badge_type(badge_type, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_badge_type(BadgeType.t(), Map.t()) :: {:ok, BadgeType.t()} | {:error, Ecto.Changeset.t()}
+  def update_badge_type(%BadgeType{} = badge_type, attrs) do
+    badge_type
+    |> BadgeType.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a BadgeType.
+
+  ## Examples
+
+      iex> delete_badge_type(badge_type)
+      {:ok, %BadgeType{}}
+
+      iex> delete_badge_type(badge_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_badge_type(BadgeType.t()) :: {:ok, BadgeType.t()} | {:error, Ecto.Changeset.t()}
+  def delete_badge_type(%BadgeType{} = badge_type) do
+    Repo.delete(badge_type)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking badge_type changes.
+
+  ## Examples
+
+      iex> change_badge_type(badge_type)
+      %Ecto.Changeset{source: %BadgeType{}}
+
+  """
+  @spec change_badge_type(BadgeType.t()) :: Ecto.Changeset.t()
+  def change_badge_type(%BadgeType{} = badge_type) do
+    BadgeType.changeset(badge_type, %{})
+  end
+
 end

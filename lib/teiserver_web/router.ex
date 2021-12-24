@@ -215,6 +215,11 @@ defmodule TeiserverWeb.Router do
 
         resources("/banhash", BanHashController, only: [:index, :show, :delete, :create])
 
+        resources("/badge_types", BadgeTypeController)
+        resources("/accolades", AccoladeController, only: [:index, :show, :delete])
+        get("/accolades/user/:user_id", AccoladeController, :user_show)
+
+
         resources("/chat", ChatController, only: [:index])
         post("/chat", ChatController, :index)
 

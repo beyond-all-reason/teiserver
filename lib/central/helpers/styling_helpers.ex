@@ -48,8 +48,8 @@ defmodule Central.Helpers.StylingHelper do
   def icon(:admin), do: "fas fa-user-crown"
   def icon(:moderation), do: "fas fa-gavel"
 
-  def icon(:overview), do: "fa-expand-alt"
-  def icon(:detail), do: "fa-eye"
+  def icon(:overview), do: "fal fa-expand-alt"
+  def icon(:detail), do: "fal fa-eye"
 
   def icon(:summary), do: "fal fa-user-chart"
 

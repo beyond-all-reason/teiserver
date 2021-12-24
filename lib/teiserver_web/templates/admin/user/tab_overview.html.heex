@@ -1,0 +1,152 @@
+<style type="text/css">
+  .role-badge {
+    width: 120px;
+    display: inline-block;
+    text-align: center;
+    font-size: 1.5em;
+  }
+</style>
+
+<%
+  {_fg, _bg, _bsname} = colours()
+  empty_badge = ""
+%>
+
+<div class="page-row row">
+  <div class="col-md-12">
+    <h4>Status</h4><br />
+    <%= if "moderator" in @roles do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-gavel' style="color: #FFAA00" title="Moderator"></i>
+        <br />
+        Moderator
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if "bot" in @roles do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-robot' style="color: #333333" title="Bot"></i>
+        <br />
+        Bot
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if "developer" in @roles do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-code-branch' style="color: #008800" title="Developer"></i>
+        <br />
+        Dev
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if "contributor" in @roles do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-code-commit' style="color: #00AA66" title="Contributor"></i>
+        <br />
+        Contributor
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if "tester" in @roles do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-vial' style="color: #00CCCC" title="Tester"></i>
+        <br />
+        Tester
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if "donor" in @roles do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-euro' style="color: #0066AA" title="Donor"></i>
+        <br />
+        Donor
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if "streamer" in @roles do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fab fa-twitch' style="color: #AA00AA" title="Streamer"></i>
+        <br />
+        Streamer
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if "trusted" in @roles do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-check-double' style="color: #66AAFF" title="Trusted"></i>
+        <br />
+        Trusted
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+
+    <%= if "verified" in @roles do %>
+      <div class="role-badge">
+        <i class='fa-fw fa-2x fas fa-check' style="color: #777777" title="Verified"></i>
+        <br />
+        Verified
+      </div>
+    <% else %>
+      <%= raw empty_badge %>
+    <% end %>
+    <br /><br />
+  </div>
+</div>
+
+<div class="page-row row">
+  <div class="col-md-12">
+    <h4>Links</h4>
+  </div>
+
+  <%#=
+    central_component "menu_card",
+    icon: Central.Account.ReportLib.icon(),
+    name: "reports",
+    text: "Reports",
+    icon_class: "fas",
+    link: Routes.ts_admin_user_path(@conn, :show, @user) <> "#reports_tab"
+  %>
+
+  <%=
+    central_component "menu_card",
+    icon: Central.Communication.ChatRoomLib.icon(),
+    name: "chat",
+    text: "Chat",
+    icon_class: "fas",
+    link: Routes.ts_admin_user_path(@conn, :full_chat, @user)
+  %>
+
+  <%=
+    central_component "menu_card",
+    icon: Teiserver.Account.AccoladeLib.icon(),
+    name: "accolades",
+    text: "Accolades",
+    icon_class: "fas",
+    link: Routes.ts_admin_accolade_path(@conn, :user_show, @user.id)
+  %>
+  
+  <%=
+    central_component "menu_card",
+    icon: "fas fa-face-angry-horns",
+    name: "smurf",
+    text: "Smurf search",
+    icon_class: "fas",
+    link: Routes.ts_admin_user_path(@conn, :smurf_search, @user.id)
+  %>
+  
+</div>
