@@ -33,6 +33,10 @@
   <div class="form-group">
     <%= central_component "fa5_icon_picker", %{form: f, field: :icon} %>
   </div>
+
+  <div class="form-group">
+    <%= input_with_type f, :description, "text" %>
+  </div>
   
   <%
     changeset_purposes = Ecto.Changeset.get_field(@changeset, :purposes)

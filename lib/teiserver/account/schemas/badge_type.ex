@@ -5,6 +5,7 @@ defmodule Teiserver.Account.BadgeType do
     field :name, :string
     field :icon, :string
     field :colour, :string
+    field :description, :string
 
     field :purposes, {:array, :string}, default: []
 
@@ -17,10 +18,10 @@ defmodule Teiserver.Account.BadgeType do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     params = params
-    |> trim_strings(~w(name)a)
+    |> trim_strings(~w(name description)a)
 
     struct
-    |> cast(params, ~w(name icon colour purposes)a)
+    |> cast(params, ~w(name icon colour purposes description)a)
     |> validate_required(~w(name icon colour purposes)a)
   end
 

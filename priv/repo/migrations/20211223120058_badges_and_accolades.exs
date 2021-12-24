@@ -6,6 +6,7 @@ defmodule Central.Repo.Migrations.BadgesAndAccolades do
       add :name, :string
       add :icon, :string
       add :colour, :string
+      add :description, :text
 
       add :purposes, {:array, :string}
 
