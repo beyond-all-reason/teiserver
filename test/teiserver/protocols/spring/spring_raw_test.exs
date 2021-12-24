@@ -37,7 +37,7 @@ defmodule Teiserver.SpringRawTest do
     # Failure first - existing email
     _send_raw(socket, "REGISTER new_name_here password #{existing.email}\n")
     reply = _recv_raw(socket)
-    assert reply =~ "REGISTRATIONDENIED User already exists\n"
+    assert reply =~ "REGISTRATIONDENIED Email already attached to a user\n"
 
     # Too long
     _send_raw(socket, "REGISTER longnamelongnamelongname password raw_register_email@email.com\n")

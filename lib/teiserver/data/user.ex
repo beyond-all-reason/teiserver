@@ -214,7 +214,7 @@ defmodule Teiserver.User do
         {:error, "Username already taken"}
 
       get_user_by_email(email) ->
-        {:error, "User already exists"}
+        {:error, "Email already attached to a user"}
 
       true ->
         case do_register_user_with_md5(name, email, md5_password, ip) do
