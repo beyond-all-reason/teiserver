@@ -148,7 +148,6 @@ defmodule Central.Logging.AggregateViewLogsTask do
         group_by: [extract_hour(logs.inserted_at)],
         order_by: [asc: extract_hour(logs.inserted_at)]
 
-        # Central.Logging.AggregateViewLogsTask.perform(%{})
     logs =
       Repo.all(logs)
       |> Enum.filter(fn {h, c} -> h != nil and c > 0 end)
