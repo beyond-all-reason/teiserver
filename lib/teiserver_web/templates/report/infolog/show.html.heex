@@ -24,18 +24,19 @@
 
         &nbsp;&nbsp;&nbsp;
         <%= time_until(@infolog.timestamp) %> ago
+        <br />
+        User: <%= @infolog.user.name %>
       </h3>
 
       <div class="row">
         <div class="col-md-12">
-          <h5>Contents</h5>
-          <textarea rows="6" class="form-control" style="font-family: monospace;"><%= @infolog.contents %></textarea>
+          <h5>Metadata</h5>
+          <textarea rows="30" class="form-control" style="font-family: monospace;"><%= Jason.encode! @infolog.metadata, pretty: true %></textarea>
         </div>
         <div class="col-md-12">
-          <h5>Metadata</h5>
-          <textarea rows="40" class="form-control" style="font-family: monospace;"><%= Jason.encode! @infolog.metadata, pretty: true %></textarea>
+          <h5>Contents</h5>
+          <textarea rows="30" class="form-control" style="font-family: monospace;"><%= @infolog.contents %></textarea>
         </div>
-
       </div>
 
 
