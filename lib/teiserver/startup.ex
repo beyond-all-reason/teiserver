@@ -171,15 +171,39 @@ defmodule Teiserver.Startup do
 
       # Admin pages
       %{
-        label: "Teiserver metrics",
+        label: "Teiserver dashboard",
         icons: ["fa-regular fa-tachometer-alt", :list],
         url: "/logging/live/dashboard/metrics?nav=teiserver",
         permissions: "logging.live.show"
       },
       %{
-        label: "Teiserver aggregate logs",
-        icons: ["fa-regular fa-layer-group", :list],
-        url: "/teiserver/admin/tools/day_metrics",
+        label: "Teiserver client events",
+        icons: ["fa-regular #{Teiserver.Telemetry.ClientEventLib.icon()}", :list],
+        url: "/teiserver/reports/client_events/summary",
+        permissions: "teiserver.admin"
+      },
+      %{
+        label: "Teiserver server metrics",
+        icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", :list],
+        url: "/teiserver/reports/client_events/summary",
+        permissions: "teiserver.admin"
+      },
+      %{
+        label: "Teiserver match metrics",
+        icons: ["fa-regular #{Teiserver.Battle.MatchLib.icon()}", :list],
+        url: "/teiserver/reports/client_events/summary",
+        permissions: "teiserver.admin"
+      },
+      %{
+        label: "Teiserver infologs",
+        icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
+        url: "/teiserver/reports/client_events/summary",
+        permissions: "teiserver.moderator.telemetry"
+      },
+      %{
+        label: "Teiserver reports",
+        icons: ["fa-regular #{Central.Helpers.StylingHelper.icon(:report)}", :list],
+        url: "/teiserver/reports/client_events/summary",
         permissions: "teiserver.admin"
       }
     ])
