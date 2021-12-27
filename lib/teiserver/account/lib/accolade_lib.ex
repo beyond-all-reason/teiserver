@@ -1,6 +1,8 @@
 defmodule Teiserver.Account.AccoladeLib do
   use CentralWeb, :library
+  alias Teiserver.Account
   alias Teiserver.Account.{Accolade, AccoladeServer}
+  alias Teiserver.Data.Types, as: T
 
   # Functions
   @spec icon :: String.t()
@@ -72,23 +74,58 @@ defmodule Teiserver.Account.AccoladeLib do
   def _search(query, :filter, {"all", _}), do: query
 
   def _search(query, :filter, {"recipient", user_id}) do
-    from reports in query,
-      where: reports.recipient_id == ^user_id
+    from accolades in query,
+      where: accolades.recipient_id == ^user_id
   end
 
   def _search(query, :filter, {"giver", user_id}) do
-    from reports in query,
-      where: reports.giver_id == ^user_id
+    from accolades in query,
+      where: accolades.giver_id == ^user_id
   end
 
   def _search(query, :filter, {"badge_type", type_id}) do
-    from reports in query,
-      where: reports.badge_type_id == ^type_id
+    from accolades in query,
+      where: accolades.badge_type_id == ^type_id
   end
 
   def _search(query, :user_id, user_id) do
-    from reports in query,
-      where: (reports.giver_id == ^user_id or reports.recipient_id == ^user_id)
+    from accolades in query,
+      where: (accolades.giver_id == ^user_id or accolades.recipient_id == ^user_id)
+  end
+
+  def _search(query, :giver_id, giver_id) do
+    from accolades in query,
+      where: accolades.giver_id == ^giver_id
+  end
+
+  def _search(query, :recipient_id, recipient_id_list) when is_list(recipient_id_list) do
+    from accolades in query,
+      where: accolades.recipient_id in ^recipient_id_list
+  end
+
+  def _search(query, :recipient_id, recipient_id) do
+    from accolades in query,
+      where: accolades.recipient_id == ^recipient_id
+  end
+
+  def _search(query, :badge_type_id, badge_type_id_list) when is_list(badge_type_id_list) do
+    from accolades in query,
+      where: accolades.badge_type_id in ^badge_type_id_list
+  end
+
+  def _search(query, :badge_type_id, badge_type_id) do
+    from accolades in query,
+      where: accolades.badge_type_id == ^badge_type_id
+  end
+
+  def _search(query, :inserted_after, timestamp) do
+    from accolades in query,
+      where: accolades.inserted_at >= ^timestamp
+  end
+
+  def _search(query, :inserted_before, timestamp) do
+    from accolades in query,
+      where: accolades.inserted_at < ^timestamp
   end
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
@@ -155,8 +192,43 @@ defmodule Teiserver.Account.AccoladeLib do
     end
   end
 
+  @spec cast_accolade_server(any) :: any
+  def cast_accolade_server(msg) do
+    case get_accolade_server_pid() do
+      nil -> nil
+      pid -> send(pid, msg)
+    end
+  end
+
+  @spec call_accolade_server(any) :: any
+  def call_accolade_server(msg) do
+    case get_accolade_server_pid() do
+      nil -> nil
+      pid -> GenServer.call(pid, msg)
+    end
+  end
+
   @spec get_accolade_server_userid() :: T.userid()
   def get_accolade_server_userid() do
     ConCache.get(:application_metadata_cache, "teiserver_accolade_userid")
+  end
+
+  @spec get_accolade_server_pid() :: pid() | nil
+  def get_accolade_server_pid() do
+    ConCache.get(:teiserver_consul_pids, :accolade)
+  end
+
+  @spec get_possible_ratings(T.userid(), [map()]) :: any
+  def get_possible_ratings(userid, memberships) do
+    member_ids = Enum.map(memberships, fn m -> m.user_id end)
+    timestamp = Timex.now() |> Timex.shift(days: -5)
+
+    # Get a list of everybody they reviewed recently
+    existing = Account.list_accolades(search: [giver_id: userid, recipient_id: member_ids, inserted_after: timestamp])
+    |> Enum.map(fn a -> a.recipient_id end)
+
+    # Now get a list of everybody in the match minus the ones they have reviewed recently
+    member_ids
+    |> Enum.filter(fn m -> not Enum.member?(existing, m) and m != userid end)
   end
 end

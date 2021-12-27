@@ -8,6 +8,8 @@ defmodule Teiserver.Battle do
   alias Central.Repo
   alias Teiserver.{Telemetry, Coordinator}
   alias Teiserver.Battle.Lobby
+  alias Teiserver.Account.AccoladeLib
+  alias Phoenix.PubSub
 
   alias Teiserver.Battle.Match
   alias Teiserver.Battle.MatchLib
@@ -227,6 +229,11 @@ defmodule Teiserver.Battle do
     case list_matches(search: [uuid: uuid]) do
       [match] ->
         update_match(match, params)
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_global_match_updates",
+          {:global_match_updates, :match_completed, match.id}
+        )
       _ ->
         :ok
     end

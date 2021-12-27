@@ -31,6 +31,12 @@ Limited information pertaining to the creation/deletion of battles.
   {:global_battle_lobby, :rename, lobby_id}
 ```
 
+### teiserver_global_match_updates
+
+```
+  {:global_match_updates, :match_completed, match_id}
+```
+
 #### teiserver_lobby_updates:#{battle_lobby_id}
 Information affecting only those in this given battle. Chat is not sent via this channel.
 Valid events:

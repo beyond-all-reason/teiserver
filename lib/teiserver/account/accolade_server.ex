@@ -3,7 +3,8 @@ defmodule Teiserver.Account.AccoladeServer do
   The accolade server is the interface point for the Accolade system.
   """
   use GenServer
-  alias Teiserver.{Account, User, Room}
+  alias Teiserver.{Account, User, Room, Battle}
+  alias Teiserver.Account.AccoladeLib
   alias Phoenix.PubSub
   require Logger
 
@@ -40,11 +41,41 @@ defmodule Teiserver.Account.AccoladeServer do
       :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
     end)
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_inout")
+    # :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_inout")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_match_updates")
 
     {:noreply, state}
   end
+
+  def handle_info({:start_accolade_process, giver_id, recipient_id, match_id}, state) do
+    # TODO: Make this start doing stuff
+    # IO.puts ""
+    # IO.inspect {:start_accolade_process, giver_id, recipient_id, match_id}
+    # IO.puts ""
+    {:noreply, state}
+  end
+
+  # Match ending
+  # For testing purposes: Teiserver.Account.AccoladeLib.cast_accolade_server({:global_match_updates, :match_completed, match_id})
+  def handle_info({:global_match_updates, :match_completed, match_id}, state) do
+    # Get a list of all the players, then check if there are possible ratings for them
+    memberships = Battle.list_match_memberships(search: [match_id: match_id])
+
+    memberships
+    |> Enum.each(fn %{user_id: userid} ->
+      case AccoladeLib.get_possible_ratings(userid, memberships) do
+        [] ->
+          :ok
+        [possibles] ->
+          chosen = Enum.random(possibles)
+          send(self(), {:start_accolade_process, userid, chosen, match_id})
+      end
+    end)
+
+    {:noreply, state}
+  end
+  def handle_info({:global_match_updates, _, _}, state), do: {:noreply, state}
 
   # Direct/Room messaging
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
@@ -63,8 +94,6 @@ defmodule Teiserver.Account.AccoladeServer do
     :timer.send_after(500, {:do_client_inout, :login, userid})
     {:noreply, state}
   end
-
-  def handle_info({:client_inout, :disconnect, _userid, _reason}, state), do: {:noreply, state}
 
   # Catchall handle_info
   def handle_info(msg, state) do
