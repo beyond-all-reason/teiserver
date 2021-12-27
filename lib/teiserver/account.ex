@@ -583,159 +583,7 @@ defmodule Teiserver.Account do
     BanHash.changeset(ban_hash, %{})
   end
 
-    alias Teiserver.Account.Accolade
-  alias Teiserver.Account.AccoladeLib
-
-  @spec accolade_query(List.t()) :: Ecto.Query.t()
-  def accolade_query(args) do
-    accolade_query(nil, args)
-  end
-
-  @spec accolade_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def accolade_query(id, args) do
-    AccoladeLib.query_accolades
-    |> AccoladeLib.search(%{id: id})
-    |> AccoladeLib.search(args[:search])
-    |> AccoladeLib.preload(args[:preload])
-    |> AccoladeLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
-  end
-
-  @doc """
-  Returns the list of accolades.
-
-  ## Examples
-
-      iex> list_accolades()
-      [%Accolade{}, ...]
-
-  """
-  @spec list_accolades(List.t()) :: List.t()
-  def list_accolades(args \\ []) do
-    accolade_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
-  end
-
-  @doc """
-  Gets a single accolade.
-
-  Raises `Ecto.NoResultsError` if the Accolade does not exist.
-
-  ## Examples
-
-      iex> get_accolade!(123)
-      %Accolade{}
-
-      iex> get_accolade!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  @spec get_accolade!(Integer.t() | List.t()) :: Accolade.t()
-  @spec get_accolade!(Integer.t(), List.t()) :: Accolade.t()
-  def get_accolade!(id) when not is_list(id) do
-    accolade_query(id, [])
-    |> Repo.one!
-  end
-  def get_accolade!(args) do
-    accolade_query(nil, args)
-    |> Repo.one!
-  end
-  def get_accolade!(id, args) do
-    accolade_query(id, args)
-    |> Repo.one!
-  end
-
-  # Uncomment this if needed, default files do not need this function
-  # @doc """
-  # Gets a single accolade.
-
-  # Returns `nil` if the Accolade does not exist.
-
-  # ## Examples
-
-  #     iex> get_accolade(123)
-  #     %Accolade{}
-
-  #     iex> get_accolade(456)
-  #     nil
-
-  # """
-  # def get_accolade(id, args \\ []) when not is_list(id) do
-  #   accolade_query(id, args)
-  #   |> Repo.one
-  # end
-
-  @doc """
-  Creates a accolade.
-
-  ## Examples
-
-      iex> create_accolade(%{field: value})
-      {:ok, %Accolade{}}
-
-      iex> create_accolade(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec create_accolade(Map.t()) :: {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
-  def create_accolade(attrs \\ %{}) do
-    %Accolade{}
-    |> Accolade.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a accolade.
-
-  ## Examples
-
-      iex> update_accolade(accolade, %{field: new_value})
-      {:ok, %Accolade{}}
-
-      iex> update_accolade(accolade, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec update_accolade(Accolade.t(), Map.t()) :: {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
-  def update_accolade(%Accolade{} = accolade, attrs) do
-    accolade
-    |> Accolade.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a Accolade.
-
-  ## Examples
-
-      iex> delete_accolade(accolade)
-      {:ok, %Accolade{}}
-
-      iex> delete_accolade(accolade)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec delete_accolade(Accolade.t()) :: {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
-  def delete_accolade(%Accolade{} = accolade) do
-    Repo.delete(accolade)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking accolade changes.
-
-  ## Examples
-
-      iex> change_accolade(accolade)
-      %Ecto.Changeset{source: %Accolade{}}
-
-  """
-  @spec change_accolade(Accolade.t()) :: Ecto.Changeset.t()
-  def change_accolade(%Accolade{} = accolade) do
-    Accolade.changeset(accolade, %{})
-  end
-
-    alias Teiserver.Account.BadgeType
+  alias Teiserver.Account.BadgeType
   alias Teiserver.Account.BadgeTypeLib
 
   @spec badge_type_query(List.t()) :: Ecto.Query.t()
@@ -885,6 +733,158 @@ defmodule Teiserver.Account do
   @spec change_badge_type(BadgeType.t()) :: Ecto.Changeset.t()
   def change_badge_type(%BadgeType{} = badge_type) do
     BadgeType.changeset(badge_type, %{})
+  end
+
+  alias Teiserver.Account.Accolade
+  alias Teiserver.Account.AccoladeLib
+
+  @spec accolade_query(List.t()) :: Ecto.Query.t()
+  def accolade_query(args) do
+    accolade_query(nil, args)
+  end
+
+  @spec accolade_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def accolade_query(id, args) do
+    AccoladeLib.query_accolades
+    |> AccoladeLib.search(%{id: id})
+    |> AccoladeLib.search(args[:search])
+    |> AccoladeLib.preload(args[:preload])
+    |> AccoladeLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of accolades.
+
+  ## Examples
+
+      iex> list_accolades()
+      [%Accolade{}, ...]
+
+  """
+  @spec list_accolades(List.t()) :: List.t()
+  def list_accolades(args \\ []) do
+    accolade_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Gets a single accolade.
+
+  Raises `Ecto.NoResultsError` if the Accolade does not exist.
+
+  ## Examples
+
+      iex> get_accolade!(123)
+      %Accolade{}
+
+      iex> get_accolade!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_accolade!(Integer.t() | List.t()) :: Accolade.t()
+  @spec get_accolade!(Integer.t(), List.t()) :: Accolade.t()
+  def get_accolade!(id) when not is_list(id) do
+    accolade_query(id, [])
+    |> Repo.one!
+  end
+  def get_accolade!(args) do
+    accolade_query(nil, args)
+    |> Repo.one!
+  end
+  def get_accolade!(id, args) do
+    accolade_query(id, args)
+    |> Repo.one!
+  end
+
+  # Uncomment this if needed, default files do not need this function
+  # @doc """
+  # Gets a single accolade.
+
+  # Returns `nil` if the Accolade does not exist.
+
+  # ## Examples
+
+  #     iex> get_accolade(123)
+  #     %Accolade{}
+
+  #     iex> get_accolade(456)
+  #     nil
+
+  # """
+  # def get_accolade(id, args \\ []) when not is_list(id) do
+  #   accolade_query(id, args)
+  #   |> Repo.one
+  # end
+
+  @doc """
+  Creates a accolade.
+
+  ## Examples
+
+      iex> create_accolade(%{field: value})
+      {:ok, %Accolade{}}
+
+      iex> create_accolade(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_accolade(Map.t()) :: {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
+  def create_accolade(attrs \\ %{}) do
+    %Accolade{}
+    |> Accolade.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a accolade.
+
+  ## Examples
+
+      iex> update_accolade(accolade, %{field: new_value})
+      {:ok, %Accolade{}}
+
+      iex> update_accolade(accolade, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_accolade(Accolade.t(), Map.t()) :: {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
+  def update_accolade(%Accolade{} = accolade, attrs) do
+    accolade
+    |> Accolade.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a Accolade.
+
+  ## Examples
+
+      iex> delete_accolade(accolade)
+      {:ok, %Accolade{}}
+
+      iex> delete_accolade(accolade)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_accolade(Accolade.t()) :: {:ok, Accolade.t()} | {:error, Ecto.Changeset.t()}
+  def delete_accolade(%Accolade{} = accolade) do
+    Repo.delete(accolade)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking accolade changes.
+
+  ## Examples
+
+      iex> change_accolade(accolade)
+      %Ecto.Changeset{source: %Accolade{}}
+
+  """
+  @spec change_accolade(Accolade.t()) :: Ecto.Changeset.t()
+  def change_accolade(%Accolade{} = accolade) do
+    Accolade.changeset(accolade, %{})
   end
 
 end
