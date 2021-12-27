@@ -50,6 +50,7 @@ defmodule Teiserver.Account.UserCache do
     |> Enum.map(fn userid ->
       ConCache.get(:users, userid)
     end)
+    |> Enum.filter(fn user -> user != nil end)
   end
 
   @spec recache_user(Integer.t()) :: :ok

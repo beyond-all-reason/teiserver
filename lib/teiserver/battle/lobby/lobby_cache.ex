@@ -156,5 +156,6 @@ defmodule Teiserver.Battle.LobbyCache do
   def list_lobbies() do
     list_lobby_ids()
     |> Enum.map(fn lobby_id -> ConCache.get(:lobbies, lobby_id) end)
+    |> Enum.filter(fn lobby -> lobby != nil end)
   end
 end
