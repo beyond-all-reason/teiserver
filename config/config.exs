@@ -114,7 +114,9 @@ config :central, Oban,
 
         # Every minute
         {"* * * * *", Teiserver.Telemetry.Tasks.PersistServerMinuteTask},
-        {"* * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},
+
+        # Every 5 minutes
+        {"*/5 * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},
 
         # 2:05 am and 2:15 am
         {"5 2 * * *", Teiserver.Telemetry.Tasks.PersistServerDayTask},
