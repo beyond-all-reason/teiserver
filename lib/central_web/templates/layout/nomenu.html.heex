@@ -20,7 +20,7 @@
     <script src={Routes.static_path(@conn, "/js/popper.js")}></script>
     <script src={Routes.static_path(@conn, "/js/bootstrap.min.js")}></script>
     <script src={Routes.static_path(@conn, "/js/fontawesome.js")}></script>
-    <script src={Routes.static_path(@conn, "/js/app.js")}></script>
+    <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
 
     <script type="text/javascript" charset="utf-8">
       $(function() {

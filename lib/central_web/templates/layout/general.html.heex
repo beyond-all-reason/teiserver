@@ -21,7 +21,7 @@
 
   <script src={Routes.static_path(@conn, "/js/jquery.min.js")}></script>
   <script src={Routes.static_path(@conn, "/js/bootstrap.min.js")}></script>
-  <script src={Routes.static_path(@conn, "/js/app.js")}></script>
+  <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
 
   <style type="text/css">
     body {
