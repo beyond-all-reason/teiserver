@@ -15,7 +15,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   end
 
   def handle_info(:begin, _state) do
-    Logger.debug("Starting up Coordinator coordinator")
+    Logger.debug("Starting up Coordinator main server")
     account = get_coordinator_account()
     ConCache.put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
 

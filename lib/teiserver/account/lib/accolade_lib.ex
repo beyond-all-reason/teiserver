@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.AccoladeLib do
   use CentralWeb, :library
-  alias Teiserver.Account.Accolade
+  alias Teiserver.Account.{Accolade, AccoladeServer}
 
   # Functions
   @spec icon :: String.t()
@@ -125,4 +125,38 @@ defmodule Teiserver.Account.AccoladeLib do
   #     left_join: things in assoc(accolades, :things),
   #     preload: [things: things]
   # end
+
+
+  @spec do_start() :: :ok
+  defp do_start() do
+    # Start the supervisor server
+    {:ok, _accolade_server_pid} =
+      DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
+        Teiserver.Account.AccoladeServer,
+        name: Teiserver.Account.AccoladeServer,
+        data: %{}
+      })
+    :ok
+  end
+
+  # @spec get_accolade_server_pid() :: pid()
+  # defp get_accolade_server_pid() do
+  #   ConCache.get(:teiserver_accolade_server, :accolade_server)
+  # end
+
+  @spec start_accolade_server() :: :ok | {:failure, String.t()}
+  def start_accolade_server() do
+    cond do
+      get_accolade_server_userid() != nil ->
+        {:failure, "Already started"}
+
+      true ->
+        do_start()
+    end
+  end
+
+  @spec get_accolade_server_userid() :: T.userid()
+  def get_accolade_server_userid() do
+    ConCache.get(:application_metadata_cache, "teiserver_accolade_userid")
+  end
 end

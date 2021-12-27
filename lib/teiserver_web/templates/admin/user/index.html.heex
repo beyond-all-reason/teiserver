@@ -73,8 +73,8 @@
         <%= central_component "icon", icon: user.icon %>
       </td>
       <td><%= user.name %></td>
-      <td><%= user.data["lobby_client"] %></td>
       <%= if is_admin do %><td><%= user.email %></td><% end %>
+      <td><%= user.data["lobby_client"] %></td>
 
       <td>
         <%

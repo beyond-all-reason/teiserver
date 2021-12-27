@@ -268,6 +268,13 @@ defmodule Teiserver.Startup do
       end)
     end
 
+    if Application.get_env(:central, Teiserver)[:enable_accolade_mode] do
+      spawn(fn ->
+        :timer.sleep(500)
+        Teiserver.Account.AccoladeLib.start_accolade_server()
+      end)
+    end
+
     # We want this to start up later than the coordinator
     if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
       spawn(fn ->
