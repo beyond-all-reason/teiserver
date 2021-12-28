@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.AccoladeServerTest do
+defmodule Teiserver.Account.AccoladeBotServerTest do
   use Central.ServerCase, async: false
   alias Phoenix.PubSub
 

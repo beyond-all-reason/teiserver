@@ -52,6 +52,10 @@ defmodule Teiserver.Application do
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Coordinator.DynamicSupervisor},
       {Teiserver.Coordinator.AutomodServer, name: Teiserver.Coordinator.AutomodServer},
 
+      # Accolades
+      concache_perm_sup(:teiserver_accolade_pids),
+      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Account.AccoladeSupervisor},
+
       # Telemetry
       {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
       {Teiserver.Telemetry.SpringTelemetryServer, name: Teiserver.Telemetry.SpringTelemetryServer},

@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.AccoladeLib do
   use CentralWeb, :library
   alias Teiserver.Account
-  alias Teiserver.Account.{Accolade, AccoladeServer}
+  alias Teiserver.Account.{Accolade, AccoladeBotServer}
   alias Teiserver.Data.Types, as: T
 
   # Functions
@@ -169,22 +169,22 @@ defmodule Teiserver.Account.AccoladeLib do
     # Start the supervisor server
     {:ok, _accolade_server_pid} =
       DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
-        Teiserver.Account.AccoladeServer,
-        name: Teiserver.Account.AccoladeServer,
+        Teiserver.Account.AccoladeBotServer,
+        name: Teiserver.Account.AccoladeBotServer,
         data: %{}
       })
     :ok
   end
 
-  # @spec get_accolade_server_pid() :: pid()
-  # defp get_accolade_server_pid() do
+  # @spec get_accolade_bot_pid() :: pid()
+  # defp get_accolade_bot_pid() do
   #   ConCache.get(:teiserver_accolade_server, :accolade_server)
   # end
 
   @spec start_accolade_server() :: :ok | {:failure, String.t()}
   def start_accolade_server() do
     cond do
-      get_accolade_server_userid() != nil ->
+      get_accolade_bot_userid() != nil ->
         {:failure, "Already started"}
 
       true ->
@@ -192,30 +192,30 @@ defmodule Teiserver.Account.AccoladeLib do
     end
   end
 
-  @spec cast_accolade_server(any) :: any
-  def cast_accolade_server(msg) do
-    case get_accolade_server_pid() do
+  @spec cast_accolade_bot(any) :: any
+  def cast_accolade_bot(msg) do
+    case get_accolade_bot_pid() do
       nil -> nil
       pid -> send(pid, msg)
     end
   end
 
-  @spec call_accolade_server(any) :: any
-  def call_accolade_server(msg) do
-    case get_accolade_server_pid() do
+  @spec call_accolade_bot(any) :: any
+  def call_accolade_bot(msg) do
+    case get_accolade_bot_pid() do
       nil -> nil
       pid -> GenServer.call(pid, msg)
     end
   end
 
-  @spec get_accolade_server_userid() :: T.userid()
-  def get_accolade_server_userid() do
+  @spec get_accolade_bot_userid() :: T.userid()
+  def get_accolade_bot_userid() do
     ConCache.get(:application_metadata_cache, "teiserver_accolade_userid")
   end
 
-  @spec get_accolade_server_pid() :: pid() | nil
-  def get_accolade_server_pid() do
-    ConCache.get(:teiserver_consul_pids, :accolade)
+  @spec get_accolade_bot_pid() :: pid() | nil
+  def get_accolade_bot_pid() do
+    ConCache.get(:teiserver_accolade_pids, :accolade_bot)
   end
 
   @spec get_possible_ratings(T.userid(), [map()]) :: any

@@ -1,4 +1,4 @@
-defmodule Teiserver.Account.AccoladeServer do
+defmodule Teiserver.Account.AccoladeBotServer do
   @moduledoc """
   The accolade server is the interface point for the Accolade system.
   """
@@ -45,7 +45,6 @@ defmodule Teiserver.Account.AccoladeServer do
 
     # We only subscribe to this if we're not in test, if we are it'll generate a bunch of SQL errors
     # without actually breaking anything
-    # if Application.get_env()
     if not Application.get_env(:central, Teiserver)[:test_mode] do
       :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_match_updates")
     end
@@ -62,7 +61,7 @@ defmodule Teiserver.Account.AccoladeServer do
   end
 
   # Match ending
-  # For testing purposes: Teiserver.Account.AccoladeLib.cast_accolade_server({:global_match_updates, :match_completed, match_id})
+  # For testing purposes: Teiserver.Account.AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match_id})
   def handle_info({:global_match_updates, :match_completed, match_id}, state) do
     # Get a list of all the players, then check if there are possible ratings for them
     memberships = Battle.list_match_memberships(search: [match_id: match_id])
@@ -154,7 +153,7 @@ defmodule Teiserver.Account.AccoladeServer do
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
-    ConCache.put(:teiserver_consul_pids, :accolade, self())
+    ConCache.put(:teiserver_accolade_pids, :accolade_bot, self())
     send(self(), :begin)
     {:ok, %{}}
   end
