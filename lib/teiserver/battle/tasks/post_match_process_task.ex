@@ -19,6 +19,14 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     :ok
   end
 
+  def perform_reprocess(match_id) do
+    Battle.get_match(match_id,
+      preload: [:members],
+      limit: :infinity
+    )
+    |> post_process_match
+  end
+
   defp post_process_match(match) do
     skills = get_match_skill(match)
 

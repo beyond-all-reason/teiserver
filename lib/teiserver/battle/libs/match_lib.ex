@@ -26,6 +26,7 @@ defmodule Teiserver.Battle.MatchLib do
 
     cond do
       String.contains?(bot_names, "Scavengers") -> "Scavengers"
+      String.contains?(bot_names, "Chicken") -> "Raptors"
       String.contains?(bot_names, "Raptor") -> "Raptors"
       Enum.empty?(lobby.bots) == false -> "Bots"
       Enum.count(teams) == 2 and max_team_size == 1 -> "Duel"
@@ -90,7 +91,7 @@ defmodule Teiserver.Battle.MatchLib do
       "Duel" -> "Duel on #{match.map}"
       "Team" -> "#{match.team_size}v#{match.team_size} on #{match.map}"
       "FFA" -> "#{match.team_count} way FFA on #{match.map}"
-      "Bots" -> "Bot game on #{match.map}"
+      t -> "#{t} game on #{match.map}"
     end
   end
 
