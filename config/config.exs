@@ -60,6 +60,7 @@ config :central, Teiserver,
   heartbeat_interval: 30_000,
   # Heartbeat timeout is seconds
   heartbeat_timeout: 120,
+  test_mode: false,
 
   game_name: "Spring game",
   game_name_short: "SG",

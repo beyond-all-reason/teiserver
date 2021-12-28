@@ -18,6 +18,7 @@ config :central, Teiserver,
     certfile: "priv/certs/localhost.crt",
     cacertfile: "priv/certs/localhost.crt"
   ],
+  test_mode: true,
   enable_hooks: false,
   enable_coordinator_mode: false,
   enable_discord_bridge: false,

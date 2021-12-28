@@ -41,9 +41,14 @@ defmodule Teiserver.Account.AccoladeServer do
       :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
     end)
 
-    # :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_inout")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_match_updates")
+
+    # We only subscribe to this if we're not in test, if we are it'll generate a bunch of SQL errors
+    # without actually breaking anything
+    # if Application.get_env()
+    if not Application.get_env(:central, Teiserver)[:test_mode] do
+      :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_match_updates")
+    end
 
     {:noreply, state}
   end
@@ -104,7 +109,7 @@ defmodule Teiserver.Account.AccoladeServer do
   @spec get_accolade_account() :: Central.Account.User.t()
   def get_accolade_account() do
     user = Account.get_user(nil, search: [
-      exact_name: "Accolade"
+      exact_name: "AccoladesBot"
     ])
 
     case user do
