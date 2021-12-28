@@ -33,6 +33,15 @@
       icon_class: "fad",
       link: Routes.ts_account_general_path(@conn, :index)
     %>
+    
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Battle.MatchLib.icon(),
+      name: "matches",
+      text: "Matches",
+      icon_class: "fad",
+      link: Routes.ts_battle_match_path(@conn, :index)
+    %>
 
     <%= if false and allow?(@conn, "teiserver.account.verified") do %>
       <%=

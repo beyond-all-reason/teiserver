@@ -20,8 +20,8 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
       duel: get_subset_data(matches, "Duel"),
       team: get_subset_data(matches, "Team"),
       ffa: get_subset_data(matches, "FFA"),
-      scavenger: get_subset_data(matches, "Scavengers"),
-      chicken: get_subset_data(matches, "Chicken"),
+      scavengers: get_subset_data(matches, "Scavengers"),
+      raptors: get_subset_data(matches, "Raptors"),
       totals: get_subset_data(matches, nil),
     }
   end

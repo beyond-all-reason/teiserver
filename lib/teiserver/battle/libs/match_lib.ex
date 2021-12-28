@@ -10,6 +10,7 @@ defmodule Teiserver.Battle.MatchLib do
   @spec colours :: {String.t(), String.t(), String.t()}
   def colours, do: Central.Helpers.StylingHelper.colours(:success2)
 
+  @spec game_type(T.lobby(), map()) :: <<_::24, _::_*8>>
   def game_type(lobby, teams) do
     bot_names = Map.keys(lobby.bots)
       |> Enum.join(" ")
@@ -24,8 +25,8 @@ defmodule Teiserver.Battle.MatchLib do
     end
 
     cond do
-      String.contains?(bot_names, "ScavengersAI") -> "Scavengers"
-      String.contains?(bot_names, "Chicken") -> "Chicken"
+      String.contains?(bot_names, "Scavengers") -> "Scavengers"
+      String.contains?(bot_names, "Raptor") -> "Raptors"
       Enum.empty?(lobby.bots) == false -> "Bots"
       Enum.count(teams) == 2 and max_team_size == 1 -> "Duel"
       Enum.count(teams) == 2 -> "Team"
@@ -84,6 +85,15 @@ defmodule Teiserver.Battle.MatchLib do
     }}
   end
 
+  def make_match_name(match) do
+    case match.game_type do
+      "Duel" -> "Duel on #{match.map}"
+      "Team" -> "#{match.team_size}v#{match.team_size} on #{match.map}"
+      "FFA" -> "#{match.team_count} way FFA on #{match.map}"
+      "Bots" -> "Bot game on #{match.map}"
+    end
+  end
+
   @spec make_favourite(Map.t()) :: Map.t()
   def make_favourite(match) do
     %{
@@ -94,7 +104,7 @@ defmodule Teiserver.Battle.MatchLib do
       item_type: "teiserver_battle_match",
       item_colour: colours() |> elem(0),
       item_icon: Teiserver.Battle.MatchLib.icon(),
-      item_label: "#{match.name}",
+      item_label: make_match_name(match),
 
       url: "/battle/matches/#{match.id}"
     }

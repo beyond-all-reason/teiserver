@@ -29,15 +29,13 @@
             lib: Teiserver.Battle.LobbyLib
           %>
 
-          <%= if allow?(@conn, "admin.dev") do %>
-            <%= central_component "sub_menu_icon",
-              name: "battle_logs",
-              label: "Battle logs",
-              active: @active,
-              url: Routes.ts_battle_match_path(@conn, :index),
-              lib: Teiserver.Battle.MatchLib
-            %>
-          <% end %>
+          <%= central_component "sub_menu_icon",
+            name: "matches",
+            label: "Matches",
+            active: @active,
+            url: Routes.ts_battle_match_path(@conn, :index),
+            lib: Teiserver.Battle.MatchLib
+          %>
         </div>
 
       </div>

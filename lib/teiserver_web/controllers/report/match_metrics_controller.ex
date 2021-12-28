@@ -84,10 +84,10 @@ defmodule TeiserverWeb.Report.MatchMetricController do
 
     field_list = case Map.get(params, "fields", "total_matches") do
       "total_matches" ->
-        [{"Duel", "duel.aggregate.total_count"}, {"Team", "team.aggregate.total_count"}, {"FFA", "ffa.aggregate.total_count"}, {"Chickens", "chicken.aggregate.total_count"}, {"Scavengers", "scavenger.aggregate.total_count"}]
+        [{"Duel", "duel.aggregate.total_count"}, {"Team", "team.aggregate.total_count"}, {"FFA", "ffa.aggregate.total_count"}, {"Raptors", "raptors.aggregate.total_count"}, {"Scavengers", "scavenger.aggregate.total_count"}]
 
       _ -> # just default to the above
-        [{"Duel", "duel.aggregate.total_count"}, {"Team", "team.aggregate.total_count"}, {"FFA", "ffa.aggregate.total_count"}, {"Chickens", "chicken.aggregate.total_count"}, {"Scavengers", "scavenger.aggregate.total_count"}]
+        [{"Duel", "duel.aggregate.total_count"}, {"Team", "team.aggregate.total_count"}, {"FFA", "ffa.aggregate.total_count"}, {"Raptors", "raptors.aggregate.total_count"}, {"Scavengers", "scavenger.aggregate.total_count"}]
     end
 
     extra_params = %{"field_list" => field_list}

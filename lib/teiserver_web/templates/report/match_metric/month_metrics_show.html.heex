@@ -68,12 +68,12 @@
 
         <%= central_component "detail_line",
           label: "Scavengers",
-          value: format_number @data["scavenger"]["aggregate"]["total_count"]
+          value: format_number @data["scavengers"]["aggregate"]["total_count"]
         %>
 
         <%= central_component "detail_line",
-          label: "Chickens",
-          value: format_number @data["chicken"]["aggregate"]["total_count"]
+          label: "Raptors",
+          value: format_number @data["raptors"]["aggregate"]["total_count"]
         %>
       </div>
 

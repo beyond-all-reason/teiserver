@@ -1,0 +1,27 @@
+<%= central_component "detail_line",
+  label: "Team count",
+  value: @match.team_count
+%>
+
+<%= central_component "detail_line",
+  label: "Team size",
+  value: @match.team_size
+%>
+
+<hr />
+
+<%= central_component "detail_line",
+  label: "Started",
+  value: date_to_str(@match.started, format: :ymd_hms, tz: @tz)
+%>
+
+<%= central_component "detail_line",
+  label: "Finished",
+  value: date_to_str(@match.finished, format: :ymd_hms, tz: @tz)
+%>
+
+<%= if allow?(@conn, "teiserver.moderator") do %>
+  <hr />
+  <textarea class="form-control" style="font-family: monospace" rows="20"><%= Jason.encode!(@match.data, pretty: true) %></textarea>
+  <textarea class="form-control" style="font-family: monospace" rows="20"><%= Jason.encode!(@match.bots, pretty: true) %></textarea>
+<% end %>

@@ -1,6 +1,6 @@
 <% {_fg, _bg, bsname} = colours() %>
 
-<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "battle_logs"}) %>
+<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "matches"}) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -16,30 +16,29 @@
         }) %>
         <br /><br />
 
-<h4>Listing Matchs</h4>
+<h4>Listing Matches</h4>
 
 <table class="table table-sm">
   <thead>
     <tr>
-      <th>GUID</th>
+      <th>Type</th>
+      <th>Map</th>
       <th>Teams</th>
-      <th>Players</th>
-      <th>Spectators</th>
+      <th>Team size</th>
       <th colspan="1">&nbsp;</th>
     </tr>
   </thead>
   <tbody>
-<%= for battle_log <- @battle_logs do %>
+<%= for match <- @matches do %>
     <tr>
-      <td><%= battle_log.guid %></td>
+      <td><%= match.game_type %></td>
+      <td><%= match.map %></td>
 
-      <td><%= battle_log.team_count %></td>
-
-      <td><%= Enum.count(battle_log.players) %></td>
-      <td><%= Enum.count(battle_log.spectators) %></td>
+      <td><%= match.team_count %></td>
+      <td><%= match.team_size %></td>
 
       <td>
-        <a href={Routes.ts_battle_match_path(@conn, :show, battle_log.id)} class="btn btn-secondary btn-sm">
+        <a href={Routes.ts_battle_match_path(@conn, :show, match.id)} class="btn btn-secondary btn-sm">
           Show
         </a>
       </td>

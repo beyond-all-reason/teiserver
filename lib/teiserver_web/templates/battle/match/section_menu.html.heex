@@ -1,0 +1,10 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= central_component "section_menu_button",
+  name: "index",
+  label: "List",
+  active: @active,
+  icon: "far fa-bars",
+  bsname: bsname,
+  url: Routes.ts_battle_match_path(@conn, :index)
+%>

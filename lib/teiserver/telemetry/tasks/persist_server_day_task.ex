@@ -448,7 +448,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
     counts: %{
       total: 0,
       scavengers: 0,
-      chicken: 0,
+      raptors: 0,
       bots: 0,
       duel: 0,
       team: 0,
@@ -519,7 +519,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
     game_type = case match.game_type do
       "PvE" -> :scavengers
       "Scavengers" -> :scavengers
-      "Chicken" -> :chicken
+      "Raptors" -> :raptors
       "Bots" -> :bots
       "Duel" -> :duel
       "Team" -> :team

@@ -342,11 +342,11 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "ADDBOT #{botid} STAI(1) #{user2.name} 4195458 0 STAI\n"
 
     # Add a different bot
-    _send_raw(socket2, "ADDBOT Chicken:Normal(1) 4195458 0 Chicken: Normal\n")
+    _send_raw(socket2, "ADDBOT Raptor:Normal(1) 4195458 0 Raptor: Normal\n")
     reply = _recv_raw(socket2)
-    [_, botid] = Regex.run(~r/ADDBOT (\d+) Chicken:Normal\(1\) #{user2.name} 4195458 0 Chicken: Normal/, reply)
+    [_, botid] = Regex.run(~r/ADDBOT (\d+) Raptor:Normal\(1\) #{user2.name} 4195458 0 Raptor: Normal/, reply)
     botid = int_parse(botid)
-    assert reply == "ADDBOT #{botid} Chicken:Normal(1) #{user2.name} 4195458 0 Chicken: Normal\n"
+    assert reply == "ADDBOT #{botid} Raptor:Normal(1) #{user2.name} 4195458 0 Raptor: Normal\n"
 
     # # Promote?
     # _send_raw(socket2, "PROMOTE\n")

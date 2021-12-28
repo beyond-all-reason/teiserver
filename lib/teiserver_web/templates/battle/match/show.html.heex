@@ -12,7 +12,7 @@
   });
 </script>
 
-<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "battle_logs"}) %>
+<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "matches"}) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -29,7 +29,7 @@
         </div>
 
       <h3>
-        <%= @battle_log.guid %>
+        <%= @match_name %>
       </h3>
       <br />
       <ul class="nav nav-tabs" role="tablist" id="the_tabs">

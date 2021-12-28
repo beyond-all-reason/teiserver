@@ -18,12 +18,25 @@ defmodule TeiserverWeb.Battle.MatchController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    matches = Battle.list_matches(
-      search: [
-        simple_search: Map.get(params, "s", "") |> String.trim,
-      ],
-      order_by: "Newest first"
-    )
+    matches = if false and allow?(conn, "teiserver.moderator") do
+      Battle.list_matches(
+        search: [
+          processed: true
+        ],
+        order_by: "Newest first"
+      )
+    else
+      memberships = Battle.list_match_memberships(search: [user_id: conn.user_id], select: [:match_id])
+      |> Enum.map(fn mm -> mm.match_id end)
+
+      Battle.list_matches(
+        search: [
+          processed: true,
+          id_list: memberships
+        ],
+        order_by: "Newest first"
+      )
+    end
 
     conn
     |> assign(:matches, matches)
@@ -40,9 +53,12 @@ defmodule TeiserverWeb.Battle.MatchController do
     |> MatchLib.make_favourite
     |> insert_recently(conn)
 
+    match_name = MatchLib.make_match_name(match)
+
     conn
     |> assign(:match, match)
-    |> add_breadcrumb(name: "Show: #{match.guid}", url: conn.request_path)
+    |> assign(:match_name, match_name)
+    |> add_breadcrumb(name: "Show: #{match_name}", url: conn.request_path)
     |> render("show.html")
   end
 

@@ -78,16 +78,16 @@
       </li>
 
       <li>
-        <a href="#scavenger_tab" role="tab" class="nav-link" data-toggle="tab">
+        <a href="#scavengers_tab" role="tab" class="nav-link" data-toggle="tab">
           <i class="far fa-fw fa-user-robot"></i>
-          Scavenger
+          Scavengers
         </a>
       </li>
 
       <li>
-        <a href="#chicken_tab" role="tab" class="nav-link" data-toggle="tab">
+        <a href="#raptors_tab" role="tab" class="nav-link" data-toggle="tab">
           <i class="far fa-fw fa-drumstick"></i>
-          Chicken
+          Raptors
         </a>
       </li>
     </ul>
@@ -110,11 +110,11 @@
       </div>
 
       <div class="tab-pane" id="scavenger_tab" style="padding:5px;">
-        <%= render "tab_scavenger.html", %{data: @data["scavenger"]} %>
+        <%= render "tab_scavengers.html", %{data: @data["scavengers"]} %>
       </div>
 
-      <div class="tab-pane" id="chicken_tab" style="padding:5px;">
-        <%= render "tab_chicken.html", %{data: @data["chicken"]} %>
+      <div class="tab-pane" id="raptors_tab" style="padding:5px;">
+        <%= render "tab_raptors.html", %{data: @data["raptors"]} %>
       </div>
     </div>
   </div>

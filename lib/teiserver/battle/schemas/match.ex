@@ -10,7 +10,7 @@ defmodule Teiserver.Battle.Match do
     field :team_count, :integer
     field :team_size, :integer
     field :passworded, :boolean
-    field :game_type, :string # Scavengers, Chicken, Bots, Duel, Team, FFA, Team FFA
+    field :game_type, :string # Scavengers, Raptors, Bots, Duel, Team, FFA, Team FFA
 
     belongs_to :founder, Central.Account.User
     field :bots, :map
