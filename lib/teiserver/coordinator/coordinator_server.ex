@@ -73,63 +73,10 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info({:new_message, _userid, _room_name, _message}, state), do: {:noreply, state}
   def handle_info({:new_message_ex, _userid, _room_name, _message}, state), do: {:noreply, state}
 
-  def handle_info({:direct_message, fromid, "$" <> command}, state) do
-    from = User.get_user_by_id(fromid)
-    command = String.trim(command)
+  def handle_info({:direct_message, sender_id, "$" <> command}, state) do
+    cmd = Coordinator.Parser.parse_command(sender_id, "$#{command}")
+    new_state = CoordinatorCommands.handle_command(cmd, state)
 
-    new_state = case {command, from.moderator} do
-      {"check " <> remaining, true} ->
-        case User.get_userid(remaining) do
-          nil ->
-            User.send_direct_message(state.userid, fromid, "Unable to find a user with that name")
-          userid ->
-            result = AutomodServer.check_user(userid)
-            User.send_direct_message(state.userid, fromid, "Automod result: #{result}")
-        end
-        state
-
-      {"whois " <> remaining, true} ->
-        case User.get_user_by_name(remaining) do
-          nil ->
-            User.send_direct_message(state.userid, fromid, "Unable to find a user with that name")
-          user ->
-            stats = Account.get_user_stat_data(user.id)
-
-            player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
-            spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
-            rank_time = User.rank_time(user.id)
-
-            msg = [
-              "Found #{user.name}",
-              "Rank: #{user.rank} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
-              "They currently have no accolades"
-            ]
-
-            User.send_direct_message(state.userid, fromid, msg)
-        end
-        state
-
-      {"whoami", _} ->
-        stats = Account.get_user_stat_data(fromid)
-
-        player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
-        spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
-        rank_time = User.rank_time(fromid)
-
-        msg = [
-          "You are #{from.name}",
-          "Rank: #{from.rank} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
-          "You currently have no accolades"
-        ]
-
-        User.send_direct_message(state.userid, fromid, msg)
-        state
-
-      _ ->
-        username = User.get_username(fromid)
-        User.send_direct_message(state.userid, fromid, "I don't currently handle messages, sorry #{username}")
-        state
-    end
     {:noreply, new_state}
   end
 

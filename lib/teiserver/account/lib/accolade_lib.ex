@@ -296,4 +296,12 @@ defmodule Teiserver.Account.AccoladeLib do
       |> Enum.map(fn {bt, i} -> {i + 1, bt} end)
     end)
   end
+
+  @spec get_player_accolades(T.userid()) :: map()
+  def get_player_accolades(userid) do
+    Account.list_accolades(search: [recipient_id: userid])
+    |> Enum.map(fn a -> a.badge_type_id end)
+    |> Enum.group_by(fn bt -> bt end)
+    |> Map.new(fn {k, v} -> {k, Enum.count(v)} end)
+  end
 end

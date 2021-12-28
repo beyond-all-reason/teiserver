@@ -37,6 +37,11 @@ defmodule Teiserver.Account.AccoladeChatServer do
   # Handling user messages
   def handle_info({:user_message, message}, %{stage: :awaiting_choice} = state) do
     new_state = case Integer.parse(String.trim(message)) do
+      {0, _} ->
+        User.send_direct_message(state.bot_id, state.userid, "Thank you for your feedback, no Accolade will be bestowed.")
+        send(self(), :terminate)
+        %{state | stage: :completed}
+
       {choice, _} ->
         badge_type = state.badge_types
         |> Enum.filter(fn {i, _} -> i == choice end)
