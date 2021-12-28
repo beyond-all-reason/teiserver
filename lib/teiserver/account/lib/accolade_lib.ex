@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.AccoladeLib do
   use CentralWeb, :library
-  alias Teiserver.Account
-  alias Teiserver.Account.{Accolade, AccoladeBotServer}
+  alias Teiserver.{Account}
+  alias Teiserver.Account.{Accolade, AccoladeBotServer, AccoladeChatServer}
   alias Teiserver.Data.Types, as: T
 
   # Functions
@@ -152,24 +152,38 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
-  def preload(query, _preloads) do
-    # query = if :things in preloads, do: _preload_things(query), else: query
+  def preload(query, preloads) do
+    query = if :badge_type in preloads, do: _preload_badge_type(query), else: query
+    query = if :recipient in preloads, do: _preload_recipient(query), else: query
+    query = if :giver in preloads, do: _preload_giver(query), else: query
     query
   end
 
-  # def _preload_things(query) do
-  #   from accolades in query,
-  #     left_join: things in assoc(accolades, :things),
-  #     preload: [things: things]
-  # end
+  def _preload_badge_type(query) do
+    from accolades in query,
+      left_join: badge_types in assoc(accolades, :badge_type),
+      preload: [badge_type: badge_types]
+  end
+
+  def _preload_recipient(query) do
+    from accolades in query,
+      left_join: recipients in assoc(accolades, :recipient),
+      preload: [recipient: recipients]
+  end
+
+  def _preload_giver(query) do
+    from accolades in query,
+      left_join: givers in assoc(accolades, :giver),
+      preload: [giver: givers]
+  end
 
 
   @spec do_start() :: :ok
   defp do_start() do
     # Start the supervisor server
     {:ok, _accolade_server_pid} =
-      DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
-        Teiserver.Account.AccoladeBotServer,
+      DynamicSupervisor.start_child(Teiserver.Account.AccoladeSupervisor, {
+        AccoladeBotServer,
         name: Teiserver.Account.AccoladeBotServer,
         data: %{}
       })
@@ -218,17 +232,68 @@ defmodule Teiserver.Account.AccoladeLib do
     ConCache.get(:teiserver_accolade_pids, :accolade_bot)
   end
 
+  @spec get_accolade_chat_pid(T.userid()) :: pid() | nil
+  def get_accolade_chat_pid(userid) do
+    ConCache.get(:teiserver_accolade_pids, userid)
+  end
+
+  @spec cast_accolade_chat(T.userid(), any) :: any
+  def cast_accolade_chat(userid, msg) do
+    case get_accolade_chat_pid(userid) do
+      nil -> nil
+      pid -> send(pid, msg)
+    end
+  end
+
   @spec get_possible_ratings(T.userid(), [map()]) :: any
   def get_possible_ratings(userid, memberships) do
-    member_ids = Enum.map(memberships, fn m -> m.user_id end)
+    their_membership = Enum.filter(memberships, fn m -> m.user_id == userid end) |> hd
+
+    teammate_ids = memberships
+      |> Enum.filter(fn m -> m.team_id == their_membership.team_id and m.user_id != userid end)
+      |> Enum.map(fn m -> m.user_id end)
     timestamp = Timex.now() |> Timex.shift(days: -5)
 
     # Get a list of everybody they reviewed recently
-    existing = Account.list_accolades(search: [giver_id: userid, recipient_id: member_ids, inserted_after: timestamp])
+    existing = Account.list_accolades(search: [giver_id: userid, recipient_id: teammate_ids, inserted_after: timestamp])
     |> Enum.map(fn a -> a.recipient_id end)
 
-    # Now get a list of everybody in the match minus the ones they have reviewed recently
-    member_ids
-    |> Enum.filter(fn m -> not Enum.member?(existing, m) and m != userid end)
+    # Now get a list of everybody from their team
+    teammate_ids
+    |> Enum.filter(fn m -> not Enum.member?(existing, m) end)
+  end
+
+  @spec start_chat_server(T.userid(), T.userid()) :: pid()
+  def start_chat_server(userid, recipient_id) do
+    {:ok, chat_server_pid} =
+      DynamicSupervisor.start_child(Teiserver.Account.AccoladeSupervisor, {
+        AccoladeChatServer,
+        name: "accolade_chat_#{userid}",
+        data: %{
+          userid: userid,
+          recipient_id: recipient_id
+        }
+      })
+
+    chat_server_pid
+  end
+
+  @spec start_accolade_process(T.userid(), T.userid(), T.lobby_id()) :: :ok | :existing
+  def start_accolade_process(userid, recipient_id, _match_id) do
+    case get_accolade_chat_pid(userid) do
+      nil ->
+        start_chat_server(userid, recipient_id)
+      _pid ->
+        :existing
+    end
+  end
+
+  @spec get_badge_types() :: map()
+  def get_badge_types() do
+    ConCache.get_or_store(:application_temp_cache, "accolade_badges", fn ->
+      Account.list_badge_types(search: [has_purpose: "Accolade"], order_by: "Name (A-Z)")
+      |> Enum.with_index
+      |> Enum.map(fn {bt, i} -> {i + 1, bt} end)
+    end)
   end
 end

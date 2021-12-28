@@ -101,10 +101,10 @@ config :logger,
     :console
   ]
 
-# Comment the below block to stop background jobs happening in dev
-# config :central, Oban,
-#   queues: false,
-#   crontab: false
+# Comment the below block to allow background jobs to happen in dev
+config :central, Oban,
+  queues: false,
+  crontab: false
 
 config :logger, :error_log,
   path: "/tmp/barserver_error.log",

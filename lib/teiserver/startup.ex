@@ -256,21 +256,21 @@ defmodule Teiserver.Startup do
 
     if Application.get_env(:central, Teiserver)[:enable_match_monitor] do
       spawn(fn ->
-        :timer.sleep(500)
+        :timer.sleep(200)
         Teiserver.Battle.start_match_monitor()
       end)
     end
 
     if Application.get_env(:central, Teiserver)[:enable_coordinator_mode] do
       spawn(fn ->
-        :timer.sleep(500)
+        :timer.sleep(200)
         Teiserver.Coordinator.start_coordinator()
       end)
     end
 
     if Application.get_env(:central, Teiserver)[:enable_accolade_mode] do
       spawn(fn ->
-        :timer.sleep(500)
+        :timer.sleep(200)
         Teiserver.Account.AccoladeLib.start_accolade_server()
       end)
     end

@@ -100,7 +100,7 @@ Sent when a new message is sent to a room.
 }
 ```
 
-### TODO: `c.communication.direct_message`
+### TODO: `c.communication.send_direct_message`
 * recipient_id :: userid
 * message :: string
 
@@ -114,31 +114,31 @@ Sent when a new message is sent to a room.
 #### Example input/output
 ```
 {
-  "cmd": "c.communication.direct_message",
+  "cmd": "c.communication.send_direct_message",
   "recipient_id": 789,
   "message": "hello person!"
 }
 
 {
-  "cmd": "s.communication.direct_message",
+  "cmd": "s.communication.send_direct_message",
   "result": "success"
 }
 
 {
-  "cmd": "s.communication.direct_message",
+  "cmd": "s.communication.send_direct_message",
   "result": "failure",
   "reason": "muted"
 }
 ```
 
-### TODO: `s.communication.direct_message`
+### TODO: `s.communication.received_direct_message`
 * sender_id :: userid
 * message :: string
 
 #### Example
 ```
 {
-  "cmd": "s.communication.direct_message",
+  "cmd": "s.communication.received_direct_message",
   "sender_id": 123,
   "message": "hello person!"
 }

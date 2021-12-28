@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
   alias Teiserver.Account.AccoladeLib
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Account.Accolade,
+    policy: Teiserver.Moderator,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
@@ -24,8 +24,9 @@ defmodule TeiserverWeb.Admin.AccoladeController do
           filter: params["filter"] || "all"
         ],
         preload: [
-          :target,
-          :creator
+          # :giver,
+          :recipient,
+          :badge_type
         ],
         order_by: "Newest first"
       )
@@ -44,9 +45,8 @@ defmodule TeiserverWeb.Admin.AccoladeController do
           filter: {params["filter"] || "all", user_id}
         ],
         preload: [
-          :reporter,
-          :target,
-          :responder
+          :recipient,
+          :badge_type
         ],
         order_by: "Newest first"
       )

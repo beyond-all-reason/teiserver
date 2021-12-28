@@ -52,14 +52,6 @@ defmodule Teiserver.Account.AccoladeBotServer do
     {:noreply, state}
   end
 
-  def handle_info({:start_accolade_process, giver_id, recipient_id, match_id}, state) do
-    # TODO: Make this start doing stuff
-    # IO.puts ""
-    # IO.inspect {:start_accolade_process, giver_id, recipient_id, match_id}
-    # IO.puts ""
-    {:noreply, state}
-  end
-
   # Match ending
   # For testing purposes: Teiserver.Account.AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match_id})
   def handle_info({:global_match_updates, :match_completed, match_id}, state) do
@@ -71,9 +63,10 @@ defmodule Teiserver.Account.AccoladeBotServer do
       case AccoladeLib.get_possible_ratings(userid, memberships) do
         [] ->
           :ok
-        [possibles] ->
+
+        possibles ->
           chosen = Enum.random(possibles)
-          send(self(), {:start_accolade_process, userid, chosen, match_id})
+          AccoladeLib.start_accolade_process(userid, chosen, match_id)
       end
     end)
 
@@ -88,8 +81,14 @@ defmodule Teiserver.Account.AccoladeBotServer do
   def handle_info({:new_message, _userid, _room_name, _message}, state), do: {:noreply, state}
   def handle_info({:new_message_ex, _userid, _room_name, _message}, state), do: {:noreply, state}
 
-  def handle_info({:direct_message, userid, _message}, state) do
-    User.send_direct_message(state.userid, userid, "I don't handle messages. Yet.")
+  def handle_info({:direct_message, userid, message}, state) do
+    case AccoladeLib.cast_accolade_chat(userid, {:user_message, message}) do
+      nil ->
+        User.send_direct_message(state.userid, userid, "I'm not currently awaiting feedback for a player")
+      _ ->
+        :ok
+    end
+
     {:noreply, state}
   end
 

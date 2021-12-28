@@ -34,6 +34,7 @@ defmodule Central.Application do
         concache_perm_sup(:config_user_type_cache),
         concache_perm_sup(:config_site_type_cache),
         concache_perm_sup(:application_metadata_cache),
+        concache_sup(:application_temp_cache),
         concache_sup(:config_user_cache),
         concache_sup(:communication_user_notifications),
         {Oban, oban_config()}

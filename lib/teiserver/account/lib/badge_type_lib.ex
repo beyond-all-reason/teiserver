@@ -57,6 +57,11 @@ defmodule Teiserver.Account.BadgeTypeLib do
       where: badge_types.name == ^name
   end
 
+  def _search(query, :has_purpose, purpose) do
+    from badge_types in query,
+      where: ^purpose in badge_types.purposes
+  end
+
   def _search(query, :id_list, id_list) do
     from badge_types in query,
       where: badge_types.id in ^id_list

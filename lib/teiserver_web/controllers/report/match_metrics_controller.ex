@@ -143,39 +143,39 @@ defmodule TeiserverWeb.Report.MatchMetricController do
   #   |> render("month_metrics_show.html")
   # end
 
-  def month_metrics_graph(conn, params) do
-    logs =
-      Telemetry.list_match_month_logs(
-        # search: [user_id: params["user_id"]],
-        # joins: [:user],
-        order: "Newest first",
-        limit: 31
-      )
-      |> Enum.reverse()
+  # def month_metrics_graph(conn, params) do
+  #   logs =
+  #     Telemetry.list_match_month_logs(
+  #       # search: [user_id: params["user_id"]],
+  #       # joins: [:user],
+  #       order: "Newest first",
+  #       limit: 31
+  #     )
+  #     |> Enum.reverse()
 
 
-    field_list = case Map.get(params, "fields", "unique_users") do
-      "unique_users" ->
-        ["aggregates.stats.unique_users", "aggregates.stats.unique_players"]
+  #   field_list = case Map.get(params, "fields", "unique_users") do
+  #     "unique_users" ->
+  #       ["aggregates.stats.unique_users", "aggregates.stats.unique_players"]
 
-      "peak_users" ->
-        ["aggregates.stats.peak_user_counts.total", "aggregates.stats.peak_user_counts.player"]
+  #     "peak_users" ->
+  #       ["aggregates.stats.peak_user_counts.total", "aggregates.stats.peak_user_counts.player"]
 
-      "minutes" ->
-        ["aggregates.minutes.player", "aggregates.minutes.spectator", "aggregates.minutes.lobby", "aggregates.minutes.menu", "aggregates.minutes.total"]
+  #     "minutes" ->
+  #       ["aggregates.minutes.player", "aggregates.minutes.spectator", "aggregates.minutes.lobby", "aggregates.minutes.menu", "aggregates.minutes.total"]
 
-      _ -> #"battles"
-        ["battles.in_progress", "battles.lobby", "battles.total"]
-    end
+  #     _ -> #"battles"
+  #       ["battles.in_progress", "battles.lobby", "battles.total"]
+  #   end
 
-    extra_params = %{"field_list" => field_list}
+  #   extra_params = %{"field_list" => field_list}
 
-    data = GraphMonthLogsTask.perform(logs, Map.merge(params, extra_params))
+  #   data = GraphMonthLogsTask.perform(logs, Map.merge(params, extra_params))
 
-    conn
-    |> assign(:params, params)
-    |> assign(:data, data)
-    |> add_breadcrumb(name: "Monthly metrics - Graph", url: conn.request_path)
-    |> render("month_metrics_graph.html")
-  end
+  #   conn
+  #   |> assign(:params, params)
+  #   |> assign(:data, data)
+  #   |> add_breadcrumb(name: "Monthly metrics - Graph", url: conn.request_path)
+  #   |> render("month_metrics_graph.html")
+  # end
 end
