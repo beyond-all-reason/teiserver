@@ -25,7 +25,7 @@ defmodule Teiserver.Battle.MatchLib do
     end
 
     cond do
-      String.contains?(bot_names, "Scavengers") -> "Scavengers"
+      String.contains?(bot_names, "Scavenger") -> "Scavengers"
       String.contains?(bot_names, "Chicken") -> "Raptors"
       String.contains?(bot_names, "Raptor") -> "Raptors"
       Enum.empty?(lobby.bots) == false -> "Bots"
