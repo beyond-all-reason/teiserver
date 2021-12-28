@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Admin.ToolControllerTest do
 
   test "index", %{conn: conn} do
     conn = get(conn, Routes.ts_admin_tool_path(conn, :index))
-    assert html_response(conn, 200) =~ "Uberserver converter"
+    assert html_response(conn, 200) =~ "Badge types"
   end
 
   test "uberserver converter form", %{conn: conn} do

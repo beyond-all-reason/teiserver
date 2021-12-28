@@ -62,11 +62,11 @@ defmodule Teiserver.Account.AccoladeBotTest do
   end
 
   test "basic post match stuff", %{match: match, player11: player11, player12: player12, psocket11: psocket11, badge_type1: badge_type1} do
-    AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
-    :timer.sleep(500)
-
     # player11 should have no accolades given
     assert Account.list_accolades(search: [giver_id: player11.id]) == []
+
+    AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
+    :timer.sleep(500)
 
     # Now, player11 should have a set of messages
     [result] = _tachyon_recv(psocket11)

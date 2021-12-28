@@ -386,7 +386,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     _tachyon_send(hsocket, data)
 
     [reply] = _tachyon_recv(hsocket)
-    assert reply["cmd"] == "s.communication.direct_message"
+    assert reply["cmd"] == "s.communication.received_direct_message"
     assert reply["sender_id"] == Coordinator.get_coordinator_userid()
     assert reply["message"] |> Enum.slice(0, 4) == ["Status for battle ##{lobby_id}", "Locks: ", "Gatekeeper: default", "Join queue: "]
   end
@@ -396,7 +396,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     _tachyon_send(hsocket, data)
 
     [reply] = _tachyon_recv(hsocket)
-    assert reply["cmd"] == "s.communication.direct_message"
+    assert reply["cmd"] == "s.communication.received_direct_message"
     assert reply["sender_id"] == Coordinator.get_coordinator_userid()
     assert reply["message"] |> Enum.count > 5
   end
