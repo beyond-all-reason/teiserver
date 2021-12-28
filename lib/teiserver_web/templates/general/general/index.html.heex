@@ -1,26 +1,26 @@
 <%# Live services %>
 <%= if allow?(@conn, "teiserver.moderator") do %>
-<div class="row page-row">
-  <%=
-    central_component "menu_card",
-    icon: Teiserver.Battle.LobbyLib.icon(),
-    name: "battle_lobbies",
-    text: "Lobbies",
-    icon_class: "fad",
-    link: Routes.ts_battle_lobby_index_path(@conn, :index)
-  %>
-
-  <%= if allow?(@conn, "teiserver.moderator.account") do %>
+  <div class="row page-row">
     <%=
       central_component "menu_card",
-      icon: Teiserver.ClientLib.icon(),
-      name: "live_client",
-      text: "Live clients",
+      icon: Teiserver.Battle.LobbyLib.icon(),
+      name: "battle_lobbies",
+      text: "Lobbies",
       icon_class: "fad",
-      link: Routes.ts_admin_client_index_path(@conn, :index)
+      link: Routes.ts_battle_lobby_index_path(@conn, :index)
     %>
-  <% end %>
-</div>
+
+    <%= if allow?(@conn, "teiserver.moderator.account") do %>
+      <%=
+        central_component "menu_card",
+        icon: Teiserver.ClientLib.icon(),
+        name: "live_client",
+        text: "Live clients",
+        icon_class: "fad",
+        link: Routes.ts_admin_client_index_path(@conn, :index)
+      %>
+    <% end %>
+  </div>
 <% end %>
 
 <div class="row page-row">

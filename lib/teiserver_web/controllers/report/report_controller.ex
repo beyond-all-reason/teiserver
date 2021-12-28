@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Report.ReportController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Account.Admin,
+    policy: Teiserver.Moderator,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 

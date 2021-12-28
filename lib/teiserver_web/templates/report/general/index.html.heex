@@ -7,7 +7,9 @@
       text: "Client events",
       link: Routes.ts_reports_client_event_path(@conn, :summary)
     %>
-
+  <% end %>
+  
+  <%= if allow?(@current_user, "teiserver.moderator") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Telemetry.ServerDayLogLib.icon(),
@@ -37,7 +39,7 @@
 </div>
 
 <div class="row">
-  <%= if allow?(@current_user, "teiserver.admin") do %>
+  <%= if allow?(@current_user, "teiserver.moderator") do %>
     <%=
       central_component "menu_card",
       icon: "fas fa-satellite-dish",
