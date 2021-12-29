@@ -38,15 +38,31 @@ defmodule Teiserver.Account.AccoladeChatServer do
 
   # Handling user messages
   def handle_info({:user_message, message}, %{stage: :awaiting_choice} = state) do
-    new_state = case Integer.parse(String.trim(message)) do
-      {0, _} ->
+    integer_choice = case Integer.parse(String.trim(message)) do
+      :error -> :error
+      {v, _} -> v
+    end
+
+    new_state = cond do
+      String.downcase(message) == "n" ->
+        Account.create_accolade(%{
+          recipient_id: state.recipient_id,
+          giver_id: state.userid,
+          inserted_at: Timex.now()
+        })
+
         User.send_direct_message(state.bot_id, state.userid, "Thank you for your feedback, no Accolade will be bestowed.")
         send(self(), :terminate)
         %{state | stage: :completed}
 
-      {choice, _} ->
+      integer_choice == 0 ->
+        User.send_direct_message(state.bot_id, state.userid, "Thank you for your feedback, no Accolade will be bestowed.")
+        send(self(), :terminate)
+        %{state | stage: :completed}
+
+      true ->
         badge_type = state.badge_types
-        |> Enum.filter(fn {i, _} -> i == choice end)
+        |> Enum.filter(fn {i, _} -> i == integer_choice end)
 
         case badge_type do
           [] ->
@@ -99,7 +115,8 @@ defmodule Teiserver.Account.AccoladeChatServer do
       @line_break,
       "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{state.recipient.name}",
       "Which of the following accolades do you feel they most deserve (if any)?",
-      "0 - No accolade",
+      "N - No accolade for this player at all",
+      "0 - No accolade this time, ask again later",
     ] ++ badge_lines ++ [
       ".",
       "Reply to this message with the number corresponding to the Accolade you feel is most appropriate for this player for this match."

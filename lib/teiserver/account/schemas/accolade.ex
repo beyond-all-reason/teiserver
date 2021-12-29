@@ -18,7 +18,7 @@ defmodule Teiserver.Account.Accolade do
 
     struct
     |> cast(params, ~w(recipient_id giver_id badge_type_id inserted_at)a)
-    |> validate_required(~w(recipient_id giver_id badge_type_id inserted_at)a)
+    |> validate_required(~w(recipient_id giver_id inserted_at)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

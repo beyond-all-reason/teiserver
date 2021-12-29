@@ -92,7 +92,8 @@ defmodule Teiserver.Account.AccoladeBotTest do
       "-------------------------------------------------",
       _,
       "Which of the following accolades do you feel they most deserve (if any)?",
-      "0 - No accolade",
+      "N - No accolade for this player at all",
+      "0 - No accolade this time, ask again later",
       "1 - Badge A, Description for the first badge",
       "2 - Badge B, Description for the second badge",
       "3 - Badge C, Description for the third badge",
@@ -112,5 +113,93 @@ defmodule Teiserver.Account.AccoladeBotTest do
     assert accolade_given.giver_id == player11.id
     assert accolade_given.recipient_id == player12.id
     assert accolade_given.badge_type_id == badge_type1.id
+
+    # Now send something again
+    _tachyon_send(psocket11, %{
+      "cmd" => "c.communication.send_direct_message",
+      "recipient_id" => AccoladeLib.get_accolade_bot_userid(),
+      "message" => "1"
+    })
+
+    # Should be no differences in the results
+    [accolade_given] = Account.list_accolades(search: [giver_id: player11.id])
+    assert accolade_given.giver_id == player11.id
+    assert accolade_given.recipient_id == player12.id
+    assert accolade_given.badge_type_id == badge_type1.id
+  end
+
+  test "send N", %{match: match, player11: player11, player12: player12, psocket11: psocket11} do
+    # player11 should have no accolades given
+    assert Account.list_accolades(search: [giver_id: player11.id]) == []
+
+    AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
+    :timer.sleep(500)
+
+    # Now, player11 should have a set of messages
+    [result] = _tachyon_recv(psocket11)
+
+    assert result["cmd"] == "s.communication.received_direct_message"
+    assert result["sender_id"] == AccoladeLib.get_accolade_bot_userid()
+    assert match?([
+      "-------------------------------------------------",
+      _,
+      "Which of the following accolades do you feel they most deserve (if any)?",
+      "N - No accolade for this player at all",
+      "0 - No accolade this time, ask again later",
+      "1 - Badge A, Description for the first badge",
+      "2 - Badge B, Description for the second badge",
+      "3 - Badge C, Description for the third badge",
+      ".",
+      "Reply to this message with the number corresponding to the Accolade you feel is most appropriate for this player for this match."
+    ], result["message"])
+    assert Enum.at(result["message"], 1) == "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{player12.name}"
+
+    # Now send the response, pick the first accolade
+    _tachyon_send(psocket11, %{
+      "cmd" => "c.communication.send_direct_message",
+      "recipient_id" => AccoladeLib.get_accolade_bot_userid(),
+      "message" => "N"
+    })
+
+    [accolade_given] = Account.list_accolades(search: [giver_id: player11.id])
+    assert accolade_given.giver_id == player11.id
+    assert accolade_given.recipient_id == player12.id
+    assert accolade_given.badge_type_id == nil
+  end
+
+  test "Send 0", %{match: match, player11: player11, player12: player12, psocket11: psocket11} do
+    # player11 should have no accolades given
+    assert Account.list_accolades(search: [giver_id: player11.id]) == []
+
+    AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
+    :timer.sleep(500)
+
+    # Now, player11 should have a set of messages
+    [result] = _tachyon_recv(psocket11)
+
+    assert result["cmd"] == "s.communication.received_direct_message"
+    assert result["sender_id"] == AccoladeLib.get_accolade_bot_userid()
+    assert match?([
+      "-------------------------------------------------",
+      _,
+      "Which of the following accolades do you feel they most deserve (if any)?",
+      "N - No accolade for this player at all",
+      "0 - No accolade this time, ask again later",
+      "1 - Badge A, Description for the first badge",
+      "2 - Badge B, Description for the second badge",
+      "3 - Badge C, Description for the third badge",
+      ".",
+      "Reply to this message with the number corresponding to the Accolade you feel is most appropriate for this player for this match."
+    ], result["message"])
+    assert Enum.at(result["message"], 1) == "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{player12.name}"
+
+    # Now send the response, pick the first accolade
+    _tachyon_send(psocket11, %{
+      "cmd" => "c.communication.send_direct_message",
+      "recipient_id" => AccoladeLib.get_accolade_bot_userid(),
+      "message" => "0"
+    })
+
+    assert Account.list_accolades(search: [giver_id: player11.id]) == []
   end
 end
