@@ -96,4 +96,15 @@ defmodule Central.Helpers.StringHelper do
       |> String.to_integer()
     end
   end
+
+  @spec multisplit(String.t(), integer, [String.t()]) :: [String.t()]
+  def multisplit(string, length, existing \\ []) do
+    {p1, p2} = String.split_at(string, length)
+    if String.length(p2) > length do
+      multisplit(p2, length, existing ++ [p1])
+    else
+      existing ++ [p1, p2]
+      |> Enum.filter(fn s -> s != "" end)
+    end
+  end
 end

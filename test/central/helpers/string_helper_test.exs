@@ -94,4 +94,14 @@ defmodule Central.General.StringHelpersTest do
       assert result == expected, message: "Input: #{name}, Got: #{result}, Expected: #{expected}"
     end
   end
+
+  test "multisplit" do
+    short_string = "string string"
+    assert StringHelper.multisplit(short_string, 14) == ["string string"]
+
+    double_string = "astring astring bstring bstring"
+    assert StringHelper.multisplit(double_string, 16) == ["astring astring ", "bstring bstring"]
+
+    assert StringHelper.multisplit(double_string, 4) == ["astr", "ing ", "astr", "ing ", "bstr", "ing ", "bstr", "ing"]
+  end
 end
