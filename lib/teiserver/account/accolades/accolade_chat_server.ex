@@ -8,6 +8,8 @@ defmodule Teiserver.Account.AccoladeChatServer do
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Data.Types, as: T
 
+  @line_break "-------------------------------------------------"
+
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
@@ -94,6 +96,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
     |> Enum.map(fn {i, bt} -> "#{i} - #{bt.name}, #{bt.description}" end)
 
     User.send_direct_message(state.bot_id, state.userid, [
+      @line_break,
       "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{state.recipient.name}",
       "Which of the following accolades do you feel they most deserve (if any)?",
       "0 - No accolade",

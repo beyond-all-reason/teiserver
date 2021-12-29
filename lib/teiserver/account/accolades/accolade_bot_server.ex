@@ -55,20 +55,15 @@ defmodule Teiserver.Account.AccoladeBotServer do
   # Match ending
   # For testing purposes: Teiserver.Account.AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match_id})
   def handle_info({:global_match_updates, :match_completed, match_id}, state) do
-    # Get a list of all the players, then check if there are possible ratings for them
-    memberships = Battle.list_match_memberships(search: [match_id: match_id])
-
-    memberships
-    |> Enum.each(fn %{user_id: userid} ->
-      case AccoladeLib.get_possible_ratings(userid, memberships) do
-        [] ->
-          :ok
-
-        possibles ->
-          chosen = Enum.random(possibles)
-          AccoladeLib.start_accolade_process(userid, chosen, match_id)
-      end
-    end)
+    case Battle.get_match(match_id) do
+      nil ->
+        nil
+      match ->
+        duration = Timex.diff(match.finished, match.started, :second)
+        if duration > 300 do
+          post_match_messages(match)
+        end
+    end
 
     {:noreply, state}
   end
@@ -148,6 +143,23 @@ defmodule Teiserver.Account.AccoladeBotServer do
   @spec make_password() :: String.t
   defp make_password() do
     :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64)
+  end
+
+  defp post_match_messages(%{id: match_id} = _match) do
+    # Get a list of all the players, then check if there are possible ratings for them
+    memberships = Battle.list_match_memberships(search: [match_id: match_id])
+
+    memberships
+    |> Enum.each(fn %{user_id: userid} ->
+      case AccoladeLib.get_possible_ratings(userid, memberships) do
+        [] ->
+          :ok
+
+        possibles ->
+          chosen = Enum.random(possibles)
+          AccoladeLib.start_accolade_process(userid, chosen, match_id)
+      end
+    end)
   end
 
   @spec init(Map.t()) :: {:ok, Map.t()}

@@ -61,6 +61,21 @@ defmodule Teiserver.Account.AccoladeBotTest do
     }
   end
 
+  test "short battle", %{match: match, player11: player11, psocket11: psocket11} do
+    Battle.update_match(match, %{
+      started: Timex.now |> Timex.shift(seconds: -200),
+      finished: Timex.now |> Timex.shift(seconds: -30)
+    })
+
+    assert Account.list_accolades(search: [giver_id: player11.id]) == []
+
+    AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
+    :timer.sleep(500)
+
+    # Now, player11 should have zero messages because it was a short game
+    :timeout = _tachyon_recv(psocket11)
+  end
+
   test "basic post match stuff", %{match: match, player11: player11, player12: player12, psocket11: psocket11, badge_type1: badge_type1} do
     # player11 should have no accolades given
     assert Account.list_accolades(search: [giver_id: player11.id]) == []
@@ -74,6 +89,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
     assert result["cmd"] == "s.communication.received_direct_message"
     assert result["sender_id"] == AccoladeLib.get_accolade_bot_userid()
     assert match?([
+      "-------------------------------------------------",
       _,
       "Which of the following accolades do you feel they most deserve (if any)?",
       "0 - No accolade",
@@ -83,7 +99,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
       ".",
       "Reply to this message with the number corresponding to the Accolade you feel is most appropriate for this player for this match."
     ], result["message"])
-    assert hd(result["message"]) == "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{player12.name}"
+    assert Enum.at(result["message"], 1) == "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{player12.name}"
 
     # Now send the response, pick the first accolade
     _tachyon_send(psocket11, %{
