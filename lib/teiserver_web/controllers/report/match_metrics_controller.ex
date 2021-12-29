@@ -74,32 +74,32 @@ defmodule TeiserverWeb.Report.MatchMetricController do
   #   |> send_resp(200, data)
   # end
 
-  def day_metrics_graph(conn, params) do
-    logs =
-      Telemetry.list_match_day_logs(
-        order: "Newest first",
-        limit: 31
-      )
-      |> Enum.reverse()
+  # def day_metrics_graph(conn, params) do
+  #   logs =
+  #     Telemetry.list_match_day_logs(
+  #       order: "Newest first",
+  #       limit: 31
+  #     )
+  #     |> Enum.reverse()
 
-    field_list = case Map.get(params, "fields", "total_matches") do
-      "total_matches" ->
-        [{"Duel", "duel.aggregate.total_count"}, {"Team", "team.aggregate.total_count"}, {"FFA", "ffa.aggregate.total_count"}, {"Raptors", "raptors.aggregate.total_count"}, {"Scavengers", "scavengers.aggregate.total_count"}]
+  #   field_list = case Map.get(params, "fields", "total_matches") do
+  #     "total_matches" ->
+  #       [{"Duel", "duel.aggregate.total_count"}, {"Team", "team.aggregate.total_count"}, {"FFA", "ffa.aggregate.total_count"}, {"Raptors", "raptors.aggregate.total_count"}, {"Scavengers", "scavengers.aggregate.total_count"}]
 
-      _ -> # just default to the above
-        [{"Duel", "duel.aggregate.total_count"}, {"Team", "team.aggregate.total_count"}, {"FFA", "ffa.aggregate.total_count"}, {"Raptors", "raptors.aggregate.total_count"}, {"Scavengers", "scavengers.aggregate.total_count"}]
-    end
+  #     _ -> # just default to the above
+  #       [{"Duel", "duel.aggregate.total_count"}, {"Team", "team.aggregate.total_count"}, {"FFA", "ffa.aggregate.total_count"}, {"Raptors", "raptors.aggregate.total_count"}, {"Scavengers", "scavengers.aggregate.total_count"}]
+  #   end
 
-    extra_params = %{"field_list" => field_list}
+  #   extra_params = %{"field_list" => field_list}
 
-    data = GraphDayLogsTask.perform(logs, Map.merge(params, extra_params))
+  #   data = GraphDayLogsTask.perform(logs, Map.merge(params, extra_params))
 
-    conn
-    |> assign(:params, params)
-    |> assign(:data, data)
-    |> add_breadcrumb(name: "Daily - Graph", url: conn.request_path)
-    |> render("day_metrics_graph.html")
-  end
+  #   conn
+  #   |> assign(:params, params)
+  #   |> assign(:data, data)
+  #   |> add_breadcrumb(name: "Daily - Graph", url: conn.request_path)
+  #   |> render("day_metrics_graph.html")
+  # end
 
 
   # MONTHLY METRICS

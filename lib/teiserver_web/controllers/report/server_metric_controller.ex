@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   alias Teiserver.Telemetry
   alias Central.Helpers.{TimexHelper, DatePresets}
   alias Teiserver.Telemetry.{GraphDayLogsTask, GraphMonthLogsTask, ExportServerMetricsTask}
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     sidemenu_active: ["teiserver"]
@@ -88,37 +89,41 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   end
 
   def day_metrics_graph(conn, params) do
+    params = Map.merge(params, %{
+      "days" => Map.get(params, "days", 31) |> int_parse
+    })
+
     logs =
       Telemetry.list_server_day_logs(
         # search: [user_id: params["user_id"]],
         # joins: [:user],
         order: "Newest first",
-        limit: 31
+        limit: params["days"]
       )
       |> Enum.reverse()
 
-
-    field_list = case Map.get(params, "fields", "unique_users") do
+    {field_list, f} = case Map.get(params, "fields", "unique_users") do
       "unique_users" ->
-        ["aggregates.stats.unique_users", "aggregates.stats.unique_players"]
+        {["aggregates.stats.unique_users", "aggregates.stats.unique_players"], fn x -> x end}
 
       "peak_users" ->
-        ["aggregates.stats.peak_user_counts.total", "aggregates.stats.peak_user_counts.player"]
+        {["aggregates.stats.peak_user_counts.total", "aggregates.stats.peak_user_counts.player"], fn x -> x end}
 
-      "minutes" ->
-        ["aggregates.minutes.player", "aggregates.minutes.spectator", "aggregates.minutes.lobby", "aggregates.minutes.menu", "aggregates.minutes.total"]
-
-      _ -> #"battles"
-        ["battles.in_progress", "battles.lobby", "battles.total"]
+      "days" ->
+        {["aggregates.minutes.player", "aggregates.minutes.spectator", "aggregates.minutes.lobby", "aggregates.minutes.menu", "aggregates.minutes.total"], fn x -> round(x/60/24) end}
     end
 
     extra_params = %{"field_list" => field_list}
 
-    data = GraphDayLogsTask.perform(logs, Map.merge(params, extra_params))
+    columns = GraphDayLogsTask.perform(logs, Map.merge(params, extra_params), f)
+
+    key = logs
+    |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
 
     conn
     |> assign(:params, params)
-    |> assign(:data, data)
+    |> assign(:columns, columns)
+    |> assign(:key, key)
     |> add_breadcrumb(name: "Daily - Graph", url: conn.request_path)
     |> render("day_metrics_graph.html")
   end
@@ -166,38 +171,73 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   end
 
   def month_metrics_graph(conn, params) do
+    params = Map.merge(params, %{
+      "months" => Map.get(params, "months", 12) |> int_parse
+    })
+
     logs =
       Telemetry.list_server_month_logs(
         # search: [user_id: params["user_id"]],
         # joins: [:user],
         order: "Newest first",
-        limit: 31
+        limit: params["months"]
       )
       |> Enum.reverse()
 
-
-    field_list = case Map.get(params, "fields", "unique_users") do
+    {field_list, f} = case Map.get(params, "fields", "unique_users") do
       "unique_users" ->
-        ["aggregates.stats.unique_users", "aggregates.stats.unique_players"]
+        {["aggregates.stats.unique_users", "aggregates.stats.unique_players"], fn x -> x end}
 
       "peak_users" ->
-        ["aggregates.stats.peak_user_counts.total", "aggregates.stats.peak_user_counts.player"]
+        {["aggregates.stats.peak_users", "aggregates.stats.peak_players"], fn x -> x end}
 
-      "minutes" ->
-        ["aggregates.minutes.player", "aggregates.minutes.spectator", "aggregates.minutes.lobby", "aggregates.minutes.menu", "aggregates.minutes.total"]
-
-      _ -> #"battles"
-        ["battles.in_progress", "battles.lobby", "battles.total"]
+      "days" ->
+        {["aggregates.minutes.player", "aggregates.minutes.spectator", "aggregates.minutes.lobby", "aggregates.minutes.menu", "aggregates.minutes.total"], fn x -> round(x/60/24) end}
     end
 
     extra_params = %{"field_list" => field_list}
 
-    data = GraphMonthLogsTask.perform(logs, Map.merge(params, extra_params))
+    columns = GraphDayLogsTask.perform(logs, Map.merge(params, extra_params), f)
+
+    key = logs
+    |> Enum.map(fn log -> {log.year,log.month, 1} |> TimexHelper.date_to_str(format: :ymd) end)
 
     conn
     |> assign(:params, params)
-    |> assign(:data, data)
+    |> assign(:columns, columns)
+    |> assign(:key, key)
     |> add_breadcrumb(name: "Monthly - Graph", url: conn.request_path)
     |> render("month_metrics_graph.html")
+
+
+    # logs =
+    #   Telemetry.list_server_month_logs(
+    #     # search: [user_id: params["user_id"]],
+    #     # joins: [:user],
+    #     order: "Newest first",
+    #     limit: 31
+    #   )
+    #   |> Enum.reverse()
+
+    # {field_list, f} = case Map.get(params, "fields", "unique_users") do
+    #   "unique_users" ->
+    #     {["aggregates.stats.unique_users", "aggregates.stats.unique_players"], fn x -> x end}
+
+    #   "peak_users" ->
+    #     {["aggregates.stats.peak_users", "aggregates.stats.peak_players"], fn x -> x end}
+
+    #   "days" ->
+    #     {["aggregates.minutes.player", "aggregates.minutes.spectator", "aggregates.minutes.lobby", "aggregates.minutes.menu", "aggregates.minutes.total"], fn x -> round(x/60/24) end}
+    # end
+
+    # extra_params = %{"field_list" => field_list}
+
+    # data = GraphMonthLogsTask.perform(logs, Map.merge(params, extra_params), f)
+
+    # conn
+    # |> assign(:params, params)
+    # |> assign(:data, data)
+    # |> add_breadcrumb(name: "Monthly - Graph", url: conn.request_path)
+    # |> render("month_metrics_graph.html")
   end
 end

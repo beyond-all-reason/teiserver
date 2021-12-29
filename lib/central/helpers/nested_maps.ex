@@ -11,10 +11,10 @@ defmodule Central.NestedMaps do
 
   @spec put(Map.t(), [String.t() | atom], any) :: Map.t()
   def put(map, [k | []] = _path, value) do
-    Map.put(map, k, value)
+    Map.put(map || %{}, k, value)
   end
 
   def put(map, [k | keys] = _path, value) do
-    Map.put(map, k, put(map[k], keys, value))
+    Map.put(map || %{}, k, put(map[k] || %{}, keys, value))
   end
 end

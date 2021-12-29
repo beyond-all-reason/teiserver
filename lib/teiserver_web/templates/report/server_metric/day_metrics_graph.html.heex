@@ -10,14 +10,23 @@
 </style>
 
 <script>
-$(function() {
-  var chart = c3.generate({
-    bindto: '#chart',
-    data: {
-      columns: <%= raw Jason.encode!(@data) %>
-    }
+  $(function() {
+    var chart = c3.generate({
+      bindto: '#chart',
+      data: {
+        x: 'x',
+        columns: <%= raw Jason.encode!([["x" | @key] | @columns]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%Y-%m-%d'
+          }
+        }
+      }
+    });
   });
-});
 </script>
 
 <%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "server_metrics"}) %>
@@ -47,11 +56,15 @@ $(function() {
             enumerable: [
               %{id: "unique_users", name: "Unique users"},
               %{id: "peak_users", name: "Peak users"},
-              %{id: "minutes", name: "Minutes"},
-              # %{id: "battles", name: "Battles"},
+              %{id: "days", name: "Days (combined time)"}
             ],
             selected: Map.get(@params, "fields")
           %>
+        </div>
+        
+        <div class='col-xl-4 col-lg-6 col-md-12'>
+          <label for='days' class='control-label'>Days</label>
+          <input type='text' name='days' id='days' value={@params["days"]} class='form-control' />
         </div>
       </div>
 
