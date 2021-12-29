@@ -108,6 +108,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
       "recipient_id" => AccoladeLib.get_accolade_bot_userid(),
       "message" => "1"
     })
+    :timer.sleep(200)
 
     [accolade_given] = Account.list_accolades(search: [giver_id: player11.id])
     assert accolade_given.giver_id == player11.id
@@ -120,6 +121,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
       "recipient_id" => AccoladeLib.get_accolade_bot_userid(),
       "message" => "1"
     })
+    :timer.sleep(200)
 
     # Should be no differences in the results
     [accolade_given] = Account.list_accolades(search: [giver_id: player11.id])
@@ -160,6 +162,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
       "recipient_id" => AccoladeLib.get_accolade_bot_userid(),
       "message" => "N"
     })
+    :timer.sleep(200)
 
     [accolade_given] = Account.list_accolades(search: [giver_id: player11.id])
     assert accolade_given.giver_id == player11.id
@@ -199,6 +202,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
       "recipient_id" => AccoladeLib.get_accolade_bot_userid(),
       "message" => "0"
     })
+    :timer.sleep(200)
 
     assert Account.list_accolades(search: [giver_id: player11.id]) == []
   end

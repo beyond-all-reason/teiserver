@@ -3,7 +3,8 @@ defmodule Teiserver.Account.AccoladeBotServer do
   The accolade server is the interface point for the Accolade system.
   """
   use GenServer
-  alias Teiserver.{Account, User, Room, Battle}
+  alias Teiserver.{Account, User, Room, Battle, Coordinator}
+  alias Teiserver.Coordinator.CoordinatorCommands
   alias Teiserver.Account.AccoladeLib
   alias Phoenix.PubSub
   require Logger
@@ -76,6 +77,13 @@ defmodule Teiserver.Account.AccoladeBotServer do
   def handle_info({:new_message, _userid, _room_name, _message}, state), do: {:noreply, state}
   def handle_info({:new_message_ex, _userid, _room_name, _message}, state), do: {:noreply, state}
 
+  def handle_info({:direct_message, sender_id, "$" <> command}, state) do
+    cmd = Coordinator.Parser.parse_command(sender_id, "$#{command}")
+    new_state = CoordinatorCommands.handle_command(cmd, state)
+
+    {:noreply, new_state}
+  end
+
   def handle_info({:direct_message, userid, message}, state) do
     case AccoladeLib.cast_accolade_chat(userid, {:user_message, message}) do
       nil ->
@@ -84,6 +92,11 @@ defmodule Teiserver.Account.AccoladeBotServer do
         :ok
     end
 
+    {:noreply, state}
+  end
+
+  def handle_info({:new_accolade, userid}, state) do
+    User.send_direct_message(state.userid, userid, "You have been awarded a new accolade send $whoami to myself to see your collection.")
     {:noreply, state}
   end
 
