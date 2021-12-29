@@ -24,7 +24,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
           filter: params["filter"] || "all"
         ],
         preload: [
-          # :giver,
+          :giver,
           :recipient,
           :badge_type
         ],
@@ -45,6 +45,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
           filter: {params["filter"] || "all", user_id}
         ],
         preload: [
+          :giver,
           :recipient,
           :badge_type
         ],
@@ -53,7 +54,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
 
     conn
     |> assign(:accolades, accolades)
-    |> render("index.html")
+    |> render("user_index.html")
   end
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

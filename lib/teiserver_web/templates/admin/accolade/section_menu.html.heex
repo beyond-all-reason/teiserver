@@ -8,3 +8,14 @@
   bsname: bsname,
   url: Routes.ts_admin_accolade_path(@conn, :index)
 %>
+
+<%= if @active == "user" do %>
+  <%= central_component "section_menu_button",
+    name: "user",
+    label: "User",
+    active: @active,
+    icon: "far fa-user",
+    bsname: bsname,
+    url: @conn.request_path
+  %>
+<% end %>
