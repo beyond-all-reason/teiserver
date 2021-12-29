@@ -1,0 +1,21 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= central_component "section_menu_button",
+  name: "index",
+  label: "List",
+  active: @active,
+  icon: "far fa-bars",
+  bsname: bsname,
+  url: Routes.ts_admin_match_path(@conn, :index)
+%>
+
+<%= if @active == "user" do %>
+  <%= central_component "section_menu_button",
+    name: "user",
+    label: "User",
+    active: @active,
+    icon: "far fa-user",
+    bsname: bsname,
+    url: @conn.request_path
+  %>
+<% end %>

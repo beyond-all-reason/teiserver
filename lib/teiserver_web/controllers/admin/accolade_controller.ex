@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.AccoladeController do
   use CentralWeb, :controller
 
-  alias Teiserver.Account
+  alias Teiserver.{User, Account}
   alias Teiserver.Account.Accolade
   alias Teiserver.Account.AccoladeLib
 
@@ -13,8 +13,9 @@ defmodule TeiserverWeb.Admin.AccoladeController do
   plug AssignPlug,
     sidemenu_active: ["teiserver"]
 
-  plug :add_breadcrumb, name: 'Account', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Accolades', url: '/teiserver/accolades'
+  plug :add_breadcrumb, name: 'Teiserver', url: '/teiserver'
+  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
+  plug :add_breadcrumb, name: 'Accolades', url: '/teiserver/admin/accolades'
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
@@ -52,8 +53,11 @@ defmodule TeiserverWeb.Admin.AccoladeController do
         order_by: "Newest first"
       )
 
+    user = User.get_user_by_id(user_id)
+
     conn
     |> assign(:accolades, accolades)
+    |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
     |> render("user_index.html")
   end
 

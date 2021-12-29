@@ -1,0 +1,16 @@
+<table class='table'>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Team</th>
+   </tr>
+  </thead>
+  <tbody>
+    <%= for member <- @match.members do %>
+      <tr>
+        <td><%= member.user.name %></td>
+        <td><%= member.team_id %></td>
+      </tr>
+   <% end %>
+  </tbody>
+</table>

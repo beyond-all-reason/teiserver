@@ -133,6 +133,15 @@
 
   <%=
     central_component "menu_card",
+    icon: Teiserver.Battle.MatchLib.icon(),
+    name: "matches",
+    text: "Matches",
+    icon_class: "fas",
+    link: Routes.ts_admin_match_path(@conn, :user_show, @user.id)
+  %>
+
+  <%=
+    central_component "menu_card",
     icon: Teiserver.Account.AccoladeLib.icon(),
     name: "accolades",
     text: "Accolades",

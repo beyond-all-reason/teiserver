@@ -145,6 +145,12 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.name == ^name
   end
 
+  def _search(query, :user_id, user_id) do
+    from matches in query,
+      join: members in assoc(matches, :members),
+      where: members.user_id == ^user_id
+  end
+
   def _search(query, :id_list, id_list) do
     from matches in query,
       where: matches.id in ^id_list
@@ -227,18 +233,19 @@ defmodule Teiserver.Battle.MatchLib do
 
   def order_by(query, "Newest first") do
     from matches in query,
-      order_by: [desc: matches.inserted_at]
+      order_by: [desc: matches.started]
   end
 
   def order_by(query, "Oldest first") do
     from matches in query,
-      order_by: [asc: matches.inserted_at]
+      order_by: [asc: matches.started]
   end
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
   def preload(query, preloads) do
     query = if :members in preloads, do: _preload_members(query), else: query
+    query = if :members_and_users in preloads, do: _preload_members_and_users(query), else: query
     query
   end
 
@@ -246,5 +253,13 @@ defmodule Teiserver.Battle.MatchLib do
     from matches in query,
       left_join: members in assoc(matches, :members),
       preload: [members: members]
+  end
+
+  def _preload_members_and_users(query) do
+    from matches in query,
+      left_join: memberships in assoc(matches, :members),
+      left_join: users in assoc(memberships, :user),
+      # order_by: [asc: memberships.team_id, asc: users.name],
+      preload: [members: {memberships, user: users}]
   end
 end

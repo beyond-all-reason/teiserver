@@ -15,5 +15,6 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def colours("ban_hashes"), do: Teiserver.Account.BanHashLib.colours()
   def colours("chat"), do: Central.Communication.CommentLib.colours()
   def colours("accolades"), do: Teiserver.Account.AccoladeLib.colours()
+  def colours("matches"), do: Teiserver.Battle.MatchLib.colours()
   def colours("badge_types"), do: Teiserver.Account.BadgeTypeLib.colours()
 end
