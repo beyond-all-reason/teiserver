@@ -63,13 +63,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
-  def handle_command(%{command: "help", senderid: senderid} = _cmd, state) do
+  def handle_command(%{command: "help", senderid: senderid} = cmd, state) do
     user = User.get_user_by_id(senderid)
     lobby = Lobby.get_lobby!(state.lobby_id)
 
     messages = Teiserver.Coordinator.CoordinatorLib.help(user, lobby.founder_id == senderid)
     |> String.split("\n")
 
+    ConsulServer.say_command(cmd, state)
     Coordinator.send_to_user(senderid, messages)
     state
   end
