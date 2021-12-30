@@ -24,7 +24,7 @@ defmodule TeiserverWeb.Admin.ChatController do
             term: params["term"]
           ],
           preload: [:user],
-          limit: 250,
+          limit: 500,
           order_by: params["order"]
         )
       "Room" ->
@@ -33,7 +33,7 @@ defmodule TeiserverWeb.Admin.ChatController do
             term: params["term"]
           ],
           preload: [:user],
-          limit: 250,
+          limit: 500,
           order_by: params["order"]
         )
     end
