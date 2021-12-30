@@ -3,6 +3,7 @@ defmodule Teiserver.Account.AccoladeLib do
   alias Teiserver.{Account}
   alias Teiserver.Account.{Accolade, AccoladeBotServer, AccoladeChatServer}
   alias Teiserver.Data.Types, as: T
+  require Logger
 
   # Functions
   @spec icon :: String.t()
@@ -303,5 +304,37 @@ defmodule Teiserver.Account.AccoladeLib do
     |> Enum.map(fn a -> a.badge_type_id end)
     |> Enum.group_by(fn bt -> bt end)
     |> Map.new(fn {k, v} -> {k, Enum.count(v)} end)
+  end
+
+  def live_debug do
+    case get_accolade_bot_pid() do
+      nil ->
+        Logger.error("Error, no accolade bot pid")
+      pid ->
+        state = GenServer.call(pid, :get_state, 5000)
+        children = DynamicSupervisor.which_children(Teiserver.Account.AccoladeSupervisor)
+        child_count = Enum.count(children) - 1
+
+        Logger.info("Accolade bot found, state is:")
+        Logger.info("#{Kernel.inspect state}")
+        Logger.info("Accolade chat count: #{child_count}")
+
+        if Enum.count(children) > 1 do
+          Logger.info("Pinging all chat servers...")
+
+          pings = children
+          |> Parallel.filter(fn {_, _, _, [module]} -> module == Teiserver.Account.AccoladeChatServer end)
+          |> Parallel.map(fn {_, pid, _, _} ->
+            case GenServer.call(pid, :ping, 5000) do
+              :ok -> :ok
+              _ -> :not_okay
+            end
+          end)
+          |> Enum.filter(fn p -> p == :ok end)
+
+          rate = ((Enum.count(pings))/child_count) * 100 |> round
+          Logger.info("Out of #{child_count} children, #{Enum.count(pings)} respond to ping (#{rate}%)")
+        end
+    end
   end
 end

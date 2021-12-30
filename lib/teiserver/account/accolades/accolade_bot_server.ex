@@ -14,6 +14,10 @@ defmodule Teiserver.Account.AccoladeBotServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
+  def handle_call(:get_state, _from, state) do
+    {:reply, state, state}
+  end
+
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Accolade server")
     account = get_accolade_account()
@@ -27,12 +31,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
     state = %{
       ip: "127.0.0.1",
       userid: user.id,
-      username: user.name,
-      lobby_host: false,
-      user: user,
-      queues: [],
-      ready_queue_id: nil,
-      consuls: %{}
+      username: user.name
     }
 
     ~w(main accolades)
@@ -58,11 +57,15 @@ defmodule Teiserver.Account.AccoladeBotServer do
   def handle_info({:global_match_updates, :match_completed, match_id}, state) do
     case Battle.get_match(match_id) do
       nil ->
+        Logger.info("global_match_updates - no match found")
         nil
       match ->
         duration = Timex.diff(match.finished, match.started, :second)
         if duration > 300 do
+          Logger.info("global_match_updates - post match messages")
           post_match_messages(match)
+        else
+          Logger.info("global_match_updates - match too short")
         end
     end
 

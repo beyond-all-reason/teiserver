@@ -1,5 +1,6 @@
 defmodule Teiserver do
   @moduledoc false
+
   # def icon(), do: "fad fa-robot"
   def icon(), do: "fad fa-server"
 
@@ -29,5 +30,10 @@ defmodule Teiserver do
   # Designed for debugging help
   def tachyon(v) do
     Teiserver.Protocols.TachyonLib.decode(v)
+  end
+
+  def accolade_status() do
+    Application.put_env(:elixir, :ansi_enabled, true)
+    Teiserver.Account.AccoladeLib.live_debug()
   end
 end

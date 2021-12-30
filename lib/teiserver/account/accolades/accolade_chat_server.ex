@@ -30,9 +30,14 @@ defmodule Teiserver.Account.AccoladeChatServer do
     }
   end
 
+  def handle_call(:ping, _from, state) do
+    {:reply, :ok, state}
+  end
+
   # Doesn't do anything at this stage
   def handle_info(:startup, state) do
     new_state = do_tick(state)
+    :timer.send_after(300_000, :terminate)
     {:noreply, new_state}
   end
 
