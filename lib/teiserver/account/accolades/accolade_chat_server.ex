@@ -65,11 +65,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
         send(self(), :terminate)
         %{state | stage: :completed}
 
-      :error ->
-        User.send_direct_message(state.bot_id, state.userid, "I'm sorry but I can't pick an Accolade based on that value")
-        state
-
-      true ->
+      integer_choice != :error ->
         badge_type = state.badge_types
         |> Enum.filter(fn {i, _} -> i == integer_choice end)
 
@@ -93,6 +89,10 @@ defmodule Teiserver.Account.AccoladeChatServer do
             send(self(), :terminate)
             %{state | stage: :completed}
         end
+
+      :error ->
+        User.send_direct_message(state.bot_id, state.userid, "I'm sorry but I can't pick an Accolade based on that value")
+        state
     end
     {:noreply, new_state}
   end

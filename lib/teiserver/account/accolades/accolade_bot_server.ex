@@ -57,15 +57,15 @@ defmodule Teiserver.Account.AccoladeBotServer do
   def handle_info({:global_match_updates, :match_completed, match_id}, state) do
     case Battle.get_match(match_id) do
       nil ->
-        Logger.info("global_match_updates - no match found")
+        Logger.info("global_match_updates:#{match_id} - no match found")
         nil
       match ->
         duration = Timex.diff(match.finished, match.started, :second)
         if duration > 300 do
-          Logger.info("global_match_updates - post match messages")
+          Logger.info("global_match_updates:#{match_id} - post match messages")
           post_match_messages(match)
         else
-          Logger.info("global_match_updates - match too short")
+          Logger.info("global_match_updates:#{match_id} - match too short")
         end
     end
 
