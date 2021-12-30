@@ -263,7 +263,7 @@ defmodule Teiserver.Battle do
     end
   end
 
-  @spec save_match_stats(T.lobby_id(), String.t()) :: :ok
+  @spec save_match_stats(T.lobby_id(), String.t()) :: :success | {:error, String.t()}
   def save_match_stats(_match_id, stats) do
     case Base.url_decode64(stats) do
       {:ok, data} ->
@@ -272,14 +272,16 @@ defmodule Teiserver.Battle do
         case Base.decode64(stats) do
           {:ok, data} ->
             Logger.info("save_match_stats - good decode with decode64 - #{Kernel.inspect data}")
+            {:error, "base64 decode error"}
+
           _ ->
             Central.Helpers.StringHelper.multisplit(stats, 800)
             |> Enum.map(fn part ->
               Logger.info("save_match_stats - bad decode part - '#{part}'")
             end)
+            :success
         end
     end
-    :ok
   end
 
   @spec start_match_monitor() :: :ok | {:failure, String.t()}

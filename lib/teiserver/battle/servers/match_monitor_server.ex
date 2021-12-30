@@ -145,7 +145,8 @@ defmodule Teiserver.Battle.MatchMonitorServer do
           user_id: account.id,
           group_id: Teiserver.internal_group_id()
         })
-.recache_user(account.id)
+
+        User.recache_user(account.id)
         account
 
       account ->
