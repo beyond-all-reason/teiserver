@@ -10,6 +10,7 @@ defmodule Teiserver.Battle.Match do
     field :team_count, :integer
     field :team_size, :integer
     field :passworded, :boolean
+    field :processed, :boolean, default: false
     field :game_type, :string # Scavengers, Raptors, Bots, Duel, Team, FFA, Team FFA
 
     belongs_to :founder, Central.Account.User
@@ -32,7 +33,7 @@ defmodule Teiserver.Battle.Match do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, ~w(uuid map data tags team_count team_size passworded game_type founder_id bots started finished)a)
+    |> cast(params, ~w(uuid map data tags team_count team_size passworded game_type founder_id bots started finished processed)a)
     |> validate_required(~w(uuid map tags team_count team_size passworded game_type founder_id bots started)a)
   end
 

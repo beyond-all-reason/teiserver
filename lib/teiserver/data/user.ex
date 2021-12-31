@@ -886,7 +886,7 @@ defmodule Teiserver.User do
     ingame_hours = rank_time(userid)
 
     @rank_levels
-      |> Enum.filter(fn r -> r < ingame_hours end)
+      |> Enum.filter(fn r -> r <= ingame_hours end)
       |> Enum.count()
   end
 

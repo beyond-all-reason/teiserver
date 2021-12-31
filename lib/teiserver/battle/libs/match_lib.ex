@@ -158,19 +158,19 @@ defmodule Teiserver.Battle.MatchLib do
 
   def _search(query, :ready_for_post_process, _) do
     from matches in query,
-      where: is_nil(matches.data),
+      where: matches.processed == false,
       where: not is_nil(matches.finished),
       where: not is_nil(matches.started)
   end
 
-  def _search(query, :processed, true) do
+  def _search(query, :processed, value) do
     from matches in query,
-      where: not is_nil(matches.data)
+      where: matches.processed == ^value
   end
 
   def _search(query, :of_interest, true) do
     from matches in query,
-      where: not is_nil(matches.data),
+      where: matches.processed == true,
       where: not is_nil(matches.finished),
       where: not is_nil(matches.started)
   end
