@@ -199,6 +199,7 @@ defmodule TeiserverWeb.Router do
         resources("/clans", ClanController)
 
         get("/users/reset_password/:id", UserController, :reset_password)
+        get("/users/relationships/:id", UserController, :relationships)
         get("/users/action/:id/:action", UserController, :perform_action)
         put("/users/action/:id/:action", UserController, :perform_action)
         get("/users/reports/:id/respond", UserController, :respond_form)

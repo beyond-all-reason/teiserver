@@ -130,6 +130,15 @@
     icon_class: "fas",
     link: Routes.ts_admin_user_path(@conn, :full_chat, @user)
   %>
+  
+  <%=
+    central_component "menu_card",
+    icon: Teiserver.icon(:relationship),
+    name: "relationships",
+    text: "Relationships",
+    icon_class: "fas",
+    link: Routes.ts_admin_user_path(@conn, :relationships, @user)
+  %>
 
   <%=
     central_component "menu_card",

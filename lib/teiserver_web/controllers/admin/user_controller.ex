@@ -529,6 +529,23 @@ defmodule TeiserverWeb.Admin.UserController do
     |> render("full_chat.html")
   end
 
+  @spec relationships(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def relationships(conn, %{"id" => id}) do
+    user = Account.get_user!(id)
+    user_ids = (user.data["friends"] ++ user.data["friend_requests"] ++ user.data["ignored"])
+      |> Enum.uniq
+
+    lookup = Account.list_users(search: [id_in: user_ids])
+    |> Map.new(fn u -> {u.id, u} end)
+
+    conn
+    |> assign(:user, user)
+    |> assign(:lookup, lookup)
+    |> add_breadcrumb(name: "Show: #{user.name}", url: Routes.ts_admin_user_path(conn, :show, id))
+    |> add_breadcrumb(name: "Relationships", url: conn.request_path)
+    |> render("relationships.html")
+  end
+
   @spec set_stat(Plug.Conn.t(), map) :: Plug.Conn.t()
   def set_stat(conn, %{"userid" => userid, "key" => key, "value" => value}) do
     user = Account.get_user!(userid)
