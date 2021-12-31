@@ -53,7 +53,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
     msg = [
       "You are #{sender.name}",
-      "Rank: #{sender.rank} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
+      "Rank: #{sender.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
       accolades_string
     ]
     |> List.flatten
@@ -92,7 +92,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
         msg = [
           "Found #{user.name}",
-          "Rank: #{user.rank} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
+          "Rank: #{user.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
           accolades_string
         ]
         |> List.flatten
