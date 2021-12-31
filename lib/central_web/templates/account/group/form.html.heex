@@ -32,8 +32,8 @@
       id: "group_see_group",
       value: "true",
       label: "See group",
-      data: @changeset.data.see_group,
-      changes: @changeset.changes[:see_group]
+      field: :see_group,
+      changeset: @changeset
     %>
   </div>
 
@@ -43,8 +43,8 @@
       id: "group_see_members",
       value: "true",
       label: "See members",
-      data: @changeset.data.see_members,
-      changes: @changeset.changes[:see_members]
+      field: :see_members,
+      changeset: @changeset
     %>
   </div>
 
@@ -54,8 +54,8 @@
       id: "group_self_add_members",
       value: "true",
       label: "Self add members",
-      data: @changeset.data.self_add_members,
-      changes: @changeset.changes[:self_add_members]
+      field: :self_add_members,
+      changeset: @changeset
     %>
   </div>
 
@@ -65,8 +65,8 @@
       id: "group_invite_members",
       value: "true",
       label: "Invite members",
-      data: @changeset.data.invite_members,
-      changes: @changeset.changes[:invite_members]
+      field: :invite_members,
+      changeset: @changeset
     %>
   </div>
 

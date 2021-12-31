@@ -277,8 +277,14 @@ defmodule Teiserver.Battle do
           _ -> "error"
         end
 
-        match = get_match!(match_id)
-        update_match(match, Map.put(match.data, "export_data", export_data))
+        case get_match(match_id) do
+          nil ->
+            {:error, "No match"}
+          match ->
+            update_match(match, Map.put(match.data, "export_data", export_data))
+            :success
+        end
+
       _ ->
         Central.Helpers.StringHelper.multisplit(stats, 800)
         |> Enum.map(fn part ->

@@ -175,8 +175,8 @@
         id: "post_allow_comments",
         value: "true",
         label: "Allow comments",
-        data: @changeset.data.allow_comments,
-        changes: @changeset.changes[:allow_comments]
+        field: :allow_comments,
+        changeset: @changeset
       %>
     </div>
 
@@ -186,8 +186,8 @@
         id: "post_visible",
         value: "true",
         label: "Visible",
-        data: @changeset.data.visible,
-        changes: @changeset.changes[:visible]
+        field: :visible,
+        changeset: @changeset
       %>
     </div>
 

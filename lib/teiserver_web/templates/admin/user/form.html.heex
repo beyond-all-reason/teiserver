@@ -29,54 +29,42 @@
         id: "user_verified",
         name: "user[verified]",
         label: "Verified",
-        checked: @changeset.data.data["verified"],
-        changes: nil,
-        data: nil
+        checked: @changeset.data.data["verified"]
       %>
 
       <%= central_component "checkbox",
         id: "user_bot",
         name: "user[bot]",
         label: "Bot",
-        checked: @changeset.data.data["bot"],
-        changes: nil,
-        data: nil
+        checked: @changeset.data.data["bot"]
       %>
 
       <%= central_component "checkbox",
         id: "user_trusted",
         name: "user[trusted]",
         label: "Trusted",
-        checked: ("Trusted" in (@changeset.data.data["roles"] || [])),
-        changes: nil,
-        data: nil
+        checked: ("Trusted" in (@changeset.data.data["roles"] || []))
       %>
 
       <%= central_component "checkbox",
         id: "user_tester",
         name: "user[tester]",
         label: "Tester",
-        checked: ("Tester" in (@changeset.data.data["roles"] || [])),
-        changes: nil,
-        data: nil
+        checked: ("Tester" in (@changeset.data.data["roles"] || []))
       %>
 
       <%= central_component "checkbox",
         id: "user_non-bridged",
         name: "user[non-bridged]",
         label: "Non-bridged",
-        checked: ("Non-bridged" in (@changeset.data.data["roles"] || [])),
-        changes: nil,
-        data: nil
+        checked: ("Non-bridged" in (@changeset.data.data["roles"] || []))
       %>
 
       <%= central_component "checkbox",
         id: "user_moderator",
         name: "user[moderator]",
         label: "Moderator",
-        checked: @changeset.data.data["moderator"],
-        changes: nil,
-        data: nil
+        checked: @changeset.data.data["moderator"]
       %>
     </div>
 
@@ -85,36 +73,28 @@
         id: "user_streamer",
         name: "user[streamer]",
         label: "Streamer",
-        checked: ("Streamer" in (@changeset.data.data["roles"] || [])),
-        changes: nil,
-        data: nil
+        checked: ("Streamer" in (@changeset.data.data["roles"] || []))
       %>
 
       <%= central_component "checkbox",
         id: "user_donor",
         name: "user[donor]",
         label: "Donor",
-        checked: ("Donor" in (@changeset.data.data["roles"] || [])),
-        changes: nil,
-        data: nil
+        checked: ("Donor" in (@changeset.data.data["roles"] || []))
       %>
 
       <%= central_component "checkbox",
         id: "user_contributor",
         name: "user[contributor]",
         label: "Contributor",
-        checked: ("Contributor" in (@changeset.data.data["roles"] || [])),
-        changes: nil,
-        data: nil
+        checked: ("Contributor" in (@changeset.data.data["roles"] || []))
       %>
 
       <%= central_component "checkbox",
         id: "user_developer",
         name: "user[developer]",
         label: "Developer",
-        checked: ("Developer" in (@changeset.data.data["roles"] || [])),
-        changes: nil,
-        data: nil
+        checked: ("Developer" in (@changeset.data.data["roles"] || []))
       %>
     </div>
   </div>

@@ -5,16 +5,26 @@
     id: "group_see_group",
     value: "true",
     label: "See group",
-    changes: @changeset.changes.see_group
-    data: @changeset.data[:see_group]
+    field: :see_group,
+    changeset: @changeset,
+    
+    description: ""
+  >
   
+  Optionally you can manually set the checked attribute as true/false instead of changeset and field
+  if you do this then the changeset data will be ignored
 %>
 <%
-  checked = cond do
-    assigns[:checked] == true -> [checked: "checked"]
-    assigns[:changes] == true -> [checked: "checked"]
-    assigns[:changes] == nil and assigns[:data] == true -> [checked: "checked"]
-    true -> []
+  checked = if Map.has_key?(assigns, :checked) do
+    case @checked do
+      true -> [checked: "checked"]
+      false -> []
+    end
+  else
+    case Ecto.Changeset.get_field(@changeset, @field) do
+      true -> [checked: "checked"]
+      false -> []
+    end
   end
 %>
 <div class="custom-control custom-checkbox mb-3">

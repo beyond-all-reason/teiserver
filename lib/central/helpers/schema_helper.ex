@@ -233,18 +233,20 @@ defmodule Central.Helpers.SchemaHelper do
     end)
   end
 
-  def parse_checkboxes(params, names) do
-    names = Enum.map(names, fn n -> Atom.to_string(n) end)
+  # Possible bug in the function, seems to work without it being needed
+  def parse_checkboxes(params, _names), do: params
+  # def parse_checkboxes(params, names) do
+  #   names = Enum.map(names, fn n -> Atom.to_string(n) end)
 
-    adjusted_params =
-      names
-      |> Enum.map(fn k ->
-        {k, if(params[k] == "true" or params[k] == true, do: true, else: false)}
-      end)
-      |> Map.new()
+  #   adjusted_params =
+  #     names
+  #     |> Enum.map(fn k ->
+  #       {k, if(params[k] == "true" or params[k] == true, do: true, else: false)}
+  #     end)
+  #     |> Map.new()
 
-    Map.merge(params, adjusted_params)
-  end
+  #   Map.merge(params, adjusted_params)
+  # end
 
   def parse_humantimes(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)
