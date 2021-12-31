@@ -264,7 +264,7 @@ defmodule Teiserver.Battle do
   end
 
   @spec save_match_stats(T.lobby_id(), String.t()) :: :success | {:error, String.t()}
-  def save_match_stats(match_id, stats) do
+  def save_match_stats(lobby_id, stats) do
     case Base.url_decode64(stats) do
       {:ok, data} ->
         # Central.Helpers.StringHelper.multisplit(data, 800)
@@ -274,15 +274,21 @@ defmodule Teiserver.Battle do
 
         export_data = case Jason.decode(data) do
           {:ok, v} -> v
-          _ -> "error"
+          _ ->
+            Logger.error("Error with json decode of save_match_stats")
+            "error"
         end
 
-        case get_match(match_id) do
-          nil ->
-            {:error, "No match"}
-          match ->
+        # Get the lobby to get the uuid of the match
+        lobby = Lobby.get_lobby!(lobby_id)
+        uuid = lobby.tags["server/match/uuid"]
+        case list_matches(search: [uuid: uuid]) do
+          [match] ->
             update_match(match, Map.put(match.data, "export_data", export_data))
             :success
+          _ ->
+            Logger.error("Error finding match uuid of #{uuid}")
+            {:error, "No match"}
         end
 
       _ ->
