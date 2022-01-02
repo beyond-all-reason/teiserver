@@ -284,7 +284,7 @@ defmodule Teiserver.Battle do
         uuid = lobby.tags["server/match/uuid"]
         case list_matches(search: [uuid: uuid]) do
           [match] ->
-            update_match(match, Map.put(match.data, "export_data", export_data))
+            update_match(match, Map.put((match.data || %{}), "export_data", export_data))
             :success
           _ ->
             Logger.error("Error finding match uuid of #{uuid}")

@@ -4,7 +4,7 @@ defmodule Teiserver.Battle.Match do
   schema "teiserver_battle_matches" do
     field :uuid, :string
     field :map, :string
-    field :data, :map # The end of match data to be provided by clients
+    field :data, :map, default: %{} # The end of match data to be provided by clients
     field :tags, :map
 
     field :team_count, :integer
