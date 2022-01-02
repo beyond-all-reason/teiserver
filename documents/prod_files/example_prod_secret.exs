@@ -36,7 +36,8 @@ config :central, Central.Repo,
   username: "teiserver_prod",
   password: "mix phx.gen.secret",
   database: "teiserver_prod",
-  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10"),
+  timeout: 30_000
 
 config :central, CentralWeb.Endpoint,
   http: [:inet6, port: String.to_integer(System.get_env("PORT") || "4000")],
