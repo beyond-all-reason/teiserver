@@ -89,6 +89,16 @@ defmodule Teiserver.Account.AccoladeLib do
       where: accolades.badge_type_id == ^type_id
   end
 
+  def _search(query, :has_badge, true) do
+    from accolades in query,
+      where: not is_nil(accolades.badge_type_id)
+  end
+
+  def _search(query, :has_badge, false) do
+    from accolades in query,
+      where: is_nil(accolades.badge_type_id)
+  end
+
   def _search(query, :user_id, user_id) do
     from accolades in query,
       where: (accolades.giver_id == ^user_id or accolades.recipient_id == ^user_id)
@@ -300,7 +310,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec get_player_accolades(T.userid()) :: map()
   def get_player_accolades(userid) do
-    Account.list_accolades(search: [recipient_id: userid])
+    Account.list_accolades(search: [recipient_id: userid, has_badge: true])
     |> Enum.map(fn a -> a.badge_type_id end)
     |> Enum.group_by(fn bt -> bt end)
     |> Map.new(fn {k, v} -> {k, Enum.count(v)} end)
