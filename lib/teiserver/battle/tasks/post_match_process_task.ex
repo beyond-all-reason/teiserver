@@ -30,12 +30,13 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   defp post_process_match(match) do
     skills = get_match_skill(match)
 
-    new_data = Map.merge((match.data || %{}), %{
+    new_data = Map.merge(match.data, %{
       "skills" => skills
     })
 
     Battle.update_match(match, %{
-      data: new_data
+      data: new_data,
+      processed: true
     })
   end
 

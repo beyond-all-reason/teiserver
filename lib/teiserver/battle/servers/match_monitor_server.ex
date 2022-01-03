@@ -67,8 +67,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   def handle_info({:direct_message, from_id, "endGameData " <> data}, state) do
-    client = Client.get_client_by_id(from_id)
-    Battle.save_match_stats(client.lobby_id, data)
+    Battle.save_match_stats(data)
     {:noreply, state}
   end
 

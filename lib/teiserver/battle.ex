@@ -263,32 +263,32 @@ defmodule Teiserver.Battle do
     end
   end
 
-  @spec save_match_stats(T.lobby_id(), String.t()) :: :success | {:error, String.t()}
-  def save_match_stats(lobby_id, stats) do
+  @spec save_match_stats(String.t()) :: :success | {:error, String.t()}
+  def save_match_stats(stats) do
     case Base.url_decode64(stats) do
-      {:ok, data} ->
+      {:ok, json_string} ->
         # Central.Helpers.StringHelper.multisplit(data, 800)
         # |> Enum.map(fn part ->
         #   Logger.info("save_match_stats - bad decode part - '#{part}'")
         # end)
 
-        export_data = case Jason.decode(data) do
-          {:ok, v} -> v
+        case Jason.decode(json_string) do
+          {:ok, data} ->
+            # We have to get the UUID from the script tags sent
+            # because the bot itself is in a new lobby since the last one finished
+            uuid = data["battleContext"]["scriptTags"]["server/match/uuid"]
+
+            case list_matches(search: [uuid: uuid]) do
+              [match] ->
+                update_match(match, Map.put(match.data, "export_data", data))
+                :success
+              _ ->
+                Logger.error("Error finding match uuid of #{uuid}")
+                {:error, "No match found"}
+            end
           _ ->
             Logger.error("Error with json decode of save_match_stats")
-            "error"
-        end
-
-        # Get the lobby to get the uuid of the match
-        lobby = Lobby.get_lobby!(lobby_id)
-        uuid = lobby.tags["server/match/uuid"]
-        case list_matches(search: [uuid: uuid]) do
-          [match] ->
-            update_match(match, Map.put((match.data || %{}), "export_data", export_data))
-            :success
-          _ ->
-            Logger.error("Error finding match uuid of #{uuid}")
-            {:error, "No match"}
+            {:error, "JSON decode"}
         end
 
       _ ->
