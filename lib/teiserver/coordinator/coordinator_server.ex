@@ -4,6 +4,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   performing their actions in the name of the coordinator
   """
   use GenServer
+  alias Central.Config
   alias Teiserver.{Account, User, Clans, Room, Coordinator, Client}
   alias Teiserver.Coordinator.{CoordinatorCommands}
   alias Phoenix.PubSub
@@ -81,8 +82,24 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   end
 
   def handle_info({:direct_message, userid, message}, state) do
-    case message |> String.downcase |> String.trim do
-      "i acknowledge this" ->
+    warning_response = Config.get_site_config_cache("teiserver.Warning acknowledge response")
+      |> String.downcase
+      |> String.trim
+
+    converted_message = message
+      |> String.downcase
+      |> String.trim
+
+    case converted_message do
+      ^warning_response ->
+        client = Client.get_client_by_id(userid)
+
+        last_login = Account.get_user_stat_data(userid)
+        |> Map.get("last_login")
+
+        time_diff = :erlang.system_time(:seconds) - last_login
+        Logger.info("Acknowledge time of #{time_diff} seconds for #{userid}:#{client.name}")
+
         Client.clear_awaiting_ack(userid)
         User.send_direct_message(state.userid, userid, "Thank you")
       _ ->
@@ -115,12 +132,14 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         |> Enum.map(fn report -> " - " <> report.reason end)
 
         [_, expires] = user.warned
+        warning_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
+
         if expires == nil do
-          msg = ["This is a reminder that you received one or more formal warnings for misbehaving as listed below. This is your last warning and this warning does not expire."] ++ reasons ++ ["Acknowledge this with 'I acknowledge this' to resume play"]
+          msg = ["This is a reminder that you received one or more formal warnings for misbehaving as listed below. This is your last warning and this warning does not expire."] ++ reasons ++ [warning_prompt]
           Client.set_awaiting_ack(userid)
           Coordinator.send_to_user(userid, msg)
         else
-          msg = ["This is a reminder that you recently received one or more formal warnings as listed below, the warnings expire #{expires}."] ++ reasons ++ ["Acknowledge this with 'I acknowledge this' to resume play"]
+          msg = ["This is a reminder that you recently received one or more formal warnings as listed below, the warnings expire #{expires}."] ++ reasons ++ [warning_prompt]
           Client.set_awaiting_ack(userid)
           Coordinator.send_to_user(userid, msg)
         end

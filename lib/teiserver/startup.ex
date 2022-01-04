@@ -17,6 +17,26 @@ defmodule Teiserver.Startup do
 
     # Example site configs
     add_site_config_type(%{
+      key: "teiserver.Warning acknowledge prompt",
+      section: "Moderation",
+      type: "string",
+      permissions: ["admin.dev.developer"],
+      description: "The string used to request acknowledgement of warnings",
+      opts: [],
+      default: "Acknowledge this with 'I acknowledge this' to resume play"
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Warning acknowledge response",
+      section: "Moderation",
+      type: "string",
+      permissions: ["admin.dev.developer"],
+      description: "The response string expected to acknowledge the warning",
+      opts: [],
+      default: "I acknowledge this"
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Require Chobby login",
       section: "Registrations",
       type: "boolean",
