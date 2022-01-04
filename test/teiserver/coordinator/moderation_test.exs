@@ -6,7 +6,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
     only: [new_user: 0, tachyon_auth_setup: 1, _tachyon_send: 2, _tachyon_recv: 1]
 
   setup do
-    Teiserver.Coordinator.start_coordinator()
+    Coordinator.start_coordinator()
     user = new_user()
     moderator = new_user()
     {:ok, user: user, moderator: moderator}

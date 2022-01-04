@@ -9,6 +9,8 @@ defmodule Teiserver.Account.AccoladeBotTest do
     only: [tachyon_auth_setup: 0, _tachyon_recv: 1, _tachyon_send: 2]
 
   setup do
+    AccoladeLib.start_accolade_server()
+
     # Create the badge types
     {:ok, badge_type1} = Account.create_badge_type(%{name: "Badge A", icon: "i", colour: "c", purposes: ["Accolade"], description: "Description for the first badge"})
     Account.create_badge_type(%{name: "Badge B", icon: "i", colour: "c", purposes: ["Accolade"], description: "Description for the second badge"})

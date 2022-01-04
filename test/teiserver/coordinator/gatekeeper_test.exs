@@ -9,7 +9,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
   setup do
-    Teiserver.Coordinator.start_coordinator()
+    Coordinator.start_coordinator()
     %{socket: hsocket, user: host} = tachyon_auth_setup()
     %{socket: psocket, user: player} = tachyon_auth_setup()
 
