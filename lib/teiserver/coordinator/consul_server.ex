@@ -353,6 +353,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
       client == nil ->
         {false, "No client"}
 
+      Client.is_shadowbanned?(client) ->
+        {false, "Bad client"}
+
       client.moderator ->
         {true, nil}
 
