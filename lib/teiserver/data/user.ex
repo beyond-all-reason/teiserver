@@ -843,12 +843,12 @@ defmodule Teiserver.User do
   def is_shadowbanned?(%{shadowbanned: true}), do: true
   def is_shadowbanned?(_), do: false
 
-  @spec shadowban(T.userid() | T.user()) :: :ok
-  def shadowban(nil), do: :ok
-  def shadowban(userid) when is_integer(userid), do: shadowban(get_user_by_id(userid))
-  def shadowban(user) do
+  @spec shadowban_user(T.userid() | T.user()) :: :ok
+  def shadowban_user(nil), do: :ok
+  def shadowban_user(userid) when is_integer(userid), do: shadowban_user(get_user_by_id(userid))
+  def shadowban_user(user) do
     update_user(%{user | shadowbanned: true, muted: [true, nil]}, persist: true)
-    Client.shadowban(user.id)
+    Client.shadowban_client(user.id)
     :ok
   end
 

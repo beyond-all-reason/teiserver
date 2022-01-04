@@ -52,7 +52,8 @@ defmodule Teiserver.Client do
         ip: nil,
         country: nil,
         lobby_client: nil,
-        shadowbanned: false
+        shadowbanned: false,
+        awaiting_ack: false
       },
       client
     )
@@ -337,6 +338,13 @@ defmodule Teiserver.Client do
     end)
   end
 
+  @spec is_shadowbanned?(T.userid() | T.client()) :: boolean()
+  def is_shadowbanned?(nil), do: false
+  def is_shadowbanned?(userid) when is_integer(userid), do: is_shadowbanned?(get_client_by_id(userid))
+  def is_shadowbanned?(%{shadowbanned: true}), do: true
+  def is_shadowbanned?(%{awaiting_ack: true}), do: true
+  def is_shadowbanned?(_), do: false
+
   @spec chat_flood_check(T.userid()) :: :ok
   def chat_flood_check(userid) do
     now = System.system_time(:second)
@@ -375,10 +383,24 @@ defmodule Teiserver.Client do
     :ok
   end
 
-  @spec shadowban(T.userid()) :: :ok
-  def shadowban(userid) do
+  @spec shadowban_client(T.userid()) :: :ok
+  def shadowban_client(userid) do
     client = get_client_by_id(userid)
     update(%{client | shadowbanned: true}, :silent)
+    :ok
+  end
+
+  @spec set_awaiting_ack(T.userid()) :: :ok
+  def set_awaiting_ack(userid) do
+    client = get_client_by_id(userid)
+    update(%{client | awaiting_ack: true}, :silent)
+    :ok
+  end
+
+  @spec clear_awaiting_ack(T.userid()) :: :ok
+  def clear_awaiting_ack(userid) do
+    client = get_client_by_id(userid)
+    update(%{client | awaiting_ack: false}, :silent)
     :ok
   end
 
