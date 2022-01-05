@@ -68,6 +68,10 @@ defmodule Teiserver.Application do
       %{
         id: Teiserver.RawSpringTcpServer,
         start: {Teiserver.SpringTcpServer, :start_link, [[]]}
+      },
+      %{
+        id: Teiserver.TachyonTcpServer,
+        start: {Teiserver.TachyonTcpServer, :start_link, [[]]}
       }
     ]
 

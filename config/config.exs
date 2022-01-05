@@ -47,7 +47,8 @@ config :esbuild,
 config :central, Teiserver,
   ports: [
     tcp: 8200,
-    tls: 8201
+    tls: 8201,
+    tachyon: 8202
   ],
   website: [
     url: "https://server2.beyondallreason.info"

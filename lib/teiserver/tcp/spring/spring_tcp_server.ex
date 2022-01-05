@@ -137,7 +137,7 @@ defmodule Teiserver.SpringTcpServer do
 
   # If Ctrl + C is sent through it kills the connection, makes telnet debugging easier
   def handle_info({_, _socket, <<255, 244, 255, 253, 6>>}, state) do
-    Client.disconnect(state.userid, "Spring EXIT command")
+    Client.disconnect(state.userid, "Terminal exit command")
     send(self(), :terminate)
     {:noreply, state}
   end
@@ -156,7 +156,7 @@ defmodule Teiserver.SpringTcpServer do
       if Enum.count(cmd_timestamps) > @cmd_flood_limit do
         User.set_flood_level(state.userid, 10)
         Client.disconnect(state.userid, :flood)
-        Logger.error("Command overflow from #{state.username}/#{state.userid} with #{Enum.count(cmd_timestamps)} commands. Disconnected and flood protection engaged.")
+        Logger.error("Spring command overflow from #{state.username}/#{state.userid} with #{Enum.count(cmd_timestamps)} commands. Disconnected and flood protection engaged.")
       end
 
       cmd_timestamps
