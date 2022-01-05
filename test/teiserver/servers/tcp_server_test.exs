@@ -1,4 +1,4 @@
-defmodule Teiserver.TcpServerTest do
+defmodule Teiserver.SpringTcpServerTest do
   use Central.ServerCase, async: false
 
   alias Teiserver.Account.UserCache

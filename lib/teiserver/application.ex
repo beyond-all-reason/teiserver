@@ -62,12 +62,12 @@ defmodule Teiserver.Application do
 
       # Ranch servers
       %{
-        id: Teiserver.SSLTcpServer,
-        start: {Teiserver.TcpServer, :start_link, [[ssl: true]]}
+        id: Teiserver.SSLSpringTcpServer,
+        start: {Teiserver.SpringTcpServer, :start_link, [[ssl: true]]}
       },
       %{
-        id: Teiserver.RawTcpServer,
-        start: {Teiserver.TcpServer, :start_link, [[]]}
+        id: Teiserver.RawSpringTcpServer,
+        start: {Teiserver.SpringTcpServer, :start_link, [[]]}
       }
     ]
 

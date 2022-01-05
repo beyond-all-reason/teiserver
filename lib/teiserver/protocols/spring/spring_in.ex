@@ -102,7 +102,7 @@ defmodule Teiserver.Protocols.SpringIn do
   # https://ninenines.eu/docs/en/ranch/1.7/guide/transports/ - Upgrading a TCP socket to SSL
   defp do_handle("STLS", _, msg_id, state) do
     reply(:okay, "STLS", msg_id, state)
-    new_state = Teiserver.TcpServer.upgrade_connection(state)
+    new_state = Teiserver.SpringTcpServer.upgrade_connection(state)
     reply(:welcome, nil, msg_id, new_state)
   end
 

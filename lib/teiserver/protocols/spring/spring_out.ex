@@ -667,7 +667,7 @@ defmodule Teiserver.Protocols.SpringOut do
           false ->
             client = Client.get_client_by_id(member_id)
             state_acc.protocol_out.reply(:user_logged_in, client, nil, state)
-            %{state_acc | known_users: Map.put(state_acc.known_users, member_id, Teiserver.TcpServer._blank_user(member_id))}
+            %{state_acc | known_users: Map.put(state_acc.known_users, member_id, Teiserver.SpringTcpServer._blank_user(member_id))}
 
           true ->
             state_acc

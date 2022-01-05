@@ -1,4 +1,4 @@
-defmodule Teiserver.TcpServer do
+defmodule Teiserver.SpringTcpServer do
   @moduledoc false
   use GenServer
   require Logger
@@ -235,13 +235,6 @@ defmodule Teiserver.TcpServer do
     new_state = user_logged_in(userid, state)
     {:noreply, new_state}
   end
-
-
-  # Lobby chat
-  # def handle_info({:lobby_chat, action, lobby_id, userid, msg}, state) do
-  #   {:noreply, TcpChat.do_handle({action, lobby_id, userid, msg}, state)}
-  # end
-
 
   # Some logic because if we're the one logged out we need to disconnect
   def handle_info({:user_logged_out, userid, username}, state) do

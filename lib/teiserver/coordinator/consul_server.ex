@@ -354,7 +354,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         {false, "No client"}
 
       Client.is_shadowbanned?(client) ->
-        {false, "Bad client"}
+        {false, "Awaiting acknowledgement"}
 
       client.moderator ->
         {true, nil}
