@@ -2,7 +2,6 @@ defmodule TeiserverWeb.Admin.MatchController do
   use CentralWeb, :controller
 
   alias Teiserver.Battle
-  alias Teiserver.Battle.Match
   alias Teiserver.Battle.MatchLib
 
   plug Bodyguard.Plug.Authorize,
@@ -38,7 +37,7 @@ defmodule TeiserverWeb.Admin.MatchController do
   end
 
   @spec user_show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def user_show(conn, %{"user_id" => user_id} = params) do
+  def user_show(conn, %{"user_id" => user_id}) do
     # match_ids = Battle.list_match_memberships(search: [user_id: user_id])
     # |> Enum.map(fn mm -> mm.match_id end)
 

@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Battle.MatchController do
   plug :add_breadcrumb, name: 'Logs', url: '/teiserver/matches'
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def index(conn, params) do
+  def index(conn, _params) do
     matches = if false and allow?(conn, "teiserver.moderator") do
       Battle.list_matches(
         search: [
