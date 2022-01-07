@@ -5,6 +5,8 @@ defmodule TeiserverWeb.Admin.AccoladeController do
   alias Teiserver.Account.Accolade
   alias Teiserver.Account.AccoladeLib
 
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Moderator,
     action: {Phoenix.Controller, :action_name},
@@ -57,6 +59,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
 
     conn
     |> assign(:accolades, accolades)
+    |> assign(:userid, int_parse(user_id))
     |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
     |> render("user_index.html")
   end

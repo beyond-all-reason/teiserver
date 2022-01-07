@@ -25,7 +25,7 @@
       </thead>
       <tbody>
     <%= for accolade <- @accolades do %>
-      <%= if accolade.giver_id == @current_user.id do %>
+      <%= if accolade.giver_id == @userid and accolade.badge_type != nil do %>
         <tr>
           <td style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"} width="22">
             <%= central_component "icon", icon: accolade.badge_type.icon %>
@@ -55,7 +55,7 @@
       </thead>
       <tbody>
     <%= for accolade <- @accolades do %>
-      <%= if accolade.recipient_id == @current_user.id do %>
+      <%= if accolade.recipient_id == @userid and accolade.badge_type != nil do %>
         <tr>
           <td style={"background-color: #{accolade.badge_type.colour}; color: #FFF;"} width="22">
             <%= central_component "icon", icon: accolade.badge_type.icon %>
