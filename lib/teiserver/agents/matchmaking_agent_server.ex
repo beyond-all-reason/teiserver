@@ -44,14 +44,18 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
 
   defp handle_msg(nil, state), do: state
   defp handle_msg(%{"cmd" => "s.matchmaking.query", "result" => "success", "queues" => queues}, state) do
-    queue_id = queues
-    |> Enum.map(fn q -> q["id"] end)
-    |> Enum.random()
+    queue_ids = queues
+      |> Enum.map(fn q -> q["id"] end)
 
-    cmd = %{cmd: "c.matchmaking.join_queue", queue_id: queue_id}
-    AgentLib._send(state.socket, cmd)
+    case queue_ids do
+      [] ->
+        state
 
-    state
+      _ ->
+        queue_id = Enum.random(queue_ids)
+        cmd = %{cmd: "c.matchmaking.join_queue", queue_id: queue_id}
+        AgentLib._send(state.socket, cmd)
+    end
   end
   defp handle_msg(%{"cmd" => "s.matchmaking.join_queue", "result" => "success", "queue_id" => queue_id}, state) do
     %{state | queues: [queue_id]}

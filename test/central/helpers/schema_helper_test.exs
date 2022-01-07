@@ -122,11 +122,11 @@ defmodule Central.Helpers.SchemaHelperTest do
     assert result == %{"a" => "abc", "b" => "abc", "c" => "abc", "d" => "abc"}
   end
 
-  test "parse checkboxes" do
-    params = %{"a" => "true"}
-    names = [:a, :b]
+  # test "parse checkboxes" do
+  #   params = %{"a" => "true"}
+  #   names = [:a, :b]
 
-    result = SchemaHelper.parse_checkboxes(params, names)
-    assert result == %{"a" => true, "b" => false}
-  end
+  #   result = SchemaHelper.parse_checkboxes(params, names)
+  #   assert result == %{"a" => true, "b" => false}
+  # end
 end
