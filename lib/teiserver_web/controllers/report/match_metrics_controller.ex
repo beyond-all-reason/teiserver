@@ -3,7 +3,6 @@ defmodule TeiserverWeb.Report.MatchMetricController do
   alias Teiserver.Telemetry
   alias Central.Helpers.{TimexHelper, DatePresets}
   alias Teiserver.Battle.{ExportRawMatchMetricsTask}
-  alias Teiserver.Telemetry.GraphDayLogsTask
 
   plug(AssignPlug,
     sidemenu_active: ["teiserver"]

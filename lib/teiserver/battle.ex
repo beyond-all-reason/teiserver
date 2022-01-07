@@ -8,7 +8,6 @@ defmodule Teiserver.Battle do
   alias Central.Repo
   alias Teiserver.{Telemetry, Coordinator}
   alias Teiserver.Battle.Lobby
-  alias Teiserver.Account.AccoladeLib
   alias Phoenix.PubSub
 
   alias Teiserver.Battle.Match
