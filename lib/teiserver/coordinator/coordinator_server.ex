@@ -100,7 +100,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         time_diff = :erlang.system_time(:seconds) - last_login
         Logger.info("Acknowledge time of #{time_diff} seconds for #{userid}:#{client.name}")
 
-        Client.clear_awaiting_ack(userid)
+        Client.clear_awaiting_warn_ack(userid)
         User.send_direct_message(state.userid, userid, "Thank you")
       _ ->
         username = User.get_username(userid)
@@ -136,11 +136,11 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
         if expires == nil do
           msg = ["This is a reminder that you received one or more formal warnings for misbehaving as listed below. This is your last warning and this warning does not expire."] ++ reasons ++ [warning_prompt]
-          Client.set_awaiting_ack(userid)
+          Client.set_awaiting_warn_ack(userid)
           Coordinator.send_to_user(userid, msg)
         else
           msg = ["This is a reminder that you recently received one or more formal warnings as listed below, the warnings expire #{expires}."] ++ reasons ++ [warning_prompt]
-          Client.set_awaiting_ack(userid)
+          Client.set_awaiting_warn_ack(userid)
           Coordinator.send_to_user(userid, msg)
         end
       end

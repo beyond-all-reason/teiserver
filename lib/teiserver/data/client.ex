@@ -52,8 +52,12 @@ defmodule Teiserver.Client do
         ip: nil,
         country: nil,
         lobby_client: nil,
+
         shadowbanned: false,
-        awaiting_ack: false
+        awaiting_warn_ack: false,
+        warned: false,
+        muted: false,
+        restricted: false
       },
       client
     )
@@ -88,7 +92,11 @@ defmodule Teiserver.Client do
         ip: ip || stats["last_ip"],
         country: stats["country"] || "??",
         lobby_client: stats["lobby_client"],
-        shadowbanned: user.shadowbanned
+
+        shadowbanned: User.is_shadowbanned?(user),
+        muted: User.is_muted?(user),
+        restricted: User.is_restricted?(user),
+        warned: User.is_warned?(user)
       })
       |> add_client
 
@@ -338,12 +346,12 @@ defmodule Teiserver.Client do
     end)
   end
 
-  @spec is_shadowbanned?(T.userid() | T.client()) :: boolean()
-  def is_shadowbanned?(nil), do: false
-  def is_shadowbanned?(userid) when is_integer(userid), do: is_shadowbanned?(get_client_by_id(userid))
-  def is_shadowbanned?(%{shadowbanned: true}), do: true
-  def is_shadowbanned?(%{awaiting_ack: true}), do: true
-  def is_shadowbanned?(_), do: false
+  @spec is_restricted?(T.userid() | T.client()) :: boolean()
+  def is_restricted?(nil), do: true
+  def is_restricted?(userid) when is_integer(userid), do: is_restricted?(get_client_by_id(userid))
+  def is_restricted?(%{restricted: true}), do: true
+  def is_restricted?(%{awaiting_warn_ack: true}), do: true
+  def is_restricted?(_), do: false
 
   @spec chat_flood_check(T.userid()) :: :ok
   def chat_flood_check(userid) do
@@ -390,17 +398,17 @@ defmodule Teiserver.Client do
     :ok
   end
 
-  @spec set_awaiting_ack(T.userid()) :: :ok
-  def set_awaiting_ack(userid) do
+  @spec set_awaiting_warn_ack(T.userid()) :: :ok
+  def set_awaiting_warn_ack(userid) do
     client = get_client_by_id(userid)
-    update(%{client | awaiting_ack: true}, :silent)
+    update(%{client | awaiting_warn_ack: true}, :silent)
     :ok
   end
 
-  @spec clear_awaiting_ack(T.userid()) :: :ok
-  def clear_awaiting_ack(userid) do
+  @spec clear_awaiting_warn_ack(T.userid()) :: :ok
+  def clear_awaiting_warn_ack(userid) do
     client = get_client_by_id(userid)
-    update(%{client | awaiting_ack: false}, :silent)
+    update(%{client | awaiting_warn_ack: false}, :silent)
     :ok
   end
 

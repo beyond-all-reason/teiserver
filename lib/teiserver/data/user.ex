@@ -39,6 +39,7 @@ defmodule Teiserver.User do
     :last_login,
     :banned,
     :muted,
+    :restricted,
     :warned,
     :shadowbanned,
     :springid,
@@ -65,6 +66,7 @@ defmodule Teiserver.User do
     last_login: nil,
     banned: [false, nil],
     muted: [false, nil],
+    restricted: [false, nil],
     warned: [false, nil],
     shadowbanned: false,
     springid: nil,
@@ -746,15 +748,19 @@ defmodule Teiserver.User do
     report = Account.get_report!(report_id)
     user = get_user_by_id(report.target_id)
 
-    if Enum.member?(~w(Warn Mute Ban), report.response_action) do
+    if Enum.member?(~w(Warn Restrict Mute Ban), report.response_action) do
       Teiserver.Bridge.DiscordBridge.moderator_action(report_id)
       Coordinator.update_report(user, report)
     end
 
     changes =
       case {report.response_action, report.expires} do
-        {"Mute", nil} ->
-          %{muted: [true, nil]}
+        {"Restrict", expires} ->
+          %{restricted: [true, expires]}
+
+        {"Unrestrict", _} ->
+          %{restricted: [false, nil]}
+
 
         {"Mute", expires} ->
           %{muted: [true, expires]}
@@ -762,14 +768,13 @@ defmodule Teiserver.User do
         {"Unmute", _} ->
           %{muted: [false, nil]}
 
-        {"Ban", nil} ->
-          %{banned: [true, nil]}
 
         {"Ban", expires} ->
           %{banned: [true, expires]}
 
         {"Unban", _} ->
           %{banned: [false, nil]}
+
 
         {"Warn", expires} ->
           %{warned: [true, expires]}
@@ -816,6 +821,19 @@ defmodule Teiserver.User do
   def is_muted?(userid) when is_integer(userid), do: is_muted?(get_user_by_id(userid))
   def is_muted?(%{muted: muted}) do
     case muted do
+      [false, _] -> false
+      [true, nil] -> true
+      [true, until_str] ->
+        until = parse_ymd_t_hms(until_str)
+        Timex.compare(Timex.now(), until) != 1
+    end
+  end
+
+  @spec is_restricted?(T.userid() | T.user()) :: boolean()
+  def is_restricted?(nil), do: true
+  def is_restricted?(userid) when is_integer(userid), do: is_restricted?(get_user_by_id(userid))
+  def is_restricted?(%{restricted: restricted}) do
+    case restricted do
       [false, _] -> false
       [true, nil] -> true
       [true, until_str] ->

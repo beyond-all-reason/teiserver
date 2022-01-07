@@ -50,7 +50,11 @@ defmodule Teiserver.Bridge.BridgeServer do
         # Non-bridged user, ignore it
         nil
 
-      Config.get_site_config_cache("teiserver.Bridge from server") == false ->
+      # If they are restricted we don't want to bridge anything
+      User.is_restricted?(user) ->
+        nil
+
+      Config.get_site_config_cache("teiserver.Bridge from serv]er") == false ->
         nil
 
       Map.has_key?(state.rooms, room_name) ->
