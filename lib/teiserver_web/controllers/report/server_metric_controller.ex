@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
   alias Central.Helpers.{TimexHelper, DatePresets}
-  alias Teiserver.Telemetry.{GraphDayLogsTask, GraphMonthLogsTask, ExportServerMetricsTask}
+  alias Teiserver.Telemetry.{GraphDayLogsTask, ExportServerMetricsTask}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
