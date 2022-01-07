@@ -61,7 +61,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
         nil
       match ->
         duration = Timex.diff(match.finished, match.started, :second)
-        if duration > 300 do
+        if duration > 600 do
           Logger.info("global_match_updates:#{match_id} - post match messages")
           post_match_messages(match)
         else
