@@ -191,4 +191,58 @@ defmodule CentralWeb.Admin.ReportController do
         |> render("respond.html")
     end
   end
+
+  @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def edit(conn, %{"id" => id}) do
+    report =
+      Account.get_report!(id,
+        preload: [
+          :reporter,
+          :target,
+          :responder
+        ]
+      )
+
+    changeset = Account.change_report(report)
+
+    fav =
+      report
+      |> ReportLib.make_favourite()
+
+    conn
+    |> assign(:report, report)
+    |> assign(:changeset, changeset)
+    |> add_breadcrumb(name: "Edit: #{fav.item_label}", url: conn.request_path)
+    |> render("edit.html")
+  end
+
+  @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def update(conn, %{"id" => id, "report" => params}) do
+    report = Account.get_report!(id)
+
+    case Account.update_report(report, params) do
+      {:ok, report} ->
+        add_audit_log(conn, "Account: Updated report", %{
+          report: report.id,
+          reason: params["audit_reason"]
+        })
+
+        conn
+        |> put_flash(:success, "Report updated successfully.")
+        |> redirect(to: Routes.admin_report_path(conn, :show, report))
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        report = Account.get_report!(id)
+
+        fav =
+          report
+          |> ReportLib.make_favourite()
+
+        conn
+        |> assign(:report, report)
+        |> assign(:changeset, changeset)
+        |> add_breadcrumb(name: "Edit: #{fav.item_label}", url: conn.request_path)
+        |> render("edit.html")
+    end
+  end
 end

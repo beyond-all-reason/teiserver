@@ -46,7 +46,7 @@ defmodule CentralWeb.Account.ReportControllerTest do
     test "renders show page", %{conn: conn} do
       report = AccountTestLib.report_fixture()
       resp = get(conn, Routes.admin_report_path(conn, :show, report))
-      assert html_response(resp, 200) =~ "More reports of this user"
+      assert html_response(resp, 200) =~ "More reports against this user"
     end
 
     test "renders show nil item", %{conn: conn} do

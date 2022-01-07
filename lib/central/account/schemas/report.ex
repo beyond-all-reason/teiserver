@@ -26,6 +26,7 @@ defmodule Central.Account.Report do
     params =
       params
       |> trim_strings([:location, :reason, :response_text, :response_action])
+      |> parse_humantimes([:expires])
 
     struct
     |> cast(params, [
@@ -62,5 +63,7 @@ defmodule Central.Account.Report do
     |> validate_required([:response_text, :response_action, :responder_id])
   end
 
+  def authorize(:edit, conn, _), do: allow?(conn, "admin.dev")
+  def authorize(:update, conn, _), do: allow?(conn, "admin.dev")
   def authorize(_, conn, _), do: allow?(conn, "admin.report")
 end

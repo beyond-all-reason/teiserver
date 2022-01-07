@@ -56,8 +56,15 @@
         <hr />
         <a href={"#{Routes.admin_report_path(@conn, :user_show, @report.target_id)}?filter=target"} class={"btn btn-outline-#{bsname}"}>
           <%= central_component "icon", icon: Central.Account.ReportLib.icon() %>
-          More reports of this user
+          More reports against this user
         </a>
+
+        <%= if allow?(@conn, "admin.dev") do %>
+          <a href={"#{Routes.admin_report_path(@conn, :edit, @report)}"} class={"btn btn-outline-#{bsname}"}>
+            <%= central_component "icon", icon: Central.Helpers.StylingHelper.icon(:edit) %>
+            Edit this report
+          </a>
+        <% end %>
 
       </div>
     </div>

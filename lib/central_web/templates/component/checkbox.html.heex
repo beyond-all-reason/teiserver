@@ -18,12 +18,12 @@
   checked = if Map.has_key?(assigns, :checked) do
     case @checked do
       true -> [checked: "checked"]
-      false -> []
+      _ -> []
     end
   else
     case Ecto.Changeset.get_field(@changeset, @field) do
       true -> [checked: "checked"]
-      false -> []
+      _ -> []
     end
   end
 %>
@@ -35,5 +35,4 @@
     &nbsp;<%= assigns[:description] %>
   <% end %>
   </label>
-
 </div>

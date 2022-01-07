@@ -6,6 +6,7 @@ defmodule Central.Account.ReportLib do
   # Functions
   @spec icon :: String.t()
   def icon, do: "far fa-flag"
+
   @spec colours :: {String.t(), String.t(), String.t()}
   def colours, do: Central.Helpers.StylingHelper.colours(:warning)
 
@@ -28,6 +29,7 @@ defmodule Central.Account.ReportLib do
     [
       "Ignore report",
       "Warn",
+      "Restrict",
       "Mute",
       "Ban"
     ]
@@ -37,6 +39,7 @@ defmodule Central.Account.ReportLib do
   def past_tense(nil), do: ""
   def past_tense("Ignore report"), do: nil
   def past_tense("Warn"), do: "Warned"
+  def past_tense("Restrict"), do: "Restricted"
   def past_tense("Mute"), do: "Muted"
   def past_tense("Ban"), do: "Banned"
 
@@ -44,9 +47,11 @@ defmodule Central.Account.ReportLib do
   def action_icon(nil), do: ""
   def action_icon("Ignore report"), do: "fas fa-check-circle"
   def action_icon("Warn"), do: "fas fa-triangle-exclamation"
+  def action_icon("Restrict"), do: "fas fa-do-not-enter"
   def action_icon("Mute"), do: "fas fa-microphone-slash"
   def action_icon("Ban"), do: "fas fa-ban"
 
+  @spec perform_action(Report.t(), String.t(), String.t()) :: {:error, String.t()} | {:ok, nil | DateTime.t()}
   def perform_action(_report, "Ignore report", _data) do
     {:ok, nil}
   end
@@ -54,30 +59,10 @@ defmodule Central.Account.ReportLib do
   def perform_action(_report, _, "never"), do: {:ok, nil}
   def perform_action(_report, _, "Never"), do: {:ok, nil}
 
-  def perform_action(_report, "Warn", data) do
+  def perform_action(_report, _action, data) do
     case HumanTime.relative(data) do
-      {:ok, warned_until} ->
-        {:ok, warned_until}
-
-      err ->
-        err
-    end
-  end
-
-  def perform_action(_report, "Mute", data) do
-    case HumanTime.relative(data) do
-      {:ok, muted_until} ->
-        {:ok, muted_until}
-
-      err ->
-        err
-    end
-  end
-
-  def perform_action(_report, "Ban", data) do
-    case HumanTime.relative(data) do
-      {:ok, banned_until} ->
-        {:ok, banned_until}
+      {:ok, do_until} ->
+        {:ok, do_until}
 
       err ->
         err
@@ -100,6 +85,7 @@ defmodule Central.Account.ReportLib do
     end)
   end
 
+  @spec _search(Ecto.Query.t(), atom, any) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -191,18 +177,21 @@ defmodule Central.Account.ReportLib do
     query
   end
 
+  @spec _preload_reporter(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_reporter(query) do
     from reports in query,
       left_join: reporters in assoc(reports, :reporter),
       preload: [reporter: reporters]
   end
 
+  @spec _preload_target(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_target(query) do
     from reports in query,
       left_join: targets in assoc(reports, :target),
       preload: [target: targets]
   end
 
+  @spec _preload_responder(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_responder(query) do
     from reports in query,
       left_join: responders in assoc(reports, :responder),
