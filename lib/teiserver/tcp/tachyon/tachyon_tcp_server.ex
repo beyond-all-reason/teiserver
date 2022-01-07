@@ -4,7 +4,6 @@ defmodule Teiserver.TachyonTcpServer do
   require Logger
 
   alias Teiserver.{User, Client}
-  alias Teiserver.Tcp.{TcpLobby}
 
   # Duration refers to how long it will track commands for
   # Limit is the number of commands that can be sent in that time
@@ -122,6 +121,12 @@ defmodule Teiserver.TachyonTcpServer do
     {:noreply, state}
   end
 
+  def handle_info({:action, {_action_type, _data}}, state) do
+    # new_state = do_action(action_type, data, state)
+    Logger.info("Tachyon TCP server action")
+    {:noreply, state}
+  end
+
   # Main source of data ingress
   def handle_info({:tcp, _socket, data}, %{exempt_from_cmd_throttle: false} = state) do
     data = to_string(data)
@@ -174,5 +179,26 @@ defmodule Teiserver.TachyonTcpServer do
     else
       {:noreply, state}
     end
+  end
+
+  # Connection
+  def handle_info({:ssl_closed, socket}, %{socket: socket, transport: transport} = state) do
+    transport.close(socket)
+    Client.disconnect(state.userid, ":ssl_closed with socket")
+    {:stop, :normal, %{state | userid: nil}}
+  end
+
+  def handle_info({:ssl_closed, _socket}, state) do
+    Client.disconnect(state.userid, ":ssl_closed no socket")
+    {:stop, :normal, %{state | userid: nil}}
+  end
+
+  def handle_info(:terminate, state) do
+    Client.disconnect(state.userid, "tcp_server :terminate")
+    {:stop, :normal, %{state | userid: nil}}
+  end
+
+  def terminate(_reason, state) do
+    Client.disconnect(state.userid, "tcp_server terminate")
   end
 end
