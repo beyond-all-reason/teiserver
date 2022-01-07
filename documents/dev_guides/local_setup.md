@@ -6,6 +6,9 @@ You will need to install:
 - [Elixir/Erlang installed](https://elixir-lang.org/install.html).
 - [Postresql](https://www.postgresql.org/download).
 
+Make sure that Elixir is in correct version (currently 1.12.2). You can find requred version [here](https://github.com/beyond-all-reason/teiserver/blob/master/mix.exs#L8).
+You can use [asdf](https://github.com/asdf-vm/asdf) to install correct version.
+
 ### Clone repo
 ```
 git clone git@github.com:beyond-all-reason/teiserver.git
@@ -19,12 +22,10 @@ sudo apt update
 sudo apt install build-essential
 ```
 
-### Elixir/Node setup
+### Elixir setup
 ```
 mix deps.get
 mix deps.compile
-cd assets && npm install && node node_modules/webpack/bin/webpack.js --mode development
-cd ..
 ```
 
 ### Postgres setup
