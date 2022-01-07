@@ -23,5 +23,4 @@
 <%= if allow?(@conn, "teiserver.moderator") do %>
   <hr />
   <textarea class="form-control" style="font-family: monospace" rows="20"><%= Jason.encode!(@match.data, pretty: true) %></textarea>
-  <textarea class="form-control" style="font-family: monospace" rows="20"><%= Jason.encode!(@match.bots, pretty: true) %></textarea>
 <% end %>

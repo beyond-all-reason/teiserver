@@ -281,8 +281,8 @@ defmodule Teiserver.Battle do
               [match] ->
                 update_match(match, Map.put((match.data || %{}), "export_data", data))
                 :success
-              _ ->
-                Logger.error("Error finding match uuid of #{uuid}")
+              matchlist ->
+                Logger.error("Error finding match uuid of #{uuid} (got #{Enum.count(matchlist)})")
                 {:error, "No match found"}
             end
           _ ->
