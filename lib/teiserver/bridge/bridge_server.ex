@@ -54,7 +54,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       User.is_restricted?(user) ->
         nil
 
-      Config.get_site_config_cache("teiserver.Bridge from serv]er") == false ->
+      Config.get_site_config_cache("teiserver.Bridge from server") == false ->
         nil
 
       Map.has_key?(state.rooms, room_name) ->
