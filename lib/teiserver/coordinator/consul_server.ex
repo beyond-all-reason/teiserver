@@ -353,7 +353,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       client == nil ->
         {false, "No client"}
 
-      %{awaiting_warn_ack: true} ->
+      client.awaiting_warn_ack ->
         {false, "Awaiting acknowledgement"}
 
       client.moderator ->

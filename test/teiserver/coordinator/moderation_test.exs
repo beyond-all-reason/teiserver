@@ -34,7 +34,6 @@ defmodule Teiserver.Coordinator.ModerationTest do
     assert User.is_warned?(user.id)
     refute User.is_muted?(user.id)
     refute User.is_banned?(user.id)
-    refute Client.is_shadowbanned?(user.id)
 
     # Now login
     %{socket: socket} = tachyon_auth_setup(user)
@@ -52,7 +51,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
       "sender_id" => Coordinator.get_coordinator_userid()
     }
 
-    assert Client.is_shadowbanned?(user.id)
+    assert Client.is_restricted?(user.id)
 
     # Send something back
     _tachyon_send(socket, %{
@@ -70,7 +69,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
       "message" => "I don't currently handle messages, sorry #{user.name}",
       "sender_id" => Coordinator.get_coordinator_userid()
     }
-    assert Client.is_shadowbanned?(user.id)
+    assert Client.is_restricted?(user.id)
 
     # Now send back the correct response
     _tachyon_send(socket, %{
@@ -85,6 +84,6 @@ defmodule Teiserver.Coordinator.ModerationTest do
       "message" => "Thank you",
       "sender_id" => Coordinator.get_coordinator_userid()
     }
-    refute Client.is_shadowbanned?(user.id)
+    refute Client.is_restricted?(user.id)
   end
 end

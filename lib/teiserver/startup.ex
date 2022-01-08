@@ -75,7 +75,11 @@ defmodule Teiserver.Startup do
               "active" => true,
               "icon" => "fa-duotone fa-umbrella",
               "colour" => "#00AA66",
-              "data" => %{}
+              "data" => %{},
+              "see_group" => false,
+              "see_members" => false,
+              "invite_members" => false,
+              "self_add_members" => false
             })
 
           group
@@ -94,7 +98,11 @@ defmodule Teiserver.Startup do
               "icon" => "fa-duotone fa-robot",
               "colour" => "#00AA00",
               "data" => %{},
-              "super_group_id" => umbrella_group.id
+              "super_group_id" => umbrella_group.id,
+              "see_group" => false,
+              "see_members" => false,
+              "invite_members" => false,
+              "self_add_members" => false
             })
 
           group
@@ -113,7 +121,11 @@ defmodule Teiserver.Startup do
               "icon" => "fa-duotone fa-microchip",
               "colour" => "#660066",
               "data" => %{},
-              "super_group_id" => umbrella_group.id
+              "super_group_id" => umbrella_group.id,
+              "see_group" => false,
+              "see_members" => false,
+              "invite_members" => false,
+              "self_add_members" => false
             })
 
           group
