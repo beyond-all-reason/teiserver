@@ -536,7 +536,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       host_boss: nil,
       host_preset: nil,
-      host_teamsize: 8,
+      host_teamsize: 4,
       host_teamcount: 2
     }
   end
