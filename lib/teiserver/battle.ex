@@ -14,6 +14,8 @@ defmodule Teiserver.Battle do
   alias Teiserver.Battle.MatchLib
   alias Teiserver.Data.Types, as: T
 
+  alias Teiserver.Protocols.Spring
+
   @spec match_query(List.t()) :: Ecto.Query.t()
   def match_query(args) do
     match_query(nil, args)
@@ -264,13 +266,11 @@ defmodule Teiserver.Battle do
 
   @spec save_match_stats(String.t()) :: :success | {:error, String.t()}
   def save_match_stats(stats) do
-    case Base.url_decode64(stats) do
+    case Spring.read_compressed_base64(stats) do
+      {:error, reason} ->
+        Logger.error("save_match_stats error #{reason}")
+        {:error, reason}
       {:ok, json_string} ->
-        # Central.Helpers.StringHelper.multisplit(data, 800)
-        # |> Enum.map(fn part ->
-        #   Logger.info("save_match_stats - bad decode part - '#{part}'")
-        # end)
-
         case Jason.decode(json_string) do
           {:ok, data} ->
             # We have to get the UUID from the script tags sent
@@ -279,29 +279,23 @@ defmodule Teiserver.Battle do
 
             case list_matches(search: [uuid: uuid]) do
               [match] ->
-                update_match(match, Map.put((match.data || %{}), "export_data", data))
+                new_data = Map.put((match.data || %{}), "export_data", data)
+                update_match(match, %{data: new_data})
 
-                "Got match export data for #{uuid} of: #{json_string}"
-                |> Central.Helpers.StringHelper.multisplit(800)
-                |> Enum.map(fn part ->
-                  Logger.info("'#{part}'")
-                end)
+                # "Got match export data for #{uuid} of: #{json_string}"
+                # |> Central.Helpers.StringHelper.multisplit(800)
+                # |> Enum.map(fn part ->
+                #   Logger.info("'#{part}'")
+                # end)
                 :success
-              matchlist ->
-                Logger.error("Error finding match uuid of #{uuid} (got #{Enum.count(matchlist)})")
+              match_list ->
+                Logger.error("Error finding match uuid of #{uuid} (got #{Enum.count(match_list)})")
                 {:error, "No match found"}
             end
           _ ->
             Logger.error("Error with json decode of save_match_stats")
             {:error, "JSON decode"}
         end
-
-      _ ->
-        Central.Helpers.StringHelper.multisplit(stats, 800)
-        |> Enum.map(fn part ->
-          Logger.info("save_match_stats - bad decode part - '#{part}'")
-        end)
-        {:error, "base64 url_decode error"}
     end
   end
 

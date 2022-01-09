@@ -174,4 +174,48 @@ defmodule Teiserver.Protocols.Spring do
     |> String.replace("\t", "~~")
     |> String.slice(0..100)
   end
+
+
+  @doc """
+  Takes zipped and base64'd data and tries to extract it
+  """
+  def read_compressed_base64(raw_string) do
+    case Base.url_decode64(raw_string) do
+      {:ok, compressed_contents} ->
+        case unzip(compressed_contents) do
+          {:ok, contents} ->
+            {:ok, contents}
+          {:error, _} ->
+            {:error, "unzip decode error"}
+        end
+      _ ->
+        {:error, "base64 decode error"}
+    end
+  end
+
+  def unzip(data) do
+    try do
+      result = :zlib.uncompress(data)
+      {:ok, result}
+    rescue
+      _ ->
+        {:error, :unzip_decompress}
+    end
+  end
+
+  @spec decode_value(String.t()) :: {:ok, any} | {:error, String.t()}
+  def decode_value(raw) do
+    case Base.url_decode64(raw) do
+      {:ok, string} ->
+        case Jason.decode(string) do
+          {:ok, json} ->
+            {:ok, json}
+          {:error, %Jason.DecodeError{position: position, data: _data}} ->
+            {:error, "Json decode error at position #{position}"}
+        end
+
+      _ ->
+        {:error, "Base64 decode error"}
+    end
+  end
 end

@@ -110,8 +110,9 @@ defmodule Teiserver.Account.AccoladeBotTest do
       "recipient_id" => AccoladeLib.get_accolade_bot_userid(),
       "message" => "1"
     })
-    :timer.sleep(200)
+    :timer.sleep(400)
 
+    # For some reason this might fail as part of a larger test but not a smaller
     [accolade_given] = Account.list_accolades(search: [giver_id: player11.id])
     assert accolade_given.giver_id == player11.id
     assert accolade_given.recipient_id == player12.id
@@ -123,7 +124,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
       "recipient_id" => AccoladeLib.get_accolade_bot_userid(),
       "message" => "1"
     })
-    :timer.sleep(200)
+    :timer.sleep(400)
 
     # Should be no differences in the results
     [accolade_given] = Account.list_accolades(search: [giver_id: player11.id])

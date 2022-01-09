@@ -1,6 +1,6 @@
 defmodule Teiserver.Protocols.Spring.TelemetryIn do
   alias Teiserver.Telemetry
-  alias Teiserver.Protocols.SpringIn
+  alias Teiserver.Protocols.{Spring, SpringIn}
   require Logger
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   # import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -10,11 +10,11 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   def do_handle("upload_infolog", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+) (\S+) (\S+)/, data) do
       [_, log_type, user_hash, metadata64, contents64] ->
-        case decode_value(metadata64) do
+        case Spring.decode_value(metadata64) do
           {:ok, metadata} ->
             case Base.url_decode64(contents64) do
               {:ok, compressed_contents} ->
-                case unzip(compressed_contents) do
+                case Spring.unzip(compressed_contents) do
                   {:ok, contents} ->
                     params = %{
                       user_hash: user_hash,
@@ -71,27 +71,11 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
     SpringIn._no_match(state, "c.telemetry." <> cmd, msg_id, data)
   end
 
-  @spec decode_value(String.t()) :: {:ok, any} | {:error, String.t()}
-  defp decode_value(raw) do
-    case Base.url_decode64(raw) do
-      {:ok, string} ->
-        case Jason.decode(string) do
-          {:ok, json} ->
-            {:ok, json}
-          {:error, %Jason.DecodeError{position: position, data: _data}} ->
-            {:error, "Json decode error at position #{position}"}
-        end
-
-      _ ->
-        {:error, "Base64 decode error"}
-    end
-  end
-
   defp client_event(data, state) do
     if String.length(data) < 1024 do
       case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
         [_, event, value64, hash] ->
-          case decode_value(value64) do
+          case Spring.decode_value(value64) do
             {:ok, value} ->
               Telemetry.log_client_event(state.userid, event, value, hash)
               "success"
@@ -129,16 +113,6 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
       end
     else
       "exceeds max_length"
-    end
-  end
-
-  defp unzip(data) do
-    try do
-      result = :zlib.uncompress(data)
-      {:ok, result}
-    rescue
-      _ ->
-        {:error, :unzip_decompress}
     end
   end
 end
