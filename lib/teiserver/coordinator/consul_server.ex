@@ -131,16 +131,16 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
-  def handle_info({:lobby_chat, :say, _lobby_id, userid, msg}, state) do
+  def handle_info({:lobby_chat, _, _lobby_id, userid, msg}, state) do
     case SpadsParser.handle_in(msg) do
       {:host_update, host_data} -> handle_info({:host_update, userid, host_data}, state)
       nil -> {:noreply, state}
     end
   end
 
-  def handle_info({:lobby_chat, :sayex, _lobby_id, _userid, _msg}, state) do
-    {:noreply, state}
-  end
+  # def handle_info({:lobby_chat, :sayex, _lobby_id, _userid, _msg}, state) do
+  #   {:noreply, state}
+  # end
 
   def handle_info({:do_split, split_uuid}, %{split: split} = state) do
     Logger.info("Doing split")
