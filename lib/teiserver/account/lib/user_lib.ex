@@ -241,4 +241,42 @@ defmodule Teiserver.Account.UserLib do
       left_join: user_stats in assoc(user, :user_stat),
       preload: [user_stat: user_stats]
   end
+
+  @spec restriction_list :: [String.t()]
+  def restriction_list() do
+    [
+      # Chat
+      "Room chat",
+      "Direct chat",
+      "Lobby chat",
+      "Battle chat",
+
+      # Lobby interaction
+      "Host commands",
+      "Voting",
+
+      # Lobbies - Joining
+      "Hosting games",
+      "Joining existing lobbies",
+      "Joining duel",
+      "Joining ffa",
+      "Joining team",
+      "Joining coop",
+
+      # Lobbies - Playing
+      "Playing duel",
+      "Playing ffa",
+      "Playing team",
+      "Playing coop",
+
+      # Games - coverall
+      "Joining lobbies",
+
+      # MM
+      "Matchmaking",
+
+      # In game?
+      # "pausing the game (if possible, probably needs spads support)",
+    ]
+  end
 end
