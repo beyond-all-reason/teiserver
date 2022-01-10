@@ -55,6 +55,7 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
         queue_id = Enum.random(queue_ids)
         cmd = %{cmd: "c.matchmaking.join_queue", queue_id: queue_id}
         AgentLib._send(state.socket, cmd)
+        state
     end
   end
   defp handle_msg(%{"cmd" => "s.matchmaking.join_queue", "result" => "success", "queue_id" => queue_id}, state) do
