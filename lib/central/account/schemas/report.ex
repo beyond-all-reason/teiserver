@@ -14,7 +14,7 @@ defmodule Central.Account.Report do
     field :response_text, :string
     field :response_action, :string
     field :followup, :string
-    field :code_references, :string
+    field :code_references, {:array, :string}, default: []
 
     field :responded_at, :naive_datetime
     field :expires, :naive_datetime
@@ -29,7 +29,7 @@ defmodule Central.Account.Report do
   def changeset(struct, params \\ %{}) do
     params =
       params
-      |> trim_strings([:location, :reason, :response_text, :response_action, :followup, :code_references])
+      |> trim_strings([:location, :reason, :response_text, :response_action, :followup])
       |> parse_humantimes([:expires])
 
     struct
@@ -63,7 +63,7 @@ defmodule Central.Account.Report do
   def respond_changeset(struct, params \\ %{}) do
     params =
       params
-      |> trim_strings([:response_text, :response_action, :responded_at, :followup, :code_references])
+      |> trim_strings([:response_text, :response_action, :responded_at, :followup])
 
     struct
     |> cast(params, [:response_text, :response_action, :responder_id, :responded_at, :expires, :followup, :code_references])

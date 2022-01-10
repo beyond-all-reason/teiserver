@@ -35,6 +35,17 @@ defmodule Teiserver.Account.CodeOfConductData do
     }
   end
 
+  def flat_data() do
+    data()
+    |> Enum.map(fn {key1, items} ->
+      items
+      |> Enum.map(fn {key2, text} ->
+        {"#{key1}.#{key2}", text}
+      end)
+    end)
+    |> List.flatten()
+  end
+
   @spec get_point(String.t()) :: String.t() | nil
   def get_point(key) do
     case String.split(key, ".") do

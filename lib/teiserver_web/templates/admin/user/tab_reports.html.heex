@@ -1,21 +1,24 @@
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('.list-builder-select').select2({
+      width: "100%"
+    });
+  });
+</script>
+
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
+<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+
+
 <form action={Routes.ts_admin_user_path(@conn, :perform_action, @user, "report_action")} method="POST">
   <div class="row section-menu">
     <input type="hidden" name="_method" value="PUT" />
     <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
-    <div class="col-md-2">
+    <div class="col-md-4">
       <input type="text" name="reason" value="" placeholder="Reason" class="form-control" />
     </div>
-    <div class="col-md-2">
-      <input type="text" name="until" value="" placeholder="Expires (e.g. 60 minutes or 1 week), 'never' for a pemenant action" class="form-control" />
-    </div>
-    <div class="col-md-2">
-      <input type="text" name="followup" value="" placeholder="Followup" class="form-control" />
-    </div>
-    <div class="col-md-2">
-      <input type="text" name="code_references" value="" placeholder="CoC specifics" class="form-control" />
-    </div>
-
+    
     <div class="col-md-2">
       <select class="form-control" name="report_response_action" id="report_response_action" autofocus="autofocus">
         <%= for opt <- Central.Account.ReportLib.response_actions() do %>
@@ -29,6 +32,21 @@
     </div>
 
     <div class="col-md-2">
+      <input type="text" name="until" value="" placeholder="Expires (e.g. 60 minutes or 1 week), 'never' for a pemenant action" class="form-control" />
+    </div>
+    <div class="col-md-4">
+      <input type="text" name="followup" value="" placeholder="Followup" class="form-control" />
+    </div>
+    
+    <div class="col-md-10" style="margin-top: 10px;">
+      <select class="form-control list-builder-select" multiple="multiple" name="code_references[]" id="code_references">
+        <%= for {key, text} <- @coc_lookup do %>
+          <option value={key}><%= key <> " - " <> text %></option>
+        <% end %>
+      </select>
+    </div>
+
+    <div class="col-md-2" style="margin-top: 10px;">
       <button type='submit' class='btn btn-warning btn-block' data-confirm="Are you sure">
         <i class={"fa-fw #{Central.Helpers.StylingHelper.icon(:new)}"}></i>
         Add
@@ -105,3 +123,12 @@
 <% end %>
   </tbody>
 </table>
+
+<hr />
+<h5>CoC Quick Reference</h5>
+
+<ul>
+<%= for {key, text} <- @coc_lookup do %>
+  <li><strong><%= key %>:</strong> <%= text %></li>
+<% end %>
+</ul>

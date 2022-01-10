@@ -144,6 +144,7 @@ defmodule TeiserverWeb.Admin.UserController do
         user_stats = Account.get_user_stat_data(user.id)
 
         conn
+        |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
         |> assign(:user, user)
         |> assign(:user_stats, user_stats)
         |> assign(:roles, Account.get_roles(user))

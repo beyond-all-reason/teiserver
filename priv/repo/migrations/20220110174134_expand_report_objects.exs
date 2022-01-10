@@ -5,7 +5,7 @@ defmodule Central.Repo.Migrations.ExpandReportObjects do
     alter table(:account_reports) do
       add :followup, :string
       add :responded_at, :utc_datetime
-      add :code_references, :text
+      add :code_references, {:array, :string}
     end
   end
 end

@@ -160,6 +160,17 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           msg ++ ["If the behaviour continues one or more of the following actions may be performed:"] ++ followups
         end
 
+        # Code of conduct references
+        cocs = reports["Warn"]
+        |> Enum.map(fn r -> r.code_references end)
+        |> List.flatten
+        |> Enum.uniq
+
+        msg = case cocs do
+          [] -> msg
+          _ -> msg ++ ["Please refer to Code of Conduct points #{Enum.join(cocs, ", ")}"]
+        end
+
         # Do we need an acknowledgement? If they are muted then no.
         msg = if User.is_muted?(user) do
           msg ++ [dispute_string]
@@ -182,6 +193,17 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           nil
         else
           msg = ["This is a reminder that you are currently muted for reasons listed below, the muting will expire #{expires}." | reasons]
+
+          # Code of conduct references
+          cocs = reports["Mute"]
+          |> Enum.map(fn r -> r.code_references end)
+          |> List.flatten
+          |> Enum.uniq
+
+          msg = case cocs do
+            [] -> msg
+            _ -> msg ++ ["Please refer to Code of Conduct points #{Enum.join(cocs, ", ")}"]
+          end
           Coordinator.send_to_user(userid, msg)
         end
       end
