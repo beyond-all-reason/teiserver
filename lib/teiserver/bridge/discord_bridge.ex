@@ -84,6 +84,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
   end
 
+  @spec moderator_report(integer()) :: any
   def moderator_report(report_id) do
     result = Application.get_env(:central, DiscordBridge)[:bridges]
       |> Enum.filter(fn {_chan, room} -> room == "moderation-reports" end)
@@ -96,21 +97,25 @@ defmodule Teiserver.Bridge.DiscordBridge do
     if chan do
       report = Account.get_report!(report_id, preload: [:reporter, :target])
       if report.response_action == nil do
-        host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
-        url = "https://#{host}/teiserver/admin/user/#{report.target_id}#reports_tab"
-
-        msg = "#{report.target.name} was reported by #{report.reporter.name} for reason #{report.reason} - #{url}"
-
-        Alchemy.Client.send_message(
-          chan,
-          "Moderation report: #{msg}",
-          []# Options
-        )
+        report_creation(report, chan)
       else
         # This was created as a whole thing
         moderator_action(report_id)
       end
     end
+  end
+
+  def report_creation(report, chan) do
+    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    url = "https://#{host}/teiserver/admin/user/#{report.target_id}#reports_tab"
+
+    msg = "#{report.target.name} was reported by #{report.reporter.name} for reason #{report.reason} - #{url}"
+
+    Alchemy.Client.send_message(
+      chan,
+      "Moderation report: #{msg}",
+      []# Options
+    )
   end
 
   def moderator_action(report_id) do
@@ -133,7 +138,28 @@ defmodule Teiserver.Bridge.DiscordBridge do
           "Permanent"
         end
 
-        msg = "#{report.target.name} was #{past_tense} by #{report.responder.name} for reason #{report.response_text}, #{until}"
+        # TODO: Put this into a list of flags for the user and have
+        # a function in user.ex to generate the text
+        restrictions = case past_tense do
+          "Warned" -> "None"
+          "Muted" -> "Muted"
+          "Banned" -> "Banned"
+        end
+
+        followup = if report.followup != "" do
+          "If the behaviour continues, a follow up of #{report.followup} may be employed"
+        else
+          ""
+        end
+
+        msg = [
+          "Action: #{report.target.name} was #{past_tense} by #{report.responder.name}",
+          "Reason: #{report.response_text}",
+          "Restriction(s): #{restrictions}",
+          "Expires: #{until}",
+          followup
+        ]
+        |> Enum.join("\n")
 
         Alchemy.Client.send_message(
           chan,

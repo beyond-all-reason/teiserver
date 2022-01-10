@@ -1,9 +1,14 @@
 <table class='table'>
   <tbody>
+    <tr>
+      <td>Report by</td>
+      <td><%= @report.reporter.name %>, <%= date_to_str(@report.inserted_at, format: :hms_or_dmy) %></td>
+    </tr>
+  
     <%= if @report.responder do %>
       <tr>
         <td>Responded to by</td>
-        <td><%= @report.responder.name %></td>
+        <td><%= @report.responder.name %>, <%= date_to_str(@report.responded_at, format: :hms_or_dmy) %></td>
       </tr>
       <tr>
         <td>Action:</td>
@@ -12,6 +17,14 @@
       <tr>
         <td>Text:</td>
         <td><%= @report.response_text %></td>
+      </tr>
+      <tr>
+        <td>Followup:</td>
+        <td><%= @report.followup %></td>
+      </tr>
+      <tr>
+        <td>CoC references:</td>
+        <td><%= @report.code_references %></td>
       </tr>
       <tr>
         <td><%= if @report.expires != nil and Timex.compare(Timex.now(), @report.expires) == -1, do: "Expires", else: "Expired" %></td>

@@ -229,4 +229,37 @@ defmodule Central.Helpers.TimexHelper do
   #     true -> "#{s}s"
   #   end
   # end
+
+  def duration_to_str(nil, _), do: ""
+  def duration_to_str(_, nil), do: ""
+  def duration_to_str(t1, t2) do
+    Timex.diff(t1, t2, :second)
+    |> abs
+    |> duration_to_str
+  end
+
+  @hour 60 * 60
+  @day 60 * 60 * 24
+  def duration_to_str(seconds) do
+    cond do
+      seconds >= @day ->
+        days = seconds/@day |> round
+        if days == 1 do
+          "#{days} day"
+        else
+          "#{days} days"
+        end
+
+      seconds >= @hour ->
+        hours = seconds/@hour |> round
+        if hours == 1 do
+          "#{hours} hour"
+        else
+          "#{hours} hours"
+        end
+
+      true ->
+        "#{seconds} seconds"
+    end
+  end
 end

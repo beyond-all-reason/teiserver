@@ -132,17 +132,44 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         |> Enum.map(fn report -> " - " <> report.reason end)
 
         [_, expires] = user.warned
-        warning_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
 
-        if expires == nil do
-          msg = ["This is a reminder that you received one or more formal warnings for misbehaving as listed below. This is your last warning and this warning does not expire."] ++ reasons ++ [warning_prompt]
-          Client.set_awaiting_warn_ack(userid)
-          Coordinator.send_to_user(userid, msg)
+        # Coordinator message:
+        # You have been [Warned/Banned/Muted/Restricted] by [Admin]
+        # Reason: [Reason]
+        # Restriction(s): [restriction type], [restriction type2] etc  *(if applied)*
+        # Expires: [Time]
+        # If the behaviour continues, a [follow-up action] will be employed.
+
+        dispute_string = "If you feel that you have been the target of an erroneous or unjust moderation action please contact the moderator who performed the action or our head of moderation - Beherith"
+
+        msg = if expires == nil do
+          ["This is a reminder that you received one or more formal warnings for misbehaving as listed below. This is your last warning and this warning does not expire."] ++ reasons
         else
-          msg = ["This is a reminder that you recently received one or more formal warnings as listed below, the warnings expire #{expires}."] ++ reasons ++ [warning_prompt]
-          Client.set_awaiting_warn_ack(userid)
-          Coordinator.send_to_user(userid, msg)
+          expires = String.replace(expires, "T", " ")
+          ["This is a reminder that you recently received one or more formal warnings as listed below, the warnings expire #{expires}."] ++ reasons
         end
+
+        # Follow-up
+        followups = reports["Warn"]
+        |> Enum.filter(fn r -> r.followup != nil and r.followup != "" end)
+        |> Enum.map(fn r -> "- #{r.followup}" end)
+
+        msg = if Enum.empty?(followups) do
+          msg
+        else
+          msg ++ ["If the behaviour continues one or more of the following actions may be performed:"] ++ followups
+        end
+
+        # Do we need an acknowledgement? If they are muted then no.
+        msg = if User.is_muted?(user) do
+          msg ++ [dispute_string]
+        else
+          Client.set_awaiting_warn_ack(userid)
+          acknowledge_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
+          msg ++ [dispute_string, acknowledge_prompt]
+        end
+
+        Coordinator.send_to_user(userid, msg)
       end
 
       if User.is_muted?(user) do

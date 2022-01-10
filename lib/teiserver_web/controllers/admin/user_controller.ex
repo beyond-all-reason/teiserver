@@ -316,6 +316,8 @@ defmodule TeiserverWeb.Admin.UserController do
             "report_action" ->
               action = params["report_response_action"]
               reason = params["reason"]
+              followup = params["followup"]
+              code_references = params["code_references"]
 
               case Central.Account.ReportLib.perform_action(%{}, action, params["until"]) do
                 {:ok, expires} ->
@@ -328,6 +330,9 @@ defmodule TeiserverWeb.Admin.UserController do
                       "target_id" => user.id,
                       "response_text" => reason,
                       "response_action" => params["report_response_action"],
+                      "responded_at" => Timex.now(),
+                      "followup" => followup,
+                      "code_references" => code_references,
                       "expires" => expires,
                       "responder_id" => conn.user_id
                     })
