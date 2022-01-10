@@ -30,7 +30,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       -1 ->
         nil
       pos ->
-        "You are position #{pos} in the queue"
+        "You are position #{pos + 1} in the queue"
     end
 
     queue_string = state.join_queue
