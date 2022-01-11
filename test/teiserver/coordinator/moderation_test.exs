@@ -44,8 +44,9 @@ defmodule Teiserver.Coordinator.ModerationTest do
     assert msg == %{
       "cmd" => "s.communication.received_direct_message",
       "message" => [
-        "This is a reminder that you recently received one or more formal warnings as listed below, the warnings expire #{expires}.",
+        "This is a reminder that you recently received one or more formal warnings as listed below, the warnings expire #{expires |> String.replace("T", " ")}.",
         " - login_with_warning_test",
+        "If you feel that you have been the target of an erroneous or unjust moderation action please contact the moderator who performed the action or our head of moderation - Beherith",
         "Acknowledge this with 'I acknowledge this' to resume play"
       ],
       "sender_id" => Coordinator.get_coordinator_userid()

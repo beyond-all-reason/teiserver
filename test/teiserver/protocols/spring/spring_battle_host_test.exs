@@ -370,7 +370,7 @@ defmodule Teiserver.SpringBattleHostTest do
     # Update the host settings
     state = Coordinator.call_consul(lobby_id, :get_all)
     assert state.host_teamcount == 2
-    assert state.host_teamsize == 8
+    assert state.host_teamsize == 4
     _send_raw(socket, "c.battle.update_host {\"teamSize\": \"8\", \"nbTeams\": \"5\"}\n")
     :timer.sleep(100)
     reply = _recv_raw(socket)
