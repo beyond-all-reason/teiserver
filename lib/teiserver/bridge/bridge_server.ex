@@ -141,14 +141,14 @@ defmodule Teiserver.Bridge.BridgeServer do
   @spec get_bridge_account() :: Central.Account.User.t()
   def get_bridge_account() do
     user = Account.get_user(nil, search: [
-      exact_name: "Bridge"
+      exact_name: "DiscordBridge"
     ])
 
     case user do
       nil ->
         # Make account
         {:ok, account} = Account.create_user(%{
-          name: "Bridge",
+          name: "DiscordBridge",
           email: "bridge@teiserver",
           icon: "fa-brand fa-discord",
           colour: "#0066AA",
