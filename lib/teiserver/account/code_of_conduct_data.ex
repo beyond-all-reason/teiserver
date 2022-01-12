@@ -25,7 +25,7 @@ defmodule Teiserver.Account.CodeOfConductData do
       "3" => %{
         "1" => "Attempting to hack another player's account or the game infrastructure (if you wish to perform security testing contact the devs)",
         "2" => "Revealing personal or identifiable information about another player they've not already revealed themselves",
-        "3" => "Posting malware, spam or overly inappropriate content. We'd assume most of these would be bot behaviours but we're listing it here to be safe.",
+        "3" => "Posting malware, spam or scam links/messages. We'd assume most of these would be bot behaviours but we're listing it here to be safe.",
         "4" => "Bad or intentionally erroneous reports",
         "5" => "Impersonation of another player or the team running and making BAR, this includes taking credit for things you did not contribute to",
         "6" => "Circumvention of moderation, if you've been temporarily banned don't try to create a new account to get around it",
