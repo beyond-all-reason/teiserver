@@ -15,7 +15,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @always_allow ~w(status help y n follow joinq leaveq)
   @coordinator_bot ~w(whoami whois check)
   @boss_commands ~w(gatekeeper welcome-message)
-  @host_commands ~w(specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
+  @host_commands ~w(specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock rename)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
