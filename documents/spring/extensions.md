@@ -44,3 +44,10 @@ Sends a list of battle ids separated by tabs:
 c.battles.list_ids
 s.battles.id_list 1 2 3
 ```
+
+#### `s.battle.update_lobby_title lobby_id lobby.name`
+Indicates a lobby has a new title.
+```
+s.battle.update_lobby_title 123 My new and fancy name
+```
+

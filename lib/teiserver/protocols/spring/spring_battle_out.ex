@@ -7,7 +7,7 @@ defmodule Teiserver.Protocols.Spring.BattleOut do
       nil ->
         ""
       lobby ->
-        "s.battle.update_lobby_title #{lobby_id} #{lobby.name}\n"
+        "s.battle.update_lobby_title #{lobby_id}\t#{lobby.name}\n"
     end
   end
 end
