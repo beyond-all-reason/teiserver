@@ -17,7 +17,7 @@ These are just the highlights, full documentation can be found in the documentat
 ### In progress features
 - [Coordinator mode](/documents/planned_designs/coordinator.md)
 - [Matchmaking](/documents/spring/matchmaking.md)
-- [Reputation/Reporting system](/documents/designs/planned_reputation.md)
+- [Reputation/Reporting system](/documents/planned_designs/reputation.md)
 - [Tachyon](/documents/tachyon)
 - [Agent mode/Lobby dev assist](/documents/planned_designs/agent_mode.md)
 
