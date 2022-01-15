@@ -119,8 +119,8 @@ This is the channel for sending messages to the client. It allows the client on 
   {:client_message, topic, userid, data}
   
   # Matchmaking
-  {:client_message, :matchmaking, userid, {:match_ready, state.id}}
-  {:client_message, :matchmaking, userid, {:join_lobby, state.id}}
+  {:client_message, :matchmaking, userid, {:match_ready, queue_id}}
+  {:client_message, :matchmaking, userid, {:join_lobby, queue_id}}
 
   # Messaging
   {:client_message, :received_direct_message, userid, {from_id, message_content}}

@@ -246,6 +246,10 @@ defmodule Teiserver.TachyonTcpServer do
         :lobby_direct_announce ->
           {:noreply, state.protocol_out.reply(:lobby, :received_lobby_direct_announce, data, state)}
 
+        :matchmaking ->
+          {event, queue_id} = data
+          {:noreply, state.protocol_out.reply(:matchmaking, event, queue_id, state)}
+
         _ ->
           {:noreply, state.protocol_out.reply(:client, event, data, state)}
       end

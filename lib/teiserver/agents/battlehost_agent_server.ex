@@ -68,12 +68,12 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   end
 
   defp handle_msg(nil, state), do: state
-  defp handle_msg(%{"cmd" => "s.lobby.request_to_join", "userid" => userid}, %{reject: true} = state) do
+  defp handle_msg(%{"cmd" => "s.lobby_host.user_requests_to_join", "userid" => userid}, %{reject: true} = state) do
     cmd = %{cmd: "c.lobby_host.respond_to_join_request", userid: userid, response: "reject", reason: "because"}
     AgentLib._send(state.socket, cmd)
     state
   end
-  defp handle_msg(%{"cmd" => "s.lobby.request_to_join", "userid" => userid}, %{reject: false} = state) do
+  defp handle_msg(%{"cmd" => "s.lobby_host.user_requests_to_join", "userid" => userid}, %{reject: false} = state) do
     cmd = %{cmd: "c.lobby_host.respond_to_join_request", userid: userid, response: "approve"}
     AgentLib._send(state.socket, cmd)
     state
@@ -86,7 +86,12 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   end
   defp handle_msg(%{"cmd" => "s.communication.direct_message"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.announce"}, state), do: state
-  defp handle_msg(%{"cmd" => "s.lobby.message"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.say"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.closed"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.add_user"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.remove_user"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.kick_user"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.updated_client_battlestatus"}, state), do: state
 
   defp open_battle(state) do
     password = if :rand.uniform() <= state.password_chance, do: "password"

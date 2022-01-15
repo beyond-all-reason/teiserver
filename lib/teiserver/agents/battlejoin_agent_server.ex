@@ -68,12 +68,19 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   defp handle_msg(%{"cmd" => "s.lobby.leave", "result" => "success"}, state) do
     %{state | lobby_id: nil}
   end
+  defp handle_msg(%{"cmd" => "s.lobby.closed"}, state) do
+    %{state | lobby_id: nil}
+  end
   defp handle_msg(%{"cmd" => "s.lobby.request_status"}, state) do
     update_battlestatus(state)
   end
   defp handle_msg(%{"cmd" => "s.communication.direct_message"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.add_user"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.remove_user"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.kick_user"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.announce"}, state), do: state
-  defp handle_msg(%{"cmd" => "s.lobby.message"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.say"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.updated_client_battlestatus"}, state), do: state
 
   defp update_battlestatus(state) do
     data = if Enum.random([true, false]) do

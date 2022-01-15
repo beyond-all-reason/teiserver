@@ -55,7 +55,7 @@ defmodule Teiserver.Agents.AgentLib do
 
   def get_socket() do
     {:ok, socket} =
-      :ssl.connect(@localhost, Application.get_env(:central, Teiserver)[:ports][:tls],
+      :ssl.connect(@localhost, Application.get_env(:central, Teiserver)[:ports][:tachyon],
         active: true,
         verify: :verify_none
       )
@@ -66,12 +66,6 @@ defmodule Teiserver.Agents.AgentLib do
   defp do_login(socket, token) do
     msg = %{cmd: "c.auth.login", token: token, lobby_name: "agent_lobby", lobby_version: "1", lobby_hash: "token1 token2"}
     _send(socket, msg)
-  end
-
-  defp swap_to_tachyon(socket) do
-    _send_raw(socket, "TACHYON v1\n")
-    :timer.sleep(100)
-    :ok
   end
 
   @spec login({:sslsocket, any, any}, Map.t()) :: {:success, T.user()}
@@ -92,8 +86,7 @@ defmodule Teiserver.Agents.AgentLib do
     end
 
     user = User.get_user_by_name(data.name)
-    with :ok <- swap_to_tachyon(socket),
-        token <- User.create_token(user),
+    with token <- User.create_token(user),
         :ok <- do_login(socket, token)
       do
         {:success, user}
