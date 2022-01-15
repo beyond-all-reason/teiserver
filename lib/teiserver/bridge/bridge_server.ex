@@ -18,6 +18,11 @@ defmodule Teiserver.Bridge.BridgeServer do
     ConCache.get(:application_metadata_cache, "teiserver_bridge_userid")
   end
 
+  @spec get_bridge_pid() :: pid
+  def get_bridge_pid() do
+    ConCache.get(:application_metadata_cache, "teiserver_bridge_pid")
+  end
+
   def handle_info(:begin, _state) do
     state = if ConCache.get(:application_metadata_cache, "teiserver_startup_completed") != true do
       pid = self()
@@ -28,6 +33,23 @@ defmodule Teiserver.Bridge.BridgeServer do
     else
       do_begin()
     end
+
+    {:noreply, state}
+  end
+
+  # Metrics
+  def handle_info({:update_stats, stat_name, value}, state) do
+    channel_id = Application.get_env(:central, DiscordBridge)[:stat_channels]
+      |> Map.get(stat_name, "")
+
+    new_name = case stat_name do
+      :client_count -> "Players: #{value}"
+      :player_count -> "In game: #{value}"
+      :match_count -> "Battles: #{value}"
+      _ -> ""
+    end
+
+    change_channel_name(channel_id, new_name)
 
     {:noreply, state}
   end
@@ -179,6 +201,18 @@ defmodule Teiserver.Bridge.BridgeServer do
     end
   end
 
+  @spec change_channel_name(String.t(), String.t()) :: boolean()
+  def change_channel_name(_, ""), do: false
+  def change_channel_name("", _), do: false
+  def change_channel_name(channel_id, new_name) do
+    case Alchemy.Client.get_channel(channel_id) do
+      {:ok, _channel} ->
+        Alchemy.Client.edit_channel(channel_id, name: new_name)
+      _ ->
+        false
+    end
+  end
+
   @spec make_password() :: String.t
   defp make_password() do
     :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64)
@@ -189,6 +223,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
       send(self(), :begin)
     end
+    ConCache.put(:application_metadata_cache, "teiserver_bridge_pid", self())
 
     {:ok, %{}}
   end

@@ -23,10 +23,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingOut do
     }
   end
 
-  def do_reply(_, _) do
-    # TODO: Implement Tachyon matchmaking
-  end
-
   # def do_reply(:queue_info, {queue, info}) do
   #   %{
   #     "cmd" => "s.matchmaking.your_queue_list",
@@ -149,4 +145,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingOut do
   #     "message" => msg
   #   }
   # end
+
+  def do_reply(_, _) do
+    # TODO: Implement Tachyon matchmaking
+  end
 end
