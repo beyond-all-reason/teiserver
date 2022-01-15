@@ -117,15 +117,6 @@ defmodule Central.General.DateSeries do
     |> Stream.take_while(&(Timex.compare(&1, last) == -1))
   end
 
-  # def series("week", first_date, last_date) do
-  #   IO.puts ""
-  #   IO.inspect first_date
-  #   IO.puts ""
-
-  #   start = first_date
-  #   |> to_timex
-  # end
-
   def parse(d) do
     case d do
       {_, _, _} -> to_timex(d)

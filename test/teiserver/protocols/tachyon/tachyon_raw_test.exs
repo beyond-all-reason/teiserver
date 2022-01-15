@@ -4,16 +4,17 @@ defmodule Teiserver.Protocols.TachyonRawTest do
   alias Teiserver.{User, Account}
 
   import Teiserver.TeiserverTestLib,
-    only: [tls_setup: 0, raw_setup: 0, _send_raw: 2, _tachyon_send: 2, _recv_raw: 1, _tachyon_recv: 1, new_user: 0, new_user_name: 0, _recv_until: 1]
+    only: [spring_tls_setup: 0, tachyon_tls_setup: 0, raw_setup: 0, _send_raw: 2, _tachyon_send: 2, _recv_raw: 1, _tachyon_recv: 1, new_user: 0, new_user_name: 0, _recv_until: 1]
 
   alias Teiserver.Protocols.TachyonLib
 
   setup do
-    %{socket: socket} = tls_setup()
+    %{socket: socket} = tachyon_tls_setup()
     {:ok, socket: socket}
   end
 
-  test "spring tachyon interop command", %{socket: socket} do
+  test "spring tachyon interop command" do
+    %{socket: socket} = spring_tls_setup()
     _ = _recv_raw(socket)
     cmd = %{cmd: "c.system.ping"}
     data = TachyonLib.encode(cmd)
@@ -22,13 +23,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     assert reply == [%{"cmd" => "s.system.pong"}]
   end
 
-  test "swap to tachyon", %{socket: socket} do
-    # Test it swaps to it
-    _ = _recv_raw(socket)
-    _send_raw(socket, "TACHYON\n")
-    reply = _recv_raw(socket)
-    assert reply =~ "OK cmd=TACHYON\n"
-
+  test "basic tachyon", %{socket: socket} do
     # Now test we can ping it
     cmd = %{cmd: "c.system.ping"}
     data = TachyonLib.encode(cmd)
@@ -71,12 +66,6 @@ defmodule Teiserver.Protocols.TachyonRawTest do
   end
 
   test "register and auth", %{socket: socket} do
-    # Swap to Tachyon
-    _ = _recv_raw(socket)
-    _send_raw(socket, "TACHYON\n")
-    reply = _recv_raw(socket)
-    assert reply =~ "OK cmd=TACHYON\n"
-
     # Lets start with a bad register command
     existing_user = new_user()
     data = %{cmd: "c.auth.register", username: "test_name", email: existing_user.email, password: "password"}
@@ -124,12 +113,6 @@ defmodule Teiserver.Protocols.TachyonRawTest do
   end
 
   test "register, verify and auth", %{socket: socket} do
-    # Swap to Tachyon
-    _ = _recv_raw(socket)
-    _send_raw(socket, "TACHYON\n")
-    reply = _recv_raw(socket)
-    assert reply =~ "OK cmd=TACHYON\n"
-
     # Create the user
     name = new_user_name()
     data = %{cmd: "c.auth.register", username: name, email: "tachyon_verify@example", password: "password"}
@@ -187,12 +170,6 @@ defmodule Teiserver.Protocols.TachyonRawTest do
   end
 
   test "auth existing user", %{socket: socket} do
-    # Swap to Tachyon
-    _ = _recv_raw(socket)
-    _send_raw(socket, "TACHYON\n")
-    reply = _recv_raw(socket)
-    assert reply =~ "OK cmd=TACHYON\n"
-
     # Create the user
     name = new_user_name()
     data = %{cmd: "c.auth.register", username: name, email: "tachyon_existing@example", password: "token_password"}
@@ -302,11 +279,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     _send_raw(raw_socket, "EXIT\n")
 
     # Swap to Tachyon
-    %{socket: tls_socket} = tls_setup()
-    _ = _recv_raw(tls_socket)
-    _send_raw(tls_socket, "TACHYON\n")
-    reply = _recv_raw(tls_socket)
-    assert reply =~ "OK cmd=TACHYON\n"
+    %{socket: tls_socket} = tachyon_tls_setup()
 
     # Now auth via Tachyon
     # Good password
@@ -326,11 +299,7 @@ defmodule Teiserver.Protocols.TachyonRawTest do
     _tachyon_send(tls_socket, %{cmd: "c.auth.disconnect"})
 
     # Can we reconnect? It should no longer be a spring password
-    %{socket: tls_socket} = tls_setup()
-    _ = _recv_raw(tls_socket)
-    _send_raw(tls_socket, "TACHYON\n")
-    reply = _recv_raw(tls_socket)
-    assert reply =~ "OK cmd=TACHYON\n"
+    %{socket: tls_socket} = tachyon_tls_setup()
 
     _tachyon_send(tls_socket, %{cmd: "c.auth.get_token", password: "password", email: user.email})
     [reply] = _tachyon_recv(tls_socket)

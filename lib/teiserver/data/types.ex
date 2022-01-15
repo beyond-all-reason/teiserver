@@ -8,4 +8,7 @@ defmodule Teiserver.Data.Types do
   @type lobby() :: map()
   @type client() :: map()
   @type user() :: map()
+
+  @type spring_tcp_state() :: map()
+  @type tachyon_tcp_state() :: map()
 end

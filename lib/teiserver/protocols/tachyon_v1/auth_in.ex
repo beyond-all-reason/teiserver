@@ -1,6 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
   alias Teiserver.{User, Client, Account}
-  alias Teiserver.Protocols.Tachyon.V1.Tachyon
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
@@ -50,12 +49,12 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
     response = User.try_login(token, state.ip, "#{lobby_name} #{lobby_version}", lobby_hash)
 
     case response do
+      {:ok, user} ->
+        send(self(), {:action, {:login_accepted, user}})
+        reply(:auth, :login, {:success, user}, state)
+
       {:error, "Unverified", _userid} ->
         reply(:auth, :user_agreement, nil, state)
-
-      {:ok, user} ->
-        new_state = Tachyon.do_login_accepted(state, user)
-        reply(:auth, :login, {:success, user}, new_state)
 
       {:error, reason} ->
         reply(:auth, :login, {:failure, reason}, state)

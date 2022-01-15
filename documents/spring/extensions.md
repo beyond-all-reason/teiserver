@@ -51,3 +51,8 @@ Indicates a lobby has a new title.
 s.battle.update_lobby_title 123 My new and fancy name
 ```
 
+#### `s.system.shutdown`
+Sent to indicate the system is shutting down.
+```
+s.system.shutdown
+```

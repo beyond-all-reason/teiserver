@@ -81,8 +81,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
   defp check_wrapper(userid) do
     case User.get_user_by_id(userid) do
       nil -> "No user"
-      %{name: "PtaQ"} -> "PICKAXE"
-      %{name: "Damgam"} -> "It's all his fault"
       %{bot: true} -> "Bot account"
       %{moderator: true} -> "Moderator account"
       user ->
@@ -146,8 +144,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
         if not Enum.empty?(hashes) do
           banhash = hd(hashes)
-          user = User.get_user_by_id(userid)
-          Logger.error("BANHASH for lobby_hash #{banhash.id} - userid: #{userid}, name: #{user.name}, type: #{banhash.type}")
           do_ban(userid, banhash)
         else
           nil
@@ -160,7 +156,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
     Account.update_user_stat(userid, %{"autoban_type" => banhash.type, "autoban_id" => banhash.id})
     User.update_user(%{user | banned: [true, nil]})
     Client.disconnect(user.id, :banned)
-    Logger.error("Automod added ban action for userid: #{userid}, name: #{user.name}, type: #{banhash.type}")
     "Banned user"
   end
 end

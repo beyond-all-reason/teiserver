@@ -5,7 +5,7 @@ defmodule Teiserver.SpringTokenTest do
   alias Teiserver.Client
 
   import Teiserver.TeiserverTestLib,
-    only: [tls_setup: 0, raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1]
+    only: [spring_tls_setup: 0, raw_setup: 0, _send_raw: 2, _recv_raw: 1, _recv_until: 1]
 
   test "c.user.get_token - insecure" do
     %{socket: socket} = raw_setup()
@@ -41,7 +41,7 @@ defmodule Teiserver.SpringTokenTest do
 
     Teiserver.Account.UserCache.recache_user(user.id)
 
-    %{socket: socket} = tls_setup()
+    %{socket: socket} = spring_tls_setup()
     _welcome = _recv_raw(socket)
 
     _send_raw(socket, "c.user.get_token_by_email test_user_token_test_user@\ttoken_password\n")
@@ -106,7 +106,7 @@ defmodule Teiserver.SpringTokenTest do
   end
 
   test "c.user.get_token_by_email - incorrect" do
-    %{socket: socket} = tls_setup()
+    %{socket: socket} = spring_tls_setup()
     _welcome = _recv_raw(socket)
 
     _send_raw(socket, "c.user.get_token_by_email nouser@\ttoken_password\n")
@@ -119,7 +119,7 @@ defmodule Teiserver.SpringTokenTest do
   end
 
   test "c.user.get_token_by_name - incorrect" do
-    %{socket: socket} = tls_setup()
+    %{socket: socket} = spring_tls_setup()
     _welcome = _recv_raw(socket)
 
     _send_raw(socket, "c.user.get_token_by_name nouser\ttoken_password\n")

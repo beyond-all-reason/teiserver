@@ -309,7 +309,7 @@ CLIENTS test_room #{user.name}\n"
       joinedbattle,
       tags,
       host_bstatus,
-      bstatus,
+      # bstatus,
       request,
       ""
     ] = reply
@@ -317,7 +317,7 @@ CLIENTS test_room #{user.name}\n"
     assert joinbattle == "JOINBATTLE #{lobby_id} #{hash}"
     assert joinedbattle == "JOINEDBATTLE #{lobby_id} #{user2.name} sPassword"
     assert tags =~ "SETSCRIPTTAGS server/match/uuid="
-    assert bstatus == "CLIENTBATTLESTATUS #{user2.name} 0 0"
+    # assert bstatus == "CLIENTBATTLESTATUS #{user2.name} 0 0"
     assert host_bstatus == "CLIENTBATTLESTATUS #{user1.name} 0 0"
     assert request == "REQUESTBATTLESTATUS"
 

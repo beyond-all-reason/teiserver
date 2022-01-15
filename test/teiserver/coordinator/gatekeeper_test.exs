@@ -47,6 +47,12 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
       player: true
     }, :client_updated_battlestatus)
 
+    # Add user message
+    _tachyon_recv(hsocket)
+
+    # Battlestatus message
+    _tachyon_recv(hsocket)
+
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
   end
 
@@ -82,7 +88,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
 
     # Now we bring in player 2, they should be allowed in
     %{user: player2, socket: psocket2} = tachyon_auth_setup()
-    assert Lobby.can_join?(player2.id, lobby_id) == {:waiting_on_host, nil}
+    assert match?({:waiting_on_host, _}, Lobby.can_join?(player2.id, lobby_id))
 
     # Okay, add them
     Lobby.force_add_user_to_battle(player2.id, lobby_id)
@@ -123,6 +129,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
 
     # Now we bring in player 2, they should not be allowed in
     %{user: player2} = tachyon_auth_setup()
-    assert Lobby.can_join?(player2.id, lobby_id) == {:waiting_on_host, nil}
+    # assert Lobby.can_join?(player2.id, lobby_id) == {:waiting_on_host, nil}
+    assert match?({:waiting_on_host, _}, Lobby.can_join?(player2.id, lobby_id))
   end
 end

@@ -3,10 +3,15 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   Used for library-like functions that are specific to a version.
   """
 
-  import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
   alias Teiserver.Client
-  alias Teiserver.Battle.Lobby
   alias Phoenix.PubSub
+  alias Teiserver.Data.Types, as: T
+
+  @spec protocol_in :: Teiserver.Protocols.Tachyon.V1.TachyonIn
+  def protocol_in(), do: Teiserver.Protocols.Tachyon.V1.TachyonIn
+
+  @spec protocol_out :: Teiserver.Protocols.Tachyon.V1.TachyonOut
+  def protocol_out(), do: Teiserver.Protocols.Tachyon.V1.TachyonOut
 
   @doc """
   Used to convert objects into something that will be sent back over the wire. We use this
@@ -25,41 +30,59 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   def convert_object(:queue, queue), do: Map.take(queue, [:id, :name, :team_size, :conditions, :settings, :map_list])
   def convert_object(:blog_post, post), do: Map.take(post, ~w(id short_content content url tags live_from)a)
 
-  @spec do_login_accepted(Map.t(), Map.t()) :: Map.t()
-  def do_login_accepted(state, user) do
+  @spec do_action(atom, any(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
+  def do_action(:login_accepted, user, state) do
     # Login the client
     Client.login(user, self(), state.ip)
 
-    send(self(), {:action, {:login_end, nil}})
-    PubSub.unsubscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_user_updates:#{user.id}")
+
+    PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
+    PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{user.id}")
 
     exempt_from_cmd_throttle = if user.moderator == true or user.bot == true do
       true
     else
       false
     end
-    %{state | user: user, username: user.name, userid: user.id, exempt_from_cmd_throttle: exempt_from_cmd_throttle}
+    %{state |
+      user: user,
+      username: user.name,
+      userid: user.id,
+      exempt_from_cmd_throttle: exempt_from_cmd_throttle
+    }
   end
 
-  def do_leave_battle(state, lobby_id) do
-    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{lobby_id}")
-    state
+  def do_action(:host_lobby, lobby_id, state) do
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_host_message:#{lobby_id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+
+    PubSub.subscribe(Central.PubSub, "teiserver_lobby_host_message:#{lobby_id}")
+    PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    %{state |
+      lobby_id: lobby_id,
+      lobby_host: true
+    }
   end
 
-  # Does the joining of a battle
-  @spec do_join_battle(map(), integer(), String.t()) :: map()
-  def do_join_battle(state, lobby_id, script_password) do
-    # TODO: Change this function to be purely about sending info to the client
-    # the part where it calls Lobby.add_user_to_battle should happen elsewhere
-    battle = Lobby.get_battle(lobby_id)
-    Lobby.add_user_to_battle(state.userid, battle.id, script_password)
-    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
-    PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{battle.id}")
+  def do_action(:leave_lobby, lobby_id, state) do
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    %{state | lobby_id: nil}
+  end
 
-    reply(:lobby, :join_response, {:approve, battle}, state)
-    reply(:lobby, :request_status, nil, state)
+  def do_action(:join_lobby, lobby_id, state) do
+    Teiserver.Battle.Lobby.add_user_to_battle(state.userid, lobby_id, state.script_password)
 
-    %{state | lobby_id: battle.id}
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+
+    PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+    PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+
+    %{state | lobby_id: lobby_id}
   end
 end

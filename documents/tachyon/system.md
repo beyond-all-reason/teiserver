@@ -1,3 +1,4 @@
+## Client initiated
 ### `c.system.ping`
 No arguments
 
@@ -15,6 +16,20 @@ No response data
 }
 ```
 
+## Server initiated
+#### `s.system.server_event`
+Instructs the application of an event taking place on the server.
 
-#### Server
-- Server restarting message, instructing the client(s) to be aware service is going down but expected to resume soon
+#### Arguments
+event :: "server_restart"
+
+#### Event types
+**server_restart** - Indicates the server is in the process of or about to restart. This means it will not respond to commands or send updated data until the restart has taken place.
+
+#### Examples
+```
+{
+  "cmd": "c.system.server_event",
+  "event": "server_restart"
+}
+```

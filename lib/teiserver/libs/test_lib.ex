@@ -18,9 +18,18 @@ defmodule Teiserver.TeiserverTestLib do
 
   # Looks like we might want to use https://erlang.org/documentation/doc-12.0/lib/ssl-10.4/doc/html/ssl.html#connect-2
   # and upgrade the connection instead?
-  @spec tls_setup :: %{socket: port()}
-  def tls_setup() do
+  @spec spring_tls_setup :: %{socket: port()}
+  def spring_tls_setup() do
     {:ok, socket} = :ssl.connect(@host, 8201,
+      active: false,
+      verify: :verify_none
+    )
+    %{socket: socket}
+  end
+
+  @spec tachyon_tls_setup :: %{socket: port()}
+  def tachyon_tls_setup() do
+    {:ok, socket} = :ssl.connect(@host, 8202,
       active: false,
       verify: :verify_none
     )
@@ -108,13 +117,7 @@ defmodule Teiserver.TeiserverTestLib do
     user = if user, do: user, else: new_user()
     token = User.create_token(user)
 
-    %{socket: socket} = tls_setup()
-    # Ignore the TASSERVER
-    _recv_raw(socket)
-
-    # Swap to Tachyon
-    _send_raw(socket, "TACHYON\n")
-    _recv_raw(socket)
+    %{socket: socket} = tachyon_tls_setup()
 
     # Now do our login
     data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a", lobby_hash: "t1 t2"}

@@ -30,7 +30,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:reply, Map.get(state, key), state}
   end
 
-  def handle_call({:request_user_join_battle, userid}, _from, state) do
+  def handle_call({:request_user_join_lobby, userid}, _from, state) do
     {:reply, allow_join(userid, state), state}
   end
 
@@ -94,23 +94,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, %{state | timeouts: %{}}}
   end
 
-  def handle_info({:user_joined, userid}, state) do
-    user = User.get_user_by_id(userid)
-
-    if state.welcome_message do
-      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name}: ####################", state.lobby_id)
-      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name}: " <> state.welcome_message, state.lobby_id)
-      Lobby.sayprivateex(state.coordinator_id, userid, " #{user.name}: ####################", state.lobby_id)
-    end
-
-    # If the client is muted, we need to tell the host
-    if User.is_muted?(userid) do
-      Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{user.name}")
-    end
-
-    {:noreply, state}
-  end
-
   def handle_info({:dequeue_user, userid}, state) do
     new_queue = state.join_queue |> List.delete(userid)
     {:noreply, %{state | join_queue: new_queue}}
@@ -138,7 +121,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  # def handle_info({:lobby_chat, :sayex, _lobby_id, _userid, _msg}, state) do
+  # def handle_info({:lobby_chat, :announce, _lobby_id, _userid, _msg}, state) do
   #   {:noreply, state}
   # end
 
@@ -203,8 +186,27 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  def handle_info({:lobby_update, :updated_client_status, _lobby_id, {_userid, _reason}}, state) do
+  def handle_info({:lobby_update, :updated_client_battlestatus, _lobby_id, {_userid, _reason}}, state) do
     player_count_changed(state)
+    {:noreply, state}
+  end
+
+  def handle_info({:lobby_update, :add_user, _lobby_id, userid}, state) do
+    user = User.get_user_by_id(userid)
+
+    if state.welcome_message do
+      Lobby.sayprivateex(state.coordinator_id, userid, [
+        " #{user.name}: ####################",
+        " #{user.name}: " <> state.welcome_message,
+        " #{user.name}: ####################"
+      ], state.lobby_id)
+    end
+
+    # If the client is muted, we need to tell the host
+    if User.is_muted?(userid) do
+      Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{user.name}")
+    end
+
     {:noreply, state}
   end
 
@@ -388,8 +390,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def broadcast_update(state, reason \\ nil) do
     Phoenix.PubSub.broadcast(
       Central.PubSub,
-      "teiserver_lobby_updates:#{state.lobby_id}",
-      {:lobby_update, :consul_server_updated, state.lobby_id, reason}
+      "teiserver_liveview_lobby_updates:#{state.lobby_id}",
+      {:liveview_lobby_update, :consul_server_updated, state.lobby_id, reason}
     )
     state
   end

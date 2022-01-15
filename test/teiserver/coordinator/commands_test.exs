@@ -45,6 +45,12 @@ defmodule Teiserver.Coordinator.CommandsTest do
       player: true
     }, :client_updated_battlestatus)
 
+    # Add user message
+    _tachyon_recv(hsocket)
+
+    # Battlestatus message
+    _tachyon_recv(hsocket)
+
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
   end
 
@@ -153,7 +159,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     _tachyon_send(hsocket, data)
 
     [reply] = _tachyon_recv(psocket)
-    assert reply["cmd"] == "s.lobby.join_response"
+    assert reply["cmd"] == "s.lobby.force_join"
     assert reply["lobby"]["id"] == lobby_id
   end
 
@@ -391,9 +397,12 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert reply["message"] |> Enum.slice(0, 4) == ["Status for battle ##{lobby_id}", "Locks: ", "Gatekeeper: default", "Join queue: "]
   end
 
-  test "help", %{hsocket: hsocket} do
+  test "help", %{lobby_id: lobby_id, hsocket: hsocket, host: host} do
     data = %{cmd: "c.lobby.message", message: "$help"}
     _tachyon_send(hsocket, data)
+
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{"cmd" => "s.lobby.say", "lobby_id" => lobby_id, "message" => "$help", "sender" => host.id}
 
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.communication.received_direct_message"
@@ -404,18 +413,17 @@ defmodule Teiserver.Coordinator.CommandsTest do
   test "passthrough", %{lobby_id: lobby_id, host: host, hsocket: hsocket, listener: listener} do
     data = %{cmd: "c.lobby.message", message: "$non-existing command"}
     _tachyon_send(hsocket, data)
-
     messages = PubsubListener.get(listener)
     assert messages == [{:battle_updated, lobby_id, {host.id, "$non-existing command", lobby_id}, :say}]
 
     reply = _tachyon_recv(hsocket)
-    assert reply == :timeout
+    assert reply == [%{"cmd" => "s.lobby.say", "lobby_id" => lobby_id, "message" => "$non-existing command", "sender" => host.id}]
   end
 
   test "join_queue", %{lobby_id: lobby_id, hsocket: hsocket, psocket: _psocket, player: player} do
     # We don't want to use the player we start with, we want to number our players specifically
     Lobby.remove_user_from_any_battle(player.id)
-    _tachyon_send(hsocket, %{cmd: "c.lobby.update_host_status", boss: nil, teamsize: 8, teamcount: 2})
+    _tachyon_send(hsocket, %{cmd: "c.lobby_host.update_host_status", boss: nil, teamsize: 8, teamcount: 2})
 
     # At the moment we are hard coding the join queue to 8v8s until we
     # add something to get the player count limit

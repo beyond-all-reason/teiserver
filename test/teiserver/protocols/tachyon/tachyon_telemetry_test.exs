@@ -3,7 +3,7 @@ defmodule Teiserver.Protocols.TachyonTelemetryTest do
   use Central.ServerCase
 
   import Teiserver.TeiserverTestLib,
-    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, tls_setup: 0, _send_raw: 2, _recv_raw: 1]
+    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, tachyon_tls_setup: 0]
 
   setup do
     %{socket: socket, user: user, pid: pid} = tachyon_auth_setup()
@@ -11,10 +11,7 @@ defmodule Teiserver.Protocols.TachyonTelemetryTest do
   end
 
   test "unauth properties" do
-    %{socket: socket} = tls_setup()
-    _send_raw(socket, "TACHYON\n")
-    assert _recv_raw(socket) == "OK cmd=TACHYON\n"
-
+    %{socket: socket} = tachyon_tls_setup()
     assert Enum.count(Telemetry.list_unauth_properties()) == 0
 
     data = %{cmd: "c.telemetry.update_property", hash: "myhash", property: "tachyon_unauth_test_property", value: "value here"}
@@ -37,10 +34,7 @@ defmodule Teiserver.Protocols.TachyonTelemetryTest do
   end
 
   test "unauth events" do
-    %{socket: socket} = tls_setup()
-    _send_raw(socket, "TACHYON\n")
-    _recv_raw(socket)
-
+    %{socket: socket} = tachyon_tls_setup()
     assert Enum.count(Telemetry.list_unauth_events()) == 0
 
     data = %{cmd: "c.telemetry.log_event", hash: "myhash", event: "tachyon_unauth_test_event", value: %{"key" => "value here"}}

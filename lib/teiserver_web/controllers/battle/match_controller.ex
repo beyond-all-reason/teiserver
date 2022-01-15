@@ -53,10 +53,6 @@ defmodule TeiserverWeb.Battle.MatchController do
     |> MatchLib.make_favourite
     |> insert_recently(conn)
 
-    IO.puts ""
-    IO.inspect match
-    IO.puts ""
-
     match_name = MatchLib.make_match_name(match)
 
     conn

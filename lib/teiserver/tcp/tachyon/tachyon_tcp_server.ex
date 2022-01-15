@@ -2,8 +2,10 @@ defmodule Teiserver.TachyonTcpServer do
   @moduledoc false
   use GenServer
   require Logger
+  alias Phoenix.PubSub
 
   alias Teiserver.{User, Client}
+  alias Teiserver.Data.Types, as: T
 
   # Duration refers to how long it will track commands for
   # Limit is the number of commands that can be sent in that time
@@ -74,6 +76,9 @@ defmodule Teiserver.TachyonTcpServer do
       socket: socket,
       transport: transport,
       ip: ip,
+      protocol: Application.get_env(:central, Teiserver)[:default_tachyon_protocol],
+      protocol_in: Application.get_env(:central, Teiserver)[:default_tachyon_protocol].protocol_in(),
+      protocol_out: Application.get_env(:central, Teiserver)[:default_tachyon_protocol].protocol_out(),
 
       # Client state
       userid: nil,
@@ -93,7 +98,8 @@ defmodule Teiserver.TachyonTcpServer do
       cmd_timestamps: []
     }
 
-    send(self(), {:action, {:welcome, nil}})
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
+
     :gen_server.enter_loop(__MODULE__, [], state)
   end
 
@@ -101,6 +107,7 @@ defmodule Teiserver.TachyonTcpServer do
     {:ok, init_arg}
   end
 
+  @spec handle_call(any(), any(), T.tachyon_tcp_state()) :: {:reply, any(), T.tachyon_tcp_state()}
   def handle_call(:get_state, _from, state) do
     {:reply, state, state}
   end
@@ -109,6 +116,7 @@ defmodule Teiserver.TachyonTcpServer do
     {:reply, Map.get(state, key), state}
   end
 
+  @spec handle_info(any(), T.tachyon_tcp_state()) :: {:noreply, T.tachyon_tcp_state()}
   def handle_info({:put, key, value}, state) do
     new_state = Map.put(state, key, value)
     {:noreply, new_state}
@@ -121,10 +129,26 @@ defmodule Teiserver.TachyonTcpServer do
     {:noreply, state}
   end
 
-  def handle_info({:action, {_action_type, _data}}, state) do
-    # new_state = do_action(action_type, data, state)
-    Logger.info("Tachyon TCP server action")
-    {:noreply, state}
+  # Instructions to update the state of the connection
+  def handle_info({:action, {action_type, data}}, state) do
+    new_state = case {action_type, data} do
+      {:login_accepted, user_data} ->
+        state.protocol.do_action(:login_accepted, user_data, state)
+
+      {:host_lobby, lobby_id} ->
+        state.protocol.do_action(:host_lobby, lobby_id, state)
+
+      {:join_lobby, lobby_id} ->
+        state.protocol.do_action(:join_lobby, lobby_id, state)
+
+      {:leave_lobby, lobby_id} ->
+        state.protocol.do_action(:leave_lobby, lobby_id, state)
+
+      {:set_script_password, new_script_password} ->
+        %{state | script_password: new_script_password}
+    end
+
+    {:noreply, new_state}
   end
 
   # Main source of data ingress
@@ -176,6 +200,55 @@ defmodule Teiserver.TachyonTcpServer do
         Logger.error("Heartbeat timeout for #{state.username}")
       end
       {:stop, :normal, state}
+    else
+      {:noreply, state}
+    end
+  end
+
+  # Depreciated/depreciating stuff, we just ignore it
+  def handle_info({:request_user_join_lobby, _}, state), do: {:noreply, state}
+  def handle_info({:join_battle_request_response, _, _, _}, state), do: {:noreply, state}
+  def handle_info({:force_join_battle, _, _}, state), do: {:noreply, state}
+
+  # Internal pubsub messaging (see pubsub.md)
+  def handle_info({:server_event, event}, state) do
+    {:noreply, state.protocol_out.reply(:system, :server_event, event, state)}
+  end
+
+  def handle_info({:lobby_host_message, event, lobby_id, data}, state) do
+    if state.lobby_host == true and state.lobby_id == lobby_id do
+      {:noreply, state.protocol_out.reply(:lobby_host, event, data, state)}
+    else
+      {:noreply, state}
+    end
+  end
+
+  def handle_info({:lobby_chat, event, lobby_id, userid, data}, state) do
+    {:noreply, state.protocol_out.reply(:lobby_chat, event, {lobby_id, userid, data}, state)}
+  end
+
+  def handle_info({:lobby_update, event, lobby_id, data}, state) do
+    {:noreply, state.protocol_out.reply(:lobby, event, {lobby_id, data}, state)}
+  end
+
+  def handle_info({:client_message, event, userid, data}, state) do
+    if state.userid == userid do
+      case event do
+        :join_lobby_request_response ->
+          {:noreply, state.protocol_out.reply(:lobby, event, data, state)}
+
+        :force_join_lobby ->
+          {:noreply, state.protocol_out.reply(:lobby, event, data, state)}
+
+        :received_direct_message ->
+          {:noreply, state.protocol_out.reply(:communication, event, data, state)}
+
+        :lobby_direct_announce ->
+          {:noreply, state.protocol_out.reply(:lobby, :received_lobby_direct_announce, data, state)}
+
+        _ ->
+          {:noreply, state.protocol_out.reply(:client, event, data, state)}
+      end
     else
       {:noreply, state}
     end

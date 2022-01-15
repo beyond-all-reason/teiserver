@@ -67,13 +67,19 @@ defmodule Teiserver.Coordinator.JoiningTest do
     }
 
     # Accept them
-    data = %{cmd: "c.lobby.respond_to_join_request", userid: user2.id, response: "approve"}
-    _tachyon_send(socket, data)
-    _battle = _tachyon_recv(socket2)
+    data = %{cmd: "c.lobby_host.respond_to_join_request", userid: user2.id, response: "approve"}
 
-    # Request status message for the player
-    [status_request] = _tachyon_recv(socket2)
-    assert status_request["cmd"] == "s.lobby.request_status"
+    _tachyon_send(socket, data)
+    [join_response] = _tachyon_recv(socket2)
+    assert join_response["cmd"] == "s.lobby.join_response"
+
+    # Expect welcome message
+    [reply] = _tachyon_recv(socket2)
+    assert reply == %{
+      "cmd" => "s.lobby.received_lobby_direct_announce",
+      "message" => [" #{user2.name}: ####################", " #{user2.name}: This is the welcome message", " #{user2.name}: ####################"],
+      "sender_id" => Coordinator.get_coordinator_userid()
+    }
 
     # Send the battle status
     data = %{
@@ -83,30 +89,22 @@ defmodule Teiserver.Coordinator.JoiningTest do
       team_number: 0,
       ally_team_number: 0,
       side: 0,
-      team_colour: 0
+      team_colour: 0,
+      ready: true
     }
     _tachyon_send(socket2, data)
 
-    # Expect welcome message
-    reply = _tachyon_recv(socket2)
-    assert reply == [%{
-      "cmd" => "s.lobby.announce",
-      "message" => " #{user2.name}: ####################",
-      "sender" => Coordinator.get_coordinator_userid()
-    }]
+    # We expect to hear about our new status
+    [reply] = _tachyon_recv(socket2)
+    assert reply == %{
+      "cmd" => "s.lobby.updated_client_battlestatus",
+      "client" => %{"ally_team_number" => 0, "away" => false, "in_game" => false, "lobby_id" => lobby_id, "ready" => true, "team_colour" => 0, "team_number" => 0},
+      "lobby_id" => lobby_id,
+      "reason" => "client_updated_battlestatus"
+    }
 
+    # No more messages
     reply = _tachyon_recv(socket2)
-    assert reply == [%{
-      "cmd" => "s.lobby.announce",
-      "message" => " #{user2.name}: This is the welcome message",
-      "sender" => Coordinator.get_coordinator_userid()
-    }]
-
-    reply = _tachyon_recv(socket2)
-    assert reply == [%{
-      "cmd" => "s.lobby.announce",
-      "message" => " #{user2.name}: ####################",
-      "sender" => Coordinator.get_coordinator_userid()
-    }]
+    assert reply == :timeout
   end
 end

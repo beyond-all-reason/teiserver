@@ -24,7 +24,7 @@ Information affecting all those not in a battle, such as a battle being created.
 Information affecting only those in this given battle, such as a player joining.
 
 #### teiserver_global_battle_lobby_updates
-Limited information pertaining to the creation/deletion of battles.
+Limited information pertaining to the creation/deletion of battle lobbies.
 ```
   {:global_battle_lobby, :opened, lobby_id}
   {:global_battle_lobby, :closed, lobby_id}
@@ -37,10 +37,24 @@ Limited information pertaining to the creation/deletion of battles.
   {:global_match_updates, :match_completed, match_id}
 ```
 
-#### teiserver_lobby_updates:#{battle_lobby_id}
-Information affecting only those in this given battle. Chat is not sent via this channel.
+### Lobbies
+#### teiserver_lobby_host_message:#{battle_lobby_id}
+Messages intended for the host of a given lobby. This saves a call for the client pid and also allows debugging tools to hook into the messages if needed.
 Valid events:
 ```
+  # Structure
+  {:lobby_host_message, _action, lobby_id, _data}
+
+  {:lobby_host_message, :user_requests_to_join, lobby_id, {userid, script_password}}
+```
+
+#### teiserver_lobby_updates:#{battle_lobby_id}
+Information affecting only those in this given lobby. Chat is not sent via this channel.
+Valid events:
+```
+  # Structure
+  {:lobby_update, _action, lobby_id, _data}
+
   # BattleLobby
   {:lobby_update, :updated, lobby_id, update_reason}
   {:lobby_update, :closed, lobby_id, reason}
@@ -51,23 +65,28 @@ Valid events:
   {:lobby_update, :remove_user, lobby_id, userid}
   {:lobby_update, :kick_user, lobby_id, userid}
 
-  # Coordinator
-  {:lobby_update, :consul_server_updated, lobby_id, reason}
-
   # Client
-  {:lobby_update, :updated_client_status, lobby_id, {userid, reason}}
+  {:lobby_update, :updated_client_battlestatus, lobby_id, {Client, reason}}
 ```
 
 #### teiserver_lobby_chat:#{battle_lobby_id}
-Information specific to the chat in a battle lobby, state changes to the battle will never be in this channel.
+Information specific to the chat in a battle lobby, state changes to the battle are not sent via this channel.
 Valid events:
 ```
+  # Structure
+  {:lobby_chat, _action, lobby_id, userid, _data}
+
+  # Chatting
   {:lobby_chat, :say, lobby_id, userid, msg}
-  {:lobby_chat, :sayex, lobby_id, userid, msg}
+  {:lobby_chat, :announce, lobby_id, userid, msg}
 ```
 
 #### teiserver_liveview_lobby_updates:#{battle_lobby_id}
 These are updates sent from the LiveBattle genservers (used to throttle/batch messages sent to the liveviews).
+```
+  # Coordinator
+  {:liveview_lobby_update, :consul_server_updated, lobby_id, reason}
+```
 
 ### User/Client
 #### legacy_all_user_updates
@@ -95,19 +114,26 @@ Valid events
 
 ### teiserver_client_messages:#{userid}
 This is the channel for sending messages to the client. It allows the client on the web and lobby application to receive messages.
-General structure should be: `{:client_message, :topic, userid, data}` to allow for easy matching and discarding as new items are added to the list
 ```
+  # Structure
+  {:client_message, topic, userid, data}
+  
+  # Matchmaking
   {:client_message, :matchmaking, userid, {:match_ready, state.id}}
   {:client_message, :matchmaking, userid, {:join_lobby, state.id}}
 
-  {:client_message, :lobby, userid, {:join_lobby, lobby_id}}
-  {:client_message, :lobby, userid, {:leave_lobby, lobby_id}}
-  
-  {:client_message, :direct_message, userid, {from_id, message_content}}
+  # Messaging
+  {:client_message, :received_direct_message, userid, {from_id, message_content}}
+  {:client_message, :lobby_direct_say, userid, {from_id, message_content}}
+  {:client_message, :lobby_direct_announce, userid, {from_id, message_content}}
+
+  # Server initiated actions related to the lobby
+  {:client_message, :join_lobby_request_response, userid, {lobby_id, response, reason}}
+  {:client_message, :force_join_lobby, userid, {lobby_id, script_password}}
 ```
 
 ### teiserver_client_action_updates:#{userid}
-Information actions taken by a specific user
+Informs about actions performed by a specific client
 Aside from connect/disconnect there should always be the structure of `{:client_action, :join_queue, userid, data}`
 ```
   {:client_action, :client_connect, userid}
@@ -124,6 +150,13 @@ Aside from connect/disconnect there should always be the structure of `{:client_
 Designed for lobby applications to display/perform various actions as opposed to internal agent clients or any web interfaces
 ```
   {:teiserver_client_application, :ring, userid, ringer_id}
+```
+
+### teiserver_user_updates:#{userid}
+Information pertinent to a specific user
+Aside from connect/disconnect there should always be the structure of `{:client_action, :join_queue, userid, data}`
+```
+  {:user_update, ?update_type?, userid, ?data?}
 ```
 
 

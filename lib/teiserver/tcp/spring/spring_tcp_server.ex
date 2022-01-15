@@ -3,6 +3,7 @@ defmodule Teiserver.SpringTcpServer do
   use GenServer
   require Logger
 
+  alias Phoenix.PubSub
   alias Teiserver.{User, Client}
   alias Teiserver.Tcp.{TcpLobby}
 
@@ -89,8 +90,8 @@ defmodule Teiserver.SpringTcpServer do
       last_msg: System.system_time(:second),
       socket: socket,
       transport: transport,
-      protocol_in: Application.get_env(:central, Teiserver)[:default_protocol].protocol_in(),
-      protocol_out: Application.get_env(:central, Teiserver)[:default_protocol].protocol_out(),
+      protocol_in: Application.get_env(:central, Teiserver)[:default_spring_protocol].protocol_in(),
+      protocol_out: Application.get_env(:central, Teiserver)[:default_spring_protocol].protocol_out(),
       ip: ip,
 
       # Client state
@@ -113,6 +114,8 @@ defmodule Teiserver.SpringTcpServer do
       exempt_from_cmd_throttle: true,
       cmd_timestamps: []
     }
+
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
 
     send(self(), {:action, {:welcome, nil}})
     :gen_server.enter_loop(__MODULE__, [], state)
@@ -201,8 +204,18 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, new_state}
   end
 
+  # Server messages
+  def handle_info({:server_event, :server_restart}, state) do
+    new_state = state.protocol_out.reply(:server_restart, nil, nil, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info({:server_event, _}, state) do
+    {:noreply, state}
+  end
+
   # Client channel messages
-  def handle_info({:client_message, :direct_message, _userid, {_from_id, _message}}, state) do
+  def handle_info({:client_message, :received_direct_message, _userid, {_from_id, _message}}, state) do
     # TODO: Currently we seem to subscribe to multiple channels at once
     # so if we uncomment this we get messages double up
     # new_state = new_chat_message(:direct_message, from_id, nil, message, state)
@@ -222,8 +235,7 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, TcpLobby.handle_info({:global_battle_lobby, action, lobby_id}, state)}
   end
 
-  def handle_info({:client_message, topic, _userid, _data}, state) do
-    Logger.warn("No tcp_server handler for :client_message with topic #{topic}")
+  def handle_info({:client_message, _topic, _userid, _data}, state) do
     {:noreply, state}
   end
 
@@ -308,8 +320,8 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, new_state}
   end
 
-  def handle_info({:request_user_join_battle, userid}, state) do
-    new_state = request_user_join_battle(userid, state)
+  def handle_info({:request_user_join_lobby, userid}, state) do
+    new_state = request_user_join_lobby(userid, state)
     {:noreply, new_state}
   end
 
@@ -324,6 +336,12 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   def handle_info({:add_user_to_battle, userid, lobby_id, script_password}, state) do
+    script_password = if userid == state.userid do
+      state.script_password
+    else
+      script_password
+    end
+
     new_state = user_join_battle(userid, lobby_id, script_password, state)
     {:noreply, new_state}
   end
@@ -556,8 +574,8 @@ defmodule Teiserver.SpringTcpServer do
 
   # This is the server asking the host if a client can join the battle
   # the client is expected to reply with a yes or no
-  defp request_user_join_battle(userid, state) do
-    state.protocol_out.reply(:request_user_join_battle, userid, nil, state)
+  defp request_user_join_lobby(userid, state) do
+    state.protocol_out.reply(:request_user_join_lobby, userid, nil, state)
   end
 
   # This is the result of the host responding to the server asking if the client

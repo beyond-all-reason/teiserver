@@ -15,11 +15,6 @@ defmodule Central.Helpers.ReportHelper do
   # end
 
   # defp get_weekly_keys(first, last) do
-  #   IO.puts ""
-  #   IO.inspect first
-  #   IO.inspect last
-  #   IO.puts ""
-
   #   cond do
   #     first_year == last_year ->
   #       # Same? We just need the weeks then!

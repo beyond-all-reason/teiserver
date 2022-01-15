@@ -69,6 +69,12 @@ defmodule Teiserver.Coordinator.SplitTest do
       player: true
     }, :client_updated_battlestatus)
 
+    # Add user message
+    _tachyon_recv(hsocket)
+
+    # Battlestatus message
+    _tachyon_recv(hsocket)
+
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener, empty_lobby_id: empty_lobby_id}
   end
 
@@ -102,7 +108,7 @@ defmodule Teiserver.Coordinator.SplitTest do
     messages = PubsubListener.get(listener)
     assert messages == [
       {:lobby_chat, :say, lobby_id, player1.id, "$splitlobby"},
-      {:lobby_chat, :sayex, lobby_id, Coordinator.get_coordinator_userid(), "#{player1.name} is moving to a new lobby, to follow them say $y. If you want to follow someone else then say $follow <name> and you will follow that user. The split will take place in 30 seconds, you can change your mind at any time. Say $n to cancel your decision and stay here."}]
+      {:lobby_chat, :announce, lobby_id, Coordinator.get_coordinator_userid(), "#{player1.name} is moving to a new lobby, to follow them say $y. If you want to follow someone else then say $follow <name> and you will follow that user. The split will take place in 30 seconds, you can change your mind at any time. Say $n to cancel your decision and stay here."}]
 
     # Check state
     split = Coordinator.call_consul(lobby_id, {:get, :split})

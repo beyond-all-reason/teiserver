@@ -211,21 +211,27 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   # Used to send the user PID a join battle command
+  @spec force_add_user_to_battle(T.userid(), T.lobby_id()) :: :ok | nil
   def force_add_user_to_battle(userid, battle_lobby_id) do
+    remove_user_from_any_battle(userid)
+    script_password = new_script_password()
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_client_messages:#{userid}",
+      {:client_message, :force_join_lobby, userid, {battle_lobby_id, script_password}}
+    )
+
+    # TODO: Depreciate this
     case Client.get_client_by_id(userid) do
       nil ->
         nil
       client ->
-        remove_user_from_any_battle(userid)
-        send(client.pid, {:force_join_battle, battle_lobby_id, "scriptpass"})
+        send(client.pid, {:force_join_battle, battle_lobby_id, script_password})
     end
   end
 
-  @spec add_user_to_battle(Integer.t(), Integer.t() | nil) :: nil
-  def add_user_to_battle(_userid, nil), do: nil
-
-  @spec add_user_to_battle(integer(), integer(), String.t()) :: nil
-  def add_user_to_battle(userid, lobby_id, script_password) do
+  @spec add_user_to_battle(integer(), integer(), String.t() | nil) :: nil
+  def add_user_to_battle(userid, lobby_id, script_password \\ nil) do
     ConCache.update(:lobbies, lobby_id, fn battle_state ->
       new_state =
         if Enum.member?(battle_state.players, userid) do
@@ -234,12 +240,10 @@ defmodule Teiserver.Battle.Lobby do
         else
           Client.join_battle(userid, lobby_id)
 
-          Coordinator.cast_consul(lobby_id, {:user_joined, userid})
-
           PubSub.broadcast(
             Central.PubSub,
-            "teiserver_client_messages:#{userid}",
-            {:client_message, :lobby, userid, {:join_lobby, lobby_id}}
+            "teiserver_client_action_updates:#{userid}",
+            {:client_action, :join_lobby, userid, lobby_id}
           )
 
           PubSub.broadcast(
@@ -283,10 +287,10 @@ defmodule Teiserver.Battle.Lobby do
         Coordinator.cast_consul(lobby_id, {:user_left, userid})
 
         PubSub.broadcast(
-          Central.PubSub,
-          "teiserver_client_messages:#{userid}",
-          {:client_message, :lobby, userid, {:leave_lobby, lobby_id}}
-        )
+            Central.PubSub,
+            "teiserver_client_action_updates:#{userid}",
+            {:client_action, :leave_lobby, userid, lobby_id}
+          )
 
         PubSub.broadcast(
           Central.PubSub,
@@ -491,10 +495,11 @@ defmodule Teiserver.Battle.Lobby do
     lobby_id = int_parse(lobby_id)
     battle = get_battle(lobby_id)
     user = User.get_user_by_id(userid)
+    script_password = if script_password == nil, do: new_script_password(), else: script_password
 
     # In theory this would never happen but it's possible to see this at startup when
     # not everything is loaded and ready, hence the case statement
-    {consul_response, consul_reason} = case Coordinator.call_consul(lobby_id, {:request_user_join_battle, userid}) do
+    {consul_response, consul_reason} = case Coordinator.call_consul(lobby_id, {:request_user_join_lobby, userid}) do
       {a, b} -> {a, b}
       nil -> {true, nil}
     end
@@ -522,25 +527,50 @@ defmodule Teiserver.Battle.Lobby do
             {:failure, "Battle closed"}
 
           host_client ->
-            send(host_client.pid, {:request_user_join_battle, userid})
+            # TODO: Depreciate
+            send(host_client.pid, {:request_user_join_lobby, userid})
+
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_lobby_host_message:#{lobby_id}",
+              {:lobby_host_message, :user_requests_to_join, lobby_id, {userid, script_password}}
+            )
             {:waiting_on_host, script_password}
         end
     end
   end
 
-  @spec accept_join_request(integer(), integer()) :: :ok
+  @spec accept_join_request(T.userid(), T.lobby_id()) :: :ok
   def accept_join_request(userid, lobby_id) do
     client = Client.get_client_by_id(userid)
     if client do
+      # TODO: Depreciate
       send(client.pid, {:join_battle_request_response, lobby_id, :accept, nil})
     end
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_client_messages:#{userid}",
+      {:client_message, :join_lobby_request_response, userid, {lobby_id, :accept}}
+    )
+    # TODO: Refactor this as per the TODO list, this should take place here and not in the client process
+    # add_user_to_battle(userid, lobby_id)
+
+
     :ok
   end
 
-  @spec deny_join_request(integer(), integer(), String.t()) :: :ok
+  @spec deny_join_request(T.userid(), T.lobby_id(), String.t()) :: :ok
   def deny_join_request(userid, lobby_id, reason) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_client_messages:#{userid}",
+      {:client_message, :join_lobby_request_response, userid, {lobby_id, :deny, reason}}
+    )
+
     client = Client.get_client_by_id(userid)
     if client do
+      # TODO: Depreciate
       send(client.pid, {:join_battle_request_response, lobby_id, :deny, reason})
     end
     :ok
@@ -576,12 +606,15 @@ defmodule Teiserver.Battle.Lobby do
     Client.update(client, :client_updated_battlestatus)
   end
 
+  @spec allow?(T.userid, atom, T.lobby_id()) :: boolean()
   def allow?(nil, _, _), do: false
   def allow?(_, nil, _), do: false
   def allow?(_, _, nil), do: false
 
   def allow?(userid, :saybattle, _), do: not User.is_muted?(userid)
   def allow?(userid, :saybattleex, _), do: not User.is_muted?(userid)
+
+  def allow?(_userid, :host, _), do: true
 
   def allow?(changer, field, lobby_id) when is_integer(lobby_id),
     do: allow?(changer, field, get_battle(lobby_id))
@@ -667,5 +700,11 @@ defmodule Teiserver.Battle.Lobby do
       true ->
         true
     end
+  end
+
+  @spec new_script_password() :: String.t()
+  def new_script_password() do
+    UUID.uuid1()
+    |> Base.encode32(padding: false)
   end
 end

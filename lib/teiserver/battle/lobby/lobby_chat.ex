@@ -78,7 +78,7 @@ defmodule Teiserver.Battle.LobbyChat do
       PubSub.broadcast(
         Central.PubSub,
         "teiserver_lobby_chat:#{lobby_id}",
-        {:lobby_chat, :sayex, lobby_id, userid, msg}
+        {:lobby_chat, :announce, lobby_id, userid, msg}
       )
 
       # Client.chat_flood_check(userid)
@@ -94,6 +94,12 @@ defmodule Teiserver.Battle.LobbyChat do
         Central.PubSub,
         "legacy_user_updates:#{to_id}",
         {:battle_updated, lobby_id, {from_id, msg, lobby_id}, :sayex}
+      )
+
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_client_messages:#{to_id}",
+        {:client_message, :lobby_direct_announce, to_id, {from_id, msg}}
       )
     end
   end

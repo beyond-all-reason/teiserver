@@ -496,7 +496,7 @@ defmodule Teiserver.User do
       PubSub.broadcast(
         Central.PubSub,
         "teiserver_client_messages:#{to_id}",
-        {:client_message, :direct_message, to_id, {from_id, message_content}}
+        {:client_message, :received_direct_message, to_id, {from_id, message_content}}
       )
     end
     :ok

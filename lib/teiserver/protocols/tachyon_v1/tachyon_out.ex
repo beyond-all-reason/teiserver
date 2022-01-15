@@ -1,35 +1,17 @@
 defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
   require Logger
-  alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.TachyonLib
-  alias Teiserver.Protocols.Tachyon.V1.{Tachyon, AuthOut, LobbyOut, CommunicationOut, MatchmakingOut, NewsOut, SystemOut}
+  alias Teiserver.Protocols.Tachyon.V1.{AuthOut, ClientOut, CommunicationOut, LobbyChatOut, LobbyHostOut, LobbyOut, MatchmakingOut, NewsOut, SystemOut}
 
   @spec reply(atom(), atom(), Map.t(), Map.t()) :: Map.t()
-
-  # Stuff we have to use because spring used it
-  # TODO: Remove these with Spring
-  def reply(:welcome, _data, _msg_id, state), do: state
-  def reply(:login_end, _data, _msg_id, state), do: state
-  def reply(:user_logged_in, _data, _msg_id, state), do: state
-  def reply(:battle_opened, _data, _msg_id, state), do: state
-  def reply(:battle_updated, {lobby_id, _data, _reason}, _msg_id, state), do: reply(:lobby, :updated, Lobby.get_battle(lobby_id), state)
-  def reply(:battle_message_ex, {sender_id, msg, lobby_id}, _msg_id, state), do: reply(:lobby, :announce, {sender_id, msg, lobby_id}, state)
-  def reply(:add_script_tags, _data, _msg_id, state), do: state
-  def reply(:add_bot_to_battle, _data, _msg_id, state), do: state
-  def reply(:remove_bot_from_battle, _data, _msg_id, state), do: state
-  def reply(:set_script_tags, _data, _msg_id, state), do: state
-  def reply(:remove_script_tags, _data, _msg_id, state), do: state
-  def reply(:request_user_join_battle, data, _msg_id, state), do: reply(:lobby, :request_to_join, data, state)
-  def reply(:join_battle_failure, data, _msg_id, state), do: reply(:lobby, :join_response, {:reject, data}, state)
-  def reply(:battle_message, {sender_id, msg, lobby_id}, _msg_id, state), do: reply(:lobby, :message, {sender_id, msg, lobby_id}, state)
-  def reply(:direct_message, {sender_id, msg, _user}, _msg_id, state), do: reply(:communication, :direct_message, {sender_id, msg}, state)
-  def reply(:ring, {ringer_id, _}, _msg_id, state), do: reply(:system, :ring, ringer_id, state)
-  # def reply(:join_battle_success, _data, _msg_id, state), do: reply(:lobby, :join_response, {:approve, state.lobby_id}, state)
 
   def reply(namespace, reply_cmd, data, state) do
     msg =
       case namespace do
         :auth -> AuthOut.do_reply(reply_cmd, data)
+        :client -> ClientOut.do_reply(reply_cmd, data)
+        :lobby_chat -> LobbyChatOut.do_reply(reply_cmd, data)
+        :lobby_host -> LobbyHostOut.do_reply(reply_cmd, data)
         :lobby -> LobbyOut.do_reply(reply_cmd, data)
         :battle ->
           Logger.warn("Tachyon :battle namespace message #{reply_cmd}")
@@ -64,7 +46,4 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
     encoded_msg = TachyonLib.encode(msg)
     transport.send(socket, encoded_msg <> "\n")
   end
-
-  def do_leave_battle(state, lobby_id), do: Tachyon.do_leave_battle(state, lobby_id)
-  def do_join_battle(state, lobby_id, script_password), do: Tachyon.do_join_battle(state, lobby_id, script_password)
 end

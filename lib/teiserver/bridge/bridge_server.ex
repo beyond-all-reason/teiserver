@@ -73,7 +73,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     handle_info({:new_message, from_id, room_name, message}, state)
   end
 
-  def handle_info({:client_message, :direct_message, _userid, {from_id, _content}}, state) do
+  def handle_info({:client_message, :received_direct_message, _userid, {from_id, _content}}, state) do
     username = User.get_username(from_id)
     User.send_direct_message(state.userid, from_id, "I don't currently handle messages, sorry #{username}")
     {:noreply, state}

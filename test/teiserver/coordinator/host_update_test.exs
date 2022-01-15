@@ -43,6 +43,12 @@ defmodule Teiserver.Coordinator.HostUpdateTest do
       ready: true
     }, :client_updated_battlestatus)
 
+    # Add user message
+    _tachyon_recv(hsocket)
+
+    # Battlestatus message
+    _tachyon_recv(hsocket)
+
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
   end
 

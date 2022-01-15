@@ -1,7 +1,8 @@
 defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
+  alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Tachyon.V1.Tachyon
 
-  @spec do_reply(atom(), any) :: Map.t()
+  @spec do_reply(atom(), any) :: Map.t() | nil
 
   ###########
   # Query
@@ -24,12 +25,53 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
+  def do_reply(:create, {:failure, reason}) do
+    %{
+      "cmd" => "s.lobby.create",
+      "result" => "failure",
+      "reason" => reason
+    }
+  end
+
   ###########
   # Updated
   def do_reply(:updated, lobby) do
     %{
       "cmd" => "s.lobby.updated",
       "lobby" => Tachyon.convert_object(:lobby, lobby)
+    }
+  end
+
+  def do_reply(:add_user, {lobby_id, joiner_id}) do
+    %{
+      "cmd" => "s.lobby.add_user",
+      "lobby_id" => lobby_id,
+      "joiner_id" => joiner_id
+    }
+  end
+
+  def do_reply(:remove_user, {lobby_id, leaver_id}) do
+    %{
+      "cmd" => "s.lobby.remove_user",
+      "lobby_id" => lobby_id,
+      "leaver_id" => leaver_id
+    }
+  end
+
+  def do_reply(:kick_user, {lobby_id, kicked_id}) do
+    %{
+      "cmd" => "s.lobby.kick_user",
+      "lobby_id" => lobby_id,
+      "kicked_id" => kicked_id
+    }
+  end
+
+  def do_reply(:updated_client_battlestatus, {lobby_id, {client, reason}}) do
+    %{
+      "cmd" => "s.lobby.updated_client_battlestatus",
+      "lobby_id" => lobby_id,
+      "client" => Tachyon.convert_object(:client, client),
+      "reason" => reason
     }
   end
 
@@ -50,6 +92,13 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
+  def do_reply(:closed, {lobby_id, _reason}) do
+    %{
+      "cmd" => "s.lobby.closed",
+      "lobby_id" => lobby_id
+    }
+  end
+
   ###########
   # Join
   def do_reply(:join, :waiting) do
@@ -67,31 +116,47 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
-  ###########
-  # Join request
-  def do_reply(:request_to_join, userid) do
-    %{
-      "cmd" => "s.lobby.request_to_join",
-      "userid" => userid
-    }
+  def do_reply(:force_join_lobby, {lobby_id, script_password}) do
+    case Lobby.get_lobby(lobby_id) do
+      nil -> nil
+      lobby ->
+        send(self(), {:action, {:join_lobby, lobby_id}})
+        %{
+          "cmd" => "s.lobby.force_join",
+          "script_password" => script_password,
+          "lobby" => Tachyon.convert_object(:lobby, lobby)
+        }
+    end
   end
 
   ###########
   # Join response
-  def do_reply(:join_response, {:approve, lobby}) do
-    %{
-      "cmd" => "s.lobby.join_response",
-      "result" => "approve",
-      "lobby" => Tachyon.convert_object(:lobby, lobby)
-    }
-  end
-
-  def do_reply(:join_response, {:reject, reason}) do
+  def do_reply(:join_lobby_request_response, {lobby_id, :deny, reason}) do
     %{
       "cmd" => "s.lobby.join_response",
       "result" => "reject",
+      "lobby_id" => lobby_id,
       "reason" => reason
     }
+  end
+
+  def do_reply(:join_lobby_request_response, {lobby_id, :accept}) do
+    case Lobby.get_lobby(lobby_id) do
+      nil ->
+        %{
+          "cmd" => "s.lobby.join_response",
+          "result" => "reject",
+          "lobby_id" => lobby_id,
+          "reason" => "closed"
+        }
+      lobby ->
+        send(self(), {:action, {:join_lobby, lobby_id}})
+        %{
+          "cmd" => "s.lobby.join_response",
+          "result" => "approve",
+          "lobby" => Tachyon.convert_object(:lobby, lobby)
+        }
+    end
   end
 
   ###########
@@ -102,20 +167,10 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
-  ###########
-  # Messages
-  def do_reply(:message, {sender_id, msg, _lobby_id}) do
+  def do_reply(:received_lobby_direct_announce, {sender_id, msg}) do
     %{
-      "cmd" => "s.lobby.message",
-      "sender" => sender_id,
-      "message" => msg
-    }
-  end
-
-  def do_reply(:announce, {sender_id, msg, _lobby_id}) do
-    %{
-      "cmd" => "s.lobby.announce",
-      "sender" => sender_id,
+      "cmd" => "s.lobby.received_lobby_direct_announce",
+      "sender_id" => sender_id,
       "message" => msg
     }
   end

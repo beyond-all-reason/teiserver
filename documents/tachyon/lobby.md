@@ -35,64 +35,6 @@
 }
 ```
 
-## Creation/Management
-### `c.lobby.create`
-* battle ::
-  * name :: string
-  * nattype :: string (none | holepunch | fixed)
-  * password :: string, default: nil
-  * port :: integer
-  * game_hash :: string
-  * map_hash :: string
-  * map_name :: string
-  * game_name :: string
-  * engine_name :: string
-  * engine_version :: string
-  * ip :: string
-  * settings :: map
-
-#### Success response
-* battle :: Battle
-
-#### Example input/output
-```
-{
-  "cmd": "c.lobby.create",
-  "battle": {
-    "name": "EU 01 - 123",
-    "nattype": "none",
-    "password": "password2",
-    "port": 1234,
-    "game_hash": "string_of_characters",
-    "map_hash": "string_of_characters",
-    "map_name": "koom valley",
-    "game_name": "BAR",
-    "engine_name": "spring-105",
-    "engine_version": "105.1.2.3",
-    "ip": "127.0.0.1",
-    "settings": {
-      "max_players": 12
-    }
-  }
-}
-
-{
-  "cmd": "s.lobby.query",
-  "result": "success",
-  "battle": Battle
-}
-```
-
-### TODO: `c.lobby.update_status`
-### TODO: `s.lobby.updated_status`
-
-### TODO: `c.lobby.update_host_state`
-### TODO: `s.lobby.updated_host_state`
-
-### TODO: `c.lobby.start`
-### TODO: `c.lobby.end`
-### TODO: `c.lobby.close`
-
 ## Interacting
 ### TODO: `c.lobby.join`
 Requests to join the battle, the host will be sent a message asking if the person can join or not. Based on that an accept/reject is sent. If there is a failure to join then it means the host wasn't even consulted as the joiner didn't qualify (e.g. didn't supply the password).
@@ -115,22 +57,22 @@ Requests to join the battle, the host will be sent a message asking if the perso
   "reason": "Reason for failure"
 }
 
-// Stage 2
+// Stage 2 - sent to the lobby host
 // Host approves/rejects the joiner
 {
-  "cmd": "s.lobby.request_to_join",
-  "userid": 123
+  "cmd": "s.lobby_host.request_to_join",
+  "userid": 456
 }
 
 {
-  "cmd": "c.lobby.respond_to_join_request",
-  "userid": 123,
+  "cmd": "c.lobby_host.respond_to_join_request",
+  "userid": 456,
   "response": "approve"
 }
 
 {
-  "cmd": "c.lobby.respond_to_join_request",
-  "userid": 123,
+  "cmd": "c.lobby_host.respond_to_join_request",
+  "userid": 456,
   "response": "reject",
   "reason": "Reason for rejection"
 }
@@ -139,14 +81,26 @@ Requests to join the battle, the host will be sent a message asking if the perso
 // Host response sent to prospective player
 {
   "cmd": "s.lobby.join_response",
+  "lobbyid": 123,
   "result": "approve",
-  "battle": Battle
+  "lobby": Lobby
 }
 
 {
   "cmd": "s.lobby.join_response",
+  "lobbyid": 123,
   "result": "reject",
   "reason": "Reason for rejection"
+}
+```
+
+### TODO: `c.lobby.force_join`
+Used when the server moves you to a lobby. It will move you out of your existing lobby (if in one) and into the lobby in the message
+```
+{
+  "cmd": "s.lobby.join_response",
+  "lobby": Lobby,
+  "script_password": "123456789"
 }
 ```
 
@@ -159,7 +113,7 @@ No server response.
 ```
 
 ### TODO: `s.lobby.request_to_join`
-Sent to the host when someone requests to join the battle. The host should send the server a `c.lobby.respond_to_join_request` with their decision.
+Sent to the host when someone requests to join the battle. The host should send the server a `c.lobby_host.respond_to_join_request` with their decision.
 ```
 {
   "cmd": "s.lobby.request_to_join",
@@ -167,17 +121,17 @@ Sent to the host when someone requests to join the battle. The host should send 
 }
 ```
 
-### TODO: `c.lobby.respond_to_join_request`
+### TODO: `c.lobby_host.respond_to_join_request`
 The response to a `s.lobby.request_to_join` message informing the server if the request has been accepted or rejected. No server response.
 ```
 {
-  "cmd": "c.lobby.respond_to_join_request",
+  "cmd": "c.lobby_host.respond_to_join_request",
   "response": "accept",
   "userid": 123
 }
 
 {
-  "cmd": "c.lobby.respond_to_join_request",
+  "cmd": "c.lobby_host.respond_to_join_request",
   "response": "reject",
   "reason": "reason given",
   "userid": 123
@@ -191,11 +145,11 @@ The response to a `s.lobby.request_to_join` message informing the server if the 
 ### TODO: `s.lobby.request_status`
 ### TODO: `c.lobby.update_status`
 
-### TODO: `c.lobby.message`
-### TODO: `s.lobby.message`
+### TODO: `c.lobby.updated_client_battlestatus`
 
-### TODO: `c.lobby.announce` -- Previously sayex
-### TODO: `s.lobby.announce`
+### TODO: `s.lobby.user_joined`
+
+### TODO: `s.lobby.received_lobby_direct_announce`
 
 ## Telemetry
 - Mid-battle updates?

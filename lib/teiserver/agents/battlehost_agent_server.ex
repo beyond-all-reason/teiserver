@@ -69,12 +69,12 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
 
   defp handle_msg(nil, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.request_to_join", "userid" => userid}, %{reject: true} = state) do
-    cmd = %{cmd: "c.lobby.respond_to_join_request", userid: userid, response: "reject", reason: "because"}
+    cmd = %{cmd: "c.lobby_host.respond_to_join_request", userid: userid, response: "reject", reason: "because"}
     AgentLib._send(state.socket, cmd)
     state
   end
   defp handle_msg(%{"cmd" => "s.lobby.request_to_join", "userid" => userid}, %{reject: false} = state) do
-    cmd = %{cmd: "c.lobby.respond_to_join_request", userid: userid, response: "approve"}
+    cmd = %{cmd: "c.lobby_host.respond_to_join_request", userid: userid, response: "approve"}
     AgentLib._send(state.socket, cmd)
     state
   end

@@ -291,15 +291,6 @@ defmodule Teiserver.Protocols.SpringOut do
     "UPDATEBOT #{lobby_id} #{bot.name} #{status} #{bot.team_colour}\n"
   end
 
-  # Not actually used
-  # defp do_reply(:battle_players, battle) do
-  #   battle.players
-  #   |> Parallel.map(fn player_id ->
-  #     pname = User.get_username(player_id)
-  #     "JOINEDBATTLE #{battle.id} #{pname}\n"
-  #   end)
-  # end
-
   # Client
   defp do_reply(:registration_accepted, nil) do
     "REGISTRATIONACCEPTED\n"
@@ -438,11 +429,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:direct_message, {from_id, msg, state_user}) do
-    from_user = User.get_user_by_id(from_id)
-    if from_id not in (state_user.ignored || []) or from_user.moderator == true or from_user.bot == true do
-      from_name = User.get_username(from_id)
-      "SAIDPRIVATE #{from_name} #{msg}\n"
-    end
+    do_reply(:direct_message, {from_id, [msg], state_user})
   end
 
   defp do_reply(:chat_message, {from_id, room_name, messages, state_user}) when is_list(messages) do
@@ -458,19 +445,23 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:chat_message, {from_id, room_name, msg, state_user}) do
+    do_reply(:chat_message, {from_id, room_name, [msg], state_user})
+  end
+
+  defp do_reply(:chat_message_ex, {from_id, room_name, messages, state_user}) when is_list(messages) do
     from_user = User.get_user_by_id(from_id)
     if from_id not in (state_user.ignored || []) or from_user.moderator == true or from_user.bot == true do
       from_name = User.get_username(from_id)
-      "SAID #{room_name} #{from_name} #{msg}\n"
+      messages
+      |> Enum.map(fn msg ->
+        "SAIDEX #{room_name} #{from_name} #{msg}\n"
+      end)
+      |> Enum.join("")
     end
   end
 
   defp do_reply(:chat_message_ex, {from_id, room_name, msg, state_user}) do
-    from_user = User.get_user_by_id(from_id)
-    if from_id not in (state_user.ignored || []) or from_user.moderator == true or from_user.bot == true do
-      from_name = User.get_username(from_id)
-      "SAIDEX #{room_name} #{from_name} #{msg}\n"
-    end
+    do_reply(:chat_message_ex, {from_id, room_name, [msg], state_user})
   end
 
   defp do_reply(:add_user_to_room, {userid, room_name}) do
@@ -479,7 +470,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   # Battle
-  defp do_reply(:request_user_join_battle, userid) do
+  defp do_reply(:request_user_join_lobby, userid) do
     client = Client.get_client_by_id(userid)
     "JOINBATTLEREQUEST #{client.name} #{client.ip}\n"
   end
@@ -513,18 +504,38 @@ defmodule Teiserver.Protocols.SpringOut do
     "FORCEQUITBATTLE\n"
   end
 
-  defp do_reply(:battle_message, {userid, msg, _lobby_id}) do
+  defp do_reply(:battle_message, {userid, messages, _lobby_id}) when is_list(messages) do
     username = User.get_username(userid)
-    "SAIDBATTLE #{username} #{msg}\n"
+    messages
+    |> Enum.map(fn msg ->
+      "SAIDBATTLE #{username} #{msg}\n"
+    end)
+    |> Enum.join("")
   end
 
-  defp do_reply(:battle_message_ex, {userid, msg, _lobby_id}) do
+  defp do_reply(:battle_message, {userid, msg, lobby_id}) do
+    do_reply(:battle_message, {userid, [msg], lobby_id})
+  end
+
+  defp do_reply(:battle_message_ex, {userid, messages, _lobby_id}) when is_list(messages) do
     username = User.get_username(userid)
-    "SAIDBATTLEEX #{username} #{msg}\n"
+    messages
+    |> Enum.map(fn msg ->
+      "SAIDBATTLEEX #{username} #{msg}\n"
+    end)
+    |> Enum.join()
+  end
+
+  defp do_reply(:battle_message_ex, {userid, msg, lobby_id}) do
+    do_reply(:battle_message_ex, {userid, [msg], lobby_id})
   end
 
   defp do_reply(:servermsg, msg) do
     "SERVERMSG #{msg}\n"
+  end
+
+  defp do_reply(:server_restart, _) do
+    "s.system.shutdown\n"
   end
 
   # defp do_reply(:tachyon, {namespace, function, data, state}) do
@@ -566,9 +577,6 @@ defmodule Teiserver.Protocols.SpringOut do
       |> Enum.each(fn {_botname, bot} ->
         reply(:add_bot_to_battle, {lobby.id, bot}, nil, state)
       end)
-
-      client = Client.get_client_by_id(state.userid)
-      reply(:client_battlestatus, client, nil, state)
 
       lobby.start_rectangles
       |> Enum.each(fn {team, r} ->

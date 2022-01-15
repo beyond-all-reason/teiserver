@@ -74,32 +74,29 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
     }]
 
     # Host is expecting to see a request
-    reply = _tachyon_recv(socket)
-    assert reply == [%{
-      "cmd" => "s.lobby.request_to_join",
-      "userid" => user2.id
-    }]
+    [reply] = _tachyon_recv(socket)
+    assert reply["cmd"] == "s.lobby_host.user_requests_to_join"
+    assert reply["userid"] == user2.id
 
     # Here should be the next request
-    reply = _tachyon_recv(socket)
-    assert reply == [%{
-      "cmd" => "s.lobby.request_to_join",
-      "userid" => user3.id
-    }]
+    [reply] = _tachyon_recv(socket)
+    assert reply["cmd"] == "s.lobby_host.user_requests_to_join"
+    assert reply["userid"] == user3.id
 
     # Host can reject
-    data = %{cmd: "c.lobby.respond_to_join_request", userid: user2.id, response: "reject", reason: "reason given"}
+    data = %{cmd: "c.lobby_host.respond_to_join_request", userid: user2.id, response: "reject", reason: "reason given"}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket2)
 
     # Reject user3 at the same time
-    data = %{cmd: "c.lobby.respond_to_join_request", userid: user3.id, response: "reject", reason: "reason given"}
+    data = %{cmd: "c.lobby_host.respond_to_join_request", userid: user3.id, response: "reject", reason: "reason given"}
     _tachyon_send(socket, data)
 
     assert reply == [%{
       "cmd" => "s.lobby.join_response",
       "result" => "reject",
-      "reason" => "reason given"
+      "reason" => "reason given",
+      "lobby_id" => lobby_id
     }]
 
     # Now request again but this time accept
@@ -110,7 +107,7 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
 
     assert GenServer.call(pid2, {:get, :lobby_id}) == nil
 
-    data = %{cmd: "c.lobby.respond_to_join_request", userid: user2.id, response: "approve"}
+    data = %{cmd: "c.lobby_host.respond_to_join_request", userid: user2.id, response: "approve"}
     _tachyon_send(socket, data)
     [reply] = _tachyon_recv(socket2)
 
@@ -120,16 +117,8 @@ defmodule Teiserver.Protocols.TachyonBattleHostTest do
 
     assert GenServer.call(pid2, {:get, :lobby_id}) == lobby_id
 
-    # # Expecting a request to join here
-    # data = %{cmd: "c.lobby.join", lobby_id: lobby_id}
-    # _tachyon_send(socket2, data)
-    # reply = _tachyon_recv(socket2)
-
-    # # Lets see what happens now
-    # reply = _tachyon_recv(socket2)
-    # IO.puts ""
-    # IO.inspect reply
-    # IO.puts ""
+    # Add user, we can ignore this
+    _tachyon_recv(socket)
 
     # Now leave the lobby, closing it in the process
     data = %{cmd: "c.lobby.leave"}
