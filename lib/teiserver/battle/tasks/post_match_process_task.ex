@@ -7,14 +7,16 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    Battle.list_matches(
-      search: [
-        ready_for_post_process: true
-      ],
-      preload: [:members],
-      limit: :infinity
-    )
-    |> Enum.each(&post_process_match/1)
+    if ConCache.get(:application_metadata_cache, "teiserver_startup_completed") == true do
+      Battle.list_matches(
+        search: [
+          ready_for_post_process: true
+        ],
+        preload: [:members],
+        limit: :infinity
+      )
+      |> Enum.each(&post_process_match/1)
+    end
 
     :ok
   end
