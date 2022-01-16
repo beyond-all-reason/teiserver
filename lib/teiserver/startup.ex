@@ -66,6 +66,16 @@ defmodule Teiserver.Startup do
       default: true
     })
 
+    add_site_config_type(%{
+      key: "teiserver.Bridge player numbers",
+      section: "Discord",
+      type: "boolean",
+      permissions: ["admin.dev.developer"],
+      description: "Enables bridging of channel names to discord",
+      opts: [],
+      default: true
+    })
+
     umbrella_group =
       case Central.Account.get_group(nil, search: [name: "Teiserver umbrella group"]) do
         nil ->

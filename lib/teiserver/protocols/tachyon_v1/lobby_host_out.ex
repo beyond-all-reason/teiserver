@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.LobbyHostOut do
-  # alias Teiserver.Protocols.Tachyon.V1.Tachyon
+  alias Teiserver.Protocols.Tachyon.V1.Tachyon
 
   @spec do_reply(atom(), any) :: Map.t()
 

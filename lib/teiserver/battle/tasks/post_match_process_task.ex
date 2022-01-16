@@ -63,6 +63,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       |> String.replace("~", "")
       |> String.replace("(", "")
       |> String.replace(")", "")
+      |> String.replace("#", "")
       |> NumberHelper.float_parse
     end)
 
