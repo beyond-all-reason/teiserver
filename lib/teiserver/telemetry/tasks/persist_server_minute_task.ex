@@ -25,7 +25,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMinuteTask do
       |> Map.drop([:cycle])
 
     if rem(Timex.now().minute(), 10) == 0 do
-      if Config.get_site_config_cache("teiserver.Bridge player numbers") == true do
+      if Config.get_site_config_cache("teiserver.Bridge player numbers") != false do
         bridge_pid = BridgeServer.get_bridge_pid()
         send(bridge_pid, {:update_stats, :client_count, Enum.count(data.client.total)})
         send(bridge_pid, {:update_stats, :player_count, Enum.count(data.client.player)})
