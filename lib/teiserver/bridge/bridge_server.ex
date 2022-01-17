@@ -43,9 +43,9 @@ defmodule Teiserver.Bridge.BridgeServer do
       |> Map.get(stat_name, "")
 
     new_name = case stat_name do
-      :client_count -> "Players: #{value}"
-      :player_count -> "In game: #{value}"
-      :match_count -> "Battles: #{value}"
+      :client_count -> "Players in game: #{value}"
+      :player_count -> "Players online: #{value}"
+      :match_count -> "Ongoing battles: #{value}"
       _ -> ""
     end
 
