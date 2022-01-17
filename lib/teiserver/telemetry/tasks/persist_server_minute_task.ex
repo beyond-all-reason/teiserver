@@ -30,6 +30,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMinuteTask do
         send(bridge_pid, {:update_stats, :client_count, Enum.count(data.client.total)})
         send(bridge_pid, {:update_stats, :player_count, Enum.count(data.client.player)})
         send(bridge_pid, {:update_stats, :match_count, data.battle.in_progress})
+        send(bridge_pid, {:update_stats, :lobby_count, data.battle.lobby})
       end
     end
 

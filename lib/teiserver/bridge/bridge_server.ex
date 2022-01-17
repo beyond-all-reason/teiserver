@@ -46,6 +46,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       :client_count -> "Players in game: #{value}"
       :player_count -> "Players online: #{value}"
       :match_count -> "Ongoing battles: #{value}"
+      :lobby_count -> "Open lobbies: #{value}"
       _ -> ""
     end
 
