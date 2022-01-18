@@ -43,8 +43,8 @@ defmodule Teiserver.Bridge.BridgeServer do
       |> Map.get(stat_name, "")
 
     new_name = case stat_name do
-      :client_count -> "Players in game: #{value}"
-      :player_count -> "Players online: #{value}"
+      :client_count -> "Players online: #{value}"
+      :player_count -> "Players in game: #{value}"
       :match_count -> "Ongoing battles: #{value}"
       :lobby_count -> "Open lobbies: #{value}"
       _ -> ""
@@ -82,6 +82,7 @@ defmodule Teiserver.Bridge.BridgeServer do
 
       Map.has_key?(state.rooms, room_name) ->
         message = if is_list(message), do: Enum.join(message, "\n"), else: message
+        message = clean_message(message)
 
         room_name = if String.contains?(message, " player(s) needed for battle"), do: "promote", else: room_name
         forward_to_discord(from_id, state.rooms[room_name], message, state)
@@ -217,6 +218,11 @@ defmodule Teiserver.Bridge.BridgeServer do
   @spec make_password() :: String.t
   defp make_password() do
     :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64)
+  end
+
+  defp clean_message(message) do
+    message
+    |> String.replace("@", " at ")
   end
 
   @spec init(Map.t()) :: {:ok, Map.t()}
