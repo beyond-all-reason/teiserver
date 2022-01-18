@@ -24,7 +24,7 @@
       </tr>
       <tr>
         <td>CoC references:</td>
-        <td><%= @report.code_references |> Enum.join(", ") %></td>
+        <td><%= (@report.code_references || []) |> Enum.join(", ") %></td>
       </tr>
       <tr>
         <td><%= if @report.expires != nil and Timex.compare(Timex.now(), @report.expires) == -1, do: "Expires", else: "Expired" %></td>
