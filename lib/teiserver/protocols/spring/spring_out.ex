@@ -11,6 +11,7 @@ defmodule Teiserver.Protocols.SpringOut do
   alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.{MatchmakingOut, BattleOut}
+  alias Teiserver.Data.Types, as: T
 
   @motd """
   Message of the day
@@ -550,6 +551,7 @@ defmodule Teiserver.Protocols.SpringOut do
     ""
   end
 
+  @spec do_leave_battle(map(), T.lobby_id()) :: map()
   def do_leave_battle(state, lobby_id) do
     PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{lobby_id}")
     state

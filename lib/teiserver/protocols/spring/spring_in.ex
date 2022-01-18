@@ -1138,6 +1138,12 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("LEAVEBATTLE", _, _msg_id, state) do
+    # Remove them from all the battles anyways, just in case
+    Lobby.remove_user_from_any_battle(state.userid)
+    |> Enum.each(fn b ->
+      PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{b}")
+    end)
+
     PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{state.lobby_id}")
     Lobby.remove_user_from_battle(state.userid, state.lobby_id)
 
