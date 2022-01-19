@@ -35,7 +35,7 @@ defmodule CentralWeb.Admin.SiteConfigController do
   end
 
   def update(conn, %{"id" => key, "site_config" => site_config_params}) do
-    value = Map.get(site_config_params, "value", false)
+    value = Map.get(site_config_params, "value", "false")
     Config.update_site_config(key, value)
 
     tab =

@@ -299,7 +299,7 @@ defmodule Central.Config do
         |> Repo.update()
     end
 
-    ConCache.put(:config_site_cache, key, value)
+    ConCache.dirty_delete(:config_site_cache, key)
   end
 
   def delete_site_config(key) do
@@ -318,7 +318,7 @@ defmodule Central.Config do
         |> Repo.delete()
     end
 
-    ConCache.delete(:config_site_cache, key)
+    ConCache.dirty_delete(:config_site_cache, key)
   end
 
 
