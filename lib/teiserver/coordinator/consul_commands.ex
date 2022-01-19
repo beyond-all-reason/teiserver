@@ -155,6 +155,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are already a player, you can't join the queue!", state.lobby_id)
         state
       _ ->
+        send(self(), :queue_check)
         ConsulServer.say_command(cmd, state)
 
         case Enum.member?(state.join_queue, senderid) do

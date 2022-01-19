@@ -94,6 +94,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, %{state | timeouts: %{}}}
   end
 
+  def handle_info(:queue_check, state) do
+    player_count_changed(state)
+    {:noreply, state}
+  end
+
   def handle_info({:dequeue_user, userid}, state) do
     new_queue = state.join_queue |> List.delete(userid)
     {:noreply, %{state | join_queue: new_queue}}
@@ -283,6 +288,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         {change, new_status}
 
       hd(state.join_queue) != userid and new_client.player == true and existing.player == false ->
+        LobbyChat.sayprivateex(state.coordinator_id, userid, "You are not part of the join queue so cannot become a player. Add yourself to the queue by chatting $joinq", state.lobby_id)
         {false, nil}
 
       true ->
