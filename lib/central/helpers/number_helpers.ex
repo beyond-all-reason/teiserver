@@ -1,5 +1,6 @@
 defmodule Central.Helpers.NumberHelper do
   @moduledoc false
+
   @spec int_parse(String.t() | nil | number() | List.t()) :: Integer.t() | List.t()
   def int_parse(""), do: 0
   def int_parse(nil), do: 0

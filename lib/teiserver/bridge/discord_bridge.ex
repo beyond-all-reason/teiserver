@@ -146,18 +146,20 @@ defmodule Teiserver.Bridge.DiscordBridge do
           "Banned" -> "Banned"
         end
 
-        followup = if report.followup != "" do
+        followup = if report.followup != nil do
           "If the behaviour continues, a follow up of #{report.followup} may be employed"
         else
           ""
         end
 
         msg = [
+          "----------------------",
           "Action: #{report.target.name} was #{past_tense} by #{report.responder.name}",
           "Reason: #{report.response_text}",
           "Restriction(s): #{restrictions}",
           "Expires: #{until}",
-          followup
+          followup,
+          "----------------------"
         ]
         |> Enum.join("\n")
 
