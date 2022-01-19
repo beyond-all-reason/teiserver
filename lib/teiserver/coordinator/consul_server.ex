@@ -450,7 +450,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state.host_teamcount * state.host_teamsize
   end
 
-  defp get_player_count(state) do
+  @spec get_player_count(map()) :: non_neg_integer
+  def get_player_count(state) do
     lobby = Lobby.get_lobby!(state.lobby_id)
     lobby.players
     |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)

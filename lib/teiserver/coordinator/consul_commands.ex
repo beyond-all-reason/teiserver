@@ -37,11 +37,16 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     |> Enum.map(&User.get_username/1)
     |> Enum.join(", ")
 
+    player_count = ConsulServer.get_player_count(state)
+
     # Put other settings in here
     other_settings = [
       (if state.welcome_message, do: "Welcome message: #{state.welcome_message}"),
       "Team size set to #{state.host_teamsize}",
       "Team count set to #{state.host_teamcount}",
+      "Host boss is #{state.host_boss}",
+      "Currently I think there are #{player_count} players",
+      "I think the maximum allowed number of players is #{state.host_teamsize * state.host_teamcount}",
       "Level required to play is #{state.level_to_play}",
       "Level required to spectate is #{state.level_to_spectate}",
     ]
