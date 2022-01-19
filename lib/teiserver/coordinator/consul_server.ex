@@ -282,7 +282,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Enum.empty?(state.join_queue) ->
         {change, new_status}
 
-      not Enum.member?(state.join_queue, userid) and new_client.player == true ->
+      hd(state.join_queue) != userid and new_client.player == true and existing.player == false ->
         {false, nil}
 
       true ->

@@ -134,7 +134,7 @@ defmodule Teiserver.Client do
   end
 
   @spec update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
-  def update(client, reason) do
+  def update(%{userid: _} = client, reason) do
     client =
       client
       |> add_client
@@ -153,6 +153,7 @@ defmodule Teiserver.Client do
 
     client
   end
+  def update(client, _reason), do: client
 
   @spec join_battle(T.client_id(), Integer.t(), Integer.t()) :: nil | Map.t()
   def join_battle(userid, lobby_id, colour \\ 0) do

@@ -1162,8 +1162,10 @@ defmodule Teiserver.Protocols.SpringIn do
           Spring.parse_battle_status(battlestatus)
           |> Map.take([:ready, :team_number, :ally_team_number, :player, :sync, :side])
 
+        existing = Client.get_client_by_id(state.userid)
+
         new_client =
-          (Client.get_client_by_id(state.userid) || %{})
+          (existing || %{})
           |> Map.merge(updates)
           |> Map.put(:team_colour, team_colour)
 
@@ -1174,7 +1176,7 @@ defmodule Teiserver.Protocols.SpringIn do
             {true, allowed_client} ->
               Client.update(allowed_client, :client_updated_battlestatus)
             {false, _} ->
-              :ok
+              Client.update(existing, :client_updated_battlestatus)
           end
         end
 
