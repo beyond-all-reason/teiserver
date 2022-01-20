@@ -154,6 +154,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
         msg = [
           "----------------------",
+          "Moderation action:",
           "Action: #{report.target.name} was #{past_tense} by #{report.responder.name}",
           "Reason: #{report.response_text}",
           "Restriction(s): #{restrictions}",
@@ -165,7 +166,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
         Alchemy.Client.send_message(
           chan,
-          "Moderation action: #{msg}",
+          msg,
           []# Options
         )
       end
