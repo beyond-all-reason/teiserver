@@ -386,7 +386,8 @@ defmodule TeiserverWeb.Admin.UserController do
         conn
         |> assign(:report, report)
         |> assign(:changeset, changeset)
-        |> add_breadcrumb(name: "Edit: #{fav.item_label}", url: conn.request_path)
+        |> add_breadcrumb(name: "Respond to report against: #{fav.item_label}", url: conn.request_path)
+        |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
         |> render("respond.html")
 
       _ ->
@@ -411,7 +412,10 @@ defmodule TeiserverWeb.Admin.UserController do
             report_params =
               Map.merge(report_params, %{
                 "expires" => expires,
-                "responder_id" => conn.user_id
+                "responder_id" => conn.user_id,
+                "followup" => report_params["followup"],
+                "code_references" => report_params["code_references"],
+                "responded_at" => Timex.now(),
               })
 
             case Central.Account.update_report(report, report_params) do
@@ -434,6 +438,7 @@ defmodule TeiserverWeb.Admin.UserController do
             |> assign(:error, error)
             |> assign(:report, report)
             |> assign(:changeset, changeset)
+            |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
             |> render("respond.html")
         end
 

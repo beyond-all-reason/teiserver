@@ -9,7 +9,6 @@
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
 <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
 
-
 <form action={Routes.ts_admin_user_path(@conn, :perform_action, @user, "report_action")} method="POST">
   <div class="row section-menu">
     <input type="hidden" name="_method" value="PUT" />
@@ -18,7 +17,7 @@
     <div class="col-md-4">
       <input type="text" name="reason" value="" placeholder="Reason" class="form-control" />
     </div>
-    
+
     <div class="col-md-2">
       <select class="form-control" name="report_response_action" id="report_response_action" autofocus="autofocus">
         <%= for opt <- Central.Account.ReportLib.response_actions() do %>
@@ -63,6 +62,7 @@
       <th>Reason</th>
       <th>Reported by</th>
       <th>Reported from</th>
+      <th>At</th>
 
       <th colspan="2">Responder</th>
       <th colspan="2">Response</th>
@@ -78,6 +78,7 @@
       <td><%= report.reason %></td>
       <td><%= report.reporter.name %></td>
       <td><%= report.location %>:<%= report.location_id %></td>
+      <td><%= date_to_str(report.inserted_at, format: :hms_or_dmy) %></td>
 
       <%= if report.responder do %>
         <td><%= report.responder.name %></td>
@@ -101,7 +102,7 @@
           <% end %>
         </td>
       <% else %>
-        <td colspan="4">No response</td>
+        <td colspan="6">No response</td>
       <% end %>
 
       <td>
