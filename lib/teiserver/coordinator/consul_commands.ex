@@ -149,15 +149,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  def handle_command(%{command: "joinq", senderid: senderid} = cmd, state) do
+  def handle_command(%{command: "joinq", senderid: senderid} = _cmd, state) do
     case Client.get_client_by_id(senderid) do
       %{player: true} ->
         LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are already a player, you can't join the queue!", state.lobby_id)
         state
       _ ->
         send(self(), :queue_check)
-        ConsulServer.say_command(cmd, state)
-
         case Enum.member?(state.join_queue, senderid) do
           false ->
             new_queue = state.join_queue ++ [senderid]
