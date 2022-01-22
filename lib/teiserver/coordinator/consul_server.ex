@@ -106,6 +106,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info({:user_left, userid}, state) do
     new_queue = state.join_queue |> List.delete(userid)
+    player_count_changed(state)
     {:noreply, %{state | join_queue: new_queue}}
   end
 
