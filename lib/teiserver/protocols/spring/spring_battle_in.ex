@@ -1,6 +1,6 @@
 defmodule Teiserver.Protocols.Spring.BattleIn do
   alias Teiserver.Battle.Lobby
-  alias Teiserver.{Coordinator}
+  alias Teiserver.{Coordinator, User}
   alias Teiserver.Protocols.SpringIn
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -20,7 +20,7 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
     case Jason.decode(json_str) do
       {:ok, data} ->
         host_data = %{
-          # host_boss: User.get_userid(data["boss"]),
+          host_boss: User.get_userid(data["boss"]),
           host_teamsize: data["teamSize"] |> int_parse,
           host_teamcount: data["nbTeams"] |> int_parse
         }
