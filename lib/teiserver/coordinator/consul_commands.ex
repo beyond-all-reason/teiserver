@@ -162,12 +162,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           false ->
             new_queue = state.join_queue ++ [senderid]
             pos = get_queue_position(new_queue, senderid) + 1
-            LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}", state.lobby_id)
+            LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}. Use $status to check on the queue.", state.lobby_id)
 
             %{state | join_queue: new_queue}
           true ->
             pos = get_queue_position(state.join_queue, senderid) + 1
-            LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}", state.lobby_id)
+            LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}. Use $status to check on the queue.", state.lobby_id)
             state
         end
     end
