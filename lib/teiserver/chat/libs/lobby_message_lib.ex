@@ -4,7 +4,7 @@ defmodule Teiserver.Chat.LobbyMessageLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "far fa-???"
+  def icon, do: "far fa-comment"
   @spec colours :: {String.t(), String.t(), String.t()}
   def colours, do: Central.Helpers.StylingHelper.colours(:default)
 

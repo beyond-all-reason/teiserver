@@ -38,13 +38,6 @@ defmodule TeiserverWeb.Admin.MatchController do
 
   @spec user_show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def user_show(conn, %{"user_id" => user_id}) do
-    # match_ids = Battle.list_match_memberships(search: [user_id: user_id])
-    # |> Enum.map(fn mm -> mm.match_id end)
-
-    # IO.puts ""
-    # IO.inspect match_ids
-    # IO.puts ""
-
     matches =
       Battle.list_matches(
         search: [
@@ -70,6 +63,10 @@ defmodule TeiserverWeb.Admin.MatchController do
       preload: [:members_and_users]
     ])
 
+    members = match.members
+      |> Enum.sort_by(fn m -> m.user.name end, &<=/2)
+      |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
+
     match
     |> MatchLib.make_favourite
     |> insert_recently(conn)
@@ -79,6 +76,7 @@ defmodule TeiserverWeb.Admin.MatchController do
     conn
     |> assign(:match, match)
     |> assign(:match_name, match_name)
+    |> assign(:members, members)
     |> add_breadcrumb(name: "Show: #{match_name}", url: conn.request_path)
     |> render("show.html")
   end

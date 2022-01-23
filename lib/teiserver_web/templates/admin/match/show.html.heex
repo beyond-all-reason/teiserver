@@ -12,13 +12,13 @@
   });
 </script>
 
-<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "matches"}) %>
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "matches"}) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Battle.MatchView, "section_menu.html", Map.merge(assigns, %{
+        <%= render TeiserverWeb.Admin.MatchView, "section_menu.html", Map.merge(assigns, %{
             show_search: false,
             active: ""
         }) %>
@@ -30,6 +30,10 @@
 
       <h3>
         <%= @match_name %>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <%= if @match.winning_team != nil do %>
+          Team <%= @match.winning_team + 1 %> won
+        <% end %>
       </h3>
       <br />
       <ul class="nav nav-tabs" role="tablist" id="the_tabs">
@@ -41,9 +45,9 @@
         </li>
         
         <li>
-          <a href="#members_tab" role="tab" class="nav-link" data-toggle="tab">
-            <%= central_component "icon", icon: "fas fa-user" %>
-            Members
+          <a href="#players_tab" role="tab" class="nav-link" data-toggle="tab">
+            <%= central_component "icon", icon: "fas fa-users" %>
+            Players
           </a>
         </li>
       </ul>
@@ -53,8 +57,8 @@
           <%= render "tab_details.html", assigns %>
         </div>
         
-        <div class="tab-pane" id="members_tab" style="padding:5px;">
-          <%= render "tab_members.html", assigns %>
+        <div class="tab-pane" id="players_tab" style="padding:5px;">
+          <%= render "tab_players.html", assigns %>
         </div>
       </div>
       <%# END OF TABS %>

@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.LobbyController do
   use CentralWeb, :controller
 
-  alias Teiserver.{Chat}
+  alias Teiserver.{Chat, Battle}
 
   plug(AssignPlug,
     sidemenu_active: ["teiserver", "teiserver_admin"]
@@ -28,7 +28,15 @@ defmodule TeiserverWeb.Admin.LobbyController do
       order_by: "Oldest first"
     )
 
+    match_id = case Battle.list_matches(search: [uuid: lobby_guid]) do
+      [match] ->
+        match.id
+      _ ->
+        nil
+    end
+
     conn
+    |> assign(:match_id, match_id)
     |> assign(:lobby_messages, lobby_messages)
     |> add_breadcrumb(name: "Show: #{lobby_guid}", url: conn.request_path)
     |> render("chat.html")

@@ -56,8 +56,8 @@ defmodule TeiserverWeb.Battle.MatchController do
     match_name = MatchLib.make_match_name(match)
 
     members = match.members
-    |> Enum.sort_by(fn m -> m.user.name end, &<=/2)
-    |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
+      |> Enum.sort_by(fn m -> m.user.name end, &<=/2)
+      |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
 
     conn
     |> assign(:match, match)

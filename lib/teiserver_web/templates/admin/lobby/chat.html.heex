@@ -1,5 +1,11 @@
 <div class="row">
   <div class="col-md-12">
+    <%= if @match_id do %>
+      <a href={Routes.ts_admin_match_path(@conn, :show, @match_id)} class="float-right btn btn-outline-secondary">
+        Match details
+      </a>
+    <% end %>
+  
     <h4>Lobby chat</h4>
     Oldest chat at the top (read top to bottom)
 
