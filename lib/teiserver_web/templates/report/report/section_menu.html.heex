@@ -44,3 +44,12 @@
   bsname: bsname,
   url: Routes.ts_reports_report_path(@conn, :show, "retention")
 %>
+
+<%= central_component "section_menu_button",
+  name: "accolades",
+  label: "Accolades",
+  active: @active,
+  icon: Teiserver.Account.AccoladeLib.icon(),
+  bsname: bsname,
+  url: Routes.ts_reports_report_path(@conn, :show, "accolades")
+%>

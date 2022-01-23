@@ -79,6 +79,14 @@
       text: "Retention",
       link: Routes.ts_reports_report_path(@conn, :show, "retention")
     %>
+
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Account.AccoladeLib.icon(),
+      name: "accolades",
+      text: "Accolades",
+      link: Routes.ts_reports_report_path(@conn, :show, "accolades")
+    %>
   <% end %>
 </div>
 

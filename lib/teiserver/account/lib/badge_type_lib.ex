@@ -110,4 +110,14 @@ defmodule Teiserver.Account.BadgeTypeLib do
   #     left_join: things in assoc(badge_types, :things),
   #     preload: [things: things]
   # end
+
+  def nil_badge_type() do
+    %{
+      name: "No badge",
+      icon: "far fa-square",
+      colour: "#555",
+      description: "",
+      purposes: []
+    }
+  end
 end
