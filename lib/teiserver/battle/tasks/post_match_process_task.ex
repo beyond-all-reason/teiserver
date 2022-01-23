@@ -27,6 +27,8 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       limit: :infinity
     )
     |> post_process_match
+
+    :ok
   end
 
   defp post_process_match(match) do
@@ -35,6 +37,9 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     new_data = Map.merge((match.data || %{}), %{
       "skills" => skills
     })
+
+    use_export_data(match)
+    new_data = Map.merge(new_data, extract_export_data(match))
 
     Battle.update_match(match, %{
       data: new_data,
@@ -80,4 +85,71 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       }
     end
   end
+
+  defp use_export_data(%{data: %{"export_data" => export_data}} = match) do
+    win_map = export_data["players"]
+    |> Map.new(fn stats -> {stats["name"], stats["win"] == 1} end)
+
+    winning_team = Battle.list_match_memberships(search: [match_id: match.id])
+    |> Enum.map(fn m ->
+      username = User.get_username(m.user_id)
+      win = Map.get(win_map, username, false)
+
+      stats = export_data["teamStats"]
+        |> Map.get(username, %{})
+        |> Map.drop(~w(allyTeam frameNb))
+        |> Map.new(fn {k, v} ->
+          {k,
+            v
+              |> NumberHelper.int_parse()
+              |> round
+          }
+        end)
+
+      Battle.update_match_membership(m, %{
+        win: win,
+        stats: stats
+      })
+
+      {m.team_id, win}
+    end)
+    |> Enum.filter(fn {_teamid, win} -> win == true end)
+    |> hd_or_x({nil, nil})
+    |> elem(0)
+
+    Battle.update_match(match, %{winning_team: winning_team})
+  end
+  defp use_export_data(_), do: []
+
+  defp extract_export_data(%{data: %{"export_data" => _export_data}} = _match) do
+    %{}
+  end
+  defp extract_export_data(_), do: %{}
+
+  defp hd_or_x([], x), do: x
+  defp hd_or_x([x | _], _x), do: x
+
+  # defp map_keys_to_integer(map, keys) do
+  #   map
+  #   |> Map.new(fn {k, v} ->
+  #     if Enum.member?(keys, k) do
+  #       {k, NumberHelper.int_parse(v)}
+  #     else
+  #       {k, v}
+  #     end
+  #   end)
+  # end
+
+  # defp map_keys_to_round(map, keys) do
+  #   map
+  #   |> Map.new(fn {k, v} ->
+  #     if Enum.member?(keys, k) do
+  #       {k, round(v)}
+  #     else
+  #       {k, v}
+  #     end
+  #   end)
+  # end
+
+  # Teiserver.Battle.Tasks.PostMatchProcessTask.perform_reprocess(37665)
 end

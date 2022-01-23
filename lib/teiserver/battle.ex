@@ -279,7 +279,10 @@ defmodule Teiserver.Battle do
 
             case list_matches(search: [uuid: uuid]) do
               [match] ->
-                new_data = Map.put((match.data || %{}), "export_data", data)
+                filtered_data = data
+                |> Map.drop(~w(battleContext bots))
+
+                new_data = Map.put((match.data || %{}), "export_data", filtered_data)
                 update_match(match, %{data: new_data})
 
                 # "Got match export data for #{uuid} of: #{json_string}"

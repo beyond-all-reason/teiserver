@@ -76,6 +76,8 @@ defmodule CentralWeb do
 
       import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
 
+      import Central.Helpers.NumberHelper, only: [normalize: 1]
+
       import Phoenix.LiveView
       import Phoenix.LiveView.Helpers
     end

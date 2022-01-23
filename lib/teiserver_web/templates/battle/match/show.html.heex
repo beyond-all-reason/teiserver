@@ -30,6 +30,10 @@
 
       <h3>
         <%= @match_name %>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <%= if @match.winning_team != nil do %>
+          Team <%= @match.winning_team + 1 %> won
+        <% end %>
       </h3>
       <br />
       <ul class="nav nav-tabs" role="tablist" id="the_tabs">
@@ -39,11 +43,21 @@
             Details
           </a>
         </li>
+        <li>
+          <a href="#players_tab" role="tab" class="nav-link" data-toggle="tab">
+            <%= central_component "icon", icon: "fas fa-users" %>
+            Players
+          </a>
+        </li>
       </ul>
 
       <div class="tab-content">
         <div class="tab-pane" id="details_tab" style="padding:5px;">
           <%= render "tab_details.html", assigns %>
+        </div>
+        
+        <div class="tab-pane" id="players_tab" style="padding:5px;">
+          <%= render "tab_players.html", assigns %>
         </div>
       </div>
       <%# END OF TABS %>

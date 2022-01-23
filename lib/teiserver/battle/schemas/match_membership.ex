@@ -5,6 +5,9 @@ defmodule Teiserver.Battle.MatchMembership do
   schema "teiserver_battle_match_memberships" do
     field :team_id, :integer, default: nil
 
+    field :win, :boolean, default: nil
+    field :stats, :map, default: nil
+
     belongs_to :user, Central.Account.User, primary_key: true
     belongs_to :match, Teiserver.Battle.Match, primary_key: true
   end
@@ -14,7 +17,7 @@ defmodule Teiserver.Battle.MatchMembership do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:match_id, :user_id, :team_id])
+    |> cast(params, [:match_id, :user_id, :team_id, :win, :stats])
     |> validate_required([:match_id, :user_id, :team_id])
     |> unique_constraint([:match_id, :user_id])
   end
