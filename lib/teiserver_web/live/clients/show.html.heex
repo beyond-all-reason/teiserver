@@ -9,7 +9,7 @@
 
 <%#= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{conn: @socket, active: "users"}) %>
 
-<a href={Routes.ts_admin_user_path(@socket, :edit, @user.id)} class={"float-right btn btn-#{bsname}"}>
+<a href={Routes.ts_admin_user_path(@socket, :edit, @user.id)} class={"float-end btn btn-#{bsname}"}>
   Edit account
 </a>
 
@@ -46,7 +46,7 @@
 <% end %>
 <br />
 
-<div class="float-right">
+<div class="float-end">
   <span class="btn btn-danger" phx-click="force-disconnect">
     Force disconnect
   </span>

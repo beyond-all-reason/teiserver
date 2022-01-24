@@ -4,7 +4,7 @@
   $(function() {
     var selected_tab = window.location.hash.substr(1).replace("_tab", "");
     $('#the_tabs a:first').tab('show');
-    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     page_quick_actions = [
       {label: "User reports", icons: ["far fa-bars", "<%= Central.Account.ReportLib.icon() %>"], url: "<%= Routes.admin_report_path(@conn, :user_show, @user) %>", keywords: ["report"]},
@@ -34,9 +34,9 @@
         <hr />
 
         <%= if @edit_access do %>
-          <div class="float-right">
+          <div class="float-end">
             <div class="dropdown" style="display: inline-block;">
-              <div class={"btn btn-#{bsname} dropdown-toggle"} data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <div class={"btn btn-#{bsname} dropdown-toggle"} data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Actions
               </div>
               <%= render "actions.html", assigns %>
@@ -59,7 +59,7 @@
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li>
-            <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
+            <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
               <%= central_component "icon", icon: icon() %>
               Details
             </a>
@@ -67,21 +67,21 @@
 
           <%= if @edit_access do %>
             <li>
-              <a href="#groups_tab" role="tab" class="nav-link" data-toggle="tab">
+              <a href="#groups_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                 <%= central_component "icon", icon: Central.Account.GroupLib.icon() %>
                 Groups (<%= Enum.count(@user.groups) %>)
               </a>
             </li>
 
             <li>
-              <a href="#permissions_tab" role="tab" class="nav-link" data-toggle="tab">
+              <a href="#permissions_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                 <%= central_component "icon", icon: Central.Account.AuthLib.icon() %>
                 Permissions
               </a>
             </li>
 
             <li>
-              <a href="#settings_tab" role="tab" class="nav-link" data-toggle="tab">
+              <a href="#settings_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                 <%= central_component "icon", icon: Central.Config.UserConfigLib.icon() %>
                 Settings
               </a>

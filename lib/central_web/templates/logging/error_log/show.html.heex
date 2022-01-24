@@ -10,7 +10,7 @@
   <div class="col-lg-12">
     <div class={"card page-card border-#{bsname}"}>
       <div class="card-body">
-        <%= link "Delete", to: Routes.logging_error_log_path(@conn, :delete, @log), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-sm float-right" %>
+        <%= link "Delete", to: Routes.logging_error_log_path(@conn, :delete, @log), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-sm float-end" %>
 
         <h4>Error log #<%= @log.id %></h4>
         <br />

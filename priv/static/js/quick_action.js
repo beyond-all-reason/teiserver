@@ -27,29 +27,25 @@ var qa_test_mode = false;
 
 var min_icon_count = 2
 
+var list_modal = null;
+var form_modal = null;
+
 $(function() {
   $('#quick-action-modal').on('hidden.bs.modal', function () {
     $("#modal-fixer").hide();
   })
-  
+
   $('#quick-action-modal').on('shown.bs.modal', function () {
     $('#quick_action_text').trigger('focus')
   })
-  
-  // $('body').after('<div id="quick_action_dialog" style="display:none;" title="">\
-  //     <input type="text" id="quick_action_text" value="" style="width:99%;"/>\
-  //     <div id="quick_action_list" style="max-height:' + ($(window).height()-300) + 'px;">\
-  //         &nbsp;\
-  //     </div>\
-  // </div><div id="quick_action_form" style="display:none;"></div><div id="quick_action_cache" style="display:none;"></div>');
-  
+
   $('#quick_action_text').keyup(function(e) {
     if (e.which != qa_down_arrow && e.which != qa_up_arrow && e.which != qa_enter)
     {
       update_quick_action_modal(true);
     }
   });
-  
+
   $('#quick_action_text').keydown(function(e) {
     if(e.which == qa_enter) {
       var search_term = $('#quick_action_text').val().toLowerCase();
@@ -95,7 +91,7 @@ $(function() {
       show_quick_action_modal();
     }
   });
-  
+
   // When testing it can be useful to uncomment the following line
   if (qa_test_mode) {show_quick_action_modal();}
 });
@@ -108,30 +104,30 @@ $(function() {
 function filter_gotos (search_term)
 {
   var found_items = [];
-  
+
   var search_terms = search_term.toLowerCase().split(" ");
-  
+
   // For each possible item we can go to
   for (var i = 0; i < qa_item_list.length; i++)
   {
     the_item = qa_item_list[i];
     use_this_item = false;
-    
+
     // No search term? List all the items
     if (search_terms == [""]) {
       use_this_item = true
       continue;
     }
-    
+
     // For each searchable term this item has
     var terms = the_item.keywords;
     for (var j = 0; j < terms.length; j++)
     {
       if (use_this_item == true) {continue;}
-      
+
       haystack = terms[j].toLowerCase();
       contaiqa_all_parts = true;
-      
+
       // For each of our search terms
       for (var k = 0; k < search_terms.length; k++)
       {
@@ -141,19 +137,19 @@ function filter_gotos (search_term)
           contaiqa_all_parts = false;
         }
       }
-      
+
       if (contaiqa_all_parts)
       {
         use_this_item = true;
       }
     }
-    
+
     if (use_this_item)
     {
       found_items.push(the_item);
     }
   }
-  
+
   return found_items;
 }
 
@@ -171,8 +167,7 @@ function select_goto (search_term)
     else if (the_item.js != null) {
       the_item.js();
     }
-    
-    
+
     /*
     May want to use this with a more complex form, leaving it in for future reference
     if (jQuery.isEmptyObject(form))
@@ -188,8 +183,9 @@ function select_goto (search_term)
 
 function show_form_dialog (the_item)
 {
-  $('#quick-action-modal').modal('hide');
-  
+  console.log("show_form_dialog");
+  list_modal.hide();
+
   $('#quick-action-form').attr("action", the_item.url);
   $('#quick-action-form-input').attr("name", the_item.input);
   if (the_item.method == "get") {
@@ -199,8 +195,10 @@ function show_form_dialog (the_item)
 
   icon_str = make_icon_string(the_item.icons)
   $('#quick-action-form-heading').html(icon_str + " " + the_item.label);
-  
-  $('#quick-action-form-modal').modal({});
+
+  var elem = document.getElementById('quick-action-form-modal');
+  form_modal = new bootstrap.Modal(elem, {});
+  form_modal.show();
   $('#quick-action-form-input').focus();
 }
 
@@ -283,15 +281,17 @@ function actually_show_quick_action_modal () {
   $('#quick_action_list').html("");
   search_term = "";
   var quick_action_list = build_quick_action_list(search_term, true);
-  
+
   if (quick_action_list != "")
   {
     // var ft = setTimeout(function() {if ($('#quick_action_text').text() == ''){$('#quick_action_text').focus();}}, 500);
-    
+
     $('#quick_action_list').html(quick_action_list);
-    
+
     $("#modal-fixer").show();
-    $('#quick-action-modal').modal({});
+    var elem = document.getElementById('quick-action-modal');
+    list_modal = new bootstrap.Modal(elem, {});
+    list_modal.toggle();
     
     // if ($('#quick_action_text').text() == ''){$('#quick_action_text').focus();}
     

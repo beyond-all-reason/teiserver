@@ -1,7 +1,25 @@
+<li style="width: 50px;">&nbsp;</li>
+
 <%= if allow?(@current_user, "teiserver") do %>
   <%= central_component "top_nav_item",
-    text: "BAR",
+    text: "BAR home",
     route: Routes.ts_general_general_path(@conn, :index),
+    active: false
+  %>
+<% end %>
+
+<%= if allow?(@current_user, "teiserver") do %>
+  <%= central_component "top_nav_item",
+    text: "Matches",
+    route: Routes.ts_battle_match_path(@conn, :index),
+    active: false
+  %>
+<% end %>
+
+<%= if allow?(@current_user, "teiserver.moderator") do %>
+  <%= central_component "top_nav_item",
+    text: "Reports",
+    route: Routes.ts_reports_general_path(@conn, :index),
     active: false
   %>
 <% end %>

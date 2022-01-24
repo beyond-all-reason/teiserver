@@ -1,15 +1,15 @@
 let ChatApp = {
   init(socket) {
-    var element = document.getElementById("chat-wrapper");
+    var element = $("#chat-wrapper");
     if (element) {
       socket.connect();
       this.onReady(socket, element)
     }
   },
-  
+
   onReady(socket, element) {
-    var room_name = element.getAttribute('data-room_name');
-    var room_names = element.getAttribute("data-room_names");
+    var room_name = element.data("room_name");
+    var room_names = element.data("room_names");
 
     if (room_name) {
       let chat_channel = socket.channel("chat:" + room_name)
@@ -24,11 +24,11 @@ let ChatApp = {
         chat_incomming_message(resp)
       )
     }
-    
+
     // Or have they joined multiple chat rooms at once?
     if (room_names) {
       let names = room_names.split(" ")
-      
+
       for (var i = names.length - 1; i >= 0; i--) {
         let room_name = names[i]
         let chat_channel = socket.channel("chat:" + room_name)

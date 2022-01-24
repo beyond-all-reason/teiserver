@@ -1,18 +1,18 @@
-<div class="input-group input-group-show">
+<div class="input-group input-group-show m-1">
   <%= if assigns[:label] do %>
-  <span class="input-group-prepend">
-    <span class="input-group-text row-left" style={if assigns[:width], do: "width: #{assigns[:width]}px"}>
-      <%= @label %>
+    <span class="input-group-prepend">
+      <span class="input-group-text row-left" style={if assigns[:width], do: "width: #{assigns[:width]}px";}>
+        <%= @label %>
+      </span>
     </span>
-  </span>
   <% end %>
 
   <%= if assigns[:icon] do %>
-  <span class="input-group-prepend">
-    <span class="input-group-text" style={"background-color: #{@icon.colour}; color: #FFF;"}>
-      <%= central_component "icon", icon: @icon.icon %>
+    <span class="input-group-prepend">
+      <span class="input-group-text" style={"background-color: #{@icon.colour}; color: #FFF; height: 100%;"}>
+        <%= central_component "icon", icon: @icon.icon %>
+      </span>
     </span>
-  </span>
   <% end %>
 
   <%
@@ -36,7 +36,7 @@
 
   <%= if assigns[:link] do %>
     <span class="input-group-append">
-      <a class={"input-group-text btn btn-#{@link.bsname} btn-sm"} href={@link.path}>
+      <a class={"input-group-text btn btn-#{@link.bsname} btn-sm"} href={@link.path} style="height: 100%;">
         <%= if @link.icon do %>
           <%= central_component "icon", icon: @link.icon %>
           &nbsp;

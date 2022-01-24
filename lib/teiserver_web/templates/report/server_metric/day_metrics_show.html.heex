@@ -4,7 +4,7 @@
   $(function() {
     var selected_tab = window.location.hash.substr(1).replace("_tab", "");
     $('#the_tabs a:first').tab('show');
-    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
   });
 </script>
 
@@ -35,7 +35,7 @@
 
 <div class="row page-row">
   <div class="col-md-12">
-    <a href={Routes.ts_reports_match_metric_path(@conn, :day_metrics_show, date_to_str(@date, format: :ymd))} class={"btn float-right btn-outline-#{TeiserverWeb.Report.MatchMetricView.colours |> elem(2)}"}>
+    <a href={Routes.ts_reports_match_metric_path(@conn, :day_metrics_show, date_to_str(@date, format: :ymd))} class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.colours |> elem(2)}"}>
       <%= central_component "icon", icon: TeiserverWeb.Report.MatchMetricView.icon %>
       &nbsp;
       Match detail
@@ -50,35 +50,35 @@
     <ul class="nav nav-tabs" role="tablist" id="the_tabs">
 
       <li>
-        <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
+        <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
           <%= central_component "icon", icon: icon() %>
           Details
         </a>
       </li>
 
       <li>
-        <a href="#hourly_tab" role="tab" class="nav-link" data-toggle="tab">
+        <a href="#hourly_tab" role="tab" class="nav-link" data-bs-toggle="tab">
           <i class="far fa-fw fa-hourglass"></i>
           Hourly
         </a>
       </li>
 
       <li>
-        <a href="#user_tab" role="tab" class="nav-link" data-toggle="tab">
+        <a href="#user_tab" role="tab" class="nav-link" data-bs-toggle="tab">
           <%= central_component "icon", icon: Central.Account.UserLib.icon() %>
           Users
         </a>
       </li>
 
       <li>
-        <a href="#raw_tab" role="tab" class="nav-link" data-toggle="tab">
+        <a href="#raw_tab" role="tab" class="nav-link" data-bs-toggle="tab">
           <i class="far fa-fw fa-code"></i>
           Raw data
         </a>
       </li>
 
       <li>
-        <a href="#anon_raw_tab" role="tab" class="nav-link" data-toggle="tab">
+        <a href="#anon_raw_tab" role="tab" class="nav-link" data-bs-toggle="tab">
           <i class="far fa-fw fa-user-secret"></i>
           Anon data
         </a>

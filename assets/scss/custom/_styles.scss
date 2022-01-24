@@ -4,7 +4,20 @@
   margin: 0;
 }
 
+body {
+  overflow-x: hidden;
+  margin: 0;
+}
 
+.debug {
+  background-color: #F66;
+  color: #000;
+}
+
+// Top nav
+#top-nav {
+  border-bottom: 1px solid $light;
+}
 
 .slow-blink-outline-primary {
   animation: pulse-outline-primary 6s ease infinite;
@@ -160,7 +173,7 @@
 
 /* Page sub menu */
 .sub-menu {
-  margin-top: -5px;
+  margin-top: 0;
 }
 
 .sub-menu .card {
@@ -284,4 +297,22 @@
   .btn-outline-#{$color} {
     @include button-outline-variant($value);
   }
+}
+
+.row-left {
+  width: 145px;
+}
+
+body.modal-open {
+  overflow: visible;
+}
+
+// Live search
+.picker-input {
+  /*height: 42px;*/
+  height: 100%;
+}
+
+.picker-modal-close {
+  font-size: 2em;
 }

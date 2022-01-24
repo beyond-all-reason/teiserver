@@ -25,10 +25,10 @@
         <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
             show_search: false,
             active: (cond do
-              @conn.params["search"] != nil -> "search"
+              @conn.params["search"] != nil -> "advanced_search"
               assigns[:data_search] != nil -> "data_search"
               # @filter != nil -> @filter
-              true -> "index"
+              true -> "list"
             end)
         }) %>
 

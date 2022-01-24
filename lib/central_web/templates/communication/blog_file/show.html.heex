@@ -4,7 +4,7 @@
   $(function() {
     var selected_tab = window.location.hash.substr(1).replace("_tab", "");
     $('#the_tabs a:first').tab('show');
-    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
   });
 </script>
 
@@ -25,7 +25,7 @@
 
 <div class="row page-row">
   <div class="col-md-12">
-    <div class="float-right">
+    <div class="float-end">
       <a href={Routes.blog_path(@conn, :show_file, @blog_file.url)} class={"btn btn-outline-#{bsname}"}>
         <i class="fa-fw fas fa-eye"></i>
         Show

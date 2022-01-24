@@ -4,7 +4,7 @@
   $(function() {
     var selected_tab = window.location.hash.substr(1).replace("_tab", "");
     $('#the_tabs a:first').tab('show');
-    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
   });
 </script>
 
@@ -30,7 +30,7 @@
 
         <hr />
 
-        <div class="float-right">
+        <div class="float-end">
 
           <%= if @group_access[:admin] do %>
             <a href={Routes.account_group_path(@conn, :edit, @group)} class={"btn btn-outline-#{bsname}"}>
@@ -60,7 +60,7 @@
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item">
-            <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
+            <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
               <%= central_component "icon", icon: icon() %>
               Details
             </a>
@@ -68,7 +68,7 @@
 
           <%= if @group_access[:see_members] do %>
             <li class="nav-item">
-              <a href="#members_tab" role="tab" class="nav-link" data-toggle="tab">
+              <a href="#members_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                 <%= central_component "icon", icon: "fas fa-users" %>
                 Members (<%= Enum.count(@group.memberships) %>)
               </a>
@@ -76,7 +76,7 @@
           <% end %>
 
           <li class="nav-item">
-            <a href="#family_tab" role="tab" class="nav-link" data-toggle="tab">
+            <a href="#family_tab" role="tab" class="nav-link" data-bs-toggle="tab">
               <%= central_component "icon", icon: "fas fa-sitemap" %>
               Family
             </a>

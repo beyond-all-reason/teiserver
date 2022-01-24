@@ -4,7 +4,7 @@
   $(function() {
     var selected_tab = window.location.hash.substr(1).replace("_tab", "");
     $('#the_tabs a:first').tab('show');
-    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     page_quick_actions = [
       {label: "Respond", icons: ["<%= icon() %>"], url: "<%= Routes.admin_report_path(@conn, :respond_form, @report) %>", keywords: ["respond", "report", "respond report"]},

@@ -19,10 +19,10 @@
 <%= if allow?(@conn, "teiserver.admin.account") do %>
   <div class="row">
     <div class="col-md-6">
-      <textarea id="user_data" rows="28" class="form-control monospace"><%= Jason.encode! Map.drop(@user.data, ["password_hash", "ip"]), pretty: true %></textarea>
+      <textarea id="user_data" rows="28" class="form-control monospace m1"><%= Jason.encode! Map.drop(@user.data, ["password_hash", "ip"]), pretty: true %></textarea>
     </div>
     <div class="col-md-6">
-      <textarea id="user_stats" rows="20" class="form-control monospace"><%= Jason.encode! Map.drop(@user_stats, ["password_hash", "ip"]), pretty: true %></textarea>
+      <textarea id="user_stats" rows="20" class="form-control monospace m1"><%= Jason.encode! Map.drop(@user_stats, ["password_hash", "ip"]), pretty: true %></textarea>
 
       <hr />
       <form action={Routes.ts_admin_user_path(@conn, :set_stat)} method='post' class=''>
@@ -37,7 +37,7 @@
           <input type='text' name='value' value='' class='form-control' placeholder="value" />
         </div>
 
-        <button type='submit' class={"btn btn-#{bsname} float-right"}>
+        <button type='submit' class={"btn btn-#{bsname} float-end"}>
           Set stat
         </button>
       </form>

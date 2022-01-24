@@ -20,10 +20,10 @@
   %>
 <% end %>
 
-<form action={Routes.ts_game_queue_path(@conn, :index)} method="get" class="float-right form-inline d-none d-md-block">
+<form action={Routes.ts_game_queue_path(@conn, :index)} method="get" class="float-end form-inline d-none d-md-block">
   <div class="input-group">
     <input type="text" name="s" id="quick_search" value={assigns[:quick_search] || Map.get(@conn, :params)["s"]} placeholder="Quick search" class="form-control" style="width: 150px; display: inline-block;" />
     &nbsp;
-    <input type="submit" value="Search" class={"btn btn-#{bsname} float-right"} style="margin-top: 0px;" />
+    <input type="submit" value="Search" class={"btn btn-#{bsname} float-end"} style="margin-top: 0px;" />
   </div>
 </form>

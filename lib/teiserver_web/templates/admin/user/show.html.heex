@@ -3,9 +3,8 @@
 <script type="text/javascript" charset="utf-8">
   $(function() {
     var selected_tab = window.location.hash.substr(1).replace("_tab", "");
-    if (selected_tab.substring(0, 7) == "stages-") {selected_tab = "stages";}
     $('#the_tabs a:first').tab('show');
-    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     page_quick_actions = [
       {label: "Edit user", icon: "<%= icon() %>", url: "<%= Routes.ts_admin_user_path(@conn, :edit, @user) %>", keywords: ["edit", "user", "edit user"]},
@@ -29,9 +28,9 @@
         }) %>
         <hr />
 
-        <div class="float-right">
+        <div class="float-end">
           <div class="dropdown" style="display: inline-block;">
-            <div class={"btn btn-#{bsname} dropdown-toggle"} data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <div class={"btn btn-#{bsname} dropdown-toggle"} data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               Actions
             </div>
             <%= render "actions.html", assigns %>
@@ -54,63 +53,63 @@
           <% end %>
         </div>
 
-      <h3 style={"color: #{@user.colour}"}>
-        <%= @user.name %>
-        &nbsp;
-        <i class={"far fa-fw #{@user.icon}"}></i>
-      </h3>
-      <br />
-      <ul class="nav nav-tabs" role="tablist" id="the_tabs">
-        <li>
-          <a href="#overview_tab" role="tab" class="nav-link" data-toggle="tab">
-            <%= central_component "icon", icon: Central.Helpers.StylingHelper.icon(:overview), class: "fas" %>
-            Overview
-          </a>
-        </li>
+        <h3 style={"color: #{@user.colour}"}>
+          <%= @user.name %>
+          &nbsp;
+          <i class={"far fa-fw #{@user.icon}"}></i>
+        </h3>
+        
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+          <li class="nav-item" role="presentation">
+            <a href="#overview_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component "icon", icon: Central.Helpers.StylingHelper.icon(:overview), class: "fas" %>
+              Overview
+            </a>
+          </li>
 
-        <li>
-          <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
-            <%= central_component "icon", icon: "fas fa-file-alt" %>
-            Details
-          </a>
-        </li>
+          <li class="nav-item" role="presentation">
+            <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component "icon", icon: "fas fa-file-alt" %>
+              Details
+            </a>
+          </li>
 
-        <li>
-          <a href="#reports_tab" role="tab" class="nav-link" data-toggle="tab">
-            <%
-              outstanding_reports = @reports
-                |> Enum.filter(fn r -> r.responder_id == nil end)
-                |> Enum.count
-            %>
-            <%= case outstanding_reports do %>
-              <% 0 -> %>
-                <%= central_component "icon", icon: Central.Account.ReportLib.icon() %>
-                Reports
-              <% 1 -> %>
-                <%= central_component "icon", icon: Central.Account.ReportLib.icon(), class: "text-danger fas" %>
-                1 Report outstanding
-              <% _ -> %>
-                <%= central_component "icon", icon: Central.Account.ReportLib.icon(), class: "text-danger fas" %>
-                <%= outstanding_reports %> Reports outstanding
-            <% end %>
-          </a>
-        </li>
-      </ul>
+          <li class="nav-item" role="presentation">
+            <a href="#reports_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%
+                outstanding_reports = @reports
+                  |> Enum.filter(fn r -> r.responder_id == nil end)
+                  |> Enum.count
+              %>
+              <%= case outstanding_reports do %>
+                <% 0 -> %>
+                  <%= central_component "icon", icon: Central.Account.ReportLib.icon() %>
+                  Reports
+                <% 1 -> %>
+                  <%= central_component "icon", icon: Central.Account.ReportLib.icon(), class: "text-danger fas" %>
+                  1 Report outstanding
+                <% _ -> %>
+                  <%= central_component "icon", icon: Central.Account.ReportLib.icon(), class: "text-danger fas" %>
+                  <%= outstanding_reports %> Reports outstanding
+              <% end %>
+            </a>
+          </li>
+        </ul>
 
-      <div class="tab-content">
-        <div class="tab-pane" id="overview_tab" style="padding:5px;">
-          <%= render "tab_overview.html", assigns %>
+        <div class="tab-content">
+          <div class="tab-pane" id="overview_tab" style="padding:5px;">
+            <%= render "tab_overview.html", assigns %>
+          </div>
+
+          <div class="tab-pane" id="details_tab" style="padding:5px;">
+            <%= render "tab_details.html", assigns %>
+          </div>
+
+          <div class="tab-pane" id="reports_tab" style="padding:5px;">
+            <%= render "tab_reports.html", assigns %>
+          </div>
         </div>
-
-        <div class="tab-pane" id="details_tab" style="padding:5px;">
-          <%= render "tab_details.html", assigns %>
-        </div>
-
-        <div class="tab-pane" id="reports_tab" style="padding:5px;">
-          <%= render "tab_reports.html", assigns %>
-        </div>
-      </div>
-      <%# END OF TABS %>
+        <%# END OF TABS %>
 
       </div>
     </div>

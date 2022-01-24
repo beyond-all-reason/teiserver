@@ -75,7 +75,7 @@
 
 <%= if not_in_group == false and @group_access[:is_member] == true do %>
   <br /><br />
-  <div class="float-right">
+  <div class="float-end">
     <%= link raw("Remove yourself from this group"), to: Routes.account_group_path(@conn, :delete_membership, @group.id, @current_user.id), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-outline" %>
   </div>
   <br /><br />

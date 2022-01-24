@@ -21,7 +21,7 @@ uid = Enum.random(100000..999999) |> to_string
   var timer = null;
 
   $(function () {
-    $('[data-toggle="popover"]').popover();
+    $('[data-bs-toggle="popover"]').popover();
 
     $('#<%= assigns[:name] %>-picker-modal').on('shown.bs.modal', function (e) {
       $('#<%= assigns[:name] %>-picker-ref').focus();
@@ -39,14 +39,19 @@ uid = Enum.random(100000..999999) |> to_string
   var <%= assigns[:name] %>_picker_target = "";
 
   function <%= assigns[:name] %>_picker (new_target) {
+    console.log("_picker");
     <%= assigns[:name] %>_picker_target = $(new_target);
 
     $('#<%= assigns[:name] %>-picker-ref').val('');
     $('#<%= assigns[:name] %>-picker-modal-results').html('');
-    $('#<%= assigns[:name] %>-picker-modal').modal({});
+
+    var elem = document.getElementById('<%= assigns[:name] %>-picker-modal');
+    var the_modal = new bootstrap.Modal(elem, {});
+    the_modal.toggle();
   }
 
   function <%= assigns[:name] %>_picker_select (selection) {
+    console.log("_picker_select");
     $('#<%= assigns[:name] %>-picker-ref').val('');
     $('#<%= assigns[:name] %>-picker-modal-results').html('');
 
@@ -60,6 +65,7 @@ uid = Enum.random(100000..999999) |> to_string
   }
 
   function <%= assigns[:name] %>_picker_display (results) {
+    console.log("_picker_display");
     // if (results == "" && results != []) {return;}
     $('#<%= assigns[:name] %>-picker-modal-results').html('');
 
@@ -76,7 +82,7 @@ uid = Enum.random(100000..999999) |> to_string
         icon = "<i class='fa-fw " + results[i].icon + "' style='color:" + results[i].colour + "'></i> "
       }
 
-      new_html += '<div class={"#{assigns[:name]}-picker-row"} onclick="<%= assigns[:name] %>_picker_select(\'' + value.replace("'", "\\'") + '\');">' + icon + label + '</div>';
+      new_html += '<div class="<%= assigns[:name] %>-picker-row" onclick="<%= assigns[:name] %>_picker_select(\'' + value.replace("'", "\\'") + '\');">' + icon + label + '</div>';
     }
 
     if (results.length == 0) {
@@ -87,6 +93,7 @@ uid = Enum.random(100000..999999) |> to_string
   }
 
   function <%= assigns[:name] %>_picker_search () {
+    console.log("_picker_search");
     search_term = $('#<%= assigns[:name] %>-picker-ref').val();
     dataset = "<%= assigns[:name] %>";
     uid = "<%= uid %>";
@@ -106,13 +113,14 @@ uid = Enum.random(100000..999999) |> to_string
   }
 
   function live_search_results(results) {
+    console.log("live_search_results");
     <%= assigns[:name] %>_picker_display(results.results);
   }
 </script>
 
 <div id="live-search-element" data-uid={uid}></div>
 
-<div class="modal fade" id={"#{assigns[:name]}-picker-modal"} tabindex="-1" role="dialog">
+<div class="modal fade" id={"#{assigns[:name]}-picker-modal"} tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-lg modal-dialog">
     <div class="modal-content">
       <div class="modal-header" style={"border-color: #{fg};"}>
@@ -123,7 +131,7 @@ uid = Enum.random(100000..999999) |> to_string
           <%= assigns[:title] %>
         </h4>
 
-        <button type="button" class="picker-modal-close close" data-dismiss="modal" aria-label="Close">
+        <button type="button" class="picker-modal-close close" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
 
@@ -145,7 +153,7 @@ uid = Enum.random(100000..999999) |> to_string
       </div>
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-secondary btn-block" data-bs-dismiss="modal">Cancel</button>
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->

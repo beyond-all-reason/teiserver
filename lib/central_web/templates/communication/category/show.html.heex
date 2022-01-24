@@ -4,7 +4,7 @@
   $(function() {
     var selected_tab = window.location.hash.substr(1).replace("_tab", "");
     $('#the_tabs a:first').tab('show');
-    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
   });
 </script>
 
@@ -31,10 +31,10 @@
 
     <!-- Actions can go here -->
 
-    <div class="float-right">
+    <div class="float-end">
       <%= link raw("<i class='far fa-fw fa-trash'></i> Delete"), to: Routes.blog_category_path(@conn, :delete, @category), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-outline" %>
     </div>
-    <div class="float-right">
+    <div class="float-end">
       <a href={Routes.blog_category_path(@conn, :edit, @category)} class={"btn btn-outline-#{bsname}"}>
         <i class="far fa-fw fa-wrench"></i>
         Edit category
@@ -45,7 +45,7 @@
 
     <ul class="nav nav-tabs" role="tablist" id="the_tabs">
       <li>
-        <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
+        <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
           <i class={"fa-fw #{icon()}"}></i>
           Details
         </a>

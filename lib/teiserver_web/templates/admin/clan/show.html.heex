@@ -4,7 +4,7 @@
   $(function() {
     var selected_tab = window.location.hash.substr(1).replace("_tab", "");
     $('#the_tabs a:first').tab('show');
-    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     page_quick_actions = [
       {label: "Edit clan", icon: "<%= icon() %>", url: "<%= Routes.ts_admin_clan_path(@conn, :edit, @clan) %>", keywords: ["edit", "clan", "edit clan"]},
@@ -24,7 +24,7 @@
         }) %>
         <hr />
 
-        <div class="float-right">
+        <div class="float-end">
           <a href={Routes.ts_admin_clan_path(@conn, :edit, @clan)} class={"btn btn-outline-#{bsname}"}>
             <i class="far fa-fw fa-wrench"></i>
             Edit clan
@@ -39,21 +39,21 @@
       <br />
       <ul class="nav nav-tabs" role="tablist" id="the_tabs">
         <li>
-          <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
+          <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
             <%= central_component "icon", icon: "fas fa-file-alt" %>
             Details
           </a>
         </li>
 
         <li>
-          <a href="#members_tab" role="tab" class="nav-link" data-toggle="tab">
+          <a href="#members_tab" role="tab" class="nav-link" data-bs-toggle="tab">
             <%= central_component "icon", icon: "fas fa-users" %>
             Members
           </a>
         </li>
 
         <li>
-          <a href="#invites_tab" role="tab" class="nav-link" data-toggle="tab">
+          <a href="#invites_tab" role="tab" class="nav-link" data-bs-toggle="tab">
             <%= central_component "icon", icon: "fas fa-envelope" %>
             Invites
           </a>

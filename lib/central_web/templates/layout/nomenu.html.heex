@@ -26,12 +26,14 @@
   <%= @inner_content %>
 
   <%= if get_user_config_cache(@conn, "module.Quick action") == true do %>
-    <%#= render CentralWeb.General.QuickAction.HtmlView, "modal.html", assigns %>
+    <%= render CentralWeb.General.QuickAction.HtmlView, "modal.html", assigns %>
   <% end %>
 </div>
 
+<%= if false do %>
 <footer class="main-footer d-flex p-2 px-3 border-top">
-  <span class="float-right">
+  <span class="float-end">
     Created by <%= Application.get_env(:central, Central)[:credit] %>
   </span>
 </footer>
+<% end %>

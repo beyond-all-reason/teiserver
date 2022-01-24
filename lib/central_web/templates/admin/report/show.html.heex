@@ -4,7 +4,7 @@
   $(function() {
     var selected_tab = window.location.hash.substr(1).replace("_tab", "");
     $('#the_tabs a:first').tab('show');
-    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     page_quick_actions = [
       {label: "Respond", icons: ["<%= icon() %>"], url: "<%= Routes.admin_report_path(@conn, :respond_form, @report) %>", keywords: ["respond", "report", "respond report"]},
@@ -24,7 +24,7 @@
         }) %>
         <hr />
 
-        <div class="float-right">
+        <div class="float-end">
           <%= if @report.responder_id == nil do %>
             <a href={Routes.admin_report_path(@conn, :respond_form, @report)} class={"btn btn-outline-#{bsname}"}>
               <i class="far fa-fw fa-reply"></i>
@@ -39,7 +39,7 @@
         <br />
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li>
-            <a href="#details_tab" role="tab" class="nav-link" data-toggle="tab">
+            <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
               <%= central_component "icon", icon: "fas fa-file-alt" %>
               Details
             </a>
