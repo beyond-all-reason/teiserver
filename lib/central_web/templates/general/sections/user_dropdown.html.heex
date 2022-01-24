@@ -1,8 +1,18 @@
-<li class="nav-item dropdown">
-  <a class="nav-link dropdown-toggle dropdown-toggle-icon-only" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="user-dropdown-link">
+<div class="nav-item dropdown">
+  <a
+    class="dropdown-toggle dropdown-toggle-icon-only"
+    href="#"
+    data-bs-toggle="dropdown"
+    aria-haspopup="true"
+    aria-expanded="false"
+    id="user-dropdown-link"
+  >
     <i class="fas fa-user fa-fw fa-lg"></i>
   </a>
-  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="user-dropdown-link" style="min-width: 300px; max-width: 500px;">
+  <div class="dropdown-menu dropdown-menu-end"
+      aria-labelledby="user-dropdown-link"
+      style="min-width: 300px; max-width: 500px;"
+  >
     <a class="dropdown-item" href={Routes.account_general_path(@conn, :index)}>
       <i class={"fa-fw #{Central.Account.icon()}"}></i>
       &nbsp;
@@ -28,4 +38,4 @@
     </form>
 
   </div>
-</li>
+</div>

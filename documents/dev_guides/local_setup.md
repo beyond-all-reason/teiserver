@@ -65,14 +65,26 @@ cd ../..
 ```
 
 #### Migrations
-Run the following from your directory to migrate the database.
+Run the following from your directory to migrate the database. Further migrations are run at startup but for the first run you want to have run them manually.
 ```
 mix ecto.migrate
 ```
 
+### SASS
+We use sass for our css generation and you'll need to run this to get it started.
+```
+mix sass.install
+```
+
 ### Running it
+Standard mode
 ```
 mix phx.server
+```
+
+Interactive REPL mode
+```
+iex -S mix phx.server
 ```
 If all goes to plan you should be able to access your site locally at [http://localhost:4000/](http://localhost:4000/).
 

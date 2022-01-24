@@ -32,7 +32,20 @@ import LiveSearch from "./live_search"
 import ChatApp from "./chat"
 import CommunicationNotification from "./communication_notification"
 
-$(function () {
+var ready = function (fn) {
+  // Sanity check
+  if (typeof fn !== 'function') return;
+
+  // If document is already loaded, run method
+  if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    return fn();
+  }
+
+  // Otherwise, wait until document is loaded
+  document.addEventListener('DOMContentLoaded', fn, false);
+};
+
+ready(function () {
   LiveSearch.init(socket);
   ChatApp.init(socket);
   CommunicationNotification.init(socket);

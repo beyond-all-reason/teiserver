@@ -1,6 +1,6 @@
 let ChatApp = {
   init(socket) {
-    var element = $("#chat-wrapper");
+    var element = document.getElementById("chat-wrapper");
     if (element) {
       socket.connect();
       this.onReady(socket, element)
@@ -8,8 +8,8 @@ let ChatApp = {
   },
   
   onReady(socket, element) {
-    var room_name = element.data("room_name");
-    var room_names = element.data("room_names");
+    var room_name = element.getAttribute('data-room_name');
+    var room_names = element.getAttribute("data-room_names");
 
     if (room_name) {
       let chat_channel = socket.channel("chat:" + room_name)

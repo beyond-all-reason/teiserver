@@ -32,7 +32,8 @@ defmodule CentralWeb.Admin.ToolController do
       "nomenu" -> "nomenu.html"
       "nomenu_live" -> "nomenu_live.html"
       "admin_live" -> "admin_live.html"
-      _ -> "admin.html"
+      "admin" -> "admin.html"
+      _ -> "standard.html"
     end
 
     # This is for the live pages
@@ -50,7 +51,7 @@ defmodule CentralWeb.Admin.ToolController do
     |> put_flash(:primary, "Example flash message primary")
     |> put_flash(:warning, "Example flash message warning")
     |> put_flash(:danger, "Example flash message danger")
-    |> add_breadcrumb(name: 'Test page', url: '#')
+    |> add_breadcrumb(name: "Test page", url: conn.request_path)
     |> assign(:socket, conn)
     |> assign(:flash, flash)
     |> put_layout(layout)

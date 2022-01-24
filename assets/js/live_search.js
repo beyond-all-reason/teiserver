@@ -1,8 +1,8 @@
 let LiveSearch = {
   init(socket) {
-    var element = $("#live-search-element");
+    var element = document.getElementById("live-search-element");
 
-    if (element.length) {
+    if (element) {
       socket.connect();
       this.onReady(socket, element)
     }
@@ -12,7 +12,7 @@ let LiveSearch = {
     var uid = element.attr("data-uid");
     let live_search_channel = socket.channel("live_search:endpoints:" + uid);
     
-    $("body").data("live_search_channel", live_search_channel)
+    document.querySelector("body").data("live_search_channel", live_search_channel)
     
     live_search_channel.join()
       .receive("ok", resp => console.log("Live search active", resp))

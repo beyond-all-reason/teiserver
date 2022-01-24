@@ -1,16 +1,19 @@
 let CommunicationsNotification = {
   init(socket, element) {
-    var element = $("#communication-notifications-wrapper")
+    var element = document.getElementById("communication-notifications-wrapper")
     if (element) {
-      let user_id = element.data("user-id");
+      let user_id = element.getAttribute("data-user-id");
       socket.connect();
       this.onReady(user_id, socket)
     }
 
-    var key = $("#communications-reload").data("key")
-    if (key) {
-      socket.connect();
-      this.reloadReady(key, socket)
+    var reload_element = document.getElementById("communications-reload");
+    if (reload_element) {
+      var key = reload_element.getAttribute("data-key")
+      if (key) {
+        socket.connect();
+        this.reloadReady(key, socket)
+      }
     }
   },
   
@@ -45,26 +48,26 @@ let CommunicationsNotification = {
     new_div += '</a>';
 
     this.ringBell();
-    $("#communication-notifications-dropdown-list").prepend(new_div);
+    document.getElementById("communication-notifications-dropdown-list").prepend(new_div);
   },
 
   ringBell() {
-    var v = $("#communication-notifications-badge").html();
+    var v = document.getElementById("communication-notifications-badge").html();
 
     if (v.trim() == "0") {
       v = "1";
-      $("#communication-notifications-empty-marker").hide();
-      $("#communication-notifications-icon").addClass("text-info");
-      $("#communication-notifications-badge").removeClass("badge-outline-primary");
-      $("#communication-notifications-badge").addClass("badge-outline-info");
-      $("#communication-notifications-icon").removeClass("far");
-      $("#communication-notifications-icon").addClass("fas");
+      document.getElementById("communication-notifications-empty-marker").hide();
+      document.getElementById("communication-notifications-icon").addClass("text-info");
+      document.getElementById("communication-notifications-badge").removeClass("badge-outline-primary");
+      document.getElementById("communication-notifications-badge").addClass("badge-outline-info");
+      document.getElementById("communication-notifications-icon").removeClass("far");
+      document.getElementById("communication-notifications-icon").addClass("fas");
     } else {
       v = parseInt(v) + 1;
     }
 
-    $("#communication-notifications-badge").html(v);
-    var e = $("#communication-notifications-icon-wrapper");
+    document.getElementById("communication-notifications-badge").html(v);
+    var e = document.getElementById("communication-notifications-icon-wrapper");
 
     e.animate({opacity: 0.25,}, 200, function() {
       e.animate({opacity: 1,}, 200, function() {
@@ -87,8 +90,8 @@ let CommunicationsNotification = {
   
   onReady(user_id, socket) {
     if (user_id != undefined) {
-      let div_output = $("#messages");
-      let div_input = $("#chat-input");
+      let div_output = document.getElementById("messages");
+      let div_input = document.getElementById("chat-input");
       
       let notificationChannel = socket.channel("communication_notification:" + user_id);
       

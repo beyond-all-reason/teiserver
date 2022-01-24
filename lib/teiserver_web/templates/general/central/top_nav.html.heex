@@ -1,0 +1,15 @@
+<%= if allow?(@current_user, "teiserver") do %>
+  <%= central_component "top_nav_item",
+    text: "BAR",
+    route: Routes.ts_general_general_path(@conn, :index),
+    active: false
+  %>
+<% end %>
+
+<%= if allow?(@current_user, "teiserver.moderator.account") do %>
+  <%= central_component "top_nav_item",
+    text: "User Admin",
+    route: Routes.ts_admin_user_path(@conn, :index),
+    active: false
+  %>
+<% end %>

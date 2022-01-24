@@ -16,14 +16,14 @@ defmodule TeiserverWeb.Router do
       end
 
       scope "/teiserver", TeiserverWeb.General, as: :ts_general do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
 
         get("/", GeneralController, :index)
       end
 
       # ts_account_X_path
       scope "/teiserver/account", TeiserverWeb.Account, as: :ts_account do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
 
         get("/relationships", RelationshipsController, :index)
         post("/relationships/find/", RelationshipsController, :find)
@@ -40,7 +40,7 @@ defmodule TeiserverWeb.Router do
 
       # ts_clans_X_path
       scope "/teiserver/clans", TeiserverWeb.Clans, as: :ts_clans do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
 
         get("/", ClanController, :index)
         get("/:name", ClanController, :show)
@@ -56,31 +56,31 @@ defmodule TeiserverWeb.Router do
       end
 
       scope "/teiserver/games", TeiserverWeb.Game, as: :ts_game do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
         resources("/queues", QueueController)
       end
 
       scope "/teiserver/battle", TeiserverWeb.Battle, as: :ts_battle do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
 
         get("/", GeneralController, :index)
       end
 
       scope "/teiserver/battle", TeiserverWeb.Battle, as: :ts_battle do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
 
         resources("/matches", MatchController, only: [:index, :show, :delete])
       end
 
       scope "/teiserver/battle", TeiserverWeb.Battle.LobbyLive, as: :ts_battle do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
 
         live("/lobbies", Index, :index)
         live("/lobbies/:id", Show, :show)
       end
 
       scope "/teiserver/game_live", TeiserverWeb.Matchmaking.QueueLive, as: :ts_game do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
 
         live("/queues", Index, :index)
         live("/queues/:id", Show, :show)
@@ -89,7 +89,7 @@ defmodule TeiserverWeb.Router do
 
       # REPORTING
       scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
 
         get("/", GeneralController, :index)
 
@@ -144,7 +144,7 @@ defmodule TeiserverWeb.Router do
 
       # ts_engine_X_path
       scope "/teiserver/engine", TeiserverWeb.Engine, as: :ts_engine do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
 
         resources("/unit", UnitController)
       end
@@ -162,27 +162,27 @@ defmodule TeiserverWeb.Router do
 
       # ADMIN
       scope "/teiserver/admin", TeiserverWeb.AdminDashLive, as: :ts do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
 
         live("/dashboard", Index, :index)
       end
 
       scope "/teiserver/admin", TeiserverWeb.ClientLive, as: :ts_admin do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
 
         live("/client", Index, :index)
         live("/client/:id", Show, :show)
       end
 
       scope "/teiserver/admin", TeiserverWeb.AgentLive, as: :ts_admin do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
 
         live("/agent", Index, :index)
         # live("/agent/:id", Show, :show)
       end
 
       scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
-        pipe_through([:browser, :admin_layout, :protected])
+        pipe_through([:browser, :standard_layout, :protected])
 
         get("/", GeneralController, :index)
         get("/metrics", GeneralController, :metrics)

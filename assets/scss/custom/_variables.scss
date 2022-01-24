@@ -1,0 +1,48 @@
+// First override some or all individual color variables
+$blue: #007bff;
+$indigo: #674eec;
+$purple: #8445f7;
+$pink: #ff4169;
+$red: #c4183c;
+$orange: #fb7906;
+$yellow: #ffb400;
+$green: #17c671;
+$teal: #1adba2;
+$cyan: #00b8d8;
+$white: #fff;
+$gray: #868e96;
+$gray-dark: #343a40;
+$primary: #007bff;
+$primary2: #990088;
+$secondary: #5A6169;
+$success: #17c671;
+$success2: #079110;
+$info: #00b8d8;
+$info2: #17b0ad;
+$warning: #ffb400;
+$warning2: #CC4400;
+$danger: #c4183c;
+$danger2: #AA1122;
+$light: #e9ecef;
+$dark: #212529;
+
+
+// Then add them to your custom theme-colors map, together with any additional colors you might need
+$theme-colors: (
+  primary: $primary,
+  primary2: $primary2,
+  secondary: $secondary,
+  success: $success,
+  success2: $success2,
+  info: $info,
+  info2: $info2,
+  warning: $warning,
+  warning2: $warning2,
+  danger: $danger,
+  danger2: $danger2,
+  light: $light,
+  dark: $dark,
+  // add any additional color below
+  
+  body-bg: $dark,
+);

@@ -33,6 +33,11 @@ defmodule CentralWeb.Router do
     plug(:put_layout, {CentralWeb.LayoutView, "admin.html"})
   end
 
+  pipeline :standard_layout do
+    plug :put_root_layout, {CentralWeb.LayoutView, :root}
+    plug(:put_layout, {CentralWeb.LayoutView, "standard.html"})
+  end
+
   pipeline :nomenu_layout do
     plug :put_root_layout, {CentralWeb.LayoutView, :root}
     plug(:put_layout, {CentralWeb.LayoutView, "nomenu.html"})
@@ -99,7 +104,7 @@ defmodule CentralWeb.Router do
   end
 
   scope "/account", CentralWeb.Account, as: :account do
-    pipe_through([:browser, :protected, :admin_layout])
+    pipe_through([:browser, :protected, :standard_layout])
 
     get("/", GeneralController, :index)
 
@@ -119,13 +124,13 @@ defmodule CentralWeb.Router do
   end
 
   scope "/config", CentralWeb.Config do
-    pipe_through([:browser, :protected, :admin_layout])
+    pipe_through([:browser, :protected, :standard_layout])
 
     resources("/user", UserConfigController, only: [:index, :edit, :update, :new, :create])
   end
 
   scope "/account", CentralWeb.Account, as: :account do
-    pipe_through([:browser, :admin_layout])
+    pipe_through([:browser, :standard_layout])
 
     get("/registrations/new", RegistrationController, :new)
     post("/registrations/create", RegistrationController, :create)
@@ -138,7 +143,7 @@ defmodule CentralWeb.Router do
   end
 
   scope "/logging", CentralWeb.Logging, as: :logging do
-    pipe_through([:browser, :protected, :admin_layout])
+    pipe_through([:browser, :protected, :standard_layout])
 
     get("/", GeneralController, :index)
 
@@ -171,7 +176,7 @@ defmodule CentralWeb.Router do
   end
 
   scope "/communication", CentralWeb.Communication, as: :communication do
-    pipe_through([:browser, :protected, :admin_layout])
+    pipe_through([:browser, :protected, :standard_layout])
 
     get("/notifications/handle_test/", NotificationController, :handle_test)
     post("/notifications/quick_new", NotificationController, :quick_new)
@@ -195,7 +200,7 @@ defmodule CentralWeb.Router do
   end
 
   scope "/blog_admin", CentralWeb.Communication, as: :blog do
-    pipe_through([:browser, :protected, :admin_layout])
+    pipe_through([:browser, :protected, :standard_layout])
 
     resources("/posts", PostController)
     resources("/comments", CommentController)
@@ -207,7 +212,7 @@ defmodule CentralWeb.Router do
 
   # Extra block to stop it being blog_blog_files_path
   scope "/blog_admin", CentralWeb.Communication do
-    pipe_through([:browser, :protected, :admin_layout])
+    pipe_through([:browser, :protected, :standard_layout])
 
     # get "/blog_files/search", BlogFileController, :index
     # post "/blog_files/search", BlogFileController, :search
@@ -215,7 +220,7 @@ defmodule CentralWeb.Router do
   end
 
   scope "/admin", CentralWeb.Admin, as: :admin do
-    pipe_through([:browser, :protected, :admin_layout])
+    pipe_through([:browser, :protected, :standard_layout])
 
     get("/", GeneralController, :index)
 
@@ -275,7 +280,7 @@ defmodule CentralWeb.Router do
   import Phoenix.LiveDashboard.Router
 
   scope "/logging/live", CentralWeb, as: :logging_live do
-    pipe_through([:browser, :protected, :admin_layout, :logging_live_auth])
+    pipe_through([:browser, :protected, :standard_layout, :logging_live_auth])
 
     live_dashboard("/dashboard",
       metrics: CentralWeb.Telemetry,

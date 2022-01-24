@@ -1,0 +1,74 @@
+<%= if Kernel.function_exported?(@conn.private.phoenix_view, :colours, 0) do %>
+  <% {fg, bg, _bsname} = @conn.private.phoenix_view.colours() %>
+  <style type="text/css">
+    @media print {
+      #menu, #header, #navigation {
+        display: none;
+      }
+    }
+
+    #breadcrumb-wrapper {
+      border-bottom: 1px solid <%= fg %> !important;
+      background-color: <%= bg %> !important;
+    }
+    #breadcrumb {
+      background-color: <%= bg %> !important;
+    }
+
+    .side-menu-active a i, .side-menu-active a {
+      color: <%= fg %> !important;
+    }
+    .side-menu-active a {
+      border-left-color: <%= fg %> !important;
+      background: linear-gradient(to right, <%= bg %>, rgba(0,0,0,0));
+    }
+
+    .line-card a {
+      color: <%= fg %> !important;
+    }
+    .line-card a:hover {
+      background-color: <%= bg %> !important;
+    }
+  </style>
+<% end %>
+
+<%= render CentralWeb.General.PageView, "top_navbar.html", assigns %>
+
+<div id="wrapper">
+  <!-- Page Content -->
+  <div id="page-content-wrapper">
+    <%= if assigns[:breadcrumb_trails] do %>
+      <%= render CentralWeb.ComponentView, "breadcrumb.html", assigns %>
+    <% end %>
+
+    <div id="flash-messages">
+      <%= if get_flash(@conn, :danger) do %>
+        <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= get_flash(@conn, :danger) %></p>
+      <% end %>
+      <%= if get_flash(@conn, :warning) do %>
+        <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning"><%= get_flash(@conn, :warning) %></p>
+      <% end %>
+      <%= if get_flash(@conn, :info) do %>
+        <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= get_flash(@conn, :info) %></p>
+      <% end %>
+      <%= if get_flash(@conn, :success) do %>
+        <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success"><%= get_flash(@conn, :success) %></p>
+      <% end %>
+    </div>
+
+    <%= @inner_content %>
+
+    <footer class="main-footer d-flex p-2 px-3 border-top">
+      <span class="float-right">
+        Created by <%= Application.get_env(:central, Central)[:credit] %>
+      </span>
+    </footer>
+  </div>
+  <!-- /#page-content-wrapper -->
+
+  <%= if get_user_config_cache(@conn, "module.Quick action") == true do %>
+    <%#= render CentralWeb.General.QuickAction.HtmlView, "modal.html", assigns %>
+  <% end %>
+
+</div>
+<!-- /#wrapper -->

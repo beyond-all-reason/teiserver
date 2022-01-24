@@ -1,0 +1,75 @@
+<nav class="navbar fixed-top navbar-expand-lg mb-3" id="top-nav" style="padding-top: 0; padding-bottom: 0;">
+
+  <!-- Container wrapper -->
+  <div class="container-fluid">
+    <!-- Collapsible wrapper -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <!-- Navbar brand -->
+      <a class="navbar-brand mt-2 mt-lg-0" href="/">
+        <i class={"fa-fw #{Application.get_env(:central, Central)[:site_icon]}"} style="margin: -4px 20px 0 0px;"></i>
+        <span id="page-title">
+          <%= assigns[:page_title] || Application.get_env(:central, Central)[:site_title] %>
+        </span>
+      </a>
+
+      <!-- Left links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <%= central_component "top_nav_item",
+          text: "Main menu",
+          route: "/",
+          active: false
+        %>
+        
+        <%= if Application.get_env(:central, Central)[:enable_blog] do %>
+          <%= central_component "top_nav_item",
+            text: "Blog",
+            route: Routes.blog_path(@conn, :index),
+            active: false
+          %>
+        <% end %>
+
+
+        <%= if allow?(@current_user, "admin") do %>
+          <%= central_component "top_nav_item",
+            text: "Admin",
+            route: Routes.admin_general_path(@conn, :index),
+            active: assigns[:sidemenu_active]
+          %>
+        <% end %>
+
+        <%= if allow?(@current_user, "logging") do %>
+          <%= central_component "top_nav_item",
+            text: "Logging",
+            route: Routes.logging_general_path(@conn, :index),
+            active: assigns[:sidemenu_active]
+          %>
+        <% end %>
+        
+        <%= for view <- Application.get_env(:central, Extensions)[:side_views] do %>
+          <%= render view, "top_nav.html", assigns %>
+        <% end %>  
+      </ul>
+      <!-- Left links -->
+    </div>
+    <!-- Collapsible wrapper -->
+
+    <!-- Right elements -->
+    <div class="d-flex align-items-center">
+      <%= if @current_user do %>
+        <%= render CentralWeb.Communication.GeneralView, "notification_dropdown.html", assigns %>
+        <%= render CentralWeb.General.SectionsView, "user_recents.html", assigns %>
+        <%= render CentralWeb.General.SectionsView, "user_favourites.html", assigns %>
+        <%= render CentralWeb.General.SectionsView, "user_dropdown.html", assigns %>
+        <div style="width: 300px; display: inline-block;"></div>
+      <% else %>
+        <%= central_component "top_nav_button",
+          text: "Sign in",
+          route: Routes.account_session_path(@conn, :new),
+          style: "button",
+          active: false
+        %>
+      <% end %>
+    </div>
+    <!-- Right elements -->
+  </div>
+</nav>

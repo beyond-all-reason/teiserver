@@ -8,7 +8,7 @@
   $(function() {
     var selected_tab = window.location.hash.substr(1).replace("_tab", "");
     $('#the_tabs a:first').tab('show');
-    $('#the_tabs [href="#' + selected_tab + '_tab"]').click();
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     // They'll get hidden by the main theme but this will re-show them
     setTimeout(function() {
@@ -59,18 +59,36 @@
 
 <br />
 <ul class="nav nav-tabs" role="tablist" id="the_tabs">
-  <li><a href="#icons_tab" role="tab" class="nav-link" data-toggle="tab">Icons</a></li>
-  <li><a href="#colours_tab" role="tab" class="nav-link" data-toggle="tab">Colours</a></li>
-  <li><a href="#cards_tab" role="tab" class="nav-link" data-toggle="tab">Cards</a></li>
-  <li><a href="#tables_tab" role="tab" class="nav-link" data-toggle="tab">Tables</a></li>
-  <li><a href="#buttons_tab" role="tab" class="nav-link" data-toggle="tab">Buttons</a></li>
-  <li><a href="#forms_tab" role="tab" class="nav-link" data-toggle="tab">Forms</a></li>
-  <li><a href="#layouts_tab" role="tab" class="nav-link" data-toggle="tab">Layouts</a></li>
-  <li><a href="#calculations_tab" role="tab" class="nav-link" data-toggle="tab">Calculations</a></li>
+  <li class="nav-item" role="presentation">
+    <a href="#icons_tab" role="tab" class="nav-link active" data-bs-toggle="tab">Icons</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a href="#colours_tab" role="tab" class="nav-link" data-bs-toggle="tab">Colours</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a href="#cards_tab" role="tab" class="nav-link" data-bs-toggle="tab">Cards</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a href="#tables_tab" role="tab" class="nav-link" data-bs-toggle="tab">Tables</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a href="#buttons_tab" role="tab" class="nav-link" data-bs-toggle="tab">Buttons</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a href="#forms_tab" role="tab" class="nav-link" data-bs-toggle="tab">Forms</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a href="#layouts_tab" role="tab" class="nav-link" data-bs-toggle="tab">Layouts</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a href="#calculations_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+      Calculations
+    </a>
+  </li>
 </ul>
 
 <div class="tab-content">
-  <div class="tab-pane" id="icons_tab" style="padding:5px;">
+  <div class="tab-pane fade show active" id="icons_tab" style="padding:5px;">
     <div class="row">
       <div class="col-md-6">
         One icon per row, no <code>fa-</code> prefix. Columns on the right are <code>far, fas, fal, fab, fad</code>.
@@ -86,7 +104,7 @@
     </div>
   </div>
 
-  <div class="tab-pane" id="colours_tab" style="padding:5px;">
+  <div class="tab-pane fade" id="colours_tab" style="padding:5px;">
     <div class="row">
       <div class="col-md-6">
         One colour per row
@@ -102,7 +120,7 @@
     </div>
   </div>
 
-  <div class="tab-pane" id="cards_tab" style="padding:5px;">
+  <div class="tab-pane fade" id="cards_tab" style="padding:5px;">
     <div class="row">
       <%= for c <- colours do %>
         <div class="col-md-3">
@@ -128,7 +146,7 @@
     </div>
   </div>
 
-  <div class="tab-pane" id="tables_tab" style="padding:5px;">
+  <div class="tab-pane fade" id="tables_tab" style="padding:5px;">
     <div class="card page-card card-default">
       <div class="card-body">
         <table class="table table-hover table-striped">
@@ -165,7 +183,7 @@
     </div>
   </div>
 
-  <div class="tab-pane" id="buttons_tab" style="padding:5px;">
+  <div class="tab-pane fade" id="buttons_tab" style="padding:5px;">
     <div class="col-md-12">
       <div class="card page-card card-default">
         <div class="card-body" id="button-card">
@@ -217,7 +235,7 @@
     }
   </style>
 
-  <div class="tab-pane" id="forms_tab" style="padding:5px;">
+  <div class="tab-pane fade" id="forms_tab" style="padding:5px;">
     <div class="col-md-12">
       <div class="card page-card card-default">
         <div class="card-body">
@@ -239,7 +257,7 @@
     </div>
   </div>
 
-  <div class="tab-pane" id="layouts_tab" style="padding:5px;">
+  <div class="tab-pane fade" id="layouts_tab" style="padding:5px;">
     <div class="col-md-12">
       <div class="card page-card card-default">
         <div class="card-body">
@@ -273,7 +291,7 @@
     </div>
   </div>
 
-  <div class="tab-pane" id="calculations_tab" style="padding:5px;">
+  <div class="tab-pane fade" id="calculations_tab" style="padding:5px;">
     <div class="col-md-12">
       <div class="card page-card card-default">
         <div class="card-body">

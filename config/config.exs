@@ -83,6 +83,13 @@ config :central, Teiserver,
   user_agreement: "A verification code has been sent to your email address. Please read our terms of service at <<<site_url>>> and the code of conduct at <<<URL>>>. Then enter your six digit code below if you agree to the terms.",
   use_geoip: true
 
+config :dart_sass,
+  version: "1.49.0",
+  default: [
+    args: ~w(scss/mdb.free.scss ../priv/static/assets/mdb.css),
+    cd: Path.expand("../assets", __DIR__)
+  ]
+
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
