@@ -218,7 +218,14 @@ defmodule CentralWeb.Admin.ReportController do
 
   @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "report" => params}) do
-    report = Account.get_report!(id)
+    report =
+      Account.get_report!(id,
+        preload: [
+          :reporter,
+          :target,
+          :responder
+        ]
+      )
 
     case Account.update_report(report, params) do
       {:ok, report} ->
@@ -232,8 +239,6 @@ defmodule CentralWeb.Admin.ReportController do
         |> redirect(to: Routes.admin_report_path(conn, :show, report))
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        report = Account.get_report!(id)
-
         fav =
           report
           |> ReportLib.make_favourite()

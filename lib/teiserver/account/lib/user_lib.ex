@@ -246,6 +246,7 @@ defmodule Teiserver.Account.UserLib do
   def restriction_list() do
     [
       # Chat
+      "Bridging",
       "Room chat",
       "Direct chat",
       "Lobby chat",
@@ -274,6 +275,9 @@ defmodule Teiserver.Account.UserLib do
 
       # MM
       "Matchmaking",
+
+      # Meta
+      "Community",# Accolades/Polls
 
       # In game?
       # "pausing the game (if possible, probably needs spads support)",
