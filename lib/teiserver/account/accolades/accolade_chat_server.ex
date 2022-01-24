@@ -4,6 +4,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
   """
 
   use GenServer
+  alias Central.Config
   alias Teiserver.{User, Account}
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Data.Types, as: T
@@ -85,8 +86,10 @@ defmodule Teiserver.Account.AccoladeChatServer do
               inserted_at: Timex.now()
             })
 
-            bot_pid = AccoladeLib.get_accolade_bot_pid()
-            :timer.send_after(30_000, bot_pid, {:new_accolade, state.recipient_id})
+            if Config.get_site_config_cache("teiserver.Inform of new accolades") do
+              bot_pid = AccoladeLib.get_accolade_bot_pid()
+              :timer.send_after(30_000, bot_pid, {:new_accolade, state.recipient_id})
+            end
 
             User.send_direct_message(state.bot_id, state.userid, "Thank you for your feedback, this Accolade will be bestowed.")
             send(self(), :terminate)

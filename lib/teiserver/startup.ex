@@ -15,7 +15,6 @@ defmodule Teiserver.Startup do
     add_group_type("Teiserver clan", %{fields: []})
 
 
-    # Example site configs
     add_site_config_type(%{
       key: "teiserver.Warning acknowledge prompt",
       section: "Moderation",
@@ -34,6 +33,16 @@ defmodule Teiserver.Startup do
       description: "The response string expected to acknowledge the warning",
       opts: [],
       default: "I acknowledge this"
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Inform of new accolades",
+      section: "Accolades",
+      type: "boolean",
+      permissions: ["admin.dev.developer"],
+      description: "When set to true, players will be informed when they get a new accolade",
+      opts: [],
+      default: false
     })
 
     add_site_config_type(%{
