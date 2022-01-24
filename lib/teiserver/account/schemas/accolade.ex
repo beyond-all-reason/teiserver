@@ -5,6 +5,7 @@ defmodule Teiserver.Account.Accolade do
     belongs_to :recipient, Central.Account.User
     belongs_to :giver, Central.Account.User
     belongs_to :badge_type, Teiserver.Account.BadgeType
+    belongs_to :match, Teiserver.Battle.Match
     field :inserted_at, :utc_datetime
   end
 
@@ -17,7 +18,7 @@ defmodule Teiserver.Account.Accolade do
     |> trim_strings(~w(type)a)
 
     struct
-    |> cast(params, ~w(recipient_id giver_id badge_type_id inserted_at)a)
+    |> cast(params, ~w(recipient_id giver_id badge_type_id match_id inserted_at)a)
     |> validate_required(~w(recipient_id giver_id inserted_at)a)
   end
 

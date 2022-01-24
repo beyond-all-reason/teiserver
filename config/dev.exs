@@ -31,6 +31,12 @@ config :central, CentralWeb.Endpoint,
     }
   ]
 
+config :dart_sass,
+  version: "1.49.0",
+  default: [
+    args: ~w(scss/mdb.free.scss ../priv/static/assets/mdb.css),
+    cd: Path.expand("../assets", __DIR__)
+  ]
 
 config :central, Teiserver,
   certs: [

@@ -14,8 +14,8 @@ defmodule Teiserver.Account.AccoladeChatServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  @spec empty_state(T.userid(), T.userid()) :: map()
-  def empty_state(userid, recipient_id) do
+  @spec empty_state(T.userid(), T.userid(), T.lobby_id()) :: map()
+  def empty_state(userid, recipient_id, match_id) do
     badge_types = AccoladeLib.get_badge_types()
 
     %{
@@ -25,6 +25,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
       user: User.get_user_by_id(userid),
       recipient_id: recipient_id,
       recipient: User.get_user_by_id(recipient_id),
+      match_id: match_id,
 
       stage: :not_started
     }
@@ -53,6 +54,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
         Account.create_accolade(%{
           recipient_id: state.recipient_id,
           giver_id: state.userid,
+          match_id: state.match_id,
           inserted_at: Timex.now()
         })
 
@@ -79,6 +81,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
               recipient_id: state.recipient_id,
               giver_id: state.userid,
               badge_type_id: selected_type.id,
+              match_id: state.match_id,
               inserted_at: Timex.now()
             })
 
@@ -138,11 +141,12 @@ defmodule Teiserver.Account.AccoladeChatServer do
   def init(opts) do
     userid = opts[:userid]
     recipient_id = opts[:recipient_id]
+    match_id = opts[:match_id]
 
     # Update the queue pids cache to point to this process
     ConCache.put(:teiserver_accolade_pids, userid, self())
     # :timer.send_interval(10_000, :tick)
     send(self(), :startup)
-    {:ok, empty_state(userid, recipient_id)}
+    {:ok, empty_state(userid, recipient_id, match_id)}
   end
 end

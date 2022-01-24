@@ -274,15 +274,16 @@ defmodule Teiserver.Account.AccoladeLib do
     |> Enum.filter(fn m -> not Enum.member?(existing, m) end)
   end
 
-  @spec start_chat_server(T.userid(), T.userid()) :: pid()
-  def start_chat_server(userid, recipient_id) do
+  @spec start_chat_server(T.userid(), T.userid(), T.lobby_id()) :: pid()
+  def start_chat_server(userid, recipient_id, match_id) do
     {:ok, chat_server_pid} =
       DynamicSupervisor.start_child(Teiserver.Account.AccoladeSupervisor, {
         AccoladeChatServer,
         name: "accolade_chat_#{userid}",
         data: %{
           userid: userid,
-          recipient_id: recipient_id
+          recipient_id: recipient_id,
+          match_id: match_id,
         }
       })
 
@@ -290,10 +291,10 @@ defmodule Teiserver.Account.AccoladeLib do
   end
 
   @spec start_accolade_process(T.userid(), T.userid(), T.lobby_id()) :: :ok | :existing
-  def start_accolade_process(userid, recipient_id, _match_id) do
+  def start_accolade_process(userid, recipient_id, match_id) do
     case get_accolade_chat_pid(userid) do
       nil ->
-        start_chat_server(userid, recipient_id)
+        start_chat_server(userid, recipient_id, match_id)
       _pid ->
         :existing
     end
