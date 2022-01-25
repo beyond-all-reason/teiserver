@@ -10,6 +10,7 @@ defmodule Teiserver.Application do
       concache_perm_sup(:users_lookup_name_with_id),
       concache_perm_sup(:users_lookup_id_with_name),
       concache_perm_sup(:users_lookup_id_with_email),
+      concache_perm_sup(:users_lookup_id_with_discord_id),
       concache_perm_sup(:users),
       concache_perm_sup(:clients),
       concache_sup(:teiserver_login_count, global_ttl: 10_000),
@@ -41,6 +42,7 @@ defmodule Teiserver.Application do
       # Bridge
       Teiserver.Bridge.BridgeServer,
       concache_sup(:discord_bridge_dm_cache),
+      concache_sup(:discord_bridge_account_codes, global_ttl: 300_000),
 
       # Matchmaking
       concache_perm_sup(:teiserver_queue_pids),

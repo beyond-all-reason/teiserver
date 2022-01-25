@@ -28,6 +28,12 @@ defmodule Teiserver.Account.UserCache do
     ConCache.get(:users, id)
   end
 
+  @spec get_user_by_discord_id(String.t()) :: User.t() | nil
+  def get_user_by_discord_id(discord_id) do
+    id = ConCache.get(:users_lookup_id_with_discord_id, cachename(discord_id))
+    ConCache.get(:users, id)
+  end
+
   @spec get_user_by_token(String.t()) :: User.t() | nil
   def get_user_by_token(token) do
     case Guardian.resource_from_token(token) do
@@ -114,6 +120,9 @@ defmodule Teiserver.Account.UserCache do
     ConCache.put(:users_lookup_name_with_id, user.id, user.name)
     ConCache.put(:users_lookup_id_with_name, cachename(user.name), user.id)
     ConCache.put(:users_lookup_id_with_email, cachename(user.email), user.id)
+    if user.discord_id do
+      ConCache.put(:users_lookup_id_with_discord_id, cachename(user.discord_id), user.id)
+    end
 
     user
   end

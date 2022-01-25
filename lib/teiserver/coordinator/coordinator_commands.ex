@@ -62,6 +62,25 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     state
   end
 
+  defp do_handle(%{command: "discord", senderid: senderid} = _cmd, state) do
+    sender = User.get_user_by_id(senderid)
+
+    if sender.discord_id != nil do
+      User.send_direct_message(state.userid, senderid, "You already have a discord account linked.")
+    else
+      code = :rand.uniform(899999) + 100000 |> to_string
+      ConCache.put(:discord_bridge_account_codes, senderid, code)
+
+      User.send_direct_message(state.userid, senderid, [
+        "To link your discord account, message the the discord bot (Teiserver Bridge) with the message",
+        "$discord #{senderid}-#{code}",
+        "This code will expire after 5 minutes",
+      ])
+    end
+
+    state
+  end
+
   # Moderator commands
   defp do_handle(%{command: "whois", senderid: senderid, remaining: remaining} = _cmd, state) do
     case User.get_user_by_name(remaining) do

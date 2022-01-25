@@ -37,6 +37,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     case dm_channel.recipients do
       [recipient] ->
         ConCache.put(:discord_bridge_dm_cache, dm_channel.id, recipient["id"])
+        nil
 
       _ -> nil
     end
@@ -53,7 +54,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
         nil
 
       dm_sender != nil ->
-        receive_dm(message)
+        MessageCommands.handle(message)
 
       Config.get_site_config_cache("teiserver.Bridge from discord") == false ->
         nil
@@ -73,7 +74,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
       String.contains?(message, "https:") ->
         nil
 
-        true ->
+      true ->
         do_reply(message)
         :ok
     end
@@ -210,9 +211,5 @@ defmodule Teiserver.Bridge.DiscordBridge do
       [{_, room}] -> room
       _ -> nil
     end
-  end
-
-  def receive_dm(%Alchemy.Message{} = message) do
-    MessageCommands.handle(message)
   end
 end

@@ -49,7 +49,8 @@ defmodule Teiserver.User do
     :roles,
     :print_client_messages,
     :print_server_messages,
-    :spring_password
+    :spring_password,
+    :discord_id
   ]
   def data_keys(), do: @data_keys
 
@@ -76,7 +77,8 @@ defmodule Teiserver.User do
     roles: [],
     print_client_messages: false,
     print_server_messages: false,
-    spring_password: true
+    spring_password: true,
+    discord_id: nil
   }
 
   def default_data(), do: @default_data
@@ -429,6 +431,9 @@ defmodule Teiserver.User do
 
   @spec get_user_by_email(String.t()) :: User.t() | nil
   defdelegate get_user_by_email(email), to: UserCache
+
+  @spec get_user_by_discord_id(String.t()) :: User.t() | nil
+  defdelegate get_user_by_discord_id(discord_id), to: UserCache
 
   @spec get_user_by_token(String.t()) :: User.t() | nil
   defdelegate get_user_by_token(token), to: UserCache
