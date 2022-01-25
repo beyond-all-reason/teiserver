@@ -5,7 +5,8 @@ defmodule TeiserverWeb.General.GeneralController do
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
 
   plug(AssignPlug,
-    sidemenu_active: "teiserver"
+    site_menu_active: "teiserver",
+    sub_menu_active: "teiserver",
   )
 
   plug(Teiserver.ServerUserPlug)

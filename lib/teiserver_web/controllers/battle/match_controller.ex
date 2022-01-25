@@ -10,8 +10,10 @@ defmodule TeiserverWeb.Battle.MatchController do
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
-  plug AssignPlug,
-    sidemenu_active: "teiserver"
+  plug(AssignPlug,
+    site_menu_active: "teiserver_match",
+    sub_menu_active: "match",
+  )
 
   plug :add_breadcrumb, name: 'Battle', url: '/teiserver'
   plug :add_breadcrumb, name: 'Logs', url: '/teiserver/matches'

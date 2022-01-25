@@ -4,7 +4,8 @@ defmodule TeiserverWeb.Admin.LobbyController do
   alias Teiserver.{Chat, Battle}
 
   plug(AssignPlug,
-    sidemenu_active: ["teiserver", "teiserver_admin"]
+    site_menu_active: "teiserver_admin",
+    sub_menu_active: "match",
   )
 
   plug(Bodyguard.Plug.Authorize,

@@ -9,7 +9,8 @@ defmodule TeiserverWeb.Account.PreferencesController do
   plug(:add_breadcrumb, name: 'Preferences', url: '/teiserver/account/preferences')
 
   plug(AssignPlug,
-    sidemenu_active: ["teiserver", "teiserver_account"]
+    site_menu_active: "teiserver_account",
+    sub_menu_active: "preferences",
   )
 
   def index(conn, _params) do

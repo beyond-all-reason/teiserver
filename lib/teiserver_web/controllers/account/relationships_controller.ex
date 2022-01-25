@@ -8,7 +8,8 @@ defmodule TeiserverWeb.Account.RelationshipsController do
   plug(:add_breadcrumb, name: 'Relationships', url: '/teiserver/account/relationships')
 
   plug(AssignPlug,
-    sidemenu_active: ["teiserver", "teiserver_account"]
+    site_menu_active: "teiserver_account",
+    sub_menu_active: "relationships",
   )
 
   plug(Teiserver.ServerUserPlug)

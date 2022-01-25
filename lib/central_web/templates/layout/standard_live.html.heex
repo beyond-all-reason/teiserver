@@ -1,0 +1,66 @@
+<% {fg, bg, _bsname} = @colours %>
+<style type="text/css">
+  @media print {
+    #menu, #header, #navigation {
+      display: none;
+    }
+  }
+
+  #breadcrumb-wrapper {
+    border-bottom: 1px solid <%= fg %> !important;
+    background-color: <%= bg %> !important;
+  }
+  #breadcrumb {
+    background-color: <%= bg %> !important;
+  }
+
+  .side-menu-active a i, .side-menu-active a {
+    color: <%= fg %> !important;
+  }
+  .side-menu-active a {
+    border-left-color: <%= fg %> !important;
+    background: linear-gradient(to right, <%= bg %>, rgba(0,0,0,0));
+  }
+
+  .line-card a {
+    color: <%= fg %> !important;
+  }
+  .line-card a:hover {
+    background-color: <%= bg %> !important;
+  }
+</style>
+
+<%= render CentralWeb.General.PageView, "top_navbar.html", Map.put(assigns, :conn, @socket) %>
+
+<main>
+  <%= if assigns[:breadcrumb_trails] do %>
+    <%= render CentralWeb.ComponentView, "breadcrumb.html", assigns %>
+  <% end %>
+
+  <div id="flash-messages">
+    <%= if live_flash(@flash, :danger) do %>
+      <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= live_flash(@flash, :danger) %></p>
+    <% end %>
+    <%= if live_flash(@flash, :warning) do %>
+      <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning"><%= live_flash(@flash, :warning) %></p>
+    <% end %>
+    <%= if live_flash(@flash, :info) do %>
+      <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= live_flash(@flash, :info) %></p>
+    <% end %>
+    <%= if live_flash(@flash, :success) do %>
+      <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success"><%= live_flash(@flash, :success) %></p>
+    <% end %>
+  </div>
+
+  <div class="px-3 my-0">
+    <%= @inner_content %>
+  </div>
+</main>
+
+<%= if false do %>
+  <footer class="footer mt-auto pt-2 pb-1 px-2">
+    <div class="container" style="text-align: right;">
+      Created by <%= Application.get_env(:central, Central)[:credit] %>
+    </div>
+  </footer>
+<% end %>

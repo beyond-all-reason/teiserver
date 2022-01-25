@@ -30,6 +30,14 @@
           %>
 
           <%= central_component "sub_menu_icon",
+            name: "customisation",
+            label: "Apperance",
+            active: @active,
+            url: Routes.ts_account_general_path(@conn, :customisation_form),
+            lib: %{icon: "fas fa-icons"}
+          %>
+
+          <%= central_component "sub_menu_icon",
             name: "preferences",
             label: "Preferences",
             active: @active,

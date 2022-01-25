@@ -3,7 +3,8 @@ defmodule TeiserverWeb.Report.InfologController do
   alias Teiserver.Telemetry
 
   plug(AssignPlug,
-    sidemenu_active: ["teiserver"]
+    site_menu_active: "teiserver_report",
+    sub_menu_active: "infolog",
   )
 
   plug Bodyguard.Plug.Authorize,

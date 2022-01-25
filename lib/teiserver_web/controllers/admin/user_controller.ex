@@ -7,7 +7,8 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Central.Account.GroupLib
 
   plug(AssignPlug,
-    sidemenu_active: ["teiserver", "teiserver_admin"]
+    site_menu_active: "teiserver_user",
+    sub_menu_active: "user",
   )
 
   plug(Bodyguard.Plug.Authorize,
@@ -149,6 +150,7 @@ defmodule TeiserverWeb.Admin.UserController do
         |> assign(:user_stats, user_stats)
         |> assign(:roles, Account.get_roles(user))
         |> assign(:reports, reports)
+        |> assign(:section_menu_active, "show")
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
         |> render("show.html")
 

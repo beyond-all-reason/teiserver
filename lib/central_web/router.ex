@@ -21,6 +21,7 @@ defmodule CentralWeb.Router do
     plug(:fetch_live_flash)
     plug(:protect_from_forgery)
     plug(:put_secure_browser_headers)
+    plug(Central.Account.DefaultsPlug)
     plug(Central.Logging.LoggingPlug)
     plug(Central.Account.AuthPipeline)
     plug(Central.Account.AuthPlug)

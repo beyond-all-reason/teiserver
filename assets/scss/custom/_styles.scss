@@ -19,6 +19,11 @@ body {
   border-bottom: 1px solid $light;
 }
 
+#top-nav .nav-item .active {
+  font-weight: bold;
+  background-color: $light;
+}
+
 .slow-blink-outline-primary {
   animation: pulse-outline-primary 6s ease infinite;
 }
@@ -315,4 +320,10 @@ body.modal-open {
 
 .picker-modal-close {
   font-size: 2em;
+}
+
+// Forms and inputs
+input[type="color"] {
+  min-height: 2rem;
+  padding: 0.2rem;
 }

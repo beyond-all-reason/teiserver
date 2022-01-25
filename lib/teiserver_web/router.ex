@@ -36,6 +36,8 @@ defmodule TeiserverWeb.Router do
         )
 
         get("/", GeneralController, :index)
+        get("/customisation_form", GeneralController, :customisation_form)
+        get("/customisation_select/:role", GeneralController, :customisation_select)
       end
 
       # ts_clans_X_path

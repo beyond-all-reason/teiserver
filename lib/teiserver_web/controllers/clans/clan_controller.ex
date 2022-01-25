@@ -11,7 +11,8 @@ defmodule TeiserverWeb.Clans.ClanController do
   plug(:add_breadcrumb, name: 'Clans', url: '/teiserver/clans')
 
   plug(AssignPlug,
-    sidemenu_active: ["teiserver", "teiserver_clans"]
+    site_menu_active: "teiserver_clan",
+    sub_menu_active: "",
   )
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

@@ -5,7 +5,8 @@ defmodule TeiserverWeb.Battle.GeneralController do
   plug(:add_breadcrumb, name: 'Battle', url: '/teiserver/battle')
 
   plug(AssignPlug,
-    sidemenu_active: "teiserver"
+    site_menu_active: "teiserver_match",
+    sub_menu_active: "",
   )
 
   plug(Teiserver.ServerUserPlug)

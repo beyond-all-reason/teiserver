@@ -6,7 +6,8 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
-    sidemenu_active: ["teiserver"]
+    site_menu_active: "teiserver_report",
+    sub_menu_active: "server_metric",
   )
 
   plug Bodyguard.Plug.Authorize,

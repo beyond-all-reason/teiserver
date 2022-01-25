@@ -8,56 +8,51 @@
   <% end %>
 
   <div class="form-group row">
-    <div class="col-lg-6">
+    <div class="col-xl-4 col-lg-4">
       <%= label f, :name, class: "control-label" %>
       <%= text_input f, :name, class: "form-control", disabled: "disabled" %>
       <%= error_tag f, :name %>
     </div>
 
     <%= if allow?(@conn, "teiserver.admin.account") do %>
-      <div class="col-lg-6">
+      <div class="col-xl-4 col-lg-4">
         <%= label f, :email, class: "control-label" %>
         <%= text_input f, :email, class: "form-control" %>
         <%= error_tag f, :email %>
       </div>
     <% end %>
+
+    <%= if allow?(@conn, "admin.user") do %>
+      <div class="col-xl-4 col-lg-4">
+        &nbsp;<br />
+        <a href={Routes.admin_user_path(@conn, :edit, @user)} class={"btn btn-outline-#{bsname} float-end"} id="section-menu-new">
+          <i class="far fa-power-off"></i>
+          &nbsp;
+          Admin edit
+        </a>
+      </div>
+    <% end %>
   </div>
 
-  <div class="form-group row">
-    <div class="col-lg-6">
+  <div class="form-group row px-3 py-1">
+    <div class="col-xl-3 col-lg-4 col-md-6">
       <%= central_component "checkbox",
         id: "user_verified",
         name: "user[verified]",
         label: "Verified",
         checked: @changeset.data.data["verified"]
       %>
-
       <%= central_component "checkbox",
         id: "user_bot",
         name: "user[bot]",
         label: "Bot",
         checked: @changeset.data.data["bot"]
       %>
-
       <%= central_component "checkbox",
         id: "user_trusted",
         name: "user[trusted]",
         label: "Trusted",
         checked: ("Trusted" in (@changeset.data.data["roles"] || []))
-      %>
-
-      <%= central_component "checkbox",
-        id: "user_tester",
-        name: "user[tester]",
-        label: "Tester",
-        checked: ("Tester" in (@changeset.data.data["roles"] || []))
-      %>
-
-      <%= central_component "checkbox",
-        id: "user_non-bridged",
-        name: "user[non-bridged]",
-        label: "Non-bridged",
-        checked: ("Non-bridged" in (@changeset.data.data["roles"] || []))
       %>
 
       <%= central_component "checkbox",
@@ -68,7 +63,23 @@
       %>
     </div>
 
-    <div class="col-lg-6">
+    <div class="col-xl-3 col-lg-4 col-md-6">
+      <%= central_component "checkbox",
+        id: "user_contributor",
+        name: "user[contributor]",
+        label: "Contributor",
+        checked: ("Contributor" in (@changeset.data.data["roles"] || []))
+      %>
+
+      <%= central_component "checkbox",
+        id: "user_developer",
+        name: "user[developer]",
+        label: "Developer",
+        checked: ("Developer" in (@changeset.data.data["roles"] || []))
+      %>
+    </div>
+    
+    <div class="col-xl-3 col-lg-4 col-md-6">
       <%= central_component "checkbox",
         id: "user_streamer",
         name: "user[streamer]",
@@ -84,32 +95,32 @@
       %>
 
       <%= central_component "checkbox",
-        id: "user_contributor",
-        name: "user[contributor]",
-        label: "Contributor",
-        checked: ("Contributor" in (@changeset.data.data["roles"] || []))
+        id: "user_tester",
+        name: "user[tester]",
+        label: "Tester",
+        checked: ("Tester" in (@changeset.data.data["roles"] || []))
       %>
 
       <%= central_component "checkbox",
-        id: "user_developer",
-        name: "user[developer]",
-        label: "Developer",
-        checked: ("Developer" in (@changeset.data.data["roles"] || []))
+        id: "user_non-bridged",
+        name: "user[non-bridged]",
+        label: "Non-bridged",
+        checked: ("Non-bridged" in (@changeset.data.data["roles"] || []))
       %>
     </div>
   </div>
 
   <hr />
 
-  <div class="form-group">
+  <div class="form-group m-2">
     <%= input_with_type f, :colour, "color" %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group m-2">
     <%= central_component "fa5_icon_picker", %{form: f, field: :icon} %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group m-2 my-4">
     <%= if @changeset.data.id do %>
       <a href={Routes.ts_admin_user_path(@conn, :show, @user)} class="btn btn-secondary btn-outline">
         Cancel

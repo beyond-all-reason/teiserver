@@ -10,8 +10,10 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
-  plug AssignPlug,
-    sidemenu_active: ["teiserver"]
+  plug(AssignPlug,
+    site_menu_active: "teiserver_admin",
+    sub_menu_active: "tool",
+  )
 
   plug :add_breadcrumb, name: 'Account', url: '/teiserver'
   plug :add_breadcrumb, name: 'BadgeTypes', url: '/teiserver/badge_types'

@@ -2,7 +2,8 @@ defmodule TeiserverWeb.Admin.GeneralController do
   use CentralWeb, :controller
 
   plug(AssignPlug,
-    sidemenu_active: ["teiserver", "teiserver_admin"]
+    site_menu_active: "teiserver_admin",
+    sub_menu_active: "",
   )
 
   plug(Bodyguard.Plug.Authorize,

@@ -11,8 +11,10 @@ defmodule TeiserverWeb.Game.QueueController do
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
-  plug AssignPlug,
-    sidemenu_active: ["teiserver", "teiserver_matchmaking"]
+  plug(AssignPlug,
+    site_menu_active: "teiserver_admin",
+    sub_menu_active: "queue",
+  )
 
   plug :add_breadcrumb, name: 'Game', url: '/teiserver'
   plug :add_breadcrumb, name: 'Queues', url: '/teiserver/queues'

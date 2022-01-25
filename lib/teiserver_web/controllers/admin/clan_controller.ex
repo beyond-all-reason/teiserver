@@ -13,7 +13,8 @@ defmodule TeiserverWeb.Admin.ClanController do
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin/clans')
 
   plug(AssignPlug,
-    sidemenu_active: ["teiserver", "teiserver_admin"]
+    site_menu_active: "teiserver_admin",
+    sub_menu_active: "clan",
   )
 
   plug(Bodyguard.Plug.Authorize,

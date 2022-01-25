@@ -1,8 +1,9 @@
 defmodule TeiserverWeb.Report.ReportController do
   use CentralWeb, :controller
 
-    plug(AssignPlug,
-    sidemenu_active: ["teiserver"]
+  plug(AssignPlug,
+    site_menu_active: "teiserver_report",
+    sub_menu_active: "report",
   )
 
   plug Bodyguard.Plug.Authorize,

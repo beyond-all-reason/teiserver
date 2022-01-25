@@ -39,6 +39,17 @@
         url: Routes.ts_admin_user_path(@conn, :data_search)
       %>
     <% end %>
+    
+    <%= if @active == "show" do %>
+      <%= central_component "section_menu_button",
+        name: "show",
+        label: "Show",
+        active: @active,
+        icon: Central.Helpers.StylingHelper.icon(:detail),
+        bsname: bsname,
+        url: "#"
+      %>
+    <% end %>
   </div>
   
   <div class="col-md-3">

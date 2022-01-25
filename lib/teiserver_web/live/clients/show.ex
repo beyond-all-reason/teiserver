@@ -24,11 +24,11 @@ defmodule TeiserverWeb.ClientLive.Show do
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Clients", url: "/teiserver/admin/client")
-      |> assign(:sidemenu_active, "teiserver")
+      |> assign(:site_menu_active, "teiserver_user")
       |> assign(:colours, UserLib.colours())
       |> assign(:extra_menu_content, @extra_menu_content)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "nomenu_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
   end
 
   @impl true

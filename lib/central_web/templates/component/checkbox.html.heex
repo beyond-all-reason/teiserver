@@ -26,9 +26,11 @@
       _ -> []
     end
   end
+  
+  row_class = "form-check " <> (assigns[:row_class] || "m-1")
 %>
 
-<div class="form-check">
+<div class={row_class}>
   <input name={@name} id={@id} class="form-check-input" type="checkbox" value="true" {checked}>
   <label class="form-check-label" for={@id}>
     <strong><%= @label %></strong><%= assigns[:text] %>

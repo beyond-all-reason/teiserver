@@ -17,14 +17,14 @@
         <%= central_component "top_nav_item",
           text: "Main menu",
           route: "/",
-          active: false
+          active: @site_menu_active == "central_home"
         %>
         
         <%= if Application.get_env(:central, Central)[:enable_blog] do %>
           <%= central_component "top_nav_item",
             text: "Blog",
             route: Routes.blog_path(@conn, :index),
-            active: false
+            active: @site_menu_active == "central_blog"
           %>
         <% end %>
 
@@ -33,7 +33,7 @@
           <%= central_component "top_nav_item",
             text: "Admin",
             route: Routes.admin_general_path(@conn, :index),
-            active: assigns[:sidemenu_active]
+            active: @site_menu_active == "central_admin"
           %>
         <% end %>
 
@@ -41,7 +41,7 @@
           <%= central_component "top_nav_item",
             text: "Logging",
             route: Routes.logging_general_path(@conn, :index),
-            active: assigns[:sidemenu_active]
+            active: @site_menu_active == "central_logging"
           %>
         <% end %>
         

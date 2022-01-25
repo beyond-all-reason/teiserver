@@ -4,7 +4,8 @@ defmodule TeiserverWeb.Admin.ToolController do
   alias Central.Helpers.TimexHelper
 
   plug(AssignPlug,
-    sidemenu_active: ["teiserver", "teiserver_admin"]
+    site_menu_active: "teiserver_admin",
+    sub_menu_active: "tool",
   )
 
   plug Bodyguard.Plug.Authorize,

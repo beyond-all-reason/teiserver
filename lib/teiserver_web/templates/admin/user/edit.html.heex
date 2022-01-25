@@ -13,29 +13,9 @@
           })
         %>
 
-        <%= if allow?(@conn, "admin.user") do %>
-          <div class="float-end">
-            <a href={Routes.admin_user_path(@conn, :edit, @user)} class={"btn btn-outline-#{bsname}"} id="section-menu-new">
-              <i class="far fa-power-off"></i>
-              &nbsp;
-              Admin edit
-            </a>
-            &nbsp;&nbsp;
-          </div>
-        <% end %>
-
         <hr />
 
-<%= render "form.html", Map.put(assigns, :action, Routes.ts_admin_user_path(@conn, :update, @user)) %>
-<hr />
-
-<form action={Routes.ts_admin_user_path(@conn, :reset_password, @user)} method="POST" class="form-horizontal" style="padding-right: 15px; display:none;">
-  <input type="hidden" name="_method" value="POST">
-
-  <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-
-  <input type="submit" value="Reset password" name="form.submitted" class="btn btn-danger float-end" data-confirm="Are you sure?" />
-</form>
+        <%= render "form.html", Map.put(assigns, :action, Routes.ts_admin_user_path(@conn, :update, @user)) %>
 
       </div>
     </div>

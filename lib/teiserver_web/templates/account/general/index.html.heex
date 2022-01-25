@@ -1,6 +1,27 @@
 <div class="row page-row">
-  <%= central_component "menu_card", icon_class: "fad", name: "", icon: Teiserver.icon(:relationship), text: "Friends/Mutes/Invites", link: Routes.ts_account_relationships_path(@conn, :index) %>
-  <%= central_component "menu_card", icon_class: "fad", name: "", icon: Central.Config.UserConfigLib.icon(), text: "Preferences", link: Routes.ts_account_preferences_path(@conn, :index) %>
+  <%= central_component "menu_card",
+    icon_class: "fad",
+    name: "",
+    icon: Teiserver.icon(:relationship),
+    text: "Friends/Mutes/Invites",
+    link: Routes.ts_account_relationships_path(@conn, :index)
+  %>
+  
+  <%= central_component "menu_card",
+    icon_class: "fad",
+    name: "apperance",
+    icon: "fas fa-icons",
+    text: "Apperance",
+    link: Routes.ts_account_general_path(@conn, :customisation_form)
+  %>
+  
+  <%= central_component "menu_card",
+    icon_class: "fad",
+    name: "",
+    icon: Central.Config.UserConfigLib.icon(),
+    text: "Preferences",
+    link: Routes.ts_account_preferences_path(@conn, :index)
+  %>
 </div>
 
 <div class="row page-row">

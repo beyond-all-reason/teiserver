@@ -30,14 +30,14 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> Teiserver.ServerUserPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
-      |> assign(:sidemenu_active, "teiserver")
+      |> assign(:site_menu_active, "teiserver_match")
       |> assign(:colours, LobbyLib.colours())
       |> assign(:messages, [])
       |> assign(:extra_menu_content, extra_content)
       |> assign(:consul_command, "")
       |> assign(:subbed, true)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "nomenu_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
   end
 
   @impl true

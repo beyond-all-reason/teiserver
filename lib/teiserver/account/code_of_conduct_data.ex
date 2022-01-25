@@ -36,6 +36,7 @@ defmodule Teiserver.Account.CodeOfConductData do
     }
   end
 
+  @spec flat_data :: list
   def flat_data() do
     data()
     |> Enum.map(fn {key1, items} ->

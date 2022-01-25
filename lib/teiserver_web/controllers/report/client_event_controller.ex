@@ -4,7 +4,8 @@ defmodule TeiserverWeb.Report.ClientEventController do
   alias Teiserver.Telemetry.{ExportEventsTask, ExportPropertiesTask}
 
   plug(AssignPlug,
-    sidemenu_active: ["teiserver"]
+    site_menu_active: "teiserver_report",
+    sub_menu_active: "client_event",
   )
 
   plug Bodyguard.Plug.Authorize,
