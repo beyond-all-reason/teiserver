@@ -2,10 +2,10 @@ defmodule Teiserver.Bridge.DiscordBridge do
   # use Alchemy.Cogs
   use Alchemy.Events
   alias Teiserver.{Account, Room}
+  alias Teiserver.Bridge.{BridgeServer, MessageCommands}
   alias Central.Config
   alias Central.Account.ReportLib
   alias Central.Helpers.TimexHelper
-  alias Teiserver.Bridge.BridgeServer
   require Logger
 
   # Discord message ping: <@userid>
@@ -67,7 +67,13 @@ defmodule Teiserver.Bridge.DiscordBridge do
       room == "moderation-actions" ->
         nil
 
-      true ->
+      String.contains?(message, "http:") ->
+        nil
+
+      String.contains?(message, "https:") ->
+        nil
+
+        true ->
         do_reply(message)
         :ok
     end
@@ -206,11 +212,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
   end
 
-  def receive_dm(%Alchemy.Message{author: _author, channel_id: channel, content: _content, attachments: []} = _message) do
-    Alchemy.Client.send_message(
-      channel,
-      "Unfortunately I don't understand that command",
-      []# Options
-    )
+  def receive_dm(%Alchemy.Message{} = message) do
+    MessageCommands.handle(message)
   end
 end
