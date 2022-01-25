@@ -1,0 +1,43 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<%= render TeiserverWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "customisation"}) %>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+
+        <h4>Select icon/colour</h4>
+        This combination will be how you appear on user lists such as the post match data. You can change it at any time.
+        <br /><br />
+        
+        Your appearance is currently set as:
+        <%= central_component "menu_card",
+          icon_class: "fad",
+          name: "",
+          icon: @current_user.icon,
+          text: "",
+          style: "background-color: #{@current_user.colour}; color: #FFFFFF;",
+          link: "#"
+        %>
+        <br /><br />
+
+        Click a box below to change it.
+        <div class="row">
+          <%= for {role, colour, icon} <- @options do %>
+            <%= central_component "menu_card",
+              icon_class: "fad",
+              name: "",
+              icon: icon,
+              text: role,
+              style: "background-color: #{colour}; color: #FFFFFF;",
+              link: Routes.ts_account_general_path(@conn, :customisation_select, role)
+            %>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

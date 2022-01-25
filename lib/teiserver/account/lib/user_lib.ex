@@ -283,4 +283,13 @@ defmodule Teiserver.Account.UserLib do
       # "pausing the game (if possible, probably needs spads support)",
     ]
   end
+
+  @spec role_def(String.t()) :: nil | {String.t(), String.t()}
+  def role_def("default"), do: {"#AA0000", "fas fa-user"}
+  def role_def("moderator"), do: {"#FFAA00", "fas fa-gavel"}
+  def role_def("developer"), do: {"#008800", "fas fa-code-branch"}
+  def role_def("contributor"), do: {"#00AA66", "fas fa-code-commit"}
+  def role_def("donor"), do: {"#0066AA", "fas fa-euro"}
+  def role_def("streamer"), do: {"#0066AA", "fab fa-twitch"}
+  def role_def(_), do: nil
 end
