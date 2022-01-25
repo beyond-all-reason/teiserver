@@ -821,6 +821,11 @@ defmodule Teiserver.Protocols.SpringIn do
     end
     case response do
       {:waiting_on_host, script_password} ->
+        Lobby.remove_user_from_any_battle(state.userid)
+        |> Enum.each(fn b ->
+          PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{b}")
+        end)
+
         %{state | script_password: script_password}
 
       {:failure, "No match"} ->
