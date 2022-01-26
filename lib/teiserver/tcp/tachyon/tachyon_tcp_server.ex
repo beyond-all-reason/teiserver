@@ -159,21 +159,21 @@ defmodule Teiserver.TachyonTcpServer do
       now = System.system_time(:second)
       limiter = now - @cmd_flood_duration
 
-      cmd_timestamps = [now | state.cmd_timestamps]
+      [now | state.cmd_timestamps]
       |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
-
-      if Enum.count(cmd_timestamps) > @cmd_flood_limit do
-        User.set_flood_level(state.userid, 10)
-        Client.disconnect(state.userid, :flood)
-        Logger.error("Tachyon command overflow from #{state.username}/#{state.userid} with #{Enum.count(cmd_timestamps)} commands. Disconnected and flood protection engaged.")
-      end
-
-      cmd_timestamps
     else
       state.cmd_timestamps
     end
 
-    new_state = state.protocol_in.data_in(data, state)
+    new_state = if Enum.count(cmd_timestamps) > @cmd_flood_limit do
+      User.set_flood_level(state.userid, 10)
+      Client.disconnect(state.userid, :flood)
+      Logger.error("Tachyon command overflow from #{state.username}/#{state.userid} with #{Enum.count(cmd_timestamps)} commands. Disconnected and flood protection engaged.")
+      state
+    else
+      state.protocol_in.data_in(data, state)
+    end
+
     {:noreply, %{new_state | cmd_timestamps: cmd_timestamps}}
   end
   def handle_info({:tcp, _socket, data}, %{exempt_from_cmd_throttle: true} = state) do

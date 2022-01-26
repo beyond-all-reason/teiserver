@@ -153,10 +153,8 @@ defmodule Teiserver.SpringTcpServer do
       now = System.system_time(:second)
       limiter = now - @cmd_flood_duration
 
-      cmd_timestamps = [now | state.cmd_timestamps]
+      [now | state.cmd_timestamps]
       |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
-
-      cmd_timestamps
     else
       state.cmd_timestamps
     end
