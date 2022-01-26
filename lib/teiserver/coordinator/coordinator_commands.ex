@@ -1,8 +1,10 @@
 defmodule Teiserver.Coordinator.CoordinatorCommands do
-  alias Teiserver.{User, Account, Client}
+  alias Teiserver.{User, Account, Client, Coordinator}
+  alias Teiserver.Battle.Lobby
   alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Coordinator.CoordinatorLib
 
-  @always_allow ~w(whoami discord)
+  @always_allow ~w(help whoami discord)
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, _state) do
@@ -27,6 +29,18 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   # Public commands
   @spec do_handle(map(), map()) :: map()
+  defp do_handle(%{command: "help", senderid: senderid} = cmd, state) do
+    user = User.get_user_by_id(senderid)
+    host_id = Map.get(cmd, :host_id, nil)
+
+    messages = CoordinatorLib.help(user, host_id == senderid)
+    |> String.split("\n")
+
+    say_command(cmd)
+    Coordinator.send_to_user(senderid, messages)
+    state
+  end
+
   defp do_handle(%{command: "whoami", senderid: senderid} = _cmd, state) do
     sender = User.get_user_by_id(senderid)
     stats = Account.get_user_stat_data(senderid)
@@ -125,4 +139,20 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     User.send_direct_message(state.userid, senderid, "I don't have a handler for the command '#{command}'")
     state
   end
+
+  @spec command_as_message(Map.t()) :: String.t()
+  defp command_as_message(cmd) do
+    remaining = if Map.get(cmd, :remaining), do: " #{cmd.remaining}", else: ""
+    error = if Map.get(cmd, :error), do: " Error: #{cmd.error}", else: ""
+
+    "#{cmd.command}#{remaining}#{error}"
+      |> String.trim
+  end
+
+  defp say_command(%{lobby_id: nil}), do: :ok
+  defp say_command(%{lobby_id: lobby_id, senderid: senderid} = cmd) do
+    message = "$ " <> command_as_message(cmd)
+    Lobby.say(senderid, message, lobby_id)
+  end
+  defp say_command(_), do: :ok
 end

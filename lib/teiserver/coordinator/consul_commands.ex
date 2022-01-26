@@ -67,18 +67,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
-  def handle_command(%{command: "help", senderid: senderid} = cmd, state) do
-    user = User.get_user_by_id(senderid)
-    lobby = Lobby.get_lobby!(state.lobby_id)
-
-    messages = Teiserver.Coordinator.CoordinatorLib.help(user, lobby.founder_id == senderid)
-    |> String.split("\n")
-
-    ConsulServer.say_command(cmd, state)
-    Coordinator.send_to_user(senderid, messages)
-    state
-  end
-
   def handle_command(%{command: "splitlobby", senderid: senderid} = cmd, %{split: nil} = state) do
     ConsulServer.say_command(cmd, state)
 
@@ -165,14 +153,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             %{state | join_queue: new_queue}
           true ->
             pos = get_queue_position(state.join_queue, senderid) + 1
-            LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}. Use $status to check on the queue.", state.lobby_id)
+            LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}. Use $status to check on the queue and $leaveq to leave it.", state.lobby_id)
             state
         end
     end
   end
 
   def handle_command(%{command: "leaveq", senderid: senderid} = cmd, state) do
-    ConsulServer.say_command(cmd, state)
     new_queue = List.delete(state.join_queue, senderid)
     LobbyChat.sayprivateex(state.coordinator_id, senderid, "You have been removed from the join queue", state.lobby_id)
     %{state | join_queue: new_queue}
@@ -209,9 +196,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
 
   #################### Host and Moderator
-  def handle_command(%{command: "leveltoplay", remaining: remaining} = cmd, state) do
+  def handle_command(%{command: "leveltoplay", remaining: remaining, senderid: senderid} = cmd, state) do
     case Integer.parse(remaining |> String.trim) do
       :error ->
+        Lobby.sayprivateex(state.coordinator_id, senderid, [
+          "No level of that type",
+        ], state.lobby_id)
         state
       {level, _} ->
         ConsulServer.say_command(cmd, state)
@@ -219,9 +209,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  def handle_command(%{command: "leveltospectate", remaining: remaining} = cmd, state) do
+  def handle_command(%{command: "leveltospectate", remaining: remaining, senderid: senderid} = cmd, state) do
     case Integer.parse(remaining |> String.trim) do
       :error ->
+        Lobby.sayprivateex(state.coordinator_id, senderid, [
+          "No level of that type",
+        ], state.lobby_id)
         state
       {level, _} ->
         ConsulServer.say_command(cmd, state)
@@ -229,9 +222,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  def handle_command(%{command: "lock", remaining: remaining} = cmd, state) do
+  def handle_command(%{command: "lock", remaining: remaining, senderid: senderid} = cmd, state) do
     new_locks = case get_lock(remaining) do
-      nil -> state.locks
+      nil ->
+        Lobby.sayprivateex(state.coordinator_id, senderid, [
+          "No lock of that type",
+        ], state.lobby_id)
+        state.locks
       lock ->
         ConsulServer.say_command(cmd, state)
         [lock | state.locks] |> Enum.uniq
@@ -239,9 +236,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     %{state | locks: new_locks}
   end
 
-  def handle_command(%{command: "unlock", remaining: remaining} = cmd, state) do
+  def handle_command(%{command: "unlock", remaining: remaining, senderid: senderid} = cmd, state) do
     new_locks = case get_lock(remaining) do
-      nil -> state.locks
+      nil ->
+        Lobby.sayprivateex(state.coordinator_id, senderid, [
+          "No lock of that type",
+        ], state.lobby_id)
+        state.locks
       lock ->
         ConsulServer.say_command(cmd, state)
         List.delete(state.locks, lock)

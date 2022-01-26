@@ -74,6 +74,11 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info({:new_message, _userid, _room_name, _message}, state), do: {:noreply, state}
   def handle_info({:new_message_ex, _userid, _room_name, _message}, state), do: {:noreply, state}
 
+  def handle_info({:consul_command, cmd}, state) do
+    new_state = CoordinatorCommands.handle_command(cmd, state)
+    {:noreply, new_state}
+  end
+
   def handle_info({:direct_message, sender_id, "$" <> command}, state) do
     cmd = Coordinator.Parser.parse_command(sender_id, "$#{command}")
     new_state = CoordinatorCommands.handle_command(cmd, state)

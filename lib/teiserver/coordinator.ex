@@ -39,6 +39,28 @@ defmodule Teiserver.Coordinator do
     ConCache.get(:application_metadata_cache, "teiserver_coordinator_userid")
   end
 
+  @spec get_coordinator_pid() :: pid() | nil
+  def get_coordinator_pid() do
+    ConCache.get(:teiserver_consul_pids, :coordinator)
+  end
+
+  @spec cast_coordinator(any) :: any
+  def cast_coordinator(msg) do
+    case get_coordinator_pid() do
+      nil -> nil
+      pid -> send(pid, msg)
+    end
+  end
+
+  @spec call_coordinator(any) :: any
+  def call_coordinator(msg) do
+    case get_coordinator_pid() do
+      nil -> nil
+      pid -> GenServer.call(pid, msg)
+    end
+  end
+
+
   @spec get_consul_pid(T.lobby_id()) :: pid() | nil
   def get_consul_pid(lobby_id) do
     ConCache.get(:teiserver_consul_pids, lobby_id)
