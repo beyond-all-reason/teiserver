@@ -1,20 +1,28 @@
 defmodule Teiserver.Bridge.MessageCommands do
   @moduledoc false
-  alias Teiserver.User
+  alias Teiserver.{User, Account}
+  alias Teiserver.Account.AccoladeLib
   alias Central.Helpers.NumberHelper
 
+  @unauth ~w(discord)
+  @always_allow ~w(whoami help)
+
+  @spec handle(Alchemy.Message.t()) :: any
   def handle(%Alchemy.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []} = _message) do
     [cmd | remaining] = String.split(content, " ")
     remaining = Enum.join(remaining, " ")
     user = User.get_user_by_discord_id(author)
 
-    handle_command({user, author}, cmd, remaining, channel)
+    if allow?(cmd, user) do
+      handle_command({user, author}, cmd, remaining, channel)
+    end
   end
 
   def handle(_) do
     :ok
   end
 
+  @spec handle_command({T.user(), String.t()}, String.t(), String.t(), String.t()) :: any
   def handle_command({nil, discord_id}, "discord", remaining, channel) do
     case String.split(remaining, "-") do
       [userid_str, given_code] ->
@@ -48,10 +56,64 @@ defmodule Teiserver.Bridge.MessageCommands do
     reply(channel, response)
   end
 
+  def handle_command({user, _}, "whoami", _remaining, channel) do
+    stats = Account.get_user_stat_data(user.id)
+
+    player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
+    spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
+    rank_time = User.rank_time(user.id)
+
+    accolades = AccoladeLib.get_player_accolades(user.id)
+    accolades_string = case Map.keys(accolades) do
+      [] ->
+        "You currently have no accolades"
+
+      _ ->
+        badge_types = Account.list_badge_types(search: [id_list: Map.keys(accolades)])
+        |> Map.new(fn bt -> {bt.id, bt} end)
+
+        ["Your accolades are as follows:"] ++
+          (accolades
+          |> Enum.map(fn {bt_id, count} ->
+            ">> #{count}x #{badge_types[bt_id].name}"
+          end))
+    end
+
+    msg = [
+      "You are #{user.name}",
+      "Rank: #{user.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
+      accolades_string
+    ]
+    |> List.flatten
+
+    reply(channel, msg)
+  end
+
+  def handle_command({_sender, _}, "help", _remaining, channel) do
+    reply(channel, "Currently we don't have a list of commands, please feel free to suggest them to Teifion though!.")
+  end
+
   def handle_command({_sender, _}, "discord", _remaining, channel) do
+    reply(channel, "Your account is already linked.")
+  end
+
+  def handle_command({_sender, _}, _, _remaining, channel) do
     reply(channel, "Your account is linked but at the moment there's nothing else I can do.")
   end
 
+  defp allow?(cmd, nil), do: Enum.member?(@unauth, cmd)
+  defp allow?(cmd, user) do
+    cond do
+      Enum.member?(@unauth, cmd) ->
+        true
+      Enum.member?(@always_allow, cmd) ->
+        true
+      true ->
+        User.allow?(user, "Moderator")
+    end
+  end
+
+  defp reply(channel, message) when is_list(message), do: reply(channel, Enum.join(message, "\n"))
   defp reply(channel, message) do
     Alchemy.Client.send_message(
       channel,

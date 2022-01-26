@@ -966,18 +966,19 @@ defmodule Teiserver.User do
     end
   end
 
-  def allow?(userid, permission) do
-    user = get_user_by_id(userid)
-
-    case permission do
+  @spec allow?(T.userid() | T.user() | nil, String.t() | atom | [String.t()]) :: boolean()
+  def allow?(nil, _), do: false
+  def allow?(userid, required) when is_integer(userid), do: allow?(get_user_by_id(userid), required)
+  def allow?(user, required) do
+    case required do
       :moderator ->
         user.moderator
 
       :bot ->
         user.moderator or user.bot
 
-      _ ->
-        false
+      required ->
+        Enum.member?(user.roles, required)
     end
   end
 end

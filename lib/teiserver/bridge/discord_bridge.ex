@@ -1,8 +1,12 @@
 defmodule Teiserver.Bridge.DiscordBridge do
+  @moduledoc """
+  This is the module that receives discord events and passes them to the rest of Teiserver.
+  """
+
   # use Alchemy.Cogs
   use Alchemy.Events
   alias Teiserver.{Account, Room}
-  alias Teiserver.Bridge.{BridgeServer, MessageCommands}
+  alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands}
   alias Central.Config
   alias Central.Account.ReportLib
   alias Central.Helpers.TimexHelper
@@ -45,7 +49,17 @@ defmodule Teiserver.Bridge.DiscordBridge do
   end
 
   @spec recv_message(atom | %{:attachments => any, optional(any) => any}) :: nil | :ok
-  def recv_message(%Alchemy.Message{author: author, channel_id: channel_id, attachments: []} = message) do
+  def recv_message(%Alchemy.Message{channel_id: channel_id, content: "$" <> _content} = message) do
+    dm_sender = ConCache.get(:discord_bridge_dm_cache, channel_id)
+
+    if dm_sender != nil do
+      MessageCommands.handle(message)
+    else
+      ChatCommands.handle(message)
+    end
+  end
+
+  def recv_message(%Alchemy.Message{author: author, channel_id: channel_id, attachments: [], content: content} = message) do
     room = bridge_channel_to_room(channel_id)
     dm_sender = ConCache.get(:discord_bridge_dm_cache, channel_id)
 
@@ -56,27 +70,26 @@ defmodule Teiserver.Bridge.DiscordBridge do
       dm_sender != nil ->
         MessageCommands.handle(message)
 
-      Config.get_site_config_cache("teiserver.Bridge from discord") == false ->
-        nil
-
-      room == nil ->
-        nil
-
       room == "moderation-reports" ->
         nil
 
       room == "moderation-actions" ->
         nil
 
-      String.contains?(message, "http:") ->
+      String.contains?(content, "http:") ->
         nil
 
-      String.contains?(message, "https:") ->
+      String.contains?(content, "https:") ->
         nil
+
+      Config.get_site_config_cache("teiserver.Bridge from discord") == false ->
+        nil
+
+      room != nil ->
+        do_reply(message)
 
       true ->
-        do_reply(message)
-        :ok
+        nil
     end
   end
 
