@@ -1,8 +1,8 @@
 <div class="row">
   <%= for {bt_id, badge_type} <- @badge_type_lookup do %>
     <%
-      given = @accolades_given[bt_id]
-      received = @accolades_received[bt_id]
+      given = @accolades_given[bt_id] || 0
+      received = @accolades_received[bt_id] || 0
     %>
     <%= central_component "menu_card",
       icon_class: "fad",
