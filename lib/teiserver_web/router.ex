@@ -40,6 +40,13 @@ defmodule TeiserverWeb.Router do
         get("/customisation_select/:role", GeneralController, :customisation_select)
       end
 
+      scope "/teiserver", TeiserverWeb.Account, as: :ts_account do
+        pipe_through([:browser, :standard_layout])
+
+        get("/profile/:id", ProfileController, :show)
+        get("/profile", ProfileController, :index)
+      end
+
       # ts_clans_X_path
       scope "/teiserver/clans", TeiserverWeb.Clans, as: :ts_clans do
         pipe_through([:browser, :standard_layout, :protected])

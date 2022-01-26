@@ -22,6 +22,14 @@
 
         <div class="row">
           <%= central_component "sub_menu_icon",
+            name: "profile",
+            label: "Profile",
+            active: @active,
+            url: Routes.ts_account_profile_path(@conn, :show, @conn.current_user.id),
+            lib: %{icon: "fas fa-user-circle"}
+          %>
+
+          <%= central_component "sub_menu_icon",
             name: "relationships",
             label: "Relationships",
             active: @active,

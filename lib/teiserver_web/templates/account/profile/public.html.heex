@@ -1,0 +1,24 @@
+<% {_fg, _bg, bsname} = colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+    $('#the_tabs a:first').tab('show');
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
+  });
+</script>
+
+<%= render TeiserverWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "profile"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+
+<h1><%= @user.name %></h1>
+Profiles are currently not being made visible to others. Please join the discussion on the <a href="https://discord.gg/N968ddE">discord</a> in the User profile thread in the #server channel.
+
+      </div>
+    </div>
+  </div>
+</div>

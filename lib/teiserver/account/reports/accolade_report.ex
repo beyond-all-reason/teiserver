@@ -16,8 +16,8 @@ defmodule Teiserver.Account.AccoladeReport do
       )
 
     badge_types = Account.list_badge_types()
-    |> Map.new(fn bt -> {bt.id, bt} end)
-    |> Map.put(nil, BadgeTypeLib.nil_badge_type())
+      |> Map.new(fn bt -> {bt.id, bt} end)
+      |> Map.put(nil, BadgeTypeLib.nil_badge_type())
 
     accolades = Account.list_accolades(search: [
       inserted_after: start_date |> Timex.to_datetime,

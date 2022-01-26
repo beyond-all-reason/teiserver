@@ -1,6 +1,14 @@
 <div class="row page-row">
   <%= central_component "menu_card",
     icon_class: "fad",
+    name: "profile",
+    icon: "fas fa-user-circle",
+    text: "My profile",
+    link: Routes.ts_account_profile_path(@conn, :show, @conn.current_user.id)
+  %>
+  
+  <%= central_component "menu_card",
+    icon_class: "fad",
     name: "",
     icon: Teiserver.icon(:relationship),
     text: "Friends/Mutes/Invites",

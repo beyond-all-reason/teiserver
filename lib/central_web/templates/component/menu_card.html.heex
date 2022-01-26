@@ -15,9 +15,10 @@
   end
   
   extra_classes = (assigns[:class] || "")
+  col_classes = (assigns[:col_classes] || "col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1")
 %>
 
-<div class={"col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card #{extra_classes}"}>
+<div class={"#{col_classes} menu-card #{extra_classes}"}>
   <a href={assigns[:link]} class="block-link" id={"sub-menu-#{assigns[:name]}"} style={style}>
     <i class={"fa-fw #{the_icon} fa-3x"}></i><br />
     <%= assigns[:text] %>
