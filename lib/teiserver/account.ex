@@ -886,5 +886,4 @@ defmodule Teiserver.Account do
   def change_accolade(%Accolade{} = accolade) do
     Accolade.changeset(accolade, %{})
   end
-
 end
