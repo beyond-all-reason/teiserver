@@ -2,7 +2,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.{User, Account, Client}
   alias Teiserver.Account.AccoladeLib
 
-  @always_allow ~w(whoami)
+  @always_allow ~w(whoami discord)
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, _state) do
