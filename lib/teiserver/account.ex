@@ -291,8 +291,8 @@ defmodule Teiserver.Account do
     |> Enum.filter(fn r -> not Enum.member?(remove_permissions, r) end)
 
     # Then we add back in the ones we want this person to have
-    add_permissions = get_roles(user)
-    |> Enum.map(fn r -> "teiserver.player.#{r}" end)
+    add_permissions = user.data["roles"]
+    |> Enum.map(fn r -> "teiserver.player.#{String.downcase(r)}" end)
 
     permissions = base_permissions ++ add_permissions
 

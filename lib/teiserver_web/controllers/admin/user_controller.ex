@@ -144,13 +144,13 @@ defmodule TeiserverWeb.Admin.UserController do
 
         user_stats = Account.get_user_stat_data(user.id)
 
-        roles = Account.get_roles(user)
+        roles = user.data["roles"]
         |> Enum.map(fn r ->
           {r, UserLib.role_def(r)}
         end)
         |> Enum.filter(fn {_, v} -> v != nil end)
         |> Enum.map(fn {role, {colour, icon}} ->
-          {role |> String.capitalize(), colour, icon}
+          {role, colour, icon}
         end)
 
         conn

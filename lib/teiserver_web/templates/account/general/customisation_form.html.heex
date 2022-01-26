@@ -16,7 +16,7 @@
           icon_class: "fad",
           name: "",
           icon: @current_user.icon,
-          text: "",
+          text: raw("&nbsp;"),
           style: "background-color: #{@current_user.colour}; color: #FFFFFF;",
           link: "#"
         %>
@@ -30,6 +30,7 @@
               name: "",
               icon: icon,
               text: role,
+              class: "p-1",
               style: "background-color: #{colour}; color: #FFFFFF;",
               link: Routes.ts_account_general_path(@conn, :customisation_select, role)
             %>

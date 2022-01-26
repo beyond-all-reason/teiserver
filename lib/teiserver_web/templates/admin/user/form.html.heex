@@ -43,6 +43,7 @@
         label: "Verified",
         checked: @changeset.data.data["verified"]
       %>
+
       <%= central_component "checkbox",
         id: "user_bot",
         name: "user[bot]",
@@ -62,6 +63,13 @@
         name: "user[moderator]",
         label: "Moderator",
         checked: @changeset.data.data["moderator"]
+      %>
+
+      <%= central_component "checkbox",
+        id: "user_admin",
+        name: "user[admin]",
+        label: "Admin",
+        checked: ("Admin" in (@changeset.data.data["roles"] || []))
       %>
     </div>
 

@@ -19,13 +19,13 @@ defmodule TeiserverWeb.Account.GeneralController do
 
   @spec customisation_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def customisation_form(conn, _params) do
-    options = ["default" | Account.get_roles(conn.current_user)]
+    options = ["Default" | conn.current_user.data["roles"]]
     |> Enum.map(fn r ->
       {r, UserLib.role_def(r)}
     end)
     |> Enum.filter(fn {_, v} -> v != nil end)
     |> Enum.map(fn {role, {colour, icon}} ->
-      {role |> String.capitalize(), colour, icon}
+      {role, colour, icon}
     end)
 
     conn
@@ -35,17 +35,16 @@ defmodule TeiserverWeb.Account.GeneralController do
 
   @spec customisation_select(Plug.Conn.t(), map) :: Plug.Conn.t()
   def customisation_select(conn, %{"role" => role}) do
-    role = String.downcase(role)
-    available = ["default" | Account.get_roles(conn.current_user)]
+    available = ["Default" | conn.current_user.data["roles"]]
 
     {colour, icon} = if Enum.member?(available, role) do
       if UserLib.role_def(role) do
         UserLib.role_def(role)
       else
-        UserLib.role_def("default")
+        UserLib.role_def("Default")
       end
     else
-      UserLib.role_def("default")
+      UserLib.role_def("Default")
     end
 
     user = Account.get_user!(conn.current_user.id)
@@ -54,13 +53,13 @@ defmodule TeiserverWeb.Account.GeneralController do
       icon: icon
     })
 
-    options = ["default" | Account.get_roles(conn.current_user)]
+    options = ["Default" | conn.current_user.data["roles"]]
     |> Enum.map(fn r ->
       {r, UserLib.role_def(r)}
     end)
     |> Enum.filter(fn {_, v} -> v != nil end)
     |> Enum.map(fn {role, {colour, icon}} ->
-      {role |> String.capitalize(), colour, icon}
+      {role, colour, icon}
     end)
 
     conn
