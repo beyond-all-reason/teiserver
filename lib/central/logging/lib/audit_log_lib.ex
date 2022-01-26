@@ -83,13 +83,13 @@ defmodule Central.Logging.AuditLogLib do
 
   def _preload_user(query) do
     from logs in query,
-      join: users in assoc(logs, :user),
+      left_join: users in assoc(logs, :user),
       preload: [user: users]
   end
 
   def _preload_group(query) do
     from logs in query,
-      join: groups in assoc(logs, :group),
+      left_join: groups in assoc(logs, :group),
       preload: [group: groups]
   end
 

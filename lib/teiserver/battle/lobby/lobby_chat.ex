@@ -2,6 +2,7 @@ defmodule Teiserver.Battle.LobbyChat do
   alias Teiserver.{User, Chat}
   alias Teiserver.Battle.{Lobby}
   alias Phoenix.PubSub
+  alias Teiserver.Chat.WordLib
 
   @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def say(userid, "!start" <> s, lobby_id), do: say(userid, "!cv start" <> s, lobby_id)
@@ -21,6 +22,10 @@ defmodule Teiserver.Battle.LobbyChat do
   def do_say(userid, "$ " <> msg, lobby_id), do: do_say(userid, "$#{msg}", lobby_id)
   def do_say(userid, msg, lobby_id) do
     user = User.get_user_by_id(userid)
+    if User.is_restricted?(user, "Bridging") and WordLib.flagged_words(msg) > 0 do
+      User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
+    end
+
     if not User.is_muted?(user) do
       if user.bot == false do
         case Lobby.get_lobby(lobby_id) do
@@ -55,6 +60,10 @@ defmodule Teiserver.Battle.LobbyChat do
   @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok
   def sayex(userid, msg, lobby_id) do
     user = User.get_user_by_id(userid)
+    if User.is_restricted?(user, "Bridging") and WordLib.flagged_words(msg) > 0 do
+      User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
+    end
+
     if not User.is_muted?(userid) do
       if user.bot == false do
         case Lobby.get_lobby(lobby_id) do

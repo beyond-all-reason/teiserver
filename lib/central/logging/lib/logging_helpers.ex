@@ -49,6 +49,20 @@ defmodule Central.Logging.Helpers do
     the_log
   end
 
+  @spec add_audit_log(non_neg_integer(), String.t(), String.t(), Map.t()) :: Central.Logging.AuditLog.t()
+  def add_audit_log(userid, ip, action, details) when is_integer(userid) do
+    {:ok, the_log} =
+      Logging.create_audit_log(%{
+        action: action,
+        user_id: userid,
+        group_id: nil,
+        details: details,
+        ip: ip
+      })
+
+    the_log
+  end
+
   def add_error_log(error) do
     conn = error.conn
 

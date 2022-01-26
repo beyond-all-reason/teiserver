@@ -2,6 +2,7 @@ defmodule Teiserver.Room do
   @moduledoc false
   require Logger
   alias Teiserver.{User, Client, Chat, Coordinator}
+  alias alias Teiserver.Chat.WordLib
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
@@ -158,6 +159,11 @@ defmodule Teiserver.Room do
   end
 
   def send_message(from_id, room_name, msg) do
+    user = User.get_user_by_id(from_id)
+    if User.is_restricted?(user, "Bridging") and WordLib.flagged_words(msg) > 0 do
+      User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
+    end
+
     if allow?(from_id, room_name) do
       case get_room(room_name) do
         nil ->
@@ -186,6 +192,11 @@ defmodule Teiserver.Room do
   end
 
   def send_message_ex(from_id, room_name, msg) do
+    user = User.get_user_by_id(from_id)
+    if User.is_restricted?(user, "Bridging") and WordLib.flagged_words(msg) > 0 do
+      User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
+    end
+
     if allow?(from_id, room_name) do
       case get_room(room_name) do
         nil ->

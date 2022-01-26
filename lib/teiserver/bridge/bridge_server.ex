@@ -4,6 +4,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   """
   use GenServer
   alias Teiserver.{Account, Room, User}
+  alias Teiserver.Chat.WordLib
   alias Phoenix.PubSub
   alias Central.Config
   require Logger
@@ -69,7 +70,13 @@ defmodule Teiserver.Bridge.BridgeServer do
         # It's us, ignore it
         nil
 
-      Enum.member?((user.roles || []), "Non-bridged") ->
+      String.contains?(message, "http:") ->
+        nil
+
+      String.contains?(message, "https:") ->
+        nil
+
+      User.is_restricted?(user, "Bridging") ->
         # Non-bridged user, ignore it
         nil
 
@@ -78,6 +85,11 @@ defmodule Teiserver.Bridge.BridgeServer do
         nil
 
       Config.get_site_config_cache("teiserver.Bridge from server") == false ->
+        nil
+
+      WordLib.flagged_words(message) > 0 ->
+        # In theory we should catch this at the general chat level but it's possible the user
+        # won't have updated by the time the execution gets here so we need to be certain
         nil
 
       Map.has_key?(state.rooms, room_name) ->
