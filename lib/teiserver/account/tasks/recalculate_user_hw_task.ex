@@ -26,6 +26,9 @@ defmodule Teiserver.Account.RecalculateUserHWTask do
       Account.update_user_stat(userid, %{
         hw_fingerprint: hw_fingerprint,
       })
+
+      user = User.get_user_by_id(userid)
+      User.update_user(%{user | hw_hash: hw_fingerprint}, persist: true)
     end)
 
     :ok

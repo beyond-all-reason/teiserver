@@ -144,11 +144,20 @@ defmodule TeiserverWeb.Admin.UserController do
 
         user_stats = Account.get_user_stat_data(user.id)
 
+        roles = Account.get_roles(user)
+        |> Enum.map(fn r ->
+          {r, UserLib.role_def(r)}
+        end)
+        |> Enum.filter(fn {_, v} -> v != nil end)
+        |> Enum.map(fn {role, {colour, icon}} ->
+          {role |> String.capitalize(), colour, icon}
+        end)
+
         conn
         |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
         |> assign(:user, user)
         |> assign(:user_stats, user_stats)
-        |> assign(:roles, Account.get_roles(user))
+        |> assign(:roles, roles)
         |> assign(:reports, reports)
         |> assign(:section_menu_active, "show")
         |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
@@ -231,6 +240,8 @@ defmodule TeiserverWeb.Admin.UserController do
     user = Account.get_user!(id)
 
     roles = [
+      (if user_params["verified"] == "true", do: "Verified"),
+      (if user_params["bot"] == "true", do: "Bot"),
       (if user_params["moderator"] == "true", do: "Moderator"),
       (if user_params["admin"] == "true", do: "Admin"),
       (if user_params["streamer"] == "true", do: "Streamer"),

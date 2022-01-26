@@ -10,6 +10,7 @@ defmodule Teiserver.User do
   alias Central.Account.Guardian
   alias Teiserver.Data.Types, as: T
   import Central.Helpers.TimexHelper, only: [parse_ymd_t_hms: 1, date_to_str: 2]
+  import Central.Logging.Helpers, only: [add_audit_log: 4]
 
   require Logger
   alias Phoenix.PubSub
@@ -45,6 +46,7 @@ defmodule Teiserver.User do
     :shadowbanned,
     :springid,
     :lobby_hash,
+    :hw_hash,
     :lobby_client,
     :roles,
     :print_client_messages,
@@ -74,6 +76,7 @@ defmodule Teiserver.User do
     shadowbanned: false,
     springid: nil,
     lobby_hash: [],
+    hw_hash: nil,
     roles: [],
     print_client_messages: false,
     print_server_messages: false,
@@ -808,6 +811,36 @@ defmodule Teiserver.User do
     end
 
     :ok
+  end
+
+  @spec restrict_user(T.userid() | T.user(), String.t()) :: any
+  def restrict_user(userid, restriction) when is_integer(userid), do: restrict_user(get_user_by_id(userid), restriction)
+  def restrict_user(user, restrictions) when is_list(restrictions) do
+    new_restrictions = Enum.uniq(restrictions ++ user.restrictions)
+    update_user(%{user | restrictions: new_restrictions}, persist: true)
+  end
+  def restrict_user(user, restriction) do
+    new_restrictions = Enum.uniq([restriction | user.restrictions])
+    update_user(%{user | restrictions: new_restrictions}, persist: true)
+  end
+
+  @spec unbridge_user(T.user(), String.t(), non_neg_integer(), String.t()) :: any
+  def unbridge_user(user, message, flagged_words, location) do
+    restrict_user(user, "Bridging")
+
+    client = Client.get_client_by_id(user.id) || %{ip: "no client"}
+    add_audit_log(user.id, client.ip, "de-bridged user", %{
+      message: message,
+      flagged_word_count: flagged_words,
+      location: location
+    })
+  end
+
+  @spec is_restricted?(T.userid() | T.user(), String.t()) :: boolean()
+  def is_restricted?(nil, _), do: true
+  def is_restricted?(userid, restriction) when is_integer(userid), do: is_restricted?(get_user_by_id(userid), restriction)
+  def is_restricted?(%{restrictions: restrictions}, the_restriction) do
+    Enum.member?(restrictions, the_restriction)
   end
 
   @spec is_banned?(T.userid() | T.user()) :: boolean()

@@ -270,17 +270,18 @@ defmodule Teiserver.Account.UserLib do
       "Playing team",
       "Playing coop",
 
-      # Games - coverall
-      "Joining lobbies",
-
       # MM
-      "Matchmaking",
-
-      # Meta
-      "Community",# Accolades/Polls
 
       # In game?
       # "pausing the game (if possible, probably needs spads support)",
+
+      # Global overrides
+      "All chat",
+      "All lobbies",
+      "Site",
+      "Matchmaking",
+      "Community",# Accolades/Polls
+      "Login",
     ]
   end
 
@@ -291,5 +292,6 @@ defmodule Teiserver.Account.UserLib do
   def role_def("contributor"), do: {"#00AA66", "fas fa-code-commit"}
   def role_def("donor"), do: {"#0066AA", "fas fa-euro"}
   def role_def("streamer"), do: {"#0066AA", "fab fa-twitch"}
+  def role_def("tester"), do: {"#00AACC", "fas fa-vial"}
   def role_def(_), do: nil
 end

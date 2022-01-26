@@ -7,108 +7,110 @@
   }
 </style>
 
-<%
-  {_fg, _bg, _bsname} = colours()
-  empty_badge = ""
-%>
-
 <div class="page-row row">
-  <div class="col-md-12">
+  <div class="col-md-12 col-lg-6">
     <h4>Status</h4><br />
-    <%= if "moderator" in @roles do %>
+    <%= for {name, colour, icon} <- @roles do %>
       <div class="role-badge">
-        <i class='fa-fw fa-2x fas fa-gavel' style="color: #FFAA00" title="Moderator"></i>
+        <i class={"fa-fw fa-2x fas #{icon}"} style={"color: #{colour}"} title={name}></i>
         <br />
-        Moderator
+        <%= name %>
       </div>
-    <% else %>
-      <%= raw empty_badge %>
     <% end %>
+  </div>
+  
+  <%
+    chat_restrictions = [
+      "Bridging",
+      "Room chat",
+      "Direct chat",
+      "Lobby chat",
+      "Battle chat",
+    ]
 
-    <%= if "bot" in @roles do %>
-      <div class="role-badge">
-        <i class='fa-fw fa-2x fas fa-robot' style="color: #333333" title="Bot"></i>
-        <br />
-        Bot
-      </div>
-    <% else %>
-      <%= raw empty_badge %>
-    <% end %>
+    lobby_restrictions = [
+      "Host commands",
+      "Voting",
 
-    <%= if "developer" in @roles do %>
-      <div class="role-badge">
-        <i class='fa-fw fa-2x fas fa-code-branch' style="color: #008800" title="Developer"></i>
-        <br />
-        Dev
-      </div>
-    <% else %>
-      <%= raw empty_badge %>
-    <% end %>
+      "Hosting games",
+      "Joining existing lobbies",
+      "Joining duel",
+      "Joining ffa",
+      "Joining team",
+      "Joining coop",
+    ]
 
-    <%= if "contributor" in @roles do %>
-      <div class="role-badge">
-        <i class='fa-fw fa-2x fas fa-code-commit' style="color: #00AA66" title="Contributor"></i>
-        <br />
-        Contributor
-      </div>
-    <% else %>
-      <%= raw empty_badge %>
-    <% end %>
+    play_restrictions = [
+      "Playing duel",
+      "Playing ffa",
+      "Playing team",
+      "Playing coop",
+    ]
 
-    <%= if "tester" in @roles do %>
-      <div class="role-badge">
-        <i class='fa-fw fa-2x fas fa-vial' style="color: #00CCCC" title="Tester"></i>
-        <br />
-        Tester
+    global_restrictions = [
+      "All chat",
+      "All lobbies",
+      "Site",
+      "Matchmaking",
+      "Community",
+      "Login",
+    ]
+  %>
+  <div class="col-md-12 col-lg-6">
+    <h4>Restrictions</h4>
+    <div class="row">
+      <div class="col-md-3">
+        <%= for r <- chat_restrictions do %>
+          <% r_clean = String.replace(r, " ", "_") %>
+          <%= central_component "checkbox",
+            id: "restriction_#{r_clean}",
+            name: "user[restrict][#{r_clean}]",
+            label: r,
+            checked: Enum.member?(@user.data["restrictions"], r)
+          %>
+        <% end %>
       </div>
-    <% else %>
-      <%= raw empty_badge %>
-    <% end %>
-
-    <%= if "donor" in @roles do %>
-      <div class="role-badge">
-        <i class='fa-fw fa-2x fas fa-euro' style="color: #0066AA" title="Donor"></i>
-        <br />
-        Donor
+      
+      <div class="col-md-3">
+        <%= for r <- lobby_restrictions do %>
+          <% r_clean = String.replace(r, " ", "_") %>
+          <%= central_component "checkbox",
+            id: "restriction_#{r_clean}",
+            name: "user[restrict][#{r_clean}]",
+            label: r,
+            checked: Enum.member?(@user.data["restrictions"], r)
+          %>
+        <% end %>
       </div>
-    <% else %>
-      <%= raw empty_badge %>
-    <% end %>
-
-    <%= if "streamer" in @roles do %>
-      <div class="role-badge">
-        <i class='fa-fw fa-2x fab fa-twitch' style="color: #AA00AA" title="Streamer"></i>
-        <br />
-        Streamer
+      
+      <div class="col-md-3">
+        <%= for r <- play_restrictions do %>
+          <% r_clean = String.replace(r, " ", "_") %>
+          <%= central_component "checkbox",
+            id: "restriction_#{r_clean}",
+            name: "user[restrict][#{r_clean}]",
+            label: r,
+            checked: Enum.member?(@user.data["restrictions"], r)
+          %>
+        <% end %>
       </div>
-    <% else %>
-      <%= raw empty_badge %>
-    <% end %>
-
-    <%= if "trusted" in @roles do %>
-      <div class="role-badge">
-        <i class='fa-fw fa-2x fas fa-check-double' style="color: #66AAFF" title="Trusted"></i>
-        <br />
-        Trusted
+      
+      <div class="col-md-3">
+        <%= for r <- global_restrictions do %>
+          <% r_clean = String.replace(r, " ", "_") %>
+          <%= central_component "checkbox",
+            id: "restriction_#{r_clean}",
+            name: "user[restrict][#{r_clean}]",
+            label: r,
+            checked: Enum.member?(@user.data["restrictions"], r)
+          %>
+        <% end %>
       </div>
-    <% else %>
-      <%= raw empty_badge %>
-    <% end %>
-
-    <%= if "verified" in @roles do %>
-      <div class="role-badge">
-        <i class='fa-fw fa-2x fas fa-check' style="color: #777777" title="Verified"></i>
-        <br />
-        Verified
-      </div>
-    <% else %>
-      <%= raw empty_badge %>
-    <% end %>
-    <br /><br />
+    </div>
   </div>
 </div>
 
-<div class="page-row row">
+<div class="row mt-3">
   <div class="col-md-12">
     <h4>Links</h4>
   </div>

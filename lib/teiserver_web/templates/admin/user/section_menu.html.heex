@@ -50,6 +50,17 @@
         url: "#"
       %>
     <% end %>
+    
+    <%= if @active == "edit" do %>
+      <%= central_component "section_menu_button",
+        name: "edit",
+        label: "Edit",
+        active: @active,
+        icon: Central.Helpers.StylingHelper.icon(:edit),
+        bsname: bsname,
+        url: "#"
+      %>
+    <% end %>
   </div>
   
   <div class="col-md-3">

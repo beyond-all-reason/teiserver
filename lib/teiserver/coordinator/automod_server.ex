@@ -115,6 +115,9 @@ defmodule Teiserver.Coordinator.AutomodServer do
         hw_fingerprint: hw_fingerprint
       })
 
+      user = User.get_user_by_id(userid)
+      User.update_user(%{user | hw_hash: hw_fingerprint}, persist: true)
+
       hashes = Account.list_ban_hashes(search: [
         type: "hardware",
         value: hw_fingerprint

@@ -25,7 +25,7 @@
     <%= if allow?(@conn, "admin.user") do %>
       <div class="col-xl-4 col-lg-4">
         &nbsp;<br />
-        <a href={Routes.admin_user_path(@conn, :edit, @user)} class={"btn btn-outline-#{bsname} float-end"} id="section-menu-new">
+        <a href={Routes.admin_user_path(@conn, :edit, @user)} class={"btn btn-outline-primary float-end"} id="section-menu-new">
           <i class="far fa-power-off"></i>
           &nbsp;
           Admin edit
@@ -35,7 +35,8 @@
   </div>
 
   <div class="form-group row px-3 py-1">
-    <div class="col-xl-3 col-lg-4 col-md-6">
+    <div class="col-xxl-1 col-xl-2 col-lg-3 col-md-4">
+      <h5>Authority</h5>
       <%= central_component "checkbox",
         id: "user_verified",
         name: "user[verified]",
@@ -48,6 +49,7 @@
         label: "Bot",
         checked: @changeset.data.data["bot"]
       %>
+
       <%= central_component "checkbox",
         id: "user_trusted",
         name: "user[trusted]",
@@ -63,7 +65,8 @@
       %>
     </div>
 
-    <div class="col-xl-3 col-lg-4 col-md-6">
+    <div class="col-xxl-1 col-xl-2 col-lg-3 col-md-4">
+      <h5>Role</h5>
       <%= central_component "checkbox",
         id: "user_contributor",
         name: "user[contributor]",
@@ -77,9 +80,7 @@
         label: "Developer",
         checked: ("Developer" in (@changeset.data.data["roles"] || []))
       %>
-    </div>
-    
-    <div class="col-xl-3 col-lg-4 col-md-6">
+
       <%= central_component "checkbox",
         id: "user_streamer",
         name: "user[streamer]",
@@ -93,19 +94,12 @@
         label: "Donor",
         checked: ("Donor" in (@changeset.data.data["roles"] || []))
       %>
-
+      
       <%= central_component "checkbox",
         id: "user_tester",
         name: "user[tester]",
         label: "Tester",
         checked: ("Tester" in (@changeset.data.data["roles"] || []))
-      %>
-
-      <%= central_component "checkbox",
-        id: "user_non-bridged",
-        name: "user[non-bridged]",
-        label: "Non-bridged",
-        checked: ("Non-bridged" in (@changeset.data.data["roles"] || []))
       %>
     </div>
   </div>
