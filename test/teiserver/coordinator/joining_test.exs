@@ -76,8 +76,8 @@ defmodule Teiserver.Coordinator.JoiningTest do
     # Expect welcome message
     [reply] = _tachyon_recv(socket2)
     assert reply == %{
-      "cmd" => "s.lobby.received_lobby_direct_announce",
-      "message" => [" #{user2.name}: ####################", " #{user2.name}: This is the welcome message", " #{user2.name}: ####################"],
+      "cmd" => "s.communication.received_direct_message",
+      "message" => ["########################################", "This is the welcome message", "########################################"],
       "sender_id" => Coordinator.get_coordinator_userid()
     }
 
