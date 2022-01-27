@@ -92,6 +92,9 @@ Moves the user to players
 """
 
     moderators = """
+$set_player_limit <limit>
+Sets a new player limit for this specific host.
+
 $whois <user>
 Sends back information about the user specified
 

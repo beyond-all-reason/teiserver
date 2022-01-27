@@ -387,6 +387,26 @@ defmodule Teiserver.Coordinator.CommandsTest do
     }
   end
 
+  test "set_player_limit", %{lobby_id: lobby_id, hsocket: hsocket, host: host} do
+    player_limit = Coordinator.call_consul(lobby_id, {:get, :player_limit})
+    assert player_limit == 20
+
+    data = %{cmd: "c.lobby.message", message: "$playerlimit 16"}
+    _tachyon_send(hsocket, data)
+
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{
+      "cmd" => "s.lobby.say",
+      "lobby_id" => lobby_id,
+      "message" => "$playerlimit 16",
+      "sender" => host.id
+    }
+
+    # Check state
+    player_limit = Coordinator.call_consul(lobby_id, {:get, :player_limit})
+    assert player_limit == 16
+  end
+
   test "status", %{lobby_id: lobby_id, hsocket: hsocket} do
     data = %{cmd: "c.lobby.message", message: "$status"}
     _tachyon_send(hsocket, data)

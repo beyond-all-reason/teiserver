@@ -451,10 +451,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  defp get_max_player_count(%{host_teamcount: nil}), do: 16
-  defp get_max_player_count(%{host_teamsize: nil}), do: 16
+  defp get_max_player_count(%{host_teamcount: nil, player_limit: player_limit}), do: min(16, player_limit)
+  defp get_max_player_count(%{host_teamsize: nil, player_limit: player_limit}), do: min(16, player_limit)
   defp get_max_player_count(state) do
-    state.host_teamcount * state.host_teamsize
+    min(state.host_teamcount * state.host_teamsize, state.player_limit)
   end
 
   @spec get_player_count(map()) :: non_neg_integer
@@ -547,7 +547,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
       host_boss: nil,
       host_preset: nil,
       host_teamsize: 4,
-      host_teamcount: 2
+      host_teamcount: 2,
+
+      player_limit: 20,
     }
   end
 

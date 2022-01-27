@@ -159,7 +159,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  def handle_command(%{command: "leaveq", senderid: senderid} = cmd, state) do
+  def handle_command(%{command: "leaveq", senderid: senderid}, state) do
     new_queue = List.delete(state.join_queue, senderid)
     LobbyChat.sayprivateex(state.coordinator_id, senderid, "You have been removed from the join queue", state.lobby_id)
     %{state | join_queue: new_queue}
@@ -293,6 +293,17 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   #################### Moderator only
   # ----------------- General commands
+  def handle_command(%{command: "playerlimit", remaining: value_str, senderid: senderid} = cmd, state) do
+    case Integer.parse(value_str) do
+      {new_limit, _} ->
+        ConsulServer.say_command(cmd, state)
+        %{state | player_limit: abs(new_limit)}
+      _ ->
+        LobbyChat.sayprivateex(state.coordinator_id, senderid, "Unable to convert #{value_str} into an integer", state.lobby_id)
+        state
+    end
+  end
+
   def handle_command(%{command: "cancelsplit"}, %{split: nil} = state) do
     state
   end
