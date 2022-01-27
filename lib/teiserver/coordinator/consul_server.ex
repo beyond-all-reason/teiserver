@@ -8,6 +8,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.{Coordinator, Client, User, Battle}
   alias Teiserver.Battle.{Lobby, LobbyChat}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Central.Config
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser}
@@ -549,7 +550,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       host_teamsize: 4,
       host_teamcount: 2,
 
-      player_limit: 20,
+      player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
     }
   end
 

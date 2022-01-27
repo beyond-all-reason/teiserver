@@ -85,6 +85,16 @@ defmodule Teiserver.Startup do
       default: true
     })
 
+    add_site_config_type(%{
+      key: "teiserver.Default player limit",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["admin.dev.developer"],
+      description: "The default player limit for lobbies",
+      opts: [],
+      default: 20
+    })
+
     umbrella_group =
       case Central.Account.get_group(nil, search: [name: "Teiserver umbrella group"]) do
         nil ->
