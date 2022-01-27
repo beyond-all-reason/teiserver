@@ -21,7 +21,9 @@ defmodule TeiserverWeb.ClientLive.Index do
 
     users =
       clients
-      |> Map.new(fn {userid, _} -> {userid, User.get_user_by_id(userid)} end)
+      |> Map.new(fn {userid, _} -> {
+        userid, User.get_user_by_id(userid) |> limited_user
+      } end)
 
     socket =
       socket
@@ -137,6 +139,6 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   defp limited_user(user) do
-    Map.take(user, ~w(id bot moderator verified)a)
+    Map.take(user, ~w(id bot moderator verified hw_hash)a)
   end
 end

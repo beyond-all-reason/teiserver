@@ -1,12 +1,11 @@
-<div class="nav-item dropdown" id="communication-notifications-wrapper" data-user-id={@current_user.id}>
+<div class="nav-item dropdown mx-2" id="communication-notifications-wrapper" data-user-id={@current_user.id}>
   <a
-    class="nav-link dropdown-toggle"
+    class="dropdown-toggle dropdown-toggle-icon-only"
     href="#"
-    id="navbarDropdownNotificationsLink"
-    role="button"
-    type="button"
     data-bs-toggle="dropdown"
+    aria-haspopup="true"
     aria-expanded="false"
+    id="navbarDropdownNotificationsLink"
   >
     <%= if @user_notifications_unread_count > 0 do %>
       <i class="fas fa-bell text-primary" id="communication-notifications-icon"></i>

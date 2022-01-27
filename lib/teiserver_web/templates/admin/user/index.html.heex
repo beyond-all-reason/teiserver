@@ -51,17 +51,15 @@
       <%= if is_admin do %><th>Email</th><% end %>
       <th>Client</th>
       <th>Status</th>
+      <th>Restrictions</th>
       <%= if is_admin do %>
         <th>HW</th>
       <% end %>
-      <th>Bot</th>
-      <th>Mod</th>
       <th>Trusted</th>
-      <th>Donor</th>
       <th>Contributor</th>
-      <th>Dev</th>
+      <th>Moderator</th>
       <th>Registered</th>
-      <th>Status</th>
+      
       <%= if is_admin do %>
         <th colspan="2">&nbsp;</th>
       <% else %>
@@ -139,6 +137,14 @@
         <% end %>
       </td>
 
+      <td class="text-center">
+        <%= if Enum.empty?(Map.get(user.data, "restrictions", [])) do %>
+          &nbsp;
+        <% else %>
+          <i class='fa-fw fas text-danger2 fa-octagon'></i>
+        <% end %>
+      </td>
+
       <%= if is_admin do %>
         <td>
           <%= if user.data["hw_hash"] != nil do %>
@@ -150,22 +156,13 @@
       <% end %>
 
       <td>
-        <%= if user.data["bot"], do: "Bot" %>
+        <%= if Enum.member?(user.data["roles"], "Trusted"), do: "Trusted" %>
       </td>
       <td>
-        <%= if user.data["moderator"], do: "Mod" %>
+        <%= if Enum.member?(user.data["roles"], "Contributor"), do: "Contributor" %>
       </td>
       <td>
-        <%= if "Trusted" in (user.data["roles"] || []), do: "Trusted" %>
-      </td>
-      <td>
-        <%= if "Donor" in (user.data["roles"] || []), do: "Donor" %>
-      </td>
-      <td>
-        <%= if "Contributor" in (user.data["roles"] || []), do: "Contributor" %>
-      </td>
-      <td>
-        <%= if "Developer" in (user.data["roles"] || []), do: "Dev" %>
+        <%= if Enum.member?(user.data["roles"], "Moderator"), do: "Moderator" %>
       </td>
 
       <td>

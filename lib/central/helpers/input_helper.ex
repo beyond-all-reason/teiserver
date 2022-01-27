@@ -44,6 +44,11 @@ defmodule Central.Helpers.InputHelper do
     label_opts = [class: "control-label"]
     input_opts = [class: "form-control"]
 
+    input_opts = input_opts ++ case opts[:using] do
+      :checkbox -> [class: "form-check-input"]
+      _ -> []
+    end
+
     # A bit messy but the best way I can think of doing it
     input_opts = input_opts ++ if opts[:autofocus], do: [autofocus: "autofocus"], else: []
 

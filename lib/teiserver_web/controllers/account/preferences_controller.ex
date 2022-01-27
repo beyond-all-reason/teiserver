@@ -31,15 +31,24 @@ defmodule TeiserverWeb.Account.PreferencesController do
   def new(conn, %{"key" => key}) do
     config_info = Config.get_user_config_type(key)
     changeset = UserConfig.creation_changeset(%UserConfig{}, config_info)
+    user_config = %{
+      value: config_info.default
+    }
 
     conn
+    |> assign(:user_config, user_config)
     |> assign(:changeset, changeset)
     |> assign(:config_info, config_info)
+    |> assign(:method, "POST")
     |> render("new.html")
   end
 
   def create(conn, %{"user_config" => user_config_params}) do
-    user_config_params = Map.put(user_config_params, "user_id", conn.user_id)
+    value = Map.get(user_config_params, "value", "false")
+    user_config_params = Map.merge(user_config_params, %{
+      "user_id" => conn.user_id,
+      "value" => value
+    })
 
     case Config.create_user_config(user_config_params) do
       {:ok, _user_config} ->
@@ -69,11 +78,18 @@ defmodule TeiserverWeb.Account.PreferencesController do
     |> assign(:user_config, user_config)
     |> assign(:changeset, changeset)
     |> assign(:config_info, config_info)
+    |> assign(:method, "PUT")
     |> render("edit.html")
   end
 
   def update(conn, %{"id" => id, "user_config" => user_config_params}) do
     user_config = Config.get_user_config!(id)
+
+    value = Map.get(user_config_params, "value", "false")
+    user_config_params = Map.merge(user_config_params, %{
+      "user_id" => conn.user_id,
+      "value" => value
+    })
 
     case Config.update_user_config(user_config, user_config_params) do
       {:ok, _user_config} ->
@@ -91,14 +107,4 @@ defmodule TeiserverWeb.Account.PreferencesController do
         |> redirect(to: Routes.ts_account_preferences_path(conn, :index))
     end
   end
-
-  # def delete(conn, %{"id" => id}) do
-  #   user_config = Config.get_user_config!(id)
-  #   {:ok, _user_config} = Config.delete_user_config(user_config)
-  #   ConCache.dirty_delete(:config_user_cache, user_config.user_id)
-
-  #   conn
-  #   |> put_flash(:info, "User config deleted successfully.")
-  #   |> redirect(to: Routes.ts_account_preferences_path(conn, :index))
-  # end
 end
