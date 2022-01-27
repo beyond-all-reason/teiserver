@@ -168,6 +168,7 @@ defmodule Teiserver.Account.UserCache do
     end
   end
 
+  defp cachename(nil), do: nil
   defp cachename(str) do
     str
     |> String.trim
