@@ -1,7 +1,7 @@
 # Teiserver
-alias nginxlog='sudo tail /var/log/nginx/error.log -n 40 -f'
-alias sitelog='tail /var/log/central/error.log -n 40 -f'
-alias siteinfo='tail /var/log/central/info.log -n 40 -f'
+alias nginxlog='sudo grc tail /var/log/nginx/error.log -n 40 -f'
+alias sitelog='grc --config=elixir.log tail -f /var/log/central/error.log -n 40'
+alias siteinfo='grc --config=elixir.log tail -f /var/log/central/info.log -n 40'
 alias dodeploy='sudo sh /scripts/deploy.sh'
 alias quickrestart='sudo sh /scripts/quick_restart.sh'
 

@@ -1,0 +1,61 @@
+# this configuration file is suitable for displaying kernel log files
+# save to /usr/share/grc/elixir.log
+# none, default, bold, underline, blink, reverse, concealed,
+# black, green, yellow, blue, magenta, cyan, white,
+# on_black, on_green, on_yellow, on_blue, on_magenta, on_cyan, on_white
+# beep
+
+# example of text substitution
+#regexp=\bda?emon
+#replace=angel
+#colours=red
+#======
+# example of text substitution
+#regexp=(\d\d):(\d\d):(\d\d)
+#replace=\1h\2m\3s
+#======
+
+# display this line in yellow and stop further processing
+regexp=.*last message repeated \d+ times$
+colours=yellow
+count=stop
+======
+# this is timestap/date
+regexp=^\d\d:\d\d:\d\d\.\d\d\d\s
+colours=green
+count=once
+======
+# [info]
+regexp=\[info\]
+colours=cyan
+count=once
+======
+# [warn]
+regexp=\[error\]
+colours=yellow
+count=once
+======
+# [error]
+regexp=\[error\]
+colours=red
+count=once
+# ======
+# # this is probably a pathname
+# regexp=/[\w/\.]+
+# colours=bold green
+# count=more
+# ======
+# # name of process and pid
+# regexp=([\w/\.\-]+)(\[\d+?\])
+# colours=bold blue, bold red
+# count=more
+# ======
+# # ip number
+# regexp=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}
+# colours=bold magenta
+# count=more
+# ======
+# # connect requires special attention
+# regexp=connect
+# colours=on_red
+# count=more

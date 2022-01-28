@@ -14,7 +14,7 @@ Before you start I suggest setting up the DNS to point towards your server. It'l
 ### Fresh install time
 ```
 apt-get update
-apt-get -y install htop git-core ca-certificates vim sudo curl vnstat sysstat procinfo build-essential net-tools geoip-bin libtinfo-dev aptitude lsb-release
+apt-get -y install htop git-core ca-certificates vim sudo curl vnstat sysstat procinfo build-essential net-tools geoip-bin libtinfo-dev aptitude lsb-release grc
 apt-get -y upgrade
 apt-get -y autoremove
 
@@ -86,7 +86,7 @@ echo "<html><head><meta http-equiv=\"refresh\" content=\"0; url=https://yourdoma
 ```
 
 #### Update the Nginx conf file
-The template file is located in [documents/prod/nginx.conf](/documents/prod/nginx.conf), you will need to replace the existing nginx conf with it's contents.
+The template file is located in [documents/prod_files/nginx.conf](/documents/prod_files/nginx.conf), you will need to replace the existing nginx conf with it's contents.
 ```
 sudo rm /etc/nginx/nginx.conf
 sudo vi /etc/nginx/nginx.conf
@@ -212,15 +212,18 @@ sudo mkdir -p /releases
 sudo chmod -R o+wr /releases
 ```
 
+#### grc
+I use grc for my log colours so the aliases in .bashrc use it. If you don't want to use grc you'll need to update these. If you do want to use it you will also need to place the contents of [documents/prod_files/grc_log_colours](/documents/prod_files/grc_log_colours) in `/usr/share/grc/elixir.log`.
+
 #### bashrc
-Append to `~/.bashrc` the contents of [documents/prod/bashrc.sh](/documents/prod/bashrc.sh). This contains a bunch of commands to make life easier for you; especially if like me you can't always recall exactly where logs and the like are!
+Append to `~/.bashrc` the contents of [documents/prod_files/bashrc.sh](/documents/prod_files/bashrc.sh). This contains a bunch of commands to make life easier for you; especially if like me you can't always recall exactly where logs and the like are!
 
 #### scripts
 Now we have a .bashrc file pointing to them, we need to add some scripts to help manage our system. For each of the scripts referenced here, create a copy of them in the `/scripts` directory of your server.
 
 
 #### Service file
-The central.service file is located [documents/prod/central.service](/documents/prod/central.service)
+The central.service file is located [documents/prod_files/central.service](/documents/prod_files/central.service)
 ```
 # Edit/insert the file here
 sudo vi /etc/systemd/system/central.service
