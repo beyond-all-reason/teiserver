@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Account.RelationshipsController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_account",
-    sub_menu_active: "relationships",
+    sub_menu_active: "relationships"
   )
 
   plug(Teiserver.ServerUserPlug)

@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Admin.GeneralController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_admin",
-    sub_menu_active: "",
+    sub_menu_active: ""
   )
 
   plug(Bodyguard.Plug.Authorize,

@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Battle.GeneralController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_match",
-    sub_menu_active: "",
+    sub_menu_active: ""
   )
 
   plug(Teiserver.ServerUserPlug)
