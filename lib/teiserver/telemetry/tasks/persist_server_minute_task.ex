@@ -7,17 +7,18 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMinuteTask do
 
   @impl Oban.Worker
   def perform(_) do
-    now = Timex.now() |> Timex.set([microsecond: 0])
+    if ConCache.get(:application_metadata_cache, "teiserver_startup_completed") == true do
+      now = Timex.now() |> Timex.set([microsecond: 0])
 
-    case Telemetry.get_server_minute_log(now) do
-      nil ->
-        perform_telemetry_persist(now)
-        :ok
+      case Telemetry.get_server_minute_log(now) do
+        nil ->
+          perform_telemetry_persist(now)
 
-      _ ->
-        # Log has already been added
-        :ok
+        _ ->
+          :ok
+      end
     end
+    :ok
   end
 
   defp perform_telemetry_persist(timestamp) do
