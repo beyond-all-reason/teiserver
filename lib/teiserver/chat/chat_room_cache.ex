@@ -154,13 +154,14 @@ defmodule Teiserver.Room do
     |> Enum.map(fn room_name -> ConCache.get(:rooms, room_name) end)
   end
 
+  @spec send_message(T.userid(), String.t(), String.t()) :: nil | :ok
   def send_message(from_id, _room_name, "$" <> msg) do
     User.send_direct_message(from_id, Coordinator.get_coordinator_userid(), "$" <> msg)
   end
 
   def send_message(from_id, room_name, msg) do
     user = User.get_user_by_id(from_id)
-    if User.is_restricted?(user, "Bridging") and WordLib.flagged_words(msg) > 0 do
+    if not User.is_restricted?(user, "Bridging") and WordLib.flagged_words(msg) > 0 do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
@@ -191,9 +192,10 @@ defmodule Teiserver.Room do
     end
   end
 
+  @spec send_message_ex(T.userid(), String.t(), String.t()) :: nil | :ok
   def send_message_ex(from_id, room_name, msg) do
     user = User.get_user_by_id(from_id)
-    if User.is_restricted?(user, "Bridging") and WordLib.flagged_words(msg) > 0 do
+    if not User.is_restricted?(user, "Bridging") and WordLib.flagged_words(msg) > 0 do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 

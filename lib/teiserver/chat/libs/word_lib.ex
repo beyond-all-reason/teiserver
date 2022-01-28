@@ -1,7 +1,7 @@
 defmodule Teiserver.Chat.WordLib do
   @moduledoc false
 
-  @flagged_regex ~r/(n[i1]gg[e3]r|cun[t7][s5]?|\b(r[e3])?[t7]ard\b)/i
+  @flagged_regex ~r/(n[i1]gg[e3]r|cun[t7][s5]?|\b(r[e3])?[t7]ards?\b)/i
 
   @doc """
   Given a text message it will look for a set of flagged words.
