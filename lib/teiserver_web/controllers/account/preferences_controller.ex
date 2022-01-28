@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_account",
-    sub_menu_active: "preferences",
+    sub_menu_active: "preferences"
   )
 
   def index(conn, _params) do

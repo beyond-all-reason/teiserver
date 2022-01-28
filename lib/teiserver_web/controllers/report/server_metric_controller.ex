@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
-    sub_menu_active: "server_metric",
+    sub_menu_active: "server_metric"
   )
 
   plug Bodyguard.Plug.Authorize,

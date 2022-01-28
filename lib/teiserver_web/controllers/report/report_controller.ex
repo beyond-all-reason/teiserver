@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Report.ReportController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
-    sub_menu_active: "report",
+    sub_menu_active: "report"
   )
 
   plug Bodyguard.Plug.Authorize,

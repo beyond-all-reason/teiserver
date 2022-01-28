@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Report.InfologController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
-    sub_menu_active: "infolog",
+    sub_menu_active: "infolog"
   )
 
   plug Bodyguard.Plug.Authorize,

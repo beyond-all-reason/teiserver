@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Report.ClientEventController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
-    sub_menu_active: "client_event",
+    sub_menu_active: "client_event"
   )
 
   plug Bodyguard.Plug.Authorize,

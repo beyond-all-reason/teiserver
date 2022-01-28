@@ -8,7 +8,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_user",
-    sub_menu_active: "user",
+    sub_menu_active: "user"
   )
 
   plug(Bodyguard.Plug.Authorize,

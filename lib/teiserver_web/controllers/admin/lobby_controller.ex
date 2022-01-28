@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_admin",
-    sub_menu_active: "match",
+    sub_menu_active: "match"
   )
 
   plug(Bodyguard.Plug.Authorize,

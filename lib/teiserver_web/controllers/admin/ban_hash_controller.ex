@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Admin.BanHashController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_admin",
-    sub_menu_active: "ban_hash",
+    sub_menu_active: "ban_hash"
   )
 
   plug :add_breadcrumb, name: 'Account', url: '/teiserver'

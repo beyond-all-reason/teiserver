@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Admin.MatchController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_user",
-    sub_menu_active: "match",
+    sub_menu_active: "match"
   )
 
   plug :add_breadcrumb, name: 'Teiserver', url: '/teiserver'

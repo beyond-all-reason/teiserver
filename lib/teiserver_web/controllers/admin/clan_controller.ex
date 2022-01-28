@@ -14,7 +14,7 @@ defmodule TeiserverWeb.Admin.ClanController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_admin",
-    sub_menu_active: "clan",
+    sub_menu_active: "clan"
   )
 
   plug(Bodyguard.Plug.Authorize,

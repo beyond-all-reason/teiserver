@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Game.QueueController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_admin",
-    sub_menu_active: "queue",
+    sub_menu_active: "queue"
   )
 
   plug :add_breadcrumb, name: 'Game', url: '/teiserver'

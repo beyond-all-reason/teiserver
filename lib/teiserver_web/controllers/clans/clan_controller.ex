@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Clans.ClanController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_clan",
-    sub_menu_active: "",
+    sub_menu_active: ""
   )
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

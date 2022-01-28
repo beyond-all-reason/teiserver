@@ -14,7 +14,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_user",
-    sub_menu_active: "accolade",
+    sub_menu_active: "accolade"
   )
 
   plug :add_breadcrumb, name: 'Teiserver', url: '/teiserver'

@@ -12,7 +12,7 @@ defmodule TeiserverWeb.Battle.MatchController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_match",
-    sub_menu_active: "match",
+    sub_menu_active: "match"
   )
 
   plug :add_breadcrumb, name: 'Battle', url: '/teiserver'

@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Admin.ToolController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_admin",
-    sub_menu_active: "tool",
+    sub_menu_active: "tool"
   )
 
   plug Bodyguard.Plug.Authorize,

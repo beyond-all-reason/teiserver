@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Admin.ChatController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_admin",
-    sub_menu_active: "chat",
+    sub_menu_active: "chat"
   )
 
   plug :add_breadcrumb, name: 'Account', url: '/teiserver'

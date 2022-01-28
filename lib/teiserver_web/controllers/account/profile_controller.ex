@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Account.ProfileController do
 
   plug(AssignPlug,
     site_menu_active: "teiserver_account",
-    sub_menu_active: "account",
+    sub_menu_active: "account"
   )
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
