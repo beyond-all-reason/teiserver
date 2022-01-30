@@ -41,29 +41,148 @@
             </div>
           </div>
         </form>
-        <br /><br />
 
-        <table class='table'>
-          <thead>
-            <tr>
-              <th colspan="2">Name</th>
-              <th>Given</th>
-           </tr>
-          </thead>
-          <tbody>
-          <%= for {bt_id, badge_type} <- @badge_types do %>
-            <tr>
-              <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
-                <%= central_component "icon", icon: badge_type.icon %>
-              </td>
-              <td style={"background-color: #{rgba_css badge_type.colour};"}><%= badge_type.name %></td>
-              
-              <td><%= @counts[bt_id] %></td>
-           </tr>
-           <% end %>
-          </tbody>
-        </table>
+        <div class="row">
+          <div class="col-md-12 col-lg-6 col-xl-4 col-xxl-3">
+            <h4>Overall counts</h4>
+            <table class='table'>
+              <thead>
+                <tr>
+                  <th colspan="2">Accolade</th>
+                  <th>Given</th>
+              </tr>
+              </thead>
+              <tbody>
+              <%= for {bt_id, badge_type} <- @badge_types do %>
+                <tr>
+                  <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
+                    <%= central_component "icon", icon: badge_type.icon %>
+                  </td>
+                  <td style={"background-color: #{rgba_css badge_type.colour};"}><%= badge_type.name %></td>
+                  
+                  <td><%= @counts[bt_id] %></td>
+              </tr>
+              <% end %>
+              </tbody>
+            </table>
+          </div>
 
+          <div class="col-md-12 col-lg-6 col-xl-4 col-xxl-3">
+            <h4>By recipient</h4>
+            <table class='table'>
+              <thead>
+                <tr>
+                  <th colspan="2">Accolade</th>
+                  <th>1st</th>
+                  <th>2nd</th>
+                  <th>3rd</th>
+              </tr>
+              </thead>
+              <tbody>
+                <%= for {bt_id, board} <- @recipient_leaderboard do %>
+                  <%
+                    badge_type = @badge_types[bt_id]
+                  %>
+                  <tr>
+                    <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
+                      <%= central_component "icon", icon: badge_type.icon %>
+                    </td>
+                    <td style={"background-color: #{rgba_css badge_type.colour};"}><%= badge_type.name %></td>
+                    
+                    <%= for {userid, count} <- board do %>
+                      <% user = @users[userid] %>
+                      <td><%= user.name %> x<%= count %></td>
+                    <% end %>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="col-md-12 col-lg-6 col-xl-4 col-xxl-3">
+            <h4>By giver</h4>
+            <table class='table'>
+              <thead>
+                <tr>
+                  <th colspan="2">Accolade</th>
+                  <th>1st</th>
+                  <th>2nd</th>
+                  <th>3rd</th>
+              </tr>
+              </thead>
+              <tbody>
+                <%= for {bt_id, board} <- @giver_leaderboard do %>
+                  <%
+                    badge_type = @badge_types[bt_id]
+                  %>
+                  <tr>
+                    <td style={"background-color: #{badge_type.colour}; color: #FFF;"} width="22">
+                      <%= central_component "icon", icon: badge_type.icon %>
+                    </td>
+                    <td style={"background-color: #{rgba_css badge_type.colour};"}><%= badge_type.name %></td>
+                    
+                    <%= for {userid, count} <- board do %>
+                      <% user = @users[userid] %>
+                      <td><%= user.name %> x<%= count %></td>
+                    <% end %>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="col-md-12 col-lg-6 col-xl-4 col-xxl-3">
+            <h4>Top givers</h4>
+            <table class='table table-sm'>
+              <thead>
+                <tr>
+                  <th colspan="1">Giver</th>
+                  <th>Gave</th>
+                  <th>Got</th>
+                  <th>Ratio</th>
+              </tr>
+              </thead>
+              <tbody>
+                <%= for {userid, gave, received, ratio} <- @top_givers do %>
+                  <% user = @users[userid] %>
+                  <tr>
+                    <td><%= user.name %></td>
+
+                    <td><%= gave %></td>
+                    <td><%= received %></td>
+                    <td><%= ratio %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="col-md-12 col-lg-6 col-xl-4 col-xxl-3">
+            <h4>Top receivers</h4>
+            <table class='table table-sm'>
+              <thead>
+                <tr>
+                  <th colspan="1">Giver</th>
+                  <th>Gave</th>
+                  <th>Got</th>
+                  <th>Ratio</th>
+              </tr>
+              </thead>
+              <tbody>
+                <%= for {userid, gave, received, ratio} <- @top_takers do %>
+                  <% user = @users[userid] %>
+                  <tr>
+                    <td><%= user.name %></td>
+                    
+                    <td><%= gave %></td>
+                    <td><%= received %></td>
+                    <td><%= ratio %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>

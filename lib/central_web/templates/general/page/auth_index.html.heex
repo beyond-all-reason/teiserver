@@ -16,7 +16,7 @@
   <% end %>
 
   <!--
-  <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 menu-card">
+  <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
     <a href="<%#= Routes.general_page_path(@conn, :search) %>">
       <i class="fas fa-fw fa-search fa-3x"></i><br />
       Search
@@ -87,7 +87,7 @@
       end
     %>
 
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 menu-card">
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
       <a href={Routes.communication_notification_path(@conn, :index)}>
         <%= central_component "icon", icon: notification_icon, class: "fa-3x" %>
         <%= if @user_notifications_unread_count > 0 do %>
@@ -111,7 +111,7 @@
       link: Routes.account_general_path(@conn, :index)
     %>
 
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 menu-card">
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
       <form action={Routes.account_session_path(@conn, :logout)} method="post" class="link" id="signout-form">
         <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
