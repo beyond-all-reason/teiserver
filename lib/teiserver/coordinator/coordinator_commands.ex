@@ -1,7 +1,7 @@
 defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.{User, Account, Client, Coordinator}
   alias Teiserver.Battle.Lobby
-  alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Account.{AccoladeLib, CodeOfConductData}
   alias Teiserver.Coordinator.CoordinatorLib
 
   @always_allow ~w(help whoami discord coc ignore)
@@ -73,6 +73,29 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     |> List.flatten
 
     User.send_direct_message(state.userid, senderid, msg)
+    state
+  end
+
+  # Code of Conduct search
+  defp do_handle(%{command: "coc", remaining: remaining, senderid: senderid} = _cmd, state) do
+    search_term = remaining
+      |> String.trim
+      |> String.downcase()
+
+    messages = CodeOfConductData.flat_data()
+    |> Enum.filter(fn {_key, value} ->
+      String.contains?(value |> String.downcase, search_term)
+    end)
+    |> Enum.map(fn {key, value} ->
+      "#{key} - #{value}"
+    end)
+
+    if Enum.empty?(messages) do
+      User.send_direct_message(state.userid, senderid, "No matches for '#{remaining}'")
+    else
+      User.send_direct_message(state.userid, senderid, messages)
+    end
+
     state
   end
 

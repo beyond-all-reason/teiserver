@@ -4,9 +4,20 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
   @spec help(T.user(), boolean()) :: String.t()
   def help(user, host) do
     everybody = """
+---- Globally useable ----
+$help
+displays this help text
+
 $whoami
 Sends back information about who you are
 
+$discord
+Allows linking of your discord account to your BAR account
+
+$coc <term>
+Searches the code of conduct and returns items with a textual match in them
+
+---- Only useable in a battle lobby ----
 $joinq
 Adds you to the queue to join when a space opens up, you will be automatically added to the game as a player. If already a member it has no effect.
 
@@ -15,9 +26,6 @@ Removes you from the join queue.
 
 $status
 status info about the battle lobby
-
-$help
-displays this help text
 
 $splitlobby
 Causes a "vote" to start where other players can elect to join you in splitting the lobby, follow someone
