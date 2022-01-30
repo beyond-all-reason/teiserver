@@ -275,6 +275,9 @@ defmodule Teiserver.Account.UserLib do
       # In game?
       # "pausing the game (if possible, probably needs spads support)",
 
+      # Community related stuff
+      "Accolades",
+
       # Global overrides
       "All chat",
       "All lobbies",

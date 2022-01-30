@@ -836,9 +836,27 @@ defmodule Teiserver.User do
     })
   end
 
+  @spec is_restricted?(T.userid() | T.user()) :: boolean()
+  def is_restricted?(nil), do: true
+  def is_restricted?(userid) when is_integer(userid), do: is_restricted?(get_user_by_id(userid))
+  def is_restricted?(%{restricted: restricted}) do
+    case restricted do
+      [false, _] -> false
+      [true, nil] -> true
+      [true, until_str] ->
+        until = parse_ymd_t_hms(until_str)
+        Timex.compare(Timex.now(), until) != 1
+    end
+  end
+
   @spec is_restricted?(T.userid() | T.user(), String.t()) :: boolean()
   def is_restricted?(nil, _), do: true
   def is_restricted?(userid, restriction) when is_integer(userid), do: is_restricted?(get_user_by_id(userid), restriction)
+  def is_restricted?(%{restrictions: restrictions}, restriction_list) when is_list(restriction_list) do
+    restriction_list
+    |> Enum.map(fn r -> Enum.member?(restrictions, r) end)
+    |> Enum.any?
+  end
   def is_restricted?(%{restrictions: restrictions}, the_restriction) do
     Enum.member?(restrictions, the_restriction)
   end
@@ -861,19 +879,6 @@ defmodule Teiserver.User do
   def is_muted?(userid) when is_integer(userid), do: is_muted?(get_user_by_id(userid))
   def is_muted?(%{muted: muted}) do
     case muted do
-      [false, _] -> false
-      [true, nil] -> true
-      [true, until_str] ->
-        until = parse_ymd_t_hms(until_str)
-        Timex.compare(Timex.now(), until) != 1
-    end
-  end
-
-  @spec is_restricted?(T.userid() | T.user()) :: boolean()
-  def is_restricted?(nil), do: true
-  def is_restricted?(userid) when is_integer(userid), do: is_restricted?(get_user_by_id(userid))
-  def is_restricted?(%{restricted: restricted}) do
-    case restricted do
       [false, _] -> false
       [true, nil] -> true
       [true, until_str] ->

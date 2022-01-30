@@ -9,6 +9,8 @@ defmodule Teiserver.Account.AccoladeBotServer do
   alias Phoenix.PubSub
   require Logger
 
+  @miss_count_limit 3
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -173,9 +175,27 @@ defmodule Teiserver.Account.AccoladeBotServer do
 
         possibles ->
           chosen = Enum.random(possibles)
-          AccoladeLib.start_accolade_process(userid, chosen, match_id)
+
+          if allow_accolades_for_user?(chosen) do
+            AccoladeLib.start_accolade_process(userid, chosen, match_id)
+          end
       end
     end)
+  end
+
+  defp allow_accolades_for_user?(userid) do
+    if User.is_restricted?(userid, ["Accolades", "Community"]) do
+      false
+    else
+      stats = Account.get_user_stat_data(userid)
+      accolade_miss_count = Map.get(stats, "accolade_miss_count", 0)
+
+      if accolade_miss_count >= @miss_count_limit do
+        false
+      else
+        true
+      end
+    end
   end
 
   @spec init(Map.t()) :: {:ok, Map.t()}

@@ -317,6 +317,7 @@ defmodule Teiserver.Account.AccoladeLib do
     |> Map.new(fn {k, v} -> {k, Enum.count(v)} end)
   end
 
+  @spec live_debug :: nil | :ok
   def live_debug do
     case get_accolade_bot_pid() do
       nil ->

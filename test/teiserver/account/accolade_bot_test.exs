@@ -2,7 +2,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
   use Central.ServerCase, async: false
   # alias Phoenix.PubSub
 
-  alias Teiserver.{Battle, Account}
+  alias Teiserver.{Battle, Account, User}
   alias Teiserver.Account.AccoladeLib
 
   import Teiserver.TeiserverTestLib,
@@ -208,5 +208,37 @@ defmodule Teiserver.Account.AccoladeBotTest do
     :timer.sleep(200)
 
     assert Account.list_accolades(search: [giver_id: player11.id]) == []
+  end
+
+  test "not allowed - miss_count", %{match: match, player11: player11, player12: player12, psocket11: psocket11} do
+    # player11 should have no accolades given
+    assert Account.list_accolades(search: [giver_id: player11.id]) == []
+
+    # restrict player12 from getting accolades
+    Account.update_user_stat(player12.id, %{
+      "accolade_miss_count" => 500
+    })
+    :timer.sleep(500)
+
+    AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
+    :timer.sleep(500)
+
+    # Now, player11 should not have a message
+    assert _tachyon_recv(psocket11) == :timeout
+  end
+
+  test "not allowed - restricted", %{match: match, player11: player11, player12: player12, psocket11: psocket11} do
+    # player11 should have no accolades given
+    assert Account.list_accolades(search: [giver_id: player11.id]) == []
+
+    # restrict player11 from getting accolades
+    User.restrict_user(player12.id, "Accolades")
+    :timer.sleep(500)
+
+    AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
+    :timer.sleep(500)
+
+    # Now, player11 should not have a message
+    assert _tachyon_recv(psocket11) == :timeout
   end
 end

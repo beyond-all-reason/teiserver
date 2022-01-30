@@ -39,7 +39,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
   # Doesn't do anything at this stage
   def handle_info(:startup, state) do
     new_state = do_tick(state)
-    :timer.send_after(300_000, :terminate)
+    :timer.send_after(300_000, :self_terminate)
     {:noreply, new_state}
   end
 
@@ -59,11 +59,13 @@ defmodule Teiserver.Account.AccoladeChatServer do
           inserted_at: Timex.now()
         })
 
+        decrement_miss_count(state.userid)
         User.send_direct_message(state.bot_id, state.userid, "Thank you for your feedback, no Accolade will be bestowed.")
         send(self(), :terminate)
         %{state | stage: :completed}
 
       integer_choice == 0 ->
+        decrement_miss_count(state.userid)
         User.send_direct_message(state.bot_id, state.userid, "Thank you for your feedback, no Accolade will be bestowed.")
         send(self(), :terminate)
         %{state | stage: :completed}
@@ -91,6 +93,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
               :timer.send_after(30_000, bot_pid, {:new_accolade, state.recipient_id})
             end
 
+            decrement_miss_count(state.userid)
             User.send_direct_message(state.bot_id, state.userid, "Thank you for your feedback, this Accolade will be bestowed.")
             send(self(), :terminate)
             %{state | stage: :completed}
@@ -101,6 +104,18 @@ defmodule Teiserver.Account.AccoladeChatServer do
         state
     end
     {:noreply, new_state}
+  end
+
+  def handle_info(:self_terminate, state) do
+    stats = Account.get_user_stat_data(state.userid)
+    accolade_miss_count = Map.get(stats, "accolade_miss_count", 0)
+
+    Account.update_user_stat(state.userid, %{
+      "accolade_miss_count" => accolade_miss_count
+    })
+
+    send(self(), :terminate)
+    {:noreply, state}
   end
 
   def handle_info(:terminate, state) do
@@ -120,6 +135,14 @@ defmodule Teiserver.Account.AccoladeChatServer do
     end
   end
 
+  defp decrement_miss_count(userid) do
+    stats = Account.get_user_stat_data(userid)
+    accolade_miss_count = Map.get(stats, "accolade_miss_count", 0)
+
+    Account.update_user_stat(userid, %{
+      "accolade_miss_count" => max(accolade_miss_count - 1, 0)
+    })
+  end
 
   @spec send_initial_message(map()) :: map()
   defp send_initial_message(state) do
