@@ -425,7 +425,7 @@ defmodule Teiserver.User do
   end
 
   # Cache functions
-  @spec get_username(T.userid()) :: String.t()
+  @spec get_username(T.userid()) :: String.t() | nil
   defdelegate get_username(userid), to: UserCache
 
   @spec get_userid(String.t()) :: integer() | nil
@@ -439,6 +439,9 @@ defmodule Teiserver.User do
 
   @spec get_user_by_discord_id(String.t()) :: User.t() | nil
   defdelegate get_user_by_discord_id(discord_id), to: UserCache
+
+  @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
+  defdelegate get_userid_by_discord_id(discord_id), to: UserCache
 
   @spec get_user_by_token(String.t()) :: User.t() | nil
   defdelegate get_user_by_token(token), to: UserCache

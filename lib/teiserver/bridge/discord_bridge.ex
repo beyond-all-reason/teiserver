@@ -5,7 +5,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
   # use Alchemy.Cogs
   use Alchemy.Events
-  alias Teiserver.{Account, Room}
+  alias Teiserver.{Account, Room, User, Client}
   alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands}
   alias Central.Config
   alias Central.Account.ReportLib
@@ -202,13 +202,36 @@ defmodule Teiserver.Bridge.DiscordBridge do
     |> String.replace(~r/<#[0-9]+> ?/, "")
     |> convert_emoticons
     |> String.split("\n")
-    |> Enum.map(fn row ->
-      "#{author.username}: #{row}"
-    end)
 
-    from_id = BridgeServer.get_bridge_userid()
+    bridge_user_id = BridgeServer.get_bridge_userid()
+
+    from_id = case User.get_userid_by_discord_id(author.id) do
+      nil ->
+        bridge_user_id
+      userid ->
+        case Client.get_client_by_id(userid) do
+          nil ->
+            bridge_user_id
+          _ ->
+            userid
+        end
+    end
+
+    message = if from_id == bridge_user_id do
+      new_content
+      |> Enum.map(fn row ->
+        "#{author.username}: #{row}"
+      end)
+    else
+      new_content
+    end
+
     room = bridge_channel_to_room(channel_id)
-    Room.send_message(from_id, room, new_content)
+    IO.puts ""
+    IO.inspect {from_id, room, message}
+    IO.puts ""
+
+    Room.send_message(from_id, room, message)
   end
 
   defp convert_emoticons(msg) do

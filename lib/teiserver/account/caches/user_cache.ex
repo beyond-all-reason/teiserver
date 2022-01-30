@@ -6,7 +6,7 @@ defmodule Teiserver.Account.UserCache do
   alias Teiserver.Client
   require Logger
 
-  @spec get_username(T.userid()) :: String.t()
+  @spec get_username(T.userid()) :: String.t() | nil
   def get_username(userid) do
     ConCache.get(:users_lookup_name_with_id, int_parse(userid))
   end
@@ -26,6 +26,11 @@ defmodule Teiserver.Account.UserCache do
   def get_user_by_email(email) do
     id = ConCache.get(:users_lookup_id_with_email, cachename(email))
     ConCache.get(:users, id)
+  end
+
+  @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
+  def get_userid_by_discord_id(discord_id) do
+    ConCache.get(:users_lookup_id_with_discord_id, cachename(discord_id))
   end
 
   @spec get_user_by_discord_id(String.t()) :: User.t() | nil
