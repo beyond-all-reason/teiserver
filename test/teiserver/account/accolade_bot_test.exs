@@ -72,7 +72,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
     assert Account.list_accolades(search: [giver_id: player11.id]) == []
 
     AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
-    :timer.sleep(500)
+    :timer.sleep(100)
 
     # Now, player11 should have zero messages because it was a short game
     :timeout = _tachyon_recv(psocket11)
@@ -83,7 +83,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
     assert Account.list_accolades(search: [giver_id: player11.id]) == []
 
     AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
-    :timer.sleep(500)
+    :timer.sleep(100)
 
     # Now, player11 should have a set of messages
     [result] = _tachyon_recv(psocket11)
@@ -138,7 +138,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
     assert Account.list_accolades(search: [giver_id: player11.id]) == []
 
     AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
-    :timer.sleep(500)
+    :timer.sleep(100)
 
     # Now, player11 should have a set of messages
     [result] = _tachyon_recv(psocket11)
@@ -167,6 +167,8 @@ defmodule Teiserver.Account.AccoladeBotTest do
     })
     :timer.sleep(200)
 
+    # If this bit breaks it's because the "null" accolade wasn't inserted because of a foreign key constraint
+    # that doesn't exist and can't be reliably replicated
     [accolade_given] = Account.list_accolades(search: [giver_id: player11.id])
     assert accolade_given.giver_id == player11.id
     assert accolade_given.recipient_id == player12.id
@@ -178,7 +180,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
     assert Account.list_accolades(search: [giver_id: player11.id]) == []
 
     AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
-    :timer.sleep(500)
+    :timer.sleep(100)
 
     # Now, player11 should have a set of messages
     [result] = _tachyon_recv(psocket11)
@@ -218,10 +220,10 @@ defmodule Teiserver.Account.AccoladeBotTest do
     Account.update_user_stat(player12.id, %{
       "accolade_miss_count" => 500
     })
-    :timer.sleep(500)
+    :timer.sleep(100)
 
     AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
-    :timer.sleep(500)
+    :timer.sleep(100)
 
     # Now, player11 should not have a message
     assert _tachyon_recv(psocket11) == :timeout
@@ -233,10 +235,10 @@ defmodule Teiserver.Account.AccoladeBotTest do
 
     # restrict player11 from getting accolades
     User.restrict_user(player12.id, "Accolades")
-    :timer.sleep(500)
+    :timer.sleep(100)
 
     AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match.id})
-    :timer.sleep(500)
+    :timer.sleep(100)
 
     # Now, player11 should not have a message
     assert _tachyon_recv(psocket11) == :timeout

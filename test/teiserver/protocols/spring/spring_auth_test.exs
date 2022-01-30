@@ -355,7 +355,7 @@ CLIENTS test_room #{user.name}\n"
     # Time to leave
     _send_raw(socket2, "LEAVEBATTLE\n")
     reply = _recv_raw(socket2)
-    assert reply == "LEFTBATTLE #{lobby_id} #{user2.name}\n"
+    assert reply == "REMOVEBOT #{botid} Raptor:Normal(1)\nREMOVEBOT #{botid} STAI(1)\nLEFTBATTLE #{lobby_id} #{user2.name}\n"
 
     # These commands shouldn't work, they also shouldn't error
     _send_raw(socket2, "SAYBATTLE I'm not here anymore!\n")

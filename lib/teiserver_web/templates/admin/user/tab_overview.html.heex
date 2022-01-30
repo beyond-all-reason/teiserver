@@ -70,7 +70,7 @@
             id: "restriction_#{r_clean}",
             name: "user[restrict][#{r_clean}]",
             label: r,
-            checked: Enum.member?(@user.data["restrictions"], r)
+            checked: Enum.member?(@user.data["restrictions"] || [], r)
           %>
         <% end %>
       </div>
@@ -82,7 +82,7 @@
             id: "restriction_#{r_clean}",
             name: "user[restrict][#{r_clean}]",
             label: r,
-            checked: Enum.member?(@user.data["restrictions"], r)
+            checked: Enum.member?(@user.data["restrictions"] || [], r)
           %>
         <% end %>
       </div>
@@ -94,7 +94,7 @@
             id: "restriction_#{r_clean}",
             name: "user[restrict][#{r_clean}]",
             label: r,
-            checked: Enum.member?(@user.data["restrictions"], r)
+            checked: Enum.member?(@user.data["restrictions"] || [], r)
           %>
         <% end %>
       </div>
@@ -106,7 +106,7 @@
             id: "restriction_#{r_clean}",
             name: "user[restrict][#{r_clean}]",
             label: r,
-            checked: Enum.member?(@user.data["restrictions"], r)
+            checked: Enum.member?(@user.data["restrictions"] || [], r)
           %>
         <% end %>
       </div>
@@ -118,7 +118,7 @@
             id: "restriction_#{r_clean}",
             name: "user[restrict][#{r_clean}]",
             label: r,
-            checked: Enum.member?(@user.data["restrictions"], r)
+            checked: Enum.member?(@user.data["restrictions"] || [], r)
           %>
         <% end %>
       </div>

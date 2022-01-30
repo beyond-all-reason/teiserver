@@ -156,13 +156,13 @@
       <% end %>
 
       <td>
-        <%= if Enum.member?(user.data["roles"], "Trusted"), do: "Trusted" %>
+        <%= if Enum.member?(user.data["roles"] || [], "Trusted"), do: "Trusted" %>
       </td>
       <td>
-        <%= if Enum.member?(user.data["roles"], "Contributor"), do: "Contributor" %>
+        <%= if Enum.member?(user.data["roles"] || [], "Contributor"), do: "Contributor" %>
       </td>
       <td>
-        <%= if Enum.member?(user.data["roles"], "Moderator"), do: "Moderator" %>
+        <%= if Enum.member?(user.data["roles"] || [], "Moderator"), do: "Moderator" %>
       </td>
 
       <td>

@@ -144,7 +144,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
         user_stats = Account.get_user_stat_data(user.id)
 
-        roles = user.data["roles"]
+        roles = (user.data["roles"] || [])
         |> Enum.map(fn r ->
           {r, UserLib.role_def(r)}
         end)
