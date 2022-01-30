@@ -62,6 +62,16 @@ defmodule Teiserver.Telemetry.InfologLib do
         )
   end
 
+  def _search(query, :inserted_after, timestamp) do
+    from infologs in query,
+      where: infologs.timestamp >= ^timestamp
+  end
+
+  def _search(query, :inserted_before, timestamp) do
+    from infologs in query,
+      where: infologs.timestamp < ^timestamp
+  end
+
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Newest first") do
