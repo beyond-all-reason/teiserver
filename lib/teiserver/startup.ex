@@ -95,6 +95,36 @@ defmodule Teiserver.Startup do
       default: 20
     })
 
+    add_site_config_type(%{
+      key: "teiserver.Curse word score A",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["admin.dev.developer"],
+      description: "Points for the harshest of curse words",
+      opts: [],
+      default: 10
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Curse word score B",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["admin.dev.developer"],
+      description: "Points for the middlest of curse words",
+      opts: [],
+      default: 4
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Curse word score C",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["admin.dev.developer"],
+      description: "Points for the lightest of curse words",
+      opts: [],
+      default: 1
+    })
+
     umbrella_group =
       case Central.Account.get_group(nil, search: [name: "Teiserver umbrella group"]) do
         nil ->

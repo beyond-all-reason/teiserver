@@ -227,10 +227,6 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
 
     room = bridge_channel_to_room(channel_id)
-    IO.puts ""
-    IO.inspect {from_id, room, message}
-    IO.puts ""
-
     Room.send_message(from_id, room, message)
   end
 
