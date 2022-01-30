@@ -131,6 +131,62 @@ defmodule Teiserver.Account.RelationsLib do
     end
   end
 
+  @spec block_user(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  def block_user(nil, _), do: nil
+  def block_user(_, nil), do: nil
+  def block_user(blockr_id, blockd_id) do
+    blockr = User.get_user_by_id(blockr_id)
+
+    if blockd_id not in blockr.blockd do
+      # Add to requests
+      new_blockr =
+        Map.merge(blockr, %{
+          blockd: [blockd_id | blockr.blockd]
+        })
+
+      User.update_user(new_blockr, persist: true)
+
+      # Now push out the updates
+      PubSub.broadcast(
+        Central.PubSub,
+        "legacy_user_updates:#{blockr_id}",
+        {:this_user_updated, [:blockd]}
+      )
+
+      new_blockr
+    else
+      blockr
+    end
+  end
+
+  @spec unblock_user(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  def unblock_user(nil, _), do: nil
+  def unblock_user(_, nil), do: nil
+  def unblock_user(unblockr_id, unblockd_id) do
+    unblockr = User.get_user_by_id(unblockr_id)
+
+    if unblockd_id in unblockr.blockd do
+      # Add to requests
+      new_unblockr =
+        Map.merge(unblockr, %{
+          blockd: Enum.filter(unblockr.blockd, fn f -> f != unblockd_id end)
+        })
+
+      User.update_user(new_unblockr, persist: true)
+
+      # Now push out the updates
+      PubSub.broadcast(
+        Central.PubSub,
+        "legacy_user_updates:#{unblockr_id}",
+        {:this_user_updated, [:blockd]}
+      )
+
+      new_unblockr
+    else
+      unblockr
+    end
+  end
+
   @spec ignore_user(T.userid() | nil, T.userid() | nil) :: User.t() | nil
   def ignore_user(nil, _), do: nil
   def ignore_user(_, nil), do: nil

@@ -13,7 +13,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser}
 
-  @coordinator_bot ~w(whoami whois check discord help)
+  @coordinator_bot ~w(whoami whois check discord help coc ignore)
   @always_allow ~w(status y n follow joinq leaveq splitlobby)
   @boss_commands ~w(gatekeeper welcome-message)
   @host_commands ~w(specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock rename)
