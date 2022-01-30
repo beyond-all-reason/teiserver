@@ -8,6 +8,7 @@ defmodule Teiserver.Chat.WordLib do
   The number of flagged words is returned as an integer
   """
   @spec flagged_words(String.t()) :: non_neg_integer()
+  def flagged_words(text) when is_list(text), do: flagged_words(text |> Enum.join("\n"))
   def flagged_words(text) do
     Regex.scan(@flagged_regex, text)
     |> Enum.count
