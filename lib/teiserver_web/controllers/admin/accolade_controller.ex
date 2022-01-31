@@ -61,7 +61,8 @@ defmodule TeiserverWeb.Admin.AccoladeController do
 
     conn
     |> assign(:accolades, accolades)
-    |> assign(:userid, int_parse(user_id))
+    |> assign(:userid, user.id)
+    |> assign(:user, user)
     |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
     |> render("user_index.html")
   end
