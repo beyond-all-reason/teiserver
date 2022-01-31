@@ -505,30 +505,36 @@ defmodule Teiserver.Protocols.SpringOut do
     "FORCEQUITBATTLE\n"
   end
 
-  defp do_reply(:battle_message, {userid, messages, _lobby_id}) when is_list(messages) do
-    username = User.get_username(userid)
-    messages
-    |> Enum.map(fn msg ->
-      "SAIDBATTLE #{username} #{msg}\n"
-    end)
-    |> Enum.join("")
+  defp do_reply(:battle_message, {sender_id, messages, _lobby_id, state_userid}) when is_list(messages) do
+    user = User.get_user_by_id(state_userid)
+    if sender_id not in (user.ignored || []) do
+      username = User.get_username(sender_id)
+      messages
+      |> Enum.map(fn msg ->
+        "SAIDBATTLE #{username} #{msg}\n"
+      end)
+      |> Enum.join("")
+    end
   end
 
-  defp do_reply(:battle_message, {userid, msg, lobby_id}) do
-    do_reply(:battle_message, {userid, [msg], lobby_id})
+  defp do_reply(:battle_message, {userid, msg, lobby_id, state_userid}) do
+    do_reply(:battle_message, {userid, [msg], lobby_id, state_userid})
   end
 
-  defp do_reply(:battle_message_ex, {userid, messages, _lobby_id}) when is_list(messages) do
-    username = User.get_username(userid)
-    messages
-    |> Enum.map(fn msg ->
-      "SAIDBATTLEEX #{username} #{msg}\n"
-    end)
-    |> Enum.join()
+  defp do_reply(:battle_message_ex, {sender_id, messages, _lobby_id, state_userid}) when is_list(messages) do
+    user = User.get_user_by_id(state_userid)
+    if sender_id not in (user.ignored || []) do
+      username = User.get_username(sender_id)
+      messages
+      |> Enum.map(fn msg ->
+        "SAIDBATTLEEX #{username} #{msg}\n"
+      end)
+      |> Enum.join("")
+    end
   end
 
-  defp do_reply(:battle_message_ex, {userid, msg, lobby_id}) do
-    do_reply(:battle_message_ex, {userid, [msg], lobby_id})
+  defp do_reply(:battle_message_ex, {userid, msg, lobby_id, state_userid}) do
+    do_reply(:battle_message_ex, {userid, [msg], lobby_id, state_userid})
   end
 
   defp do_reply(:servermsg, msg) do

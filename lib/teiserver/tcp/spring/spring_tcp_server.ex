@@ -521,10 +521,14 @@ defmodule Teiserver.SpringTcpServer do
         state.protocol_out.reply(:disable_units, data, nil, state)
 
       :say ->
-        state.protocol_out.reply(:battle_message, data, nil, state)
+        {sender_id, messages, lobby_id} = data
+        new_data = {sender_id, messages, lobby_id, state.userid}
+        state.protocol_out.reply(:battle_message, new_data, nil, state)
 
       :sayex ->
-        state.protocol_out.reply(:battle_message_ex, data, nil, state)
+        {sender_id, messages, lobby_id} = data
+        new_data = {sender_id, messages, lobby_id, state.userid}
+        state.protocol_out.reply(:battle_message_ex, new_data, nil, state)
 
       # TODO: Check we can't get an out of sync server-client state
       # with the bot commands
