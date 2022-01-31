@@ -38,6 +38,9 @@ defmodule TeiserverWeb.Report.ReportController do
         "accolades" ->
           Teiserver.Account.AccoladeReport.run(conn, params)
 
+        "mutes" ->
+          Teiserver.Account.MuteReport.run(conn, params)
+
         _ ->
           raise "No handler for name of '#{name}'"
       end

@@ -87,6 +87,14 @@
       text: "Accolades",
       link: Routes.ts_reports_report_path(@conn, :show, "accolades")
     %>
+
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Account.MuteReport.icon(),
+      name: "mutes",
+      text: "Mutes",
+      link: Routes.ts_reports_report_path(@conn, :show, "mutes")
+    %>
   <% end %>
 </div>
 

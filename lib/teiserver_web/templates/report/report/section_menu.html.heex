@@ -53,3 +53,12 @@
   bsname: bsname,
   url: Routes.ts_reports_report_path(@conn, :show, "accolades")
 %>
+
+<%= central_component "section_menu_button",
+  name: "mutes",
+  label: "Mutes",
+  active: @active,
+  icon: Teiserver.Account.MuteReport.icon(),
+  bsname: bsname,
+  url: Routes.ts_reports_report_path(@conn, :show, "mutes")
+%>
