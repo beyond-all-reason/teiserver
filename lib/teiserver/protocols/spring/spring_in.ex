@@ -589,6 +589,7 @@ defmodule Teiserver.Protocols.SpringIn do
     case String.split(data, "\t") do
       [target_name, location_type, location_id, reason] ->
         if String.trim(reason) == "" or String.trim(reason) == "None Given" do
+          User.send_direct_message(Coordinator.get_coordinator_userid(), state.userid, "Your report has not been submitted as no reason for the report was given.")
           reply(:no, {"c.moderation.report_user", "no reason given"}, msg_id, state)
         else
           target = User.get_user_by_name(target_name) || %{id: nil}
