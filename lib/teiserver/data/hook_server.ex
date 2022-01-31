@@ -1,6 +1,7 @@
 defmodule Teiserver.HookServer do
   use GenServer
   alias Phoenix.PubSub
+  alias Teiserver.Coordinator
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   def start_link(opts \\ []) do
@@ -26,6 +27,7 @@ defmodule Teiserver.HookServer do
         Teiserver.User.recache_user(int_parse(payload))
 
       "create_report" ->
+        Coordinator.cast_coordinator({:new_report, int_parse(payload)})
         Teiserver.User.create_report(int_parse(payload))
 
       "update_report" ->

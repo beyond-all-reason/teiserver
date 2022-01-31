@@ -305,6 +305,7 @@ defmodule Teiserver.Account do
 
   # Reports
   def list_reports(args), do: Central.Account.list_reports(args)
+  def get_report(id), do: Central.Account.get_report(id)
   def get_report!(id), do: Central.Account.get_report!(id)
   def get_report!(id, args), do: Central.Account.get_report!(id, args)
 

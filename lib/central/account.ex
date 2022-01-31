@@ -717,6 +717,11 @@ defmodule Central.Account do
     |> Repo.all()
   end
 
+  def get_report(id) when not is_list(id) do
+    report_query(id, [])
+    |> Repo.one()
+  end
+
   @doc """
   Gets a single report.
 

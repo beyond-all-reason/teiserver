@@ -58,6 +58,17 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, state}
   end
 
+  # New report
+  def handle_info({:new_report, report_id}, state) do
+    case Account.get_report(report_id) do
+      nil ->
+        nil
+      report ->
+        User.send_direct_message(state.userid, report.reporter_id, "Thank you for submitting your report, it has been passed on to the moderation team.")
+    end
+    {:noreply, state}
+  end
+
   # Direct/Room messaging
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
