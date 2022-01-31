@@ -9,7 +9,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   alias Phoenix.PubSub
   require Logger
 
-  @miss_count_limit 3
+  @miss_count_limit 20
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
