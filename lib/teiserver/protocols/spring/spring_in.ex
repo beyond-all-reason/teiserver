@@ -563,14 +563,22 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("IGNORE", data, _msg_id, state) do
-    [_, username] = String.split(data, "=")
-    User.ignore_user(state.userid, User.get_userid(username))
+    case String.split(data, "=") do
+      [_, username] ->
+        User.ignore_user(state.userid, User.get_userid(username))
+      _ ->
+        :ok
+    end
     state
   end
 
   defp do_handle("UNIGNORE", data, _msg_id, state) do
-    [_, username] = String.split(data, "=")
-    User.unignore_user(state.userid, User.get_userid(username))
+    case String.split(data, "=") do
+      [_, username] ->
+        User.unignore_user(state.userid, User.get_userid(username))
+      _ ->
+        :ok
+    end
     state
   end
 
