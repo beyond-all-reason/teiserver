@@ -8,7 +8,7 @@ defmodule Central.Helpers.InputHelper do
 
   @human_time_info {:safe,
                     [
-                      "<button tabindex='-1' type='button' class='btn btn-sm btn-info float-right' data-toggle='popover' data-placement='left' title='Human time' data-content='Human time (HT) allows you to write more natural text and the system will convert it into a date for you. Examples include: \"this tuesday at 5pm\", \"next weekday\", \"30 minutes\" and most normal UK date formats.'>HT Enabled</button>"
+                      "<button tabindex='-1' type='button' class='btn btn-sm btn-info float-end' data-toggle='popover' data-placement='left' title='Human time' data-content='Human time (HT) allows you to write more natural text and the system will convert it into a date for you. Examples include: \"this tuesday at 5pm\", \"next weekday\", \"30 minutes\" and most normal UK date formats.'>HT Enabled</button>"
                     ]}
 
   # http://blog.plataformatec.com.br/2016/09/dynamic-forms-with-phoenix/
