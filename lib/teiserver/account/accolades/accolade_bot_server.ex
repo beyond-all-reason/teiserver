@@ -11,6 +11,10 @@ defmodule Teiserver.Account.AccoladeBotServer do
 
   @miss_count_limit 20
 
+  def max_miss_count do
+    @miss_count_limit * 1.5
+  end
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])

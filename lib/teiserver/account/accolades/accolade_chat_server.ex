@@ -7,6 +7,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
   alias Central.Config
   alias Teiserver.{User, Account}
   alias Teiserver.Account.AccoladeLib
+  alias Teiserver.Account.AccoladeBotServer
   alias Teiserver.Data.Types, as: T
 
   @line_break "-------------------------------------------------"
@@ -93,7 +94,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
               :timer.send_after(30_000, bot_pid, {:new_accolade, state.recipient_id})
             end
 
-            decrement_miss_count(state.userid)
+            decrement_miss_count(state.userid, 5)
             User.send_direct_message(state.bot_id, state.userid, "Thank you for your feedback, this Accolade will be bestowed.")
             send(self(), :terminate)
             %{state | stage: :completed}
@@ -130,21 +131,21 @@ defmodule Teiserver.Account.AccoladeChatServer do
     end
   end
 
-  defp decrement_miss_count(userid) do
+  defp decrement_miss_count(userid, amount) do
     stats = Account.get_user_stat_data(userid)
     accolade_miss_count = Map.get(stats, "accolade_miss_count", 0)
 
     Account.update_user_stat(userid, %{
-      "accolade_miss_count" => max(accolade_miss_count - 1, 0)
+      "accolade_miss_count" => max(accolade_miss_count - amount, 0)
     })
   end
 
-  defp increment_miss_count(userid, amount \\ 1) do
+  defp increment_miss_count(userid, amount) do
     stats = Account.get_user_stat_data(userid)
     accolade_miss_count = Map.get(stats, "accolade_miss_count", 0)
 
     Account.update_user_stat(userid, %{
-      "accolade_miss_count" => max(accolade_miss_count + amount, 0)
+      "accolade_miss_count" => min(max(accolade_miss_count + amount, 0), AccoladeBotServer.max_miss_count())
     })
   end
 
