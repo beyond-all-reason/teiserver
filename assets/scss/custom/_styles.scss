@@ -21,7 +21,7 @@ body {
 
 #top-nav .nav-item .active {
   font-weight: bold;
-  background-color: $light;
+  background-color: $gray-700;
 }
 
 .slow-blink-outline-primary {
@@ -136,8 +136,6 @@ body {
 }
 
 .menu-card .panel-body:hover {
-  /*background-color: #6bd0fe;*/
-  
   -webkit-transition: all 300ms linear;
   -moz-transition: all 300ms linear;
   -o-transition: all 300ms linear;
@@ -156,7 +154,7 @@ body {
   font-size: 1.6em;
   line-height: 2em;
   
-  color: #34495e;
+  color: $primary;
   
   text-decoration: none;
   
@@ -170,7 +168,7 @@ body {
 }
 
 .menu-card a:hover, .menu-card span:hover {
-  color: #007bff;
+  color: $info;
   
   cursor: pointer;
   text-shadow: 2px 2px 2px rgba(0,0,0,0.1);
@@ -201,7 +199,7 @@ body {
 .sub-menu-icon a {
   margin: 0;
   padding: 10px 0 5px 0;
-  color: #555;
+  color: $gray-600;
   
   border-bottom: 5px solid #FFF;
   
