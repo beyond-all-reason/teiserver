@@ -39,7 +39,7 @@
     <%= render CentralWeb.ComponentView, "breadcrumb.html", assigns %>
   <% end %>
 
-  <div id="flash-messages m-0">
+  <div id="flash-messages">
     <%= if get_flash(@conn, :danger) do %>
       <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= get_flash(@conn, :danger) %></p>
     <% end %>
