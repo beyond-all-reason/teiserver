@@ -4,8 +4,10 @@ defmodule CentralWeb.Logging.ReportController do
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
   plug :add_breadcrumb, name: 'Reports', url: '/logging/reports'
 
-  plug AssignPlug,
-    sidemenu_active: "logging"
+  plug(AssignPlug,
+    site_menu_active: "central_logging",
+    sub_menu_active: "report"
+  )
 
   plug Bodyguard.Plug.Authorize,
     policy: Central.Logging.LoggingLib,

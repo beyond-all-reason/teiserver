@@ -8,8 +8,10 @@ defmodule CentralWeb.Admin.CodeController do
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
-  plug AssignPlug,
-    sidemenu_active: "admin"
+  plug(AssignPlug,
+    site_menu_active: "central_admin",
+    sub_menu_active: "code"
+  )
 
   plug :add_breadcrumb, name: 'Account', url: '/central'
   plug :add_breadcrumb, name: 'Codes', url: '/central/codes'

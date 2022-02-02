@@ -9,7 +9,8 @@ defmodule CentralWeb.Admin.GeneralController do
     user: {Central.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
-    sidemenu_active: ["admin"]
+    site_menu_active: "central_admin",
+    sub_menu_active: "general"
   )
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

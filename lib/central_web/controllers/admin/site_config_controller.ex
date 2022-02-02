@@ -12,8 +12,10 @@ defmodule CentralWeb.Admin.SiteConfigController do
   plug :add_breadcrumb, name: 'Admin', url: '/admin'
   plug :add_breadcrumb, name: 'Site config', url: '/config/site'
 
-  plug AssignPlug,
-    sidemenu_active: "admin"
+  plug(AssignPlug,
+    site_menu_active: "central_admin",
+    sub_menu_active: "config"
+  )
 
   def index(conn, _params) do
     site_configs = Config.get_grouped_site_configs()

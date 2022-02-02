@@ -15,8 +15,10 @@ defmodule CentralWeb.Logging.AggregateViewLogController do
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
   plug :add_breadcrumb, name: 'Aggregate', url: '/logging/aggregate_views'
 
-  plug AssignPlug,
-    sidemenu_active: "logging"
+  plug(AssignPlug,
+    site_menu_active: "central_logging",
+    sub_menu_active: "aggregate"
+  )
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do

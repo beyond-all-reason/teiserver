@@ -105,7 +105,7 @@ openssl s_client -connect localhost:8201
 ### config/dev.secret.exs
 If you want to do things like have a discord bot in development you don't want these details going into git. It is advisable to create a file `config/dev.secret.exs` where you can put these config details. I would suggest a file like so:
 ```
-use Mix.Config
+import Config
 
 config :central, Teiserver,
   enable_discord_bridge: true,

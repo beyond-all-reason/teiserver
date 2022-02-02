@@ -6,8 +6,10 @@ defmodule CentralWeb.Logging.PageViewLogController do
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
   plug :add_breadcrumb, name: 'Page views', url: '/logging/page_views'
 
-  plug AssignPlug,
-    sidemenu_active: "logging"
+  plug(AssignPlug,
+    site_menu_active: "central_logging",
+    sub_menu_active: "page_view"
+  )
 
   plug Bodyguard.Plug.Authorize,
     policy: Central.Logging.PageViewLog,

@@ -13,8 +13,10 @@ defmodule CentralWeb.Logging.AuditLogController do
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
-  plug AssignPlug,
-    sidemenu_active: "logging"
+  plug(AssignPlug,
+    site_menu_active: "central_logging",
+    sub_menu_active: "audit"
+  )
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do

@@ -16,6 +16,11 @@ defmodule CentralWeb.Admin.GroupController do
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
+  plug(AssignPlug,
+    site_menu_active: "central_admin",
+    sub_menu_active: "group"
+  )
+
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
     memberships =

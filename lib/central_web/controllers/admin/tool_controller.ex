@@ -16,7 +16,7 @@ defmodule CentralWeb.Admin.ToolController do
   # action_fallback CentralWeb.General.FallbackController
 
   plug(AssignPlug,
-    site_menu_active: "admin",
+    site_menu_active: "central_admin",
     sub_menu_active: "tool"
   )
 

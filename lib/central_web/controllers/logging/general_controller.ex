@@ -3,8 +3,10 @@ defmodule CentralWeb.Logging.GeneralController do
 
   plug :add_breadcrumb, name: 'Logging', url: '/logging'
 
-  plug AssignPlug,
-    sidemenu_active: "logging"
+  plug(AssignPlug,
+    site_menu_active: "central_logging",
+    sub_menu_active: "general"
+  )
 
   plug Bodyguard.Plug.Authorize,
     policy: Central.Logging.LoggingLib,

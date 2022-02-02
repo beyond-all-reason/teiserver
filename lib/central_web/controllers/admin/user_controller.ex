@@ -18,8 +18,10 @@ defmodule CentralWeb.Admin.UserController do
   plug :add_breadcrumb, name: 'Admin', url: '/admin'
   plug :add_breadcrumb, name: 'Users', url: '/admin/users'
 
-  plug AssignPlug,
-    sidemenu_active: "admin"
+  plug(AssignPlug,
+    site_menu_active: "central_admin",
+    sub_menu_active: "user"
+  )
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
