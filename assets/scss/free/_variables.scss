@@ -754,7 +754,7 @@ $nav-tabs-link-color: rgba(0, 0, 0, 0.6) !default;
 $nav-tabs-link-padding-top: 17px !default;
 $nav-tabs-link-padding-bottom: 16px !default;
 $nav-tabs-link-padding-x: 29px !default;
-$nav-tabs-link-hover-background-color: #f5f5f5 !default;
+$nav-tabs-link-hover-background-color: $gray-900 !default;
 
 $nav-pills-margin: 0.5rem !default;
 $nav-pills-link-border-radius: 0.25rem !default;
@@ -865,9 +865,9 @@ $progress-height: 4px !default;
 
 // Breadcrumbs
 
-$breadcrumb-item-color: rgba(0, 0, 0, 0.55) !default;
+$breadcrumb-item-color: $blue-gray-300 !default;
 $breadcrumb-item-transition: color 0.15s ease-in-out !default;
-$breadcrumb-item-hover-color: rgba(0, 0, 0, 0.7) !default;
+$breadcrumb-item-hover-color: $blue-gray-100 !default;
 $breadcrumb-item-before-color: $breadcrumb-item-color !default;
 
 // Carousel

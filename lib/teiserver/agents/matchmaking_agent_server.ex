@@ -85,7 +85,7 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
   # defp handle_msg(%{"cmd" => "s.lobby.leave", "result" => "success"}, state) do
   #   %{state | lobby_id: nil}
   # end
-  defp handle_msg(%{"cmd" => "s.communication.direct_message"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.communication.received_direct_message"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.announce"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.message"}, state), do: state
 

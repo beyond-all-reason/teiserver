@@ -19,7 +19,7 @@ defmodule Teiserver.Startup do
       key: "teiserver.Warning acknowledge prompt",
       section: "Moderation",
       type: "string",
-      permissions: ["admin.dev.developer"],
+      permissions: ["teiserver.admin.account"],
       description: "The string used to request acknowledgement of warnings",
       opts: [],
       default: "Acknowledge this with 'I acknowledge this' to resume play"
@@ -29,7 +29,7 @@ defmodule Teiserver.Startup do
       key: "teiserver.Warning acknowledge response",
       section: "Moderation",
       type: "string",
-      permissions: ["admin.dev.developer"],
+      permissions: ["teiserver.admin.account"],
       description: "The response string expected to acknowledge the warning",
       opts: [],
       default: "I acknowledge this"
@@ -39,7 +39,7 @@ defmodule Teiserver.Startup do
       key: "teiserver.Inform of new accolades",
       section: "Accolades",
       type: "boolean",
-      permissions: ["admin.dev.developer"],
+      permissions: ["teiserver.admin.account"],
       description: "When set to true, players will be informed when they get a new accolade",
       opts: [],
       default: false
@@ -79,7 +79,7 @@ defmodule Teiserver.Startup do
       key: "teiserver.Bridge player numbers",
       section: "Discord",
       type: "boolean",
-      permissions: ["admin.dev.developer"],
+      permissions: ["teiserver.admin"],
       description: "Enables bridging of channel names to discord",
       opts: [],
       default: true
@@ -89,7 +89,7 @@ defmodule Teiserver.Startup do
       key: "teiserver.Default player limit",
       section: "Lobbies",
       type: "integer",
-      permissions: ["admin.dev.developer"],
+      permissions: ["teiserver.admin"],
       description: "The default player limit for lobbies",
       opts: [],
       default: 20
@@ -99,7 +99,7 @@ defmodule Teiserver.Startup do
       key: "teiserver.Curse word score A",
       section: "Lobbies",
       type: "integer",
-      permissions: ["admin.dev.developer"],
+      permissions: ["teiserver.admin.account"],
       description: "Points for the harshest of curse words",
       opts: [],
       default: 10
@@ -109,7 +109,7 @@ defmodule Teiserver.Startup do
       key: "teiserver.Curse word score B",
       section: "Lobbies",
       type: "integer",
-      permissions: ["admin.dev.developer"],
+      permissions: ["teiserver.admin.account"],
       description: "Points for the middlest of curse words",
       opts: [],
       default: 4
@@ -119,7 +119,7 @@ defmodule Teiserver.Startup do
       key: "teiserver.Curse word score C",
       section: "Lobbies",
       type: "integer",
-      permissions: ["admin.dev.developer"],
+      permissions: ["teiserver.admin.account"],
       description: "Points for the lightest of curse words",
       opts: [],
       default: 1

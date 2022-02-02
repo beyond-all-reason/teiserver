@@ -1,5 +1,7 @@
 <% {_fg, _bg, bsname} = colours() %>
 
+<%= render CentralWeb.Admin.ToolView, "sub_menu.html", Map.merge(assigns, %{active: "oban"}) %>
+
 <div class="row">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>

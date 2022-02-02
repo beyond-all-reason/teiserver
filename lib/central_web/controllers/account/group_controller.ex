@@ -54,7 +54,7 @@ defmodule CentralWeb.Account.GroupController do
       |> render("show.html")
     else
       conn
-      |> put_flash(:warning, "Unable to access this group")
+      |> put_flash(:danger, "Unable to access this group")
       |> redirect(to: Routes.account_group_path(conn, :index))
     end
   end
@@ -81,11 +81,11 @@ defmodule CentralWeb.Account.GroupController do
     else
       if group_access[:see_group] do
         conn
-        |> put_flash(:warning, "You do not have edit access to that group")
+        |> put_flash(:danger, "You do not have edit access to that group")
         |> redirect(to: Routes.account_group_path(conn, :show, group.id))
       else
         conn
-        |> put_flash(:warning, "Unable to access this group")
+        |> put_flash(:danger, "Unable to access this group")
         |> redirect(to: Routes.account_group_path(conn, :index))
       end
     end
@@ -128,11 +128,11 @@ defmodule CentralWeb.Account.GroupController do
     else
       if group_access[:see_group] do
         conn
-        |> put_flash(:warning, "You do not have edit access to that group")
+        |> put_flash(:danger, "You do not have edit access to that group")
         |> redirect(to: Routes.account_group_path(conn, :show, group.id))
       else
         conn
-        |> put_flash(:warning, "Unable to access this group")
+        |> put_flash(:danger, "Unable to access this group")
         |> redirect(to: Routes.account_group_path(conn, :index))
       end
     end
@@ -174,7 +174,7 @@ defmodule CentralWeb.Account.GroupController do
 
         {:error, _changeset} ->
           conn
-          |> put_flash(:warning, "User was unable to be added to group.")
+          |> put_flash(:danger, "User was unable to be added to group.")
           |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
       end
     else

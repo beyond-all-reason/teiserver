@@ -87,7 +87,7 @@
             <td>
               <%= for {permission, label} <- Enum.zip([permissions, labels]) do %>
                 <%= if Enum.member?(@user.permissions, permission) do %>
-                  <span class="badge badge-primary">
+                  <span class="badge rounded-pill bg-primary">
                     <%= label %>
                   </span>&nbsp;
                 <% end %>

@@ -145,17 +145,17 @@ defmodule CentralWeb.Account.SessionController do
     cond do
       code == nil ->
         conn
-        |> put_flash(:warning, "Unable to find link")
+        |> put_flash(:danger, "Unable to find link")
         |> redirect(to: "/")
 
       code.purpose != "reset_password" ->
         conn
-        |> put_flash(:warning, "Link cannot be found")
+        |> put_flash(:danger, "Link cannot be found")
         |> redirect(to: "/")
 
       Timex.compare(Timex.now(), code.expires) == 1 ->
         conn
-        |> put_flash(:warning, "Link has expired")
+        |> put_flash(:danger, "Link has expired")
         |> redirect(to: "/")
 
       true ->
@@ -172,23 +172,23 @@ defmodule CentralWeb.Account.SessionController do
     cond do
       code == nil ->
         conn
-        |> put_flash(:warning, "Unable to find link")
+        |> put_flash(:danger, "Unable to find link")
         |> redirect(to: "/")
 
       code.purpose != "reset_password" ->
         conn
-        |> put_flash(:warning, "Link cannot be found")
+        |> put_flash(:danger, "Link cannot be found")
         |> redirect(to: "/")
 
       Timex.compare(Timex.now(), code.expires) == 1 ->
         conn
-        |> put_flash(:warning, "Link has expired")
+        |> put_flash(:danger, "Link has expired")
         |> redirect(to: "/")
 
       pass1 != pass2 ->
         conn
         |> assign(:value, value)
-        |> put_flash(:warning, "Passwords need to match")
+        |> put_flash(:danger, "Passwords need to match")
         |> render("password_reset_form.html")
 
       true ->

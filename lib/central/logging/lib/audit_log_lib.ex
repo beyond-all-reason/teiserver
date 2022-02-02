@@ -4,7 +4,7 @@ defmodule Central.Logging.AuditLogLib do
 
   alias Central.Logging.AuditLog
 
-  def colours(), do: {"#AA1122", "#FFEEEE", "danger2"}
+  def colours(), do: Central.Helpers.StylingHelper.colours(:danger2)
   def icon(), do: "far fa-archive"
 
   def add_audit_types(types) do

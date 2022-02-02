@@ -4,7 +4,7 @@ defmodule Central.Logging.ErrorLogLib do
 
   alias Central.Logging.ErrorLog
 
-  def colours(), do: {"#A12", "#FEE", "danger"}
+  def colours(), do: Central.Helpers.StylingHelper.colours(:danger)
   def icon(), do: "far fa-exclamation-triangle"
 
   def get_log(id) do

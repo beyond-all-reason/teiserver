@@ -151,7 +151,7 @@ defmodule TeiserverWeb.Clans.ClanController do
     cond do
       invite == nil ->
         conn
-        |> put_flash(:warning, "There is no invite to accept")
+        |> put_flash(:danger, "There is no invite to accept")
         |> redirect(to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab")
 
       membership != nil ->
@@ -188,7 +188,7 @@ defmodule TeiserverWeb.Clans.ClanController do
 
           {:error, _changeset} ->
             conn
-            |> put_flash(:warning, "There was an error accepting the invite")
+            |> put_flash(:danger, "There was an error accepting the invite")
             |> redirect(
               to: Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab"
             )
@@ -277,12 +277,12 @@ defmodule TeiserverWeb.Clans.ClanController do
 
       Clans.get_clan_membership(clan_id, user_id) != nil ->
         conn
-        |> put_flash(:warning, "User already in clan.")
+        |> put_flash(:danger, "User already in clan.")
         |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites")
 
       Clans.get_clan_invite(clan_id, user_id) != nil ->
         conn
-        |> put_flash(:warning, "User already invited to clan (or has blocked further invites).")
+        |> put_flash(:danger, "User already invited to clan (or has blocked further invites).")
         |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#invites")
 
       true ->

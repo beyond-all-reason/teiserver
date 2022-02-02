@@ -4,7 +4,7 @@ defmodule Central.Communication.BlogFileLib do
 
   alias Central.Communication.BlogFile
 
-  def colours(), do: {"#CC4400", "#FFDDCC", "warning2"}
+  def colours(), do: Central.Helpers.StylingHelper.colours(:warning2)
   def icon(), do: "far fa-file"
 
   # Queries

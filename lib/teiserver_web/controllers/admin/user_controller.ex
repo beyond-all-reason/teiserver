@@ -165,7 +165,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
       _ ->
         conn
-        |> put_flash(:warning, "Unable to access this user")
+        |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end
@@ -230,7 +230,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
       _ ->
         conn
-        |> put_flash(:warning, "Unable to access this user")
+        |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end
@@ -281,7 +281,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
       _ ->
         conn
-        |> put_flash(:warning, "Unable to access this user")
+        |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end
@@ -366,13 +366,13 @@ defmodule TeiserverWeb.Admin.UserController do
 
           {:error, msg} ->
             conn
-            |> put_flash(:warning, "There was an error: #{msg}")
+            |> put_flash(:danger, "There was an error: #{msg}")
             |> redirect(to: Routes.ts_admin_user_path(conn, :show, user))
         end
 
       _ ->
         conn
-        |> put_flash(:warning, "Unable to access this user")
+        |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end
@@ -405,7 +405,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
       _ ->
         conn
-        |> put_flash(:warning, "Unable to access this user")
+        |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end
@@ -457,7 +457,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
       _ ->
         conn
-        |> put_flash(:warning, "Unable to access this user")
+        |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end
@@ -488,7 +488,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
       _ ->
         conn
-        |> put_flash(:warning, "Unable to access this user")
+        |> put_flash(:danger, "Unable to access this user")
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end

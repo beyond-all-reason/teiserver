@@ -8,12 +8,12 @@
     id="navbarDropdownNotificationsLink"
   >
     <%= if @user_notifications_unread_count > 0 do %>
-      <i class="fas fa-bell text-primary" id="communication-notifications-icon"></i>
-      <span class="badge rounded-pill badge-notification bg-info2 slow-blink-outline-primary" id="communication-notifications-badge">
+      <i class="fas fa-bell" id="communication-notifications-icon"></i>
+      <span class="badge rounded-pill badge-notification bg-warning text-light" id="communication-notifications-badge">
         <%= @user_notifications_unread_count %>
       </span>
     <% else %>
-      <i class="far fa-bell text-primary" id="communication-notifications-icon"></i>
+      <i class="far fa-bell" id="communication-notifications-icon"></i>
       <span class="badge rounded-pill badge-notification" id="communication-notifications-badge">
         0
       </span>
@@ -29,7 +29,7 @@
     <%= if Enum.count(@user_notifications) > 15 do %>
       <li>
         <a href={Routes.communication_notification_path(@conn, :index)} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
-          <i class='far fa-fw fa-bars' style='color: #000;'></i>
+          <i class='far fa-fw fa-bars'></i>
           &nbsp;
           Showing first 15 notifications, click here to view all notifications
         </a>
@@ -50,7 +50,7 @@
     <%= if Enum.count(@user_notifications) <= 15 do %>
       <li>
         <a href={Routes.communication_notification_path(@conn, :index)} class="dropdown-item" style="padding-top: 5px; padding-bottom: 3px;">
-          <i class='far fa-fw fa-bars' style='color: #000;'></i>
+          <i class='far fa-fw fa-bars'></i>
           &nbsp;
           View all notifications
         </a>

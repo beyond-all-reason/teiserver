@@ -33,30 +33,33 @@ $light:         $gray-500 !default;
 $dark:          $gray-800 !default;
 */
 
-$blue: #007bff;
+$blue: #274aAf;
 $indigo: #674eec;
-$purple: #8445f7;
+$purple: #790068;
 $pink: #ff4169;
-$red: #c4183c;
-$orange: #fb7906;
-$yellow: #ffb400;
-$green: #17c671;
-$teal: #1adba2;
+$red: #a4182c;
+$orange: #CC4400;
+$yellow: #f39c12;
+$green: #108c1a;
+$teal: #008987;
 $cyan: #00b8d8;
 $white: #fff;
 $gray: #868e96;
 $gray-dark: #343a40;
-$primary: #007bff;
-$primary2: #990088;
-$secondary: #5A6169;
-$success: #17c671;
-$success2: #079110;
-$info: #00b8d8;
-$info2: #17b0ad;
-$warning: #ffb400;
+$primary: #274aAf;
+$primary-light: #ACF;
+$primary-dark: #172a6f;
+$primary2: #3498db;
+$secondary: #4A5159;
+$success: #108c1a;
+$success2: #005c0a;
+$info: #008987;
+$info2: #A90088;
+$warning: #c37c02;
 $warning2: #CC4400;
-$danger: #c4183c;
-$danger2: #AA1122;
+$danger-light: #fdd;
+$danger: #a4382c;
+$danger2: #800000;
 $light: #e9ecef;
 $dark: #212529;
 
@@ -95,7 +98,7 @@ $table-hover-color:         $white !default;
 
 // Links
 
-$link-color:                $success !default;
+$link-color:                $primary-light !default;
 
 // Fonts
 
@@ -115,12 +118,14 @@ $table-bg-scale:              0 !default;
 // Forms
 
 $input-bg:                          $dark !default;
+$input-disabled-bg:                 $gray-700 !default;
 $input-color:                       $gray-100 !default;
 $input-border-color:                $body-bg !default;
 $input-group-addon-color:           $gray-500 !default;
 $input-group-addon-bg:              $gray-700 !default;
 
-$form-check-input-bg:                     $white !default;
+$form-check-input-bg:                     $dark !default;
+$form-check-input-background-color:       $dark !default;
 $form-check-input-border:                 none !default;
 
 $form-file-button-color:          $dark !default;
@@ -130,6 +135,7 @@ $form-file-button-color:          $dark !default;
 $dropdown-bg:                       $gray-900 !default;
 $dropdown-border-color:             $gray-700 !default;
 $dropdown-divider-bg:               $gray-700 !default;
+$dropdown-color:                    $light !default;
 $dropdown-link-color:               $white !default;
 $dropdown-link-hover-color:         $white !default;
 $dropdown-link-hover-bg:            $primary !default;
@@ -143,7 +149,7 @@ $nav-tabs-link-hover-border-color:  $nav-tabs-border-color $nav-tabs-border-colo
 $nav-tabs-link-active-color:        $white !default;
 $nav-tabs-link-active-border-color: $nav-tabs-border-color $nav-tabs-border-color transparent !default;
 
-$nav-tabs-link-active-bg:           $success !default;
+$nav-tabs-link-active-bg:           transparent !default;
 
 // Navbar
 

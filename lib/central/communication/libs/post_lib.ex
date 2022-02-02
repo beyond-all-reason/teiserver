@@ -3,7 +3,7 @@ defmodule Central.Communication.PostLib do
   use CentralWeb, :library
   alias Central.Communication.Post
 
-  def colours(), do: {"#007bff", "#CCEEFF", "primary"}
+  def colours(), do: Central.Helpers.StylingHelper.colours(:primary)
   def icon(), do: "far fa-file-alt"
 
   # Queries

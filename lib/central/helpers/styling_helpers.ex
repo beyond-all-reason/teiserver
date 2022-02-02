@@ -3,23 +3,23 @@ defmodule Central.Helpers.StylingHelper do
   alias HTMLIcons
 
   @spec colours(atom) :: {String.t(), String.t(), String.t()}
-  def colours(:default), do: {"#555555", "#E5E5E5", "secondary"}
-  def colours(:report), do: {"#843534", "#f2dede", "danger"}
+  def colours(:default), do: {"#555555", "#111", "secondary"}
+  def colours(:report), do: colours(:danger)
 
-  def colours(:primary), do: {"#007bff", "#DDEEFF", "primary"}
-  def colours(:primary2), do: {"#990088", "#FFEEFF", "primary2"}
+  def colours(:primary), do: {"#274aAf", "#002", "primary"}
+  def colours(:primary2), do: {"#3498db", "#012", "primary2"}
 
-  def colours(:info), do: {"#22AACC", "#EEFAFF", "info"}
-  def colours(:info2), do: {"#17b0ad", "#DDF5F5", "info2"}
+  def colours(:info), do: {"#008987", "#022", "info"}
+  def colours(:info2), do: {"#A90088", "#011", "info2"}
 
-  def colours(:success), do: {"#22AA44", "#EEFFEE", "success"}
-  def colours(:success2), do: {"#079110", "#CFD", "success2"}
+  def colours(:success), do: {"#108c1a", "#020", "success"}
+  def colours(:success2), do: {"#005c0a", "#010", "success2"}
 
-  def colours(:warning), do: {"#ffb606", "#FFEEBB", "warning"}
-  def colours(:warning2), do: {"#CC4400", "#FFDDCC", "warning2"}
+  def colours(:warning), do: {"#c37c02", "#210", "warning"}
+  def colours(:warning2), do: {"#CC4400", "#110", "warning2"}
 
-  def colours(:danger), do: {"#e74c3c", "#FFF5F5", "danger"}
-  def colours(:danger2), do: {"#AA1122", "#FEE", "danger2"}
+  def colours(:danger), do: {"#a4382c", "#200", "danger"}
+  def colours(:danger2), do: {"#800000", "#100", "danger2"}
 
   def colours(:negative), do: {"#", "#", "negative"}
   def colours(:negative2), do: {"#", "#", "negative2"}

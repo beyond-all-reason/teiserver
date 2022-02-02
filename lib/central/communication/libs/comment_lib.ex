@@ -3,7 +3,7 @@ defmodule Central.Communication.CommentLib do
   use CentralWeb, :library
   alias Central.Communication.Comment
 
-  def colours(), do: {"#22AACC", "#EEFAFF", "info"}
+  def colours(), do: Central.Helpers.StylingHelper.colours(:info)
   def icon(), do: "far fa-comment"
 
   # Queries

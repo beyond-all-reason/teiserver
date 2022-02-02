@@ -6,18 +6,20 @@
       format: "dd/mm/yyyy"
     });
 
-    $('select').select2({
-      width: "100%"
-    });
+    //$('select').select2({
+    //  width: "100%"
+    //});
   });
 </script>
 
 <%= central_component "icon_dropdown_js", [] %>
 
+<!--
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
 <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+-->
 
-<div class="search-row">
+<div class="search-row pt-3">
   <div class={"btn btn-outline-#{bsname}"} onclick="show_search();" id="search-box-shower">
     <i class="far fa-fw fa-search"></i>
     Show search form

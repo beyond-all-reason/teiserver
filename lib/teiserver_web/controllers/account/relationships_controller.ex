@@ -51,7 +51,7 @@ defmodule TeiserverWeb.Account.RelationshipsController do
       end
     else
       conn
-      |> put_flash(:warning, "No user found with the name '#{params["target_name"]}'")
+      |> put_flash(:danger, "No user found with the name '#{params["target_name"]}'")
       |> redirect(to: Routes.ts_account_relationships_path(conn, :index))
     end
   end

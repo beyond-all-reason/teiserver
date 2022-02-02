@@ -1,8 +1,5 @@
 defmodule Central.Account.GroupTypeLib do
   @moduledoc false
-  # def colours(), do: {"#908", "#FEF", "primary2"}
-  # def icon(), do: "fab fa-connectdevelop"
-
   def blank_type() do
     %{name: "No type", fields: []}
   end

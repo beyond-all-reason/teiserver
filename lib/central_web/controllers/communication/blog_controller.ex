@@ -135,7 +135,7 @@ defmodule CentralWeb.Communication.BlogController do
 
       post.allow_comments == false ->
         conn
-        |> put_flash(:warning, "Comments are not enabled for this post.")
+        |> put_flash(:danger, "Comments are not enabled for this post.")
         |> redirect(to: Routes.blog_path(conn, :show, post.url_slug))
 
       true ->

@@ -15,8 +15,10 @@ defmodule CentralWeb.Admin.ToolController do
 
   # action_fallback CentralWeb.General.FallbackController
 
-  plug AssignPlug,
-    sidemenu_active: "admin"
+  plug(AssignPlug,
+    site_menu_active: "admin",
+    sub_menu_active: "tool"
+  )
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do
@@ -40,16 +42,12 @@ defmodule CentralWeb.Admin.ToolController do
     flash = %{
       success: "Example flash message success",
       info: "Example flash message info",
-      primary: "Example flash message primary",
-      warning: "Example flash message warning",
       danger: "Example flash message danger",
     }
 
     conn
     |> put_flash(:success, "Example flash message success")
     |> put_flash(:info, "Example flash message info")
-    |> put_flash(:primary, "Example flash message primary")
-    |> put_flash(:warning, "Example flash message warning")
     |> put_flash(:danger, "Example flash message danger")
     |> add_breadcrumb(name: "Test page", url: conn.request_path)
     |> assign(:socket, conn)

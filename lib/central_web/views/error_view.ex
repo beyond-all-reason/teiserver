@@ -4,7 +4,7 @@ defmodule CentralWeb.ErrorView do
   import Central.Logging.Helpers, only: [add_error_log: 1]
 
   def icon(), do: "far fa-exclamation-triangle"
-  def colours(), do: {"#AA1122", "#FEE", "danger2"}
+  def colours(), do: Central.Helpers.StylingHelper.colours(:danger2)
 
   # If you want to customize a particular status code
   # for a certain format, you may uncomment below.

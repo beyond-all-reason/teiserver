@@ -3,7 +3,7 @@ defmodule Central.Logging.LoggingLib do
   import Plug.Conn, only: [assign: 3]
 
   @spec colours() :: {String.t(), String.t(), String.t()}
-  def colours(), do: {"#666", "#EEE", "default"}
+  def colours(), do: Central.Helpers.StylingHelper.colours(:default)
 
   @spec icon() :: String.t()
   def icon(), do: "far fa-bars"

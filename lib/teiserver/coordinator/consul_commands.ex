@@ -188,7 +188,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       "" ->
         %{state | welcome_message: nil}
       msg ->
-        Lobby.say(cmd.senderid, "New welcome message set to: #{msg}", state.lobby_id)
+        Lobby.sayex(state.coordinator_id, "New welcome message set to: #{msg}", state.lobby_id)
         %{state | welcome_message: msg}
     end
     ConsulServer.broadcast_update(new_state)
@@ -588,9 +588,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
-  def handle_command(cmd, state) do
+  def handle_command(%{senderid: senderid} = cmd, state) do
     if Map.has_key?(cmd, :raw) do
-      LobbyChat.do_say(cmd.senderid, cmd.raw, state.lobby_id)
+      # LobbyChat.do_say(cmd.senderid, cmd.raw, state.lobby_id)
+      LobbyChat.sayprivateex(state.coordinator_id, senderid, "No command of that name", state.lobby_id)
     else
       Logger.error("No handler in consul_server for command #{Kernel.inspect cmd}")
     end

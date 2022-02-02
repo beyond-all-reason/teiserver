@@ -4,7 +4,7 @@ defmodule Central.Communication.CategoryLib do
 
   alias Central.Communication.Category
 
-  def colours(), do: {"#2A4", "#EFE", "success"}
+  def colours(), do: Central.Helpers.StylingHelper.colours(:success)
   def icon(), do: "far fa-indent"
 
   # Queries

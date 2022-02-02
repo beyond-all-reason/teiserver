@@ -84,7 +84,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   defp handle_msg(%{"cmd" => "s.lobby.create", "lobby" => %{"id" => lobby_id}}, state) do
     %{state | lobby_id: lobby_id}
   end
-  defp handle_msg(%{"cmd" => "s.communication.direct_message"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.communication.received_direct_message"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.announce"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.say"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.closed"}, state), do: state
