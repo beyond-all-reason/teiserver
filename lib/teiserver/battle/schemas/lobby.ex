@@ -675,6 +675,14 @@ defmodule Teiserver.Battle.Lobby do
         cmd
       )
 
+    player_command =
+      Enum.member?(
+        [
+          :add_bot
+        ],
+        cmd
+      )
+
     cond do
       changer.moderator == true ->
         true
@@ -690,7 +698,8 @@ defmodule Teiserver.Battle.Lobby do
       mod_command == true ->
         false
 
-      # TODO: something about boss mode here?
+      player_command == true and changer.player == false ->
+        false
 
       # If they're not a member they can't do anything either
       not Enum.member?(battle.players, changer.userid) ->

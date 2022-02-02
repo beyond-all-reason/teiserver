@@ -160,6 +160,29 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
   end
 
   ###########
+  # Bots
+  def do_reply(:add_bot, {_lobby_id, bot_name}) do
+    %{
+      "cmd" => "s.lobby.add_bot",
+      "name" => bot_name
+    }
+  end
+
+  def do_reply(:update_bot, bot_name) do
+    %{
+      "cmd" => "s.lobby.update_bot",
+      "name" => bot_name
+    }
+  end
+
+  def do_reply(:remove_bot, bot_name) do
+    %{
+      "cmd" => "s.lobby.remove_bot",
+      "name" => bot_name
+    }
+  end
+
+  ###########
   # Messages
   def do_reply(:request_status, nil) do
     %{
