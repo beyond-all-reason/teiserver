@@ -509,10 +509,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec say_command(Map.t(), Map.t()) :: Map.t()
   def say_command(%{silent: true}, state), do: state
   def say_command(cmd, state) do
-    IO.puts ""
-    IO.inspect cmd
-    IO.puts ""
-
     message = "$ " <> command_as_message(cmd)
     Lobby.say(cmd.senderid, message, state.lobby_id)
     state

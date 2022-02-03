@@ -69,11 +69,25 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "splitlobby", senderid: senderid} = cmd, %{split: nil} = state) do
     ConsulServer.say_command(cmd, state)
-
     sender_name = User.get_username(senderid)
-    LobbyChat.sayex(state.coordinator_id, "#{sender_name} is moving to a new lobby, to follow them say $y. If you want to follow someone else then say $follow <name> and you will follow that user. The split will take place in #{round(@split_delay/1_000)} seconds, you can change your mind at any time. Say $n to cancel your decision and stay here.", state.lobby_id)
 
-    LobbyChat.sayprivateex(state.coordinator_id, senderid, "Splitlobby sequence started. If you stay in this lobby you will be moved to a random empty lobby. If you choose a lobby yourself then anybody ", state.lobby_id)
+    Lobby.get_lobby_players!(state.lobby_id)
+    |> Enum.each(fn playerid ->
+      User.send_direct_message(state.coordinator_id, playerid, [
+        "--------",
+        "#{sender_name} is moving to a new lobby, to follow them say $y.",
+        "If you want to follow someone else then say $follow <name> and you will follow that user.",
+        "The split will take place in #{round(@split_delay/1_000)} seconds",
+        "You can change your mind at any time. Say $n to cancel your decision and stay here.",
+        "--------",
+      ])
+    end)
+
+    User.send_direct_message(state.coordinator_id, senderid, [
+      "Splitlobby sequence started. If you stay in this lobby you will be moved to a random empty lobby.",
+      "If you choose a lobby yourself then anybody voting yes will follow you to that lobby.",
+      "--------",
+    ])
 
     split_uuid = UUID.uuid4()
 
@@ -90,7 +104,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "splitlobby", senderid: senderid} = _cmd, state) do
-    LobbyChat.sayprivateex(state.coordinator_id, senderid, "A split is already underway, you cannot start a new one yet", state.lobbyid)
+    LobbyChat.sayprivateex(state.coordinator_id, senderid, "A split is already underway, you cannot start a new one yet", state.lobby_id)
     state
   end
 
@@ -183,7 +197,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, state)
   end
 
-  def handle_command(%{command: "welcome-message", remaining: remaining} = cmd, state) do
+  def handle_command(%{command: "welcome-message", remaining: remaining}, state) do
     new_state = case String.trim(remaining) do
       "" ->
         %{state | welcome_message: nil}
