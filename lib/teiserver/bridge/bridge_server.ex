@@ -70,10 +70,10 @@ defmodule Teiserver.Bridge.BridgeServer do
         # It's us, ignore it
         nil
 
-      String.contains?(message, "http:") ->
+      message_contains?(message, "http:") ->
         nil
 
-      String.contains?(message, "https:") ->
+      message_contains?(message, "https:") ->
         nil
 
       User.is_restricted?(user, "Bridging") ->
@@ -236,6 +236,13 @@ defmodule Teiserver.Bridge.BridgeServer do
     message
     |> String.replace("@", " at ")
   end
+
+  defp message_contains?(messages, contains) when is_list(messages) do
+    messages
+    |> Enum.filter(fn m -> String.contains?(m, contains) end)
+    |> Enum.any?
+  end
+  defp message_contains?(message, contains), do: String.contains?(message, contains)
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
