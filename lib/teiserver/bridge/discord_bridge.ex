@@ -204,18 +204,20 @@ defmodule Teiserver.Bridge.DiscordBridge do
     |> String.split("\n")
 
     bridge_user_id = BridgeServer.get_bridge_userid()
+    from_id = bridge_user_id
 
-    from_id = case User.get_userid_by_discord_id(author.id) do
-      nil ->
-        bridge_user_id
-      userid ->
-        case Client.get_client_by_id(userid) do
-          nil ->
-            bridge_user_id
-          _ ->
-            userid
-        end
-    end
+    # Temporarily disabled as the bridge echos itself
+    # from_id = case User.get_userid_by_discord_id(author.id) do
+    #   nil ->
+    #     bridge_user_id
+    #   userid ->
+    #     case Client.get_client_by_id(userid) do
+    #       nil ->
+    #         bridge_user_id
+    #       _ ->
+    #         userid
+    #     end
+    # end
 
     message = if from_id == bridge_user_id do
       new_content
