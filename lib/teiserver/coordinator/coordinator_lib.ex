@@ -100,7 +100,7 @@ Moves the user to players
 """
 
     moderators = """
-$set_player_limit <limit>
+$playerlimit <limit>
 Sets a new player limit for this specific host.
 
 $whois <user>

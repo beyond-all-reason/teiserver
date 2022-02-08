@@ -452,9 +452,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  defp get_max_player_count(%{host_teamcount: nil, player_limit: player_limit}), do: min(16, player_limit)
-  defp get_max_player_count(%{host_teamsize: nil, player_limit: player_limit}), do: min(16, player_limit)
-  defp get_max_player_count(state) do
+  def get_max_player_count(%{host_teamcount: nil, player_limit: player_limit}), do: min(16, player_limit)
+  def get_max_player_count(%{host_teamsize: nil, player_limit: player_limit}), do: min(16, player_limit)
+  def get_max_player_count(state) do
     min(state.host_teamcount * state.host_teamsize, state.player_limit)
   end
 
