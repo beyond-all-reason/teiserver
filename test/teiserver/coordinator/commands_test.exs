@@ -54,11 +54,6 @@ defmodule Teiserver.Coordinator.CommandsTest do
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
   end
 
-
-  test "splitlobby", %{host: _host, player: _player, hsocket: _hsocket} do
-
-  end
-
   test "specunready", %{lobby_id: lobby_id, player: player1, hsocket: hsocket} do
     %{user: player2} = tachyon_auth_setup()
 

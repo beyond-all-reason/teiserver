@@ -26,7 +26,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
                     :team_colour, :role, :bonus, :synced, :faction, :lobby_id])
   def convert_object(:lobby, lobby), do: Map.take(lobby, [:id, :name, :founder_id, :type, :max_players, :password,
                     :locked, :engine_name, :engine_version, :players, :spectators, :bots, :ip, :settings, :map_name,
-                    :map_hash])
+                    :map_hash, :tags, :disabled_units])
   def convert_object(:queue, queue), do: Map.take(queue, [:id, :name, :team_size, :conditions, :settings, :map_list])
   def convert_object(:blog_post, post), do: Map.take(post, ~w(id short_content content url tags live_from)a)
 

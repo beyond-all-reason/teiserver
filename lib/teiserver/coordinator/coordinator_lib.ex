@@ -130,6 +130,16 @@ Mutes the user for that many hours and creates a report for them
 $modban <user> <hours> <reason>
 Bans the user for that many hours and creates a report for them
 
+$meme <meme>
+A predefined bunch of settings for meme games. It's all Rikerss' fault.
+- ticks: Ticks only, don't go Cortex!
+- greenfields: No metal extractors
+- rich: infinite money
+- poor: No money generation
+- hardt1: T1 but no seaplanes or hovers either
+- crazy: random combination of several settings
+- undo: Removes all meme effects
+
 $reset
 Resets the coordinator bot for this lobby to the default
 """

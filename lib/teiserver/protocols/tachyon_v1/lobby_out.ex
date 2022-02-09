@@ -35,7 +35,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
 
   ###########
   # Updated
-  def do_reply(:updated, lobby) do
+  def do_reply(:updated, {lobby_id, _data}) do
+    lobby = Lobby.get_lobby(lobby_id)
     %{
       "cmd" => "s.lobby.updated",
       "lobby" => Tachyon.convert_object(:lobby, lobby)

@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.ConsulCommands do
   require Logger
-  alias Teiserver.Coordinator.ConsulServer
+  alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
   alias Teiserver.{Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat}
   # alias Phoenix.PubSub
@@ -591,6 +591,20 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+  def handle_command(%{command: "meme", remaining: meme, senderid: senderid}, state) do
+    meme = String.downcase(meme)
+
+    msg = RikerssMemes.handle_meme(meme, senderid, state)
+
+    if not Enum.empty?(msg) do
+      Lobby.get_lobby_players!(state.lobby_id)
+      |> Enum.each(fn playerid ->
+        User.send_direct_message(state.coordinator_id, playerid, msg)
+      end)
+    end
+
+    state
+  end
 
   def handle_command(%{command: "reset"} = _cmd, state) do
     ConsulServer.empty_state(state.lobby_id)
