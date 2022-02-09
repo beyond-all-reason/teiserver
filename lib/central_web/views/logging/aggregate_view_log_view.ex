@@ -60,4 +60,21 @@ defmodule CentralWeb.Logging.AggregateViewLogView do
       |> String.pad_leading(2, "0")
     end)
   end
+
+  def heatmap(value, maximum, "black-red") do
+    percentage = value / max(maximum, 1)
+
+    [
+      (percentage * 255),
+      (percentage * 25),
+      (percentage * 25)
+    ]
+    |> Enum.map_join(fn colour ->
+      colour
+      |> round
+      |> Integer.to_string(16)
+      |> to_string
+      |> String.pad_leading(2, "0")
+    end)
+  end
 end

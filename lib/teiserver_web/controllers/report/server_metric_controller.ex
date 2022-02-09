@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
   # DAILY METRICS
   @spec day_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_list(conn, _params) do
+  def day_metrics_list(conn, params) do
     logs =
       Telemetry.list_server_day_logs(
         # search: [user_id: params["user_id"]],
@@ -30,8 +30,11 @@ defmodule TeiserverWeb.Report.ServerMetricController do
         limit: 31
       )
 
+    filter = params["filter"] || "default"
+
     conn
     |> assign(:logs, logs)
+    |> assign(:filter, filter)
     |> add_breadcrumb(name: "Daily", url: conn.request_path)
     |> render("day_metrics_list.html")
   end
