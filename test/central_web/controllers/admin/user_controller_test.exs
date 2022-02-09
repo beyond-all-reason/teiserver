@@ -196,11 +196,11 @@ defmodule CentralWeb.Admin.UserControllerTest do
         })
 
       resp =
-        post(conn, Routes.admin_user_path(conn, :update_permissions, target_user),
-          account_user: source_user.id
+        post(conn, Routes.admin_user_path(conn, :copy_permissions, target_user),
+          account_user: "##{source_user.id}"
         )
 
-      assert resp.private[:phoenix_flash]["success"] == "User permissions updated successfully."
+      assert resp.private[:phoenix_flash]["success"] == "User permissions copied successfully."
 
       assert redirected_to(resp) ==
                Routes.admin_user_path(resp, :show, target_user) <> "#permissions"

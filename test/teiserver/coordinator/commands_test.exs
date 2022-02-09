@@ -430,14 +430,14 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert reply["message"] |> Enum.count > 5
   end
 
-  test "passthrough", %{lobby_id: lobby_id, host: host, hsocket: hsocket, listener: listener} do
+  test "passthrough", %{hsocket: hsocket, listener: listener} do
     data = %{cmd: "c.lobby.message", message: "$non-existing command"}
     _tachyon_send(hsocket, data)
     messages = PubsubListener.get(listener)
-    assert messages == [{:battle_updated, lobby_id, {host.id, "$non-existing command", lobby_id}, :say}]
+    assert messages == []
 
     reply = _tachyon_recv(hsocket)
-    assert reply == [%{"cmd" => "s.lobby.say", "lobby_id" => lobby_id, "message" => "$non-existing command", "sender" => host.id}]
+    assert reply == [%{"cmd" => "s.lobby.received_lobby_direct_announce", "message" => "No command of that name", "sender_id" => Coordinator.get_coordinator_userid()}]
   end
 
   test "join_queue", %{lobby_id: lobby_id, hsocket: hsocket, psocket: _psocket, player: player} do

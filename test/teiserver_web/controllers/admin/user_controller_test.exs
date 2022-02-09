@@ -86,7 +86,7 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
   describe "edit user" do
     test "renders form for editing nil", %{conn: conn} do
       resp = get(conn, Routes.ts_admin_user_path(conn, :edit, -1))
-      assert resp.private[:phoenix_flash]["warning"] == "Unable to access this user"
+      assert resp.private[:phoenix_flash]["danger"] == "Unable to access this user"
       assert redirected_to(resp) == Routes.ts_admin_user_path(conn, :index)
     end
 

@@ -337,6 +337,16 @@ CLIENTS test_room #{user.name}\n"
     # Add a bot
     _send_raw(socket2, "ADDBOT STAI(1) 4195458 0 STAI\n")
     reply = _recv_raw(socket2)
+    assert reply == :timeout
+
+    # Now set ourselves to a player since we can't add bots as a spectator
+    _send_raw(socket2, "MYBATTLESTATUS 4195330 0\n")
+    reply = _recv_raw(socket2)
+    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195330 0\n"
+
+    # Actually add it this time
+    _send_raw(socket2, "ADDBOT STAI(1) 4195458 0 STAI\n")
+    reply = _recv_raw(socket2)
     [_, botid] = Regex.run(~r/ADDBOT (\d+) STAI\(1\) #{user2.name} 4195458 0 STAI/, reply)
     botid = int_parse(botid)
     assert reply == "ADDBOT #{botid} STAI(1) #{user2.name} 4195458 0 STAI\n"

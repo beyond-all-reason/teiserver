@@ -50,7 +50,7 @@ defmodule CentralWeb.Account.GroupControllerTest do
 
     test "show without membership and is private", %{conn: conn, parent_group: parent_group} do
       conn = get(conn, Routes.account_group_path(conn, :show, parent_group.id))
-      assert conn.private[:phoenix_flash]["warning"] == "Unable to access this group"
+      assert conn.private[:phoenix_flash]["danger"] == "Unable to access this group"
       assert redirected_to(conn) == Routes.account_group_path(conn, :index)
     end
 
@@ -85,7 +85,7 @@ defmodule CentralWeb.Account.GroupControllerTest do
 
     test "edit without membership and is private", %{conn: conn, parent_group: parent_group} do
       conn = get(conn, Routes.account_group_path(conn, :edit, parent_group.id))
-      assert conn.private[:phoenix_flash]["warning"] == "Unable to access this group"
+      assert conn.private[:phoenix_flash]["danger"] == "Unable to access this group"
       assert redirected_to(conn) == Routes.account_group_path(conn, :index)
     end
 
@@ -93,7 +93,7 @@ defmodule CentralWeb.Account.GroupControllerTest do
       unrelated_group = Account.get_group!(search: [name: "unrelated group"])
       conn = get(conn, Routes.account_group_path(conn, :edit, unrelated_group.id))
 
-      assert conn.private[:phoenix_flash]["warning"] ==
+      assert conn.private[:phoenix_flash]["danger"] ==
                "You do not have edit access to that group"
 
       assert redirected_to(conn) == Routes.account_group_path(conn, :show, unrelated_group.id)
@@ -153,7 +153,7 @@ defmodule CentralWeb.Account.GroupControllerTest do
       conn =
         put(conn, Routes.account_group_path(conn, :update, parent_group.id), group: @update_attrs)
 
-      assert conn.private[:phoenix_flash]["warning"] == "Unable to access this group"
+      assert conn.private[:phoenix_flash]["danger"] == "Unable to access this group"
       assert redirected_to(conn) == Routes.account_group_path(conn, :index)
     end
 
@@ -165,7 +165,7 @@ defmodule CentralWeb.Account.GroupControllerTest do
           group: @update_attrs
         )
 
-      assert conn.private[:phoenix_flash]["warning"] ==
+      assert conn.private[:phoenix_flash]["danger"] ==
                "You do not have edit access to that group"
 
       assert redirected_to(conn) == Routes.account_group_path(conn, :show, unrelated_group.id)
@@ -186,7 +186,7 @@ defmodule CentralWeb.Account.GroupControllerTest do
       assert redirected_to(conn) ==
                Routes.account_group_path(conn, :show, main_group.id) <> "#members"
 
-      assert conn.private[:phoenix_flash]["warning"] == "User was unable to be added to group."
+      assert conn.private[:phoenix_flash]["danger"] == "User was unable to be added to group."
     end
 
     test "create without existing membership - allowed", %{conn: conn, user: user} do
