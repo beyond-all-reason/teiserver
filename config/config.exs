@@ -113,8 +113,10 @@ config :central, Oban,
         # Every minute
         {"* * * * *", Teiserver.Account.Tasks.CleanupTask},
 
-        # 1:05 am
-        {"5 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+        # 1:07 am
+        {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
+        {"12 1 * * *", Teiserver.Chat.Tasks.DailyCleanupTask},
+        {"17 1 * * *", Teiserver.Battle.Tasks.DailyCleanupTask},
 
         # Every minute
         {"* * * * *", Teiserver.Telemetry.Tasks.PersistServerMinuteTask},
@@ -122,18 +124,18 @@ config :central, Oban,
         # Every 5 minutes
         {"*/5 * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},
 
-        # 2:05 am and 2:15 am
-        {"5 2 * * *", Teiserver.Telemetry.Tasks.PersistServerDayTask},
-        {"15 2 * * *", Teiserver.Telemetry.Tasks.PersistServerMonthTask},
+        # 2:07 am and 2:17 am
+        {"2 2 * * *", Teiserver.Telemetry.Tasks.PersistServerDayTask},
+        {"12 2 * * *", Teiserver.Telemetry.Tasks.PersistServerMonthTask},
 
-        {"5 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchDayTask},
-        {"15 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchMonthTask},
-        {"25 2 * * *", Teiserver.Telemetry.InfologCleanupTask},
+        {"7 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchDayTask},
+        {"17 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchMonthTask},
+        {"27 2 * * *", Teiserver.Telemetry.InfologCleanupTask},
 
-        # 3:05 am every day, gives time for multiple telemetry day tasks to run if needed
-        {"5 3 * * *", Teiserver.Account.RecalculateUserStatTask},
-        {"5 12 * * *", Teiserver.Account.RecalculateUserStatTask},
-        {"5 4 * * *", Teiserver.Account.RecalculateUserHWTask},
+        # 3:02 am every day, gives time for multiple telemetry day tasks to run if needed
+        {"2 3 * * *", Teiserver.Account.RecalculateUserStatTask},
+        {"2 12 * * *", Teiserver.Account.RecalculateUserStatTask},
+        {"2 4 * * *", Teiserver.Account.RecalculateUserHWTask},
       ]
     }
   ],
