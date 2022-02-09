@@ -36,7 +36,7 @@ defmodule Teiserver.Protocols.SpringOut do
         :spring -> do_reply(reply_cmd, data)
       end
 
-    if state.print_server_messages do
+    if Application.get_env(:central, Teiserver)[:extra_logging] == true or state.print_server_messages do
       if is_list(msg) do
         msg
         |> Enum.map(fn m ->
