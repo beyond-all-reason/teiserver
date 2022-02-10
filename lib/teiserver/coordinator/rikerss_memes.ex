@@ -117,6 +117,24 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/startmetal" => "1000",
       "game/modoptions/startenergy" => "1000",
       "game/modoptions/resourceincomemultiplier" => "1",
+
+      "game/modoptions/maxunits" => "2000",
+
+      "game/modoptions/norushtime" => "10",
+      "game/modoptions/norushmode" => "0",
+      "game/modoptions/map_waterlevel" => "0",
+      "game/modoptions/lootboxes" => "scav_only",
+      "game/modoptions/lootboxes_density" => "normal",
+      "game/modoptions/teamcolors_anonymous_mode" => "0",
+      "game/modoptions/experimentalshieldpower" => "1",
+      "game/modoptions/experimentalradarrange" => "1",
+      "game/modoptions/disable_fogofwar" => "0",
+
+      "game/modoptions/assistdronesenabled" => "scav_only",
+      "game/modoptions/assistdronescount" => "4",
+
+      "game/modoptions/experimentalscavuniqueunits" => "0",
+      "game/modoptions/experimentallosrange" => "1",
     })
     Lobby.set_script_tags(lobby_id, new_tags)
   end
