@@ -148,7 +148,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
 
     if chan do
-      report = Account.get_report!(report_id, preload: [:responder, :target])
+      report = Account.get_report!(report_id, preload: [:target])
       past_tense = ReportLib.past_tense(report.response_action)
 
       if past_tense != nil do
@@ -175,7 +175,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
         msg = [
           "----------------------",
           "Moderation action:",
-          "Action: #{report.target.name} was #{past_tense} by #{report.responder.name}",
+          "Action: #{report.target.name} was #{past_tense}",
           "Reason: #{report.response_text}",
           "Restriction(s): #{restrictions}",
           "Expires: #{until}",

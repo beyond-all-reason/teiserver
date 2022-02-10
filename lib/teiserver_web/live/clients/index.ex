@@ -39,7 +39,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> assign(:users, users)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:extra_menu_content, @extra_menu_content)
-      |> assign(:filters, [])
+      |> assign(:filters, ["people", "normal"])
       |> apply_filters
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}

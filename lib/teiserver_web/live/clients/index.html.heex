@@ -4,12 +4,14 @@
 
 <div class="row">
   <div class="col-md-12">
-    <div class={"card border-#{bsname} page-card"}>
+    <div class="card">
       <div class="card-body">
 
         <div class="float-end">
           <%= if Enum.member?(@filters, "people") do %>
             <span class={"btn btn-#{bsname} active"} phx-click="remove-filter:people">
+              <i class='fa-fw far fa-check'></i>
+              &nbsp;
               People only
             </span>
           <% else %>
@@ -22,11 +24,13 @@
 
           <%= if Enum.member?(@filters, "normal") do %>
             <span class={"btn btn-#{bsname} active"} phx-click="remove-filter:normal">
-              All users
+              <i class='fa-fw far fa-check'></i>
+              &nbsp;
+              Non-mods
             </span>
           <% else %>
             <span class={"btn btn-outline-#{bsname}"} phx-click="add-filter:normal">
-              Non-mods only
+              Non-mods
             </span>
           <% end %>
         </div>
@@ -42,15 +46,12 @@
         <table class="table">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Name</th>
               <th>Lobby</th>
               <th>HW</th>
               <th>Status</th>
               <th>Bot</th>
-              <th>Mod</th>
-
-              <th></th>
+              <th>&nbsp;</th>
             </tr>
           </thead>
           <tbody id="clients">
@@ -62,7 +63,6 @@
                 %>
                 <%= if client != nil do %>
                   <tr>
-                    <td><%= client.userid %></td>
                     <td><%= client.name %></td>
                     <td>
                       <%= if client.lobby_id do %>
@@ -76,7 +76,7 @@
                         &nbsp;
                       <% end %>
                     </td>
-                    
+
                     <td>
                       <%= cond do %>
                         <% client.in_game == true and client.player == true -> %>
@@ -94,7 +94,6 @@
                     </td>
 
                     <td><%= if user.bot, do: "Bot" %></td>
-                    <td><%= if user.moderator, do: "Mod" %></td>
 
                     <td>
                       <span>
