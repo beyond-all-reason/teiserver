@@ -47,7 +47,9 @@ central-*.tar
 /assets/static/images/landing/*
 /assets/static/images/logo/*
 /assets/static/favicon.*
+/priv/static/webfonts/fa-*
 *fontawesome.js
+*fontawesome.css
 /assets/static/js/ace
 /backups/
 /remote/

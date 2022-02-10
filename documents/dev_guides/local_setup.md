@@ -89,7 +89,11 @@ iex -S mix phx.server
 If all goes to plan you should be able to access your site locally at [http://localhost:4000/](http://localhost:4000/).
 
 ### Libraries you need to get yourself
-The site makes liberal use of [FontAwesome](https://fontawesome.com/) so if you are using the site you'll need to download it and place the `all.min.js` file in `assets/static/js/fontawesome.js`.
+The site makes liberal use of [FontAwesome](https://fontawesome.com/) so if you are using the site you'll need to download it and do the following
+```
+fontawesome/css/all.css -> priv/static/css/fontawesome.css
+fontawesome/webfonts -> priv/static/webfonts
+```
 
 If you want to use the blog you will also need to place [ace.js](https://ace.c9.io/) folder in the same place.
 

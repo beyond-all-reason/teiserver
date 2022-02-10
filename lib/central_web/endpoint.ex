@@ -23,7 +23,7 @@ defmodule CentralWeb.Endpoint do
     at: "/",
     from: :central,
     gzip: true,
-    only: ~w(css js assets fonts images favicon.ico robots.txt)
+    only: ~w(css js assets webfonts fonts images favicon.ico robots.txt)
   )
 
   # Code reloading can be explicitly enabled under the
