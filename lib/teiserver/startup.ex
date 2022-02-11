@@ -330,7 +330,7 @@ defmodule Teiserver.Startup do
     User.pre_cache_users(:active)
     Teiserver.Data.Matchmaking.pre_cache_queues()
 
-    springids = Account.list_users(order_by: "Newest first")
+    springids = Account.list_users(order_by: "Newest first", limit: 5, select: [:data])
     |> Enum.map(fn u -> Central.Helpers.NumberHelper.int_parse(u.data["springid"]) end)
 
     # We do this as a separate operation because a blank DB won't have any springids yet
@@ -342,7 +342,8 @@ defmodule Teiserver.Startup do
     ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", nil)
     ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_cache", true)
 
-    # User.pre_cache_users(:remaining)
+    # Now we can do the post-precache stuff
+    User.pre_cache_users(:remaining)
     Teiserver.Telemetry.startup()
 
     if Application.get_env(:central, Teiserver)[:enable_match_monitor] do

@@ -81,8 +81,22 @@ defmodule Teiserver.Account.UserCache do
 
   @spec pre_cache_users(:active | :remaining) :: :ok
   def pre_cache_users(:active) do
+    start_time = System.system_time(:millisecond)
+
+    # now_login = round(:erlang.system_time(:seconds) / 60)
+    # recent_login = now_login - 360
+    # Account.list_users(limit: :infinity, search: [data_greater_than: {"last_login", "recent_login"}]) |> Enum.count()
+
+    # Account.list_users(limit: :infinity) |> Enum.count()
+    # Account.list_users(limit: :infinity, select: [:id, :name, :password, :email, :data]) |> Enum.count()
+    # Teiserver.User.get_user_by_id(3)
+
     user_count =
-      Account.list_users(limit: :infinity)
+      Account.list_users(
+        select: [:data | User.keys()],
+        search: [pre_cache: true],
+        limit: :infinity
+      )
       |> Parallel.map(fn user ->
         user
         |> convert_user
@@ -90,21 +104,29 @@ defmodule Teiserver.Account.UserCache do
       end)
       |> Enum.count()
 
-    Logger.info("pre_cache_users:active, got #{user_count} users")
+    time_taken = System.system_time(:millisecond) - start_time
+    Logger.info("pre_cache_users:active, got #{user_count} users in #{time_taken}ms")
   end
 
-  # def pre_cache_users(:remaining) do
-  #   user_count =
-  #     Account.list_users(limit: :infinity)
-  #     |> Parallel.map(fn user ->
-  #       user
-  #       |> convert_user
-  #       |> add_user
-  #     end)
-  #     |> Enum.count()
+  def pre_cache_users(:remaining) do
+    start_time = System.system_time(:millisecond)
 
-  #   Logger.info("pre_cache_users:remaining, got #{user_count} users")
-  # end
+    user_count =
+      Account.list_users(
+        select: [:data | User.keys()],
+        search: [pre_cache: false],
+        limit: :infinity
+      )
+      |> Parallel.map(fn user ->
+        user
+        |> convert_user
+        |> add_user
+      end)
+      |> Enum.count()
+
+    time_taken = System.system_time(:millisecond) - start_time
+    Logger.info("pre_cache_users:remaining, got #{user_count} users in #{time_taken}ms")
+  end
 
   @spec convert_user(User.t()) :: User.t()
   def convert_user(user) do

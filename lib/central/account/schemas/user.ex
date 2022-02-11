@@ -7,7 +7,7 @@ defmodule Central.Account.User do
 
   # import Central.Account.AuthLib, only: [allow?: 2]
 
-  @extra_fields [:clan_id]
+  @extra_fields [:clan_id, :pre_cache]
 
   schema "account_users" do
     field :name, :string
@@ -29,6 +29,7 @@ defmodule Central.Account.User do
     # Extra user.ex relations go here
     belongs_to :clan, Teiserver.Clans.Clan
     has_one :user_stat, Teiserver.Account.UserStat
+    field :pre_cache, :boolean, default: true
 
     belongs_to :admin_group, Central.Account.Group
 

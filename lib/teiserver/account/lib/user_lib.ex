@@ -74,6 +74,11 @@ defmodule Teiserver.Account.UserLib do
   #     where: fragment("? ->> ? != ?", users.data, ^field, ^value)
   # end
 
+  def _search(query, :pre_cache, value) do
+    from users in query,
+      where: users.pre_cache == ^value
+  end
+
   def _search(query, :bot, "Person") do
     Logger.error("user.data['bot'] is being queried, this property is due to be depreciated")
     from users in query,

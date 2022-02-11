@@ -117,6 +117,7 @@ config :central, Oban,
         {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
         {"12 1 * * *", Teiserver.Chat.Tasks.DailyCleanupTask},
         {"17 1 * * *", Teiserver.Battle.Tasks.DailyCleanupTask},
+        {"22 1 * * *", Teiserver.Account.Tasks.DailyPrecacheCheckTask},
 
         # Every minute
         {"* * * * *", Teiserver.Telemetry.Tasks.PersistServerMinuteTask},
