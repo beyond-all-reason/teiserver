@@ -338,7 +338,7 @@ defmodule Teiserver.Startup do
 
     ConCache.put(:id_counters, :springid, current_springid + 1)
 
-    ConCache.put(:application_metadata_cache, "teiserver_startup_completed", true)
+    ConCache.put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
     ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", nil)
     ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_cache", true)
 
@@ -374,6 +374,8 @@ defmodule Teiserver.Startup do
         Teiserver.agent_mode()
       end)
     end
+
+    ConCache.put(:application_metadata_cache, "teiserver_full_startup_completed", true)
 
     time_taken = System.system_time(:millisecond) - start_time
     Logger.info("Teiserver startup complete, took #{time_taken}ms")

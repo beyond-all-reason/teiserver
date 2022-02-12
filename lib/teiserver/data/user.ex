@@ -540,7 +540,7 @@ defmodule Teiserver.User do
 
   @spec wait_for_precache() :: :ok
   defp wait_for_precache() do
-    if ConCache.get(:application_metadata_cache, "teiserver_startup_completed") != true do
+    if ConCache.get(:application_metadata_cache, "teiserver_partial_startup_completed") != true do
       :timer.sleep(@timer_sleep)
       wait_for_precache()
     else
@@ -731,6 +731,13 @@ defmodule Teiserver.User do
       }
 
     update_user(user, persist: true)
+
+    # Also update the user entry to say they logged in and should
+    # be considered for pre-cache again
+    db_user = Account.get_user!(user.id)
+    Account.update_user(db_user, %{
+      "pre_cache" => true
+    })
 
     # User stats
     Account.update_user_stat(user.id, %{

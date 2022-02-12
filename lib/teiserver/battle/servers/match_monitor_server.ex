@@ -31,7 +31,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   def handle_info(:begin, _state) do
-    state = if ConCache.get(:application_metadata_cache, "teiserver_startup_completed") != true do
+    state = if ConCache.get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
       pid = self()
       spawn(fn ->
         :timer.sleep(1000)

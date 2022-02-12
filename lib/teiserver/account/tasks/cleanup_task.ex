@@ -6,7 +6,7 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    if ConCache.get(:application_metadata_cache, "teiserver_startup_completed") == true do
+    if ConCache.get(:application_metadata_cache, "teiserver_full_startup_completed") == true do
       # Find all users who are muted or banned
       # we have these anti-nil things to handle if the job
       # runs just after startup the users may not be in the cache

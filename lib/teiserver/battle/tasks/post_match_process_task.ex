@@ -7,7 +7,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    if ConCache.get(:application_metadata_cache, "teiserver_startup_completed") == true do
+    if ConCache.get(:application_metadata_cache, "teiserver_full_startup_completed") == true do
       Battle.list_matches(
         search: [
           ready_for_post_process: true

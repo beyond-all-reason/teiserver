@@ -1,5 +1,8 @@
 <h4 style="margin-top: 10px;">
   Last build: <%= date_to_str build_time(), format: :hms_or_dmy, tz: @tz %>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  Last restart <%= date_to_str ConCache.get(:application_metadata_cache, "central_app_startup_time"), format: :hms_or_dmy, tz: @tz %>
 </h4>
 
 <div class="row page-row">
