@@ -87,7 +87,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/disable_fogofwar" => Enum.random(~w(0 0 0 1)),
 
       "game/modoptions/assistdronesenabled" => Enum.random(~w(scav_only scav_only scav_only enabled)),
-      "game/modoptions/assistdronescount" => Enum.random(~w(1 2 3 4)),
+      "game/modoptions/assistdronescount" => Enum.random(~w(2 4 8 16)),
 
       "game/modoptions/experimentalscavuniqueunits" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/experimentallosrange" => Enum.random(~w(0.3 0.4 0.5 0.8 1 1 1 1 1.5)),
@@ -131,7 +131,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/disable_fogofwar" => "0",
 
       "game/modoptions/assistdronesenabled" => "scav_only",
-      "game/modoptions/assistdronescount" => "4",
+      "game/modoptions/assistdronescount" => "8",
 
       "game/modoptions/experimentalscavuniqueunits" => "0",
       "game/modoptions/experimentallosrange" => "1",
