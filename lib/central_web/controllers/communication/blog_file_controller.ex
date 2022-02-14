@@ -19,7 +19,7 @@ defmodule CentralWeb.Communication.BlogFileController do
       Communication.list_blog_files(
         search: [
           # membership: conn,
-          simple_search: Map.get(params, "s", "") |> String.trim()
+          basic_search: Map.get(params, "s", "") |> String.trim()
         ],
         order_by: "Newest first"
       )
@@ -34,7 +34,7 @@ defmodule CentralWeb.Communication.BlogFileController do
       Communication.list_blog_files(
         search: [
           # membership: conn,
-          simple_search: Map.get(params, "s", "") |> String.trim()
+          basic_search: Map.get(params, "s", "") |> String.trim()
         ],
         order_by: "Newest first"
       )

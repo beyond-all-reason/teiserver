@@ -6,13 +6,13 @@ defmodule Teiserver.Engine.UnitLib do
   @spec icon :: String.t()
   def icon, do: "far fa-drone-front"
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours, do: Central.Helpers.StylingHelper.colours(:default)
+  @spec colours :: atom
+  def colours, do: :default
 
   @spec make_favourite(Map.t()) :: Map.t()
   def make_favourite(unit) do
     %{
-      type_colour: colours() |> elem(0),
+      type_colour: StylingHelper.colours(colours()) |> elem(0),
       type_icon: icon(),
 
       item_id: unit.id,
@@ -59,7 +59,7 @@ defmodule Teiserver.Engine.UnitLib do
       where: units.id in ^id_list
   end
 
-  def _search(query, :simple_search, ref) do
+  def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from units in query,

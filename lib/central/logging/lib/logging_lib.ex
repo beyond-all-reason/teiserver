@@ -2,8 +2,8 @@ defmodule Central.Logging.LoggingLib do
   @moduledoc false
   import Plug.Conn, only: [assign: 3]
 
-  @spec colours() :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:default)
+  @spec colours() :: atom
+  def colours(), do: :default
 
   @spec icon() :: String.t()
   def icon(), do: "far fa-bars"

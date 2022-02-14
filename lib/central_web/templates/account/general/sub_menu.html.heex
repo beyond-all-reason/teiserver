@@ -1,4 +1,4 @@
-<% {fg, _bg, _bsname} = colours(@active) %>
+<% {fg, _bg, _bsname} = colours(view_colour(@active)) %>
 
 <style>
   .sub-menu-icon a:hover {
@@ -26,7 +26,7 @@
             label: "Groups",
             active: @active,
             url: Routes.account_group_path(@conn, :index),
-            lib: Central.Account.GroupLib
+            icon: Central.Account.GroupLib.icon()
           %>
 
           <%= central_component "sub_menu_icon",
@@ -34,7 +34,7 @@
             label: "Preferences",
             active: @active,
             url: Routes.user_config_path(@conn, :index),
-            lib: Central.Config.UserConfigLib
+            icon: Central.Config.UserConfigLib.icon()
           %>
 
           <%= central_component "sub_menu_icon",
@@ -42,7 +42,7 @@
             label: "Account details",
             active: @active,
             url: Routes.account_registration_path(@conn, :edit_details),
-            lib: Central.Account
+            icon: Central.Account.icon()
           %>
 
           <%= central_component "sub_menu_icon",
@@ -50,7 +50,7 @@
             label: "Password",
             active: @active,
             url: Routes.account_registration_path(@conn, :edit_password),
-            lib: %{icon: "far fa-lock"}
+            icon: "far fa-lock"
           %>
         </div>
 

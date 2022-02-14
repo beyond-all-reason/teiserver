@@ -23,7 +23,7 @@ defmodule CentralWeb.Admin.ReportController do
     reports =
       Account.list_reports(
         search: [
-          simple_search: Map.get(params, "s", "") |> String.trim(),
+          basic_search: Map.get(params, "s", "") |> String.trim(),
           filter: params["filter"] || "all"
         ],
         preload: [

@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Game.GeneralView do
   use TeiserverWeb, :view
 
-  def colours(), do: StylingHelper.colours(:default)
+  def view_colour(), do: :default
   def icon(), do: StylingHelper.icon(:default)
 
-  def colours("queues"), do: Teiserver.Game.QueueLib.colours()
+  def view_colour("queues"), do: Teiserver.Game.QueueLib.colours()
 end

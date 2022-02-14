@@ -26,7 +26,7 @@
       name: "admin",
       label: "Admin",
       active: assigns[:sidemenu_active],
-      lib: Central.Admin,
+      icon: Central.Admin,
       url: Routes.admin_general_path(@conn, :index)
     %>
   <% end %>
@@ -36,7 +36,7 @@
       name: "logging",
       label: "Logging",
       active: assigns[:sidemenu_active],
-      lib: Central.Logging,
+      icon: Central.Logging,
       url: Routes.logging_general_path(@conn, :index)
     %>
   <% end %>
@@ -51,7 +51,7 @@
     name: "account",
     label: "Site account",
     active: assigns[:sidemenu_active],
-    lib: Central.Account,
+    icon: Central.Account,
     url: Routes.account_general_path(@conn, :index)
   %>
 </ul>

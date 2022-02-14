@@ -1,5 +1,3 @@
-<% {_fg, _bg, _bsname} = colours() %>
-
 <%= central_component "detail_line",
   label: "Short content",
   value: @post.short_content,
@@ -21,7 +19,7 @@
   value: (if @post.visible, do: "Post is visible", else: "Post is not visible"),
   link: %{
     path: Routes.blog_path(@conn, :show, @post.url_slug),
-    bsname: Central.Communication.BlogLib.colours |> elem(2),
+    bsname: Central.Communication.BlogLib.colours,
     icon: Central.Communication.BlogLib.icon()
   }
 %>
@@ -43,7 +41,7 @@
   value: @post.poster.name,
   link: %{
     path: "",
-    bsname: Central.Account.UserLib.colours() |> elem(2),
+    bsname: Central.Account.UserLib.colours(),
     icon: Central.Account.UserLib.icon(),
   }
 %>

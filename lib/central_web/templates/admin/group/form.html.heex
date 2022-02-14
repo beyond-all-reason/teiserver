@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
 <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
@@ -16,13 +16,13 @@
 
   <h4><%= if @group_type, do: "Type: #{@group_type.name}", else: "No type selected" %></h4>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= label f, :name, class: "control-label" %>
     <%= text_input f, :name, class: "form-control", autofocus: "autofocus" %>
     <%= error_tag f, :name %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= central_component "checkbox",
       name: "group[active]",
       id: "group_active",
@@ -33,21 +33,21 @@
     %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= label f, :super_group_id, class: "control-label" %>
     <%= select f, :super_group_id, @groups, class: "form-control" %>
     <%= error_tag f, :super_group_id %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= central_component "fa5_icon_picker", %{form: f, field: :icon} %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= input_with_type f, :colour, "color" %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= central_component "checkbox",
       name: "group[see_group]",
       id: "group_see_group",
@@ -58,7 +58,7 @@
     %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= central_component "checkbox",
       name: "group[see_members]",
       id: "group_see_members",
@@ -69,7 +69,7 @@
     %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= central_component "checkbox",
       name: "group[self_add_members]",
       id: "group_self_add_members",
@@ -80,7 +80,7 @@
     %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= central_component "checkbox",
       name: "group[invite_members]",
       id: "group_invite_members",
@@ -93,7 +93,7 @@
 
   <%= if @group_type do %>
     <%= for {f, i} <- Enum.with_index(@group_type.fields) do %>
-      <div class="form-group">
+      <div class="form-group my-3">
         <label for={"group_field_#{i}"} class="control-label"><%= f.name %></label>
 
       <%= case f.type do %>
@@ -122,7 +122,7 @@
 
   <%= if @types do %>
     <br /><hr />
-    <div class="form-group">
+    <div class="form-group my-3">
       <%= label f, :group_type, class: "control-label" %> <em class="text-warning">Be aware, changing the group type can delete type specific information.</em><br />
       <%= select f, :group_type, @types, class: "form-control" %>
       <%= error_tag f, :group_type %>
@@ -130,7 +130,7 @@
     <br />
   <% end %>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= if @changeset.data.id do %>
       <a href={Routes.admin_group_path(@conn, :show, @changeset.data.id)} class="btn btn-secondary">
         Cancel

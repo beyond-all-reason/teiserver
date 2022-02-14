@@ -3,7 +3,10 @@ defmodule Central.Communication.PostLib do
   use CentralWeb, :library
   alias Central.Communication.Post
 
-  def colours(), do: Central.Helpers.StylingHelper.colours(:primary)
+  @spec colours() :: atom
+  def colours(), do: :primary
+
+  @spec icon() :: String.t()
   def icon(), do: "far fa-file-alt"
 
   # Queries
@@ -66,7 +69,7 @@ defmodule Central.Communication.PostLib do
       where: posts.id in ^id_list
   end
 
-  def _search(query, :simple_search, ref) do
+  def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from posts in query,

@@ -5,8 +5,9 @@ defmodule Teiserver.Telemetry.ClientPropertyLib do
   # Functions
   @spec icon :: String.t()
   def icon, do: "far fa-???"
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours, do: Central.Helpers.StylingHelper.colours(:default)
+
+  @spec colours :: atom
+  def colours, do: :default
 
   # Queries
   @spec query_client_properties() :: Ecto.Query.t
@@ -42,7 +43,7 @@ defmodule Teiserver.Telemetry.ClientPropertyLib do
       where: client_properties.id in ^id_list
   end
 
-  def _search(query, :simple_search, ref) do
+  def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from client_properties in query,

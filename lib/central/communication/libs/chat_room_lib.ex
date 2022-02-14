@@ -4,7 +4,10 @@ defmodule Central.Communication.ChatRoomLib do
 
   alias Central.Communication.ChatRoom
 
-  def colours(), do: Central.Helpers.StylingHelper.colours(:success)
+  @spec colours() :: atom
+  def colours(), do: :success
+
+  @spec icon() :: String.t()
   def icon(), do: "far fa-comment"
 
   def icon_full(), do: "fas fa-comment"

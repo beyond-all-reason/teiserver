@@ -60,13 +60,13 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
       |> add_breadcrumb(name: "Matchmaking", url: "/teiserver/game_live/queues")
       |> assign(:match_ready, nil)
       |> assign(:queue_membership, queue_membership)
-      |> assign(:sidemenu_active, "teiserver")
-      |> assign(:colours, QueueLib.colours())
+      |> assign(:view_colour, QueueLib.colours())
+      |> assign(:site_menu_active, "teiserver_admin")
       |> assign(:queues, queues)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:extra_menu_content, extra_content)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "nomenu_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
   end
 
   @impl true

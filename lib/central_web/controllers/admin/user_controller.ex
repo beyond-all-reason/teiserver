@@ -29,7 +29,7 @@ defmodule CentralWeb.Admin.UserController do
       Account.list_users(
         search: [
           admin_group: conn,
-          simple_search: Map.get(params, "s", "") |> String.trim()
+          basic_search: Map.get(params, "s", "") |> String.trim()
         ],
         joins: [:admin_group],
         order: "Name (A-Z)"
@@ -58,7 +58,7 @@ defmodule CentralWeb.Admin.UserController do
           admin_group: conn,
           admin_group: params["admin_group_id"],
           has_admin_group: params["has_admin_group"],
-          simple_search: params["name"],
+          basic_search: params["name"],
           permissions: params["permissions"]
         ],
         joins: [:admin_group],

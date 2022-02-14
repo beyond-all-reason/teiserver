@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -45,10 +45,7 @@
               <th>Super group</th>
               <th>Type</th>
               <th>Perm</th>
-              <th>Members</th>
               <th>&nbsp;</th>
-
-              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -84,8 +81,6 @@
                 <> (if group.self_add_members, do: "A", else: "-")
                 %> 
               </td>
-
-              <td><%= Enum.count(group.memberships) %></td>
 
               <td>
                 <%= link "Show", to: Routes.admin_group_path(@conn, :show, group), class: "btn btn-secondary btn-sm" %>

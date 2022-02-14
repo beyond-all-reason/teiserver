@@ -3,5 +3,5 @@ defmodule Teiserver.Battle.LobbyLib do
   def icon, do: "far fa-sword"
 
   @spec colours :: {String.t(), String.t(), String.t()}
-  def colours, do: Central.Helpers.StylingHelper.colours(:primary2)
+  def colours, do: :primary2
 end

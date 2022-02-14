@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -10,7 +10,7 @@
 
 <%= render CentralWeb.Communication.GeneralView, "sub_menu.html", Map.put(assigns, :active, "files") %>
 
-<div class="row page-row">
+<div class="row mt-3">
   <div class="col-md-12">
 
     <div class={"card card-#{bsname}"}>
@@ -23,7 +23,7 @@
 
         <hr />
 
-<div class="row page-row">
+<div class="row mt-3">
   <div class="col-md-12">
     <div class="float-end">
       <a href={Routes.blog_path(@conn, :show_file, @blog_file.url)} class={"btn btn-outline-#{bsname}"}>

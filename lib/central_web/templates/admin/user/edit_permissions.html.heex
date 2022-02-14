@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -13,7 +13,7 @@
 
 <%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "user"}) %>
 
-<div class="row page-row">
+<div class="row mt-3">
   <div class="col-md-12">
 
     <div class={"card border-#{bsname}"}>

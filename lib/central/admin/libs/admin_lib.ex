@@ -2,8 +2,9 @@ defmodule Central.Admin.AdminLib do
   @moduledoc false
   use CentralWeb, :library
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:info2)
+  @spec colours :: atom
+  def colours(), do: :info2
+
   @spec icon() :: String.t()
   def icon(), do: "fas fa-user-circle"
 

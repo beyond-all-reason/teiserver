@@ -3,8 +3,8 @@ defmodule Teiserver.Telemetry.MatchMonthLogLib do
 
   alias Teiserver.Telemetry.MatchMonthLog
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:warning2)
+  @spec colours :: atom
+  def colours(), do: :warning2
 
   @spec icon() :: String.t()
   def icon(), do: "far fa-bar-chart"

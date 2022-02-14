@@ -4,7 +4,10 @@ defmodule Central.Account.GroupMembershipLib do
 
   alias Central.Account.GroupMembership
 
-  def colours(), do: Central.Helpers.StylingHelper.colours(:primary2)
+  @spec colours :: atom
+  def colours(), do: :primary2
+
+  @spec icon :: String.t()
   def icon(), do: "far fa-users"
 
   @spec get_group_memberships() :: Ecto.Query.t()

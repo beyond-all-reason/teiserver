@@ -1,16 +1,16 @@
 defmodule TeiserverWeb.Account.GeneralView do
   use TeiserverWeb, :view
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: StylingHelper.colours(:success)
+  @spec view_colour :: atom
+  def view_colour(), do: :success
 
   @spec icon() :: String.t()
   def icon(), do: "fas fa-user"
 
-  @spec colours(String.t()) :: {String.t(), String.t(), String.t()}
-  def colours("profile"), do: StylingHelper.colours(:primary)
-  def colours("relationships"), do: StylingHelper.colours(:info)
-  def colours("customisation"), do: Central.Config.UserConfigLib.colours()
-  def colours("preferences"), do: Central.Config.UserConfigLib.colours()
-  def colours("clans"), do: Teiserver.Clans.ClanLib.colours()
+  @spec view_colour(String.t()) :: atom
+  def view_colour("profile"), do: :primary
+  def view_colour("relationships"), do: :info
+  def view_colour("customisation"), do: Central.Config.UserConfigLib.colours()
+  def view_colour("preferences"), do: Central.Config.UserConfigLib.colours()
+  def view_colour("clans"), do: Teiserver.Clans.ClanLib.colours()
 end

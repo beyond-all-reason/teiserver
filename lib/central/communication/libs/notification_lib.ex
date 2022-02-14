@@ -3,10 +3,16 @@ defmodule Central.Communication.NotificationLib do
   use CentralWeb, :library
   alias Central.Communication.Notification
 
-  def colours(), do: Central.Helpers.StylingHelper.colours(:primary)
+  @spec colours() :: atom
+  def colours(), do: :primary
+
+  @spec icon() :: String.t()
   def icon(), do: "far fa-bell"
 
+  @spec icon_full() :: String.t()
   def icon_full(), do: "fas fa-bell"
+
+  @spec icon_empty() :: String.t()
   def icon_empty(), do: "fad fa-bell"
 
   # Queries

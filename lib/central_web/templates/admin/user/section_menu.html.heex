@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -11,23 +11,47 @@
   });
 </script>
 
-<a href={Routes.admin_user_path(@conn, :index)} class={"btn btn-outline-#{bsname}"} id="section-menu-index">
-  <i class="far fa-bars"></i>
-  &nbsp;
-  List
-</a>
+<%= central_component "section_menu_button",
+  name: "list",
+  label: "List",
+  active: @active,
+  icon: StylingHelper.icon(:list, "thin"),
+  bsname: bsname,
+  url: Routes.admin_user_path(@conn, :index)
+%>
 
-<a href={"#{Routes.admin_user_path(@conn, :index)}?search=true"} class={"btn btn-outline-#{bsname}"} id="section-menu-search">
-  <i class="far fa-search"></i>
-  &nbsp;
-  Advanced search
-</a>
+<%= central_component "section_menu_button",
+  name: "search",
+  label: "Search",
+  active: @active,
+  icon: StylingHelper.icon(:search, "thin"),
+  bsname: bsname,
+  url: Routes.admin_user_path(@conn, :index) <> "?search=true"
+%>
 
-<a href={Routes.admin_user_path(@conn, :new)} class={"btn btn-outline-#{bsname}"} id="section-menu-new">
-  <i class="far fa-plus"></i>
-  &nbsp;
-  New
-</a>
+<%= central_component "section_menu_button",
+  name: "new",
+  label: "New",
+  active: @active,
+  icon: StylingHelper.icon(:new, "thin"),
+  bsname: bsname,
+  url: Routes.admin_user_path(@conn, :new)
+%>
+
+<%= case @active do %>
+  <% "show" -> %>
+    <%= central_component "section_menu_button",
+      name: "show",
+      label: "Show",
+      active: @active,
+      icon: StylingHelper.icon(:show, "thin"),
+      bsname: bsname,
+      url: "#"
+    %>
+
+  <% _ -> %>
+    
+<% end %>
 
 <form action={Routes.admin_user_path(@conn, :index)} method="get" class="float-end form-inline d-none d-md-block">
   <div class="input-group">

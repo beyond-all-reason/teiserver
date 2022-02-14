@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -145,7 +145,7 @@
     </div>
   </div>
 
-  <div class="row page-row">
+  <div class="row mt-3">
     <div class="col-md-12">
       <%= label f, :content, class: "control-label" %>
       <%= textarea f, :content, class: "form-control", rows: (if @content_mode, do: 40, else: 12), style: "font-family: monospace;"  %>
@@ -201,7 +201,7 @@
     </div>
   </div>
 
-  <div class="row page-row">
+  <div class="row mt-3">
     <div class="col-md-12">
       <%= if @changeset.data.id do %>
         <a href={Routes.blog_post_path(@conn, :show, @changeset.data.id)} class="btn btn-secondary">

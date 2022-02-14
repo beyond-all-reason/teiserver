@@ -27,7 +27,7 @@ defmodule TeiserverWeb.AgentLive.Index do
       |> assign(:colours, Central.Admin.ToolLib.colours())
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "nomenu_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
   end
 
   @impl true

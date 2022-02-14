@@ -78,7 +78,7 @@ defmodule Central.Account.UserQueries do
       where: ilike(users.name, ^uname)
   end
 
-  def _search(query, :simple_search, value) do
+  def _search(query, :basic_search, value) do
     from users in query,
       where:
         ilike(users.name, ^"%#{value}%") or

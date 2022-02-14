@@ -3,7 +3,10 @@ defmodule Central.Communication.CommentLib do
   use CentralWeb, :library
   alias Central.Communication.Comment
 
-  def colours(), do: Central.Helpers.StylingHelper.colours(:info)
+  @spec colours() :: atom
+  def colours(), do: :info
+
+  @spec icon() :: String.t()
   def icon(), do: "far fa-comment"
 
   # Queries
@@ -40,7 +43,7 @@ defmodule Central.Communication.CommentLib do
       where: comments.id in ^id_list
   end
 
-  def _search(query, :simple_search, ref) do
+  def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from comments in query,

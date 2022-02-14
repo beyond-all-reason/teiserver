@@ -1,4 +1,4 @@
-<% {fg, _bg, _bsname} = colours(@active) %>
+<% {fg, _bg, _bsname} = view_colour(@active) |> colours() %>
 
 <style>
   .sub-menu-icon a:hover {
@@ -26,7 +26,7 @@
             label: "TS Dashboard",
             active: @active,
             url: Routes.ts_admin_dash_index_path(@conn, :index),
-            lib: %{icon: "fas fa-gauge"}
+            icon: "fas fa-gauge"
           %>
 
           <%= if allow?(@conn, "teiserver.moderator.account") do %>
@@ -35,7 +35,7 @@
               label: "Users",
               active: @active,
               url: Routes.ts_admin_user_path(@conn, :index),
-              lib: %{icon: "fas fa-users"}
+              icon: "fas fa-users"
             %>
           <% end %>
 
@@ -45,7 +45,7 @@
               label: "Queues",
               active: @active,
               url: Routes.ts_game_queue_path(@conn, :index),
-              lib: Teiserver.Game.QueueLib
+              icon: Teiserver.Game.QueueLib.icon()
             %>
           <% end %>
 
@@ -55,7 +55,7 @@
               label: "Ban hashes",
               active: @active,
               url: Routes.ts_admin_ban_hash_path(@conn, :index),
-              lib: Teiserver.Account.BanHashLib
+              icon: Teiserver.Account.BanHashLib.icon()
             %>
           <% end %>
 
@@ -65,7 +65,7 @@
               label: "Chat",
               active: @active,
               url: Routes.ts_admin_chat_path(@conn, :index),
-              lib: Central.Communication.CommentLib
+              icon: Central.Communication.CommentLib.icon()
             %>
           <% end %>
 
@@ -75,7 +75,7 @@
               label: "Tools",
               active: @active,
               url: Routes.ts_admin_tool_path(@conn, :index),
-              lib: Central.Admin.ToolLib
+              icon: Central.Admin.ToolLib.icon()
             %>
           <% end %>
         </div>

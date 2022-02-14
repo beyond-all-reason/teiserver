@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -19,7 +19,7 @@
     <br />
   <% end %>
 
-<div class="row page-row">
+<div class="row mt-3">
   <div class="col-lg-12 form-input-col">
     <div class="form-group">
       <%= label f, :name, class: "control-label" %>

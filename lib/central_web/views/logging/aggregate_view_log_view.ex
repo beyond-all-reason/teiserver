@@ -1,7 +1,7 @@
 defmodule CentralWeb.Logging.AggregateViewLogView do
   use CentralWeb, :view
 
-  def colours(), do: Central.Logging.AggregateViewLogLib.colours()
+  def view_colour(), do: Central.Logging.AggregateViewLogLib.colours()
   # def gradient(), do: {"#112266", "#6688CC"}
   def icon(), do: Central.Logging.AggregateViewLogLib.icon()
 

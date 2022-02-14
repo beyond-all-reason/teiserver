@@ -2,15 +2,13 @@ defmodule Teiserver.HookServer do
   use GenServer
   alias Phoenix.PubSub
   alias Teiserver.Coordinator
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, nil, opts)
   end
 
-  # GenServer callbacks
   @impl true
-  def handle_info(%{event: event, topic: "account_hooks", payload: payload}, state) do
+  def handle_info({:account_hooks, event, payload}, state) do
     start_completed =
       ConCache.get(:application_metadata_cache, "teiserver_full_startup_completed") == true
 
@@ -20,18 +18,18 @@ defmodule Teiserver.HookServer do
       nil ->
         nil
 
-      "create_user" ->
-        Teiserver.User.recache_user(int_parse(payload))
+      :create_user ->
+        Teiserver.User.recache_user(payload.id)
 
-      "update_user" ->
-        Teiserver.User.recache_user(int_parse(payload))
+      :update_user ->
+        Teiserver.User.recache_user(payload.id)
 
-      "create_report" ->
-        Coordinator.cast_coordinator({:new_report, int_parse(payload)})
-        Teiserver.User.create_report(int_parse(payload))
+      :create_report ->
+        Coordinator.cast_coordinator({:new_report, payload.id})
+        Teiserver.User.create_report(payload.id)
 
-      "update_report" ->
-        Teiserver.User.update_report(int_parse(payload))
+      :update_report ->
+        Teiserver.User.update_report(payload.id)
 
       _ ->
         throw("No HookServer account_hooks handler for event '#{event}'")
@@ -40,9 +38,9 @@ defmodule Teiserver.HookServer do
     {:noreply, state}
   end
 
-  def handle_info(%{event: event, topic: "application", payload: _payload}, state) do
-    case event do
-      "prep_stop" ->
+  def handle_info({:application, app_event}, state) do
+    case app_event do
+      :prep_stop ->
         # Currently we don't do anything but we will
         # later want to tell each client everything is stopping for a
         # minute or two
@@ -54,7 +52,7 @@ defmodule Teiserver.HookServer do
         :ok
 
       _ ->
-        throw("No HookServer application handler for event '#{event}'")
+        throw("No HookServer application handler for event '#{app_event}'")
     end
 
     {:noreply, state}

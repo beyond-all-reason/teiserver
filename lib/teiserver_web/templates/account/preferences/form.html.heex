@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <form action={@action} method='post' class=''>
   <input type='hidden' name='_csrf_token' value={get_csrf_token()} />

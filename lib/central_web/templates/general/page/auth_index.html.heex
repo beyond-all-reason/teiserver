@@ -91,7 +91,7 @@
       <a href={Routes.communication_notification_path(@conn, :index)}>
         <%= central_component "icon", icon: notification_icon, class: "fa-3x" %>
         <%= if @user_notifications_unread_count > 0 do %>
-          <div class={"badge badge-pill badge-#{Central.Communication.NotificationLib.colours() |> elem(2)}"}
+          <div class={"badge badge-pill badge-#{Central.Communication.NotificationLib.colours() |> colours()}"}
             id="communication-notifications-badge"
             style="width: 65px; margin-left:-60px; font-size: 1em;">
             <%= @user_notifications_unread_count %>
@@ -116,7 +116,7 @@
         <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
         <a data-submit="parent" href="#" rel="nofollow" onclick="$('#signout-form').submit();">
-          <i class="fa-duotone fa-sign-out-alt fa-fw fa-3x"></i><br />
+          <i class="fad fa-sign-out-alt fa-fw fa-3x"></i><br />
           Sign out
         </a>
       </form>

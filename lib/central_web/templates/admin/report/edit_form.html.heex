@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <%= form_for @changeset, Routes.admin_report_path(@conn, :update, @report), fn _f -> %>
   <%= if @changeset.action do %>

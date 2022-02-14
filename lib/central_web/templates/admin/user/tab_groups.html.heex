@@ -9,7 +9,7 @@
         </td>
         <td><%= group.name %></td>
         <td>
-          <a href={Routes.admin_group_path(@conn, :show, group.id)} class={"btn btn-sm btn-outline btn-#{elem(Central.Account.GroupLib.colours(), 2)}"}>
+          <a href={Routes.admin_group_path(@conn, :show, group.id)} class={"btn btn-sm btn-outline btn-#{elem(Central.Account.GroupLib.colours() |> colours(), 2)}"}>
             Show
           </a>
         </td>

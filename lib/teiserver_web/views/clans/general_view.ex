@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Clans.GeneralView do
   use TeiserverWeb, :view
 
-  def colours(), do: StylingHelper.colours(:success)
+  def view_colour(), do: :success
   def icon(), do: StylingHelper.icon(:success)
 
-  def colours("relationships"), do: StylingHelper.colours(:info)
-  def colours("clans"), do: StylingHelper.colours(:info)
+  def view_colour("relationships"), do: StylingHelper.colours(:info)
+  def view_colour("clans"), do: StylingHelper.colours(:info)
 end

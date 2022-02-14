@@ -4,8 +4,11 @@
 
   icon = if is_active do
     icon
+    |> String.replace("fa-regular ", "fa-solid ")
     |> String.replace("far ", "fas ")
+    |> String.replace("fa-light ", "fa-solid ")
     |> String.replace("fal ", "fas ")
+    |> String.replace("fa-thin ", "fa-solid ")
   else
     icon
   end

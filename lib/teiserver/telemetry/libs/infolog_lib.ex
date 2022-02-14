@@ -3,8 +3,8 @@ defmodule Teiserver.Telemetry.InfologLib do
   alias Teiserver.Telemetry.Infolog
 
   # Functions
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:success2)
+  @spec colours :: atom
+  def colours(), do: :success2
 
   @spec icon() :: String.t()
   def icon(), do: "far fa-barcode-scan"
@@ -53,7 +53,7 @@ defmodule Teiserver.Telemetry.InfologLib do
       where: between(infologs.timestamp, ^start_date, ^end_date)
   end
 
-  def _search(query, :simple_search, ref) do
+  def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from infologs in query,

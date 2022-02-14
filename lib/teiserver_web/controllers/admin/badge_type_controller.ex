@@ -22,7 +22,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
   def index(conn, params) do
     badge_types = Account.list_badge_types(
       search: [
-        simple_search: Map.get(params, "s", "") |> String.trim,
+        basic_search: Map.get(params, "s", "") |> String.trim,
       ],
       order_by: "Name (A-Z)"
     )

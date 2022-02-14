@@ -5,6 +5,7 @@ defmodule Central.Account do
 
   import Ecto.Query, warn: false
   alias Central.Helpers.QueryHelpers
+  alias Phoenix.PubSub
   alias Central.Repo
 
   alias Argon2
@@ -13,6 +14,7 @@ defmodule Central.Account do
   alias Central.Account.UserQueries
   import Central.Logging.Helpers, only: [add_anonymous_audit_log: 3]
 
+  @spec icon :: String.t()
   def icon, do: "fad fa-user-alt"
 
   defp user_query(args) do
@@ -135,10 +137,10 @@ defmodule Central.Account do
   end
 
   def broadcast_create_user({:ok, user}) do
-    CentralWeb.Endpoint.broadcast(
+    PubSub.broadcast(
+      Central.PubSub,
       "account_hooks",
-      "create_user",
-      user.id
+      {:account_hooks, :create_user, user}
     )
 
     {:ok, user}
@@ -147,10 +149,10 @@ defmodule Central.Account do
   def broadcast_create_user(v), do: v
 
   def broadcast_update_user({:ok, user}) do
-    CentralWeb.Endpoint.broadcast(
+    PubSub.broadcast(
+      Central.PubSub,
       "account_hooks",
-      "update_user",
-      user.id
+      {:account_hooks, :update_user, user}
     )
 
     {:ok, user}
@@ -791,10 +793,10 @@ defmodule Central.Account do
   end
 
   def broadcast_create_report({:ok, report}) do
-    CentralWeb.Endpoint.broadcast(
+    PubSub.broadcast(
+      Central.PubSub,
       "account_hooks",
-      "create_report",
-      report.id
+      {:account_hooks, :create_report, report}
     )
 
     {:ok, report}
@@ -822,10 +824,10 @@ defmodule Central.Account do
   end
 
   def broadcast_update_report({:ok, report}) do
-    CentralWeb.Endpoint.broadcast(
+    PubSub.broadcast(
+      Central.PubSub,
       "account_hooks",
-      "update_report",
-      report.id
+      {:account_hooks, :update_report, report}
     )
 
     {:ok, report}

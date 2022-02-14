@@ -27,7 +27,7 @@ defmodule TeiserverWeb.Admin.UserController do
       Account.list_users(
         search: [
           admin_group: conn,
-          simple_search: Map.get(params, "s", "") |> String.trim()
+          basic_search: Map.get(params, "s", "") |> String.trim()
         ],
         order_by: "Newest first",
         limit: 50
@@ -61,7 +61,7 @@ defmodule TeiserverWeb.Admin.UserController do
       Account.list_users(
         search: [
           admin_group: conn,
-          simple_search: Map.get(params, "name", "") |> String.trim(),
+          basic_search: Map.get(params, "name", "") |> String.trim(),
           bot: params["bot"],
           moderator: params["moderator"],
           verified: params["verified"],

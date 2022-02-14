@@ -1,4 +1,4 @@
-<div class="row page-row">
+<div class="row mt-3">
   <%= central_component "menu_card", icon_class: "fas", name: "", icon: "far fa-barcode-scan", text: "Coverage", link: Routes.admin_tool_path(@conn, :coverage_form) %>
   <%= central_component "menu_card", icon_class: "fas", name: "", icon: "far fa-exclamation-triangle", text: "Test errors", link: Routes.admin_tool_path(@conn, :test_error) %>
   <%= central_component "menu_card", icon_class: "fas", name: "", icon: "far fa-map-marker-question", text: "Test page", link: Routes.admin_tool_path(@conn, :test_page) %>
@@ -7,6 +7,6 @@
   <%= central_component "menu_card", icon_class: "fas", name: "", icon: "far fa-brackets-curly", text: "Conn params", link: Routes.admin_tool_path(@conn, :conn_params) %>
 </div>
 
-<div class="row page-row">
+<div class="row mt-3">
   <%= central_component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.admin_general_path(@conn, :index) %>
 </div>

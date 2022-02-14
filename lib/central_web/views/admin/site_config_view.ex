@@ -7,6 +7,6 @@ defmodule CentralWeb.Admin.SiteConfigView do
     |> tl
   end
 
-  def colours(), do: Central.Config.SiteConfigLib.colours()
+  def view_colour(), do: Central.Config.SiteConfigLib.colours()
   def icon(), do: Central.Config.SiteConfigLib.icon()
 end

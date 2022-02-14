@@ -13,7 +13,7 @@ defmodule CentralWeb.Account.GroupController do
         search: [
           active: "Active",
           public: conn.assigns[:memberships],
-          simple_search: Map.get(params, "s", "")
+          basic_search: Map.get(params, "s", "")
         ],
         joins: [:super_group, :memberships],
         order: "Name (A-Z)"

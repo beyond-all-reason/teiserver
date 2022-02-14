@@ -1,21 +1,14 @@
-<% {fg, _bg, bsname} = colours() %>
+<% {fg, _bg, bsname} = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
     $('.datepicker').datepicker({
       format: "dd/mm/yyyy"
     });
-
-    $('select').select2({
-      width: "100%",
-    });
   });
 </script>
 
 <%= central_component "icon_dropdown_js", [] %>
-
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
-<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
 
 <div class="search-row">
   <div class={"btn btn-outline-#{bsname}"} onclick="show_search();" id="search-box-shower">

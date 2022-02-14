@@ -24,7 +24,7 @@
 </script>
 
 <%= if Kernel.function_exported?(@conn.private.phoenix_view, :colours, 0) do %>
-  <% {fg, bg, _bsname} = @conn.private.phoenix_view.colours() %>
+  <% {fg, bg, _bsname} = @conn.private.phoenix_view.view_colour() %>
   <style type="text/css">
     @media print {
       #menu, #header, #navigation {

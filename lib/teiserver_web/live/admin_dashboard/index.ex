@@ -15,14 +15,14 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Dashboard", url: "/teiserver/admin/dashboard")
-      |> assign(:sidemenu_active, "teiserver")
-      |> assign(:colours, Central.Admin.AdminLib.colours())
+      |> assign(:site_menu_active, "teiserver_admin")
+      |> assign(:view_colour, Central.Admin.AdminLib.colours())
       |> assign(:telemetry_loading, true)
       |> assign(:telemetry_client, nil)
       |> assign(:telemetry_battle, nil)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "nomenu_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
   end
 
   @impl true

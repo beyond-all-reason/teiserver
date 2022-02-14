@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <style type="text/css">
   .exception-logo {
@@ -34,7 +34,7 @@
     value: "#{@log.user.name} - #{@log.user.email}",
     link: %{
       path: Routes.admin_user_path(@conn, :show, @log.user_id),
-      bsname: elem(Central.Account.UserLib.colours(), 2),
+      bsname: elem(Central.Account.UserLib.colours() |> colours(), 2),
       icon: Central.Account.UserLib.icon(),
     }
   %>

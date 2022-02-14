@@ -17,7 +17,7 @@ defmodule CentralWeb.Communication.PostController do
       Communication.list_posts(
         search: [
           # membership: conn,
-          # simple_search: Map.get(params, "s", "") |> String.trim,
+          # basic_search: Map.get(params, "s", "") |> String.trim,
         ],
         joins: [:category, :poster],
         order_by: "Newest first"
@@ -34,7 +34,7 @@ defmodule CentralWeb.Communication.PostController do
   #   posts = Communication.list_posts(
   #     search: [
   #       # membership: conn,
-  #       simple_search: Map.get(params, "s", "") |> String.trim,
+  #       basic_search: Map.get(params, "s", "") |> String.trim,
   #     ],
   #     order_by: "Newest first"
   #   )

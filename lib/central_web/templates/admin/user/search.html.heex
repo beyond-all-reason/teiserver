@@ -1,4 +1,4 @@
-<% {fg, _bg, bsname} = colours() %>
+<% {fg, _bg, bsname} = view_colour() |> colours %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -27,13 +27,13 @@
     <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
     <div class="row">
-      <div class="col-md-4 col-xl-2 search-form-input">
+      <div class="col-md-4 col-xl-2 my-2">
         <label for="search_name" class="control-label">Name/Email: </label>
         <input type="text" name="search[name]" id="search_name" value={@params["name"]} placeholder="" class="form-control" />
       </div>
 
       <%= if allow?(@current_user, "admin.admin.full") do %>
-        <div class="col-md-4 col-xl-2 search-form-input">
+        <div class="col-md-4 col-xl-2 my-2">
           <label for="search_admin_group" class="control-label">Admin group: </label>
           <%= central_component "icon_dropdown", %{
             name: "search[admin_group_id]",
@@ -44,7 +44,7 @@
           } %>
         </div>
 
-        <div class="col-md-4 col-xl-2 search-form-input">
+        <div class="col-md-4 col-xl-2 my-2">
           <label for="search_has_admin_group" class="control-label">Has admin group: </label>
           <%= central_component "icon_dropdown", %{
             name: "search[has_admin_group]",
@@ -59,14 +59,15 @@
         </div>
       <% end %>
 
-      <div class="col-md-4 col-xl-2 search-form-input">
+      <div class="col-md-4 col-xl-2 my-2">
         <label for="search_limit" class="control-label">Limit: </label>
         <input type="text" name="search[limit]" id="search_limit" value={@params["limit"]} placeholder="" class="form-control" />
       </div>
 
-      <div class="col-md-4 col-xl-2 search-form-input">
+      <div class="col-md-4 col-xl-2 my-2">
         <label for="search_order" class="control-label">Order by: </label>
-        <%= central_component "icon_dropdown", %{
+        <%= select :search, :active, ["Name (A-Z)", "Name (Z-A)", "Newest first", "Oldest first"], class: "form-control" %>
+        <%#= central_component "icon_dropdown", %{
           name: "search[order]",
           id: "search_order",
           selected: @params["order"],

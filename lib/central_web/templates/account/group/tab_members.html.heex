@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <%= if not @group_access[:is_member] and (@group_access[:self_add_members] or @group_access[:invite_members]) do %>
   <form action={Routes.account_group_path(@conn, :create_membership)} method="post" class="form-horizontal">

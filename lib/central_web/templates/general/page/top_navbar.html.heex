@@ -45,7 +45,7 @@
           %>
         <% end %>
         
-        <%= for view <- Application.get_env(:central, Extensions)[:side_views] do %>
+        <%= for view <- Application.get_env(:central, Extensions)[:topmenu_views] do %>
           <%= render view, "top_nav.html", assigns %>
         <% end %>  
       </ul>

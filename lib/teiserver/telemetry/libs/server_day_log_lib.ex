@@ -3,8 +3,8 @@ defmodule Teiserver.Telemetry.ServerDayLogLib do
 
   alias Teiserver.Telemetry.ServerDayLog
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:warning)
+  @spec colours :: atom
+  def colours(), do: :warning
 
   @spec icon() :: String.t()
   def icon(), do: "far fa-monitor-heart-rate"

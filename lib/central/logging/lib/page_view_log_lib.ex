@@ -2,7 +2,10 @@ defmodule Central.Logging.PageViewLogLib do
   @moduledoc false
   use CentralWeb, :library
 
-  def colours(), do: Central.Helpers.StylingHelper.colours(:info)
+  @spec colours() :: atom
+  def colours(), do: :info
+
+  @spec icon() :: String.t()
   def icon(), do: "far fa-chart-line"
 
   alias Central.Logging.PageViewLog

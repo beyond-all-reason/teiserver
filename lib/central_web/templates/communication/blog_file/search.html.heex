@@ -1,4 +1,4 @@
-<% {fg, _bg, bsname} = colours() %>
+<% {fg, _bg, bsname} = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -17,7 +17,7 @@
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
 <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
 
-<div class="row page-row">
+<div class="row mt-3">
   <div class="col-md-12">
     <div class={"card card-#{bsname}"}>
       <div class="card-body">

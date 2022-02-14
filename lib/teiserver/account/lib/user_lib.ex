@@ -7,13 +7,13 @@ defmodule Teiserver.Account.UserLib do
   @spec icon :: String.t()
   def icon, do: "far fa-user-robot"
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours, do: Central.Helpers.StylingHelper.colours(:success)
+  @spec colours :: atom
+  def colours, do: :success
 
   @spec make_favourite(Central.Account.User.t()) :: Map.t()
   def make_favourite(user) do
     %{
-      type_colour: colours() |> elem(0),
+      type_colour: StylingHelper.colours(colours()) |> elem(0),
       type_icon: icon(),
       item_id: user.id,
       item_type: "teiserver_user",

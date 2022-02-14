@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Admin.BanHashController do
   def index(conn, _params) do
     ban_hashes = Account.list_ban_hashes(
       search: [
-        # simple_search: Map.get(params, "s", "") |> String.trim,
+        # basic_search: Map.get(params, "s", "") |> String.trim,
       ],
       preload: [:user, :added_by],
       order_by: "Newest first"

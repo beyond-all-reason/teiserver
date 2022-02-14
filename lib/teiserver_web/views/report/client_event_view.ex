@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Report.ClientEventView do
   use TeiserverWeb, :view
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Teiserver.Telemetry.ClientEventLib.colours()
+  @spec view_colour :: atom
+  def view_colour(), do: Teiserver.Telemetry.ClientEventLib.colour()
 
   @spec icon() :: String.t()
   def icon(), do: Teiserver.Telemetry.ClientEventLib.icon()

@@ -21,7 +21,7 @@ defmodule CentralWeb.Admin.CodeController do
     codes =
       Account.list_codes(
         search: [
-          simple_search: Map.get(params, "s", "") |> String.trim()
+          basic_search: Map.get(params, "s", "") |> String.trim()
         ],
         preload: [:user],
         order_by: "Newest first"

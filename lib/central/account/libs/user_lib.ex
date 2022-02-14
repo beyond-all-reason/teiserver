@@ -5,8 +5,8 @@ defmodule Central.Account.UserLib do
   alias Central.Account.User
   alias Central.Account.GroupLib
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:primary)
+  @spec colours :: atom
+  def colours(), do: :primary
 
   @spec icon :: String.t()
   def icon(), do: "far fa-user"
@@ -14,7 +14,7 @@ defmodule Central.Account.UserLib do
   @spec make_favourite(User.t()) :: Map.t()
   def make_favourite(user) do
     %{
-      type_colour: colours() |> elem(0),
+      type_colour: StylingHelper.colours(colours()) |> elem(0),
       type_icon: icon(),
       item_id: user.id,
       item_type: "central_user",

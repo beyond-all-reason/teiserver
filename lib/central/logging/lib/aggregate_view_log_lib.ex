@@ -6,7 +6,10 @@ defmodule Central.Logging.AggregateViewLogLib do
   alias Central.Logging.AggregateViewLog
   alias Central.Logging.PageViewLog
 
-  def colours(), do: Central.Helpers.StylingHelper.colours(:info2)
+  @spec colours() :: atom
+  def colours(), do: :info2
+
+  @spec icon() :: String.t()
   def icon(), do: "far fa-chart-area"
 
   def get_logs() do

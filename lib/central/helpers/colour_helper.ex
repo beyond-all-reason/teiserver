@@ -40,26 +40,6 @@ defmodule Central.Helpers.ColourHelper do
     }
   end
 
-  # def new(nil), do: new("#000000")
-  # def new(""), do: new("#000000")
-  # def new("primary"), do: new("#007bff")
-  # def new("primary2"), do: new("#990088")
-
-  # def new("info"), do: new("#22AACC")
-  # def new("info2"), do: new("#17b0ad")
-
-  # def new("success"), do: new("#22AA44")
-  # def new("success2"), do: new("#079110")
-
-  # def new("warning"), do: new("#ffb606")
-  # def new("warning2"), do: new("#CC4400")
-
-  # def new("danger"), do: new("#e74c3c")
-  # def new("danger2"), do: new("#AA1122")
-
-  # def new("negative"), do: new("#AAAAAA")
-  # def new("negative2"), do: new("#777777")
-
   def new(rgb_string) do
     rgb_list =
       rgb_string

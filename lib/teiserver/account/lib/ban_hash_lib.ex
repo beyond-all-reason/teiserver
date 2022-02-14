@@ -6,13 +6,13 @@ defmodule Teiserver.Account.BanHashLib do
   @spec icon :: String.t()
   def icon, do: "far fa-ban"
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours, do: Central.Helpers.StylingHelper.colours(:danger)
+  @spec colours :: atom
+  def colours, do: :danger
 
   @spec make_favourite(Map.t()) :: Map.t()
   def make_favourite(ban_hash) do
     %{
-      type_colour: colours() |> elem(0),
+      type_colour: StylingHelper.colours(colours()) |> elem(0),
       type_icon: icon(),
 
       item_id: ban_hash.id,

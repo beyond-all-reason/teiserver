@@ -1,4 +1,4 @@
-<% {fg, _bg, _bsname} = colours(@active) %>
+<% {fg, _bg, _bsname} = view_colour(@active) |> colours() %>
 
 <style>
   .sub-menu-icon a:hover {
@@ -27,7 +27,7 @@
               label: "Matchmaking",
               active: @active,
               url: Routes.ts_game_queue_path(@conn, :index),
-              lib: Teiserver.Game.QueueLib
+              icon: Teiserver.Game.QueueLib.icon()
             %>
           <% end %>
         </div>

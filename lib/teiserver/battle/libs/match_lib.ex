@@ -8,7 +8,7 @@ defmodule Teiserver.Battle.MatchLib do
   def icon, do: "far fa-swords"
 
   @spec colours :: {String.t(), String.t(), String.t()}
-  def colours, do: Central.Helpers.StylingHelper.colours(:success2)
+  def colours, do: :success2
 
   @spec game_type(T.lobby(), map()) :: <<_::24, _::_*8>>
   def game_type(lobby, teams) do
@@ -98,12 +98,13 @@ defmodule Teiserver.Battle.MatchLib do
   @spec make_favourite(Map.t()) :: Map.t()
   def make_favourite(match) do
     %{
-      type_colour: colours() |> elem(0),
+      type_colour: StylingHelper.colours(colours()) |> elem(0),
       type_icon: icon(),
 
       item_id: match.id,
       item_type: "teiserver_battle_match",
-      item_colour: colours() |> elem(0),
+      # TODO: Make this colour/icon based on type of match
+      item_colour: StylingHelper.colours(colours()) |> elem(0),
       item_icon: Teiserver.Battle.MatchLib.icon(),
       item_label: make_match_name(match),
 
@@ -175,7 +176,7 @@ defmodule Teiserver.Battle.MatchLib do
       where: not is_nil(matches.started)
   end
 
-  def _search(query, :simple_search, ref) do
+  def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from matches in query,

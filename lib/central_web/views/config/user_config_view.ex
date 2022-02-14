@@ -7,6 +7,6 @@ defmodule CentralWeb.Config.UserConfigView do
     |> tl
   end
 
-  def colours(), do: Central.Config.UserConfigLib.colours()
+  def view_colour(), do: Central.Config.UserConfigLib.colours()
   def icon(), do: Central.Config.UserConfigLib.icon()
 end

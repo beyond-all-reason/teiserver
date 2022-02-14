@@ -3,8 +3,8 @@ defmodule Central.Account.CodeLib do
   use CentralWeb, :library
   alias Central.Account.Code
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:info)
+  @spec colours :: atom
+  def colours(), do: :info
 
   @spec icon :: String.t()
   def icon(), do: "far fa-octagon"

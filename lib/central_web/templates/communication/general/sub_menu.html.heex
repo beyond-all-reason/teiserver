@@ -1,4 +1,4 @@
-<% {fg, _bg, _bsname} = colours(@active) %>
+<% {fg, _bg, _bsname} = colours(view_colour(@active)) %>
 
 <style>
   .sub-menu-icon a:hover {
@@ -26,7 +26,7 @@
             label: "Blog",
             active: @active,
             url: Routes.blog_path(@conn, :index),
-            lib: Central.Communication.BlogLib
+            icon: Central.Communication.BlogLib.icon()
           %>
 
           <%= central_component "sub_menu_icon",
@@ -34,7 +34,7 @@
             label: "Posts",
             active: @active,
             url: Routes.blog_post_path(@conn, :index),
-            lib: Central.Communication.PostLib
+            icon: Central.Communication.PostLib.icon()
           %>
 
           <%= central_component "sub_menu_icon",
@@ -42,7 +42,7 @@
             label: "Categories",
             active: @active,
             url: Routes.blog_category_path(@conn, :index),
-            lib: Central.Communication.CategoryLib
+            icon: Central.Communication.CategoryLib.icon()
           %>
 
           <%= central_component "sub_menu_icon",
@@ -50,7 +50,7 @@
             label: "Comments",
             active: @active,
             url: Routes.blog_comment_path(@conn, :index),
-            lib: Central.Communication.CommentLib
+            icon: Central.Communication.CommentLib.icon()
           %>
 
           <%= central_component "sub_menu_icon",
@@ -58,7 +58,7 @@
             label: "Files",
             active: @active,
             url: Routes.blog_file_path(@conn, :index),
-            lib: Central.Communication.BlogFileLib
+            icon: Central.Communication.BlogFileLib.icon()
           %>
         </div>
 

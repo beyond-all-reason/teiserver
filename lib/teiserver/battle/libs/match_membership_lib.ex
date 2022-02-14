@@ -3,7 +3,7 @@ defmodule Teiserver.Battle.MatchMembershipLib do
 
   alias Teiserver.Battle.MatchMembership
 
-  def colours(), do: Central.Helpers.StylingHelper.colours(:primary2)
+  def colours(), do: :primary2
   def icon(), do: "far fa-users"
 
   @spec get_match_memberships() :: Ecto.Query.t()

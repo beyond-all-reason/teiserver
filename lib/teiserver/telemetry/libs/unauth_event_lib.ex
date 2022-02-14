@@ -3,8 +3,8 @@ defmodule Teiserver.Telemetry.UnauthEventLib do
   alias Teiserver.Telemetry.UnauthEvent
 
   # Functions
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:info2)
+  @spec colours :: atom
+  def colours(), do: :info2
 
   @spec icon() :: String.t()
   def icon(), do: "far fa-sliders-up"
@@ -38,7 +38,7 @@ defmodule Teiserver.Telemetry.UnauthEventLib do
       where: unauth_events.id in ^id_list
   end
 
-  def _search(query, :simple_search, ref) do
+  def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from unauth_events in query,

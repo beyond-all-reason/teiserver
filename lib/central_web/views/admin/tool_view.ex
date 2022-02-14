@@ -1,7 +1,7 @@
 defmodule CentralWeb.Admin.ToolView do
   use CentralWeb, :view
 
-  def colours(), do: Central.Admin.ToolLib.colours()
+  def view_colour(), do: Central.Admin.ToolLib.colours()
   def icon(), do: Central.Admin.ToolLib.icon()
 
   def uptime() do
@@ -10,5 +10,5 @@ defmodule CentralWeb.Admin.ToolView do
     |> String.trim
   end
 
-  def colours(_), do: Central.Admin.ToolLib.colours()
+  def view_colour(_), do: Central.Admin.ToolLib.colours()
 end

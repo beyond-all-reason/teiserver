@@ -1,5 +1,5 @@
 <%
-{fg, bg, bsname} = assigns[:module].colours()
+{fg, bg, bsname} = assigns[:module].colours() |> colours()
 # icon = assigns[:module].icon()
 uid = Enum.random(100000..999999) |> to_string
 %>

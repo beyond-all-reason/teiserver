@@ -34,7 +34,7 @@ config :central, CentralWeb.Endpoint,
 config :dart_sass,
   version: "1.49.0",
   default: [
-    args: ~w(scss/mdb.free.scss ../priv/static/assets/mdb.css),
+    args: ~w(scss/mdb.dark.scss ../priv/static/assets/mdb_dark.css),
     cd: Path.expand("../assets", __DIR__)
   ]
 

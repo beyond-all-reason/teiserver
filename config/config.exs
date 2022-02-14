@@ -24,7 +24,7 @@ config :central, Extensions,
   startups: [Teiserver.Startup],
   routers: [TeiserverWeb.Router],
   index_views: [TeiserverWeb.General.CentralView],
-  side_views: [TeiserverWeb.General.CentralView]
+  topmenu_views: [TeiserverWeb.General.CentralView]
 
 # Configures the endpoint
 config :central, CentralWeb.Endpoint,

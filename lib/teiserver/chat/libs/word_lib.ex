@@ -39,4 +39,12 @@ defmodule Teiserver.Chat.WordLib do
       end
     end)
   end
+
+  def acceptable_name?(name) do
+    if flagged_words(name) > 0 do
+      false
+    else
+      true
+    end
+  end
 end

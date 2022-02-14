@@ -211,17 +211,16 @@ defmodule Teiserver.Coordinator.CommandsTest do
     :timer.sleep(500)
 
     hook_message = PubsubListener.get(hook_listener) |> hd
-    %{payload: report_id} = hook_message
-    assert hook_message == %Phoenix.Socket.Broadcast{event: "create_report", payload: report_id, topic: "account_hooks"}
+    {:account_hooks, :create_report, report} = hook_message
 
     # Ensure the report was created
-    assert Account.get_report!(report_id)
+    assert Account.get_report!(report.id)
 
     messages = PubsubListener.get(listener)
     assert messages == [{:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "#{player.name} banned for 60 hours by #{host.name}, reason: Spamming channel", lobby_id}, :say}]
 
     # Now propogate the broadcast the way the hook server would have
-    User.update_report(report_id)
+    User.update_report(report.id)
 
     assert User.is_muted?(player.id) == false
     assert User.is_banned?(player.id) == true
@@ -238,17 +237,16 @@ defmodule Teiserver.Coordinator.CommandsTest do
     :timer.sleep(500)
 
     hook_message = PubsubListener.get(hook_listener) |> hd
-    %{payload: report_id} = hook_message
-    assert hook_message == %Phoenix.Socket.Broadcast{event: "create_report", payload: report_id, topic: "account_hooks"}
+    {:account_hooks, :create_report, report} = hook_message
 
     # Ensure the report was created
-    assert Account.get_report!(report_id)
+    assert Account.get_report!(report.id)
 
     messages = PubsubListener.get(listener)
     assert messages == [{:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "#{player.name} muted for 60 hours by #{host.name}, reason: Spamming channel", lobby_id}, :say}]
 
     # Now propogate the broadcast the way the hook server would have
-    User.update_report(report_id)
+    User.update_report(report.id)
 
     assert User.is_muted?(player.id) == true
     assert User.is_banned?(player.id) == false

@@ -1,4 +1,4 @@
-<% {fg, _bg, _bsname} = colours(@active) %>
+<% {fg, _bg, _bsname} = view_colour(@active) |> colours() %>
 
 <style>
   .sub-menu-icon a:hover {
@@ -27,7 +27,7 @@
               label: "Client events",
               active: @active,
               url: Routes.ts_reports_client_event_path(@conn, :summary),
-              lib: Teiserver.Telemetry.ClientEventLib
+              icon: Teiserver.Telemetry.ClientEventLib.icon()
             %>
 
             <%= central_component "sub_menu_icon",
@@ -35,7 +35,7 @@
               label: "Server metrics",
               active: @active,
               url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_list),
-              lib: Teiserver.Telemetry.ServerDayLogLib
+              icon: Teiserver.Telemetry.ServerDayLogLib.icon()
             %>
 
             <%= central_component "sub_menu_icon",
@@ -43,7 +43,7 @@
               label: "Match metrics",
               active: @active,
               url: Routes.ts_reports_match_metric_path(@conn, :day_metrics_list),
-              lib: Teiserver.Battle.MatchLib
+              icon: Teiserver.Battle.MatchLib.icon()
             %>
           <% end %>
 
@@ -53,7 +53,7 @@
               label: "Infologs",
               active: @active,
               url: Routes.ts_reports_infolog_path(@conn, :index),
-              lib: Teiserver.Telemetry.InfologLib
+              icon: Teiserver.Telemetry.InfologLib.icon()
             %>
           <% end %>
 
@@ -63,7 +63,7 @@
               label: "Reports",
               active: @active,
               url: Routes.ts_reports_general_path(@conn, :index),
-              lib: %{icon: Central.Helpers.StylingHelper.icon(:report)}
+              icon: Central.Helpers.StylingHelper.icon(:report)
             %>
           <% end %>
         </div>

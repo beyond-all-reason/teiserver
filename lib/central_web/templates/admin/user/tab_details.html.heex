@@ -29,7 +29,7 @@
     value: @user.admin_group.name,
     link: %{
       path: Routes.admin_group_path(@conn, :show, @user.admin_group),
-      bsname: elem(Central.Account.GroupLib.colours(), 2),
+      bsname: elem(Central.Account.GroupLib.colours() |> colours(), 2),
       icon: Central.Account.GroupLib.icon(),
     }
   %>

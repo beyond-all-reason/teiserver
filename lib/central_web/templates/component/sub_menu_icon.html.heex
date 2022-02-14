@@ -1,13 +1,27 @@
+<%# 
+  Called like so:
+  
+  <%= central_component "sub_menu_icon",
+    name: "coverage",
+    label: "Coverage",
+    active: @active,
+    url: Routes.admin_tool_path(@conn, :coverage_form),
+    icon: "far fa-barcode-scan"
+  % >
+  
+  If active is set to the same as name then the button will be marked as active
+%>
+
 <%
   is_active = @active == @name
 
   icon = if is_active do
-    @lib.icon
-    |> String.replace("far ", "fad ")
-    |> String.replace("fal ", "fad ")
-    |> String.replace("fas ", "fad ")
+    @icon
+      |> String.replace("far ", "fad ")
+      |> String.replace("fal ", "fad ")
+      |> String.replace("fas ", "fad ")
   else
-    @lib.icon
+    @icon
   end
 
   disabled = if assigns[:disabled], do: "color: #888; cursor: default;"

@@ -7,8 +7,8 @@ defmodule Teiserver.Agents.AgentLib do
 
   @localhost '127.0.0.1'
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:danger)
+  @spec colours :: atom
+  def colours(), do: :danger
 
   @spec icon() :: String.t()
   def icon(), do: "far fa-user-robot"

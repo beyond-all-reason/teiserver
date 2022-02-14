@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -53,7 +53,6 @@
   }
 
   .final-row, .final-row td {
-    color: #000;
     font-weight: bold;
     font-size: 1.05em;
   }
@@ -62,8 +61,8 @@
 <%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "tool"})
 %>
 
-<div class="row">
-  <div class="col-lg-12 col-xl-6">
+<div class="row mt-3">
+  <div class="col-md-12 col-lg-6">
     <div class={"card page-card border-#{bsname}"}>
       <div class="card-body">
         <h4>
@@ -101,7 +100,7 @@
               %>
 
               <tr class={"cov-#{round(row.coverage)}"}>
-                <td style={"color: #333; border-left: 10px solid #{cfg}; background-color: #{cbg};"}>
+                <td style={"border-left: 10px solid #{cfg}; background-color: #{cbg};"}>
                   <%= row.section %>
 
                   <%= if row.missed > 0 do %>
@@ -112,7 +111,7 @@
                     </a>
                   <% end %>
                 </td>
-                <td style={"color: #333; background-color: #{cbg};"}>
+                <td style={"background-color: #{cbg};"}>
                   <%= Float.round row.coverage, 2 %>%
                 </td>
                 <td><%= format_number row.files %></td>
@@ -125,11 +124,11 @@
             <tr class="final-row">
               <% {cfg, cbg, _cbsname} = Central.Admin.ToolLib.coverage_colours(@results[:project].coverage) %>
 
-              <td style={"color: #333; border-left: 10px solid #{cfg}; background-color: #{cbg};"}>
+              <td style={"border-left: 10px solid #{cfg}; background-color: #{cbg};"}>
                 &nbsp;&nbsp;&nbsp;&nbsp;
                 Project
               </td>
-              <td style={"color: #333; background-color: #{cbg};"}>
+              <td style={"background-color: #{cbg};"}>
                 <%= Float.round @results[:project].coverage, 2 %>%
               </td>
               <td><%= format_number @results[:project].files %></td>
@@ -143,7 +142,7 @@
     </div>
   </div>
 
-  <div class="col-lg-12 col-xl-6">
+  <div class="col-md-12 col-lg-6">
     <div class={"card page-card border-#{bsname}"}>
       <div class="card-body">
         <h4>

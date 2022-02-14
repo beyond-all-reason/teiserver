@@ -17,7 +17,7 @@ defmodule CentralWeb.Communication.CategoryController do
       Communication.list_categories(
         search: [
           # membership: conn,
-          simple_search: Map.get(params, "s", "") |> String.trim()
+          basic_search: Map.get(params, "s", "") |> String.trim()
         ],
         order_by: "Name (A-Z)"
       )
@@ -34,7 +34,7 @@ defmodule CentralWeb.Communication.CategoryController do
       Communication.list_categories(
         search: [
           membership: conn,
-          simple_search: Map.get(params, "s", "") |> String.trim()
+          basic_search: Map.get(params, "s", "") |> String.trim()
         ],
         order_by: "Name (A-Z)"
       )

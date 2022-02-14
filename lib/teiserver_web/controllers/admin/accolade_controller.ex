@@ -5,8 +5,6 @@ defmodule TeiserverWeb.Admin.AccoladeController do
   alias Teiserver.Account.Accolade
   alias Teiserver.Account.AccoladeLib
 
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
-
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Moderator,
     action: {Phoenix.Controller, :action_name},
@@ -25,7 +23,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
   def index(conn, params) do
     accolades = Account.list_accolades(
         search: [
-          simple_search: Map.get(params, "s", "") |> String.trim(),
+          basic_search: Map.get(params, "s", "") |> String.trim(),
           filter: params["filter"] || "all"
         ],
         preload: [

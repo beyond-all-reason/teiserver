@@ -1,4 +1,4 @@
-<% {_fg, bg, bsname} = colours() %>
+<% {_fg, bg, bsname} = view_colour() |> colours() %>
 
 <%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "server_metrics"}) %>
 

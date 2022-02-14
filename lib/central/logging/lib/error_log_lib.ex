@@ -4,7 +4,10 @@ defmodule Central.Logging.ErrorLogLib do
 
   alias Central.Logging.ErrorLog
 
-  def colours(), do: Central.Helpers.StylingHelper.colours(:danger)
+  @spec colours() :: atom
+  def colours(), do: :danger
+
+  @spec icon() :: String.t()
   def icon(), do: "far fa-exclamation-triangle"
 
   def get_log(id) do

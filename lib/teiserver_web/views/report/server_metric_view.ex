@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Report.ServerMetricView do
   use TeiserverWeb, :view
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Teiserver.Telemetry.ServerDayLogLib.colours()
+  @spec view_colour :: atom
+  def view_colour(), do: Teiserver.Telemetry.ServerDayLogLib.colours()
 
   @spec icon() :: String.t()
   def icon(), do: Teiserver.Telemetry.ServerDayLogLib.icon()

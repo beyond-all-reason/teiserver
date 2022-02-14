@@ -61,6 +61,7 @@ defmodule CentralWeb do
 
       import Central.Helpers.StringHelper
       alias Central.Helpers.StylingHelper
+      import Central.Helpers.StylingHelper, only: [colours: 1]
 
       alias Central.Helpers.ColourHelper
       import Central.Helpers.ColourHelper, only: [rgba_css: 1, rgba_css: 2]
@@ -129,6 +130,7 @@ defmodule CentralWeb do
 
       import Central.Helpers.QueryHelpers
       import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
+      alias Central.Helpers.StylingHelper
     end
   end
 

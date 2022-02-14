@@ -3,8 +3,8 @@ defmodule Teiserver.Telemetry.ClientEventLib do
   alias Teiserver.Telemetry.ClientEvent
 
   # Functions
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:info2)
+  @spec colour :: atom
+  def colour(), do: :info2
 
   @spec icon() :: String.t()
   def icon(), do: "far fa-sliders-up"
@@ -48,7 +48,7 @@ defmodule Teiserver.Telemetry.ClientEventLib do
       where: client_events.event_type_id == ^event_type_id
   end
 
-  def _search(query, :simple_search, ref) do
+  def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from client_events in query,

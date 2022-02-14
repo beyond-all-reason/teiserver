@@ -4,6 +4,7 @@ defmodule Central.Application do
   @moduledoc false
 
   use Application
+  alias Phoenix.PubSub
   require Logger
 
   @impl true
@@ -130,11 +131,12 @@ defmodule Central.Application do
   end
 
   @impl true
+  @spec prep_stop(map()) :: map()
   def prep_stop(state) do
-    CentralWeb.Endpoint.broadcast(
+    PubSub.broadcast(
+      Central.PubSub,
       "application",
-      "prep_stop",
-      %{}
+      {:application, :prep_stop}
     )
 
     state

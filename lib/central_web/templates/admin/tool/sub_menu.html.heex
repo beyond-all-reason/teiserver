@@ -1,4 +1,4 @@
-<% {fg, _bg, _bsname} = colours(@active) %>
+<% {fg, _bg, _bsname} = colours(view_colour(@active)) %>
 
 <style>
   .sub-menu-icon a:hover {
@@ -26,18 +26,14 @@
             label: "Coverage",
             active: @active,
             url: Routes.admin_tool_path(@conn, :coverage_form),
-            lib: %{
-              icon: "far fa-barcode-scan"
-            }
+            icon: "far fa-barcode-scan"
           %>
           <%= central_component "sub_menu_icon",
             name: "test_page",
             label: "Test page",
             active: @active,
             url: Routes.admin_tool_path(@conn, :test_page),
-            lib: %{
-              icon: "far fa-map-marker-question"
-            }
+            icon: "far fa-map-marker-question"
           %>
 
           <%= central_component "sub_menu_icon",
@@ -45,9 +41,7 @@
             label: "FA List",
             active: @active,
             url: Routes.admin_tool_path(@conn, :falist),
-            lib: %{
-              icon: "fab fa-font-awesome"
-            }
+            icon: "fab fa-font-awesome"
           %>
 
           <%= central_component "sub_menu_icon",
@@ -55,9 +49,7 @@
             label: "Oban",
             active: @active,
             url: Routes.admin_tool_path(@conn, :oban_dashboard),
-            lib: %{
-              icon: "far fa-circle-notch"
-            }
+            icon: "far fa-circle-notch"
           %>
 
           <%= central_component "sub_menu_icon",
@@ -65,9 +57,7 @@
             label: "Conn params",
             active: @active,
             url: Routes.admin_tool_path(@conn, :conn_params),
-            lib: %{
-              icon: "far fa-brackets-curly"
-            }
+            icon: "far fa-brackets-curly"
           %>
         </div>
 

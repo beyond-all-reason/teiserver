@@ -1,16 +1,16 @@
 defmodule CentralWeb.Logging.GeneralView do
   use CentralWeb, :view
 
-  @spec colours() :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Logging.LoggingLib.colours()
+  @spec view_colour() :: atom
+  def view_colour(), do: Central.Logging.LoggingLib.colours()
 
   @spec icon() :: String.t()
   def icon(), do: Central.Logging.LoggingLib.icon()
 
-  @spec colours(String.t()) :: {String.t(), String.t(), String.t()}
-  def colours("page_view"), do: Central.Logging.PageViewLogLib.colours()
-  def colours("aggregate"), do: Central.Logging.AggregateViewLogLib.colours()
-  def colours("audit"), do: Central.Logging.AuditLogLib.colours()
-  def colours("error"), do: Central.Logging.ErrorLogLib.colours()
-  def colours("report"), do: Central.Helpers.StylingHelper.colours(:report)
+  @spec view_colour(String.t()) :: atom
+  def view_colour("page_view"), do: Central.Logging.PageViewLogLib.colours()
+  def view_colour("aggregate"), do: Central.Logging.AggregateViewLogLib.colours()
+  def view_colour("audit"), do: Central.Logging.AuditLogLib.colours()
+  def view_colour("error"), do: Central.Logging.ErrorLogLib.colours()
+  def view_colour("report"), do: :report
 end

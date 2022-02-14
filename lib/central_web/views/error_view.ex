@@ -3,8 +3,11 @@ defmodule CentralWeb.ErrorView do
 
   import Central.Logging.Helpers, only: [add_error_log: 1]
 
+  @spec icon() :: String.t()
   def icon(), do: "far fa-exclamation-triangle"
-  def colours(), do: Central.Helpers.StylingHelper.colours(:danger2)
+
+  @spec view_colour() :: atom
+  def view_colour(), do: :danger2
 
   # If you want to customize a particular status code
   # for a certain format, you may uncomment below.

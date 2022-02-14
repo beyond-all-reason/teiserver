@@ -5,13 +5,14 @@ defmodule Teiserver.Game.QueueLib do
   # Functions
   @spec icon :: String.t()
   def icon, do: "far fa-list-alt"
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours, do: Central.Helpers.StylingHelper.colours(:primary2)
+
+  @spec colours :: atom
+  def colours, do: :primary2
 
   @spec make_favourite(Queue.t()) :: Map.t()
   def make_favourite(queue) do
     %{
-      type_colour: colours() |> elem(0),
+      type_colour: StylingHelper.colours(colours()) |> elem(0),
       type_icon: icon(),
       item_id: queue.id,
       item_type: "teiserver_game_queue",
@@ -57,7 +58,7 @@ defmodule Teiserver.Game.QueueLib do
       where: queues.id in ^id_list
   end
 
-  def _search(query, :simple_search, ref) do
+  def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from queues in query,

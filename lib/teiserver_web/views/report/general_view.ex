@@ -1,16 +1,16 @@
 defmodule TeiserverWeb.Report.GeneralView do
   use TeiserverWeb, :view
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: StylingHelper.colours(:primary)
+  @spec view_colour :: atom
+  def view_colour(), do: :primary
 
   @spec icon() :: String.t()
   def icon(), do: StylingHelper.icon(:primary)
 
-  @spec colours(String.t()) :: {String.t(), String.t(), String.t()}
-  def colours("client_events"), do: Teiserver.Telemetry.ClientEventLib.colours()
-  def colours("server_metrics"), do: Teiserver.Telemetry.ServerDayLogLib.colours()
-  def colours("match_metrics"), do: Teiserver.Battle.MatchLib.colours()
-  def colours("reports"), do: Central.Helpers.StylingHelper.colours(:report)
-  def colours("infologs"), do: Teiserver.Telemetry.InfologLib.colours()
+  @spec view_colour(String.t()) :: atom
+  def view_colour("client_events"), do: Teiserver.Telemetry.ClientEventLib.colour()
+  def view_colour("server_metrics"), do: Teiserver.Telemetry.ServerDayLogLib.colours()
+  def view_colour("match_metrics"), do: Teiserver.Battle.MatchLib.colours()
+  def view_colour("reports"), do: :report
+  def view_colour("infologs"), do: Teiserver.Telemetry.InfologLib.colours()
 end

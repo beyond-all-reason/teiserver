@@ -12,6 +12,8 @@ defmodule TeiserverWeb.Live.ClientTest do
     |> TeiserverTestLib.conn_setup()
   end
 
+  @sleep_time 2100
+
   describe "client live" do
     test "index", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/teiserver/admin/client")
@@ -22,14 +24,15 @@ defmodule TeiserverWeb.Live.ClientTest do
 
       # Time to add a client
       %{socket: socket1, user: user1} = TeiserverTestLib.auth_setup()
-      :timer.sleep(500)
+
+      :timer.sleep(@sleep_time)
       html = render(view)
       assert html =~ "Clients - "
       assert html =~ "#{user1.name}"
 
       # Another
       %{socket: socket2, user: user2} = TeiserverTestLib.auth_setup()
-      :timer.sleep(500)
+      :timer.sleep(@sleep_time)
       html = render(view)
       assert html =~ "Clients - "
       assert html =~ "#{user1.name}"
@@ -37,7 +40,7 @@ defmodule TeiserverWeb.Live.ClientTest do
 
       # User 2 logs out
       _send_raw(socket2, "EXIT\n")
-      :timer.sleep(500)
+      :timer.sleep(@sleep_time)
       html = render(view)
       assert html =~ "Clients - "
       assert html =~ "#{user1.name}"
@@ -45,7 +48,7 @@ defmodule TeiserverWeb.Live.ClientTest do
 
       # And now user 1 too
       _send_raw(socket1, "EXIT\n")
-      :timer.sleep(500)
+      :timer.sleep(@sleep_time)
       html = render(view)
       # assert html =~ "No clients found"
       refute html =~ "#{user1.name}"

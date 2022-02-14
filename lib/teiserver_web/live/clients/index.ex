@@ -33,7 +33,7 @@ defmodule TeiserverWeb.ClientLive.Index do
       |> add_breadcrumb(name: "Admin", url: "/teiserver/admin")
       |> add_breadcrumb(name: "Clients", url: "/teiserver/admin/client")
       |> assign(:site_menu_active, "teiserver_user")
-      |> assign(:colours, UserLib.colours())
+      |> assign(:view_colour, UserLib.colours())
       |> assign(:clients, clients)
       |> assign(:client_ids, Map.keys(clients))
       |> assign(:users, users)

@@ -22,8 +22,8 @@ defmodule TeiserverWeb.Admin.MatchController do
   def index(conn, params) do
     matches = Battle.list_matches(
         search: [
-          simple_search: Map.get(params, "s", "") |> String.trim(),
-          filter: params["filter"] || "all"
+          basic_search: Map.get(params, "s", "") |> String.trim(),
+          # filter: params["filter"] || "all"
         ],
         preload: [
           :giver,

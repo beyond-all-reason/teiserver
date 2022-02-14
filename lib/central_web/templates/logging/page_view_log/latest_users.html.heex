@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <style type="text/css">
   .block-button {
@@ -8,7 +8,7 @@
 
 <%= render CentralWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "page_view"}) %>
 
-<div class="row page-row">
+<div class="row mt-3">
   <div class="col-md-12">
 
     <div class={"card border-#{bsname}"}>

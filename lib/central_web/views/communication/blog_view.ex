@@ -1,7 +1,7 @@
 defmodule CentralWeb.Communication.BlogView do
   use CentralWeb, :view
 
-  def colours(), do: Central.Communication.BlogLib.colours()
+  def view_colour(), do: Central.Communication.BlogLib.colours()
   def icon(), do: Central.Communication.BlogLib.icon()
 
   def get_key(url_slug), do: Central.Communication.PostLib.get_key(url_slug)

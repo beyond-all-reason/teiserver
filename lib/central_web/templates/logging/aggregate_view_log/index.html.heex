@@ -1,4 +1,4 @@
-<% {_fg, bg, bsname} = colours() %>
+<% {_fg, bg, bsname} = colours(view_colour()) %>
 
 <%= render CentralWeb.Logging.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "aggregate"})
 %>

@@ -8,9 +8,8 @@ defmodule CentralWeb.General.PageController do
       render(conn, "auth_index.html")
     else
       conn
-      # |> put_layout("unauth.html")
-      # |> render("index.html")
-      |> redirect(to: Routes.account_session_path(conn, :new))
+      |> put_layout("unauth.html")
+      |> render("index.html")
     end
   end
 

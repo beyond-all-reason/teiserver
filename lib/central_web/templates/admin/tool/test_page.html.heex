@@ -37,7 +37,7 @@
     $("#icon-output").html(output);
   }
 
-  function do_colours() {
+  function do_view_colour() {
     var colour_list = $("#colours-area").val().split("\n");
     var output = "";
 
@@ -115,7 +115,7 @@
     <div class="row">
       <div class="col-md-6">
         One colour per row
-        <textarea name="colours" id="colours-area" rows="8" class="form-control" onkeyup="do_colours();"></textarea>
+        <textarea name="colours" id="colours-area" rows="8" class="form-control" onkeyup="do_view_colour();"></textarea>
         <br />
         <div class="btn btn-primary">Update</div>
       </div>

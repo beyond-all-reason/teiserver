@@ -6,8 +6,8 @@ defmodule Teiserver.Account.BadgeTypeLib do
   @spec icon :: String.t()
   def icon, do: "far fa-certificate"
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours, do: Central.Helpers.StylingHelper.colours(:warning2)
+  @spec colours :: atom
+  def colours, do: :warning2
 
   @spec purpose_list() :: [String.t()]
   def purpose_list(), do: ["Accolade"]
@@ -67,7 +67,7 @@ defmodule Teiserver.Account.BadgeTypeLib do
       where: badge_types.id in ^id_list
   end
 
-  def _search(query, :simple_search, ref) do
+  def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from badge_types in query,

@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = @colours %>
+<% bsname = @view_colour %>
 
 <%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "battle_lobbies", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
 

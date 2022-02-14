@@ -1,4 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
+<% bsname = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -36,7 +36,7 @@
 <div class="row page-row">
   <div class="col-md-12">
 
-    <a href={Routes.ts_reports_match_metric_path(@conn, :month_metrics_show, @year, @month)} class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.colours |> elem(2)}"}>
+    <a href={Routes.ts_reports_match_metric_path(@conn, :month_metrics_show, @year, @month)} class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.view_colour}"}>
       <%= central_component "icon", icon: TeiserverWeb.Report.MatchMetricView.icon %>
       &nbsp;
       Match detail

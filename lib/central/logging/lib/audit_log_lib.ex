@@ -4,7 +4,10 @@ defmodule Central.Logging.AuditLogLib do
 
   alias Central.Logging.AuditLog
 
-  def colours(), do: Central.Helpers.StylingHelper.colours(:danger2)
+  @spec colours() :: atom
+  def colours(), do: :danger2
+
+  @spec icon() :: String.t()
   def icon(), do: "far fa-archive"
 
   def add_audit_types(types) do

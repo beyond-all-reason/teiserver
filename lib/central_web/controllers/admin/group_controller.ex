@@ -34,9 +34,9 @@ defmodule CentralWeb.Admin.GroupController do
         search: [
           active: "Active",
           id_list: memberships,
-          simple_search: Map.get(params, "s", "")
+          basic_search: Map.get(params, "s", "")
         ],
-        joins: [:super_group, :memberships],
+        joins: [:super_group],
         order: "Name (A-Z)"
       )
 
@@ -183,6 +183,10 @@ defmodule CentralWeb.Admin.GroupController do
     group_access = GroupLib.access_policy(group, conn.current_user, group_memberships)
 
     if group_access[:see_group] do
+      group
+        |> GroupLib.make_favourite()
+        |> insert_recently(conn)
+
       member_lookup =
         if group do
           GroupLib.membership_lookup(group.memberships)

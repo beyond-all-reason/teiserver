@@ -5,11 +5,25 @@ defmodule Central.Account.GroupLib do
   alias Central.Account.Group
   alias Central.Account.GroupMembership
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours(), do: Central.Helpers.StylingHelper.colours(:primary2)
+  @spec colours :: atom
+  def colours(), do: :primary2
 
   @spec icon :: String.t()
   def icon(), do: "far fa-users"
+
+  @spec make_favourite(Group.t()) :: Map.t()
+  def make_favourite(group) do
+    %{
+      type_colour: StylingHelper.colours(colours()) |> elem(0),
+      type_icon: icon(),
+      item_id: group.id,
+      item_type: "central_group",
+      item_colour: group.colour,
+      item_icon: group.icon,
+      item_label: "#{group.name}",
+      url: "/admin/groups/#{group.id}"
+    }
+  end
 
   @spec get_groups() :: Ecto.Query.t()
   def get_groups do
@@ -89,7 +103,7 @@ defmodule Central.Account.GroupLib do
       where: ilike(groups.name, ^ref_like)
   end
 
-  def _search(query, :simple_search, ref) do
+  def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
     from groups in query,
@@ -312,6 +326,7 @@ defmodule Central.Account.GroupLib do
     |> Central.Helpers.QueryHelpers.select([:id, :name, :icon, :colour])
     |> order("Name (A-Z)")
     |> Repo.all()
+    # |> Enum.map(fn %{id: id, name: name} -> {name, id} end)
   end
 
   # # Functions for using the group system with other objects

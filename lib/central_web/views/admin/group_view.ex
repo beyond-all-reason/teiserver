@@ -7,6 +7,6 @@ defmodule CentralWeb.Admin.GroupView do
     |> tl
   end
 
-  def colours(), do: Central.Account.GroupLib.colours()
+  def view_colour(), do: Central.Account.GroupLib.colours()
   def icon(), do: Central.Account.GroupLib.icon()
 end

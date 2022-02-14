@@ -7,20 +7,22 @@ defmodule Central.Account.ReportLib do
   @spec icon :: String.t()
   def icon, do: "far fa-flag"
 
-  @spec colours :: {String.t(), String.t(), String.t()}
-  def colours, do: Central.Helpers.StylingHelper.colours(:warning)
+  @spec colours :: atom
+  def colours, do: :warning
 
   @spec make_favourite(Report.t()) :: Map.t()
   def make_favourite(report) do
+    icon = action_icon(report.response_action)
+
     %{
-      type_colour: colours() |> elem(0),
+      type_colour: StylingHelper.colours(colours()) |> elem(0),
       type_icon: icon(),
       item_id: report.id,
       item_type: "central_account_report",
-      item_colour: colours() |> elem(0),
-      item_icon: Central.Account.ReportLib.icon(),
+      item_colour: StylingHelper.colours(colours()) |> elem(0),
+      item_icon: icon,
       item_label: "#{report.reporter.name} -> #{report.target.name}",
-      url: "/account/reports/#{report.id}"
+      url: "/admin/reports/#{report.id}"
     }
   end
 

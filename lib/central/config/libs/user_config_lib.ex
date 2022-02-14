@@ -5,6 +5,9 @@ defmodule Central.Config.UserConfigLib do
 
   # alias Central.Config
 
-  def colours(), do: Central.Helpers.StylingHelper.colours(:success)
+  @spec colours() :: atom
+  def colours(), do: :success
+
+  @spec icon() :: String.t()
   def icon(), do: "far fa-cog"
 end

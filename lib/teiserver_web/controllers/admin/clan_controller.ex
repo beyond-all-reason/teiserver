@@ -28,7 +28,7 @@ defmodule TeiserverWeb.Admin.ClanController do
     clans =
       Clans.list_clans(
         search: [
-          simple_search: Map.get(params, "s", "") |> String.trim()
+          basic_search: Map.get(params, "s", "") |> String.trim()
         ],
         order_by: "Name (A-Z)"
       )

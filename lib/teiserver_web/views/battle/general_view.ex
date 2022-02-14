@@ -1,9 +1,9 @@
 defmodule TeiserverWeb.Battle.GeneralView do
   use TeiserverWeb, :view
 
-  def colours(), do: StylingHelper.colours(:default)
+  def view_colour(), do: :default
   def icon(), do: StylingHelper.icon(:default)
 
-  def colours("battle_lobbies"), do: Teiserver.Battle.LobbyLib.colours()
-  def colours("matches"), do: Teiserver.Battle.MatchLib.colours()
+  def view_colour("battle_lobbies"), do: Teiserver.Battle.LobbyLib.colours()
+  def view_colour("matches"), do: Teiserver.Battle.MatchLib.colours()
 end

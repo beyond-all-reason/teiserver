@@ -1,7 +1,4 @@
-<% {_fg, _bg, bsname} = colours() %>
-
-<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
-<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+<% bsname = view_colour() %>
 
 <%= form_for @changeset, @action, fn f -> %>
   <%= if @changeset.action do %>
@@ -12,21 +9,21 @@
 
   <h4>Editing <%= @group.name %></h4>
 
-  <div class="form-group">
+  <div class="form-group mt-2">
     <%= label f, :name, class: "control-label" %>
     <%= text_input f, :name, class: "form-control", autofocus: "autofocus" %>
     <%= error_tag f, :name %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group mt-2">
     <%= central_component "fa5_icon_picker", %{form: f, field: :icon} %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group mt-2">
     <%= input_with_type f, :colour, "color" %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group mt-2">
     <%= central_component "checkbox",
       name: "group[see_group]",
       id: "group_see_group",
@@ -37,7 +34,7 @@
     %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group mt-2">
     <%= central_component "checkbox",
       name: "group[see_members]",
       id: "group_see_members",
@@ -48,7 +45,7 @@
     %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group mt-2">
     <%= central_component "checkbox",
       name: "group[self_add_members]",
       id: "group_self_add_members",
@@ -59,7 +56,7 @@
     %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group mt-2">
     <%= central_component "checkbox",
       name: "group[invite_members]",
       id: "group_invite_members",
@@ -72,7 +69,7 @@
 
   <%= if @group_type do %>
     <%= for {f, i} <- Enum.with_index(@group_type.fields) do %>
-      <div class="form-group">
+      <div class="form-group mt-2">
         <label for={"group_field_#{i}"} class="control-label"><%= f.name %></label>
 
       <%= case f.type do %>
@@ -99,7 +96,7 @@
     <% end %>
   <% end %>
 
-  <div class="form-group">
+  <div class="form-group mt-2">
     <%= if @changeset.data.id do %>
       <a href={Routes.account_group_path(@conn, :show, @changeset.data.id)} class="btn btn-secondary">
         Cancel
