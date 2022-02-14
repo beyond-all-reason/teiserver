@@ -370,6 +370,18 @@ defmodule Teiserver.Coordinator.ConsulServer do
     client = Client.get_client_by_id(userid)
     {ban_state, reason} = check_ban_state(userid, state)
 
+    if Config.get_site_config_cache("teiserver.Require Chobby login") == true do
+      if client != nil do
+        user = User.get_user_by_id(userid)
+        case user.hw_hash do
+          "" ->
+            Logger.info("JOINBATTLE with empty hash - name: #{user.name}, client: #{user.lobby_client}")
+          _ ->
+            :ok
+        end
+      end
+    end
+
     cond do
       client == nil ->
         {false, "No client"}
