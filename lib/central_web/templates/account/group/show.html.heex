@@ -10,12 +10,6 @@
 
 <%= render CentralWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "groups"}) %>
 
-<%= central_component "picker_script",
-  module: Central.Account.UserLib,
-  name: "account_user",
-  title: "User search"
-%>
-
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
@@ -48,11 +42,13 @@
         </div>
 
         <h4>
-          <div style={"border: 1px solid #{@group.colour}; display: inline-block; padding-right: 6px;"}>
+          <div style={"border: 3px solid #{@group.colour}; display: inline-block;"}>
             <div style={"color: #FFF; background-color: #{@group.colour}; padding: 2px 6px; display: inline-block;"}>
               <%= central_component "icon", icon: @group.icon %>
             </div>
-            <%= @group.name %>
+            <div style="display: inline-block; padding: 0 10px;">
+              <%= @group.name %>
+            </div>
           </div>
         </h4>
         <br /><br />
@@ -70,6 +66,13 @@
               <a href="#members_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                 <%= central_component "icon", icon: "fas fa-users" %>
                 Members (<%= Enum.count(@group.memberships) %>)
+              </a>
+            </li>
+
+            <li class="nav-item">
+              <a href="#invites_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+                <%= central_component "icon", icon: "fas fa-envelope" %>
+                Invites
               </a>
             </li>
           <% end %>
@@ -90,6 +93,10 @@
           <%= if @group_access[:see_members] do %>
             <div class="tab-pane" id="members_tab" style="padding:5px;">
               <%= render "tab_members.html", assigns %>
+            </div>
+            
+            <div class="tab-pane" id="invites_tab" style="padding:5px;">
+              <%= render "tab_invites.html", assigns %>
             </div>
           <% end %>
 

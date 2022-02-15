@@ -51,22 +51,6 @@
   </tbody>
 </table>
 
-<%= if @group_access[:invite_members] do %>
-  <form action={Routes.account_group_path(@conn, :create_membership)} method="post" class="form-horizontal">
-    <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
-    <input type="hidden" name="group_id" value={@group.id} />
-
-    <div class="row">
-      <div class="col-sm-8">
-        <%= render CentralWeb.Account.UserView, "picker.html" %>
-      </div>
-      <div class="col-sm-4">
-        <input type="submit" value="Add user" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
-      </div>
-    </div>
-  </form>
-<% end %>
-
 <%
   not_in_group = @group.memberships
   |> Enum.filter(fn gm -> gm.user_id == @current_user.id end)

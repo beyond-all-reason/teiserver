@@ -14,12 +14,7 @@ defmodule Central.Logging.LoggingPlug do
   def call(conn, _ops) do
     start_tick = :os.system_time(:micro_seconds)
 
-    ip =
-      case List.keyfind(conn.req_headers, "x-real-ip", 0) do
-        {_, ip} -> convert_from_x_real_ip(ip)
-        nil -> conn.remote_ip
-        _ -> "Error finding IP"
-      end
+    ip = get_ip_from_conn(conn) || "Error finding IP"
 
     # conn = Map.put(conn, :remote_ip, ip)
     # new_peer = {ip, conn.peer |> elem(1)}
@@ -80,6 +75,14 @@ defmodule Central.Logging.LoggingPlug do
 
     if conn.assigns[:do_not_log] == nil do
       Repo.insert!(page_log)
+    end
+  end
+
+  def get_ip_from_conn(conn) do
+    case List.keyfind(conn.req_headers, "x-real-ip", 0) do
+      {_, ip} -> convert_from_x_real_ip(ip)
+      nil -> conn.remote_ip
+      _ -> nil
     end
   end
 end

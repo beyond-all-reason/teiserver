@@ -114,9 +114,16 @@ defmodule CentralWeb.Router do
     get("/edit/password", RegistrationController, :edit_password)
     put("/edit/password", RegistrationController, :update_password)
 
-    post("/groups/create_membership", GroupController, :create_membership)
+    # post("/groups/create_membership", GroupController, :create_membership)
     delete("/groups/delete_membership/:group_id/:user_id", GroupController, :delete_membership)
     put("/groups/update_membership/:group_id/:user_id", GroupController, :update_membership)
+
+    post("/groups/create_invite", GroupController, :create_invite)
+    delete("/groups/delete_invite/:group_id/:user_id", GroupController, :delete_invite)
+    put("/groups/respond_to_invite/:group_id/:response", GroupController, :respond_to_invite)
+    # delete("/groups/delete_membership/:group_id/:user_id", GroupController, :delete_membership)
+    put("/groups/promote/:group_id/:user_id", GroupController, :promote)
+    put("/groups/demote/:group_id/:user_id", GroupController, :demote)
 
     resources("/groups", GroupController, only: [:index, :show, :edit, :update])
 
@@ -133,6 +140,7 @@ defmodule CentralWeb.Router do
   scope "/account", CentralWeb.Account, as: :account do
     pipe_through([:browser, :standard_layout])
 
+    get("/registrations/new/:code", RegistrationController, :new)
     get("/registrations/new", RegistrationController, :new)
     post("/registrations/create", RegistrationController, :create)
   end

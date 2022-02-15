@@ -1,0 +1,34 @@
+<div class="row" style="padding-top: 15vh;">
+  <div class="col-sm-10 col-sm-offset-1 col-md-6 offset-md-3 col-xl-4 offset-xl-4">
+
+    <div class="card card-default">
+      <div class="card-header">
+        <h3 class="card-title">
+          <img src={Routes.static_path(@conn, "/images/logo/logo_favicon.png")}
+          height="42" style="margin-right: 5px;" class="d-inline align-top"
+        />
+
+          Register account
+        </h3>
+      </div>
+      <div class="card-body">
+        <%= case @reason do %>
+          <% "disabled" -> %>
+            Manual user registration is currently disabled.
+
+          <% "no_code" -> %>
+            You need an invite code to register here.
+
+          <% "invalid_code" -> %>
+            That code does not exist.
+
+          <% "expired_code" -> %>
+            This code has expired.
+
+          <% _ -> %>
+            Unfortunately you are not able to register at this time.
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -2,6 +2,7 @@ defmodule CentralWeb.Admin.CodeController do
   use CentralWeb, :controller
 
   alias Central.Account
+  alias Central.Account.{Code, CodeLib}
 
   plug Bodyguard.Plug.Authorize,
     policy: Central.Account.Code,
@@ -44,5 +45,36 @@ defmodule CentralWeb.Admin.CodeController do
     conn
     |> put_flash(:info, "Code deleted successfully.")
     |> redirect(to: Routes.admin_code_path(conn, :index))
+  end
+
+  @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def new(conn, _params) do
+    changeset = Account.change_code(%Code{expires: "24 hours"})
+
+    conn
+    |> assign(:changeset, changeset)
+    |> assign(:code_types, CodeLib.code_types())
+    |> add_breadcrumb(name: "New code", url: conn.request_path)
+    |> render("new.html")
+  end
+
+  @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def create(conn, %{"code" => code_params}) do
+    code_params = Map.merge(code_params, %{
+      "user_id" => conn.current_user.id
+    })
+
+    case Account.create_code(code_params) do
+      {:ok, _code} ->
+        conn
+        |> put_flash(:info, "Code created successfully.")
+        |> redirect(to: Routes.admin_code_path(conn, :index))
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        conn
+        |> assign(:code_types, CodeLib.code_types())
+        |> assign(:changeset, changeset)
+        |> render("new.html")
+    end
   end
 end

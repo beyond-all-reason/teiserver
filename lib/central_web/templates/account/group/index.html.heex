@@ -28,11 +28,42 @@
               <th>Type</th>
               <th>Members</th>
               <th>&nbsp;</th>
-
-              <th></th>
             </tr>
           </thead>
           <tbody>
+        
+        <%# Invites %>
+        <%= for group <- @invites do %>
+            <tr>
+              <%
+                c = ColourHelper.new(group.colour)
+
+                rgba = c |> ColourHelper.as_css_style(0.1)
+                rgb = c |> ColourHelper.as_css_style()
+              %>
+
+              <td style={"background-color: #{rgb}; color: #FFF;"} width="22">
+                <i class={"fa-fw #{group.icon}"}></i>
+              </td>
+
+              <td style={"background-color: #{rgba};"}><%= group.name %></td>
+
+              <td colspan="3">&nbsp;</td>
+              <td>
+                <%= link "Accept", to: Routes.account_group_path(@conn, :respond_to_invite, group, "accept"), class: "btn btn-success btn-sm", method: "put" %>
+                
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                
+                <%= link "Decline", to: Routes.account_group_path(@conn, :respond_to_invite, group, "decline"), class: "btn btn-warning btn-sm ", method: "put" %>
+                
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                
+                <%= link "Decline and block", to: Routes.account_group_path(@conn, :respond_to_invite, group, "block"), class: "btn btn-danger2 btn-sm float-end", method: "put", data: [confirm: "Are you sure?"] %>
+              </td>
+            </tr>
+        <% end %>
+        
+        <%# Memberships %>
         <%= for group <- @groups do %>
             <tr>
               <%
@@ -58,6 +89,7 @@
               </td>
             </tr>
         <% end %>
+        
           </tbody>
         </table>
       </div>

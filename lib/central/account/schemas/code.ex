@@ -16,7 +16,7 @@ defmodule Central.Account.Code do
   def changeset(code, attrs \\ %{}) do
     attrs =
       attrs
-      |> parse_humantimes([:start_date])
+      |> parse_humantimes([:expires])
 
     code
     |> cast(attrs, [

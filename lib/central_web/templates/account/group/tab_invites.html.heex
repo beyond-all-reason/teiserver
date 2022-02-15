@@ -1,0 +1,49 @@
+<% bsname = view_colour() %>
+
+<%= central_component "picker_script",
+  module: Central.Account.UserLib,
+  name: "account_user",
+  title: "User search"
+%>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for m <- @group.invites do %>
+      <%= if m.response not in ~w(block) do %>
+        <%
+          u = m.user
+        %>
+        <tr>
+          <td><%= u.name %></td>
+          <%= if @group_access[:admin] and u.id != @conn.user_id do %>
+            <td>
+              <%= link "Remove", to: Routes.account_group_path(@conn, :delete_invite, @group.id, u.id), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-sm" %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>
+
+<%= if @group_access[:invite_members] do %>
+  <form action={Routes.account_group_path(@conn, :create_invite)} method="post" class="form-horizontal">
+    <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+    <input type="hidden" name="group_id" value={@group.id} />
+
+    <div class="row">
+      <div class="col-sm-8">
+        <%= render CentralWeb.Account.UserView, "picker.html" %>
+      </div>
+      <div class="col-sm-4">
+        <input type="submit" value="Invite user" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+      </div>
+    </div>
+  </form>
+<% end %>

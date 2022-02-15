@@ -10,12 +10,6 @@
 
 <%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "group"}) %>
 
-<%= central_component "picker_script",
-  module: Central.Account.UserLib,
-  name: "account_user",
-  title: "User search"
-%>
-
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
@@ -73,6 +67,13 @@
           </li>
 
           <li class="nav-item">
+            <a href="#invites_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component "icon", icon: "fas fa-envelope" %>
+              Invites (<%= Enum.count(@group.invites) %>)
+            </a>
+          </li>
+
+          <li class="nav-item">
             <a href="#family_tab" role="tab" class="nav-link" data-bs-toggle="tab">
               <%= central_component "icon", icon: "fas fa-sitemap" %>
               Family
@@ -87,6 +88,10 @@
 
           <div class="tab-pane" id="members_tab" style="padding:5px;">
             <%= render "tab_members.html", assigns %>
+          </div>
+
+          <div class="tab-pane" id="invites_tab" style="padding:5px;">
+            <%= render "tab_invites.html", assigns %>
           </div>
 
           <%= if allow?(@current_user, "admin.dev.developer") do %>

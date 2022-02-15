@@ -325,6 +325,25 @@ defmodule Teiserver.Account do
     end
   end
 
+  def spring_auth_check(conn, user, plain_text_password) do
+    tei_user = Teiserver.User.get_user_by_id(user.id)
+    md5_password = Teiserver.User.spring_md5_password(plain_text_password)
+
+    if Teiserver.User.test_password(md5_password, tei_user.password_hash) do
+      update_user(user, %{password: plain_text_password})
+
+      {:ok, user}
+    else
+      Central.Logging.Helpers.add_anonymous_audit_log(conn, "Account: Failed login", %{
+        reason: "Bad password",
+        user_id: user.id,
+        email: user.email
+      })
+
+      {:error, "Invalid credentials"}
+    end
+  end
+
   # User stat table
   alias Teiserver.Account.UserStat
   alias Teiserver.Account.UserStatLib

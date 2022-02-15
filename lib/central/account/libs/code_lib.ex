@@ -9,6 +9,16 @@ defmodule Central.Account.CodeLib do
   @spec icon :: String.t()
   def icon(), do: "far fa-octagon"
 
+  @doc """
+  Returns a list of the code types we can manually use (e.g. not password_reset)
+  """
+  @spec code_types() :: [String.t()]
+  def code_types() do
+    ~w(
+      user_registration
+    )
+  end
+
   # Queries
   @spec query_codes() :: Ecto.Query.t()
   def query_codes do

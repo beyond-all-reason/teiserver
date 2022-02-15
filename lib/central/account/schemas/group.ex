@@ -7,6 +7,7 @@ defmodule Central.Account.Group do
     field :icon, :string
     field :colour, :string
     field :data, :map
+    field :member_count, :integer
 
     field :active, :boolean, default: true
     field :group_type, :string
@@ -22,6 +23,7 @@ defmodule Central.Account.Group do
     belongs_to :super_group, Central.Account.Group
 
     has_many :memberships, Central.Account.GroupMembership, foreign_key: :group_id
+    has_many :invites, Central.Account.GroupInvite, foreign_key: :group_id
 
     many_to_many :members, Central.Account.User,
       join_through: "account_group_memberships",
@@ -53,6 +55,7 @@ defmodule Central.Account.Group do
       :children_cache,
       :supers_cache,
       :active,
+      :member_count,
       :group_type
     ])
     |> validate_required([

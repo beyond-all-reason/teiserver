@@ -24,8 +24,9 @@ defmodule Central.Logging.Helpers do
           Central.Logging.AuditLog.t()
   def add_anonymous_audit_log(conn, action, details) do
     attrs = %{
-      user_id: if(conn.assigns[:current_user], do: conn.assigns[:current_user].id, else: nil),
       action: action,
+      user_id: if(conn.assigns[:current_user], do: conn.assigns[:current_user].id, else: nil),
+      group_id: if(conn.assigns[:current_user], do: conn.assigns[:current_user].admin_group_id, else: nil),
       details: details,
       ip: conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
     }
@@ -40,8 +41,8 @@ defmodule Central.Logging.Helpers do
     {:ok, the_log} =
       Logging.create_audit_log(%{
         action: action,
-        user_id: conn.assigns[:current_user].id,
-        group_id: conn.assigns[:current_user].admin_group_id,
+        user_id: if(conn.assigns[:current_user], do: conn.assigns[:current_user].id, else: nil),
+        group_id: if(conn.assigns[:current_user], do: conn.assigns[:current_user].admin_group_id, else: nil),
         details: details,
         ip: conn.remote_ip |> Tuple.to_list() |> Enum.join(".")
       })

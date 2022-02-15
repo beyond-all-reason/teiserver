@@ -73,6 +73,20 @@ defmodule Central.Account.GroupLib do
       where: groups.id in ^id_list or groups.see_group == true
   end
 
+  def _search(query, :pending_inviting, id_list) when is_list(id_list) do
+    from groups in query,
+      left_join: invites in assoc(groups, :invites),
+      where: invites.user_id in ^id_list,
+      where: invites.response != "block"
+  end
+
+  def _search(query, :pending_inviting, user_id) do
+    from groups in query,
+      join: invites in assoc(groups, :invites),
+      where: invites.user_id == ^user_id,
+      where: invites.response != "block"
+  end
+
   def _search(query, :active, "All"), do: query
   def _search(query, :active, "Active"), do: _search(query, :active, true)
   def _search(query, :active, "Inactive"), do: _search(query, :active, false)
@@ -139,11 +153,17 @@ defmodule Central.Account.GroupLib do
   def preload(query, preloads) do
     query = if :super_group in preloads, do: _preload_super_group(query), else: query
     query = if :memberships in preloads, do: _preload_memberships(query), else: query
+    query = if :invites in preloads, do: _preload_invites(query), else: query
     query = if :members in preloads, do: _preload_members(query), else: query
 
     query =
       if :members_and_memberships in preloads,
         do: _preload_members_and_memberships(query),
+        else: query
+
+    query =
+      if :invitees_and_invites in preloads,
+        do: _preload_invitees_and_invites(query),
         else: query
 
     query
@@ -170,6 +190,14 @@ defmodule Central.Account.GroupLib do
       preload: [members: members]
   end
 
+  def _preload_invites(query) do
+    from groups in query,
+      left_join: invites in assoc(groups, :invites),
+      order_by: [asc: invites.name],
+      limit: 50,
+      preload: [invites: invites]
+  end
+
   def _preload_members_and_memberships(query) do
     from groups in query,
       left_join: memberships in assoc(groups, :memberships),
@@ -177,6 +205,15 @@ defmodule Central.Account.GroupLib do
       order_by: [asc: users.name],
       limit: 50,
       preload: [memberships: {memberships, user: users}]
+  end
+
+  def _preload_invitees_and_invites(query) do
+    from groups in query,
+      left_join: invites in assoc(groups, :invites),
+      left_join: users in assoc(invites, :user),
+      order_by: [asc: users.name],
+      limit: 50,
+      preload: [invites: {invites, user: users}]
   end
 
   def load_user_memebership_ids(user_id) when is_integer(user_id) do

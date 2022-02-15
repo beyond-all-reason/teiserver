@@ -1,12 +1,12 @@
 <% bsname = view_colour() %>
 
-<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "group"}) %>
+<%= render CentralWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "codes"}) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render CentralWeb.Admin.GroupView, "section_menu.html", Map.merge(assigns, %{
+        <%= render CentralWeb.Admin.CodeView, "section_menu.html", Map.merge(assigns, %{
           quick_search: "",
           show_search: false,
           active: "new"
@@ -17,11 +17,9 @@
 
 <%= render "form.html",
   changeset: @changeset,
-  group_type: @group_type,
-  types: nil,
-  groups: @groups,
+  code_types: @code_types,
   conn: @conn,
-  action: Routes.admin_group_path(@conn, :create)
+  action: Routes.admin_code_path(@conn, :create)
 %>
 
       </div>

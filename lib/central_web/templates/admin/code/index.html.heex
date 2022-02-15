@@ -24,7 +24,7 @@
       <th>Purpose</th>
       <th>Expires</th>
       <th>Value</th>
-      <th colspan="2">&nbsp;</th>
+      <th colspan="3">&nbsp;</th>
     </tr>
   </thead>
   <tbody>
@@ -33,6 +33,8 @@
   path = case code.purpose do
     "reset_password" ->
       Routes.account_session_path(@conn, :password_reset_form, code.value)
+    "user_registration" ->
+      Routes.account_registration_path(@conn, :new, code.value)
     _ ->
       ""
   end

@@ -176,7 +176,7 @@ defmodule CentralWeb.Admin.GroupController do
   def show(conn, %{"id" => id}) do
     group =
       Account.get_group(id,
-        joins: [:super_group, :members_and_memberships]
+        joins: [:super_group, :members_and_memberships, :invitees_and_invites]
       )
 
     group_memberships = Account.list_group_memberships(user_id: conn.current_user.id)

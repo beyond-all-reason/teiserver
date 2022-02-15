@@ -7,6 +7,12 @@ defmodule CentralWeb.Account.GroupController do
   plug :add_breadcrumb, name: 'Account', url: '/account'
   plug :add_breadcrumb, name: 'Groups', url: '/account/groups'
 
+  plug(AssignPlug,
+    site_menu_active: "central_account",
+    sub_menu_active: "group"
+  )
+
+  @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
     groups =
       Account.list_groups(
@@ -19,15 +25,25 @@ defmodule CentralWeb.Account.GroupController do
         order: "Name (A-Z)"
       )
 
+    invites =
+      Account.list_groups(
+        search: [
+          pending_inviting: conn.assigns[:current_user].id,
+        ],
+        order: "Name (A-Z)"
+      )
+
     conn
     |> assign(:groups, groups)
+    |> assign(:invites, invites)
     |> render("index.html")
   end
 
+  @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     group =
       Account.get_group(id,
-        joins: [:super_group, :members_and_memberships]
+        joins: [:super_group, :members_and_memberships, :invitees_and_invites]
       )
 
     group_memberships = Account.list_group_memberships(user_id: conn.current_user.id)
@@ -59,6 +75,7 @@ defmodule CentralWeb.Account.GroupController do
     end
   end
 
+  @spec edit(Plug.Conn.t(), map) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     group =
       Account.get_group!(id,
@@ -91,6 +108,7 @@ defmodule CentralWeb.Account.GroupController do
     end
   end
 
+  @spec update(Plug.Conn.t(), map) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "group" => group_params}) do
     group = Account.get_group!(id)
 
@@ -138,7 +156,54 @@ defmodule CentralWeb.Account.GroupController do
     end
   end
 
-  def create_membership(conn, params) do
+  # def create_membership(conn, params) do
+  #   user_id = get_hash_id(params["account_user"])
+  #   group_id = params["group_id"]
+
+  #   group = Account.get_group!(group_id)
+
+  #   group_memberships = Account.list_group_memberships(user_id: conn.current_user.id)
+  #   group_access = GroupLib.access_policy(group, conn.current_user, group_memberships)
+
+  #   access_allowed =
+  #     (user_id == conn.user_id and group_access[:self_add_members]) or
+  #       (user_id != conn.user_id and group_access[:invite_members] and
+  #          GroupLib.access?(conn, group.id)) or
+  #       group_access[:admin]
+
+  #   if access_allowed do
+  #     attrs = %{
+  #       user_id: user_id,
+  #       group_id: group_id,
+  #       admin: false
+  #     }
+
+  #     case Account.create_group_membership(attrs) do
+  #       {:ok, membership} ->
+  #         CentralWeb.Endpoint.broadcast(
+  #           "recache:#{membership.user_id}",
+  #           "recache",
+  #           %{}
+  #         )
+
+  #         conn
+  #         |> put_flash(:success, "User added to group.")
+  #         |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
+
+  #       {:error, _changeset} ->
+  #         conn
+  #         |> put_flash(:danger, "User was unable to be added to group.")
+  #         |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
+  #     end
+  #   else
+  #     conn
+  #     |> put_flash(:danger, "You do not have the access to add that user to this group.")
+  #     |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
+  #   end
+  # end
+
+  @spec create_invite(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def create_invite(conn, params) do
     user_id = get_hash_id(params["account_user"])
     group_id = params["group_id"]
 
@@ -153,37 +218,166 @@ defmodule CentralWeb.Account.GroupController do
            GroupLib.access?(conn, group.id)) or
         group_access[:admin]
 
-    if access_allowed do
-      attrs = %{
-        user_id: user_id,
-        group_id: group_id,
-        admin: false
-      }
+    cond do
+      access_allowed == false ->
+        conn
+        |> put_flash(:danger, "You do not have the access to add that user to this group.")
+        |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#invites")
 
-      case Account.create_group_membership(attrs) do
-        {:ok, membership} ->
-          CentralWeb.Endpoint.broadcast(
-            "recache:#{membership.user_id}",
-            "recache",
-            %{}
-          )
+      Account.get_group_membership(user_id, group_id) != nil ->
+        conn
+        |> put_flash(:info, "This user is already a member!.")
+        |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#invites")
 
-          conn
-          |> put_flash(:success, "User added to group.")
-          |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
+      Account.get_group_invite(user_id, group_id) != nil ->
+        conn
+        |> put_flash(:info, "User has already been invited.")
+        |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#invites")
 
-        {:error, _changeset} ->
-          conn
-          |> put_flash(:danger, "User was unable to be added to group.")
-          |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
-      end
-    else
-      conn
-      |> put_flash(:danger, "You do not have the access to add that user to this group.")
-      |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
+      true ->
+        attrs = %{
+          user_id: user_id,
+          group_id: group_id
+        }
+
+        case Account.create_group_invite(attrs) do
+          {:ok, _invite} ->
+            conn
+            |> put_flash(:success, "Invite sent to user.")
+            |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#invites")
+
+          {:error, _changeset} ->
+            conn
+            |> put_flash(:danger, "User was unable to be invited.")
+            |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#invites")
+        end
     end
   end
 
+  @spec delete_invite(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def delete_invite(conn, %{"user_id" => user_id, "group_id" => group_id}) do
+    group = Account.get_group!(group_id)
+
+    group_memberships = Account.list_group_memberships(user_id: conn.current_user.id)
+    group_access = GroupLib.access_policy(group, conn.current_user, group_memberships)
+
+    if user_id |> String.to_integer() == conn.user_id or group_access[:admin] do
+      group_invite = Account.get_group_invite!(user_id, group_id)
+      Account.delete_group_invite(group_invite)
+
+      conn
+      |> put_flash(:info, "Invite deleted successfully.")
+      |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#invites")
+    else
+      conn
+      |> put_flash(:danger, "You do not have the access to remove that user from this group.")
+      |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#invites")
+    end
+  end
+
+  @spec respond_to_invite(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def respond_to_invite(conn, %{"group_id" => group_id, "response" => "accept"}) do
+    invite = Account.get_group_invite(conn.user_id, group_id)
+    membership = Account.get_group_membership(conn.user_id, group_id)
+
+    cond do
+      invite == nil ->
+        conn
+        |> put_flash(:danger, "There is no invite to accept")
+        |> redirect(to: Routes.account_group_path(conn, :index) <> "#invites_tab")
+
+      membership != nil ->
+        Account.delete_group_invite(invite)
+
+        conn
+        |> put_flash(:success, "Invite accepted")
+        |> redirect(to: Routes.account_group_path(conn, :index) <> "#invites_tab")
+
+      true ->
+        attrs = %{
+          user_id: conn.user_id,
+          group_id: group_id,
+          role: "Member"
+        }
+
+        case Account.create_group_membership(attrs) do
+          {:ok, _membership} ->
+            user = Account.get_user!(conn.user_id)
+            Account.update_user(user, %{"group_id" => group_id})
+            CentralWeb.Endpoint.broadcast(
+              "recache:#{conn.user_id}",
+              "recache",
+              %{}
+            )
+
+            Account.delete_group_invite(invite)
+
+            conn
+            |> put_flash(:success, "Invite accepted")
+            |> redirect(
+              to: Routes.account_group_path(conn, :index) <> "#invites_tab"
+            )
+
+          {:error, _changeset} ->
+            conn
+            |> put_flash(:danger, "There was an error accepting the invite")
+            |> redirect(
+              to: Routes.account_group_path(conn, :index) <> "#invites_tab"
+            )
+        end
+    end
+  end
+
+  def respond_to_invite(conn, %{"group_id" => group_id, "response" => "decline"}) do
+    invite = Account.get_group_invite(conn.user_id, group_id)
+
+    cond do
+      invite == nil ->
+        conn
+        |> put_flash(:success, "Invite declined")
+        |> redirect(to: Routes.account_group_path(conn, :index) <> "#invites_tab")
+
+      true ->
+        Account.delete_group_invite(invite)
+
+        conn
+        |> put_flash(:success, "Invite declined")
+        |> redirect(to: Routes.account_group_path(conn, :index) <> "#invites_tab")
+    end
+  end
+
+  def respond_to_invite(conn, %{"group_id" => group_id, "response" => "block"}) do
+    invite = Account.get_group_invite(conn.user_id, group_id)
+
+    cond do
+      invite == nil ->
+        conn
+        |> put_flash(:success, "Invite declined")
+        |> redirect(to: Routes.account_group_path(conn, :index) <> "#invites_tab")
+
+      true ->
+        case Account.update_group_invite(invite, %{response: "block"}) do
+          {:ok, _group} ->
+            conn
+            |> put_flash(:success, "Invite blocked.")
+            |> redirect(
+              to: Routes.account_group_path(conn, :index) <> "#invites_tab"
+            )
+
+          {:error, _changeset} ->
+            conn
+            |> put_flash(
+              :success,
+              "Invite unable to be blocked, if this persists please contact an admin."
+            )
+            |> redirect(
+              to: Routes.account_group_path(conn, :index) <> "#invites_tab"
+            )
+        end
+    end
+  end
+
+  @spec delete_membership(Plug.Conn.t(), map) :: Plug.Conn.t()
   def delete_membership(conn, %{"user_id" => user_id, "group_id" => group_id}) do
     group = Account.get_group!(group_id)
 
@@ -210,6 +404,7 @@ defmodule CentralWeb.Account.GroupController do
     end
   end
 
+  @spec update_membership(Plug.Conn.t(), map) :: Plug.Conn.t()
   def update_membership(conn, %{"user_id" => user_id, "group_id" => group_id} = params) do
     group = Account.get_group!(group_id)
 
@@ -242,25 +437,4 @@ defmodule CentralWeb.Account.GroupController do
       |> redirect(to: Routes.account_group_path(conn, :show, group_id))
     end
   end
-
-  # defp search_params(params \\ %{}) do
-  #   %{
-  #     name: Map.get(params, "name", ""),
-  #     active: Map.get(params, "active", "All"),
-  #     order: Map.get(params, "order", "Name (A-Z)"),
-  #     limit: Map.get(params, "limit", "50"),
-  #   }
-  # end
-
-  # # def form_dropdowns(conn) do
-  # #   conn
-  # #   |> assign(:pipelines, PipelineLib.dropdown(conn))
-  # #   |> assign(:groups, GroupLib.extended_dropdown(conn))
-  # # end
-
-  # # def search_dropdowns(conn) do
-  # #   conn
-  # #   |> assign(:pipelines, PipelineLib.dropdown(conn))
-  # #   |> assign(:groups, [{"All", "all"}] ++ GroupLib.extended_dropdown(conn))
-  # # end
 end

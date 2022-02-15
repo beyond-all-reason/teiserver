@@ -141,7 +141,7 @@ uid = Enum.random(100000..999999) |> to_string
         <form action="#" method="post" class="form-horizontal" onsubmit={"#{assigns[:name]}_picker_search(); return false;"}>
           <div class="form-group">
             <div class="col-sm-12">
-              <input type="text" name="username" id={"#{assigns[:name]}-picker-ref"} value="" placeholder="Start typing and the search will start automatically (3 or more characters needed)" class={"form-control text-#{bsname}"} autocomplete="off" />
+              <input type="text" name="username" id={"#{assigns[:name]}-picker-ref"} value="" placeholder="Start typing and the search will start automatically (3 or more characters needed)" class={"form-control"} autocomplete="off" />
             </div>
           </div>
 
