@@ -62,7 +62,7 @@ defmodule Teiserver.Protocols.TachyonLib do
     case decode(data) do
       {:ok, result} -> result
       {:error, reason} ->
-        throw "Tachyon decode! error: #{reason}, data: #{data}"
+        raise "Tachyon decode! error: #{reason}, data: #{data}"
     end
   end
 

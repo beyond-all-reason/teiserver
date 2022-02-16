@@ -18,6 +18,11 @@ config :central, Teiserver,
     certfile: "priv/certs/localhost.crt",
     cacertfile: "priv/certs/localhost.crt"
   ],
+  ports: [
+    tcp: 9200,
+    tls: 9201,
+    tachyon: 9202
+  ],
   test_mode: true,
   enable_hooks: false,
   enable_coordinator_mode: false,

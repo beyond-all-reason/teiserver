@@ -12,7 +12,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   @spec raw_setup :: %{socket: port()}
   def raw_setup() do
-    {:ok, socket} = :gen_tcp.connect(@host, 8200, active: false)
+    {:ok, socket} = :gen_tcp.connect(@host, 9200, active: false)
     %{socket: socket}
   end
 
@@ -20,7 +20,7 @@ defmodule Teiserver.TeiserverTestLib do
   # and upgrade the connection instead?
   @spec spring_tls_setup :: %{socket: port()}
   def spring_tls_setup() do
-    {:ok, socket} = :ssl.connect(@host, 8201,
+    {:ok, socket} = :ssl.connect(@host, 9201,
       active: false,
       verify: :verify_none
     )
@@ -29,7 +29,7 @@ defmodule Teiserver.TeiserverTestLib do
 
   @spec tachyon_tls_setup :: %{socket: port()}
   def tachyon_tls_setup() do
-    {:ok, socket} = :ssl.connect(@host, 8202,
+    {:ok, socket} = :ssl.connect(@host, 9202,
       active: false,
       verify: :verify_none
     )

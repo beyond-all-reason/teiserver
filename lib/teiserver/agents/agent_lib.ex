@@ -81,7 +81,7 @@ defmodule Teiserver.Agents.AgentLib do
           :timer.sleep(100)
 
         {:error, error_message} ->
-          throw "Login error - #{error_message}, name: #{data.name}"
+          raise "Login error - #{error_message}, name: #{data.name}"
       end
     end
 
@@ -92,7 +92,7 @@ defmodule Teiserver.Agents.AgentLib do
         {:success, user}
       else
         {:error, :login} ->
-          throw "Login error"
+          raise "Login error"
     end
   end
 

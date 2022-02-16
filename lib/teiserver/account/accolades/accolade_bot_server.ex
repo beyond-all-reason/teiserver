@@ -31,7 +31,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
 
     user = case User.internal_client_login(account.id) do
       {:ok, user} -> user
-      :error -> throw "No accolade user found"
+      :error -> raise "No accolade user found"
     end
 
     state = %{

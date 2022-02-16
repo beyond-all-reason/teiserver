@@ -22,7 +22,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
     user = case User.internal_client_login(account.id) do
       {:ok, user} -> user
-      :error -> throw "No coordinator user found"
+      :error -> raise "No coordinator user found"
     end
 
     state = %{

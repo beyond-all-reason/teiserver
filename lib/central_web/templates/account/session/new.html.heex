@@ -48,7 +48,7 @@
         <a href={Routes.account_session_path(@conn, :forgot_password)} class="btn btn-secondary btn-block">Forgotten password</a>
       </div>
       
-      <%= if true or Application.get_env(:central, Central)[:user_registrations] == :allowed do %>
+      <%= if Application.get_env(:central, Central)[:user_registrations] == :allowed do %>
         <div class="col-md-4">
           <a href={Routes.account_registration_path(@conn, :new)} class="btn btn-secondary btn-block">Register new account</a>
         </div>
