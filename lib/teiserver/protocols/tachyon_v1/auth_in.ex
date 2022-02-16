@@ -92,6 +92,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
     # It's possible there is a password in this data, if there is we need to remove it
     data = if Map.has_key?(data, "password"), do: Map.put(data, "password", "*******"), else: data
 
-    reply(:system, :error, %{location: "auth.handle", error: "No match for cmd: '#{cmd}' with data '#{data}'"}, state)
+    reply(:system, :error, %{location: "auth.handle", error: "No match for cmd: '#{cmd}' with data '#{Kernel.inspect data}'"}, state)
   end
 end

@@ -19,8 +19,12 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     User.create_friend_request(user.id, friend1.id)
     User.create_friend_request(user.id, friend2.id)
 
-    User.accept_friend_request(friend1.id, user.id)
-    User.create_friend_request(friend2.id, user.id)
+
+    User.accept_friend_request(user.id, friend1.id)
+    User.accept_friend_request(user.id, friend2.id)
+
+    # User.accept_friend_request(friend1.id, user.id)
+    # User.accept_friend_request(friend2.id, user.id)
 
     User.create_friend_request(user.id, pending_friend.id)
 
@@ -42,16 +46,21 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     }
   end
 
-  test "tachyon end to end", %{socket: socket, user: user, pid: pid} do
+  test "tachyon end to end", %{socket: socket, user: user, pid: pid, friend1: friend1, friend2: friend2} do
     # We are already logged in, lets start by getting a list of our friends!
 
     _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids", "filter" => ""})
-    friend_list = []
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.user.list_friend_ids",
+      "friend_id_list" => [friend2.id, friend1.id]
+    }
 
-    _tachyon_send(socket, %{"cmd" => "c.client.list_clients", "id_list" => friend_list})
+    # friend_list = []
+    # _tachyon_send(socket, %{"cmd" => "c.client.list_clients", "id_list" => friend_list})
 
 
-    # Now for matches
-    _tachyon_send(socket, %{"cmd" => "c.lobby.list_lobbies"})
+    # # Now for matches
+    # _tachyon_send(socket, %{"cmd" => "c.lobby.list_lobbies"})
   end
 end
