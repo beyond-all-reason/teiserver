@@ -16,7 +16,7 @@
   ],
 
   "terminal_options": {
-    "file_column_width": 40
+    "file_column_width": 100
   },
 
   "coverage_options": {

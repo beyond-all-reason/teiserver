@@ -76,26 +76,18 @@ defmodule CentralWeb.Admin.ToolController do
 
   @spec coverage_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def coverage_post(conn, params) do
-    file_path = Application.get_env(:central, Central)[:file_path]
-    coverage_path = "file:///#{file_path}/cover/excoveralls.html#"
+    file_path = params["file_path"] || ""
 
-    coverage_data =
-      if params["results"] == "" do
-        "apps/central/cover/coverage_result"
-        |> File.read!()
-      else
-        params["results"]
-      end
-
-    results = CoverageLib.parse_coverage(coverage_data)
+    results = CoverageLib.parse_coverage(params["results"], file_path)
     overall_stats = CoverageLib.get_overall_stats(results)
 
     conn
     |> add_breadcrumb(name: 'Coverage', url: '/developer/coverage')
     |> add_breadcrumb(name: 'Results', url: '#')
+    |> assign(:path, file_path)
+    |> assign(:coverage_data, params["results"])
     |> assign(:overall_stats, overall_stats)
     |> assign(:results, results)
-    |> assign(:path, coverage_path)
     |> render("coverage_post.html")
   end
 

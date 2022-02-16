@@ -2,13 +2,18 @@ import Config
 
 config :central, Central,
   site_title: "BAR",
+  site_suffix: "",
   site_description: "",
   site_icon: "fad fa-robot",
   enable_blog: false,
   blog_title: "BAR Blog",
-  # This is used for the coverage tool
-  file_path: "~/programming/elixir/barserver/",
-  credit: "Teifion Jordan"
+  credit: "Teifion Jordan",
+
+  # :allowed, :link_only, :disabled
+  user_registrations: :disabled,
+
+  # If you have a secondary site put the link here (string)
+  main_site_link: "https://www.beyondallreason.info/"
 
 # Default configs
 config :central, Central.Config,

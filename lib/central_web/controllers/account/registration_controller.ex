@@ -90,7 +90,7 @@ defmodule CentralWeb.Account.RegistrationController do
 
     if allowed do
       case Account.self_create_user(user_params) do
-        {:ok, user} ->
+        {:ok, _user} ->
           case Account.get_code(user_params["code"]) do
             nil ->
               :ok

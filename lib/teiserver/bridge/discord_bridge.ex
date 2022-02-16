@@ -5,7 +5,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
   # use Alchemy.Cogs
   use Alchemy.Events
-  alias Teiserver.{Account, Room, User, Client}
+  alias Teiserver.{Account, Room}
   alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands}
   alias Central.Config
   alias Central.Account.ReportLib

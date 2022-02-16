@@ -282,6 +282,7 @@ defmodule Teiserver.Account.UserLib do
 
       # Community related stuff
       "Accolades",
+      "Reporting",
 
       # Global overrides
       "All chat",

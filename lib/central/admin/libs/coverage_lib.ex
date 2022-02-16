@@ -2,8 +2,7 @@ defmodule Central.Admin.CoverageLib do
   @moduledoc false
   defp capture_parse(s) do
     ~r/(?<cov>[0-9\.]+)%\s+lib\/
-      (?<app>[_a-zA-Z]+?)\/
-      (?<file>[_a-zA-Z\/\.\ ]+\/[_a-zA-Z\/\.\ ]+)\s+
+      (?<file>[_a-zA-Z0-9\/\.\ ]+\/[_a-zA-Z0-9\/\.\ ]+?)\s+
       (?<lines>[0-9]+)\s+
       (?<relevant>[0-9]+)\s+
       (?<missed>[0-9]+)/x
@@ -11,14 +10,12 @@ defmodule Central.Admin.CoverageLib do
   end
 
   defp add_section(m) do
-    app = m["app"]
-
     [section | _] =
-      m["file"]
-      |> String.replace("web/", "")
+      m["trimmed_file"]
+      # |> String.replace("web/", "")
       |> String.split("/")
 
-    m |> Map.put("section", "#{app}/#{section}")
+    m |> Map.put("section", section)
   end
 
   defp sum_matches(match, acc) do
@@ -76,7 +73,7 @@ defmodule Central.Admin.CoverageLib do
     Map.put(data, :coverage, 100 * (1 - data[:missed] / max(data[:relevant], 1)))
   end
 
-  defp module_stats(parsed_data) do
+  defp module_stats(parsed_data, file_path) do
     sections =
       parsed_data
       |> Enum.map(fn m -> m["section"] end)
@@ -88,7 +85,7 @@ defmodule Central.Admin.CoverageLib do
             f["section"] == s and f["cov"] != "100.0" and f["missed"] != "0"
           end)
           |> Enum.map(fn f ->
-            {f["file"], String.to_float(f["cov"]), String.to_integer(f["missed"])}
+            {f["file"] |> String.replace(file_path <> f["section"] <> "/", ""), String.to_float(f["cov"]), String.to_integer(f["missed"])}
           end)
 
         wp =
@@ -119,7 +116,11 @@ defmodule Central.Admin.CoverageLib do
     sections
   end
 
-  def parse_coverage(data) do
+  @doc """
+  data: The raw output from coveralls
+  file_path: The file path we require a file to have to be considered, allowing us to filter
+  """
+  def parse_coverage(data, file_path) do
     parsed_data =
       data
       |> String.split("\n")
@@ -128,17 +129,21 @@ defmodule Central.Admin.CoverageLib do
         cond do
           m == nil -> false
           m["relevant"] == "0" -> false
-          String.contains?(m["file"], ["/coherence/"]) -> false
           String.contains?(m["file"], ["/channels/"]) -> false
+          not String.contains?(m["file"], file_path) -> false
           true -> true
         end
+      end)
+      |> Enum.map(fn m ->
+        trimmed_file = m["file"] |> String.replace(file_path, "")
+        Map.put(m, "trimmed_file", trimmed_file)
       end)
       |> Enum.map(&add_section/1)
 
     [
       headline: headline_stats(parsed_data),
       project: project_stats(parsed_data),
-      module: module_stats(parsed_data)
+      module: module_stats(parsed_data, file_path)
     ]
   end
 

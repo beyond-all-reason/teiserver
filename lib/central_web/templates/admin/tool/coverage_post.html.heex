@@ -22,6 +22,17 @@
     $(body_name).hide();
     $(shower_name).show();
   }
+  
+  function drilldown(mname) {
+    new_val = $('#file_path').val() + mname + "/"
+    $('#file_path').val(new_val);
+    $('#resub_form').submit();
+  }
+  
+  function up_level(mname) {
+    // new_val = $('#file_path').val() + mname + "/"
+    alert("Not implemented, manually remove the last folder");
+  }
 
   // $(function() {
   //   show_module("bedrock");
@@ -104,11 +115,19 @@
                   <%= row.section %>
 
                   <%= if row.missed > 0 do %>
-                    <a class="btn btn-sm btn-secondary float-end" href={"#module-#{section_id}"} onclick={"show_module('#{section_id}')"}>
-                      &nbsp;
-                      Show
-                      &nbsp;
-                    </a>
+                    <div class="float-end">
+                      <a class="btn btn-sm btn-secondary" href={"#module-#{section_id}"} onclick={"show_module('#{section_id}')"}>
+                        Show
+                      </a>
+                      
+                      <%= if not String.ends_with?(row.section, ".ex") do %>
+                        &nbsp;&nbsp;&nbsp;
+                      
+                        <span class="btn btn-sm btn-secondary" onclick={"drilldown('#{row.section}')"}>
+                          Drilldown
+                        </span>
+                      <% end %>
+                    </div>
                   <% end %>
                 </td>
                 <td style={"background-color: #{cbg};"}>
@@ -162,15 +181,23 @@
               $('.module-shower').show();
               $('.module-body').hide();
             ">Hide all</div>
-          </div>
-          <br /><br />
 
-          <form action={Routes.admin_tool_path(@conn, :coverage_post)} method="post"  style="width: 100%;">
+
+            <div class="btn btn-secondary float-end" onclick="up_level();">Up level</div>
+          </div>
+
+          <form action={Routes.admin_tool_path(@conn, :coverage_post)} method="post"  style="width: 100%; margin-top: 10px" id="resub_form">
             <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
-            <div class="row">
+            <div class="row mt-2">
+              <div class="col-md-12">
+                <input type='text' name='file_path' id='file_path' value={@path} class='form-control' />
+              </div>
+            </div>
+
+            <div class="row mt-2">
               <div class="col-md-10">
-                <textarea name="results" rows="1" class="form-control" style="font-family: monospace; background-color: #EEF;"></textarea>
+                <textarea name="results" rows="1" class="form-control" style="font-family: monospace;"><%= @coverage_data %></textarea>
               </div>
               <div class="col-md-2">
                 <input type="submit" value="Submit" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
@@ -182,7 +209,7 @@
 
         <%= for m <- @results[:module] do %>
           <% module_id = String.replace(m.name, "/", "__") %>
-          <%= if m.worst_percentage != [] do %>
+          <%= if m.worst_percentage != [] and not String.ends_with?(m.name, ".ex") do %>
             <div class="module-row row" id={"module-#{module_id}"}>
               <div class="col-md-12">
 
@@ -208,9 +235,6 @@
                         <%= for {f, cov, miss} <- m.worst_percentage do %>
                           <li>
                             <%= cov %>%: <%= f %> (miss: <%= miss %>)
-                            <a href={@path <> f} class="coverage-link">
-                              <i class="far fa-fw fa-dot-circle-o"></i>
-                            </a>
                           </li>
                         <% end %>
                       </ul>
@@ -222,9 +246,6 @@
                         <%= for {f, cov, miss} <- m.most_missed do %>
                           <li>
                             <%= miss %>: <%= f %> (cov: <%= cov %>%)
-                            <a href={@path <> f} class="coverage-link">
-                              <i class="far fa-fw fa-dot-circle-o"></i>
-                            </a>
                           </li>
                         <% end %>
                       </ul>
