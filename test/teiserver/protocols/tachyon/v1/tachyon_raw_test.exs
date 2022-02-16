@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.TachyonRawTest do
+defmodule Teiserver.Protocols.V1.TachyonRawTest do
   use Central.ServerCase
 
   alias Teiserver.{User, Account}

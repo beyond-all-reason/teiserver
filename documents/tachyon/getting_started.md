@@ -1,5 +1,5 @@
 ## Protocol basics
-Each request is encoded as JSON compressed with Gzip and then encoded into Base64 to be sent over a TLS connection. This is true for both the server and the client sending messages. A received message will need to be Base64 decoded, uncompressed with Gzip and then parsed into a JSON object. Below is an example of how this would look.
+Each request is encoded as JSON compressed with Gzip and then encoded into Base64 to be sent over a TLS connection (defaults to port 8202). This is true for both the server and the client sending messages. A received message will need to be Base64 decoded, uncompressed with Gzip and then parsed into a JSON object. Below is an example of how this would look.
 
 ```
   Raw Base64 data
@@ -78,3 +78,6 @@ At every stage the central server is considered to be the source of truth; if th
 
 ## Example and implementations
 No lobbies currently implement the protocol, when they do we will add links to them here. In the meantime Teiserver has unit tests for the Tachyon protocol and they can be found at [/test/teiserver/protocols/tachyon](/test/teiserver/protocols/tachyon). The server implementation for Tachyon is found at [/lib/teiserver/protocols/tachyon](/lib/teiserver/protocols/tachyon) though this is not expected to be overly helpful for lobby implementers.
+
+## Spring interop
+Given the server is currently used primarily for the Spring protocol we have added the `TACHYON` command to Spring. For testing/interop you can send `TACHYON some_data` where `some_data` is the JSON -> Gzip -> Base64 data you would send via Tachyon normally. It will result in the system sending the result back as if you were using the Tachyon protocol. It will do so without swapping you to the Tachyon protocol; this is intended only to enable access to certain commands added only for Tachyon and not as a long term solution.

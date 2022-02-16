@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.TachyonNewsTest do
+defmodule Teiserver.Protocols.V1.TachyonNewsTest do
   alias Central.CommunicationTestLib
   alias Central.Helpers.GeneralTestLib
   use Central.ServerCase

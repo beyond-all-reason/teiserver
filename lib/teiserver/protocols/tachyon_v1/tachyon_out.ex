@@ -1,7 +1,7 @@
 defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
   require Logger
   alias Teiserver.Protocols.TachyonLib
-  alias Teiserver.Protocols.Tachyon.V1.{AuthOut, ClientOut, CommunicationOut, LobbyChatOut, LobbyHostOut, LobbyOut, MatchmakingOut, NewsOut, SystemOut}
+  alias Teiserver.Protocols.Tachyon.V1.{AuthOut, ClientOut, CommunicationOut, LobbyChatOut, LobbyHostOut, LobbyOut, MatchmakingOut, NewsOut, SystemOut, UserOut}
 
   @spec reply(atom(), atom(), Map.t(), Map.t()) :: Map.t()
 
@@ -20,6 +20,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
         :matchmaking -> MatchmakingOut.do_reply(reply_cmd, data)
         :news -> NewsOut.do_reply(reply_cmd, data)
         :system -> SystemOut.do_reply(reply_cmd, data)
+        :user -> UserOut.do_reply(reply_cmd, data)
       end
       |> add_msg_id(state)
 

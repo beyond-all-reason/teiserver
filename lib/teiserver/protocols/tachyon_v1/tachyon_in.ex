@@ -3,7 +3,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonIn do
   alias Teiserver.Protocols.TachyonLib
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Protocols.Tachyon.V1.{AuthIn, LobbyHostIn, LobbyIn, CommunicationIn, MatchmakingIn, NewsIn, SystemIn, TelemetryIn}
+  alias Teiserver.Protocols.Tachyon.V1.{AuthIn, LobbyHostIn, LobbyIn, CommunicationIn, MatchmakingIn, NewsIn, SystemIn, TelemetryIn, UserIn}
 
   @spec data_in(String.t(), map()) :: map()
   def data_in(data, state) do
@@ -75,6 +75,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonIn do
           "news" -> NewsIn.do_handle(subcommand, data, state)
           "system" -> SystemIn.do_handle(subcommand, data, state)
           "telemetry" -> TelemetryIn.do_handle(subcommand, data, state)
+          "user" -> UserIn.do_handle(subcommand, data, state)
           _ -> reply(:system, :error, %{location: "dispatch", error: "No dispatch for namespace '#{namespace}'"}, state)
         end
       _ ->

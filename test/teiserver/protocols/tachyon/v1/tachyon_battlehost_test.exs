@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.TachyonBattleHostTest do
+defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
   use Central.ServerCase
   alias Teiserver.Battle.Lobby
 

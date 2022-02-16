@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.Tachyon.V1.UsersIn do
+defmodule Teiserver.Protocols.Tachyon.V1.UserIn do
   # alias Teiserver.{User, Client}
   # alias Teiserver.Protocols.Tachyon.V1.Tachyon
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]

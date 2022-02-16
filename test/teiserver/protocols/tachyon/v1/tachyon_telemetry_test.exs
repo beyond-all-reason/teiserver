@@ -1,4 +1,4 @@
-defmodule Teiserver.Protocols.TachyonTelemetryTest do
+defmodule Teiserver.Protocols.V1.TachyonTelemetryTest do
   alias Teiserver.Telemetry
   use Central.ServerCase
 
