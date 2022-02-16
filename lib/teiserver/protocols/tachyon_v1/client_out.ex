@@ -1,13 +1,9 @@
 defmodule Teiserver.Protocols.Tachyon.V1.ClientOut do
   @spec do_reply(atom(), any) :: Map.t()
-
-  ###########
-  # Tokens
-  def do_reply(:user_token, {:success, token}) do
+  def do_reply(:client_list, clients) do
     %{
-      "cmd" => "s.auth.get_token",
-      "result" => "success",
-      "token" => token
+      cmd: "s.client.client_list",
+      clients: clients
     }
   end
 end

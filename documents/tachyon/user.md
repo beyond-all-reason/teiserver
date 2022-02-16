@@ -1,18 +1,16 @@
-### `c.user.query`
-* query :: Query
+### `c.user.list_users_from_ids`
+Returns a list of users as listed by the ids.
 
-#### Queryable fields
-`name` - String
-`clan_id` - Clan.id
+#### Arguments
 `id_list` - list (User.id)
 
 #### Response
-* user_list :: List (User)
+* users :: List (User)
 
 #### Example input/output
 ```
 {
-  "cmd": "c.user.query",
+  "cmd": "c.user.list_users_from_ids",
   "query": Query
 }
 

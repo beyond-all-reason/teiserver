@@ -22,7 +22,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   def convert_object(:user, user), do: Map.take(user, [:id, :name, :bot, :clan_id, :skill, :icons, :springid])
   def convert_object(:user_extended, user), do: Map.take(user, [:id, :name, :bot, :clan_id, :skill, :icons, :permissions,
                     :friends, :friend_requests, :ignores, :springid])
-  def convert_object(:client, client), do: Map.take(client, [:id, :in_game, :away, :ready, :team_number, :ally_team_number,
+  def convert_object(:client, client), do: Map.take(client, [:userid, :in_game, :away, :ready, :team_number, :ally_team_number,
                     :team_colour, :role, :bonus, :synced, :faction, :lobby_id])
   def convert_object(:lobby, lobby), do: Map.take(lobby, [:id, :name, :founder_id, :type, :max_players, :password,
                     :locked, :engine_name, :engine_version, :players, :spectators, :bots, :ip, :settings, :map_name,
