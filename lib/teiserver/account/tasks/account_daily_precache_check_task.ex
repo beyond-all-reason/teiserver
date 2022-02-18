@@ -14,7 +14,7 @@ defmodule Teiserver.Account.Tasks.DailyPrecacheCheckTask do
     sql_id_list = Account.list_users(
       search: [
         pre_cache: true,
-        inserted_before: Timex.shift(Timex.now(), days: -3),
+        inserted_before: Timex.shift(Timex.now(), days: -1),
       ],
       limit: :infinity
     )

@@ -17,7 +17,7 @@ config :central, CentralWeb.Endpoint,
     keyfile: "/var/www/tls/privkey.pem",
     certfile: "/var/www/tls/cert.pem",
     cacertfile: "/var/www/tls/fullchain.pem",
-    versions: ["tlsv1.2"],
+    versions: [:"tlsv1.2"],
     dhfile: '/var/www/tls/dh-params.pem',
     ciphers: [
       'ECDHE-ECDSA-AES256-GCM-SHA384',

@@ -111,7 +111,7 @@ defmodule Teiserver.SpringTcpServer do
       print_client_messages: false,
       print_server_messages: false,
       script_password: nil,
-      exempt_from_cmd_throttle: true,
+      exempt_from_cmd_throttle: false,
       cmd_timestamps: []
     }
 
@@ -146,38 +146,31 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Main source of data ingress
-  def handle_info({:tcp, _socket, data}, %{exempt_from_cmd_throttle: false} = state) do
+  def handle_info({:tcp, _socket, data}, state) do
     data = to_string(data)
 
-    cmd_timestamps = if String.contains?(data, "\n") do
-      now = System.system_time(:second)
-      limiter = now - @cmd_flood_duration
-
-      [now | state.cmd_timestamps]
-      |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
-    else
-      state.cmd_timestamps
+    case flood_protect?(data, state) do
+      {true, state} ->
+        engage_flood_protection(state)
+      {false, state} ->
+        new_state = state.protocol_in.data_in(data, state)
+        {:noreply, new_state}
     end
-
-    new_state = if Enum.count(cmd_timestamps) > @cmd_flood_limit do
-      User.set_flood_level(state.userid, 10)
-      Client.disconnect(state.userid, :flood)
-      Logger.error("Spring command overflow from #{state.username}/#{state.userid} with #{Enum.count(cmd_timestamps)} commands. Disconnected and flood protection engaged.")
-      state
-    else
-      state.protocol_in.data_in(data, state)
-    end
-
-    {:noreply, %{new_state | cmd_timestamps: cmd_timestamps}}
-  end
-  def handle_info({:tcp, _socket, data}, %{exempt_from_cmd_throttle: true} = state) do
-    new_state = state.protocol_in.data_in(to_string(data), state)
-    {:noreply, new_state}
   end
 
   def handle_info({:ssl, _socket, data}, state) do
-    new_state = state.protocol_in.data_in(to_string(data), state)
-    {:noreply, new_state}
+    data = to_string(data)
+
+    case flood_protect?(data, state) do
+      {true, state} ->
+        engage_flood_protection(state)
+      {false, state} ->
+        new_state = state.protocol_in.data_in(data, state)
+        {:noreply, new_state}
+    end
+
+    # new_state = state.protocol_in.data_in(to_string(data), state)
+    # {:noreply, new_state}
   end
 
   # Email, when an email is sent we get a message, we don't care about that for the most part (yet)
@@ -836,6 +829,33 @@ defmodule Teiserver.SpringTcpServer do
     end
 
     state
+  end
+
+  @spec flood_protect?(String.t(), map()) :: {boolean, map()}
+  defp flood_protect?(_, %{exempt_from_cmd_throttle: true} = state), do: {false, state}
+  defp flood_protect?(data, state) do
+    cmd_timestamps = if String.contains?(data, "\n") do
+      now = System.system_time(:second)
+      limiter = now - @cmd_flood_duration
+
+      [now | state.cmd_timestamps]
+      |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
+    else
+      state.cmd_timestamps
+    end
+
+    if Enum.count(cmd_timestamps) > @cmd_flood_limit do
+      {true, %{state | cmd_timestamps: cmd_timestamps}}
+    else
+      {false, %{state | cmd_timestamps: cmd_timestamps}}
+    end
+  end
+
+  defp engage_flood_protection(state) do
+    User.set_flood_level(state.userid, 10)
+    Client.disconnect(state.userid, :flood)
+    Logger.error("Spring command overflow from #{state.username}/#{state.userid} with #{Enum.count(state.cmd_timestamps)} commands. Disconnected and flood protection engaged.")
+    {:stop, "Flood protection", state}
   end
 
   # Example of how gen-smtp handles upgrading the connection
