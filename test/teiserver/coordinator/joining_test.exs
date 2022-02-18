@@ -42,7 +42,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
     {:ok, socket: socket, user: user, lobby_id: lobby_id, listener: listener}
   end
 
-  test "welcome message", %{socket: socket, user: user, lobby_id: lobby_id, listener: listener} do
+  test "welcome message", %{socket: socket, lobby_id: lobby_id, listener: listener} do
     consul_state = Coordinator.call_consul(lobby_id, :get_all)
     assert consul_state.welcome_message == nil
 
@@ -98,7 +98,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
     [reply] = _tachyon_recv(socket2)
     assert reply == %{
       "cmd" => "s.lobby.updated_client_battlestatus",
-      "client" => %{"ally_team_number" => 0, "away" => false, "in_game" => false, "lobby_id" => lobby_id, "ready" => true, "team_colour" => 0, "team_number" => 0},
+      "client" => %{"ally_team_number" => 0, "away" => false, "in_game" => false, "lobby_id" => lobby_id, "ready" => true, "team_colour" => 0, "team_number" => 0, "userid" => user2.id},
       "lobby_id" => lobby_id,
       "reason" => "client_updated_battlestatus"
     }
