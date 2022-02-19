@@ -554,7 +554,7 @@ defmodule CentralWeb.Admin.UserController do
         |> redirect(to: Routes.admin_user_path(conn, :index))
 
       {true, _} ->
-        Central.Admin.DeleteUserTask.delete_user(user)
+        Central.Admin.DeleteUserTask.delete_users([user.id])
 
         conn
         |> put_flash(:success, "User deleted")

@@ -39,6 +39,11 @@ defmodule CentralWeb.Router do
     plug(:put_layout, {CentralWeb.LayoutView, "standard.html"})
   end
 
+  pipeline :standard_live_layout do
+    plug :put_root_layout, {CentralWeb.LayoutView, :root}
+    plug(:put_layout, {CentralWeb.LayoutView, "standard_live.html"})
+  end
+
   pipeline :nomenu_layout do
     plug :put_root_layout, {CentralWeb.LayoutView, :root}
     plug(:put_layout, {CentralWeb.LayoutView, "nomenu.html"})
@@ -114,10 +119,10 @@ defmodule CentralWeb.Router do
     get("/edit/password", RegistrationController, :edit_password)
     put("/edit/password", RegistrationController, :update_password)
 
-    # post("/groups/create_membership", GroupController, :create_membership)
     delete("/groups/delete_membership/:group_id/:user_id", GroupController, :delete_membership)
     put("/groups/update_membership/:group_id/:user_id", GroupController, :update_membership)
 
+    post("/groups/create_membership", GroupController, :create_membership)
     post("/groups/create_invite", GroupController, :create_invite)
     delete("/groups/delete_invite/:group_id/:user_id", GroupController, :delete_invite)
     put("/groups/respond_to_invite/:group_id/:response", GroupController, :respond_to_invite)
@@ -269,6 +274,8 @@ defmodule CentralWeb.Router do
 
     # Codes
     resources("/codes", CodeController)
+    put("/codes/extend/:id/:hours", CodeController, :extend)
+
 
     # Config
     resources("/site", SiteConfigController, only: [:index, :edit, :update, :delete])

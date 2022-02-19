@@ -22,8 +22,11 @@ defmodule CentralWeb.Account.RegistrationController do
         code = Account.get_code(params["code"] || "!no_code!")
 
         cond do
-          code == nil ->
+          params["code"] == nil ->
             {false, "no_code"}
+
+          code == nil ->
+            {false, "invalid_code"}
 
           code.purpose != "user_registration" ->
             {false, "invalid_code"}
@@ -71,8 +74,11 @@ defmodule CentralWeb.Account.RegistrationController do
         code = Account.get_code(user_params["code"] || "!no_code!")
 
         cond do
-          code == nil ->
+          user_params["code"] == nil ->
             {false, "no_code"}
+
+          code == nil ->
+            {false, "invalid_code"}
 
           code.purpose != "user_registration" ->
             {false, "invalid_code"}

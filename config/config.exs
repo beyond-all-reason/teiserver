@@ -9,6 +9,9 @@ config :central, Central,
   blog_title: "BAR Blog",
   credit: "Teifion Jordan",
 
+  # These toggle what users are able to access from their account area
+  enabled_account_group_pages: false,
+
   # :allowed, :link_only, :disabled
   user_registrations: :disabled,
 

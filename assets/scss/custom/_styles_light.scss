@@ -1,0 +1,357 @@
+// Your custom variables
+
+.alert-no-margin {
+  margin: 0;
+}
+
+body {
+  overflow-x: hidden;
+  margin: 0;
+}
+
+.debug {
+  background-color: #A00;
+  color: #FFF;
+}
+
+// Top nav
+#top-nav {
+  border-bottom: 1px solid $dark;
+}
+
+#top-nav .navbar-brand, #top-nav .nav-item a {
+  color: $primary;
+}
+
+#top-nav .nav-item .active {
+  font-weight: bold;
+  background-color: $gray-500;
+}
+
+.slow-blink-outline-primary {
+  animation: pulse-outline-primary 6s ease infinite;
+}
+@keyframes pulse-outline-primary {
+  0% {
+    background-color: #DDEEFF;
+    color: #4466BB;
+  }
+  50% {
+    background-color: #FFF;
+    color: #6677DD;
+  }
+  100% {
+    background-color: #DDEEFF;
+    color: #4466BB;
+  }
+}
+
+/* Alerts and form errors used by phx.new */
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+.alert-info {
+  color: $light;
+  background-color: $primary-dark;
+  border-color: $primary;
+}
+.alert-danger {
+  color: $light;
+  background-color: $danger2;
+  border-color: $danger;
+}
+.alert-success {
+  color: $light;
+  background-color: $success2;
+  border-color: $success;
+}
+.alert p {
+  margin-bottom: 0;
+}
+.alert:empty {
+  display: none;
+}
+.invalid-feedback {
+  color: #a94442;
+  display: block;
+  margin: -1rem 0 2rem;
+}
+
+/* LiveView specific classes for your customization */
+.phx-no-feedback.invalid-feedback,
+.phx-no-feedback .invalid-feedback {
+  display: none;
+}
+
+.phx-click-loading {
+  opacity: 0.5;
+  transition: opacity 1s ease-out;
+}
+
+.phx-disconnected{
+  cursor: wait;
+}
+.phx-disconnected *{
+  pointer-events: none;
+}
+
+.phx-modal {
+  opacity: 1!important;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.4);
+}
+
+.phx-modal-content {
+  background-color: #fefefe;
+  margin: 15vh auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+.phx-modal-close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.phx-modal-close:hover,
+.phx-modal-close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+
+.menu-card .panel-body {
+  padding: 0;
+}
+
+.menu-card .panel-body:hover {
+  -webkit-transition: all 300ms linear;
+  -moz-transition: all 300ms linear;
+  -o-transition: all 300ms linear;
+  -ms-transition: all 300ms linear;
+  transition: all 300ms linear;
+}
+
+.menu-card a, .menu-card span {
+  /*border: 1px solid #000;*/
+  
+  display: block;
+  text-align: center;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  
+  font-size: 1.6em;
+  line-height: 2em;
+  
+  color: $primary;
+  
+  text-decoration: none;
+  
+  /*text-shadow: 2px 2px 2px rgba(0,0,0,0.05);*/
+  
+  -webkit-transition: all 200ms linear;
+  -moz-transition: all 200ms linear;
+  -o-transition: all 200ms linear;
+  -ms-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+
+.menu-card a:hover, .menu-card span:hover {
+  color: $primary2;
+  
+  cursor: pointer;
+  text-shadow: 2px 2px 2px rgba(0,0,0,0.1);
+}
+
+/* Page sub menu */
+.sub-menu {
+  margin-top: 0;
+}
+
+.sub-menu .card {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+.sub-menu .card-body, #sub-menu-card-body {
+  padding: 0 15px;
+  padding: 0;
+}
+
+.sub-menu-icon a {
+  margin: 0 5px;
+  
+  margin: 0;
+  padding: 0;
+}
+
+.sub-menu-icon a {
+  margin: 0;
+  padding: 10px 0 5px 0;
+  color: $gray-600;
+  
+  border-bottom: 5px solid $gray-700;
+  
+  -webkit-transition: all 200ms linear;
+  -moz-transition: all 200ms linear;
+  -o-transition: all 200ms linear;
+  -ms-transition: all 200ms linear;
+  transition: all 200ms linear;
+}
+
+.sub-menu-icon a:hover {
+  text-decoration: none;
+  -webkit-transition: all 300ms linear;
+  -moz-transition: all 300ms linear;
+  -o-transition: all 300ms linear;
+  -ms-transition: all 300ms linear;
+  transition: all 300ms linear;
+}
+
+.block-link {
+  text-align: center;
+  display: inline-block;
+  
+  /*background-color: #AAA;*/
+  width: 100%;
+  /*height: 100%;*/
+  
+  -webkit-transition: all 300ms linear;
+  -moz-transition: all 300ms linear;
+  -o-transition: all 300ms linear;
+  -ms-transition: all 300ms linear;
+  transition: all 300ms linear;
+}
+
+.block-link:hover {
+  text-decoration: none;
+  color: #05A;
+}
+
+
+// Section menu
+.section-menu {
+  margin-top: 20px;
+}
+
+#section-men-extended {
+  border-top: 1px solid #EEE;
+  margin-top: 5px;
+  display: none;
+}
+#section-men-extended .btn {
+  margin-top: 5px;
+}
+
+.help-block {
+  color: $danger;
+  padding: 2px 5px;
+  display: block;
+}
+
+// Small tables
+.table-sm {
+  font-size: 0.9rem;
+}
+
+.table-sm .btn-sm {
+  padding: 0.25rem 0.6rem;
+}
+
+
+
+// We want out outline buttons to be filled in when you mouseover or activate them
+@mixin button-outline-variant($color) {
+  & {
+    color: $gray-800;
+  }
+  
+  &:hover {
+    color: $gray-200;
+    background-color: $color;
+  }
+
+  &:focus,
+  &.focus {
+    color: $light;
+    background-color: transparent;
+  }
+
+  &:active,
+  &.active,
+  &.dropdown-toggle.show {
+    color: $light;
+    background-color: $color;
+
+    &:focus {
+      box-shadow: none;
+    }
+  }
+}
+
+@each $color, $value in $theme-colors {
+  .btn-outline-#{$color} {
+    @include button-outline-variant($value);
+  }
+}
+
+.row-left {
+  width: 145px;
+}
+
+body.modal-open {
+  overflow: visible;
+}
+
+// Live search
+.picker-input {
+  /*height: 42px;*/
+  height: 100%;
+}
+
+.picker-modal-close {
+  font-size: 2em;
+}
+
+// Forms and inputs
+input {
+  color: $light;
+}
+
+input[type="color"] {
+  min-height: 2rem;
+  padding: 0.2rem;
+}
+
+
+.select2-selection {
+  border-color: $gray-700 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  background-color: $dark;
+  color: $light !important;
+}
+
+.select2-search__field {
+  background-color: $input-bg;
+}
+
+.text-invert {
+  color: $dark;
+}

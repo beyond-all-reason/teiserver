@@ -44,6 +44,17 @@ defmodule Central.General.Startup do
     ])
 
     add_user_config_type(%{
+      key: "general.Light mode",
+      section: "Interface",
+      type: "boolean",
+      visible: true,
+      permissions: [],
+      description: "Enable light mode",
+      opts: [],
+      default: false
+    })
+
+    add_user_config_type(%{
       key: "general.Rate limit",
       section: "General",
       type: "integer",

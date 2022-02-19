@@ -70,11 +70,11 @@ defmodule Central.AccountTest do
       assert user == Account.get_user!(user.id)
     end
 
-    test "delete_user/1 deletes the user" do
-      user = AccountTestLib.user_fixture()
-      assert {:ok, %User{}} = Account.delete_user(user)
-      assert_raise Ecto.NoResultsError, fn -> Account.get_user!(user.id) end
-    end
+    # test "delete_user/1 deletes the user" do
+    #   user = AccountTestLib.user_fixture()
+    #   assert {:ok, %User{}} = Account.delete_user(user)
+    #   assert_raise Ecto.NoResultsError, fn -> Account.get_user!(user.id) end
+    # end
 
     test "change_user/1 returns a user changeset" do
       user = AccountTestLib.user_fixture()

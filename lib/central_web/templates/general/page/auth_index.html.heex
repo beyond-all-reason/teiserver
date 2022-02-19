@@ -91,7 +91,7 @@
       <a href={Routes.communication_notification_path(@conn, :index)}>
         <%= central_component "icon", icon: notification_icon, class: "fa-3x" %>
         <%= if @user_notifications_unread_count > 0 do %>
-          <div class={"badge badge-pill badge-#{Central.Communication.NotificationLib.colours() |> colours()}"}
+          <div class={"badge rounded-pill bg-#{Central.Communication.NotificationLib.colours()}"}
             id="communication-notifications-badge"
             style="width: 65px; margin-left:-60px; font-size: 1em;">
             <%= @user_notifications_unread_count %>

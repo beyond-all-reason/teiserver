@@ -227,7 +227,7 @@ defmodule Central.Helpers.GeneralTestLib do
             socket
 
           _e ->
-            throw("Error connecting to socket in test_lib")
+            raise "Error connecting to socket in test_lib"
         end
       end
 

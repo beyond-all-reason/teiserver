@@ -81,16 +81,14 @@ $theme-colors: (
   dark: $dark,
   // add any additional color below
   
-  body-bg: $dark,
+  body-bg: $light,
 );
 
 $min-contrast-ratio:   1.9 !default;
 
 // Body
-
-$body-bg:                   $gray-900 !default;
-$body-color:                $white !default;
-
+$body-bg:                   $gray-200 !default;
+/*
 $table-color:               $white !default;
 $table-striped-color:       $white !default;
 $table-active-color:        $white !default;
@@ -148,6 +146,7 @@ $nav-tabs-border-color:             $gray-700 !default;
 $nav-tabs-link-hover-border-color:  $nav-tabs-border-color $nav-tabs-border-color transparent !default;
 $nav-tabs-link-active-color:        $white !default;
 $nav-tabs-link-active-border-color: $nav-tabs-border-color $nav-tabs-border-color transparent !default;
+$nav-tabs-link-hover-bg:            $gray-100 !default;
 
 $nav-tabs-link-active-bg:           transparent !default;
 
@@ -222,7 +221,7 @@ $btn-close-hover-opacity:    1 !default;
 // Code
 
 $pre-color:                         inherit !default;
-
+*/
 
 
 

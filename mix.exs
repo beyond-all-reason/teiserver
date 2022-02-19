@@ -100,7 +100,8 @@ defmodule Central.MixProject do
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.deploy": [
         "esbuild default --minify",
-        "sass default --no-source-map --style=compressed",
+        "sass dark --no-source-map --style=compressed",
+        "sass light --no-source-map --style=compressed",
         "phx.digest"
       ]
     ]

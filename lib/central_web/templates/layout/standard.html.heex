@@ -15,14 +15,6 @@
       background-color: <%= bg %> !important;
     }
 
-    .side-menu-active a i, .side-menu-active a {
-      color: <%= fg %> !important;
-    }
-    .side-menu-active a {
-      border-left-color: <%= fg %> !important;
-      background: linear-gradient(to right, <%= bg %>, rgba(0,0,0,0));
-    }
-
     .line-card a {
       color: <%= fg %> !important;
     }
@@ -42,9 +34,6 @@
   <div id="flash-messages">
     <%= if get_flash(@conn, :danger) do %>
       <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= get_flash(@conn, :danger) %></p>
-    <% end %>
-    <%= if get_flash(@conn, :warning) do %>
-      <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning"><%= get_flash(@conn, :warning) %></p>
     <% end %>
     <%= if get_flash(@conn, :info) do %>
       <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= get_flash(@conn, :info) %></p>

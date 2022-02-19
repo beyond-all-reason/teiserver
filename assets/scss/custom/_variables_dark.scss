@@ -148,6 +148,7 @@ $nav-tabs-border-color:             $gray-700 !default;
 $nav-tabs-link-hover-border-color:  $nav-tabs-border-color $nav-tabs-border-color transparent !default;
 $nav-tabs-link-active-color:        $white !default;
 $nav-tabs-link-active-border-color: $nav-tabs-border-color $nav-tabs-border-color transparent !default;
+$nav-tabs-link-hover-bg:            $gray-900 !default;
 
 $nav-tabs-link-active-bg:           transparent !default;
 
@@ -212,6 +213,8 @@ $list-group-action-active-bg:       $gray-900 !default;
 // Breadcrumbs
 
 $breadcrumb-bg:                     $gray-700 !default;
+$breadcrumb-color:                  $primary !default;
+$breadcrumb-hover-color:            $primary-light !default;
 
 // Close
 

@@ -221,21 +221,21 @@ defmodule Central.Account do
     |> broadcast_update_user
   end
 
-  @doc """
-  Deletes a User.
+  # @doc """
+  # Deletes a User.
 
-  ## Examples
+  # ## Examples
 
-      iex> delete_user(user)
-      {:ok, %User{}}
+  #     iex> delete_user(user)
+  #     {:ok, %User{}}
 
-      iex> delete_user(user)
-      {:error, %Ecto.Changeset{}}
+  #     iex> delete_user(user)
+  #     {:error, %Ecto.Changeset{}}
 
-  """
-  def delete_user(%User{} = user) do
-    Repo.delete(user)
-  end
+  # """
+  # def delete_user(%User{} = user) do
+  #   Repo.delete(user)
+  # end
 
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking user changes.
@@ -347,21 +347,25 @@ defmodule Central.Account do
   """
   def get_group!(id) when not is_list(id) do
     group_query(id, [])
+    |> QueryHelpers.limit_query(1)
     |> Repo.one!()
   end
 
   def get_group!(args) do
     group_query(nil, args)
+    |> QueryHelpers.limit_query(args[:limit] || 1)
     |> Repo.one!()
   end
 
   def get_group!(id, args) do
     group_query(id, args)
+    |> QueryHelpers.limit_query(args[:limit] || 1)
     |> Repo.one!()
   end
 
   def get_group(id, args \\ []) when not is_list(id) do
     group_query(id, args)
+    |> QueryHelpers.limit_query(args[:limit] || 1)
     |> Repo.one()
   end
 

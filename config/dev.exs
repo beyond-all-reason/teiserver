@@ -23,17 +23,27 @@ config :central, CentralWeb.Endpoint,
   code_reloader: true,
   check_origin: false,
   watchers: [
+    # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
-    sass: {
+    dark_sass: {
       DartSass,
       :install_and_run,
-      [:default, ~w(--embed-source-map --source-map-urls=absolute --watch)]
+      [:dark, ~w(--embed-source-map --source-map-urls=absolute --watch)]
+    },
+    light_sass: {
+      DartSass,
+      :install_and_run,
+      [:light, ~w(--embed-source-map --source-map-urls=absolute --watch)]
     }
   ]
 
 config :dart_sass,
   version: "1.49.0",
-  default: [
+  light: [
+    args: ~w(scss/mdb.light.scss ../priv/static/assets/mdb_light.css),
+    cd: Path.expand("../assets", __DIR__)
+  ],
+  dark: [
     args: ~w(scss/mdb.dark.scss ../priv/static/assets/mdb_dark.css),
     cd: Path.expand("../assets", __DIR__)
   ]

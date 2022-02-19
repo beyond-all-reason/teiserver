@@ -51,7 +51,7 @@ defmodule Central.Account.User do
         attrs,
         [:name, :email, :icon, :colour, :permissions, :admin_group_id, :data] ++ @extra_fields
       )
-      |> validate_required([:name, :email, :icon, :colour, :permissions])
+      |> validate_required([:name, :email, :permissions])
       |> unique_constraint(:email)
     else
       user
@@ -68,7 +68,7 @@ defmodule Central.Account.User do
           :data
         ] ++ @extra_fields
       )
-      |> validate_required([:name, :email, :password, :icon, :colour, :permissions])
+      |> validate_required([:name, :email, :password, :permissions])
       |> unique_constraint(:email)
       |> put_password_hash()
     end
@@ -92,7 +92,7 @@ defmodule Central.Account.User do
         :data
       ] ++ @extra_fields
     )
-    |> validate_required([:name, :email, :icon, :colour, :permissions])
+    |> validate_required([:name, :email, :permissions])
     |> unique_constraint(:email)
   end
 
@@ -119,7 +119,7 @@ defmodule Central.Account.User do
 
     user
     |> cast(attrs, [:name, :email, :icon, :colour] ++ @extra_fields)
-    |> validate_required([:name, :email, :icon, :colour])
+    |> validate_required([:name, :email])
     |> unique_constraint(:email)
   end
 
@@ -129,7 +129,7 @@ defmodule Central.Account.User do
 
     user
     |> cast(attrs, [:name, :email, :icon, :colour, :data] ++ @extra_fields)
-    |> validate_required([:name, :email, :icon, :colour])
+    |> validate_required([:name, :email])
     |> unique_constraint(:email)
   end
 

@@ -175,18 +175,16 @@ defmodule CentralWeb.Account.GroupControllerTest do
   describe "create membership" do
     test "create without existing membership - allowed bad data", %{
       conn: conn,
-      main_group: main_group
     } do
       conn =
         post(conn, Routes.account_group_path(conn, :create_membership), %{
-          "account_user" => "",
-          "group_id" => main_group.id
+          "group_id" => ""
         })
 
       assert redirected_to(conn) ==
-               Routes.account_group_path(conn, :show, main_group.id) <> "#members"
+               Routes.account_group_path(conn, :index)
 
-      assert conn.private[:phoenix_flash]["danger"] == "User was unable to be added to group."
+      assert conn.private[:phoenix_flash]["danger"] == "You do not have the access to add that user to that group."
     end
 
     test "create without existing membership - allowed", %{conn: conn, user: user} do
@@ -223,21 +221,19 @@ defmodule CentralWeb.Account.GroupControllerTest do
     end
   end
 
+  describe "membership invites" do
+
+  end
+
   describe "membership" do
     test "add/update/remove membership", %{conn: conn, main_group: main_group} do
       child_user = Account.get_user_by_email("child@child.com")
 
       # Add membership
-      conn =
-        post(conn, Routes.account_group_path(conn, :create_membership),
-          group_id: main_group.id,
-          account_user: "##{child_user.id}"
-        )
-
-      assert conn.private[:phoenix_flash]["success"] == "User added to group."
-
-      assert redirected_to(conn) ==
-               Routes.account_group_path(conn, :show, main_group) <> "#members"
+      {:ok, _agm} = Account.create_group_membership(%{
+        group_id: main_group.id,
+        user_id: child_user.id
+      })
 
       # Update
       conn =

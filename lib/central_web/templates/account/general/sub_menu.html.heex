@@ -21,13 +21,15 @@
       <div class="card-body" style="padding: 0 15px;">
 
         <div class="row">
-          <%= central_component "sub_menu_icon",
-            name: "groups",
-            label: "Groups",
-            active: @active,
-            url: Routes.account_group_path(@conn, :index),
-            icon: Central.Account.GroupLib.icon()
-          %>
+          <%= if Application.get_env(:central, Central)[:enabled_account_group_pages] do %>
+            <%= central_component "sub_menu_icon",
+              name: "groups",
+              label: "Groups",
+              active: @active,
+              url: Routes.account_group_path(@conn, :index),
+              icon: Central.Account.GroupLib.icon()
+            %>
+          <% end %>
 
           <%= central_component "sub_menu_icon",
             name: "user_configs",

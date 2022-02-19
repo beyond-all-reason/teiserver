@@ -111,6 +111,8 @@ defmodule Central.Account.Group do
     |> cast(%{supers_cache: new_cache}, [:supers_cache])
   end
 
-  def authorize(_, conn, _), do: allow?(conn, "admin.group")
+  def authorize(_, conn, _) do
+    allow?(conn, "admin.group")
+  end
   # def authorize(_, _, _), do: false
 end

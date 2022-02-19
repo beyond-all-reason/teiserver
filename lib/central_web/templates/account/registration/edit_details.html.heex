@@ -20,25 +20,25 @@
     </div>
   <% end %>
 
-  <div class="form-group">
+  <div class="form-group mt-3">
     <%= label f, :name %>
     <%= text_input f, :name, class: "form-control", required: "", autofocus: "autofocus" %>
     <%= error_tag f, :name %>
   </div>
 
-  <div class="form-group" style="display: nnone;">
+  <div class="form-group mt-3" style="display: nnone;">
     <%= label f, :email %> (optional)
     <%= text_input f, :email, class: "form-control" %>
     <%= error_tag f, :email %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group mt-3">
     <%= label f, :password_confirmation %>
     <%= password_input f, :password_confirmation, [class: "form-control"] %>
     <%= error_tag f, :password_confirmation %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group mt-3">
     <a href={Routes.account_general_path(@conn, :index)} class="btn btn-secondary float-start">Cancel</a>
 
     <%= submit "Update details", class: "btn btn-primary float-end" %>

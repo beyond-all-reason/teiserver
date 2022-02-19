@@ -1,34 +1,28 @@
-<% {fg, bg, _bsname} = @view_colour |> colours %>
-<style type="text/css">
-  @media print {
-    #menu, #header, #navigation {
-      display: none;
+<%= if assigns[:view_colour] do %>
+  <% {fg, bg, _bsname} = colours(@view_colour) %>
+  <style type="text/css">
+    @media print {
+      #menu, #header, #navigation {
+        display: none;
+      }
     }
-  }
 
-  #breadcrumb-wrapper {
-    border-bottom: 1px solid <%= fg %> !important;
-    background-color: <%= bg %> !important;
-  }
-  #breadcrumb {
-    background-color: <%= bg %> !important;
-  }
+    #breadcrumb-wrapper {
+      border-bottom: 1px solid <%= fg %> !important;
+      background-color: <%= bg %> !important;
+    }
+    #breadcrumb {
+      background-color: <%= bg %> !important;
+    }
 
-  .side-menu-active a i, .side-menu-active a {
-    color: <%= fg %> !important;
-  }
-  .side-menu-active a {
-    border-left-color: <%= fg %> !important;
-    background: linear-gradient(to right, <%= bg %>, rgba(0,0,0,0));
-  }
-
-  .line-card a {
-    color: <%= fg %> !important;
-  }
-  .line-card a:hover {
-    background-color: <%= bg %> !important;
-  }
-</style>
+    .line-card a {
+      color: <%= fg %> !important;
+    }
+    .line-card a:hover {
+      background-color: <%= bg %> !important;
+    }
+  </style>
+<% end %>
 
 <%= render CentralWeb.General.PageView, "top_navbar.html", Map.put(assigns, :conn, @socket) %>
 
@@ -40,9 +34,6 @@
   <div id="flash-messages">
     <%= if live_flash(@flash, :danger) do %>
       <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= live_flash(@flash, :danger) %></p>
-    <% end %>
-    <%= if live_flash(@flash, :warning) do %>
-      <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning"><%= live_flash(@flash, :warning) %></p>
     <% end %>
     <%= if live_flash(@flash, :info) do %>
       <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= live_flash(@flash, :info) %></p>

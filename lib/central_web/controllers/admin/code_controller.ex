@@ -77,4 +77,22 @@ defmodule CentralWeb.Admin.CodeController do
         |> render("new.html")
     end
   end
+
+  @spec extend(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def extend(conn, %{"id" => id, "hours" => hours}) do
+    code = Account.get_code!(nil, search: [id: id])
+    new_expires = if Timex.compare(Timex.now(), code.expires) == 1 do
+      # If it's 1 then the code is currently expired
+      Timex.shift(Timex.now(), hours: hours |> String.to_integer)
+    else
+      Timex.shift(code.expires, hours: hours |> String.to_integer)
+    end
+
+    case Account.update_code(code, %{"expires" => new_expires}) do
+      {:ok, _code} ->
+        conn
+        |> put_flash(:success, "Code expiry extended.")
+        |> redirect(to: Routes.admin_code_path(conn, :index))
+    end
+  end
 end

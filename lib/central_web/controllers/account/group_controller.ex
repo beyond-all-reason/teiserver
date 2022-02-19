@@ -7,6 +7,11 @@ defmodule CentralWeb.Account.GroupController do
   plug :add_breadcrumb, name: 'Account', url: '/account'
   plug :add_breadcrumb, name: 'Groups', url: '/account/groups'
 
+  plug Bodyguard.Plug.Authorize,
+    policy: Central.Account.PublicGroup,
+    action: {Phoenix.Controller, :action_name},
+    user: {Central.Account.AuthLib, :current_user}
+
   plug(AssignPlug,
     site_menu_active: "central_account",
     sub_menu_active: "group"
@@ -156,51 +161,57 @@ defmodule CentralWeb.Account.GroupController do
     end
   end
 
-  # def create_membership(conn, params) do
-  #   user_id = get_hash_id(params["account_user"])
-  #   group_id = params["group_id"]
+  def create_membership(conn, %{"group_id" => ""}) do
+    conn
+      |> put_flash(:danger, "You do not have the access to add that user to that group.")
+      |> redirect(to: Routes.account_group_path(conn, :index))
+  end
 
-  #   group = Account.get_group!(group_id)
+  def create_membership(conn, params) do
+    user_id = conn.assigns[:current_user].id
+    group_id = params["group_id"] || -100
 
-  #   group_memberships = Account.list_group_memberships(user_id: conn.current_user.id)
-  #   group_access = GroupLib.access_policy(group, conn.current_user, group_memberships)
+    group = Account.get_group(group_id)
 
-  #   access_allowed =
-  #     (user_id == conn.user_id and group_access[:self_add_members]) or
-  #       (user_id != conn.user_id and group_access[:invite_members] and
-  #          GroupLib.access?(conn, group.id)) or
-  #       group_access[:admin]
+    group_memberships = Account.list_group_memberships(user_id: conn.current_user.id)
+    group_access = GroupLib.access_policy(group, conn.current_user, group_memberships)
 
-  #   if access_allowed do
-  #     attrs = %{
-  #       user_id: user_id,
-  #       group_id: group_id,
-  #       admin: false
-  #     }
+    access_allowed =
+      (user_id == conn.user_id and group_access[:self_add_members]) or
+        (user_id != conn.user_id and group_access[:invite_members] and
+           GroupLib.access?(conn, group.id)) or
+        group_access[:admin]
 
-  #     case Account.create_group_membership(attrs) do
-  #       {:ok, membership} ->
-  #         CentralWeb.Endpoint.broadcast(
-  #           "recache:#{membership.user_id}",
-  #           "recache",
-  #           %{}
-  #         )
+    if access_allowed do
+      attrs = %{
+        user_id: user_id,
+        group_id: group_id,
+        admin: false
+      }
 
-  #         conn
-  #         |> put_flash(:success, "User added to group.")
-  #         |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
+      case Account.create_group_membership(attrs) do
+        {:ok, membership} ->
+          CentralWeb.Endpoint.broadcast(
+            "recache:#{membership.user_id}",
+            "recache",
+            %{}
+          )
 
-  #       {:error, _changeset} ->
-  #         conn
-  #         |> put_flash(:danger, "User was unable to be added to group.")
-  #         |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
-  #     end
-  #   else
-  #     conn
-  #     |> put_flash(:danger, "You do not have the access to add that user to this group.")
-  #     |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
-  #   end
-  # end
+          conn
+          |> put_flash(:success, "User added to group.")
+          |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
+
+        {:error, _changeset} ->
+          conn
+          |> put_flash(:danger, "User was unable to be added to group.")
+          |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
+      end
+    else
+      conn
+      |> put_flash(:danger, "You do not have the access to add that user to this group.")
+      |> redirect(to: Routes.account_group_path(conn, :show, group_id) <> "#members")
+    end
+  end
 
   @spec create_invite(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create_invite(conn, params) do
@@ -436,5 +447,10 @@ defmodule CentralWeb.Account.GroupController do
       |> put_flash(:danger, "You do not have the access to alter admin status in this group.")
       |> redirect(to: Routes.account_group_path(conn, :show, group_id))
     end
+  end
+
+  def forward_to_index(conn, _) do
+    conn
+    |> redirect(to: "/")
   end
 end

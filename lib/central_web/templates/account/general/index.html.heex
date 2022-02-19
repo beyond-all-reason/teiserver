@@ -1,12 +1,15 @@
 <div class="row mt-3">
-  <%=
-    central_component "menu_card",
-    icon: Central.Account.GroupLib.icon(),
-    name: "groups",
-    text: "Groups",
-    icon_class: "fad",
-    link: Routes.account_group_path(@conn, :index)
-  %>
+  <%= if Application.get_env(:central, Central)[:enabled_account_group_pages] do %>
+    <%=
+      central_component "menu_card",
+      icon: Central.Account.GroupLib.icon(),
+      name: "groups",
+      text: "Groups",
+      icon_class: "fad",
+      link: Routes.account_group_path(@conn, :index)
+    %>
+  <% end %>
+
   <%=
     central_component "menu_card",
     icon: "fad fa-cog",
