@@ -152,31 +152,7 @@ defmodule Teiserver.TachyonTcpServer do
   end
 
   # Main source of data ingress
-  def handle_info({:tcp, _socket, data}, %{exempt_from_cmd_throttle: false} = state) do
-    data = to_string(data)
-
-    cmd_timestamps = if String.contains?(data, "\n") do
-      now = System.system_time(:second)
-      limiter = now - @cmd_flood_duration
-
-      [now | state.cmd_timestamps]
-      |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
-    else
-      state.cmd_timestamps
-    end
-
-    new_state = if Enum.count(cmd_timestamps) > @cmd_flood_limit do
-      User.set_flood_level(state.userid, 10)
-      Client.disconnect(state.userid, :flood)
-      Logger.error("Tachyon command overflow from #{state.username}/#{state.userid} with #{Enum.count(cmd_timestamps)} commands. Disconnected and flood protection engaged.")
-      state
-    else
-      state.protocol_in.data_in(data, state)
-    end
-
-    {:noreply, %{new_state | cmd_timestamps: cmd_timestamps}}
-  end
-  def handle_info({:tcp, _socket, data}, %{exempt_from_cmd_throttle: true} = state) do
+  def handle_info({:tcp, _socket, data}, state) do
     new_state = state.protocol_in.data_in(to_string(data), state)
     {:noreply, new_state}
   end

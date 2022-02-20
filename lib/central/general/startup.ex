@@ -3,6 +3,8 @@ defmodule Central.General.Startup do
   use CentralWeb, :startup
 
   def startup do
+    ConCache.put(:application_temp_cache, :app_startup_datetime, Timex.now)
+
     QuickAction.add_items([
       %{
         label: "Admin index",
