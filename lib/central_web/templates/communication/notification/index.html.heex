@@ -55,7 +55,7 @@
               <td><%= notification.body %></td>
 
               <%= if notification.read do %>
-                <td style="background-color: #EEE; text-align: center;">
+                <td style="text-align: center;" class="bg-success">
                   <i class="far fa-fw fa-check"></i>
                   &nbsp;
                   Read
@@ -64,7 +64,7 @@
                 <td></td>
               <% end %>
 
-              <td style={if Timex.compare(now, notification.expires) == 1, do: "background-color: #FEE;"}>
+              <td class={if Timex.compare(now, notification.expires) == 1, do: "bg-warning"}>
                 <%= date_to_str notification.expires, format: :dmy, tz: @tz %>
               </td>
               <td>
