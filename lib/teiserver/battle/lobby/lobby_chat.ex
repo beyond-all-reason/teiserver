@@ -27,7 +27,7 @@ defmodule Teiserver.Battle.LobbyChat do
     end
 
     if not User.is_muted?(user) do
-      if user.bot == false do
+      # if user.bot == false do
         case Lobby.get_lobby(lobby_id) do
           nil -> nil
           lobby ->
@@ -38,7 +38,7 @@ defmodule Teiserver.Battle.LobbyChat do
               user_id: userid,
             })
         end
-      end
+      # end
 
       PubSub.broadcast(
         Central.PubSub,
@@ -65,7 +65,7 @@ defmodule Teiserver.Battle.LobbyChat do
     end
 
     if not User.is_muted?(userid) do
-      if user.bot == false do
+      # if user.bot == false do
         case Lobby.get_lobby(lobby_id) do
           nil -> nil
           lobby ->
@@ -76,7 +76,7 @@ defmodule Teiserver.Battle.LobbyChat do
               user_id: userid,
             })
         end
-      end
+      # end
 
       PubSub.broadcast(
         Central.PubSub,
