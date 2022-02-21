@@ -33,6 +33,10 @@ defmodule Teiserver.Room do
     }
   end
 
+  def remove_room(room_name) do
+    ConCache.dirty_delete(:rooms, room_name)
+  end
+
   @spec get_room(String.t()) :: Map.t()
   def get_room(name) do
     ConCache.get(:rooms, name)

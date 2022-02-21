@@ -8,7 +8,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
   # TODO: Less nested hackyness
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
   def do_handle("upload_infolog", data, msg_id, state) do
-    case Regex.run(~r/(\S+) (\S+) (\S+) (\S+)/, data) do
+    case Regex.run(~r/(\S+) (\S+) (\S+) (\S+)/u, data) do
       [_, log_type, user_hash, metadata64, contents64] ->
         case Spring.decode_value(metadata64) do
           {:ok, metadata} ->
@@ -29,7 +29,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
                       {:ok, infolog} ->
                         reply(:spring, :okay, "upload_infolog - id:#{infolog.id}", msg_id, state)
                       {:error, changeset} ->
-                        Logger.error(Kernel.inspect changeset)
+                        # Logger.error(Kernel.inspect changeset)
                         reply(:spring, :no, "upload_infolog - db error", msg_id, state)
                     end
                   {:error, _} ->
@@ -73,18 +73,18 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
 
   defp client_event(data, state) do
     if String.length(data) < 1024 do
-      case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
+      case Regex.run(~r/(\S+) (\S+) (\S+)/u, data) do
         [_, event, value64, hash] ->
           case Spring.decode_value(value64) do
             {:ok, value} ->
               Telemetry.log_client_event(state.userid, event, value, hash)
               "success"
             {:error, reason} ->
-              Logger.error("log_client_event:#{reason} - #{data}")
+              # Logger.error("log_client_event:#{reason} - #{data}")
               reason
           end
         nil ->
-          Logger.error("log_client_event:no match - #{data}")
+          # Logger.error("log_client_event:no match - #{data}")
           "no match"
       end
     else
@@ -94,7 +94,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
 
   defp client_property(data, state) do
     if String.length(data) < 1024 do
-      case Regex.run(~r/(\S+) (\S+) (\S+)/, data) do
+      case Regex.run(~r/(\S+) (\S+) (\S+)/u, data) do
         [_, event, value64, hash] ->
           value = Base.url_decode64(value64)
 
@@ -104,11 +104,11 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
             Telemetry.log_client_property(state.userid, event, value, hash)
             "success"
           else
-            Logger.error("update_client_property:bad base64 value - #{data}")
+            # Logger.error("update_client_property:bad base64 value - #{data}")
             "bad base64 value"
           end
         nil ->
-          Logger.error("update_client_property:no match - #{data}")
+          # Logger.error("update_client_property:no match - #{data}")
           "no match"
       end
     else

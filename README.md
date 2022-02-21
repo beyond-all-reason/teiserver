@@ -30,4 +30,4 @@ All contributors are welcome; if you spot an issue or bug with it mention me on 
 
 #### Special thanks
 - Beherith for extensive help with the autohosts
-- Skynet for finding those hard to spot bits of the protocol I'd missed, check out his [Skylobby](https://github.com/skynet-gh/skylobby) project
+- Skynet and AKU for extensive finding of and reporting bugs

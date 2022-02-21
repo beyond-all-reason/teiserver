@@ -171,7 +171,14 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _recv_raw(socket) do
     case :gen_tcp.recv(socket, 0, 500) do
-      {:ok, reply} -> reply |> to_string
+      {:ok, reply} ->
+        IO.puts ""
+        IO.inspect reply
+        IO.inspect (Enum.into(reply, <<>>, fn bit -> <<bit :: 1>> end))
+        IO.inspect reply |> to_string
+        IO.inspect reply |> List.to_string
+        IO.puts ""
+        reply |> to_string
       {:error, :timeout} -> :timeout
       {:error, :closed} -> :closed
     end

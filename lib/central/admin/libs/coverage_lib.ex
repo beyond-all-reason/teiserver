@@ -5,7 +5,7 @@ defmodule Central.Admin.CoverageLib do
       (?<file>[_a-zA-Z0-9\/\.\ ]+\/[_a-zA-Z0-9\/\.\ ]+?)\s+
       (?<lines>[0-9]+)\s+
       (?<relevant>[0-9]+)\s+
-      (?<missed>[0-9]+)/x
+      (?<missed>[0-9]+)/xu
     |> Regex.named_captures(String.trim(s))
   end
 

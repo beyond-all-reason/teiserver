@@ -51,7 +51,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   def handle(data, state) do
     tuple =
-      ~r/^(#[0-9]+ )?([a-z_A-Z0-9\.]+)(.*)?$/
+      ~r/^(#[0-9]+ )?([a-z_A-Z0-9\.]+)(.*)?$/u
       |> Regex.run(data)
       |> _clean()
 
@@ -145,7 +145,7 @@ defmodule Teiserver.Protocols.SpringIn do
     reply(:servermsg, "You need to login before you can set your status", msg_id, state)
   end
   defp do_handle("MYSTATUS", data, msg_id, state) do
-    case Regex.run(~r/([0-9]+)/, data) do
+    case Regex.run(~r/(\d+)/, data) do
       [_, new_value] ->
         new_status =
           Spring.parse_client_status(new_value)
@@ -612,7 +612,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # Chat related
   defp do_handle("JOIN", data, msg_id, state) do
-    regex_result = case Regex.run(~r/(\w+)(?:\t)?(\w+)?/, data) do
+    regex_result = case Regex.run(~r/(\w+)(?:\t)?(\w+)?/u, data) do
       [_, room_name] ->
         {room_name, ""}
 
@@ -659,7 +659,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("SAY", data, msg_id, state) do
-    case Regex.run(~r/(\w+) (.+)/, data) do
+    case Regex.run(~r/(\w+) (.+)/u, data) do
       [_, room_name, msg] ->
         Room.send_message(state.userid, room_name, msg)
 
@@ -671,7 +671,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("SAYEX", data, msg_id, state) do
-    case Regex.run(~r/(\w+) (.+)/, data) do
+    case Regex.run(~r/(\w+) (.+)/u, data) do
       [_, room_name, msg] ->
         Room.send_message_ex(state.userid, room_name, msg)
 
@@ -688,7 +688,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("SAYPRIVATE", data, msg_id, state) do
-    case Regex.run(~r/(\S+) (.+)/, data) do
+    case Regex.run(~r/(\S+) (.+)/u, data) do
       [_, to_name, msg] ->
         to_id = User.get_userid(to_name)
         User.send_direct_message(state.userid, to_id, msg)
@@ -706,7 +706,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("OPENBATTLE", data, msg_id, state) do
     response =
       case Regex.run(
-             ~r/^(\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) ([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t(.+)$/,
+             ~r/^(\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) (\S+) ([^\t]+)\t([^\t]+)\t([^\t]+)\t([^\t]+)\t(.+)$/u,
              data
            ) do
         [
@@ -809,7 +809,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("JOINBATTLE", data, msg_id, state) do
     # Double space is here as the hashcode isn't sent by Chobby
     # Skylobby sends an * for empty so need to handle that
-    data = case Regex.run(~r/^(\S+) \*? (\S+)$/, data) do
+    data = case Regex.run(~r/^(\S+) \*? (\S+)$/u, data) do
       [_, lobby_id, script_password] ->
         "#{lobby_id} empty #{script_password}"
       nil ->
@@ -817,7 +817,7 @@ defmodule Teiserver.Protocols.SpringIn do
     end
 
     response =
-      case Regex.run(~r/^(\S+) (\S+) (\S+)$/, data) do
+      case Regex.run(~r/^(\S+) (\S+) (\S+)$/u, data) do
         [_, lobby_id, password, script_password] ->
           Lobby.can_join?(state.userid, lobby_id, password, script_password)
 
@@ -1096,7 +1096,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   # SAYBATTLEPRIVATEEX username
   defp do_handle("SAYBATTLEPRIVATEEX", data, msg_id, state) do
-    case Regex.run(~r/(\S+) (.+)/, data) do
+    case Regex.run(~r/(\S+) (.+)/u, data) do
       [_, to_name, msg] ->
         to_id = User.get_userid(to_name)
 
