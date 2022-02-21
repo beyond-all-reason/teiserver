@@ -16,7 +16,7 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
         ],
         select: [:id]
       )
-      |> Stream.each(fn %{id: userid} ->
+      |> Enum.each(fn %{id: userid} ->
         user = User.get_user_by_id(userid)
 
         if user do
