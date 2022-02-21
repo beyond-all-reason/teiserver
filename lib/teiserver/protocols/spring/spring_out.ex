@@ -541,6 +541,10 @@ defmodule Teiserver.Protocols.SpringOut do
     "SERVERMSG #{msg}\n"
   end
 
+  defp do_reply(:disconnect, reason) do
+    "s.system.disconnect #{reason}\n"
+  end
+
   defp do_reply(:server_restart, _) do
     "s.system.shutdown\n"
   end

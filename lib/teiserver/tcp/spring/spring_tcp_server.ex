@@ -75,6 +75,8 @@ defmodule Teiserver.SpringTcpServer do
       |> Tuple.to_list()
       |> Enum.join(".")
 
+    Logger.info("New spring connection from #{ip}")
+
     :ranch.accept_ack(ref)
     transport.setopts(socket, [{:active, true}])
 
@@ -140,6 +142,7 @@ defmodule Teiserver.SpringTcpServer do
 
   # If Ctrl + C is sent through it kills the connection, makes telnet debugging easier
   def handle_info({_, _socket, <<255, 244, 255, 253, 6>>}, state) do
+    state.protocol_out.reply(:disconnect, "Ctrl + C", nil, state)
     Client.disconnect(state.userid, "Terminal exit command")
     send(self(), :terminate)
     {:noreply, state}
@@ -183,6 +186,7 @@ defmodule Teiserver.SpringTcpServer do
     diff = System.system_time(:second) - state.last_msg
 
     if diff > Application.get_env(:central, Teiserver)[:heartbeat_timeout] do
+      state.protocol_out.reply(:disconnect, "Heartbeat", nil, state)
       if state.username do
         Logger.error("Heartbeat timeout for #{state.username}")
       end
@@ -244,6 +248,7 @@ defmodule Teiserver.SpringTcpServer do
   # Some logic because if we're the one logged out we need to disconnect
   def handle_info({:user_logged_out, userid, username}, state) do
     if state.userid == userid do
+      state.protocol_out.reply(:disconnect, "Logged out", nil, state)
       {:stop, :normal, state}
     else
       new_state = user_logged_out(userid, username, state)
@@ -364,12 +369,14 @@ defmodule Teiserver.SpringTcpServer do
 
   # Connection
   def handle_info({:tcp_closed, _socket}, %{socket: socket, transport: transport} = state) do
+    state.protocol_out.reply(:disconnect, "TCP Closed", nil, state)
     transport.close(socket)
     Client.disconnect(state.userid, ":tcp_closed with socket")
     {:stop, :normal, %{state | userid: nil}}
   end
 
   def handle_info({:tcp_closed, _socket}, state) do
+    state.protocol_out.reply(:disconnect, "TCP Closed", nil, state)
     Client.disconnect(state.userid, ":tcp_closed no socket")
     {:stop, :normal, %{state | userid: nil}}
   end
@@ -386,6 +393,7 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   def handle_info(:terminate, state) do
+    state.protocol_out.reply(:disconnect, "Terminate", nil, state)
     Client.disconnect(state.userid, "tcp_server :terminate")
     {:stop, :normal, %{state | userid: nil}}
   end
@@ -852,6 +860,7 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   defp engage_flood_protection(state) do
+    state.protocol_out.reply(:disconnect, "Flood protection", nil, state)
     User.set_flood_level(state.userid, 10)
     Client.disconnect(state.userid, :flood)
     Logger.error("Spring command overflow from #{state.username}/#{state.userid} with #{Enum.count(state.cmd_timestamps)} commands. Disconnected and flood protection engaged.")
