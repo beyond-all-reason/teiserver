@@ -638,13 +638,14 @@ defmodule Teiserver.Protocols.SpringOut do
       send(self(), {:global_battle_updated, lobby_id, :update_battle_info})
 
       battle = Lobby.get_battle(lobby_id)
-
-      battle.players
-      |> Enum.each(fn player_id ->
-        send(self(), {:add_user_to_battle, player_id, lobby_id, nil})
-      end)
-      if not state.exempt_from_cmd_throttle do
-        :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
+      if battle != nil do
+        battle.players
+        |> Enum.each(fn player_id ->
+          send(self(), {:add_user_to_battle, player_id, lobby_id, nil})
+        end)
+        if not state.exempt_from_cmd_throttle do
+          :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
+        end
       end
     end)
 
@@ -656,11 +657,7 @@ defmodule Teiserver.Protocols.SpringOut do
     PubSub.unsubscribe(Central.PubSub, "teiserver_global_battle_lobby_updates")
     PubSub.subscribe(Central.PubSub, "teiserver_global_battle_lobby_updates")
 
-    exempt_from_cmd_throttle = if user.moderator == true or user.bot == true do
-      true
-    else
-      false
-    end
+    exempt_from_cmd_throttle = (user.moderator == true or user.bot == true)
     %{state | user: user, username: user.name, userid: user.id, exempt_from_cmd_throttle: exempt_from_cmd_throttle}
   end
 

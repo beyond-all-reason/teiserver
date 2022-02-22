@@ -27,18 +27,7 @@ defmodule Teiserver.Battle.LobbyChat do
     end
 
     if not User.is_muted?(user) do
-      # if user.bot == false do
-        case Lobby.get_lobby(lobby_id) do
-          nil -> nil
-          lobby ->
-            Chat.create_lobby_message(%{
-              content: msg,
-              lobby_guid: lobby.tags["server/match/uuid"],
-              inserted_at: Timex.now(),
-              user_id: userid,
-            })
-        end
-      # end
+      persist_message(user, msg, lobby_id, :say)
 
       PubSub.broadcast(
         Central.PubSub,
@@ -64,19 +53,8 @@ defmodule Teiserver.Battle.LobbyChat do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    if not User.is_muted?(userid) do
-      # if user.bot == false do
-        case Lobby.get_lobby(lobby_id) do
-          nil -> nil
-          lobby ->
-            Chat.create_lobby_message(%{
-              content: msg,
-              lobby_guid: lobby.tags["server/match/uuid"],
-              inserted_at: Timex.now(),
-              user_id: userid,
-            })
-        end
-      # end
+    if not User.is_muted?(user) do
+      persist_message(user, msg, lobby_id, :sayex)
 
       PubSub.broadcast(
         Central.PubSub,
@@ -110,6 +88,31 @@ defmodule Teiserver.Battle.LobbyChat do
         "teiserver_client_messages:#{to_id}",
         {:client_message, :lobby_direct_announce, to_id, {from_id, msg}}
       )
+    end
+  end
+
+  @spec persist_message(T.user(), String.t(), T.lobby_id(), atom) :: any
+  def persist_message(user, msg, lobby_id, type) do
+    lobby = Lobby.get_lobby(lobby_id)
+
+    persist = cond do
+      lobby == nil -> false
+      user.bot and String.slice(msg, 0..1) == "* " -> false
+      true -> true
+    end
+
+    if persist do
+      msg = case type do
+        :sayex -> "sayex: #{msg}"
+        _ -> msg
+      end
+
+      Chat.create_lobby_message(%{
+        content: msg,
+        lobby_guid: lobby.tags["server/match/uuid"],
+        inserted_at: Timex.now(),
+        user_id: user.id,
+      })
     end
   end
 end
