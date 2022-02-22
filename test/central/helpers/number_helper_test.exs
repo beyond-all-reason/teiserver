@@ -2,6 +2,7 @@ defmodule Central.General.NumberHelperTest do
   use Central.DataCase, async: true
 
   alias Central.Helpers.NumberHelper
+  alias Decimal
 
   test "int_parse" do
     params = [
@@ -58,4 +59,22 @@ defmodule Central.General.NumberHelperTest do
   #     assert result == expected
   #   end
   # end
+
+  test "c_round" do
+    params = [
+      {123, 123},
+      {987.4, 987},
+      {456.7, 457},
+      {nil, 0},
+      {-100.9, -101},
+      {Decimal.new("10.23"), 10},
+      {Decimal.new("10.11"), 10},
+      {Decimal.new(10), 10}
+    ]
+
+    for {input, expected} <- params do
+      result = NumberHelper.c_round(input)
+      assert result == expected
+    end
+  end
 end

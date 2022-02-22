@@ -1,5 +1,6 @@
 defmodule Central.Helpers.NumberHelper do
   @moduledoc false
+  require Decimal
 
   @spec int_parse(String.t() | nil | number() | List.t()) :: Integer.t() | List.t()
   def int_parse(""), do: 0
@@ -32,6 +33,19 @@ defmodule Central.Helpers.NumberHelper do
   defp _normalize(v) when v > 1_000_000, do: "#{Float.round(v / 1_000_000, 2)}M"
   defp _normalize(v) when v > 1_000, do: "#{Float.round(v / 1_000, 2)}K"
   defp _normalize(v), do: v
+
+  @doc """
+  Allows us to round any number type with just one function call, useful for when we're
+  not certain if we will get back a decimal or not
+  """
+  @spec c_round(nil | number | Decimal.t()) :: integer
+  def c_round(nil), do: 0
+  def c_round(v) when Decimal.is_decimal(v) do
+    v
+      |> Decimal.round()
+      |> Decimal.to_integer()
+  end
+  def c_round(v), do: round(v)
 
   # def dec_parse(""), do: Decimal.new(0)
   # def dec_parse(nil), do: Decimal.new(0)

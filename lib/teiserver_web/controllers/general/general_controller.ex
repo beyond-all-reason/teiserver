@@ -16,8 +16,9 @@ defmodule TeiserverWeb.General.GeneralController do
     client = Client.get_client_by_id(conn.user_id)
 
     conn
-    |> assign(:client, client)
-    |> render("index.html")
+    |> redirect(to: Routes.general_page_path(conn, :index))
+    # |> assign(:client, client)
+    # |> render("index.html")
   end
 
   @spec gdpr(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

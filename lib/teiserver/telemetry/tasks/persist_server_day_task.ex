@@ -6,8 +6,9 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
 
   alias Central.Repo
   import Ecto.Query, warn: false
+  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
 
-  @log_keep_days 90
+  @log_keep_days 30
   @segment_length 60# Minutes
   @segment_count div(1440, @segment_length)-1
 
@@ -402,14 +403,15 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
 
   @spec clean_up_logs(Date.t()) :: :ok
   defp clean_up_logs(date) do
-    # Clean up all minute logs older than X
-    timestamp = Timex.shift(date, days: -@log_keep_days) |> Timex.to_datetime
+    # Clean up all minute logs older than X days
+    before_timestamp = Timex.shift(date, days: -@log_keep_days)
+      |> Timex.to_datetime
+      |> date_to_str(format: :ymd_hms)
 
-    delete_query =
-      from logs in Teiserver.Telemetry.ServerMinuteLog,
-        where: logs.timestamp < ^timestamp
-
-    Repo.delete_all(delete_query)
+    query = """
+      DELETE FROM teiserver_server_minute_logs WHERE timestamp < #{before_timestamp}
+"""
+    Ecto.Adapters.SQL.query(Repo, query, [])
   end
 
   defp concatenate_lists(items, path) do

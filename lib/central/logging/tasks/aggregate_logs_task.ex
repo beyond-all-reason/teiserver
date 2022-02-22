@@ -10,6 +10,7 @@ defmodule Central.Logging.AggregateViewLogsTask do
   alias Central.Repo
   import Ecto.Query, warn: false
   import Central.Helpers.QueryHelpers
+  import Central.Helpers.NumberHelper, only: [c_round: 1]
   alias Decimal
 
   @log_keep_period 180
@@ -107,18 +108,10 @@ defmodule Central.Logging.AggregateViewLogsTask do
   end
 
   defp get_average_load_time(logs) do
-    l =
-      logs
+    logs
       |> select([l], avg(l.load_time))
       |> Repo.one()
-
-    if l != nil do
-      l
-      |> Decimal.round()
-      |> Decimal.to_integer()
-    else
-      0
-    end
+      |> c_round
   end
 
   defp get_guest_view_count(logs) do
@@ -151,7 +144,7 @@ defmodule Central.Logging.AggregateViewLogsTask do
     logs =
       Repo.all(logs)
       |> Enum.filter(fn {h, c} -> h != nil and c > 0 end)
-      |> Enum.map(fn {h, c} -> {round(h), c} end)
+      |> Enum.map(fn {h, c} -> {c_round(h), c} end)
       |> Map.new()
 
     Enum.map(0..24, fn h -> logs[h] || 0 end)
@@ -167,7 +160,7 @@ defmodule Central.Logging.AggregateViewLogsTask do
     logs =
       Repo.all(logs)
       |> Enum.filter(fn {h, c} -> h != nil and c > 0 end)
-      |> Enum.map(fn {h, lt} -> {round(h), lt |> Decimal.round() |> Decimal.to_integer()} end)
+      |> Enum.map(fn {h, lt} -> {c_round(h), c_round(lt)} end)
       |> Map.new()
 
     Enum.map(0..24, fn h -> logs[h] || 0 end)
@@ -183,7 +176,7 @@ defmodule Central.Logging.AggregateViewLogsTask do
     logs =
       Repo.all(logs)
       |> Enum.filter(fn {h, c} -> h != nil and c > 0 end)
-      |> Enum.map(fn {h, users} -> {round(h), users |> Enum.uniq() |> Enum.count()} end)
+      |> Enum.map(fn {h, users} -> {c_round(h), users |> Enum.uniq() |> Enum.count()} end)
       |> Map.new()
 
     Enum.map(0..24, fn h -> logs[h] || 0 end)
@@ -229,7 +222,7 @@ defmodule Central.Logging.AggregateViewLogsTask do
       {user,
        %{
          count: count,
-         load_time: load_time |> Decimal.round() |> Decimal.to_integer(),
+         load_time: c_round(load_time),
          sections: sections |> Enum.uniq() |> Enum.filter(fn s -> s != nil end),
          ips: ips |> Enum.uniq()
        }}
@@ -254,7 +247,7 @@ defmodule Central.Logging.AggregateViewLogsTask do
       {section,
        %{
          count: count,
-         load_time: load_time |> Decimal.round() |> Decimal.to_integer(),
+         load_time: c_round(load_time),
          users: users |> Enum.uniq()
        }}
     end)
@@ -266,4 +259,7 @@ defmodule Central.Logging.AggregateViewLogsTask do
     |> PageViewLogLib.search(end_date: Timex.shift(date, days: -@log_keep_period))
     |> Repo.delete_all()
   end
+
+  # Getting some issues where it can be a float or a decimal
+
 end
