@@ -53,6 +53,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     new_state = check_queue_status(state)
+    player_count_changed(new_state)
 
     {:noreply, new_state}
   end
@@ -454,7 +455,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
       new_client = Map.merge(existing, %{player: true, ready: true})
       case request_user_change_status(new_client, existing, state) do
         {true, allowed_client} ->
-          Logger.info("joinq - Dequeing #{userid}")
+          LobbyChat.sayprivateex(state.coordinator_id, userid, "#{new_client.name} You were at the front of the queue, you are now a player.", state.lobby_id)
+          Logger.info("joinq - Dequeing #{userid} into a player")
           send(self(), {:dequeue_user, userid})
           Client.update(allowed_client, :client_updated_battlestatus)
         {false, _} ->
