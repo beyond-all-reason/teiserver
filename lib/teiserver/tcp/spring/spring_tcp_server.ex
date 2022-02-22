@@ -9,7 +9,7 @@ defmodule Teiserver.SpringTcpServer do
 
   # Duration refers to how long it will track commands for
   # Limit is the number of commands that can be sent in that time
-  @cmd_flood_duration 10
+  @cmd_flood_duration 6
   @cmd_flood_limit 20
 
   @behaviour :ranch_protocol
