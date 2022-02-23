@@ -101,6 +101,17 @@ defmodule Teiserver.Battle.LobbyChat do
       true -> true
     end
 
+    userid = if user.bot do
+      case Regex.run(~r/<(.*?)>/, msg) do
+        [_, username] ->
+          User.get_userid(username) || user.id
+        _ ->
+          user.id
+      end
+    else
+      user.id
+    end
+
     if persist do
       msg = case type do
         :sayex -> "sayex: #{msg}"
@@ -111,7 +122,7 @@ defmodule Teiserver.Battle.LobbyChat do
         content: msg,
         lobby_guid: lobby.tags["server/match/uuid"],
         inserted_at: Timex.now(),
-        user_id: user.id,
+        user_id: userid,
       })
     end
   end
