@@ -45,6 +45,8 @@ defmodule CentralWeb.Admin.SiteConfigController do
       |> String.split(".")
       |> hd
 
+    add_audit_log(conn, "Site config:Update value", %{key: key, value: value})
+
     conn
       |> put_flash(:info, "Your preferences have been updated.")
       |> redirect(to: Routes.admin_site_config_path(conn, :index) <> "##{tab}")
