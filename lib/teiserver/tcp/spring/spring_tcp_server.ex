@@ -4,13 +4,9 @@ defmodule Teiserver.SpringTcpServer do
   require Logger
 
   alias Phoenix.PubSub
+  alias Central.Config
   alias Teiserver.{User, Client}
   alias Teiserver.Tcp.{TcpLobby}
-
-  # Duration refers to how long it will track commands for
-  # Limit is the number of commands that can be sent in that time
-  @cmd_flood_duration 6
-  @cmd_flood_limit 20
 
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [
@@ -114,7 +110,11 @@ defmodule Teiserver.SpringTcpServer do
       print_server_messages: false,
       script_password: nil,
       exempt_from_cmd_throttle: false,
-      cmd_timestamps: []
+      cmd_timestamps: [],
+
+      # Caching app configs
+      flood_rate_limit_count: Config.get_site_config_cache("teiserver.Flood rate limit count"),
+      floot_rate_window_size: Config.get_site_config_cache("teiserver.Flood rate window size")
     }
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
@@ -275,6 +275,12 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, new_state}
   end
 
+  # This is used only as part of the login process to keep stuff in a certain order
+  def handle_info({:spring_add_user_from_login, client}, state) do
+    new_state = user_added_at_login(client, state)
+    {:noreply, new_state}
+  end
+
   # Matchmaking
   # def handle_info({:matchmaking, data}, state) do
   #   new_state = matchmaking_update(data, state)
@@ -417,6 +423,20 @@ defmodule Teiserver.SpringTcpServer do
               state.protocol_out.reply(:user_logged_in, client, nil, state)
               Map.put(state.known_users, userid, _blank_user(userid))
           end
+
+        _ ->
+          state.known_users
+      end
+
+    %{state | known_users: known_users}
+  end
+
+  defp user_added_at_login(client, state) do
+    known_users =
+      case state.known_users[client.userid] do
+        nil ->
+          state.protocol_out.reply(:add_user, client, nil, state)
+          Map.put(state.known_users, client.userid, _blank_user(client.userid))
 
         _ ->
           state.known_users
@@ -844,7 +864,7 @@ defmodule Teiserver.SpringTcpServer do
   defp flood_protect?(data, state) do
     cmd_timestamps = if String.contains?(data, "\n") do
       now = System.system_time(:second)
-      limiter = now - @cmd_flood_duration
+      limiter = now - state.floot_rate_window_size
 
       [now | state.cmd_timestamps]
       |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
@@ -852,7 +872,7 @@ defmodule Teiserver.SpringTcpServer do
       state.cmd_timestamps
     end
 
-    if Enum.count(cmd_timestamps) > @cmd_flood_limit do
+    if Enum.count(cmd_timestamps) > state.flood_rate_limit_count do
       {true, %{state | cmd_timestamps: cmd_timestamps}}
     else
       {false, %{state | cmd_timestamps: cmd_timestamps}}

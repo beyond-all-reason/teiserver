@@ -611,20 +611,19 @@ defmodule Teiserver.Protocols.SpringOut do
     # Login the client
     _client = Client.login(user, self(), state.ip)
 
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
-
     # Who is online?
-    # skip ourselves because that will result in a double ADDUSER
     clients = Client.list_client_ids()
+    |> Enum.map(fn userid ->
+      Client.get_client_by_id(userid)
+    end)
+    |> Enum.filter(fn c -> c != nil end)
 
     # ADDUSER entries
     clients
-    |> Enum.each(fn userid ->
-      send(self(), {:user_logged_in, userid})
+    |> Enum.each(fn client ->
+      send(self(), {:spring_add_user_from_login, client})
     end)
+
     if not state.exempt_from_cmd_throttle do
       :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
     end
@@ -649,7 +648,18 @@ defmodule Teiserver.Protocols.SpringOut do
       end
     end)
 
+    # CLIENTSTATUS entries
+    clients
+    |> Enum.each(fn client ->
+      send(self(), {:updated_client, client, :client_updated_status})
+    end)
+
     send(self(), {:action, {:login_end, nil}})
+
+    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
 
     PubSub.unsubscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
     PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")

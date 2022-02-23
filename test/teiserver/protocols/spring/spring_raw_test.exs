@@ -120,7 +120,7 @@ defmodule Teiserver.SpringRawTest do
     _ = _recv_raw(socket)
 
     # Is it actually killed?
-    {:error, :enotconn} = :gen_tcp.recv(socket, 0, 1000)
+    {:error, :closed} = :gen_tcp.recv(socket, 0, 1000)
   end
 
   test "CONFIRMAGREEMENT", %{socket: socket} do
