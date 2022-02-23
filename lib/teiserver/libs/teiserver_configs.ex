@@ -23,6 +23,16 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "teiserver.Post login action delay",
+      section: "Protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The time in milliseconds to wait until doing something when a user logs in (e.g. sending a message)",
+      opts: [],
+      default: 2500
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Warning acknowledge prompt",
       section: "Moderation",
       type: "string",

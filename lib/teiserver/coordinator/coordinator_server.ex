@@ -127,7 +127,8 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   # Client inout
   def handle_info({:client_inout, :login, userid}, state) do
-    :timer.send_after(500, {:do_client_inout, :login, userid})
+    delay = Config.get_site_config_cache("teiserver.Post login action delay")
+    :timer.send_after(delay, {:do_client_inout, :login, userid})
     {:noreply, state}
   end
 

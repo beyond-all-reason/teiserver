@@ -642,9 +642,9 @@ defmodule Teiserver.Protocols.SpringOut do
         |> Enum.each(fn player_id ->
           send(self(), {:add_user_to_battle, player_id, lobby_id, nil})
         end)
-        if not state.exempt_from_cmd_throttle do
-          :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
-        end
+        # if not state.exempt_from_cmd_throttle do
+        #   :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
+        # end
       end
     end)
 
