@@ -330,7 +330,7 @@ body.modal-open {
 
 // Forms and inputs
 input {
-  color: $light;
+  color: $dark;
 }
 
 input[type="color"] {
@@ -344,8 +344,8 @@ input[type="color"] {
 }
 
 .select2-container--default .select2-selection--single .select2-selection__rendered {
-  background-color: $dark;
-  color: $light !important;
+  background-color: $light;
+  color: $dark !important;
 }
 
 .select2-search__field {
@@ -353,5 +353,5 @@ input[type="color"] {
 }
 
 .text-invert {
-  color: $dark;
+  color: $light;
 }
