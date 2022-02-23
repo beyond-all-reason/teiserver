@@ -841,7 +841,7 @@ defmodule Teiserver.User do
     restrict_user(user, "Bridging")
 
     client = Client.get_client_by_id(user.id) || %{ip: "no client"}
-    add_audit_log(user.id, client.ip, "de-bridged user", %{
+    add_audit_log(user.id, client.ip, "Teiserver:De-bridged user", %{
       message: message,
       flagged_word_count: flagged_words,
       location: location
