@@ -3,6 +3,26 @@ defmodule Teiserver.TeiserverConfigs do
 
   def teiserver_configs do
     add_site_config_type(%{
+      key: "teiserver.Flood rate limit count",
+      section: "Protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The number of commands required to trip flood protection",
+      opts: [],
+      default: 20
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Flood rate window size",
+      section: "Protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The size of the window in seconds for flood protection to trip",
+      opts: [],
+      default: 6
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Warning acknowledge prompt",
       section: "Moderation",
       type: "string",
