@@ -20,7 +20,7 @@ defmodule CentralWeb.Logging.AuditLogController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    logs = Logging.list_audit_logs(order: "Newest first")
+    logs = Logging.list_audit_logs(joins: [:user], order: "Newest first")
     # |> AuditLogLib.search(:groups, conn.assigns[:memberships])
     # |> AuditLogLib.preload_user
 
@@ -43,6 +43,7 @@ defmodule CentralWeb.Logging.AuditLogController do
           user_id: params["user_id"],
           group_id: params["group_id"]
         ],
+        joins: [:user],
         order: "Newest first",
         limit: params["limit"]
       )

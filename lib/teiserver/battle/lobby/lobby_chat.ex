@@ -22,7 +22,7 @@ defmodule Teiserver.Battle.LobbyChat do
   def do_say(userid, "$ " <> msg, lobby_id), do: do_say(userid, "$#{msg}", lobby_id)
   def do_say(userid, msg, lobby_id) do
     user = User.get_user_by_id(userid)
-    if not User.is_restricted?(user, "Bridging") and WordLib.flagged_words(msg) > 0 do
+    if user.bot == false and WordLib.flagged_words(msg) > 0 do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
@@ -49,7 +49,7 @@ defmodule Teiserver.Battle.LobbyChat do
   @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok
   def sayex(userid, msg, lobby_id) do
     user = User.get_user_by_id(userid)
-    if not User.is_restricted?(user, "Bridging") and WordLib.flagged_words(msg) > 0 do
+    if user.bot == false and WordLib.flagged_words(msg) > 0 do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 

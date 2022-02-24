@@ -848,14 +848,16 @@ defmodule Teiserver.User do
 
   @spec unbridge_user(T.user(), String.t(), non_neg_integer(), String.t()) :: any
   def unbridge_user(user, message, flagged_words, location) do
-    restrict_user(user, "Bridging")
+    if not is_restricted?(user, ["Bridging"]) do
+      restrict_user(user, "Bridging")
 
-    client = Client.get_client_by_id(user.id) || %{ip: "no client"}
-    add_audit_log(user.id, client.ip, "Teiserver: De-bridged user", %{
-      message: message,
-      flagged_word_count: flagged_words,
-      location: location
-    })
+      client = Client.get_client_by_id(user.id) || %{ip: "no client"}
+      add_audit_log(user.id, client.ip, "Teiserver:De-bridged user", %{
+        message: message,
+        flagged_word_count: flagged_words,
+        location: location
+      })
+    end
   end
 
   @spec is_restricted?(T.userid() | T.user()) :: boolean()

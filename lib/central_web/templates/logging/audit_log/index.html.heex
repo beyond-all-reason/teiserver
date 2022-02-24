@@ -89,7 +89,7 @@
               <th>Action</th>
               <th>Details</th>
               <th>Timestamp</th>
-              <th>Ip</th>
+              <th>User & Ip</th>
 
               <th></th>
             </tr>
@@ -112,7 +112,7 @@
               </td>
               <td><%= date_to_str log.inserted_at, format: :hms_or_dmy, tz: @tz %></td>
 
-              <%= if Ecto.assoc_loaded?(log.user) do %>
+              <%= if Ecto.assoc_loaded?(log.user) and log.user != nil do %>
                 <td><%= log.user.name %>, <%= log.ip %></td>
               <% else %>
                 <td>&nbsp;</td>
