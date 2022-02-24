@@ -6,6 +6,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   use GenServer
   alias Central.Config
   alias Teiserver.{Account, User, Clans, Room, Coordinator, Client}
+  alias Teiserver.Battle.Lobby
   alias Teiserver.Coordinator.{CoordinatorCommands}
   alias Phoenix.PubSub
   require Logger
@@ -129,6 +130,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   def handle_info({:client_inout, :login, userid}, state) do
     delay = Config.get_site_config_cache("teiserver.Post login action delay")
     :timer.send_after(delay, {:do_client_inout, :login, userid})
+
     {:noreply, state}
   end
 
@@ -192,6 +194,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         msg = if User.is_muted?(user) do
           msg ++ [dispute_string]
         else
+          Lobby.remove_user_from_any_battle(user.id)
           Client.set_awaiting_warn_ack(userid)
           acknowledge_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
           msg ++ [dispute_string, acknowledge_prompt]

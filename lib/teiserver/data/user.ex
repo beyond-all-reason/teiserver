@@ -527,9 +527,19 @@ defmodule Teiserver.User do
     Argon2.verify_pass(plain_password, encrypted_password)
   end
 
+  @spec verify_user(T.user()) :: T.user()
   def verify_user(user) do
     %{user | verification_code: nil, verified: true, roles: ["Verified" | user.roles]}
     |> update_user(persist: true)
+  end
+
+  @spec add_roles(T.user() | T.userid(), [String.t()]) :: nil | T.user()
+  def add_roles(nil, _), do: nil
+  def add_roles(_, []), do: nil
+  def add_roles(userid, roles) when is_integer(userid), do: add_roles(get_user_by_id(userid), roles)
+  def add_roles(user, roles) do
+    new_roles = Enum.uniq(roles ++ user.roles)
+    update_user(%{user | roles: new_roles}, persist: true)
   end
 
   @spec create_token(Central.Account.User.t()) :: String.t()

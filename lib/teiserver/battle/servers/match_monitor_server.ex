@@ -71,9 +71,11 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
-  def handle_info({:direct_message, from_id, _message}, state) do
-    username = User.get_username(from_id)
-    User.send_direct_message(state.userid, from_id, "I don't currently handle messages, sorry #{username}")
+  def handle_info({:direct_message, _from_id, message}, state) do
+    Logger.info("AHM DM no catch - #{message}")
+
+    # username = User.get_username(from_id)
+    # User.send_direct_message(state.userid, from_id, "I don't currently handle messages, sorry #{username}")
     {:noreply, state}
   end
 

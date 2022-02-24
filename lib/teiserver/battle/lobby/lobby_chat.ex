@@ -102,7 +102,7 @@ defmodule Teiserver.Battle.LobbyChat do
     end
 
     userid = if user.bot do
-      case Regex.run(~r/<(.*?)>/, msg) do
+      case Regex.run(~r/<(.*?)>/u, msg) do
         [_, username] ->
           User.get_userid(username) || user.id
         _ ->

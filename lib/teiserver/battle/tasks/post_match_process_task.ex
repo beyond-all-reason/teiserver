@@ -52,6 +52,13 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     member_ids = members
     |> Enum.map(fn m -> m.user_id end)
 
+    # Add the "has_played" role
+    member_ids
+    |> Enum.each(fn userid ->
+      User.add_roles(userid, ["has_played"])
+    end)
+
+    # Get skills
     skills = tags
     |> Enum.filter(fn {k, _v} ->
       String.starts_with?(k, "game/players/") and String.ends_with?(k, "/skill")
