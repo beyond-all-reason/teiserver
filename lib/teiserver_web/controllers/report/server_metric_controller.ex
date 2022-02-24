@@ -212,37 +212,6 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     |> assign(:key, key)
     |> add_breadcrumb(name: "Monthly - Graph", url: conn.request_path)
     |> render("month_metrics_graph.html")
-
-
-    # logs =
-    #   Telemetry.list_server_month_logs(
-    #     # search: [user_id: params["user_id"]],
-    #     # joins: [:user],
-    #     order: "Newest first",
-    #     limit: 31
-    #   )
-    #   |> Enum.reverse()
-
-    # {field_list, f} = case Map.get(params, "fields", "unique_users") do
-    #   "unique_users" ->
-    #     {["aggregates.stats.unique_users", "aggregates.stats.unique_players"], fn x -> x end}
-
-    #   "peak_users" ->
-    #     {["aggregates.stats.peak_users", "aggregates.stats.peak_players"], fn x -> x end}
-
-    #   "days" ->
-    #     {["aggregates.minutes.player", "aggregates.minutes.spectator", "aggregates.minutes.lobby", "aggregates.minutes.menu", "aggregates.minutes.total"], fn x -> round(x/60/24) end}
-    # end
-
-    # extra_params = %{"field_list" => field_list}
-
-    # data = GraphMonthLogsTask.perform(logs, Map.merge(params, extra_params), f)
-
-    # conn
-    # |> assign(:params, params)
-    # |> assign(:data, data)
-    # |> add_breadcrumb(name: "Monthly - Graph", url: conn.request_path)
-    # |> render("month_metrics_graph.html")
   end
 
   # DAILY METRICS
@@ -255,30 +224,21 @@ defmodule TeiserverWeb.Report.ServerMetricController do
       )
       |> Enum.reverse
 
-    columns = GraphMinuteLogsTask.perform(logs)
-
-    key = logs
-    |> Enum.map(fn log -> log.timestamp |> TimexHelper.date_to_str(format: :hm) end)
-
-    # columns
-    # [
-    #   ["unique_users", 497, 521, 488, 489, 550, 695, 666, 557, 526, 523, 546, 576,
-    #   637, 612, 500, 466, 450, 429, 522, 621, 567, 470, 444, 460, 473, 512, 569,
-    #   593, 523, 473, 454],
-    #   ["unique_players", 269, 284, 256, 258, 301, 422, 391, 273, 270, 260, 291, 314,
-    #   362, 347, 281, 272, 247, 244, 278, 384, 331, 242, 248, 247, 242, 295, 326,
-    #   359, 316, 246, 227]
-    # ]
-
-    IO.puts ""
-    IO.inspect columns
-    IO.puts ""
-
+    columns_players = GraphMinuteLogsTask.perform_players(logs)
+    columns_matches = GraphMinuteLogsTask.perform_matches(logs)
+    columns_matches_start_stop = GraphMinuteLogsTask.perform_matches_start_stop(logs)
+    columns_user_connections = GraphMinuteLogsTask.perform_user_connections(logs)
+    columns_bot_connections = GraphMinuteLogsTask.perform_bot_connections(logs)
+    columns_load = GraphMinuteLogsTask.perform_load(logs)
 
     conn
-    |> assign(:columns, columns)
-    |> assign(:key, key)
+    |> assign(:columns_players, columns_players)
+    |> assign(:columns_matches, columns_matches)
+    |> assign(:columns_matches_start_stop, columns_matches_start_stop)
+    |> assign(:columns_user_connections, columns_user_connections)
+    |> assign(:columns_bot_connections, columns_bot_connections)
+    |> assign(:columns_load, columns_load)
     |> add_breadcrumb(name: "Now", url: conn.request_path)
-    |> render("now_list.html")
+    |> render("now_graph.html")
   end
 end

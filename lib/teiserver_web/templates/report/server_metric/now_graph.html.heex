@@ -1,0 +1,115 @@
+<% bsname = view_colour() %>
+
+<script src={Routes.static_path(@conn, "/js/d3.js")}></script>
+<script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
+
+<link href="/css/c3.min.css" rel="stylesheet">
+
+<style>
+  .c3-axis .tick, .c3-legend-item {
+    fill: #ccc !important;
+  }
+
+  .c3-axis .domain, .c3-axis .tick line {
+    stroke: #AAA !important;
+  }
+
+  .chart-div {
+    margin: 0 0 15px 0;
+    padding-bottom: 10px;
+    height: 20vh;
+    border-bottom: 1px solid #555;
+  }
+</style>
+
+<script>
+  $(function() {
+    c3.generate({
+      bindto: '#chart_players',
+      data: {
+        columns: <%= raw Jason.encode!(@columns_players) %>
+      }
+    });
+
+    c3.generate({
+      bindto: '#chart_matches',
+      data: {
+        columns: <%= raw Jason.encode!(@columns_matches) %>
+      }
+    });
+
+    c3.generate({
+      bindto: '#chart_matches_start_stop',
+      data: {
+        columns: <%= raw Jason.encode!(@columns_matches_start_stop) %>
+      }
+    });
+
+    c3.generate({
+      bindto: '#chart_user_connections',
+      data: {
+        columns: <%= raw Jason.encode!(@columns_user_connections) %>
+      }
+    });
+
+    c3.generate({
+      bindto: '#chart_bot_connections',
+      data: {
+        columns: <%= raw Jason.encode!(@columns_bot_connections) %>
+      }
+    });
+
+    c3.generate({
+      bindto: '#chart_load',
+      data: {
+        columns: <%= raw Jason.encode!(@columns_load) %>
+      }
+    });
+  });
+</script>
+
+<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "server_metrics"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Report.ServerMetricView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "now"
+          })
+        %>
+        <br /><br />
+
+<div class="row">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-12 col-lg-6">
+            <div id="chart_players" class='with-transitions chart-div'></div>
+
+            <div id="chart_matches" class='with-transitions chart-div'></div>
+            
+            <div id="chart_matches_start_stop" class='with-transitions chart-div'></div>
+          </div>
+
+          <div class="col-md-12 col-lg-6">
+            <div id="chart_user_connections" class='with-transitions chart-div'></div>
+            
+            <div id="chart_bot_connections" class='with-transitions chart-div'></div>
+            
+            <div id="chart_load" class='with-transitions chart-div'></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+      </div>
+    </div>
+  </div>
+</div>

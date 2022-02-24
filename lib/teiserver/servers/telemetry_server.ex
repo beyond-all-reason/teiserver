@@ -7,7 +7,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
   @client_states ~w(lobby menu player spectator total)a
   @tick_period 9_000
-  @counters ~w(matches_started matches_stopped)a
+  @counters ~w(matches_started matches_stopped users_connected users_disconnected bots_connected bots_disconnected)a
   @default_state %{
     counters: Map.new(@counters, fn c -> {c, 0} end),
     client: %{
@@ -27,6 +27,15 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     },
     matchmaking: %{
 
+    },
+    server: %{
+      users_connected: 0,
+      users_disconnected: 0,
+
+      bots_connected: 0,
+      bots_disconnected: 0,
+
+      load: 0,
     }
   }
 
@@ -118,6 +127,11 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
     counters = state.counters
 
+    # TODO: Change this to use :os_mon like the liveview dashboard
+    {load_str, _} = System.cmd("uptime", [])
+    [_, l1, _, _] = Regex.run(~r/load average: ([\d\.]+), ([\d\.]+), ([\d\.]+)/, load_str)
+    {load, _} = Float.parse(l1)
+
     %{
       client: %{
         player: player_ids,
@@ -135,6 +149,15 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       },
       matchmaking: %{
 
+      },
+      server: %{
+        users_connected: counters.users_connected,
+        users_disconnected: counters.users_disconnected,
+
+        bots_connected: counters.bots_connected,
+        bots_disconnected: counters.bots_disconnected,
+
+        load: load,
       }
     }
   end

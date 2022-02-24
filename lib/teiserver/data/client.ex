@@ -9,7 +9,7 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.{Room, User, Coordinator, Account}
+  alias Teiserver.{Room, User, Coordinator, Account, Telemetry}
   alias Teiserver.Battle.Lobby
   alias Central.Helpers.TimexHelper
   require Logger
@@ -131,6 +131,12 @@ defmodule Teiserver.Client do
     :timer.sleep(Application.get_env(:central, Teiserver)[:post_login_delay])
 
     Logger.info("Client connected: #{client.name} using #{client.lobby_client}")
+
+    if client.bot do
+      Telemetry.increment(:bots_connected)
+    else
+      Telemetry.increment(:users_connected)
+    end
 
     client
   end
@@ -304,6 +310,12 @@ defmodule Teiserver.Client do
     Lobby.remove_user_from_any_battle(client.userid)
     Room.remove_user_from_any_room(client.userid)
     leave_rooms(client.userid)
+
+    if client.bot do
+      Telemetry.increment(:bots_disconnected)
+    else
+      Telemetry.increment(:users_disconnected)
+    end
 
     # If it's a test user then it can mean the db connection is closed
     # we don't actually care about logging out most of them and the

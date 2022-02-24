@@ -10,6 +10,7 @@ defmodule Teiserver.Telemetry do
   alias Teiserver.Telemetry.ServerMinuteLog
   alias Teiserver.Telemetry.ServerMinuteLogLib
 
+  @spec get_totals_and_reset :: map()
   def get_totals_and_reset() do
     GenServer.call(TelemetryServer, :get_totals_and_reset)
   end
