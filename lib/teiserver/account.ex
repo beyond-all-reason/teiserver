@@ -334,7 +334,7 @@ defmodule Teiserver.Account do
 
       {:ok, user}
     else
-      Central.Logging.Helpers.add_anonymous_audit_log(conn, "Account: Failed login", %{
+      Central.Logging.Helpers.add_anonymous_audit_log(conn, "Account:Failed login", %{
         reason: "Bad password",
         user_id: user.id,
         email: user.email

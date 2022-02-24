@@ -9,11 +9,11 @@ defmodule Teiserver.UberserverConvert do
   def perform(%{args: %{"body" => body}}) do
     id = UUID.uuid4()
     start_time = :erlang.system_time(:seconds)
-    Helpers.add_anonymous_audit_log("Teiserver.UberserverConvert started", %{id: id})
+    Helpers.add_anonymous_audit_log("Teiserver:UberserverConvert started", %{id: id})
     create_conversion_job(body)
     time_taken = :erlang.system_time(:seconds) - start_time
 
-    Helpers.add_anonymous_audit_log("Teiserver.UberserverConvert completed", %{
+    Helpers.add_anonymous_audit_log("Teiserver:UberserverConvert completed", %{
       id: id,
       time_taken: time_taken
     })

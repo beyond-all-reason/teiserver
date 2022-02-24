@@ -101,7 +101,7 @@ defmodule CentralWeb.Account.RegistrationController do
             nil ->
               :ok
             code ->
-              add_audit_log(conn, "user_registration", %{
+              add_audit_log(conn, "Account:User registration", %{
                 code_value: code.value,
                 code_creator: code.user_id
               })

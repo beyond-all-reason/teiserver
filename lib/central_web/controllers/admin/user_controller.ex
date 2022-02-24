@@ -118,7 +118,7 @@ defmodule CentralWeb.Admin.UserController do
 
     case Account.create_user(user_params) do
       {:ok, user} ->
-        add_audit_log(conn, "Account: Created user", %{
+        add_audit_log(conn, "Account:Created user", %{
           user: user.id
         })
 
@@ -263,7 +263,7 @@ defmodule CentralWeb.Admin.UserController do
 
         case Account.update_user(user, user_params) do
           {:ok, user} ->
-            add_audit_log(conn, "Account: Updated user", %{
+            add_audit_log(conn, "Account:Updated user", %{
               user: user.id
             })
 
@@ -462,7 +462,7 @@ defmodule CentralWeb.Admin.UserController do
       {true, _} ->
         Account.update_user(user, new_permissions, :permissions)
 
-        add_audit_log(conn, "Account: Updated user permissions", %{
+        add_audit_log(conn, "Account:Updated user permissions", %{
           user: user.id,
           new_permissions: new_permissions,
           method: "Manual form"
@@ -520,7 +520,7 @@ defmodule CentralWeb.Admin.UserController do
       true ->
         Account.update_user(user, from_user.permissions, :permissions)
 
-        add_audit_log(conn, "Account: Updated user permissions", %{
+        add_audit_log(conn, "Account:Updated user permissions", %{
           user: user.id,
           new_permissions: from_user.permissions,
           method: "Copy from"

@@ -9,6 +9,10 @@ defmodule Teiserver.Startup do
 
     Teiserver.TeiserverConfigs.teiserver_configs()
 
+    add_audit_types([
+      "Teiserver:De-bridged user",
+    ])
+
     add_permission_set("teiserver", "admin", ~w(account battle clan queue))
     add_permission_set("teiserver", "moderator", ~w(account battle clan queue telemetry))
     add_permission_set("teiserver", "api", ~w(battle))

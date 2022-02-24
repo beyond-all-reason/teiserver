@@ -79,7 +79,7 @@ defmodule TeiserverWeb.Clans.ClanController do
 
     cond do
       role == nil ->
-        add_audit_log(conn, "teiserver.clans.update", %{
+        add_audit_log(conn, "Teiserver:Clan update", %{
           clan_id: id,
           auth: true
         })
@@ -260,7 +260,7 @@ defmodule TeiserverWeb.Clans.ClanController do
 
     cond do
       role == nil ->
-        add_audit_log(conn, "teiserver.clans.create_invite", %{
+        add_audit_log(conn, "Teiserver:Invite to clan", %{
           clan_id: clan_id,
           user_id: user_id,
           auth: true
@@ -407,7 +407,7 @@ defmodule TeiserverWeb.Clans.ClanController do
 
     cond do
       role == nil ->
-        add_audit_log(conn, "teiserver.clans.promote", %{
+        add_audit_log(conn, "Teiserver:Clan promote", %{
           clan_id: clan_id,
           user_id: user_id,
           auth: true

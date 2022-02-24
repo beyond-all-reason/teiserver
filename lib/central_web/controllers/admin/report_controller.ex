@@ -231,7 +231,7 @@ defmodule CentralWeb.Admin.ReportController do
 
     case Account.update_report(report, params) do
       {:ok, report} ->
-        add_audit_log(conn, "Account: Updated report", %{
+        add_audit_log(conn, "Account:Updated report", %{
           report: report.id,
           reason: params["audit_reason"]
         })

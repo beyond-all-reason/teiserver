@@ -265,7 +265,7 @@ defmodule Central.Account do
     case Repo.one(query) do
       nil ->
         Argon2.no_user_verify()
-        add_anonymous_audit_log(conn, "Account: Failed login", %{reason: "No user", email: email})
+        add_anonymous_audit_log(conn, "Account:Failed login", %{reason: "No user", email: email})
         {:error, "Invalid credentials"}
 
       user ->
@@ -274,7 +274,7 @@ defmodule Central.Account do
   end
 
   def login_failure(conn, user) do
-    add_anonymous_audit_log(conn, "Account: Failed login", %{
+    add_anonymous_audit_log(conn, "Account:Failed login", %{
       reason: "Bad password",
       user_id: user.id,
       email: user.email

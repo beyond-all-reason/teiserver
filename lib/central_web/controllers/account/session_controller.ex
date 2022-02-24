@@ -202,7 +202,7 @@ defmodule CentralWeb.Account.SessionController do
             Teiserver.User.set_new_spring_password(user.id, pass1)
             Central.Logging.Helpers.add_anonymous_audit_log(
               conn,
-              "Account: User password reset",
+              "Account:User password reset",
               %{
                 user: user.id,
                 notes: "Self reset"

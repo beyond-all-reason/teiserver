@@ -18,7 +18,7 @@
         <form action={Routes.logging_audit_log_path(@conn, :search)} method="post" class="form-horizontal" id="search-box" style="display: none;">
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
-          <div class="form-group">
+          <div class="row">
             <div class="col-md-4 col-xl-2">
               <label for="search_action" class="control-label">Action type: </label>
               <%= select :search, :action, ["Any"] ++ @actions, class: "form-control", selected: @params["action"] %>
