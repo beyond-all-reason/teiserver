@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
   alias Central.Helpers.{TimexHelper, DatePresets}
-  alias Teiserver.Telemetry.{GraphDayLogsTask, ExportServerMetricsTask}
+  alias Teiserver.Telemetry.{GraphDayLogsTask, ExportServerMetricsTask, GraphMinuteLogsTask}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
@@ -243,5 +243,42 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     # |> assign(:data, data)
     # |> add_breadcrumb(name: "Monthly - Graph", url: conn.request_path)
     # |> render("month_metrics_graph.html")
+  end
+
+  # DAILY METRICS
+  @spec now_list(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def now_list(conn, _params) do
+    logs =
+      Telemetry.list_server_minute_logs(
+        order: "Newest first",
+        limit: 30
+      )
+      |> Enum.reverse
+
+    columns = GraphMinuteLogsTask.perform(logs)
+
+    key = logs
+    |> Enum.map(fn log -> log.timestamp |> TimexHelper.date_to_str(format: :hm) end)
+
+    # columns
+    # [
+    #   ["unique_users", 497, 521, 488, 489, 550, 695, 666, 557, 526, 523, 546, 576,
+    #   637, 612, 500, 466, 450, 429, 522, 621, 567, 470, 444, 460, 473, 512, 569,
+    #   593, 523, 473, 454],
+    #   ["unique_players", 269, 284, 256, 258, 301, 422, 391, 273, 270, 260, 291, 314,
+    #   362, 347, 281, 272, 247, 244, 278, 384, 331, 242, 248, 247, 242, 295, 326,
+    #   359, 316, 246, 227]
+    # ]
+
+    IO.puts ""
+    IO.inspect columns
+    IO.puts ""
+
+
+    conn
+    |> assign(:columns, columns)
+    |> assign(:key, key)
+    |> add_breadcrumb(name: "Now", url: conn.request_path)
+    |> render("now_list.html")
   end
 end

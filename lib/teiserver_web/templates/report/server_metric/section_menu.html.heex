@@ -36,6 +36,15 @@
   url: Routes.ts_reports_server_metric_path(@conn, :day_metrics_export_form)
 %>
 
+<%= central_component "section_menu_button",
+  name: "now",
+  label: "Now",
+  active: @active,
+  icon: "far fa-clock",
+  bsname: bsname,
+  url: Routes.ts_reports_server_metric_path(@conn, :now_list)
+%>
+
 
 &nbsp;&nbsp;&nbsp;&nbsp;
 
