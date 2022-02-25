@@ -404,12 +404,10 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
   @spec clean_up_logs(Date.t()) :: :ok
   defp clean_up_logs(date) do
     # Clean up all minute logs older than X days
-    before_timestamp = Timex.shift(date, days: -@log_keep_days)
-      |> Timex.to_datetime
-      |> date_to_str(format: :ymd_hms)
+    before_timestamp = Timex.shift(date, days: -@log_keep_days) |> Timex.to_datetime |> date_to_str(format: :ymd_hms)
 
     query = """
-      DELETE FROM teiserver_server_minute_logs WHERE timestamp < #{before_timestamp}
+      DELETE FROM teiserver_server_minute_logs WHERE timestamp < '#{before_timestamp}'
 """
     Ecto.Adapters.SQL.query(Repo, query, [])
   end

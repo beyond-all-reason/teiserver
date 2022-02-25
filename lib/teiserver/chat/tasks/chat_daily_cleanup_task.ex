@@ -12,13 +12,13 @@ defmodule Teiserver.Chat.Tasks.DailyCleanupTask do
 
     query = """
       DELETE FROM teiserver_room_messages
-      WHERE inserted_at < #{before_timestamp}
+      WHERE inserted_at < '#{before_timestamp}'
 """
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     query = """
       DELETE FROM teiserver_lobby_messages
-      WHERE inserted_at < #{before_timestamp}
+      WHERE inserted_at < '#{before_timestamp}'
 """
     Ecto.Adapters.SQL.query(Repo, query, [])
 
