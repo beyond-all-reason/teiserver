@@ -55,7 +55,7 @@ defmodule Central.Helpers.StylingHelper do
   def icon(:moderation, fa_type), do: "fa-#{fa_type} fa-gavel"
 
   def icon(:overview, fa_type), do: "fa-#{fa_type} fa-expand-alt"
-  def icon(:detail, fa_type), do: "fa-#{fa_type} fa-eye"
+  def icon(:detail, fa_type), do: "fa-#{fa_type} fa-file-alt"
 
   def icon(:summary, fa_type), do: "fa-#{fa_type} fa-user-chart"
 

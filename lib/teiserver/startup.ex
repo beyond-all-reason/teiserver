@@ -10,6 +10,8 @@ defmodule Teiserver.Startup do
     Teiserver.TeiserverConfigs.teiserver_configs()
 
     add_audit_types([
+      "Teiserver:Updated automod action",
+      "Teiserver:Automod action enacted",
       "Teiserver:De-bridged user",
     ])
 

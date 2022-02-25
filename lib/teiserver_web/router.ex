@@ -225,6 +225,8 @@ defmodule TeiserverWeb.Router do
         resources("/user", UserController)
 
         resources("/automod_action", AutomodActionController, only: [:index, :show, :delete, :create])
+        put("/automod_action/:id/disable", AutomodActionController, :disable)
+        put("/automod_action/:id/enable", AutomodActionController, :enable)
 
         resources("/badge_types", BadgeTypeController)
         resources("/accolades", AccoladeController, only: [:index, :show, :delete])

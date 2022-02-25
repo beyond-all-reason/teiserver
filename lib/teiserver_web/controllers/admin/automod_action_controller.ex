@@ -1,7 +1,8 @@
 defmodule TeiserverWeb.Admin.AutomodActionController do
   use CentralWeb, :controller
 
-  alias Teiserver.Account
+  alias Central.Logging
+  alias Teiserver.{Account}
   alias Teiserver.Account.{AutomodAction, AutomodActionLib}
 
   plug Bodyguard.Plug.Authorize,
@@ -38,12 +39,19 @@ defmodule TeiserverWeb.Admin.AutomodActionController do
       preload: [:user, :added_by]
     ])
 
+    logs = Logging.list_audit_logs(search: [
+      action: "Teiserver:Updated automod action",
+      # data_equal: {}
+    ],
+    joins: [:user])
+
     automod_action
     |> AutomodActionLib.make_favourite
     |> insert_recently(conn)
 
     conn
     |> assign(:automod_action, automod_action)
+    |> assign(:logs, logs)
     |> add_breadcrumb(name: "Show: #{automod_action.type} - #{automod_action.user.name}", url: conn.request_path)
     |> render("show.html")
   end
@@ -122,5 +130,39 @@ defmodule TeiserverWeb.Admin.AutomodActionController do
     conn
     |> put_flash(:info, "AutomodAction deleted successfully.")
     |> redirect(to: Routes.ts_admin_automod_action_path(conn, :index))
+  end
+
+  @spec enable(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def enable(conn, %{"id" => id}) do
+    automod_action = Account.get_automod_action!(id)
+
+    add_audit_log(conn, "Teiserver:Updated automod action", %{
+      automod_action_id: automod_action.id,
+      change: "Enabled"
+    })
+
+    case Account.update_automod_action(automod_action, %{"enabled" => true}) do
+      {:ok, _automod_action} ->
+        conn
+        |> put_flash(:info, "Automod Action enabled successfully.")
+        |> redirect(to: Routes.ts_admin_automod_action_path(conn, :show, id))
+    end
+  end
+
+  @spec disable(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def disable(conn, %{"id" => id}) do
+    automod_action = Account.get_automod_action!(id)
+
+    add_audit_log(conn, "Teiserver:Updated automod action", %{
+      automod_action_id: automod_action.id,
+      change: "Disabled"
+    })
+
+    case Account.update_automod_action(automod_action, %{"enabled" => false}) do
+      {:ok, _automod_action} ->
+        conn
+        |> put_flash(:info, "Automod Action disabled successfully.")
+        |> redirect(to: Routes.ts_admin_automod_action_path(conn, :show, id))
+    end
   end
 end
