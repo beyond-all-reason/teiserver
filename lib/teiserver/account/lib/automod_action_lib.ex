@@ -1,34 +1,34 @@
-defmodule Teiserver.Account.BanHashLib do
+defmodule Teiserver.Account.AutomodActionLib do
   use CentralWeb, :library
-  alias Teiserver.Account.BanHash
+  alias Teiserver.Account.AutomodAction
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "far fa-ban"
+  def icon, do: "fa-regular fa-circle-divide"
 
   @spec colours :: atom
   def colours, do: :danger
 
   @spec make_favourite(Map.t()) :: Map.t()
-  def make_favourite(ban_hash) do
+  def make_favourite(automod_action) do
     %{
       type_colour: StylingHelper.colours(colours()) |> elem(0),
       type_icon: icon(),
 
-      item_id: ban_hash.id,
-      item_type: "teiserver_account_ban_hash",
-      item_colour: colours() |> elem(0),
-      item_icon: Teiserver.Account.BanHashLib.icon(),
-      item_label: "#{ban_hash.type} - #{ban_hash.user.name}",
+      item_id: automod_action.id,
+      item_type: "teiserver_account_automod_action",
+      item_colour: colours(),
+      item_icon: Teiserver.Account.AutomodActionLib.icon(),
+      item_label: "#{automod_action.type} - #{automod_action.user.name}",
 
-      url: "/account/ban_hashes/#{ban_hash.id}"
+      url: "/account/automod_actions/#{automod_action.id}"
     }
   end
 
   # Queries
-  @spec query_ban_hashes() :: Ecto.Query.t
-  def query_ban_hashes do
-    from ban_hashes in BanHash
+  @spec query_automod_actions() :: Ecto.Query.t
+  def query_automod_actions do
+    from automod_actions in AutomodAction
   end
 
   @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
@@ -45,35 +45,40 @@ defmodule Teiserver.Account.BanHashLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :id, id) do
-    from ban_hashes in query,
-      where: ban_hashes.id == ^id
+    from automod_actions in query,
+      where: automod_actions.id == ^id
   end
 
   def _search(query, :value, value) do
-    from ban_hashes in query,
-      where: ban_hashes.value == ^value
+    from automod_actions in query,
+      where: automod_actions.value == ^value
+  end
+
+  def _search(query, :enabled, enabled) do
+    from automod_actions in query,
+      where: automod_actions.enabled == ^enabled
   end
 
   def _search(query, :type, type) do
-    from ban_hashes in query,
-      where: ban_hashes.type == ^type
+    from automod_actions in query,
+      where: automod_actions.type == ^type
   end
 
   def _search(query, :id_list, id_list) do
-    from ban_hashes in query,
-      where: ban_hashes.id in ^id_list
+    from automod_actions in query,
+      where: automod_actions.id in ^id_list
   end
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Newest first") do
-    from ban_hashes in query,
-      order_by: [desc: ban_hashes.inserted_at]
+    from automod_actions in query,
+      order_by: [desc: automod_actions.inserted_at]
   end
 
   def order_by(query, "Oldest first") do
-    from ban_hashes in query,
-      order_by: [asc: ban_hashes.inserted_at]
+    from automod_actions in query,
+      order_by: [asc: automod_actions.inserted_at]
   end
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
@@ -85,14 +90,14 @@ defmodule Teiserver.Account.BanHashLib do
   end
 
   def _preload_user(query) do
-    from ban_hashes in query,
-      left_join: user in assoc(ban_hashes, :user),
+    from automod_actions in query,
+      left_join: user in assoc(automod_actions, :user),
       preload: [user: user]
   end
 
   def _preload_added_by(query) do
-    from ban_hashes in query,
-      left_join: added_by in assoc(ban_hashes, :added_by),
+    from automod_actions in query,
+      left_join: added_by in assoc(automod_actions, :added_by),
       preload: [added_by: added_by]
   end
 end

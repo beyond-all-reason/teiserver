@@ -92,7 +92,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
     end
   end
 
-  # TODO: Refactor into a with statement for multiple types of hash
   @spec do_check(T.userid()) :: String.t()
   defp do_check(userid) do
     stats = Account.get_user_stat_data(userid)
@@ -118,14 +117,15 @@ defmodule Teiserver.Coordinator.AutomodServer do
       user = User.get_user_by_id(userid)
       User.update_user(%{user | hw_hash: hw_fingerprint}, persist: true)
 
-      hashes = Account.list_ban_hashes(search: [
+      hashes = Account.list_automod_actions(search: [
+        enabled: true,
         type: "hardware",
         value: hw_fingerprint
       ], limit: 1)
 
       if not Enum.empty?(hashes) do
-        banhash = hd(hashes)
-        do_ban(userid, banhash)
+        automod_action = hd(hashes)
+        do_ban(userid, automod_action)
       else
         nil
       end
@@ -140,23 +140,24 @@ defmodule Teiserver.Coordinator.AutomodServer do
       nil ->
         nil
       hash ->
-        hashes = Account.list_ban_hashes(search: [
+        hashes = Account.list_automod_actions(search: [
+          enabled: true,
           type: "lobby_hash",
           value: hash
         ], limit: 1)
 
         if not Enum.empty?(hashes) do
-          banhash = hd(hashes)
-          do_ban(userid, banhash)
+          automod_action = hd(hashes)
+          do_ban(userid, automod_action)
         else
           nil
         end
     end
   end
 
-  defp do_ban(userid, banhash) do
+  defp do_ban(userid, automod_action) do
     user = User.get_user_by_id(userid)
-    Account.update_user_stat(userid, %{"autoban_type" => banhash.type, "autoban_id" => banhash.id})
+    Account.update_user_stat(userid, %{"autoban_type" => automod_action.type, "autoban_id" => automod_action.id})
     User.update_user(%{user | banned: [true, nil]})
     Client.disconnect(user.id, :banned)
     "Banned user"

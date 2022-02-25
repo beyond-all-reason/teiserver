@@ -1,0 +1,67 @@
+<% bsname = view_colour() %>
+
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "automod_action"
+          })
+        %>
+
+        <hr />
+Pick one
+<br /><br />
+
+<div class="row">
+  <%
+    types = [
+      {"Hardware", "hardware", @user_stats["hw_fingerprint"]},
+      {"Lobby hash", "lobby_hash", @user_stats["lobby_hash"]},
+    ]
+  %>
+  <%= for {name, type, value} <- types do %>
+    <div class="col-md-12 col-lg-6 mb-4">
+      <h4><%= name %></h4>
+      <form action={Routes.ts_admin_automod_action_path(@conn, :create)} method='post' style="padding: 0 20px;">
+        <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
+        <input type='hidden' name='automod_action[user_id]' value={@userid} />
+        <input type='hidden' name='automod_action[type]' value={type} />
+        <input type='hidden' name='automod_action[value]' value={value} />
+        <input type='hidden' name='automod_action[enabled]' value="true" />
+
+        <div class="form-group row mt-3">
+          <div class="col-sm-12">
+            <label class="control-label">Reason:</label>
+            <input type='text' name='automod_action[reason]' id='' value='' class='form-control' />
+          </div>
+        </div>
+
+        <div class="form-group row mt-3">
+          <div class="col-sm-12">
+            <label class="control-label">Expires:</label>
+            <input type='text' name='automod_action[expires]' id='' value='never' class='form-control' />
+          </div>
+        </div>
+
+        <button type='submit' class={"btn btn-#{bsname} float-end mt-3"}>
+          Add
+        </button>
+      </form>
+    </div>
+    <% end %>
+</div>
+
+<a href={Routes.ts_admin_user_path(@conn, :show, @userid)} class="btn btn-secondary btn-outline">
+  Cancel
+</a>
+
+
+      </div>
+    </div>
+  </div>
+</div>

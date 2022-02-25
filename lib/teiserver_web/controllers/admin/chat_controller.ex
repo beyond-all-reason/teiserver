@@ -13,8 +13,9 @@ defmodule TeiserverWeb.Admin.ChatController do
     sub_menu_active: "chat"
   )
 
-  plug :add_breadcrumb, name: 'Account', url: '/teiserver'
-  plug :add_breadcrumb, name: 'BanHashes', url: '/teiserver/ban_hashes'
+  plug :add_breadcrumb, name: 'Teiserver', url: '/teiserver'
+  plug :add_breadcrumb, name: 'Admin', url: '/teiserver/admin'
+  plug :add_breadcrumb, name: 'Chat', url: '/teiserver/admin/chat'
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, %{"search" => params}) do

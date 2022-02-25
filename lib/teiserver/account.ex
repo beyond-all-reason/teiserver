@@ -451,156 +451,156 @@ defmodule Teiserver.Account do
   end
 
 
-  alias Teiserver.Account.BanHash
-  alias Teiserver.Account.BanHashLib
+  alias Teiserver.Account.AutomodAction
+  alias Teiserver.Account.AutomodActionLib
 
-  @spec ban_hash_query(List.t()) :: Ecto.Query.t()
-  def ban_hash_query(args) do
-    ban_hash_query(nil, args)
+  @spec automod_action_query(List.t()) :: Ecto.Query.t()
+  def automod_action_query(args) do
+    automod_action_query(nil, args)
   end
 
-  @spec ban_hash_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def ban_hash_query(id, args) do
-    BanHashLib.query_ban_hashes
-    |> BanHashLib.search(%{id: id})
-    |> BanHashLib.search(args[:search])
-    |> BanHashLib.preload(args[:preload])
-    |> BanHashLib.order_by(args[:order_by])
+  @spec automod_action_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def automod_action_query(id, args) do
+    AutomodActionLib.query_automod_actions
+    |> AutomodActionLib.search(%{id: id})
+    |> AutomodActionLib.search(args[:search])
+    |> AutomodActionLib.preload(args[:preload])
+    |> AutomodActionLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
   end
 
   @doc """
-  Returns the list of ban_hashes.
+  Returns the list of automod_actions.
 
   ## Examples
 
-      iex> list_ban_hashes()
-      [%BanHash{}, ...]
+      iex> list_automod_actions()
+      [%AutomodAction{}, ...]
 
   """
-  @spec list_ban_hashes(List.t()) :: List.t()
-  def list_ban_hashes(args \\ []) do
-    ban_hash_query(args)
+  @spec list_automod_actions(List.t()) :: List.t()
+  def list_automod_actions(args \\ []) do
+    automod_action_query(args)
     |> QueryHelpers.limit_query(args[:limit] || 50)
     |> Repo.all
   end
 
   @doc """
-  Gets a single ban_hash.
+  Gets a single automod_action.
 
-  Raises `Ecto.NoResultsError` if the BanHash does not exist.
+  Raises `Ecto.NoResultsError` if the AutomodAction does not exist.
 
   ## Examples
 
-      iex> get_ban_hash!(123)
-      %BanHash{}
+      iex> get_automod_action!(123)
+      %AutomodAction{}
 
-      iex> get_ban_hash!(456)
+      iex> get_automod_action!(456)
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_ban_hash!(Integer.t() | List.t()) :: BanHash.t()
-  @spec get_ban_hash!(Integer.t(), List.t()) :: BanHash.t()
-  def get_ban_hash!(id) when not is_list(id) do
-    ban_hash_query(id, [])
+  @spec get_automod_action!(Integer.t() | List.t()) :: AutomodAction.t()
+  @spec get_automod_action!(Integer.t(), List.t()) :: AutomodAction.t()
+  def get_automod_action!(id) when not is_list(id) do
+    automod_action_query(id, [])
     |> Repo.one!
   end
-  def get_ban_hash!(args) do
-    ban_hash_query(nil, args)
+  def get_automod_action!(args) do
+    automod_action_query(nil, args)
     |> Repo.one!
   end
-  def get_ban_hash!(id, args) do
-    ban_hash_query(id, args)
+  def get_automod_action!(id, args) do
+    automod_action_query(id, args)
     |> Repo.one!
   end
 
   # Uncomment this if needed, default files do not need this function
   # @doc """
-  # Gets a single ban_hash.
+  # Gets a single automod_action.
 
-  # Returns `nil` if the BanHash does not exist.
+  # Returns `nil` if the AutomodAction does not exist.
 
   # ## Examples
 
-  #     iex> get_ban_hash(123)
-  #     %BanHash{}
+  #     iex> get_automod_action(123)
+  #     %AutomodAction{}
 
-  #     iex> get_ban_hash(456)
+  #     iex> get_automod_action(456)
   #     nil
 
   # """
-  # def get_ban_hash(id, args \\ []) when not is_list(id) do
-  #   ban_hash_query(id, args)
+  # def get_automod_action(id, args \\ []) when not is_list(id) do
+  #   automod_action_query(id, args)
   #   |> Repo.one
   # end
 
   @doc """
-  Creates a ban_hash.
+  Creates a automod_action.
 
   ## Examples
 
-      iex> create_ban_hash(%{field: value})
-      {:ok, %BanHash{}}
+      iex> create_automod_action(%{field: value})
+      {:ok, %AutomodAction{}}
 
-      iex> create_ban_hash(%{field: bad_value})
+      iex> create_automod_action(%{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_ban_hash(Map.t()) :: {:ok, BanHash.t()} | {:error, Ecto.Changeset.t()}
-  def create_ban_hash(attrs \\ %{}) do
-    %BanHash{}
-    |> BanHash.changeset(attrs)
+  @spec create_automod_action(Map.t()) :: {:ok, AutomodAction.t()} | {:error, Ecto.Changeset.t()}
+  def create_automod_action(attrs \\ %{}) do
+    %AutomodAction{}
+    |> AutomodAction.changeset(attrs)
     |> Repo.insert()
   end
 
   @doc """
-  Updates a ban_hash.
+  Updates a automod_action.
 
   ## Examples
 
-      iex> update_ban_hash(ban_hash, %{field: new_value})
-      {:ok, %BanHash{}}
+      iex> update_automod_action(automod_action, %{field: new_value})
+      {:ok, %AutomodAction{}}
 
-      iex> update_ban_hash(ban_hash, %{field: bad_value})
+      iex> update_automod_action(automod_action, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec update_ban_hash(BanHash.t(), Map.t()) :: {:ok, BanHash.t()} | {:error, Ecto.Changeset.t()}
-  def update_ban_hash(%BanHash{} = ban_hash, attrs) do
-    ban_hash
-    |> BanHash.changeset(attrs)
+  @spec update_automod_action(AutomodAction.t(), Map.t()) :: {:ok, AutomodAction.t()} | {:error, Ecto.Changeset.t()}
+  def update_automod_action(%AutomodAction{} = automod_action, attrs) do
+    automod_action
+    |> AutomodAction.changeset(attrs)
     |> Repo.update()
   end
 
   @doc """
-  Deletes a BanHash.
+  Deletes a AutomodAction.
 
   ## Examples
 
-      iex> delete_ban_hash(ban_hash)
-      {:ok, %BanHash{}}
+      iex> delete_automod_action(automod_action)
+      {:ok, %AutomodAction{}}
 
-      iex> delete_ban_hash(ban_hash)
+      iex> delete_automod_action(automod_action)
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec delete_ban_hash(BanHash.t()) :: {:ok, BanHash.t()} | {:error, Ecto.Changeset.t()}
-  def delete_ban_hash(%BanHash{} = ban_hash) do
-    Repo.delete(ban_hash)
+  @spec delete_automod_action(AutomodAction.t()) :: {:ok, AutomodAction.t()} | {:error, Ecto.Changeset.t()}
+  def delete_automod_action(%AutomodAction{} = automod_action) do
+    Repo.delete(automod_action)
   end
 
   @doc """
-  Returns an `%Ecto.Changeset{}` for tracking ban_hash changes.
+  Returns an `%Ecto.Changeset{}` for tracking automod_action changes.
 
   ## Examples
 
-      iex> change_ban_hash(ban_hash)
-      %Ecto.Changeset{source: %BanHash{}}
+      iex> change_automod_action(automod_action)
+      %Ecto.Changeset{source: %AutomodAction{}}
 
   """
-  @spec change_ban_hash(BanHash.t()) :: Ecto.Changeset.t()
-  def change_ban_hash(%BanHash{} = ban_hash) do
-    BanHash.changeset(ban_hash, %{})
+  @spec change_automod_action(AutomodAction.t()) :: Ecto.Changeset.t()
+  def change_automod_action(%AutomodAction{} = automod_action) do
+    AutomodAction.changeset(automod_action, %{})
   end
 
   alias Teiserver.Account.BadgeType

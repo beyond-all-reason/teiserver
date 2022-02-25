@@ -495,7 +495,7 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
-  def banhash_form(conn, %{"id" => id}) do
+  def automod_action_form(conn, %{"id" => id}) do
     user = Account.get_user!(id)
 
     # Update their hw_key
@@ -512,11 +512,11 @@ defmodule TeiserverWeb.Admin.UserController do
     end
 
     conn
-    |> add_breadcrumb(name: "Add banhash form", url: conn.request_path)
+    |> add_breadcrumb(name: "Add automod_action form", url: conn.request_path)
     |> assign(:user, user)
     |> assign(:user_stats, user_stats)
     |> assign(:userid, user.id)
-    |> render("banhash_form.html")
+    |> render("automod_action_form.html")
   end
 
   def full_chat(conn, params = %{"id" => id}) do

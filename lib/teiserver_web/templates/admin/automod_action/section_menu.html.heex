@@ -1,0 +1,35 @@
+<% bsname = view_colour() %>
+
+<div class="row">
+  <div class="col-md-9">
+    <%= central_component "section_menu_button",
+      name: "index",
+      label: "List",
+      active: @active,
+      icon: "far fa-bars",
+      bsname: bsname,
+      url: Routes.ts_admin_automod_action_path(@conn, :index)
+    %>
+
+    <%= if @active == "show" do %>
+      <%= central_component "section_menu_button",
+        name: "show",
+        label: "Show",
+        active: @active,
+        icon: Central.Helpers.StylingHelper.icon(:detail),
+        bsname: bsname,
+        url: "#"
+      %>
+    <% end %>
+  </div>
+
+  <div class="col-md-3">
+    <form action={Routes.ts_admin_automod_action_path(@conn, :index)} method="get" class="float-end form-inline d-none d-md-block">
+      <div class="input-group">
+        <input type="text" name="s" id="quick_search" value={assigns[:quick_search] || @conn.params["s"]} placeholder="Quick search" class="form-control" style="width: 150px; display: inline-block;" />
+        &nbsp;
+        <input type="submit" value="Search" class={"btn btn-#{bsname} float-end"} style="margin-top: 0px;" />
+      </div>
+    </form>
+  </div>
+</div>

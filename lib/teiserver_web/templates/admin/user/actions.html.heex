@@ -31,9 +31,9 @@
     Send password reset email
   </a>
 
-  <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :banhash_form, @user.id)}>
-    <%= central_component "icon", icon: "fas fa-ban" %>
+  <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :automod_action_form, @user.id)}>
+    <%= central_component "icon", icon: Teiserver.Account.AutomodActionLib.icon() %>
     &nbsp;
-    Add ban hash
+    Add automod action
   </a>
 </div>

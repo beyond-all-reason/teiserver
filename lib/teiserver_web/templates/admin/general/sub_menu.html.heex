@@ -51,11 +51,11 @@
 
           <%= if allow?(@conn, "teiserver.moderator.account") do %>
             <%= central_component "sub_menu_icon",
-              name: "ban_hashes",
-              label: "Ban hashes",
+              name: "automod_actions",
+              label: "Automod",
               active: @active,
-              url: Routes.ts_admin_ban_hash_path(@conn, :index),
-              icon: Teiserver.Account.BanHashLib.icon()
+              url: Routes.ts_admin_automod_action_path(@conn, :index),
+              icon: Teiserver.Account.AutomodActionLib.icon()
             %>
           <% end %>
 

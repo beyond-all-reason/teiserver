@@ -1,0 +1,15 @@
+<%= case @automod_action.type do %>
+  <% "hardware" -> %>
+    <%
+      user_stat = Teiserver.Account.get_user_stat_data(@automod_action.user_id)
+    %>
+    <label class="control-label" for="automod_action_value">Raw value:</label>
+    <input id="automod_action_value" type="text" class="form-control" value={@automod_action.value} />
+    <br />
+
+    <label class="control-label" for="user_stats">Complete user stats:</label>
+    <textarea id="user_stats" rows="20" class="form-control monospace"><%= Jason.encode! Map.drop(user_stat, ["password_hash", "ip"]), pretty: true %></textarea>
+
+  <% _ -> %>
+    No display handler for automod_action of <%= @automod_action.type %>
+<% end %>

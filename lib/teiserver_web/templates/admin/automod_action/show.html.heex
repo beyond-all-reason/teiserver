@@ -12,15 +12,15 @@
   });
 </script>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "ban_hashes"}) %>
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "automod_actions"}) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.BanHashView, "section_menu.html", Map.merge(assigns, %{
+        <%= render TeiserverWeb.Admin.AutomodActionView, "section_menu.html", Map.merge(assigns, %{
             show_search: false,
-            active: ""
+            active: "show"
         }) %>
         <hr />
 
@@ -29,7 +29,7 @@
         </div>
 
       <h3>
-        <%= @ban_hash.type %> - <%= @ban_hash.user.name %>
+        <%= @automod_action.type %> - <%= @automod_action.user.name %>
       </h3>
       <br />
       <ul class="nav nav-tabs" role="tablist" id="the_tabs">

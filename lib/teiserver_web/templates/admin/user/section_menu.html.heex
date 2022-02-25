@@ -61,6 +61,17 @@
         url: "#"
       %>
     <% end %>
+    
+    <%= if @active == "automod_action" do %>
+      <%= central_component "section_menu_button",
+        name: "automod_action",
+        label: "Automod action",
+        active: @active,
+        icon: Teiserver.Account.AutomodActionLib.icon(),
+        bsname: bsname,
+        url: "#"
+      %>
+    <% end %>
   </div>
   
   <div class="col-md-3">
