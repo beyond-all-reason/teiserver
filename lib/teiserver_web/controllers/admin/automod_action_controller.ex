@@ -40,10 +40,15 @@ defmodule TeiserverWeb.Admin.AutomodActionController do
     ])
 
     logs = Logging.list_audit_logs(search: [
-      action: "Teiserver:Updated automod action",
+      actions: [
+          "Teiserver:Updated automod action",
+          "Teiserver:Automod action enacted"
+        ],
       # data_equal: {}
-    ],
-    joins: [:user])
+      ],
+      joins: [:user],
+      order_by: "Newest first"
+    )
 
     automod_action
     |> AutomodActionLib.make_favourite
