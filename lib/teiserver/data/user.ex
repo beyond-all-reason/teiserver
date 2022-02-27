@@ -829,6 +829,10 @@ defmodule Teiserver.User do
     recache_user(user.id)
 
     if is_banned?(user.id) do
+      client = Client.get_client_by_id(user.id)
+      if client do
+        Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
+      end
       Client.disconnect(user.id, "Banned")
     end
 

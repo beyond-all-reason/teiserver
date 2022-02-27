@@ -129,11 +129,13 @@ defmodule Teiserver.Coordinator do
   end
 
   @spec send_to_host(T.userid(), String.t()) :: :ok
+  def send_to_host(nil, _), do: :ok
   def send_to_host(lobby_id, msg) do
     send_to_host(get_coordinator_userid(), lobby_id, msg)
   end
 
   @spec send_to_host(T.userid(), T.userid(), String.t()) :: :ok
+  def send_to_host(nil, _, _), do: :ok
   def send_to_host(from_id, lobby_id, msg) do
     battle = Lobby.get_battle!(lobby_id)
     User.send_direct_message(from_id, battle.founder_id, msg)
