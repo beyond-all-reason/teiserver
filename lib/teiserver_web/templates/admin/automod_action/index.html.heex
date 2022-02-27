@@ -22,13 +22,12 @@
 <table class="table table-sm">
   <thead>
     <tr>
-      <th>#</th>
+      <th>Based on</th>
       <th>Enabled</th>
       <th>Type</th>
       <th>Action</th>
       <th>Expires</th>
       <th>Reason</th>
-      <th>Based on</th>
       <th>Added by</th>
       <th colspan="1">&nbsp;</th>
     </tr>
@@ -36,14 +35,23 @@
   <tbody>
 <%= for automod_action <- @automod_actions do %>
     <tr>
-      <td><%= automod_action.id %></td>
+      <td><%= automod_action.user.name %></td>
       <td>
         <%= if automod_action.enabled do %>
           <i class='fa-fw fa-regular fa-check'></i>
         <% end %>
       </td>
       <td><%= automod_action.type %></td>
-      <td></td>
+      <td>
+        <%
+          actions = [
+            (if automod_action.actions["original"], do: "Origional: #{Enum.join(automod_action.actions["original"], ", ")}"),
+            (if automod_action.actions["tripper"], do: "Tripper: #{Enum.join(automod_action.actions["tripper"], ", ")}")
+          ]
+          |> Enum.filter(fn v -> v != nil end)
+        %>
+        <%= raw Enum.join(actions, "<br />") %>
+      </td>
       <td>
         <%= cond do %>
           <% automod_action.expires == nil -> %>
@@ -58,7 +66,6 @@
       </td>
       
       <td><%= automod_action.reason %></td>
-      <td><%= automod_action.user.name %></td>
       <td><%= automod_action.added_by.name %></td>
 
       <td>

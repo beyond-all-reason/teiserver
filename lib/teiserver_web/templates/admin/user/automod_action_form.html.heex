@@ -14,51 +14,108 @@
         %>
 
         <hr />
-Pick one
-<br /><br />
+<h3>Adding automod action based on <%= @user.name %></h3>
 
 <div class="row">
   <%
     types = [
-      {"Hardware", "hardware", @user_stats["hw_fingerprint"]},
-      {"Lobby hash", "lobby_hash", @user_stats["lobby_hash"]},
+      {"Hardware", "hardware", @user_stats["hw_fingerprint"], true},
+      {"Lobby hash", "lobby_hash", @user_stats["lobby_hash"], false},
+    ]
+    
+    origional_actions = [
+      {"Extend reports", "extend_reports", " - any existing reports will be refreshed and their duration extended", true},
+      {"Message discord", "message_discord", " - a message will be posted by the discord bot to the user-reports chanel informing of this infraction", false},
+      {"Null report", "null_report", " - an empty report will be generated against this user to log what happened", true},
+    ]
+    
+    tripper_actions = [
+      {"Permaban", "permaban", " - permanently ban the account", true},
+      {"Message discord", "message_discord", " - a message will be posted by the discord bot to the user-reports chanel informing of this tripping", false},
     ]
   %>
-  <%= for {name, type, value} <- types do %>
-    <div class="col-md-12 col-lg-6 mb-4">
-      <h4><%= name %></h4>
-      <form action={Routes.ts_admin_automod_action_path(@conn, :create)} method='post' style="padding: 0 20px;">
-        <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
-        <input type='hidden' name='automod_action[user_id]' value={@userid} />
-        <input type='hidden' name='automod_action[type]' value={type} />
-        <input type='hidden' name='automod_action[value]' value={value} />
-        <input type='hidden' name='automod_action[enabled]' value="true" />
 
-        <div class="form-group row mt-3">
-          <div class="col-sm-12">
-            <label class="control-label">Reason:</label>
-            <input type='text' name='automod_action[reason]' id='' value='' class='form-control' />
-          </div>
-        </div>
-
-        <div class="form-group row mt-3">
-          <div class="col-sm-12">
-            <label class="control-label">Expires:</label>
-            <input type='text' name='automod_action[expires]' id='' value='never' class='form-control' />
-          </div>
-        </div>
-
-        <button type='submit' class={"btn btn-#{bsname} float-end mt-3"}>
-          Add
-        </button>
-      </form>
+  <div class="col-md-12 mb-4">
+    <div class="alert alert-danger2">
+      Currently most of these fields don't do anything. Actions are currently always that the tripper account is perma banned.
     </div>
-    <% end %>
-</div>
+  
+    <%= form_for @changeset, Routes.ts_admin_user_path(@conn, :automod_action_post, @userid), fn f -> %>
+      <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
+      <input type='hidden' name='automod_action[user_id]' value={@userid} />
+      <input type='hidden' name='automod_action[enabled]' value="true" />
 
-<a href={Routes.ts_admin_user_path(@conn, :show, @userid)} class="btn btn-secondary btn-outline">
-  Cancel
-</a>
+      <div class="row">
+        <div class="form-group col-md-12 col-lg-6 my-3">
+          <label class="control-label">Hash type:</label>
+          <%= for {label, type, value, checked} <- types do %>
+            <%= central_component "radio",
+              name: "automod_action[type_value]",
+              id: "automod_action_type_#{type}",
+              value: "#{type}~#{value}",
+              label: label,
+              checked: checked
+            %>
+          <% end %>
+        </div>
+        
+        <div class="form-group col-md-12 col-lg-6 my-3">
+          <%= label f, :reason, class: "control-label" %>
+          <%= text_input f, :reason, class: "form-control", autofocus: :autofocus %>
+          <%= error_tag f, :reason %>
+        </div>
+
+        <div class="form-group col-md-12 col-lg-6 my-3">
+          <label class="control-label">Original user (<%= @user.name %>) action:</label>
+          <%= for {label, value, text, checked} <- origional_actions do %>
+            <%= central_component "checkbox",
+              name: "automod_action[action][original][]",
+              id: "automod_action_action_original_#{label}",
+              value: value,
+              label: label,
+              checked: checked,
+              text: text
+            %>
+          <% end %>
+        </div>
+        
+        <div class="form-group col-md-12 col-lg-6 my-3">
+          <label class="control-label">Actions to perform on the user that trips this automod:</label>
+          <%= for {label, value, text, checked} <- tripper_actions do %>
+            <%= central_component "checkbox",
+              name: "automod_action[action][tripper][]",
+              id: "automod_action_action_tripper_#{label}",
+              value: value,
+              label: label,
+              checked: checked,
+              text: text
+            %>
+          <% end %>
+        </div>
+
+        <div class="form-group col-md-12 col-lg-6 my-3">
+          <%= label f, :expires, class: "control-label" %>
+          <%= text_input f, :expires, class: "form-control", placeholder: "\"never\" to never expire" %>
+          <%= error_tag f, :expires %>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="form-group col-md-3 my-3">
+          <a href={Routes.ts_admin_user_path(@conn, :show, @userid)} class="btn btn-secondary btn-block">
+            Cancel
+          </a>
+        </div>
+
+        <div class="form-group offset-md-6 col-md-3 my-3">
+          <button type='submit' class={"btn btn-#{bsname} btn-block mt-3"}>
+            Add
+          </button>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
 
 
       </div>

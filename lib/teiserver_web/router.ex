@@ -216,6 +216,7 @@ defmodule TeiserverWeb.Router do
         put("/users/reports/:id/respond", UserController, :respond_post)
         get("/users/smurf_search/:id", UserController, :smurf_search)
         get("/users/automod_action_form/:id", UserController, :automod_action_form)
+        post("/users/automod_action_post/:id", UserController, :automod_action_post)
         get("/users/full_chat/:id", UserController, :full_chat)
         get("/users/search", UserController, :index)
         post("/users/set_stat", UserController, :set_stat)

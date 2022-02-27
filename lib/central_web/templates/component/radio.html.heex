@@ -27,12 +27,11 @@
     end
   end
   
-  value = assigns[:value] || true
   row_class = "form-check " <> (assigns[:row_class] || "m-1")
 %>
 
 <div class={row_class}>
-  <input name={@name} id={@id} class="form-check-input" type="checkbox" value={value} {checked}>
+  <input name={@name} id={@id} class="form-check-input" type="radio" value={@value} {checked}>
   <label class="form-check-label" for={@id}>
     <strong><%= @label %></strong><%= assigns[:text] %>
     <%= if assigns[:description] do %>

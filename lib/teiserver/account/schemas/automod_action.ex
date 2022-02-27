@@ -27,7 +27,7 @@ defmodule Teiserver.Account.AutomodAction do
 
     struct
     |> cast(params, ~w(type value reason enabled expires actions added_by_id user_id)a)
-    |> validate_required(~w(type value added_by_id user_id)a)
+    |> validate_required(~w(type value reason actions added_by_id user_id)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

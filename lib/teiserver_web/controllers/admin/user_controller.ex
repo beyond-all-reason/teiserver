@@ -495,6 +495,7 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
+  @spec automod_action_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def automod_action_form(conn, %{"id" => id}) do
     user = Account.get_user!(id)
 
@@ -511,12 +512,67 @@ defmodule TeiserverWeb.Admin.UserController do
       stats -> stats.data
     end
 
+    changeset = Account.change_automod_action(%Account.AutomodAction{})
+
     conn
-    |> add_breadcrumb(name: "Add automod_action form", url: conn.request_path)
+    |> assign(:changeset, changeset)
+    |> add_breadcrumb(name: "Add automod action form", url: conn.request_path)
     |> assign(:user, user)
     |> assign(:user_stats, user_stats)
     |> assign(:userid, user.id)
     |> render("automod_action_form.html")
+  end
+
+  @spec automod_action_post(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def automod_action_post(conn, %{"id" => id, "automod_action" => automod_action_params}) do
+    [type, value] = String.split(automod_action_params["type_value"], "~")
+
+    automod_action_params = Map.merge(automod_action_params, %{
+      "added_by_id" => conn.current_user.id,
+      "actions" => %{
+        "original" => automod_action_params["action"]["original"],
+        "tripper" => automod_action_params["action"]["tripper"],
+      },
+      "type" => type,
+      "value" => value
+    })
+
+    case Account.create_automod_action(automod_action_params) do
+      {:ok, automod_action} ->
+        conn
+        |> put_flash(:info, "AutomodAction created successfully.")
+        |> redirect(to: Routes.ts_admin_automod_action_path(conn, :show, automod_action.id))
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        IO.puts ""
+        IO.inspect changeset
+        IO.puts ""
+
+        user = Account.get_user!(id)
+
+        user_stats = case Account.get_user_stat(user.id) do
+          nil -> %{}
+          stats -> stats.data
+        end
+
+        error_message = cond do
+          changeset.errors[:value] != nil ->
+            "Please select a hash type"
+          changeset.errors[:actions] != nil ->
+            "Please select one or more actions"
+          true ->
+            nil
+        end
+
+        conn
+        |> add_breadcrumb(name: "Add automod action form", url: conn.request_path)
+        |> assign(:changeset, changeset)
+        |> assign(:user, user)
+        |> assign(:user_stats, user_stats)
+        |> assign(:userid, user.id)
+        |> put_flash(:danger, error_message)
+        |> render("automod_action_form.html")
+    end
   end
 
   def full_chat(conn, params = %{"id" => id}) do
