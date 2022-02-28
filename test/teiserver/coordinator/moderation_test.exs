@@ -31,6 +31,8 @@ defmodule Teiserver.Coordinator.ModerationTest do
       "responder_id" => moderator.id
     })
     User.create_report(report, :create)
+    # Need to allow time for it to propagate
+    :timer.sleep(200)
 
     # Did it take?
     assert User.is_warned?(user.id)

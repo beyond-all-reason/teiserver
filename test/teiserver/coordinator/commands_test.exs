@@ -211,7 +211,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     :timer.sleep(500)
 
     hook_message = PubsubListener.get(hook_listener) |> hd
-    {:account_hooks, :create_report, report, :create} = hook_message
+    {:account_hooks, :create_report, report} = hook_message
 
     # Ensure the report was created
     assert Account.get_report!(report.id)
@@ -237,7 +237,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     :timer.sleep(500)
 
     hook_message = PubsubListener.get(hook_listener) |> hd
-    {:account_hooks, :create_report, report, :create} = hook_message
+    {:account_hooks, :create_report, report} = hook_message
 
     # Ensure the report was created
     assert Account.get_report!(report.id)

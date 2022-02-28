@@ -44,7 +44,7 @@ defmodule TeiserverWeb.Admin.AutomodActionController do
           "Teiserver:Updated automod action",
           "Teiserver:Automod action enacted"
         ],
-      # data_equal: {}
+      details_equal: {"automod_action_id", automod_action.id |> to_string}
       ],
       joins: [:user],
       order_by: "Newest first"

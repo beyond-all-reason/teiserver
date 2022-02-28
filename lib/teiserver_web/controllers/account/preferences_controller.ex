@@ -20,7 +20,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
 
     group_configs =
       Config.get_grouped_user_configs()
-      |> Map.get("teiserver")
+      |> Map.get("Teiserver account")
 
     conn
     |> assign(:group_configs, group_configs)

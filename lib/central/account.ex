@@ -958,13 +958,13 @@ defmodule Central.Account do
     PubSub.broadcast(
       Central.PubSub,
       "account_hooks",
-      {:account_hooks, :create_report, report, :create}
+      {:account_hooks, :create_report, report}
     )
 
     {:ok, report}
   end
 
-  def broadcast_create_report(v, _), do: v
+  def broadcast_create_report(v), do: v
 
   @doc """
   Updates a report.

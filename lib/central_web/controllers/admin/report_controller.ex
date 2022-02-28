@@ -1,9 +1,8 @@
 defmodule CentralWeb.Admin.ReportController do
   use CentralWeb, :controller
 
-  alias Central.Account
-  alias Central.Account.Report
-  alias Central.Account.ReportLib
+  alias Central.{Account, Logging}
+  alias Central.Account.{Report, ReportLib}
 
   plug Bodyguard.Plug.Authorize,
     policy: Central.Account.Report,
@@ -76,6 +75,16 @@ defmodule CentralWeb.Admin.ReportController do
         ]
       )
 
+    logs = Logging.list_audit_logs(search: [
+      actions: [
+          "Account:Updated report",
+        ],
+      details_equal: {"report", report.id |> to_string}
+      ],
+      joins: [:user],
+      order_by: "Newest first"
+    )
+
     fav =
       report
       |> ReportLib.make_favourite()
@@ -83,6 +92,7 @@ defmodule CentralWeb.Admin.ReportController do
 
     conn
     |> assign(:report, report)
+    |> assign(:logs, logs)
     |> add_breadcrumb(name: "Show: #{fav.item_label}", url: conn.request_path)
     |> render("show.html")
   end

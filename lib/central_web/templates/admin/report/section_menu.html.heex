@@ -67,6 +67,19 @@
     %>
 <% end %>
 
+<%= case @active do %>
+  <% "show" -> %>
+    <%= central_component "section_menu_button",
+      name: "show",
+      label: "Show",
+      active: @active,
+      icon: StylingHelper.icon(:show, "thin"),
+      bsname: bsname,
+      url: "#"
+    %>
+  <% _ -> %>
+<% end %>
+
 <form action={Routes.admin_report_path(@conn, :index)} method="get" class="float-end form-inline d-none d-md-block">
   <div class="input-group">
     <input type="text" name="s" id="quick_search" value={assigns[:quick_search] || @conn.params["s"]} placeholder="Quick search" class="form-control" style="width: 150px; display: inline-block;" />

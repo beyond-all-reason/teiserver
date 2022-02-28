@@ -156,8 +156,8 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         report.response_action
       end)
 
-      if User.is_warned?(user) do
-        reasons = reports["Warn"] || []
+      if User.is_warned?(user) and reports["Warn"] != nil do
+        reasons = reports["Warn"]
         |> Enum.map(fn report -> " - " <> report.reason end)
 
         [_, expires] = user.warned
@@ -179,7 +179,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         end
 
         # Follow-up
-        followups = reports["Warn"] || []
+        followups = reports["Warn"]
         |> Enum.filter(fn r -> r.followup != nil and r.followup != "" end)
         |> Enum.map(fn r -> "- #{r.followup}" end)
 
@@ -190,7 +190,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         end
 
         # Code of conduct references
-        cocs = reports["Warn"] || []
+        cocs = reports["Warn"]
         |> Enum.map(fn r -> r.code_references end)
         |> List.flatten
         |> Enum.uniq
@@ -213,8 +213,8 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         Coordinator.send_to_user(userid, msg)
       end
 
-      if User.is_muted?(user) do
-        reasons = reports["Mute"] || []
+      if User.is_muted?(user) and reports["Mute"] != nil do
+        reasons = reports["Mute"]
         |> Enum.map(fn report -> " - " <> report.reason end)
 
         [_, expires] = user.muted
@@ -225,7 +225,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           msg = ["This is a reminder that you are currently muted for reasons listed below, the muting will expire #{expires}." | reasons]
 
           # Code of conduct references
-          cocs = reports["Mute"] || []
+          cocs = reports["Mute"]
           |> Enum.map(fn r -> r.code_references end)
           |> List.flatten
           |> Enum.uniq

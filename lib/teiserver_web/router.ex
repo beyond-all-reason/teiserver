@@ -225,7 +225,7 @@ defmodule TeiserverWeb.Router do
         post("/users/search", UserController, :search)
         resources("/user", UserController)
 
-        resources("/automod_action", AutomodActionController, only: [:index, :show, :delete, :create])
+        resources("/automod_action", AutomodActionController, only: [:index, :show, :create, :edit, :update])
         put("/automod_action/:id/disable", AutomodActionController, :disable)
         put("/automod_action/:id/enable", AutomodActionController, :enable)
 

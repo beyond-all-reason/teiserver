@@ -637,7 +637,7 @@ defmodule Teiserver.Protocols.SpringOut do
       send(self(), {:global_battle_updated, lobby_id, :update_battle_info})
 
       battle = Lobby.get_battle(lobby_id)
-      if battle != nil do
+      if battle != nil and Map.has_key?(battle, :players) do
         battle.players
         |> Enum.each(fn player_id ->
           send(self(), {:add_user_to_battle, player_id, lobby_id, nil})

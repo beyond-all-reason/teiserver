@@ -1,0 +1,20 @@
+<table class='table'>
+  <thead>
+    <tr>
+      <th>Action</th>
+      <th>User</th>
+      <th>Reason</th>
+      <th>Date</th>
+   </tr>
+  </thead>
+  <tbody>
+    <%= for log <- @logs do %>
+      <tr>
+        <td><%= log.action %></td>
+        <td><%= log.user.name %></td>
+        <td><%= log.details["reason"] %></td>
+        <td><%= date_to_str log.inserted_at, format: :hms_or_dmy %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

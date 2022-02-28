@@ -57,6 +57,7 @@ defmodule Central.Application do
     Logger.info("Central.Supervisor start result: #{Kernel.inspect start_result}")
 
     startup_sub_functions()
+    ConCache.put(:application_temp_cache, :app_startup_datetime, Timex.now())
 
     start_result
   end

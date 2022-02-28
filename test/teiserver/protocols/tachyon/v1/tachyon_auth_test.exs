@@ -1,7 +1,6 @@
 defmodule Teiserver.Protocols.V1.TachyonAuthTest do
   use Central.ServerCase
   alias Teiserver.{User, Client}
-  alias Teiserver.Battle.Lobby
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
@@ -48,7 +47,7 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     }
   end
 
-  test "tachyon end to end", %{socket: socket, user: user, pid: pid, friend1: friend1, friend2: friend2} do
+  test "tachyon end to end", %{socket: socket, friend1: friend1, friend2: friend2} do
     # We are already logged in, lets start by getting a list of our friends!
 
     _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids", "filter" => ""})
