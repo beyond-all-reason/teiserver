@@ -211,7 +211,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     :timer.sleep(500)
 
     hook_message = PubsubListener.get(hook_listener) |> hd
-    {:account_hooks, :create_report, report} = hook_message
+    {:account_hooks, :create_report, report, :create} = hook_message
 
     # Ensure the report was created
     assert Account.get_report!(report.id)
@@ -220,7 +220,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert messages == [{:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "#{player.name} banned for 60 hours by #{host.name}, reason: Spamming channel", lobby_id}, :say}]
 
     # Now propogate the broadcast the way the hook server would have
-    User.update_report(report.id)
+    User.update_report(report, :update)
 
     assert User.is_muted?(player.id) == false
     assert User.is_banned?(player.id) == true
@@ -237,7 +237,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     :timer.sleep(500)
 
     hook_message = PubsubListener.get(hook_listener) |> hd
-    {:account_hooks, :create_report, report} = hook_message
+    {:account_hooks, :create_report, report, :create} = hook_message
 
     # Ensure the report was created
     assert Account.get_report!(report.id)
@@ -246,7 +246,7 @@ defmodule Teiserver.Coordinator.CommandsTest do
     assert messages == [{:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "#{player.name} muted for 60 hours by #{host.name}, reason: Spamming channel", lobby_id}, :say}]
 
     # Now propogate the broadcast the way the hook server would have
-    User.update_report(report.id)
+    User.update_report(report, :update)
 
     assert User.is_muted?(player.id) == true
     assert User.is_banned?(player.id) == false

@@ -92,7 +92,7 @@ defmodule Teiserver.Account.UserLib do
   end
 
   def _search(query, :moderator, "User") do
-    Logger.error("user.data['verified'] is being queried, this property is due to be depreciated")
+    Logger.error("user.data['moderator'] is being queried, this property is due to be depreciated")
     from users in query,
       where: fragment("? ->> ? = ?", users.data, "moderator", "false")
   end

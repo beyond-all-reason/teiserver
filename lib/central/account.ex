@@ -140,29 +140,31 @@ defmodule Central.Account do
     ConCache.dirty_delete(:config_user_cache, id)
   end
 
-  def broadcast_create_user({:ok, user}) do
+  def broadcast_create_user(u), do: broadcast_create_user(u, :create)
+  def broadcast_create_user({:ok, user}, reason) do
     PubSub.broadcast(
       Central.PubSub,
       "account_hooks",
-      {:account_hooks, :create_user, user}
+      {:account_hooks, :create_user, user, reason}
     )
 
     {:ok, user}
   end
 
-  def broadcast_create_user(v), do: v
+  def broadcast_create_user(v, _), do: v
 
-  def broadcast_update_user({:ok, user}) do
+  def broadcast_update_user(u), do: broadcast_update_user(u, :update)
+  def broadcast_update_user({:ok, user}, reason) do
     PubSub.broadcast(
       Central.PubSub,
       "account_hooks",
-      {:account_hooks, :update_user, user}
+      {:account_hooks, :update_user, user, reason}
     )
 
     {:ok, user}
   end
 
-  def broadcast_update_user(v), do: v
+  def broadcast_update_user(v, _), do: v
 
   @doc """
   Creates a user.
@@ -956,13 +958,13 @@ defmodule Central.Account do
     PubSub.broadcast(
       Central.PubSub,
       "account_hooks",
-      {:account_hooks, :create_report, report}
+      {:account_hooks, :create_report, report, :create}
     )
 
     {:ok, report}
   end
 
-  def broadcast_create_report(v), do: v
+  def broadcast_create_report(v, _), do: v
 
   @doc """
   Updates a report.
@@ -976,24 +978,24 @@ defmodule Central.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_report(%Report{} = report, attrs) do
+  def update_report(%Report{} = report, attrs, reason) do
     report
     |> Report.changeset(attrs)
     |> Repo.update()
-    |> broadcast_update_report
+    |> broadcast_update_report(reason)
   end
 
-  def broadcast_update_report({:ok, report}) do
+  def broadcast_update_report({:ok, report}, reason) do
     PubSub.broadcast(
       Central.PubSub,
       "account_hooks",
-      {:account_hooks, :update_report, report}
+      {:account_hooks, :update_report, report, reason}
     )
 
     {:ok, report}
   end
 
-  def broadcast_update_report(v), do: v
+  def broadcast_update_report(v, _), do: v
 
   @doc """
   Deletes a Report.

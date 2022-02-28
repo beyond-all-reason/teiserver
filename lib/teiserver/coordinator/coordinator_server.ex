@@ -70,6 +70,16 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, state}
   end
 
+  def handle_info({:update_report, report_id}, state) do
+    case Account.get_report(report_id) do
+      nil ->
+        nil
+      report ->
+        User.send_direct_message(state.userid, report.reporter_id, "Thank you for submitting your report, it has been passed on to the moderation team.")
+    end
+    {:noreply, state}
+  end
+
   # Direct/Room messaging
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
@@ -147,7 +157,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       end)
 
       if User.is_warned?(user) do
-        reasons = reports["Warn"]
+        reasons = reports["Warn"] || []
         |> Enum.map(fn report -> " - " <> report.reason end)
 
         [_, expires] = user.warned
@@ -169,7 +179,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         end
 
         # Follow-up
-        followups = reports["Warn"]
+        followups = reports["Warn"] || []
         |> Enum.filter(fn r -> r.followup != nil and r.followup != "" end)
         |> Enum.map(fn r -> "- #{r.followup}" end)
 
@@ -180,7 +190,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         end
 
         # Code of conduct references
-        cocs = reports["Warn"]
+        cocs = reports["Warn"] || []
         |> Enum.map(fn r -> r.code_references end)
         |> List.flatten
         |> Enum.uniq
@@ -204,7 +214,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       end
 
       if User.is_muted?(user) do
-        reasons = reports["Mute"]
+        reasons = reports["Mute"] || []
         |> Enum.map(fn report -> " - " <> report.reason end)
 
         [_, expires] = user.muted
@@ -215,7 +225,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           msg = ["This is a reminder that you are currently muted for reasons listed below, the muting will expire #{expires}." | reasons]
 
           # Code of conduct references
-          cocs = reports["Mute"]
+          cocs = reports["Mute"] || []
           |> Enum.map(fn r -> r.code_references end)
           |> List.flatten
           |> Enum.uniq

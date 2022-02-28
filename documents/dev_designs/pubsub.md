@@ -182,5 +182,18 @@ Valid events
 ```
 
 
+### Central
+#### account_hooks
+Used for hooking into account related activities such as updating users.
+
+Valid events
+```
+  {:account_hooks, :create_user, user, :create}
+  {:account_hooks, :update_user, user, :update}
+
+  {:account_hooks, :create_report, report}
+  {:account_hooks, :update_report, report, :create | :respond | :update}
+```
+
 ### Dev mode
 agent_updates

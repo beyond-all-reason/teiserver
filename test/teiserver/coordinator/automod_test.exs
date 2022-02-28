@@ -17,7 +17,9 @@ defmodule Teiserver.Coordinator.AutomodTest do
       type: "hardware",
       value: "uOGXziwWC1mCePGsh0tTQg==",
       added_by_id: banned_user.id,
-      user_id: banned_user.id
+      user_id: banned_user.id,
+      actions: %{},
+      reason: "hw-ban"
     })
 
     good_user = new_user()
@@ -52,7 +54,9 @@ defmodule Teiserver.Coordinator.AutomodTest do
       type: "lobby_hash",
       value: "123456789 abcdefghij",
       added_by_id: banned_user.id,
-      user_id: banned_user.id
+      user_id: banned_user.id,
+      actions: %{},
+      reason: "hw-ban"
     })
 
     good_user1 = new_user()

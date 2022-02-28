@@ -74,24 +74,24 @@ defmodule Central.Logging.AuditLogLib do
       where: logs.inserted_at < ^end_date
   end
 
-  def _search(query, :data_equal, {field, value}) do
+  def _search(query, :details_equal, {field, value}) do
     from logs in query,
-      where: fragment("? ->> ? = ?", logs.data, ^field, ^value)
+      where: fragment("? ->> ? = ?", logs.details, ^field, ^value)
   end
 
-  def _search(query, :data_greater_than, {field, value}) do
+  def _search(query, :details_greater_than, {field, value}) do
     from logs in query,
-      where: fragment("? ->> ? > ?", logs.data, ^field, ^value)
+      where: fragment("? ->> ? > ?", logs.details, ^field, ^value)
   end
 
-  def _search(query, :data_less_than, {field, value}) do
+  def _search(query, :details_less_than, {field, value}) do
     from logs in query,
-      where: fragment("? ->> ? < ?", logs.data, ^field, ^value)
+      where: fragment("? ->> ? < ?", logs.details, ^field, ^value)
   end
 
-  def _search(query, :data_not, {field, value}) do
+  def _search(query, :details_not, {field, value}) do
     from logs in query,
-      where: fragment("? ->> ? != ?", logs.data, ^field, ^value)
+      where: fragment("? ->> ? != ?", logs.details, ^field, ^value)
   end
 
   @spec preload(Ecto.Query.t(), list | nil) :: Ecto.Query.t()

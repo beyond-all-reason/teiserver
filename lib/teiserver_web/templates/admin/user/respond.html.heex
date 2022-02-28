@@ -68,7 +68,7 @@
               <input type="text" id="report_followup" name="report[followup]" value="" placeholder="" class="form-control" />
             </div>
 
-            <div class="col-md-12" style="margin-top: 10px;">
+            <div class="col-md-12 my-3">
               <label class="control-label" for="report_code_references">Code of Conduct references</label>
               <select class="form-control list-builder-select" multiple="multiple" name="report[code_references][]" id="report_code_references">
                 <%= for {key, text} <- @coc_lookup do %>
@@ -78,7 +78,7 @@
             </div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group my-3">
             <%= if @changeset.data.id do %>
               <a href={"#{Routes.ts_admin_user_path(@conn, :show, @report.target_id)}#reports_tab"} class="btn btn-secondary btn-outline">
                 Cancel

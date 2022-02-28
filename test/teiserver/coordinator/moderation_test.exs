@@ -13,6 +13,8 @@ defmodule Teiserver.Coordinator.ModerationTest do
   end
 
   test "login with warning", %{user: user, moderator: moderator} do
+    delay = Central.Config.get_site_config_cache("teiserver.Post login action delay")
+
     refute User.is_warned?(user.id)
     refute User.is_muted?(user.id)
     refute User.is_banned?(user.id)
@@ -28,7 +30,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
       "expires" => Timex.now |> Timex.shift(days: 1),
       "responder_id" => moderator.id
     })
-    User.create_report(report.id)
+    User.create_report(report, :create)
 
     # Did it take?
     assert User.is_warned?(user.id)
@@ -37,7 +39,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
 
     # Now login
     %{socket: socket} = tachyon_auth_setup(user)
-    :timer.sleep(200)
+    :timer.sleep(200 + delay)
 
     [_, expires] = User.get_user_by_id(user.id).warned
     [msg] = _tachyon_recv(socket)

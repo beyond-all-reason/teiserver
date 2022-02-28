@@ -238,7 +238,7 @@ defmodule Central.AccountTest do
                    "responder_id" => responder.id,
                    "response_text" => "Response text",
                    "response_action" => "Ignore"
-                 })
+                 }), :update
                )
 
       assert report.reason == "some updated reason"

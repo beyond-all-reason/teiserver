@@ -8,7 +8,7 @@ defmodule Teiserver.HookServer do
   end
 
   @impl true
-  def handle_info({:account_hooks, event, payload}, state) do
+  def handle_info({:account_hooks, event, payload, reason}, state) do
     start_completed =
       ConCache.get(:application_metadata_cache, "teiserver_full_startup_completed") == true
 
@@ -25,11 +25,14 @@ defmodule Teiserver.HookServer do
         Teiserver.User.recache_user(payload.id)
 
       :create_report ->
-        Coordinator.cast_coordinator({:new_report, payload.id})
-        Teiserver.User.create_report(payload.id)
+        Coordinator.create_report(payload)
+        Teiserver.Bridge.DiscordBridge.create_report(payload)
+        Teiserver.User.create_report(payload, reason)
 
       :update_report ->
-        Teiserver.User.update_report(payload.id)
+        Coordinator.update_report(payload, reason)
+        Teiserver.Bridge.DiscordBridge.report_updated(payload, reason)
+        Teiserver.User.update_report(payload, reason)
 
       _ ->
         throw("No HookServer account_hooks handler for event '#{event}'")

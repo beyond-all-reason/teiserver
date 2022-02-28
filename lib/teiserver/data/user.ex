@@ -764,26 +764,16 @@ defmodule Teiserver.User do
     {:ok, user}
   end
 
-  @spec create_report(Integer.t()) :: :ok
-  def create_report(report_id) do
-    report = Account.get_report!(report_id)
-
+  @spec create_report(Integer.t(), atom) :: :ok
+  def create_report(report, reason) do
     if report.response_text != nil do
-      update_report(report_id)
-    else
-      Teiserver.Bridge.DiscordBridge.moderator_report(report_id)
+      update_report(report, reason)
     end
   end
 
-  @spec update_report(Integer.t()) :: :ok
-  def update_report(report_id) do
-    report = Account.get_report!(report_id)
+  @spec update_report(Integer.t(), atom) :: :ok
+  def update_report(report, _reason) do
     user = get_user_by_id(report.target_id)
-
-    if Enum.member?(~w(Warn Restrict Mute Ban), report.response_action) do
-      Teiserver.Bridge.DiscordBridge.moderator_action(report_id)
-      Coordinator.update_report(user, report)
-    end
 
     changes =
       case {report.response_action, report.expires} do
@@ -815,6 +805,11 @@ defmodule Teiserver.User do
           %{warned: [false, nil]}
 
         {"Ignore report", nil} ->
+          %{}
+
+        # No action selected yet, this function may have been called
+        # in error
+        {nil, _} ->
           %{}
 
         {action, _} ->

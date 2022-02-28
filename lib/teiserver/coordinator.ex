@@ -115,17 +115,23 @@ defmodule Teiserver.Coordinator do
     end
   end
 
-  def create_report(_user, _report) do
-    # Do nothing
+  @spec create_report(T.report) :: :ok
+  def create_report(report) do
+    cast_coordinator({:new_report, report.id})
   end
 
-  def update_report(user, report) do
+  @spec update_report(T.report, atom) :: :ok
+  def update_report(report, :respond) do
     case report.response_action do
       "Warn" ->
-        send_to_user(user.id, "You have just received a formal warning, reason: #{report.reason}.")
+        send_to_user(report.target_id, "You have just received a formal warning, reason: #{report.reason}.")
       _ ->
         nil
     end
+  end
+
+  def update_report(_report, _reason) do
+    nil
   end
 
   @spec send_to_host(T.userid(), String.t()) :: :ok

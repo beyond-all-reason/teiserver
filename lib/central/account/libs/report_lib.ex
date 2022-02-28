@@ -45,6 +45,25 @@ defmodule Central.Account.ReportLib do
   def past_tense("Mute"), do: "Muted"
   def past_tense("Ban"), do: "Banned"
 
+  @spec verb(String.t() | nil) :: String.t()
+  def verb(nil), do: ""
+  def verb("Warn"), do: "Warning"
+  def verb("Restrict"), do: "Restriction"
+  def verb("Mute"), do: "Mute"
+  def verb("Ban"), do: "Ban"
+
+  @spec reverse(String.t() | nil) :: String.t()
+  def reverse(nil), do: ""
+  def reverse(""), do: nil
+  def reverse("Warn"), do: "Unwarn"
+  def reverse("Restrict"), do: "Derestrict"
+  def reverse("Mute"), do: "Unmute"
+  def reverse("Ban"), do: "Unban"
+  def reverse("Warned"), do: "Unwarnned"
+  def reverse("Restricted"), do: "Derestricted"
+  def reverse("Muted"), do: "Unmuted"
+  def reverse("Banned"), do: "Unbanned"
+
   @spec action_icon(String.t() | nil) :: String.t()
   def action_icon(nil), do: ""
   def action_icon("Ignore report"), do: "fas fa-check-circle"

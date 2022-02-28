@@ -27,7 +27,7 @@
         <h3>
           <%= @report.reporter.name %> reported <%= @report.target.name %>
         </h3>
-        <br />
+        
         <%= render "edit_form.html", Map.put(assigns, :action, Routes.admin_report_path(@conn, :update, @report)) %>
       </div>
     </div>

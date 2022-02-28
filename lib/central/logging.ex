@@ -24,6 +24,7 @@ defmodule Central.Logging do
     |> AuditLogLib.preload(args[:joins])
     |> AuditLogLib.order_by(args[:order])
     |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.limit_query(args[:limit] || 50)
   end
 
   @doc """
@@ -37,7 +38,6 @@ defmodule Central.Logging do
   """
   def list_audit_logs(args \\ []) do
     audit_log_query(args)
-    |> QueryHelpers.limit_query(50)
     |> Repo.all()
   end
 
@@ -68,6 +68,22 @@ defmodule Central.Logging do
   def get_audit_log!(id, args) do
     audit_log_query(id, args)
     |> Repo.one!()
+  end
+
+
+  def get_audit_log(id) when not is_list(id) do
+    audit_log_query(id, [])
+    |> Repo.one()
+  end
+
+  def get_audit_log(args) do
+    audit_log_query(nil, args)
+    |> Repo.one()
+  end
+
+  def get_audit_log(id, args) do
+    audit_log_query(id, args)
+    |> Repo.one()
   end
 
   @doc """

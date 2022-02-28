@@ -152,7 +152,7 @@ defmodule CentralWeb.Admin.ReportController do
             "responder_id" => conn.user_id
           })
 
-        case Account.update_report(report, report_params) do
+        case Account.update_report(report, report_params, :respond) do
           {:ok, _report} ->
             conn
             |> put_flash(:success, "Report updated.")
@@ -229,11 +229,14 @@ defmodule CentralWeb.Admin.ReportController do
         ]
       )
 
-    case Account.update_report(report, params) do
-      {:ok, report} ->
+    case Account.update_report(report, params, :update) do
+      {:ok, new_report} ->
+        sooner = Timex.compare(new_report.expires, report.expires) == -1
+
         add_audit_log(conn, "Account:Updated report", %{
           report: report.id,
-          reason: params["audit_reason"]
+          reason: params["audit_reason"],
+          sooner: sooner
         })
 
         conn

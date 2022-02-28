@@ -433,7 +433,7 @@ defmodule TeiserverWeb.Admin.UserController do
                 "responded_at" => Timex.now(),
               })
 
-            case Central.Account.update_report(report, report_params) do
+            case Central.Account.update_report(report, report_params, :respond) do
               {:ok, _report} ->
                 conn
                 |> put_flash(:success, "Report updated.")

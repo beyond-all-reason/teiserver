@@ -1,6 +1,6 @@
 <% bsname = view_colour() %>
 
-<%= form_for @changeset, Routes.admin_report_path(@conn, :update, @report), fn _f -> %>
+<%= form_for @changeset, Routes.admin_report_path(@conn, :update, @report), fn f -> %>
   <%= if @changeset.action do %>
     <div class="alert alert-danger">
       <p>Oops, something went wrong! Please check the errors below.</p>
@@ -14,21 +14,26 @@
   <% end %>
 
   <em><%= @report.reporter.name %></em> reported <em><%= @report.target.name %></em> with the reason: <%= @report.reason %>
-  <br /><br />
 
   <div class="form-group row">
-    <div class="col-lg-6">
+    <div class="col-lg-6 my-3">
       <label class="control-label" for="report_expires">Expires</label>
       <input type='text' name='report[expires]' id='report_expires' value={date_to_str(Ecto.Changeset.get_field(@changeset, :expires), :ymd_hms)} placeholder='"Never" to never expire' class='form-control' />
     </div>
+    
+    <div class="col-lg-6 my-3">
+      <%= label f, :response_text, class: "control-label" %>
+      <%= text_input f, :response_text, class: "form-control", autofocus: :autofocus %>
+      <%= error_tag f, :response_text %>
+    </div>
 
-    <div class="col-lg-6">
+    <div class="col-lg-6 my-3">
       <label class="control-label" for="report_audit_reason">Reason for change:</label>
       <input type='text' name='report[audit_reason]' id='report_audit_reason' value="" class='form-control' />
     </div>
   </div>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= if @changeset.data.id do %>
       <a href={Routes.admin_report_path(@conn, :show, @report)} class="btn btn-secondary btn-outline">
         Cancel
