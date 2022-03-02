@@ -10,7 +10,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
   @spec do_handle(String.t(), Map.t(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
   def do_handle("query", %{"query" => query}, state) do
     lobby_list = Lobby.list_lobbies()
-    |> TachyonLib.query(:id, query["id"])
     |> TachyonLib.query(:locked, query["locked"])
     |> TachyonLib.query(:in_progress, query["in_progress"])
 
@@ -22,6 +21,9 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
     # `player_list` - List (User.id), A list of player ids in the battle
     # `spectator_list` - List (User.id), A list of spectator ids in the battle
     # `user_list` - List (User.id), A list of player and spectator ids in the battle
+  end
+  def do_handle("query", _, state) do
+    reply(:system, :error, %{error: "no query supplied", location: "c.lobby.query"}, state)
   end
 
   def do_handle("create", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)

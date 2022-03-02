@@ -2,8 +2,10 @@ defmodule Teiserver.Protocols.Tachyon.V1.ClientIn do
   alias Teiserver.{Client}
   alias Teiserver.Protocols.Tachyon.V1.Tachyon
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
+  alias Teiserver.Data.Types, as: T
 
-  def do_handle("list_clients", %{"id_list" => id_list}, state) do
+  @spec do_handle(String.t(), Map.t(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
+  def do_handle("list_clients_from_ids", %{"id_list" => id_list}, state) do
     clients = Client.get_clients(id_list)
       |> Enum.filter(fn c -> c != nil end)
       |> Enum.map(fn c -> Tachyon.convert_object(:client, c) end)

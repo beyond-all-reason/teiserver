@@ -1,8 +1,9 @@
 defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
   alias Teiserver.{User, Client, Account}
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
+  alias Teiserver.Data.Types, as: T
 
-  @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
+  @spec do_handle(String.t(), Map.t(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
   def do_handle("get_token", _, %{transport: :ranch_tcp} = state) do
     reply(:auth, :user_token, {:failure, "Non-secured connection"}, state)
   end

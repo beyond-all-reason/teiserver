@@ -70,7 +70,7 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     assert users_map[friend2.id]["name"] == friend2.name
 
     # Lets get their client state
-    _tachyon_send(socket, %{"cmd" => "c.client.list_clients", "id_list" => friend_list})
+    _tachyon_send(socket, %{"cmd" => "c.client.list_clients_from_ids", "id_list" => friend_list})
     [resp] = _tachyon_recv(socket)
     assert resp["cmd"] == "s.client.client_list"
     client_list = resp["clients"]
@@ -78,5 +78,73 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     assert Enum.count(client_list) == 1
     [f1_client] = client_list
     assert f1_client["userid"] == friend1.id
+
+    # List lobbies
+    # First we don't send a query, should error
+    _tachyon_send(socket, %{"cmd" => "c.lobby.query"})
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "error" => "no query supplied",
+      "location" => "c.lobby.query",
+      "result" => "error"
+    }
+
+    # Now we do an empty query, there are no lobbies so we expect an empty result
+    _tachyon_send(socket, %{"cmd" => "c.lobby.query", "query" => %{}})
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.lobby.query",
+      "lobbies" => [],
+      "result" => "success"
+    }
+
+    # Lets get a lobby hosted
+    {lobby1, _} = create_lobby(%{name: "Test lobby 1"})
+    {lobby2, _} = create_lobby(%{name: "Test lobby 2"})
+    {lobby3, _} = create_lobby(%{name: "Test lobby 3"})
+    {lobby_locked, _} = create_lobby(%{name: "Test lobby locked", locked: true})
+
+    # We expect to get all 4 of them
+    # Now we do an empty query, there are no lobbies so we expect an empty result
+    _tachyon_send(socket, %{"cmd" => "c.lobby.query", "query" => %{}})
+    [resp] = _tachyon_recv(socket)
+    assert resp["cmd"] == "s.lobby.query"
+    assert resp["result"] == "success"
+    lobbies = resp["lobbies"]
+      |> Map.new(fn l -> {l["name"], l} end)
+
+    assert Enum.count(lobbies) == 4
+    assert Map.has_key?(lobbies, "Test lobby 1")
+    assert Map.has_key?(lobbies, "Test lobby 2")
+    assert Map.has_key?(lobbies, "Test lobby 3")
+    assert Map.has_key?(lobbies, "Test lobby locked")
+  end
+
+
+
+  defp create_lobby(params) do
+    %{socket: socket, user: user} = tachyon_auth_setup()
+    # Open the lobby
+    lobby_data = Map.merge(%{
+      cmd: "c.lobby.create",
+      name: "EU 01 - 123",
+      nattype: "none",
+      password: "password2",
+      port: 1234,
+      game_hash: "string_of_characters",
+      map_hash: "string_of_characters",
+      map_name: "koom valley",
+      game_name: "BAR",
+      engine_name: "spring-105",
+      engine_version: "105.1.2.3",
+      settings: %{
+        max_players: 12
+      }
+    }, params)
+
+    data = %{cmd: "c.lobby.create", lobby: lobby_data}
+    _tachyon_send(socket, data)
+    [reply] = _tachyon_recv(socket)
+    {reply["lobby"], user}
   end
 end

@@ -1,4 +1,4 @@
-### `c.client.list_clients`
+### `c.client.list_clients_from_ids`
 Given a list of ids, return information about the relevant clients
 
 #### Arguments

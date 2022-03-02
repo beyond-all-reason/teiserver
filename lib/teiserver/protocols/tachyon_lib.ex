@@ -67,7 +67,9 @@ defmodule Teiserver.Protocols.TachyonLib do
   end
 
 
+  @spec query(List.t(), atom | nil, any) :: List.t()
   def query(list, nil, _), do: list
+  def query(list, _, nil), do: list
   def query(list, field, value) when is_atom(field) do
     list
     |> Enum.filter(fn item -> Map.get(item, field) == value end)

@@ -3,7 +3,6 @@
 * query :: Query
 
 #### Queryable fields
-`id` - Integer (Battle ID)
 `locked` - Boolean
 `in_progress` - Boolean
 `player_count` - Integer, a count of the number of players in the battle

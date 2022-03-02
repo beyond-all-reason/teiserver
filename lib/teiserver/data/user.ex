@@ -642,7 +642,7 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec try_md5_login(String.t(), String.t(), String.t(), String.t(), String.t()) :: {:ok, Map.t()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
+  @spec try_md5_login(String.t(), String.t(), String.t(), String.t(), String.t()) :: {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
   def try_md5_login(username, md5_password, ip, lobby, lobby_hash) do
     wait_for_precache()
 
@@ -698,7 +698,7 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec do_login(Map.t(), String.t(), String.t(), String.t()) :: {:ok, Map.t()}
+  @spec do_login(T.user(), String.t(), String.t(), String.t()) :: {:ok, T.user()}
   defp do_login(user, ip, lobby_client, lobby_hash) do
     stats = Account.get_user_stat_data(user.id)
 
@@ -764,14 +764,14 @@ defmodule Teiserver.User do
     {:ok, user}
   end
 
-  @spec create_report(Integer.t(), atom) :: :ok
+  @spec create_report(T.report(), atom) :: :ok
   def create_report(report, reason) do
     if report.response_text != nil do
       update_report(report, reason)
     end
   end
 
-  @spec update_report(Integer.t(), atom) :: :ok
+  @spec update_report(T.report(), atom) :: :ok
   def update_report(report, _reason) do
     user = get_user_by_id(report.target_id)
 

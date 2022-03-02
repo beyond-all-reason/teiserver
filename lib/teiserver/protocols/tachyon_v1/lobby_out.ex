@@ -10,7 +10,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     %{
       "cmd" => "s.lobby.query",
       "result" => "success",
-      "lobbys" => lobby_list
+      "lobbies" => lobby_list
         |> Enum.map(fn b -> Tachyon.convert_object(:lobby, b) end)
     }
   end
