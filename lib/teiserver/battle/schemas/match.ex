@@ -20,6 +20,8 @@ defmodule Teiserver.Battle.Match do
     # TODO: Clan support?
     # TODO: Tourney support?
 
+    belongs_to :queue, Teiserver.Game.Queue
+
     field :started, :utc_datetime
     field :finished, :utc_datetime
 
@@ -34,7 +36,7 @@ defmodule Teiserver.Battle.Match do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, ~w(uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed)a)
+    |> cast(params, ~w(uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id)a)
     |> validate_required(~w(uuid map tags team_count team_size passworded game_type founder_id bots started)a)
   end
 
