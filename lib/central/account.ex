@@ -958,7 +958,7 @@ defmodule Central.Account do
     PubSub.broadcast(
       Central.PubSub,
       "account_hooks",
-      {:account_hooks, :create_report, report}
+      {:account_hooks, :create_report, report, :create}
     )
 
     {:ok, report}

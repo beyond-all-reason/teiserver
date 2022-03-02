@@ -140,7 +140,14 @@ defmodule Teiserver.Bridge.DiscordBridge do
     )
   end
 
-  def report_updated(_, :create), do: :ok
+  def report_updated(report, :create) do
+    if report.response_text != nil do
+      report_updated(report, :respond)
+    else
+      :ok
+    end
+  end
+
   def report_updated(%{response_action: nil}, :respond), do: :ok
   def report_updated(%{response_action: "Ignore report"}, :respond), do: :ok
   def report_updated(report, :respond) do
