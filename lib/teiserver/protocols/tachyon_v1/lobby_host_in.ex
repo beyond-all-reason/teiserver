@@ -29,6 +29,9 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyHostIn do
 
       "reject" ->
         Lobby.deny_join_request(userid, lobby_id, data["reason"])
+
+      r ->
+        reply(:system, :error, %{error: "invalid response type, no handler for '#{r}'", location: "c.lobby_host.respond_to_join_request"}, state)
     end
     state
   end

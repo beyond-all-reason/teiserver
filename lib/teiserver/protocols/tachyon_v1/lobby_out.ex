@@ -34,7 +34,25 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
   end
 
   ###########
-  # Updated
+  # Update
+  def do_reply(:update, {:success, lobby}) do
+    %{
+      "cmd" => "s.lobby.update",
+      "result" => "success",
+      "lobby" => Tachyon.convert_object(:lobby, lobby)
+    }
+  end
+
+  def do_reply(:update, {:failure, reason}) do
+    %{
+      "cmd" => "s.lobby.update",
+      "result" => "failure",
+      "reason" => reason
+    }
+  end
+
+  ###########
+  # Updated -- TODO: Is this needed/used?
   def do_reply(:updated, {lobby_id, _data}) do
     lobby = Lobby.get_lobby(lobby_id)
     %{

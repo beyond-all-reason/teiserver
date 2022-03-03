@@ -10,8 +10,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
   @spec do_handle(String.t(), Map.t(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
   def do_handle("query", %{"query" => query}, state) do
     lobby_list = Lobby.list_lobbies()
-    |> TachyonLib.query(:locked, query["locked"])
-    |> TachyonLib.query(:in_progress, query["in_progress"])
+      |> TachyonLib.query(:locked, query["locked"])
+      |> TachyonLib.query(:in_progress, query["in_progress"])
 
     reply(:lobby, :query, lobby_list, state)
 
@@ -28,7 +28,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
 
   def do_handle("create", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
   def do_handle("create", %{"lobby" => lobby_dict}, state) do
-    lobby_keys = [:cmd, :name, :nattype, :password, :port, :game_hash, :map_hash, :map_name, :game_name, :engine_name, :engine_version, :settings, :ip]
+    lobby_keys = ~w(cmd name nattype password port game_hash map_hash map_name game_name engine_name engine_version settings ip)a
 
     # Apply defaults
     if Lobby.allow?(state.userid, :host, -1) do
@@ -45,6 +45,30 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
       reply(:lobby, :create, {:success, lobby}, state)
     else
       reply(:lobby, :create, {:failure, "Permission denied"}, state)
+    end
+  end
+
+  def do_handle("update", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
+  def do_handle("update", %{"lobby" => lobby_dict}, state) do
+    update_keys = ~w(locked map_hash map_name name password)a
+
+    if Lobby.allow?(state.userid, :updatebattleinfo, state.lobby_id) do
+      lobby = Lobby.get_lobby(state.lobby_id)
+
+      updates =
+        update_keys
+        |> Map.new(fn k -> {k, Map.get(lobby_dict, to_string(k), Map.get(lobby, k))} end)
+
+      new_lobby = Map.merge(lobby, updates)
+
+      Lobby.update_lobby(
+        new_lobby,
+        nil,
+        :update_battle_info
+      )
+      reply(:lobby, :update, {:success, new_lobby}, state)
+    else
+      reply(:lobby, :update, {:failure, "Permission denied"}, state)
     end
   end
 

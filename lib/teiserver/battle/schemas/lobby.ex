@@ -107,6 +107,9 @@ defmodule Teiserver.Battle.Lobby do
         map_hash: nil,
         map_name: nil,
 
+        # To tie it into matchmaking
+        queue_id: nil,
+
         # Meta data
         in_progress: false,
       },
@@ -660,15 +663,7 @@ defmodule Teiserver.Battle.Lobby do
           :player,
           :disableunits,
           :enableunits,
-          :enableallunits
-        ],
-        cmd
-      )
-
-    founder_command =
-      Enum.member?(
-        [
-          :updatebattleinfo,
+          :enableallunits,
           :update_lobby,
           :update_host_status
         ],
@@ -690,11 +685,8 @@ defmodule Teiserver.Battle.Lobby do
       battle.founder_id == changer.userid ->
         true
 
-      founder_command == true ->
-        false
-
       # If they're not a moderator/founder then they can't
-      # do moderator commands
+      # do founder commands
       mod_command == true ->
         false
 

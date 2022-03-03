@@ -47,7 +47,7 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     }
   end
 
-  test "tachyon end to end", %{socket: socket, friend1: friend1, friend2: friend2} do
+  test "tachyon end to end", %{socket: socket, user: user, friend1: friend1, friend2: friend2} do
     # We are already logged in, lets start by getting a list of our friends!
 
     _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids", "filter" => ""})
@@ -99,13 +99,12 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     }
 
     # Lets get a lobby hosted
-    {lobby1, _} = create_lobby(%{name: "Test lobby 1"})
-    {lobby2, _} = create_lobby(%{name: "Test lobby 2"})
-    {lobby3, _} = create_lobby(%{name: "Test lobby 3"})
-    {lobby_locked, _} = create_lobby(%{name: "Test lobby locked", locked: true})
+    {_lobby1, host1, _hsocket1} = create_lobby(%{name: "Test lobby 1"})
+    {lobby2, _host2, hsocket2} = create_lobby(%{name: "Test lobby 2"})
+    {_lobby_passworded, _host_passworded, _hsocketpassworded} = create_lobby(%{name: "Test lobby passworded", password: "password2"})
+    {_lobby_locked, _host_locked, _hsocketlocked} = create_lobby(%{name: "Test lobby locked", locked: true})
 
     # We expect to get all 4 of them
-    # Now we do an empty query, there are no lobbies so we expect an empty result
     _tachyon_send(socket, %{"cmd" => "c.lobby.query", "query" => %{}})
     [resp] = _tachyon_recv(socket)
     assert resp["cmd"] == "s.lobby.query"
@@ -116,11 +115,41 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     assert Enum.count(lobbies) == 4
     assert Map.has_key?(lobbies, "Test lobby 1")
     assert Map.has_key?(lobbies, "Test lobby 2")
-    assert Map.has_key?(lobbies, "Test lobby 3")
+    assert Map.has_key?(lobbies, "Test lobby passworded")
     assert Map.has_key?(lobbies, "Test lobby locked")
+
+    assert lobbies["Test lobby 1"]["founder_id"] == host1.id
+    assert lobbies["Test lobby 1"]["locked"] == false
+    assert lobbies["Test lobby locked"]["locked"] == true
+
+    # Now just the locked
+    _tachyon_send(socket, %{"cmd" => "c.lobby.query", "query" => %{"locked" => true}})
+    [resp] = _tachyon_recv(socket)
+    assert resp["cmd"] == "s.lobby.query"
+    assert resp["result"] == "success"
+    assert Enum.count(resp["lobbies"]) == 1
+
+    # Now just the unlocked
+    _tachyon_send(socket, %{"cmd" => "c.lobby.query", "query" => %{"locked" => false}})
+    [resp] = _tachyon_recv(socket)
+    assert resp["cmd"] == "s.lobby.query"
+    assert resp["result"] == "success"
+    assert Enum.count(resp["lobbies"]) == 3
+
+    # We want to join one of them
+    _tachyon_send(socket, %{"cmd" => "c.lobby.join", "lobby_id" => lobby2["id"]})
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{"cmd" => "s.lobby.join", "result" => "waiting_for_host"}
+
+    # Host will approve us
+    _tachyon_send(hsocket2, %{cmd: "c.lobby_host.respond_to_join_request", userid: user.id, response: "approve"})
+
+    # We should now get info saying we are in
+    [resp] = _tachyon_recv(socket)
+    assert resp["cmd"] == "s.lobby.join_response"
+    assert resp["result"] == "approve"
+    assert Map.has_key?(resp, "lobby")
   end
-
-
 
   defp create_lobby(params) do
     %{socket: socket, user: user} = tachyon_auth_setup()
@@ -129,7 +158,6 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
       cmd: "c.lobby.create",
       name: "EU 01 - 123",
       nattype: "none",
-      password: "password2",
       port: 1234,
       game_hash: "string_of_characters",
       map_hash: "string_of_characters",
@@ -142,9 +170,16 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
       }
     }, params)
 
+    # Create the lobby
     data = %{cmd: "c.lobby.create", lobby: lobby_data}
     _tachyon_send(socket, data)
+    _tachyon_recv(socket)
+
+    # Update the lobby
+    data = %{cmd: "c.lobby.update", lobby: params}
+    _tachyon_send(socket, data)
     [reply] = _tachyon_recv(socket)
-    {reply["lobby"], user}
+
+    {reply["lobby"], user, socket}
   end
 end
