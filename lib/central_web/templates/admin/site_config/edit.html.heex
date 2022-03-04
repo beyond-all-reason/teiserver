@@ -16,33 +16,31 @@
           <input type='hidden' name='_method' value='PUT' />
           <input type='hidden' name='site_config[x]' value='x' />
 
-          <div class='row'>
-            <label for='control_id' class='col-sm-2 control-label'>Value</label>
-            <div class='col-sm-10'>
-              <%= case @config_info.type do %>
-                <% "select" -> %>
-                  <%= central_component "icon_dropdown_js", [] %>
-                  <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
-                  <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
-                  <%= central_component "icon_dropdown", %{
-                            name: "site_config[value]",
-                            id: "site_config_value",
-                            selected: @value,
-                            enumerable: (for v <- @config_info.opts[:choices], do: %{id: v, name: v, colour: "#555555", icon: "fas fa-square"})
-                          } %>
-                <% "boolean" -> %>
-                  <%= central_component "checkbox", %{
-                    name: "site_config[value]",
-                    id: "site_config_value",
-                    checked: @value,
-                    label: ""
-                  } %>
+          <div class="form-group my-4">
+            <%= case @config_info.type do %>
+              <% "select" -> %>
+                <%= central_component "icon_dropdown_js", [] %>
+                <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
+                <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+                <%= central_component "icon_dropdown", %{
+                  name: "site_config[value]",
+                  id: "site_config_value",
+                  selected: @value,
+                  enumerable: (for v <- @config_info.opts[:choices], do: %{id: v, name: v, colour: "#555555", icon: "fas fa-square"})
+                } %>
+              <% "boolean" -> %>
+                <%= central_component "checkbox", %{
+                  name: "site_config[value]",
+                  id: "site_config_value",
+                  checked: @value,
+                  label: @config_info.value_label || "Value"
+                } %>
 
-                <% _ -> %>
-                  <input type='text' name='site_config[value]' id='site_config_value' value={@value} class='form-control' />
+              <% _ -> %>
+                <label for='control_id' class='col-sm-2 control-label'>Value</label>
+                <input type='text' name='site_config[value]' id='site_config_value' value={@value} class='form-control' />
 
-              <% end %>
-            </div>
+            <% end %>
           </div>
           <br /><br />
 

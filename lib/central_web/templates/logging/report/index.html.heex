@@ -16,19 +16,19 @@
             </h4>
           </div>
 
-          <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 line-card">
-            <a href={Routes.logging_report_path(@conn, :show, "most_recent_users")}>
-              <i class="fal fa-fw fa-clock fa-lg"></i>
-              Most recent users
-            </a>
-          </div>
+          <%=
+            central_component "menu_card",
+            icon: "fa-regular fa-clock",
+            text: "Most recent users",
+            link: Routes.logging_report_path(@conn, :show, "most_recent_users")
+          %>
 
-          <div class="col-sm-12 col-md-6 col-lg-4 col-xl-3 line-card">
-            <a href={Routes.logging_report_path(@conn, :show, "individual_page_views")}>
-              <i class="far fa-fw fa-table fa-lg"></i>
-              Page view stats
-            </a>
-          </div>
+          <%=
+            central_component "menu_card",
+            icon: "fa-regular fa-table",
+            text: "Page view stats",
+            link: Routes.logging_report_path(@conn, :show, "individual_page_views")
+          %>
         </div>
         <br /><br />
 

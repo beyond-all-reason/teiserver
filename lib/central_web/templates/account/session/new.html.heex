@@ -38,9 +38,9 @@
 
   <div class="form-group m-2 mt-4">
     <div class="row">
-      <%= if Application.get_env(:central, Central)[:main_site_link] do %>
+      <%= if Central.Config.get_site_config_cache("site.Main site link") do %>
         <div class="col-md-4">
-          <a href="https://beyondallreason.info" class="btn btn-secondary btn-block">Main site</a>
+          <a href={Central.Config.get_site_config_cache("site.Main site link")} class="btn btn-secondary btn-block">Main site</a>
         </div>
       <% end %>
       
@@ -48,7 +48,7 @@
         <a href={Routes.account_session_path(@conn, :forgot_password)} class="btn btn-secondary btn-block">Forgotten password</a>
       </div>
       
-      <%= if Application.get_env(:central, Central)[:user_registrations] == :allowed do %>
+      <%= if Central.Config.get_site_config_cache("user.Enable user registrations") == "Allowed" do %>
         <div class="col-md-4">
           <a href={Routes.account_registration_path(@conn, :new)} class="btn btn-secondary btn-block">Register new account</a>
         </div>

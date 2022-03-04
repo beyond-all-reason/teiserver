@@ -1,9 +1,8 @@
 <div class="row mt-3">
-  <%= if Application.get_env(:central, Central)[:enabled_account_group_pages] do %>
+  <%= if Central.Config.get_site_config_cache("user.Enable account group pages") do %>
     <%=
       central_component "menu_card",
       icon: Central.Account.GroupLib.icon(),
-      name: "groups",
       text: "Groups",
       icon_class: "fad",
       link: Routes.account_group_path(@conn, :index)
@@ -13,7 +12,6 @@
   <%=
     central_component "menu_card",
     icon: "fad fa-cog",
-    name: "settings",
     text: "Preferences",
     icon_class: "fad",
     link: Routes.user_config_path(@conn, :index)
@@ -22,7 +20,6 @@
   <%=
     central_component "menu_card",
     icon: Central.Account.icon(),
-    name: "account",
     text: "Account details",
     icon_class: "fad",
     link: Routes.account_registration_path(@conn, :edit_details)
@@ -31,7 +28,6 @@
   <%=
     central_component "menu_card",
     icon: "fad fa-lock",
-    name: "password",
     text: "Password",
     icon_class: "fad",
     link: Routes.account_registration_path(@conn, :edit_password)
@@ -39,5 +35,10 @@
 </div>
 
 <div class="row mt-3">
-  <%= central_component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.general_page_path(@conn, :index) %>
+  <%= central_component "menu_card",
+    icon_class: "fas",
+    icon: StylingHelper.icon(:back),
+    text: "Back",
+    link: Routes.general_page_path(@conn, :index)
+  %>
 </div>

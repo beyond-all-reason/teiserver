@@ -217,15 +217,24 @@ defmodule Central.Config do
 
     permissions: Permission list, decides if it can be edited on the account page
 
-    description: String, Information presented to the user if they edit it on their settings page
-
     opts: List, used to define options for various data types. If set then only items from the list will be selectable
       - If type is "select" then include a :choices key in your opts list
 
     default: Any, The default value used when the variable is not set,
+
+
+    -- Optional params
+    description: String, Information presented to the user if they edit it on their settings page. Defaults to an empty string.
+
+    value_label: The label shown next to the value input. Defaults to "Value"
   """
 
   def add_user_config_type(config) do
+    config = Map.merge(%{
+      value_label: "Value",
+      description: "",
+    }, config)
+
     all_config_types =
       (ConCache.get(:config_user_type_cache, "all-config-types") || %{})
       |> Map.put(config.key, config)

@@ -14,6 +14,7 @@ defmodule CentralWeb.Communication.BlogFileController do
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
+  @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
   def index(conn, params) do
     blog_files =
       Communication.list_blog_files(
@@ -29,6 +30,7 @@ defmodule CentralWeb.Communication.BlogFileController do
     |> render("index.html")
   end
 
+  @spec search(Plug.Conn.t(), map) :: Plug.Conn.t()
   def search(conn, %{"search" => params}) do
     blog_files =
       Communication.list_blog_files(
@@ -47,6 +49,7 @@ defmodule CentralWeb.Communication.BlogFileController do
     |> render("index.html")
   end
 
+  @spec new(Plug.Conn.t(), map) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset = Communication.change_blog_file(%BlogFile{})
 
@@ -56,6 +59,7 @@ defmodule CentralWeb.Communication.BlogFileController do
     |> render("new.html")
   end
 
+  @spec create(Plug.Conn.t(), map) :: Plug.Conn.t()
   def create(conn, %{"blog_file" => params}) do
     params = Map.put(params, "url", StringHelper.safe_name(params["name"] || ""))
 
@@ -90,8 +94,11 @@ defmodule CentralWeb.Communication.BlogFileController do
               |> redirect(to: Routes.blog_file_path(conn, :edit, blog_file))
 
             {:error, msg} ->
+              changeset = Communication.change_blog_file(%BlogFile{})
+
               conn
               |> put_flash(:danger, msg)
+              |> assign(:changeset, changeset)
               |> render("new.html")
           end
         else
@@ -105,6 +112,7 @@ defmodule CentralWeb.Communication.BlogFileController do
     end
   end
 
+  @spec show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     blog_file = Communication.get_blog_file!(id)
 
@@ -113,6 +121,7 @@ defmodule CentralWeb.Communication.BlogFileController do
     |> render("show.html")
   end
 
+  @spec edit(Plug.Conn.t(), map) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
     blog_file = Communication.get_blog_file!(id)
     changeset = Communication.change_blog_file(blog_file)
@@ -124,6 +133,7 @@ defmodule CentralWeb.Communication.BlogFileController do
     |> render("edit.html")
   end
 
+  @spec update(Plug.Conn.t(), map) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "blog_file" => blog_file_params}) do
     blog_file_params =
       Map.put(blog_file_params, "url", StringHelper.safe_name(blog_file_params["name"] || ""))
@@ -184,6 +194,7 @@ defmodule CentralWeb.Communication.BlogFileController do
     end
   end
 
+  @spec delete(Plug.Conn.t(), map) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
     blog_file = Communication.get_blog_file!(id)
     {:ok, _blog_file} = Communication.delete_blog_file(blog_file)

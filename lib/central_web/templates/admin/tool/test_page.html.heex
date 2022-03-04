@@ -1,8 +1,26 @@
+<%
+  light = (assigns[:current_user] != nil and Central.Config.get_user_config_cache(@current_user.id, "general.Light mode") == true)
+%>
+
 <style type="text/css">
   .icon-test {
     margin: 4px 6px;
   }
 </style>
+
+<%= if light do %>
+  <style type="text/css">
+    .theme-bg {
+      background-color: rgb(233, 236, 239);
+    }
+  </style>
+<% else %>
+  <style type="text/css">
+    .theme-bg {
+      background-color: rgb(34, 34, 34);
+    }
+  </style>
+<% end %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -25,11 +43,12 @@
     for (var i = 0; i < icon_list.length; i++) {
       var icon = icon_list[i];
 
-      output += "<i class='icon-test fa-3x fa-fw far fa-" + icon + "'></i>";
-      output += "<i class='icon-test fa-3x fa-fw fas fa-" + icon + "'></i>";
-      output += "<i class='icon-test fa-3x fa-fw fal fa-" + icon + "'></i>";
-      output += "<i class='icon-test fa-3x fa-fw fab fa-" + icon + "'></i>";
-      output += "<i class='icon-test fa-3x fa-fw fad fa-" + icon + "'></i>";
+      output += "<i class='icon-test fa-3x fa-fw fa-thin fa-" + icon + "'></i>";
+      output += "<i class='icon-test fa-3x fa-fw fa-light fa-" + icon + "'></i>";
+      output += "<i class='icon-test fa-3x fa-fw fa-regular fa-" + icon + "'></i>";
+      output += "<i class='icon-test fa-3x fa-fw fa-solid fa-" + icon + "'></i>";
+      output += "<i class='icon-test fa-3x fa-fw fa-duotone fa-" + icon + "'></i>";
+      output += "<i class='icon-test fa-3x fa-fw fa-brand fa-" + icon + "'></i>";
 
       output += "<br />";
     }
@@ -62,8 +81,37 @@
 
 <div class="row mt-3">
   <div class="col-xl-6 col-lg-12">
-    <div class={"card"}>
+    <div class="card">
       <div class="card-body">
+      
+<%# Section menu %>
+<%= central_component "section_menu_button",
+  name: "list",
+  label: "List",
+  active: "list",
+  icon: StylingHelper.icon(:list, "thin"),
+  bsname: :primary,
+  url: "#"
+%>
+
+<%= central_component "section_menu_button",
+  name: "show",
+  label: "Show",
+  active: "",
+  icon: StylingHelper.icon(:show, "thin"),
+  bsname: :primary,
+  url: "#"
+%>
+
+<%= central_component "section_menu_button",
+  name: "edit",
+  label: "Edit",
+  active: "",
+  icon: StylingHelper.icon(:edit, "thin"),
+  bsname: :primary,
+  url: "#"
+%>
+<br /><br />
 
 <ul class="nav nav-tabs" role="tablist" id="the_tabs">
   <li class="nav-item" role="presentation">
@@ -98,7 +146,7 @@
   <div class="tab-pane fade show active p-2" id="icons_tab">
     <div class="row">
       <div class="col-md-6">
-        One icon per row, no <code>fa-</code> prefix. Columns on the right are <code>far, fas, fal, fab, fad</code>.
+        One icon per row, no <code>fa-</code> prefix. Columns on the right are <code>fa-thin, fa-light, fa-regular, fa-solid, fa-duotone, fa-brand</code>.
         <textarea name="icons" id="icons-area" rows="8" class="form-control" onchange="do_icons();">house</textarea>
         <br />
         <div class="btn btn-primary">Update</div>
@@ -128,10 +176,10 @@
   </div>
 
   <div class="tab-pane fade p-2" id="cards_tab">
-    <div class="row" style="background-color: #000;">
+    <div class="row theme-bg" style="margin: 0 -40px; padding: 20px 40px;">
       <%= for c <- colours do %>
         <div class="col-md-3 p-2">
-          <div class={"card page-card card-#{c}"}>
+          <div class={"card card-#{c}"}>
             <div class="card-header">
               <i class="fa fa-search fa-fw"></i>
               Title - <%= c %>
@@ -260,89 +308,91 @@
   </style>
 
   <div class="tab-pane fade" id="forms_tab">
-    <div class="col-md-12">
-      <div class="card page-card card-default">
-        <div class="card-body">
-
-          <div class="input-group picker-group p-2">
-            <span class="input-group-addon btn-primary btn active active-button">
-              <i class="fas fa-user fa-fw"></i>
-            </span>
-            <input type="text" class="form-control picker-shower" value="Search terms" />
-            <a class="input-group-addon btn btn-primary link-button" href="">
-              <i class="fas fa-fw fa-user"></i>
-              <i class="fas fa-fw fa-link"></i>
-            </a>
-          </div>
-          
-          <div class="input-group p-2">
-            <input type='text' name='' id='' value='' class='form-control' />
-          </div>
-          <div class="input-group p-2">
-            <select class="form-control">
-              <option>Value 1</option>
-              <option>Value 2</option>
-              <option>Value 3</option>
-            </select>
-          </div>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="input-group picker-group p-2">
+          <span class="input-group-addon btn-primary btn active active-button">
+            <i class="fas fa-user fa-fw"></i>
+          </span>
+          <input type="text" class="form-control picker-shower" value="Search terms" />
+          <a class="input-group-addon btn btn-primary link-button" href="">
+            <i class="fas fa-fw fa-user"></i>
+            <i class="fas fa-fw fa-link"></i>
+          </a>
         </div>
       </div>
+      
+      <div class="col-md-6">
+        &nbsp;
+      </div>
+      
+      <div class="col-md-6">
+        <div class="input-group p-2">
+          <input type='text' name='' id='' value='' class='form-control' />
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="input-group p-2">
+          <input type='text' name='' id='' value='With text in the field' class='form-control' />
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="input-group p-2">
+          <select class="form-control">
+            <option>Dropdown Value 1</option>
+            <option>Dropdown Value 2</option>
+            <option>Dropdown Value 3</option>
+          </select>
+        </div>
+      </div>
+
     </div>
   </div>
+
 
   <div class="tab-pane fade" id="layouts_tab">
-    <div class="col-md-12">
-      <div class="card page-card card-default">
-        <div class="card-body">
-
-          <a href="?layout=empty#layouts_tab" class="btn btn-outline-secondary">
-            Empty
-          </a>
-          <a href="?layout=unauth#layouts_tab" class="btn btn-outline-secondary">
-            Unauth
-          </a>
-          <br /><br />
-          
-          <a href="?layout=admin#layouts_tab" class="btn btn-outline-secondary">
-            Admin
-          </a>
-          <a href="?layout=admin_live#layouts_tab" class="btn btn-outline-secondary">
-            Admin live
-          </a>
-          <br /><br />
-          
-          <a href="?layout=nomenu#layouts_tab" class="btn btn-outline-secondary">
-            No menu
-          </a>
-          <a href="?layout=nomenu_live#layouts_tab" class="btn btn-outline-secondary">
-            No menu live
-          </a>
-          <br /><br />
-          
-        </div>
-      </div>
-    </div>
+    <a href="?layout=standard#layouts_tab" class={"btn btn-#{if @layout_value == "standard.html", do: "", else: "outline-"}secondary"}>
+      Standard
+    </a>
+    <a href="?layout=empty#layouts_tab" class={"btn btn-#{if @layout_value == "empty.html", do: "", else: "outline-"}secondary"}>
+      Empty
+    </a>
+    <a href="?layout=unauth#layouts_tab" class={"btn btn-#{if @layout_value == "unauth.html", do: "", else: "outline-"}secondary"}>
+      Unauth
+    </a>
+    <br /><br />
+    
+    <a href="?layout=admin#layouts_tab" class={"btn btn-#{if @layout_value == "admin.html", do: "", else: "outline-"}secondary"}>
+      Admin
+    </a>
+    <a href="?layout=admin_live#layouts_tab" class={"btn btn-#{if @layout_value == "admin_live.html", do: "", else: "outline-"}secondary"}>
+      Admin live
+    </a>
+    <br /><br />
+    
+    <a href="?layout=nomenu#layouts_tab" class={"btn btn-#{if @layout_value == "nomenu.html", do: "", else: "outline-"}secondary"}>
+      No menu
+    </a>
+    <a href="?layout=nomenu_live#layouts_tab" class={"btn btn-#{if @layout_value == "nomenu_live.html", do: "", else: "outline-"}secondary"}>
+      No menu live
+    </a>
   </div>
 
-  <div class="tab-pane fade" id="calculations_tab">
-    <div class="col-md-12">
-      <div class="card page-card card-default">
-        <div class="card-body">
-          <%
-            now = Timex.now()
-          %>
-          Server time is <%= now |> Kernel.inspect %><br /><br />
 
-          <pre>
+  <div class="tab-pane fade" id="calculations_tab">
+    <%
+      now = Timex.now()
+    %>
+    Server time is <%= now |> Kernel.inspect %><br /><br />
+
+    <pre>
 UTC conversion is <%= date_to_str(now, format: :ymd_hms, tz: "UTC") %>
 Your config conversion is <%= date_to_str(now, format: :ymd_hms, tz: @tz) %> (<%= @tz %>)
 
 GMT conversion is <%= date_to_str(now, format: :ymd_hms, tz: "Europe/London") %>
 New York conversion is <%= date_to_str(now, format: :ymd_hms, tz: "America/New_York") %>
-          </pre>
-        </div>
-      </div>
-    </div>
+    </pre>
   </div>
 </div>
 

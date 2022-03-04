@@ -1,6 +1,7 @@
 defmodule Teiserver.TeiserverConfigs do
   import Central.Config, only: [add_site_config_type: 1]
 
+  @spec teiserver_configs :: any
   def teiserver_configs do
     add_site_config_type(%{
       key: "teiserver.Flood rate limit count",
@@ -63,11 +64,21 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "teiserver.Require Chobby login",
+      key: "teiserver.Require Chobby registration",
       section: "Registrations",
       type: "boolean",
       permissions: ["admin.dev.developer"],
       description: "Prevents users registering with anything other than Chobby",
+      opts: [],
+      default: false
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Require Chobby login",
+      section: "Registrations",
+      type: "boolean",
+      permissions: ["admin.dev.developer"],
+      description: "Prevents users logging in with anything other than Chobby",
       opts: [],
       default: false
     })
@@ -109,7 +120,7 @@ defmodule Teiserver.TeiserverConfigs do
       permissions: ["teiserver.admin"],
       description: "The default player limit for lobbies",
       opts: [],
-      default: 20
+      default: 16
     })
 
     add_site_config_type(%{

@@ -2,5 +2,10 @@
   active = if @active, do: "active", else: ""
 %>
 <li class="nav-item">
-  <a class={"nav-link #{active}"} href={@route}><%= @text %></a>
+  <a class={"nav-link #{active}"} href={@route}>
+    <%= if assigns[:icon] do %>
+      <i class={"fa-fw #{@icon}"}></i>
+    <% end %>
+    <%= @text %>
+  </a>
 </li>

@@ -17,6 +17,7 @@ defmodule CentralWeb.Admin.SiteConfigController do
     sub_menu_active: "config"
   )
 
+  @spec index(Plug.Conn.t(), any) :: Plug.Conn.t()
   def index(conn, _params) do
     site_configs = Config.get_grouped_site_configs()
 
@@ -25,6 +26,7 @@ defmodule CentralWeb.Admin.SiteConfigController do
     |> render("index.html")
   end
 
+  @spec edit(Plug.Conn.t(), any) :: Plug.Conn.t()
   def edit(conn, %{"id" => key}) do
     config_info = Config.get_site_config_type(key)
     value = Config.get_site_config_cache(key)
@@ -36,14 +38,14 @@ defmodule CentralWeb.Admin.SiteConfigController do
     |> render("edit.html")
   end
 
+  @spec update(Plug.Conn.t(), any) :: Plug.Conn.t()
   def update(conn, %{"id" => key, "site_config" => site_config_params}) do
     value = Map.get(site_config_params, "value", "false")
     Config.update_site_config(key, value)
 
-    tab =
-      key
-      |> String.split(".")
-      |> hd
+    tab = Config.get_site_config_type(key)
+      |> Map.get(:section)
+      |> Central.Helpers.StringHelper.remove_spaces()
 
     add_audit_log(conn, "Site config:Update value", %{key: key, value: value})
 

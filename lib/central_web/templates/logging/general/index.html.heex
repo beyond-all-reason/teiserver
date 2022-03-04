@@ -1,29 +1,29 @@
 <div class="row mt-3">
   <%= if allow?(@conn, "logging.page_view") do %>
-    <%= central_component "menu_card", icon_class: "fas", name: "", icon: Central.Logging.PageViewLogLib.icon, text: "Page views", link: Routes.logging_page_view_log_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fas", icon: Central.Logging.PageViewLogLib.icon, text: "Page views", link: Routes.logging_page_view_log_path(@conn, :index) %>
   <% end %>
 
   <%= if allow?(@conn, "logging.aggregate") do %>
-    <%= central_component "menu_card", icon_class: "fas", name: "", icon: Central.Logging.AggregateViewLogLib.icon, text: "Aggregate", link: Routes.logging_aggregate_view_log_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fas", icon: Central.Logging.AggregateViewLogLib.icon, text: "Aggregate", link: Routes.logging_aggregate_view_log_path(@conn, :index) %>
   <% end %>
 
   <%= if allow?(@conn, "logging.audit") do %>
-    <%= central_component "menu_card", icon_class: "fas", name: "", icon: Central.Logging.AuditLogLib.icon, text: "Audit", link: Routes.logging_audit_log_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fas", icon: Central.Logging.AuditLogLib.icon, text: "Audit", link: Routes.logging_audit_log_path(@conn, :index) %>
   <% end %>
 
   <%= if allow?(@conn, "logging.error") do %>
-    <%= central_component "menu_card", icon_class: "fas", name: "", icon: Central.Logging.ErrorLogLib.icon, text: "Error logs", link: Routes.logging_error_log_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fas", icon: Central.Logging.ErrorLogLib.icon, text: "Error logs", link: Routes.logging_error_log_path(@conn, :index) %>
   <% end %>
 
   <%= if allow?(@conn, "logging.live") do %>
-    <%= central_component "menu_card", icon_class: "fas", name: "", icon: "far fa-tachometer-alt", text: "Live dashboard", link: "/logging/live/dashboard" %>
+    <%= central_component "menu_card", icon_class: "fas", icon: "far fa-tachometer-alt", text: "Live dashboard", link: "/logging/live/dashboard" %>
   <% end %>
 </div>
 
 <div class="row mt-3">
-  <%= central_component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:report), text: "Reporting", link: Routes.logging_report_path(@conn, :index) %>
+  <%= central_component "menu_card", icon_class: "fas", icon: StylingHelper.icon(:report), text: "Reporting", link: Routes.logging_report_path(@conn, :index) %>
 </div>
 
 <div class="row mt-3">
-  <%= central_component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: "/" %>
+  <%= central_component "menu_card", icon_class: "fas", icon: StylingHelper.icon(:back), text: "Back", link: "/" %>
 </div>

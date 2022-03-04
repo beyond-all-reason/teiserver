@@ -72,10 +72,16 @@ defmodule CentralWeb.Communication.PostController do
         "live_from" => "today"
       })
 
-    conn
-    |> assign(:changeset, changeset)
-    |> assign(:categories, categories)
-    |> render("new.html")
+    if Enum.empty?(categories) do
+      conn
+        |> put_flash(:info, "Please create a category before creating any posts")
+        |> redirect(to: Routes.blog_category_path(conn, :new))
+    else
+      conn
+        |> assign(:changeset, changeset)
+        |> assign(:categories, categories)
+        |> render("new.html")
+    end
   end
 
   def create(conn, %{"post" => post_params}) do

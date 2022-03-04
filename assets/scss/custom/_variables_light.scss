@@ -1,3 +1,5 @@
+@import './variables';
+
 // First override some or all individual color variables
 $white:    #fff !default;
 $gray-100: #f8f9fa !default;
@@ -52,16 +54,21 @@ $primary-dark: #172a6f;
 $primary2: #3498db;
 $secondary: #4A5159;
 $success: #108c1a;
+$success-dark: #006c00;
 $success2: #005c0a;
 $info: #008987;
+$info-dark: #006967;
 $info2: #A90088;
 $warning: #c37c02;
 $warning2: #CC4400;
 $danger-light: #fdd;
 $danger: #a4382c;
+$danger-dark: #84180c;
 $danger2: #800000;
 $light: #e9ecef;
 $dark: #212529;
+
+$shadow: rgba(0,0,0,0.1);
 
 
 // Then add them to your custom theme-colors map, together with any additional colors you might need
@@ -87,13 +94,14 @@ $theme-colors: (
 $min-contrast-ratio:   1.9 !default;
 
 // Body
-$body-bg:                   $gray-200 !default;
-/*
-$table-color:               $white !default;
-$table-striped-color:       $white !default;
-$table-active-color:        $white !default;
-$table-hover-color:         $white !default;
+$body-bg:                   $light !default;
+$invert-color:              $light !default;
 
+$table-color:               $dark !default;
+$table-striped-color:       $dark !default;
+$table-active-color:        $dark !default;
+$table-hover-color:         $dark !default;
+/*
 // Links
 
 $link-color:                $primary-light !default;
@@ -108,11 +116,12 @@ $h3-font-size:                2rem !default;
 $text-muted:                  $gray-600 !default;
 
 // Tables
+*/
+$table-border-color:          $gray-500 !default;
 
-$table-border-color:          $gray-700 !default;
-
+$table-bg:                    $light !default;
 $table-bg-scale:              0 !default;
-
+/*
 // Forms
 
 $input-bg:                          $dark !default;
@@ -139,9 +148,9 @@ $dropdown-link-hover-color:         $white !default;
 $dropdown-link-hover-bg:            $primary !default;
 
 // Navs
-
-$nav-tabs-link-color:               $gray-300 !default;
-$nav-link-disabled-color:           $gray-500 !default;
+*/
+$nav-tabs-link-color:               $gray-900 !default;
+$nav-link-disabled-color:           $gray-700 !default;
 $nav-tabs-border-color:             $gray-700 !default;
 $nav-tabs-link-hover-border-color:  $nav-tabs-border-color $nav-tabs-border-color transparent !default;
 $nav-tabs-link-active-color:        $white !default;
@@ -150,8 +159,8 @@ $nav-tabs-link-hover-bg:            $gray-100 !default;
 
 $nav-tabs-link-active-bg:           transparent !default;
 
+/*
 // Navbar
-
 $navbar-dark-color:                rgba($white, .6) !default;
 $navbar-dark-hover-color:          $white !default;
 $navbar-light-color:                rgba($gray-900, .7) !default;
@@ -175,10 +184,10 @@ $pagination-disabled-bg:            darken($success, 15%) !default;
 $pagination-disabled-border-color:  transparent !default;
 
 // Cards
-
-$card-cap-bg:                       $gray-700 !default;
-$card-bg:                           $gray-800 !default;
-
+*/
+$card-cap-bg:                       $gray-200 !default;
+$card-bg:                           $gray-100 !default;
+/*
 // Popovers
 
 $popover-bg:                        $gray-800 !default;
@@ -213,8 +222,8 @@ $list-group-action-active-bg:       $gray-900 !default;
 $breadcrumb-bg:                     $gray-700 !default;
 $breadcrumb-color:                  $primary !default;
 $breadcrumb-hover-color:            $primary-light !default;
-$breadcrumb-item-color:             $gray-500 !default;
-$breadcrumb-item-hover-color:       $gray-200 !default;
+$breadcrumb-item-color:             $gray-900 !default;
+$breadcrumb-item-hover-color:       $gray-600 !default;
 /*
 // Close
 
@@ -229,11 +238,30 @@ $pre-color:                         inherit !default;
 
 
 
-$grid-breakpoints: (
-  xs: 0,
-  sm: 576px,
-  md: 768px,
-  lg: 1024px,
-  xl: 1920px,
-  xxl: 2560px,
-);
+// Additional styles
+$menu-card-link-colour:         rgb(52, 73, 94);
+$menu-card-link-colour-hover:     $primary2;
+
+$sub-menu-icon-colour:            $gray-600;
+$sub-menu-icon-border-colour:     $gray-700;
+
+$top-nav-bg-colour:               $white;
+$top-nav-bottom-border-colour:    $light;
+$top-nav-item-colour:             $primary;
+$top-nav-active-bg-colour:        $gray-300;
+
+$debug-colour:                    $dark;
+$debug-bg-colour:                 $red;
+
+$invalid-feedback:                $danger-light;
+
+$phx-modal-bg-colour:             #fefefe;
+$phx-modal-close-colour:          #AAA;
+$phx-modal-close-colour-hover:    #000;
+
+$button-outline-colour:           $gray-800;
+$button-outline-colour-hover:     $light;
+$button-outline-focus-colour:     $dark;
+$button-outline-active-colour:    $light;
+
+$select2-border-colour:           $gray-700;

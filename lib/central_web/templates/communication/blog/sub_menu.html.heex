@@ -1,8 +1,19 @@
-<div class="welcome d-flex justify-content-center flex-column" style="height: 250px; min-height: 250px;">
+<style type="text/css">
+  #top-nav .nav-item a {
+    padding: 15px 15px;
+    margin: 0 5px;
+  }
+
+  #top-nav {
+    border-bottom-color: transparent;
+  }
+</style>
+
+<div class="d-flex justify-content-center flex-column" style="min-height: 250px;">
   <div class="container">
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark pt-4 px-0">
-      <a class="navbar-brand" href={Routes.general_page_path(@conn, :index)}>
+    <nav class="navbar navbar-expand-lg m-0 p-0" id="top-nav">
+      <a class="navbar-brand mx-2" href={Routes.general_page_path(@conn, :index)}>
         <img src={Routes.static_path(@conn, "/images/logo/square_logo.svg")} width="30" class="mr-2" alt="Landing Page">
         <%= Application.get_env(:central, Central)[:site_title] %>
       </a>
@@ -12,12 +23,12 @@
       <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav ml-auto">
           <%= if @current_user == nil do %>
-            <li class="nav-item">
-              <a class="nav-link" href={Routes.blog_path(@conn, :index)}>
-                <i class={"fa-fw #{Central.Communication.BlogLib.icon()}"}></i>
-                Blog
-              </a>
-            </li>
+            <%= central_component "top_nav_item",
+              text: "Blog",
+              icon: Central.Communication.BlogLib.icon(),
+              route: Routes.blog_path(@conn, :index),
+              active: @site_menu_active == "central_blog"
+            %>
 
             <li class="nav-item">
               <a class="nav-link" href={Routes.account_session_path(@conn, :new)}>
@@ -26,6 +37,13 @@
               </a>
             </li>
           <% else %>
+            <%= central_component "top_nav_item",
+              text: "Blog",
+              icon: Central.Communication.BlogLib.icon(),
+              route: Routes.blog_path(@conn, :index),
+              active: @site_menu_active == "central_blog"
+            %>
+          
             <%= if allow?(@conn, "communication.blog") do %>
               <li class="nav-item">
                 <a class="nav-link" href={Routes.blog_post_path(@conn, :new)}>
@@ -76,9 +94,10 @@
     <div class="row">
       <div class="col-md-12">
         <a href={Routes.blog_path(@conn, :index)}>
-          <h1 class="welcome-heading text-white">
+          <h1>
             <%= Application.get_env(:central, Central)[:blog_title] %>
           </h1>
+          <%= Application.get_env(:central, Central)[:blog_sub_title] %>
         </a>
       </div>
     </div>

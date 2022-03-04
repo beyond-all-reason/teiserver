@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg my-0" id="top-nav" style="padding-top: 0; padding-bottom: 0;">
+<nav class="navbar navbar-expand-lg m-0 p-0" id="top-nav">
 
   <!-- Container wrapper -->
   <div class="container-fluid">
@@ -19,6 +19,14 @@
           route: "/",
           active: @site_menu_active == "central_home"
         %>
+        
+        <%= if @current_user do %>
+          <%= central_component "top_nav_item",
+            text: "Account",
+            route: Routes.account_general_path(@conn, :index),
+            active: @site_menu_active == "central_account"
+          %>
+        <% end %>
         
         <%= if Application.get_env(:central, Central)[:enable_blog] do %>
           <%= central_component "top_nav_item",

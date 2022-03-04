@@ -19,8 +19,8 @@
     <br />
   <% end %>
 
-<div class="row mt-3">
-  <div class="col-lg-12 form-input-col">
+<div class="row">
+  <div class="col-lg-12 my-2">
     <div class="form-group">
       <%= label f, :name, class: "control-label" %>
       <%= text_input f, :name, class: "form-control", autofocus: "" %>
@@ -29,14 +29,14 @@
   </div>
 
   <%= if true or @include_upload do %>
-    <div class="col-lg-12 form-input-col">
+    <div class="col-lg-12 my-2">
       <label for="file_upload" class="control-label" style="text-align:right;">Import file:</label>
       <input class="form-control" id="file_upload" name="blog_file[file_upload]" type="file">
       <%= error_tag f, :file_upload %>
     </div>
   <% end %>
 
-  <div class="col-lg-12 form-input-col">
+  <div class="col-lg-12 my-2">
     <%= if @changeset.data.id do %>
       <a href={Routes.blog_file_path(@conn, :show, @changeset.data.id)} class="btn btn-secondary">
         Cancel

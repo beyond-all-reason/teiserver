@@ -1,86 +1,5 @@
-<%= if assigns[:colours] do %>
-  <% {fg, bg, _bsname} = @colours %>
-  <style type="text/css">
-    #breadcrumb-wrapper {
-      border-bottom: 1px solid <%= fg %> !important;
-      background-color: <%= bg %> !important;
-    }
-    #breadcrumb {
-      background-color: <%= bg %> !important;
-    }
-
-    .side-menu-active a i, .side-menu-active a {
-      color: <%= fg %> !important;
-    }
-    .side-menu-active a {
-      border-left-color: <%= fg %> !important;
-      background: linear-gradient(to right, <%= bg %>, rgba(0,0,0,0));
-    }
-
-    .line-card a {
-      color: <%= fg %> !important;
-    }
-    .line-card a:hover {
-      background-color: <%= bg %> !important;
-    }
-  </style>
-<% end %>
-
-<nav class="navbar fixed-top navbar-expand-md mb-3" id="top-nav" style="padding-top: 0; padding-bottom: 0;">
-
-  <div class="flex-row d-flex">
-    <div class="navbar-brand hide-sm" href="#">
-      <i class={Application.get_env(:central, Central)[:site_icon]} style="margin: -4px 20px 0 0px;" class="d-inline align-top"></i>
-      <span id="page-title">
-        <%= assigns[:page_title] || Application.get_env(:central, Central)[:site_title] %>
-      </span>
-    </div>
-  </div>
-
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsingNavbar" style="background-color: inherit;">
-    <span class="navbar-toggler-icon" style="padding-top: 3px;">
-      <i class="fas fa-fw fa-plus fa-lg"></i>
-    </span>
-  </button>
-
-  <div class="navbar-collapse collapse" id="collapsingNavbar">
-    <%= if assigns[:current_user] != nil and assigns[:menu_override] != :hidden do %>
-      <a href={assigns[:menu_override] || "/"} class="btn btn-outline-primary">
-        <i class="fas fa-fw fa-th"></i>
-        Main menu
-      </a>
-    <% end %>
-
-    <%= if assigns[:extra_menu_content] do %>
-      <%= raw assigns[:extra_menu_content] %>
-    <% end %>
-
-    <%# Right side %>
-    <ul class="navbar-nav ml-auto">
-      <%= if @current_user do %>
-        <%= render CentralWeb.General.SectionsView, "user_recents.html", Map.put(assigns, :conn, @socket) %>
-        <%= render CentralWeb.General.SectionsView, "user_favourites.html", Map.put(assigns, :conn, @socket) %>
-        <%= render CentralWeb.General.SectionsView, "user_dropdown.html", Map.put(assigns, :conn, @socket) %>
-      <% else %>
-        <li class="nav-item">
-          <a href={Routes.account_session_path(@socket, :new)}>
-            <i class="fa fa-user fa-fw"></i>
-            Sign in
-          </a>
-        </li>
-      <% end %>
-    </ul>
-  </div>
-</nav>
-
-<div style="height: 47px;">&nbsp;</div>
-
 <!-- Page Content -->
 <div id="page-content-wrapper" style="margin: 0; padding: 0;">
-  <%= if assigns[:breadcrumb_trails] do %>
-    <%= render CentralWeb.ComponentView, "breadcrumb.html", assigns %>
-  <% end %>
-
   <div id="flash-messages">
     <%= if live_flash(@flash, :danger) do %>
       <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger" phx-click="lv:clear-flash" phx-value-key="danger"><%= live_flash(@flash, :danger) %></p>
@@ -107,8 +26,10 @@
 </div>
 <!-- /#page-content-wrapper -->
 
+<%= if false do %>
 <footer class="main-footer d-flex p-2 px-3 border-top">
   <span class="float-end">
     Created by <%= Application.get_env(:central, Central)[:credit] %>
   </span>
 </footer>
+<% end %>

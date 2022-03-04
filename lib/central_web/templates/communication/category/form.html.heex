@@ -19,21 +19,21 @@
     <br />
   <% end %>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= label f, :name, class: "control-label" %>
-    <%= text_input f, :name, class: "form-control" , autofocus: "" %>
+    <%= text_input f, :name, class: "form-control" , autofocus: "", required: true %>
     <%= error_tag f, :name %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= input_with_type f, :colour, "color" %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= central_component "fa5_icon_picker", %{form: f, field: :icon} %>
   </div>
 
-  <div class="form-group">
+  <div class="form-group my-3">
     <%= central_component "checkbox",
       name: "category[public]",
       id: "category_public",

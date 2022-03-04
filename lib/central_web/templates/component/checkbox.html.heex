@@ -9,7 +9,7 @@
     changeset: @changeset,
     
     description: ""
-  >
+  % >
   
   Optionally you can manually set the checked attribute as true/false instead of changeset and field
   if you do this then the changeset data will be ignored
@@ -23,15 +23,17 @@
   else
     case Ecto.Changeset.get_field(@changeset, @field) do
       true -> [checked: "checked"]
+      "true" -> [checked: "checked"]
       _ -> []
     end
   end
   
-  value = assigns[:value] || true
+  value = assigns[:value] || "true"
   row_class = "form-check " <> (assigns[:row_class] || "m-1")
 %>
 
 <div class={row_class}>
+  <input name={@name} type="hidden" value="false">
   <input name={@name} id={@id} class="form-check-input" type="checkbox" value={value} {checked}>
   <label class="form-check-label" for={@id}>
     <strong><%= @label %></strong><%= assigns[:text] %>

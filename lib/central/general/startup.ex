@@ -2,6 +2,7 @@ defmodule Central.General.Startup do
   @moduledoc false
   use CentralWeb, :startup
 
+  @spec startup :: :ok
   def startup do
     QuickAction.add_items([
       %{
@@ -49,9 +50,11 @@ defmodule Central.General.Startup do
       type: "boolean",
       visible: true,
       permissions: [],
-      description: "Enable light mode",
       opts: [],
-      default: false
+      default: false,
+
+      description: "Light mode has a bright background and dark text.",
+      value_label: "Enable light mode"
     })
 
     add_user_config_type(%{
@@ -96,17 +99,6 @@ defmodule Central.General.Startup do
       description: "Sets the default homepage for when you first log in",
       opts: [],
       default: "/"
-    })
-
-    add_user_config_type(%{
-      key: "general.Sidebar",
-      section: "General",
-      type: "boolean",
-      visible: true,
-      permissions: [],
-      description: "Shows the sidebar menu",
-      opts: [],
-      default: true
     })
 
     add_user_config_type(%{

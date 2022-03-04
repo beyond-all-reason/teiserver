@@ -9,7 +9,6 @@
     <%=
       central_component "menu_card",
       icon: "fas fa-sign-in-alt",
-      name: "signin",
       text: "Sign in",
       link: Routes.account_session_path(@conn, :new)
     %>
@@ -33,7 +32,6 @@
       <%=
         central_component "menu_card",
           icon: Central.Communication.BlogLib.icon(),
-          name: "blog",
           text: "Blog posts",
           link: Routes.blog_post_path(@conn, :index)
       %>
@@ -41,7 +39,6 @@
       <%=
         central_component "menu_card",
           icon: Central.Communication.BlogLib.icon(),
-          name: "blog",
           text: "Blog",
           link: Routes.blog_path(@conn, :index)
       %>
@@ -52,7 +49,6 @@
     <%=
       central_component "menu_card",
       icon: Central.Admin.icon(),
-      name: "admin",
       text: "Admin",
       link: Routes.admin_general_path(@conn, :index)
     %>
@@ -62,7 +58,6 @@
     <%=
       central_component "menu_card",
       icon: Central.Logging.icon(),
-      name: "logging",
       text: "Logging",
       link: Routes.logging_general_path(@conn, :index)
     %>

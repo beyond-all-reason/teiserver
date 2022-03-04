@@ -27,6 +27,7 @@ defmodule CentralWeb.Communication.BlogController do
     conn
     |> assign(:posts, posts)
     |> assign(:categories, categories)
+    |> assign(:site_menu_active, "central_blog")
     |> assign(:title, "#{Application.get_env(:central, Central)[:site_title]} - Blog")
     |> render("index.html")
   end

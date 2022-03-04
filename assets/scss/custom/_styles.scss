@@ -10,40 +10,23 @@ body {
 }
 
 .debug {
-  background-color: #A00;
-  color: #FFF;
+  background-color: $debug-bg-colour;
+  color: $debug-colour;
 }
 
 // Top nav
 #top-nav {
-  border-bottom: 1px solid $dark;
+  background-color: $top-nav-bg-colour;
+  border-bottom: 1px solid $top-nav-bottom-border-colour;
 }
 
 #top-nav .navbar-brand, #top-nav .nav-item a {
-  color: $primary;
+  color: $top-nav-item-colour;
 }
 
 #top-nav .nav-item .active {
   font-weight: bold;
-  background-color: $gray-500;
-}
-
-.slow-blink-outline-primary {
-  animation: pulse-outline-primary 6s ease infinite;
-}
-@keyframes pulse-outline-primary {
-  0% {
-    background-color: #DDEEFF;
-    color: #4466BB;
-  }
-  50% {
-    background-color: #FFF;
-    color: #6677DD;
-  }
-  100% {
-    background-color: #DDEEFF;
-    color: #4466BB;
-  }
+  background-color: $top-nav-active-bg-colour;
 }
 
 /* Alerts and form errors used by phx.new */
@@ -54,19 +37,19 @@ body {
   border-radius: 4px;
 }
 .alert-info {
-  color: $light;
-  background-color: $primary-dark;
-  border-color: $primary;
+  color: $body-color;
+  background-color: $info;
+  border-color: $info-dark;
 }
 .alert-danger {
-  color: $light;
-  background-color: $danger2;
-  border-color: $danger;
+  color: $body-color;
+  background-color: $danger;
+  border-color: $danger-dark;
 }
 .alert-success {
-  color: $light;
-  background-color: $success2;
-  border-color: $success;
+  color: $body-color;
+  background-color: $success;
+  border-color: $success-dark;
 }
 .alert p {
   margin-bottom: 0;
@@ -75,7 +58,7 @@ body {
   display: none;
 }
 .invalid-feedback {
-  color: #a94442;
+  color: $invalid-feedback;
   display: block;
   margin: -1rem 0 2rem;
 }
@@ -112,7 +95,7 @@ body {
 }
 
 .phx-modal-content {
-  background-color: #fefefe;
+  background-color: $phx-modal-bg-colour;
   margin: 15vh auto;
   padding: 20px;
   border: 1px solid #888;
@@ -120,7 +103,7 @@ body {
 }
 
 .phx-modal-close {
-  color: #aaa;
+  color: $phx-modal-close-colour;
   float: right;
   font-size: 28px;
   font-weight: bold;
@@ -128,12 +111,10 @@ body {
 
 .phx-modal-close:hover,
 .phx-modal-close:focus {
-  color: black;
+  color: $phx-modal-close-colour-hover;
   text-decoration: none;
   cursor: pointer;
 }
-
-
 
 .menu-card .panel-body {
   padding: 0;
@@ -158,7 +139,7 @@ body {
   font-size: 1.6em;
   line-height: 2em;
   
-  color: $primary;
+  color: $menu-card-link-colour;
   
   text-decoration: none;
   
@@ -172,10 +153,10 @@ body {
 }
 
 .menu-card a:hover, .menu-card span:hover {
-  color: $primary2;
+  color: $menu-card-link-colour-hover;
   
   cursor: pointer;
-  text-shadow: 2px 2px 2px rgba(0,0,0,0.1);
+  text-shadow: 2px 2px 2px $shadow;
 }
 
 /* Page sub menu */
@@ -203,9 +184,9 @@ body {
 .sub-menu-icon a {
   margin: 0;
   padding: 10px 0 5px 0;
-  color: $gray-600;
+  color: $sub-menu-icon-colour;
   
-  border-bottom: 5px solid $gray-700;
+  border-bottom: 5px solid $sub-menu-icon-border-colour;
   
   -webkit-transition: all 200ms linear;
   -moz-transition: all 200ms linear;
@@ -240,7 +221,7 @@ body {
 
 .block-link:hover {
   text-decoration: none;
-  color: #05A;
+  color: $link-color;
 }
 
 
@@ -249,17 +230,7 @@ body {
   margin-top: 20px;
 }
 
-#section-men-extended {
-  border-top: 1px solid #EEE;
-  margin-top: 5px;
-  display: none;
-}
-#section-men-extended .btn {
-  margin-top: 5px;
-}
-
 .help-block {
-  color: $danger;
   padding: 2px 5px;
   display: block;
 }
@@ -278,24 +249,24 @@ body {
 // We want out outline buttons to be filled in when you mouseover or activate them
 @mixin button-outline-variant($color) {
   & {
-    color: $gray-800;
+    color: $button-outline-colour;
   }
   
   &:hover {
-    color: $gray-200;
+    color: $button-outline-colour-hover;
     background-color: $color;
   }
 
   &:focus,
   &.focus {
-    color: $light;
+    color: $button-outline-focus-colour;
     background-color: transparent;
   }
 
   &:active,
   &.active,
   &.dropdown-toggle.show {
-    color: $light;
+    color: $button-outline-active-colour;
     background-color: $color;
 
     &:focus {
@@ -329,29 +300,8 @@ body.modal-open {
 }
 
 // Forms and inputs
-input {
-  color: $dark;
-}
-
 input[type="color"] {
   min-height: 2rem;
   padding: 0.2rem;
 }
 
-
-.select2-selection {
-  border-color: $gray-700 !important;
-}
-
-.select2-container--default .select2-selection--single .select2-selection__rendered {
-  background-color: $light;
-  color: $dark !important;
-}
-
-.select2-search__field {
-  background-color: $input-bg;
-}
-
-.text-invert {
-  color: $light;
-}

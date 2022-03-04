@@ -38,20 +38,28 @@ defmodule CentralWeb.Admin.ToolController do
       _ -> "standard.html"
     end
 
-    # This is for the live pages
-    flash = %{
-      success: "Example flash message success",
-      info: "Example flash message info",
-      danger: "Example flash message danger",
-    }
+    conn = if params["flash"] do
+      # This is for the live pages
+      flash = %{
+        success: "Example flash message success",
+        info: "Example flash message info",
+        danger: "Example flash message danger",
+      }
+
+      conn
+        |> put_flash(:success, "Example flash message success")
+        |> put_flash(:info, "Example flash message info")
+        |> put_flash(:danger, "Example flash message danger")
+        |> assign(:flash, flash)
+    else
+      conn
+      |> assign(:flash, %{})
+    end
 
     conn
-    |> put_flash(:success, "Example flash message success")
-    |> put_flash(:info, "Example flash message info")
-    |> put_flash(:danger, "Example flash message danger")
     |> add_breadcrumb(name: "Test page", url: conn.request_path)
     |> assign(:socket, conn)
-    |> assign(:flash, flash)
+    |> assign(:layout_value, layout)
     |> put_layout(layout)
     |> render("test_page.html")
   end

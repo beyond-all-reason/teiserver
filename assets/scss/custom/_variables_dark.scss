@@ -1,3 +1,5 @@
+@import './variables';
+
 // First override some or all individual color variables
 $white:    #fff !default;
 $gray-100: #f8f9fa !default;
@@ -53,15 +55,20 @@ $primary2: #3498db;
 $secondary: #4A5159;
 $success: #108c1a;
 $success2: #005c0a;
+$success-dark: #006c0a;
 $info: #008987;
+$info-dark: #006967;
 $info2: #A90088;
 $warning: #c37c02;
 $warning2: #CC4400;
 $danger-light: #fdd;
 $danger: #a4382c;
 $danger2: #800000;
+$danger-dark: #84180c;
 $light: #e9ecef;
 $dark: #212529;
+
+$shadow: rgba(255, 255, 255, 0.1);
 
 
 // Then add them to your custom theme-colors map, together with any additional colors you might need
@@ -90,6 +97,7 @@ $min-contrast-ratio:   1.9 !default;
 
 $body-bg:                   $gray-900 !default;
 $body-color:                $white !default;
+$invert-color:              $dark !default;
 
 $table-color:               $white !default;
 $table-striped-color:       $white !default;
@@ -229,13 +237,48 @@ $btn-close-hover-opacity:    1 !default;
 $pre-color:                         inherit !default;
 
 
+// Additional styles
+$menu-card-link-colour:         rgb(92, 112, 154);
+$menu-card-link-colour-hover:     $primary2;
+
+$sub-menu-icon-colour:            $gray-600;
+$sub-menu-icon-border-colour:     $gray-700;
+
+$top-nav-bg-colour:               $dark;
+$top-nav-bottom-border-colour:    $gray-900;
+$top-nav-item-colour:             $primary2;
+$top-nav-active-bg-colour:        $gray-700;
+
+$debug-colour:                    $dark;
+$debug-bg-colour:                 $red;
+
+$invalid-feedback:                $danger-light;
+
+$phx-modal-bg-colour:             #fefefe;
+$phx-modal-close-colour:          #AAA;
+$phx-modal-close-colour-hover:    #000;
+
+$button-outline-colour:           $gray-300;
+$button-outline-colour-hover:     $gray-200;
+$button-outline-focus-colour:     $light;
+$button-outline-active-colour:  $light;
 
 
-$grid-breakpoints: (
-  xs: 0,
-  sm: 576px,
-  md: 768px,
-  lg: 1024px,
-  xl: 1920px,
-  xxl: 2560px,
-);
+
+// Select 2 stuff, just for dark mode
+.select2-selection {
+  border-color: $dark !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  background-color: $dark;
+  color: $light !important;
+}
+
+.select2-search__field {
+  background-color: $input-bg;
+}
+
+.text-invert {
+  color: $invert-color;
+}

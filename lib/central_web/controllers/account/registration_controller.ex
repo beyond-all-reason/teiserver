@@ -4,21 +4,23 @@ defmodule CentralWeb.Account.RegistrationController do
   alias Central.Account
   alias Central.Account.User
 
-  plug AssignPlug,
-    sidemenu_active: "account"
+  plug(AssignPlug,
+    site_menu_active: "central_account",
+    sub_menu_active: "account"
+  )
 
   @spec new(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def new(conn, params) do
-    config_setting = Application.get_env(:central, Central)[:user_registrations]
+    config_setting = Central.Config.get_site_config_cache("user.Enable user registrations")
 
     {allowed, reason} = cond do
-      config_setting == :allowed ->
+      config_setting == "Allowed" ->
         {true, nil}
 
-      config_setting == :disabled ->
+      config_setting == "Disabled" ->
         {false, "disabled"}
 
-      config_setting == :link_only ->
+      config_setting == "Link only" ->
         code = Account.get_code(params["code"] || "!no_code!")
 
         cond do
@@ -61,16 +63,16 @@ defmodule CentralWeb.Account.RegistrationController do
   @spec create(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create(conn, %{"user" => user_params}) do
     user_params = Account.merge_default_params(user_params)
-    config_setting = Application.get_env(:central, Central)[:user_registrations]
+    config_setting = Central.Config.get_site_config_cache("user.Enable user registrations")
 
     {allowed, reason} = cond do
-      config_setting == :allowed ->
+      config_setting == "Allowed" ->
         {true, nil}
 
-      config_setting == :disabled ->
+      config_setting == "Disabled" ->
         {false, "disabled"}
 
-      config_setting == :link_only ->
+      config_setting == "Link only" ->
         code = Account.get_code(user_params["code"] || "!no_code!")
 
         cond do
