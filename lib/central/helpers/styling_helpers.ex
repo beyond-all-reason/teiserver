@@ -48,9 +48,6 @@ defmodule Central.Helpers.StylingHelper do
   def colours(:negative, true), do: {"#", "#", "negative"}
   def colours(:negative2, true), do: {"#", "#", "negative2"}
 
-  # Aliases
-  def colours(:report, light), do: colours(:danger, light)
-
   @spec get_fg(atom) :: String.t()
   def get_fg(colour), do: elem(colours(colour), 0)
 

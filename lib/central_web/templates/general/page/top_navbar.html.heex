@@ -8,7 +8,7 @@
       <a class="navbar-brand mt-2 mt-lg-0" href="/">
         <i class={"fa-fw #{Application.get_env(:central, Central)[:site_icon]}"} style="margin: -4px 20px 0 0px;"></i>
         <span id="page-title">
-          <%= assigns[:page_title] || Application.get_env(:central, Central)[:site_title] %>
+          <%= Application.get_env(:central, Central)[:site_title] %>
         </span>
       </a>
 

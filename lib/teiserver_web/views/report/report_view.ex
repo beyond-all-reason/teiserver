@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Report.ReportView do
   use TeiserverWeb, :view
 
   @spec view_colour :: atom
-  def view_colour(), do: :report
+  def view_colour(), do: :danger
 
   @spec icon() :: String.t()
   def icon(), do: Central.Helpers.StylingHelper.icon(:report)
