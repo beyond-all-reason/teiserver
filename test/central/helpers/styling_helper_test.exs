@@ -6,7 +6,6 @@ defmodule Central.General.StylingHelpersTest do
   test "colours" do
     params = [
       :default,
-      :report,
       :primary,
       :primary2,
       :info,

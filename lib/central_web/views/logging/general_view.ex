@@ -12,5 +12,5 @@ defmodule CentralWeb.Logging.GeneralView do
   def view_colour("aggregate"), do: Central.Logging.AggregateViewLogLib.colours()
   def view_colour("audit"), do: Central.Logging.AuditLogLib.colours()
   def view_colour("error"), do: Central.Logging.ErrorLogLib.colours()
-  def view_colour("report"), do: :report
+  def view_colour("report"), do: :danger
 end
