@@ -9,7 +9,8 @@ defmodule CentralWeb.General.PageController do
     else
       conn
       |> put_layout("unauth.html")
-      |> render("index.html")
+      |> put_view(TeiserverWeb.General.GeneralView)
+      |> render("unauth_index.html")
     end
   end
 
