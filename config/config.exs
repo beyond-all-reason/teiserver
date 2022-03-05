@@ -7,16 +7,7 @@ config :central, Central,
   site_icon: "fad fa-robot",
   enable_blog: false,
   blog_title: "BAR Blog",
-  credit: "Teifion Jordan",
-
-  # These toggle what users are able to access from their account area
-  enabled_account_group_pages: false,
-
-  # :allowed, :link_only, :disabled
-  user_registrations: :disabled,
-
-  # If you have a secondary site put the link here (string)
-  main_site_link: "https://www.beyondallreason.info/"
+  credit: "Teifion Jordan"
 
 # Default configs
 config :central, Central.Config,
