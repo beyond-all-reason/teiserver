@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.Account.{AccoladeLib, CodeOfConductData}
   alias Teiserver.Coordinator.CoordinatorLib
 
-  @always_allow ~w(help whoami discord coc ignore)
+  @always_allow ~w(help whoami discord coc ignore mute ignore unmute unignore)
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, _state) do
@@ -115,6 +115,30 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       ])
     end
 
+    state
+  end
+
+  defp do_handle(%{command: "ignore"} = cmd, state), do: do_handle(%{cmd | command: "mute"}, state)
+  defp do_handle(%{command: "mute", senderid: senderid, remaining: remaining} = _cmd, state) do
+    case User.get_user_by_name(remaining) do
+      nil ->
+        Coordinator.send_to_user(senderid, "I am unable to find a user by the name of '#{remaining}'")
+      user ->
+        User.ignore_user(senderid, user.id)
+        Coordinator.send_to_user(senderid, "#{user.name} is now ignored, you can unmute them with the $unignore command or via the relationships section of the website.")
+    end
+    state
+  end
+
+  defp do_handle(%{command: "unignore"} = cmd, state), do: do_handle(%{cmd | command: "unmute"}, state)
+  defp do_handle(%{command: "unmute", senderid: senderid, remaining: remaining} = _cmd, state) do
+    case User.get_user_by_name(remaining) do
+      nil ->
+        Coordinator.send_to_user(senderid, "I am unable to find a user by the name of '#{remaining}'")
+      user ->
+        User.unignore_user(senderid, user.id)
+        Coordinator.send_to_user(senderid, "#{user.name} is now un-ignored.")
+    end
     state
   end
 

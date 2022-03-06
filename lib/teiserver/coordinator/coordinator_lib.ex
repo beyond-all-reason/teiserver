@@ -14,6 +14,12 @@ Sends back information about who you are
 $discord
 Allows linking of your discord account to your BAR account
 
+$mute <username>
+Mutes that user and prevents you seeing their messages
+
+$unmute <username>
+Un-mutes that user and allows you to see their messages
+
 $coc <term>
 Searches the code of conduct and returns items with a textual match in them
 

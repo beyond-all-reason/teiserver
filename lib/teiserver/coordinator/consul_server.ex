@@ -13,7 +13,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser}
 
-  @coordinator_bot ~w(whoami whois check discord help coc ignore)
+  # Commands that are always forwarded to the coordinator itself, not the consul server
+  @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore)
+
   @always_allow ~w(status y n follow joinq leaveq splitlobby)
   @boss_commands ~w(gatekeeper welcome-message)
   @host_commands ~w(specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock rename)

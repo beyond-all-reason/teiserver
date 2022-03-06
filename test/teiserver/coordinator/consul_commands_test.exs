@@ -1,4 +1,4 @@
-defmodule Teiserver.Coordinator.CommandsTest do
+defmodule Teiserver.Coordinator.ConsulCommandsTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.Lobby
   alias Teiserver.Common.PubsubListener
