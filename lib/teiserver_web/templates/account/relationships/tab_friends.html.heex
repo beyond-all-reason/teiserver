@@ -10,12 +10,14 @@
   <tbody>
     <%= for userid <- @friends do %>
       <% user = @user_lookup[userid] %>
-      <tr>
-        <td><%= user.name %></td>
-        <td>
-          <%= link raw("<i class='fas fa-fw fa-user-slash'></i> Remove"), to: Routes.ts_account_relationships_path(@conn, :delete, "friend", userid), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-sm btn-danger btn-outline" %>
-        </td>
-      </tr>
+      <%= if user do %>
+        <tr>
+          <td><%= user.name %></td>
+          <td>
+            <%= link raw("<i class='fas fa-fw fa-user-slash'></i> Remove"), to: Routes.ts_account_relationships_path(@conn, :delete, "friend", userid), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-sm btn-danger btn-outline" %>
+          </td>
+        </tr>
+      <% end %>
     <% end %>
     <tr>
       <form action={Routes.ts_account_relationships_path(@conn, :find)} method="post">
