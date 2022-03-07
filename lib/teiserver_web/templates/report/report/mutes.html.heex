@@ -12,19 +12,21 @@
             active: "mutes"
           })
         %>
-        
+
         <table class='table mt-3'>
           <thead>
             <tr>
               <th>&nbsp;</th>
-              <th>&nbsp;</th>
+              <th>Ignore count</th>
+              <th>Ignored by</th>
           </tr>
           </thead>
           <tbody>
-            <%= for {user, count} <- @data do %>
+            <%= for {userid, ignore_count} <- @data do %>
               <tr>
-                <td><%= user.name %></td>
-                <td><%= count %></td>
+                <td><%= @usernames[userid] %></td>
+                <td><%= ignore_count %></td>
+                <td><%= Enum.map(@ignored_by_lists[userid], fn u -> @usernames[u] end) |> Enum.join(", ") %></td>
               </tr>
             <% end %>
           </tbody>
