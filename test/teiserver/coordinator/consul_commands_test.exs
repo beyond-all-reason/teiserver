@@ -211,7 +211,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     :timer.sleep(500)
 
     hook_message = PubsubListener.get(hook_listener) |> hd
-    {:account_hooks, :create_report, report} = hook_message
+    {:account_hooks, :create_report, report, :create} = hook_message
 
     # Ensure the report was created
     assert Account.get_report!(report.id)
@@ -237,7 +237,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     :timer.sleep(500)
 
     hook_message = PubsubListener.get(hook_listener) |> hd
-    {:account_hooks, :create_report, report} = hook_message
+    {:account_hooks, :create_report, report, :create} = hook_message
 
     # Ensure the report was created
     assert Account.get_report!(report.id)
@@ -382,7 +382,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
   test "set_player_limit", %{lobby_id: lobby_id, hsocket: hsocket, host: host} do
     player_limit = Coordinator.call_consul(lobby_id, {:get, :player_limit})
-    assert player_limit == 20
+    assert player_limit == 16
 
     data = %{cmd: "c.lobby.message", message: "$playerlimit 16"}
     _tachyon_send(hsocket, data)

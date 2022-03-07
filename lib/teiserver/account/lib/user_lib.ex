@@ -247,50 +247,53 @@ defmodule Teiserver.Account.UserLib do
       preload: [user_stat: user_stats]
   end
 
-  @spec restriction_list :: [String.t()]
-  def restriction_list() do
+  @spec restrictions_lists() :: list()
+  def restrictions_lists() do
     [
-      # Chat
-      "Bridging",
-      "Room chat",
-      "Direct chat",
-      "Lobby chat",
-      "Battle chat",
+      {"Chat", [
+        "Bridging",
+        "Room chat",
+        "Direct chat",
+        "Lobby chat",
+        "Battle chat",
+      ]},
 
       # Lobby interaction
-      "Host commands",
-      "Voting",
+      {"Lobby", [
+        "Host commands",
+        "Voting",
 
-      # Lobbies - Joining
-      "Hosting games",
-      "Joining existing lobbies",
-      "Joining duel",
-      "Joining ffa",
-      "Joining team",
-      "Joining coop",
+        "Hosting games",
+        "Joining existing lobbies",
+        "Joining duel",
+        "Joining ffa",
+        "Joining team",
+        "Joining coop",
+      ]},
 
-      # Lobbies - Playing
-      "Playing duel",
-      "Playing ffa",
-      "Playing team",
-      "Playing coop",
+      {"Playing", [
+        "Playing duel",
+        "Playing ffa",
+        "Playing team",
+        "Playing coop",
 
-      # MM
+        # Matchmaking stuff here
+      ]},
 
-      # In game?
-      # "pausing the game (if possible, probably needs spads support)",
-
-      # Community related stuff
-      "Accolades",
-      "Reporting",
+      {"Community", [
+        "Accolades",
+        "Reporting",
+      ]},
 
       # Global overrides
-      "All chat",
-      "All lobbies",
-      "Site",
-      "Matchmaking",
-      "Community",# Accolades/Polls
-      "Login",
+      {"Global", [
+        "All chat",
+        "All lobbies",
+        "Site",
+        "Matchmaking",
+        "Community",
+        "Login"
+      ]}
     ]
   end
 

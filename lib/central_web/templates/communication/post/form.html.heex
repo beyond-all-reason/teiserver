@@ -31,15 +31,6 @@
 
   <script type="text/javascript">
     $(function() {
-      <%= if get_user_config_cache(@conn, "general.Sidebar") != false do %>
-      if (window.innerWidth > 1280) {
-        $("#wrapper").toggleClass("toggled");
-        $("#dev-error-dropdown").hide();
-        $("#page-title").hide();
-        $(".navbar-brand").css("width", 20);
-      }
-      <% end %>
-
       $("#html-editor").html($("#main-form_content").html());
       $("#main-form_content").hide();
 

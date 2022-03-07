@@ -105,7 +105,6 @@ defmodule TeiserverWeb.Admin.UserController do
       |> Teiserver.Account.UserStatLib.field_contains("hardware:osinfo", params["data_search"]["os"])
       |> Teiserver.Account.UserStatLib.field_contains("hardware:raminfo", params["data_search"]["ram"])
       |> Teiserver.Account.UserStatLib.field_contains(params["data_search"]["custom_field"], params["data_search"]["custom_value"])
-      |> IO.inspect
       |> Stream.map(fn stats -> stats.user_id end)
       |> Stream.take(50)
       |> Enum.to_list
@@ -141,34 +140,35 @@ defmodule TeiserverWeb.Admin.UserController do
           )
 
         user
-        |> UserLib.make_favourite()
-        |> insert_recently(conn)
+          |> UserLib.make_favourite()
+          |> insert_recently(conn)
 
         user_stats = Account.get_user_stat_data(user.id)
 
         roles = (user.data["roles"] || [])
-        |> Enum.map(fn r ->
-          {r, UserLib.role_def(r)}
-        end)
-        |> Enum.filter(fn {_, v} -> v != nil end)
-        |> Enum.map(fn {role, {colour, icon}} ->
-          {role, colour, icon}
-        end)
+          |> Enum.map(fn r ->
+            {r, UserLib.role_def(r)}
+          end)
+          |> Enum.filter(fn {_, v} -> v != nil end)
+          |> Enum.map(fn {role, {colour, icon}} ->
+            {role, colour, icon}
+          end)
 
         conn
-        |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
-        |> assign(:user, user)
-        |> assign(:user_stats, user_stats)
-        |> assign(:roles, roles)
-        |> assign(:reports, reports)
-        |> assign(:section_menu_active, "show")
-        |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
-        |> render("show.html")
+          |> assign(:restrictions_lists, UserLib.restrictions_lists())
+          |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
+          |> assign(:user, user)
+          |> assign(:user_stats, user_stats)
+          |> assign(:roles, roles)
+          |> assign(:reports, reports)
+          |> assign(:section_menu_active, "show")
+          |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
+          |> render("show.html")
 
       _ ->
         conn
-        |> put_flash(:danger, "Unable to access this user")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+          |> put_flash(:danger, "Unable to access this user")
+          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end
 
@@ -335,6 +335,10 @@ defmodule TeiserverWeb.Admin.UserController do
               followup = params["followup"]
               code_references = params["code_references"]
 
+              restriction_list = params["restrict"]
+                |> Enum.filter(fn {_, v} -> v != "false" end)
+                |> Enum.map(fn {_, v} -> v end)
+
               case Central.Account.ReportLib.perform_action(%{}, action, params["until"]) do
                 {:ok, expires} ->
                   {:ok, _report} =
@@ -350,7 +354,10 @@ defmodule TeiserverWeb.Admin.UserController do
                       "followup" => followup,
                       "code_references" => code_references,
                       "expires" => expires,
-                      "responder_id" => conn.user_id
+                      "responder_id" => conn.user_id,
+                      "action_data" => %{
+                        "restriction_list" => restriction_list
+                      }
                     })
 
                     {:ok, nil, "#reports_tab"}
@@ -364,7 +371,7 @@ defmodule TeiserverWeb.Admin.UserController do
           {:ok, nil, tab} ->
             conn
             |> put_flash(:info, "Action performed.")
-            |> redirect(to: Routes.ts_admin_user_path(conn, :show, user) <> tab)
+            |> redirect(to: Routes.ts_admin_user_path(conn, :applying, user) <> "?tab=reports_tab")
 
           {:error, msg} ->
             conn
@@ -544,10 +551,6 @@ defmodule TeiserverWeb.Admin.UserController do
         |> redirect(to: Routes.ts_admin_automod_action_path(conn, :show, automod_action.id))
 
       {:error, %Ecto.Changeset{} = changeset} ->
-        IO.puts ""
-        IO.inspect changeset
-        IO.puts ""
-
         user = Account.get_user!(id)
 
         user_stats = case Account.get_user_stat(user.id) do
@@ -637,6 +640,21 @@ defmodule TeiserverWeb.Admin.UserController do
     conn
     |> put_flash(:success, "stat #{key} updated")
     |> redirect(to: Routes.ts_admin_user_path(conn, :show, user.id))
+  end
+
+  @spec applying(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def applying(conn, %{"id" => id} = params) do
+    # Gives stuff time to happen
+    :timer.sleep(500)
+
+    tab = if params["tab"] do
+      "##{params["tab"]}"
+    else
+      ""
+    end
+
+    conn
+    |> redirect(to: Routes.ts_admin_user_path(conn, :show, id) <> tab)
   end
 
   @spec search_defaults(Plug.Conn.t()) :: Map.t()

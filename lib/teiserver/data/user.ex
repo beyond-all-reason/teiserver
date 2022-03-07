@@ -46,6 +46,7 @@ defmodule Teiserver.User do
     :muted,
     :restricted,
     :restrictions,
+    :restricted_until,
     :warned,
     :shadowbanned,
     :springid,
@@ -77,6 +78,7 @@ defmodule Teiserver.User do
     muted: [false, nil],
     restricted: [false, nil],
     restrictions: [],
+    restricted_until: nil,
     warned: [false, nil],
     shadowbanned: false,
     springid: nil,
@@ -772,6 +774,7 @@ defmodule Teiserver.User do
     if report.response_text != nil do
       update_report(report, reason)
     end
+    :ok
   end
 
   @spec update_report(T.report(), atom) :: :ok
@@ -819,6 +822,26 @@ defmodule Teiserver.User do
           throw("No handler for action type '#{action}' in #{__MODULE__}")
       end
 
+    # Work out how long they are restricted until
+    # so we know when to look at lifting the restrictions
+    expires_as_string = report.expires |> Jason.encode! |> Jason.decode!
+
+    new_restrict_until = cond do
+      expires_as_string == nil -> user.restricted_until
+      user.restricted_until == nil -> expires_as_string
+      true -> min(expires_as_string, user.restricted_until)
+    end
+
+    # Get the new restrictions
+    new_restrictions = user.restrictions ++ Map.get(report.action_data || %{}, "restriction_list", [])
+      |> Enum.uniq
+
+    changes = Map.merge(changes, %{
+      restrictions: new_restrictions,
+      restricted_until: new_restrict_until
+    })
+
+    # Save changes
     Map.merge(user, changes)
     |> update_user(persist: true)
 

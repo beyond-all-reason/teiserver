@@ -9,50 +9,91 @@
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
 <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
 
-<form action={Routes.ts_admin_user_path(@conn, :perform_action, @user, "report_action")} method="POST">
-  <div class="row section-menu">
-    <input type="hidden" name="_method" value="PUT" />
-    <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+<%# Button for showing the form %>
+<div id="show-form-button" class="btn btn-warning mt-2" onclick="$('#report-form-div').show(); $(this).hide();">
+  <i class='fa-fw fa-regular fa-eye'></i>
+  &nbsp;
+  Show report form and CoC reference
+</div>
 
-    <div class="col-md-4">
-      <input type="text" name="reason" value="" placeholder="Reason" class="form-control" />
-    </div>
+<div id="report-form-div" style="display: none;">
+  <form action={Routes.ts_admin_user_path(@conn, :perform_action, @user, "report_action")} method="POST" id="report-form">
+    <div class="row section-menu">
+      <input type="hidden" name="_method" value="PUT" />
+      <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
-    <div class="col-md-2">
-      <select class="form-control" name="report_response_action" id="report_response_action" autofocus="autofocus">
-        <%= for opt <- Central.Account.ReportLib.response_actions() do %>
-          <%= if opt not in ["Ignore report"] do %>
-            <option value={opt}>
-              <%= opt %>
-            </option>
+      <div class="col-md-4 mt-2">
+        <input type="text" name="reason" value="" placeholder="Reason" class="form-control" />
+      </div>
+
+      <div class="col-md-2 mt-2">
+        <select class="form-control" name="report_response_action" id="report_response_action" autofocus="autofocus">
+          <%= for opt <- Central.Account.ReportLib.response_actions() do %>
+            <%= if opt not in ["Ignore report"] do %>
+              <option value={opt}>
+                <%= opt %>
+              </option>
+            <% end %>
           <% end %>
-        <% end %>
-      </select>
-    </div>
+        </select>
+      </div>
 
-    <div class="col-md-2">
-      <input type="text" name="until" value="" placeholder="Expires (e.g. 60 minutes or 1 week), 'never' for a pemenant action" class="form-control" />
-    </div>
-    <div class="col-md-4">
-      <input type="text" name="followup" value="" placeholder="Followup" class="form-control" />
-    </div>
-    
-    <div class="col-md-10" style="margin-top: 10px;">
-      <select class="form-control list-builder-select" multiple="multiple" name="code_references[]" id="code_references">
-        <%= for {key, text} <- @coc_lookup do %>
-          <option value={key}><%= key <> " - " <> text %></option>
-        <% end %>
-      </select>
-    </div>
+      <div class="col-md-2 mt-2">
+        <input type="text" name="until" value="" placeholder="Expires (e.g. 60 minutes or 1 week), 'never' for a pemenant action" class="form-control" />
+      </div>
+      <div class="col-md-4 mt-2">
+        <input type="text" name="followup" value="" placeholder="Followup" class="form-control" />
+      </div>
 
-    <div class="col-md-2" style="margin-top: 10px;">
-      <button type='submit' class='btn btn-warning btn-block' data-confirm="Are you sure">
-        <i class={"fa-fw #{Central.Helpers.StylingHelper.icon(:new)}"}></i>
-        Add
-      </button>
+      <div class="col-md-12 mt-2">
+        CoC references:
+        <select class="form-control list-builder-select" multiple="multiple" name="code_references[]" id="code_references">
+          <%= for {key, text} <- @coc_lookup do %>
+            <option value={key}><%= key <> " - " <> text %></option>
+          <% end %>
+        </select>
+      </div>
+
+      <div class="col-md-12 mt-2">
+        <div class="row">
+          <h5>Additional restrictions - <span class="text-danger">Not currently having an effect, please rely on standard dropdown for now</span></h5>
+          <%= for {section, r_list} <- @restrictions_lists do %>
+            <div class="col-md-3 col-lg-2">
+              <strong><%= section %></strong>
+              <%= for r <- r_list do %>
+                <% r_clean = String.replace(r, " ", "_") %>
+                <%= central_component "checkbox",
+                  id: "restriction_#{r_clean}",
+                  name: "restrict[#{r_clean}]",
+                  label: r,
+                  value: r,
+                  checked: false
+                %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="offset-md-10 col-md-2 mt-2">
+        <button type='submit' class='btn btn-warning btn-block' data-confirm="Are you sure">
+          <i class={"fa-fw #{Central.Helpers.StylingHelper.icon(:new)}"}></i>
+          Add
+        </button>
+      </div>
     </div>
-  </div>
-</form>
+  </form>
+
+  <hr />
+  <h5>CoC Quick Reference</h5>
+
+  <ul>
+  <%= for {key, text} <- @coc_lookup do %>
+    <li><strong><%= key %>:</strong> <%= text %></li>
+  <% end %>
+  </ul>
+</div>
+
 <br /><br />
 
 <h4>Previous reports/actions</h4>
@@ -124,12 +165,3 @@
 <% end %>
   </tbody>
 </table>
-
-<hr />
-<h5>CoC Quick Reference</h5>
-
-<ul>
-<%= for {key, text} <- @coc_lookup do %>
-  <li><strong><%= key %>:</strong> <%= text %></li>
-<% end %>
-</ul>

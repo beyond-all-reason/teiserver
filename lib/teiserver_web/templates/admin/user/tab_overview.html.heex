@@ -18,110 +18,24 @@
       </div>
     <% end %>
   </div>
-  
-  <%
-    chat_restrictions = [
-      "Bridging",
-      "Room chat",
-      "Direct chat",
-      "Lobby chat",
-      "Battle chat",
-    ]
 
-    lobby_restrictions = [
-      "Host commands",
-      "Voting",
-
-      "Hosting games",
-      "Joining existing lobbies",
-      "Joining duel",
-      "Joining ffa",
-      "Joining team",
-      "Joining coop",
-    ]
-
-    play_restrictions = [
-      "Playing duel",
-      "Playing ffa",
-      "Playing team",
-      "Playing coop",
-    ]
-
-    community_restrictions = [
-      "Accolades",# Means they can't get accolades, they will still be allowed to give them
-    ]
-
-    global_restrictions = [
-      "All chat",
-      "All lobbies",
-      "Site",
-      "Matchmaking",
-      "Community",
-      "Login",
-    ]
-  %>
   <div class="col-md-12 col-lg-8">
     <h4>Restrictions</h4>
     <div class="row">
-      <div class="col-lg-3 col-xl-2 col-xxl-2">
-        <%= for r <- chat_restrictions do %>
-          <% r_clean = String.replace(r, " ", "_") %>
-          <%= central_component "checkbox",
-            id: "restriction_#{r_clean}",
-            name: "user[restrict][#{r_clean}]",
-            label: r,
-            checked: Enum.member?(@user.data["restrictions"] || [], r)
-          %>
-        <% end %>
-      </div>
-
-      <div class="col-lg-3 col-xl-2 col-xxl-2">
-        <%= for r <- lobby_restrictions do %>
-          <% r_clean = String.replace(r, " ", "_") %>
-          <%= central_component "checkbox",
-            id: "restriction_#{r_clean}",
-            name: "user[restrict][#{r_clean}]",
-            label: r,
-            checked: Enum.member?(@user.data["restrictions"] || [], r)
-          %>
-        <% end %>
-      </div>
-
-      <div class="col-lg-3 col-xl-2 col-xxl-2">
-        <%= for r <- play_restrictions do %>
-          <% r_clean = String.replace(r, " ", "_") %>
-          <%= central_component "checkbox",
-            id: "restriction_#{r_clean}",
-            name: "user[restrict][#{r_clean}]",
-            label: r,
-            checked: Enum.member?(@user.data["restrictions"] || [], r)
-          %>
-        <% end %>
-      </div>
-
-      <div class="col-lg-3 col-xl-2 col-xxl-2">
-        <%= for r <- community_restrictions do %>
-          <% r_clean = String.replace(r, " ", "_") %>
-          <%= central_component "checkbox",
-            id: "restriction_#{r_clean}",
-            name: "user[restrict][#{r_clean}]",
-            label: r,
-            checked: Enum.member?(@user.data["restrictions"] || [], r)
-          %>
-        <% end %>
-      </div>
-
-      <div class="col-lg-3 col-xl-2 col-xxl-2">
-        <%= for r <- global_restrictions do %>
-          <% r_clean = String.replace(r, " ", "_") %>
-          <%= central_component "checkbox",
-            id: "restriction_#{r_clean}",
-            name: "user[restrict][#{r_clean}]",
-            label: r,
-            checked: Enum.member?(@user.data["restrictions"] || [], r)
-          %>
-        <% end %>
-      </div>
+      <%= for {section, r_list} <- @restrictions_lists do %>
+        <div class="col-lg-3 col-xl-2 col-xxl-2">
+          <strong><%= section %></strong>
+          <%= for r <- r_list do %>
+            <% r_clean = String.replace(r, " ", "_") %>
+            <%= central_component "checkbox",
+              id: "to_restriction_#{r_clean}",
+              name: "_",
+              label: r,
+              checked: Enum.member?(@user.data["restrictions"] || [], r)
+            %>
+          <% end %>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>

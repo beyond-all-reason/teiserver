@@ -223,6 +223,7 @@ defmodule TeiserverWeb.Router do
         get("/users/data_search", UserController, :data_search)
         post("/users/data_search", UserController, :data_search)
         post("/users/search", UserController, :search)
+        get("/users/applying/:id", UserController, :applying)
         resources("/user", UserController)
 
         resources("/automod_action", AutomodActionController, only: [:index, :show, :create, :edit, :update])
