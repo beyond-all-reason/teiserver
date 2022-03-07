@@ -53,7 +53,7 @@ defmodule TeiserverWeb.Account.GeneralController do
       icon: icon
     })
 
-    options = ["Default" | conn.current_user.data["roles"]]
+    options = UserLib.global_roles() ++ conn.current_user.data["roles"]
     |> Enum.map(fn r ->
       {r, UserLib.role_def(r)}
     end)
