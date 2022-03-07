@@ -20,6 +20,9 @@ defmodule Teiserver.User do
   @timer_sleep 500
   @max_username_length 20
 
+  @default_colour "#666666"
+  @default_icon "fa-solid fa-user"
+
   @spec role_list :: [String.t()]
   def role_list(), do: ~w(Tester Streamer Donor Contributor Dev Moderator Admin Verified Bot)
 
@@ -135,8 +138,8 @@ defmodule Teiserver.User do
       name: name,
       email: email,
       password: encrypted_password,
-      colour: "#AA0000",
-      icon: "fas fa-user",
+      colour: @default_colour,
+      icon: @default_icon,
       admin_group_id: Teiserver.user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
       springid: next_springid(),
@@ -165,8 +168,8 @@ defmodule Teiserver.User do
       name: name,
       email: email,
       password: encrypted_password,
-      colour: "#AA0000",
-      icon: "fas fa-user",
+      colour: @default_colour,
+      icon: @default_icon,
       admin_group_id: Teiserver.user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
       springid: next_springid(),

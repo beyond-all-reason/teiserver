@@ -294,14 +294,23 @@ defmodule Teiserver.Account.UserLib do
     ]
   end
 
+  def global_roles() do
+    ~w(Default Armada Cortex Raptor Scavenger)
+  end
+
   @spec role_def(String.t()) :: nil | {String.t(), String.t()}
-  def role_def("Default"), do: {"#AA0000", "fas fa-user"}
-  def role_def("Admin"), do: {"#CE5C00", "fas fa-user-circle"}
-  def role_def("Moderator"), do: {"#FFAA00", "fas fa-gavel"}
-  def role_def("Developer"), do: {"#008800", "fas fa-code-branch"}
-  def role_def("Contributor"), do: {"#00AA66", "fas fa-code-commit"}
-  def role_def("Donor"), do: {"#0066AA", "fas fa-euro"}
+  def role_def("Default"), do: {"#666666", "fa-solid fa-user"}
+  def role_def("Armada"), do: {"#000066", "fa-solid fa-a"}
+  def role_def("Cortex"), do: {"#660000", "fa-solid fa-c"}
+  def role_def("Legion"), do: {"#006600", "fa-solid fa-l"}
+  def role_def("Raptor"), do: {"#AA6600", "fa-solid fa-drumstick"}
+  def role_def("Scavenger"), do: {"#660066", "fa-solid fa-user-robot"}
+  def role_def("Admin"), do: {"#CE5C00", "fa-solid fa-user-circle"}
+  def role_def("Moderator"), do: {"#FFAA00", "fa-solid fa-gavel"}
+  def role_def("Developer"), do: {"#008800", "fa-solid fa-code-branch"}
+  def role_def("Contributor"), do: {"#00AA66", "fa-solid fa-code-commit"}
+  def role_def("Donor"), do: {"#0066AA", "fa-solid fa-euro"}
   def role_def("Streamer"), do: {"#0066AA", "fab fa-twitch"}
-  def role_def("Tester"), do: {"#00AACC", "fas fa-vial"}
+  def role_def("Tester"), do: {"#00AACC", "fa-solid fa-vial"}
   def role_def(_), do: nil
 end

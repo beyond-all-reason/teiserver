@@ -19,7 +19,7 @@ defmodule TeiserverWeb.Account.GeneralController do
 
   @spec customisation_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def customisation_form(conn, _params) do
-    options = ["Default" | conn.current_user.data["roles"]]
+    options = UserLib.global_roles() ++ conn.current_user.data["roles"]
     |> Enum.map(fn r ->
       {r, UserLib.role_def(r)}
     end)
@@ -35,7 +35,7 @@ defmodule TeiserverWeb.Account.GeneralController do
 
   @spec customisation_select(Plug.Conn.t(), map) :: Plug.Conn.t()
   def customisation_select(conn, %{"role" => role}) do
-    available = ["Default" | conn.current_user.data["roles"]]
+    available = UserLib.global_roles() ++ conn.current_user.data["roles"]
 
     {colour, icon} = if Enum.member?(available, role) do
       if UserLib.role_def(role) do
