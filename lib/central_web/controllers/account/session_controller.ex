@@ -28,6 +28,8 @@ defmodule CentralWeb.Account.SessionController do
 
   @spec login(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def login(conn, %{"user" => %{"email" => email, "password" => password}}) do
+    email = String.trim(email)
+
     conn
     |> Account.authenticate_user(email, password)
     |> login_reply(conn)

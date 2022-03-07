@@ -52,6 +52,21 @@ defmodule CentralWeb.Account.SessionControllerTest do
       refute conn.private[:phoenix_flash]["danger"] == "Invalid credentials"
       assert redirected_to(conn) == "/"
     end
+
+    test "correctly with space after email", %{conn: conn, r: r} do
+      conn = get(conn, Routes.account_session_path(conn, :logout))
+
+      conn =
+        post(conn, Routes.account_session_path(conn, :login), %{
+          "user" => %{
+            "email" => "current_user#{r}@current_user#{r}.com ",
+            "password" => "password"
+          }
+        })
+
+      refute conn.private[:phoenix_flash]["danger"] == "Invalid credentials"
+      assert redirected_to(conn) == "/"
+    end
   end
 
   describe "logout" do

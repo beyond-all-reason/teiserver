@@ -9,11 +9,14 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Central</title>
-    <link rel="stylesheet" href={Routes.static_path(@conn, "/css/bootstrap.min.css")}>
-    <link rel="stylesheet" href={Routes.static_path(@conn, "/css/shards.css")}>
-    <link rel="stylesheet" href={Routes.static_path(@conn, "/css/layout.css")}>
-    <link rel="stylesheet" href={Routes.static_path(@conn, "/css/styles.css")}>
+    <title><%= Application.get_env(:central, CentralWeb)[:page_title] %></title>
+  
+    <%= if assigns[:current_user] != nil and Central.Config.get_user_config_cache(@current_user.id, "general.Light mode") == true do %>
+      <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/mdb_light.css")}/>
+    <% else %>
+      <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/mdb_dark.css")}/>
+    <% end %>
+    <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/css/fontawesome.css")}/>
 
     <script>
       window.userToken = "<%= assigns[:user_token] %>";
