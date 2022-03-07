@@ -36,13 +36,22 @@
 
   <div id="flash-messages">
     <%= if get_flash(@conn, :danger) do %>
-      <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= get_flash(@conn, :danger) %></p>
+      <p class="alert alert-danger alert-no-margin alert-dismissible fade show" role="alert" id="app-flash-danger">
+        <%= get_flash(@conn, :danger) %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </p>
     <% end %>
     <%= if get_flash(@conn, :info) do %>
-      <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= get_flash(@conn, :info) %></p>
+      <p class="alert alert-info alert-no-margin alert-dismissible fade show" role="alert" id="app-flash-info">
+        <%= get_flash(@conn, :info) %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </p>
     <% end %>
     <%= if get_flash(@conn, :success) do %>
-      <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success"><%= get_flash(@conn, :success) %></p>
+      <p class="alert alert-success alert-no-margin alert-dismissible fade show" role="alert" id="app-flash-success">
+        <%= get_flash(@conn, :success) %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </p>
     <% end %>
   </div>
 
