@@ -15,6 +15,7 @@ defmodule Central.Account.Report do
     field :response_action, :string
     field :followup, :string
     field :code_references, {:array, :string}, default: []
+    field :action_data, :map, default: %{}
 
     field :responded_at, :naive_datetime
     field :expires, :naive_datetime
@@ -45,7 +46,8 @@ defmodule Central.Account.Report do
       :responded_at,
       :followup,
       :code_references,
-      :expires
+      :expires,
+      :action_data
     ])
     |> validate_required([:reporter_id, :target_id])
   end
@@ -66,7 +68,7 @@ defmodule Central.Account.Report do
       |> trim_strings([:response_text, :response_action, :responded_at, :followup])
 
     struct
-    |> cast(params, [:response_text, :response_action, :responder_id, :responded_at, :expires, :followup, :code_references])
+    |> cast(params, [:response_text, :response_action, :responder_id, :responded_at, :expires, :followup, :code_references, :action_data])
     |> validate_required([:response_text, :response_action, :responder_id])
   end
 
