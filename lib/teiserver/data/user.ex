@@ -367,6 +367,9 @@ defmodule Teiserver.User do
   @spec rename_user(T.userid(), String.t()) :: :success | {:error, String.t()}
   def rename_user(userid, new_name) do
     cond do
+      is_muted?(userid) ->
+        {:error, "Muted"}
+
       clean_name(new_name) |> String.length() > @max_username_length ->
         {:error, "Max length #{@max_username_length} characters"}
 
