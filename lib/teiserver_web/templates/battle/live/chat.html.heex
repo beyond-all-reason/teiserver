@@ -1,0 +1,26 @@
+<% bsname = view_colour() %>
+
+<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "battle_lobbies", conn: @socket}) %>
+
+<div class="row mt-3" id="main-content">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+
+        <div class="float-end">
+          <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, @battle.id), class: "btn btn-#{bsname}" %>
+        </div>
+
+        <div id="chat">
+          <%= for {userid, message} <- @messages do %>
+            <div class="chat-row">
+              <%= @user_map[userid].name %>
+              <%= message %>
+            </div>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

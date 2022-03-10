@@ -8,16 +8,18 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   @leave_chance 0.5
 
   def handle_info(:startup, state) do
+    name = "Battlejoin_#{state.number}"
+
     socket = AgentLib.get_socket()
     AgentLib.login(socket, %{
-      name: "Battlejoin_#{state.number}",
+      name: name,
       email: "Battlejoin_#{state.number}@agent_email",
       extra_data: %{}
     })
 
     :timer.send_interval(@tick_period, self(), :tick)
 
-    {:noreply, %{state | socket: socket}}
+    {:noreply, %{state | socket: socket, name: name}}
   end
 
   def handle_info(:tick, state) do
@@ -32,7 +34,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
         if :rand.uniform() <= @leave_chance do
           leave_battle(state)
         else
-          state
+          chat_message(state)
         end
     end
 
@@ -130,6 +132,15 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
     %{state | lobby_id: nil, stage: :no_battle}
   end
 
+  defp chat_message(state) do
+    msg = "This is a chat message from #{state.name}, #{state.msg_count}"
+
+    AgentLib._send(state.socket, %{cmd: "c.lobby.message", message: msg})
+
+    AgentLib.post_agent_update(state.id, "sent message")
+    %{state | msg_count: state.msg_count + 1}
+  end
+
   # Startup
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, opts[:data], opts)
@@ -144,7 +155,9 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
        number: opts.number,
        lobby_id: nil,
        stage: :no_battle,
-       socket: nil
+       socket: nil,
+       name: nil,
+       msg_count: 0
      }}
   end
 end

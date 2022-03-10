@@ -122,7 +122,7 @@ defmodule Teiserver.Battle.LobbyChat do
 
     persist = cond do
       lobby == nil -> false
-      user.bot and String.slice(msg, 0..1) == "* " -> false
+      user.bot == true and String.slice(msg, 0..1) == "* " -> false
       true -> true
     end
 

@@ -27,17 +27,23 @@
 
 <%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "battle_lobbies", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
 
-<div class="row" id="main-content">
+<div class="row mt-3" id="main-content">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
 
-    <%= if @bar_user.moderator do %>
-      <form pphx-change="suggest" phx-submit="send-to-host" class="float-end" onsubmit="setTimeout(function() {$('#coordinator_msg').val('');}, 300);">
-        <input class="form-control" style="display: inline-block; width: 600px;" type="text" id="coordinator_msg" name="msg" value={@consul_command} placeholder="Consul commands" autocomplete="off"/>
-        <button class={"btn btn-#{bsname}"} type="submit" phx-disable-with="Executing...">Execute</button>
-      </form>
-    <% end %>
+        <div class="float-end">
+          <%= if @bar_user.moderator do %>
+            <form pphx-change="suggest" phx-submit="send-to-host" style="display: inline-block;" onsubmit="setTimeout(function() {$('#coordinator_msg').val('');}, 300);">
+              <input class="form-control" style="display: inline-block; width: 300px;" type="text" id="coordinator_msg" name="msg" value={@consul_command} placeholder="Consul commands" autocomplete="off"/>
+              <button class={"btn btn-outline-#{bsname}"} type="submit" phx-disable-with="Executing...">Execute</button>
+            </form>
+            &nbsp;&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;
+          <% end %>
+          
+          <%= live_redirect "Chat", to: Routes.ts_battle_lobby_chat_path(@socket, :chat, @battle.id), class: "btn btn-#{bsname}" %>
+        </div>
 
 <h3>
   <%= @battle.name %>

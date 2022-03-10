@@ -2,7 +2,7 @@
 
 <%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "battle_lobbies", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
 
-<div class="row">
+<div class="row mt-3">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
@@ -24,7 +24,7 @@
       <th>Player count</th>
       <th>Spectator count</th>
 
-      <th></th>
+      <th colspan="2"></th>
     </tr>
   </thead>
   <tbody id="battles">
@@ -41,6 +41,11 @@
           <td>
             <span>
               <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id), class: "btn btn-sm btn-#{bsname}" %>
+            </span>
+          </td>
+          <td>
+            <span>
+              <%= live_redirect "Chat", to: Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id), class: "btn btn-sm btn-#{bsname}" %>
             </span>
           </td>
         </tr>
