@@ -201,7 +201,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
   # Broken since we now propogate the action via the hook server which breaks in tests
   test "modban", %{lobby_id: lobby_id, host: host, hsocket: hsocket, player: player, listener: listener} do
-    assert User.is_muted?(player.id) == false
+    assert User.has_mute?(player.id) == false
     assert User.is_restricted??(player.id, ["Login"]) == false
 
     hook_listener = PubsubListener.new_listener(["account_hooks"])
@@ -222,12 +222,12 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     # Now propogate the broadcast the way the hook server would have
     User.update_report(report, :update)
 
-    assert User.is_muted?(player.id) == false
+    assert User.has_mute?(player.id) == false
     assert User.is_restricted??(player.id, ["Login"]) == true
   end
 
   test "modmute", %{lobby_id: lobby_id, host: host, hsocket: hsocket, player: player, listener: listener} do
-    assert User.is_muted?(player.id) == false
+    assert User.has_mute?(player.id) == false
     assert User.is_restricted??(player.id, ["Login"]) == false
 
     hook_listener = PubsubListener.new_listener(["account_hooks"])
@@ -248,7 +248,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     # Now propogate the broadcast the way the hook server would have
     User.update_report(report, :update)
 
-    assert User.is_muted?(player.id) == true
+    assert User.has_mute?(player.id) == true
     assert User.is_restricted??(player.id, ["Login"]) == false
   end
 

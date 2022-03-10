@@ -911,6 +911,17 @@ defmodule Teiserver.User do
     Enum.member?(restrictions, the_restriction)
   end
 
+  @spec has_mute?(T.userid() | T.user()) :: boolean()
+  def has_mute?(user) do
+    is_restricted?(user, [
+      "All chat",
+      "Room chat",
+      "Direct chat",
+      "Lobby chat",
+      "Battle chat"
+    ])
+  end
+
   @spec is_shadowbanned?(T.userid() | T.user()) :: boolean()
   def is_shadowbanned?(nil), do: true
   def is_shadowbanned?(userid) when is_integer(userid), do: is_shadowbanned?(get_user_by_id(userid))

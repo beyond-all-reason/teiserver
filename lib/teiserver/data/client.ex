@@ -94,9 +94,9 @@ defmodule Teiserver.Client do
         lobby_client: stats["lobby_client"],
 
         shadowbanned: User.is_shadowbanned?(user),
-        muted: User.is_muted?(user),
+        muted: User.has_mute?(user),
         restricted: User.is_restricted?(user),
-        warned: User.is_warned?(user)
+        warned: false
       })
       |> add_client
 

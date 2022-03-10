@@ -201,7 +201,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         end
 
         # Do we need an acknowledgement? If they are muted then no.
-        msg = if User.is_muted?(user) do
+        msg = if User.has_mute?(user) do
           msg ++ [dispute_string]
         else
           Lobby.remove_user_from_any_battle(user.id)
@@ -213,7 +213,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         Coordinator.send_to_user(userid, msg)
       end
 
-      if User.is_muted?(user) and reports["Mute"] != nil do
+      if User.has_mute?(user) and reports["Mute"] != nil do
         reasons = reports["Mute"]
         |> Enum.map(fn report -> " - " <> report.reason end)
 

@@ -16,7 +16,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
     delay = Central.Config.get_site_config_cache("teiserver.Post login action delay")
 
     refute User.is_warned?(user.id)
-    refute User.is_muted?(user.id)
+    refute User.has_mute?(user.id)
     refute User.is_restricted?(user.id, ["Login"])
 
     {:ok, report} = Central.Account.create_report(%{
@@ -36,7 +36,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
 
     # Did it take?
     assert User.is_warned?(user.id)
-    refute User.is_muted?(user.id)
+    refute User.has_mute?(user.id)
     refute User.is_restricted?(user.id, ["Login"])
 
     # Now login
