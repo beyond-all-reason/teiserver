@@ -42,12 +42,8 @@ defmodule Teiserver.User do
     :verified,
     :email_change_code,
     :last_login,
-    :banned,
-    :muted,
-    :restricted,
     :restrictions,
     :restricted_until,
-    :warned,
     :shadowbanned,
     :springid,
     :lobby_hash,
@@ -57,7 +53,13 @@ defmodule Teiserver.User do
     :print_client_messages,
     :print_server_messages,
     :spring_password,
-    :discord_id
+    :discord_id,
+
+    # TODO: Remove
+    :warned,
+    :muted,
+    :banned,
+    :restricted
   ]
   def data_keys(), do: @data_keys
 
@@ -74,12 +76,8 @@ defmodule Teiserver.User do
     verified: false,
     email_change_code: nil,
     last_login: nil,
-    banned: [false, nil],
-    muted: [false, nil],
-    restricted: [false, nil],
     restrictions: [],
     restricted_until: nil,
-    warned: [false, nil],
     shadowbanned: false,
     springid: nil,
     lobby_hash: [],
@@ -88,7 +86,13 @@ defmodule Teiserver.User do
     print_client_messages: false,
     print_server_messages: false,
     spring_password: true,
-    discord_id: nil
+    discord_id: nil,
+
+    # TODO: Remove
+    banned: [false, nil],
+    muted: [false, nil],
+    restricted: [false, nil],
+    warned: [false, nil]
   }
 
   def default_data(), do: @default_data
@@ -367,7 +371,7 @@ defmodule Teiserver.User do
   @spec rename_user(T.userid(), String.t()) :: :success | {:error, String.t()}
   def rename_user(userid, new_name) do
     cond do
-      is_muted?(userid) ->
+      is_restricted?(userid, ["All chat", "Renaming"]) ->
         {:error, "Muted"}
 
       clean_name(new_name) |> String.length() > @max_username_length ->
@@ -507,7 +511,7 @@ defmodule Teiserver.User do
 
   def send_direct_message(from_id, to_id, message_content) do
     sender = get_user_by_id(from_id)
-    if not is_muted?(sender) do
+    if not is_restricted?(sender, ["All chat", "Direct chat"]) do
       PubSub.broadcast(
         Central.PubSub,
         "legacy_user_updates:#{to_id}",
@@ -617,14 +621,8 @@ defmodule Teiserver.User do
           Application.get_env(:central, Teiserver)[:autologin] ->
             do_login(user, ip, lobby, lobby_hash)
 
-          is_banned?(user) ->
-            [_, until] = user.data.banned
-
-            if until == nil do
-              {:error, "Banned"}
-            else
-              {:error, "Banned until #{until}"}
-            end
+          is_restricted?(user, ["Login"]) ->
+            {:error, "Banned, please see Discord for details"}
 
           not is_verified?(user) ->
             Account.update_user_stat(user.id, %{
@@ -676,8 +674,8 @@ defmodule Teiserver.User do
           test_password(md5_password, user.password_hash) == false ->
             {:error, "Invalid password"}
 
-          is_banned?(user) ->
-            {:error, "Banned"}
+          is_restricted?(user, ["Login"]) ->
+            {:error, "Banned, please see Discord for details"}
 
           not is_verified?(user) ->
             # Log them in to save some details we'd not otherwise get
@@ -852,7 +850,7 @@ defmodule Teiserver.User do
     # from a date to a string of the date
     recache_user(user.id)
 
-    if is_banned?(user.id) do
+    if is_restricted?(user, ["Login"]) do
       client = Client.get_client_by_id(user.id)
       if client do
         Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
@@ -911,45 +909,6 @@ defmodule Teiserver.User do
   end
   def is_restricted?(%{restrictions: restrictions}, the_restriction) do
     Enum.member?(restrictions, the_restriction)
-  end
-
-  @spec is_banned?(T.userid() | T.user()) :: boolean()
-  def is_banned?(nil), do: true
-  def is_banned?(userid) when is_integer(userid), do: is_banned?(get_user_by_id(userid))
-  def is_banned?(%{banned: banned}) do
-    case banned do
-      [false, _] -> false
-      [true, nil] -> true
-      [true, until_str] ->
-        until = parse_ymd_t_hms(until_str)
-        Timex.compare(Timex.now(), until) != 1
-    end
-  end
-
-  @spec is_muted?(T.userid() | T.user()) :: boolean()
-  def is_muted?(nil), do: true
-  def is_muted?(userid) when is_integer(userid), do: is_muted?(get_user_by_id(userid))
-  def is_muted?(%{muted: muted}) do
-    case muted do
-      [false, _] -> false
-      [true, nil] -> true
-      [true, until_str] ->
-        until = parse_ymd_t_hms(until_str)
-        Timex.compare(Timex.now(), until) != 1
-    end
-  end
-
-  @spec is_warned?(T.userid() | T.user()) :: boolean()
-  def is_warned?(nil), do: true
-  def is_warned?(userid) when is_integer(userid), do: is_warned?(get_user_by_id(userid))
-  def is_warned?(%{warned: warned}) do
-    case warned do
-      [false, _] -> false
-      [true, nil] -> true
-      [true, until_str] ->
-        until = parse_ymd_t_hms(until_str)
-        Timex.compare(Timex.now(), until) != 1
-    end
   end
 
   @spec is_shadowbanned?(T.userid() | T.user()) :: boolean()

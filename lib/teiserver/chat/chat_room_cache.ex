@@ -232,10 +232,8 @@ defmodule Teiserver.Room do
 
   @spec allow?(Map.t(), String.t()) :: boolean()
   def allow?(userid, _room_name) do
-    user = User.get_user_by_id(userid)
-
     cond do
-      User.is_muted?(user) ->
+      User.is_restricted?(userid, ["All chat", "Room chat"]) ->
         false
 
       true ->

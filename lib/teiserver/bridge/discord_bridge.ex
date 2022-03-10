@@ -140,6 +140,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     )
   end
 
+  @spec report_updated(Report.t(), :create | :respond | :update) :: :ok
   def report_updated(report, :create) do
     if report.response_text != nil do
       report_updated(report, :respond)
@@ -170,13 +171,14 @@ defmodule Teiserver.Bridge.DiscordBridge do
           "Permanent"
         end
 
-        # TODO: Put this into a list of flags for the user and have
-        # a function in user.ex to generate the text
-        # restrictions = case past_tense do
-        #   "Warned" -> "None"
-        #   "Muted" -> "Muted"
-        #   "Banned" -> "Banned"
-        # end
+        {restrictions, action} = if not Enum.empty?(report.action_data["restriction_list"]) do
+          restriction_string = report.action_data["restriction_list"]
+            |> Enum.join(", ")
+
+          {"Restriction(s): #{restriction_string}", "action"}
+        else
+          {"", "warning"}
+        end
 
         followup = if report.followup != nil do
           "If the behaviour continues, a follow up of #{report.followup} may be employed"
@@ -186,10 +188,9 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
         msg = [
           "----------------------",
-          "Moderation action:",
-          "#{report.target.name} was #{past_tense}",
+          "Moderation #{action} for #{report.target.name}",
           "Reason: #{report.response_text}",
-          # "Restriction(s): #{restrictions}",
+          restrictions,
           until,
           followup,
           "----------------------"
@@ -204,6 +205,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
         )
       end
     end
+    :ok
   end
 
   def report_updated(report, :update) do
@@ -227,7 +229,6 @@ defmodule Teiserver.Bridge.DiscordBridge do
         limit: 1
       )
 
-
       expires_now = Timex.compare(Timex.now() |> Timex.shift(minutes: 1), report.expires) == 1
 
       report = Account.get_report!(report.id, preload: [:target])
@@ -235,12 +236,9 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
       message = cond do
         expires_now == true ->
-          past_tense = ReportLib.past_tense(report.response_action)
-            |> ReportLib.reverse
-
           [
             "----------------------",
-            "#{report.target.name} was #{past_tense}",
+            "#{report.target.name} had moderation action reversed",
             "Reason: #{log.details["reason"]}",
             "----------------------"
           ]
@@ -249,7 +247,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
         log.details["sooner"] == true ->
           [
             "----------------------",
-            "#{report.target.name} had their #{report.response_action |> ReportLib.verb} reduced",
+            "#{report.target.name} had their penalty duration reduced",
             "Now expires: #{until}",
             "Reason: #{log.details["reason"]}",
             "----------------------"
@@ -259,7 +257,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
         true ->
           [
             "----------------------",
-            "#{report.target.name} had their #{report.response_action |> ReportLib.verb} extended",
+            "#{report.target.name} had their penalty duration extended",
             "Now expires: #{until}",
             "Reason: #{log.details["reason"]}",
             "----------------------"
@@ -273,6 +271,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
         []# Options
       )
     end
+    :ok
   end
 
   defp do_reply(%Alchemy.Message{author: author, content: content, channel_id: channel_id, mentions: mentions}) do

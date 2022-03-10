@@ -89,7 +89,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     |> Lobby.get_lobby!()
     |> Map.get(:players)
     |> Enum.each(fn userid ->
-      if User.is_muted?(userid) do
+      if User.is_restricted?(userid, ["All chat", "Battle chat"]) do
         name = User.get_username(userid)
         Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{name}")
       end
@@ -213,7 +213,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     # If the client is muted, we need to tell the host
-    if User.is_muted?(userid) do
+    if User.is_restricted?(user, ["All chat", "Battle chat"]) do
       Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{user.name}")
     end
 

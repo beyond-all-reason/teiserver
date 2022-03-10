@@ -283,6 +283,7 @@ defmodule Teiserver.Account.UserLib do
       {"Community", [
         "Accolades",
         "Reporting",
+        "Renaming"
       ]},
 
       # Global overrides

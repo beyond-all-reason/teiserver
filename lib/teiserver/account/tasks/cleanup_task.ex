@@ -49,7 +49,7 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
   end
 
   defp check_banned(user) do
-    if User.is_banned?(user) do
+    if User.is_restricted?(user, ["Login"]) do
       user
     else
       %{user | banned: [false, nil]}

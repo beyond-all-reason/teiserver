@@ -614,8 +614,8 @@ defmodule Teiserver.Battle.Lobby do
   def allow?(_, nil, _), do: false
   def allow?(_, _, nil), do: false
 
-  def allow?(userid, :saybattle, _), do: not User.is_muted?(userid)
-  def allow?(userid, :saybattleex, _), do: not User.is_muted?(userid)
+  def allow?(userid, :saybattle, _), do: not User.is_restricted?(userid, ["All chat", "Lobby chat"])
+  def allow?(userid, :saybattleex, _), do: not User.is_restricted?(userid, ["All chat", "Lobby chat"])
 
   def allow?(_userid, :host, _), do: true
 

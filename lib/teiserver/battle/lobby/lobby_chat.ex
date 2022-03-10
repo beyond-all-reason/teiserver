@@ -21,12 +21,20 @@ defmodule Teiserver.Battle.LobbyChat do
   @spec do_say(Types.userid(), String.t(), Types.lobby_id()) :: :ok
   def do_say(userid, "$ " <> msg, lobby_id), do: do_say(userid, "$#{msg}", lobby_id)
   def do_say(userid, msg, lobby_id) do
+    msg = String.trim(msg)
     user = User.get_user_by_id(userid)
     if user.bot == false and WordLib.flagged_words(msg) > 0 do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    if not User.is_muted?(user) do
+    disallowed = cond do
+      User.is_restricted?(user, ["All chat", "Lobby chat"]) -> true
+      String.slice(msg, 0..0) == "!" and User.is_restricted?(user, ["Host commands"]) -> true
+      Enum.member?(["!y", "!n"], String.downcase(msg)) and User.is_restricted?(user, ["Voting"]) -> true
+      true -> false
+    end
+
+    if not disallowed do
       persist_message(user, msg, lobby_id, :say)
 
       PubSub.broadcast(
@@ -48,12 +56,20 @@ defmodule Teiserver.Battle.LobbyChat do
 
   @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok
   def sayex(userid, msg, lobby_id) do
+    msg = String.trim(msg)
     user = User.get_user_by_id(userid)
     if user.bot == false and WordLib.flagged_words(msg) > 0 do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    if not User.is_muted?(user) do
+    disallowed = cond do
+      User.is_restricted?(user, ["All chat", "Lobby chat"]) -> true
+      String.slice(msg, 0..0) == "!" and User.is_restricted?(user, ["Host commands"]) -> true
+      Enum.member?(["!y", "!n"], String.downcase(msg)) and User.is_restricted?(user, ["Voting"]) -> true
+      true -> false
+    end
+
+    if not disallowed do
       persist_message(user, msg, lobby_id, :sayex)
 
       PubSub.broadcast(
@@ -75,8 +91,17 @@ defmodule Teiserver.Battle.LobbyChat do
 
   @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def sayprivateex(from_id, to_id, msg, lobby_id) do
+    msg = String.trim(msg)
     sender = User.get_user_by_id(from_id)
-    if not User.is_muted?(sender) do
+
+    disallowed = cond do
+      User.is_restricted?(sender, ["All chat", "Lobby chat", "Direct chat"]) -> true
+      String.slice(msg, 0..0) == "!" and User.is_restricted?(sender, ["Host commands"]) -> true
+      Enum.member?(["!y", "!n"], String.downcase(msg)) and sender.is_restricted?(sender, ["Voting"]) -> true
+      true -> false
+    end
+
+    if not disallowed do
       PubSub.broadcast(
         Central.PubSub,
         "legacy_user_updates:#{to_id}",
