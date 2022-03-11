@@ -803,47 +803,6 @@ defmodule Teiserver.User do
   def update_report(report, _reason) do
     user = get_user_by_id(report.target_id)
 
-    # changes =
-    #   case {report.response_action, report.expires} do
-    #     {"Restrict", expires} ->
-    #       %{restricted: [true, expires]}
-
-    #     {"Unrestrict", _} ->
-    #       %{restricted: [false, nil]}
-
-
-    #     {"Mute", expires} ->
-    #       %{muted: [true, expires]}
-
-    #     {"Unmute", _} ->
-    #       %{muted: [false, nil]}
-
-
-    #     {"Ban", expires} ->
-    #       %{banned: [true, expires]}
-
-    #     {"Unban", _} ->
-    #       %{banned: [false, nil]}
-
-
-    #     {"Warn", expires} ->
-    #       %{warned: [true, expires]}
-
-    #     {"Unwarn", _} ->
-    #       %{warned: [false, nil]}
-
-    #     {"Ignore report", nil} ->
-    #       %{}
-
-    #     # No action selected yet, this function may have been called
-    #     # in error
-    #     {nil, _} ->
-    #       %{}
-
-    #     {action, _} ->
-    #       throw("No handler for action type '#{action}' in #{__MODULE__}")
-    #   end
-
     # Work out how long they are restricted until
     # so we know when to look at lifting the restrictions
     expires_as_string = report.expires |> Jason.encode! |> Jason.decode!

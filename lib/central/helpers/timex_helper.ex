@@ -114,6 +114,26 @@ defmodule Central.Helpers.TimexHelper do
     end
   end
 
+  @spec datetime_min(DateTime.t(), DateTime.t()) :: DateTime.t()
+  @spec datetime_min(Date.t(), Date.t()) :: Date.t()
+  def datetime_min(dt1, dt2) do
+    if Timex.compare(dt1, dt2) == -1 do
+      dt1
+    else
+      dt2
+    end
+  end
+
+  @spec datetime_max(DateTime.t(), DateTime.t()) :: DateTime.t()
+  @spec datetime_max(Date.t(), Date.t()) :: Date.t()
+  def datetime_max(dt1, dt2) do
+    if Timex.compare(dt1, dt2) == 1 do
+      dt1
+    else
+      dt2
+    end
+  end
+
   @spec _hms_or_hmsdmy(DateTime.t(), DateTime.t()) :: String.t()
   defp _hms_or_hmsdmy(the_time, today) do
     if Timex.compare(the_time |> Timex.to_date(), today) == 0 do

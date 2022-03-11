@@ -33,23 +33,6 @@
       <tr>
         <td colspan="2">&nbsp;</td>
       </tr>
-      
-      <%= if @report.action_data != nil and @report.action_data != %{} do %>
-        <tr>
-          <td colspan="2">
-            Additional data
-          </td>
-        </tr>
-        <%= for {key, value} <- @report.action_data do %>
-          <tr>
-            <td><%= key %></td>
-            <td><code><%= Jason.encode!(value, pretty: true)  %></code></td>
-          </tr>
-        <% end %>
-      <% end %>
-      <tr>
-        <td colspan="2">&nbsp;</td>
-      </tr>
     <% end %>
 
     <tr>
