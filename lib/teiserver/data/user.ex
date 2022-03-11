@@ -370,7 +370,22 @@ defmodule Teiserver.User do
 
   @spec rename_user(T.userid(), String.t()) :: :success | {:error, String.t()}
   def rename_user(userid, new_name) do
+    rename_log = Account.get_user_stat_data(userid)
+      |> Map.get("rename_log", [])
+
+    now = :erlang.system_time(:seconds)
+    since_most_recent_rename = now - (Enum.slice(rename_log, 0..0) ++ [0] |> hd)
+    since_rename_three = now - (Enum.slice(rename_log, 2..2) ++ [0, 0, 0] |> hd)
+
     cond do
+      # Can't rename more than once every 5 days
+      since_most_recent_rename < 60 * 60 * 24 * 5 ->
+        {:error, "You have only recently changed your name, give this one a chance"}
+
+      # Can't rename more than 3 times in 30 days
+      since_rename_three < 60 * 60 * 24 * 30 ->
+        {:error, "If you keep changing your name people won't know who you are; give it a bit of time"}
+
       is_restricted?(userid, ["All chat", "Renaming"]) ->
         {:error, "Muted"}
 
@@ -399,7 +414,13 @@ defmodule Teiserver.User do
     previous_names = Account.get_user_stat_data(userid)
       |> Map.get("previous_names", [])
 
-    Account.update_user_stat(userid, %{"previous_names" => [user.name | previous_names]})
+    rename_log = Account.get_user_stat_data(userid)
+      |> Map.get("rename_log", [])
+
+    Account.update_user_stat(userid, %{
+      "rename_log" => [:erlang.system_time(:seconds) | rename_log],
+      "previous_names" => [user.name | previous_names]
+    })
 
     # We need to re-get the user to ensure we don't overwrite our banned flag
     user = get_user_by_id(userid)
