@@ -286,6 +286,10 @@ defmodule Teiserver.Account.UserLib do
         "Renaming"
       ]},
 
+      {"Reminders", [
+        "Warning reminder",
+      ]},
+
       # Global overrides
       {"Global", [
         "All chat",

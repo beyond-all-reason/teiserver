@@ -9,7 +9,10 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   alias Teiserver.Battle.Lobby
   alias Teiserver.Coordinator.{CoordinatorCommands}
   alias Phoenix.PubSub
+  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   require Logger
+
+  @dispute_string "If you feel that you have been the target of an erroneous or unjust moderation action please contact the moderator who performed the action or our head of moderation, Beherith"
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -146,97 +149,65 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   def handle_info({:do_client_inout, :login, userid}, state) do
     user = User.get_user_by_id(userid)
-    if User.is_warned?(user) or User.is_muted?(user) do
+    relevant_restrictions = user.restrictions
+      |> Enum.filter(fn r -> not Enum.member?(["Bridging"], r) end)
+
+    if not Enum.empty?(relevant_restrictions) do
       reports = Account.list_reports(search: [
         target_id: userid,
         expired: false,
         filter: "closed"
       ])
-      |> Enum.group_by(fn report ->
-        report.response_action
-      end)
 
-      if User.is_warned?(user) and reports["Warn"] != nil do
-        reasons = reports["Warn"]
-        |> Enum.map(fn report -> " - " <> report.reason end)
+      # Reasons you've had action taken against you
+      reasons = reports
+        |> Enum.map(fn report ->
+          expires = if report.expires do
+            ", expires #{date_to_str(report.expires, format: :ymd_hms)}"
+          else
+            ""
+          end
 
-        [_, expires] = user.warned
+          " - #{report.reason}#{expires}"
+        end)
 
-        # Coordinator message:
-        # You have been [Warned/Banned/Muted/Restricted] by [Admin]
-        # Reason: [Reason]
-        # Restriction(s): [restriction type], [restriction type2] etc  *(if applied)*
-        # Expires: [Time]
-        # If the behaviour continues, a [follow-up action] will be employed.
+      msg = [
+        "This is a reminder that you received one or more formal moderation actions as listed below:"
+      ] ++ reasons
 
-        dispute_string = "If you feel that you have been the target of an erroneous or unjust moderation action please contact the moderator who performed the action or our head of moderation - Beherith"
-
-        msg = if expires == nil do
-          ["This is a reminder that you received one or more formal warnings for misbehaving as listed below. This is your last warning and this warning does not expire."] ++ reasons
-        else
-          expires = String.replace(expires, "T", " ")
-          ["This is a reminder that you recently received one or more formal warnings as listed below, the warnings expire #{expires}."] ++ reasons
-        end
-
-        # Follow-up
-        followups = reports["Warn"]
+      # Follow-up
+      followups = reports
         |> Enum.filter(fn r -> r.followup != nil and r.followup != "" end)
         |> Enum.map(fn r -> "- #{r.followup}" end)
 
-        msg = if Enum.empty?(followups) do
-          msg
-        else
-          msg ++ ["If the behaviour continues one or more of the following actions may be performed:"] ++ followups
-        end
+      msg = if Enum.empty?(followups) do
+        msg
+      else
+        msg ++ ["If the behaviour continues one or more of the following actions may be performed:"] ++ followups
+      end
 
-        # Code of conduct references
-        cocs = reports["Warn"]
+      # Code of conduct references
+      cocs = reports
         |> Enum.map(fn r -> r.code_references end)
         |> List.flatten
         |> Enum.uniq
 
-        msg = case cocs do
-          [] -> msg
-          _ -> msg ++ ["Please refer to Code of Conduct points #{Enum.join(cocs, ", ")}"]
-        end
-
-        # Do we need an acknowledgement? If they are muted then no.
-        msg = if User.has_mute?(user) do
-          msg ++ [dispute_string]
-        else
-          Lobby.remove_user_from_any_battle(user.id)
-          Client.set_awaiting_warn_ack(userid)
-          acknowledge_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
-          msg ++ [dispute_string, acknowledge_prompt]
-        end
-
-        Coordinator.send_to_user(userid, msg)
+      msg = case cocs do
+        [] -> msg
+        _ -> msg ++ ["Please refer to Code of Conduct points #{Enum.join(cocs, ", ")}"]
       end
 
-      if User.has_mute?(user) and reports["Mute"] != nil do
-        reasons = reports["Mute"]
-        |> Enum.map(fn report -> " - " <> report.reason end)
-
-        [_, expires] = user.muted
-        if expires == nil do
-          # They're perma muted, we don't really need to say anything else to them tbh
-          nil
-        else
-          msg = ["This is a reminder that you are currently muted for reasons listed below, the muting will expire #{expires}." | reasons]
-
-          # Code of conduct references
-          cocs = reports["Mute"]
-          |> Enum.map(fn r -> r.code_references end)
-          |> List.flatten
-          |> Enum.uniq
-
-          msg = case cocs do
-            [] -> msg
-            _ -> msg ++ ["Please refer to Code of Conduct points #{Enum.join(cocs, ", ")}"]
-          end
-          Coordinator.send_to_user(userid, msg)
-        end
+      # Do we need an acknowledgement? If they are muted then no.
+      msg = if User.has_mute?(user) do
+        msg ++ [@dispute_string]
+      else
+        Lobby.remove_user_from_any_battle(user.id)
+        Client.set_awaiting_warn_ack(userid)
+        acknowledge_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
+        msg ++ [@dispute_string, acknowledge_prompt]
       end
+
+      Coordinator.send_to_user(userid, msg)
     end
     {:noreply, state}
   end

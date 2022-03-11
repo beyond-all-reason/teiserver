@@ -1,6 +1,7 @@
 defmodule Teiserver.Coordinator.ModerationTest do
   use Central.ServerCase, async: false
   alias Teiserver.{User, Coordinator, Client}
+  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
 
   import Teiserver.TeiserverTestLib,
     only: [new_user: 0, tachyon_auth_setup: 1, _tachyon_send: 2, _tachyon_recv: 1]
@@ -15,7 +16,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
   test "login with warning", %{user: user, moderator: moderator} do
     delay = Central.Config.get_site_config_cache("teiserver.Post login action delay")
 
-    refute User.is_warned?(user.id)
+    refute User.has_warning?(user.id)
     refute User.has_mute?(user.id)
     refute User.is_restricted?(user.id, ["Login"])
 
@@ -26,16 +27,20 @@ defmodule Teiserver.Coordinator.ModerationTest do
       "reporter_id" => moderator.id,
       "target_id" => user.id,
       "response_text" => "login_with_warning_test",
-      "response_action" => "Warn",
+      "response_action" => "Restrict",
+      "action_data" => %{"restriction_list" => ["Warning reminder"]},
+      "followup" => "Additional actions",
+      "code_refernces" => ["1.1", "2.2"],
       "expires" => Timex.now |> Timex.shift(days: 1),
       "responder_id" => moderator.id
     })
+
     User.create_report(report, :create)
     # Need to allow time for it to propagate
     :timer.sleep(200)
 
     # Did it take?
-    assert User.is_warned?(user.id)
+    assert User.has_warning?(user.id)
     refute User.has_mute?(user.id)
     refute User.is_restricted?(user.id, ["Login"])
 
@@ -43,14 +48,16 @@ defmodule Teiserver.Coordinator.ModerationTest do
     %{socket: socket} = tachyon_auth_setup(user)
     :timer.sleep(200 + delay)
 
-    [_, expires] = User.get_user_by_id(user.id).warned
+    expires = date_to_str(report.expires, format: :ymd_hms)
     [msg] = _tachyon_recv(socket)
     assert msg == %{
       "cmd" => "s.communication.received_direct_message",
       "message" => [
-        "This is a reminder that you recently received one or more formal warnings as listed below, the warnings expire #{expires |> String.replace("T", " ")}.",
-        " - login_with_warning_test",
-        "If you feel that you have been the target of an erroneous or unjust moderation action please contact the moderator who performed the action or our head of moderation - Beherith",
+        "This is a reminder that you received one or more formal moderation actions as listed below:",
+        " - login_with_warning_test, expires #{expires}",
+        "If the behaviour continues one or more of the following actions may be performed:",
+        "- Additional actions",
+        "If you feel that you have been the target of an erroneous or unjust moderation action please contact the moderator who performed the action or our head of moderation, Beherith",
         "Acknowledge this with 'I acknowledge this' to resume play"
       ],
       "sender_id" => Coordinator.get_coordinator_userid()

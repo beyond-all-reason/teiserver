@@ -20,7 +20,7 @@
   Show report form and CoC reference
 </div>
 
-<div id="report-form-div" style="display: none;">
+<div id="report-form-div" style="display: nnone;">
   <form action={Routes.ts_admin_user_path(@conn, :perform_action, @user, "report_action")} method="POST" id="report-form">
     <div class="row section-menu">
       <input type="hidden" name="_method" value="PUT" />
@@ -71,6 +71,12 @@
       </div>
 
       <div class="col-md-10 mt-2">
+        <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+          $('#restriction_Warning_reminder').prop('checked', true);
+        ">
+          Apply warning
+        </div>
+
         <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
           $('#restriction_All_chat').prop('checked', true);
         ">

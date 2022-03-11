@@ -782,46 +782,46 @@ defmodule Teiserver.User do
   def update_report(report, _reason) do
     user = get_user_by_id(report.target_id)
 
-    changes =
-      case {report.response_action, report.expires} do
-        {"Restrict", expires} ->
-          %{restricted: [true, expires]}
+    # changes =
+    #   case {report.response_action, report.expires} do
+    #     {"Restrict", expires} ->
+    #       %{restricted: [true, expires]}
 
-        {"Unrestrict", _} ->
-          %{restricted: [false, nil]}
-
-
-        {"Mute", expires} ->
-          %{muted: [true, expires]}
-
-        {"Unmute", _} ->
-          %{muted: [false, nil]}
+    #     {"Unrestrict", _} ->
+    #       %{restricted: [false, nil]}
 
 
-        {"Ban", expires} ->
-          %{banned: [true, expires]}
+    #     {"Mute", expires} ->
+    #       %{muted: [true, expires]}
 
-        {"Unban", _} ->
-          %{banned: [false, nil]}
+    #     {"Unmute", _} ->
+    #       %{muted: [false, nil]}
 
 
-        {"Warn", expires} ->
-          %{warned: [true, expires]}
+    #     {"Ban", expires} ->
+    #       %{banned: [true, expires]}
 
-        {"Unwarn", _} ->
-          %{warned: [false, nil]}
+    #     {"Unban", _} ->
+    #       %{banned: [false, nil]}
 
-        {"Ignore report", nil} ->
-          %{}
 
-        # No action selected yet, this function may have been called
-        # in error
-        {nil, _} ->
-          %{}
+    #     {"Warn", expires} ->
+    #       %{warned: [true, expires]}
 
-        {action, _} ->
-          throw("No handler for action type '#{action}' in #{__MODULE__}")
-      end
+    #     {"Unwarn", _} ->
+    #       %{warned: [false, nil]}
+
+    #     {"Ignore report", nil} ->
+    #       %{}
+
+    #     # No action selected yet, this function may have been called
+    #     # in error
+    #     {nil, _} ->
+    #       %{}
+
+    #     {action, _} ->
+    #       throw("No handler for action type '#{action}' in #{__MODULE__}")
+    #   end
 
     # Work out how long they are restricted until
     # so we know when to look at lifting the restrictions
@@ -837,10 +837,10 @@ defmodule Teiserver.User do
     new_restrictions = user.restrictions ++ Map.get(report.action_data || %{}, "restriction_list", [])
       |> Enum.uniq
 
-    changes = Map.merge(changes, %{
+    changes = %{
       restrictions: new_restrictions,
       restricted_until: new_restrict_until
-    })
+    }
 
     # Save changes
     Map.merge(user, changes)
@@ -919,6 +919,13 @@ defmodule Teiserver.User do
       "Direct chat",
       "Lobby chat",
       "Battle chat"
+    ])
+  end
+
+  @spec has_warning?(T.userid() | T.user()) :: boolean()
+  def has_warning?(user) do
+    is_restricted?(user, [
+      "Warning reminder",
     ])
   end
 
