@@ -158,9 +158,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
   defp do_ban(userid, automod_action) do
     user = User.get_user_by_id(userid)
     Account.update_user_stat(userid, %{"autoban_type" => automod_action.type, "autoban_id" => automod_action.id})
-    # Central.Logging.Helpers.add_audit_log(userid, "127.0.0.1", "Teiserver:Automod action enacted", %{
-    #   automod_action_id: automod_action.id,
-    # })
 
     User.update_user(%{user | banned: [true, nil]})
     Client.disconnect(user.id, :banned)

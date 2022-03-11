@@ -147,7 +147,7 @@
 
       <%= if is_admin do %>
         <td>
-          <%= if user.data["hw_hash"] != nil do %>
+          <%= if (user.data["hw_hash"] || "") != "" do %>
             <i class='fa-fw far fa-check'></i>
           <% else %>
             &nbsp;

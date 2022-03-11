@@ -71,11 +71,24 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
-  def handle_info({:direct_message, _from_id, message}, state) do
-    Logger.info("AHM DM no catch - #{message}")
+  def handle_info({:direct_message, from_id, message}, state) do
+    case Base.url_decode64(message) do
+      {:ok, compressed_contents} ->
+        case Teiserver.Protocols.Spring.unzip(compressed_contents) do
+          {:ok, contents_string} ->
+            case Jason.decode(contents_string) do
+              {:ok, data} ->
+                handle_json_msg(data, from_id)
+              _ ->
+                Logger.info("AHM DM no catch, no json-decode - #{contents_string}")
+            end
+          _ ->
+            Logger.info("AHM DM no catch, no decompress - #{compressed_contents}")
+        end
+      _ ->
+        Logger.info("AHM DM no catch, no base64 - #{message}")
+    end
 
-    # username = User.get_username(from_id)
-    # User.send_direct_message(state.userid, from_id, "I don't currently handle messages, sorry #{username}")
     {:noreply, state}
   end
 
@@ -83,6 +96,32 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   def handle_info(msg, state) do
     Logger.error("Match monitor Server handle_info error. No handler for msg of #{Kernel.inspect msg}")
     {:noreply, state}
+  end
+
+  defp handle_json_msg(%{"username" => _, "CPU" => _} = contents, from_id) do
+    if User.is_bot?(from_id) do
+      case User.get_user_by_name(contents["username"]) do
+        nil ->
+          :ok
+        user ->
+          Logger.error("Handling")
+          stats = %{
+            "hardware:cpuinfo" => contents["CPU"],
+            "hardware:gpuinfo" => contents["GPU"],
+            "hardware:osinfo" => contents["OS"],
+            "hardware:raminfo" => contents["RAM"]
+          }
+          Account.update_user_stat(user.id, stats)
+
+          if (user.hw_hash || "") == "" do
+            Teiserver.Coordinator.AutomodServer.check_user(user.id)
+          end
+      end
+    end
+  end
+
+  defp handle_json_msg(contents, _from_id) do
+    Logger.error("AHM DM no handle - #{Kernel.inspect contents}")
   end
 
   defp do_begin() do

@@ -51,7 +51,7 @@
 
       <div class="col-md-12 mt-2">
         <div class="row">
-          <h5>Additional restrictions - <span class="text-danger">Not currently having an effect, please rely on standard dropdown for now</span></h5>
+          <h5>Additional restrictions</h5>
           <%= for {section, r_list} <- @restrictions_lists do %>
             <div class="col-md-3 col-lg-2">
               <strong><%= section %></strong>
@@ -74,27 +74,27 @@
         <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
           $('#restriction_Warning_reminder').prop('checked', true);
         ">
-          Apply warning
+          Add warning
         </div>
 
         <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
           $('#restriction_All_chat').prop('checked', true);
         ">
-          Apply mute
+          Add mute
         </div>
 
         <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
           $('#restriction_Site').prop('checked', true);
           $('#restriction_Login').prop('checked', true);
         ">
-          Apply ban
+          Add ban
         </div>
       </div>
 
       <div class="col-md-2 mt-2">
         <button type='submit' class='btn btn-warning btn-block' data-confirm="Are you sure">
           <i class={"fa-fw #{Central.Helpers.StylingHelper.icon(:new)}"}></i>
-          Add
+          Save moderation action
         </button>
       </div>
     </div>
