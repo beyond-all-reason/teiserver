@@ -159,7 +159,6 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   end
 
   # TODO: settag
-  # TODO: modwarn
 
   test "leveltoplay", %{lobby_id: lobby_id, hsocket: hsocket} do
     setting = Coordinator.call_consul(lobby_id, {:get, :level_to_play})
@@ -197,59 +196,6 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     setting = Coordinator.call_consul(lobby_id, {:get, :level_to_spectate})
     assert setting == 3
-  end
-
-  # Broken since we now propogate the action via the hook server which breaks in tests
-  test "modban", %{lobby_id: lobby_id, host: host, hsocket: hsocket, player: player, listener: listener} do
-    assert User.has_mute?(player.id) == false
-    assert User.is_restricted??(player.id, ["Login"]) == false
-
-    hook_listener = PubsubListener.new_listener(["account_hooks"])
-
-    data = %{cmd: "c.lobby.message", message: "$modban #{player.name} 60 Spamming channel"}
-    _tachyon_send(hsocket, data)
-    :timer.sleep(500)
-
-    hook_message = PubsubListener.get(hook_listener) |> hd
-    {:account_hooks, :create_report, report, :create} = hook_message
-
-    # Ensure the report was created
-    assert Account.get_report!(report.id)
-
-    messages = PubsubListener.get(listener)
-    assert messages == [{:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "#{player.name} banned for 60 hours by #{host.name}, reason: Spamming channel", lobby_id}, :say}]
-
-    # Now propogate the broadcast the way the hook server would have
-    User.update_report(report, :update)
-
-    assert User.has_mute?(player.id) == false
-    assert User.is_restricted??(player.id, ["Login"]) == true
-  end
-
-  test "modmute", %{lobby_id: lobby_id, host: host, hsocket: hsocket, player: player, listener: listener} do
-    assert User.has_mute?(player.id) == false
-    assert User.is_restricted??(player.id, ["Login"]) == false
-
-    hook_listener = PubsubListener.new_listener(["account_hooks"])
-
-    data = %{cmd: "c.lobby.message", message: "$modmute #{player.name} 60 Spamming channel"}
-    _tachyon_send(hsocket, data)
-    :timer.sleep(500)
-
-    hook_message = PubsubListener.get(hook_listener) |> hd
-    {:account_hooks, :create_report, report, :create} = hook_message
-
-    # Ensure the report was created
-    assert Account.get_report!(report.id)
-
-    messages = PubsubListener.get(listener)
-    assert messages == [{:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "#{player.name} muted for 60 hours by #{host.name}, reason: Spamming channel", lobby_id}, :say}]
-
-    # Now propogate the broadcast the way the hook server would have
-    User.update_report(report, :update)
-
-    assert User.has_mute?(player.id) == true
-    assert User.is_restricted??(player.id, ["Login"]) == false
   end
 
   test "timeout", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do

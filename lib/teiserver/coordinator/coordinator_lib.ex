@@ -127,15 +127,6 @@ Cancels the lobby split
 $rename <new name>
 Renames the lobby to the name given
 
-$modwarn <user> <hours> <reason>
-Warns the user for that many hours and creates a report for them
-
-$modmute <user> <hours> <reason>
-Mutes the user for that many hours and creates a report for them
-
-$modban <user> <hours> <reason>
-Bans the user for that many hours and creates a report for them
-
 $meme <meme>
 A predefined bunch of settings for meme games. It's all Rikerss' fault.
 - ticks: Ticks only, don't go Cortex!
