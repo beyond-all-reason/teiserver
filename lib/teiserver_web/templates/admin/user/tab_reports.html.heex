@@ -29,11 +29,11 @@
       <input type="hidden" name="report_response_action" value="Restrict" />
 
       <div class="col-md-4 mt-2">
-        <input type="text" name="reason" value="" placeholder="Reason" class="form-control" />
+        <input type="text" name="reason" id="report_form_reason" value="" placeholder="Reason" class="form-control" />
       </div>
 
       <div class="col-md-4 mt-2">
-        <input type="text" name="until" value="" placeholder="Expires (e.g. 60 minutes or 1 week), 'never' for a pemenant action" class="form-control" />
+        <input type="text" name="until" id="report_expires" value="" placeholder="Expires (e.g. 60 minutes or 1 week), 'never' for a pemenant action" class="form-control" />
       </div>
 
       <div class="col-md-4 mt-2">
@@ -88,6 +88,21 @@
           $('#restriction_Login').prop('checked', true);
         ">
           Add ban
+        </div>
+
+        <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+          $('#code_references').val('1.4');
+          $('#code_references').trigger('change');
+          $('#restriction_Warning_reminder').prop('checked', true);
+          $('#restriction_All_lobbies').prop('checked', true);
+          $('#restriction_Room_chat').prop('checked', true);
+          $('#restriction_All_lobbies').prop('checked', true);
+          $('#restriction_Matchmaking').prop('checked', true);
+          $('#restriction_Community').prop('checked', true);
+          $('#report_form_reason').val('Please rename to a name not in breach of the Code of Conduct and contact a moderator to have the restrictions lifted.');
+          $('#report_expires').val('never');
+        ">
+          Add rename
         </div>
       </div>
 
