@@ -415,8 +415,12 @@ defmodule Teiserver.Client do
 
   @spec set_awaiting_warn_ack(T.userid()) :: :ok
   def set_awaiting_warn_ack(userid) do
-    client = get_client_by_id(userid)
-    update(%{client | awaiting_warn_ack: true}, :silent)
+    case get_client_by_id(userid) do
+      nil ->
+        :ok
+      client ->
+        update(%{client | awaiting_warn_ack: true}, :silent)
+    end
     :ok
   end
 
