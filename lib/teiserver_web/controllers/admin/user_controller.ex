@@ -406,6 +406,7 @@ defmodule TeiserverWeb.Admin.UserController do
           |> Central.Account.ReportLib.make_favourite()
 
         conn
+        |> assign(:restrictions_lists, UserLib.restrictions_lists())
         |> assign(:report, report)
         |> assign(:changeset, changeset)
         |> add_breadcrumb(name: "Respond to report against: #{fav.item_label}", url: conn.request_path)
@@ -457,6 +458,7 @@ defmodule TeiserverWeb.Admin.UserController do
             changeset = Central.Account.change_report(report)
 
             conn
+            |> assign(:restrictions_lists, UserLib.restrictions_lists())
             |> assign(:error, error)
             |> assign(:report, report)
             |> assign(:changeset, changeset)

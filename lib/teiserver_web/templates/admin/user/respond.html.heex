@@ -1,4 +1,7 @@
-<% bsname = view_colour() %>
+<%
+  bsname = view_colour()
+  report_bsname = Central.Account.ReportLib.colours()
+%>
 
 <%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
 
@@ -22,7 +25,27 @@
             active: ""
         }) %>
         <hr />
+        
+        <div class="alert alert-warning">
+          <strong><%= @report.reporter.name %></strong> reported <strong><%= @report.target.name %></strong> with the reason: <strong><%= @report.reason %></strong>
+        </div>
 
+        <h5>Quick actions</h5>
+        <form action={Routes.ts_admin_user_path(@conn, :respond_post, @report)} method="POST" style="display: inline-block; margin-right: 10px;">
+          <input type="submit" value="Ignore report (Invalid)" name="form.submitted" class={"btn btn-#{report_bsname}"} />
+        </form>
+        
+        <form action={Routes.ts_admin_user_path(@conn, :respond_post, @report)} method="POST" style="display: inline-block; margin-right: 10px;">
+          <input type="submit" value="Ignore report (No evidence)" name="form.submitted" class={"btn btn-#{report_bsname}"} />
+        </form>
+        
+        <form action={Routes.ts_admin_user_path(@conn, :respond_post, @report)} method="POST" style="display: inline-block; margin-right: 10px;">
+          <input type="submit" value="False/Bad report" name="form.submitted" class={"btn btn-#{report_bsname}"} />
+        </form>
+        
+        <hr />
+
+        <h5>Detailed action</h5>
         <%= form_for @changeset, Routes.ts_admin_user_path(@conn, :respond_post, @report), fn f -> %>
           <%= if @changeset.action do %>
             <div class="alert alert-danger">
@@ -35,9 +58,8 @@
               <p><%= assigns[:error] %></p>
             </div>
           <% end %>
-
-          <em><%= @report.reporter.name %></em> reported <em><%= @report.target.name %></em> with the reason: <%= @report.reason %>
-          <br /><br />
+          
+          <input type="hidden" name="report[response_action]" value="Restrict" />
 
           <div class="form-group row">
             <div class="col-lg-4">
@@ -46,21 +68,9 @@
               <%= error_tag f, :response_text %>
             </div>
 
-            <div class="col-lg-2">
-              <%= label f, :response_action, class: "control-label" %>
-
-              <select class="form-control" name="report[response_action]" id="report_response_action" autofocus="autofocus">
-                <%= for opt <- Central.Account.ReportLib.response_actions() do %>
-                  <option value={opt}>
-                    <%= opt %>
-                  </option>
-                <% end %>
-              </select>
-            </div>
-
-            <div class="col-lg-2">
+            <div class="col-lg-4">
               <label class="control-label">Expires</label>
-              <input type='text' name='report[response_data]' id='report_response_data' value='' placeholder='"Never" to never expire' class='form-control' />
+              <input type='text' name='report[response_data]' id='report_response_data' value='' placeholder="e.g. 60 minutes or 1 week, 'never' for a pemenant action" class='form-control' />
             </div>
 
             <div class="col-md-4">
@@ -76,29 +86,81 @@
                 <% end %>
               </select>
             </div>
-          </div>
+            
+            <div class="col-md-12 mt-2">
+              <div class="row">
+                <h5>Restrictions</h5>
+                <%= for {section, r_list} <- @restrictions_lists do %>
+                  <div class="col-md-3 col-lg-2">
+                    <strong><%= section %></strong>
+                    <%= for r <- r_list do %>
+                      <% r_clean = String.replace(r, " ", "_") %>
+                      <%= central_component "checkbox",
+                        id: "restriction_#{r_clean}",
+                        name: "restrict[#{r_clean}]",
+                        label: r,
+                        value: r,
+                        checked: false
+                      %>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          
+            <div class="col-md-10 mt-2">
+              <div class={"btn btn-outline-#{report_bsname} mx-2"} onclick="
+                $('#restriction_Warning_reminder').prop('checked', true);
+              ">
+                Add warning
+              </div>
 
-          <div class="form-group my-3">
-            <%= if @changeset.data.id do %>
+              <div class={"btn btn-outline-#{report_bsname} mx-2"} onclick="
+                $('#restriction_All_chat').prop('checked', true);
+              ">
+                Add mute
+              </div>
+
+              <div class={"btn btn-outline-#{report_bsname} mx-2"} onclick="
+                $('#restriction_Site').prop('checked', true);
+                $('#restriction_Login').prop('checked', true);
+              ">
+                Add ban
+              </div>
+
+              <div class={"btn btn-outline-#{report_bsname} mx-2"} onclick="
+                $('#report_code_references').val('1.4');
+                $('#report_code_references').trigger('change');
+                $('#restriction_Warning_reminder').prop('checked', true);
+                $('#restriction_All_lobbies').prop('checked', true);
+                $('#restriction_Room_chat').prop('checked', true);
+                $('#restriction_All_lobbies').prop('checked', true);
+                $('#restriction_Matchmaking').prop('checked', true);
+                $('#restriction_Community').prop('checked', true);
+                $('#report_form_reason').val('Please rename to a name not in breach of the Code of Conduct and contact a moderator to have the restrictions lifted.');
+                $('#report_response_data').val('never');
+              ">
+                Add rename
+              </div>
+            </div>
+
+            <div class="form-group my-3">
               <a href={"#{Routes.ts_admin_user_path(@conn, :show, @report.target_id)}#reports_tab"} class="btn btn-secondary btn-outline">
                 Cancel
               </a>
 
-              <input type="submit" value="Save changes" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
-            <% else %>
-              <input type="submit" value="Create" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
-            <% end %>
-          </div>
-        <% end %>
+              <input type="submit" value="Submit response" name="form.submitted" class={"btn btn-#{report_bsname} float-end"} />
+            </div>
+          <% end %>
 
-        <hr />
-        <h5>CoC Quick Reference</h5>
+          <hr />
+          <h5>CoC Quick Reference</h5>
 
-        <ul>
-        <%= for {key, text} <- @coc_lookup do %>
-          <li><strong><%= key %>:</strong> <%= text %></li>
-        <% end %>
-        </ul>
+          <ul>
+          <%= for {key, text} <- @coc_lookup do %>
+            <li><strong><%= key %>:</strong> <%= text %></li>
+          <% end %>
+          </ul>
 
       </div>
     </div>
