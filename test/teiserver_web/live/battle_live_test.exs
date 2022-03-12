@@ -105,7 +105,7 @@ defmodule TeiserverWeb.Live.BattleTest do
         |> String.replace(" gameHash", "")
         |> int_parse
 
-      {:ok, view, html} = live(conn, "/teiserver/battle/lobbies/#{lobby_id}")
+      {:ok, view, html} = live(conn, "/teiserver/battle/lobbies/show/#{lobby_id}")
       assert html =~ "LiveBattleShow"
       assert html =~ "Speed metal"
       assert html =~ "#{host_user.name}"
@@ -149,7 +149,7 @@ defmodule TeiserverWeb.Live.BattleTest do
     end
 
     test "show - no battle", %{conn: conn} do
-      assert {:error, {:redirect, %{to: "/teiserver/battle/lobbies"}}} = live(conn, "/teiserver/battle/lobbies/0")
+      assert {:error, {:redirect, %{to: "/teiserver/battle/lobbies"}}} = live(conn, "/teiserver/battle/lobbies/show/0")
     end
   end
 end

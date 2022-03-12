@@ -68,6 +68,14 @@ defmodule Teiserver.Battle.LobbyThrottle do
     {:noreply, broadcast(state)}
   end
 
+  def terminate(_reason, state) do
+    :ok = PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
+      {:battle_lobby_throttle, :closed}
+    )
+  end
+
   defp broadcast(state) do
     :ok = PubSub.broadcast(
       Central.PubSub,

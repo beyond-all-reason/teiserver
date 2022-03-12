@@ -112,7 +112,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   # end
 
   @impl true
-  def handle_info({:battle_lobby_throttle, _lobby_id}, socket) do
+  def handle_info({:battle_lobby_throttle, :closed}, socket) do
     {:noreply,
       socket
       |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
