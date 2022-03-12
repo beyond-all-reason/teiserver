@@ -21,7 +21,7 @@ defmodule Teiserver.Battle.LobbyChat do
   @spec do_say(Types.userid(), String.t(), Types.lobby_id()) :: :ok
   def do_say(userid, "$ " <> msg, lobby_id), do: do_say(userid, "$#{msg}", lobby_id)
   def do_say(userid, msg, lobby_id) do
-    msg = String.trim(msg)
+    msg = trim_message(msg)
     user = User.get_user_by_id(userid)
     if user.bot == false and WordLib.flagged_words(msg) > 0 do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
@@ -56,7 +56,7 @@ defmodule Teiserver.Battle.LobbyChat do
 
   @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok
   def sayex(userid, msg, lobby_id) do
-    msg = String.trim(msg)
+    msg = trim_message(msg)
     user = User.get_user_by_id(userid)
     if user.bot == false and WordLib.flagged_words(msg) > 0 do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
@@ -91,7 +91,7 @@ defmodule Teiserver.Battle.LobbyChat do
 
   @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def sayprivateex(from_id, to_id, msg, lobby_id) do
-    msg = String.trim(msg)
+    msg = trim_message(msg)
     sender = User.get_user_by_id(from_id)
 
     disallowed = cond do
@@ -150,5 +150,12 @@ defmodule Teiserver.Battle.LobbyChat do
         user_id: userid,
       })
     end
+  end
+
+  defp trim_message(msg) when is_list(msg) do
+    Enum.join(msg, "\n") |> trim_message
+  end
+  defp trim_message(msg) do
+    String.trim(msg)
   end
 end

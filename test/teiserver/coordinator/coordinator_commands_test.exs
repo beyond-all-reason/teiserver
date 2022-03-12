@@ -1,8 +1,6 @@
 defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
   use Central.ServerCase, async: false
-  alias Teiserver.Battle.Lobby
-  alias Teiserver.Common.PubsubListener
-  alias Teiserver.{User, Client, Coordinator, Account}
+  alias Teiserver.{User, Coordinator}
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
@@ -16,7 +14,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     {:ok, socket: socket, user: user, coordinator_userid: coordinator_userid}
   end
 
-  test "no command", %{socket: socket, user: user} do
+  test "no command", %{socket: socket} do
     message_coordinator(socket, "$no_command_here or here")
     [reply] = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}

@@ -149,65 +149,67 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   def handle_info({:do_client_inout, :login, userid}, state) do
     user = User.get_user_by_id(userid)
-    relevant_restrictions = user.restrictions
-      |> Enum.filter(fn r -> not Enum.member?(["Bridging"], r) end)
+    if user do
+      relevant_restrictions = user.restrictions
+        |> Enum.filter(fn r -> not Enum.member?(["Bridging"], r) end)
 
-    if not Enum.empty?(relevant_restrictions) do
-      reports = Account.list_reports(search: [
-        target_id: userid,
-        expired: false,
-        filter: "closed"
-      ])
+      if not Enum.empty?(relevant_restrictions) do
+        reports = Account.list_reports(search: [
+          target_id: userid,
+          expired: false,
+          filter: "closed"
+        ])
 
-      # Reasons you've had action taken against you
-      reasons = reports
-        |> Enum.map(fn report ->
-          expires = if report.expires do
-            ", expires #{date_to_str(report.expires, format: :ymd_hms)}"
-          else
-            ""
-          end
+        # Reasons you've had action taken against you
+        reasons = reports
+          |> Enum.map(fn report ->
+            expires = if report.expires do
+              ", expires #{date_to_str(report.expires, format: :ymd_hms)}"
+            else
+              ""
+            end
 
-          " - #{report.reason}#{expires}"
-        end)
+            " - #{report.reason}#{expires}"
+          end)
 
-      msg = [
-        "This is a reminder that you received one or more formal moderation actions as listed below:"
-      ] ++ reasons
+        msg = [
+          "This is a reminder that you received one or more formal moderation actions as listed below:"
+        ] ++ reasons
 
-      # Follow-up
-      followups = reports
-        |> Enum.filter(fn r -> r.followup != nil and r.followup != "" end)
-        |> Enum.map(fn r -> "- #{r.followup}" end)
+        # Follow-up
+        followups = reports
+          |> Enum.filter(fn r -> r.followup != nil and r.followup != "" end)
+          |> Enum.map(fn r -> "- #{r.followup}" end)
 
-      msg = if Enum.empty?(followups) do
-        msg
-      else
-        msg ++ ["If the behaviour continues one or more of the following actions may be performed:"] ++ followups
+        msg = if Enum.empty?(followups) do
+          msg
+        else
+          msg ++ ["If the behaviour continues one or more of the following actions may be performed:"] ++ followups
+        end
+
+        # Code of conduct references
+        cocs = reports
+          |> Enum.map(fn r -> r.code_references end)
+          |> List.flatten
+          |> Enum.uniq
+
+        msg = case cocs do
+          [] -> msg
+          _ -> msg ++ ["Please refer to Code of Conduct points #{Enum.join(cocs, ", ")}"]
+        end
+
+        # Do we need an acknowledgement? If they are muted then no.
+        msg = if User.has_mute?(user) do
+          msg ++ [@dispute_string]
+        else
+          Lobby.remove_user_from_any_battle(user.id)
+          Client.set_awaiting_warn_ack(userid)
+          acknowledge_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
+          msg ++ [@dispute_string, acknowledge_prompt]
+        end
+
+        Coordinator.send_to_user(userid, msg)
       end
-
-      # Code of conduct references
-      cocs = reports
-        |> Enum.map(fn r -> r.code_references end)
-        |> List.flatten
-        |> Enum.uniq
-
-      msg = case cocs do
-        [] -> msg
-        _ -> msg ++ ["Please refer to Code of Conduct points #{Enum.join(cocs, ", ")}"]
-      end
-
-      # Do we need an acknowledgement? If they are muted then no.
-      msg = if User.has_mute?(user) do
-        msg ++ [@dispute_string]
-      else
-        Lobby.remove_user_from_any_battle(user.id)
-        Client.set_awaiting_warn_ack(userid)
-        acknowledge_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
-        msg ++ [@dispute_string, acknowledge_prompt]
-      end
-
-      Coordinator.send_to_user(userid, msg)
     end
     {:noreply, state}
   end

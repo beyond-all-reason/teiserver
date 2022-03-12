@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
   alias Teiserver.Coordinator.AutomodServer
 
   import Teiserver.TeiserverTestLib,
-    only: [new_user: 0, tachyon_auth_setup: 1, _tachyon_send: 2, _tachyon_recv: 1]
+    only: [new_user: 0, tachyon_auth_setup: 1, _tachyon_send: 2]
 
   setup do
     banned_user = new_user()
@@ -107,7 +107,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
 
     monitor_user = User.get_user_by_name("AutohostMonitor")
 
-    {:ok, automod_action} = Account.create_automod_action(%{
+    {:ok, _automod_action} = Account.create_automod_action(%{
       enabled: true,
       type: "hardware",
       value: "uOGXziwWC1mCePGsh0tTQg==",
@@ -118,7 +118,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
     })
 
     delayed_user = new_user()
-    %{socket: delayed_socket} = tachyon_auth_setup(delayed_user)
+    %{socket: _delayed_socket} = tachyon_auth_setup(delayed_user)
 
     result = AutomodServer.check_user(delayed_user.id)
     assert result == "No action"
