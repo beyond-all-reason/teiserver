@@ -1,11 +1,6 @@
 <nav class="navbar navbar-expand-lg" id="breadcrumb-wrapper" aria-label="breadcrumb">
   <div class="container-fluid">
     <nav aria-label="breadcrumb">
-      <%= if assigns[:breadcrumb_extra] do %> 
-        <div id="breadcrumb-right">
-          <%= assigns[:breadcrumb_extra] %>
-        </div>
-      <% end %>
       <%= for breadcrumb_trail <- @breadcrumb_trails do %>
         <ol class="breadcrumb">
           <%= for breadcrumb <- breadcrumb_trail do %>
@@ -22,5 +17,11 @@
         </ol>
       <% end %>
     </nav>
+
+    <%= if assigns[:breadcrumb_extra] do %> 
+      <div id="breadcrumb-right">
+        <%= assigns[:breadcrumb_extra] %>
+      </div>
+    <% end %>
   </div>
 </nav>
