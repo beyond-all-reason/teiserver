@@ -421,23 +421,35 @@ defmodule TeiserverWeb.Admin.UserController do
   end
 
   @spec respond_post(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def respond_post(conn, %{"id" => id, "report" => report_params}) do
-    report = Central.Account.get_report!(id, preload: [:target])
+  def respond_post(conn, %{"id" => id, "report" => report_params} = params) do
+    report =
+      Central.Account.get_report!(id,
+        preload: [
+          :reporter,
+          :target,
+          :responder
+        ]
+      )
 
     case Central.Account.UserLib.has_access(report.target, conn) do
       {true, _} ->
         case Central.Account.ReportLib.perform_action(
                report,
                report_params["response_action"],
-               report_params["response_data"]
+               report_params["expires"]
              ) do
           {:ok, expires} ->
+            restriction_list = (params["restrict"] || [])
+              |> Enum.filter(fn {_, v} -> v != "false" end)
+              |> Enum.map(fn {_, v} -> v end)
+
             report_params =
               Map.merge(report_params, %{
                 "expires" => expires,
                 "responder_id" => conn.user_id,
                 "followup" => report_params["followup"],
                 "code_references" => report_params["code_references"],
+                "action_data" => %{"restriction_list" => restriction_list},
                 "responded_at" => Timex.now(),
               })
 
@@ -445,7 +457,7 @@ defmodule TeiserverWeb.Admin.UserController do
               {:ok, _report} ->
                 conn
                 |> put_flash(:success, "Report updated.")
-                |> redirect(to: Routes.ts_admin_user_path(conn, :show, report.target_id))
+                |> redirect(to: Routes.ts_admin_user_path(conn, :applying, report.target_id) <> "?tab=reports_tab")
 
               {:error, %Ecto.Changeset{} = changeset} ->
                 conn

@@ -42,24 +42,38 @@
         <div class="help-box alert alert-primary2">
           Clicking one of these buttons will submit a templated report according to the button pushed.
         </div>
-        
+
         <div class="btn btn-primary2 float-end" onclick="$('.help-box').toggle();">
           <i class='fa-fw fa-solid fa-circle-info'></i>
           &nbsp;
           Show/Hide help
         </div>
+
+        <form action={Routes.ts_admin_user_path(@conn, :respond_post, @report)} method="post" style="display: inline-block; margin-right: 10px;">
+          <input type="hidden" name="report[response_text]" value="Invalid report" />
+          <input type="hidden" name="report[response_action]" value="Ignore report" />
+          <input type="hidden" name="report[expires]" value="now" />
+          <input type="hidden" name="_method" value="PUT" />
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
         
-        <form action={Routes.ts_admin_user_path(@conn, :respond_post, @report)} method="POST" style="display: inline-block; margin-right: 10px;">
           <input type="submit" value="Ignore report (Invalid)" name="form.submitted" class={"btn btn-#{report_bsname}"} />
         </form>
 
-        <form action={Routes.ts_admin_user_path(@conn, :respond_post, @report)} method="POST" style="display: inline-block; margin-right: 10px;">
+        <form action={Routes.ts_admin_user_path(@conn, :respond_post, @report)} method="post" style="display: inline-block; margin-right: 10px;">
+          <input type="hidden" name="report[response_text]" value="Insufficent evidence" />
+          <input type="hidden" name="report[response_action]" value="Ignore report" />
+          <input type="hidden" name="report[expires]" value="now" />
+          <input type="hidden" name="_method" value="PUT" />
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
           <input type="submit" value="Ignore report (No evidence)" name="form.submitted" class={"btn btn-#{report_bsname}"} />
         </form>
         
+        <!--
         <form action={Routes.ts_admin_user_path(@conn, :respond_post, @report)} method="POST" style="display: inline-block; margin-right: 10px;">
           <input type="submit" value="False/Bad report" name="form.submitted" class={"btn btn-#{report_bsname}"} />
         </form>
+        -->
         
         <hr />
 
@@ -94,7 +108,7 @@
                 This is how long until the action will expire
               </div>
               <label class="control-label">Expires</label>
-              <input type='text' name='report[response_data]' id='report_response_data' value='' placeholder="e.g. 60 minutes or 1 week, 'never' for a pemenant action" class='form-control' />
+              <input type='text' name='report[expires]' id='report_expires' value='' placeholder="e.g. 60 minutes or 1 week, 'never' for a pemenant action" class='form-control' />
             </div>
 
             <div class="col-md-4">
@@ -174,8 +188,8 @@
                 $('#restriction_All_lobbies').prop('checked', true);
                 $('#restriction_Matchmaking').prop('checked', true);
                 $('#restriction_Community').prop('checked', true);
-                $('#report_form_reason').val('Please rename to a name not in breach of the Code of Conduct and contact a moderator to have the restrictions lifted.');
-                $('#report_response_data').val('never');
+                $('#report_response_text').val('Please rename to a name not in breach of the Code of Conduct and contact a moderator to have the restrictions lifted.');
+                $('#report_expires').val('never');
               ">
                 Add rename
               </div>
