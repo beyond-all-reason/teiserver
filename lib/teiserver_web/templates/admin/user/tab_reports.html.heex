@@ -10,6 +10,14 @@
   });
 </script>
 
+<style type="text/css">
+  .help-box {
+    display: none;
+    padding-bottom: 1px;
+    margin-bottom: 2px;
+  }
+</style>
+
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
 <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
 
@@ -20,28 +28,50 @@
   Show report form and CoC reference
 </div>
 
-<div id="report-form-div" style="display: none;">
+<div id="report-form-div" style="display: nnone;">
   <form action={Routes.ts_admin_user_path(@conn, :perform_action, @user, "report_action")} method="POST" id="report-form">
-    <div class="row section-menu">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="btn btn-primary2 float-end" onclick="$('.help-box').toggle();">
+          <i class='fa-fw fa-solid fa-circle-info'></i>
+          &nbsp;
+          Show/Hide help
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
       <input type="hidden" name="_method" value="PUT" />
       <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
       <input type="hidden" name="report_response_action" value="Restrict" />
 
       <div class="col-md-4 mt-2">
+        <div class="help-box alert alert-primary2">
+          This is the reason you are performing the action.
+        </div>
         <input type="text" name="reason" id="report_form_reason" value="" placeholder="Reason" class="form-control" />
       </div>
 
       <div class="col-md-4 mt-2">
+        <div class="help-box alert alert-primary2">
+          This is how long until the action will expire
+        </div>
         <input type="text" name="until" id="report_expires" value="" placeholder="Expires (e.g. 60 minutes or 1 week), 'never' for a pemenant action" class="form-control" />
       </div>
 
       <div class="col-md-4 mt-2">
+        <div class="help-box alert alert-primary2">
+          This is what will be done if the user persists in their behaviour. It will be placed into a template of: "If the behaviour continues, a follow up of {{followup}} may be employed"
+        </div>
         <input type="text" name="followup" value="" placeholder="Followup" class="form-control" />
       </div>
 
       <div class="col-md-12 mt-2">
-        CoC references:
+        <div class="help-box alert alert-primary2">
+          A list of items in the code of conduct that can be referenced. If you click the box and start typing it will filter the list for you so you can search on terms within the CoC. Reference as many points as you feel appropriate.
+        </div>
+        <label for="code_references" class="control-label">CoC references:</label>
         <select class="form-control list-builder-select" multiple="multiple" name="code_references[]" id="code_references">
           <%= for {key, text} <- @coc_lookup do %>
             <option value={key}><%= key <> " - " <> text %></option>
@@ -50,6 +80,9 @@
       </div>
 
       <div class="col-md-12 mt-2">
+        <div class="help-box alert alert-primary2">
+          These are the actual effects of the moderation action.
+        </div>
         <div class="row">
           <h5>Restrictions</h5>
           <%= for {section, r_list} <- @restrictions_lists do %>
@@ -71,6 +104,9 @@
       </div>
 
       <div class="col-md-10 mt-2">
+        <div class="help-box alert alert-primary2">
+          These buttons on the left will tick some of the checkboxes but will not submit the form.
+        </div>
         <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
           $('#restriction_Warning_reminder').prop('checked', true);
         ">
@@ -109,7 +145,7 @@
       <div class="col-md-2 mt-2">
         <button type='submit' class='btn btn-warning btn-block' data-confirm="Are you sure">
           <i class={"fa-fw #{Central.Helpers.StylingHelper.icon(:new)}"}></i>
-          Save moderation action
+          Create moderation action
         </button>
       </div>
     </div>

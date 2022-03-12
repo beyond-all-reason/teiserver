@@ -13,6 +13,14 @@
   });
 </script>
 
+<style type="text/css">
+  .help-box {
+    display: none;
+    padding-bottom: 1px;
+    margin-bottom: 2px;
+  }
+</style>
+
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
 <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
 
@@ -31,10 +39,20 @@
         </div>
 
         <h5>Quick actions</h5>
+        <div class="help-box alert alert-primary2">
+          Clicking one of these buttons will submit a templated report according to the button pushed.
+        </div>
+        
+        <div class="btn btn-primary2 float-end" onclick="$('.help-box').toggle();">
+          <i class='fa-fw fa-solid fa-circle-info'></i>
+          &nbsp;
+          Show/Hide help
+        </div>
+        
         <form action={Routes.ts_admin_user_path(@conn, :respond_post, @report)} method="POST" style="display: inline-block; margin-right: 10px;">
           <input type="submit" value="Ignore report (Invalid)" name="form.submitted" class={"btn btn-#{report_bsname}"} />
         </form>
-        
+
         <form action={Routes.ts_admin_user_path(@conn, :respond_post, @report)} method="POST" style="display: inline-block; margin-right: 10px;">
           <input type="submit" value="Ignore report (No evidence)" name="form.submitted" class={"btn btn-#{report_bsname}"} />
         </form>
@@ -63,22 +81,34 @@
 
           <div class="form-group row">
             <div class="col-lg-4">
+              <div class="help-box alert alert-primary2">
+                This is the reason you are performing the action.
+              </div>
               <%= label f, :response_text, class: "control-label" %>
               <%= text_input f, :response_text, class: "form-control" %>
               <%= error_tag f, :response_text %>
             </div>
 
             <div class="col-lg-4">
+              <div class="help-box alert alert-primary2">
+                This is how long until the action will expire
+              </div>
               <label class="control-label">Expires</label>
               <input type='text' name='report[response_data]' id='report_response_data' value='' placeholder="e.g. 60 minutes or 1 week, 'never' for a pemenant action" class='form-control' />
             </div>
 
             <div class="col-md-4">
+              <div class="help-box alert alert-primary2">
+                This is what will be done if the user persists in their behaviour. It will be placed into a template of: "If the behaviour continues, a follow up of {{followup}} may be employed"
+              </div>
               <label class="control-label" for="report_followup">Followup</label>
               <input type="text" id="report_followup" name="report[followup]" value="" placeholder="" class="form-control" />
             </div>
 
             <div class="col-md-12 my-3">
+              <div class="help-box alert alert-primary2">
+                A list of items in the code of conduct that can be referenced. If you click the box and start typing it will filter the list for you so you can search on terms within the CoC. Reference as many points as you feel appropriate.
+              </div>
               <label class="control-label" for="report_code_references">Code of Conduct references</label>
               <select class="form-control list-builder-select" multiple="multiple" name="report[code_references][]" id="report_code_references">
                 <%= for {key, text} <- @coc_lookup do %>
@@ -88,6 +118,10 @@
             </div>
             
             <div class="col-md-12 mt-2">
+              <div class="help-box alert alert-primary2">
+                These are the actual effects of the moderation action.
+              </div>
+              
               <div class="row">
                 <h5>Restrictions</h5>
                 <%= for {section, r_list} <- @restrictions_lists do %>
@@ -109,6 +143,9 @@
             </div>
           
             <div class="col-md-10 mt-2">
+              <div class="help-box alert alert-primary2">
+                These buttons on the left will tick some of the checkboxes but will not submit the form.
+              </div>
               <div class={"btn btn-outline-#{report_bsname} mx-2"} onclick="
                 $('#restriction_Warning_reminder').prop('checked', true);
               ">
@@ -149,7 +186,7 @@
                 Cancel
               </a>
 
-              <input type="submit" value="Submit response" name="form.submitted" class={"btn btn-#{report_bsname} float-end"} />
+              <input type="submit" value="Save and apply response" name="form.submitted" class={"btn btn-#{report_bsname} float-end"} />
             </div>
           <% end %>
 
