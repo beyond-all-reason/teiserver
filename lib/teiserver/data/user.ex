@@ -6,6 +6,7 @@ defmodule Teiserver.User do
   alias Teiserver.EmailHelper
   alias Teiserver.Account
   alias Teiserver.Account.{UserCache, RelationsLib}
+  alias Teiserver.Chat.WordLib
   alias Argon2
   alias Central.Account.Guardian
   alias Teiserver.Data.Types, as: T
@@ -196,6 +197,9 @@ defmodule Teiserver.User do
     email = String.trim(email)
 
     cond do
+      WordLib.acceptable_name?(name) == false ->
+        {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
+
       clean_name(name) |> String.length() > @max_username_length ->
         {:failure, "Max length #{@max_username_length} characters"}
 
@@ -224,6 +228,9 @@ defmodule Teiserver.User do
     email = String.trim(email)
 
     cond do
+      WordLib.acceptable_name?(name) == false ->
+        {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
+
       clean_name(name) |> String.length() > @max_username_length ->
         {:error, "Max length #{@max_username_length} characters"}
 
@@ -378,6 +385,9 @@ defmodule Teiserver.User do
     since_rename_three = now - (Enum.slice(rename_log, 2..2) ++ [0, 0, 0] |> hd)
 
     cond do
+      WordLib.acceptable_name?(new_name) == false ->
+        {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
+
       # Can't rename more than once every 5 days
       since_most_recent_rename < 60 * 60 * 24 * 5 ->
         {:error, "You have only recently changed your name, give this one a chance"}

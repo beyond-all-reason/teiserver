@@ -20,6 +20,7 @@ defmodule Teiserver.Chat.WordLib do
   @curse_words_b ~w(cunt retard tards)
   @curse_words_c ~w(shit fuck faggot)
 
+  @spec curse_score(String.t()) :: non_neg_integer()
   def curse_score(string) do
     a_score = Config.get_site_config_cache("teiserver.Curse word score A")
     b_score = Config.get_site_config_cache("teiserver.Curse word score B")
@@ -40,6 +41,7 @@ defmodule Teiserver.Chat.WordLib do
     end)
   end
 
+  @spec acceptable_name?(String.t()) :: boolean()
   def acceptable_name?(name) do
     if flagged_words(name) > 0 do
       false
