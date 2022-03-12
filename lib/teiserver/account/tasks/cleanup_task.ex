@@ -34,6 +34,7 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
 
   defp recalculate_restrictions(userid) do
     now = Timex.now()
+    never = Timex.now() |> Timex.shift(years: 1)
 
     {expires, restrictions} = Account.list_reports(search: [
       target_id: userid,
@@ -42,14 +43,14 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
     ])
     |> Enum.reduce({Timex.shift(now, years: 1), []}, fn (report, {expires, restriction_list}) ->
       {
-        TimexHelper.datetime_min(report.expires, expires),
-        restriction_list ++ report.action_data["restriction_list"]
+        TimexHelper.datetime_min(report.expires || never, expires),
+        restriction_list ++ (report.action_data["restriction_list"] || [])
       }
     end)
 
     # If expires is after now then we use that, if not it's now nil!
     # we encode/decode it to ensure the formatting is consistent
-    expires = if Timex.compare(now, expires) == -1, do: expires
+    expires = if Timex.compare(now, expires) == -1 and not Enum.empty?(restrictions), do: expires
     expires = expires |> Jason.encode!() |> Jason.decode!()
 
     {expires, Enum.uniq(restrictions)}

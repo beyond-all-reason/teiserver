@@ -120,6 +120,11 @@ defmodule Central.Account.ReportLib do
       where: reports.id in ^id_list
   end
 
+  def _search(query, :response_action, response_action) do
+    from reports in query,
+      where: reports.response_action == ^response_action
+  end
+
   def _search(query, :expired, false) do
     now = Timex.now()
     from reports in query,

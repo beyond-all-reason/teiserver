@@ -273,6 +273,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
     :ok
   end
+  def report_updated(_, :silent), do: :ok
 
   defp do_reply(%Alchemy.Message{author: author, content: content, channel_id: channel_id, mentions: mentions}) do
     # Mentions come through encoded in a way we don't want to preserve, this substitutes them

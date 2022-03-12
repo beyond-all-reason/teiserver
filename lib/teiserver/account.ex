@@ -309,6 +309,8 @@ defmodule Teiserver.Account do
   def get_report!(id), do: Central.Account.get_report!(id)
   def get_report!(id, args), do: Central.Account.get_report!(id, args)
 
+  def update_report(report, params, reason), do: Central.Account.update_report(report, params, reason)
+
   def create_report(_, nil, _, _, _), do: {:error, "no target user"}
   def create_report(reporter_id, target_id, location, location_id, reason) do
     params = %{
