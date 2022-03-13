@@ -1,6 +1,7 @@
 defmodule Teiserver.Chat.WordLib do
   @moduledoc false
   alias Central.Config
+  alias Central.Helpers.StringHelper
 
   @flagged_regex ~r/(n[i1]gg[e3]r|cun[t7][s5]?|\b(r[e3])?[t7]ards?\b)/iu
 
@@ -15,10 +16,19 @@ defmodule Teiserver.Chat.WordLib do
     |> Enum.count
   end
 
+  # def plurals(words) when is_list(words), do: Enum.map(words, &plurals/1)
+  # def plurals(w) do
+  #   [
+  #     w,
+  #     w <> "s",
+  #     w <> "ed"
+  #   ]
+  # end
+
   # Curse words in group A are very bad and treated worse, C are casual and scored less harshly
-  @curse_words_a ~w(nigger)
-  @curse_words_b ~w(cunt retard tards)
-  @curse_words_c ~w(shit fuck faggot)
+  @curse_words_a ~w(nigger) |> StringHelper.plurals |> List.flatten
+  @curse_words_b ~w(cunt retard tards) |> StringHelper.plurals |> List.flatten
+  @curse_words_c ~w(shit fuck faggot) |> StringHelper.plurals |> List.flatten
 
   @spec curse_score(String.t()) :: non_neg_integer()
   def curse_score(string) do

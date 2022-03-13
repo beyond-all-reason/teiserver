@@ -23,8 +23,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{command: "s"} = cmd, state), do: handle_command(Map.put(cmd, :command, "status"), state)
   def handle_command(%{command: "status", senderid: senderid} = _cmd, state) do
     locks = state.locks
-    |> Enum.map(fn l -> to_string(l) end)
-    |> Enum.join(", ")
+      |> Enum.map(fn l -> to_string(l) end)
+      |> Enum.join(", ")
 
     pos_str = case get_queue_position(state.join_queue, senderid) do
       -1 ->

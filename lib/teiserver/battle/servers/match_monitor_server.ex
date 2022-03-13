@@ -71,7 +71,8 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
-  def handle_info({:direct_message, from_id, message}, state) do
+  def handle_info({:direct_message, from_id, "user_info " <> message}, state) do
+    message = String.trim(message)
     case Base.url_decode64(message) do
       {:ok, compressed_contents} ->
         case Teiserver.Protocols.Spring.unzip(compressed_contents) do
@@ -80,13 +81,13 @@ defmodule Teiserver.Battle.MatchMonitorServer do
               {:ok, data} ->
                 handle_json_msg(data, from_id)
               _ ->
-                Logger.info("AHM DM no catch, no json-decode - #{contents_string}")
+                Logger.info("AHM DM no catch, no json-decode - '#{contents_string}'")
             end
           _ ->
-            Logger.info("AHM DM no catch, no decompress - #{compressed_contents}")
+            Logger.info("AHM DM no catch, no decompress - '#{compressed_contents}'")
         end
       _ ->
-        Logger.info("AHM DM no catch, no base64 - #{message}")
+        Logger.info("AHM DM no catch, no base64 - '#{message}'")
     end
 
     {:noreply, state}
@@ -94,7 +95,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   # Catchall handle_info
   def handle_info(msg, state) do
-    Logger.error("Match monitor Server handle_info error. No handler for msg of #{Kernel.inspect msg}")
+    Logger.info("Match monitor Server handle_info error. No handler for msg of #{Kernel.inspect msg}")
     {:noreply, state}
   end
 
@@ -104,7 +105,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         nil ->
           :ok
         user ->
-          Logger.error("Handling")
           stats = %{
             "hardware:cpuinfo" => contents["CPU"],
             "hardware:gpuinfo" => contents["GPU"],

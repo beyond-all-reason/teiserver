@@ -18,7 +18,7 @@ defmodule Teiserver.Battle.LobbyChat do
     end
   end
 
-  @spec do_say(Types.userid(), String.t(), Types.lobby_id()) :: :ok
+  @spec do_say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def do_say(userid, "$ " <> msg, lobby_id), do: do_say(userid, "$#{msg}", lobby_id)
   def do_say(userid, msg, lobby_id) do
     msg = trim_message(msg)
@@ -27,14 +27,14 @@ defmodule Teiserver.Battle.LobbyChat do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    disallowed = cond do
-      User.is_restricted?(user, ["All chat", "Lobby chat"]) -> true
-      String.slice(msg, 0..0) == "!" and User.is_restricted?(user, ["Host commands"]) -> true
-      Enum.member?(["!y", "!n"], String.downcase(msg)) and User.is_restricted?(user, ["Voting"]) -> true
-      true -> false
+    allowed = cond do
+      User.is_restricted?(user, ["All chat", "Lobby chat"]) -> false
+      String.slice(msg, 0..0) == "!" and User.is_restricted?(user, ["Host commands"]) -> false
+      Enum.member?(["!y", "!n"], String.downcase(msg)) and User.is_restricted?(user, ["Voting"]) -> false
+      true -> true
     end
 
-    if not disallowed do
+    if allowed do
       persist_message(user, msg, lobby_id, :say)
 
       PubSub.broadcast(
@@ -49,12 +49,13 @@ defmodule Teiserver.Battle.LobbyChat do
         {:lobby_chat, :say, lobby_id, userid, msg}
       )
 
-      # Client.chat_flood_check(userid)
+      :ok
+    else
+      {:error, "Permission denied"}
     end
-    :ok
   end
 
-  @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok
+  @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def sayex(userid, msg, lobby_id) do
     msg = trim_message(msg)
     user = User.get_user_by_id(userid)
@@ -62,14 +63,14 @@ defmodule Teiserver.Battle.LobbyChat do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
-    disallowed = cond do
-      User.is_restricted?(user, ["All chat", "Lobby chat"]) -> true
-      String.slice(msg, 0..0) == "!" and User.is_restricted?(user, ["Host commands"]) -> true
-      Enum.member?(["!y", "!n"], String.downcase(msg)) and User.is_restricted?(user, ["Voting"]) -> true
-      true -> false
+    allowed = cond do
+      User.is_restricted?(user, ["All chat", "Lobby chat", "Direct chat"]) -> false
+      String.starts_with?(msg, "!") and User.is_restricted?(user, ["Host commands"]) -> false
+      Enum.member?(["!y", "!n"], String.downcase(msg)) and User.is_restricted?(user, ["Voting"]) -> false
+      true -> true
     end
 
-    if not disallowed do
+    if allowed do
       persist_message(user, msg, lobby_id, :sayex)
 
       PubSub.broadcast(
@@ -83,10 +84,10 @@ defmodule Teiserver.Battle.LobbyChat do
         "teiserver_lobby_chat:#{lobby_id}",
         {:lobby_chat, :announce, lobby_id, userid, msg}
       )
-
-      # Client.chat_flood_check(userid)
+      :ok
+    else
+      {:error, "Permission denied"}
     end
-    :ok
   end
 
   @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
@@ -94,14 +95,14 @@ defmodule Teiserver.Battle.LobbyChat do
     msg = trim_message(msg)
     sender = User.get_user_by_id(from_id)
 
-    disallowed = cond do
-      User.is_restricted?(sender, ["All chat", "Lobby chat", "Direct chat"]) -> true
-      String.slice(msg, 0..0) == "!" and User.is_restricted?(sender, ["Host commands"]) -> true
-      Enum.member?(["!y", "!n"], String.downcase(msg)) and sender.is_restricted?(sender, ["Voting"]) -> true
-      true -> false
+    allowed = cond do
+      User.is_restricted?(sender, ["All chat", "Lobby chat", "Direct chat"]) -> false
+      String.starts_with?(msg, "!") and User.is_restricted?(sender, ["Host commands"]) -> false
+      Enum.member?(["!y", "!n"], String.downcase(msg)) and User.is_restricted?(sender, ["Voting"]) -> false
+      true -> true
     end
 
-    if not disallowed do
+    if allowed do
       PubSub.broadcast(
         Central.PubSub,
         "legacy_user_updates:#{to_id}",
@@ -113,6 +114,9 @@ defmodule Teiserver.Battle.LobbyChat do
         "teiserver_client_messages:#{to_id}",
         {:client_message, :lobby_direct_announce, to_id, {from_id, msg}}
       )
+      :ok
+    else
+      {:error, "Permission denied"}
     end
   end
 

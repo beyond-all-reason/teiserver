@@ -107,4 +107,15 @@ defmodule Central.Helpers.StringHelper do
       |> Enum.filter(fn s -> s != "" end)
     end
   end
+
+  def plurals(words) when is_list(words), do: Enum.map(words, &plurals/1)
+  def plurals(w) do
+    [
+      w,
+      w <> "s",
+      w <> "ed",
+      w <> "er",
+      w <> "ers",
+    ]
+  end
 end

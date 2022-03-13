@@ -56,7 +56,7 @@
         <h3 style={"color: #{@user.colour}"}>
           <%= @user.name %>
           &nbsp;
-          <i class={"far fa-fw #{@user.icon}"}></i>
+          <%= central_component "icon", icon: @user.icon, class: "fas" %>
         </h3>
         
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">

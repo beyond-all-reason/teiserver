@@ -131,10 +131,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  # def handle_info({:lobby_chat, :announce, _lobby_id, _userid, _msg}, state) do
-  #   {:noreply, state}
-  # end
-
   def handle_info({:do_split, split_uuid}, %{split: split} = state) do
     Logger.info("Doing split")
 
@@ -560,6 +556,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
       welcome_message: nil,
       join_queue: [],
 
+      started_at: Timex.now(),
+
       host_boss: nil,
       host_preset: nil,
       host_teamsize: 4,
@@ -586,13 +584,18 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
     lobby_id = opts[:lobby_id]
+    case Lobby.get_lobby(lobby_id) do
+      nil -> :ok
+      lobby ->
+        Logger.info("Starting consul_server for lobby_id #{lobby_id}/#{lobby.name}")
+    end
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
     # Update the queue pids cache to point to this process
     ConCache.put(:teiserver_consul_pids, lobby_id, self())
-    :timer.send_interval(10_000, :tick)
+    :timer.send_interval(5_000, :tick)
     send(self(), :startup)
     {:ok, empty_state(lobby_id)}
   end
