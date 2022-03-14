@@ -9,7 +9,7 @@ defmodule Teiserver.Agents.FrienderAgentServer do
     socket = AgentLib.get_socket()
     AgentLib.login(socket, %{
       name: "Friender_#{state.name}",
-      email: "Friender_#{state.name}@agent_email"
+      email: "Friender_#{state.name}@agents"
     })
 
     :timer.send_interval(@tick_period, self(), :tick)

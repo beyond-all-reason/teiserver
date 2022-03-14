@@ -1,6 +1,7 @@
 defmodule Teiserver.Agents.SupervisorAgentServer do
   use GenServer
-  alias Teiserver.Agents.AgentLib
+  alias Teiserver.Agents
+  alias Agents.AgentLib
 
   def handle_info(:begin, state) do
     AgentLib.post_agent_update(state.id, "Starting agents supervisor")
@@ -17,6 +18,10 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
     add_servers("matchmaking", 5)
     add_servers("partyjoin", 3)
     add_servers("partyhost", 3)
+
+    add_servers("moderated", 1, 1, %{action: "Warning"})
+    add_servers("moderated", 2, 2, %{action: "Mute"})
+    add_servers("moderated", 3, 3, %{action: "Ban"})
 
     AgentLib.post_agent_update(state.id, "Agent supervisor started")
     {:noreply, state}
@@ -38,7 +43,7 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
     start_at..end_at
     |> Enum.each(fn i ->
       {:ok, _pid} =
-        DynamicSupervisor.start_child(Teiserver.Agents.DynamicSupervisor, {
+        DynamicSupervisor.start_child(Agents.DynamicSupervisor, {
           module,
           name: AgentLib.via_tuple(module, i),
           data: Map.merge(%{
@@ -54,15 +59,16 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
   @spec lookup_module(String.t()) :: any()
   defp lookup_module(type) do
     case type do
-      "battlehost" -> Teiserver.Agents.BattlehostAgentServer
-      "battlejoin" -> Teiserver.Agents.BattlejoinAgentServer
-      "idle" -> Teiserver.Agents.IdleAgentServer
-      "in_and_out" -> Teiserver.Agents.InOutAgentServer
-      "friender" -> Teiserver.Agents.FrienderAgentServer
-      "unfriender" -> Teiserver.Agents.UnfrienderAgentServer
-      "matchmaking" -> Teiserver.Agents.MatchmakingAgentServer
-      "partyhost" -> Teiserver.Agents.PartyhostAgentServer
-      "partyjoin" -> Teiserver.Agents.PartyjoinAgentServer
+      "battlehost" -> Agents.BattlehostAgentServer
+      "battlejoin" -> Agents.BattlejoinAgentServer
+      "idle" -> Agents.IdleAgentServer
+      "in_and_out" -> Agents.InOutAgentServer
+      "friender" -> Agents.FrienderAgentServer
+      "unfriender" -> Agents.UnfrienderAgentServer
+      "matchmaking" -> Agents.MatchmakingAgentServer
+      "partyhost" -> Agents.PartyhostAgentServer
+      "partyjoin" -> Agents.PartyjoinAgentServer
+      "moderated" -> Agents.ModeratedAgentServer
     end
   end
 

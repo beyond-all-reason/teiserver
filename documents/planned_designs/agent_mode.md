@@ -5,6 +5,7 @@ Designed to be used to simulate a set of users using the server. Designed to aid
 The agents act as clients and interact with the system the same way any other client would. They are designed to allow for testing of the server and lobby clients by mimicking behaviour as organically as is easily feasible.
 
 ### Agent list
+#### Core agents
  * **idle** - Sits there and pings the server so it doesn't get disconnected.
  * **battlehost** - Every tick will open a battle lobby if not already in one. If already in one and there are no players, will randomly decide to keep it open or close it down.
  * **battlejoin** - Randomly joins/leaves lobbies
@@ -16,6 +17,8 @@ The agents act as clients and interact with the system the same way any other cl
  * **TODO partyhost** - Periodically sends party invites to friends; later leaves the party
  * **TODO partyjoin** - Accepts invites to parties and later leaves them
  
+ #### Additional agents
+ * **moderated** - Logs in but with moderation actions present against it
+ 
 ### Control
 The agents are controlled from [supervisor_agent_server.ex](lib/teiserver/agents/supervisor_agent_server.ex) in the `def handle_info(:begin, state) do` function. Here you can tweak which agents are started as per your needs.
-

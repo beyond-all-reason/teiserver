@@ -13,7 +13,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
     socket = AgentLib.get_socket()
     AgentLib.login(socket, %{
       name: name,
-      email: "Battlejoin_#{state.number}@agent_email",
+      email: "Battlejoin_#{state.number}@agents",
       extra_data: %{}
     })
 

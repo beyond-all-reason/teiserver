@@ -32,7 +32,7 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
     :ok
   end
 
-  defp recalculate_restrictions(userid) do
+  def recalculate_restrictions(userid) do
     now = Timex.now()
     never = Timex.now() |> Timex.shift(years: 1)
 

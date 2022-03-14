@@ -54,7 +54,6 @@ config :central, Teiserver,
   ],
   enable_benchmark: false,
   enable_hooks: true,
-  autologin: false,
 
   # Heatbeat interval is ms
   heartbeat_interval: 30_000,

@@ -15,7 +15,7 @@ defmodule Teiserver.Agents.IdleAgentServer do
     socket = AgentLib.get_socket()
     AgentLib.login(socket, %{
       name: "Idle_#{state.number}",
-      email: "Idle_#{state.number}@agent_email",
+      email: "Idle_#{state.number}@agents",
       extra_data: %{}
     })
 

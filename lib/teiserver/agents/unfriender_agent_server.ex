@@ -9,7 +9,7 @@ defmodule Teiserver.Agents.UnfrienderAgentServer do
     socket = AgentLib.get_socket()
     AgentLib.login(socket, %{
       name: "Unfriender_#{state.name}",
-      email: "Unfriender_#{state.name}@agent_email"
+      email: "Unfriender_#{state.name}@agents"
     })
 
     :timer.send_interval(@tick_period, self(), :tick)

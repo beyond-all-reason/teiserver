@@ -75,7 +75,6 @@ config :central, Teiserver,
     certfile: "/var/www/tls/cert.pem",
     cacertfile: "/var/www/tls/fullchain.pem"
   ],
-  autologin: false,
   enable_benchmark: false,
   enable_agent_mode: false
 

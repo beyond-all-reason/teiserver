@@ -76,12 +76,8 @@ defmodule Teiserver.Bridge.BridgeServer do
       message_contains?(message, "https:") ->
         nil
 
-      User.is_restricted?(user, "Bridging") ->
+      User.is_restricted?(user, ["Bridging"]) ->
         # Non-bridged user, ignore it
-        nil
-
-      # If they are restricted we don't want to bridge anything
-      User.is_restricted?(user) ->
         nil
 
       Config.get_site_config_cache("teiserver.Bridge from server") == false ->

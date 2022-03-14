@@ -95,7 +95,7 @@ defmodule Teiserver.Client do
 
         shadowbanned: User.is_shadowbanned?(user),
         muted: User.has_mute?(user),
-        restricted: User.is_restricted?(user),
+        awaiting_warn_ack: false,
         warned: false
       })
       |> add_client
@@ -360,13 +360,6 @@ defmodule Teiserver.Client do
       {:ok, new_value}
     end)
   end
-
-  @spec is_restricted?(T.userid() | T.client()) :: boolean()
-  def is_restricted?(nil), do: true
-  def is_restricted?(userid) when is_integer(userid), do: is_restricted?(get_client_by_id(userid))
-  def is_restricted?(%{restricted: true}), do: true
-  def is_restricted?(%{awaiting_warn_ack: true}), do: true
-  def is_restricted?(_), do: false
 
   @spec chat_flood_check(T.userid()) :: :ok
   def chat_flood_check(userid) do

@@ -60,7 +60,6 @@ config :central, Teiserver,
   ],
   heartbeat_interval: nil,
   heartbeat_timeout: nil,
-  autologin: true,
   enable_discord_bridge: false,
   enable_agent_mode: true,
   use_geoip: true

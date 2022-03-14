@@ -52,7 +52,7 @@ defmodule Teiserver.Agents.InOutAgentServer do
 
     {:success, user} = AgentLib.login(socket, %{
       name: "InAndOut_#{state.number}",
-      email: "InAndOut_#{state.number}@agent_email",
+      email: "InAndOut_#{state.number}@agents",
       extra_data: %{}
     })
 

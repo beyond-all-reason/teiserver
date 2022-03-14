@@ -9,7 +9,7 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
     socket = AgentLib.get_socket()
     AgentLib.login(socket, %{
       name: "Partyhost_#{state.name}",
-      email: "Partyhost_#{state.name}@agent_email"
+      email: "Partyhost_#{state.name}@agents"
     })
 
     :timer.send_interval(@tick_period, self(), :tick)

@@ -155,6 +155,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "joinq", senderid: senderid} = _cmd, state) do
     case Client.get_client_by_id(senderid) do
+      nil ->
+        Logger.info("Cannot joinq as no client")
+        state
+
       %{player: true} ->
         Logger.info("Cannot queue user #{senderid}, already a player")
         r = LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are already a player, you can't join the queue!", state.lobby_id)

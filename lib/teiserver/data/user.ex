@@ -15,8 +15,6 @@ defmodule Teiserver.User do
 
   require Logger
   alias Phoenix.PubSub
-  alias Teiserver.EmailHelper
-  alias Teiserver.Account
 
   @timer_sleep 500
   @max_username_length 20
@@ -264,12 +262,14 @@ defmodule Teiserver.User do
         |> Map.put(:spring_password, false)
         |> add_user
 
-        case EmailHelper.new_user(user) do
-          {:error, error} ->
-            Logger.error("Error sending new user email - #{user.email} - #{error}")
-          {:ok, _} ->
-            :ok
-            # Logger.error("Email sent, response of #{Kernel.inspect response}")
+        if not String.ends_with?(user.email, "@agents") do
+          case EmailHelper.new_user(user) do
+            {:error, error} ->
+              Logger.error("Error sending new user email - #{user.email} - #{error}")
+            {:ok, _} ->
+              :ok
+              # Logger.error("Email sent, response of #{Kernel.inspect response}")
+          end
         end
         :ok
 
@@ -304,11 +304,13 @@ defmodule Teiserver.User do
         |> Map.put(:springid, next_springid())
         |> add_user
 
-        case EmailHelper.new_user(user) do
-          {:error, error} ->
-            Logger.error("Error sending new user email - #{user.email} - #{Kernel.inspect error}")
-          {:ok, _} ->
-            :ok
+        if not String.ends_with?(user.email, "@agents") do
+          case EmailHelper.new_user(user) do
+            {:error, error} ->
+              Logger.error("Error sending new user email - #{user.email} - #{Kernel.inspect error}")
+            {:ok, _} ->
+              :ok
+          end
         end
         :ok
 
@@ -635,10 +637,6 @@ defmodule Teiserver.User do
           Enum.member?(["", "0", nil], lobby_hash) == true and not is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
 
-          # Used for testing, this should never be enabled in production
-          Application.get_env(:central, Teiserver)[:autologin] ->
-            do_login(user, ip, lobby, lobby_hash)
-
           is_restricted?(user, ["Login"]) ->
             {:error, "Banned, please see Discord for details"}
 
@@ -684,10 +682,6 @@ defmodule Teiserver.User do
 
           Enum.member?(["", "0", nil], lobby_hash) == true and not is_bot?(user) ->
             {:error, "LobbyHash/UserID missing in login"}
-
-          # Used for testing, this should never be enabled in production
-          Application.get_env(:central, Teiserver)[:autologin] ->
-            do_login(user, ip, lobby, lobby_hash)
 
           test_password(md5_password, user.password_hash) == false ->
             {:error, "Invalid password"}
