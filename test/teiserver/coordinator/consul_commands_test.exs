@@ -212,9 +212,22 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     bans = Coordinator.call_consul(lobby_id, {:get, :bans})
     assert bans == %{}
 
+    timeouts = Coordinator.call_consul(lobby_id, {:get, :timeouts})
+    assert timeouts == %{player.id => %{by: host.id, level: :banned, reason: "Because I said so"}}
+
+    assert Coordinator.call_consul(lobby_id, {:request_user_join_lobby, player.id}) == {false, "Because I said so"}
+
     # Check timeout state
     timeouts = Coordinator.call_consul(lobby_id, {:get, :timeouts})
     assert timeouts == %{player.id => %{by: host.id, level: :banned, reason: "Because I said so"}}
+
+    # Now we say the match ended
+    Coordinator.cast_consul(lobby_id, :match_stop)
+
+    assert Coordinator.call_consul(lobby_id, {:request_user_join_lobby, player.id}) == {true, nil}
+
+    timeouts = Coordinator.call_consul(lobby_id, {:get, :timeouts})
+    assert timeouts == %{}
   end
 
   test "kick by name", %{player: player, hsocket: hsocket, lobby_id: lobby_id} do
