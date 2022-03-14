@@ -50,7 +50,7 @@
             
             <h4>Random rename</h4>
             <form action={Routes.ts_admin_user_path(@conn, :rename_post, @user)} method='post' class=''>
-              <% random_rename = "rename#{:rand.uniform(899_999_999) + 100_000_000}" %>
+              <% random_rename = "renamed#{:rand.uniform(899_999_999) + 100_000_000}" %>
               <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
               <input type="hidden" name="_method" value="PUT" />
               <input type="hidden" name="new_name" value={random_rename} />
