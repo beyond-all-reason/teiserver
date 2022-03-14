@@ -54,13 +54,7 @@ defmodule Teiserver.User do
     :print_client_messages,
     :print_server_messages,
     :spring_password,
-    :discord_id,
-
-    # TODO: Remove
-    :warned,
-    :muted,
-    :banned,
-    :restricted
+    :discord_id
   ]
   def data_keys(), do: @data_keys
 
@@ -87,13 +81,7 @@ defmodule Teiserver.User do
     print_client_messages: false,
     print_server_messages: false,
     spring_password: true,
-    discord_id: nil,
-
-    # TODO: Remove
-    banned: [false, nil],
-    muted: [false, nil],
-    restricted: [false, nil],
-    warned: [false, nil]
+    discord_id: nil
   }
 
   def default_data(), do: @default_data
@@ -376,27 +364,29 @@ defmodule Teiserver.User do
   end
 
   @spec rename_user(T.userid(), String.t()) :: :success | {:error, String.t()}
-  def rename_user(userid, new_name) do
+  def rename_user(userid, new_name, admin_action \\ false) do
     rename_log = Account.get_user_stat_data(userid)
       |> Map.get("rename_log", [])
+
+    new_name = String.trim(new_name)
 
     now = :erlang.system_time(:seconds)
     since_most_recent_rename = now - (Enum.slice(rename_log, 0..0) ++ [0] |> hd)
     since_rename_three = now - (Enum.slice(rename_log, 2..2) ++ [0, 0, 0] |> hd)
 
     cond do
-      WordLib.acceptable_name?(new_name) == false ->
+      admin_action == false and WordLib.acceptable_name?(new_name) == false ->
         {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
 
       # Can't rename more than once every 5 days
-      since_most_recent_rename < 60 * 60 * 24 * 5 ->
+      admin_action == false and since_most_recent_rename < 60 * 60 * 24 * 5 ->
         {:error, "You have only recently changed your name, give this one a chance"}
 
       # Can't rename more than 3 times in 30 days
-      since_rename_three < 60 * 60 * 24 * 30 ->
+      admin_action == false and since_rename_three < 60 * 60 * 24 * 30 ->
         {:error, "If you keep changing your name people won't know who you are; give it a bit of time"}
 
-      is_restricted?(userid, ["All chat", "Renaming"]) ->
+      admin_action == false and is_restricted?(userid, ["All chat", "Renaming"]) ->
         {:error, "Muted"}
 
       clean_name(new_name) |> String.length() > @max_username_length ->
@@ -417,8 +407,7 @@ defmodule Teiserver.User do
   @spec do_rename_user(T.userid(), String.t()) :: :ok
   defp do_rename_user(userid, new_name) do
     user = get_user_by_id(userid)
-    ban_time = Timex.now() |> Timex.shift(seconds: 15) |> date_to_str(format: :ymd_t_hms)
-    update_user(%{user | banned: [true, ban_time]}, persist: true)
+    set_flood_level(user.id, 10)
 
     # Log the current name in their history
     previous_names = Account.get_user_stat_data(userid)
@@ -441,8 +430,6 @@ defmodule Teiserver.User do
 
     :timer.sleep(5000)
     recache_user(userid)
-    user = get_user_by_id(userid)
-    update_user(%{user | banned: [false, nil]}, persist: true)
     :ok
   end
 
@@ -873,19 +860,6 @@ defmodule Teiserver.User do
         flagged_word_count: flagged_words,
         location: location
       })
-    end
-  end
-
-  @spec is_restricted?(T.userid() | T.user()) :: boolean()
-  def is_restricted?(nil), do: true
-  def is_restricted?(userid) when is_integer(userid), do: is_restricted?(get_user_by_id(userid))
-  def is_restricted?(%{restricted: restricted}) do
-    case restricted do
-      [false, _] -> false
-      [true, nil] -> true
-      [true, until_str] ->
-        until = parse_ymd_t_hms(until_str)
-        Timex.compare(Timex.now(), until) != 1
     end
   end
 

@@ -368,7 +368,7 @@ defmodule TeiserverWeb.Admin.UserController do
           end
 
         case result do
-          {:ok, nil, tab} ->
+          {:ok, nil, _tab} ->
             conn
             |> put_flash(:info, "Action performed.")
             |> redirect(to: Routes.ts_admin_user_path(conn, :applying, user) <> "?tab=reports_tab")
@@ -654,6 +654,51 @@ defmodule TeiserverWeb.Admin.UserController do
     conn
     |> put_flash(:success, "stat #{key} updated")
     |> redirect(to: Routes.ts_admin_user_path(conn, :show, user.id))
+  end
+
+  @spec rename_form(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def rename_form(conn, %{"id" => id}) do
+    user = Account.get_user(id)
+
+    case Central.Account.UserLib.has_access(user, conn) do
+      {true, _} ->
+      conn
+          |> assign(:user, user)
+          |> add_breadcrumb(name: "Rename: #{user.name}", url: conn.request_path)
+          |> render("rename_form.html")
+
+      _ ->
+        conn
+        |> put_flash(:danger, "Unable to access this user")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
+  end
+
+  @spec rename_post(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def rename_post(conn, %{"id" => id, "new_name" => new_name}) do
+    user = Account.get_user(id)
+
+    case Central.Account.UserLib.has_access(user, conn) do
+      {true, _} ->
+        case Teiserver.User.rename_user(user.id, new_name, true) do
+          :success ->
+            conn
+              |> put_flash(:success, "User renamed")
+              |> redirect(to: Routes.ts_admin_user_path(conn, :show, user.id))
+
+          {:error, reason} ->
+            conn
+              |> assign(:user, user)
+              |> put_flash(:danger, "Error with rename: #{reason}")
+              |> add_breadcrumb(name: "Rename: #{user.name}", url: conn.request_path)
+              |> render("rename_form.html")
+        end
+
+      _ ->
+        conn
+        |> put_flash(:danger, "Unable to access this user")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
   end
 
   @spec applying(Plug.Conn.t(), map()) :: Plug.Conn.t()

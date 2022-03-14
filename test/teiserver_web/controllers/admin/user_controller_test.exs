@@ -120,6 +120,38 @@ defmodule TeiserverWeb.Admin.UserControllerTest do
     end
   end
 
+  describe "rename user" do
+    test "redirects when data is valid", %{conn: conn, main_group: main_group} do
+      user =
+        GeneralTestLib.make_user(%{
+          "email" => "tsuser_rename@tsuser_rename",
+          "admin_group_id" => "#{main_group.id}",
+          "data" => %{}
+        })
+      Teiserver.User.recache_user(user.id)
+
+      conn = put(conn, Routes.ts_admin_user_path(conn, :rename_post, user), new_name: "new_test_name")
+      assert redirected_to(conn) == Routes.ts_admin_user_path(conn, :show, user)
+
+      conn = get(conn, Routes.ts_admin_user_path(conn, :show, user))
+      assert html_response(conn, 200) =~ "new_test_name"
+    end
+
+    test "renders errors when data is invalid", %{conn: conn, main_group: main_group} do
+      user =
+        GeneralTestLib.make_user(%{
+          "email" => "tsuser_rename_bad@tsuser_rename_bad",
+          "admin_group_id" => "#{main_group.id}",
+          "data" => %{}
+        })
+      Teiserver.User.recache_user(user.id)
+
+      conn = put(conn, Routes.ts_admin_user_path(conn, :rename_post, user), new_name: "this_name_is_too_long_and_has_invalid_characters!")
+      assert html_response(conn, 200) =~ "New user name:"
+      assert conn.private[:phoenix_flash]["danger"] == "Error with rename: Max length 20 characters"
+    end
+  end
+
   # Report action takes place through the hookserver which isn't firing in this mode
   # describe "moderation" do
   #   test "apply temporary mute", %{conn: conn} do

@@ -5,6 +5,12 @@
     Recache
   </a>
 
+  <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :rename_form, @user)}>
+    <%= central_component "icon", icon: "fas fa-pen-field" %>
+    &nbsp;
+    Rename
+  </a>
+
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :full_chat, @user)}>
     <%= central_component "icon", icon: Central.Communication.ChatRoomLib.icon() %>
     &nbsp;
