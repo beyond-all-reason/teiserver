@@ -224,11 +224,11 @@ defmodule TeiserverWeb.Admin.UserController do
         changeset = Account.change_user(user)
 
         conn
-        |> assign(:user, user)
-        |> assign(:changeset, changeset)
-        |> assign(:groups, GroupLib.dropdown(conn))
-        |> add_breadcrumb(name: "Edit: #{user.name}", url: conn.request_path)
-        |> render("edit.html")
+          |> assign(:user, user)
+          |> assign(:changeset, changeset)
+          |> assign(:groups, GroupLib.dropdown(conn))
+          |> add_breadcrumb(name: "Edit: #{user.name}", url: conn.request_path)
+          |> render("edit.html")
 
       _ ->
         conn

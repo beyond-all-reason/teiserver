@@ -51,7 +51,6 @@
       <%= if is_admin do %><th>Email</th><% end %>
       <th>Client</th>
       <th>Status</th>
-      <th>Restrictions</th>
       <%= if is_admin do %>
         <th>HW</th>
       <% end %>
@@ -80,68 +79,27 @@
       <td>
         <%
           unverified = user.data["verified"] != true
+          user_r = %{restrictions: user.data["restrictions"] || []}
 
-          banned = case (user.data["banned"] || nil) do
-            [true, _] -> true
-            _ -> false
-          end
-
-          muted = case (user.data["muted"] || nil) do
-            [true, _] -> true
-            _ -> false
-          end
-
-          warned = case (user.data["warned"] || nil) do
-            [true, _] -> true
-            _ -> false
-          end
-
-          until = cond do
-            banned -> user.data["banned"] |> List.last()
-            muted -> user.data["muted"] |> List.last()
-            warned -> user.data["warned"] |> List.last()
-            true -> nil
-          end
+          banned = Teiserver.User.is_restricted?(user_r, ["Login"])
+          muted = Teiserver.User.is_restricted?(user_r, ["All chat", "Room chat", "Direct chat", "Lobby chat", "Battle chat"])
+          warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"])
         %>
 
-        <%= cond do %>
-          <% banned -> %>
-            <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Ban")}"}></i>
-            <%= if until do %>
-              <%= until %>
-            <% else %>
-              <i class='fa-fw far fa-infinity'></i>
-            <% end %>
-
-          <% muted -> %>
-            <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Mute")}"}></i>
-            <%= if until do %>
-              <%= until %>
-            <% else %>
-              <i class='fa-fw far fa-infinity'></i>
-            <% end %>
-
-          <% warned -> %>
-            <i class={"fa-fw text-warning #{Central.Account.ReportLib.action_icon("Warn")}"}></i>
-            <%= if until do %>
-              <%= until %>
-            <% else %>
-              <i class='fa-fw far fa-infinity'></i>
-            <% end %>
-
-          <% unverified -> %>
-            <i class='fa-fw text-info fas fa-square-question'></i>
-
-          <% true -> %>
-            &nbsp;
+        <%= if banned do %>
+          <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Ban")}"}></i>
         <% end %>
-      </td>
 
-      <td class="text-center">
-        <%= if Enum.empty?(Map.get(user.data, "restrictions", [])) do %>
-          &nbsp;
-        <% else %>
-          <i class='fa-fw fas text-danger2 fa-octagon'></i>
+        <%= if muted do %>
+          <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Mute")}"}></i>
+        <% end %>
+
+        <%= if warned do %>
+          <i class={"fa-fw text-warning #{Central.Account.ReportLib.action_icon("Warn")}"}></i>
+        <% end %>
+
+        <%= if unverified do %>
+          <i class='fa-fw text-info fas fa-square-question'></i>
         <% end %>
       </td>
 

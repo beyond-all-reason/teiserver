@@ -182,35 +182,6 @@ defmodule Teiserver.Account.UserLib do
       where: ilike(users.name, ^uname)
   end
 
-  def _search(query, :mod_action, "Banned") do
-    from users in query,
-      where: fragment("? -> ? ->> 0 = 'true'", users.data, "banned")
-  end
-
-  def _search(query, :mod_action, "Muted") do
-    from users in query,
-      where: fragment("? -> ? ->> 0 = 'true'", users.data, "muted")
-  end
-
-  def _search(query, :mod_action, "Warned") do
-    from users in query,
-      where: fragment("? -> ? ->> 0 = 'true'", users.data, "warned")
-  end
-
-  def _search(query, :mod_action, "Any action") do
-    from users in query,
-      where: fragment("? -> ? ->> 0 = 'true'", users.data, "warned")
-        or fragment("? -> ? ->> 0 = 'true'", users.data, "muted")
-        or fragment("? -> ? ->> 0 = 'true'", users.data, "banned")
-  end
-
-  def _search(query, :mod_action, "None") do
-    from users in query,
-      where: fragment("? -> ? ->> 0 = 'false'", users.data, "warned")
-        and fragment("? -> ? ->> 0 = 'false'", users.data, "muted")
-        and fragment("? -> ? ->> 0 = 'false'", users.data, "banned")
-  end
-
   def _search(query, key, value) do
     UserQueries._search(query, key, value)
   end
