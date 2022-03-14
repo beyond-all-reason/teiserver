@@ -157,7 +157,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     case Client.get_client_by_id(senderid) do
       %{player: true} ->
         Logger.info("Cannot queue user #{senderid}, already a player")
-        LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are already a player, you can't join the queue!", state.lobby_id)
+        r = LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are already a player, you can't join the queue!", state.lobby_id)
+        Logger.info("joinq_sayprivateex result #{Kernel.inspect r} for #{Kernel.inspect {state.coordinator_id, senderid, state.lobby_id}} type 1")
         state
       _ ->
         send(self(), :queue_check)
@@ -166,13 +167,15 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             Logger.info("Added #{senderid} to queue")
             new_queue = state.join_queue ++ [senderid]
             pos = get_queue_position(new_queue, senderid) + 1
-            LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}. Use $status to check on the queue.", state.lobby_id)
+            r = LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}. Use $status to check on the queue.", state.lobby_id)
+            Logger.info("joinq_sayprivateex result #{Kernel.inspect r} for #{Kernel.inspect {state.coordinator_id, senderid, state.lobby_id}} type 2")
 
             %{state | join_queue: new_queue}
           true ->
             Logger.info("Spectator #{senderid} is already in the queue")
             pos = get_queue_position(state.join_queue, senderid) + 1
-            LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}. Use $status to check on the queue and $leaveq to leave it.", state.lobby_id)
+            r = LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}. Use $status to check on the queue and $leaveq to leave it.", state.lobby_id)
+            Logger.info("joinq_sayprivateex result #{Kernel.inspect r} for #{Kernel.inspect {state.coordinator_id, senderid, state.lobby_id}} type 3")
             state
         end
     end
