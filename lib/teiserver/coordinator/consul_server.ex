@@ -392,6 +392,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         {true, nil}
 
       ban_state == :banned ->
+        Logger.info("ConsulServer allow_join false for #{userid} for reason #{reason}")
         {false, reason}
 
       state.gatekeeper == "friends" ->
