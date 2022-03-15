@@ -11,6 +11,9 @@ displays this help text
 $whoami
 Sends back information about who you are
 
+$whois <user>
+Sends back information about the user specified
+
 $discord
 Allows linking of your discord account to your BAR account
 
@@ -108,9 +111,6 @@ Moves the user to players
     moderators = """
 $playerlimit <limit>
 Sets a new player limit for this specific host.
-
-$whois <user>
-Sends back information about the user specified
 
 $check <user>
 Performs a smurf check against the user mentioned and sends you the result

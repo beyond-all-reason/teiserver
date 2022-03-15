@@ -1,9 +1,9 @@
 defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
   use Central.ServerCase, async: false
-  alias Teiserver.{User, Coordinator}
+  alias Teiserver.{User, Coordinator, Account}
 
   import Teiserver.TeiserverTestLib,
-    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
+    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, new_user: 0]
 
   setup do
     Coordinator.start_coordinator()
@@ -24,6 +24,50 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     assert reply == :timeout
   end
 
+  test "whoami", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
+    message_coordinator(socket, "$whoami")
+    [reply] = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+
+    [reply] = _tachyon_recv(socket)
+    assert reply == %{
+      "cmd" => "s.communication.received_direct_message",
+      "message" => ["You are #{user.name}", "Rank: 1 with 0 player hours and 0 spectator hours for a rank hour count of 0", "You currently have no accolades"],
+      "sender_id" => coordinator_userid
+    }
+  end
+
+  test "whois", %{socket: socket, coordinator_userid: coordinator_userid} do
+    other_user = new_user()
+
+    message_coordinator(socket, "$whois #{other_user.name}")
+    [reply] = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+
+    [reply] = _tachyon_recv(socket)
+    assert reply == %{
+      "cmd" => "s.communication.received_direct_message",
+      "message" => ["Found #{other_user.name}"],
+      "sender_id" => coordinator_userid
+    }
+
+    # Now with previous names
+    Account.update_user_stat(other_user.id, %{
+      "previous_names" => ["name1", "name2"]
+    })
+
+    message_coordinator(socket, "$whois #{other_user.name}")
+    [reply] = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+
+    [reply] = _tachyon_recv(socket)
+    assert reply == %{
+      "cmd" => "s.communication.received_direct_message",
+      "message" => ["Found #{other_user.name}", "Previous names: name1, name2"],
+      "sender_id" => coordinator_userid
+    }
+  end
+
   test "mute user command", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
     %{user: user2} = tachyon_auth_setup()
 
@@ -31,7 +75,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     [reply] = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
 
-    # It's not a valid command and thus we ignore it currently
     [reply] = _tachyon_recv(socket)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
@@ -47,7 +90,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     [reply] = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
 
-    # It's not a valid command and thus we ignore it currently
     [reply] = _tachyon_recv(socket)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
@@ -63,7 +105,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     [reply] = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
 
-    # It's not a valid command and thus we ignore it currently
     [reply] = _tachyon_recv(socket)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",

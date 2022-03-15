@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.Account.{AccoladeLib, CodeOfConductData}
   alias Teiserver.Coordinator.CoordinatorLib
 
-  @always_allow ~w(help whoami discord coc ignore mute ignore unmute unignore)
+  @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore)
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, _state) do
@@ -76,6 +76,60 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     state
   end
 
+  defp do_handle(%{command: "whois", senderid: senderid, remaining: remaining} = _cmd, state) do
+    case User.get_user_by_name(remaining) do
+      nil ->
+        User.send_direct_message(state.userid, senderid, "Unable to find a user with that name")
+      user ->
+        sender = User.get_user_by_id(senderid)
+        stats = Account.get_user_stat_data(user.id)
+
+        previous_names = (stats["previous_names"] || [])
+          |> Enum.join(", ")
+
+        standard_parts = [
+          "Found #{user.name}",
+          (if previous_names != "", do: "Previous names: #{previous_names}")
+        ]
+
+        mod_parts = if sender.moderator do
+          player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
+          spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
+          rank_time = User.rank_time(user.id)
+
+          accolades = AccoladeLib.get_player_accolades(user.id)
+          accolades_string = case Map.keys(accolades) do
+            [] ->
+              "They currently have no accolades"
+
+            _ ->
+              badge_types = Account.list_badge_types(search: [id_list: Map.keys(accolades)])
+              |> Map.new(fn bt -> {bt.id, bt} end)
+
+              ["Accolades as follows:"] ++
+                (accolades
+                |> Enum.map(fn {bt_id, count} ->
+                  ">> #{count}x #{badge_types[bt_id].name}"
+                end))
+          end
+
+          [
+            "Rank: #{user.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
+            accolades_string
+          ]
+        else
+          []
+        end
+
+        msg = (mod_parts ++ standard_parts)
+          |> List.flatten
+          |> Enum.filter(fn l -> l != nil end)
+
+        User.send_direct_message(state.userid, senderid, msg)
+    end
+    state
+  end
+
   # Code of Conduct search
   defp do_handle(%{command: "coc", remaining: remaining, senderid: senderid} = _cmd, state) do
     search_term = remaining
@@ -143,45 +197,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   end
 
   # Moderator commands
-  defp do_handle(%{command: "whois", senderid: senderid, remaining: remaining} = _cmd, state) do
-    case User.get_user_by_name(remaining) do
-      nil ->
-        User.send_direct_message(state.userid, senderid, "Unable to find a user with that name")
-      user ->
-        stats = Account.get_user_stat_data(user.id)
-
-        player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
-        spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
-        rank_time = User.rank_time(user.id)
-
-        accolades = AccoladeLib.get_player_accolades(user.id)
-        accolades_string = case Map.keys(accolades) do
-          [] ->
-            "They currently have no accolades"
-
-          _ ->
-            badge_types = Account.list_badge_types(search: [id_list: Map.keys(accolades)])
-            |> Map.new(fn bt -> {bt.id, bt} end)
-
-            ["Accolades as follows:"] ++
-              (accolades
-              |> Enum.map(fn {bt_id, count} ->
-                ">> #{count}x #{badge_types[bt_id].name}"
-              end))
-        end
-
-        msg = [
-          "Found #{user.name}",
-          "Rank: #{user.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
-          accolades_string
-        ]
-        |> List.flatten
-
-        User.send_direct_message(state.userid, senderid, msg)
-    end
-    state
-  end
-
   defp do_handle(%{command: command, senderid: senderid} = _cmd, state) do
     User.send_direct_message(state.userid, senderid, "I don't have a handler for the command '#{command}'")
     state
