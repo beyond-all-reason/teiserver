@@ -7,7 +7,7 @@ defmodule Teiserver.Chat.Tasks.DailyCleanupTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    before_timestamp = Timex.shift(Timex.now(), days: -14)
+    before_timestamp = Timex.shift(Timex.now(), days: -31)
       |> date_to_str(format: :ymd_hms)
 
     query = """

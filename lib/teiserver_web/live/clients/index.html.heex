@@ -70,7 +70,7 @@
                       <% end %>
                     </td>
                     <td>
-                      <%= if user.hw_hash != nil do %>
+                      <%= if user.hw_hash != nil and user.hw_hash != "" do %>
                         <i class='fa-fw far fa-check'></i>
                       <% else %>
                         &nbsp;

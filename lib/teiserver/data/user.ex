@@ -821,12 +821,20 @@ defmodule Teiserver.User do
     # from a date to a string of the date
     recache_user(user.id)
 
+    # If they're in a battle we need to deal with that
     if is_restricted?(user, ["Login"]) do
       client = Client.get_client_by_id(user.id)
       if client do
         Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
       end
       Client.disconnect(user.id, "Banned")
+    end
+
+    if is_restricted?(user, ["All chat", "Battle chat"]) do
+      client = Client.get_client_by_id(user.id)
+      if client do
+        Coordinator.send_to_host(client.lobby_id, "!mute #{client.name}")
+      end
     end
 
     :ok

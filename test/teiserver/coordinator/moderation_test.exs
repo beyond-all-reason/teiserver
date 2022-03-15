@@ -57,7 +57,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
         " - login_with_warning_test, expires #{expires}",
         "If the behaviour continues one or more of the following actions may be performed:",
         "- Additional actions",
-        "If you feel that you have been the target of an erroneous or unjust moderation action please contact the moderator who performed the action or our head of moderation, Beherith",
+        "If you feel that you have been the target of an erroneous or unjust moderation action please contact the head of moderation, Beherith",
         "Acknowledge this with 'I acknowledge this' to resume play"
       ],
       "sender_id" => Coordinator.get_coordinator_userid()
