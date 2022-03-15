@@ -33,7 +33,3 @@ defmodule Teiserver.Account.MergeAccountsTask do
     User.delete_user(deleting_id)
   end
 end
-
-
-# Teiserver.Account.MergeAccountsTask.perform(17925, 9265)
-# Teiserver.Account.MergeAccountsTask.perform(9756, 9265)

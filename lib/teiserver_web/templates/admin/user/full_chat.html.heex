@@ -29,7 +29,7 @@ Newest chat at the top of the list (read bottom to top).
 
 <%= case @mode do %>
   <% "room" -> %>
-    <h4>Room chat</h4>
+    <h4>Room chat - Page <%= @page + 1 %></h4>
     <table class='table'>
       <thead>
         <tr>
@@ -50,7 +50,7 @@ Newest chat at the top of the list (read bottom to top).
     </table>
 
   <% "lobby" -> %>
-    <h4>Lobby chat</h4>
+    <h4>Lobby chat - Page <%= @page + 1 %></h4>
     <table class='table'>
       <thead>
         <tr>
@@ -73,9 +73,34 @@ Newest chat at the top of the list (read bottom to top).
         <% end %>
       </tbody>
     </table>
+
+  <div class="row">
+    <div class="col-md-12">
+      <textarea rows="8" class="form-control"><%= for msg <- @messages do %>
+  <%= msg.content %><% end %></textarea>
+    </div>
+  </div>
 <% end %>
 
+  <div class="row mt-2">
+    <div class="col-md-12">
+<%= if @page > 0 do %>
+  <a href={Routes.ts_admin_user_path(@conn, :full_chat, @user, @page - 1)} class="btn btn-secondary">
+    <i class='fa-fw fa-arrow-left'></i>
+    &nbsp;
+    Previous page
+  </a>
+<% end %>
 
+<%= if not @last_page do %>
+  <a href={Routes.ts_admin_user_path(@conn, :full_chat, @user, @page + 1)} class="btn btn-secondary float-end">
+    <i class='fa-fw fa-arrow-right'></i>
+    &nbsp;
+    Next page
+  </a>
+<% end %>
+    </div>
+  </div>
 
       </div>
     </div>

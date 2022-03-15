@@ -221,6 +221,7 @@ defmodule TeiserverWeb.Router do
         get("/users/automod_action_form/:id", UserController, :automod_action_form)
         post("/users/automod_action_post/:id", UserController, :automod_action_post)
         get("/users/full_chat/:id", UserController, :full_chat)
+        get("/users/full_chat/:id/:page", UserController, :full_chat)
         get("/users/search", UserController, :index)
         post("/users/set_stat", UserController, :set_stat)
         get("/users/data_search", UserController, :data_search)
@@ -245,6 +246,7 @@ defmodule TeiserverWeb.Router do
         post("/chat", ChatController, :index)
 
         get("/lobbies/:id/chat", LobbyController, :chat)
+        get("/lobbies/:id/chat/:page", LobbyController, :chat)
       end
     end
   end

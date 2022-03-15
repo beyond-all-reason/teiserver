@@ -6,7 +6,7 @@
       </a>
     <% end %>
   
-    <h4>Lobby chat</h4>
+    <h4>Lobby chat - Page <%= @page + 1 %></h4>
     Oldest chat at the top (read top to bottom)
 
     <table class='table'>
@@ -35,7 +35,23 @@
 
 
   <div class="col-md-12">
-  <textarea rows="8" cols="40" class="form-control"><%= for msg <- @lobby_messages do %>
+    <textarea rows="8" cols="40" class="form-control"><%= for msg <- @lobby_messages do %>
 <%= msg.user.name %>: <%= msg.content %><% end %></textarea>
   </div>
 </div>
+
+<%= if @page > 0 do %>
+  <a href={Routes.ts_admin_lobby_path(@conn, :chat, @lobby_guid, @page - 1)} class="btn btn-secondary">
+    <i class='fa-fw fa-arrow-left'></i>
+    &nbsp;
+    Previous page
+  </a>
+<% end %>
+
+<%= if not @last_page do %>
+  <a href={Routes.ts_admin_lobby_path(@conn, :chat, @lobby_guid, @page + 1)} class="btn btn-secondary float-end">
+    <i class='fa-fw fa-arrow-right'></i>
+    &nbsp;
+    Next page
+  </a>
+<% end %>

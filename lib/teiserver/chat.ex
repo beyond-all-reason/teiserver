@@ -19,6 +19,8 @@ defmodule Teiserver.Chat do
     |> RoomMessageLib.preload(args[:preload])
     |> RoomMessageLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> QueryHelpers.offset_query(args[:offset] || 0)
   end
 
   @doc """
@@ -33,7 +35,6 @@ defmodule Teiserver.Chat do
   @spec list_room_messages(List.t()) :: List.t()
   def list_room_messages(args \\ []) do
     room_message_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
     |> Repo.all
   end
 
@@ -171,6 +172,8 @@ defmodule Teiserver.Chat do
     |> LobbyMessageLib.preload(args[:preload])
     |> LobbyMessageLib.order_by(args[:order_by])
     |> QueryHelpers.select(args[:select])
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> QueryHelpers.offset_query(args[:offset] || 0)
   end
 
   @doc """
@@ -185,7 +188,6 @@ defmodule Teiserver.Chat do
   @spec list_lobby_messages(List.t()) :: List.t()
   def list_lobby_messages(args \\ []) do
     lobby_message_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
     |> Repo.all
   end
 
