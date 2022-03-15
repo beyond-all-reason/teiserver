@@ -24,11 +24,7 @@
       <div class="card-body">
         <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
             show_search: false,
-            active: (cond do
-              @conn.params["search"] != nil -> "search"
-              # @filter != nil -> @filter
-              true -> "index"
-            end)
+            active: "smurf"
         }) %>
 
 <%= if @conn.params["search"] != nil do %>
@@ -68,60 +64,27 @@
       <td>
         <%
           unverified = user.data["verified"] != true
+          user_r = %{restrictions: user.data["restrictions"] || []}
 
-          banned = case (user.data["banned"] || nil) do
-            [true, _] -> true
-            _ -> false
-          end
-
-          muted = case (user.data["muted"] || nil) do
-            [true, _] -> true
-            _ -> false
-          end
-
-          warned = case (user.data["warned"] || nil) do
-            [true, _] -> true
-            _ -> false
-          end
-
-          until = cond do
-            banned -> user.data["banned"] |> List.last()
-            muted -> user.data["muted"] |> List.last()
-            warned -> user.data["warned"] |> List.last()
-            true -> nil
-          end
+          banned = Teiserver.User.is_restricted?(user_r, ["Login"])
+          muted = Teiserver.User.is_restricted?(user_r, ["All chat", "Room chat", "Direct chat", "Lobby chat", "Battle chat"])
+          warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"])
         %>
 
-        <%= cond do %>
-          <% banned -> %>
-            <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Ban")}"}></i>
-            <%= if until do %>
-              <%= until %>
-            <% else %>
-              <i class='fa-fw far fa-infinity'></i>
-            <% end %>
+        <%= if banned do %>
+          <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Ban")}"}></i>
+        <% end %>
 
-          <% muted -> %>
-            <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Mute")}"}></i>
-            <%= if until do %>
-              <%= until %>
-            <% else %>
-              <i class='fa-fw far fa-infinity'></i>
-            <% end %>
+        <%= if muted do %>
+          <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Mute")}"}></i>
+        <% end %>
 
-          <% warned -> %>
-            <i class={"fa-fw text-warning #{Central.Account.ReportLib.action_icon("Warn")}"}></i>
-            <%= if until do %>
-              <%= until %>
-            <% else %>
-              <i class='fa-fw far fa-infinity'></i>
-            <% end %>
+        <%= if warned do %>
+          <i class={"fa-fw text-warning #{Central.Account.ReportLib.action_icon("Warn")}"}></i>
+        <% end %>
 
-          <% unverified -> %>
-            <i class='fa-fw text-info fas fa-square-question'></i>
-
-          <% true -> %>
-            &nbsp;
+        <%= if unverified do %>
+          <i class='fa-fw text-info fas fa-square-question'></i>
         <% end %>
       </td>
 

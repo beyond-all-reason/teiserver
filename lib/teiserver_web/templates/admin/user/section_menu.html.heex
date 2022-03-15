@@ -72,6 +72,17 @@
         url: "#"
       %>
     <% end %>
+    
+    <%= if @active == "smurf" do %>
+      <%= central_component "section_menu_button",
+        name: "smurf",
+        label: "Smurf search",
+        active: @active,
+        icon: "fa-solid fa-face-angry-horns",
+        bsname: bsname,
+        url: "#"
+      %>
+    <% end %>
   </div>
   
   <div class="col-md-3">

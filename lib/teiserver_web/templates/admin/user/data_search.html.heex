@@ -1,46 +1,44 @@
 <% bsname = view_colour() %>
 
-<div class="search-row">
-  <form action={Routes.ts_admin_user_path(@conn, :data_search)} method="post" class="form-horizontal" id="search-box">
-    <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+<form action={Routes.ts_admin_user_path(@conn, :data_search)} method="post" class="form-horizontal" id="search-box">
+  <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
-    <div class="row">
-      <div class="col-md-4 col-xl-2 search-form-input">
-        <label for="data_search_cpu" class="control-label">CPU: </label>
-        <input type="text" name="data_search[cpu]" id="data_search_cpu" value={@params["cpu"]} placeholder="" class="form-control" />
-      </div>
-      
-      <div class="col-md-4 col-xl-2 search-form-input">
-        <label for="data_search_gpu" class="control-label">GPU: </label>
-        <input type="text" name="data_search[gpu]" id="data_search_gpu" value={@params["gpu"]} placeholder="" class="form-control" />
-      </div>
-      
-      <div class="col-md-4 col-xl-2 search-form-input">
-        <label for="data_search_ram" class="control-label">RAM: </label>
-        <input type="text" name="data_search[ram]" id="data_search_ram" value={@params["ram"]} placeholder="" class="form-control" />
-      </div>
-      
-      <div class="col-md-4 col-xl-2 search-form-input">
-        <label for="data_search_os" class="control-label">OS: </label>
-        <input type="text" name="data_search[os]" id="data_search_os" value={@params["os"]} placeholder="" class="form-control" />
-      </div>
-      
-      <div class="col-md-4 col-xl-2 search-form-input">
-        <label for="data_search_os" class="control-label">Custom field: </label>
-        <input type="text" name="data_search[custom_field]" id="data_search_custom_field" value={@params["custom_field"]} placeholder="" class="form-control" />
-      </div>
-      
-      <div class="col-md-4 col-xl-2 search-form-input">
-        <label for="data_search_os" class="control-label">Custom value: </label>
-        <input type="text" name="data_search[custom_value]" id="data_search_custom_value" value={@params["custom_value"]} placeholder="" class="form-control" />
-      </div>
+  <div class="row">
+    <div class="col-md-4 col-xl-2 search-form-input my-2">
+      <label for="data_search_cpu" class="control-label">CPU: </label>
+      <input type="text" name="data_search[cpu]" id="data_search_cpu" value={@params["cpu"]} placeholder="" class="form-control" />
     </div>
+    
+    <div class="col-md-4 col-xl-2 search-form-input my-2">
+      <label for="data_search_gpu" class="control-label">GPU: </label>
+      <input type="text" name="data_search[gpu]" id="data_search_gpu" value={@params["gpu"]} placeholder="" class="form-control" />
+    </div>
+    
+    <div class="col-md-4 col-xl-2 search-form-input my-2">
+      <label for="data_search_ram" class="control-label">RAM: </label>
+      <input type="text" name="data_search[ram]" id="data_search_ram" value={@params["ram"]} placeholder="" class="form-control" />
+    </div>
+    
+    <div class="col-md-4 col-xl-2 search-form-input my-2">
+      <label for="data_search_os" class="control-label">OS: </label>
+      <input type="text" name="data_search[os]" id="data_search_os" value={@params["os"]} placeholder="" class="form-control" />
+    </div>
+    
+    <div class="col-md-4 col-xl-2 search-form-input my-2">
+      <label for="data_search_os" class="control-label">Custom field: </label>
+      <input type="text" name="data_search[custom_field]" id="data_search_custom_field" value={@params["custom_field"]} placeholder="" class="form-control" />
+    </div>
+    
+    <div class="col-md-4 col-xl-2 search-form-input my-2">
+      <label for="data_search_os" class="control-label">Custom value: </label>
+      <input type="text" name="data_search[custom_value]" id="data_search_custom_value" value={@params["custom_value"]} placeholder="" class="form-control" />
+    </div>
+  </div>
 
-    <div class="row">
-      <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
-        &nbsp;<br />
-        <input type="submit" value="Search" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
-      </div>
+  <div class="row">
+    <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
+      &nbsp;<br />
+      <input type="submit" value="Search" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
     </div>
-  </form>
-</div>
+  </div>
+</form>
