@@ -13,7 +13,7 @@
         
         Your appearance is currently set as:
         <%= central_component "menu_card",
-          icon_class: "fad",
+          icon_class: "fa-duotone",
           name: "",
           icon: @current_user.icon,
           text: raw("&nbsp;"),
@@ -26,7 +26,7 @@
         <div class="row">
           <%= for {role, colour, icon} <- @options do %>
             <%= central_component "menu_card",
-              icon_class: "fad",
+              icon_class: "fa-duotone",
               name: "",
               icon: icon,
               text: role,

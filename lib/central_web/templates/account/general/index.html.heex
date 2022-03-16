@@ -4,7 +4,7 @@
       central_component "menu_card",
       icon: Central.Account.GroupLib.icon(),
       text: "Groups",
-      icon_class: "fad",
+      icon_class: "fa-duotone",
       link: Routes.account_group_path(@conn, :index)
     %>
   <% end %>
@@ -13,7 +13,7 @@
     central_component "menu_card",
     icon: "fad fa-cog",
     text: "Preferences",
-    icon_class: "fad",
+    icon_class: "fa-duotone",
     link: Routes.user_config_path(@conn, :index)
   %>
 
@@ -21,7 +21,7 @@
     central_component "menu_card",
     icon: Central.Account.icon(),
     text: "Account details",
-    icon_class: "fad",
+    icon_class: "fa-duotone",
     link: Routes.account_registration_path(@conn, :edit_details)
   %>
 
@@ -29,14 +29,14 @@
     central_component "menu_card",
     icon: "fad fa-lock",
     text: "Password",
-    icon_class: "fad",
+    icon_class: "fa-duotone",
     link: Routes.account_registration_path(@conn, :edit_password)
   %>
 </div>
 
 <div class="row mt-3">
   <%= central_component "menu_card",
-    icon_class: "fas",
+    icon_class: "fa-solid",
     icon: StylingHelper.icon(:back),
     text: "Back",
     link: Routes.general_page_path(@conn, :index)

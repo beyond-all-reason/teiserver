@@ -57,8 +57,8 @@ let CommunicationsNotification = {
       $("#communication-notifications-icon").addClass("text-info");
       $("#communication-notifications-badge").removeClass("badge-outline-primary");
       $("#communication-notifications-badge").addClass("badge-outline-info");
-      $("#communication-notifications-icon").removeClass("far");
-      $("#communication-notifications-icon").addClass("fas");
+      $("#communication-notifications-icon").removeClass("fa-regular");
+      $("#communication-notifications-icon").addClass("fa-solid");
     } else {
       v = parseInt(v) + 1;
     }

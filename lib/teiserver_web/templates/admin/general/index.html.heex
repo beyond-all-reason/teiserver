@@ -13,7 +13,7 @@
       icon: "far fa-users",
       name: "user_admin",
       text: "User admin",
-      icon_class: "fad",
+      icon_class: "fa-duotone",
       link: Routes.ts_admin_user_path(@conn, :index)
     %>
   <% end %>
@@ -24,7 +24,7 @@
       icon: Teiserver.Clans.ClanLib.icon(),
       name: "clan_admin",
       text: "Clan admin",
-      icon_class: "fad",
+      icon_class: "fa-duotone",
       link: Routes.ts_admin_clan_path(@conn, :index)
     %>
   <% end %>
@@ -35,12 +35,12 @@
       icon: Central.Admin.ToolLib.icon(),
       name: "tools",
       text: "Tools",
-      icon_class: "fad",
+      icon_class: "fa-duotone",
       link: Routes.ts_admin_tool_path(@conn, :index)
     %>
   <% end %>
 </div>
 
 <div class="row page-row">
-  <%= central_component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_general_general_path(@conn, :index) %>
+  <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_general_general_path(@conn, :index) %>
 </div>

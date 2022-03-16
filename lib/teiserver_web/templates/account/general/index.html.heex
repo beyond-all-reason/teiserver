@@ -1,6 +1,6 @@
 <div class="row page-row">
   <%= central_component "menu_card",
-    icon_class: "fad",
+    icon_class: "fa-duotone",
     name: "profile",
     icon: "fas fa-user-circle",
     text: "My profile",
@@ -8,7 +8,7 @@
   %>
   
   <%= central_component "menu_card",
-    icon_class: "fad",
+    icon_class: "fa-duotone",
     name: "",
     icon: Teiserver.icon(:relationship),
     text: "Friends/Mutes/Invites",
@@ -16,7 +16,7 @@
   %>
   
   <%= central_component "menu_card",
-    icon_class: "fad",
+    icon_class: "fa-duotone",
     name: "apperance",
     icon: "fas fa-icons",
     text: "Apperance",
@@ -24,7 +24,7 @@
   %>
   
   <%= central_component "menu_card",
-    icon_class: "fad",
+    icon_class: "fa-duotone",
     name: "",
     icon: Central.Config.UserConfigLib.icon(),
     text: "Preferences",
@@ -33,5 +33,5 @@
 </div>
 
 <div class="row page-row">
-  <%= central_component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_general_general_path(@conn, :index) %>
+  <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_general_general_path(@conn, :index) %>
 </div>

@@ -6,30 +6,30 @@
 
 <div class="row mt-3">
   <%= if allow?(@current_user, "admin.user") do %>
-    <%= central_component "menu_card", icon_class: "fas", icon: Central.Account.UserLib.icon, text: "Users", link: Routes.admin_user_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fa-solid", icon: Central.Account.UserLib.icon, text: "Users", link: Routes.admin_user_path(@conn, :index) %>
   <% end %>
 
   <%= if allow?(@current_user, "admin.group") do %>
-    <%= central_component "menu_card", icon_class: "fas", icon: Central.Account.GroupLib.icon, text: "Groups", link: Routes.admin_group_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fa-solid", icon: Central.Account.GroupLib.icon, text: "Groups", link: Routes.admin_group_path(@conn, :index) %>
   <% end %>
 
   <%= if allow?(@current_user, "admin.report") do %>
-    <%= central_component "menu_card", icon_class: "fas", icon: Central.Account.ReportLib.icon, text: "Reports", link: Routes.admin_report_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fa-solid", icon: Central.Account.ReportLib.icon, text: "Reports", link: Routes.admin_report_path(@conn, :index) %>
   <% end %>
 
   <%= if allow?(@current_user, "admin.dev") do %>
-    <%= central_component "menu_card", icon_class: "fas", icon: Central.Account.CodeLib.icon, text: "Codes", link: Routes.admin_code_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fa-solid", icon: Central.Account.CodeLib.icon, text: "Codes", link: Routes.admin_code_path(@conn, :index) %>
   <% end %>
 
   <%= if allow?(@current_user, "admin.dev") do %>
-    <%= central_component "menu_card", icon_class: "fas", icon: Central.Config.SiteConfigLib.icon, text: "Site config", link: Routes.admin_site_config_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fa-solid", icon: Central.Config.SiteConfigLib.icon, text: "Site config", link: Routes.admin_site_config_path(@conn, :index) %>
   <% end %>
 
   <%= if allow?(@current_user, "admin.dev") do %>
-    <%= central_component "menu_card", icon_class: "fas", icon: Central.Admin.ToolLib.icon, text: "Tools", link: Routes.admin_tool_path(@conn, :index) %>
+    <%= central_component "menu_card", icon_class: "fa-solid", icon: Central.Admin.ToolLib.icon, text: "Tools", link: Routes.admin_tool_path(@conn, :index) %>
   <% end %>
 </div>
 
 <div class="row mt-3">
-  <%= central_component "menu_card", icon_class: "fas", icon: StylingHelper.icon(:back), text: "Back", link: Routes.general_page_path(@conn, :index) %>
+  <%= central_component "menu_card", icon_class: "fa-solid", icon: StylingHelper.icon(:back), text: "Back", link: Routes.general_page_path(@conn, :index) %>
 </div>

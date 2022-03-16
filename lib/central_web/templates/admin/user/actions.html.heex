@@ -9,7 +9,7 @@
   <% end %>
 
   <a class="dropdown-item" href={Routes.account_report_path(@conn, :new, @user.id)}>
-    <%= central_component "icon", icon: StylingHelper.icon(:new), class: "fas" %>
+    <%= central_component "icon", icon: StylingHelper.icon(:new), class: "fa-solid" %>
     <%= central_component "icon", icon: Central.Account.ReportLib.icon() %>
     &nbsp;
     Add report

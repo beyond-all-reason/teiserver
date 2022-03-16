@@ -56,13 +56,13 @@
         <h3 style={"color: #{@user.colour}"}>
           <%= @user.name %>
           &nbsp;
-          <%= central_component "icon", icon: @user.icon, class: "fas" %>
+          <%= central_component "icon", icon: @user.icon, class: "fa-solid" %>
         </h3>
         
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item" role="presentation">
             <a href="#overview_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: Central.Helpers.StylingHelper.icon(:overview), class: "fas" %>
+              <%= central_component "icon", icon: Central.Helpers.StylingHelper.icon(:overview), class: "fa-solid" %>
               Overview
             </a>
           </li>

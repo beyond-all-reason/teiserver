@@ -50,7 +50,7 @@
     icon: Central.Account.ReportLib.icon(),
     name: "reports",
     text: "Reports",
-    icon_class: "fas",
+    icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :show, @user) <> "#reports_tab"
   %>
 
@@ -59,7 +59,7 @@
     icon: Central.Communication.ChatRoomLib.icon(),
     name: "chat",
     text: "Chat",
-    icon_class: "fas",
+    icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :full_chat, @user)
   %>
   
@@ -68,7 +68,7 @@
     icon: Teiserver.icon(:relationship),
     name: "relationships",
     text: "Relationships",
-    icon_class: "fas",
+    icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :relationships, @user)
   %>
 
@@ -77,7 +77,7 @@
     icon: Teiserver.Battle.MatchLib.icon(),
     name: "matches",
     text: "Matches",
-    icon_class: "fas",
+    icon_class: "fa-solid",
     link: Routes.ts_admin_match_path(@conn, :user_show, @user.id)
   %>
 
@@ -86,7 +86,7 @@
     icon: Teiserver.Account.AccoladeLib.icon(),
     name: "accolades",
     text: "Accolades",
-    icon_class: "fas",
+    icon_class: "fa-solid",
     link: Routes.ts_admin_accolade_path(@conn, :user_show, @user.id)
   %>
   
@@ -95,7 +95,7 @@
     icon: "fas fa-face-angry-horns",
     name: "smurf",
     text: "Smurf search",
-    icon_class: "fas",
+    icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :smurf_search, @user.id)
   %>
   

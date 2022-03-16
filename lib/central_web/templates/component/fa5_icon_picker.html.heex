@@ -12,7 +12,7 @@
 
   {thickness, the_icon} = case (Map.get(form.data, @field) || "") |> String.split(" ") do
     [a, b] -> {a, b}
-    [the_icon] -> {"fas", the_icon}
+    [the_icon] -> {"fa-solid", the_icon}
   end
 %>
 

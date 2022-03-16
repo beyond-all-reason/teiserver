@@ -6,7 +6,7 @@
       icon: Teiserver.Battle.LobbyLib.icon(),
       name: "battle_lobbies",
       text: "Lobbies",
-      icon_class: "fad",
+      icon_class: "fa-duotone",
       link: Routes.ts_battle_lobby_index_path(@conn, :index)
     %>
 
@@ -16,7 +16,7 @@
         icon: Teiserver.ClientLib.icon(),
         name: "live_client",
         text: "Live clients",
-        icon_class: "fad",
+        icon_class: "fa-duotone",
         link: Routes.ts_admin_client_index_path(@conn, :index)
       %>
     <% end %>
@@ -30,7 +30,7 @@
       icon: "far fa-user",
       name: "account",
       text: "Account",
-      icon_class: "fad",
+      icon_class: "fa-duotone",
       link: Routes.ts_account_general_path(@conn, :index)
     %>
     
@@ -39,7 +39,7 @@
       icon: Teiserver.Battle.MatchLib.icon(),
       name: "matches",
       text: "Matches",
-      icon_class: "fad",
+      icon_class: "fa-duotone",
       link: Routes.ts_battle_match_path(@conn, :index)
     %>
 
@@ -49,7 +49,7 @@
         icon: Teiserver.Game.QueueLib.icon(),
         name: "queue",
         text: "MM Queues",
-        icon_class: "fad",
+        icon_class: "fa-duotone",
         link: Routes.ts_game_queue_path(@conn, :index)
       %>
     <% end %>
@@ -60,7 +60,7 @@
         icon: Central.Helpers.StylingHelper.icon(:summary),
         name: "reports",
         text: "Reports",
-        icon_class: "fad",
+        icon_class: "fa-duotone",
         link: Routes.ts_reports_general_path(@conn, :index)
       %>
     <% end %>
@@ -84,7 +84,7 @@
         icon: "far fa-users",
         name: "user_admin",
         text: "User admin",
-        icon_class: "fad",
+        icon_class: "fa-duotone",
         link: Routes.ts_admin_user_path(@conn, :index)
       %>
     <% end %>
@@ -95,7 +95,7 @@
         icon: Teiserver.Clans.ClanLib.icon(),
         name: "clan_admin",
         text: "Clan admin",
-        icon_class: "fad",
+        icon_class: "fa-duotone",
         link: Routes.ts_admin_clan_path(@conn, :index)
       %>
     <% end %>
@@ -106,7 +106,7 @@
         icon: Central.Communication.CommentLib.icon(),
         name: "chat",
         text: "Chat",
-        icon_class: "fad",
+        icon_class: "fa-duotone",
         link: Routes.ts_admin_chat_path(@conn, :index)
       %>
     <% end %>
@@ -117,7 +117,7 @@
         icon: Central.Admin.ToolLib.icon(),
         name: "tools",
         text: "Tools",
-        icon_class: "fad",
+        icon_class: "fa-duotone",
         link: Routes.ts_admin_tool_path(@conn, :index)
       %>
     <% end %>
@@ -125,5 +125,5 @@
 <% end %>
 
 <div class="row page-row">
-  <%= central_component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.general_page_path(@conn, :index) %>
+  <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.general_page_path(@conn, :index) %>
 </div>

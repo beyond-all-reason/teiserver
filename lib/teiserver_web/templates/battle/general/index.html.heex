@@ -4,7 +4,7 @@
     icon: Teiserver.Battle.LobbyLib.icon(),
     name: "lobbies",
     text: "Lobbies",
-    icon_class: "fad",
+    icon_class: "fa-duotone",
     link: Routes.ts_battle_lobby_index_path(@conn, :index)
   %>
 
@@ -14,12 +14,12 @@
       icon: Teiserver.Battle.MatchLib.icon(),
       name: "battle_logs",
       text: "Battle logs",
-      icon_class: "fad",
+      icon_class: "fa-duotone",
       link: Routes.ts_battle_match_path(@conn, :index)
     %>
   <% end %>
 </div>
 
 <div class="row page-row">
-  <%= central_component "menu_card", icon_class: "fas", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_general_general_path(@conn, :index) %>
+  <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_general_general_path(@conn, :index) %>
 </div>
