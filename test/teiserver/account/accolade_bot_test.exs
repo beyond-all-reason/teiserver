@@ -4,17 +4,13 @@ defmodule Teiserver.Account.AccoladeBotTest do
 
   alias Teiserver.{Battle, Account, User}
   alias Teiserver.Account.AccoladeLib
+  require Logger
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_recv: 1, _tachyon_send: 2]
 
   setup do
     AccoladeLib.start_accolade_server()
-
-    # Create the badge types
-    {:ok, badge_type1} = Account.create_badge_type(%{name: "Badge A", icon: "i", colour: "c", purposes: ["Accolade"], description: "Description for the first badge"})
-    Account.create_badge_type(%{name: "Badge B", icon: "i", colour: "c", purposes: ["Accolade"], description: "Description for the second badge"})
-    Account.create_badge_type(%{name: "Badge C", icon: "i", colour: "c", purposes: ["Accolade"], description: "Description for the third badge"})
 
     # First number is team, second number is member of the team
     %{socket: _hsocket, user: host} = tachyon_auth_setup()
@@ -47,6 +43,11 @@ defmodule Teiserver.Account.AccoladeBotTest do
     Battle.create_match_membership(%{data | user_id: player12.id, team_id: 1})
     Battle.create_match_membership(%{data | user_id: player21.id, team_id: 2})
     Battle.create_match_membership(%{data | user_id: player22.id, team_id: 2})
+
+    badge_type1 = AccoladeLib.get_badge_types()
+      |> Enum.filter(fn {i, _} -> i == 1 end)
+      |> hd
+      |> elem(1)
 
     {:ok,
       match: match,
@@ -111,6 +112,20 @@ defmodule Teiserver.Account.AccoladeBotTest do
       "message" => "1"
     })
     :timer.sleep(400)
+
+    # We expect success regarding sending the message
+    [result] = _tachyon_recv(psocket11)
+    assert result == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+
+    # And a response from the Accolade chat bot
+    [result] = _tachyon_recv(psocket11)
+    assert result == %{
+      "cmd" => "s.communication.received_direct_message",
+      "message" => "Thank you for your feedback, this Accolade will be bestowed.",
+      "sender_id" => AccoladeLib.get_accolade_bot_userid()
+    }
+
+    Logger.warn("basic test, player11 = #{player11.id}, player12 = #{player12.id}")
 
     # For some reason this might fail as part of a larger test but not a smaller
     [accolade_given] = Account.list_accolades(search: [giver_id: player11.id])

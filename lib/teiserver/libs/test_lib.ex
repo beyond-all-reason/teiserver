@@ -6,6 +6,7 @@ end
 defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
   alias Teiserver.{Client, User, Account}
+  alias Teiserver.Account.AccoladeLib
   alias Teiserver.Protocols.TachyonLib
   alias Teiserver.Coordinator.CoordinatorServer
   @host '127.0.0.1'
@@ -479,7 +480,19 @@ defmodule Teiserver.TeiserverTestLib do
     |> Teiserver.Battle.Lobby.add_battle()
   end
 
+  defp seed_badge_types() do
+    # Create the badge types
+    if Enum.empty?(AccoladeLib.get_badge_types()) do
+      {:ok, _badge_type1} = Account.create_badge_type(%{name: "Badge A", icon: "i", colour: "c", purposes: ["Accolade"], description: "Description for the first badge"})
+      {:ok, _badge_type2} = Account.create_badge_type(%{name: "Badge B", icon: "i", colour: "c", purposes: ["Accolade"], description: "Description for the second badge"})
+      {:ok, _badge_type3} = Account.create_badge_type(%{name: "Badge C", icon: "i", colour: "c", purposes: ["Accolade"], description: "Description for the third badge"})
+    end
+  end
+
   def seed() do
     CoordinatorServer.get_coordinator_account()
+    Teiserver.Account.AccoladeBotServer.get_accolade_account()
+
+    seed_badge_types()
   end
 end

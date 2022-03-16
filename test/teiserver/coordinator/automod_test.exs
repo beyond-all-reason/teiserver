@@ -148,7 +148,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
     _tachyon_send(standard_socket, %{
       "cmd" => "c.communication.send_direct_message",
       "recipient_id" => monitor_user.id,
-      "message" => encoded
+      "message" => "user_info " <> encoded
     })
     :timer.sleep(200)
 
@@ -163,7 +163,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
     _tachyon_send(bot_socket, %{
       "cmd" => "c.communication.send_direct_message",
       "recipient_id" => monitor_user.id,
-      "message" => encoded
+      "message" => "user_info " <> encoded
     })
     :timer.sleep(200)
 

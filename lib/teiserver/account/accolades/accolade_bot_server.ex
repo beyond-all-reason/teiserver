@@ -9,10 +9,8 @@ defmodule Teiserver.Account.AccoladeBotServer do
   alias Phoenix.PubSub
   require Logger
 
-  @miss_count_limit 20
-
   def max_miss_count do
-    @miss_count_limit * 1.5
+    AccoladeLib.miss_count_limit() * 1.5
   end
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
@@ -166,6 +164,8 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   defp post_match_messages(%{id: match_id} = _match) do
+    Logger.info("AccoladeBotServer post match messages for #{match_id}")
+
     # Get a list of all the players, then check if there are possible ratings for them
     memberships = Battle.list_match_memberships(search: [match_id: match_id])
 
@@ -177,27 +177,9 @@ defmodule Teiserver.Account.AccoladeBotServer do
 
         possibles ->
           chosen = Enum.random(possibles)
-
-          if allow_accolades_for_user?(chosen) do
-            AccoladeLib.start_accolade_process(userid, chosen, match_id)
-          end
+          AccoladeLib.start_accolade_process(userid, chosen, match_id)
       end
     end)
-  end
-
-  defp allow_accolades_for_user?(userid) do
-    if User.is_restricted?(userid, ["Accolades", "Community"]) do
-      false
-    else
-      stats = Account.get_user_stat_data(userid)
-      accolade_miss_count = Map.get(stats, "accolade_miss_count", 0)
-
-      if accolade_miss_count >= @miss_count_limit do
-        false
-      else
-        true
-      end
-    end
   end
 
   @spec init(Map.t()) :: {:ok, Map.t()}

@@ -155,11 +155,30 @@ defmodule Teiserver.Coordinator.AutomodServer do
     end
   end
 
-  defp do_ban(userid, automod_action) do
+  # Teiserver.Coordinator.AutomodServer.do_ban(3, %{type: "type", id: 123})
+
+  def do_ban(userid, automod_action) do
     user = User.get_user_by_id(userid)
     Account.update_user_stat(userid, %{"autoban_type" => automod_action.type, "autoban_id" => automod_action.id})
 
-    User.update_user(%{user | banned: [true, nil]})
+    Central.Account.create_report(%{
+      "location" => "Automod",
+      "location_id" => nil,
+      "reason" => "Automod",
+      "reporter_id" => Coordinator.get_coordinator_userid(),
+      "target_id" => userid,
+      "response_text" => "Automod",
+      "response_action" => "Restrict",
+      "responded_at" => Timex.now(),
+      "followup" => nil,
+      "code_references" => [],
+      "expires" => nil,
+      "responder_id" => Coordinator.get_coordinator_userid(),
+      "action_data" => %{
+        "restriction_list" => ["Login", "Site"]
+      }
+    })
+
     Client.disconnect(user.id, :banned)
     "Banned user"
   end

@@ -63,7 +63,8 @@ defmodule Teiserver.Coordinator.ModerationTest do
       "sender_id" => Coordinator.get_coordinator_userid()
     }
 
-    assert Client.is_restricted?(user.id)
+    client = Client.get_client_by_id(user.id)
+    assert client.awaiting_warn_ack
 
     # Send something back
     _tachyon_send(socket, %{
@@ -81,7 +82,8 @@ defmodule Teiserver.Coordinator.ModerationTest do
       "message" => "I don't currently handle messages, sorry #{user.name}",
       "sender_id" => Coordinator.get_coordinator_userid()
     }
-    assert Client.is_restricted?(user.id)
+    client = Client.get_client_by_id(user.id)
+    assert client.awaiting_warn_ack
 
     # Now send back the correct response
     _tachyon_send(socket, %{
@@ -96,6 +98,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
       "message" => "Thank you",
       "sender_id" => Coordinator.get_coordinator_userid()
     }
-    refute Client.is_restricted?(user.id)
+    client = Client.get_client_by_id(user.id)
+    refute client.awaiting_warn_ack
   end
 end

@@ -1,9 +1,11 @@
 defmodule Teiserver.Account.AccoladeLib do
   use CentralWeb, :library
-  alias Teiserver.{Account}
+  alias Teiserver.{Account, User}
   alias Teiserver.Account.{Accolade, AccoladeBotServer, AccoladeChatServer}
   alias Teiserver.Data.Types, as: T
   require Logger
+
+  def miss_count_limit(), do: 20
 
   # Functions
   @spec icon :: String.t()
@@ -262,7 +264,9 @@ defmodule Teiserver.Account.AccoladeLib do
 
     teammate_ids = memberships
       |> Enum.filter(fn m -> m.team_id == their_membership.team_id and m.user_id != userid end)
+      |> Enum.filter(fn m -> allow_accolades_for_user?(m.user_id) end)
       |> Enum.map(fn m -> m.user_id end)
+
     timestamp = Timex.now() |> Timex.shift(days: -5)
 
     # Get a list of everybody they reviewed recently
@@ -272,6 +276,21 @@ defmodule Teiserver.Account.AccoladeLib do
     # Now get a list of everybody from their team
     teammate_ids
     |> Enum.filter(fn m -> not Enum.member?(existing, m) end)
+  end
+
+  defp allow_accolades_for_user?(userid) do
+    if User.is_restricted?(userid, ["Accolades", "Community"]) do
+      false
+    else
+      stats = Account.get_user_stat_data(userid)
+      accolade_miss_count = Map.get(stats, "accolade_miss_count", 0)
+
+      if accolade_miss_count >= miss_count_limit() do
+        false
+      else
+        true
+      end
+    end
   end
 
   @spec start_chat_server(T.userid(), T.userid(), T.lobby_id()) :: pid()
@@ -300,7 +319,7 @@ defmodule Teiserver.Account.AccoladeLib do
     end
   end
 
-  @spec get_badge_types() :: map()
+  @spec get_badge_types() :: [{non_neg_integer(), map()}]
   def get_badge_types() do
     ConCache.get_or_store(:application_temp_cache, "accolade_badges", fn ->
       Account.list_badge_types(search: [has_purpose: "Accolade"], order_by: "Name (A-Z)")

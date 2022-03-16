@@ -5,7 +5,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
   # use Alchemy.Cogs
   use Alchemy.Events
-  alias Teiserver.{Account, Room}
+  alias Teiserver.{Account, Room, Coordinator}
   alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands}
   alias Central.{Config, Logging}
   alias Central.Account.{Report, ReportLib}
@@ -120,8 +120,11 @@ defmodule Teiserver.Bridge.DiscordBridge do
         # It's a fresh report, we handle it as a report creation
         report_creation(report, chan)
       else
-        # This was created as a whole thing
-        report_updated(report, :respond)
+        # This was created as a whole thing, that said if it's the coordinator
+        # then we don't bridge it
+        if report.responder_id != Coordinator.get_coordinator_userid() do
+          report_updated(report, :respond)
+        end
       end
     end
   end

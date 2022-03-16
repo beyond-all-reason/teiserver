@@ -60,7 +60,6 @@ defmodule Teiserver.AccountTest do
         donor: "Donor",
         contributor: "Contributor",
         developer: "Developer",
-        mod_action: "Any action"
       ])
 
       # Flag filters as false
@@ -73,7 +72,6 @@ defmodule Teiserver.AccountTest do
         donor: "Normal",
         contributor: "Normal",
         developer: "Normal",
-        mod_action: "None"
       ])
 
       # Order by
