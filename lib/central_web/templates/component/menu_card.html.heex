@@ -8,6 +8,8 @@
     |> String.replace("fa-regular ", "#{assigns[:icon_class]} ")
     |> String.replace("fas ", "#{assigns[:icon_class]} ")
     |> String.replace("fa-solid ", "#{assigns[:icon_class]} ")
+    |> String.replace("fad ", "#{assigns[:icon_class]} ")
+    |> String.replace("fa-duotone ", "#{assigns[:icon_class]} ")
   else
     assigns[:icon]
   end

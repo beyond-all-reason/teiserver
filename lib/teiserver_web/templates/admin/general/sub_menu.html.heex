@@ -26,7 +26,7 @@
             label: "TS Dashboard",
             active: @active,
             url: Routes.ts_admin_dash_index_path(@conn, :index),
-            icon: "fas fa-gauge"
+            icon: "fa-solid fa-gauge"
           %>
 
           <%= if allow?(@conn, "teiserver.moderator.account") do %>
@@ -35,7 +35,7 @@
               label: "Users",
               active: @active,
               url: Routes.ts_admin_user_path(@conn, :index),
-              icon: "fas fa-users"
+              icon: "fa-solid fa-users"
             %>
           <% end %>
 
