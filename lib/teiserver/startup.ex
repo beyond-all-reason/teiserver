@@ -272,6 +272,9 @@ defmodule Teiserver.Startup do
       end)
     end
 
+    # Add in achievements
+    Teiserver.Game.GenerateAchievementTypes.perform()
+
     ConCache.put(:application_metadata_cache, "teiserver_full_startup_completed", true)
 
     time_taken = System.system_time(:millisecond) - start_time
