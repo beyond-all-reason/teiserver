@@ -377,6 +377,9 @@ defmodule Teiserver.User do
     since_rename_three = now - (Enum.slice(rename_log, 2..2) ++ [0, 0, 0] |> hd)
 
     cond do
+      is_restricted?(userid, ["Community", "Renaming"]) ->
+        {:error, "Your account is restricted from renaming"}
+
       admin_action == false and WordLib.acceptable_name?(new_name) == false ->
         {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
 

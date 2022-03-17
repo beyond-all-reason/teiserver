@@ -105,6 +105,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         nil ->
           :ok
         user ->
+          Logger.info("MatchMonitorServer got user_info from #{from_id}")
           stats = %{
             "hardware:cpuinfo" => contents["CPU"],
             "hardware:gpuinfo" => contents["GPU"],
@@ -120,7 +121,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     end
   end
 
-  defp handle_json_msg(contents, _from_id) do
+  defp handle_json_msg(_contents, _from_id) do
     # Logger.error("AHM DM no handle - #{Kernel.inspect contents}")
     :ok
   end
