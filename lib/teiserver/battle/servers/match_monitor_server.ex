@@ -121,7 +121,8 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   defp handle_json_msg(contents, _from_id) do
-    Logger.error("AHM DM no handle - #{Kernel.inspect contents}")
+    # Logger.error("AHM DM no handle - #{Kernel.inspect contents}")
+    :ok
   end
 
   defp do_begin() do

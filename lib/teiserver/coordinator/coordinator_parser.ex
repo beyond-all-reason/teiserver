@@ -23,6 +23,7 @@ defmodule Teiserver.Coordinator.Parser do
   end
 
   @spec parse_and_handle(Types.userid(), String.t(), Map.t()) :: :handled
+  defp parse_and_handle(_, _, nil), do: :handled
   defp parse_and_handle(userid, msg, battle) do
     cmd = parse_command(userid, msg)
     Coordinator.cast_consul(battle.id, cmd)
