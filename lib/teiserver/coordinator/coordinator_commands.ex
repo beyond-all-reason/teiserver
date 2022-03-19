@@ -121,7 +121,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           []
         end
 
-        msg = (mod_parts ++ standard_parts)
+        msg = (standard_parts ++ mod_parts)
           |> List.flatten
           |> Enum.filter(fn l -> l != nil end)
 
