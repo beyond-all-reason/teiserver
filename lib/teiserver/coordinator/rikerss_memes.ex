@@ -11,10 +11,10 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     sender = User.get_user_by_id(senderid)
 
     labs = ~w(armaap armalab armap armavp armhp armshltx armvp armamsub armasy armfhp armplat armshltxuw armsy)
-    defences = ~w(armmg armllt armbeamer armhlt arm armdrag armclaw armguard)
+    defences = ~w(armmg armllt armbeamer armhlt arm armdrag armclaw armguard armjuno)
     units = ~w(armham armjeth armpw armrectr armrock armwar)
 
-    cortex = ~w(coraap coralab corap coravp corgant corhp corlab corvp corllt)
+    cortex = ~w(coraap coralab corap coravp corgant corhp corlab corvp corllt corfhp corsy corjuno corhllt corhlt)
     Lobby.disable_units(lobby_id, labs ++ defences ++ units ++ cortex)
 
     ["#{sender.name} has enabled the Ticks meme. In this game the only fighting unit you will be able to build will be ticks. It is highly inadvisable to play Cortex."]
