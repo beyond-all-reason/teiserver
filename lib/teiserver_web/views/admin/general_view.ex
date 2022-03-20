@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Admin.GeneralView do
   @spec icon() :: String.t()
   def icon(), do: StylingHelper.icon(:info)
 
-  @spec view_colour(String.t()) :: {String.t(), String.t(), String.t()}
+  @spec view_colour(String.t()) :: atom()
   def view_colour("clans"), do: Teiserver.Clans.ClanLib.colours()
   def view_colour("users"), do: Teiserver.Account.UserLib.colours()
   def view_colour("queues"), do: Teiserver.Game.QueueLib.colours()
@@ -18,4 +18,5 @@ defmodule TeiserverWeb.Admin.GeneralView do
   def view_colour("accolades"), do: Teiserver.Account.AccoladeLib.colours()
   def view_colour("matches"), do: Teiserver.Battle.MatchLib.colours()
   def view_colour("badge_types"), do: Teiserver.Account.BadgeTypeLib.colours()
+  def view_colour("achievements"), do: Teiserver.Game.AchievementTypeLib.colour()
 end

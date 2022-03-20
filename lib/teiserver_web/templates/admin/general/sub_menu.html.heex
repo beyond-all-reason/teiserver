@@ -21,14 +21,6 @@
       <div class="card-body" style="padding: 0 15px;">
 
         <div class="row">
-          <%= central_component "sub_menu_icon",
-            name: "dashboard",
-            label: "TS Dashboard",
-            active: @active,
-            url: Routes.ts_admin_dash_index_path(@conn, :index),
-            icon: "fa-solid fa-gauge"
-          %>
-
           <%= if allow?(@conn, "teiserver.moderator.account") do %>
             <%= central_component "sub_menu_icon",
               name: "users",
@@ -49,16 +41,6 @@
             %>
           <% end %>
 
-          <%= if allow?(@conn, "teiserver.moderator.account") do %>
-            <%= central_component "sub_menu_icon",
-              name: "automod_actions",
-              label: "Automod",
-              active: @active,
-              url: Routes.ts_admin_automod_action_path(@conn, :index),
-              icon: Teiserver.Account.AutomodActionLib.icon()
-            %>
-          <% end %>
-
           <%= if allow?(@conn, "teiserver.moderator") do %>
             <%= central_component "sub_menu_icon",
               name: "chat",
@@ -66,6 +48,26 @@
               active: @active,
               url: Routes.ts_admin_chat_path(@conn, :index),
               icon: Central.Communication.CommentLib.icon()
+            %>
+          <% end %>
+
+          <%= if allow?(@conn, "teiserver.moderator") do %>
+            <%= central_component "sub_menu_icon",
+              name: "achievements",
+              label: "Achievements",
+              active: @active,
+              url: Routes.ts_admin_achievement_path(@conn, :index),
+              icon: Teiserver.Game.AchievementTypeLib.icon()
+            %>
+          <% end %>
+
+          <%= if allow?(@conn, "teiserver.moderator.account") do %>
+            <%= central_component "sub_menu_icon",
+              name: "automod_actions",
+              label: "Automod",
+              active: @active,
+              url: Routes.ts_admin_automod_action_path(@conn, :index),
+              icon: Teiserver.Account.AutomodActionLib.icon()
             %>
           <% end %>
 

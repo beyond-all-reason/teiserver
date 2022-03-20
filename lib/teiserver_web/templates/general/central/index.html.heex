@@ -73,16 +73,6 @@
 
 <%= if allow?(@conn, "teiserver.moderator") do %>
   <div class="row">
-    <%= if false do %>
-    <%=
-      central_component "menu_card",
-      icon: "fad fa-gauge",
-      name: "ts_console",
-      text: "TS Dashboard",
-      link: Routes.ts_admin_dash_index_path(@conn, :index)
-    %>
-    <% end %>
-
     <%= if allow?(@conn, "teiserver.moderator.account") do %>
       <%=
         central_component "menu_card",
@@ -113,6 +103,15 @@
         text: "Chat",
         icon_class: "fa-duotone",
         link: Routes.ts_admin_chat_path(@conn, :index)
+      %>
+
+      <%=
+        central_component "menu_card",
+        icon: Teiserver.Game.AchievementTypeLib.icon(),
+        name: "achievements",
+        text: "Achievements",
+        icon_class: "fa-duotone",
+        link: Routes.ts_admin_achievement_path(@conn, :index)
       %>
     <% end %>
 

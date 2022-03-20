@@ -105,17 +105,20 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         nil ->
           :ok
         user ->
-          Logger.info("MatchMonitorServer got user_info from #{from_id}")
-          stats = %{
-            "hardware:cpuinfo" => contents["CPU"],
-            "hardware:gpuinfo" => contents["GPU"],
-            "hardware:osinfo" => contents["OS"],
-            "hardware:raminfo" => contents["RAM"]
-          }
-          Account.update_user_stat(user.id, stats)
+          if from_id == 3411 do
+            stats = %{
+              "hardware:cpuinfo" => contents["CPU"],
+              "hardware:gpuinfo" => contents["GPU"],
+              "hardware:osinfo" => contents["OS"],
+              "hardware:raminfo" => contents["RAM"],
+              "hardware:displaymax" => contents["Displaymax"],
+              "hardware:validation" => contents["validation"],
+            }
+            Account.update_user_stat(user.id, stats)
 
-          if (user.hw_hash || "") == "" do
-            Teiserver.Coordinator.AutomodServer.check_user(user.id)
+            if (user.hw_hash || "") == "" do
+              Teiserver.Coordinator.AutomodServer.check_user(user.id)
+            end
           end
       end
     end

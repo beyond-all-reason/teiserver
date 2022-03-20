@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Account.ProfileController do
   use CentralWeb, :controller
 
-  alias Teiserver.{User, Account}
+  alias Teiserver.{User, Account, Game}
   alias Central.Helpers.NumberHelper
 
   plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
@@ -42,9 +42,24 @@ defmodule TeiserverWeb.Account.ProfileController do
   defp public_profile(conn, userid) do
     user = User.get_user_by_id(userid)
 
+    achievements = Game.list_user_achievements(search: [
+      user_id: userid,
+      achieved: true
+    ], preload: [:achievement_type])
+    |> Enum.group_by(fn a ->
+      a.achievement_type.grouping
+    end)
+    |> Map.new(fn {g, achievements} ->
+      {g,
+        achievements
+          |> Enum.sort_by(fn a -> a.achievement_type.name end, &<=/2)
+      }
+    end)
+
     conn
-    |> assign(:user, user)
-    |> render("public.html")
+      |> assign(:achievements, achievements)
+      |> assign(:user, user)
+      |> render("public.html")
   end
 
   defp me(conn, userid) do
@@ -53,12 +68,27 @@ defmodule TeiserverWeb.Account.ProfileController do
     {accolades_given, accolades_received} = accolade_data(userid)
     badge_types = badge_type_lookup()
 
+    achievements = Game.list_user_achievements(search: [
+      user_id: userid,
+      achieved: true
+    ], preload: [:achievement_type])
+    |> Enum.group_by(fn a ->
+      a.achievement_type.grouping
+    end)
+    |> Map.new(fn {g, achievements} ->
+      {g,
+        achievements
+          |> Enum.sort_by(fn a -> a.achievement_type.name end, &<=/2)
+      }
+    end)
+
     conn
-    |> assign(:accolades_given, accolades_given)
-    |> assign(:accolades_received, accolades_received)
-    |> assign(:badge_type_lookup, badge_types)
-    |> assign(:user, user)
-    |> render("me.html")
+      |> assign(:accolades_given, accolades_given)
+      |> assign(:accolades_received, accolades_received)
+      |> assign(:achievements, achievements)
+      |> assign(:badge_type_lookup, badge_types)
+      |> assign(:user, user)
+      |> render("me.html")
   end
 
   defp badge_type_lookup() do

@@ -241,9 +241,10 @@ defmodule TeiserverWeb.Router do
         resources("/matches", MatchController, only: [:index, :show, :delete])
         get("/matches/user/:user_id", MatchController, :user_show)
 
-
         resources("/chat", ChatController, only: [:index])
         post("/chat", ChatController, :index)
+
+        resources("/achievements", AchievementController)
 
         get("/lobbies/:id/chat", LobbyController, :chat)
         get("/lobbies/:id/chat/:page", LobbyController, :chat)

@@ -1,0 +1,14 @@
+<%= for {grouping, achievements} <- @achievements do %>
+  <div class="row mt-3">
+    <div class="col-md-12">
+      <h4><%= grouping %></h4>
+      <%= for a <- achievements do %>
+        <% at = a.achievement_type %>
+
+        <%= central_component "icon", icon: at.icon, style: "color: #{at.colour}" %>
+        &nbsp;
+        <%= a.achievement_type.name %><br />
+      <% end %>
+    </div>
+  </div>
+<% end %>
