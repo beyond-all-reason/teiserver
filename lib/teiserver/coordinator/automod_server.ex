@@ -96,12 +96,16 @@ defmodule Teiserver.Coordinator.AutomodServer do
   defp do_check(userid) do
     stats = Account.get_user_stat_data(userid)
 
-    with nil <- do_hw_check(userid, stats),
-      nil <- do_lobby_hash_check(userid, stats)
-    do
-      "No action"
+    if User.is_restricted?(userid, ["Login"]) do
+      "Already banned"
     else
-      reason -> reason
+      with nil <- do_hw_check(userid, stats),
+        nil <- do_lobby_hash_check(userid, stats)
+      do
+        "No action"
+      else
+        reason -> reason
+      end
     end
   end
 
@@ -154,8 +158,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
         end
     end
   end
-
-  # Teiserver.Coordinator.AutomodServer.do_ban(3, %{type: "type", id: 123})
 
   def do_ban(userid, automod_action) do
     user = User.get_user_by_id(userid)
