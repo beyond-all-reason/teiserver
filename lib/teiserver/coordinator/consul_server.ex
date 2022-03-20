@@ -149,11 +149,16 @@ defmodule Teiserver.Coordinator.ConsulServer do
       end
 
       # If the first splitter is still in this lobby, move them to a new one
-      case new_lobby do
-        nil ->
+      cond do
+        Enum.count(players_to_move) == 1 ->
+          LobbyChat.sayex(state.coordinator_id, "Split failed, nobody followed the split leader", state.lobby_id)
+
+        new_lobby == nil ->
           LobbyChat.sayex(state.coordinator_id, "Split failed, unable to find empty lobby", state.lobby_id)
 
-        %{id: lobby_id} ->
+        true ->
+          lobby_id = new_lobby.id
+
           if client.lobby_id != lobby_id do
             Lobby.force_add_user_to_battle(split.first_splitter_id, lobby_id)
           end
@@ -165,7 +170,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
           LobbyChat.sayex(state.coordinator_id, "Split completed.", state.lobby_id)
       end
-
 
       %{state | split: nil}
 
