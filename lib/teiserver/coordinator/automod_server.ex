@@ -9,7 +9,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
   require Logger
   alias Teiserver.Data.Types, as: T
 
-  @check_delay 10_000
   @tick_interval 60_000
 
   @spec check_user(T.userid()) :: nil
@@ -52,7 +51,8 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   # Client inout
   def handle_info({:client_inout, :login, userid}, state) do
-    :timer.send_after(@check_delay, {:check_user, userid})
+    delay = Application.get_env(:central, Teiserver)[:automod_delay]
+    :timer.send_after(delay, {:check_user, userid})
     {:noreply, state}
   end
   def handle_info({:client_inout, :disconnect, _userid, _reason}, state), do: {:noreply, state}

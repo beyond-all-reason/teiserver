@@ -523,6 +523,9 @@ defmodule Teiserver.Battle.Lobby do
       consul_response == false ->
         {:failure, consul_reason}
 
+      User.is_restricted?(user, ["All lobbies", "Joining existing lobbies"]) ->
+        {:failure, "You are currently banned from joining lobbies"}
+
       true ->
         # Okay, so far so good, what about the host? Are they okay with it?
         case Client.get_client_by_id(battle.founder_id) do
