@@ -824,9 +824,13 @@ defmodule Teiserver.User do
     # from a date to a string of the date
     recache_user(user.id)
 
-    # If they're in a battle we need to deal with that
+    # Sleep to enable the ETS cache to update and they don't insta-login
+    :timer.sleep(50)
+
     if is_restricted?(user, ["Login"]) do
       client = Client.get_client_by_id(user.id)
+
+      # If they're in a battle we need to deal with that
       if client do
         Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
       end
