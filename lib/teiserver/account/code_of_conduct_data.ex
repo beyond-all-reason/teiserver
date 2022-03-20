@@ -15,6 +15,7 @@ defmodule Teiserver.Account.CodeOfConductData do
         "8" => "Harassing players for using perfectly valid strategies such as rushing, commander drops, unexpected air raids and the like",
         "9" => "Abuse of the ping or draw function to obscure team mates view or drawing hate symbols, heavy profanity etc",
         "10" => "Disrupting game lobbies either by flooding chat, calling repeated votes or repeatedly joining when asked to leave",
+        "11" => "Respect for all other members is mandatory, harassment and baiting of any community member, especially contributors is not tolerated.",
       },
       "2" => %{
         "1" => "Playing in a team game but not working with your team; you are not obliged to work with your team but it's certainly bad manners",
