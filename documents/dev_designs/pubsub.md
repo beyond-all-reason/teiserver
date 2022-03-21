@@ -16,6 +16,18 @@ Used for broadcasting internal telemetry for consumers (such as admin dashboard)
   {:teiserver_telemetry, data}
 ```
 
+#### teiserver_telemetry_client_events
+Used for broadcasting specific client telemetry events as defined in Teiserver.Telemetry. Does not broadcast anonymous events.
+```
+  {:teiserver_telemetry_client_events, userid, event_type_name, event_value}
+```
+
+#### teiserver_telemetry_client_properties
+Used for broadcasting specific client telemetry property updates as defined in Teiserver.Telemetry. Does not broadcast anonymous property updates.
+```
+  {:teiserver_telemetry_client_properties, userid, event_type_name, event_value}
+```
+
 ### Battles
 #### legacy_all_battle_updates
 Information affecting all those not in a battle, such as a battle being created.

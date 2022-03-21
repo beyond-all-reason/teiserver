@@ -4,11 +4,15 @@ defmodule Teiserver.Telemetry do
   import Ecto.Query, warn: false
   alias Central.Helpers.QueryHelpers
   alias Central.Repo
+  alias Phoenix.PubSub
   alias Teiserver.Account
 
   alias Teiserver.Telemetry.TelemetryServer
   alias Teiserver.Telemetry.ServerMinuteLog
   alias Teiserver.Telemetry.ServerMinuteLogLib
+
+  @broadcast_event_types ~w(game_start:singleplayer:scenario_end)
+  @broadcast_property_types ~w()
 
   @spec get_totals_and_reset :: map()
   def get_totals_and_reset() do
@@ -1297,12 +1301,27 @@ defmodule Teiserver.Telemetry do
 
   def log_client_event(userid, event_type_name, value, _hash) do
     event_type_id = get_or_add_event_type(event_type_name)
-    create_client_event(%{
+    result = create_client_event(%{
       event_type_id: event_type_id,
       user_id: userid,
       value: value,
       timestamp: Timex.now()
     })
+
+    case result do
+      {:ok, _event} ->
+        if Enum.member?(@broadcast_event_types, event_type_name) do
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_telemetry_client_events",
+            {:teiserver_telemetry_client_events, userid, event_type_name, value}
+          )
+        end
+
+        result
+      _ ->
+        result
+    end
   end
 
   def log_client_property(nil, value_name, value, hash) do
@@ -1339,12 +1358,27 @@ defmodule Teiserver.Telemetry do
 
     Account.update_user_stat(userid, %{value_name => value})
 
-    create_client_property(%{
+    result = create_client_property(%{
       property_type_id: property_type_id,
       user_id: userid,
       value: value,
       last_updated: Timex.now()
     })
+
+    case result do
+      {:ok, _event} ->
+        if Enum.member?(@broadcast_property_types, value_name) do
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_telemetry_client_properties",
+            {:teiserver_telemetry_client_properties, userid, value_name, value}
+          )
+        end
+
+        result
+      _ ->
+        result
+    end
   end
 
   def get_or_add_property_type(name) do

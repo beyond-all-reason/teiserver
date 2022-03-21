@@ -58,6 +58,9 @@ defmodule Teiserver.Application do
       concache_perm_sup(:teiserver_accolade_pids),
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Account.AccoladeSupervisor},
 
+      # Achievements
+      {Teiserver.Game.AchievementServer, name: Teiserver.Game.AchievementServer},
+
       # Telemetry
       {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
       {Teiserver.Telemetry.SpringTelemetryServer, name: Teiserver.Telemetry.SpringTelemetryServer},

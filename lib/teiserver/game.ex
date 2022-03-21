@@ -324,13 +324,14 @@ defmodule Teiserver.Game do
 
   @spec user_achievement_query(List.t()) :: Ecto.Query.t()
   def user_achievement_query(args) do
-    user_achievement_query(nil, args)
+    user_achievement_query(nil, nil, args)
   end
 
-  @spec user_achievement_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def user_achievement_query(id, args) do
+  @spec user_achievement_query(Integer.t(), Integer.t(), List.t()) :: Ecto.Query.t()
+  def user_achievement_query(userid, type_id, args) do
     UserAchievementLib.query_user_achievements
-    |> UserAchievementLib.search(%{id: id})
+    |> UserAchievementLib.search(%{user_id: userid})
+    |> UserAchievementLib.search(%{type_id: type_id})
     |> UserAchievementLib.search(args[:search])
     |> UserAchievementLib.preload(args[:preload])
     |> UserAchievementLib.order_by(args[:order_by])
@@ -367,40 +368,33 @@ defmodule Teiserver.Game do
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_user_achievement!(Integer.t() | List.t()) :: UserAchievement.t()
-  @spec get_user_achievement!(Integer.t(), List.t()) :: UserAchievement.t()
-  def get_user_achievement!(id) when not is_list(id) do
-    user_achievement_query(id, [])
-    |> Repo.one!
-  end
-  def get_user_achievement!(args) do
-    user_achievement_query(nil, args)
-    |> Repo.one!
-  end
-  def get_user_achievement!(id, args) do
-    user_achievement_query(id, args)
+  @spec get_user_achievement!(Integer.t(), Integer.t()) :: UserAchievement.t()
+  @spec get_user_achievement!(Integer.t(), Integer.t(), List.t()) :: UserAchievement.t()
+  def get_user_achievement!(userid, type_id, args \\ []) do
+    user_achievement_query(userid, type_id, args)
     |> Repo.one!
   end
 
-  # Uncomment this if needed, default files do not need this function
-  # @doc """
-  # Gets a single user_achievement.
+  @doc """
+  Gets a single user_achievement.
 
-  # Returns `nil` if the UserAchievement does not exist.
+  Returns `nil` if the UserAchievement does not exist.
 
-  # ## Examples
+  ## Examples
 
-  #     iex> get_user_achievement(123)
-  #     %UserAchievement{}
+      iex> get_user_achievement(123)
+      %UserAchievement{}
 
-  #     iex> get_user_achievement(456)
-  #     nil
+      iex> get_user_achievement(456)
+      nil
 
-  # """
-  # def get_user_achievement(id, args \\ []) when not is_list(id) do
-  #   user_achievement_query(id, args)
-  #   |> Repo.one
-  # end
+  """
+  @spec get_user_achievement(Integer.t(), Integer.t()) :: UserAchievement.t()
+  @spec get_user_achievement(Integer.t(), Integer.t(), List.t()) :: UserAchievement.t()
+  def get_user_achievement(userid, type_id, args \\ []) do
+    user_achievement_query(userid, type_id, args)
+    |> Repo.one
+  end
 
   @doc """
   Creates a user_achievement.
