@@ -62,7 +62,7 @@ defmodule TeiserverWeb.Admin.UserController do
       Account.list_users(
         search: [
           admin_group: conn,
-          basic_search: Map.get(params, "name", "") |> String.trim(),
+          name_or_email: Map.get(params, "name", "") |> String.trim(),
           bot: params["bot"],
           moderator: params["moderator"],
           verified: params["verified"],

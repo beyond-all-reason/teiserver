@@ -71,6 +71,11 @@ defmodule Central.Account.UserQueries do
       where: users.email == ^email
   end
 
+  def _search(query, :name_or_email, value) do
+    from users in query,
+      where: (users.email == ^value or users.name == ^value)
+  end
+
   def _search(query, :name_like, name) do
     uname = "%" <> name <> "%"
 

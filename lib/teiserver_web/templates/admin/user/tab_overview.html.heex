@@ -89,6 +89,15 @@
     icon_class: "fa-solid",
     link: Routes.ts_admin_accolade_path(@conn, :user_show, @user.id)
   %>
+
+  <%=
+    central_component "menu_card",
+    icon: "fa-solid fa-user-circle",
+    name: "profile",
+    text: "Profile",
+    icon_class: "fa-solid",
+    link: Routes.ts_account_profile_path(@conn, :show, @user.id)
+  %>
   
   <%=
     central_component "menu_card",
