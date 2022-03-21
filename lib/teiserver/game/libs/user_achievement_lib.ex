@@ -49,6 +49,11 @@ defmodule Teiserver.Game.UserAchievementLib do
       where: user_achievements.user_id == ^user_id
   end
 
+  def _search(query, :user_id_in, user_ids) when is_list(user_ids) do
+    from user_achievements in query,
+      where: user_achievements.user_id in ^user_ids
+  end
+
   def _search(query, :type_id, type_id) do
     from user_achievements in query,
       where: user_achievements.achievement_type_id == ^type_id
