@@ -10,6 +10,18 @@ defmodule Central.Admin.Startup do
     add_permission_set("admin", "admin", ~w(limited full))
 
     add_site_config_type(%{
+      key: "user.Enable renames",
+      section: "User permissions",
+      type: "boolean",
+      permissions: ["teiserver.admin"],
+      description: "Users are able to change their name via the account page.",
+      opts: [],
+      default: true,
+
+      value_label: "Allow users to change their name"
+    })
+
+    add_site_config_type(%{
       key: "user.Enable account group pages",
       section: "User permissions",
       type: "boolean",

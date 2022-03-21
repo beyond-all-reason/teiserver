@@ -155,6 +155,12 @@ defmodule CentralWeb.Account.RegistrationController do
     user = Account.get_user!(conn.user_id)
     user_params = Map.put(user_params, "password", user_params["password_confirmation"])
 
+    user_params = if Central.Config.get_site_config_cache("user.Enable renames") do
+      user_params
+    else
+      Map.drop(user_params, ["name"])
+    end
+
     case Account.update_user(user, user_params, :user_form) do
       {:ok, _user} ->
         conn
