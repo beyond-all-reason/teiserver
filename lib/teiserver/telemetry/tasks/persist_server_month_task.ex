@@ -148,8 +148,8 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
         unique_users: existing.tmp_reduction.unique_users ++ Map.keys(data["minutes_per_user"]["total"]),
         unique_players: existing.tmp_reduction.unique_players ++ Map.keys(data["minutes_per_user"]["player"]),
         accounts_created: existing.tmp_reduction.accounts_created + data["aggregates"]["stats"]["accounts_created"],
-        peak_users: max(existing.tmp_reduction.peak_players, data["aggregates"]["stats"]["unique_users"]),
-        peak_players: max(existing.tmp_reduction.peak_players, data["aggregates"]["stats"]["unique_players"]),
+        peak_users: max(existing.tmp_reduction.peak_players, data["aggregates"]["stats"]["peak_user_counts"]["total"]),
+        peak_players: max(existing.tmp_reduction.peak_players, data["aggregates"]["stats"]["peak_user_counts"]["player"]),
       },
 
       # Monthly totals
@@ -175,16 +175,12 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
 
   # Given a day log, calculate the end of day stats
   defp calculate_month_statistics(data) do
-    # TODO: Calculate number of battles that took place
-    battles = 0
-
     aggregate_stats = %{
       accounts_created: data.tmp_reduction.accounts_created,
       unique_users: data.tmp_reduction.unique_users |> Enum.uniq |> Enum.count,
       unique_players: data.tmp_reduction.unique_players |> Enum.uniq |> Enum.count,
       peak_users: data.tmp_reduction.peak_users,
-      peak_players: data.tmp_reduction.peak_players,
-      battles: battles
+      peak_players: data.tmp_reduction.peak_players
     }
 
     NestedMaps.put(data, ~w(aggregates stats)a, aggregate_stats)
