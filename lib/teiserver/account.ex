@@ -433,7 +433,7 @@ defmodule Teiserver.Account do
       nil ->
         create_user_stat(%{user_id: userid, data: data})
       user_stat ->
-        ConCache.dirty_delete(:teiserver_user_stat_cache, userid)
+        ConCache.delete(:teiserver_user_stat_cache, userid)
         new_data = Map.merge(user_stat.data, data)
         update_user_stat(user_stat, %{data: new_data})
     end
@@ -448,7 +448,7 @@ defmodule Teiserver.Account do
 
   @spec delete_user_stat(UserStat.t()) :: {:ok, UserStat.t()} | {:error, Ecto.Changeset.t()}
   def delete_user_stat(%UserStat{} = user_stat) do
-    ConCache.dirty_delete(:teiserver_user_stat_cache, user_stat.user_id)
+    ConCache.delete(:teiserver_user_stat_cache, user_stat.user_id)
     Repo.delete(user_stat)
   end
 

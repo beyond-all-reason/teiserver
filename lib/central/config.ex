@@ -119,7 +119,7 @@ defmodule Central.Config do
 
   """
   def create_user_config(attrs \\ %{}) do
-    ConCache.dirty_delete(:config_user_cache, attrs["user_id"])
+    ConCache.delete(:config_user_cache, attrs["user_id"])
 
     %UserConfig{}
     |> UserConfig.changeset(attrs)
@@ -139,7 +139,7 @@ defmodule Central.Config do
 
   """
   def update_user_config(%UserConfig{} = user_config, attrs) do
-    ConCache.dirty_delete(:config_user_cache, user_config.user_id)
+    ConCache.delete(:config_user_cache, user_config.user_id)
 
     user_config
     |> UserConfig.changeset(attrs)
@@ -159,7 +159,7 @@ defmodule Central.Config do
 
   """
   def delete_user_config(%UserConfig{} = user_config) do
-    ConCache.dirty_delete(:config_user_cache, user_config.user_id)
+    ConCache.delete(:config_user_cache, user_config.user_id)
     Repo.delete(user_config)
   end
 
@@ -173,7 +173,7 @@ defmodule Central.Config do
 
   """
   def change_user_config(%UserConfig{} = user_config) do
-    ConCache.dirty_delete(:config_user_cache, user_config.user_id)
+    ConCache.delete(:config_user_cache, user_config.user_id)
     UserConfig.changeset(user_config, %{})
   end
 
@@ -308,7 +308,7 @@ defmodule Central.Config do
         |> Repo.update()
     end
 
-    ConCache.dirty_delete(:config_site_cache, key)
+    ConCache.delete(:config_site_cache, key)
   end
 
   def delete_site_config(key) do
@@ -327,7 +327,7 @@ defmodule Central.Config do
         |> Repo.delete()
     end
 
-    ConCache.dirty_delete(:config_site_cache, key)
+    ConCache.delete(:config_site_cache, key)
   end
 
 

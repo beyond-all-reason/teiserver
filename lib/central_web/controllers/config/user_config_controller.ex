@@ -95,7 +95,7 @@ defmodule CentralWeb.Config.UserConfigController do
       # If there's an error then it's because they have removed the value, we just delete the config
       {:error, %Ecto.Changeset{} = _changeset} ->
         {:ok, _user_config} = Config.delete_user_config(user_config)
-        ConCache.dirty_delete(:config_user_cache, user_config.user_id)
+        ConCache.delete(:config_user_cache, user_config.user_id)
 
         conn
         |> put_flash(:info, "Your preferences have been updated.")
@@ -107,7 +107,7 @@ defmodule CentralWeb.Config.UserConfigController do
   # def delete(conn, %{"id" => id}) do
   #   user_config = Config.get_user_config!(id)
   #   {:ok, _user_config} = Config.delete_user_config(user_config)
-  #   ConCache.dirty_delete(:config_user_cache, user_config.user_id)
+  #   ConCache.delete(:config_user_cache, user_config.user_id)
 
   #   conn
   #   |> put_flash(:info, "User config deleted successfully.")
