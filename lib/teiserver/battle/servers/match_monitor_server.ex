@@ -105,7 +105,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
         nil ->
           :ok
         user ->
-          if from_id == 3411 do
+          if User.is_bot?(from_id) do
             stats = %{
               "hardware:cpuinfo" => contents["CPU"],
               "hardware:gpuinfo" => contents["GPU"],
