@@ -41,7 +41,11 @@ defmodule Central.General.Startup do
         url: "/admin/tools/coverage",
         permissions: "admin.dev.developer"
       },
-      %{label: "Home", icons: ["far fa-home"], url: "/"}
+      %{
+        label: "Home",
+        icons: ["far fa-home"],
+        url: "/"
+      }
     ])
 
     add_user_config_type(%{
@@ -87,7 +91,8 @@ defmodule Central.General.Startup do
       permissions: [],
       description: "Enables the 'Quick Action' shortcut: Ctrl + .",
       opts: [],
-      default: nil
+      default: true,
+      value_label: "Enable quick action shortcut"
     })
 
     add_user_config_type(%{

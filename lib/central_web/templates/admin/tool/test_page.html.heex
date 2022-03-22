@@ -48,7 +48,7 @@
       output += "<i class='icon-test fa-3x fa-fw fa-regular fa-" + icon + "'></i>";
       output += "<i class='icon-test fa-3x fa-fw fa-solid fa-" + icon + "'></i>";
       output += "<i class='icon-test fa-3x fa-fw fa-duotone fa-" + icon + "'></i>";
-      output += "<i class='icon-test fa-3x fa-fw fa-brand fa-" + icon + "'></i>";
+      output += "<i class='icon-test fa-3x fa-fw fa-brands fa-" + icon + "'></i>";
 
       output += "<br />";
     }
@@ -146,7 +146,7 @@
   <div class="tab-pane fade show active p-2" id="icons_tab">
     <div class="row">
       <div class="col-md-6">
-        One icon per row, no <code>fa-</code> prefix. Columns on the right are <code>fa-thin, fa-light, fa-regular, fa-solid, fa-duotone, fa-brand</code>.
+        One icon per row, no <code>fa-</code> prefix. Columns on the right are <code>fa-thin, fa-light, fa-regular, fa-solid, fa-duotone, fa-brands</code>.
         <textarea name="icons" id="icons-area" rows="8" class="form-control" onchange="do_icons();">house</textarea>
         <br />
         <div class="btn btn-primary">Update</div>
@@ -344,6 +344,54 @@
             <option>Dropdown Value 2</option>
             <option>Dropdown Value 3</option>
           </select>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+      
+      </div>
+
+      <div class="col-md-6">
+        <div class="p-2">
+          <%= central_component "checkbox",
+            name: "cb1",
+            id: "cb1",
+            value: "true",
+            label: "Checkbox 1",
+            checked: true,
+            description: ""
+          %>
+
+          <%= central_component "checkbox",
+            name: "cb2",
+            id: "cb2",
+            value: "true",
+            label: "Checkbox 2",
+            checked: false,
+            description: ""
+          %>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="p-2">
+          <%= central_component "radio",
+            name: "rb",
+            id: "rb1",
+            value: "true",
+            label: "Radio button 1",
+            checked: true,
+            description: ""
+          %>
+
+          <%= central_component "radio",
+            name: "rb",
+            id: "rb2",
+            value: "false",
+            label: "Radio button 2",
+            checked: false,
+            description: ""
+          %>
         </div>
       </div>
 

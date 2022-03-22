@@ -25,7 +25,7 @@ defmodule Central.Application do
         CentralWeb.Telemetry,
         {Central.Account.RecentlyUsedCache, name: Central.Account.RecentlyUsedCache},
         {Central.Account.AuthGroups.Server, name: Central.Account.AuthGroups.Server},
-        {Central.General.QuickAction.Cache, name: Central.General.QuickAction.Cache},
+        {Central.General.CacheClusterServer, name: Central.General.CacheClusterServer},
         concache_sup(:codes),
         concache_sup(:account_user_cache),
         concache_sup(:account_user_cache_bang),

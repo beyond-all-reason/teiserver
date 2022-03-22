@@ -1,6 +1,5 @@
 defmodule Central.General.QuickAction do
   @moduledoc false
-  alias Central.General.QuickAction.Cache
   alias Central.Helpers.StylingHelper
 
   @doc """
@@ -14,23 +13,21 @@ defmodule Central.General.QuickAction do
     %{label: "List users", icon: Central.Account.UserLib.icon(), input: "s", method: "get", placeholder: "Search username and/or email", url: "/admin/users", permissions: "admin.admin.limited"},
   """
   def add_items(items) do
-    items = Enum.map(items, &convert_item/1)
+    new_items = Enum.map(items, &convert_item/1)
 
-    Cache.add_items(items)
+    ConCache.put(:application_metadata_cache, :quick_action_items, get_items() ++ new_items)
   end
 
-  def get_items(), do: Cache.get_items()
+  def get_items(), do: ConCache.get(:application_metadata_cache, :quick_action_items) || []
 
+  @icon_atoms ~w(list new edit delete report)a
   defp convert_item(item) do
     icons =
       Enum.map(item.icons, fn i ->
-        case i do
-          :list -> StylingHelper.icon(:list)
-          :new -> StylingHelper.icon(:new)
-          :edit -> StylingHelper.icon(:edit)
-          :delete -> StylingHelper.icon(:delete)
-          :report -> StylingHelper.icon(:report)
-          _ -> i
+        if Enum.member?(@icon_atoms, i) do
+          StylingHelper.icon(:list)
+        else
+          i
         end
       end)
 
