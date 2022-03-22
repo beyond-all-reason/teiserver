@@ -182,7 +182,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         {:ok, account} = Account.create_user(%{
           name: "DiscordBridge",
           email: "bridge@teiserver",
-          icon: "fa-brand fa-discord",
+          icon: "fa-brands fa-discord",
           colour: "#0066AA",
           admin_group_id: Teiserver.internal_group_id(),
           password: make_password(),
