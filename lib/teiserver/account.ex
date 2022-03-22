@@ -160,17 +160,15 @@ defmodule Teiserver.Account do
 
   @spec smurf_search(Plug.Conn.t, User.t()) :: {list(), map()}
   def smurf_search(conn, user) do
-    ip_ids = get_smurfs_by_ip(user)
     hash_ids = get_smurfs_by_hash(user)
     hw_ids = get_smurfs_by_hw(user)
 
     reasons = %{
-      ip: ip_ids,
       hash: hash_ids,
       hw: hw_ids
     }
 
-    ids = (ip_ids ++ hash_ids ++ hw_ids)
+    ids = (hash_ids ++ hw_ids)
     |> Enum.uniq
 
     users = list_users(search: [
@@ -183,32 +181,6 @@ defmodule Teiserver.Account do
 
     {users, reasons}
   end
-
-  defp get_smurfs_by_ip(_), do: []
-#   defp get_smurfs_by_ip(%{data: %{"ip_list" => []}}), do: []
-#   defp get_smurfs_by_ip(user) do
-#     user_stats = get_user_stat_data(user.id)
-#     ip_fragments = (user_stats["ip_list"] || [])
-#     |> Enum.map(fn ip ->
-#       "u.data -> 'ip_list' ? '#{ip}'"
-#     end)
-#     |> Enum.join(" or ")
-
-#     query = """
-#     SELECT u.id
-#     FROM account_users u
-#     WHERE #{ip_fragments}
-# """
-
-#     case Ecto.Adapters.SQL.query(Repo, query, []) do
-#       {:ok, results} ->
-#         results.rows
-#         |> List.flatten
-
-#       {a, b} ->
-#         raise "ERR: #{a}, #{b}"
-#     end
-#   end
 
   defp get_smurfs_by_hash(user) do
     user_stats = get_user_stat_data(user.id)

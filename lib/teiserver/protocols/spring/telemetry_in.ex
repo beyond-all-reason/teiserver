@@ -28,8 +28,7 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
                     case Telemetry.create_infolog(params) do
                       {:ok, infolog} ->
                         reply(:spring, :okay, "upload_infolog - id:#{infolog.id}", msg_id, state)
-                      {:error, changeset} ->
-                        # Logger.error(Kernel.inspect changeset)
+                      {:error, _changeset} ->
                         reply(:spring, :no, "upload_infolog - db error", msg_id, state)
                     end
                   {:error, _} ->

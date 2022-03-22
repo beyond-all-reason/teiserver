@@ -507,6 +507,19 @@ CLIENTS test_room #{user.name}\n"
 
     :timer.sleep(4000)
 
+    # Now we get flood protection after the rename
+    _send_raw(
+      socket,
+      "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
+    )
+
+    reply = _recv_until(socket)
+    [accepted | _remainder] = String.split(reply, "\n")
+    assert accepted == "DENIED Flood protection - Please wait 20 seconds and try again"
+
+    # Un-flood them
+    User.set_flood_level(userid, 0)
+
     # Now they can log in again
     _send_raw(
       socket,

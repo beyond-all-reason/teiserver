@@ -11,7 +11,7 @@ defmodule Teiserver.EmailHelper do
     website_url = "https://#{host}"
     verification_code = user.data["verification_code"]
 
-    {:ok, code} =
+    {:ok, _code} =
       Account.create_code(%{
         value: UUID.uuid4(),
         purpose: "reset_password",
@@ -19,8 +19,6 @@ defmodule Teiserver.EmailHelper do
         user_id: user.id
       })
 
-    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
-    url = "https://#{host}/password_reset/#{code.value}"
     message_id = UUID.uuid4()
 
     game_name = Application.get_env(:central, Teiserver)[:game_name]

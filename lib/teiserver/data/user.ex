@@ -10,7 +10,6 @@ defmodule Teiserver.User do
   alias Argon2
   alias Central.Account.Guardian
   alias Teiserver.Data.Types, as: T
-  import Central.Helpers.TimexHelper, only: [parse_ymd_t_hms: 1, date_to_str: 2]
   import Central.Logging.Helpers, only: [add_audit_log: 4]
 
   require Logger
@@ -25,8 +24,8 @@ defmodule Teiserver.User do
   @spec role_list :: [String.t()]
   def role_list(), do: ~w(Tester Streamer Donor Contributor Dev Moderator Admin Verified Bot)
 
-  @keys [:id, :name, :email, :inserted_at, :clan_id]
-  def keys(), do: @keys
+  @spec keys() :: [atom]
+  def keys(), do: [:id, :name, :email, :inserted_at, :clan_id]
 
   @data_keys [
     :rank,
@@ -736,8 +735,6 @@ defmodule Teiserver.User do
           Teiserver.Geoip.get_flag(ip)
       end
 
-    ip_list = [ip | (stats["ip_list"] || [])] |> Enum.uniq |> Enum.take(20)
-
     rank = calculate_rank(user.id)
 
     springid = if Map.get(user, :springid) != nil, do: user.springid, else: next_springid()
@@ -778,8 +775,7 @@ defmodule Teiserver.User do
       rank: rank,
       lobby_client: lobby_client,
       lobby_hash: lobby_hash,
-      last_ip: ip,
-      ip_list: ip_list
+      last_ip: ip
     })
 
     {:ok, user}

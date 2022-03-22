@@ -3,11 +3,12 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{Client, Coordinator, User, Chat}
+  alias Teiserver.{User, Chat}
   alias Teiserver.Battle.{Lobby, LobbyLib}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
-  def mount(params, session, socket) do
+  @impl true
+  def mount(_params, session, socket) do
     socket =
       socket
       |> AuthPlug.live_call(session)

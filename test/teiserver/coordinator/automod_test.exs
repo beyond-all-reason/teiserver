@@ -126,7 +126,6 @@ defmodule Teiserver.Coordinator.AutomodTest do
     assert match?(%{
       "country" => "??",
       "bot" => false,
-      "ip_list" => ["127.0.0.1"],
       "last_ip" => "127.0.0.1",
       "lobby_hash" => "t1 t2",
       "rank" => 0

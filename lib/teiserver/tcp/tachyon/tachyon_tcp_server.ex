@@ -3,14 +3,10 @@ defmodule Teiserver.TachyonTcpServer do
   use GenServer
   require Logger
   alias Phoenix.PubSub
+  alias Central.Config
 
   alias Teiserver.{User, Client}
   alias Teiserver.Data.Types, as: T
-
-  # Duration refers to how long it will track commands for
-  # Limit is the number of commands that can be sent in that time
-  @cmd_flood_duration 10
-  @cmd_flood_limit 20
 
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [
@@ -95,7 +91,11 @@ defmodule Teiserver.TachyonTcpServer do
       print_server_messages: false,
       script_password: nil,
       exempt_from_cmd_throttle: true,
-      cmd_timestamps: []
+      cmd_timestamps: [],
+
+      # Caching app configs
+      flood_rate_limit_count: Config.get_site_config_cache("teiserver.Flood rate limit count"),
+      floot_rate_window_size: Config.get_site_config_cache("teiserver.Flood rate window size")
     }
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
@@ -152,14 +152,16 @@ defmodule Teiserver.TachyonTcpServer do
   end
 
   # Main source of data ingress
-  def handle_info({:tcp, _socket, data}, state) do
-    new_state = state.protocol_in.data_in(to_string(data), state)
-    {:noreply, new_state}
-  end
-
   def handle_info({:ssl, _socket, data}, state) do
-    new_state = state.protocol_in.data_in(to_string(data), state)
-    {:noreply, new_state}
+    data = to_string(data)
+
+    case flood_protect?(data, state) do
+      {true, state} ->
+        engage_flood_protection(state)
+      {false, state} ->
+        new_state = state.protocol_in.data_in(to_string(data), state)
+        {:noreply, new_state}
+    end
   end
 
   # Email, when an email is sent we get a message, we don't care about that for the most part (yet)
@@ -253,5 +255,34 @@ defmodule Teiserver.TachyonTcpServer do
 
   def terminate(_reason, state) do
     Client.disconnect(state.userid, "tcp_server terminate")
+  end
+
+  # Internal functions
+  @spec flood_protect?(String.t(), map()) :: {boolean, map()}
+  defp flood_protect?(_, %{exempt_from_cmd_throttle: true} = state), do: {false, state}
+  defp flood_protect?(data, state) do
+    cmd_timestamps = if String.contains?(data, "\n") do
+      now = System.system_time(:second)
+      limiter = now - state.floot_rate_window_size
+
+      [now | state.cmd_timestamps]
+      |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
+    else
+      state.cmd_timestamps
+    end
+
+    if Enum.count(cmd_timestamps) > state.flood_rate_limit_count do
+      {true, %{state | cmd_timestamps: cmd_timestamps}}
+    else
+      {false, %{state | cmd_timestamps: cmd_timestamps}}
+    end
+  end
+
+  defp engage_flood_protection(state) do
+    state.protocol_out.reply(:disconnect, "Flood protection", nil, state)
+    User.set_flood_level(state.userid, 10)
+    Client.disconnect(state.userid, :flood)
+    Logger.error("Tachyon command overflow from #{state.username}/#{state.userid} with #{Enum.count(state.cmd_timestamps)} commands. Disconnected and flood protection engaged.")
+    {:stop, "Flood protection", state}
   end
 end
