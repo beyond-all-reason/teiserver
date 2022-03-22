@@ -110,7 +110,7 @@ defmodule Teiserver.Coordinator do
     case get_consul_pid(lobby_id) do
       nil -> nil
       pid ->
-        ConCache.delete(:teiserver_consul_pids, lobby_id)
+        Central.cache_delete(:teiserver_consul_pids, lobby_id)
         DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, pid)
     end
   end

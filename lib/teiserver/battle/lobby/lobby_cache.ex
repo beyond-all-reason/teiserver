@@ -107,7 +107,7 @@ defmodule Teiserver.Battle.LobbyCache do
   def close_lobby(lobby_id, reason \\ :closed) do
     battle = get_lobby(lobby_id)
     Coordinator.close_battle(lobby_id)
-    ConCache.delete(:lobbies, lobby_id)
+    Central.cache_delete(:lobbies, lobby_id)
     ConCache.update(:lists, :lobbies, fn value ->
       new_value =
         value

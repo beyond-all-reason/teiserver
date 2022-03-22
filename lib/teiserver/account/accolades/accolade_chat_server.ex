@@ -115,13 +115,13 @@ defmodule Teiserver.Account.AccoladeChatServer do
   end
 
   def handle_info(:terminate, state) do
-    ConCache.delete(:teiserver_accolade_pids, state.userid)
+    Central.cache_delete(:teiserver_accolade_pids, state.userid)
     DynamicSupervisor.terminate_child(Teiserver.Account.AccoladeSupervisor, self())
     {:stop, :normal, %{state | userid: nil}}
   end
 
   def terminate(_reason, state) do
-    ConCache.delete(:teiserver_accolade_pids, state.userid)
+    Central.cache_delete(:teiserver_accolade_pids, state.userid)
   end
 
   @spec do_tick(map()) :: map()

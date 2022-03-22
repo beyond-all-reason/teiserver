@@ -30,7 +30,7 @@ defmodule Teiserver.Bridge.MessageCommands do
         correct_code = ConCache.get(:discord_bridge_account_codes, userid)
 
         if given_code == correct_code do
-          ConCache.delete(:discord_bridge_account_codes, userid)
+          Central.cache_delete(:discord_bridge_account_codes, userid)
           user = User.get_user_by_id(userid)
           User.update_user(%{user | discord_id: discord_id}, persist: true)
           ConCache.put(:users_lookup_id_with_discord_id, discord_id, user.id)

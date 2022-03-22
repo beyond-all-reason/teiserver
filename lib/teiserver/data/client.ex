@@ -350,7 +350,7 @@ defmodule Teiserver.Client do
       {:client_inout, :disconnect, client.userid, reason}
     )
 
-    ConCache.delete(:clients, client.userid)
+    Central.cache_delete(:clients, client.userid)
 
     ConCache.update(:lists, :clients, fn value ->
       new_value =

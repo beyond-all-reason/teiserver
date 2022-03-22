@@ -454,7 +454,7 @@ defmodule Teiserver.User do
   end
 
   def change_email(user, new_email) do
-    ConCache.delete(:users_lookup_id_with_email, String.downcase(user.email))
+    Central.cache_delete(:users_lookup_id_with_email, String.downcase(user.email))
     ConCache.put(:users_lookup_id_with_email, String.downcase(new_email), user.id)
     update_user(%{user | email: new_email, email_change_code: [nil, nil]})
   end

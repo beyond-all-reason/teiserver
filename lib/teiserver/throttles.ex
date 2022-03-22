@@ -21,7 +21,7 @@ defmodule Teiserver.Throttles do
     case get_throttle_pid(key) do
       nil -> nil
       pid ->
-        ConCache.delete(:teiserver_throttle_pids, key)
+        Central.cache_delete(:teiserver_throttle_pids, key)
         DynamicSupervisor.terminate_child(Teiserver.Throttles.Supervisor, pid)
         :ok
     end

@@ -100,7 +100,7 @@ defmodule TeiserverWeb.Account.PreferencesController do
       # If there's an error then it's because they have removed the value, we just delete the config
       {:error, %Ecto.Changeset{} = _changeset} ->
         {:ok, _user_config} = Config.delete_user_config(user_config)
-        ConCache.delete(:config_user_cache, user_config.user_id)
+        Central.cache_delete(:config_user_cache, user_config.user_id)
 
         conn
         |> put_flash(:info, "Your preferences have been updated.")

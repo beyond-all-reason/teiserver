@@ -185,10 +185,10 @@ defmodule Teiserver.Account.UserCache do
       Client.disconnect(userid, "User cache deletion")
       :timer.sleep(100)
 
-      ConCache.delete(:users, userid)
-      ConCache.delete(:users_lookup_name_with_id, user.id)
-      ConCache.delete(:users_lookup_id_with_name, cachename(user.name))
-      ConCache.delete(:users_lookup_id_with_email, cachename(user.email))
+      Central.cache_delete(:users, userid)
+      Central.cache_delete(:users_lookup_name_with_id, user.id)
+      Central.cache_delete(:users_lookup_id_with_name, cachename(user.name))
+      Central.cache_delete(:users_lookup_id_with_email, cachename(user.email))
       :ok
     else
       :no_user
