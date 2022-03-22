@@ -104,7 +104,7 @@ defmodule Teiserver.Game.AchievementServer do
 
   @impl true
   def init(_) do
-    send(self(), :refresh_type_map)
+    :timer.send_after(10_000, :refresh_type_map)
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_telemetry_client_events")
     :timer.send_interval(300_000, :refresh_type_map)
     {:ok, %{
