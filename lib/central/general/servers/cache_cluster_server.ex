@@ -19,7 +19,7 @@ defmodule Central.General.CacheClusterServer do
   end
 
   defp delete_key(table, key) do
-    ConCache.delete(table, key)
+    Central.cache_delete(table, key)
   end
 
   @impl true

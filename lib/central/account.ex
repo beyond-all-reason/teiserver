@@ -133,11 +133,11 @@ defmodule Central.Account do
   def recache_user(%User{} = user), do: recache_user(user.id)
 
   def recache_user(id) do
-    ConCache.delete(:account_user_cache, id)
-    ConCache.delete(:account_user_cache_bang, id)
-    ConCache.delete(:account_membership_cache, id)
-    ConCache.delete(:communication_user_notifications, id)
-    ConCache.delete(:config_user_cache, id)
+    Central.cache_delete(:account_user_cache, id)
+    Central.cache_delete(:account_user_cache_bang, id)
+    Central.cache_delete(:account_membership_cache, id)
+    Central.cache_delete(:communication_user_notifications, id)
+    Central.cache_delete(:config_user_cache, id)
   end
 
   def broadcast_create_user(u), do: broadcast_create_user(u, :create)

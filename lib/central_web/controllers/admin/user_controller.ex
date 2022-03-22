@@ -377,7 +377,7 @@ defmodule CentralWeb.Admin.UserController do
       {true, _} ->
         user_config = Config.get_user_config!(user_id, key)
         {:ok, _user_config} = Config.delete_user_config(user_config)
-        ConCache.delete(:config_user_cache, user_config.user_id)
+        Central.cache_delete(:config_user_cache, user_config.user_id)
 
         conn
         |> put_flash(:success, "User config removed.")
