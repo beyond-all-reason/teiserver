@@ -37,19 +37,19 @@
         <td>
           <%= if ugm.admin do %>
             <a href={"#{Routes.admin_group_path(@conn, :update_membership, @group.id, u.id)}?role=normal"} class="btn btn-secondary btn-sm">
-              <i class="far fa-fw fa-arrow-down"></i>
+              <i class="fa-regular fa-fw fa-arrow-down"></i>
               Demote
             </a>
           <% else %>
             <a href={"#{Routes.admin_group_path(@conn, :update_membership, @group.id, u.id)}?role=admin"} class="btn btn-secondary btn-sm">
-              <i class="far fa-fw fa-arrow-up"></i>
+              <i class="fa-regular fa-fw fa-arrow-up"></i>
               Promote
             </a>
           <% end %>
         </td>
         <td>
           <a href={Routes.admin_group_path(@conn, :delete_membership, @group.id, u.id)} class="btn btn-danger btn-sm">
-            <i class="far fa-fw fa-trash"></i>
+            <i class="fa-regular fa-fw fa-trash"></i>
             Remove
           </a>
         </td>
@@ -58,7 +58,7 @@
       <%= if allow?(@current_user, "admin.admin.limited") do %>
         <td>
           <a href={Routes.admin_user_path(@conn, :show, u.id)} class="btn btn-outline-secondary btn-sm">
-            <i class="far fa-fw fa-user"></i>
+            <i class="fa-regular fa-fw fa-user"></i>
             Show user
           </a>
         </td>

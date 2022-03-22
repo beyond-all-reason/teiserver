@@ -2,14 +2,14 @@
   <a class="nav-link dropdown-toggle dropdown-toggle-icon-only" href="#" id="communication-notifications-menu-link" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
     <div id="communication-notifications-icon-wrapper">
       <%= if true or @user_notifications_unread_count > 0 do %>
-        <i class="fas fa-bell fa-fw fa-lg text-primary align-middle" id="communication-notifications-icon"></i>
+        <i class="fa-solid fa-bell fa-fw fa-lg text-primary align-middle" id="communication-notifications-icon"></i>
         <div class="badge rounded-pill bg-primary"
           id="communication-notifications-badge"
           style="margin-left:-15px; font-weight: bold; display: inline-block;">
           <%= @user_notifications_unread_count %>
         </div>
       <% else %>
-        <i class="far fa-bell fa-fw fa-lg align-middle" id="communication-notifications-icon"></i>
+        <i class="fa-regular fa-bell fa-fw fa-lg align-middle" id="communication-notifications-icon"></i>
         <div class="badge rounded-pill bg-primary"
           id="communication-notifications-badge"
           style="margin-left:-15px; font-weight: bold; background-color: #FFF; display: inline-block;">

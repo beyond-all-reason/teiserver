@@ -24,7 +24,7 @@
     <div class="post-tags">
       <%= for t <- p.tags do %>
         <a href={Routes.blog_path(@conn, :tag, t)} class="badge badge-pill badge-outline-secondary">
-          <i class="far fa-fw fa-tag"></i>
+          <i class="fa-regular fa-fw fa-tag"></i>
           <%= t %>
         </a>
       <% end %>

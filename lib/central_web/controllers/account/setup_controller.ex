@@ -24,7 +24,7 @@ defmodule CentralWeb.Account.SetupController do
             Account.create_group(%{
               "name" => "Root group",
               "colour" => "#AA0000",
-              "icon" => "far fa-info",
+              "icon" => "fa-regular fa-info",
               "active" => true,
               "group_type" => nil,
               "data" => %{},
@@ -42,7 +42,7 @@ defmodule CentralWeb.Account.SetupController do
               password: true_key,
               permissions: ["admin.dev.developer"],
               admin_group_id: group.id,
-              icon: "fas fa-power-off",
+              icon: "fa-solid fa-power-off",
               colour: "#00AA00"
             })
 

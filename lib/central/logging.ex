@@ -4,7 +4,7 @@ defmodule Central.Logging do
   """
 
   @spec icon() :: String.t()
-  def icon(), do: "fas fa-bars"
+  def icon(), do: "fa-solid fa-bars"
 
   import Ecto.Query, warn: false
   alias Central.Helpers.QueryHelpers

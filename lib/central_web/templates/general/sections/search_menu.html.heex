@@ -18,7 +18,7 @@
   <form action={Routes.general_page_path(@conn, :search)} method="get" class="form-inline" id="general-search-form">
     <input type="text" name="s" id="general-search-input" value={assigns[:site_search_term]} placeholder="" class="form-control" style="border: 0px solid #000; font-size: 16px; margin: 4px 5px 0;" />
     <div style="display: inline-block; height: 100%; margin-top: 6px;" onclick="if ($('#general-search-input').val() == '') {$('#general-search-input').focus();} else {$('#general-search-form').submit();}">
-      <i class="fas fa-fw fa-search fa-lg"></i>
+      <i class="fa-solid fa-fw fa-search fa-lg"></i>
     </div>
   </form>
 </li>

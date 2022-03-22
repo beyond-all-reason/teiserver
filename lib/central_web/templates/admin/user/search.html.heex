@@ -19,7 +19,7 @@
 
 <div class="search-row">
   <div class={"btn btn-outline-#{bsname}"} onclick="show_search();" id="search-box-shower">
-    <i class="far fa-fw fa-search"></i>
+    <i class="fa-regular fa-fw fa-search"></i>
     Show search form
   </div>
 
@@ -38,7 +38,7 @@
           <%= central_component "icon_dropdown", %{
             name: "search[admin_group_id]",
             id: "search_admin_group_id",
-            insert_blank: %{id: "", name: "All groups", icon: "far far far fa-th", colour: fg},
+            insert_blank: %{id: "", name: "All groups", icon: "fa-regular far far fa-th", colour: fg},
             selected: @params["admin_group_id"],
             enumerable: @groups
           } %>
@@ -51,9 +51,9 @@
             id: "search_has_admin_group",
             selected: @params["has_admin_group"],
             enumerable: [
-              %{id: "Either", icon: "far far fa-th", colour: fg},
-              %{id: "Has group", icon: "far far fa-check", colour: fg},
-              %{id: "No group", icon: "far far fa-times", colour: fg},
+              %{id: "Either", icon: "fa-regular far fa-th", colour: fg},
+              %{id: "Has group", icon: "fa-regular far fa-check", colour: fg},
+              %{id: "No group", icon: "fa-regular far fa-times", colour: fg},
             ]
           } %>
         </div>
@@ -72,10 +72,10 @@
           id: "search_order",
           selected: @params["order"],
           enumerable: [
-            %{id: "Name (A-Z)", icon: "far far fa-sort-numeric-down", colour: fg},
-            %{id: "Name (Z-A)", icon: "far far fa-sort-numeric-up", colour: fg},
-            %{id: "Newest first", icon: "far far fa-sort-numeric-down", colour: fg},
-            %{id: "Oldest first", icon: "far far fa-sort-numeric-up", colour: fg},
+            %{id: "Name (A-Z)", icon: "fa-regular far fa-sort-numeric-down", colour: fg},
+            %{id: "Name (Z-A)", icon: "fa-regular far fa-sort-numeric-up", colour: fg},
+            %{id: "Newest first", icon: "fa-regular far fa-sort-numeric-down", colour: fg},
+            %{id: "Oldest first", icon: "fa-regular far fa-sort-numeric-up", colour: fg},
           ]
         } %>
       </div>

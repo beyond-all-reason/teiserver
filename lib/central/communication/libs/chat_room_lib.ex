@@ -8,10 +8,10 @@ defmodule Central.Communication.ChatRoomLib do
   def colours(), do: :success
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-comment"
+  def icon(), do: "fa-regular fa-comment"
 
-  def icon_full(), do: "fas fa-comment"
-  def icon_empty(), do: "far fa-comment"
+  def icon_full(), do: "fa-solid fa-comment"
+  def icon_empty(), do: "fa-regular fa-comment"
 
   # Queries
   @spec get_chat_rooms() :: Ecto.Query.t()

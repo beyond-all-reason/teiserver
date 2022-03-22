@@ -10,7 +10,7 @@ defmodule Central.Logging.AggregateViewLogLib do
   def colours(), do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-chart-area"
+  def icon(), do: "fa-regular fa-chart-area"
 
   def get_logs() do
     from(logs in AggregateViewLog)

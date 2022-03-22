@@ -5,7 +5,7 @@ defmodule CentralWeb.Account.UserView do
   def view_colour, do: :success
 
   @spec icon :: String.t()
-  def icon, do: "fas fa-user"
+  def icon, do: "fa-solid fa-user"
 
   @spec name :: String.t()
   def name, do: "user"

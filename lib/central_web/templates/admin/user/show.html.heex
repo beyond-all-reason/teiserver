@@ -7,10 +7,10 @@
     $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     page_quick_actions = [
-      {label: "User reports", icons: ["far fa-bars", "<%= Central.Account.ReportLib.icon() %>"], url: "<%= Routes.admin_report_path(@conn, :user_show, @user) %>", keywords: ["report"]},
-      {label: "Add report", icons: ["far fa-plus", "<%= Central.Account.ReportLib.icon() %>"], url: "<%= Routes.logging_page_view_log_path(@conn, :index) %>?user_id=<%= @user.id %>", keywords: ["add", "report"]},
-      {label: "Edit user", icons: ["far fa-wrench", "<%= icon() %>"], url: "<%= Routes.admin_user_path(@conn, :edit, @user) %>", keywords: ["edit", "user", "edit user"]},
-      {label: "Password reset", icons: ["far fa-shield-alt", "far fa-undo"], url: "<%= Routes.admin_user_path(@conn, :reset_password, @user.id) %>", keywords: ["reset", "password"]},
+      {label: "User reports", icons: ["fa-regular fa-bars", "<%= Central.Account.ReportLib.icon() %>"], url: "<%= Routes.admin_report_path(@conn, :user_show, @user) %>", keywords: ["report"]},
+      {label: "Add report", icons: ["fa-regular fa-plus", "<%= Central.Account.ReportLib.icon() %>"], url: "<%= Routes.logging_page_view_log_path(@conn, :index) %>?user_id=<%= @user.id %>", keywords: ["add", "report"]},
+      {label: "Edit user", icons: ["fa-regular fa-wrench", "<%= icon() %>"], url: "<%= Routes.admin_user_path(@conn, :edit, @user) %>", keywords: ["edit", "user", "edit user"]},
+      {label: "Password reset", icons: ["fa-regular fa-shield-alt", "fa-regular fa-undo"], url: "<%= Routes.admin_user_path(@conn, :reset_password, @user.id) %>", keywords: ["reset", "password"]},
 
     ];
   });
@@ -43,7 +43,7 @@
             </div>
 
             <a href={Routes.admin_user_path(@conn, :edit, @user)} class={"btn btn-outline-#{bsname}"}>
-              <i class="far fa-fw fa-wrench"></i>
+              <i class="fa-regular fa-fw fa-wrench"></i>
               Edit user
             </a>
             <%# Actions float end %>

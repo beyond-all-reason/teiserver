@@ -8,7 +8,7 @@ defmodule Central.Communication.BlogFileLib do
   def colours(), do: :warning2
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-file"
+  def icon(), do: "fa-regular fa-file"
 
   # Queries
   @spec get_blog_files() :: Ecto.Query.t()

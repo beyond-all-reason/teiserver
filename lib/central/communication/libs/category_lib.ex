@@ -8,7 +8,7 @@ defmodule Central.Communication.CategoryLib do
   def colours(), do: :success
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-indent"
+  def icon(), do: "fa-regular fa-indent"
 
   # Queries
   @spec get_categories() :: Ecto.Query.t()

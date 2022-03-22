@@ -7,13 +7,13 @@ defmodule Central.Communication.NotificationLib do
   def colours(), do: :primary
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-bell"
+  def icon(), do: "fa-regular fa-bell"
 
   @spec icon_full() :: String.t()
-  def icon_full(), do: "fas fa-bell"
+  def icon_full(), do: "fa-solid fa-bell"
 
   @spec icon_empty() :: String.t()
-  def icon_empty(), do: "fad fa-bell"
+  def icon_empty(), do: "fa-duotone fa-bell"
 
   # Queries
   @spec get_notifications() :: Ecto.Query.t()

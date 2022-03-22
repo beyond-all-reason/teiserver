@@ -12,7 +12,7 @@ defmodule Central.Logging.Startup do
     QuickAction.add_items([
       %{
         label: "Live view dashboard",
-        icons: ["far fa-tachometer-alt", :list],
+        icons: ["fa-regular fa-tachometer-alt", :list],
         url: "/logging/live/dashboard",
         permissions: "logging.live"
       },
@@ -52,7 +52,7 @@ defmodule Central.Logging.Startup do
     #     icons: [
     #       CentralWeb.Logging.GeneralHelper.icon(),
     #       Central.Logging.PageViewLogHelper.icon(),
-    #       "far fa-plus"
+    #       "fa-regular fa-plus"
     #     ],
     #     colour: elem(Central.Logging.PageViewLogHelper.colours(), 0),
 

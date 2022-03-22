@@ -91,7 +91,7 @@ defmodule CentralWeb.Admin.GroupController do
 
     changeset =
       Account.change_group(%Group{
-        icon: "fas fa-" <> StylingHelper.random_icon(),
+        icon: "fa-solid fa-" <> StylingHelper.random_icon(),
         colour: StylingHelper.random_colour()
       })
 

@@ -6,7 +6,7 @@
       name: "open",
       label: "Open",
       active: @active,
-      icon: "far fa-list",
+      icon: "fa-regular fa-list",
       bsname: bsname,
       url: Routes.admin_report_path(@conn, :index) <> "?filter=open"
     %>
@@ -15,7 +15,7 @@
       name: "closed",
       label: "Closed",
       active: @active,
-      icon: "far fa-ellipsis-v",
+      icon: "fa-regular fa-ellipsis-v",
       bsname: bsname,
       url: Routes.admin_report_path(@conn, :index) <> "?filter=closed"
     %>
@@ -24,7 +24,7 @@
       name: "all",
       label: "All",
       active: @active,
-      icon: "far fa-bars",
+      icon: "fa-regular fa-bars",
       bsname: bsname,
       url: Routes.admin_report_path(@conn, :index) <> "?filter=all"
     %>
@@ -34,7 +34,7 @@
       name: "all",
       label: "All",
       active: @active,
-      icon: "far fa-list",
+      icon: "fa-regular fa-list",
       bsname: bsname,
       url: Routes.admin_report_path(@conn, :user_show, @user) <> "?filter=all"
     %>
@@ -43,7 +43,7 @@
       name: "target",
       label: "Target",
       active: @active,
-      icon: "far fa-bullseye",
+      icon: "fa-regular fa-bullseye",
       bsname: bsname,
       url: Routes.admin_report_path(@conn, :user_show, @user) <> "?filter=target"
     %>
@@ -52,7 +52,7 @@
       name: "reporter",
       label: "Reporter",
       active: @active,
-      icon: "far fa-whistle",
+      icon: "fa-regular fa-whistle",
       bsname: bsname,
       url: Routes.admin_report_path(@conn, :user_show, @user) <> "?filter=reporter"
     %>
@@ -61,7 +61,7 @@
       name: "responder",
       label: "Responder",
       active: @active,
-      icon: "far fa-reply",
+      icon: "fa-regular fa-reply",
       bsname: bsname,
       url: Routes.admin_report_path(@conn, :user_show, @user) <> "?filter=responder"
     %>

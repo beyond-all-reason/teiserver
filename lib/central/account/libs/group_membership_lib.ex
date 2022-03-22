@@ -8,7 +8,7 @@ defmodule Central.Account.GroupMembershipLib do
   def colours(), do: :primary2
 
   @spec icon :: String.t()
-  def icon(), do: "far fa-users"
+  def icon(), do: "fa-regular fa-users"
 
   @spec get_group_memberships() :: Ecto.Query.t()
   def get_group_memberships do

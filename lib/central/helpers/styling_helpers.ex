@@ -204,7 +204,7 @@ defmodule Central.Helpers.StylingHelper do
   @spec random_styling() :: Map.t()
   def random_styling() do
     %{
-      "icon" => "far fa-" <> random_icon(),
+      "icon" => "fa-regular fa-" <> random_icon(),
       "colour" => random_colour()
     }
   end

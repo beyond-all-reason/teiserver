@@ -27,7 +27,7 @@
         <div class="float-end">
           <%= if @report.responder_id == nil do %>
             <a href={Routes.admin_report_path(@conn, :respond_form, @report)} class={"btn btn-outline-#{bsname}"}>
-              <i class="far fa-fw fa-reply"></i>
+              <i class="fa-regular fa-fw fa-reply"></i>
               Respond
             </a>
           <% end %>
@@ -40,7 +40,7 @@
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li>
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: "fas fa-file-alt" %>
+              <%= central_component "icon", icon: "fa-solid fa-file-alt" %>
               Details
             </a>
           </li>

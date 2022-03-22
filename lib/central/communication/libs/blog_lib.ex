@@ -6,5 +6,5 @@ defmodule Central.Communication.BlogLib do
   def colours(), do: :primary
 
   @spec icon() :: String.t()
-  def icon(), do: "fad fa-rss"
+  def icon(), do: "fa-duotone fa-rss"
 end

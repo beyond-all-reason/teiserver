@@ -16,8 +16,8 @@
   </a>
 
   <a class="dropdown-item" href={Routes.admin_user_path(@conn, :reset_password, @user.id)}>
-    <%= central_component "icon", icon: "fas fa-undo" %>
-    <%= central_component "icon", icon: "fas fa-shield-alt" %>
+    <%= central_component "icon", icon: "fa-solid fa-undo" %>
+    <%= central_component "icon", icon: "fa-solid fa-shield-alt" %>
     &nbsp;
     Reset password
   </a>
@@ -27,7 +27,7 @@
 
   <a class="dropdown-item" href={"#{Routes.admin_user_path(@conn, :delete_check, @user)}?user_id=#{@user.id}"}>
     <%= central_component "icon", icon: Central.Account.UserLib.icon() %>
-    <i class="far fa-fw fa-trash"></i>
+    <i class="fa-regular fa-fw fa-trash"></i>
     &nbsp;
     Check deletion
   </a>

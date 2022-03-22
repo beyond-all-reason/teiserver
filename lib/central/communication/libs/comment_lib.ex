@@ -7,7 +7,7 @@ defmodule Central.Communication.CommentLib do
   def colours(), do: :info
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-comment"
+  def icon(), do: "fa-regular fa-comment"
 
   # Queries
   @spec get_comments() :: Ecto.Query.t()

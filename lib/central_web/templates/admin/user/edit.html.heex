@@ -50,7 +50,7 @@
                 <td><%= c.value %></td>
                 <td>
                   <a href={Routes.admin_user_path(@conn, :config_delete, c.user_id, c.key)} class="btn btn-danger btn-block btn-sm">
-                    <i class="far fa-fw fa-trash"></i>
+                    <i class="fa-regular fa-fw fa-trash"></i>
                     &nbsp;
                     Delete
                   </a>
@@ -88,7 +88,7 @@
       <div class="card-body">
         <h4>Security</h4>
         <a href={Routes.admin_user_path(@conn, :reset_password, @user.id)} class="btn btn-danger">
-          <i class="far fa-fw fa-undo"></i>
+          <i class="fa-regular fa-fw fa-undo"></i>
           &nbsp;
           Reset password
         </a>

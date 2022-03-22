@@ -50,7 +50,7 @@ defmodule CentralWeb.Communication.CategoryController do
   def new(conn, _params) do
     changeset =
       Category.changeset(%Category{
-        icon: "fas fa-" <> StylingHelper.random_icon(),
+        icon: "fa-solid fa-" <> StylingHelper.random_icon(),
         colour: StylingHelper.random_colour(),
         public: true
       })

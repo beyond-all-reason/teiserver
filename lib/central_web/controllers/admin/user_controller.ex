@@ -83,7 +83,7 @@ defmodule CentralWeb.Admin.UserController do
   def new(conn, _params) do
     changeset =
       Account.change_user(%User{
-        icon: "fas fa-" <> StylingHelper.random_icon(),
+        icon: "fa-solid fa-" <> StylingHelper.random_icon(),
         colour: StylingHelper.random_colour()
       })
 

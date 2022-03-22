@@ -6,7 +6,7 @@ defmodule Central.Admin.ToolLib do
   def colours(), do: :info
 
   @spec icon :: String.t()
-  def icon(), do: "far fa-tools"
+  def icon(), do: "fa-regular fa-tools"
 
   @spec coverage_colours(integer()) :: {String.t(), String.t(), String.t()}
   def coverage_colours(value) do

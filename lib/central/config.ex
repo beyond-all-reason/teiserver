@@ -239,8 +239,8 @@ defmodule Central.Config do
       (ConCache.get(:config_user_type_cache, "all-config-types") || %{})
       |> Map.put(config.key, config)
 
-    ConCache.put(:config_user_type_cache, "all-config-types", all_config_types)
-    ConCache.put(:config_user_type_cache, config.key, config)
+    Central.cache_put(:config_user_type_cache, "all-config-types", all_config_types)
+    Central.cache_put(:config_user_type_cache, config.key, config)
   end
 
   def get_user_config_default(key) do
@@ -379,8 +379,8 @@ defmodule Central.Config do
       (ConCache.get(:config_site_type_cache, "all-config-types") || %{})
       |> Map.put(config.key, config)
 
-    ConCache.put(:config_site_type_cache, "all-config-types", all_config_types)
-    ConCache.put(:config_site_type_cache, config.key, config)
+    Central.cache_put(:config_site_type_cache, "all-config-types", all_config_types)
+    Central.cache_put(:config_site_type_cache, config.key, config)
   end
 
   def get_site_config_default(key) do

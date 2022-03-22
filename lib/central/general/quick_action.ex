@@ -4,10 +4,10 @@ defmodule Central.General.QuickAction do
 
   @doc """
   Each action is a map such as the below:
-    %{label: "Preferences", icon: "far fa-cog", url: "/config/user"},
+    %{label: "Preferences", icon: "fa-regular fa-cog", url: "/config/user"},
 
   Optionally you can include a few other options like so:
-    %{label: "Preferences", icon: "far fa-cog", url: "/config/user", keywords: ["Settings"], permissions: "user-settings"},
+    %{label: "Preferences", icon: "fa-regular fa-cog", url: "/config/user", keywords: ["Settings"], permissions: "user-settings"},
 
   If you want to make a two part form you can use something like:
     %{label: "List users", icon: Central.Account.UserLib.icon(), input: "s", method: "get", placeholder: "Search username and/or email", url: "/admin/users", permissions: "admin.admin.limited"},

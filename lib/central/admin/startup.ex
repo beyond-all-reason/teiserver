@@ -57,6 +57,6 @@ defmodule Central.Admin.Startup do
       value_label: "Link"
     })
 
-    ConCache.put(:application_metadata_cache, :app_startup_datetime, Timex.now())
+    ConCache.put(:application_metadata_cache, :node_startup_datetime, Timex.now())
   end
 end

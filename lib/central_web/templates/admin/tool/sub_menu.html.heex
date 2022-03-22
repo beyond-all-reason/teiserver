@@ -26,14 +26,14 @@
             label: "Coverage",
             active: @active,
             url: Routes.admin_tool_path(@conn, :coverage_form),
-            icon: "far fa-barcode-scan"
+            icon: "fa-regular fa-barcode-scan"
           %>
           <%= central_component "sub_menu_icon",
             name: "test_page",
             label: "Test page",
             active: @active,
             url: Routes.admin_tool_path(@conn, :test_page),
-            icon: "far fa-map-marker-question"
+            icon: "fa-regular fa-map-marker-question"
           %>
 
           <%= central_component "sub_menu_icon",
@@ -49,7 +49,7 @@
             label: "Oban",
             active: @active,
             url: Routes.admin_tool_path(@conn, :oban_dashboard),
-            icon: "far fa-circle-notch"
+            icon: "fa-regular fa-circle-notch"
           %>
 
           <%= central_component "sub_menu_icon",
@@ -57,7 +57,7 @@
             label: "Conn params",
             active: @active,
             url: Routes.admin_tool_path(@conn, :conn_params),
-            icon: "far fa-brackets-curly"
+            icon: "fa-regular fa-brackets-curly"
           %>
         </div>
 

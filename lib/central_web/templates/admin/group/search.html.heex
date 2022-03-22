@@ -15,7 +15,7 @@
 
 <div class="search-row">
   <div class={"btn btn-outline-#{bsname}"} onclick="show_search();" id="search-box-shower">
-    <i class="far fa-fw fa-search"></i>
+    <i class="fa-regular fa-fw fa-search"></i>
     Show search form
   </div>
 
@@ -35,9 +35,9 @@
           id: "search_active",
           selected: @params[:active],
           enumerable: [
-            %{id: "All", icon: "fas fa-th", colour: fg},
-            %{id: "Active", icon: "far fa-check", colour: fg},
-            %{id: "Inactive", icon: "fas fa-stop", colour: fg},
+            %{id: "All", icon: "fa-solid fa-th", colour: fg},
+            %{id: "Active", icon: "fa-regular fa-check", colour: fg},
+            %{id: "Inactive", icon: "fa-solid fa-stop", colour: fg},
           ]
         } %>
       </div>
@@ -49,8 +49,8 @@
           id: "search_group",
           selected: @params[:order],
           enumerable: [
-            %{id: "Name (A-Z)", icon: "far fa-sort-alpha-down", colour: fg},
-            %{id: "Name (Z-A)", icon: "far fa-sort-alpha-up", colour: fg},
+            %{id: "Name (A-Z)", icon: "fa-regular fa-sort-alpha-down", colour: fg},
+            %{id: "Name (Z-A)", icon: "fa-regular fa-sort-alpha-up", colour: fg},
           ]
         } %>
       </div>

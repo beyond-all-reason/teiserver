@@ -70,7 +70,7 @@
               <%= central_component "icon_dropdown", %{
                 name: "report[group]",
                 id: "report_group",
-                insert_blank: %{id: "", name: "All", icon: "fas fa-th", colour: fg},
+                insert_blank: %{id: "", name: "All", icon: "fa-solid fa-th", colour: fg},
                 selected: @params["group"],
                 enumerable: @groups
               } %>
@@ -83,7 +83,7 @@
                 id: "report_section",
                 selected: @params["section"],
                 enumerable: [
-                  %{id: "", name: "Any section", icon: "fas fa-th", colour: fg},
+                  %{id: "", name: "Any section", icon: "fa-solid fa-th", colour: fg},
                   %{id: "admin", icon: "fa-user-circle", colour: fg},
                 ]
               } %>

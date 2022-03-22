@@ -11,7 +11,7 @@ defmodule Central.CommunicationTestLib do
         %{
           "name" => "Name",
           "colour" => "#000000",
-          "icon" => "far fa-home",
+          "icon" => "fa-regular fa-home",
           "public" => true
         },
         params

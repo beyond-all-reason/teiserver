@@ -6,5 +6,5 @@ defmodule Central.Config.SiteConfigLib do
   def colours(), do: :success2
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-cogs"
+  def icon(), do: "fa-regular fa-cogs"
 end

@@ -8,7 +8,7 @@ defmodule Central.Logging.AuditLogLib do
   def colours(), do: :danger2
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-archive"
+  def icon(), do: "fa-regular fa-archive"
 
   def add_audit_types(types) do
     new_types = list_audit_types() ++ types

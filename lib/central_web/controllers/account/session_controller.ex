@@ -61,7 +61,7 @@ defmodule CentralWeb.Account.SessionController do
   def forgot_password(conn, _params) do
     key = UUID.uuid1()
     value = UUID.uuid1()
-    ConCache.put(:codes, key, value)
+    Central.cache_put(:codes, key, value)
 
     conn
     |> assign(:key, key)
@@ -100,7 +100,7 @@ defmodule CentralWeb.Account.SessionController do
       expected_value == nil ->
         key = UUID.uuid1()
         value = UUID.uuid1()
-        ConCache.put(:codes, key, value)
+        Central.cache_put(:codes, key, value)
 
         conn
         |> assign(:key, key)
@@ -111,7 +111,7 @@ defmodule CentralWeb.Account.SessionController do
       params[key] != expected_value ->
         key = UUID.uuid1()
         value = UUID.uuid1()
-        ConCache.put(:codes, key, value)
+        Central.cache_put(:codes, key, value)
 
         conn
         |> assign(:key, key)
@@ -122,7 +122,7 @@ defmodule CentralWeb.Account.SessionController do
       user.id == -1 ->
         key = UUID.uuid1()
         value = UUID.uuid1()
-        ConCache.put(:codes, key, value)
+        Central.cache_put(:codes, key, value)
 
         conn
         |> assign(:key, key)

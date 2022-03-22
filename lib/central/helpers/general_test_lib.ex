@@ -41,7 +41,7 @@ defmodule Central.Helpers.GeneralTestLib do
         "name" => params["name"] || "Test",
         "email" => params["email"] || "email@email#{:rand.uniform(999_999_999_999)}",
         "colour" => params["colour"] || "#00AA00",
-        "icon" => params["icon"] || "far fa-user",
+        "icon" => params["icon"] || "fa-regular fa-user",
         "permissions" => permissions,
         "password" => params["password"] || "password",
         "password_confirmation" => params["password"] || "password",
@@ -57,7 +57,7 @@ defmodule Central.Helpers.GeneralTestLib do
       Account.create_group(%{
         "name" => name,
         "colour" => params["colour"] || "#AA0000",
-        "icon" => params["icon"] || "far fa-info",
+        "icon" => params["icon"] || "fa-regular fa-info",
         "active" => params["active"] || true,
         "group_type" => params["group_type"] || nil,
         "data" => data,

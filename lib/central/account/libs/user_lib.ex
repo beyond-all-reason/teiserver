@@ -9,7 +9,7 @@ defmodule Central.Account.UserLib do
   def colours(), do: :primary
 
   @spec icon :: String.t()
-  def icon(), do: "far fa-user"
+  def icon(), do: "fa-regular fa-user"
 
   @spec make_favourite(User.t()) :: Map.t()
   def make_favourite(user) do

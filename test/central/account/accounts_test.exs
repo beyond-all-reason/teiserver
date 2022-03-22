@@ -9,7 +9,7 @@ defmodule Central.AccountTest do
 
     @valid_attrs %{
       colour: "some colour",
-      icon: "far fa-home",
+      icon: "fa-regular fa-home",
       name: "some name",
       permissions: [],
       email: "some email",
@@ -17,7 +17,7 @@ defmodule Central.AccountTest do
     }
     @update_attrs %{
       colour: "some updated colour",
-      icon: "fas fa-wrench",
+      icon: "fa-solid fa-wrench",
       permissions: [],
       name: "some updated name",
       email: "some updated email",
@@ -44,7 +44,7 @@ defmodule Central.AccountTest do
     test "create_user/1 with valid data creates a user" do
       assert {:ok, %User{} = user} = Account.create_user(@valid_attrs)
       assert user.colour == "some colour"
-      assert user.icon == "far fa-home"
+      assert user.icon == "fa-regular fa-home"
       assert user.name == "some name"
       assert user.permissions == []
       assert user.name == "some name"
@@ -58,7 +58,7 @@ defmodule Central.AccountTest do
       user = AccountTestLib.user_fixture()
       assert {:ok, %User{} = user} = Account.update_user(user, @update_attrs)
       assert user.colour == "some updated colour"
-      assert user.icon == "fas fa-wrench"
+      assert user.icon == "fa-solid fa-wrench"
       assert user.name == "some updated name"
       assert user.permissions == []
       assert user.name == "some updated name"
@@ -87,7 +87,7 @@ defmodule Central.AccountTest do
 
     @valid_attrs %{
       "colour" => "some colour",
-      "icon" => "far fa-home",
+      "icon" => "fa-regular fa-home",
       "name" => "some name",
       "data" => %{},
       "active" => true,
@@ -101,7 +101,7 @@ defmodule Central.AccountTest do
     }
     @update_attrs %{
       "colour" => "some updated colour",
-      "icon" => "fas fa-wrench",
+      "icon" => "fa-solid fa-wrench",
       "name" => "some updated name",
       "data" => %{},
       "active" => false,
@@ -149,7 +149,7 @@ defmodule Central.AccountTest do
     test "create_group/1 with valid data creates a group" do
       assert {:ok, %Group{} = group} = Account.create_group(@valid_attrs)
       assert group.colour == "some colour"
-      assert group.icon == "far fa-home"
+      assert group.icon == "fa-regular fa-home"
       assert group.name == "some name"
     end
 
@@ -161,7 +161,7 @@ defmodule Central.AccountTest do
       group = group_fixture()
       assert {:ok, %Group{} = group} = Account.update_group(group, @update_attrs)
       assert group.colour == "some updated colour"
-      assert group.icon == "fas fa-wrench"
+      assert group.icon == "fa-solid fa-wrench"
       assert group.name == "some updated name"
     end
 

@@ -76,7 +76,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
 
       key = "bad-key-value-pair-key"
       value = "bad-key-value-pair-value"
-      ConCache.put(:codes, key, value)
+      Central.cache_put(:codes, key, value)
 
       conn =
         post(conn, Routes.account_session_path(conn, :send_password_reset),
@@ -95,7 +95,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
     test "no user", %{conn: conn} do
       key = "no-user-key"
       value = "no-user-value"
-      ConCache.put(:codes, key, value)
+      Central.cache_put(:codes, key, value)
 
       params = %{
         "email" => "no-user-email@x",
@@ -115,7 +115,7 @@ defmodule CentralWeb.Account.ForgottenPasswordControllerTest do
       dummy = GeneralTestLib.make_user()
       key = "correctly-submitted-key"
       value = "correctly-submitted-value"
-      ConCache.put(:codes, key, value)
+      Central.cache_put(:codes, key, value)
 
       params = %{
         "email" => dummy.email,

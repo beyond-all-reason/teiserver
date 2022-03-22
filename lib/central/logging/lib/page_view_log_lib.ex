@@ -6,7 +6,7 @@ defmodule Central.Logging.PageViewLogLib do
   def colours(), do: :info
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-chart-line"
+  def icon(), do: "fa-regular fa-chart-line"
 
   alias Central.Logging.PageViewLog
 

@@ -4,8 +4,8 @@ defmodule Central.Account.Startup do
 
   def startup do
     QuickAction.add_items([
-      %{label: "Logout", icons: ["far fa-sign-out"], url: "/logout"},
-      %{label: "Edit account", icons: ["far fa-lock", :edit], url: "/account/edit"}
+      %{label: "Logout", icons: ["fa-regular fa-sign-out"], url: "/logout"},
+      %{label: "Edit account", icons: ["fa-regular fa-lock", :edit], url: "/account/edit"}
     ])
 
     add_audit_types([

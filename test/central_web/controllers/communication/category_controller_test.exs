@@ -10,8 +10,8 @@ defmodule CentralWeb.Communication.CategoryControllerTest do
     GeneralTestLib.conn_setup(~w(communication.blog))
   end
 
-  @create_attrs %{colour: "some colour", icon: "far fa-home", name: "some name", public: "true"}
-  @update_attrs %{colour: "some updated colour", icon: "fas fa-wrench", name: "some updated name"}
+  @create_attrs %{colour: "some colour", icon: "fa-regular fa-home", name: "some name", public: "true"}
+  @update_attrs %{colour: "some updated colour", icon: "fa-solid fa-wrench", name: "some updated name"}
   @invalid_attrs %{colour: nil, icon: nil, name: nil}
 
   describe "index" do

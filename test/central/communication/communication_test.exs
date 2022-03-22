@@ -135,10 +135,10 @@ defmodule Central.CommunicationTest do
   describe "categories" do
     alias Central.Communication.Category
 
-    @valid_attrs %{"colour" => "some colour", "icon" => "far fa-home", "name" => "some name", "public" => "true"}
+    @valid_attrs %{"colour" => "some colour", "icon" => "fa-regular fa-home", "name" => "some name", "public" => "true"}
     @update_attrs %{
       "colour" => "some updated colour",
-      "icon" => "fas fa-wrench",
+      "icon" => "fa-solid fa-wrench",
       "name" => "some updated name"
     }
     @invalid_attrs %{"colour" => nil, "icon" => nil, "name" => nil}
@@ -156,7 +156,7 @@ defmodule Central.CommunicationTest do
     test "create_category/1 with valid data creates a category" do
       assert {:ok, %Category{} = category} = Communication.create_category(@valid_attrs)
       assert category.colour == "some colour"
-      assert category.icon == "far fa-home"
+      assert category.icon == "fa-regular fa-home"
       assert category.name == "some name"
     end
 
@@ -171,7 +171,7 @@ defmodule Central.CommunicationTest do
                Communication.update_category(category, @update_attrs)
 
       assert category.colour == "some updated colour"
-      assert category.icon == "fas fa-wrench"
+      assert category.icon == "fa-solid fa-wrench"
       assert category.name == "some updated name"
     end
 

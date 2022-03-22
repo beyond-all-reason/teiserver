@@ -12,14 +12,17 @@ defmodule Central.General.CacheClusterServer do
     if from_node != Node.self() do
       keys
       |> Enum.each(fn key ->
-        delete_key(table, key)
+        ConCache.delete(table, key)
       end)
     end
     {:noreply, state}
   end
 
-  defp delete_key(table, key) do
-    Central.cache_delete(table, key)
+  def handle_info({:cluster_hooks, :put, from_node, table, key, value}, state) do
+    if from_node != Node.self() do
+      ConCache.put(table, key, value)
+    end
+    {:noreply, state}
   end
 
   @impl true

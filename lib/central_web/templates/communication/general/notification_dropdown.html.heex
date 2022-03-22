@@ -8,12 +8,12 @@
     id="navbarDropdownNotificationsLink"
   >
     <%= if @user_notifications_unread_count > 0 do %>
-      <i class="fas fa-bell" id="communication-notifications-icon"></i>
+      <i class="fa-solid fa-bell" id="communication-notifications-icon"></i>
       <span class="badge rounded-pill badge-notification bg-warning text-light" id="communication-notifications-badge">
         <%= @user_notifications_unread_count %>
       </span>
     <% else %>
-      <i class="far fa-bell" id="communication-notifications-icon"></i>
+      <i class="fa-regular fa-bell" id="communication-notifications-icon"></i>
       <span class="badge rounded-pill badge-notification" id="communication-notifications-badge">
         0
       </span>

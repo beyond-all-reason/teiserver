@@ -6,7 +6,7 @@ defmodule Central.Config.Startup do
     QuickAction.add_items([
       %{
         label: "Preferences",
-        icons: ["far fa-cog", :edit],
+        icons: ["fa-regular fa-cog", :edit],
         url: "/config/user",
         keywords: ["Settings"]
       }

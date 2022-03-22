@@ -7,7 +7,7 @@ defmodule Central.Account.CodeLib do
   def colours(), do: :info
 
   @spec icon :: String.t()
-  def icon(), do: "far fa-octagon"
+  def icon(), do: "fa-regular fa-octagon"
 
   @doc """
   Returns a list of the code types we can manually use (e.g. not password_reset)

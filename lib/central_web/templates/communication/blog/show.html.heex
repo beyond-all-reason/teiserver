@@ -59,7 +59,7 @@
           <%= if allow?(@current_user, "communications.post.create") do %>
             <div class="float-end">
               <a href={"#{Routes.blog_path(@conn, :show, @post.url_slug)}?key=#{get_key @post.url_slug}"} class="btn btn-warning2 btn-sm" style="margin-top: -3px;">
-                <i class="far fa-fw fa-eye"></i>
+                <i class="fa-regular fa-fw fa-eye"></i>
                 &nbsp;
                 Preview link
               </a>
@@ -67,7 +67,7 @@
               &nbsp;
 
               <a href={Routes.blog_post_path(@conn, :edit, @post)} class="btn btn-warning2 btn-sm" style="margin-top: -3px;">
-                <i class="far fa-fw fa-wrench"></i>
+                <i class="fa-regular fa-fw fa-wrench"></i>
                 &nbsp;
                 Edit post
               </a>
@@ -97,7 +97,7 @@
         <div class="post-tags">
           <%= for t <- @post.tags do %>
             <a href={Routes.blog_path(@conn, :tag, t)} class="btn btn-outline-secondary">
-              <i class="far fa-fw fa-tag"></i>
+              <i class="fa-regular fa-fw fa-tag"></i>
               <%= t %>
             </a>
           <% end %>

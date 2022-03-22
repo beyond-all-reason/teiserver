@@ -8,7 +8,7 @@ defmodule Central.Logging.ErrorLogLib do
   def colours(), do: :danger
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-exclamation-triangle"
+  def icon(), do: "fa-regular fa-exclamation-triangle"
 
   def get_log(id) do
     from logs in ErrorLog,

@@ -9,7 +9,7 @@ defmodule CentralWeb.Account.GroupControllerTest do
     GeneralTestLib.conn_setup([])
   end
 
-  @update_attrs %{colour: "some updated colour", icon: "fas fa-wrench", name: "some updated name"}
+  @update_attrs %{colour: "some updated colour", icon: "fa-solid fa-wrench", name: "some updated name"}
 
   defp create_group_type(key) do
     Central.Account.GroupTypeLib.add_group_type(key, %{

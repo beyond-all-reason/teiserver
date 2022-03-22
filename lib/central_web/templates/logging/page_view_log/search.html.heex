@@ -27,7 +27,7 @@
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
         <div class={"btn btn-outline-#{bsname}"} onclick="show_search();" id="search-box-shower">
-          <i class="far fa-fw fa-search"></i>
+          <i class="fa-regular fa-fw fa-search"></i>
           Show search form
         </div>
 
@@ -54,8 +54,8 @@
                 id: "search_section",
                 selected: @params["section"],
                 enumerable: [
-                  %{id: "any", name: "Any section", icon: "fas fa-th", colour: fg},
-                  %{id: "admin", icon: "far fa-user-circle", colour: fg},
+                  %{id: "any", name: "Any section", icon: "fa-solid fa-th", colour: fg},
+                  %{id: "admin", icon: "fa-regular fa-user-circle", colour: fg},
                 ]
               } %>
             </div>
@@ -66,7 +66,7 @@
                 <%= central_component "icon_dropdown", %{
                   name: "search[admin_group_id]",
                   id: "search_admin_group_id",
-                  insert_blank: %{id: "", name: "All groups", icon: "fas fa-th", colour: fg},
+                  insert_blank: %{id: "", name: "All groups", icon: "fa-solid fa-th", colour: fg},
                   selected: @params["admin_group_id"],
                   enumerable: @groups
                 } %>
@@ -97,10 +97,10 @@
                 id: "search_search_group",
                 selected: @params["order"],
                 enumerable: [
-                  %{id: "Newest first", icon: "far fa-sort-numeric-down", colour: fg},
-                  %{id: "Oldest first", icon: "far fa-sort-numeric-up", colour: fg},
+                  %{id: "Newest first", icon: "fa-regular fa-sort-numeric-down", colour: fg},
+                  %{id: "Oldest first", icon: "fa-regular fa-sort-numeric-up", colour: fg},
 
-                  %{id: "Slowest", icon: "far fa-hourglass-end", colour: fg},
+                  %{id: "Slowest", icon: "fa-regular fa-hourglass-end", colour: fg},
                 ]
               } %>
             </div>

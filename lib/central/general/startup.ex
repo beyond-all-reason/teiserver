@@ -37,13 +37,13 @@ defmodule Central.General.Startup do
       },
       %{
         label: "Coverage",
-        icons: ["far fa-percent"],
+        icons: ["fa-regular fa-percent"],
         url: "/admin/tools/coverage",
         permissions: "admin.dev.developer"
       },
       %{
         label: "Home",
-        icons: ["far fa-home"],
+        icons: ["fa-regular fa-home"],
         url: "/"
       }
     ])

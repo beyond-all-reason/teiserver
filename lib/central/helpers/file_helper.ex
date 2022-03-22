@@ -4,17 +4,17 @@ defmodule Central.Helpers.FileHelper do
 
   def icon_and_colour(type) do
     case type do
-      "URL" -> {"fas fa-link", "success2"}
-      "Plain text" -> {"fas fa-file-alt", "info2"}
-      "PDF" -> {"fas fa-file-pdf", "danger"}
-      "Image" -> {"fas fa-file-image", "primary2"}
-      "Rich text" -> {"fas fa-file-word", "primary"}
-      "Spreadsheet" -> {"fas fa-file-excel", "success"}
-      "Presentation" -> {"fas fa-file-powerpoint", "warning"}
-      "Audio" -> {"fas fa-file-audio", "info"}
-      "Video" -> {"fas fa-file-video", "info2"}
-      "Code" -> {"fas fa-file-code", "default"}
-      _type -> {"fas fa-file", "default"}
+      "URL" -> {"fa-solid fa-link", "success2"}
+      "Plain text" -> {"fa-solid fa-file-alt", "info2"}
+      "PDF" -> {"fa-solid fa-file-pdf", "danger"}
+      "Image" -> {"fa-solid fa-file-image", "primary2"}
+      "Rich text" -> {"fa-solid fa-file-word", "primary"}
+      "Spreadsheet" -> {"fa-solid fa-file-excel", "success"}
+      "Presentation" -> {"fa-solid fa-file-powerpoint", "warning"}
+      "Audio" -> {"fa-solid fa-file-audio", "info"}
+      "Video" -> {"fa-solid fa-file-video", "info2"}
+      "Code" -> {"fa-solid fa-file-code", "default"}
+      _type -> {"fa-solid fa-file", "default"}
     end
   end
 

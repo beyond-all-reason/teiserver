@@ -1,5 +1,5 @@
 <a href="/recache" title="recache" class="float-end">
-  <i class="far fa-fw fa-sync"></i>
+  <i class="fa-regular fa-fw fa-sync"></i>
 </a>
 
 <div style="height: 15px;">&nbsp;</div>
@@ -8,7 +8,7 @@
   <%= if @current_user == nil do %>
     <%=
       central_component "menu_card",
-      icon: "fas fa-sign-in-alt",
+      icon: "fa-solid fa-sign-in-alt",
       text: "Sign in",
       link: Routes.account_session_path(@conn, :new)
     %>
@@ -17,7 +17,7 @@
   <!--
   <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
     <a href="<%#= Routes.general_page_path(@conn, :search) %>">
-      <i class="fas fa-fw fa-search fa-3x"></i><br />
+      <i class="fa-solid fa-fw fa-search fa-3x"></i><br />
       Search
     </a>
   </div>
@@ -111,7 +111,7 @@
         <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
         <a data-submit="parent" href="#" rel="nofollow" onclick="$('#signout-form').submit();">
-          <i class="fad fa-sign-out-alt fa-fw fa-3x"></i><br />
+          <i class="fa-duotone fa-sign-out-alt fa-fw fa-3x"></i><br />
           Sign out
         </a>
       </form>

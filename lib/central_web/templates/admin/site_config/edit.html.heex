@@ -26,7 +26,7 @@
                   name: "site_config[value]",
                   id: "site_config_value",
                   selected: @value,
-                  enumerable: (for v <- @config_info.opts[:choices], do: %{id: v, name: v, colour: "#555555", icon: "fas fa-square"})
+                  enumerable: (for v <- @config_info.opts[:choices], do: %{id: v, name: v, colour: "#555555", icon: "fa-solid fa-square"})
                 } %>
               <% "boolean" -> %>
                 <%= central_component "checkbox", %{

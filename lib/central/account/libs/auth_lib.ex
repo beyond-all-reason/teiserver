@@ -5,7 +5,7 @@ defmodule Central.Account.AuthLib do
   alias Central.Account.AuthGroups.Server
 
   @spec icon :: String.t()
-  def icon(), do: "far fa-address-card"
+  def icon(), do: "fa-regular fa-address-card"
 
   @spec get_all_permission_sets() :: Map.t()
   def get_all_permission_sets do

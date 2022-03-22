@@ -37,7 +37,7 @@
       id: "user_admin_group_id",
       selected: f.data.admin_group_id || Map.get(@changeset.changes, :admin_group_id, @current_user.admin_group_id),
       enumerable: @groups,
-      insert_blank: %{id: "", name: "None", icon: "fas fa-square", colour: "#000000"},
+      insert_blank: %{id: "", name: "None", icon: "fa-solid fa-square", colour: "#000000"},
     } %>
   </div>
 

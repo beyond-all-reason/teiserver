@@ -6,7 +6,7 @@ defmodule Central.Logging.LoggingLib do
   def colours(), do: :default
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-bars"
+  def icon(), do: "fa-regular fa-bars"
 
   @spec do_not_log(Plug.Conn.t()) :: Plug.Conn.t()
   def do_not_log(conn) do

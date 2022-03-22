@@ -9,5 +9,5 @@ defmodule Central.Config.UserConfigLib do
   def colours(), do: :success
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-cog"
+  def icon(), do: "fa-regular fa-cog"
 end

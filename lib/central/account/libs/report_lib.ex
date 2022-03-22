@@ -5,7 +5,7 @@ defmodule Central.Account.ReportLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "far fa-flag"
+  def icon, do: "fa-regular fa-flag"
 
   @spec colours :: atom
   def colours, do: :warning
@@ -66,11 +66,11 @@ defmodule Central.Account.ReportLib do
 
   @spec action_icon(String.t() | nil) :: String.t()
   def action_icon(nil), do: ""
-  def action_icon("Ignore report"), do: "fas fa-check-circle"
-  def action_icon("Warn"), do: "fas fa-triangle-exclamation"
-  def action_icon("Restrict"), do: "fas fa-do-not-enter"
-  def action_icon("Mute"), do: "fas fa-microphone-slash"
-  def action_icon("Ban"), do: "fas fa-ban"
+  def action_icon("Ignore report"), do: "fa-solid fa-check-circle"
+  def action_icon("Warn"), do: "fa-solid fa-triangle-exclamation"
+  def action_icon("Restrict"), do: "fa-solid fa-do-not-enter"
+  def action_icon("Mute"), do: "fa-solid fa-microphone-slash"
+  def action_icon("Ban"), do: "fa-solid fa-ban"
 
   @spec perform_action(Report.t(), String.t(), String.t()) :: {:error, String.t()} | {:ok, nil | DateTime.t()}
   def perform_action(_report, "Ignore report", _data) do

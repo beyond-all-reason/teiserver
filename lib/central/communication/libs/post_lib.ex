@@ -7,7 +7,7 @@ defmodule Central.Communication.PostLib do
   def colours(), do: :primary
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-file-alt"
+  def icon(), do: "fa-regular fa-file-alt"
 
   # Queries
   @spec get_posts() :: Ecto.Query.t()

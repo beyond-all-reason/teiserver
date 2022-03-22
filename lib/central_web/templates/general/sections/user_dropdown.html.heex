@@ -7,7 +7,7 @@
     aria-expanded="false"
     id="user-dropdown-link"
   >
-    <i class="fas fa-user fa-fw fa-lg"></i>
+    <i class="fa-solid fa-user fa-fw fa-lg"></i>
   </a>
   <div class="dropdown-menu dropdown-menu-end"
       aria-labelledby="user-dropdown-link"
@@ -20,7 +20,7 @@
     </a>
 
     <a class="dropdown-item" href={Routes.general_page_path(@conn, :recache)}>
-      <i class="far fa-sync fa-fw"></i>
+      <i class="fa-regular fa-sync fa-fw"></i>
       &nbsp;
       Refresh session cache
     </a>
@@ -31,7 +31,7 @@
       <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
       <a class="dropdown-item" data-submit="parent" href="#" rel="nofollow" onclick="$('#signout-form').submit();" id="signout-link">
-        <i class="far fa-sign-out fa-fw"></i>
+        <i class="fa-regular fa-sign-out fa-fw"></i>
         &nbsp;
         Sign out <%= @current_user.name %>
       </a>

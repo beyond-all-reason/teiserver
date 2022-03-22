@@ -16,7 +16,7 @@ defmodule Central.Account do
   import Central.Logging.Helpers, only: [add_anonymous_audit_log: 3]
 
   @spec icon :: String.t()
-  def icon, do: "fad fa-user-alt"
+  def icon, do: "fa-duotone fa-user-alt"
 
   defp user_query(args) do
     user_query(nil, args)
@@ -195,7 +195,7 @@ defmodule Central.Account do
   def merge_default_params(user_params) do
     Map.merge(
       %{
-        "icon" => "fas fa-" <> Central.Helpers.StylingHelper.random_icon(),
+        "icon" => "fa-solid fa-" <> Central.Helpers.StylingHelper.random_icon(),
         "colour" => Central.Helpers.StylingHelper.random_colour()
       },
       user_params

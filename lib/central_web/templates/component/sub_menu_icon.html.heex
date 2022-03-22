@@ -6,7 +6,7 @@
     label: "Coverage",
     active: @active,
     url: Routes.admin_tool_path(@conn, :coverage_form),
-    icon: "far fa-barcode-scan"
+    icon: "fa-regular fa-barcode-scan"
   % >
   
   If active is set to the same as name then the button will be marked as active
@@ -17,9 +17,9 @@
 
   icon = if is_active do
     @icon
-      |> String.replace("far ", "fa-duotone ")
       |> String.replace("fa-regular ", "fa-duotone ")
-      |> String.replace("fal ", "fa-duotone ")
+      |> String.replace("fa-regular ", "fa-duotone ")
+      |> String.replace("fa-light ", "fa-duotone ")
       |> String.replace("fa-light ", "fa-duotone ")
       |> String.replace("fa ", "fa-duotone ")
       |> String.replace("fa-solid ", "fa-duotone ")
