@@ -418,6 +418,17 @@ defmodule Teiserver.Account do
     |> Repo.update()
   end
 
+  def delete_user_stat_keys(userid, keys) when is_integer(userid) and is_list(keys) do
+    case get_user_stat(userid) do
+      nil ->
+        :ok
+      user_stat ->
+        Central.cache_delete(:teiserver_user_stat_cache, userid)
+        new_data = Map.drop(user_stat.data, keys)
+        update_user_stat(user_stat, %{data: new_data})
+    end
+  end
+
   @spec delete_user_stat(UserStat.t()) :: {:ok, UserStat.t()} | {:error, Ecto.Changeset.t()}
   def delete_user_stat(%UserStat{} = user_stat) do
     Central.cache_delete(:teiserver_user_stat_cache, user_stat.user_id)
