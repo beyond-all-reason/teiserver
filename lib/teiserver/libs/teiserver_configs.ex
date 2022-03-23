@@ -54,6 +54,16 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "teiserver.Automod action delay",
+      section: "Moderation",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The delay in seconds after a user logs in for the automod to check on them.",
+      opts: [],
+      default: 120
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Inform of new accolades",
       section: "Accolades",
       type: "boolean",

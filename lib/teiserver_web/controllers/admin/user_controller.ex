@@ -432,19 +432,35 @@ defmodule TeiserverWeb.Admin.UserController do
         ]
       )
 
+    expires_string = if report_params["expires"] == "" do
+      "never"
+    else
+      report_params["expires"]
+    end
+
     case Central.Account.UserLib.has_access(report.target, conn) do
       {true, _} ->
         case Central.Account.ReportLib.perform_action(
                report,
                report_params["response_action"],
-               report_params["expires"]
+               expires_string
              ) do
           {:ok, expires} ->
             restriction_list = (params["restrict"] || [])
               |> Enum.filter(fn {_, v} -> v != "false" end)
               |> Enum.map(fn {_, v} -> v end)
 
-            report_params =
+            report_params = if Enum.empty?(restriction_list) do
+              Map.merge(report_params, %{
+                "response_action" => "Ignore report",
+                "expires" => "never",
+                "responder_id" => conn.user_id,
+                "followup" => "",
+                "code_references" => [],
+                "action_data" => %{"restriction_list" => []},
+                "responded_at" => Timex.now(),
+              })
+            else
               Map.merge(report_params, %{
                 "expires" => expires,
                 "responder_id" => conn.user_id,
@@ -453,6 +469,7 @@ defmodule TeiserverWeb.Admin.UserController do
                 "action_data" => %{"restriction_list" => restriction_list},
                 "responded_at" => Timex.now(),
               })
+            end
 
             case Central.Account.update_report(report, report_params, :respond) do
               {:ok, _report} ->

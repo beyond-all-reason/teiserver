@@ -4,6 +4,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   performing their actions in the name of the coordinator
   """
   use GenServer
+  alias Central.Config
   alias Teiserver.{Account, User, Client, Coordinator}
   alias Phoenix.PubSub
   require Logger
@@ -51,7 +52,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   # Client inout
   def handle_info({:client_inout, :login, userid}, state) do
-    delay = Application.get_env(:central, Teiserver)[:automod_delay]
+    delay = Config.get_site_config_cache("teiserver.Automod action delay") * 1000
     :timer.send_after(delay, {:check_user, userid})
     {:noreply, state}
   end

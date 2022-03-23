@@ -154,6 +154,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
   def report_updated(%{response_action: nil}, :respond), do: :ok
   def report_updated(%{response_action: "Ignore report"}, :respond), do: :ok
+  def report_updated(%{restrictions: []}, :respond), do: :ok
   def report_updated(report, :respond) do
     result = Application.get_env(:central, DiscordBridge)[:bridges]
       |> Enum.filter(fn {_chan, room} -> room == "moderation-actions" end)
@@ -163,7 +164,12 @@ defmodule Teiserver.Bridge.DiscordBridge do
       _ -> nil
     end
 
-    if chan do
+    skip_message = cond do
+      Enum.empty?(report.action_data["restriction_list"]) -> true
+      true -> false
+    end
+
+    if chan != nil and not skip_message do
       report = Account.get_report!(report.id, preload: [:target])
       past_tense = ReportLib.past_tense(report.response_action)
 
