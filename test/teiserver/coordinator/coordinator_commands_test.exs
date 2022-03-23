@@ -32,7 +32,12 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     [reply] = _tachyon_recv(socket)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => ["You are #{user.name}", "Rank: 1 with 0 player hours and 0 spectator hours for a rank hour count of 0", "You currently have no accolades"],
+      "message" => [
+          "You are #{user.name}",
+          "Profile link: https://localhost/teiserver/profile/#{user.id}",
+          "Rank: 1 with 0 player hours and 0 spectator hours for a rank hour count of 0",
+          "You currently have no accolades"
+        ],
       "sender_id" => coordinator_userid
     }
   end
@@ -47,7 +52,10 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     [reply] = _tachyon_recv(socket)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => ["Found #{other_user.name}"],
+      "message" => [
+        "Found #{other_user.name}",
+        "Profile link: https://localhost/teiserver/profile/#{other_user.id}",
+      ],
       "sender_id" => coordinator_userid
     }
 
@@ -63,7 +71,11 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     [reply] = _tachyon_recv(socket)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => ["Found #{other_user.name}", "Previous names: name1, name2"],
+      "message" => [
+        "Found #{other_user.name}",
+        "Previous names: name1, name2",
+        "Profile link: https://localhost/teiserver/profile/#{other_user.id}",
+      ],
       "sender_id" => coordinator_userid
     }
   end
