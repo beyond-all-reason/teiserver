@@ -75,6 +75,7 @@ defmodule Central.MixProject do
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.1", only: [:dev], runtime: false},
       {:dart_sass, "~> 0.3", only: [:dev]},
+      {:libcluster, "~> 3.3"},
 
       # Teiserver libs
       {:cowboy, "~> 2.9"},
