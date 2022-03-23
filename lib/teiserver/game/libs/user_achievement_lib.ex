@@ -124,6 +124,7 @@ defmodule Teiserver.Game.UserAchievementLib do
   def preload(query, nil), do: query
   def preload(query, preloads) do
     query = if :achievement_type in preloads, do: _preload_achievement_type(query), else: query
+    query
   end
 
   def _preload_achievement_type(query) do

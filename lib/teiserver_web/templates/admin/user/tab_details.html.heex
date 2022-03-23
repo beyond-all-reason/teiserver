@@ -60,7 +60,16 @@
       <textarea id="user_data" rows="28" class="form-control monospace m1"><%= Jason.encode! Map.drop(@user.data, ["password_hash", "ip"]), pretty: true %></textarea>
     </div>
     <div class="col-md-6">
-      <textarea id="user_stats" rows="20" class="form-control monospace m1"><%= Jason.encode! Map.drop(@user_stats, ["password_hash", "ip"]), pretty: true %></textarea>
+      <table class="table table-sm">
+        <tbody>
+          <%= for {k, v} <- Map.drop(@user_stats, ["password_hash", "ip"]) do %>
+            <tr>
+              <td><%= k %></td>
+              <td><%= Kernel.inspect v %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
 
       <hr />
       <form action={Routes.ts_admin_user_path(@conn, :set_stat)} method='post' class=''>

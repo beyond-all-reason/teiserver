@@ -678,11 +678,15 @@ defmodule TeiserverWeb.Admin.UserController do
   def set_stat(conn, %{"userid" => userid, "key" => key, "value" => value}) do
     user = Account.get_user!(userid)
 
-    Account.update_user_stat(user.id, %{key => value})
+    if value == "" do
+      Account.delete_user_stat_keys(int_parse(userid), [key])
+    else
+      Account.update_user_stat(user.id, %{key => value})
+    end
 
     conn
     |> put_flash(:success, "stat #{key} updated")
-    |> redirect(to: Routes.ts_admin_user_path(conn, :show, user.id))
+    |> redirect(to: Routes.ts_admin_user_path(conn, :show, user.id) <> "#details_tab")
   end
 
   @spec rename_form(Plug.Conn.t(), map) :: Plug.Conn.t()
