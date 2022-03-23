@@ -87,9 +87,13 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         previous_names = (stats["previous_names"] || [])
           |> Enum.join(", ")
 
+        host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+        profile_link = "https://#{host}/teiserver/profile/#{user.id}"
+
         standard_parts = [
           "Found #{user.name}",
-          (if previous_names != "", do: "Previous names: #{previous_names}")
+          (if previous_names != "", do: "Previous names: #{previous_names}"),
+          "Profile link: #{profile_link}"
         ]
 
         mod_parts = if sender.moderator do
