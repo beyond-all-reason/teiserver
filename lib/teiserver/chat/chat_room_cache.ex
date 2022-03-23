@@ -76,7 +76,7 @@ defmodule Teiserver.Room do
   end
 
   def add_user_to_room(userid, room_name) do
-    ConCache.update(:rooms, room_name, fn room_state ->
+    Central.cache_update(:rooms, room_name, fn room_state ->
       new_state =
         if Enum.member?(room_state.members, userid) do
           # No change takes place, they're already in the room!
@@ -97,7 +97,7 @@ defmodule Teiserver.Room do
   end
 
   def remove_user_from_room(userid, room_name) do
-    ConCache.update(:rooms, room_name, fn room_state ->
+    Central.cache_update(:rooms, room_name, fn room_state ->
       new_state =
         if not Enum.member?(room_state.members, userid) do
           # No change takes place, they've already left the room
@@ -142,7 +142,7 @@ defmodule Teiserver.Room do
   def add_room(room) do
     ConCache.put(:rooms, room.name, room)
 
-    ConCache.update(:lists, :rooms, fn value ->
+    Central.cache_update(:lists, :rooms, fn value ->
       new_value =
         ([room.name | value])
         |> Enum.uniq()

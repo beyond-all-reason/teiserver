@@ -25,6 +25,13 @@ defmodule Central.General.CacheClusterServer do
     {:noreply, state}
   end
 
+  def handle_info({:cluster_hooks, :update, from_node, table, key, func}, state) do
+    if from_node != Node.self() do
+      ConCache.update(table, key, func)
+    end
+    {:noreply, state}
+  end
+
   @impl true
   @spec init(any) :: {:ok, %{}}
   def init(_) do

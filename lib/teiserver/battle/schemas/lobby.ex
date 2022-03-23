@@ -235,7 +235,7 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec add_user_to_battle(integer(), integer(), String.t() | nil) :: nil
   def add_user_to_battle(userid, lobby_id, script_password \\ nil) do
-    ConCache.update(:lobbies, lobby_id, fn battle_state ->
+    Central.cache_update(:lobbies, lobby_id, fn battle_state ->
       new_state =
         if Enum.member?(battle_state.players, userid) do
           # No change takes place, they're already in the battle!
@@ -396,7 +396,7 @@ defmodule Teiserver.Battle.Lobby do
           end)
 
           # Now update the battle to remove the player
-          ConCache.update(:lobbies, lobby_id, fn battle_state ->
+          Central.cache_update(:lobbies, lobby_id, fn battle_state ->
             # This is purely to prevent errors if the battle is in the process of shutting down
             # mid function call
             new_state =

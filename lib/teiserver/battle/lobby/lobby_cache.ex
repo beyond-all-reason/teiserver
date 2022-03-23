@@ -80,7 +80,7 @@ defmodule Teiserver.Battle.LobbyCache do
     _consul_pid = Coordinator.start_consul(lobby.id)
     Lobby.start_battle_lobby_throttle(lobby.id)
 
-    ConCache.update(:lists, :lobbies, fn value ->
+    Central.cache_update(:lists, :lobbies, fn value ->
       new_value =
         ([lobby.id | value])
         |> Enum.uniq()
@@ -108,7 +108,7 @@ defmodule Teiserver.Battle.LobbyCache do
     battle = get_lobby(lobby_id)
     Coordinator.close_battle(lobby_id)
     Central.cache_delete(:lobbies, lobby_id)
-    ConCache.update(:lists, :lobbies, fn value ->
+    Central.cache_update(:lists, :lobbies, fn value ->
       new_value =
         value
         |> Enum.filter(fn v -> v != lobby_id end)
