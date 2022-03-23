@@ -49,6 +49,9 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
     rank_time = User.rank_time(senderid)
 
+    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    profile_link = "https://#{host}/teiserver/profile/#{senderid}"
+
     accolades = AccoladeLib.get_player_accolades(senderid)
     accolades_string = case Map.keys(accolades) do
       [] ->
@@ -67,6 +70,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
     msg = [
       "You are #{sender.name}",
+      "Profile link: #{profile_link}",
       "Rank: #{sender.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
       accolades_string
     ]
