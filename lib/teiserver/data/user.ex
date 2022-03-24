@@ -823,13 +823,19 @@ defmodule Teiserver.User do
     # Sleep to enable the ETS cache to update and they don't insta-login
     :timer.sleep(50)
 
+    # Re-get the user
+    user = get_user_by_id(user.id)
+
     if is_restricted?(user, ["Login"]) do
       client = Client.get_client_by_id(user.id)
 
       # If they're in a battle we need to deal with that
       if client do
+        Logger.info("Kicking #{client.name} from battle as now banned")
         Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
       end
+
+      Logger.info("Disconnecting #{client.name} from server as now banned")
       Client.disconnect(user.id, "Banned")
     end
 
