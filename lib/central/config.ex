@@ -308,7 +308,7 @@ defmodule Central.Config do
         |> Repo.update()
     end
 
-    Central.cache_delete(:config_site_cache, key)
+    Central.cache_put(:config_site_cache, key, value)
   end
 
   def delete_site_config(key) do

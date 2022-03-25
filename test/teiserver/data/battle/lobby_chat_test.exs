@@ -2,20 +2,21 @@ defmodule Teiserver.Data.Battle.LobbyChatTest do
   use Central.DataCase, async: false
   alias Teiserver.{User}
   import Teiserver.TeiserverTestLib, only: [new_user: 0]
-  alias Teiserver.Battle.{LobbyChat, LobbyCache}
+  alias Teiserver.Battle.{Lobby, LobbyChat}
 
   test "test lobby chat as bot" do
     bot_user = new_user()
     bot_user = User.update_user(%{bot_user | bot: true})
     real_user = new_user()
 
-    lobby = LobbyCache.add_lobby(%{
+    lobby = Lobby.create_lobby(%{
       founder_id: bot_user.id,
       id: 1,
       tags: %{
         "server/match/uuid" => UUID.uuid1()
       },
     })
+    |> Lobby.add_lobby()
 
     {:ok, chat_log} = LobbyChat.persist_message(bot_user, "Message from the bot", lobby.id, :say)
     assert chat_log.user_id == bot_user.id

@@ -1,5 +1,6 @@
 defmodule Teiserver.Coordinator.AutomodTest do
   use Central.ServerCase, async: false
+  alias Central.Config
   alias Teiserver.{Account, User, Client}
   alias Teiserver.Coordinator.AutomodServer
 
@@ -7,6 +8,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
     only: [new_user: 0, tachyon_auth_setup: 1, _tachyon_send: 2]
 
   setup do
+    Config.update_site_config("teiserver.Automod action delay", 0)
     banned_user = new_user()
     {:ok, banned_user: banned_user}
   end

@@ -63,6 +63,9 @@ defmodule Teiserver.Bridge.MessageCommands do
     spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
     rank_time = User.rank_time(user.id)
 
+    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    profile_link = "https://#{host}/teiserver/profile/#{user.id}"
+
     accolades = AccoladeLib.get_player_accolades(user.id)
     accolades_string = case Map.keys(accolades) do
       [] ->
@@ -81,6 +84,7 @@ defmodule Teiserver.Bridge.MessageCommands do
 
     msg = [
       "You are #{user.name}",
+      "Profile link: #{profile_link}",
       "Rank: #{user.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
       accolades_string
     ]
