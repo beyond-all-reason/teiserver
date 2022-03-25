@@ -1,8 +1,9 @@
 defmodule CentralWeb.Account.SessionController do
   use CentralWeb, :controller
-  alias Central.Account
-
-  alias Central.{Account, Account.Guardian, Account.User}
+  alias Central.{Account, Config}
+  alias Central.Logging.LoggingPlug
+  alias Central.Account.{Guardian, User}
+  require Logger
 
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _) do
@@ -33,6 +34,41 @@ defmodule CentralWeb.Account.SessionController do
     conn
     |> Account.authenticate_user(email, password)
     |> login_reply(conn)
+  end
+
+  @spec one_time_login(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def one_time_login(conn, %{"value" => value}) do
+    ip = conn
+      |> LoggingPlug.get_ip_from_conn
+      |> Tuple.to_list()
+      |> Enum.join(".")
+
+    codes =
+      Account.list_codes(
+        search: [
+          value: "#{value}$#{ip}",
+          purpose: "one-time-login",
+          expired: false
+        ]
+      )
+
+    cond do
+      Enum.empty?(codes) ->
+        conn
+        |> redirect(to: "/")
+
+      Config.get_site_config_cache("user.Enable one time links") == false ->
+        conn
+        |> redirect(to: "/")
+
+      true ->
+        code = hd(codes)
+        Account.delete_code(code)
+
+        user = Account.get_user!(code.user_id)
+
+        login_reply({:ok, user}, conn)
+    end
   end
 
   @spec logout(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

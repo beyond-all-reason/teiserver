@@ -34,4 +34,18 @@ defmodule Central do
       {:cluster_hooks, :put, Node.self(), table, key, value}
     )
   end
+
+  @doc """
+  Puts the `value` into `key` for `table` across the entire cluster. Makes use of Phoenix.PubSub to do so.
+  """
+  @spec cache_update(atom, any, any) :: :ok | {:error, any}
+  def cache_update(table, key, func) do
+    ConCache.update(table, key, func)
+
+    Phoenix.PubSub.broadcast(
+      Central.PubSub,
+      "cluster_hooks",
+      {:cluster_hooks, :update, Node.self(), table, key, func}
+    )
+  end
 end

@@ -15,6 +15,7 @@ defmodule Central.Account.CodeLib do
   @spec code_types() :: [String.t()]
   def code_types() do
     ~w(
+      one-time-login
       user_registration
     )
   end
