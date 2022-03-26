@@ -11,6 +11,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
   alias Teiserver.Data.Types, as: T
 
   @line_break "-------------------------------------------------"
+  @chat_timeout 600_000
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -40,7 +41,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
   # Doesn't do anything at this stage
   def handle_info(:startup, state) do
     new_state = do_tick(state)
-    :timer.send_after(300_000, :self_terminate)
+    :timer.send_after(@chat_timeout, :self_terminate)
     {:noreply, new_state}
   end
 

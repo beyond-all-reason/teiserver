@@ -57,7 +57,6 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   # Match ending
-  # For testing purposes: Teiserver.Account.AccoladeLib.cast_accolade_bot({:global_match_updates, :match_completed, match_id})
   def handle_info({:global_match_updates, :match_completed, match_id}, state) do
     case Battle.get_match(match_id) do
       nil ->
