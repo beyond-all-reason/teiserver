@@ -1,10 +1,11 @@
 defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.{User, Account, Client, Coordinator}
   alias Teiserver.Battle.Lobby
+  alias alias Teiserver.Data.Matchmaking
   alias Teiserver.Account.{AccoladeLib, CodeOfConductData}
   alias Teiserver.Coordinator.CoordinatorLib
 
-  @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore)
+  @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore 1v1me un1v1)
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, _state) do
@@ -38,6 +39,24 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
     say_command(cmd)
     Coordinator.send_to_user(senderid, messages)
+    state
+  end
+
+  defp do_handle(%{command: "1v1me", senderid: senderid} = _cmd, state) do
+    case Matchmaking.add_player_to_queue(1, senderid) do
+      :failed ->
+        User.send_direct_message(state.userid, senderid, "You were not added to the queue")
+      _ ->
+        User.send_direct_message(state.userid, senderid, "You have been added to the queue. You can remove yourself by messaging me $un1v1")
+    end
+
+    state
+  end
+
+  defp do_handle(%{command: "un1v1", senderid: senderid} = _cmd, state) do
+    Matchmaking.remove_player_from_queue(1, senderid)
+    User.send_direct_message(state.userid, senderid, "You have been removed from the queue")
+
     state
   end
 

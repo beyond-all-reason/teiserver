@@ -363,11 +363,12 @@ defmodule Teiserver.Battle.Lobby do
     lobby_ids
   end
 
-  @spec find_empty_battle() :: Map.t()
-  def find_empty_battle() do
+  @spec find_empty_battle(function()) :: Map.t()
+  def find_empty_battle(filter_func \\ (fn _ -> true end)) do
     empties =
       list_lobbies()
       |> Enum.filter(fn b -> b.players == [] end)
+      |> Enum.filter(filter_func)
 
     case empties do
       [] -> nil

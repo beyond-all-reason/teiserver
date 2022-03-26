@@ -161,7 +161,7 @@ defmodule Teiserver.Game.QueueServer do
         # TODO: Currently this is hard coded to waiting for 2 players so only allows 1v1
         state.ready_started_at == nil ->
           # First make sure we have enough players...
-          if Enum.count(state.unmatched_players) >= 2 and state.waiting_for_players == [] and
+          if Enum.count(state.unmatched_players) >= state.team_size * state.team_count and state.waiting_for_players == [] and
                state.players_accepted == [] do
             # Now grab the players
             [p1, p2 | new_unmatched_players] = Enum.reverse(state.unmatched_players)
@@ -177,6 +177,12 @@ defmodule Teiserver.Game.QueueServer do
                 "teiserver_client_messages:#{userid}",
                 {:client_message, :matchmaking, userid, {:match_ready, state.id}}
               )
+            end)
+
+            # TODO: Remove the auto-ready part
+            new_matched_players
+            |> Enum.each(fn player_id ->
+              send(self(), {:player_accept, player_id})
             end)
 
             %{
@@ -250,7 +256,7 @@ defmodule Teiserver.Game.QueueServer do
   # Try to setup a battle with the players currently readied up
   defp try_setup_battle(state) do
     # Send out the new battle stuff
-    empty_battle = Lobby.find_empty_battle()
+    empty_battle = Lobby.find_empty_battle(fn l -> String.contains?(l.name, "EU ") end)
 
     case empty_battle do
       nil ->
@@ -348,6 +354,7 @@ defmodule Teiserver.Game.QueueServer do
        matched_players: [],
        unmatched_players: [],
        player_count: 0,
+       team_count: 2,
        player_map: %{},
        last_wait_time: 0,
        ready_wait_time: opts.queue.settings["ready_wait_time"] || @ready_wait_time
