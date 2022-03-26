@@ -183,6 +183,7 @@ defmodule Teiserver.Protocols.SpringOut do
         "none" -> 0
         "holepunch" -> 1
         "fixed" -> 2
+        _ -> 0
       end
 
     passworded = if battle.password == nil, do: 0, else: 1
