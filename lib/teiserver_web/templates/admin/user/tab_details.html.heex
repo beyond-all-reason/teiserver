@@ -62,10 +62,17 @@
     <div class="col-md-6">
       <table class="table table-sm">
         <tbody>
-          <%= for {k, v} <- Map.drop(@user_stats, ["password_hash", "ip"]) do %>
+          <%
+            keys = @user_stats
+              |> Map.drop(["password_hash", "ip"])
+              |> Map.keys()
+              |> Enum.sort()
+          %>  
+          <%= for key <- keys do %>
+            <% value = @user_stats[key] %>
             <tr>
-              <td><%= k %></td>
-              <td><%= Kernel.inspect v %></td>
+              <td><%= key %></td>
+              <td><%= Kernel.inspect value %></td>
             </tr>
           <% end %>
         </tbody>
