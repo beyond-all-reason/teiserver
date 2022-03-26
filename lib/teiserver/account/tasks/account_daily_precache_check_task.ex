@@ -3,6 +3,7 @@ defmodule Teiserver.Account.Tasks.DailyPrecacheCheckTask do
 
   alias Central.Repo
   alias Teiserver.{Account}
+  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   require Logger
 
   @impl Oban.Worker
@@ -11,25 +12,22 @@ defmodule Teiserver.Account.Tasks.DailyPrecacheCheckTask do
     # Did they login within the last 24 hours?
     recent_login = round(:erlang.system_time(:seconds) / 60) - (60 * 24)
 
-    sql_id_list = Account.list_users(
-      search: [
-        pre_cache: true,
-        inserted_before: Timex.shift(Timex.now(), days: -1),
-      ],
-      limit: :infinity
-    )
-    |> Stream.filter(fn user ->
-      cond do
-        user.data["bot"] -> false
-        user.data["last_login"] > recent_login -> false
-        true -> true
-      end
-    end)
-    |> Stream.map(fn user -> user.id end)
-    |> Enum.join(",")
+    # Were they created within the last 24 hours
+    recent_creation = date_to_str(Timex.now() |> Timex.shift(days: -1), format: :ymd_t_hms)
 
-    query = "UPDATE account_users SET pre_cache = false WHERE id IN (#{sql_id_list});"
+    # Everybody stops being pre_cached
+    query = "UPDATE account_users SET pre_cache = false;"
     Ecto.Adapters.SQL.query(Repo, query, [])
+
+    # Now set the ones to be true that we want to be true
+    query = """
+      UPDATE account_users SET pre_cache = true
+        WHERE data ->> 'bot' = 'true'
+          or data ->> 'last_login' > '#{recent_login}'
+          or inserted_at > '#{recent_creation}';
+"""
+    Ecto.Adapters.SQL.query(Repo, query, [])
+
 
     :ok
   end
