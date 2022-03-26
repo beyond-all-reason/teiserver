@@ -199,10 +199,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{command: "leaveq", senderid: senderid}, state) do
     Logger.info("Removed #{senderid} from queue because $leaveq")
     LobbyChat.sayprivateex(state.coordinator_id, senderid, "You have been removed from the join queue", state.lobby_id)
-    {:noreply, %{state |
+    %{state |
       join_queue: state.join_queue |> List.delete(senderid),
       low_priority_join_queue: state.join_queue |> List.delete(senderid)
-    }}
+    }
   end
 
 
