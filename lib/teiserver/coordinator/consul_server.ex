@@ -104,14 +104,18 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:dequeue_user, userid}, state) do
-    new_queue = state.join_queue |> List.delete(userid)
-    {:noreply, %{state | join_queue: new_queue}}
+    {:noreply, %{state |
+      join_queue: state.join_queue |> List.delete(userid),
+      low_priority_join_queue: state.join_queue |> List.delete(userid)
+    }}
   end
 
   def handle_info({:user_left, userid}, state) do
-    new_queue = state.join_queue |> List.delete(userid)
     player_count_changed(state)
-    {:noreply, %{state | join_queue: new_queue}}
+    {:noreply, %{state |
+      join_queue: state.join_queue |> List.delete(userid),
+      low_priority_join_queue: state.join_queue |> List.delete(userid)
+    }}
   end
 
   def handle_info(:cancel_split, state) do
@@ -289,10 +293,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # Take into account if they are waiting to join
     # if they are not waiting to join and someone else is then
     {change, new_status} = cond do
-      Enum.empty?(state.join_queue) ->
+      Enum.empty?(get_queue(state)) ->
         {change, new_status}
 
-      hd(state.join_queue) != userid and new_client.player == true and existing.player == false ->
+      hd(get_queue(state)) != userid and new_client.player == true and existing.player == false ->
         LobbyChat.sayprivateex(state.coordinator_id, userid, "You are not part of the join queue so cannot become a player. Add yourself to the queue by chatting $joinq", state.lobby_id)
         {false, nil}
 
@@ -446,13 +450,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  defp player_count_changed(%{join_queue: []} = _state), do: nil
-  defp player_count_changed(%{join_queue: join_queue} = state) do
+  defp player_count_changed(%{join_queue: [], low_priority_join_queue: []} = _state), do: nil
+  defp player_count_changed(%{join_queue: join_queue, low_priority_join_queue: low_priority_join_queue} = state) do
     if get_player_count(state) < get_max_player_count(state) do
       count = get_player_count(state)
       Logger.info("joinq - Player count #{count}, queue is #{Kernel.inspect join_queue}")
 
-      [userid | _new_queue] = join_queue
+      [userid | _] = (join_queue ++ low_priority_join_queue)
 
       existing = Client.get_client_by_id(userid)
       new_client = Map.merge(existing, %{player: true, ready: true})
@@ -469,6 +473,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
+  @spec get_max_player_count(map()) :: non_neg_integer()
   def get_max_player_count(%{host_teamcount: nil, player_limit: player_limit}), do: min(16, player_limit)
   def get_max_player_count(%{host_teamsize: nil, player_limit: player_limit}), do: min(16, player_limit)
   def get_max_player_count(state) do
@@ -560,6 +565,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       split: nil,
       welcome_message: nil,
       join_queue: [],
+      low_priority_join_queue: [],
 
       started_at: Timex.now(),
 
@@ -576,14 +582,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def get_level("spectator"), do: :spectator
   def get_level("player"), do: :player
 
-  defp check_queue_status(%{join_queue: []} = state), do: state
+  defp check_queue_status(%{join_queue: [], low_priority_join_queue: []} = state), do: state
   defp check_queue_status(state) do
-    new_queue = state.join_queue
+    new_queue = get_queue(state)
     |> Enum.filter(fn userid ->
       Client.get_client_by_id(userid).player == false
     end)
 
     %{state | join_queue: new_queue}
+  end
+
+  @spec get_queue(map()) :: [T.userid()]
+  def get_queue(state) do
+    state.join_queue ++ state.low_priority_join_queue
   end
 
   @spec init(Map.t()) :: {:ok, Map.t()}

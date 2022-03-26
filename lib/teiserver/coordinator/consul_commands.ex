@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.{Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat}
   # alias Phoenix.PubSub
-  # alias Teiserver.Data.Types, as: T
+  alias Teiserver.Data.Types, as: T
 
   @doc """
     Command has structure:
@@ -26,14 +26,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> Enum.map(fn l -> to_string(l) end)
       |> Enum.join(", ")
 
-    pos_str = case get_queue_position(state.join_queue, senderid) do
+    pos_str = case get_queue_position(get_queue(state), senderid) do
       -1 ->
         nil
       pos ->
         "You are position #{pos + 1} in the queue"
     end
 
-    queue_string = state.join_queue
+    queue_string = get_queue(state)
     |> Enum.map(&User.get_username/1)
     |> Enum.join(", ")
 
@@ -154,42 +154,55 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "joinq", senderid: senderid} = _cmd, state) do
-    case Client.get_client_by_id(senderid) do
-      nil ->
+    client = Client.get_client_by_id(senderid)
+    cond do
+      client == nil ->
         Logger.info("Cannot joinq as no client")
         state
 
-      %{player: true} ->
+      User.is_restricted?(senderid, ["Game queue"]) ->
+        LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are restricted from joining from joining the queue", state.lobby_id)
+        state
+
+      client.player ->
         Logger.info("Cannot queue user #{senderid}, already a player")
         r = LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are already a player, you can't join the queue!", state.lobby_id)
         Logger.info("joinq_sayprivateex result #{Kernel.inspect r} for #{Kernel.inspect {state.coordinator_id, senderid, state.lobby_id}} type 1")
         state
-      _ ->
-        send(self(), :queue_check)
-        case Enum.member?(state.join_queue, senderid) do
-          false ->
-            Logger.info("Added #{senderid} to queue")
-            new_queue = state.join_queue ++ [senderid]
-            pos = get_queue_position(new_queue, senderid) + 1
-            r = LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}. Use $status to check on the queue.", state.lobby_id)
-            Logger.info("joinq_sayprivateex result #{Kernel.inspect r} for #{Kernel.inspect {state.coordinator_id, senderid, state.lobby_id}} type 2")
 
-            %{state | join_queue: new_queue}
-          true ->
-            Logger.info("Spectator #{senderid} is already in the queue")
-            pos = get_queue_position(state.join_queue, senderid) + 1
-            r = LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}. Use $status to check on the queue and $leaveq to leave it.", state.lobby_id)
-            Logger.info("joinq_sayprivateex result #{Kernel.inspect r} for #{Kernel.inspect {state.coordinator_id, senderid, state.lobby_id}} type 3")
-            state
+      Enum.member?(get_queue(state), senderid) ->
+        Logger.info("Spectator #{senderid} is already in the queue")
+        pos = get_queue_position(get_queue(state), senderid) + 1
+        r = LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}. Use $status to check on the queue and $leaveq to leave it.", state.lobby_id)
+        Logger.info("joinq_sayprivateex result #{Kernel.inspect r} for #{Kernel.inspect {state.coordinator_id, senderid, state.lobby_id}} type 2")
+        state
+
+      true ->
+        send(self(), :queue_check)
+
+        new_state = if User.is_restricted?(senderid, ["Low priority"]) do
+          %{state | low_priority_join_queue: state.low_priority_join_queue ++ [senderid]}
+        else
+          %{state | join_queue: state.join_queue ++ [senderid]}
         end
+
+        Logger.info("Added #{senderid} to queue")
+        new_queue = get_queue(new_state)
+        pos = get_queue_position(new_queue, senderid) + 1
+        r = LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}. Use $status to check on the queue.", state.lobby_id)
+        Logger.info("joinq_sayprivateex result #{Kernel.inspect r} for #{Kernel.inspect {state.coordinator_id, senderid, state.lobby_id}} type 3")
+
+        new_state
     end
   end
 
   def handle_command(%{command: "leaveq", senderid: senderid}, state) do
     Logger.info("Removed #{senderid} from queue because $leaveq")
-    new_queue = List.delete(state.join_queue, senderid)
     LobbyChat.sayprivateex(state.coordinator_id, senderid, "You have been removed from the join queue", state.lobby_id)
-    %{state | join_queue: new_queue}
+    {:noreply, %{state |
+      join_queue: state.join_queue |> List.delete(senderid),
+      low_priority_join_queue: state.join_queue |> List.delete(senderid)
+    }}
   end
 
 
@@ -583,4 +596,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         -1
     end
   end
+
+  @spec get_queue(map()) :: [T.userid()]
+  defdelegate get_queue(state), to: ConsulServer
 end

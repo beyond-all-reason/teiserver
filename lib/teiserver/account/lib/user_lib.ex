@@ -251,19 +251,8 @@ defmodule Teiserver.Account.UserLib do
 
         "Hosting games",
         "Joining existing lobbies",
-        "Joining duel",
-        "Joining ffa",
-        "Joining team",
-        "Joining coop",
-      ]},
-
-      {"Playing", [
-        "Playing duel",
-        "Playing ffa",
-        "Playing team",
-        "Playing coop",
-
-        # Matchmaking stuff here
+        "Low priority",
+        "Game queue",
       ]},
 
       {"Community", [
