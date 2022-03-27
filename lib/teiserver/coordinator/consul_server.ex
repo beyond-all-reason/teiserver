@@ -106,7 +106,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info({:dequeue_user, userid}, state) do
     {:noreply, %{state |
       join_queue: state.join_queue |> List.delete(userid),
-      low_priority_join_queue: state.join_queue |> List.delete(userid)
+      low_priority_join_queue: state.low_priority_join_queue |> List.delete(userid)
     }}
   end
 
@@ -114,7 +114,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     player_count_changed(state)
     {:noreply, %{state |
       join_queue: state.join_queue |> List.delete(userid),
-      low_priority_join_queue: state.join_queue |> List.delete(userid)
+      low_priority_join_queue: state.low_priority_join_queue |> List.delete(userid)
     }}
   end
 
