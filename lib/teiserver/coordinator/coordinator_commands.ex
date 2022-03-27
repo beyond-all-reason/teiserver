@@ -6,6 +6,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.Coordinator.CoordinatorLib
 
   @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore 1v1me un1v1)
+  @forward_to_consul ~w(s status follow joinq leaveq splitlobby)
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, _state) do
@@ -13,6 +14,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
     cond do
       client == nil -> false
+      Enum.member?(@forward_to_consul, cmd.command) -> true
       Enum.member?(@always_allow, cmd.command) -> true
       client.moderator == true -> true
       true -> false
@@ -21,10 +23,20 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   @spec handle_command(map(), map()) :: map()
   def handle_command(cmd, state) do
-    if allow_command?(cmd, state) do
-      do_handle(cmd, state)
-    else
-      state
+    cond do
+      Enum.member?(@forward_to_consul, cmd.command) ->
+        client = Client.get_client_by_id(cmd.senderid)
+        if client.lobby_id do
+          consul_pid = Coordinator.get_consul_pid(client.lobby_id)
+          send(consul_pid, cmd)
+        end
+        state
+
+      allow_command?(cmd, state) == true ->
+        do_handle(cmd, state)
+
+      true ->
+        state
     end
   end
 

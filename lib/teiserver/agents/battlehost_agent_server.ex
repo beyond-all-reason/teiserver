@@ -11,8 +11,8 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
 
   @map_hash "1565299817"
   @game_hash "393009621"
-  @game_name "Beyond All Reason test-18609-5136d88"
-  @engine_version "105.1.1-739-ga241485 BAR105"
+  @game_name "Beyond All Reason test-19289-f2810de"
+  @engine_version "105.1.1-861-ge8bf8a9 BAR105"
 
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
