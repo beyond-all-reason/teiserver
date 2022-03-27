@@ -11,6 +11,7 @@ defmodule Central.Helpers.TimexHelper do
 
     case new_timestamp do
       %Timex.AmbiguousDateTime{} -> timestamp
+      {:error, _reason} -> timestamp
       _ -> new_timestamp
     end
   end
