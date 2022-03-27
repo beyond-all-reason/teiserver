@@ -14,7 +14,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser}
 
   # Commands that are always forwarded to the coordinator itself, not the consul server
-  @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore)
+  @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore 1v1me un1v1)
 
   @always_allow ~w(status y n follow joinq leaveq splitlobby)
   @boss_commands ~w(gatekeeper welcome-message)
@@ -56,6 +56,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     new_state = check_queue_status(state)
     player_count_changed(new_state)
+
+    # It is possible we can "forget" the coordinator_id
+    # no idea how it happens but it can cause issues to arise
+    # as such we just do a quick check for it here
+    new_state = if new_state.coordinator_id == nil do
+      %{new_state | coordinator_id: Coordinator.get_coordinator_userid()}
+    else
+      new_state
+    end
 
     {:noreply, new_state}
   end
@@ -454,7 +463,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp player_count_changed(%{join_queue: join_queue, low_priority_join_queue: low_priority_join_queue} = state) do
     if get_player_count(state) < get_max_player_count(state) do
       count = get_player_count(state)
-      Logger.info("joinq - Player count #{count}, queue is #{Kernel.inspect join_queue}")
+      Logger.info("joinq - Player count #{count}, queue is #{Kernel.inspect join_queue}, low_prio_queue is #{Kernel.inspect low_priority_join_queue}")
 
       [userid | _] = (join_queue ++ low_priority_join_queue)
 
@@ -584,12 +593,20 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   defp check_queue_status(%{join_queue: [], low_priority_join_queue: []} = state), do: state
   defp check_queue_status(state) do
-    new_queue = get_queue(state)
+    join_queue = state.join_queue
     |> Enum.filter(fn userid ->
       Client.get_client_by_id(userid).player == false
     end)
 
-    %{state | join_queue: new_queue}
+    low_priority_join_queue = state.low_priority_join_queue
+    |> Enum.filter(fn userid ->
+      Client.get_client_by_id(userid).player == false
+    end)
+
+    %{state |
+      join_queue: join_queue,
+      low_priority_join_queue: low_priority_join_queue
+    }
   end
 
   @spec get_queue(map()) :: [T.userid()]
