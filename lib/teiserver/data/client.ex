@@ -241,7 +241,7 @@ defmodule Teiserver.Client do
   def add_client(client) do
     ConCache.put(:clients, client.userid, client)
 
-    ConCache.update(:lists, :clients, fn value ->
+    Central.cache_update(:lists, :clients, fn value ->
       new_value =
         ([client.userid | value])
         |> Enum.uniq()
@@ -352,7 +352,7 @@ defmodule Teiserver.Client do
 
     Central.cache_delete(:clients, client.userid)
 
-    ConCache.update(:lists, :clients, fn value ->
+    Central.cache_update(:lists, :clients, fn value ->
       new_value =
         value
         |> Enum.filter(fn v -> v != client.userid end)
