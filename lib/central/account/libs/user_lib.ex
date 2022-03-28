@@ -59,4 +59,21 @@ defmodule Central.Account.UserLib do
     {result, _} = has_access(target_user, conn)
     result
   end
+
+  def list_restrictions() do
+    ConCache.get(:restriction_lookup, :categories)
+    |> Enum.map(fn key ->
+      {key, ConCache.get(:restriction_lookup, key)}
+    end)
+  end
+
+  @spec add_report_restriction_types(String.t(), list) :: :ok
+  def add_report_restriction_types(key, items) do
+    categories = ConCache.get(:restriction_lookup, :categories) || []
+    new_categories = categories ++ [key]
+
+    Central.cache_put(:restriction_lookup, :categories, new_categories)
+    Central.cache_put(:restriction_lookup, key, items)
+    :ok
+  end
 end

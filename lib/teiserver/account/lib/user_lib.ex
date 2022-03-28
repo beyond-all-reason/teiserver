@@ -233,50 +233,6 @@ defmodule Teiserver.Account.UserLib do
       preload: [user_stat: user_stats]
   end
 
-  @spec restrictions_lists() :: list()
-  def restrictions_lists() do
-    [
-      {"Chat", [
-        "Bridging",
-        "Room chat",
-        "Direct chat",
-        "Lobby chat",
-        "Battle chat",
-      ]},
-
-      # Lobby interaction
-      {"Lobby", [
-        "Host commands",
-        "Voting",
-
-        "Hosting games",
-        "Joining existing lobbies",
-        "Low priority",
-        "Game queue",
-      ]},
-
-      {"Community", [
-        "Accolades",
-        "Reporting",
-        "Renaming"
-      ]},
-
-      {"Reminders", [
-        "Warning reminder",
-      ]},
-
-      # Global overrides
-      {"Global", [
-        "All chat",
-        "All lobbies",
-        "Site",
-        "Matchmaking",
-        "Community",
-        "Login"
-      ]}
-    ]
-  end
-
   def global_roles() do
     ~w(Default Armada Cortex Raptor Scavenger)
   end

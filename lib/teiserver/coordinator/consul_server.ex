@@ -465,7 +465,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       count = get_player_count(state)
       Logger.info("joinq - Player count #{count}, queue is #{Kernel.inspect join_queue}, low_prio_queue is #{Kernel.inspect low_priority_join_queue}")
 
-      [userid | _] = (join_queue ++ low_priority_join_queue)
+      [userid | _] = get_queue(state)
 
       existing = Client.get_client_by_id(userid)
       new_client = Map.merge(existing, %{player: true, ready: true})

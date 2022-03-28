@@ -28,6 +28,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   def handle_info(:begin, state) do
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_inout")
     coordinator_id = Coordinator.get_coordinator_userid()
 
     if coordinator_id != nil do
@@ -72,9 +73,8 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
-    send(self(), :begin)
+    :timer.send_after(500, :begin)
     ConCache.put(:teiserver_consul_pids, :automod, self())
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_inout")
     {:ok, %{}}
   end
 

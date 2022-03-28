@@ -156,7 +156,7 @@ defmodule TeiserverWeb.Admin.UserController do
           end)
 
         conn
-          |> assign(:restrictions_lists, UserLib.restrictions_lists())
+          |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
           |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
           |> assign(:user, user)
           |> assign(:user_stats, user_stats)
@@ -407,7 +407,7 @@ defmodule TeiserverWeb.Admin.UserController do
           |> Central.Account.ReportLib.make_favourite()
 
         conn
-        |> assign(:restrictions_lists, UserLib.restrictions_lists())
+        |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
         |> assign(:report, report)
         |> assign(:changeset, changeset)
         |> add_breadcrumb(name: "Respond to report against: #{fav.item_label}", url: conn.request_path)
@@ -488,7 +488,7 @@ defmodule TeiserverWeb.Admin.UserController do
             changeset = Central.Account.change_report(report)
 
             conn
-            |> assign(:restrictions_lists, UserLib.restrictions_lists())
+            |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
             |> assign(:error, error)
             |> assign(:report, report)
             |> assign(:changeset, changeset)
