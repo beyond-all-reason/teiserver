@@ -1,28 +1,31 @@
 defmodule Teiserver.Telemetry.ExportPropertiesTask do
   alias Teiserver.Telemetry
   alias Central.Helpers.{TimexHelper, DatePresets}
+  alias Teiserver.Telemetry.{ClientProperty, UnauthProperty}
+  alias Central.Repo
+  import Ecto.Query, warn: false
+  import Central.Helpers.QueryHelpers
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   def perform(params) do
     do_query(params)
-    |> do_output(params)
     |> add_csv_headings
+    |> CSV.encode()
+    |> Enum.to_list
   end
 
   defp add_csv_headings(output) do
     headings = [[
-      "Username",
-      "Hash",
+      "Name",
       "Property",
       "Last updated",
       "Value"
     ]]
-    |> CSV.encode()
-    |> Enum.to_list
 
     headings ++ output
   end
 
-  defp do_query(%{"property_type" => property_type, "timeframe" => timeframe, "auth" => auth}) do
+  defp do_query(%{"property_types" => property_types, "timeframe" => timeframe, "auth" => auth}) do
     {start_date, end_date} = DatePresets.parse(timeframe, "", "")
 
     start_date = Timex.to_datetime(start_date)
@@ -30,54 +33,60 @@ defmodule Teiserver.Telemetry.ExportPropertiesTask do
 
     case auth do
       "auth" ->
-        query_auth(property_type, start_date, end_date)
+        query_client(property_types, start_date, end_date)
       "unauth" ->
-        query_unauth(property_type, start_date, end_date)
+        query_unauth(property_types, start_date, end_date)
       "combined" ->
-        query_auth(property_type, start_date, end_date) ++ query_unauth(property_type, start_date, end_date)
+        query_client(property_types, start_date, end_date) ++ query_unauth(property_types, start_date, end_date)
     end
   end
 
-  defp query_auth(property_type, start_date, end_date) do
-    Telemetry.list_client_properties(
-      preload: [:property_type, :user],
-      search: [
-        between: {start_date, end_date},
-        property_type_id: property_type
-      ],
-      limit: :infinity
-    )
-  end
+  defp query_client(property_types, start_date, end_date) do
+    query = from client_properties in ClientProperty,
+      where: client_properties.property_type_id in ^property_types,
+      where: between(client_properties.last_updated, ^start_date, ^end_date),
+      join: property_types in assoc(client_properties, :property_type),
+      join: users in assoc(client_properties, :user),
+      select: [users.name, property_types.name, client_properties.last_updated, client_properties.value]
 
-  defp query_unauth(property_type, start_date, end_date) do
-    Telemetry.list_unauth_properties(
-      preload: [:property_type],
-      search: [
-        between: {start_date, end_date},
-        property_type_id: property_type
-      ],
-      limit: :infinity
-    )
-  end
-
-  defp do_output(data, _params) do
-    data
-    |> Stream.map(fn property ->
-      {username, hash} = if Map.has_key?(property, :user) do
-        {property.user.name, nil}
-      else
-        {nil, property.hash}
-      end
-
-      [
-        username,
-        hash,
-        property.property_type.name,
-        TimexHelper.date_to_str(property.last_updated, format: :ymd_hms),
-        property.value
-      ]
+    stream = Repo.stream(query, max_rows: 500)
+    {:ok, result} = Repo.transaction(fn() ->
+      stream
+      |> Enum.map(fn [name, property_type, last_updated, value] ->
+        [
+          name,
+          property_type,
+          TimexHelper.date_to_str(last_updated, format: :ymd_hms),
+          value
+        ]
+      end)
+      |> Enum.to_list
     end)
-    |> CSV.encode()
-    |> Enum.to_list
+
+    result
+  end
+
+  defp query_unauth(property_types, start_date, end_date) do
+    query = from unauth_properties in UnauthProperty,
+      where: unauth_properties.property_type_id in ^property_types,
+      where: between(unauth_properties.last_updated, ^start_date, ^end_date),
+      join: property_types in assoc(unauth_properties, :property_type),
+      select: [unauth_properties.hash, property_types.name, unauth_properties.last_updated, unauth_properties.value]
+
+    stream = Repo.stream(query, max_rows: 500)
+    {:ok, result} = Repo.transaction(fn() ->
+      stream
+      |> Enum.map(fn [hash, property_type, last_updated, value] ->
+        [
+          hash,
+          property_type,
+          TimexHelper.date_to_str(last_updated, format: :ymd_hms),
+          value
+        ]
+      end)
+      |> Enum.to_list
+    end)
+
+    result
   end
 end

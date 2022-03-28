@@ -84,11 +84,16 @@
       %>
     <% end %>
   </div>
-  
+
   <div class="col-md-3">
     <form action={Routes.ts_admin_user_path(@conn, :index)} method="get" class="">
       <div class="input-group">
-        <input type="text" name="s" id="quick_search" value={assigns[:quick_search] || @conn.params["s"]} placeholder="Quick search" class="form-control" style="width: 150px; display: inline-block;" />
+        <%
+          input_opts = [
+            autofocus: (if not Enum.member?(["edit"], @active), do: "autofocus"),
+          ]
+        %>
+        <input type="text" name="s" id="quick_search" value={assigns[:quick_search] || @conn.params["s"]} placeholder="Quick search" class="form-control" style="width: 150px; display: inline-block;" {input_opts}/>
         &nbsp;
         <input type="submit" value="Search" class={"btn btn-#{bsname} float-end"} style="margin-top: 0px;" />
       </div>

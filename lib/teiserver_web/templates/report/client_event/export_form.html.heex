@@ -1,5 +1,9 @@
 <% bsname = view_colour() %>
 
+
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
+<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+
 <%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "client_events"}) %>
 
 <script type="text/javascript" charset="utf-8">
@@ -7,16 +11,19 @@
     table_name = $("#table-name").val();
 
     if (table_name == "events") {
-      $("#property-col").hide();
-      $("#event-col").show();
+      $(".property-col").hide();
+      $(".event-col").show();
     } else {
-      $("#event-col").hide();
-      $("#property-col").show();
+      $(".event-col").hide();
+      $(".property-col").show();
     }
   }
 
   $(function() {
     type_table();
+    $('.list-builder-select').select2({
+      width: "100%"
+    });
   });
 </script>
 
@@ -35,7 +42,7 @@
         <form action={Routes.ts_reports_client_event_path(@conn, :export_post)} method='post' class=''>
           <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
           <div class='row'>
-            <div class='col-xl-4 col-lg-6 col-md-12'>
+            <div class='col-xl-4 col-lg-6 col-md-12 my-2'>
               <label for='table-name' class='control-label'>Data type</label>
               <select class="form-control" name="table_name" id="table-name" onchange="type_table()">
                 <option value="events">Events</option>
@@ -43,27 +50,25 @@
               </select>
             </div>
 
-            <div class='col-xl-4 col-lg-6 col-md-12' id="event-col">
-              <label for='event_type' class='control-label'>Event type (no effect at this time)</label>
-              <%= central_component "icon_dropdown",
-                name: "event_type",
-                id: "event_type",
-                enumerable: @event_types,
-                insert_blank: %{name: "All events", id: nil}
-              %>
+            <div class='col-xl-4 col-lg-6 col-md-12 my-2 event-col'>
+              <label for='event_types' class='control-label'>Event type (no effect at this time)</label>
+              <select class="form-control list-builder-select" multiple="multiple" name="event_types[]" id="event_type">
+                <%= for event_type <- @event_types do %>
+                  <option value={event_type.id}><%= event_type.name %></option>
+                <% end %>
+              </select>
             </div>
 
-            <div class='col-xl-4 col-lg-6 col-md-12' id="property-col" style="display: none;">
-              <label for='property_type' class='control-label'>Property type (no effect at this time)</label>
-              <%= central_component "icon_dropdown",
-                name: "property_type",
-                id: "property_type",
-                enumerable: @property_types,
-                insert_blank: %{name: "All properties", id: nil}
-              %>
+            <div class='col-xl-4 col-lg-6 col-md-12 my-2 property-col' style="display: none;">
+              <label for='property_types' class='control-label'>Property type (no effect at this time)</label>
+              <select class="form-control list-builder-select" multiple="multiple" name="property_types[]" id="property_type">
+                <%= for property_type <- @property_types do %>
+                  <option value={property_type.id}><%= property_type.name %></option>
+                <% end %>
+              </select>
             </div>
 
-            <div class='col-xl-4 col-lg-6 col-md-12'>
+            <div class='col-xl-4 col-lg-6 col-md-12 my-2'>
               <label for='auth-dropdown' class='control-label'>Auth type</label>
               <select class="form-control" name="auth" id="auth-dropdown">
                 <option value="combined">Combined</option>
@@ -72,7 +77,7 @@
               </select>
             </div>
 
-            <div class='col-xl-4 col-lg-6 col-md-12'>
+            <div class='col-xl-4 col-lg-6 col-md-12 my-2'>
               <label for='timeframe' class='control-label'>Timeframe</label>
               <%= central_component "icon_dropdown",
                 name: "timeframe",
@@ -80,22 +85,12 @@
                 enumerable: (for p <- Central.Helpers.DatePresets.short_ranges(), do: %{id: p, name: p})
               %>
             </div>
-
-            <div class='col-xl-4 col-lg-6 col-md-12'>
-              <label for='output-format' class='control-label'>Output format</label>
-              <select class="form-control" name="output-format" id="output-format">
-                <!--<option value="graph">Graph</option>-->
-                <option value="file-export">File export</option>
-              </select>
-            </div>
           </div>
 
-          <div class='row page-row'>
-            <div class='col-md-12'>
-              <button type='submit' class={"btn btn-#{bsname} btn-block"}>
-                Export data
-              </button>
-            </div>
+          <div class='col-md-12 my-3'>
+            <button type='submit' class={"btn btn-#{bsname} btn-block"}>
+              Export data
+            </button>
           </div>
         </form>
 

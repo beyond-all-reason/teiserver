@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Report.ClientEventController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
   alias Teiserver.Telemetry.{ExportEventsTask, ExportPropertiesTask}
+  require Logger
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -126,33 +127,37 @@ defmodule TeiserverWeb.Report.ClientEventController do
   @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def export_form(conn, _params) do
     conn
-    |> assign(:event_types, Telemetry.list_event_types)
+    |> assign(:event_types, Telemetry.list_event_types(order_by: "Name (A-Z)"))
     |> assign(:property_types, Telemetry.list_property_types)
     |> render("export_form.html")
   end
 
   @spec export_post(Plug.Conn.t(), map) :: Plug.Conn.t()
   def export_post(conn, %{"table_name" => "properties"} = params) do
-    case params["output-format"] do
-      "file-export" ->
-        data = ExportPropertiesTask.perform(params)
+    start_time = System.system_time(:millisecond)
 
-        conn
-        |> put_resp_content_type("text/csv")
-        |> put_resp_header("content-disposition", "attachment; filename=\"events.csv\"")
-        |> send_resp(200, data)
-    end
+    data = ExportPropertiesTask.perform(params)
+
+    time_taken = System.system_time(:millisecond) - start_time
+    Logger.info("ClientEventController property export of #{Kernel.inspect params}, took #{time_taken}ms")
+
+    conn
+      |> put_resp_content_type("text/csv")
+      |> put_resp_header("content-disposition", "attachment; filename=\"properties.csv\"")
+      |> send_resp(200, data)
   end
 
   def export_post(conn, %{"table_name" => "events"} = params) do
-    case params["output-format"] do
-      "file-export" ->
-        data = ExportEventsTask.perform(params)
+    start_time = System.system_time(:millisecond)
 
-        conn
-        |> put_resp_content_type("application/json")
-        |> put_resp_header("content-disposition", "attachment; filename=\"events.json\"")
-        |> send_resp(200, data)
-    end
+    data = ExportEventsTask.perform(params)
+
+    time_taken = System.system_time(:millisecond) - start_time
+    Logger.info("ClientEventController event export of #{Kernel.inspect params}, took #{time_taken}ms")
+
+    conn
+      |> put_resp_content_type("application/json")
+      |> put_resp_header("content-disposition", "attachment; filename=\"events.json\"")
+      |> send_resp(200, Jason.encode!(data))
   end
 end
