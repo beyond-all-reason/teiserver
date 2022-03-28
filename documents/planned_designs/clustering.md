@@ -13,3 +13,8 @@ Various services place their PID into ETS, this should be changed to be a Regist
 
 #### PubSub.broadcast
 Currently we use `broadcast` but in some cases we might need to either include the node with the data or use `broadcast_local`. One example would be achievements, we don't want to double-count them.
+
+#### Less reliance on pre-caching
+When taking place pre-caching is an opportunity for nodes to diverge in state (e.g. user list). Ideally this would be replaced by a solution not requiring a pre-cache. As a bonus this will improve startup time.
+- Identify pre-caches used
+- Decide which can be migrated away
