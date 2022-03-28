@@ -97,7 +97,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
     Registry.register(
       Teiserver.ServerRegistry,
       {:throttle, "ClientIndexThrottle"},
-      battle_lobby_id
+      :index
     )
 
     {:ok, %{

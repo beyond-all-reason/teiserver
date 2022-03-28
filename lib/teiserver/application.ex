@@ -2,6 +2,10 @@ defmodule Teiserver.Application do
   @moduledoc false
   def children() do
     children = [
+      # Registries
+      {Registry, keys: :unique, name: Teiserver.ServerRegistry},
+      {Registry, keys: :unique, name: Teiserver.ClientRegistry},
+
       # Caches - Meta
       concache_perm_sup(:id_counters),
       concache_perm_sup(:lists),
@@ -64,10 +68,6 @@ defmodule Teiserver.Application do
       # Telemetry
       {Teiserver.Telemetry.TelemetryServer, name: Teiserver.Telemetry.TelemetryServer},
       {Teiserver.Telemetry.SpringTelemetryServer, name: Teiserver.Telemetry.SpringTelemetryServer},
-
-      # Registries
-      {Registry, keys: :unique, name: Teiserver.ServerRegistry},
-      {Registry, keys: :unique, name: Teiserver.ClientRegistry},
 
       # Ranch servers
       %{
