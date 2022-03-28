@@ -287,7 +287,7 @@ defmodule Teiserver.Game.QueueServer do
 
         # Now put the players on their teams, for now we're assuming every game is just a 1v1
         Logger.info("QueueServer try_setup_battle putting players on teams")
-        [p1, p2] = state.players_accepted
+        [p1, p2 | _] = state.players_accepted
         Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p1, senderid: Coordinator.get_coordinator_userid(),
           status: %{
             team_number: 0,
