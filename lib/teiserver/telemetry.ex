@@ -1385,6 +1385,8 @@ defmodule Teiserver.Telemetry do
   end
 
   def get_or_add_property_type(name) do
+    name = String.trim(name)
+
     case ConCache.get(:teiserver_telemetry_property_types, name) do
       nil ->
         {:ok, property} = %PropertyType{}
@@ -1399,6 +1401,8 @@ defmodule Teiserver.Telemetry do
   end
 
   def get_or_add_event_type(name) do
+    name = String.trim(name)
+
     case ConCache.get(:teiserver_telemetry_event_types, name) do
       nil ->
         {:ok, event} = %EventType{}
