@@ -267,6 +267,8 @@ defmodule Teiserver.Game.QueueServer do
         Logger.info("QueueServer try_setup_battle found empty battle")
         state.players_accepted
         |> Enum.each(fn userid ->
+          Lobby.remove_user_from_any_battle(userid)
+
           PubSub.broadcast(
             Central.PubSub,
             "teiserver_client_messages:#{userid}",
