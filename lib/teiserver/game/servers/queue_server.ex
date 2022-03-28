@@ -260,9 +260,11 @@ defmodule Teiserver.Game.QueueServer do
 
     case empty_battle do
       nil ->
+        Logger.info("QueueServer try_setup_battle no empty battle")
         %{state | finding_battle: true}
 
       battle ->
+        Logger.info("QueueServer try_setup_battle found empty battle")
         state.players_accepted
         |> Enum.each(fn userid ->
           PubSub.broadcast(
@@ -275,12 +277,14 @@ defmodule Teiserver.Game.QueueServer do
         midway_state = remove_players(state, state.players_accepted)
 
         # Coordinator sets up the battle
+        Logger.info("QueueServer try_setup_battle starting battle setup")
         map_name = state.map_list |> Enum.random()
         Coordinator.send_to_host(empty_battle.id, "!autobalance off")
         Coordinator.send_to_host(empty_battle.id, "!map #{map_name}")
         :timer.sleep(250)
 
         # Now put the players on their teams, for now we're assuming every game is just a 1v1
+        Logger.info("QueueServer try_setup_battle putting players on teams")
         [p1, p2] = state.players_accepted
         Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p1, senderid: Coordinator.get_coordinator_userid(),
           status: %{
@@ -303,6 +307,7 @@ defmodule Teiserver.Game.QueueServer do
 
         # Give things time to propagate before we start
         :timer.sleep(250)
+        Logger.info("QueueServer try_setup_battle calling forcestart")
         Coordinator.send_to_host(empty_battle.id, "!forcestart")
 
         PubSub.broadcast(
