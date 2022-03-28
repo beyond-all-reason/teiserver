@@ -85,11 +85,19 @@ defmodule TeiserverWeb.Report.ClientEventController do
     event_type_id = Telemetry.get_or_add_event_type(event_name)
 
     client_data = Telemetry.list_client_events(
-      search: [event_type_id: event_type_id]
+      search: [
+        event_type_id: event_type_id,
+        between: {Timex.now() |> Timex.shift(days: -7), Timex.now()}
+      ],
+      limit: 500
     )
 
     unauth_data = Telemetry.list_client_events(
-      search: [event_type_id: event_type_id]
+      search: [
+        event_type_id: event_type_id,
+        between: {Timex.now() |> Timex.shift(days: -7), Timex.now()}
+      ],
+      limit: 500
     )
 
     schema_keys = client_data ++ unauth_data
