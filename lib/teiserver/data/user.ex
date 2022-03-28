@@ -835,7 +835,7 @@ defmodule Teiserver.User do
         Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
       end
 
-      Logger.info("Disconnecting #{client.name} from server as now banned")
+      Logger.info("Disconnecting #{user.name} from server as now banned")
       Client.disconnect(user.id, "Banned")
     end
 

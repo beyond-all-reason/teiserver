@@ -212,16 +212,17 @@
 
               <input type="submit" value="Save and apply response" name="form.submitted" class={"btn btn-#{report_bsname} float-end"} />
             </div>
-          <% end %>
+          </div>
+        <% end %>
 
-          <hr />
-          <h5>CoC Quick Reference</h5>
+        <hr />
+        <h5>CoC Quick Reference</h5>
 
-          <ul>
-          <%= for {key, text} <- @coc_lookup do %>
-            <li><strong><%= key %>:</strong> <%= text %></li>
-          <% end %>
-          </ul>
+        <ul>
+        <%= for {key, text} <- @coc_lookup do %>
+          <li><strong><%= key %>:</strong> <%= text %></li>
+        <% end %>
+        </ul>
 
       </div>
     </div>

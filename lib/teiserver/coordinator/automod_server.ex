@@ -5,6 +5,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   """
   use GenServer
   alias Central.Config
+  import Central.Logging.Helpers, only: [add_audit_log: 4]
   alias Teiserver.{Account, User, Client, Coordinator}
   alias Phoenix.PubSub
   require Logger
@@ -164,11 +165,13 @@ defmodule Teiserver.Coordinator.AutomodServer do
     user = User.get_user_by_id(userid)
     Account.update_user_stat(userid, %{"autoban_type" => automod_action.type, "autoban_id" => automod_action.id})
 
-    Central.Account.create_report(%{
+    coordinator_user_id = Coordinator.get_coordinator_userid()
+
+    {:ok, report} = Central.Account.create_report(%{
       "location" => "Automod",
       "location_id" => nil,
       "reason" => "Automod",
-      "reporter_id" => Coordinator.get_coordinator_userid(),
+      "reporter_id" => coordinator_user_id,
       "target_id" => userid,
       "response_text" => "Automod",
       "response_action" => "Restrict",
@@ -176,13 +179,23 @@ defmodule Teiserver.Coordinator.AutomodServer do
       "followup" => nil,
       "code_references" => [],
       "expires" => nil,
-      "responder_id" => Coordinator.get_coordinator_userid(),
+      "responder_id" => coordinator_user_id,
       "action_data" => %{
         "restriction_list" => ["Login", "Site"]
       }
     })
 
-    Client.disconnect(user.id, :banned)
+    add_audit_log(
+      coordinator_user_id,
+      "127.0.0.0",
+      "Teiserver:Automod action enacted",
+      %{
+        "report_id" => report.id,
+        "target_user_id" => userid,
+        "automod_action_id" => automod_action.id,
+      }
+    )
+
     "Banned user"
   end
 end
