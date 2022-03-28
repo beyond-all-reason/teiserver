@@ -51,7 +51,7 @@
             </div>
 
             <div class='col-xl-4 col-lg-6 col-md-12 my-2 event-col'>
-              <label for='event_types' class='control-label'>Event type (no effect at this time)</label>
+              <label for='event_types' class='control-label'>Event types</label>
               <select class="form-control list-builder-select" multiple="multiple" name="event_types[]" id="event_type">
                 <%= for event_type <- @event_types do %>
                   <option value={event_type.id}><%= event_type.name %></option>
@@ -60,7 +60,7 @@
             </div>
 
             <div class='col-xl-4 col-lg-6 col-md-12 my-2 property-col' style="display: none;">
-              <label for='property_types' class='control-label'>Property type (no effect at this time)</label>
+              <label for='property_types' class='control-label'>Property types</label>
               <select class="form-control list-builder-select" multiple="multiple" name="property_types[]" id="property_type">
                 <%= for property_type <- @property_types do %>
                   <option value={property_type.id}><%= property_type.name %></option>
