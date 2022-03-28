@@ -94,6 +94,12 @@ defmodule Teiserver.Account.ClientIndexThrottle do
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
 
+    Registry.register(
+      Teiserver.ServerRegistry,
+      {:throttle, "ClientIndexThrottle"},
+      battle_lobby_id
+    )
+
     {:ok, %{
       new_clients: [],
       removed_clients: []

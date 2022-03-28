@@ -66,7 +66,7 @@ defmodule Teiserver.Application do
       {Teiserver.Telemetry.SpringTelemetryServer, name: Teiserver.Telemetry.SpringTelemetryServer},
 
       # Registries
-      {Registry, keys: :unique, name: Teiserver.TeiserverRegistry},
+      {Registry, keys: :unique, name: Teiserver.ServerRegistry},
       {Registry, keys: :unique, name: Teiserver.ClientRegistry},
 
       # Ranch servers

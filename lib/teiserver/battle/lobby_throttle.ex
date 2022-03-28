@@ -100,6 +100,11 @@ defmodule Teiserver.Battle.LobbyThrottle do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{battle_lobby_id}")
 
     ConCache.put(:teiserver_throttle_pids, {:battle_lobby, battle_lobby_id}, self())
+    Registry.register(
+      Teiserver.ServerRegistry,
+      {:throttle, "LobbyThrottle"},
+      battle_lobby_id
+    )
 
     {:ok, %{
       battle: nil,

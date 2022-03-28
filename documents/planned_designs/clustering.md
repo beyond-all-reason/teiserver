@@ -18,3 +18,26 @@ Currently we use `broadcast` but in some cases we might need to either include t
 When taking place pre-caching is an opportunity for nodes to diverge in state (e.g. user list). Ideally this would be replaced by a solution not requiring a pre-cache. As a bonus this will improve startup time.
 - Identify pre-caches used
 - Decide which can be migrated away
+- Might need to use cache_update rather than cache_put to help ensure consistency
+
+## Logging of progress
+#### Propagate data
+
+
+#### PID store
+**teiserver_throttle_pids**
+
+
+**teiserver_queue_pids**
+**teiserver_consul_pids**
+**teiserver_accolade_pids**
+
+
+
+
+
+#### PubSub.broadcast
+
+
+#### Less reliance on pre-caching
+
