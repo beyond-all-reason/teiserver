@@ -243,24 +243,47 @@ defmodule Teiserver.Bridge.DiscordBridge do
       report = Account.get_report!(report.id, preload: [:target])
       until = TimexHelper.date_to_str(report.expires, format: :hms_dmy) <> " (UTC)"
 
+      restriction_change = case log.details["restriction_change"] do
+        "expanded" -> "Restrictions expanded to: #{report.action_data["restriction_list"] |> Enum.join(", ")}"
+        "reduced" -> "Restrictions reduced to: #{report.action_data["restriction_list"] |> Enum.join(", ")}"
+        "no change" -> nil
+        "altered" -> "Restrictions altered to: #{report.action_data["restriction_list"] |> Enum.join(", ")}"
+        _ -> nil
+      end
+
       message = cond do
         expires_now == true ->
           [
             "----------------------",
             "#{report.target.name} had moderation action reversed",
+            restriction_change,
             "Reason: #{log.details["reason"]}",
             "----------------------"
           ]
+          |> Enum.filter(fn i -> i != nil end)
           |> Enum.join("\n")
 
-        log.details["sooner"] == true ->
+        log.details["duration"] == "Sooner" ->
           [
             "----------------------",
             "#{report.target.name} had their penalty duration reduced",
             "Now expires: #{until}",
+            restriction_change,
             "Reason: #{log.details["reason"]}",
             "----------------------"
           ]
+          |> Enum.filter(fn i -> i != nil end)
+          |> Enum.join("\n")
+
+        log.details["duration"] == "No change" ->
+          [
+            "----------------------",
+            "#{report.target.name} had their penalty altered",
+            restriction_change,
+            "Reason: #{log.details["reason"]}",
+            "----------------------"
+          ]
+          |> Enum.filter(fn i -> i != nil end)
           |> Enum.join("\n")
 
         true ->
@@ -268,9 +291,11 @@ defmodule Teiserver.Bridge.DiscordBridge do
             "----------------------",
             "#{report.target.name} had their penalty duration extended",
             "Now expires: #{until}",
+            restriction_change,
             "Reason: #{log.details["reason"]}",
             "----------------------"
           ]
+          |> Enum.filter(fn i -> i != nil end)
           |> Enum.join("\n")
       end
 

@@ -20,16 +20,39 @@
       <label class="control-label" for="report_expires">Expires</label>
       <input type='text' name='report[expires]' id='report_expires' value={date_to_str(Ecto.Changeset.get_field(@changeset, :expires), :ymd_hms)} placeholder='"Never" to never expire' class='form-control' />
     </div>
-    
+
     <div class="col-lg-6 my-3">
       <%= label f, :response_text, class: "control-label" %>
       <%= text_input f, :response_text, class: "form-control", autofocus: :autofocus %>
       <%= error_tag f, :response_text %>
     </div>
-
+  </div>
+  
+  <div class="row">
+    <h5>Restrictions</h5>
+    <% restrictions = @report.action_data["restriction_list"] %>
+    <%= for {section, r_list} <- @restrictions_lists do %>
+      <div class="col-md-3 col-lg-2">
+        <strong><%= section %></strong>
+        <%= for r <- r_list do %>
+          <% r_clean = String.replace(r, " ", "_") %>
+          <%= central_component "checkbox",
+            id: "restriction_#{r_clean}",
+            name: "report[restrictions][#{r_clean}]",
+            label: r,
+            value: r,
+            checked: Enum.member?(restrictions, r)
+          %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+  
+  
+  <div class="row">
     <div class="col-lg-6 my-3">
       <label class="control-label" for="report_audit_reason">Reason for change:</label>
-      <input type='text' name='report[audit_reason]' id='report_audit_reason' value="" class='form-control' />
+      <input type='text' name='report[audit_reason]' id='report_audit_reason' value="" class='form-control' required="required" />
     </div>
   </div>
 

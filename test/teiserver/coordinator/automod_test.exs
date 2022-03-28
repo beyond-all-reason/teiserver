@@ -1,13 +1,16 @@
 defmodule Teiserver.Coordinator.AutomodTest do
   use Central.ServerCase, async: false
-  alias Central.Config
+  alias Central.{Config, Logging}
   alias Teiserver.{Account, User, Client}
-  alias Teiserver.Coordinator.AutomodServer
+  alias Teiserver.Coordinator.{CoordinatorServer, AutomodServer}
 
   import Teiserver.TeiserverTestLib,
     only: [new_user: 0, tachyon_auth_setup: 1, _tachyon_send: 2]
 
   setup do
+    account = CoordinatorServer.get_coordinator_account()
+    ConCache.put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
+
     Config.update_site_config("teiserver.Automod action delay", 0)
     banned_user = new_user()
     {:ok, banned_user: banned_user}
@@ -106,6 +109,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
     bot_user = new_user()
     User.update_user(%{bot_user | bot: true}, persist: true)
     %{socket: bot_socket} = tachyon_auth_setup(bot_user)
+    assert User.is_bot?(bot_user.id)
 
     monitor_user = User.get_user_by_name("AutohostMonitor")
 
@@ -166,11 +170,24 @@ defmodule Teiserver.Coordinator.AutomodTest do
       "recipient_id" => monitor_user.id,
       "message" => "user_info " <> encoded
     })
-    :timer.sleep(200)
 
     # Should be a key now!
     stats = Account.get_user_stat_data(delayed_user.id)
     assert Map.has_key?(stats, "hardware:cpuinfo")
+
+    # Should also have an automod report against them
+    [log] = Logging.list_audit_logs(search: [
+      actions: [
+          "Teiserver:Automod action enacted",
+        ],
+      details_equal: {"target_user_id", delayed_user.id |> to_string}
+      ],
+      order_by: "Newest first"
+    )
+    report_id = log.details["report_id"]
+
+    report = Account.get_report!(report_id)
+    User.update_report(report, "any reason")
 
     # And disconnected
     assert Client.get_client_by_id(delayed_user.id) == nil

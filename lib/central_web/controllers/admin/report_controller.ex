@@ -2,7 +2,8 @@ defmodule CentralWeb.Admin.ReportController do
   use CentralWeb, :controller
 
   alias Central.{Account, Logging}
-  alias Central.Account.{Report, ReportLib}
+  alias Central.Account.{Report, ReportLib, UserLib}
+  alias Central.Helpers.ListHelper
 
   plug Bodyguard.Plug.Authorize,
     policy: Central.Account.Report,
@@ -102,6 +103,7 @@ defmodule CentralWeb.Admin.ReportController do
     changeset = Account.change_report(%Report{})
 
     conn
+    |> assign(:restrictions_lists, UserLib.list_restrictions())
     |> assign(:changeset, changeset)
     |> add_breadcrumb(name: "New report", url: conn.request_path)
     |> render("new.html")
@@ -117,6 +119,7 @@ defmodule CentralWeb.Admin.ReportController do
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
+        |> assign(:restrictions_lists, UserLib.list_restrictions())
         |> assign(:changeset, changeset)
         |> render("new.html")
     end
@@ -140,6 +143,7 @@ defmodule CentralWeb.Admin.ReportController do
       |> ReportLib.make_favourite()
 
     conn
+    |> assign(:restrictions_lists, UserLib.list_restrictions())
     |> assign(:report, report)
     |> assign(:changeset, changeset)
     |> add_breadcrumb(name: "Edit: #{fav.item_label}", url: conn.request_path)
@@ -197,6 +201,7 @@ defmodule CentralWeb.Admin.ReportController do
           )
 
         conn
+        |> assign(:restrictions_lists, UserLib.list_restrictions())
         |> assign(:error, error)
         |> assign(:report, report)
         |> assign(:changeset, changeset)
@@ -222,6 +227,7 @@ defmodule CentralWeb.Admin.ReportController do
       |> ReportLib.make_favourite()
 
     conn
+    |> assign(:restrictions_lists, UserLib.list_restrictions())
     |> assign(:report, report)
     |> assign(:changeset, changeset)
     |> add_breadcrumb(name: "Edit: #{fav.item_label}", url: conn.request_path)
@@ -230,7 +236,7 @@ defmodule CentralWeb.Admin.ReportController do
 
   @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "report" => params}) do
-    report =
+    old_report =
       Account.get_report!(id,
         preload: [
           :reporter,
@@ -239,27 +245,49 @@ defmodule CentralWeb.Admin.ReportController do
         ]
       )
 
-    case Account.update_report(report, params, :update) do
+    restriction_list = params["restrictions"]
+      |> Enum.filter(fn {_, v} -> v != "false" end)
+      |> Enum.map(fn {_, v} -> v end)
+
+    params = Map.merge(params, %{
+      "action_data" => %{"restriction_list" => restriction_list}
+    })
+
+    case Account.update_report(old_report, params, :update) do
       {:ok, new_report} ->
-        sooner = Timex.compare(new_report.expires, report.expires) == -1
+        duration = case Timex.compare(new_report.expires, old_report.expires) do
+          -1 -> "Sooner"
+          1 -> "Longer"
+          _ -> "No change"
+        end
+
+        which_is_sublist = ListHelper.which_is_sublist(old_report.action_data["restriction_list"], new_report.action_data["restriction_list"])
+        restriction_change = case which_is_sublist do
+          :asub -> "expanded"
+          :bsub -> "reduced"
+          :eq -> "no change"
+          :neither -> "altered"
+        end
 
         add_audit_log(conn, "Account:Updated report", %{
-          report: report.id,
+          report: new_report.id,
           reason: params["audit_reason"],
-          sooner: sooner
+          duration: duration,
+          restriction_change: restriction_change
         })
 
         conn
         |> put_flash(:success, "Report updated successfully.")
-        |> redirect(to: Routes.admin_report_path(conn, :show, report))
+        |> redirect(to: Routes.admin_report_path(conn, :show, new_report))
 
       {:error, %Ecto.Changeset{} = changeset} ->
         fav =
-          report
+          old_report
           |> ReportLib.make_favourite()
 
         conn
-        |> assign(:report, report)
+        |> assign(:restrictions_lists, UserLib.list_restrictions())
+        |> assign(:report, old_report)
         |> assign(:changeset, changeset)
         |> add_breadcrumb(name: "Edit: #{fav.item_label}", url: conn.request_path)
         |> render("edit.html")

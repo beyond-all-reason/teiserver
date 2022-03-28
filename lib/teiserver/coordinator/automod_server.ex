@@ -6,7 +6,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   use GenServer
   alias Central.Config
   import Central.Logging.Helpers, only: [add_audit_log: 4]
-  alias Teiserver.{Account, User, Client, Coordinator}
+  alias Teiserver.{Account, Client, Coordinator}
   alias Phoenix.PubSub
   require Logger
   alias Teiserver.Data.Types, as: T
@@ -162,7 +162,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   def do_ban(userid, automod_action) do
-    user = User.get_user_by_id(userid)
     Account.update_user_stat(userid, %{"autoban_type" => automod_action.type, "autoban_id" => automod_action.id})
 
     coordinator_user_id = Coordinator.get_coordinator_userid()
