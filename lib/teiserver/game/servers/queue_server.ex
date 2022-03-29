@@ -308,6 +308,10 @@ defmodule Teiserver.Game.QueueServer do
           }
         })
 
+        # Update the lobby itself
+        new_tags = Map.put(battle.tags, "server/match/queue_id", state.id)
+        Lobby.set_script_tags(battle.id, new_tags)
+
         # Give things time to propagate before we start
         :timer.sleep(250)
         Logger.info("QueueServer try_setup_battle calling forcestart")
@@ -351,6 +355,11 @@ defmodule Teiserver.Game.QueueServer do
 
     # Update the queue pids cache to point to this process
     ConCache.put(:teiserver_queue_pids, opts.queue.id, self())
+    Registry.register(
+      Teiserver.ServerRegistry,
+      "QueueServer:#{opts.queue.id}",
+      opts.queue.id
+    )
 
     state = update_state_from_db(%{
        # Match ready stuff

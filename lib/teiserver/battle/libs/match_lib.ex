@@ -61,6 +61,8 @@ defmodule Teiserver.Battle.MatchLib do
       founder_id: lobby.founder_id,
       bots: lobby.bots,
 
+      queue_id: Map.get(lobby.tags, "server/match/queue_id"),
+
       started: Timex.now(),
       finished: nil
     }

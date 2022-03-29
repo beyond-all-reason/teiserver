@@ -116,7 +116,7 @@ defmodule Teiserver.SpringMatchmakingTest do
 
     _send_raw(
       battle_socket,
-      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tgameTitle\tgameName\n"
+      "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tmapName\tEU 01\tgameName\n"
     )
 
     # We know the battle is being opened, don't need to worry about it
