@@ -165,6 +165,12 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
     coordinator_user_id = Coordinator.get_coordinator_userid()
 
+    Registry.register(
+      Teiserver.ServerRegistry,
+      "AutomodServer",
+      :automod
+    )
+
     {:ok, report} = Central.Account.create_report(%{
       "location" => "Automod",
       "location_id" => nil,

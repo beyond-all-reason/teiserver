@@ -628,6 +628,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     # Update the queue pids cache to point to this process
     ConCache.put(:teiserver_consul_pids, lobby_id, self())
+    Registry.register(
+      Teiserver.ServerRegistry,
+      "ConsulServer:#{lobby_id}",
+      lobby_id
+    )
+
     :timer.send_interval(5_000, :tick)
     send(self(), :startup)
     {:ok, empty_state(lobby_id)}

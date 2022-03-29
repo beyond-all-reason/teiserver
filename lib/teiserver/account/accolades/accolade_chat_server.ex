@@ -177,6 +177,12 @@ defmodule Teiserver.Account.AccoladeChatServer do
 
     # Update the queue pids cache to point to this process
     ConCache.put(:teiserver_accolade_pids, userid, self())
+    Registry.register(
+      Teiserver.ServerRegistry,
+      "AccoladeChatServer:#{userid}",
+      userid
+    )
+
     # :timer.send_interval(10_000, :tick)
     send(self(), :startup)
     {:ok, empty_state(userid, recipient_id, match_id)}
