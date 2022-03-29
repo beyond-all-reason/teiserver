@@ -281,6 +281,7 @@ defmodule Teiserver.Game.QueueServer do
         # Coordinator sets up the battle
         Logger.info("QueueServer try_setup_battle starting battle setup")
         map_name = state.map_list |> Enum.random()
+        Coordinator.send_to_host(empty_battle.id, "!preset duel")
         Coordinator.send_to_host(empty_battle.id, "!autobalance off")
         Coordinator.send_to_host(empty_battle.id, "!map #{map_name}")
         :timer.sleep(250)

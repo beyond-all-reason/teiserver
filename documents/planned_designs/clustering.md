@@ -41,3 +41,7 @@ When taking place pre-caching is an opportunity for nodes to diverge in state (e
 
 #### Less reliance on pre-caching
 
+
+
+## Lessons learned
+- Ensure when registering processes they have a unique key. I accidentally registered the LobbyThrottles without having the lobby_id be part of the key and as a result they didn't register correctly at first.

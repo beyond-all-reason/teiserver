@@ -6,7 +6,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   use GenServer
   alias Central.Config
   import Central.Logging.Helpers, only: [add_audit_log: 4]
-  alias Teiserver.{Account, Client, Coordinator}
+  alias Teiserver.{Account, User, Coordinator}
   alias Phoenix.PubSub
   require Logger
   alias Teiserver.Data.Types, as: T
@@ -52,7 +52,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
     {:noreply, state}
   end
 
-  # Client inout
   def handle_info({:client_inout, :login, userid}, state) do
     delay = Config.get_site_config_cache("teiserver.Automod action delay") * 1000
     :timer.send_after(delay, {:check_user, userid})

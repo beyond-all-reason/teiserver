@@ -102,7 +102,7 @@ defmodule Teiserver.Battle.LobbyThrottle do
     ConCache.put(:teiserver_throttle_pids, {:battle_lobby, battle_lobby_id}, self())
     Registry.register(
       Teiserver.ServerRegistry,
-      {:throttle, "LobbyThrottle"},
+      {:throttle, "LobbyThrottle:#{battle_lobby_id}"},
       battle_lobby_id
     )
 
