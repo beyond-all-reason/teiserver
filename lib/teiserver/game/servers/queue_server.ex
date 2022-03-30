@@ -313,7 +313,7 @@ defmodule Teiserver.Game.QueueServer do
         Lobby.set_script_tags(battle.id, new_tags)
 
         # Give things time to propagate before we start
-        :timer.sleep(250)
+        :timer.sleep(1000)
         Logger.info("QueueServer try_setup_battle calling forcestart")
         Coordinator.send_to_host(empty_battle.id, "!forcestart")
 
