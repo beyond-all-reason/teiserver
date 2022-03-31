@@ -49,6 +49,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
       |> assign(:last_page, last_page)
       |> assign(:match_id, match_id)
       |> assign(:lobby_messages, lobby_messages)
+      |> assign(:lobby_guid, lobby_guid)
       |> add_breadcrumb(name: "Show: #{lobby_guid}", url: conn.request_path)
       |> render("chat.html")
   end

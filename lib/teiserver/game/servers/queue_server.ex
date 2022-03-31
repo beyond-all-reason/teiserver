@@ -282,9 +282,13 @@ defmodule Teiserver.Game.QueueServer do
         Logger.info("QueueServer try_setup_battle starting battle setup")
         map_name = state.map_list |> Enum.random()
         Coordinator.send_to_host(empty_battle.id, "!preset duel")
+        :timer.sleep(100)
+        Coordinator.send_to_host(empty_battle.id, "!bset startpostype 2")
+        :timer.sleep(100)
         Coordinator.send_to_host(empty_battle.id, "!autobalance off")
+        :timer.sleep(100)
         Coordinator.send_to_host(empty_battle.id, "!map #{map_name}")
-        :timer.sleep(250)
+        :timer.sleep(100)
 
         # Now put the players on their teams, for now we're assuming every game is just a 1v1
         Logger.info("QueueServer try_setup_battle putting players on teams")
