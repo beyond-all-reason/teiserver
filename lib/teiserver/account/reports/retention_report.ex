@@ -18,6 +18,7 @@ defmodule Teiserver.Account.RetentionReport do
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, params) do
     params = apply_defaults(params)
+    skip0 = params["skip0"] == "true"
 
     # Date range
     {start_date, _end_date} =
@@ -55,10 +56,7 @@ defmodule Teiserver.Account.RetentionReport do
         end
       end)
 
-      last_login = Timex.from_unix(user.data["last_login"] * 60) |> Timex.to_date()
-
       Map.merge(user, %{
-        last_logged_in: last_login,
         last_played: last_played
       })
     end)
@@ -66,21 +64,19 @@ defmodule Teiserver.Account.RetentionReport do
 
     # Grouping 1 - Last time played
     play_retention_grouping = accounts
-    |> Enum.group_by(fn user ->
-      Timex.diff(user.inserted_at, user.last_played, :day) |> abs
-    end)
-    |> Map.new(fn {days, userlist} -> {days, Enum.count(userlist)} end)
+      |> Enum.group_by(fn user ->
+        Timex.diff(user.inserted_at, user.last_played, :day) |> abs
+      end)
+      |> Map.new(fn {days, userlist} -> {days, Enum.count(userlist)} end)
 
-    # Group 2 - Last logged in
-    login_retention_grouping = accounts
-    |> Enum.group_by(fn user ->
-      Timex.diff(user.inserted_at |> Timex.to_date(), user.last_logged_in, :day) |> abs
-    end)
-    |> Map.new(fn {days, userlist} -> {days, Enum.count(userlist)} end)
+    play_retention_grouping = if skip0 do
+      play_retention_grouping |> Map.put(0, 0)
+    else
+      play_retention_grouping
+    end
 
     graph_data = [
       ["Play" | build_line(play_retention_grouping)],
-      ["Login" | build_line(login_retention_grouping)],
     ]
 
     assigns = %{
@@ -106,6 +102,7 @@ defmodule Teiserver.Account.RetentionReport do
       "date_preset" => "Last 3 months",
       "start_date" => "",
       "end_date" => "",
+      "skip0" => "true"
     }, Map.get(params, "report", %{}))
   end
 end

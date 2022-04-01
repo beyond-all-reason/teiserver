@@ -420,7 +420,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:direct_message, {from_id, messages, state_user}) when is_list(messages) do
     from_user = User.get_user_by_id(from_id)
-    if from_id not in (state_user.ignored || []) or from_user.moderator == true or from_user.bot == true do
+    if from_id not in (state_user.ignored || []) or from_user.moderator == true do
       from_name = User.get_username(from_id)
       messages
       |> Enum.map(fn msg ->

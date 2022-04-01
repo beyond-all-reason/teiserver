@@ -78,6 +78,13 @@
       </li>
 
       <li>
+        <a href="#bots_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+          <i class="far fa-fw fa-user-robot"></i>
+          Bots
+        </a>
+      </li>
+
+      <li>
         <a href="#scavengers_tab" role="tab" class="nav-link" data-bs-toggle="tab">
           <i class="far fa-fw fa-user-robot"></i>
           Scavengers
@@ -107,6 +114,10 @@
 
       <div class="tab-pane" id="ffa_tab" style="padding:5px;">
         <%= render "tab_ffa.html", %{data: @data["ffa"]} %>
+      </div>
+
+      <div class="tab-pane" id="bots_tab" style="padding:5px;">
+        <%= render "tab_bots.html", %{data: @data["bots"]} %>
       </div>
 
       <div class="tab-pane" id="scavengers_tab" style="padding:5px;">

@@ -5,16 +5,6 @@
 
 <link href="/css/c3.min.css" rel="stylesheet">
 
-<style>
-  .c3-axis .tick, .c3-legend-item {
-    fill: #ccc !important;
-  }
-  
-  .c3-axis .domain, .c3-axis .tick line {
-    stroke: #AAA !important;
-  }
-</style>
-
 <script>
   $(function() {
     var chart = c3.generate({
@@ -73,11 +63,13 @@
           <label for='months' class='control-label'>Months</label>
           <input type='text' name='months' id='months' value={@params["months"]} class='form-control' />
         </div>
+        
+        <div class='col-md-12'>
+          <button type='submit' class={"btn btn-#{bsname} float-end"}>
+            Submit
+          </button>
+        </div>
       </div>
-
-      <button type='submit' class={"btn btn-#{bsname} float-end"}>
-        Submit
-      </button>
     </form>
   </div>
 </div>

@@ -9,18 +9,16 @@
   url: Routes.ts_reports_match_metric_path(@conn, :day_metrics_list)
 %>
 
-<%= if @active == "today" do %>
-  <%= central_component "section_menu_button",
-    name: "today",
-    label: "Today",
-    active: @active,
-    icon: "far fa-waveform",
-    bsname: bsname,
-    url: @conn.request_path
-  %>
-<% end %>
+<%= central_component "section_menu_button",
+  name: "today",
+  label: "Today",
+  active: @active,
+  icon: "far fa-waveform",
+  bsname: bsname,
+  url: Routes.ts_reports_match_metric_path(@conn, :day_metrics_today)
+%>
 
-<%#= central_component "section_menu_button",
+<%= central_component "section_menu_button",
   name: "graph",
   label: "Graph",
   active: @active,
@@ -51,7 +49,7 @@
   url: Routes.ts_reports_match_metric_path(@conn, :month_metrics_list)
 %>
 
-<%#= central_component "section_menu_button",
+<%= central_component "section_menu_button",
   name: "this_month",
   label: "Month to date",
   active: @active,
@@ -60,7 +58,7 @@
   url: Routes.ts_reports_match_metric_path(@conn, :month_metrics_today)
 %>
 
-<%#= central_component "section_menu_button",
+<%= central_component "section_menu_button",
   name: "month_graph",
   label: "Graph",
   active: @active,

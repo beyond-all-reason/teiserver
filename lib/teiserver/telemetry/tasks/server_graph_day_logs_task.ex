@@ -1,4 +1,4 @@
-defmodule Teiserver.Telemetry.GraphDayLogsTask do
+defmodule Teiserver.Telemetry.ServerGraphDayLogsTask do
   @spec perform(list, map(), function()) :: list()
   def perform(logs, %{"field_list" => field_list} = _params, mapper_function) do
     field_list

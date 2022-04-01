@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
   alias Central.Helpers.{TimexHelper, DatePresets}
-  alias Teiserver.Telemetry.{GraphDayLogsTask, ExportServerMetricsTask, GraphMinuteLogsTask}
+  alias Teiserver.Telemetry.{ServerGraphDayLogsTask, ExportServerMetricsTask, GraphMinuteLogsTask}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
   @spec day_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_today(conn, _params) do
-    data = Telemetry.get_todays_log()
+    data = Telemetry.get_todays_server_log()
 
     users =
       [%{data: data}]
@@ -92,6 +92,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     |> send_resp(200, data)
   end
 
+  @spec day_metrics_graph(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_graph(conn, params) do
     params = Map.merge(params, %{
       "days" => Map.get(params, "days", 31) |> int_parse
@@ -119,7 +120,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
     extra_params = %{"field_list" => field_list}
 
-    columns = GraphDayLogsTask.perform(logs, Map.merge(params, extra_params), f)
+    columns = ServerGraphDayLogsTask.perform(logs, Map.merge(params, extra_params), f)
 
     key = logs
     |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
@@ -152,19 +153,26 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
   @spec month_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def month_metrics_show(conn, %{"year" => year, "month" => month}) do
-    log = Telemetry.get_server_month_log({year, month})
+    today = "#{Timex.now().month}/#{Timex.now().year}"
 
-    conn
-    |> assign(:year, year)
-    |> assign(:month, month)
-    |> assign(:data, log.data)
-    |> add_breadcrumb(name: "Monthly - #{month}/#{year}", url: conn.request_path)
-    |> render("month_metrics_show.html")
+    if today == "#{month}/#{year}" do
+      conn
+        |> redirect(to: Routes.ts_reports_server_metric_path(conn, :month_metrics_today))
+    else
+      log = Telemetry.get_server_month_log({year, month})
+
+      conn
+      |> assign(:year, year)
+      |> assign(:month, month)
+      |> assign(:data, log.data)
+      |> add_breadcrumb(name: "Monthly - #{month}/#{year}", url: conn.request_path)
+      |> render("month_metrics_show.html")
+    end
   end
 
   @spec month_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
   def month_metrics_today(conn, _params) do
-    data = Telemetry.get_this_months_log()
+    data = Telemetry.get_this_months_server_metrics_log()
 
     conn
     |> assign(:year, Timex.today().year)
@@ -201,7 +209,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
     extra_params = %{"field_list" => field_list}
 
-    columns = GraphDayLogsTask.perform(logs, Map.merge(params, extra_params), f)
+    columns = ServerGraphDayLogsTask.perform(logs, Map.merge(params, extra_params), f)
 
     key = logs
     |> Enum.map(fn log -> {log.year,log.month, 1} |> TimexHelper.date_to_str(format: :ymd) end)

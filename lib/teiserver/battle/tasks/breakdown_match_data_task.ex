@@ -22,6 +22,7 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
       ffa: get_subset_data(matches, "FFA"),
       scavengers: get_subset_data(matches, "Scavengers"),
       raptors: get_subset_data(matches, "Raptors"),
+      bots: get_subset_data(matches, "Bots"),
       totals: get_subset_data(matches, nil),
     }
   end

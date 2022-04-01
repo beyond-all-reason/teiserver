@@ -75,7 +75,7 @@ defmodule TeiserverWeb.Admin.ToolController do
 
   @spec day_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_today(conn, _params) do
-    data = Telemetry.get_todays_log()
+    data = Telemetry.get_todays_server_log()
 
     users =
       [%{data: data}]

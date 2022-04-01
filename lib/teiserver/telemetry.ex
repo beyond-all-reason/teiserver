@@ -349,8 +349,8 @@ defmodule Teiserver.Telemetry do
     |> Map.new()
   end
 
-  def get_todays_log() do
-    last_time = ConCache.get(:application_metadata_cache, "teiserver_day_metrics_today_last_time")
+  def get_todays_server_log() do
+    last_time = ConCache.get(:application_metadata_cache, "teiserver_day_server_metrics_today_last_time")
     recache = cond do
       last_time == nil -> true
       Timex.compare(Timex.now() |> Timex.shift(minutes: -15), last_time) == 1 -> true
@@ -359,11 +359,11 @@ defmodule Teiserver.Telemetry do
 
     if recache do
       data = Teiserver.Telemetry.Tasks.PersistServerDayTask.today_so_far()
-      ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_cache", data)
-      ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", Timex.now())
+      ConCache.put(:application_metadata_cache, "teiserver_day_server_metrics_today_cache", data)
+      ConCache.put(:application_metadata_cache, "teiserver_day_server_metrics_today_last_time", Timex.now())
       data
     else
-      ConCache.get(:application_metadata_cache, "teiserver_day_metrics_today_cache")
+      ConCache.get(:application_metadata_cache, "teiserver_day_server_metrics_today_cache")
     end
   end
 
@@ -507,8 +507,8 @@ defmodule Teiserver.Telemetry do
     end
   end
 
-  def get_this_months_log() do
-    last_time = ConCache.get(:application_metadata_cache, "teiserver_month_metrics_last_time")
+  def get_this_months_server_metrics_log() do
+    last_time = ConCache.get(:application_metadata_cache, "teiserver_month_server_metrics_last_time")
     recache = cond do
       last_time == nil -> true
       Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
@@ -517,11 +517,11 @@ defmodule Teiserver.Telemetry do
 
     if recache do
       data = Teiserver.Telemetry.Tasks.PersistServerMonthTask.month_so_far()
-      ConCache.put(:application_metadata_cache, "teiserver_month_metrics_cache", data)
-      ConCache.put(:application_metadata_cache, "teiserver_month_metrics_last_time", Timex.now())
+      ConCache.put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
+      ConCache.put(:application_metadata_cache, "teiserver_month_server_metrics_last_time", Timex.now())
       data
     else
-      ConCache.get(:application_metadata_cache, "teiserver_month_metrics_cache")
+      ConCache.get(:application_metadata_cache, "teiserver_month_month_metrics_cache")
     end
   end
 
@@ -659,6 +659,50 @@ defmodule Teiserver.Telemetry do
         limit: 1
 
     Repo.one(query)
+  end
+
+  @spec get_todays_match_log :: map()
+  def get_todays_match_log() do
+    last_time = ConCache.get(:application_metadata_cache, "teiserver_day_match_metrics_today_last_time")
+    recache = cond do
+      last_time == nil -> true
+      Timex.compare(Timex.now() |> Timex.shift(minutes: -15), last_time) == 1 -> true
+      true -> false
+    end
+
+    if recache do
+      data = Teiserver.Battle.Tasks.BreakdownMatchDataTask.perform(Timex.today())
+        |> Jason.encode!()
+        |> Jason.decode!()
+
+      ConCache.put(:application_metadata_cache, "teiserver_day_match_metrics_today_cache", data)
+      ConCache.put(:application_metadata_cache, "teiserver_day_match_metrics_today_last_time", Timex.now())
+      data
+    else
+      ConCache.get(:application_metadata_cache, "teiserver_day_match_metrics_today_cache")
+    end
+  end
+
+  @spec get_this_months_match_metrics_log :: map()
+  def get_this_months_match_metrics_log() do
+    last_time = ConCache.get(:application_metadata_cache, "teiserver_month_server_metrics_last_time")
+    recache = cond do
+      last_time == nil -> true
+      Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
+      true -> false
+    end
+
+    if recache do
+      data = Teiserver.Battle.Tasks.BreakdownMatchDataTask.perform(Timex.beginning_of_month(Timex.now()), Timex.now())
+        |> Jason.encode!()
+        |> Jason.decode!()
+
+      ConCache.put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
+      ConCache.put(:application_metadata_cache, "teiserver_month_server_metrics_last_time", Timex.now())
+      data
+    else
+      ConCache.get(:application_metadata_cache, "teiserver_month_month_metrics_cache")
+    end
   end
 
   # Month logs

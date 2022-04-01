@@ -3,6 +3,8 @@ defmodule TeiserverWeb.Report.MatchMetricController do
   alias Teiserver.Telemetry
   alias Central.Helpers.{TimexHelper, DatePresets}
   alias Teiserver.Battle.{ExportRawMatchMetricsTask}
+  alias Teiserver.Telemetry.{MatchGraphDayLogsTask, MatchGraphMonthLogsTask}
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -39,10 +41,21 @@ defmodule TeiserverWeb.Report.MatchMetricController do
     log = Telemetry.get_match_day_log(date)
 
     conn
-    |> assign(:date, date)
-    |> assign(:data, log.data)
-    |> add_breadcrumb(name: "Daily - #{date_str}", url: conn.request_path)
-    |> render("day_metrics_show.html")
+      |> assign(:date, date)
+      |> assign(:data, log.data)
+      |> add_breadcrumb(name: "Daily - #{date_str}", url: conn.request_path)
+      |> render("day_metrics_show.html")
+  end
+
+  @spec day_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def day_metrics_today(conn, _params) do
+    data = Telemetry.get_todays_match_log()
+
+    conn
+      |> assign(:date, Timex.today())
+      |> assign(:data, data)
+      |> add_breadcrumb(name: "Daily - Today (partial)", url: conn.request_path)
+      |> render("day_metrics_show.html")
   end
 
   @spec export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -65,42 +78,37 @@ defmodule TeiserverWeb.Report.MatchMetricController do
     |> send_resp(200, data)
   end
 
-  # def export_post(conn, %{"report" => params}) do
-  #   data = ExportMatchMetricsTask.perform(params)
+  @spec day_metrics_graph(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def day_metrics_graph(conn, params) do
+    params = Map.merge(params, %{
+      "days" => Map.get(params, "days", 31) |> int_parse
+    })
 
-  #   conn
-  #   |> put_resp_content_type("application/json")
-  #   |> put_resp_header("content-disposition", "attachment; filename=\"match_metrics.json\"")
-  #   |> send_resp(200, data)
-  # end
+    logs =
+      Telemetry.list_match_day_logs(
+        order: "Newest first",
+        limit: params["days"]
+      )
+      |> Enum.reverse()
 
-  # def day_metrics_graph(conn, params) do
-  #   logs =
-  #     Telemetry.list_match_day_logs(
-  #       order: "Newest first",
-  #       limit: 31
-  #     )
-  #     |> Enum.reverse()
+    columns = case Map.get(params, "fields", "total_matches") do
+      "grouped" ->
+        MatchGraphDayLogsTask.perform(logs, :grouped)
 
-  #   field_list = case Map.get(params, "fields", "total_matches") do
-  #     "total_matches" ->
-  #       [{"Duel", "duel.aggregate.total_count"}, {"Team", "team.aggregate.total_count"}, {"FFA", "ffa.aggregate.total_count"}, {"Raptors", "raptors.aggregate.total_count"}, {"Scavengers", "scavengers.aggregate.total_count"}]
+      _ -> # Default to split
+        MatchGraphDayLogsTask.perform(logs, :split)
+    end
 
-  #     _ -> # just default to the above
-  #       [{"Duel", "duel.aggregate.total_count"}, {"Team", "team.aggregate.total_count"}, {"FFA", "ffa.aggregate.total_count"}, {"Raptors", "raptors.aggregate.total_count"}, {"Scavengers", "scavengers.aggregate.total_count"}]
-  #   end
+    key = logs
+    |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
 
-  #   extra_params = %{"field_list" => field_list}
-
-  #   data = GraphDayLogsTask.perform(logs, Map.merge(params, extra_params))
-
-  #   conn
-  #   |> assign(:params, params)
-  #   |> assign(:data, data)
-  #   |> add_breadcrumb(name: "Daily - Graph", url: conn.request_path)
-  #   |> render("day_metrics_graph.html")
-  # end
-
+    conn
+      |> assign(:params, params)
+      |> assign(:columns, columns)
+      |> assign(:key, key)
+      |> add_breadcrumb(name: "Daily - Graph", url: conn.request_path)
+      |> render("day_metrics_graph.html")
+  end
 
   # MONTHLY METRICS
   @spec month_metrics_list(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -121,61 +129,64 @@ defmodule TeiserverWeb.Report.MatchMetricController do
 
   @spec month_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def month_metrics_show(conn, %{"year" => year, "month" => month}) do
-    log = Telemetry.get_match_month_log({year, month})
+    today = "#{Timex.now().month}/#{Timex.now().year}"
 
-    conn
-    |> assign(:year, year)
-    |> assign(:month, month)
-    |> assign(:data, log.data)
-    |> add_breadcrumb(name: "Monthly metrics - #{month}/#{year}", url: conn.request_path)
-    |> render("month_metrics_show.html")
+    if today == "#{month}/#{year}" do
+      conn
+        |> redirect(to: Routes.ts_reports_match_metric_path(conn, :month_metrics_today))
+    else
+      log = Telemetry.get_match_month_log({year, month})
+
+      conn
+      |> assign(:year, year)
+      |> assign(:month, month)
+      |> assign(:data, log.data)
+      |> add_breadcrumb(name: "Monthly metrics - #{month}/#{year}", url: conn.request_path)
+      |> render("month_metrics_show.html")
+    end
   end
 
-  # @spec month_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
-  # def month_metrics_today(conn, _params) do
-  #   data = Telemetry.get_this_months_log()
+  @spec month_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def month_metrics_today(conn, _params) do
+    data = Telemetry.get_this_months_match_metrics_log()
 
-  #   conn
-  #   |> assign(:year, Timex.today().year)
-  #   |> assign(:month, Timex.today().month)
-  #   |> assign(:data, data)
-  #   |> add_breadcrumb(name: "Monthly metrics - Today (partial)", url: conn.request_path)
-  #   |> render("month_metrics_show.html")
-  # end
+    conn
+      |> assign(:year, Timex.today().year)
+      |> assign(:month, Timex.today().month)
+      |> assign(:data, data)
+      |> add_breadcrumb(name: "Monthly metrics - Today (partial)", url: conn.request_path)
+      |> render("month_metrics_show.html")
+  end
 
-  # def month_metrics_graph(conn, params) do
-  #   logs =
-  #     Telemetry.list_match_month_logs(
-  #       # search: [user_id: params["user_id"]],
-  #       # joins: [:user],
-  #       order: "Newest first",
-  #       limit: 31
-  #     )
-  #     |> Enum.reverse()
+  @spec month_metrics_graph(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def month_metrics_graph(conn, params) do
+    params = Map.merge(params, %{
+      "months" => Map.get(params, "months", 13) |> int_parse
+    })
 
+    logs =
+      Telemetry.list_match_month_logs(
+        order: "Newest first",
+        limit: params["months"]
+      )
+      |> Enum.reverse()
 
-  #   field_list = case Map.get(params, "fields", "unique_users") do
-  #     "unique_users" ->
-  #       ["aggregates.stats.unique_users", "aggregates.stats.unique_players"]
+    columns = case Map.get(params, "fields", "total_matches") do
+      "grouped" ->
+        MatchGraphMonthLogsTask.perform(logs, :grouped)
 
-  #     "peak_users" ->
-  #       ["aggregates.stats.peak_user_counts.total", "aggregates.stats.peak_user_counts.player"]
+      _ -> # Default to split
+        MatchGraphMonthLogsTask.perform(logs, :split)
+    end
 
-  #     "minutes" ->
-  #       ["aggregates.minutes.player", "aggregates.minutes.spectator", "aggregates.minutes.lobby", "aggregates.minutes.menu", "aggregates.minutes.total"]
+    key = logs
+    |> Enum.map(fn log -> {log.year,log.month, 1} |> TimexHelper.date_to_str(format: :ymd) end)
 
-  #     _ -> #"battles"
-  #       ["battles.in_progress", "battles.lobby", "battles.total"]
-  #   end
-
-  #   extra_params = %{"field_list" => field_list}
-
-  #   data = GraphMonthLogsTask.perform(logs, Map.merge(params, extra_params))
-
-  #   conn
-  #   |> assign(:params, params)
-  #   |> assign(:data, data)
-  #   |> add_breadcrumb(name: "Monthly metrics - Graph", url: conn.request_path)
-  #   |> render("month_metrics_graph.html")
-  # end
+    conn
+      |> assign(:params, params)
+      |> assign(:columns, columns)
+      |> assign(:key, key)
+      |> add_breadcrumb(name: "Monthly - Graph", url: conn.request_path)
+      |> render("month_metrics_graph.html")
+  end
 end

@@ -128,10 +128,11 @@ defmodule Teiserver.Coordinator do
       _ ->
         nil
     end
+    :ok
   end
 
   def update_report(_report, _reason) do
-    nil
+    :ok
   end
 
   @spec send_to_host(T.userid(), String.t()) :: :ok

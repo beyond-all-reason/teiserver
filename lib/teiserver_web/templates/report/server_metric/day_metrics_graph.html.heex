@@ -5,16 +5,6 @@
 
 <link href="/css/c3.min.css" rel="stylesheet">
 
-<style>
-  .c3-axis .tick, .c3-legend-item {
-    fill: #ccc !important;
-  }
-  
-  .c3-axis .domain, .c3-axis .tick line {
-    stroke: #AAA !important;
-  }
-</style>
-
 <script>
   $(function() {
     var chart = c3.generate({
@@ -54,7 +44,7 @@
     <form action={Routes.ts_reports_server_metric_path(@conn, :day_metrics_graph)} method='post' class=''>
       <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
       <div class='row'>
-        <div class='col-xl-4 col-lg-6 col-md-12'>
+        <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
           <label for='fields' class='control-label'>Fields</label>
           <%= central_component "icon_dropdown",
             name: "fields",
@@ -67,16 +57,18 @@
             selected: Map.get(@params, "fields")
           %>
         </div>
-        
-        <div class='col-xl-4 col-lg-6 col-md-12'>
+
+        <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
           <label for='days' class='control-label'>Days</label>
           <input type='text' name='days' id='days' value={@params["days"]} class='form-control' />
         </div>
-      </div>
 
-      <button type='submit' class={"btn btn-#{bsname} float-end"}>
-        Submit
-      </button>
+        <div class='col-md-12 my-3'>
+          <button type='submit' class={"btn btn-#{bsname} float-end"}>
+            Submit
+          </button>
+        </div>
+      </div>
     </form>
   </div>
 </div>

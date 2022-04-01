@@ -13,14 +13,6 @@
   });
 </script>
 
-<style type="text/css">
-  .help-box {
-    display: none;
-    padding-bottom: 1px;
-    margin-bottom: 2px;
-  }
-</style>
-
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
 <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
 
@@ -39,7 +31,7 @@
         </div>
 
         <h5>Quick actions</h5>
-        <div class="help-box alert alert-primary2">
+        <div class="help-box">
           Clicking one of these buttons will submit a templated report according to the button pushed.
         </div>
 
@@ -105,7 +97,7 @@
 
           <div class="form-group row">
             <div class="col-lg-4">
-              <div class="help-box alert alert-primary2">
+              <div class="help-box">
                 This is the reason you are performing the action.
               </div>
               <%= label f, :response_text, class: "control-label" %>
@@ -114,7 +106,7 @@
             </div>
 
             <div class="col-lg-4">
-              <div class="help-box alert alert-primary2">
+              <div class="help-box">
                 This is how long until the action will expire
               </div>
               <label class="control-label">Expires</label>
@@ -122,7 +114,7 @@
             </div>
 
             <div class="col-md-4">
-              <div class="help-box alert alert-primary2">
+              <div class="help-box">
                 This is what will be done if the user persists in their behaviour. It will be placed into a template of: "If the behaviour continues, a follow up of {{followup}} may be employed"
               </div>
               <label class="control-label" for="report_followup">Followup</label>
@@ -130,7 +122,7 @@
             </div>
 
             <div class="col-md-12 my-3">
-              <div class="help-box alert alert-primary2">
+              <div class="help-box">
                 A list of items in the code of conduct that can be referenced. If you click the box and start typing it will filter the list for you so you can search on terms within the CoC. Reference as many points as you feel appropriate.
               </div>
               <label class="control-label" for="report_code_references">Code of Conduct references</label>
@@ -142,7 +134,7 @@
             </div>
             
             <div class="col-md-12 mt-2">
-              <div class="help-box alert alert-primary2">
+              <div class="help-box">
                 These are the actual effects of the moderation action.
               </div>
               
@@ -167,7 +159,7 @@
             </div>
           
             <div class="col-md-10 mt-2">
-              <div class="help-box alert alert-primary2">
+              <div class="help-box">
                 These buttons on the left will tick some of the checkboxes but will not submit the form.
               </div>
               <div class={"btn btn-outline-#{report_bsname} mx-2"} onclick="

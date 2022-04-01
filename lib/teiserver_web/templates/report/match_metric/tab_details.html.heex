@@ -27,6 +27,11 @@
     %>
 
     <%= central_component "detail_line",
+      label: "Bots",
+      value: format_number @data["bots"]["aggregate"]["total_count"]
+    %>
+
+    <%= central_component "detail_line",
       label: "Raptors",
       value: format_number @data["raptors"]["aggregate"]["total_count"]
     %>
