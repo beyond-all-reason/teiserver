@@ -3,7 +3,7 @@ defmodule Teiserver.Game.QueueServer do
   require Logger
   alias Teiserver.Battle.Lobby
   alias Phoenix.PubSub
-  alias Teiserver.Coordinator
+  alias Teiserver.{Coordinator, Client}
 
   # @default_tick_interval 5_000
   @default_tick_interval 1_000
@@ -318,14 +318,26 @@ defmodule Teiserver.Game.QueueServer do
 
         # Give things time to propagate before we start
         :timer.sleep(1000)
-        Logger.info("QueueServer try_setup_battle calling forcestart")
-        Coordinator.send_to_host(empty_battle.id, "!forcestart")
 
-        PubSub.broadcast(
-          Central.PubSub,
-          "teiserver_queue:#{state.id}",
-          {:match_made, state.id, battle.id}
-        )
+        all_players = [p1, p2]
+        |> Enum.map(fn userid ->
+          Client.get_client_by_id(userid).player
+        end)
+        |> Enum.all?
+
+        if all_players do
+          Logger.info("QueueServer try_setup_battle calling forcestart")
+          Coordinator.send_to_host(empty_battle.id, "!forcestart")
+
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_queue:#{state.id}",
+            {:match_made, state.id, battle.id}
+          )
+        else
+          Logger.info("QueueServer try_setup_battle cannot start as not all are players")
+          Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched users are not a player. Please rejoin the queue and try again.", battle.id)
+        end
 
         %{
           midway_state
