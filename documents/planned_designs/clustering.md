@@ -37,7 +37,7 @@ Currently Teiserver runs on a single node, we would like to run it on multiple n
 Any time an ETS is updated this needs to be propagated. `Central.cache_put` and `Central.cache_delete` are two functions to help with this.
 
 ##### PID store
-Various services place their PID into ETS, this should be changed to be a Registry.
+Various services place their PID into ETS, this should be changed to be a Registry. Long term we might want to swap to a pool system and things being in a Registry will make this easier.
 
 ##### PubSub.broadcast
 Currently we use `broadcast` but in some cases we might need to either include the node with the data or use `broadcast_local`. One example would be achievements, we don't want to double-count them.
@@ -47,6 +47,8 @@ When taking place pre-caching is an opportunity for nodes to diverge in state (e
 
 ##### Per node processes
 We can't have N processes for every process such as ConsulServer processes, these need to be placed on a single node and communicated with via PubSub. At the same time we do want to have 1 central process per node without overlapping actions, e.g. CoordinatorServer.
+
+We can use Swarm/Horde to run a process with a single name and have it automatically get pushed over to other nodes when the host node goes down. At the same time we can have a per-node process by not using the Swarm/Horde supervisor.
 
 ## List/explanation of steps to take
 ##### Propagate data
@@ -75,16 +77,16 @@ Note: This ties in with the "Per node process" item.
 ##### Per node processes
 - **Stage 1:** List each type of process we track.
 
-- - List of per ID processes:
+- - List of per ID processes (1 per id in entire cluster):
 - - - ConsulServer
 - - - LobbyThrottleServer
 - - - AccoladeChatServer
 - - - QueueServer
-- - List of singular processes:
+- - List of singular processes (1 per node but written to not be cross-cluster):
 - - - CoordinatorServer
 - - - AccoldeBotServer
 - - - AutomodServer
-- - Processes that don't track their PIDs
+- - Processes that don't track their PIDs (need to be written to not be cross-cluster):
 - - - TelemetryServer
 - - - SpringTelemetryServer
 - - - AchievementServer
@@ -95,3 +97,4 @@ Note: This ties in with the "Per node process" item.
 
 ## Lessons learned
 - Ensure when registering processes they have a unique key. I accidentally registered the LobbyThrottles without having the lobby_id be part of the key and as a result they didn't register correctly at first.
+- The pubsub.md document was incredibly helpful in planning, more documents like it should be made
