@@ -52,6 +52,7 @@ $primary: #274aAf;
 $primary-light: #ACF;
 $primary-dark: #172a6f;
 $primary2: #3498db;
+$primary2-dark: #0468ab;
 $secondary: #4A5159;
 $success: #108c1a;
 $success2: #005c0a;
@@ -281,4 +282,20 @@ $button-outline-active-colour:  $light;
 
 .text-invert {
   color: $invert-color;
+}
+
+
+// C3 stuff
+.c3-axis .tick,
+.c3-legend-item {
+  fill: #ccc !important;
+}
+
+.c3-axis .domain,
+.c3-axis .tick line {
+  stroke: #AAA !important;
+}
+
+.c3-tooltip-container {
+  color: #300 !important;
 }

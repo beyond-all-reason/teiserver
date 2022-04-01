@@ -310,3 +310,19 @@ input[type="color"] {
   // padding: 7px 8px 0 0;
 }
 
+.help-box, .help-box-large {
+  padding: 15px;
+  border-radius: 4px;
+  display: none;
+  padding-bottom: 3px;
+  margin-bottom: 3px;
+
+  background-color: shift-color($primary2, $alert-bg-scale);
+  border: 1px solid shift-color($primary2-dark, $alert-border-scale);
+  color: $dark;
+}
+
+.help-box-large {
+  padding: 15px;
+  margin: 20px;
+}
