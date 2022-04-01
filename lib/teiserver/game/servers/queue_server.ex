@@ -326,6 +326,7 @@ defmodule Teiserver.Game.QueueServer do
         |> Enum.all?
 
         if all_players do
+          Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to forcestart the game, if this doesn't work feel free to start it yourselves and report to Teifion.", battle.id)
           Logger.info("QueueServer try_setup_battle calling forcestart")
           Coordinator.send_to_host(empty_battle.id, "!forcestart")
 
