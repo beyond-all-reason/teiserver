@@ -319,25 +319,35 @@ defmodule Teiserver.Game.QueueServer do
         # Give things time to propagate before we start
         :timer.sleep(1000)
 
-        all_players = [p1, p2]
-        |> Enum.map(fn userid ->
-          Client.get_client_by_id(userid).player
-        end)
-        |> Enum.all?
+        all_clients = Client.get_clients([p1, p2])
 
-        if all_players do
-          Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to forcestart the game, if this doesn't work feel free to start it yourselves and report to Teifion.", battle.id)
-          Logger.info("QueueServer try_setup_battle calling forcestart")
-          Coordinator.send_to_host(empty_battle.id, "!forcestart")
+        all_players = all_clients
+          |> Enum.map(fn c -> c.player end)
+          |> Enum.all?
 
-          PubSub.broadcast(
-            Central.PubSub,
-            "teiserver_queue:#{state.id}",
-            {:match_made, state.id, battle.id}
-          )
-        else
-          Logger.info("QueueServer try_setup_battle cannot start as not all are players")
-          Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched users are not a player. Please rejoin the queue and try again.", battle.id)
+        all_synced = all_clients
+          |> Enum.map(fn c -> c.sync == 1 end)
+          |> Enum.all?
+
+        cond do
+          all_players == false ->
+            Logger.info("QueueServer try_setup_battle cannot start as not all are players")
+            Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched users are not a player. Please rejoin the queue and try again.", battle.id)
+
+          all_synced == false ->
+            Logger.info("QueueServer try_setup_battle cannot start as not all are synced")
+            Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched players are unsynced. Please rejoin the queue and try again.", battle.id)
+
+          true ->
+            Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to forcestart the game, if this doesn't work feel free to start it yourselves and report to Teifion.", battle.id)
+            Logger.info("QueueServer try_setup_battle calling forcestart")
+            Coordinator.send_to_host(empty_battle.id, "!forcestart")
+
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_queue:#{state.id}",
+              {:match_made, state.id, battle.id}
+            )
         end
 
         %{
