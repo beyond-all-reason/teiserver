@@ -339,9 +339,17 @@ defmodule Teiserver.Game.QueueServer do
             Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched players are unsynced. Please rejoin the queue and try again.", battle.id)
 
           true ->
-            Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to forcestart the game, if this doesn't work feel free to start it yourselves and report to Teifion.", battle.id)
-            Logger.info("QueueServer try_setup_battle calling forcestart")
-            Coordinator.send_to_host(empty_battle.id, "!forcestart")
+            Logger.info("QueueServer try_setup_battle calling player cv start")
+            Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to start the game, if this doesn't work feel free to start it yourselves and report to Teifion.", battle.id)
+            :timer.sleep(100)
+            Lobby.say(p1, "!cv start", battle.id)
+            :timer.sleep(100)
+            Lobby.say(p2, "!y", battle.id)
+            :timer.sleep(100)
+
+            # Logger.info("QueueServer try_setup_battle calling forcestart")
+            # Coordinator.send_to_host(empty_battle.id, "!forcestart")
+            :timer.sleep(100)
 
             PubSub.broadcast(
               Central.PubSub,
