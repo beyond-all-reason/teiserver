@@ -42,13 +42,15 @@ Various services place their PID into ETS, this should be changed to be a Regist
 ##### PubSub.broadcast
 Currently we use `broadcast` but in some cases we might need to either include the node with the data or use `broadcast_local`. One example would be achievements, we don't want to double-count them.
 
+Additionally we should change anything that would normally be send(pid) to instead either be `GenServer.cast` or a `PubSub.broadcast` to make it more explicit.
+
 ##### Less reliance on pre-caching
 When taking place pre-caching is an opportunity for nodes to diverge in state (e.g. user list). Ideally this would be replaced by a solution not requiring a pre-cache. As a bonus this will improve startup time.
 
 ##### Per node processes
 We can't have N processes for every process such as ConsulServer processes, these need to be placed on a single node and communicated with via PubSub. At the same time we do want to have 1 central process per node without overlapping actions, e.g. CoordinatorServer.
 
-We can use Swarm/Horde to run a process with a single name and have it automatically get pushed over to other nodes when the host node goes down. At the same time we can have a per-node process by not using the Swarm/Horde supervisor.
+We can use Horde to run a process with a single name and have it automatically get pushed over to other nodes when the host node goes down. At the same time we can have a per-node process by not using the Swarm/Horde supervisor. PubSub will work across nodes and so we need to be mindful of it as per the above point.
 
 ## List/explanation of steps to take
 ##### Propagate data
