@@ -3,6 +3,14 @@ defmodule Central do
   Central is a starting point for making a Phoenix based application.
   """
 
+  @spec cache_get(atom, any) :: any
+  def cache_get(table, key), do: ConCache.get(table, key)
+
+  @spec cache_get_or_store(atom, any, function) :: any
+  def cache_get_or_store(table, key, func) do
+    ConCache.get_or_store(table, key, func)
+  end
+
   @doc """
   Deletes the `key` from `table` across the entire cluster. Makes use of Phoenix.PubSub to do so.
   """
@@ -47,5 +55,19 @@ defmodule Central do
       "cluster_hooks",
       {:cluster_hooks, :update, Node.self(), table, key, func}
     )
+  end
+
+
+  # Stores
+  @spec store_get(atom, any) :: any
+  def store_get(table, key), do: Central.cache_get(table, key)
+
+  def store_delete(table, key), do: ConCache.delete(table, key)
+  def store_put(table, key, value), do: ConCache.put(table, key, value)
+  def store_update(table, key, func), do: ConCache.update(table, key, func)
+
+  @spec store_get_or_store(atom, any, function) :: any
+  def store_get_or_store(table, key, func) do
+    ConCache.get_or_store(table, key, func)
   end
 end

@@ -63,7 +63,7 @@ defmodule Central.Account do
   @spec get_user!(Integer.t() | List.t()) :: User.t()
   @spec get_user!(Integer.t(), List.t()) :: User.t()
   def get_user!(id) when not is_list(id) do
-    ConCache.get_or_store(:account_user_cache_bang, id, fn ->
+    Central.cache_get_or_store(:account_user_cache_bang, id, fn ->
       user_query(id, [])
       |> QueryHelpers.limit_query(1)
       |> Repo.one!()
@@ -99,7 +99,7 @@ defmodule Central.Account do
   @spec get_user(Integer.t() | List.t()) :: User.t() | nil
   @spec get_user(Integer.t(), List.t()) :: User.t() | nil
   def get_user(id) when not is_list(id) do
-    ConCache.get_or_store(:account_user_cache, id, fn ->
+    Central.cache_get_or_store(:account_user_cache, id, fn ->
       user_query(id, [])
       |> Repo.one()
     end)
@@ -460,7 +460,7 @@ defmodule Central.Account do
   end
 
   def list_group_memberships_cache(user_id) do
-    ConCache.get_or_store(:account_membership_cache, user_id, fn ->
+    Central.cache_get_or_store(:account_membership_cache, user_id, fn ->
       query =
         from ugm in GroupMembership,
           join: ug in Group,

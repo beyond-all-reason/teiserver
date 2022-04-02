@@ -112,7 +112,7 @@ defmodule CentralWeb.Account.SessionController do
     # query
     user = Account.get_user_by_email(email) || %{id: -1}
     key = params["key"]
-    expected_value = ConCache.get(:codes, key)
+    expected_value = Central.cache_get(:codes, key)
 
     existing_resets =
       Account.list_codes(

@@ -72,7 +72,7 @@ defmodule Central.Config do
   def get_user_configs!(nil), do: %{}
 
   def get_user_configs!(user_id) do
-    ConCache.get_or_store(:config_user_cache, user_id, fn ->
+    Central.cache_get_or_store(:config_user_cache, user_id, fn ->
       query =
         from user_config in UserConfig,
           where: user_config.user_id == ^user_id,
@@ -178,16 +178,19 @@ defmodule Central.Config do
   end
 
   # User Config Types
+  @spec get_user_config_types :: list()
   def get_user_config_types() do
-    ConCache.get(:config_user_type_cache, "all-config-types")
+    Central.store_get(:config_user_type_store, "all-config-types")
   end
 
+  @spec get_user_config_type(String.t()) :: map() | nil
   def get_user_config_type(key) do
-    ConCache.get(:config_user_type_cache, key)
+    Central.store_get(:config_user_type_store, key)
   end
 
+  @spec get_grouped_user_configs :: map()
   def get_grouped_user_configs() do
-    ConCache.get(:config_user_type_cache, "all-config-types")
+    Central.store_get(:config_user_type_store, "all-config-types")
     |> Map.values()
     |> Enum.filter(fn c ->
       c.visible
@@ -229,6 +232,7 @@ defmodule Central.Config do
     value_label: The label shown next to the value input. Defaults to "Value"
   """
 
+  @spec add_user_config_type(map()) :: :ok
   def add_user_config_type(config) do
     config = Map.merge(%{
       value_label: "Value",
@@ -236,20 +240,22 @@ defmodule Central.Config do
     }, config)
 
     all_config_types =
-      (ConCache.get(:config_user_type_cache, "all-config-types") || %{})
+      (Central.store_get(:config_user_type_store, "all-config-types") || %{})
       |> Map.put(config.key, config)
 
-    Central.cache_put(:config_user_type_cache, "all-config-types", all_config_types)
-    Central.cache_put(:config_user_type_cache, config.key, config)
+    Central.store_put(:config_user_type_store, "all-config-types", all_config_types)
+    Central.store_put(:config_user_type_store, config.key, config)
   end
 
+  @spec get_user_config_default(String.t()) :: any
   def get_user_config_default(key) do
     case get_user_config_type(key) do
-      nil -> raise "Invalid config key of #{key}"
+      nil -> throw "Invalid config key of #{key}"
       v -> Map.get(v, :default)
     end
   end
 
+  @spec cast_user_config_value(String.t(), any) :: any
   def cast_user_config_value(type_key, value) do
     type = get_user_config_type(type_key)
 
@@ -264,8 +270,9 @@ defmodule Central.Config do
 
   alias Central.Config.SiteConfig
 
+  @spec get_site_config_cache(String.t()) :: any
   def get_site_config_cache(key) do
-    ConCache.get_or_store(:config_site_cache, key, fn ->
+    Central.cache_get_or_store(:config_site_cache, key, fn ->
       case get_site_config(key) do
         nil ->
           default = get_site_config_default(key)
@@ -332,16 +339,19 @@ defmodule Central.Config do
 
 
   # Site Config Types
+  @spec get_site_config_types :: list()
   def get_site_config_types() do
-    ConCache.get(:config_site_type_cache, "all-config-types")
+    Central.store_get(:config_site_type_store, "all-config-types")
   end
 
+  @spec get_site_config_type(String.t()) :: map | nil
   def get_site_config_type(key) do
-    ConCache.get(:config_site_type_cache, key)
+    Central.store_get(:config_site_type_store, key)
   end
 
+  @spec get_grouped_site_configs :: map
   def get_grouped_site_configs() do
-    (ConCache.get(:config_site_type_cache, "all-config-types") || %{})
+    (Central.store_get(:config_site_type_store, "all-config-types") || %{})
     |> Map.values()
     |> Enum.sort(fn c1, c2 ->
       c1.key <= c2.key
@@ -373,23 +383,25 @@ defmodule Central.Config do
 
     default: Any, The default value used when the variable is not set,
   """
-
+  @spec add_site_config_type(map()) :: :ok
   def add_site_config_type(config) do
     all_config_types =
-      (ConCache.get(:config_site_type_cache, "all-config-types") || %{})
+      (Central.store_get(:config_site_type_store, "all-config-types") || %{})
       |> Map.put(config.key, config)
 
-    Central.cache_put(:config_site_type_cache, "all-config-types", all_config_types)
-    Central.cache_put(:config_site_type_cache, config.key, config)
+    Central.store_put(:config_site_type_store, "all-config-types", all_config_types)
+    Central.store_put(:config_site_type_store, config.key, config)
   end
 
+  @spec get_site_config_default(String.t()) :: any
   def get_site_config_default(key) do
     case get_site_config_type(key) do
-      nil -> raise "Invalid config key of #{key}"
+      nil -> throw "Invalid config key of #{key}"
       v -> Map.get(v, :default)
     end
   end
 
+  @spec cast_site_config_value(String.t(), any) :: any
   def cast_site_config_value(type_key, value) do
     type = get_site_config_type(type_key)
 

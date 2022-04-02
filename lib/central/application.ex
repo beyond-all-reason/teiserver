@@ -30,12 +30,17 @@ defmodule Central.Application do
         concache_sup(:account_user_cache),
         concache_sup(:account_user_cache_bang),
         concache_sup(:account_membership_cache),
-        concache_perm_sup(:group_type_cache),
+
+        # Store refers to something that is typically only updated at startup
+        # and should not be clustered
+        concache_perm_sup(:group_type_store),
+        concache_perm_sup(:restriction_lookup_store),
+        concache_perm_sup(:config_user_type_store),
+        concache_perm_sup(:config_site_type_store),
+
         concache_perm_sup(:config_site_cache),
-        concache_perm_sup(:config_user_type_cache),
-        concache_perm_sup(:config_site_type_cache),
         concache_perm_sup(:application_metadata_cache),
-        concache_perm_sup(:restriction_lookup),
+
         concache_sup(:application_temp_cache),
         concache_sup(:config_user_cache),
         concache_sup(:communication_user_notifications),

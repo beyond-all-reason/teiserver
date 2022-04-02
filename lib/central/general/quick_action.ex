@@ -12,13 +12,15 @@ defmodule Central.General.QuickAction do
   If you want to make a two part form you can use something like:
     %{label: "List users", icon: Central.Account.UserLib.icon(), input: "s", method: "get", placeholder: "Search username and/or email", url: "/admin/users", permissions: "admin.admin.limited"},
   """
+  @spec add_items(list()) :: :ok
   def add_items(items) do
     new_items = Enum.map(items, &convert_item/1)
 
-    ConCache.put(:application_metadata_cache, :quick_action_items, get_items() ++ new_items)
+    Central.store_put(:application_metadata_cache, :quick_action_items, get_items() ++ new_items)
   end
 
-  def get_items(), do: ConCache.get(:application_metadata_cache, :quick_action_items) || []
+  @spec get_items :: list()
+  def get_items(), do: Central.cache_get(:application_metadata_cache, :quick_action_items) || []
 
   @icon_atoms ~w(list new edit delete report)a
   defp convert_item(item) do

@@ -1,18 +1,19 @@
 defmodule Central.Account.GroupTypeLib do
   @moduledoc false
+  @spec blank_type() :: map()
   def blank_type() do
     %{name: "No type", fields: []}
   end
 
   @spec get_all_group_types :: List.t()
   def get_all_group_types do
-    ConCache.get(:group_type_cache, "-all") || []
+    Central.store_get(:group_type_store, "-all") || []
   end
 
+  @spec get_group_type(nil | String.t()) :: map()
   def get_group_type(nil), do: blank_type()
-
   def get_group_type(key) do
-    r = ConCache.get(:group_type_cache, key)
+    r = Central.store_get(:group_type_store, key)
     if r, do: r, else: blank_type()
   end
 
@@ -23,14 +24,15 @@ defmodule Central.Account.GroupTypeLib do
   # ---- Opts: Empty string?
   # ---- Type: :boolean | :string | :choice
   # ---- Required: Boolean
+  @spec add_group_type(String.t(), map) :: :ok
   def add_group_type(key, group_type) do
     group_type = Map.put(group_type, :name, key)
 
-    ConCache.get_or_store(:group_type_cache, key, fn ->
+    Central.store_get_or_store(:group_type_store, key, fn ->
       group_type
     end)
 
     new_all = [group_type | (get_all_group_types() || [])]
-    ConCache.put(:group_type_cache, "-all", new_all)
+    Central.store_put(:group_type_store, "-all", new_all)
   end
 end

@@ -25,6 +25,7 @@ defmodule Central.Account.UserLib do
     }
   end
 
+  @spec has_access(integer() | map(), Plug.Conn.t()) :: {boolean, nil | :not_found | :no_access}
   def has_access(target_user_id, conn) when is_integer(target_user_id) do
     if allow?(conn.permissions, "admin.admin.full") do
       {true, nil}
@@ -55,25 +56,27 @@ defmodule Central.Account.UserLib do
     end
   end
 
+  @spec has_access!(integer() | map(), Plug.Conn.t()) :: boolean
   def has_access!(target_user, conn) do
     {result, _} = has_access(target_user, conn)
     result
   end
 
+  @spec list_restrictions :: list
   def list_restrictions() do
-    ConCache.get(:restriction_lookup, :categories)
+    Central.store_get(:restriction_lookup_store, :categories)
     |> Enum.map(fn key ->
-      {key, ConCache.get(:restriction_lookup, key)}
+      {key, Central.store_get(:restriction_lookup_store, key)}
     end)
   end
 
   @spec add_report_restriction_types(String.t(), list) :: :ok
   def add_report_restriction_types(key, items) do
-    categories = ConCache.get(:restriction_lookup, :categories) || []
+    categories = Central.store_get(:restriction_lookup_store, :categories) || []
     new_categories = categories ++ [key]
 
-    Central.cache_put(:restriction_lookup, :categories, new_categories)
-    Central.cache_put(:restriction_lookup, key, items)
+    Central.store_put(:restriction_lookup_store, :categories, new_categories)
+    Central.store_put(:restriction_lookup_store, key, items)
     :ok
   end
 end

@@ -10,16 +10,19 @@ defmodule Central.Logging.AuditLogLib do
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-archive"
 
+  @spec add_audit_types([String.t()]) :: :ok
   def add_audit_types(types) do
     new_types = list_audit_types() ++ types
-    ConCache.put(:application_metadata_cache, "audit_types", new_types)
+    Central.store_put(:application_metadata_cache, "audit_types", new_types)
   end
 
+  @spec list_audit_types :: [String.t()]
   def list_audit_types() do
-    ConCache.get(:application_metadata_cache, "audit_types") || []
+    Central.cache_get(:application_metadata_cache, "audit_types") || []
   end
 
   # Queries
+  @spec query_audit_logs() :: Ecto.Query.t()
   def query_audit_logs() do
     from(logs in AuditLog)
   end
@@ -34,6 +37,7 @@ defmodule Central.Logging.AuditLogLib do
     end)
   end
 
+  @spec _search(Ecto.Query.t(), any, any) :: Ecto.Query.t()
   def _search(query, _, ""), do: query
   def _search(query, _, nil), do: query
 
@@ -104,12 +108,14 @@ defmodule Central.Logging.AuditLogLib do
     query
   end
 
+  @spec _preload_user(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_user(query) do
     from logs in query,
       left_join: users in assoc(logs, :user),
       preload: [user: users]
   end
 
+  @spec _preload_group(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_group(query) do
     from logs in query,
       left_join: groups in assoc(logs, :group),
