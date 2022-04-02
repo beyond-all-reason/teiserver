@@ -21,7 +21,7 @@
     <%
       bgcolour = Map.get(row, :colour, "")
       icons = if Map.has_key?(row, :icons), do: Enum.join(row.icons, ","), else: Map.get(row, :icon, "")
-      selected = if assigns[:selected] == row.id, do: [selected: "selected"], else: []
+      selected = if assigns[:selected] == row.id or assigns[:selected] == to_string(row.id), do: [selected: "selected"], else: []
     %>
     <option value={row.id}
       data-textcolour={Map.get(row, :text_colour, "#FFFFFF")}
