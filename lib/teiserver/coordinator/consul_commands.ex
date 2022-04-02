@@ -201,7 +201,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     LobbyChat.sayprivateex(state.coordinator_id, senderid, "You have been removed from the join queue", state.lobby_id)
     %{state |
       join_queue: state.join_queue |> List.delete(senderid),
-      low_priority_join_queue: state.join_queue |> List.delete(senderid)
+      low_priority_join_queue: state.low_priority_join_queue |> List.delete(senderid)
     }
   end
 
