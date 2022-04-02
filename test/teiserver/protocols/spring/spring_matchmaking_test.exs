@@ -20,7 +20,7 @@ defmodule Teiserver.SpringMatchmakingTest do
       Game.create_queue(%{
         "name" => "test_queue",
         "team_size" => 1,
-        "icon" => "far fa-home",
+        "icon" => "fa-regular fa-home",
         "colour" => "#112233",
         "map_list" => ["map1"],
         "conditions" => %{},
@@ -174,7 +174,7 @@ defmodule Teiserver.SpringMatchmakingTest do
       Game.create_queue(%{
         "name" => "test_queue_join_leave1",
         "team_size" => 1,
-        "icon" => "far fa-home",
+        "icon" => "fa-regular fa-home",
         "colour" => "#112233",
         "map_list" => ["map1"],
         "conditions" => %{},
@@ -187,7 +187,7 @@ defmodule Teiserver.SpringMatchmakingTest do
       Game.create_queue(%{
         "name" => "test_queue_join_leave2",
         "team_size" => 1,
-        "icon" => "far fa-home",
+        "icon" => "fa-regular fa-home",
         "colour" => "#112233",
         "map_list" => ["map1"],
         "conditions" => %{},
@@ -280,7 +280,7 @@ defmodule Teiserver.SpringMatchmakingTest do
       Game.create_queue(%{
         "name" => "test_queue",
         "team_size" => 1,
-        "icon" => "far fa-home",
+        "icon" => "fa-regular fa-home",
         "colour" => "#112233",
         "map_list" => ["map1"],
         "conditions" => %{},
@@ -350,7 +350,7 @@ defmodule Teiserver.SpringMatchmakingTest do
       Game.create_queue(%{
         "name" => "test_queue",
         "team_size" => 1,
-        "icon" => "far fa-home",
+        "icon" => "fa-regular fa-home",
         "colour" => "#112233",
         "map_list" => ["map1"],
         "conditions" => %{},
@@ -426,7 +426,7 @@ defmodule Teiserver.SpringMatchmakingTest do
       Game.create_queue(%{
         "name" => "test_queue",
         "team_size" => 1,
-        "icon" => "far fa-home",
+        "icon" => "fa-regular fa-home",
         "colour" => "#112233",
         "map_list" => ["map1"],
         "conditions" => %{},

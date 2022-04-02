@@ -226,7 +226,7 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
       permissions: [],
       admin_group_id: Teiserver.user_group_id(),
       colour: "#AA0000",
-      icon: "fas fa-user",
+      icon: "fa-solid fa-user",
       data: %{
         "bot" => false,
         "moderator" => false,

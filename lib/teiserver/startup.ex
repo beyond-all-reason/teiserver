@@ -149,7 +149,7 @@ defmodule Teiserver.Startup do
       },
       %{
         label: "Teiserver live metrics",
-        icons: ["far fa-tachometer-alt", :list],
+        icons: ["fa-regular fa-tachometer-alt", :list],
         url: "/teiserver/admin/metrics",
         permissions: "logging.live"
       },

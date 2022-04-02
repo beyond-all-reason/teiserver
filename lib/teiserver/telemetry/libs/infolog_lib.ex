@@ -7,7 +7,7 @@ defmodule Teiserver.Telemetry.InfologLib do
   def colours(), do: :success2
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-barcode-scan"
+  def icon(), do: "fa-regular fa-barcode-scan"
 
   # Queries
   @spec query_infologs() :: Ecto.Query.t

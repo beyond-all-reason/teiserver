@@ -3,7 +3,7 @@ defmodule Teiserver.Account.RanksReport do
   alias Teiserver.{Account, User}
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-satellite-dish"
+  def icon(), do: "fa-regular fa-satellite-dish"
 
   @spec run(Plug.Conn.t(), map()) :: {list(), map()}
   def run(_conn, params) do

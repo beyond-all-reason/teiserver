@@ -4,7 +4,7 @@ defmodule Teiserver.Game.QueueLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "far fa-list-alt"
+  def icon, do: "fa-regular fa-list-alt"
 
   @spec colours :: atom
   def colours, do: :primary2

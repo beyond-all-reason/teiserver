@@ -19,7 +19,7 @@
 
 <div class="search-row pt-3">
   <div class={"btn btn-outline-#{bsname}"} onclick="show_search();" id="search-box-shower">
-    <i class="far fa-fw fa-search"></i>
+    <i class="fa-regular fa-fw fa-search"></i>
     Show search form
   </div>
 
@@ -44,10 +44,10 @@
           id: "search_order",
           selected: @params["order"] || "Newest first",
           enumerable: [
-            %{id: "Name (A-Z)", icon: "fas fa-sort-numeric-down", colour: fg},
-            %{id: "Name (Z-A)", icon: "fas fa-sort-numeric-up", colour: fg},
-            %{id: "Newest first", icon: "fas fa-sort-numeric-down", colour: fg},
-            %{id: "Oldest first", icon: "fas fa-sort-numeric-up", colour: fg},
+            %{id: "Name (A-Z)", icon: "fa-solid fa-sort-numeric-down", colour: fg},
+            %{id: "Name (Z-A)", icon: "fa-solid fa-sort-numeric-up", colour: fg},
+            %{id: "Newest first", icon: "fa-solid fa-sort-numeric-down", colour: fg},
+            %{id: "Oldest first", icon: "fa-solid fa-sort-numeric-up", colour: fg},
           ]
         } %>
       </div>
@@ -59,9 +59,9 @@
           id: "search_verified",
           selected: @params["verified"],
           enumerable: [
-            %{id: "Any", icon: "fas fa-square", colour: fg},
-            %{id: "Verified", icon: "fas fa-check", colour: fg},
-            %{id: "Unverified", icon: "fas fa-times", colour: fg},
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
+            %{id: "Verified", icon: "fa-solid fa-check", colour: fg},
+            %{id: "Unverified", icon: "fa-solid fa-times", colour: fg},
           ]
         } %>
       </div>
@@ -73,9 +73,9 @@
           id: "search_bot",
           selected: @params["bot"],
           enumerable: [
-            %{id: "Any", icon: "fas fa-square", colour: fg},
-            %{id: "Person", icon: "fas fa-user", colour: fg},
-            %{id: "Robot", icon: "fas fa-robot", colour: fg},
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
+            %{id: "Person", icon: "fa-solid fa-user", colour: fg},
+            %{id: "Robot", icon: "fa-solid fa-robot", colour: fg},
           ]
         } %>
       </div>
@@ -87,9 +87,9 @@
           id: "search_moderator",
           selected: @params["moderator"],
           enumerable: [
-            %{id: "Any", icon: "fas fa-square", colour: fg},
-            %{id: "User", icon: "fas fa-user", colour: fg},
-            %{id: "Moderator", icon: "fas fa-gavel", colour: fg},
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
+            %{id: "User", icon: "fa-solid fa-user", colour: fg},
+            %{id: "Moderator", icon: "fa-solid fa-gavel", colour: fg},
           ]
         } %>
       </div>
@@ -101,9 +101,9 @@
           id: "search_tester",
           selected: @params["tester"],
           enumerable: [
-            %{id: "Any", icon: "fas fa-square", colour: fg},
-            %{id: "Normal", icon: "fas fa-user", colour: fg},
-            %{id: "Tester", icon: "fas fa-vial", colour: fg},
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
+            %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
+            %{id: "Tester", icon: "fa-solid fa-vial", colour: fg},
           ]
         } %>
       </div>
@@ -115,8 +115,8 @@
           id: "search_streamer",
           selected: @params["streamer"],
           enumerable: [
-            %{id: "Any", icon: "fas fa-square", colour: fg},
-            %{id: "Normal", icon: "fas fa-user", colour: fg},
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
+            %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
             %{id: "Streamer", icon: "fab fa-twitch", colour: fg},
           ]
         } %>
@@ -129,9 +129,9 @@
           id: "search_donor",
           selected: @params["donor"],
           enumerable: [
-            %{id: "Any", icon: "fas fa-square", colour: fg},
-            %{id: "Normal", icon: "fas fa-user", colour: fg},
-            %{id: "Donor", icon: "fas fa-euro-sign", colour: fg},
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
+            %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
+            %{id: "Donor", icon: "fa-solid fa-euro-sign", colour: fg},
           ]
         } %>
       </div>
@@ -143,9 +143,9 @@
           id: "search_contributor",
           selected: @params["contributor"],
           enumerable: [
-            %{id: "Any", icon: "fas fa-square", colour: fg},
-            %{id: "Normal", icon: "fas fa-user", colour: fg},
-            %{id: "Contributor", icon: "fas fa-handshake", colour: fg},
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
+            %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
+            %{id: "Contributor", icon: "fa-solid fa-handshake", colour: fg},
           ]
         } %>
       </div>
@@ -157,9 +157,9 @@
           id: "search_developer",
           selected: @params["developer"],
           enumerable: [
-            %{id: "Any", icon: "fas fa-square", colour: fg},
-            %{id: "Normal", icon: "fas fa-user", colour: fg},
-            %{id: "Developer", icon: "fas fa-code", colour: fg},
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
+            %{id: "Normal", icon: "fa-solid fa-user", colour: fg},
+            %{id: "Developer", icon: "fa-solid fa-code", colour: fg},
           ]
         } %>
       </div>
@@ -171,7 +171,7 @@
           id: "search_mod_action",
           selected: @params["mod_action"],
           enumerable: [
-            %{id: "Any", icon: "fas fa-square", colour: fg},
+            %{id: "Any", icon: "fa-solid fa-square", colour: fg},
             %{id: "Banned", icon: Central.Account.ReportLib.action_icon("Ban"), colour: fg},
             %{id: "Muted", icon: Central.Account.ReportLib.action_icon("Mute"), colour: fg},
             %{id: "Warned", icon: Central.Account.ReportLib.action_icon("Warn"), colour: fg},

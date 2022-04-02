@@ -4,8 +4,8 @@
 #   describe "clans" do
 #     alias Teiserver.Clans.Clan
 
-#     @valid_attrs %{"colour" => "some colour", "icon" => "far fa-home", "name" => "some name"}
-#     @update_attrs %{"colour" => "some updated colour", "icon" => "fas fa-wrench", "name" => "some updated name"}
+#     @valid_attrs %{"colour" => "some colour", "icon" => "fa-regular fa-home", "name" => "some name"}
+#     @update_attrs %{"colour" => "some updated colour", "icon" => "fa-solid fa-wrench", "name" => "some updated name"}
 #     @invalid_attrs %{"colour" => nil, "icon" => nil, "name" => nil}
 
 #     test "list_clans/0 returns clans" do
@@ -21,7 +21,7 @@
 #     test "create_clan/1 with valid data creates a clan" do
 #       assert {:ok, %Clan{} = clan} = Clan.create_clan(@valid_attrs)
 #       assert clan.colour == "some colour"
-#       assert clan.icon == "far fa-home"
+#       assert clan.icon == "fa-regular fa-home"
 #       assert clan.name == "some name"
 #     end
 
@@ -33,7 +33,7 @@
 #       clan = ClanTestLib.clan_fixture(1)
 #       assert {:ok, %Clan{} = clan} = Clan.update_clan(clan, @update_attrs)
 #       assert clan.colour == "some updated colour"
-#       assert clan.icon == "fas fa-wrench"
+#       assert clan.icon == "fa-solid fa-wrench"
 #       assert clan.name == "some updated name"
 #     end
 

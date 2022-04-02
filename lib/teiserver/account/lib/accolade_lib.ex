@@ -9,7 +9,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "far fa-award"
+  def icon, do: "fa-regular fa-award"
 
   @spec colours :: atom
   def colours, do: :info

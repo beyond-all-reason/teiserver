@@ -4,5 +4,5 @@ defmodule Teiserver.ClientLib do
   def colours, do: :primary
 
   @spec icon() :: String.t()
-  def icon, do: "fas fa-plug"
+  def icon, do: "fa-solid fa-plug"
 end

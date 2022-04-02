@@ -38,7 +38,7 @@
 
           <%= if allow?(@conn, "admin.user") do %>
             <a href={Routes.admin_user_path(@conn, :show, @user)} class={"btn btn-outline-#{bsname}"} id="section-menu-new">
-              <i class="far fa-power-off"></i>
+              <i class="fa-regular fa-power-off"></i>
               &nbsp;
               Admin show
             </a>
@@ -47,7 +47,7 @@
 
           <%= if allow?(@conn, "teiserver.moderator.account") do %>
             <a href={Routes.ts_admin_user_path(@conn, :edit, @user)} class={"btn btn-outline-#{bsname}"}>
-              <i class="far fa-fw fa-wrench"></i>
+              <i class="fa-regular fa-fw fa-wrench"></i>
               Edit user
             </a>
           <% end %>
@@ -69,7 +69,7 @@
 
           <li class="nav-item" role="presentation">
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-              <%= central_component "icon", icon: "fas fa-file-alt" %>
+              <%= central_component "icon", icon: "fa-solid fa-file-alt" %>
               Details
             </a>
           </li>

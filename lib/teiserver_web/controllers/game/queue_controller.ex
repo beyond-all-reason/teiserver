@@ -55,7 +55,7 @@ defmodule TeiserverWeb.Game.QueueController do
   def new(conn, _params) do
     changeset =
       Game.change_queue(%Queue{
-        icon: "fas fa-" <> StylingHelper.random_icon(),
+        icon: "fa-solid fa-" <> StylingHelper.random_icon(),
         colour: StylingHelper.random_colour()
       })
 

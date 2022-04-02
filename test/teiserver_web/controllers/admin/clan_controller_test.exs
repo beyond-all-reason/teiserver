@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Admin.ClanControllerTest do
     colour2: "some colour2",
     text_colour: "some colour",
     description: "some description",
-    icon: "far fa-home",
+    icon: "fa-regular fa-home",
     name: "some name",
     tag: "some tag"
   }
@@ -25,7 +25,7 @@ defmodule TeiserverWeb.Admin.ClanControllerTest do
     colour2: "some updated colour2",
     text_colour: "some updated colour",
     description: "some updated description",
-    icon: "fas fa-wrench",
+    icon: "fa-solid fa-wrench",
     name: "some updated name",
     tag: "some updated tag"
   }

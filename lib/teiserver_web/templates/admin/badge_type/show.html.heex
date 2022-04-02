@@ -26,7 +26,7 @@
 
         <div class="float-end">
           <a href={Routes.ts_admin_badge_type_path(@conn, :edit, @badge_type)} class={"btn btn-outline-#{bsname}"}>
-            <i class="far fa-fw fa-wrench"></i>
+            <i class="fa-regular fa-fw fa-wrench"></i>
             Edit Badge type
           </a>
         </div>
@@ -34,13 +34,13 @@
       <h3 style={"color: #{@badge_type.colour}"}>
         <%= @badge_type.name %>
         &nbsp;
-        <i class={"far fa-fw #{@badge_type.icon}"}></i>
+        <i class={"fa-regular fa-fw #{@badge_type.icon}"}></i>
       </h3>
       <br />
       <ul class="nav nav-tabs" role="tablist" id="the_tabs">
         <li>
           <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-            <%= central_component "icon", icon: "fas fa-file-alt" %>
+            <%= central_component "icon", icon: "fa-solid fa-file-alt" %>
             Details
           </a>
         </li>

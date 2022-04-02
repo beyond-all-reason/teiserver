@@ -37,7 +37,7 @@ let CommunicationsNotification = {
     }
 
     var new_div = '<a href="' + url + '" class="dropdown-item" id="communication-notifications-li-' + notification.id + '">'
-    new_div += '<i class="far fa-fw ' + notification.icon + '" style="color: ' + notification.colour + '"></i>'
+    new_div += '<i class="fa-regular fa-fw ' + notification.icon + '" style="color: ' + notification.colour + '"></i>'
     new_div += ' '
     new_div += '<strong style="color:' + notification.colour + '">' + notification.title + '</strong><br />'
 

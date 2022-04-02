@@ -5,7 +5,7 @@ defmodule Teiserver.Battle.MatchLib do
   alias Teiserver.Data.Types, as: T
 
   @spec icon :: String.t()
-  def icon, do: "far fa-swords"
+  def icon, do: "fa-regular fa-swords"
 
   @spec colours :: {String.t(), String.t(), String.t()}
   def colours, do: :success2

@@ -4,7 +4,7 @@ defmodule Teiserver.Engine.UnitLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "far fa-drone-front"
+  def icon, do: "fa-regular fa-drone-front"
 
   @spec colours :: atom
   def colours, do: :default

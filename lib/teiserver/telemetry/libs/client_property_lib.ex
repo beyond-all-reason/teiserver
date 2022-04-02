@@ -4,7 +4,7 @@ defmodule Teiserver.Telemetry.ClientPropertyLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "far fa-???"
+  def icon, do: "fa-regular fa-???"
 
   @spec colours :: atom
   def colours, do: :default

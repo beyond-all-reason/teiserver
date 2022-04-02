@@ -3,7 +3,7 @@ defmodule Teiserver.Account.RetentionReport do
   alias Teiserver.{Account, Telemetry}
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-campground"
+  def icon(), do: "fa-regular fa-campground"
 
   @max_key 30
 

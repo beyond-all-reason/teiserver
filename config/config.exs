@@ -4,7 +4,7 @@ config :central, Central,
   site_title: "BAR",
   site_suffix: "",
   site_description: "",
-  site_icon: "fad fa-robot",
+  site_icon: "fa-duotone fa-robot",
   enable_blog: false,
   blog_title: "BAR Blog",
   credit: "Teifion Jordan"

@@ -4,7 +4,7 @@ defmodule Teiserver.Clans.ClanLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fas fa-globe"
+  def icon, do: "fa-solid fa-globe"
 
   @spec colours :: atom
   def colours, do: :info2

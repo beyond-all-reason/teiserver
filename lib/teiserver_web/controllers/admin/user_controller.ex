@@ -177,7 +177,7 @@ defmodule TeiserverWeb.Admin.UserController do
   def new(conn, _params) do
     changeset =
       Account.change_user(%User{
-        icon: "fas fa-user",
+        icon: "fa-solid fa-user",
         colour: "#AA0000"
       })
 

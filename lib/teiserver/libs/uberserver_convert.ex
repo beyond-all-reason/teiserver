@@ -114,7 +114,7 @@ defmodule Teiserver.UberserverConvert do
       permissions: permissions,
       admin_group_id: teiserver_user_group,
       colour: "#AA0000",
-      icon: "fas fa-user",
+      icon: "fa-solid fa-user",
       data: %{
         "bot" => raw_data["bot"] == "1",
         "moderator" => is_mod,

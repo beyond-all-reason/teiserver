@@ -1,7 +1,7 @@
 <div class="row page-row">
   <%=
     central_component "menu_card",
-    icon: "fad fa-gauge",
+    icon: "fa-duotone fa-gauge",
     name: "ts_console",
     text: "Dashboard",
     link: Routes.ts_admin_dash_index_path(@conn, :index)
@@ -24,7 +24,7 @@
 
   <%= if Application.get_env(:central, Teiserver)[:enable_uberserver_convert] do %>
     <%= if allow?(@conn, "admin.dev") do %>
-      <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: "far fa-file-import", text: "Uberserver converter", link: Routes.ts_admin_tool_path(@conn, :convert_form) %>
+      <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: "fa-regular fa-file-import", text: "Uberserver converter", link: Routes.ts_admin_tool_path(@conn, :convert_form) %>
     <% end %>
   <% end %>
   
@@ -37,7 +37,7 @@
   <%= if allow?(@conn, "teiserver.moderator.account") do %>
     <%=
       central_component "menu_card",
-      icon: "far fa-users",
+      icon: "fa-regular fa-users",
       name: "user_admin",
       text: "User admin",
       icon_class: "fa-duotone",

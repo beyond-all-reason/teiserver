@@ -42,7 +42,7 @@
   <%= if server_user do %>
     <%=
       central_component "menu_card",
-      icon: "far fa-user",
+      icon: "fa-regular fa-user",
       name: "account",
       text: "Teiserver Account",
       icon_class: "fa-duotone",
@@ -76,7 +76,7 @@
     <%= if allow?(@conn, "teiserver.moderator.account") do %>
       <%=
         central_component "menu_card",
-        icon: "far fa-users",
+        icon: "fa-regular fa-users",
         name: "user_admin",
         text: "User admin",
         icon_class: "fa-duotone",

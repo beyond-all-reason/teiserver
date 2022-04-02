@@ -16,7 +16,7 @@ defmodule TeiserverWeb.Clans.ClanControllerTest do
     colour2: "some updated colour2",
     text_colour: "some updated colour",
     description: "some updated description",
-    icon: "fas fa-wrench",
+    icon: "fa-solid fa-wrench",
     name: "some_clan_updated_name",
     tag: "some updated tag"
   }

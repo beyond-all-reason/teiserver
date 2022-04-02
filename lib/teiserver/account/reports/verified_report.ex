@@ -3,7 +3,7 @@ defmodule Teiserver.Account.VerifiedReport do
   alias Teiserver.Account
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-satellite-dish"
+  def icon(), do: "fa-regular fa-satellite-dish"
 
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, params) do

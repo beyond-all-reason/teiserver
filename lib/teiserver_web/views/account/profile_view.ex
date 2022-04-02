@@ -5,5 +5,5 @@ defmodule TeiserverWeb.Account.ProfileView do
   def view_colour(), do: :primary
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-user-circle"
+  def icon(), do: "fa-regular fa-user-circle"
 end

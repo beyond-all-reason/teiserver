@@ -11,7 +11,7 @@ defmodule Teiserver.Agents.AgentLib do
   def colours(), do: :danger
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-user-robot"
+  def icon(), do: "fa-regular fa-user-robot"
 
   @spec do_start() :: :ok
   defp do_start() do

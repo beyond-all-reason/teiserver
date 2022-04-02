@@ -9,7 +9,7 @@ defmodule Teiserver.AccountTest do
 
     @valid_attrs %{
       colour: "some colour",
-      icon: "far fa-home",
+      icon: "fa-regular fa-home",
       name: "some name",
       permissions: [],
       email: "some email",
@@ -17,7 +17,7 @@ defmodule Teiserver.AccountTest do
     }
     @update_attrs %{
       colour: "some updated colour",
-      icon: "fas fa-wrench",
+      icon: "fa-solid fa-wrench",
       permissions: [],
       name: "some updated name",
       email: "some updated email",
@@ -90,7 +90,7 @@ defmodule Teiserver.AccountTest do
     test "create_user/1 with valid data creates a user" do
       assert {:ok, %User{} = user} = Account.create_user(@valid_attrs)
       assert user.colour == "some colour"
-      assert user.icon == "far fa-home"
+      assert user.icon == "fa-regular fa-home"
       assert user.name == "some name"
       assert user.permissions == []
       assert user.name == "some name"
@@ -104,7 +104,7 @@ defmodule Teiserver.AccountTest do
       user = AccountTestLib.user_fixture()
       assert {:ok, %User{} = user} = Account.update_user(user, @update_attrs)
       assert user.colour == "some updated colour"
-      assert user.icon == "fas fa-wrench"
+      assert user.icon == "fa-solid fa-wrench"
       assert user.name == "some updated name"
       assert user.permissions == []
       assert user.name == "some updated name"
@@ -183,8 +183,8 @@ defmodule Teiserver.AccountTest do
   # describe "badge_types" do
   #   alias Teiserver.Account.BadgeType
 
-  #   @valid_attrs %{"colour" => "some colour", "icon" => "far fa-home", "name" => "some name"}
-  #   @update_attrs %{"colour" => "some updated colour", "icon" => "fas fa-wrench", "name" => "some updated name"}
+  #   @valid_attrs %{"colour" => "some colour", "icon" => "fa-regular fa-home", "name" => "some name"}
+  #   @update_attrs %{"colour" => "some updated colour", "icon" => "fa-solid fa-wrench", "name" => "some updated name"}
   #   @invalid_attrs %{"colour" => nil, "icon" => nil, "name" => nil}
 
   #   test "list_badge_types/0 returns badge_types" do
@@ -200,7 +200,7 @@ defmodule Teiserver.AccountTest do
   #   test "create_badge_type/1 with valid data creates a badge_type" do
   #     assert {:ok, %BadgeType{} = badge_type} = Account.create_badge_type(@valid_attrs)
   #     assert badge_type.colour == "some colour"
-  #     assert badge_type.icon == "far fa-home"
+  #     assert badge_type.icon == "fa-regular fa-home"
   #     assert badge_type.name == "some name"
   #   end
 
@@ -212,7 +212,7 @@ defmodule Teiserver.AccountTest do
   #     badge_type = AccountTestLib.badge_type_fixture(1)
   #     assert {:ok, %BadgeType{} = badge_type} = Account.update_badge_type(badge_type, @update_attrs)
   #     assert badge_type.colour == "some updated colour"
-  #     assert badge_type.icon == "fas fa-wrench"
+  #     assert badge_type.icon == "fa-solid fa-wrench"
   #     assert badge_type.name == "some updated name"
   #   end
 

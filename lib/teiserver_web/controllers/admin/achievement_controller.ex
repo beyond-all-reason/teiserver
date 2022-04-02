@@ -50,7 +50,7 @@ defmodule TeiserverWeb.Admin.AchievementController do
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset = Game.change_achievement_type(%AchievementType{
-      icon: "fas fa-" <> StylingHelper.random_icon(),
+      icon: "fa-solid fa-" <> StylingHelper.random_icon(),
       colour: StylingHelper.random_colour()
     })
 

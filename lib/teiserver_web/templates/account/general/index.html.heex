@@ -2,7 +2,7 @@
   <%= central_component "menu_card",
     icon_class: "fa-duotone",
     name: "profile",
-    icon: "fas fa-user-circle",
+    icon: "fa-solid fa-user-circle",
     text: "My profile",
     link: Routes.ts_account_profile_path(@conn, :show, @conn.current_user.id)
   %>
@@ -18,7 +18,7 @@
   <%= central_component "menu_card",
     icon_class: "fa-duotone",
     name: "apperance",
-    icon: "fas fa-icons",
+    icon: "fa-solid fa-icons",
     text: "Apperance",
     link: Routes.ts_account_general_path(@conn, :customisation_form)
   %>

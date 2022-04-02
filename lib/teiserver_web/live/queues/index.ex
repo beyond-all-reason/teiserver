@@ -13,7 +13,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   @base_extra_menu_content """
   &nbsp;&nbsp;&nbsp;
     <a href='/teiserver/battle/lobbies' class="btn btn-outline-primary">
-      <i class="fas fa-fw fa-swords"></i>
+      <i class="fa-solid fa-fw fa-swords"></i>
       Battles
     </a>
   """
@@ -21,7 +21,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   @client_extra_menu_content """
   &nbsp;&nbsp;&nbsp;
     <a href='/teiserver/admin/client' class="btn btn-outline-primary">
-      <i class="fas fa-fw fa-plug"></i>
+      <i class="fa-solid fa-fw fa-plug"></i>
       Clients
     </a>
   """

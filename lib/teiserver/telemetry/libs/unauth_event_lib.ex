@@ -7,7 +7,7 @@ defmodule Teiserver.Telemetry.UnauthEventLib do
   def colours(), do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "far fa-sliders-up"
+  def icon(), do: "fa-regular fa-sliders-up"
 
   # Queries
   @spec query_unauth_events() :: Ecto.Query.t

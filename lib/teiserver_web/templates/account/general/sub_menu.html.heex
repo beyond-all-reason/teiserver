@@ -26,7 +26,7 @@
             label: "Profile",
             active: @active,
             url: Routes.ts_account_profile_path(@conn, :show, @conn.current_user.id),
-            icon: "fas fa-user-circle"
+            icon: "fa-solid fa-user-circle"
           %>
 
           <%= central_component "sub_menu_icon",
@@ -42,7 +42,7 @@
             label: "Apperance",
             active: @active,
             url: Routes.ts_account_general_path(@conn, :customisation_form),
-            icon: "fas fa-icons"
+            icon: "fa-solid fa-icons"
           %>
 
           <%= central_component "sub_menu_icon",

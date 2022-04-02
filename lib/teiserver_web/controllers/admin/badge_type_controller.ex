@@ -51,7 +51,7 @@ defmodule TeiserverWeb.Admin.BadgeTypeController do
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset = Account.change_badge_type(%BadgeType{
-      icon: "fas fa-" <> StylingHelper.random_icon(),
+      icon: "fa-solid fa-" <> StylingHelper.random_icon(),
       colour: StylingHelper.random_colour()
     })
 

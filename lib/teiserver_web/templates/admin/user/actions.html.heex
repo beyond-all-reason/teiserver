@@ -1,12 +1,12 @@
 <div class="dropdown-menu">
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :perform_action, @user, "recache")}>
-    <%= central_component "icon", icon: "fas fa-sync" %>
+    <%= central_component "icon", icon: "fa-solid fa-sync" %>
     &nbsp;
     Recache
   </a>
 
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :rename_form, @user)}>
-    <%= central_component "icon", icon: "fas fa-pen-field" %>
+    <%= central_component "icon", icon: "fa-solid fa-pen-field" %>
     &nbsp;
     Rename
   </a>
@@ -18,7 +18,7 @@
   </a>
 
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :smurf_search, @user.id)}>
-    <%= central_component "icon", icon: "fas fa-face-angry-horns" %>
+    <%= central_component "icon", icon: "fa-solid fa-face-angry-horns" %>
     &nbsp;
     Smurf search
   </a>
@@ -26,13 +26,13 @@
   <hr />
 
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :perform_action, @user, "reset_flood_protection")}>
-    <%= central_component "icon", icon: "fas fa-water-arrow-down" %>
+    <%= central_component "icon", icon: "fa-solid fa-water-arrow-down" %>
     &nbsp;
     Reset flood protection
   </a>
 
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :reset_password, @user.id)}>
-    <%= central_component "icon", icon: "fas fa-shield-alt" %>
+    <%= central_component "icon", icon: "fa-solid fa-shield-alt" %>
     &nbsp;
     Send password reset email
   </a>

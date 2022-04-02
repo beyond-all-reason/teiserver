@@ -26,7 +26,7 @@
 
         <div class="float-end">
           <a href={Routes.ts_admin_clan_path(@conn, :edit, @clan)} class={"btn btn-outline-#{bsname}"}>
-            <i class="far fa-fw fa-wrench"></i>
+            <i class="fa-regular fa-fw fa-wrench"></i>
             Edit clan
           </a>
         </div>
@@ -34,27 +34,27 @@
       <h3 style={"color: #{@clan.colour1}; background-color: #{@clan.colour2}; display: inline-block; padding: 5px;"}>
         <%= @clan.name %>
         &nbsp;
-        <i class={"far fa-fw #{@clan.icon}"}></i>
+        <i class={"fa-regular fa-fw #{@clan.icon}"}></i>
       </h3>
       <br />
       <ul class="nav nav-tabs" role="tablist" id="the_tabs">
         <li>
           <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-            <%= central_component "icon", icon: "fas fa-file-alt" %>
+            <%= central_component "icon", icon: "fa-solid fa-file-alt" %>
             Details
           </a>
         </li>
 
         <li>
           <a href="#members_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-            <%= central_component "icon", icon: "fas fa-users" %>
+            <%= central_component "icon", icon: "fa-solid fa-users" %>
             Members
           </a>
         </li>
 
         <li>
           <a href="#invites_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-            <%= central_component "icon", icon: "fas fa-envelope" %>
+            <%= central_component "icon", icon: "fa-solid fa-envelope" %>
             Invites
           </a>
         </li>

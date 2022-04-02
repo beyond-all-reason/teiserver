@@ -42,7 +42,7 @@
   <%= if allow?(@current_user, "teiserver.moderator") do %>
     <%=
       central_component "menu_card",
-      icon: "fas fa-satellite-dish",
+      icon: "fa-solid fa-satellite-dish",
       name: "active",
       text: "Active",
       link: Routes.ts_reports_report_path(@conn, :show, "active")
@@ -50,7 +50,7 @@
 
     <%=
       central_component "menu_card",
-      icon: "fas fa-watch",
+      icon: "fa-solid fa-watch",
       name: "time_spent",
       text: "Time spent",
       link: Routes.ts_reports_report_path(@conn, :show, "time_spent")
@@ -58,7 +58,7 @@
 
     <%=
       central_component "menu_card",
-      icon: "fas fa-chevrons-up",
+      icon: "fa-solid fa-chevrons-up",
       name: "ranks",
       text: "Ranks",
       link: Routes.ts_reports_report_path(@conn, :show, "ranks")
@@ -66,7 +66,7 @@
 
     <%=
       central_component "menu_card",
-      icon: "fas fa-check",
+      icon: "fa-solid fa-check",
       name: "verified",
       text: "Verified",
       link: Routes.ts_reports_report_path(@conn, :show, "verified")
@@ -74,7 +74,7 @@
 
     <%=
       central_component "menu_card",
-      icon: "fas fa-campground",
+      icon: "fa-solid fa-campground",
       name: "retention",
       text: "Retention",
       link: Routes.ts_reports_report_path(@conn, :show, "retention")

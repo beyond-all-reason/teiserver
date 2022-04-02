@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   @extra_menu_content """
   &nbsp;&nbsp;&nbsp;
     <a href='/teiserver/admin/client' class="btn btn-outline-primary">
-      <i class="fas fa-fw fa-plug"></i>
+      <i class="fa-solid fa-fw fa-plug"></i>
       Clients
     </a>
   """

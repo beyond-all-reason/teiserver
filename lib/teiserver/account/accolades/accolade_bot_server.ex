@@ -128,7 +128,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
         {:ok, account} = Account.create_user(%{
           name: "AccoladesBot",
           email: "accolades_bot@teiserver",
-          icon: "fas #{Teiserver.Account.AccoladeLib.icon()}" |> String.replace(" far ", " "),
+          icon: "fa-solid #{Teiserver.Account.AccoladeLib.icon()}" |> String.replace(" far ", " "),
           colour: "#0066AA",
           admin_group_id: Teiserver.internal_group_id(),
           password: make_password(),
