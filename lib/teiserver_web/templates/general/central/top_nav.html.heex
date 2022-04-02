@@ -35,7 +35,7 @@
 <%= if allow?(@current_user, "teiserver.moderator.account") do %>
   <%= central_component "top_nav_item",
     text: "Admin",
-    route: Routes.ts_admin_user_path(@conn, :index),
+    route: Routes.ts_admin_general_path(@conn, :index),
     active: @site_menu_active == "teiserver_admin"
   %>
 <% end %>

@@ -31,17 +31,15 @@
             %>
           <% end %>
 
-          <%= if allow?(@conn, "teiserver.moderator.queue") do %>
-            <%= central_component "sub_menu_icon",
-              name: "queues",
-              label: "Queues",
-              active: @active,
-              url: Routes.ts_game_queue_path(@conn, :index),
-              icon: Teiserver.Game.QueueLib.icon()
-            %>
-          <% end %>
-
           <%= if allow?(@conn, "teiserver.moderator") do %>
+            <%= central_component "sub_menu_icon",
+              name: "matches",
+              label: "Matches",
+              active: @active,
+              url: Routes.ts_admin_match_path(@conn, :index),
+              icon: Teiserver.Battle.MatchLib.icon()
+            %>
+          
             <%= central_component "sub_menu_icon",
               name: "chat",
               label: "Chat",
@@ -68,16 +66,6 @@
               active: @active,
               url: Routes.ts_admin_automod_action_path(@conn, :index),
               icon: Teiserver.Account.AutomodActionLib.icon()
-            %>
-          <% end %>
-
-          <%= if allow?(@conn, "teiserver.admin") do %>
-            <%= central_component "sub_menu_icon",
-              name: "tools",
-              label: "Tools",
-              active: @active,
-              url: Routes.ts_admin_tool_path(@conn, :index),
-              icon: Central.Admin.ToolLib.icon()
             %>
           <% end %>
         </div>

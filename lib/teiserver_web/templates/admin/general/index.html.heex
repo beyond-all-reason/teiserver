@@ -3,20 +3,9 @@
     central_component "menu_card",
     icon: "fad fa-gauge",
     name: "ts_console",
-    text: "TS Dashboard",
+    text: "Dashboard",
     link: Routes.ts_admin_dash_index_path(@conn, :index)
   %>
-
-  <%= if allow?(@conn, "teiserver.moderator.account") do %>
-    <%=
-      central_component "menu_card",
-      icon: "far fa-users",
-      name: "user_admin",
-      text: "User admin",
-      icon_class: "fa-duotone",
-      link: Routes.ts_admin_user_path(@conn, :index)
-    %>
-  <% end %>
 
   <%= if allow?(@conn, "teiserver.moderator.clan") do %>
     <%=
@@ -30,15 +19,41 @@
   <% end %>
 
   <%= if allow?(@conn, "teiserver.admin") do %>
+    <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: Teiserver.Account.BadgeTypeLib.icon(), text: "Badge types", link: Routes.ts_admin_badge_type_path(@conn, :index) %>
+  <% end %>
+
+  <%= if Application.get_env(:central, Teiserver)[:enable_uberserver_convert] do %>
+    <%= if allow?(@conn, "admin.dev") do %>
+      <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: "far fa-file-import", text: "Uberserver converter", link: Routes.ts_admin_tool_path(@conn, :convert_form) %>
+    <% end %>
+  <% end %>
+  
+  <%= if Application.get_env(:central, Teiserver)[:enable_agent_mode] do %>
+    <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: Teiserver.Agents.AgentLib.icon(), text: "Agent mode", link: Routes.ts_admin_agent_index_path(@conn, :index) %>
+  <% end %>
+</div>
+
+<div class="row">
+  <%= if allow?(@conn, "teiserver.moderator.account") do %>
     <%=
       central_component "menu_card",
-      icon: Central.Admin.ToolLib.icon(),
-      name: "tools",
-      text: "Tools",
+      icon: "far fa-users",
+      name: "user_admin",
+      text: "User admin",
       icon_class: "fa-duotone",
-      link: Routes.ts_admin_tool_path(@conn, :index)
+      link: Routes.ts_admin_user_path(@conn, :index)
     %>
   <% end %>
+  
+  <%=
+    central_component "menu_card",
+    icon: Central.Helpers.StylingHelper.icon(:summary),
+    name: "reports",
+    text: "Reports",
+    icon_class: "fa-duotone",
+    link: Routes.ts_reports_general_path(@conn, :index)
+  %>
+
 </div>
 
 <div class="row page-row">

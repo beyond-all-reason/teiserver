@@ -5,6 +5,17 @@
 <%# Live services %>
 <%= if allow?(@conn, "teiserver.moderator") do %>
   <div class="row">
+    <%= if allow?(@conn, "teiserver.moderator.account") do %>
+      <%=
+        central_component "menu_card",
+        icon: Teiserver.icon(),
+        name: "tei_admin",
+        text: "TS Admin",
+        icon_class: "fa-duotone",
+        link: Routes.ts_admin_general_path(@conn, :index)
+      %>
+    <% end %>
+    
     <%=
       central_component "menu_card",
       icon: Teiserver.Battle.LobbyLib.icon(),
@@ -52,20 +63,9 @@
         central_component "menu_card",
         icon: Teiserver.Game.QueueLib.icon(),
         name: "queue",
-        text: "MM Queues",
+        text: "Matchmaking",
         icon_class: "fa-duotone",
         link: Routes.ts_game_queue_path(@conn, :index)
-      %>
-    <% end %>
-
-    <%= if allow?(@conn, "teiserver.moderator") do %>
-      <%=
-        central_component "menu_card",
-        icon: Central.Helpers.StylingHelper.icon(:summary),
-        name: "reports",
-        text: "Reports",
-        icon_class: "fa-duotone",
-        link: Routes.ts_reports_general_path(@conn, :index)
       %>
     <% end %>
   <% end %>
@@ -81,17 +81,6 @@
         text: "User admin",
         icon_class: "fa-duotone",
         link: Routes.ts_admin_user_path(@conn, :index)
-      %>
-    <% end %>
-
-    <%= if false and allow?(@conn, "teiserver.moderator.clan") do %>
-      <%=
-        central_component "menu_card",
-        icon: Teiserver.Clans.ClanLib.icon(),
-        name: "clan_admin",
-        text: "Clan admin",
-        icon_class: "fa-duotone",
-        link: Routes.ts_admin_clan_path(@conn, :index)
       %>
     <% end %>
 
@@ -113,16 +102,14 @@
         icon_class: "fa-duotone",
         link: Routes.ts_admin_achievement_path(@conn, :index)
       %>
-    <% end %>
-
-    <%= if allow?(@conn, "teiserver.admin") do %>
+      
       <%=
         central_component "menu_card",
-        icon: Central.Admin.ToolLib.icon(),
-        name: "tools",
-        text: "Tools",
+        icon: Central.Helpers.StylingHelper.icon(:summary),
+        name: "reports",
+        text: "Reports",
         icon_class: "fa-duotone",
-        link: Routes.ts_admin_tool_path(@conn, :index)
+        link: Routes.ts_reports_general_path(@conn, :index)
       %>
     <% end %>
   </div>
