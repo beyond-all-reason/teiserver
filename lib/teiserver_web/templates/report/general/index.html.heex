@@ -74,10 +74,18 @@
 
     <%=
       central_component "menu_card",
-      icon: "fa-solid fa-campground",
+      icon: Teiserver.Account.RetentionReport.icon(),
       name: "retention",
       text: "Retention",
       link: Routes.ts_reports_report_path(@conn, :show, "retention")
+    %>
+
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Account.NewUserFunnelReport.icon(),
+      name: "new_user_funnel",
+      text: "New user funnel",
+      link: Routes.ts_reports_report_path(@conn, :show, "new_user_funnel")
     %>
 
     <%=

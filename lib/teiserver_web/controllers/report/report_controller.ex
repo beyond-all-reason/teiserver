@@ -35,6 +35,9 @@ defmodule TeiserverWeb.Report.ReportController do
         "retention" ->
           Teiserver.Account.RetentionReport.run(conn, params)
 
+        "new_user_funnel" ->
+          Teiserver.Account.NewUserFunnelReport.run(conn, params)
+
         "accolades" ->
           Teiserver.Account.AccoladeReport.run(conn, params)
 
@@ -50,7 +53,7 @@ defmodule TeiserverWeb.Report.ReportController do
       assign(conn, key, value)
     end)
     |> assign(:data, data)
-    |> add_breadcrumb(name: name |> String.capitalize(), url: conn.request_path)
+    |> add_breadcrumb(name: name |> String.capitalize() |> String.replace("_", " "), url: conn.request_path)
     |> render("#{name}.html")
   end
 end

@@ -33,6 +33,11 @@ defmodule Teiserver.Telemetry.ClientEventLib do
       where: client_events.user_id == ^user_id
   end
 
+  def _search(query, :user_id_in, user_ids) do
+    from client_events in query,
+      where: client_events.user_id in ^user_ids
+  end
+
   def _search(query, :id_list, id_list) do
     from client_events in query,
       where: client_events.id in ^id_list
@@ -46,6 +51,11 @@ defmodule Teiserver.Telemetry.ClientEventLib do
   def _search(query, :event_type_id, event_type_id) do
     from client_events in query,
       where: client_events.event_type_id == ^event_type_id
+  end
+
+  def _search(query, :event_type_id_in, event_type_ids) do
+    from client_events in query,
+      where: client_events.event_type_id in ^event_type_ids
   end
 
   def _search(query, :basic_search, ref) do

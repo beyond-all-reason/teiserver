@@ -40,9 +40,18 @@
   name: "retention",
   label: "Retention",
   active: @active,
-  icon: "fa-regular fa-campground",
+  icon: Teiserver.Account.RetentionReport.icon(),
   bsname: bsname,
   url: Routes.ts_reports_report_path(@conn, :show, "retention")
+%>
+
+<%= central_component "section_menu_button",
+  name: "new_user_funnel",
+  label: "New user funnel",
+  active: @active,
+  icon: Teiserver.Account.NewUserFunnelReport.icon(),
+  bsname: bsname,
+  url: Routes.ts_reports_report_path(@conn, :show, "new_user_funnel")
 %>
 
 <%= central_component "section_menu_button",
