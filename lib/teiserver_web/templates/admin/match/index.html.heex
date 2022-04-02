@@ -1,5 +1,18 @@
 <% bsname = view_colour() %>
 
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    <%= if @conn.params["search"] != nil do %>
+      show_search();
+    <% end %>
+  });
+
+  function show_search() {
+    $("#search-box-shower").hide();
+    $("#search-box").show(350);
+  }
+</script>
+
 <%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "matches"}) %>
 
 <div class="row section-menu">
@@ -8,9 +21,18 @@
       <div class="card-body">
         <%= render TeiserverWeb.Admin.MatchView, "section_menu.html", Map.merge(assigns, %{
             show_search: false,
-            active: "user"
+            active: (cond do
+              @conn.params["search"] != nil -> "advanced_search"
+              # @filter != nil -> @filter
+              true -> "list"
+            end)
         }) %>
-        <br /><br />
+
+<%= if @conn.params["search"] != nil do %>
+  <%= render TeiserverWeb.Admin.MatchView, "search.html", assigns %>
+<% else %>
+  <br /><br />
+<% end %>
 
 <h4>Listing Matches</h4>
 
@@ -19,6 +41,8 @@
     <tr>
       <th>Type</th>
       <th>Map</th>
+      <th>Queue</th>
+      
       <th>Teams</th>
       <th>Team size</th>
       <th>Duration (mins)</th>
@@ -31,6 +55,8 @@
     <tr>
       <td><%= match.game_type %></td>
       <td><%= match.map %></td>
+
+      <td><%= if match.queue != nil, do: match.queue.name %></td>
 
       <td><%= match.team_count %></td>
       <td><%= match.team_size %></td>

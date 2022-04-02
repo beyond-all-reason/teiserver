@@ -6,6 +6,15 @@
     text: "Dashboard",
     link: Routes.ts_admin_dash_index_path(@conn, :index)
   %>
+  
+  <%=
+    central_component "menu_card",
+    icon: Teiserver.Battle.MatchLib.icon(),
+    name: "matches",
+    text: "Matches",
+    icon_class: "fa-duotone",
+    link: Routes.ts_admin_match_path(@conn, :index)
+  %>
 
   <%= if allow?(@conn, "teiserver.moderator.clan") do %>
     <%=

@@ -27,17 +27,17 @@
     <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
     <div class="row">
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_name" class="control-label">Name/Email: </label>
         <input type="text" name="search[name]" id="search_name" value={@params["name"]} placeholder="" class="form-control" />
       </div>
 
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_limit" class="control-label">Limit: </label>
         <input type="text" name="search[limit]" id="search_limit" value={@params["limit"]} placeholder="" class="form-control" />
       </div>
 
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_order" class="control-label">Order by: </label>
         <%= central_component "icon_dropdown", %{
           name: "search[order]",
@@ -52,7 +52,7 @@
         } %>
       </div>
 
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_verified" class="control-label">Verified: </label>
         <%= central_component "icon_dropdown", %{
           name: "search[verified]",
@@ -66,7 +66,7 @@
         } %>
       </div>
 
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_bot" class="control-label">Bot: </label>
         <%= central_component "icon_dropdown", %{
           name: "search[bot]",
@@ -80,7 +80,7 @@
         } %>
       </div>
 
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_moderator" class="control-label">Moderator: </label>
         <%= central_component "icon_dropdown", %{
           name: "search[moderator]",
@@ -94,7 +94,7 @@
         } %>
       </div>
 
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_tester" class="control-label">Tester: </label>
         <%= central_component "icon_dropdown", %{
           name: "search[tester]",
@@ -108,7 +108,7 @@
         } %>
       </div>
 
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_streamer" class="control-label">Streamer: </label>
         <%= central_component "icon_dropdown", %{
           name: "search[streamer]",
@@ -122,7 +122,7 @@
         } %>
       </div>
 
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_donor" class="control-label">Donor: </label>
         <%= central_component "icon_dropdown", %{
           name: "search[donor]",
@@ -136,7 +136,7 @@
         } %>
       </div>
 
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_contributor" class="control-label">Contributor: </label>
         <%= central_component "icon_dropdown", %{
           name: "search[contributor]",
@@ -150,7 +150,7 @@
         } %>
       </div>
 
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_developer" class="control-label">Developer: </label>
         <%= central_component "icon_dropdown", %{
           name: "search[developer]",
@@ -164,7 +164,7 @@
         } %>
       </div>
 
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_mod_action" class="control-label">Mod action: </label>
         <%= central_component "icon_dropdown", %{
           name: "search[mod_action]",
@@ -179,12 +179,12 @@
         } %>
       </div>
 
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_lobby_client" class="control-label">Lobby: </label>
         <input type="text" name="search[lobby_client]" id="search_lobby_client" value={@params["lobby_client"]} placeholder="" class="form-control" />
       </div>
 
-      <div class="col-md-4 col-xl-2 my-2">
+      <div class="col-md-4 col-lg-3 col-xl-2 my-2">
         <label for="search_previous_names" class="control-label">Current/Previons names: (case sensitive)</label>
         <input type="text" name="search[previous_names]" id="search_previous_names" value={@params["previous_names"]} placeholder="" class="form-control" />
       </div>

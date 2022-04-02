@@ -7,7 +7,7 @@ defmodule Teiserver.Battle.MatchLib do
   @spec icon :: String.t()
   def icon, do: "fa-regular fa-swords"
 
-  @spec colours :: {String.t(), String.t(), String.t()}
+  @spec colours :: atom
   def colours, do: :success2
 
   @spec game_type(T.lobby(), map()) :: <<_::24, _::_*8>>
@@ -82,6 +82,10 @@ defmodule Teiserver.Battle.MatchLib do
   @spec stop_match(T.lobby_id()) :: {String.t(), %{finished: DateTime.t()}}
   def stop_match(lobby_id) do
     lobby = Lobby.get_battle!(lobby_id)
+
+    new_tags = Map.drop(lobby.tags, ["server/match/queue_id"])
+    Lobby.set_script_tags(lobby_id, new_tags)
+
     tag = lobby.tags["server/match/uuid"]
     {tag, %{
       finished: Timex.now()
@@ -157,6 +161,20 @@ defmodule Teiserver.Battle.MatchLib do
   def _search(query, :id_list, id_list) do
     from matches in query,
       where: matches.id in ^id_list
+  end
+
+  def _search(query, :queue_id, "no_queue") do
+    from matches in query,
+      where: is_nil(matches.queue_id)
+  end
+  def _search(query, :queue_id, queue_id) do
+    from matches in query,
+      where: matches.queue_id == ^queue_id
+  end
+
+  def _search(query, :game_type, game_type) do
+    from matches in query,
+      where: matches.game_type == ^game_type
   end
 
   def _search(query, :ready_for_post_process, _) do
@@ -249,6 +267,7 @@ defmodule Teiserver.Battle.MatchLib do
   def preload(query, preloads) do
     query = if :members in preloads, do: _preload_members(query), else: query
     query = if :members_and_users in preloads, do: _preload_members_and_users(query), else: query
+    query = if :queue in preloads, do: _preload_queue(query), else: query
     query
   end
 
@@ -264,5 +283,11 @@ defmodule Teiserver.Battle.MatchLib do
       left_join: users in assoc(memberships, :user),
       # order_by: [asc: memberships.team_id, asc: users.name],
       preload: [members: {memberships, user: users}]
+  end
+
+  def _preload_queue(query) do
+    from matches in query,
+      left_join: queues in assoc(matches, :queue),
+      preload: [queue: queues]
   end
 end

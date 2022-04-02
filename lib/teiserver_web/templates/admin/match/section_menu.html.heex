@@ -9,6 +9,15 @@
   url: Routes.ts_admin_match_path(@conn, :index)
 %>
 
+<%= central_component "section_menu_button",
+  name: "advanced_search",
+  label: "Advanced search",
+  active: @active,
+  icon: Central.Helpers.StylingHelper.icon(:search),
+  bsname: bsname,
+  url: Routes.ts_admin_match_path(@conn, :index) <> "?search=true"
+%>
+
 <%= if @active == "user" do %>
   <%= central_component "section_menu_button",
     name: "user",

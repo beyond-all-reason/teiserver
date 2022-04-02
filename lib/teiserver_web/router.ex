@@ -239,6 +239,8 @@ defmodule TeiserverWeb.Router do
         get("/accolades/user/:user_id", AccoladeController, :user_show)
 
         resources("/matches", MatchController, only: [:index, :show, :delete])
+        get("/matches/search", MatchController, :index)
+        post("/matches/search", MatchController, :search)
         get("/matches/user/:user_id", MatchController, :user_show)
 
         resources("/chat", ChatController, only: [:index])

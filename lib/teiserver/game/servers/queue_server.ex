@@ -313,6 +313,7 @@ defmodule Teiserver.Game.QueueServer do
         })
 
         # Update the lobby itself
+        battle = Lobby.get_lobby(battle.id)
         new_tags = Map.put(battle.tags, "server/match/queue_id", state.id)
         Lobby.set_script_tags(battle.id, new_tags)
 
@@ -334,9 +335,17 @@ defmodule Teiserver.Game.QueueServer do
             Logger.info("QueueServer try_setup_battle cannot start as not all are players")
             Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched users are not a player. Please rejoin the queue and try again.", battle.id)
 
+            battle = Lobby.get_lobby(battle.id)
+            new_tags = Map.drop(battle.tags, ["server/match/queue_id"])
+            Lobby.set_script_tags(battle.id, new_tags)
+
           all_synced == false ->
             Logger.info("QueueServer try_setup_battle cannot start as not all are synced")
             Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched players are unsynced. Please rejoin the queue and try again.", battle.id)
+
+            battle = Lobby.get_lobby(battle.id)
+            new_tags = Map.drop(battle.tags, ["server/match/queue_id"])
+            Lobby.set_script_tags(battle.id, new_tags)
 
           true ->
             Logger.info("QueueServer try_setup_battle calling player cv start")

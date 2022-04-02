@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.MatchController do
   use CentralWeb, :controller
 
-  alias Teiserver.Battle
+  alias Teiserver.{Battle, Game}
   alias Teiserver.Battle.MatchLib
 
   plug Bodyguard.Plug.Authorize,
@@ -22,40 +22,44 @@ defmodule TeiserverWeb.Admin.MatchController do
   def index(conn, params) do
     matches = Battle.list_matches(
         search: [
-          basic_search: Map.get(params, "s", "") |> String.trim(),
-          # filter: params["filter"] || "all"
+
         ],
         preload: [
-          :giver,
-          :recipient,
-          :badge_type
+          :queue
         ],
         order_by: "Newest first"
       )
 
+    queues = Game.list_queues(order_by: "Name (A-Z)")
+
     conn
+    |> assign(:queues, queues)
+    |> assign(:params, params)
     |> assign(:matches, matches)
     |> render("index.html")
   end
 
-  @spec user_show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def user_show(conn, %{"user_id" => user_id}) do
-    matches =
-      Battle.list_matches(
-        search: [
-          # id_list: match_ids,
-          user_id: user_id,
-          processed: :true,
-        ],
-        preload: [
-          # :members_and_users
-        ],
-        order_by: "Newest first"
-      )
+  @spec search(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def search(conn, %{"search" => params}) do
+    matches = Battle.list_matches(
+      search: [
+        user_id: Map.get(params, "account_user", "") |> get_hash_id,
+        queue_id: params["queue"],
+        game_type: params["game_type"],
+      ],
+      preload: [
+        :queue
+      ],
+      order_by: "Newest first"
+    )
+
+    queues = Game.list_queues(order_by: "Name (A-Z)")
 
     conn
+    |> assign(:queues, queues)
+    |> assign(:params, params)
     |> assign(:matches, matches)
-    |> render("user_index.html")
+    |> render("index.html")
   end
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
