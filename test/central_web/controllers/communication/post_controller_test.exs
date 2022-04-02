@@ -34,7 +34,13 @@ defmodule CentralWeb.Communication.PostControllerTest do
   end
 
   describe "new post" do
+    test "redirects because no categories", %{conn: conn} do
+      conn = get(conn, Routes.blog_post_path(conn, :new))
+      assert redirected_to(conn) =~ Routes.blog_category_path(conn, :new)
+    end
+
     test "renders form", %{conn: conn} do
+      _ = CommunicationTestLib.post_fixture()
       conn = get(conn, Routes.blog_post_path(conn, :new))
       assert html_response(conn, 200) =~ "Create"
     end

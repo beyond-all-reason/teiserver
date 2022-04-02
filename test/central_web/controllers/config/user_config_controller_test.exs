@@ -20,7 +20,7 @@ defmodule CentralWeb.Config.UserConfigControllerTest do
   describe "creating" do
     test "new", %{conn: conn} do
       conn = get(conn, Routes.user_config_path(conn, :new, key: @key))
-      assert html_response(conn, 200) =~ "<h4>Edit setting</h4>"
+      assert html_response(conn, 200) =~ "<h4>Edit setting"
     end
 
     test "create", %{conn: conn, user: user} do
@@ -36,7 +36,7 @@ defmodule CentralWeb.Config.UserConfigControllerTest do
           }
         )
 
-      assert redirected_to(conn) == Routes.user_config_path(conn, :index) <> "#general"
+      assert redirected_to(conn) == Routes.user_config_path(conn, :index) <> "#General"
 
       configs = Config.get_user_configs!(user.id)
       assert Enum.count(configs) == 1
@@ -55,7 +55,7 @@ defmodule CentralWeb.Config.UserConfigControllerTest do
           }
         )
 
-      assert redirected_to(conn) == Routes.user_config_path(conn, :index) <> "#general"
+      assert redirected_to(conn) == Routes.user_config_path(conn, :index) <> "#General"
 
       configs = Config.get_user_configs!(user.id)
       assert Enum.empty?(configs)
@@ -79,7 +79,7 @@ defmodule CentralWeb.Config.UserConfigControllerTest do
           user_config: %{"key" => @key, "value" => "some updated value"}
         )
 
-      assert redirected_to(conn) == Routes.user_config_path(conn, :index) <> "#general"
+      assert redirected_to(conn) == Routes.user_config_path(conn, :index) <> "#General"
 
       the_config = Config.get_user_config!(the_config.id)
       assert the_config.value == "some updated value"
@@ -101,7 +101,7 @@ defmodule CentralWeb.Config.UserConfigControllerTest do
           user_config: %{"key" => @key, "value" => ""}
         )
 
-      assert redirected_to(conn) == Routes.user_config_path(conn, :index) <> "#general"
+      assert redirected_to(conn) == Routes.user_config_path(conn, :index) <> "#General"
 
       configs = Config.get_user_configs!(user.id)
       assert Enum.empty?(configs)

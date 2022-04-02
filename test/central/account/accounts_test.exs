@@ -246,7 +246,7 @@ defmodule Central.AccountTest do
 
     test "update_report/2 with invalid data returns error changeset" do
       report = AccountTestLib.report_fixture()
-      assert {:error, %Ecto.Changeset{}} = Account.update_report(report, @invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} = Account.update_report(report, @invalid_attrs, :update)
       assert report == Account.get_report!(report.id)
     end
 

@@ -1,6 +1,6 @@
 defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
   use CentralWeb.ConnCase, async: false
-  alias Central.Account
+  alias Central.{Account, Config}
   alias Central.Account.User
 
   alias Central.Helpers.GeneralTestLib
@@ -16,22 +16,19 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
     password_confirmation: "new_password"
   }
 
-  defp update_env_setting(v) do
-    env = Application.get_env(:central, Central)
-      |> Keyword.put(:user_registrations, v)
-
-    Application.put_env(:central, Central, env)
+  defp update_config_setting(v) do
+    Config.update_site_config("user.Enable user registrations", v)
   end
 
   describe "create user - :allowed" do
     test "render form", %{conn: conn} do
-      update_env_setting(:allowed)
+      update_config_setting("Allowed")
       conn = get(conn, Routes.account_registration_path(conn, :new))
       assert html_response(conn, 200) =~ "Register account"
     end
 
     test "valid attrs", %{conn: conn} do
-      update_env_setting(:allowed)
+      update_config_setting("Allowed")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: @valid_attrs)
       assert conn.private[:phoenix_flash]["info"] == "User created successfully."
       assert redirected_to(conn) == "/"
@@ -41,7 +38,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
     end
 
     test "invalid attrs - no details", %{conn: conn} do
-      update_env_setting(:allowed)
+      update_config_setting("Allowed")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: %{})
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
       new_user = Account.get_user(search: [name: "new user"])
@@ -49,7 +46,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
     end
 
     test "invalid attrs - short password", %{conn: conn} do
-      update_env_setting(:allowed)
+      update_config_setting("Allowed")
       conn =
         post(conn, Routes.account_registration_path(conn, :create),
           user: Map.merge(@valid_attrs, %{password: "1234", password_confirmation: "1234"})
@@ -61,7 +58,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
     end
 
     test "invalid attrs - mismatched password", %{conn: conn} do
-      update_env_setting(:allowed)
+      update_config_setting("Allowed")
       conn =
         post(conn, Routes.account_registration_path(conn, :create),
           user: Map.put(@valid_attrs, :password_confirmation, "long long password")
@@ -75,13 +72,13 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
   describe "create user - :disabled" do
     test "render form", %{conn: conn} do
-      update_env_setting(:disabled)
+      update_config_setting("Disabled")
       conn = get(conn, Routes.account_registration_path(conn, :new))
       assert html_response(conn, 200) =~ "Manual user registration is currently disabled."
     end
 
     test "valid attrs", %{conn: conn} do
-      update_env_setting(:disabled)
+      update_config_setting("Disabled")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: @valid_attrs)
       assert html_response(conn, 200) =~ "Manual user registration is currently disabled."
 
@@ -90,7 +87,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
     end
 
     test "invalid attrs - no details", %{conn: conn} do
-      update_env_setting(:disabled)
+      update_config_setting("Disabled")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: %{})
       assert html_response(conn, 200) =~ "Manual user registration is currently disabled."
 
@@ -102,13 +99,13 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
   describe "create user - :link_only" do
     # No code
     test "render form - no code", %{conn: conn} do
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = get(conn, Routes.account_registration_path(conn, :new))
       assert html_response(conn, 200) =~ "You need an invite code to register here."
     end
 
     test "valid attrs - no code", %{conn: conn} do
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: @valid_attrs)
       assert html_response(conn, 200) =~ "You need an invite code to register here."
 
@@ -117,7 +114,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
     end
 
     test "invalid attrs - no details - no code", %{conn: conn} do
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: %{})
       assert html_response(conn, 200) =~ "You need an invite code to register here."
 
@@ -135,7 +132,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
         user_id: code_user.id
       })
 
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = get(conn, Routes.account_registration_path(conn, :new, code.value))
       assert html_response(conn, 200) =~ "This code has expired."
     end
@@ -149,7 +146,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
         user_id: code_user.id
       })
 
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: Map.put(@valid_attrs, :code, code.value))
       assert html_response(conn, 200) =~ "This code has expired."
 
@@ -166,7 +163,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
         user_id: code_user.id
       })
 
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: %{code: code.value})
       assert html_response(conn, 200) =~ "This code has expired."
 
@@ -176,13 +173,13 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
 
     # Non-existing code
     test "render form - non-existant code", %{conn: conn} do
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = get(conn, Routes.account_registration_path(conn, :new, "xxxxx"))
       assert html_response(conn, 200) =~ "That code does not exist."
     end
 
     test "valid attrs - non-existant code", %{conn: conn} do
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: Map.put(@valid_attrs, :code, "xxxxx"))
       assert html_response(conn, 200) =~ "That code does not exist."
 
@@ -191,7 +188,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
     end
 
     test "invalid attrs - no details - non-existant code", %{conn: conn} do
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: %{code: "xxxxx"})
       assert html_response(conn, 200) =~ "That code does not exist."
 
@@ -209,7 +206,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
         user_id: code_user.id
       })
 
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = get(conn, Routes.account_registration_path(conn, :new, code.value))
       assert html_response(conn, 200) =~ "That code does not exist."
     end
@@ -223,7 +220,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
         user_id: code_user.id
       })
 
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: Map.put(@valid_attrs, :code, code.value))
       assert html_response(conn, 200) =~ "That code does not exist."
 
@@ -240,7 +237,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
         user_id: code_user.id
       })
 
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: %{code: code.value})
       assert html_response(conn, 200) =~ "That code does not exist."
 
@@ -258,7 +255,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
         user_id: code_user.id
       })
 
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = get(conn, Routes.account_registration_path(conn, :new, code.value))
       assert html_response(conn, 200) =~ "Register account"
     end
@@ -272,7 +269,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
         user_id: code_user.id
       })
 
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: Map.put(@valid_attrs, :code, code.value))
       assert conn.private[:phoenix_flash]["info"] == "User created successfully."
       assert redirected_to(conn) == "/"
@@ -290,7 +287,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
         user_id: code_user.id
       })
 
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn = post(conn, Routes.account_registration_path(conn, :create), user: %{code: code.value})
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
       new_user = Account.get_user(search: [name: "new user"])
@@ -306,7 +303,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
         user_id: code_user.id
       })
 
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn =
         post(conn, Routes.account_registration_path(conn, :create),
           user: Map.merge(@valid_attrs, %{
@@ -330,7 +327,7 @@ defmodule CentralWeb.Account.RegistrationNewUserControllerTest do
         user_id: code_user.id
       })
 
-      update_env_setting(:link_only)
+      update_config_setting("Link only")
       conn =
         post(conn, Routes.account_registration_path(conn, :create),
           user: Map.merge(@valid_attrs, %{
