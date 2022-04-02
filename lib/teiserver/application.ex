@@ -2,10 +2,24 @@ defmodule Teiserver.Application do
   @moduledoc false
   def children() do
     children = [
-      # Registries
+      # Registries - TODO: Change these into Horde Registries
       {Registry, keys: :unique, name: Teiserver.ServerRegistry},
-      {Registry, keys: :unique, name: Teiserver.ClientRegistry},
 
+      # ETS pid tables, need to refactor them out
+      concache_sup(:teiserver_throttle_pids),
+      concache_perm_sup(:teiserver_queue_pids),
+      concache_perm_sup(:teiserver_consul_pids),
+      concache_perm_sup(:teiserver_accolade_pids),
+
+      # Stores - Tables where changes are not propagated across the cluster
+      # Possible stores
+      concache_perm_sup(:teiserver_queues),
+
+      # Telemetry
+      concache_perm_sup(:teiserver_telemetry_event_types),
+      concache_perm_sup(:teiserver_telemetry_property_types),
+
+      # Caches
       # Caches - Meta
       concache_perm_sup(:id_counters),
       concache_perm_sup(:lists),
@@ -22,24 +36,18 @@ defmodule Teiserver.Application do
 
       # Caches - Battle/Queue/Clan
       concache_perm_sup(:lobbies),
-      concache_perm_sup(:teiserver_queues),
       concache_sup(:teiserver_clan_cache_bang),
 
       # Caches - Chat
       concache_perm_sup(:rooms),
 
-      # Caches - Blog
+      # Caches - Blog - TODO: Is this actually needed? It's not in use
       concache_sup(:teiserver_blog_posts),
       concache_sup(:teiserver_blog_categories),
-
-      # Caches - Telemetry
-      concache_perm_sup(:teiserver_telemetry_event_types),
-      concache_perm_sup(:teiserver_telemetry_property_types),
 
       {Teiserver.HookServer, name: Teiserver.HookServer},
 
       # Liveview throttles
-      concache_sup(:teiserver_throttle_pids),
       Teiserver.Account.ClientIndexThrottle,
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Throttles.Supervisor},
 
@@ -49,17 +57,13 @@ defmodule Teiserver.Application do
       concache_sup(:discord_bridge_account_codes, global_ttl: 300_000),
 
       # Matchmaking
-      concache_perm_sup(:teiserver_queue_pids),
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},
-      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueMatchSupervisor},
 
       # Coordinator mode
-      concache_perm_sup(:teiserver_consul_pids),
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Coordinator.DynamicSupervisor},
       {Teiserver.Coordinator.AutomodServer, name: Teiserver.Coordinator.AutomodServer},
 
       # Accolades
-      concache_perm_sup(:teiserver_accolade_pids),
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Account.AccoladeSupervisor},
 
       # Achievements
