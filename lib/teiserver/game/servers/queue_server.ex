@@ -351,7 +351,7 @@ defmodule Teiserver.Game.QueueServer do
             Logger.info("QueueServer try_setup_battle calling player cv start")
             Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to start the game, if this doesn't work feel free to start it yourselves and report to Teifion.", battle.id)
             :timer.sleep(100)
-            Lobby.say(p1, "!cv start", battle.id)
+            Lobby.say(p1, "!cv forcestart", battle.id)
             :timer.sleep(100)
             Lobby.say(p2, "!y", battle.id)
             :timer.sleep(100)
