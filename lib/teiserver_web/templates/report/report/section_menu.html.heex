@@ -4,7 +4,7 @@
   name: "active",
   label: "Active",
   active: @active,
-  icon: "fa-regular fa-satellite-dish",
+  icon: Teiserver.Account.ActiveReport.icon(),
   bsname: bsname,
   url: Routes.ts_reports_report_path(@conn, :show, "active")
 %>
@@ -13,7 +13,7 @@
   name: "time_spent",
   label: "Time spent",
   active: @active,
-  icon: "fa-regular fa-watch",
+  icon: Teiserver.Account.TimeSpentReport.icon(),
   bsname: bsname,
   url: Routes.ts_reports_report_path(@conn, :show, "time_spent")
 %>
@@ -22,7 +22,7 @@
   name: "ranks",
   label: "Ranks",
   active: @active,
-  icon: "fa-regular fa-chevrons-up",
+  icon: Teiserver.Account.RanksReport.icon(),
   bsname: bsname,
   url: Routes.ts_reports_report_path(@conn, :show, "ranks")
 %>
@@ -31,7 +31,7 @@
   name: "verified",
   label: "Verified",
   active: @active,
-  icon: "fa-regular fa-check",
+  icon: Teiserver.Account.VerifiedReport.icon(),
   bsname: bsname,
   url: Routes.ts_reports_report_path(@conn, :show, "verified")
 %>
