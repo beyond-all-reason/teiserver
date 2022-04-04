@@ -170,6 +170,18 @@ defmodule Central.Helpers.DatePresets do
     {start, Timex.shift(start, months: 1)}
   end
 
+  def _parse_named_period("This quarter") do
+    {Timex.beginning_of_quarter(Timex.now()), Timex.end_of_quarter(Timex.now())}
+  end
+
+  def _parse_named_period("Last quarter") do
+    start = Timex.now()
+      |> Timex.shift(months: -3)
+      |> Timex.beginning_of_quarter()
+
+    {start, Timex.beginning_of_quarter(Timex.now())}
+  end
+
   def _parse_named_period("Two months ago") do
     today = Timex.today()
 

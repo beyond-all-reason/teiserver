@@ -76,7 +76,18 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
         today = Timex.today()
 
         if log.date.year < today.year or log.date.month < today.month do
-          run(log.date.year, log.date.month)
+          logs = Telemetry.list_server_day_logs(search: [
+            start_date: log.date.year,
+            end_date: log.date.month
+          ])
+
+          data = run(logs)
+
+          Telemetry.create_server_month_log(%{
+            year: log.date.year,
+            month: log.date.month,
+            data: data
+          })
         end
       _ ->
         nil
@@ -87,39 +98,35 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
   defp perform_standard(year, month) do
     today = Timex.today()
     if year < today.year or month < today.month do
-      run(year, month)
+      now = Timex.Date.new!(year, month, 1)
+
+      logs = Telemetry.list_server_day_logs(search: [
+        start_date: Timex.beginning_of_month(now),
+        end_date: Timex.end_of_month(now)
+      ])
+
+      data = run(logs)
+
+      Telemetry.create_server_month_log(%{
+        year: year,
+        month: month,
+        data: data
+      })
     else
       nil
     end
   end
 
-  @spec run(integer(), integer()) :: :ok
-  def run(year, month) do
-    now = Timex.Date.new!(year, month, 1)
-
-    Telemetry.list_server_day_logs(search: [
-      start_date: Timex.beginning_of_month(now),
-      end_date: Timex.end_of_month(now)
-    ])
-
-    data = Telemetry.list_server_day_logs(search: [
-      start_date: Timex.beginning_of_month(now),
-      end_date: Timex.end_of_month(now)
-    ])
+  @spec run(list()) :: map()
+  def run(logs) do
+    logs
     |> Enum.reduce(@empty_log, fn (log, acc) ->
       extend_segment(acc, log)
     end)
     |> calculate_month_statistics()
-
-    Telemetry.create_server_month_log(%{
-      year: year,
-      month: month,
-      data: data
-    })
-
-    :ok
   end
 
+  @spec month_so_far() :: map()
   def month_so_far() do
     now = Timex.now()
 

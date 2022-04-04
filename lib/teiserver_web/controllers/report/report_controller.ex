@@ -44,6 +44,9 @@ defmodule TeiserverWeb.Report.ReportController do
         "mutes" ->
           Teiserver.Account.MuteReport.run(conn, params)
 
+        "review" ->
+          Teiserver.Account.ReviewReport.run(conn, params)
+
         _ ->
           raise "No handler for name of '#{name}'"
       end

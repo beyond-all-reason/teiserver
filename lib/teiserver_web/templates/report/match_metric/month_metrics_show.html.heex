@@ -43,87 +43,21 @@
     </a>
     <h4>Headline stats - <%= @month %>/<%= @year %></h4>
     
-    <div class="row">
-      <div class="col-md-6">
-        <h4>Counts</h4>
-        <%= central_component "detail_line",
-          label: "Total completed",
-          value: format_number @data["totals"]["aggregate"]["total_count"]
-        %>
+    <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+      <li>
+        <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+          <%= central_component "icon", icon: icon() %>
+          Details
+        </a>
+      </li>
+    </ul>
 
-        <%= central_component "detail_line",
-          label: "Duel",
-          value: format_number @data["duel"]["aggregate"]["total_count"]
-        %>
-
-        <%= central_component "detail_line",
-          label: "FFA",
-          value: format_number @data["ffa"]["aggregate"]["total_count"]
-        %>
-
-        <%= central_component "detail_line",
-          label: "Team",
-          value: format_number @data["team"]["aggregate"]["total_count"]
-        %>
-
-        <%= central_component "detail_line",
-          label: "Bots",
-          value: format_number @data["bots"]["aggregate"]["total_count"]
-        %>
-
-        <%= central_component "detail_line",
-          label: "Scavengers",
-          value: format_number @data["scavengers"]["aggregate"]["total_count"]
-        %>
-
-        <%= central_component "detail_line",
-          label: "Raptors",
-          value: format_number @data["raptors"]["aggregate"]["total_count"]
-        %>
-      </div>
-
-      <div class="col-md-6">
-        <h4>Durations</h4>
-        <%= central_component "detail_line",
-          label: "Mean duration",
-          value: represent_seconds @data["totals"]["aggregate"]["mean_duration_seconds"]
-        %>
-        <%= for t <- ~w(5 10 15 20 25 30 35 40 45 50 55 60) do %>
-          <%= central_component "detail_line",
-            label: "#{t} minutes",
-            value: format_number @data["totals"]["duration"][t]
-          %>
-        <% end %>
+    <div class="tab-content">
+      <div class="tab-pane" id="details_tab" style="padding:5px;">
+        <%= render "tab_month_details.html", %{data: @data} %>
       </div>
     </div>
-    <hr />
-
-    <div class="row">
-      <div class="col-md-6">
-        <h4>Map</h4>
-        <%
-          maps = @data["totals"]["maps"]
-            |> Enum.sort(fn ({_, v1}, {_, v2}) -> v1 >= v2 end)
-        %>
-        <%= for {name, count} <- maps do %>
-          <%= central_component "detail_line",
-            label: name,
-            value: format_number(count),
-            width: 350
-          %>
-        <% end %>
-      </div>
-      <div class="col-md-6">
-        <h4>Team size</h4>
-        <%= for t <- 1..8 do %>
-          <%= central_component "detail_line",
-            label: t,
-            value: format_number (@data["totals"]["team_sizes"]["#{t}"] || 0)
-          %>
-        <% end %>
-      </div>
-    </div>
-
+    
 
   </div>
 </div>

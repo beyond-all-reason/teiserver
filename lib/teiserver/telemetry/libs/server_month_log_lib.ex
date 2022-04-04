@@ -41,11 +41,19 @@ defmodule Teiserver.Telemetry.ServerMonthLogLib do
         or logs.year > ^year
   end
 
+  def _search(query, :start_date, date) do
+    _search(query, :start_date, {date.year, date.month})
+  end
+
   def _search(query, :end_date, {year, month}) do
     from logs in query,
       where: (logs.year == ^year
         and logs.month <= ^month)
         or logs.year < ^year
+  end
+
+  def _search(query, :end_date, date) do
+    _search(query, :end_date, {date.year, date.month})
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()

@@ -71,3 +71,13 @@
   bsname: bsname,
   url: Routes.ts_reports_report_path(@conn, :show, "mutes")
 %>
+
+
+<%= central_component "section_menu_button",
+  name: "review",
+  label: "Review",
+  active: @active,
+  icon: Teiserver.Account.ReviewReport.icon(),
+  bsname: bsname,
+  url: Routes.ts_reports_report_path(@conn, :show, "review")
+%>
