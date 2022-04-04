@@ -332,7 +332,7 @@ defmodule Teiserver.Protocols.SpringOut do
   defp do_reply(:ring, {ringer_id, state_userid}) do
     user = User.get_user_by_id(state_userid)
     ringer_user = User.get_user_by_id(ringer_id)
-    if ringer_id not in (user.ignored || []) or ringer_user.moderator == true or ringer_user.bot == true do
+    if ringer_id not in (user.ignored || []) or ringer_user.moderator == true or User.is_bot?(ringer_user) == true do
       ringer_name = User.get_username(ringer_id)
       "RING #{ringer_name}\n"
     end
@@ -436,7 +436,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:chat_message, {from_id, room_name, messages, state_user}) when is_list(messages) do
     from_user = User.get_user_by_id(from_id)
-    if from_id not in (state_user.ignored || []) or from_user.moderator == true or from_user.bot == true do
+    if from_id not in (state_user.ignored || []) or from_user.moderator == true or User.is_bot?(from_user) == true do
       from_name = User.get_username(from_id)
       messages
       |> Enum.map(fn msg ->
@@ -452,7 +452,7 @@ defmodule Teiserver.Protocols.SpringOut do
 
   defp do_reply(:chat_message_ex, {from_id, room_name, messages, state_user}) when is_list(messages) do
     from_user = User.get_user_by_id(from_id)
-    if from_id not in (state_user.ignored || []) or from_user.moderator == true or from_user.bot == true do
+    if from_id not in (state_user.ignored || []) or from_user.moderator == true or User.is_bot?(from_user) == true do
       from_name = User.get_username(from_id)
       messages
       |> Enum.map(fn msg ->
@@ -668,7 +668,7 @@ defmodule Teiserver.Protocols.SpringOut do
     PubSub.unsubscribe(Central.PubSub, "teiserver_global_battle_lobby_updates")
     PubSub.subscribe(Central.PubSub, "teiserver_global_battle_lobby_updates")
 
-    exempt_from_cmd_throttle = (user.moderator == true or user.bot == true)
+    exempt_from_cmd_throttle = (user.moderator == true or User.is_bot?(user) == true)
     %{state | user: user, username: user.name, userid: user.id, exempt_from_cmd_throttle: exempt_from_cmd_throttle}
   end
 

@@ -41,7 +41,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
     PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
     PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{user.id}")
 
-    exempt_from_cmd_throttle = (user.moderator == true or user.bot == true)
+    exempt_from_cmd_throttle = (user.moderator == true or User.is_bot?(user) == true)
     %{state |
       user: user,
       username: user.name,

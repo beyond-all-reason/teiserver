@@ -165,7 +165,7 @@ defmodule Teiserver.Room do
 
   def send_message(from_id, room_name, msg) do
     user = User.get_user_by_id(from_id)
-    if user.bot == false and WordLib.flagged_words(msg) > 0 do
+    if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
@@ -199,7 +199,7 @@ defmodule Teiserver.Room do
   @spec send_message_ex(T.userid(), String.t(), String.t()) :: nil | :ok
   def send_message_ex(from_id, room_name, msg) do
     user = User.get_user_by_id(from_id)
-    if user.bot == false and WordLib.flagged_words(msg) > 0 do
+    if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 

@@ -23,7 +23,7 @@ defmodule Teiserver.Battle.LobbyChat do
   def do_say(userid, msg, lobby_id) do
     msg = trim_message(msg)
     user = User.get_user_by_id(userid)
-    if user.bot == false and WordLib.flagged_words(msg) > 0 do
+    if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
@@ -59,7 +59,7 @@ defmodule Teiserver.Battle.LobbyChat do
   def sayex(userid, msg, lobby_id) do
     msg = trim_message(msg)
     user = User.get_user_by_id(userid)
-    if user.bot == false and WordLib.flagged_words(msg) > 0 do
+    if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
@@ -126,11 +126,11 @@ defmodule Teiserver.Battle.LobbyChat do
 
     persist = cond do
       lobby == nil -> false
-      user.bot == true and String.slice(msg, 0..1) == "* " -> false
+      User.is_bot?(user) == true and String.slice(msg, 0..1) == "* " -> false
       true -> true
     end
 
-    userid = if user.bot do
+    userid = if User.is_bot?(user) do
       case Regex.run(~r/<(.*?)>/u, msg) do
         [_, username] ->
           User.get_userid(username) || user.id
