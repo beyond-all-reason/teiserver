@@ -100,27 +100,25 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   defp handle_json_msg(%{"username" => _, "CPU" => _} = contents, from_id) do
-    if User.is_bot?(from_id) do
-      case User.get_user_by_name(contents["username"]) do
-        nil ->
-          :ok
-        user ->
-          if User.is_bot?(from_id) do
-            stats = %{
-              "hardware:cpuinfo" => contents["CPU"],
-              "hardware:gpuinfo" => contents["GPU"],
-              "hardware:osinfo" => contents["OS"],
-              "hardware:raminfo" => contents["RAM"],
-              "hardware:displaymax" => contents["Displaymax"],
-              "hardware:validation" => contents["validation"],
-            }
-            Account.update_user_stat(user.id, stats)
+    case User.get_user_by_name(contents["username"]) do
+      nil ->
+        :ok
+      user ->
+        if User.is_bot?(from_id) do
+          stats = %{
+            "hardware:cpuinfo" => contents["CPU"],
+            "hardware:gpuinfo" => contents["GPU"],
+            "hardware:osinfo" => contents["OS"],
+            "hardware:raminfo" => contents["RAM"],
+            "hardware:displaymax" => contents["Displaymax"],
+            "hardware:validation" => contents["validation"],
+          }
+          Account.update_user_stat(user.id, stats)
 
-            if (user.hw_hash || "") == "" do
-              Teiserver.Coordinator.AutomodServer.check_user(user.id)
-            end
+          if (user.hw_hash || "") == "" do
+            Teiserver.Coordinator.AutomodServer.check_user(user.id)
           end
-      end
+        end
     end
   end
 
