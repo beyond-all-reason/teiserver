@@ -253,6 +253,7 @@ defmodule TeiserverWeb.Admin.UserController do
       (if user_params["non-bridged"] == "true", do: "Non-bridged"),
       (if user_params["donor"] == "true", do: "Donor"),
       (if user_params["contributor"] == "true", do: "Contributor"),
+      (if user_params["caster"] == "true", do: "Caster"),
       (if user_params["developer"] == "true", do: "Developer"),
     ]
     |> Enum.filter(&(&1 != nil))

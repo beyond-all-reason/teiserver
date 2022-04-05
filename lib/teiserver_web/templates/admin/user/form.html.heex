@@ -97,6 +97,13 @@
       %>
 
       <%= central_component "checkbox",
+        id: "user_caster",
+        name: "user[caster]",
+        label: "Caster",
+        checked: ("Caster" in (@changeset.data.data["roles"] || []))
+      %>
+
+      <%= central_component "checkbox",
         id: "user_donor",
         name: "user[donor]",
         label: "Donor",

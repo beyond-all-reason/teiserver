@@ -22,7 +22,7 @@ defmodule Teiserver.User do
   @default_icon "fa-solid fa-user"
 
   @spec role_list :: [String.t()]
-  def role_list(), do: ~w(Tester Streamer Donor Contributor Dev Moderator Admin Verified Bot)
+  def role_list(), do: ~w(Tester Streamer Donor Caster Contributor Dev Moderator Admin Verified Bot)
 
   @spec keys() :: [atom]
   def keys(), do: [:id, :name, :email, :inserted_at, :clan_id]
