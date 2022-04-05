@@ -55,8 +55,10 @@
 
 <ul>
   <li>Max players: <%= @battle.max_players %></li>
-  <li>Password: <%= @battle.password %></li>
   <li>Locked: <%= @battle.locked %></li>
+  <%= if allow?(@current_user, "teiserver.moderator") do %>
+    <li>Password: <%= @battle.password %></li>
+  <% end %>
 </ul>
 
 <h4>Players</h4>
@@ -209,19 +211,18 @@
 </span>
 
 <%= if allow?(@current_user, "admin.dev.developer") do %>
-<br /><br />
-<div class="row" id="admin-data">
-  <div class="col-md-6">
-    <pre>
-      <%= Kernel.inspect @battle, pretty: true, limit: :infinity %>
-    </pre>
+  <div class="row mt-3" id="admin-data">
+    <div class="col-md-6">
+      <pre>
+        <%= Kernel.inspect @battle, pretty: true, limit: :infinity %>
+      </pre>
+    </div>
+    <div class="col-md-6">
+      <pre>
+        <%= Kernel.inspect @consul, pretty: true, limit: :infinity %>
+      </pre>
+    </div>
   </div>
-  <div class="col-md-6">
-    <pre>
-      <%= Kernel.inspect @consul, pretty: true, limit: :infinity %>
-    </pre>
-  </div>
-</div>
 <% end %>
 
       </div>
