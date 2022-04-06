@@ -72,6 +72,12 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
+    Registry.register(
+      Teiserver.ServerRegistry,
+      "AutomodServer",
+      :automod
+    )
+
     :timer.send_after(500, :begin)
     ConCache.put(:teiserver_consul_pids, :automod, self())
     {:ok, %{}}
@@ -164,12 +170,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
     Account.update_user_stat(userid, %{"autoban_type" => automod_action.type, "autoban_id" => automod_action.id})
 
     coordinator_user_id = Coordinator.get_coordinator_userid()
-
-    Registry.register(
-      Teiserver.ServerRegistry,
-      "AutomodServer",
-      :automod
-    )
 
     {:ok, report} = Central.Account.create_report(%{
       "location" => "Automod",
