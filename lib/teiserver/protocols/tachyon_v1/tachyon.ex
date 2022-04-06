@@ -3,7 +3,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   Used for library-like functions that are specific to a version.
   """
 
-  alias Teiserver.Client
+  alias Teiserver.{Client, User}
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
 
@@ -41,7 +41,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
     PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
     PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{user.id}")
 
-    exempt_from_cmd_throttle = (user.moderator == true or User.is_bot?(user) == true)
+    exempt_from_cmd_throttle = (User.is_moderator?(user) == true or User.is_bot?(user) == true)
     %{state |
       user: user,
       username: user.name,

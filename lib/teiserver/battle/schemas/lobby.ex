@@ -312,7 +312,7 @@ defmodule Teiserver.Battle.Lobby do
   @spec kick_user_from_battle(Integer.t(), Integer.t()) :: nil | :ok | {:error, any}
   def kick_user_from_battle(userid, lobby_id) do
     user = User.get_user_by_id(userid)
-    if not user.moderator do
+    if not User.is_moderator?(user) do
       case do_remove_user_from_battle(userid, lobby_id) do
         :closed ->
           nil
@@ -508,7 +508,7 @@ defmodule Teiserver.Battle.Lobby do
       nil -> {true, nil}
     end
 
-    ignore_password = (user.moderator == true) or Enum.member?(user.roles, "Caster")
+    ignore_password = User.is_moderator?(user) or Enum.member?(user.roles, "Caster")
 
     cond do
       user == nil ->
@@ -517,7 +517,7 @@ defmodule Teiserver.Battle.Lobby do
       battle == nil ->
         {:failure, "No battle found"}
 
-       battle.locked == true and user.moderator == false ->
+       battle.locked == true and User.is_moderator?(user) == false ->
         {:failure, "Battle locked"}
 
       battle.password != nil and password != battle.password and not ignore_password ->
@@ -640,7 +640,7 @@ defmodule Teiserver.Battle.Lobby do
       bot == nil ->
         false
 
-      changer.moderator == true ->
+      User.is_moderator?(changer) == true ->
         true
 
       battle.founder_id == changer.userid ->
@@ -685,7 +685,7 @@ defmodule Teiserver.Battle.Lobby do
       )
 
     cond do
-      changer.moderator == true ->
+      User.is_moderator?(changer) == true ->
         true
 
       battle.founder_id == changer.userid ->

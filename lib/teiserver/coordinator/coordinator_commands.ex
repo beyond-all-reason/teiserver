@@ -131,7 +131,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           "Profile link: #{profile_link}"
         ]
 
-        mod_parts = if sender.moderator do
+        mod_parts = if User.is_moderator?(sender) do
           player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
           spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
           rank_time = User.rank_time(user.id)

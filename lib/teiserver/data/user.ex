@@ -4,7 +4,7 @@ defmodule Teiserver.User do
   """
   alias Teiserver.{Client, Coordinator}
   alias Teiserver.EmailHelper
-  alias Teiserver.Account
+  alias Teiserver.{Account, User}
   alias Teiserver.Account.{UserCache, RelationsLib}
   alias Teiserver.Chat.WordLib
   alias Argon2
@@ -452,6 +452,7 @@ defmodule Teiserver.User do
     update_user(%{user | email_change_code: ["#{code}", new_email]})
   end
 
+  @spec change_email(T.user(), String.t()) :: T.user()
   def change_email(user, new_email) do
     Central.cache_delete(:users_lookup_id_with_email, String.downcase(user.email))
     ConCache.put(:users_lookup_id_with_email, String.downcase(new_email), user.id)
@@ -465,22 +466,22 @@ defmodule Teiserver.User do
   @spec get_userid(String.t()) :: integer() | nil
   defdelegate get_userid(username), to: UserCache
 
-  @spec get_user_by_name(String.t()) :: User.t() | nil
+  @spec get_user_by_name(String.t()) :: T.user() | nil
   defdelegate get_user_by_name(username), to: UserCache
 
-  @spec get_user_by_email(String.t()) :: User.t() | nil
+  @spec get_user_by_email(String.t()) :: T.user() | nil
   defdelegate get_user_by_email(email), to: UserCache
 
-  @spec get_user_by_discord_id(String.t()) :: User.t() | nil
+  @spec get_user_by_discord_id(String.t()) :: T.user() | nil
   defdelegate get_user_by_discord_id(discord_id), to: UserCache
 
   @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
   defdelegate get_userid_by_discord_id(discord_id), to: UserCache
 
-  @spec get_user_by_token(String.t()) :: User.t() | nil
+  @spec get_user_by_token(String.t()) :: T.user() | nil
   defdelegate get_user_by_token(token), to: UserCache
 
-  @spec get_user_by_id(T.userid()) :: User.t() | nil
+  @spec get_user_by_id(T.userid()) :: T.user() | nil
   defdelegate get_user_by_id(id), to: UserCache
 
   @spec list_users(list) :: list
@@ -492,13 +493,13 @@ defmodule Teiserver.User do
   @spec pre_cache_users(atom) :: :ok
   defdelegate pre_cache_users(type), to: UserCache
 
-  @spec convert_user(User.t()) :: User.t()
+  @spec convert_user(T.user()) :: T.user()
   defdelegate convert_user(user), to: UserCache
 
-  @spec add_user(User.t()) :: User.t()
+  @spec add_user(T.user()) :: T.user()
   defdelegate add_user(user), to: UserCache
 
-  @spec update_user(User.t(), boolean) :: User.t()
+  @spec update_user(T.user(), boolean) :: T.user()
   defdelegate update_user(user, persist \\ false), to: UserCache
 
   @spec delete_user(T.userid()) :: :ok | :no_user
@@ -506,25 +507,25 @@ defmodule Teiserver.User do
 
 
   # Friend related
-  @spec accept_friend_request(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  @spec accept_friend_request(T.userid() | nil, T.userid() | nil) :: T.user() | nil
   defdelegate accept_friend_request(requester, accepter), to: RelationsLib
 
-  @spec decline_friend_request(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  @spec decline_friend_request(T.userid() | nil, T.userid() | nil) :: T.user() | nil
   defdelegate decline_friend_request(requester, accepter), to: RelationsLib
 
-  @spec create_friend_request(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  @spec create_friend_request(T.userid() | nil, T.userid() | nil) :: T.user() | nil
   defdelegate create_friend_request(requester, accepter), to: RelationsLib
 
-  @spec ignore_user(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  @spec ignore_user(T.userid() | nil, T.userid() | nil) :: T.user() | nil
   defdelegate ignore_user(requester, accepter), to: RelationsLib
 
-  @spec unignore_user(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  @spec unignore_user(T.userid() | nil, T.userid() | nil) :: T.user() | nil
   defdelegate unignore_user(requester, accepter), to: RelationsLib
 
-  @spec remove_friend(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  @spec remove_friend(T.userid() | nil, T.userid() | nil) :: T.user() | nil
   defdelegate remove_friend(requester, accepter), to: RelationsLib
 
-  @spec list_combined_friendslist([T.userid()]) :: [User.t()]
+  @spec list_combined_friendslist([T.userid()]) :: [T.user()]
   defdelegate list_combined_friendslist(userids), to: RelationsLib
 
   @spec send_direct_message(T.userid(), T.userid(), String.t()) :: :ok
@@ -981,10 +982,10 @@ defmodule Teiserver.User do
   def allow?(user, required) do
     case required do
       :moderator ->
-        user.moderator
+        User.is_moderator?(user)
 
       :bot ->
-        user.moderator or user.bot
+        User.is_moderator?(user) or User.is_bot?(user)
 
       required ->
         Enum.member?(user.roles, required)

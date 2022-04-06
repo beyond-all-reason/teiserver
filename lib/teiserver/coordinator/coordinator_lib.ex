@@ -1,5 +1,6 @@
 defmodule Teiserver.Coordinator.CoordinatorLib do
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.User
 
   @spec help(T.user(), boolean()) :: String.t()
   def help(user, host) do
@@ -145,8 +146,8 @@ Resets the coordinator bot for this lobby to the default
 
     [
       everybody,
-      (if user.moderator or host, do: hosts, else: ""),
-      (if user.moderator, do: moderators, else: "")
+      (if User.is_moderator?(user) or host, do: hosts, else: ""),
+      (if User.is_moderator?(user), do: moderators, else: "")
     ]
     |> Enum.join("\n")
   end

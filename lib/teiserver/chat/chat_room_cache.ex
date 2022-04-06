@@ -50,7 +50,7 @@ defmodule Teiserver.Room do
       user == nil ->
         {false, "No user"}
 
-      user.moderator == true ->
+      User.is_moderator?(user) == true ->
         true
 
       room.clan_id ->
