@@ -83,7 +83,8 @@ defmodule Central.MixProject do
       {:csv, "~> 2.4"},
       {:earmark, "~> 1.4"},
       {:ranch, "~> 1.8"},
-      {:alchemy, "~> 0.7.0", hex: :discord_alchemy}
+      {:alchemy, "~> 0.7.0", hex: :discord_alchemy},
+      {:horde, "~> 0.8"},
     ]
   end
 
