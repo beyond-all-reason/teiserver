@@ -114,10 +114,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             "hardware:validation" => contents["validation"],
           }
           Account.update_user_stat(user.id, stats)
-
-          if (user.hw_hash || "") == "" do
-            Teiserver.Coordinator.AutomodServer.check_user(user.id)
-          end
+          Teiserver.Coordinator.AutomodServer.check_user(user.id)
         end
     end
   end

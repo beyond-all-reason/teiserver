@@ -508,7 +508,7 @@ defmodule Teiserver.Battle.Lobby do
       nil -> {true, nil}
     end
 
-    ignore_password = (user.moderator == false) or Enum.member?(user.roles, "Caster")
+    ignore_password = (user.moderator == true) or Enum.member?(user.roles, "Caster")
 
     cond do
       user == nil ->

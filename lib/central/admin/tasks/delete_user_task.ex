@@ -37,7 +37,11 @@ defmodule Central.Admin.DeleteUserTask do
 
     # And now the users
     query = "DELETE FROM account_users WHERE id IN #{sql_id_list}"
-    Ecto.Adapters.SQL.query(Repo, query, [])
+    r = Ecto.Adapters.SQL.query(Repo, query, [])
+
+    # IO.puts ""
+    # IO.inspect r
+    # IO.puts ""
 
     :ok
   end
