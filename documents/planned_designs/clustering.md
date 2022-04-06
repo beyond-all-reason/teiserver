@@ -8,26 +8,26 @@ Currently Teiserver runs on a single node, we would like to run it on multiple n
 - [X] **Stage 3:** Cache actions should use the new functions in `Central`
 
 ##### PID store
-- [X] Stage 1: Change each server process to register it's `pid` with `Teiserver.ServerRegistry`.
-- [X] Stage 2: Ensure on a running server each of the servers expected appears in the registry list
-- [ ] Stage 3: Update all `get_server_pid` functions to call the registry, test them
-- [ ] Stage 4: Remove the ETS table and calls to it
+- [X] **Stage 1:** Change each server process to register it's `pid` with `Teiserver.ServerRegistry`.
+- [X] **Stage 2:** Ensure on a running server each of the servers expected appears in the registry list
+- [ ] **Stage 3:** Update all `get_server_pid` functions to call the registry, test them
+- [ ] **Stage 4:** Remove the ETS table and calls to it
 
 ##### PubSub.broadcast
-- [ ] Stage 1: Identify which pubsub messages need to include the sending `Node.self()` as part of their structure
-- [ ] Stage 2: One message at a time, update the documentation and implementation of said message (both send and receive)
+- [ ] **Stage 1:** Identify which pubsub messages need to include the sending `Node.self()` as part of their structure
+- [ ] **Stage 2:** One message at a time, update the documentation and implementation of said message (both send and receive)
 
 ##### Less reliance on pre-caching
-- [ ] Stage 1: Identify pre-caches used
-- [ ] Stage 2: Add a `caches.md` documentation file
-- [ ] Stage 3: Decide which can be migrated away
-- [ ] Stage 4: Might need to use cache_update rather than cache_put to help ensure consistency
+- [ ] **Stage 1:** Identify pre-caches used
+- [ ] **Stage 2:** Add a `caches.md` documentation file
+- [ ] **Stage 3:** Decide which can be migrated away
+- [ ] **Stage 4:** Might need to use cache_update rather than cache_put to help ensure consistency
 
 ##### Per node processes
-- [X] Stage 1: List each type of process we track.
-- [ ] Stage 2: Find a good example of a per-node message vs a cluster-wide message and document how it should work
-- [ ] Stage 3: Identify the changes that will need to be made to it and attempt implementing them
-- [ ] Stage 4: Repeat for all other messages to node vs cluster processes
+- [X] **Stage 1:** List each type of process we track.
+- [ ] **Stage 2:** Find a good example of a per-node message vs a cluster-wide message and document how it should work
+- [ ] **Stage 3:** Identify the changes that will need to be made to it and attempt implementing them
+- [ ] **Stage 4:** Repeat for all other messages to node vs cluster processes
 
 ## Known issues
 - ETS (via ConCache) is node specific, we need to make changes propagate across the cluster
