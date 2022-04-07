@@ -509,6 +509,7 @@ defmodule Teiserver.Battle.Lobby do
     end
 
     ignore_password = User.is_moderator?(user) or Enum.member?(user.roles, "Caster")
+    ignore_locked = User.is_moderator?(user) or Enum.member?(user.roles, "Caster")
 
     cond do
       user == nil ->
@@ -517,7 +518,7 @@ defmodule Teiserver.Battle.Lobby do
       battle == nil ->
         {:failure, "No battle found"}
 
-       battle.locked == true and User.is_moderator?(user) == false ->
+       battle.locked == true and ignore_locked == false ->
         {:failure, "Battle locked"}
 
       battle.password != nil and password != battle.password and not ignore_password ->
