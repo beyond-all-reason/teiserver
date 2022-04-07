@@ -11,15 +11,17 @@
   </thead>
   <tbody>
     <%= for {uid, total} <- @data["minutes_per_user"]["total"] do %>
-    <% user = Map.fetch!(@users, uid |> String.to_integer) %>
-    <tr>
-      <td><%= user.name %></td>
-      <td><%= represent_minutes total %></td>
-      <td><%= represent_minutes @data["minutes_per_user"]["player"][uid] %></td>
-      <td><%= represent_minutes @data["minutes_per_user"]["spectator"][uid] %></td>
-      <td><%= represent_minutes @data["minutes_per_user"]["lobby"][uid] %></td>
-      <td><%= represent_minutes @data["minutes_per_user"]["menu"][uid] %></td>
-    </tr>
+      <% user = @users[uid |> String.to_integer] %>
+      <%= if user do %>
+        <tr>
+          <td><%= user.name %></td>
+          <td><%= represent_minutes total %></td>
+          <td><%= represent_minutes @data["minutes_per_user"]["player"][uid] %></td>
+          <td><%= represent_minutes @data["minutes_per_user"]["spectator"][uid] %></td>
+          <td><%= represent_minutes @data["minutes_per_user"]["lobby"][uid] %></td>
+          <td><%= represent_minutes @data["minutes_per_user"]["menu"][uid] %></td>
+        </tr>
+      <% end %>
     <% end %>
     <tr>
       <td><strong>Total:</strong></td>

@@ -201,7 +201,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
-    ConCache.put(:teiserver_consul_pids, :match_monitor, self())
     send(self(), :begin)
 
     {:ok, %{}}

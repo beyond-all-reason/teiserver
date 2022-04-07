@@ -3,7 +3,15 @@ defmodule Teiserver.Application do
   def children() do
     children = [
       # Registries - TODO: Change these into Horde Registries
+      {Registry, keys: :duplicate, name: Teiserver.PoolRegistry},
       {Registry, keys: :unique, name: Teiserver.ServerRegistry},
+
+      # These are for tracking the number of servers on the local node
+      {Registry, keys: :duplicate, name: Teiserver.LocalPoolRegistry},
+      {Registry, keys: :duplicate, name: Teiserver.LocalServerRegistry},
+
+      # {Horde.Registry, [keys: :duplicate, members: :auto, name: Teiserver.PoolRegistry]},
+      # {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
 
       # ETS pid tables, need to refactor them out
       concache_sup(:teiserver_throttle_pids),

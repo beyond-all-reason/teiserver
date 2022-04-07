@@ -1,8 +1,4 @@
 defmodule Teiserver.Coordinator.AutomodServer do
-  @moduledoc """
-  The coordinator server is the interface point for the Coordinator system. Consuls are invisible (to the players) processes
-  performing their actions in the name of the coordinator
-  """
   use GenServer
   alias Central.Config
   import Central.Logging.Helpers, only: [add_audit_log: 4]
@@ -15,10 +11,11 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec check_user(T.userid()) :: nil
   def check_user(userid) do
-    case ConCache.get(:teiserver_consul_pids, :automod) do
-      nil -> nil
-      pid ->
+    case Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
+      [{pid, _}] ->
         GenServer.call(pid, {:check_user, userid})
+      _ ->
+        nil
     end
   end
 

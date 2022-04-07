@@ -41,7 +41,14 @@ defmodule Teiserver.Coordinator do
 
   @spec get_coordinator_pid() :: pid() | nil
   def get_coordinator_pid() do
-    ConCache.get(:teiserver_consul_pids, :coordinator)
+    # ConCache.get(:teiserver_consul_pids, :coordinator)
+
+    case Registry.lookup(Teiserver.ServerRegistry, "CoordinatorServer") do
+      [{pid, _}] ->
+        pid
+      _ ->
+        nil
+    end
   end
 
   @spec cast_coordinator(any) :: any
@@ -63,7 +70,14 @@ defmodule Teiserver.Coordinator do
 
   @spec get_consul_pid(T.lobby_id()) :: pid() | nil
   def get_consul_pid(lobby_id) do
-    ConCache.get(:teiserver_consul_pids, lobby_id)
+    # ConCache.get(:teiserver_consul_pids, lobby_id)
+
+    case Registry.lookup(Teiserver.ServerRegistry, "ConsulServer:#{lobby_id}") do
+      [{pid, _}] ->
+        pid
+      _ ->
+        nil
+    end
   end
 
   @spec start_consul(T.lobby_id()) :: pid()
@@ -106,6 +120,7 @@ defmodule Teiserver.Coordinator do
     Parser.handle_in(userid, msg, lobby_id)
   end
 
+  @spec close_battle(T.lobby_id()) :: :ok
   def close_battle(lobby_id) do
     case get_consul_pid(lobby_id) do
       nil -> nil
@@ -113,6 +128,9 @@ defmodule Teiserver.Coordinator do
         Central.cache_delete(:teiserver_consul_pids, lobby_id)
         DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, pid)
     end
+
+    Teiserver.Throttles.stop_throttle("battle_lobby_throttle_#{lobby_id}")
+    :ok
   end
 
   @spec create_report(T.report) :: :ok
