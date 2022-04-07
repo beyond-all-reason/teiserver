@@ -242,12 +242,26 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec get_accolade_bot_pid() :: pid() | nil
   def get_accolade_bot_pid() do
-    ConCache.get(:teiserver_accolade_pids, :accolade_bot)
+    # ConCache.get(:teiserver_accolade_pids, :accolade_bot)
+
+    case Registry.lookup(Teiserver.ServerRegistry, "AccoladeBotServer") do
+      [{pid, _}] ->
+        pid
+      _ ->
+        nil
+    end
   end
 
   @spec get_accolade_chat_pid(T.userid()) :: pid() | nil
   def get_accolade_chat_pid(userid) do
-    ConCache.get(:teiserver_accolade_pids, userid)
+    # ConCache.get(:teiserver_accolade_pids, userid)
+
+    case Registry.lookup(Teiserver.ServerRegistry, "AccoladeChatServer:#{userid}") do
+      [{pid, _}] ->
+        pid
+      _ ->
+        nil
+    end
   end
 
   @spec cast_accolade_chat(T.userid(), any) :: any

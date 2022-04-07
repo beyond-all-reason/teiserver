@@ -129,7 +129,7 @@ defmodule Teiserver.Coordinator do
         DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, pid)
     end
 
-    Teiserver.Throttles.stop_throttle("battle_lobby_throttle_#{lobby_id}")
+    Teiserver.Throttles.stop_throttle("LobbyThrottle:#{lobby_id}")
     :ok
   end
 

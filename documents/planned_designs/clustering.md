@@ -10,7 +10,7 @@ Currently Teiserver runs on a single node, we would like to run it on multiple n
 ##### PID store
 - [X] **Stage 1:** Change each server process to register it's `pid` with `Teiserver.ServerRegistry`.
 - [X] **Stage 2:** Ensure on a running server each of the servers expected appears in the registry list
-- [ ] **Stage 3:** Update all `get_server_pid` functions to call the registry, test them
+- [X] **Stage 3:** Update all `get_server_pid` functions to call the registry, test them
 - [ ] **Stage 4:** Remove the ETS table and calls to it
 
 ##### PubSub.broadcast

@@ -13,7 +13,14 @@ defmodule Teiserver.Throttles do
 
   @spec get_throttle_pid({atom(), integer()}) :: pid() | nil
   def get_throttle_pid(key) do
-    ConCache.get(:teiserver_throttle_pids, key)
+    # ConCache.get(:teiserver_throttle_pids, key)
+
+    case Registry.lookup(Teiserver.ServerRegistry, key) do
+      [{pid, _}] ->
+        pid
+      _ ->
+        nil
+    end
   end
 
   @spec stop_throttle({atom(), integer()}) :: nil | :ok

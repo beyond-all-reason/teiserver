@@ -27,8 +27,16 @@ defmodule Teiserver.Data.Matchmaking do
     ConCache.get(:teiserver_queues, id)
   end
 
+  @spec get_queue_pid(integer) :: pid() | nil
   def get_queue_pid(id) when is_integer(id) do
-    ConCache.get(:teiserver_queue_pids, id)
+    case Registry.lookup(Teiserver.ServerRegistry, "QueueServer:#{id}") do
+      [{pid, _}] ->
+        pid
+      _ ->
+        nil
+    end
+
+    # ConCache.get(:teiserver_queue_pids, id)
   end
 
   @spec call_queue(Integer.t(), any) :: any
