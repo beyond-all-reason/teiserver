@@ -95,6 +95,7 @@ defmodule Teiserver.Coordinator do
   end
 
   @spec cast_consul(T.lobby_id(), any) :: any
+  def cast_consul(nil, _), do: :ok
   def cast_consul(lobby_id, msg) when is_integer(lobby_id) do
     case get_consul_pid(lobby_id) do
       nil -> nil
