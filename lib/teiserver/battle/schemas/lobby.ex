@@ -142,7 +142,7 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   def stop_battle_lobby_throttle(battle_lobby_id) do
-    Teiserver.Throttles.stop_throttle({:battle_lobby, battle_lobby_id})
+    Teiserver.Throttles.stop_throttle("LobbyThrottle:#{battle_lobby_id}")
   end
 
   def add_bot_to_battle(lobby_id, bot) do
