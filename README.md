@@ -1,5 +1,7 @@
 # Teiserver
-An Elixir centralised/middleware game server. Originally an alternate implementation of [Uberserver](https://github.com/spring/uberserver) as used by Spring RTS games. Currently implementing only the Spring protocol but later I plan to create a new and more modern protocol and am open to implementing other existing protocols. Being written in Elixir it takes full advantage of the Erlang OTP for a very concurrent application with very low demand on system resources.
+An Elixir centralised/middleware game server. Originally an alternate implementation of [Uberserver](https://github.com/spring/uberserver) as used by Spring RTS games. Currently implementing the Spring protocol but with work being done on a new protocol [Tachyon](/documents/tachyon).
+
+It takes full advantage of Elixir/OTP for a fully concurrent application with very low demand on system resources. Work is currently being undertaken to make it suitable for a clustered deployment.
 
 ## Documentation
 - [Architecture](/documents/architecture.md)
@@ -12,13 +14,13 @@ These are just the highlights, full documentation can be found in the documentat
 
 ### Feature documentation
 - [Metrics](/documents/planned_designs/metrics.md)
-- [Agent mode/Lobby dev assist](/documents/dev_guides/discord_bot.md)
+- [Discord bot](/documents/dev_guides/discord_bot.md)
 
 ### In progress features
-- [Coordinator mode](/documents/planned_designs/coordinator.md)
+- [Tachyon](/documents/tachyon)
+- [Clustering](/documents/planned_designs/clustering.md)
 - [Matchmaking](/documents/spring/matchmaking.md)
 - [Reputation/Reporting system](/documents/planned_designs/reputation.md)
-- [Tachyon](/documents/tachyon)
 - [Agent mode/Lobby dev assist](/documents/planned_designs/agent_mode.md)
 
 ### Features planned but not started
