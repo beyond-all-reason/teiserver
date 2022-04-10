@@ -1523,6 +1523,7 @@ defmodule Teiserver.Telemetry do
     Repo.delete(infolog)
   end
 
+  @spec startup :: :ok
   def startup() do
     list_property_types(limit: :infinity)
     |> Enum.map(fn property_type ->
@@ -1533,5 +1534,7 @@ defmodule Teiserver.Telemetry do
     |> Enum.map(fn event_type ->
       ConCache.put(:teiserver_telemetry_event_types, event_type.name, event_type.id)
     end)
+
+    :ok
   end
 end

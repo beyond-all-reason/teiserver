@@ -46,6 +46,20 @@ defmodule Central do
   @doc """
   Puts the `value` into `key` for `table` across the entire cluster. Makes use of Phoenix.PubSub to do so.
   """
+  @spec cache_insert_new(atom, any, any) :: :ok | {:error, any}
+  def cache_insert_new(table, key, value) do
+    ConCache.insert_new(table, key, value)
+
+    Phoenix.PubSub.broadcast(
+      Central.PubSub,
+      "cluster_hooks",
+      {:cluster_hooks, :insert_new, Node.self(), table, key, value}
+    )
+  end
+
+  @doc """
+  Puts the `value` into `key` for `table` across the entire cluster. Makes use of Phoenix.PubSub to do so.
+  """
   @spec cache_update(atom, any, any) :: :ok | {:error, any}
   def cache_update(table, key, func) do
     ConCache.update(table, key, func)
@@ -62,8 +76,16 @@ defmodule Central do
   @spec store_get(atom, any) :: any
   def store_get(table, key), do: Central.cache_get(table, key)
 
+  @spec store_delete(atom, any) :: :ok
   def store_delete(table, key), do: ConCache.delete(table, key)
+
+  @spec store_put(atom, any, any) :: :ok
   def store_put(table, key, value), do: ConCache.put(table, key, value)
+
+  @spec store_insert_new(atom, any, any) :: :ok
+  def store_insert_new(table, key, value), do: ConCache.put(table, key, value)
+
+  @spec store_update(atom, any, function()) :: :ok
   def store_update(table, key, func), do: ConCache.update(table, key, func)
 
   @spec store_get_or_store(atom, any, function) :: any

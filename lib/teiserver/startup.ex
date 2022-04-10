@@ -265,6 +265,7 @@ defmodule Teiserver.Startup do
     ConCache.put(:id_counters, :battle, 1)
 
     User.pre_cache_users(:active)
+
     Teiserver.Data.Matchmaking.pre_cache_queues()
 
     springids = Account.list_users(order_by: "Newest first", limit: 5, select: [:data])
@@ -278,6 +279,9 @@ defmodule Teiserver.Startup do
     ConCache.put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
     ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", nil)
     ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_cache", true)
+
+    # Add in achievements
+    Teiserver.Game.GenerateAchievementTypes.perform()
 
     # Now we can do the post-precache stuff
     User.pre_cache_users(:remaining)
@@ -311,9 +315,6 @@ defmodule Teiserver.Startup do
         Teiserver.agent_mode()
       end)
     end
-
-    # Add in achievements
-    Teiserver.Game.GenerateAchievementTypes.perform()
 
     ConCache.put(:application_metadata_cache, "teiserver_full_startup_completed", true)
 

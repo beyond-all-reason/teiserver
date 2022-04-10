@@ -16,6 +16,8 @@ Currently Teiserver runs on a single node, we would like to run it on multiple n
 ##### PubSub.broadcast
 - [ ] **Stage 1:** Identify which pubsub messages need to include the sending `Node.self()` as part of their structure
 - [ ] **Stage 2:** One message at a time, update the documentation and implementation of said message (both send and receive)
+- [ ] **Stage 3:** Identify other things that need to be a singleton (e.g. lobby_id, spring_id)
+- [ ] **Stage 4:** Add functionality for a node coming online after the others and being caught-up on state of caches
 
 ##### Less reliance on pre-caching
 - [ ] **Stage 1:** Identify pre-caches used
@@ -69,6 +71,8 @@ We can use Horde to run a process with a single name and have it automatically g
 Note: This ties in with the "Per node process" item.
 - **Stage 1:** Identify which pubsub messages need to include the sending `Node.self()` as part of their structure
 - **Stage 2:** One message at a time, update the documentation and implementation of said message (both send and receive)
+- **Stage 3:** Identify other things that need to be a singleton (e.g. lobby_id, spring_id), they probably need to be placed in a single GenServer instance rather than ETS
+- **Stage 4:** Add functionality for a node coming online after the others and being caught-up on state of caches (e.g. client list)
 
 ##### Less reliance on pre-caching
 - **Stage 1:** Identify pre-caches used
