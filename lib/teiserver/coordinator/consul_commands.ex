@@ -344,6 +344,16 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+  def handle_command(%{command: "success"}, %{split: nil} = state) do
+    lobby = Lobby.get_lobby!(state.lobby_id)
+    lobby.players
+      |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
+      |> Enum.filter(fn client -> client.player == true end)
+      |> Enum.each(fn client ->
+        Lobby.say(client.userid, "!y", state.lobby_id)
+      end)
+  end
+
   def handle_command(%{command: "cancelsplit"}, %{split: nil} = state) do
     state
   end

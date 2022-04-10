@@ -110,6 +110,9 @@ Moves the user to players
 """
 
     moderators = """
+$success
+Sends a "!y" message from every player to the game host to make a vote pass.
+
 $playerlimit <limit>
 Sets a new player limit for this specific host.
 
