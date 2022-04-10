@@ -5,7 +5,7 @@ Currently Teiserver runs on a single node, we would like to run it on multiple n
 ##### Propagate data
 - [X] **Stage 1:** Central module functions
 - [X] **Stage 2:** Implement ClusterServer
-- [X] **Stage 3:** Cache actions should use the new functions in `Central`
+- [ ] **Stage 3:** Cache actions should use the new functions in `Central`
 
 ##### PID store
 - [X] **Stage 1:** Change each server process to register it's `pid` with `Teiserver.ServerRegistry`.
