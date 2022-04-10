@@ -1,12 +1,10 @@
 ## Pre clustering-changes caches
-- Site config
+- Site config types
 - Report restrictions
 - Audit log types
 - Permission sets
 - Group type
-- Umbrella group
-- Player group
-- Internal group
+- Umbrella, Player and Internal groups
 - Update group caches for above 3
 - Quick items
 - User config types
@@ -25,30 +23,24 @@
 - Telemetry event/property types
 - User list precache (remaining)
 
-#### Identify if even needed
-- ConCache.put(:lists, :rooms, [])
-
 #### Keep but will need work to cache based on state of cluster
 - ConCache.put(:lists, :clients, [])
 - ConCache.insert_new(:lists, :lobbies, [])}
+- ConCache.put(:lists, :rooms, [])
 
-#### Keep but should check if needs backend work
-- Site config
+#### Keep - No race-conditions and no duplication (uses db/store not cache)
+- Site config types
 - Report restrictions
 - Audit log types
-- Permission sets
 - Group type
-- Umbrella group
-- Player group
-- Internal group
-- Update group caches for above 3
+- Umbrella, Player and Internal groups (uses cache but it's built from a DB entry that won't change)
 - Quick items
 - User config types
 - GenerateAchievement types
 
-#### Keep - No race-conditions
-
-#### Keep - Minor changes made to backend to race-conditions
+#### Keep - Changes needed to backend before clustering but otherwise can remain as they are
+- Permission sets (needs to become a Central.store system)
+- Update group caches for new groups (only needs to be run if the groups don't already exist)
 
 #### Replace with Singleton GenServer
 - ConCache.put(:id_counters, :battle, 1)

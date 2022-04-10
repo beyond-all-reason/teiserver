@@ -319,6 +319,7 @@ defmodule Central.Config do
     Central.cache_put(:config_site_cache, key, cached_value)
   end
 
+  @spec delete_site_config(String.t()) :: :ok | {:error, any}
   def delete_site_config(key) do
     query =
       from site_config in SiteConfig,

@@ -20,7 +20,7 @@ defmodule Central.General.QuickAction do
   end
 
   @spec get_items :: list()
-  def get_items(), do: Central.cache_get(:application_metadata_cache, :quick_action_items) || []
+  def get_items(), do: Central.store_get(:application_metadata_cache, :quick_action_items) || []
 
   @icon_atoms ~w(list new edit delete report)a
   defp convert_item(item) do
