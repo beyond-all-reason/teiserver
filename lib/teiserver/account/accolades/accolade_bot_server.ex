@@ -119,7 +119,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   @spec get_accolade_account() :: Central.Account.User.t()
   def get_accolade_account() do
     user = Account.get_user(nil, search: [
-      exact_name: "AccoladesBot"
+      email: "accolades_bot@teiserver"
     ])
 
     case user do

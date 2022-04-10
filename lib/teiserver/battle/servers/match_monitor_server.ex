@@ -156,7 +156,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   @spec get_match_monitor_account() :: Central.Account.User.t()
   def get_match_monitor_account() do
     user = Account.get_user(nil, search: [
-      exact_name: "AutohostMonitor"
+      email: "match_monitor@teiserver"
     ])
 
     case user do

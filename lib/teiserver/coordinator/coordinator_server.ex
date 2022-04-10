@@ -224,7 +224,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   @spec get_coordinator_account() :: Central.Account.User.t()
   def get_coordinator_account() do
     user = Account.get_user(nil, search: [
-      exact_name: "Coordinator"
+      email: "coordinator@teiserver"
     ])
 
     case user do

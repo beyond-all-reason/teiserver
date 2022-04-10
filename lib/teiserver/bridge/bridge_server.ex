@@ -173,7 +173,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   @spec get_bridge_account() :: Central.Account.User.t()
   def get_bridge_account() do
     user = Account.get_user(nil, search: [
-      exact_name: "DiscordBridge"
+      email: "bridge@teiserver"
     ])
 
     case user do
