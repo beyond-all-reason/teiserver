@@ -66,6 +66,11 @@ defmodule Central.Account.UserQueries do
       where: users.name == ^name
   end
 
+  def _search(query, :name_lower, value) do
+    from users in query,
+      where: lower(users.name) == ^String.downcase(value)
+  end
+
   def _search(query, :email, email) do
     from users in query,
       where: users.email == ^email

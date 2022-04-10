@@ -39,7 +39,6 @@ defmodule Teiserver.AccountTest do
     test "list_users with extra filters" do
       # We don't care about the actual results at this point, just that the filters are called
       Account.list_users(search: [
-        exact_name: "",
         data_equal: {"field", "value"},
         data_greater_than: {"field", "123"},
         data_less_than: {"field", "123"},

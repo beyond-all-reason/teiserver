@@ -43,11 +43,6 @@ defmodule Teiserver.Account.UserLib do
   def _search(query, _, nil), do: query
   def _search(query, _, "Any"), do: query
 
-  def _search(query, :exact_name, value) do
-    from users in query,
-      where: users.name == ^value
-  end
-
   def _search(query, :data_equal, {field, value}) do
     from users in query,
       where: fragment("? ->> ? = ?", users.data, ^field, ^value)

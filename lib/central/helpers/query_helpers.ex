@@ -3,6 +3,12 @@ defmodule Central.Helpers.QueryHelpers do
   alias Central.Repo
   import Ecto.Query, warn: false
 
+  defmacro lower(field) do
+    quote do
+      fragment("LOWER(?)", unquote(field))
+    end
+  end
+
   defmacro stddev_pop(field) do
     quote do
       fragment("stddev_pop(?)", unquote(field))
