@@ -112,6 +112,7 @@ defmodule Teiserver.User do
     Argon2.hash_pwd_salt(password)
   end
 
+  @spec spring_md5_password(String.t()) :: String.t()
   def spring_md5_password(password) do
     :crypto.hash(:md5, password) |> Base.encode64()
   end
@@ -475,8 +476,8 @@ defmodule Teiserver.User do
   @spec get_user_by_discord_id(String.t()) :: T.user() | nil
   defdelegate get_user_by_discord_id(discord_id), to: UserCache
 
-  @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
-  defdelegate get_userid_by_discord_id(discord_id), to: UserCache
+  # @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
+  # defdelegate get_userid_by_discord_id(discord_id), to: UserCache
 
   @spec get_user_by_token(String.t()) :: T.user() | nil
   defdelegate get_user_by_token(token), to: UserCache
