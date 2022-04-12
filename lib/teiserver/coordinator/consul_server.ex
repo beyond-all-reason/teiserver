@@ -138,9 +138,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:lobby_chat, _, _lobby_id, userid, msg}, state) do
-    case SpadsParser.handle_in(msg, state) do
-      {:host_update, host_data} -> handle_info({:host_update, userid, host_data}, state)
-      nil -> {:noreply, state}
+    if state.host_id == userid do
+      case SpadsParser.handle_in(msg, state) do
+        {:host_update, host_data} -> handle_info({:host_update, userid, host_data}, state)
+        nil -> {:noreply, state}
+      end
+    else
+      {:noreply, state}
     end
   end
 
