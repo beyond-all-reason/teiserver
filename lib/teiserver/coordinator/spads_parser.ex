@@ -15,9 +15,9 @@ defmodule Teiserver.Coordinator.SpadsParser do
         {:host_update, %{host_teamcount: String.to_integer(count)}}
 
       # Add a boss
-      (match = Regex.run(~r/Boss mode enabled for (\S)+/, msg)) ->
+      (match = Regex.run(~r/Boss mode enabled for (\S+)/, msg)) ->
         [_, player_name] = match
-        player_id = User.get_user_by_name(player_name)
+        player_id = User.get_userid(player_name)
 
         if player_id do
           new_bosses = [player_id | state.host_bosses]

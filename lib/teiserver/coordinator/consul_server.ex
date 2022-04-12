@@ -17,7 +17,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore 1v1me un1v1)
 
   @always_allow ~w(status y n follow joinq leaveq splitlobby)
-  @boss_commands ~w(gatekeeper welcome-message)
+  @boss_commands ~w(gatekeeper welcome-message meme)
   @host_commands ~w(specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock rename)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}

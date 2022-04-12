@@ -370,10 +370,10 @@ defmodule TeiserverWeb.Admin.UserController do
           end
 
         case result do
-          {:ok, nil, _tab} ->
+          {:ok, nil, tab} ->
             conn
             |> put_flash(:info, "Action performed.")
-            |> redirect(to: Routes.ts_admin_user_path(conn, :applying, user) <> "?tab=reports_tab")
+            |> redirect(to: Routes.ts_admin_user_path(conn, :applying, user) <> "?tab=#{tab}")
 
           {:error, msg} ->
             conn

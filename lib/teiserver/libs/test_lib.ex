@@ -63,10 +63,10 @@ defmodule Teiserver.TeiserverTestLib do
         })
 
         user
-        |> User.convert_user()
-        |> Map.put(:springid, User.next_springid())
-        |> User.add_user()
-        |> User.verify_user()
+          |> User.convert_user()
+          |> Map.put(:springid, User.next_springid())
+          |> User.add_user()
+          |> User.verify_user()
       _ ->
         new_user()
     end

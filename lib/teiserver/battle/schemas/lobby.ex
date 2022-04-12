@@ -76,14 +76,22 @@ defmodule Teiserver.Battle.Lobby do
 
 
   @spec create_lobby(Map.t()) :: Map.t()
-  def create_lobby(lobby) do
+  def create_lobby(%{founder_id: _, founder_name: _, name: _} = lobby) do
     # Needs to be supplied a map with:
-    # founder_id/name, ip, port, engine_version, map_hash, map_name, name, game_name, hash_code
+    # ip, port, engine_version, map_hash, map_name, game_name, hash_code
     Map.merge(
       %{
         id: next_id(),
-        founder_id: nil,
-        founder_name: nil,
+
+        # Expected to be overriden
+        ip: nil,
+        port: nil,
+        engine_version: nil,
+        map_hash: nil,
+        map_name: nil,
+        game_name: nil,
+        hash_code: nil,
+
         type: "normal",
         nattype: :none,
         max_players: 16,
@@ -96,16 +104,11 @@ defmodule Teiserver.Battle.Lobby do
         spectator_count: 0,
         bot_count: 0,
         bots: %{},
-        ip: nil,
         tags: %{
           "server/match/uuid" => Battle.generate_lobby_uuid()
         },
         disabled_units: [],
         start_rectangles: %{},
-
-        # Expected to be overriden
-        map_hash: nil,
-        map_name: nil,
 
         # To tie it into matchmaking
         queue_id: nil,

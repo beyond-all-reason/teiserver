@@ -31,6 +31,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
       game_type: "Team",
 
       founder_id: host.id,
+      founder_name: host.name,
       bots: %{},
 
       started: Timex.now |> Timex.shift(minutes: -30),
