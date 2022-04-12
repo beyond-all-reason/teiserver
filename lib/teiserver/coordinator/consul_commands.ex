@@ -46,7 +46,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       (if state.welcome_message, do: "Welcome message: #{state.welcome_message}"),
       "Team size set to #{state.host_teamsize}",
       "Team count set to #{state.host_teamcount}",
-      "Host boss is #{state.host_boss}",
+      "Host boss is #{Kernel.inspect state.host_bosses}",
       "Currently I think there are #{player_count} players",
       "I think the maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
       "Level required to play is #{state.level_to_play}",

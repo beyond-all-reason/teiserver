@@ -138,7 +138,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:lobby_chat, _, _lobby_id, userid, msg}, state) do
-    case SpadsParser.handle_in(msg) do
+    case SpadsParser.handle_in(msg, state) do
       {:host_update, host_data} -> handle_info({:host_update, userid, host_data}, state)
       nil -> {:noreply, state}
     end
@@ -238,7 +238,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info({:host_update, userid, host_data}, state) do
     if state.host_id == userid do
       host_data = host_data
-        |> Map.take([:host_boss, :host_preset, :host_teamsize, :host_teamcount])
+        |> Map.take([:host_bosses, :host_preset, :host_teamsize, :host_teamcount])
         |> Enum.filter(fn {_k, v} -> v != nil and v != 0 end)
         |> Map.new
 
@@ -456,7 +456,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     client = Client.get_client_by_id(senderid)
 
     is_host = senderid == state.host_id
-    is_boss = senderid == state.host_boss
+    is_boss = senderid == state.host_bosses
 
     cond do
       client == nil -> false
@@ -589,7 +589,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       started_at: Timex.now(),
 
-      host_boss: nil,
+      host_bosses: nil,
       host_preset: nil,
       host_teamsize: 4,
       host_teamcount: 2,
@@ -598,6 +598,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     }
   end
 
+  @spec get_level(String.t()) :: :banned | :spectator | :player
   def get_level("banned"), do: :banned
   def get_level("spectator"), do: :spectator
   def get_level("player"), do: :player
