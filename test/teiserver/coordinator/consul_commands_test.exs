@@ -469,15 +469,12 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     # Make player2 not a player
     _tachyon_send(ps2.socket, %{cmd: "c.lobby.update_status", player: false, ready: true})
 
-    # Queue should have updated as became a spectator
+    # Shouldn't be an update just yet
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
-    assert queue == [player7.id]
+    assert queue == [player6.id, player7.id]
 
     # Call the tick function, 6 is now a player so should be removed from the queue
     Coordinator.cast_consul(lobby_id, :tick)
-
-    p = Teiserver.Coordinator.ConsulServer.list_players(%{lobby_id: lobby_id})
-      |> Enum.map(fn c -> c.userid end)
 
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
     assert queue == [player7.id]
