@@ -80,7 +80,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       socket.assigns[:battles]
       |> Enum.map(fn battle ->
         if battle.id == lobby_id do
-          %{battle | player_count: battle.player_count + 1, players: [user_id | battle.players]}
+          %{battle | player_count: Enum.count([user_id | battle.players]), players: [user_id | battle.players]}
         else
           battle
         end
@@ -96,7 +96,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> Enum.map(fn battle ->
         if battle.id == lobby_id do
           new_players = Enum.filter(battle.players, fn p -> p != user_id end)
-          %{battle | player_count: battle.player_count - 1, players: new_players}
+          %{battle | player_count: Enum.count(new_players), players: new_players}
         else
           battle
         end
@@ -112,7 +112,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> Enum.map(fn battle ->
         if battle.id == lobby_id do
           new_players = Enum.filter(battle.players, fn p -> p != user_id end)
-          %{battle | player_count: battle.player_count - 1, players: new_players}
+          %{battle | player_count: Enum.count(new_players), players: new_players}
         else
           battle
         end

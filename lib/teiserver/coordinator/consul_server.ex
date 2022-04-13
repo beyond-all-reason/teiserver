@@ -281,7 +281,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # Player limit, if they want to be a player and we have
     # enough players then they can't be a player
     new_client = if existing.player == false and new_client.player == true and get_player_count(state) >= get_max_player_count(state) do
-      Logger.warn("The lobby is currently full, add yourself to the player queue by chatting $joinq")
       LobbyChat.sayprivateex(state.coordinator_id, userid, "The lobby is currently full, add yourself to the player queue by chatting $joinq", state.lobby_id)
       %{new_client | player: false}
     else
@@ -327,10 +326,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
         {change, new_status}
     end
 
-    # If they are moving from player to spectator, call this!
+    # If they are moving from player to spectator, queue up a tick
     if change do
       if existing.player == true and new_status.player == false do
-        player_count_changed(state)
+        send(self(), :tick)
       end
     end
 
@@ -505,13 +504,18 @@ defmodule Teiserver.Coordinator.ConsulServer do
     min(state.host_teamcount * state.host_teamsize, state.player_limit)
   end
 
+  @spec list_players(map()) :: list()
+  def list_players(%{lobby_id: lobby_id}) do
+    Lobby.get_lobby!(lobby_id)
+      |> Map.get(:players)
+      |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
+      |> Enum.filter(fn client -> client.player == true and client.lobby_id == lobby_id end)
+  end
+
   @spec get_player_count(map()) :: non_neg_integer
-  def get_player_count(state) do
-    lobby = Lobby.get_lobby!(state.lobby_id)
-    lobby.players
-    |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
-    |> Enum.filter(fn client -> client.player == true end)
-    |> Enum.count
+  def get_player_count(%{lobby_id: lobby_id}) do
+    list_players(%{lobby_id: lobby_id})
+      |> Enum.count
   end
 
   @spec get_user(String.t() | integer(), Map.t()) :: integer() | nil
