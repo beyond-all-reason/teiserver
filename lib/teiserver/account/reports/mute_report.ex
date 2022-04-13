@@ -8,8 +8,10 @@ defmodule Teiserver.Account.MuteReport do
   def run(_conn, _params) do
     x_ignores_y = Account.list_users(select: [:id], limit: :infinity)
       |> Enum.map(fn %{id: userid} ->
-        user = User.get_user_by_id(userid)
-        {user.id, user.ignored}
+        case User.get_user_by_id(userid) do
+          nil -> {nil, []}
+          user -> {user.id, user.ignored}
+        end
       end)
       |> Enum.filter(fn {_, ignores} -> not Enum.empty?(ignores) end)
       |> Enum.map(fn {userid, ignores} ->
