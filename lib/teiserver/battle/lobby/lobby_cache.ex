@@ -146,6 +146,7 @@ defmodule Teiserver.Battle.LobbyCache do
     Lobby.stop_battle_lobby_throttle(lobby_id)
   end
 
+  @spec list_lobby_ids :: [non_neg_integer()]
   def list_lobby_ids() do
     case ConCache.get(:lists, :lobbies) do
       nil -> []
@@ -153,6 +154,7 @@ defmodule Teiserver.Battle.LobbyCache do
     end
   end
 
+  @spec list_lobbies() :: list()
   def list_lobbies() do
     list_lobby_ids()
     |> Enum.map(fn lobby_id -> ConCache.get(:lobbies, lobby_id) end)
