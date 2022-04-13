@@ -55,15 +55,20 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   end
 
   defp do_handle(%{command: "1v1me", senderid: senderid} = _cmd, state) do
-    case Matchmaking.add_player_to_queue(1, senderid) do
-      :failed ->
-        User.send_direct_message(state.userid, senderid, "You were not added to the queue")
-      _ ->
-        User.send_direct_message(state.userid, senderid, "You have been added to the queue. You can remove yourself by messaging me $un1v1")
-    end
-
+    User.send_direct_message(state.userid, senderid, "The matchmaking test is over due to lack of interest. If you wish to resume testing please let Teifion know in the discord.")
     state
   end
+
+  # defp do_handle(%{command: "1v1me", senderid: senderid} = _cmd, state) do
+  #   case Matchmaking.add_player_to_queue(1, senderid) do
+  #     :failed ->
+  #       User.send_direct_message(state.userid, senderid, "You were not added to the queue")
+  #     _ ->
+  #       User.send_direct_message(state.userid, senderid, "You have been added to the queue. You can remove yourself by messaging me $un1v1")
+  #   end
+
+  #   state
+  # end
 
   defp do_handle(%{command: "un1v1", senderid: senderid} = _cmd, state) do
     Matchmaking.remove_player_from_queue(1, senderid)
