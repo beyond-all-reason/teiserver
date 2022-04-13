@@ -6,26 +6,66 @@ defmodule Teiserver.Account.UserCache do
   alias Teiserver.Client
   require Logger
 
-  @spec get_username(T.userid()) :: String.t() | nil
+  @spec get_username(T.userid() | nil) :: String.t() | nil
+  def get_username(nil), do: nil
   def get_username(userid) do
-    ConCache.get(:users_lookup_name_with_id, int_parse(userid))
+    userid = int_parse(userid)
+
+    Central.cache_get_or_store(:users_lookup_name_with_id, int_parse(userid), fn ->
+      case get_user_by_id(userid) do
+        nil -> nil
+        user -> user.name
+      end
+    end)
   end
 
-  @spec get_userid(String.t()) :: integer() | nil
+  @spec get_userid(String.t() | nil) :: integer() | nil
+  def get_userid(nil), do: nil
+  def get_userid(""), do: nil
   def get_userid(username) do
-    ConCache.get(:users_lookup_id_with_name, cachename(username))
+    username = cachename(username)
+
+    Central.cache_get_or_store(:users_lookup_id_with_name, username, fn ->
+      user = Account.get_user(nil, search: [
+        name_lower: username
+      ], select: [:id])
+
+      case user do
+        nil -> nil
+        %{id: id} ->
+          recache_user(id)
+          id
+      end
+    end)
   end
 
-  @spec get_user_by_name(String.t()) :: User.t() | nil
+  @spec get_user_by_name(String.t() | nil) :: User.t() | nil
+  def get_user_by_name(nil), do: nil
+  def get_user_by_name(""), do: nil
   def get_user_by_name(username) do
-    id = get_userid(username)
-    ConCache.get(:users, id)
+    username
+      |> get_userid
+      |> get_user_by_id
   end
 
   @spec get_user_by_email(String.t()) :: User.t() | nil
   def get_user_by_email(email) do
-    id = ConCache.get(:users_lookup_id_with_email, cachename(email))
-    ConCache.get(:users, id)
+    cachename_email = cachename(email)
+
+    id = Central.cache_get_or_store(:users_lookup_id_with_email, cachename_email, fn ->
+      user = Account.get_user(nil, search: [
+        email: email
+      ], select: [:id])
+
+      case user do
+        nil -> nil
+        %{id: id} ->
+          recache_user(id)
+          id
+      end
+    end)
+
+    get_user_by_id(id)
   end
 
   @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
@@ -50,7 +90,8 @@ defmodule Teiserver.Account.UserCache do
     end
   end
 
-  @spec get_user_by_id(T.userid()) :: User.t() | nil
+  @spec get_user_by_id(T.userid() | nil) :: User.t() | nil
+  def get_user_by_id(nil), do: nil
   def get_user_by_id(id) do
     ConCache.get(:users, int_parse(id))
   end
@@ -64,17 +105,18 @@ defmodule Teiserver.Account.UserCache do
     |> Enum.filter(fn user -> user != nil end)
   end
 
-  @spec recache_user(Integer.t()) :: :ok
-  def recache_user(id) do
-    if get_user_by_id(id) do
-      Account.get_user!(id)
-      |> convert_user
-      |> update_user
-    else
-      Account.get_user!(id)
+  @spec recache_user(T.userid() | User.t()) :: :ok
+  def recache_user(id) when is_integer(id) do
+    Account.get_user(id)
       |> convert_user
       |> add_user
-    end
+
+    :ok
+  end
+  def recache_user(user) do
+    user
+      |> convert_user
+      |> add_user
 
     :ok
   end
@@ -128,7 +170,12 @@ defmodule Teiserver.Account.UserCache do
     Logger.info("pre_cache_users:remaining, got #{user_count} users in #{time_taken}ms")
   end
 
-  @spec convert_user(User.t()) :: User.t()
+  @doc """
+  Given a database user it will convert it into a cached user
+  """
+
+  @spec convert_user(User.t() | nil) :: T.user() | nil
+  def convert_user(nil), do: nil
   def convert_user(user) do
     data =
       User.data_keys
@@ -136,12 +183,16 @@ defmodule Teiserver.Account.UserCache do
       |> Map.put(:spring_password, (user.data["password_hash"] == user.password))
 
     user
-    |> Map.take(User.keys())
-    |> Map.merge(User.default_data())
-    |> Map.merge(data)
+      |> Map.take(User.keys())
+      |> Map.merge(User.default_data())
+      |> Map.merge(data)
   end
 
-  @spec add_user(User.t()) :: User.t()
+  @doc """
+  Given a cacheable user it will update the relevant caches
+  """
+  @spec add_user(T.user() | nil) :: T.user() | nil
+  def add_user(nil), do: nil
   def add_user(user) do
     update_user(user)
     ConCache.put(:users_lookup_name_with_id, user.id, user.name)

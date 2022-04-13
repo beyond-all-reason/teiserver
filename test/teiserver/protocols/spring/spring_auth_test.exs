@@ -472,36 +472,6 @@ CLIENTS test_room #{user.name}\n"
     # we should try to login though, it should be rejected as rename in progress
     %{socket: socket} = Teiserver.TeiserverTestLib.raw_setup()
     _ = _recv_raw(socket)
-    _send_raw(
-      socket,
-      "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
-    )
-
-    reply = _recv_until(socket)
-    [accepted | _remainder] = String.split(reply, "\n")
-    assert accepted == "DENIED No user found for 'test_user_rename'"
-
-    # But the database should say the user exists
-    db_user = Account.get_user!(userid)
-    assert db_user.name == new_name
-
-    # Didn't get re-added just yet
-    wreply = _recv_raw(watcher)
-    assert wreply == :timeout
-
-    # Lets try again, just incase!
-    :timer.sleep(1500)
-
-    _send_raw(
-      socket,
-      "LOGIN #{new_name} X03MO1qnZdYdgyfeuILPmQ== 0 * LuaLobby Chobby\t1993717506 0d04a635e200f308\tb sp\n"
-    )
-
-    reply = _recv_until(socket)
-    [accepted | _remainder] = String.split(reply, "\n")
-    assert accepted == "DENIED No user found for 'test_user_rename'"
-
-    :timer.sleep(4000)
 
     # Now we get flood protection after the rename
     _send_raw(
