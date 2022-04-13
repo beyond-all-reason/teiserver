@@ -30,12 +30,16 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       -1 ->
         nil
       pos ->
-        "You are position #{pos + 1} in the queue"
+        if Enum.member?(state.low_priority_join_queue, senderid) do
+          "You are position #{pos + 1} but in the low prority queue so other users may be added in front of you"
+        else
+          "You are position #{pos + 1} in the queue"
+        end
     end
 
     queue_string = get_queue(state)
-    |> Enum.map(&User.get_username/1)
-    |> Enum.join(", ")
+      |> Enum.map(&User.get_username/1)
+      |> Enum.join(", ")
 
     player_count = ConsulServer.get_player_count(state)
 
@@ -189,7 +193,14 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         Logger.info("Added #{senderid} to queue")
         new_queue = get_queue(new_state)
         pos = get_queue_position(new_queue, senderid) + 1
-        r = LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}. Use $status to check on the queue.", state.lobby_id)
+
+        r = if User.is_restricted?(senderid, ["Low priority"]) do
+          LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the low priority join-queue at position #{pos}, this means you will be added to the game after normal-priority members. Use $status to check on the queue.", state.lobby_id)
+        else
+          LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}. Use $status to check on the queue.", state.lobby_id)
+        end
+
+
         Logger.info("joinq_sayprivateex result #{Kernel.inspect r} for #{Kernel.inspect {state.coordinator_id, senderid, state.lobby_id}} type 3")
 
         new_state
