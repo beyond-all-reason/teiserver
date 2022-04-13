@@ -145,6 +145,13 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   def stop_battle_lobby_throttle(battle_lobby_id) do
+    # We send this out because the throttle won't
+    :ok = PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_liveview_lobby_updates:#{battle_lobby_id}",
+      {:battle_lobby_throttle, :closed}
+    )
+
     Teiserver.Throttles.stop_throttle("LobbyThrottle:#{battle_lobby_id}")
   end
 
