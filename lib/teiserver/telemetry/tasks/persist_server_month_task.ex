@@ -77,8 +77,8 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
 
         if log.date.year < today.year or log.date.month < today.month do
           logs = Telemetry.list_server_day_logs(search: [
-            start_date: log.date.year,
-            end_date: log.date.month
+            start_date: Timex.beginning_of_month(log.date),
+            end_date: Timex.end_of_month(log.date)
           ])
 
           data = run(logs)

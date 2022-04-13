@@ -483,6 +483,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     # Call the tick function, 18 is now a player so should be removed from the queue
     Coordinator.cast_consul(lobby_id, :tick)
 
+    This is failing because the game is still apparently full
+
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
     assert queue == [player19.id]
   end

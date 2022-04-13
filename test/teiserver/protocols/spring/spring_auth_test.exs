@@ -458,10 +458,6 @@ CLIENTS test_room #{user.name}\n"
     # Give it a chance to perform some of the actions
     :timer.sleep(250)
 
-    # User is removed and uncached, it should be nil
-    assert UserCache.get_user_by_name(new_name) == nil
-    assert UserCache.get_user_by_name(user.name) == nil
-    assert UserCache.get_user_by_id(userid) == nil
     assert Client.get_client_by_id(userid) == nil
 
     # Lets be REAL sure

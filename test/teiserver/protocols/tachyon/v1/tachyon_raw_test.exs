@@ -284,6 +284,10 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     # Now auth via Tachyon
     # Good password
     _tachyon_send(tls_socket, %{cmd: "c.auth.get_token", password: "password", email: user.email})
+    # We have a sleep here because on a slower computer the tests can fail as
+    # the password hash takes a bit longer
+    :timer.sleep(500)
+
     [reply] = _tachyon_recv(tls_socket)
     assert Map.has_key?(reply, "token")
     token = reply["token"]

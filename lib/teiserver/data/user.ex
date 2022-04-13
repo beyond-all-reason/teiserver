@@ -365,7 +365,7 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec rename_user(T.userid(), String.t()) :: :success | {:error, String.t()}
+  @spec rename_user(T.userid(), String.t(), boolean) :: :success | {:error, String.t()}
   def rename_user(userid, new_name, admin_action \\ false) do
     rename_log = Account.get_user_stat_data(userid)
       |> Map.get("rename_log", [])

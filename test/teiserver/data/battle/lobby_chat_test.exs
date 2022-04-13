@@ -11,6 +11,8 @@ defmodule Teiserver.Data.Battle.LobbyChatTest do
 
     lobby = Lobby.create_lobby(%{
       founder_id: bot_user.id,
+      founder_name: bot_user.name,
+      name: "lobby_chat_test_as_bot",
       id: 1,
       tags: %{
         "server/match/uuid" => UUID.uuid1()

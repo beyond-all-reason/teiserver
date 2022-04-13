@@ -37,8 +37,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:reply, allow_join(userid, state), state}
   end
 
-  def handle_call({:request_user_change_status, userid}, _from, state) do
-    {:reply, request_user_change_status(userid, state), state}
+  def handle_call({:request_user_change_status, client}, _from, state) do
+    {:reply, request_user_change_status(client, state), state}
   end
 
   # Infos
@@ -280,11 +280,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     # Player limit, if they want to be a player and we have
     # enough players then they can't be a player
-    new_client = if existing.player == false and new_client.player == true do
-      if get_player_count(state) >= get_max_player_count(state) do
-        LobbyChat.sayprivateex(state.coordinator_id, userid, "The lobby is currently full, add yourself to the player queue by chatting $joinq", state.lobby_id)
-        %{new_client | player: false}
-      end
+    new_client = if existing.player == false and new_client.player == true and get_player_count(state) >= get_max_player_count(state) do
+      Logger.warn("The lobby is currently full, add yourself to the player queue by chatting $joinq")
+      LobbyChat.sayprivateex(state.coordinator_id, userid, "The lobby is currently full, add yourself to the player queue by chatting $joinq", state.lobby_id)
+      %{new_client | player: false}
+    else
+      new_client
     end
 
     # Check locks
