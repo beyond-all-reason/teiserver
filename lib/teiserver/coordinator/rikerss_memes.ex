@@ -30,7 +30,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
   def handle_meme("poor", senderid, %{lobby_id: lobby_id} = _state) do
     sender = User.get_user_by_id(senderid)
-    battle = Lobby.get_lobby!(lobby_id)
+    battle = Lobby.get_lobby(lobby_id)
     new_tags = Map.merge(battle.tags, %{
       "game/modoptions/resourceincomemultiplier" => "0",
     })
@@ -41,7 +41,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
   def handle_meme("rich", senderid, %{lobby_id: lobby_id} = _state) do
     sender = User.get_user_by_id(senderid)
-    battle = Lobby.get_lobby!(lobby_id)
+    battle = Lobby.get_lobby(lobby_id)
     new_tags = Map.merge(battle.tags, %{
       "game/modoptions/startmetal" => "100000000",
       "game/modoptions/startenergy" => "100000000",
@@ -68,7 +68,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     undo_memes(lobby_id)
     :timer.sleep(100)
 
-    battle = Lobby.get_lobby!(lobby_id)
+    battle = Lobby.get_lobby(lobby_id)
     new_tags = Map.merge(battle.tags, %{
       "game/modoptions/startmetal" => Enum.random(~w(500 750 1000 1500 2500 5000 10000 100000)),
       "game/modoptions/startenergy" => Enum.random(~w(750 1000 1500 2500 5000 10000 100000 500000)),
@@ -112,7 +112,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   def undo_memes(lobby_id) do
     Lobby.enable_all_units(lobby_id)
 
-    battle = Lobby.get_lobby!(lobby_id)
+    battle = Lobby.get_lobby(lobby_id)
     new_tags = Map.merge(battle.tags, %{
       "game/modoptions/startmetal" => "1000",
       "game/modoptions/startenergy" => "1000",

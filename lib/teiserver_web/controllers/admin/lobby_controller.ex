@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   alias Teiserver.{Chat, Battle}
+  alias Teiserver.Battle.Lobby
 
   plug(AssignPlug,
     site_menu_active: "teiserver_admin",
@@ -42,6 +43,8 @@ defmodule TeiserverWeb.Admin.LobbyController do
         nil
     end
 
+    lobby = Lobby.get_lobby_by_uuid(lobby_guid)
+
     last_page = Enum.count(lobby_messages) < 300
 
     conn
@@ -50,6 +53,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
       |> assign(:match_id, match_id)
       |> assign(:lobby_messages, lobby_messages)
       |> assign(:lobby_guid, lobby_guid)
+      |> assign(:lobby, lobby)
       |> add_breadcrumb(name: "Show: #{lobby_guid}", url: conn.request_path)
       |> render("chat.html")
   end

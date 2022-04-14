@@ -43,11 +43,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   # Infos
   def handle_info(:tick, state) do
-    lobby = Lobby.get_lobby!(state.lobby_id)
+    lobby = Lobby.get_lobby(state.lobby_id)
     case Map.get(lobby.tags, "server/match/uuid", nil) do
       nil ->
         uuid = Battle.generate_lobby_uuid()
-        lobby = Lobby.get_lobby!(state.lobby_id)
+        lobby = Lobby.get_lobby(state.lobby_id)
         new_tags = Map.put(lobby.tags, "server/match/uuid", uuid)
         Lobby.set_script_tags(state.lobby_id, new_tags)
       _tag ->
@@ -90,12 +90,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info(:match_stop, state) do
     uuid = Battle.generate_lobby_uuid()
-    battle = Lobby.get_lobby!(state.lobby_id)
+    battle = Lobby.get_lobby(state.lobby_id)
     new_tags = Map.put(battle.tags, "server/match/uuid", uuid)
     Lobby.set_script_tags(state.lobby_id, new_tags)
 
     state.lobby_id
-    |> Lobby.get_lobby!()
+    |> Lobby.get_lobby()
     |> Map.get(:players)
     |> Enum.each(fn userid ->
       if User.is_restricted?(userid, ["All chat", "Battle chat"]) do
@@ -364,7 +364,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def is_on_friendlist?(userid, state, :players) do
-    battle = Lobby.get_lobby!(state.lobby_id)
+    battle = Lobby.get_lobby(state.lobby_id)
     players = battle.players
       |> Enum.map(&Client.get_client_by_id/1)
       |> Enum.filter(fn c -> c.player end)
@@ -381,7 +381,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def is_on_friendlist?(userid, state, :all) do
-    battle = Lobby.get_lobby!(state.lobby_id)
+    battle = Lobby.get_lobby(state.lobby_id)
 
     # If battle has no members it'll succeed regardless
     case battle do
@@ -506,7 +506,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec list_players(map()) :: list()
   def list_players(%{lobby_id: lobby_id}) do
-    Lobby.get_lobby!(lobby_id)
+    Lobby.get_lobby(lobby_id)
       |> Map.get(:players)
       |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
       |> Enum.filter(fn client -> client.player == true and client.lobby_id == lobby_id end)
@@ -578,7 +578,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def empty_state(lobby_id) do
     # it's possible the lobby is nil before we even get to start this up (tests in particular)
     # hence this defensive methodology
-    lobby = Lobby.get_lobby!(lobby_id)
+    lobby = Lobby.get_lobby(lobby_id)
     founder_id = if lobby, do: lobby.founder_id, else: nil
 
     %{

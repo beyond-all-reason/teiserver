@@ -124,16 +124,22 @@ defmodule Teiserver.Battle.Lobby do
   defdelegate list_lobby_ids(), to: LobbyCache
   defdelegate list_lobbies(), to: LobbyCache
   defdelegate update_lobby(lobby, data, reason), to: LobbyCache
-  defdelegate get_lobby!(id), to: LobbyCache
+
+  @spec get_lobby(T.lobby_id() | nil) :: T.lobby() | nil
   defdelegate get_lobby(id), to: LobbyCache
+
+  @spec get_lobby_by_uuid(String.t()) :: T.lobby() | nil
+  defdelegate get_lobby_by_uuid(uuid), to: LobbyCache
+
   defdelegate get_lobby_players!(id), to: LobbyCache
   defdelegate add_lobby(lobby), to: LobbyCache
   defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyCache
 
+
   # Refactor of above from when we called them battle
   def create_battle(battle), do: create_lobby(battle)
   def update_battle(battle, data, reason), do: LobbyCache.update_lobby(battle, data, reason)
-  def get_battle!(lobby_id), do: LobbyCache.get_lobby!(lobby_id)
+  def get_battle!(lobby_id), do: LobbyCache.get_lobby(lobby_id)
   def get_battle(lobby_id), do: LobbyCache.get_lobby(lobby_id)
   def add_battle(battle), do: LobbyCache.add_lobby(battle)
   def close_battle(battle), do: LobbyCache.close_lobby(battle)

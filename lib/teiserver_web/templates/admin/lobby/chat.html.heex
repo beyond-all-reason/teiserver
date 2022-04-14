@@ -1,5 +1,3 @@
-<% bsname = view_colour() %>
-
 <%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "chat"}) %>
 
 <div class="row mt-3">
@@ -7,11 +5,19 @@
     <div class="card">
       <div class="card-body">
 
-        <%= if @match_id do %>
-          <a href={Routes.ts_admin_match_path(@conn, :show, @match_id)} class="float-end btn btn-outline-secondary">
-            Match details
-          </a>
-        <% end %>
+        <div class="float-end">
+          <%= if @lobby do %>
+            <a href={Routes.ts_battle_lobby_chat_path(@conn, :chat, @lobby.id)} class="btn btn-outline-secondary">
+              Live chat
+            </a>
+          <% end %>
+
+          <%= if @match_id do %>
+            <a href={Routes.ts_admin_match_path(@conn, :show, @match_id)} class="btn btn-outline-secondary">
+              Match details
+            </a>
+          <% end %>
+        </div>
       
         <h4>Lobby chat - Page <%= @page + 1 %></h4>
         Oldest chat at the top (read top to bottom)

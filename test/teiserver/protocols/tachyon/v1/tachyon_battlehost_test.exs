@@ -43,7 +43,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
 
     assert GenServer.call(pid, {:get, :lobby_id}) == lobby_id
     assert GenServer.call(pid, {:get, :lobby_host}) == true
-    assert Lobby.get_lobby!(lobby_id) != nil
+    assert Lobby.get_lobby(lobby_id) != nil
 
     # Now create a user to join the lobby
     %{socket: socket2, user: user2, pid: pid2} = tachyon_auth_setup()
@@ -128,6 +128,6 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
 
     assert GenServer.call(pid, {:get, :lobby_id}) == nil
     assert GenServer.call(pid, {:get, :lobby_host}) == false
-    assert Lobby.get_lobby!(lobby_id) == nil
+    assert Lobby.get_lobby(lobby_id) == nil
   end
 end

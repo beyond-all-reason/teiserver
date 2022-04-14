@@ -302,7 +302,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "specunready"} = cmd, state) do
-    battle = Lobby.get_lobby!(state.lobby_id)
+    battle = Lobby.get_lobby(state.lobby_id)
 
     battle.players
     |> Enum.each(fn player_id ->
@@ -317,7 +317,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "makeready", remaining: ""} = cmd, state) do
-    battle = Lobby.get_lobby!(state.lobby_id)
+    battle = Lobby.get_lobby(state.lobby_id)
 
     battle.players
     |> Enum.each(fn player_id ->
@@ -355,14 +355,16 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  def handle_command(%{command: "success"}, %{split: nil} = state) do
-    lobby = Lobby.get_lobby!(state.lobby_id)
+  def handle_command(%{command: "success"} = cmd, %{split: nil} = state) do
+    ConsulServer.say_command(cmd, state)
+    lobby = Lobby.get_lobby(state.lobby_id)
     lobby.players
       |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
       |> Enum.filter(fn client -> client.player == true end)
       |> Enum.each(fn client ->
         Lobby.say(client.userid, "!y", state.lobby_id)
       end)
+    state
   end
 
   def handle_command(%{command: "cancelsplit"}, %{split: nil} = state) do
@@ -401,7 +403,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{command: "settag", remaining: remaining} = cmd, state) do
     case String.split(remaining, " ") do
       [key, value | _] ->
-        battle = Lobby.get_lobby!(state.lobby_id)
+        battle = Lobby.get_lobby(state.lobby_id)
         new_tags = Map.put(battle.tags, String.downcase(key), value)
         Lobby.set_script_tags(state.lobby_id, new_tags)
         ConsulServer.say_command(cmd, state)

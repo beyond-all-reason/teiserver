@@ -58,19 +58,25 @@ defmodule Teiserver.Battle.LobbyCache do
     lobby
   end
 
-  @spec get_lobby!(T.lobby_id() | nil) :: T.lobby() | nil
-  def get_lobby!(id) do
-    ConCache.get(:lobbies, int_parse(id))
-  end
-
   @spec get_lobby(integer()) :: T.lobby() | nil
   def get_lobby(id) do
     ConCache.get(:lobbies, int_parse(id))
   end
 
+  @spec get_lobby_by_uuid(String.t()) :: T.lobby() | nil
+  def get_lobby_by_uuid(uuid) do
+    lobby_list = list_lobbies()
+      |> Enum.filter(fn lobby -> lobby.tags["server/match/uuid"] == uuid end)
+
+    case lobby_list do
+      [] -> nil
+      [lobby | _] -> lobby
+    end
+  end
+
   @spec get_lobby_players!(T.lobby_id()) :: [integer()]
   def get_lobby_players!(id) do
-    get_lobby!(id).players
+    get_lobby(id).players
   end
 
   @spec add_lobby(T.lobby()) :: T.lobby()
@@ -157,7 +163,7 @@ defmodule Teiserver.Battle.LobbyCache do
   @spec list_lobbies() :: list()
   def list_lobbies() do
     list_lobby_ids()
-    |> Enum.map(fn lobby_id -> ConCache.get(:lobbies, lobby_id) end)
-    |> Enum.filter(fn lobby -> lobby != nil end)
+      |> Enum.map(fn lobby_id -> ConCache.get(:lobbies, lobby_id) end)
+      |> Enum.filter(fn lobby -> lobby != nil end)
   end
 end

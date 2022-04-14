@@ -8,6 +8,12 @@
   });
 </script>
 
+<%= central_component "picker_script",
+  module: Central.Account.UserLib,
+  name: "account_user",
+  title: "User search"
+%>
+
 <%= central_component "icon_dropdown_js", [] %>
 
 <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
@@ -17,12 +23,34 @@
   <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
   <div class="row">
-    <div class="col-md-4 col-xl-2 search-form-input">
+    <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_term" class="control-label">Term: </label>
-      <input type="text" name="search[term]" id="search_term" value={@params["term"]} placeholder="" class="form-control" />
+      <input type="text" name="search[term]" id="search_term" value={@params["term"]} placeholder="" autofocus="" class="form-control" />
     </div>
 
-    <div class="col-md-4 col-xl-2 search-form-input">
+    <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <label for="search_timeframe" class="control-label">Timeframe: </label>
+      <%= central_component "icon_dropdown", %{
+        name: "search[timeframe]",
+        id: "search_timeframe",
+        selected: @params["timeframe"] || "24 hours",
+        enumerable: [
+          %{id: "24 hours", icon: "fa-solid fa-square", colour: fg},
+          %{id: "7 days", icon: "fa-solid fa-square", colour: fg},
+          %{id: "All time", icon: "fa-solid fa-square", colour: fg},
+        ]
+      } %>
+    </div>
+
+    <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+      <label for="search_account_user" class="control-label">User: </label>
+      <%= render CentralWeb.Account.UserView, "picker.html",
+        input_name: "search[account_user]",
+        value: @params["account_user"]
+      %>
+    </div>
+
+    <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_order" class="control-label">Order by: </label>
       <%= central_component "icon_dropdown", %{
         name: "search[order]",
@@ -35,7 +63,7 @@
       } %>
     </div>
 
-    <div class="col-md-4 col-xl-2 search-form-input">
+    <div class="col-md-4 col-lg-3 col-xl-2 my-2">
       <label for="search_mode" class="control-label">Mode: </label>
       <%= central_component "icon_dropdown", %{
         name: "search[mode]",
