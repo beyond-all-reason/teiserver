@@ -113,6 +113,26 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   def handle_info({:client_message, _, _, _}, state), do: {:noreply, state}
 
+  def handle_info({:application, :prep_stop}, state) do
+    channels = Application.get_env(:central, DiscordBridge)[:bridges]
+      |> Enum.filter(fn {_, name} -> name == "server-updates" end)
+
+    case channels do
+      [{channel_id, _}] ->
+        Alchemy.Client.send_message(
+          channel_id,
+          "Teiserver shutdown for node #{Node.self()}",
+          []# Options
+        )
+      _ ->
+        :ok
+    end
+
+    {:noreply, state}
+  end
+
+  def handle_info({:application, _}, state), do: {:noreply, state}
+
   # Catchall handle_info
   def handle_info(msg, state) do
     Logger.error("BridgeServer handle_info error. No handler for msg of #{Kernel.inspect msg}")
@@ -145,6 +165,22 @@ defmodule Teiserver.Bridge.BridgeServer do
       :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
     end)
 
+    # Startup message
+    channels = Application.get_env(:central, DiscordBridge)[:bridges]
+      |> Enum.filter(fn {_, name} -> name == "server-updates" end)
+
+    case channels do
+      [{channel_id, _}] ->
+        Alchemy.Client.send_message(
+          channel_id,
+          "Teiserver startup for node #{Node.self()}",
+          []# Options
+        )
+      _ ->
+        :ok
+    end
+
+    :ok = PubSub.subscribe(Central.PubSub, "application")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
 
     state
@@ -246,6 +282,11 @@ defmodule Teiserver.Bridge.BridgeServer do
       send(self(), :begin)
     end
     ConCache.put(:application_metadata_cache, "teiserver_bridge_pid", self())
+    Registry.register(
+      Teiserver.ServerRegistry,
+      "BridgeServer",
+      :bridge_server
+    )
 
     {:ok, %{}}
   end
