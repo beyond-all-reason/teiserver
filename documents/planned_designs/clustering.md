@@ -20,10 +20,11 @@ Currently Teiserver runs on a single node, we would like to run it on multiple n
 - [ ] **Stage 4:** Add functionality for a node coming online after the others and being caught-up on state of caches
 
 ##### Less reliance on pre-caching
-- [ ] **Stage 1:** Identify pre-caches used
-- [ ] **Stage 2:** Add a `caches.md` documentation file
-- [ ] **Stage 3:** Decide which can be migrated away
+- [X] **Stage 1:** Identify pre-caches used
+- [X] **Stage 2:** Add a `caches.md` documentation file
+- [X] **Stage 3:** Decide which can be migrated away
 - [ ] **Stage 4:** Might need to use cache_update rather than cache_put to help ensure consistency
+- [ ] **Stage 5:** Migrate caches away
 
 ##### Per node processes
 - [X] **Stage 1:** List each type of process we track.

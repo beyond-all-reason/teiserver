@@ -51,7 +51,10 @@
 - ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_cache", true)
 
 #### Replace with non-precached version (cache on access/change)
+##### Done
 - User list precache (active)
+- User list precache (remaining)
+
+##### Yet to do
 - Queue precache
 - Telemetry event/property types
-- User list precache (remaining)
