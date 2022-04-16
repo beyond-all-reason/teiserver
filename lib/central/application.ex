@@ -23,9 +23,9 @@ defmodule Central.Application do
         # {Central.Worker, arg}
         CentralWeb.Presence,
         CentralWeb.Telemetry,
-        {Central.Account.RecentlyUsedCache, name: Central.Account.RecentlyUsedCache},
-        {Central.Account.AuthGroups.Server, name: Central.Account.AuthGroups.Server},
+
         {Central.General.CacheClusterServer, name: Central.General.CacheClusterServer},
+
         concache_sup(:codes),
         concache_sup(:account_user_cache),
         concache_sup(:account_user_cache_bang),
@@ -33,6 +33,8 @@ defmodule Central.Application do
 
         # Store refers to something that is typically only updated at startup
         # and should not be clustered
+        concache_perm_sup(:recently_used_cache),
+        concache_perm_sup(:auth_group_store),
         concache_perm_sup(:group_type_store),
         concache_perm_sup(:restriction_lookup_store),
         concache_perm_sup(:config_user_type_store),

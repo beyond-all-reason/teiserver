@@ -49,6 +49,16 @@
       url: "#"
     %>
 
+  <% "permissions" -> %>
+    <%= central_component "section_menu_button",
+      name: "permissions",
+      label: "Permissions",
+      active: @active,
+      icon: Central.Account.AuthLib.icon(),
+      bsname: bsname,
+      url: "#"
+    %>
+
   <% _ -> %>
     
 <% end %>

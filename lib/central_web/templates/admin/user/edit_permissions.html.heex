@@ -23,7 +23,7 @@
           permissions: @current_user.permissions,
           show_search: false,
           quick_search: @conn.params["s"],
-          active: "index"
+          active: "permissions"
         %>
 
       </div>
@@ -118,6 +118,10 @@
             <% end %>
           </tbody>
         </table>
+
+          <a href={Routes.admin_user_path(@conn, :show, @user)} class="btn btn-secondary">
+            Cancel
+          </a>
 
           <input type="submit" value="Save changes" class={"btn btn-#{bsname} float-end"} />
         </form>

@@ -2,22 +2,13 @@ defmodule Central.Account.AuthLib do
   @moduledoc false
   require Logger
 
-  alias Central.Account.AuthGroups.Server
-
   @spec icon :: String.t()
   def icon(), do: "fa-regular fa-address-card"
 
   @spec get_all_permission_sets() :: Map.t()
   def get_all_permission_sets do
-    Server.get_all()
-  end
-
-  @spec get_all_permissions() :: [String.t()]
-  def get_all_permissions do
-    Server.get_all()
-    |> Enum.map(fn {_, ps} -> ps end)
-    |> List.flatten()
-    |> split_permissions
+    Central.store_get(:auth_group_store, :all)
+    |> Enum.map(fn key -> {key, get_permission_set(key)} end)
   end
 
   @spec split_permissions([String.t()]) :: [String.t()]
@@ -40,6 +31,12 @@ defmodule Central.Account.AuthLib do
     permission_list ++ sections ++ modules
   end
 
+  @spec get_permission_set({String.t(), String.t()}) :: [String.t()]
+  def get_permission_set(key) do
+    Central.store_get(:auth_group_store, key)
+  end
+
+  @spec add_permission_set(String.t(), String.t(), [String.t()]) :: :ok
   def add_permission_set(module, section, auths) do
     permissions =
       auths
@@ -47,7 +44,12 @@ defmodule Central.Account.AuthLib do
         "#{module}.#{section}.#{a}"
       end)
 
-    Server.add(module, section, permissions)
+    key = {module, section}
+    all_auth_keys = [key | Central.store_get(:auth_group_store, :all) || []]
+
+    Central.store_put(:auth_group_store, key, permissions)
+    Central.store_put(:auth_group_store, :all, all_auth_keys)
+    :ok
   end
 
   def allow_any?(conn, perms) do

@@ -554,7 +554,11 @@ defmodule CentralWeb.Admin.UserController do
         |> redirect(to: Routes.admin_user_path(conn, :index))
 
       {true, _} ->
-        Central.Admin.DeleteUserTask.delete_users([user.id])
+        r = Central.Admin.DeleteUserTask.delete_users([user.id])
+
+        IO.puts ""
+        IO.inspect r
+        IO.puts ""
 
         conn
         |> put_flash(:success, "User deleted")
@@ -583,48 +587,6 @@ defmodule CentralWeb.Admin.UserController do
         |> render("delete_check.html")
     end
   end
-
-  # # defp load_auth_team_list(conn, existing_teams) do
-  # #   auth_team_map = GroupsLib.get_all_acl_teams()
-
-  # #   existing_teamings = existing_teams
-  # #   |> Enum.map(fn g -> auth_team_map[g.team] end)
-  # #   |> Enum.filter(fn g -> g != nil end)
-  # #   |> Enum.filter(fn {_perms, teaming, _req, _desc} ->
-  # #     teaming != ""
-  # #   end)
-  # #   |> Enum.map(fn {_perms, teaming, _req, _desc} ->
-  # #     teaming
-  # #   end)
-
-  # #   existing_team_names = existing_teams
-  # #   |> Enum.map(fn g -> g.team end)
-
-  # #   GroupsLib.get_all_acl_teams()
-  # #   |> Enum.filter(fn {k, {_perms, teaming, req, _desc}} ->
-  # #     AuthLib.allow?(conn, req)
-  # #       and
-  # #     Enum.member?(existing_teamings, teaming) == false
-  # #       and
-  # #     Enum.member?(existing_team_names, k) == false
-  # #   end)
-  # #   |> Enum.map(fn {k, {_perms, _teaming, _req, _desc}} ->
-  # Account.get_users()
-  #   end)
-  # end
-
-  # defp form_params(params \\ %{}) do
-  #   %{
-  #     name: Map.get(params, "name", ""),
-  #     active: Map.get(params, "active", "Active"),
-
-  #     admin_group_id: Map.get(params, "admin_group_id", ""),
-  #     has_admin_group: Map.get(params, "has_admin_group", "Either"),
-
-  #     order: Map.get(params, "order", "Name (A-Z)"),
-  #     limit: Map.get(params, "limit", "50"),
-  #   }
-  # end
 
   @spec search_defaults(Plug.Conn.t()) :: Map.t()
   defp search_defaults(_conn) do

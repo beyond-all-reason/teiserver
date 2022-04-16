@@ -44,7 +44,7 @@ defmodule CentralWeb do
       import Central.Config, only: [get_user_config_cache: 2, set_user_config: 3]
 
       import Central.Account.RecentlyUsedCache,
-        only: [remove_recently: 2, insert_recently: 2, insert_recently: 1, get_recently: 1]
+        only: [insert_recently: 2, insert_recently: 1, get_recently: 1]
 
       import Central.Account.AuthLib, only: [allow?: 2, allow_any?: 2]
     end
