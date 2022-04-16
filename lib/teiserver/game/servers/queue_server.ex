@@ -398,7 +398,6 @@ defmodule Teiserver.Game.QueueServer do
     :timer.send_interval(tick_interval, self(), :tick)
 
     # Update the queue pids cache to point to this process
-    ConCache.put(:teiserver_queue_pids, opts.queue.id, self())
     Registry.register(
       Teiserver.ServerRegistry,
       "QueueServer:#{opts.queue.id}",

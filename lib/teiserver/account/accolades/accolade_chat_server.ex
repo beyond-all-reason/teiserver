@@ -116,13 +116,12 @@ defmodule Teiserver.Account.AccoladeChatServer do
   end
 
   def handle_info(:terminate, state) do
-    Central.cache_delete(:teiserver_accolade_pids, state.userid)
     DynamicSupervisor.terminate_child(Teiserver.Account.AccoladeSupervisor, self())
     {:stop, :normal, %{state | userid: nil}}
   end
 
   def terminate(_reason, state) do
-    Central.cache_delete(:teiserver_accolade_pids, state.userid)
+    :ok
   end
 
   @spec do_tick(map()) :: map()
@@ -176,7 +175,6 @@ defmodule Teiserver.Account.AccoladeChatServer do
     match_id = opts[:match_id]
 
     # Update the queue pids cache to point to this process
-    ConCache.put(:teiserver_accolade_pids, userid, self())
     Registry.register(
       Teiserver.ServerRegistry,
       "AccoladeChatServer:#{userid}",

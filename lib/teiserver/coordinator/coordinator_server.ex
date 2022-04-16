@@ -269,7 +269,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
-    ConCache.put(:teiserver_consul_pids, :coordinator, self())
     Registry.register(
       Teiserver.ServerRegistry,
       "CoordinatorServer",

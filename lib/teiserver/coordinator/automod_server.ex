@@ -76,7 +76,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
     )
 
     :timer.send_after(500, :begin)
-    ConCache.put(:teiserver_consul_pids, :automod, self())
     {:ok, %{}}
   end
 

@@ -11,7 +11,7 @@ Currently Teiserver runs on a single node, we would like to run it on multiple n
 - [X] **Stage 1:** Change each server process to register it's `pid` with `Teiserver.ServerRegistry`.
 - [X] **Stage 2:** Ensure on a running server each of the servers expected appears in the registry list
 - [X] **Stage 3:** Update all `get_server_pid` functions to call the registry, test them
-- [ ] **Stage 4:** Remove the ETS table and calls to it
+- [X] **Stage 4:** Remove the ETS table and calls to it
 
 ##### PubSub.broadcast
 - [ ] **Stage 1:** Identify which pubsub messages need to include the sending `Node.self()` as part of their structure

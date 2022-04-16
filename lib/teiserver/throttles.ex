@@ -13,8 +13,6 @@ defmodule Teiserver.Throttles do
 
   @spec get_throttle_pid({atom(), integer()}) :: pid() | nil
   def get_throttle_pid(key) do
-    # ConCache.get(:teiserver_throttle_pids, key)
-
     case Registry.lookup(Teiserver.ServerRegistry, key) do
       [{pid, _}] ->
         pid
@@ -28,7 +26,6 @@ defmodule Teiserver.Throttles do
     case get_throttle_pid(key) do
       nil -> nil
       pid ->
-        Central.cache_delete(:teiserver_throttle_pids, key)
         DynamicSupervisor.terminate_child(Teiserver.Throttles.Supervisor, pid)
         :ok
     end

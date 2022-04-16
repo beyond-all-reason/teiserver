@@ -41,8 +41,6 @@ defmodule Teiserver.Coordinator do
 
   @spec get_coordinator_pid() :: pid() | nil
   def get_coordinator_pid() do
-    # ConCache.get(:teiserver_consul_pids, :coordinator)
-
     case Registry.lookup(Teiserver.ServerRegistry, "CoordinatorServer") do
       [{pid, _}] ->
         pid
@@ -70,8 +68,6 @@ defmodule Teiserver.Coordinator do
 
   @spec get_consul_pid(T.lobby_id()) :: pid() | nil
   def get_consul_pid(lobby_id) do
-    # ConCache.get(:teiserver_consul_pids, lobby_id)
-
     case Registry.lookup(Teiserver.ServerRegistry, "ConsulServer:#{lobby_id}") do
       [{pid, _}] ->
         pid
@@ -126,7 +122,6 @@ defmodule Teiserver.Coordinator do
     case get_consul_pid(lobby_id) do
       nil -> nil
       pid ->
-        Central.cache_delete(:teiserver_consul_pids, lobby_id)
         DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, pid)
     end
 

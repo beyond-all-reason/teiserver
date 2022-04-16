@@ -35,8 +35,6 @@ defmodule Teiserver.Data.Matchmaking do
       _ ->
         nil
     end
-
-    # ConCache.get(:teiserver_queue_pids, id)
   end
 
   @spec call_queue(Integer.t(), any) :: any

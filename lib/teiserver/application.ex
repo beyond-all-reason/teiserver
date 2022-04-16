@@ -13,12 +13,6 @@ defmodule Teiserver.Application do
       # {Horde.Registry, [keys: :duplicate, members: :auto, name: Teiserver.PoolRegistry]},
       # {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
 
-      # ETS pid tables, need to refactor them out
-      concache_sup(:teiserver_throttle_pids),
-      concache_perm_sup(:teiserver_queue_pids),
-      concache_perm_sup(:teiserver_consul_pids),
-      concache_perm_sup(:teiserver_accolade_pids),
-
       # Stores - Tables where changes are not propagated across the cluster
       # Possible stores
       concache_perm_sup(:teiserver_queues),
