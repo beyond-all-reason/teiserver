@@ -1,7 +1,6 @@
 defmodule Teiserver.Account.ReviewReport do
   alias Central.Helpers.DatePresets
-  alias Teiserver.{Account, User, Telemetry}
-  alias Central.Helpers.TimexHelper
+  alias Teiserver.{Telemetry}
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-champagne-glasses"

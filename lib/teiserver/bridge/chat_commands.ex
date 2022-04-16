@@ -1,10 +1,9 @@
 defmodule Teiserver.Bridge.ChatCommands do
   @moduledoc false
-  alias Teiserver.User
-  require Logger
+  # alias Teiserver.User
   alias Teiserver.Data.Types, as: T
 
-  @always_allow ~w()
+  # @always_allow ~w()
 
   # def handle(%Alchemy.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []} = _message) do
   #   [cmd | remaining] = String.split(content, " ")
@@ -29,13 +28,14 @@ defmodule Teiserver.Bridge.ChatCommands do
     nil
   end
 
-  defp allow?(cmd, user) do
-    if Enum.member?(@always_allow, cmd) do
-      true
-    else
-      User.allow?(user, "Moderator")
-    end
-  end
+  # @spec allow?(map(), map()) :: boolean
+  # defp allow?(cmd, user) do
+  #   if Enum.member?(@always_allow, cmd) do
+  #     true
+  #   else
+  #     User.allow?(user, "Moderator")
+  #   end
+  # end
 
   defp reply(channel, message) do
     Alchemy.Client.send_message(

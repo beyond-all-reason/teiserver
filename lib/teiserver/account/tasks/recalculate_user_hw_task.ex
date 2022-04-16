@@ -1,13 +1,10 @@
 defmodule Teiserver.Account.RecalculateUserHWTask do
-  use Oban.Worker, queue: :cleanup
-
-  alias Teiserver.{Account, Telemetry, User}
 
   @spec calculate_hw_fingerprint(map()) :: String.t()
   def calculate_hw_fingerprint(data) do
     base = ~w(hardware:cpuinfo hardware:gpuinfo hardware:osinfo hardware:raminfo)
-    |> Enum.map(fn hw_key -> Map.get(data, hw_key, "") end)
-    |> Enum.join("")
+      |> Enum.map(fn hw_key -> Map.get(data, hw_key, "") end)
+      |> Enum.join("")
 
     if base == "" do
       ""

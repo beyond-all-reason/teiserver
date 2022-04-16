@@ -2,7 +2,6 @@ defmodule Teiserver.Account.Tasks.DailyPrecacheCheckTask do
   use Oban.Worker, queue: :cleanup
 
   alias Central.Repo
-  alias Teiserver.{Account}
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   require Logger
 

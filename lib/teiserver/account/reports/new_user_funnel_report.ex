@@ -1,5 +1,4 @@
 defmodule Teiserver.Account.NewUserFunnelReport do
-  alias Central.Helpers.DatePresets
   alias Teiserver.{Account, Telemetry, Battle}
 
   @spec icon() :: String.t()

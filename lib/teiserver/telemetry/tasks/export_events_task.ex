@@ -1,13 +1,11 @@
 defmodule Teiserver.Telemetry.ExportEventsTask do
-  alias Teiserver.Telemetry
   alias Teiserver.Telemetry.{ClientEvent, UnauthEvent}
-  alias Central.Helpers.{TimexHelper, DatePresets}
+  alias Central.Helpers.{DatePresets}
   alias Central.Repo
   import Ecto.Query, warn: false
   import Central.Helpers.QueryHelpers
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
-  @spec perform(map) :: list
+  @spec perform(map) :: map()
   def perform(%{"event_types" => event_types, "timeframe" => timeframe, "auth" => auth}) do
     {start_date, end_date} = DatePresets.parse(timeframe, "", "")
 
