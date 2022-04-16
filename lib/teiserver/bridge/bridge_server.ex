@@ -169,11 +169,14 @@ defmodule Teiserver.Bridge.BridgeServer do
     channels = Application.get_env(:central, DiscordBridge)[:bridges]
       |> Enum.filter(fn {_, name} -> name == "server-updates" end)
 
+    node_start_time = Central.cache_get(:application_metadata_cache, :node_startup_datetime)
+    diff_seconds = Timex.diff(Timex.now(), node_start_time, :seconds)
+
     case channels do
       [{channel_id, _}] ->
         Alchemy.Client.send_message(
           channel_id,
-          "Teiserver startup for node #{Node.self()}",
+          "Teiserver startup for node #{Node.self()} in #{diff_seconds} seconds",
           []# Options
         )
       _ ->
