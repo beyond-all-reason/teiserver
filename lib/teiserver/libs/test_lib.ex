@@ -228,6 +228,7 @@ defmodule Teiserver.TeiserverTestLib do
     case :ssl.recv(socket, 0, 500) do
       {:ok, reply} ->
         resp = reply
+        |> to_string
         |> String.split("\n")
         |> Enum.map(fn line ->
           case TachyonLib.decode(line) do

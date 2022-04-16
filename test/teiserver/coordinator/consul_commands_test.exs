@@ -6,7 +6,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   alias Teiserver.Coordinator.ConsulServer
 
   import Teiserver.TeiserverTestLib,
-    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
+    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]
 
   setup do
     Coordinator.start_coordinator()
@@ -393,7 +393,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert reply == [%{"cmd" => "s.lobby.received_lobby_direct_announce", "message" => "No command of that name", "sender_id" => Coordinator.get_coordinator_userid()}]
   end
 
-  test "join_queue", %{lobby_id: lobby_id, hsocket: hsocket, psocket: _psocket, player: player} do
+  test "join_queue", %{lobby_id: lobby_id, host: host, hsocket: hsocket, psocket: _psocket, player: player} do
     # We don't want to use the player we start with, we want to number our players specifically
     Lobby.remove_user_from_any_battle(player.id)
     _tachyon_send(hsocket, %{cmd: "c.lobby_host.update_host_status", boss: nil, teamsize: 2, teamcount: 2})
@@ -412,6 +412,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     %{user: player5, socket: socket5} = tachyon_auth_setup()
     %{user: player6, socket: socket6} = tachyon_auth_setup()
     %{user: player7, socket: socket7} = tachyon_auth_setup()
+    %{user: player8, socket: _socket8} = tachyon_auth_setup()
 
     [ps1, ps2, ps3, ps4]
     |> Enum.each(fn %{user: user, socket: socket} ->
@@ -422,6 +423,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     Lobby.force_add_user_to_battle(player5.id, lobby_id)
     Lobby.force_add_user_to_battle(player6.id, lobby_id)
     Lobby.force_add_user_to_battle(player7.id, lobby_id)
+    Lobby.force_add_user_to_battle(player8.id, lobby_id)
 
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
     assert queue == []
@@ -478,5 +480,38 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
     assert queue == [player7.id]
+
+    # Finally we want to test the VIP command
+    # Clear the messages from the host socket
+    _tachyon_recv_until(hsocket)
+
+    data = %{cmd: "c.lobby.message", message: "$vip #{player8.name}"}
+    _tachyon_send(hsocket, data)
+
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == [player8.id, player7.id]
+
+    result = _tachyon_recv(hsocket)
+    assert result == [%{
+      "cmd" => "s.lobby.say",
+      "lobby_id" => lobby_id,
+      "message" => "$vip #{player8.name}",
+      "sender" => host.id
+    }]
+
+    result = _tachyon_recv(hsocket)
+    assert result == [%{
+      "cmd" => "s.lobby.announce",
+      "lobby_id" => lobby_id,
+      "message" => "#{host.name} used the VIP command to place #{player8.name} at the front of the joinq",
+      "sender" => Coordinator.get_coordinator_userid()
+    }]
+
+    # Now do it for #7
+    data = %{cmd: "c.lobby.message", message: "$vip #{player7.name}"}
+    _tachyon_send(hsocket, data)
+
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == [player7.id, player8.id]
   end
 end

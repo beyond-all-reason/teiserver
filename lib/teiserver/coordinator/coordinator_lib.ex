@@ -131,6 +131,9 @@ Cancels the lobby split
 $rename <new name>
 Renames the lobby to the name given
 
+$vip <name>
+Places that user at the front of the queue. This command will always output it's use even if used with the % operator.
+
 $meme <meme>
 A predefined bunch of settings for meme games. It's all Rikerss' fault.
 - ticks: Ticks only, don't go Cortex!

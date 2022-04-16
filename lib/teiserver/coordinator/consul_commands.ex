@@ -390,6 +390,18 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, state)
   end
 
+  def handle_command(%{command: "vip", remaining: target, senderid: senderid} = cmd, state) do
+    case ConsulServer.get_user(target, state) do
+      nil ->
+        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
+      target_id ->
+        ConsulServer.say_command(cmd, state)
+        sender_name = User.get_username(senderid)
+        Lobby.sayex(state.coordinator_id, "#{sender_name} used the VIP command to place #{target} at the front of the joinq", state.lobby_id)
+        %{state | join_queue: Enum.uniq([target_id] ++ state.join_queue)}
+    end
+  end
+
   def handle_command(%{command: "pull", remaining: target} = cmd, state) do
     case ConsulServer.get_user(target, state) do
       nil ->
