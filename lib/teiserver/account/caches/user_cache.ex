@@ -3,7 +3,6 @@ defmodule Teiserver.Account.UserCache do
   alias Teiserver.{Account, User}
   alias Teiserver.Data.Types, as: T
   alias Central.Account.Guardian
-  alias Teiserver.Client
   require Logger
 
   @spec get_username(T.userid() | nil) :: String.t() | nil
@@ -68,17 +67,6 @@ defmodule Teiserver.Account.UserCache do
     get_user_by_id(id)
   end
 
-  @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
-  def get_userid_by_discord_id(discord_id) do
-    ConCache.get(:users_lookup_id_with_discord_id, cachename(discord_id))
-  end
-
-  @spec get_user_by_discord_id(String.t()) :: User.t() | nil
-  def get_user_by_discord_id(discord_id) do
-    id = ConCache.get(:users_lookup_id_with_discord_id, cachename(discord_id))
-    ConCache.get(:users, id)
-  end
-
   @spec get_user_by_token(String.t()) :: User.t() | nil
   def get_user_by_token(token) do
     case Guardian.resource_from_token(token) do
@@ -93,16 +81,20 @@ defmodule Teiserver.Account.UserCache do
   @spec get_user_by_id(T.userid() | nil) :: User.t() | nil
   def get_user_by_id(nil), do: nil
   def get_user_by_id(id) do
-    ConCache.get(:users, int_parse(id))
+    id = int_parse(id)
+
+    Central.cache_get_or_store(:users, id, fn ->
+      Account.get_user(id)
+        |> convert_user
+        |> add_user
+    end)
   end
 
   @spec list_users(list) :: list
   def list_users(id_list) do
     id_list
-    |> Enum.map(fn userid ->
-      ConCache.get(:users, userid)
-    end)
-    |> Enum.filter(fn user -> user != nil end)
+      |> Enum.map(&get_user_by_id/1)
+      |> Enum.filter(fn user -> user != nil end)
   end
 
   @spec recache_user(T.userid() | User.t()) :: :ok
@@ -121,54 +113,48 @@ defmodule Teiserver.Account.UserCache do
     :ok
   end
 
-  @spec pre_cache_users(:active | :remaining) :: :ok
-  def pre_cache_users(:active) do
-    start_time = System.system_time(:millisecond)
+  def pre_cache_users(_), do: :ok
 
-    # now_login = round(:erlang.system_time(:seconds) / 60)
-    # recent_login = now_login - 360
-    # Account.list_users(limit: :infinity, search: [data_greater_than: {"last_login", "recent_login"}]) |> Enum.count()
+  # @spec pre_cache_users(:active | :remaining) :: :ok
+  # def pre_cache_users(:active) do
+  #   start_time = System.system_time(:millisecond)
 
-    # Account.list_users(limit: :infinity) |> Enum.count()
-    # Account.list_users(limit: :infinity, select: [:id, :name, :password, :email, :data]) |> Enum.count()
-    # Teiserver.User.get_user_by_id(3)
+  #   user_count =
+  #     Account.list_users(
+  #       select: [:data | User.keys()],
+  #       search: [pre_cache: true],
+  #       limit: :infinity
+  #     )
+  #     |> Parallel.map(fn user ->
+  #       user
+  #       |> convert_user
+  #       |> add_user
+  #     end)
+  #     |> Enum.count()
 
-    user_count =
-      Account.list_users(
-        select: [:data | User.keys()],
-        search: [pre_cache: true],
-        limit: :infinity
-      )
-      |> Parallel.map(fn user ->
-        user
-        |> convert_user
-        |> add_user
-      end)
-      |> Enum.count()
+  #   time_taken = System.system_time(:millisecond) - start_time
+  #   Logger.info("pre_cache_users:active, got #{user_count} users in #{time_taken}ms")
+  # end
 
-    time_taken = System.system_time(:millisecond) - start_time
-    Logger.info("pre_cache_users:active, got #{user_count} users in #{time_taken}ms")
-  end
+  # def pre_cache_users(:remaining) do
+  #   start_time = System.system_time(:millisecond)
 
-  def pre_cache_users(:remaining) do
-    start_time = System.system_time(:millisecond)
+  #   user_count =
+  #     Account.list_users(
+  #       select: [:data | User.keys()],
+  #       search: [pre_cache: false],
+  #       limit: :infinity
+  #     )
+  #     |> Parallel.map(fn user ->
+  #       user
+  #       |> convert_user
+  #       |> add_user
+  #     end)
+  #     |> Enum.count()
 
-    user_count =
-      Account.list_users(
-        select: [:data | User.keys()],
-        search: [pre_cache: false],
-        limit: :infinity
-      )
-      |> Parallel.map(fn user ->
-        user
-        |> convert_user
-        |> add_user
-      end)
-      |> Enum.count()
-
-    time_taken = System.system_time(:millisecond) - start_time
-    Logger.info("pre_cache_users:remaining, got #{user_count} users in #{time_taken}ms")
-  end
+  #   time_taken = System.system_time(:millisecond) - start_time
+  #   Logger.info("pre_cache_users:remaining, got #{user_count} users in #{time_taken}ms")
+  # end
 
   @doc """
   Given a database user it will convert it into a cached user
@@ -195,12 +181,9 @@ defmodule Teiserver.Account.UserCache do
   def add_user(nil), do: nil
   def add_user(user) do
     update_user(user)
-    ConCache.put(:users_lookup_name_with_id, user.id, user.name)
-    ConCache.put(:users_lookup_id_with_name, cachename(user.name), user.id)
-    ConCache.put(:users_lookup_id_with_email, cachename(user.email), user.id)
-    if user.discord_id do
-      ConCache.put(:users_lookup_id_with_discord_id, cachename(user.discord_id), user.id)
-    end
+    Central.cache_put(:users_lookup_name_with_id, user.id, user.name)
+    Central.cache_put(:users_lookup_id_with_name, cachename(user.name), user.id)
+    Central.cache_put(:users_lookup_id_with_email, cachename(user.email), user.id)
 
     user
   end
@@ -223,19 +206,22 @@ defmodule Teiserver.Account.UserCache do
 
   @spec update_user(User.t(), boolean) :: User.t()
   def update_user(user, persist \\ false) do
-    ConCache.put(:users, user.id, user)
+    Central.cache_put(:users, user.id, user)
     if persist, do: persist_user(user)
     user
   end
 
   @spec delete_user(T.userid()) :: :ok | :no_user
   def delete_user(userid) do
+    Logger.warn("UserCache.delete_user is being depreciated in favour of decache_user")
+    decache_user(userid)
+  end
+
+  @spec decache_user(T.userid()) :: :ok | :no_user
+  def decache_user(userid) do
     user = get_user_by_id(userid)
 
     if user do
-      Client.disconnect(userid, "User cache deletion")
-      :timer.sleep(100)
-
       Central.cache_delete(:users, userid)
       Central.cache_delete(:users_lookup_name_with_id, user.id)
       Central.cache_delete(:users_lookup_id_with_name, cachename(user.name))
@@ -249,7 +235,7 @@ defmodule Teiserver.Account.UserCache do
   defp cachename(nil), do: nil
   defp cachename(str) do
     str
-    |> String.trim
-    |> String.downcase
+      |> String.trim
+      |> String.downcase
   end
 end

@@ -413,6 +413,7 @@ defmodule Teiserver.User do
   defp do_rename_user(userid, new_name) do
     user = get_user_by_id(userid)
     set_flood_level(user.id, 10)
+    Client.disconnect(userid)
 
     # Log the current name in their history
     previous_names = Account.get_user_stat_data(userid)
@@ -428,7 +429,7 @@ defmodule Teiserver.User do
 
     # We need to re-get the user to ensure we don't overwrite our banned flag
     user = get_user_by_id(userid)
-    delete_user(user.id)
+    decache_user(user.id)
 
     db_user = Account.get_user!(userid)
     Account.update_user(db_user, %{"name" => new_name})
@@ -455,8 +456,7 @@ defmodule Teiserver.User do
 
   @spec change_email(T.user(), String.t()) :: T.user()
   def change_email(user, new_email) do
-    Central.cache_delete(:users_lookup_id_with_email, String.downcase(user.email))
-    ConCache.put(:users_lookup_id_with_email, String.downcase(new_email), user.id)
+    decache_user(user.id)
     update_user(%{user | email: new_email, email_change_code: [nil, nil]}, persist: true)
   end
 
@@ -473,8 +473,8 @@ defmodule Teiserver.User do
   @spec get_user_by_email(String.t()) :: T.user() | nil
   defdelegate get_user_by_email(email), to: UserCache
 
-  @spec get_user_by_discord_id(String.t()) :: T.user() | nil
-  defdelegate get_user_by_discord_id(discord_id), to: UserCache
+  # @spec get_user_by_discord_id(String.t()) :: T.user() | nil
+  # defdelegate get_user_by_discord_id(discord_id), to: UserCache
 
   # @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
   # defdelegate get_userid_by_discord_id(discord_id), to: UserCache
@@ -505,6 +505,9 @@ defmodule Teiserver.User do
 
   @spec delete_user(T.userid()) :: :ok | :no_user
   defdelegate delete_user(userid), to: UserCache
+
+  @spec decache_user(T.userid()) :: :ok | :no_user
+  defdelegate decache_user(userid), to: UserCache
 
 
   # Friend related

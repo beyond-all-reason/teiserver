@@ -141,8 +141,8 @@ defmodule TeiserverWeb.Admin.AccoladeController do
     accolade = Account.get_accolade!(id)
 
     accolade
-    |> AccoladeLib.make_favourite
-    |> remove_recently(conn)
+      |> AccoladeLib.make_favourite
+      |> remove_recently(conn)
 
     {:ok, _accolade} = Account.delete_accolade(accolade)
 

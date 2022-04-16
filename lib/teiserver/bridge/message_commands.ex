@@ -11,7 +11,8 @@ defmodule Teiserver.Bridge.MessageCommands do
   def handle(%Alchemy.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []} = _message) do
     [cmd | remaining] = String.split(content, " ")
     remaining = Enum.join(remaining, " ")
-    user = User.get_user_by_discord_id(author)
+    # user = User.get_user_by_discord_id(author)
+    user = nil
 
     if allow?(cmd, user) do
       handle_command({user, author}, cmd, remaining, channel)
@@ -23,27 +24,31 @@ defmodule Teiserver.Bridge.MessageCommands do
   end
 
   @spec handle_command({T.user(), String.t()}, String.t(), String.t(), String.t()) :: any
-  def handle_command({nil, discord_id}, "discord", remaining, channel) do
-    case String.split(remaining, "-") do
-      [userid_str, given_code] ->
-        userid = NumberHelper.int_parse(userid_str)
-        correct_code = ConCache.get(:discord_bridge_account_codes, userid)
-
-        if given_code == correct_code do
-          Central.cache_delete(:discord_bridge_account_codes, userid)
-          user = User.get_user_by_id(userid)
-          User.update_user(%{user | discord_id: discord_id}, persist: true)
-          ConCache.put(:users_lookup_id_with_discord_id, discord_id, user.id)
-
-          reply(channel, "Congratulations, your accounts are now linked.")
-        else
-          reply(channel, "This code is incorrect.")
-        end
-
-      _ ->
-        reply(channel, "Invalid code")
-    end
+  def handle_command({nil, _discord_id}, "discord", _remaining, channel) do
+    reply(channel, "Unfortunately we are currently not enabling linking of discord to server accounts due to glitchy code and lack of features to add when we do link. We plan to re-enable this later and if you have ideas please contact Teifion.")
   end
+
+  # def handle_command({nil, discord_id}, "discord", remaining, channel) do
+  #   case String.split(remaining, "-") do
+  #     [userid_str, given_code] ->
+  #       userid = NumberHelper.int_parse(userid_str)
+  #       correct_code = ConCache.get(:discord_bridge_account_codes, userid)
+
+  #       if given_code == correct_code do
+  #         Central.cache_delete(:discord_bridge_account_codes, userid)
+  #         user = User.get_user_by_id(userid)
+  #         User.update_user(%{user | discord_id: discord_id}, persist: true)
+  #         # ConCache.put(:users_lookup_id_with_discord_id, discord_id, user.id)
+
+  #         reply(channel, "Congratulations, your accounts are now linked.")
+  #       else
+  #         reply(channel, "This code is incorrect.")
+  #       end
+
+  #     _ ->
+  #       reply(channel, "Invalid code")
+  #   end
+  # end
 
   def handle_command({nil, _}, cmd, _remaining, channel) do
     response = case cmd do

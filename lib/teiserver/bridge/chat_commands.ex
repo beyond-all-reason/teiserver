@@ -6,15 +6,15 @@ defmodule Teiserver.Bridge.ChatCommands do
 
   @always_allow ~w()
 
-  def handle(%Alchemy.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []} = _message) do
-    [cmd | remaining] = String.split(content, " ")
-    remaining = Enum.join(remaining, " ")
-    user = User.get_user_by_discord_id(author)
+  # def handle(%Alchemy.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []} = _message) do
+  #   [cmd | remaining] = String.split(content, " ")
+  #   remaining = Enum.join(remaining, " ")
+  #   user = User.get_user_by_discord_id(author)
 
-    if allow?(cmd, user) do
-      handle_message({user, author}, cmd, remaining, channel)
-    end
-  end
+  #   if allow?(cmd, user) do
+  #     handle_message({user, author}, cmd, remaining, channel)
+  #   end
+  # end
 
   def handle(_) do
     :ok
