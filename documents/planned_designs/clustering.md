@@ -82,6 +82,7 @@ Note: This ties in with the "Per node process" item.
 - **Stage 2:** Add a `caches.md` documentation file at [/documents/dev_designs/caches.md](/documents/dev_designs/caches.md) to document the different caches
 - **Stage 3:** Decide which can be migrated away
 - **Stage 4:** Might need to use cache_update rather than cache_put to help ensure consistency
+- **Stage 5:** Migrate the caches away
 
 ##### Per node processes
 - **Stage 1:** List each type of process we track.
