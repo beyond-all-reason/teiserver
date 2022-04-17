@@ -155,7 +155,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
         unique_users: existing.tmp_reduction.unique_users ++ Map.keys(data["minutes_per_user"]["total"]),
         unique_players: existing.tmp_reduction.unique_players ++ Map.keys(data["minutes_per_user"]["player"]),
         accounts_created: existing.tmp_reduction.accounts_created + data["aggregates"]["stats"]["accounts_created"],
-        peak_users: max(existing.tmp_reduction.peak_players, data["aggregates"]["stats"]["peak_user_counts"]["total"]),
+        peak_users: max(existing.tmp_reduction.peak_users, data["aggregates"]["stats"]["peak_user_counts"]["total"]),
         peak_players: max(existing.tmp_reduction.peak_players, data["aggregates"]["stats"]["peak_user_counts"]["player"]),
       },
 
