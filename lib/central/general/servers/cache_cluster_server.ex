@@ -8,6 +8,13 @@ defmodule Central.General.CacheClusterServer do
   end
 
   @impl true
+  def handle_info({:cluster_hooks, :insert_new, from_node, table, key, value}, state) do
+    if from_node != Node.self() do
+      ConCache.insert_new(table, key, value)
+    end
+    {:noreply, state}
+  end
+
   def handle_info({:cluster_hooks, :delete, from_node, table, keys}, state) do
     if from_node != Node.self() do
       keys
