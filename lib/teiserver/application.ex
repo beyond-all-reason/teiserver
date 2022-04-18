@@ -20,7 +20,6 @@ defmodule Teiserver.Application do
 
       # Caches
       # Caches - Meta
-      concache_perm_sup(:id_counters),
       concache_perm_sup(:lists),
 
       # Caches - User

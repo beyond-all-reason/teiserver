@@ -34,13 +34,18 @@ defmodule Teiserver.Battle.Lobby do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.{User, Client, Battle}
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Coordinator
+  alias Teiserver.{Coordinator, LobbyIdServer}
   alias Teiserver.Battle.{LobbyChat, LobbyCache}
 
 
   # LobbyChat
+  @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def say(userid, msg, lobby_id), do: LobbyChat.say(userid, msg, lobby_id)
+
+  @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def sayex(userid, msg, lobby_id), do: LobbyChat.sayex(userid, msg, lobby_id)
+
+  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def sayprivateex(from_id, to_id, msg, lobby_id), do: LobbyChat.sayprivateex(from_id, to_id, msg, lobby_id)
 
 
@@ -49,14 +54,6 @@ defmodule Teiserver.Battle.Lobby do
 #     :id, :founder_id, :founder_name,
 #     :type, :nattype, :max_players, :password, :rank, :locked, :engine_name, :players, :player_count, :spectator_count, :bot_count, :bots, :ip, :tags, :disabled_units, :start_rectangles, :map_hash, :map_name
 #   ]
-
-  defp next_id() do
-    ConCache.isolated(:id_counters, :battle, fn ->
-      new_value = Central.cache_get(:id_counters, :battle) + 1
-      Central.cache_put(:id_counters, :battle, new_value)
-      new_value
-    end)
-  end
 
   def new_bot(data) do
     Map.merge(
@@ -81,7 +78,7 @@ defmodule Teiserver.Battle.Lobby do
     # ip, port, engine_version, map_hash, map_name, game_name, hash_code
     Map.merge(
       %{
-        id: next_id(),
+        id: LobbyIdServer.get_next_id(),
 
         # Expected to be overriden
         ip: nil,

@@ -43,9 +43,12 @@
 - Update group caches for new groups (only needs to be run if the groups don't already exist)
 
 #### Replace with Singleton GenServer
+##### Done
 - ConCache.put(:id_counters, :battle, 1)
 - Springids
 - id_counters
+
+##### Yet to do
 - ConCache.put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
 - ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", nil)
 - ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_cache", true)

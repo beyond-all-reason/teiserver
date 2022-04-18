@@ -256,17 +256,6 @@ defmodule Teiserver.Startup do
     Central.cache_put(:lists, :rooms, [])
     Central.cache_insert_new(:lists, :lobbies, [])
 
-    # We tried having a random lobby id start number to help prevent people joining
-    # ongoing games but it didn't work
-    # # We were using :rand.uniform() but it wasn't being random
-    # # since we don't care about random random we're okay with this!
-    # bid = :erlang.system_time()
-    #   |> to_string
-    #   |> String.reverse()
-    #   |> String.slice(0..5)
-    #   |> String.to_integer()
-    Central.cache_put(:id_counters, :battle, 1)
-
     User.pre_cache_users(:active)
     time_taken = System.system_time(:millisecond) - start_time
     Logger.info("Teiserver active user precache, took #{time_taken}ms")
