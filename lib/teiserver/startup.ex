@@ -266,7 +266,7 @@ defmodule Teiserver.Startup do
 
     User.pre_cache_users(:active)
     time_taken = System.system_time(:millisecond) - start_time
-    Logger.error("Teiserver active user precache, took #{time_taken}ms")
+    Logger.info("Teiserver active user precache, took #{time_taken}ms")
 
     Teiserver.Data.Matchmaking.pre_cache_queues()
 
@@ -300,6 +300,7 @@ defmodule Teiserver.Startup do
       spawn(fn ->
         :timer.sleep(200)
         Teiserver.Coordinator.start_coordinator()
+        Teiserver.Coordinator.AutomodServer.start_automod_server()
       end)
     end
 
@@ -321,6 +322,6 @@ defmodule Teiserver.Startup do
     ConCache.put(:application_metadata_cache, "teiserver_full_startup_completed", true)
 
     time_taken = System.system_time(:millisecond) - start_time
-    Logger.error("Teiserver startup complete, took #{time_taken}ms")
+    Logger.info("Teiserver startup complete, took #{time_taken}ms")
   end
 end

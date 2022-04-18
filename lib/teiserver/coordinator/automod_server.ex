@@ -11,12 +11,33 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec check_user(T.userid()) :: nil
   def check_user(userid) do
-    case Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
       [{pid, _}] ->
         GenServer.call(pid, {:check_user, userid})
       _ ->
         nil
     end
+  end
+
+  @spec start_automod_server() :: :ok | {:failure, String.t()}
+  def start_automod_server() do
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
+      [{_pid, _}] ->
+        {:failure, "Already started"}
+      _ ->
+        do_start()
+    end
+  end
+
+  @spec do_start() :: :ok
+  defp do_start() do
+    {:ok, _coordinator_pid} =
+      DynamicSupervisor.start_child(Teiserver.Coordinator.DynamicSupervisor, {
+        Teiserver.Coordinator.AutomodServer,
+        name: Teiserver.Coordinator.AutomodServer,
+        data: %{}
+      })
+    :ok
   end
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}

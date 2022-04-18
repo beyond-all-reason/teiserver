@@ -13,7 +13,7 @@ defmodule Teiserver.Throttles do
 
   @spec get_throttle_pid({atom(), integer()}) :: pid() | nil
   def get_throttle_pid(key) do
-    case Registry.lookup(Teiserver.ServerRegistry, key) do
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, key) do
       [{pid, _}] ->
         pid
       _ ->

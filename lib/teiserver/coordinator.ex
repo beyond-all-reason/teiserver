@@ -26,7 +26,7 @@ defmodule Teiserver.Coordinator do
   @spec start_coordinator() :: :ok | {:failure, String.t()}
   def start_coordinator() do
     cond do
-      get_coordinator_userid() != nil ->
+      get_coordinator_pid() != nil ->
         {:failure, "Already started"}
 
       true ->
@@ -41,7 +41,7 @@ defmodule Teiserver.Coordinator do
 
   @spec get_coordinator_pid() :: pid() | nil
   def get_coordinator_pid() do
-    case Registry.lookup(Teiserver.ServerRegistry, "CoordinatorServer") do
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, "CoordinatorServer") do
       [{pid, _}] ->
         pid
       _ ->
@@ -68,7 +68,7 @@ defmodule Teiserver.Coordinator do
 
   @spec get_consul_pid(T.lobby_id()) :: pid() | nil
   def get_consul_pid(lobby_id) do
-    case Registry.lookup(Teiserver.ServerRegistry, "ConsulServer:#{lobby_id}") do
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, "ConsulServer:#{lobby_id}") do
       [{pid, _}] ->
         pid
       _ ->

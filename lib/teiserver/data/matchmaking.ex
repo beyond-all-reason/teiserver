@@ -29,7 +29,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec get_queue_pid(integer) :: pid() | nil
   def get_queue_pid(id) when is_integer(id) do
-    case Registry.lookup(Teiserver.ServerRegistry, "QueueServer:#{id}") do
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, "QueueServer:#{id}") do
       [{pid, _}] ->
         pid
       _ ->

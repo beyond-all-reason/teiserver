@@ -11,6 +11,8 @@ defmodule Teiserver.Coordinator.AutomodTest do
     account = CoordinatorServer.get_coordinator_account()
     ConCache.put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
 
+    Teiserver.Coordinator.AutomodServer.start_automod_server()
+
     Config.update_site_config("teiserver.Automod action delay", 0)
     banned_user = new_user()
     {:ok, banned_user: banned_user}

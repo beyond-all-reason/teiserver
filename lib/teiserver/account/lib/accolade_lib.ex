@@ -242,7 +242,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec get_accolade_bot_pid() :: pid() | nil
   def get_accolade_bot_pid() do
-    case Registry.lookup(Teiserver.ServerRegistry, "AccoladeBotServer") do
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AccoladeBotServer") do
       [{pid, _}] ->
         pid
       _ ->
@@ -252,7 +252,7 @@ defmodule Teiserver.Account.AccoladeLib do
 
   @spec get_accolade_chat_pid(T.userid()) :: pid() | nil
   def get_accolade_chat_pid(userid) do
-    case Registry.lookup(Teiserver.ServerRegistry, "AccoladeChatServer:#{userid}") do
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AccoladeChatServer:#{userid}") do
       [{pid, _}] ->
         pid
       _ ->
