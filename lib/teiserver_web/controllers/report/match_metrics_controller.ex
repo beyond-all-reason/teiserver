@@ -150,12 +150,20 @@ defmodule TeiserverWeb.Report.MatchMetricController do
   def month_metrics_today(conn, _params) do
     data = Telemetry.get_this_months_match_metrics_log()
 
+    {lyear, lmonth} = if Timex.today().month == 1 do
+      {Timex.today().year - 1, 12}
+    else
+      {Timex.today().year, Timex.today().month - 1}
+    end
+    last_month = Telemetry.get_match_month_log({lyear, lmonth}).data
+
     conn
       |> assign(:year, Timex.today().year)
       |> assign(:month, Timex.today().month)
       |> assign(:data, data)
-      |> add_breadcrumb(name: "Monthly metrics - Today (partial)", url: conn.request_path)
-      |> render("month_metrics_show.html")
+      |> assign(:last_month, last_month)
+      |> add_breadcrumb(name: "Monthly - This month (partial)", url: conn.request_path)
+      |> render("month_metrics_today_show.html")
   end
 
   @spec month_metrics_graph(Plug.Conn.t(), map) :: Plug.Conn.t()

@@ -685,7 +685,8 @@ defmodule Teiserver.Telemetry do
 
   @spec get_this_months_match_metrics_log :: map()
   def get_this_months_match_metrics_log() do
-    last_time = ConCache.get(:application_metadata_cache, "teiserver_month_server_metrics_last_time")
+    last_time = ConCache.get(:application_metadata_cache, "teiserver_month_match_metrics_last_time")
+
     recache = cond do
       last_time == nil -> true
       Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
@@ -697,11 +698,11 @@ defmodule Teiserver.Telemetry do
         |> Jason.encode!()
         |> Jason.decode!()
 
-      ConCache.put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
-      ConCache.put(:application_metadata_cache, "teiserver_month_server_metrics_last_time", Timex.now())
+      ConCache.put(:application_metadata_cache, "teiserver_month_match_metrics_cache", data)
+      ConCache.put(:application_metadata_cache, "teiserver_month_match_metrics_last_time", Timex.now())
       data
     else
-      ConCache.get(:application_metadata_cache, "teiserver_month_month_metrics_cache")
+      ConCache.get(:application_metadata_cache, "teiserver_month_match_metrics_cache")
     end
   end
 

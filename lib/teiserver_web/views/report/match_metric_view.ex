@@ -30,4 +30,9 @@ defmodule TeiserverWeb.Report.MatchMetricView do
     dp_mult = :math.pow(10, decimal_places)
     round(value * dp_mult)/dp_mult
   end
+
+  @spec percent(number) :: integer
+  def percent(v) do
+    round(v * 100)
+  end
 end

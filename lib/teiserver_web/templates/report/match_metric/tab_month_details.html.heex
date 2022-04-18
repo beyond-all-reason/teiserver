@@ -57,7 +57,7 @@
   <div class="col-md-6">
     <h4>Map</h4>
     <%
-      maps = @data["totals"]["maps"]
+      maps = (@data["totals"]["maps"] || [])
         |> Enum.sort(fn ({_, v1}, {_, v2}) -> v1 >= v2 end)
     %>
     <%= for {name, count} <- maps do %>

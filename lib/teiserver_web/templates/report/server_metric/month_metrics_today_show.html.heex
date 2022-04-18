@@ -27,7 +27,7 @@
         <%= render TeiserverWeb.Report.ServerMetricView, "section_menu.html", Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
-            active: "month_metrics"
+            active: "this_month"
           })
         %>
 
@@ -36,12 +36,12 @@
 <div class="row page-row">
   <div class="col-md-12">
 
-    <a href={Routes.ts_reports_match_metric_path(@conn, :month_metrics_show, @year, @month)} class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.view_colour}"}>
+    <a href={Routes.ts_reports_match_metric_path(@conn, :month_metrics_today)} class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.view_colour}"}>
       <%= central_component "icon", icon: TeiserverWeb.Report.MatchMetricView.icon %>
       &nbsp;
       Match detail
     </a>
-    <h4>Headline stats - <%= @month %>/<%= @year %></h4>
+    <h4>Headline stats - <%= @month %>/<%= @year %> month to date</h4>
     <br />
 
     <ul class="nav nav-tabs" role="tablist" id="the_tabs">
@@ -55,7 +55,7 @@
 
     <div class="tab-content">
       <div class="tab-pane" id="details_tab" style="padding:5px;">
-        <%= render "tab_month_details.html", %{data: @data} %>
+        <%= render "tab_month_today_details.html", %{data: @data, last_month: @last_month} %>
       </div>
     </div>
 
