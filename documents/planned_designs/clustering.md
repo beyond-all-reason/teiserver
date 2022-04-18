@@ -16,8 +16,9 @@ Currently Teiserver runs on a single node, we would like to run it on multiple n
 ##### PubSub.broadcast
 - [ ] **Stage 1:** Identify which pubsub messages need to include the sending `Node.self()` as part of their structure
 - [ ] **Stage 2:** One message at a time, update the documentation and implementation of said message (both send and receive)
-- [ ] **Stage 3:** Identify other things that need to be a singleton (e.g. lobby_id, spring_id)
-- [ ] **Stage 4:** Add functionality for a node coming online after the others and being caught-up on state of caches
+- [X] **Stage 3:** Identify counters that need to be a singleton (e.g. lobby_id, spring_id)
+- [X] **Stage 4:** Convert these to singletons
+- [ ] **Stage 5:** Add functionality for a node coming online after the others and being caught-up on state of caches
 
 ##### Less reliance on pre-caching
 - [X] **Stage 1:** Identify pre-caches used
@@ -28,9 +29,8 @@ Currently Teiserver runs on a single node, we would like to run it on multiple n
 
 ##### Per node processes
 - [X] **Stage 1:** List each type of process we track.
-- [ ] **Stage 2:** Find a good example of a per-node message vs a cluster-wide message and document how it should work
-- [ ] **Stage 3:** Identify the changes that will need to be made to it and attempt implementing them
-- [ ] **Stage 4:** Repeat for all other messages to node vs cluster processes
+- [ ] **Stage 2:** Convert these to use a Horde DynamicSupervisor
+- [ ] **Stage 3:** Have them all startup from Teiserver.Startup where they can check for existing PIDs
 
 ## Known issues
 - ETS (via ConCache) is node specific, we need to make changes propagate across the cluster
@@ -72,10 +72,11 @@ We can use Horde to run a process with a single name and have it automatically g
 Note: This ties in with the "Per node process" item.
 - **Stage 1:** Identify which pubsub messages need to include the sending `Node.self()` as part of their structure. By default we should assume all items are global.
 - **Stage 2:** One message at a time, update the documentation and implementation of said message (both send and receive)
-- **Stage 3:** Identify other things that need to be a singleton, they probably need to be placed in a single GenServer instance rather than ETS. Investigation has found only two things that need to be singletons.
-- - User SpringId
-- - Lobby match_id
-- **Stage 4:** Add functionality for a node coming online after the others and being caught-up on state of caches (e.g. client/lobby list)
+- **Stage 3:** Identify counters that need to be a singleton, they probably need to be placed in a single GenServer instance rather than ETS. Investigation has found two id counters that need to be singletons.
+  - User SpringId
+  - Lobby match_id
+- **Stage 4:** Convert these to singletons
+- **Stage 5:** Add functionality for a node coming online after the others and being caught-up on state of caches (e.g. client/lobby list)
 
 ##### Less reliance on pre-caching
 - **Stage 1:** Identify pre-caches used
@@ -86,24 +87,22 @@ Note: This ties in with the "Per node process" item.
 
 ##### Per node processes
 - **Stage 1:** List each type of process we track.
+  - List of per ID processes (1 per id in entire cluster):
+    - ConsulServer
+    - LobbyThrottleServer
+    - AccoladeChatServer
+    - QueueServer
+  - Per cluster processes that might need to be changed to use pooled resources (e.g. worker pool):
+    - CoordinatorServer
+    - AccoldeBotServer
+    - AutomodServer
+  - Per cluster processes
+    - TelemetryServer
+    - SpringTelemetryServer
+    - AchievementServer
+- **Stage 2:** Convert these to use a Horde DynamicSupervisor
+- **Stage 3:** Have them all startup from Teiserver.Startup where they can check for existing PIDs
 
-- - List of per ID processes (1 per id in entire cluster):
-- - - ConsulServer
-- - - LobbyThrottleServer
-- - - AccoladeChatServer
-- - - QueueServer
-- - List of singular processes (1 per node but written to not be cross-cluster):
-- - - CoordinatorServer
-- - - AccoldeBotServer
-- - - AutomodServer
-- - Processes that don't track their PIDs (need to be written to not be cross-cluster):
-- - - TelemetryServer
-- - - SpringTelemetryServer
-- - - AchievementServer
-
-- **Stage 2:** Find a good example of a per-node message vs a cluster-wide message and document how it should work
-- **Stage 3:** Identify the changes that will need to be made to it and attempt implementing them
-- **Stage 4:** Repeat for all other messages to node vs cluster processes
 
 ## Lessons learned
 - Ensure when registering processes they have a unique key. I accidentally registered the LobbyThrottles without having the lobby_id be part of the key and as a result they didn't register correctly at first.
