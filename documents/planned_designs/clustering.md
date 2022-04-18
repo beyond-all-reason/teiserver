@@ -5,7 +5,7 @@ Currently Teiserver runs on a single node, we would like to run it on multiple n
 ##### Propagate data
 - [X] **Stage 1:** Central module functions
 - [X] **Stage 2:** Implement ClusterServer
-- [ ] **Stage 3:** Cache actions should use the new functions in `Central`
+- [X] **Stage 3:** Cache actions should use the new functions in `Central`
 
 ##### PID store
 - [X] **Stage 1:** Change each server process to register it's `pid` with `Teiserver.ServerRegistry`.
@@ -70,7 +70,7 @@ We can use Horde to run a process with a single name and have it automatically g
 
 ##### PubSub.broadcast
 Note: This ties in with the "Per node process" item.
-- **Stage 1:** Identify which pubsub messages need to include the sending `Node.self()` as part of their structure
+- **Stage 1:** Identify which pubsub messages need to include the sending `Node.self()` as part of their structure. By default we should assume all items are global.
 - **Stage 2:** One message at a time, update the documentation and implementation of said message (both send and receive)
 - **Stage 3:** Identify other things that need to be a singleton, they probably need to be placed in a single GenServer instance rather than ETS. Investigation has found only two things that need to be singletons.
 - - User SpringId

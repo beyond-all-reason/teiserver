@@ -9,6 +9,9 @@ defmodule Teiserver.Startup do
 
     Teiserver.TeiserverConfigs.teiserver_configs()
 
+    Teiserver.LobbyIdServer.start_lobby_id_server()
+    Teiserver.SpringIdServer.start_spring_id_server()
+
     # Chat stuff
     Central.Account.UserLib.add_report_restriction_types("Chat", [
       "Bridging",
