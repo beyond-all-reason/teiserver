@@ -5,7 +5,7 @@ end
 
 defmodule Teiserver.TeiserverTestLib do
   @moduledoc false
-  alias Teiserver.{Client, User, Account}
+  alias Teiserver.{Client, User, Account, SpringIdServer}
   alias Teiserver.Account.AccoladeLib
   alias Teiserver.Protocols.TachyonLib
   alias Teiserver.Coordinator.CoordinatorServer
@@ -64,7 +64,7 @@ defmodule Teiserver.TeiserverTestLib do
 
         user
           |> User.convert_user()
-          |> Map.put(:springid, User.next_springid())
+          |> Map.put(:springid, SpringIdServer.get_next_id())
           |> User.add_user()
           |> User.verify_user()
       _ ->

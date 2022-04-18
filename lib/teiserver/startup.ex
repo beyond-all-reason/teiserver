@@ -273,14 +273,6 @@ defmodule Teiserver.Startup do
 
     Teiserver.Data.Matchmaking.pre_cache_queues()
 
-    springids = Account.list_users(order_by: "Newest first", limit: 5, select: [:data])
-    |> Enum.map(fn u -> Central.Helpers.NumberHelper.int_parse(u.data["springid"]) end)
-
-    # We do this as a separate operation because a blank DB won't have any springids yet
-    current_springid = Enum.max([0] ++ springids)
-
-    Central.cache_put(:id_counters, :springid, current_springid + 1)
-
     Central.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
     Central.cache_put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", nil)
     Central.cache_put(:application_metadata_cache, "teiserver_day_metrics_today_cache", true)

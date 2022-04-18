@@ -7,6 +7,7 @@ defmodule Teiserver.User do
   alias Teiserver.{Account, User}
   alias Teiserver.Account.{UserCache, RelationsLib}
   alias Teiserver.Chat.WordLib
+  alias Teiserver.SpringIdServer
   alias Argon2
   alias Central.Account.Guardian
   alias Teiserver.Data.Types, as: T
@@ -93,13 +94,6 @@ defmodule Teiserver.User do
     3000
   ]
 
-  def next_springid() do
-    ConCache.isolated(:id_counters, :springid, fn ->
-      new_value = Central.cache_get(:id_counters, :springid) + 1
-      Central.cache_put(:id_counters, :springid, new_value)
-      new_value
-    end)
-  end
 
   @spec clean_name(String.t()) :: String.t()
   def clean_name(name) do
@@ -135,7 +129,7 @@ defmodule Teiserver.User do
       icon: @default_icon,
       admin_group_id: Teiserver.user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
-      springid: next_springid(),
+      springid: SpringIdServer.get_next_id(),
       data:
         data
         |> Map.merge(%{
@@ -165,7 +159,7 @@ defmodule Teiserver.User do
       icon: @default_icon,
       admin_group_id: Teiserver.user_group_id(),
       permissions: ["teiserver", "teiserver.player", "teiserver.player.account"],
-      springid: next_springid(),
+      springid: SpringIdServer.get_next_id(),
       data:
         data
         |> Map.merge(%{
@@ -257,7 +251,7 @@ defmodule Teiserver.User do
         # Now add them to the cache
         user
         |> convert_user
-        |> Map.put(:springid, next_springid())
+        |> Map.put(:springid, SpringIdServer.get_next_id())
         |> Map.put(:password_hash, spring_md5_password(password))
         |> Map.put(:spring_password, false)
         |> add_user
@@ -301,7 +295,7 @@ defmodule Teiserver.User do
         # Now add them to the cache
         user
         |> convert_user
-        |> Map.put(:springid, next_springid())
+        |> Map.put(:springid, SpringIdServer.get_next_id())
         |> add_user
 
         if not String.ends_with?(user.email, "@agents") do
@@ -742,7 +736,7 @@ defmodule Teiserver.User do
 
     rank = calculate_rank(user.id)
 
-    springid = if Map.get(user, :springid) != nil, do: user.springid, else: next_springid()
+    springid = if Map.get(user, :springid) != nil, do: user.springid, else: SpringIdServer.get_next_id()
     |> Central.Helpers.NumberHelper.int_parse
 
     # We don't care about the lobby version so much as we do about the lobby itself
