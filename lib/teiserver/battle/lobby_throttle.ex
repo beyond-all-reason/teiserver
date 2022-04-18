@@ -99,7 +99,7 @@ defmodule Teiserver.Battle.LobbyThrottle do
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{battle_lobby_id}")
 
-    Registry.register(
+    Horde.Registry.register(
       Teiserver.ServerRegistry,
       "LobbyThrottle:#{battle_lobby_id}",
       battle_lobby_id

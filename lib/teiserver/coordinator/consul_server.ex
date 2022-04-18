@@ -648,7 +648,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
 
     # Update the queue pids cache to point to this process
-    Registry.register(
+    Horde.Registry.register(
       Teiserver.ServerRegistry,
       "ConsulServer:#{lobby_id}",
       lobby_id

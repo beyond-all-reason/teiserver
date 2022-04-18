@@ -94,7 +94,7 @@ defmodule Teiserver.Account.ClientIndexThrottle do
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
 
-    Registry.register(
+    Horde.Registry.register(
       Teiserver.ServerRegistry,
       "ClientIndexThrottle",
       :index

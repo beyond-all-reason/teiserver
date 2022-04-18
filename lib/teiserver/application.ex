@@ -2,16 +2,13 @@ defmodule Teiserver.Application do
   @moduledoc false
   def children() do
     children = [
-      # Registries - TODO: Change these into Horde Registries
-      {Registry, keys: :duplicate, name: Teiserver.PoolRegistry},
-      {Registry, keys: :unique, name: Teiserver.ServerRegistry},
+      # Global/singleton registries
+      # {Horde.Registry, [keys: :duplicate, members: :auto, name: Teiserver.PoolRegistry]},
+      {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
 
       # These are for tracking the number of servers on the local node
       {Registry, keys: :duplicate, name: Teiserver.LocalPoolRegistry},
       {Registry, keys: :duplicate, name: Teiserver.LocalServerRegistry},
-
-      # {Horde.Registry, [keys: :duplicate, members: :auto, name: Teiserver.PoolRegistry]},
-      # {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
 
       # Stores - Tables where changes are not propagated across the cluster
       # Possible stores

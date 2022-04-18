@@ -285,7 +285,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       send(self(), :begin)
     end
     ConCache.put(:application_metadata_cache, "teiserver_bridge_pid", self())
-    Registry.register(
+    Horde.Registry.register(
       Teiserver.ServerRegistry,
       "BridgeServer",
       :bridge_server

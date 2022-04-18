@@ -175,7 +175,7 @@ defmodule Teiserver.Account.AccoladeChatServer do
     match_id = opts[:match_id]
 
     # Update the queue pids cache to point to this process
-    Registry.register(
+    Horde.Registry.register(
       Teiserver.ServerRegistry,
       "AccoladeChatServer:#{userid}",
       userid

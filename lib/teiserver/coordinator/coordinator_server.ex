@@ -269,7 +269,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
-    Registry.register(
+    Horde.Registry.register(
       Teiserver.ServerRegistry,
       "CoordinatorServer",
       :coordinator
