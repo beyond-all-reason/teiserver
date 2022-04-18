@@ -24,7 +24,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec get_queue(Integer.t()) :: QueueStruct.t() | nil
   def get_queue(id) do
-    ConCache.get(:teiserver_queues, id)
+    Central.cache_get(:teiserver_queues, id)
   end
 
   @spec get_queue_pid(integer) :: pid() | nil
@@ -51,7 +51,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec get_queue_and_info(Integer.t()) :: {QueueStruct.t(), Map.t()}
   def get_queue_and_info(id) when is_integer(id) do
-    queue = ConCache.get(:teiserver_queues, id)
+    queue = Central.cache_get(:teiserver_queues, id)
     info = call_queue(id, :get_info)
     {queue, info}
   end
@@ -75,20 +75,20 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec update_queue(QueueStruct.t()) :: :ok
   def update_queue(queue) do
-    ConCache.put(:teiserver_queues, queue.id, queue)
+    Central.cache_put(:teiserver_queues, queue.id, queue)
   end
 
   @spec list_queues :: [QueueStruct.t() | nil]
   def list_queues() do
-    ConCache.get(:lists, :queues)
-    |> Enum.map(fn queue_id -> ConCache.get(:teiserver_queues, queue_id) end)
+    Central.cache_get(:lists, :queues)
+    |> Enum.map(fn queue_id -> Central.cache_get(:teiserver_queues, queue_id) end)
   end
 
   @spec list_queues([Integer.t()]) :: [QueueStruct.t() | nil]
   def list_queues(id_list) do
     id_list
     |> Enum.map(fn queue_id ->
-      ConCache.get(:teiserver_queues, queue_id)
+      Central.cache_get(:teiserver_queues, queue_id)
     end)
   end
 
@@ -164,7 +164,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec pre_cache_queues :: :ok
   def pre_cache_queues() do
-    ConCache.insert_new(:lists, :queues, [])
+    Central.cache_insert_new(:lists, :queues, [])
 
     queue_count =
       Game.list_queues(limit: :infinity)

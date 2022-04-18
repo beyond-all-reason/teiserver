@@ -370,7 +370,7 @@ defmodule Teiserver.Account do
 
   @spec get_user_stat_data(integer()) :: Map.t()
   def get_user_stat_data(userid) do
-    ConCache.get_or_store(:teiserver_user_stat_cache, userid, fn ->
+    Central.cache_get_or_store(:teiserver_user_stat_cache, userid, fn ->
       case get_user_stat(userid) do
         nil ->
           %{}

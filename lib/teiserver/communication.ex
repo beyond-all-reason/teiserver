@@ -4,7 +4,7 @@ defmodule Teiserver.Communication do
   alias Central.Communication
 
   def get_category_id(category_name) do
-    ConCache.get_or_store(:teiserver_blog_categories, category_name, fn ->
+    Central.cache_get_or_store(:teiserver_blog_categories, category_name, fn ->
       case Communication.get_category(nil, search: [name: category_name]) do
         nil -> nil
         category -> category.id
@@ -14,7 +14,7 @@ defmodule Teiserver.Communication do
 
   def get_latest_post(nil), do: nil
   def get_latest_post(category_id) do
-    ConCache.get_or_store(:teiserver_blog_posts, :latest, fn ->
+    Central.cache_get_or_store(:teiserver_blog_posts, :latest, fn ->
       posts = Communication.list_posts(
         search: [category_id: category_id],
         joins: [],

@@ -204,7 +204,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       User.send_direct_message(state.userid, senderid, "You already have a discord account linked.")
     else
       code = :rand.uniform(899999) + 100000 |> to_string
-      ConCache.put(:discord_bridge_account_codes, senderid, code)
+      Central.cache_put(:discord_bridge_account_codes, senderid, code)
 
       User.send_direct_message(state.userid, senderid, [
         "To link your discord account, message the the discord bot (Teiserver Bridge) with the message",

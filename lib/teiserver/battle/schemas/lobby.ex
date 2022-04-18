@@ -52,8 +52,8 @@ defmodule Teiserver.Battle.Lobby do
 
   defp next_id() do
     ConCache.isolated(:id_counters, :battle, fn ->
-      new_value = ConCache.get(:id_counters, :battle) + 1
-      ConCache.put(:id_counters, :battle, new_value)
+      new_value = Central.cache_get(:id_counters, :battle) + 1
+      Central.cache_put(:id_counters, :battle, new_value)
       new_value
     end)
   end
@@ -165,7 +165,7 @@ defmodule Teiserver.Battle.Lobby do
     battle = get_battle(lobby_id)
     new_bots = Map.put(battle.bots, bot.name, bot)
     new_battle = %{battle | bots: new_bots}
-    ConCache.put(:lobbies, battle.id, new_battle)
+    Central.cache_put(:lobbies, battle.id, new_battle)
 
     PubSub.broadcast(
       Central.PubSub,
@@ -194,7 +194,7 @@ defmodule Teiserver.Battle.Lobby do
 
         new_bots = Map.put(battle.bots, botname, new_bot)
         new_battle = %{battle | bots: new_bots}
-        ConCache.put(:lobbies, battle.id, new_battle)
+        Central.cache_put(:lobbies, battle.id, new_battle)
 
         PubSub.broadcast(
           Central.PubSub,
@@ -214,7 +214,7 @@ defmodule Teiserver.Battle.Lobby do
     battle = get_battle(lobby_id)
     new_bots = Map.delete(battle.bots, botname)
     new_battle = %{battle | bots: new_bots}
-    ConCache.put(:lobbies, battle.id, new_battle)
+    Central.cache_put(:lobbies, battle.id, new_battle)
 
     PubSub.broadcast(
       Central.PubSub,

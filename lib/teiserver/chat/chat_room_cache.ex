@@ -39,7 +39,7 @@ defmodule Teiserver.Room do
 
   @spec get_room(String.t()) :: Map.t()
   def get_room(name) do
-    ConCache.get(:rooms, name)
+    Central.cache_get(:rooms, name)
   end
 
   @spec can_join_room?(T.userid(), String.t()) :: true | {false, String.t()}
@@ -64,7 +64,7 @@ defmodule Teiserver.Room do
   @spec get_or_make_room(String.t(), T.userid()) :: Map.t()
   @spec get_or_make_room(String.t(), T.userid(), T.clan_id()) :: Map.t()
   def get_or_make_room(name, author_id, clan_id \\ nil) do
-    case ConCache.get(:rooms, name) do
+    case Central.cache_get(:rooms, name) do
       nil ->
         # No room, we need to make one!
         create_room(name, author_id, clan_id)
@@ -140,7 +140,7 @@ defmodule Teiserver.Room do
   end
 
   def add_room(room) do
-    ConCache.put(:rooms, room.name, room)
+    Central.cache_put(:rooms, room.name, room)
 
     Central.cache_update(:lists, :rooms, fn value ->
       new_value =
@@ -154,8 +154,8 @@ defmodule Teiserver.Room do
   end
 
   def list_rooms() do
-    ConCache.get(:lists, :rooms)
-    |> Enum.map(fn room_name -> ConCache.get(:rooms, room_name) end)
+    Central.cache_get(:lists, :rooms)
+    |> Enum.map(fn room_name -> Central.cache_get(:rooms, room_name) end)
   end
 
   @spec send_message(T.userid(), String.t(), String.t()) :: nil | :ok

@@ -9,7 +9,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
 
   setup do
     account = CoordinatorServer.get_coordinator_account()
-    ConCache.put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
+    Central.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
 
     Teiserver.Coordinator.AutomodServer.start_automod_server()
 

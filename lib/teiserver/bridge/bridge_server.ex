@@ -16,16 +16,16 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   @spec get_bridge_userid() :: T.userid()
   def get_bridge_userid() do
-    ConCache.get(:application_metadata_cache, "teiserver_bridge_userid")
+    Central.cache_get(:application_metadata_cache, "teiserver_bridge_userid")
   end
 
   @spec get_bridge_pid() :: pid
   def get_bridge_pid() do
-    ConCache.get(:application_metadata_cache, "teiserver_bridge_pid")
+    Central.cache_get(:application_metadata_cache, "teiserver_bridge_pid")
   end
 
   def handle_info(:begin, _state) do
-    state = if ConCache.get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
+    state = if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
       pid = self()
       spawn(fn ->
         :timer.sleep(1000)
@@ -142,7 +142,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   defp do_begin() do
     Logger.debug("Starting up Bridge server")
     account = get_bridge_account()
-    ConCache.put(:application_metadata_cache, "teiserver_bridge_userid", account.id)
+    Central.cache_put(:application_metadata_cache, "teiserver_bridge_userid", account.id)
     {:ok, user} = User.internal_client_login(account.id)
 
     rooms = Application.get_env(:central, DiscordBridge)[:bridges]
@@ -284,7 +284,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
       send(self(), :begin)
     end
-    ConCache.put(:application_metadata_cache, "teiserver_bridge_pid", self())
+    Central.cache_put(:application_metadata_cache, "teiserver_bridge_pid", self())
     Horde.Registry.register(
       Teiserver.ServerRegistry,
       "BridgeServer",

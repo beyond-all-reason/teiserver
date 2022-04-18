@@ -57,7 +57,7 @@ defmodule Teiserver.Agents.InOutAgentServer do
     })
 
     # Reset flood protection
-    ConCache.put(:teiserver_login_count, user.id, 0)
+    Central.cache_put(:teiserver_login_count, user.id, 0)
 
     %{state | socket: socket, logged_in: true}
   end

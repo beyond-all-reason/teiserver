@@ -76,7 +76,7 @@ defmodule Teiserver.UberserverConvert do
   end
 
   defp convert_data(raw_data) do
-    teiserver_user_group = ConCache.get(:application_metadata_cache, "teiserver_user_group")
+    teiserver_user_group = Central.cache_get(:application_metadata_cache, "teiserver_user_group")
 
     {verified, code} =
       case raw_data["verification_code"] do
@@ -126,7 +126,7 @@ defmodule Teiserver.UberserverConvert do
   end
 
   defp add_user({ubid, raw_data}) do
-    teiserver_user_group = ConCache.get(:application_metadata_cache, "teiserver_user_group")
+    teiserver_user_group = Central.cache_get(:application_metadata_cache, "teiserver_user_group")
     data = convert_data(raw_data)
 
     {:ok, user} = Teiserver.Account.create_user(data)

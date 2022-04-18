@@ -18,11 +18,6 @@ defmodule Teiserver.Coordinator do
     :ok
   end
 
-  # @spec get_coordinator_pid() :: pid()
-  # defp get_coordinator_pid() do
-  #   ConCache.get(:teiserver_coordinator, :coordinator)
-  # end
-
   @spec start_coordinator() :: :ok | {:failure, String.t()}
   def start_coordinator() do
     cond do
@@ -36,7 +31,7 @@ defmodule Teiserver.Coordinator do
 
   @spec get_coordinator_userid() :: T.userid()
   def get_coordinator_userid() do
-    ConCache.get(:application_metadata_cache, "teiserver_coordinator_userid")
+    Central.cache_get(:application_metadata_cache, "teiserver_coordinator_userid")
   end
 
   @spec get_coordinator_pid() :: pid() | nil

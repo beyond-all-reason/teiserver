@@ -172,7 +172,7 @@ defmodule Teiserver.Client do
       client ->
         new_client = reset_battlestatus(client)
         new_client = %{new_client | team_colour: colour, lobby_id: lobby_id}
-        ConCache.put(:clients, new_client.userid, new_client)
+        Central.cache_put(:clients, new_client.userid, new_client)
         new_client
     end
   end
@@ -190,7 +190,7 @@ defmodule Teiserver.Client do
 
       client ->
         new_client = reset_battlestatus(client)
-        ConCache.put(:clients, new_client.userid, new_client)
+        Central.cache_put(:clients, new_client.userid, new_client)
         new_client
     end
   end
@@ -212,14 +212,14 @@ defmodule Teiserver.Client do
 
   def get_client_by_name(name) do
     userid = User.get_userid(name)
-    ConCache.get(:clients, userid)
+    Central.cache_get(:clients, userid)
   end
 
   @spec get_client_by_id(Integer.t() | nil) :: nil | Map.t()
   def get_client_by_id(nil), do: nil
 
   def get_client_by_id(userid) do
-    ConCache.get(:clients, userid)
+    Central.cache_get(:clients, userid)
   end
 
   def get_client_by_pid(pid) do
@@ -234,12 +234,12 @@ defmodule Teiserver.Client do
 
   def get_clients(id_list) do
     id_list
-    |> Enum.map(fn userid -> ConCache.get(:clients, userid) end)
+    |> Enum.map(fn userid -> Central.cache_get(:clients, userid) end)
   end
 
   @spec add_client(Map.t()) :: Map.t()
   def add_client(client) do
-    ConCache.put(:clients, client.userid, client)
+    Central.cache_put(:clients, client.userid, client)
 
     Central.cache_update(:lists, :clients, fn value ->
       new_value =
@@ -254,7 +254,7 @@ defmodule Teiserver.Client do
 
   @spec list_client_ids() :: [integer()]
   def list_client_ids() do
-    case ConCache.get(:lists, :clients) do
+    case Central.cache_get(:lists, :clients) do
       nil -> []
       ids -> ids
     end

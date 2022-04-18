@@ -350,7 +350,7 @@ defmodule Teiserver.Telemetry do
   end
 
   def get_todays_server_log() do
-    last_time = ConCache.get(:application_metadata_cache, "teiserver_day_server_metrics_today_last_time")
+    last_time = Central.cache_get(:application_metadata_cache, "teiserver_day_server_metrics_today_last_time")
     recache = cond do
       last_time == nil -> true
       Timex.compare(Timex.now() |> Timex.shift(minutes: -15), last_time) == 1 -> true
@@ -359,11 +359,11 @@ defmodule Teiserver.Telemetry do
 
     if recache do
       data = Teiserver.Telemetry.Tasks.PersistServerDayTask.today_so_far()
-      ConCache.put(:application_metadata_cache, "teiserver_day_server_metrics_today_cache", data)
-      ConCache.put(:application_metadata_cache, "teiserver_day_server_metrics_today_last_time", Timex.now())
+      Central.cache_put(:application_metadata_cache, "teiserver_day_server_metrics_today_cache", data)
+      Central.cache_put(:application_metadata_cache, "teiserver_day_server_metrics_today_last_time", Timex.now())
       data
     else
-      ConCache.get(:application_metadata_cache, "teiserver_day_server_metrics_today_cache")
+      Central.cache_get(:application_metadata_cache, "teiserver_day_server_metrics_today_cache")
     end
   end
 
@@ -508,7 +508,7 @@ defmodule Teiserver.Telemetry do
   end
 
   def get_this_months_server_metrics_log() do
-    last_time = ConCache.get(:application_metadata_cache, "teiserver_month_server_metrics_last_time")
+    last_time = Central.cache_get(:application_metadata_cache, "teiserver_month_server_metrics_last_time")
     recache = cond do
       last_time == nil -> true
       Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
@@ -517,11 +517,11 @@ defmodule Teiserver.Telemetry do
 
     if recache do
       data = Teiserver.Telemetry.Tasks.PersistServerMonthTask.month_so_far()
-      ConCache.put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
-      ConCache.put(:application_metadata_cache, "teiserver_month_server_metrics_last_time", Timex.now())
+      Central.cache_put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
+      Central.cache_put(:application_metadata_cache, "teiserver_month_server_metrics_last_time", Timex.now())
       data
     else
-      ConCache.get(:application_metadata_cache, "teiserver_month_month_metrics_cache")
+      Central.cache_get(:application_metadata_cache, "teiserver_month_month_metrics_cache")
     end
   end
 
@@ -663,7 +663,7 @@ defmodule Teiserver.Telemetry do
 
   @spec get_todays_match_log :: map()
   def get_todays_match_log() do
-    last_time = ConCache.get(:application_metadata_cache, "teiserver_day_match_metrics_today_last_time")
+    last_time = Central.cache_get(:application_metadata_cache, "teiserver_day_match_metrics_today_last_time")
     recache = cond do
       last_time == nil -> true
       Timex.compare(Timex.now() |> Timex.shift(minutes: -15), last_time) == 1 -> true
@@ -675,17 +675,17 @@ defmodule Teiserver.Telemetry do
         |> Jason.encode!()
         |> Jason.decode!()
 
-      ConCache.put(:application_metadata_cache, "teiserver_day_match_metrics_today_cache", data)
-      ConCache.put(:application_metadata_cache, "teiserver_day_match_metrics_today_last_time", Timex.now())
+      Central.cache_put(:application_metadata_cache, "teiserver_day_match_metrics_today_cache", data)
+      Central.cache_put(:application_metadata_cache, "teiserver_day_match_metrics_today_last_time", Timex.now())
       data
     else
-      ConCache.get(:application_metadata_cache, "teiserver_day_match_metrics_today_cache")
+      Central.cache_get(:application_metadata_cache, "teiserver_day_match_metrics_today_cache")
     end
   end
 
   @spec get_this_months_match_metrics_log :: map()
   def get_this_months_match_metrics_log() do
-    last_time = ConCache.get(:application_metadata_cache, "teiserver_month_match_metrics_last_time")
+    last_time = Central.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_last_time")
 
     recache = cond do
       last_time == nil -> true
@@ -698,11 +698,11 @@ defmodule Teiserver.Telemetry do
         |> Jason.encode!()
         |> Jason.decode!()
 
-      ConCache.put(:application_metadata_cache, "teiserver_month_match_metrics_cache", data)
-      ConCache.put(:application_metadata_cache, "teiserver_month_match_metrics_last_time", Timex.now())
+      Central.cache_put(:application_metadata_cache, "teiserver_month_match_metrics_cache", data)
+      Central.cache_put(:application_metadata_cache, "teiserver_month_match_metrics_last_time", Timex.now())
       data
     else
-      ConCache.get(:application_metadata_cache, "teiserver_month_match_metrics_cache")
+      Central.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_cache")
     end
   end
 
@@ -1432,13 +1432,13 @@ defmodule Teiserver.Telemetry do
   def get_or_add_property_type(name) do
     name = String.trim(name)
 
-    case ConCache.get(:teiserver_telemetry_property_types, name) do
+    case Central.cache_get(:teiserver_telemetry_property_types, name) do
       nil ->
         {:ok, property} = %PropertyType{}
           |> PropertyType.changeset(%{name: name})
           |> Repo.insert()
 
-        ConCache.put(:teiserver_telemetry_property_types, property.name, property.id)
+        Central.cache_put(:teiserver_telemetry_property_types, property.name, property.id)
         property.id
       property_id ->
         property_id
@@ -1448,13 +1448,13 @@ defmodule Teiserver.Telemetry do
   def get_or_add_event_type(name) do
     name = String.trim(name)
 
-    case ConCache.get(:teiserver_telemetry_event_types, name) do
+    case Central.cache_get(:teiserver_telemetry_event_types, name) do
       nil ->
         {:ok, event} = %EventType{}
           |> EventType.changeset(%{name: name})
           |> Repo.insert()
 
-        ConCache.put(:teiserver_telemetry_event_types, event.name, event.id)
+        Central.cache_put(:teiserver_telemetry_event_types, event.name, event.id)
         event.id
       event_id ->
         event_id
@@ -1528,12 +1528,12 @@ defmodule Teiserver.Telemetry do
   def startup() do
     list_property_types(limit: :infinity)
     |> Enum.map(fn property_type ->
-      ConCache.put(:teiserver_telemetry_property_types, property_type.name, property_type.id)
+      Central.cache_put(:teiserver_telemetry_property_types, property_type.name, property_type.id)
     end)
 
     list_event_types(limit: :infinity)
     |> Enum.map(fn event_type ->
-      ConCache.put(:teiserver_telemetry_event_types, event_type.name, event_type.id)
+      Central.cache_put(:teiserver_telemetry_event_types, event_type.name, event_type.id)
     end)
 
     :ok

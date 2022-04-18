@@ -32,13 +32,13 @@ defmodule Teiserver.Bridge.MessageCommands do
   #   case String.split(remaining, "-") do
   #     [userid_str, given_code] ->
   #       userid = NumberHelper.int_parse(userid_str)
-  #       correct_code = ConCache.get(:discord_bridge_account_codes, userid)
+  #       correct_code = Central.cache_get(:discord_bridge_account_codes, userid)
 
   #       if given_code == correct_code do
   #         Central.cache_delete(:discord_bridge_account_codes, userid)
   #         user = User.get_user_by_id(userid)
   #         User.update_user(%{user | discord_id: discord_id}, persist: true)
-  #         # ConCache.put(:users_lookup_id_with_discord_id, discord_id, user.id)
+  #         # Central.cache_put(:users_lookup_id_with_discord_id, discord_id, user.id)
 
   #         reply(channel, "Congratulations, your accounts are now linked.")
   #       else

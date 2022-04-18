@@ -25,7 +25,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Accolade server")
     account = get_accolade_account()
-    ConCache.put(:application_metadata_cache, "teiserver_accolade_userid", account.id)
+    Central.cache_put(:application_metadata_cache, "teiserver_accolade_userid", account.id)
 
     user = case User.internal_client_login(account.id) do
       {:ok, user} -> user

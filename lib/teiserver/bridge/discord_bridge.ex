@@ -40,7 +40,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
   def new_dm_channel(dm_channel) do
     case dm_channel.recipients do
       [recipient] ->
-        ConCache.put(:discord_bridge_dm_cache, dm_channel.id, recipient["id"])
+        Central.cache_put(:discord_bridge_dm_cache, dm_channel.id, recipient["id"])
         nil
 
       _ -> nil
@@ -50,7 +50,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
   @spec recv_message(atom | %{:attachments => any, optional(any) => any}) :: nil | :ok
   def recv_message(%Alchemy.Message{channel_id: channel_id, content: "$" <> _content} = message) do
-    dm_sender = ConCache.get(:discord_bridge_dm_cache, channel_id)
+    dm_sender = Central.cache_get(:discord_bridge_dm_cache, channel_id)
 
     if dm_sender != nil do
       MessageCommands.handle(message)
@@ -61,7 +61,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
   def recv_message(%Alchemy.Message{author: author, channel_id: channel_id, attachments: [], content: content} = message) do
     room = bridge_channel_to_room(channel_id)
-    dm_sender = ConCache.get(:discord_bridge_dm_cache, channel_id)
+    dm_sender = Central.cache_get(:discord_bridge_dm_cache, channel_id)
 
     cond do
       author.username == Application.get_env(:central, DiscordBridge)[:bot_name] ->

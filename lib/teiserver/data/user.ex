@@ -95,8 +95,8 @@ defmodule Teiserver.User do
 
   def next_springid() do
     ConCache.isolated(:id_counters, :springid, fn ->
-      new_value = ConCache.get(:id_counters, :springid) + 1
-      ConCache.put(:id_counters, :springid, new_value)
+      new_value = Central.cache_get(:id_counters, :springid) + 1
+      Central.cache_put(:id_counters, :springid, new_value)
       new_value
     end)
   end
@@ -589,7 +589,7 @@ defmodule Teiserver.User do
 
   @spec wait_for_precache() :: :ok
   defp wait_for_precache() do
-    if ConCache.get(:application_metadata_cache, "teiserver_partial_startup_completed") != true do
+    if Central.cache_get(:application_metadata_cache, "teiserver_partial_startup_completed") != true do
       :timer.sleep(@timer_sleep)
       wait_for_precache()
     else
@@ -599,18 +599,18 @@ defmodule Teiserver.User do
 
   @spec set_flood_level(T.userid(), Integer) :: :ok
   def set_flood_level(userid, value \\ 10) do
-    ConCache.put(:teiserver_login_count, userid, value)
+    Central.cache_put(:teiserver_login_count, userid, value)
     :ok
   end
 
   @spec login_flood_check(T.userid()) :: :allow | :block
   def login_flood_check(userid) do
-    login_count = ConCache.get(:teiserver_login_count, userid) || 0
+    login_count = Central.cache_get(:teiserver_login_count, userid) || 0
 
     if login_count > 3 do
       :block
     else
-      ConCache.put(:teiserver_login_count, userid, login_count + 1)
+      Central.cache_put(:teiserver_login_count, userid, login_count + 1)
       :allow
     end
   end
@@ -658,7 +658,7 @@ defmodule Teiserver.User do
           Client.get_client_by_id(user.id) != nil ->
             Client.disconnect(user.id, "Already logged in")
             if not is_bot?(user) do
-              ConCache.put(:teiserver_login_count, user.id, 10)
+              Central.cache_put(:teiserver_login_count, user.id, 10)
               {:error, "Existing session, please retry in 20 seconds to clear the cache"}
             else
               :timer.sleep(1000)
@@ -710,7 +710,7 @@ defmodule Teiserver.User do
           Client.get_client_by_id(user.id) != nil ->
             Client.disconnect(user.id, "Already logged in")
             if not is_bot?(user) do
-              ConCache.put(:teiserver_login_count, user.id, 10)
+              Central.cache_put(:teiserver_login_count, user.id, 10)
               {:error, "Existing session, please retry in 20 seconds to clear the cache"}
             else
               :timer.sleep(1000)

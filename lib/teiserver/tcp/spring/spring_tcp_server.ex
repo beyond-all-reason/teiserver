@@ -66,7 +66,7 @@ defmodule Teiserver.SpringTcpServer do
   def init(ref, socket, transport) do
     # If we've not started up yet, lets just delay for a moment
     # for some of the stuff to get sorted
-    if ConCache.get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
+    if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
       :timer.sleep(1000)
     end
 

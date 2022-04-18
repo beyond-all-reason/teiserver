@@ -27,11 +27,11 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   @spec get_match_monitor_userid() :: T.userid()
   def get_match_monitor_userid() do
-    ConCache.get(:application_metadata_cache, "teiserver_match_monitor_userid")
+    Central.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
   end
 
   def handle_info(:begin, _state) do
-    state = if ConCache.get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
+    state = if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
       pid = self()
       spawn(fn ->
         :timer.sleep(1000)
@@ -127,7 +127,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   defp do_begin() do
     Logger.debug("Starting up Match monitor server")
     account = get_match_monitor_account()
-    ConCache.put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
+    Central.cache_put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
     {:ok, user} = User.internal_client_login(account.id)
 
     rooms = ["autohosts"]

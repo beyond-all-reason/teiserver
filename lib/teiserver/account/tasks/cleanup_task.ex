@@ -7,7 +7,7 @@ defmodule Teiserver.Account.Tasks.CleanupTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    if ConCache.get(:application_metadata_cache, "teiserver_full_startup_completed") == true do
+    if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") == true do
       now_as_string = Timex.now() |> Jason.encode! |> Jason.decode!
 
       # Find all users who are muted or banned

@@ -13,7 +13,7 @@ defmodule Teiserver.Battle.MatchMonitorTest do
   # This test is to ensure long messages are not being truncated
   test "spring send" do
     %{socket: socket, user: _user} = auth_setup()
-    # monitor_userid = ConCache.get(:application_metadata_cache, "teiserver_match_monitor_userid")
+    # monitor_userid = Central.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
 
     # Send a direct message to the match monitor server
     short_data = %{key: "value"}

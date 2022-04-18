@@ -172,7 +172,7 @@ defmodule Teiserver.SpringRawTest do
     user = new_user()
 
     # Update the login count
-    ConCache.put(:teiserver_login_count, user.id, 9999)
+    Central.cache_put(:teiserver_login_count, user.id, 9999)
 
     # Welcome message
     _recv_raw(socket)

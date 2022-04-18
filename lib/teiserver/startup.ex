@@ -130,9 +130,9 @@ defmodule Teiserver.Startup do
           group
       end
 
-    ConCache.put(:application_metadata_cache, "teiserver_umbrella_group", umbrella_group.id)
-    ConCache.put(:application_metadata_cache, "teiserver_user_group", player_group.id)
-    ConCache.put(:application_metadata_cache, "teiserver_internal_group", internal_group.id)
+    Central.cache_put(:application_metadata_cache, "teiserver_umbrella_group", umbrella_group.id)
+    Central.cache_put(:application_metadata_cache, "teiserver_user_group", player_group.id)
+    Central.cache_put(:application_metadata_cache, "teiserver_internal_group", internal_group.id)
 
     Central.Account.GroupCacheLib.update_caches(player_group)
     Central.Account.GroupCacheLib.update_caches(internal_group)
@@ -249,9 +249,9 @@ defmodule Teiserver.Startup do
       default: true
     })
 
-    ConCache.put(:lists, :clients, [])
-    ConCache.put(:lists, :rooms, [])
-    ConCache.insert_new(:lists, :lobbies, [])
+    Central.cache_put(:lists, :clients, [])
+    Central.cache_put(:lists, :rooms, [])
+    Central.cache_insert_new(:lists, :lobbies, [])
 
     # We tried having a random lobby id start number to help prevent people joining
     # ongoing games but it didn't work
@@ -262,7 +262,7 @@ defmodule Teiserver.Startup do
     #   |> String.reverse()
     #   |> String.slice(0..5)
     #   |> String.to_integer()
-    ConCache.put(:id_counters, :battle, 1)
+    Central.cache_put(:id_counters, :battle, 1)
 
     User.pre_cache_users(:active)
     time_taken = System.system_time(:millisecond) - start_time
@@ -276,11 +276,11 @@ defmodule Teiserver.Startup do
     # We do this as a separate operation because a blank DB won't have any springids yet
     current_springid = Enum.max([0] ++ springids)
 
-    ConCache.put(:id_counters, :springid, current_springid + 1)
+    Central.cache_put(:id_counters, :springid, current_springid + 1)
 
-    ConCache.put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
-    ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", nil)
-    ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_cache", true)
+    Central.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
+    Central.cache_put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", nil)
+    Central.cache_put(:application_metadata_cache, "teiserver_day_metrics_today_cache", true)
 
     # Add in achievements
     Teiserver.Game.GenerateAchievementTypes.perform()
@@ -319,7 +319,7 @@ defmodule Teiserver.Startup do
       end)
     end
 
-    ConCache.put(:application_metadata_cache, "teiserver_full_startup_completed", true)
+    Central.cache_put(:application_metadata_cache, "teiserver_full_startup_completed", true)
 
     time_taken = System.system_time(:millisecond) - start_time
     Logger.info("Teiserver startup complete, took #{time_taken}ms")

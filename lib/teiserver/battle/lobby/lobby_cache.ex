@@ -8,12 +8,12 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   def update_lobby(lobby, nil, :silent) do
-    ConCache.put(:lobbies, lobby.id, lobby)
+    Central.cache_put(:lobbies, lobby.id, lobby)
     lobby
   end
 
   def update_lobby(lobby, nil, reason) do
-    ConCache.put(:lobbies, lobby.id, lobby)
+    Central.cache_put(:lobbies, lobby.id, lobby)
 
     if Enum.member?([:rename], reason) do
       PubSub.broadcast(
@@ -33,7 +33,7 @@ defmodule Teiserver.Battle.LobbyCache do
   end
 
   def update_lobby(lobby, data, reason) do
-    ConCache.put(:lobbies, lobby.id, lobby)
+    Central.cache_put(:lobbies, lobby.id, lobby)
 
     if Enum.member?([:update_battle_info], reason) do
       PubSub.broadcast(
@@ -60,7 +60,7 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec get_lobby(integer()) :: T.lobby() | nil
   def get_lobby(id) do
-    ConCache.get(:lobbies, int_parse(id))
+    Central.cache_get(:lobbies, int_parse(id))
   end
 
   @spec get_lobby_by_uuid(String.t()) :: T.lobby() | nil
@@ -81,7 +81,7 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec add_lobby(T.lobby()) :: T.lobby()
   def add_lobby(lobby) do
-    ConCache.put(:lobbies, lobby.id, lobby)
+    Central.cache_put(:lobbies, lobby.id, lobby)
 
     _consul_pid = Coordinator.start_consul(lobby.id)
     Lobby.start_battle_lobby_throttle(lobby.id)
@@ -154,7 +154,7 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec list_lobby_ids :: [non_neg_integer()]
   def list_lobby_ids() do
-    case ConCache.get(:lists, :lobbies) do
+    case Central.cache_get(:lists, :lobbies) do
       nil -> []
       ids -> ids
     end
@@ -163,7 +163,7 @@ defmodule Teiserver.Battle.LobbyCache do
   @spec list_lobbies() :: list()
   def list_lobbies() do
     list_lobby_ids()
-      |> Enum.map(fn lobby_id -> ConCache.get(:lobbies, lobby_id) end)
+      |> Enum.map(fn lobby_id -> Central.cache_get(:lobbies, lobby_id) end)
       |> Enum.filter(fn lobby -> lobby != nil end)
   end
 end
