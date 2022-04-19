@@ -887,26 +887,26 @@ defmodule Teiserver.Telemetry do
 
   ## Examples
 
-      iex> get_event_type!(123)
+      iex> get_event_type(123)
       %EventType{}
 
-      iex> get_event_type!(456)
+      iex> get_event_type(456)
       ** (Ecto.NoResultsError)
 
   """
-  @spec get_event_type!(Integer.t() | List.t()) :: EventType.t()
-  @spec get_event_type!(Integer.t(), List.t()) :: EventType.t()
-  def get_event_type!(id) when not is_list(id) do
+  @spec get_event_type(Integer.t() | List.t()) :: EventType.t()
+  @spec get_event_type(Integer.t(), List.t()) :: EventType.t()
+  def get_event_type(id) when not is_list(id) do
     event_type_query(id, [])
-    |> Repo.one!
+    |> Repo.one
   end
-  def get_event_type!(args) do
+  def get_event_type(args) do
     event_type_query(nil, args)
-    |> Repo.one!
+    |> Repo.one
   end
-  def get_event_type!(id, args) do
+  def get_event_type(id, args) do
     event_type_query(id, args)
-    |> Repo.one!
+    |> Repo.one
   end
 
   @doc """
@@ -1432,33 +1432,35 @@ defmodule Teiserver.Telemetry do
   def get_or_add_property_type(name) do
     name = String.trim(name)
 
-    case Central.cache_get(:teiserver_telemetry_property_types, name) do
-      nil ->
-        {:ok, property} = %PropertyType{}
-          |> PropertyType.changeset(%{name: name})
-          |> Repo.insert()
+    Central.cache_get_or_store(:teiserver_telemetry_property_types, name, fn ->
+      case list_property_types(search: [name: name], select: [:id]) do
+        [] ->
+          {:ok, property} = %PropertyType{}
+            |> PropertyType.changeset(%{name: name})
+            |> Repo.insert()
 
-        Central.cache_put(:teiserver_telemetry_property_types, property.name, property.id)
-        property.id
-      property_id ->
-        property_id
-    end
+          property.id
+        [%{id: id} | _] ->
+          id
+      end
+    end)
   end
 
   def get_or_add_event_type(name) do
     name = String.trim(name)
 
-    case Central.cache_get(:teiserver_telemetry_event_types, name) do
-      nil ->
-        {:ok, event} = %EventType{}
-          |> EventType.changeset(%{name: name})
-          |> Repo.insert()
+    Central.cache_get_or_store(:teiserver_telemetry_event_types, name, fn ->
+      case list_event_types(search: [name: name], select: [:id]) do
+        [] ->
+          {:ok, event} = %EventType{}
+            |> EventType.changeset(%{name: name})
+            |> Repo.insert()
 
-        Central.cache_put(:teiserver_telemetry_event_types, event.name, event.id)
-        event.id
-      event_id ->
-        event_id
-    end
+          event.id
+        [%{id: id} | _] ->
+          id
+      end
+    end)
   end
 
   alias Teiserver.Telemetry.{Infolog, InfologLib}
