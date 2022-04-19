@@ -143,6 +143,28 @@ defmodule Central.Helpers.SchemaHelper do
     end)
   end
 
+  @spec uniq_lists(Map.t(), List.t()) :: Map.t()
+  def uniq_lists(params, names) do
+    names = Enum.map(names, fn n -> Atom.to_string(n) end)
+
+    params
+    |> Map.new(fn {k, v} ->
+      case Enum.member?(names, k) do
+        true ->
+          case v do
+            nil ->
+              {k, nil}
+
+            _ ->
+              {k, Enum.uniq(v)}
+          end
+
+        false ->
+          {k, v}
+      end
+    end)
+  end
+
   @spec remove_whitespace(Map.t(), List.t()) :: Map.t()
   def remove_whitespace(params, names) do
     names = Enum.map(names, fn n -> Atom.to_string(n) end)

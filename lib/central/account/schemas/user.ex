@@ -44,6 +44,7 @@ defmodule Central.Account.User do
   def changeset(user, attrs \\ %{}) do
     attrs = attrs
       |> remove_whitespace([:email])
+      |> uniq_lists([:permissions])
 
     if attrs["password"] == "" do
       user
@@ -77,6 +78,7 @@ defmodule Central.Account.User do
   def changeset(user, attrs, :script) do
     attrs = attrs
       |> remove_whitespace([:email])
+      |> uniq_lists([:permissions])
 
     user
     |> cast(
