@@ -822,26 +822,29 @@ defmodule Teiserver.User do
     # Sleep to enable the ETS cache to update and they don't insta-login
     :timer.sleep(50)
 
-    # Re-get the user
+    # Re-get the user, do we need to affect their currently-connected client?
     user = get_user_by_id(user.id)
-
-    if is_restricted?(user, ["Login"]) do
-      client = Client.get_client_by_id(user.id)
-
-      # If they're in a battle we need to deal with that
-      if client do
+    client = Client.get_client_by_id(user.id)
+    if client do
+      if is_restricted?(user, ["Login"]) do
+        # If they're in a battle we need to deal with that before disconnecting them
         Logger.info("Kicking #{client.name} from battle as now banned")
         Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
-      end
 
-      Logger.info("Disconnecting #{user.name} from server as now banned")
-      Client.disconnect(user.id, "Banned")
-    end
+        Logger.info("Disconnecting #{user.name} from server as now banned")
+        Client.disconnect(user.id, "Banned")
+      else
 
-    if is_restricted?(user, ["All chat", "Battle chat"]) do
-      client = Client.get_client_by_id(user.id)
-      if client do
-        Coordinator.send_to_host(client.lobby_id, "!mute #{client.name}")
+        # Kick?
+        if is_restricted?(user, ["All lobbies"]) do
+          Logger.info("Kicking #{client.name} from battle due to moderation action")
+          Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
+        end
+
+        # Mute?
+        if is_restricted?(user, ["All chat", "Battle chat"]) do
+          Coordinator.send_to_host(client.lobby_id, "!mute #{client.name}")
+        end
       end
     end
 
