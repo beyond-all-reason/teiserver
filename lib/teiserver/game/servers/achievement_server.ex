@@ -39,6 +39,10 @@ defmodule Teiserver.Game.AchievementServer do
   }}, state) do
     if Enum.member?(["Normal", "Hard", "Brutal"], difficulty) do
       type_id = state.normal_scenario_map[scenarioid]
+      if type_id == nil do
+        Logger.error("Nil achievement id for scenarioid of #{scenarioid}")
+      end
+
       if Game.get_user_achievement(userid, type_id) == nil do
         Game.create_user_achievement(%{
           user_id: userid,
