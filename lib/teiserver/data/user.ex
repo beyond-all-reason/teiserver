@@ -485,9 +485,6 @@ defmodule Teiserver.User do
   @spec recache_user(Integer.t()) :: :ok
   defdelegate recache_user(id), to: UserCache
 
-  @spec pre_cache_users(atom) :: :ok
-  defdelegate pre_cache_users(type), to: UserCache
-
   @spec convert_user(T.user()) :: T.user()
   defdelegate convert_user(user), to: UserCache
 

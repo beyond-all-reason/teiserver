@@ -113,49 +113,6 @@ defmodule Teiserver.Account.UserCache do
     :ok
   end
 
-  def pre_cache_users(_), do: :ok
-
-  # @spec pre_cache_users(:active | :remaining) :: :ok
-  # def pre_cache_users(:active) do
-  #   start_time = System.system_time(:millisecond)
-
-  #   user_count =
-  #     Account.list_users(
-  #       select: [:data | User.keys()],
-  #       search: [pre_cache: true],
-  #       limit: :infinity
-  #     )
-  #     |> Parallel.map(fn user ->
-  #       user
-  #       |> convert_user
-  #       |> add_user
-  #     end)
-  #     |> Enum.count()
-
-  #   time_taken = System.system_time(:millisecond) - start_time
-  #   Logger.info("pre_cache_users:active, got #{user_count} users in #{time_taken}ms")
-  # end
-
-  # def pre_cache_users(:remaining) do
-  #   start_time = System.system_time(:millisecond)
-
-  #   user_count =
-  #     Account.list_users(
-  #       select: [:data | User.keys()],
-  #       search: [pre_cache: false],
-  #       limit: :infinity
-  #     )
-  #     |> Parallel.map(fn user ->
-  #       user
-  #       |> convert_user
-  #       |> add_user
-  #     end)
-  #     |> Enum.count()
-
-  #   time_taken = System.system_time(:millisecond) - start_time
-  #   Logger.info("pre_cache_users:remaining, got #{user_count} users in #{time_taken}ms")
-  # end
-
   @doc """
   Given a database user it will convert it into a cached user
   """

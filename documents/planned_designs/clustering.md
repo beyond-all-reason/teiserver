@@ -1,6 +1,8 @@
 # Objective
 Currently Teiserver runs on a single node, we would like to run it on multiple nodes.
 
+TODO: Expand this
+
 ## Summary of progress
 ##### Propagate data
 - [X] **Stage 1:** Central module functions
