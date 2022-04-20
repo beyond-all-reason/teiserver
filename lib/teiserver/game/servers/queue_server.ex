@@ -180,10 +180,10 @@ defmodule Teiserver.Game.QueueServer do
             end)
 
             # TODO: Remove the auto-ready part
-            new_matched_players
-            |> Enum.each(fn player_id ->
-              GenServer.cast(self(), {:player_accept, player_id})
-            end)
+            # new_matched_players
+            # |> Enum.each(fn player_id ->
+            #   GenServer.cast(self(), {:player_accept, player_id})
+            # end)
 
             %{
               state
