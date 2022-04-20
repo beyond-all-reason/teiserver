@@ -48,7 +48,7 @@
 - Springids
 - id_counters
 
-##### Yet to do
+##### Delete these as no longer needed
 - ConCache.put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
 - ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", nil)
 - ConCache.put(:application_metadata_cache, "teiserver_day_metrics_today_cache", true)
@@ -57,7 +57,7 @@
 ##### Done
 - User list precache (active)
 - User list precache (remaining)
+- Telemetry event/property types
 
 ##### Yet to do
 - Queue precache
-- Telemetry event/property types

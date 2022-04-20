@@ -1,7 +1,6 @@
 defmodule Teiserver.Startup do
   use CentralWeb, :startup
   require Logger
-  alias Teiserver.{Account, User}
 
   @spec startup :: :ok
   def startup do
@@ -256,22 +255,10 @@ defmodule Teiserver.Startup do
     Central.cache_put(:lists, :rooms, [])
     Central.cache_insert_new(:lists, :lobbies, [])
 
-    User.pre_cache_users(:active)
-    time_taken = System.system_time(:millisecond) - start_time
-    Logger.info("Teiserver active user precache, took #{time_taken}ms")
-
     Teiserver.Data.Matchmaking.pre_cache_queues()
-
-    Central.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
-    Central.cache_put(:application_metadata_cache, "teiserver_day_metrics_today_last_time", nil)
-    Central.cache_put(:application_metadata_cache, "teiserver_day_metrics_today_cache", true)
 
     # Add in achievements
     Teiserver.Game.GenerateAchievementTypes.perform()
-
-    # Now we can do the post-precache stuff
-    User.pre_cache_users(:remaining)
-    Teiserver.Telemetry.startup()
 
     if Application.get_env(:central, Teiserver)[:enable_match_monitor] do
       spawn(fn ->
@@ -303,6 +290,7 @@ defmodule Teiserver.Startup do
       end)
     end
 
+    Central.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
     Central.cache_put(:application_metadata_cache, "teiserver_full_startup_completed", true)
 
     time_taken = System.system_time(:millisecond) - start_time

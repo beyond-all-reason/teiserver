@@ -64,14 +64,14 @@ defmodule Teiserver.Telemetry.PropertyTypeLib do
       order_by: [desc: property_types.name]
   end
 
-  def order_by(query, "Newest first") do
+  def order_by(query, "ID (Lowest first)") do
     from property_types in query,
-      order_by: [desc: property_types.inserted_at]
+      order_by: [asc: property_types.id]
   end
 
-  def order_by(query, "Oldest first") do
+  def order_by(query, "ID (Highest first)") do
     from property_types in query,
-      order_by: [asc: property_types.inserted_at]
+      order_by: [desc: property_types.id]
   end
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t

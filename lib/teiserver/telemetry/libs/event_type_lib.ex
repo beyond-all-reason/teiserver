@@ -64,14 +64,14 @@ defmodule Teiserver.Telemetry.EventTypeLib do
       order_by: [desc: event_types.name]
   end
 
-  def order_by(query, "Newest first") do
-    from event_types in query,
-      order_by: [desc: event_types.inserted_at]
+  def order_by(query, "ID (Lowest first)") do
+    from property_types in query,
+      order_by: [asc: property_types.id]
   end
 
-  def order_by(query, "Oldest first") do
-    from event_types in query,
-      order_by: [asc: event_types.inserted_at]
+  def order_by(query, "ID (Highest first)") do
+    from property_types in query,
+      order_by: [desc: property_types.id]
   end
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t

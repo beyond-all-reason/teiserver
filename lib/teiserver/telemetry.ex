@@ -1433,7 +1433,7 @@ defmodule Teiserver.Telemetry do
     name = String.trim(name)
 
     Central.cache_get_or_store(:teiserver_telemetry_property_types, name, fn ->
-      case list_property_types(search: [name: name], select: [:id]) do
+      case list_property_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
         [] ->
           {:ok, property} = %PropertyType{}
             |> PropertyType.changeset(%{name: name})
@@ -1450,7 +1450,7 @@ defmodule Teiserver.Telemetry do
     name = String.trim(name)
 
     Central.cache_get_or_store(:teiserver_telemetry_event_types, name, fn ->
-      case list_event_types(search: [name: name], select: [:id]) do
+      case list_event_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
         [] ->
           {:ok, event} = %EventType{}
             |> EventType.changeset(%{name: name})
@@ -1524,20 +1524,5 @@ defmodule Teiserver.Telemetry do
   @spec delete_infolog(Infolog.t()) :: {:ok, Infolog.t()} | {:error, Ecto.Changeset.t()}
   def delete_infolog(%Infolog{} = infolog) do
     Repo.delete(infolog)
-  end
-
-  @spec startup :: :ok
-  def startup() do
-    list_property_types(limit: :infinity)
-    |> Enum.map(fn property_type ->
-      Central.cache_put(:teiserver_telemetry_property_types, property_type.name, property_type.id)
-    end)
-
-    list_event_types(limit: :infinity)
-    |> Enum.map(fn event_type ->
-      Central.cache_put(:teiserver_telemetry_event_types, event_type.name, event_type.id)
-    end)
-
-    :ok
   end
 end
