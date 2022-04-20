@@ -157,11 +157,15 @@ defmodule TeiserverWeb.Report.MatchMetricController do
     end
     last_month = Telemetry.get_match_month_log({lyear, lmonth}).data
 
+    days_in_month = Timex.days_in_month(Timex.now())
+    progress = round(Timex.today().day/days_in_month * 100)
+
     conn
       |> assign(:year, Timex.today().year)
       |> assign(:month, Timex.today().month)
       |> assign(:data, data)
       |> assign(:last_month, last_month)
+      |> assign(:progress, progress)
       |> add_breadcrumb(name: "Monthly - This month (partial)", url: conn.request_path)
       |> render("month_metrics_today_show.html")
   end
