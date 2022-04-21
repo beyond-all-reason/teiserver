@@ -77,14 +77,12 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   # match-chat <Teifion> g: A message to the game
   # match-chat <Teifion> d123: A direct message of some sort, in theory shouldn't appear
   def handle_info({:direct_message, from_id, "match-chat " <> data}, state) do
-    case Regex.run(~r/<(.*?)> ([asgd][0-9]+?):/, data) do
+    case Regex.run(~r/<(.*?)> ([asg]|d[0-9]+): (.+)$/, data) do
       [_all, username, to, msg] ->
-        Logger.info("[MatchMonitorServer] match-chat nomatch #{from_id}: match-chat #{data}")
+        Logger.info("[MatchMonitorServer] match-chat match from: #{from_id}, username: #{username}, to: #{to}, msg: #{msg}")
       _ ->
-        Logger.info("[MatchMonitorServer] match-chat nomatch #{from_id}: match-chat #{data}")
+        Logger.info("[MatchMonitorServer] match-chat nomatch from: #{from_id}: match-chat #{data}")
     end
-
-    [_all, m1, m2] =
 
     {:noreply, state}
   end
