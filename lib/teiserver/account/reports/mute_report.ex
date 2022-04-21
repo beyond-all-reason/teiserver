@@ -6,12 +6,15 @@ defmodule Teiserver.Account.MuteReport do
 
   @spec run(Plug.Conn.t(), map()) :: {list(), map()}
   def run(_conn, _params) do
-    x_ignores_y = Account.list_users(select: [:id], limit: :infinity)
-      |> Enum.map(fn %{id: userid} ->
-        case User.get_user_by_id(userid) do
-          nil -> {nil, []}
-          user -> {user.id, user.ignored}
-        end
+    x_ignores_y = Account.list_users(
+      search: [
+        data_not: {"ignored", "[]"},
+      ],
+      select: [:id, :data],
+      limit: :infinity
+    )
+      |> Enum.map(fn %{id: userid, data: data} ->
+        {userid, data["ignored"]}
       end)
       |> Enum.filter(fn {_, ignores} -> not Enum.empty?(ignores) end)
       |> Enum.map(fn {userid, ignores} ->
