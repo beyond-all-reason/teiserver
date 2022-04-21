@@ -133,7 +133,15 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   end
 
   defp chat_message(state) do
-    msg = "This is a chat message from #{state.name}, #{state.msg_count}"
+    r = :rand.uniform()
+
+    msg = cond do
+      r < 0.2 -> "!y"
+      r < 0.4 -> "!n"
+      r < 0.5 -> "!b"
+      r < 0.6 -> "!cv map koom"
+      true -> "This is a chat message from #{state.name}, #{state.msg_count}"
+    end
 
     AgentLib._send(state.socket, %{cmd: "c.lobby.message", message: msg})
 

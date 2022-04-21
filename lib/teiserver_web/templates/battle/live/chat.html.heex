@@ -3,8 +3,26 @@
 <%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "battle_lobbies", conn: @socket}) %>
 
 <style type="text/css">
+  .chat-row {
+    margin: 2px 0;
+    padding: 0 0;
+  }
+
   .chat-author {
     font-weight: bold;
+    padding-right: 3px;
+    min-width: 150px;
+    text-align: right;
+    display: inline-block;
+  }
+  
+  .chat-message {
+    display: inline-block;
+  }
+  
+  .new-author {
+    border-top: 1px solid rgba(150, 150, 150, 0.1);
+    padding: 4px 0;
   }
 </style>
 
@@ -16,12 +34,41 @@
         <div class="float-end">
           <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, @battle.id), class: "btn btn-#{bsname}" %>
         </div>
+        
+        <h5>Newest messages at top</h5>
+        Text will automatically update as people post.
 
-        <div id="chat">
-          <%= for {userid, message} <- @messages do %>
+        <div id="chat" class="mt-3">
+          <%= for {{userid, message}, i} <- Enum.with_index(@messages) do %>
+            <%
+              last_msg = Enum.at(@messages, i-1)
+              different_user = cond do
+                last_msg == nil -> true
+                elem(last_msg, 0) != userid -> true
+                true -> false
+              end
+            %>
+            <%= if different_user do %>
+              <div class="new-author"></div>
+            <% end %>
             <div class="chat-row">
-              <span class="chat-author"><%= @user_map[userid].name %>:</span>
-              <span class="chat-message"><%= message %></span>
+              <%= if different_user do %>
+                <div class="chat-author"><%= @user_map[userid].name %>:</div>
+              <% else %>
+                <div class="chat-author">&nbsp;</div>
+              <% end %>
+              
+              <%
+                class = cond do
+                  Enum.member?(["!y", "!yes"], message) -> "text-success"
+                  Enum.member?(["!n", "!no"], message) -> "text-danger"
+                  Enum.member?(["!b", "!abstain"], message) -> "text-info"
+                  String.starts_with?(message, "!") -> "text-primary2"
+                  true -> ""
+                end
+              %>
+              
+              <div class={"chat-message #{class}"}><%= message %></div>
             </div>
           <% end %>
         </div>

@@ -106,7 +106,7 @@ defmodule Teiserver.Chat.LobbyMessageLib do
 
   def order_by(query, "Newest first") do
     from lobby_messages in query,
-      order_by: [desc: lobby_messages.inserted_at]
+      order_by: [desc: lobby_messages.inserted_at, desc: lobby_messages.id]
   end
 
   def order_by(query, "Oldest first") do
