@@ -65,10 +65,10 @@ defmodule Central.Helpers.DatePresets do
 
   # We use ++ here since the order matters
   @spec presets() :: list(String.t())
-  def presets(), do: @presets ++ ["All time"]
+  def presets(), do: @presets
 
   @spec long_presets() :: list(String.t())
-  def long_presets(), do: @long_presets ++ ["All time"]
+  def long_presets(), do: @long_presets
 
   @spec short_ranges() :: list(String.t())
   def short_ranges(), do: @short_ranges ++ ["All time"]
@@ -126,6 +126,7 @@ defmodule Central.Helpers.DatePresets do
     end
   end
 
+  @spec _parse_named_period(String.t()) :: {Date.t() | DateTime.t(), Date.t() | DateTime.t()}
   def _parse_named_period("This week") do
     today = Timex.today()
     start = Timex.beginning_of_week(today)
@@ -157,7 +158,7 @@ defmodule Central.Helpers.DatePresets do
     today = Timex.today()
     start = Timex.to_date({today.year, today.month, 1})
 
-    {start, Timex.shift(start, months: 1)}
+    {start, Timex.shift(today, days: 1)}
   end
 
   def _parse_named_period("Last month") do
@@ -245,6 +246,7 @@ defmodule Central.Helpers.DatePresets do
     {start, Timex.shift(today, days: 1)}
   end
 
+  @spec as_datetimes({Date.t(), Date.t()}) :: {DateTime.t(), DateTime.t()}
   def as_datetimes({start_date, end_date}) do
     {Timex.to_datetime(start_date), Timex.to_datetime(end_date)}
   end
