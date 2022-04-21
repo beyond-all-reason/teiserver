@@ -130,25 +130,26 @@ defmodule Teiserver.Battle.LobbyChat do
       true -> true
     end
 
-    userid = if User.is_bot?(user) do
-      case Regex.run(~r/<(.*?)>/u, msg) do
-        [_, username] ->
-          User.get_userid(username) || user.id
+    {userid, content} = if User.is_bot?(user) do
+      case Regex.run(~r/^<(.*?)> (.+)$/u, msg) do
+        [_, username, remainder] ->
+          userid = User.get_userid(username) || user.id
+          {userid, "g: #{remainder}"}
         _ ->
-          user.id
+          {user.id, msg}
       end
     else
-      user.id
+      {user.id, msg}
     end
 
     if persist do
-      msg = case type do
-        :sayex -> "sayex: #{msg}"
-        _ -> msg
+      content = case type do
+        :sayex -> "sayex: #{content}"
+        _ -> content
       end
 
       Chat.create_lobby_message(%{
-        content: msg,
+        content: content,
         lobby_guid: lobby.tags["server/match/uuid"],
         inserted_at: Timex.now(),
         user_id: userid,

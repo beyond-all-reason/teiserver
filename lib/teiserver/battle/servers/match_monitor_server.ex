@@ -71,6 +71,14 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
+  # Examples of accepted format:
+  # match-chat <Teifion> a: Message to allies
+  # match-chat <Teifion> s: A message to the spectators
+  def handle_info({:direct_message, _from_id, "match-chat " <> data}, state) do
+    Battle.save_match_stats(data)
+    {:noreply, state}
+  end
+
   def handle_info({:direct_message, from_id, "user_info " <> message}, state) do
     message = String.trim(message)
     case Base.url_decode64(message) do
