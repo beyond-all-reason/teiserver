@@ -1,4 +1,4 @@
-<% {fg, _bg, bsname} = view_colour() |> colours() %>
+<% {_fg, _bg, bsname} = view_colour() |> colours() %>
 
 <script src={Routes.static_path(@conn, "/js/d3.js")}></script>
 <script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
@@ -12,8 +12,6 @@
   name: "account_user",
   title: "User search"
 %>
-
-<%= central_component "icon_dropdown_js", [] %>
 
 <script>
   $(function() {
