@@ -17,35 +17,42 @@ defmodule Teiserver.Account.ActiveReport do
         params["end_date"]
       )
 
-    player_counts = Telemetry.list_server_day_logs(search: [start_date: start_date, end_date: end_date], order: "Newest first", limit: :infinity)
-    |> Enum.reduce(%{}, fn (log, players_acc) ->
-      log.data["minutes_per_user"]["player"]
-      |> Enum.reduce(players_acc, fn ({player_id, minutes}, acc) ->
-        existing = Map.get(acc, player_id, 0)
-        Map.put(acc, player_id, existing + minutes)
+    player_counts = Telemetry.list_server_day_logs(
+      search: [
+        start_date: start_date,
+        end_date: end_date
+      ],
+      order: "Newest first",
+      limit: :infinity
+    )
+      |> Enum.reduce(%{}, fn (log, players_acc) ->
+        log.data["minutes_per_user"]["player"]
+        |> Enum.reduce(players_acc, fn ({player_id, minutes}, acc) ->
+          existing = Map.get(acc, player_id, 0)
+          Map.put(acc, player_id, existing + minutes)
+        end)
       end)
-    end)
-    |> Enum.group_by(fn {_, v} ->
-      get_grouping(v)
-    end, fn {k, _} ->
-      k
-    end)
-    |> Enum.map(fn {group, players} ->
-      {group, Enum.count(players)}
-    end)
+      |> Enum.group_by(fn {_, v} ->
+        get_grouping(v)
+      end, fn {k, _} ->
+        k
+      end)
+      |> Enum.map(fn {group, players} ->
+        {group, Enum.count(players)}
+      end)
 
     cumulative_player_counts = player_counts
-    |> Map.new
-    |> Map.keys
-    |> Enum.map(fn key ->
-      v = player_counts
-      |> Enum.filter(fn {k, _} -> k >= key end)
-      |> Enum.map(fn {_, v} -> v end)
-      |> Enum.sum
+      |> Map.new
+      |> Map.keys
+      |> Enum.map(fn key ->
+        v = player_counts
+        |> Enum.filter(fn {k, _} -> k >= key end)
+        |> Enum.map(fn {_, v} -> v end)
+        |> Enum.sum
 
-      {key, v}
-    end)
-    |> Map.new
+        {key, v}
+      end)
+      |> Map.new
 
     assigns = %{
       params: params,

@@ -64,10 +64,10 @@ defmodule Teiserver.Account.UserLib do
   end
 
   # https://www.postgresql.org/docs/current/functions-json.html - Unable to find a function for this :(
-  # def _search(query, :data_contains, {field, value}) do
-  #   from users in query,
-  #     where: fragment("? ->> ? != ?", users.data, ^field, ^value)
-  # end
+  def _search(query, :data_contains, {field, value}) do
+    from users in query,
+      where: fragment("? ->> ? @> ?", users.data, ^field, ^value)
+  end
 
   def _search(query, :pre_cache, value) do
     from users in query,

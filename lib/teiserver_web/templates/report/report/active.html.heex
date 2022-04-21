@@ -6,6 +6,11 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
+        <div class="btn btn-primary2 float-end" onclick="$('.help-box, .help-box-large').toggle();">
+          <i class='fa-fw fa-solid fa-circle-info'></i>
+          &nbsp;
+          Show/Hide help
+        </div>
         <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
@@ -41,9 +46,16 @@
             </div>
           </div>
         </form>
-        <br /><br />
+        
+        <div class="help-box-large">
+          Uses daily player data to calculate the hours played for all players within the timeframe selected.
+        </div>
 
-        Date range: <%= @data.start_date %> to <%= @data.end_date %>
+        <%
+          day_count = Timex.diff(@data.end_date, @data.start_date, :days)
+        %>
+
+        <h4>Date range: <%= @data.start_date %> to <%= @data.end_date %>, <%= day_count %> days</h4>
         <table class='table' style="width: 600px;">
           <thead>
             <tr>
