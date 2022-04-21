@@ -1,11 +1,49 @@
 <% {fg, _bg, bsname} = view_colour() |> colours() %>
 
+<script src={Routes.static_path(@conn, "/js/d3.js")}></script>
+<script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
+
+<link href="/css/c3.min.css" rel="stylesheet">
+
 <%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+
+<%= central_component "picker_script",
+  module: Central.Account.UserLib,
+  name: "account_user",
+  title: "User search"
+%>
+
+<%= central_component "icon_dropdown_js", [] %>
+
+<script>
+  $(function() {
+    var chart = c3.generate({
+      bindto: '#chart',
+      data: {
+        x: 'x',
+        columns: <%= raw Jason.encode!([["x" | @data.keys] | @data.lines]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%Y-%m-%d'
+          }
+        }
+      }
+    });
+  });
+</script>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
+        <div class="btn btn-primary2 float-end" onclick="$('.help-box, .help-box-large').toggle();">
+          <i class='fa-fw fa-solid fa-circle-info'></i>
+          &nbsp;
+          Show/Hide help
+        </div>
         <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
@@ -18,32 +56,25 @@
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">
-            <div class="col-md-4 col-xl-2 search-form-input">
-              <label for="report_mode" class="control-label">Mode:</label>
-              <%= central_component "icon_dropdown", %{
-                name: "report[mode]",
-                id: "report_mode",
-                selected: @params["mode"],
-                enumerable: [
-                  %{id: "player_minutes", name: "Play time", icon: Central.Account.UserLib.icon(), colour: fg},
-                ]
-              } %>
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="search_account_user" class="control-label">User: </label>
+              <%= render CentralWeb.Account.UserView, "picker.html",
+                input_name: "report[account_user]",
+                value: @params["account_user"]
+              %>
             </div>
 
-          </div>
-
-          <div class="row">
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_date_preset" class="control-label">Date range:</label>
               <%= select :report, :date_preset, @presets, class: "form-control", selected: @params["date_preset"] %>
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_start_date" class="control-label">Start date:</label>
               <input type="text" id="report_start_date" name="report[start_date]" value={@params["start_date"]} class="form-control datepicker" />
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
               <label for="report_end_date" class="control-label">End date:</label>
               <input type="text" id="report_end_date" name="report[end_date]" value={@params["end_date"]} class="form-control datepicker" />
             </div>
@@ -56,44 +87,13 @@
             </div>
           </div>
         </form>
-        <br /><br />
 
-        <table class='table table-sm table-striped'>
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Player</th>
-              <th>Spectator</th>
-              <th>Lobby</th>
-              <th>Menu</th>
-              <th>Total</th>
-              <th>Play %</th>
-              <th>Play & Spec %</th>
-              <th>Play vs Play & Spec %</th>
-              <th>Menu %</th>
-           </tr>
-          </thead>
-          <tbody>
-            <%= for user <- @data do %>
-              <% stat = user.user_stat.data %>
-              <tr>
-                <td><%= user.name %></td>
-                <td><%= stat["player_minutes"] |> mins_to_hours %></td>
-                <td><%= stat["spectator_minutes"] |> mins_to_hours %></td>
-                <td><%= stat["lobby_minutes"] |> mins_to_hours %></td>
-                <td><%= stat["menu_minutes"] |> mins_to_hours %></td>
-                <td><%= stat["total_minutes"] |> mins_to_hours %></td>
+        <div class="help-box-large">
+          Gives a history of a specific player over time, time is in minutes spent on each activity per day.
+        </div>
 
-                <td><%= (stat["player_minutes"]/stat["total_minutes"]) |> percent %>%</td>
-                <td><%= ((stat["player_minutes"] + stat["spectator_minutes"]) / stat["total_minutes"]) |> percent %>%</td>
-                <td><%= stat["player_minutes"] / (max(stat["player_minutes"] + stat["spectator_minutes"], 1)) |> percent %>%</td>
-                <td><%= (stat["menu_minutes"]/stat["total_minutes"]) |> percent %>%</td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-
-
+        <div id="chart" class='with-transitions mt-3' style="height: 400px;">
+        </div>
 
       </div>
     </div>
