@@ -79,7 +79,7 @@ defmodule Teiserver.Account.TimeSpentReport do
       "date_preset" => "This month",
       "start_date" => "",
       "end_date" => "",
-      "account_user" => "#3, Teifion"
+      "account_user" => ""
     }, Map.get(params, "report", %{}))
   end
 end
