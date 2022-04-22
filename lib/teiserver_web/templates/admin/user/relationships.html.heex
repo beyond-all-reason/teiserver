@@ -29,20 +29,22 @@
       </thead>
       <tbody>
         <%= for userid <- @user.data["friends"] do %>
-        <% user = @lookup[userid] %>
-          <tr>
-            <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-              <%= central_component "icon", icon: user.icon %>
-            </td>
-            <td style={"background-color: #{rgba_css user.colour};"}><%= user.name %></td>
-            <td>&nbsp;</td>
-            <td>
-              <a href={Routes.ts_admin_user_path(@conn, :show, user.id)} class="btn btn-secondary btn-sm">
-                Show
-              </a>
-            </td>
-          </tr>
-       <% end %>
+          <% user = @lookup[userid] %>
+          <%= if user != nil do %>
+            <tr>
+              <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
+                <%= central_component "icon", icon: user.icon %>
+              </td>
+              <td style={"background-color: #{rgba_css user.colour};"}><%= user.name %></td>
+              <td>&nbsp;</td>
+              <td>
+                <a href={Routes.ts_admin_user_path(@conn, :show, user.id)} class="btn btn-secondary btn-sm">
+                  Show
+                </a>
+              </td>
+            </tr>
+          <% end %>
+        <% end %>
       </tbody>
     </table>
   </div>

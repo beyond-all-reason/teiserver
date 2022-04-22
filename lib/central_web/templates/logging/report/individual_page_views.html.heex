@@ -1,4 +1,4 @@
-<% {fg, _bg, bsname} = view_colour() %>
+<% {fg, _bg, bsname} = view_colour() |> colours() %>
 <%= central_component "picker_script",
   module: Central.Account.UserLib,
   name: "account_user",
@@ -37,7 +37,7 @@
           <input type="hidden" name="name" value="transaction_breakdown" />
 
           <div class="row">
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-xl-2 my-2">
               <label for="report_mode" class="control-label">Mode:</label>
               <%= central_component "icon_dropdown", %{
                 name: "report[mode]",
@@ -55,17 +55,17 @@
               } %>
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-xl-2 my-2">
               <label for="central-user-search" class="control-label">User: </label>
               <%= render CentralWeb.Account.UserView, "picker.html" %>
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-xl-2 my-2">
               <label for="report_path" class="control-label">Path:</label>
               <input type="text" name="report[path]" id="report_path" value={@params["path"]} class="form-control" />
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-xl-2 my-2">
               <label for="report_mode" class="control-label">Group:</label>
               <%= central_component "icon_dropdown", %{
                 name: "report[group]",
@@ -76,7 +76,7 @@
               } %>
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-xl-2 my-2">
               <label for="report_metric" class="control-label">Section:</label>
               <%= central_component "icon_dropdown", %{
                 name: "report[section]",
@@ -91,17 +91,17 @@
           </div>
 
           <div class="row">
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-xl-2 my-2">
               <label for="report_date_preset" class="control-label">Date range:</label>
               <%= select :report, :date_preset, @presets, class: "form-control", selected: @params["date_preset"] %>
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-xl-2 my-2">
               <label for="report_start_date" class="control-label">Start date:</label>
               <input type="text" id="report_start_date" name="report[start_date]" value={@params["start_date"]} class="form-control datepicker" />
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-xl-2 my-2">
               <label for="report_end_date" class="control-label">End date:</label>
               <input type="text" id="report_end_date" name="report[end_date]" value={@params["end_date"]} class="form-control datepicker" />
             </div>
