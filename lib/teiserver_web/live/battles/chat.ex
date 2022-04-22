@@ -27,6 +27,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   @impl true
   def handle_params(%{"id" => id}, _, socket) do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{id}")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
     battle = Lobby.get_battle!(id)
 
     case battle do
@@ -40,7 +41,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
           search: [
             lobby_guid: battle.tags["server/match/uuid"]
           ],
-          limit: 100,
+          limit: 25,
           order_by: "Newest first"
         )
         |> Enum.map(fn m -> {m.user_id, m.content} end)
@@ -66,6 +67,14 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
   @impl true
   def handle_info({:lobby_chat, :say, _lobby_id, userid, message}, socket) do
+    {userid, message} = case Regex.run(~r/^<(.*?)> (.+)$/u, message) do
+      [_, username, remainder] ->
+        userid = User.get_userid(username) || userid
+        {userid, "g: #{remainder}"}
+      _ ->
+        {userid, message}
+    end
+
     messages = [{userid, message} | socket.assigns[:messages]]
       |> Enum.take(100)
 
@@ -74,6 +83,27 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         |> assign(:messages, messages)
         |> update_user_map
     }
+  end
+
+  def handle_info({:battle_lobby_throttle, :closed}, socket) do
+    {:noreply,
+      socket
+      |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
+  end
+
+   def handle_info({:liveview_lobby_update, :consul_server_updated, _, _}, socket) do
+    # socket = socket
+    #   |> get_consul_state
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:battle_lobby_throttle, _lobby_changes, _}, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_info({:liveview_lobby_update, _lobby_changes, _, _}, socket) do
+    {:noreply, socket}
   end
 
   def handle_info(msg, socket) do

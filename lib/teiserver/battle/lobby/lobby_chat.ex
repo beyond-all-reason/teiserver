@@ -30,7 +30,10 @@ defmodule Teiserver.Battle.LobbyChat do
     allowed = cond do
       User.is_restricted?(user, ["All chat", "Lobby chat"]) -> false
       String.slice(msg, 0..0) == "!" and User.is_restricted?(user, ["Host commands"]) -> false
-      Enum.member?(["!y", "!n"], String.downcase(msg)) and User.is_restricted?(user, ["Voting"]) -> false
+      Enum.member?([
+        "!y", "!vote y", "!yes", "!vote yes",
+        "!n", "!vote n", "!no", "!vote no",
+        ], String.downcase(msg)) and User.is_restricted?(user, ["Voting"]) -> false
       true -> true
     end
 
@@ -66,7 +69,10 @@ defmodule Teiserver.Battle.LobbyChat do
     allowed = cond do
       User.is_restricted?(user, ["All chat", "Lobby chat", "Direct chat"]) -> false
       String.starts_with?(msg, "!") and User.is_restricted?(user, ["Host commands"]) -> false
-      Enum.member?(["!y", "!n"], String.downcase(msg)) and User.is_restricted?(user, ["Voting"]) -> false
+      Enum.member?([
+        "!y", "!vote y", "!yes", "!vote yes",
+        "!n", "!vote n", "!no", "!vote no",
+        ], String.downcase(msg)) and User.is_restricted?(user, ["Voting"]) -> false
       true -> true
     end
 
@@ -98,7 +104,10 @@ defmodule Teiserver.Battle.LobbyChat do
     allowed = cond do
       User.is_restricted?(sender, ["All chat", "Lobby chat", "Direct chat"]) -> false
       String.starts_with?(msg, "!") and User.is_restricted?(sender, ["Host commands"]) -> false
-      Enum.member?(["!y", "!n"], String.downcase(msg)) and User.is_restricted?(sender, ["Voting"]) -> false
+      Enum.member?([
+        "!y", "!vote y", "!yes", "!vote yes",
+        "!n", "!vote n", "!no", "!vote no",
+        ], String.downcase(msg)) and User.is_restricted?(sender, ["Voting"]) -> false
       true -> true
     end
 
