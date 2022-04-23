@@ -21,8 +21,6 @@
   spectators = Map.get(result, false, [])
   |> Enum.map(fn p -> @clients[p] end)
   |> Enum.sort_by(& &1[:name])
-
-  is_moderator = @bar_user.moderator
 %>
 
 <%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "battle_lobbies", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
@@ -33,7 +31,7 @@
       <div class="card-body">
 
         <div class="float-end">
-          <%= if @bar_user.moderator do %>
+          <%= if @moderator do %>
             <form pphx-change="suggest" phx-submit="send-to-host" style="display: inline-block;" onsubmit="setTimeout(function() {$('#coordinator_msg').val('');}, 300);">
               <input class="form-control" style="display: inline-block; width: 300px;" type="text" id="coordinator_msg" name="msg" value={@consul_command} placeholder="Consul commands" autocomplete="off"/>
               <button class={"btn btn-outline-#{bsname}"} type="submit" phx-disable-with="Executing...">Execute</button>
@@ -41,7 +39,7 @@
             &nbsp;&nbsp;&nbsp;
             &nbsp;&nbsp;&nbsp;
           <% end %>
-          
+
           <%= live_redirect "Chat", to: Routes.ts_battle_lobby_chat_path(@socket, :chat, @battle.id), class: "btn btn-#{bsname}" %>
         </div>
 
@@ -73,7 +71,10 @@
       <th>Team</th>
       <th>Faction</th>
       <th>Colour</th>
-      <th>&nbsp;</th>
+      
+      <%= if @moderator do %>
+        <th>&nbsp;</th>
+      <% end %>
     </tr>
   </thead>
   <tbody>
@@ -101,10 +102,10 @@
           <td><%= factions[client.side] %></td>
           <td><%= client.team_colour %></td>
 
-          <td>
-            <%= live_redirect "Show", to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}" %>
+          <%= if @moderator do %>
+            <td>
+              <%= live_redirect "Show", to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}" %>
 
-            <%= if is_moderator do %>
               <span class={"btn btn-sm btn-outline-#{bsname}"} phx-click={"forcespec:#{client.userid}"}>
                 &nbsp;
                 <i class='fa-fw fas fa-glasses'></i>
@@ -116,14 +117,8 @@
                 <i class='fa-fw fas fa-boot'></i>
                 &nbsp;
               </span>
-
-              <span class={"btn btn-sm btn-outline-#{bsname}"} phx-click={"ban:#{client.userid}"}>
-                &nbsp;
-                <i class='fa-fw fas fa-ban'></i>
-                &nbsp;
-              </span>
-            <% end %>
-          </td>
+            </td>
+          <% end %>
         </tr>
       <% end %>
     <% end %>
@@ -136,7 +131,10 @@
     <tr>
       <th width="100">&nbsp;</th>
       <th>Name</th>
-      <th>&nbsp;</th>
+      
+      <%= if @moderator do %>
+        <th>&nbsp;</th>
+      <% end %>
     </tr>
   </thead>
   <tbody>
@@ -159,23 +157,17 @@
           </td>
           <td><%= user.name %></td>
 
-          <td>
-            <%= live_redirect "Show", to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}" %>
+          <%= if @moderator do %>
+            <td>
+              <%= live_redirect "Show", to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}" %>
 
-            <%= if is_moderator do %>
               <span class={"btn btn-sm btn-outline-#{bsname}"} phx-click={"kick:#{client.userid}"}>
                 &nbsp;
                 <i class='fa-fw fas fa-boot'></i>
                 &nbsp;
               </span>
-
-              <span class={"btn btn-sm btn-outline-#{bsname}"} phx-click={"ban:#{client.userid}"}>
-                &nbsp;
-                <i class='fa-fw fas fa-ban'></i>
-                &nbsp;
-              </span>
-            <% end %>
-          </td>
+            </td>
+          <% end %>
         </tr>
       <% end %>
     <% end %>

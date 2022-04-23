@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{User, Chat}
+  alias Teiserver.{User, Chat, Coordinator}
   alias Teiserver.Battle.{Lobby, LobbyLib}
   alias Teiserver.Chat.LobbyMessage
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -35,16 +35,19 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
     battle = Lobby.get_battle!(id)
+    current_user = socket.assigns[:current_user]
 
     cond do
       battle == nil ->
         index_redirect(socket)
 
+      # Coordinator.call_consul(battle.id, {:request_user_join_lobby, current_user.id}) != {true, nil} ->
+      #   index_redirect(socket)
+
       (battle.locked or battle.password != nil) and not allow?(socket, "teiserver.moderator") ->
         index_redirect(socket)
 
       true ->
-        current_user = socket.assigns[:current_user]
         allowed_to_send = not User.has_mute?(current_user.id)
 
         bar_user = User.get_user_by_id(socket.assigns.current_user.id)

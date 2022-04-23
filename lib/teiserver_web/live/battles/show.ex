@@ -22,7 +22,9 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> AuthPlug.live_call(session)
       |> NotificationPlug.live_call()
 
-    extra_content = if allow?(socket, "teiserver.moderator.account") do
+    moderator = allow?(socket, "teiserver.moderator")
+
+    extra_content = if moderator do
       @extra_menu_content
     end
 
@@ -36,6 +38,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> assign(:extra_menu_content, extra_content)
       |> assign(:consul_command, "")
       |> assign(:subbed, true)
+      |> assign(:moderator, moderator)
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
   end
@@ -44,6 +47,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   def handle_params(%{"id" => id}, _, socket) do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
     battle = Lobby.get_battle!(id)
+    current_user = socket.assigns[:current_user]
 
     cond do
       battle == nil ->
@@ -51,6 +55,9 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
       (battle.locked or battle.password != nil) and not allow?(socket, "teiserver.moderator") ->
         index_redirect(socket)
+
+      # Coordinator.call_consul(battle.id, {:request_user_join_lobby, current_user.id}) != {true, nil} ->
+      #   index_redirect(socket)
 
       true ->
         {users, clients} = get_user_and_clients(battle.players)
