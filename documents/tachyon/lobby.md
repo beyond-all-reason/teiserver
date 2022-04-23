@@ -3,14 +3,16 @@
 * query :: Query
 
 #### Queryable fields
-`locked` - Boolean
-`in_progress` - Boolean
-`player_count` - Integer, a count of the number of players in the battle
-`spectator_count` - Integer, a count of the number of spectators in the battle
-`user_count` - Integer, a count of the number of players and spectators in the battle
-`player_list` - List (User.id), A list of player ids in the battle
-`spectator_list` - List (User.id), A list of spectator ids in the battle
-`user_list` - List (User.id), A list of player and spectator ids in the battle
+- `locked` - Boolean
+- `in_progress` - Boolean
+
+##### Planned items to add
+- `player_count` - Integer, a count of the number of players in the battle
+- `spectator_count` - Integer, a count of the number of spectators in the battle
+- `user_count` - Integer, a count of the number of players and spectators in the battle
+- `player_list` - List (User.id), A list of player ids in the battle
+- `spectator_list` - List (User.id), A list of spectator ids in the battle
+- `user_list` - List (User.id), A list of player and spectator ids in the battle
 
 #### Success response
 * battle_list :: List (Battle)
@@ -37,6 +39,7 @@
 ## Interacting
 ### `c.lobby.join`
 Requests to join the battle, the host will be sent a message asking if the person can join or not. Based on that an accept/reject is sent. If there is a failure to join then it means the host wasn't even consulted as the joiner didn't qualify (e.g. didn't supply the password).
+**Stage 1**
 ```
 {
   "cmd": "c.lobby.join",
@@ -44,7 +47,7 @@ Requests to join the battle, the host will be sent a message asking if the perso
   "password": "******" // Optional
 }
 
-// Stage 1
+// Response
 {
   "cmd": "s.lobby.join",
   "result": "waiting_for_host"
@@ -55,14 +58,18 @@ Requests to join the battle, the host will be sent a message asking if the perso
   "result": "failure",
   "reason": "Reason for failure"
 }
+```
 
-// Stage 2 - sent to the lobby host
+**Stage 2** - sent to the lobby host
+```
 // Host approves/rejects the joiner
+// this is what the lobby host sees
 {
   "cmd": "s.lobby_host.request_to_join",
   "userid": 456
 }
 
+// This is how the lobby host replies to the server
 {
   "cmd": "c.lobby_host.respond_to_join_request",
   "userid": 456,
@@ -75,9 +82,12 @@ Requests to join the battle, the host will be sent a message asking if the perso
   "response": "reject",
   "reason": "Reason for rejection"
 }
+```
 
-// Stage 3
-// Host response sent to prospective player
+**Stage 3**
+```
+// Server sends the response to the would-be player
+// Approval
 {
   "cmd": "s.lobby.join_response",
   "lobbyid": 123,
@@ -85,6 +95,7 @@ Requests to join the battle, the host will be sent a message asking if the perso
   "lobby": Lobby
 }
 
+// Rejection
 {
   "cmd": "s.lobby.join_response",
   "lobbyid": 123,
@@ -103,7 +114,7 @@ Used when the server moves you to a lobby. It will move you out of your existing
 }
 ```
 
-### TODO: `c.lobby.leave`
+### `c.lobby.leave`
 No server response.
 ```
 {
@@ -111,17 +122,17 @@ No server response.
 }
 ```
 
-### TODO: `s.lobby.request_to_join`
+### `s.lobby.user_requests_to_join`
 Sent to the host when someone requests to join the battle. The host should send the server a `c.lobby_host.respond_to_join_request` with their decision.
 ```
 {
-  "cmd": "s.lobby.request_to_join",
+  "cmd": "s.lobby.user_requests_to_join",
   "userid": 123
 }
 ```
 
-### TODO: `c.lobby_host.respond_to_join_request`
-The response to a `s.lobby.request_to_join` message informing the server if the request has been accepted or rejected. No server response.
+### `c.lobby_host.respond_to_join_request`
+The response to a `s.lobby.user_requests_to_join` message informing the server if the request has been accepted or rejected. No server response.
 ```
 {
   "cmd": "c.lobby_host.respond_to_join_request",
