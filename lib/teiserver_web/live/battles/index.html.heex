@@ -19,8 +19,10 @@
     <tr>
       <th>Name</th>
       <th>Map</th>
-      <th>UUID</th>
-      <th>Locked</th>
+      <%= if allow?(@current_user, "teiserver.moderator") do %>
+        <th>UUID</th>
+      <% end %>
+      <th colspan="2">Status</th>
       <th>Player count</th>
       <th>Spectator count</th>
 
@@ -33,21 +35,37 @@
         <tr id={"lobby-#{lobby.id}"}>
           <td><%= lobby.name %></td>
           <td><%= lobby.map_name %></td>
-          <td><%= lobby.tags["server/match/uuid"] %></td>
-          <td><%= if lobby.locked, do: "Locked" %></td>
+          <%= if allow?(@current_user, "teiserver.moderator") do %>
+            <td><%= lobby.tags["server/match/uuid"] %></td>
+          <% end %>
+          <td>
+            <%= if lobby.locked do %>
+              <i class='fa-fw fa-solid fa-lock'></i>
+            <% end %>
+          </td>
+          <td>
+            <%= if lobby.password != nil do %>
+              <i class='fa-fw fa-solid fa-key'></i>
+            <% end %>
+          </td>
           <td><%= lobby.player_count %></td>
           <td><%= lobby.spectator_count %></td>
 
-          <td>
-            <span>
-              <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id), class: "btn btn-sm btn-#{bsname}" %>
-            </span>
-          </td>
-          <td>
-            <span>
-              <%= live_redirect "Chat", to: Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id), class: "btn btn-sm btn-#{bsname}" %>
-            </span>
-          </td>
+          <%= if allow?(@current_user, "teiserver.moderator") or (lobby.password == nil and lobby.locked == false) do %>
+            <td>
+              <span>
+                <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id), class: "btn btn-sm btn-#{bsname}" %>
+              </span>
+            </td>
+            <td>
+              <span>
+                <%= live_redirect "Chat", to: Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id), class: "btn btn-sm btn-#{bsname}" %>
+              </span>
+            </td>
+          <% else %>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+          <% end %>
         </tr>
       <% end %>
     <% end %>

@@ -136,10 +136,13 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
     r = :rand.uniform()
 
     msg = cond do
-      r < 0.2 -> "!y"
-      r < 0.4 -> "!n"
-      r < 0.5 -> "!b"
-      r < 0.6 -> "!cv map koom"
+      r < 0.1 -> "!y, #{state.msg_count}"
+      r < 0.2 -> "!n, #{state.msg_count}"
+      r < 0.3 -> "!b, #{state.msg_count}"
+      r < 0.4 -> "!cv map koom, #{state.msg_count}"
+      r < 0.5 -> "g: Game message, #{state.msg_count}"
+      r < 0.6 -> "s: Spectator message, #{state.msg_count}"
+      r < 0.7 -> "a: Allied message, #{state.msg_count}"
       true -> "This is a chat message from #{state.name}, #{state.msg_count}"
     end
 

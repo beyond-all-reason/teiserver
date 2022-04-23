@@ -45,25 +45,29 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
     battle = Lobby.get_battle!(id)
 
-    case battle do
-      nil ->
+    cond do
+      battle == nil ->
         index_redirect(socket)
 
-      _ ->
+      (battle.locked or battle.password != nil) and not allow?(socket, "teiserver.moderator") ->
+        index_redirect(socket)
+
+      true ->
         {users, clients} = get_user_and_clients(battle.players)
 
         bar_user = User.get_user_by_id(socket.assigns.current_user.id)
 
         {:noreply,
          socket
-         |> assign(:bar_user, bar_user)
-         |> assign(:page_title, page_title(socket.assigns.live_action))
-         |> add_breadcrumb(name: battle.name, url: "/teiserver/battles/lobbies/#{battle.id}")
-         |> assign(:id, int_parse(id))
-         |> assign(:battle, battle)
-         |> get_consul_state
-         |> assign(:users, users)
-         |> assign(:clients, clients)}
+          |> assign(:bar_user, bar_user)
+          |> assign(:page_title, page_title(socket.assigns.live_action))
+          |> add_breadcrumb(name: battle.name, url: "/teiserver/battles/lobbies/#{battle.id}")
+          |> assign(:id, int_parse(id))
+          |> assign(:battle, battle)
+          |> get_consul_state
+          |> assign(:users, users)
+          |> assign(:clients, clients)
+        }
     end
   end
 

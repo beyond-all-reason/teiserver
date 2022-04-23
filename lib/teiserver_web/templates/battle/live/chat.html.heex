@@ -37,10 +37,11 @@
         
         Text will automatically update as people post.
 
-        <div id="chat" class="mt-3">
-          <%= for {{userid, message}, i} <- @messages |> Enum.reverse |> Enum.with_index do %>
+        <div id="chat" class="mt-4">
+          <% messages = @messages |> Enum.reverse %>
+          <%= for {{userid, message}, i} <- Enum.with_index(messages) do %>
             <%
-              last_msg = Enum.at(@messages, i)
+              last_msg = Enum.at(messages, i-1)
 
               different_user = cond do
                 i == 0 -> true
@@ -60,11 +61,14 @@
 
               <%
                 class = cond do
-                  Enum.member?(["!y", "!yes", "!vote y", "!vote yes"], message) -> "text-success"
-                  Enum.member?(["!n", "!no", "!vote n", "!vote no"], message) -> "text-danger"
+                  Enum.member?(["!y", "!yes", "!vote y", "!vote yes"], message) -> "text-success2"
+                  Enum.member?(["!n", "!no", "!vote n", "!vote no"], message) -> "text-danger2"
                   Enum.member?(["!b", "!abstain", "!vote b", "!vote abstain"], message) -> "text-info"
                   String.starts_with?(message, "!") -> "text-primary2"
                   String.starts_with?(message, "$") -> "text-primary2"
+                  String.starts_with?(message, "s:") -> "text-warning2"
+                  String.starts_with?(message, "a:") -> "text-success"
+                  String.starts_with?(message, "g:") -> ""
                   true -> ""
                 end
               %>
@@ -73,6 +77,20 @@
             </div>
           <% end %>
         </div>
+
+        <%= if allow?(@current_user, "teiserver.player.contributor") or allow?(@current_user, "teiserver.player.tester") or allow?(@current_user, "teiserver.moderator") do %>
+          <.form let={f} for={@message_changeset} phx-submit="send-message" class="mt-2">
+            <div class="row">
+              <div class="col-md-10">
+                <%= text_input f, :content, class: "form-control", autofocus: "autofocus" %>
+              </div>
+            
+              <div class="col-md-2">
+                <%= submit "Send", class: "btn btn-primary btn-block" %>
+              </div>
+            </div>
+          </.form>
+        <% end %>
 
       </div>
     </div>

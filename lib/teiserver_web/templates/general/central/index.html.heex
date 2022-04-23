@@ -15,15 +15,6 @@
         link: Routes.ts_admin_general_path(@conn, :index)
       %>
     <% end %>
-    
-    <%=
-      central_component "menu_card",
-      icon: Teiserver.Battle.LobbyLib.icon(),
-      name: "battle_lobbies",
-      text: "Lobbies",
-      icon_class: "fa-duotone",
-      link: Routes.ts_battle_lobby_index_path(@conn, :index)
-    %>
 
     <%= if allow?(@conn, "teiserver.moderator.account") do %>
       <%=
@@ -47,6 +38,15 @@
       text: "Teiserver Account",
       icon_class: "fa-duotone",
       link: Routes.ts_account_general_path(@conn, :index)
+    %>
+    
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Battle.LobbyLib.icon(),
+      name: "battle_lobbies",
+      text: "Live lobbies",
+      icon_class: "fa-duotone",
+      link: Routes.ts_battle_lobby_index_path(@conn, :index)
     %>
     
     <%=

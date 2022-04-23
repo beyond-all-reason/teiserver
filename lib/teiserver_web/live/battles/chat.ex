@@ -5,7 +5,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
   alias Teiserver.{User, Chat}
   alias Teiserver.Battle.{Lobby, LobbyLib}
+  alias Teiserver.Chat.LobbyMessage
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+
+  @message_count 25
 
   @impl true
   def mount(_params, session, socket) do
@@ -30,32 +33,40 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
     battle = Lobby.get_battle!(id)
 
-    case battle do
-      nil ->
+    cond do
+      battle == nil ->
         index_redirect(socket)
 
-      _ ->
+      (battle.locked or battle.password != nil) and not allow?(socket, "teiserver.moderator") ->
+        index_redirect(socket)
+
+      true ->
         bar_user = User.get_user_by_id(socket.assigns.current_user.id)
 
         messages = Chat.list_lobby_messages(
           search: [
             lobby_guid: battle.tags["server/match/uuid"]
           ],
-          limit: 25,
+          limit: @message_count*2,
           order_by: "Newest first"
         )
         |> Enum.map(fn m -> {m.user_id, m.content} end)
+        |> Enum.filter(fn {_, msg} ->
+          allow_message?(msg, socket)
+        end)
+        |> Enum.take(@message_count)
 
         {:noreply,
          socket
-         |> assign(:bar_user, bar_user)
-         |> assign(:page_title, "Show battle - Chat")
-         |> add_breadcrumb(name: battle.name, url: "/teiserver/battles/lobbies/#{battle.id}")
-         |> assign(:id, int_parse(id))
-         |> assign(:battle, battle)
-         |> assign(:messages, messages)
-         |> assign(:user_map, %{})
-         |> update_user_map
+          |> assign(:message_changeset, new_message_changeset())
+          |> assign(:bar_user, bar_user)
+          |> assign(:page_title, "Show battle - Chat")
+          |> add_breadcrumb(name: battle.name, url: "/teiserver/battles/lobbies/#{battle.id}")
+          |> assign(:id, int_parse(id))
+          |> assign(:battle, battle)
+          |> assign(:messages, messages)
+          |> assign(:user_map, %{})
+          |> update_user_map
         }
     end
   end
@@ -63,6 +74,20 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   @impl true
   def render(assigns) do
     Phoenix.View.render(TeiserverWeb.Battle.LiveView, "chat.html", assigns)
+  end
+
+  @impl true
+  def handle_event("send-message", %{
+      "lobby_message" => %{"content" => content}
+    },
+    %{
+    assigns: %{current_user: current_user, id: id}
+  } = socket) do
+    Lobby.say(current_user.id, strip_message(content), id)
+
+    {:noreply, socket
+      |> assign(:message_changeset, new_message_changeset())
+    }
   end
 
   @impl true
@@ -75,14 +100,18 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         {userid, message}
     end
 
-    messages = [{userid, message} | socket.assigns[:messages]]
-      |> Enum.take(100)
+    if allow_message?(message, socket) do
+      messages = [{userid, message} | socket.assigns[:messages]]
+        |> Enum.take(@message_count)
 
-    {:noreply,
-      socket
-        |> assign(:messages, messages)
-        |> update_user_map
-    }
+      {:noreply,
+        socket
+          |> assign(:messages, messages)
+          |> update_user_map
+      }
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_info({:battle_lobby_throttle, :closed}, socket) do
@@ -122,8 +151,35 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       |> assign(:user_map, Map.merge(user_map, extra_users))
   end
 
+  defp allow_message?(msg, %{assigns: %{current_user: current_user}}) do
+    if allow?(current_user, "teiserver.moderator") do
+      true
+    else
+      not (String.starts_with?(msg, "s:") or String.starts_with?(msg, "a:"))
+    end
+  end
 
   defp index_redirect(socket) do
     {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
+  end
+
+  # Takes the message and strips off assignment stuff
+  defp strip_message(msg) do
+    cond do
+      String.starts_with?(msg, "s:") -> strip_message(msg |> String.replace("s:", ""))
+      String.starts_with?(msg, "a:") -> strip_message(msg |> String.replace("a:", ""))
+      String.starts_with?(msg, "g:") -> strip_message(msg |> String.replace("g:", ""))
+      true -> msg
+    end
+  end
+
+  defp new_message_changeset() do
+    %LobbyMessage{}
+      |> LobbyMessage.changeset(%{
+        "lobby_guid" => "guid",
+        "user_id" => 1,
+        "inserted_at" => Timex.now(),
+        "content" => ""
+      })
   end
 end

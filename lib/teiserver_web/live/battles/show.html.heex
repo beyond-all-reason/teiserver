@@ -56,9 +56,10 @@
 <ul>
   <li>Max players: <%= @battle.max_players %></li>
   <li>Locked: <%= @battle.locked %></li>
-  <%= if allow?(@current_user, "teiserver.moderator") do %>
+  <%= if @battle.password != nil do %>
     <li>Password: <%= @battle.password %></li>
   <% end %>
+  <li>Queue size: <%= Enum.count(@consul.join_queue ++ @consul.low_priority_join_queue) %></li>
 </ul>
 
 <h4>Players</h4>
