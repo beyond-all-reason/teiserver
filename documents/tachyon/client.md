@@ -8,7 +8,7 @@ Given a list of ids, return information about the relevant clients
 * clients :: List (Client)
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.client.list_clients",
   "id_list": [1, 2, 3]

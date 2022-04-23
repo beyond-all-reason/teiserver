@@ -8,7 +8,7 @@ Returns a list of users as listed by the ids.
 * users :: List (User)
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.user.list_users_from_ids",
   "query": Query
@@ -28,7 +28,7 @@ Returns a list of users as listed by the ids.
 Returns a list of user ids of those on your friend list
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.user.list_friend_ids"
 }

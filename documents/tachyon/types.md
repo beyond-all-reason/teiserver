@@ -8,7 +8,7 @@ A set of parameters used to filter, sort or limit information from a larger data
 * where :: list(Conditionals)
 
 #### Examples
-```
+```json
 {
   "select": [
     "name",
@@ -29,7 +29,7 @@ A set of parameters used to filter, sort or limit information from a larger data
 * value :: any type, default: true
 
 #### Examples
-```
+```json
 {
   "field": "open"
 }
@@ -69,7 +69,7 @@ A set of parameters used to filter, sort or limit information from a larger data
 * ignores :: list (User.id)
 
 #### Examples
-```
+```json
 {
   "id": 1967,
   "name": "Gerald Feinberg",
@@ -121,7 +121,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 * lobby_id: Lobby.id -- TODO: Replace with lobby_id
 
 #### Examples
-```
+```json
 {
   {
   "id": 1967,
@@ -154,7 +154,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 * map_hash :: string
 
 #### Examples
-```
+```json
 {
   "id": 9556,
   "name": "EU 07 - 670",
@@ -192,7 +192,7 @@ A queue used in matchmaking
 * map_list :: list (string)
 
 #### Examples
-```
+```json
 {
   "id": 1967,
   "name": "Competitive 1v1",
@@ -235,7 +235,7 @@ A comment attached to a blog post
 Returned when an unexpected error is generated. The difference between an error and a failure is the failure is an expected possible outcome (e.g. login failing) while an error is unexpected (e.g. message cannot be decoded). As such the error field will not always have the command being executed (though may sometimes).
 
 #### Examples
-```
+```json
 {
   "result": "error",
   "error": "base64_decode",

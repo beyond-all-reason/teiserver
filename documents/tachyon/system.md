@@ -6,7 +6,7 @@ No arguments
 No response data
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.system.ping"
 }
@@ -27,7 +27,7 @@ event :: "server_restart"
 **server_restart** - Indicates the server is in the process of or about to restart. This means it will not respond to commands or send updated data until the restart has taken place.
 
 #### Examples
-```
+```json
 {
   "cmd": "c.system.server_event",
   "event": "server_restart"

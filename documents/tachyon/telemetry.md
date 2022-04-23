@@ -12,7 +12,7 @@ property: String
 value: String
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.telemetry.update_property",
   "hash": "abcdefg",
@@ -27,7 +27,7 @@ event: String
 value: JSON Map
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.telemetry.log_event",
   "hash": "abcdefg",

@@ -9,7 +9,7 @@ TODO: Identify if using a cache for categories and a cache for posts is better t
 
 If the blog post does not exist or the category does not exist then you will receive a null response for the `blog_post` key.
 
-```
+```json
 {
   "cmd": "c.news.get_latest_game_news",
   "category": "Game updates"

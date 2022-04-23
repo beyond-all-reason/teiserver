@@ -5,10 +5,10 @@ An API for uploading data about battles fought to Teiserver.
 ### POST /teiserver/api/auth -- Authorises your user
 **email:** the email of your account
 **password:** the password of your account for authorisation
-```
-curl -X POST $SERVER_ADDR/teiserver/api/auth -H "Content-Type: application/json" -d '{"user": {"email": "email@email", "password": "password1"}}'
+```json
+// curl -X POST $SERVER_ADDR/teiserver/api/auth -H "Content-Type: application/json" -d '{"user": {"email": "email@email", "password": "password1"}}'
 
-## Example data
+// Example data
 {
   "user": {
     "email": "my_email@email.com",
@@ -18,7 +18,7 @@ curl -X POST $SERVER_ADDR/teiserver/api/auth -H "Content-Type: application/json"
 ```
 
 **Expected response**
-```
+```json
 {
   "result": "success",
   "token": "..."
@@ -26,7 +26,7 @@ curl -X POST $SERVER_ADDR/teiserver/api/auth -H "Content-Type: application/json"
 ```
 
 **Failure response**
-```
+```json
 {
   "result": "failure",
   "reason": "auth error"

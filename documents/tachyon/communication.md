@@ -9,7 +9,7 @@
 * reason :: string
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.communication.join_room",
   "room_name": "main"
@@ -40,7 +40,7 @@
 Success is assumed, no response is sent
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.communication.leave_room",
   "room_name": "main"
@@ -54,7 +54,7 @@ Success is assumed, no response is sent
 * member_ids :: List (userid)
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.communication.list_members",
   "room_name": "main"
@@ -75,7 +75,7 @@ Success is assumed, no response is sent
 This command has no response expected. Though you should receive a `s.communication.room_message` from yourself (as will everybody else in the room).
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.communication.room_message",
   "room_name": "main",
@@ -91,7 +91,7 @@ Sent when a new message is sent to a room.
 * sender_id :: userid
 
 #### Example input/output
-```
+```json
 {
   "cmd": "s.communication.room_message",
   "room_name": "main",
@@ -112,7 +112,7 @@ Sent when a new message is sent to a room.
 * reason :: string
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.communication.send_direct_message",
   "recipient_id": 789,
@@ -136,7 +136,7 @@ Sent when a new message is sent to a room.
 * message :: string
 
 #### Example
-```
+```json
 {
   "cmd": "s.communication.received_direct_message",
   "sender_id": 123,

@@ -8,7 +8,7 @@ Given the correct email and password combination the server will send back a tok
 * token :: string
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.auth.get_token",
   "email": "email@email.com",
@@ -38,7 +38,7 @@ Performs user authentication via a token obtained from `c.auth.token`.
 * user :: User
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.auth.login",
   "lobby_name": "Bar Lobby",
@@ -75,7 +75,7 @@ Confirms the accuracy of the user email address. Once successful the user will b
 * user :: User
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.auth.verify",
   "token": "long-string-of-digits-here",
@@ -102,7 +102,7 @@ Confirms the accuracy of the user email address. Once successful the user will b
 The connection will be terminated, there will be no response.
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.auth.disconnect"
 }
@@ -118,7 +118,7 @@ Requests the creation of a new user account on the server
 You will receive a standard success response, if it fails you will receive a failure response. Once registered you can attempt to login though the server may require you to validate the account before the login can be successful.
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.auth.register",
   "username": "new_user_101",

@@ -18,7 +18,7 @@
 * battle :: Battle
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.lobby_host.create",
   "battle": {
@@ -52,15 +52,29 @@
 }
 ```
 
-### TODO: `s.lobby_host.user_requests_to_join`
-### TODO: `c.lobby_host.decline_user_join`
-### TODO: `c.lobby_host.allow_user_join`
+### `c.lobby_host.respond_to_join_request`
+The response to a `s.lobby.user_requests_to_join` message informing the server if the request has been accepted or rejected. No server response.
+```json
+{
+  "cmd": "c.lobby_host.respond_to_join_request",
+  "response": "accept",
+  "userid": 123
+}
 
-
-
+{
+  "cmd": "c.lobby_host.respond_to_join_request",
+  "response": "reject",
+  "reason": "reason given",
+  "userid": 123
+}
+```
 
 ### TODO: `c.lobby_host.update_status`
+Update the status of a player
+
 ### TODO: `s.lobby_host.updated_status`
+Tells you a player has had their status updated (by themselves, you or the server)
+
 
 ### TODO: `c.lobby_host.update_host_state`
 ### TODO: `s.lobby_host.updated_host_state`

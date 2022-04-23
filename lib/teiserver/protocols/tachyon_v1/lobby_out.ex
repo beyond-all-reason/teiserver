@@ -203,12 +203,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
 
   ###########
   # Messages
-  def do_reply(:request_status, nil) do
-    %{
-      "cmd" => "s.lobby.request_status"
-    }
-  end
-
   def do_reply(:received_lobby_direct_announce, {sender_id, msg}) do
     %{
       "cmd" => "s.lobby.received_lobby_direct_announce",

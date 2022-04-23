@@ -9,7 +9,7 @@
 * queue_list :: List (Queue)
 
 #### Example input/output
-```
+```json
 {
   "cmd": "c.matchmaking.query",
   "query": Query
