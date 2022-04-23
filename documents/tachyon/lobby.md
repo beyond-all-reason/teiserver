@@ -35,7 +35,7 @@
 ```
 
 ## Interacting
-### TODO: `c.lobby.join`
+### `c.lobby.join`
 Requests to join the battle, the host will be sent a message asking if the person can join or not. Based on that an accept/reject is sent. If there is a failure to join then it means the host wasn't even consulted as the joiner didn't qualify (e.g. didn't supply the password).
 ```
 {
