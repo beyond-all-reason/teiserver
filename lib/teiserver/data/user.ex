@@ -789,15 +789,10 @@ defmodule Teiserver.User do
   def update_report(report, _reason) do
     user = get_user_by_id(report.target_id)
 
-    # Work out how long they are restricted until
-    # so we know when to look at lifting the restrictions
-    expires_as_string = report.expires |> Jason.encode! |> Jason.decode!
-
-    new_restrict_until = cond do
-      expires_as_string == nil -> user.restricted_until
-      user.restricted_until == nil -> expires_as_string
-      true -> min(expires_as_string, user.restricted_until)
-    end
+    # If the report is being updated we'll need to update their restrictions
+    # and that won't take place correctly in some cases
+    # by making the expiry now we make it so the next check will mark them as clear
+    expires_as_string = Timex.now() |> Jason.encode! |> Jason.decode!
 
     # Get the new restrictions
     new_restrictions = user.restrictions ++ Map.get(report.action_data || %{}, "restriction_list", [])
@@ -805,12 +800,12 @@ defmodule Teiserver.User do
 
     changes = %{
       restrictions: new_restrictions,
-      restricted_until: new_restrict_until
+      restricted_until: expires_as_string
     }
 
     # Save changes
     Map.merge(user, changes)
-    |> update_user(persist: true)
+      |> update_user(persist: true)
 
     # We recache because the json conversion process converts the date
     # from a date to a string of the date
