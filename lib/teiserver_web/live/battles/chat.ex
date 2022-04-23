@@ -10,6 +10,9 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
   @message_count 25
 
+  @flood_protect_window_size 5
+  @flood_protect_message_count 5
+
   @impl true
   def mount(_params, session, socket) do
     socket =
@@ -41,6 +44,9 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         index_redirect(socket)
 
       true ->
+        current_user = socket.assigns[:current_user]
+        allowed_to_send = not User.has_mute?(current_user.id)
+
         bar_user = User.get_user_by_id(socket.assigns.current_user.id)
 
         messages = Chat.list_lobby_messages(
@@ -50,14 +56,16 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
           limit: @message_count*2,
           order_by: "Newest first"
         )
-        |> Enum.map(fn m -> {m.user_id, m.content} end)
-        |> Enum.filter(fn {_, msg} ->
-          allow_message?(msg, socket)
-        end)
-        |> Enum.take(@message_count)
+          |> Enum.map(fn m -> {m.user_id, m.content} end)
+          |> Enum.filter(fn {_, msg} ->
+            allow_read_message?(msg, socket)
+          end)
+          |> Enum.take(@message_count)
 
         {:noreply,
          socket
+          |> assign(:message_timestamps, [])
+          |> assign(:allowed_to_send, allowed_to_send)
           |> assign(:message_changeset, new_message_changeset())
           |> assign(:bar_user, bar_user)
           |> assign(:page_title, "Show battle - Chat")
@@ -81,12 +89,25 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       "lobby_message" => %{"content" => content}
     },
     %{
-    assigns: %{current_user: current_user, id: id}
+    assigns: %{current_user: current_user, id: id, message_timestamps: message_timestamps}
   } = socket) do
-    Lobby.say(current_user.id, strip_message(content), id)
+    content = strip_message(content)
+    message_timestamps = update_flood_protection(message_timestamps)
+
+    cond do
+      content == "" -> :ok
+      not allow_send_message?(content, current_user) ->
+        send(self(), {:lobby_chat, :say, :ok, current_user.id, "--- Unable to send messages starting with s:, a:, ! or $ via the web interface ---"})
+
+      flood_protect?(message_timestamps) ->
+        send(self(), {:lobby_chat, :say, :ok, current_user.id, "--- FLOOD PROTECTION IN PLACE, PLEAES WAIT BEFORE SENDING ANOTHER MESSAGE ---"})
+      true ->
+        Lobby.say(current_user.id, content, id)
+    end
 
     {:noreply, socket
       |> assign(:message_changeset, new_message_changeset())
+      |> assign(:message_timestamps, message_timestamps)
     }
   end
 
@@ -100,7 +121,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         {userid, message}
     end
 
-    if allow_message?(message, socket) do
+    if allow_read_message?(message, socket) do
       messages = [{userid, message} | socket.assigns[:messages]]
         |> Enum.take(@message_count)
 
@@ -151,11 +172,25 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       |> assign(:user_map, Map.merge(user_map, extra_users))
   end
 
-  defp allow_message?(msg, %{assigns: %{current_user: current_user}}) do
-    if allow?(current_user, "teiserver.moderator") do
-      true
-    else
-      not (String.starts_with?(msg, "s:") or String.starts_with?(msg, "a:"))
+  defp allow_read_message?(msg, %{
+    assigns: %{current_user: current_user}}) do
+    cond do
+      allow?(current_user, "teiserver.moderator") -> true
+      String.starts_with?(msg, "s:") -> false
+      String.starts_with?(msg, "a:") -> false
+      true -> true
+    end
+  end
+
+  defp allow_send_message?(msg, current_user) do
+    cond do
+      allow?(current_user, "teiserver.moderator") -> true
+      String.starts_with?(msg, "g:") -> false
+      String.starts_with?(msg, "s:") -> false
+      String.starts_with?(msg, "a:") -> false
+      String.starts_with?(msg, "!") -> false
+      String.starts_with?(msg, "$") -> false
+      true -> true
     end
   end
 
@@ -163,8 +198,12 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
   end
 
-  # Takes the message and strips off assignment stuff
+  # Takes the message and strips off assignment stuff plus commands
   defp strip_message(msg) do
+    msg
+      |> String.trim()
+      |> String.slice(0..128)
+
     cond do
       String.starts_with?(msg, "s:") -> strip_message(msg |> String.replace("s:", ""))
       String.starts_with?(msg, "a:") -> strip_message(msg |> String.replace("a:", ""))
@@ -181,5 +220,18 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         "inserted_at" => Timex.now(),
         "content" => ""
       })
+  end
+
+  defp update_flood_protection(message_timestamps) do
+    now = System.system_time(:second)
+    limiter = now - @flood_protect_window_size
+
+    [now | message_timestamps]
+      |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
+  end
+
+  @spec flood_protect?(list()) :: boolean
+  defp flood_protect?(message_timestamps) do
+    Enum.count(message_timestamps) > @flood_protect_message_count
   end
 end

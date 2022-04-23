@@ -153,9 +153,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     new_state = if split_uuid == split.split_uuid do
       players_to_move = Map.put(split.splitters, split.first_splitter_id, true)
-      |> CoordinatorLib.resolve_split()
-      |> Map.delete(split.first_splitter_id)
-      |> Map.keys
+        |> CoordinatorLib.resolve_split()
+        |> Map.delete(split.first_splitter_id)
+        |> Map.keys
 
       client = Client.get_client_by_id(split.first_splitter_id)
       new_lobby = if client.lobby_id == state.lobby_id or client.lobby_id == nil do
@@ -174,6 +174,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
           LobbyChat.sayex(state.coordinator_id, "Split failed, unable to find empty lobby", state.lobby_id)
 
         true ->
+          Logger.info("Splitting lobby for #{split.first_splitter_id} with players #{Kernel.inspect players_to_move}")
+
           lobby_id = new_lobby.id
 
           if client.lobby_id != lobby_id do
