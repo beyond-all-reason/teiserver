@@ -34,7 +34,7 @@
         <div class="float-end">
           <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, @battle.id), class: "btn btn-#{bsname}" %>
         </div>
-        
+
         Text will automatically update as people post.
 
         <div id="chat" class="mt-4">
@@ -61,8 +61,8 @@
 
               <%
                 class = cond do
-                  Enum.member?(["!y", "!yes", "!vote y", "!vote yes"], message) -> "text-success2"
-                  Enum.member?(["!n", "!no", "!vote n", "!vote no"], message) -> "text-danger2"
+                  Enum.member?(["!y", "!yes", "!vote y", "!vote yes"], message) -> "text-success"
+                  Enum.member?(["!n", "!no", "!vote n", "!vote no"], message) -> "text-danger"
                   Enum.member?(["!b", "!abstain", "!vote b", "!vote abstain"], message) -> "text-info"
                   String.starts_with?(message, "!") -> "text-primary2"
                   String.starts_with?(message, "$") -> "text-primary2"
@@ -84,7 +84,7 @@
               <div class="col-md-10">
                 <%= text_input f, :content, class: "form-control", autofocus: "autofocus" %>
               </div>
-            
+
               <div class="col-md-2">
                 <%= submit "Send", class: "btn btn-primary btn-block" %>
               </div>
