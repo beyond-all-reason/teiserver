@@ -197,6 +197,9 @@ Sent by the server to inform of a new player joining the battle room.
 ### TODO: `s.lobby.received_lobby_direct_announce`
 Sent by the server to inform of an announcement made in the room
 
-## Telemetry
+## TODO: Bot stuff
+- Add/Remove/Update
+
+## TODO: Telemetry
 - Mid-battle updates?
 
