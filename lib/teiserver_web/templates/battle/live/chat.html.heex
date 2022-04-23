@@ -61,9 +61,9 @@
 
               <%
                 class = cond do
-                  Enum.member?(["!y", "!yes", "!vote y", "!vote yes"], message) -> "text-success"
-                  Enum.member?(["!n", "!no", "!vote n", "!vote no"], message) -> "text-danger"
-                  Enum.member?(["!b", "!abstain", "!vote b", "!vote abstain"], message) -> "text-info"
+                  Enum.member?(["!y", "!yes", "!vote y", "!vote yes", "g: !vote y"], message) -> "text-success"
+                  Enum.member?(["!n", "!no", "!vote n", "!vote no", "g: !vote n"], message) -> "text-danger"
+                  Enum.member?(["!b", "!abstain", "!vote b", "!vote abstain", "g: !vote b"], message) -> "text-info"
                   String.starts_with?(message, "!") -> "text-primary2"
                   String.starts_with?(message, "$") -> "text-primary2"
                   String.starts_with?(message, "s:") -> "text-warning2"
