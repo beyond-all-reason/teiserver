@@ -63,7 +63,7 @@
     
 <% end %>
 
-<form action={Routes.admin_user_path(@conn, :index)} method="get" class="float-end form-inline d-none d-md-block">
+<form action={Routes.admin_user_path(@conn, :index)} method="get" class="float-end form-inline d-md-block">
   <div class="input-group">
     <input type="text" name="s" id="quick_search" value={@quick_search} placeholder="Quick search" class="form-control" style="width: 150px; display: inline-block;" />
     &nbsp;

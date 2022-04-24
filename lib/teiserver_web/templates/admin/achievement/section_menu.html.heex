@@ -56,7 +56,7 @@
   </div>
   
   <div class="col-md-3">
-    <form action={Routes.ts_admin_achievement_path(@conn, :index)} method="get" class="float-end form-inline d-none d-md-block">
+    <form action={Routes.ts_admin_achievement_path(@conn, :index)} method="get" class="float-end form-inline d-md-block">
       <div class="input-group">
         <input type="text" name="s" id="basic_search" value={assigns[:basic_search] || @conn.params["s"]} placeholder="Basic search" class="form-control" style="width: 150px; display: inline-block;" />
         &nbsp;

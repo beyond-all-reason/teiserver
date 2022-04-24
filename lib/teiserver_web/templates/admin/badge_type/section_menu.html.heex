@@ -18,7 +18,7 @@
   url: Routes.ts_admin_badge_type_path(@conn, :new)
 %>
 
-<form action={Routes.ts_admin_badge_type_path(@conn, :index)} method="get" class="float-end form-inline d-none d-md-block">
+<form action={Routes.ts_admin_badge_type_path(@conn, :index)} method="get" class="float-end form-inline d-md-block">
   <div class="input-group">
     <input type="text" name="s" id="quick_search" value={assigns[:quick_search] || @conn.params["s"]} placeholder="Quick search" class="form-control" style="width: 150px; display: inline-block;" />
     &nbsp;
