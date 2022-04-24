@@ -245,6 +245,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.broadcast_update(new_state)
   end
 
+  def handle_command(%{command: "reset_approval"} = cmd, state) do
+    players = Lobby.get_lobby_players!(state.lobby_id)
+    new_state = %{state | approved_users: players}
+    ConsulServer.say_command(cmd, new_state)
+  end
+
 
   #################### Host and Moderator
   def handle_command(%{command: "leveltoplay", remaining: remaining, senderid: senderid} = cmd, state) do

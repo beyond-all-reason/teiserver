@@ -42,7 +42,20 @@ Causes a "vote" to start where other players can elect to join you in splitting 
 of their choosing or remain in place. After 20 seconds you are moved to a new (empty) lobby and those that voted yes
 or are following someone that voted yes are also moved to that lobby.
 
-The following are available to the boss (and battle host)
+
+---- Boss only ----
+$reset_approval (boss only)
+Resets the list of approved players to just the ones present at the moment (approved players are able to join even if it is locked and without needing a password).
+
+$meme <meme>
+A predefined bunch of settings for meme games. It's all Rikerss' fault.
+- ticks: Ticks only, don't go Cortex!
+- greenfields: No metal extractors
+- rich: infinite money
+- poor: No money generation
+- hardt1: T1 but no seaplanes or hovers either
+- crazy: random combination of several settings
+- undo: Removes all meme effects
 
 $welcome-message <message>
 Sets the welcome message sent to anybody joining the lobby
@@ -56,6 +69,7 @@ sets the gatekeeper for this battle
 """
 
     hosts = """
+---- Hosts only ----
 $lock (team | player | spectator | side)
 Engages a lock on that mode, when engaged members are unable to change that attribute about themselves.
 Hosts and the server are the only thing that will be able to change it. Moderators are typically exempt
@@ -110,6 +124,7 @@ Moves the user to players
 """
 
     moderators = """
+---- Moderators only ----
 $success
 Sends a "!y" message from every player to the game host to make a vote pass.
 
@@ -133,16 +148,6 @@ Renames the lobby to the name given
 
 $vip <name>
 Places that user at the front of the queue. This command will always output it's use even if used with the % operator.
-
-$meme <meme>
-A predefined bunch of settings for meme games. It's all Rikerss' fault.
-- ticks: Ticks only, don't go Cortex!
-- greenfields: No metal extractors
-- rich: infinite money
-- poor: No money generation
-- hardt1: T1 but no seaplanes or hovers either
-- crazy: random combination of several settings
-- undo: Removes all meme effects
 
 $reset
 Resets the coordinator bot for this lobby to the default

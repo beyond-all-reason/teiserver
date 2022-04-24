@@ -231,6 +231,9 @@ defmodule Teiserver.Battle.Lobby do
   def force_add_user_to_battle(userid, battle_lobby_id) do
     remove_user_from_any_battle(userid)
     script_password = new_script_password()
+
+    Coordinator.cast_consul(battle_lobby_id, {:user_joined, userid})
+
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_client_messages:#{userid}",
@@ -254,6 +257,7 @@ defmodule Teiserver.Battle.Lobby do
           # No change takes place, they're already in the battle!
           battle_state
         else
+          Coordinator.cast_consul(lobby_id, {:user_joined, userid})
           Client.join_battle(userid, lobby_id)
 
           PubSub.broadcast(
@@ -337,7 +341,7 @@ defmodule Teiserver.Battle.Lobby do
           nil
 
         :removed ->
-          Coordinator.cast_consul(lobby_id, {:user_left, userid})
+          Coordinator.cast_consul(lobby_id, {:user_kicked, userid})
 
           PubSub.broadcast(
             Central.PubSub,
@@ -521,8 +525,8 @@ defmodule Teiserver.Battle.Lobby do
       nil -> {true, nil}
     end
 
-    ignore_password = User.is_moderator?(user) or Enum.member?(user.roles, "Caster")
-    ignore_locked = User.is_moderator?(user) or Enum.member?(user.roles, "Caster")
+    ignore_password = User.is_moderator?(user) or Enum.member?(user.roles, "Caster") or consul_reason == :override_approve
+    ignore_locked = User.is_moderator?(user) or Enum.member?(user.roles, "Caster") or consul_reason == :override_approve
 
     cond do
       user == nil ->

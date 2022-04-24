@@ -17,7 +17,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore 1v1me un1v1)
 
   @always_allow ~w(status y n follow joinq leaveq splitlobby)
-  @boss_commands ~w(gatekeeper welcome-message meme)
+  @boss_commands ~w(gatekeeper welcome-message meme reset_approval)
   @host_commands ~w(specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock rename)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
@@ -120,11 +120,28 @@ defmodule Teiserver.Coordinator.ConsulServer do
     }}
   end
 
+  def handle_info({:user_joined, userid}, state) do
+    new_approved = [userid | state.approved_users] |> Enum.uniq
+    {:noreply, %{state |
+      approved_users: new_approved
+    }}
+  end
+
   def handle_info({:user_left, userid}, state) do
     player_count_changed(state)
     {:noreply, %{state |
       join_queue: state.join_queue |> List.delete(userid),
       low_priority_join_queue: state.low_priority_join_queue |> List.delete(userid)
+    }}
+  end
+
+  def handle_info({:user_kicked, userid}, state) do
+    new_approved = state.approved_users |> List.delete(userid)
+    player_count_changed(state)
+    {:noreply, %{state |
+      join_queue: state.join_queue |> List.delete(userid),
+      low_priority_join_queue: state.low_priority_join_queue |> List.delete(userid),
+      approved_users: new_approved
     }}
   end
 
@@ -461,7 +478,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
         {false, "Awaiting acknowledgement"}
 
       client.moderator ->
-        {true, nil}
+        {true, :override_approve}
+
+      Enum.member?(state.approved_users, userid) ->
+        {true, :override_approve}
 
       ban_state == :banned ->
         Logger.info("ConsulServer allow_join false for #{userid} for reason #{reason}")
@@ -658,6 +678,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       low_priority_join_queue: [],
 
       started_at: Timex.now(),
+      approved_users: [],
 
       host_bosses: nil,
       host_preset: nil,
