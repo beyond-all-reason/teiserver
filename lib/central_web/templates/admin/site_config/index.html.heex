@@ -20,7 +20,7 @@
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <%= for {group_name, _group_configs} <- @site_configs do %>
-            <li>
+            <li class="nav-item">
               <a href={"##{remove_spaces group_name}_tab"} role="tab" class="nav-link" data-bs-toggle="tab"><%= String.capitalize group_name %>
               </a>
           </li>

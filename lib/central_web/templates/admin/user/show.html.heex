@@ -58,7 +58,7 @@
         <br />
 
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
-          <li>
+          <li class="nav-item">
             <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
               <%= central_component "icon", icon: icon() %>
               Details
@@ -66,21 +66,21 @@
           </li>
 
           <%= if @edit_access do %>
-            <li>
+            <li class="nav-item">
               <a href="#groups_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                 <%= central_component "icon", icon: Central.Account.GroupLib.icon() %>
                 Groups (<%= Enum.count(@user.groups) %>)
               </a>
             </li>
 
-            <li>
+            <li class="nav-item">
               <a href="#permissions_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                 <%= central_component "icon", icon: Central.Account.AuthLib.icon() %>
                 Permissions
               </a>
             </li>
 
-            <li>
+            <li class="nav-item">
               <a href="#settings_tab" role="tab" class="nav-link" data-bs-toggle="tab">
                 <%= central_component "icon", icon: Central.Config.UserConfigLib.icon() %>
                 Settings
