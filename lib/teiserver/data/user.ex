@@ -578,11 +578,11 @@ defmodule Teiserver.User do
     jwt
   end
 
-  @spec wait_for_precache() :: :ok
-  defp wait_for_precache() do
+  @spec wait_for_startup() :: :ok
+  defp wait_for_startup() do
     if Central.cache_get(:application_metadata_cache, "teiserver_partial_startup_completed") != true do
       :timer.sleep(@timer_sleep)
-      wait_for_precache()
+      wait_for_startup()
     else
       :ok
     end
@@ -619,7 +619,7 @@ defmodule Teiserver.User do
 
   @spec try_login(String.t(), String.t(), String.t(), String.t()) :: {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), T.userid()}
   def try_login(token, ip, lobby, lobby_hash) do
-    wait_for_precache()
+    wait_for_startup()
 
     case Guardian.resource_from_token(token) do
       {:error, _bad_token} ->
@@ -664,7 +664,7 @@ defmodule Teiserver.User do
 
   @spec try_md5_login(String.t(), String.t(), String.t(), String.t(), String.t()) :: {:ok, T.user()} | {:error, String.t()} | {:error, String.t(), Integer.t()}
   def try_md5_login(username, md5_password, ip, lobby, lobby_hash) do
-    wait_for_precache()
+    wait_for_startup()
 
     case get_user_by_name(username) do
       nil ->
@@ -755,13 +755,6 @@ defmodule Teiserver.User do
       }
 
     update_user(user, persist: true)
-
-    # Also update the user entry to say they logged in and should
-    # be considered for pre-cache again
-    db_user = Account.get_user!(user.id)
-    Account.update_user(db_user, %{
-      "pre_cache" => true
-    })
 
     # User stats
     Account.update_user_stat(user.id, %{
