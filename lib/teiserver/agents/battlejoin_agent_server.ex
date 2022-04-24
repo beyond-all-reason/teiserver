@@ -81,26 +81,26 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   defp handle_msg(%{"cmd" => "s.lobby.say"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.updated_client_battlestatus"}, state), do: state
 
-  defp update_battlestatus(state) do
-    data = if Enum.random([true, false]) do
-      %{
-        player: true,
-        ready: Enum.random([true, false]),
-        sync: 1,
-        team_number: Enum.random(0..15),
-        ally_team_number: Enum.random([0, 1]),
-        side: Enum.random([0, 1, 2]),
-        team_colour: Enum.random(0..9322660)
-      }
-    else
-      %{
-        player: false
-      }
-    end
+  # defp update_battlestatus(state) do
+  #   data = if Enum.random([true, false]) do
+  #     %{
+  #       player: true,
+  #       ready: Enum.random([true, false]),
+  #       sync: 1,
+  #       team_number: Enum.random(0..15),
+  #       ally_team_number: Enum.random([0, 1]),
+  #       side: Enum.random([0, 1, 2]),
+  #       team_colour: Enum.random(0..9322660)
+  #     }
+  #   else
+  #     %{
+  #       player: false
+  #     }
+  #   end
 
-    AgentLib._send(state.socket, Map.put(data, :cmd, "c.lobby.update_status"))
-    state
-  end
+  #   AgentLib._send(state.socket, Map.put(data, :cmd, "c.lobby.update_status"))
+  #   state
+  # end
 
   defp join_battle(state, []), do: state
   defp join_battle(state, lobby_ids) do
