@@ -873,7 +873,7 @@ defmodule Teiserver.SpringTcpServer do
       limiter = now - state.floot_rate_window_size
 
       [now | state.cmd_timestamps]
-      |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
+        |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
     else
       state.cmd_timestamps
     end

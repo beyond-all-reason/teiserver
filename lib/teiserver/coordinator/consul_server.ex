@@ -20,6 +20,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @boss_commands ~w(gatekeeper welcome-message meme)
   @host_commands ~w(specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock rename)
 
+  @ring_flood_protect_window_size 5
+  @ring_flood_protect_message_count 5
+  @ring_flood_protect_message_count_warn 4
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -144,7 +148,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
         nil -> {:noreply, state}
       end
     else
-      {:noreply, state}
+      new_state = handle_lobby_chat(userid, msg, state)
+      {:noreply, new_state}
     end
   end
 
@@ -256,6 +261,44 @@ defmodule Teiserver.Coordinator.ConsulServer do
     else
       {:noreply, state}
     end
+  end
+
+  # Chat handler
+  @spec handle_lobby_chat(T.userid(), String.t(), map()) :: map()
+  defp handle_lobby_chat(userid, "!ring " <> _remainder, %{ring_timestamps: ring_timestamps} = state) do
+    user_times = Map.get(ring_timestamps, userid, [])
+
+    now = System.system_time(:second)
+    limiter = now - @ring_flood_protect_window_size
+
+    new_user_times = [now | user_times]
+      |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
+
+    user = User.get_user_by_id(userid)
+
+    cond do
+      User.is_moderator?(user) ->
+        :ok
+
+      Enum.count(new_user_times) >= @ring_flood_protect_message_count ->
+        User.set_flood_level(userid, 100)
+        Client.disconnect(userid)
+
+      Enum.count(new_user_times) >= @ring_flood_protect_message_count_warn ->
+        User.ring(userid, state.coordinator_id)
+        LobbyChat.sayprivateex(state.coordinator_id, userid, "Attention #{user.name}, you are ringing a lot of people very fast, please slow down", state.lobby_id)
+
+      true ->
+        :ok
+    end
+
+    new_ring_timestamps = Map.put(ring_timestamps, userid, new_user_times)
+
+    %{state | ring_timestamps: new_ring_timestamps}
+  end
+
+  defp handle_lobby_chat(_userid, _msg, state) do
+    state
   end
 
   # Says if a status change is allowed to happen. If it is then an allowed status
@@ -604,6 +647,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
       host_preset: nil,
       host_teamsize: 4,
       host_teamcount: 2,
+
+      ring_timestamps: %{},
 
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
     }
