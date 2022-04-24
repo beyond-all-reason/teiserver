@@ -56,6 +56,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     new_state = check_queue_status(state)
     player_count_changed(new_state)
+    fix_ids(new_state)
 
     # It is possible we can "forget" the coordinator_id
     # no idea how it happens but it can cause issues to arise
@@ -510,6 +511,25 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Enum.member?(@host_commands, cmd.command) and is_host -> true
       Enum.member?(@boss_commands, cmd.command) and (is_host or is_boss) -> true
       true -> false
+    end
+  end
+
+  # Ensure no two players have the same team_number
+  defp fix_ids(state) do
+    players = list_players(state)
+
+    team_numbers = players
+      |> Enum.map(fn %{team_number: team_number} -> team_number end)
+      |> Enum.uniq
+
+    # If they don't match then we have non-unique ids
+    if Enum.count(team_numbers) != Enum.count(players) do
+      Logger.info("Fixing ids")
+      players
+        |> Enum.reduce(1, fn (player, acc) ->
+          Client.update(%{player | team_number: acc}, :client_updated_battlestatus)
+          acc + 1
+        end)
     end
   end
 
