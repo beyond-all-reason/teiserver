@@ -3,10 +3,9 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
   alias Teiserver.Battle.Lobby
   alias Teiserver.Common.PubsubListener
   alias Teiserver.{User, Client, Coordinator}
-  alias Teiserver.Coordinator.ConsulServer
 
   import Teiserver.TeiserverTestLib,
-    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]
+    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
 
   setup do
     Coordinator.start_coordinator()
@@ -62,7 +61,7 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
   end
 
-  test "standard mesages", %{lobby_id: lobby_id, player: player1, hsocket: hsocket, psocket: psocket} do
+  test "standard messages", %{lobby_id: lobby_id, psocket: psocket} do
     data = %{cmd: "c.lobby.message", message: "Chat chat chat 1"}
     _tachyon_send(psocket, data)
 
@@ -76,7 +75,7 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
     assert message == "This is the welcome message"
   end
 
-  test "ring flood", %{lobby_id: lobby_id, player: player1, hsocket: hsocket, psocket: psocket} do
+  test "ring flood", %{lobby_id: lobby_id, player: player1, psocket: psocket} do
     data = %{cmd: "c.lobby.message", message: "!ring other_player"}
     _tachyon_send(psocket, data)
 

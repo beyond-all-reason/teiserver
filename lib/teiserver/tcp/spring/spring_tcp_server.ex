@@ -119,8 +119,8 @@ defmodule Teiserver.SpringTcpServer do
       cmd_timestamps: [],
 
       # Caching app configs
-      flood_rate_limit_count: Config.get_site_config_cache("teiserver.Flood rate limit count"),
-      floot_rate_window_size: Config.get_site_config_cache("teiserver.Flood rate window size")
+      flood_rate_limit_count: Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
+      floot_rate_window_size: Config.get_site_config_cache("teiserver.Spring flood rate window size")
     }
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")

@@ -94,8 +94,8 @@ defmodule Teiserver.TachyonTcpServer do
       cmd_timestamps: [],
 
       # Caching app configs
-      flood_rate_limit_count: Config.get_site_config_cache("teiserver.Flood rate limit count"),
-      floot_rate_window_size: Config.get_site_config_cache("teiserver.Flood rate window size")
+      flood_rate_limit_count: Config.get_site_config_cache("teiserver.Tachyon flood rate limit count"),
+      floot_rate_window_size: Config.get_site_config_cache("teiserver.Tachyon flood rate window size")
     }
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")

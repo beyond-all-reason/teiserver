@@ -20,10 +20,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @boss_commands ~w(gatekeeper welcome-message meme)
   @host_commands ~w(specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock rename)
 
-  @ring_flood_protect_window_size 5
-  @ring_flood_protect_message_count 5
-  @ring_flood_protect_message_count_warn 4
-
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -269,7 +265,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     user_times = Map.get(ring_timestamps, userid, [])
 
     now = System.system_time(:second)
-    limiter = now - @ring_flood_protect_window_size
+    limiter = now - state.ring_window_size
 
     new_user_times = [now | user_times]
       |> Enum.filter(fn cmd_ts -> cmd_ts > limiter end)
@@ -280,13 +276,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
       User.is_moderator?(user) ->
         :ok
 
-      Enum.count(new_user_times) >= @ring_flood_protect_message_count ->
+      Enum.count(new_user_times) >= state.ring_limit_count ->
         User.set_flood_level(userid, 100)
         Client.disconnect(userid)
 
-      Enum.count(new_user_times) >= @ring_flood_protect_message_count_warn ->
+      Enum.count(new_user_times) >= (state.ring_limit_count - 1) ->
         User.ring(userid, state.coordinator_id)
-        LobbyChat.sayprivateex(state.coordinator_id, userid, "Attention #{user.name}, you are ringing a lot of people very fast, please slow down", state.lobby_id)
+        LobbyChat.sayprivateex(state.coordinator_id, userid, "Attention #{user.name}, you are ringing a lot of people very fast, please pause for a bit", state.lobby_id)
 
       true ->
         :ok
@@ -649,6 +645,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
       host_teamcount: 2,
 
       ring_timestamps: %{},
+      ring_limit_count: Config.get_site_config_cache("teiserver.Ring flood rate limit count"),
+      ring_window_size: Config.get_site_config_cache("teiserver.Ring flood rate window size"),
 
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
     }

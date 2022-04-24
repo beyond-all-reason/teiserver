@@ -4,23 +4,63 @@ defmodule Teiserver.TeiserverConfigs do
   @spec teiserver_configs :: any
   def teiserver_configs do
     add_site_config_type(%{
-      key: "teiserver.Flood rate limit count",
+      key: "teiserver.Spring flood rate limit count",
       section: "Protocol",
       type: "integer",
       permissions: ["teiserver.admin"],
-      description: "The number of commands required to trip flood protection",
+      description: "The number of commands required to trip flood protection for Spring",
       opts: [],
       default: 20
     })
 
     add_site_config_type(%{
-      key: "teiserver.Flood rate window size",
+      key: "teiserver.Spring flood rate window size",
       section: "Protocol",
       type: "integer",
       permissions: ["teiserver.admin"],
-      description: "The size of the window in seconds for flood protection to trip",
+      description: "The size of the window in seconds for flood protection to trip for Spring",
       opts: [],
       default: 6
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Tachyon flood rate limit count",
+      section: "Protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The number of commands required to trip flood protection for Tachyon",
+      opts: [],
+      default: 20
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Tachyon flood rate window size",
+      section: "Protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The size of the window in seconds for flood protection to trip for Tachyon",
+      opts: [],
+      default: 6
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Ring flood rate limit count",
+      section: "Protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The number of rings required to trip flood protection",
+      opts: [],
+      default: 5
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Ring flood rate window size",
+      section: "Protocol",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The size of the window in seconds for flood protection to trip for rings",
+      opts: [],
+      default: 10
     })
 
     add_site_config_type(%{
