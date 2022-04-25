@@ -7,6 +7,7 @@ defmodule Teiserver.Account.TSAuthPlug do
     # Keyword.fetch!(opts, :repo)
   end
 
+  def call(%{assigns: %{current_user: nil}} = conn, _opts), do: conn
   def call(%{assigns: %{current_user: current_user}} = conn, _opts) do
     if User.is_restricted?(current_user.id, ["Site"]) do
       conn
@@ -16,6 +17,7 @@ defmodule Teiserver.Account.TSAuthPlug do
     end
   end
 
+  def live_call(%{assigns: %{current_user: nil}} = socket, _session), do: socket
   def live_call(%{assigns: %{current_user: current_user}} = socket, _session) do
     if User.is_restricted?(current_user.id, ["Site"]) do
       socket

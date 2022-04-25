@@ -546,7 +546,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     if Enum.count(team_numbers) != Enum.count(players) do
       Logger.info("Fixing ids")
       players
-        |> Enum.reduce(1, fn (player, acc) ->
+        |> Enum.reduce(0, fn (player, acc) ->
           Client.update(%{player | team_number: acc}, :client_updated_battlestatus)
           acc + 1
         end)

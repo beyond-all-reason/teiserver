@@ -183,6 +183,11 @@ defmodule Teiserver.TachyonTcpServer do
     end
   end
 
+  # User updates
+  def handle_info({:user_update, _event, _userid, _data}, state) do
+    {:noreply, state}
+  end
+
   # Depreciated/depreciating stuff, we just ignore it
   def handle_info({:request_user_join_lobby, _}, state), do: {:noreply, state}
   def handle_info({:join_battle_request_response, _, _, _}, state), do: {:noreply, state}
