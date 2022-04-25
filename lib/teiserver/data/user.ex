@@ -833,6 +833,12 @@ defmodule Teiserver.User do
       end
     end
 
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_user_updates:#{user.id}",
+      {:user_update, :update_report, user.id, report.id}
+    )
+
     :ok
   end
 
