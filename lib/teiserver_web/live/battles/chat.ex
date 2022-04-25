@@ -105,7 +105,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       flood_protect?(message_timestamps) ->
         send(self(), {:lobby_chat, :say, :ok, current_user.id, "--- FLOOD PROTECTION IN PLACE, PLEAES WAIT BEFORE SENDING ANOTHER MESSAGE ---"})
       true ->
-        Lobby.say(current_user.id, content, id)
+        Lobby.say(current_user.id, "w: #{content}", id)
     end
 
     {:noreply, socket
@@ -115,7 +115,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   end
 
   @impl true
-  def handle_info({:lobby_chat, :say, _lobby_id, userid, message}, socket) do
+  def handle_info({:lobby_chat, _say_or_announce, _lobby_id, userid, message}, socket) do
     {userid, message} = case Regex.run(~r/^<(.*?)> (.+)$/u, message) do
       [_, username, remainder] ->
         userid = User.get_userid(username) || userid
@@ -208,6 +208,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       |> String.slice(0..128)
 
     cond do
+      String.starts_with?(msg, "w:") -> strip_message(msg |> String.replace("w:", ""))
       String.starts_with?(msg, "s:") -> strip_message(msg |> String.replace("s:", ""))
       String.starts_with?(msg, "a:") -> strip_message(msg |> String.replace("a:", ""))
       String.starts_with?(msg, "g:") -> strip_message(msg |> String.replace("g:", ""))
