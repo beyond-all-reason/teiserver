@@ -305,6 +305,7 @@ defmodule Teiserver.Client do
 
   # If it's a test user, don't worry about actually disconnecting it
   defp do_disconnect(client, reason) do
+    Logger.info("#{client.name}/##{client.id} disconnected because #{reason}")
     Lobby.remove_user_from_any_battle(client.userid)
     Room.remove_user_from_any_room(client.userid)
     leave_rooms(client.userid)

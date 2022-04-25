@@ -41,6 +41,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
         |> Lobby.create_lobby()
         |> Lobby.add_lobby()
 
+      Client.join_battle(state.userid, lobby.id)
+
       send(self(), {:action, {:host_lobby, lobby.id}})
       reply(:lobby, :create, {:success, lobby}, state)
     else
