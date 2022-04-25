@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{User, Chat}
+  alias Teiserver.{User, Chat, Coordinator, Client}
   alias Teiserver.Battle.{Lobby, LobbyLib}
   alias Teiserver.Chat.LobbyMessage
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -58,6 +58,9 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       true ->
         allowed_to_send = not User.has_mute?(current_user.id)
 
+        players = Lobby.get_lobby_players!(int_parse(id))
+        clients = get_clients(players)
+
         bar_user = User.get_user_by_id(socket.assigns.current_user.id)
 
         messages = Chat.list_lobby_messages(
@@ -85,6 +88,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
           |> assign(:battle, battle)
           |> assign(:messages, messages)
           |> assign(:user_map, %{})
+          |> assign(:clients, clients)
           |> update_user_map
         }
     end
@@ -155,20 +159,31 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     end
   end
 
-  def handle_info({:battle_lobby_throttle, :closed}, socket) do
-    {:noreply,
-      socket
-      |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
-  end
+  def handle_info({:battle_lobby_throttle, _lobby_changes, player_changes}, %{assigns: assigns} = socket) do
+    battle = Lobby.get_battle(assigns.id)
 
-   def handle_info({:liveview_lobby_update, :consul_server_updated, _, _}, socket) do
-    # socket = socket
-    #   |> get_consul_state
+    socket = socket
+      |> assign(:battle, battle)
+
+    # Players
+    # TODO: This can likely be optimised somewhat
+    socket = case player_changes do
+      [] ->
+        socket
+      _ ->
+        players = Lobby.get_lobby_players!(assigns.id)
+        clients = get_clients(players)
+
+        socket
+          |> assign(:clients, clients)
+    end
 
     {:noreply, socket}
   end
 
-  def handle_info({:battle_lobby_throttle, _lobby_changes, _}, socket) do
+  def handle_info({:liveview_lobby_update, :consul_server_updated, _, _}, socket) do
+    socket = socket
+
     {:noreply, socket}
   end
 
@@ -258,5 +273,13 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   @spec flood_protect?(list()) :: boolean
   defp flood_protect?(message_timestamps) do
     Enum.count(message_timestamps) > @flood_protect_message_count
+  end
+
+  defp get_clients(id_list) do
+    clients =
+      Client.get_clients(id_list)
+      |> Map.new(fn c -> {c.userid, c} end)
+
+    clients
   end
 end

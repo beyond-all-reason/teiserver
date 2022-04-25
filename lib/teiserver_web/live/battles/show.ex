@@ -133,7 +133,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> redirect(to: Routes.ts_battle_lobby_index_path(socket, :index))}
   end
 
-   def handle_info({:liveview_lobby_update, :consul_server_updated, _, _}, socket) do
+  def handle_info({:liveview_lobby_update, :consul_server_updated, _, _}, socket) do
     socket = socket
       |> get_consul_state
 

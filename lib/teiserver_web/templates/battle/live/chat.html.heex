@@ -27,7 +27,7 @@
 </style>
 
 <div class="row mt-3" id="main-content">
-  <div class="col-md-12">
+  <div class="col-md-10">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
 
@@ -95,5 +95,13 @@
 
       </div>
     </div>
+  </div>
+  
+  <div class="col-md-2">
+    <.live_component
+      id="player_list"
+      module={TeiserverWeb.Components.PlayerListComponent}
+      clients={@clients}
+    />
   </div>
 </div>

@@ -1,0 +1,18 @@
+<div class={"card page-card"}>
+  <div class="card-body">
+    <strong>Players</strong>
+    <ul>
+      <%= for p <- @players do %>
+        <li><%= p.name %></li>
+      <% end %>
+    </ul>
+    <br />
+
+    <strong>Spectators</strong>
+    <ul>
+      <%= for p <- @spectators do %>
+        <li><%= p.name %></li>
+      <% end %>
+    </ul>
+  </div>
+</div>
