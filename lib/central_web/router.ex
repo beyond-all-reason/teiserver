@@ -25,6 +25,7 @@ defmodule CentralWeb.Router do
     plug(Central.Logging.LoggingPlug)
     plug(Central.Account.AuthPipeline)
     plug(Central.Account.AuthPlug)
+    plug(Teiserver.Account.TSAuthPlug)
     plug(Central.General.CachePlug)
     plug(Central.Communication.NotificationPlug)
   end
