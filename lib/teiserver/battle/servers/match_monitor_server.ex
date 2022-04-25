@@ -85,11 +85,23 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
         case to do
           "d" ->
-            LobbyChat.persist_message(user, "g: #{msg}", host.lobby_id, :say)
+            # We don't persist this as it's already persisted elsewhere
+            # LobbyChat.persist_message(user, "g: #{msg}", host.lobby_id, :say)
+            :ok
           "dallies" ->
             LobbyChat.persist_message(user, "a: #{msg}", host.lobby_id, :say)
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_liveview_lobby_chat:#{host.lobby_id}",
+              {:liveview_lobby_chat, :say, user.id, msg}
+            )
           "dspectators" ->
             LobbyChat.persist_message(user, "s: #{msg}", host.lobby_id, :say)
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_liveview_lobby_chat:#{host.lobby_id}",
+              {:liveview_lobby_chat, :say, user.id, msg}
+            )
         end
       _ ->
         Logger.info("[MatchMonitorServer] match-chat nomatch from: #{from_id}: match-chat #{data}")

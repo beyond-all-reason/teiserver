@@ -100,6 +100,13 @@ These are updates sent from the LiveBattle genservers (used to throttle/batch me
   {:liveview_lobby_update, :consul_server_updated, lobby_id, reason}
 ```
 
+#### teiserver_liveview_lobby_chat:#{battle_lobby_id}
+Updates specifically for liveview chat interfaces, due to the way messages are persisted from matchmonitor server.
+```elixir
+  # Coordinator
+  {:liveview_lobby_chat, :say, lobby_id, reason}
+```
+
 ### User/Client
 #### legacy_all_user_updates
 Information about all users, such as a user logging on/off

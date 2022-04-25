@@ -42,6 +42,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_chat:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{current_user.id}")
 
     cond do
@@ -122,6 +123,15 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   end
 
   @impl true
+  def handle_info({:liveview_lobby_chat, :say, userid, message}, socket) do
+    send(self(), {:lobby_chat, :say, nil, userid, message})
+    {:noreply, socket}
+  end
+
+  def handle_info({:lobby_chat, :announce, _lobby_id, _, _}, socket) do
+    {:noreply, socket}
+  end
+
   def handle_info({:lobby_chat, _say_or_announce, _lobby_id, userid, message}, socket) do
     {userid, message} = case Regex.run(~r/^<(.*?)> (.+)$/u, message) do
       [_, username, remainder] ->
