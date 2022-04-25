@@ -19,6 +19,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     socket =
       socket
       |> AuthPlug.live_call(session)
+      |> TSAuthPlug.live_call(session)
       |> NotificationPlug.live_call()
 
     extra_content = if allow?(socket, "teiserver.moderator.account") do
@@ -38,6 +39,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   @impl true
+  def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
+    {:noreply, socket |> redirect(to: Routes.general_page_path(socket, :index))}
+  end
+
   def handle_params(params, _url, socket) do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end

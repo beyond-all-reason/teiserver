@@ -18,6 +18,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     socket =
       socket
       |> AuthPlug.live_call(session)
+      |> TSAuthPlug.live_call(session)
       |> NotificationPlug.live_call()
 
     socket = socket
@@ -31,11 +32,17 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   end
 
   @impl true
+  def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
+    {:noreply, socket |> redirect(to: Routes.general_page_path(socket, :index))}
+  end
+
   def handle_params(%{"id" => id}, _, socket) do
+    current_user = socket.assigns[:current_user]
+    battle = Lobby.get_battle!(id)
+
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
-    battle = Lobby.get_battle!(id)
-    current_user = socket.assigns[:current_user]
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{current_user.id}")
 
     cond do
       battle == nil ->
@@ -157,6 +164,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
   def handle_info({:liveview_lobby_update, _lobby_changes, _, _}, socket) do
     {:noreply, socket}
+  end
+
+  def handle_info({:user_update, _update_type, _userid, _data}, %{assigns: %{id: id}} = socket) do
+    {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_chat_path(socket, :chat, id))}
   end
 
   def handle_info(msg, socket) do

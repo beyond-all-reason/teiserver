@@ -1,5 +1,7 @@
 <%
-  server_user = Teiserver.User.get_user_by_id(@current_user.id)
+  server_user = if @current_user do
+    Teiserver.User.get_user_by_id(@current_user.id)
+  end
 %>
 
 <%# Live services %>

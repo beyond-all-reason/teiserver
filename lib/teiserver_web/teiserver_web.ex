@@ -13,6 +13,7 @@ defmodule TeiserverWeb do
   def live_view do
     quote do
       use CentralWeb, :live_view_structure
+      alias Teiserver.Account.TSAuthPlug
     end
   end
 

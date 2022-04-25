@@ -20,6 +20,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     socket =
       socket
       |> AuthPlug.live_call(session)
+      |> TSAuthPlug.live_call(session)
       |> NotificationPlug.live_call()
 
     moderator = allow?(socket, "teiserver.moderator")
@@ -44,10 +45,16 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   end
 
   @impl true
-  def handle_params(%{"id" => id}, _, socket) do
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
-    battle = Lobby.get_battle!(id)
+  def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
+    {:noreply, socket |> redirect(to: Routes.general_page_path(socket, :index))}
+  end
+
+  def handle_params(%{"id" => id}, _, %{} = socket) do
     current_user = socket.assigns[:current_user]
+
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{current_user.id}")
+    battle = Lobby.get_battle!(id)
 
     cond do
       battle == nil ->
@@ -55,9 +62,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
       (battle.locked or battle.password != nil) and not allow?(socket, "teiserver.moderator") ->
         index_redirect(socket)
-
-      # Coordinator.call_consul(battle.id, {:request_user_join_lobby, current_user.id}) != {true, nil} ->
-      #   index_redirect(socket)
 
       true ->
         {users, clients} = get_user_and_clients(battle.players)
@@ -159,6 +163,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     end
 
     {:noreply, socket}
+  end
+
+  def handle_info({:user_update, _update_type, _userid, _data}, %{assigns: %{id: id}} = socket) do
+    {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_show_path(socket, :show, id))}
   end
 
   @impl true
