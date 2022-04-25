@@ -29,7 +29,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     socket = socket
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
-      |> assign(:site_menu_active, "teiserver_match")
+      |> assign(:site_menu_active, "teiserver_lobbies")
       |> assign(:view_colour, LobbyLib.colours())
       |> assign(:battles, Lobby.list_lobbies() |> sort_lobbies)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
@@ -129,7 +129,12 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
 
   defp sort_lobbies(lobbies) do
     lobbies
-    |> Enum.sort_by(fn v -> v end, fn l1, l2 -> l1.name <= l2.name end)
+      |> Enum.sort_by(
+        fn v -> {v.locked, v.password != nil, v.name} end,
+        &<=/2
+      )
+
+      # |> Enum.sort_by(fn v -> v end, &<=/2)
   end
 
   defp apply_action(socket, :index, _params) do

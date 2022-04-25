@@ -6,15 +6,21 @@
     route: Routes.ts_general_general_path(@conn, :index),
     active: Enum.member?(~w(teiserver teiserver_account), @site_menu_active)
   %>
-<% end %>
+  
+  <%=
+    central_component "top_nav_item",
+    text: "Live lobbies",
+    route: Routes.ts_battle_lobby_index_path(@conn, :index),
+    active: @site_menu_active == "teiserver_lobbies"
+  %>
 
-<%= if allow?(@current_user, "teiserver") do %>
   <%= central_component "top_nav_item",
     text: "Matches",
     route: Routes.ts_battle_match_path(@conn, :index),
     active: @site_menu_active == "teiserver_match"
   %>
 <% end %>
+
 
 <%= if allow?(@current_user, "teiserver.moderator") do %>
   <%= central_component "top_nav_item",

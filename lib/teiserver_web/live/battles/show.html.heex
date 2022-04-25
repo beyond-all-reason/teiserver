@@ -40,7 +40,13 @@
             &nbsp;&nbsp;&nbsp;
           <% end %>
 
-          <%= live_redirect "Chat", to: Routes.ts_battle_lobby_chat_path(@socket, :chat, @battle.id), class: "btn btn-#{bsname}" %>
+          <%= live_redirect "Live chat", to: Routes.ts_battle_lobby_chat_path(@socket, :chat, @battle.id), class: "btn btn-#{bsname}" %>
+          
+          <%= if @moderator do %>
+            <a href={Routes.ts_admin_lobby_path(@socket, :chat, @battle.tags["server/match/uuid"])} class={"btn btn-#{bsname}"}>
+              Full chat
+            </a>
+          <% end %>
         </div>
 
 <h3>
