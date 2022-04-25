@@ -4,6 +4,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   """
   use GenServer
   alias Teiserver.{Account, Room, Client, User, Battle}
+  alias Teiserver.Battle.LobbyChat
   alias Phoenix.PubSub
   require Logger
 
@@ -77,9 +78,19 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   # match-chat <Teifion> g: A message to the game
   # match-chat <Teifion> d123: A direct message of some sort, in theory shouldn't appear
   def handle_info({:direct_message, from_id, "match-chat " <> data}, state) do
-    case Regex.run(~r/<(.*?)> ([asg]|d[0-9]+): (.+)$/, data) do
+    case Regex.run(~r/<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
       [_all, username, to, msg] ->
-        Logger.info("[MatchMonitorServer] match-chat match from: #{from_id}, username: #{username}, to: #{to}, msg: #{msg}")
+        host = Client.get_client_by_id(from_id)
+        user = User.get_user_by_name(username)
+
+        case to do
+          "d" ->
+            LobbyChat.persist_message(user, "g: #{msg}", host.lobby_id, :say)
+          "dallies" ->
+            LobbyChat.persist_message(user, "a: #{msg}", host.lobby_id, :say)
+          "dspectators" ->
+            LobbyChat.persist_message(user, "s: #{msg}", host.lobby_id, :say)
+        end
       _ ->
         Logger.info("[MatchMonitorServer] match-chat nomatch from: #{from_id}: match-chat #{data}")
     end
