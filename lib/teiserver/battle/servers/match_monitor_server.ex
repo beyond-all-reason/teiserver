@@ -93,14 +93,14 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             PubSub.broadcast(
               Central.PubSub,
               "teiserver_liveview_lobby_chat:#{host.lobby_id}",
-              {:liveview_lobby_chat, :say, user.id, msg}
+              {:liveview_lobby_chat, :say, user.id, "a: #{msg}"}
             )
           "dspectators" ->
             LobbyChat.persist_message(user, "s: #{msg}", host.lobby_id, :say)
             PubSub.broadcast(
               Central.PubSub,
               "teiserver_liveview_lobby_chat:#{host.lobby_id}",
-              {:liveview_lobby_chat, :say, user.id, msg}
+              {:liveview_lobby_chat, :say, user.id, "s: #{msg}"}
             )
         end
       _ ->
