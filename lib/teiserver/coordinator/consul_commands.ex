@@ -224,8 +224,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         %{state | gatekeeper: :friends}
       "friendsplay" ->
         %{state | gatekeeper: :friendsplay}
-      "clan" ->
-        %{state | gatekeeper: :clan}
       "default" ->
         %{state | gatekeeper: :default}
       _ ->

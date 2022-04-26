@@ -65,7 +65,6 @@ sets the gatekeeper for this battle
 > default: no limitations
 > friends allows only friends of existing members to join the lobby
 > friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)
-> TODO: clan: allows only members of an existing clan to join the game (enable after one member from each clan is present)
 """
 
     hosts = """
