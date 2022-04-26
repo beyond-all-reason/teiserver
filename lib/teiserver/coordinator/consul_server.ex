@@ -296,7 +296,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       Enum.count(new_user_times) >= state.ring_limit_count ->
         User.set_flood_level(userid, 100)
-        Client.disconnect(userid)
+        Client.disconnect(userid, "Ring flood")
 
       Enum.count(new_user_times) >= (state.ring_limit_count - 1) ->
         User.ring(userid, state.coordinator_id)

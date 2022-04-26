@@ -888,7 +888,7 @@ defmodule Teiserver.SpringTcpServer do
   defp engage_flood_protection(state) do
     state.protocol_out.reply(:disconnect, "Flood protection", nil, state)
     User.set_flood_level(state.userid, 10)
-    Client.disconnect(state.userid, :flood)
+    Client.disconnect(state.userid, "SpringTCPServer.flood_protection")
     Logger.error("Spring command overflow from #{state.username}/#{state.userid} with #{Enum.count(state.cmd_timestamps)} commands. Disconnected and flood protection engaged.")
     {:stop, "Flood protection", state}
   end

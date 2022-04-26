@@ -407,7 +407,7 @@ defmodule Teiserver.User do
   defp do_rename_user(userid, new_name) do
     user = get_user_by_id(userid)
     set_flood_level(user.id, 10)
-    Client.disconnect(userid)
+    Client.disconnect(userid, "Rename")
 
     # Log the current name in their history
     previous_names = Account.get_user_stat_data(userid)
