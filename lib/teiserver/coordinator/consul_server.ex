@@ -17,8 +17,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore 1v1me un1v1)
 
   @always_allow ~w(status y n follow joinq leaveq splitlobby)
-  @boss_commands ~w(gatekeeper welcome-message meme reset-approval)
-  @host_commands ~w(specunready makeready pull settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock rename)
+  @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename)
+  @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -311,7 +311,37 @@ defmodule Teiserver.Coordinator.ConsulServer do
     %{state | ring_timestamps: new_ring_timestamps}
   end
 
-  defp handle_lobby_chat(_userid, _msg, state) do
+  # Handle a command message
+  defp handle_lobby_chat(userid, "!" <> msg, state) do
+    trimmed_msg = String.trim(msg)
+      |> String.downcase()
+
+    is_boss = Enum.member?(state.host_bosses, userid)
+    is_moderator = User.is_moderator?(userid)
+
+    [cmd | args] = String.split(trimmed_msg, " ")
+
+    case {cmd, args} do
+      {"boss", _} ->
+        if Enum.member?(state.locks, :boss) do
+          if not is_boss and not is_moderator do
+            spawn(fn ->
+              :timer.sleep(200)
+              LobbyChat.say(userid, "!ev", state.lobby_id)
+            end)
+          end
+        end
+
+      _ ->
+        :ok
+    end
+
+
+    state
+  end
+
+  # Any other messages
+  defp handle_lobby_chat(_, _, state) do
     state
   end
 
@@ -359,6 +389,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
         :spectator ->
           if existing.player, do: %{acc | player: true}, else: acc
+
+        :boss ->
+          acc
       end
     end)
 
@@ -690,7 +723,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       started_at: Timex.now(),
       approved_users: [],
 
-      host_bosses: nil,
+      host_bosses: [],
       host_preset: nil,
       host_teamsize: 4,
       host_teamcount: 2,

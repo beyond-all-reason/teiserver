@@ -79,6 +79,7 @@ Multiple locks can be engaged at the same time
 > Player: Prevents spectators becoming players
 > Spectator: Prevents players becoming spectators
 > Side: Prevents players changing their side (faction)
+> Boss: Prevents unbossing except by moderators and bosses
 
 $unlock (team | player | spectator)
 Disengages the lock on that mode

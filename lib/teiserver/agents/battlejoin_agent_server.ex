@@ -77,6 +77,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   defp handle_msg(%{"cmd" => "s.lobby.closed"}, state) do
     %{state | lobby_id: nil}
   end
+  defp handle_msg(%{"cmd" => "s.lobby.received_lobby_direct_announce"}, state), do: state
   defp handle_msg(%{"cmd" => "s.communication.received_direct_message"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.add_user"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.remove_user"}, state), do: state
