@@ -44,7 +44,7 @@ or are following someone that voted yes are also moved to that lobby.
 
 
 ---- Boss only ----
-$reset_approval (boss only)
+$reset-approval
 Resets the list of approved players to just the ones present at the moment (approved players are able to join even if it is locked and without needing a password).
 
 $meme <meme>
