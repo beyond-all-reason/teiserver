@@ -522,7 +522,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     client = Client.get_client_by_id(senderid)
 
     is_host = senderid == state.host_id
-    is_boss = senderid == state.host_bosses
+    is_boss = Enum.member?(state.host_bosses, senderid)
 
     cond do
       client == nil -> false
@@ -642,10 +642,17 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # end
 
   @spec say_command(Map.t(), Map.t()) :: Map.t()
-  def say_command(%{silent: true}, state), do: state
+  def say_command(cmd = %{silent: true}, state), do: say_command(cmd, state)
   def say_command(cmd, state) do
     message = "$ " <> command_as_message(cmd)
     Lobby.say(cmd.senderid, message, state.lobby_id)
+    state
+  end
+
+  # Allows us to log the command even if it was silent
+  def log_command(cmd, state) do
+    message = "$ " <> command_as_message(cmd)
+    LobbyChat.persist_message(cmd.senderid, message, state.lobby_id, :say)
     state
   end
 

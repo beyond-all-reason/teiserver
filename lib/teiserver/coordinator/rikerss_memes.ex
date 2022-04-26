@@ -131,7 +131,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/disable_fogofwar" => "0",
 
       "game/modoptions/assistdronesenabled" => "scav_only",
-      "game/modoptions/assistdronescount" => "8",
+      "game/modoptions/assistdronescount" => "4",
 
       "game/modoptions/experimentalscavuniqueunits" => "0",
       "game/modoptions/experimentallosrange" => "1",
