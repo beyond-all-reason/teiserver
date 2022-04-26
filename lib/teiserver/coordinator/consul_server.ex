@@ -538,18 +538,21 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp fix_ids(state) do
     players = list_players(state)
 
-    team_numbers = players
-      |> Enum.map(fn %{team_number: team_number} -> team_number end)
-      |> Enum.uniq
+    # Never do this for more than 16 players
+    if Enum.count(players) <= 16 do
+      team_numbers = players
+        |> Enum.map(fn %{team_number: team_number} -> team_number end)
+        |> Enum.uniq
 
-    # If they don't match then we have non-unique ids
-    if Enum.count(team_numbers) != Enum.count(players) do
-      Logger.info("Fixing ids")
-      players
-        |> Enum.reduce(0, fn (player, acc) ->
-          Client.update(%{player | team_number: acc}, :client_updated_battlestatus)
-          acc + 1
-        end)
+      # If they don't match then we have non-unique ids
+      if Enum.count(team_numbers) != Enum.count(players) do
+        Logger.info("Fixing ids")
+        players
+          |> Enum.reduce(0, fn (player, acc) ->
+            Client.update(%{player | team_number: acc}, :client_updated_battlestatus)
+            acc + 1
+          end)
+      end
     end
   end
 
