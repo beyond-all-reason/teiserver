@@ -61,6 +61,7 @@
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
         <h5>Editing permissions: <%= @user.name %></h5>
+
         <table class="table">
           <tbody>
             <%= for {m, sections} <- @modules do %>
@@ -96,8 +97,8 @@
                 <td>
                   <select class="form-control list-builder-select" multiple="multiple" name={"permissions[#{ms_name}][]"} id={"#{ms_id}-select"}>
                     <%= for {permission, label} <- Enum.zip([permissions, labels]) do %>
-                      <% attrs = if Enum.member?(@user.permissions, permission), do: [selected: "selected"], else: [] %>
-                      <option value={permission} {attrs}><%= label %></option>
+                      <% selected = if Enum.member?(@user.permissions, permission), do: [selected: "selected"], else: [] %>
+                      <option value={permission} {selected}><%= label %></option>
                     <% end %>
                   </select>
                 </td>
