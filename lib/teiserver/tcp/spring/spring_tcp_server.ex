@@ -77,8 +77,6 @@ defmodule Teiserver.SpringTcpServer do
       |> Tuple.to_list()
       |> Enum.join(".")
 
-    Logger.info("New spring connection from #{ip}")
-
     :ranch.accept_ack(ref)
     transport.setopts(socket, [{:active, true}])
 

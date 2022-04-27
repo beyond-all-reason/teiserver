@@ -200,7 +200,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}. Use $status to check on the queue.", state.lobby_id)
         end
 
-
         Logger.info("joinq_sayprivateex result #{Kernel.inspect r} for #{Kernel.inspect {state.coordinator_id, senderid, state.lobby_id}} type 3")
 
         new_state
@@ -218,25 +217,30 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
 
   #################### Boss
-  def handle_command(%{command: "gatekeeper", remaining: mode} = cmd, state) do
+  def handle_command(%{command: "gatekeeper", remaining: mode, senderid: senderid} = cmd, state) do
     state = case mode do
       "friends" ->
+        LobbyChat.say(state.coordinator_id, "Gatekeeper mode set to friends, only friends of a player can join the lobby", state.lobby_id)
         %{state | gatekeeper: :friends}
       "friendsplay" ->
+        LobbyChat.say(state.coordinator_id, "Gatekeeper mode set to friendsplay, only friends of a player can play in the lobby (anybody can join)", state.lobby_id)
         %{state | gatekeeper: :friendsplay}
       "default" ->
+        LobbyChat.say(state.coordinator_id, "Gatekeeper reset", state.lobby_id)
         %{state | gatekeeper: :default}
       _ ->
+        LobbyChat.sayprivateex(state.coordinator_id, senderid, "No gatekeeper of that type (accepted types are: friends, friendsplay)", state.lobby_id)
         state
     end
     ConsulServer.say_command(cmd, state)
   end
 
-  def handle_command(%{command: "welcome-message", remaining: remaining}, state) do
+  def handle_command(cmd = %{command: "welcome-message", remaining: remaining}, state) do
     new_state = case String.trim(remaining) do
       "" ->
         %{state | welcome_message: nil}
       msg ->
+        ConsulServer.say_command(cmd, state)
         Lobby.sayex(state.coordinator_id, "New welcome message set to: #{msg}", state.lobby_id)
         %{state | welcome_message: msg}
     end
