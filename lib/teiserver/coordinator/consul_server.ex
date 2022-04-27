@@ -320,14 +320,22 @@ defmodule Teiserver.Coordinator.ConsulServer do
     is_boss = Enum.member?(state.host_bosses, userid)
     is_moderator = User.is_moderator?(userid)
 
+    # If it's CV then strip that out!
     [cmd | args] = String.split(trimmed_msg, " ")
+    {cmd, args} = case cmd do
+      "cv" ->
+        [cmd2 | args2] = args
+        {cmd2, args2}
+      _ ->
+        {cmd, args}
+    end
 
     case {cmd, args} do
       {"boss", _} ->
         if Enum.member?(state.locks, :boss) do
           if not is_boss and not is_moderator do
             spawn(fn ->
-              :timer.sleep(200)
+              :timer.sleep(300)
               LobbyChat.say(userid, "!ev", state.lobby_id)
             end)
           end

@@ -6,6 +6,8 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
   @meme_list ~w(ticks greenfields poor rich hardt1 crazy undo)
 
+  @crazy_multiplier_opts ~w(0.3 0.5 0.7 1 1 1 1 1 1 1 1.5 2 4)
+
   @spec handle_meme(String.t(), T.userid(), map()) :: [String.t()]
   def handle_meme("ticks", senderid, %{lobby_id: lobby_id} = _state) do
     sender = User.get_user_by_id(senderid)
@@ -83,15 +85,35 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/lootboxes_density" => Enum.random(~w(rarer normal normal normal dense verydense)),
       "game/modoptions/teamcolors_anonymous_mode" => Enum.random(~w(0 0 0 1)),
       "game/modoptions/experimentalshieldpower" => Enum.random(~w(1 1 1 2 3 4)),
-      "game/modoptions/experimentalradarrange" => Enum.random(~w(0.5 0.75 0.8 1 1 1 1 1 1.5 2)),
       "game/modoptions/disable_fogofwar" => Enum.random(~w(0 0 0 1)),
 
       "game/modoptions/assistdronesenabled" => Enum.random(~w(scav_only scav_only scav_only enabled)),
       "game/modoptions/assistdronescount" => Enum.random(~w(2 4 8 16)),
 
       "game/modoptions/experimentalscavuniqueunits" => Enum.random(~w(0 0 0 1)),
-      "game/modoptions/experimentallosrange" => Enum.random(~w(0.3 0.4 0.5 0.8 1 1 1 1 1.5)),
+
+      "game/modoptions/multiplier_maxdamage" => Enum.random(@crazy_multiplier_opts),
+      "game/modoptions/multiplier_turnrate" => Enum.random(@crazy_multiplier_opts),
+      "game/modoptions/multiplier_builddistance" => Enum.random(@crazy_multiplier_opts),
+      "game/modoptions/multiplier_weaponrange" => Enum.random(@crazy_multiplier_opts),
+      "game/modoptions/multiplier_metalcost" => Enum.random(@crazy_multiplier_opts),
+      "game/modoptions/multiplier_energycost" => Enum.random(@crazy_multiplier_opts),
+      "game/modoptions/multiplier_buildtimecost" => Enum.random(@crazy_multiplier_opts),
+      "game/modoptions/multiplier_weapondamage" => Enum.random(@crazy_multiplier_opts),
+      "game/modoptions/multiplier_buildpower" => Enum.random(@crazy_multiplier_opts),
+      "game/modoptions/multiplier_maxvelocity" => Enum.random(@crazy_multiplier_opts),
+      "game/modoptions/multiplier_losrange" => Enum.random(@crazy_multiplier_opts),
+      "game/modoptions/multiplier_radarrange" => Enum.random(@crazy_multiplier_opts),
     })
+
+    # Toggle default for some options based on others
+    # Assist dronse
+    new_tags = if new_tags["game/modoptions/assistdronesenabled"] != "enabled" do
+      Map.put(new_tags, "game/modoptions/assistdronescount", "8")
+    else
+      new_tags
+    end
+
     Lobby.set_script_tags(lobby_id, new_tags)
 
     ["#{sender.name} has enabled the crazy meme. We've rolled some dice on a bunch of stuff and hopefully it'll make for a fun game."]
@@ -127,14 +149,25 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/lootboxes_density" => "normal",
       "game/modoptions/teamcolors_anonymous_mode" => "0",
       "game/modoptions/experimentalshieldpower" => "1",
-      "game/modoptions/experimentalradarrange" => "1",
       "game/modoptions/disable_fogofwar" => "0",
 
       "game/modoptions/assistdronesenabled" => "scav_only",
       "game/modoptions/assistdronescount" => "4",
 
       "game/modoptions/experimentalscavuniqueunits" => "0",
-      "game/modoptions/experimentallosrange" => "1",
+
+      "game/modoptions/multiplier_maxdamage" => "1",
+      "game/modoptions/multiplier_turnrate" => "1",
+      "game/modoptions/multiplier_builddistance" => "1",
+      "game/modoptions/multiplier_weaponrange" => "1",
+      "game/modoptions/multiplier_metalcost" => "1",
+      "game/modoptions/multiplier_energycost" => "1",
+      "game/modoptions/multiplier_buildtimecost" => "1",
+      "game/modoptions/multiplier_weapondamage" => "1",
+      "game/modoptions/multiplier_buildpower" => "1",
+      "game/modoptions/multiplier_maxvelocity" => "1",
+      "game/modoptions/multiplier_losrange" => "1",
+      "game/modoptions/multiplier_radarrange" => "1",
     })
     Lobby.set_script_tags(lobby_id, new_tags)
   end
