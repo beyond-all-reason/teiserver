@@ -16,7 +16,8 @@ mv /apps/central /apps/central_backup
 
 echo "Stopping service"
 /apps/central/bin/central_backup stop
-sudo systemctl stop clustering.service
+# Lets see if this allows us to restart faster
+# sudo systemctl stop clustering.service
 
 echo "Remove existing binary"
 sudo rm -rf /apps/clustering
@@ -40,4 +41,4 @@ sudo chown -R deploy:deploy /apps/central
 sudo chown -R deploy:deploy /var/log/central
 
 echo "Starting service"
-sudo systemctl start clustering.service
+sudo systemctl restart clustering.service
