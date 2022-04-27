@@ -33,6 +33,12 @@
 
         <div class="float-end">
           <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, @battle.id), class: "btn btn-#{bsname}" %>
+
+          <%= if @moderator do %>
+            <a href={Routes.ts_admin_lobby_path(@socket, :chat, @battle.tags["server/match/uuid"])} class={"btn btn-#{bsname}"}>
+              Full chat
+            </a>
+          <% end %>
         </div>
 
         Text will automatically update as people post.

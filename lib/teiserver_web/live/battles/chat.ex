@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{User, Chat, Coordinator, Client}
+  alias Teiserver.{User, Chat, Client}
   alias Teiserver.Battle.{Lobby, LobbyLib}
   alias Teiserver.Chat.LobbyMessage
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -48,9 +48,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     cond do
       battle == nil ->
         index_redirect(socket)
-
-      # Coordinator.call_consul(battle.id, {:request_user_join_lobby, current_user.id}) != {true, nil} ->
-      #   index_redirect(socket)
 
       (battle.locked or battle.password != nil) and not allow?(socket, "teiserver.moderator") ->
         index_redirect(socket)
