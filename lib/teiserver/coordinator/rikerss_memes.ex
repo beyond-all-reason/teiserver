@@ -144,7 +144,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     cortex_aa = ~w(corerad corflak cormadsam corrl corscreamer corenaa)
     scav = ~w(armannit3 cordoomt3 armbotrail armminivulc corhllllt corminibuzz corscavdrag corscavdtf corscavdtl corscavdtm)
     
-    Lobby.disable_units(lobby_id, arnada_defences + Scav.get_scav_names(armada_defences) + armada_aa + Scav.get_scav_names(armada_aa) + cortex_defences + Scav.get_scav_names(cortex_defences) + cortex_aa + Scav.get_scav_names(cortex_aa) + scav)
+    Lobby.disable_units(lobby_id, armada_defences + Scav.get_scav_names(armada_defences) + armada_aa + Scav.get_scav_names(armada_aa) + cortex_defences + Scav.get_scav_names(cortex_defences) + cortex_aa + Scav.get_scav_names(cortex_aa) + scav)
 
     ["#{sender.name} has enabled the Defenceless meme. All defences are disabled except LLT."]
   end
