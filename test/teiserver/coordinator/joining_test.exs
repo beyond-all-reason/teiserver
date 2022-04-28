@@ -42,7 +42,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
     {:ok, socket: socket, user: user, lobby_id: lobby_id, listener: listener}
   end
 
-  test "welcome message", %{socket: socket, lobby_id: lobby_id, listener: listener} do
+  test "welcome message", %{socket: socket, user: user, lobby_id: lobby_id, listener: listener} do
     consul_state = Coordinator.call_consul(lobby_id, :get_all)
     assert consul_state.welcome_message == nil
 
@@ -50,7 +50,10 @@ defmodule Teiserver.Coordinator.JoiningTest do
     _tachyon_send(socket, data)
 
     messages = PubsubListener.get(listener)
-    assert messages == [{:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "New welcome message set to: This is the welcome message", lobby_id}, :sayex}]
+    assert messages == [
+      {:battle_updated, lobby_id, {Coordinator.get_coordinator_userid(), "New welcome message set to: This is the welcome message", lobby_id}, :sayex},
+      {:battle_updated, lobby_id, {user.id, "$welcome-message This is the welcome message", lobby_id}, :say}
+    ]
 
     consul_state = Coordinator.call_consul(lobby_id, :get_all)
     assert consul_state.welcome_message == "This is the welcome message"
