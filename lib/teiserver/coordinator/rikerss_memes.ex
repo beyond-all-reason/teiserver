@@ -120,6 +120,35 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
   end
 
+  def handle_meme("defenceless", senderid, %{lobby_id: lobby_id} = _state) do
+  
+    defmodule Scav do
+        def get_scav_names([head | tail]) do
+            get_scav_names(tail, [head <> "_scav"])
+        end
+        
+        def get_scav_names([head | tail], [result_head | _ ]) do
+            get_scav_names(tail, [result_head <> " " <> head <> "_scav"])
+        end
+        
+        def get_scav_names([], [result_head | _ ]) do
+            result_head
+        end
+    end
+  
+    sender = User.get_user_by_id(senderid)
+
+    armada_defences = ~w(armamb armamd armanni armbeamer armbrtha armclaw armemp armguard armhlt armjuno armmg armpb armsilo armvulc armatl armdl armfhlt armfrt armgplat armkraken armptl armtl)
+    armada_aa = ~w(armferret armflak armmercury armrl armfflak armfrock)
+    cortex_defences =  ~w(corbhmth corbuzz cordoom corexp corfmd corhllt corhlt corjuno cormaw cormexp corpun corsilo cortoast cortron corvipe coratl cordl corfdoom corfhlt corfrock corfrt corgplat corptl cortl)
+    cortex_aa = ~w(corerad corflak cormadsam corrl corscreamer corenaa)
+    scav = ~w(armannit3 cordoomt3 armbotrail armminivulc corhllllt corminibuzz corscavdrag corscavdtf corscavdtl corscavdtm)
+    
+    Lobby.disable_units(lobby_id, arnada_defences + Scav.get_scav_names(armada_defences) + armada_aa + Scav.get_scav_names(armada_aa) + cortex_defences + Scav.get_scav_names(cortex_defences) + cortex_aa + Scav.get_scav_names(cortex_aa) + scav)
+
+    ["#{sender.name} has enabled the Defenceless meme. All defences are disabled except LLT."]
+  end
+
   def handle_meme("undo", _senderid, %{lobby_id: lobby_id} = _state) do
     undo_memes(lobby_id)
 
