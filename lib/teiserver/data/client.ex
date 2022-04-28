@@ -57,7 +57,8 @@ defmodule Teiserver.Client do
         awaiting_warn_ack: false,
         warned: false,
         muted: false,
-        restricted: false
+        restricted: false,
+        lobby_host: false
       },
       client
     )
@@ -163,15 +164,18 @@ defmodule Teiserver.Client do
   end
   def update(client, _reason), do: client
 
-  @spec join_battle(T.client_id(), Integer.t(), Integer.t()) :: nil | Map.t()
-  def join_battle(userid, lobby_id, colour \\ 0) do
+  @spec join_battle(T.client_id(), Integer.t(), boolean()) :: nil | Map.t()
+  def join_battle(userid, lobby_id, lobby_host) do
     case get_client_by_id(userid) do
       nil ->
         nil
 
       client ->
         new_client = reset_battlestatus(client)
-        new_client = %{new_client | team_colour: colour, lobby_id: lobby_id}
+        new_client = %{new_client |
+          lobby_id: lobby_id,
+          lobby_host: lobby_host
+        }
         Central.cache_put(:clients, new_client.userid, new_client)
         new_client
     end

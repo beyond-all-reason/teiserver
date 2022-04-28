@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Live.BattleTest do
 
   alias Central.Helpers.GeneralTestLib
   alias Teiserver.TeiserverTestLib
-  import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1]
+  import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1, _tachyon_send: 2]
   alias Teiserver.Battle.Lobby
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -150,6 +150,76 @@ defmodule TeiserverWeb.Live.BattleTest do
 
     test "show - no battle", %{conn: conn} do
       assert {:error, {:redirect, %{to: "/teiserver/battle/lobbies"}}} = live(conn, "/teiserver/battle/lobbies/show/0")
+    end
+
+    test "chat - valid battle", %{conn: conn} do
+      # Lets create a battle
+      %{socket: host_socket, user: _host_user} = TeiserverTestLib.auth_setup()
+      _send_raw(
+        host_socket,
+        "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tSpeed metal\tLiveBattleShow\tgameName\n"
+      )
+
+      reply =
+        _recv_until(host_socket)
+        |> String.split("\n")
+
+      [
+        _opened,
+        _open,
+        join,
+        _tags,
+        _battle_status,
+        _battle_opened
+        | _
+      ] = reply
+
+      lobby_id =
+        join
+        |> String.replace("JOINBATTLE ", "")
+        |> String.replace(" gameHash", "")
+        |> int_parse
+
+      {:ok, view, html} = live(conn, "/teiserver/battle/lobbies/chat/#{lobby_id}")
+
+      %{user: user1, socket: socket1} = TeiserverTestLib.tachyon_auth_setup()
+      %{user: user2, socket: socket2} = TeiserverTestLib.tachyon_auth_setup()
+      %{user: user3, socket: socket3} = TeiserverTestLib.tachyon_auth_setup()
+
+      Lobby.force_add_user_to_battle(user1.id, lobby_id)
+      Lobby.force_add_user_to_battle(user2.id, lobby_id)
+      Lobby.force_add_user_to_battle(user3.id, lobby_id)
+      :timer.sleep(@throttle_wait)
+
+      html = render(view)
+      assert html =~ "#{user1.name}"
+      assert html =~ "#{user2.name}"
+      assert html =~ "#{user3.name}"
+      refute html =~ "Standard message"
+
+      _recv_until(socket1)
+
+      data = %{cmd: "c.lobby.message", message: "Standard messages"}
+      _tachyon_send(socket1, data)
+
+      # reply =
+      #   _recv_until(socket1)
+      #   |> String.split("\n")
+
+      :timer.sleep(@throttle_wait)
+
+      html = render(view)
+      assert html =~ "Standard message"
+
+      # Battle closes
+      Lobby.close_battle(lobby_id)
+      :timer.sleep(@throttle_wait)
+
+      assert_redirect(view, "/teiserver/battle/lobbies", 250)
+    end
+
+    test "chat - no battle", %{conn: conn} do
+      assert {:error, {:redirect, %{to: "/teiserver/battle/lobbies"}}} = live(conn, "/teiserver/battle/lobbies/chat/0")
     end
   end
 end

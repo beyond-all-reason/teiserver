@@ -258,7 +258,7 @@ defmodule Teiserver.Battle.Lobby do
           battle_state
         else
           Coordinator.cast_consul(lobby_id, {:user_joined, userid})
-          Client.join_battle(userid, lobby_id)
+          Client.join_battle(userid, lobby_id, false)
 
           PubSub.broadcast(
             Central.PubSub,
