@@ -91,6 +91,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   defp handle_msg(%{"cmd" => "s.lobby.add_user"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.remove_user"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.kick_user"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.updated"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.updated_client_battlestatus"}, state), do: state
 
   defp open_battle(state) do

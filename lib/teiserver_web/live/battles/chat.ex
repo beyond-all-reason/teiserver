@@ -178,6 +178,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     {:noreply, socket}
   end
 
+  def handle_info({:battle_lobby_throttle, :closed}, socket) do
+    index_redirect(socket)
+  end
+
   def handle_info({:liveview_lobby_update, :consul_server_updated, _, _}, socket) do
     socket = socket
 

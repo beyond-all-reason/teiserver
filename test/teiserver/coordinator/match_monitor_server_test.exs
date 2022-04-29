@@ -86,7 +86,7 @@ defmodule Teiserver.Coordinator.MatchMonitorServerTest do
     messages2 = Chat.list_lobby_messages(search: [user_id: player.id])
 
     assert Enum.empty?(messages1)
-    assert Enum.count(messages2) == 2
+    assert Enum.count(messages2) == 1
 
     _tachyon_send(hsocket, %{
       "cmd" => "c.communication.send_direct_message",
@@ -99,15 +99,15 @@ defmodule Teiserver.Coordinator.MatchMonitorServerTest do
     messages2 = Chat.list_lobby_messages(search: [user_id: player.id])
 
     assert Enum.empty?(messages1)
-    assert Enum.count(messages2) == 3
+    assert Enum.count(messages2) == 2
 
-    [allied, game, spectator] = messages2
+    [allied, spectator] = messages2
     assert match?(%{
       content: "a: Allied chat message"
     }, allied)
-    assert match?(%{
-      content: "g: Game chat message"
-    }, game)
+    # assert match?(%{
+    #   content: "g: Game chat message"
+    # }, game)
     assert match?(%{
       content: "s: Spec chat message"
     }, spectator)
