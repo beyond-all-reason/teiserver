@@ -24,6 +24,16 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     assert reply == :timeout
   end
 
+  test "help", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
+    message_coordinator(socket, "$help")
+    [reply] = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+
+    [reply] = _tachyon_recv(socket)
+    message = reply["message"]
+    assert Enum.member?(message, "$whoami")
+  end
+
   test "whoami", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
     message_coordinator(socket, "$whoami")
     [reply] = _tachyon_recv(socket)
