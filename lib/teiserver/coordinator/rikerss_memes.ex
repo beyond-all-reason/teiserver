@@ -120,33 +120,23 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
   end
 
-  def handle_meme("defenceless", senderid, %{lobby_id: lobby_id} = _state) do
-  
-    defmodule Scav do
-        def get_scav_names([head | tail]) do
-            get_scav_names(tail, [head <> "_scav"])
-        end
-        
-        def get_scav_names([head | tail], [result_head | _ ]) do
-            get_scav_names(tail, [result_head <> " " <> head <> "_scav"])
-        end
-        
-        def get_scav_names([], [result_head | _ ]) do
-            result_head
-        end
-    end
-  
+  def handle_meme("nodefense", senderid, %{lobby_id: lobby_id} = _state) do
     sender = User.get_user_by_id(senderid)
 
     armada_defences = ~w(armamb armamd armanni armbeamer armbrtha armclaw armemp armguard armhlt armjuno armmg armpb armsilo armvulc armatl armdl armfhlt armfrt armgplat armkraken armptl armtl)
-    armada_aa = ~w(armferret armflak armmercury armrl armfflak armfrock)
-    cortex_defences =  ~w(corbhmth corbuzz cordoom corexp corfmd corhllt corhlt corjuno cormaw cormexp corpun corsilo cortoast cortron corvipe coratl cordl corfdoom corfhlt corfrock corfrt corgplat corptl cortl)
+    armada_aa = ~w(armferret armflak armmercury armrl armfflak armfrock armcir)
+    cortex_defences =  ~w(corbhmth corbuzz cordoom corexp corfmd corhllt corhlt corjuno cormaw cormexp corpun corsilo cortoast cortron corvipe coratl cordl corfdoom corfhlt corfrock corfrt corgplat corptl cortl corint)
     cortex_aa = ~w(corerad corflak cormadsam corrl corscreamer corenaa)
-    scav = ~w(armannit3 cordoomt3 armbotrail armminivulc corhllllt corminibuzz corscavdrag corscavdtf corscavdtl corscavdtm)
-    
-    Lobby.disable_units(lobby_id, armada_defences + Scav.get_scav_names(armada_defences) + armada_aa + Scav.get_scav_names(armada_aa) + cortex_defences + Scav.get_scav_names(cortex_defences) + cortex_aa + Scav.get_scav_names(cortex_aa) + scav)
+    scavt3 = ~w(armannit3 cordoomt3 armbotrail armminivulc corhllllt corminibuzz corscavdrag corscavdtf corscavdtl corscavdtm)
 
-    ["#{sender.name} has enabled the Defenceless meme. All defences are disabled except LLT."]
+    unit_list = armada_defences ++ armada_aa ++ cortex_defences ++ cortex_aa ++ scavt3
+
+    scav_units = unit_list
+      |> Enum.map(fn unit -> "#{unit}_scav" end)
+
+    Lobby.disable_units(lobby_id, unit_list ++ scav_units)
+
+    ["#{sender.name} has enabled the No defense meme. In this game you will not be able to create any defenses; good luck!"]
   end
 
   def handle_meme("undo", _senderid, %{lobby_id: lobby_id} = _state) do
