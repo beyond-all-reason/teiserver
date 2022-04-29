@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   alias Teiserver.Battle.{Lobby, LobbyChat}
   alias Teiserver.Data.Types, as: T
 
-  @meme_list ~w(ticks greenfields poor rich hardt1 crazy undo)
+  @meme_list ~w(ticks nodefense greenfields poor rich hardt1 crazy undo)
 
   @crazy_multiplier_opts ~w(0.3 0.5 0.7 1 1 1 1 1 1 1 1.5 2 4)
 

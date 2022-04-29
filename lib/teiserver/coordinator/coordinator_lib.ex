@@ -50,6 +50,7 @@ Resets the list of approved players to just the ones present at the moment (appr
 $meme <meme>
 A predefined bunch of settings for meme games. It's all Rikerss' fault.
 - ticks: Ticks only, don't go Cortex!
+- nodefense: No defences
 - greenfields: No metal extractors
 - rich: infinite money
 - poor: No money generation
