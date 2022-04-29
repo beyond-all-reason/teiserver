@@ -84,6 +84,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   defp handle_msg(%{"cmd" => "s.lobby.kick_user"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.announce"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.say"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.updated"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.updated_client_battlestatus"}, state), do: state
 
   defp update_battlestatus(state) do
