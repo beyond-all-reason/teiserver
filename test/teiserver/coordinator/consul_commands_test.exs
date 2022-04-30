@@ -450,7 +450,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert Client.get_client_by_id(player5.id).player == false
     _tachyon_send(ps1.socket, %{cmd: "c.lobby.update_status", player: false})
 
-    :timer.sleep(50)
+    :timer.sleep(100)
 
     assert Client.get_client_by_id(player5.id).player == true
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})

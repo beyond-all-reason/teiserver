@@ -790,7 +790,7 @@ defmodule Teiserver.Protocols.SpringIn do
         reply(:request_battle_status, nil, msg_id, state)
 
         # Update the client
-        Client.join_battle(state.userid, battle.id, host: true)
+        Client.join_battle(state.userid, battle.id, true)
 
         # Update local state to point to this battle and say
         # we are the host

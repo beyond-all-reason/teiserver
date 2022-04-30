@@ -56,7 +56,7 @@ defmodule Teiserver.Coordinator.MemesTest do
     [reply] = _tachyon_recv(hsocket)
     assert reply == %{
       "cmd" => "s.lobby.received_lobby_direct_announce",
-      "message" => "That's not a valid meme. The memes are ticks, greenfields, poor, rich, hardt1, crazy, undo",
+      "message" => "That's not a valid meme. The memes are ticks, nodefence, greenfields, poor, rich, hardt1, crazy, undo",
       "sender_id" => Coordinator.get_coordinator_userid()
     }
   end

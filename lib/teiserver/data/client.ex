@@ -77,6 +77,7 @@ defmodule Teiserver.Client do
     }
   end
 
+  @spec login(T.user(), pid(), String.t() | nil) :: T.client()
   def login(user, pid, ip \\ nil) do
     stats = Account.get_user_stat_data(user.id)
 
@@ -157,6 +158,14 @@ defmodule Teiserver.Client do
           "teiserver_lobby_updates:#{client.lobby_id}",
           {:lobby_update, :updated_client_battlestatus, client.lobby_id, {client, reason}}
         )
+
+        if client.lobby_host do
+          case Lobby.get_lobby(client.lobby_id) do
+            nil -> :ok
+            lobby ->
+              Lobby.update_lobby(%{lobby | in_progress: client.in_game}, nil, :host_updated_clientstatus)
+          end
+        end
       end
     end
 
