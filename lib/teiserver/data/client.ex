@@ -58,7 +58,8 @@ defmodule Teiserver.Client do
         warned: false,
         muted: false,
         restricted: false,
-        lobby_host: false
+        lobby_host: false,
+        party_id: nil
       },
       client
     )
