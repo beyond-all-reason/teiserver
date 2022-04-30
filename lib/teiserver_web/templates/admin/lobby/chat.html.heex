@@ -27,7 +27,7 @@
             <tr>
               <th>Poster</th>
               <th>Message</th>
-              <th>When</th>
+              <th class="d-none d-lg-block">When</th>
           </tr>
           </thead>
           <tbody>
@@ -39,7 +39,7 @@
                   </a>
                 </td>
                 <td><%= msg.content %></td>
-                <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
+                <td class="d-none d-lg-block"><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
               </tr>
             <% end %>
           </tbody>

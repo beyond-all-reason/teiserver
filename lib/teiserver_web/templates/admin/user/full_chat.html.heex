@@ -35,7 +35,7 @@ Newest chat at the top of the list (read bottom to top).
         <tr>
           <th>Room</th>
           <th>Message</th>
-          <th>When</th>
+          <th class="d-none d-lg-block">When</th>
        </tr>
       </thead>
       <tbody>
@@ -43,7 +43,7 @@ Newest chat at the top of the list (read bottom to top).
           <tr>
             <td><%= msg.chat_room %></td>
             <td><%= msg.content %></td>
-            <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
+            <td class="d-none d-lg-block"><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
           </tr>
         <% end %>
       </tbody>
@@ -56,7 +56,7 @@ Newest chat at the top of the list (read bottom to top).
         <tr>
           <th>Lobby</th>
           <th>Message</th>
-          <th>When</th>
+          <th class="d-none d-lg-block">When</th>
        </tr>
       </thead>
       <tbody>
@@ -68,7 +68,7 @@ Newest chat at the top of the list (read bottom to top).
               </a>
             </td>
             <td><%= msg.content %></td>
-            <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
+            <td class="d-none d-lg-block"><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
           </tr>
         <% end %>
       </tbody>
