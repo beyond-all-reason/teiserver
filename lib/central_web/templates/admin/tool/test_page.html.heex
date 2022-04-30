@@ -55,21 +55,6 @@
 
     $("#icon-output").html(output);
   }
-
-  function do_view_colour() {
-    var colour_list = $("#colours-area").val().split("\n");
-    var output = "";
-
-    for (var i = 0; i < colour_list.length; i++) {
-      var colour = colour_list[i];
-
-      output += "<div style='width: 600px; height: 30px; display: inline-block; background-color: " + colour + ";'>&nbsp;</div><br />";
-
-      output += "<br />";
-    }
-
-    $("#colour-output").html(output);
-  }
 </script>
 
 <%
@@ -162,15 +147,14 @@
   <div class="tab-pane fade p-2" id="colours_tab">
     <div class="row">
       <div class="col-md-6">
-        One colour per row
-        <textarea name="colours" id="colours-area" rows="8" class="form-control" onkeyup="do_view_colour();"></textarea>
-        <br />
-        <div class="btn btn-primary">Update</div>
+        <h4>text-xxx</h4>
+        <%= for c <- colours do %>
+          <div class={"text-#{c}"}><%= c |> String.capitalize %> lorem ipsum text goes here</div>
+          &nbsp;&nbsp;
+        <% end %>
       </div>
       <div class="col-md-6">
-        <div id="colour-output">
-
-        </div>
+        
       </div>
     </div>
   </div>
