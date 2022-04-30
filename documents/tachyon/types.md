@@ -1,57 +1,6 @@
 ## Types
 Tachyon defines types for all objects wherever possible. Users of the spec are expected to adhere to these types when using it.
 
-## Query
-A set of parameters used to filter, sort or limit information from a larger dataset. Typically used when requesting lists of items from the server. The dataset being queried and any additional limits to the query are dictated by the command the query is connected to.
-
-* select :: string
-* where :: list(Conditionals)
-
-#### Examples
-```json
-{
-  "select": [
-    "name",
-    "players",
-    "settings"
-  ],
-  "where": [
-    {"field": "locked"},
-    {"field": "started", "value": false},
-    {"field": "max_players", "operator": "<=", "value": 8}
-  ]
-}
-```
-
-## Conditional
-* field :: string
-* operator :: string, default: "="
-* value :: any type, default: true
-
-#### Examples
-```json
-{
-  "field": "open"
-}
-
-{
-  "field": "score",
-  "operator": ">",
-  "value": 5
-}
-
-{
-  "field": "id",
-  "operator": "in",
-  "value": [1,2,3,4]
-}
-
-{
-  "field": "players",
-  "operator": "contains",
-  "value": 3
-}
-```
 
 ## User
 * id :: integer
@@ -118,12 +67,11 @@ This represents a user who is logged in. A user who is logged out will not have 
 * bonus: integer, default: 0 -- In spring this is 0-127, here it's an unsigned integer
 * synced: boolean
 * faction: string
-* lobby_id: Lobby.id -- TODO: Replace with lobby_id
+* lobby_id: Lobby.id
 
 #### Examples
 ```json
 {
-  {
   "id": 1967,
   "in_game": true,
   "away": false,
@@ -208,6 +156,23 @@ A queue used in matchmaking
 }
 ```
 
+## Party
+1 or more players grouped together for the purpose of play and communication.
+* id :: String/UUID
+* leader :: User.id
+* members :: list(User.id)
+* invites :: list(User.id) -- A list of users currently being invited to the party
+
+#### Examples
+```json
+{
+  "id": "3cd51300-c8ce-11ec-9db7-f02f74dbae33",
+  "leader": 123,
+  "members": [123, 456, 789],
+  "invites": [222, 444]
+}
+```
+
 ## BlogPost
 An item posted to the site blog
 
@@ -242,3 +207,55 @@ Returned when an unexpected error is generated. The difference between an error 
   "location": "decode"
 }
 ```
+
+<!-- ## Query
+A set of parameters used to filter, sort or limit information from a larger dataset. Typically used when requesting lists of items from the server. The dataset being queried and any additional limits to the query are dictated by the command the query is connected to.
+
+* select :: string
+* where :: list(Conditionals)
+
+#### Examples
+```json
+{
+  "select": [
+    "name",
+    "players",
+    "settings"
+  ],
+  "where": [
+    {"field": "locked"},
+    {"field": "started", "value": false},
+    {"field": "max_players", "operator": "<=", "value": 8}
+  ]
+}
+```
+
+## Conditional
+* field :: string
+* operator :: string, default: "="
+* value :: any type, default: true
+
+#### Examples
+```json
+{
+  "field": "open"
+}
+
+{
+  "field": "score",
+  "operator": ">",
+  "value": 5
+}
+
+{
+  "field": "id",
+  "operator": "in",
+  "value": [1,2,3,4]
+}
+
+{
+  "field": "players",
+  "operator": "contains",
+  "value": 3
+}
+``` -->
