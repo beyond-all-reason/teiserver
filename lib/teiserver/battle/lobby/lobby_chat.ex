@@ -8,6 +8,7 @@ defmodule Teiserver.Battle.LobbyChat do
   def say(userid, "!start" <> s, lobby_id), do: say(userid, "!cv start" <> s, lobby_id)
   def say(userid, "!joinas spec", lobby_id), do: say(userid, "!!joinas spec", lobby_id)
   def say(userid, "!joinas" <> s, lobby_id), do: say(userid, "!cv joinas" <> s, lobby_id)
+  def say(userid, "!joinq", lobby_id), do: say(userid, "$joinq", lobby_id)
 
   def say(userid, msg, lobby_id) do
     msg = String.replace(msg, "!!joinas spec", "!joinas spec")
