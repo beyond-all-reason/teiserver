@@ -193,6 +193,9 @@ defmodule Central.General.Startup do
     #   default: "aaa"
     # })
 
+    Central.store_put(:application_metadata_cache, "random_names_1", ~w(serene energised humble auspicious decisive exemplary cheerful determined playful spry springy))
+    Central.store_put(:application_metadata_cache, "random_names_2", ~w(maroon magenta lemon aqua cerulean amber beige lavender indigo))
+    Central.store_put(:application_metadata_cache, "random_names_3", ~w(hamster gerbil cat dog falcon eagle mole fox tiger panda elephant lion cow dove whale dolphin squid dragon snake platypus badger))
 
     add_permission_set("admin", "debug", ~w(debug))
     add_permission_set("admin", "dev", ~w(developer structure))

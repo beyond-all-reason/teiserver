@@ -132,9 +132,9 @@ defmodule Central.Helpers.StylingHelper do
 
   @random_icons ~w(
       club diamond heart spade
-      bat cat crow deer dog dove duck fish horse pig rabbit unicorn
-      car truck plane paper-plane rocket ship truck-monster
-      beer flask glass-martini wine-bottle paw-claws
+      bat cat crow deer dog dolphin dove duck elephant fish horse kiwi-bird otter pig rabbit sheep squirrel turtle unicorn
+      car truck plane paper-plane rocket ship space-shuttle truck-monster
+      beer bowl-hot flask martini-glass wine-bottle paw-claws
       bed suitcase star badge shovel handshake shopping-cart camera cube hammer-war lightbulb
       utensil-fork utensil-knife utensil-spoon
       chess-pawn chess-bishop chess-knight chess-rook chess-king chess-queen

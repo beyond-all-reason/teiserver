@@ -192,6 +192,21 @@ defmodule Central.Account do
     |> broadcast_create_user
   end
 
+  def create_throwaway_user(attrs \\ %{}) do
+    params = %{
+        "name" => generate_throwaway_name(),
+        "email" => "#{UUID.uuid1()}@throwaway",
+        "password" => UUID.uuid1(),
+      }
+      |> Central.Helpers.StylingHelper.random_styling()
+      |> Map.merge(attrs)
+
+    %User{}
+      |> User.changeset(params)
+      |> Repo.insert()
+      |> broadcast_create_user
+  end
+
   def merge_default_params(user_params) do
     Map.merge(
       %{
@@ -1024,5 +1039,22 @@ defmodule Central.Account do
   """
   def change_report(%Report{} = report) do
     Report.changeset(report, %{})
+  end
+
+  @doc """
+  Uses :application_metadata_cache store to generate a random username
+  based on the keys random_names_1, random_names_2 and random_names_3
+  if you override these keys with an empty list you can generate shorter names
+  """
+  @spec generate_throwaway_name() :: String.t()
+  def generate_throwaway_name do
+    [
+      Central.store_get(:application_metadata_cache, "random_names_1"),
+      Central.store_get(:application_metadata_cache, "random_names_2"),
+      Central.store_get(:application_metadata_cache, "random_names_3")
+    ]
+    |> Enum.filter(fn l -> l != [] end)
+    |> Enum.map(fn l -> Enum.random(l) |> String.capitalize() end)
+    |> Enum.join(" ")
   end
 end
