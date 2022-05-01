@@ -34,11 +34,9 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
         if :rand.uniform() <= @leave_chance do
           leave_battle(state)
         else
-          if :rand.uniform() <= 0.5 do
-            update_battlestatus(state)
-          else
-            chat_message(state)
-          end
+          state = if :rand.uniform() <= 0.7, do: update_battlestatus(state), else: state
+          state = if :rand.uniform() <= 0.5, do: chat_message(state), else: state
+          state
         end
     end
 
@@ -88,13 +86,13 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   defp handle_msg(%{"cmd" => "s.lobby.updated_client_battlestatus"}, state), do: state
 
   defp update_battlestatus(state) do
-    data = if Enum.random([true, false]) do
+    data = if :rand.uniform() <= 0.7 do
       %{
         player: true,
         ready: Enum.random([true, false]),
         sync: 1,
         team_number: Enum.random(0..15),
-        ally_team_number: Enum.random([0, 1]),
+        ally_team_number: Enum.random([0, 1, 2, 3]),
         side: Enum.random([0, 1, 2]),
         team_colour: Enum.random(0..9322660)
       }
@@ -124,6 +122,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
         AgentLib._send(state.socket, cmd)
 
         AgentLib.post_agent_update(state.id, "opened battle")
+        send(self(), :tick)
         %{state | lobby_id: lobby_id, stage: :waiting}
     end
   end

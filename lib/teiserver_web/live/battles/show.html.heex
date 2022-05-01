@@ -49,13 +49,13 @@
           <% end %>
         </div>
 
-<h3>
-  <%= @battle.name %>
-  &nbsp;&nbsp;&nbsp;
-  <%= @battle.map_name %>
-  &nbsp;&nbsp;&nbsp;
-  <%= @battle.founder_name %>
-</h3>
+<% extra = "#{@battle.name} - #{@battle.map_name}" %>
+<%= if @battle.in_progress do %>
+  <h4>Match in progress - <%= extra %></h4>
+<% else %>
+  <h4>Pre-game lobby - <%= extra %></h4>
+<% end %>
+
 
 <ul>
   <li>Max players: <%= @battle.max_players %></li>

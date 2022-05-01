@@ -1,15 +1,17 @@
 <div class={"card page-card"}>
   <div class="card-body">
-    <strong>Players</strong>
-    <ul>
-      <%= for p <- @players do %>
-        <li><%= p.name %></li>
-      <% end %>
-    </ul>
+    <%= for {team, players} <- @teams do %>
+      <strong class="px-2">Team <%= team + 1 %></strong>
+      <ul class="list-unstyled">
+        <%= for p <- players do %>
+          <li><%= p.name %></li>
+        <% end %>
+      </ul>
+    <% end %>
     <br />
 
-    <strong>Spectators</strong>
-    <ul>
+    <strong class="px-2">Spectators</strong>
+    <ul class="list-unstyled">
       <%= for p <- @spectators do %>
         <li><%= p.name %></li>
       <% end %>

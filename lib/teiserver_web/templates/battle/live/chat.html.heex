@@ -36,16 +36,22 @@
       <div class="card-body">
 
         <div class="float-end">
-          <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, @battle.id), class: "btn btn-#{bsname}" %>
+          <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, @lobby.id), class: "btn btn-#{bsname}" %>
 
           <%= if moderator do %>
-            <a href={Routes.ts_admin_lobby_path(@socket, :chat, @battle.tags["server/match/uuid"])} class={"btn btn-#{bsname}"}>
+            <a href={Routes.ts_admin_lobby_path(@socket, :chat, @lobby.tags["server/match/uuid"])} class={"btn btn-#{bsname}"}>
               Full chat
             </a>
           <% end %>
         </div>
+        
+        <% extra = "#{@lobby.name} - #{@lobby.map_name}" %>
 
-        Text will automatically update as people post.
+        <%= if @lobby.in_progress do %>
+          <h4>Match in progress - <%= extra %></h4>
+        <% else %>
+          <h4>Pre-game lobby - <%= extra %></h4>
+        <% end %>
 
         <div id="chat" class="mt-4">
           <% messages = @messages |> Enum.reverse %>
@@ -106,7 +112,7 @@
       </div>
     </div>
   </div>
-  
+
   <div class="col-md-2">
     <.live_component
       id="player_list"

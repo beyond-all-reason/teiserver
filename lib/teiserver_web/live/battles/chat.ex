@@ -38,7 +38,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
   def handle_params(%{"id" => id}, _, socket) do
     current_user = socket.assigns[:current_user]
-    battle = Lobby.get_battle!(id)
+    lobby = Lobby.get_lobby(id)
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
@@ -46,10 +46,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{current_user.id}")
 
     cond do
-      battle == nil ->
+      lobby == nil ->
         index_redirect(socket)
 
-      (battle.locked or battle.password != nil) and not allow?(socket, "teiserver.moderator") ->
+      (lobby.locked or lobby.password != nil) and not allow?(socket, "teiserver.moderator") ->
         index_redirect(socket)
 
       true ->
@@ -62,7 +62,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
         messages = Chat.list_lobby_messages(
           search: [
-            lobby_guid: battle.tags["server/match/uuid"]
+            lobby_guid: lobby.tags["server/match/uuid"]
           ],
           limit: @message_count*2,
           order_by: "Newest first"
@@ -79,10 +79,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
           |> assign(:allowed_to_send, allowed_to_send)
           |> assign(:message_changeset, new_message_changeset())
           |> assign(:bar_user, bar_user)
-          |> assign(:page_title, "Show battle - Chat")
-          |> add_breadcrumb(name: battle.name, url: "/teiserver/battles/lobbies/#{battle.id}")
+          |> assign(:page_title, "Show lobby - Chat")
+          |> add_breadcrumb(name: lobby.name, url: "/teiserver/battles/lobbies/#{lobby.id}")
           |> assign(:id, int_parse(id))
-          |> assign(:battle, battle)
+          |> assign(:lobby, lobby)
           |> assign(:messages, messages)
           |> assign(:user_map, %{})
           |> assign(:clients, clients)
@@ -157,10 +157,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   end
 
   def handle_info({:battle_lobby_throttle, _lobby_changes, player_changes}, %{assigns: assigns} = socket) do
-    battle = Lobby.get_battle(assigns.id)
+    lobby = Lobby.get_lobby(assigns.id)
 
     socket = socket
-      |> assign(:battle, battle)
+      |> assign(:lobby, lobby)
 
     # Players
     # TODO: This can likely be optimised somewhat

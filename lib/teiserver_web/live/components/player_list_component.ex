@@ -24,17 +24,23 @@ defmodule TeiserverWeb.Components.PlayerListComponent do
   def update(assigns, socket) do
     clients = assigns[:clients]
       |> Map.values
+      |> Enum.group_by(fn v -> v.player end)
 
-    players = clients
-      |> Enum.filter(fn c -> c.player end)
-      |> Enum.sort_by(fn c -> c.name end, &<=/2)
+    teams = clients
+      |> Map.get(:true, [])
+      |> Enum.group_by(fn v -> v.ally_team_number end)
+      |> Enum.map(fn {team, players} ->
+        {team, players
+          |> Enum.sort_by(fn c -> c.name end, &<=/2)
+        }
+      end)
 
     spectators = clients
-      |> Enum.filter(fn c -> not c.player end)
+      |> Map.get(:false, [])
       |> Enum.sort_by(fn c -> c.name end, &<=/2)
 
     socket = socket
-      |> assign(:players, players)
+      |> assign(:teams, teams)
       |> assign(:spectators, spectators)
 
     {:ok, socket}

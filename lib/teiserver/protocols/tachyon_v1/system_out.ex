@@ -16,6 +16,13 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemOut do
   def do_reply(:nouser, nil) do
     %{
       result: "error",
+      error: "not in a lobby"
+    }
+  end
+
+  def do_reply(:nouser, nil) do
+    %{
+      result: "error",
       error: "not logged in"
     }
   end
