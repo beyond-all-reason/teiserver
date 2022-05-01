@@ -1,7 +1,7 @@
 # Objective
-Currently Teiserver runs on a single node, we would like to run it on multiple nodes.
+Currently Teiserver runs on a single node, we would like to run it on multiple nodes. After performing all these steps Teiserver should be able to run across multiple nodes in a transparent manner without compromising the ability to run it on a single node.
 
-TODO: Expand this
+This document serves as a list of steps to convert the game from single to multi node 
 
 ## Summary of progress
 ##### Propagate data
@@ -16,8 +16,8 @@ TODO: Expand this
 - [X] **Stage 4:** Remove the ETS table and calls to it
 
 ##### PubSub.broadcast
-- [ ] **Stage 1:** Identify which pubsub messages need to include the sending `Node.self()` as part of their structure
-- [ ] **Stage 2:** One message at a time, update the documentation and implementation of said message (both send and receive)
+- [X] **Stage 1:** Identify which pubsub messages need to include the sending `Node.self()` as part of their structure
+- [X] **Stage 2:** One message at a time, update the documentation and implementation of said message (both send and receive)
 - [X] **Stage 3:** Identify counters that need to be a singleton (e.g. lobby_id, spring_id)
 - [X] **Stage 4:** Convert these to singletons
 - [ ] **Stage 5:** Add functionality for a node coming online after the others and being caught-up on state of caches
@@ -48,6 +48,8 @@ Various services place their PID into ETS, this should be changed to be a Regist
 Currently we use `broadcast` but in some cases we might need to either include the node with the data or use `broadcast_local`. One example would be achievements, we don't want to double-count them.
 
 Additionally we should change anything that would normally be send(pid) to instead either be `GenServer.cast` or a `PubSub.broadcast` to make it more explicit.
+
+The initial pass seems to show we only need to tweak a couple of messages needed to have their node of origin included.
 
 ##### Less reliance on pre-caching
 When taking place pre-caching is an opportunity for nodes to diverge in state (e.g. user list). Ideally this would be replaced by a solution not requiring a pre-cache. As a bonus this will improve startup time.

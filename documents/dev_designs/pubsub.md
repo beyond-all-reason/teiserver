@@ -7,7 +7,7 @@ Anything prefixed with "teiserver" is something added after the spring protocol 
 #### teiserver_server
 Used for sending out global messages about server events
 ```elixir
-  {:server_event, :stop}
+  {:server_event, :stop, node}
 ```
 
 #### teiserver_telemetry
@@ -57,6 +57,7 @@ Valid events:
   # Structure
   {:lobby_host_message, _action, lobby_id, _data}
 
+  # Examples
   {:lobby_host_message, :user_requests_to_join, lobby_id, {userid, script_password}}
 ```
 

@@ -34,10 +34,11 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemOut do
     }
   end
 
-  def do_reply(:server_event, event) do
+  def do_reply(:server_event, {event, node}) do
     %{
       cmd: "s.system.server_event",
-      event: event
+      event: event,
+      node: node
     }
   end
 

@@ -50,7 +50,7 @@ defmodule Teiserver.HookServer do
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_server",
-          {:server_event, :server_restart}
+          {:server_event, :stop, Node.self()}
         )
         :ok
 

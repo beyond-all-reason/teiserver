@@ -206,12 +206,12 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Server messages
-  def handle_info({:server_event, :stop}, state) do
+  def handle_info({:server_event, :stop, _node}, state) do
     new_state = state.protocol_out.reply(:server_restart, nil, nil, state)
     {:noreply, new_state}
   end
 
-  def handle_info({:server_event, _}, state) do
+  def handle_info({:server_event, _event, _node}, state) do
     {:noreply, state}
   end
 
