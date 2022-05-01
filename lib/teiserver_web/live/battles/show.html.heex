@@ -76,7 +76,6 @@
       <th>Bonus</th>
       <th>Team</th>
       <th>Faction</th>
-      <th>Colour</th>
       
       <%= if @moderator do %>
         <th>&nbsp;</th>
@@ -106,7 +105,6 @@
           <td><%= client.handicap %></td>
           <td><%= client.ally_team_number %></td>
           <td><%= factions[client.side] %></td>
-          <td><%= client.team_colour %></td>
 
           <%= if @moderator do %>
             <td>

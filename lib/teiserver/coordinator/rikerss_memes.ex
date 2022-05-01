@@ -4,7 +4,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   alias Teiserver.Battle.{Lobby, LobbyChat}
   alias Teiserver.Data.Types, as: T
 
-  @meme_list ~w(ticks nodefense greenfields poor rich hardt1 crazy undo)
+  @meme_list ~w(ticks nodefence greenfields poor rich hardt1 crazy undo)
 
   @crazy_multiplier_opts ~w(0.3 0.5 0.7 1 1 1 1 1 1 1 1.5 2 4)
 
@@ -120,7 +120,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
   end
 
-  def handle_meme("nodefense", senderid, %{lobby_id: lobby_id} = _state) do
+  def handle_meme("nodefence", senderid, %{lobby_id: lobby_id} = _state) do
     sender = User.get_user_by_id(senderid)
 
     armada_defences = ~w(armamb armamd armanni armbeamer armbrtha armclaw armemp armguard armhlt armjuno armmg armpb armsilo armvulc armatl armdl armfhlt armfrt armgplat armkraken armptl armtl)
@@ -136,7 +136,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
     Lobby.disable_units(lobby_id, unit_list ++ scav_units)
 
-    ["#{sender.name} has enabled the No defense meme. In this game you will not be able to create any defenses; good luck!"]
+    ["#{sender.name} has enabled the No defence meme. In this game you will not be able to create any defences; good luck!"]
   end
 
   def handle_meme("undo", _senderid, %{lobby_id: lobby_id} = _state) do
