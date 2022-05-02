@@ -25,13 +25,13 @@ defmodule Teiserver.Account.ReviewReport do
     |> Jason.encode!
     |> Jason.decode!
 
-    match_data = Teiserver.Battle.Tasks.BreakdownMatchDataTask.perform(start_date, end_date)
-    |> Jason.encode!
-    |> Jason.decode!
+    # match_data = Teiserver.Battle.Tasks.BreakdownMatchDataTask.perform(start_date, end_date)
+    # |> Jason.encode!
+    # |> Jason.decode!
 
     data = %{
       server: server_data,
-      match: match_data
+      # match: match_data
     }
 
     params = params

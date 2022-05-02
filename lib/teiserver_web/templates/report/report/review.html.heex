@@ -82,22 +82,11 @@
                   Server details
                 </a>
               </li>
-
-              <li class="nav-item">
-                <a href="#match_details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-                  <%= central_component "icon", icon: Teiserver.Battle.MatchLib.icon() %>
-                  Match details
-                </a>
-              </li>
             </ul>
 
             <div class="tab-content">
               <div class="tab-pane" id="server_details_tab" style="padding:5px;">
                 <%= render TeiserverWeb.Report.ServerMetricView, "tab_month_details.html", data: @data.server %>
-              </div>
-
-              <div class="tab-pane" id="match_details_tab" style="padding:5px;">
-                <%= render TeiserverWeb.Report.MatchMetricView, "tab_month_details.html", data: @data.match %>
               </div>
             </div>
 
