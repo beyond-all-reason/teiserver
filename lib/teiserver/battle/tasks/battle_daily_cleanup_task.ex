@@ -47,17 +47,14 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
 
     Ecto.Adapters.SQL.query(Repo, query, [])
 
-    # Battle.list_match_memberships(search: [match_id: match.id])
-    # |> Enum.each(fn membership ->
-    #   Battle.delete_match_membership(membership)
-    # end)
-
     Battle.delete_match(match)
   end
 
   defp delete_old_matches() do
+    days = Application.get_env(:central, Teiserver)[:retention][:battle_match]
+
     ids = Battle.list_matches(search: [
-        inserted_before: Timex.shift(Timex.now(), days: -95)
+        inserted_before: Timex.shift(Timex.now(), days: -days)
       ],
       search: [:id],
       limit: :infinity

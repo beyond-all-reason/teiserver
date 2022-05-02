@@ -2,17 +2,22 @@ defmodule Teiserver.Telemetry.InfologCleanupTask do
   @moduledoc false
   use Oban.Worker, queue: :cleanup
 
-  alias Teiserver.Telemetry
-
-  @max_age_in_days 25
+  alias Central.Repo
+  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    Telemetry.list_infologs(search: [inserted_before: Timex.now |> Timex.shift(days: -@max_age_in_days)])
-    |> Enum.each(fn i ->
-      Telemetry.delete_infolog(i)
-    end)
+    days = Application.get_env(:central, Teiserver)[:retention][:telemetry_infolog]
+
+    before_timestamp = Timex.shift(Timex.now(), days: -days)
+      |> date_to_str(format: :ymd_hms)
+
+    query = """
+      DELETE FROM teiserver_telemetry_infologs
+      WHERE timestamp < '#{before_timestamp}'
+"""
+    Ecto.Adapters.SQL.query(Repo, query, [])
 
     :ok
   end
