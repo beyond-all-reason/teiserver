@@ -79,7 +79,16 @@ config :central, Teiserver,
   post_login_delay: 150,
   spring_post_state_change_delay: 150,
   user_agreement: "A verification code has been sent to your email address. Please read our terms of service at <<<site_url>>> and the code of conduct at <<<URL>>>. Then enter your six digit code below if you agree to the terms.",
-  use_geoip: true
+  use_geoip: true,
+
+  retention: %{
+    telemetry_infolog: 25,
+    telemetry_event: 90,
+    battle_match: 90,
+    account_unverified: 14,
+    lobby_chat: 31,
+    room_chat: 31
+  }
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
@@ -115,6 +124,7 @@ config :central, Oban,
         {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
         {"12 1 * * *", Teiserver.Chat.Tasks.DailyCleanupTask},
         {"17 1 * * *", Teiserver.Battle.Tasks.DailyCleanupTask},
+        {"22 1 * * *", Teiserver.Telemetry.EventCleanupTask},
 
         # Every minute
         {"* * * * *", Teiserver.Telemetry.Tasks.PersistServerMinuteTask},
