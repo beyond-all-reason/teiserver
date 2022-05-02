@@ -83,7 +83,7 @@ config :central, Teiserver,
 
   retention: %{
     telemetry_infolog: 25,
-    telemetry_event: 90,
+    telemetry_events: 90,
     battle_match: 90,
     account_unverified: 14,
     lobby_chat: 31,
