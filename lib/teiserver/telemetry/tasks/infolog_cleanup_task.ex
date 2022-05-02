@@ -4,7 +4,7 @@ defmodule Teiserver.Telemetry.InfologCleanupTask do
 
   alias Teiserver.Telemetry
 
-  @max_age_in_days 35
+  @max_age_in_days 25
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
