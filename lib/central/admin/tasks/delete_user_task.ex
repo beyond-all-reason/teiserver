@@ -35,6 +35,10 @@ defmodule Central.Admin.DeleteUserTask do
     query = "DELETE FROM page_view_logs WHERE user_id IN #{sql_id_list}"
     Ecto.Adapters.SQL.query(Repo, query, [])
 
+    # Audit logs
+    query = "DELETE FROM audit_logs WHERE user_id IN #{sql_id_list}"
+    Ecto.Adapters.SQL.query(Repo, query, [])
+
     # And now the users
     query = "DELETE FROM account_users WHERE id IN #{sql_id_list}"
     Ecto.Adapters.SQL.query(Repo, query, [])

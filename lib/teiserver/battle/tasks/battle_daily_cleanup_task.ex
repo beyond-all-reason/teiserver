@@ -4,50 +4,52 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
   alias Central.Repo
   alias Teiserver.{Battle}
 
+  @short_match_seconds 300
+
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
     Battle.list_matches(search: [
-        inserted_before: Timex.shift(Timex.now(), days: -3),
-        never_finished: :ok,
-      ],
-      limit: :infinity
+          inserted_before: Timex.shift(Timex.now(), days: -3),
+          never_finished: :ok,
+        ],
+        select: [:id],
+        limit: :infinity
     )
-    |> Enum.each(&delete_match/1)
+      |> Enum.map(fn %{id: id} -> id end)
+      |> Enum.join(",")
+      |> delete_matches()
 
     # Remove tags from matches as the tags take up a lot of space and we don't need them long term
     # only need them for 7 days since the game, we also don't want to have to search every single game
-    Battle.list_matches(search: [
+    matches = Battle.list_matches(search: [
         inserted_before: Timex.shift(Timex.now(), days: -7),
         inserted_after: Timex.shift(Timex.now(), days: -21)
       ],
-      limit: :infinity)
-    |> Enum.filter(fn match -> match.tags != %{} end)
-    |> Enum.each(fn match ->
-      duration = Timex.diff(match.finished, match.started, :second)
+      limit: :infinity
+    )
+      |> Enum.filter(fn match -> match.tags != %{} end)
 
-      cond do
-        duration < 300 ->
-          delete_match(match)
-        true ->
-          Battle.update_match(match, %{"tags" => %{}})
-      end
-    end)
+    # Delete short matches
+    matches
+      |> Enum.filter(fn match ->
+        duration = Timex.diff(match.finished, match.started, :second)
+        duration < @short_match_seconds
+      end)
+      |> Enum.map(fn %{id: id} -> id end)
+      |> Enum.join(",")
+      |> delete_matches()
 
+    # Wipe tags of remaining matches
+    matches
+      |> Enum.map(fn %{id: id} -> id end)
+      |> Enum.join(",")
+      |> remove_tags
+
+    # Finally, delete the older matches
     delete_old_matches()
 
     :ok
-  end
-
-  defp delete_match(match) do
-    query = """
-      DELETE FROM teiserver_battle_match_memberships
-      WHERE match_id = #{match.id}
-"""
-
-    Ecto.Adapters.SQL.query(Repo, query, [])
-
-    Battle.delete_match(match)
   end
 
   defp delete_old_matches() do
@@ -57,20 +59,40 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
         inserted_before: Timex.shift(Timex.now(), days: -days)
       ],
       search: [:id],
-      limit: :infinity
+      limit: 1000
     )
     |> Enum.map(fn %{id: id} -> id end)
     |> Enum.join(",")
 
+    delete_matches(ids)
+  end
+
+  defp delete_matches(""), do: :ok
+  defp delete_matches(ids) do
+    query = """
+      UPDATE teiserver_account_accolades SET match_id = NULL
+      WHERE match_id IN (#{ids})
+"""
+    Ecto.Adapters.SQL.query(Repo, query, [])
+
     query = """
       DELETE FROM teiserver_battle_match_memberships
-      WHERE match_id IN #{ids}
+      WHERE match_id IN (#{ids})
 """
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     query = """
       DELETE FROM teiserver_battle_matches
-      WHERE id IN #{ids}
+      WHERE id IN (#{ids})
+"""
+    Ecto.Adapters.SQL.query(Repo, query, [])
+  end
+
+  defp remove_tags(""), do: :ok
+  defp remove_tags(ids) do
+    query = """
+      UPDATE teiserver_battle_matches SET tags = '{}'
+      WHERE id IN (#{ids})
 """
     Ecto.Adapters.SQL.query(Repo, query, [])
   end
