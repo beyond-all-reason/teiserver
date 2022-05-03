@@ -21,17 +21,28 @@ defmodule Teiserver.Account.ReviewReport do
       start_date: start_date,
       end_date: end_date
     ], limit: :infinity)
-    |> Teiserver.Telemetry.Tasks.PersistServerMonthTask.run()
-    |> Jason.encode!
-    |> Jason.decode!
+      |> Teiserver.Telemetry.Tasks.PersistServerMonthTask.run()
+      |> Jason.encode!
+      |> Jason.decode!
 
-    # match_data = Teiserver.Battle.Tasks.BreakdownMatchDataTask.perform(start_date, end_date)
-    # |> Jason.encode!
-    # |> Jason.decode!
+    days = Timex.diff(end_date, start_date, :days)
+    past_end_date = start_date
+    past_start_date = Timex.shift(past_end_date, days: -days)
+
+    past_server_data = Telemetry.list_server_day_logs(search: [
+      start_date: past_start_date,
+      end_date: past_end_date
+    ], limit: :infinity)
+      |> Teiserver.Telemetry.Tasks.PersistServerMonthTask.run()
+      |> Jason.encode!
+      |> Jason.decode!
 
     data = %{
       server: server_data,
-      # match: match_data
+      past_server: past_server_data,
+
+      past_start_date: past_start_date,
+      past_end_date: past_end_date
     }
 
     params = params
