@@ -3,6 +3,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
 
   alias Teiserver.{Battle, User}
   alias Central.Helpers.NumberHelper
+  # alias Teiserver.Data.Types, as: T
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
@@ -21,6 +22,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     :ok
   end
 
+  @spec perform_reprocess(non_neg_integer()) :: :ok
   def perform_reprocess(match_id) do
     Battle.get_match(match_id,
       preload: [:members],
@@ -31,11 +33,13 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     :ok
   end
 
+  # Teiserver.Battle.Tasks.PostMatchProcessTask.perform_reprocess(75567)
   defp post_process_match(match) do
     skills = get_match_skill(match)
 
     new_data = Map.merge((match.data || %{}), %{
-      "skills" => skills
+      "skills" => skills,
+      "player_count" => Enum.count(match.members)
     })
 
     use_export_data(match)

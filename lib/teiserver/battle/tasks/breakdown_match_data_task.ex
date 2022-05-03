@@ -17,13 +17,13 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
     end)
 
     %{
-      duel: get_subset_data(matches, "Duel"),
-      team: get_subset_data(matches, "Team"),
-      ffa: get_subset_data(matches, "FFA"),
-      scavengers: get_subset_data(matches, "Scavengers"),
-      raptors: get_subset_data(matches, "Raptors"),
-      bots: get_subset_data(matches, "Bots"),
-      totals: get_subset_data(matches, nil),
+      duel: get_subset_data(matches, game_type: "Duel"),
+      team: get_subset_data(matches, game_type: "Team"),
+      ffa: get_subset_data(matches, game_type: "FFA"),
+      scavengers: get_subset_data(matches, game_type: "Scavengers"),
+      raptors: get_subset_data(matches, game_type: "Raptors"),
+      bots: get_subset_data(matches, game_type: "Bots"),
+      totals: get_subset_data(matches)
     }
   end
 
@@ -38,65 +38,66 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
         inserted_before: end_date,
         of_interest: true
       ],
+      preload: [:members],
       limit: :infinity
     )
   end
 
-  defp get_subset_data(matches, nil) do
+  defp get_subset_data(matches, opts \\ []) do
     matches
-    |> Stream.map(fn m -> Map.drop(m, ~w(tags)a) end)
-    |> do_get_subset_data
+      |> Stream.filter(fn m ->
+        if opts[:game_type] do
+          m.game_type == opts[:game_type]
+        else
+          true
+        end
+      end)
+      |> Stream.map(fn m -> Map.drop(m, ~w(tags)a) end)
+      |> do_get_subset_data(opts)
   end
 
-  defp get_subset_data(matches, game_type) do
-    matches
-    |> Stream.filter(fn m -> m.game_type == game_type end)
-    |> Stream.map(fn m -> Map.drop(m, ~w(tags)a) end)
-    |> do_get_subset_data
-  end
-
-  defp do_get_subset_data(matches) do
+  defp do_get_subset_data(matches, _opts) do
     maps = matches
-    |> Stream.map(fn m -> m.map end)
-    |> Enum.frequencies()
-    |> Map.new
-    # |> Enum.map(fn {k, v} -> {k, v} end)
-    # |> Enum.sort_by(fn {_, v} -> v end, &>=/2)
+      |> Stream.map(fn m -> m.map end)
+      |> Enum.frequencies()
+      |> Map.new
 
     mean_skill = matches
-    |> Stream.filter(fn m -> m.data["skills"] != %{} end)
-    |> Stream.map(fn m -> m.data["skills"]["mean"] |> round end)
-    |> Enum.frequencies()
-    |> Map.new
-    # |> Enum.map(fn {k, v} -> {k, v} end)
-    # |> Enum.sort_by(fn {k, _} -> k end, &>=/2)
+      |> Stream.filter(fn m -> m.data["skills"] != %{} end)
+      |> Stream.map(fn m -> m.data["skills"]["mean"] |> round end)
+      |> Enum.frequencies()
+      |> Map.new
 
     duration = matches
-    |> Stream.map(fn match ->
-      d = Timex.diff(match.finished, match.started, :second)
-      :math.floor(d / 300) * 5
-      |> round
-    end)
-    |> Enum.frequencies()
-    |> Map.new
+      |> Stream.map(fn match ->
+        d = Timex.diff(match.finished, match.started, :second)
+        :math.floor(d / 300) * 5
+        |> round
+      end)
+      |> Enum.frequencies()
+      |> Map.new
 
     total_duration = matches
-    |> Stream.map(fn match ->
-      Timex.diff(match.finished, match.started, :second)
-    end)
-    |> Enum.sum
+      |> Stream.map(fn match ->
+        Timex.diff(match.finished, match.started, :second)
+      end)
+      |> Enum.sum
 
     matches_per_hour = matches
-    |> Stream.map(fn match -> match.started.hour end)
-    |> Enum.frequencies()
-    |> Map.new
-    # |> Enum.map(fn {k, v} -> {k, v} end)
-    # |> Enum.sort_by(fn {k, _} -> k end, &>=/2)
+      |> Stream.map(fn match -> match.started.hour end)
+      |> Enum.frequencies()
+      |> Map.new
 
     team_sizes = matches
-    |> Stream.map(fn match -> match.team_size end)
-    |> Enum.frequencies()
-    |> Map.new
+      |> Stream.map(fn match -> match.team_size end)
+      |> Enum.frequencies()
+      |> Map.new
+
+    # TODO: change this to be based on data["player_count"]
+    # we were not tracking player count as a separate number so can't be done yet
+    weighted_count = matches
+      |> Enum.map(fn m -> Enum.count(m.members) end)
+      |> Enum.sum()
 
     %{
       maps: maps,
@@ -106,6 +107,7 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
       team_sizes: team_sizes,
       aggregate: %{
         total_count: Enum.count(matches),
+        weighted_count: weighted_count,
         total_duration_seconds: total_duration,
         mean_duration_seconds: total_duration/max(Enum.count(matches), 1) |> round
       }
