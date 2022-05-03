@@ -20,7 +20,7 @@ echo "Relocate binary"
 cp -r opt/build/_build/prod/rel/central /apps
 
 echo "Stopping service"
-sudo systemctl stop central.service
+/apps/central_backup/bin/central stop
 
 echo "Wipe logs"
 > /var/log/central/error.log
