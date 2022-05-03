@@ -59,7 +59,7 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
         inserted_before: Timex.shift(Timex.now(), days: -days)
       ],
       search: [:id],
-      limit: 1000
+      limit: :infinity
     )
     |> Enum.map(fn %{id: id} -> id end)
     |> Enum.join(",")
