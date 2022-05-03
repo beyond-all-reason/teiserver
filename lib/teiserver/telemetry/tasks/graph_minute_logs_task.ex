@@ -7,6 +7,7 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
     ]
   end
 
+  @spec perform_matches(list) :: list()
   def perform_matches(logs) do
     [
       ["Matches lobby" | Enum.map(logs, fn l -> l.data["battle"]["lobby"] end)],
@@ -14,6 +15,7 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
     ]
   end
 
+  @spec perform_matches_start_stop(list) :: list()
   def perform_matches_start_stop(logs) do
     [
       ["Matches started" | Enum.map(logs, fn l -> l.data["battle"]["started"] end)],
@@ -21,6 +23,7 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
     ]
   end
 
+  @spec perform_user_connections(list) :: list()
   def perform_user_connections(logs) do
     [
       ["User Connects" | Enum.map(logs, fn l -> l.data["server"]["users_connected"] end)],
@@ -28,6 +31,7 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
     ]
   end
 
+  @spec perform_bot_connections(list) :: list()
   def perform_bot_connections(logs) do
     [
       ["Bot Connects" | Enum.map(logs, fn l -> l.data["server"]["bots_connected"] end)],
@@ -35,6 +39,7 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
     ]
   end
 
+  @spec perform_load(list) :: list()
   def perform_load(logs) do
     [
       ["Load" | Enum.map(logs, fn l -> l.data["server"]["load"] end)]

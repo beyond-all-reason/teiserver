@@ -1,6 +1,9 @@
 <div class="row">
-  <div class="col-md-6">
-    <h4>Counts</h4>
+  <div class="col-md-3">
+    <h4>
+      <i class='fa-fw fa-regular fa-user'></i>
+      Counts
+    </h4>
     <%= central_component "detail_line",
       label: "Total completed",
       value: format_number @data["totals"]["aggregate"]["total_count"]
@@ -34,6 +37,47 @@
     <%= central_component "detail_line",
       label: "Raptors",
       value: format_number @data["raptors"]["aggregate"]["total_count"]
+    %>
+  </div>
+  
+  <div class="col-md-3">
+    <h4>
+      <i class='fa-fw fa-regular fa-users'></i>
+      Weighted counts
+    </h4>
+    <%= central_component "detail_line",
+      label: "Total completed",
+      value: format_number @data["totals"]["aggregate"]["weighted_count"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Duel",
+      value: format_number @data["duel"]["aggregate"]["weighted_count"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "FFA",
+      value: format_number @data["ffa"]["aggregate"]["weighted_count"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Team",
+      value: format_number @data["team"]["aggregate"]["weighted_count"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Scavengers",
+      value: format_number @data["scavengers"]["aggregate"]["weighted_count"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Bots",
+      value: format_number @data["bots"]["aggregate"]["weighted_count"]
+    %>
+
+    <%= central_component "detail_line",
+      label: "Raptors",
+      value: format_number @data["raptors"]["aggregate"]["weighted_count"]
     %>
   </div>
 

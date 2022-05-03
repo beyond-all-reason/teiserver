@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Report.MatchMetricController do
   alias Teiserver.Telemetry
   alias Central.Helpers.{TimexHelper, DatePresets}
   alias Teiserver.Battle.{ExportRawMatchMetricsTask}
-  alias Teiserver.Telemetry.{MatchGraphDayLogsTask, MatchGraphMonthLogsTask}
+  alias Teiserver.Telemetry.{MatchGraphLogsTask}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
@@ -91,13 +91,9 @@ defmodule TeiserverWeb.Report.MatchMetricController do
       )
       |> Enum.reverse()
 
-    columns = case Map.get(params, "fields", "total_matches") do
-      "grouped" ->
-        MatchGraphDayLogsTask.perform(logs, :grouped)
-
-      _ -> # Default to split
-        MatchGraphDayLogsTask.perform(logs, :split)
-    end
+    key = Map.get(params, "type", "total_count")
+    fields = Map.get(params, "fields", "split")
+    columns = MatchGraphLogsTask.perform(logs, fields, key)
 
     key = logs
     |> Enum.map(fn log -> log.date |> TimexHelper.date_to_str(format: :ymd) end)
@@ -183,13 +179,10 @@ defmodule TeiserverWeb.Report.MatchMetricController do
       )
       |> Enum.reverse()
 
-    columns = case Map.get(params, "fields", "total_matches") do
-      "grouped" ->
-        MatchGraphMonthLogsTask.perform(logs, :grouped)
 
-      _ -> # Default to split
-        MatchGraphMonthLogsTask.perform(logs, :split)
-    end
+    key = Map.get(params, "type", "total_count")
+    fields = Map.get(params, "fields", "split")
+    columns = MatchGraphLogsTask.perform(logs, fields, key)
 
     key = logs
     |> Enum.map(fn log -> {log.year,log.month, 1} |> TimexHelper.date_to_str(format: :ymd) end)

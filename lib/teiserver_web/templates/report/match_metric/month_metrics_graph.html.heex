@@ -44,20 +44,34 @@
     <form action={Routes.ts_reports_match_metric_path(@conn, :month_metrics_graph)} method='post' class=''>
       <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
       <div class='row'>
-        <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
+        <div class='col-xl-3 col-lg-4 col-md-12 my-3'>
           <label for='fields' class='control-label'>Fields</label>
           <%= central_component "icon_dropdown",
             name: "fields",
             id: "fields",
             enumerable: [
               %{id: "split", name: "Split"},
-              %{id: "grouped", name: "Grouped"},
+              %{id: "grouped1", name: "Grouped (PvP, PvE, Bots)"},
+              %{id: "grouped2", name: "Grouped (PvP, Co-op)"},
             ],
             selected: Map.get(@params, "fields", "split")
           %>
         </div>
+        
+        <div class='col-xl-3 col-lg-4 col-md-12 my-3'>
+          <label for='type' class='control-label'>Type</label>
+          <%= central_component "icon_dropdown",
+            name: "type",
+            id: "type",
+            enumerable: [
+              %{id: "total_count", name: "Raw"},
+              %{id: "weighted_count", name: "Weighted"},
+            ],
+            selected: Map.get(@params, "type", "total_count")
+          %>
+        </div>
 
-        <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
+        <div class='col-xl-3 col-lg-4 col-md-12 my-3'>
           <label for='months' class='control-label'>Months</label>
           <input type='text' name='months' id='months' value={@params["months"]} class='form-control' />
         </div>

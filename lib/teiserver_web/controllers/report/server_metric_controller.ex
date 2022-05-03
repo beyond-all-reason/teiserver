@@ -237,11 +237,15 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
   # DAILY METRICS
   @spec now_list(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def now_list(conn, _params) do
+  def now_list(conn, params) do
+    limit = Map.get(params, "limit", "30")
+      |> int_parse()
+      |> min(1440)
+
     logs =
       Telemetry.list_server_minute_logs(
         order: "Newest first",
-        limit: 30
+        limit: limit
       )
       |> Enum.reverse
 
