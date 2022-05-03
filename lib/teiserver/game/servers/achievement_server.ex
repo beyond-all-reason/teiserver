@@ -20,7 +20,7 @@ defmodule Teiserver.Game.AchievementServer do
     "013 - One by one" => "tma20ffabarbs",
     "014 - The sky is the limit" => "acidicquarrybarbs",
     "015 - David vs Goliath" => "glaciergoliath018",
-    # "016 - A final stand" => "",
+    "016 - A final stand" => "twobarbspwakonly006",
     "017 - Infantry simulator" => "twobarbspwakonly006",
     "018 - Tick tock" => "SpeedMetalSnipe011",
     "019 - Catch those rare comets" => "threebarbscomet",
