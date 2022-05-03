@@ -18,11 +18,12 @@
   <%
     type = assigns[:type] || "text"
     disabled = if Map.get(assigns, :disabled, true), do: [disabled: "disabled"], else: []
+    append = assigns[:append] || ""
   %>
 
   <%= case type do %>
     <% "text" -> %>
-      <input type="text" class="form-control" {disabled} value={@value} style={assigns[:style]} />
+      <input type="text" class="form-control" {disabled} value={"#{@value}#{append}"} style={assigns[:style]} />
 
     <% "textarea" -> %>
       <textarea class="form-control" rows={assigns[:rows] || 4} {disabled} style={assigns[:style]}><%= @value %></textarea>
