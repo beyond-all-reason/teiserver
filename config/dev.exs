@@ -4,8 +4,8 @@ config :central, Central.Setup, key: "dev_key"
 
 # Configure your database
 config :central, Central.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "teiserver_dev",
+  password: "123456789",
   database: "teiserver_dev",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
