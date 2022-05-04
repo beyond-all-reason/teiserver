@@ -222,8 +222,12 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       nil ->
         Coordinator.send_to_user(senderid, "I am unable to find a user by the name of '#{remaining}'")
       user ->
-        User.ignore_user(senderid, user.id)
-        Coordinator.send_to_user(senderid, "#{user.name} is now ignored, you can unmute them with the $unignore command or via the relationships section of the website.")
+        if User.is_moderator?(user) do
+          Coordinator.send_to_user(senderid, "You cannot block moderators.")
+        else
+          User.ignore_user(senderid, user.id)
+          Coordinator.send_to_user(senderid, "#{user.name} is now ignored, you can unmute them with the $unignore command or via the relationships section of the website.")
+        end
     end
     state
   end
