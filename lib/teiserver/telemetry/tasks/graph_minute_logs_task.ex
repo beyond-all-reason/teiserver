@@ -39,10 +39,42 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
     ]
   end
 
-  @spec perform_load(list) :: list()
-  def perform_load(logs) do
+  @spec perform_combined_connections(list) :: list()
+  def perform_combined_connections(logs) do
     [
-      ["Load" | Enum.map(logs, fn l -> l.data["server"]["load"] end)]
+      ["User Connects" | Enum.map(logs, fn l -> l.data["server"]["users_connected"] + l.data["server"]["bots_connected"] end)],
+      ["User Disconnects" | Enum.map(logs, fn l -> l.data["server"]["users_disconnected"] + l.data["server"]["bots_disconnected"] end)]
+    ]
+  end
+
+  # Gigabytes
+  @memory_div (1024*1024*1024)
+
+  @spec perform_memory(list) :: list()
+  def perform_memory(logs) do
+    [
+      ["Total" | Enum.map(logs, fn l ->
+        m = l.data["os_mon"]["system_mem"]["total_memory"]
+        m/@memory_div
+      end)],
+      ["Used" | Enum.map(logs, fn l ->
+        total = l.data["os_mon"]["system_mem"]["total_memory"]
+        free = l.data["os_mon"]["system_mem"]["free_memory"]
+        cached = l.data["os_mon"]["system_mem"]["cached_memory"]
+        buffered = l.data["os_mon"]["system_mem"]["buffered_memory"]
+
+        m = total - (free + cached + buffered)
+        m/@memory_div
+      end)]
+    ]
+  end
+
+  @spec perform_cpu(list) :: list()
+  def perform_cpu(logs) do
+    [
+      ["CPU Load 1" | Enum.map(logs, fn l -> l.data["os_mon"]["cpu_avg1"] end)],
+      ["CPU Load 5" | Enum.map(logs, fn l -> l.data["os_mon"]["cpu_avg5"] end)],
+      ["CPU Load 15" | Enum.map(logs, fn l -> l.data["os_mon"]["cpu_avg15"] end)]
     ]
   end
 end

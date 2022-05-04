@@ -127,11 +127,6 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
     counters = state.counters
 
-    # TODO: Change this to use :os_mon like the liveview dashboard
-    {load_str, _} = System.cmd("uptime", [])
-    [_, l1, _, _] = Regex.run(~r/load average: ([\d\.]+), ([\d\.]+), ([\d\.]+)/, load_str)
-    {load, _} = Float.parse(l1)
-
     %{
       client: %{
         player: player_ids,
@@ -155,10 +150,34 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         users_disconnected: counters.users_disconnected,
 
         bots_connected: counters.bots_connected,
-        bots_disconnected: counters.bots_disconnected,
+        bots_disconnected: counters.bots_disconnected
+      },
+      os_mon: get_os_mon_data()
+    }
+  end
 
-        load: load,
-      }
+  @spec get_os_mon_data :: map()
+  def get_os_mon_data() do
+    cpu_per_core =
+      case :cpu_sup.util([:detailed, :per_cpu]) do
+        {:all, 0, 0, []} -> []
+        cores -> Enum.map(cores, fn {n, busy, non_b, _} -> {n, Map.new(busy ++ non_b)} end)
+      end
+
+    # disk =
+    #   case :disksup.get_disk_data() do
+    #     [{'none', 0, 0}] -> []
+    #     other -> other
+    #   end
+
+    %{
+      cpu_avg1: :cpu_sup.avg1(),
+      cpu_avg5: :cpu_sup.avg5(),
+      cpu_avg15: :cpu_sup.avg15(),
+      cpu_nprocs: :cpu_sup.nprocs(),
+      cpu_per_core: cpu_per_core,
+      # disk: disk,
+      system_mem: :memsup.get_system_memory_data() |> Map.new()
     }
   end
 

@@ -104,7 +104,8 @@ defmodule TeiserverWeb.Router do
         get("/", GeneralController, :index)
 
         # Server metrics
-        get("/server/day_metrics/now", ServerMetricController, :now_list)
+        get("/server/day_metrics/now", ServerMetricController, :now)
+        get("/server/day_metrics/load", ServerMetricController, :load)
         get("/server/day_metrics/today", ServerMetricController, :day_metrics_today)
         get("/server/day_metrics/show/:date", ServerMetricController, :day_metrics_show)
         get("/server/day_metrics/export_form", ServerMetricController, :day_metrics_export_form)

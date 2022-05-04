@@ -16,7 +16,7 @@
 
 <script>
   $(function() {
-    setTimeout("location.reload(true);", 60000);
+    // setTimeout("location.reload(true);", 60000);
 
     c3.generate({
       bindto: '#chart_players',
@@ -26,30 +26,16 @@
     });
 
     c3.generate({
-      bindto: '#chart_matches',
+      bindto: '#chart_combined_connections',
       data: {
-        columns: <%= raw Jason.encode!(@columns_matches) %>
+        columns: <%= raw Jason.encode!(@columns_combined_connections) %>
       }
     });
 
     c3.generate({
-      bindto: '#chart_matches_start_stop',
+      bindto: '#chart_memory',
       data: {
-        columns: <%= raw Jason.encode!(@columns_matches_start_stop) %>
-      }
-    });
-
-    c3.generate({
-      bindto: '#chart_user_connections',
-      data: {
-        columns: <%= raw Jason.encode!(@columns_user_connections) %>
-      }
-    });
-
-    c3.generate({
-      bindto: '#chart_bot_connections',
-      data: {
-        columns: <%= raw Jason.encode!(@columns_bot_connections) %>
+        columns: <%= raw Jason.encode!(@columns_memory) %>
       }
     });
 
@@ -83,17 +69,11 @@
         <div class="row">
           <div class="col-md-12 col-lg-6">
             <div id="chart_players" class='with-transitions chart-div'></div>
-
-            <div id="chart_matches" class='with-transitions chart-div'></div>
-            
-            <div id="chart_matches_start_stop" class='with-transitions chart-div'></div>
+            <div id="chart_memory" class='with-transitions chart-div'></div>
           </div>
 
           <div class="col-md-12 col-lg-6">
-            <div id="chart_user_connections" class='with-transitions chart-div'></div>
-            
-            <div id="chart_bot_connections" class='with-transitions chart-div'></div>
-            
+            <div id="chart_combined_connections" class='with-transitions chart-div'></div>
             <div id="chart_cpu" class='with-transitions chart-div'></div>
           </div>
         </div>

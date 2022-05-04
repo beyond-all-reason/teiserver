@@ -42,7 +42,16 @@
   active: @active,
   icon: "fa-regular fa-clock",
   bsname: bsname,
-  url: Routes.ts_reports_server_metric_path(@conn, :now_list)
+  url: Routes.ts_reports_server_metric_path(@conn, :now)
+%>
+
+<%= central_component "section_menu_button",
+  name: "load",
+  label: "Load",
+  active: @active,
+  icon: "fa-regular fa-server",
+  bsname: bsname,
+  url: Routes.ts_reports_server_metric_path(@conn, :load)
 %>
 
 

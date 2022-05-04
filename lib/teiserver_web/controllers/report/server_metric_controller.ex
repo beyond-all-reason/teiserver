@@ -235,9 +235,8 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     |> render("month_metrics_graph.html")
   end
 
-  # DAILY METRICS
-  @spec now_list(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def now_list(conn, params) do
+  @spec now(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def now(conn, params) do
     limit = Map.get(params, "limit", "30")
       |> int_parse()
       |> min(1440)
@@ -254,16 +253,44 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     columns_matches_start_stop = GraphMinuteLogsTask.perform_matches_start_stop(logs)
     columns_user_connections = GraphMinuteLogsTask.perform_user_connections(logs)
     columns_bot_connections = GraphMinuteLogsTask.perform_bot_connections(logs)
-    columns_load = GraphMinuteLogsTask.perform_load(logs)
+    columns_cpu = GraphMinuteLogsTask.perform_cpu(logs)
 
     conn
-    |> assign(:columns_players, columns_players)
-    |> assign(:columns_matches, columns_matches)
-    |> assign(:columns_matches_start_stop, columns_matches_start_stop)
-    |> assign(:columns_user_connections, columns_user_connections)
-    |> assign(:columns_bot_connections, columns_bot_connections)
-    |> assign(:columns_load, columns_load)
-    |> add_breadcrumb(name: "Now", url: conn.request_path)
-    |> render("now_graph.html")
+      |> assign(:columns_players, columns_players)
+      |> assign(:columns_matches, columns_matches)
+      |> assign(:columns_matches_start_stop, columns_matches_start_stop)
+      |> assign(:columns_user_connections, columns_user_connections)
+      |> assign(:columns_bot_connections, columns_bot_connections)
+      |> assign(:columns_cpu, columns_cpu)
+      |> add_breadcrumb(name: "Now", url: conn.request_path)
+      |> render("now_graph.html")
+  end
+
+  @spec load(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def load(conn, params) do
+    limit = Map.get(params, "limit", "30")
+      |> int_parse()
+      |> min(1440)
+
+    logs =
+      Telemetry.list_server_minute_logs(
+        order: "Newest first",
+        limit: limit
+      )
+      |> Enum.reverse
+
+    columns_players = GraphMinuteLogsTask.perform_players(logs)
+    columns_combined_connections = GraphMinuteLogsTask.perform_combined_connections(logs)
+    columns_memory = GraphMinuteLogsTask.perform_memory(logs)
+    columns_cpu = GraphMinuteLogsTask.perform_cpu(logs)
+
+    conn
+      |> assign(:columns_players, columns_players)
+      |> assign(:columns_combined_connections, columns_combined_connections)
+      |> assign(:columns_memory, columns_memory)
+      |> assign(:columns_cpu, columns_cpu)
+
+      |> add_breadcrumb(name: "Now", url: conn.request_path)
+      |> render("load_graph.html")
   end
 end
