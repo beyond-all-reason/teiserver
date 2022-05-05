@@ -54,6 +54,12 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   end
 
   @impl true
+  def handle_cast({:matchmaking_update, queue_id, data}, %{matchmaking: matchmaking} = state) do
+    new_matchmaking = Map.put(matchmaking, queue_id, data)
+    {:noreply, %{state | matchmaking: new_matchmaking}}
+  end
+
+  @impl true
   def handle_call(:get_state, _from, state) do
     {:reply, state, state}
   end
@@ -158,11 +164,11 @@ defmodule Teiserver.Telemetry.TelemetryServer do
 
   @spec get_os_mon_data :: map()
   def get_os_mon_data() do
-    cpu_per_core =
-      case :cpu_sup.util([:detailed, :per_cpu]) do
-        {:all, 0, 0, []} -> []
-        cores -> Enum.map(cores, fn {n, busy, non_b, _} -> {n, Map.new(busy ++ non_b)} end)
-      end
+    # cpu_per_core =
+    #   case :cpu_sup.util([:detailed, :per_cpu]) do
+    #     {:all, 0, 0, []} -> []
+    #     cores -> Enum.map(cores, fn {n, busy, non_b, _} -> {n, Map.new(busy ++ non_b)} end)
+    #   end
 
     # disk =
     #   case :disksup.get_disk_data() do
@@ -175,8 +181,8 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       cpu_avg5: :cpu_sup.avg5(),
       cpu_avg15: :cpu_sup.avg15(),
       cpu_nprocs: :cpu_sup.nprocs(),
-      cpu_per_core: cpu_per_core,
-      # disk: disk,
+      # cpu_per_core: cpu_per_core |> Map.new(),
+      # disk: disk |> Map.new(),
       system_mem: :memsup.get_system_memory_data() |> Map.new()
     }
   end

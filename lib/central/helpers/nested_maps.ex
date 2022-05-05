@@ -1,5 +1,21 @@
 defmodule Central.NestedMaps do
-  @moduledoc false
+  @moduledoc """
+    Used to get/manipulate data inside maps nested in other maps.
+    Paths are lists of keys; e.g.
+
+    ```
+      map = %{
+        k: %{
+          j: %{
+            m: 1
+          }
+        }
+      }
+      get(map, [:k, :j, :m])
+      >>> 1
+    ```
+  """
+
   @spec get(Map.t(), [String.t() | atom]) :: any
   def get(map, [k | []] = _path) do
     map[k]

@@ -40,9 +40,9 @@
     });
 
     c3.generate({
-      bindto: '#chart_cpu',
+      bindto: '#chart_cpu_load',
       data: {
-        columns: <%= raw Jason.encode!(@columns_cpu) %>
+        columns: <%= raw Jason.encode!(@columns_cpu_load) %>
       }
     });
   });
@@ -57,7 +57,7 @@
         <%= render TeiserverWeb.Report.ServerMetricView, "section_menu.html", Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
-            active: "now"
+            active: "load"
           })
         %>
         <br /><br />
@@ -67,6 +67,47 @@
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
         <div class="row">
+          <form action={Routes.ts_reports_server_metric_path(@conn, :load)} method='get' class=''>
+            <div class='row'>
+              <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
+                <label for='hours' class='control-label'>Hours</label>
+                <%= central_component "icon_dropdown",
+                  name: "hours",
+                  id: "hours",
+                  enumerable: [
+                    %{id: "1", name: "1"},
+                    %{id: "6", name: "6"},
+                    %{id: "24", name: "24"},
+                    %{id: "48", name: "48 (2 days)"},
+                    %{id: "168", name: "168 (7 days)"}
+                  ],
+                  selected: Map.get(@params, "hours", "24")
+                %>
+              </div>
+
+              <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
+                <label for='resolution' class='control-label'>Resolution (minutes per point)</label>
+                <%= central_component "icon_dropdown",
+                  name: "resolution",
+                  id: "resolution",
+                  enumerable: [
+                    %{id: "1", name: "1"},
+                    %{id: "5", name: "5"},
+                    %{id: "30", name: "30"},
+                    %{id: "60", name: "60"}
+                  ],
+                  selected: Map.get(@params, "resolution", "5")
+                %>
+              </div>
+
+              <div class='col-md-12 my-3'>
+                <button type='submit' class={"btn btn-#{bsname} float-end"}>
+                  Submit
+                </button>
+              </div>
+            </div>
+          </form>
+
           <div class="col-md-12 col-lg-6">
             <div id="chart_players" class='with-transitions chart-div'></div>
             <div id="chart_memory" class='with-transitions chart-div'></div>
@@ -74,7 +115,7 @@
 
           <div class="col-md-12 col-lg-6">
             <div id="chart_combined_connections" class='with-transitions chart-div'></div>
-            <div id="chart_cpu" class='with-transitions chart-div'></div>
+            <div id="chart_cpu_load" class='with-transitions chart-div'></div>
           </div>
         </div>
       </div>

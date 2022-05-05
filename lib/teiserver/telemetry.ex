@@ -19,8 +19,15 @@ defmodule Teiserver.Telemetry do
     GenServer.call(TelemetryServer, :get_totals_and_reset)
   end
 
+  @spec increment(any) :: :ok
   def increment(key) do
     send(TelemetryServer, {:increment, key})
+    :ok
+  end
+
+  @spec cast_to_server(any) :: :ok
+  def cast_to_server(msg) do
+    GenServer.cast(TelemetryServer, msg)
   end
 
   @spec metrics() :: List.t()

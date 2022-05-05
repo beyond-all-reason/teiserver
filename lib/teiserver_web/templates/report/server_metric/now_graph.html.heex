@@ -56,7 +56,7 @@
     c3.generate({
       bindto: '#chart_cpu',
       data: {
-        columns: <%= raw Jason.encode!(@columns_cpu) %>
+        columns: <%= raw Jason.encode!(@columns_cpu_load) %>
       }
     });
   });
@@ -78,9 +78,52 @@
 
 <div class="row">
   <div class="col-md-12">
-    <div class={"card border-#{bsname} page-card"}>
+    <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <div class="row">
+          <form action={Routes.ts_reports_server_metric_path(@conn, :now)} method='get' class=''>
+            <div class='row'>
+              <div class='col-lg-5 col-md-12 my-3'>
+                <label for='minutes' class='control-label'>Minutes</label>
+                <%= central_component "icon_dropdown",
+                  name: "minutes",
+                  id: "minutes",
+                  enumerable: [
+                    %{id: "5", name: "5"},
+                    %{id: "30", name: "30"},
+                    %{id: "60", name: "60"},
+                    %{id: "180", name: "180 (3 hours)"},
+                    %{id: "720", name: "720 (12 hours)"},
+                    %{id: "1440", name: "1440 (24 days)"}
+                  ],
+                  selected: Map.get(@params, "minutes", "30")
+                %>
+              </div>
+
+              <div class='col-lg-5 col-md-12 my-3'>
+                <label for='resolution' class='control-label'>Resolution (minutes per point)</label>
+                <%= central_component "icon_dropdown",
+                  name: "resolution",
+                  id: "resolution",
+                  enumerable: [
+                    %{id: "1", name: "1"},
+                    %{id: "5", name: "5"},
+                    %{id: "30", name: "30"},
+                    %{id: "60", name: "60"}
+                  ],
+                  selected: Map.get(@params, "resolution", "1")
+                %>
+              </div>
+
+              <div class='col-lg-2 col-md-12 my-3'>
+                &nbsp;<br />
+                <button type='submit' class={"btn btn-#{bsname} btn-block"}>
+                  Update
+                </button>
+              </div>
+            </div>
+          </form>
+        
           <div class="col-md-12 col-lg-6">
             <div id="chart_players" class='with-transitions chart-div'></div>
 

@@ -1,80 +1,136 @@
 defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
-  @spec perform_players(list) :: list()
-  def perform_players(logs) do
+  alias Central.NestedMaps
+  alias Central.Helpers.NumberHelper
+
+  @spec perform_players(list, non_neg_integer()) :: list()
+  def perform_players(logs, chunk_size) do
     [
-      ["Users" | Enum.map(logs, fn l -> l.data["client"]["total"] |> Enum.count end)],
-      ["Players" | Enum.map(logs, fn l -> l.data["client"]["player"] |> Enum.count end)]
+      ["Users" | extract_value(logs, chunk_size, ~w(client total), &Enum.count/1)],
+      ["Players" | extract_value(logs, chunk_size, ~w(client player), &Enum.count/1)]
     ]
   end
 
-  @spec perform_matches(list) :: list()
-  def perform_matches(logs) do
+  @spec perform_matches(list, non_neg_integer()) :: list()
+  def perform_matches(logs, chunk_size) do
     [
-      ["Matches lobby" | Enum.map(logs, fn l -> l.data["battle"]["lobby"] end)],
-      ["Matches ongoing" | Enum.map(logs, fn l -> l.data["battle"]["in_progress"] end)]
+      ["Matches lobby" | extract_value(logs, chunk_size, ~w(battle lobby))],
+      ["Matches ongoing" | extract_value(logs, chunk_size, ~w(battle in_progress))]
     ]
   end
 
-  @spec perform_matches_start_stop(list) :: list()
-  def perform_matches_start_stop(logs) do
+  @spec perform_matches_start_stop(list, non_neg_integer()) :: list()
+  def perform_matches_start_stop(logs, chunk_size) do
     [
-      ["Matches started" | Enum.map(logs, fn l -> l.data["battle"]["started"] end)],
-      ["Matches stopped" | Enum.map(logs, fn l -> l.data["battle"]["stopped"] end)]
+      ["Matches started" | extract_value(logs, chunk_size, ~w(battle started))],
+      ["Matches stopped" | extract_value(logs, chunk_size, ~w(battle stopped))]
     ]
   end
 
-  @spec perform_user_connections(list) :: list()
-  def perform_user_connections(logs) do
+  @spec perform_user_connections(list, non_neg_integer()) :: list()
+  def perform_user_connections(logs, chunk_size) do
     [
-      ["User Connects" | Enum.map(logs, fn l -> l.data["server"]["users_connected"] end)],
-      ["User Disconnects" | Enum.map(logs, fn l -> l.data["server"]["users_disconnected"] end)]
+      ["User Connects" | extract_value(logs, chunk_size, ~w(server users_connected))],
+      ["User Disconnects" | extract_value(logs, chunk_size, ~w(server users_disconnected))]
     ]
   end
 
-  @spec perform_bot_connections(list) :: list()
-  def perform_bot_connections(logs) do
+  @spec perform_bot_connections(list, non_neg_integer()) :: list()
+  def perform_bot_connections(logs, chunk_size) do
     [
-      ["Bot Connects" | Enum.map(logs, fn l -> l.data["server"]["bots_connected"] end)],
-      ["Bot Disconnects" | Enum.map(logs, fn l -> l.data["server"]["bots_disconnected"] end)]
+      ["Bot Connects" | extract_value(logs, chunk_size, ~w(server bots_connected))],
+      ["Bot Disconnects" | extract_value(logs, chunk_size, ~w(server bots_disconnected))]
     ]
   end
 
-  @spec perform_combined_connections(list) :: list()
-  def perform_combined_connections(logs) do
+  @spec perform_combined_connections(list, non_neg_integer()) :: list()
+  def perform_combined_connections(logs, chunk_size) do
+    user_connects = extract_value(logs, chunk_size, ~w(server users_connected))
+    bot_connects = extract_value(logs, chunk_size, ~w(server bots_connected))
+
+    user_disconnects = extract_value(logs, chunk_size, ~w(server users_disconnected))
+    bot_disconnects = extract_value(logs, chunk_size, ~w(server bots_disconnected))
+
+    connected = [user_connects, bot_connects]
+      |> Enum.zip()
+      |> Enum.map(fn {u, b} -> u + b end)
+
+    disconnected = [user_disconnects, bot_disconnects]
+      |> Enum.zip()
+      |> Enum.map(fn {u, b} -> u + b end)
+
     [
-      ["User Connects" | Enum.map(logs, fn l -> l.data["server"]["users_connected"] + l.data["server"]["bots_connected"] end)],
-      ["User Disconnects" | Enum.map(logs, fn l -> l.data["server"]["users_disconnected"] + l.data["server"]["bots_disconnected"] end)]
+      ["Connects" | connected],
+      ["Disconnects" | disconnected]
     ]
   end
 
   # Gigabytes
   @memory_div (1024*1024*1024)
 
-  @spec perform_memory(list) :: list()
-  def perform_memory(logs) do
-    [
-      ["Total" | Enum.map(logs, fn l ->
-        m = l.data["os_mon"]["system_mem"]["total_memory"]
-        m/@memory_div
-      end)],
-      ["Used" | Enum.map(logs, fn l ->
-        total = l.data["os_mon"]["system_mem"]["total_memory"]
-        free = l.data["os_mon"]["system_mem"]["free_memory"]
-        cached = l.data["os_mon"]["system_mem"]["cached_memory"]
-        buffered = l.data["os_mon"]["system_mem"]["buffered_memory"]
+  @spec perform_memory(list, non_neg_integer()) :: list()
+  def perform_memory(logs, chunk_size) do
+    total = extract_value(logs, chunk_size, ~w(os_mon system_mem total_memory))
+      |> Enum.map(fn v -> (v / @memory_div) |> NumberHelper.round(2) end)
 
-        m = total - (free + cached + buffered)
-        m/@memory_div
-      end)]
+    free = extract_value(logs, chunk_size, ~w(os_mon system_mem free_memory))
+      |> Enum.map(fn v -> (v / @memory_div) |> NumberHelper.round(2) end)
+
+    cached = extract_value(logs, chunk_size, ~w(os_mon system_mem cached_memory))
+      |> Enum.map(fn v -> (v / @memory_div) |> NumberHelper.round(2) end)
+
+    buffered = extract_value(logs, chunk_size, ~w(os_mon system_mem buffered_memory))
+      |> Enum.map(fn v -> (v / @memory_div) |> NumberHelper.round(2) end)
+
+    free_swap = extract_value(logs, chunk_size, ~w(os_mon system_mem free_swap))
+      |> Enum.map(fn v -> (v / @memory_div) |> NumberHelper.round(2) end)
+
+    total_swap = extract_value(logs, chunk_size, ~w(os_mon system_mem total_swap))
+      |> Enum.map(fn v -> (v / @memory_div) |> NumberHelper.round(2) end)
+
+    used = [total, free, cached, buffered]
+      |> Enum.zip()
+      |> Enum.map(fn {t, f, c, b} -> (t - (f + c + b)) |> NumberHelper.round(2) end)
+
+    swap = [total_swap, free_swap]
+      |> Enum.zip()
+      |> Enum.map(fn {t, f} -> (t - f) |> NumberHelper.round(2) end)
+
+    [
+      # ["Total" | total],
+      ["Used" | used],
+      ["Buffered" | buffered],
+      ["Cached" | cached],
+      ["Swap" | swap],
     ]
   end
 
-  @spec perform_cpu(list) :: list()
-  def perform_cpu(logs) do
+  @spec perform_cpu_load(list, non_neg_integer()) :: list()
+  def perform_cpu_load(logs, chunk_size) do
     [
-      ["CPU Load 1" | Enum.map(logs, fn l -> l.data["os_mon"]["cpu_avg1"] end)],
-      ["CPU Load 5" | Enum.map(logs, fn l -> l.data["os_mon"]["cpu_avg5"] end)],
-      ["CPU Load 15" | Enum.map(logs, fn l -> l.data["os_mon"]["cpu_avg15"] end)]
+      ["CPU Load 1" | extract_value(logs, chunk_size, ~w(os_mon cpu_avg1))],
+      ["CPU Load 5" | extract_value(logs, chunk_size, ~w(os_mon cpu_avg5))],
+      ["CPU Load 15" | extract_value(logs, chunk_size, ~w(os_mon cpu_avg15))]
     ]
+  end
+
+  defp extract_value(logs, 1, path) do
+    logs
+      |> Enum.map(fn log ->
+        NestedMaps.get(log.data, path) || 0
+      end)
+  end
+
+  defp extract_value(logs, chunk_size, path, func \\ (fn x -> x end)) do
+    logs
+      |> Enum.chunk_every(chunk_size)
+      |> Enum.map(fn chunk ->
+        result = chunk
+          |> Enum.map(fn log ->
+            NestedMaps.get(log.data, path) |> func.()
+          end)
+          |> Enum.sum
+
+        result / chunk_size
+      end)
   end
 end

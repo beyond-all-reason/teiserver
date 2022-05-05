@@ -237,9 +237,11 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
   @spec now(Plug.Conn.t(), map) :: Plug.Conn.t()
   def now(conn, params) do
-    limit = Map.get(params, "limit", "30")
-      |> int_parse()
-      |> min(1440)
+    resolution = Map.get(params, "resolution", "1") |> int_parse()
+    minutes = Map.get(params, "minutes", "30") |> int_parse()
+
+    limit = minutes / resolution
+      |> round()
 
     logs =
       Telemetry.list_server_minute_logs(
@@ -248,47 +250,48 @@ defmodule TeiserverWeb.Report.ServerMetricController do
       )
       |> Enum.reverse
 
-    columns_players = GraphMinuteLogsTask.perform_players(logs)
-    columns_matches = GraphMinuteLogsTask.perform_matches(logs)
-    columns_matches_start_stop = GraphMinuteLogsTask.perform_matches_start_stop(logs)
-    columns_user_connections = GraphMinuteLogsTask.perform_user_connections(logs)
-    columns_bot_connections = GraphMinuteLogsTask.perform_bot_connections(logs)
-    columns_cpu = GraphMinuteLogsTask.perform_cpu(logs)
+    columns_players = GraphMinuteLogsTask.perform_players(logs, 1)
+    columns_matches = GraphMinuteLogsTask.perform_matches(logs, 1)
+    columns_matches_start_stop = GraphMinuteLogsTask.perform_matches_start_stop(logs, 1)
+    columns_user_connections = GraphMinuteLogsTask.perform_user_connections(logs, 1)
+    columns_bot_connections = GraphMinuteLogsTask.perform_bot_connections(logs, 1)
+    columns_cpu_load = GraphMinuteLogsTask.perform_cpu_load(logs, 1)
 
     conn
+      |> assign(:params, params)
       |> assign(:columns_players, columns_players)
       |> assign(:columns_matches, columns_matches)
       |> assign(:columns_matches_start_stop, columns_matches_start_stop)
       |> assign(:columns_user_connections, columns_user_connections)
       |> assign(:columns_bot_connections, columns_bot_connections)
-      |> assign(:columns_cpu, columns_cpu)
+      |> assign(:columns_cpu_load, columns_cpu_load)
       |> add_breadcrumb(name: "Now", url: conn.request_path)
       |> render("now_graph.html")
   end
 
   @spec load(Plug.Conn.t(), map) :: Plug.Conn.t()
   def load(conn, params) do
-    limit = Map.get(params, "limit", "30")
-      |> int_parse()
-      |> min(1440)
+    hours = Map.get(params, "hours", "6") |> int_parse()
+    resolution = Map.get(params, "resolution", "5") |> int_parse()
 
     logs =
       Telemetry.list_server_minute_logs(
         order: "Newest first",
-        limit: limit
+        limit: hours * 60
       )
       |> Enum.reverse
 
-    columns_players = GraphMinuteLogsTask.perform_players(logs)
-    columns_combined_connections = GraphMinuteLogsTask.perform_combined_connections(logs)
-    columns_memory = GraphMinuteLogsTask.perform_memory(logs)
-    columns_cpu = GraphMinuteLogsTask.perform_cpu(logs)
+    columns_players = GraphMinuteLogsTask.perform_players(logs, resolution)
+    columns_combined_connections = GraphMinuteLogsTask.perform_combined_connections(logs, resolution)
+    columns_memory = GraphMinuteLogsTask.perform_memory(logs, resolution)
+    columns_cpu_load = GraphMinuteLogsTask.perform_cpu_load(logs, resolution)
 
     conn
+      |> assign(:params, params)
       |> assign(:columns_players, columns_players)
       |> assign(:columns_combined_connections, columns_combined_connections)
       |> assign(:columns_memory, columns_memory)
-      |> assign(:columns_cpu, columns_cpu)
+      |> assign(:columns_cpu_load, columns_cpu_load)
 
       |> add_breadcrumb(name: "Now", url: conn.request_path)
       |> render("load_graph.html")
