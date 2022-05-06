@@ -368,7 +368,8 @@ defmodule Teiserver.User do
     new_name = String.trim(new_name)
 
     now = :erlang.system_time(:seconds)
-    since_most_recent_rename = now - (Enum.slice(rename_log, 0..0) ++ [0] |> hd)
+    # since_most_recent_rename = now - (Enum.slice(rename_log, 0..0) ++ [0] |> hd)
+    since_rename_two = now - (Enum.slice(rename_log, 1..1) ++ [0, 0, 0] |> hd)
     since_rename_three = now - (Enum.slice(rename_log, 2..2) ++ [0, 0, 0] |> hd)
 
     cond do
@@ -378,9 +379,9 @@ defmodule Teiserver.User do
       admin_action == false and WordLib.acceptable_name?(new_name) == false ->
         {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
 
-      # Can't rename more than once every 5 days
-      admin_action == false and since_most_recent_rename < 60 * 60 * 24 * 5 ->
-        {:error, "You have only recently changed your name, give this one a chance"}
+      # Can't rename more than 2 times in 5 days
+      admin_action == false and since_rename_two < 60 * 60 * 24 * 5 ->
+        {:error, "If you keep changing your name people won't know who you are; give it a bit of time"}
 
       # Can't rename more than 3 times in 30 days
       admin_action == false and since_rename_three < 60 * 60 * 24 * 30 ->
