@@ -130,7 +130,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   defp sort_lobbies(lobbies) do
     lobbies
       |> Enum.sort_by(
-        fn v -> {v.locked, v.password != nil, v.name} end,
+        fn v -> {v.locked, v.password != nil, v.player_count, v.name} end,
         &<=/2
       )
 
