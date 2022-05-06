@@ -1,6 +1,6 @@
 defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
   alias Central.NestedMaps
-  alias Central.Helpers.NumberHelper
+  alias Central.Helpers.{NumberHelper, TimexHelper}
 
   @spec perform_players(list, non_neg_integer()) :: list()
   def perform_players(logs, chunk_size) do
@@ -111,6 +111,13 @@ defmodule Teiserver.Telemetry.GraphMinuteLogsTask do
       ["CPU Load 5" | extract_value(logs, chunk_size, ~w(os_mon cpu_avg5))],
       ["CPU Load 15" | extract_value(logs, chunk_size, ~w(os_mon cpu_avg15))]
     ]
+  end
+
+  @spec perform_axis_key(list, non_neg_integer()) :: list()
+  def perform_axis_key(logs, chunk_size) do
+    logs
+      |> Enum.chunk_every(chunk_size)
+      |> Enum.map(fn [log | _] -> log.timestamp |> TimexHelper.date_to_str(format: :ymd_hms) end)
   end
 
   defp extract_value(logs, 1, path) do

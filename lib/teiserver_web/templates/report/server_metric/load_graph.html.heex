@@ -16,33 +16,71 @@
 
 <script>
   $(function() {
-    // setTimeout("location.reload(true);", 60000);
-
     c3.generate({
       bindto: '#chart_players',
       data: {
-        columns: <%= raw Jason.encode!(@columns_players) %>
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @columns_players]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        }
       }
     });
-
+    
     c3.generate({
       bindto: '#chart_combined_connections',
       data: {
-        columns: <%= raw Jason.encode!(@columns_combined_connections) %>
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @columns_combined_connections]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        }
       }
     });
-
+    
     c3.generate({
       bindto: '#chart_memory',
       data: {
-        columns: <%= raw Jason.encode!(@columns_memory) %>
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @columns_memory]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        }
       }
     });
-
+    
     c3.generate({
       bindto: '#chart_cpu_load',
       data: {
-        columns: <%= raw Jason.encode!(@columns_cpu_load) %>
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: <%= raw Jason.encode!([["x" | @axis_key] | @columns_cpu_load]) %>
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        }
       }
     });
   });

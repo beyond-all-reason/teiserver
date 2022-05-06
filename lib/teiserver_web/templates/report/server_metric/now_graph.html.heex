@@ -15,50 +15,34 @@
 </style>
 
 <script>
+  function c3_chart (elem, data) {
+    c3.generate({
+      bindto: elem,
+      data: {
+        x: 'x',
+        xFormat: '%Y-%m-%d %H:%M:%S',
+        columns: data
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%d %H:%M:%S'
+          }
+        }
+      }
+    });
+  }
+
   $(function() {
     setTimeout("location.reload(true);", 60000);
 
-    c3.generate({
-      bindto: '#chart_players',
-      data: {
-        columns: <%= raw Jason.encode!(@columns_players) %>
-      }
-    });
-
-    c3.generate({
-      bindto: '#chart_matches',
-      data: {
-        columns: <%= raw Jason.encode!(@columns_matches) %>
-      }
-    });
-
-    c3.generate({
-      bindto: '#chart_matches_start_stop',
-      data: {
-        columns: <%= raw Jason.encode!(@columns_matches_start_stop) %>
-      }
-    });
-
-    c3.generate({
-      bindto: '#chart_user_connections',
-      data: {
-        columns: <%= raw Jason.encode!(@columns_user_connections) %>
-      }
-    });
-
-    c3.generate({
-      bindto: '#chart_bot_connections',
-      data: {
-        columns: <%= raw Jason.encode!(@columns_bot_connections) %>
-      }
-    });
-
-    c3.generate({
-      bindto: '#chart_cpu',
-      data: {
-        columns: <%= raw Jason.encode!(@columns_cpu_load) %>
-      }
-    });
+    c3_chart('#chart_players', <%= raw Jason.encode!([["x" | @axis_key] | @columns_players]) %>);
+    c3_chart('#chart_matches', <%= raw Jason.encode!([["x" | @axis_key] | @columns_matches]) %>);
+    c3_chart('#chart_matches_start_stop', <%= raw Jason.encode!([["x" | @axis_key] | @columns_matches_start_stop]) %>);
+    c3_chart('#chart_user_connections', <%= raw Jason.encode!([["x" | @axis_key] | @columns_user_connections]) %>);
+    c3_chart('#chart_bot_connections', <%= raw Jason.encode!([["x" | @axis_key] | @columns_bot_connections]) %>);
+    c3_chart('#chart_cpu', <%= raw Jason.encode!([["x" | @axis_key] | @columns_cpu_load]) %>);
   });
 </script>
 
