@@ -44,6 +44,9 @@ or are following someone that voted yes are also moved to that lobby.
 
 
 ---- Boss only ----
+$rename <new name>
+Renames the lobby to the name given
+
 $reset-approval
 Resets the list of approved players to just the ones present at the moment (approved players are able to join even if it is locked and without needing a password).
 
@@ -143,9 +146,6 @@ Completes the lobby split now
 
 $cancelsplit
 Cancels the lobby split
-
-$rename <new name>
-Renames the lobby to the name given
 
 $vip <name>
 Places that user at the front of the queue. This command will always output it's use even if used with the % operator.
