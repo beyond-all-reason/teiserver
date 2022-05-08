@@ -54,9 +54,9 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
 
     [reply] = _tachyon_recv(socket)
     message = reply["message"]
-    assert Enum.member?(message, "No commands matching that filter.")
+    assert message == ["No commands matching that filter."]
     assert Enum.count(message) == 1
-    assert not Enum.member?(message, "Displays this help text.")
+    refute Enum.member?(message, "Displays this help text.")
   end
 
   test "help whois", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
@@ -69,7 +69,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     assert Enum.member?(message, "$whois <user>")
     assert Enum.member?(message, "Sends back information about the user specified.")
     assert Enum.count(message) == 2
-    assert not Enum.member?(message, "Displays this help text.")
+    refute Enum.member?(message, "Displays this help text.")
   end
 
   test "help pull", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
@@ -81,10 +81,10 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     [reply] = _tachyon_recv(socket)
     message = reply["message"]
 
-    assert Enum.member?(message, "No commands matching that filter.")
+    assert message == ["No commands matching that filter."]
     assert Enum.count(message) == 1
-    assert not Enum.member?(message, "Pulls a given user into the battle.")
-    assert not Enum.member?(message, "Displays this help text.")
+    refute Enum.member?(message, "Pulls a given user into the battle.")
+    refute Enum.member?(message, "Displays this help text.")
 
     #Moderator pull test
     User.update_user(%{user | moderator: true})
@@ -95,10 +95,10 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     [reply] = _tachyon_recv(socket)
     message = reply["message"]
 
-    assert not Enum.member?(message, "No commands matching that filter.")
+    refute message == ["No commands matching that filter."]
     assert Enum.count(message) == 2
     assert Enum.member?(message, "Pulls a given user into the battle.")
-    assert not Enum.member?(message, "Displays this help text.")
+    refute Enum.member?(message, "Displays this help text.")
   end
 
   test "whoami", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
