@@ -1,9 +1,12 @@
 defmodule Teiserver.Account.RecalculateUserStatTask do
   use Oban.Worker, queue: :cleanup
 
-  alias Teiserver.{User, Account, Telemetry}
+  alias Central.Repo
+  import Ecto.Query, warn: false
+  alias Teiserver.{User, Account}
+  alias alias Teiserver.Telemetry.ServerDayLog
 
-  # Teiserver.Account.RecalculateUserStatTask.perform(%{})
+  # Teiserver.Account.RecalculateUserStatTask.perform(nil)
 
   @empty_row %{
     menu: 0,
@@ -15,43 +18,65 @@ defmodule Teiserver.Account.RecalculateUserStatTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
-    Telemetry.list_server_day_logs(limit: :infinity)
-    |> Enum.map(&convert_to_user_log/1)
-    |> List.flatten
-    |> Enum.group_by(fn {userid, _} ->
-      userid
-    end, fn {_, user_data} ->
-      user_data
-    end)
-    |> Enum.filter(fn {userid, _} ->
-      username = User.get_username(userid)
-      username != nil
-    end)
-    |> Enum.each(fn {userid, data_rows} ->
-      data = data_rows
-      |> Enum.reduce(@empty_row, fn (row, acc) ->
-        combine_row(row, acc)
+    start_date = Timex.now()
+      |> Timex.shift(hours: -24)
+      |> Timex.to_unix
+
+    start_date = round(start_date/60)
+
+    user_ids = Account.list_users(
+      search: [
+        data_greater_than: {"last_login", start_date |> to_string},
+        data_equal: {"bot", "false"}
+      ],
+      limit: :infinity,
+      select: [:id]
+    ) |> Enum.map(fn %{id: id} -> id end)
+
+    query = from logs in ServerDayLog
+
+    stream = Repo.stream(query, max_rows: 50)
+    {:ok, _result} = Repo.transaction(fn() ->
+      stream
+      |> Enum.map(&convert_to_user_log/1)
+      |> List.flatten
+      |> Enum.group_by(fn {userid, _} ->
+        userid
+      end, fn {_, user_data} ->
+        user_data
       end)
+      |> Enum.filter(fn {userid, _} ->
+        if Enum.member?(user_ids, userid) do
+          username = User.get_username(userid)
+          username != nil
+        end
+      end)
+      |> Enum.each(fn {userid, data_rows} ->
+        data = data_rows
+        |> Enum.reduce(@empty_row, fn (row, acc) ->
+          combine_row(row, acc)
+        end)
 
-      Account.update_user_stat(userid, %{
-        menu_minutes: data.menu,
-        lobby_minutes: data.lobby,
-        spectator_minutes: data.spectator,
-        player_minutes: data.player,
-        total_minutes: data.menu + data.lobby + data.spectator + data.player
-      })
+        Account.update_user_stat(userid, %{
+          menu_minutes: data.menu,
+          lobby_minutes: data.lobby,
+          spectator_minutes: data.spectator,
+          player_minutes: data.player,
+          total_minutes: data.menu + data.lobby + data.spectator + data.player
+        })
 
-      user = User.get_user_by_id(userid)
-      User.update_user(%{user | rank: User.calculate_rank(user.id)}, persist: true)
+        user = User.get_user_by_id(userid)
+        User.update_user(%{user | rank: User.calculate_rank(user.id)}, persist: true)
 
-      Account.update_user_roles(Account.get_user!(userid))
+        Account.update_user_roles(Account.get_user!(userid))
+      end)
     end)
 
     :ok
   end
 
   # Take the log of the day and extract the user related data we actually
-  # want to aggregrate
+  # want to aggregate
   defp convert_to_user_log(%{data: data}) do
     user_data = data["minutes_per_user"]
 

@@ -19,8 +19,15 @@ defmodule Teiserver.Telemetry do
     GenServer.call(TelemetryServer, :get_totals_and_reset)
   end
 
+  @spec increment(any) :: :ok
   def increment(key) do
     send(TelemetryServer, {:increment, key})
+    :ok
+  end
+
+  @spec cast_to_server(any) :: :ok
+  def cast_to_server(msg) do
+    GenServer.cast(TelemetryServer, msg)
   end
 
   @spec metrics() :: List.t()
@@ -946,7 +953,7 @@ defmodule Teiserver.Telemetry do
   end
 
 
-    alias Teiserver.Telemetry.PropertyType
+  alias Teiserver.Telemetry.PropertyType
   alias Teiserver.Telemetry.PropertyTypeLib
 
   @spec property_type_query(List.t()) :: Ecto.Query.t()
@@ -1043,6 +1050,105 @@ defmodule Teiserver.Telemetry do
   @spec delete_property_type(PropertyType.t()) :: {:ok, PropertyType.t()} | {:error, Ecto.Changeset.t()}
   def delete_property_type(%PropertyType{} = property_type) do
     Repo.delete(property_type)
+  end
+
+    alias Teiserver.Telemetry.GameEventType
+  alias Teiserver.Telemetry.GameEventTypeLib
+
+  @spec game_event_type_query(List.t()) :: Ecto.Query.t()
+  def game_event_type_query(args) do
+    game_event_type_query(nil, args)
+  end
+
+  @spec game_event_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def game_event_type_query(id, args) do
+    GameEventTypeLib.query_game_event_types
+    |> GameEventTypeLib.search(%{id: id})
+    |> GameEventTypeLib.search(args[:search])
+    |> GameEventTypeLib.preload(args[:preload])
+    |> GameEventTypeLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of game_event_types.
+
+  ## Examples
+
+      iex> list_game_event_types()
+      [%GameEventType{}, ...]
+
+  """
+  @spec list_game_event_types(List.t()) :: List.t()
+  def list_game_event_types(args \\ []) do
+    game_event_type_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Gets a single game_event_type.
+
+  Raises `Ecto.NoResultsError` if the GameEventType does not exist.
+
+  ## Examples
+
+      iex> get_game_event_type(123)
+      %GameEventType{}
+
+      iex> get_game_event_type(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_game_event_type(Integer.t() | List.t()) :: GameEventType.t()
+  @spec get_game_event_type(Integer.t(), List.t()) :: GameEventType.t()
+  def get_game_event_type(id) when not is_list(id) do
+    game_event_type_query(id, [])
+    |> Repo.one
+  end
+  def get_game_event_type(args) do
+    game_event_type_query(nil, args)
+    |> Repo.one
+  end
+  def get_game_event_type(id, args) do
+    game_event_type_query(id, args)
+    |> Repo.one
+  end
+
+  @doc """
+  Creates a game_event_type.
+
+  ## Examples
+
+      iex> create_game_event_type(%{field: value})
+      {:ok, %GameEventType{}}
+
+      iex> create_game_event_type(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_game_event_type(Map.t()) :: {:ok, GameEventType.t()} | {:error, Ecto.Changeset.t()}
+  def create_game_event_type(attrs \\ %{}) do
+    %GameEventType{}
+    |> GameEventType.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Deletes a GameEventType.
+
+  ## Examples
+
+      iex> delete_game_event_type(game_event_type)
+      {:ok, %GameEventType{}}
+
+      iex> delete_game_event_type(game_event_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_game_event_type(GameEventType.t()) :: {:ok, GameEventType.t()} | {:error, Ecto.Changeset.t()}
+  def delete_game_event_type(%GameEventType{} = game_event_type) do
+    Repo.delete(game_event_type)
   end
 
   alias Teiserver.Telemetry.UnauthProperty
@@ -1319,6 +1425,128 @@ defmodule Teiserver.Telemetry do
     Repo.delete(client_event)
   end
 
+    alias Teiserver.Telemetry.UnauthGameEvent
+  alias Teiserver.Telemetry.UnauthGameEventLib
+
+  @spec unauth_game_event_query(List.t()) :: Ecto.Query.t()
+  def unauth_game_event_query(args) do
+    unauth_game_event_query(nil, args)
+  end
+
+  @spec unauth_game_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def unauth_game_event_query(_id, args) do
+    UnauthGameEventLib.query_unauth_game_events
+    |> UnauthGameEventLib.search(args[:search])
+    |> UnauthGameEventLib.preload(args[:preload])
+    |> UnauthGameEventLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of unauth_game_events.
+
+  ## Examples
+
+      iex> list_unauth_game_events()
+      [%UnauthGameEvent{}, ...]
+
+  """
+  @spec list_unauth_game_events(List.t()) :: List.t()
+  def list_unauth_game_events(args \\ []) do
+    unauth_game_event_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Creates a unauth_game_event.
+
+  ## Examples
+
+      iex> create_unauth_game_event(%{field: value})
+      {:ok, %UnauthGameEvent{}}
+
+      iex> create_unauth_game_event(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_unauth_game_event(Map.t()) :: {:ok, UnauthGameEvent.t()} | {:error, Ecto.Changeset.t()}
+  def create_unauth_game_event(attrs \\ %{}) do
+    %UnauthGameEvent{}
+    |> UnauthGameEvent.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def get_unauth_game_events_summary(args) do
+    query = from unauth_game_events in UnauthGameEvent,
+      join: game_event_types in assoc(unauth_game_events, :game_event_type),
+      group_by: game_event_types.name,
+      select: {game_event_types.name, count(unauth_game_events.game_event_type_id)}
+
+    query = query
+    |> UnauthGameEventLib.search(args)
+
+    Repo.all(query)
+    |> Map.new()
+  end
+
+
+  alias Teiserver.Telemetry.{ClientGameEvent, ClientGameEventLib}
+
+  @spec client_game_event_query(List.t()) :: Ecto.Query.t()
+  def client_game_event_query(args) do
+    client_game_event_query(nil, args)
+  end
+
+  @spec client_game_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def client_game_event_query(_id, args) do
+    ClientGameEventLib.query_client_game_events
+    |> ClientGameEventLib.search(args[:search])
+    |> ClientGameEventLib.preload(args[:preload])
+    |> ClientGameEventLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of client_game_events.
+
+  ## Examples
+
+      iex> list_client_game_events()
+      [%ClientGameEvent{}, ...]
+
+  """
+  @spec list_client_game_events(List.t()) :: List.t()
+  def list_client_game_events(args \\ []) do
+    client_game_event_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Creates a client_game_event.
+
+  ## Examples
+
+      iex> create_client_game_event(%{field: value})
+      {:ok, %ClientGameEvent{}}
+
+      iex> create_client_game_event(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_client_game_event(Map.t()) :: {:ok, ClientGameEvent.t()} | {:error, Ecto.Changeset.t()}
+  def create_client_game_event(attrs \\ %{}) do
+    %ClientGameEvent{}
+    |> ClientGameEvent.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @spec delete_client_game_event(ClientGameEvent.t()) :: {:ok, ClientGameEvent.t()} | {:error, Ecto.Changeset.t()}
+  def delete_client_game_event(%ClientGameEvent{} = client_game_event) do
+    Repo.delete(client_game_event)
+  end
+
   def get_client_events_summary(args) do
     query = from client_events in ClientEvent,
       join: event_types in assoc(client_events, :event_type),
@@ -1429,6 +1657,35 @@ defmodule Teiserver.Telemetry do
     end
   end
 
+  def log_client_game_event(nil, game_event_type_name, value, hash) do
+    game_event_type_id = get_or_add_game_event_type(game_event_type_name)
+    create_unauth_game_event(%{
+      game_event_type_id: game_event_type_id,
+      hash: hash,
+      value: value,
+      timestamp: Timex.now()
+    })
+  end
+
+
+  def log_client_game_event(userid, game_event_type_name, value, _hash) do
+    game_event_type_id = get_or_add_game_event_type(game_event_type_name)
+
+    result = create_client_game_event(%{
+      game_event_type_id: game_event_type_id,
+      user_id: userid,
+      value: value,
+      timestamp: Timex.now()
+    })
+
+    case result do
+      {:ok, _game_event} ->
+        result
+      _ ->
+        result
+    end
+  end
+
   def get_or_add_property_type(name) do
     name = String.trim(name)
 
@@ -1457,6 +1714,23 @@ defmodule Teiserver.Telemetry do
             |> Repo.insert()
 
           event.id
+        [%{id: id} | _] ->
+          id
+      end
+    end)
+  end
+
+  def get_or_add_game_event_type(name) do
+    name = String.trim(name)
+
+    Central.cache_get_or_store(:teiserver_telemetry_game_event_types, name, fn ->
+      case list_game_event_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
+        [] ->
+          {:ok, game_event} = %GameEventType{}
+            |> GameEventType.changeset(%{name: name})
+            |> Repo.insert()
+
+          game_event.id
         [%{id: id} | _] ->
           id
       end

@@ -101,6 +101,34 @@ defmodule Teiserver.SpringTelemetryTest do
     assert Enum.count(Telemetry.list_client_events()) == 1
   end
 
+  test "log_client_game_event call", %{socket: socket} do
+    # Bad/malformed data
+    _send_raw(socket, "c.telemetry.log_client_game_event game_event_name e30=-- rXTrJC0nAdWUmCH8Q7+kWQ==--\n")
+    reply = _recv_raw(socket)
+    assert reply == :timeout
+
+    assert Enum.count(Telemetry.list_unauth_game_events()) == 0
+    assert Enum.count(Telemetry.list_client_game_events()) == 0
+
+    # Good data
+    _send_raw(socket, "c.telemetry.log_client_game_event game_event_name e30= TXlWYWx1ZUdvZXNoZXJl\n")
+    reply = _recv_raw(socket)
+    assert reply == :timeout
+
+    assert Enum.count(Telemetry.list_unauth_game_events()) == 0
+    assert Enum.count(Telemetry.list_client_game_events()) == 1
+
+    # Unauth
+    %{socket: socket_raw} = raw_setup()
+    _recv_raw(socket_raw)
+    _send_raw(socket_raw, "c.telemetry.log_client_game_event game_event_name e30= TXlWYWx1ZUdvZXNoZXJl\n")
+    reply = _recv_raw(socket_raw)
+    assert reply == :timeout
+
+    assert Enum.count(Telemetry.list_unauth_game_events()) == 1
+    assert Enum.count(Telemetry.list_client_game_events()) == 1
+  end
+
   test "update_client_property call", %{socket: socket} do
     # Bad/malformed data
     _send_raw(socket, "c.telemetry.update_client_property property_name e30=-- rXTrJC0nAdWUmCH8Q7+kWQ==--\n")

@@ -47,6 +47,13 @@ defmodule Central.Helpers.NumberHelper do
   end
   def c_round(v), do: round(v)
 
+
+  @spec round(number(), non_neg_integer()) :: integer()
+  def round(value, decimal_places) do
+    dp_mult = :math.pow(10, decimal_places)
+    round(value * dp_mult)/dp_mult
+  end
+
   # def dec_parse(""), do: Decimal.new(0)
   # def dec_parse(nil), do: Decimal.new(0)
   # def dec_parse(d) when is_number(d), do: Decimal.new(d)

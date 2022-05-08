@@ -3,9 +3,9 @@ defmodule Teiserver.Game.QueueServer do
   require Logger
   alias Teiserver.Battle.Lobby
   alias Phoenix.PubSub
-  alias Teiserver.{Coordinator, Client}
+  alias Teiserver.{Coordinator, Client, Telemetry}
 
-  # @default_tick_interval 5_000
+  @default_telemetry_interval 10_000
   @default_tick_interval 1_000
 
   @ready_wait_time 15
@@ -145,6 +145,15 @@ defmodule Teiserver.Game.QueueServer do
         player_map: new_player_map
     }
     {:noreply, new_state}
+  end
+
+  def handle_info(:telemetry_tick, state) do
+    Telemetry.cast_to_server({:matchmaking_update, state.id, %{
+      last_wait_time: state.last_wait_time,
+      player_count: state.player_count
+    }})
+
+    {:noreply, state}
   end
 
   def handle_info(:tick, state) do
@@ -396,6 +405,7 @@ defmodule Teiserver.Game.QueueServer do
   def init(opts) do
     tick_interval = Map.get(opts.queue.settings, "tick_interval", @default_tick_interval)
     :timer.send_interval(tick_interval, self(), :tick)
+    :timer.send_interval(@default_telemetry_interval, self(), :telemetry_tick)
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(

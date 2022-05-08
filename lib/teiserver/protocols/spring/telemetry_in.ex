@@ -66,6 +66,16 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
     reply(:spring, :okay, result, msg_id, state)
   end
 
+  def do_handle("log_client_game_event", data, _msg_id, state) do
+    client_game_event(data, state)
+    state
+  end
+
+  def do_handle("log_client_game_event_test", data, msg_id, state) do
+    result = client_game_event(data, state)
+    reply(:spring, :okay, result, msg_id, state)
+  end
+
   def do_handle(cmd, data, msg_id, state) do
     SpringIn._no_match(state, "c.telemetry." <> cmd, msg_id, data)
   end
@@ -108,6 +118,27 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
           end
         nil ->
           # Logger.error("update_client_property:no match - #{data}")
+          "no match"
+      end
+    else
+      "exceeds max_length"
+    end
+  end
+
+  defp client_game_event(data, state) do
+    if String.length(data) < 1024 do
+      case Regex.run(~r/(\S+) (\S+) (\S+)/u, data) do
+        [_, event, value64, hash] ->
+          case Spring.decode_value(value64) do
+            {:ok, value} ->
+              Telemetry.log_client_game_event(state.userid, event, value, hash)
+              "success"
+            {:error, reason} ->
+              # Logger.error("log_client_event:#{reason} - #{data}")
+              reason
+          end
+        nil ->
+          # Logger.error("log_client_event:no match - #{data}")
           "no match"
       end
     else

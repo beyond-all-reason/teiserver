@@ -143,7 +143,7 @@ config :central, Oban,
         # 2:43
         {"43 2 * * *", Teiserver.Game.AchievementCleanupTask},
 
-        # 3:02 am every day, gives time for multiple telemetry day tasks to run if needed
+        # 0302 and 1202 every day, gives time for multiple telemetry day tasks to run if needed
         {"2 3 * * *", Teiserver.Account.RecalculateUserStatTask},
         {"2 12 * * *", Teiserver.Account.RecalculateUserStatTask},
       ]

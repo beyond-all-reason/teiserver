@@ -11,8 +11,16 @@
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
         <h4>
+          <%
+            player_count = @battles |> Enum.reduce(0, fn (b, acc) -> acc + b.player_count end)
+            spectator_count = @battles |> Enum.reduce(0, fn (b, acc) -> acc + b.spectator_count end)
+          %>
           <%= if Enum.count(@battles) > 0 do %>
-            Battles - <%= Enum.count(@battles) %>
+            Battles: <%= Enum.count(@battles) %>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            Players: <%= player_count %>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            Spectators: <%= spectator_count %>
           <% else %>
             No battles found
           <% end %>
@@ -41,7 +49,7 @@
           <td><%= lobby.map_name %></td>
           <td>
             <%= if lobby.in_progress do %>
-              <i class='fa-fw fa-play fa-lock'></i>
+              <i class='fa-fw fa-solid fa-play'></i>
             <% end %>
           </td>
           <td>
