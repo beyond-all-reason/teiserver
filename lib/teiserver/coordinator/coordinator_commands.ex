@@ -42,11 +42,11 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   # Public commands
   @spec do_handle(map(), map()) :: map()
-  defp do_handle(%{command: "help", senderid: senderid} = cmd, state) do
+  defp do_handle(%{command: "help", senderid: senderid, remaining: remaining} = cmd, state) do
     user = User.get_user_by_id(senderid)
     host_id = Map.get(cmd, :host_id, nil)
 
-    messages = CoordinatorLib.help(user, host_id == senderid)
+    messages = CoordinatorLib.help(user, host_id == senderid, remaining)
     |> String.split("\n")
 
     say_command(cmd)
