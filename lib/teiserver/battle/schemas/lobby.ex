@@ -155,6 +155,7 @@ defmodule Teiserver.Battle.Lobby do
     Teiserver.Throttles.stop_throttle("LobbyThrottle:#{battle_lobby_id}")
   end
 
+  @spec add_bot_to_battle(T.lobby_id(), map()) :: :ok
   def add_bot_to_battle(lobby_id, bot) do
     battle = get_battle(lobby_id)
     new_bots = Map.put(battle.bots, bot.name, bot)
@@ -172,8 +173,10 @@ defmodule Teiserver.Battle.Lobby do
       "teiserver_lobby_updates:#{battle.id}",
       {:lobby_update, :add_bot, battle.id, bot.name}
     )
+    :ok
   end
 
+  @spec update_bot(T.lobby_id(), String.t(), map()) :: nil | :ok
   def update_bot(lobby_id, botname, "0", _), do: remove_bot(lobby_id, botname)
 
   def update_bot(lobby_id, botname, new_data) do
@@ -201,9 +204,11 @@ defmodule Teiserver.Battle.Lobby do
           "teiserver_lobby_updates:#{battle.id}",
           {:lobby_update, :update_bot, battle.id, botname}
         )
+        :ok
     end
   end
 
+  @spec remove_bot(T.lobby_id(), String.t()) :: :ok
   def remove_bot(lobby_id, botname) do
     battle = get_battle(lobby_id)
     new_bots = Map.delete(battle.bots, botname)
@@ -221,6 +226,7 @@ defmodule Teiserver.Battle.Lobby do
       "teiserver_lobby_updates:#{battle.id}",
       {:lobby_update, :remove_bot, battle.id, botname}
     )
+    :ok
   end
 
   # Used to send the user PID a join battle command
