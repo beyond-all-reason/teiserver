@@ -58,13 +58,10 @@ defmodule Teiserver.Battle.Lobby do
   def new_bot(data) do
     Map.merge(
       %{
-        ready: true,
         team_number: 0,
         team_colour: 0,
         ally_team_number: 0,
-        player: true,
         handicap: 0,
-        sync: 1,
         side: 0
       },
       data
