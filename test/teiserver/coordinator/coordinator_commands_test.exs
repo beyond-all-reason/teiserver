@@ -55,7 +55,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     [reply] = _tachyon_recv(socket)
     message = reply["message"]
     assert message == ["No commands matching that filter."]
-    assert Enum.count(message) == 1
     refute Enum.member?(message, "Displays this help text.")
   end
 
@@ -82,7 +81,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     message = reply["message"]
 
     assert message == ["No commands matching that filter."]
-    assert Enum.count(message) == 1
     refute Enum.member?(message, "Pulls a given user into the battle.")
     refute Enum.member?(message, "Displays this help text.")
 
