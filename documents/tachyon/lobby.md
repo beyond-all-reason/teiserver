@@ -21,7 +21,7 @@
 ```json
 {
   "cmd": "c.lobby.query",
-  "query": %{
+  "query": {
     "locked": false
   }
 }
