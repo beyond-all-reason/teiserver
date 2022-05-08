@@ -7,18 +7,18 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
 
     commands = [
       #---- Globally useable ----
-      {"help", [], "Displays this help text", :everybody},
-      {"whoami", [], "Sends back information about who you are", :everybody},
-      {"whois", ["user"], "Sends back information about the user specified", :everybody},
-      {"discord", [], "Allows linking of your discord account to your BAR account", :everybody},
-      {"mute", ["username"], "Mutes that user and prevents you seeing their messages", :everybody},
-      {"unmute", ["username"], "Un-mutes that user and allows you to see their messages", :everybody},
-      {"coc", ["term"], "Searches the code of conduct and returns items with a textual match in them", :everybody},
+      {"help", [], "Displays this help text.", :everybody},
+      {"whoami", [], "Sends back information about who you are.", :everybody},
+      {"whois", ["user"], "Sends back information about the user specified.", :everybody},
+      {"discord", [], "Allows linking of your discord account to your BAR account.", :everybody},
+      {"mute", ["username"], "Mutes that user and prevents you seeing their messages.", :everybody},
+      {"unmute", ["username"], "Un-mutes that user and allows you to see their messages.", :everybody},
+      {"coc", ["term"], "Searches the code of conduct and returns items with a textual match in them.", :everybody},
 
       #---- Only useable in a battle lobby ----
       {"joinq", [], "Adds you to the queue to join when a space opens up, you will be automatically added to the game as a player. If already a member it has no effect.", :everybody},
       {"leaveq", [], "Removes you from the join queue.", :everybody},
-      {"status", [], "Status info about the battle lobby", :everybody},
+      {"status", [], "Status info about the battle lobby.", :everybody},
       {"splitlobby", [], "Causes a \"vote\" to start where other players can elect to join you in splitting the lobby, follow someone
 of their choosing or remain in place. After 20 seconds you are moved to a new (empty) lobby and those that voted yes
 or are following someone that voted yes are also moved to that lobby.", :everybody},
@@ -88,17 +88,17 @@ Multiple locks can be engaged at the same time
 
   case result do
     [{cmd, args, desc, _group}] ->
-      arg_str = args |> Enum.map(fn a -> "<#{a}>" end) |> Enum.join(" ")
-      "#{cmd} #{arg_str}\n#{desc}"
+      arg_str = args |> Enum.map(fn a -> " <#{a}>" end)
+      "$#{cmd}#{arg_str}\n#{desc}"
     _ ->
       if command != "" do
-        "No commands matching that filter"
+        "No commands matching that filter."
       else
-
-
-        Enum.map(result, fn {cmd, args, desc, _group} ->
-        arg_str = args |> Enum.map(fn a -> "<#{a}>" end) |> Enum.join(" ")
-        "\n#{cmd} #{arg_str}\n#{desc}\n" end)
+        result
+        |> Enum.map(fn {cmd, args, desc, _group} ->
+          arg_str = args |> Enum.map(fn a -> " <#{a}>" end)
+          "\n$#{cmd}#{arg_str}\n#{desc}\n"
+        end)
         |> List.to_string()
       end
     end

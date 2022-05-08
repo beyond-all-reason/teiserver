@@ -32,6 +32,73 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     [reply] = _tachyon_recv(socket)
     message = reply["message"]
     assert Enum.member?(message, "$whoami")
+
+    #Moderator help test
+    User.update_user(%{user | moderator: true})
+    message_coordinator(socket, "$help")
+    [reply] = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+
+    [reply] = _tachyon_recv(socket)
+    message = reply["message"]
+
+    assert Enum.member?(message, "$whoami")
+    assert Enum.member?(message, "$pull")
+    assert Enum.member?(message, "$rename")
+  end
+
+  test "help not existing", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
+    message_coordinator(socket, "$help give 10 corjugg Lexon")
+    [reply] = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+
+    [reply] = _tachyon_recv(socket)
+    message = reply["message"]
+    assert Enum.member?(message, "No commands matching that filter.")
+    assert Enum.count(message) == 1
+    assert not Enum.member?(message, "Displays this help text.")
+  end
+
+  test "help whois", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
+    message_coordinator(socket, "$help whois")
+    [reply] = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+
+    [reply] = _tachyon_recv(socket)
+    message = reply["message"]
+    assert Enum.member?(message, "$whois <user>")
+    assert Enum.member?(message, "Sends back information about the user specified.")
+    assert Enum.count(message) == 2
+    assert not Enum.member?(message, "Displays this help text.")
+  end
+
+  test "help pull", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
+    #Normal pull test
+    message_coordinator(socket, "$help pull")
+    [reply] = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+
+    [reply] = _tachyon_recv(socket)
+    message = reply["message"]
+
+    assert Enum.member?(message, "No commands matching that filter.")
+    assert Enum.count(message) == 1
+    assert not Enum.member?(message, "Pulls a given user into the battle.")
+    assert not Enum.member?(message, "Displays this help text.")
+
+    #Moderator pull test
+    User.update_user(%{user | moderator: true})
+    message_coordinator(socket, "$help pull")
+    [reply] = _tachyon_recv(socket)
+    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+
+    [reply] = _tachyon_recv(socket)
+    message = reply["message"]
+
+    assert not Enum.member?(message, "No commands matching that filter.")
+    assert Enum.count(message) == 2
+    assert Enum.member?(message, "Pulls a given user into the battle.")
+    assert not Enum.member?(message, "Displays this help text.")
   end
 
   test "whoami", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
