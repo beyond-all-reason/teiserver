@@ -43,8 +43,8 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     message = reply["message"]
 
     assert Enum.member?(message, "$whoami")
-    assert Enum.member?(message, "$pull")
-    assert Enum.member?(message, "$rename")
+    assert Enum.member?(message, "$pull <user>")
+    assert Enum.member?(message, "$success")
   end
 
   test "help not existing", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
