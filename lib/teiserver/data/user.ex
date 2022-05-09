@@ -859,14 +859,34 @@ defmodule Teiserver.User do
   end
 
   @spec unbridge_user(T.user(), String.t(), non_neg_integer(), String.t()) :: any
-  def unbridge_user(user, message, flagged_words, location) do
+  def unbridge_user(user, message, flagged_word_count, location) do
     if not is_restricted?(user, ["Bridging"]) do
+      coordinator_user_id = Coordinator.get_coordinator_userid()
+
+      {:ok, _report} = Central.Account.create_report(%{
+        "location" => "Automod",
+        "location_id" => nil,
+        "reason" => "Automod detected flagged words",
+        "reporter_id" => coordinator_user_id,
+        "target_id" => user.id,
+        "response_text" => "Unbridging because said: #{message}",
+        "response_action" => "Restrict",
+        "responded_at" => Timex.now(),
+        "followup" => nil,
+        "code_references" => [],
+        "expires" => nil,
+        "responder_id" => coordinator_user_id,
+        "action_data" => %{
+          "restriction_list" => ["Bridging"]
+        }
+      })
+
       restrict_user(user, "Bridging")
 
       client = Client.get_client_by_id(user.id) || %{ip: "no client"}
       add_audit_log(user.id, client.ip, "Teiserver:De-bridged user", %{
         message: message,
-        flagged_word_count: flagged_words,
+        flagged_word_count: flagged_word_count,
         location: location
       })
     end
@@ -877,8 +897,8 @@ defmodule Teiserver.User do
   def is_restricted?(userid, restriction) when is_integer(userid), do: is_restricted?(get_user_by_id(userid), restriction)
   def is_restricted?(%{restrictions: restrictions}, restriction_list) when is_list(restriction_list) do
     restriction_list
-    |> Enum.map(fn r -> Enum.member?(restrictions, r) end)
-    |> Enum.any?
+      |> Enum.map(fn r -> Enum.member?(restrictions, r) end)
+      |> Enum.any?
   end
   def is_restricted?(%{restrictions: restrictions}, the_restriction) do
     Enum.member?(restrictions, the_restriction)
