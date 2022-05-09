@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.UserIn do
-  alias Teiserver.{User}
+  alias Teiserver.{User, Client}
   alias Teiserver.Protocols.Tachyon.V1.Tachyon
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
 
@@ -8,12 +8,22 @@ defmodule Teiserver.Protocols.Tachyon.V1.UserIn do
     state
   end
 
-  def do_handle("list_users_from_ids", %{"id_list" => id_list}, state) do
-    users = User.list_users(id_list)
+  def do_handle("list_users_from_ids", %{"id_list" => id_list} = args, state) do
+    users = id_list
+      |> User.list_users
       |> Enum.filter(fn u -> u != nil end)
       |> Enum.map(fn u -> Tachyon.convert_object(:user, u) end)
 
-    reply(:user, :user_list, users, state)
+    if Map.get(args, "include_clients", false) do
+      clients = id_list
+        |> Client.list_clients()
+        |> Enum.filter(fn c -> c != nil end)
+        |> Enum.map(fn c -> Tachyon.convert_object(:client, c) end)
+
+      reply(:user, :user_and_client_list, {users, clients}, state)
+    else
+      reply(:user, :user_list, users, state)
+    end
   end
 
   def do_handle("list_friend_ids", _, state) do

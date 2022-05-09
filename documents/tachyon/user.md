@@ -4,6 +4,9 @@ Returns a list of users as listed by the ids.
 #### Arguments
 `id_list` - list (User.id)
 
+##### Optional
+`include_clients` - Booalen - default false
+
 #### Response
 * users :: List (User)
 
@@ -11,15 +14,32 @@ Returns a list of users as listed by the ids.
 ```json
 {
   "cmd": "c.user.list_users_from_ids",
-  "id_list": [1, 2, 3]
+  "id_list": [1, 2, 3],
+  "include_clients": true
 }
 
+// Without clients
 {
-  "cmd": "s.user.query",
+  "cmd": "s.user.user_list",
   "user_list": [
     User,
     User,
     User
+  ]
+}
+
+// With clients
+{
+  "cmd": "s.user.user_list",
+  "user_list": [
+    User,
+    User,
+    User
+  ],
+  "client_list": [
+    Client,
+    Client,
+    Client
   ]
 }
 ```

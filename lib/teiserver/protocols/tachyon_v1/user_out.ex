@@ -7,6 +7,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.UserOut do
     }
   end
 
+  def do_reply(:user_and_client_list, {users, clients}) do
+    %{
+      cmd: "s.user.user_and_client_list",
+      users: users,
+      clients: clients
+    }
+  end
+
   def do_reply(:friend_id_list, id_list) do
     %{
       cmd: "s.user.list_friend_ids",

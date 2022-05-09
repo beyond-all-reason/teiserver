@@ -69,6 +69,25 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     assert users_map[friend1.id]["name"] == friend1.name
     assert users_map[friend2.id]["name"] == friend2.name
 
+    # Now include clients
+    _tachyon_send(socket, %{"cmd" => "c.user.list_users_from_ids", "id_list" => friend_list, "include_clients" => true})
+    [resp] = _tachyon_recv(socket)
+    assert resp["cmd"] == "s.user.user_and_client_list"
+    users_map = resp["users"]
+      |> Map.new(fn u -> {u["id"], u} end)
+
+    assert Enum.count(resp["users"]) == 2
+    assert users_map[friend1.id]["name"] == friend1.name
+    assert users_map[friend2.id]["name"] == friend2.name
+
+    clients_map = resp["clients"]
+      |> Map.new(fn u -> {u["userid"], u} end)
+
+    # Only one of the users is logged in so only 1 client
+    assert Enum.count(resp["clients"]) == 1
+    assert clients_map[friend1.id]["ready"] == false
+    assert clients_map[friend2.id] == nil
+
     # Lets get their client state
     _tachyon_send(socket, %{"cmd" => "c.client.list_clients_from_ids", "id_list" => friend_list})
     [resp] = _tachyon_recv(socket)
