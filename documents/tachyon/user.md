@@ -11,7 +11,7 @@ Returns a list of users as listed by the ids.
 ```json
 {
   "cmd": "c.user.list_users_from_ids",
-  "query": Query
+  "id_list": [1, 2, 3]
 }
 
 {
