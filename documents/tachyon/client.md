@@ -10,7 +10,7 @@ Given a list of ids, return information about the relevant clients
 #### Example input/output
 ```json
 {
-  "cmd": "c.client.list_clients",
+  "cmd": "c.client.list_clients_from_ids",
   "id_list": [1, 2, 3]
 }
 
