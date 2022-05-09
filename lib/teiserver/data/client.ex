@@ -164,7 +164,22 @@ defmodule Teiserver.Client do
           case Lobby.get_lobby(client.lobby_id) do
             nil -> :ok
             lobby ->
-              Lobby.update_lobby(%{lobby | in_progress: client.in_game}, nil, :host_updated_clientstatus)
+              case {lobby.in_progress, client.in_game} do
+                {true, false} ->
+                  new_lobby = %{lobby |
+                    in_progress: false,
+                    started_at: nil
+                  }
+                  Lobby.update_lobby(new_lobby, nil, :host_updated_clientstatus)
+                {false, true} ->
+                  new_lobby = %{lobby |
+                    in_progress: true,
+                    started_at: System.system_time(:second)
+                  }
+                  Lobby.update_lobby(new_lobby, nil, :host_updated_clientstatus)
+                _ ->
+                  :ok
+              end
           end
         end
       end

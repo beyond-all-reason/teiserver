@@ -109,6 +109,7 @@ defmodule Teiserver.Battle.Lobby do
 
         # Meta data
         in_progress: false,
+        started_at: nil
       },
       lobby
     )
