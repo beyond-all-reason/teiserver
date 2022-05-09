@@ -20,7 +20,7 @@ defmodule Teiserver.Data.Matchmaking do
   require Logger
   alias Teiserver.Game
   alias Teiserver.Data.QueueStruct
-  alias Teiserver.Game.QueueServer
+  alias Teiserver.Game.OldQueueServer
 
   @spec get_queue(Integer.t()) :: QueueStruct.t() | nil
   def get_queue(id) do
@@ -29,7 +29,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec get_queue_pid(integer) :: pid() | nil
   def get_queue_pid(id) when is_integer(id) do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "QueueServer:#{id}") do
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, "OldQueueServer:#{id}") do
       [{pid, _}] ->
         pid
       _ ->
@@ -67,7 +67,7 @@ defmodule Teiserver.Data.Matchmaking do
     end)
 
     DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
-      QueueServer,
+      OldQueueServer,
       data: %{queue: queue}
     })
     update_queue(queue)

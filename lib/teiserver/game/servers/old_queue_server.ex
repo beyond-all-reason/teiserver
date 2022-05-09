@@ -1,4 +1,4 @@
-defmodule Teiserver.Game.QueueServer do
+defmodule Teiserver.Game.OldQueueServer do
   use GenServer
   require Logger
   alias Teiserver.Battle.Lobby
@@ -269,11 +269,11 @@ defmodule Teiserver.Game.QueueServer do
 
     case empty_battle do
       nil ->
-        Logger.info("QueueServer try_setup_battle no empty battle")
+        Logger.info("OldQueueServer try_setup_battle no empty battle")
         %{state | finding_battle: true}
 
       battle ->
-        Logger.info("QueueServer try_setup_battle found empty battle")
+        Logger.info("OldQueueServer try_setup_battle found empty battle")
         state.players_accepted
         |> Enum.each(fn userid ->
           Lobby.remove_user_from_any_battle(userid)
@@ -288,7 +288,7 @@ defmodule Teiserver.Game.QueueServer do
         midway_state = remove_players(state, state.players_accepted)
 
         # Coordinator sets up the battle
-        Logger.info("QueueServer try_setup_battle starting battle setup")
+        Logger.info("OldQueueServer try_setup_battle starting battle setup")
         map_name = state.map_list |> Enum.random()
         Coordinator.send_to_host(empty_battle.id, "!preset duel")
         :timer.sleep(100)
@@ -300,7 +300,7 @@ defmodule Teiserver.Game.QueueServer do
         :timer.sleep(100)
 
         # Now put the players on their teams, for now we're assuming every game is just a 1v1
-        Logger.info("QueueServer try_setup_battle putting players on teams")
+        Logger.info("OldQueueServer try_setup_battle putting players on teams")
         [p1, p2 | _] = state.players_accepted
         Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p1, senderid: Coordinator.get_coordinator_userid(),
           status: %{
@@ -341,7 +341,7 @@ defmodule Teiserver.Game.QueueServer do
 
         cond do
           all_players == false ->
-            Logger.info("QueueServer try_setup_battle cannot start as not all are players")
+            Logger.info("OldQueueServer try_setup_battle cannot start as not all are players")
             Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched users are not a player. Please rejoin the queue and try again.", battle.id)
 
             battle = Lobby.get_lobby(battle.id)
@@ -349,7 +349,7 @@ defmodule Teiserver.Game.QueueServer do
             Lobby.set_script_tags(battle.id, new_tags)
 
           all_synced == false ->
-            Logger.info("QueueServer try_setup_battle cannot start as not all are synced")
+            Logger.info("OldQueueServer try_setup_battle cannot start as not all are synced")
             Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched players are unsynced. Please rejoin the queue and try again.", battle.id)
 
             battle = Lobby.get_lobby(battle.id)
@@ -357,7 +357,7 @@ defmodule Teiserver.Game.QueueServer do
             Lobby.set_script_tags(battle.id, new_tags)
 
           true ->
-            Logger.info("QueueServer try_setup_battle calling player cv start")
+            Logger.info("OldQueueServer try_setup_battle calling player cv start")
             Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to start the game, if this doesn't work feel free to start it yourselves and report to Teifion.", battle.id)
             :timer.sleep(100)
             Lobby.say(p1, "!cv forcestart", battle.id)
@@ -365,7 +365,7 @@ defmodule Teiserver.Game.QueueServer do
             Lobby.say(p2, "!y", battle.id)
             :timer.sleep(100)
 
-            # Logger.info("QueueServer try_setup_battle calling forcestart")
+            # Logger.info("OldQueueServer try_setup_battle calling forcestart")
             # Coordinator.send_to_host(empty_battle.id, "!forcestart")
             :timer.sleep(100)
 
@@ -410,7 +410,7 @@ defmodule Teiserver.Game.QueueServer do
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
       Teiserver.ServerRegistry,
-      "QueueServer:#{opts.queue.id}",
+      "OldQueueServer:#{opts.queue.id}",
       opts.queue.id
     )
 
