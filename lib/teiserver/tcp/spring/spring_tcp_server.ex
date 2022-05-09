@@ -192,7 +192,7 @@ defmodule Teiserver.SpringTcpServer do
     if diff > Application.get_env(:central, Teiserver)[:heartbeat_timeout] do
       state.protocol_out.reply(:disconnect, "Heartbeat", nil, state)
       if state.username do
-        Logger.error("Heartbeat timeout for #{state.username}")
+        Logger.info("Heartbeat timeout for #{state.username}")
       end
       {:stop, :normal, state}
     else

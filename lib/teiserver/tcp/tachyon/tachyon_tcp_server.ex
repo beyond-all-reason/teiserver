@@ -175,7 +175,7 @@ defmodule Teiserver.TachyonTcpServer do
 
     if diff > Application.get_env(:central, Teiserver)[:heartbeat_timeout] do
       if state.username do
-        Logger.error("Heartbeat timeout for #{state.username}")
+        Logger.info("Heartbeat timeout for #{state.username}")
       end
       {:stop, :normal, state}
     else
