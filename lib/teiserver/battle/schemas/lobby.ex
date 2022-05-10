@@ -1,34 +1,4 @@
 defmodule Teiserver.Battle.Lobby do
-  # @moduledoc false
-  # use CentralWeb, :schema
-
-  # schema "teiserver_battle_lobbies" do
-  #   field :name, :string
-  #   field :data, :map
-
-  #   field :engine_version, :string
-  #   field :game_version, :string
-
-  #   field :closed, :utc_datetime
-
-  #   # has_many :matches, Teiserver.Battle.Match
-
-  #   timestamps()
-  # end
-
-  # @doc """
-  # Builds a changeset based on the `struct` and `params`.
-  # """
-  # @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
-  # def changeset(struct, params \\ %{}) do
-  #   struct
-  #   |> cast(params, ~w(name data engine_version game_version closed)a)
-  #   |> validate_required(~w(name data engine_version game_version)a)
-  # end
-
-  # @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()
-  # def authorize(_, conn, _), do: allow?(conn, "teiserver")
-
   alias Phoenix.PubSub
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -47,13 +17,6 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   def sayprivateex(from_id, to_id, msg, lobby_id), do: LobbyChat.sayprivateex(from_id, to_id, msg, lobby_id)
-
-
-#   @enforce_keys [:id, :founder_id, :founder_name]
-#   defstruct [
-#     :id, :founder_id, :founder_name,
-#     :type, :nattype, :max_players, :password, :rank, :locked, :engine_name, :players, :player_count, :spectator_count, :bot_count, :bots, :ip, :tags, :disabled_units, :start_rectangles, :map_hash, :map_name
-#   ]
 
   def new_bot(data) do
     Map.merge(
@@ -77,7 +40,7 @@ defmodule Teiserver.Battle.Lobby do
       %{
         id: LobbyIdServer.get_next_id(),
 
-        # Expected to be overriden
+        # Expected to be overridden
         ip: nil,
         port: nil,
         engine_version: nil,
@@ -94,8 +57,11 @@ defmodule Teiserver.Battle.Lobby do
         locked: false,
         engine_name: "spring",
         players: [],
+
+        member_count: 0,
         player_count: 0,
         spectator_count: 0,
+
         bot_count: 0,
         bots: %{},
         tags: %{
@@ -283,7 +249,7 @@ defmodule Teiserver.Battle.Lobby do
           )
 
           new_players = [userid | battle_state.players]
-          %{battle_state | players: new_players, player_count: Enum.count(new_players)}
+          %{battle_state | players: new_players, member_count: Enum.count(new_players)}
         end
 
       {:ok, new_state}
@@ -424,7 +390,7 @@ defmodule Teiserver.Battle.Lobby do
             new_state =
               if battle_state != nil do
                 new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
-                %{battle_state | players: new_players, player_count: Enum.count(new_players)}
+                %{battle_state | players: new_players, member_count: Enum.count(new_players)}
               else
                 nil
               end
