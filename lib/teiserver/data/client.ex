@@ -41,6 +41,7 @@ defmodule Teiserver.Client do
         handicap: 0,
         sync: 0,
         side: 0,
+        role: "spectator",
 
         # TODO: Change client:lobby_id to be client:battle_lobby_id
         lobby_id: nil,
@@ -73,6 +74,7 @@ defmodule Teiserver.Client do
       player: false,
       handicap: 0,
       sync: 0,
+      role: "spectator",
       lobby_id: nil,
       current_lobby_id: nil
     }
@@ -146,8 +148,14 @@ defmodule Teiserver.Client do
 
   @spec update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
   def update(%{userid: _} = client, reason) do
+    role = cond do
+      client.player -> "player"
+      true -> "spectator"
+    end
+
     client =
       client
+      |> Map.put(:role, role)
       |> add_client
 
     if reason != :silent do

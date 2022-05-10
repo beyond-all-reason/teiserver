@@ -233,7 +233,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.lobby.updated_client_battlestatus"
     assert reply["client"]["userid"] == player2.id
-    assert reply["client"]["player"] == false
+    assert reply["client"]["role"] == "spectator"
 
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.lobby.say"
