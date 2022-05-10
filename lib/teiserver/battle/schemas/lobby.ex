@@ -74,6 +74,7 @@ defmodule Teiserver.Battle.Lobby do
         queue_id: nil,
 
         # Meta data
+        silence: false,
         in_progress: false,
         started_at: nil
       },
@@ -439,6 +440,18 @@ defmodule Teiserver.Battle.Lobby do
     update_battle(new_battle, team_id, :remove_start_rectangle)
   end
 
+  @spec silence_lobby(T.lobby() | T.lobby_id()) :: T.lobby()
+  def silence_lobby(lobby_id) when is_integer(lobby_id), do: silence_lobby(get_lobby(lobby_id))
+  def silence_lobby(lobby) do
+    update_lobby(%{lobby | silence: true}, nil, :silence)
+  end
+
+  @spec unsilence_lobby(T.lobby() | T.lobby_id()) :: T.lobby()
+  def unsilence_lobby(lobby_id) when is_integer(lobby_id), do: unsilence_lobby(get_lobby(lobby_id))
+  def unsilence_lobby(lobby) do
+    update_lobby(%{lobby | silence: false}, nil, :unsilence)
+  end
+
   # Unit enabling
   def enable_all_units(lobby_id) do
     battle = get_battle(lobby_id)
@@ -607,8 +620,8 @@ defmodule Teiserver.Battle.Lobby do
   def allow?(_, nil, _), do: false
   def allow?(_, _, nil), do: false
 
-  def allow?(userid, :saybattle, _), do: not User.is_restricted?(userid, ["All chat", "Lobby chat"])
-  def allow?(userid, :saybattleex, _), do: not User.is_restricted?(userid, ["All chat", "Lobby chat"])
+  def allow?(userid, :saybattle, lobby_id), do: allow_say?(userid, lobby_id)
+  def allow?(userid, :saybattleex, lobby_id), do: allow_say?(userid, lobby_id)
 
   def allow?(_userid, :host, _), do: true
 
@@ -694,6 +707,25 @@ defmodule Teiserver.Battle.Lobby do
       true ->
         true
     end
+  end
+
+  @spec allow_say?(T.userid(), T.lobby_id()) :: boolean()
+  def allow_say?(userid, lobby_id) do
+    lobby = get_lobby(lobby_id)
+    cond do
+      lobby == nil ->
+        false
+
+      User.is_restricted?(userid, ["All chat", "Lobby chat"]) ->
+        false
+
+      lobby.silence ->
+        false
+
+      true ->
+        true
+    end
+
   end
 
   @spec new_script_password() :: String.t()
