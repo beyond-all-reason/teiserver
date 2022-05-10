@@ -393,6 +393,21 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, state)
   end
 
+  def handle_command(%{command: "afkcheck"} = cmd, state) do
+    afk_check_list = ConsulServer.list_players(state)
+      |> Enum.map(fn %{userid: userid} -> userid end)
+
+    afk_check_list
+      |> Enum.each(fn userid ->
+        User.send_direct_message(state.coordinator_id, userid, "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk.")
+      end)
+
+    ConsulServer.say_command(cmd, %{state |
+      afk_check_list: afk_check_list,
+      afk_check_at: System.system_time(:millisecond)
+    })
+  end
+
   def handle_command(%{command: "rename", remaining: new_name} = cmd, state) do
     Lobby.rename_lobby(state.lobby_id, new_name)
     ConsulServer.say_command(cmd, state)

@@ -25,8 +25,8 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
 
 
       #---- Boss only ----
-      {"reset-approval", [], "Resets the list of approved players to just the ones present at the moment (approved players are able to join even if it is locked and without needing a password).", :host},
-      {"meme", ["meme"], "A predefined bunch of settings for meme games. It's all Rikerss' fault.
+      {"reset-approval", [], "Resets the list of approved players to just the ones present at the moment (approved players are able to join even if it is locked and without needing a password). Requires boss privileges.", :everybody},
+      {"meme", ["meme"], "A predefined bunch of settings for meme games. It's all Rikerss' fault. Requires boss privileges.
 - ticks: Ticks only, don't go Cortex!
 - nodefence: No defences
 - greenfields: No metal extractors
@@ -34,13 +34,14 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
 - poor: No money generation
 - hardt1: T1 but no seaplanes or hovers either
 - crazy: Random combination of several settings
-- undo: Removes all meme effects", :host},
-      {"welcome-message", ["message"], "Sets the welcome message sent to anybody joining the lobby.", :host},
+- undo: Removes all meme effects", :everybody},
+      {"welcome-message", ["message"], "Sets the welcome message sent to anybody joining the lobby. Requires boss privileges.", :everybody},
       {"gatekeeper", ["(default | friends | friendsplay | clan)"],
-"sets the gatekeeper for this battle
+"sets the gatekeeper for this battle. Requires boss privileges.
 > default: no limitations
 > friends allows only friends of existing members to join the lobby
-> friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)", :host},
+> friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)", :everybody},
+      {"afkcheck", [], "Everybody is sent a message asking them to confirm they are not afk. If they don't respond within 20 seconds they are moved to spectators. Requires boss privileges.", :everybody},
 
       #---- "hosts" only ----
       {"lock", ["(team | player | spectator | side)"], "Engages a lock on that mode, when engaged members are unable to change that attribute about themselves.

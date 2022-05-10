@@ -20,6 +20,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
+  @afk_check_duration 20_000
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -57,6 +59,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     new_state = check_queue_status(state)
     player_count_changed(new_state)
     fix_ids(new_state)
+    new_state = afk_check_update(new_state)
 
     # It is possible we can "forget" the coordinator_id
     # no idea how it happens but it can cause issues to arise
@@ -276,6 +279,20 @@ defmodule Teiserver.Coordinator.ConsulServer do
     else
       {:noreply, state}
     end
+  end
+
+  def handle_info({:hello_message, user_id}, state) do
+    new_state = if Enum.member?(state.afk_check_list, user_id) do
+      new_afk_check_list = state.afk_check_list |> List.delete(user_id)
+      time_taken = System.system_time(:millisecond) - state.afk_check_at
+      Logger.info("#{user_id} afk checked in #{time_taken}ms")
+
+      %{state | afk_check_list: new_afk_check_list}
+    else
+      state
+    end
+
+    {:noreply, new_state}
   end
 
   # Chat handler
@@ -598,6 +615,37 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
+  @spec afk_check_update(map()) :: map()
+  defp afk_check_update(%{afk_check_at: nil} = state), do: state
+  defp afk_check_update(state) do
+    time_since_check_start = System.system_time(:millisecond) - state.afk_check_at
+
+    if time_since_check_start > @afk_check_duration do
+      state.afk_check_list
+        |> Enum.each(fn user_id ->
+          Lobby.force_change_client(state.coordinator_id, user_id, %{player: false})
+          User.send_direct_message(state.coordinator_id, user_id, "You were AFK while waiting for a game and have been moved to spectators.")
+        end)
+
+      Lobby.say(state.coordinator_id, "AFK-check is now complete, #{Enum.count(state.afk_check_list)} player(s) were found to be afk", state.lobby_id)
+      %{state |
+        afk_check_list: [],
+        afk_check_at: nil
+      }
+    else
+      case state.afk_check_list do
+        [] ->
+          Lobby.say(state.coordinator_id, "AFK-check is now complete, all players marked as present", state.lobby_id)
+          %{state |
+            afk_check_list: [],
+            afk_check_at: nil
+          }
+        _ ->
+          state
+      end
+    end
+  end
+
   defp player_count_changed(%{join_queue: [], low_priority_join_queue: []} = _state), do: nil
   defp player_count_changed(%{join_queue: join_queue, low_priority_join_queue: low_priority_join_queue} = state) do
     if get_player_count(state) < get_max_player_count(state) do
@@ -630,7 +678,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     min(state.host_teamcount * state.host_teamsize, state.player_limit)
   end
 
-  @spec list_players(map()) :: list()
+  @spec list_players(map()) :: [T.client()]
   def list_players(%{lobby_id: lobby_id}) do
     Lobby.get_lobby(lobby_id)
       |> Map.get(:players)
@@ -743,6 +791,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
       ring_limit_count: Config.get_site_config_cache("teiserver.Ring flood rate limit count"),
       ring_window_size: Config.get_site_config_cache("teiserver.Ring flood rate window size"),
 
+      afk_check_list: [],
+      afk_check_at: nil,
+
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
     }
   end
@@ -794,7 +845,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       lobby_id
     )
 
-    :timer.send_interval(5_000, :tick)
+    :timer.send_interval(2_000, :tick)
     send(self(), :startup)
     {:ok, empty_state(lobby_id)}
   end

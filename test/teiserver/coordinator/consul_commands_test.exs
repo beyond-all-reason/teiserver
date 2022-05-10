@@ -148,6 +148,98 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert readies == [false, true]
   end
 
+  test "afkcheck", %{player: player1, psocket: psocket1, hsocket: hsocket, lobby_id: lobby_id} do
+    %{socket: psocket2, user: player2} = tachyon_auth_setup()
+    Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
+    player_client2 = Client.get_client_by_id(player2.id)
+    Client.update(%{player_client2 |
+      player: true
+    }, :client_updated_battlestatus)
+
+    player_client1 = Client.get_client_by_id(player1.id)
+    player_client2 = Client.get_client_by_id(player2.id)
+    assert player_client1.player == true
+    assert player_client2.player == true
+
+    :timer.sleep(1000)
+
+    _ = _tachyon_recv_until(hsocket)
+    _ = _tachyon_recv_until(psocket1)
+    _ = _tachyon_recv_until(psocket2)
+
+    # Say the command
+    data = %{cmd: "c.lobby.message", message: "$afkcheck"}
+    _tachyon_send(hsocket, data)
+    [reply] = _tachyon_recv(hsocket)
+    assert reply["cmd"] == "s.lobby.say"
+    assert reply["message"] == "$afkcheck"
+
+    # Both players should get a message from the coordinator
+    [reply] = _tachyon_recv(psocket1)
+    assert reply["cmd"] == "s.communication.received_direct_message"
+    assert reply["message"] == "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk."
+
+    [reply] = _tachyon_recv(psocket2)
+    assert reply["cmd"] == "s.communication.received_direct_message"
+    assert reply["message"] == "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk."
+
+    # Check consul state
+    pid = Coordinator.get_consul_pid(lobby_id)
+
+    state = :sys.get_state(pid)
+    assert state.afk_check_list == [player2.id, player1.id]
+    assert state.afk_check_at != nil
+
+    send(pid, :tick)
+
+    state = :sys.get_state(pid)
+    assert state.afk_check_list == [player2.id, player1.id]
+    assert state.afk_check_at != nil
+
+    # Send the wrong message
+    data = %{cmd: "c.communication.send_direct_message", message: "this is the wrong message", recipient_id: Coordinator.get_coordinator_userid()}
+    _tachyon_send(psocket1, data)
+
+    send(pid, :tick)
+    state = :sys.get_state(pid)
+    assert state.afk_check_list == [player2.id, player1.id]
+    assert state.afk_check_at != nil
+
+    # Now send the correct message
+    data = %{cmd: "c.communication.send_direct_message", message: "hello", recipient_id: Coordinator.get_coordinator_userid()}
+    _tachyon_send(psocket1, data)
+
+    send(pid, :tick)
+    state = :sys.get_state(pid)
+    assert state.afk_check_list == [player2.id]
+    assert state.afk_check_at != nil
+
+    _ = _tachyon_recv_until(hsocket)
+
+    # Now we say time has elapsed
+    send(pid, {:put, :afk_check_at, 1})
+    send(pid, :tick)
+
+    state = :sys.get_state(pid)
+    assert state.afk_check_list == []
+    assert state.afk_check_at == nil
+
+    player_client1 = Client.get_client_by_id(player1.id)
+    player_client2 = Client.get_client_by_id(player2.id)
+    assert player_client1.player == true
+    assert player_client2.player == false
+
+    # What has happened now?
+    [reply] = _tachyon_recv(hsocket)
+    assert reply["cmd"] == "s.lobby.updated_client_battlestatus"
+    assert reply["client"]["userid"] == player2.id
+    assert reply["client"]["player"] == false
+
+    [reply] = _tachyon_recv(hsocket)
+    assert reply["cmd"] == "s.lobby.say"
+    assert reply["message"] == "AFK-check is now complete, 1 player(s) were found to be afk"
+  end
+
   test "pull user", %{lobby_id: lobby_id, hsocket: hsocket} do
     %{user: player2, socket: psocket} = tachyon_auth_setup()
 

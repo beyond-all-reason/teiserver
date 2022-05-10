@@ -111,6 +111,24 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, new_state}
   end
 
+  def handle_info({:direct_message, userid, "hello"}, state) do
+    case Client.get_client_by_id(userid) do
+      nil ->
+        :ok
+
+      %{lobby_id: nil} ->
+        :ok
+
+      %{lobby_id: lobby_id} ->
+        Coordinator.cast_consul(lobby_id, {:hello_message, userid})
+        Coordinator.send_to_user(userid, "Thank you, you've been marked as present.")
+
+      _ ->
+        :ok
+    end
+    {:noreply, state}
+  end
+
   def handle_info({:direct_message, userid, message}, state) do
     warning_response = Config.get_site_config_cache("teiserver.Warning acknowledge response")
       |> String.downcase
