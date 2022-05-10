@@ -3,7 +3,7 @@
 No arguments
 
 #### Success response
-No response data
+Responds with a pong and the system time. This time can be used to calculate offsets between the local time and server time.
 
 #### Example input/output
 ```json
@@ -12,7 +12,8 @@ No response data
 }
 
 {
-  "cmd": "s.system.pong"
+  "cmd": "s.system.pong",
+  "time": 123456789
 }
 ```
 

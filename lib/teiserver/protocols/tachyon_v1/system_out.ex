@@ -2,7 +2,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemOut do
   @spec do_reply(atom(), any) :: Map.t()
   def do_reply(:pong, _data) do
     %{
-      cmd: "s.system.pong"
+      cmd: "s.system.pong",
+      time: System.system_time(:second)
     }
   end
 
@@ -10,13 +11,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemOut do
     %{
       cmd: "s.system.ring",
       ringer_id: ringer_id
-    }
-  end
-
-  def do_reply(:nouser, nil) do
-    %{
-      result: "error",
-      error: "not in a lobby"
     }
   end
 
