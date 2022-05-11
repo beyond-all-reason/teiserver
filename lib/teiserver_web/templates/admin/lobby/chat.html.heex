@@ -51,7 +51,7 @@
 
         <%= if @page > 0 do %>
           <a href={Routes.ts_admin_lobby_path(@conn, :chat, @lobby_guid, @page - 1)} class="btn btn-secondary">
-            <i class='fa-fw fa-arrow-left'></i>
+            <i class='fa-fw fa-solid fa-arrow-left'></i>
             &nbsp;
             Previous page
           </a>
@@ -59,7 +59,7 @@
 
         <%= if not @last_page do %>
           <a href={Routes.ts_admin_lobby_path(@conn, :chat, @lobby_guid, @page + 1)} class="btn btn-secondary float-end">
-            <i class='fa-fw fa-arrow-right'></i>
+            <i class='fa-fw fa-solid fa-arrow-right'></i>
             &nbsp;
             Next page
           </a>
