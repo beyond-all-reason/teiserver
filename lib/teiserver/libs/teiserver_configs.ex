@@ -104,6 +104,16 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "teiserver.Enable accolades",
+      section: "Accolades",
+      type: "boolean",
+      permissions: ["teiserver.admin.account"],
+      description: "When enabled, players will be offered the chance to bestow accolades to each other.",
+      opts: [],
+      default: true
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Inform of new accolades",
       section: "Accolades",
       type: "boolean",

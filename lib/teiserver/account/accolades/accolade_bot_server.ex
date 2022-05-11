@@ -3,6 +3,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   The accolade server is the interface point for the Accolade system.
   """
   use GenServer
+  alias Central.Config
   alias Teiserver.{Account, User, Room, Battle, Coordinator}
   alias Teiserver.Coordinator.CoordinatorCommands
   alias Teiserver.Account.AccoladeLib
@@ -64,7 +65,9 @@ defmodule Teiserver.Account.AccoladeBotServer do
       match ->
         duration = Timex.diff(match.finished, match.started, :second)
         if duration > 600 do
-          post_match_messages(match)
+          if Config.get_site_config_cache("teiserver.Enable accolades") do
+            post_match_messages(match)
+          end
         else
           :ok
         end
