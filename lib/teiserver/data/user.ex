@@ -367,7 +367,7 @@ defmodule Teiserver.User do
 
     new_name = String.trim(new_name)
 
-    now = :erlang.system_time(:seconds)
+    now = System.system_time(:second)
     # since_most_recent_rename = now - (Enum.slice(rename_log, 0..0) ++ [0] |> hd)
     since_rename_two = now - (Enum.slice(rename_log, 1..1) ++ [0, 0, 0] |> hd)
     since_rename_three = now - (Enum.slice(rename_log, 2..2) ++ [0, 0, 0] |> hd)
@@ -419,7 +419,7 @@ defmodule Teiserver.User do
       |> Map.get("rename_log", [])
 
     Account.update_user_stat(userid, %{
-      "rename_log" => [:erlang.system_time(:seconds) | rename_log],
+      "rename_log" => [System.system_time(:second) | rename_log],
       "previous_names" => [user.name | previous_names]
     })
 
@@ -749,7 +749,7 @@ defmodule Teiserver.User do
     user =
       %{
         user
-        | last_login: round(:erlang.system_time(:seconds) / 60),
+        | last_login: round(System.system_time(:second) / 60),
           rank: rank,
           springid: springid,
           lobby_client: lobby_client,
@@ -762,7 +762,7 @@ defmodule Teiserver.User do
     Account.update_user_stat(user.id, %{
       bot: user.bot,
       country: country,
-      last_login: :erlang.system_time(:seconds),
+      last_login: System.system_time(:second),
       rank: rank,
       lobby_client: lobby_client,
       lobby_hash: lobby_hash,

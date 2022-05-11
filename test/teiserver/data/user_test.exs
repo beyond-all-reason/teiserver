@@ -73,7 +73,7 @@ defmodule Teiserver.Data.UserTest do
     assert User.rename_user(user.id, "rename6") == {:error, "You have only recently changed your name, give this one a chance"}
 
     # Nothing in the last 15 days but enough in the last 30
-    now = :erlang.system_time(:seconds)
+    now = System.system_time(:second)
     day = 60 * 60 * 24
     Account.update_user_stat(user.id, %{
       "rename_log" => [

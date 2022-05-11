@@ -145,7 +145,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         last_login = Account.get_user_stat_data(userid)
         |> Map.get("last_login")
 
-        time_diff = :erlang.system_time(:seconds) - last_login
+        time_diff = System.system_time(:second) - last_login
         Logger.info("Acknowledge time of #{time_diff} seconds for #{userid}:#{client.name}")
 
         Client.clear_awaiting_warn_ack(userid)

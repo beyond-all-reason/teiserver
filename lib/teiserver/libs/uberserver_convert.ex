@@ -8,10 +8,10 @@ defmodule Teiserver.UberserverConvert do
   @spec perform(Map.t()) :: :ok
   def perform(%{args: %{"body" => body}}) do
     id = UUID.uuid4()
-    start_time = :erlang.system_time(:seconds)
+    start_time = System.system_time(:second)
     Helpers.add_anonymous_audit_log("Teiserver:UberserverConvert started", %{id: id})
     create_conversion_job(body)
-    time_taken = :erlang.system_time(:seconds) - start_time
+    time_taken = System.system_time(:second) - start_time
 
     Helpers.add_anonymous_audit_log("Teiserver:UberserverConvert completed", %{
       id: id,

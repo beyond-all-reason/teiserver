@@ -110,7 +110,7 @@ defmodule Teiserver.Battle.LobbyThrottle do
       battle_lobby_id: battle_lobby_id,
       lobby_changes: [],
       player_changes: [],
-      last_update: :erlang.system_time(:seconds)
+      last_update: System.system_time(:second)
     }}
   end
 end

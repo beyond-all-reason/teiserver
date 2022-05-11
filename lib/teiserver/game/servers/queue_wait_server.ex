@@ -25,7 +25,7 @@ defmodule Teiserver.Game.QueueWaitServer do
 
         false ->
           key = bucket_function(userid)
-          player_item = {userid, :erlang.system_time(:seconds), 0, :user}
+          player_item = {userid, System.system_time(:second), 0, :user}
 
           new_bucket = [player_item | Map.get(state.buckets, key, [])]
           new_buckets = Map.put(state.buckets, key, new_bucket)

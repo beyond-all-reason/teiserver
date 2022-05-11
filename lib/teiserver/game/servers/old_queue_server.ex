@@ -30,8 +30,8 @@ defmodule Teiserver.Game.OldQueueServer do
 
         false ->
           player_item = %{
-            join_time: :erlang.system_time(:seconds),
-            last_heartbeart: :erlang.system_time(:seconds),
+            join_time: System.system_time(:second),
+            last_heartbeart: System.system_time(:second),
           }
 
           new_state = %{
@@ -199,7 +199,7 @@ defmodule Teiserver.Game.OldQueueServer do
               | unmatched_players: new_unmatched_players,
                 matched_players: new_matched_players,
                 waiting_for_players: new_matched_players,
-                ready_started_at: :erlang.system_time(:seconds),
+                ready_started_at: System.system_time(:second),
                 players_accepted: []
             }
           else
@@ -207,11 +207,11 @@ defmodule Teiserver.Game.OldQueueServer do
           end
 
         # Waiting but haven't been waiting too long yet
-        :erlang.system_time(:seconds) - state.ready_started_at <= state.ready_wait_time ->
+        System.system_time(:second) - state.ready_started_at <= state.ready_wait_time ->
           state
 
         # Need to cancel waiting, all players not yet matched decline
-        :erlang.system_time(:seconds) - state.ready_started_at > state.ready_wait_time ->
+        System.system_time(:second) - state.ready_started_at > state.ready_wait_time ->
           new_unmatched_players = state.players_accepted ++ state.unmatched_players
           new_player_map = Map.drop(state.player_map, state.waiting_for_players)
 
