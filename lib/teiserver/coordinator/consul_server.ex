@@ -436,6 +436,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     # Now we apply modifiers (unready = spec)
     {change, new_status} = cond do
+      state.unready_can_play -> {true, new_client}
       list_status != :player and new_client.player == true -> {false, nil}
       new_client.ready == false and new_client.player == true ->
         LobbyChat.sayprivateex(state.coordinator_id, userid, "You have been spec'd as you are unready. Please disable auto-unready in your lobby settings to prevent this from happening.", state.lobby_id)
@@ -808,6 +809,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
       afk_check_at: nil,
 
       last_seen_map: %{},
+
+      # Toggle with Coordinator.cast_consul(lobby_id, {:put, :unready_can_play, true})
+      unready_can_play: false,
 
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
     }
