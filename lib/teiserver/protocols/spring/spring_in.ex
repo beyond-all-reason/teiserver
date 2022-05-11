@@ -979,7 +979,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, username, team_colour] ->
         client_id = User.get_userid(username)
         value = int_parse(team_colour)
-        Lobby.force_change_client(state.userid, client_id, %{team_colour: value})
+        Lobby.force_change_client(state.userid, client_id, %{team_colour: value |> to_string})
 
       _ ->
         _no_match(state, "FORCETEAMCOLOR", msg_id, data)
@@ -1032,7 +1032,7 @@ defmodule Teiserver.Protocols.SpringIn do
                   name: name,
                   owner_name: state.username,
                   owner_id: state.userid,
-                  team_colour: team_colour,
+                  team_colour: team_colour |> to_string,
                   ai_dll: ai_dll
                 },
                 Spring.parse_battle_status(battlestatus)
@@ -1059,7 +1059,7 @@ defmodule Teiserver.Protocols.SpringIn do
           new_bot =
             Map.merge(
               %{
-                team_colour: team_colour
+                team_colour: team_colour |> to_string
               },
               Spring.parse_battle_status(battlestatus)
             )
@@ -1185,7 +1185,7 @@ defmodule Teiserver.Protocols.SpringIn do
         new_client =
           (existing || %{})
           |> Map.merge(updates)
-          |> Map.put(:team_colour, team_colour)
+          |> Map.put(:team_colour, team_colour |> to_string)
 
         # This one needs a bit more nuance, for now we'll wrap it in this
         # later it's possible we don't want players updating their status
