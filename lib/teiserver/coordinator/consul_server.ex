@@ -16,11 +16,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # Commands that are always forwarded to the coordinator itself, not the consul server
   @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore 1v1me un1v1)
 
-  @always_allow ~w(status y n follow joinq leaveq splitlobby)
+  @always_allow ~w(status y n follow joinq leaveq splitlobby afks)
   @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
-  @afk_check_duration 20_000
+  @afk_check_duration 40_000
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -126,7 +126,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info({:user_joined, userid}, state) do
     new_approved = [userid | state.approved_users] |> Enum.uniq
     {:noreply, %{state |
-      approved_users: new_approved
+      approved_users: new_approved,
+      last_seen_map: state.last_seen_map |> Map.put(userid, System.system_time(:millisecond))
     }}
   end
 
@@ -135,6 +136,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, %{state |
       join_queue: state.join_queue |> List.delete(userid),
       low_priority_join_queue: state.low_priority_join_queue |> List.delete(userid),
+      last_seen_map: state.last_seen_map |> Map.delete(userid),
       host_bosses: List.delete(state.host_bosses, userid)
     }}
   end
@@ -145,6 +147,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, %{state |
       join_queue: state.join_queue |> List.delete(userid),
       low_priority_join_queue: state.low_priority_join_queue |> List.delete(userid),
+      last_seen_map: state.last_seen_map |> Map.delete(userid),
       approved_users: new_approved
     }}
   end
@@ -167,7 +170,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
       end
     else
       new_state = handle_lobby_chat(userid, msg, state)
-      {:noreply, new_state}
+      {:noreply, %{new_state |
+        last_seen_map: state.last_seen_map |> Map.put(userid, System.system_time(:millisecond))
+      }}
     end
   end
 
@@ -267,7 +272,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info({:host_update, userid, host_data}, state) do
     if state.host_id == userid do
       host_data = host_data
-        |> Map.take([:host_bosses, :host_preset, :host_teamsize, :host_teamcount])
+        |> Map.take([:host_preset, :host_teamsize, :host_teamcount])
         |> Enum.filter(fn {_k, v} -> v != nil and v != 0 end)
         |> Map.new
 
@@ -293,6 +298,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     {:noreply, new_state}
+  end
+
+  def handle_info({:server_event, :stop, _node}, state) do
+    {:noreply, state}
+  end
+
+  def handle_info({:server_event, _event, _node}, state) do
+    {:noreply, state}
   end
 
   # Chat handler
@@ -794,6 +807,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
       afk_check_list: [],
       afk_check_at: nil,
 
+      last_seen_map: %{},
+
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
     }
   end
@@ -837,6 +852,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(

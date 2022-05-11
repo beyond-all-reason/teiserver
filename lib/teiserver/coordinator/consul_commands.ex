@@ -73,6 +73,30 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
+  def handle_command(%{command: "afks", senderid: senderid} = _cmd, state) do
+    max_diff = 1
+    now = System.system_time(:millisecond)
+
+    player_ids = Lobby.get_lobby(state.lobby_id) |> Map.get(:players)
+
+    lines = state.last_seen_map
+      |> Enum.filter(fn {userid, seen_at} ->
+        Enum.member?(player_ids, userid) and (now - seen_at) > max_diff
+      end)
+      |> Enum.map(fn {userid, seen_at} ->
+        "#{User.get_username(userid)} last seen #{(now - seen_at)}ms ago"
+      end)
+
+    case lines do
+      [] ->
+        Coordinator.send_to_user(senderid, "No afk users found")
+      _ ->
+        Coordinator.send_to_user(senderid, ["The following users may be afk" | lines])
+    end
+
+    state
+  end
+
   def handle_command(%{command: "splitlobby", senderid: senderid} = cmd, %{split: nil} = state) do
     ConsulServer.say_command(cmd, state)
     sender_name = User.get_username(senderid)
@@ -393,12 +417,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, state)
   end
 
-  def handle_command(%{command: "afkcheck"} = cmd, state) do
+  def handle_command(%{command: "specafk"} = cmd, state) do
     afk_check_list = ConsulServer.list_players(state)
       |> Enum.map(fn %{userid: userid} -> userid end)
 
     afk_check_list
       |> Enum.each(fn userid ->
+        User.ring(userid, state.coordinator_id)
         User.send_direct_message(state.coordinator_id, userid, "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk.")
       end)
 
@@ -420,7 +445,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       target_id ->
         ConsulServer.say_command(cmd, state)
         sender_name = User.get_username(senderid)
-        Lobby.sayex(state.coordinator_id, "#{sender_name} used the VIP command to place #{target} at the front of the joinq", state.lobby_id)
+        Lobby.sayex(state.coordinator_id, "#{sender_name} placed #{target} at the front of the join queue", state.lobby_id)
         %{state | join_queue: Enum.uniq([target_id] ++ state.join_queue)}
     end
   end

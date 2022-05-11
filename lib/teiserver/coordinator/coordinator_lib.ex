@@ -19,6 +19,7 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
       {"joinq", [], "Adds you to the queue to join when a space opens up, you will be automatically added to the game as a player. If already a member it has no effect.", :everybody},
       {"leaveq", [], "Removes you from the join queue.", :everybody},
       {"status", [], "Status info about the battle lobby.", :everybody},
+      {"afks", [], "Lists possible afk players.", :everybody},
       {"splitlobby", [], "Causes a \"vote\" to start where other players can elect to join you in splitting the lobby, follow someone
 of their choosing or remain in place. After 20 seconds you are moved to a new (empty) lobby and those that voted yes
 or are following someone that voted yes are also moved to that lobby.", :everybody},
@@ -41,7 +42,7 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
 > default: no limitations
 > friends allows only friends of existing members to join the lobby
 > friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)", :everybody},
-      {"afkcheck", [], "Everybody is sent a message asking them to confirm they are not afk. If they don't respond within 20 seconds they are moved to spectators. Requires boss privileges.", :everybody},
+      {"specafk", [], "Everybody is sent a message asking them to confirm they are not afk. If they don't respond within 40 seconds they are moved to spectators. Requires boss privileges.", :everybody},
 
       #---- "hosts" only ----
       {"lock", ["(team | player | spectator | side)"], "Engages a lock on that mode, when engaged members are unable to change that attribute about themselves.
