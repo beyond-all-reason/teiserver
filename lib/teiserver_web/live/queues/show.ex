@@ -42,9 +42,9 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
     case allow?(socket.assigns[:current_user], "teiserver.moderator.account") do
       true ->
         id = int_parse(id)
-        PubSub.subscribe(Central.PubSub, "teiserver_queue:#{id}")
+        PubSub.subscribe(Central.PubSub, "teiserver_queue_wait:#{id}")
         queue = Matchmaking.get_queue(id)
-        queue_state = Matchmaking.call_queue(id, :get_state)
+        queue_state = Matchmaking.call_queue_wait(id, :get_state)
 
         case queue do
           nil ->
@@ -72,7 +72,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
   def handle_info(_msg, %{assigns: assigns} = socket) do
     {:noreply,
       socket
-      |> assign(:queue_state, Matchmaking.call_queue(assigns.id, :get_state))
+      |> assign(:queue_state, Matchmaking.call_queue_wait(assigns.id, :get_state))
     }
   end
 

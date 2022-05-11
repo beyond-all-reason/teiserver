@@ -20,15 +20,16 @@ defmodule Teiserver.Data.Matchmaking do
   require Logger
   alias Teiserver.Game
   alias Teiserver.Data.QueueStruct
-  alias Teiserver.Game.QueueWaitServer
+  alias Teiserver.Game.{QueueWaitServer, QueueMatchServer}
+  alias Teiserver.Data.Types, as: T
 
   @spec get_queue(Integer.t()) :: QueueStruct.t() | nil
   def get_queue(id) do
     Central.cache_get(:teiserver_queues, id)
   end
 
-  @spec get_queue_pid(integer) :: pid() | nil
-  def get_queue_pid(id) when is_integer(id) do
+  @spec get_queue_wait_pid(integer) :: pid() | nil
+  def get_queue_wait_pid(id) when is_integer(id) do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "QueueWaitServer:#{id}") do
       [{pid, _}] ->
         pid
@@ -37,22 +38,60 @@ defmodule Teiserver.Data.Matchmaking do
     end
   end
 
-  @spec call_queue(Integer.t(), any) :: any
-  def call_queue(id, msg) do
-    pid = get_queue_pid(id)
+  @spec call_queue_wait(Integer.t(), any) :: any
+  def call_queue_wait(id, msg) do
+    pid = get_queue_wait_pid(id)
     GenServer.call(pid, msg)
   end
 
-  @spec cast_queue(Integer.t(), any) :: any
-  def cast_queue(id, msg) do
-    pid = get_queue_pid(id)
+  @spec cast_queue_wait(Integer.t(), any) :: any
+  def cast_queue_wait(id, msg) do
+    pid = get_queue_wait_pid(id)
     GenServer.cast(pid, msg)
+  end
+
+  @spec get_queue_match_pid(String.t()) :: pid() | nil
+  def get_queue_match_pid(id) do
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, "QueueMatchServer:#{id}") do
+      [{pid, _}] ->
+        pid
+      _ ->
+        nil
+    end
+  end
+
+  @spec call_queue_match(String.t(), any) :: any
+  def call_queue_match(id, msg) do
+    pid = get_queue_match_pid(id)
+    GenServer.call(pid, msg)
+  end
+
+  @spec cast_queue_match(String.t(), any) :: any
+  def cast_queue_match(id, msg) do
+    pid = get_queue_match_pid(id)
+    GenServer.cast(pid, msg)
+  end
+
+  @spec add_match_server(T.queue_id(), list()) :: pid
+  def add_match_server(queue_id, members) do
+    match_id = UUID.uuid1()
+
+    {:ok, pid} = DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
+      QueueMatchServer,
+      data: %{
+        match_id: match_id,
+        queue_id: queue_id,
+        members: members
+      }
+    })
+
+    pid
   end
 
   @spec get_queue_and_info(Integer.t()) :: {QueueStruct.t(), Map.t()}
   def get_queue_and_info(id) when is_integer(id) do
     queue = Central.cache_get(:teiserver_queues, id)
-    info = call_queue(id, :get_info)
+    info = call_queue_wait(id, :get_info)
     {queue, info}
   end
 
@@ -94,7 +133,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec add_player_to_queue(Integer.t(), Integer.t()) :: :ok | :duplicate | :failed
   def add_player_to_queue(queue_id, player_id) do
-    case get_queue_pid(queue_id) do
+    case get_queue_wait_pid(queue_id) do
       nil ->
         :failed
 
@@ -105,7 +144,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec remove_player_from_queue(Integer.t(), Integer.t()) :: :ok | :missing
   def remove_player_from_queue(queue_id, player_id) do
-    case get_queue_pid(queue_id) do
+    case get_queue_wait_pid(queue_id) do
       nil ->
         :failed
 
@@ -116,7 +155,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec player_accept(Integer.t(), Integer.t()) :: :ok | :missing
   def player_accept(queue_id, player_id) do
-    case get_queue_pid(queue_id) do
+    case get_queue_wait_pid(queue_id) do
       nil ->
         :failed
 
@@ -128,7 +167,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec player_decline(Integer.t(), Integer.t()) :: :ok | :missing
   def player_decline(queue_id, player_id) do
-    case get_queue_pid(queue_id) do
+    case get_queue_wait_pid(queue_id) do
       nil ->
         :failed
 
@@ -145,7 +184,7 @@ defmodule Teiserver.Data.Matchmaking do
   end
 
   def refresh_queue_from_db(queue) do
-    cast_queue(queue.id, {:refresh_from_db, queue})
+    cast_queue_wait(queue.id, {:refresh_from_db, queue})
   end
 
   @spec convert_queue(Game.Queue.t()) :: QueueStruct.t()

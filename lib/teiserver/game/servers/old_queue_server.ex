@@ -43,7 +43,7 @@ defmodule Teiserver.Game.OldQueueServer do
 
           PubSub.broadcast(
             Central.PubSub,
-            "teiserver_queue:#{state.id}",
+            "teiserver_queue_wait:#{state.id}",
             {:queue_add_player, state.id, userid}
           )
 
@@ -67,7 +67,7 @@ defmodule Teiserver.Game.OldQueueServer do
 
           PubSub.broadcast(
             Central.PubSub,
-            "teiserver_queue:#{state.id}",
+            "teiserver_queue_wait:#{state.id}",
             {:queue_remove_player, state.id, userid}
           )
 
@@ -371,7 +371,7 @@ defmodule Teiserver.Game.OldQueueServer do
 
             PubSub.broadcast(
               Central.PubSub,
-              "teiserver_queue:#{state.id}",
+              "teiserver_queue_wait:#{state.id}",
               {:match_made, state.id, battle.id}
             )
         end

@@ -8,96 +8,8 @@ defmodule Teiserver.Game.QueueMatchServer do
   @default_telemetry_interval 10_000
   @default_tick_interval 1_000
 
+  @tick_interval 500
   @ready_wait_time 15
-
-  # TODO - Convert this into a system where each match is a new process and the match can
-  # tell the queue server to either re-add the players to the pool or remove them (as the match is going ahead)
-  # currently as the queues get bigger they'll stall waiting for players to ready up but
-  # it's good enough for now
-  def handle_call(:get_state, _from, state) do
-    {:reply, state, state}
-  end
-
-  def handle_call({:get, key}, _from, state) do
-    {:reply, Map.get(state, key), state}
-  end
-
-  def handle_call({:add_player, userid}, _from, state) when is_integer(userid) do
-    {resp, new_state} =
-      case Enum.member?(state.unmatched_players ++ state.matched_players, userid) do
-        true ->
-          {:duplicate, state}
-
-        false ->
-          player_item = %{
-            join_time: :erlang.system_time(:seconds),
-            last_heartbeart: :erlang.system_time(:seconds),
-          }
-
-          new_state = %{
-            state
-            | unmatched_players: [userid | state.unmatched_players],
-              player_count: state.player_count + 1,
-              player_map: Map.put(state.player_map, userid, player_item)
-          }
-
-          PubSub.broadcast(
-            Central.PubSub,
-            "teiserver_queue:#{state.id}",
-            {:queue_add_player, state.id, userid}
-          )
-
-          PubSub.broadcast(
-            Central.PubSub,
-            "teiserver_client_action_updates:#{userid}",
-            {:client_action, :join_queue, userid, state.id}
-          )
-
-          {:ok, new_state}
-      end
-
-    {:reply, resp, new_state}
-  end
-
-  def handle_call({:remove_player, userid}, _from, state) when is_integer(userid) do
-    {resp, new_state} =
-      case Enum.member?(state.unmatched_players ++ state.matched_players, userid) do
-        true ->
-          new_state = remove_players(state, [userid])
-
-          PubSub.broadcast(
-            Central.PubSub,
-            "teiserver_queue:#{state.id}",
-            {:queue_remove_player, state.id, userid}
-          )
-
-          PubSub.broadcast(
-            Central.PubSub,
-            "teiserver_client_action_updates:#{userid}",
-            {:client_action, :leave_queue, userid, state.id}
-          )
-
-          {:ok, new_state}
-
-        false ->
-          {:missing, state}
-      end
-
-    {:reply, resp, new_state}
-  end
-
-  def handle_call(:get_info, _from, state) do
-    resp = %{
-      last_wait_time: state.last_wait_time,
-      player_count: state.player_count
-    }
-
-    {:reply, resp, state}
-  end
-
-  def handle_cast({:refresh_from_db, db_queue}, state) do
-    update_state_from_db(state, db_queue)
-  end
 
   def handle_cast({:player_accept, player_id}, state) when is_integer(player_id) do
     new_state =
@@ -145,15 +57,6 @@ defmodule Teiserver.Game.QueueMatchServer do
         player_map: new_player_map
     }
     {:noreply, new_state}
-  end
-
-  def handle_info(:telemetry_tick, state) do
-    Telemetry.cast_to_server({:matchmaking_update, state.id, %{
-      last_wait_time: state.last_wait_time,
-      player_count: state.player_count
-    }})
-
-    {:noreply, state}
   end
 
   def handle_info(:tick, state) do
@@ -269,11 +172,11 @@ defmodule Teiserver.Game.QueueMatchServer do
 
     case empty_battle do
       nil ->
-        Logger.info("OldQueueServer try_setup_battle no empty battle")
+        Logger.info("QueueMatchServer try_setup_battle no empty battle")
         %{state | finding_battle: true}
 
       battle ->
-        Logger.info("OldQueueServer try_setup_battle found empty battle")
+        Logger.info("QueueMatchServer try_setup_battle found empty battle")
         state.players_accepted
         |> Enum.each(fn userid ->
           Lobby.remove_user_from_any_battle(userid)
@@ -288,7 +191,7 @@ defmodule Teiserver.Game.QueueMatchServer do
         midway_state = remove_players(state, state.players_accepted)
 
         # Coordinator sets up the battle
-        Logger.info("OldQueueServer try_setup_battle starting battle setup")
+        Logger.info("QueueMatchServer try_setup_battle starting battle setup")
         map_name = state.map_list |> Enum.random()
         Coordinator.send_to_host(empty_battle.id, "!preset duel")
         :timer.sleep(100)
@@ -300,7 +203,7 @@ defmodule Teiserver.Game.QueueMatchServer do
         :timer.sleep(100)
 
         # Now put the players on their teams, for now we're assuming every game is just a 1v1
-        Logger.info("OldQueueServer try_setup_battle putting players on teams")
+        Logger.info("QueueMatchServer try_setup_battle putting players on teams")
         [p1, p2 | _] = state.players_accepted
         Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p1, senderid: Coordinator.get_coordinator_userid(),
           status: %{
@@ -341,7 +244,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
         cond do
           all_players == false ->
-            Logger.info("OldQueueServer try_setup_battle cannot start as not all are players")
+            Logger.info("QueueMatchServer try_setup_battle cannot start as not all are players")
             Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched users are not a player. Please rejoin the queue and try again.", battle.id)
 
             battle = Lobby.get_lobby(battle.id)
@@ -349,7 +252,7 @@ defmodule Teiserver.Game.QueueMatchServer do
             Lobby.set_script_tags(battle.id, new_tags)
 
           all_synced == false ->
-            Logger.info("OldQueueServer try_setup_battle cannot start as not all are synced")
+            Logger.info("QueueMatchServer try_setup_battle cannot start as not all are synced")
             Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched players are unsynced. Please rejoin the queue and try again.", battle.id)
 
             battle = Lobby.get_lobby(battle.id)
@@ -357,7 +260,7 @@ defmodule Teiserver.Game.QueueMatchServer do
             Lobby.set_script_tags(battle.id, new_tags)
 
           true ->
-            Logger.info("OldQueueServer try_setup_battle calling player cv start")
+            Logger.info("QueueMatchServer try_setup_battle calling player cv start")
             Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to start the game, if this doesn't work feel free to start it yourselves and report to Teifion.", battle.id)
             :timer.sleep(100)
             Lobby.say(p1, "!cv forcestart", battle.id)
@@ -365,14 +268,14 @@ defmodule Teiserver.Game.QueueMatchServer do
             Lobby.say(p2, "!y", battle.id)
             :timer.sleep(100)
 
-            # Logger.info("OldQueueServer try_setup_battle calling forcestart")
+            # Logger.info("QueueMatchServer try_setup_battle calling forcestart")
             # Coordinator.send_to_host(empty_battle.id, "!forcestart")
             :timer.sleep(100)
 
             PubSub.broadcast(
               Central.PubSub,
-              "teiserver_queue:#{state.id}",
-              {:match_made, state.id, battle.id}
+              "teiserver_queue_wait:#{state.id}",
+              {:queue_match, :match_made, state.id, battle.id}
             )
         end
 
@@ -392,43 +295,28 @@ defmodule Teiserver.Game.QueueMatchServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  defp update_state_from_db(state, db_queue) do
-    Map.merge(state, %{
-      id: db_queue.id,
-      team_size: db_queue.team_size,
-      map_list: db_queue.map_list |> Enum.map(fn m -> String.trim(m) end),
-      settings: db_queue.settings,
-    })
-  end
-
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
-    tick_interval = Map.get(opts.queue.settings, "tick_interval", @default_tick_interval)
-    :timer.send_interval(tick_interval, self(), :tick)
-    :timer.send_interval(@default_telemetry_interval, self(), :telemetry_tick)
+    :timer.send_interval(@tick_interval, self(), :tick)
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
       Teiserver.ServerRegistry,
-      "OldQueueServer:#{opts.queue.id}",
-      opts.queue.id
+      "QueueMatchServer:#{opts.match_id}",
+      opts.match_id
     )
 
-    state = update_state_from_db(%{
-       # Match ready stuff
-       waiting_for_players: [],
-       players_accepted: [],
-       ready_started_at: nil,
-       finding_battle: false,
-       matchups: [],
-       matched_players: [],
-       unmatched_players: [],
-       player_count: 0,
-       team_count: 2,
-       player_map: %{},
-       last_wait_time: 0,
-       ready_wait_time: opts.queue.settings["ready_wait_time"] || @ready_wait_time
-     }, opts.queue)
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_queue_match:#{opts.queue_id}",
+      {:queue_wait, :match_attempt, opts.queue_id, opts.match_id}
+    )
+
+    state = %{
+      match_id: opts.match_id,
+      queue_id: opts.queue_id,
+      members: opts.members
+    }
 
     {:ok, state}
   end

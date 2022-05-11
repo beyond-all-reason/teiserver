@@ -41,7 +41,8 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
     queues = Game.list_queues()
     |> Map.new(fn queue ->
-      :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue:#{queue.id}")
+      :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue_wait:#{queue.id}")
+      :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue_match:#{queue.id}")
 
       {queue.id, Map.merge(queue, %{
         player_count: nil,
@@ -51,7 +52,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
     queue_membership = Map.keys(queues)
     |> Parallel.filter(fn queue_id ->
-      player_map = Matchmaking.call_queue(queue_id, {:get, :player_map})
+      player_map = Matchmaking.call_queue_wait(queue_id, {:get, :player_map})
       Map.has_key?(player_map, socket.assigns[:current_user].id)
     end)
 
@@ -137,16 +138,21 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     {:noreply, socket}
   end
 
-  # Queue related
-  def handle_info({:queue_add_player, _queue_id, _userid}, socket) do
+  # Queue wait
+  def handle_info({:queue_wait, :queue_add_player, _queue_id, _userid}, socket) do
     {:noreply, socket}
   end
 
-  def handle_info({:queue_remove_player, _queue_id, _userid}, socket) do
+  def handle_info({:queue_wait, :queue_remove_player, _queue_id, _userid}, socket) do
     {:noreply, socket}
   end
 
-  def handle_info({:match_made, _queue_id, _lobby_id}, socket) do
+  # Queue match
+  def handle_info({:queue_match, :match_attempt, _queue_id, _lobby_id}, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_info({:queue_match, :match_made, _queue_id, _lobby_id}, socket) do
     {:noreply, socket}
   end
 

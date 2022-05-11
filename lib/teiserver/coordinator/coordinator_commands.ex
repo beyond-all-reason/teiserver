@@ -226,7 +226,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           Coordinator.send_to_user(senderid, "You cannot block moderators.")
         else
           User.ignore_user(senderid, user.id)
-          Coordinator.send_to_user(senderid, "#{user.name} is now ignored, you can unmute them with the $unignore command or via the relationships section of the website.")
+          Coordinator.send_to_user(senderid, "#{user.name} is now ignored, you can unmute them with the $unignore command or via the account section of the server website.")
         end
     end
     state
