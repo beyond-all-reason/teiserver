@@ -101,7 +101,17 @@ defmodule Teiserver.Coordinator.JoiningTest do
     [reply] = _tachyon_recv(socket2)
     assert reply == %{
       "cmd" => "s.lobby.updated_client_battlestatus",
-      "client" => %{"ally_team_number" => 0, "away" => false, "in_game" => false, "lobby_id" => lobby_id, "ready" => true, "team_colour" => 0, "team_number" => 0, "userid" => user2.id},
+      "client" => %{
+        "ally_team_number" => 0,
+        "away" => false,
+        "in_game" => false,
+        "lobby_id" => lobby_id,
+        "ready" => true,
+        "team_colour" => 0,
+        "team_number" => 0,
+        "userid" => user2.id,
+        "role" => "player"
+      },
       "lobby_id" => lobby_id,
       "reason" => "client_updated_battlestatus"
     }

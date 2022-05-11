@@ -165,7 +165,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     [reply] = _tachyon_recv(socket)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => "#{user2.name} is now ignored, you can unmute them with the $unignore command or via the relationships section of the website.",
+      "message" => "#{user2.name} is now ignored, you can unmute them with the $unignore command or via the account section of the server website.",
       "sender_id" => coordinator_userid
     }
 

@@ -148,7 +148,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert readies == [false, true]
   end
 
-  test "afkcheck", %{player: player1, psocket: psocket1, hsocket: hsocket, lobby_id: lobby_id} do
+  test "specafk", %{player: player1, psocket: psocket1, hsocket: hsocket, lobby_id: lobby_id} do
     %{socket: psocket2, user: player2} = tachyon_auth_setup()
     Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
     player_client2 = Client.get_client_by_id(player2.id)
@@ -168,11 +168,11 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     _ = _tachyon_recv_until(psocket2)
 
     # Say the command
-    data = %{cmd: "c.lobby.message", message: "$afkcheck"}
+    data = %{cmd: "c.lobby.message", message: "$specafk"}
     _tachyon_send(hsocket, data)
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.lobby.say"
-    assert reply["message"] == "$afkcheck"
+    assert reply["message"] == "$specafk"
 
     # Both players should get a message from the coordinator
     [reply] = _tachyon_recv(psocket1)
@@ -595,7 +595,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert result == [%{
       "cmd" => "s.lobby.announce",
       "lobby_id" => lobby_id,
-      "message" => "#{host.name} used the VIP command to place #{player8.name} at the front of the joinq",
+      "message" => "#{host.name} placed #{player8.name} at the front of the join queue",
       "sender" => Coordinator.get_coordinator_userid()
     }]
 
