@@ -5,9 +5,9 @@ That's right, if you do it wrong you can cause instability in your server; worst
 I highly recommend you read [A guide to hot code reloading in Elixir](https://blog.appsignal.com/2021/07/27/a-guide-to-hot-code-reloading-in-elixir.html) on the AppSignal blog.
 
 ### Usage
-1 - Identify the modules you have changed and thus want to reload
-2 - Run the `hot_reload` script (be sure to modify it with your server address etc)
-3 - Do what the script says to reload the modules
+- Identify the modules you have changed and thus want to reload
+- Run the `hot_reload` script (be sure to modify it with your server address etc)
+- Do what the script says to reload the modules
 
 
 ```python
