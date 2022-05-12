@@ -67,4 +67,17 @@ defmodule Central.Helpers.TimexHelperTest do
       assert TimexHelper.parse_dmy(input_value) == expected
     end
   end
+
+  test "duration_to_str" do
+    assert TimexHelper.duration_to_str(50) == "50 seconds"
+    assert TimexHelper.duration_to_str(180) == "180 seconds"
+    assert TimexHelper.duration_to_str(3680) == "1 hour"
+  end
+
+  test "duration_to_str_short" do
+    assert TimexHelper.duration_to_str_short(50) == "00:50"
+    assert TimexHelper.duration_to_str_short(180) == "03:00"
+    assert TimexHelper.duration_to_str_short(2339) == "38:59"
+    assert TimexHelper.duration_to_str_short(3680) == "1:01:20"
+  end
 end
