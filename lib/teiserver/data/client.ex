@@ -148,14 +148,7 @@ defmodule Teiserver.Client do
 
   @spec update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
   def update(%{userid: _} = client, reason) do
-    role = cond do
-      client.player -> "player"
-      true -> "spectator"
-    end
-
-    client =
-      client
-      |> Map.put(:role, role)
+    client = client
       |> add_client
 
     if reason != :silent do

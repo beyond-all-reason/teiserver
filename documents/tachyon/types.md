@@ -63,7 +63,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 * team_number: integer
 * ally_team_number: integer -- I want to rename this and the previous one to make it less confusing
 * team_colour: colour
-* role: string -- player, spectator
+* player: boolean
 * bonus: integer, default: 0 -- In spring this is 0-127, here it's an unsigned integer
 * synced: boolean
 * faction: string
