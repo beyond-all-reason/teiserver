@@ -7,7 +7,6 @@ Tachyon defines types for all objects wherever possible. Users of the spec are e
 * name :: string
 * bot :: boolean, default: false
 * clan_id :: Clan.id, default: nil
-* skill :: map :: (string -> integer)
 * icons :: map (string -> string) -- Badge type as the key, badge icon as the value (e.g. rank => level5)
 * springid :: integer -- Temporary item until we transition away from the need for springids
 

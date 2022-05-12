@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.UserIn do
-  alias Teiserver.{User, Client}
+  alias Teiserver.{Account, User, Client}
   alias Teiserver.Protocols.Tachyon.V1.Tachyon
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
 
@@ -12,7 +12,17 @@ defmodule Teiserver.Protocols.Tachyon.V1.UserIn do
     users = id_list
       |> User.list_users
       |> Enum.filter(fn u -> u != nil end)
-      |> Enum.map(fn u -> Tachyon.convert_object(:user, u) end)
+      |> Enum.map(fn u ->
+        stats = Account.get_user_stat_data(u.id)
+        updated_u = Map.merge(u, %{
+          country: stats["country"],
+          icons: %{
+            "play_time_rank" => stats["rank"]
+          }
+        })
+
+        Tachyon.convert_object(:user, updated_u)
+      end)
 
     if Map.get(args, "include_clients", false) do
       clients = id_list

@@ -19,9 +19,9 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   """
   @spec convert_object(:user | :user_extended | :client | :battle | :queue | :blog_post, Map.t() | nil) :: Map.t() | nil
   def convert_object(_, nil), do: nil
-  def convert_object(:user, user), do: Map.take(user, [:id, :name, :bot, :clan_id, :skill, :icons, :springid])
-  def convert_object(:user_extended, user), do: Map.take(user, [:id, :name, :bot, :clan_id, :skill, :icons, :permissions,
-                    :friends, :friend_requests, :ignores, :springid])
+  def convert_object(:user, user), do: Map.take(user, [:id, :name, :bot, :clan_id, :icons, :springid, :country])
+  def convert_object(:user_extended, user), do: Map.take(user, [:id, :name, :bot, :clan_id, :icons, :permissions,
+                    :friends, :friend_requests, :ignores, :springid, :country])
   def convert_object(:client, client), do: Map.take(client, [:userid, :in_game, :away, :ready, :team_number, :ally_team_number,
                     :team_colour, :player, :bonus, :synced, :faction, :lobby_id])
   def convert_object(:lobby, lobby), do: Map.take(lobby, [:id, :name, :founder_id, :type, :max_players, :password,

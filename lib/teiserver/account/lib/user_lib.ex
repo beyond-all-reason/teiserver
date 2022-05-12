@@ -2,6 +2,8 @@ defmodule Teiserver.Account.UserLib do
   use CentralWeb, :library
   alias Central.Account.UserQueries
   require Logger
+  alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account
 
   # Functions
   @spec icon :: String.t()
@@ -243,4 +245,22 @@ defmodule Teiserver.Account.UserLib do
   def role_def("Streamer"), do: {"#0066AA", "fab fa-twitch"}
   def role_def("Tester"), do: {"#00AACC", "fa-solid fa-vial"}
   def role_def(_), do: nil
+
+  @spec generate_user_icons(T.user()) :: map()
+  def generate_user_icons(user) do
+    stats = Account.get_user_stat_data(user.id)
+    generate_user_icons(user, stats)
+  end
+
+  @spec generate_user_icons(T.user(), map()) :: map()
+  def generate_user_icons(user, stats) do
+    role_icons = user.roles
+      |> Enum.filter(fn r -> role_def(r) != nil end)
+      |> Map.new(fn r -> {r, 1} end)
+
+    %{
+      "play_time_rank" => stats["rank"]
+    }
+    |> Map.merge(role_icons)
+  end
 end
