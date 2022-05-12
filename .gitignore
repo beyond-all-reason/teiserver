@@ -54,6 +54,7 @@ central-*.tar
 /backups/
 /remote/
 /zignore/
+/hot_reload
 /rel/
 /source_deploy
 /source_deploy.tar.gz
