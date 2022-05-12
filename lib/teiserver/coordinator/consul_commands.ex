@@ -73,27 +73,44 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
-  def handle_command(%{command: "afks", senderid: senderid} = _cmd, state) do
-    max_diff = 1
+  def handle_command(%{command: "afks", senderid: senderid} = cmd, state) do
+    min_diff_ms = 20_000
+    max_diff_s = 300
     now = System.system_time(:millisecond)
+    lobby = Lobby.get_lobby(state.lobby_id)
 
-    player_ids = Lobby.get_lobby(state.lobby_id) |> Map.get(:players)
+    if lobby.in_progress do
+      Coordinator.send_to_user(senderid, "The game is currently in progress, we cannot check for AFK at this time")
+    else
+      lines = state.last_seen_map
+        |> Enum.filter(fn {userid, seen_at} ->
+          Enum.member?(lobby.players, userid) and (now - seen_at) > min_diff_ms
+        end)
+        |> Enum.filter(fn {userid, _seen_at} ->
+          Client.get_client_by_id(userid).player
+        end)
+        |> Enum.map(fn {userid, seen_at} ->
+          seconds_ago = ((now - seen_at)/1000) |> round
+          {userid, seconds_ago}
+        end)
+        |> Enum.sort_by(fn {_userid, seconds_ago  } -> seconds_ago   end, &<=/2)
+        |> Enum.map(fn {userid, seconds_ago} ->
+          if seconds_ago > max_diff_s do
+            "#{User.get_username(userid)} is almost certainly afk"
+          else
+            "#{User.get_username(userid)} last seen #{seconds_ago}s ago"
+          end
+        end)
 
-    lines = state.last_seen_map
-      |> Enum.filter(fn {userid, seen_at} ->
-        Enum.member?(player_ids, userid) and (now - seen_at) > max_diff
-      end)
-      |> Enum.map(fn {userid, seen_at} ->
-        "#{User.get_username(userid)} last seen #{(now - seen_at)}ms ago"
-      end)
-
-    case lines do
-      [] ->
-        Coordinator.send_to_user(senderid, "No afk users found")
-      _ ->
-        Coordinator.send_to_user(senderid, ["The following users may be afk" | lines])
+      case lines do
+        [] ->
+          Coordinator.send_to_user(senderid, "No afk users found")
+        _ ->
+          Coordinator.send_to_user(senderid, ["------------------------", "The following users may be afk"] ++ lines)
+      end
     end
 
+    ConsulServer.say_command(cmd, state)
     state
   end
 
@@ -417,20 +434,25 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, state)
   end
 
-  def handle_command(%{command: "specafk"} = cmd, state) do
-    afk_check_list = ConsulServer.list_players(state)
-      |> Enum.map(fn %{userid: userid} -> userid end)
+  def handle_command(%{command: "specafk", senderid: senderid} = cmd, state) do
+    lobby = Lobby.get_lobby(state.lobby_id)
+    if lobby.in_progress do
+      Coordinator.send_to_user(senderid, "The game is currently in progress, we cannot spec-afk members")
+    else
+      afk_check_list = ConsulServer.list_players(state)
+        |> Enum.map(fn %{userid: userid} -> userid end)
 
-    afk_check_list
-      |> Enum.each(fn userid ->
-        User.ring(userid, state.coordinator_id)
-        User.send_direct_message(state.coordinator_id, userid, "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk.")
-      end)
+      afk_check_list
+        |> Enum.each(fn userid ->
+          User.ring(userid, state.coordinator_id)
+          User.send_direct_message(state.coordinator_id, userid, "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk or just type something into the lobby chat.")
+        end)
 
-    ConsulServer.say_command(cmd, %{state |
-      afk_check_list: afk_check_list,
-      afk_check_at: System.system_time(:millisecond)
-    })
+      ConsulServer.say_command(cmd, %{state |
+        afk_check_list: afk_check_list,
+        afk_check_at: System.system_time(:millisecond)
+      })
+    end
   end
 
   def handle_command(%{command: "rename", remaining: new_name} = cmd, state) do

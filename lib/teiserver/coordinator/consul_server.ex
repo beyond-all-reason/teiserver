@@ -171,7 +171,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
     else
       new_state = handle_lobby_chat(userid, msg, state)
       {:noreply, %{new_state |
-        last_seen_map: state.last_seen_map |> Map.put(userid, System.system_time(:millisecond))
+        last_seen_map: state.last_seen_map |> Map.put(userid, System.system_time(:millisecond)),
+        afk_check_list: state.afk_check_list |> List.delete(userid)
       }}
     end
   end
@@ -301,6 +302,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:server_event, :stop, _node}, state) do
+    Lobby.say(state.coordinator_id, "Teiserver update taking place, see discord for details/issues.", state.lobby_id)
     {:noreply, state}
   end
 
