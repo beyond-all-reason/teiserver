@@ -83,6 +83,7 @@ defmodule Central.MixProject do
       {:ranch, "~> 1.8"},
       {:alchemy, "~> 0.7.0", hex: :discord_alchemy},
       {:horde, "~> 0.8"},
+      {:etop, "~> 0.7.0"}
     ]
   end
 
