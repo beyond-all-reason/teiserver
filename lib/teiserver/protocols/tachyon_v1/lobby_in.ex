@@ -10,6 +10,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
   @spec do_handle(String.t(), Map.t(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
   def do_handle("query", %{"query" => query}, state) do
     lobby_list = Lobby.list_lobbies()
+      |> TachyonLib.query_in(:id, query["id_list"])
       |> TachyonLib.query(:locked, query["locked"])
       |> TachyonLib.query(:in_progress, query["in_progress"])
 

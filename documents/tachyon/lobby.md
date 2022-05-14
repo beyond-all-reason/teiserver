@@ -5,6 +5,7 @@
 #### Queryable fields
 - `locked` - Boolean
 - `in_progress` - Boolean
+- `id_list` - List (Lobby ID)
 
 ##### Planned items to add
 - `player_count` - Integer, a count of the number of players in the battle

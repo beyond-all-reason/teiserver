@@ -75,6 +75,14 @@ defmodule Teiserver.Protocols.TachyonLib do
     |> Enum.filter(fn item -> Map.get(item, field) == value end)
   end
 
+  @spec query_in(List.t(), atom | nil, List.t()) :: List.t()
+  def query_in(list, nil, _), do: list
+  def query_in(list, _, nil), do: list
+  def query_in(list, field, value) when is_atom(field) do
+    list
+    |> Enum.filter(fn item -> Enum.member?(value, Map.get(item, field)) end)
+  end
+
   # def query(list, _, func) when is_function(func) do
   #   list
   #   |> Enum.filter(fn item ->

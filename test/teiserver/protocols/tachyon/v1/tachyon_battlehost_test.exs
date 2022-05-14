@@ -120,6 +120,16 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     # Add user, we can ignore this
     _tachyon_recv(socket)
 
+    # Ensure the lobby state is accurate
+    data = %{cmd: "c.lobby.query", query: %{id_list: [lobby_id]}}
+    _tachyon_send(socket2, data)
+    [reply] = _tachyon_recv(socket2)
+
+    assert reply["cmd"] == "s.lobby.query"
+    assert Enum.count(reply["lobbies"]) == 1
+    lobby = hd(reply["lobbies"])
+    assert lobby["id"] == lobby_id
+
     # Now leave the lobby, closing it in the process
     data = %{cmd: "c.lobby.leave"}
     _tachyon_send(socket, data)

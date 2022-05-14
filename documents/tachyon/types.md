@@ -96,7 +96,8 @@ This represents a user who is logged in. A user who is logged out will not have 
 * spectators :: list (User.id)
 * bots :: list (User.id)
 * ip :: string
-* settings :: map :: (string -> any) -- Replaces spring's scripttags, disabled units and start rectanges should go here I think
+* settings :: map :: (string -> any) -- Replaces spring's scripttags, disabled units and should go here I think
+* start_rectangles :: map :: (id -> [x1, y1, x2, y2])
 * map_name :: string
 * map_hash :: string
 
