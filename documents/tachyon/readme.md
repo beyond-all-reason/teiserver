@@ -3,7 +3,6 @@ Tachyon is a protocol designed for a client-server architecture for computer gam
 
 #### Guide pages
 - [Getting started](getting_started.md)
-- [Command overview](overview.md)
 - [Types](types.md)
 - [Listeners](listeners.md)
 

@@ -48,6 +48,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     # Now create a user to join the lobby
     %{socket: socket2, user: user2, pid: pid2} = tachyon_auth_setup()
     %{socket: socket3, user: user3} = tachyon_auth_setup()
+    %{socket: socket4, user: _user4} = tachyon_auth_setup()
 
     # Bad password
     _tachyon_send(socket2, %{cmd: "c.lobby.join", lobby_id: lobby_id})
@@ -161,14 +162,20 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     _tachyon_recv_until(socket3)
 
     _tachyon_send(socket2, %{cmd: "c.lobby.update_status", client: %{player: true, team_number: 3, ready: true}})
+    [replyh] = _tachyon_recv(socket)
     [reply2] = _tachyon_recv(socket2)
     [reply3] = _tachyon_recv(socket3)
 
+    assert replyh == reply2
     assert reply2 == reply3
     assert reply2["cmd"] == "s.lobby.updated_client_battlestatus"
     assert reply2["lobby_id"] == lobby_id
     assert reply2["client"]["player"] == true
     assert reply2["client"]["team_number"] == 3
+
+    # User4, they shouldn't have seen any of this
+    reply = _tachyon_recv_until(socket4)
+    assert reply == []
 
     # Now leave the lobby, closing it in the process
     _tachyon_recv_until(socket)
