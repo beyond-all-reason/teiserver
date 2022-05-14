@@ -78,8 +78,10 @@ defmodule Teiserver.Protocols.SpringIn do
     {command, String.trim(data), String.trim(msg_id)}
   end
 
+  # Spring matchmaking disabled
   defp do_handle("c.matchmaking." <> cmd, data, msg_id, state) do
-    MatchmakingIn.do_handle(cmd, data, msg_id, state)
+    # MatchmakingIn.do_handle(cmd, data, msg_id, state)
+    state
   end
 
   defp do_handle("c.telemetry." <> cmd, data, msg_id, state) do
