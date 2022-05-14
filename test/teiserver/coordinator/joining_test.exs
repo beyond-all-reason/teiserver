@@ -87,13 +87,15 @@ defmodule Teiserver.Coordinator.JoiningTest do
     # Send the battle status
     data = %{
       cmd: "c.lobby.update_status",
-      player: true,
-      sync: 1,
-      player_number: 0,
-      team_number: 0,
-      side: 0,
-      team_colour: 0,
-      ready: true
+      client: %{
+        player: true,
+        sync: 1,
+        player_number: 0,
+        team_number: 0,
+        side: 0,
+        team_colour: 0,
+        ready: true
+      }
     }
     _tachyon_send(socket2, data)
 

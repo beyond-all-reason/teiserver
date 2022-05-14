@@ -102,108 +102,87 @@ defmodule Teiserver.Coordinator.LockTest do
     assert locks == [:allyid]
   end
 
-  test "team", %{player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
+  test "team_number", %{player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
     # Try to change team
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", team_number: 1})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{team_number: 1}})
     assert Client.get_client_by_id(player.id).team_number == 1
 
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", team_number: 2})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{team_number: 2}})
     assert Client.get_client_by_id(player.id).team_number == 2
 
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$lock team"})
     assert Coordinator.call_consul(lobby_id, {:get, :locks}) == [:team]
 
     # Lock team and try to change it
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", team_number: 1})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{team_number: 1}})
     assert Client.get_client_by_id(player.id).team_number == 2
 
     # Unlock and change
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$unlock team"})
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", team_number: 1})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{team_number: 1}})
     assert Client.get_client_by_id(player.id).team_number == 1
   end
 
-  test "allyid", %{player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
+  test "player_number", %{player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
     # Try to change team
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", player_number: 1})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{player_number: 1}})
     assert Client.get_client_by_id(player.id).player_number == 1
 
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", player_number: 2})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{player_number: 2}})
     assert Client.get_client_by_id(player.id).player_number == 2
 
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$lock allyid"})
     assert Coordinator.call_consul(lobby_id, {:get, :locks}) == [:allyid]
 
     # Lock team and try to change it
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", player_number: 1})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{player_number: 1}})
     assert Client.get_client_by_id(player.id).player_number == 2
 
     # Unlock and change
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$unlock allyid"})
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", player_number: 1})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{player_number: 1}})
     assert Client.get_client_by_id(player.id).player_number == 1
-  end
-
-  test "side", %{player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
-    # Try to change team
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", side: 1})
-    assert Client.get_client_by_id(player.id).side == 1
-
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", side: 2})
-    assert Client.get_client_by_id(player.id).side == 2
-
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$lock side"})
-    assert Coordinator.call_consul(lobby_id, {:get, :locks}) == [:side]
-
-    # Lock team and try to change it
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", side: 1})
-    assert Client.get_client_by_id(player.id).side == 2
-
-    # Unlock and change
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$unlock side"})
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", side: 1})
-    assert Client.get_client_by_id(player.id).side == 1
   end
 
   test "player", %{player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
     # Try to change team
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", player: true})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{player: true}})
     assert Client.get_client_by_id(player.id).player == true
 
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", player: false})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{player: false}})
     assert Client.get_client_by_id(player.id).player == false
 
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$lock player"})
     assert Coordinator.call_consul(lobby_id, {:get, :locks}) == [:player]
 
     # Lock team and try to change it
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", player: true})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{player: true}})
     assert Client.get_client_by_id(player.id).player == false
 
     # Unlock and change
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$unlock player"})
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", player: true})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{player: true}})
     assert Client.get_client_by_id(player.id).player == true
   end
 
   test "spectator", %{player: player, hsocket: hsocket, psocket: psocket, lobby_id: lobby_id} do
     # Try to change team
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", player: false})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{player: false}})
     assert Client.get_client_by_id(player.id).player == false
 
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", player: true})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{player: true}})
     assert Client.get_client_by_id(player.id).player == true
 
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$lock spectator"})
     assert Coordinator.call_consul(lobby_id, {:get, :locks}) == [:spectator]
 
     # Lock team and try to change it
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", player: false})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{player: false}})
     assert Client.get_client_by_id(player.id).player == true
 
     # Unlock and change
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$unlock spectator"})
-    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", player: false})
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{player: false}})
     assert Client.get_client_by_id(player.id).player == false
   end
 end

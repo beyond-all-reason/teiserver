@@ -79,7 +79,7 @@ defmodule TeiserverWeb.Live.BattleTest do
 
     test "show - valid battle", %{conn: conn} do
       # Lets create a battle
-      %{socket: host_socket, user: host_user} = TeiserverTestLib.auth_setup()
+      %{socket: host_socket, user: _host_user} = TeiserverTestLib.auth_setup()
       _send_raw(
         host_socket,
         "OPENBATTLE 0 0 empty 322 16 gameHash 0 mapHash engineName\tengineVersion\tSpeed metal\tLiveBattleShow\tgameName\n"
@@ -182,8 +182,8 @@ defmodule TeiserverWeb.Live.BattleTest do
       {:ok, view, html} = live(conn, "/teiserver/battle/lobbies/chat/#{lobby_id}")
 
       %{user: user1, socket: socket1} = TeiserverTestLib.tachyon_auth_setup()
-      %{user: user2, socket: socket2} = TeiserverTestLib.tachyon_auth_setup()
-      %{user: user3, socket: socket3} = TeiserverTestLib.tachyon_auth_setup()
+      %{user: user2, socket: _socket2} = TeiserverTestLib.tachyon_auth_setup()
+      %{user: user3, socket: _socket3} = TeiserverTestLib.tachyon_auth_setup()
 
       Lobby.force_add_user_to_battle(user1.id, lobby_id)
       Lobby.force_add_user_to_battle(user2.id, lobby_id)

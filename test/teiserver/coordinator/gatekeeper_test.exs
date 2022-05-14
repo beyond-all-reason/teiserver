@@ -75,7 +75,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     assert player_client.lobby_id == lobby_id
 
     # Try to change it
-    data = %{cmd: "c.lobby.update_status", player: true, ready: true}
+    data = %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}}
     _tachyon_send(psocket, data)
 
     # No players, we should be able to become a player even though having no "friends" in the game
@@ -92,7 +92,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
 
     # Okay, add them
     Lobby.force_add_user_to_battle(player2.id, lobby_id)
-    data = %{cmd: "c.lobby.update_status", player: true, ready: true}
+    data = %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}}
     _tachyon_send(psocket2, data)
 
     player_client2 = Client.get_client_by_id(player2.id)
@@ -119,7 +119,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     assert player_client.lobby_id == lobby_id
 
     # Try to change it
-    data = %{cmd: "c.lobby.update_status", player: true, ready: true}
+    data = %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}}
     _tachyon_send(psocket, data)
 
     # Change should be fine

@@ -19,8 +19,8 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     cmd = %{cmd: "c.system.ping"}
     data = TachyonLib.encode(cmd)
     _send_raw(socket, "TACHYON #{data}\n")
-    reply = _tachyon_recv(socket)
-    assert reply == [%{"cmd" => "s.system.pong"}]
+    [reply] = _tachyon_recv(socket)
+    assert reply["cmd"] == "s.system.pong"
   end
 
   test "basic tachyon", %{socket: socket} do
@@ -28,15 +28,16 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     cmd = %{cmd: "c.system.ping"}
     data = TachyonLib.encode(cmd)
     _send_raw(socket, data <> "\n")
-    reply = _tachyon_recv(socket)
-    assert reply == [%{"cmd" => "s.system.pong"}]
+    [reply] = _tachyon_recv(socket)
+    assert reply["cmd"] == "s.system.pong"
 
     # With msg_id
     cmd = %{cmd: "c.system.ping", msg_id: 123_456}
     data = TachyonLib.encode(cmd)
     _send_raw(socket, data <> "\n")
-    reply = _tachyon_recv(socket)
-    assert reply == [%{"cmd" => "s.system.pong", "msg_id" => 123_456}]
+    [reply] = _tachyon_recv(socket)
+    assert reply["cmd"] == "s.system.pong"
+    assert reply["msg_id"] == 123_456
 
     # Test we can send it bad data and it won't crash
     data =

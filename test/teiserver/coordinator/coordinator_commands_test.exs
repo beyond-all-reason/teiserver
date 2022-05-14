@@ -24,7 +24,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     assert reply == :timeout
   end
 
-  test "help", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
+  test "help", %{socket: socket, user: user} do
     message_coordinator(socket, "$help")
     [reply] = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
@@ -47,7 +47,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     assert Enum.member?(message, "$success")
   end
 
-  test "help not existing", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
+  test "help not existing", %{socket: socket} do
     message_coordinator(socket, "$help give 10 corjugg Lexon")
     [reply] = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
@@ -58,7 +58,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     refute Enum.member?(message, "Displays this help text.")
   end
 
-  test "help whois", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
+  test "help whois", %{socket: socket} do
     message_coordinator(socket, "$help whois")
     [reply] = _tachyon_recv(socket)
     assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
@@ -71,7 +71,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     refute Enum.member?(message, "Displays this help text.")
   end
 
-  test "help pull", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
+  test "help pull", %{socket: socket, user: user} do
     #Normal pull test
     message_coordinator(socket, "$help pull")
     [reply] = _tachyon_recv(socket)
