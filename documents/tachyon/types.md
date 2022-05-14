@@ -75,10 +75,10 @@ This represents a user who is logged in. A user who is logged out will not have 
   "in_game": true,
   "away": false,
   "ready": true,
+  "player": true,
   "team_number": 1,
   "team_colour": "#AA9900",
-  "role": "player",
-  "synced": true,
+  "sync": ["map", "engine"],
   "faction": "random",
   "lobby_id": 5
 }

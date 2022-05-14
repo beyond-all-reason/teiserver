@@ -169,7 +169,7 @@ Sent by a client to inform the server their status is updated. Below are the fie
 * `player_id`: integer -- In spring this would be `team_number`
 * `team_id`: integer -- In spring this would be `ally_team_number`
 * `team_color`: colour
-* `role`: string -- player, spectator (later maybe caster etc?)
+* `player`: boolean
 * `sync`: list(String) -- A list of things not yet sync'd, e.g. map, engine
 * `faction`: string
 
@@ -181,7 +181,7 @@ Sent by a client to inform the server their status is updated. Below are the fie
     "player_id": 3,
     "team_id": 1,
     "team_color": "#AA55AA",
-    "role": "player",
+    "player": true,
     "sync": ["map", "game"],
     "faction": "cortex"
   }

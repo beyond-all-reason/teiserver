@@ -89,7 +89,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
 
   def do_handle("update_status", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
   def do_handle("update_status", _, %{lobby_id: nil} = state), do: reply(:system, :nolobby, nil, state)
-  def do_handle("update_status", new_status, state) do
+  def do_handle("update_status", %{"client" => new_status}, state) do
     updates =
       new_status
       |> Map.take(~w(ready team_number team_colour ally_team_number player sync side))
