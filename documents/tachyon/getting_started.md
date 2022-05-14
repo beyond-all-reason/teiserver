@@ -77,7 +77,7 @@ A section detailing the possible response(s) from this command. It may be as lit
 At every stage the central server is considered to be the source of truth; if there is every client to client communication the client should always query the server for information.
 
 ## Example and implementations
-No lobbies currently implement the protocol, when they do we will add links to them here. In the meantime Teiserver has unit tests for the Tachyon protocol and they can be found at [/test/teiserver/protocols/tachyon](/test/teiserver/protocols/tachyon). The server implementation for Tachyon is found at [/lib/teiserver/protocols/tachyon](/lib/teiserver/protocols/tachyon) though this is not expected to be overly helpful for lobby implementers.
+No lobbies currently implement the protocol, when they do we will add links to them here. In the meantime Teiserver has unit tests for the Tachyon protocol and they can be found at [/test/teiserver/protocols/tachyon](/test/teiserver/protocols/tachyon). The server implementation for Tachyon is found at [/lib/teiserver/protocols/tachyon_v1](/lib/teiserver/protocols/tachyon_v1) though this is not expected to be overly helpful for lobby implementers.
 
 ## Spring interop
 Given the server is currently used primarily for the Spring protocol we have added the `TACHYON` command to Spring. For testing/interop you can send `TACHYON some_data` where `some_data` is the JSON -> Gzip -> Base64 data you would send via Tachyon normally. It will result in the system sending the result back as if you were using the Tachyon protocol. It will do so without swapping you to the Tachyon protocol; this is intended only to enable access to certain commands added only for Tachyon and not as a long term solution.
