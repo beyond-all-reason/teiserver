@@ -68,6 +68,13 @@ defmodule Teiserver.Game.AchievementServer do
     {:noreply, state}
   end
 
+  def handle_info({:teiserver_telemetry_client_events,
+    userid, "game_start:singleplayer:scenario_end", %{
+    "won" => false
+  }}, state) do
+    {:noreply, state}
+  end
+
   def handle_info({:teiserver_telemetry_client_events, _, type, value}, state) do
     Logger.info("No AchievementServer handler for #{type} - #{Kernel.inspect value}")
     {:noreply, state}
