@@ -244,7 +244,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  def handle_info({:lobby_update, :updated_client_battlestatus, _lobby_id, {_userid, _reason}}, state) do
+  def handle_info({:lobby_update, :updated_client_battlestatus, _lobby_id, {_client, _reason}}, state) do
     player_count_changed(state)
     {:noreply, state}
   end

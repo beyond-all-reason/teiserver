@@ -177,11 +177,11 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     # Both players should get a message from the coordinator
     [reply] = _tachyon_recv(psocket1)
     assert reply["cmd"] == "s.communication.received_direct_message"
-    assert reply["message"] == "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk."
+    assert reply["message"] == "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk or just type something into the lobby chat."
 
     [reply] = _tachyon_recv(psocket2)
     assert reply["cmd"] == "s.communication.received_direct_message"
-    assert reply["message"] == "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk."
+    assert reply["message"] == "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk or just type something into the lobby chat."
 
     # Check consul state
     pid = Coordinator.get_consul_pid(lobby_id)
@@ -233,7 +233,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.lobby.updated_client_battlestatus"
     assert reply["client"]["userid"] == player2.id
-    assert reply["client"]["role"] == "spectator"
+    assert reply["client"]["player"] == false
 
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.lobby.say"
@@ -509,7 +509,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     [ps1, ps2, ps3, ps4]
     |> Enum.each(fn %{user: user, socket: socket} ->
       Lobby.force_add_user_to_battle(user.id, lobby_id)
-      _tachyon_send(socket, %{cmd: "c.lobby.update_status", player: true, ready: true})
+      _tachyon_send(socket, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
     end)
 
     Lobby.force_add_user_to_battle(player5.id, lobby_id)
@@ -540,7 +540,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     # Now we need one of the players to become a spectator and open up a slot!
     assert Client.get_client_by_id(player5.id).player == false
-    _tachyon_send(ps1.socket, %{cmd: "c.lobby.update_status", player: false})
+    _tachyon_send(ps1.socket, %{cmd: "c.lobby.update_status", client: %{player: false, ready: false}})
 
     :timer.sleep(100)
 
@@ -561,7 +561,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert queue == [player6.id, player7.id]
 
     # Make player2 not a player
-    _tachyon_send(ps2.socket, %{cmd: "c.lobby.update_status", player: false, ready: true})
+    _tachyon_send(ps2.socket, %{cmd: "c.lobby.update_status", client: %{player: false, ready: false}})
 
     # Shouldn't be an update just yet
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
