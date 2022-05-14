@@ -91,8 +91,8 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
         player: true,
         ready: Enum.random([true, false]),
         sync: 1,
-        team_number: Enum.random(0..15),
-        ally_team_number: Enum.random([0, 1, 2, 3]),
+        player_number: Enum.random(0..15),
+        team_number: Enum.random([0, 1, 2, 3]),
         side: Enum.random([0, 1, 2]),
         team_colour: Enum.random(0..9322660)
       }

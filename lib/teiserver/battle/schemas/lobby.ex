@@ -21,9 +21,9 @@ defmodule Teiserver.Battle.Lobby do
   def new_bot(data) do
     Map.merge(
       %{
-        team_number: 0,
+        player_number: 0,
         team_colour: 0,
-        ally_team_number: 0,
+        team_number: 0,
         handicap: 0,
         side: 0
       },
@@ -663,8 +663,7 @@ defmodule Teiserver.Battle.Lobby do
           :addstartrect,
           :removestartrect,
           :kickfrombattle,
-          :team_number,
-          :ally_team_number,
+          :player_number,
           :team_number,
           :player,
           :disableunits,

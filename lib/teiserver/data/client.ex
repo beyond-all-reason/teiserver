@@ -9,18 +9,18 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.{Room, User, Coordinator, Account, Telemetry}
+  alias Teiserver.{Room, User, Account, Telemetry}
   alias Teiserver.Battle.Lobby
-  alias Central.Helpers.TimexHelper
+  # alias Central.Helpers.TimexHelper
   require Logger
 
   alias Teiserver.Data.Types, as: T
 
-  @chat_flood_count_short 3
-  @chat_flood_time_short 1
-  @chat_flood_count_long 10
-  @chat_flood_time_long 5
-  @temp_mute_count_limit 3
+  # @chat_flood_count_short 3
+  # @chat_flood_time_short 1
+  # @chat_flood_count_long 10
+  # @chat_flood_time_long 5
+  # @temp_mute_count_limit 3
 
   @spec create(Map.t()) :: Map.t()
   def create(client) do
@@ -34,9 +34,9 @@ defmodule Teiserver.Client do
 
         # Battle stuff
         ready: false,
-        team_number: 0,# Used for archon mode
+        player_number: 0,# In spring this is team_number
         team_colour: 0,
-        ally_team_number: 0,# Actual which team the player is on
+        team_number: 0, # In spring this would be ally_team_number
         player: false,
         handicap: 0,
         sync: 0,
@@ -69,8 +69,8 @@ defmodule Teiserver.Client do
   @spec reset_battlestatus(Map.t()) :: Map.t()
   def reset_battlestatus(client) do
     %{client |
+      player_number: 0,
       team_number: 0,
-      ally_team_number: 0,
       player: false,
       handicap: 0,
       sync: 0,

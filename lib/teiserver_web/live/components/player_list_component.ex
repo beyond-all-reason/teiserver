@@ -28,7 +28,7 @@ defmodule TeiserverWeb.Components.PlayerListComponent do
 
     teams = clients
       |> Map.get(:true, [])
-      |> Enum.group_by(fn v -> v.ally_team_number end)
+      |> Enum.group_by(fn v -> v.team_number end)
       |> Enum.map(fn {team, players} ->
         {team, players
           |> Enum.sort_by(fn c -> c.name end, &<=/2)

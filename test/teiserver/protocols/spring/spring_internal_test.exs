@@ -55,25 +55,25 @@ defmodule Teiserver.SpringInternalTest do
     for s <- team0_status do
       result = Spring.parse_battle_status(s)
       assert result.player == true, message: "Status #{s}"
-      assert result.ally_team_number == 0, message: "Status #{s}"
+      assert result.team_number == 0, message: "Status #{s}"
     end
 
     for s <- team1_status do
       result = Spring.parse_battle_status(s)
       assert result.player == true, message: "Status #{s}"
-      assert result.ally_team_number == 1, message: "Status #{s}"
+      assert result.team_number == 1, message: "Status #{s}"
     end
 
     for s <- team2_status do
       result = Spring.parse_battle_status(s)
       assert result.player == true, message: "Status #{s}"
-      assert result.ally_team_number == 2, message: "Status #{s}"
+      assert result.team_number == 2, message: "Status #{s}"
     end
 
     for s <- team3_status do
       result = Spring.parse_battle_status(s)
       assert result.player == true, message: "Status #{s}"
-      assert result.ally_team_number == 3, message: "Status #{s}"
+      assert result.team_number == 3, message: "Status #{s}"
     end
 
     # Faction selector

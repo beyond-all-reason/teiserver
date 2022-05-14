@@ -261,8 +261,8 @@ defmodule Teiserver.SpringBattleHostTest do
     assert status == %{
              ready: true,
              handicap: 0,
+             player_number: 0,
              team_number: 0,
-             ally_team_number: 0,
              player: true,
              sync: 1,
              side: 0
@@ -289,7 +289,7 @@ defmodule Teiserver.SpringBattleHostTest do
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195334 600\n"
     status = Spring.parse_battle_status("4195334")
-    assert status.team_number == 1
+    assert status.player_number == 1
 
     # Forceallyno
     _send_raw(socket, "FORCEALLYNO #{user2.name} 1\n")
@@ -297,7 +297,7 @@ defmodule Teiserver.SpringBattleHostTest do
     reply = _recv_until(socket)
     assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195398 600\n"
     status = Spring.parse_battle_status("4195398")
-    assert status.ally_team_number == 1
+    assert status.team_number == 1
 
     # Forceteamcolour
     _send_raw(socket, "FORCETEAMCOLOR #{user2.name} 800\n")

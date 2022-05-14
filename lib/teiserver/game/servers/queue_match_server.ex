@@ -207,8 +207,8 @@ defmodule Teiserver.Game.QueueMatchServer do
         [p1, p2 | _] = state.players_accepted
         Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p1, senderid: Coordinator.get_coordinator_userid(),
           status: %{
+            player_number: 0,
             team_number: 0,
-            ally_team_number: 0,
             player: true,
             bonus: 0,
             ready: true
@@ -216,8 +216,8 @@ defmodule Teiserver.Game.QueueMatchServer do
         })
         Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p2, senderid: Coordinator.get_coordinator_userid(),
           status: %{
+            player_number: 1,
             team_number: 1,
-            ally_team_number: 1,
             player: true,
             bonus: 0,
             ready: true

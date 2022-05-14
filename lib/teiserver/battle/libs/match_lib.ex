@@ -43,7 +43,7 @@ defmodule Teiserver.Battle.MatchLib do
 
     teams = clients
     |> Enum.filter(fn c -> c.player == true end)
-    |> Enum.group_by(fn c -> c.ally_team_number end)
+    |> Enum.group_by(fn c -> c.team_number end)
 
     game_type = game_type(lobby, teams)
 
@@ -72,7 +72,7 @@ defmodule Teiserver.Battle.MatchLib do
     |> Enum.map(fn client ->
       %{
         user_id: client.userid,
-        team_id: client.ally_team_number
+        team_id: client.team_number
       }
     end)
 

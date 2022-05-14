@@ -89,8 +89,8 @@ defmodule Teiserver.Coordinator.JoiningTest do
       cmd: "c.lobby.update_status",
       player: true,
       sync: 1,
+      player_number: 0,
       team_number: 0,
-      ally_team_number: 0,
       side: 0,
       team_colour: 0,
       ready: true
@@ -102,13 +102,13 @@ defmodule Teiserver.Coordinator.JoiningTest do
     assert reply == %{
       "cmd" => "s.lobby.updated_client_battlestatus",
       "client" => %{
-        "ally_team_number" => 0,
+        "team_number" => 0,
         "away" => false,
         "in_game" => false,
         "lobby_id" => lobby_id,
         "ready" => true,
         "team_colour" => 0,
-        "team_number" => 0,
+        "player_number" => 0,
         "userid" => user2.id,
         "role" => "player"
       },

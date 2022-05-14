@@ -111,8 +111,8 @@ defmodule Teiserver.Protocols.Spring do
     %{
       ready: ready == 1,
       handicap: [h7, h6, h5, h4, h3, h2, h1] |> Integer.undigits(2),
-      team_number: [t4, t3, t2, t1] |> Integer.undigits(2),
-      ally_team_number: [a4, a3, a2, a1] |> Integer.undigits(2),
+      player_number: [t4, t3, t2, t1] |> Integer.undigits(2),
+      team_number: [a4, a3, a2, a1] |> Integer.undigits(2),
       player: player == 1,
       sync: [sync2, sync1] |> Integer.undigits(2),
       side: [side4, side3, side2, side1] |> Integer.undigits(2)
@@ -121,8 +121,8 @@ defmodule Teiserver.Protocols.Spring do
 
   @spec create_battle_status(Map.t()) :: Integer.t()
   def create_battle_status(client) do
-    [t4, t3, t2, t1] = BitParse.parse_bits("#{client.team_number}", 4)
-    [a4, a3, a2, a1] = BitParse.parse_bits("#{client.ally_team_number}", 4)
+    [t4, t3, t2, t1] = BitParse.parse_bits("#{client.player_number}", 4)
+    [a4, a3, a2, a1] = BitParse.parse_bits("#{client.team_number}", 4)
     [h7, h6, h5, h4, h3, h2, h1] = BitParse.parse_bits("#{client.handicap}", 7)
     [sync2, sync1] = BitParse.parse_bits("#{client.sync}", 2)
     [side4, side3, side2, side1] = BitParse.parse_bits("#{client.side}", 4)

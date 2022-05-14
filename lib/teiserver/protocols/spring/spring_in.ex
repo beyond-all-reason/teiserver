@@ -948,10 +948,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("FORCETEAMNO", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
-      [_, username, team_number] ->
+      [_, username, player_number] ->
         client_id = User.get_userid(username)
-        value = int_parse(team_number)
-        Lobby.force_change_client(state.userid, client_id, %{team_number: value})
+        value = int_parse(player_number)
+        Lobby.force_change_client(state.userid, client_id, %{player_number: value})
 
       _ ->
         _no_match(state, "FORCETEAMNO", msg_id, data)
@@ -962,10 +962,10 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("FORCEALLYNO", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
-      [_, username, ally_team_number] ->
+      [_, username, team_number] ->
         client_id = User.get_userid(username)
-        value = int_parse(ally_team_number)
-        Lobby.force_change_client(state.userid, client_id, %{ally_team_number: value})
+        value = int_parse(team_number)
+        Lobby.force_change_client(state.userid, client_id, %{team_number: value})
 
       _ ->
         _no_match(state, "FORCEALLYNO", msg_id, data)
@@ -1178,7 +1178,7 @@ defmodule Teiserver.Protocols.SpringIn do
       [_, battlestatus, team_colour] ->
         updates =
           Spring.parse_battle_status(battlestatus)
-          |> Map.take([:ready, :team_number, :ally_team_number, :player, :sync, :side])
+          |> Map.take([:ready, :player_number, :team_number, :player, :sync, :side])
 
         existing = Client.get_client_by_id(state.userid)
 

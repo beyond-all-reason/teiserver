@@ -421,8 +421,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
     new_client = state.locks
     |> Enum.reduce(new_client, fn (lock, acc) ->
       case lock do
-        :team -> %{acc | ally_team_number: existing.ally_team_number}
-        :allyid -> %{acc | team_number: existing.team_number}
+        :team -> %{acc | team_number: existing.team_number}
+        :allyid -> %{acc | player_number: existing.player_number}
         :side -> %{acc | side: existing.side}
 
         :player ->
@@ -609,22 +609,22 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  # Ensure no two players have the same team_number
+  # Ensure no two players have the same player_number
   defp fix_ids(state) do
     players = list_players(state)
 
     # Never do this for more than 16 players
     if Enum.count(players) <= 16 do
-      team_numbers = players
-        |> Enum.map(fn %{team_number: team_number} -> team_number end)
+      player_numbers = players
+        |> Enum.map(fn %{player_number: player_number} -> player_number end)
         |> Enum.uniq
 
       # If they don't match then we have non-unique ids
-      if Enum.count(team_numbers) != Enum.count(players) do
+      if Enum.count(player_numbers) != Enum.count(players) do
         Logger.info("Fixing ids")
         players
           |> Enum.reduce(0, fn (player, acc) ->
-            Client.update(%{player | team_number: acc}, :client_updated_battlestatus)
+            Client.update(%{player | player_number: acc}, :client_updated_battlestatus)
             acc + 1
           end)
       end

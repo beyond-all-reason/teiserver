@@ -16,7 +16,7 @@
 
   players = Map.get(result, true, [])
   |> Enum.map(fn p -> @clients[p] end)
-  |> Enum.sort_by(& {&1[:ally_team_number], &1[:name]})
+  |> Enum.sort_by(& {&1[:team_number], &1[:name]})
 
   spectators = Map.get(result, false, [])
   |> Enum.map(fn p -> @clients[p] end)
@@ -103,7 +103,7 @@
           <td><%= user.name %></td>
           <td><%= if client.ready, do: "Ready" %></td>
           <td><%= client.handicap %></td>
-          <td><%= client.ally_team_number %></td>
+          <td><%= client.team_number %></td>
           <td><%= factions[client.side] %></td>
 
           <%= if @moderator do %>
