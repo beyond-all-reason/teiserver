@@ -411,7 +411,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # Player limit, if they want to be a player and we have
     # enough players then they can't be a player
     new_client = if existing.player == false and new_client.player == true and get_player_count(state) >= get_max_player_count(state) do
-      LobbyChat.sayprivateex(state.coordinator_id, userid, "The lobby is currently full, add yourself to the player queue by chatting $joinq", state.lobby_id)
+      #LobbyChat.sayprivateex(state.coordinator_id, userid, "The lobby is currently full, add yourself to the player queue by chatting $joinq", state.lobby_id)
+      LobbyChat.say(userid, "!joinq", state.lobby_id)
       %{new_client | player: false}
     else
       new_client

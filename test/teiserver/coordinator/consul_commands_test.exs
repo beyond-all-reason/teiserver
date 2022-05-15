@@ -606,4 +606,53 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
     assert queue == [player7.id, player8.id]
   end
+
+  test "join_queue_on_full_game", %{lobby_id: lobby_id, host: host, hsocket: hsocket, psocket: socket1, player: player1} do
+    #Limit player count to 2 (1v1)
+    _tachyon_send(hsocket, %{cmd: "c.lobby_host.update_host_status", boss: nil, teamsize: 1, teamcount: 2})
+
+    state = Coordinator.call_consul(lobby_id, :get_all)
+    max_player_count = ConsulServer.get_max_player_count(state)
+    assert max_player_count == 2
+
+    #Add 2 more player
+    %{user: player2, socket: socket2} = tachyon_auth_setup()
+    %{user: player3, socket: socket3} = tachyon_auth_setup()
+
+    Lobby.force_add_user_to_battle(player1.id, lobby_id)
+    Lobby.force_add_user_to_battle(player2.id, lobby_id)
+    Lobby.force_add_user_to_battle(player3.id, lobby_id)
+
+    #Players 2 and 3 are playing a 1v1, player 1 is a not a player
+    _tachyon_send(socket1, %{cmd: "c.lobby.update_status", player: false, ready: false})
+    _tachyon_send(socket2, %{cmd: "c.lobby.update_status", player: true, ready: true})
+    _tachyon_send(socket3, %{cmd: "c.lobby.update_status", player: true, ready: true})
+
+    assert Client.get_client_by_id(player1.id).player == false
+    assert Client.get_client_by_id(player2.id).player == true
+    assert Client.get_client_by_id(player3.id).player == true
+    player_client = Client.get_client_by_id(player2.id)
+
+    #Queue should be empty at start
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == []
+
+    #Player 1 now wants to join
+    _tachyon_send(socket1, %{cmd: "c.lobby.update_status", player: true, ready: true})
+    #And added to the join queue
+    assert Client.get_client_by_id(player1.id).player == false
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == [player1.id]
+
+    #Player 3 becomes a spectator
+    _tachyon_send(socket3, %{cmd: "c.lobby.update_status", player: false, ready: false})
+    assert Client.get_client_by_id(player3.id).player == false
+
+    #Now there is 1 spot free and player 1 should be added as a player and removed from the queue
+    :timer.sleep(100)
+    assert Client.get_client_by_id(player1.id).player == true
+    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
+    assert queue == []
+
+  end
 end
