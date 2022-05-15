@@ -134,8 +134,8 @@ defmodule Teiserver.Account.RelationsLib do
   @spec block_user(T.userid() | nil, T.userid() | nil) :: User.t() | nil
   def block_user(nil, _), do: nil
   def block_user(_, nil), do: nil
-  def block_user(blockr_id, blockd_id) do
-    blockr = User.get_user_by_id(blockr_id)
+  def block_user(blocker_id, blockd_id) do
+    blockr = User.get_user_by_id(blocker_id)
 
     if blockd_id not in blockr.blockd do
       # Add to requests
@@ -149,7 +149,7 @@ defmodule Teiserver.Account.RelationsLib do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "legacy_user_updates:#{blockr_id}",
+        "legacy_user_updates:#{blocker_id}",
         {:this_user_updated, [:blockd]}
       )
 
@@ -162,8 +162,8 @@ defmodule Teiserver.Account.RelationsLib do
   @spec unblock_user(T.userid() | nil, T.userid() | nil) :: User.t() | nil
   def unblock_user(nil, _), do: nil
   def unblock_user(_, nil), do: nil
-  def unblock_user(unblockr_id, unblockd_id) do
-    unblockr = User.get_user_by_id(unblockr_id)
+  def unblock_user(unblocker_id, unblockd_id) do
+    unblockr = User.get_user_by_id(unblocker_id)
 
     if unblockd_id in unblockr.blockd do
       # Add to requests
@@ -177,7 +177,7 @@ defmodule Teiserver.Account.RelationsLib do
       # Now push out the updates
       PubSub.broadcast(
         Central.PubSub,
-        "legacy_user_updates:#{unblockr_id}",
+        "legacy_user_updates:#{unblocker_id}",
         {:this_user_updated, [:blockd]}
       )
 
