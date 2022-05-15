@@ -10,27 +10,27 @@ Make sure that Elixir is in correct version (currently 1.12.2). You can find req
 You can use [asdf](https://github.com/asdf-vm/asdf) to install correct version.
 
 ### Clone repo
-```
+```krtn
 git clone git@github.com:beyond-all-reason/teiserver.git
 cd teiserver
 ```
 
 ### Install build tools (gcc, g++, make)
 #### Ubuntu/Debian
-```
+```bash
 sudo apt update
 sudo apt install build-essential
 ```
 
 ### Elixir setup
-```
+```bash
 mix deps.get
 mix deps.compile
 ```
 
 ### Postgres setup
 If you want to change the username or password then you will need to update the relevant files in [config](/config).
-```
+```bash
 sudo su postgres
 psql postgres postgres <<EOF
 CREATE USER teiserver_dev WITH PASSWORD '123456789';
@@ -53,7 +53,7 @@ mix ecto.create
 #### Localhost certs
 To run the TLS server locally you will also need to create localhost certificates in `priv/certs` using the following commands
 
-```
+```bash
 mkdir -p priv/certs
 cd priv/certs
 openssl dhparam -out dh-params.pem 2048
@@ -66,19 +66,19 @@ cd ../..
 
 #### Migrations
 Run the following from your directory to migrate the database. Further migrations are run at startup but for the first run you want to have run them manually.
-```
+```bash
 mix ecto.migrate
 ```
 
 ### SASS
 We use sass for our css generation and you'll need to run this to get it started.
-```
+```bash
 mix sass.install
 ```
 
 ### Running it
 Standard mode
-```
+```bash
 mix phx.server
 ```
 
@@ -90,7 +90,7 @@ If all goes to plan you should be able to access your site locally at [http://lo
 
 ### Libraries you need to get yourself
 The site makes liberal use of [FontAwesome](https://fontawesome.com/) so if you are using the site you'll need to download it and do the following
-```
+```bash
 fontawesome/css/all.css -> priv/static/css/fontawesome.css
 fontawesome/webfonts -> priv/static/webfonts
 ```
@@ -101,14 +101,14 @@ If you want to use the blog you will also need to place [ace.js](https://ace.c9.
 Most of the configuration takes place in [config/config.exs](config/config.exs) with the other config files overriding for specific environments. The first block of `config.exs` contains a bunch of keys and values, which you can update.
 
 ### Connecting to the spring party of your server locally
-```
+```bash
 telnet localhost 8200
 openssl s_client -connect localhost:8201
 ```
 
 ### config/dev.secret.exs
 If you want to do things like have a discord bot in development you don't want these details going into git. It is advisable to create a file `config/dev.secret.exs` where you can put these config details. I would suggest a file like so:
-```
+```elixir
 import Config
 
 config :central, Teiserver,
@@ -130,6 +130,18 @@ config :central, Oban,
   queues: false,
   crontab: false
 
+```
+
+### Resetting your user password
+When running locally it's likely you won't want to connect the server to an email account, as such password resets need to be done a little differently.
+
+I suggest turning off agent mode in `config/dev.secret.exs` with `enable_agent_mode: false` as while agent mode is running you will be getting a lot of terminal output which can make it harder to perform.
+
+Run your server with `iex -S mix phx.server` and then once it has started up use the following code to update your password.
+
+```elixir
+user = Central.Account.get_user_by_email("your email here")
+Central.Account.update_user(user, %{"password" => "your password here"})
 ```
 
 ### Main 3rd party dependencies
