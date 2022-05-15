@@ -211,15 +211,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
       client.player ->
         Logger.info("Cannot queue user #{senderid}, already a player")
-        r = LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are already a player, you can't join the queue!", state.lobby_id)
-        Logger.info("joinq_sayprivateex result #{Kernel.inspect r} for #{Kernel.inspect {state.coordinator_id, senderid, state.lobby_id}} type 1")
+        LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are already a player, you can't join the queue!", state.lobby_id)
         state
 
       Enum.member?(get_queue(state), senderid) ->
         Logger.info("Spectator #{senderid} is already in the queue")
         pos = get_queue_position(get_queue(state), senderid) + 1
-        r = LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}. Use $status to check on the queue and $leaveq to leave it.", state.lobby_id)
-        Logger.info("joinq_sayprivateex result #{Kernel.inspect r} for #{Kernel.inspect {state.coordinator_id, senderid, state.lobby_id}} type 2")
+        LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}. Use $status to check on the queue and $leaveq to leave it.", state.lobby_id)
         state
 
       true ->
@@ -235,13 +233,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         new_queue = get_queue(new_state)
         pos = get_queue_position(new_queue, senderid) + 1
 
-        r = if User.is_restricted?(senderid, ["Low priority"]) do
+        if User.is_restricted?(senderid, ["Low priority"]) do
           LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the low priority join-queue at position #{pos}, this means you will be added to the game after normal-priority members. Use $status to check on the queue.", state.lobby_id)
         else
           LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are now in the join-queue at position #{pos}. Use $status to check on the queue.", state.lobby_id)
         end
-
-        Logger.info("joinq_sayprivateex result #{Kernel.inspect r} for #{Kernel.inspect {state.coordinator_id, senderid, state.lobby_id}} type 3")
 
         new_state
     end

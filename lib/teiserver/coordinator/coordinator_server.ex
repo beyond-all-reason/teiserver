@@ -233,9 +233,15 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   end
   def handle_info({:client_inout, :disconnect, _userid, _reason}, state), do: {:noreply, state}
 
+  # Special debugging to see what is being sent
+  def handle_info({:timeout, duration}, state) do
+    :timer.sleep(duration)
+    {:noreply, state}
+  end
+
   # Catchall handle_info
   def handle_info(msg, state) do
-    Logger.error("Coordinator server handle_info error. No handler for msg of #{Kernel.inspect msg}")
+    Logger.error("CoordinatorServer handle_info error. No handler for msg of #{Kernel.inspect msg}")
     {:noreply, state}
   end
 
