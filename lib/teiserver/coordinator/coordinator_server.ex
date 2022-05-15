@@ -151,8 +151,10 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         Client.clear_awaiting_warn_ack(userid)
         User.send_direct_message(state.userid, userid, "Thank you")
       _ ->
-        username = User.get_username(userid)
-        User.send_direct_message(state.userid, userid, "I don't currently handle messages, sorry #{username}")
+        user = User.get_user_by_id(userid)
+        if not User.is_bot?(user) do
+          User.send_direct_message(state.userid, userid, "I don't currently handle messages, sorry #{user.name}")
+        end
     end
     {:noreply, state}
   end
