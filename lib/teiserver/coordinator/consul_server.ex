@@ -423,7 +423,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       case lock do
         :team -> %{acc | team_number: existing.team_number}
         :allyid -> %{acc | player_number: existing.player_number}
-        :side -> %{acc | side: existing.side}
 
         :player ->
           if not existing.player, do: %{acc | player: false}, else: acc

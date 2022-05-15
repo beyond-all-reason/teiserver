@@ -686,7 +686,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       "allyid" -> :allyid
       "player" -> :player
       "spectator" -> :spectator
-      "side" ->  :side
       "boss" -> :boss
       _ -> nil
     end

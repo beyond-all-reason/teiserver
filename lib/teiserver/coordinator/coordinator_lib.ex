@@ -53,7 +53,6 @@ Multiple locks can be engaged at the same time
 > Allyid: Prevents a member from changing their team value (also called playerid)
 > Player: Prevents spectators becoming players
 > Spectator: Prevents players becoming spectators
-> Side: Prevents players changing their side (faction)
 > Boss: Prevents unbossing except by moderators and bosses", :host},
       {"unlock", ["(team | player | spectator)"], "Disengages the lock on that mode", :host},
       {"specunready", [], "Specs all unready players, they are each sent a ring from the coordinator.", :host},
