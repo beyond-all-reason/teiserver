@@ -6,6 +6,11 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
+        <div class="btn btn-primary2 float-end" onclick="$('.help-box, .help-box-large').toggle();">
+          <i class='fa-fw fa-solid fa-circle-info'></i>
+          &nbsp;
+          Show/Hide help
+        </div>
         <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
@@ -18,67 +23,102 @@
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">
-            <div class="col-md-4 col-xl-2 search-form-input">
-              <label for="report_mode" class="control-label">Mode:</label>
-              <%= central_component "icon_dropdown", %{
-                name: "report[mode]",
-                id: "report_mode",
-                selected: @params["mode"],
-                enumerable: [
-                  %{id: "Time logged in", icon: "fa-solid fa-watch", colour: fg},
-                ]
-              } %>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-lg-3 col-xl-2 search-form-input">
               <label for="report_date_preset" class="control-label">Date range:</label>
               <%= select :report, :date_preset, @presets, class: "form-control", selected: @params["date_preset"] %>
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-lg-3 col-xl-2 search-form-input">
               <label for="report_start_date" class="control-label">Start date:</label>
               <input type="text" id="report_start_date" name="report[start_date]" value={@params["start_date"]} class="form-control datepicker" />
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-lg-3 col-xl-2 search-form-input">
               <label for="report_end_date" class="control-label">End date:</label>
               <input type="text" id="report_end_date" name="report[end_date]" value={@params["end_date"]} class="form-control datepicker" />
             </div>
-          </div>
+            
+            <div class="col-md-4 col-lg-3 col-xl-2 search-form-input">
+              <label for="report_game_type" class="control-label">Game type:</label>
+              <%= select :report, :game_type, [
+                "Any",
+                "Duel",
+                "Team",
+                "FFA",
+                "Raptors",
+                "Scavengers",
+                "Bots",
+                "PvP",
+                "PvE",
+                "Coop"
+              ], class: "form-control", selected: @params["game_type"] %>
+            </div>
 
-          <div class="row">
-            <div class="offset-md-8 col-md-4 offset-xl-9 col-xl-3">
+            <div class="col-md-4 col-lg-3 col-xl-2">
               &nbsp;<br />
               <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
             </div>
           </div>
         </form>
+        
+        <div class="help-box-large">
+          Draws data from all players who played at least one multiplayer game within the timeframe specified.
+        </div>
         <br /><br />
 
-        <table class='table'>
-          <thead>
-            <tr>
-              <th>User</th>
-              <th>Rank level</th>
-              <th>Rank hours</th>
-              <th>Player hours</th>
-              <th>Spectator hours</th>
-           </tr>
-          </thead>
-          <tbody>
-            <%= for user <- @data do %>
-              <tr>
-                <td><%= user.name %></td>
-                <td><%= user.data["rank"] %></td>
-                <td><%= user.rank_hours %></td>
-                <td><%= (user.stats["player_minutes"] || 0)/60 |> round %></td>
-                <td><%= (user.stats["spectator_minutes"] || 0)/60 |> round %></td>
+        <div class="row">
+          <div class="col-lg-12 mb-3">
+            <h4>Found <%= format_number @data.total %> users</h4>
+          </div>
+          
+          <div class="col-lg-4">
+            <h5>Registration date</h5>
+            <table class='table'>
+              <thead>
+                <tr>
+                  <th>User for...</th>
+                  <th>User count</th>
+                  <th>%</th>
               </tr>
-            <% end %>
-          </tbody>
-        </table>
+              </thead>
+              <tbody>
+                <%
+                  keys = ["0 days", "1 day", "2 days", "3 days", "1 week", "2 weeks", "3 weeks", "4 weeks", "3 months", "6 months", "1 year", "Older"]
+                %>
+                <%= for age <- keys do %>
+                  <% value = @data.registration_age[age] || 0 %>
+                  <tr>
+                    <td><%= age %></td>
+                    <td><%= format_number value %></td>
+                    <td><%= percent (value/@data.total) %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="col-lg-4">
+            <h5>Rank</h5>
+            <table class='table'>
+              <thead>
+                <tr>
+                  <th>Rank level</th>
+                  <th>User count</th>
+                  <th>%</th>
+              </tr>
+              </thead>
+              <tbody>
+                <%= for {rank, user_count} <- @data.rank_count do %>
+                  <tr>
+                    <td><%= rank %></td>
+                    <td><%= format_number user_count %></td>
+                    <td><%= percent (user_count/@data.total) %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
       </div>
     </div>
