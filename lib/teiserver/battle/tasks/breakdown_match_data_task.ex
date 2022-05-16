@@ -62,12 +62,6 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
       |> Enum.frequencies()
       |> Map.new
 
-    mean_skill = matches
-      |> Stream.filter(fn m -> m.data["skills"] != %{} end)
-      |> Stream.map(fn m -> m.data["skills"]["mean"] |> round end)
-      |> Enum.frequencies()
-      |> Map.new
-
     duration = matches
       |> Stream.map(fn match ->
         d = Timex.diff(match.finished, match.started, :second)
@@ -101,7 +95,6 @@ defmodule Teiserver.Battle.Tasks.BreakdownMatchDataTask do
 
     %{
       maps: maps,
-      mean_skill: mean_skill,
       duration: duration,
       matches_per_hour: matches_per_hour,
       team_sizes: team_sizes,

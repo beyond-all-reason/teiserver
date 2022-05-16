@@ -35,10 +35,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
 
   # Teiserver.Battle.Tasks.PostMatchProcessTask.perform_reprocess(75567)
   defp post_process_match(match) do
-    skills = get_match_skill(match)
-
     new_data = Map.merge((match.data || %{}), %{
-      "skills" => skills,
       "player_count" => Enum.count(match.members)
     })
 
@@ -49,52 +46,6 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       data: new_data,
       processed: true
     })
-  end
-
-  @spec get_match_skill(Battle.Match.t()) :: map()
-  defp get_match_skill(%{tags: tags, members: members} = _match) do
-    member_ids = members
-    |> Enum.map(fn m -> m.user_id end)
-
-    # Add the "has_played" role
-    member_ids
-    |> Enum.each(fn userid ->
-      User.add_roles(userid, ["has_played"])
-    end)
-
-    # Get skills
-    skills = tags
-    |> Enum.filter(fn {k, _v} ->
-      String.starts_with?(k, "game/players/") and String.ends_with?(k, "/skill")
-    end)
-    |> Enum.filter(fn {k, _v} ->
-      userid = k
-        |> String.replace("game/players/", "")
-        |> String.replace("/skill", "")
-        |> User.get_userid()
-      Enum.member?(member_ids, userid)
-    end)
-    |> Enum.map(fn {_, v} ->
-      v
-      |> String.replace("~", "")
-      |> String.replace("(", "")
-      |> String.replace(")", "")
-      |> String.replace("#", "")
-      |> NumberHelper.float_parse
-    end)
-
-    if Enum.empty?(skills) do
-      %{}
-    else
-      %{
-        mean: Statistics.mean(skills),
-        median: Statistics.median(skills),
-        maximum: Enum.max(skills),
-        minimum: Enum.min(skills),
-        range: Enum.max(skills) - Enum.min(skills),
-        stdev: Statistics.stdev(skills)
-      }
-    end
   end
 
   defp use_export_data(%{data: %{"export_data" => export_data}} = match) do
