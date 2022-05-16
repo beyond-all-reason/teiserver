@@ -609,7 +609,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert queue == [player7.id, player8.id]
   end
 
-  test "join_queue_on_full_game", %{lobby_id: lobby_id, host: host, hsocket: hsocket, psocket: socket1, player: player1} do
+  test "join_queue_on_full_game", %{lobby_id: lobby_id, hsocket: hsocket, psocket: socket1, player: player1} do
     #Limit player count to 2 (1v1)
     _tachyon_send(hsocket, %{cmd: "c.lobby_host.update_host_status", boss: nil, teamsize: 1, teamcount: 2})
 
@@ -633,7 +633,6 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert Client.get_client_by_id(player1.id).player == false
     assert Client.get_client_by_id(player2.id).player == true
     assert Client.get_client_by_id(player3.id).player == true
-    player_client = Client.get_client_by_id(player2.id)
 
     #Queue should be empty at start
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
