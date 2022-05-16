@@ -486,6 +486,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   end
 
   test "join_queue", %{lobby_id: lobby_id, host: host, hsocket: hsocket, psocket: _psocket, player: player} do
+    consul_pid = Coordinator.get_consul_pid(lobby_id)
+
     # We don't want to use the player we start with, we want to number our players specifically
     Lobby.remove_user_from_any_battle(player.id)
     _tachyon_send(hsocket, %{cmd: "c.lobby_host.update_host_status", boss: nil, teamsize: 2, teamcount: 2})
@@ -541,12 +543,12 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     # Now we need one of the players to become a spectator and open up a slot!
     assert Client.get_client_by_id(player5.id).player == false
     _tachyon_send(ps1.socket, %{cmd: "c.lobby.update_status", client: %{player: false, ready: false}})
-
     :timer.sleep(100)
+    send(consul_pid, :tick)
 
+    consul_state = :sys.get_state(consul_pid)
+    assert consul_state.join_queue == []
     assert Client.get_client_by_id(player5.id).player == true
-    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
-    assert queue == []
 
     # Now get users 6 and 7 back in
     Lobby.force_add_user_to_battle(player6.id, lobby_id)
