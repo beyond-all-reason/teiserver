@@ -219,12 +219,14 @@ defmodule Teiserver.Account.UserLib do
     query
   end
 
+  @spec _preload_user_stat(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_user_stat(query) do
     from user in query,
       left_join: user_stats in assoc(user, :user_stat),
       preload: [user_stat: user_stats]
   end
 
+  @spec global_roles :: [String.t()]
   def global_roles() do
     ~w(Default Armada Cortex Raptor Scavenger)
   end

@@ -152,6 +152,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         User.send_direct_message(state.userid, userid, "Thank you")
       _ ->
         user = User.get_user_by_id(userid)
+        Logger.info("CoordinatorServer unhandled DM from #{user.name} of: #{message}")
         if not User.is_bot?(user) do
           User.send_direct_message(state.userid, userid, "I don't currently handle messages, sorry #{user.name}")
         end

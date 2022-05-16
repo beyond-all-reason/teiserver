@@ -273,7 +273,7 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
   @spec load(Plug.Conn.t(), map) :: Plug.Conn.t()
   def load(conn, params) do
-    hours = Map.get(params, "hours", "6") |> int_parse()
+    hours = Map.get(params, "hours", "24") |> int_parse()
     resolution = Map.get(params, "resolution", "5") |> int_parse()
 
     logs =
