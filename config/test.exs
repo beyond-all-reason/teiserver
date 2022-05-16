@@ -2,8 +2,8 @@ import Config
 
 # Configure your database
 config :central, Central.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "teiserver_test",
+  password: "123456789",
   database: "teiserver_test",
   hostname: "localhost",
   queue_target: 5000,
