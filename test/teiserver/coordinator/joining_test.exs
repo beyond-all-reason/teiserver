@@ -112,7 +112,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
         "team_colour" => 0,
         "player_number" => 0,
         "userid" => user2.id,
-        "role" => "player"
+        "player" => true
       },
       "lobby_id" => lobby_id,
       "reason" => "client_updated_battlestatus"
