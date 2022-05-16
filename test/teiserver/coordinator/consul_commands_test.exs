@@ -626,9 +626,9 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     Lobby.force_add_user_to_battle(player3.id, lobby_id)
 
     #Players 2 and 3 are playing a 1v1, player 1 is a not a player
-    _tachyon_send(socket1, %{cmd: "c.lobby.update_status", player: false, ready: false})
-    _tachyon_send(socket2, %{cmd: "c.lobby.update_status", player: true, ready: true})
-    _tachyon_send(socket3, %{cmd: "c.lobby.update_status", player: true, ready: true})
+    _tachyon_send(socket1, %{cmd: "c.lobby.update_status", client: %{player: false, ready: false}})
+    _tachyon_send(socket2, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
+    _tachyon_send(socket3, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
 
     assert Client.get_client_by_id(player1.id).player == false
     assert Client.get_client_by_id(player2.id).player == true
@@ -640,21 +640,10 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert queue == []
 
     #Player 1 now wants to join
-    _tachyon_send(socket1, %{cmd: "c.lobby.update_status", player: true, ready: true})
+    _tachyon_send(socket1, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
     #And added to the join queue
     assert Client.get_client_by_id(player1.id).player == false
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
     assert queue == [player1.id]
-
-    #Player 3 becomes a spectator
-    _tachyon_send(socket3, %{cmd: "c.lobby.update_status", player: false, ready: false})
-    assert Client.get_client_by_id(player3.id).player == false
-
-    #Now there is 1 spot free and player 1 should be added as a player and removed from the queue
-    :timer.sleep(100)
-    assert Client.get_client_by_id(player1.id).player == true
-    queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
-    assert queue == []
-
   end
 end
