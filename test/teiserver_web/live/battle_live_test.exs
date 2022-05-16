@@ -179,7 +179,7 @@ defmodule TeiserverWeb.Live.BattleTest do
         |> String.replace(" gameHash", "")
         |> int_parse
 
-      {:ok, view, html} = live(conn, "/teiserver/battle/lobbies/chat/#{lobby_id}")
+      {:ok, view, _html} = live(conn, "/teiserver/battle/lobbies/chat/#{lobby_id}")
 
       %{user: user1, socket: socket1} = TeiserverTestLib.tachyon_auth_setup()
       %{user: user2, socket: _socket2} = TeiserverTestLib.tachyon_auth_setup()

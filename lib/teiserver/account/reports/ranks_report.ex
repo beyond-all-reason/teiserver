@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.RanksReport do
   alias Central.Helpers.{DatePresets, TimexHelper}
-  alias Teiserver.{Account, User}
+  alias Teiserver.{Account}
   alias Central.Repo
 
   @spec icon() :: String.t()
