@@ -10,16 +10,16 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
     reply(:matchmaking, :query, queues, state)
   end
 
-  def do_handle("list_my_queues", %{"query" => _query}, state) do
+  def do_handle("list_my_queues", _, state) do
     queues = Matchmaking.list_queues(state.queues)
     reply(:matchmaking, :your_queue_list, queues, state)
   end
 
-  # def do_handle("get_queue_info", queue_id, msg_id, state) do
-  #   queue_id = int_parse(queue_id)
-  #   {queue, info} = Matchmaking.get_queue_and_info(queue_id)
-  #   reply(:matchmaking, :queue_info, {queue, info}, state)
-  # end
+  def do_handle("get_queue_info", %{"queue_id" => queue_id}, state) do
+    queue_id = int_parse(queue_id)
+    {queue, info} = Matchmaking.get_queue_and_info(queue_id)
+    reply(:matchmaking, :queue_info, {queue, info}, state)
+  end
 
   def do_handle("join_queue", %{"queue_id" => queue_id}, state) do
     queue_id = int_parse(queue_id)
@@ -30,6 +30,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
         :ok -> true
         :duplicate -> true
         :failed -> false
+        :missing -> false
       end
 
     case joined do
@@ -38,7 +39,10 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
         reply(:matchmaking, :join_queue_success, queue_id, new_state)
 
       false ->
-        reason = "Failure"
+        reason = case resp do
+          :missing -> "No queue found"
+          _ -> "Failure"
+        end
         reply(:matchmaking, :join_queue_failure, {queue_id, reason}, state)
     end
   end

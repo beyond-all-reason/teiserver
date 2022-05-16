@@ -1,10 +1,9 @@
 defmodule Teiserver.Game.QueueWaitServer do
   use GenServer
   require Logger
-  alias Teiserver.Battle.Lobby
   alias Teiserver.Data.Matchmaking
   alias Phoenix.PubSub
-  alias Teiserver.{Coordinator, Client, Telemetry}
+  alias Teiserver.{Telemetry}
   alias Teiserver.Data.Types, as: T
 
   @default_telemetry_interval 10_000

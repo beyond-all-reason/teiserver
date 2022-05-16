@@ -23,14 +23,17 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingOut do
     }
   end
 
-  # def do_reply(:queue_info, {queue, info}) do
-  #   %{
-  #     "cmd" => "s.matchmaking.your_queue_list",
-  #     "result" => "success",
-  #     "queues" => queue_list
-  #       |> Enum.map(fn b -> Tachyon.convert_object(:queue, b) end)
-  #   }
-  # end
+  def do_reply(:queue_info, {queue, info}) do
+    %{
+      "cmd" => "s.matchmaking.queue_info",
+      "queue" => %{
+        "queue_id" => queue.id,
+        "name" => queue.name,
+        "last_wait_time" => info.last_wait_time,
+        "player_count" => info.player_count
+      }
+    }
+  end
 
   # ###########
   # # Create
@@ -146,7 +149,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingOut do
   #   }
   # end
 
-  def do_reply(_, _) do
-    # TODO: Implement Tachyon matchmaking
-  end
+  # def do_reply(_, _) do
+  #   # TODO: Implement Tachyon matchmaking
+  # end
 end

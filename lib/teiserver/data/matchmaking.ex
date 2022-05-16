@@ -131,11 +131,11 @@ defmodule Teiserver.Data.Matchmaking do
     end)
   end
 
-  @spec add_player_to_queue(Integer.t(), Integer.t()) :: :ok | :duplicate | :failed
+  @spec add_player_to_queue(Integer.t(), Integer.t()) :: :ok | :duplicate | :failed | :missing
   def add_player_to_queue(queue_id, player_id) do
     case get_queue_wait_pid(queue_id) do
       nil ->
-        :failed
+        :missing
 
       pid ->
         GenServer.call(pid, {:add_player, player_id})
@@ -146,7 +146,7 @@ defmodule Teiserver.Data.Matchmaking do
   def remove_player_from_queue(queue_id, player_id) do
     case get_queue_wait_pid(queue_id) do
       nil ->
-        :failed
+        :missing
 
       pid ->
         GenServer.call(pid, {:remove_player, player_id})
@@ -157,7 +157,7 @@ defmodule Teiserver.Data.Matchmaking do
   def player_accept(queue_id, player_id) do
     case get_queue_wait_pid(queue_id) do
       nil ->
-        :failed
+        :missing
 
       pid ->
         GenServer.cast(pid, {:player_accept, player_id})
@@ -169,7 +169,7 @@ defmodule Teiserver.Data.Matchmaking do
   def player_decline(queue_id, player_id) do
     case get_queue_wait_pid(queue_id) do
       nil ->
-        :failed
+        :missing
 
       pid ->
         GenServer.cast(pid, {:player_decline, player_id})

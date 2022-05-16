@@ -3,7 +3,7 @@
 * query :: Query
 
 #### Queryable fields
-`id` - Integer (Battle ID)
+-- None yet
 
 #### Success response
 * queue_list :: List (Queue)
@@ -28,7 +28,28 @@
 ### TODO: `c.matchmaking.list_my_queues`
 Operates the same way as the queue query but with a preset set of filters, only returning queues you are currently a part of.
 
-### TODO: `s.matchmaking.your_queue_list`
+### `c.matchmaking.get_queue_info`
+### Result
+* wait_time: The amount of time most players are waiting for a game (in seconds), exact method of calculation may vary
+* player_count: The number of players currently in the queue
+
+#### Example input/output
+```json
+{
+  "cmd": "c.matchmaking.get_queue_info",
+  "queue_id": 123
+}
+
+{
+  "cmd": "s.matchmaking.queue_info",
+  "queue": {
+    "queue_id": 123,
+    "name": "Best queue name in the world",
+    "last_wait_time": 33,
+    "player_count": 2
+  }
+}
+```
 
 
 ### TODO: `c.matchmaking.join_queue`
