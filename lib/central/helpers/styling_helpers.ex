@@ -74,12 +74,16 @@ defmodule Central.Helpers.StylingHelper do
   def icon(:export, fa_type), do: "fa-#{fa_type} fa-download"
   def icon(:structure, fa_type), do: "fa-#{fa_type} fa-cubes"
   def icon(:documentation, fa_type), do: "fa-#{fa_type} fa-book"
+  def icon(:live_view, _fa_type), do: "fa-brands fa-phoenix-framework"
 
   def icon(:admin, fa_type), do: "fa-#{fa_type} fa-user-crown"
   def icon(:moderation, fa_type), do: "fa-#{fa_type} fa-gavel"
 
   def icon(:overview, fa_type), do: "fa-#{fa_type} fa-expand-alt"
   def icon(:detail, fa_type), do: "fa-#{fa_type} fa-file-alt"
+
+  def icon(:day, fa_type), do: "fa-#{fa_type} fa-calendar-day"
+  def icon(:month, fa_type), do: "fa-#{fa_type} fa-calendar-days"
 
   def icon(:summary, fa_type), do: "fa-#{fa_type} fa-user-chart"
 

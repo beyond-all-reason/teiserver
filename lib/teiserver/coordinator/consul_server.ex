@@ -663,11 +663,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   defp player_count_changed(%{join_queue: [], low_priority_join_queue: []} = _state), do: nil
-  defp player_count_changed(%{join_queue: join_queue, low_priority_join_queue: low_priority_join_queue} = state) do
+  defp player_count_changed(state) do
     if get_player_count(state) < get_max_player_count(state) do
-      count = get_player_count(state)
-      Logger.info("joinq - Player count #{count}, queue is #{Kernel.inspect join_queue}, low_prio_queue is #{Kernel.inspect low_priority_join_queue}")
-
       [userid | _] = get_queue(state)
 
       existing = Client.get_client_by_id(userid)
@@ -677,11 +674,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
           # Sometimes people get added and SPADS thinks they need to go, this delay might help
           :timer.sleep(100)
           LobbyChat.sayprivateex(state.coordinator_id, userid, "#{new_client.name} You were at the front of the queue, you are now a player.", state.lobby_id)
-          Logger.info("joinq - Dequeing #{userid} into a player")
           send(self(), {:dequeue_user, userid})
           Client.update(allowed_client, :client_updated_battlestatus)
         {false, _} ->
-          Logger.info("joinq - No dequeue")
           :ok
       end
     end

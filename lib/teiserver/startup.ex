@@ -7,6 +7,7 @@ defmodule Teiserver.Startup do
     start_time = System.system_time(:millisecond)
 
     Teiserver.TeiserverConfigs.teiserver_configs()
+    Teiserver.TeiserverQuickActions.teiserver_quick_actions()
 
     Teiserver.LobbyIdServer.start_lobby_id_server()
     Teiserver.SpringIdServer.start_spring_id_server()
@@ -139,104 +140,6 @@ defmodule Teiserver.Startup do
     Central.Account.GroupCacheLib.update_caches(player_group)
     Central.Account.GroupCacheLib.update_caches(internal_group)
     Central.Account.GroupCacheLib.update_caches(umbrella_group)
-
-    # Quick actions
-    QuickAction.add_items([
-      # General pages
-      %{
-        label: "Friends/Mutes/Invites",
-        icons: [Teiserver.icon(:relationship), :list],
-        url: "/teiserver/account/relationships",
-        permissions: "teiserver"
-      },
-      %{
-        label: "Teiserver live metrics",
-        icons: ["fa-regular fa-tachometer-alt", :list],
-        url: "/teiserver/admin/metrics",
-        permissions: "logging.live"
-      },
-      %{
-        label: "Clans",
-        icons: [Teiserver.Clans.ClanLib.icon(), :list],
-        url: "/teiserver/account/clans",
-        permissions: "teiserver"
-      },
-      %{
-        label: "Battles",
-        icons: [Teiserver.Battle.LobbyLib.icon(), :list],
-        url: "/teiserver/battle/lobbies",
-        permissions: "teiserver"
-      },
-
-      # Mod pages
-      %{
-        label: "Clients",
-        icons: [Teiserver.ClientLib.icon(), :list],
-        url: "/teiserver/admin/client",
-        permissions: "teiserver.moderator"
-      },
-      %{
-        label: "Live queues",
-        icons: [Teiserver.Game.QueueLib.icon(), :list],
-        url: "/teiserver/admin_live/queues",
-        permissions: "teiserver.moderator"
-      },
-      %{
-        label: "Teiserver users",
-        icons: [Teiserver.ClientLib.icon(), :list],
-        input: "s",
-        method: "get",
-        placeholder: "Search username",
-        url: "/teiserver/admin/users/search",
-        permissions: "teiserver.moderator"
-      },
-
-      # %{label: "Parties", icons: [Teiserver.ClientLib.icon(), :list], url: "/teiserver/admin/parties", permissions: "teiserver.moderator"},
-      %{
-        label: "Clan admin",
-        icons: [Teiserver.Clans.ClanLib.icon(), :list],
-        url: "/teiserver/admin/clans",
-        permissions: "teiserver.moderator"
-      },
-
-      # Admin pages
-      %{
-        label: "Teiserver dashboard",
-        icons: ["fa-regular fa-tachometer-alt", :list],
-        url: "/logging/live/dashboard/metrics?nav=teiserver",
-        permissions: "logging.live.show"
-      },
-      %{
-        label: "Teiserver client events",
-        icons: ["fa-regular #{Teiserver.Telemetry.ClientEventLib.icon()}", :list],
-        url: "/teiserver/reports/client_events/summary",
-        permissions: "teiserver.admin"
-      },
-      %{
-        label: "Teiserver server metrics",
-        icons: ["fa-regular #{Teiserver.Telemetry.ServerDayLogLib.icon()}", :list],
-        url: "/teiserver/reports/client_events/summary",
-        permissions: "teiserver.admin"
-      },
-      %{
-        label: "Teiserver match metrics",
-        icons: ["fa-regular #{Teiserver.Battle.MatchLib.icon()}", :list],
-        url: "/teiserver/reports/client_events/summary",
-        permissions: "teiserver.admin"
-      },
-      %{
-        label: "Teiserver infologs",
-        icons: ["fa-regular #{Teiserver.Telemetry.InfologLib.icon()}", :list],
-        url: "/teiserver/reports/client_events/summary",
-        permissions: "teiserver.moderator.telemetry"
-      },
-      %{
-        label: "Teiserver reports",
-        icons: ["fa-regular #{Central.Helpers.StylingHelper.icon(:report)}", :list],
-        url: "/teiserver/reports/client_events/summary",
-        permissions: "teiserver.admin"
-      }
-    ])
 
     # User configs
     add_user_config_type(%{

@@ -2,6 +2,7 @@ defmodule Teiserver do
   @moduledoc false
 
   # def icon(), do: "fa-duotone fa-robot"
+  @spec icon :: String.t()
   def icon(), do: "fa-duotone fa-server"
 
   @spec icon(:friend | :friend_request | :ignore | :relationship) :: String.t()
@@ -28,6 +29,7 @@ defmodule Teiserver do
   def internal_group_id(), do: ConCache.get(:application_metadata_cache, "teiserver_internal_group")
 
   # Designed for debugging help
+  @spec tachyon(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}
   def tachyon(v) do
     Teiserver.Protocols.TachyonLib.decode(v)
   end
