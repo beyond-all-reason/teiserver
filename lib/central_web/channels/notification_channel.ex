@@ -3,10 +3,15 @@ defmodule CentralWeb.Communication.NotificationChannel do
   use Phoenix.Channel
 
   def join("communication_notification:" <> user_id, _params, socket) do
-    if socket.assigns[:current_user].id == user_id |> String.to_integer() do
-      {:ok, socket}
-    else
-      {:error, "Permission denied"}
+    cond do
+      socket.assigns[:current_user] == nil ->
+        {:error, "No user"}
+
+      socket.assigns[:current_user].id == user_id |> String.to_integer() ->
+        {:ok, socket}
+
+      true ->
+        {:error, "Permission denied"}
     end
   end
 
