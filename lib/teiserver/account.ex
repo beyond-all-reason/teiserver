@@ -891,4 +891,164 @@ defmodule Teiserver.Account do
   def change_accolade(%Accolade{} = accolade) do
     Accolade.changeset(accolade, %{})
   end
+
+
+  alias Teiserver.Account.SmurfKey
+  alias Teiserver.Account.SmurfKeyLib
+
+  @spec smurf_key_query(List.t()) :: Ecto.Query.t()
+  def smurf_key_query(args) do
+    smurf_key_query(nil, args)
+  end
+
+  @spec smurf_key_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def smurf_key_query(id, args) do
+    SmurfKeyLib.query_smurf_keys
+      |> SmurfKeyLib.search(%{id: id})
+      |> SmurfKeyLib.search(args[:search])
+      |> SmurfKeyLib.preload(args[:preload])
+      |> SmurfKeyLib.order_by(args[:order_by])
+      |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of smurf_keys.
+
+  ## Examples
+
+      iex> list_smurf_keys()
+      [%SmurfKey{}, ...]
+
+  """
+  @spec list_smurf_keys(List.t()) :: List.t()
+  def list_smurf_keys(args \\ []) do
+    smurf_key_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Gets a single smurf_key.
+
+  Raises `Ecto.NoResultsError` if the SmurfKey does not exist.
+
+  ## Examples
+
+      iex> get_smurf_key!(123)
+      %SmurfKey{}
+
+      iex> get_smurf_key!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_smurf_key!(Integer.t() | List.t()) :: SmurfKey.t()
+  @spec get_smurf_key!(Integer.t(), List.t()) :: SmurfKey.t()
+  def get_smurf_key!(id) when not is_list(id) do
+    smurf_key_query(id, [])
+    |> Repo.one!
+  end
+  def get_smurf_key!(args) do
+    smurf_key_query(nil, args)
+    |> Repo.one!
+  end
+  def get_smurf_key!(id, args) do
+    smurf_key_query(id, args)
+    |> Repo.one!
+  end
+
+  @doc """
+  Gets a single smurf_key.
+
+  Returns `nil` if the SmurfKey does not exist.
+
+  ## Examples
+
+      iex> get_smurf_key(123)
+      %SmurfKey{}
+
+      iex> get_smurf_key(456)
+      nil
+
+  """
+  def get_smurf_key(user_id, value) do
+    smurf_key_query(nil, search: [
+      user_id: user_id,
+      value: value
+    ])
+    |> Repo.one
+  end
+
+  @doc """
+  Creates a smurf_key.
+
+  ## Examples
+
+      iex> create_smurf_key(%{field: value})
+      {:ok, %SmurfKey{}}
+
+      iex> create_smurf_key(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_smurf_key(non_neg_integer(), String.t()) :: {:ok, SmurfKey.t()} | {:error, Ecto.Changeset.t()}
+  def create_smurf_key(user_id, value) do
+    case get_smurf_key(user_id, value) do
+      nil ->
+        %SmurfKey{}
+          |> SmurfKey.changeset(%{user_id: user_id, value: value})
+          |> Repo.insert()
+      existing ->
+        existing
+    end
+  end
+
+  @doc """
+  Updates a smurf_key.
+
+  ## Examples
+
+      iex> update_smurf_key(smurf_key, %{field: new_value})
+      {:ok, %SmurfKey{}}
+
+      iex> update_smurf_key(smurf_key, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_smurf_key(SmurfKey.t(), Map.t()) :: {:ok, SmurfKey.t()} | {:error, Ecto.Changeset.t()}
+  def update_smurf_key(%SmurfKey{} = smurf_key, attrs) do
+    smurf_key
+    |> SmurfKey.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a SmurfKey.
+
+  ## Examples
+
+      iex> delete_smurf_key(smurf_key)
+      {:ok, %SmurfKey{}}
+
+      iex> delete_smurf_key(smurf_key)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_smurf_key(SmurfKey.t()) :: {:ok, SmurfKey.t()} | {:error, Ecto.Changeset.t()}
+  def delete_smurf_key(%SmurfKey{} = smurf_key) do
+    Repo.delete(smurf_key)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking smurf_key changes.
+
+  ## Examples
+
+      iex> change_smurf_key(smurf_key)
+      %Ecto.Changeset{source: %SmurfKey{}}
+
+  """
+  @spec change_smurf_key(SmurfKey.t()) :: Ecto.Changeset.t()
+  def change_smurf_key(%SmurfKey{} = smurf_key) do
+    SmurfKey.changeset(smurf_key, %{})
+  end
 end
