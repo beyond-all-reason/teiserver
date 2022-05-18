@@ -102,7 +102,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
       }
     end
 
-    AgentLib._send(state.socket, Map.put(data, :cmd, "c.lobby.update_status"))
+    AgentLib._send(state.socket, %{cmd: "c.lobby.update_status", client: data})
     state
   end
 
