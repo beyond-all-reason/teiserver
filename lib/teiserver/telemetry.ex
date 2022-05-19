@@ -1629,11 +1629,6 @@ defmodule Teiserver.Telemetry do
       Repo.delete(property)
     end
 
-    # No point updating user stats if it's certain values
-    if not Enum.member?(["", "unknown"], value) do
-      Account.update_user_stat(userid, %{value_name => value})
-    end
-
     result = create_client_property(%{
       property_type_id: property_type_id,
       user_id: userid,
