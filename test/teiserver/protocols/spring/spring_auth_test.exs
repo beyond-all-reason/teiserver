@@ -559,7 +559,7 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "SERVERMSG No incomming match for CREATEBOTACCOUNT with data '\"nomatchname\"'. Userid #{user.id}\n"
   end
 
-  test "c.moderation.report", %{socket: socket} do
+  test "c.moderation.report", %{socket: socket, user: user} do
     _send_raw(socket, "c.moderation.report_user bad_name_here location_type nil reason with spaces\n")
     reply = _recv_raw(socket)
     assert reply =~ "NO cmd=c.moderation.report_user\tbad command format\n"
@@ -593,17 +593,13 @@ CLIENTS test_room #{user.name}\n"
     assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 2
 
     # Reporting a friend
-    user = new_user()
-    %{socket: socket} = auth_setup(user)
-    %{user: friend} = auth_setup()
+    User.create_friend_request(user.id, target_user.id)
+    User.accept_friend_request(user.id, target_user.id)
 
-    User.create_friend_request(user.id, friend.id)
-    User.accept_friend_request(user.id, friend.id)
-
-    _send_raw(socket, "c.moderation.report_user #{friend.name}\tlocation_type\t123\treason with spaces\n")
+    _send_raw(socket, "c.moderation.report_user #{target_user.name}\tlocation_type\t123\treason with spaces\n")
     reply = _recv_raw(socket)
     assert reply =~ "NO cmd=c.moderation.report_user\treporting friend\n"
-    assert Enum.count(Account.list_reports(search: [filter: {"target", friend.id}])) == 0
+    assert Enum.count(Account.list_reports(search: [filter: {"target", target_user.id}])) == 2
   end
 
   test "Ranks" do
