@@ -593,20 +593,26 @@ defmodule Teiserver.Protocols.SpringIn do
     else
       case String.split(data, "\t") do
         [target_name, location_type, location_id, reason] ->
-          if String.trim(reason) == "" or String.trim(reason) == "None Given" do
-            User.send_direct_message(Coordinator.get_coordinator_userid(), state.userid, "Your report has not been submitted as no reason for the report was given.")
-            reply(:no, {"c.moderation.report_user", "no reason given"}, msg_id, state)
+          friendList = User.list_combined_friendslist([state.userid])
+          if Enum.find(friendList, fn friend -> User.get_username(friend) == target_name end) do
+            User.send_direct_message(Coordinator.get_coordinator_userid(), state.userid, "Your report has not been submitted, you can't report a friend.")
+            reply(:no, {"c.moderation.report_user", "reporting friend"}, msg_id, state)
           else
-            target = User.get_user_by_name(target_name) || %{id: nil}
-            location_id = if location_id == "nil", do: nil, else: location_id
-            result = Account.create_report(state.userid, target.id, location_type, location_id, reason)
+            if String.trim(reason) == "" or String.trim(reason) == "None Given" do
+              User.send_direct_message(Coordinator.get_coordinator_userid(), state.userid, "Your report has not been submitted as no reason for the report was given.")
+              reply(:no, {"c.moderation.report_user", "no reason given"}, msg_id, state)
+            else
+              target = User.get_user_by_name(target_name) || %{id: nil}
+              location_id = if location_id == "nil", do: nil, else: location_id
+              result = Account.create_report(state.userid, target.id, location_type, location_id, reason)
 
-            case result do
-              {:ok, _} ->
-                reply(:okay, nil, msg_id, state)
+              case result do
+                {:ok, _} ->
+                  reply(:okay, nil, msg_id, state)
 
-              {:error, reason} ->
-                reply(:no, {"c.moderation.report_user", reason}, msg_id, state)
+                {:error, reason} ->
+                  reply(:no, {"c.moderation.report_user", reason}, msg_id, state)
+              end
             end
           end
 
