@@ -111,19 +111,40 @@ defmodule Teiserver.Coordinator.AutomodServer do
         cond do
           Enum.member?(user.roles, "Developer") -> "Developer account"
           Enum.member?(user.roles, "Trusted") -> "Trusted account"
-          true -> do_check(userid)
+          true ->
+            # do_check(userid)
+            do_old_check(userid)
         end
     end
   end
 
   @spec do_check(T.userid()) :: String.t()
-  defp do_check(userid) do
+  def do_check(userid) do
+    if User.is_restricted?(userid, ["Login"]) do
+      "Already banned"
+    else
+      smurf_keys = Account.list_smurf_keys(search: [user_id: userid], select: [:type_id, :value])
+
+      value_list = smurf_keys
+        |> Enum.map(fn %{value: value} -> value end)
+
+      _automods = Account.list_automod_actions(search: [
+        enabled: true,
+        type: "hardware",
+        value_in: value_list
+      ])
+      |> Kernel.inspect
+    end
+  end
+
+  @spec do_old_check(T.userid()) :: String.t()
+  defp do_old_check(userid) do
     stats = Account.get_user_stat_data(userid)
 
     if User.is_restricted?(userid, ["Login"]) do
       "Already banned"
     else
-      with nil <- do_hw_check(userid, stats),
+      with nil <- do_hw1_check(userid, stats),
         nil <- do_lobby_hash_check(userid, stats)
       do
         "No action"
@@ -133,22 +154,22 @@ defmodule Teiserver.Coordinator.AutomodServer do
     end
   end
 
-  @spec do_hw_check(T.userid(), map()) :: String.t() | nil
-  defp do_hw_check(userid, stats) do
-    hw_fingerprint = Teiserver.Account.RecalculateUserHWTask.calculate_hw_fingerprint(stats)
+  @spec do_hw1_check(T.userid(), map()) :: String.t() | nil
+  defp do_hw1_check(userid, stats) do
+    hw1_fingerprint = Teiserver.Account.CalculateSmurfKeyTask.calculate_hw1_fingerprint(stats)
 
-    if hw_fingerprint != "" do
+    if hw1_fingerprint != "" do
       Account.update_user_stat(userid, %{
-        hw_fingerprint: hw_fingerprint
+        hw1_fingerprint: hw1_fingerprint
       })
 
       user = User.get_user_by_id(userid)
-      User.update_user(%{user | hw_hash: hw_fingerprint}, persist: true)
+      User.update_user(%{user | hw_hash: hw1_fingerprint}, persist: true)
 
       hashes = Account.list_automod_actions(search: [
         enabled: true,
         type: "hardware",
-        value: hw_fingerprint
+        value: hw1_fingerprint
       ], limit: 1)
 
       if not Enum.empty?(hashes) do

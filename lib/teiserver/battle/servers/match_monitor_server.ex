@@ -6,6 +6,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   alias Teiserver.{Account, Room, Client, User, Battle}
   alias Teiserver.Battle.LobbyChat
   alias Phoenix.PubSub
+  alias Teiserver.Account.CalculateSmurfKeyTask
   require Logger
 
   @spec do_start() :: :ok
@@ -153,6 +154,11 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             "hardware:validation" => contents["validation"],
           }
           Account.update_user_stat(user.id, stats)
+
+          hw1 = CalculateSmurfKeyTask.calculate_hw1_fingerprint(stats)
+          # hw2 = CalculateSmurfKeyTask.calculate_hw2_fingerprint(stats)
+
+          Account.create_smurf_key(user.id, "hw1", hw1)
           Teiserver.Coordinator.AutomodServer.check_user(user.id)
         end
     end

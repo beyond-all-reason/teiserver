@@ -18,6 +18,7 @@ defmodule Teiserver.Application do
       concache_perm_sup(:teiserver_telemetry_event_types),
       concache_perm_sup(:teiserver_telemetry_property_types),
       concache_perm_sup(:teiserver_telemetry_game_event_types),
+      concache_perm_sup(:teiserver_account_smurf_key_types),
 
       # Caches
       # Caches - Meta

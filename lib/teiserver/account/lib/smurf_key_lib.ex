@@ -87,7 +87,15 @@ defmodule Teiserver.Account.SmurfKeyLib do
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
-  def preload(query, _preloads) do
+  def preload(query, preloads) do
+    query = if :smurf_key_type in preloads, do: _preload_smurf_key_type(query), else: query
     query
+  end
+
+  @spec _preload_smurf_key_type(Ecto.Query.t) :: Ecto.Query.t
+  def _preload_smurf_key_type(query) do
+    from smurf_keys in query,
+      left_join: smurf_key_types in assoc(smurf_keys, :smurf_key_type),
+      preload: [smurf_key_type: smurf_key_types]
   end
 end

@@ -54,6 +54,11 @@ defmodule Teiserver.Account.AutomodActionLib do
       where: automod_actions.value == ^value
   end
 
+  def _search(query, :value_in, value_list) do
+    from automod_actions in query,
+      where: automod_actions.value in ^value_list
+  end
+
   def _search(query, :enabled, enabled) do
     from automod_actions in query,
       where: automod_actions.enabled == ^enabled

@@ -769,6 +769,9 @@ defmodule Teiserver.User do
       last_ip: ip
     })
 
+    # TODO: Replace lobby_hash name with client_app_hash
+    Account.create_smurf_key(user.id, "client_app_hash", lobby_hash)
+
     {:ok, user}
   end
 

@@ -990,15 +990,17 @@ defmodule Teiserver.Account do
       {:error, %Ecto.Changeset{}}
 
   """
-  @spec create_smurf_key(non_neg_integer(), String.t()) :: {:ok, SmurfKey.t()} | {:error, Ecto.Changeset.t()}
-  def create_smurf_key(user_id, value) do
+  @spec create_smurf_key(non_neg_integer(), String.t(), String.t()) :: {:ok, SmurfKey.t()} | {:error, Ecto.Changeset.t()}
+  def create_smurf_key(user_id, type_name, value) do
+    type_id = get_or_add_smurf_key_type(type_name)
+
     case get_smurf_key(user_id, value) do
       nil ->
         %SmurfKey{}
-          |> SmurfKey.changeset(%{user_id: user_id, value: value})
+          |> SmurfKey.changeset(%{user_id: user_id, value: value, type_id: type_id})
           |> Repo.insert()
       existing ->
-        existing
+        {:ok, existing}
     end
   end
 
@@ -1051,4 +1053,121 @@ defmodule Teiserver.Account do
   def change_smurf_key(%SmurfKey{} = smurf_key) do
     SmurfKey.changeset(smurf_key, %{})
   end
+
+  alias Teiserver.Account.SmurfKeyType
+  alias Teiserver.Account.SmurfKeyTypeLib
+
+  @spec smurf_key_type_query(List.t()) :: Ecto.Query.t()
+  def smurf_key_type_query(args) do
+    smurf_key_type_query(nil, args)
+  end
+
+  @spec smurf_key_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def smurf_key_type_query(id, args) do
+    SmurfKeyTypeLib.query_smurf_key_types
+      |> SmurfKeyTypeLib.search(%{id: id})
+      |> SmurfKeyTypeLib.search(args[:search])
+      |> SmurfKeyTypeLib.preload(args[:preload])
+      |> SmurfKeyTypeLib.order_by(args[:order_by])
+      |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of smurf_key_types.
+
+  ## Examples
+
+      iex> list_smurf_key_types()
+      [%SmurfKeyType{}, ...]
+
+  """
+  @spec list_smurf_key_types(List.t()) :: List.t()
+  def list_smurf_key_types(args \\ []) do
+    smurf_key_type_query(args)
+      |> QueryHelpers.limit_query(args[:limit] || 50)
+      |> Repo.all
+  end
+
+  @doc """
+  Gets a single smurf_key_type.
+
+  Raises `Ecto.NoResultsError` if the SmurfKeyType does not exist.
+
+  ## Examples
+
+      iex> get_smurf_key_type(123)
+      %SmurfKeyType{}
+
+      iex> get_smurf_key_type(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_smurf_key_type(Integer.t() | List.t()) :: SmurfKeyType.t()
+  @spec get_smurf_key_type(Integer.t(), List.t()) :: SmurfKeyType.t()
+  def get_smurf_key_type(id) when not is_list(id) do
+    smurf_key_type_query(id, [])
+      |> Repo.one
+  end
+  def get_smurf_key_type(args) do
+    smurf_key_type_query(nil, args)
+      |> Repo.one
+  end
+  def get_smurf_key_type(id, args) do
+    smurf_key_type_query(id, args)
+      |> Repo.one
+  end
+
+  @doc """
+  Creates a smurf_key_type.
+
+  ## Examples
+
+      iex> create_smurf_key_type(%{field: value})
+      {:ok, %SmurfKeyType{}}
+
+      iex> create_smurf_key_type(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_smurf_key_type(Map.t()) :: {:ok, SmurfKeyType.t()} | {:error, Ecto.Changeset.t()}
+  def create_smurf_key_type(attrs \\ %{}) do
+    %SmurfKeyType{}
+      |> SmurfKeyType.changeset(attrs)
+      |> Repo.insert()
+  end
+
+  @doc """
+  Deletes a SmurfKeyType.
+
+  ## Examples
+
+      iex> delete_smurf_key_type(smurf_key_type)
+      {:ok, %SmurfKeyType{}}
+
+      iex> delete_smurf_key_type(smurf_key_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_smurf_key_type(SmurfKeyType.t()) :: {:ok, SmurfKeyType.t()} | {:error, Ecto.Changeset.t()}
+  def delete_smurf_key_type(%SmurfKeyType{} = smurf_key_type) do
+    Repo.delete(smurf_key_type)
+  end
+
+  def get_or_add_smurf_key_type(name) do
+    name = String.trim(name)
+
+    Central.cache_get_or_store(:teiserver_account_smurf_key_types, name, fn ->
+      case list_smurf_key_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
+        [] ->
+          {:ok, key_type} = %SmurfKeyType{}
+            |> SmurfKeyType.changeset(%{name: name})
+            |> Repo.insert()
+
+          key_type.id
+        [%{id: id} | _] ->
+          id
+      end
+    end)
+  end
+
 end

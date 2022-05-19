@@ -511,7 +511,7 @@ defmodule TeiserverWeb.Admin.UserController do
     # Update their hw_key
     hw_fingerprint = Account.get_user_stat(user.id)
     |> Map.get(:data)
-    |> Teiserver.Account.RecalculateUserHWTask.calculate_hw_fingerprint()
+    |> Teiserver.Account.CalculateSmurfKeyTask.calculate_hw1_fingerprint()
 
     Account.update_user_stat(user.id, %{
       hw_fingerprint: hw_fingerprint
@@ -541,7 +541,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
     # Update their hw_key
     hw_fingerprint = Account.get_user_stat_data(user.id)
-    |> Teiserver.Account.RecalculateUserHWTask.calculate_hw_fingerprint()
+    |> Teiserver.Account.CalculateSmurfKeyTask.calculate_hw1_fingerprint()
 
     Account.update_user_stat(user.id, %{
       hw_fingerprint: hw_fingerprint
