@@ -970,9 +970,10 @@ defmodule Teiserver.Account do
       nil
 
   """
-  def get_smurf_key(user_id, value) do
+  def get_smurf_key(user_id, type_id, value) do
     smurf_key_query(nil, search: [
       user_id: user_id,
+      type_id: type_id,
       value: value
     ])
     |> Repo.one
@@ -994,7 +995,7 @@ defmodule Teiserver.Account do
   def create_smurf_key(user_id, type_name, value) do
     type_id = get_or_add_smurf_key_type(type_name)
 
-    case get_smurf_key(user_id, value) do
+    case get_smurf_key(user_id, type_id, value) do
       nil ->
         %SmurfKey{}
           |> SmurfKey.changeset(%{user_id: user_id, value: value, type_id: type_id})

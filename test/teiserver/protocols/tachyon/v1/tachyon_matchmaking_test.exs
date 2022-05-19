@@ -218,7 +218,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     }
 
     # And rejoin
-    _tachyon_send(socket, %{cmd: "c.matchmaking.join_queue #{queue1.id}\n")
+    _tachyon_send(socket, %{cmd: "c.matchmaking.join_queue #{queue1.id}\n"})
     reply = _tachyon_recv(socket)
     assert reply == "OK cmd=c.matchmaking.join_queue\t#{queue1.id}\n"
 
