@@ -1,5 +1,6 @@
 defmodule Teiserver do
   @moduledoc false
+  alias Teiserver.Data.Types, as: T
 
   # def icon(), do: "fa-duotone fa-robot"
   @spec icon :: String.t()
@@ -37,5 +38,11 @@ defmodule Teiserver do
   def accolade_status() do
     Application.put_env(:elixir, :ansi_enabled, true)
     Teiserver.Account.AccoladeLib.live_debug()
+  end
+
+  @spec manually_delete_user(T.userid()) :: {:ok, map()} | {:error, map()}
+  def manually_delete_user(id) do
+    Application.put_env(:elixir, :ansi_enabled, true)
+    Teiserver.Account.Tasks.DailyCleanupTask.manually_delete_user(id)
   end
 end

@@ -26,12 +26,12 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
     :ok
   end
 
-  @spec manually_delete_user(T.userid()) :: :ok
+  @spec manually_delete_user(T.userid()) :: {:ok, map()} | {:error, map()}
   def manually_delete_user(userid) do
     do_deletion([userid])
   end
 
-  @spec do_deletion([T.userid()]) :: :ok
+  @spec do_deletion([T.userid()]) :: {:ok, map()} | {:error, map()}
   defp do_deletion(id_list) do
     # Some mass deletion first
     sql_id_list = id_list
@@ -66,7 +66,5 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
 
     # Given there are other potential things to worry about we defer to the Central delete user task
     Central.Admin.DeleteUserTask.delete_users(id_list)
-
-    :ok
   end
 end
