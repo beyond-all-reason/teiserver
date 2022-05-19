@@ -562,15 +562,15 @@ CLIENTS test_room #{user.name}\n"
   test "c.moderation.report", %{socket: socket} do
     _send_raw(socket, "c.moderation.report_user bad_name_here location_type nil reason with spaces\n")
     reply = _recv_raw(socket)
-    assert String.contains?(reply, "NO cmd=c.moderation.report_user\tbad command format\n")
+    assert reply =~ "NO cmd=c.moderation.report_user\tbad command format\n"
 
     _send_raw(socket, "c.moderation.report_user bad_name_here\n")
     reply = _recv_raw(socket)
-    assert String.contains?(reply, "NO cmd=c.moderation.report_user\tbad command format\n")
+    assert reply =~ "NO cmd=c.moderation.report_user\tbad command format\n"
 
     _send_raw(socket, "c.moderation.report_user bad_name_here\tlocation_type\tnil\treason with spaces\n")
     reply = _recv_raw(socket)
-    assert String.contains?(reply, "NO cmd=c.moderation.report_user\tno target user\n")
+    assert reply =~ "NO cmd=c.moderation.report_user\tno target user\n"
 
     # Now we do it correctly, first without a location id
     target_user = new_user()
@@ -602,7 +602,7 @@ CLIENTS test_room #{user.name}\n"
 
     _send_raw(socket, "c.moderation.report_user #{friend.name}\tlocation_type\t123\treason with spaces\n")
     reply = _recv_raw(socket)
-    assert String.contains?(reply, "NO cmd=c.moderation.report_user\treporting friend\n")
+    assert reply =~ "NO cmd=c.moderation.report_user\treporting friend\n"
     assert Enum.count(Account.list_reports(search: [filter: {"target", friend.id}])) == 0
   end
 
