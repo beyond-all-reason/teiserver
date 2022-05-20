@@ -92,11 +92,13 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   def handle_info({:direct_message, userid, message}, state) do
-    case AccoladeLib.cast_accolade_chat(userid, {:user_message, message}) do
-      nil ->
-        User.send_direct_message(state.userid, userid, "I'm not currently awaiting feedback for a player")
-      _ ->
-        :ok
+    if not User.is_bot?(userid) do
+      case AccoladeLib.cast_accolade_chat(userid, {:user_message, message}) do
+        nil ->
+          User.send_direct_message(state.userid, userid, "I'm not currently awaiting feedback for a player")
+        _ ->
+          :ok
+      end
     end
 
     {:noreply, state}
