@@ -1,6 +1,6 @@
 defmodule Teiserver.Protocols.Spring.BattleIn do
   alias Teiserver.Battle.Lobby
-  alias Teiserver.{Coordinator, User}
+  alias Teiserver.{Coordinator}
   alias Teiserver.Protocols.SpringIn
   import Teiserver.Protocols.SpringOut, only: [reply: 5]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -8,7 +8,7 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
 
   @spec do_handle(String.t(), String.t(), String.t() | nil, Map.t()) :: Map.t()
   def do_handle("update_lobby_title", new_name, msg_id, state) do
-    if Lobby.allow?(state.userid, :update_lobby, state.lobby_id) do
+    if Lobby.allow?(state.userid, :update_lobby_title, state.lobby_id) do
       Lobby.rename_lobby(state.lobby_id, new_name)
       reply(:spring, :okay, "c.battle.update_lobby_title", msg_id, state)
     end
@@ -20,7 +20,7 @@ defmodule Teiserver.Protocols.Spring.BattleIn do
     case Jason.decode(json_str) do
       {:ok, data} ->
         host_data = %{
-          host_bosses: [User.get_userid(data["boss"])],
+          # host_bosses: [User.get_userid(data["boss"])],
           host_teamsize: data["teamSize"] |> int_parse,
           host_teamcount: data["nbTeams"] |> int_parse
         }

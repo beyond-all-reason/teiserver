@@ -74,6 +74,7 @@ defmodule Teiserver.Battle.Lobby do
         queue_id: nil,
 
         # Meta data
+        consul_rename: false,
         silence: false,
         in_progress: false,
         started_at: nil
@@ -410,11 +411,12 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   @spec rename_lobby(T.lobby_id(), String.t()) :: :ok
-  def rename_lobby(lobby_id, new_name) do
+  @spec rename_lobby(T.lobby_id(), String.t(), boolean) :: :ok
+  def rename_lobby(lobby_id, new_name, consul_rename \\ false) do
     case get_lobby(lobby_id) do
       nil -> nil
       lobby ->
-        update_lobby(%{lobby | name: new_name}, nil, :rename)
+        update_lobby(%{lobby | name: new_name, consul_rename: consul_rename}, nil, :rename)
     end
 
     :ok
@@ -670,6 +672,7 @@ defmodule Teiserver.Battle.Lobby do
           :enableunits,
           :enableallunits,
           :update_lobby,
+          :update_lobby_title,
           :update_host_status
         ],
         cmd
@@ -684,6 +687,10 @@ defmodule Teiserver.Battle.Lobby do
       )
 
     cond do
+      # If the battle has been renamed by the consul then we'll keep it renamed as such
+      battle.consul_rename == true and cmd == :update_lobby_title ->
+        false
+
       User.is_moderator?(changer) == true ->
         true
 

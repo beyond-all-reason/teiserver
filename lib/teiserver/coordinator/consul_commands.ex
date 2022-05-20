@@ -45,12 +45,24 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     max_player_count = ConsulServer.get_max_player_count(state)
 
+    boss_string = case state.host_bosses do
+      [] -> "Nobody is bossed"
+      [boss_id] ->
+        "Host boss is: #{User.get_username(boss_id)}"
+      boss_ids ->
+        boss_names = boss_ids
+          |> Enum.map(fn b -> User.get_username(b) end)
+          |> Enum.join(", ")
+
+        "Host bosses are: #{boss_names}"
+    end
+
     # Put other settings in here
     other_settings = [
       (if state.welcome_message, do: "Welcome message: #{state.welcome_message}"),
       "Team size set to #{state.host_teamsize}",
       "Team count set to #{state.host_teamcount}",
-      "Host boss is #{Kernel.inspect state.host_bosses}",
+      boss_string,
       "Currently I think there are #{player_count} players",
       "I think the maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
       "Level required to play is #{state.level_to_play}",
@@ -452,7 +464,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "rename", remaining: new_name} = cmd, state) do
-    Lobby.rename_lobby(state.lobby_id, new_name)
+    Lobby.rename_lobby(state.lobby_id, new_name, true)
     ConsulServer.say_command(cmd, state)
   end
 
