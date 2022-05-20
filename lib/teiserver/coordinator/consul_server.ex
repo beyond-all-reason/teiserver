@@ -273,7 +273,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info({:host_update, userid, host_data}, state) do
     if state.host_id == userid do
       host_data = host_data
-        |> Map.take([:host_preset, :host_teamsize, :host_teamcount])
+        |> Map.take([:host_preset, :host_teamsize, :host_teamcount, :host_boss])
         |> Enum.filter(fn {_k, v} -> v != nil and v != 0 end)
         |> Map.new
 
