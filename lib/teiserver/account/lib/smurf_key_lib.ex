@@ -43,6 +43,11 @@ defmodule Teiserver.Account.SmurfKeyLib do
       where: smurf_keys.value == ^value
   end
 
+  def _search(query, :value_in, value_list) do
+    from smurf_keys in query,
+      where: smurf_keys.value in ^value_list
+  end
+
   def _search(query, :value_like, value) do
     value_like = "%" <> String.replace(value, "*", "%") <> "%"
 
@@ -65,6 +70,11 @@ defmodule Teiserver.Account.SmurfKeyLib do
   def _search(query, :user_id_in, user_id_list) do
     from smurf_keys in query,
       where: smurf_keys.user_id in ^user_id_list
+  end
+
+  def _search(query, :not_user_id, user_id) do
+    from smurf_keys in query,
+      where: smurf_keys.user_id != ^user_id
   end
 
 
@@ -93,14 +103,22 @@ defmodule Teiserver.Account.SmurfKeyLib do
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
   def preload(query, preloads) do
-    query = if :smurf_key_type in preloads, do: _preload_smurf_key_type(query), else: query
+    query = if :type in preloads, do: _preload_type(query), else: query
+    query = if :user in preloads, do: _preload_user(query), else: query
     query
   end
 
-  @spec _preload_smurf_key_type(Ecto.Query.t) :: Ecto.Query.t
-  def _preload_smurf_key_type(query) do
+  @spec _preload_type(Ecto.Query.t) :: Ecto.Query.t
+  def _preload_type(query) do
     from smurf_keys in query,
-      left_join: smurf_key_types in assoc(smurf_keys, :smurf_key_type),
-      preload: [smurf_key_type: smurf_key_types]
+      left_join: types in assoc(smurf_keys, :type),
+      preload: [type: types]
+  end
+
+  @spec _preload_user(Ecto.Query.t) :: Ecto.Query.t
+  def _preload_user(query) do
+    from smurf_keys in query,
+      left_join: users in assoc(smurf_keys, :user),
+      preload: [user: users]
   end
 end

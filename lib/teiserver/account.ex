@@ -158,28 +158,27 @@ defmodule Teiserver.Account do
     }
   end
 
-  @spec smurf_search(Plug.Conn.t, User.t()) :: {list(), map()}
-  def smurf_search(conn, user) do
-    hash_ids = get_smurfs_by_hash(user)
-    hw_ids = get_smurfs_by_hw(user)
-
-    reasons = %{
-      hash: hash_ids,
-      hw: hw_ids
-    }
-
-    ids = (hash_ids ++ hw_ids)
-    |> Enum.uniq
-
-    users = list_users(search: [
-        admin_group: conn,
-        id_in: ids
+  @spec smurf_search(User.t()) :: map()
+  def smurf_search(user) do
+    values = list_smurf_keys(
+      search: [
+        user_id: user.id
       ],
-      order_by: "Name (A-Z)",
-      limit: 50
+      limit: :infinity,
+      select: [:value]
     )
+    |> Enum.map(fn %{value: value} -> value end)
 
-    {users, reasons}
+    list_smurf_keys(
+      search: [
+        value_in: values,
+        not_user_id: user.id
+      ],
+      preload: [:user, :type],
+      limit: :infinity
+    )
+    |> Enum.group_by(fn sk -> {sk.type.name, sk.value} end)
+    |> Enum.sort_by(fn {key, _value} -> key end, &<=/2)
   end
 
   defp get_smurfs_by_hash(user) do
@@ -923,8 +922,8 @@ defmodule Teiserver.Account do
   @spec list_smurf_keys(List.t()) :: List.t()
   def list_smurf_keys(args \\ []) do
     smurf_key_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+      |> QueryHelpers.limit_query(args[:limit] || 50)
+      |> Repo.all
   end
 
   @doc """

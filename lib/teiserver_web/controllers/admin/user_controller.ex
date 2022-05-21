@@ -508,25 +508,16 @@ defmodule TeiserverWeb.Admin.UserController do
   def smurf_search(conn, %{"id" => id}) do
     user = Account.get_user!(id)
 
-    # Update their hw_key
-    hw_fingerprint = Account.get_user_stat(user.id)
-    |> Map.get(:data)
-    |> Teiserver.Account.CalculateSmurfKeyTask.calculate_hw1_fingerprint()
-
-    Account.update_user_stat(user.id, %{
-      hw_fingerprint: hw_fingerprint
-    })
-
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        {users, reasons} = Account.smurf_search(conn, user)
+        matching_keys = Account.smurf_search(user)
 
         conn
-        |> add_breadcrumb(name: "List possible smurfs", url: conn.request_path)
-        |> assign(:users, users)
-        |> assign(:reasons, reasons)
-        |> assign(:params, search_defaults(conn))
-        |> render("smurf_list.html")
+          |> add_breadcrumb(name: "List possible smurfs", url: conn.request_path)
+          |> assign(:matching_keys, matching_keys)
+          |> assign(:user, user)
+          |> assign(:params, search_defaults(conn))
+          |> render("smurf_list.html")
 
       _ ->
         conn

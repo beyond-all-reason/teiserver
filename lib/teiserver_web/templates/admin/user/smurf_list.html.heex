@@ -27,102 +27,109 @@
             active: "smurf"
         }) %>
 
-<%= if @conn.params["search"] != nil do %>
-  <%= render TeiserverWeb.Admin.UserView, "search.html", assigns %>
-<% else %>
-  <br /><br />
+<h3 class="my-4">Listing matches for <%= @user.name %></h3>
+
+<%= for {{type_name, _value}, matches} <- @matching_keys do %>
+  <%
+    {type_colour, type_icon} = case type_name do
+      "hw1" -> {"danger", "fa-computer"}
+      "hw2" -> {"danger", "fa-computer"}
+      "client_app_hash" -> {"warning", "fa-code-simple"}
+      _ -> {"warning", "fa-house"}
+    end
+  %>
+  <div class="row">
+    <div class="col-md-12">
+      <h4>
+        <i class={"fa-fw fa-solid #{type_icon} text-#{type_colour}"}></i>
+        &nbsp;
+        <%= type_name %>
+      </h4>
+      
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th colspan="2">Name</th>
+            <%= if false and is_admin do %><th>Email</th><% end %>
+            <th>Status</th>
+            <th>&nbsp;</th>
+            <th>Registered</th>
+            <th>Last login</th>
+            <%= if is_admin do %>
+              <th colspan="2">&nbsp;</th>
+            <% else %>
+              <th>&nbsp;</th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody>
+      <%= for _key = %{user: user, type: _type} <- matches do %>
+          <tr>
+            <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
+              <%= central_component "icon", icon: user.icon %>
+            </td>
+            <td><%= user.name %></td>
+            <%= if false and is_admin do %><td><%= user.email %></td><% end %>
+
+            <td>
+              <%
+                unverified = user.data["verified"] != true
+                user_r = %{restrictions: user.data["restrictions"] || []}
+
+                banned = Teiserver.User.is_restricted?(user_r, ["Login"])
+                muted = Teiserver.User.is_restricted?(user_r, ["All chat", "Room chat", "Direct chat", "Lobby chat", "Battle chat"])
+                warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"])
+              %>
+
+              <%= if banned do %>
+                <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Ban")}"}></i>
+              <% end %>
+
+              <%= if muted do %>
+                <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Mute")}"}></i>
+              <% end %>
+
+              <%= if warned do %>
+                <i class={"fa-fw text-warning #{Central.Account.ReportLib.action_icon("Warn")}"}></i>
+              <% end %>
+
+              <%= if unverified do %>
+                <i class='fa-fw text-info fas fa-square-question'></i>
+              <% end %>
+            </td>
+
+            <td>&nbsp;</td>
+
+            <td>
+              <%= date_to_str(user.inserted_at, format: :dmy) %>
+            </td>
+
+            <td>
+              <%= date_to_str(((user.data["last_login"] || 0) * 60) |> Timex.from_unix, format: :hms_dmy, tz: @tz) %>
+            </td>
+
+            <td>
+              <a href={Routes.ts_admin_user_path(@conn, :show, user.id)} class="btn btn-secondary btn-sm">
+                Show
+              </a>
+            </td>
+
+            <%= if is_admin do %>
+              <td>
+                <a href={Routes.ts_admin_user_path(@conn, :edit, user.id)} class="btn btn-secondary btn-sm">
+                  Edit
+                </a>
+              </td>
+            <% end %>
+          </tr>
+      <% end %>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
 <% end %>
 
-<h4>Listing Users</h4>
-
-<table class="table table-sm">
-  <thead>
-    <tr>
-      <th colspan="2">Name</th>
-      <%= if false and is_admin do %><th>Email</th><% end %>
-      <th>Status</th>
-      <th style="text-align:center;" width="120">Hash</th>
-      <th style="text-align:center;" width="120">Hardware</th>
-      <th>&nbsp;</th>
-      <th>Registered</th>
-      <%= if is_admin do %>
-        <th colspan="2">&nbsp;</th>
-      <% else %>
-        <th>&nbsp;</th>
-      <% end %>
-    </tr>
-  </thead>
-  <tbody>
-<%= for user <- @users do %>
-    <tr>
-      <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
-        <%= central_component "icon", icon: user.icon %>
-      </td>
-      <td><%= user.name %></td>
-      <%= if false and is_admin do %><td><%= user.email %></td><% end %>
-
-      <td>
-        <%
-          unverified = user.data["verified"] != true
-          user_r = %{restrictions: user.data["restrictions"] || []}
-
-          banned = Teiserver.User.is_restricted?(user_r, ["Login"])
-          muted = Teiserver.User.is_restricted?(user_r, ["All chat", "Room chat", "Direct chat", "Lobby chat", "Battle chat"])
-          warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"])
-        %>
-
-        <%= if banned do %>
-          <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Ban")}"}></i>
-        <% end %>
-
-        <%= if muted do %>
-          <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Mute")}"}></i>
-        <% end %>
-
-        <%= if warned do %>
-          <i class={"fa-fw text-warning #{Central.Account.ReportLib.action_icon("Warn")}"}></i>
-        <% end %>
-
-        <%= if unverified do %>
-          <i class='fa-fw text-info fas fa-square-question'></i>
-        <% end %>
-      </td>
-
-      <td style="text-align: center">
-        <%= if Enum.member?(@reasons.hash, user.id) do %>
-          <i class='fa-fw fas fa-circle-check text-danger fa-lg'></i>
-        <% end %>
-      </td>
-
-      <td style="text-align: center">
-        <%= if Enum.member?(@reasons.hw, user.id) do %>
-          <i class='fa-fw fas fa-circle-check text-danger fa-lg'></i>
-        <% end %>
-      </td>
-
-      <td>&nbsp;</td>
-
-      <td>
-        <%= date_to_str(user.inserted_at, format: :dmy) %>
-      </td>
-
-      <td>
-        <a href={Routes.ts_admin_user_path(@conn, :show, user.id)} class="btn btn-secondary btn-sm">
-          Show
-        </a>
-      </td>
-
-      <%= if is_admin do %>
-        <td>
-          <a href={Routes.ts_admin_user_path(@conn, :edit, user.id)} class="btn btn-secondary btn-sm">
-            Edit
-          </a>
-        </td>
-      <% end %>
-    </tr>
-<% end %>
-  </tbody>
-</table>
 
       </div>
     </div>
