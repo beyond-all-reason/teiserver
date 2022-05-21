@@ -42,13 +42,13 @@ ssh-keygen
 > Enter passphrase (empty for no passphrase):
 > Enter same passphrase again:
 > Your identification has been saved in /home/username/.ssh/identity.
-> Your public key has been saved in /home/username/.ssh/identity.pub.
+> Your public key has been saved in /home/username/.ssh/id_rsa.pub.
 > The key fingerprint is:
 > 22:bc:0b:fe:f5:06:1d:c0:05:ea:59:09:e3:07:8a:8c username@caprice
 
-# That identity.pub is the part we'll upload to our server and then refer to the non-pub file when we want to connect.
+# That id_rsa.pub is the part we'll upload to our server and then refer to the non-pub file when we want to connect.
 
-scp ~/.ssh/identity.pub deploy@yourdomain.com:./identity.pub
+scp ~/.ssh/id_rsa.pub deploy@yourdomain.com:./id_rsa.pub
 ```
 
 Now back on the server (logged in as `deploy`) we make use of this
@@ -59,8 +59,8 @@ chmod 700 .ssh
 cd .ssh
 touch authorized_keys
 chmod 600 authorized_keys
-cat ../identity.pub >> authorized_keys
-rm ../identity.pub
+cat ../id_rsa.pub >> authorized_keys
+rm ../id_rsa.pub
 exit
 ```
 
