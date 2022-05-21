@@ -46,34 +46,81 @@ Operates the same way as the queue query but with a preset set of filters, only 
     "queue_id": 123,
     "name": "Best queue name in the world",
     "last_wait_time": 33,
-    "player_count": 2
+    "member_count": 2
   }
 }
 ```
 
-
 ### TODO: `c.matchmaking.join_queue`
 Tells the server to add the player to the MM queue. A player can be part of multiple queues at the same time (provided they and their party meet all criteria of the queues such as party size).
+
+```json
+%{
+  "cmd": "c.matchmaking.join_queue",
+  "queue_id": 123
+}
+```
 
 ### TODO: `c.matchmaking.leave_queue`
 Tells the server to remove the player from the specified MM queue. No response expected.
 
+```json
+%{
+  "cmd": "c.matchmaking.leave_queue",
+  "queue_id": 123
+}
+```
+
 ### TODO: `c.matchmaking.leave_all_queues`
 Tells the server to remove the player from all MM queues. No response selected.
+```json
+%{
+  "cmd": "c.matchmaking.leave_all_queues"
+}
+```
 
-### TODO: `s.matchmaking.ready_check`
-When an MM game is ready the player is placed into a special "readyup" state where they are assigned to a potential game and sent this message. The player is expected to either send back a `c.matchmaking.ready` or `c.matchmaking.decline`.
+### TODO: `s.matchmaking.match_ready`
+```json
+{
+  "cmd": "s.matchmaking.match_ready",
+  "match_id": "match-id-string",
+  "queue_id": 123
+}
+```
+When a match is made all players are sent this command. They should display an accept/decline dialog to the user and submit the response to the server accordingly.
 
 If all players ready up the game is created. If any players fail to ready up in the time frame or decline those players are removed from all matchmaking queues (they can rejoin though a timeout could be applied) and the players that did ready up are placed back in the queue in their previous positions (the readyup state is removed).
 
-### TODO: `c.matchmaking.ready`
-Tells the server the player is ready to participate in the MM game. Sent in response to a ready_check.
+### TODO: `c.matchmaking.accept`
+Tells the server the player accepts the match. The match_id needs to be included in the response.
+```json
+{
+  "cmd": "s.matchmaking.match_ready",
+  "match_id": "match-id-string"
+}
+```
 
 ### TODO: `c.matchmaking.decline`
 Tells the server the player is not ready to participate in the MM game. This will result in the player being removed from all MM queues as if they'd sent `c.matchmaking.leave_all_queues`.
 
-### TODO: `s.matchmaking.match_cancelled`
-When one or more of the other players selected for a match cancel, this message is sent to all others that were selected as potentials for this match. It informs the client they are still in the queue and retain their place in the queue. No client response is expected.
+### TODO: `s.matchmaking.match_declined`
+Sent when you have either declined the match or have failed to accept within the required timeframe. As part of this you will have been removed from all queues so will need to rejoin them.
+```json
+{
+  "cmd": "s.matchmaking.match_declined",
+  "match_id": "match-id-string",
+  "queue_id": 123
+}
+```
 
-### TODO: `s.matchmaking.removed_from_queue`
+### TODO: `s.matchmaking.match_cancelled`
+Sent when one or more players have declined or failed to accept in time. You will be re-added to all queues you were in and at the search range you were in when you left.
+```json
+{
+  "cmd": "s.matchmaking.match_cancelled",
+  "match_id": "match-id-string",
+  "queue_id": 123
+}
+```
+
 

@@ -23,7 +23,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
 
   def do_handle("join_queue", %{"queue_id" => queue_id}, state) do
     queue_id = int_parse(queue_id)
-    resp = Matchmaking.add_player_to_queue(queue_id, state.userid)
+    resp = Matchmaking.add_user_to_queue(queue_id, state.userid)
 
     joined =
       case resp do
@@ -49,41 +49,27 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
 
   def do_handle("leave_queue", %{"queue_id" => queue_id}, state) do
     queue_id = int_parse(queue_id)
-    Matchmaking.remove_player_from_queue(queue_id, state.userid)
+    Matchmaking.remove_user_from_queue(queue_id, state.userid)
     %{state | queues: List.delete(state.queues, queue_id)}
   end
 
   def do_handle("leave_all_queues", _cmd, state) do
     state.queues
     |> Enum.each(fn queue_id ->
-      Matchmaking.remove_player_from_queue(queue_id, state.userid)
+      Matchmaking.remove_user_from_queue(queue_id, state.userid)
     end)
 
     %{state | queues: []}
   end
 
-  # def do_handle("ready", _msg, _msg_id, state) do
-  #   case state.ready_queue_id do
-  #     nil ->
-  #       state
+  def do_handle("accept", %{"match_id" => match_id}, state) do
+    Matchmaking.player_accept(match_id, state.userid)
+    state
+  end
 
-  #     queue_id ->
-  #       Matchmaking.player_accept(queue_id, state.userid)
-  #       state
-  #   end
-  # end
-
-  def do_handle("decline", _cmd, state) do
-    case state.ready_queue_id do
-      nil ->
-        state
-
-      queue_id ->
-        Matchmaking.player_decline(queue_id, state.userid)
-
-        # Player has declined to ready up, remove them from all other queues
-        do_handle("leave_all_queues", nil, state)
-    end
+  def do_handle("decline", %{"match_id" => match_id}, state) do
+    Matchmaking.player_decline(match_id, state.userid)
+    do_handle("leave_all_queues", nil, state)
   end
 
   # def do_handle(cmd, data, msg_id, state) do

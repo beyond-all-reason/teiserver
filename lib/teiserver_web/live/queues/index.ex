@@ -78,14 +78,14 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   @impl true
   def handle_event("join-queue", %{"queue_id" => queue_id}, %{assigns: assigns} = socket) do
     queue_id = int_parse(queue_id)
-    Matchmaking.add_player_to_queue(queue_id, assigns[:current_user].id)
+    Matchmaking.add_user_to_queue(queue_id, assigns[:current_user].id)
 
     {:noreply, socket}
   end
 
   def handle_event("leave-queue", %{"queue_id" => queue_id}, %{assigns: assigns} = socket) do
     queue_id = int_parse(queue_id)
-    Matchmaking.remove_player_from_queue(queue_id, assigns[:current_user].id)
+    Matchmaking.remove_user_from_queue(queue_id, assigns[:current_user].id)
 
     {:noreply, socket}
   end
@@ -139,11 +139,11 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   end
 
   # Queue wait
-  def handle_info({:queue_wait, :queue_add_player, _queue_id, _userid}, socket) do
+  def handle_info({:queue_wait, :queue_add_user, _queue_id, _userid}, socket) do
     {:noreply, socket}
   end
 
-  def handle_info({:queue_wait, :queue_remove_player, _queue_id, _userid}, socket) do
+  def handle_info({:queue_wait, :queue_remove_user, _queue_id, _userid}, socket) do
     {:noreply, socket}
   end
 

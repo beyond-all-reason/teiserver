@@ -133,8 +133,9 @@ This is the channel for sending messages to the client. It allows the client on 
   {:client_message, topic, userid, data}
   
   # Matchmaking
-  {:client_message, :matchmaking, userid, {:match_ready, queue_id}}
-  {:client_message, :matchmaking, userid, {:join_lobby, queue_id}}
+  {:client_message, :matchmaking, userid, {:match_ready, {queue_id, match_id}}}
+  {:client_message, :matchmaking, userid, {:match_cancelled, {queue_id, match_id}}}
+  {:client_message, :matchmaking, userid, {:match_declined, {queue_id, match_id}}}
 
   # Messaging
   {:client_message, :received_direct_message, userid, {from_id, message_content}}
@@ -184,8 +185,11 @@ All updates about the room and content for the room. Likely to be kept as is and
 Sent from the queue wait server to update regarding it's status
 Valid events
 ```elixir
-  {:queue_wait, :queue_add_player, queue_id, userid}
-  {:queue_wait, :queue_remove_player, queue_id, userid}
+  {:queue_wait, :queue_add_user, queue_id, userid}
+  {:queue_wait, :queue_remove_user, queue_id, userid}
+  
+  {:queue_wait, :queue_add_party, queue_id, party_id}
+  {:queue_wait, :queue_remove_party, queue_id, party_id}
 ```
 
 #### teiserver_queue_match:#{queue_id}

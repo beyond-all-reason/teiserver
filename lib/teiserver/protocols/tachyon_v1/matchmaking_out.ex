@@ -30,7 +30,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingOut do
         "queue_id" => queue.id,
         "name" => queue.name,
         "last_wait_time" => info.last_wait_time,
-        "player_count" => info.player_count
+        "member_count" => info.member_count
       }
     }
   end
@@ -81,10 +81,27 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingOut do
     }
   end
 
-  def do_reply(:match_ready, queue_id) when is_integer(queue_id) do
+  def do_reply(:match_ready, {queue_id, match_id}) do
     %{
       "cmd" => "s.matchmaking.match_ready",
-      "queue_id" => queue_id
+      "queue_id" => queue_id,
+      "match_id" => match_id
+    }
+  end
+
+  def do_reply(:match_declined, {queue_id, match_id}) do
+    %{
+      "cmd" => "s.matchmaking.match_declined",
+      "queue_id" => queue_id,
+      "match_id" => match_id
+    }
+  end
+
+  def do_reply(:match_cancelled, {queue_id, match_id}) do
+    %{
+      "cmd" => "s.matchmaking.match_cancelled",
+      "queue_id" => queue_id,
+      "match_id" => match_id
     }
   end
 

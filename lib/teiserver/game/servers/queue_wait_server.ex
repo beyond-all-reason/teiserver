@@ -16,9 +16,9 @@ defmodule Teiserver.Game.QueueWaitServer do
   # Party item structure
   # {party_id, join_time, current_range, :party}
 
-  def handle_call({:add_player, userid}, _from, state) when is_integer(userid) do
+  def handle_call({:add_user, userid}, _from, state) when is_integer(userid) do
     {resp, new_state} =
-      case Enum.member?(state.player_list, userid) do
+      case Enum.member?(state.wait_list, {userid, :user}) do
         true ->
           {:duplicate, state}
 
@@ -29,20 +29,20 @@ defmodule Teiserver.Game.QueueWaitServer do
           new_bucket = [player_item | Map.get(state.buckets, key, [])]
           new_buckets = Map.put(state.buckets, key, new_bucket)
 
-          new_player_list = [userid | state.player_list]
+          new_wait_list = [{userid, :user} | state.wait_list]
 
           new_state = %{
             state
             | buckets: new_buckets,
-              player_list: new_player_list,
-              player_count: Enum.count(new_player_list),
+              wait_list: new_wait_list,
+              member_count: Enum.count(new_wait_list),
               skip: false
           }
 
           PubSub.broadcast(
             Central.PubSub,
             "teiserver_queue_wait:#{state.queue_id}",
-            {:queue_wait, :queue_add_player, state.queue_id, userid}
+            {:queue_wait, :queue_add_user, state.queue_id, userid}
           )
 
           PubSub.broadcast(
@@ -57,16 +57,16 @@ defmodule Teiserver.Game.QueueWaitServer do
     {:reply, resp, new_state}
   end
 
-  def handle_call({:remove_player, userid}, _from, state) when is_integer(userid) do
+  def handle_call({:remove_user, userid}, _from, state) when is_integer(userid) do
     {resp, new_state} =
-      case Enum.member?(state.player_list, userid) do
+      case Enum.member?(state.wait_list, {userid, :user}) do
         true ->
-          new_state = remove_player(state, userid)
+          new_state = remove_user(userid, state)
 
           PubSub.broadcast(
             Central.PubSub,
             "teiserver_queue_wait:#{state.queue_id}",
-            {:queue_wait, :queue_remove_player, state.queue_id, userid}
+            {:queue_wait, :queue_remove_user, state.queue_id, userid}
           )
 
           PubSub.broadcast(
@@ -87,10 +87,50 @@ defmodule Teiserver.Game.QueueWaitServer do
   def handle_call(:get_info, _from, state) do
     resp = %{
       last_wait_time: state.last_wait_time,
-      player_count: state.player_count
+      member_count: state.member_count
     }
 
     {:reply, resp, state}
+  end
+
+  def handle_cast({:re_add_users, player_list}, state) do
+    # First we ignore those already added
+    new_state = player_list
+      |> Enum.reject(fn {userid, _, _, type} -> Enum.member?(state.wait_list, {userid, type}) end)
+      |> Enum.reduce(state, fn (player_item = {itemid, _, _, type}, acc) ->
+        key = bucket_function(itemid)
+
+        new_bucket = [player_item | Map.get(acc.buckets, key, [])]
+        new_buckets = Map.put(acc.buckets, key, new_bucket)
+
+        new_wait_list = [{itemid, type} | acc.wait_list]
+
+        new_state = %{
+          acc
+          | buckets: new_buckets,
+            wait_list: new_wait_list,
+            member_count: Enum.count(new_wait_list),
+            skip: false
+        }
+
+        if type == :user do
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_queue_wait:#{acc.queue_id}",
+            {:queue_wait, :queue_add_user, acc.queue_id, itemid}
+          )
+
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_client_action_updates:#{itemid}",
+            {:client_action, :join_queue, itemid, acc.queue_id}
+          )
+        end
+
+        new_state
+      end)
+
+    {:noreply, new_state}
   end
 
   def handle_info({:refresh_from_db, db_queue}, state) do
@@ -114,7 +154,7 @@ defmodule Teiserver.Game.QueueWaitServer do
   def handle_info(:telemetry_tick, state) do
     Telemetry.cast_to_server({:matchmaking_update, state.queue_id, %{
       last_wait_time: state.last_wait_time,
-      player_count: state.player_count
+      member_count: state.member_count
     }})
 
     {:noreply, state}
@@ -129,49 +169,55 @@ defmodule Teiserver.Game.QueueWaitServer do
     matches = state.buckets
       |> Enum.map(fn {key, players} ->
         players
-          |> Enum.map(fn {userid, _time, current_range, _type} ->
-            best_match = find_matches(userid, key, current_range, state.buckets)
-              |> Enum.sort_by(fn {_userid, distance} -> distance end)
-              |> hd_or_x(nil)
+          |> Enum.map(fn {userid, time, current_range, type} ->
+            {best_match, _distance} = find_matches(userid, key, current_range, state.buckets)
+              |> Enum.sort_by(fn {_data, distance} -> distance end)
+              |> hd_or_x({nil, nil})
 
-            {userid, best_match}
+            {{userid, time, current_range, type}, best_match}
           end)
       end)
       |> List.flatten
-      |> Enum.filter(fn {_userid, match} -> match != nil end)
-      |> Enum.map(fn {userid, {matchid, _}} -> [userid, matchid] end)
+      |> Enum.filter(fn {_userid_type, match} -> match != nil end)
       |> Enum.map(fn match ->
-        create_match(match, state)
+        team_list = case match do
+          {m1, m2} -> [m1, m2]
+        end
+        Matchmaking.create_match(team_list, state.queue_id)
       end)
 
-    {new_buckets, new_player_list} = case matches do
+    {new_buckets, new_wait_list} = case matches do
       [] ->
-        {state.buckets, state.player_list}
+        {state.buckets, state.wait_list}
 
       _ ->
-        userids = matches
-          |> Enum.map(fn {_pid, ids} -> ids end)
+        # Teams will be: [{id, time, range, type}]
+        matched_teams = matches
+          |> Enum.map(fn {_pid, _match_id, teams} -> teams end)
           |> List.flatten
 
         new_buckets = state.buckets
           |> Map.new(fn {key, members} ->
             new_members = members |>
-              Enum.reject(fn {mem, _time, _range, _type} -> Enum.member?(userids, mem) end)
+              Enum.reject(fn team -> Enum.member?(matched_teams, team) end)
 
             {key, new_members}
           end)
 
-        new_player_list = state.player_list
-          |> Enum.reject(fn u -> Enum.member?(userids, u) end)
+        waits_to_remove = matched_teams
+          |> Enum.map(fn {id, _time, _range, type} -> {id, type} end)
 
-        {new_buckets, new_player_list}
+        new_wait_list = state.wait_list
+          |> Enum.reject(fn u -> Enum.member?(waits_to_remove, u) end)
+
+        {new_buckets, new_wait_list}
     end
 
     :timer.send_after(250, :tick)
     {:noreply, %{state |
       buckets: new_buckets,
-      player_list: new_player_list,
-      player_count: Enum.count(new_player_list)
+      wait_list: new_wait_list,
+      member_count: Enum.count(new_wait_list)
     }}
   end
 
@@ -192,34 +238,28 @@ defmodule Teiserver.Game.QueueWaitServer do
           |> Enum.filter(fn {player_id, _time, player_range, _type} ->
             (abs(key - inner_key) <= player_range) and (player_id != userid)
           end)
-          |> Enum.map(fn {player_id, _time, _player_range, _type} ->
-            {player_id, abs(key - inner_key)}
+          |> Enum.map(fn {player_id, time, player_range, type} ->
+            {{player_id, time, player_range, type}, abs(key - inner_key)}
           end)
       end)
       |> List.flatten
   end
 
-  @spec create_match(list(), map()) :: {pid, list()}
-  defp create_match(members, state) do
-    pid = Matchmaking.add_match_server(state.queue_id, members)
-    {pid, members}
-  end
-
   # Used to remove players from all aspects of the queue, either because
   # they left or their game started
-  @spec remove_player(Map.t(), T.userid()) :: Map.t()
-  defp remove_player(state, userid) do
+  @spec remove_user(T.userid(), Map.t()) :: Map.t()
+  defp remove_user(userid, state) do
     key = bucket_function(userid)
 
-    new_bucket = state.buckets[key] |> List.delete(userid)
+    new_bucket = state.buckets[key] |> List.delete({userid, :user})
     new_buckets = Map.put(state.buckets, key, new_bucket)
 
-    new_player_list = state.player_list |> List.delete(userid)
+    new_wait_list = state.wait_list |> List.delete({userid, :user})
 
     %{state |
       buckets: new_buckets,
-      player_list: new_player_list,
-      player_count: Enum.count(new_player_list)
+      wait_list: new_wait_list,
+      member_count: Enum.count(new_wait_list)
     }
   end
 
@@ -259,8 +299,8 @@ defmodule Teiserver.Game.QueueWaitServer do
 
     state = update_state_from_db(%{
        buckets: %{},
-       player_list: [],
-       player_count: 0,
+       wait_list: [],
+       member_count: 0,
        last_wait_time: 0,
        skip: false,
        queue_id: opts.queue.id

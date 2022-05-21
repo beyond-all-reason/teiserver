@@ -224,8 +224,8 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, state}
   end
 
-  def handle_info({:client_message, :matchmaking, _userid, data}, state) do
-    {:noreply, matchmaking_update(data, state)}
+  def handle_info({:client_message, :matchmaking, _userid, _data}, state) do
+    {:noreply, state}
   end
 
   def handle_info({:client_message, :lobby, userid, data}, state) do
@@ -499,26 +499,6 @@ defmodule Teiserver.SpringTcpServer do
     end
 
     state
-  end
-
-  # Matchmaking
-  defp matchmaking_update({cmd, data}, state) do
-    case cmd do
-      :match_ready ->
-        state.protocol_out.reply(:matchmaking, :match_ready, data, nil, state)
-        %{state | ready_queue_id: data}
-
-      :match_cancel ->
-        %{state | ready_queue_id: nil}
-
-      :join_lobby ->
-        # TODO: Make it so we know what the script password is because normally it's sent
-        # by the client, maybe update the MM protocol so when you join a queue it's there?
-        state.protocol_out.do_join_battle(state, data, state.script_password)
-
-      :dequeue ->
-        state
-    end
   end
 
   # Battle updates

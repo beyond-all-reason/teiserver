@@ -60,7 +60,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   end
 
   # defp do_handle(%{command: "1v1me", senderid: senderid} = _cmd, state) do
-  #   case Matchmaking.add_player_to_queue(1, senderid) do
+  #   case Matchmaking.add_user_to_queue(1, senderid) do
   #     :failed ->
   #       User.send_direct_message(state.userid, senderid, "You were not added to the queue")
   #     _ ->
@@ -71,7 +71,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   # end
 
   defp do_handle(%{command: "un1v1", senderid: senderid} = _cmd, state) do
-    Matchmaking.remove_player_from_queue(1, senderid)
+    Matchmaking.remove_user_from_queue(1, senderid)
     User.send_direct_message(state.userid, senderid, "You have been removed from the queue")
 
     state

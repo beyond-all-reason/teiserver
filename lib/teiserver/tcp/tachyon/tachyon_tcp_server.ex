@@ -82,7 +82,6 @@ defmodule Teiserver.TachyonTcpServer do
       lobby_host: false,
       user: nil,
       queues: [],
-      ready_queue_id: nil,
 
       # Connection microstate
       msg_id: nil,
@@ -230,8 +229,8 @@ defmodule Teiserver.TachyonTcpServer do
           {:noreply, state.protocol_out.reply(:lobby, :received_lobby_direct_announce, data, state)}
 
         :matchmaking ->
-          {event, queue_id} = data
-          {:noreply, state.protocol_out.reply(:matchmaking, event, queue_id, state)}
+          {event, event_data} = data
+          {:noreply, state.protocol_out.reply(:matchmaking, event, event_data, state)}
 
         _ ->
           {:noreply, state.protocol_out.reply(:client, event, data, state)}

@@ -28,7 +28,7 @@ defmodule Teiserver.Data.Matchmaking do
     Central.cache_get(:teiserver_queues, id)
   end
 
-  @spec get_queue_wait_pid(integer) :: pid() | nil
+  @spec get_queue_wait_pid(T.queue_id()) :: pid() | nil
   def get_queue_wait_pid(id) when is_integer(id) do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "QueueWaitServer:#{id}") do
       [{pid, _}] ->
@@ -50,7 +50,7 @@ defmodule Teiserver.Data.Matchmaking do
     GenServer.cast(pid, msg)
   end
 
-  @spec get_queue_match_pid(String.t()) :: pid() | nil
+  @spec get_queue_match_pid(T.mm_match_id()) :: pid() | nil
   def get_queue_match_pid(id) do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "QueueMatchServer:#{id}") do
       [{pid, _}] ->
@@ -60,20 +60,26 @@ defmodule Teiserver.Data.Matchmaking do
     end
   end
 
-  @spec call_queue_match(String.t(), any) :: any
-  def call_queue_match(id, msg) do
-    pid = get_queue_match_pid(id)
+  @spec call_queue_match(T.mm_match_id(), any) :: any
+  def call_queue_match(match_id, msg) do
+    pid = get_queue_match_pid(match_id)
     GenServer.call(pid, msg)
   end
 
-  @spec cast_queue_match(String.t(), any) :: any
-  def cast_queue_match(id, msg) do
-    pid = get_queue_match_pid(id)
+  @spec cast_queue_match(T.mm_match_id(), any) :: any
+  def cast_queue_match(match_id, msg) do
+    pid = get_queue_match_pid(match_id)
     GenServer.cast(pid, msg)
   end
 
-  @spec add_match_server(T.queue_id(), list()) :: pid
-  def add_match_server(queue_id, members) do
+  @spec create_match([{T.userid(), :user} | {T.party_id(), :party}], T.queue_id()) :: {pid, String.t(), list()}
+  def create_match(teams, queue_id) do
+    {pid, match_id} = add_match_server(queue_id, teams)
+    {pid, match_id, teams}
+  end
+
+  @spec add_match_server(T.queue_id(), [{T.userid(), :user} | {T.party_id(), :party}]) :: {pid, String.t()}
+  def add_match_server(queue_id, teams) do
     match_id = UUID.uuid1()
 
     {:ok, pid} = DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
@@ -81,11 +87,11 @@ defmodule Teiserver.Data.Matchmaking do
       data: %{
         match_id: match_id,
         queue_id: queue_id,
-        members: members
+        teams: teams
       }
     })
 
-    pid
+    {pid, match_id}
   end
 
   @spec get_queue_and_info(Integer.t()) :: {QueueStruct.t(), Map.t()}
@@ -131,31 +137,37 @@ defmodule Teiserver.Data.Matchmaking do
     end)
   end
 
-  @spec add_player_to_queue(Integer.t(), Integer.t()) :: :ok | :duplicate | :failed | :missing
-  def add_player_to_queue(queue_id, player_id) do
+  @spec add_user_to_queue(T.queue_id(), T.userid()) :: :ok | :duplicate | :failed | :missing
+  def add_user_to_queue(queue_id, user_id) do
     case get_queue_wait_pid(queue_id) do
       nil ->
         :missing
 
       pid ->
-        GenServer.call(pid, {:add_player, player_id})
+        GenServer.call(pid, {:add_user, user_id})
     end
   end
 
-  @spec remove_player_from_queue(Integer.t(), Integer.t()) :: :ok | :missing
-  def remove_player_from_queue(queue_id, player_id) do
+  @spec remove_user_from_queue(T.queue_id(), T.userid()) :: :ok | :missing
+  def remove_user_from_queue(queue_id, user_id) do
     case get_queue_wait_pid(queue_id) do
       nil ->
         :missing
 
       pid ->
-        GenServer.call(pid, {:remove_player, player_id})
+        GenServer.call(pid, {:remove_user, user_id})
     end
   end
 
-  @spec player_accept(Integer.t(), Integer.t()) :: :ok | :missing
-  def player_accept(queue_id, player_id) do
-    case get_queue_wait_pid(queue_id) do
+  @spec re_add_users_to_queue(list(), T.queue_id()) :: :ok
+  def re_add_users_to_queue(player_list, queue_id) do
+    cast_queue_wait(queue_id, {:re_add_users, player_list})
+    :ok
+  end
+
+  @spec player_accept(T.mm_match_id(), T.userid()) :: :ok | :missing
+  def player_accept(match_id, player_id) do
+    case get_queue_match_pid(match_id) do
       nil ->
         :missing
 
@@ -165,9 +177,9 @@ defmodule Teiserver.Data.Matchmaking do
     end
   end
 
-  @spec player_decline(Integer.t(), Integer.t()) :: :ok | :missing
-  def player_decline(queue_id, player_id) do
-    case get_queue_wait_pid(queue_id) do
+  @spec player_decline(T.mm_match_id(), Integer.t()) :: :ok | :missing
+  def player_decline(match_id, player_id) do
+    case get_queue_match_pid(match_id) do
       nil ->
         :missing
 

@@ -24,7 +24,7 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
 
   def do_handle("join_queue", queue_id, msg_id, state) do
     queue_id = int_parse(queue_id)
-    resp = Matchmaking.add_player_to_queue(queue_id, state.userid)
+    resp = Matchmaking.add_user_to_queue(queue_id, state.userid)
 
     joined =
       case resp do
@@ -45,14 +45,14 @@ defmodule Teiserver.Protocols.Spring.MatchmakingIn do
 
   def do_handle("leave_queue", queue_id, _msg_id, state) do
     queue_id = int_parse(queue_id)
-    Matchmaking.remove_player_from_queue(queue_id, state.userid)
+    Matchmaking.remove_user_from_queue(queue_id, state.userid)
     %{state | queues: List.delete(state.queues, queue_id)}
   end
 
   def do_handle("leave_all_queues", _msg, _msg_id, state) do
     state.queues
     |> Enum.each(fn queue_id ->
-      Matchmaking.remove_player_from_queue(queue_id, state.userid)
+      Matchmaking.remove_user_from_queue(queue_id, state.userid)
     end)
 
     %{state | queues: []}
