@@ -489,7 +489,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     consul_pid = Coordinator.get_consul_pid(lobby_id)
 
     # We don't want to use the player we start with, we want to number our players specifically
-    Lobby.remove_user_from_any_battle(player.id)
+    Lobby.remove_user_from_any_lobby(player.id)
     _tachyon_send(hsocket, %{cmd: "c.lobby_host.update_host_status", boss: nil, teamsize: 2, teamcount: 2})
 
     state = Coordinator.call_consul(lobby_id, :get_all)

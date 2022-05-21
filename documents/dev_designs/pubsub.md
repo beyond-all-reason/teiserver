@@ -134,6 +134,7 @@ This is the channel for sending messages to the client. It allows the client on 
   
   # Matchmaking
   {:client_message, :matchmaking, userid, {:match_ready, {queue_id, match_id}}}
+  {:client_message, :matchmaking, userid, {:join_lobby, lobby_id}}
   {:client_message, :matchmaking, userid, {:match_cancelled, {queue_id, match_id}}}
   {:client_message, :matchmaking, userid, {:match_declined, {queue_id, match_id}}}
 
@@ -190,12 +191,7 @@ Valid events
   
   {:queue_wait, :queue_add_party, queue_id, party_id}
   {:queue_wait, :queue_remove_party, queue_id, party_id}
-```
 
-#### teiserver_queue_match:#{queue_id}
-Sent from the queue match servers
-Valid events
-```elixir
   {:queue_match, :match_attempt, queue_id, match_id}
   {:queue_match, :match_made, queue_id, lobby_id}
 ```

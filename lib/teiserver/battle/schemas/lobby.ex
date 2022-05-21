@@ -201,7 +201,7 @@ defmodule Teiserver.Battle.Lobby do
   # Used to send the user PID a join battle command
   @spec force_add_user_to_battle(T.userid(), T.lobby_id()) :: :ok | nil
   def force_add_user_to_battle(userid, battle_lobby_id) do
-    remove_user_from_any_battle(userid)
+    remove_user_from_any_lobby(userid)
     script_password = new_script_password()
 
     Coordinator.cast_consul(battle_lobby_id, {:user_joined, userid})
@@ -332,10 +332,10 @@ defmodule Teiserver.Battle.Lobby do
     end
   end
 
-  @spec remove_user_from_any_battle(integer() | nil) :: list()
-  def remove_user_from_any_battle(nil), do: []
+  @spec remove_user_from_any_lobby(integer() | nil) :: list()
+  def remove_user_from_any_lobby(nil), do: []
 
-  def remove_user_from_any_battle(userid) do
+  def remove_user_from_any_lobby(userid) do
     lobby_ids =
       list_lobbies()
       |> Enum.filter(fn b -> b != nil end)
@@ -352,8 +352,8 @@ defmodule Teiserver.Battle.Lobby do
     lobby_ids
   end
 
-  @spec find_empty_battle(function()) :: Map.t()
-  def find_empty_battle(filter_func \\ (fn _ -> true end)) do
+  @spec find_empty_lobby(function()) :: Map.t()
+  def find_empty_lobby(filter_func \\ (fn _ -> true end)) do
     empties =
       list_lobbies()
       |> Enum.filter(fn b -> b.players == [] end)
@@ -724,6 +724,12 @@ defmodule Teiserver.Battle.Lobby do
 
       User.is_restricted?(userid, ["All chat", "Lobby chat"]) ->
         false
+
+      lobby.founder_id == userid ->
+        true
+
+      User.is_moderator?(userid) ->
+        true
 
       lobby.silence ->
         false

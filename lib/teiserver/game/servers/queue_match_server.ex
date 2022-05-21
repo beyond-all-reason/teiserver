@@ -9,6 +9,7 @@ defmodule Teiserver.Game.QueueMatchServer do
   @tick_interval 500
   @ready_wait_time 15_000
 
+  @impl true
   def handle_cast({:player_accept, player_id}, state) when is_integer(player_id) do
     new_state =
       case player_id in state.pending_accepts do
@@ -24,9 +25,9 @@ defmodule Teiserver.Game.QueueMatchServer do
           case Enum.empty?(new_pending_accepts) do
             # That was the last one, go-time
             true ->
-              try_setup_lobby(interim_state)
+              find_empty_lobby(interim_state)
 
-            # Not ready quite yet, still waiting for at least one more
+            # Not ready quite yet, still waiting for 1 or more others
             false ->
               interim_state
           end
@@ -54,7 +55,19 @@ defmodule Teiserver.Game.QueueMatchServer do
     cancel_match(state)
   end
 
-  def handle_info(:tick, %{pending_accepts: [], declined_users: []} = state) do
+  def handle_info(:tick, %{stage: "Completed"} = state) do
+    {:noreply, state}
+  end
+
+  def handle_info(:tick, %{stage: "Setting up lobby"} = state) do
+    {:noreply, setup_lobby(state)}
+  end
+
+  def handle_info(:tick, %{stage: "Finding empty lobby"} = state) do
+    {:noreply, find_empty_lobby(state)}
+  end
+
+  def handle_info(:tick, %{stage: "finding_battle"} = state) do
     # Typically we need to check things like team size and the like
     # but for this test of concept stage we're going to just assume we need two players
 
@@ -62,7 +75,7 @@ defmodule Teiserver.Game.QueueMatchServer do
       cond do
         # Trying to find a battle, not doing standard tick stuff
         state.finding_battle == true ->
-          try_setup_lobby(state)
+          setup_lobby(state)
 
         # This means we are not waiting for players, we can instead find some
         # TODO: Currently this is hard coded to waiting for 2 players so only allows 1v1
@@ -151,23 +164,6 @@ defmodule Teiserver.Game.QueueMatchServer do
   def handle_info({:update, :map_list, new_list}, state),
     do: {:noreply, %{state | map_list: new_list}}
 
-  # Used to remove players from all aspects of the queue, either because
-  # they left or their game started
-  @spec remove_players(Map.t(), [Integer.t()]) :: Map.t()
-  defp remove_players(state, userids) do
-    new_umatched = Enum.reject(state.unmatched_players, fn u -> u in userids end)
-    new_matched = Enum.reject(state.matched_players, fn u -> u in userids end)
-    new_player_map = Map.drop(state.player_map, userids)
-
-    %{
-      state
-      | unmatched_players: new_umatched,
-        matched_players: new_matched,
-        player_map: new_player_map,
-        player_count: Enum.count(new_player_map)
-    }
-  end
-
   defp send_invites(%{users: users} = state) do
     users
       |> Enum.map(fn userid ->
@@ -212,130 +208,136 @@ defmodule Teiserver.Game.QueueMatchServer do
     {:noreply, state}
   end
 
-  # Try to setup a battle with the players currently readied up
-  defp try_setup_lobby(state), do: {:noreply, state}
-  defp try_setup_lobby_old(state) do
-    # Send out the new battle stuff
-    empty_battle = Lobby.find_empty_battle(fn l -> String.contains?(l.name, "EU ") end)
+  @spec find_empty_lobby(map()) :: map()
+  defp find_empty_lobby(state) do
+    empty_lobby = Lobby.find_empty_lobby(fn l -> String.contains?(l.name, "EU ") end)
 
-    case empty_battle do
+    case empty_lobby do
       nil ->
-        Logger.info("QueueMatchServer try_setup_lobby no empty battle")
-        %{state | finding_battle: true}
+        Logger.warn("QueueMatchServer #{state.match_id} find_empty_lobby was unable to find an empty lobby")
+        # TODO: Use the coordinator to request a new lobby be hosted by SPADS
+        %{state | stage: "Finding empty lobby"}
 
-      battle ->
-        Logger.info("QueueMatchServer try_setup_lobby found empty battle")
-        state.accepted_users
-        |> Enum.each(fn userid ->
-          Lobby.remove_user_from_any_battle(userid)
-
-          PubSub.broadcast(
-            Central.PubSub,
-            "teiserver_client_messages:#{userid}",
-            {:client_message, :matchmaking, userid, {:join_lobby, battle.id}}
-          )
-        end)
-
-        midway_state = remove_players(state, state.accepted_users)
-
-        # Coordinator sets up the battle
-        Logger.info("QueueMatchServer try_setup_lobby starting battle setup")
-        map_name = state.map_list |> Enum.random()
-        Coordinator.send_to_host(empty_battle.id, "!preset duel")
-        :timer.sleep(100)
-        Coordinator.send_to_host(empty_battle.id, "!bset startpostype 2")
-        :timer.sleep(100)
-        Coordinator.send_to_host(empty_battle.id, "!autobalance off")
-        :timer.sleep(100)
-        Coordinator.send_to_host(empty_battle.id, "!map #{map_name}")
-        :timer.sleep(100)
-
-        # Now put the players on their teams, for now we're assuming every game is just a 1v1
-        Logger.info("QueueMatchServer try_setup_lobby putting players on teams")
-        [p1, p2 | _] = state.accepted_users
-        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p1, senderid: Coordinator.get_coordinator_userid(),
-          status: %{
-            player_number: 0,
-            team_number: 0,
-            player: true,
-            bonus: 0,
-            ready: true
-          }
-        })
-        Coordinator.cast_consul(battle.id, %{command: "change-battlestatus", remaining: p2, senderid: Coordinator.get_coordinator_userid(),
-          status: %{
-            player_number: 1,
-            team_number: 1,
-            player: true,
-            bonus: 0,
-            ready: true
-          }
-        })
-
-        # Update the lobby itself
-        battle = Lobby.get_lobby(battle.id)
-        new_tags = Map.put(battle.tags, "server/match/queue_id", state.id)
-        Lobby.set_script_tags(battle.id, new_tags)
-
-        # Give things time to propagate before we start
-        :timer.sleep(1000)
-
-        all_clients = Client.get_clients([p1, p2])
-
-        all_players = all_clients
-          |> Enum.map(fn c -> c.player end)
-          |> Enum.all?
-
-        all_synced = all_clients
-          |> Enum.map(fn c -> c.sync == 1 end)
-          |> Enum.all?
-
-        cond do
-          all_players == false ->
-            Logger.info("QueueMatchServer try_setup_lobby cannot start as not all are players")
-            Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched users are not a player. Please rejoin the queue and try again.", battle.id)
-
-            battle = Lobby.get_lobby(battle.id)
-            new_tags = Map.drop(battle.tags, ["server/match/queue_id"])
-            Lobby.set_script_tags(battle.id, new_tags)
-
-          all_synced == false ->
-            Logger.info("QueueMatchServer try_setup_lobby cannot start as not all are synced")
-            Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched players are unsynced. Please rejoin the queue and try again.", battle.id)
-
-            battle = Lobby.get_lobby(battle.id)
-            new_tags = Map.drop(battle.tags, ["server/match/queue_id"])
-            Lobby.set_script_tags(battle.id, new_tags)
-
-          true ->
-            Logger.info("QueueMatchServer try_setup_lobby calling player cv start")
-            Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to start the game, if this doesn't work feel free to start it yourselves and report to Teifion.", battle.id)
-            :timer.sleep(100)
-            Lobby.say(p1, "!cv forcestart", battle.id)
-            :timer.sleep(100)
-            Lobby.say(p2, "!y", battle.id)
-            :timer.sleep(100)
-
-            # Logger.info("QueueMatchServer try_setup_lobby calling forcestart")
-            # Coordinator.send_to_host(empty_battle.id, "!forcestart")
-            :timer.sleep(100)
-
-            PubSub.broadcast(
-              Central.PubSub,
-              "teiserver_queue_wait:#{state.id}",
-              {:queue_match, :match_made, state.id, battle.id}
-            )
-        end
-
-        %{
-          midway_state
-          | finding_battle: false,
-            matched_players: [],
-            pending_accepts: [],
-            ready_started_at: nil,
-            accepted_users: []
-        }
+      _ ->
+        Logger.warn("QueueMatchServer #{state.match_id} find_empty_lobby found empty lobby")
+        setup_lobby(%{state | lobby_id: empty_lobby.id})
     end
+  end
+
+  # Try to setup a battle with the players currently readied up
+  def setup_lobby(%{lobby_id: nil} = state), do: find_empty_lobby(state)
+  def setup_lobby(state) do
+    lobby = state.lobby_id
+      |> Lobby.get_lobby()
+      |> Lobby.silence_lobby()
+
+    state.users
+      |> Enum.each(fn userid ->
+        Lobby.force_add_user_to_battle(userid, lobby.id)
+      end)
+
+    # Coordinator sets up the battle
+    Logger.warn("QueueMatchServer #{state.match_id} setup_lobby starting battle setup")
+    map_name = state.db_queue.map_list |> Enum.random()
+
+    [
+      "!preset team",
+      "!bset startpostype 2",
+      "!autobalance off",
+      "!map #{map_name}"
+    ]
+      |> Enum.each(fn cmd ->
+        Coordinator.send_to_host(lobby.id, cmd)
+        :timer.sleep(100)
+      end)
+
+    # Now put the players on their teams, for now we're assuming every game is just a 1v1
+    Logger.warn("QueueMatchServer #{state.match_id} setup_lobby putting players on teams")
+    [p1, p2 | _] = state.users
+    Coordinator.cast_consul(lobby.id, %{command: "change-battlestatus", remaining: p1, senderid: Coordinator.get_coordinator_userid(),
+      status: %{
+        player_number: 0,
+        team_number: 0,
+        player: true,
+        bonus: 0,
+        ready: true
+      }
+    })
+    Coordinator.cast_consul(lobby.id, %{command: "change-battlestatus", remaining: p2, senderid: Coordinator.get_coordinator_userid(),
+      status: %{
+        player_number: 1,
+        team_number: 1,
+        player: true,
+        bonus: 0,
+        ready: true
+      }
+    })
+
+    # Update the lobby itself
+    lobby = Lobby.get_lobby(lobby.id)
+    new_tags = Map.merge(lobby.tags, %{
+      "server/match/match_id" => state.match_id,
+      "server/match/queue_id" => state.queue_id
+    })
+    Lobby.set_script_tags(lobby.id, new_tags)
+
+    # Give things time to propagate before we start
+    :timer.sleep(1000)
+
+    all_clients = Client.get_clients([p1, p2])
+
+    all_players = all_clients
+      |> Enum.map(fn c -> c.player end)
+      |> Enum.all?
+
+    all_synced = all_clients
+      |> Enum.map(fn c -> c.sync == 1 end)
+      |> Enum.all?
+
+    lobby = Lobby.unsilence_lobby(lobby)
+
+    cond do
+      all_players == false ->
+        Logger.warn("QueueMatchServer #{state.match_id} setup_lobby cannot start as not all are players")
+        Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched users are not a player. Please rejoin the queue and try again.", lobby.id)
+
+        new_tags = Map.drop(lobby.tags, ["server/match/match_id", "server/match/queue_id"])
+        Lobby.set_script_tags(lobby.id, new_tags)
+
+      all_synced == false ->
+        Logger.warn("QueueMatchServer #{state.match_id} setup_lobby cannot start as not all are synced")
+        Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched players are unsynced. Please rejoin the queue and try again.", lobby.id)
+
+        new_tags = Map.drop(lobby.tags, ["server/match/match_id", "server/match/queue_id"])
+        Lobby.set_script_tags(lobby.id, new_tags)
+
+      true ->
+        Logger.warn("QueueMatchServer #{state.match_id} setup_lobby calling player cv start")
+        Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to start the game, if this doesn't work feel free to start it yourselves and report to Teifion.", lobby.id)
+
+        :timer.sleep(100)
+        Lobby.say(p1, "testing: !cv forcestart", lobby.id)
+        :timer.sleep(100)
+        Lobby.say(p2, "testing: !y", lobby.id)
+        :timer.sleep(100)
+
+        # Logger.warn("QueueMatchServer #{state.match_id} setup_lobby calling forcestart")
+        # Coordinator.send_to_host(lobby.id, "!forcestart")
+        :timer.sleep(100)
+
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_queue_wait:#{state.id}",
+          {:queue_match, :match_made, state.id, lobby.id}
+        )
+    end
+
+    self_pid = self()
+    spawn(fn ->
+      :timer.sleep(5_000)
+      DynamicSupervisor.terminate_child(Teiserver.Game.QueueSupervisor, self_pid)
+    end)
+    %{state | stage: "Completed"}
   end
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
@@ -379,8 +381,12 @@ defmodule Teiserver.Game.QueueMatchServer do
     state = %{
       match_id: opts.match_id,
       queue_id: opts.queue_id,
+      db_queue: db_queue,
       teams: opts.teams,
       users: users,
+
+      stage: "accepting",
+      lobby_id: nil,
 
       pending_accepts: users,
       accepted_users: [],

@@ -843,7 +843,7 @@ defmodule Teiserver.Protocols.SpringIn do
     end
     case response do
       {:waiting_on_host, script_password} ->
-        Lobby.remove_user_from_any_battle(state.userid)
+        Lobby.remove_user_from_any_lobby(state.userid)
         |> Enum.each(fn b ->
           PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{b}")
         end)
@@ -1153,7 +1153,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   defp do_handle("LEAVEBATTLE", _, _msg_id, %{lobby_id: nil} = state) do
-    Lobby.remove_user_from_any_battle(state.userid)
+    Lobby.remove_user_from_any_lobby(state.userid)
     |> Enum.each(fn b ->
       PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{b}")
     end)
@@ -1166,7 +1166,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("LEAVEBATTLE", _, _msg_id, state) do
     # Remove them from all the battles anyways, just in case
-    Lobby.remove_user_from_any_battle(state.userid)
+    Lobby.remove_user_from_any_lobby(state.userid)
     |> Enum.each(fn b ->
       PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{b}")
     end)

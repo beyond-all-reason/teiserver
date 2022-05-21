@@ -1,17 +1,51 @@
 defmodule Teiserver.TachyonMatchmakingTest do
   use Central.ServerCase, async: false
   require Logger
-  alias Teiserver.{Client, Game}
+  alias Teiserver.{Client, Game, User}
   alias Teiserver.Data.Matchmaking
   alias Teiserver.Common.PubsubListener
 
   import Teiserver.TeiserverTestLib,
-    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
+    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]
 
   setup do
     Teiserver.Coordinator.start_coordinator()
     %{socket: socket, user: user} = tachyon_auth_setup()
     {:ok, socket: socket, user: user}
+  end
+
+  defp make_empty_lobby() do
+    %{socket: hsocket, user: host} = tachyon_auth_setup()
+
+    # User needs to be a moderator (at this time) to start/stop Coordinator mode
+    User.update_user(%{host | moderator: true})
+    Client.refresh_client(host.id)
+
+    lobby_data = %{
+      cmd: "c.lobby.create",
+      name: "EU Matchmaking #{:rand.uniform(999_999_999)}",
+      nattype: "none",
+      port: 1234,
+      game_hash: "string_of_characters",
+      map_hash: "string_of_characters",
+      map_name: "koom valley",
+      game_name: "BAR",
+      engine_name: "spring-105",
+      engine_version: "105.1.2.3",
+      settings: %{
+        max_players: 12
+      }
+    }
+    data = %{cmd: "c.lobby.create", lobby: lobby_data}
+    _tachyon_send(hsocket, data)
+    [reply] = _tachyon_recv(hsocket)
+    lobby_id = reply["lobby"]["id"]
+
+    %{
+      lobby_id: lobby_id,
+      hsocket: hsocket,
+      host: host
+    }
   end
 
   test "queue wait lifecycle", %{socket: socket1, user: user1} do
@@ -475,6 +509,85 @@ defmodule Teiserver.TachyonMatchmakingTest do
     # Check wait state
     wait_state = :sys.get_state(wait_pid)
     assert wait_state.wait_list == [{user1.id, :user}]
+    refute wait_state.buckets == %{}
+  end
+
+  test "they both accept", %{socket: socket1, user: user1} do
+    {:ok, queue} =
+      Game.create_queue(%{
+        "name" => "test_queue",
+        "team_size" => 1,
+        "icon" => "fa-regular fa-home",
+        "colour" => "#112233",
+        "map_list" => ["map1"],
+        "conditions" => %{},
+        "settings" => %{
+          "tick_interval" => 60_000,
+          "ready_wait_time" => 60_000
+        }
+      })
+
+    queue = Matchmaking.get_queue(queue.id)
+    %{socket: socket2, user: user2} = tachyon_auth_setup()
+
+    wait_pid = Matchmaking.get_queue_wait_pid(queue.id)
+
+    # Create the match process
+    {match_pid, match_id, teams} = Matchmaking.create_match([{user2.id, 1000, 1, :user}, {user1.id, 1000, 1, :user}], queue.id)
+    assert teams == [{user2.id, 1000, 1, :user}, {user1.id, 1000, 1, :user}]
+
+    # Clear both sockets
+    _tachyon_recv_until(socket1)
+    _tachyon_recv_until(socket2)
+
+    # Check server states
+    match_state = :sys.get_state(match_pid)
+    assert match_state.users == [user2.id, user1.id]
+    assert match_state.pending_accepts == [user2.id, user1.id]
+    assert match_state.accepted_users == []
+    assert match_state.declined_users == []
+
+    wait_state = :sys.get_state(wait_pid)
+    assert wait_state.wait_list == []
+    assert wait_state.buckets == %{}
+
+    # Ensure we have an open and empty battle
+    %{
+      # lobby_id: lobby_id
+    } = make_empty_lobby()
+
+    # Accept user user1
+    _tachyon_send(socket1, %{cmd: "c.matchmaking.accept", match_id: match_id})
+    _tachyon_send(socket2, %{cmd: "c.matchmaking.accept", match_id: match_id})
+    :timer.sleep(100)
+
+    [reply] = _tachyon_recv(socket1)
+    assert reply["cmd"] == "s.lobby.force_join"
+
+    [reply] = _tachyon_recv(socket2)
+    assert reply["cmd"] == "s.lobby.force_join"
+
+    # Clear both sockets
+    _tachyon_recv_until(socket1)
+    _tachyon_recv_until(socket2)
+
+    # Wait for it to do everything
+    :timer.sleep(1000)
+
+    state = :sys.get_state(match_pid)
+    assert state.users == [user2.id, user1.id]
+    assert state.pending_accepts == []
+    assert state.accepted_users == [user2.id, user1.id]
+    assert state.declined_users == []
+
+    send(match_pid, :end_waiting)
+    :timer.sleep(500)
+    refute Process.alive?(match_pid)
+    assert Matchmaking.get_queue_match_pid(match_id) == nil
+
+    # Check wait state
+    wait_state = :sys.get_state(wait_pid)
+    assert wait_state.wait_list == []
     refute wait_state.buckets == %{}
   end
 end

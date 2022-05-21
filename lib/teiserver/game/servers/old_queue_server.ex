@@ -265,7 +265,7 @@ defmodule Teiserver.Game.OldQueueServer do
   # Try to setup a battle with the players currently readied up
   defp try_setup_battle(state) do
     # Send out the new battle stuff
-    empty_battle = Lobby.find_empty_battle(fn l -> String.contains?(l.name, "EU ") end)
+    empty_battle = Lobby.find_empty_lobby(fn l -> String.contains?(l.name, "EU ") end)
 
     case empty_battle do
       nil ->
@@ -276,7 +276,7 @@ defmodule Teiserver.Game.OldQueueServer do
         Logger.info("OldQueueServer try_setup_battle found empty battle")
         state.players_accepted
         |> Enum.each(fn userid ->
-          Lobby.remove_user_from_any_battle(userid)
+          Lobby.remove_user_from_any_lobby(userid)
 
           PubSub.broadcast(
             Central.PubSub,

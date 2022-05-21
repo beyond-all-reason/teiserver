@@ -223,7 +223,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         msg = if User.has_mute?(user) do
           msg ++ [@dispute_string]
         else
-          Lobby.remove_user_from_any_battle(user.id)
+          Lobby.remove_user_from_any_lobby(user.id)
           Client.set_awaiting_warn_ack(userid)
           acknowledge_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
           msg ++ [@dispute_string, acknowledge_prompt]

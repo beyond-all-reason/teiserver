@@ -189,7 +189,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       client = Client.get_client_by_id(split.first_splitter_id)
       new_lobby = if client.lobby_id == state.lobby_id or client.lobby_id == nil do
         # If the first splitter is still in this lobby, move them to a new one
-        Lobby.find_empty_battle()
+        Lobby.find_empty_lobby()
       else
         %{id: client.lobby_id}
       end
