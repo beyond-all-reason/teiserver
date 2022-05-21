@@ -463,8 +463,18 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  def handle_command(%{command: "rename", remaining: new_name} = cmd, state) do
-    Lobby.rename_lobby(state.lobby_id, new_name, true)
+  def handle_command(%{command: "rename", remaining: new_name, senderid: senderid} = cmd, state) do
+    lobby = Lobby.get_lobby(state.lobby_id)
+    cond do
+      senderid != lobby.founder_id ->
+        Lobby.rename_lobby(state.lobby_id, new_name, true)
+
+      lobby.consul_rename ->
+        :ok
+
+      true ->
+        Lobby.rename_lobby(state.lobby_id, new_name, false)
+    end
     ConsulServer.say_command(cmd, state)
   end
 
