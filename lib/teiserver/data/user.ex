@@ -770,7 +770,7 @@ defmodule Teiserver.User do
     })
 
     # TODO: Replace lobby_hash name with client_app_hash
-    if not user.bot do
+    if not is_bot?(user) do
       Account.create_smurf_key(user.id, "client_app_hash", lobby_hash)
     end
 
