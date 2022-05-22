@@ -61,9 +61,9 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
   defp handle_msg(%{"cmd" => "s.matchmaking.join_queue", "result" => "success", "queue_id" => queue_id}, state) do
     %{state | queues: [queue_id]}
   end
-  defp handle_msg(%{"cmd" => "s.matchmaking.match_ready", "queue_id" => queue_id}, state) do
+  defp handle_msg(%{"cmd" => "s.matchmaking.match_ready", "match_id" => match_id}, state) do
     # if :rand.uniform() <= state.decline_chance do
-      cmd = %{cmd: "c.matchmaking.decline", queue_id: queue_id}
+      cmd = %{cmd: "c.matchmaking.decline", match_id: match_id}
       AgentLib._send(state.socket, cmd)
       %{state | queues: []}
     # else
@@ -85,6 +85,8 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
   # defp handle_msg(%{"cmd" => "s.lobby.leave", "result" => "success"}, state) do
   #   %{state | lobby_id: nil}
   # end
+  defp handle_msg(%{"cmd" => "s.matchmaking.match_declined"}, state), do: state
+
   defp handle_msg(%{"cmd" => "s.communication.received_direct_message"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.announce"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.message"}, state), do: state
