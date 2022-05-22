@@ -72,19 +72,7 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
     # end
   end
 
-  # defp handle_msg(%{"cmd" => "s.lobby.request_to_join", "userid" => userid}, %{reject: true} = state) do
-  #   cmd = %{cmd: "c.lobby_host.respond_to_join_request", userid: userid, response: "reject", reason: "because"}
-  #   AgentLib._send(state.socket, cmd)
-  #   state
-  # end
-  # defp handle_msg(%{"cmd" => "s.lobby.request_to_join", "userid" => userid}, %{reject: false} = state) do
-  #   cmd = %{cmd: "c.lobby_host.respond_to_join_request", userid: userid, response: "approve"}
-  #   AgentLib._send(state.socket, cmd)
-  #   state
-  # end
-  # defp handle_msg(%{"cmd" => "s.lobby.leave", "result" => "success"}, state) do
-  #   %{state | lobby_id: nil}
-  # end
+
   defp handle_msg(%{"cmd" => "s.matchmaking.match_declined"}, state), do: state
 
   defp handle_msg(%{"cmd" => "s.communication.received_direct_message"}, state), do: state

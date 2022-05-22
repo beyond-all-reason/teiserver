@@ -8,6 +8,8 @@ defmodule Teiserver.Game.QueueWaitServer do
 
   @default_telemetry_interval 60_000
   @default_range_increase_interval 30_000
+  @tick_interval 250
+  @update_interval 2_500
   @max_range 5
 
   # Player item structure:
@@ -86,7 +88,7 @@ defmodule Teiserver.Game.QueueWaitServer do
 
   def handle_call(:get_info, _from, state) do
     resp = %{
-      last_wait_time: state.last_wait_time,
+      mean_wait_time: state.mean_wait_time,
       member_count: Enum.count(state.wait_list)
     }
 
@@ -152,7 +154,7 @@ defmodule Teiserver.Game.QueueWaitServer do
 
   def handle_info(:telemetry_tick, state) do
     Telemetry.cast_to_server({:matchmaking_update, state.queue_id, %{
-      mean_wait_times: Enum.sum(state.recent_wait_times)/(Enum.count(state.recent_wait_times) + 1),
+      mean_wait_time: calculate_mean_wait_time(state),
       member_count: Enum.count(state.wait_list),
       join_count: state.join_count,
       leave_count: state.leave_count,
@@ -161,14 +163,26 @@ defmodule Teiserver.Game.QueueWaitServer do
 
     {:noreply, %{state |
       recent_wait_times: [],
+      old_wait_times: state.recent_wait_times,
       join_count: 0,
       leave_count: 0,
       found_match_count: 0
     }}
   end
 
+  def handle_info(:broadcast_update, state) do
+    mean_wait_time = calculate_mean_wait_time(state)
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_queue_all_queues",
+      {:queue_periodic_update, state.queue_id, Enum.count(state.wait_list), mean_wait_time}
+    )
+    {:noreply, %{state | mean_wait_time: mean_wait_time}}
+  end
+
   def handle_info(:tick, %{skip: true} = state) do
-    :timer.send_after(250, :tick)
+    :timer.send_after(@tick_interval, :tick)
     {:noreply, state}
   end
 
@@ -193,9 +207,9 @@ defmodule Teiserver.Game.QueueWaitServer do
         Matchmaking.create_match(team_list, state.queue_id)
       end)
 
-    {new_buckets, new_wait_list} = case matches do
+    {new_buckets, new_wait_list, wait_times} = case matches do
       [] ->
-        {state.buckets, state.wait_list}
+        {state.buckets, state.wait_list, []}
 
       _ ->
         # Teams will be: [{id, time, range, type}]
@@ -217,14 +231,18 @@ defmodule Teiserver.Game.QueueWaitServer do
         new_wait_list = state.wait_list
           |> Enum.reject(fn u -> Enum.member?(waits_to_remove, u) end)
 
-        {new_buckets, new_wait_list}
+        wait_times = matched_teams
+          |> Enum.map(fn {_id, time, _range, _type} -> System.system_time(:second) - time end)
+
+        {new_buckets, new_wait_list, wait_times}
     end
 
-    :timer.send_after(250, :tick)
+    :timer.send_after(@tick_interval, :tick)
     {:noreply, %{state |
       buckets: new_buckets,
       wait_list: new_wait_list,
-      found_match_count: (state.found_match_count + Enum.count(matches))
+      found_match_count: (state.found_match_count + Enum.count(matches)),
+      recent_wait_times: state.recent_wait_times ++ wait_times
     }}
   end
 
@@ -258,15 +276,15 @@ defmodule Teiserver.Game.QueueWaitServer do
   defp remove_user(userid, state) do
     key = bucket_function(userid)
 
-    new_bucket = state.buckets[key] |> List.delete({userid, :user})
+    new_bucket = state.buckets[key]
+      |> Enum.reject(fn {u, _, _, :user} -> userid == u end)
     new_buckets = Map.put(state.buckets, key, new_bucket)
 
     new_wait_list = state.wait_list |> List.delete({userid, :user})
 
     %{state |
       buckets: new_buckets,
-      wait_list: new_wait_list,
-      member_count: Enum.count(new_wait_list)
+      wait_list: new_wait_list
     }
   end
 
@@ -292,10 +310,17 @@ defmodule Teiserver.Game.QueueWaitServer do
   defp hd_or_x([], x), do: x
   defp hd_or_x([x | _], _x), do: x
 
+  defp calculate_mean_wait_time(state) do
+    wait_times = state.recent_wait_times ++ state.old_wait_times
+
+    Enum.sum(wait_times)/(Enum.count(wait_times) + 1)
+  end
+
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
     :timer.send_interval(@default_telemetry_interval, self(), :telemetry_tick)
     :timer.send_interval(@default_range_increase_interval, self(), :increase_range)
+    :timer.send_interval(@update_interval, self(), :broadcast_update)
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
@@ -311,7 +336,9 @@ defmodule Teiserver.Game.QueueWaitServer do
         queue_id: opts.queue.id,
 
         # Telemetry related
+        mean_wait_time: 0,
         recent_wait_times: [],
+        old_wait_times: [],
         join_count: 0,
         leave_count: 0,
         found_match_count: 0

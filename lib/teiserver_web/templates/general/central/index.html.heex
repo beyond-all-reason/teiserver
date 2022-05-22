@@ -55,19 +55,30 @@
       central_component "menu_card",
       icon: Teiserver.Battle.MatchLib.icon(),
       name: "matches",
-      text: "Matches",
+      text: "My matches",
       icon_class: "fa-duotone",
       link: Routes.ts_battle_match_path(@conn, :index)
     %>
 
     <%= if allow?(@conn, "teiserver.account.verified") do %>
+      <%= if false do %>
+        <%=
+          central_component "menu_card",
+          icon: Teiserver.Game.QueueLib.icon(),
+          name: "queue",
+          text: "Matchmaking",
+          icon_class: "fa-duotone",
+          link: Routes.ts_game_queue_path(@conn, :index)
+        %>
+      <% end %>
+      
       <%=
         central_component "menu_card",
         icon: Teiserver.Game.QueueLib.icon(),
         name: "queue",
         text: "Matchmaking",
         icon_class: "fa-duotone",
-        link: Routes.ts_game_queue_path(@conn, :index)
+        link: Routes.ts_game_queue_index_path(@conn, :index)
       %>
     <% end %>
   <% end %>

@@ -94,11 +94,16 @@ defmodule Teiserver.Data.Matchmaking do
     {pid, match_id}
   end
 
-  @spec get_queue_and_info(Integer.t()) :: {QueueStruct.t(), Map.t()}
+  @spec get_queue_and_info(T.queue_id()) :: {QueueStruct.t(), Map.t()}
   def get_queue_and_info(id) when is_integer(id) do
     queue = Central.cache_get(:teiserver_queues, id)
     info = call_queue_wait(id, :get_info)
     {queue, info}
+  end
+
+  @spec get_queue_info(T.queue_id()) :: Map.t()
+  def get_queue_info(id) when is_integer(id) do
+    call_queue_wait(id, :get_info)
   end
 
   @spec add_queue(QueueStruct.t()) :: :ok

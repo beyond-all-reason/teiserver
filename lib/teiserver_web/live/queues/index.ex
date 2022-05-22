@@ -5,26 +5,10 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
   alias Teiserver
   alias Teiserver.Data.Matchmaking
-  alias Teiserver.{Game}
+  alias Teiserver.{Game, Client}
   alias Teiserver.Game.{QueueLib}
 
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-
-  @base_extra_menu_content """
-  &nbsp;&nbsp;&nbsp;
-    <a href='/teiserver/battle/lobbies' class="btn btn-outline-primary">
-      <i class="fa-solid fa-fw fa-swords"></i>
-      Battles
-    </a>
-  """
-
-  @client_extra_menu_content """
-  &nbsp;&nbsp;&nbsp;
-    <a href='/teiserver/admin/client' class="btn btn-outline-primary">
-      <i class="fa-solid fa-fw fa-plug"></i>
-      Clients
-    </a>
-  """
 
   @impl true
   def mount(_params, session, socket) do
@@ -33,39 +17,45 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
       |> AuthPlug.live_call(session)
       |> NotificationPlug.live_call()
 
-    extra_content = if allow?(socket, "teiserver.moderator.account") do
-      @base_extra_menu_content <> @client_extra_menu_content
-    else
-      @base_extra_menu_content
-    end
+    client = Client.get_client_by_id(socket.assigns[:current_user].id)
 
-    queues = Game.list_queues()
-    |> Map.new(fn queue ->
-      :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue_wait:#{queue.id}")
-      :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue_match:#{queue.id}")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue_all_queues")
 
-      {queue.id, Map.merge(queue, %{
-        player_count: nil,
-        last_wait_time: nil
-      })}
-    end)
+    db_queues = Game.list_queues()
+      |> Map.new(fn queue ->
+        :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue_wait:#{queue.id}")
+        :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue_match:#{queue.id}")
 
-    queue_membership = Map.keys(queues)
-    |> Parallel.filter(fn queue_id ->
-      player_map = Matchmaking.call_queue_wait(queue_id, {:get, :player_map})
-      Map.has_key?(player_map, socket.assigns[:current_user].id)
-    end)
+        {queue.id, queue}
+      end)
+
+    queue_info = db_queues
+      |> Map.keys()
+      |> Map.new(fn id ->
+        {id, Matchmaking.get_queue_info(id)}
+      end)
+
+    queue_membership = Map.keys(db_queues)
+      |> Parallel.reject(fn queue_id ->
+        p = Matchmaking.get_queue_wait_pid(queue_id)
+        state = :sys.get_state(p)
+
+        state.wait_list
+          |> Enum.filter(fn {userid, :user} -> userid == socket.assigns[:current_user].id end)
+          |> Enum.empty?()
+      end)
 
     socket = socket
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Matchmaking", url: "/teiserver/game_live/queues")
+      |> assign(:client, client)
       |> assign(:match_ready, nil)
       |> assign(:queue_membership, queue_membership)
       |> assign(:view_colour, QueueLib.colours())
       |> assign(:site_menu_active, "teiserver_admin")
-      |> assign(:queues, queues)
+      |> assign(:db_queues, db_queues)
+      |> assign(:queue_info, queue_info)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
-      |> assign(:extra_menu_content, extra_content)
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
   end
@@ -107,35 +97,39 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   end
 
   @impl true
-  def handle_info({:queue_periodic_update, queue_id, player_count, last_wait_time}, socket) do
-    update_data = %{
-      player_count: player_count,
-      last_wait_time: last_wait_time
+  def handle_info({:queue_periodic_update, queue_id, member_count, mean_wait_time}, socket) do
+    new_data = %{
+      member_count: member_count,
+      mean_wait_time: mean_wait_time
     }
-    new_queue = Map.merge(socket.assigns.queues[queue_id], update_data)
-    new_queues = Map.put(socket.assigns.queues, queue_id, new_queue)
+
+    new_info = socket.assigns[:queue_info]
+      |> Map.put(queue_id, new_data)
 
     {
       :noreply,
       socket
-        |> assign(:queues, new_queues)
+        |> assign(:queue_info, new_info)
     }
   end
 
-  def handle_info({:client_action, :client_disconnect, userid}, %{assigns: assigns} = socket) do
-    # TODO: Is this if socketment still needed? We're not using the legacy pubsub any more
-    if userid == assigns[:current_user].id do
-      {:noreply,
-       socket
-       |> redirect(to: Routes.ts_general_general_path(socket, :index))}
-    else
-      {:noreply, socket}
-    end
+  def handle_info({:client_action, :client_connect, _userid}, socket) do
+    {:noreply,
+      socket
+        |> assign(:client, Client.get_client_by_id(socket.assigns[:current_user].id))
+    }
   end
 
-  # In theory never used
-  def handle_info({:client_action, :client_connect, _userid}, socket) do
-    {:noreply, socket}
+  def handle_info({:client_action, :client_disconnect, userid}, socket) do
+    socket.assigns[:queue_membership]
+      |> Enum.each(fn queue_id ->
+        Matchmaking.remove_user_from_queue(queue_id, userid)
+      end)
+
+    {:noreply,
+      socket
+        |> assign(:client, nil)
+    }
   end
 
   # Queue wait
@@ -144,6 +138,10 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   end
 
   def handle_info({:queue_wait, :queue_remove_user, _queue_id, _userid}, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_info({:queue_wait, :match_attempt, _queue_id, _match_id}, socket) do
     {:noreply, socket}
   end
 
@@ -180,24 +178,23 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   end
 
   # Client message
-  def handle_info({:client_message, :matchmaking, {:join_battle, _lobby_id}}, socket) do
+  def handle_info({:client_message, :matchmaking, _userid, {:join_battle, _lobby_id}}, socket) do
     Logger.warn("index.ex Join battle")
     {:noreply, socket}
   end
 
-  def handle_info({:client_message, :matchmaking, {:match_ready, queue_id}}, socket) do
+  def handle_info({:client_message, :matchmaking, _userid, {:match_ready, {queue_id, _match_id}}}, socket) do
     Logger.warn("index.ex Match ready")
     {:noreply,
     socket
     |> assign(:match_ready, queue_id)}
   end
 
-  def handle_info({:client_message, _topic, _data}, socket) do
+  def handle_info({:client_message, _topic, _userid, _data}, socket) do
     {:noreply, socket}
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue_all_queues")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{socket.assigns[:current_user].id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_action_updates:#{socket.assigns[:current_user].id}")
 

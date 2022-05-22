@@ -89,7 +89,7 @@ defmodule TeiserverWeb.Router do
         live("/lobbies/chat/:id", Chat, :chat)
       end
 
-      scope "/teiserver/game_live", TeiserverWeb.Matchmaking.QueueLive, as: :ts_game do
+      scope "/teiserver/matchmaking", TeiserverWeb.Matchmaking.QueueLive, as: :ts_game do
         pipe_through([:browser, :standard_layout, :protected])
 
         live("/queues", Index, :index)
