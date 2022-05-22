@@ -159,16 +159,6 @@ defmodule Teiserver.Game.QueueWaitServer do
       found_match_count: state.found_match_count
     }})
 
-    IO.puts ""
-    IO.inspect %{
-      mean_wait_times: Enum.sum(state.recent_wait_times)/(Enum.count(state.recent_wait_times) + 1),
-      member_count: Enum.count(state.wait_list),
-      join_count: state.join_count,
-      leave_count: state.leave_count,
-      found_match_count: state.found_match_count
-    }
-    IO.puts ""
-
     {:noreply, %{state |
       recent_wait_times: [],
       join_count: 0,
