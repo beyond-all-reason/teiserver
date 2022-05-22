@@ -6,7 +6,7 @@ defmodule Teiserver.Game.QueueWaitServer do
   alias Teiserver.{Telemetry}
   alias Teiserver.Data.Types, as: T
 
-  @default_telemetry_interval 10_000
+  @default_telemetry_interval 60_000
   @default_range_increase_interval 30_000
   @max_range 5
 
@@ -35,8 +35,8 @@ defmodule Teiserver.Game.QueueWaitServer do
             state
             | buckets: new_buckets,
               wait_list: new_wait_list,
-              member_count: Enum.count(new_wait_list),
-              skip: false
+              skip: false,
+              join_count: (state.join_count + 1)
           }
 
           PubSub.broadcast(
@@ -75,7 +75,7 @@ defmodule Teiserver.Game.QueueWaitServer do
             {:client_action, :leave_queue, userid, state.queue_id}
           )
 
-          {:ok, new_state}
+          {:ok, %{new_state | leave_count: (state.leave_count - 1)}}
 
         false ->
           {:missing, state}
@@ -87,7 +87,7 @@ defmodule Teiserver.Game.QueueWaitServer do
   def handle_call(:get_info, _from, state) do
     resp = %{
       last_wait_time: state.last_wait_time,
-      member_count: state.member_count
+      member_count: Enum.count(state.wait_list)
     }
 
     {:reply, resp, state}
@@ -109,7 +109,6 @@ defmodule Teiserver.Game.QueueWaitServer do
           acc
           | buckets: new_buckets,
             wait_list: new_wait_list,
-            member_count: Enum.count(new_wait_list),
             skip: false
         }
 
@@ -153,11 +152,29 @@ defmodule Teiserver.Game.QueueWaitServer do
 
   def handle_info(:telemetry_tick, state) do
     Telemetry.cast_to_server({:matchmaking_update, state.queue_id, %{
-      last_wait_time: state.last_wait_time,
-      member_count: state.member_count
+      mean_wait_times: Enum.sum(state.recent_wait_times)/(Enum.count(state.recent_wait_times) + 1),
+      member_count: Enum.count(state.wait_list),
+      join_count: state.join_count,
+      leave_count: state.leave_count,
+      found_match_count: state.found_match_count
     }})
 
-    {:noreply, state}
+    IO.puts ""
+    IO.inspect %{
+      mean_wait_times: Enum.sum(state.recent_wait_times)/(Enum.count(state.recent_wait_times) + 1),
+      member_count: Enum.count(state.wait_list),
+      join_count: state.join_count,
+      leave_count: state.leave_count,
+      found_match_count: state.found_match_count
+    }
+    IO.puts ""
+
+    {:noreply, %{state |
+      recent_wait_times: [],
+      join_count: 0,
+      leave_count: 0,
+      found_match_count: 0
+    }}
   end
 
   def handle_info(:tick, %{skip: true} = state) do
@@ -217,7 +234,7 @@ defmodule Teiserver.Game.QueueWaitServer do
     {:noreply, %{state |
       buckets: new_buckets,
       wait_list: new_wait_list,
-      member_count: Enum.count(new_wait_list)
+      found_match_count: (state.found_match_count + Enum.count(matches))
     }}
   end
 
@@ -298,12 +315,16 @@ defmodule Teiserver.Game.QueueWaitServer do
     )
 
     state = update_state_from_db(%{
-       buckets: %{},
-       wait_list: [],
-       member_count: 0,
-       last_wait_time: 0,
-       skip: false,
-       queue_id: opts.queue.id
+        buckets: %{},
+        wait_list: [],
+        skip: false,
+        queue_id: opts.queue.id,
+
+        # Telemetry related
+        recent_wait_times: [],
+        join_count: 0,
+        leave_count: 0,
+        found_match_count: 0
      }, opts.queue)
 
      send(self(), :tick)
