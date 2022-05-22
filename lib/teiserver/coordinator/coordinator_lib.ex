@@ -23,6 +23,11 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
       {"splitlobby", [], "Causes a \"vote\" to start where other players can elect to join you in splitting the lobby, follow someone
 of their choosing or remain in place. After 20 seconds you are moved to a new (empty) lobby and those that voted yes
 or are following someone that voted yes are also moved to that lobby.", :everybody},
+      {"roll", ["range"], "Rolls a random number based on the range format.
+- Dice format: nDs, where n is number of dice and s is sides of die. E.g. 4D6 - 4 dice with 6 sides are rolled
+- Max format: N, where N is a number and an integer between 1 and N is returned
+- Min/Max format: MN MX, where each is a number and an integer between them (inclusive) is returned
+", :everybody},
 
 
       #---- Boss only ----

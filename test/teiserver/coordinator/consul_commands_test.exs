@@ -444,12 +444,44 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
       "cmd" => "s.lobby.say",
       "lobby_id" => lobby_id,
       "message" => "$playerlimit 16",
-      "sender" => host.id
+      "sender_id" => host.id
     }
 
     # Check state
     player_limit = Coordinator.call_consul(lobby_id, {:get, :player_limit})
     assert player_limit == 16
+  end
+
+  test "roll", %{hsocket: hsocket, host: host} do
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$roll badly"})
+    [reply] = _tachyon_recv(hsocket)
+    assert reply["cmd"] == "s.lobby.received_lobby_direct_announce"
+    assert reply["sender_id"] == Coordinator.get_coordinator_userid()
+    assert reply["message"] == "Format not recognised, please consult the help for this command for more information."
+
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$roll 1D1"})
+    [reply] = _tachyon_recv(hsocket)
+    assert reply["cmd"] == "s.lobby.say"
+    assert reply["sender_id"] == Coordinator.get_coordinator_userid()
+    assert reply["message"] == "#{host.name} rolled 1D1 and got a result of: 1"
+
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$roll 50D1"})
+    [reply] = _tachyon_recv(hsocket)
+    assert reply["cmd"] == "s.lobby.say"
+    assert reply["sender_id"] == Coordinator.get_coordinator_userid()
+    assert reply["message"] == "#{host.name} rolled 50D1 and got a result of: 50"
+
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$roll 100"})
+    [reply] = _tachyon_recv(hsocket)
+    assert reply["cmd"] == "s.lobby.say"
+    assert reply["sender_id"] == Coordinator.get_coordinator_userid()
+    assert reply["message"] =~ "#{host.name} rolled for a number between 1 and 100, they got: "
+
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$roll 20 100"})
+    [reply] = _tachyon_recv(hsocket)
+    assert reply["cmd"] == "s.lobby.say"
+    assert reply["sender_id"] == Coordinator.get_coordinator_userid()
+    assert reply["message"] =~ "#{host.name} rolled for a number between 20 and 100, they got: "
   end
 
   test "status", %{lobby_id: lobby_id, hsocket: hsocket} do
@@ -467,7 +499,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     _tachyon_send(hsocket, data)
 
     [reply] = _tachyon_recv(hsocket)
-    assert reply == %{"cmd" => "s.lobby.say", "lobby_id" => lobby_id, "message" => "$help", "sender" => host.id}
+    assert reply == %{"cmd" => "s.lobby.say", "lobby_id" => lobby_id, "message" => "$help", "sender_id" => host.id}
 
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.communication.received_direct_message"
@@ -590,7 +622,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
       "cmd" => "s.lobby.say",
       "lobby_id" => lobby_id,
       "message" => "$vip #{player8.name}",
-      "sender" => host.id
+      "sender_id" => host.id
     }]
 
     result = _tachyon_recv(hsocket)
@@ -598,7 +630,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
       "cmd" => "s.lobby.announce",
       "lobby_id" => lobby_id,
       "message" => "#{host.name} placed #{player8.name} at the front of the join queue",
-      "sender" => Coordinator.get_coordinator_userid()
+      "sender_id" => Coordinator.get_coordinator_userid()
     }]
 
     # Now do it for #7

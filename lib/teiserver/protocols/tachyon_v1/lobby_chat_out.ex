@@ -7,7 +7,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyChatOut do
     %{
       "cmd" => "s.lobby.say",
       "lobby_id" => lobby_id,
-      "sender" => sender_id,
+      "sender_id" => sender_id,
       "message" => message
     }
   end
@@ -16,7 +16,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyChatOut do
     %{
       "cmd" => "s.lobby.announce",
       "lobby_id" => lobby_id,
-      "sender" => sender_id,
+      "sender_id" => sender_id,
       "message" => message
     }
   end

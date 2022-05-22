@@ -5,6 +5,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Battle.{Lobby, LobbyChat}
   # alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @doc """
     Command has structure:
@@ -82,6 +83,52 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     |> Enum.filter(fn s -> s != nil end)
 
     Coordinator.send_to_user(senderid, status_msg)
+    state
+  end
+
+  def handle_command(%{command: "roll", remaining: remaining, senderid: senderid} = _cmd, state) do
+    username = User.get_username(senderid)
+
+    dice_regex = Regex.run(~r/^(\d+)[dD](\d+)$/, remaining)
+    max_format = Regex.run(~r/^(\d+)$/, remaining)
+    min_max_format = Regex.run(~r/^(\d+) (\d+)$/, remaining)
+
+    cond do
+      dice_regex != nil ->
+        [_all, n_dice, s_dice] = dice_regex
+        n_dice = int_parse(n_dice)
+        s_dice = int_parse(s_dice)
+
+        result = Range.new(1, n_dice)
+          |> Enum.map(fn _ -> :rand.uniform(s_dice) end)
+          |> Enum.sum
+
+        LobbyChat.say(state.coordinator_id, "#{username} rolled #{n_dice}D#{s_dice} and got a result of: #{result}", state.lobby_id)
+
+      max_format != nil ->
+        [_all, max] = max_format
+        max = int_parse(max)
+
+        result = :rand.uniform(max)
+        LobbyChat.say(state.coordinator_id, "#{username} rolled for a number between 1 and #{max}, they got: #{result}", state.lobby_id)
+
+      min_max_format != nil ->
+        [_all, smin, smax] = min_max_format
+        nmin = int_parse(smin)
+        nmax = int_parse(smax)
+
+        if nmax > nmin do
+          result = nmin + :rand.uniform(nmax - nmin)
+          LobbyChat.say(state.coordinator_id, "#{username} rolled for a number between #{nmin} and #{nmax}, they got: #{result}", state.lobby_id)
+        else
+          LobbyChat.sayprivateex(state.coordinator_id, senderid, "Format not recognised, please consult the help for this command for more information.", state.lobby_id)
+        end
+
+
+
+      true ->
+        LobbyChat.sayprivateex(state.coordinator_id, senderid, "Format not recognised, please consult the help for this command for more information.", state.lobby_id)
+    end
     state
   end
 

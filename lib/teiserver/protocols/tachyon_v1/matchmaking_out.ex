@@ -153,7 +153,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingOut do
   # def do_reply(:message, {sender_id, msg, _queue_id}) do
   #   %{
   #     "cmd" => "s.matchmaking.message",
-  #     "sender" => sender_id,
+  #     "sender_id" => sender_id,
   #     "message" => msg
   #   }
   # end
@@ -161,7 +161,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingOut do
   # def do_reply(:announce, {sender_id, msg, _queue_id}) do
   #   %{
   #     "cmd" => "s.matchmaking.announce",
-  #     "sender" => sender_id,
+  #     "sender_id" => sender_id,
   #     "message" => msg
   #   }
   # end
