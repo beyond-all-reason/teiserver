@@ -96,8 +96,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     cond do
       dice_regex != nil ->
         [_all, n_dice, s_dice] = dice_regex
-        n_dice = int_parse(n_dice)
-        s_dice = int_parse(s_dice)
+        n_dice = int_parse(n_dice) |> max(1) |> min(100)
+        s_dice = int_parse(s_dice) |> max(1) |> min(100)
 
         result = Range.new(1, n_dice)
           |> Enum.map(fn _ -> :rand.uniform(s_dice) end)
@@ -106,18 +106,22 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         LobbyChat.say(state.coordinator_id, "#{username} rolled #{n_dice}D#{s_dice} and got a result of: #{result}", state.lobby_id)
 
       max_format != nil ->
-        [_all, max] = max_format
-        max = int_parse(max)
+        [_all, smax] = max_format
+        nmax = int_parse(smax)
 
-        result = :rand.uniform(max)
-        LobbyChat.say(state.coordinator_id, "#{username} rolled for a number between 1 and #{max}, they got: #{result}", state.lobby_id)
+        if nmax > 0 do
+          result = :rand.uniform(nmax)
+          LobbyChat.say(state.coordinator_id, "#{username} rolled for a number between 1 and #{nmax}, they got: #{result}", state.lobby_id)
+        else
+          LobbyChat.sayprivateex(state.coordinator_id, senderid, "Format not recognised, please consult the help for this command for more information.", state.lobby_id)
+        end
 
       min_max_format != nil ->
         [_all, smin, smax] = min_max_format
         nmin = int_parse(smin)
         nmax = int_parse(smax)
 
-        if nmax > nmin do
+        if nmax > nmin and nmin > 0 do
           result = nmin + :rand.uniform(nmax - nmin)
           LobbyChat.say(state.coordinator_id, "#{username} rolled for a number between #{nmin} and #{nmax}, they got: #{result}", state.lobby_id)
         else
