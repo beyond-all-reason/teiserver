@@ -6,13 +6,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   alias Teiserver.Battle.Lobby
   alias Teiserver.Battle.LobbyLib
 
-  @extra_menu_content """
-  &nbsp;&nbsp;&nbsp;
-    <a href='/teiserver/admin/client' class="btn btn-outline-primary">
-      <i class="fa-solid fa-fw fa-plug"></i>
-      Clients
-    </a>
-  """
 
   @impl true
   def mount(_params, session, socket) do
@@ -22,10 +15,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> TSAuthPlug.live_call(session)
       |> NotificationPlug.live_call()
 
-    extra_content = if allow?(socket, "teiserver.moderator.account") do
-      @extra_menu_content
-    end
-
     socket = socket
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
@@ -33,7 +22,6 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> assign(:view_colour, LobbyLib.colours())
       |> assign(:battles, Lobby.list_lobbies() |> sort_lobbies)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
-      |> assign(:extra_menu_content, extra_content)
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
   end
@@ -48,7 +36,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   @impl true
-  def handle_info({:global_battle_updated, lobby_id, :battle_opened}, socket) do
+  def handle_info({:global_battle_lobby, :opened, lobby_id}, socket) do
     new_battle = Lobby.get_battle(lobby_id)
     battles = [new_battle | socket.assigns[:battles]]
     |> sort_lobbies
@@ -56,73 +44,41 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:global_battle_updated, lobby_id, :battle_closed}, socket) do
+  def handle_info({:global_battle_lobby, :closed, lobby_id}, socket) do
     battles =
       socket.assigns[:battles]
       |> Enum.filter(fn b -> b.id != lobby_id end)
-    |> sort_lobbies
+      |> sort_lobbies
 
     {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:global_battle_updated, lobby_id, _reason}, socket) do
+  def handle_info({:global_battle_lobby, :rename, lobby_id}, socket) do
     battles =
       socket.assigns[:battles]
-      |> Enum.map(fn battle ->
-        if battle.id == lobby_id do
-          Lobby.get_battle(lobby_id)
+      |> Enum.map(fn l ->
+        if l.id == lobby_id do
+          Lobby.get_lobby(lobby_id)
         else
-          battle
+          l
         end
       end)
-    |> sort_lobbies
+      |> sort_lobbies
 
     {:noreply, assign(socket, :battles, battles)}
   end
 
-  def handle_info({:add_user_to_battle, user_id, lobby_id, _script_password}, socket) do
+  def handle_info({:global_battle_lobby, :update_battle_info, lobby_id}, socket) do
     battles =
       socket.assigns[:battles]
-      |> Enum.map(fn battle ->
-        if battle.id == lobby_id do
-          %{battle | member_count: Enum.count([user_id | battle.players]), players: [user_id | battle.players]}
+      |> Enum.map(fn l ->
+        if l.id == lobby_id do
+          Lobby.get_lobby(lobby_id)
         else
-          battle
+          l
         end
       end)
-    |> sort_lobbies
-
-    {:noreply, assign(socket, :battles, battles)}
-  end
-
-  def handle_info({:remove_user_from_battle, user_id, lobby_id}, socket) do
-    battles =
-      socket.assigns[:battles]
-      |> Enum.map(fn battle ->
-        if battle.id == lobby_id do
-          new_players = Enum.filter(battle.players, fn p -> p != user_id end)
-          %{battle | member_count: Enum.count(new_players), players: new_players}
-        else
-          battle
-        end
-      end)
-    |> sort_lobbies
-
-    {:noreply, assign(socket, :battles, battles)}
-  end
-
-  def handle_info({:kick_user_from_battle, user_id, lobby_id}, socket) do
-    battles =
-      socket.assigns[:battles]
-      |> Enum.map(fn battle ->
-        if battle.id == lobby_id do
-          new_players = Enum.filter(battle.players, fn p -> p != user_id end)
-          %{battle | member_count: Enum.count(new_players), players: new_players}
-        else
-          battle
-        end
-      end)
-    |> sort_lobbies
+      |> sort_lobbies
 
     {:noreply, assign(socket, :battles, battles)}
   end
@@ -138,10 +94,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Central.PubSub, "legacy_all_battle_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_battle_lobby_updates")
 
     socket
-    |> assign(:page_title, "Listing Battles")
-    |> assign(:battle, nil)
+      |> assign(:page_title, "Listing Battles")
+      |> assign(:battle, nil)
   end
 end

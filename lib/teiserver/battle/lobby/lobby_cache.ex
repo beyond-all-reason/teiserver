@@ -41,6 +41,12 @@ defmodule Teiserver.Battle.LobbyCache do
         "legacy_all_battle_updates",
         {:global_battle_updated, lobby.id, reason}
       )
+
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_global_battle_lobby_updates",
+        {:global_battle_lobby, :update_battle_info, lobby.id}
+      )
     else
       PubSub.broadcast(
         Central.PubSub,

@@ -41,6 +41,7 @@ Limited information pertaining to the creation/deletion of battle lobbies.
   {:global_battle_lobby, :opened, lobby_id}
   {:global_battle_lobby, :closed, lobby_id}
   {:global_battle_lobby, :rename, lobby_id}
+  {:global_battle_lobby, :update_battle_info, lobby_id}
 ```
 
 ### teiserver_global_match_updates

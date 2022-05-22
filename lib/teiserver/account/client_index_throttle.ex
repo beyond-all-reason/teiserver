@@ -9,16 +9,6 @@ defmodule Teiserver.Account.ClientIndexThrottle do
 
   @update_interval 2000
 
-  # Lobby closed
-  def handle_info({:global_battle_lobby, :closed, _lobby_id}, state) do
-    # :ok = PubSub.broadcast(
-    #   Central.PubSub,
-    #   "teiserver_liveview_lobby_updates:#{state.battle_lobby_id}",
-    #   {:battle_lobby_throttle, :closed}
-    # )
-    {:noreply, state}
-  end
-
   # Users
   def handle_info({:user_logged_in, userid}, state) do
     {:noreply, %{state | new_clients: [userid | state.new_clients]}}
