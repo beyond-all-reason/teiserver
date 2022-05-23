@@ -49,13 +49,13 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Matchmaking", url: "/teiserver/game_live/queues")
       |> assign(:client, client)
-      |> assign(:match_ready, nil)
       |> assign(:queue_membership, queue_membership)
       |> assign(:view_colour, QueueLib.colours())
       |> assign(:site_menu_active, "teiserver_admin")
       |> assign(:db_queues, db_queues)
       |> assign(:queue_info, queue_info)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
+      |> assign(:match_id, nil)
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
   end
@@ -81,18 +81,18 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   end
 
   def handle_event("ready-accept", _, %{assigns: assigns} = socket) do
-    Matchmaking.player_accept(assigns[:match_ready], assigns[:current_user].id)
+    Matchmaking.player_accept(assigns[:match_id], assigns[:current_user].id)
 
     {:noreply, socket
-      |> assign(:match_ready, nil)
+      |> assign(:match_id, nil)
       |> assign(:queue_membership, [])}
   end
 
   def handle_event("ready-decline", _, %{assigns: assigns} = socket) do
-    Matchmaking.player_decline(assigns[:match_ready], assigns[:current_user].id)
+    Matchmaking.player_decline(assigns[:match_id], assigns[:current_user].id)
 
     {:noreply, socket
-      |> assign(:match_ready, nil)
+      |> assign(:match_id, nil)
       |> assign(:queue_membership, [])}
   end
 
@@ -183,11 +183,12 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     {:noreply, socket}
   end
 
-  def handle_info({:client_message, :matchmaking, _userid, {:match_ready, {queue_id, _match_id}}}, socket) do
+  def handle_info({:client_message, :matchmaking, _userid, {:match_ready, {_queue_id, match_id}}}, socket) do
     Logger.warn("index.ex Match ready")
     {:noreply,
-    socket
-    |> assign(:match_ready, queue_id)}
+      socket
+      |> assign(:match_id, match_id)
+    }
   end
 
   def handle_info({:client_message, _topic, _userid, _data}, socket) do

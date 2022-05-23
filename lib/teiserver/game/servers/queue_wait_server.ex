@@ -304,7 +304,8 @@ defmodule Teiserver.Game.QueueWaitServer do
 
   @spec bucket_function(T.userid()) :: non_neg_integer()
   defp bucket_function(user_id) do
-    rem(user_id, 2)
+    1
+    # rem(user_id, 2)
   end
 
   defp hd_or_x([], x), do: x

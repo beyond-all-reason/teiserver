@@ -6,7 +6,7 @@
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">
-        <%= if @match_ready do %>
+        <%= if @match_id do %>
           <div style="margin-left: 400px;">
             <span class="btn btn-lg btn-danger" phx-click="ready-decline">
               Decline
@@ -53,13 +53,13 @@
       <td><%= info.mean_wait_time %></td>
 
       <td>
-        <%= live_redirect "Show", to: Routes.ts_game_queue_show_path(@socket, :show, queue_id), class: "btn btn-sm btn-outline-#{bsname}" %>
+        <%#= live_redirect "Show", to: Routes.ts_game_queue_show_path(@socket, :show, queue_id), class: "btn btn-sm btn-outline-#{bsname}" %>
       </td>
 
       <td>
         <%= cond do %>
-          <% @client == nil -> %>
-            Login to join queue
+          <% false and @client == nil -> %>
+            Connect with client to join queue
         
           <% Enum.member?(@queue_membership, queue_id) -> %>
             <span class={"btn btn-sm btn-warning"} phx-click="leave-queue" phx-value-queue_id={queue_id}>

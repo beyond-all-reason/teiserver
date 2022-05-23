@@ -11,6 +11,8 @@ defmodule Teiserver.Game.QueueMatchServer do
 
   @impl true
   def handle_cast({:player_accept, player_id}, state) when is_integer(player_id) do
+    Logger.info("QueueMatchServer #{state.match_id} player accept #{player_id}")
+
     new_state =
       case player_id in state.pending_accepts do
         true ->
@@ -41,6 +43,8 @@ defmodule Teiserver.Game.QueueMatchServer do
   end
 
   def handle_cast({:player_decline, player_id}, state) when is_integer(player_id) do
+    Logger.info("QueueMatchServer #{state.match_id} player decline #{player_id}")
+
     new_state = %{
       state |
         pending_accepts: List.delete(state.pending_accepts, player_id),
@@ -231,9 +235,9 @@ defmodule Teiserver.Game.QueueMatchServer do
         Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to start the game, if this doesn't work feel free to start it yourselves and report to Teifion.", lobby.id)
 
         :timer.sleep(100)
-        Lobby.say(p1, "testing: !cv forcestart", lobby.id)
+        Lobby.say(p1, "!cv forcestart", lobby.id)
         :timer.sleep(100)
-        Lobby.say(p2, "testing: !y", lobby.id)
+        Lobby.say(p2, "!y", lobby.id)
         :timer.sleep(100)
 
         Logger.info("QueueMatchServer #{state.match_id} setup_lobby calling forcestart")
@@ -309,6 +313,8 @@ defmodule Teiserver.Game.QueueMatchServer do
     }
 
     send_invites(state)
+
+    Logger.info("QueueMatchServer #{state.match_id} created, sent invites to #{Kernel.inspect users}")
 
     {:ok, state}
   end
