@@ -31,6 +31,7 @@ defmodule Teiserver.User do
 
   @data_keys [
     :rank,
+    :country,
     :moderator,
     :bot,
     :friends,
@@ -59,6 +60,7 @@ defmodule Teiserver.User do
 
   @default_data %{
     rank: 0,
+    country: "??",
     moderator: false,
     bot: false,
     friends: [],
@@ -750,6 +752,7 @@ defmodule Teiserver.User do
       %{
         user
         | last_login: round(System.system_time(:second) / 60),
+          country: country,
           rank: rank,
           springid: springid,
           lobby_client: lobby_client,
