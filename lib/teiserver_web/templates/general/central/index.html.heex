@@ -60,7 +60,7 @@
       link: Routes.ts_battle_match_path(@conn, :index)
     %>
 
-    <%= if allow?(@conn, "teiserver.account.verified") do %>
+    <%= if allow?(@conn, "teiserver.player.verified") do %>
       <%= if false do %>
         <%=
           central_component "menu_card",

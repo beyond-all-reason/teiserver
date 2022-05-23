@@ -21,7 +21,7 @@
       <div class="card-body" style="padding: 0 15px;">
 
         <div class="row">
-          <%= if allow?(@conn, "teiserver.account.verified") do %>
+          <%= if allow?(@conn, "teiserver.player.verified") do %>
             <%= central_component "sub_menu_icon",
               name: "queues",
               label: "Matchmaking",

@@ -43,7 +43,7 @@
       link: Routes.ts_battle_match_path(@conn, :index)
     %>
 
-    <%= if false and allow?(@conn, "teiserver.account.verified") do %>
+    <%= if false and allow?(@conn, "teiserver.player.verified") do %>
       <%=
         central_component "menu_card",
         icon: Teiserver.Game.QueueLib.icon(),
