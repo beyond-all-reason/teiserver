@@ -137,8 +137,11 @@ defmodule Teiserver.Protocols.SpringOut do
       user.friends
       |> Enum.map(fn f ->
         name = User.get_username(f)
-        "FRIENDLIST userName=#{name}\n"
+        if name do
+          "FRIENDLIST userName=#{name}\n"
+        end
       end)
+      |> Enum.reject(fn s -> s == nil end)
 
     (["FRIENDLISTBEGIN\n"] ++ friends ++ ["FRIENDLISTEND\n"])
     |> Enum.join("")
