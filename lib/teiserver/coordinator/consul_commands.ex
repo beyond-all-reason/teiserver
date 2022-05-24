@@ -265,7 +265,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     client = Client.get_client_by_id(senderid)
     cond do
       client == nil ->
-        Logger.info("Cannot joinq as no client")
         state
 
       User.is_restricted?(senderid, ["Game queue"]) ->
@@ -273,12 +272,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         state
 
       client.player ->
-        Logger.info("Cannot queue user #{senderid}, already a player")
         LobbyChat.sayprivateex(state.coordinator_id, senderid, "You are already a player, you can't join the queue!", state.lobby_id)
         state
 
       Enum.member?(get_queue(state), senderid) ->
-        Logger.info("Spectator #{senderid} is already in the queue")
         pos = get_queue_position(get_queue(state), senderid) + 1
         LobbyChat.sayprivateex(state.coordinator_id, senderid, "You were already in the join-queue at position #{pos}. Use $status to check on the queue and $leaveq to leave it.", state.lobby_id)
         state
@@ -292,7 +289,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           %{state | join_queue: state.join_queue ++ [senderid]}
         end
 
-        Logger.info("Added #{senderid} to queue")
         new_queue = get_queue(new_state)
         pos = get_queue_position(new_queue, senderid) + 1
 
@@ -307,7 +303,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "leaveq", senderid: senderid}, state) do
-    Logger.info("Removed #{senderid} from queue because $leaveq")
     LobbyChat.sayprivateex(state.coordinator_id, senderid, "You have been removed from the join queue", state.lobby_id)
     %{state |
       join_queue: state.join_queue |> List.delete(senderid),
