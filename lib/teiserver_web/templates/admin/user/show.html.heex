@@ -75,7 +75,7 @@
           </li>
 
           <li class="nav-item" role="presentation">
-            <a href="#reports_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+            <a href="#moderation_tab" role="tab" class="nav-link" data-bs-toggle="tab">
               <%
                 outstanding_reports = @reports
                   |> Enum.filter(fn r -> r.responder_id == nil end)
@@ -84,13 +84,13 @@
               <%= case outstanding_reports do %>
                 <% 0 -> %>
                   <%= central_component "icon", icon: Central.Account.ReportLib.icon() %>
-                  Reports
+                  Moderation
                 <% 1 -> %>
                   <%= central_component "icon", icon: Central.Account.ReportLib.icon(), class: "text-danger fas" %>
-                  1 Report outstanding
+                  1 issue outstanding
                 <% _ -> %>
                   <%= central_component "icon", icon: Central.Account.ReportLib.icon(), class: "text-danger fas" %>
-                  <%= outstanding_reports %> Reports outstanding
+                  <%= outstanding_reports %> issues outstanding
               <% end %>
             </a>
           </li>
@@ -105,8 +105,8 @@
             <%= render "tab_details.html", assigns %>
           </div>
 
-          <div class="tab-pane" id="reports_tab" style="padding:5px;">
-            <%= render "tab_reports.html", assigns %>
+          <div class="tab-pane" id="moderation_tab" style="padding:5px;">
+            <%= render "tab_moderation.html", assigns %>
           </div>
         </div>
         <%# END OF TABS %>

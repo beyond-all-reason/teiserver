@@ -1,0 +1,95 @@
+<% bsname = view_colour() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    
+  });
+</script>
+
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
+            show_search: false,
+            active: "reports_submitted"
+        }) %>
+        <hr />
+
+<h4>Reports submitted by <%= @user.name %></h4>
+<table class="table table-sm">
+  <thead>
+    <tr>
+      <th>Reason</th>
+      <th>Reported</th>
+      <th>Reported from</th>
+      <th>At</th>
+
+      <th colspan="2">Responder</th>
+      <th colspan="2">Response</th>
+      <th>Duration</th>
+      <th>Expires</th>
+
+      <th colspan="1">&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for report <- @reports do %>
+    <tr>
+      <td><%= report.reason %></td>
+      <td><%= report.target.name %></td>
+      <td><%= report.location %>:<%= report.location_id %></td>
+      <td><%= date_to_str(report.inserted_at, format: :hms_or_dmy) %></td>
+
+      <%= if report.responder do %>
+        <td><%= report.responder.name %></td>
+        <td><%= date_to_str(report.responded_at, format: :hms_or_dmy) %></td>
+        <td>
+          <i class={"fa-fw #{Central.Account.ReportLib.action_icon(report.response_action)}"}></i>
+          <%= report.response_action %>
+        </td>
+        <td><%= report.response_text %></td>
+        <td><%= duration_to_str(report.responded_at, report.expires) %></td>
+        <td>
+          <%= cond do %>
+            <% report.expires == nil -> %>
+              Never
+
+            <% Timex.compare(report.expires, Timex.now) == 1 -> %>
+              <%= time_until(report.expires) %>
+
+            <% true -> %>
+              Expired
+          <% end %>
+        </td>
+      <% else %>
+        <td colspan="6">No response</td>
+      <% end %>
+
+      <td>
+        <%= if report.responder == nil do %>
+          <a href={Routes.ts_admin_user_path(@conn, :respond_form, report.id)} class="btn btn-secondary btn-sm">
+            Respond
+            &nbsp;
+            <i class="fa-fw fas fa-reply"></i>
+          </a>
+        <% else %>
+          <a href={Routes.admin_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
+            Show
+            &nbsp;
+            <i class="fa-fw fas fa-eye"></i>
+          </a>
+        <% end %>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+
+      </div>
+    </div>
+  </div>
+</div>

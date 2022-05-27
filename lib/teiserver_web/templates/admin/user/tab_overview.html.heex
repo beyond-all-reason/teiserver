@@ -101,6 +101,15 @@
     icon_class: "fa-solid",
     link: Routes.ts_account_profile_path(@conn, :show, @user.id)
   %>
+
+  <%=
+    central_component "menu_card",
+    icon: "fa-solid #{Central.Account.ReportLib.icon()}",
+    name: "reports",
+    text: "Submitted reports",
+    icon_class: "fa-solid",
+    link: Routes.ts_admin_user_path(@conn, :reports_submitted, @user.id)
+  %>
   
   <%=
     central_component "menu_card",

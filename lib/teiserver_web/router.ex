@@ -216,6 +216,7 @@ defmodule TeiserverWeb.Router do
         get("/users/relationships/:id", UserController, :relationships)
         get("/users/action/:id/:action", UserController, :perform_action)
         put("/users/action/:id/:action", UserController, :perform_action)
+        get("/users/reports/:id/submitted", UserController, :reports_submitted)
         get("/users/reports/:id/respond", UserController, :respond_form)
         put("/users/reports/:id/respond", UserController, :respond_post)
         get("/users/smurf_search/:id", UserController, :smurf_search)
