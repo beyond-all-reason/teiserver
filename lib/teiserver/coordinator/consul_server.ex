@@ -795,7 +795,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       host_bosses: [],
       host_preset: nil,
-      host_teamsize: 4,
+      host_teamsize: 8,
       host_teamcount: 2,
 
       ring_timestamps: %{},
