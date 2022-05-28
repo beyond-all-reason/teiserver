@@ -29,7 +29,7 @@ defmodule Teiserver.EmailHelper do
 
     <p>To verify your account you will need this code:: <span style="font-family: monospace">#{
       verification_code
-    }</span>.<p>
+    }</span><p>
 
     <p>This game also has a <a href="#{website_url}">website</a> component.<p>
 
@@ -41,7 +41,7 @@ defmodule Teiserver.EmailHelper do
     text_body = """
     Welcome to #{game_name}.
 
-    You will be asked for a verification code, it is: #{verification_code}.
+    You will be asked for a verification code, it is: #{verification_code}
 
     This client also has a website component at #{website_url}.<p>
 
