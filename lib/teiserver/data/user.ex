@@ -721,6 +721,7 @@ defmodule Teiserver.User do
   @spec do_login(T.user(), String.t(), String.t(), String.t()) :: {:ok, T.user()}
   defp do_login(user, ip, lobby_client, lobby_hash) do
     stats = Account.get_user_stat_data(user.id)
+    ip = Map.get(stats, "ip_override", ip)
 
     # If they don't want a flag shown, don't show it, otherwise check for an override before trying geoip
     country =
