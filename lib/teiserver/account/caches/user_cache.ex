@@ -18,7 +18,7 @@ defmodule Teiserver.Account.UserCache do
     end)
   end
 
-  @spec get_userid(String.t() | nil) :: integer() | nil
+  @spec get_userid(String.t() | nil) :: T.userid() | nil
   def get_userid(nil), do: nil
   def get_userid(""), do: nil
   def get_userid(username) do
@@ -38,7 +38,7 @@ defmodule Teiserver.Account.UserCache do
     end)
   end
 
-  @spec get_user_by_name(String.t() | nil) :: User.t() | nil
+  @spec get_user_by_name(String.t() | nil) :: T.user() | nil
   def get_user_by_name(nil), do: nil
   def get_user_by_name(""), do: nil
   def get_user_by_name(username) do
@@ -47,7 +47,7 @@ defmodule Teiserver.Account.UserCache do
       |> get_user_by_id
   end
 
-  @spec get_user_by_email(String.t()) :: User.t() | nil
+  @spec get_user_by_email(String.t()) :: T.user() | nil
   def get_user_by_email(email) do
     cachename_email = cachename(email)
 
@@ -67,7 +67,7 @@ defmodule Teiserver.Account.UserCache do
     get_user_by_id(id)
   end
 
-  @spec get_user_by_token(String.t()) :: User.t() | nil
+  @spec get_user_by_token(String.t()) :: T.user() | nil
   def get_user_by_token(token) do
     case Guardian.resource_from_token(token) do
       {:error, _bad_token} ->
@@ -78,7 +78,7 @@ defmodule Teiserver.Account.UserCache do
     end
   end
 
-  @spec get_user_by_id(T.userid() | nil) :: User.t() | nil
+  @spec get_user_by_id(T.userid() | nil) :: T.user() | nil
   def get_user_by_id(nil), do: nil
   def get_user_by_id(id) do
     id = int_parse(id)
@@ -88,6 +88,32 @@ defmodule Teiserver.Account.UserCache do
         |> convert_user
         |> add_user
     end)
+  end
+
+  @spec get_userid_by_discord_id(String.t() | nil) :: T.userid() | nil
+  def get_userid_by_discord_id(nil), do: nil
+  def get_userid_by_discord_id(discord_id) do
+    Central.cache_get_or_store(:users_lookup_id_with_discord, discord_id, fn ->
+      user = Account.get_user(nil, search: [
+        data_equal: {"discord_id", discord_id}
+      ], select: [:id])
+
+      case user do
+        nil -> nil
+        %{id: id} ->
+          recache_user(id)
+          id
+      end
+    end)
+  end
+
+
+  @spec get_user_by_discord_id(String.t() | nil) :: T.user() | nil
+  def get_user_by_discord_id(nil), do: nil
+  def get_user_by_discord_id(discord_id) do
+    discord_id
+      |> get_userid_by_discord_id
+      |> get_user_by_id
   end
 
   @spec list_users(list) :: list

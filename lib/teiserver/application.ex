@@ -28,6 +28,7 @@ defmodule Teiserver.Application do
       concache_perm_sup(:users_lookup_name_with_id),
       concache_perm_sup(:users_lookup_id_with_name),
       concache_perm_sup(:users_lookup_id_with_email),
+      concache_perm_sup(:users_lookup_id_with_discord),
       concache_perm_sup(:users),
 
       concache_perm_sup(:clients),

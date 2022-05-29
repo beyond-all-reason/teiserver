@@ -83,6 +83,17 @@
         url: "#"
       %>
     <% end %>
+    
+    <%= if @active == "reports_submitted" do %>
+      <%= central_component "section_menu_button",
+        name: "reports_submitted",
+        label: "Reports submitted",
+        active: @active,
+        icon: "fa-solid #{Central.Account.ReportLib.icon()}",
+        bsname: bsname,
+        url: "#"
+      %>
+    <% end %>
   </div>
 
   <div class="col-md-3">

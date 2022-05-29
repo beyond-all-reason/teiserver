@@ -315,6 +315,44 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
+  @spec reports_submitted(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def reports_submitted(conn, %{"id" => id}) do
+    user = Account.get_user(id)
+
+    case Central.Account.UserLib.has_access(user, conn) do
+      {true, _} ->
+        reports =
+          Central.Account.list_reports(
+            search: [
+              filter: {"reporter", user.id}
+            ],
+            preload: [
+              :reporter,
+              :target,
+              :responder
+            ],
+            order_by: "Newest first"
+          )
+
+        user
+          |> UserLib.make_favourite()
+          |> insert_recently(conn)
+
+        conn
+          |> assign(:user, user)
+          |> assign(:reports, reports)
+          |> assign(:section_menu_active, "reports_submitted")
+          |> add_breadcrumb(name: "Show: #{user.name}", url: Routes.ts_admin_user_path(conn, :show, user.id))
+          |> add_breadcrumb(name: "Submitted reports", url: conn.request_path)
+          |> render("reports_submitted.html")
+
+      _ ->
+        conn
+          |> put_flash(:danger, "Unable to access this user")
+          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
+  end
+
   @spec perform_action(Plug.Conn.t(), map) :: Plug.Conn.t()
   def perform_action(conn, %{"id" => id, "action" => action} = params) do
     user = Account.get_user!(id)
