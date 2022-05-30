@@ -186,7 +186,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     [reply] = _tachyon_recv(socket)
     assert reply["cmd"] == "s.matchmaking.queue_info"
     assert reply["queue"] == %{
-      "last_wait_time" => 0,
+      "mean_wait_time" => 0,
       "name" => "test_queue_join_leave1",
       "member_count" => 0,
       "queue_id" => queue1.id
@@ -224,7 +224,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     [reply] = _tachyon_recv(socket)
     assert reply["cmd"] == "s.matchmaking.queue_info"
     assert reply["queue"] == %{
-      "last_wait_time" => 0,
+      "mean_wait_time" => 0,
       "name" => "test_queue_join_leave1",
       "member_count" => 1,
       "queue_id" => queue1.id
@@ -250,7 +250,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     [reply] = _tachyon_recv(socket)
     assert reply["cmd"] == "s.matchmaking.queue_info"
     assert reply["queue"] == %{
-      "last_wait_time" => 0,
+      "mean_wait_time" => 0,
       "name" => "test_queue_join_leave1",
       "member_count" => 0,
       "queue_id" => queue1.id

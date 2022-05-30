@@ -559,6 +559,44 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   # ----------------- Moderation commands
+  def handle_command(%{command: "balance"} = cmd, state) do
+    lobby = Lobby.get_lobby(state.lobby_id)
+    if lobby.consul_balance do
+      send(self(), :balance)
+      ConsulServer.say_command(cmd, state)
+    end
+    state
+  end
+
+  def handle_command(%{command: "balancemode", remaining: type, senderid: senderid} = cmd, state) do
+    type = type
+      |> String.downcase()
+      |> String.trim()
+
+    case type do
+      "consul" ->
+        lobby = Lobby.get_lobby(state.lobby_id)
+        Lobby.update_lobby(%{lobby | consul_balance: true}, nil, :balance)
+        ConsulServer.say_command(cmd, state)
+        Lobby.sayex(state.coordinator_id, "Balance mode changed to Consul mode", state.lobby_id)
+
+        new_locks = ["team" | state.locks] |> Enum.uniq
+        %{state | locks: new_locks}
+
+      "spads" ->
+        lobby = Lobby.get_lobby(state.lobby_id)
+        Lobby.update_lobby(%{lobby | consul_balance: false}, nil, :balance)
+        ConsulServer.say_command(cmd, state)
+        Lobby.sayex(state.coordinator_id, "Balance mode changed to SPADS mode", state.lobby_id)
+
+        new_locks = List.delete(state.locks, "team")
+        %{state | locks: new_locks}
+      _ ->
+        LobbyChat.sayprivateex(state.coordinator_id, senderid, "No balancemode of that name, accepts consul and spads", state.lobby_id)
+        state
+    end
+  end
+
   def handle_command(%{command: "speclock", remaining: target} = cmd, state) do
     case ConsulServer.get_user(target, state) do
       nil ->

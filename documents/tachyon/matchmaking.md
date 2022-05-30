@@ -45,7 +45,7 @@ Operates the same way as the queue query but with a preset set of filters, only 
   "queue": {
     "queue_id": 123,
     "name": "Best queue name in the world",
-    "last_wait_time": 33,
+    "mean_wait_time": 33,
     "member_count": 2
   }
 }

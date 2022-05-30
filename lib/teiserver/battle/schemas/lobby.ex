@@ -73,8 +73,11 @@ defmodule Teiserver.Battle.Lobby do
         # To tie it into matchmaking
         queue_id: nil,
 
-        # Meta data
+        # Consul flags
         consul_rename: false,
+        consul_balance: false,
+
+        # Meta data
         silence: false,
         in_progress: false,
         started_at: nil
@@ -86,6 +89,8 @@ defmodule Teiserver.Battle.Lobby do
   # Cache functions
   defdelegate list_lobby_ids(), to: LobbyCache
   defdelegate list_lobbies(), to: LobbyCache
+
+  @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   defdelegate update_lobby(lobby, data, reason), to: LobbyCache
 
   @spec get_lobby(T.lobby_id() | nil) :: T.lobby() | nil
@@ -691,6 +696,14 @@ defmodule Teiserver.Battle.Lobby do
       battle.consul_rename == true and cmd == :update_lobby_title ->
         false
 
+      # Consul balance?
+      battle.consul_balance == true and cmd == :player_number ->
+        false
+
+      battle.consul_balance == true and cmd == :team_number ->
+        false
+
+      # Basic stuff
       User.is_moderator?(changer) == true ->
         true
 

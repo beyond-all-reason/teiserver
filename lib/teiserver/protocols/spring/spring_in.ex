@@ -958,9 +958,11 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("FORCETEAMNO", data, msg_id, state) do
     case Regex.run(~r/(\S+) (\S+)/, data) do
       [_, username, player_number] ->
-        client_id = User.get_userid(username)
-        value = int_parse(player_number)
-        Lobby.force_change_client(state.userid, client_id, %{player_number: value})
+        if Lobby.allow?(state.userid, :player_number, state.lobby_id) do
+          client_id = User.get_userid(username)
+          value = int_parse(player_number)
+          Lobby.force_change_client(state.userid, client_id, %{player_number: value})
+        end
 
       _ ->
         _no_match(state, "FORCETEAMNO", msg_id, data)

@@ -37,6 +37,8 @@ defmodule Teiserver.Battle.BalanceLibTest do
 
     assert BalanceLib.team_stats(team1) == {6, 3}
     assert BalanceLib.team_stats(team2) == {4, 2}
+
+    assert BalanceLib.get_deviation(result) == 50
   end
 
   test "round robin complex 6" do
@@ -50,6 +52,8 @@ defmodule Teiserver.Battle.BalanceLibTest do
 
     assert BalanceLib.team_stats(team1) == {22, 7.33}
     assert BalanceLib.team_stats(team2) == {13, 4.33}
+
+    assert BalanceLib.get_deviation(result) == 69
   end
 
   test "loser picks basic 4" do
@@ -63,6 +67,8 @@ defmodule Teiserver.Battle.BalanceLibTest do
 
     assert BalanceLib.team_stats(team1) == {5, 2.5}
     assert BalanceLib.team_stats(team2) == {5, 2.5}
+
+    assert BalanceLib.get_deviation(result) == 0
   end
 
   test "loser picks complex 6" do
@@ -76,6 +82,8 @@ defmodule Teiserver.Battle.BalanceLibTest do
 
     assert BalanceLib.team_stats(team1) == {18, 6}
     assert BalanceLib.team_stats(team2) == {17, 5.67}
+
+    assert BalanceLib.get_deviation(result) == 6
   end
 
   test "loser picks uneven 5" do
@@ -89,5 +97,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
 
     assert BalanceLib.team_stats(team1) == {12, 6}
     assert BalanceLib.team_stats(team2) == {12, 4}
+
+    assert BalanceLib.get_deviation(result) == 50
   end
 end

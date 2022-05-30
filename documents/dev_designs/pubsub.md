@@ -201,7 +201,7 @@ Valid events
 Data for those watching all queues at the same time
 Valid events
 ```elixir
-  {:queue_periodic_update, queue_id, queue_size, last_wait_time}
+  {:queue_periodic_update, queue_id, queue_size, mean_wait_time}
 ```
 
 

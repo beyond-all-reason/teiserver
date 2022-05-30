@@ -88,7 +88,7 @@ defmodule Teiserver.Game.OldQueueServer do
 
   def handle_call(:get_info, _from, state) do
     resp = %{
-      last_wait_time: state.last_wait_time,
+      mean_wait_time: state.mean_wait_time,
       player_count: state.player_count
     }
 
@@ -149,7 +149,7 @@ defmodule Teiserver.Game.OldQueueServer do
 
   def handle_info(:telemetry_tick, state) do
     Telemetry.cast_to_server({:matchmaking_update, state.id, %{
-      last_wait_time: state.last_wait_time,
+      mean_wait_time: state.mean_wait_time,
       player_count: state.player_count
     }})
 
@@ -233,7 +233,7 @@ defmodule Teiserver.Game.OldQueueServer do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_queue_all_queues",
-      {:queue_periodic_update, state.id, new_state.player_count, new_state.last_wait_time}
+      {:queue_periodic_update, state.id, new_state.player_count, new_state.mean_wait_time}
     )
 
     {:noreply, new_state}
@@ -426,7 +426,7 @@ defmodule Teiserver.Game.OldQueueServer do
        player_count: 0,
        team_count: 2,
        player_map: %{},
-       last_wait_time: 0,
+       mean_wait_time: 0,
        ready_wait_time: opts.queue.settings["ready_wait_time"] || @ready_wait_time
      }, opts.queue)
 

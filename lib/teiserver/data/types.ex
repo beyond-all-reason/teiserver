@@ -16,6 +16,8 @@ defmodule Teiserver.Data.Types do
   @type spring_tcp_state() :: map()
   @type tachyon_tcp_state() :: map()
 
+  @type consul_state() :: map()
+
   # Central stuff
   @type report() :: Central.Account.Report.t()
 end

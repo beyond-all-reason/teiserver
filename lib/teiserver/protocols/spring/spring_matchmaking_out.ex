@@ -15,7 +15,7 @@ defmodule Teiserver.Protocols.Spring.MatchmakingOut do
       [
         the_queue.id,
         the_queue.name,
-        info.last_wait_time,
+        info.mean_wait_time,
         info.player_count
       ]
       |> Enum.join("\t")

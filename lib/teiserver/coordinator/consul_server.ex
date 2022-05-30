@@ -6,7 +6,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   use GenServer
   require Logger
   alias Teiserver.{Coordinator, Client, User, Battle}
-  alias Teiserver.Battle.{Lobby, LobbyChat}
+  alias Teiserver.Battle.{Lobby, LobbyChat, BalanceLib}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Central.Config
   alias Phoenix.PubSub
@@ -59,6 +59,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     new_state = check_queue_status(state)
     player_count_changed(new_state)
     fix_ids(new_state)
+    balance_teams(state)
     new_state = afk_check_update(new_state)
 
     # It is possible we can "forget" the coordinator_id
@@ -71,6 +72,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     {:noreply, new_state}
+  end
+
+  def handle_info(:balance, state) do
+    force_rebalance(state)
+    {:noreply, state}
   end
 
   def handle_info({:put, key, value}, state) do
@@ -662,6 +668,50 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
+  @spec balance_teams(T.consul_state()) :: :ok
+  defp balance_teams(state) do
+    current_hash = make_balance_hash(state)
+    lobby = Lobby.get_lobby(state.lobby_id)
+
+    if current_hash != state.last_balance_hash and lobby.consul_balance == true do
+      Logger.info("ConsulServer:#{state.lobby_id}.balance_teams - rebalance accepted")
+      force_rebalance(state)
+    end
+    :ok
+  end
+
+  @spec force_rebalance(T.consul_state()) :: :ok
+  defp force_rebalance(state) do
+    Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - starting")
+
+    balance = BalanceLib.balance_players(list_players(state), state.host_teamcount)
+
+    balance
+      |> Enum.each(fn {team_number, ratings} ->
+        ratings
+        |> Enum.each(fn {userid, _rating} ->
+          Lobby.force_change_client(state.coordinator_id, userid, %{team_number: team_number})
+        end)
+      end)
+
+    deviation = BalanceLib.get_deviation(balance)
+
+    LobbyChat.sayex(state.coordinator_id, "Rebalanced via server, deviation at #{deviation}", state.lobby_id)
+
+    Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - completed")
+    :ok
+  end
+
+  @spec make_balance_hash(T.consul_state()) :: String.t()
+  defp make_balance_hash(state) do
+    client_string = list_players(state)
+      |> Enum.map(fn c -> "#{c.userid}:#{c.team_number}" end)
+      |> Enum.join(",")
+
+    :crypto.hash(:md5, client_string)
+      |> Base.encode64()
+  end
+
   defp player_count_changed(%{join_queue: [], low_priority_join_queue: []} = _state), do: nil
   defp player_count_changed(state) do
     if get_player_count(state) < get_max_player_count(state) do
@@ -694,6 +744,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     Lobby.get_lobby(lobby_id)
       |> Map.get(:players)
       |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
+      |> Enum.filter(fn client -> client != nil end)
       |> Enum.filter(fn client -> client.player == true and client.lobby_id == lobby_id end)
   end
 
@@ -806,6 +857,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
       afk_check_at: nil,
 
       last_seen_map: %{},
+
+      # Used to detect if there's actually been a change to the balance since we last checked
+      last_balance_hash: nil,
 
       # Toggle with Coordinator.cast_consul(lobby_id, {:put, :unready_can_play, true})
       unready_can_play: false,

@@ -59,7 +59,6 @@ defmodule TeiserverWeb.Live.BattleTest do
       html = render(view)
       assert html =~ "Battles: 1"
       assert html =~ "LiveBattleName"
-      assert html =~ "<td>3</td>"
 
       # One player leaves
       Lobby.remove_user_from_battle(user3.id, battle1.id)
@@ -67,7 +66,6 @@ defmodule TeiserverWeb.Live.BattleTest do
       html = render(view)
       assert html =~ "Battles: 1"
       assert html =~ "LiveBattleName"
-      assert html =~ "<td>2</td>"
 
       # Finally close battle1, just to ensure there's not some error when we go back to 0 battles
       Lobby.close_battle(battle1.id)
