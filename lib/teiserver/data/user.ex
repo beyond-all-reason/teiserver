@@ -778,6 +778,12 @@ defmodule Teiserver.User do
       Account.create_smurf_key(user.id, "client_app_hash", lobby_hash)
     end
 
+    Horde.Registry.register(
+      Teiserver.ClientRegistry,
+      user.id,
+      lobby_client
+    )
+
     {:ok, user}
   end
 
