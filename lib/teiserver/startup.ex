@@ -141,19 +141,6 @@ defmodule Teiserver.Startup do
     Central.Account.GroupCacheLib.update_caches(internal_group)
     Central.Account.GroupCacheLib.update_caches(umbrella_group)
 
-    # User configs
-    add_user_config_type(%{
-      key: "teiserver.Show flag",
-      section: "Teiserver account",
-      type: "boolean",
-      visible: true,
-      permissions: ["teiserver"],
-      description:
-        "When checked the flag associated with your IP will be displayed. If unchecked your flag will be blank. This will take effect next time you login with your client.",
-      opts: [],
-      default: true
-    })
-
     Central.cache_put(:lists, :clients, [])
     Central.cache_put(:lists, :rooms, [])
     Central.cache_insert_new(:lists, :lobbies, [])

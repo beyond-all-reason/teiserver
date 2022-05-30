@@ -27,10 +27,6 @@ defmodule Teiserver.Bridge.MessageCommands do
   end
 
   @spec handle_command({T.user(), String.t()}, String.t(), String.t(), String.t()) :: any
-  # def handle_command({nil, _discord_id}, "discord", _remaining, channel) do
-  #   reply(channel, "Unfortunately we are currently not enabling linking of discord to server accounts due to glitchy code and lack of features to add when we do link. We plan to re-enable this later and if you have ideas please contact Teifion.")
-  # end
-
   def handle_command({nil, _discord_id}, "discord", "", channel) do
     reply(channel, "To begin the process of linking your BAR account to your Discord account, please message the coordinator bot in BAR itself: `discord`")
   end

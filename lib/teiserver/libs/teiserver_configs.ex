@@ -1,8 +1,15 @@
 defmodule Teiserver.TeiserverConfigs do
-  import Central.Config, only: [add_site_config_type: 1]
+  @moduledoc false
+  import Central.Config, only: [add_site_config_type: 1, add_user_config_type: 1]
 
   @spec teiserver_configs :: any
   def teiserver_configs do
+    site_configs()
+    user_configs()
+  end
+
+  @spec site_configs :: any
+  defp site_configs do
     add_site_config_type(%{
       key: "teiserver.Spring flood rate limit count",
       section: "Protocol",
@@ -211,6 +218,33 @@ defmodule Teiserver.TeiserverConfigs do
       description: "Points for the lightest of curse words",
       opts: [],
       default: 1
+    })
+  end
+
+  @spec user_configs() :: any
+  defp user_configs() do
+    add_user_config_type(%{
+      key: "teiserver.Show flag",
+      section: "Teiserver account",
+      type: "boolean",
+      visible: true,
+      permissions: ["teiserver"],
+      description:
+        "When checked the flag associated with your IP will be displayed. If unchecked your flag will be blank. This will take effect next time you login with your client.",
+      opts: [],
+      default: true
+    })
+
+    add_user_config_type(%{
+      key: "teiserver.Discord notifications",
+      section: "Teiserver account",
+      type: "boolean",
+      visible: true,
+      permissions: ["teiserver"],
+      description:
+        "When checked you will receive discord messages from the Teiserver bridge bot for various in-lobby events.",
+      opts: [],
+      default: false
     })
   end
 end

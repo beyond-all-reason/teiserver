@@ -10,6 +10,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Central.Config
   alias Phoenix.PubSub
+  alias Teiserver.Bridge.BridgeServer
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator.{ConsulCommands, CoordinatorLib, SpadsParser}
 
@@ -724,6 +725,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
           # Sometimes people get added and SPADS thinks they need to go, this delay might help
           :timer.sleep(100)
           LobbyChat.sayprivateex(state.coordinator_id, userid, "#{new_client.name} You were at the front of the queue, you are now a player.", state.lobby_id)
+
+          # if Config.get_user_config_cache(userid, "teiserver.Discord notifications") do
+          #   user = User.get_user_by_id(userid)
+          #   BridgeServer.send_direct_message(user.discord_id, "You have reached the front of the queue and are now a player.")
+          # end
+
           send(self(), {:dequeue_user, userid})
           Client.update(allowed_client, :client_updated_battlestatus)
         {false, _} ->
