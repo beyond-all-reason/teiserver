@@ -49,7 +49,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
   end
 
   @spec recv_message(atom | %{:attachments => any, optional(any) => any}) :: nil | :ok
-  def recv_message(%Alchemy.Message{channel_id: channel_id, content: "$" <> _content} = message) do
+  def recv_message(%Alchemy.Message{channel_id: channel_id, content: "$" <> content} = message) do
     dm_sender = Central.cache_get(:discord_bridge_dm_cache, channel_id)
 
     if dm_sender != nil do
