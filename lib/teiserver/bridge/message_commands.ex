@@ -3,6 +3,7 @@ defmodule Teiserver.Bridge.MessageCommands do
   alias Teiserver.{User, Account}
   alias Teiserver.Account.AccoladeLib
   alias Central.Helpers.NumberHelper
+  require Logger
 
   @unauth ~w(discord)
   @always_allow ~w(whoami help)
@@ -11,8 +12,10 @@ defmodule Teiserver.Bridge.MessageCommands do
   def handle(%Alchemy.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []} = _message) do
     [cmd | remaining] = String.split(content, " ")
     remaining = Enum.join(remaining, " ")
-    # user = User.get_user_by_discord_id(author)
-    user = nil
+    user = User.get_user_by_discord_id(author)
+
+    allowed = allow?(cmd, user)
+    Logger.info("MessageCommands.handle #{author}, #{content}, #{allowed}")
 
     if allow?(cmd, user) do
       handle_command({user, author}, cmd, remaining, channel)
@@ -24,31 +27,35 @@ defmodule Teiserver.Bridge.MessageCommands do
   end
 
   @spec handle_command({T.user(), String.t()}, String.t(), String.t(), String.t()) :: any
-  def handle_command({nil, _discord_id}, "discord", _remaining, channel) do
-    reply(channel, "Unfortunately we are currently not enabling linking of discord to server accounts due to glitchy code and lack of features to add when we do link. We plan to re-enable this later and if you have ideas please contact Teifion.")
+  # def handle_command({nil, _discord_id}, "discord", _remaining, channel) do
+  #   reply(channel, "Unfortunately we are currently not enabling linking of discord to server accounts due to glitchy code and lack of features to add when we do link. We plan to re-enable this later and if you have ideas please contact Teifion.")
+  # end
+
+  def handle_command({nil, _discord_id}, "discord", "", channel) do
+    reply(channel, "To begin the process of linking your BAR account to your Discord account, please message the coordinator bot in BAR itself: `discord`")
   end
 
-  # def handle_command({nil, discord_id}, "discord", remaining, channel) do
-  #   case String.split(remaining, "-") do
-  #     [userid_str, given_code] ->
-  #       userid = NumberHelper.int_parse(userid_str)
-  #       correct_code = Central.cache_get(:discord_bridge_account_codes, userid)
+  def handle_command({nil, discord_id}, "discord", remaining, channel) do
+    case String.split(remaining, "-") do
+      [userid_str, given_code] ->
+        userid = NumberHelper.int_parse(userid_str)
+        correct_code = Central.cache_get(:discord_bridge_account_codes, userid)
 
-  #       if given_code == correct_code do
-  #         Central.cache_delete(:discord_bridge_account_codes, userid)
-  #         user = User.get_user_by_id(userid)
-  #         User.update_user(%{user | discord_id: discord_id}, persist: true)
-  #         # Central.cache_put(:users_lookup_id_with_discord_id, discord_id, user.id)
+        if given_code == correct_code do
+          Central.cache_delete(:discord_bridge_account_codes, userid)
+          user = User.get_user_by_id(userid)
+          User.update_user(%{user | discord_id: discord_id}, persist: true)
+          User.recache_user(user.id)
 
-  #         reply(channel, "Congratulations, your accounts are now linked.")
-  #       else
-  #         reply(channel, "This code is incorrect.")
-  #       end
+          reply(channel, "Congratulations, your accounts are now linked.")
+        else
+          reply(channel, "This code is incorrect.")
+        end
 
-  #     _ ->
-  #       reply(channel, "Invalid code")
-  #   end
-  # end
+      _ ->
+        reply(channel, "Invalid code")
+    end
+  end
 
   def handle_command({nil, _}, cmd, _remaining, channel) do
     response = case cmd do

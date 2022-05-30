@@ -168,6 +168,9 @@ defmodule Teiserver.Account.UserCache do
     Central.cache_put(:users_lookup_id_with_name, cachename(user.name), user.id)
     Central.cache_put(:users_lookup_id_with_email, cachename(user.email), user.id)
 
+    if user.discord_id do
+      Central.cache_put(:users_lookup_id_with_discord, user.discord_id, user.id)
+    end
     user
   end
 
