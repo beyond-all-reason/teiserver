@@ -691,6 +691,9 @@ defmodule Teiserver.Battle.Lobby do
       )
 
     cond do
+      User.is_moderator?(changer) == true ->
+        true
+
       # If the battle has been renamed by the consul then we'll keep it renamed as such
       battle.consul_rename == true and cmd == :update_lobby_title ->
         false
@@ -703,9 +706,6 @@ defmodule Teiserver.Battle.Lobby do
         false
 
       # Basic stuff
-      User.is_moderator?(changer) == true ->
-        true
-
       battle.founder_id == changer.userid ->
         true
 
