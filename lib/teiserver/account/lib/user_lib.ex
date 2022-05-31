@@ -244,7 +244,7 @@ defmodule Teiserver.Account.UserLib do
   def role_def("Contributor"), do: {"#00AA66", "fa-solid fa-code-commit"}
   def role_def("Caster"), do: {"#660066", "fa-solid fa-microphone-lines"}
   def role_def("Donor"), do: {"#0066AA", "fa-solid fa-euro"}
-  def role_def("Streamer"), do: {"#0066AA", "fab fa-twitch"}
+  def role_def("Streamer"), do: {"#0066AA", "fa-brand fa-twitch"}
   def role_def("Tester"), do: {"#00AACC", "fa-solid fa-vial"}
   def role_def(_), do: nil
 
