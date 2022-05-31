@@ -6,6 +6,9 @@ defmodule Central.MixProject do
       app: :central,
       version: "0.1.0",
       elixir: ">= 1.12.2",
+      description: description(),
+      package: package(),
+      dialyzer: dialyzer(),
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
@@ -19,6 +22,12 @@ defmodule Central.MixProject do
         "coveralls.html": :test
       ]
     ]
+  end
+
+  defp description do
+    """
+    Middleware server for online gaming
+    """
   end
 
   # Run "mix help compile.app" to learn about applications.
@@ -105,6 +114,25 @@ defmodule Central.MixProject do
         "sass light --no-source-map --style=compressed",
         "phx.digest"
       ]
+    ]
+  end
+
+  defp dialyzer do
+    [
+      plt_core_path: "priv/plts",
+      plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
+    ]
+  end
+
+  defp package do
+    [
+      files: ["lib", "mix.exs", "README.md", "license.md"],
+      maintainers: ["Teifion Jordan"],
+      licenses: ["MIT"],
+      links: %{
+        Changelog: "https://github.com/beyond-all-reason/teiserver/blob/master/changelog.md",
+        GitHub: "https://github.com/beyond-all-reason/teiserver"
+      }
     ]
   end
 end
