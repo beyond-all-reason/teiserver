@@ -80,15 +80,15 @@ defmodule Teiserver.Client do
     }
   end
 
-  @spec login(T.user(), pid(), String.t() | nil) :: T.client()
-  def login(user, pid, ip \\ nil) do
+  @spec login(T.user(), String.t() | nil) :: T.client()
+  def login(user, ip \\ nil) do
     stats = Account.get_user_stat_data(user.id)
 
     client =
       create(%{
         userid: user.id,
         name: user.name,
-        pid: pid,
+        pid: self(),
         rank: user.rank,
         moderator: User.is_moderator?(user),
         bot: User.is_bot?(user),
@@ -121,6 +121,12 @@ defmodule Teiserver.Client do
       Central.PubSub,
       "teiserver_client_action_updates:#{user.id}",
       {:client_action, :client_connect, user.id}
+    )
+
+    Horde.Registry.register(
+      Teiserver.ClientRegistry,
+      user.id,
+      stats["lobby_client"]
     )
 
     # Message logging

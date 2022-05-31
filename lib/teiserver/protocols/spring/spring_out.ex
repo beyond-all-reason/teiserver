@@ -615,7 +615,7 @@ defmodule Teiserver.Protocols.SpringOut do
     reply(:motd, nil, nil, state)
 
     # Login the client
-    _client = Client.login(user, self(), state.ip)
+    _client = Client.login(user, state.ip)
 
     # Who is online?
     clients = Client.list_client_ids()

@@ -33,7 +33,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   @spec do_action(atom, any(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
   def do_action(:login_accepted, user, state) do
     # Login the client
-    Client.login(user, self(), state.ip)
+    Client.login(user, state.ip)
 
     PubSub.unsubscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
     PubSub.unsubscribe(Central.PubSub, "teiserver_user_updates:#{user.id}")

@@ -629,7 +629,7 @@ CLIENTS test_room #{user.name}\n"
       |> User.verify_user()
 
     # Need to add it as a client for the :add_user command to work
-    Client.login(User.get_user_by_id(bad_user.id), self(), "127.0.0.1")
+    Client.login(User.get_user_by_id(bad_user.id), "127.0.0.1")
 
     # Now see what happens when we add user
     pid = Client.get_client_by_id(user.id).pid

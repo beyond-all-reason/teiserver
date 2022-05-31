@@ -82,7 +82,7 @@ defmodule Teiserver.TeiserverTestLib do
       value -> raise "Error setting up user - #{Kernel.inspect value}"
     end
 
-    Client.login(user, self(), "127.0.0.1")
+    Client.login(user, "127.0.0.1")
 
     state = mock_async_state(protocol.protocol_in(), protocol.protocol_out(), user)
     %{user: user, state: state}
@@ -287,7 +287,7 @@ defmodule Teiserver.TeiserverTestLib do
   def mock_state_auth(protocol_in, protocol_out, socket \\ nil) do
     socket = if socket, do: socket, else: mock_socket()
     user = new_user()
-    Client.login(user, self(), "127.0.0.1")
+    Client.login(user, "127.0.0.1")
 
     %{
       # Connection state

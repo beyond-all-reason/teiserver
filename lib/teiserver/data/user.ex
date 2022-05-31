@@ -616,7 +616,7 @@ defmodule Teiserver.User do
       nil -> :error
       user ->
         do_login(user, "127.0.0.1", "Teiserver Internal Client", "IC")
-        Client.login(user, self(), "127.0.0.1")
+        Client.login(user, "127.0.0.1")
         {:ok, user}
     end
   end
@@ -777,12 +777,6 @@ defmodule Teiserver.User do
     if not is_bot?(user) do
       Account.create_smurf_key(user.id, "client_app_hash", lobby_hash)
     end
-
-    Horde.Registry.register(
-      Teiserver.ClientRegistry,
-      user.id,
-      lobby_client
-    )
 
     {:ok, user}
   end
