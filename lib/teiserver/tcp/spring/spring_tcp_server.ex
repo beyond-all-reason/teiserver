@@ -104,6 +104,9 @@ defmodule Teiserver.SpringTcpServer do
       queues: [],
       ready_queue_id: nil,
 
+      # Client object
+      client: nil,
+
       # Connection microstate
       msg_id: nil,
       lobby_id: nil,
@@ -131,14 +134,30 @@ defmodule Teiserver.SpringTcpServer do
     {:ok, init_arg}
   end
 
+  @impl true
   def handle_call(:get_state, _from, state) do
     {:reply, state, state}
+  end
+
+  def handle_call(:client_state, _from, state) do
+    {:reply, state.client, state}
   end
 
   def handle_call({:get, key}, _from, state) do
     {:reply, Map.get(state, key), state}
   end
 
+  @impl true
+  def handle_cast({:update_client, new_client}, state) do
+    {:noreply, %{state | client: new_client}}
+  end
+
+  def handle_cast({:merge_client, partial_client}, state) do
+    {:noreply, %{state | client: Map.merge(state.client, partial_client)}}
+  end
+
+
+  @impl true
   def handle_info({:put, key, value}, state) do
     new_state = Map.put(state, key, value)
     {:noreply, new_state}

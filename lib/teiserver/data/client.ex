@@ -152,10 +152,20 @@ defmodule Teiserver.Client do
     client
   end
 
+  @spec merge_update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
+  def merge_update(%{userid: userid} = partial_client, _reason) do
+    cast_client(userid, {:merge_client, partial_client})
+    Logger.error("Client.merge_update not implemented yet")
+  end
+  def merge_update(client, _reason), do: client
+
   @spec update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
-  def update(%{userid: _} = client, reason) do
+  def update(%{userid: userid} = client, reason) do
     client = client
       |> add_client
+
+    # Update the process with it
+    cast_client(userid, {:update_client, client})
 
     if reason != :silent do
       PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
@@ -195,6 +205,30 @@ defmodule Teiserver.Client do
     client
   end
   def update(client, _reason), do: client
+
+  @spec get_client_pid(T.userid()) :: pid() | nil
+  def get_client_pid(userid) do
+    case Horde.Registry.lookup(Teiserver.ClientRegistry, userid) do
+      [{pid, _}] -> pid
+      _ -> nil
+    end
+  end
+
+  @spec cast_client(T.userid(), any) :: any
+  def cast_client(userid, msg) do
+    case get_client_pid(userid) do
+      nil -> nil
+      pid -> GenServer.cast(pid, msg)
+    end
+  end
+
+  @spec call_client(T.userid(), any) :: any | nil
+  def call_client(userid, msg) do
+    case get_client_pid(userid) do
+      nil -> nil
+      pid -> GenServer.call(pid, msg)
+    end
+  end
 
   @spec join_battle(T.client_id(), Integer.t(), boolean()) :: nil | Map.t()
   def join_battle(userid, lobby_id, lobby_host) do
@@ -256,13 +290,6 @@ defmodule Teiserver.Client do
 
   def get_client_by_id(userid) do
     Central.cache_get(:clients, userid)
-  end
-
-  def get_client_by_pid(pid) do
-    list_clients()
-    |> Enum.filter(fn client ->
-      client.pid == pid
-    end)
   end
 
   @spec get_clients(List.t()) :: List.t()
