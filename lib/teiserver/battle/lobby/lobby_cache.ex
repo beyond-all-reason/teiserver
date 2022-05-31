@@ -92,6 +92,8 @@ defmodule Teiserver.Battle.LobbyCache do
     _consul_pid = Coordinator.start_consul(lobby.id)
     Lobby.start_battle_lobby_throttle(lobby.id)
 
+    start_lobby_server(lobby)
+
     Central.cache_update(:lists, :lobbies, fn value ->
       new_value =
         ([lobby.id | value])
@@ -115,6 +117,44 @@ defmodule Teiserver.Battle.LobbyCache do
     lobby
   end
 
+  @spec start_lobby_server(T.lobby()) :: pid()
+  def start_lobby_server(lobby) do
+    {:ok, server_pid} =
+      DynamicSupervisor.start_child(Teiserver.LobbySupervisor, {
+        Teiserver.Battle.LobbyServer,
+        name: "lobby_#{lobby.id}",
+        data: %{
+          lobby: lobby
+        }
+      })
+
+    server_pid
+  end
+
+  @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
+  def get_lobby_pid(lobby_id) do
+    case Horde.Registry.lookup(Teiserver.LobbyRegistry, lobby_id) do
+      [{pid, _}] -> pid
+      _ -> nil
+    end
+  end
+
+  @spec cast_lobby(T.lobby_id(), any) :: any
+  def cast_lobby(lobby_id, msg) do
+    case get_lobby_pid(lobby_id) do
+      nil -> nil
+      pid -> GenServer.cast(pid, msg)
+    end
+  end
+
+  @spec call_lobby(T.lobby_id(), any) :: any | nil
+  def call_lobby(lobby_id, msg) do
+    case get_lobby_pid(lobby_id) do
+      nil -> nil
+      pid -> GenServer.call(pid, msg)
+    end
+  end
+
   @spec close_lobby(integer() | nil, atom) :: :ok
   def close_lobby(lobby_id, reason \\ :closed) do
     battle = get_lobby(lobby_id)
@@ -127,6 +167,12 @@ defmodule Teiserver.Battle.LobbyCache do
 
       {:ok, new_value}
     end)
+
+    # Kill lobby server process
+    case get_lobby_pid(lobby_id) do
+      nil -> nil
+      p -> DynamicSupervisor.terminate_child(Teiserver.LobbySupervisor, p)
+    end
 
     [battle.founder_id | battle.players]
     |> Enum.each(fn userid ->

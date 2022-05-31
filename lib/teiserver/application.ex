@@ -5,6 +5,7 @@ defmodule Teiserver.Application do
       # Global/singleton registries
       # {Horde.Registry, [keys: :duplicate, members: :auto, name: Teiserver.PoolRegistry]},
       {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
+      {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyRegistry]},
       {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ClientRegistry]},
 
       # These are for tracking the number of servers on the local node
@@ -58,6 +59,9 @@ defmodule Teiserver.Application do
       Teiserver.Bridge.BridgeServer,
       concache_sup(:discord_bridge_dm_cache),
       concache_sup(:discord_bridge_account_codes, global_ttl: 300_000),
+
+      # Lobbies
+      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbySupervisor},
 
       # Matchmaking
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},

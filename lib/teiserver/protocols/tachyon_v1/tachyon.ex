@@ -43,7 +43,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
 
     exempt_from_cmd_throttle = (User.is_moderator?(user) == true or User.is_bot?(user) == true)
     %{state |
-      user: user,
       username: user.name,
       userid: user.id,
       exempt_from_cmd_throttle: exempt_from_cmd_throttle
