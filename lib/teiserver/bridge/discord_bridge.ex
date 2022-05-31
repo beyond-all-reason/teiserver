@@ -28,8 +28,8 @@ defmodule Teiserver.Bridge.DiscordBridge do
   }
 
   @text_to_emoticon_map @emoticon_map
-  |> Map.new(fn {k, v} -> {v, k} end)
-  |> Map.merge(@extra_text_emoticons)
+    |> Map.new(fn {k, v} -> {v, k} end)
+    |> Map.merge(@extra_text_emoticons)
 
   @spec get_text_to_emoticon_map() :: Map.t()
   def get_text_to_emoticon_map, do: @text_to_emoticon_map
@@ -41,6 +41,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     case dm_channel.recipients do
       [recipient] ->
         Central.cache_put(:discord_bridge_dm_cache, dm_channel.id, recipient["id"])
+        Logger.info("Discord DM Channel #{dm_channel.id} set to #{recipient["id"]}")
         nil
 
       _ -> nil
@@ -49,7 +50,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
   end
 
   @spec recv_message(atom | %{:attachments => any, optional(any) => any}) :: nil | :ok
-  def recv_message(%Alchemy.Message{channel_id: channel_id, content: "$" <> content} = message) do
+  def recv_message(%Alchemy.Message{channel_id: channel_id, content: "$" <> _content} = message) do
     dm_sender = Central.cache_get(:discord_bridge_dm_cache, channel_id)
 
     if dm_sender != nil do
