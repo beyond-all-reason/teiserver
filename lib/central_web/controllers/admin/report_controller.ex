@@ -261,6 +261,10 @@ defmodule CentralWeb.Admin.ReportController do
           _ -> "No change"
         end
 
+        response_change = if old_report.response_text != new_report.response_text do
+          new_report.response_text
+        end
+
         which_is_sublist = ListHelper.which_is_sublist(old_report.action_data["restriction_list"], new_report.action_data["restriction_list"])
         restriction_change = case which_is_sublist do
           :asub -> "expanded"
@@ -272,6 +276,7 @@ defmodule CentralWeb.Admin.ReportController do
         add_audit_log(conn, "Account:Updated report", %{
           report: new_report.id,
           reason: params["audit_reason"],
+          response_change: response_change,
           duration: duration,
           restriction_change: restriction_change
         })

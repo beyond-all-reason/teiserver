@@ -251,13 +251,19 @@ defmodule Teiserver.Bridge.DiscordBridge do
         _ -> nil
       end
 
+      response_change = case log.details["response_change"] do
+        nil -> nil
+        r -> "Updated reason for action: #{r}"
+      end
+
       message = cond do
         expires_now == true ->
           [
             "----------------------",
             "#{report.target.name} had moderation action reversed",
+            response_change,
             restriction_change,
-            "Reason: #{log.details["reason"]}",
+            "Reason for update: #{log.details["reason"]}",
             "----------------------"
           ]
           |> Enum.filter(fn i -> i != nil end)
@@ -268,8 +274,9 @@ defmodule Teiserver.Bridge.DiscordBridge do
             "----------------------",
             "#{report.target.name} had their penalty duration reduced",
             "Now expires: #{until}",
+            response_change,
             restriction_change,
-            "Reason: #{log.details["reason"]}",
+            "Reason for update: #{log.details["reason"]}",
             "----------------------"
           ]
           |> Enum.filter(fn i -> i != nil end)
@@ -279,8 +286,9 @@ defmodule Teiserver.Bridge.DiscordBridge do
           [
             "----------------------",
             "#{report.target.name} had their penalty altered",
+            response_change,
             restriction_change,
-            "Reason: #{log.details["reason"]}",
+            "Reason for update: #{log.details["reason"]}",
             "----------------------"
           ]
           |> Enum.filter(fn i -> i != nil end)
@@ -291,8 +299,9 @@ defmodule Teiserver.Bridge.DiscordBridge do
             "----------------------",
             "#{report.target.name} had their penalty duration extended",
             "Now expires: #{until}",
+            response_change,
             restriction_change,
-            "Reason: #{log.details["reason"]}",
+            "Reason for update: #{log.details["reason"]}",
             "----------------------"
           ]
           |> Enum.filter(fn i -> i != nil end)
