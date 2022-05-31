@@ -9,16 +9,6 @@ defmodule TeiserverWeb.API.BattleController do
   )
 
   def create(conn, _battle = %{"outcome" => "completed"}) do
-    # {:ok, dbbattle} = Battle.create_battle_log(%{
-    #   map: "map",
-    #   data: battle,
-    #   team_count: 1,
-    #   players: [],
-    #   spectators: [],
-    #   started: Timex.now(),
-    #   finished: Timex.now() |> Timex.shift(minutes: 20)
-    # })
-
     conn
     |> put_status(201)
     # |> render("create.json", %{outcome: :success, id: dbbattle.id})

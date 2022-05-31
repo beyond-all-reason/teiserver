@@ -397,4 +397,40 @@ defmodule Teiserver.Battle do
   def change_match_membership(%MatchMembership{} = match_membership) do
     MatchMembership.changeset(match_membership, %{})
   end
+
+  # Lobby stuff
+  alias Teiserver.Battle.{LobbyChat, LobbyCache}
+
+  @spec list_lobby_ids :: [T.lobby_id()]
+  defdelegate list_lobby_ids(), to: LobbyCache
+
+  @spec list_lobbies() :: [T.lobby()]
+  defdelegate list_lobbies(), to: LobbyCache
+
+  @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
+  defdelegate update_lobby(lobby, data, reason), to: LobbyCache
+
+  @spec get_lobby(T.lobby_id() | nil) :: T.lobby() | nil
+  defdelegate get_lobby(id), to: LobbyCache
+
+  @spec get_lobby_by_uuid(String.t()) :: T.lobby() | nil
+  defdelegate get_lobby_by_uuid(uuid), to: LobbyCache
+
+  @spec get_lobby_players!(T.lobby_id()) :: [integer()]
+  defdelegate get_lobby_players!(id), to: LobbyCache
+
+  @spec add_lobby(T.lobby()) :: T.lobby()
+  defdelegate add_lobby(lobby), to: LobbyCache
+
+  @spec close_lobby(integer() | nil, atom) :: :ok
+  defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyCache
+
+  @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
+  defdelegate say(userid, msg, lobby_id), to: LobbyChat
+
+  @spec sayex(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
+  defdelegate sayex(userid, msg, lobby_id), to: LobbyChat
+
+  @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
+  defdelegate sayprivateex(from_id, to_id, msg, lobby_id), to: LobbyChat
 end

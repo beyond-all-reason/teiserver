@@ -748,7 +748,7 @@ defmodule Teiserver.Protocols.SpringIn do
           client = Client.get_client_by_id(state.userid)
           password = if Enum.member?(["empty", "*"], password), do: nil, else: password
 
-          battle =
+          lobby =
             %{
               founder_id: state.userid,
               founder_name: state.username,
@@ -768,10 +768,10 @@ defmodule Teiserver.Protocols.SpringIn do
               game_name: game_name,
               ip: client.ip
             }
-            |> Lobby.create_battle()
-            |> Lobby.add_battle()
+            |> Lobby.create_lobby()
+            |> Lobby.add_lobby()
 
-          {:success, battle}
+          {:success, lobby}
 
         nil ->
           _no_match(state, "OPENBATTLE", msg_id, data)

@@ -112,8 +112,8 @@ defmodule Teiserver.Coordinator do
     Parser.handle_in(userid, msg, lobby_id)
   end
 
-  @spec close_battle(T.lobby_id()) :: :ok
-  def close_battle(lobby_id) do
+  @spec close_lobby(T.lobby_id()) :: :ok
+  def close_lobby(lobby_id) do
     case get_consul_pid(lobby_id) do
       nil -> nil
       pid ->

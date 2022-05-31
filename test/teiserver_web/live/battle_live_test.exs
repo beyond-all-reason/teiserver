@@ -40,7 +40,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       assert html =~ "SecondLiveBattle"
 
       # Now close battle 2
-      Lobby.close_battle(battle2.id)
+      Lobby.close_lobby(battle2.id)
 
       html = render(view)
       assert html =~ "Battles: 1"
@@ -68,7 +68,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       assert html =~ "LiveBattleName"
 
       # Finally close battle1, just to ensure there's not some error when we go back to 0 battles
-      Lobby.close_battle(battle1.id)
+      Lobby.close_lobby(battle1.id)
 
       html = render(view)
       assert html =~ "No battles found"
@@ -139,7 +139,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       assert html =~ "#{user3.name}"
 
       # Battle closes
-      Lobby.close_battle(lobby_id)
+      Lobby.close_lobby(lobby_id)
       :timer.sleep(@throttle_wait)
 
       assert_redirect(view, "/teiserver/battle/lobbies", 250)
@@ -209,7 +209,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       assert html =~ "Standard message"
 
       # Battle closes
-      Lobby.close_battle(lobby_id)
+      Lobby.close_lobby(lobby_id)
       :timer.sleep(@throttle_wait)
 
       assert_redirect(view, "/teiserver/battle/lobbies", 250)

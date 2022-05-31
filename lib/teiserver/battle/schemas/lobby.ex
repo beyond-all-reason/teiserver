@@ -105,12 +105,10 @@ defmodule Teiserver.Battle.Lobby do
 
 
   # Refactor of above from when we called them battle
-  def create_battle(battle), do: create_lobby(battle)
   def update_battle(battle, data, reason), do: LobbyCache.update_lobby(battle, data, reason)
   def get_battle!(lobby_id), do: LobbyCache.get_lobby(lobby_id)
   def get_battle(lobby_id), do: LobbyCache.get_lobby(lobby_id)
   def add_battle(battle), do: LobbyCache.add_lobby(battle)
-  def close_battle(battle), do: LobbyCache.close_lobby(battle)
 
 
   @spec start_battle_lobby_throttle(T.lobby_id()) :: pid()
@@ -265,6 +263,7 @@ defmodule Teiserver.Battle.Lobby do
     nil
   end
 
+  @spec remove_user_from_battle(T.userid(), T.lobby_id()) :: nil | :ok | {:error, any}
   def remove_user_from_battle(_uid, nil), do: nil
 
   def remove_user_from_battle(userid, lobby_id) do
@@ -303,7 +302,7 @@ defmodule Teiserver.Battle.Lobby do
     end
   end
 
-  @spec kick_user_from_battle(Integer.t(), Integer.t()) :: nil | :ok | {:error, any}
+  @spec kick_user_from_battle(T.userid(), T.lobby_id()) :: nil | :ok | {:error, any}
   def kick_user_from_battle(userid, lobby_id) do
     user = User.get_user_by_id(userid)
     if not User.is_moderator?(user) do
@@ -378,7 +377,7 @@ defmodule Teiserver.Battle.Lobby do
 
     if battle do
       if battle.founder_id == userid do
-        close_battle(lobby_id)
+        close_lobby(lobby_id)
         :closed
       else
         if Enum.member?(battle.players, userid) do

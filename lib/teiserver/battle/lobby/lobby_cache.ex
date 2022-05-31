@@ -118,7 +118,7 @@ defmodule Teiserver.Battle.LobbyCache do
   @spec close_lobby(integer() | nil, atom) :: :ok
   def close_lobby(lobby_id, reason \\ :closed) do
     battle = get_lobby(lobby_id)
-    Coordinator.close_battle(lobby_id)
+    Coordinator.close_lobby(lobby_id)
     Central.cache_delete(:lobbies, lobby_id)
     Central.cache_update(:lists, :lobbies, fn value ->
       new_value =
@@ -158,7 +158,7 @@ defmodule Teiserver.Battle.LobbyCache do
     Lobby.stop_battle_lobby_throttle(lobby_id)
   end
 
-  @spec list_lobby_ids :: [non_neg_integer()]
+  @spec list_lobby_ids :: [T.lobby_id()]
   def list_lobby_ids() do
     case Central.cache_get(:lists, :lobbies) do
       nil -> []
@@ -166,7 +166,7 @@ defmodule Teiserver.Battle.LobbyCache do
     end
   end
 
-  @spec list_lobbies() :: list()
+  @spec list_lobbies() :: [T.lobby()]
   def list_lobbies() do
     list_lobby_ids()
       |> Enum.map(fn lobby_id -> Central.cache_get(:lobbies, lobby_id) end)
