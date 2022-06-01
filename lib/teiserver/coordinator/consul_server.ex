@@ -60,7 +60,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     new_state = check_queue_status(state)
     player_count_changed(new_state)
     fix_ids(new_state)
-    balance_teams(state)
+    new_balance_hash = balance_teams(state)
     new_state = afk_check_update(new_state)
 
     # It is possible we can "forget" the coordinator_id
@@ -72,12 +72,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
       new_state
     end
 
-    {:noreply, new_state}
+    {:noreply, %{new_state | last_balance_hash: new_balance_hash}}
   end
 
   def handle_info(:balance, state) do
-    force_rebalance(state)
-    {:noreply, state}
+    new_balance_hash = force_rebalance(state)
+    {:noreply, %{state | coordinator_id: Coordinator.get_coordinator_userid()}}
   end
 
   def handle_info({:put, key, value}, state) do
@@ -669,7 +669,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  @spec balance_teams(T.consul_state()) :: :ok
+  @spec balance_teams(T.consul_state()) :: String.t()
   defp balance_teams(state) do
     current_hash = make_balance_hash(state)
     lobby = Lobby.get_lobby(state.lobby_id)
@@ -677,11 +677,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
     if current_hash != state.last_balance_hash and lobby.consul_balance == true do
       Logger.info("ConsulServer:#{state.lobby_id}.balance_teams - rebalance accepted")
       force_rebalance(state)
+    else
+      state.last_balance_hash
     end
-    :ok
   end
 
-  @spec force_rebalance(T.consul_state()) :: :ok
+  @spec force_rebalance(T.consul_state()) :: String.t()
   defp force_rebalance(state) do
     Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - starting")
 
@@ -703,7 +704,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     LobbyChat.sayex(state.coordinator_id, "Rebalanced via server, deviation at #{deviation}", state.lobby_id)
 
     Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - completed")
-    :ok
+
+    :timer.sleep(100)
+    make_balance_hash(state)
   end
 
   @spec make_balance_hash(T.consul_state()) :: String.t()
