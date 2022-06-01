@@ -692,7 +692,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> Enum.each(fn {team_number, ratings} ->
         ratings
         |> Enum.each(fn {userid, _rating} ->
-          Lobby.force_change_client(state.coordinator_id, userid, %{team_number: team_number})
+          Lobby.force_change_client(state.coordinator_id, userid, %{team_number: team_number - 1})
 
           username = User.get_username(userid)
           Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - moved #{userid}/#{username} to #{team_number}")
