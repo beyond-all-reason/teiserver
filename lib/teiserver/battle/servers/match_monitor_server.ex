@@ -46,7 +46,22 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
+  @impl true
+  def handle_call(:client_state, _from, state) do
+    {:reply, state.client, state}
+  end
+
+  @impl true
+  def handle_cast({:update_client, new_client}, state) do
+    {:noreply, %{state | client: new_client}}
+  end
+
+  def handle_cast({:merge_client, partial_client}, state) do
+    {:noreply, %{state | client: Map.merge(state.client, partial_client)}}
+  end
+
   # Direct/Room messaging
+  @impl true
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
@@ -174,7 +189,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     Logger.debug("Starting up Match monitor server")
     account = get_match_monitor_account()
     Central.cache_put(:application_metadata_cache, "teiserver_match_monitor_userid", account.id)
-    {:ok, user} = User.internal_client_login(account.id)
+    {:ok, user, client} = User.internal_client_login(account.id)
 
     rooms = ["autohosts"]
 
@@ -184,7 +199,8 @@ defmodule Teiserver.Battle.MatchMonitorServer do
       username: user.name,
       lobby_host: false,
       user: user,
-      rooms: rooms
+      rooms: rooms,
+      client: client
     }
 
     rooms

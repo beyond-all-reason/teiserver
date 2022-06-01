@@ -24,6 +24,21 @@ defmodule Teiserver.Bridge.BridgeServer do
     Central.cache_get(:application_metadata_cache, "teiserver_bridge_pid")
   end
 
+  @impl true
+  def handle_call(:client_state, _from, state) do
+    {:reply, state.client, state}
+  end
+
+  @impl true
+  def handle_cast({:update_client, new_client}, state) do
+    {:noreply, %{state | client: new_client}}
+  end
+
+  def handle_cast({:merge_client, partial_client}, state) do
+    {:noreply, %{state | client: Map.merge(state.client, partial_client)}}
+  end
+
+  @impl true
   def handle_info(:begin, _state) do
     state = if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
       pid = self()
@@ -143,7 +158,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     Logger.debug("Starting up Bridge server")
     account = get_bridge_account()
     Central.cache_put(:application_metadata_cache, "teiserver_bridge_userid", account.id)
-    {:ok, user} = User.internal_client_login(account.id)
+    {:ok, user, client} = User.internal_client_login(account.id)
 
     rooms = Application.get_env(:central, DiscordBridge)[:bridges]
     |> Map.new(fn {chan, room} -> {room, chan} end)
@@ -155,7 +170,8 @@ defmodule Teiserver.Bridge.BridgeServer do
       username: user.name,
       lobby_host: false,
       user: user,
-      rooms: rooms
+      rooms: rooms,
+      client: client
     }
 
     Map.keys(rooms)

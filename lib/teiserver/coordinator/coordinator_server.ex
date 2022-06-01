@@ -19,13 +19,28 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
+  @impl true
+  def handle_call(:client_state, _from, state) do
+    {:reply, state.client, state}
+  end
+
+  @impl true
+  def handle_cast({:update_client, new_client}, state) do
+    {:noreply, %{state | client: new_client}}
+  end
+
+  def handle_cast({:merge_client, partial_client}, state) do
+    {:noreply, %{state | client: Map.merge(state.client, partial_client)}}
+  end
+
+  @impl true
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Coordinator main server")
     account = get_coordinator_account()
     Central.cache_put(:application_metadata_cache, "teiserver_coordinator_userid", account.id)
 
-    user = case User.internal_client_login(account.id) do
-      {:ok, user} -> user
+    {user, client} = case User.internal_client_login(account.id) do
+      {:ok, user, client} -> {user, client}
       :error -> raise "No coordinator user found"
     end
 
@@ -37,6 +52,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       user: user,
       queues: [],
       ready_queue_id: nil,
+      client: client,
       consuls: %{}
     }
 
@@ -303,6 +319,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     )
 
     send(self(), :begin)
-    {:ok, %{}}
+    {:ok, %{client: %{}}}
   end
 end

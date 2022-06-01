@@ -40,7 +40,10 @@ defmodule Teiserver.Bridge.MessageCommands do
         if given_code == correct_code do
           Central.cache_delete(:discord_bridge_account_codes, userid)
           user = User.get_user_by_id(userid)
-          User.update_user(%{user | discord_id: discord_id}, persist: true)
+          User.update_user(%{user |
+            discord_id: discord_id,
+            discord_dm_channel: channel
+          }, persist: true)
           User.recache_user(user.id)
 
           reply(channel, "Congratulations, your accounts are now linked.")

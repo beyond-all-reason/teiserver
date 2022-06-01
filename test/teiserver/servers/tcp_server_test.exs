@@ -296,41 +296,41 @@ defmodule Teiserver.SpringTcpServerTest do
 
     # --- User logs out
     # At first it should be user, dud and coordinator
-    known = GenServer.call(pid, :get_state) |> Map.get(:known_users)
+    known = :sys.get_state(pid) |> Map.get(:known_users)
     assert Map.keys(known) == [coordinator_id, dud.id, user.id]
 
     send(pid, {:user_logged_out, dud.id, dud.name})
     r = _recv_until(socket)
     assert r == "REMOVEUSER #{dud.name}\n"
-    known = GenServer.call(pid, :get_state) |> Map.get(:known_users)
+    known = :sys.get_state(pid) |> Map.get(:known_users)
     assert Map.keys(known) == [coordinator_id, user.id]
 
     # Now what if they log out again?
     send(pid, {:user_logged_out, dud.id, dud.name})
     r = _recv_until(socket)
     assert r == ""
-    known = GenServer.call(pid, :get_state) |> Map.get(:known_users)
+    known = :sys.get_state(pid) |> Map.get(:known_users)
     assert Map.keys(known) == [coordinator_id, user.id]
 
     # Now what if non_user is logged out (they were never logged in to start with)
     send(pid, {:user_logged_out, non_user.id, non_user.name})
     r = _recv_until(socket)
     assert r == ""
-    known = GenServer.call(pid, :get_state) |> Map.get(:known_users)
+    known = :sys.get_state(pid) |> Map.get(:known_users)
     assert Map.keys(known) == [coordinator_id, user.id]
 
     # Now what if we find a userid that they don't have?
     send(pid, {:user_logged_out, 0, "noname"})
     r = _recv_until(socket)
     assert r == ""
-    known = GenServer.call(pid, :get_state) |> Map.get(:known_users)
+    known = :sys.get_state(pid) |> Map.get(:known_users)
     assert Map.keys(known) == [coordinator_id, user.id]
 
     # ---- Chat rooms ----
     # Join chat room
     send(pid, {:user_logged_out, dud.id, dud.name})
     _recv_until(socket)
-    known = GenServer.call(pid, :get_state) |> Map.get(:known_users)
+    known = :sys.get_state(pid) |> Map.get(:known_users)
     assert Map.keys(known) == [coordinator_id, user.id]
 
     send(pid, {:add_user_to_room, dud.id, "roomname"})
@@ -390,7 +390,7 @@ defmodule Teiserver.SpringTcpServerTest do
     Room.get_or_make_room("dud_room", dud.id)
     Room.add_user_to_room(dud.id, "dud_room")
     send(pid, {:user_logged_out, dud.id, dud.name})
-    state = GenServer.call(pid, :get_state)
+    state = :sys.get_state(pid)
     _recv_until(socket)
 
     # Join a room when we don't know about dud_user

@@ -354,11 +354,6 @@ defmodule Teiserver.Client do
     |> add_client
   end
 
-  # It appears this isn't used but I suspect it will be at a later stage
-  # def get_client_state(pid) do
-  #   GenServer.call(pid, :get_state)
-  # end
-
   def disconnect(userid, reason \\ nil) do
     case get_client_by_id(userid) do
       nil -> nil

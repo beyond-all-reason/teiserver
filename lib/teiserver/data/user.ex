@@ -54,7 +54,8 @@ defmodule Teiserver.User do
     :print_client_messages,
     :print_server_messages,
     :spring_password,
-    :discord_id
+    :discord_id,
+    :discord_dm_channel
   ]
   def data_keys(), do: @data_keys
 
@@ -82,7 +83,8 @@ defmodule Teiserver.User do
     print_client_messages: false,
     print_server_messages: false,
     spring_password: true,
-    discord_id: nil
+    discord_id: nil,
+    discord_dm_channel: nil
   }
 
   def default_data(), do: @default_data
@@ -610,14 +612,14 @@ defmodule Teiserver.User do
     end
   end
 
-  @spec internal_client_login(T.userid()) :: {:ok, T.user()} | :error
+  @spec internal_client_login(T.userid()) :: {:ok, T.user(), T.client()} | :error
   def internal_client_login(userid) do
     case get_user_by_id(userid) do
       nil -> :error
       user ->
-        do_login(user, "127.0.0.1", "Teiserver Internal Client", "IC")
-        Client.login(user, "127.0.0.1")
-        {:ok, user}
+        {:ok, user} = do_login(user, "127.0.0.1", "Teiserver Internal Client", "IC")
+        client = Client.login(user, "127.0.0.1")
+        {:ok, user, client}
     end
   end
 

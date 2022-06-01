@@ -26,11 +26,6 @@ defmodule Teiserver.Telemetry.SpringTelemetryServer do
     {:noreply, new_state}
   end
 
-  # @impl true
-  # def handle_call(:get_state, _from, state) do
-  #   {:reply, state, state}
-  # end
-
   @spec report_telemetry(Map.t()) :: :ok
   defp report_telemetry(state) do
     :telemetry.execute([:spring], state, %{})

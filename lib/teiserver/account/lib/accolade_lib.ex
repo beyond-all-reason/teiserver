@@ -352,7 +352,7 @@ defmodule Teiserver.Account.AccoladeLib do
       nil ->
         Logger.error("Error, no accolade bot pid")
       pid ->
-        state = GenServer.call(pid, :get_state, 5000)
+        state = :sys.get_state(pid)
         children = DynamicSupervisor.which_children(Teiserver.Account.AccoladeSupervisor)
         child_count = Enum.count(children) - 1
 

@@ -10,6 +10,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   alias Phoenix.PubSub
   require Logger
 
+  @spec max_miss_count :: float
   def max_miss_count do
     AccoladeLib.miss_count_limit() * 1.5
   end
@@ -19,24 +20,36 @@ defmodule Teiserver.Account.AccoladeBotServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
-  def handle_call(:get_state, _from, state) do
-    {:reply, state, state}
+  @impl true
+  def handle_call(:client_state, _from, state) do
+    {:reply, state.client, state}
   end
 
+  @impl true
+  def handle_cast({:update_client, new_client}, state) do
+    {:noreply, %{state | client: new_client}}
+  end
+
+  def handle_cast({:merge_client, partial_client}, state) do
+    {:noreply, %{state | client: Map.merge(state.client, partial_client)}}
+  end
+
+  @impl true
   def handle_info(:begin, _state) do
     Logger.debug("Starting up Accolade server")
     account = get_accolade_account()
     Central.cache_put(:application_metadata_cache, "teiserver_accolade_userid", account.id)
 
-    user = case User.internal_client_login(account.id) do
-      {:ok, user} -> user
+    {user, client} = case User.internal_client_login(account.id) do
+      {:ok, user, client} -> {user, client}
       :error -> raise "No accolade user found"
     end
 
     state = %{
       ip: "127.0.0.1",
       userid: user.id,
-      username: user.name
+      username: user.name,
+      client: client
     }
 
     ~w(main accolades)

@@ -44,7 +44,9 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
         id = int_parse(id)
         PubSub.subscribe(Central.PubSub, "teiserver_queue_wait:#{id}")
         queue = Matchmaking.get_queue(id)
-        queue_state = Matchmaking.call_queue_wait(id, :get_state)
+
+        wait_pid = Matchmaking.get_queue_wait_pid(id)
+        queue_state = :sys.get_state(wait_pid)
 
         case queue do
           nil ->
@@ -70,9 +72,11 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
 
   @impl true
   def handle_info(_msg, %{assigns: assigns} = socket) do
+    wait_pid = Matchmaking.get_queue_wait_pid(assigns.id)
+
     {:noreply,
       socket
-      |> assign(:queue_state, Matchmaking.call_queue_wait(assigns.id, :get_state))
+      |> assign(:queue_state, :sys.get_state(wait_pid))
     }
   end
 

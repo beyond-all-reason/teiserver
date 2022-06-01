@@ -137,7 +137,7 @@ config :central, Oban,
         {"12 2 * * *", Teiserver.Telemetry.Tasks.PersistServerMonthTask},
 
         {"7 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchDayTask},
-        {"17 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchMonthTask},
+        # {"17 2 * * *", Teiserver.Telemetry.Tasks.PersistMatchMonthTask},
         {"27 2 * * *", Teiserver.Telemetry.InfologCleanupTask},
 
         # 2:43

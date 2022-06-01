@@ -401,6 +401,16 @@ defmodule Teiserver.Battle do
   # Lobby stuff
   alias Teiserver.Battle.{LobbyChat, LobbyCache}
 
+  @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
+  defdelegate get_lobby_pid(lobby_id), to: LobbyCache
+
+  @spec cast_lobby(T.lobby_id(), any) :: any
+  defdelegate call_lobby(lobby_id, msg), to: LobbyCache
+
+  @spec call_lobby(T.lobby_id(), any) :: any | nil
+  defdelegate cast_lobby(lobby_id, msg), to: LobbyCache
+
+
   @spec list_lobby_ids :: [T.lobby_id()]
   defdelegate list_lobby_ids(), to: LobbyCache
 
@@ -424,6 +434,7 @@ defmodule Teiserver.Battle do
 
   @spec close_lobby(integer() | nil, atom) :: :ok
   defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyCache
+
 
   @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   defdelegate say(userid, msg, lobby_id), to: LobbyChat

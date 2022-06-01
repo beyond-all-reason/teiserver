@@ -110,10 +110,6 @@ defmodule Teiserver.TachyonTcpServer do
 
   @impl true
   @spec handle_call(any(), any(), T.tachyon_tcp_state()) :: {:reply, any(), T.tachyon_tcp_state()}
-  def handle_call(:get_state, _from, state) do
-    {:reply, state, state}
-  end
-
   def handle_call(:client_state, _from, state) do
     {:reply, state.client, state}
   end

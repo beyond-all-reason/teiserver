@@ -130,15 +130,12 @@ defmodule Teiserver.SpringTcpServer do
     :gen_server.enter_loop(__MODULE__, [], state)
   end
 
+  @impl true
   def init(init_arg) do
     {:ok, init_arg}
   end
 
   @impl true
-  def handle_call(:get_state, _from, state) do
-    {:reply, state, state}
-  end
-
   def handle_call(:client_state, _from, state) do
     {:reply, state.client, state}
   end

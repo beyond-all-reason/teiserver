@@ -60,10 +60,6 @@ defmodule Teiserver.Telemetry.TelemetryServer do
   end
 
   @impl true
-  def handle_call(:get_state, _from, state) do
-    {:reply, state, state}
-  end
-
   def handle_call(:get_totals_and_reset, _from, state) do
     {:reply, get_totals(state), @default_state}
   end
