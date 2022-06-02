@@ -514,9 +514,12 @@ defmodule Teiserver.Telemetry do
     end
   end
 
-  def get_this_months_server_metrics_log() do
+  @spec get_this_months_server_metrics_log(boolean) :: map()
+  def get_this_months_server_metrics_log(force_recache \\ false) do
     last_time = Central.cache_get(:application_metadata_cache, "teiserver_month_server_metrics_last_time")
+
     recache = cond do
+      force_recache == true -> force_recache
       last_time == nil -> true
       Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
       true -> false
@@ -678,33 +681,28 @@ defmodule Teiserver.Telemetry do
     end
 
     if recache do
-      data = Teiserver.Battle.Tasks.BreakdownMatchDataTask.perform(Timex.today())
-        |> Jason.encode!()
-        |> Jason.decode!()
-
-      Central.cache_put(:application_metadata_cache, "teiserver_day_match_metrics_today_cache", data)
-      Central.cache_put(:application_metadata_cache, "teiserver_day_match_metrics_today_last_time", Timex.now())
+      data = Teiserver.Telemetry.Tasks.PersistMatchMonthTask.month_so_far()
+      Central.cache_put(:application_metadata_cache, "teiserver_month_month_metrics_cache", data)
+      Central.cache_put(:application_metadata_cache, "teiserver_month_server_metrics_last_time", Timex.now())
       data
     else
       Central.cache_get(:application_metadata_cache, "teiserver_day_match_metrics_today_cache")
     end
   end
 
-  @spec get_this_months_match_metrics_log :: map()
-  def get_this_months_match_metrics_log() do
+  @spec get_this_months_match_metrics_log(boolean) :: map()
+  def get_this_months_match_metrics_log(force_recache \\ false) do
     last_time = Central.cache_get(:application_metadata_cache, "teiserver_month_match_metrics_last_time")
 
     recache = cond do
+      force_recache == true -> true
       last_time == nil -> true
       Timex.compare(Timex.now() |> Timex.shift(days: -1), last_time) == 1 -> true
       true -> false
     end
 
     if recache do
-      data = Teiserver.Battle.Tasks.BreakdownMatchDataTask.perform(Timex.beginning_of_month(Timex.now()), Timex.now())
-        |> Jason.encode!()
-        |> Jason.decode!()
-
+      data = Teiserver.Telemetry.Tasks.PersistMatchMonthTask.month_so_far()
       Central.cache_put(:application_metadata_cache, "teiserver_month_match_metrics_cache", data)
       Central.cache_put(:application_metadata_cache, "teiserver_month_match_metrics_last_time", Timex.now())
       data

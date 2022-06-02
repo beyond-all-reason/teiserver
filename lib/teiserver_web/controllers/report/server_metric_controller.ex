@@ -171,8 +171,9 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   end
 
   @spec month_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def month_metrics_today(conn, _params) do
-    data = Telemetry.get_this_months_server_metrics_log()
+  def month_metrics_today(conn, params) do
+    force_recache = (Map.get(params, "recache", false) == "true")
+    data = Telemetry.get_this_months_server_metrics_log(force_recache)
 
     {lyear, lmonth} = if Timex.today().month == 1 do
       {Timex.today().year - 1, 12}
