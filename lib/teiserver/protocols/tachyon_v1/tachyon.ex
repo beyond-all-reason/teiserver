@@ -24,11 +24,19 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
                     :friends, :friend_requests, :ignores, :springid, :country])
   def convert_object(:client, client), do: Map.take(client, [:userid, :in_game, :away, :ready, :player_number, :team_number,
                     :team_colour, :player, :bonus, :synced, :faction, :lobby_id])
-  def convert_object(:lobby, lobby), do: Map.take(lobby, [:id, :name, :founder_id, :type, :max_players, :password,
-                    :locked, :engine_name, :engine_version, :players, :spectators, :bots, :ip, :settings, :map_name,
-                    :map_hash, :tags, :disabled_units, :in_progress, :started_at, :start_rectangles])
   def convert_object(:queue, queue), do: Map.take(queue, [:id, :name, :team_size, :conditions, :settings, :map_list])
   def convert_object(:blog_post, post), do: Map.take(post, ~w(id short_content content url tags live_from)a)
+
+  # Slightly more complex conversions
+  def convert_object(:lobby, lobby) do
+    lobby = %{lobby |
+      password: lobby.password != nil
+    }
+
+    Map.take(lobby, [:id, :name, :founder_id, :type, :max_players,
+                    :locked, :engine_name, :engine_version, :players, :spectators, :bots, :ip, :settings, :map_name, :password,
+                    :map_hash, :tags, :disabled_units, :in_progress, :started_at, :start_rectangles])
+  end
 
   @spec do_action(atom, any(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
   def do_action(:login_accepted, user, state) do
