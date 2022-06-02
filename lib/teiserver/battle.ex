@@ -410,6 +410,8 @@ defmodule Teiserver.Battle do
   @spec call_lobby(T.lobby_id(), any) :: any | nil
   defdelegate cast_lobby(lobby_id, msg), to: LobbyCache
 
+  @spec lobby_exists?(T.lobby_id()) :: boolean()
+  defdelegate lobby_exists?(lobby_id), to: LobbyCache
 
   @spec list_lobby_ids :: [T.lobby_id()]
   defdelegate list_lobby_ids(), to: LobbyCache

@@ -154,6 +154,14 @@ defmodule Teiserver.Battle.LobbyCache do
     server_pid
   end
 
+  @spec lobby_exists?(T.lobby_id()) :: boolean()
+  def lobby_exists?(lobby_id) do
+    case get_lobby_pid(lobby_id) do
+      nil -> false
+      _ -> true
+    end
+  end
+
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
   def get_lobby_pid(lobby_id) do
     case Horde.Registry.lookup(Teiserver.LobbyRegistry, lobby_id) do

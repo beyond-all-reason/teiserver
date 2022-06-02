@@ -1,4 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
+  alias Teiserver.Battle
   alias Teiserver.Battle.Lobby
   alias Teiserver.{Client, Coordinator}
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
@@ -84,6 +85,16 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
 
       {:failure, reason} ->
         reply(:lobby, :join, {:failure, reason}, state)
+    end
+  end
+
+  def do_handle("watch", %{"lobby_id" => lobby_id}, state) do
+    case Battle.lobby_exists?(lobby_id) do
+      true ->
+        send(self(), {:action, {:watch_lobby, lobby_id}})
+        reply(:lobby, :watch, {:success, lobby_id}, state)
+      false ->
+        reply(:lobby, :watch, {:failure, "No lobby", lobby_id}, state)
     end
   end
 

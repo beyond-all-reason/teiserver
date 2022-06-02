@@ -157,6 +157,23 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     end
   end
 
+  def do_reply(:watch, {:success, lobby_id}) do
+    %{
+      "cmd" => "s.lobby.watch",
+      "result" => "success",
+      "lobby_id" => lobby_id
+    }
+  end
+
+  def do_reply(:watch, {:failure, reason, lobby_id}) do
+    %{
+      "cmd" => "s.lobby.watch",
+      "result" => "failure",
+      "reason" => reason,
+      "lobby_id" => lobby_id
+    }
+  end
+
   ###########
   # Join response
   def do_reply(:join_lobby_request_response, {lobby_id, :deny, reason}) do

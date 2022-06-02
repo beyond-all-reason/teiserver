@@ -37,6 +37,29 @@
 }
 ```
 
+### `c.lobby.watch`
+Subscribes you to lobby updates for a given lobby without joining it. Does not subscribe you to the lobby chat and if you join then leave a lobby you will need to resubscribe to it.
+```json
+{
+  "cmd": "c.lobby.watch",
+  "lobby_id": 123
+}
+
+{
+  "cmd": "s.lobby.watch",
+  "result": "success",
+  "lobby_id": 123
+}
+
+{
+  "cmd": "s.lobby.watch",
+  "result": "failure",
+  "reason": "No lobby",
+  "lobby_id": 1234
+}
+```
+
+
 ## Interacting
 ### `c.lobby.join`
 Requests to join the battle, the host will be sent a message asking if the person can join or not. Based on that an accept/reject is sent. If there is a failure to join then it means the host wasn't even consulted as the joiner didn't qualify (e.g. didn't supply the password).

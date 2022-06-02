@@ -154,6 +154,9 @@ defmodule Teiserver.TachyonTcpServer do
       {:join_lobby, lobby_id} ->
         state.protocol.do_action(:join_lobby, lobby_id, state)
 
+      {:watch_lobby, lobby_id} ->
+        state.protocol.do_action(:watch_lobby, lobby_id, state)
+
       {:leave_lobby, lobby_id} ->
         state.protocol.do_action(:leave_lobby, lobby_id, state)
 
