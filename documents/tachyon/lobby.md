@@ -188,6 +188,18 @@ Sent by a client to inform the server their status is updated. Below are the fie
 }
 ```
 
+### `s.lobby.update_value`
+Sent by the server to inform of a change in a value of the lobby.
+```json
+{
+  "cmd": "c.lobby.update_value",
+  "lobby_id": 123,
+  "key": "map_name",
+  "value": "Not DSDR"
+}
+
+```
+
 
 ### TODO: `s.lobby.user_joined`
 Sent by the server to inform of a new player joining the battle room.

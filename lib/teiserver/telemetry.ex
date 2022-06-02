@@ -5,7 +5,6 @@ defmodule Teiserver.Telemetry do
   alias Central.Helpers.QueryHelpers
   alias Central.Repo
   alias Phoenix.PubSub
-  alias Teiserver.Account
 
   alias Teiserver.Telemetry.TelemetryServer
   alias Teiserver.Telemetry.ServerMinuteLog

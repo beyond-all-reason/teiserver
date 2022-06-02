@@ -79,6 +79,9 @@ Valid events:
   {:lobby_update, :remove_user, lobby_id, userid}
   {:lobby_update, :kick_user, lobby_id, userid}
 
+  # Partial lobby updates
+  {:lobby_update, :update_value, lobby_id, {key, value}}
+
   # Client
   {:lobby_update, :updated_client_battlestatus, lobby_id, {Client, reason}}
 ```

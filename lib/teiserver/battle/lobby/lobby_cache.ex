@@ -6,14 +6,36 @@ defmodule Teiserver.Battle.LobbyCache do
   alias Teiserver.Data.Types, as: T
   require Logger
 
+  @spec update_value(T.lobby_id(), atom, any) :: :ok
+  def update_value(lobby_id, key, value) do
+    cast_lobby(lobby_id, {:update_value, key, value})
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "legacy_all_battle_updates",
+      {:global_battle_updated, lobby_id, :update_value}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_lobby_updates:#{lobby_id}",
+      {:lobby_update, :update_value, lobby_id, {key, value}}
+    )
+
+    :ok
+  end
+
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
-  def update_lobby(lobby, nil, :silent) do
-    Central.cache_put(:lobbies, lobby.id, lobby)
+  def update_lobby(%{id: lobby_id} = lobby, nil, :silent) do
+    Central.cache_put(:lobbies, lobby_id, lobby)
+    cast_lobby(lobby_id, {:update_lobby, lobby})
+
     lobby
   end
 
-  def update_lobby(lobby, nil, reason) do
+  def update_lobby(%{id: lobby_id} = lobby, nil, reason) do
     Central.cache_put(:lobbies, lobby.id, lobby)
+    cast_lobby(lobby_id, {:update_lobby, lobby})
 
     if Enum.member?([:rename], reason) do
       PubSub.broadcast(
@@ -32,8 +54,9 @@ defmodule Teiserver.Battle.LobbyCache do
     lobby
   end
 
-  def update_lobby(lobby, data, reason) do
+  def update_lobby(%{id: lobby_id} = lobby, data, reason) do
     Central.cache_put(:lobbies, lobby.id, lobby)
+    cast_lobby(lobby_id, {:update_lobby, lobby})
 
     if Enum.member?([:update_battle_info], reason) do
       PubSub.broadcast(

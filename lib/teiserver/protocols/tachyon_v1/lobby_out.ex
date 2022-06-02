@@ -94,6 +94,15 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
+  def do_reply(:update_value, {lobby_id, {key, value}}) do
+    %{
+      "cmd" => "s.lobby.update_value",
+      "lobby_id" => lobby_id,
+      "key" => key,
+      "value" => value
+    }
+  end
+
   ###########
   # Leave
   def do_reply(:leave, {:success, nil}) do

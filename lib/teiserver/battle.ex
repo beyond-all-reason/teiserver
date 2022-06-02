@@ -417,6 +417,10 @@ defmodule Teiserver.Battle do
   @spec list_lobbies() :: [T.lobby()]
   defdelegate list_lobbies(), to: LobbyCache
 
+
+  @spec update_value(T.lobby_id(), atom, any) :: :ok
+  defdelegate update_value(lobby_id, key, value), to: LobbyCache
+
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   defdelegate update_lobby(lobby, data, reason), to: LobbyCache
 
