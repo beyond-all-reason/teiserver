@@ -47,7 +47,7 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
 > default: no limitations
 > friends allows only friends of existing members to join the lobby
 > friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)", :everybody},
-      {"specafk", [], "Everybody is sent a message asking them to confirm they are not afk. If they don't respond within 40 seconds they are moved to spectators. Requires boss privileges.", :everybody},
+      {"rename", ["new name"],"Renames the lobby to the name given. Requires boss privileges.", :everybody},
 
       #---- "hosts" only ----
       {"lock", ["(team | player | spectator | side)"], "Engages a lock on that mode, when engaged members are unable to change that attribute about themselves.
@@ -66,7 +66,7 @@ Multiple locks can be engaged at the same time
       {"settag", ["key", "value"], "Sets a battletag of <key> to <value>", :host},
       {"speclock", ["user"], "Locks the user into a spectator role. Can be reverted with the unban command.", :host},
       {"forceplay", ["user"], "Forces the user into a player position.", :host},
-      {"rename", ["new name"],"Renames the lobby to the name given.", :host},
+
       {"timeout", ["user", "reason, default: You have been given a timeout on the naughty step"], "Bans the user from the lobby for 1 game, will expire once the game is over.", :host},
       {"lobbykick ", ["user"], "Kicks the user from the lobby.", :host},
       {"lobbyban", ["user", "reason , default: None given"], "Bans the user from the lobby but not the server, will refresh on !rehost", :host},
@@ -84,6 +84,7 @@ Multiple locks can be engaged at the same time
       {"cancelsplit", [], "Cancels the lobby split.", :moderator},
       {"vip", ["name"], "Places that user at the front of the queue. This command will always output it's use even if used with the % operator.", :moderator},
       {"reset", [], "Resets the coordinator bot for this lobby to the default.", :moderator},
+      {"specafk", [], "Everybody is sent a message asking them to confirm they are not afk. If they don't respond within 40 seconds they are moved to spectators. Requires boss privileges.", :moderator},
     ]
     # $command - Coordinator command
     # $%command - Don't echo command back to chat
