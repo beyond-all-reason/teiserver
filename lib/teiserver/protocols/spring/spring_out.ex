@@ -615,7 +615,7 @@ defmodule Teiserver.Protocols.SpringOut do
     reply(:motd, nil, nil, state)
 
     # Login the client
-    _client = Client.login(user, state.ip)
+    client = Client.login(user, state.ip)
 
     # Who is online?
     clients = Client.list_client_ids()
@@ -674,7 +674,13 @@ defmodule Teiserver.Protocols.SpringOut do
     PubSub.subscribe(Central.PubSub, "teiserver_global_battle_lobby_updates")
 
     exempt_from_cmd_throttle = (user.moderator == true or User.is_bot?(user) == true)
-    %{state | user: user, username: user.name, userid: user.id, exempt_from_cmd_throttle: exempt_from_cmd_throttle}
+    %{state |
+      user: user,
+      client: client,
+      username: user.name,
+      userid: user.id,
+      exempt_from_cmd_throttle: exempt_from_cmd_throttle
+    }
   end
 
   @spec do_join_room(map(), String.t()) :: map()
