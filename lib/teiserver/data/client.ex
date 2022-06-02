@@ -242,8 +242,7 @@ defmodule Teiserver.Client do
           lobby_id: lobby_id,
           lobby_host: lobby_host
         }
-        Central.cache_put(:clients, new_client.userid, new_client)
-        new_client
+        update(new_client, :client_updated_battlestatus)
     end
   end
 
