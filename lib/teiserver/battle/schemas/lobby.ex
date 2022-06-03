@@ -150,7 +150,6 @@ defmodule Teiserver.Battle.Lobby do
   defdelegate add_lobby(lobby), to: LobbyCache
   defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyCache
 
-
   # Refactor of above from when we called them battle
   def update_battle(battle, data, reason), do: LobbyCache.update_lobby(battle, data, reason)
   def get_battle!(lobby_id), do: LobbyCache.get_lobby(lobby_id)

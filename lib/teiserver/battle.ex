@@ -404,10 +404,10 @@ defmodule Teiserver.Battle do
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
   defdelegate get_lobby_pid(lobby_id), to: LobbyCache
 
-  @spec cast_lobby(T.lobby_id(), any) :: any
+  @spec call_lobby(T.lobby_id(), any) :: any | nil
   defdelegate call_lobby(lobby_id, msg), to: LobbyCache
 
-  @spec call_lobby(T.lobby_id(), any) :: any | nil
+  @spec cast_lobby(T.lobby_id(), any) :: any | nil
   defdelegate cast_lobby(lobby_id, msg), to: LobbyCache
 
   @spec lobby_exists?(T.lobby_id()) :: boolean()

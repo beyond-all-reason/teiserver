@@ -170,19 +170,25 @@ defmodule Teiserver.Battle.LobbyCache do
     end
   end
 
-  @spec cast_lobby(T.lobby_id(), any) :: any
-  def cast_lobby(lobby_id, msg) do
+  @doc """
+  GenServer.cast the message to the LobbyServer process for lobby_id
+  """
+  @spec cast_lobby(T.lobby_id(), any) :: any | nil
+  def cast_lobby(lobby_id, message) do
     case get_lobby_pid(lobby_id) do
       nil -> nil
-      pid -> GenServer.cast(pid, msg)
+      pid -> GenServer.cast(pid, message)
     end
   end
 
+  @doc """
+  GenServer.call the message to the LobbyServer process for lobby_id and return the result
+  """
   @spec call_lobby(T.lobby_id(), any) :: any | nil
-  def call_lobby(lobby_id, msg) do
+  def call_lobby(lobby_id, message) do
     case get_lobby_pid(lobby_id) do
       nil -> nil
-      pid -> GenServer.call(pid, msg)
+      pid -> GenServer.call(pid, message)
     end
   end
 
