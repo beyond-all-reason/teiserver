@@ -177,6 +177,11 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.game_type == ^game_type
   end
 
+  def _search(query, :game_type_in, game_types) do
+    from matches in query,
+      where: matches.game_type in ^game_types
+  end
+
   def _search(query, :ready_for_post_process, _) do
     from matches in query,
       where: matches.processed == false,
