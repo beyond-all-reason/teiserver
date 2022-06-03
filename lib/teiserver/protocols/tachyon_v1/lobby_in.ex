@@ -103,7 +103,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
   def do_handle("update_status", %{"client" => new_status}, state) do
     updates =
       new_status
-      |> Map.take(~w(ready player_number team_colour team_number player sync side))
+      |> Map.take(~w(in_game away ready player_number team_colour team_number player sync side))
       |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
 
     new_client =
