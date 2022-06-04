@@ -450,4 +450,14 @@ defmodule Teiserver.Battle do
 
   @spec sayprivateex(Types.userid(), Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   defdelegate sayprivateex(from_id, to_id, msg, lobby_id), to: LobbyChat
+
+  @spec say_to_all_lobbies(String.t()) :: :ok
+  def say_to_all_lobbies(msg) do
+    coordinator_id = Coordinator.get_coordinator_userid()
+
+    list_lobby_ids()
+      |> Enum.each(fn lobby_id ->
+        Lobby.say(coordinator_id, msg, lobby_id)
+      end)
+  end
 end
