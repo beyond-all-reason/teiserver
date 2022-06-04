@@ -41,7 +41,7 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
 - hardt1: T1 but no seaplanes or hovers either
 - crazy: Random combination of several settings
 - undo: Removes all meme effects", :everybody},
-      {"welcome-message", ["message"], "Sets the welcome message sent to anybody joining the lobby. Requires boss privileges.", :everybody},
+      {"welcome-message", ["message"], "Sets the welcome message sent to anybody joining the lobby. Requires boss privileges. Use $$ to add a line return.", :everybody},
       {"gatekeeper", ["(default | friends | friendsplay | clan)"],
 "sets the gatekeeper for this battle. Requires boss privileges.
 > default: no limitations

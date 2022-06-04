@@ -260,11 +260,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     user = User.get_user_by_id(userid)
 
     if state.welcome_message do
-      Coordinator.send_to_user(userid, [
-        "########################################",
-        "" <> state.welcome_message,
-        "########################################"
-      ])
+      splitter = "########################################"
+      parts = String.split(state.welcome_message, "$$")
+      Coordinator.send_to_user(userid, [splitter] ++ parts ++ [splitter])
     end
 
     # If the client is muted, we need to tell the host
