@@ -42,11 +42,11 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthOut do
   end
 
   def do_reply(:verify, {:success, user}) do
-    updated_u = %{ icons: %{"play_time_rank" => user.rank}}
+    icons = %{ icons: %{"play_time_rank" => user.rank}}
     %{
       "cmd" => "s.auth.verify",
       "result" => "success",
-      "user" => Tachyon.convert_object(:user_extended, Map.merge(user, updated_u))
+      "user" => Tachyon.convert_object(:user_extended, Map.merge(user, icons))
     }
   end
 
@@ -61,11 +61,11 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthOut do
   end
 
   def do_reply(:login, {:success, user}) do
-    updated_u = %{ icons: %{"play_time_rank" => user.rank}}
+    icons = %{ icons: %{"play_time_rank" => user.rank}}
     %{
       "cmd" => "s.auth.login",
       "result" => "success",
-      "user" => Tachyon.convert_object(:user_extended, Map.merge(user, updated_u))
+      "user" => Tachyon.convert_object(:user_extended, Map.merge(user, icons))
     }
   end
 
