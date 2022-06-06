@@ -24,7 +24,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
                     friends friend_requests ignores springid country)a)
   def convert_object(:client, client), do: Map.take(client, ~w(userid in_game away ready player_number team_number
                     team_colour player bonus synced faction lobby_id)a)
-  def convert_object(:queue, queue), do: Map.take(queue, ~w(:id name team_size conditions settings :map_list)a)
+  def convert_object(:queue, queue), do: Map.take(queue, ~w(id name team_size conditions settings map_list)a)
   def convert_object(:blog_post, post), do: Map.take(post, ~w(id short_content content url tags live_from)a)
 
   # Slightly more complex conversions
