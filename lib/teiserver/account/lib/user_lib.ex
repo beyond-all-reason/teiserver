@@ -250,18 +250,12 @@ defmodule Teiserver.Account.UserLib do
 
   @spec generate_user_icons(T.user()) :: map()
   def generate_user_icons(user) do
-    stats = Account.get_user_stat_data(user.id)
-    generate_user_icons(user, stats)
-  end
-
-  @spec generate_user_icons(T.user(), map()) :: map()
-  def generate_user_icons(user, stats) do
     role_icons = user.roles
       |> Enum.filter(fn r -> role_def(r) != nil end)
       |> Map.new(fn r -> {r, 1} end)
 
     %{
-      "play_time_rank" => stats["rank"]
+      "play_time_rank" => user.rank
     }
     |> Map.merge(role_icons)
   end

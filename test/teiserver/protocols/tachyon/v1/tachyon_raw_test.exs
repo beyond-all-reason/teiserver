@@ -71,7 +71,6 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     existing_user = new_user()
     data = %{cmd: "c.auth.register", username: "test_name", email: existing_user.email, password: "password"}
     _tachyon_send(socket, data)
-    :timer.sleep(3000)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.register", "result" => "failure", "reason" => "Email already in use"}]
 
@@ -79,7 +78,6 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     name = new_user_name()
     data = %{cmd: "c.auth.register", username: name, email: "tachyon_register@example", password: "password"}
     _tachyon_send(socket, data)
-    :timer.sleep(3000)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.register", "result" => "success"}]
 
@@ -97,14 +95,12 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     # Bad password but also test msg_id continuance
     data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}
     _tachyon_send(socket, data)
-    :timer.sleep(3000)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.get_token", "result" => "failure", "reason" => "Invalid credentials", "msg_id" => 555}]
 
     # Good password
     data = %{cmd: "c.auth.get_token", password: "password", email: user.email}
     _tachyon_send(socket, data)
-    :timer.sleep(3000)
     [reply] = _tachyon_recv(socket)
     assert Map.has_key?(reply, "token")
     token = reply["token"]
@@ -113,7 +109,6 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     # Now do the login, it should work as we only just created the user
     data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a", lobby_hash: "t1 t2"}
     _tachyon_send(socket, data)
-    :timer.sleep(3000)
     reply = _tachyon_recv(socket)
     assert match?([%{"cmd" => "s.auth.login", "result" => "success"}], reply)
     [reply] = reply
@@ -125,7 +120,6 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     name = new_user_name()
     data = %{cmd: "c.auth.register", username: name, email: "tachyon_verify@example", password: "password"}
     _tachyon_send(socket, data)
-    :timer.sleep(3000)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.register", "result" => "success"}]
 
@@ -135,14 +129,12 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     # Bad password but also test msg_id continuance
     data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}
     _tachyon_send(socket, data)
-    :timer.sleep(3000)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.get_token", "result" => "failure", "reason" => "Invalid credentials", "msg_id" => 555}]
 
     # Good password
     data = %{cmd: "c.auth.get_token", password: "password", email: user.email}
     _tachyon_send(socket, data)
-    :timer.sleep(3000)
     [reply] = _tachyon_recv(socket)
     assert Map.has_key?(reply, "token")
     token = reply["token"]
@@ -151,28 +143,24 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     # Now do the login
     data = %{cmd: "c.auth.login", token: token, lobby_name: "ex_test", lobby_version: "1a", lobby_hash: "t1 t2"}
     _tachyon_send(socket, data)
-    :timer.sleep(3000)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.login", "result" => "unverified", "agreement" => "User agreement goes here."}]
 
     # Verify - bad token
     data = %{cmd: "c.auth.verify", token: "aaaa", code: "1a"}
     _tachyon_send(socket, data)
-    :timer.sleep(3000)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.verify", "result" => "failure", "reason" => "bad token"}]
 
     # Verify - bad code
     data = %{cmd: "c.auth.verify", token: token, code: "1a"}
     _tachyon_send(socket, data)
-    :timer.sleep(3000)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.verify", "result" => "failure", "reason" => "bad code"}]
 
     # Verify - good code
     data = %{cmd: "c.auth.verify", token: token, code: "123456"}
     _tachyon_send(socket, data)
-    :timer.sleep(3000)
     [reply] = _tachyon_recv(socket)
     assert Map.has_key?(reply, "user")
     assert reply["user"]["id"] == user.id
@@ -182,7 +170,6 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     # Disconnect
     data = %{cmd: "c.auth.disconnect"}
     _tachyon_send(socket, data)
-    :timer.sleep(3000)
     _tachyon_recv(socket)
   end
 
@@ -303,7 +290,6 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     _tachyon_send(tls_socket, %{cmd: "c.auth.get_token", password: "password", email: user.email})
     # We have a sleep here because on a slower computer the tests can fail as
     # the password hash takes a bit longer
-    :timer.sleep(500)
 
     [reply] = _tachyon_recv(tls_socket)
     assert Map.has_key?(reply, "token")
