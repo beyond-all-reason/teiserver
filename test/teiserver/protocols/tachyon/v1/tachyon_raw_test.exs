@@ -111,6 +111,8 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert match?([%{"cmd" => "s.auth.login", "result" => "success"}], reply)
+    [reply] = reply
+    assert Map.has_key?(reply["user"], "icons")
   end
 
   test "register, verify and auth", %{socket: socket} do
@@ -163,6 +165,7 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     assert Map.has_key?(reply, "user")
     assert reply["user"]["id"] == user.id
     assert match?(%{"cmd" => "s.auth.verify", "result" => "success"}, reply)
+    assert Map.has_key?(reply["user"], "icons")
 
     # Disconnect
     data = %{cmd: "c.auth.disconnect"}
@@ -287,7 +290,6 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     _tachyon_send(tls_socket, %{cmd: "c.auth.get_token", password: "password", email: user.email})
     # We have a sleep here because on a slower computer the tests can fail as
     # the password hash takes a bit longer
-    :timer.sleep(500)
 
     [reply] = _tachyon_recv(tls_socket)
     assert Map.has_key?(reply, "token")

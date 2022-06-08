@@ -45,7 +45,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthOut do
     %{
       "cmd" => "s.auth.verify",
       "result" => "success",
-      "user" => Tachyon.convert_object(:user_extended, user)
+      "user" => Tachyon.convert_object(:user_extended_icons, user)
     }
   end
 
@@ -63,7 +63,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthOut do
     %{
       "cmd" => "s.auth.login",
       "result" => "success",
-      "user" => Tachyon.convert_object(:user_extended, user)
+      "user" => Tachyon.convert_object(:user_extended_icons, user)
     }
   end
 
