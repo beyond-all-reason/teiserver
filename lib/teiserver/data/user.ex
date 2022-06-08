@@ -385,11 +385,11 @@ defmodule Teiserver.User do
 
       # Can't rename more than 2 times in 5 days
       admin_action == false and since_rename_two < 60 * 60 * 24 * 5 ->
-        {:error, "If you keep changing your name people won't know who you are; give it a bit of time"}
+        {:error, "If you keep changing your name people won't know who you are; give it a bit of time (5 days)"}
 
       # Can't rename more than 3 times in 30 days
       admin_action == false and since_rename_three < 60 * 60 * 24 * 30 ->
-        {:error, "If you keep changing your name people won't know who you are; give it a bit of time"}
+        {:error, "If you keep changing your name people won't know who you are; give it a bit of time (30 days)"}
 
       admin_action == false and is_restricted?(userid, ["All chat", "Renaming"]) ->
         {:error, "Muted"}
