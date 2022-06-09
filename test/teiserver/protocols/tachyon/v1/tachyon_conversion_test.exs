@@ -24,6 +24,7 @@ defmodule Teiserver.Protocols.V1.TachyonConversionTest do
       engine_version: "105.1.2.3",
       map_hash: "string_of_characters",
       map_name: "koom valley",
+      game_name: "BAR",
       name: "Tachyon lobby conversion test",
       password: true,
       settings: %{max_players: 12}
