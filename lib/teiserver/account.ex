@@ -1,6 +1,7 @@
 defmodule Teiserver.Account do
   import Ecto.Query, warn: false
   alias Central.Repo
+  require Logger
 
   # Mostly a wrapper around Central.Account
   alias Central.Account.User
@@ -179,58 +180,6 @@ defmodule Teiserver.Account do
     )
     |> Enum.group_by(fn sk -> {sk.type.name, sk.value} end)
     |> Enum.sort_by(fn {key, _value} -> key end, &<=/2)
-  end
-
-  defp get_smurfs_by_hash(user) do
-    user_stats = get_user_stat_data(user.id)
-    lobby_hash = user_stats["lobby_hash"]
-
-    if Enum.member?([nil, ""], lobby_hash) do
-      []
-    else
-      hash_fragement = "u.data ->> 'lobby_hash' = '#{lobby_hash}'"
-
-      query = """
-      SELECT u.user_id
-      FROM teiserver_account_user_stats u
-      WHERE #{hash_fragement}
-"""
-
-      case Ecto.Adapters.SQL.query(Repo, query, []) do
-        {:ok, results} ->
-          results.rows
-          |> List.flatten
-
-        {a, b} ->
-          raise "ERR: #{a}, #{b}"
-      end
-    end
-  end
-
-  defp get_smurfs_by_hw(user) do
-    user_stats = get_user_stat_data(user.id)
-
-    hw_fingerprint = user_stats["hw_fingerprint"]
-    if hw_fingerprint == "" do
-      []
-    else
-      hw_fragement = "u.data ->> 'hw_fingerprint' = '#{hw_fingerprint}'"
-
-      query = """
-      SELECT u.user_id
-      FROM teiserver_account_user_stats u
-      WHERE #{hw_fragement}
-"""
-
-      case Ecto.Adapters.SQL.query(Repo, query, []) do
-        {:ok, results} ->
-          results.rows
-          |> List.flatten
-
-        {a, b} ->
-          raise "ERR: #{a}, #{b}"
-      end
-    end
   end
 
   # Gets the the roles for the user based on their flags/data
@@ -975,7 +924,7 @@ defmodule Teiserver.Account do
       type_id: type_id,
       value: value
     ])
-    |> Repo.one
+    |> Repo.all
   end
 
   @doc """
@@ -995,11 +944,14 @@ defmodule Teiserver.Account do
     type_id = get_or_add_smurf_key_type(type_name)
 
     case get_smurf_key(user_id, type_id, value) do
-      nil ->
+      [] ->
         %SmurfKey{}
           |> SmurfKey.changeset(%{user_id: user_id, value: value, type_id: type_id})
           |> Repo.insert()
-      existing ->
+      [existing] ->
+        {:ok, existing}
+      [existing | _] ->
+        Logger.error("#{__MODULE__}.create_smurf_key found user with two identical keys: #{user_id}, #{type_id}, #{value}")
         {:ok, existing}
     end
   end
