@@ -73,6 +73,8 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     _tachyon_send(socket, %{"cmd" => "c.user.list_users_from_ids", "id_list" => friend_list, "include_clients" => true})
     [resp] = _tachyon_recv(socket)
     assert resp["cmd"] == "s.user.user_and_client_list"
+    [clients] = resp["clients"]
+    assert clients["sync"]
     users_map = resp["users"]
       |> Map.new(fn u -> {u["id"], u} end)
 
