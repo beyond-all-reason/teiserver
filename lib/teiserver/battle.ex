@@ -197,13 +197,16 @@ defmodule Teiserver.Battle do
     end
   end
 
-  alias Teiserver.Battle.MatchMonitorServer
-  alias Teiserver.Battle.MatchLib
+  alias Teiserver.Battle.{MatchMonitorServer, MatchLib}
+  alias Teiserver.Battle.{LobbyChat, LobbyCache}
   require Logger
 
+  @spec start_match(nil | T.lobby_id()) :: :ok
   def start_match(nil), do: :ok
   def start_match(lobby_id) do
     Telemetry.increment(:matches_started)
+
+    LobbyCache.cast_lobby(lobby_id, :start_match)
 
     {match_params, members} = MatchLib.match_from_lobby(lobby_id)
     case create_match(match_params) do
@@ -220,12 +223,16 @@ defmodule Teiserver.Battle do
     end
 
     Coordinator.cast_consul(lobby_id, :match_start)
+    :ok
   end
 
+  @spec stop_match(nil | T.lobby_id()) :: :ok
   def stop_match(nil), do: :ok
   def stop_match(lobby_id) do
     Telemetry.increment(:matches_stopped)
     {uuid, params} = MatchLib.stop_match(lobby_id)
+
+    LobbyCache.cast_lobby(lobby_id, :stop_match)
 
     case list_matches(search: [uuid: uuid]) do
       [match] ->
@@ -240,6 +247,7 @@ defmodule Teiserver.Battle do
     end
 
     Coordinator.cast_consul(lobby_id, :match_stop)
+    :ok
   end
 
   def generate_lobby_uuid() do
@@ -398,8 +406,6 @@ defmodule Teiserver.Battle do
     MatchMembership.changeset(match_membership, %{})
   end
 
-  # Lobby stuff
-  alias Teiserver.Battle.{LobbyChat, LobbyCache}
 
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
   defdelegate get_lobby_pid(lobby_id), to: LobbyCache
