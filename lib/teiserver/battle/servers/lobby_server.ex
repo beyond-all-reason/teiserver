@@ -50,6 +50,10 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, %{state | lobby: new_lobby}}
   end
 
+  def handle_cast({:update_lobby, new_lobby}, state) do
+    {:noreply, %{state | lobby: new_lobby}}
+  end
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
