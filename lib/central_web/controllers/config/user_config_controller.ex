@@ -21,9 +21,9 @@ defmodule CentralWeb.Config.UserConfigController do
     config_types = Config.get_grouped_user_configs()
 
     conn
-    |> assign(:config_types, config_types)
-    |> assign(:config_values, config_values)
-    |> render("index.html")
+      |> assign(:config_types, config_types)
+      |> assign(:config_values, config_values)
+      |> render("index.html")
   end
 
   @spec new(Plug.Conn.t(), any) :: Plug.Conn.t()
@@ -32,9 +32,9 @@ defmodule CentralWeb.Config.UserConfigController do
     changeset = UserConfig.creation_changeset(%UserConfig{}, config_info)
 
     conn
-    |> assign(:changeset, changeset)
-    |> assign(:config_info, config_info)
-    |> render("new.html")
+      |> assign(:changeset, changeset)
+      |> assign(:config_info, config_info)
+      |> render("new.html")
   end
 
   @spec create(Plug.Conn.t(), any) :: Plug.Conn.t()
@@ -48,20 +48,23 @@ defmodule CentralWeb.Config.UserConfigController do
     case Config.create_user_config(user_config_params) do
       {:ok, _user_config} ->
         conn
-        |> put_flash(:info, "Your preferences have been updated.")
-        |> redirect(to: Routes.user_config_path(conn, :index) <> "##{tab}")
+          |> put_flash(:info, "Your preferences have been updated.")
+          |> redirect(to: Routes.user_config_path(conn, :index) <> "##{tab}")
 
       {:error, %Ecto.Changeset{} = _changeset} ->
         conn
-        |> put_flash(:info, "Your preferences have been updated.")
-        |> redirect(to: Routes.user_config_path(conn, :index) <> "##{tab}")
+          |> put_flash(:info, "Your preferences have been updated.")
+          |> redirect(to: Routes.user_config_path(conn, :index) <> "##{tab}")
     end
   end
 
   @spec show(Plug.Conn.t(), any) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     user_config = Config.get_user_config!(id)
-    render(conn, "show.html", user_config: user_config)
+
+    conn
+      |> assign(:user_config, user_config)
+      |> render("show.html")
   end
 
   @spec edit(Plug.Conn.t(), any) :: Plug.Conn.t()
@@ -72,10 +75,10 @@ defmodule CentralWeb.Config.UserConfigController do
     changeset = Config.change_user_config(user_config)
 
     conn
-    |> assign(:user_config, user_config)
-    |> assign(:changeset, changeset)
-    |> assign(:config_info, config_info)
-    |> render("edit.html")
+      |> assign(:user_config, user_config)
+      |> assign(:changeset, changeset)
+      |> assign(:config_info, config_info)
+      |> render("edit.html")
   end
 
   @spec update(Plug.Conn.t(), any) :: Plug.Conn.t()
@@ -103,14 +106,18 @@ defmodule CentralWeb.Config.UserConfigController do
     end
   end
 
-  # @spec delete(Plug.Conn.t(), any) :: Plug.Conn.t()
-  # def delete(conn, %{"id" => id}) do
-  #   user_config = Config.get_user_config!(id)
-  #   {:ok, _user_config} = Config.delete_user_config(user_config)
-  #   Central.cache_delete(:config_user_cache, user_config.user_id)
+  @spec delete(Plug.Conn.t(), any) :: Plug.Conn.t()
+  def delete(conn, %{"id" => id}) do
+    user_config = Config.get_user_config!(id)
+    tab = Config.get_user_config_type(user_config.key)
+      |> Map.get(:section)
+      |> Central.Helpers.StringHelper.remove_spaces()
 
-  #   conn
-  #   |> put_flash(:info, "User config deleted successfully.")
-  #   |> redirect(to: Routes.user_config_path(conn, :index))
-  # end
+    {:ok, _user_config} = Config.delete_user_config(user_config)
+    Central.cache_delete(:config_user_cache, user_config.user_id)
+
+    conn
+      |> put_flash(:info, "User config deleted successfully.")
+      |> redirect(to: Routes.user_config_path(conn, :index) <> "##{tab}")
+  end
 end

@@ -1,7 +1,12 @@
 <%= if Kernel.function_exported?(@conn.private.phoenix_view, :view_colour, 0) do %>
   <%
-    light = (assigns[:current_user] != nil and Central.Config.get_user_config_cache(@current_user.id, "general.Light mode") == true)
-    {fg, bg, _bsname} = colours(@conn.private.phoenix_view.view_colour(), light)
+    light_mode = case get_user_config_cache(@current_user, "general.Colour scheme") do
+      "Site default" -> get_site_config_cache("user.Default light mode")
+      "Light" -> true
+      "Dark" -> false
+    end
+
+    {fg, bg, _bsname} = colours(@conn.private.phoenix_view.view_colour(), light_mode)
   %>
   <style type="text/css">
     @media print {

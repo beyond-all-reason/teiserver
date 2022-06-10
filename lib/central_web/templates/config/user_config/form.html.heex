@@ -35,7 +35,7 @@
 
           description: ""
         %>
-      
+
       <% _ -> %>
         <%= input_with_type f, :value, @config_info.type, @config_info.opts ++ [choices_arg: @conn] %>
     <% end %>
@@ -43,6 +43,13 @@
 
   <div class="form-group mt-2">
     <a href={"#{Routes.user_config_path(@conn, :index)}##{@config_info.section}"} class="btn btn-secondary">Cancel</a>
+    
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+    <%= if assigns[:user_config] do %>
+      <%= link "Reset to default", to: Routes.user_config_path(@conn, :delete, @user_config), class: "btn btn-danger2", method: "delete", data: [confirm: "Are you sure?"] %>
+    <% end %>
 
     <%= submit "Save changes", class: "btn btn-#{bsname} float-end" %>
   </div>

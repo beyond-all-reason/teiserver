@@ -16,6 +16,10 @@ defmodule Central.Config do
     get_user_config_cache(current_user.id, key)
   end
 
+  def get_user_config_cache(%{id: id}, key) do
+    get_user_config_cache(id, key)
+  end
+
   def get_user_config_cache(user_id, key) do
     value = get_user_configs!(user_id)[key]
 
@@ -213,7 +217,7 @@ defmodule Central.Config do
     section: String, the tab it would appear under in an options menu. Does not need to be the same as the keyed namespace,
       e.g. "Colours"
 
-    type: String, choose from: string, password, boolean, array
+    type: String, choose from: string, select, password, boolean, array
       array allows the picking of multiple options
 
     visible: Boolean, dictates if it is visible in the account settings page

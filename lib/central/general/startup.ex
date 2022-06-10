@@ -49,16 +49,15 @@ defmodule Central.General.Startup do
     ])
 
     add_user_config_type(%{
-      key: "general.Light mode",
+      key: "general.Colour scheme",
       section: "Interface",
-      type: "boolean",
+      type: "select",
       visible: true,
       permissions: [],
-      opts: [],
-      default: false,
+      opts: [choices: ["Site default", "Light", "Dark"]],
+      default: "Site default",
 
-      description: "Light mode has a bright background and dark text.",
-      value_label: "Enable light mode"
+      description: "The colour scheme used by the site."
     })
 
     add_user_config_type(%{
@@ -164,34 +163,17 @@ defmodule Central.General.Startup do
     })
 
 
-    # Example site configs
-    # add_site_config_type(%{
-    #   key: "general.Allow site registrations",
-    #   section: "General",
-    #   type: "boolean",
-    #   permissions: ["admin.dev.developer"],
-    #   description: "Allow/disallow registrations via the main site page.",
-    #   opts: [],
-    #   default: true
-    # })
-    # add_site_config_type(%{
-    #   key: "general.Text test",
-    #   section: "General",
-    #   type: "string",
-    #   permissions: ["admin.dev.developer"],
-    #   description: "Allow/disallow registrations via the main site page.",
-    #   opts: [],
-    #   default: "abc"
-    # })
-    # add_site_config_type(%{
-    #   key: "general.Drop test",
-    #   section: "General",
-    #   type: "select",
-    #   permissions: ["admin.dev.developer"],
-    #   description: "Allow/disallow registrations via the main site page.",
-    #   opts: [choices: ["aaa", "bbb", "ccc"]],
-    #   default: "aaa"
-    # })
+    add_site_config_type(%{
+      key: "user.Default light mode",
+      section: "Interface",
+      type: "boolean",
+      permissions: ["admin.admin"],
+      description: "When set to true the default view for users is light mode.",
+      opts: [],
+      default: false,
+
+      value_label: "Light mode as default"
+    })
 
     Central.store_put(:application_metadata_cache, "random_names_1", ~w(serene energised humble auspicious decisive exemplary cheerful determined playful spry springy))
     Central.store_put(:application_metadata_cache, "random_names_2", ~w(maroon magenta lemon aqua cerulean amber beige lavender indigo))

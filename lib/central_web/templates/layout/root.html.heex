@@ -7,7 +7,15 @@
     <%= csrf_meta_tag() %>
     <%= live_title_tag assigns[:page_title] || Application.get_env(:central, Central)[:site_title], suffix: Application.get_env(:central, Central)[:site_suffix] %>
 
-    <%= if assigns[:current_user] != nil and Central.Config.get_user_config_cache(@current_user.id, "general.Light mode") == true do %>
+    <%
+      light_mode = case get_user_config_cache(@current_user, "general.Colour scheme") do
+        "Site default" -> get_site_config_cache("user.Default light mode")
+        "Light" -> true
+        "Dark" -> false
+      end
+    %>
+
+    <%= if light_mode do %>
       <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/mdb_light.css")}/>
     <% else %>
       <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/mdb_dark.css")}/>
