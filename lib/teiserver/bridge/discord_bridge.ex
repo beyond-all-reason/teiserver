@@ -37,6 +37,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
   Events.on_DMChannel_create(:new_dm_channel)
   Events.on_message(:recv_message)
 
+  @spec new_dm_channel(atom | %{:recipients => any, optional(any) => any}) :: :ok
   def new_dm_channel(dm_channel) do
     case dm_channel.recipients do
       [recipient] ->
