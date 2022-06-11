@@ -13,7 +13,7 @@
     <%= if allow?(@conn, "teiserver.moderator.account") do %>
       <%=
         central_component "menu_card",
-        icon: Teiserver.ClientLib.icon(),
+        icon: Teiserver.Account.ClientLib.icon(),
         name: "live_client",
         text: "Live clients",
         icon_class: "fa-duotone",

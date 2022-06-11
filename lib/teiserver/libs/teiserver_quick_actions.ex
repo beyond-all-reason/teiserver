@@ -55,13 +55,13 @@ defmodule Teiserver.TeiserverQuickActions do
       # Moderator pages
       %{
         label: "Live clients",
-        icons: [Teiserver.ClientLib.icon(), :list],
+        icons: [Teiserver.Account.ClientLib.icon(), :list],
         url: "/teiserver/admin/client",
         permissions: "teiserver.moderator.account"
       },
       %{
         label: "Teiserver users",
-        icons: [Teiserver.ClientLib.icon(), :list],
+        icons: [Teiserver.Account.ClientLib.icon(), :list],
         input: "s",
         method: "get",
         placeholder: "Search username",

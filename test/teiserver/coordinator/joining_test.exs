@@ -4,7 +4,6 @@ defmodule Teiserver.Coordinator.JoiningTest do
   alias Teiserver.Account.ClientLib
   alias Teiserver.Coordinator
 
-  alias Teiserver.Client
   alias Teiserver.Account.UserCache
 
   import Teiserver.TeiserverTestLib,

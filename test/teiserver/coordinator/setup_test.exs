@@ -1,6 +1,5 @@
 defmodule Teiserver.Protocols.Coordinator.SetupTest do
   use Central.ServerCase, async: false
-  alias Teiserver.{Client}
   alias Teiserver.Account.ClientLib
   alias Teiserver.Account.UserCache
   alias Teiserver.TeiserverTestLib

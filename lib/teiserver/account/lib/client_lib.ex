@@ -4,6 +4,12 @@ defmodule Teiserver.Account.ClientLib do
   alias Teiserver.Client
   alias Teiserver.Data.Types, as: T
 
+  @spec colours() :: atom
+  def colours, do: :primary
+
+  @spec icon() :: String.t()
+  def icon, do: "fa-solid fa-plug"
+
   # Retrieval
   @spec get_client_by_name(nil) :: nil
   @spec get_client_by_name(String.t()) :: nil | T.client()
@@ -52,15 +58,15 @@ defmodule Teiserver.Account.ClientLib do
   end
 
   # Updates
-  @spec merge_update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: :ok
-  def merge_update(%{userid: userid} = partial_client, _reason) do
+  @spec merge_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: :ok
+  def merge_update_client(%{userid: userid} = partial_client, _reason) do
     cast_client(userid, {:merge_client, partial_client})
     :ok
   end
-  def merge_update(_client, _reason), do: :ok
+  def merge_update_client(_client, _reason), do: :ok
 
-  @spec update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
-  def update_client(%{userid: userid} = client, reason) do
+  @spec replace_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
+  def replace_update_client(%{userid: userid} = client, reason) do
     # TODO: Depreciate
     Client.add_client(client)
 

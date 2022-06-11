@@ -192,7 +192,7 @@ defmodule Teiserver.Client do
   defdelegate list_clients(id_list), to: ClientLib
 
   @spec update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: T.client()
-  def update(client, reason), do: ClientLib.update_client(client, reason)
+  def update(client, reason), do: ClientLib.replace_update_client(client, reason)
 
 
   @spec get_client_pid(T.userid()) :: pid() | nil
@@ -302,45 +302,6 @@ defmodule Teiserver.Client do
     end)
   end
 
-  @spec chat_flood_check(T.userid()) :: :ok
-  def chat_flood_check(_), do: :ok
-  # def chat_flood_check(userid) do
-  #   now = System.system_time(:second)
-  #   client = get_client_by_id(userid)
-  #   new_times = [now | client.chat_times] |> Enum.take(@chat_flood_count_long)
-
-  #   short_time = Enum.slice(new_times, @chat_flood_count_short - 1, 1) |> get_hd
-  #   long_time = Enum.slice(new_times, @chat_flood_count_long - 1, 1) |> get_hd
-
-  #   update(%{client | chat_times: new_times}, :silent)
-
-  #   take_action = cond do
-  #     client.bot -> false
-  #     # client.moderator -> false
-  #     now < (short_time + @chat_flood_time_short) -> true
-  #     now < (long_time + @chat_flood_time_long) -> true
-  #     true -> false
-  #   end
-
-  #   if take_action do
-  #     user = User.get_user_by_id(userid)
-  #     if (client.temp_mute_count + 1) == @temp_mute_count_limit do
-  #       banned_until = HumanTime.relative!("300 seconds")
-  #       new_mute = [true, banned_until]
-  #       User.update_user(%{user | banned: new_mute}, persist: true)
-  #       disconnect(userid, :chat_flood)
-
-  #     else
-  #       muted_until = TimexHelper.date_to_str(HumanTime.relative!("60 seconds"), :ymd_t_hms)
-  #       new_mute = [true, muted_until]
-  #       User.update_user(%{user | muted: new_mute}, persist: true)
-  #       update(%{client | temp_mute_count: client.temp_mute_count + 1}, :silent)
-  #       Coordinator.send_to_user(userid, "Chat flood protection enabled, please wait before sending more messages. Persist and you'll be temporarily banned.")
-  #     end
-  #   end
-  #   :ok
-  # end
-
   @spec shadowban_client(T.userid()) :: :ok
   def shadowban_client(userid) do
     client = get_client_by_id(userid)
@@ -365,9 +326,6 @@ defmodule Teiserver.Client do
     update(%{client | awaiting_warn_ack: false}, :silent)
     :ok
   end
-
-  defp get_hd([]), do: 0
-  defp get_hd(v), do: hd(v)
 
   @spec enable_client_message_print(T.userid()) :: :ok
   def enable_client_message_print(userid) do

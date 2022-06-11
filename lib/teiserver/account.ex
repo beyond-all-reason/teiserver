@@ -159,7 +159,7 @@ defmodule Teiserver.Account do
     }
   end
 
-  @spec smurf_search(User.t()) :: map()
+  @spec smurf_search(User.t()) :: list()
   def smurf_search(user) do
     values = list_smurf_keys(
       search: [
@@ -436,6 +436,38 @@ defmodule Teiserver.Account do
   # Client stuff
   alias Teiserver.Account.ClientLib
 
+  @spec get_client_by_name(String.t()) :: nil | T.client()
+  defdelegate get_client_by_name(name), to: ClientLib
+
+  @spec get_client_by_id(T.userid()) :: nil | T.client()
+  defdelegate get_client_by_id(userid), to: ClientLib
+
+  @spec get_clients([T.userid()]) :: List.t()
+  defdelegate get_clients(id_list), to: ClientLib
+
+  @spec list_client_ids() :: [T.userid()]
+  defdelegate list_client_ids(), to: ClientLib
+
+  @spec list_clients() :: [T.client()]
+  defdelegate list_clients(), to: ClientLib
+
+  @spec list_clients([T.userid()]) :: [T.client()]
+  defdelegate list_clients(id_list), to: ClientLib
+
+  @spec merge_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: :ok
+  defdelegate merge_update_client(client, reason), to: ClientLib
+
+  @spec replace_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: T.client()
+  defdelegate replace_update_client(client, reason), to: ClientLib
+
+  @spec get_client_pid(T.userid()) :: pid() | nil
+  defdelegate get_client_pid(userid), to: ClientLib
+
+  @spec cast_client(T.userid(), any) :: any
+  defdelegate cast_client(userid, msg), to: ClientLib
+
+  @spec call_client(T.userid(), any) :: any | nil
+  defdelegate call_client(userid, msg), to: ClientLib
 
 
 
