@@ -1,9 +1,10 @@
 defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.{User, Account, Client, Coordinator}
   alias Teiserver.Battle.Lobby
-  alias alias Teiserver.Data.Matchmaking
+  alias Teiserver.Data.Matchmaking
   alias Teiserver.Account.{AccoladeLib, CodeOfConductData}
   alias Teiserver.Coordinator.CoordinatorLib
+  alias Central.Config
 
   @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore 1v1me un1v1)
   @forward_to_consul ~w(s status follow joinq leaveq splitlobby y yes n no)
@@ -141,29 +142,45 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
           rank_time = User.rank_time(user.id)
 
-          accolades = AccoladeLib.get_player_accolades(user.id)
-          accolades_string = case Map.keys(accolades) do
-            [] ->
-              "They currently have no accolades"
+          smurfs = Account.smurf_search(user)
+            |> Enum.map(fn {_key, users} -> users end)
+            |> List.flatten
+            |> Enum.map(fn %{user: user} -> user end)
+            |> Enum.reject(fn %{id: id} -> id == user.id end)
+            |> Enum.uniq
+            |> Enum.map(fn %{name: name} -> name end)
 
-            _ ->
-              badge_types = Account.list_badge_types(search: [id_list: Map.keys(accolades)])
-              |> Map.new(fn bt -> {bt.id, bt} end)
+          smurf_string = case smurfs do
+            [] -> "No smurfs found"
+            _ -> "Found smurfs named: #{Enum.join(smurfs, ", ")}"
+          end
 
-              ["Accolades as follows:"] ++
-                (accolades
-                |> Enum.map(fn {bt_id, count} ->
-                  ">> #{count}x #{badge_types[bt_id].name}"
-                end))
+          accolades_string = if Config.get_site_config_cache("teiserver.Enable accolades") do
+            accolades = AccoladeLib.get_player_accolades(user.id)
+            case Map.keys(accolades) do
+              [] ->
+                "They currently have no accolades"
+
+              _ ->
+                badge_types = Account.list_badge_types(search: [id_list: Map.keys(accolades)])
+                |> Map.new(fn bt -> {bt.id, bt} end)
+
+                ["Accolades as follows:"] ++
+                  (accolades
+                  |> Enum.map(fn {bt_id, count} ->
+                    ">> #{count}x #{badge_types[bt_id].name}"
+                  end))
+            end
           end
 
           [
             "Rank: #{user.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
+            smurf_string,
             accolades_string
           ]
         else
           []
-        end
+        end# End of moderation if-statement
 
         msg = (standard_parts ++ mod_parts)
           |> List.flatten
