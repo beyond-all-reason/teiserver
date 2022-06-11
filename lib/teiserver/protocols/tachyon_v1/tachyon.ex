@@ -27,8 +27,21 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
     Map.merge(convert_object(:user_extended, user),
     %{"icons" => Teiserver.Account.UserLib.generate_user_icons(user)}
   )
-  def convert_object(:client, client), do: Map.take(client, ~w(userid in_game away ready player_number team_number
-                    team_colour player bonus synced faction lobby_id sync)a)
+  def convert_object(:client, client) do
+    sync_list = case client.sync do
+      true -> ["game", "map"]
+      1 -> ["game", "map"]
+      false -> []
+      0 -> []
+      s -> s
+    end
+
+    Map.take(client, ~w(userid in_game away ready player_number
+        team_number team_colour player bonus
+        faction lobby_id)a
+    )
+      |> Map.put(:sync, sync_list)
+  end
   def convert_object(:queue, queue), do: Map.take(queue, ~w(id name team_size conditions settings map_list)a)
   def convert_object(:blog_post, post), do: Map.take(post, ~w(id short_content content url tags live_from)a)
 

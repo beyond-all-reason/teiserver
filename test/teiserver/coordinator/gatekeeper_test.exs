@@ -1,6 +1,7 @@
 defmodule Teiserver.Coordinator.GatekeeperTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.Lobby
+  alias Teiserver.Account.ClientLib
   alias Teiserver.Common.PubsubListener
   alias Teiserver.Account.UserCache
   alias Teiserver.{Client, Coordinator}
@@ -15,7 +16,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
 
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
     UserCache.update_user(%{host | moderator: true})
-    Client.refresh_client(host.id)
+    ClientLib.refresh_client(host.id)
 
     battle_data = %{
       cmd: "c.lobby.create",

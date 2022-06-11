@@ -1,6 +1,7 @@
 defmodule Teiserver.Coordinator.ConsulChatTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.Lobby
+  alias Teiserver.Account.ClientLib
   alias Teiserver.Common.PubsubListener
   alias Teiserver.{User, Client, Coordinator}
 
@@ -14,7 +15,7 @@ defmodule Teiserver.Coordinator.ConsulChatTest do
 
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
     User.update_user(%{host | moderator: true})
-    Client.refresh_client(host.id)
+    ClientLib.refresh_client(host.id)
 
     lobby_data = %{
       cmd: "c.lobby.create",

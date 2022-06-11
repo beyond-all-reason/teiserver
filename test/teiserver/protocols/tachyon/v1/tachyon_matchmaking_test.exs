@@ -2,6 +2,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
   use Central.ServerCase, async: false
   require Logger
   alias Teiserver.{Client, Game, User}
+  alias Teiserver.Account.ClientLib
   alias Teiserver.Data.Matchmaking
   alias Teiserver.Common.PubsubListener
 
@@ -19,7 +20,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
     User.update_user(%{host | moderator: true})
-    Client.refresh_client(host.id)
+    ClientLib.refresh_client(host.id)
 
     lobby_data = %{
       cmd: "c.lobby.create",

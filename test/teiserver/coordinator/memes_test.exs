@@ -1,6 +1,7 @@
 defmodule Teiserver.Coordinator.MemesTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.Lobby
+  alias Teiserver.Account.ClientLib
   alias Teiserver.{User, Client, Coordinator}
 
   import Teiserver.TeiserverTestLib,
@@ -13,7 +14,7 @@ defmodule Teiserver.Coordinator.MemesTest do
 
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
     User.update_user(%{host | moderator: true})
-    Client.refresh_client(host.id)
+    ClientLib.refresh_client(host.id)
 
     lobby_data = %{
       cmd: "c.lobby.create",

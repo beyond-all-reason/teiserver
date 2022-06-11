@@ -1,6 +1,7 @@
 defmodule Teiserver.Coordinator.JoiningTest do
   use Central.ServerCase, async: false
   alias Teiserver.Common.PubsubListener
+  alias Teiserver.Account.ClientLib
   alias Teiserver.Coordinator
 
   alias Teiserver.Client
@@ -15,7 +16,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
 
     # User needs to be a moderator (at this time) to start/stop Coordinator mode
     UserCache.update_user(%{user | moderator: true})
-    Client.refresh_client(user.id)
+    ClientLib.refresh_client(user.id)
 
     battle_data = %{
       cmd: "c.lobby.create",
@@ -112,7 +113,8 @@ defmodule Teiserver.Coordinator.JoiningTest do
         "team_colour" => 0,
         "player_number" => 0,
         "userid" => user2.id,
-        "player" => true
+        "player" => true,
+        "sync" => ["game", "map"]
       },
       "lobby_id" => lobby_id,
       "reason" => "client_updated_battlestatus"

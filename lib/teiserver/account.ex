@@ -384,6 +384,61 @@ defmodule Teiserver.Account do
   end
 
 
+  # Cache functions
+  alias alias Teiserver.Account.UserCache
+
+  @spec get_username(T.userid()) :: String.t() | nil
+  defdelegate get_username(userid), to: UserCache
+
+  @spec get_userid_from_name(String.t()) :: integer() | nil
+  def get_userid_from_name(name), do: UserCache.get_userid(name)
+
+  @spec get_user_by_name(String.t()) :: T.user() | nil
+  defdelegate get_user_by_name(username), to: UserCache
+
+  @spec get_user_by_email(String.t()) :: T.user() | nil
+  defdelegate get_user_by_email(email), to: UserCache
+
+  @spec get_user_by_discord_id(String.t()) :: T.user() | nil
+  defdelegate get_user_by_discord_id(discord_id), to: UserCache
+
+  @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
+  defdelegate get_userid_by_discord_id(discord_id), to: UserCache
+
+  @spec get_user_by_token(String.t()) :: T.user() | nil
+  defdelegate get_user_by_token(token), to: UserCache
+
+  @spec get_user_by_id(T.userid()) :: T.user() | nil
+  defdelegate get_user_by_id(id), to: UserCache
+
+  @spec list_users_from_cache(list) :: list
+  def list_users_from_cache(id_list), do: UserCache.list_users(id_list)
+
+  @spec recache_user(Integer.t()) :: :ok
+  defdelegate recache_user(id), to: UserCache
+
+  @spec convert_user(T.user()) :: T.user()
+  defdelegate convert_user(user), to: UserCache
+
+  @spec add_user(T.user()) :: T.user()
+  defdelegate add_user(user), to: UserCache
+
+  @spec update_cache_user(T.user(), boolean) :: T.user()
+  def update_cache_user(user, persist \\ false), do: UserCache.update_user(user, persist)
+
+  @spec delete_user(T.userid()) :: :ok | :no_user
+  defdelegate delete_user(userid), to: UserCache
+
+  @spec decache_user(T.userid()) :: :ok | :no_user
+  defdelegate decache_user(userid), to: UserCache
+
+
+  # Client stuff
+  alias Teiserver.Account.ClientLib
+
+
+
+
   alias Teiserver.Account.AutomodAction
   alias Teiserver.Account.AutomodActionLib
 

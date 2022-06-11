@@ -64,7 +64,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 * team_colour: colour
 * player: boolean
 * bonus: integer, default: 0 -- In spring this is 0-127, here it's an unsigned integer
-* synced: boolean
+* sync: list(string) -- list of what is sync'd, not a list of what's missing
 * faction: string
 * lobby_id: Lobby.id
 

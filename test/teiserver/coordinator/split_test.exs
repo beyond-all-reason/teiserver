@@ -1,6 +1,7 @@
 defmodule Teiserver.Coordinator.SplitTest do
   use Central.ServerCase, async: false
   alias Teiserver.Battle.Lobby
+  alias Teiserver.Account.ClientLib
   alias Teiserver.Common.PubsubListener
   alias Teiserver.{User, Client, Coordinator}
   alias Teiserver.Coordinator.CoordinatorLib
@@ -16,8 +17,8 @@ defmodule Teiserver.Coordinator.SplitTest do
 
     User.update_user(%{host | moderator: true})
     User.update_user(%{player | moderator: true})
-    Client.refresh_client(host.id)
-    Client.refresh_client(player.id)
+    ClientLib.refresh_client(host.id)
+    ClientLib.refresh_client(player.id)
 
     lobby_data = %{
       cmd: "c.lobby.create",

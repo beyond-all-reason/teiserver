@@ -11,6 +11,7 @@ defmodule Teiserver.Client do
   alias Phoenix.PubSub
   alias Teiserver.{Room, User, Account, Telemetry}
   alias Teiserver.Battle.Lobby
+  alias Teiserver.Account.ClientLib
   # alias Central.Helpers.TimexHelper
   require Logger
 
@@ -152,85 +153,60 @@ defmodule Teiserver.Client do
     client
   end
 
-  @spec merge_update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
-  def merge_update(%{userid: userid} = partial_client, _reason) do
-    cast_client(userid, {:merge_client, partial_client})
-    Logger.error("Client.merge_update not implemented yet")
-  end
-  def merge_update(client, _reason), do: client
+  @spec add_client(Map.t()) :: Map.t()
+  def add_client(client) do
+    Central.cache_put(:clients, client.userid, client)
 
-  @spec update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
-  def update(%{userid: userid} = client, reason) do
-    client = client
-      |> add_client
+    Central.cache_update(:lists, :clients, fn value ->
+      new_value =
+        ([client.userid | value])
+        |> Enum.uniq()
 
-    # Update the process with it
-    cast_client(userid, {:update_client, client})
-
-    if reason != :silent do
-      PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
-
-      if client.lobby_id do
-        PubSub.broadcast(
-          Central.PubSub,
-          "teiserver_lobby_updates:#{client.lobby_id}",
-          {:lobby_update, :updated_client_battlestatus, client.lobby_id, {client, reason}}
-        )
-
-        if client.lobby_host do
-          case Lobby.get_lobby(client.lobby_id) do
-            nil -> :ok
-            lobby ->
-              case {lobby.in_progress, client.in_game} do
-                {true, false} ->
-                  new_lobby = %{lobby |
-                    in_progress: false,
-                    started_at: nil
-                  }
-                  Lobby.update_lobby(new_lobby, nil, :host_updated_clientstatus)
-                {false, true} ->
-                  new_lobby = %{lobby |
-                    in_progress: true,
-                    started_at: System.system_time(:second)
-                  }
-                  Lobby.update_lobby(new_lobby, nil, :host_updated_clientstatus)
-                _ ->
-                  :ok
-              end
-          end
-        end
-      end
-    end
+      {:ok, new_value}
+    end)
 
     client
   end
-  def update(client, _reason), do: client
+
+
+
+
+  @spec get_client_by_name(nil) :: nil
+  @spec get_client_by_name(String.t()) :: nil | T.client()
+  defdelegate get_client_by_name(name), to: ClientLib
+
+  @spec get_client_by_id(nil) :: nil
+  @spec get_client_by_id(T.userid()) :: nil | T.client()
+  defdelegate get_client_by_id(userid), to: ClientLib
+
+  @spec get_clients([T.userid()]) :: List.t()
+  defdelegate get_clients(id_list), to: ClientLib
+
+  @spec list_client_ids() :: [T.userid()]
+  defdelegate list_client_ids(), to: ClientLib
+
+  @spec list_clients() :: [T.client()]
+  defdelegate list_clients(), to: ClientLib
+
+  @spec list_clients([T.userid()]) :: [T.client()]
+  defdelegate list_clients(id_list), to: ClientLib
+
+  @spec update(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: T.client()
+  def update(client, reason), do: ClientLib.update_client(client, reason)
+
 
   @spec get_client_pid(T.userid()) :: pid() | nil
-  def get_client_pid(userid) do
-    case Horde.Registry.lookup(Teiserver.ClientRegistry, userid) do
-      [{pid, _}] -> pid
-      _ -> nil
-    end
-  end
+  defdelegate get_client_pid(userid), to: ClientLib
 
   @spec cast_client(T.userid(), any) :: any
-  def cast_client(userid, msg) do
-    case get_client_pid(userid) do
-      nil -> nil
-      pid -> GenServer.cast(pid, msg)
-    end
-  end
+  defdelegate cast_client(userid, msg), to: ClientLib
 
   @spec call_client(T.userid(), any) :: any | nil
-  def call_client(userid, msg) do
-    case get_client_pid(userid) do
-      nil -> nil
-      pid -> GenServer.call(pid, msg)
-    end
-  end
+  defdelegate call_client(userid, msg), to: ClientLib
 
-  @spec join_battle(T.client_id(), Integer.t(), boolean()) :: nil | Map.t()
+
+
+  @spec join_battle(T.client_id(), Integer.t(), boolean()) :: nil | T.client()
   def join_battle(userid, lobby_id, lobby_host) do
     case get_client_by_id(userid) do
       nil ->
@@ -273,85 +249,6 @@ defmodule Teiserver.Client do
         Room.remove_user_from_room(userid, room.name)
       end
     end)
-  end
-
-  @spec get_client_by_name(nil) :: nil
-  @spec get_client_by_name(String.t()) :: nil | Map.t()
-  def get_client_by_name(nil), do: nil
-  def get_client_by_name(""), do: nil
-
-  def get_client_by_name(name) do
-    userid = User.get_userid(name)
-    Central.cache_get(:clients, userid)
-  end
-
-  @spec get_client_by_id(Integer.t() | nil) :: nil | Map.t()
-  def get_client_by_id(nil), do: nil
-
-  def get_client_by_id(userid) do
-    Central.cache_get(:clients, userid)
-  end
-
-  @spec get_clients(List.t()) :: List.t()
-  def get_clients([]), do: []
-
-  def get_clients(id_list) do
-    id_list
-    |> Enum.map(fn userid -> Central.cache_get(:clients, userid) end)
-  end
-
-  @spec add_client(Map.t()) :: Map.t()
-  def add_client(client) do
-    Central.cache_put(:clients, client.userid, client)
-
-    Central.cache_update(:lists, :clients, fn value ->
-      new_value =
-        ([client.userid | value])
-        |> Enum.uniq()
-
-      {:ok, new_value}
-    end)
-
-    client
-  end
-
-  @spec list_client_ids() :: [integer()]
-  def list_client_ids() do
-    case Central.cache_get(:lists, :clients) do
-      nil -> []
-      ids -> ids
-    end
-  end
-
-  @spec list_clients() :: [Map.t()]
-  def list_clients() do
-    list_client_ids()
-    |> list_clients()
-  end
-
-  @spec list_clients([integer()]) :: [Map.t()]
-  def list_clients(id_list) do
-    id_list
-    |> Enum.map(fn c -> get_client_by_id(c) end)
-  end
-
-  @spec refresh_client(T.userid()) :: Map.t()
-  def refresh_client(userid) do
-    user = User.get_user_by_id(userid)
-    stats = Account.get_user_stat_data(user.id)
-
-    client = get_client_by_id(userid)
-    %{client |
-      userid: user.id,
-      name: user.name,
-      rank: user.rank,
-      moderator: User.is_moderator?(user),
-      bot: User.is_bot?(user),
-      ip: stats["last_ip"],
-      country: stats["country"],
-      lobby_client: stats["lobby_client"]
-    }
-    |> add_client
   end
 
   def disconnect(userid, reason \\ nil) do
