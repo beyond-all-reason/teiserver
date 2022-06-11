@@ -6,6 +6,39 @@ defmodule Teiserver.Battle.LobbyCache do
   alias Teiserver.Data.Types, as: T
   require Logger
 
+  @spec get_lobby(integer()) :: T.lobby() | nil
+  def get_lobby(id) do
+    Central.cache_get(:lobbies, int_parse(id))
+    # call_lobby(id, :lobby_state)
+  end
+
+  @spec get_lobby_by_uuid(String.t()) :: T.lobby() | nil
+  def get_lobby_by_uuid(uuid) do
+    lobby_list = list_lobbies()
+      |> Enum.filter(fn lobby -> lobby.tags["server/match/uuid"] == uuid end)
+
+    case lobby_list do
+      [] -> nil
+      [lobby | _] -> lobby
+    end
+  end
+
+  @spec list_lobby_ids :: [T.lobby_id()]
+  def list_lobby_ids() do
+    case Central.cache_get(:lists, :lobbies) do
+      nil -> []
+      ids -> ids
+    end
+    # Horde.Registry.select(Teiserver.LobbyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+  end
+
+  @spec list_lobbies() :: [T.lobby()]
+  def list_lobbies() do
+    list_lobby_ids()
+      |> Enum.map(fn lobby_id -> get_lobby(lobby_id) end)
+      |> Enum.filter(fn lobby -> lobby != nil end)
+  end
+
   @spec update_value(T.lobby_id(), atom, any) :: :ok
   def update_value(lobby_id, key, value) do
     cast_lobby(lobby_id, {:update_value, key, value})
@@ -87,21 +120,7 @@ defmodule Teiserver.Battle.LobbyCache do
     lobby
   end
 
-  @spec get_lobby(integer()) :: T.lobby() | nil
-  def get_lobby(id) do
-    Central.cache_get(:lobbies, int_parse(id))
-  end
 
-  @spec get_lobby_by_uuid(String.t()) :: T.lobby() | nil
-  def get_lobby_by_uuid(uuid) do
-    lobby_list = list_lobbies()
-      |> Enum.filter(fn lobby -> lobby.tags["server/match/uuid"] == uuid end)
-
-    case lobby_list do
-      [] -> nil
-      [lobby | _] -> lobby
-    end
-  end
 
   @spec get_lobby_players!(T.lobby_id()) :: [integer()]
   def get_lobby_players!(id) do
@@ -239,20 +258,5 @@ defmodule Teiserver.Battle.LobbyCache do
     )
 
     Lobby.stop_battle_lobby_throttle(lobby_id)
-  end
-
-  @spec list_lobby_ids :: [T.lobby_id()]
-  def list_lobby_ids() do
-    case Central.cache_get(:lists, :lobbies) do
-      nil -> []
-      ids -> ids
-    end
-  end
-
-  @spec list_lobbies() :: [T.lobby()]
-  def list_lobbies() do
-    list_lobby_ids()
-      |> Enum.map(fn lobby_id -> Central.cache_get(:lobbies, lobby_id) end)
-      |> Enum.filter(fn lobby -> lobby != nil end)
   end
 end
