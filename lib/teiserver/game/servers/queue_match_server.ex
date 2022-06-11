@@ -4,7 +4,7 @@ defmodule Teiserver.Game.QueueMatchServer do
   alias Teiserver.Battle.Lobby
   alias Teiserver.Data.Matchmaking
   alias Phoenix.PubSub
-  alias Teiserver.{Coordinator, Client, Telemetry}
+  alias Teiserver.{Coordinator, Client}
 
   @tick_interval 500
   @ready_wait_time 15_000
@@ -27,7 +27,11 @@ defmodule Teiserver.Game.QueueMatchServer do
           case Enum.empty?(new_pending_accepts) do
             # That was the last one, go-time
             true ->
-              find_empty_lobby(interim_state)
+              if Enum.empty?(state.declined_users) do
+                find_empty_lobby(interim_state)
+              else
+                cancel_match(interim_state)
+              end
 
             # Not ready quite yet, still waiting for 1 or more others
             false ->
@@ -123,6 +127,12 @@ defmodule Teiserver.Game.QueueMatchServer do
           "teiserver_client_messages:#{userid}",
           {:client_message, :matchmaking, userid, {:match_declined, {state.queue_id, state.match_id}}}
         )
+
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_queue_wait:#{state.queue_id}",
+          {:queue_wait, :queue_remove_user, state.queue_id, userid}
+        )
       end)
 
     DynamicSupervisor.terminate_child(Teiserver.Game.QueueSupervisor, self())
@@ -131,7 +141,9 @@ defmodule Teiserver.Game.QueueMatchServer do
 
   @spec find_empty_lobby(map()) :: map()
   defp find_empty_lobby(state) do
-    empty_lobby = Lobby.find_empty_lobby(fn l -> String.contains?(l.name, "EU ") end)
+    empty_lobby = Lobby.find_empty_lobby(fn l ->
+      String.starts_with?(l.name, "EU ") or String.starts_with?(l.name, "BH ")
+    end)
 
     case empty_lobby do
       nil ->

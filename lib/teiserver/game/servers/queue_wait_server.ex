@@ -195,15 +195,43 @@ defmodule Teiserver.Game.QueueWaitServer do
               |> Enum.sort_by(fn {_data, distance} -> distance end)
               |> hd_or_x({nil, nil})
 
-            {{userid, time, current_range, type}, best_match}
+            # If both teams are in the same bucket we can get a double-match
+            # event where it tries to create A-B and B-A
+            # to solve this we sort them based on their
+            # join time and call Enum.uniq later
+            if best_match != nil do
+              {_, best_time, _, _} = best_match
+
+              if best_time < time do
+                {best_match, {userid, time, current_range, type}}
+              else
+                {{userid, time, current_range, type}, best_match}
+              end
+            else
+              {{userid, time, current_range, type}, best_match}
+            end
           end)
       end)
       |> List.flatten
+      |> Enum.uniq
       |> Enum.filter(fn {_userid_type, match} -> match != nil end)
       |> Enum.map(fn match ->
         team_list = case match do
           {m1, m2} -> [m1, m2]
         end
+
+        team_list
+          |> Enum.each(fn
+            {userid, _, _, :user} ->
+              PubSub.broadcast(
+                Central.PubSub,
+                "teiserver_queue_wait:#{state.queue_id}",
+                {:queue_wait, :queue_remove_user, state.queue_id, userid}
+              )
+            _ ->
+              :ok
+          end)
+
         Matchmaking.create_match(team_list, state.queue_id)
       end)
 
@@ -303,7 +331,7 @@ defmodule Teiserver.Game.QueueWaitServer do
   end
 
   @spec bucket_function(T.userid()) :: non_neg_integer()
-  defp bucket_function(user_id) do
+  defp bucket_function(_user_id) do
     1
     # rem(user_id, 2)
   end

@@ -1,4 +1,7 @@
 <% bsname = @view_colour %>
+<%
+  moderator = allow?(@current_user, "teiserver.moderator")
+%>
 
 <%= render TeiserverWeb.Game.GeneralView, "sub_menu.html", %{active: "queues", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
 
@@ -53,12 +56,14 @@
       <td><%= info.mean_wait_time %></td>
 
       <td>
-        <%#= live_redirect "Show", to: Routes.ts_game_queue_show_path(@socket, :show, queue_id), class: "btn btn-sm btn-outline-#{bsname}" %>
+        <%= if moderator do %>
+          <%= live_redirect "Show", to: Routes.ts_game_queue_show_path(@socket, :show, queue_id), class: "btn btn-sm btn-outline-#{bsname}" %>
+        <% end %>
       </td>
 
       <td>
         <%= cond do %>
-          <% false and @client == nil -> %>
+          <% @client == nil -> %>
             Connect with client to join queue
         
           <% Enum.member?(@queue_membership, queue_id) -> %>

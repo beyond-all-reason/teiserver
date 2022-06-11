@@ -74,6 +74,8 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec create_match([{T.userid(), :user} | {T.party_id(), :party}], T.queue_id()) :: {pid, String.t(), list()}
   def create_match(teams, queue_id) do
+    Logger.info("create_match: #{inspect teams}")
+
     {pid, match_id} = add_match_server(queue_id, teams)
     {pid, match_id, teams}
   end

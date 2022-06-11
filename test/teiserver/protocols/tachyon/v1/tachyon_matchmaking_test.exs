@@ -589,5 +589,11 @@ defmodule Teiserver.TachyonMatchmakingTest do
     wait_state = :sys.get_state(wait_pid)
     assert wait_state.wait_list == []
     refute wait_state.buckets == %{}
+
+    # If we tick is that still the case?
+    send(wait_pid, :tick)
+    wait_state = :sys.get_state(wait_pid)
+    assert wait_state.wait_list == []
+    refute wait_state.buckets == %{}
   end
 end

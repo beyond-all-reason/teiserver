@@ -3,8 +3,11 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
   alias Teiserver.Agents.AgentLib
   require Logger
 
-  @tick_period 5000
+  @tick_period 5_000
   @decline_chance 0.2
+
+  @leave_delay 5_000
+  @rejoin_delay 2_000
 
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
@@ -42,6 +45,16 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
     {:noreply, new_state}
   end
 
+  def handle_info({:set_allow_join, value}, state) do
+    {:noreply, %{state | allow_join: value}}
+  end
+
+  def handle_info(:leave_lobby, state) do
+    :timer.send_after(@rejoin_delay, {:set_allow_join, true})
+    AgentLib._send(state.socket, %{cmd: "c.lobby.leave"})
+    {:noreply, state}
+  end
+
   defp handle_msg(nil, state), do: state
   defp handle_msg(%{"cmd" => "s.matchmaking.query", "result" => "success", "queues" => queues}, state) do
     queue_ids = queues
@@ -52,9 +65,11 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
         state
 
       _ ->
-        queue_id = Enum.random(queue_ids)
-        cmd = %{cmd: "c.matchmaking.join_queue", queue_id: queue_id}
-        AgentLib._send(state.socket, cmd)
+        if state.allow_join do
+          queue_id = Enum.random(queue_ids)
+          cmd = %{cmd: "c.matchmaking.join_queue", queue_id: queue_id}
+          AgentLib._send(state.socket, cmd)
+        end
         state
     end
   end
@@ -62,18 +77,36 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
     %{state | queues: [queue_id]}
   end
   defp handle_msg(%{"cmd" => "s.matchmaking.match_ready", "match_id" => match_id}, state) do
-    # if :rand.uniform() <= state.decline_chance do
+    if :rand.uniform() <= state.decline_chance do
       cmd = %{cmd: "c.matchmaking.decline", match_id: match_id}
       AgentLib._send(state.socket, cmd)
-      %{state | queues: []}
-    # else
-    #   cmd = %{cmd: "c.matchmaking.ready", queue_id: queue_id}
-    #   AgentLib._send(state.socket, cmd)
-    # end
+      :timer.send_after(@rejoin_delay, {:set_allow_join, true})
+      %{state | queues: [],  allow_join: false}
+    else
+      cmd = %{cmd: "c.matchmaking.accept", match_id: match_id}
+      AgentLib._send(state.socket, cmd)
+      %{state | queues: [],  allow_join: false}
+    end
+  end
+
+  defp handle_msg(%{"cmd" => "s.matchmaking.match_cancelled"}, state) do
+    %{state | queues: [],  allow_join: true}
+  end
+
+  defp handle_msg(%{"cmd" => "s.matchmaking.match_declined"}, state) do
+    %{state | queues: [],  allow_join: true}
   end
 
 
-  defp handle_msg(%{"cmd" => "s.matchmaking.match_declined"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.remove_user"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.leave"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.updated"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.add_user"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.updated_client_battlestatus"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.force_join"}, state) do
+    :timer.send_after(@leave_delay, :leave_lobby)
+    %{state | queues: [],  allow_join: false}
+  end
 
   defp handle_msg(%{"cmd" => "s.communication.received_direct_message"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.announce"}, state), do: state
@@ -107,6 +140,7 @@ defmodule Teiserver.Agents.MatchmakingAgentServer do
        queues: [],
        socket: nil,
        reject: Map.get(opts, :reject, false),
+       allow_join: true,
        decline_chance: Map.get(opts, :decline_chance, @decline_chance)
      }}
   end
