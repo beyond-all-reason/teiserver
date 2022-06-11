@@ -1,7 +1,7 @@
 defmodule Teiserver.Room do
   @moduledoc false
   require Logger
-  alias Teiserver.{User, Client, Chat, Coordinator}
+  alias Teiserver.{User, Chat, Coordinator}
   alias alias Teiserver.Chat.WordLib
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
@@ -190,7 +190,6 @@ defmodule Teiserver.Room do
               "room:#{room_name}",
               {:new_message, from_id, room_name, msg}
             )
-            Client.chat_flood_check(from_id)
           end
       end
     end
@@ -224,7 +223,6 @@ defmodule Teiserver.Room do
               "room:#{room_name}",
               {:new_message_ex, from_id, room_name, msg}
             )
-            Client.chat_flood_check(from_id)
           end
       end
     end

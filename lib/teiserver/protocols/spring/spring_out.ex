@@ -615,7 +615,11 @@ defmodule Teiserver.Protocols.SpringOut do
     # Who is online?
     clients = Client.list_client_ids()
     |> Enum.map(fn userid ->
-      Client.get_client_by_id(userid)
+      if userid == user.id do
+        client
+      else
+        Client.get_client_by_id(userid)
+      end
     end)
     |> Enum.filter(fn c -> c != nil end)
 

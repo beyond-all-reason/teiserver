@@ -19,6 +19,7 @@ defmodule Teiserver.Account.ClientLib do
   def get_client_by_name(name) do
     userid = Account.get_userid_from_name(name)
     Central.cache_get(:clients, userid)
+    # call_client(userid, :client_state)
   end
 
   @spec get_client_by_id(nil) :: nil
@@ -27,14 +28,14 @@ defmodule Teiserver.Account.ClientLib do
 
   def get_client_by_id(userid) do
     Central.cache_get(:clients, userid)
+    # call_client(userid, :client_state)
   end
 
   @spec get_clients([T.userid()]) :: List.t()
   def get_clients([]), do: []
-
   def get_clients(id_list) do
     id_list
-    |> Enum.map(fn userid -> Central.cache_get(:clients, userid) end)
+    |> Enum.map(fn userid -> get_client_by_id(userid) end)
   end
 
   @spec list_client_ids() :: [T.userid()]
@@ -43,6 +44,7 @@ defmodule Teiserver.Account.ClientLib do
       nil -> []
       ids -> ids
     end
+    # Horde.Registry.select(Teiserver.ClientRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_clients() :: [T.client()]
