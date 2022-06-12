@@ -153,7 +153,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             )
         end
       _ ->
-        Logger.info("[MatchMonitorServer] match-chat-name nomatch from: #{from_id}: match-chat #{data}")
+        Logger.info("[MatchMonitorServer] match-chat-name nomatch from: #{from_id}: match-chat [[#{data}]]")
     end
 
     {:noreply, state}
@@ -191,7 +191,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     #     Logger.info("[MatchMonitorServer] match-chat-name nomatch from: #{from_id}: match-chat #{data}")
     # end
 
-    Logger.info("[MatchMonitorServer] match-chat-name-noname: match-chat #{data}")
+    Logger.info("[MatchMonitorServer] match-chat-name-noname: match-chat [[#{data}]]")
 
     {:noreply, state}
   end
