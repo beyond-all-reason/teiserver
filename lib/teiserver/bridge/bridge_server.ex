@@ -85,6 +85,10 @@ defmodule Teiserver.Bridge.BridgeServer do
         # It's us, ignore it
         nil
 
+      # Ignore bots
+      User.is_bot?(user) ->
+        nil
+
       message_contains?(message, "http:") ->
         nil
 

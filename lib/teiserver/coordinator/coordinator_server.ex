@@ -72,6 +72,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
       :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
     end)
 
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_inout")
     :ok = PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
 
@@ -173,6 +174,16 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           User.send_direct_message(state.userid, userid, "I don't currently handle messages, sorry #{user.name}")
         end
     end
+    {:noreply, state}
+  end
+
+  # Application start/stop
+  def handle_info({:server_event, :stop, _node}, state) do
+    Lobby.say(state.coordinator_id, "Teiserver update taking place, see discord for details/issues.", state.lobby_id)
+    {:noreply, state}
+  end
+
+  def handle_info({:server_event, _event, _node}, state) do
     {:noreply, state}
   end
 
