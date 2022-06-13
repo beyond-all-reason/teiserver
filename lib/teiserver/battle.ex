@@ -407,6 +407,7 @@ defmodule Teiserver.Battle do
   end
 
 
+  # LobbyServer process
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
   defdelegate get_lobby_pid(lobby_id), to: LobbyCache
 
@@ -419,19 +420,14 @@ defmodule Teiserver.Battle do
   @spec lobby_exists?(T.lobby_id()) :: boolean()
   defdelegate lobby_exists?(lobby_id), to: LobbyCache
 
+  # Registry
   @spec list_lobby_ids :: [T.lobby_id()]
   defdelegate list_lobby_ids(), to: LobbyCache
 
   @spec list_lobbies() :: [T.lobby()]
   defdelegate list_lobbies(), to: LobbyCache
 
-
-  @spec update_value(T.lobby_id(), atom, any) :: :ok
-  defdelegate update_value(lobby_id, key, value), to: LobbyCache
-
-  @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
-  defdelegate update_lobby(lobby, data, reason), to: LobbyCache
-
+  # Query
   @spec get_lobby(T.lobby_id() | nil) :: T.lobby() | nil
   defdelegate get_lobby(id), to: LobbyCache
 
@@ -441,13 +437,28 @@ defmodule Teiserver.Battle do
   @spec get_lobby_players!(T.lobby_id()) :: [integer()]
   defdelegate get_lobby_players!(id), to: LobbyCache
 
+  # Update
+  @spec update_value(T.lobby_id(), atom, any) :: :ok
+  defdelegate update_value(lobby_id, key, value), to: LobbyCache
+
+  @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
+  defdelegate update_lobby(lobby, data, reason), to: LobbyCache
+
   @spec add_lobby(T.lobby()) :: T.lobby()
   defdelegate add_lobby(lobby), to: LobbyCache
 
+  # Actions
   @spec close_lobby(integer() | nil, atom) :: :ok
   defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyCache
 
+  @spec add_user_to_lobby(T.userid(), T.lobby_id(), String.t()) :: :ok
+  defdelegate add_user_to_lobby(userid, lobby_id, script_password), to: LobbyCache
 
+  @spec remove_user_from_lobby(T.userid(), T.lobby_id()) :: :ok
+  defdelegate remove_user_from_lobby(userid, lobby_id), to: LobbyCache
+
+
+  # Chat
   @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}
   defdelegate say(userid, msg, lobby_id), to: LobbyChat
 

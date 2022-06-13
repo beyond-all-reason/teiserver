@@ -7,6 +7,7 @@ defmodule Teiserver.Application do
       {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ServerRegistry]},
       {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.LobbyRegistry]},
       {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ClientRegistry]},
+      {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.PartyRegistry]},
 
       # These are for tracking the number of servers on the local node
       {Registry, keys: :duplicate, name: Teiserver.LocalPoolRegistry},

@@ -49,9 +49,8 @@ defmodule Teiserver.Battle.Lobby do
   alias Phoenix.PubSub
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.{User, Client, Battle}
+  alias Teiserver.{User, Client, Battle, Coordinator, LobbyIdServer}
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.{Coordinator, LobbyIdServer}
   alias Teiserver.Battle.{LobbyChat, LobbyCache}
 
 
@@ -254,6 +253,7 @@ defmodule Teiserver.Battle.Lobby do
     script_password = new_script_password()
 
     Coordinator.cast_consul(battle_lobby_id, {:user_joined, userid})
+    Battle.add_user_to_lobby(userid, battle_lobby_id, script_password)
 
     PubSub.broadcast(
       Central.PubSub,
@@ -272,6 +272,8 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec add_user_to_battle(integer(), integer(), String.t() | nil) :: nil
   def add_user_to_battle(userid, lobby_id, script_password \\ nil) do
+    Battle.add_user_to_lobby(userid, lobby_id, script_password)
+
     Central.cache_update(:lobbies, lobby_id, fn battle_state ->
       new_state =
         if Enum.member?(battle_state.players, userid) do
@@ -420,6 +422,7 @@ defmodule Teiserver.Battle.Lobby do
   defp do_remove_user_from_battle(userid, lobby_id) do
     battle = get_battle(lobby_id)
     Client.leave_battle(userid)
+    Battle.remove_user_from_lobby(userid, lobby_id)
 
     if battle do
       if battle.founder_id == userid do

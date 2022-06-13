@@ -2,11 +2,11 @@ defmodule Teiserver.Battle.LobbyServer do
   use GenServer
   require Logger
   alias Teiserver.{Battle, Client}
-  # alias Phoenix.PubSub
+  alias Phoenix.PubSub
 
   @impl true
-  def handle_call(:lobby_state, _from, state) do
-    {:reply, state.lobby, state}
+  def handle_call(:get_lobby_state, _from, state) do
+    {:reply, %{state.lobby | players: state.member_list}, state}
   end
 
   def handle_call({:get, key}, _from, state) do
@@ -29,6 +29,30 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, result, state}
   end
 
+  def handle_call(:get_member_list, _from, state) do
+    {:reply, state.member_list, state}
+  end
+
+  def handle_call(:get_member_count, _from, state) do
+    {:reply, Enum.count(state.member_list), state}
+  end
+
+  def handle_call(:get_player_list, _from, %{state: :lobby} = state) do
+    {:reply, :lobby, state}
+  end
+
+  def handle_call(:get_player_list, _from, state) do
+    {:reply, state.player_list, state}
+  end
+
+  def handle_call(:get_player_count, _from, %{state: :lobby} = state) do
+    {:reply, :lobby, state}
+  end
+
+  def handle_call(:get_player_count, _from, state) do
+    {:reply, Enum.count(state.player_list), state}
+  end
+
   @impl true
   def handle_cast(:start_match, state) do
     player_list = state.lobby_id
@@ -43,6 +67,16 @@ defmodule Teiserver.Battle.LobbyServer do
 
   def handle_cast(:stop_match, state) do
     {:noreply, %{state | player_list: [], state: :lobby}}
+  end
+
+  def handle_cast({:add_user, userid, _script_password}, state) do
+    new_members = [userid | state.member_list] |> Enum.uniq
+    {:noreply, %{state | member_list: new_members}}
+  end
+
+  def handle_cast({:remove_user, userid}, state) do
+    new_members = List.delete(state.member_list, userid)
+    {:noreply, %{state | member_list: new_members}}
   end
 
   def handle_cast({:update_value, key, value}, state) do
@@ -71,6 +105,7 @@ defmodule Teiserver.Battle.LobbyServer do
 
     {:ok, Map.merge(state, %{
       lobby_id: lobby_id,
+      member_list: [],
       player_list: [],
       state: :lobby
     })}

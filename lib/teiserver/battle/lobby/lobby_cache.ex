@@ -9,7 +9,7 @@ defmodule Teiserver.Battle.LobbyCache do
   @spec get_lobby(integer()) :: T.lobby() | nil
   def get_lobby(id) do
     Central.cache_get(:lobbies, int_parse(id))
-    # call_lobby(id, :lobby_state)
+    # call_lobby(id, :get_lobby_state)
   end
 
   @spec get_lobby_by_uuid(String.t()) :: T.lobby() | nil
@@ -120,6 +120,18 @@ defmodule Teiserver.Battle.LobbyCache do
     lobby
   end
 
+
+  @spec add_user_to_lobby(T.userid(), T.lobby_id(), String.t()) :: :ok
+  def add_user_to_lobby(userid, lobby_id, script_password) do
+    cast_lobby(lobby_id, {:add_user, userid, script_password})
+    :ok
+  end
+
+  @spec remove_user_from_lobby(T.userid(), T.lobby_id()) :: :ok
+  def remove_user_from_lobby(userid, lobby_id) do
+    cast_lobby(lobby_id, {:remove_user, userid})
+    :ok
+  end
 
 
   @spec get_lobby_players!(T.lobby_id()) :: [integer()]
