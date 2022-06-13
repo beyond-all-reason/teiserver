@@ -251,6 +251,7 @@ defmodule Teiserver.Client do
     end)
   end
 
+  @spec disconnect(T.userid(), nil | String.t()) :: nil | :ok | {:error, any}
   def disconnect(userid, reason \\ nil) do
     case get_client_by_id(userid) do
       nil -> nil
