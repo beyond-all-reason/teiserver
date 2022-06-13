@@ -12,7 +12,7 @@
     <title><%= Application.get_env(:central, CentralWeb)[:page_title] %></title>
   
     <%
-      light_mode = case get_user_config_cache(@current_user, "general.Colour scheme") do
+      light_mode = case get_user_config_cache(assigns[:current_user], "general.Colour scheme") do
         "Site default" -> get_site_config_cache("user.Default light mode")
         "Light" -> true
         "Dark" -> false
