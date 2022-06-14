@@ -244,7 +244,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
       true ->
         Logger.info("QueueMatchServer #{state.match_id} setup_lobby calling player cv start")
-        Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to start the game, if this doesn't work feel free to start it yourselves and report to Teifion.", lobby.id)
+        Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to start the game, if this doesn't work feel free to start it yourselves and report the error to Teifion.", lobby.id)
 
         :timer.sleep(100)
         Lobby.say(p1, "!cv forcestart", lobby.id)
