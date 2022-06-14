@@ -12,20 +12,20 @@
       <div class="card-body">
         <h4>
           <%
-            member_count = @battles |> Enum.reduce(0, fn (b, acc) -> acc + b.member_count end)
-            player_count = @battles |> Enum.reduce(0, fn (b, acc) -> acc + b.player_count end)
-            spectator_count = @battles |> Enum.reduce(0, fn (b, acc) -> acc + b.spectator_count end)
+            member_count = @lobbies |> Enum.reduce(0, fn (b, acc) -> acc + b.member_count end)
+            player_count = @lobbies |> Enum.reduce(0, fn (b, acc) -> acc + b.player_count end)
+            spectator_count = member_count - player_count
           %>
-          <%= if Enum.count(@battles) > 0 do %>
-            Battles: <%= Enum.count(@battles) %>
+          <%= if Enum.empty?(@lobbies) do %>
+            No lobbies found
+          <% else %>
+            Lobbies: <%= Enum.count(@lobbies) %>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             Total members: <%= member_count %>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             Players: <%= player_count %>
             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             Spectators: <%= spectator_count %>
-          <% else %>
-            No battles found
           <% end %>
         </h4>
 
@@ -45,8 +45,8 @@
       <% end %>
     </tr>
   </thead>
-  <tbody id="battles">
-    <%= for lobby <- @battles do %>
+  <tbody id="lobbies">
+    <%= for lobby <- @lobbies do %>
       <%= if lobby != nil do %>
         <tr id={"lobby-#{lobby.id}"}>
           <td><%= lobby.name %></td>
@@ -72,7 +72,7 @@
           </td>
           <td><%= lobby.member_count %></td>
           <td><%= lobby.player_count %></td>
-          <td><%= lobby.spectator_count %></td>
+          <td><%= lobby.member_count - lobby.player_count %></td>
 
           <%= if moderator or (lobby.password == nil and lobby.locked == false) do %>
             <td>

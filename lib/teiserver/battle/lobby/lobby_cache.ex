@@ -39,23 +39,25 @@ defmodule Teiserver.Battle.LobbyCache do
       |> Enum.filter(fn lobby -> lobby != nil end)
   end
 
-  @spec update_value(T.lobby_id(), atom, any) :: :ok
+  @spec update_value(T.lobby_id(), atom, any) :: :ok | nil
   def update_value(lobby_id, key, value) do
-    cast_lobby(lobby_id, {:update_value, key, value})
+    result = cast_lobby(lobby_id, {:update_value, key, value})
 
-    PubSub.broadcast(
-      Central.PubSub,
-      "legacy_all_battle_updates",
-      {:global_battle_updated, lobby_id, :update_value}
-    )
+    if result != nil do
+      PubSub.broadcast(
+        Central.PubSub,
+        "legacy_all_battle_updates",
+        {:global_battle_updated, lobby_id, :update_value}
+      )
 
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_lobby_updates:#{lobby_id}",
-      {:lobby_update, :update_value, lobby_id, {key, value}}
-    )
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_lobby_updates:#{lobby_id}",
+        {:lobby_update, :update_value, lobby_id, {key, value}}
+      )
+    end
 
-    :ok
+    result
   end
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
@@ -121,16 +123,24 @@ defmodule Teiserver.Battle.LobbyCache do
   end
 
 
-  @spec add_user_to_lobby(T.userid(), T.lobby_id(), String.t()) :: :ok
+  @spec add_user_to_lobby(T.userid(), T.lobby_id(), String.t()) :: nil | :ok
   def add_user_to_lobby(userid, lobby_id, script_password) do
     cast_lobby(lobby_id, {:add_user, userid, script_password})
-    :ok
   end
 
-  @spec remove_user_from_lobby(T.userid(), T.lobby_id()) :: :ok
+  @spec remove_user_from_lobby(T.userid(), T.lobby_id()) :: nil | :ok
   def remove_user_from_lobby(userid, lobby_id) do
     cast_lobby(lobby_id, {:remove_user, userid})
-    :ok
+  end
+
+  @spec get_lobby_member_count(T.lobby_id()) :: integer() | :lobby
+  def get_lobby_member_count(lobby_id) do
+    call_lobby(lobby_id, :get_member_count)
+  end
+
+  @spec get_lobby_player_count(T.lobby_id()) :: integer() | :lobby
+  def get_lobby_player_count(lobby_id) do
+    call_lobby(lobby_id, :get_player_count)
   end
 
 
@@ -204,11 +214,13 @@ defmodule Teiserver.Battle.LobbyCache do
   @doc """
   GenServer.cast the message to the LobbyServer process for lobby_id
   """
-  @spec cast_lobby(T.lobby_id(), any) :: any | nil
+  @spec cast_lobby(T.lobby_id(), any) :: :ok | nil
   def cast_lobby(lobby_id, message) do
     case get_lobby_pid(lobby_id) do
       nil -> nil
-      pid -> GenServer.cast(pid, message)
+      pid ->
+        GenServer.cast(pid, message)
+        :ok
     end
   end
 
