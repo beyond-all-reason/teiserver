@@ -110,7 +110,11 @@ defmodule CentralWeb.Account.SessionController do
     # We use the || %{} to allow for the user not existing
     # If we let user be nil it messes up the existing_resets
     # query
-    user = Account.get_user_by_email(email) || %{id: -1}
+    user = if email == "" do
+      %{id: -1}
+    else
+      Account.get_user_by_email(email) || %{id: -1}
+    end
     key = params["key"]
     expected_value = Central.cache_get(:codes, key)
 
