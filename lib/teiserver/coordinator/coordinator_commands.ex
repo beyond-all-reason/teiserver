@@ -6,6 +6,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.Coordinator.CoordinatorLib
   alias Central.Config
 
+  @splitter "---------------------------"
   @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore 1v1me un1v1)
   @forward_to_consul ~w(s status follow joinq leaveq splitlobby y yes n no)
 
@@ -106,6 +107,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     end
 
     msg = [
+      @splitter,
       "You are #{sender.name}",
       "Profile link: #{profile_link}",
       "Rank: #{sender.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
@@ -132,6 +134,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         profile_link = "https://#{host}/teiserver/profile/#{user.id}"
 
         standard_parts = [
+          @splitter,
           "Found #{user.name}",
           (if previous_names != "", do: "Previous names: #{previous_names}"),
           "Profile link: #{profile_link}"
@@ -224,6 +227,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       Central.cache_put(:discord_bridge_account_codes, senderid, code)
 
       User.send_direct_message(state.userid, senderid, [
+        @splitter,
         "To link your discord account, message the the discord bot (Teiserver Bridge) with the message",
         "$discord #{senderid}-#{code}",
         "This code will expire after 5 minutes",

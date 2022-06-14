@@ -1,7 +1,7 @@
 defmodule Teiserver.Coordinator.ConsulCommands do
   require Logger
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
-  alias Teiserver.{Coordinator, User, Client}
+  alias Teiserver.{Account, Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat}
   # alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
@@ -16,6 +16,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       senderid: userid
     }
   """
+  @splitter "---------------------------"
   @split_delay 30_000
   @spec handle_command(Map.t(), Map.t()) :: Map.t()
   @default_ban_reason "Banned"
@@ -72,6 +73,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     |> Enum.filter(fn v -> v != nil end)
 
     status_msg = [
+      @splitter,
       "Status for battle ##{state.lobby_id}",
       "Locks: #{locks}",
       "Gatekeeper: #{state.gatekeeper}",
@@ -169,7 +171,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         [] ->
           Coordinator.send_to_user(senderid, "No afk users found")
         _ ->
-          Coordinator.send_to_user(senderid, ["------------------------", "The following users may be afk"] ++ lines)
+          Coordinator.send_to_user(senderid, [@splitter, "The following users may be afk"] ++ lines)
       end
     end
 
@@ -184,19 +186,19 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     Lobby.get_lobby_players!(state.lobby_id)
     |> Enum.each(fn playerid ->
       User.send_direct_message(state.coordinator_id, playerid, [
-        "--------",
+        @splitter,
         "#{sender_name} is moving to a new lobby, to follow them say $y.",
         "If you want to follow someone else then say $follow <name> and you will follow that user.",
         "The split will take place in #{round(@split_delay/1_000)} seconds",
         "You can change your mind at any time. Say $n to cancel your decision and stay here.",
-        "--------",
+        @splitter,
       ])
     end)
 
     User.send_direct_message(state.coordinator_id, senderid, [
       "Splitlobby sequence started. If you stay in this lobby you will be moved to a random empty lobby.",
       "If you choose a lobby yourself then anybody voting yes will follow you to that lobby.",
-      "--------",
+      @splitter,
     ])
 
     split_uuid = UUID.uuid4()
@@ -638,7 +640,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         ConsulServer.say_command(cmd, state)
 
         %{state | timeouts: new_timeouts}
-        |> ConsulServer.broadcast_update("timeout")
+          |> ConsulServer.broadcast_update("timeout")
     end
   end
 
