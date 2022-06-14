@@ -4,10 +4,10 @@ defmodule Teiserver.Game.UserAchievementLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-???"
+  def icon, do: "fa-regular fa-star"
 
   @spec colour :: atom
-  def colour, do: :default
+  def colour, do: :info2
 
   @spec make_favourite(Map.t()) :: Map.t()
   def make_favourite(user_achievement) do
