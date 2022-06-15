@@ -1,7 +1,7 @@
 defmodule Teiserver.Data.Types do
   # alias Teiserver.Data.Types, as: T
   @type userid() :: non_neg_integer()
-  @type party_id() :: non_neg_integer()
+  @type party_id() :: String.t()
   @type lobby_id() :: non_neg_integer()
   @type lobby_guid() :: String.t()
   @type clan_id() :: non_neg_integer

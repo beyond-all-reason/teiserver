@@ -64,6 +64,7 @@ defmodule Teiserver.Application do
       # Lobbies
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.LobbySupervisor},
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.ClientSupervisor},
+      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.PartySupervisor},
 
       # Matchmaking
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Game.QueueSupervisor},

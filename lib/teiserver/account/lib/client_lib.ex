@@ -35,7 +35,7 @@ defmodule Teiserver.Account.ClientLib do
   def get_clients([]), do: []
   def get_clients(id_list) do
     id_list
-    |> Enum.map(fn userid -> get_client_by_id(userid) end)
+      |> Enum.map(fn userid -> get_client_by_id(userid) end)
   end
 
   @spec list_client_ids() :: [T.userid()]
@@ -50,22 +50,21 @@ defmodule Teiserver.Account.ClientLib do
   @spec list_clients() :: [T.client()]
   def list_clients() do
     list_client_ids()
-    |> list_clients()
+      |> list_clients()
   end
 
   @spec list_clients([T.userid()]) :: [T.client()]
   def list_clients(id_list) do
     id_list
-    |> Enum.map(fn c -> get_client_by_id(c) end)
+      |> Enum.map(fn c -> get_client_by_id(c) end)
   end
 
   # Updates
-  @spec merge_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: :ok
+  @spec merge_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: nil | :ok
   def merge_update_client(%{userid: userid} = partial_client, _reason) do
     cast_client(userid, {:merge_client, partial_client})
-    :ok
   end
-  def merge_update_client(_client, _reason), do: :ok
+  def merge_update_client(_client, _reason), do: nil
 
   @spec replace_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
   def replace_update_client(%{userid: userid} = client, reason) do
@@ -138,7 +137,7 @@ defmodule Teiserver.Account.ClientLib do
     end
   end
 
-  @spec cast_client(T.userid(), any) :: any
+  @spec cast_client(T.userid(), any) :: any | nil
   def cast_client(userid, msg) do
     case get_client_pid(userid) do
       nil -> nil
