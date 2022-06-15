@@ -3,7 +3,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
   alias Teiserver.Common.PubsubListener
-  alias Teiserver.{User, Client, Coordinator}
+  alias Teiserver.{Battle, User, Client, Coordinator}
   alias Teiserver.Coordinator.ConsulServer
 
   import Teiserver.TeiserverTestLib,

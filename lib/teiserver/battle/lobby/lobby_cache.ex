@@ -153,10 +153,10 @@ defmodule Teiserver.Battle.LobbyCache do
   def add_lobby(lobby) do
     Central.cache_put(:lobbies, lobby.id, lobby)
 
-    _consul_pid = Coordinator.start_consul(lobby.id)
     Lobby.start_battle_lobby_throttle(lobby.id)
-
     start_lobby_server(lobby)
+
+    _consul_pid = Coordinator.start_consul(lobby.id)
 
     Central.cache_update(:lists, :lobbies, fn value ->
       new_value =

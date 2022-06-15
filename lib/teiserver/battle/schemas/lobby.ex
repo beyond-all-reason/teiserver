@@ -161,6 +161,7 @@ defmodule Teiserver.Battle.Lobby do
     Teiserver.Throttles.start_throttle(battle_lobby_id, Teiserver.Battle.LobbyThrottle, "battle_lobby_throttle_#{battle_lobby_id}")
   end
 
+  @spec stop_battle_lobby_throttle(T.lobby_id()) :: :ok
   def stop_battle_lobby_throttle(battle_lobby_id) do
     # We send this out because the throttle won't
     :ok = PubSub.broadcast(
@@ -170,10 +171,13 @@ defmodule Teiserver.Battle.Lobby do
     )
 
     Teiserver.Throttles.stop_throttle("LobbyThrottle:#{battle_lobby_id}")
+    :ok
   end
 
   @spec add_bot_to_battle(T.lobby_id(), map()) :: :ok
   def add_bot_to_battle(lobby_id, bot) do
+    LobbyCache.cast_lobby(lobby_id, {:add_bot, bot})
+
     battle = get_battle(lobby_id)
     new_bots = Map.put(battle.bots, bot.name, bot)
     new_battle = %{battle | bots: new_bots}
@@ -197,8 +201,9 @@ defmodule Teiserver.Battle.Lobby do
   def update_bot(lobby_id, botname, "0", _), do: remove_bot(lobby_id, botname)
 
   def update_bot(lobby_id, botname, new_data) do
-    battle = get_battle(lobby_id)
+    LobbyCache.cast_lobby(lobby_id, {:update_bot, botname, new_data})
 
+    battle = get_battle(lobby_id)
     case battle.bots[botname] do
       nil ->
         nil
@@ -227,6 +232,8 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec remove_bot(T.lobby_id(), String.t()) :: :ok
   def remove_bot(lobby_id, botname) do
+    LobbyCache.cast_lobby(lobby_id, {:remove_bot, botname})
+
     battle = get_battle(lobby_id)
     new_bots = Map.delete(battle.bots, botname)
     new_battle = %{battle | bots: new_bots}

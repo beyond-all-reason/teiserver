@@ -88,6 +88,72 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, %{state | lobby: new_lobby}}
   end
 
+  # Bots
+  def handle_cast({:add_bot, bot}, %{lobby: lobby} = state) do
+    new_bots = Map.put(lobby.bots, bot.name, bot)
+    new_lobby = %{lobby | bots: new_bots}
+
+    # PubSub.broadcast(
+    #   Central.PubSub,
+    #   "legacy_battle_updates:#{lobby_id}",
+    #   {:battle_updated, lobby_id, {lobby_id, bot}, :add_bot_to_battle}
+    # )
+
+    # PubSub.broadcast(
+    #   Central.PubSub,
+    #   "teiserver_lobby_updates:#{battle.id}",
+    #   {:lobby_update, :add_bot, battle.id, bot.name}
+    # )
+
+    {:noreply, %{state | lobby: new_lobby}}
+  end
+
+  def handle_cast({:update_bot, botname, new_data}, %{lobby: lobby} = state) do
+    case lobby.bots[botname] do
+      nil ->
+        {:noreply, state}
+
+      bot ->
+        new_bot = Map.merge(bot, new_data)
+
+        new_bots = Map.put(lobby.bots, botname, new_bot)
+        new_lobby = %{lobby | bots: new_bots}
+
+        # PubSub.broadcast(
+        #   Central.PubSub,
+        #   "legacy_battle_updates:#{lobby_id}",
+        #   {:battle_updated, lobby_id, {lobby_id, new_bot}, :update_bot}
+        # )
+
+        # PubSub.broadcast(
+        #   Central.PubSub,
+        #   "teiserver_lobby_updates:#{battle.id}",
+        #   {:lobby_update, :update_bot, battle.id, botname}
+        # )
+        {:noreply, %{state | lobby: new_lobby}}
+    end
+  end
+
+  def handle_cast({:remove_bot, botname}, %{lobby: lobby} = state) do
+    new_bots = Map.delete(lobby.bots, botname)
+    new_lobby = %{lobby | bots: new_bots}
+    Central.cache_put(:lobbies, lobby.id, new_lobby)
+
+    # PubSub.broadcast(
+    #   Central.PubSub,
+    #   "legacy_battle_updates:#{lobby_id}",
+    #   {:battle_updated, lobby_id, {lobby_id, botname}, :remove_bot_from_battle}
+    # )
+
+    # PubSub.broadcast(
+    #   Central.PubSub,
+    #   "teiserver_lobby_updates:#{battle.id}",
+    #   {:lobby_update, :remove_bot, battle.id, botname}
+    # )
+
+    {:noreply, %{state | lobby: new_lobby}}
+  end
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
