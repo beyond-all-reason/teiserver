@@ -32,7 +32,7 @@ defmodule Teiserver.Account.CodeOfConductData do
         "4" => "False or intentionally erroneous reports",
         "5" => "Impersonation of another player or the team running and making BAR, this includes taking credit for things you did not contribute to",
         "6" => "Circumvention of moderation, if you've been temporarily banned don't try to create a new account to get around it",
-        "7" => "Exploiting bugs, hacking or spec cheating (second account to view the game as a spectator)",
+        "7" => "Exploiting bugs, hacking, spec cheating (second account to view the game as a spectator) or using game features to gain an unfair advantage in some manner (e.g. abusing subbing to co-op in a team game)",
         "8" => "Attempting to exploit the player skill rating system, either by dumping by losing on purpose or boosting with smurf accounts",
       }
     }
