@@ -59,7 +59,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   @spec do_action(atom, any(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
   def do_action(:login_accepted, user, state) do
     # Login the client
-    client = Client.login(user, state.ip)
+    _client = Client.login(user, state.ip)
 
     PubSub.unsubscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
     PubSub.unsubscribe(Central.PubSub, "teiserver_user_updates:#{user.id}")
@@ -69,7 +69,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
 
     exempt_from_cmd_throttle = (User.is_moderator?(user) == true or User.is_bot?(user) == true)
     %{state |
-      client: client,
       username: user.name,
       userid: user.id,
       exempt_from_cmd_throttle: exempt_from_cmd_throttle

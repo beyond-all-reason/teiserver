@@ -115,8 +115,21 @@ defmodule Teiserver.Account.ClientLib do
   def update_client(client, _reason), do: client
 
 
-
   # Process stuff
+  @spec start_client_server(T.lobby()) :: pid()
+  def start_client_server(client) do
+    {:ok, server_pid} =
+      DynamicSupervisor.start_child(Teiserver.ClientSupervisor, {
+        Teiserver.Account.ClientServer,
+        name: "client_#{client.userid}",
+        data: %{
+          client: client
+        }
+      })
+
+    server_pid
+  end
+
   @spec get_client_pid(T.userid()) :: pid() | nil
   def get_client_pid(userid) do
     case Horde.Registry.lookup(Teiserver.ClientRegistry, userid) do

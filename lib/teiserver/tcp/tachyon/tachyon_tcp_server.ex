@@ -82,9 +82,6 @@ defmodule Teiserver.TachyonTcpServer do
       lobby_host: false,
       queues: [],
 
-      # Client object
-      client: nil,
-
       # Connection microstate
       msg_id: nil,
       lobby_id: nil,
@@ -110,22 +107,8 @@ defmodule Teiserver.TachyonTcpServer do
 
   @impl true
   @spec handle_call(any(), any(), T.tachyon_tcp_state()) :: {:reply, any(), T.tachyon_tcp_state()}
-  def handle_call(:client_state, _from, state) do
-    {:reply, state.client, state}
-  end
-
   def handle_call({:get, key}, _from, state) do
     {:reply, Map.get(state, key), state}
-  end
-
-  @impl true
-  @spec handle_cast(any(), T.tachyon_tcp_state()) :: {:noreply, T.tachyon_tcp_state()}
-  def handle_cast({:update_client, new_client}, state) do
-    {:noreply, %{state | client: new_client}}
-  end
-
-  def handle_cast({:merge_client, partial_client}, state) do
-    {:noreply, %{state | client: Map.merge(state.client, partial_client)}}
   end
 
   @impl true

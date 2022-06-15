@@ -124,12 +124,6 @@ defmodule Teiserver.Client do
       {:client_action, :client_connect, user.id}
     )
 
-    Horde.Registry.register(
-      Teiserver.ClientRegistry,
-      user.id,
-      stats["lobby_client"]
-    )
-
     # Message logging
     if user.print_client_messages do
       enable_client_message_print(user.id)
@@ -164,6 +158,8 @@ defmodule Teiserver.Client do
 
       {:ok, new_value}
     end)
+
+    ClientLib.start_client_server(client)
 
     client
   end

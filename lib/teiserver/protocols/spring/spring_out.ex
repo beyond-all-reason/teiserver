@@ -615,11 +615,7 @@ defmodule Teiserver.Protocols.SpringOut do
     # Who is online?
     clients = Client.list_client_ids()
     |> Enum.map(fn userid ->
-      if userid == user.id do
-        client
-      else
-        Client.get_client_by_id(userid)
-      end
+      Client.get_client_by_id(userid)
     end)
     |> Enum.filter(fn c -> c != nil end)
 
@@ -675,7 +671,6 @@ defmodule Teiserver.Protocols.SpringOut do
     exempt_from_cmd_throttle = (user.moderator == true or User.is_bot?(user) == true)
     %{state |
       user: user,
-      client: client,
       username: user.name,
       userid: user.id,
       exempt_from_cmd_throttle: exempt_from_cmd_throttle

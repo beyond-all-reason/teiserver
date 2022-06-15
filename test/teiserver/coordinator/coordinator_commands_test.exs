@@ -108,6 +108,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
       "message" => [
+          "---------------------------",
           "You are #{user.name}",
           "Profile link: https://localhost/teiserver/profile/#{user.id}",
           "Rank: 1 with 0 player hours and 0 spectator hours for a rank hour count of 0",
@@ -128,6 +129,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
       "message" => [
+        "---------------------------",
         "Found #{other_user.name}",
         "Profile link: https://localhost/teiserver/profile/#{other_user.id}",
       ],
@@ -147,6 +149,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
       "message" => [
+        "---------------------------",
         "Found #{other_user.name}",
         "Previous names: name1, name2",
         "Profile link: https://localhost/teiserver/profile/#{other_user.id}",
