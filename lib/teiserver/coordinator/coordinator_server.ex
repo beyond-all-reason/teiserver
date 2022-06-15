@@ -217,7 +217,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
               ""
             end
 
-            " - #{report.reason}#{expires}"
+            " - #{report.response_text}#{expires}"
           end)
 
         msg = [
