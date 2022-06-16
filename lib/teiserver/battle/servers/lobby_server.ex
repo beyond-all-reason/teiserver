@@ -1,7 +1,7 @@
 defmodule Teiserver.Battle.LobbyServer do
   use GenServer
   require Logger
-  alias Teiserver.{Battle, Client}
+  alias Teiserver.{Client}
   alias Phoenix.PubSub
 
   @impl true
@@ -55,8 +55,7 @@ defmodule Teiserver.Battle.LobbyServer do
 
   @impl true
   def handle_cast(:start_match, state) do
-    player_list = state.lobby_id
-      |> Battle.get_lobby()
+    player_list = state.lobby
       |> Map.get(:players)
       |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
       |> Enum.filter(fn client -> client != nil end)

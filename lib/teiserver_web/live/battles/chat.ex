@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{User, Chat, Client}
+  alias Teiserver.{Battle, User, Chat, Client}
   alias Teiserver.Battle.{Lobby, LobbyLib}
   alias Teiserver.Chat.LobbyMessage
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -38,7 +38,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
   def handle_params(%{"id" => id}, _, socket) do
     current_user = socket.assigns[:current_user]
-    lobby = Lobby.get_lobby(id)
+    lobby = Battle.get_lobby(id)
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_chat:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")

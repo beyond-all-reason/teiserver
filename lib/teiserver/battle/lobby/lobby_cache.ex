@@ -6,10 +6,10 @@ defmodule Teiserver.Battle.LobbyCache do
   alias Teiserver.Data.Types, as: T
   require Logger
 
-  @spec get_lobby(integer()) :: T.lobby() | nil
+  @spec get_lobby(T.lobby_id()) :: T.lobby() | nil
   def get_lobby(id) do
-    Central.cache_get(:lobbies, int_parse(id))
-    # call_lobby(id, :get_lobby_state)
+    # Central.cache_get(:lobbies, int_parse(id))
+    call_lobby(int_parse(id), :get_lobby_state)
   end
 
   @spec get_lobby_by_uuid(String.t()) :: T.lobby() | nil
@@ -25,11 +25,11 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec list_lobby_ids :: [T.lobby_id()]
   def list_lobby_ids() do
-    case Central.cache_get(:lists, :lobbies) do
-      nil -> []
-      ids -> ids
-    end
-    # Horde.Registry.select(Teiserver.LobbyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    # case Central.cache_get(:lists, :lobbies) do
+    #   nil -> []
+    #   ids -> ids
+    # end
+    Horde.Registry.select(Teiserver.LobbyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_lobbies() :: [T.lobby()]

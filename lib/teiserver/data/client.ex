@@ -268,6 +268,12 @@ defmodule Teiserver.Client do
       Telemetry.increment(:users_disconnected)
     end
 
+    # Kill lobby server process
+    case get_client_pid(client.userid) do
+      nil -> nil
+      p -> DynamicSupervisor.terminate_child(Teiserver.ClientSupervisor, p)
+    end
+
     # Typically we would only send the username but it is possible they just changed their username
     # and as such we need to tell the system what username is logging out
     PubSub.broadcast(
