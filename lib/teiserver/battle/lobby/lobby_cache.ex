@@ -235,6 +235,17 @@ defmodule Teiserver.Battle.LobbyCache do
     end
   end
 
+  @spec stop_lobby_server(T.lobby_id()) :: :ok | nil
+  def stop_lobby_server(lobby_id) do
+    case get_lobby_pid(lobby_id) do
+      nil -> nil
+      p ->
+        DynamicSupervisor.terminate_child(Teiserver.LobbySupervisor, p)
+        :ok
+    end
+  end
+
+
   @spec close_lobby(integer() | nil, atom) :: :ok
   def close_lobby(lobby_id, reason \\ :closed) do
     battle = get_lobby(lobby_id)
@@ -249,10 +260,7 @@ defmodule Teiserver.Battle.LobbyCache do
     end)
 
     # Kill lobby server process
-    case get_lobby_pid(lobby_id) do
-      nil -> nil
-      p -> DynamicSupervisor.terminate_child(Teiserver.LobbySupervisor, p)
-    end
+    stop_lobby_server(lobby_id)
 
     [battle.founder_id | battle.players]
     |> Enum.each(fn userid ->

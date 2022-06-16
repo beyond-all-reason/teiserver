@@ -269,10 +269,7 @@ defmodule Teiserver.Client do
     end
 
     # Kill lobby server process
-    case get_client_pid(client.userid) do
-      nil -> nil
-      p -> DynamicSupervisor.terminate_child(Teiserver.ClientSupervisor, p)
-    end
+    ClientLib.stop_client_server(client.userid)
 
     # Typically we would only send the username but it is possible they just changed their username
     # and as such we need to tell the system what username is logging out

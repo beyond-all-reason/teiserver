@@ -62,9 +62,8 @@ defmodule Teiserver.Account.ClientLib do
   # Updates
   @spec merge_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: nil | :ok
   def merge_update_client(%{userid: userid} = partial_client, _reason) do
-    cast_client(userid, {:merge_client, partial_client})
+    cast_client(userid, {:merge_update_client, partial_client})
   end
-  def merge_update_client(_client, _reason), do: nil
 
   @spec replace_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
   def replace_update_client(%{userid: userid} = client, reason) do
@@ -150,6 +149,16 @@ defmodule Teiserver.Account.ClientLib do
     case get_client_pid(userid) do
       nil -> nil
       pid -> GenServer.call(pid, msg)
+    end
+  end
+
+  @spec stop_client_server(T.userid()) :: :ok | nil
+  def stop_client_server(userid) do
+    case get_client_pid(userid) do
+      nil -> nil
+      p ->
+        DynamicSupervisor.terminate_child(Teiserver.ClientSupervisor, p)
+        :ok
     end
   end
 
