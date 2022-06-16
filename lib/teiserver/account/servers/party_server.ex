@@ -8,10 +8,6 @@ defmodule Teiserver.Account.PartyServer do
     {:reply, state.party, state}
   end
 
-  def handle_call({:get, key}, _from, state) do
-    {:reply, Map.get(state, key), state}
-  end
-
   @impl true
   def handle_cast({:update_party, new_party}, state) do
     {:noreply, %{state | party: new_party}}

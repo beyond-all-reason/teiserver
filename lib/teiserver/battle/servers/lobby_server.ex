@@ -9,10 +9,6 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, %{state.lobby | players: state.member_list}, state}
   end
 
-  def handle_call({:get, key}, _from, state) do
-    {:reply, Map.get(state, key), state}
-  end
-
   def handle_call({:get_player, _player_id}, _from, %{state: :lobby} = state) do
     {:reply, :lobby, state}
   end

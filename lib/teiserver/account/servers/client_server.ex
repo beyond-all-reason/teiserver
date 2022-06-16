@@ -5,11 +5,7 @@ defmodule Teiserver.Account.ClientServer do
 
   @impl true
   def handle_call(:get_client_state, _from, state) do
-    {:reply, %{state.client | players: state.member_list}, state}
-  end
-
-  def handle_call({:get, key}, _from, state) do
-    {:reply, Map.get(state, key), state}
+    {:reply, state.client, state}
   end
 
   @impl true
