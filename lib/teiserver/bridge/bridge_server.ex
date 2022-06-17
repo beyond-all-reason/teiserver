@@ -43,7 +43,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     state = if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
       pid = self()
       spawn(fn ->
-        :timer.sleep(1000)
+        :timer.sleep(250)
         send(pid, :begin)
       end)
     else
@@ -194,6 +194,7 @@ defmodule Teiserver.Bridge.BridgeServer do
 
     case channels do
       [{channel_id, _}] ->
+        Logger.info("Discord connected, posting startup message")
         Alchemy.Client.send_message(
           channel_id,
           "Teiserver startup for node #{Node.self()}",
