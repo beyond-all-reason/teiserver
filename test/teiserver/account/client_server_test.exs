@@ -20,6 +20,7 @@ defmodule Teiserver.Account.ClientServerTest do
       side: 0,
       role: "spectator",
       lobby_client: "BAR Lobby",
+      lobby_id: nil
     }
 
     userid = client.userid
@@ -47,7 +48,7 @@ defmodule Teiserver.Account.ClientServerTest do
 
 
     # Update client
-    r = ClientLib.update_client(Map.put(client, :side, 1), :client_updated_battlestatus)
+    r = ClientLib.replace_update_client(Map.put(client, :side, 1), :client_updated_battlestatus)
     assert r != nil
 
     # No server

@@ -37,10 +37,6 @@ defmodule Teiserver.Battle.LobbyCacheTest do
   end
 
   test "add_user_to_battle", %{lobby_id: lobby_id, player: player} do
-    IO.puts ""
-    IO.inspect {player.id}
-    IO.puts ""
-
     p_client = Account.get_client_by_id(player.id)
     assert p_client.lobby_id == nil
 
