@@ -567,6 +567,17 @@ defmodule TeiserverWeb.Admin.UserController do
   @spec automod_action_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def automod_action_form(conn, %{"id" => id}) do
     user = Account.get_user!(id)
+    matching_users = Account.smurf_search(user)
+      |> Enum.map(fn {_type, users} -> users end)
+      |> List.flatten
+      |> Enum.map(fn %{user: user} -> user.id end)
+      |> Enum.uniq
+      |> Enum.map(fn userid -> Account.get_user_by_id(userid) end)
+      |> Enum.reject(fn user ->
+        Teiserver.User.is_restricted?(user, ["Site", "Login"])
+      end)
+
+    key_types = Account.list_smurf_key_types(limit: :infinity)
 
     # Update their hw_key
     hw_fingerprint = Account.get_user_stat_data(user.id)
@@ -584,26 +595,36 @@ defmodule TeiserverWeb.Admin.UserController do
     changeset = Account.change_automod_action(%Account.AutomodAction{})
 
     conn
-    |> assign(:changeset, changeset)
-    |> add_breadcrumb(name: "Add automod action form", url: conn.request_path)
-    |> assign(:user, user)
-    |> assign(:user_stats, user_stats)
-    |> assign(:userid, user.id)
-    |> render("automod_action_form.html")
+      |> assign(:key_types, key_types)
+      |> assign(:matching_users, matching_users)
+      |> assign(:changeset, changeset)
+      |> add_breadcrumb(name: "Add automod action form", url: conn.request_path)
+      |> assign(:user, user)
+      |> assign(:user_stats, user_stats)
+      |> assign(:userid, user.id)
+      |> render("automod_action_form.html")
   end
 
   @spec automod_action_post(Plug.Conn.t(), map) :: Plug.Conn.t()
   def automod_action_post(conn, %{"id" => id, "automod_action" => automod_action_params}) do
-    [type, value] = String.split(automod_action_params["type_value"], "~")
+    type_ids = automod_action_params["type_ids"]
+      |> Enum.reject(fn r -> r == "false" end)
+      |> Enum.map(fn t -> Account.get_or_add_smurf_key_type(t) end)
+
+    values = Account.list_smurf_keys(
+      search: [
+        user_id: id,
+        type_id_in: type_ids
+      ],
+      limit: :infinity,
+      select: [:value]
+    )
+      |> Enum.map(fn %{value: value} -> value end)
+      |> Enum.uniq
 
     automod_action_params = Map.merge(automod_action_params, %{
       "added_by_id" => conn.current_user.id,
-      "actions" => %{
-        "original" => automod_action_params["action"]["original"],
-        "tripper" => automod_action_params["action"]["tripper"],
-      },
-      "type" => type,
-      "value" => value
+      "values" => values
     })
 
     case Account.create_automod_action(automod_action_params) do
@@ -615,6 +636,18 @@ defmodule TeiserverWeb.Admin.UserController do
       {:error, %Ecto.Changeset{} = changeset} ->
         user = Account.get_user!(id)
 
+        key_types = Account.list_smurf_key_types(limit: :infinity)
+
+        matching_users = Account.smurf_search(user)
+          |> Enum.map(fn {_type, users} -> users end)
+          |> List.flatten
+          |> Enum.map(fn %{user: user} -> user.id end)
+          |> Enum.uniq
+          |> Enum.map(fn userid -> Account.get_user_by_id(userid) end)
+          |> Enum.reject(fn user ->
+            Teiserver.User.is_restricted?(user, ["Site", "Login"])
+          end)
+
         user_stats = case Account.get_user_stat(user.id) do
           nil -> %{}
           stats -> stats.data
@@ -625,18 +658,22 @@ defmodule TeiserverWeb.Admin.UserController do
             "Please select a hash type"
           changeset.errors[:actions] != nil ->
             "Please select one or more actions"
+          changeset.errors[:reason] != nil or changeset.errors[:expires] != nil ->
+            "Please ensure both a reason and expiry (even if never) are inputted"
           true ->
             nil
         end
 
         conn
-        |> add_breadcrumb(name: "Add automod action form", url: conn.request_path)
-        |> assign(:changeset, changeset)
-        |> assign(:user, user)
-        |> assign(:user_stats, user_stats)
-        |> assign(:userid, user.id)
-        |> put_flash(:danger, error_message)
-        |> render("automod_action_form.html")
+          |> add_breadcrumb(name: "Add automod action form", url: conn.request_path)
+          |> assign(:matching_users, matching_users)
+          |> assign(:key_types, key_types)
+          |> assign(:changeset, changeset)
+          |> assign(:user, user)
+          |> assign(:user_stats, user_stats)
+          |> assign(:userid, user.id)
+          |> put_flash(:danger, error_message)
+          |> render("automod_action_form.html")
     end
   end
 

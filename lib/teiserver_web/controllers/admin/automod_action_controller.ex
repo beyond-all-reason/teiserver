@@ -55,10 +55,10 @@ defmodule TeiserverWeb.Admin.AutomodActionController do
     |> insert_recently(conn)
 
     conn
-    |> assign(:automod_action, automod_action)
-    |> assign(:logs, logs)
-    |> add_breadcrumb(name: "Show: #{automod_action.type} - #{automod_action.user.name}", url: conn.request_path)
-    |> render("show.html")
+      |> assign(:automod_action, automod_action)
+      |> assign(:logs, logs)
+      |> add_breadcrumb(name: "Show: #{automod_action.user.name}", url: conn.request_path)
+      |> render("show.html")
   end
 
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
@@ -99,10 +99,10 @@ defmodule TeiserverWeb.Admin.AutomodActionController do
     changeset = Account.change_automod_action(automod_action)
 
     conn
-    |> assign(:automod_action, automod_action)
-    |> assign(:changeset, changeset)
-    |> add_breadcrumb(name: "Edit: #{automod_action.type} - #{automod_action.user.name}", url: conn.request_path)
-    |> render("edit.html")
+      |> assign(:automod_action, automod_action)
+      |> assign(:changeset, changeset)
+      |> add_breadcrumb(name: "Edit: #{automod_action.user.name}", url: conn.request_path)
+      |> render("edit.html")
   end
 
   @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

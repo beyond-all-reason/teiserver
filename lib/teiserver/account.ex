@@ -482,11 +482,11 @@ defmodule Teiserver.Account do
   @spec automod_action_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def automod_action_query(id, args) do
     AutomodActionLib.query_automod_actions
-    |> AutomodActionLib.search(%{id: id})
-    |> AutomodActionLib.search(args[:search])
-    |> AutomodActionLib.preload(args[:preload])
-    |> AutomodActionLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+      |> AutomodActionLib.search(%{id: id})
+      |> AutomodActionLib.search(args[:search])
+      |> AutomodActionLib.preload(args[:preload])
+      |> AutomodActionLib.order_by(args[:order_by])
+      |> QueryHelpers.select(args[:select])
   end
 
   @doc """
@@ -501,8 +501,8 @@ defmodule Teiserver.Account do
   @spec list_automod_actions(List.t()) :: List.t()
   def list_automod_actions(args \\ []) do
     automod_action_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+      |> QueryHelpers.limit_query(args[:limit] || 50)
+      |> Repo.all
   end
 
   @doc """

@@ -19,7 +19,7 @@ defmodule Teiserver.Account.AutomodActionLib do
       item_type: "teiserver_account_automod_action",
       item_colour: colours(),
       item_icon: Teiserver.Account.AutomodActionLib.icon(),
-      item_label: "#{automod_action.type} - #{automod_action.user.name}",
+      item_label: automod_action.user.name,
 
       url: "/account/automod_actions/#{automod_action.id}"
     }
@@ -49,24 +49,19 @@ defmodule Teiserver.Account.AutomodActionLib do
       where: automod_actions.id == ^id
   end
 
-  def _search(query, :value, value) do
+  def _search(query, :contains_value, value) do
     from automod_actions in query,
-      where: automod_actions.value == ^value
+      where: ^value in automod_actions.values
   end
 
-  def _search(query, :value_in, value_list) do
+  def _search(query, :any_value, value_list) do
     from automod_actions in query,
-      where: automod_actions.value in ^value_list
+      where: array_overlap_a_in_b(automod_actions.values, ^value_list)
   end
 
   def _search(query, :enabled, enabled) do
     from automod_actions in query,
       where: automod_actions.enabled == ^enabled
-  end
-
-  def _search(query, :type, type) do
-    from automod_actions in query,
-      where: automod_actions.type == ^type
   end
 
   def _search(query, :id_list, id_list) do

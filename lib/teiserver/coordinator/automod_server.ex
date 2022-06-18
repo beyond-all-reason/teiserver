@@ -123,14 +123,13 @@ defmodule Teiserver.Coordinator.AutomodServer do
     if User.is_restricted?(userid, ["Login"]) do
       "Already banned"
     else
-      smurf_keys = Account.list_smurf_keys(search: [user_id: userid], select: [:type_id, :value])
+      smurf_keys = Account.list_smurf_keys(search: [user_id: userid], select: [:type_id, :values])
 
       value_list = smurf_keys
         |> Enum.map(fn %{value: value} -> value end)
 
       _automods = Account.list_automod_actions(search: [
         enabled: true,
-        type: "hardware",
         value_in: value_list
       ])
       |> Kernel.inspect
@@ -168,8 +167,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
       hashes = Account.list_automod_actions(search: [
         enabled: true,
-        type: "hardware",
-        value: hw1_fingerprint
+        contains_value: hw1_fingerprint
       ], limit: 1)
 
       if not Enum.empty?(hashes) do
@@ -191,8 +189,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
       hash ->
         hashes = Account.list_automod_actions(search: [
           enabled: true,
-          type: "lobby_hash",
-          value: hash
+          contains_value: hash
         ], limit: 1)
 
         if not Enum.empty?(hashes) do
@@ -205,7 +202,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   end
 
   def do_ban(userid, automod_action) do
-    Account.update_user_stat(userid, %{"autoban_type" => automod_action.type, "autoban_id" => automod_action.id})
+    Account.update_user_stat(userid, %{"autoban_id" => automod_action.id})
 
     coordinator_user_id = Coordinator.get_coordinator_userid()
 

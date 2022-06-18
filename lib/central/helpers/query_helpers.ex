@@ -33,6 +33,12 @@ defmodule Central.Helpers.QueryHelpers do
     end
   end
 
+  defmacro array_overlap_a_in_b(a, b) do
+    quote do
+      fragment("? && ?", unquote(a), unquote(b))
+    end
+  end
+
   defmacro extract_year(field) do
     quote do
       fragment("EXTRACT(YEAR FROM ?)", unquote(field))

@@ -21,11 +21,9 @@ defmodule Teiserver.Coordinator.AutomodTest do
   test "hw_ban", %{banned_user: banned_user} do
     {:ok, automod_action} = Account.create_automod_action(%{
       enabled: true,
-      type: "hardware",
-      value: "uOGXziwWC1mCePGsh0tTQg==",
+      values: ["uOGXziwWC1mCePGsh0tTQg==", "some_other_value"],
       added_by_id: banned_user.id,
       user_id: banned_user.id,
-      actions: %{},
       reason: "hw-ban"
     })
 
@@ -51,18 +49,15 @@ defmodule Teiserver.Coordinator.AutomodTest do
     result = AutomodServer.check_user(bad_user.id)
     assert result == "Banned user"
     stats = Account.get_user_stat_data(bad_user.id)
-    assert stats["autoban_type"] == "hardware"
     assert stats["autoban_id"] == automod_action.id
   end
 
   test "lobby_hash_ban", %{banned_user: banned_user} do
     {:ok, automod_action} = Account.create_automod_action(%{
       enabled: true,
-      type: "lobby_hash",
-      value: "123456789 abcdefghij",
+      values: ["123456789 abcdefghij"],
       added_by_id: banned_user.id,
       user_id: banned_user.id,
-      actions: %{},
       reason: "hw-ban"
     })
 
@@ -98,7 +93,6 @@ defmodule Teiserver.Coordinator.AutomodTest do
     result = AutomodServer.check_user(bad_user.id)
     assert result == "Banned user"
     stats = Account.get_user_stat_data(bad_user.id)
-    assert stats["autoban_type"] == "lobby_hash"
     assert stats["autoban_id"] == automod_action.id
   end
 
@@ -117,11 +111,9 @@ defmodule Teiserver.Coordinator.AutomodTest do
 
     {:ok, _automod_action} = Account.create_automod_action(%{
       enabled: true,
-      type: "hardware",
-      value: "uOGXziwWC1mCePGsh0tTQg==",
+      values: ["uOGXziwWC1mCePGsh0tTQg=="],
       added_by_id: banned_user.id,
       user_id: banned_user.id,
-      actions: %{},
       reason: "hw-ban"
     })
 

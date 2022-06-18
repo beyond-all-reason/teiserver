@@ -1,3 +1,13 @@
+defmodule Teiserver.Account.Party do
+  @enforce_keys [:id, :leader, :members, :pending_invites]
+  defstruct [
+    :id,
+    :leader,
+    :members,
+    :pending_invites
+  ]
+end
+
 defmodule Teiserver.Account.PartyLib do
   alias Phoenix.PubSub
   alias Teiserver.{Account, Battle}

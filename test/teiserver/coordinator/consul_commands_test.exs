@@ -67,7 +67,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
       ready: false
     }, :client_updated_battlestatus)
 
-    readies = Lobby.get_battle!(lobby_id)
+    readies = Battle.get_lobby(lobby_id)
     |> Map.get(:players)
     |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
 
@@ -77,7 +77,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     _tachyon_send(hsocket, data)
 
     # Now we check they are ready or they're a spectator
-    readies = Lobby.get_battle!(lobby_id)
+    readies = Battle.get_lobby(lobby_id)
     |> Map.get(:players)
     |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
     |> Enum.map(fn c -> c.player == false or c.ready == true end)
@@ -91,7 +91,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     player_client = Client.get_client_by_id(player2.id)
     Client.update(%{player_client | ready: false}, :client_updated_battlestatus)
 
-    readies = Lobby.get_battle!(lobby_id)
+    readies = Battle.get_lobby(lobby_id)
     |> Map.get(:players)
     |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
 
@@ -109,7 +109,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
       ready: false
     }, :client_updated_battlestatus)
 
-    readies = Lobby.get_battle!(lobby_id)
+    readies = Battle.get_lobby(lobby_id)
     |> Map.get(:players)
     |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
 
@@ -119,7 +119,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     _tachyon_send(hsocket, data)
 
     # Now we get the ready statuses
-    readies = Lobby.get_battle!(lobby_id)
+    readies = Battle.get_lobby(lobby_id)
     |> Map.get(:players)
     |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
 
@@ -132,7 +132,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     player_client = Client.get_client_by_id(player2.id)
     Client.update(%{player_client | ready: false}, :client_updated_battlestatus)
 
-    readies = Lobby.get_battle!(lobby_id)
+    readies = Battle.get_lobby(lobby_id)
     |> Map.get(:players)
     |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
 
@@ -142,7 +142,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     data = %{cmd: "c.lobby.message", message: "$makeready ##{player1.id}"}
     _tachyon_send(hsocket, data)
 
-    readies = Lobby.get_battle!(lobby_id)
+    readies = Battle.get_lobby(lobby_id)
     |> Map.get(:players)
     |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
 

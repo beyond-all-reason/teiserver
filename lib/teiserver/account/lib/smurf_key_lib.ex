@@ -62,6 +62,11 @@ defmodule Teiserver.Account.SmurfKeyLib do
       where: smurf_keys.type_id == ^type_id
   end
 
+  def _search(query, :type_id_in, type_ids) do
+    from smurf_keys in query,
+      where: smurf_keys.type_id in ^type_ids
+  end
+
   def _search(query, :user_id, user_id) do
     from smurf_keys in query,
       where: smurf_keys.user_id == ^user_id
