@@ -411,7 +411,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     battle.players
     |> Enum.each(fn player_id ->
-      client = Client.get_client_by_id(player_id)
+      client = Account.get_client_by_id(player_id)
       if client.ready == false and client.player == true do
         User.ring(player_id, state.coordinator_id)
         Lobby.force_change_client(state.coordinator_id, player_id, %{player: false})

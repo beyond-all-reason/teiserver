@@ -132,6 +132,11 @@ defmodule Teiserver.Battle.LobbyCache do
     cast_lobby(lobby_id, {:remove_user, userid})
   end
 
+  @spec get_lobby_member_list(T.lobby_id()) :: [T.userid()]
+  def get_lobby_member_list(lobby_id) do
+    call_lobby(lobby_id, :get_member_list)
+  end
+
   @spec get_lobby_member_count(T.lobby_id()) :: integer() | :lobby
   def get_lobby_member_count(lobby_id) do
     call_lobby(lobby_id, :get_member_count)
@@ -142,6 +147,10 @@ defmodule Teiserver.Battle.LobbyCache do
     call_lobby(lobby_id, :get_player_count)
   end
 
+  @spec get_lobby_players(T.lobby_id()) :: [integer()]
+  def get_lobby_players(lobby_id) do
+    call_lobby(lobby_id, :get_player_list)
+  end
 
   @spec get_lobby_players!(T.lobby_id()) :: [integer()]
   def get_lobby_players!(id) do

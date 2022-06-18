@@ -420,7 +420,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # Player limit, if they want to be a player and we have
     # enough players then they can't be a player
     new_client = if existing.player == false and new_client.player == true and get_player_count(state) >= get_max_player_count(state) do
-      #LobbyChat.sayprivateex(state.coordinator_id, userid, "The lobby is currently full, add yourself to the player queue by chatting $joinq", state.lobby_id)
       LobbyChat.say(userid, "$joinq", state.lobby_id)
       %{new_client | player: false}
     else
@@ -760,8 +759,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec list_players(map()) :: [T.client()]
   def list_players(%{lobby_id: lobby_id}) do
-    Battle.get_lobby(lobby_id)
-      |> Map.get(:players)
+    Battle.get_lobby_member_list(lobby_id)
       |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
       |> Enum.filter(fn client -> client != nil end)
       |> Enum.filter(fn client -> client.player == true and client.lobby_id == lobby_id end)

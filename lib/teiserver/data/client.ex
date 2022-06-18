@@ -214,6 +214,7 @@ defmodule Teiserver.Client do
           lobby_id: lobby_id,
           lobby_host: lobby_host
         }
+        ClientLib.replace_update_client(new_client, :silent)
         Central.cache_put(:clients, new_client.userid, new_client)
         new_client
     end
@@ -232,6 +233,7 @@ defmodule Teiserver.Client do
 
       client ->
         new_client = reset_battlestatus(client)
+        ClientLib.replace_update_client(new_client, :silent)
         Central.cache_put(:clients, new_client.userid, new_client)
         new_client
     end

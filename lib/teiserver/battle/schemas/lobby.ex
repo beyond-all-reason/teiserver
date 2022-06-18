@@ -49,7 +49,7 @@ defmodule Teiserver.Battle.Lobby do
   alias Phoenix.PubSub
   require Logger
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.{User, Client, Battle, Coordinator, LobbyIdServer}
+  alias Teiserver.{Account, User, Client, Battle, Coordinator, LobbyIdServer}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle.{LobbyChat, LobbyCache}
 
@@ -261,6 +261,7 @@ defmodule Teiserver.Battle.Lobby do
 
     Coordinator.cast_consul(battle_lobby_id, {:user_joined, userid})
     Battle.add_user_to_lobby(userid, battle_lobby_id, script_password)
+    Client.join_battle(userid, battle_lobby_id, false)
 
     PubSub.broadcast(
       Central.PubSub,
@@ -279,43 +280,31 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec add_user_to_battle(integer(), integer(), String.t() | nil) :: nil
   def add_user_to_battle(userid, lobby_id, script_password \\ nil) do
+    members = Battle.get_lobby_member_list(lobby_id)
     Battle.add_user_to_lobby(userid, lobby_id, script_password)
 
-    Central.cache_update(:lobbies, lobby_id, fn battle_state ->
-      new_state =
-        if Enum.member?(battle_state.players, userid) do
-          # No change takes place, they're already in the battle!
-          battle_state
-        else
-          Coordinator.cast_consul(lobby_id, {:user_joined, userid})
-          Client.join_battle(userid, lobby_id, false)
+    if not Enum.member?(members, userid) do
+      Coordinator.cast_consul(lobby_id, {:user_joined, userid})
+      Client.join_battle(userid, lobby_id, false)
 
-          PubSub.broadcast(
-            Central.PubSub,
-            "teiserver_client_action_updates:#{userid}",
-            {:client_action, :join_lobby, userid, lobby_id}
-          )
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_client_action_updates:#{userid}",
+        {:client_action, :join_lobby, userid, lobby_id}
+      )
 
-          PubSub.broadcast(
-            Central.PubSub,
-            "legacy_all_battle_updates",
-            {:add_user_to_battle, userid, lobby_id, script_password}
-          )
+      PubSub.broadcast(
+        Central.PubSub,
+        "legacy_all_battle_updates",
+        {:add_user_to_battle, userid, lobby_id, script_password}
+      )
 
-          PubSub.broadcast(
-            Central.PubSub,
-            "teiserver_lobby_updates:#{lobby_id}",
-            {:lobby_update, :add_user, lobby_id, userid}
-          )
-
-          new_players = [userid | battle_state.players]
-          %{battle_state | players: new_players, member_count: Enum.count(new_players)}
-        end
-
-      {:ok, new_state}
-    end)
-
-    nil
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_lobby_updates:#{lobby_id}",
+        {:lobby_update, :add_user, lobby_id, userid}
+      )
+    end
   end
 
   @spec remove_user_from_battle(T.userid(), T.lobby_id()) :: nil | :ok | {:error, any}
@@ -651,20 +640,20 @@ defmodule Teiserver.Battle.Lobby do
   def force_change_client(_, nil, _), do: nil
 
   def force_change_client(changer_id, client_id, new_values) do
-    changer = Client.get_client_by_id(changer_id)
     case Client.get_client_by_id(client_id) do
       nil ->
-        :ok
+        nil
       client ->
-        battle = get_battle(client.lobby_id)
+        lobby = get_lobby(client.lobby_id)
+        changer = Client.get_client_by_id(changer_id)
 
-        new_values = new_values
-        |> Enum.filter(fn {field, _} ->
-          allow?(changer, field, battle)
-        end)
-        |> Map.new(fn {k, v} -> {k, v} end)
+        changed_values = new_values
+          |> Enum.filter(fn {field, _} ->
+            allow?(changer, field, lobby)
+          end)
+          |> Map.new(fn {k, v} -> {k, v} end)
 
-        change_client_battle_status(client, new_values)
+        change_client_battle_status(client, changed_values)
     end
   end
 
@@ -673,8 +662,8 @@ defmodule Teiserver.Battle.Lobby do
   def change_client_battle_status(_, values) when values == %{}, do: nil
 
   def change_client_battle_status(client, new_values) do
-    client = Map.merge(client, new_values)
-    Client.update(client, :client_updated_battlestatus)
+    new_client = Map.merge(client, new_values)
+    Account.replace_update_client(new_client, :client_updated_battlestatus)
   end
 
   @spec allow?(T.userid, atom, T.lobby_id()) :: boolean()

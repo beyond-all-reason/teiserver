@@ -3,7 +3,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
   alias Teiserver.Common.PubsubListener
-  alias Teiserver.{Battle, User, Client, Coordinator}
+  alias Teiserver.{Account, Battle, User, Client, Coordinator}
   alias Teiserver.Coordinator.ConsulServer
 
   import Teiserver.TeiserverTestLib,
@@ -68,8 +68,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     }, :client_updated_battlestatus)
 
     readies = Battle.get_lobby(lobby_id)
-    |> Map.get(:players)
-    |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
+      |> Map.get(:players)
+      |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
 
     assert readies == [false, false]
 
@@ -78,9 +78,9 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     # Now we check they are ready or they're a spectator
     readies = Battle.get_lobby(lobby_id)
-    |> Map.get(:players)
-    |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
-    |> Enum.map(fn c -> c.player == false or c.ready == true end)
+      |> Map.get(:players)
+      |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
+      |> Enum.map(fn c -> c.player == false or c.ready == true end)
 
     assert readies == [true, true]
 
@@ -643,14 +643,14 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   end
 
   test "join_queue_on_full_game", %{lobby_id: lobby_id, hsocket: hsocket, psocket: socket1, player: player1} do
-    #Limit player count to 2 (1v1)
+    # Limit player count to 2 (1v1)
     _tachyon_send(hsocket, %{cmd: "c.lobby_host.update_host_status", boss: nil, teamsize: 1, teamcount: 2})
 
     state = Coordinator.call_consul(lobby_id, :get_all)
     max_player_count = ConsulServer.get_max_player_count(state)
     assert max_player_count == 2
 
-    #Add 2 more player
+    # Add 2 more players
     %{user: player2, socket: socket2} = tachyon_auth_setup()
     %{user: player3, socket: socket3} = tachyon_auth_setup()
 
@@ -658,7 +658,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     Lobby.force_add_user_to_battle(player2.id, lobby_id)
     Lobby.force_add_user_to_battle(player3.id, lobby_id)
 
-    #Players 2 and 3 are playing a 1v1, player 1 is a not a player
+    # Players 2 and 3 are playing a 1v1, player 1 is a not a player
     _tachyon_send(socket1, %{cmd: "c.lobby.update_status", client: %{player: false, ready: false}})
     _tachyon_send(socket2, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
     _tachyon_send(socket3, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
@@ -667,13 +667,14 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert Client.get_client_by_id(player2.id).player == true
     assert Client.get_client_by_id(player3.id).player == true
 
-    #Queue should be empty at start
+    # Queue should be empty at start
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
     assert queue == []
 
-    #Player 1 now wants to join
+    # Player 1 now wants to join
     _tachyon_send(socket1, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
-    #And added to the join queue
+
+    # And added to the join queue
     assert Client.get_client_by_id(player1.id).player == false
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
     assert queue == [player1.id]

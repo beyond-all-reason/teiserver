@@ -18,8 +18,7 @@ defmodule Teiserver.Account.ClientLib do
 
   def get_client_by_name(name) do
     userid = Account.get_userid_from_name(name)
-    Central.cache_get(:clients, userid)
-    # call_client(userid, :client_state)
+    get_client_by_id(userid)
   end
 
   @spec get_client_by_id(nil) :: nil
@@ -27,8 +26,8 @@ defmodule Teiserver.Account.ClientLib do
   def get_client_by_id(nil), do: nil
 
   def get_client_by_id(userid) do
-    Central.cache_get(:clients, userid)
-    # call_client(userid, :client_state)
+    # Central.cache_get(:clients, userid)
+    call_client(userid, :get_client_state)
   end
 
   @spec get_clients([T.userid()]) :: List.t()
@@ -40,11 +39,11 @@ defmodule Teiserver.Account.ClientLib do
 
   @spec list_client_ids() :: [T.userid()]
   def list_client_ids() do
-    case Central.cache_get(:lists, :clients) do
-      nil -> []
-      ids -> ids
-    end
-    # Horde.Registry.select(Teiserver.ClientRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
+    # case Central.cache_get(:lists, :clients) do
+    #   nil -> []
+    #   ids -> ids
+    # end
+    Horde.Registry.select(Teiserver.ClientRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
   @spec list_clients() :: [T.client()]
@@ -110,7 +109,6 @@ defmodule Teiserver.Account.ClientLib do
 
     client
   end
-  def update_client(client, _reason), do: client
 
 
   # Process stuff
@@ -140,7 +138,9 @@ defmodule Teiserver.Account.ClientLib do
   def cast_client(userid, msg) do
     case get_client_pid(userid) do
       nil -> nil
-      pid -> GenServer.cast(pid, msg)
+      pid ->
+        GenServer.cast(pid, msg)
+        :ok
     end
   end
 
@@ -172,7 +172,7 @@ defmodule Teiserver.Account.ClientLib do
     stats = Account.get_user_stat_data(user.id)
 
     client = get_client_by_id(userid)
-    %{client |
+    new_client = %{client |
       userid: user.id,
       name: user.name,
       rank: user.rank,
@@ -182,6 +182,8 @@ defmodule Teiserver.Account.ClientLib do
       country: stats["country"],
       lobby_client: stats["lobby_client"]
     }
-    |> Client.add_client
+
+    replace_update_client(new_client, :silent)
+    Client.add_client(new_client)
   end
 end

@@ -126,8 +126,6 @@ defmodule Teiserver.Account.AccoladeBotTest do
       "sender_id" => AccoladeLib.get_accolade_bot_userid()
     }
 
-    Logger.warn("basic test, player11 = #{player11.id}, player12 = #{player12.id}")
-
     # For some reason this might fail as part of a larger test but not a smaller
     [accolade_given] = Account.list_accolades(search: [giver_id: player11.id])
     assert accolade_given.giver_id == player11.id
