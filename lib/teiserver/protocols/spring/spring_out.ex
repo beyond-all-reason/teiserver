@@ -610,14 +610,14 @@ defmodule Teiserver.Protocols.SpringOut do
     reply(:motd, nil, nil, state)
 
     # Login the client
-    client = Client.login(user, state.ip)
+    _client = Client.login(user, state.ip)
 
     # Who is online?
     clients = Client.list_client_ids()
-    |> Enum.map(fn userid ->
-      Client.get_client_by_id(userid)
-    end)
-    |> Enum.filter(fn c -> c != nil end)
+      |> Enum.map(fn userid ->
+        Client.get_client_by_id(userid)
+      end)
+      |> Enum.filter(fn c -> c != nil end)
 
     # ADDUSER entries
     clients

@@ -426,7 +426,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       new_client
     end
 
-    # Check locks
     new_client = state.locks
     |> Enum.reduce(new_client, fn (lock, acc) ->
       case lock do
@@ -444,20 +443,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
       end
     end)
 
-
-    # Putting it like this purely to allow testing before removing the below code
-    change = true
-    new_status = new_client
-
-    # Now we apply modifiers (unready = spec)
-    # {change, new_status} = cond do
-    #   state.unready_can_play -> {true, new_client}
-    #   list_status != :player and new_client.player == true -> {false, nil}
-    #   new_client.ready == false and new_client.player == true ->
-    #     LobbyChat.sayprivateex(state.coordinator_id, userid, "You have been spec'd as you are unready. Please disable auto-unready in your lobby settings to prevent this from happening.", state.lobby_id)
-    #     {true, %{new_client | player: false}}
-    #   true -> {true, new_client}
-    # end
+    # Now we apply modifiers
+    {change, new_status} = cond do
+      list_status != :player and new_client.player == true -> {false, nil}
+      # new_client.ready == false and new_client.player == true ->
+      #   LobbyChat.sayprivateex(state.coordinator_id, userid, "You have been spec'd as you are unready. Please disable auto-unready in your lobby settings to prevent this from happening.", state.lobby_id)
+      #   {true, %{new_client | player: false}}
+      true -> {true, new_client}
+    end
 
     # Take into account if they are waiting to join
     # if they are not waiting to join and someone else is then

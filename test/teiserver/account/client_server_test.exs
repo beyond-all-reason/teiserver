@@ -1,10 +1,14 @@
 defmodule Teiserver.Account.ClientServerTest do
   use Central.DataCase, async: true
+  alias Teiserver.Client
   alias Teiserver.Account.ClientLib
 
   test "server test" do
     client = %{
       userid: 1,
+      name: "ClientServerTest User",
+      country: "??",
+
       in_game: false,
       away: false,
       rank: 1,
@@ -55,6 +59,7 @@ defmodule Teiserver.Account.ClientServerTest do
     # r = ClientLib.update_client(Map.merge(client, %{side: 1, userid: -1}), :client_updated_battlestatus)
     # assert r == nil
 
+    Client.disconnect(userid)
     ClientLib.stop_client_server(userid)
   end
 end
