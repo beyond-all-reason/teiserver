@@ -732,7 +732,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       [userid | _] = get_queue(state)
 
       existing = Client.get_client_by_id(userid)
-      new_client = Map.merge(existing, %{player: true, ready: true})
+      new_client = Map.merge(existing, %{player: true, ready: false})
       case request_user_change_status(new_client, existing, state) do
         {true, allowed_client} ->
           # Sometimes people get added and SPADS thinks they need to go, this delay might help
@@ -740,8 +740,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
           LobbyChat.sayprivateex(state.coordinator_id, userid, "#{new_client.name} You were at the front of the queue, you are now a player.", state.lobby_id)
 
           # if Config.get_user_config_cache(userid, "teiserver.Discord notifications") do
-          #   user = User.get_user_by_id(userid)
-          #   BridgeServer.send_direct_message(user.discord_id, "You have reached the front of the queue and are now a player.")
+          #   BridgeServer.send_direct_message(userid, "You have reached the front of the queue and are now a player.")
           # end
 
           send(self(), {:dequeue_user, userid})

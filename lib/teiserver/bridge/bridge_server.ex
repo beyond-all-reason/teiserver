@@ -8,6 +8,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   alias Phoenix.PubSub
   alias Central.Config
   require Logger
+  alias Teiserver.Data.Types, as: T
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -22,6 +23,21 @@ defmodule Teiserver.Bridge.BridgeServer do
   @spec get_bridge_pid() :: pid
   def get_bridge_pid() do
     Central.cache_get(:application_metadata_cache, "teiserver_bridge_pid")
+  end
+
+  @spec send_direct_message(T.user_id(), String.t()) :: :ok | nil
+  def send_direct_message(user_id, message) do
+    user = User.get_user_by_id(user_id)
+
+    cond do
+      user.discord_dm_channel == nil -> nil
+      true ->
+        Alchemy.Client.send_message(
+          user.discord_dm_channel,
+          message,
+          []# Options
+        )
+    end
   end
 
   @impl true
