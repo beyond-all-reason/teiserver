@@ -1,10 +1,6 @@
 defmodule Teiserver.Battle.LobbyCacheTest do
   use Central.ServerCase, async: false
-  alias Teiserver.Battle.Lobby
-  alias Teiserver.Account.ClientLib
-  alias Teiserver.Common.PubsubListener
-  alias Teiserver.{Battle, Account, Client, Coordinator}
-  alias Teiserver.Coordinator.ConsulServer
+  alias Teiserver.{Battle}
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]
@@ -40,7 +36,7 @@ defmodule Teiserver.Battle.LobbyCacheTest do
     p_client = Account.get_client_by_id(player.id)
     assert p_client.lobby_id == nil
 
-    Lobby.add_user_to_battle(player.id, lobby_id, "script_password")
+    Battle.add_user_to_lobby(player.id, lobby_id, "script_password")
     p_client = Account.get_client_by_id(player.id)
     assert p_client.lobby_id == lobby_id
   end
