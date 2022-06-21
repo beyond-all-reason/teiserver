@@ -134,7 +134,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
   # This is called from create_report and is just a way to handle that specific instance
   defp report_creation(report, chan) do
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
-    url = "https://#{host}/teiserver/admin/user/#{report.target_id}#reports_tab"
+    url = "https://#{host}/teiserver/admin/user/#{report.target_id}#moderation_tab"
 
     msg = "#{report.target.name} was reported by #{report.reporter.name} for reason #{report.reason} - #{url}"
 

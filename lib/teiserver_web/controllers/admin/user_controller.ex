@@ -400,7 +400,7 @@ defmodule TeiserverWeb.Admin.UserController do
                       }
                     })
 
-                    {:ok, nil, "#reports_tab"}
+                    {:ok, nil, "#moderation_tab"}
 
                 err ->
                   err
