@@ -106,6 +106,8 @@ defmodule Teiserver.Client do
       })
       |> add_client
 
+    ClientLib.start_client_server(client)
+
     PubSub.broadcast(
       Central.PubSub,
       "legacy_all_user_updates",
@@ -158,8 +160,6 @@ defmodule Teiserver.Client do
 
       {:ok, new_value}
     end)
-
-    ClientLib.start_client_server(client)
 
     client
   end
