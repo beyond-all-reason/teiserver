@@ -20,19 +20,19 @@ This document serves as a list of steps to convert the game from single to multi
 - [X] **Stage 2:** One message at a time, update the documentation and implementation of said message (both send and receive)
 - [X] **Stage 3:** Identify counters that need to be a singleton (e.g. lobby_id, spring_id)
 - [X] **Stage 4:** Convert these to singletons
-- [ ] **Stage 5:** Add functionality for a node coming online after the others and being caught-up on state of caches
 
 ##### Less reliance on pre-caching
 - [X] **Stage 1:** Identify pre-caches used
 - [X] **Stage 2:** Add a `caches.md` documentation file
 - [X] **Stage 3:** Decide which can be migrated away
-- [ ] **Stage 4:** Might need to use cache_update rather than cache_put to help ensure consistency
-- [ ] **Stage 5:** Migrate caches away
+- [X] **Stage 4:** Might need to use cache_update rather than cache_put to help ensure consistency
+- [X] **Stage 5:** Migrate caches away
 
 ##### Per node processes
 - [X] **Stage 1:** List each type of process we track.
-- [ ] **Stage 2:** Convert these to use a Horde DynamicSupervisor
+- [X] **Stage 2:** Convert these to use a Horde DynamicSupervisor
 - [ ] **Stage 3:** Have them all startup from Teiserver.Startup where they can check for existing PIDs
+- [ ] **Stage 4:** Scheduled Oban jobs
 
 ## Known issues
 - ETS (via ConCache) is node specific, we need to make changes propagate across the cluster
@@ -80,7 +80,6 @@ Note: This ties in with the "Per node process" item.
   - User SpringId
   - Lobby match_id
 - **Stage 4:** Convert these to singletons
-- **Stage 5:** Add functionality for a node coming online after the others and being caught-up on state of caches (e.g. client/lobby list)
 
 ##### Less reliance on pre-caching
 - **Stage 1:** Identify pre-caches used
@@ -106,7 +105,7 @@ Note: This ties in with the "Per node process" item.
     - AchievementServer
 - **Stage 2:** Convert these to use a Horde DynamicSupervisor
 - **Stage 3:** Have them all startup from Teiserver.Startup where they can check for existing PIDs
-
+- **Stage 4:** Discover how scheduled Oban jobs will work, some of them are long running and we don't want to duplicate them
 
 ## Lessons learned
 - Ensure when registering processes they have a unique key. I accidentally registered the LobbyThrottles without having the lobby_id be part of the key and as a result they didn't register correctly at first.
