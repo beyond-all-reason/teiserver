@@ -1,7 +1,7 @@
 defmodule Teiserver.Coordinator.ConsulCommands do
   require Logger
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
-  alias Teiserver.{Account, Coordinator, User, Client}
+  alias Teiserver.{Account, Battle, Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat}
   # alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
@@ -744,8 +744,10 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "reset"} = _cmd, state) do
+    Battle.update_lobby_value(state.lobby_id, :consul_rename, false)
+
     ConsulServer.empty_state(state.lobby_id)
-    |> ConsulServer.broadcast_update("reset")
+      |> ConsulServer.broadcast_update("reset")
   end
 
   #################### Internal commands

@@ -48,6 +48,10 @@ defmodule Teiserver.Battle.LobbyThrottle do
     {:noreply, %{state | player_changes: [userid | state.player_changes]}}
   end
 
+  def handle_info({:lobby_update, :update_value, _lobby_id, {key, _value}}, state) do
+    {:noreply, %{state | player_changes: [key | state.lobby_changes]}}
+  end
+
   # Coordinator
   def handle_info({:liveview_lobby_update, :consul_server_updated, _lobby_id, _reason}, state) do
     {:noreply, %{state | lobby_changes: [:consul | state.lobby_changes]}}

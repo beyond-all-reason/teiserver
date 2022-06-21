@@ -39,16 +39,15 @@ defmodule Teiserver.Battle.LobbyCache do
       |> Enum.filter(fn lobby -> lobby != nil end)
   end
 
-  @spec update_value(T.lobby_id(), atom, any) :: :ok | nil
-  def update_value(lobby_id, key, value) do
+  @spec update_lobby_value(T.lobby_id(), atom, any) :: :ok | nil
+  def update_lobby_value(lobby_id, key, value) do
     result = cast_lobby(lobby_id, {:update_value, key, value})
 
     if result != nil do
-      PubSub.broadcast(
-        Central.PubSub,
-        "legacy_all_battle_updates",
-        {:global_battle_updated, lobby_id, :update_value}
-      )
+      # case key do
+      #   _ ->
+      #    :ok
+      # end
 
       PubSub.broadcast(
         Central.PubSub,

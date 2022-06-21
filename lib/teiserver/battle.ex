@@ -444,8 +444,8 @@ defmodule Teiserver.Battle do
   defdelegate get_lobby_player_count(lobby_id), to: LobbyCache
 
   # Update
-  @spec update_value(T.lobby_id(), atom, any) :: :ok
-  defdelegate update_value(lobby_id, key, value), to: LobbyCache
+  @spec update_lobby_value(T.lobby_id(), atom, any) :: :ok
+  defdelegate update_lobby_value(lobby_id, key, value), to: LobbyCache
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   defdelegate update_lobby(lobby, data, reason), to: LobbyCache
