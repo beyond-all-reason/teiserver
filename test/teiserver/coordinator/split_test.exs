@@ -95,12 +95,12 @@ defmodule Teiserver.Coordinator.SplitTest do
     Lobby.add_user_to_battle(player6.id, lobby_id, "script_password")
 
     # Normally the player joins through the standard means but we're doing a test so it's a bit janky atm
-    send(Client.get_client_by_id(player1.id).pid, {:put, :lobby_id, lobby_id})
-    send(Client.get_client_by_id(player2.id).pid, {:put, :lobby_id, lobby_id})
-    send(Client.get_client_by_id(player3.id).pid, {:put, :lobby_id, lobby_id})
-    send(Client.get_client_by_id(player4.id).pid, {:put, :lobby_id, lobby_id})
-    send(Client.get_client_by_id(player5.id).pid, {:put, :lobby_id, lobby_id})
-    send(Client.get_client_by_id(player6.id).pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player1.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player2.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player3.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player4.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player5.id).tcp_pid, {:put, :lobby_id, lobby_id})
+    send(Client.get_client_by_id(player6.id).tcp_pid, {:put, :lobby_id, lobby_id})
 
     data = %{cmd: "c.lobby.message", message: "$splitlobby"}
     _tachyon_send(psocket1, data)

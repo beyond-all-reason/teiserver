@@ -632,7 +632,7 @@ CLIENTS test_room #{user.name}\n"
     Client.login(User.get_user_by_id(bad_user.id), "127.0.0.1")
 
     # Now see what happens when we add user
-    pid = Client.get_client_by_id(user.id).pid
+    pid = Client.get_client_by_id(user.id).tcp_pid
     send(pid, {:user_logged_in, bad_user.id})
     reply = _recv_raw(socket)
     assert reply == "ADDUSER test_user_bad_springid ?? #{bad_user.id} \nCLIENTSTATUS test_user_bad_springid 0\n"

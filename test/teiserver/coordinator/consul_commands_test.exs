@@ -42,7 +42,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     # Player needs to be added to the battle
     Lobby.add_user_to_battle(player.id, lobby_id, "script_password")
-    player_client = Client.get_client_by_id(player.id)
+    player_client = Account.get_client_by_id(player.id)
     Client.update(%{player_client |
       player: true
     }, :client_updated_battlestatus)

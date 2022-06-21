@@ -111,12 +111,12 @@ defmodule Teiserver.SpringTcpServerTest do
   test "bad sequences" do
     %{socket: socket, user: user} = auth_setup()
     client = Client.get_client_by_name(user.name)
-    pid = client.pid
+    tcp_pid = client.tcp_pid
     coordinator_userid = Teiserver.Coordinator.get_coordinator_userid()
 
     # Should be no users but ourselves
     :timer.sleep(300)
-    assert GenServer.call(pid, {:get, :known_users}) == %{
+    assert GenServer.call(tcp_pid, {:get, :known_users}) == %{
       user.id => %{lobby_id: nil, userid: user.id},
       coordinator_userid => %{lobby_id: nil, userid: coordinator_userid},
     }
@@ -126,7 +126,7 @@ defmodule Teiserver.SpringTcpServerTest do
     %{socket: _s3, user: u3} = auth_setup()
 
     # They should now all be known
-    assert GenServer.call(pid, {:get, :known_users}) == %{
+    assert GenServer.call(tcp_pid, {:get, :known_users}) == %{
       user.id => %{lobby_id: nil, userid: user.id},
       u1.id => %{lobby_id: nil, userid: u1.id},
       u2.id => %{lobby_id: nil, userid: u2.id},
@@ -142,21 +142,21 @@ defmodule Teiserver.SpringTcpServerTest do
 
     # Lets start with the same user logging in multiple times
     # first ourselves, shouldn't see anything here
-    send(pid, {:user_logged_in, user.id})
+    send(tcp_pid, {:user_logged_in, user.id})
     r = _recv_raw(socket)
     assert r == :timeout
 
     # Now u1, already logged in
-    send(pid, {:user_logged_in, u1.id})
+    send(tcp_pid, {:user_logged_in, u1.id})
     r = _recv_raw(socket)
     assert r == :timeout
 
     # Log out u1, should work
-    send(pid, {:user_logged_out, u1.id, u1.name})
+    send(tcp_pid, {:user_logged_out, u1.id, u1.name})
     r = _recv_raw(socket)
     assert r == "REMOVEUSER #{u1.name}\n"
 
-    assert GenServer.call(pid, {:get, :known_users}) == %{
+    assert GenServer.call(tcp_pid, {:get, :known_users}) == %{
       user.id => %{lobby_id: nil, userid: user.id},
       u2.id => %{lobby_id: nil, userid: u2.id},
       u3.id => %{lobby_id: nil, userid: u3.id},
@@ -164,11 +164,11 @@ defmodule Teiserver.SpringTcpServerTest do
     }
 
     # Repeat, should not do anything
-    send(pid, {:user_logged_out, u1.id, u1.name})
+    send(tcp_pid, {:user_logged_out, u1.id, u1.name})
     r = _recv_raw(socket)
     assert r == :timeout
 
-    assert GenServer.call(pid, {:get, :known_users}) == %{
+    assert GenServer.call(tcp_pid, {:get, :known_users}) == %{
       user.id => %{lobby_id: nil, userid: user.id},
       u2.id => %{lobby_id: nil, userid: u2.id},
       u3.id => %{lobby_id: nil, userid: u3.id},
@@ -176,11 +176,11 @@ defmodule Teiserver.SpringTcpServerTest do
     }
 
     # Logs back in
-    send(pid, {:user_logged_in, u1.id})
+    send(tcp_pid, {:user_logged_in, u1.id})
     r = _recv_raw(socket)
     assert r == "ADDUSER #{u1.name} ?? #{u1.springid} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\n"
 
-    assert GenServer.call(pid, {:get, :known_users}) == %{
+    assert GenServer.call(tcp_pid, {:get, :known_users}) == %{
       user.id => %{lobby_id: nil, userid: user.id},
       u1.id => %{lobby_id: nil, userid: u1.id},
       u2.id => %{lobby_id: nil, userid: u2.id},
@@ -190,12 +190,12 @@ defmodule Teiserver.SpringTcpServerTest do
 
     # ---- BATTLES ----
     lobby_id = 111
-    assert GenServer.call(pid, {:get, :known_battles}) == []
-    send(pid, {:add_user_to_battle, u1.id, lobby_id, "script_password"})
+    assert GenServer.call(tcp_pid, {:get, :known_battles}) == []
+    send(tcp_pid, {:add_user_to_battle, u1.id, lobby_id, "script_password"})
     r = _recv_raw(socket)
     assert r == "JOINEDBATTLE #{lobby_id} #{u1.name}\n"
 
-    assert GenServer.call(pid, {:get, :known_users}) == %{
+    assert GenServer.call(tcp_pid, {:get, :known_users}) == %{
       user.id => %{lobby_id: nil, userid: user.id},
       u1.id => %{lobby_id: lobby_id, userid: u1.id},
       u2.id => %{lobby_id: nil, userid: u2.id},
@@ -204,11 +204,11 @@ defmodule Teiserver.SpringTcpServerTest do
     }
 
     # Duplicate user in battle
-    send(pid, {:add_user_to_battle, u1.id, lobby_id, "script_password"})
+    send(tcp_pid, {:add_user_to_battle, u1.id, lobby_id, "script_password"})
     r = _recv_raw(socket)
     assert r == :timeout
 
-    assert GenServer.call(pid, {:get, :known_users}) == %{
+    assert GenServer.call(tcp_pid, {:get, :known_users}) == %{
       user.id => %{lobby_id: nil, userid: user.id},
       u1.id => %{lobby_id: lobby_id, userid: u1.id},
       u2.id => %{lobby_id: nil, userid: u2.id},
@@ -217,12 +217,12 @@ defmodule Teiserver.SpringTcpServerTest do
     }
 
     # User moves to a different battle (without leave command)
-    send(pid, {:add_user_to_battle, u1.id, lobby_id + 1, "script_password"})
+    send(tcp_pid, {:add_user_to_battle, u1.id, lobby_id + 1, "script_password"})
     :timer.sleep(250)
     r = _recv_raw(socket)
 
     # Run on it's own it passes, run as part of the greater tests it sometimes fails
-    assert GenServer.call(pid, {:get, :known_users}) == %{
+    assert GenServer.call(tcp_pid, {:get, :known_users}) == %{
       user.id => %{lobby_id: nil, userid: user.id},
       u1.id => %{lobby_id: lobby_id + 1, userid: u1.id},
       u2.id => %{lobby_id: nil, userid: u2.id},
@@ -234,17 +234,17 @@ defmodule Teiserver.SpringTcpServerTest do
     # assert r == "LEFTBATTLE #{lobby_id} #{u1.name}\nJOINEDBATTLE #{lobby_id + 1} #{u1.name}\n"
 
     # Same battle again
-    send(pid, {:add_user_to_battle, u1.id, lobby_id + 1, "script_password"})
+    send(tcp_pid, {:add_user_to_battle, u1.id, lobby_id + 1, "script_password"})
     r = _recv_raw(socket)
     assert r == :timeout
 
     # Log the user out and then get them to join a battle
-    send(pid, {:user_logged_out, u1.id, u1.name})
+    send(tcp_pid, {:user_logged_out, u1.id, u1.name})
     r = _recv_raw(socket)
     assert r == "REMOVEUSER #{u1.name}\n"
 
     # Now they join, should get a login and then a join battle command
-    send(pid, {:add_user_to_battle, u1.id, lobby_id + 1, "script_password"})
+    send(tcp_pid, {:add_user_to_battle, u1.id, lobby_id + 1, "script_password"})
     :timer.sleep(500)
     r = _recv_raw(socket)
 
@@ -257,20 +257,20 @@ defmodule Teiserver.SpringTcpServerTest do
 
 
     # ---- Chat rooms ----
-    send(pid, {:add_user_to_room, u1.id, "roomname"})
+    send(tcp_pid, {:add_user_to_room, u1.id, "roomname"})
     r = _recv_raw(socket)
     assert r == "JOINED roomname #{u1.name}\n"
 
-    send(pid, {:add_user_to_room, u1.id, "roomname"})
+    send(tcp_pid, {:add_user_to_room, u1.id, "roomname"})
     r = _recv_raw(socket)
     assert r == :timeout
 
     # Remove
-    send(pid, {:remove_user_from_room, u1.id, "roomname"})
+    send(tcp_pid, {:remove_user_from_room, u1.id, "roomname"})
     r = _recv_raw(socket)
     assert r == "LEFT roomname #{u1.name}\n"
 
-    send(pid, {:remove_user_from_room, u1.id, "roomname"})
+    send(tcp_pid, {:remove_user_from_room, u1.id, "roomname"})
     r = _recv_raw(socket)
     assert r == :timeout
 
@@ -291,106 +291,106 @@ defmodule Teiserver.SpringTcpServerTest do
     %{socket: socket, user: user} = auth_setup()
 
     client = Client.get_client_by_name(user.name)
-    pid = client.pid
+    tcp_pid = client.tcp_pid
     coordinator_id = Client.get_client_by_name("Coordinator").userid
 
     # --- User logs out
     # At first it should be user, dud and coordinator
-    known = :sys.get_state(pid) |> Map.get(:known_users)
+    known = :sys.get_state(tcp_pid) |> Map.get(:known_users)
     assert Map.keys(known) == [coordinator_id, dud.id, user.id]
 
-    send(pid, {:user_logged_out, dud.id, dud.name})
+    send(tcp_pid, {:user_logged_out, dud.id, dud.name})
     r = _recv_until(socket)
     assert r == "REMOVEUSER #{dud.name}\n"
-    known = :sys.get_state(pid) |> Map.get(:known_users)
+    known = :sys.get_state(tcp_pid) |> Map.get(:known_users)
     assert Map.keys(known) == [coordinator_id, user.id]
 
     # Now what if they log out again?
-    send(pid, {:user_logged_out, dud.id, dud.name})
+    send(tcp_pid, {:user_logged_out, dud.id, dud.name})
     r = _recv_until(socket)
     assert r == ""
-    known = :sys.get_state(pid) |> Map.get(:known_users)
+    known = :sys.get_state(tcp_pid) |> Map.get(:known_users)
     assert Map.keys(known) == [coordinator_id, user.id]
 
     # Now what if non_user is logged out (they were never logged in to start with)
-    send(pid, {:user_logged_out, non_user.id, non_user.name})
+    send(tcp_pid, {:user_logged_out, non_user.id, non_user.name})
     r = _recv_until(socket)
     assert r == ""
-    known = :sys.get_state(pid) |> Map.get(:known_users)
+    known = :sys.get_state(tcp_pid) |> Map.get(:known_users)
     assert Map.keys(known) == [coordinator_id, user.id]
 
     # Now what if we find a userid that they don't have?
-    send(pid, {:user_logged_out, 0, "noname"})
+    send(tcp_pid, {:user_logged_out, 0, "noname"})
     r = _recv_until(socket)
     assert r == ""
-    known = :sys.get_state(pid) |> Map.get(:known_users)
+    known = :sys.get_state(tcp_pid) |> Map.get(:known_users)
     assert Map.keys(known) == [coordinator_id, user.id]
 
     # ---- Chat rooms ----
     # Join chat room
-    send(pid, {:user_logged_out, dud.id, dud.name})
+    send(tcp_pid, {:user_logged_out, dud.id, dud.name})
     _recv_until(socket)
-    known = :sys.get_state(pid) |> Map.get(:known_users)
+    known = :sys.get_state(tcp_pid) |> Map.get(:known_users)
     assert Map.keys(known) == [coordinator_id, user.id]
 
-    send(pid, {:add_user_to_room, dud.id, "roomname"})
+    send(tcp_pid, {:add_user_to_room, dud.id, "roomname"})
     r = _recv_until(socket)
     assert r == "ADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nJOINED roomname #{dud.name}\n"
 
     # Now the non-user, should be nothing since they're not actually logged in
-    send(pid, {:add_user_to_room, non_user.id, "roomname"})
+    send(tcp_pid, {:add_user_to_room, non_user.id, "roomname"})
     r = _recv_until(socket)
     assert r == ""
 
     # Leave chat room
-    send(pid, {:user_logged_out, dud.id, dud.name})
+    send(tcp_pid, {:user_logged_out, dud.id, dud.name})
     _recv_until(socket)
-    send(pid, {:remove_user_from_room, dud.id, "roomname"})
+    send(tcp_pid, {:remove_user_from_room, dud.id, "roomname"})
     r = _recv_until(socket)
     assert r == ""
 
     # Now the non-user, should be nothing since they're not actually logged in
-    send(pid, {:remove_user_from_room, non_user.id, "roomname"})
+    send(tcp_pid, {:remove_user_from_room, non_user.id, "roomname"})
     r = _recv_until(socket)
     assert r == ""
 
     # Send chat message
-    send(pid, {:user_logged_out, dud.id, dud.name})
+    send(tcp_pid, {:user_logged_out, dud.id, dud.name})
     _recv_until(socket)
-    send(pid, {:direct_message, dud.id, "msgmsg"})
+    send(tcp_pid, {:direct_message, dud.id, "msgmsg"})
     r = _recv_until(socket)
     assert r == "ADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAIDPRIVATE #{dud.name} msgmsg\n"
 
-    send(pid, {:user_logged_out, dud.id, dud.name})
+    send(tcp_pid, {:user_logged_out, dud.id, dud.name})
     _recv_until(socket)
-    send(pid, {:new_message, dud.id, "roomname", "msgmsg"})
+    send(tcp_pid, {:new_message, dud.id, "roomname", "msgmsg"})
     r = _recv_until(socket)
     assert r == "ADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAID roomname #{dud.name} msgmsg\n"
 
-    send(pid, {:user_logged_out, dud.id, dud.name})
+    send(tcp_pid, {:user_logged_out, dud.id, dud.name})
     _recv_until(socket)
-    send(pid, {:new_message_ex, dud.id, "roomname", "msgmsg"})
+    send(tcp_pid, {:new_message_ex, dud.id, "roomname", "msgmsg"})
     r = _recv_until(socket)
     assert r == "ADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAIDEX roomname #{dud.name} msgmsg\n"
 
     # Now the non-user, should be nothing since they're not actually logged in
-    send(pid, {:direct_message, non_user.id, "msgmsg"})
+    send(tcp_pid, {:direct_message, non_user.id, "msgmsg"})
     r = _recv_until(socket)
     assert r == ""
 
-    send(pid, {:new_message, non_user.id, "roomname", "msgmsg"})
+    send(tcp_pid, {:new_message, non_user.id, "roomname", "msgmsg"})
     r = _recv_until(socket)
     assert r == ""
 
-    send(pid, {:new_message_ex, non_user.id, "roomname", "msgmsg"})
+    send(tcp_pid, {:new_message_ex, non_user.id, "roomname", "msgmsg"})
     r = _recv_until(socket)
     assert r == ""
 
     # Join room stuff
     Room.get_or_make_room("dud_room", dud.id)
     Room.add_user_to_room(dud.id, "dud_room")
-    send(pid, {:user_logged_out, dud.id, dud.name})
-    state = :sys.get_state(pid)
+    send(tcp_pid, {:user_logged_out, dud.id, dud.name})
+    state = :sys.get_state(tcp_pid)
     _recv_until(socket)
 
     # Join a room when we don't know about dud_user

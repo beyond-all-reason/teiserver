@@ -86,7 +86,7 @@ defmodule Teiserver.SpringTokenTest do
     assert reply =~ "ACCEPTED test_user_token_test_user\n"
     :timer.sleep(200)
 
-    pid = Client.get_client_by_id(user.id).pid
+    pid = Client.get_client_by_id(user.id).tcp_pid
     assert GenServer.call(pid, {:get, :userid}) == user.id
     assert is_map(GenServer.call(pid, {:get, :user}))
 

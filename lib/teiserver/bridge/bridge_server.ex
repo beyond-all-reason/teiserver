@@ -316,6 +316,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
   defp message_contains?(message, contains), do: String.contains?(message, contains)
 
+  @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
     if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do

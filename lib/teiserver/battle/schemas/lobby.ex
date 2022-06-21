@@ -274,7 +274,7 @@ defmodule Teiserver.Battle.Lobby do
       nil ->
         nil
       client ->
-        send(client.pid, {:force_join_battle, battle_lobby_id, script_password})
+        send(client.tcp_pid, {:force_join_battle, battle_lobby_id, script_password})
     end
   end
 
@@ -589,7 +589,7 @@ defmodule Teiserver.Battle.Lobby do
 
           host_client ->
             # TODO: Depreciate
-            send(host_client.pid, {:request_user_join_lobby, userid})
+            send(host_client.tcp_pid, {:request_user_join_lobby, userid})
 
             PubSub.broadcast(
               Central.PubSub,
@@ -606,7 +606,7 @@ defmodule Teiserver.Battle.Lobby do
     client = Client.get_client_by_id(userid)
     if client do
       # TODO: Depreciate
-      send(client.pid, {:join_battle_request_response, lobby_id, :accept, nil})
+      send(client.tcp_pid, {:join_battle_request_response, lobby_id, :accept, nil})
     end
 
     PubSub.broadcast(
@@ -631,7 +631,7 @@ defmodule Teiserver.Battle.Lobby do
     client = Client.get_client_by_id(userid)
     if client do
       # TODO: Depreciate
-      send(client.pid, {:join_battle_request_response, lobby_id, :deny, reason})
+      send(client.tcp_pid, {:join_battle_request_response, lobby_id, :deny, reason})
     end
     :ok
   end

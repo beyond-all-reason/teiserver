@@ -89,7 +89,7 @@ defmodule Teiserver.Client do
       create(%{
         userid: user.id,
         name: user.name,
-        pid: self(),
+        tcp_pid: self(),
         rank: user.rank,
         moderator: User.is_moderator?(user),
         bot: User.is_bot?(user),
@@ -334,7 +334,7 @@ defmodule Teiserver.Client do
     case get_client_by_id(userid) do
       nil -> :ok
       client ->
-        send(client.pid, {:put, :print_client_messages, true})
+        send(client.tcp_pid, {:put, :print_client_messages, true})
         add_client(%{client | print_client_messages: true})
         :ok
     end
@@ -345,7 +345,7 @@ defmodule Teiserver.Client do
     case get_client_by_id(userid) do
       nil -> :ok
       client ->
-        send(client.pid, {:put, :print_client_messages, false})
+        send(client.tcp_pid, {:put, :print_client_messages, false})
         add_client(%{client | print_client_messages: false})
         :ok
     end
@@ -356,7 +356,7 @@ defmodule Teiserver.Client do
     case get_client_by_id(userid) do
       nil -> :ok
       client ->
-        send(client.pid, {:put, :print_server_messages, true})
+        send(client.tcp_pid, {:put, :print_server_messages, true})
         # add_client(%{client | print_server_messages: true})
         :ok
     end
@@ -367,7 +367,7 @@ defmodule Teiserver.Client do
     case get_client_by_id(userid) do
       nil -> :ok
       client ->
-        send(client.pid, {:put, :print_server_messages, false})
+        send(client.tcp_pid, {:put, :print_server_messages, false})
         # add_client(%{client | print_server_messages: false})
         :ok
     end

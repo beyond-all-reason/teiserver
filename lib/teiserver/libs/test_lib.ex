@@ -108,7 +108,7 @@ defmodule Teiserver.TeiserverTestLib do
         :timer.sleep(250)
         Client.get_client_by_id(user.id)
       client ->
-        client.pid
+        client.tcp_pid
     end
     %{socket: socket, user: user, pid: pid}
   end
@@ -125,7 +125,7 @@ defmodule Teiserver.TeiserverTestLib do
     _tachyon_send(socket, data)
     _tachyon_recv(socket)
 
-    pid = Client.get_client_by_id(user.id).pid
+    pid = Client.get_client_by_id(user.id).tcp_pid
     %{socket: socket, user: user, pid: pid}
   end
 

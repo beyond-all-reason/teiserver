@@ -163,7 +163,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     queue1 = Matchmaking.get_queue(queue1.id)
     queue2 = Matchmaking.get_queue(queue2.id)
-    client_pid = Client.get_client_by_id(user.id).pid
+    client_pid = Client.get_client_by_id(user.id).tcp_pid
 
     # List the queue
     _tachyon_send(socket, %{cmd: "c.matchmaking.query", query: %{}})
