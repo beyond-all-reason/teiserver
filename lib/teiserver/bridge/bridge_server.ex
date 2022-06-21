@@ -26,8 +26,8 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   @spec send_direct_message(T.user_id(), String.t()) :: :ok | nil
-  def send_direct_message(user_id, message) do
-    user = User.get_user_by_id(user_id)
+  def send_direct_message(userid, message) do
+    user = User.get_user_by_id(userid)
 
     cond do
       user.discord_dm_channel == nil -> nil

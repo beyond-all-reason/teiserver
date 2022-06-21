@@ -244,7 +244,7 @@ defmodule Teiserver.TeiserverConfigs do
       description:
         "When checked you will receive discord messages from the Teiserver bridge bot for various in-lobby events.",
       opts: [],
-      default: false
+      default: true
     })
   end
 end
