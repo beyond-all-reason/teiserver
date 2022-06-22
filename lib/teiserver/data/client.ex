@@ -35,6 +35,7 @@ defmodule Teiserver.Client do
 
         # Battle stuff
         ready: false,
+        unready_at: 0,
         player_number: 0,# In spring this is team_number
         team_colour: 0,
         team_number: 0, # In spring this would be ally_team_number

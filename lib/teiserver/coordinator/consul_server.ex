@@ -105,19 +105,19 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info(:match_stop, state) do
     uuid = Battle.generate_lobby_uuid()
-    battle = Battle.get_lobby(state.lobby_id)
-    new_tags = Map.put(battle.tags, "server/match/uuid", uuid)
+    lobby = Battle.get_lobby(state.lobby_id)
+    new_tags = Map.put(lobby.tags, "server/match/uuid", uuid)
     Lobby.set_script_tags(state.lobby_id, new_tags)
 
-    state.lobby_id
-    |> Battle.get_lobby()
-    |> Map.get(:players)
-    |> Enum.each(fn userid ->
-      if User.is_restricted?(userid, ["All chat", "Battle chat"]) do
-        name = User.get_username(userid)
-        Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{name}")
-      end
-    end)
+    Battle.get_lobby_member_list(state.lobby_id)
+      |> Enum.each(fn userid ->
+        Lobby.force_change_client(state.coordinator_id, userid, %{ready: false, unready_at: :os.system_time(:micro_seconds)})
+
+        if User.is_restricted?(userid, ["All chat", "Battle chat"]) do
+          name = User.get_username(userid)
+          Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{name}")
+        end
+      end)
 
     {:noreply, %{state | timeouts: %{}}}
   end
@@ -136,6 +136,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info({:user_joined, userid}, state) do
     new_approved = [userid | state.approved_users] |> Enum.uniq
+    Lobby.force_change_client(state.coordinator_id, userid, %{ready: false, player: false, unready_at: :os.system_time(:micro_seconds)})
+
     {:noreply, %{state |
       approved_users: new_approved,
       last_seen_map: state.last_seen_map |> Map.put(userid, System.system_time(:millisecond))
@@ -427,54 +429,72 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     new_client = state.locks
-    |> Enum.reduce(new_client, fn (lock, acc) ->
-      case lock do
-        :team -> %{acc | team_number: existing.team_number}
-        :allyid -> %{acc | player_number: existing.player_number}
+      |> Enum.reduce(new_client, fn (lock, acc) ->
+        case lock do
+          :team -> %{acc | team_number: existing.team_number}
+          :allyid -> %{acc | player_number: existing.player_number}
 
-        :player ->
-          if not existing.player, do: %{acc | player: false}, else: acc
+          :player ->
+            if not existing.player, do: %{acc | player: false}, else: acc
 
-        :spectator ->
-          if existing.player, do: %{acc | player: true}, else: acc
+          :spectator ->
+            if existing.player, do: %{acc | player: true}, else: acc
 
-        :boss ->
-          acc
-      end
-    end)
+          :boss ->
+            acc
+        end
+      end)
 
     # Now we apply modifiers
-    {change, new_status} = cond do
-      list_status != :player and new_client.player == true -> {false, nil}
-      # new_client.ready == false and new_client.player == true ->
-      #   LobbyChat.sayprivateex(state.coordinator_id, userid, "You have been spec'd as you are unready. Please disable auto-unready in your lobby settings to prevent this from happening.", state.lobby_id)
-      #   {true, %{new_client | player: false}}
-      true -> {true, new_client}
+    {change, new_client} = cond do
+      # Blocked by list status (e.g. friendsplay)
+      list_status != :player and new_client.player == true ->
+        {false, nil}
+
+      # If you make yourself a player then you are made unready at the same time
+      existing.player == false and new_client.player == true ->
+        {true, %{new_client | unready_at: :os.system_time(:micro_seconds)}}
+
+      # Default to true
+      true ->
+        {true, new_client}
     end
 
     # Take into account if they are waiting to join
     # if they are not waiting to join and someone else is then
-    {change, new_status} = cond do
+    {change, new_client} = cond do
       Enum.empty?(get_queue(state)) ->
-        {change, new_status}
+        {change, new_client}
 
-      hd(get_queue(state)) != userid and new_client.player == true and existing.player == false ->
-        LobbyChat.sayprivateex(state.coordinator_id, userid, "You are not part of the join queue so cannot become a player. Add yourself to the queue by chatting $joinq", state.lobby_id)
-        {false, nil}
+      # Made redundant from the LobbyChat.say("$joinq") above
+      # hd(get_queue(state)) != userid and new_client.player == true and existing.player == false ->
+      #   LobbyChat.sayprivateex(state.coordinator_id, userid, "You are not part of the join queue so cannot become a player. Add yourself to the queue by chatting $joinq", state.lobby_id)
+      #   {false, nil}
 
       true ->
-        {change, new_status}
+        {change, new_client}
+    end
+
+    # If they are readying up then we want to log how fast they did it
+    new_client = if existing.ready == false and new_client.ready == true and existing.unready_at != nil do
+      time = (:os.system_time(:micro_seconds) - existing.unready_at)/1_000_000
+      if time < 10 do
+        Logger.info("#{__MODULE__} ready up time of #{time}s")
+      end
+      %{new_client | unready_at: nil}
+    else
+      new_client
     end
 
     # If they are moving from player to spectator, queue up a tick
     if change do
-      if existing.player == true and new_status.player == false do
+      if existing.player == true and new_client.player == false do
         send(self(), :tick)
       end
     end
 
     # Now actually return the result
-    {change, new_status}
+    {change, new_client}
   end
 
 
