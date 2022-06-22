@@ -56,9 +56,10 @@
               %{id: "unique_users", name: "Unique users"},
               %{id: "peak_users", name: "Peak users"},
               %{id: "days", name: "Days (combined time)"},
-              %{id: "client_events", name: "Telemetry events (Client)"},
-              %{id: "unauth_events", name: "Telemetry events (Unauth)"},
-              %{id: "combined_events", name: "Telemetry events (Combined)"}
+              %{id: "client_events", name: "User events (Client)"},
+              %{id: "unauth_events", name: "User events (Unauth)"},
+              %{id: "combined_events", name: "User events (Combined)"},
+              %{id: "server_events", name: "Server events (Combined)"}
             ],
             selected: Map.get(@params, "fields")
           %>

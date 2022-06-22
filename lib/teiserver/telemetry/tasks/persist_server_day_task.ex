@@ -200,14 +200,15 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
     date = Timex.today()
 
     0..@segment_count
-    |> Enum.reduce(@empty_log, fn (segment_number, segment) ->
-      logs = get_logs(date, segment_number)
-      extend_segment(segment, logs)
-    end)
-    |> calculate_day_statistics(date)
-    |> Jason.encode!
-    |> Jason.decode!
-    # We encode and decode so it's the same format as in the database
+      |> Enum.reduce(@empty_log, fn (segment_number, segment) ->
+        logs = get_logs(date, segment_number)
+        extend_segment(segment, logs)
+      end)
+      |> calculate_day_statistics(date)
+      |> add_telemetry(date)
+      |> Jason.encode!
+      |> Jason.decode!
+      # We encode and decode so it's the same format as in the database
   end
 
   # Given an existing segment and a batch of logs, calculate the segment and add them together
@@ -586,10 +587,19 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
       {a, b} -> raise "ERR: #{a}, #{b}"
     end
 
+    server_query = String.replace(query, "teiserver_telemetry_client_events", "teiserver_telemetry_server_events")
+    server_data = case Ecto.Adapters.SQL.query(Repo, server_query, []) do
+      {:ok, results} ->
+        results.rows
+          |> Map.new(fn [key, value] -> {key, value} end)
+      {a, b} -> raise "ERR: #{a}, #{b}"
+    end
+
     Map.put(stats, :events, %{
       client: client_data,
       unauth: unauth_data,
       combined: add_maps(client_data, unauth_data),
+      server: server_data
     })
   end
 end

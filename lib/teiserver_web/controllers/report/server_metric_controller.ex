@@ -33,10 +33,10 @@ defmodule TeiserverWeb.Report.ServerMetricController do
     filter = params["filter"] || "default"
 
     conn
-    |> assign(:logs, logs)
-    |> assign(:filter, filter)
-    |> add_breadcrumb(name: "Daily", url: conn.request_path)
-    |> render("day_metrics_list.html")
+      |> assign(:logs, logs)
+      |> assign(:filter, filter)
+      |> add_breadcrumb(name: "Daily", url: conn.request_path)
+      |> render("day_metrics_list.html")
   end
 
   @spec day_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -49,27 +49,28 @@ defmodule TeiserverWeb.Report.ServerMetricController do
       |> Telemetry.user_lookup()
 
     conn
-    |> assign(:date, date)
-    |> assign(:data, log.data)
-    |> assign(:users, users)
-    |> add_breadcrumb(name: "Daily - #{date_str}", url: conn.request_path)
-    |> render("day_metrics_show.html")
+      |> assign(:date, date)
+      |> assign(:data, log.data)
+      |> assign(:users, users)
+      |> add_breadcrumb(name: "Daily - #{date_str}", url: conn.request_path)
+      |> render("day_metrics_show.html")
   end
 
   @spec day_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def day_metrics_today(conn, _params) do
-    data = Telemetry.get_todays_server_log()
+  def day_metrics_today(conn, params) do
+    force_recache = (Map.get(params, "recache", false) == "true")
+    data = Telemetry.get_todays_server_log(force_recache)
 
     users =
       [%{data: data}]
       |> Telemetry.user_lookup()
 
     conn
-    |> assign(:date, Timex.today())
-    |> assign(:data, data)
-    |> assign(:users, users)
-    |> add_breadcrumb(name: "Daily - Today (partial)", url: conn.request_path)
-    |> render("day_metrics_show.html")
+      |> assign(:date, Timex.today())
+      |> assign(:data, data)
+      |> assign(:users, users)
+      |> add_breadcrumb(name: "Daily - Today (partial)", url: conn.request_path)
+      |> render("day_metrics_show.html")
   end
 
   @spec day_metrics_export_form(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -150,6 +151,18 @@ defmodule TeiserverWeb.Report.ServerMetricController do
           |> List.flatten
           |> Enum.uniq
           |> Enum.map(fn key -> "events.combined.#{key}" end)
+
+        {keys, fn x -> x end}
+
+      "server_events" ->
+        keys = logs
+          |> Enum.map(fn %{data: data} ->
+            # This is only because not all entries have events
+            (data["events"]["server"] || %{}) |> Map.keys()
+          end)
+          |> List.flatten
+          |> Enum.uniq
+          |> Enum.map(fn key -> "events.server.#{key}" end)
 
         {keys, fn x -> x end}
     end

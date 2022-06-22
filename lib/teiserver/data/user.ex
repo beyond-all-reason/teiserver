@@ -2,9 +2,8 @@ defmodule Teiserver.User do
   @moduledoc """
   Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
-  alias Teiserver.{Client, Coordinator, Telemetry}
+  alias Teiserver.{Account, Client, Coordinator, Telemetry}
   alias Teiserver.EmailHelper
-  alias Teiserver.{Account, User}
   alias Teiserver.Battle.LobbyChat
   alias Teiserver.Account.{UserCache, RelationsLib}
   alias Teiserver.Chat.WordLib
@@ -1012,10 +1011,10 @@ defmodule Teiserver.User do
   def allow?(user, required) do
     case required do
       :moderator ->
-        User.is_moderator?(user)
+        is_moderator?(user)
 
       :bot ->
-        User.is_moderator?(user) or User.is_bot?(user)
+        is_moderator?(user) or is_bot?(user)
 
       required ->
         Enum.member?(user.roles, required)

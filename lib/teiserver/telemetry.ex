@@ -357,9 +357,10 @@ defmodule Teiserver.Telemetry do
     |> Map.new()
   end
 
-  def get_todays_server_log() do
+  def get_todays_server_log(recache \\ false) do
     last_time = Central.cache_get(:application_metadata_cache, "teiserver_day_server_metrics_today_last_time")
     recache = cond do
+      recache == true -> true
       last_time == nil -> true
       Timex.compare(Timex.now() |> Timex.shift(minutes: -15), last_time) == 1 -> true
       true -> false

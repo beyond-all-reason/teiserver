@@ -321,6 +321,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64)
   end
 
+  @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
     Horde.Registry.register(
