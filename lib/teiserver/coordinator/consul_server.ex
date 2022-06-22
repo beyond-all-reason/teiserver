@@ -489,6 +489,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # If they are moving from player to spectator, queue up a tick
     if change do
       if existing.player == true and new_client.player == false do
+        if Enum.member?(get_queue(state), existing.userid)  do
+          LobbyChat.say(userid, "$leaveq", state.lobby_id)
+        end
         send(self(), :tick)
       end
     end
