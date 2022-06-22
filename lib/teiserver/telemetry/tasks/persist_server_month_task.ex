@@ -38,6 +38,12 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
         lobby: 0,
         menu: 0,
         total: 0
+      },
+
+      events: %{
+        client: %{},
+        unauth: %{},
+        combined: %{}
       }
     }
   }
@@ -133,13 +139,13 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
     Telemetry.list_server_day_logs(search: [
       start_date: Timex.beginning_of_month(now)
     ])
-    |> Enum.reduce(@empty_log, fn (log, acc) ->
-      extend_segment(acc, log)
-    end)
-    |> calculate_month_statistics()
-    |> Jason.encode!
-    |> Jason.decode!
-    # We encode and decode so it's the same format as in the database
+      |> Enum.reduce(@empty_log, fn (log, acc) ->
+        extend_segment(acc, log)
+      end)
+      |> calculate_month_statistics()
+      |> Jason.encode!
+      |> Jason.decode!
+      # We encode and decode so it's the same format as in the database
   end
 
   # Given an existing segment and a batch of logs, calculate the segment and add them together
@@ -176,6 +182,13 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
           menu: existing.aggregates.minutes.menu + data["aggregates"]["minutes"]["menu"],
           total: existing.aggregates.minutes.total + data["aggregates"]["minutes"]["total"]
         },
+
+        # Telemetry events
+        events: %{
+          client: add_maps(existing.aggregates.events.client, data["events"]["client"]),
+          unauth: add_maps(existing.aggregates.events.unauth, data["events"]["unauth"]),
+          combined: add_maps(existing.aggregates.events.combined, data["events"]["combined"])
+        },
       }
     }
   end
@@ -196,4 +209,8 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
 
   defp next_month({year, 12}), do: {year+1, 1}
   defp next_month({year, month}), do: {year, month+1}
+
+  defp add_maps(m1, m2) do
+    Map.merge(m1, m2, fn _k, v1, v2 -> v1 + v2 end)
+  end
 end

@@ -1,5 +1,9 @@
 <% bsname = view_colour() %>
 
+<%
+  timeframes = ["Today", "Yesterday", "7 days", "14 days", "31 days"]
+%>
+
 <%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "client_events"}) %>
 
 <div class="row section-menu">
@@ -21,7 +25,22 @@
             active: "key-#{@key}",
             bsname: bsname,
             icon: "",
-            url: "?key=#{key}"
+            url: "?key=#{key}&tf=#{@tf}"
+          %>
+        <% end %>
+        
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        <%= for tf <- timeframes do %>
+          <%= central_component "section_menu_button",
+            name: "tf-#{tf}",
+            label: tf,
+            active: "tf-#{@tf}",
+            bsname: bsname,
+            icon: "",
+            url: "?key=#{@key}&tf=#{tf}"
           %>
         <% end %>
 

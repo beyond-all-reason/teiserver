@@ -45,9 +45,19 @@
           </tbody>
         </table>
 
-
-        <textarea rows="8" cols="40" class="form-control"><%= for msg <- @lobby_messages do %>
+        <div class="row">
+          <div class="col-md-6">
+            Raw chat:
+            <textarea rows="8" cols="40" class="form-control"><%= for msg <- @lobby_messages do %>
   <%= msg.user.name %>: <%= msg.content %><% end %></textarea>
+          </div>
+  
+          <div class="col-md-6">
+            Discord formatted:
+            <textarea rows="8" cols="40" class="form-control"><%= for msg <- @lobby_messages do %>
+  **<%= msg.user.name %>**: <%= msg.content %><% end %></textarea>
+          </div>
+        </div>
 
         <%= if @page > 0 do %>
           <a href={Routes.ts_admin_lobby_path(@conn, :chat, @lobby_guid, @page - 1)} class="btn btn-secondary">

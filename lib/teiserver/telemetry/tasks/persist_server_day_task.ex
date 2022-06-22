@@ -169,12 +169,13 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
   @spec run(%Date{}, boolean()) :: :ok
   def run(date, cleanup) do
     data = 0..@segment_count
-    |> Enum.reduce(@empty_log, fn (segment_number, segment) ->
-      logs = get_logs(date, segment_number)
-      extend_segment(segment, logs)
-    end)
-    |> calculate_day_statistics(date)
-    |> add_matches(date)
+      |> Enum.reduce(@empty_log, fn (segment_number, segment) ->
+        logs = get_logs(date, segment_number)
+        extend_segment(segment, logs)
+      end)
+      |> calculate_day_statistics(date)
+      |> add_matches(date)
+      |> add_telemetry(date)
 
     if cleanup do
       clean_up_logs(date)
@@ -549,7 +550,46 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
 
     # Skill
 
-
     acc
+  end
+
+  defp add_telemetry(stats, date) do
+    start_date = date |> Timex.to_datetime() |> date_to_str(format: :ymd_hms)
+    end_date = date |> Timex.shift(days: 1) |> Timex.to_datetime() |> date_to_str(format: :ymd_hms)
+
+    query = """
+      SELECT
+        t.name,
+        COUNT(e)
+      FROM
+        teiserver_telemetry_client_events e
+      JOIN
+        teiserver_telemetry_event_types t ON e.event_type_id = t.id
+      WHERE
+        e.timestamp BETWEEN '#{start_date}' AND '#{end_date}'
+      GROUP BY
+        t.name
+    """
+
+    client_data = case Ecto.Adapters.SQL.query(Repo, query, []) do
+      {:ok, results} ->
+        results.rows
+          |> Map.new(fn [key, value] -> {key, value} end)
+      {a, b} -> raise "ERR: #{a}, #{b}"
+    end
+
+    unauth_query = String.replace(query, "teiserver_telemetry_client_events", "teiserver_telemetry_unauth_events")
+    unauth_data = case Ecto.Adapters.SQL.query(Repo, unauth_query, []) do
+      {:ok, results} ->
+        results.rows
+          |> Map.new(fn [key, value] -> {key, value} end)
+      {a, b} -> raise "ERR: #{a}, #{b}"
+    end
+
+    Map.put(stats, :events, %{
+      client: client_data,
+      unauth: unauth_data,
+      combined: add_maps(client_data, unauth_data),
+    })
   end
 end

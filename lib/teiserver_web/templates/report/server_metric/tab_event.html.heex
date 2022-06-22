@@ -1,0 +1,29 @@
+<%
+  event_keys = @data["events"]["combined"] |> Map.keys |> Enum.sort()
+%>
+
+<h4>Events</h4>
+<div class="row">
+  <div class="col-md-12 col-lg-8 col-xl-6">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Auth</th>
+          <th>Unauth</th>
+          <th>Combined</th>
+       </tr>
+      </thead>
+      <tbody>
+        <%= for key <- event_keys do %>
+          <tr>
+            <td><%= key %></td>
+            <td><%= @data["events"]["client"][key] %></td>
+            <td><%= @data["events"]["unauth"][key] %></td>
+            <td><%= @data["events"]["combined"][key] %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>  
+</div>

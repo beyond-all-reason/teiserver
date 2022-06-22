@@ -116,6 +116,42 @@ defmodule TeiserverWeb.Report.ServerMetricController do
 
       "days" ->
         {["aggregates.minutes.player", "aggregates.minutes.spectator", "aggregates.minutes.lobby", "aggregates.minutes.menu", "aggregates.minutes.total"], fn x -> round(x/60/24) end}
+
+      "client_events" ->
+        keys = logs
+          |> Enum.map(fn %{data: data} ->
+            # This is only because not all entries have events
+            (data["events"]["client"] || %{}) |> Map.keys()
+          end)
+          |> List.flatten
+          |> Enum.uniq
+          |> Enum.map(fn key -> "events.client.#{key}" end)
+
+        {keys, fn x -> x end}
+
+      "unauth_events" ->
+        keys = logs
+          |> Enum.map(fn %{data: data} ->
+            # This is only because not all entries have events
+            (data["events"]["unauth"] || %{}) |> Map.keys()
+          end)
+          |> List.flatten
+          |> Enum.uniq
+          |> Enum.map(fn key -> "events.unauth.#{key}" end)
+
+        {keys, fn x -> x end}
+
+      "combined_events" ->
+        keys = logs
+          |> Enum.map(fn %{data: data} ->
+            # This is only because not all entries have events
+            (data["events"]["combined"] || %{}) |> Map.keys()
+          end)
+          |> List.flatten
+          |> Enum.uniq
+          |> Enum.map(fn key -> "events.combined.#{key}" end)
+
+        {keys, fn x -> x end}
     end
 
     extra_params = %{"field_list" => field_list}

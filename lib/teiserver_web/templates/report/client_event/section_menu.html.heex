@@ -17,3 +17,25 @@
   bsname: bsname,
   url: Routes.ts_reports_client_event_path(@conn, :export_form)
 %>
+
+<%= if @active == "property_detail" do %>
+  <%= central_component "section_menu_button",
+    name: "property_detail",
+    label: "Property detail",
+    active: @active,
+    icon: Central.Helpers.StylingHelper.icon(:detail),
+    bsname: bsname,
+    url: "#"
+  %>
+<% end %>
+
+<%= if @active == "event_detail" do %>
+  <%= central_component "section_menu_button",
+    name: "event_detail",
+    label: "Event detail",
+    active: @active,
+    icon: Central.Helpers.StylingHelper.icon(:detail),
+    bsname: bsname,
+    url: "#"
+  %>
+<% end %>
