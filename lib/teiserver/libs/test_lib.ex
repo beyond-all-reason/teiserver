@@ -495,6 +495,9 @@ defmodule Teiserver.TeiserverTestLib do
     Teiserver.Account.AccoladeBotServer.get_accolade_account()
 
     Teiserver.Account.get_or_add_smurf_key_type("client_app_hash")
+
+    Teiserver.Telemetry.get_or_add_event_type("account.user_login")
+
     seed_badge_types()
   end
 end

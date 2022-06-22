@@ -31,21 +31,6 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   def get_match_monitor_userid() do
     Central.cache_get(:application_metadata_cache, "teiserver_match_monitor_userid")
   end
-
-  def handle_info(:begin, _state) do
-    state = if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
-      pid = self()
-      spawn(fn ->
-        :timer.sleep(1000)
-        send(pid, :begin)
-      end)
-    else
-      do_begin()
-    end
-
-    {:noreply, state}
-  end
-
   @impl true
   def handle_call(:client_state, _from, state) do
     {:reply, state.client, state}
@@ -62,6 +47,20 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   # Direct/Room messaging
   @impl true
+  def handle_info(:begin, _state) do
+    state = if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") != true do
+      pid = self()
+      spawn(fn ->
+        :timer.sleep(1000)
+        send(pid, :begin)
+      end)
+    else
+      do_begin()
+    end
+
+    {:noreply, state}
+  end
+
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}
   def handle_info({:remove_user_from_room, _userid, _room_name}, state), do: {:noreply, state}
 
@@ -176,7 +175,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
-  def handle_info({:direct_message, from_id, "match-chat-noname " <> data}, state) do
+  def handle_info({:direct_message, _from_id, "match-chat-noname " <> data}, state) do
     # case Regex.run(~r/<(.*?)>:<(.*?)> (d|dallies|dspectators): (.+)$/, data) do
     #   [_all, username, user_num, to, msg] ->
     #     host = Client.get_client_by_id(from_id)
@@ -348,6 +347,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     :crypto.strong_rand_bytes(64) |> Base.encode64(padding: false) |> binary_part(0, 64)
   end
 
+  @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
     send(self(), :begin)

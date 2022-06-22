@@ -476,12 +476,16 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     # If they are readying up then we want to log how fast they did it
-    new_client = if existing.ready == false and new_client.ready == true and existing.unready_at != nil do
-      time = (:os.system_time(:micro_seconds) - existing.unready_at)/1_000_000
-      if time < 10 do
-        Logger.info("#{__MODULE__} ready up time of #{time}s")
+    new_client = if change do
+      if existing.ready == false and new_client.ready == true and existing.unready_at != nil do
+        time = (:os.system_time(:micro_seconds) - existing.unready_at)/1_000_000
+        if time < 10 do
+          Logger.info("#{__MODULE__} ready up time of #{time}s")
+        end
+        %{new_client | unready_at: nil}
+      else
+        new_client
       end
-      %{new_client | unready_at: nil}
     else
       new_client
     end
