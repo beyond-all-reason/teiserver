@@ -2,7 +2,7 @@ defmodule Teiserver.User do
   @moduledoc """
   Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
-  alias Teiserver.{Client, Coordinator}
+  alias Teiserver.{Client, Coordinator, Telemetry}
   alias Teiserver.EmailHelper
   alias Teiserver.{Account, User}
   alias Teiserver.Battle.LobbyChat
@@ -774,6 +774,8 @@ defmodule Teiserver.User do
       lobby_hash: lobby_hash,
       last_ip: ip
     })
+
+    Telemetry.log_server_event(user.id, "account.user_login", %{lobby_client: lobby_client})
 
     # TODO: Replace lobby_hash name with client_app_hash
     if not is_bot?(user) do
