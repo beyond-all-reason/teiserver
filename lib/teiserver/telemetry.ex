@@ -10,6 +10,8 @@ defmodule Teiserver.Telemetry do
   alias Teiserver.Telemetry.ServerMinuteLog
   alias Teiserver.Telemetry.ServerMinuteLogLib
 
+  alias Teiserver.Data.Types, as: T
+
   @broadcast_event_types ~w(game_start:singleplayer:scenario_end)
   @broadcast_property_types ~w()
 
@@ -1422,7 +1424,7 @@ defmodule Teiserver.Telemetry do
     Repo.delete(client_event)
   end
 
-    alias Teiserver.Telemetry.UnauthGameEvent
+  alias Teiserver.Telemetry.UnauthGameEvent
   alias Teiserver.Telemetry.UnauthGameEventLib
 
   @spec unauth_game_event_query(List.t()) :: Ecto.Query.t()
@@ -1727,6 +1729,104 @@ defmodule Teiserver.Telemetry do
           id
       end
     end)
+  end
+
+
+  alias Teiserver.Telemetry.{ServerEvent, ServerEventLib}
+
+  @spec server_event_query(List.t()) :: Ecto.Query.t()
+  def server_event_query(args) do
+    server_event_query(nil, args)
+  end
+
+  @spec server_event_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def server_event_query(_id, args) do
+    ServerEventLib.query_server_events
+    |> ServerEventLib.search(args[:search])
+    |> ServerEventLib.preload(args[:preload])
+    |> ServerEventLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of server_events.
+
+  ## Examples
+
+      iex> list_server_events()
+      [%ServerEvent{}, ...]
+
+  """
+  @spec list_server_events(List.t()) :: List.t()
+  def list_server_events(args \\ []) do
+    server_event_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Creates a server_event.
+
+  ## Examples
+
+      iex> create_server_event(%{field: value})
+      {:ok, %ServerEvent{}}
+
+      iex> create_server_event(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_server_event(Map.t()) :: {:ok, ServerEvent.t()} | {:error, Ecto.Changeset.t()}
+  def create_server_event(attrs \\ %{}) do
+    %ServerEvent{}
+    |> ServerEvent.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @spec delete_server_event(ServerEvent.t()) :: {:ok, ServerEvent.t()} | {:error, Ecto.Changeset.t()}
+  def delete_server_event(%ServerEvent{} = server_event) do
+    Repo.delete(server_event)
+  end
+
+  def get_server_events_summary(args) do
+    query = from server_events in ServerEvent,
+      join: event_types in assoc(server_events, :event_type),
+      group_by: event_types.name,
+      select: {event_types.name, count(server_events.event_type_id)}
+
+    query = query
+      |> ServerEventLib.search(args)
+
+    Repo.all(query)
+      |> Map.new()
+  end
+
+  @spec log_server_event(T.userid() | nil, String.t(), map()) :: {:error, Ecto.Changeset.t()} | {:ok, ServerEvent.t()}
+  def log_server_event(userid, event_type_name, value) do
+    event_type_id = get_or_add_event_type(event_type_name)
+    result = create_server_event(%{
+      event_type_id: event_type_id,
+      user_id: userid,
+      value: value,
+      timestamp: Timex.now()
+    })
+
+    case result do
+      {:ok, _event} ->
+        if Enum.member?(@broadcast_event_types, event_type_name) do
+          if userid do
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_telemetry_server_events",
+              {:teiserver_telemetry_server_events, userid, event_type_name, value}
+            )
+          end
+        end
+
+        result
+      _ ->
+        result
+    end
   end
 
   alias Teiserver.Telemetry.{Infolog, InfologLib}

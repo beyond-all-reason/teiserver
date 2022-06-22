@@ -1,18 +1,18 @@
-defmodule Teiserver.Telemetry.ClientEventLib do
+defmodule Teiserver.Telemetry.ServerEventLib do
   use CentralWeb, :library
-  alias Teiserver.Telemetry.ClientEvent
+  alias Teiserver.Telemetry.ServerEvent
 
   # Functions
   @spec colour :: atom
   def colour(), do: :info2
 
   @spec icon() :: String.t()
-  def icon(), do: "fa-regular fa-sliders-up"
+  def icon(), do: "fa-regular fa-server"
 
   # Queries
-  @spec query_client_events() :: Ecto.Query.t
-  def query_client_events do
-    from client_events in ClientEvent
+  @spec query_server_events() :: Ecto.Query.t
+  def query_server_events do
+    from server_events in ServerEvent
   end
 
   @spec search(Ecto.Query.t, Map.t | nil) :: Ecto.Query.t
@@ -29,55 +29,55 @@ defmodule Teiserver.Telemetry.ClientEventLib do
   def _search(query, _, nil), do: query
 
   def _search(query, :user_id, user_id) do
-    from client_events in query,
-      where: client_events.user_id == ^user_id
+    from server_events in query,
+      where: server_events.user_id == ^user_id
   end
 
   def _search(query, :user_id_in, user_ids) do
-    from client_events in query,
-      where: client_events.user_id in ^user_ids
+    from server_events in query,
+      where: server_events.user_id in ^user_ids
   end
 
   def _search(query, :id_list, id_list) do
-    from client_events in query,
-      where: client_events.id in ^id_list
+    from server_events in query,
+      where: server_events.id in ^id_list
   end
 
   def _search(query, :between, {start_date, end_date}) do
-    from client_events in query,
-      where: between(client_events.timestamp, ^start_date, ^end_date)
+    from server_events in query,
+      where: between(server_events.timestamp, ^start_date, ^end_date)
   end
 
   def _search(query, :event_type_id, event_type_id) do
-    from client_events in query,
-      where: client_events.event_type_id == ^event_type_id
+    from server_events in query,
+      where: server_events.event_type_id == ^event_type_id
   end
 
   def _search(query, :event_type_id_in, event_type_ids) do
-    from client_events in query,
-      where: client_events.event_type_id in ^event_type_ids
+    from server_events in query,
+      where: server_events.event_type_id in ^event_type_ids
   end
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Name (A-Z)") do
-    from client_events in query,
-      order_by: [asc: client_events.name]
+    from server_events in query,
+      order_by: [asc: server_events.name]
   end
 
   def order_by(query, "Name (Z-A)") do
-    from client_events in query,
-      order_by: [desc: client_events.name]
+    from server_events in query,
+      order_by: [desc: server_events.name]
   end
 
   def order_by(query, "Newest first") do
-    from client_events in query,
-      order_by: [desc: client_events.inserted_at]
+    from server_events in query,
+      order_by: [desc: server_events.inserted_at]
   end
 
   def order_by(query, "Oldest first") do
-    from client_events in query,
-      order_by: [asc: client_events.inserted_at]
+    from server_events in query,
+      order_by: [asc: server_events.inserted_at]
   end
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
@@ -90,15 +90,15 @@ defmodule Teiserver.Telemetry.ClientEventLib do
 
   @spec _preload_event_types(Ecto.Query.t) :: Ecto.Query.t
   def _preload_event_types(query) do
-    from client_events in query,
-      left_join: event_types in assoc(client_events, :event_type),
+    from server_events in query,
+      left_join: event_types in assoc(server_events, :event_type),
       preload: [event_type: event_types]
   end
 
-  @spec _preload_users(Ecto.Query.t) :: Ecto.Query.t
+  @spec _preload_event_types(Ecto.Query.t) :: Ecto.Query.t
   def _preload_users(query) do
-    from client_events in query,
-      left_join: users in assoc(client_events, :user),
+    from server_events in query,
+      left_join: users in assoc(server_events, :user),
       preload: [user: users]
   end
 end
