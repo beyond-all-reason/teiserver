@@ -3,7 +3,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
   alias Teiserver.{Account, Battle, Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat}
-  # alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 

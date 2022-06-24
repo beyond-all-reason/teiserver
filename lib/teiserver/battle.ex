@@ -326,11 +326,11 @@ defmodule Teiserver.Battle do
 
   def list_match_memberships(args) do
     MatchMembershipLib.get_match_memberships()
-    |> MatchMembershipLib.search(args[:search])
-    |> MatchMembershipLib.preload(args[:joins])
-    |> QueryHelpers.select(args[:select])
-    # |> QueryHelpers.limit_query(50)
-    |> Repo.all()
+      |> MatchMembershipLib.search(args[:search])
+      |> MatchMembershipLib.preload(args[:joins])
+      |> QueryHelpers.select(args[:select])
+      # |> QueryHelpers.limit_query(50)
+      |> Repo.all()
   end
 
   @doc """

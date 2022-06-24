@@ -7,6 +7,7 @@ defmodule Teiserver.Battle.LobbyServer do
   @impl true
   def handle_call(:get_lobby_state, _from, state) do
     result = Map.merge(state.lobby, %{
+      members: state.member_list,
       players: state.member_list
     })
     {:reply, result, state}

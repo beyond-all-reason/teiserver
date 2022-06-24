@@ -102,6 +102,8 @@ defmodule Teiserver.Battle.Lobby do
         rank: 0,
         locked: false,
         engine_name: "spring",
+
+        members: [],
         players: [],
 
         member_count: 0,
@@ -259,9 +261,7 @@ defmodule Teiserver.Battle.Lobby do
     remove_user_from_any_lobby(userid)
     script_password = new_script_password()
 
-    Coordinator.cast_consul(battle_lobby_id, {:user_joined, userid})
-    Battle.add_user_to_lobby(userid, battle_lobby_id, script_password)
-    Client.join_battle(userid, battle_lobby_id, false)
+    add_user_to_battle(userid, battle_lobby_id, script_password)
 
     PubSub.broadcast(
       Central.PubSub,
@@ -384,13 +384,16 @@ defmodule Teiserver.Battle.Lobby do
   def remove_user_from_any_lobby(nil), do: []
 
   def remove_user_from_any_lobby(userid) do
-    lobby_ids =
-      list_lobbies()
-      |> Enum.filter(fn b -> b != nil end)
-      |> Enum.filter(fn b -> Enum.member?(b.players, userid) or b.founder_id == userid end)
-      |> Enum.map(fn b ->
-        remove_user_from_battle(userid, b.id)
-        b.id
+    lobby_ids = Battle.list_lobby_ids()
+      |> Enum.map(fn lobby_id ->
+        Battle.get_lobby(lobby_id)
+      end)
+      |> Enum.filter(fn lobby ->
+        Enum.member?(lobby.members, userid) or lobby.founder_id == userid
+      end)
+      |> Enum.map(fn lobby ->
+        remove_user_from_battle(userid, lobby.id)
+        lobby.id
       end)
 
     if Enum.count(lobby_ids) > 1 do

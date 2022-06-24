@@ -241,7 +241,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert reply["message"] == "AFK-check is now complete, 1 player(s) were found to be afk"
   end
 
-  test "pull user", %{lobby_id: lobby_id, hsocket: hsocket} do
+  test "pull user", %{lobby_id: lobby_id, hsocket: hsocket, host: _host} do
     %{user: player2, socket: psocket} = tachyon_auth_setup()
 
     data = %{cmd: "c.lobby.message", message: "$pull ##{player2.id}"}
