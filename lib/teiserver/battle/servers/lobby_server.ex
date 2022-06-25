@@ -1,7 +1,9 @@
 defmodule Teiserver.Battle.LobbyServer do
   use GenServer
   require Logger
+  alias Central.Config
   alias Teiserver.{Client}
+  alias Teiserver.Bridge.BridgeServer
   alias Phoenix.PubSub
 
   @impl true
@@ -60,6 +62,15 @@ defmodule Teiserver.Battle.LobbyServer do
       |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
       |> Enum.filter(fn client -> client != nil end)
       |> Enum.filter(fn client -> client.player == true and client.lobby_id == state.lobby_id end)
+
+    player_list
+      |> Enum.each(fn %{userid: userid} ->
+        if Config.get_user_config_cache(userid, "teiserver.Discord notifications") do
+          if Config.get_user_config_cache(userid, "teiserver.Notify - Game start") do
+            BridgeServer.send_direct_message(userid, "The game you are a player of is starting.")
+          end
+        end
+      end)
 
     {:noreply, %{state | player_list: player_list, state: :in_progress}}
   end

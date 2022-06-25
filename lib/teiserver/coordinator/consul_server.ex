@@ -759,7 +759,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
           LobbyChat.sayprivateex(state.coordinator_id, userid, "#{new_client.name} You were at the front of the queue, you are now a player.", state.lobby_id)
 
           if Config.get_user_config_cache(userid, "teiserver.Discord notifications") do
-            BridgeServer.send_direct_message(userid, "You have reached the front of the queue and are now a player.")
+            if Config.get_user_config_cache(userid, "teiserver.Notify - Exited the queue") do
+              BridgeServer.send_direct_message(userid, "You have reached the front of the queue and are now a player.")
+            end
           end
 
           send(self(), {:dequeue_user, userid})

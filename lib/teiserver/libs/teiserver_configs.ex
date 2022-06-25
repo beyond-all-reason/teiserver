@@ -242,7 +242,31 @@ defmodule Teiserver.TeiserverConfigs do
       visible: true,
       permissions: ["teiserver"],
       description:
-        "When checked you will receive discord messages from the Teiserver bridge bot for various in-lobby events.",
+        "When checked you will receive discord messages from the Teiserver bridge bot for various in-lobby events. When disabled you will receive no notifications even if the others are enabled.",
+      opts: [],
+      default: true
+    })
+
+    add_user_config_type(%{
+      key: "teiserver.Notify - Exited the queue",
+      section: "Teiserver account",
+      type: "boolean",
+      visible: true,
+      permissions: ["teiserver"],
+      description:
+        "You will be messaged when you move from being in the queue to being a player",
+      opts: [],
+      default: true
+    })
+
+    add_user_config_type(%{
+      key: "teiserver.Notify - Game start",
+      section: "Teiserver account",
+      type: "boolean",
+      visible: true,
+      permissions: ["teiserver"],
+      description:
+        "You will be messaged when a lobby you are a player in starts",
       opts: [],
       default: true
     })
