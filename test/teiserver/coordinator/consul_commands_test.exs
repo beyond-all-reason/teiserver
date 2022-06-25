@@ -48,10 +48,10 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     }, :client_updated_battlestatus)
 
     # Add user message
-    _tachyon_recv(hsocket)
+    _tachyon_recv_until(hsocket)
 
     # Battlestatus message
-    _tachyon_recv(hsocket)
+    _tachyon_recv_until(hsocket)
 
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
   end
@@ -341,7 +341,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
   test "ban by name", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
     player_client = Client.get_client_by_id(player.id)
-    assert player_client.player == true
+    assert player_client.lobby_id == lobby_id
 
     data = %{cmd: "c.lobby.message", message: "$lobbyban #{player.name} Because I said so"}
     _tachyon_send(hsocket, data)
