@@ -105,7 +105,6 @@ defmodule Teiserver.Client do
         awaiting_warn_ack: false,
         warned: false
       })
-      |> add_client
 
     ClientLib.start_client_server(client)
 
@@ -149,24 +148,6 @@ defmodule Teiserver.Client do
 
     client
   end
-
-  @spec add_client(Map.t()) :: Map.t()
-  def add_client(client) do
-    Central.cache_put(:clients, client.userid, client)
-
-    Central.cache_update(:lists, :clients, fn value ->
-      new_value =
-        ([client.userid | value])
-        |> Enum.uniq()
-
-      {:ok, new_value}
-    end)
-
-    client
-  end
-
-
-
 
   @spec get_client_by_name(nil) :: nil
   @spec get_client_by_name(String.t()) :: nil | T.client()
@@ -216,7 +197,6 @@ defmodule Teiserver.Client do
           lobby_host: lobby_host
         }
         ClientLib.replace_update_client(new_client, :silent)
-        Central.cache_put(:clients, new_client.userid, new_client)
         new_client
     end
   end
@@ -235,7 +215,6 @@ defmodule Teiserver.Client do
       client ->
         new_client = reset_battlestatus(client)
         ClientLib.replace_update_client(new_client, :silent)
-        Central.cache_put(:clients, new_client.userid, new_client)
         new_client
     end
   end
@@ -293,16 +272,6 @@ defmodule Teiserver.Client do
       "teiserver_client_inout",
       {:client_inout, :disconnect, client.userid, reason}
     )
-
-    Central.cache_delete(:clients, client.userid)
-
-    Central.cache_update(:lists, :clients, fn value ->
-      new_value =
-        value
-        |> Enum.filter(fn v -> v != client.userid end)
-
-      {:ok, new_value}
-    end)
   end
 
   @spec shadowban_client(T.userid()) :: :ok
@@ -336,7 +305,6 @@ defmodule Teiserver.Client do
       nil -> :ok
       client ->
         send(client.tcp_pid, {:put, :print_client_messages, true})
-        add_client(%{client | print_client_messages: true})
         :ok
     end
   end
@@ -347,7 +315,6 @@ defmodule Teiserver.Client do
       nil -> :ok
       client ->
         send(client.tcp_pid, {:put, :print_client_messages, false})
-        add_client(%{client | print_client_messages: false})
         :ok
     end
   end
@@ -358,7 +325,6 @@ defmodule Teiserver.Client do
       nil -> :ok
       client ->
         send(client.tcp_pid, {:put, :print_server_messages, true})
-        # add_client(%{client | print_server_messages: true})
         :ok
     end
   end
@@ -369,7 +335,6 @@ defmodule Teiserver.Client do
       nil -> :ok
       client ->
         send(client.tcp_pid, {:put, :print_server_messages, false})
-        # add_client(%{client | print_server_messages: false})
         :ok
     end
   end

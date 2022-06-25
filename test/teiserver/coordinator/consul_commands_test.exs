@@ -152,6 +152,11 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   test "specafk", %{player: player1, psocket: psocket1, hsocket: hsocket, lobby_id: lobby_id} do
     %{socket: psocket2, user: player2} = tachyon_auth_setup()
     Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
+    player_client1 = Client.get_client_by_id(player1.id)
+    Client.update(%{player_client1 |
+      player: true
+    }, :client_updated_battlestatus)
+
     player_client2 = Client.get_client_by_id(player2.id)
     Client.update(%{player_client2 |
       player: true
@@ -356,7 +361,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
   test "ban by partial name", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
     player_client = Client.get_client_by_id(player.id)
-    assert player_client.player == true
+    assert player_client.lobby_id == lobby_id
 
     data = %{cmd: "c.lobby.message", message: "$lobbyban #{player.name |> String.slice(0, 5)}"}
     _tachyon_send(hsocket, data)
@@ -371,7 +376,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
   test "error with no name", %{player: player, hsocket: hsocket, lobby_id: lobby_id} do
     player_client = Client.get_client_by_id(player.id)
-    assert player_client.player == true
+    assert player_client.lobby_id == lobby_id
 
     data = %{cmd: "c.lobby.message", message: "$kick noname"}
     _tachyon_send(hsocket, data)

@@ -26,7 +26,6 @@ defmodule Teiserver.Account.ClientLib do
   def get_client_by_id(nil), do: nil
 
   def get_client_by_id(userid) do
-    # Central.cache_get(:clients, userid)
     call_client(userid, :get_client_state)
   end
 
@@ -39,10 +38,6 @@ defmodule Teiserver.Account.ClientLib do
 
   @spec list_client_ids() :: [T.userid()]
   def list_client_ids() do
-    # case Central.cache_get(:lists, :clients) do
-    #   nil -> []
-    #   ids -> ids
-    # end
     Horde.Registry.select(Teiserver.ClientRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
@@ -66,9 +61,6 @@ defmodule Teiserver.Account.ClientLib do
 
   @spec replace_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
   def replace_update_client(%{userid: userid} = client, reason) do
-    # TODO: Depreciate
-    Client.add_client(client)
-
     # Update the process with it
     cast_client(userid, {:update_client, client})
 
@@ -184,6 +176,5 @@ defmodule Teiserver.Account.ClientLib do
     }
 
     replace_update_client(new_client, :silent)
-    Client.add_client(new_client)
   end
 end

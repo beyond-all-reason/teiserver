@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.MemesTest do
   alias Teiserver.{User, Client, Coordinator}
 
   import Teiserver.TeiserverTestLib,
-    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
+    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]
 
   setup do
     Coordinator.start_coordinator()

@@ -34,8 +34,6 @@ defmodule Teiserver.Application do
       concache_perm_sup(:users_lookup_id_with_discord),
       concache_perm_sup(:users),
 
-      concache_perm_sup(:clients),
-
       concache_sup(:teiserver_login_count, global_ttl: 10_000),
       concache_sup(:teiserver_user_stat_cache),
 
