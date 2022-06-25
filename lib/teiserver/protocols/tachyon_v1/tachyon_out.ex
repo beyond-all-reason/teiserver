@@ -1,7 +1,7 @@
 defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
   require Logger
   alias Teiserver.Protocols.TachyonLib
-  alias Teiserver.Protocols.Tachyon.V1.{AuthOut, ClientOut, CommunicationOut, LobbyChatOut, LobbyHostOut, LobbyOut, MatchmakingOut, NewsOut, SystemOut, UserOut}
+  alias Teiserver.Protocols.Tachyon.V1.{AuthOut, ClientOut, CommunicationOut, ConfigOut, LobbyChatOut, LobbyHostOut, LobbyOut, MatchmakingOut, NewsOut, SystemOut, UserOut}
 
   @spec reply(atom(), atom(), Map.t(), Map.t()) :: Map.t()
 
@@ -10,13 +10,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonOut do
       case namespace do
         :auth -> AuthOut.do_reply(reply_cmd, data)
         :client -> ClientOut.do_reply(reply_cmd, data)
+        :communication -> CommunicationOut.do_reply(reply_cmd, data)
+        :config -> ConfigOut.do_reply(reply_cmd, data)
         :lobby_chat -> LobbyChatOut.do_reply(reply_cmd, data)
         :lobby_host -> LobbyHostOut.do_reply(reply_cmd, data)
         :lobby -> LobbyOut.do_reply(reply_cmd, data)
         :battle ->
           Logger.warn("Tachyon :battle namespace message #{reply_cmd}")
           LobbyOut.do_reply(reply_cmd, data)
-        :communication -> CommunicationOut.do_reply(reply_cmd, data)
         :matchmaking -> MatchmakingOut.do_reply(reply_cmd, data)
         :news -> NewsOut.do_reply(reply_cmd, data)
         :system -> SystemOut.do_reply(reply_cmd, data)

@@ -195,6 +195,29 @@ A comment attached to a blog post
 * commenter :: user
 * timestamp :: timestamp
 
+## UserConfigType
+Built on top of the Central.Config data structures and used in `c.config._user*`
+
+* default :: string
+* description :: string
+* key :: string
+* opts :: map
+* section :: string
+* type :: boolean
+* value_label :: string
+
+#### Examples
+```json
+  %{
+    "default": true,
+    "description": "When checked the flag associated with your IP will be displayed. If unchecked your flag will be blank. This will take effect next time you login with your client.",
+    "key": "teiserver.Show flag",
+    "opts": {},
+    "section": "Teiserver account",
+    "type": "boolean",
+    "value_label": "Value"
+  }
+```
 
 ## Error
 Returned when an unexpected error is generated. The difference between an error and a failure is the failure is an expected possible outcome (e.g. login failing) while an error is unexpected (e.g. message cannot be decoded). As such the error field will not always have the command being executed (though may sometimes).

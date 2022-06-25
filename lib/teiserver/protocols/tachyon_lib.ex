@@ -21,9 +21,9 @@ defmodule Teiserver.Protocols.TachyonLib do
   @spec encode(List.t() | Map.t()) :: String.t()
   def encode(data) do
     data
-    |> Jason.encode!()
-    |> :zlib.gzip()
-    |> Base.encode64()
+      |> Jason.encode!()
+      |> :zlib.gzip()
+      |> Base.encode64()
   end
 
   @spec decode(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}

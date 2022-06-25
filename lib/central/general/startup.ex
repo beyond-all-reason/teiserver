@@ -158,7 +158,9 @@ defmodule Central.General.Startup do
       permissions: [],
       description:
         "Language used on the site (currently only English).",
-      opts: ~w(English),
+      opts: [
+        choices: ~w(English)
+      ],
       default: false
     })
 

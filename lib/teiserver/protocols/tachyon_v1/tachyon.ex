@@ -44,6 +44,11 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   end
   def convert_object(:queue, queue), do: Map.take(queue, ~w(id name team_size conditions settings map_list)a)
   def convert_object(:blog_post, post), do: Map.take(post, ~w(id short_content content url tags live_from)a)
+  def convert_object(:user_config_type, type) do
+    opts = type[:opts] |> Map.new
+    Map.take(type, ~w(default description key section type value_label)a)
+      |> Map.put(:opts, opts)
+  end
 
   # Slightly more complex conversions
   def convert_object(:lobby, lobby) do
