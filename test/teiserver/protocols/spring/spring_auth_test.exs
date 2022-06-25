@@ -375,10 +375,17 @@ CLIENTS test_room #{user.name}\n"
     # _send_raw(socket2, "PROMOTE\n")
     # _ = _recv_raw(socket2)
 
-    # Time to leave
+    # Time to leave, flush socket1 since they are still in the battle
+    # and we will use them to ensure the bots are removed
+    _recv_raw(socket1)
+
     _send_raw(socket2, "LEAVEBATTLE\n")
     reply = _recv_raw(socket2)
-    assert reply == "REMOVEBOT #{botid} Raptor:Normal(1)\nREMOVEBOT #{botid} STAI(1)\nLEFTBATTLE #{lobby_id} #{user2.name}\n"
+    assert reply == "LEFTBATTLE #{lobby_id} #{user2.name}\n"
+
+    reply = _recv_until(socket1)
+    assert reply =~ "REMOVEBOT #{botid} Raptor:Normal(1)"
+    assert reply =~ "REMOVEBOT #{botid} STAI(1)"
 
     # These commands shouldn't work, they also shouldn't error
     _send_raw(socket2, "SAYBATTLE I'm not here anymore!\n")

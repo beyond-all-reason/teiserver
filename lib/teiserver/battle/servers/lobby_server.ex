@@ -103,17 +103,17 @@ defmodule Teiserver.Battle.LobbyServer do
     new_bots = Map.put(lobby.bots, bot.name, bot)
     new_lobby = %{lobby | bots: new_bots}
 
-    # PubSub.broadcast(
-    #   Central.PubSub,
-    #   "legacy_battle_updates:#{lobby_id}",
-    #   {:battle_updated, lobby_id, {lobby_id, bot}, :add_bot_to_battle}
-    # )
+    PubSub.broadcast(
+      Central.PubSub,
+      "legacy_battle_updates:#{lobby.id}",
+      {:battle_updated, lobby.id, {lobby.id, bot}, :add_bot_to_battle}
+    )
 
-    # PubSub.broadcast(
-    #   Central.PubSub,
-    #   "teiserver_lobby_updates:#{battle.id}",
-    #   {:lobby_update, :add_bot, battle.id, bot.name}
-    # )
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_lobby_updates:#{lobby.id}",
+      {:lobby_update, :add_bot, lobby.id, bot.name}
+    )
 
     {:noreply, %{state | lobby: new_lobby}}
   end
@@ -129,17 +129,17 @@ defmodule Teiserver.Battle.LobbyServer do
         new_bots = Map.put(lobby.bots, botname, new_bot)
         new_lobby = %{lobby | bots: new_bots}
 
-        # PubSub.broadcast(
-        #   Central.PubSub,
-        #   "legacy_battle_updates:#{lobby_id}",
-        #   {:battle_updated, lobby_id, {lobby_id, new_bot}, :update_bot}
-        # )
+        PubSub.broadcast(
+          Central.PubSub,
+          "legacy_battle_updates:#{lobby.id}",
+          {:battle_updated, lobby.id, {lobby.id, new_bot}, :update_bot}
+        )
 
-        # PubSub.broadcast(
-        #   Central.PubSub,
-        #   "teiserver_lobby_updates:#{battle.id}",
-        #   {:lobby_update, :update_bot, battle.id, botname}
-        # )
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_lobby_updates:#{lobby.id}",
+          {:lobby_update, :update_bot, lobby.id, botname}
+        )
         {:noreply, %{state | lobby: new_lobby}}
     end
   end
@@ -147,19 +147,18 @@ defmodule Teiserver.Battle.LobbyServer do
   def handle_cast({:remove_bot, botname}, %{lobby: lobby} = state) do
     new_bots = Map.delete(lobby.bots, botname)
     new_lobby = %{lobby | bots: new_bots}
-    Central.cache_put(:lobbies, lobby.id, new_lobby)
 
-    # PubSub.broadcast(
-    #   Central.PubSub,
-    #   "legacy_battle_updates:#{lobby_id}",
-    #   {:battle_updated, lobby_id, {lobby_id, botname}, :remove_bot_from_battle}
-    # )
+    PubSub.broadcast(
+      Central.PubSub,
+      "legacy_battle_updates:#{lobby.id}",
+      {:battle_updated, lobby.id, {lobby.id, botname}, :remove_bot_from_battle}
+    )
 
-    # PubSub.broadcast(
-    #   Central.PubSub,
-    #   "teiserver_lobby_updates:#{battle.id}",
-    #   {:lobby_update, :remove_bot, battle.id, botname}
-    # )
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_lobby_updates:#{lobby.id}",
+      {:lobby_update, :remove_bot, lobby.id, botname}
+    )
 
     {:noreply, %{state | lobby: new_lobby}}
   end

@@ -143,7 +143,6 @@ defmodule Teiserver.Startup do
 
     Central.cache_put(:lists, :clients, [])
     Central.cache_put(:lists, :rooms, [])
-    Central.cache_insert_new(:lists, :lobbies, [])
 
     Teiserver.Data.Matchmaking.pre_cache_queues()
 

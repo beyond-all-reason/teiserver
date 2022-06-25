@@ -40,7 +40,6 @@ defmodule Teiserver.Application do
       concache_sup(:teiserver_user_stat_cache),
 
       # Caches - Battle/Queue/Clan
-      concache_perm_sup(:lobbies),
       concache_sup(:teiserver_clan_cache_bang),
 
       # Caches - Chat

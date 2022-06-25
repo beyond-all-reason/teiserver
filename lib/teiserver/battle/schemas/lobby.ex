@@ -176,27 +176,9 @@ defmodule Teiserver.Battle.Lobby do
     :ok
   end
 
-  @spec add_bot_to_battle(T.lobby_id(), map()) :: :ok
+  @spec add_bot_to_battle(T.lobby_id(), map()) :: :ok | nil
   def add_bot_to_battle(lobby_id, bot) do
     LobbyCache.cast_lobby(lobby_id, {:add_bot, bot})
-
-    battle = get_battle(lobby_id)
-    new_bots = Map.put(battle.bots, bot.name, bot)
-    new_battle = %{battle | bots: new_bots}
-    Central.cache_put(:lobbies, battle.id, new_battle)
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "legacy_battle_updates:#{lobby_id}",
-      {:battle_updated, lobby_id, {lobby_id, bot}, :add_bot_to_battle}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_lobby_updates:#{battle.id}",
-      {:lobby_update, :add_bot, battle.id, bot.name}
-    )
-    :ok
   end
 
   @spec update_bot(T.lobby_id(), String.t(), map()) :: nil | :ok
@@ -204,55 +186,11 @@ defmodule Teiserver.Battle.Lobby do
 
   def update_bot(lobby_id, botname, new_data) do
     LobbyCache.cast_lobby(lobby_id, {:update_bot, botname, new_data})
-
-    battle = get_battle(lobby_id)
-    case battle.bots[botname] do
-      nil ->
-        nil
-
-      bot ->
-        new_bot = Map.merge(bot, new_data)
-
-        new_bots = Map.put(battle.bots, botname, new_bot)
-        new_battle = %{battle | bots: new_bots}
-        Central.cache_put(:lobbies, battle.id, new_battle)
-
-        PubSub.broadcast(
-          Central.PubSub,
-          "legacy_battle_updates:#{lobby_id}",
-          {:battle_updated, lobby_id, {lobby_id, new_bot}, :update_bot}
-        )
-
-        PubSub.broadcast(
-          Central.PubSub,
-          "teiserver_lobby_updates:#{battle.id}",
-          {:lobby_update, :update_bot, battle.id, botname}
-        )
-        :ok
-    end
   end
 
-  @spec remove_bot(T.lobby_id(), String.t()) :: :ok
+  @spec remove_bot(T.lobby_id(), String.t()) :: :ok | nil
   def remove_bot(lobby_id, botname) do
     LobbyCache.cast_lobby(lobby_id, {:remove_bot, botname})
-
-    battle = get_battle(lobby_id)
-    new_bots = Map.delete(battle.bots, botname)
-    new_battle = %{battle | bots: new_bots}
-    Central.cache_put(:lobbies, battle.id, new_battle)
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "legacy_battle_updates:#{lobby_id}",
-      {:battle_updated, lobby_id, {lobby_id, botname}, :remove_bot_from_battle}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_lobby_updates:#{battle.id}",
-      {:lobby_update, :remove_bot, battle.id, botname}
-    )
-    :ok
   end
 
   # Used to send the user PID a join battle command
@@ -313,7 +251,7 @@ defmodule Teiserver.Battle.Lobby do
   def remove_user_from_battle(userid, lobby_id) do
     Client.leave_battle(userid)
 
-    case do_remove_user_from_battle(userid, lobby_id) do
+    case do_remove_user_from_lobby(userid, lobby_id) do
       :closed ->
         nil
 
@@ -350,7 +288,7 @@ defmodule Teiserver.Battle.Lobby do
   def kick_user_from_battle(userid, lobby_id) do
     user = User.get_user_by_id(userid)
     if not User.is_moderator?(user) do
-      case do_remove_user_from_battle(userid, lobby_id) do
+      case do_remove_user_from_lobby(userid, lobby_id) do
         :closed ->
           nil
 
@@ -416,9 +354,9 @@ defmodule Teiserver.Battle.Lobby do
     end
   end
 
-  @spec do_remove_user_from_battle(integer(), integer()) ::
+  @spec do_remove_user_from_lobby(integer(), integer()) ::
           :closed | :removed | :not_member | :no_battle
-  defp do_remove_user_from_battle(userid, lobby_id) do
+  defp do_remove_user_from_lobby(userid, lobby_id) do
     battle = get_battle(lobby_id)
     Client.leave_battle(userid)
     Battle.remove_user_from_lobby(userid, lobby_id)
@@ -435,21 +373,6 @@ defmodule Teiserver.Battle.Lobby do
             if bot.owner_id == userid do
               remove_bot(lobby_id, botname)
             end
-          end)
-
-          # Now update the battle to remove the player
-          Central.cache_update(:lobbies, lobby_id, fn battle_state ->
-            # This is purely to prevent errors if the battle is in the process of shutting down
-            # mid function call
-            new_state =
-              if battle_state != nil do
-                new_players = Enum.filter(battle_state.players, fn m -> m != userid end)
-                %{battle_state | players: new_players, member_count: Enum.count(new_players)}
-              else
-                nil
-              end
-
-            {:ok, new_state}
           end)
 
           :removed

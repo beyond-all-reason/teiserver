@@ -44,10 +44,10 @@ defmodule Teiserver.Coordinator.MemesTest do
     }, :client_updated_battlestatus)
 
     # Add user message
-    _tachyon_recv(hsocket)
+    _tachyon_recv_until(hsocket)
 
     # Battlestatus message
-    _tachyon_recv(hsocket)
+    _tachyon_recv_until(hsocket)
 
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id}
   end

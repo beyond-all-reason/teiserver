@@ -8,7 +8,6 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec get_lobby(T.lobby_id()) :: T.lobby() | nil
   def get_lobby(id) do
-    # Central.cache_get(:lobbies, int_parse(id))
     call_lobby(int_parse(id), :get_lobby_state)
   end
 
@@ -25,10 +24,6 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec list_lobby_ids :: [T.lobby_id()]
   def list_lobby_ids() do
-    # case Central.cache_get(:lists, :lobbies) do
-    #   nil -> []
-    #   ids -> ids
-    # end
     Horde.Registry.select(Teiserver.LobbyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 
@@ -44,11 +39,6 @@ defmodule Teiserver.Battle.LobbyCache do
     result = cast_lobby(lobby_id, {:update_value, key, value})
 
     if result != nil do
-      # case key do
-      #   _ ->
-      #    :ok
-      # end
-
       PubSub.broadcast(
         Central.PubSub,
         "teiserver_lobby_updates:#{lobby_id}",
@@ -61,14 +51,12 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
   def update_lobby(%{id: lobby_id} = lobby, nil, :silent) do
-    Central.cache_put(:lobbies, lobby_id, lobby)
     cast_lobby(lobby_id, {:update_lobby, lobby})
 
     lobby
   end
 
   def update_lobby(%{id: lobby_id} = lobby, nil, reason) do
-    Central.cache_put(:lobbies, lobby.id, lobby)
     cast_lobby(lobby_id, {:update_lobby, lobby})
 
     if Enum.member?([:rename], reason) do
@@ -89,7 +77,6 @@ defmodule Teiserver.Battle.LobbyCache do
   end
 
   def update_lobby(%{id: lobby_id} = lobby, data, reason) do
-    Central.cache_put(:lobbies, lobby.id, lobby)
     cast_lobby(lobby_id, {:update_lobby, lobby})
 
     if Enum.member?([:update_battle_info], reason) do
@@ -159,20 +146,11 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec add_lobby(T.lobby()) :: T.lobby()
   def add_lobby(%{founder_id: _} = lobby) do
-    Central.cache_put(:lobbies, lobby.id, lobby)
 
     Lobby.start_battle_lobby_throttle(lobby.id)
     start_lobby_server(lobby)
 
     _consul_pid = Coordinator.start_consul(lobby.id)
-
-    Central.cache_update(:lists, :lobbies, fn value ->
-      new_value =
-        ([lobby.id | value])
-        |> Enum.uniq()
-
-      {:ok, new_value}
-    end)
 
     :ok = PubSub.broadcast(
       Central.PubSub,
@@ -258,14 +236,6 @@ defmodule Teiserver.Battle.LobbyCache do
   def close_lobby(lobby_id, reason \\ :closed) do
     battle = get_lobby(lobby_id)
     Coordinator.close_lobby(lobby_id)
-    Central.cache_delete(:lobbies, lobby_id)
-    Central.cache_update(:lists, :lobbies, fn value ->
-      new_value =
-        value
-        |> Enum.filter(fn v -> v != lobby_id end)
-
-      {:ok, new_value}
-    end)
 
     # Kill lobby server process
     stop_lobby_server(lobby_id)
