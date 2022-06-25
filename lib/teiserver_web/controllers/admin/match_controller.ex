@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.MatchController do
   use CentralWeb, :controller
 
-  alias Teiserver.{Battle, Game}
+  alias Teiserver.{Battle, Game, Account}
   alias Teiserver.Battle.MatchLib
 
   plug Bodyguard.Plug.Authorize,
@@ -33,10 +33,10 @@ defmodule TeiserverWeb.Admin.MatchController do
     queues = Game.list_queues(order_by: "Name (A-Z)")
 
     conn
-    |> assign(:queues, queues)
-    |> assign(:params, params)
-    |> assign(:matches, matches)
-    |> render("index.html")
+      |> assign(:queues, queues)
+      |> assign(:params, params)
+      |> assign(:matches, matches)
+      |> render("index.html")
   end
 
   @spec search(Plug.Conn.t(), map) :: Plug.Conn.t()
@@ -56,10 +56,10 @@ defmodule TeiserverWeb.Admin.MatchController do
     queues = Game.list_queues(order_by: "Name (A-Z)")
 
     conn
-    |> assign(:queues, queues)
-    |> assign(:params, params)
-    |> assign(:matches, matches)
-    |> render("index.html")
+      |> assign(:queues, queues)
+      |> assign(:params, params)
+      |> assign(:matches, matches)
+      |> render("index.html")
   end
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
@@ -74,16 +74,39 @@ defmodule TeiserverWeb.Admin.MatchController do
       |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
 
     match
-    |> MatchLib.make_favourite
-    |> insert_recently(conn)
+      |> MatchLib.make_favourite
+      |> insert_recently(conn)
 
     match_name = MatchLib.make_match_name(match)
 
     conn
-    |> assign(:match, match)
-    |> assign(:match_name, match_name)
-    |> assign(:members, members)
-    |> add_breadcrumb(name: "Show: #{match_name}", url: conn.request_path)
-    |> render("show.html")
+      |> assign(:match, match)
+      |> assign(:match_name, match_name)
+      |> assign(:members, members)
+      |> add_breadcrumb(name: "Show: #{match_name}", url: conn.request_path)
+      |> render("show.html")
+  end
+
+  @spec user_show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def user_show(conn, %{"user_id" => userid}) do
+    matches = Battle.list_matches(
+        search: [
+          user_id: userid
+        ],
+        preload: [
+          :queue, :members
+        ],
+        order_by: "Newest first",
+        limit: 100
+      )
+
+    queues = Game.list_queues(order_by: "Name (A-Z)")
+    user = Account.get_user_by_id(userid)
+
+    conn
+      |> assign(:user, user)
+      |> assign(:queues, queues)
+      |> assign(:matches, matches)
+      |> render("user_index.html")
   end
 end

@@ -24,11 +24,11 @@ defmodule Teiserver.Battle do
   @spec match_query(Integer.t(), List.t()) :: Ecto.Query.t()
   def match_query(id, args) do
     MatchLib.query_matches
-    |> MatchLib.search(%{id: id})
-    |> MatchLib.search(args[:search])
-    |> MatchLib.preload(args[:preload])
-    |> MatchLib.order_by(args[:order_by])
-    |> QueryHelpers.select(args[:select])
+      |> MatchLib.search(%{id: id})
+      |> MatchLib.search(args[:search])
+      |> MatchLib.preload(args[:preload])
+      |> MatchLib.order_by(args[:order_by])
+      |> QueryHelpers.select(args[:select])
   end
 
   @doc """
@@ -43,8 +43,8 @@ defmodule Teiserver.Battle do
   @spec list_matches(List.t()) :: List.t()
   def list_matches(args \\ []) do
     match_query(args)
-    |> QueryHelpers.limit_query(args[:limit] || 50)
-    |> Repo.all
+      |> QueryHelpers.limit_query(args[:limit] || 50)
+      |> Repo.all
   end
 
   @doc """

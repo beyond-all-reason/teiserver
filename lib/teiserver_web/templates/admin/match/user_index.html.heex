@@ -19,6 +19,7 @@
     <tr>
       <th>Type</th>
       <th>Map</th>
+      <th>Outcome</th>
       <th>Teams</th>
       <th>Team size</th>
       <th>Duration (mins)</th>
@@ -28,9 +29,25 @@
   </thead>
   <tbody>
 <%= for match <- @matches do %>
+  <%
+    user_member = match.members |> Enum.filter(fn mm -> mm.user_id == @current_user.id end) |> hd
+    win = (match.winning_team == user_member.team_id)
+  %>
+
     <tr>
       <td><%= match.game_type %></td>
       <td><%= match.map %></td>
+      
+      <td>
+        <%= cond do %>
+          <% win -> %>
+            Won
+          <% match.data["export_data"]["result"] == "undecided" -> %>
+            Undecided
+          <% true -> %>
+            &nbsp;
+        <% end %>
+      </td>
 
       <td><%= match.team_count %></td>
       <td><%= match.team_size %></td>
