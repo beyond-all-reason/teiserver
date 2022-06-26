@@ -476,6 +476,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
   @spec get_matches_from_day(%Date{}) :: map()
   defp get_matches_from_day(the_date) do
     the_date = Timex.to_datetime(the_date)
+    battle_minimum_seconds = Application.get_env(:central, Teiserver)[:retention][:battle_minimum_seconds]
 
     Battle.list_matches(
       search: [
@@ -486,7 +487,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
       limit: :infinity
     )
     |> Stream.filter(fn match ->
-      Timex.diff(match.finished, match.started, :second) >= 300
+      Timex.diff(match.finished, match.started, :second) >= battle_minimum_seconds
     end)
     |> Enum.reduce(@match_blank_acc, &add_match/2)
     |> second_pass

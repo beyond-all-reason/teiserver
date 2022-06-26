@@ -4,8 +4,6 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
   alias Central.Repo
   alias Teiserver.{Battle}
 
-  @short_match_seconds 300
-
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
@@ -34,7 +32,7 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
     matches
       |> Enum.filter(fn match ->
         duration = Timex.diff(match.finished, match.started, :second)
-        duration < @short_match_seconds
+        duration < Application.get_env(:central, Teiserver)[:retention][:battle_minimum_seconds]
       end)
       |> Enum.map(fn %{id: id} -> id end)
       |> Enum.join(",")

@@ -87,7 +87,8 @@ config :central, Teiserver,
     battle_match: 90,
     account_unverified: 14,
     lobby_chat: 31,
-    room_chat: 31
+    room_chat: 31,
+    battle_minimum_seconds: 120
   }
 
 config :logger, :console,
