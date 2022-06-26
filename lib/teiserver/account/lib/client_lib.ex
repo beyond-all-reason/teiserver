@@ -1,7 +1,6 @@
 defmodule Teiserver.Account.ClientLib do
   alias Phoenix.PubSub
   alias Teiserver.{Account, Battle}
-  alias Teiserver.Client
   alias Teiserver.Data.Types, as: T
 
   @spec colours() :: atom

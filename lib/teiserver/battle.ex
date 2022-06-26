@@ -250,6 +250,7 @@ defmodule Teiserver.Battle do
     :ok
   end
 
+  @spec generate_lobby_uuid :: String.t()
   def generate_lobby_uuid() do
     uuid = UUID.uuid1()
 
@@ -455,6 +456,12 @@ defmodule Teiserver.Battle do
 
   @spec add_lobby(T.lobby()) :: T.lobby()
   defdelegate add_lobby(lobby), to: LobbyCache
+
+  @spec set_script_tags(T.lobby_id(), map()) :: :ok | nil
+  defdelegate set_script_tags(lobby_id, tags), to: LobbyCache
+
+  @spec remove_script_tags(T.lobby_id(), [String.t()]) :: :ok | nil
+  defdelegate remove_script_tags(lobby_id, keys), to: LobbyCache
 
   # Actions
   @spec close_lobby(integer() | nil, atom) :: :ok

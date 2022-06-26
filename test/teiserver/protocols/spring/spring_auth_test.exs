@@ -381,7 +381,7 @@ CLIENTS test_room #{user.name}\n"
 
     _send_raw(socket2, "LEAVEBATTLE\n")
     reply = _recv_raw(socket2)
-    assert reply == "LEFTBATTLE #{lobby_id} #{user2.name}\n"
+    assert reply =~ "LEFTBATTLE #{lobby_id} #{user2.name}\n"
 
     reply = _recv_until(socket1)
     assert reply =~ "REMOVEBOT #{botid} Raptor:Normal(1)"

@@ -69,7 +69,7 @@ defmodule Teiserver.Game.AchievementServer do
   end
 
   def handle_info({:teiserver_telemetry_client_events,
-    userid, "game_start:singleplayer:scenario_end", %{
+    _userid, "game_start:singleplayer:scenario_end", %{
     "won" => false
   }}, state) do
     {:noreply, state}

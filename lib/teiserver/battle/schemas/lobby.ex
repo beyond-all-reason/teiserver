@@ -457,6 +457,8 @@ defmodule Teiserver.Battle.Lobby do
 
   # Script tags
   def set_script_tags(lobby_id, tags) do
+    LobbyCache.set_script_tags(lobby_id, tags)
+
     battle = get_battle(lobby_id)
     new_tags = Map.merge(battle.tags, tags)
     new_battle = %{battle | tags: new_tags}
@@ -464,6 +466,8 @@ defmodule Teiserver.Battle.Lobby do
   end
 
   def remove_script_tags(lobby_id, keys) do
+    LobbyCache.remove_script_tags(lobby_id, keys)
+
     battle = get_battle(lobby_id)
     new_tags = Map.drop(battle.tags, keys)
     new_battle = %{battle | tags: new_tags}

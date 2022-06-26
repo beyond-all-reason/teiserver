@@ -3,7 +3,6 @@ defmodule Teiserver.Account.UserLib do
   alias Central.Account.UserQueries
   require Logger
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Account
 
   # Functions
   @spec icon :: String.t()

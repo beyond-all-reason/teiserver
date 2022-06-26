@@ -28,6 +28,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     GenServer.start_link(__MODULE__, opts[:data], [])
   end
 
+  @impl true
   def handle_call(:get_all, _from, state) do
     {:reply, state, state}
   end
@@ -45,6 +46,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   # Infos
+  @impl true
   def handle_info(:tick, state) do
     lobby = Battle.get_lobby(state.lobby_id)
     case Map.get(lobby.tags, "server/match/uuid", nil) do
@@ -936,6 +938,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state.join_queue ++ state.low_priority_join_queue
   end
 
+  @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
     lobby_id = opts[:lobby_id]

@@ -2,7 +2,7 @@ defmodule Teiserver.Battle.LobbyServer do
   use GenServer
   require Logger
   alias Central.Config
-  alias Teiserver.{Client}
+  alias Teiserver.{Client, Battle}
   alias Teiserver.Bridge.BridgeServer
   alias Phoenix.PubSub
 
@@ -98,6 +98,14 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, %{state | lobby: new_lobby}}
   end
 
+  def handle_cast({:set_script_tags, new_tags}, %{tags: tags} = state) do
+    {:noreply, %{state | tags: Map.merge(tags, new_tags)}}
+  end
+
+  def handle_cast({:remove_script_tags, keys}, %{tags: tags} = state) do
+    {:noreply, %{state | tags: Map.drop(tags, keys)}}
+  end
+
   # Bots
   def handle_cast({:add_bot, bot}, %{lobby: lobby} = state) do
     new_bots = Map.put(lobby.bots, bot.name, bot)
@@ -163,6 +171,18 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, %{state | lobby: new_lobby}}
   end
 
+  @impl true
+  def handle_info(:tick, state) do
+    new_state = if state.tags["server/match/uuid"] == nil do
+      uuid = Battle.generate_lobby_uuid()
+      %{state | tags: Map.put(state.tags, "server/match/uuid", uuid)}
+    else
+      state
+    end
+
+    {:noreply, new_state}
+  end
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -170,7 +190,7 @@ defmodule Teiserver.Battle.LobbyServer do
 
   @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
-  def init(state = %{lobby: %{id: lobby_id}}) do
+  def init(data = %{lobby: %{id: lobby_id}}) do
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
       Teiserver.LobbyRegistry,
@@ -178,11 +198,16 @@ defmodule Teiserver.Battle.LobbyServer do
       lobby_id
     )
 
-    {:ok, Map.merge(state, %{
+    :timer.send_interval(2_000, :tick)
+
+    {:ok, %{
       lobby_id: lobby_id,
+      lobby: data.lobby,
+      tags: Map.get(data.lobby, :tags, %{}),
+      bots: Map.get(data.lobby, :bots, %{}),
       member_list: [],
       player_list: [],
       state: :lobby
-    })}
+    }}
   end
 end

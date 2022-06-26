@@ -108,6 +108,15 @@ defmodule Teiserver.Battle.LobbyCache do
     lobby
   end
 
+  @spec set_script_tags(T.lobby_id(), map()) :: :ok | nil
+  def set_script_tags(lobby_id, tags) do
+    cast_lobby(lobby_id, {:set_script_tags, tags})
+  end
+
+  @spec remove_script_tags(T.lobby_id(), [String.t()]) :: :ok | nil
+  def remove_script_tags(lobby_id, keys) do
+    cast_lobby(lobby_id, {:remove_script_tags, keys})
+  end
 
   @spec add_user_to_lobby(T.userid(), T.lobby_id(), String.t()) :: nil | :ok
   def add_user_to_lobby(userid, lobby_id, script_password) do
