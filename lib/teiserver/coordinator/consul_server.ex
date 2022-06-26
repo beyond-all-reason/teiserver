@@ -138,7 +138,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info({:user_joined, userid}, state) do
     new_approved = [userid | state.approved_users] |> Enum.uniq
-    Lobby.force_change_client(state.coordinator_id, userid, %{ready: false, player: false, unready_at: :os.system_time(:micro_seconds)})
+    # Lobby.force_change_client(state.coordinator_id, userid, %{ready: false, player: false, unready_at: :os.system_time(:micro_seconds)})
 
     {:noreply, %{state |
       approved_users: new_approved,
