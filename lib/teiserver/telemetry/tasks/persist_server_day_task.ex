@@ -442,6 +442,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerDayTask do
     end)
   end
 
+  defp add_maps(m1, nil), do: m1
   defp add_maps(m1, m2) do
     Map.merge(m1, m2, fn _k, v1, v2 -> v1 + v2 end)
   end

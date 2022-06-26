@@ -43,6 +43,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
       events: %{
         client: %{},
         unauth: %{},
+        server: %{},
         combined: %{}
       }
     }
@@ -187,6 +188,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
         events: %{
           client: add_maps(existing.aggregates.events.client, data["events"]["client"]),
           unauth: add_maps(existing.aggregates.events.unauth, data["events"]["unauth"]),
+          server: add_maps(existing.aggregates.events.server, data["events"]["server"]),
           combined: add_maps(existing.aggregates.events.combined, data["events"]["combined"])
         },
       }
@@ -210,6 +212,7 @@ defmodule Teiserver.Telemetry.Tasks.PersistServerMonthTask do
   defp next_month({year, 12}), do: {year+1, 1}
   defp next_month({year, month}), do: {year, month+1}
 
+  defp add_maps(m1, nil), do: m1
   defp add_maps(m1, m2) do
     Map.merge(m1, m2, fn _k, v1, v2 -> v1 + v2 end)
   end

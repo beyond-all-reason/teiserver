@@ -110,7 +110,7 @@
     </table>
   </div>
   <div class="col-md-6">
-    <h4>Events</h4>
+    <h4>User Events</h4>
     <%
       event_keys = @data["aggregates"]["events"]["combined"] |> Map.keys |> Enum.sort()
     %>
@@ -131,6 +131,29 @@
             <td><%= format_number @data["aggregates"]["events"]["client"][key] || 0 %></td>
             <td><%= format_number @data["aggregates"]["events"]["unauth"][key] || 0 %></td>
             <td><%= format_number @data["aggregates"]["events"]["combined"][key] || 0 %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div class="col-md-6">
+    <h4>Server Events</h4>
+    <%
+      event_keys = @data["aggregates"]["events"]["server"] |> Map.keys |> Enum.sort()
+    %>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Event</th>
+          <th>Count</th>
+       </tr>
+      </thead>
+      <tbody>
+        <%= for key <- event_keys do %>
+          <tr>
+            <td><%= key %></td>
+            <td><%= format_number @data["aggregates"]["events"]["server"][key] || 0 %></td>
           </tr>
         <% end %>
       </tbody>
