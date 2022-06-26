@@ -143,7 +143,6 @@ defmodule Teiserver.Startup do
     Central.Account.GroupCacheLib.update_caches(internal_group)
     Central.Account.GroupCacheLib.update_caches(umbrella_group)
 
-    Central.cache_put(:lists, :clients, [])
     Central.cache_put(:lists, :rooms, [])
 
     Teiserver.Data.Matchmaking.pre_cache_queues()
