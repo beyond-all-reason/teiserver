@@ -327,7 +327,7 @@ defmodule Teiserver.Battle.Lobby do
         Battle.get_lobby(lobby_id)
       end)
       |> Enum.filter(fn lobby ->
-        Enum.member?(lobby.members, userid) or lobby.founder_id == userid
+        lobby != nil and Enum.member?(lobby.members, userid) or lobby.founder_id == userid
       end)
       |> Enum.map(fn lobby ->
         remove_user_from_battle(userid, lobby.id)

@@ -203,7 +203,6 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:battle_opened, lobby_id) do
-    Logger.error("spring_out :battle_opened reply without map or integer of '#{Kernel.inspect lobby_id}'")
     ""
   end
 
