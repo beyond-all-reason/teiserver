@@ -66,6 +66,7 @@ defmodule Central.Account.ReportLib do
 
   @spec action_icon(String.t() | nil) :: String.t()
   def action_icon(nil), do: ""
+  def action_icon("Report expired"), do: "fa-solid fa-clock"
   def action_icon("Ignore report"), do: "fa-solid fa-check-circle"
   def action_icon("Warn"), do: "fa-solid fa-triangle-exclamation"
   def action_icon("Restrict"), do: "fa-solid fa-do-not-enter"
@@ -178,6 +179,11 @@ defmodule Central.Account.ReportLib do
   def _search(query, :filter, {"responder", user_id}) do
     from reports in query,
       where: reports.responder_id == ^user_id
+  end
+
+  def _search(query, :inserted_before, datetime) do
+    from reports in query,
+      where: reports.inserted_at < ^datetime
   end
 
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
