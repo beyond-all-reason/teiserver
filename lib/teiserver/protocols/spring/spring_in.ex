@@ -154,7 +154,7 @@ defmodule Teiserver.Protocols.SpringIn do
           |> Map.take([:in_game, :away])
 
         new_client =
-          (Client.get_client_by_id(state.userid) || %{})
+          (Client.get_client_by_id(state.userid) || %{userid: state.userid})
           |> Map.merge(new_status)
 
         # This just accepts it and updates the client
