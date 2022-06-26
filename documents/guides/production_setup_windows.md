@@ -1,4 +1,4 @@
-In theory this should work fine on windows. Unfortunately I've no idea how to go about installing it on Windows. If anybody wants to install it on Windows then I've listed below the key items used in the [linux](/documents/dev_guides/production_setup_linux.md) setup process.
+In theory this should work fine on windows. Unfortunately I've no idea how to go about installing it on Windows. If anybody wants to install it on Windows then I've listed below the key items used in the [linux](/documents/guides/production_setup_linux.md) setup process.
 
 - Elixir of course for the application
 - Nginx as a web proxy routing to the Phoenix application, phoenix is listening on port 8888

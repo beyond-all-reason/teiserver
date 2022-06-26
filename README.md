@@ -5,16 +5,16 @@ It takes full advantage of Elixir/OTP for a fully concurrent application with ve
 
 ## Documentation
 - [Architecture](/documents/architecture.md)
-- [Local setup](/documents/dev_guides/local_setup.md)
-- [Prod setup linux](/documents/dev_guides/production_setup_linux.md)/[Prod setup windows](/documents/dev_guides/production_setup_windows.md)
-- [Testing](/documents/dev_guides/testing.md)
-- [Uberserver, conversion process and differences](/documents/dev_guides/uberserver.md)
+- [Local setup](/documents/guides/local_setup.md)
+- [Prod setup linux](/documents/guides/production_setup_linux.md)/[Prod setup windows](/documents/guides/production_setup_windows.md)
+- [Testing](/documents/guides/testing.md)
+- [Uberserver, conversion process and differences](/documents/guides/uberserver.md)
 
 These are just the highlights, full documentation can be found in the documentation folder.
 
 ### Feature documentation
 - [Metrics](/documents/planned_designs/metrics.md)
-- [Discord bot](/documents/dev_guides/discord_bot.md)
+- [Discord bot](/documents/guides/discord_bot.md)
 
 ### In progress features
 - [Tachyon](/documents/tachyon)
