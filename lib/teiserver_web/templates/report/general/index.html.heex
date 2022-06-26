@@ -1,5 +1,5 @@
 <div class="row">
-  <%= if allow?(@current_user, "teiserver.admin") do %>
+  <%= if allow?(@current_user, "teiserver.reports.client") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Telemetry.ClientEventLib.icon(),
@@ -9,7 +9,7 @@
     %>
   <% end %>
   
-  <%= if allow?(@current_user, "teiserver.moderator") do %>
+  <%= if allow?(@current_user, "teiserver.reports.server") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Telemetry.ServerDayLogLib.icon(),
@@ -17,7 +17,9 @@
       text: "Server metrics",
       link: Routes.ts_reports_server_metric_path(@conn, :day_metrics_list)
     %>
-
+  <% end %>
+  
+  <%= if allow?(@current_user, "teiserver.reports.match") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Battle.MatchLib.icon(),
@@ -27,7 +29,7 @@
     %>
   <% end %>
 
-  <%= if allow?(@current_user, "teiserver.moderator.telemetry") do %>
+  <%= if allow?(@current_user, "teiserver.reports.infolog") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Telemetry.InfologLib.icon(),
@@ -39,7 +41,7 @@
 </div>
 
 <div class="row mt-4">
-  <%= if allow?(@current_user, "teiserver.moderator") do %>
+  <%= if allow?(@current_user, Teiserver.Account.ActiveReport.permissions()) do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Account.ActiveReport.icon(),
@@ -47,7 +49,9 @@
       text: "Active",
       link: Routes.ts_reports_report_path(@conn, :show, "active")
     %>
-
+  <% end %>
+  
+  <%= if allow?(@current_user, Teiserver.Account.TimeSpentReport.permissions()) do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Account.TimeSpentReport.icon(),
@@ -55,7 +59,9 @@
       text: "Time spent",
       link: Routes.ts_reports_report_path(@conn, :show, "time_spent")
     %>
+  <% end %>
 
+  <%= if allow?(@current_user, Teiserver.Account.RanksReport.permissions()) do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Account.RanksReport.icon(),
@@ -63,7 +69,9 @@
       text: "Ranks",
       link: Routes.ts_reports_report_path(@conn, :show, "ranks")
     %>
+  <% end %>
 
+  <%= if allow?(@current_user, Teiserver.Account.VerifiedReport.permissions()) do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Account.VerifiedReport.icon(),
@@ -71,7 +79,9 @@
       text: "Verified",
       link: Routes.ts_reports_report_path(@conn, :show, "verified")
     %>
+  <% end %>
 
+  <%= if allow?(@current_user, Teiserver.Account.RetentionReport.permissions()) do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Account.RetentionReport.icon(),
@@ -79,7 +89,9 @@
       text: "Retention",
       link: Routes.ts_reports_report_path(@conn, :show, "retention")
     %>
+  <% end %>
 
+  <%= if allow?(@current_user, Teiserver.Account.NewUserFunnelReport.permissions()) do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Account.NewUserFunnelReport.icon(),
@@ -87,15 +99,19 @@
       text: "New user funnel",
       link: Routes.ts_reports_report_path(@conn, :show, "new_user_funnel")
     %>
+  <% end %>
 
+  <%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) do %>
     <%=
       central_component "menu_card",
-      icon: Teiserver.Account.AccoladeLib.icon(),
+      icon: Teiserver.Account.AccoladeReport.icon(),
       name: "accolades",
       text: "Accolades",
       link: Routes.ts_reports_report_path(@conn, :show, "accolades")
     %>
+  <% end %>
 
+  <%= if allow?(@current_user, Teiserver.Account.MuteReport.permissions()) do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Account.MuteReport.icon(),
@@ -103,7 +119,9 @@
       text: "Mutes",
       link: Routes.ts_reports_report_path(@conn, :show, "mutes")
     %>
+  <% end %>
 
+  <%= if allow?(@current_user, Teiserver.Account.ReviewReport.permissions()) do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Account.ReviewReport.icon(),

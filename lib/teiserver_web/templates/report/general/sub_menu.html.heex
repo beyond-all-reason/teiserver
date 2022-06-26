@@ -57,7 +57,7 @@
             %>
           <% end %>
 
-          <%= if allow?(@conn, "teiserver.admin") do %>
+          <%= if allow_any?(@conn, ~w(teiserver.reports teiserver.moderator teiserver.staff)) do %>
             <%= central_component "sub_menu_icon",
               name: "reports",
               label: "Reports",

@@ -7,6 +7,9 @@ defmodule Teiserver.Account.TimeSpentReport do
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-watch"
 
+  @spec permissions() :: String.t()
+  def permissions(), do: "teiserver.admin"
+
   @spec run(Plug.Conn.t(), map()) :: {list(), map()}
   def run(_conn, params) do
     params = apply_defaults(params)

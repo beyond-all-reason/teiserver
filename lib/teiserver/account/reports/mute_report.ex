@@ -4,6 +4,9 @@ defmodule Teiserver.Account.MuteReport do
   @spec icon() :: String.t()
   def icon(), do: Central.Account.ReportLib.action_icon("Mute")
 
+  @spec permissions() :: String.t()
+  def permissions(), do: "teiserver.staff.moderator"
+
   @spec run(Plug.Conn.t(), map()) :: {list(), map()}
   def run(_conn, _params) do
     x_ignores_y = Account.list_users(

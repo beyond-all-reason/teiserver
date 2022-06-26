@@ -56,6 +56,7 @@ defmodule Central.Account.AuthLib do
     Enum.any?(
       perms
       |> Enum.map(fn p -> allow?(conn, p) end)
+      |> IO.inspect
     )
   end
 

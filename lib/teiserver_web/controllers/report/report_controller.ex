@@ -7,7 +7,7 @@ defmodule TeiserverWeb.Report.ReportController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Moderator,
+    policy: Teiserver.Staff,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 
@@ -18,45 +18,33 @@ defmodule TeiserverWeb.Report.ReportController do
   def show(conn, params) do
     name = params["name"]
 
-    {data, assigns} =
-      case name do
-        "time_spent" ->
-          Teiserver.Account.TimeSpentReport.run(conn, params)
-
-        "active" ->
-          Teiserver.Account.ActiveReport.run(conn, params)
-
-        "ranks" ->
-          Teiserver.Account.RanksReport.run(conn, params)
-
-        "verified" ->
-          Teiserver.Account.VerifiedReport.run(conn, params)
-
-        "retention" ->
-          Teiserver.Account.RetentionReport.run(conn, params)
-
-        "new_user_funnel" ->
-          Teiserver.Account.NewUserFunnelReport.run(conn, params)
-
-        "accolades" ->
-          Teiserver.Account.AccoladeReport.run(conn, params)
-
-        "mutes" ->
-          Teiserver.Account.MuteReport.run(conn, params)
-
-        "review" ->
-          Teiserver.Account.ReviewReport.run(conn, params)
-
+    module = case name do
+        "time_spent" -> Teiserver.Account.TimeSpentReport
+        "active" -> Teiserver.Account.ActiveReport
+        "ranks" -> Teiserver.Account.RanksReport
+        "verified" -> Teiserver.Account.VerifiedReport
+        "retention" -> Teiserver.Account.RetentionReport
+        "new_user_funnel" -> Teiserver.Account.NewUserFunnelReport
+        "accolades" -> Teiserver.Account.AccoladeReport
+        "mutes" -> Teiserver.Account.MuteReport
+        "review" -> Teiserver.Account.ReviewReport
         _ ->
           raise "No handler for name of '#{name}'"
       end
 
-    assigns
-    |> Enum.reduce(conn, fn {key, value}, conn ->
-      assign(conn, key, value)
-    end)
-    |> assign(:data, data)
-    |> add_breadcrumb(name: name |> String.capitalize() |> String.replace("_", " "), url: conn.request_path)
-    |> render("#{name}.html")
+    if allow?(conn.current_user, module.permissions) do
+      {data, assigns} = module.run(conn, params)
+
+      assigns
+        |> Enum.reduce(conn, fn {key, value}, conn ->
+          assign(conn, key, value)
+        end)
+        |> assign(:data, data)
+        |> add_breadcrumb(name: name |> String.capitalize() |> String.replace("_", " "), url: conn.request_path)
+        |> render("#{name}.html")
+    else
+      conn
+        |> redirect(to: Routes.ts_reports_general_path(conn, :index))
+    end
   end
 end

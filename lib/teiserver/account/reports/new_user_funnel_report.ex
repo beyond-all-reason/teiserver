@@ -4,6 +4,9 @@ defmodule Teiserver.Account.NewUserFunnelReport do
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-filter"
 
+  @spec permissions() :: String.t()
+  def permissions(), do: "teiserver.admin"
+
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, _params) do
     start_date = Timex.today

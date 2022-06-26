@@ -31,6 +31,12 @@ defmodule Teiserver.Moderator do
   def authorize(_, conn, _), do: allow?(conn, "teiserver.moderator")
 end
 
+defmodule Teiserver.Staff do
+  @behaviour Bodyguard.Policy
+  import Central.Account.AuthLib, only: [allow?: 2]
+  def authorize(_, conn, _), do: allow?(conn, "teiserver.staff")
+end
+
 defmodule Teiserver.Auth do
   @behaviour Bodyguard.Policy
   import Central.Account.AuthLib, only: [allow?: 2]

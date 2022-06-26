@@ -84,7 +84,7 @@
   <% end %>
 </div>
 
-<%= if allow?(@conn, "teiserver.moderator") do %>
+<%= if allow_any?(@conn, ~w(teiserver.reports teiserver.moderator teiserver.staff)) do %>
   <div class="row">
     <%= if allow?(@conn, "teiserver.moderator.account") do %>
       <%=
@@ -95,9 +95,7 @@
         icon_class: "fa-duotone",
         link: Routes.ts_admin_user_path(@conn, :index)
       %>
-    <% end %>
 
-    <%= if allow?(@conn, "teiserver.moderator") do %>
       <%=
         central_component "menu_card",
         icon: Central.Communication.CommentLib.icon(),
@@ -115,7 +113,9 @@
         icon_class: "fa-duotone",
         link: Routes.ts_admin_achievement_path(@conn, :index)
       %>
-      
+    <% end %>
+  
+    <%= if allow_any?(@conn, ~w(teiserver.reports teiserver.moderator teiserver.staff)) do %>
       <%=
         central_component "menu_card",
         icon: Central.Helpers.StylingHelper.icon(:summary),

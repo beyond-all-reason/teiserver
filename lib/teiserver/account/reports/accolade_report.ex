@@ -3,6 +3,12 @@ defmodule Teiserver.Account.AccoladeReport do
   alias Teiserver.{Account, User}
   alias Teiserver.Account.BadgeTypeLib
 
+  @spec icon() :: String.t()
+  def icon(), do: Teiserver.Account.AccoladeLib.icon()
+
+  @spec permissions() :: String.t()
+  def permissions(), do: "teiserver.admin"
+
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
   def run(_conn, params) do
     params = apply_defaults(params)

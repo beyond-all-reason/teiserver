@@ -12,7 +12,7 @@
     <h4>Status</h4><br />
     <%= for {name, colour, icon} <- @roles do %>
       <div class="role-badge">
-        <i class={"fa-fw fa-2x fas #{icon}"} style={"color: #{colour}"} title={name}></i>
+        <i class={"fa-fw fa-2x #{icon}"} style={"color: #{colour}"} title={name}></i>
         <br />
         <%= name %>
       </div>

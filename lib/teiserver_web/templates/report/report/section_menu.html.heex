@@ -1,83 +1,101 @@
 <% bsname = view_colour() %>
 
-<%= central_component "section_menu_button",
-  name: "active",
-  label: "Active",
-  active: @active,
-  icon: Teiserver.Account.ActiveReport.icon(),
-  bsname: bsname,
-  url: Routes.ts_reports_report_path(@conn, :show, "active")
-%>
+<%= if allow?(@current_user, Teiserver.Account.ActiveReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "active",
+    label: "Active",
+    active: @active,
+    icon: Teiserver.Account.ActiveReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "active")
+  %>
+<% end %>
 
-<%= central_component "section_menu_button",
-  name: "time_spent",
-  label: "Time spent",
-  active: @active,
-  icon: Teiserver.Account.TimeSpentReport.icon(),
-  bsname: bsname,
-  url: Routes.ts_reports_report_path(@conn, :show, "time_spent")
-%>
+<%= if allow?(@current_user, Teiserver.Account.TimeSpentReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "time_spent",
+    label: "Time spent",
+    active: @active,
+    icon: Teiserver.Account.TimeSpentReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "time_spent")
+  %>
+<% end %>
 
-<%= central_component "section_menu_button",
-  name: "ranks",
-  label: "Ranks",
-  active: @active,
-  icon: Teiserver.Account.RanksReport.icon(),
-  bsname: bsname,
-  url: Routes.ts_reports_report_path(@conn, :show, "ranks")
-%>
+<%= if allow?(@current_user, Teiserver.Account.RanksReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "ranks",
+    label: "Ranks",
+    active: @active,
+    icon: Teiserver.Account.RanksReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "ranks")
+  %>
+<% end %>
 
-<%= central_component "section_menu_button",
-  name: "verified",
-  label: "Verified",
-  active: @active,
-  icon: Teiserver.Account.VerifiedReport.icon(),
-  bsname: bsname,
-  url: Routes.ts_reports_report_path(@conn, :show, "verified")
-%>
+<%= if allow?(@current_user, Teiserver.Account.VerifiedReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "verified",
+    label: "Verified",
+    active: @active,
+    icon: Teiserver.Account.VerifiedReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "verified")
+  %>
+<% end %>
 
-<%= central_component "section_menu_button",
-  name: "retention",
-  label: "Retention",
-  active: @active,
-  icon: Teiserver.Account.RetentionReport.icon(),
-  bsname: bsname,
-  url: Routes.ts_reports_report_path(@conn, :show, "retention")
-%>
+<%= if allow?(@current_user, Teiserver.Account.RetentionReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "retention",
+    label: "Retention",
+    active: @active,
+    icon: Teiserver.Account.RetentionReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "retention")
+  %>
+<% end %>
 
-<%= central_component "section_menu_button",
-  name: "new_user_funnel",
-  label: "New user funnel",
-  active: @active,
-  icon: Teiserver.Account.NewUserFunnelReport.icon(),
-  bsname: bsname,
-  url: Routes.ts_reports_report_path(@conn, :show, "new_user_funnel")
-%>
+<%= if allow?(@current_user, Teiserver.Account.NewUserFunnelReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "new_user_funnel",
+    label: "New user funnel",
+    active: @active,
+    icon: Teiserver.Account.NewUserFunnelReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "new_user_funnel")
+  %>
+<% end %>
 
-<%= central_component "section_menu_button",
-  name: "accolades",
-  label: "Accolades",
-  active: @active,
-  icon: Teiserver.Account.AccoladeLib.icon(),
-  bsname: bsname,
-  url: Routes.ts_reports_report_path(@conn, :show, "accolades")
-%>
+<%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "accolades",
+    label: "Accolades",
+    active: @active,
+    icon: Teiserver.Account.AccoladeReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "accolades")
+  %>
+<% end %>
 
-<%= central_component "section_menu_button",
-  name: "mutes",
-  label: "Mutes",
-  active: @active,
-  icon: Teiserver.Account.MuteReport.icon(),
-  bsname: bsname,
-  url: Routes.ts_reports_report_path(@conn, :show, "mutes")
-%>
+<%= if allow?(@current_user, Teiserver.Account.MuteReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "mutes",
+    label: "Mutes",
+    active: @active,
+    icon: Teiserver.Account.MuteReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "mutes")
+  %>
+<% end %>
 
 
-<%= central_component "section_menu_button",
-  name: "review",
-  label: "Review",
-  active: @active,
-  icon: Teiserver.Account.ReviewReport.icon(),
-  bsname: bsname,
-  url: Routes.ts_reports_report_path(@conn, :show, "review")
-%>
+<%= if allow?(@current_user, Teiserver.Account.ReviewReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "review",
+    label: "Review",
+    active: @active,
+    icon: Teiserver.Account.ReviewReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "review")
+  %>
+<% end %>

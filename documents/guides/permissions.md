@@ -15,7 +15,8 @@ In summary:
 ### Teiserver sections
 `lib/teiserver/startup.ex` defines the permissions used by Teiserver (preceded by a comment saying `# Permissions setup` and are grouped accordingly:
 - Admin: Server and game management, has complete control over any portion of the Teiserver server components
-- Moderator: Ability to view things such as chat logs and perform moderation actions
+- Moderator: Ability to view things such as chat logs and perform moderation actions. This is being depreciated in favour of the Staff item.
+- Staff: Allows a role to be performed without giving access to sensitive information
 - Reports: Ability to view server reporting features. Note some other sections may grant access to the reporting area but the reports permission is required to access many of the specific reports
 - API: Allows for access to the REST API, barely started and possibly to be discarded in the future depending on demand
 - Player: Used to mark an account as being a Teiserver account, may also be discontinued in the future
