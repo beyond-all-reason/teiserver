@@ -58,8 +58,10 @@ defmodule Teiserver.Startup do
       "Teiserver:De-bridged user",
     ])
 
+    # Permissions setup
     add_permission_set("teiserver", "admin", ~w(account battle clan queue))
     add_permission_set("teiserver", "moderator", ~w(account battle clan queue telemetry))
+    add_permission_set("teiserver", "reports", ~w(client server match infolog))
     add_permission_set("teiserver", "api", ~w(battle))
     add_permission_set("teiserver", "player", ~w(account tester contributor dev streamer donor verified bot moderator))
 
