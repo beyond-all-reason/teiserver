@@ -7,8 +7,7 @@ defmodule Teiserver.Game do
   alias Central.Helpers.QueryHelpers
   alias Central.Repo
 
-  alias Teiserver.Game.Queue
-  alias Teiserver.Game.QueueLib
+  alias Teiserver.Game.{Queue, QueueLib}
 
   @spec queue_query(List.t()) :: Ecto.Query.t()
   def queue_query(args) do
@@ -465,4 +464,307 @@ defmodule Teiserver.Game do
     UserAchievement.changeset(user_achievement, %{})
   end
 
+
+
+  alias Teiserver.Game.{RatingType, RatingTypeLib}
+
+  @spec rating_type_query(List.t()) :: Ecto.Query.t()
+  def rating_type_query(args) do
+    rating_type_query(nil, args)
+  end
+
+  @spec rating_type_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def rating_type_query(id, args) do
+    RatingTypeLib.query_rating_types
+    |> RatingTypeLib.search(%{id: id})
+    |> RatingTypeLib.search(args[:search])
+    |> RatingTypeLib.preload(args[:preload])
+    |> RatingTypeLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of rating_types.
+
+  ## Examples
+
+      iex> list_rating_types()
+      [%RatingType{}, ...]
+
+  """
+  @spec list_rating_types(List.t()) :: List.t()
+  def list_rating_types(args \\ []) do
+    rating_type_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Gets a single rating_type.
+
+  Raises `Ecto.NoResultsError` if the RatingType does not exist.
+
+  ## Examples
+
+      iex> get_rating_type!(123)
+      %RatingType{}
+
+      iex> get_rating_type!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_rating_type!(Integer.t() | List.t()) :: RatingType.t()
+  @spec get_rating_type!(Integer.t(), List.t()) :: RatingType.t()
+  def get_rating_type!(id) when not is_list(id) do
+    rating_type_query(id, [])
+    |> Repo.one!
+  end
+  def get_rating_type!(args) do
+    rating_type_query(nil, args)
+    |> Repo.one!
+  end
+  def get_rating_type!(id, args) do
+    rating_type_query(id, args)
+    |> Repo.one!
+  end
+
+  # Uncomment this if needed, default files do not need this function
+  # @doc """
+  # Gets a single rating_type.
+
+  # Returns `nil` if the RatingType does not exist.
+
+  # ## Examples
+
+  #     iex> get_rating_type(123)
+  #     %RatingType{}
+
+  #     iex> get_rating_type(456)
+  #     nil
+
+  # """
+  # def get_rating_type(id, args \\ []) when not is_list(id) do
+  #   rating_type_query(id, args)
+  #   |> Repo.one
+  # end
+
+  @doc """
+  Creates a rating_type.
+
+  ## Examples
+
+      iex> create_rating_type(%{field: value})
+      {:ok, %RatingType{}}
+
+      iex> create_rating_type(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_rating_type(Map.t()) :: {:ok, RatingType.t()} | {:error, Ecto.Changeset.t()}
+  def create_rating_type(attrs \\ %{}) do
+    %RatingType{}
+    |> RatingType.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a rating_type.
+
+  ## Examples
+
+      iex> update_rating_type(rating_type, %{field: new_value})
+      {:ok, %RatingType{}}
+
+      iex> update_rating_type(rating_type, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_rating_type(RatingType.t(), Map.t()) :: {:ok, RatingType.t()} | {:error, Ecto.Changeset.t()}
+  def update_rating_type(%RatingType{} = rating_type, attrs) do
+    rating_type
+    |> RatingType.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a RatingType.
+
+  ## Examples
+
+      iex> delete_rating_type(rating_type)
+      {:ok, %RatingType{}}
+
+      iex> delete_rating_type(rating_type)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_rating_type(RatingType.t()) :: {:ok, RatingType.t()} | {:error, Ecto.Changeset.t()}
+  def delete_rating_type(%RatingType{} = rating_type) do
+    Repo.delete(rating_type)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking rating_type changes.
+
+  ## Examples
+
+      iex> change_rating_type(rating_type)
+      %Ecto.Changeset{source: %RatingType{}}
+
+  """
+  @spec change_rating_type(RatingType.t()) :: Ecto.Changeset.t()
+  def change_rating_type(%RatingType{} = rating_type) do
+    RatingType.changeset(rating_type, %{})
+  end
+
+  alias Teiserver.Game.{RatingLog, RatingLogLib}
+
+  @spec rating_log_query(List.t()) :: Ecto.Query.t()
+  def rating_log_query(args) do
+    rating_log_query(nil, args)
+  end
+
+  @spec rating_log_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def rating_log_query(id, args) do
+    RatingLogLib.query_rating_logs
+    |> RatingLogLib.search(%{id: id})
+    |> RatingLogLib.search(args[:search])
+    |> RatingLogLib.preload(args[:preload])
+    |> RatingLogLib.order_by(args[:order_by])
+    |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of rating_logs.
+
+  ## Examples
+
+      iex> list_rating_logs()
+      [%RatingLog{}, ...]
+
+  """
+  @spec list_rating_logs(List.t()) :: List.t()
+  def list_rating_logs(args \\ []) do
+    rating_log_query(args)
+    |> QueryHelpers.limit_query(args[:limit] || 50)
+    |> Repo.all
+  end
+
+  @doc """
+  Gets a single rating_log.
+
+  Raises `Ecto.NoResultsError` if the RatingLog does not exist.
+
+  ## Examples
+
+      iex> get_rating_log!(123)
+      %RatingLog{}
+
+      iex> get_rating_log!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_rating_log!(Integer.t() | List.t()) :: RatingLog.t()
+  @spec get_rating_log!(Integer.t(), List.t()) :: RatingLog.t()
+  def get_rating_log!(id) when not is_list(id) do
+    rating_log_query(id, [])
+    |> Repo.one!
+  end
+  def get_rating_log!(args) do
+    rating_log_query(nil, args)
+    |> Repo.one!
+  end
+  def get_rating_log!(id, args) do
+    rating_log_query(id, args)
+    |> Repo.one!
+  end
+
+  # Uncomment this if needed, default files do not need this function
+  # @doc """
+  # Gets a single rating_log.
+
+  # Returns `nil` if the RatingLog does not exist.
+
+  # ## Examples
+
+  #     iex> get_rating_log(123)
+  #     %RatingLog{}
+
+  #     iex> get_rating_log(456)
+  #     nil
+
+  # """
+  # def get_rating_log(id, args \\ []) when not is_list(id) do
+  #   rating_log_query(id, args)
+  #   |> Repo.one
+  # end
+
+  @doc """
+  Creates a rating_log.
+
+  ## Examples
+
+      iex> create_rating_log(%{field: value})
+      {:ok, %RatingLog{}}
+
+      iex> create_rating_log(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_rating_log(Map.t()) :: {:ok, RatingLog.t()} | {:error, Ecto.Changeset.t()}
+  def create_rating_log(attrs \\ %{}) do
+    %RatingLog{}
+    |> RatingLog.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a rating_log.
+
+  ## Examples
+
+      iex> update_rating_log(rating_log, %{field: new_value})
+      {:ok, %RatingLog{}}
+
+      iex> update_rating_log(rating_log, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_rating_log(RatingLog.t(), Map.t()) :: {:ok, RatingLog.t()} | {:error, Ecto.Changeset.t()}
+  def update_rating_log(%RatingLog{} = rating_log, attrs) do
+    rating_log
+    |> RatingLog.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a RatingLog.
+
+  ## Examples
+
+      iex> delete_rating_log(rating_log)
+      {:ok, %RatingLog{}}
+
+      iex> delete_rating_log(rating_log)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_rating_log(RatingLog.t()) :: {:ok, RatingLog.t()} | {:error, Ecto.Changeset.t()}
+  def delete_rating_log(%RatingLog{} = rating_log) do
+    Repo.delete(rating_log)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking rating_log changes.
+
+  ## Examples
+
+      iex> change_rating_log(rating_log)
+      %Ecto.Changeset{source: %RatingLog{}}
+
+  """
+  @spec change_rating_log(RatingLog.t()) :: Ecto.Changeset.t()
+  def change_rating_log(%RatingLog{} = rating_log) do
+    RatingLog.changeset(rating_log, %{})
+  end
 end

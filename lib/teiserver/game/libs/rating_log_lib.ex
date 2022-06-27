@@ -1,0 +1,129 @@
+defmodule Teiserver.Game.RatingLogLib do
+  use CentralWeb, :library
+  alias Teiserver.Game.RatingLog
+
+  # Functions
+  @spec icon :: String.t()
+  def icon, do: "fa-regular fa-list-alt"
+
+  @spec colours :: atom
+  def colours, do: :primary2
+
+  @spec make_favourite(RatingLog.t()) :: Map.t()
+  def make_favourite(queue) do
+    %{
+      type_colour: StylingHelper.colours(colours()) |> elem(0),
+      type_icon: icon(),
+      item_id: queue.id,
+      item_type: "teiserver_game_queue",
+      item_colour: queue.colour,
+      item_icon: queue.icon,
+      item_label: "#{queue.name}",
+      url: "/teiserver/admin/rating_logs/#{queue.id}"
+    }
+  end
+
+  # Queries
+  @spec query_rating_logs() :: Ecto.Query.t()
+  def query_rating_logs do
+    from(rating_logs in RatingLog)
+  end
+
+  @spec search(Ecto.Query.t(), Map.t() | nil) :: Ecto.Query.t()
+  def search(query, nil), do: query
+
+  def search(query, params) do
+    params
+    |> Enum.reduce(query, fn {key, value}, query_acc ->
+      _search(query_acc, key, value)
+    end)
+  end
+
+  @spec _search(Ecto.Query.t(), atom, any()) :: Ecto.Query.t()
+  def _search(query, _, ""), do: query
+  def _search(query, _, nil), do: query
+
+  def _search(query, :id, id) do
+    from rating_logs in query,
+      where: rating_logs.id == ^id
+  end
+
+  def _search(query, :user_id, user_id) do
+    from rating_logs in query,
+      where: rating_logs.user_id == ^user_id
+  end
+
+  def _search(query, :match_id, match_id) do
+    from rating_logs in query,
+      where: rating_logs.match_id == ^match_id
+  end
+
+  def _search(query, :rating_type_id, rating_type_id) do
+    from rating_logs in query,
+      where: rating_logs.rating_type_id == ^rating_type_id
+  end
+
+  def _search(query, :id_in, id_list) do
+    from rating_logs in query,
+      where: rating_logs.id in ^id_list
+  end
+
+  def _search(query, :user_id_in, user_id_list) do
+    from rating_logs in query,
+      where: rating_logs.user_id in ^user_id_list
+  end
+
+  def _search(query, :match_id_in, match_id_list) do
+    from rating_logs in query,
+      where: rating_logs.match_id in ^match_id_list
+  end
+
+  def _search(query, :rating_type_id_in, rating_type_id_list) do
+    from rating_logs in query,
+      where: rating_logs.rating_type_id in ^rating_type_id_list
+  end
+
+  def _search(query, :basic_search, ref) do
+    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
+
+    from rating_logs in query,
+      where: ilike(rating_logs.name, ^ref_like)
+  end
+
+  @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
+  def order_by(query, nil), do: query
+
+  def order_by(query, "Name (A-Z)") do
+    from rating_logs in query,
+      order_by: [asc: rating_logs.name]
+  end
+
+  def order_by(query, "Name (Z-A)") do
+    from rating_logs in query,
+      order_by: [desc: rating_logs.name]
+  end
+
+  def order_by(query, "Newest first") do
+    from rating_logs in query,
+      order_by: [desc: rating_logs.inserted_at]
+  end
+
+  def order_by(query, "Oldest first") do
+    from rating_logs in query,
+      order_by: [asc: rating_logs.inserted_at]
+  end
+
+  @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
+  def preload(query, nil), do: query
+
+  def preload(query, _preloads) do
+    # query = if :things in preloads, do: _preload_things(query), else: query
+    query
+  end
+
+  # def _preload_things(query) do
+  #   from rating_logs in query,
+  #     left_join: things in assoc(rating_logs, :things),
+  #     preload: [things: things]
+  # end
+end
