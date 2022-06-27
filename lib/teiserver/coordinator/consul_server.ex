@@ -113,7 +113,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     Battle.get_lobby_member_list(state.lobby_id)
       |> Enum.each(fn userid ->
-        Lobby.force_change_client(state.coordinator_id, userid, %{ready: false, unready_at: :os.system_time(:micro_seconds)})
+        Lobby.force_change_client(state.coordinator_id, userid, %{ready: false})
 
         if User.is_restricted?(userid, ["All chat", "Battle chat"]) do
           name = User.get_username(userid)
@@ -138,8 +138,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info({:user_joined, userid}, state) do
     new_approved = [userid | state.approved_users] |> Enum.uniq
-    # Lobby.force_change_client(state.coordinator_id, userid, %{ready: false, player: false, unready_at: :os.system_time(:micro_seconds)})
-
     {:noreply, %{state |
       approved_users: new_approved,
       last_seen_map: state.last_seen_map |> Map.put(userid, System.system_time(:millisecond))
@@ -455,7 +453,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       # If you make yourself a player then you are made unready at the same time
       existing.player == false and new_client.player == true ->
-        {true, %{new_client | unready_at: :os.system_time(:micro_seconds)}}
+        {true, %{new_client | ready: false}}
 
       # Default to true
       true ->
@@ -475,21 +473,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       true ->
         {change, new_client}
-    end
-
-    # If they are readying up then we want to log how fast they did it
-    new_client = if change do
-      if existing.ready == false and new_client.ready == true and existing.unready_at != nil do
-        time = (:os.system_time(:micro_seconds) - existing.unready_at)/1_000_000
-        if time < 10 do
-          Logger.info("#{__MODULE__} ready up time of #{time}s for #{existing.userid}/#{existing.name}")
-        end
-        %{new_client | unready_at: nil}
-      else
-        new_client
-      end
-    else
-      new_client
     end
 
     # If they are moving from player to spectator, queue up a tick
