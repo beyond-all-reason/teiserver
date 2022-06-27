@@ -159,7 +159,7 @@ defmodule Teiserver.Account do
     }
   end
 
-  @spec smurf_search(User.t()) :: list()
+  @spec smurf_search(User.t()) :: [{{String.t(), String.t()}, [SmurfKey.t()]}]
   def smurf_search(user) do
     values = list_smurf_keys(
       search: [
@@ -168,7 +168,7 @@ defmodule Teiserver.Account do
       limit: :infinity,
       select: [:value]
     )
-    |> Enum.map(fn %{value: value} -> value end)
+      |> Enum.map(fn %{value: value} -> value end)
 
     list_smurf_keys(
       search: [
@@ -178,8 +178,8 @@ defmodule Teiserver.Account do
       preload: [:user, :type],
       limit: :infinity
     )
-    |> Enum.group_by(fn sk -> {sk.type.name, sk.value} end)
-    |> Enum.sort_by(fn {key, _value} -> key end, &<=/2)
+      |> Enum.group_by(fn sk -> {sk.type.name, sk.value} end)
+      |> Enum.sort_by(fn {key, _value} -> key end, &<=/2)
   end
 
   # Gets the the roles for the user based on their flags/data

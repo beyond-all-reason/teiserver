@@ -550,11 +550,36 @@ defmodule TeiserverWeb.Admin.UserController do
       {true, _} ->
         matching_keys = Account.smurf_search(user)
 
+        key_types = matching_keys
+          |> Enum.map(fn {{type, _value}, _} -> type end)
+          |> Enum.uniq
+          |> Enum.sort
+
+        users = matching_keys
+          |> Enum.map(fn {{_type, _value}, matches} ->
+            matches
+            |> Enum.map(fn m -> m.user end)
+          end)
+          |> List.flatten
+          |> Map.new(fn user -> {user.id, user} end)
+          |> Enum.map(fn {_, user} -> user end)
+          |> Enum.sort_by(fn user ->
+            user.data["last_login"]
+          end, &>=/2)
+
+        crossmatch_lookup = matching_keys
+          |> Enum.map(fn {{type, _value}, matches} ->
+            matches |> Enum.map(fn %{user: u} -> {type, u.id} end)
+          end)
+          |> List.flatten
+
         conn
           |> add_breadcrumb(name: "List possible smurfs", url: conn.request_path)
-          |> assign(:matching_keys, matching_keys)
           |> assign(:user, user)
           |> assign(:params, search_defaults(conn))
+          |> assign(:key_types, key_types)
+          |> assign(:users, users)
+          |> assign(:crossmatch_lookup, crossmatch_lookup)
           |> render("smurf_list.html")
 
       _ ->
