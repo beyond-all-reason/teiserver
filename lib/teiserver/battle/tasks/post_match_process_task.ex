@@ -90,28 +90,4 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
 
   defp hd_or_x([], x), do: x
   defp hd_or_x([x | _], _x), do: x
-
-  # defp map_keys_to_integer(map, keys) do
-  #   map
-  #   |> Map.new(fn {k, v} ->
-  #     if Enum.member?(keys, k) do
-  #       {k, NumberHelper.int_parse(v)}
-  #     else
-  #       {k, v}
-  #     end
-  #   end)
-  # end
-
-  # defp map_keys_to_round(map, keys) do
-  #   map
-  #   |> Map.new(fn {k, v} ->
-  #     if Enum.member?(keys, k) do
-  #       {k, round(v)}
-  #     else
-  #       {k, v}
-  #     end
-  #   end)
-  # end
-
-  # Teiserver.Battle.Tasks.PostMatchProcessTask.perform_reprocess(37665)
 end

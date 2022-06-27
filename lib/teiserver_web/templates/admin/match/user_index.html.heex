@@ -52,7 +52,19 @@
       <td><%= match.team_count %></td>
       <td><%= match.team_size %></td>
       
-      <td><%= Timex.diff(match.finished, match.started, :minute) %></td>
+      <td>
+        <%= case {match.finished, match.started} do %>
+          <% {nil, _} -> %>
+            Never finished
+          
+          <% {_, nil} -> %>
+            Never started
+          
+          <% _ -> %>
+            <%= Timex.diff(match.finished, match.started, :minute) %>
+            
+        <% end %>
+      </td>
       <td><%= date_to_str match.finished, format: :ymd_hms %></td>
 
       <td>

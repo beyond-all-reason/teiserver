@@ -90,6 +90,16 @@ defmodule Teiserver.Game.RatingTypeLib do
       order_by: [asc: rating_types.inserted_at]
   end
 
+  def order_by(query, "ID (Lowest first)") do
+    from rating_types in query,
+      order_by: [asc: rating_types.id]
+  end
+
+  def order_by(query, "ID (Highest first)") do
+    from rating_types in query,
+      order_by: [desc: rating_types.id]
+  end
+
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
   def preload(query, _preloads) do

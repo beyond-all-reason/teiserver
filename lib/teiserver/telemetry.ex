@@ -1681,6 +1681,7 @@ defmodule Teiserver.Telemetry do
     end
   end
 
+  @spec get_or_add_property_type(String.t()) :: non_neg_integer()
   def get_or_add_property_type(name) do
     name = String.trim(name)
 
@@ -1698,6 +1699,7 @@ defmodule Teiserver.Telemetry do
     end)
   end
 
+  @spec get_or_add_event_type(String.t()) :: non_neg_integer()
   def get_or_add_event_type(name) do
     name = String.trim(name)
 

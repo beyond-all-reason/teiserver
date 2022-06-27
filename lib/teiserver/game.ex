@@ -528,6 +528,28 @@ defmodule Teiserver.Game do
     |> Repo.one!
   end
 
+  @spec get_or_add_rating_type(String.t()) :: non_neg_integer()
+  def get_or_add_rating_type(name) do
+    name = String.trim(name)
+
+    Central.cache_get_or_store(:teiserver_game_rating_types, name, fn ->
+      case list_rating_types(search: [name: name], select: [:id], order_by: "ID (Lowest first)") do
+        [] ->
+          {:ok, rating_type} = %RatingType{}
+            |> RatingType.changeset(%{
+              name: name,
+              colour: "#777777",
+              icon: "fa-house"
+            })
+            |> Repo.insert()
+
+          rating_type.id
+        [%{id: id} | _] ->
+          id
+      end
+    end)
+  end
+
   # Uncomment this if needed, default files do not need this function
   # @doc """
   # Gets a single rating_type.

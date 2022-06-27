@@ -276,12 +276,14 @@ defmodule Teiserver.Battle.MatchLib do
     query
   end
 
+  @spec _preload_members(Ecto.Query.t) :: Ecto.Query.t
   def _preload_members(query) do
     from matches in query,
       left_join: members in assoc(matches, :members),
       preload: [members: members]
   end
 
+  @spec _preload_members_and_users(Ecto.Query.t) :: Ecto.Query.t
   def _preload_members_and_users(query) do
     from matches in query,
       left_join: memberships in assoc(matches, :members),
@@ -290,6 +292,7 @@ defmodule Teiserver.Battle.MatchLib do
       preload: [members: {memberships, user: users}]
   end
 
+  @spec _preload_queue(Ecto.Query.t) :: Ecto.Query.t
   def _preload_queue(query) do
     from matches in query,
       left_join: queues in assoc(matches, :queue),
