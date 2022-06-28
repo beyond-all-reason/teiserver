@@ -257,7 +257,8 @@ defmodule Teiserver.TachyonTcpServer do
     {:stop, :normal, %{state | userid: nil}}
   end
 
-  def terminate(_reason, state) do
+  @impl true
+  def terminate(reason, state) do
     Client.disconnect(state.userid, "tcp_server terminate")
   end
 

@@ -79,6 +79,12 @@ Tells you a player has had their status updated (by themselves, you or the serve
 ### TODO: `c.lobby_host.update_host_state`
 ### TODO: `s.lobby_host.updated_host_state`
 
+### TODO: `c.lobby_host.add_bot`
+### TODO: `c.lobby_host.update_bot`
+### TODO: `c.lobby_host.remove_bot`
+
+
+
 ### TODO: `c.lobby_host.start`
 ### TODO: `c.lobby_host.end`
 ### TODO: `c.lobby_host.close`

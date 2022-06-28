@@ -179,7 +179,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
 
   # Application start/stop
   def handle_info({:server_event, :stop, _node}, state) do
-    Lobby.say(state.coordinator_id, "Teiserver update taking place, see discord for details/issues.", state.lobby_id)
+    Lobby.say(state.userid, "Teiserver update taking place, see discord for details/issues.", state.lobby_id)
     {:noreply, state}
   end
 

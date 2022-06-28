@@ -198,8 +198,54 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
       "lobby_id" => "abc"
     }
 
-    # Now leave the lobby, closing it in the process
+    # Flush socket
     _tachyon_recv_until(socket)
+
+    # Add a bot
+    Lobby.add_bot_to_battle(lobby_id, %{
+      ai_dll: "BARb",
+      handicap: 0,
+      name: "BARbarianAI(10)",
+      owner_id: 8603,
+      owner_name: "Mustard",
+      player: true,
+      player_number: 8,
+      ready: true,
+      side: 1,
+      sync: 1,
+      team_colour: "42537",
+      team_number: 2
+    })
+
+
+    reply = _tachyon_recv_until(socket)
+    IO.puts ""
+    IO.inspect reply
+    IO.puts ""
+
+    # Update the bot
+    Lobby.update_bot(lobby_id, "BARbarianAI(10)", %{
+      ai_dll: "BARb",
+      handicap: 0,
+      name: "BARbarianAI(10)",
+      owner_id: 8603,
+      owner_name: "Mustard",
+      player: true,
+      player_number: 8,
+      ready: true,
+      side: 1,
+      sync: 1,
+      team_colour: "42537",
+      team_number: 2
+    })
+
+
+    reply = _tachyon_recv_until(socket)
+    IO.puts ""
+    IO.inspect reply
+    IO.puts ""
+
+    # Now leave the lobby, closing it in the process
     data = %{cmd: "c.lobby.leave"}
     _tachyon_send(socket, data)
     [reply] = _tachyon_recv(socket)
