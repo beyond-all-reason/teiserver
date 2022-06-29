@@ -43,6 +43,7 @@ defmodule Teiserver.TachyonTcpServer do
   end
 
   # Called on new connection
+  @impl true
   def start_link(ref, socket, transport, _opts) do
     pid = :proc_lib.spawn_link(__MODULE__, :init, [ref, socket, transport])
     {:ok, pid}
@@ -101,6 +102,7 @@ defmodule Teiserver.TachyonTcpServer do
     :gen_server.enter_loop(__MODULE__, [], state)
   end
 
+  @impl true
   def init(init_arg) do
     {:ok, init_arg}
   end
@@ -258,7 +260,7 @@ defmodule Teiserver.TachyonTcpServer do
   end
 
   @impl true
-  def terminate(reason, state) do
+  def terminate(_reason, state) do
     Client.disconnect(state.userid, "tcp_server terminate")
   end
 

@@ -4,8 +4,9 @@ defmodule Teiserver.Bridge.ChatCommands do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Bridge.UnitNames
 
-  @always_allow ~w(whatwas)
+  @always_allow ~w(whatwas unit)
 
+  @spec handle(Alchemy.Message.t()) :: any
   def handle(%Alchemy.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []} = _message) do
     [cmd | remaining] = String.split(content, " ")
     remaining = Enum.join(remaining, " ")
@@ -29,19 +30,48 @@ defmodule Teiserver.Bridge.ChatCommands do
     case UnitNames.get_name(name) do
       nil ->
         reply(channel, "Unable to find a unit named or previously named '#{remaining}'")
-      {:old_to_new, new_name, code} ->
-        old_name = String.capitalize(name)
-        new_name = String.capitalize(new_name)
 
-        reply(channel, "#{old_name} is now called #{new_name} - https://www.beyondallreason.info/unit/#{code}")
-      {:new_to_old, old_name, code} ->
-        new_name = String.capitalize(name)
-        old_name = String.capitalize(old_name)
+      {:code, actual_name} ->
+        reply(channel, "#{name} is the internal name for #{actual_name |> String.capitalize()}")
 
-        reply(channel, "#{new_name} used to be called #{old_name} - https://www.beyondallreason.info/unit/#{code}")
+      {:reused, {{_old_code, old_name}, {_new_code, new_name}}} ->
+        reply(channel, "#{name |> String.capitalize()} was renamed to #{new_name |> String.capitalize()} and #{old_name |> String.capitalize()} was renamed to #{name |> String.capitalize()}")
+
+      {:unchanged, _} ->
+        reply(channel, "#{name |> String.capitalize()} did not have a name change")
+
+      {:found_old, {_code, new_name}} ->
+        reply(channel, "#{name |> String.capitalize()} is now called #{new_name |> String.capitalize()}")
+
+      {:found_new, {_code, old_name}} ->
+        reply(channel, "#{name |> String.capitalize()} used to be called #{old_name |> String.capitalize()}")
     end
+  end
 
+  def handle_message({_user, _discord_id}, "unit", remaining, channel) do
+    name = remaining
+      |> String.trim()
+      |> String.downcase()
 
+    case UnitNames.get_name(name) do
+      nil ->
+        reply(channel, "Unable to find a unit named '#{remaining}'")
+
+      {:code, _actual_name} ->
+        reply(channel, "https://www.beyondallreason.info/unit/#{name}")
+
+      {:reused, {_old, {new_code, _new_name}}} ->
+        reply(channel, "https://www.beyondallreason.info/unit/#{new_code}")
+
+      {:unchanged, {code, _name}} ->
+        reply(channel, "https://www.beyondallreason.info/unit/#{code}")
+
+      {:found_old, {_code, new_name}} ->
+        reply(channel, "Can't find #{name |> String.capitalize()}, did you mean #{new_name |> String.capitalize()}?")
+
+      {:found_new, {code ,_old_name}} ->
+        reply(channel, "https://www.beyondallreason.info/unit/#{code}")
+    end
   end
 
   def handle_message(_, _, _, _) do

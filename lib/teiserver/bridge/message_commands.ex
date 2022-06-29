@@ -3,10 +3,11 @@ defmodule Teiserver.Bridge.MessageCommands do
   alias Teiserver.{User, Account}
   alias Teiserver.Account.AccoladeLib
   alias Central.Helpers.NumberHelper
+  alias alias Teiserver.Bridge.UnitNames
   require Logger
 
   @unauth ~w(discord)
-  @always_allow ~w(whoami help)
+  @always_allow ~w(whoami help whatwas unit)
 
   @spec handle(Alchemy.Message.t()) :: any
   def handle(%Alchemy.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []} = _message) do
@@ -59,6 +60,58 @@ defmodule Teiserver.Bridge.MessageCommands do
 
       _ ->
         reply(channel, "Invalid code")
+    end
+  end
+
+  def handle_command({_user, _discord_id}, "whatwas", remaining, channel) do
+    name = remaining
+      |> String.trim()
+      |> String.downcase()
+
+    case UnitNames.get_name(name) do
+      nil ->
+        reply(channel, "Unable to find a unit named or previously named '#{remaining}'")
+
+      {:code, actual_name} ->
+        reply(channel, "#{name} is the internal name for #{actual_name |> String.capitalize()}")
+
+      {:reused, {{_old_code, old_name}, {_new_code, new_name}}} ->
+        reply(channel, "#{name |> String.capitalize()} was renamed to #{new_name |> String.capitalize()} and #{old_name |> String.capitalize()} was renamed to #{name |> String.capitalize()}")
+
+      {:unchanged, _} ->
+        reply(channel, "#{name |> String.capitalize()} did not have a name change")
+
+      {:found_old, {_code, new_name}} ->
+        reply(channel, "#{name |> String.capitalize()} is now called #{new_name |> String.capitalize()}")
+
+      {:found_new, {_code, old_name}} ->
+        reply(channel, "#{name |> String.capitalize()} used to be called #{old_name |> String.capitalize()}")
+    end
+  end
+
+  def handle_command({_user, _discord_id}, "unit", remaining, channel) do
+    name = remaining
+      |> String.trim()
+      |> String.downcase()
+
+    case UnitNames.get_name(name) do
+      nil ->
+        reply(channel, "Unable to find a unit named '#{remaining}'")
+
+      {:code, _actual_name} ->
+        reply(channel, "https://www.beyondallreason.info/unit/#{name}")
+
+      {:reused, {_old, {new_code, _new_name}}} ->
+        reply(channel, "https://www.beyondallreason.info/unit/#{new_code}")
+
+      {:unchanged, {code, _name}} ->
+        reply(channel, "https://www.beyondallreason.info/unit/#{code}")
+
+      {:found_old, {_code, new_name}} ->
+        reply(channel, "Can't find #{name |> String.capitalize()}, did you mean #{new_name |> String.capitalize()}?")
+
+      {:found_new, {code ,_old_name}} ->
+        reply(channel, "https://www.beyondallreason.info/unit/#{code}")
     end
   end
 
