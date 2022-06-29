@@ -75,7 +75,7 @@ defmodule Teiserver.Bridge.MessageCommands do
       {:code, actual_name} ->
         reply(channel, "#{name} is the internal name for #{actual_name |> String.capitalize()}")
 
-      {:reused, {{_old_code, old_name}, {_new_code, new_name}}} ->
+      {:reused, {{_new_code, new_name}, {_old_code, old_name}}} ->
         reply(channel, "#{name |> String.capitalize()} was renamed to #{new_name |> String.capitalize()} and #{old_name |> String.capitalize()} was renamed to #{name |> String.capitalize()}")
 
       {:unchanged, _} ->
