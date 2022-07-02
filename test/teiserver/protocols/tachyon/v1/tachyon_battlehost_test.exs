@@ -122,8 +122,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     _tachyon_recv(socket)
 
     # Ensure the lobby state is accurate
-    data = %{cmd: "c.lobby.query", query: %{id_list: [lobby_id]}}
-    _tachyon_send(socket2, data)
+    _tachyon_send(socket2, %{cmd: "c.lobby.query", query: %{id_list: [lobby_id]}})
     [reply] = _tachyon_recv(socket2)
 
     assert reply["cmd"] == "s.lobby.query"
@@ -131,6 +130,22 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     lobby = hd(reply["lobbies"])
     assert lobby["id"] == lobby_id
     assert lobby["players"] == [user2.id]
+
+    # Use the get command
+    _tachyon_send(socket2, %{cmd: "c.lobby.get", lobby_id: lobby_id, keys: ~w(bots modoptions players members)})
+    [reply] = _tachyon_recv(socket2)
+    assert reply == %{
+      "cmd" => "s.lobby.get",
+      "bots" => %{},
+      "lobby_id" => 1,
+      "modoptions" => %{
+        "server/match/uuid" => Battle.get_lobby_uuid(lobby_id)
+      },
+      "members" => [
+        %{"away" => false, "in_game" => false, "lobby_id" => 1, "player" => false, "player_number" => 0, "ready" => false, "sync" => [], "team_colour" => 0, "team_number" => 0, "userid" => user2.id}
+      ],
+      "players" => []
+    }
 
     # Accept player3
     _tachyon_recv_until(socket3)
@@ -191,13 +206,13 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
 
     # And if we send the wrong lobby id?
     _tachyon_recv_until(socket4)
-    _tachyon_send(socket4, %{cmd: "c.lobby.watch", lobby_id: "abc"})
+    _tachyon_send(socket4, %{cmd: "c.lobby.watch", lobby_id: -1000})
     [reply] = _tachyon_recv(socket4)
     assert reply == %{
       "cmd" => "s.lobby.watch",
       "result" => "failure",
       "reason" => "No lobby",
-      "lobby_id" => "abc"
+      "lobby_id" => -1000
     }
 
     # Flush socket

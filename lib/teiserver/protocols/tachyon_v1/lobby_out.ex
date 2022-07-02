@@ -16,6 +16,12 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
   end
 
   ###########
+  # Query
+  def do_reply(:get, result) do
+    Map.put(result, "cmd", "s.lobby.get")
+  end
+
+  ###########
   # Create
   def do_reply(:create, {:success, lobby}) do
     %{

@@ -59,6 +59,31 @@ Subscribes you to lobby updates for a given lobby without joining it. Does not s
 }
 ```
 
+### `c.lobby.get`
+Gets various properties from a lobby based on the command.
+
+Allowed keys:
+- lobby
+- modoptions
+- bots
+- players
+- members (contains all members, not just players)
+
+```json
+{
+  "cmd": "c.lobby.get",
+  "lobby_id": 123,
+  "keys": ["lobby", "modoptions", "bots"]
+}
+
+{
+  "cmd": "s.lobby.get",
+  "lobby_id": 123,
+  "lobby": {},
+  "bots": {},
+  "modoptions": {},
+}
+```
 
 ## Interacting
 ### `c.lobby.join`

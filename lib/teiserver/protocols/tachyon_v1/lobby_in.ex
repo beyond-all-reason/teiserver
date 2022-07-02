@@ -1,8 +1,8 @@
 defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
-  alias Teiserver.Battle
   alias Teiserver.Battle.Lobby
-  alias Teiserver.{Client, Coordinator}
+  alias Teiserver.{Account, Battle, Client, Coordinator}
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
+  alias Teiserver.Protocols.Tachyon.V1.Tachyon
   alias Teiserver.Protocols.TachyonLib
   alias Phoenix.PubSub
   require Logger
@@ -26,6 +26,33 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
   end
   def do_handle("query", _, state) do
     reply(:system, :error, %{error: "no query supplied", location: "c.lobby.query"}, state)
+  end
+
+  def do_handle("get", %{"lobby_id" => lobby_id, "keys" => keys}, state) do
+    result = keys
+      |> Map.new(fn k ->
+        case k do
+          "lobby" -> {"lobby", Tachyon.convert_object(:lobby, Battle.get_lobby(lobby_id))}
+          "bots" -> {"bots", Battle.get_bots(lobby_id)}
+          "players" -> {"players",
+            Battle.get_lobby_players(lobby_id)
+              |> Enum.map(fn player ->
+                Tachyon.convert_object(:client, player)
+              end)
+          }
+          "members" -> {"members",
+            Battle.get_lobby_member_list(lobby_id)
+              |> Enum.map(fn member_id ->
+                c = Account.get_client_by_id(member_id)
+                Tachyon.convert_object(:client, c)
+              end)
+          }
+          "modoptions" -> {"modoptions", Battle.get_modoptions(lobby_id)}
+        end
+      end)
+      |> Map.put("lobby_id", lobby_id)
+
+    reply(:lobby, :get, result, state)
   end
 
   def do_handle("create", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
