@@ -48,13 +48,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # Infos
   @impl true
   def handle_info(:tick, state) do
-    lobby = Battle.get_lobby(state.lobby_id)
-    case Map.get(lobby.tags, "server/match/uuid", nil) do
+    modoptions = Battle.get_modoptions(state.lobby_id)
+    case Map.get(modoptions, "server/match/uuid", nil) do
       nil ->
         uuid = Battle.generate_lobby_uuid()
-        lobby = Battle.get_lobby(state.lobby_id)
-        new_tags = Map.put(lobby.tags, "server/match/uuid", uuid)
-        Lobby.set_script_tags(state.lobby_id, new_tags)
+        Battle.set_modoption(state.lobby_id, "server/match/uuid", uuid)
       _tag ->
         nil
     end
@@ -107,9 +105,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info(:match_stop, state) do
     uuid = Battle.generate_lobby_uuid()
-    lobby = Battle.get_lobby(state.lobby_id)
-    new_tags = Map.put(lobby.tags, "server/match/uuid", uuid)
-    Lobby.set_script_tags(state.lobby_id, new_tags)
+    Battle.set_modoption(state.lobby_id, "server/match/uuid", uuid)
 
     Battle.get_lobby_member_list(state.lobby_id)
       |> Enum.each(fn userid ->

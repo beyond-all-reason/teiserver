@@ -25,11 +25,6 @@ defmodule Teiserver.Battle.Lobby do
   #   player_count: 0,
   #   spectator_count: 0,
 
-  #   bot_count: 0,
-  #   bots: %{},
-  #   tags: %{
-  #     "server/match/uuid" => Battle.generate_lobby_uuid()
-  #   },
   #   disabled_units: [],
   #   start_rectangles: %{},
 
@@ -110,11 +105,6 @@ defmodule Teiserver.Battle.Lobby do
         player_count: 0,
         spectator_count: 0,
 
-        bot_count: 0,
-        bots: %{},
-        tags: %{
-          "server/match/uuid" => Battle.generate_lobby_uuid()
-        },
         disabled_units: [],
         start_rectangles: %{},
 
@@ -174,23 +164,6 @@ defmodule Teiserver.Battle.Lobby do
 
     Teiserver.Throttles.stop_throttle("LobbyThrottle:#{battle_lobby_id}")
     :ok
-  end
-
-  @spec add_bot_to_battle(T.lobby_id(), map()) :: :ok | nil
-  def add_bot_to_battle(lobby_id, bot) do
-    LobbyCache.cast_lobby(lobby_id, {:add_bot, bot})
-  end
-
-  @spec update_bot(T.lobby_id(), String.t(), map()) :: nil | :ok
-  def update_bot(lobby_id, botname, "0", _), do: remove_bot(lobby_id, botname)
-
-  def update_bot(lobby_id, botname, new_data) do
-    LobbyCache.cast_lobby(lobby_id, {:update_bot, botname, new_data})
-  end
-
-  @spec remove_bot(T.lobby_id(), String.t()) :: :ok | nil
-  def remove_bot(lobby_id, botname) do
-    LobbyCache.cast_lobby(lobby_id, {:remove_bot, botname})
   end
 
   # Used to send the user PID a join battle command
@@ -366,12 +339,14 @@ defmodule Teiserver.Battle.Lobby do
         close_lobby(lobby_id)
         :closed
       else
-        if Enum.member?(battle.players, userid) do
+        if Enum.member?(battle.members, userid) do
+          bots = Battle.get_bots(lobby_id)
+
           # Remove all their bots
-          battle.bots
+          bots
           |> Enum.each(fn {botname, bot} ->
             if bot.owner_id == userid do
-              remove_bot(lobby_id, botname)
+              Battle.remove_bot(lobby_id, botname)
             end
           end)
 
@@ -453,25 +428,6 @@ defmodule Teiserver.Battle.Lobby do
     new_units = battle.disabled_units ++ units
     new_battle = %{battle | disabled_units: new_units}
     update_battle(new_battle, units, :disable_units)
-  end
-
-  # Script tags
-  def set_script_tags(lobby_id, tags) do
-    LobbyCache.set_script_tags(lobby_id, tags)
-
-    battle = get_battle(lobby_id)
-    new_tags = Map.merge(battle.tags, tags)
-    new_battle = %{battle | tags: new_tags}
-    update_battle(new_battle, tags, :add_script_tags)
-  end
-
-  def remove_script_tags(lobby_id, keys) do
-    LobbyCache.remove_script_tags(lobby_id, keys)
-
-    battle = get_battle(lobby_id)
-    new_tags = Map.drop(battle.tags, keys)
-    new_battle = %{battle | tags: new_tags}
-    update_battle(new_battle, keys, :remove_script_tags)
   end
 
   @spec can_join?(Types.userid(), integer(), String.t() | nil, String.t() | nil) ::
@@ -612,10 +568,11 @@ defmodule Teiserver.Battle.Lobby do
   def allow?(changer_id, field, battle) when is_integer(changer_id),
     do: allow?(Client.get_client_by_id(changer_id), field, battle)
 
-  def allow?(changer, {:remove_bot, botname}, battle), do: allow?(changer, {:bot_command, botname}, battle)
-  def allow?(changer, {:update_bot, botname}, battle), do: allow?(changer, {:bot_command, botname}, battle)
-  def allow?(changer, {:bot_command, botname}, battle) do
-    bot = battle.bots[botname]
+  def allow?(changer, {:remove_bot, botname}, lobby), do: allow?(changer, {:bot_command, botname}, lobby)
+  def allow?(changer, {:update_bot, botname}, lobby), do: allow?(changer, {:bot_command, botname}, lobby)
+  def allow?(changer, {:bot_command, botname}, lobby) do
+    bots = Battle.get_bots(lobby.id)
+    bot = bots[botname]
 
     cond do
       bot == nil ->
@@ -624,7 +581,7 @@ defmodule Teiserver.Battle.Lobby do
       User.is_moderator?(changer) == true ->
         true
 
-      battle.founder_id == changer.userid ->
+      lobby.founder_id == changer.userid ->
         true
 
       bot.owner_id == changer.userid ->

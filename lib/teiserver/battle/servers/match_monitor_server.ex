@@ -236,6 +236,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   # Catchall handle_info
   def handle_info(msg, state) do
+    Logger.error("5")
     Logger.info("Match monitor Server handle_info error. No handler for msg of #{Kernel.inspect msg}")
     {:noreply, state}
   end

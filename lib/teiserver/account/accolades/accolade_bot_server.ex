@@ -199,6 +199,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
     end)
   end
 
+  @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(_opts) do
     Horde.Registry.register(

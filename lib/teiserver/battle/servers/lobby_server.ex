@@ -15,9 +15,9 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, result, state}
   end
 
-  def handle_call({:get_player, _player_id}, _from, %{state: :lobby} = state) do
-    {:reply, :lobby, state}
-  end
+  # def handle_call({:get_player, _player_id}, _from, %{state: :lobby} = state) do
+  #   {:reply, :lobby, state}
+  # end
 
   def handle_call({:get_player, player_id}, _from, %{player_list: player_list} = state) do
     found = player_list
@@ -31,6 +31,14 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, result, state}
   end
 
+  def handle_call(:get_modoptions, _from, state) do
+    {:reply, state.modoptions, state}
+  end
+
+  def handle_call(:get_bots, _from, state) do
+    {:reply, state.bots, state}
+  end
+
   def handle_call(:get_member_list, _from, state) do
     {:reply, state.member_list, state}
   end
@@ -39,17 +47,17 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, Enum.count(state.member_list), state}
   end
 
-  def handle_call(:get_player_list, _from, %{state: :lobby} = state) do
-    {:reply, :lobby, state}
-  end
+  # def handle_call(:get_player_list, _from, %{state: :lobby} = state) do
+  #   {:reply, :lobby, state}
+  # end
 
   def handle_call(:get_player_list, _from, state) do
     {:reply, state.player_list, state}
   end
 
-  def handle_call(:get_player_count, _from, %{state: :lobby} = state) do
-    {:reply, :lobby, state}
-  end
+  # def handle_call(:get_player_count, _from, %{state: :lobby} = state) do
+  #   {:reply, :lobby, state}
+  # end
 
   def handle_call(:get_player_count, _from, state) do
     {:reply, Enum.count(state.player_list), state}
@@ -98,84 +106,120 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, %{state | lobby: new_lobby}}
   end
 
-  def handle_cast({:set_script_tags, new_tags}, %{tags: tags} = state) do
-    {:noreply, %{state | tags: Map.merge(tags, new_tags)}}
+  def handle_cast({:set_modoption, key, value}, %{modoptions: modoptions} = state) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "legacy_battle_updates:#{state.lobby_id}",
+      {:battle_updated, state.lobby_id, %{key => value}, :add_script_tags}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_lobby_updates:#{state.lobby_id}",
+      {:lobby_update, :set_modoption, state.lobby_id, {key, value}}
+    )
+
+    {:noreply, %{state | modoptions: Map.put(modoptions, key, value)}}
   end
 
-  def handle_cast({:remove_script_tags, keys}, %{tags: tags} = state) do
-    {:noreply, %{state | tags: Map.drop(tags, keys)}}
+  def handle_cast({:set_modoptions, new_modoptions}, %{modoptions: modoptions} = state) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "legacy_battle_updates:#{state.lobby_id}",
+      {:battle_updated, state.lobby_id, new_modoptions, :add_script_tags}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_lobby_updates:#{state.lobby_id}",
+      {:lobby_update, :set_modoptions, state.lobby_id, new_modoptions}
+    )
+
+    {:noreply, %{state | modoptions: Map.merge(modoptions, new_modoptions)}}
+  end
+
+  def handle_cast({:remove_modoptions, keys}, %{modoptions: modoptions} = state) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "legacy_battle_updates:#{state.lobby_id}",
+      {:battle_updated, state.lobby_id, keys, :remove_script_tags}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_lobby_updates:#{state.lobby_id}",
+      {:lobby_update, :remove_modoptions, state.lobby_id, keys}
+    )
+
+    {:noreply, %{state | modoptions: Map.drop(modoptions, keys)}}
   end
 
   # Bots
-  def handle_cast({:add_bot, bot}, %{lobby: lobby} = state) do
-    new_bots = Map.put(lobby.bots, bot.name, bot)
-    new_lobby = %{lobby | bots: new_bots}
+  def handle_cast({:add_bot, bot}, %{bots: bots, lobby_id: lobby_id} = state) do
+    new_bots = Map.put(bots, bot.name, bot)
 
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{lobby.id}",
-      {:battle_updated, lobby.id, {lobby.id, bot}, :add_bot_to_battle}
+      "legacy_battle_updates:#{lobby_id}",
+      {:battle_updated, lobby_id, {lobby_id, bot}, :add_bot_to_battle}
     )
 
     PubSub.broadcast(
       Central.PubSub,
-      "teiserver_lobby_updates:#{lobby.id}",
-      {:lobby_update, :add_bot, lobby.id, bot.name}
+      "teiserver_lobby_updates:#{lobby_id}",
+      {:lobby_update, :add_bot, lobby_id, bot}
     )
 
-    {:noreply, %{state | lobby: new_lobby}}
+    {:noreply, %{state | bots: new_bots}}
   end
 
-  def handle_cast({:update_bot, botname, new_data}, %{lobby: lobby} = state) do
-    case lobby.bots[botname] do
+  def handle_cast({:update_bot, botname, new_data}, %{bots: bots, lobby_id: lobby_id} = state) do
+    case bots[botname] do
       nil ->
         {:noreply, state}
 
       bot ->
         new_bot = Map.merge(bot, new_data)
-
-        new_bots = Map.put(lobby.bots, botname, new_bot)
-        new_lobby = %{lobby | bots: new_bots}
+        new_bots = Map.put(bots, botname, new_bot)
 
         PubSub.broadcast(
           Central.PubSub,
-          "legacy_battle_updates:#{lobby.id}",
-          {:battle_updated, lobby.id, {lobby.id, new_bot}, :update_bot}
+          "legacy_battle_updates:#{lobby_id}",
+          {:battle_updated, lobby_id, {lobby_id, new_bot}, :update_bot}
         )
 
         PubSub.broadcast(
           Central.PubSub,
-          "teiserver_lobby_updates:#{lobby.id}",
-          {:lobby_update, :update_bot, lobby.id, botname}
+          "teiserver_lobby_updates:#{lobby_id}",
+          {:lobby_update, :update_bot, lobby_id, new_bot}
         )
-        {:noreply, %{state | lobby: new_lobby}}
+        {:noreply, %{state | bots: new_bots}}
     end
   end
 
-  def handle_cast({:remove_bot, botname}, %{lobby: lobby} = state) do
-    new_bots = Map.delete(lobby.bots, botname)
-    new_lobby = %{lobby | bots: new_bots}
+  def handle_cast({:remove_bot, botname}, %{bots: bots, lobby_id: lobby_id} = state) do
+    new_bots = Map.delete(bots, botname)
 
     PubSub.broadcast(
       Central.PubSub,
-      "legacy_battle_updates:#{lobby.id}",
-      {:battle_updated, lobby.id, {lobby.id, botname}, :remove_bot_from_battle}
+      "legacy_battle_updates:#{lobby_id}",
+      {:battle_updated, lobby_id, {lobby_id, botname}, :remove_bot_from_battle}
     )
 
     PubSub.broadcast(
       Central.PubSub,
-      "teiserver_lobby_updates:#{lobby.id}",
-      {:lobby_update, :remove_bot, lobby.id, botname}
+      "teiserver_lobby_updates:#{lobby_id}",
+      {:lobby_update, :remove_bot, lobby_id, botname}
     )
 
-    {:noreply, %{state | lobby: new_lobby}}
+    {:noreply, %{state | bots: new_bots}}
   end
 
   @impl true
   def handle_info(:tick, state) do
-    new_state = if state.tags["server/match/uuid"] == nil do
-      uuid = Battle.generate_lobby_uuid()
-      %{state | tags: Map.put(state.tags, "server/match/uuid", uuid)}
+    new_state = if state.modoptions["server/match/uuid"] == nil do
+      uuid = Battle.generate_lobby_uuid([state.lobby_id])
+      %{state | modoptions: Map.put(state.modoptions, "server/match/uuid", uuid)}
     else
       state
     end
@@ -203,8 +247,10 @@ defmodule Teiserver.Battle.LobbyServer do
     {:ok, %{
       lobby_id: lobby_id,
       lobby: data.lobby,
-      tags: Map.get(data.lobby, :tags, %{}),
-      bots: Map.get(data.lobby, :bots, %{}),
+      modoptions: %{
+        "server/match/uuid" => Battle.generate_lobby_uuid([lobby_id])
+      },
+      bots: %{},
       member_list: [],
       player_list: [],
       state: :lobby

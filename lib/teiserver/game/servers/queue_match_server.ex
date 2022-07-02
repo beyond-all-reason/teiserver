@@ -4,7 +4,7 @@ defmodule Teiserver.Game.QueueMatchServer do
   alias Teiserver.Battle.Lobby
   alias Teiserver.Data.Matchmaking
   alias Phoenix.PubSub
-  alias Teiserver.{Coordinator, Client}
+  alias Teiserver.{Coordinator, Client, Battle}
 
   @tick_interval 500
   @ready_wait_time 15_000
@@ -206,13 +206,11 @@ defmodule Teiserver.Game.QueueMatchServer do
       }
     })
 
-    # Update the lobby itself
-    lobby = Lobby.get_lobby(lobby.id)
-    new_tags = Map.merge(lobby.tags, %{
+    # Update the modoptions
+    Battle.set_modoptions(lobby.id, %{
       "server/match/match_id" => state.match_id,
       "server/match/queue_id" => state.queue_id
     })
-    Lobby.set_script_tags(lobby.id, new_tags)
 
     # Give things time to propagate before we start
     :timer.sleep(1000)
@@ -220,11 +218,11 @@ defmodule Teiserver.Game.QueueMatchServer do
     all_clients = Client.get_clients([p1, p2])
 
     all_players = all_clients
-      |> Enum.map(fn c -> c.player end)
+      |> Enum.map(fn c -> c != nil and c.player == true end)
       |> Enum.all?
 
     all_synced = all_clients
-      |> Enum.map(fn c -> c.sync == 1 end)
+      |> Enum.map(fn c -> c != nil and c.sync == 1 end)
       |> Enum.all?
 
     cond do
@@ -232,15 +230,13 @@ defmodule Teiserver.Game.QueueMatchServer do
         Logger.info("QueueMatchServer #{state.match_id} setup_lobby cannot start as not all are players")
         Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched users are not a player. Please rejoin the queue and try again.", lobby.id)
 
-        new_tags = Map.drop(lobby.tags, ["server/match/match_id", "server/match/queue_id"])
-        Lobby.set_script_tags(lobby.id, new_tags)
+        Battle.remove_modoptions(lobby.id, ["server/match/match_id", "server/match/queue_id"])
 
       all_synced == false ->
         Logger.info("QueueMatchServer #{state.match_id} setup_lobby cannot start as not all are synced")
         Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched players are unsynced. Please rejoin the queue and try again.", lobby.id)
 
-        new_tags = Map.drop(lobby.tags, ["server/match/match_id", "server/match/queue_id"])
-        Lobby.set_script_tags(lobby.id, new_tags)
+        Battle.remove_modoptions(lobby.id, ["server/match/match_id", "server/match/queue_id"])
 
       true ->
         Logger.info("QueueMatchServer #{state.match_id} setup_lobby calling player cv start")

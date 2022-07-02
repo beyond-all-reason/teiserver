@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.{Client, Coordinator, User}
+  alias Teiserver.{Battle, Client, Coordinator, User}
   alias Teiserver.Battle.{Lobby, LobbyLib}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -50,31 +50,33 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   end
 
   def handle_params(%{"id" => id}, _, %{} = socket) do
+    id = int_parse(id)
     current_user = socket.assigns[:current_user]
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{current_user.id}")
-    battle = Lobby.get_battle!(id)
+    lobby = Battle.get_lobby(id)
 
     cond do
-      battle == nil ->
+      lobby == nil ->
         index_redirect(socket)
 
-      (battle.locked or battle.password != nil) and not allow?(socket, "teiserver.moderator") ->
+      (lobby.locked or lobby.password != nil) and not allow?(socket, "teiserver.moderator") ->
         index_redirect(socket)
 
       true ->
-        {users, clients} = get_user_and_clients(battle.players)
+        {users, clients} = get_user_and_clients(lobby.players)
 
         bar_user = User.get_user_by_id(socket.assigns.current_user.id)
+        lobby = Map.put(lobby, :uuid, Battle.get_lobby_uuid(id))
 
         {:noreply,
          socket
           |> assign(:bar_user, bar_user)
           |> assign(:page_title, page_title(socket.assigns.live_action))
-          |> add_breadcrumb(name: battle.name, url: "/teiserver/battles/lobbies/#{battle.id}")
+          |> add_breadcrumb(name: lobby.name, url: "/teiserver/battles/lobbies/#{lobby.id}")
           |> assign(:id, int_parse(id))
-          |> assign(:battle, battle)
+          |> assign(:lobby, lobby)
           |> get_consul_state
           |> assign(:users, users)
           |> assign(:clients, clients)

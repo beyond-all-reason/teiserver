@@ -1,7 +1,7 @@
 defmodule Teiserver.Battle.MatchLib do
   use CentralWeb, :library
-  alias Teiserver.Client
-  alias Teiserver.Battle.{Match, Lobby}
+  alias Teiserver.{Client, Battle}
+  alias Teiserver.Battle.{Match}
   alias Teiserver.Data.Types, as: T
 
   @spec icon :: String.t()
@@ -37,21 +37,22 @@ defmodule Teiserver.Battle.MatchLib do
   end
 
   def match_from_lobby(lobby_id) do
-    lobby = Lobby.get_battle!(lobby_id)
+    lobby = Battle.get_lobby(lobby_id)
+    modoptions = Battle.get_modoptions(lobby_id)
 
     clients = Client.get_clients(lobby.players)
 
     teams = clients
-    |> Enum.filter(fn c -> c.player == true end)
-    |> Enum.group_by(fn c -> c.team_number end)
+      |> Enum.filter(fn c -> c.player == true end)
+      |> Enum.group_by(fn c -> c.team_number end)
 
     game_type = game_type(lobby, teams)
 
     match = %{
-      uuid: lobby.tags["server/match/uuid"],
+      uuid: modoptions["server/match/uuid"],
       map: lobby.map_name,
       data: nil,
-      tags: Map.drop(lobby.tags, ["server/match/uuid"]),
+      tags: Map.drop(modoptions, ["server/match/uuid"]),
 
       team_count: Enum.count(teams),
       team_size: Enum.max(Enum.map(teams, fn {_, t} -> Enum.count(t) end)),
@@ -61,32 +62,31 @@ defmodule Teiserver.Battle.MatchLib do
       founder_id: lobby.founder_id,
       bots: lobby.bots,
 
-      queue_id: Map.get(lobby.tags, "server/match/queue_id"),
+      queue_id: Map.get(modoptions, "server/match/queue_id"),
 
       started: Timex.now(),
       finished: nil
     }
 
     members = clients
-    |> Enum.filter(fn c -> c.player == true end)
-    |> Enum.map(fn client ->
-      %{
-        user_id: client.userid,
-        team_id: client.team_number
-      }
-    end)
+      |> Enum.filter(fn c -> c.player == true end)
+      |> Enum.map(fn client ->
+        %{
+          user_id: client.userid,
+          team_id: client.team_number
+        }
+      end)
 
     {match, members}
   end
 
   @spec stop_match(T.lobby_id()) :: {String.t(), %{finished: DateTime.t()}}
   def stop_match(lobby_id) do
-    lobby = Lobby.get_battle!(lobby_id)
+    modoptions = Battle.get_modoptions(lobby_id)
+    tag = modoptions["server/match/uuid"]
 
-    new_tags = Map.drop(lobby.tags, ["server/match/queue_id"])
-    Lobby.set_script_tags(lobby_id, new_tags)
+    Battle.remove_modoptions(lobby_id, ["server/match/queue_id"])
 
-    tag = lobby.tags["server/match/uuid"]
     {tag, %{
       finished: Timex.now()
     }}

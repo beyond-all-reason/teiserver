@@ -1,6 +1,6 @@
 defmodule Teiserver.Data.Battle.LobbyChatTest do
   use Central.DataCase, async: false
-  alias Teiserver.{User}
+  alias Teiserver.{User, Battle}
   import Teiserver.TeiserverTestLib, only: [new_user: 0]
   alias Teiserver.Battle.{Lobby, LobbyChat}
 
@@ -13,12 +13,11 @@ defmodule Teiserver.Data.Battle.LobbyChatTest do
       founder_id: bot_user.id,
       founder_name: bot_user.name,
       name: "lobby_chat_test_as_bot",
-      id: 1,
-      tags: %{
-        "server/match/uuid" => UUID.uuid1()
-      },
+      id: 1
     })
     |> Lobby.add_lobby()
+
+    Battle.set_modoption(lobby.id, "server/match/uuid", UUID.uuid1())
 
     {:ok, chat_log} = LobbyChat.persist_message(bot_user, "Message from the bot", lobby.id, :say)
     assert chat_log.user_id == bot_user.id

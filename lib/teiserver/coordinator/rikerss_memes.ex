@@ -1,6 +1,6 @@
 defmodule Teiserver.Coordinator.RikerssMemes do
   @moduledoc false
-  alias Teiserver.{User}
+  alias Teiserver.{User, Battle}
   alias Teiserver.Battle.{Lobby, LobbyChat}
   alias Teiserver.Data.Types, as: T
 
@@ -32,24 +32,18 @@ defmodule Teiserver.Coordinator.RikerssMemes do
 
   def handle_meme("poor", senderid, %{lobby_id: lobby_id} = _state) do
     sender = User.get_user_by_id(senderid)
-    battle = Lobby.get_lobby(lobby_id)
-    new_tags = Map.merge(battle.tags, %{
-      "game/modoptions/resourceincomemultiplier" => "0",
-    })
-    Lobby.set_script_tags(lobby_id, new_tags)
+    Battle.set_modoption(lobby_id, "game/modoptions/resourceincomemultiplier", "0")
 
     ["#{sender.name} has enabled the poor meme. Nobody can produce resources."]
   end
 
   def handle_meme("rich", senderid, %{lobby_id: lobby_id} = _state) do
     sender = User.get_user_by_id(senderid)
-    battle = Lobby.get_lobby(lobby_id)
-    new_tags = Map.merge(battle.tags, %{
+    Battle.set_modoptions(lobby_id, %{
       "game/modoptions/startmetal" => "100000000",
       "game/modoptions/startenergy" => "100000000",
       "game/modoptions/resourceincomemultiplier" => "1000",
     })
-    Lobby.set_script_tags(lobby_id, new_tags)
 
     ["#{sender.name} has enabled the rich meme. Everybody has insane amounts of resources."]
   end
@@ -70,8 +64,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     undo_memes(lobby_id)
     :timer.sleep(100)
 
-    battle = Lobby.get_lobby(lobby_id)
-    new_tags = Map.merge(battle.tags, %{
+    new_options = %{
       "game/modoptions/startmetal" => Enum.random(~w(500 750 1000 1500 2500 5000 10000 100000)),
       "game/modoptions/startenergy" => Enum.random(~w(750 1000 1500 2500 5000 10000 100000 500000)),
       "game/modoptions/resourceincomemultiplier" => Enum.random(~w(0.1 0.25 0.5 0.75 1 1.5 2 5 10)),
@@ -104,17 +97,17 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/multiplier_maxvelocity" => Enum.random(@crazy_multiplier_opts),
       "game/modoptions/multiplier_losrange" => Enum.random(@crazy_multiplier_opts),
       "game/modoptions/multiplier_radarrange" => Enum.random(@crazy_multiplier_opts),
-    })
+    }
 
     # Toggle default for some options based on others
     # Assist dronse
-    new_tags = if new_tags["game/modoptions/assistdronesenabled"] != "enabled" do
-      Map.put(new_tags, "game/modoptions/assistdronescount", "8")
+    new_options = if new_options["game/modoptions/assistdronesenabled"] != "enabled" do
+      Map.put(new_options, "game/modoptions/assistdronescount", "8")
     else
-      new_tags
+      new_options
     end
 
-    Lobby.set_script_tags(lobby_id, new_tags)
+    Battle.set_modoptions(lobby_id, new_options)
 
     ["#{sender.name} has enabled the crazy meme. We've rolled some dice on a bunch of stuff and hopefully it'll make for a fun game."]
 
@@ -153,8 +146,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   def undo_memes(lobby_id) do
     Lobby.enable_all_units(lobby_id)
 
-    battle = Lobby.get_lobby(lobby_id)
-    new_tags = Map.merge(battle.tags, %{
+    new_options = %{
       "game/modoptions/startmetal" => "1000",
       "game/modoptions/startenergy" => "1000",
       "game/modoptions/resourceincomemultiplier" => "1",
@@ -187,7 +179,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/multiplier_maxvelocity" => "1",
       "game/modoptions/multiplier_losrange" => "1",
       "game/modoptions/multiplier_radarrange" => "1",
-    })
-    Lobby.set_script_tags(lobby_id, new_tags)
+    }
+    Battle.set_modoptions(lobby_id, new_options)
   end
 end

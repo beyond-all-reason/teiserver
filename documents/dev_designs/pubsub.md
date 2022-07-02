@@ -78,12 +78,16 @@ Valid events:
   # BattleLobby
   {:lobby_update, :updated, lobby_id, update_reason}
   {:lobby_update, :closed, lobby_id, reason}
-  {:lobby_update, :add_bot, lobby_id, botname}
-  {:lobby_update, :update_bot, lobby_id, botname}
+  {:lobby_update, :add_bot, lobby_id, Bot}
+  {:lobby_update, :update_bot, lobby_id, Bot}
   {:lobby_update, :remove_bot, lobby_id, botname}
   {:lobby_update, :add_user, lobby_id, userid}
   {:lobby_update, :remove_user, lobby_id, userid}
   {:lobby_update, :kick_user, lobby_id, userid}
+  
+  {:lobby_update, :set_modoption, lobby_id, {key, value}}
+  {:lobby_update, :set_modoptions, lobby_id, options}
+  {:lobby_update, :remove_modoptions, lobby_id, keys}
 
   # Partial lobby updates
   {:lobby_update, :update_value, lobby_id, {key, value}}

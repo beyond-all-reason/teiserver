@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Live.BattleTest do
   import Phoenix.LiveViewTest
 
   alias Central.Helpers.GeneralTestLib
-  alias Teiserver.TeiserverTestLib
+  alias Teiserver.{Battle, TeiserverTestLib}
   import Teiserver.TeiserverTestLib, only: [_send_raw: 2, _recv_until: 1, _tachyon_send: 2]
   alias Teiserver.Battle.Lobby
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -18,7 +18,7 @@ defmodule TeiserverWeb.Live.BattleTest do
   describe "battle live" do
     test "index", %{conn: conn} do
       {:ok, view, html} = live(conn, "/teiserver/battle/lobbies")
-      assert html =~ "No battles found"
+      assert html =~ "No lobbies found"
 
       # Lets create a battle
       battle1 = TeiserverTestLib.make_battle(%{
@@ -26,7 +26,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       })
 
       html = render(view)
-      assert html =~ "Battles: 1"
+      assert html =~ "Lobbies: 1"
       assert html =~ "LiveBattleName"
 
       # Another
@@ -35,7 +35,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       })
 
       html = render(view)
-      assert html =~ "Battles: 2"
+      assert html =~ "Lobbies: 2"
       assert html =~ "LiveBattleName"
       assert html =~ "SecondLiveBattle"
 
@@ -43,7 +43,7 @@ defmodule TeiserverWeb.Live.BattleTest do
       Lobby.close_lobby(battle2.id)
 
       html = render(view)
-      assert html =~ "Battles: 1"
+      assert html =~ "Lobbies: 1"
       assert html =~ "LiveBattleName"
       refute html =~ "SecondLiveBattle"
       refute html =~ "<td>3</td>"
@@ -57,21 +57,21 @@ defmodule TeiserverWeb.Live.BattleTest do
       Lobby.add_user_to_battle(user3.id, battle1.id, "script_password")
 
       html = render(view)
-      assert html =~ "Battles: 1"
+      assert html =~ "Lobbies: 1"
       assert html =~ "LiveBattleName"
 
       # One player leaves
       Lobby.remove_user_from_battle(user3.id, battle1.id)
 
       html = render(view)
-      assert html =~ "Battles: 1"
+      assert html =~ "Lobbies: 1"
       assert html =~ "LiveBattleName"
 
       # Finally close battle1, just to ensure there's not some error when we go back to 0 battles
       Lobby.close_lobby(battle1.id)
 
       html = render(view)
-      assert html =~ "No battles found"
+      assert html =~ "No lobbies found"
       refute html =~ "LiveBattleName"
     end
 
@@ -177,6 +177,7 @@ defmodule TeiserverWeb.Live.BattleTest do
         |> String.replace(" gameHash", "")
         |> int_parse
 
+      Battle.set_modoption(lobby_id, "server/match/uuid", UUID.uuid1())
       {:ok, view, _html} = live(conn, "/teiserver/battle/lobbies/chat/#{lobby_id}")
 
       %{user: user1, socket: socket1} = TeiserverTestLib.tachyon_auth_setup()

@@ -550,9 +550,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{command: "settag", remaining: remaining} = cmd, state) do
     case String.split(remaining, " ") do
       [key, value | _] ->
-        battle = Lobby.get_lobby(state.lobby_id)
-        new_tags = Map.put(battle.tags, String.downcase(key), value)
-        Lobby.set_script_tags(state.lobby_id, new_tags)
+        Battle.set_modoption(state.lobby_id, String.downcase(key), value)
         ConsulServer.say_command(cmd, state)
       _ ->
         ConsulServer.say_command(%{cmd | error: "no regex match"}, state)

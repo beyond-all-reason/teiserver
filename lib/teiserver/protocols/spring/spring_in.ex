@@ -7,13 +7,13 @@ defmodule Teiserver.Protocols.SpringIn do
   """
   require Logger
   alias Teiserver.Battle.Lobby
-  alias Teiserver.{Coordinator, Room, User, Client}
+  alias Teiserver.{Coordinator, Battle, Room, User, Client}
   alias Phoenix.PubSub
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
   import Teiserver.Protocols.SpringOut, only: [reply: 4]
   alias Teiserver.Protocols.{Spring, SpringOut}
-  alias Teiserver.Protocols.Spring.{MatchmakingIn, TelemetryIn, BattleIn}
+  alias Teiserver.Protocols.Spring.{TelemetryIn, BattleIn}
   alias Teiserver.{Account}
 
   @spec data_in(String.t(), Map.t()) :: Map.t()
@@ -79,8 +79,7 @@ defmodule Teiserver.Protocols.SpringIn do
   end
 
   # Spring matchmaking disabled
-  defp do_handle("c.matchmaking." <> cmd, data, msg_id, state) do
-    # MatchmakingIn.do_handle(cmd, data, msg_id, state)
+  defp do_handle("c.matchmaking." <> _cmd, _data, _msg_id, state) do
     state
   end
 
@@ -788,12 +787,13 @@ defmodule Teiserver.Protocols.SpringIn do
         reply(:join_battle_success, battle, msg_id, state)
 
         # Send information about the battle to them
-        reply(:add_script_tags, battle.tags, msg_id, state)
+        modoptions = Battle.get_modoptions(battle.id)
+        reply(:add_script_tags, modoptions, msg_id, state)
 
         battle.start_rectangles
-        |> Enum.each(fn {team, r} ->
-          reply(:add_start_rectangle, {team, r}, msg_id, state)
-        end)
+          |> Enum.each(fn {team, r} ->
+            reply(:add_start_rectangle, {team, r}, msg_id, state)
+          end)
 
         # They are offered the chance to give a battle status
         reply(:request_battle_status, nil, msg_id, state)
@@ -914,7 +914,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("SETSCRIPTTAGS", data, _msg_id, state) do
     if Lobby.allow?(state.userid, :setscripttags, state.lobby_id) do
-      tags =
+      options =
         data
         |> String.split("\t")
         |> Enum.filter(fn t ->
@@ -927,7 +927,7 @@ defmodule Teiserver.Protocols.SpringIn do
           {String.downcase(k), v}
         end)
 
-      Lobby.set_script_tags(state.lobby_id, tags)
+      Battle.set_modoptions(state.lobby_id, options)
     end
 
     state
@@ -940,7 +940,7 @@ defmodule Teiserver.Protocols.SpringIn do
         |> String.downcase()
         |> String.split("\t")
 
-      Lobby.remove_script_tags(state.lobby_id, keys)
+      Battle.remove_modoptions(state.lobby_id, keys)
     end
 
     state
@@ -1050,10 +1050,7 @@ defmodule Teiserver.Protocols.SpringIn do
               )
             )
 
-          Lobby.add_bot_to_battle(
-            state.lobby_id,
-            bot_data
-          )
+          Battle.add_bot_to_lobby(state.lobby_id, bot_data)
         end
 
       _ ->
@@ -1075,7 +1072,7 @@ defmodule Teiserver.Protocols.SpringIn do
               Spring.parse_battle_status(battlestatus)
             )
 
-          Lobby.update_bot(state.lobby_id, botname, new_bot)
+          Battle.update_bot(state.lobby_id, botname, new_bot)
         end
 
       _ ->
@@ -1087,7 +1084,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("REMOVEBOT", botname, _msg_id, state) do
     if Lobby.allow?(state.userid, {:remove_bot, botname}, state.lobby_id) do
-      Lobby.remove_bot(state.lobby_id, botname)
+      Battle.remove_bot(state.lobby_id, botname)
     end
 
     state

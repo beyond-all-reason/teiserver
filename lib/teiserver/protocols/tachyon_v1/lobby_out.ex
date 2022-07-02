@@ -205,25 +205,50 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
   end
 
   ###########
+  # Modoptions
+  def do_reply(:set_modoption, {_lobby_id, {key, value}}) do
+    %{
+      "cmd" => "s.lobby.set_modoptions",
+      "new_options" => %{
+        key => value
+      }
+    }
+  end
+
+  def do_reply(:set_modoptions, {_lobby_id, new_options}) do
+    %{
+      "cmd" => "s.lobby.set_modoptions",
+      "new_options" => new_options
+    }
+  end
+
+  def do_reply(:remove_modoptions, {_lobby_id, keys}) do
+    %{
+      "cmd" => "s.lobby.remove_modoptions",
+      "keys" => keys
+    }
+  end
+
+  ###########
   # Bots
-  def do_reply(:add_bot, {_lobby_id, bot_name}) do
+  def do_reply(:add_bot, {_lobby_id, bot}) do
     %{
       "cmd" => "s.lobby.add_bot",
-      "name" => bot_name
+      "bot" => bot
     }
   end
 
-  def do_reply(:update_bot, bot_name) do
+  def do_reply(:update_bot, {_lobby_id, bot}) do
     %{
       "cmd" => "s.lobby.update_bot",
-      "name" => bot_name
+      "bot" => bot
     }
   end
 
-  def do_reply(:remove_bot, bot_name) do
+  def do_reply(:remove_bot, {_lobby_id, bot_name}) do
     %{
       "cmd" => "s.lobby.remove_bot",
-      "name" => bot_name
+      "bot_name" => bot_name
     }
   end
 

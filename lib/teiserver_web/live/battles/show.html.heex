@@ -1,7 +1,7 @@
 <% bsname = @view_colour %>
 
 <%
-  result = @battle.players
+  result = @lobby.players
   |> Enum.filter(fn p -> Map.has_key?(@clients, p) end)
   |> Enum.group_by(fn p ->
     client = @clients[p]
@@ -40,17 +40,17 @@
             &nbsp;&nbsp;&nbsp;
           <% end %>
 
-          <%= live_redirect "Live chat", to: Routes.ts_battle_lobby_chat_path(@socket, :chat, @battle.id), class: "btn btn-#{bsname}" %>
+          <%= live_redirect "Live chat", to: Routes.ts_battle_lobby_chat_path(@socket, :chat, @lobby.id), class: "btn btn-#{bsname}" %>
           
           <%= if @moderator do %>
-            <a href={Routes.ts_admin_lobby_path(@socket, :chat, @battle.tags["server/match/uuid"])} class={"btn btn-#{bsname}"}>
+            <a href={Routes.ts_admin_lobby_path(@socket, :chat, @lobby.uuid)} class={"btn btn-#{bsname}"}>
               Full chat
             </a>
           <% end %>
         </div>
 
-<% extra = "#{@battle.name} - #{@battle.map_name}" %>
-<%= if @battle.in_progress do %>
+<% extra = "#{@lobby.name} - #{@lobby.map_name}" %>
+<%= if @lobby.in_progress do %>
   <h4>Match in progress - <%= extra %></h4>
 <% else %>
   <h4>Pre-game lobby - <%= extra %></h4>
@@ -58,10 +58,10 @@
 
 
 <ul>
-  <li>Max players: <%= @battle.max_players %></li>
-  <li>Locked: <%= @battle.locked %></li>
-  <%= if @battle.password != nil do %>
-    <li>Password: <%= @battle.password %></li>
+  <li>Max players: <%= @lobby.max_players %></li>
+  <li>Locked: <%= @lobby.locked %></li>
+  <%= if @lobby.password != nil do %>
+    <li>Password: <%= @lobby.password %></li>
   <% end %>
   <li>Queue size: <%= Enum.count(@consul.join_queue ++ @consul.low_priority_join_queue) %></li>
 </ul>
@@ -185,7 +185,7 @@
   <tbody>
     <tr>
       <td>Game name</td>
-      <td><%= @battle.game_name %></td>
+      <td><%= @lobby.game_name %></td>
     </tr>
   </tbody>
 </table>
@@ -214,7 +214,7 @@
   <div class="row mt-3" id="admin-data">
     <div class="col-md-6">
       <pre>
-        <%= Kernel.inspect @battle, pretty: true, limit: :infinity %>
+        <%= Kernel.inspect @lobby, pretty: true, limit: :infinity %>
       </pre>
     </div>
     <div class="col-md-6">

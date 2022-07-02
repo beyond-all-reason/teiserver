@@ -24,11 +24,11 @@ defmodule Teiserver.Battle.LobbyThrottle do
     {:noreply, %{state | lobby_changes: [:battle_lobby | state.lobby_changes]}}
   end
 
-  def handle_info({:lobby_update, :add_bot, _lobby_id, _botname}, state) do
+  def handle_info({:lobby_update, :add_bot, _lobby_id, _bot}, state) do
     {:noreply, %{state | lobby_changes: [:bots | state.lobby_changes]}}
   end
 
-  def handle_info({:lobby_update, :update_bot, _lobby_id, _botname}, state) do
+  def handle_info({:lobby_update, :update_bot, _lobby_id, _bot}, state) do
     {:noreply, %{state | lobby_changes: [:bots | state.lobby_changes]}}
   end
 
@@ -50,6 +50,18 @@ defmodule Teiserver.Battle.LobbyThrottle do
 
   def handle_info({:lobby_update, :update_value, _lobby_id, {key, _value}}, state) do
     {:noreply, %{state | player_changes: [key | state.lobby_changes]}}
+  end
+
+  def handle_info({:lobby_update, :set_modoptions, _lobby_id, _new_opts}, state) do
+    {:noreply, state}
+  end
+
+  def handle_info({:lobby_update, :set_modoption, _lobby_id, {_key, _value}}, state) do
+    {:noreply, state}
+  end
+
+  def handle_info({:lobby_update, :remove_modoptions, _lobby_id, _keys}, state) do
+    {:noreply, state}
   end
 
   # Coordinator

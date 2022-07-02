@@ -11,10 +11,21 @@ defmodule Teiserver.Battle.LobbyCache do
     call_lobby(int_parse(id), :get_lobby_state)
   end
 
+  @spec get_lobby_uuid(T.lobby_id()) :: String.t()
+  def get_lobby_uuid(lobby_id) do
+    case get_modoptions(lobby_id) do
+      nil -> nil
+      opts -> Map.get(opts, "server/match/uuid")
+    end
+  end
+
   @spec get_lobby_by_uuid(String.t()) :: T.lobby() | nil
   def get_lobby_by_uuid(uuid) do
-    lobby_list = list_lobbies()
-      |> Enum.filter(fn lobby -> lobby.tags["server/match/uuid"] == uuid end)
+    lobby_list = list_lobby_ids()
+      |> Stream.map(fn lobby_id -> {lobby_id, get_lobby_uuid(lobby_id)} end)
+      |> Stream.filter(fn {_lobby_id, lobby_uuid} -> lobby_uuid == uuid end)
+      |> Enum.take(1)
+      |> Enum.map(fn {lobby_id, _modoptions} -> get_lobby(lobby_id) end)
 
     case lobby_list do
       [] -> nil
@@ -108,16 +119,37 @@ defmodule Teiserver.Battle.LobbyCache do
     lobby
   end
 
-  @spec set_script_tags(T.lobby_id(), map()) :: :ok | nil
-  def set_script_tags(lobby_id, tags) do
-    cast_lobby(lobby_id, {:set_script_tags, tags})
+  # Bots
+  @spec get_bots(T.lobby_id()) :: map() | nil
+  def get_bots(lobby_id) do
+    call_lobby(lobby_id, :get_bots)
   end
 
-  @spec remove_script_tags(T.lobby_id(), [String.t()]) :: :ok | nil
-  def remove_script_tags(lobby_id, keys) do
-    cast_lobby(lobby_id, {:remove_script_tags, keys})
-  end
+  @spec add_bot_to_lobby(T.lobby_id(), map()) :: :ok | nil
+  def add_bot_to_lobby(lobby_id, bot), do: cast_lobby(lobby_id, {:add_bot, bot})
 
+  @spec update_bot(T.lobby_id(), String.t(), map()) :: nil | :ok
+  def update_bot(lobby_id, bot_name, "0"), do: remove_bot(lobby_id, bot_name)
+
+  def update_bot(lobby_id, bot_name, new_data), do: cast_lobby(lobby_id, {:update_bot, bot_name, new_data})
+
+  @spec remove_bot(T.lobby_id(), String.t()) :: :ok | nil
+  def remove_bot(lobby_id, bot_name), do: cast_lobby(lobby_id, {:remove_bot, bot_name})
+
+  # Modoptions
+  @spec get_modoptions(T.lobby_id()) :: map() | nil
+  def get_modoptions(lobby_id), do: call_lobby(lobby_id, :get_modoptions)
+
+  @spec set_modoption(T.lobby_id(), String.t(), String.t()) :: :ok | nil
+  def set_modoption(lobby_id, key, value), do: cast_lobby(lobby_id, {:set_modoption, key, value})
+
+  @spec set_modoptions(T.lobby_id(), map()) :: :ok | nil
+  def set_modoptions(lobby_id, options), do: cast_lobby(lobby_id, {:set_modoptions, options})
+
+  @spec remove_modoptions(T.lobby_id(), [String.t()]) :: :ok | nil
+  def remove_modoptions(lobby_id, keys), do: cast_lobby(lobby_id, {:remove_modoptions, keys})
+
+  # Membership
   @spec add_user_to_lobby(T.userid(), T.lobby_id(), String.t()) :: nil | :ok
   def add_user_to_lobby(userid, lobby_id, script_password) do
     cast_lobby(lobby_id, {:add_user, userid, script_password})
@@ -191,7 +223,7 @@ defmodule Teiserver.Battle.LobbyCache do
   end
 
   @spec lobby_exists?(T.lobby_id()) :: boolean()
-  def lobby_exists?(lobby_id) do
+  def lobby_exists?(lobby_id) when is_integer(lobby_id) do
     case get_lobby_pid(lobby_id) do
       nil -> false
       _ -> true
@@ -199,7 +231,7 @@ defmodule Teiserver.Battle.LobbyCache do
   end
 
   @spec get_lobby_pid(T.lobby_id()) :: pid() | nil
-  def get_lobby_pid(lobby_id) do
+  def get_lobby_pid(lobby_id) when is_integer(lobby_id) do
     case Horde.Registry.lookup(Teiserver.LobbyRegistry, lobby_id) do
       [{pid, _}] -> pid
       _ -> nil
@@ -210,7 +242,7 @@ defmodule Teiserver.Battle.LobbyCache do
   GenServer.cast the message to the LobbyServer process for lobby_id
   """
   @spec cast_lobby(T.lobby_id(), any) :: :ok | nil
-  def cast_lobby(lobby_id, message) do
+  def cast_lobby(lobby_id, message) when is_integer(lobby_id) do
     case get_lobby_pid(lobby_id) do
       nil -> nil
       pid ->
@@ -223,7 +255,7 @@ defmodule Teiserver.Battle.LobbyCache do
   GenServer.call the message to the LobbyServer process for lobby_id and return the result
   """
   @spec call_lobby(T.lobby_id(), any) :: any | nil
-  def call_lobby(lobby_id, message) do
+  def call_lobby(lobby_id, message) when is_integer(lobby_id) do
     case get_lobby_pid(lobby_id) do
       nil -> nil
       pid -> GenServer.call(pid, message)
@@ -231,7 +263,7 @@ defmodule Teiserver.Battle.LobbyCache do
   end
 
   @spec stop_lobby_server(T.lobby_id()) :: :ok | nil
-  def stop_lobby_server(lobby_id) do
+  def stop_lobby_server(lobby_id) when is_integer(lobby_id) do
     case get_lobby_pid(lobby_id) do
       nil -> nil
       p ->
@@ -240,9 +272,8 @@ defmodule Teiserver.Battle.LobbyCache do
     end
   end
 
-
   @spec close_lobby(integer() | nil, atom) :: :ok
-  def close_lobby(lobby_id, reason \\ :closed) do
+  def close_lobby(lobby_id, reason \\ :closed) when is_integer(lobby_id) do
     battle = get_lobby(lobby_id)
     Coordinator.close_lobby(lobby_id)
 

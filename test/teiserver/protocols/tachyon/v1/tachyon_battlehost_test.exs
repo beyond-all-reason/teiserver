@@ -1,6 +1,8 @@
 defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
   use Central.ServerCase
+  alias Teiserver.Battle
   alias Teiserver.Battle.Lobby
+  require Logger
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]
@@ -202,7 +204,8 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     _tachyon_recv_until(socket)
 
     # Add a bot
-    Lobby.add_bot_to_battle(lobby_id, %{
+    Logger.warn("#{__ENV__.file}.#{__ENV__.line} should add, update and remove the bot via Tachyon commands")
+    Battle.add_bot_to_lobby(lobby_id, %{
       ai_dll: "BARb",
       handicap: 0,
       name: "BARbarianAI(10)",
@@ -217,14 +220,27 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
       team_number: 2
     })
 
-
-    reply = _tachyon_recv_until(socket)
-    IO.puts ""
-    IO.inspect reply
-    IO.puts ""
+    [reply] = _tachyon_recv_until(socket)
+    assert reply == %{
+      "bot" => %{
+      "ai_dll" => "BARb",
+      "handicap" => 0,
+      "name" => "BARbarianAI(10)",
+      "owner_id" => 8603,
+      "owner_name" => "Mustard",
+      "player" => true,
+      "player_number" => 8,
+      "ready" => true,
+      "side" => 1,
+      "sync" => 1,
+      "team_colour" => "42537",
+      "team_number" => 2
+      },
+      "cmd" => "s.lobby.add_bot"
+    }
 
     # Update the bot
-    Lobby.update_bot(lobby_id, "BARbarianAI(10)", %{
+    Battle.update_bot(lobby_id, "BARbarianAI(10)", %{
       ai_dll: "BARb",
       handicap: 0,
       name: "BARbarianAI(10)",
@@ -235,15 +251,66 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
       ready: true,
       side: 1,
       sync: 1,
-      team_colour: "42537",
+      team_colour: "123445",
       team_number: 2
     })
 
+    [reply] = _tachyon_recv_until(socket)
+    assert reply == %{
+      "bot" => %{
+        "ai_dll" => "BARb",
+        "handicap" => 0,
+        "name" => "BARbarianAI(10)",
+        "owner_id" => 8603,
+        "owner_name" => "Mustard",
+        "player" => true,
+        "player_number" => 8,
+        "ready" => true,
+        "side" => 1,
+        "sync" => 1,
+        "team_colour" => "123445",
+        "team_number" => 2
+      },
+      "cmd" => "s.lobby.update_bot"
+    }
 
-    reply = _tachyon_recv_until(socket)
-    IO.puts ""
-    IO.inspect reply
-    IO.puts ""
+    # Remove bot
+    Battle.remove_bot(lobby_id, "BARbarianAI(10)")
+    [reply] = _tachyon_recv_until(socket)
+    assert reply == %{
+      "bot_name" => "BARbarianAI(10)",
+      "cmd" => "s.lobby.remove_bot"
+    }
+
+    # Set mod options
+    Logger.warn("#{__ENV__.file}.#{__ENV__.line} should add, update and remove modoptions via the Tachyon command")
+
+    Battle.set_modoption(lobby_id, "singe_key", "single_value")
+    [reply] = _tachyon_recv_until(socket)
+    assert reply == %{
+      "cmd" => "s.lobby.set_modoptions",
+      "new_options" => %{"singe_key" => "single_value"}
+    }
+
+    Battle.set_modoptions(lobby_id, %{
+      "multi_key1" => "multi_value1",
+      "multi_key2" => "multi_value2"
+    })
+    [reply] = _tachyon_recv_until(socket)
+    assert reply == %{
+      "cmd" => "s.lobby.set_modoptions",
+      "new_options" => %{
+        "multi_key1" => "multi_value1",
+        "multi_key2" => "multi_value2"
+      }
+    }
+
+    Battle.remove_modoptions(lobby_id, ["singe_key", "non-existing-key"])
+    [reply] = _tachyon_recv_until(socket)
+    assert reply == %{
+      "cmd" => "s.lobby.remove_modoptions",
+      "keys" => ["singe_key", "non-existing-key"]
+    }
 
     # Now leave the lobby, closing it in the process
     data = %{cmd: "c.lobby.leave"}

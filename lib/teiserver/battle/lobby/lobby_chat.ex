@@ -1,6 +1,6 @@
 defmodule Teiserver.Battle.LobbyChat do
   @moduledoc false
-  alias Teiserver.{User, Chat}
+  alias Teiserver.{User, Chat, Battle}
   alias Teiserver.Battle.{Lobby}
   alias Phoenix.PubSub
   alias Teiserver.Chat.WordLib
@@ -161,7 +161,7 @@ defmodule Teiserver.Battle.LobbyChat do
 
       Chat.create_lobby_message(%{
         content: content,
-        lobby_guid: lobby.tags["server/match/uuid"],
+        lobby_guid: Battle.get_lobby_uuid(lobby_id),
         inserted_at: Timex.now(),
         user_id: userid,
       })

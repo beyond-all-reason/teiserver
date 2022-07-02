@@ -1,11 +1,9 @@
 defmodule Teiserver.SpringBattleHostTest do
   use Central.ServerCase, async: false
   require Logger
-  # alias Teiserver.BitParse
-  alias Teiserver.Coordinator
+  alias Teiserver.{Coordinator, Battle}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Spring
-  # alias Teiserver.Protocols.{SpringIn, SpringOut, Spring}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   import Teiserver.TeiserverTestLib,
@@ -191,25 +189,26 @@ defmodule Teiserver.SpringBattleHostTest do
     assert Enum.count(battle.start_rectangles) == 0
 
     # Add and remove script tags
-    refute Map.has_key?(battle.tags, "custom/key1")
-    refute Map.has_key?(battle.tags, "custom/key2")
+    modoptions = Battle.get_modoptions(lobby_id)
+    refute Map.has_key?(modoptions, "custom/key1")
+    refute Map.has_key?(modoptions, "custom/key2")
     _send_raw(socket, "SETSCRIPTTAGS custom/key1=customValue\tcustom/key2=customValue2\n")
     reply = _recv_raw(socket)
 
     assert reply == "SETSCRIPTTAGS custom/key1=customValue\tcustom/key2=customValue2\n"
 
-    battle = Lobby.get_battle(lobby_id)
-    assert Map.has_key?(battle.tags, "custom/key1")
-    assert Map.has_key?(battle.tags, "custom/key2")
+    modoptions = Battle.get_modoptions(lobby_id)
+    assert Map.has_key?(modoptions, "custom/key1")
+    assert Map.has_key?(modoptions, "custom/key2")
 
     _send_raw(socket, "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n")
     reply = _recv_raw(socket)
     assert reply == "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n"
 
-    battle = Lobby.get_battle(lobby_id)
-    refute Map.has_key?(battle.tags, "custom/key1")
+    modoptions = Battle.get_modoptions(lobby_id)
+    refute Map.has_key?(modoptions, "custom/key1")
     # We never removed key2, it should still be there
-    assert Map.has_key?(battle.tags, "custom/key2")
+    assert Map.has_key?(modoptions, "custom/key2")
 
     # Enable and disable units
     _send_raw(socket, "DISABLEUNITS unit1 unit2 unit3\n")
@@ -254,12 +253,22 @@ defmodule Teiserver.SpringBattleHostTest do
     :timer.sleep(100)
     _ = _recv_raw(socket)
     reply = _recv_raw(socket2)
-    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195330 600\n"
+    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195328 600\n"
 
     status = Spring.parse_battle_status("4195330")
-
     assert status == %{
              ready: true,
+             handicap: 0,
+             player_number: 0,
+             team_number: 0,
+             player: true,
+             sync: 1,
+             side: 0
+           }
+
+    status = Spring.parse_battle_status("4195328")
+    assert status == %{
+             ready: false,
              handicap: 0,
              player_number: 0,
              team_number: 0,
@@ -272,14 +281,14 @@ defmodule Teiserver.SpringBattleHostTest do
     _send_raw(socket, "HANDICAP #{user2.name} 87\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
-    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4373506 600\n"
+    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4373504 600\n"
     status = Spring.parse_battle_status("4373506")
     assert status.handicap == 87
 
     _send_raw(socket, "HANDICAP #{user2.name} 0\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
-    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195330 600\n"
+    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195328 600\n"
     status = Spring.parse_battle_status("4195330")
     assert status.handicap == 0
 
@@ -287,15 +296,15 @@ defmodule Teiserver.SpringBattleHostTest do
     _send_raw(socket, "FORCETEAMNO #{user2.name} 1\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
-    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195334 600\n"
-    status = Spring.parse_battle_status("4195334")
+    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195332 600\n"
+    status = Spring.parse_battle_status("4195332")
     assert status.player_number == 1
 
     # Forceallyno
     _send_raw(socket, "FORCEALLYNO #{user2.name} 1\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
-    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195398 600\n"
+    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195396 600\n"
     status = Spring.parse_battle_status("4195398")
     assert status.team_number == 1
 
@@ -303,13 +312,13 @@ defmodule Teiserver.SpringBattleHostTest do
     _send_raw(socket, "FORCETEAMCOLOR #{user2.name} 800\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
-    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195398 800\n"
+    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4195396 800\n"
 
     # Forcespectator
     _send_raw(socket, "FORCESPECTATORMODE #{user2.name}\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
-    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4194374 800\n"
+    assert reply == "CLIENTBATTLESTATUS #{user2.name} 4194372 800\n"
     status = Spring.parse_battle_status("4194374")
     assert status.player == false
 

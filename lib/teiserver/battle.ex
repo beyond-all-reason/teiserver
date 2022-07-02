@@ -251,14 +251,19 @@ defmodule Teiserver.Battle do
   end
 
   @spec generate_lobby_uuid :: String.t()
-  def generate_lobby_uuid() do
+  @spec generate_lobby_uuid([T.lobby_id()]) :: String.t()
+  def generate_lobby_uuid(skip_ids \\ []) do
     uuid = UUID.uuid1()
 
     # Check if this uuid is present in the current set of lobbies
-    active_lobbies = Lobby.list_lobbies()
-    |> Enum.filter(fn lobby -> lobby.tags["server/match/uuid"] == uuid end)
+    existing_uuid = list_lobby_ids()
+      |> Enum.filter(fn id -> not Enum.member?(skip_ids, id) end)
+      |> Enum.map(fn lobby_id -> get_modoptions(lobby_id) end)
+      |> Enum.filter(fn modoptions ->
+        modoptions != nil and modoptions["server/match/uuid"] == uuid
+      end)
 
-    case Enum.empty?(active_lobbies) do
+    case Enum.empty?(existing_uuid) do
       false ->
         generate_lobby_uuid()
 
@@ -432,6 +437,9 @@ defmodule Teiserver.Battle do
   @spec get_lobby(T.lobby_id() | nil) :: T.lobby() | nil
   defdelegate get_lobby(id), to: LobbyCache
 
+  @spec get_lobby_uuid(T.lobby_id()) :: String.t()
+  defdelegate get_lobby_uuid(id), to: LobbyCache
+
   @spec get_lobby_by_uuid(String.t()) :: T.lobby() | nil
   defdelegate get_lobby_by_uuid(uuid), to: LobbyCache
 
@@ -457,11 +465,31 @@ defmodule Teiserver.Battle do
   @spec add_lobby(T.lobby()) :: T.lobby()
   defdelegate add_lobby(lobby), to: LobbyCache
 
-  @spec set_script_tags(T.lobby_id(), map()) :: :ok | nil
-  defdelegate set_script_tags(lobby_id, tags), to: LobbyCache
+  # Bots
+  @spec get_bots(T.lobby_id()) :: map() | nil
+  defdelegate get_bots(lobby_id), to: LobbyCache
 
-  @spec remove_script_tags(T.lobby_id(), [String.t()]) :: :ok | nil
-  defdelegate remove_script_tags(lobby_id, keys), to: LobbyCache
+  @spec add_bot_to_lobby(T.lobby_id(), map()) :: :ok | nil
+  defdelegate add_bot_to_lobby(lobby_id, bot), to: LobbyCache
+
+  @spec update_bot(T.lobby_id(), String.t(), map()) :: nil | :ok
+  defdelegate update_bot(lobby_id, bot_name, bot), to: LobbyCache
+
+  @spec remove_bot(T.lobby_id(), String.t()) :: :ok | nil
+  defdelegate remove_bot(lobby_id, bot_name), to: LobbyCache
+
+  # Modoptions
+  @spec get_modoptions(T.lobby_id()) :: map() | nil
+  defdelegate get_modoptions(lobby_id), to: LobbyCache
+
+  @spec set_modoption(T.lobby_id(), String.t(), String.t()) :: :ok | nil
+  defdelegate set_modoption(lobby_id, key, value), to: LobbyCache
+
+  @spec set_modoptions(T.lobby_id(), map()) :: :ok | nil
+  defdelegate set_modoptions(lobby_id, options), to: LobbyCache
+
+  @spec remove_modoptions(T.lobby_id(), [String.t()]) :: :ok | nil
+  defdelegate remove_modoptions(lobby_id, keys), to: LobbyCache
 
   # Actions
   @spec close_lobby(integer() | nil, atom) :: :ok

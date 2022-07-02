@@ -17,11 +17,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
 
     lobbies = Lobby.list_lobbies()
       |> Enum.map(fn lobby ->
-        players = Battle.get_lobby_player_count(lobby.id)
-
         Map.merge(lobby, %{
-          member_count: Battle.get_lobby_member_count(lobby.id),
-          player_count: (if players == :lobby, do: 0, else: players)
+          member_count: Battle.get_lobby_member_count(lobby.id) || 0,
+          player_count: Battle.get_lobby_player_count(lobby.id) || 0,
+          uuid: Battle.get_lobby_uuid(lobby.id)
         })
       end)
       |> sort_lobbies
@@ -114,11 +113,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
 
   defp live_get_lobby(lobby_id) do
     lobby = Battle.get_lobby(lobby_id)
-    players = Battle.get_lobby_player_count(lobby_id)
 
     Map.merge(lobby, %{
-      member_count: Battle.get_lobby_member_count(lobby_id),
-      player_count: (if players == :lobby, do: 0, else: players)
+      member_count: Battle.get_lobby_member_count(lobby_id) || 0,
+      player_count: Battle.get_lobby_player_count(lobby.id) || 0,
+      uuid: Battle.get_lobby_uuid(lobby.id)
     })
   end
 end

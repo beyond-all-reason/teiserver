@@ -108,7 +108,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
         "away" => false,
         "in_game" => false,
         "lobby_id" => lobby_id,
-        "ready" => true,
+        "ready" => false,
         "team_colour" => 0,
         "player_number" => 0,
         "userid" => user2.id,

@@ -7,10 +7,10 @@ defmodule Teiserver.Protocols.SpringOut do
   """
   require Logger
   alias Phoenix.PubSub
-  alias Teiserver.{User, Client, Room}
+  alias Teiserver.{User, Client, Room, Battle}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Spring
-  alias Teiserver.Protocols.Spring.{MatchmakingOut, BattleOut}
+  alias Teiserver.Protocols.Spring.{BattleOut}
   alias Teiserver.Data.Types, as: T
 
   @motd """
@@ -32,7 +32,6 @@ defmodule Teiserver.Protocols.SpringOut do
     msg =
       case namespace do
         :battle -> BattleOut.do_reply(reply_cmd, data)
-        :matchmaking -> MatchmakingOut.do_reply(reply_cmd, data)
         :spring -> do_reply(reply_cmd, data)
       end
 
@@ -202,7 +201,7 @@ defmodule Teiserver.Protocols.SpringOut do
     do_reply(:battle_opened, Lobby.get_battle(lobby_id))
   end
 
-  defp do_reply(:battle_opened, lobby_id) do
+  defp do_reply(:battle_opened, _lobby_id) do
     ""
   end
 
@@ -577,7 +576,9 @@ defmodule Teiserver.Protocols.SpringOut do
       PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{lobby.id}")
       reply(:join_battle_success, lobby, nil, state)
       reply(:add_user_to_battle, {state.userid, lobby.id, script_password}, nil, state)
-      reply(:add_script_tags, lobby.tags, nil, state)
+
+      modoptions = Battle.get_modoptions(lobby_id)
+      reply(:add_script_tags, modoptions, nil, state)
 
       [lobby.founder_id | lobby.players]
       |> Enum.each(fn id ->
@@ -585,10 +586,10 @@ defmodule Teiserver.Protocols.SpringOut do
         reply(:client_battlestatus, client, nil, state)
       end)
 
-      lobby.bots
-      |> Enum.each(fn {_botname, bot} ->
-        reply(:add_bot_to_battle, {lobby.id, bot}, nil, state)
-      end)
+      Battle.get_bots(lobby_id)
+        |> Enum.each(fn {_botname, bot} ->
+          reply(:add_bot_to_battle, {lobby.id, bot}, nil, state)
+        end)
 
       lobby.start_rectangles
       |> Enum.each(fn {team, r} ->

@@ -82,32 +82,28 @@ defmodule Teiserver.Coordinator.MemesTest do
     }, reply["lobby"])
   end
 
-  test "poor", %{lobby_id: lobby_id, hsocket: hsocket} do
+  test "poor", %{lobby_id: _lobby_id, hsocket: hsocket} do
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$meme poor"})
     [reply] = _tachyon_recv(hsocket)
-    assert reply["cmd"] == "s.lobby.updated"
-    assert match?(%{
-      "id" => ^lobby_id,
-      "disabled_units" => [],
-      "tags" => %{
+    assert reply == %{
+      "cmd" => "s.lobby.set_modoptions",
+      "new_options" => %{
         "game/modoptions/resourceincomemultiplier" => "0"
-      },
-    }, reply["lobby"])
+      }
+    }
   end
 
-  test "rich", %{lobby_id: lobby_id, hsocket: hsocket} do
+  test "rich", %{lobby_id: _lobby_id, hsocket: hsocket} do
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$meme rich"})
     [reply] = _tachyon_recv(hsocket)
-    assert reply["cmd"] == "s.lobby.updated"
-    assert match?(%{
-      "id" => ^lobby_id,
-      "disabled_units" => [],
-      "tags" => %{
+    assert reply == %{
+      "cmd" => "s.lobby.set_modoptions",
+      "new_options" => %{
         "game/modoptions/resourceincomemultiplier" => "1000",
         "game/modoptions/startenergy" => "100000000",
         "game/modoptions/startmetal" => "100000000",
-      },
-    }, reply["lobby"])
+      }
+    }
   end
 
   test "hardt1", %{lobby_id: lobby_id, hsocket: hsocket} do
