@@ -12,7 +12,9 @@ defmodule Teiserver.Battle.MatchLib do
 
   @spec game_type(T.lobby(), map()) :: <<_::24, _::_*8>>
   def game_type(lobby, teams) do
-    bot_names = Map.keys(lobby.bots)
+    bots = Battle.get_bots(lobby.id)
+    bot_names = bots
+      |> Map.keys
       |> Enum.join(" ")
 
     # It is possible for it to be purely bots v bots which will make it appear to be empty teams
@@ -28,7 +30,7 @@ defmodule Teiserver.Battle.MatchLib do
       String.contains?(bot_names, "Scavenger") -> "Scavengers"
       String.contains?(bot_names, "Chicken") -> "Raptors"
       String.contains?(bot_names, "Raptor") -> "Raptors"
-      Enum.empty?(lobby.bots) == false -> "Bots"
+      Enum.empty?(bots) == false -> "Bots"
       Enum.count(teams) == 2 and max_team_size == 1 -> "Duel"
       Enum.count(teams) == 2 -> "Team"
       max_team_size == 1 -> "FFA"
@@ -60,7 +62,7 @@ defmodule Teiserver.Battle.MatchLib do
       game_type: game_type,
 
       founder_id: lobby.founder_id,
-      bots: lobby.bots,
+      bots: Battle.get_bots(lobby.id),
 
       queue_id: Map.get(modoptions, "server/match/queue_id"),
 
