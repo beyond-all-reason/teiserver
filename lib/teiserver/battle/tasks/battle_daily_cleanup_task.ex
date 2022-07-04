@@ -51,10 +51,27 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
   end
 
   defp delete_old_matches() do
-    days = Application.get_env(:central, Teiserver)[:retention][:battle_match]
+    # Rated matches
+    battle_match_rated_days = Application.get_env(:central, Teiserver)[:retention][:battle_match_rated]
 
     ids = Battle.list_matches(search: [
-        inserted_before: Timex.shift(Timex.now(), days: -days)
+        inserted_before: Timex.shift(Timex.now(), days: -battle_match_rated_days),
+        game_type_in: ["Team", "Duel", "FFA", "Team FFA"],
+      ],
+      search: [:id],
+      limit: :infinity
+    )
+    |> Enum.map(fn %{id: id} -> id end)
+    |> Enum.join(",")
+
+    delete_matches(ids)
+
+    # Unrated matches
+    battle_match_unrated_days = Application.get_env(:central, Teiserver)[:retention][:battle_match_unrated]
+
+    ids = Battle.list_matches(search: [
+        inserted_before: Timex.shift(Timex.now(), days: -battle_match_unrated_days),
+        game_type_not_in: ["Team", "Duel", "FFA", "Team FFA"],
       ],
       search: [:id],
       limit: :infinity

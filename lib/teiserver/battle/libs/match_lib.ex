@@ -144,6 +144,11 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.id == ^id
   end
 
+  def _search(query, :id_in, ids) do
+    from matches in query,
+      where: matches.id in ^ids
+  end
+
   def _search(query, :uuid, uuid) do
     from matches in query,
       where: matches.uuid == ^uuid
@@ -182,6 +187,11 @@ defmodule Teiserver.Battle.MatchLib do
   def _search(query, :game_type_in, game_types) do
     from matches in query,
       where: matches.game_type in ^game_types
+  end
+
+  def _search(query, :game_type_not_in, game_types) do
+    from matches in query,
+      where: matches.game_type not in ^game_types
   end
 
   def _search(query, :ready_for_post_process, _) do
