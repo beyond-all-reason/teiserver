@@ -181,8 +181,4 @@ defmodule Teiserver.Game.RatingLib do
   def leaderboard(game_type) do
 
   end
-
-  def get_player_rating(userid) do
-    stats = Account.get_user_stat_data(userid)
-  end
 end
