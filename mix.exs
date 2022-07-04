@@ -85,6 +85,7 @@ defmodule Central.MixProject do
       {:libcluster, "~> 3.3"},
 
       # Teiserver libs
+      {:openskill, "~> 0.1.0"},
       {:cowboy, "~> 2.9"},
       {:statistics, "~> 0.6.2"},
       {:csv, "~> 2.4"},
