@@ -1,6 +1,6 @@
 defmodule Teiserver.Game.RatingLib do
   alias Teiserver.{Account, Game, Battle}
-  # alias Teiserver.Data.Types, as: T
+  alias Teiserver.Data.Types, as: T
   alias Central.Repo
 
   @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t()) :: :ok | {:error, :no_match}
@@ -23,6 +23,7 @@ defmodule Teiserver.Game.RatingLib do
     end
   end
 
+  @spec get_match_type(map()) :: non_neg_integer()
   defp get_match_type(match) do
     name = case match.game_type do
       "Duel" -> "Duel"
@@ -65,6 +66,7 @@ defmodule Teiserver.Game.RatingLib do
     :ok
   end
 
+  @spec reset_player_ratings() :: :ok
   def reset_player_ratings do
     empty_data = ["Duel", "FFA", "Team FFA", "Small Team", "Large Team"]
       |> Map.new(fn name ->
@@ -77,11 +79,12 @@ defmodule Teiserver.Game.RatingLib do
       limit: :infinity,
       select: [:id]
     )
-      |> Enum.map(fn %{id: userid} ->
+      |> Enum.each(fn %{id: userid} ->
         Account.update_user_stat(userid, empty_data)
       end)
   end
 
+  @spec get_player_rating(T.userid()) :: map
   def get_player_rating(user_id) do
     stats = Account.get_user_stat_data(user_id)
 
