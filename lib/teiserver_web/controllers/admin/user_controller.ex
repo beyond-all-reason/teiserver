@@ -1,7 +1,8 @@
 defmodule TeiserverWeb.Admin.UserController do
   use CentralWeb, :controller
 
-  alias Teiserver.{Account, Chat}
+  alias Teiserver.{Account, Chat, Game}
+  alias Teiserver.Game.MatchRatingLib
   alias Central.Account.User
   alias Teiserver.Account.UserLib
   alias Central.Account.GroupLib
@@ -345,6 +346,52 @@ defmodule TeiserverWeb.Admin.UserController do
           |> add_breadcrumb(name: "Show: #{user.name}", url: Routes.ts_admin_user_path(conn, :show, user.id))
           |> add_breadcrumb(name: "Submitted reports", url: conn.request_path)
           |> render("reports_submitted.html")
+
+      _ ->
+        conn
+          |> put_flash(:danger, "Unable to access this user")
+          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
+  end
+
+  @spec ratings(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def ratings(conn, %{"id" => id} = params) do
+    user = Account.get_user(id)
+
+    case Central.Account.UserLib.has_access(user, conn) do
+      {true, _} ->
+        filter = params["filter"]
+        filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter]
+
+        ratings = Account.list_ratings(
+          search: [
+            user_id: user.id
+          ],
+          preload: [:rating_type]
+        )
+          |> Map.new(fn rating ->
+            {rating.rating_type.name, rating}
+          end)
+
+        logs = Game.list_rating_logs(
+          search: [
+            user_id: user.id,
+            rating_type_id: filter_type_id
+          ],
+          order_by: "Newest first",
+          limit: 50,
+          preload: [:match]
+        )
+
+        conn
+          |> assign(:filter, filter || "rating-all")
+          |> assign(:user, user)
+          |> assign(:ratings, ratings)
+          |> assign(:logs, logs)
+          |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
+          |> assign(:rating_type_id_lookup, MatchRatingLib.rating_type_id_lookup())
+          |> add_breadcrumb(name: "Ratings: #{user.name}", url: conn.request_path)
+          |> render("ratings.html")
 
       _ ->
         conn

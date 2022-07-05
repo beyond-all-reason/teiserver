@@ -5,6 +5,7 @@ defmodule Teiserver.Data.Types do
   @type lobby_id() :: non_neg_integer()
   @type lobby_guid() :: String.t()
   @type clan_id() :: non_neg_integer
+  @type match_id() :: non_neg_integer
 
   @type queue_id() :: non_neg_integer
   @type mm_match_id() :: String.t()

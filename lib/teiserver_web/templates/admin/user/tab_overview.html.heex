@@ -62,6 +62,15 @@
     icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :full_chat, @user)
   %>
+
+  <%=
+    central_component "menu_card",
+    icon: Teiserver.Account.RatingLib.icon(),
+    name: "ratings",
+    text: "Ratings",
+    icon_class: "fa-solid",
+    link: Routes.ts_admin_user_path(@conn, :ratings, @user)
+  %>
   
   <%=
     central_component "menu_card",

@@ -14,8 +14,8 @@ defmodule Central.Repo.Migrations.Achievements do
     end
 
     create table(:teiserver_user_achievements, primary_key: false) do
-      add :user_id, references(:account_users, on_delete: :nothing)
-      add :achievement_type_id, references(:teiserver_achievement_types, on_delete: :nothing)
+      add :user_id, references(:account_users, on_delete: :nothing), primary_key: true
+      add :achievement_type_id, references(:teiserver_achievement_types, on_delete: :nothing), primary_key: true
 
       add :achieved, :boolean
       add :progress, :integer

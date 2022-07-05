@@ -105,25 +105,25 @@ defmodule Teiserver.Game.RatingLogLib do
 
   def order_by(query, "Newest first") do
     from rating_logs in query,
-      order_by: [desc: rating_logs.inserted_at]
+      order_by: [desc: rating_logs.match_id]
   end
 
   def order_by(query, "Oldest first") do
     from rating_logs in query,
-      order_by: [asc: rating_logs.inserted_at]
+      order_by: [asc: rating_logs.match_id]
   end
 
   @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()
   def preload(query, nil), do: query
 
-  def preload(query, _preloads) do
-    # query = if :things in preloads, do: _preload_things(query), else: query
+  def preload(query, preloads) do
+    query = if :match in preloads, do: _preload_match(query), else: query
     query
   end
 
-  # def _preload_things(query) do
-  #   from rating_logs in query,
-  #     left_join: things in assoc(rating_logs, :things),
-  #     preload: [things: things]
-  # end
+  def _preload_match(query) do
+    from rating_logs in query,
+      left_join: matches in assoc(rating_logs, :match),
+      preload: [match: matches]
+  end
 end

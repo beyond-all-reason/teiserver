@@ -1209,4 +1209,101 @@ defmodule Teiserver.Account do
     end)
   end
 
+  alias Teiserver.Account.{Rating, RatingLib}
+
+  @spec rating_query(List.t()) :: Ecto.Query.t()
+  def rating_query(args) do
+    RatingLib.query_ratings
+      |> RatingLib.search(args[:search])
+      |> RatingLib.preload(args[:preload])
+      |> RatingLib.order_by(args[:order_by])
+      |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of ratings.
+
+  ## Examples
+
+      iex> list_ratings()
+      [%Rating{}, ...]
+
+  """
+  @spec list_ratings(List.t()) :: List.t()
+  def list_ratings(args \\ []) do
+    rating_query(args)
+      |> QueryHelpers.limit_query(args[:limit] || 50)
+      |> Repo.all
+  end
+
+  @doc """
+  Gets a single rating.
+
+  Raises `Ecto.NoResultsError` if the Rating does not exist.
+
+  ## Examples
+
+      iex> get_rating(123)
+      %Rating{}
+
+      iex> get_rating(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_rating(Integer.t() | List.t()) :: Rating.t()
+  @spec get_rating(Integer.t(), List.t()) :: Rating.t()
+  def get_rating(args) do
+    rating_query(args)
+      |> Repo.one
+  end
+
+  def get_rating(user_id, rating_type_id) when is_integer(user_id) and is_integer(rating_type_id) do
+    rating_query(search: [
+      user_id: user_id,
+      rating_type_id: rating_type_id
+    ], limit: 1)
+      |> Repo.one
+  end
+
+  @doc """
+  Creates a rating.
+
+  ## Examples
+
+      iex> create_rating(%{field: value})
+      {:ok, %Rating{}}
+
+      iex> create_rating(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_rating(Map.t()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
+  def create_rating(attrs \\ %{}) do
+    %Rating{}
+      |> Rating.changeset(attrs)
+      |> Repo.insert()
+  end
+
+  def update_rating(%Rating{} = rating, attrs) do
+    rating
+      |> Rating.changeset(attrs)
+      |> Repo.update()
+  end
+
+  @doc """
+  Deletes a Rating.
+
+  ## Examples
+
+      iex> delete_rating(rating)
+      {:ok, %Rating{}}
+
+      iex> delete_rating(rating)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_rating(Rating.t()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
+  def delete_rating(%Rating{} = rating) do
+    Repo.delete(rating)
+  end
 end

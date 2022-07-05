@@ -1,0 +1,107 @@
+<%
+  bsname = view_colour()
+%>
+
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "ratings"
+          })
+        %>
+        <hr />
+
+<a class={"btn btn-outline-#{bsname} float-end"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>View user</a>
+
+<div class="row">
+  <div class="col-md-12">
+    <%= if @filter != nil do %>
+      <%= central_component "section_menu_button",
+        name: "rating-all",
+        label: "All matches",
+        active: @filter,
+        url: Routes.ts_admin_user_path(@conn, :ratings, @user),
+        icon: "",
+        bsname: bsname
+      %>
+    <% end %>
+  
+    <%= for rt <- @rating_type_list do %>
+      <%= if @ratings[rt] != nil do %>
+        <%
+          ordinal = @ratings[rt].ordinal |> Decimal.to_float |> round(2)
+        %>
+        <%= central_component "section_menu_button",
+          name: rt,
+          label: raw("#{rt} &nbsp;&nbsp;&nbsp; #{ordinal}"),
+          active: @filter,
+          url: "?filter=#{rt}",
+          icon: "",
+          bsname: bsname
+        %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<table class="table mt-3">
+  <thead>
+    <tr>
+      <th>Game</th>
+      <th>Players</th>
+      <th>Type</th>
+      <th colspan="2">Ordinal</th>
+      <th colspan="2">Mu</th>
+      <th colspan="2">Sigma</th>
+      <th>&nbsp;</th>
+      <th>Date</th>
+   </tr>
+  </thead>
+  <tbody>
+    <%= for log <- @logs do %>
+      <%
+        {text_class, icon} = if log.value["ordinal_change"] > 0 do
+          {"text-success", "up"}
+        else
+          {"text-danger", "down"}
+        end
+      %>
+      <tr>
+        <td><%= log.match.map %></td>
+        <td><%= log.match.team_size * log.match.team_count %></td>
+        <td><%= @rating_type_id_lookup[log.rating_type_id] %></td>
+        
+        <td><%= round(log.value["ordinal"], 2) %></td>
+        <td class={text_class}>
+          <%= round(log.value["ordinal_change"], 2) %>
+        </td>
+        
+        <td><%= round(log.value["mu"], 2) %></td>
+        <td class={text_class}>
+          <%= round(log.value["mu_change"] || 0, 2) %>
+        </td>
+        
+        <td><%= round(log.value["sigma"], 2) %></td>
+        <td>
+          <%= round(log.value["sigma_change"] || 0, 2) %>
+        </td>
+
+        <td class={text_class}>
+          <i class={"fa-fw fa-solid fa-#{icon}"}></i>
+        </td>
+        <td><%= date_to_str(log.match.started, format: :hms_or_dmy) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+
+      </div>
+    </div>
+  </div>
+</div>
