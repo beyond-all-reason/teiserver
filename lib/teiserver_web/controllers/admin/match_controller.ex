@@ -79,10 +79,18 @@ defmodule TeiserverWeb.Admin.MatchController do
 
     match_name = MatchLib.make_match_name(match)
 
+    rating_logs = Game.list_rating_logs(
+      search: [
+        match_id: match.id
+      ]
+    )
+    |> Map.new(fn log -> {log.user_id, log} end)
+
     conn
       |> assign(:match, match)
       |> assign(:match_name, match_name)
       |> assign(:members, members)
+      |> assign(:rating_logs, rating_logs)
       |> add_breadcrumb(name: "Show: #{match_name}", url: conn.request_path)
       |> render("show.html")
   end
@@ -90,15 +98,15 @@ defmodule TeiserverWeb.Admin.MatchController do
   @spec user_show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def user_show(conn, %{"user_id" => userid}) do
     matches = Battle.list_matches(
-        search: [
-          user_id: userid
-        ],
-        preload: [
-          :queue, :members
-        ],
-        order_by: "Newest first",
-        limit: 100
-      )
+      search: [
+        user_id: userid
+      ],
+      preload: [
+        :queue
+      ],
+      order_by: "Newest first",
+      limit: 100
+    )
 
     queues = Game.list_queues(order_by: "Name (A-Z)")
     user = Account.get_user_by_id(userid)

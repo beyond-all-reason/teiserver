@@ -1,8 +1,8 @@
 defmodule TeiserverWeb.Battle.MatchController do
   use CentralWeb, :controller
 
-  alias Teiserver.Battle
-  # alias Teiserver.Battle.Match
+  alias Teiserver.{Battle, Game, Account}
+  alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Battle.MatchLib
 
   plug Bodyguard.Plug.Authorize,
@@ -20,25 +20,16 @@ defmodule TeiserverWeb.Battle.MatchController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do
-    matches = if false and allow?(conn, "teiserver.moderator") do
-      Battle.list_matches(
-        search: [
-          processed: true
-        ],
-        order_by: "Newest first"
-      )
-    else
-      memberships = Battle.list_match_memberships(search: [user_id: conn.user_id], select: [:match_id])
-      |> Enum.map(fn mm -> mm.match_id end)
-
-      Battle.list_matches(
-        search: [
-          processed: true,
-          id_list: memberships
-        ],
-        order_by: "Newest first"
-      )
-    end
+    matches = Battle.list_matches(
+      search: [
+        user_id: conn.user_id
+      ],
+      preload: [
+        :queue
+      ],
+      order_by: "Newest first",
+      limit: 50
+    )
 
     conn
     |> assign(:matches, matches)
@@ -61,26 +52,58 @@ defmodule TeiserverWeb.Battle.MatchController do
       |> Enum.sort_by(fn m -> m.user.name end, &<=/2)
       |> Enum.sort_by(fn m -> m.team_id end, &<=/2)
 
+    rating_logs = Game.list_rating_logs(
+      search: [
+        match_id: match.id
+      ]
+    )
+    |> Map.new(fn log -> {log.user_id, log} end)
+
     conn
-    |> assign(:match, match)
-    |> assign(:match_name, match_name)
-    |> assign(:members, members)
-    |> add_breadcrumb(name: "Show: #{match_name}", url: conn.request_path)
-    |> render("show.html")
+      |> assign(:match, match)
+      |> assign(:match_name, match_name)
+      |> assign(:members, members)
+      |> assign(:rating_logs, rating_logs)
+      |> add_breadcrumb(name: "Show: #{match_name}", url: conn.request_path)
+      |> render("show.html")
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def delete(conn, %{"id" => id}) do
-    match = Battle.get_match!(id)
+  @spec ratings(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def ratings(conn, params) do
+    user = conn.assigns.current_user
 
-    match
-    |> MatchLib.make_favourite
-    |> remove_recently(conn)
+    filter = params["filter"] || "Duel"
+    filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter] || 1
 
-    {:ok, _match} = Battle.delete_match(match)
+    ratings = Account.list_ratings(
+      search: [
+        user_id: user.id
+      ],
+      preload: [:rating_type]
+    )
+      |> Map.new(fn rating ->
+        {rating.rating_type.name, rating}
+      end)
+
+    logs = Game.list_rating_logs(
+      search: [
+        user_id: user.id,
+        rating_type_id: filter_type_id
+      ],
+      order_by: "Newest first",
+      limit: 50,
+      preload: [:match]
+    )
 
     conn
-    |> put_flash(:info, "Match deleted successfully.")
-    |> redirect(to: Routes.ts_battle_match_path(conn, :index))
+      |> assign(:filter, filter || "rating-all")
+      |> assign(:user, user)
+      |> assign(:ratings, ratings)
+      |> assign(:logs, logs)
+      |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
+      |> assign(:rating_type_id_lookup, MatchRatingLib.rating_type_id_lookup())
+      |> add_breadcrumb(name: "Ratings: #{user.name}", url: conn.request_path)
+      |> render("ratings.html")
+
   end
 end

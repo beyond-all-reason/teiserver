@@ -162,7 +162,15 @@ defmodule Teiserver.Battle.MatchLib do
   def _search(query, :user_id, user_id) do
     from matches in query,
       join: members in assoc(matches, :members),
-      where: members.user_id == ^user_id
+      where: members.user_id == ^user_id,
+      preload: [members: members]
+  end
+
+  def _search(query, :user_rating, user_id) do
+    from matches in query,
+      left_join: ratings in assoc(matches, :ratings),
+      where: ratings.user_id == ^user_id or is_nil(ratings.user_id),
+      preload: [ratings: ratings]
   end
 
   def _search(query, :id_list, id_list) do
@@ -284,6 +292,9 @@ defmodule Teiserver.Battle.MatchLib do
   def preload(query, preloads) do
     query = if :members in preloads, do: _preload_members(query), else: query
     query = if :members_and_users in preloads, do: _preload_members_and_users(query), else: query
+
+    query = if :ratings in preloads, do: _preload_ratings(query), else: query
+
     query = if :queue in preloads, do: _preload_queue(query), else: query
     query
   end
@@ -302,6 +313,13 @@ defmodule Teiserver.Battle.MatchLib do
       left_join: users in assoc(memberships, :user),
       # order_by: [asc: memberships.team_id, asc: users.name],
       preload: [members: {memberships, user: users}]
+  end
+
+  @spec _preload_ratings(Ecto.Query.t) :: Ecto.Query.t
+  def _preload_ratings(query) do
+    from matches in query,
+      left_join: ratings in assoc(matches, :ratings),
+      preload: [ratings: ratings]
   end
 
   @spec _preload_queue(Ecto.Query.t) :: Ecto.Query.t

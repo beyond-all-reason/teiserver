@@ -1,36 +1,19 @@
-<%
-  bsname = view_colour()
-%>
+<% bsname = view_colour() %>
 
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "matches"}) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
-            quick_search: "",
+        <%= render TeiserverWeb.Battle.MatchView, "section_menu.html", Map.merge(assigns, %{
             show_search: false,
             active: "ratings"
-          })
-        %>
-        <hr />
-
-<a class={"btn btn-outline-#{bsname} float-end"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>View user</a>
+        }) %>
+        <br /><br />
 
 <div class="row">
   <div class="col-md-12">
-    <%= if @filter != nil do %>
-      <%= central_component "section_menu_button",
-        name: "rating-all",
-        label: "All matches",
-        active: @filter,
-        url: Routes.ts_admin_user_path(@conn, :ratings, @user),
-        icon: "",
-        bsname: bsname
-      %>
-    <% end %>
-  
     <%= for rt <- @rating_type_list do %>
       <%= if @ratings[rt] != nil do %>
         <%
@@ -55,10 +38,8 @@
       <th>Game</th>
       <th>Players</th>
       <th>Type</th>
-      <th colspan="2">Ordinal</th>
-      <th colspan="2">Mu</th>
-      <th colspan="2">Sigma</th>
-      <th>&nbsp;</th>
+      <th colspan="2">Rating</th>
+      <th>Mu</th>
       <th>Date</th>
       <th>&nbsp;</th>
    </tr>
@@ -79,25 +60,16 @@
         
         <td><%= round(log.value["ordinal"], 2) %></td>
         <td class={text_class}>
+          <i class={"fa-fw fa-solid fa-#{icon}"}></i>
+        
           <%= round(log.value["ordinal_change"], 2) %>
         </td>
-        
-        <td><%= round(log.value["mu"], 2) %></td>
-        <td class={text_class}>
-          <%= round(log.value["mu_change"] || 0, 2) %>
-        </td>
-        
-        <td><%= round(log.value["sigma"], 2) %></td>
-        <td>
-          <%= round(log.value["sigma_change"] || 0, 2) %>
-        </td>
 
-        <td class={text_class}>
-          <i class={"fa-fw fa-solid fa-#{icon}"}></i>
-        </td>
+        <td><%= round(log.value["mu"], 2) %></td>
+        
         <td><%= date_to_str(log.match.started, format: :hms_or_dmy) %></td>
         <td>
-          <a href={Routes.ts_admin_match_path(@conn, :show, log.match.id)} class="btn btn-secondary btn-sm">
+          <a href={Routes.ts_battle_match_path(@conn, :show, log.match.id)} class="btn btn-secondary btn-sm">
             Show
           </a>
         </td>
@@ -105,7 +77,6 @@
     <% end %>
   </tbody>
 </table>
-
 
       </div>
     </div>

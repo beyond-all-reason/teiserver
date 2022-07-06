@@ -8,3 +8,23 @@
   bsname: bsname,
   url: Routes.ts_battle_match_path(@conn, :index)
 %>
+
+<%= central_component "section_menu_button",
+  name: "ratings",
+  label: "Ratings",
+  active: @active,
+  icon: Teiserver.Account.RatingLib.icon(),
+  bsname: bsname,
+  url: Routes.ts_battle_match_path(@conn, :ratings)
+%>
+
+<%= if @active == "show" do %>
+  <%= central_component "section_menu_button",
+    name: "show",
+    label: "Show",
+    active: @active,
+    icon: Central.Helpers.StylingHelper.icon(:detail),
+    bsname: bsname,
+    url: "#"
+  %>
+<% end %>

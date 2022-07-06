@@ -39,6 +39,9 @@ defmodule Teiserver.Game.MatchRatingLib do
       match.processed == false ->
         {:error, :not_processed}
 
+      match.winning_team == nil ->
+        {:error, :no_winning_team}
+
       true ->
         do_rate_match(match)
     end
@@ -216,6 +219,7 @@ defmodule Teiserver.Game.MatchRatingLib do
         game_type_in: @rated_match_types,
         processed: true
       ],
+      order_by: "Oldest first",
       limit: :infinity,
       select: [:id]
     )

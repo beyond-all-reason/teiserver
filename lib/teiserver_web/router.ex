@@ -78,6 +78,7 @@ defmodule TeiserverWeb.Router do
       scope "/teiserver/battle", TeiserverWeb.Battle, as: :ts_battle do
         pipe_through([:browser, :standard_layout, :protected])
 
+        get("/matches/ratings", MatchController, :ratings)
         resources("/matches", MatchController, only: [:index, :show, :delete])
       end
 

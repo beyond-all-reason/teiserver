@@ -27,6 +27,7 @@ defmodule Teiserver.Battle.Match do
     field :finished, :utc_datetime
 
     has_many :members, Teiserver.Battle.MatchMembership
+    has_many :ratings, Teiserver.Game.RatingLog
 
     timestamps()
   end

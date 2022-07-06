@@ -20,7 +20,7 @@
       <div class="card-body">
         <%= render TeiserverWeb.Battle.MatchView, "section_menu.html", Map.merge(assigns, %{
             show_search: false,
-            active: ""
+            active: "show"
         }) %>
         <hr />
 
@@ -43,6 +43,7 @@
             Details
           </a>
         </li>
+
         <li class="nav-item">
           <a href="#players_tab" role="tab" class="nav-link" data-bs-toggle="tab">
             <%= central_component "icon", icon: "fa-solid fa-users" %>
