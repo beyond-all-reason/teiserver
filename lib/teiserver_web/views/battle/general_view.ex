@@ -6,4 +6,5 @@ defmodule TeiserverWeb.Battle.GeneralView do
 
   def view_colour("battle_lobbies"), do: Teiserver.Battle.LobbyLib.colours()
   def view_colour("matches"), do: Teiserver.Battle.MatchLib.colours()
+  def view_colour("ratings"), do: Teiserver.Account.RatingLib.colours()
 end

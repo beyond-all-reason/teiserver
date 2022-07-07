@@ -47,8 +47,15 @@ defmodule Central.Helpers.NumberHelper do
   end
   def c_round(v), do: round(v)
 
+  @spec c_round(nil | number | Decimal.t(), non_neg_integer()) :: integer | float()
+  def c_round(nil, _), do: 0
+  def c_round(v, decimal_places) when Decimal.is_decimal(v) do
+    round(Decimal.to_float(v), decimal_places)
+  end
+  def c_round(v, places), do: round(v, places)
 
-  @spec round(number(), non_neg_integer()) :: integer()
+
+  @spec round(number(), non_neg_integer()) :: integer() | float()
   def round(value, decimal_places) do
     dp_mult = :math.pow(10, decimal_places)
     round(value * dp_mult)/dp_mult

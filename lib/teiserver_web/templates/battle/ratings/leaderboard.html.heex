@@ -1,0 +1,51 @@
+<% bsname = view_colour() %>
+
+<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "ratings"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Battle.RatingsView, "section_menu.html", Map.merge(assigns, %{
+            show_search: false,
+            active: @type_name
+        }) %>
+        <br /><br />
+
+<table class="table table-sm">
+  <thead>
+    <tr>
+      <th>&nbsp;</th>
+      <th colspan="2">Player</th>
+
+      <th>Rating</th>
+      <th>Mu</th>
+      <th>Sigma</th>
+   </tr>
+  </thead>
+  <tbody>
+    <%= for {rating, pos} <- Enum.with_index(@ratings) do %>
+      <tr>
+        <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
+          <%= pos + 1 %>
+        </td>
+        <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
+          <%= central_component "icon", icon: rating.user.icon %>
+        </td>
+        <td style={"background-color: #{rgba_css rating.user.colour};"}><%= rating.user.name %></td>
+        
+        <td><%= rating.ordinal |> c_round(2) %></td>
+        
+        <td><%= rating.mu |> c_round(2) %></td>
+        
+        <td><%= rating.sigma |> c_round(2) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+
+      </div>
+    </div>
+  </div>
+</div>
