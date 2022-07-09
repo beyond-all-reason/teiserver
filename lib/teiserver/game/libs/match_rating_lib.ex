@@ -9,7 +9,7 @@ defmodule Teiserver.Game.MatchRatingLib do
 
   @spec rating_type_list() :: [String.t()]
   def rating_type_list() do
-    ["Duel", "FFA", "Team FFA", "Small Team", "Large Team"]
+    ["Overall", "Duel", "FFA", "Team FFA", "Small Team", "Large Team"]
   end
 
   @spec rating_type_id_lookup() :: map()
@@ -44,6 +44,7 @@ defmodule Teiserver.Game.MatchRatingLib do
 
       true ->
         do_rate_match(match)
+        # do_rate_overall(match)
     end
   end
 
@@ -65,7 +66,7 @@ defmodule Teiserver.Game.MatchRatingLib do
 
   @spec do_rate_match(Teiserver.Battle.Match.t()) :: :ok
   # Currently don't support more than 2 teams
-  defp do_rate_match(%{team_count: 2} = match) do
+  defp do_rate_match(%{team_count: _2} = match) do
     rating_type_id = get_match_type(match)
 
     # # Remove existing ratings for this match
@@ -117,6 +118,58 @@ defmodule Teiserver.Game.MatchRatingLib do
     :ok
   end
   defp do_rate_match(_), do: :ok
+
+  defp do_rate_overall(match) do
+    rating_type_id = Game.get_or_add_rating_type("Overall")
+
+    # # Remove existing ratings for this match
+    # query = "DELETE FROM teiserver_game_rating_logs WHERE match_id = #{match.id}"
+    # Ecto.Adapters.SQL.query(Repo, query, [])
+
+    winners = match.members
+      |> Enum.filter(fn membership -> membership.win end)
+
+    losers = match.members
+      |> Enum.reject(fn membership -> membership.win end)
+
+    # We will want to update these so we keep the whole object
+    rating_lookup = match.members
+      |> Map.new(fn membership ->
+        rating = Account.get_rating(membership.user_id, rating_type_id)
+        {membership.user_id, rating}
+      end)
+
+    # Build ratings into lists of tuples for the OpenSkill module to handle
+    winner_ratings = winners
+      |> Enum.map(fn membership ->
+        rating = rating_lookup[membership.user_id]
+        {rating.mu |> D.to_float, rating.sigma |> D.to_float}
+      end)
+
+    loser_ratings = losers
+      |> Enum.map(fn membership ->
+        rating = rating_lookup[membership.user_id]
+        {rating.mu |> D.to_float, rating.sigma |> D.to_float}
+      end)
+
+    # Run the actual calculation
+    [win_result, lose_result] = Openskill.rate([winner_ratings, loser_ratings])
+
+    # Save the results
+    Enum.zip(winners, win_result)
+      |> Enum.each(fn {%{user_id: user_id}, rating_update} ->
+        user_rating = rating_lookup[user_id]
+        do_update_rating(user_id, match.id, user_rating, rating_update)
+      end)
+
+    Enum.zip(losers, lose_result)
+      |> Enum.each(fn {%{user_id: user_id}, rating_update} ->
+        user_rating = rating_lookup[user_id]
+        do_update_rating(user_id, match.id, user_rating, rating_update)
+      end)
+
+    :ok
+  end
 
   @spec do_update_rating(T.userid, T.match_id(), map(), {number(), number()}) :: any
   defp do_update_rating(user_id, match_id, user_rating, rating_update) do
