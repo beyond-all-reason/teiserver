@@ -1,0 +1,54 @@
+<% bsname = view_colour() %>
+
+<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "ratings"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Report.RatingView, "section_menu.html", 
+          conn: @conn,
+          active: "balance_tester"
+        %>
+        <br /><br />
+
+        <form action={Routes.ts_reports_rating_path(@conn, :balance_tester)} method="post" class="">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <div class="row">
+            <div class="col-md-6">
+              <label for="player_list" class="control-label">Players, one per line</label>
+              <textarea name="player_list" id="player_list" rows="8" cols="40" class="form-control" autofocus="autofocus"><%= @found_players |> Enum.join("\n") %></textarea>
+            </div>
+            
+            <div class="col-md-6">
+              <label for="missing_names" class="control-label">Names unable to be found</label>
+              <textarea id="missing_names" rows="8" cols="40" class="form-control" autofocus="autofocus"><%= @missing_names |> Enum.join("\n") %></textarea>
+            </div>
+
+            <div class="col-md-12">
+              <button type="submit" class={"btn btn-#{bsname} mt-2"}>
+                Attempt balance
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <hr />
+        
+        <%= if @balance_result do %>
+          <%= for team_id <- [1, 2] do %>
+            <h4>Team <%= team_id %> - Rating: <%= @balance_result.stats[team_id].total_rating %></h4>
+            <strong>Members:</strong><br />
+              <%= for {userid, rating} <- @balance_result.team_players[team_id] |> Enum.reverse do %>
+                <%= @user_lookup[userid] %> (<%= round(rating, 2) %>)<br />
+              <% end %>
+            <br ><br />
+          <% end %>
+
+        <% end %>
+
+      </div>
+    </div>
+  </div>
+</div>

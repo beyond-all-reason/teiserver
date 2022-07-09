@@ -6,8 +6,11 @@ defmodule Teiserver.Account.UserCache do
   require Logger
 
   @spec get_username(T.userid() | nil) :: String.t() | nil
-  def get_username(nil), do: nil
-  def get_username(userid) do
+  def get_username(userid), do: get_username_by_id(userid)
+
+  @spec get_username_by_id(T.userid() | nil) :: String.t() | nil
+  def get_username_by_id(nil), do: nil
+  def get_username_by_id(userid) do
     userid = int_parse(userid)
 
     Central.cache_get_or_store(:users_lookup_name_with_id, int_parse(userid), fn ->

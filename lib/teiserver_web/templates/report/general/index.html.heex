@@ -29,6 +29,16 @@
     %>
   <% end %>
 
+  <%= if allow?(@current_user, "teiserver.reports.rating") do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Account.RatingLib.icon(),
+      name: "ratings",
+      text: "Ratings",
+      link: Routes.ts_reports_rating_path(@conn, :distribution_table)
+    %>
+  <% end %>
+
   <%= if allow?(@current_user, "teiserver.reports.infolog") do %>
     <%=
       central_component "menu_card",

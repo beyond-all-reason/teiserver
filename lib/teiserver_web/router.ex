@@ -136,7 +136,6 @@ defmodule TeiserverWeb.Router do
         get("/match/export_form", MatchMetricController, :export_form)
         post("/match/export_post", MatchMetricController, :export_post)
 
-
         get("/match/month_metrics/today", MatchMetricController, :month_metrics_today)
         get("/match/month_metrics/show/:year/:month", MatchMetricController, :month_metrics_show)
         get("/match/month_metrics/graph", MatchMetricController, :month_metrics_graph)
@@ -156,6 +155,15 @@ defmodule TeiserverWeb.Router do
 
         get("/show/:name", ReportController, :show)
         post("/show/:name", ReportController, :show)
+
+        # Ratings
+        get("/ratings/balance_tester", RatingController, :balance_tester)
+        post("/ratings/balance_tester", RatingController, :balance_tester)
+
+        get("/ratings/distribution_table", RatingController, :distribution_table)
+        post("/ratings/distribution_table", RatingController, :distribution_table)
+        get("/ratings/distribution_graph", RatingController, :distribution_graph)
+        post("/ratings/distribution_graph", RatingController, :distribution_graph)
       end
 
       # ts_engine_X_path

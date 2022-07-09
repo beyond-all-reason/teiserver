@@ -3,16 +3,19 @@ defmodule Teiserver.Battle.BalanceLib do
   A set of functions related to balance and ratings
   """
   alias Teiserver.Data.Types, as: T
+  alias Teiserver.Account
+  alias Teiserver.Game.MatchRatingLib
+
   @type rating() :: number()
   @type user_rating() :: {T.userid(), rating()}
 
-  @spec balance_players([T.client()], non_neg_integer(), :round_robin | :loser_picks) :: map()
-  def balance_players(client_list, team_count, mode \\ :loser_picks) do
-    # players_per_team = Enum.count(client_list) / team_count
+  @spec balance_players([T.userid()], non_neg_integer(), String.t(), :round_robin | :loser_picks) :: map()
+  def balance_players(user_ids, team_count, rating_type, mode \\ :loser_picks) do
+    # players_per_team = Enum.count(user_ids) / team_count
 
-    players = client_list
-      |> Enum.map(fn c ->
-        {c.userid, get_skill(c)}
+    players = user_ids
+      |> Enum.map(fn userid ->
+        {userid, get_skill(userid, rating_type)}
       end)
       |> Enum.sort_by(fn {_, s} -> s end, &>=/2)
 
@@ -21,17 +24,45 @@ defmodule Teiserver.Battle.BalanceLib do
         {i, []}
       end)
 
-    case mode do
+    team_players = case mode do
       :round_robin ->
         round_robin(players, teams)
       :loser_picks ->
         loser_picks(players, teams)
     end
+
+    stats = team_players
+      |> Map.new(fn {team_id, players} ->
+        total_rating = players
+          |> Enum.reduce(0, fn ({_, rating}, acc) -> acc + rating end)
+
+        {team_id, %{
+          total_rating: total_rating
+        }}
+      end)
+
+    results = %{
+      team_players: team_players,
+      stats: stats
+    }
+
+    results
   end
 
-  @spec get_skill(T.client()) :: rating()
-  def get_skill(client) do
-    client.rank
+  @spec get_skill(T.userid(), String.t()) :: rating()
+  def get_skill(userid, rating_type) do
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
+
+    case Account.get_rating(userid, rating_type_id) do
+      nil ->
+        MatchRatingLib.default_rating() |> convert_rating()
+      rating ->
+        {Decimal.to_float(rating.mu), Decimal.to_float(rating.sigma)} |> convert_rating()
+    end
+  end
+
+  defp convert_rating({mu, sigma}) do
+    mu - sigma
   end
 
   @doc """
@@ -60,13 +91,17 @@ defmodule Teiserver.Battle.BalanceLib do
   """
   @spec loser_picks([user_rating()], map()) :: map()
   defp loser_picks(players, teams) do
-    do_loser_picks(players, teams)
+    max_teamsize = Enum.count(players)/Enum.count(teams) |> :math.ceil() |> round()
+    do_loser_picks(players, teams, max_teamsize)
   end
 
-  @spec do_loser_picks([user_rating()], map()) :: map()
-  defp do_loser_picks([], teams), do: teams
-  defp do_loser_picks(players, teams) do
+  @spec do_loser_picks([user_rating()], map(), non_neg_integer()) :: map()
+  defp do_loser_picks([], teams, _), do: teams
+  defp do_loser_picks(players, teams, max_teamsize) do
     team_skills = teams
+      |> Enum.reject(fn {_team_number, players} ->
+        Enum.count(players) >= max_teamsize
+      end)
       |> Enum.map(fn {team_number, players} ->
         score = players
           |> get_skills_from_rating_list()
@@ -82,7 +117,7 @@ defmodule Teiserver.Battle.BalanceLib do
     new_team = [picked | teams[current_team]]
     new_team_map = Map.put(teams, current_team, new_team)
 
-    do_loser_picks(remaining_players, new_team_map)
+    do_loser_picks(remaining_players, new_team_map, max_teamsize)
   end
 
   @doc """

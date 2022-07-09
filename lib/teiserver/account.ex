@@ -390,6 +390,9 @@ defmodule Teiserver.Account do
   @spec get_username(T.userid()) :: String.t() | nil
   defdelegate get_username(userid), to: UserCache
 
+  @spec get_username_by_id(T.userid()) :: String.t() | nil
+  defdelegate get_username_by_id(userid), to: UserCache
+
   @spec get_userid_from_name(String.t()) :: integer() | nil
   def get_userid_from_name(name), do: UserCache.get_userid(name)
 
