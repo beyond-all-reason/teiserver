@@ -235,6 +235,16 @@ defmodule Teiserver.Battle.MatchLib do
       where: is_nil(matches.finished)
   end
 
+  def _search(query, :team_size_less_than, size) do
+    from matches in query,
+      where: matches.team_size < ^size
+  end
+
+  def _search(query, :team_size_greater_than, size) do
+    from matches in query,
+      where: matches.team_size > ^size
+  end
+
   def _search(query, :inserted_after, timestamp) do
     from matches in query,
       where: matches.inserted_at >= ^timestamp

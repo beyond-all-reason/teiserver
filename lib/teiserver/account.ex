@@ -1261,11 +1261,13 @@ defmodule Teiserver.Account do
   end
 
   def get_rating(user_id, rating_type_id) when is_integer(user_id) and is_integer(rating_type_id) do
-    rating_query(search: [
-      user_id: user_id,
-      rating_type_id: rating_type_id
-    ], limit: 1)
-      |> Repo.one
+    Central.cache_get_or_store(:teiserver_user_ratings, {user_id, rating_type_id}, fn ->
+      rating_query(search: [
+        user_id: user_id,
+        rating_type_id: rating_type_id
+      ], limit: 1)
+        |> Repo.one
+    end)
   end
 
   @doc """
@@ -1288,6 +1290,8 @@ defmodule Teiserver.Account do
   end
 
   def update_rating(%Rating{} = rating, attrs) do
+    Central.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
+
     rating
       |> Rating.changeset(attrs)
       |> Repo.update()
@@ -1307,6 +1311,7 @@ defmodule Teiserver.Account do
   """
   @spec delete_rating(Rating.t()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
   def delete_rating(%Rating{} = rating) do
+    Central.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
     Repo.delete(rating)
   end
 end

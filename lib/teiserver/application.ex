@@ -23,6 +23,7 @@ defmodule Teiserver.Application do
       concache_perm_sup(:teiserver_telemetry_game_event_types),
       concache_perm_sup(:teiserver_account_smurf_key_types),
 
+      concache_sup(:teiserver_user_ratings, global_ttl: 60_000),
       concache_sup(:teiserver_game_rating_types, global_ttl: 60_000),
 
       # Caches

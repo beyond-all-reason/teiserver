@@ -52,16 +52,13 @@ defmodule Teiserver.Battle.BalanceLib do
   @spec get_skill(T.userid(), String.t()) :: rating()
   def get_skill(userid, rating_type) do
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
-
-    case Account.get_rating(userid, rating_type_id) do
-      nil ->
-        MatchRatingLib.default_rating() |> convert_rating()
-      rating ->
-        rating |> convert_rating()
-    end
+    Account.get_rating(userid, rating_type_id) |> convert_rating()
   end
 
-  defp convert_rating(%Account.Rating{mu: mu, sigma: sigma}) do
+  def convert_rating(nil) do
+    MatchRatingLib.default_rating() |> convert_rating()
+  end
+  def convert_rating(%{mu: mu, sigma: sigma}) do
     Decimal.to_float(mu) - Decimal.to_float(sigma)
   end
 
