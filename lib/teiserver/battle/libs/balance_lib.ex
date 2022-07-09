@@ -57,12 +57,12 @@ defmodule Teiserver.Battle.BalanceLib do
       nil ->
         MatchRatingLib.default_rating() |> convert_rating()
       rating ->
-        {Decimal.to_float(rating.mu), Decimal.to_float(rating.sigma)} |> convert_rating()
+        rating |> convert_rating()
     end
   end
 
-  defp convert_rating({mu, sigma}) do
-    mu - sigma
+  defp convert_rating(%Account.Rating{mu: mu, sigma: sigma}) do
+    Decimal.to_float(mu) - Decimal.to_float(sigma)
   end
 
   @doc """

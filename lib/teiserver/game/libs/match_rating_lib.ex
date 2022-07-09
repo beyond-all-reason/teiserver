@@ -89,13 +89,13 @@ defmodule Teiserver.Game.MatchRatingLib do
     # Build ratings into lists of tuples for the OpenSkill module to handle
     winner_ratings = winners
       |> Enum.map(fn membership ->
-        rating = rating_lookup[membership.user_id]
+        rating = rating_lookup[membership.user_id] || default_rating(rating_type_id)
         {rating.mu |> D.to_float, rating.sigma |> D.to_float}
       end)
 
     loser_ratings = losers
       |> Enum.map(fn membership ->
-        rating = rating_lookup[membership.user_id]
+        rating = rating_lookup[membership.user_id] || default_rating(rating_type_id)
         {rating.mu |> D.to_float, rating.sigma |> D.to_float}
       end)
 
@@ -103,76 +103,100 @@ defmodule Teiserver.Game.MatchRatingLib do
     [win_result, lose_result] = Openskill.rate([winner_ratings, loser_ratings])
 
     # Save the results
-    Enum.zip(winners, win_result)
-      |> Enum.each(fn {%{user_id: user_id}, rating_update} ->
-        user_rating = rating_lookup[user_id]
+    win_ratings = Enum.zip(winners, win_result)
+      |> Enum.map(fn {%{user_id: user_id}, rating_update} ->
+        user_rating = rating_lookup[user_id] || default_rating(rating_type_id)
         do_update_rating(user_id, match.id, user_rating, rating_update)
       end)
 
-    Enum.zip(losers, lose_result)
-      |> Enum.each(fn {%{user_id: user_id}, rating_update} ->
-        user_rating = rating_lookup[user_id]
+    loss_ratings = Enum.zip(losers, lose_result)
+      |> Enum.map(fn {%{user_id: user_id}, rating_update} ->
+        user_rating = rating_lookup[user_id] || default_rating(rating_type_id)
         do_update_rating(user_id, match.id, user_rating, rating_update)
       end)
+
+
+    Ecto.Multi.new()
+      |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
+      |> Central.Repo.transaction()
 
     :ok
   end
   defp do_rate_match(_), do: :ok
 
-  defp do_rate_overall(match) do
-    rating_type_id = Game.get_or_add_rating_type("Overall")
+  # defp do_rate_overall(match) do
+  #   rating_type_id = Game.get_or_add_rating_type("Overall")
 
-    # # Remove existing ratings for this match
-    # query = "DELETE FROM teiserver_game_rating_logs WHERE match_id = #{match.id}"
-    # Ecto.Adapters.SQL.query(Repo, query, [])
+  #   # # Remove existing ratings for this match
+  #   # query = "DELETE FROM teiserver_game_rating_logs WHERE match_id = #{match.id}"
+  #   # Ecto.Adapters.SQL.query(Repo, query, [])
 
-    winners = match.members
-      |> Enum.filter(fn membership -> membership.win end)
+  #   winners = match.members
+  #     |> Enum.filter(fn membership -> membership.win end)
 
-    losers = match.members
-      |> Enum.reject(fn membership -> membership.win end)
+  #   losers = match.members
+  #     |> Enum.reject(fn membership -> membership.win end)
 
-    # We will want to update these so we keep the whole object
-    rating_lookup = match.members
-      |> Map.new(fn membership ->
-        rating = Account.get_rating(membership.user_id, rating_type_id)
-        {membership.user_id, rating}
-      end)
+  #   # We will want to update these so we keep the whole object
+  #   rating_lookup = match.members
+  #     |> Map.new(fn membership ->
+  #       rating = Account.get_rating(membership.user_id, rating_type_id)
+  #       {membership.user_id, rating}
+  #     end)
 
-    # Build ratings into lists of tuples for the OpenSkill module to handle
-    winner_ratings = winners
-      |> Enum.map(fn membership ->
-        rating = rating_lookup[membership.user_id]
-        {rating.mu |> D.to_float, rating.sigma |> D.to_float}
-      end)
+  #   # Build ratings into lists of tuples for the OpenSkill module to handle
+  #   winner_ratings = winners
+  #     |> Enum.map(fn membership ->
+  #       rating = rating_lookup[membership.user_id]
+  #       {rating.mu |> D.to_float, rating.sigma |> D.to_float}
+  #     end)
 
-    loser_ratings = losers
-      |> Enum.map(fn membership ->
-        rating = rating_lookup[membership.user_id]
-        {rating.mu |> D.to_float, rating.sigma |> D.to_float}
-      end)
+  #   loser_ratings = losers
+  #     |> Enum.map(fn membership ->
+  #       rating = rating_lookup[membership.user_id]
+  #       {rating.mu |> D.to_float, rating.sigma |> D.to_float}
+  #     end)
 
-    # Run the actual calculation
-    [win_result, lose_result] = Openskill.rate([winner_ratings, loser_ratings])
+  #   # Run the actual calculation
+  #   [win_result, lose_result] = Openskill.rate([winner_ratings, loser_ratings])
 
-    # Save the results
-    Enum.zip(winners, win_result)
-      |> Enum.each(fn {%{user_id: user_id}, rating_update} ->
-        user_rating = rating_lookup[user_id]
-        do_update_rating(user_id, match.id, user_rating, rating_update)
-      end)
+  #   # Save the results
+  #   win_ratings = Enum.zip(winners, win_result)
+  #     |> Enum.each(fn {%{user_id: user_id}, rating_update} ->
+  #       user_rating = rating_lookup[user_id]
+  #       do_update_rating(user_id, match.id, user_rating, rating_update)
+  #     end)
 
-    Enum.zip(losers, lose_result)
-      |> Enum.each(fn {%{user_id: user_id}, rating_update} ->
-        user_rating = rating_lookup[user_id]
-        do_update_rating(user_id, match.id, user_rating, rating_update)
-      end)
+  #   loss_ratings = Enum.zip(losers, lose_result)
+  #     |> Enum.each(fn {%{user_id: user_id}, rating_update} ->
+  #       user_rating = rating_lookup[user_id]
+  #       do_update_rating(user_id, match.id, user_rating, rating_update)
+  #     end)
 
-    :ok
-  end
+
+  #   a = Ecto.Multi.new()
+  #     |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
+  #     |> Central.Repo.transaction()
+
+  #   IO.puts ""
+  #   IO.inspect a
+  #   IO.puts ""
+
+  #   :ok
+  # end
 
   @spec do_update_rating(T.userid, T.match_id(), map(), {number(), number()}) :: any
   defp do_update_rating(user_id, match_id, user_rating, rating_update) do
+    # It's possible they don't yet have a rating
+    user_rating = if Map.get(user_rating, :user_id) do
+      user_rating
+    else
+      {:ok, rating} = Account.create_rating(Map.merge(user_rating, %{
+        user_id: user_id
+      }))
+      rating
+    end
+
     rating_type_id = user_rating.rating_type_id
     {new_mu, new_sigma} = rating_update
     new_ordinal = Openskill.ordinal(rating_update)
@@ -183,7 +207,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       sigma: new_sigma
     })
 
-    rating_log = Game.create_rating_log(%{
+    params = %{
       user_id: user_id,
       rating_type_id: rating_type_id,
       match_id: match_id,
@@ -201,14 +225,17 @@ defmodule Teiserver.Game.MatchRatingLib do
         mu_change: new_mu - D.to_float(user_rating.mu),
         sigma_change: new_sigma - D.to_float(user_rating.sigma),
       }
-    })
+    }
+    params
 
-    case rating_log do
-      {:ok, rating_log} -> rating_log
-      {:error, changeset} ->
-        Logger.error("Error saving rating log: #{Kernel.inspect changeset}")
-        nil
-    end
+    # rating_log = Game.create_rating_log(params)
+
+    # case rating_log do
+    #   {:ok, rating_log} -> rating_log
+    #   {:error, changeset} ->
+    #     Logger.error("Error saving rating log: #{Kernel.inspect changeset}")
+    #     nil
+    # end
   end
 
   @spec reset_player_ratings() :: :ok
@@ -217,36 +244,36 @@ defmodule Teiserver.Game.MatchRatingLib do
     Ecto.Adapters.SQL.query(Repo, "DELETE FROM teiserver_game_rating_logs", [])
     Ecto.Adapters.SQL.query(Repo, "DELETE FROM teiserver_account_ratings", [])
 
-    {mu, sigma} = default_rating()
-    ordinal = Openskill.ordinal({mu, sigma})
+    # {mu, sigma} = default_rating()
+    # ordinal = Openskill.ordinal({mu, sigma})
 
-    type_ids = rating_type_id_lookup() |> Map.keys()
+    # type_ids = rating_type_id_lookup() |> Map.keys()
 
-    ratings = Account.list_users(
-      limit: :infinity,
-      select: [:id]
-    )
-      |> Enum.map(fn %{id: user_id} ->
-        type_ids
-        |> Enum.map(fn type_id ->
-          %{
-            user_id: user_id,
-            rating_type_id: type_id,
-            mu: mu,
-            sigma: sigma,
-            ordinal: ordinal
-          }
-        end)
-      end)
-      |> List.flatten
+    # ratings = Account.list_users(
+    #   limit: :infinity,
+    #   select: [:id]
+    # )
+    #   |> Enum.map(fn %{id: user_id} ->
+    #     type_ids
+    #     |> Enum.map(fn type_id ->
+    #       %{
+    #         user_id: user_id,
+    #         rating_type_id: type_id,
+    #         mu: mu,
+    #         sigma: sigma,
+    #         ordinal: ordinal
+    #       }
+    #     end)
+    #   end)
+    #   |> List.flatten
 
-    ratings
-      |> Enum.chunk_every(10_000)
-      |> Enum.map(fn values ->
-        Ecto.Multi.new()
-          |> Ecto.Multi.insert_all(:insert_all, Account.Rating, values)
-          |> Central.Repo.transaction()
-      end)
+    # ratings
+    #   |> Enum.chunk_every(10_000)
+    #   |> Enum.map(fn values ->
+    #     Ecto.Multi.new()
+    #       |> Ecto.Multi.insert_all(:insert_all, Account.Rating, values)
+    #       |> Central.Repo.transaction()
+    #   end)
 
     :ok
   end
@@ -312,7 +339,16 @@ defmodule Teiserver.Game.MatchRatingLib do
   end
 
   @spec default_rating :: List.t()
-  def default_rating() do
-    Openskill.rating()
+  @spec default_rating(non_neg_integer()) :: List.t()
+  def default_rating(rating_type_id \\ nil) do
+    {mu, sigma} = Openskill.rating()
+    ordinal = Openskill.ordinal({mu, sigma})
+
+    %{
+      rating_type_id: rating_type_id,
+      mu: Decimal.from_float(mu * 1.0),
+      sigma: Decimal.from_float(sigma * 1.0),
+      ordinal: Decimal.from_float(ordinal * 1.0)
+    }
   end
 end
