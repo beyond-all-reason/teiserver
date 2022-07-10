@@ -11,8 +11,6 @@ defmodule Teiserver.Battle.BalanceLib do
 
   @spec balance_players([T.userid()], non_neg_integer(), String.t(), :round_robin | :loser_picks) :: map()
   def balance_players(user_ids, team_count, rating_type, mode \\ :loser_picks) do
-    # players_per_team = Enum.count(user_ids) / team_count
-
     players = user_ids
       |> Enum.map(fn userid ->
         {userid, get_skill(userid, rating_type)}
@@ -43,7 +41,8 @@ defmodule Teiserver.Battle.BalanceLib do
 
     results = %{
       team_players: team_players,
-      stats: stats
+      stats: stats,
+      deviation: get_deviation(stats)
     }
 
     results
@@ -131,10 +130,10 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   @spec get_deviation(map()) :: number()
-  def get_deviation(%{stats: teams}) do
-    scores = teams
-      |> Enum.map(fn {_team, team_stats} ->
-        team_stats.total_rating
+  defp get_deviation(result_stats) do
+    scores = result_stats
+      |> Enum.map(fn {_team, stats} ->
+        stats.total_rating
       end)
       |> Enum.sort
 

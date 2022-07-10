@@ -719,9 +719,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
           end)
         end)
 
-      deviation = BalanceLib.get_deviation(balance)
-
-      LobbyChat.sayex(state.coordinator_id, "Rebalanced via server, deviation at #{deviation}%", state.lobby_id)
+      LobbyChat.sayex(state.coordinator_id, "Rebalanced via server, deviation at #{balance.deviation}%", state.lobby_id)
 
       Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - completed")
 
