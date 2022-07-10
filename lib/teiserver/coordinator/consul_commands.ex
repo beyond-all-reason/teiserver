@@ -1,6 +1,7 @@
 defmodule Teiserver.Coordinator.ConsulCommands do
   require Logger
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
+  alias Teiserver.Game.MatchRatingLib
   alias Teiserver.{Account, Battle, Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat}
   alias Teiserver.Data.Types, as: T
@@ -23,6 +24,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   #################### For everybody
   def handle_command(%{command: "s"} = cmd, state), do: handle_command(Map.put(cmd, :command, "status"), state)
   def handle_command(%{command: "status", senderid: senderid} = _cmd, state) do
+    user = Account.get_user_by_id(senderid)
+
     locks = state.locks
       |> Enum.map(fn l -> to_string(l) end)
       |> Enum.join(", ")
@@ -46,6 +49,30 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     max_player_count = ConsulServer.get_max_player_count(state)
 
+    moderator_string = case User.is_moderator?(user) do
+      true ->
+        rating_type = cond do
+          player_count == 2 -> "Duel"
+          state.host_teamcount > 2 ->
+            if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
+          player_count <= 8 -> "Small Team"
+          true -> "Large Team"
+        end
+
+        rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
+
+        match_players = state
+          |> ConsulServer.list_players
+          |> Enum.map(fn p -> %{team_id: p.team_number, user_id: p.userid} end)
+
+        prediction = MatchRatingLib.predict_winning_team(match_players, rating_type_id)
+
+        [
+          "Team #{prediction + 1} is predicted to win"
+        ]
+      false -> []
+    end
+
     boss_string = case state.host_bosses do
       [] -> "Nobody is bossed"
       [boss_id] ->
@@ -61,13 +88,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     # Put other settings in here
     other_settings = [
       (if state.welcome_message, do: "Welcome message: #{state.welcome_message}"),
-      "Team size set to #{state.host_teamsize}",
-      "Team count set to #{state.host_teamcount}",
+      "Team size and count are: #{state.host_teamsize} and #{state.host_teamcount}",
       boss_string,
-      "Currently I think there are #{player_count} players",
-      "I think the maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
-      "Level required to play is #{state.level_to_play}",
-      "Level required to spectate is #{state.level_to_spectate}",
+      "Maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
+      # "Level required to play is #{state.level_to_play}",
+      # "Level required to spectate is #{state.level_to_spectate}",
     ]
     |> Enum.filter(fn v -> v != nil end)
 
@@ -79,6 +104,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       pos_str,
       "Join queue: #{queue_string}",
       other_settings,
+      moderator_string,
     ]
     |> List.flatten
     |> Enum.filter(fn s -> s != nil end)

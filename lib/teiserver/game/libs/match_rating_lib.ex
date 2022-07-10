@@ -298,6 +298,7 @@ defmodule Teiserver.Game.MatchRatingLib do
     }
   end
 
+  @spec predict_winning_team([map()], non_neg_integer()) :: non_neg_integer()
   def predict_winning_team(players, rating_type_id) do
     players
       |> Enum.group_by(
