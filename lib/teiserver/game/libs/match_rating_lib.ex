@@ -331,7 +331,8 @@ defmodule Teiserver.Game.MatchRatingLib do
   def test_prediction() do
     results = Battle.list_matches(
       search: [
-        game_type_in: ["Team FFA"],
+        # game_type_in: ["Team FFA"],
+        game_type_in: @rated_match_types,
         processed: true,
         started_after: Timex.now |> Timex.shift(days: -31)
       ],

@@ -152,12 +152,14 @@ defmodule Teiserver.Protocols.SpringIn do
           Spring.parse_client_status(new_value)
           |> Map.take([:in_game, :away])
 
-        new_client =
-          (Client.get_client_by_id(state.userid) || %{userid: state.userid})
-          |> Map.merge(new_status)
-
-        # This just accepts it and updates the client
-        Client.update(new_client, :client_updated_status)
+        case Client.get_client_by_id(state.userid) do
+          nil ->
+            :ok
+          client ->
+            # This just accepts it and updates the client
+            new_client = Map.merge(client, new_status)
+            Client.update(new_client, :client_updated_status)
+        end
 
       nil ->
         _no_match(state, "MYSTATUS", msg_id, data)
