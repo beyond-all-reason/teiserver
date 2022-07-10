@@ -131,14 +131,18 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   @spec get_deviation(map()) :: number()
-  def get_deviation(teams) do
+  def get_deviation(%{stats: teams}) do
     scores = teams
-      |> Enum.map(fn {_teamid, ratings} -> team_stats(ratings) end)
-      |> Enum.map(fn {_total, mean} -> mean end)
+      |> Enum.map(fn {_team, team_stats} ->
+        team_stats.total_rating
+      end)
       |> Enum.sort
 
     [max_score | remaining] = scores
     [min_score | _] = remaining
+
+    # Max score must always be at least one for this to not bork
+    max_score = max(max_score, 1)
 
     ((1 - (min_score/max_score)) * 100)
       |> round

@@ -20,13 +20,13 @@ defmodule TeiserverWeb.Report.RatingController do
   @spec distribution_table(Plug.Conn.t(), map) :: Plug.Conn.t()
   def distribution_table(conn, _params) do
     conn
-    |> render("distribution_table.html")
+      |> render("distribution_table.html")
   end
 
   @spec distribution_graph(Plug.Conn.t(), map) :: Plug.Conn.t()
   def distribution_graph(conn, _params) do
     conn
-    |> render("distribution_graph.html")
+      |> render("distribution_graph.html")
   end
 
   @spec balance_tester(Plug.Conn.t(), map) :: Plug.Conn.t()

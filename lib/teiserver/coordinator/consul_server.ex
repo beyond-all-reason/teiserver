@@ -691,29 +691,45 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec force_rebalance(T.consul_state()) :: String.t()
   defp force_rebalance(state) do
-    Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - starting")
+    players = list_players(state)
+    player_count = Enum.count(players)
+    if player_count > 1 do
+      Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - starting")
+      player_ids = Enum.map(players, fn %{userid: u} -> u end)
 
-    balance = BalanceLib.balance_players(list_players(state), state.host_teamcount)
+      rating_type = cond do
+        player_count == 2 -> "Duel"
+        state.host_teamcount > 2 ->
+          if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
+        player_count <= 8 -> "Small Team"
+        true -> "Large Team"
+      end
 
-    balance
-      |> Enum.each(fn {team_number, ratings} ->
-        ratings
-        |> Enum.each(fn {userid, _rating} ->
-          Lobby.force_change_client(state.coordinator_id, userid, %{team_number: team_number - 1})
+      balance = BalanceLib.balance_players(player_ids, state.host_teamcount, rating_type)
 
-          username = User.get_username(userid)
-          Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - moved #{userid}/#{username} to #{team_number}")
+      balance
+        |> Map.get(:team_players)
+        |> Enum.each(fn {team_number, ratings} ->
+          ratings
+          |> Enum.each(fn {userid, _rating} ->
+            Lobby.force_change_client(state.coordinator_id, userid, %{team_number: team_number - 1})
+
+            username = User.get_username(userid)
+            Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - moved #{userid}/#{username} to #{team_number}")
+          end)
         end)
-      end)
 
-    deviation = BalanceLib.get_deviation(balance)
+      deviation = BalanceLib.get_deviation(balance)
 
-    LobbyChat.sayex(state.coordinator_id, "Rebalanced via server, deviation at #{deviation}", state.lobby_id)
+      LobbyChat.sayex(state.coordinator_id, "Rebalanced via server, deviation at #{deviation}%", state.lobby_id)
 
-    Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - completed")
+      Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - completed")
 
-    :timer.sleep(100)
-    make_balance_hash(state)
+      :timer.sleep(100)
+      make_balance_hash(state)
+    else
+      make_balance_hash(state)
+    end
   end
 
   @spec make_balance_hash(T.consul_state()) :: String.t()
