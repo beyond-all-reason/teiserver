@@ -44,7 +44,7 @@ defmodule Teiserver.Game.MatchRatingLib do
 
       true ->
         do_rate_match(match)
-        do_rate_overall(match)
+        # do_rate_overall(match)
     end
   end
 
