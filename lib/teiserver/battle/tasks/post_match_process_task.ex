@@ -3,20 +3,23 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
 
   alias Teiserver.{Battle, User}
   alias Central.Helpers.NumberHelper
+  alias Central.Config
   # alias Teiserver.Data.Types, as: T
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
     if Central.cache_get(:application_metadata_cache, "teiserver_full_startup_completed") == true do
-      Battle.list_matches(
-        search: [
-          ready_for_post_process: true
-        ],
-        preload: [:members],
-        limit: :infinity
-      )
-      |> Enum.each(&post_process_match/1)
+      if Config.get_site_config_cache("system.Process matches") do
+        Battle.list_matches(
+          search: [
+            ready_for_post_process: true
+          ],
+          preload: [:members],
+          limit: :infinity
+        )
+        |> Enum.each(&post_process_match/1)
+      end
     end
 
     :ok
@@ -46,6 +49,8 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
       data: new_data,
       processed: true
     })
+
+    Teiserver.Game.MatchRatingLib.rate_match(match)
   end
 
   defp use_export_data(%{data: %{"export_data" => export_data}} = match) do

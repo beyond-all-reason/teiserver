@@ -32,6 +32,8 @@ defmodule Teiserver.Game.MatchRatingLib do
 
   def rate_match(nil), do: {:error, :no_match}
   def rate_match(match) do
+    logs = Game.list_rating_logs(search: [match_id: match.id], limit: 1, select: [:id])
+
     cond do
       not Enum.member?(@rated_match_types, match.game_type) ->
         {:error, :invalid_game_type}
@@ -41,6 +43,9 @@ defmodule Teiserver.Game.MatchRatingLib do
 
       match.winning_team == nil ->
         {:error, :no_winning_team}
+
+      not Enum.empty?(logs) ->
+        {:error, :already_rated}
 
       true ->
         do_rate_match(match)

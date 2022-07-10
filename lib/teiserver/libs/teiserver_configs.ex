@@ -11,6 +11,18 @@ defmodule Teiserver.TeiserverConfigs do
   @spec site_configs :: any
   defp site_configs do
     add_site_config_type(%{
+      key: "system.Process matches",
+      section: "Site management",
+      type: "boolean",
+      permissions: ["teiserver.admin"],
+      description: "Enable/disable post processing of matches",
+      opts: [],
+      default: true,
+
+      value_label: "Enable"
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Spring flood rate limit count",
       section: "Protocol",
       type: "integer",
