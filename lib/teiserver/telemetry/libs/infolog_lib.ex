@@ -91,6 +91,7 @@ defmodule Teiserver.Telemetry.InfologLib do
     query
   end
 
+  @spec _preload_users(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_users(query) do
     from infologs in query,
       left_join: users in assoc(infologs, :user),

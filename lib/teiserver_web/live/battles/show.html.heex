@@ -2,11 +2,11 @@
 
 <%
   result = @lobby.players
-  |> Enum.filter(fn p -> Map.has_key?(@clients, p) end)
-  |> Enum.group_by(fn p ->
-    client = @clients[p]
-    client.player
-  end)
+    |> Enum.filter(fn p -> Map.has_key?(@clients, p) end)
+    |> Enum.group_by(fn p ->
+      client = @clients[p]
+      client.player
+    end)
 
   factions = %{
     0 => "Armada",
@@ -15,12 +15,12 @@
   }
 
   players = Map.get(result, true, [])
-  |> Enum.map(fn p -> @clients[p] end)
-  |> Enum.sort_by(& {&1[:team_number], &1[:name]})
+    |> Enum.map(fn p -> @clients[p] end)
+    |> Enum.sort_by(& {&1[:team_number], &1[:name]})
 
   spectators = Map.get(result, false, [])
-  |> Enum.map(fn p -> @clients[p] end)
-  |> Enum.sort_by(& &1[:name])
+    |> Enum.map(fn p -> @clients[p] end)
+    |> Enum.sort_by(& &1[:name])
 %>
 
 <%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "battle_lobbies", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>

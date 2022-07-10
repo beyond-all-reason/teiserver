@@ -155,13 +155,15 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       [] ->
         socket
       _ ->
-        players = Lobby.get_lobby_players!(assigns.id)
+        players = Battle.get_lobby_member_list(assigns.id)
         {users, clients} = get_user_and_clients(players)
 
+        new_lobby = Map.put(assigns[:lobby], :players, players)
+
         socket
+          |> assign(:lobby, new_lobby)
           |> assign(:users, users)
           |> assign(:clients, clients)
-
     end
 
     {:noreply, socket}
@@ -185,10 +187,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
     {:noreply,
       socket
-      |> assign(:battle, battle)
-      |> get_consul_state
-      |> assign(:users, users)
-      |> assign(:clients, clients)}
+        |> assign(:battle, battle)
+        |> get_consul_state
+        |> assign(:users, users)
+        |> assign(:clients, clients)
+    }
   end
 
   def handle_event("reset-consul", _event, %{assigns: %{id: id, bar_user: bar_user}} = socket) do

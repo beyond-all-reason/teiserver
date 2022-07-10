@@ -137,12 +137,12 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     assert reply == %{
       "cmd" => "s.lobby.get",
       "bots" => %{},
-      "lobby_id" => 1,
+      "lobby_id" => lobby_id,
       "modoptions" => %{
         "server/match/uuid" => Battle.get_lobby_uuid(lobby_id)
       },
       "members" => [
-        %{"away" => false, "in_game" => false, "lobby_id" => 1, "player" => false, "player_number" => 0, "ready" => false, "sync" => [], "team_colour" => 0, "team_number" => 0, "userid" => user2.id}
+        %{"away" => false, "in_game" => false, "lobby_id" => lobby_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => [], "team_colour" => 0, "team_number" => 0, "userid" => user2.id}
       ],
       "players" => []
     }
