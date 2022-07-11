@@ -130,7 +130,7 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   @spec get_deviation(map()) :: number()
-  defp get_deviation(result_stats) do
+  def get_deviation(result_stats) do
     scores = result_stats
       |> Enum.map(fn {_team, stats} ->
         stats.total_rating

@@ -3,7 +3,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.{Account, Battle, Coordinator, User, Client}
-  alias Teiserver.Battle.{Lobby, LobbyChat}
+  alias Teiserver.Battle.{Lobby, LobbyChat, BalanceLib}
   alias Teiserver.Data.Types, as: T
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -70,8 +70,18 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         scores = prediction.team_scores
           |> Enum.map(fn {team, score} -> "#{team + 1} total rating: #{score}" end)
 
+        prediction_stats = prediction.team_scores
+          |> Map.new(fn {team_id, score} ->
+            {team_id, %{
+              total_rating: score
+            }}
+          end)
+
+        deviation = BalanceLib.get_deviation(prediction_stats)
+
         [
           "Team #{prediction.winning_team + 1} is predicted to win",
+          "Deviation of #{deviation}"
         ] ++ scores
       false -> []
     end
