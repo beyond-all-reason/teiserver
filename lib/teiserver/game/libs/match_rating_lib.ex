@@ -303,9 +303,9 @@ defmodule Teiserver.Game.MatchRatingLib do
     }
   end
 
-  @spec predict_winning_team([map()], non_neg_integer()) :: non_neg_integer()
+  @spec predict_winning_team([map()], non_neg_integer()) :: map()
   def predict_winning_team(players, rating_type_id) do
-    players
+    team_scores = players
       |> Enum.group_by(
         fn %{team_id: team_id} -> team_id end,
         fn %{user_id: user_id} -> user_id end
@@ -319,9 +319,16 @@ defmodule Teiserver.Game.MatchRatingLib do
 
         {team_id, score}
       end)
+
+    winning_team = team_scores
       |> Enum.sort_by(fn {_id, score} -> score end, &>=/2)
       |> hd
       |> elem(0)
+
+    %{
+      winning_team: winning_team,
+      team_scores: team_scores
+    }
   end
 
   def predict_match(match_id) when is_integer(match_id) do
@@ -331,7 +338,7 @@ defmodule Teiserver.Game.MatchRatingLib do
 
   def predict_match(match) do
     rating_type_id = get_match_type(match)
-    predict_winning_team(match.members, rating_type_id)
+    predict_winning_team(match.members, rating_type_id) |> Map.get(:winning_team)
   end
 
   def test_prediction() do

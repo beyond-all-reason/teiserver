@@ -67,9 +67,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         prediction = MatchRatingLib.predict_winning_team(match_players, rating_type_id)
 
+        scores = prediction.team_scores
+          |> Enum.map(fn {team, score} -> "#{team + 1} total rating: #{score}" end)
+
         [
-          "Team #{prediction + 1} is predicted to win"
-        ]
+          "Team #{prediction.winning_team + 1} is predicted to win",
+        ] ++ scores
       false -> []
     end
 
