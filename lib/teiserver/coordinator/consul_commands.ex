@@ -88,6 +88,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     # Put other settings in here
     other_settings = [
       (if state.welcome_message, do: "Welcome message: #{state.welcome_message}"),
+      "#{player_count} players",
       "Team size and count are: #{state.host_teamsize} and #{state.host_teamcount}",
       boss_string,
       "Maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
