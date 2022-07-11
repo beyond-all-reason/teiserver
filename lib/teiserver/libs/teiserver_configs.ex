@@ -12,7 +12,7 @@ defmodule Teiserver.TeiserverConfigs do
   defp site_configs do
     add_site_config_type(%{
       key: "system.Process matches",
-      section: "Site management",
+      section: "Background tasks",
       type: "boolean",
       permissions: ["teiserver.admin"],
       description: "Enable/disable post processing of matches",
