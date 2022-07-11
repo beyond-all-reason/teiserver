@@ -19,7 +19,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.ConfigOut do
     %{
       "cmd" => "s.config.list_user_types",
       "types" => types
-        |> Enum.map(fn type -> Tachyon.convert_object(:user_config_type, type) end)
+        |> Enum.map(fn type -> Tachyon.convert_object(type, :user_config_type) end)
     }
   end
 

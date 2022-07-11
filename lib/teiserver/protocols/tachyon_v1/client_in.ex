@@ -8,7 +8,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.ClientIn do
   def do_handle("list_clients_from_ids", %{"id_list" => id_list}, state) do
     clients = Client.get_clients(id_list)
       |> Enum.filter(fn c -> c != nil end)
-      |> Enum.map(fn c -> Tachyon.convert_object(:client, c) end)
+      |> Enum.map(fn c -> Tachyon.convert_object(c, :client) end)
 
     reply(:client, :client_list, clients, state)
   end

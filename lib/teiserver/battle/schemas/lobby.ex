@@ -340,7 +340,7 @@ defmodule Teiserver.Battle.Lobby do
         :closed
       else
         if Enum.member?(battle.members, userid) do
-          bots = Battle.get_bots(lobby_id)
+          bots = Battle.get_bots(lobby_id) || []
 
           # Remove all their bots
           bots

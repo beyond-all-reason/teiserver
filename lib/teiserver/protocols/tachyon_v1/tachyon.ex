@@ -17,17 +17,19 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   Used to convert objects into something that will be sent back over the wire. We use this
   as there might be internal fields we don't want sent out (e.g. email).
   """
-  @spec convert_object(:user | :user_extended | :user_extended_icons | :client | :battle | :queue | :blog_post, Map.t() | nil) :: Map.t() | nil
-  def convert_object(_, nil), do: nil
-  def convert_object(:user, user), do: Map.take(user, ~w(id name bot clan_id springid country)a)
-  def convert_object(:user_extended, user), do: Map.take(user, ~w(id name bot clan_id permissions
+  @spec convert_object(Map.t() | nil, :user | :user_extended | :user_extended_icons | :client | :battle | :queue | :blog_post) :: Map.t() | nil
+  def convert_object(nil, _), do: nil
+  def convert_object(user, :user), do: Map.take(user, ~w(id name bot clan_id springid country)a)
+  def convert_object(user, :user_extended), do: Map.take(user, ~w(id name bot clan_id permissions
                     friends friend_requests ignores springid country)a)
-  def convert_object(:user_extended_icons, user),
-  do:
-    Map.merge(convert_object(:user_extended, user),
-    %{"icons" => Teiserver.Account.UserLib.generate_user_icons(user)}
-  )
-  def convert_object(:client, client) do
+  def convert_object(user, :user_extended_icons) do
+    Map.merge(
+      convert_object(user, :user_extended),
+      %{"icons" => Teiserver.Account.UserLib.generate_user_icons(user)}
+    )
+  end
+
+  def convert_object(client, :client) do
     sync_list = case client.sync do
       true -> ["game", "map"]
       1 -> ["game", "map"]
@@ -42,16 +44,16 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
     )
       |> Map.put(:sync, sync_list)
   end
-  def convert_object(:queue, queue), do: Map.take(queue, ~w(id name team_size conditions settings map_list)a)
-  def convert_object(:blog_post, post), do: Map.take(post, ~w(id short_content content url tags live_from)a)
-  def convert_object(:user_config_type, type) do
+  def convert_object(queue, :queue), do: Map.take(queue, ~w(id name team_size conditions settings map_list)a)
+  def convert_object(post, :blog_post), do: Map.take(post, ~w(id short_content content url tags live_from)a)
+  def convert_object(type, :user_config_type) do
     opts = type[:opts] |> Map.new
     Map.take(type, ~w(default description key section type value_label)a)
       |> Map.put(:opts, opts)
   end
 
   # Slightly more complex conversions
-  def convert_object(:lobby, lobby) do
+  def convert_object(lobby, :lobby) do
     lobby = %{lobby |
       password: lobby.password != nil
     }

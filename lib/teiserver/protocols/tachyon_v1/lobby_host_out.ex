@@ -19,7 +19,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyHostOut do
     %{
       "cmd" => "s.lobby_host.join_response",
       "result" => "approve",
-      "lobby" => Tachyon.convert_object(:lobby, lobby)
+      "lobby" => Tachyon.convert_object(lobby, :lobby)
     }
   end
 

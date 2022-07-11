@@ -11,7 +11,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
       "cmd" => "s.lobby.query",
       "result" => "success",
       "lobbies" => lobby_list
-        |> Enum.map(fn b -> Tachyon.convert_object(:lobby, b) end)
+        |> Enum.map(fn b -> Tachyon.convert_object(b, :lobby) end)
     }
   end
 
@@ -27,7 +27,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     %{
       "cmd" => "s.lobby.create",
       "result" => "success",
-      "lobby" => Tachyon.convert_object(:lobby, lobby)
+      "lobby" => Tachyon.convert_object(lobby, :lobby)
     }
   end
 
@@ -45,7 +45,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     %{
       "cmd" => "s.lobby.update",
       "result" => "success",
-      "lobby" => Tachyon.convert_object(:lobby, lobby)
+      "lobby" => Tachyon.convert_object(lobby, :lobby)
     }
   end
 
@@ -63,7 +63,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     lobby = Lobby.get_lobby(lobby_id)
     %{
       "cmd" => "s.lobby.updated",
-      "lobby" => Tachyon.convert_object(:lobby, lobby)
+      "lobby" => Tachyon.convert_object(lobby, :lobby)
     }
   end
 
@@ -95,7 +95,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     %{
       "cmd" => "s.lobby.updated_client_battlestatus",
       "lobby_id" => lobby_id,
-      "client" => Tachyon.convert_object(:client, client),
+      "client" => Tachyon.convert_object(client, :client),
       "reason" => reason
     }
   end
@@ -158,7 +158,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
         %{
           "cmd" => "s.lobby.force_join",
           "script_password" => script_password,
-          "lobby" => Tachyon.convert_object(:lobby, lobby)
+          "lobby" => Tachyon.convert_object(lobby, :lobby)
         }
     end
   end
@@ -205,7 +205,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
         %{
           "cmd" => "s.lobby.join_response",
           "result" => "approve",
-          "lobby" => Tachyon.convert_object(:lobby, lobby)
+          "lobby" => Tachyon.convert_object(lobby, :lobby)
         }
     end
   end

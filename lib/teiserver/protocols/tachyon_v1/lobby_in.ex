@@ -32,19 +32,19 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
     result = keys
       |> Map.new(fn k ->
         case k do
-          "lobby" -> {"lobby", Tachyon.convert_object(:lobby, Battle.get_lobby(lobby_id))}
+          "lobby" -> {"lobby", Tachyon.convert_object(Battle.get_lobby(lobby_id), :lobby)}
           "bots" -> {"bots", Battle.get_bots(lobby_id)}
           "players" -> {"players",
             Battle.get_lobby_players(lobby_id)
               |> Enum.map(fn player ->
-                Tachyon.convert_object(:client, player)
+                Tachyon.convert_object(player, :client)
               end)
           }
           "members" -> {"members",
             Battle.get_lobby_member_list(lobby_id)
               |> Enum.map(fn member_id ->
                 c = Account.get_client_by_id(member_id)
-                Tachyon.convert_object(:client, c)
+                Tachyon.convert_object(c, :client)
               end)
           }
           "modoptions" -> {"modoptions", Battle.get_modoptions(lobby_id)}

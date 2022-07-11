@@ -19,7 +19,7 @@ defmodule Teiserver.Protocols.V1.TachyonConversionTest do
       }
     }
 
-    assert Tachyon.convert_object(:lobby, lobby) == %{
+    assert Tachyon.convert_object(lobby, :lobby) == %{
       engine_name: "spring-105",
       engine_version: "105.1.2.3",
       map_hash: "string_of_characters",
