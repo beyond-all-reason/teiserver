@@ -609,7 +609,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         ConsulServer.say_command(cmd, state)
         Lobby.sayex(state.coordinator_id, "Balance mode changed to Consul mode", state.lobby_id)
 
-        new_locks = ["team" | state.locks] |> Enum.uniq
+        new_locks = [:team | state.locks] |> Enum.uniq
         %{state | locks: new_locks}
 
       "spads" ->
@@ -618,7 +618,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         ConsulServer.say_command(cmd, state)
         Lobby.sayex(state.coordinator_id, "Balance mode changed to SPADS mode", state.lobby_id)
 
-        new_locks = List.delete(state.locks, "team")
+        new_locks = List.delete(state.locks, :team)
         %{state | locks: new_locks}
       _ ->
         LobbyChat.sayprivateex(state.coordinator_id, senderid, "No balancemode of that name, accepts consul and spads", state.lobby_id)
