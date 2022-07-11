@@ -2,6 +2,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Teiserver.{User, Account, Client, Coordinator}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Data.Matchmaking
+  alias Central.Helpers.NumberHelper
   alias Teiserver.Account.{AccoladeLib, CodeOfConductData}
   alias Teiserver.Coordinator.CoordinatorLib
   alias Central.Config
@@ -158,6 +159,20 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
             _ -> "Found smurfs named: #{Enum.join(smurfs, ", ")}"
           end
 
+          ratings = Account.list_ratings(
+            search: [
+              user_id: user.id
+            ],
+            preload: [:rating_type]
+          )
+            |> Enum.map(fn rating ->
+              score = rating.ordinal
+                |> Decimal.to_float()
+                |> NumberHelper.round(2)
+
+              "#{rating.rating_type.name}: #{score}"
+            end)
+
           accolades_string = if Config.get_site_config_cache("teiserver.Enable accolades") do
             accolades = AccoladeLib.get_player_accolades(user.id)
             case Map.keys(accolades) do
@@ -179,7 +194,8 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           [
             "Rank: #{user.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
             smurf_string,
-            accolades_string
+            accolades_string,
+            ["Ratings: " | ratings]
           ]
         else
           []
