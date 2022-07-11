@@ -620,9 +620,12 @@ defmodule TeiserverWeb.Admin.UserController do
           end)
           |> List.flatten
 
+        stats = Account.get_user_stat_data(user.id)
+
         conn
           |> add_breadcrumb(name: "List possible smurfs", url: conn.request_path)
           |> assign(:user, user)
+          |> assign(:stats, stats)
           |> assign(:params, search_defaults(conn))
           |> assign(:key_types, key_types)
           |> assign(:users, users)

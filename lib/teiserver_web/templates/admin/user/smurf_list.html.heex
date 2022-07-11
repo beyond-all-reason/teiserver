@@ -30,7 +30,13 @@
 <div class="float-end py-3">
   <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>Show user</a>
 </div>
-<h3 class="my-4">Listing matches for <%= @user.name %></h3>
+<h3 class="mt-4">Previous names for <%= @user.name %></h3>
+<%=
+  (@stats["previous_names"] || [])
+    |> Enum.join(", ")
+%>
+
+<h3 class="mt-4">Listing matches for <%= @user.name %></h3>
 
 <%
   type_colours = %{
