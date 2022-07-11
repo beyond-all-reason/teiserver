@@ -116,7 +116,7 @@ defmodule Teiserver.Battle.MatchLib do
       item_icon: Teiserver.Battle.MatchLib.icon(),
       item_label: make_match_name(match),
 
-      url: "/battle/matches/#{match.id}"
+      url: "/teiserver/battle/matches/#{match.id}"
     }
   end
 
