@@ -137,15 +137,22 @@ defmodule Teiserver.Battle.BalanceLib do
       end)
       |> Enum.sort
 
-    [max_score | remaining] = scores
-    [min_score | _] = remaining
+    case scores do
+      [] ->
+        0
+      [_] ->
+        0
+      _ ->
+        [max_score | remaining] = scores
+        [min_score | _] = remaining
 
-    # Max score must always be at least one for this to not bork
-    max_score = max(max_score, 1)
+        # Max score must always be at least one for this to not bork
+        max_score = max(max_score, 1)
 
-    ((1 - (min_score/max_score)) * 100)
-      |> round
-      |> abs
+        ((1 - (min_score/max_score)) * 100)
+          |> round
+          |> abs
+    end
   end
 
   defp get_skills_from_rating_list(rating_list) do

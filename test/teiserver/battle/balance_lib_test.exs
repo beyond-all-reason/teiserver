@@ -1,5 +1,5 @@
 defmodule Teiserver.Battle.BalanceLibTest do
-  use Central.DataCase, async: true
+  use Central.DataCase, async: false
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Account
