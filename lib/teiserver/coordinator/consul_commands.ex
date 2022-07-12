@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.{Account, Battle, Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat, BalanceLib}
   alias Teiserver.Data.Types, as: T
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
 
   @doc """
     Command has structure:
@@ -45,7 +45,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> Enum.map(&User.get_username/1)
       |> Enum.join(", ")
 
-    player_count = ConsulServer.get_player_count(state)
+    # player_count = ConsulServer.get_player_count(state)
+    player_count = Battle.get_lobby_player_count(state.lobby_id)
 
     max_player_count = ConsulServer.get_max_player_count(state)
 
@@ -61,14 +62,22 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
 
-        match_players = state
-          |> ConsulServer.list_players
+        # match_players = state
+        #   |> ConsulServer.list_players
+        #   |> Enum.map(fn p -> %{team_id: p.team_number, user_id: p.userid} end)
+
+        match_players = state.lobby_id
+          |> Battle.get_lobby_players()
           |> Enum.map(fn p -> %{team_id: p.team_number, user_id: p.userid} end)
 
         prediction = MatchRatingLib.predict_winning_team(match_players, rating_type_id)
 
         scores = prediction.team_scores
-          |> Enum.map(fn {team, score} -> "#{team + 1} total rating: #{score}" end)
+          |> Enum.map(fn {team, score} ->
+            score = round(score, 2)
+
+            "#{team + 1} total rating: #{score}"
+          end)
 
         prediction_stats = prediction.team_scores
           |> Map.new(fn {team_id, score} ->
@@ -81,7 +90,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         [
           "Team #{prediction.winning_team + 1} is predicted to win",
-          "Deviation of #{deviation}"
+          "Deviation of #{deviation}%"
         ] ++ scores
       false -> []
     end
@@ -101,7 +110,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     # Put other settings in here
     other_settings = [
       (if state.welcome_message, do: "Welcome message: #{state.welcome_message}"),
-      "#{player_count} players",
+      "Currently #{player_count} players",
       "Team size and count are: #{state.host_teamsize} and #{state.host_teamcount}",
       boss_string,
       "Maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
@@ -124,6 +133,50 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     |> Enum.filter(fn s -> s != nil end)
 
     Coordinator.send_to_user(senderid, status_msg)
+    state
+  end
+
+  def handle_command(%{command: "players", senderid: senderid} = _cmd, state) do
+    players = Battle.get_lobby_players(state.lobby_id)
+    player_ids = players |> Enum.map(fn p -> p.userid end)
+    player_count = Enum.count(players)
+
+    rating_type = cond do
+      player_count == 2 -> "Duel"
+      state.host_teamcount > 2 ->
+        if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
+      player_count <= 8 -> "Small Team"
+      true -> "Large Team"
+    end
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
+
+    ratings_map = Account.list_ratings(
+      search: [
+        rating_type_id: rating_type_id,
+        user_id_in: player_ids
+      ],
+      # preload: [:user]
+    )
+    |> Map.new(fn rating -> {rating.user_id, rating} end)
+
+    player_stat_lines = players
+      |> Enum.sort_by(fn player -> {player.team_number, player.name} end, &<=/2)
+      |> Enum.map(fn player ->
+        score = ratings_map[player.userid].ordinal
+          |> Decimal.to_float()
+          |> round(2)
+
+        "#{player.name}      #{score}"
+      end)
+
+    msg = [
+      "",
+      player_stat_lines
+    ]
+    |> List.flatten
+    |> Enum.filter(fn s -> s != nil end)
+
+    Coordinator.send_to_user(senderid, msg)
     state
   end
 
@@ -620,7 +673,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         Lobby.sayex(state.coordinator_id, "Balance mode changed to Consul mode", state.lobby_id)
 
         new_locks = [:team | state.locks] |> Enum.uniq
-        %{state | locks: new_locks}
+        %{state | locks: new_locks, consul_balance: true}
 
       "spads" ->
         lobby = Lobby.get_lobby(state.lobby_id)
@@ -629,7 +682,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         Lobby.sayex(state.coordinator_id, "Balance mode changed to SPADS mode", state.lobby_id)
 
         new_locks = List.delete(state.locks, :team)
-        %{state | locks: new_locks}
+        %{state | locks: new_locks, consul_balance: false}
       _ ->
         LobbyChat.sayprivateex(state.coordinator_id, senderid, "No balancemode of that name, accepts consul and spads", state.lobby_id)
         state

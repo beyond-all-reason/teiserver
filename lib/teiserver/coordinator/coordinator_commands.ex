@@ -9,7 +9,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   @splitter "---------------------------"
   @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore 1v1me un1v1)
-  @forward_to_consul ~w(s status follow joinq leaveq splitlobby y yes n no)
+  @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no)
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, _state) do
