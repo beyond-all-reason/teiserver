@@ -154,15 +154,16 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       search: [
         rating_type_id: rating_type_id,
         user_id_in: player_ids
-      ],
-      # preload: [:user]
+      ]
     )
     |> Map.new(fn rating -> {rating.user_id, rating} end)
+
+    default_rating = BalanceLib.default_rating()
 
     player_stat_lines = players
       |> Enum.sort_by(fn player -> {player.team_number, player.name} end, &<=/2)
       |> Enum.map(fn player ->
-        score = ratings_map[player.userid].ordinal
+        score = (ratings_map[player.userid] || default_rating).ordinal
           |> Decimal.to_float()
           |> round(2)
 
@@ -671,6 +672,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         Lobby.update_lobby(%{lobby | consul_balance: true}, nil, :balance)
         ConsulServer.say_command(cmd, state)
         Lobby.sayex(state.coordinator_id, "Balance mode changed to Consul mode", state.lobby_id)
+
+        :timer.send_after(500, :consul_balance_enabled)
 
         new_locks = [:team | state.locks] |> Enum.uniq
         %{state | locks: new_locks, consul_balance: true}

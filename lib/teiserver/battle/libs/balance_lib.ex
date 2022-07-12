@@ -1,19 +1,20 @@
 defmodule Teiserver.Battle.BalanceLib do
   @moduledoc """
-  A set of functions related to balance and ratings
+  A set of functions related to balance. Ratings are calculated via Teiserver.Game.MatchRatingLib
   """
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Account
   alias Teiserver.Game.MatchRatingLib
 
-  @type rating() :: number()
-  @type user_rating() :: {T.userid(), rating()}
+  @type rating_value() :: float()
+  @type ordinal_sigma_pair() :: {float(), float()}
+  @type user_rating() :: {T.userid(), rating_value()}
 
   @spec balance_players([T.userid()], non_neg_integer(), String.t(), :round_robin | :loser_picks) :: map()
   def balance_players(user_ids, team_count, rating_type, mode \\ :loser_picks) do
     players = user_ids
       |> Enum.map(fn userid ->
-        {userid, get_skill(userid, rating_type)}
+        {userid, get_user_rating_value(userid, rating_type)}
       end)
       |> Enum.sort_by(fn {_, s} -> s end, &>=/2)
 
@@ -48,22 +49,54 @@ defmodule Teiserver.Battle.BalanceLib do
     results
   end
 
-  @spec get_skill(T.userid(), String.t()) :: rating()
-  def get_skill(userid, rating_type) do
+  @spec default_rating :: List.t()
+  @spec default_rating(non_neg_integer()) :: List.t()
+  def default_rating(rating_type_id \\ nil) do
+    {mu, sigma} = Openskill.rating()
+    ordinal = Openskill.ordinal({mu, sigma})
+
+    %{
+      rating_type_id: rating_type_id,
+      mu: Decimal.from_float(mu * 1.0),
+      sigma: Decimal.from_float(sigma * 1.0),
+      ordinal: Decimal.from_float(ordinal * 1.0)
+    }
+  end
+
+  @spec get_user_ordinal_sigma_pair(T.userid(), String.t() | non_neg_integer()) :: ordinal_sigma_pair()
+  def get_user_ordinal_sigma_pair(userid, rating_type_id) when is_integer(rating_type_id) do
+    rating = Account.get_rating(userid, rating_type_id) || default_rating()
+
+    {
+      Decimal.to_float(rating.ordinal),
+      Decimal.to_float(rating.sigma)
+    }
+  end
+
+  def get_user_ordinal_sigma_pair(userid, rating_type) do
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
+    get_user_ordinal_sigma_pair(userid, rating_type_id)
+  end
+
+  @spec get_user_rating_value(T.userid(), String.t() | non_neg_integer()) :: rating_value()
+  def get_user_rating_value(userid, rating_type_id) when is_integer(rating_type_id) do
     Account.get_rating(userid, rating_type_id) |> convert_rating()
   end
 
+  def get_user_rating_value(userid, rating_type) do
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
+    get_user_rating_value(userid, rating_type_id)
+  end
+
+  @spec convert_rating(map() | nil) :: rating_value()
   def convert_rating(nil) do
-    MatchRatingLib.default_rating() |> convert_rating()
+    default_rating() |> convert_rating()
   end
   def convert_rating(%{mu: mu, sigma: sigma}) do
     Decimal.to_float(mu) - Decimal.to_float(sigma)
   end
 
-  @doc """
-  Each team takes it in turns to pick, they pick the highest ranked player
-  """
+  # Each team takes it in turns to pick, they pick the highest ranked player
   @spec round_robin([user_rating()], map()) :: map()
   defp round_robin(players, teams) do
     do_round_robin(players, teams, 1)
@@ -82,9 +115,7 @@ defmodule Teiserver.Battle.BalanceLib do
     do_round_robin(remaining_players, new_team_map, next_team)
   end
 
-  @doc """
-  Each round the team with the lowest score picks
-  """
+  # Each round the team with the lowest score picks
   @spec loser_picks([user_rating()], map()) :: map()
   defp loser_picks(players, teams) do
     max_teamsize = Enum.count(players)/Enum.count(teams) |> :math.ceil() |> round()
@@ -100,7 +131,7 @@ defmodule Teiserver.Battle.BalanceLib do
       end)
       |> Enum.map(fn {team_number, players} ->
         score = players
-          |> get_skills_from_rating_list()
+          |> get_rating_values_from_rating_list()
           |> Enum.sum
 
         {score, team_number}
@@ -121,7 +152,7 @@ defmodule Teiserver.Battle.BalanceLib do
   """
   @spec team_stats([user_rating()]) :: {number, number}
   def team_stats(player_list) do
-    skills = get_skills_from_rating_list(player_list)
+    skills = get_rating_values_from_rating_list(player_list)
 
     {
       Enum.sum(skills),
@@ -155,7 +186,7 @@ defmodule Teiserver.Battle.BalanceLib do
     end
   end
 
-  defp get_skills_from_rating_list(rating_list) do
+  defp get_rating_values_from_rating_list(rating_list) do
     rating_list |> Enum.map(fn {_, s} -> s end)
   end
 end

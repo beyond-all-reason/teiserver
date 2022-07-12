@@ -5,9 +5,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   """
   use GenServer
   require Logger
-  alias Teiserver.{Coordinator, Client, User, Battle}
+  alias Teiserver.{Account, Coordinator, Client, User, Battle}
   alias Teiserver.Battle.{Lobby, LobbyChat, BalanceLib}
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
   alias Central.Config
   alias Phoenix.PubSub
   alias Teiserver.Bridge.BridgeServer
@@ -99,6 +99,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
+  def handle_info(:consul_balance_enabled, state) do
+    set_skill_modoptions(state)
+    {:noreply, state}
+  end
+
   def handle_info(:match_start, state) do
     {:noreply, state}
   end
@@ -118,6 +123,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       end)
 
     send(self(), :balance)
+    :timer.send_after(5000, :consul_balance_enabled)
     {:noreply, %{state | timeouts: %{}}}
   end
 
@@ -271,6 +277,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # If the client is muted, we need to tell the host
     if User.is_restricted?(user, ["All chat", "Battle chat"]) do
       Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{user.name}")
+    end
+
+    if state.consul_balance do
+      set_skill_modoptions_for_user(state, userid)
     end
 
     {:noreply, state}
@@ -909,6 +919,54 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
     }
+  end
+
+  defp set_skill_modoptions(state) do
+    player_count = Battle.get_lobby_player_count(state.lobby_id)
+    rating_type = cond do
+      player_count == 2 -> "Duel"
+      state.host_teamcount > 2 ->
+        if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
+      player_count <= 8 -> "Small Team"
+      true -> "Large Team"
+    end
+
+    new_opts = state.lobby_id
+      |> Battle.get_lobby_member_list()
+      |> Enum.map(fn userid ->
+        {ordinal, sigma} = BalanceLib.get_user_ordinal_sigma_pair(userid, rating_type)
+        username = Account.get_username_by_id(userid)
+
+        [
+          {"game/players/#{username}/skill", round(ordinal, 2)},
+          {"game/players/#{username}/skilluncertainty", round(sigma, 2)}
+        ]
+      end)
+      |> List.flatten
+      |> Map.new
+
+    Battle.set_modoptions(state.lobby_id, new_opts)
+  end
+
+  defp set_skill_modoptions_for_user(state, userid) do
+    player_count = Battle.get_lobby_player_count(state.lobby_id)
+    rating_type = cond do
+      player_count == 2 -> "Duel"
+      state.host_teamcount > 2 ->
+        if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
+      player_count <= 8 -> "Small Team"
+      true -> "Large Team"
+    end
+
+    username = Account.get_username_by_id(userid)
+    {ordinal, sigma} = BalanceLib.get_user_ordinal_sigma_pair(userid, rating_type)
+
+    new_opts = %{
+      "game/players/#{username}/skill" => round(ordinal, 2),
+      "game/players/#{username}/skilluncertainty" => round(sigma, 2)
+    }
+
+    Battle.set_modoptions(state.lobby_id, new_opts)
   end
 
   @spec get_level(String.t()) :: :banned | :spectator | :player
