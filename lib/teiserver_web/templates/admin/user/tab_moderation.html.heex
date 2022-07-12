@@ -1,5 +1,11 @@
 <%
   bsname = Central.Account.ReportLib.colours()
+  
+  has_open_report = @reports
+    |> Enum.filter(fn report -> report.responder == nil end)
+    |> Enum.empty?
+    
+  has_open_report = not has_open_report
 %>
 
 <script type="text/javascript" charset="utf-8">
@@ -22,13 +28,23 @@
 <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
 
 <%# Button for showing the form %>
-<div id="show-form-button" class="btn btn-warning mt-2" onclick="$('#report-form-div').show(); $(this).hide();">
+<div id="show-form-button" class={"btn btn-#{if has_open_report, do: "outline-"}warning mt-2"} onclick="$('#report-form-div').show(); $(this).hide();">
   <i class='fa-fw fa-regular fa-eye'></i>
   &nbsp;
   Show report form and CoC reference
 </div>
 
 <div id="report-form-div" style="display: none;">
+  <%= if has_open_report do %>
+    <div class="alert alert-danger2 mt-2" style="text-align: center">
+      <h5>
+        This user has 1 or more open reports, did you mean to respond to one of those instead of making a new item?
+      </h5>
+      
+      <span class="btn btn-danger2" onclick="$('#report-form-div').hide(); $('#show-form-button').show();">Yes I did</span>
+    </div>
+  <% end %>
+
   <form action={Routes.ts_admin_user_path(@conn, :perform_action, @user, "report_action")} method="POST" id="report-form">
     <div class="row">
       <div class="col-md-12">
@@ -215,7 +231,7 @@
 
       <td>
         <%= if report.responder == nil do %>
-          <a href={Routes.ts_admin_user_path(@conn, :respond_form, report.id)} class="btn btn-secondary btn-sm">
+          <a href={Routes.ts_admin_user_path(@conn, :respond_form, report.id)} class={"btn btn-#{bsname} btn-sm"}>
             Respond
             &nbsp;
             <i class="fa-fw fas fa-reply"></i>
