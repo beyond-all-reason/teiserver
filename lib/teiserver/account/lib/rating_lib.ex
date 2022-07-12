@@ -1,4 +1,9 @@
 defmodule Teiserver.Account.RatingLib do
+  @moduledoc """
+  This module purely deals with functions around Teiserver.Account.Rating, it is not
+  the module used for balance or ratings.
+  """
+
   use CentralWeb, :library
   alias Teiserver.Account.{Rating}
   require Logger
