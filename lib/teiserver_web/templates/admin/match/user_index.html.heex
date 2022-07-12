@@ -31,7 +31,7 @@
 <%= for match <- @matches do %>
   <%
     member_ids = match.members
-      |> Enum.filter(fn mm -> mm.user_id == @current_user.id end)
+      |> Enum.filter(fn mm -> mm.user_id == @user.id end)
 
     win = case member_ids do
       [] -> false
