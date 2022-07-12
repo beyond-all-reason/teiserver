@@ -45,12 +45,13 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     use_export_data(match)
     new_data = Map.merge(new_data, extract_export_data(match))
 
-    Battle.update_match(match, %{
+    {:ok, match} = Battle.update_match(match, %{
       data: new_data,
       processed: true
     })
 
-    Teiserver.Game.MatchRatingLib.rate_match(match)
+    # We pass match.id to ensure we re-query the match correctly
+    Teiserver.Game.MatchRatingLib.rate_match(match.id)
   end
 
   defp use_export_data(%{data: %{"export_data" => export_data}} = match) do
