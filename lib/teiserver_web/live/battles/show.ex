@@ -69,14 +69,16 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
         bar_user = User.get_user_by_id(socket.assigns.current_user.id)
         lobby = Map.put(lobby, :uuid, Battle.get_lobby_uuid(id))
+        modoptions = Battle.get_modoptions(id)
 
         {:noreply,
          socket
           |> assign(:bar_user, bar_user)
           |> assign(:page_title, page_title(socket.assigns.live_action))
           |> add_breadcrumb(name: lobby.name, url: "/teiserver/battles/lobbies/#{lobby.id}")
-          |> assign(:id, int_parse(id))
+          |> assign(:id, id)
           |> assign(:lobby, lobby)
+          |> assign(:modoptions, modoptions)
           |> get_consul_state
           |> assign(:users, users)
           |> assign(:clients, clients)
@@ -144,9 +146,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   def handle_info({:battle_lobby_throttle, _lobby_changes, player_changes}, %{assigns: assigns} = socket) do
     battle = Lobby.get_battle(assigns.id)
+    modoptions = Battle.get_modoptions(assigns.id)
 
     socket = socket
       |> assign(:battle, battle)
+      |> assign(:modoptions, modoptions)
       |> get_consul_state
 
     # Players
@@ -234,7 +238,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   defp get_consul_state(%{assigns: %{id: id}} = socket) do
     socket
-    |> assign(:consul, Coordinator.call_consul(id, :get_all))
+      |> assign(:consul, Coordinator.call_consul(id, :get_all))
   end
 
   defp page_title(:show), do: "Show Battle"
