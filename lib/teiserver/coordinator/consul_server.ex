@@ -117,6 +117,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
         end
       end)
 
+    send(self(), :balance)
     {:noreply, %{state | timeouts: %{}}}
   end
 
@@ -349,6 +350,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
     new_ring_timestamps = Map.put(ring_timestamps, userid, new_user_times)
 
     %{state | ring_timestamps: new_ring_timestamps}
+  end
+
+  defp handle_lobby_chat(userid, "!balance" <> _, %{consul_balance: true} = state) do
+    User.send_direct_message(state.coordinator_id, userid, "Server balance is currently enabled and calling !balance will not do anything.")
+    state
   end
 
   # Handle a command message
@@ -892,6 +898,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
       afk_check_at: nil,
 
       last_seen_map: %{},
+
+      consul_balance: false,
 
       # Used to detect if there's actually been a change to the balance since we last checked
       last_balance_hash: nil,
