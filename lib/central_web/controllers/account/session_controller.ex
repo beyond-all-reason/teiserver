@@ -47,7 +47,7 @@ defmodule CentralWeb.Account.SessionController do
       Account.list_codes(
         search: [
           value: "#{value}$#{ip}",
-          purpose: "one-time-login",
+          purpose: "one_time_login",
           expired: false
         ]
       )

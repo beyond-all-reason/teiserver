@@ -31,7 +31,7 @@
 <%= for code <- @codes do %>
 <%
   path = case code.purpose do
-    "one-time-login" ->
+    "one_time_login" ->
       [value | _] = String.split(code.value, "$")
       Routes.account_session_path(@conn, :one_time_login, value)
     "reset_password" ->

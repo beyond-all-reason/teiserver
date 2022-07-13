@@ -8,7 +8,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Central.Config
 
   @splitter "---------------------------"
-  @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore 1v1me un1v1)
+  @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore 1v1me un1v1 website)
   @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no)
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
@@ -298,6 +298,25 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         User.unignore_user(senderid, user.id)
         Coordinator.send_to_user(senderid, "#{user.name} is now un-ignored.")
     end
+    state
+  end
+
+  defp do_handle(%{command: "website", senderid: senderid} = _cmd, state) do
+    client = Client.get_client_by_id(senderid)
+    {:ok, code} = Central.Account.create_code(%{
+        value: UUID.uuid1() <> "$#{client.ip}",
+        purpose: "one_time_login",
+        expires: Timex.now() |> Timex.shift(minutes: 5),
+        user_id: senderid
+      })
+    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    url = "https://#{host}/one_time_login/#{code.value}"
+
+    IO.puts ""
+    IO.inspect "one_time_login$#{client.ip}"
+    IO.puts ""
+
+    Coordinator.send_to_user(senderid, "Your one-time login code is #{url} it will expire in 5 minutes")
     state
   end
 

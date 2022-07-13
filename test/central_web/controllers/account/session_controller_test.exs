@@ -107,7 +107,7 @@ defmodule CentralWeb.Account.SessionControllerTest do
     test "bad ip", %{conn: conn, user: user} do
       {:ok, _code} = Account.create_code(%{
         value: "login-code$ip",
-        purpose: "one-time-login",
+        purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(days: 1),
         user_id: user.id
       })
@@ -122,7 +122,7 @@ defmodule CentralWeb.Account.SessionControllerTest do
     test "good ip", %{conn: conn, user: user} do
       {:ok, _code} = Account.create_code(%{
         value: "login-code-good$127.0.0.1",
-        purpose: "one-time-login",
+        purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(days: 1),
         user_id: user.id
       })
