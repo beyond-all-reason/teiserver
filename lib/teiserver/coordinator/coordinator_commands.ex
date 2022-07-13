@@ -107,11 +107,28 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           end))
     end
 
+    ratings = Account.list_ratings(
+      search: [
+        user_id: sender.id
+      ],
+      preload: [:rating_type]
+    )
+      |> Enum.map(fn rating ->
+        score = rating.ordinal
+          |> Decimal.to_float()
+          |> NumberHelper.round(2)
+
+        "#{rating.rating_type.name}: #{score}"
+      end)
+      |> Enum.sort
+
     msg = [
       @splitter,
       "You are #{sender.name}",
       "Profile link: #{profile_link}",
-      "Rank: #{sender.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
+      "Time rank: #{sender.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
+      "Skill ratings:",
+      ratings,
       accolades_string
     ]
     |> List.flatten
