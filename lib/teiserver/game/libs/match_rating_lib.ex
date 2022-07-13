@@ -15,7 +15,7 @@ defmodule Teiserver.Game.MatchRatingLib do
 
   @spec rating_type_list() :: [String.t()]
   def rating_type_list() do
-    ["Overall", "Duel", "FFA", "Team FFA", "Small Team", "Large Team"]
+    ["Duel", "FFA", "Team FFA", "Small Team", "Large Team"]
   end
 
   @spec rating_type_id_lookup() :: map()
