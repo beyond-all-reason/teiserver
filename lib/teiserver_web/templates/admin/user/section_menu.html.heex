@@ -105,6 +105,17 @@
         url: "#"
       %>
     <% end %>
+    
+    <%= if @active == "ratings_form" do %>
+      <%= central_component "section_menu_button",
+        name: "ratings_form",
+        label: "Ratings form",
+        active: @active,
+        icon: "fa-solid #{Teiserver.Account.RatingLib.icon()}",
+        bsname: bsname,
+        url: "#"
+      %>
+    <% end %>
   </div>
 
   <div class="col-md-3">

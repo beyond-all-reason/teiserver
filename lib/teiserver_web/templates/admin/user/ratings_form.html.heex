@@ -1,0 +1,107 @@
+<% bsname = view_colour() %>
+
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+
+<script type="text/javascript">
+  function new_ordinal(index) {
+    mu = $("#" + index + "_mu").val();
+    sigma = $("#" + index + "_sigma").val();
+
+    ordinal = mu - (sigma * 3);
+
+    $("#" + index + "_ordinal").val(ordinal);
+  }
+</script>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
+            active: "ratings_form"
+          })
+        %>
+
+        <hr />
+
+        <form action={Routes.ts_admin_user_path(@conn, :ratings_post, @user)} method="post" class="">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+          
+          <div class="row my-3" style="text-align: center;">
+            <div class="col-md-6">
+              <h4>Current</h4>
+            </div>
+            <div class="col-md-6">
+              <h4>New values</h4>
+            </div>
+            
+            <div class="col-md-2">
+              <h5>Mu</h5>
+            </div>
+            <div class="col-md-2">
+              <h5>Sigma</h5>
+            </div>
+            <div class="col-md-2" style="border-right: 1px solid #777;">
+              <h5>Ordinal</h5>
+            </div>
+
+            <div class="col-md-2">
+              <h5>Mu</h5>
+            </div>
+            <div class="col-md-2">
+              <h5>Sigma</h5>
+            </div>
+            <div class="col-md-2">
+              <h5>Ordinal</h5>
+            </div>
+          </div>
+
+          <%= for {r, i} <- Enum.with_index(@rating_type_list) do %>
+            <%
+              rating = @ratings[r] || @default_rating
+            
+              mu = rating.mu |> Decimal.to_float()
+              sigma = rating.sigma |> Decimal.to_float()
+              ordinal = rating.ordinal |> Decimal.to_float()
+            %>
+            <div class="row my-3">
+              <div class="col-md-12">
+                <h4><%= r %></h4>
+              </div>
+              <div class="col-md-2">
+                <input type="text" value={mu} class="form-control" disabled="disabled" />
+              </div>
+              <div class="col-md-2">
+                <input type="text" value={sigma} class="form-control" disabled="disabled" />
+              </div>
+              <div class="col-md-2" style="border-right: 1px solid #777;">
+                <input type="text" value={ordinal} class="form-control" disabled="disabled" />
+              </div>
+
+              <div class="col-md-2">
+                <input type="hidden" name={"#{r}[old_mu]"} value={mu} />
+                <input type="text" name={"#{r}[mu]"} id={"#{i}_mu"} value={mu} class="form-control" onkeyup={"new_ordinal(#{i})"} />
+              </div>
+              <div class="col-md-2">
+              <input type="hidden" name={"#{r}[old_sigma]"} value={sigma} />
+                <input type="text" name={"#{r}[sigma]"} id={"#{i}_sigma"} value={sigma} class="form-control" onkeyup={"new_ordinal(#{i})"} />
+              </div>
+              <div class="col-md-2">
+                <input type="text" id={"#{i}_ordinal"} value={ordinal} class="form-control" disabled="disabled" />
+              </div>
+            </div>
+          <% end %>
+
+          <a href={Routes.ts_admin_user_path(@conn, :ratings, @user)} class="btn btn-secondary">
+            Cancel
+          </a>
+
+          <button type="submit" class={"btn btn-#{bsname} float-end"}>
+            Submit
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -5,8 +5,10 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Game.MatchRatingLib
   alias Central.Account.User
   alias Teiserver.Account.UserLib
+  alias Teiserver.Battle.BalanceLib
   alias Central.Account.GroupLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Decimal, as: D
 
   plug(AssignPlug,
     site_menu_active: "teiserver_user",
@@ -392,6 +394,118 @@ defmodule TeiserverWeb.Admin.UserController do
           |> assign(:rating_type_id_lookup, MatchRatingLib.rating_type_id_lookup())
           |> add_breadcrumb(name: "Ratings: #{user.name}", url: conn.request_path)
           |> render("ratings.html")
+
+      _ ->
+        conn
+          |> put_flash(:danger, "Unable to access this user")
+          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
+  end
+
+  @spec ratings_form(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def ratings_form(conn, %{"id" => id}) do
+    user = Account.get_user(id)
+
+    case Central.Account.UserLib.has_access(user, conn) do
+      {true, _} ->
+        ratings = Account.list_ratings(
+          search: [
+            user_id: user.id
+          ],
+          preload: [:rating_type]
+        )
+          |> Map.new(fn rating ->
+            {rating.rating_type.name, rating}
+          end)
+
+        conn
+          |> assign(:user, user)
+          |> assign(:ratings, ratings)
+          |> assign(:default_rating, BalanceLib.default_rating())
+          |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
+          |> add_breadcrumb(name: "Ratings form: #{user.name}", url: conn.request_path)
+          |> render("ratings_form.html")
+
+      _ ->
+        conn
+          |> put_flash(:danger, "Unable to access this user")
+          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
+  end
+
+  @spec ratings_post(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def ratings_post(conn, %{"id" => id} = params) do
+    user = Account.get_user(id)
+
+    case Central.Account.UserLib.has_access(user, conn) do
+      {true, _} ->
+        changes = MatchRatingLib.rating_type_list()
+          |> Enum.map(fn r -> {r, params[r]} end)
+          |> Enum.reject(fn {_r, changes} ->
+            changes["mu"] == changes["old_mu"] and changes["sigma"] == changes["old_sigma"]
+          end)
+          |> Enum.map(fn {rating_type, changes} ->
+            rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
+
+            existing_rating = Account.get_rating(user.id, rating_type_id)
+            user_rating = existing_rating || BalanceLib.default_rating()
+            new_mu = D.new(changes["mu"]) |> D.to_float
+            new_sigma = D.new(changes["sigma"]) |> D.to_float
+            new_ordinal = Openskill.ordinal({new_mu, new_sigma})
+
+            {:ok, new_rating} = case Account.get_rating(user.id, rating_type_id) do
+              nil ->
+                Account.create_rating(%{
+                  user_id: user.id,
+                  rating_type_id: rating_type_id,
+                  ordinal: new_ordinal,
+                  mu: new_mu,
+                  sigma: new_sigma
+                })
+              existing ->
+                Account.update_rating(existing, %{
+                  ordinal: new_ordinal,
+                  mu: new_mu,
+                  sigma: new_sigma
+                })
+            end
+
+            log_params = %{
+              user_id: user.id,
+              rating_type_id: rating_type_id,
+              match_id: nil,
+
+              value: %{
+                ordinal: new_ordinal,
+                mu: new_mu,
+                sigma: new_sigma,
+
+                old_ordinal: D.to_float(user_rating.ordinal),
+                old_mu: D.to_float(user_rating.mu),
+                old_sigma: D.to_float(user_rating.sigma),
+
+                ordinal_change: new_ordinal - D.to_float(user_rating.ordinal),
+                mu_change: new_mu - D.to_float(user_rating.mu),
+                sigma_change: new_sigma - D.to_float(user_rating.sigma),
+              }
+            }
+
+            {:ok, log} = Game.create_rating_log(log_params)
+
+            {new_rating, log}
+          end)
+
+        log_ids = changes
+          |> Enum.map(fn {_, log} -> log.id end)
+
+        add_audit_log(conn, "Teiserver:Changed user rating", %{
+          user_id: user.id,
+          log_ids: log_ids
+        })
+
+        conn
+          |> put_flash(:success, "Ratings updated")
+          |> redirect(to: Routes.ts_admin_user_path(conn, :ratings_form, user))
 
       _ ->
         conn

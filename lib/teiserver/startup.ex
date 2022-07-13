@@ -56,6 +56,7 @@ defmodule Teiserver.Startup do
       "Teiserver:Updated automod action",
       "Teiserver:Automod action enacted",
       "Teiserver:De-bridged user",
+      "Teiserver:Changed user rating",
     ])
 
     # Permissions setup

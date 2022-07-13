@@ -242,6 +242,8 @@ defmodule TeiserverWeb.Router do
         post("/users/data_search", UserController, :data_search)
         post("/users/search", UserController, :search)
         get("/users/applying/:id", UserController, :applying)
+        get("/users/ratings_form/:id", UserController, :ratings_form)
+        post("/users/ratings_post/:id", UserController, :ratings_post)
         get("/users/ratings/:id", UserController, :ratings)
         resources("/user", UserController)
 
