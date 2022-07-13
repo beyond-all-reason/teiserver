@@ -279,7 +279,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{user.name}")
     end
 
-    if state.consul_balance do
+    if state.consul_balance == true do
       set_skill_modoptions_for_user(state, userid)
     end
 
