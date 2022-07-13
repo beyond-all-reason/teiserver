@@ -49,27 +49,14 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, Enum.count(state.member_list), state}
   end
 
-  def handle_call(:get_player_list, _from, %{state: :lobby} = state) do
-    cache_age = System.system_time(:millisecond) - state.player_list_last_updated
-
-    if cache_age > @player_list_cache_age_max do
-      player_list = state.member_list
-        |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
-        |> Enum.filter(fn client -> client != nil end)
-        |> Enum.filter(fn client -> client.player == true and client.lobby_id == state.lobby_id end)
-
-      {:reply, player_list, %{state | player_list: player_list, player_list_last_updated: System.system_time(:millisecond)}}
-    else
-      {:reply, state.player_list, state}
-    end
-  end
-
   def handle_call(:get_player_list, _from, state) do
-    {:reply, state.player_list, state}
+    {player_list, new_state} = get_player_list(state)
+    {:reply, player_list, new_state}
   end
 
   def handle_call(:get_player_count, _from, state) do
-    {:reply, Enum.count(state.player_list), state}
+    {player_list, new_state} = get_player_list(state)
+    {:reply, Enum.count(player_list), new_state}
   end
 
   @impl true
@@ -235,6 +222,30 @@ defmodule Teiserver.Battle.LobbyServer do
 
     {:noreply, new_state}
   end
+
+
+
+  # Internal
+  @spec get_player_list(map()) :: {list(), map()}
+  defp get_player_list(%{state: :lobby} = state) do
+    cache_age = System.system_time(:millisecond) - state.player_list_last_updated
+
+    if cache_age > @player_list_cache_age_max do
+      player_list = state.member_list
+        |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
+        |> Enum.filter(fn client -> client != nil end)
+        |> Enum.filter(fn client -> client.player == true and client.lobby_id == state.lobby_id end)
+
+      {player_list, %{state | player_list: player_list, player_list_last_updated: System.system_time(:millisecond)}}
+    else
+      {state.player_list, state}
+    end
+  end
+  defp get_player_list(state) do
+    {state.player_list, state}
+  end
+
+
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
