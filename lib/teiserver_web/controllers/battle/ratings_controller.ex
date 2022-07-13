@@ -35,7 +35,7 @@ defmodule TeiserverWeb.Battle.RatingsController do
       ],
       order_by: "Ordinal high to low",
       preload: [:user],
-      limit: 25
+      limit: 100
     )
 
     conn
