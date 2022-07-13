@@ -6,6 +6,7 @@ defmodule Teiserver.ServerUserPlug do
     # Keyword.fetch!(opts, :repo)
   end
 
+  @spec call(Plug.Conn.t(), any) :: Plug.Conn.t()
   def call(%{assigns: %{current_user: nil}} = conn, _opts) do
     conn
     |> assign(:server_user, nil)

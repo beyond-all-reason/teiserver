@@ -21,7 +21,7 @@
       <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/mdb_dark.css")}/>
     <% end %>
     <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/css/fontawesome.css")}/>
-    
+
     <script>
       window.userToken = "<%= assigns[:user_token] %>";
     </script>
@@ -32,5 +32,8 @@
   </head>
   <body class="container-fluid px-0 d-flex flex-column">
     <%= @inner_content %>
+    <%= if @current_user != nil do %>
+      <span class="d-none" id="fp-element"></span>
+    <% end %>
   </body>
 </html>
