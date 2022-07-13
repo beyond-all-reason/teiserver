@@ -698,7 +698,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     lobby = Battle.get_lobby(state.lobby_id)
 
     if current_hash != state.last_balance_hash and lobby.consul_balance == true do
-      Logger.info("ConsulServer:#{state.lobby_id}.balance_teams - rebalance accepted")
       force_rebalance(state)
     else
       state.last_balance_hash
@@ -731,7 +730,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
           end)
         end)
 
-      LobbyChat.sayex(state.coordinator_id, "Rebalanced via server, deviation at #{balance.deviation}%", state.lobby_id)
+      LobbyChat.sayex(state.coordinator_id, "Rebalanced via server, deviation at #{balance.deviation}% for #{player_count} players", state.lobby_id)
 
       :timer.sleep(100)
       make_balance_hash(state)
@@ -929,7 +928,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       |> Battle.get_lobby_member_list()
       |> Enum.map(fn userid ->
         {ordinal, sigma} = BalanceLib.get_user_ordinal_sigma_pair(userid, rating_type)
-        username = Account.get_username_by_id(userid)
+        username = Account.get_username_by_id(userid) |> String.downcase()
 
         [
           {"game/players/#{username}/skill", round(ordinal, 2)},
@@ -952,7 +951,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       true -> "Large Team"
     end
 
-    username = Account.get_username_by_id(userid)
+    username = Account.get_username_by_id(userid) |> String.downcase()
     {ordinal, sigma} = BalanceLib.get_user_ordinal_sigma_pair(userid, rating_type)
 
     new_opts = %{
