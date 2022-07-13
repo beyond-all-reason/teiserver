@@ -138,7 +138,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
   def handle_command(%{command: "players", senderid: senderid} = _cmd, state) do
     players = Battle.get_lobby_players(state.lobby_id)
-    player_ids = players |> Enum.map(fn p -> p.userid end)
+    # player_ids = players |> Enum.map(fn p -> p.userid end)
     player_count = Enum.count(players)
 
     rating_type = cond do
@@ -148,24 +148,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       player_count <= 8 -> "Small Team"
       true -> "Large Team"
     end
-    rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
-
-    ratings_map = Account.list_ratings(
-      search: [
-        rating_type_id: rating_type_id,
-        user_id_in: player_ids
-      ]
-    )
-    |> Map.new(fn rating -> {rating.user_id, rating} end)
-
-    default_rating = BalanceLib.default_rating()
 
     player_stat_lines = players
       |> Enum.sort_by(fn player -> {player.team_number, player.name} end, &<=/2)
       |> Enum.map(fn player ->
-        score = (ratings_map[player.userid] || default_rating).ordinal
-          |> Decimal.to_float()
-          |> round(2)
+        score = BalanceLib.get_user_rating_value(player.userid, rating_type) |> round(2)
 
         "#{player.name}      #{score}"
       end)

@@ -92,8 +92,11 @@ defmodule Teiserver.Battle.BalanceLib do
   def convert_rating(nil) do
     default_rating() |> convert_rating()
   end
-  def convert_rating(%{mu: mu, sigma: sigma}) do
-    Decimal.to_float(mu) - Decimal.to_float(sigma)
+  # def convert_rating(%{mu: mu, sigma: sigma}) do
+  #   Decimal.to_float(mu) - Decimal.to_float(sigma)
+  # end
+  def convert_rating(%{ordinal: ordinal}) do
+    Decimal.to_float(ordinal)
   end
 
   # Each team takes it in turns to pick, they pick the highest ranked player

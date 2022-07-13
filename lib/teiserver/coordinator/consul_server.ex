@@ -710,7 +710,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     players = list_players(state)
     player_count = Enum.count(players)
     if player_count > 1 do
-      Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - starting")
       player_ids = Enum.map(players, fn %{userid: u} -> u end)
 
       rating_type = cond do
@@ -729,15 +728,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
           ratings
           |> Enum.each(fn {userid, _rating} ->
             Lobby.force_change_client(state.coordinator_id, userid, %{team_number: team_number - 1})
-
-            username = User.get_username(userid)
-            Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - moved #{userid}/#{username} to #{team_number}")
           end)
         end)
 
       LobbyChat.sayex(state.coordinator_id, "Rebalanced via server, deviation at #{balance.deviation}%", state.lobby_id)
-
-      Logger.info("ConsulServer:#{state.lobby_id}.force_rebalance - completed")
 
       :timer.sleep(100)
       make_balance_hash(state)
