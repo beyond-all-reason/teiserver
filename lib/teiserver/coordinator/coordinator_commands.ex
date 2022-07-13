@@ -92,19 +92,21 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     profile_link = "https://#{host}/teiserver/profile/#{senderid}"
 
     accolades = AccoladeLib.get_player_accolades(senderid)
-    accolades_string = case Map.keys(accolades) do
-      [] ->
-        "You currently have no accolades"
+    accolades_string = if Config.get_site_config_cache("teiserver.Enable accolades") do
+      case Map.keys(accolades) do
+        [] ->
+          "You currently have no accolades"
 
-      _ ->
-        badge_types = Account.list_badge_types(search: [id_list: Map.keys(accolades)])
-        |> Map.new(fn bt -> {bt.id, bt} end)
+        _ ->
+          badge_types = Account.list_badge_types(search: [id_list: Map.keys(accolades)])
+          |> Map.new(fn bt -> {bt.id, bt} end)
 
-        ["Your accolades are as follows:"] ++
-          (accolades
-          |> Enum.map(fn {bt_id, count} ->
-            ">> #{count}x #{badge_types[bt_id].name}"
-          end))
+          ["Your accolades are as follows:"] ++
+            (accolades
+            |> Enum.map(fn {bt_id, count} ->
+              ">> #{count}x #{badge_types[bt_id].name}"
+            end))
+      end
     end
 
     ratings = Account.list_ratings(
@@ -131,7 +133,8 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       ratings,
       accolades_string
     ]
-    |> List.flatten
+      |> List.flatten
+      |> Enum.reject(fn l -> l == nil end)
 
     User.send_direct_message(state.userid, senderid, msg)
     state
@@ -220,7 +223,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
         msg = (standard_parts ++ mod_parts)
           |> List.flatten
-          |> Enum.filter(fn l -> l != nil end)
+          |> Enum.reject(fn l -> l == nil end)
 
         User.send_direct_message(state.userid, senderid, msg)
     end
