@@ -15,9 +15,7 @@ defmodule Central.General.StylingHelpersTest do
       :warning,
       :warning2,
       :danger,
-      :danger2,
-      :negative,
-      :negative2
+      :danger2
     ]
 
     for p <- params do

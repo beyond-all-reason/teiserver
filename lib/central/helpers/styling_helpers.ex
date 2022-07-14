@@ -13,7 +13,7 @@ defmodule Central.Helpers.StylingHelper do
   def colours(:primary2, false), do: {"#3498db", "#012", "primary2"}
 
   def colours(:info, false), do: {"#008987", "#022", "info"}
-  def colours(:info2, false), do: {"#A90088", "#011", "info2"}
+  def colours(:info2, false), do: {"#A90088", "#220011", "info2"}
 
   def colours(:success, false), do: {"#108c1a", "#020", "success"}
   def colours(:success2, false), do: {"#005c0a", "#010", "success2"}
@@ -23,9 +23,6 @@ defmodule Central.Helpers.StylingHelper do
 
   def colours(:danger, false), do: {"#a4382c", "#200", "danger"}
   def colours(:danger2, false), do: {"#800000", "#100", "danger2"}
-
-  def colours(:negative, false), do: {"#", "#", "negative"}
-  def colours(:negative2, false), do: {"#", "#", "negative2"}
 
   # Light mode true
   def colours(:default, true), do: {"#555555", "#E5E5E5", "secondary"}
@@ -44,10 +41,6 @@ defmodule Central.Helpers.StylingHelper do
 
   def colours(:danger, true), do: {"#e74c3c", "#FFF5F5", "danger"}
   def colours(:danger2, true), do: {"#AA1122", "#FEE", "danger2"}
-
-  def colours(:negative, true), do: {"#", "#", "negative"}
-  def colours(:negative2, true), do: {"#", "#", "negative2"}
-
   @spec get_fg(atom) :: String.t()
   def get_fg(colour), do: elem(colours(colour), 0)
 

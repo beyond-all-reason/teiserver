@@ -12,6 +12,7 @@ defmodule Teiserver.User do
   alias Central.Account.Guardian
   alias Teiserver.Data.Types, as: T
   import Central.Logging.Helpers, only: [add_audit_log: 4]
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   require Logger
   alias Phoenix.PubSub
@@ -737,10 +738,16 @@ defmodule Teiserver.User do
           Teiserver.Geoip.get_flag(ip)
       end
 
-    rank = calculate_rank(user.id)
+    # Rank
+    rank = cond do
+      stats["rank_override"] != nil ->
+        stats["rank_override"] |> int_parse
 
-    springid = if Map.get(user, :springid) != nil, do: user.springid, else: SpringIdServer.get_next_id()
-    |> Central.Helpers.NumberHelper.int_parse
+      true ->
+        calculate_rank(user.id)
+    end
+
+    springid = (if Map.get(user, :springid) != nil, do: user.springid, else: SpringIdServer.get_next_id()) |> int_parse
 
     # We don't care about the lobby version so much as we do about the lobby itself
     lobby_client = case Regex.run(~r/^[a-zA-Z\ ]+/, lobby_client) do

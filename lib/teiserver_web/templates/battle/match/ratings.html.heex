@@ -54,8 +54,12 @@
         end
       %>
       <tr>
-        <td><%= log.match.map %></td>
-        <td><%= log.match.team_size * log.match.team_count %></td>
+        <%= if log.match do %>
+          <td><%= log.match.map %></td>
+          <td><%= log.match.team_size * log.match.team_count %></td>
+        <% else %>
+          <td colspan="2">&nbsp;</td>
+        <% end %>
         <td><%= @rating_type_id_lookup[log.rating_type_id] %></td>
         
         <td><%= round(log.value["ordinal"], 2) %></td>
@@ -67,12 +71,16 @@
 
         <td><%= round(log.value["mu"], 2) %></td>
         
-        <td><%= date_to_str(log.match.started, format: :hms_or_dmy) %></td>
-        <td>
-          <a href={Routes.ts_battle_match_path(@conn, :show, log.match.id)} class="btn btn-secondary btn-sm">
-            Show
-          </a>
-        </td>
+        <%= if log.match do %>
+          <td><%= date_to_str(log.match.started, format: :hms_or_dmy) %></td>
+          <td>
+            <a href={Routes.ts_battle_match_path(@conn, :show, log.match.id)} class="btn btn-secondary btn-sm">
+              Show
+            </a>
+          </td>
+        <% else %>
+          <td colspan="2">&nbsp;</td>
+        <% end %>
       </tr>
     <% end %>
   </tbody>
