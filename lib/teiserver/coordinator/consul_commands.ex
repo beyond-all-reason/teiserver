@@ -45,7 +45,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> Enum.map(&User.get_username/1)
       |> Enum.join(", ")
 
-    # player_count = ConsulServer.get_player_count(state)
     player_count = Battle.get_lobby_player_count(state.lobby_id)
 
     max_player_count = ConsulServer.get_max_player_count(state)
@@ -62,10 +61,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
         rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
 
-        # match_players = state
-        #   |> ConsulServer.list_players
-        #   |> Enum.map(fn p -> %{team_id: p.team_number, user_id: p.userid} end)
-
         match_players = state.lobby_id
           |> Battle.get_lobby_players()
           |> Enum.map(fn p -> %{team_id: p.team_number, user_id: p.userid} end)
@@ -76,7 +71,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           |> Enum.map(fn {team, score} ->
             score = round(score, 2)
 
-            "#{team + 1} total rating: #{score}"
+            if state.balance_result do
+              captain = state.balance_result.stats[team+1].captain
+              "Team #{team + 1} (#{captain.name}) total rating: #{score}"
+            else
+              "Team #{team + 1} total rating: #{score}"
+            end
           end)
 
         prediction_stats = prediction.team_scores
@@ -120,7 +120,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     |> Enum.filter(fn v -> v != nil end)
 
     status_msg = [
-      @splitter,
+      "#{@splitter} Lobby status #{@splitter}",
       "Status for battle ##{state.lobby_id}",
       "Locks: #{locks}",
       "Gatekeeper: #{state.gatekeeper}",
@@ -158,7 +158,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       end)
 
     msg = [
-      "",
+      "#{@splitter} Player stats #{@splitter}",
       player_stat_lines
     ]
     |> List.flatten

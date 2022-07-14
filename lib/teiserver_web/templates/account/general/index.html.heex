@@ -25,12 +25,21 @@
   
   <%= central_component "menu_card",
     icon_class: "fa-duotone",
+    name: "clans",
+    icon: Teiserver.Clans.ClanLib.icon(),
+    text: "Clans",
+    link: Routes.ts_clans_clan_path(@conn, :index)
+  %>
+  
+  <%= central_component "menu_card",
+    icon_class: "fa-duotone",
     name: "",
     icon: Central.Config.UserConfigLib.icon(),
     text: "Preferences",
     link: Routes.ts_account_preferences_path(@conn, :index)
   %>
 </div>
+
 
 <div class="row page-row">
   <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: StylingHelper.icon(:back), text: "Back", link: Routes.ts_general_general_path(@conn, :index) %>

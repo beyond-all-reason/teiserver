@@ -46,6 +46,14 @@
           %>
 
           <%= central_component "sub_menu_icon",
+            name: "clans",
+            label: "Clans",
+            active: @active,
+            url: Routes.ts_clans_clan_path(@conn, :index),
+            icon: Teiserver.Clans.ClanLib.icon()
+          %>
+
+          <%= central_component "sub_menu_icon",
             name: "preferences",
             label: "Preferences",
             active: @active,

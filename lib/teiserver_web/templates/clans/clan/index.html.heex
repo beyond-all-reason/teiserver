@@ -34,7 +34,7 @@
   <% member = Enum.member?(@memberships, clan.id) %>
   <a
     href={Routes.ts_clans_clan_path(@conn, :show, clan.name)}
-    class={"clan-box #{if member, do: "clan-member"}"}
+    class={"clan-box #{if member, do: "clan-member"} m-1"}
     style={"color: #{clan.colour1}; background-color: #{clan.colour2};"}
   >
     <div class="clan-name">
