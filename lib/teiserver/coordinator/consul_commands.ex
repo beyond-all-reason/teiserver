@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.{Account, Battle, Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat, BalanceLib}
   alias Teiserver.Data.Types, as: T
-  import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
+  import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2, c_round: 2]
 
   @doc """
     Command has structure:
@@ -152,14 +152,21 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         true -> "Large Team"
       end
 
+      rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
+
       player_stat_lines = players
         |> Enum.map(fn player ->
-          rating_value = BalanceLib.get_user_rating_value(player.userid, rating_type) |> round(2)
-          {player, rating_value}
+          rating = Account.get_rating(player.userid, rating_type_id) || BalanceLib.default_rating()
+          rating_value = BalanceLib.convert_rating(rating)
+          {player, rating, rating_value}
         end)
-        |> Enum.sort_by(fn {_player, rating_value} -> rating_value end, &>=/2)
-        |> Enum.map(fn {player, rating_value} ->
-          "#{player.name}      #{rating_value}"
+        |> Enum.sort_by(fn {_player, _rating, rating_value} -> rating_value end, &>=/2)
+        |> Enum.map(fn {player, rating, _rating_value} ->
+          ordinal = rating.ordinal |> c_round(2)
+          mu = rating.mu |> c_round(2)
+          sigma = rating.sigma |> c_round(2)
+
+          "#{player.name}    #{ordinal}    #{mu}    #{sigma}"
         end)
 
       msg = [
