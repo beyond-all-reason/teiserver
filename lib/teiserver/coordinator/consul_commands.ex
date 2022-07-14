@@ -137,34 +137,40 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "players", senderid: senderid} = _cmd, state) do
-    players = Battle.get_lobby_players(state.lobby_id)
-    # player_ids = players |> Enum.map(fn p -> p.userid end)
-    player_count = Enum.count(players)
+    if state.consul_balance do
+      ConsulServer.set_skill_modoptions(state)
 
-    rating_type = cond do
-      player_count == 2 -> "Duel"
-      state.host_teamcount > 2 ->
-        if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
-      player_count <= 8 -> "Small Team"
-      true -> "Large Team"
+      players = Battle.get_lobby_players(state.lobby_id)
+      # player_ids = players |> Enum.map(fn p -> p.userid end)
+      player_count = Enum.count(players)
+
+      rating_type = cond do
+        player_count == 2 -> "Duel"
+        state.host_teamcount > 2 ->
+          if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
+        player_count <= 8 -> "Small Team"
+        true -> "Large Team"
+      end
+
+      player_stat_lines = players
+        |> Enum.map(fn player ->
+          rating_value = BalanceLib.get_user_rating_value(player.userid, rating_type) |> round(2)
+          {player, rating_value}
+        end)
+        |> Enum.sort_by(fn {_player, rating_value} -> rating_value end, &>=/2)
+        |> Enum.map(fn {player, rating_value} ->
+          "#{player.name}      #{rating_value}"
+        end)
+
+      msg = [
+        "#{@splitter} Player stats #{@splitter}",
+        player_stat_lines
+      ]
+      |> List.flatten
+      |> Enum.filter(fn s -> s != nil end)
+
+      Coordinator.send_to_user(senderid, msg)
     end
-
-    player_stat_lines = players
-      |> Enum.sort_by(fn player -> {player.team_number, player.name} end, &<=/2)
-      |> Enum.map(fn player ->
-        score = BalanceLib.get_user_rating_value(player.userid, rating_type) |> round(2)
-
-        "#{player.name}      #{score}"
-      end)
-
-    msg = [
-      "#{@splitter} Player stats #{@splitter}",
-      player_stat_lines
-    ]
-    |> List.flatten
-    |> Enum.filter(fn s -> s != nil end)
-
-    Coordinator.send_to_user(senderid, msg)
     state
   end
 

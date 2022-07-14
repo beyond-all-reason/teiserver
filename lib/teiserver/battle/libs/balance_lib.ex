@@ -36,7 +36,7 @@ defmodule Teiserver.Battle.BalanceLib do
           |> Enum.reduce(0, fn ({_, rating}, acc) -> acc + rating end)
 
         captain = players
-          |> Enum.sort_by(fn {_player_id, rating} -> rating end, &<=/2)
+          |> Enum.sort_by(fn {_player_id, rating} -> rating end, &>=/2)
           |> hd
           |> elem(0)
           |> Account.get_user_by_id()

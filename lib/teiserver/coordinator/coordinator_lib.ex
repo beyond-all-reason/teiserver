@@ -20,6 +20,7 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
       {"leaveq", [], "Removes you from the join queue.", :everybody},
       {"status", [], "Status info about the battle lobby.", :everybody},
       {"afks", [], "Lists possible afk players.", :everybody},
+      {"players", [], "Lists players and their ratings", :everybody},
       {"splitlobby", [], "Causes a \"vote\" to start where other players can elect to join you in splitting the lobby, follow someone
 of their choosing or remain in place. After 20 seconds you are moved to a new (empty) lobby and those that voted yes
 or are following someone that voted yes are also moved to that lobby.", :everybody},
