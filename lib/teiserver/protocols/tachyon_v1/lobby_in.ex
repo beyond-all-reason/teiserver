@@ -9,11 +9,26 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
   alias Teiserver.Data.Types, as: T
 
   @spec do_handle(String.t(), Map.t(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()
-  def do_handle("query", %{"query" => query}, state) do
+  def do_handle("query", %{"query" => query} = cmd, state) do
+    fields = cmd["fields"] || ["lobby"]
+
     lobby_list = Lobby.list_lobbies()
       |> TachyonLib.query_in(:id, query["id_list"])
       |> TachyonLib.query(:locked, query["locked"])
       |> TachyonLib.query(:in_progress, query["in_progress"])
+      |> Enum.map(fn lobby ->
+        fields
+          |> Map.new(fn f ->
+            case f do
+              "lobby" -> {f, Tachyon.convert_object(lobby, :lobby)}
+              "modoptions" -> {f, Battle.get_modoptions(lobby.id)}
+              "bots" -> {f, Battle.get_bots(lobby.id)}
+              "players" -> {f, Battle.get_lobby_players(lobby.id)}
+              "members" -> {f, Battle.get_lobby_member_list(lobby.id)}
+              _ -> {"#{f}", "no field by that name"}
+            end
+          end)
+      end)
 
     reply(:lobby, :query, lobby_list, state)
 

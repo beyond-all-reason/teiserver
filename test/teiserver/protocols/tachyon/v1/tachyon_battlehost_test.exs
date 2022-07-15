@@ -127,9 +127,25 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
 
     assert reply["cmd"] == "s.lobby.query"
     assert Enum.count(reply["lobbies"]) == 1
-    lobby = hd(reply["lobbies"])
+    lobby = hd(reply["lobbies"])["lobby"]
     assert lobby["id"] == lobby_id
     assert lobby["players"] == [user2.id]
+
+    # Now do the same but with some fields selected
+    _tachyon_send(socket2, %{
+      cmd: "c.lobby.query",
+      query: %{id_list: [lobby_id]},
+      fields: ["lobby", "modoptions", "bots", "players", "members"]
+    })
+    [reply] = _tachyon_recv(socket2)
+
+    assert reply["cmd"] == "s.lobby.query"
+    assert Enum.count(reply["lobbies"]) == 1
+    lobby = hd(reply["lobbies"])
+    assert lobby["lobby"]["id"] == lobby_id
+    assert lobby["lobby"]["players"] == [user2.id]
+    assert lobby["members"] == [user2.id]
+    assert lobby["players"] == []
 
     # Use the get command
     _tachyon_send(socket2, %{cmd: "c.lobby.get", lobby_id: lobby_id, keys: ~w(bots modoptions players members)})
@@ -168,7 +184,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
 
     assert reply["cmd"] == "s.lobby.query"
     assert Enum.count(reply["lobbies"]) == 1
-    lobby = hd(reply["lobbies"])
+    lobby = hd(reply["lobbies"])["lobby"]
     assert lobby["id"] == lobby_id
     assert lobby["players"] == [user3.id, user2.id]
 

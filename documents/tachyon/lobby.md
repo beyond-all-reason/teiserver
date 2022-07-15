@@ -1,6 +1,9 @@
 ## Showing
 ### `c.lobby.query`
 * query :: Query
+* fields :: List (optional)
+
+`fields` lists the additional items to return as part of each lobby. See `c.lobby.get` for more information on which fields can be included. By default the list will be a single item of `lobby`.
 
 #### Queryable fields
 - `locked` - Boolean
@@ -22,6 +25,7 @@
 ```json
 {
   "cmd": "c.lobby.query",
+  "fields": [],
   "query": {
     "locked": false
   }
