@@ -134,8 +134,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
         end
       end)
 
-    send(self(), :balance)
-    :timer.send_after(5000, :consul_balance_enabled)
+    if state.consul_balance do
+      send(self(), :balance)
+      :timer.send_after(5000, :consul_balance_enabled)
+    end
     {:noreply, %{state | timeouts: %{}}}
   end
 
