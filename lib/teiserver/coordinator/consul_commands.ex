@@ -71,7 +71,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           |> Enum.map(fn {team, score} ->
             score = round(score, 2)
 
-            if state.balance_result do
+            if state.balance_result != nil and state.balance_result != %{} do
               captain = state.balance_result.stats[team+1].captain
               "Team #{team + 1} (#{captain.name}) total rating: #{score}"
             else

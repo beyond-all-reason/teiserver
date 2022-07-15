@@ -243,6 +243,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   end
 
   @spec predict_winning_team([map()], non_neg_integer()) :: map()
+  def predict_winning_team([], _), do: %{winning_team: nil}
   def predict_winning_team(players, rating_type_id) do
     team_scores = players
       |> Enum.group_by(
@@ -284,7 +285,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   def test_predictions() do
     results = Battle.list_matches(
       search: [
-        # game_type_in: ["Team FFA"],
+        # game_type_in: ["Team"],
         game_type_in: @rated_match_types,
         processed: true,
         started_after: Timex.now |> Timex.shift(days: -31)
@@ -292,6 +293,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       limit: :infinity,
       preload: [:members]
     )
+      |> Enum.reject(fn m -> m.winning_team == nil end)
       |> Enum.map(fn m ->
         prediction = predict_match(m)
         if prediction == m.winning_team, do: 1, else: 0

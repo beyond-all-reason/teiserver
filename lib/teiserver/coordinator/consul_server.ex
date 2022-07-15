@@ -944,11 +944,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
     new_opts = state.lobby_id
       |> Battle.get_lobby_member_list()
       |> Enum.map(fn userid ->
-        {ordinal, sigma} = BalanceLib.get_user_ordinal_sigma_pair(userid, rating_type)
+        {_ordinal, sigma} = BalanceLib.get_user_ordinal_sigma_pair(userid, rating_type)
+        rating_value = BalanceLib.get_user_rating_value(userid, rating_type)
         username = Account.get_username_by_id(userid) |> String.downcase()
 
         [
-          {"game/players/#{username}/skill", round(ordinal, 2)},
+          {"game/players/#{username}/skill", round(rating_value, 2)},
           {"game/players/#{username}/skilluncertainty", round(sigma, 2)}
         ]
       end)
@@ -969,10 +970,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     username = Account.get_username_by_id(userid) |> String.downcase()
-    {ordinal, sigma} = BalanceLib.get_user_ordinal_sigma_pair(userid, rating_type)
+    {_ordinal, sigma} = BalanceLib.get_user_ordinal_sigma_pair(userid, rating_type)
+    rating_value = BalanceLib.get_user_rating_value(userid, rating_type)
 
     new_opts = %{
-      "game/players/#{username}/skill" => round(ordinal, 2),
+      "game/players/#{username}/skill" => round(rating_value, 2),
       "game/players/#{username}/skilluncertainty" => round(sigma, 2)
     }
 
