@@ -478,6 +478,13 @@ defmodule Teiserver.Battle do
   @spec remove_bot(T.lobby_id(), String.t()) :: :ok | nil
   defdelegate remove_bot(lobby_id, bot_name), to: LobbyCache
 
+  # Start areas
+  @spec add_start_area(T.lobby_id(), non_neg_integer(), list()) :: :ok | nil
+  defdelegate add_start_area(lobby_id, area_id, structure), to: LobbyCache
+
+  @spec remove_start_area(T.lobby_id(), non_neg_integer()) :: :ok | nil
+  defdelegate remove_start_area(lobby_id, area_id), to: LobbyCache
+
   # Modoptions
   @spec get_modoptions(T.lobby_id()) :: map() | nil
   defdelegate get_modoptions(lobby_id), to: LobbyCache

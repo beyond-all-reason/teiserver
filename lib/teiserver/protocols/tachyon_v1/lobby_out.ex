@@ -65,6 +65,23 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
+  def do_reply(:add_start_area, {lobby_id, {area_id, structure}}) do
+    %{
+      "cmd" => "s.lobby.add_start_area",
+      "lobby_id" => lobby_id,
+      "area_id" => area_id,
+      "structure" => structure
+    }
+  end
+
+  def do_reply(:remove_start_area, {lobby_id, area_id}) do
+    %{
+      "cmd" => "s.lobby.remove_start_area",
+      "lobby_id" => lobby_id,
+      "area_id" => area_id
+    }
+  end
+
   def do_reply(:add_user, {lobby_id, joiner_id}) do
     %{
       "cmd" => "s.lobby.add_user",

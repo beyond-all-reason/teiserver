@@ -343,6 +343,39 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
       "keys" => ["singe_key", "non-existing-key"]
     }
 
+    # Start areas
+    Logger.warn("#{__ENV__.file}.#{__ENV__.line} should add, update and remove start areas via the Tachyon command")
+    Battle.add_start_area(lobby_id, 1, ["rect", 1, 2, 3, 4])
+
+    [reply] = _tachyon_recv_until(socket)
+    assert reply == %{
+      "cmd" => "s.lobby.add_start_area",
+      "lobby_id" => lobby_id,
+      "area_id" => 1,
+      "structure" => ["rect", 1, 2, 3, 4]
+    }
+
+
+    Battle.add_start_area(lobby_id, 1, ["rect", 10, 12, 24, 35])
+
+    [reply] = _tachyon_recv_until(socket)
+    assert reply == %{
+      "cmd" => "s.lobby.add_start_area",
+      "lobby_id" => lobby_id,
+      "area_id" => 1,
+      "structure" => ["rect", 10, 12, 24, 35]
+    }
+
+
+    Battle.remove_start_area(lobby_id, 1)
+
+    [reply] = _tachyon_recv_until(socket)
+    assert reply == %{
+      "cmd" => "s.lobby.remove_start_area",
+      "lobby_id" => lobby_id,
+      "area_id" => 1
+    }
+
     # Now leave the lobby, closing it in the process
     data = %{cmd: "c.lobby.leave"}
     _tachyon_send(socket, data)
