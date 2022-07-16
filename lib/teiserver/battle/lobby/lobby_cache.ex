@@ -119,6 +119,25 @@ defmodule Teiserver.Battle.LobbyCache do
     lobby
   end
 
+  # Start areas
+  @spec add_start_rectangle(T.lobby_id(), non_neg_integer(), list()) :: :ok | nil
+  def add_start_rectangle(lobby_id, area_id, [a, b, c, d]) do
+    area_id = int_parse(area_id)
+    cast_lobby(lobby_id, {:add_start_area, area_id, ["rect", a, b, c, d]})
+  end
+
+  @spec add_start_area(T.lobby_id(), non_neg_integer(), list()) :: :ok | nil
+  def add_start_area(lobby_id, area_id, definition) do
+    area_id = int_parse(area_id)
+    cast_lobby(lobby_id, {:add_start_area, area_id, definition})
+  end
+
+  @spec remove_start_area(T.lobby_id(), non_neg_integer()) :: :ok | nil
+  def remove_start_area(lobby_id, area_id) do
+    area_id = int_parse(area_id)
+    cast_lobby(lobby_id, {:remove_start_area, area_id})
+  end
+
   # Bots
   @spec get_bots(T.lobby_id()) :: map() | nil
   def get_bots(lobby_id) do

@@ -57,7 +57,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
   end
 
   ###########
-  # Updated -- TODO: Is this needed/used?
   def do_reply(:updated, {lobby_id, _data}) do
     lobby = Lobby.get_lobby(lobby_id)
     %{

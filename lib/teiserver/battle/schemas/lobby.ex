@@ -74,7 +74,7 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec create_lobby(Map.t()) :: Map.t()
   def create_lobby(%{founder_id: _, founder_name: _, name: _} = lobby) do
-    passworded = lobby.password == nil
+    passworded = Map.get(lobby, :password) == nil
 
     # Needs to be supplied a map with:
     # ip, port, engine_version, map_hash, map_name, game_name, hash_code
@@ -94,7 +94,7 @@ defmodule Teiserver.Battle.Lobby do
         type: "normal",
         nattype: :none,
         max_players: 16,
-        passworded: false,
+        passworded: passworded,
         password: nil,
         rank: 0,
         locked: false,
@@ -376,21 +376,24 @@ defmodule Teiserver.Battle.Lobby do
   # Start rects
   def add_start_rectangle(lobby_id, [team, a, b, c, d]) do
     [team, a, b, c, d] = int_parse([team, a, b, c, d])
+    LobbyCache.add_start_rectangle(lobby_id, team, [a, b, c, d])
 
-    battle = get_battle(lobby_id)
-    new_rectangles = Map.put(battle.start_rectangles, team, [a, b, c, d])
-    new_battle = %{battle | start_rectangles: new_rectangles}
-    update_battle(new_battle, {team, [a, b, c, d]}, :add_start_rectangle)
+    # battle = get_battle(lobby_id)
+    # new_rectangles = Map.put(battle.start_rectangles, team, [a, b, c, d])
+    # new_battle = %{battle | start_rectangles: new_rectangles}
+    # update_battle(new_battle, {team, [a, b, c, d]}, :add_start_rectangle)
   end
 
   def remove_start_rectangle(lobby_id, team_id) do
-    battle = get_battle(lobby_id)
-    team_id = int_parse(team_id)
+    LobbyCache.remove_start_area(lobby_id, team_id)
 
-    new_rectangles = Map.delete(battle.start_rectangles, team_id)
+    # battle = get_battle(lobby_id)
+    # team_id = int_parse(team_id)
 
-    new_battle = %{battle | start_rectangles: new_rectangles}
-    update_battle(new_battle, team_id, :remove_start_rectangle)
+    # new_rectangles = Map.delete(battle.start_rectangles, team_id)
+
+    # new_battle = %{battle | start_rectangles: new_rectangles}
+    # update_battle(new_battle, team_id, :remove_start_rectangle)
   end
 
   @spec silence_lobby(T.lobby() | T.lobby_id()) :: T.lobby()

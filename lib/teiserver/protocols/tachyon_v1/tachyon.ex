@@ -59,7 +59,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
     }
 
     Map.take(lobby, [:id, :name, :founder_id, :type, :max_players, :game_name,
-                    :locked, :engine_name, :engine_version, :players, :spectators, :bots, :ip, :settings, :map_name, :password,
+                    :locked, :engine_name, :engine_version, :players, :spectators, :bots, :ip, :settings, :map_name, :password, :passworded,
                     :map_hash, :tags, :disabled_units, :in_progress, :started_at, :start_rectangles])
   end
 

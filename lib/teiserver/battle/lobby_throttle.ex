@@ -52,6 +52,14 @@ defmodule Teiserver.Battle.LobbyThrottle do
     {:noreply, %{state | player_changes: [key | state.lobby_changes]}}
   end
 
+  def handle_info({:lobby_update, :add_start_area, _lobby_id, _new_opts}, state) do
+    {:noreply, state}
+  end
+
+  def handle_info({:lobby_update, :remove_start_area, _lobby_id, _new_opts}, state) do
+    {:noreply, state}
+  end
+
   def handle_info({:lobby_update, :set_modoptions, _lobby_id, _new_opts}, state) do
     {:noreply, state}
   end

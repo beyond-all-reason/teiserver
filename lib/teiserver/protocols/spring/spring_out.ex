@@ -243,7 +243,7 @@ defmodule Teiserver.Protocols.SpringOut do
     "JOINBATTLEFAILED #{reason}\n"
   end
 
-  defp do_reply(:add_start_rectangle, {team, [left, top, right, bottom]}) do
+  defp do_reply(:add_start_rectangle, {team, ["rect", left, top, right, bottom]}) do
     "ADDSTARTRECT #{team} #{left} #{top} #{right} #{bottom}\n"
   end
 
