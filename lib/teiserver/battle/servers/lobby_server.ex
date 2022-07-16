@@ -76,7 +76,14 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_cast(:stop_match, state) do
-    {:noreply, %{state | player_list: [], state: :lobby}}
+    uuid = Battle.generate_lobby_uuid()
+    modoptions = state.modoptions |> Map.put("server/match/uuid", uuid)
+
+    {:noreply, %{state |
+      player_list: [],
+      state: :lobby,
+      modoptions: modoptions
+    }}
   end
 
   def handle_cast({:add_user, userid, _script_password}, state) do

@@ -48,15 +48,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # Infos
   @impl true
   def handle_info(:tick, state) do
-    modoptions = Battle.get_modoptions(state.lobby_id)
-    case Map.get(modoptions, "server/match/uuid", nil) do
-      nil ->
-        uuid = Battle.generate_lobby_uuid()
-        Battle.set_modoption(state.lobby_id, "server/match/uuid", uuid)
-      _tag ->
-        nil
-    end
-
     new_state = check_queue_status(state)
     player_count_changed(new_state)
     fix_ids(new_state)
@@ -94,9 +85,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info(:match_stop, state) do
-    uuid = Battle.generate_lobby_uuid()
-    Battle.set_modoption(state.lobby_id, "server/match/uuid", uuid)
-
     Battle.get_lobby_member_list(state.lobby_id)
       |> Enum.each(fn userid ->
         Lobby.force_change_client(state.coordinator_id, userid, %{ready: false})
