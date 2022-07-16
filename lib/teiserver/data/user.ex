@@ -533,22 +533,44 @@ defmodule Teiserver.User do
   def send_direct_message(from_id, to_id, "!start" <> s), do: send_direct_message(from_id, to_id, "!cv start" <> s)
   def send_direct_message(from_id, to_id, "!joinas" <> s), do: send_direct_message(from_id, to_id, "!cv joinas" <> s)
 
-  def send_direct_message(from_id, to_id, message_content) do
+  def send_direct_message(from_id, to_id, message_parts) when is_list(message_parts) do
     sender = get_user_by_id(from_id)
     if not is_restricted?(sender, ["All chat", "Direct chat"]) do
+
+      if is_bot?(to_id) do
+        message_parts
+          |> Enum.each(fn line ->
+            cond do
+              String.starts_with?(line, "!clan ") ->
+                clan = line
+                  |> String.replace("!clan ", "")
+                  |> String.trim()
+
+                Account.update_user_stat(from_id, %{"clan" => clan})
+
+              true ->
+                :ok
+            end
+          end)
+      end
+
       PubSub.broadcast(
         Central.PubSub,
         "legacy_user_updates:#{to_id}",
-        {:direct_message, from_id, message_content}
+        {:direct_message, from_id, message_parts}
       )
 
       PubSub.broadcast(
         Central.PubSub,
         "teiserver_client_messages:#{to_id}",
-        {:client_message, :received_direct_message, to_id, {from_id, message_content}}
+        {:client_message, :received_direct_message, to_id, {from_id, message_parts}}
       )
     end
     :ok
+  end
+
+  def send_direct_message(from_id, to_id, message) do
+    send_direct_message(from_id, to_id, [message])
   end
 
   @spec ring(T.userid(), T.userid()) :: :ok
