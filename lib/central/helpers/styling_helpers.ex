@@ -41,6 +41,7 @@ defmodule Central.Helpers.StylingHelper do
 
   def colours(:danger, true), do: {"#e74c3c", "#FFF5F5", "danger"}
   def colours(:danger2, true), do: {"#AA1122", "#FEE", "danger2"}
+
   @spec get_fg(atom) :: String.t()
   def get_fg(colour), do: elem(colours(colour), 0)
 
