@@ -60,11 +60,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
         clients = get_clients(players)
 
         bar_user = User.get_user_by_id(socket.assigns.current_user.id)
-        lobby = Map.put(lobby, :uuid, Battle.get_lobby_uuid(id))
+        lobby = Map.put(lobby, :uuid, Battle.get_lobby_match_uuid(id))
 
         messages = Chat.list_lobby_messages(
           search: [
-            lobby_guid: Battle.get_lobby_uuid(id)
+            lobby_guid: Battle.get_lobby_match_uuid(id)
           ],
           limit: @message_count*2,
           order_by: "Newest first"
@@ -160,7 +160,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
   def handle_info({:battle_lobby_throttle, _lobby_changes, player_changes}, %{assigns: assigns} = socket) do
     lobby = Lobby.get_lobby(assigns.id)
-    lobby = Map.put(lobby, :uuid, Battle.get_lobby_uuid(assigns.id))
+    lobby = Map.put(lobby, :uuid, Battle.get_lobby_match_uuid(assigns.id))
 
     socket = socket
       |> assign(:lobby, lobby)

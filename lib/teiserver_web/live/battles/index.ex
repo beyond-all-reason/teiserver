@@ -20,7 +20,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
         Map.merge(lobby, %{
           member_count: Battle.get_lobby_member_count(lobby.id) || 0,
           player_count: Battle.get_lobby_player_count(lobby.id) || 0,
-          uuid: Battle.get_lobby_uuid(lobby.id)
+          uuid: Battle.get_lobby_match_uuid(lobby.id)
         })
       end)
       |> sort_lobbies
@@ -117,7 +117,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     Map.merge(lobby, %{
       member_count: Battle.get_lobby_member_count(lobby_id) || 0,
       player_count: Battle.get_lobby_player_count(lobby.id) || 0,
-      uuid: Battle.get_lobby_uuid(lobby.id)
+      uuid: Battle.get_lobby_match_uuid(lobby.id)
     })
   end
 end

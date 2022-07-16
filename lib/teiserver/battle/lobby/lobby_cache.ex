@@ -11,21 +11,23 @@ defmodule Teiserver.Battle.LobbyCache do
     call_lobby(int_parse(id), :get_lobby_state)
   end
 
-  @spec get_lobby_uuid(T.lobby_id()) :: String.t()
-  def get_lobby_uuid(lobby_id) do
-    case get_modoptions(lobby_id) do
-      nil -> nil
-      opts -> Map.get(opts, "server/match/uuid")
-    end
+  @spec get_lobby_match_uuid(T.lobby_id()) :: String.t() | nil
+  def get_lobby_match_uuid(lobby_id) do
+    call_lobby(lobby_id, :get_match_uuid)
   end
 
-  @spec get_lobby_by_uuid(String.t()) :: T.lobby() | nil
-  def get_lobby_by_uuid(uuid) do
+  @spec get_lobby_server_uuid(T.lobby_id()) :: String.t() | nil
+  def get_lobby_server_uuid(lobby_id) do
+    call_lobby(lobby_id, :get_server_uuid)
+  end
+
+  @spec get_lobby_by_match_uuid(String.t()) :: T.lobby() | nil
+  def get_lobby_by_match_uuid(uuid) do
     lobby_list = list_lobby_ids()
-      |> Stream.map(fn lobby_id -> {lobby_id, get_lobby_uuid(lobby_id)} end)
+      |> Stream.map(fn lobby_id -> {lobby_id, get_lobby_match_uuid(lobby_id)} end)
       |> Stream.filter(fn {_lobby_id, lobby_uuid} -> lobby_uuid == uuid end)
       |> Enum.take(1)
-      |> Enum.map(fn {lobby_id, _modoptions} -> get_lobby(lobby_id) end)
+      |> Enum.map(fn {lobby_id, _lobby_uuid} -> get_lobby(lobby_id) end)
 
     case lobby_list do
       [] -> nil

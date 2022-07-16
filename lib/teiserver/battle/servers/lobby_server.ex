@@ -29,6 +29,14 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, result, state}
   end
 
+  def handle_call(:get_match_uuid, _from, state) do
+    {:reply, state.match_uuid, state}
+  end
+
+  def handle_call(:get_server_uuid, _from, state) do
+    {:reply, state.server_uuid, state}
+  end
+
   def handle_call(:get_modoptions, _from, state) do
     {:reply, state.modoptions, state}
   end
@@ -82,6 +90,7 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, %{state |
       player_list: [],
       state: :lobby,
+      match_uuid: uuid,
       modoptions: modoptions
     }}
   end
@@ -264,17 +273,7 @@ defmodule Teiserver.Battle.LobbyServer do
 
   @impl true
   def handle_info(:tick, state) do
-    new_state = if state.modoptions["server/match/uuid"] == nil do
-      uuid = Battle.generate_lobby_uuid([state.id])
-      %{state |
-        match_uuid: uuid,
-        modoptions: Map.put(state.modoptions, "server/match/uuid", uuid)
-      }
-    else
-      state
-    end
-
-    {:noreply, new_state}
+    {:noreply, state}
   end
 
   # Internal

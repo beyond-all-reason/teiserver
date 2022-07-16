@@ -68,7 +68,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
         {users, clients} = get_user_and_clients(lobby.players)
 
         bar_user = User.get_user_by_id(socket.assigns.current_user.id)
-        lobby = Map.put(lobby, :uuid, Battle.get_lobby_uuid(id))
+        lobby = Map.put(lobby, :uuid, Battle.get_lobby_match_uuid(id))
         modoptions = Battle.get_modoptions(id)
 
         {:noreply,

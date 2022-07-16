@@ -43,7 +43,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
         nil
     end
 
-    lobby = Lobby.get_lobby_by_uuid(lobby_guid)
+    lobby = Lobby.get_lobby_by_match_uuid(lobby_guid)
 
     last_page = Enum.count(lobby_messages) < 300
 
