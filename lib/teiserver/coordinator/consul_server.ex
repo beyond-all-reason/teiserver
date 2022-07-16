@@ -60,7 +60,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     new_state = check_queue_status(state)
     player_count_changed(new_state)
     fix_ids(new_state)
-    {new_balance_hash, new_balance_result} = balance_teams(state)
     new_state = afk_check_update(new_state)
 
     # It is possible we can "forget" the coordinator_id
@@ -70,27 +69,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       %{new_state | coordinator_id: Coordinator.get_coordinator_userid()}
     else
       new_state
-    end
-
-    {:noreply, %{new_state |
-      last_balance_hash: new_balance_hash,
-      balance_result: new_balance_result
-    }}
-  end
-
-  def handle_info(:balance, state) do
-    lobby = Battle.get_lobby(state.lobby_id)
-
-    new_state = if lobby.consul_balance == true do
-      {new_balance_hash, new_balance_result} = force_rebalance(state)
-
-      %{state |
-        coordinator_id: Coordinator.get_coordinator_userid(),
-        last_balance_hash: new_balance_hash,
-        balance_result: new_balance_result
-      }
-    else
-      state
     end
 
     {:noreply, new_state}
@@ -108,11 +86,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   # Doesn't do anything at this stage
   def handle_info(:startup, state) do
-    {:noreply, state}
-  end
-
-  def handle_info(:consul_balance_enabled, state) do
-    set_skill_modoptions(state)
     {:noreply, state}
   end
 
@@ -134,10 +107,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
         end
       end)
 
-    if state.consul_balance do
-      send(self(), :balance)
-      :timer.send_after(5000, :consul_balance_enabled)
-    end
     {:noreply, %{state | timeouts: %{}}}
   end
 
@@ -293,10 +262,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{user.name}")
     end
 
-    if state.consul_balance == true do
-      set_skill_modoptions_for_user(state, userid)
-    end
-
     {:noreply, state}
   end
 
@@ -374,11 +339,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     new_ring_timestamps = Map.put(ring_timestamps, userid, new_user_times)
 
     %{state | ring_timestamps: new_ring_timestamps}
-  end
-
-  defp handle_lobby_chat(userid, "!balance" <> _, %{consul_balance: true} = state) do
-    User.send_direct_message(state.coordinator_id, userid, "Server balance is currently enabled and calling !balance will not do anything.")
-    state
   end
 
   # Handle a command message
@@ -706,63 +666,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
   end
 
-  @spec balance_teams(T.consul_state()) :: {String.t(), map()}
-  defp balance_teams(state) do
-    current_hash = make_balance_hash(state)
-    lobby = Battle.get_lobby(state.lobby_id)
-
-    if current_hash != state.last_balance_hash and lobby.consul_balance == true do
-      force_rebalance(state)
-    else
-      {state.last_balance_hash, state.balance_result}
-    end
-  end
-
-  @spec force_rebalance(T.consul_state()) :: {String.t(), map()}
-  defp force_rebalance(state) do
-    players = list_players(state)
-    player_count = Enum.count(players)
-    if player_count > 1 do
-      player_ids = Enum.map(players, fn %{userid: u} -> u end)
-
-      rating_type = cond do
-        player_count == 2 -> "Duel"
-        state.host_teamcount > 2 ->
-          if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
-        player_count <= 8 -> "Small Team"
-        true -> "Large Team"
-      end
-
-      balance = BalanceLib.balance_players(player_ids, state.host_teamcount, rating_type)
-
-      balance
-        |> Map.get(:team_players)
-        |> Enum.each(fn {team_number, ratings} ->
-          ratings
-          |> Enum.each(fn {userid, _rating} ->
-            Lobby.force_change_client(state.coordinator_id, userid, %{team_number: team_number - 1})
-          end)
-        end)
-
-      LobbyChat.sayex(state.coordinator_id, "Rebalanced via server, deviation at #{balance.deviation}% for #{player_count} players", state.lobby_id)
-
-      :timer.sleep(100)
-      {make_balance_hash(state), balance}
-    else
-      {make_balance_hash(state), %{}}
-    end
-  end
-
-  @spec make_balance_hash(T.consul_state()) :: String.t()
-  defp make_balance_hash(state) do
-    client_string = list_players(state)
-      |> Enum.map(fn c -> "#{c.userid}:#{c.team_number}" end)
-      |> Enum.join(",")
-
-    :crypto.hash(:md5, client_string)
-      |> Base.encode64()
-  end
-
   defp player_count_changed(%{join_queue: [], low_priority_join_queue: []} = _state), do: nil
   defp player_count_changed(state) do
     if get_player_count(state) < get_max_player_count(state) do
@@ -919,12 +822,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       afk_check_at: nil,
 
       last_seen_map: %{},
-
-      consul_balance: false,
-
-      # Used to detect if there's actually been a change to the balance since we last checked
-      last_balance_hash: nil,
-      balance_result: nil,
 
       # Toggle with Coordinator.cast_consul(lobby_id, {:put, :unready_can_play, true})
       unready_can_play: false,

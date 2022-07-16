@@ -136,51 +136,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
-  def handle_command(%{command: "players", senderid: senderid} = _cmd, state) do
-    if state.consul_balance do
-      ConsulServer.set_skill_modoptions(state)
-
-      players = Battle.get_lobby_players(state.lobby_id)
-      # player_ids = players |> Enum.map(fn p -> p.userid end)
-      player_count = Enum.count(players)
-
-      rating_type = cond do
-        player_count == 2 -> "Duel"
-        state.host_teamcount > 2 ->
-          if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
-        player_count <= 8 -> "Small Team"
-        true -> "Large Team"
-      end
-
-      rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
-
-      player_stat_lines = players
-        |> Enum.map(fn player ->
-          rating = Account.get_rating(player.userid, rating_type_id) || BalanceLib.default_rating()
-          rating_value = BalanceLib.convert_rating(rating)
-          {player, rating, rating_value}
-        end)
-        |> Enum.sort_by(fn {_player, _rating, rating_value} -> rating_value end, &>=/2)
-        |> Enum.map(fn {player, rating, _rating_value} ->
-          ordinal = rating.ordinal |> c_round(2)
-          mu = rating.mu |> c_round(2)
-          sigma = rating.sigma |> c_round(2)
-
-          "#{player.name}    #{ordinal}    #{mu}    #{sigma}"
-        end)
-
-      msg = [
-        "#{@splitter} Player stats #{@splitter}",
-        player_stat_lines
-      ]
-      |> List.flatten
-      |> Enum.filter(fn s -> s != nil end)
-
-      Coordinator.send_to_user(senderid, msg)
-    end
-    state
-  end
-
   def handle_command(%{command: "roll", remaining: remaining, senderid: senderid} = _cmd, state) do
     username = User.get_username(senderid)
 
@@ -652,46 +607,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   # ----------------- Moderation commands
-  def handle_command(%{command: "balance"} = cmd, state) do
-    lobby = Lobby.get_lobby(state.lobby_id)
-    if lobby.consul_balance do
-      send(self(), :balance)
-      ConsulServer.say_command(cmd, state)
-    end
-    state
-  end
-
-  def handle_command(%{command: "balancemode", remaining: type, senderid: senderid} = cmd, state) do
-    type = type
-      |> String.downcase()
-      |> String.trim()
-
-    case type do
-      "consul" ->
-        lobby = Lobby.get_lobby(state.lobby_id)
-        Lobby.update_lobby(%{lobby | consul_balance: true}, nil, :balance)
-        ConsulServer.say_command(cmd, state)
-        Lobby.sayex(state.coordinator_id, "Balance mode changed to Consul mode", state.lobby_id)
-
-        :timer.send_after(500, :consul_balance_enabled)
-
-        new_locks = [:team | state.locks] |> Enum.uniq
-        %{state | locks: new_locks, consul_balance: true}
-
-      "spads" ->
-        lobby = Lobby.get_lobby(state.lobby_id)
-        Lobby.update_lobby(%{lobby | consul_balance: false}, nil, :balance)
-        ConsulServer.say_command(cmd, state)
-        Lobby.sayex(state.coordinator_id, "Balance mode changed to SPADS mode", state.lobby_id)
-
-        new_locks = List.delete(state.locks, :team)
-        %{state | locks: new_locks, consul_balance: false}
-      _ ->
-        LobbyChat.sayprivateex(state.coordinator_id, senderid, "No balancemode of that name, accepts consul and spads", state.lobby_id)
-        state
-    end
-  end
-
   def handle_command(%{command: "speclock", remaining: target} = cmd, state) do
     case ConsulServer.get_user(target, state) do
       nil ->
