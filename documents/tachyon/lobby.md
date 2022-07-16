@@ -7,16 +7,15 @@
 
 #### Queryable fields
 - `locked` - Boolean
+- `passworded` - Boolean
 - `in_progress` - Boolean
 - `id_list` - List (Lobby ID)
 
 ##### Planned items to add
-- `player_count` - Integer, a count of the number of players in the battle
+- `min_player_count` - Integer, a count of the number of players in the battle
+- `max_player_count` - Integer, a count of the number of players in the battle
 - `spectator_count` - Integer, a count of the number of spectators in the battle
-- `user_count` - Integer, a count of the number of players and spectators in the battle
-- `player_list` - List (User.id), A list of player ids in the battle
-- `spectator_list` - List (User.id), A list of spectator ids in the battle
-- `user_list` - List (User.id), A list of player and spectator ids in the battle
+- `member_count` - Integer, a count of the number of players and spectators in the battle
 
 #### Success response
 * battle_list :: List (Battle)

@@ -15,7 +15,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
     lobby_list = Lobby.list_lobbies()
       |> TachyonLib.query_in(:id, query["id_list"])
       |> TachyonLib.query(:locked, query["locked"])
-      |> TachyonLib.query(:in_progress, query["in_progress"])
+      |> TachyonLib.query(:passworded, query["passworded"])
       |> Enum.map(fn lobby ->
         fields
           |> Map.new(fn f ->
