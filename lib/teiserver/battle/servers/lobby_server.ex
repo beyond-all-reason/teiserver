@@ -17,10 +17,6 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, result, state}
   end
 
-  # def handle_call({:get_player, _player_id}, _from, %{state: :lobby} = state) do
-  #   {:reply, :lobby, state}
-  # end
-
   def handle_call({:get_player, player_id}, _from, %{player_list: player_list} = state) do
     found = player_list
       |> Enum.filter(fn p -> p.userid == player_id end)
@@ -215,15 +211,16 @@ defmodule Teiserver.Battle.LobbyServer do
   def handle_info(:tick, state) do
     new_state = if state.modoptions["server/match/uuid"] == nil do
       uuid = Battle.generate_lobby_uuid([state.lobby_id])
-      %{state | modoptions: Map.put(state.modoptions, "server/match/uuid", uuid)}
+      %{state |
+        match_uuid: uuid,
+        modoptions: Map.put(state.modoptions, "server/match/uuid", uuid)
+      }
     else
       state
     end
 
     {:noreply, new_state}
   end
-
-
 
   # Internal
   @spec get_player_list(map()) :: {list(), map()}
@@ -263,13 +260,16 @@ defmodule Teiserver.Battle.LobbyServer do
     )
 
     :timer.send_interval(2_000, :tick)
+    match_uuid = Battle.generate_lobby_uuid([lobby_id])
 
     {:ok, %{
       lobby_id: lobby_id,
       lobby: data.lobby,
       modoptions: %{
-        "server/match/uuid" => Battle.generate_lobby_uuid([lobby_id])
+        "server/match/uuid" => match_uuid
       },
+      server_uuid: UUID.uuid1(),
+      match_uuid: match_uuid,
       bots: %{},
       member_list: [],
       player_list: [],
