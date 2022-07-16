@@ -33,7 +33,6 @@ defmodule Teiserver.Battle.Lobby do
 
   #   # Consul flags
   #   consul_rename: false,
-  #   consul_balance: false,
 
   #   # Meta data
   #   silence: false,
@@ -113,7 +112,6 @@ defmodule Teiserver.Battle.Lobby do
 
         # Consul flags
         consul_rename: false,
-        consul_balance: false,
 
         # Meta data
         silence: false,
@@ -628,13 +626,6 @@ defmodule Teiserver.Battle.Lobby do
 
       # If the battle has been renamed by the consul then we'll keep it renamed as such
       battle.consul_rename == true and cmd == :update_lobby_title ->
-        false
-
-      # Consul balance?
-      battle.consul_balance == true and cmd == :player_number ->
-        false
-
-      battle.consul_balance == true and cmd == :team_number ->
         false
 
       # Basic stuff
