@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   alias Teiserver.{Account, Battle, Coordinator, User, Client}
   alias Teiserver.Battle.{Lobby, LobbyChat, BalanceLib}
   alias Teiserver.Data.Types, as: T
-  import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2, c_round: 2]
+  import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
 
   @doc """
     Command has structure:
@@ -70,13 +70,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         scores = prediction.team_scores
           |> Enum.map(fn {team, score} ->
             score = round(score, 2)
-
-            if state.balance_result != nil and state.balance_result != %{} do
-              captain = state.balance_result.stats[team+1].captain
-              "Team #{team + 1} (#{captain.name}) total rating: #{score}"
-            else
-              "Team #{team + 1} total rating: #{score}"
-            end
+            "Team #{team + 1} total rating: #{score}"
           end)
 
         prediction_stats = prediction.team_scores

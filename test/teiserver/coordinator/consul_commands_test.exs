@@ -495,7 +495,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.communication.received_direct_message"
     assert reply["sender_id"] == Coordinator.get_coordinator_userid()
-    assert reply["message"] |> Enum.slice(0, 5) == ["---------------------------", "Status for battle ##{lobby_id}", "Locks: ", "Gatekeeper: default", "Join queue: "]
+    assert reply["message"] |> Enum.slice(0, 5) == ["--------------------------- Lobby status ---------------------------", "Status for battle ##{lobby_id}", "Locks: ", "Gatekeeper: default", "Join queue: "]
   end
 
   test "help", %{lobby_id: lobby_id, hsocket: hsocket, host: host} do
@@ -643,17 +643,6 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
     assert queue == [player7.id, player8.id]
-
-    # Now some commands that rely on player count
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$balancemode consul"})
-    _tachyon_recv_until(hsocket)
-
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$players"})
-    _mod_options = _tachyon_recv(hsocket)
-    [result] = _tachyon_recv(hsocket)
-
-    assert result["cmd"] == "s.communication.received_direct_message"
-    assert hd(result["message"]) == "--------------------------- Player stats ---------------------------"
   end
 
   test "join_queue_on_full_game", %{lobby_id: lobby_id, hsocket: hsocket, psocket: socket1, player: player1} do

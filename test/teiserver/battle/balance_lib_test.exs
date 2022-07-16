@@ -86,10 +86,10 @@ defmodule Teiserver.Battle.BalanceLibTest do
     assert Enum.count(result.team_players[1]) == 2
     assert Enum.count(result.team_players[2]) == 2
 
-    assert result.stats[1].total_rating == 51
-    assert result.stats[2].total_rating == 45
+    assert result.stats[1].total_rating == 56.0
+    assert result.stats[2].total_rating == 53
 
-    assert result.deviation == 13
+    assert result.deviation == 6
   end
 
   test "round robin complex 6", %{user1: user1, user2: user2, user3: user3, user4: user4, user5: user5, user6: user6} do
@@ -98,10 +98,10 @@ defmodule Teiserver.Battle.BalanceLibTest do
     assert Enum.count(result.team_players[1]) == 3
     assert Enum.count(result.team_players[2]) == 3
 
-    assert result.stats[1].total_rating == 85
-    assert result.stats[2].total_rating == 56
+    assert result.stats[1].total_rating == 103
+    assert result.stats[2].total_rating == 66
 
-    assert result.deviation == 52
+    assert result.deviation == 56
   end
 
   test "loser picks basic 4", %{user1: user1, user2: user2, user3: user3, user4: user4} do
@@ -110,10 +110,10 @@ defmodule Teiserver.Battle.BalanceLibTest do
     assert Enum.count(result.team_players[1]) == 2
     assert Enum.count(result.team_players[2]) == 2
 
-    assert result.stats[1].total_rating == 48
-    assert result.stats[2].total_rating == 48
+    assert result.stats[1].total_rating == 55
+    assert result.stats[2].total_rating == 54
 
-    assert result.deviation == 0
+    assert result.deviation == 2
   end
 
   test "loser picks complex 6", %{user1: user1, user2: user2, user3: user3, user4: user4, user5: user5, user6: user6} do
@@ -122,10 +122,10 @@ defmodule Teiserver.Battle.BalanceLibTest do
     assert Enum.count(result.team_players[1]) == 3
     assert Enum.count(result.team_players[2]) == 3
 
-    assert result.stats[1].total_rating == 68
-    assert result.stats[2].total_rating == 73
+    assert result.stats[1].total_rating == 86
+    assert result.stats[2].total_rating == 83
 
-    assert result.deviation == 7
+    assert result.deviation == 4
   end
 
   test "loser picks uneven 5", %{user1: user1, user2: user2, user3: user3, user4: user4, user5: user5} do
@@ -134,9 +134,9 @@ defmodule Teiserver.Battle.BalanceLibTest do
     assert Enum.count(result.team_players[1]) == 2
     assert Enum.count(result.team_players[2]) == 3
 
-    assert result.stats[1].total_rating == 63
-    assert result.stats[2].total_rating == 73
+    assert result.stats[1].total_rating == 76
+    assert result.stats[2].total_rating == 83
 
-    assert result.deviation == 16
+    assert result.deviation == 9
   end
 end

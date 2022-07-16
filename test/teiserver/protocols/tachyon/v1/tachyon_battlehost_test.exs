@@ -158,7 +158,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
         "server/match/uuid" => Battle.get_lobby_uuid(lobby_id)
       },
       "members" => [
-        %{"away" => false, "in_game" => false, "lobby_id" => lobby_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => [], "team_colour" => 0, "team_number" => 0, "userid" => user2.id}
+        %{"away" => false, "in_game" => false, "lobby_id" => lobby_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => 0, "team_number" => 0, "userid" => user2.id}
       ],
       "players" => []
     }
@@ -246,7 +246,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
       player_number: 8,
       ready: true,
       side: 1,
-      sync: 1,
+      sync: %{"engine" => 1, "game" => 1, "map" => 1},
       team_colour: "42537",
       team_number: 2
     })
@@ -263,7 +263,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
       "player_number" => 8,
       "ready" => true,
       "side" => 1,
-      "sync" => 1,
+      "sync" => %{"engine" => 1, "game" => 1, "map" => 1},
       "team_colour" => "42537",
       "team_number" => 2
       },
@@ -281,7 +281,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
       player_number: 8,
       ready: true,
       side: 1,
-      sync: 1,
+      sync: %{"engine" => 1, "game" => 1, "map" => 1},
       team_colour: "123445",
       team_number: 2
     })
@@ -298,7 +298,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
         "player_number" => 8,
         "ready" => true,
         "side" => 1,
-        "sync" => 1,
+        "sync" => %{"engine" => 1, "game" => 1, "map" => 1},
         "team_colour" => "123445",
         "team_number" => 2
       },

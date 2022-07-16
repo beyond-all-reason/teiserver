@@ -111,7 +111,8 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
           "---------------------------",
           "You are #{user.name}",
           "Profile link: https://localhost/teiserver/profile/#{user.id}",
-          "Rank: 1 with 0 player hours and 0 spectator hours for a rank hour count of 0",
+          "Time rank: 1 with 0 player hours and 0 spectator hours for a rank hour count of 0",
+          "Skill ratings:",
           "You currently have no accolades"
         ],
       "sender_id" => coordinator_userid

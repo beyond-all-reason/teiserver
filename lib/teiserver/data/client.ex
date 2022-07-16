@@ -40,7 +40,11 @@ defmodule Teiserver.Client do
         team_number: 0, # In spring this would be ally_team_number
         player: false,
         handicap: 0,
-        sync: 0,
+        sync: %{
+          engine: 0,
+          game: 0,
+          map: 0
+        },
         side: 0,
         role: "spectator",
 
@@ -74,7 +78,11 @@ defmodule Teiserver.Client do
       team_number: 0,
       player: false,
       handicap: 0,
-      sync: 0,
+      sync: %{
+          engine: 0,
+          game: 0,
+          map: 0
+        },
       role: "spectator",
       lobby_id: nil,
       current_lobby_id: nil

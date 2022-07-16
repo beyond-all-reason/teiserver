@@ -64,7 +64,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 * team_colour: colour
 * player: boolean
 * bonus: integer, default: 0 -- In spring this is 0-127, here it's an unsigned integer
-* sync: list(string) -- list of what is sync'd, not a list of what's missing
+* sync: map -- key represents the item with a value between 0-1 showing the percentage downloaded
 * faction: string
 * lobby_id: Lobby.id
 
@@ -78,7 +78,11 @@ This represents a user who is logged in. A user who is logged out will not have 
   "player": true,
   "team_number": 1,
   "team_colour": "#AA9900",
-  "sync": ["map", "engine"],
+  "sync": {
+    "map": 1,
+    "engine": 0,
+    "game": 1
+  },
   "faction": "random",
   "lobby_id": 5
 }

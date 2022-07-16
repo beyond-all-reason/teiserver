@@ -74,7 +74,7 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     [resp] = _tachyon_recv(socket)
     assert resp["cmd"] == "s.user.user_and_client_list"
     [client] = resp["clients"]
-    assert client["sync"] == []
+    assert client["sync"] == %{"engine" => 0, "game" => 0, "map" => 0}
     users_map = resp["users"]
       |> Map.new(fn u -> {u["id"], u} end)
 
@@ -131,7 +131,7 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     assert resp["cmd"] == "s.lobby.query"
     assert resp["result"] == "success"
     lobbies = resp["lobbies"]
-      |> Map.new(fn l -> {l["name"], l} end)
+      |> Map.new(fn l -> {l["lobby"]["name"], l["lobby"]} end)
 
     assert Enum.count(lobbies) == 4
     assert Map.has_key?(lobbies, "Test lobby 1")

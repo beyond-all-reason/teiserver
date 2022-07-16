@@ -262,7 +262,7 @@ defmodule Teiserver.SpringBattleHostTest do
              player_number: 0,
              team_number: 0,
              player: true,
-             sync: 1,
+             sync: %{engine: 1, game: 1, map: 1},
              side: 0
            }
 
@@ -273,7 +273,7 @@ defmodule Teiserver.SpringBattleHostTest do
              player_number: 0,
              team_number: 0,
              player: true,
-             sync: 1,
+             sync: %{engine: 1, game: 1, map: 1},
              side: 0
            }
 
