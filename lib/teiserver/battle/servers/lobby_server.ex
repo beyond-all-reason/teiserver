@@ -118,9 +118,46 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, %{state | member_list: new_members}}
   end
 
+  def handle_cast({:set_password, nil}, state) do
+    new_lobby = Map.merge(state.lobby, %{
+      password: nil,
+      passworded: false
+    })
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_lobby_updates:#{state.id}",
+      {:lobby_update, :update_value, state.id, {:passworded, false}}
+    )
+
+    {:noreply, %{state | lobby: new_lobby}}
+  end
+  def handle_cast({:set_password, new_password}, state) do
+    new_lobby = Map.merge(state.lobby, %{
+      password: new_password,
+      passworded: true
+    })
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_lobby_updates:#{state.id}",
+      {:lobby_update, :update_value, state.id, {:passworded, true}}
+    )
+
+    {:noreply, %{state | lobby: new_lobby}}
+  end
+
+
   # Generic updates
   def handle_cast({:update_value, key, value}, state) do
     new_lobby = Map.put(state.lobby, key, value)
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_lobby_updates:#{state.id}",
+      {:lobby_update, :update_value, state.id, {key, value}}
+    )
+
     {:noreply, %{state | lobby: new_lobby}}
   end
 

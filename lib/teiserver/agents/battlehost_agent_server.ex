@@ -94,6 +94,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   defp handle_msg(%{"cmd" => "s.lobby.updated"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.updated_client_battlestatus"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.set_modoptions"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.update_value"}, state), do: state
 
   defp open_battle(state) do
     password = if :rand.uniform() <= state.password_chance, do: "password"

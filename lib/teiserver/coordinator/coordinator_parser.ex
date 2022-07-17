@@ -55,7 +55,7 @@ defmodule Teiserver.Coordinator.Parser do
 
   @spec parse_command_name(Map.t()) :: Map.t()
   defp parse_command_name(%{remaining: string} = cmd) do
-    case Regex.run(~r/\$([a-z0-9\-]+) ?/, string) do
+    case Regex.run(~r/\$([a-z0-9\-\?]+) ?/, string) do
       [_, command_name] ->
         %{cmd |
           command: command_name,

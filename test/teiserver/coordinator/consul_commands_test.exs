@@ -511,6 +511,93 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert reply["message"] |> Enum.count > 5
   end
 
+  test "rename", %{lobby_id: lobby_id, hsocket: hsocket, host: host} do
+    data = %{cmd: "c.lobby.message", message: "$rename New Lobby Name::?  "}
+    _tachyon_send(hsocket, data)
+
+    [reply] = _tachyon_recv(hsocket)
+    assert reply["cmd"] == "s.lobby.updated"
+    assert reply["lobby"]["name"] == "New Lobby Name::?"
+
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{
+      "cmd" => "s.lobby.say",
+      "message" => "$rename New Lobby Name::?",
+      "sender_id" => host.id,
+      "lobby_id" => lobby_id
+    }
+
+    assert Battle.get_lobby(lobby_id).name == "New Lobby Name::?"
+  end
+
+  test "password and password?", %{lobby_id: lobby_id, hsocket: hsocket} do
+    coordinator_id = Coordinator.get_coordinator_userid()
+
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password?"})
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{
+      "cmd" => "s.lobby.received_lobby_direct_announce",
+      "message" => "This lobby has no password set",
+      "sender_id" => coordinator_id
+    }
+    assert Battle.get_lobby(lobby_id).password == nil
+    assert Battle.get_lobby(lobby_id).passworded == false
+
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password abcdef"})
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{
+      "cmd" => "s.lobby.update_value",
+      "key" => "passworded",
+      "value" => true,
+      "lobby_id" => lobby_id
+    }
+    assert Battle.get_lobby(lobby_id).password == "abcdef"
+    assert Battle.get_lobby(lobby_id).passworded == true
+
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{
+      "cmd" => "s.lobby.announce",
+      "message" => "Password updated",
+      "sender_id" => coordinator_id,
+      "lobby_id" => lobby_id
+    }
+
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password?"})
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{
+      "cmd" => "s.lobby.received_lobby_direct_announce",
+      "message" => "The lobby password is currently: abcdef",
+      "sender_id" => coordinator_id
+    }
+
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password"})
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{
+      "cmd" => "s.lobby.update_value",
+      "key" => "passworded",
+      "value" => false,
+      "lobby_id" => lobby_id
+    }
+    assert Battle.get_lobby(lobby_id).password == nil
+    assert Battle.get_lobby(lobby_id).passworded == false
+
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{
+      "cmd" => "s.lobby.announce",
+      "message" => "Password removed",
+      "sender_id" => coordinator_id,
+      "lobby_id" => lobby_id
+    }
+
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password?"})
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{
+      "cmd" => "s.lobby.received_lobby_direct_announce",
+      "message" => "This lobby has no password set",
+      "sender_id" => coordinator_id
+    }
+  end
+
   test "passthrough", %{hsocket: hsocket, listener: listener} do
     data = %{cmd: "c.lobby.message", message: "$non-existing command"}
     _tachyon_send(hsocket, data)

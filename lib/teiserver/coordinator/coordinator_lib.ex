@@ -20,7 +20,7 @@ defmodule Teiserver.Coordinator.CoordinatorLib do
       {"leaveq", [], "Removes you from the join queue.", :everybody},
       {"status", [], "Status info about the battle lobby.", :everybody},
       {"afks", [], "Lists possible afk players.", :everybody},
-      {"players", [], "Lists players and their ratings", :everybody},
+      {"password?", [], "Tells you the room password, not to be confused with $password which sets the password", :everybody},
       {"splitlobby", [], "Causes a \"vote\" to start where other players can elect to join you in splitting the lobby, follow someone
 of their choosing or remain in place. After 20 seconds you are moved to a new (empty) lobby and those that voted yes
 or are following someone that voted yes are also moved to that lobby.", :everybody},
@@ -49,6 +49,7 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
 > friends allows only friends of existing members to join the lobby
 > friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)", :everybody},
       {"rename", ["new name"],"Renames the lobby to the name given. Requires boss privileges.", :everybody},
+      {"password", ["new password"],"Sets the lobby password to the new password. If the password is empty then the password is removed. Requires boss permissions and should not be confused with the $password? command which queries the password.", :everybody},
 
       #---- "hosts" only ----
       {"lock", ["(team | player | spectator | side)"], "Engages a lock on that mode, when engaged members are unable to change that attribute about themselves.

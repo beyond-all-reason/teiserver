@@ -354,6 +354,18 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     }
   end
 
+  def handle_command(%{command: "password?", senderid: senderid}, state) do
+    case Battle.get_lobby(state.lobby_id) do
+      %{passworded: false} ->
+        LobbyChat.sayprivateex(state.coordinator_id, senderid, "This lobby has no password set", state.lobby_id)
+
+      %{password: password} ->
+        LobbyChat.sayprivateex(state.coordinator_id, senderid, "The lobby password is currently: #{password}", state.lobby_id)
+    end
+
+    state
+  end
+
 
   #################### Boss
   def handle_command(%{command: "gatekeeper", remaining: mode, senderid: senderid} = cmd, state) do
@@ -390,6 +402,21 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     players = Lobby.get_lobby_players!(state.lobby_id)
     new_state = %{state | approved_users: players}
     ConsulServer.say_command(cmd, new_state)
+  end
+
+  def handle_command(%{command: "password", remaining: remaining}, state) do
+    remaining = String.trim(remaining)
+
+    case remaining do
+      "" ->
+        Battle.set_lobby_password(state.lobby_id, nil)
+        Lobby.sayex(state.coordinator_id, "Password removed", state.lobby_id)
+
+      _ ->
+        Battle.set_lobby_password(state.lobby_id, remaining)
+        Lobby.sayex(state.coordinator_id, "Password updated", state.lobby_id)
+    end
+    state
   end
 
 
@@ -463,6 +490,39 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, state)
   end
 
+  def handle_command(%{command: "rename", remaining: new_name, senderid: senderid} = cmd, state) do
+    new_name = String.trim(new_name)
+
+    lobby = Lobby.get_lobby(state.lobby_id)
+    cond do
+      new_name == "" ->
+        :ok
+
+      senderid != lobby.founder_id ->
+        Lobby.rename_lobby(state.lobby_id, new_name, true)
+
+      lobby.consul_rename ->
+        :ok
+
+      true ->
+        Lobby.rename_lobby(state.lobby_id, new_name, false)
+    end
+    ConsulServer.say_command(cmd, state)
+  end
+
+  #################### Moderator only
+  # ----------------- General commands
+  def handle_command(%{command: "playerlimit", remaining: value_str, senderid: senderid} = cmd, state) do
+    case Integer.parse(value_str) do
+      {new_limit, _} ->
+        ConsulServer.say_command(cmd, state)
+        %{state | player_limit: abs(new_limit)}
+      _ ->
+        LobbyChat.sayprivateex(state.coordinator_id, senderid, "Unable to convert #{value_str} into an integer", state.lobby_id)
+        state
+    end
+  end
+
   def handle_command(%{command: "makeready", remaining: ""} = cmd, state) do
     battle = Lobby.get_lobby(state.lobby_id)
 
@@ -486,19 +546,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         User.ring(player_id, state.coordinator_id)
         Lobby.force_change_client(state.coordinator_id, player_id, %{ready: true})
         ConsulServer.say_command(cmd, state)
-    end
-  end
-
-  #################### Moderator only
-  # ----------------- General commands
-  def handle_command(%{command: "playerlimit", remaining: value_str, senderid: senderid} = cmd, state) do
-    case Integer.parse(value_str) do
-      {new_limit, _} ->
-        ConsulServer.say_command(cmd, state)
-        %{state | player_limit: abs(new_limit)}
-      _ ->
-        LobbyChat.sayprivateex(state.coordinator_id, senderid, "Unable to convert #{value_str} into an integer", state.lobby_id)
-        state
     end
   end
 
@@ -551,21 +598,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         afk_check_at: System.system_time(:millisecond)
       })
     end
-  end
-
-  def handle_command(%{command: "rename", remaining: new_name, senderid: senderid} = cmd, state) do
-    lobby = Lobby.get_lobby(state.lobby_id)
-    cond do
-      senderid != lobby.founder_id ->
-        Lobby.rename_lobby(state.lobby_id, new_name, true)
-
-      lobby.consul_rename ->
-        :ok
-
-      true ->
-        Lobby.rename_lobby(state.lobby_id, new_name, false)
-    end
-    ConsulServer.say_command(cmd, state)
   end
 
   def handle_command(%{command: "vip", remaining: target, senderid: senderid} = cmd, state) do

@@ -54,17 +54,12 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec update_lobby_value(T.lobby_id(), atom, any) :: :ok | nil
   def update_lobby_value(lobby_id, key, value) do
-    result = cast_lobby(lobby_id, {:update_value, key, value})
+    cast_lobby(lobby_id, {:update_value, key, value})
+  end
 
-    if result != nil do
-      PubSub.broadcast(
-        Central.PubSub,
-        "teiserver_lobby_updates:#{lobby_id}",
-        {:lobby_update, :update_value, lobby_id, {key, value}}
-      )
-    end
-
-    result
+  @spec set_lobby_password(T.lobby_id(), String.t() | nil) :: :ok | nil
+  def set_lobby_password(lobby_id, password) do
+    cast_lobby(lobby_id, {:set_password, password})
   end
 
   @spec update_lobby(T.lobby(), nil | atom, any) :: T.lobby()
