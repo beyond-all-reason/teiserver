@@ -38,7 +38,7 @@
   %>
 <% end %>
 
-<%= if allow?(@current_user, "teiserver.moderator.account") do %>
+<%= if allow?(@current_user, "teiserver.admin") do %>
   <%= central_component "top_nav_item",
     text: "Admin",
     route: Routes.ts_admin_general_path(@conn, :index),

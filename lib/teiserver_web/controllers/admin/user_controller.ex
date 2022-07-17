@@ -246,20 +246,21 @@ defmodule TeiserverWeb.Admin.UserController do
     user = Account.get_user!(id)
 
     roles = [
-      (if user_params["verified"] == "true", do: "Verified"),
-      (if user_params["bot"] == "true", do: "Bot"),
-      (if user_params["moderator"] == "true", do: "Moderator"),
-      (if user_params["admin"] == "true", do: "Admin"),
-      (if user_params["streamer"] == "true", do: "Streamer"),
-      (if user_params["trusted"] == "true", do: "Trusted"),
-      (if user_params["tester"] == "true", do: "Tester"),
-      (if user_params["non-bridged"] == "true", do: "Non-bridged"),
-      (if user_params["donor"] == "true", do: "Donor"),
-      (if user_params["contributor"] == "true", do: "Contributor"),
-      (if user_params["caster"] == "true", do: "Caster"),
-      (if user_params["developer"] == "true", do: "Developer"),
+      {"verified", "Verified"},
+      {"bot", "Bot"},
+      {"moderator", "Moderator"},
+      {"admin", "Admin"},
+      {"streamer", "Streamer"},
+      {"trusted", "Trusted"},
+      {"tester", "Tester"},
+      {"non-bridged", "Non-bridged"},
+      {"donor", "Donor"},
+      {"contributor", "Contributor"},
+      {"caster", "Caster"},
+      {"core", "Core team"}
     ]
-    |> Enum.filter(&(&1 != nil))
+    |> Enum.map(fn {k, v} -> if user_params[k] == "true", do: v end)
+    |> Enum.reject(&(&1 == nil))
 
     data =
       Map.merge(user.data || %{}, %{

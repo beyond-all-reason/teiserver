@@ -83,10 +83,10 @@
       %>
 
       <%= central_component "checkbox",
-        id: "user_developer",
-        name: "user[developer]",
-        label: "Developer",
-        checked: ("Developer" in (@changeset.data.data["roles"] || []))
+        id: "user_core",
+        name: "user[core]",
+        label: "Core team",
+        checked: ("Core team" in (@changeset.data.data["roles"] || []))
       %>
 
       <%= central_component "checkbox",

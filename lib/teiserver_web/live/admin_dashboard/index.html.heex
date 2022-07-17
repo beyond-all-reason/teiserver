@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-md-6 mb-4">
     <%= if @telemetry_loading do %>
       Telemetry loading...
     <% else %>
@@ -26,16 +26,68 @@
     <% end %>
   </div>
 
-  <div class="col-md-6">
+  <div class="col-md-6 mb-4">
     Notifications/items needing action
   </div>
 
-  <div class="col-md-6">
-
+  <div class="col-md-6 mb-4">
+    <h4>Lobbies</h4>
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Consul</th>
+          <th>Throttle</th>
+       </tr>
+      </thead>
+      <tbody>
+        <%= for {lobby, consul, throttle} <- @lobbies do %>
+          <tr>
+            <td><%= lobby.name %></td>
+            <td>
+              <%= if consul == nil do %>
+                <i class="fa-fw fa-regular fa-cross text-danger"></i>
+              <% else %>
+                <i class="fa-fw fa-regular fa-check text-success"></i>
+              <% end %>
+            </td>
+            <td>
+              <%= if throttle == nil do %>
+                <i class="fa-fw fa-regular fa-cross text-danger"></i>
+              <% else %>
+                <i class="fa-fw fa-regular fa-check text-success"></i>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
   </div>
 
-  <div class="col-md-6">
-
+  <div class="col-md-6 mb-4">
+    <h4>Servers</h4>
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Running</th>
+       </tr>
+      </thead>
+      <tbody>
+        <%= for {server_name, server_pid} <- @server_pids do %>
+          <tr>
+            <td><%= server_name %></td>
+            <td>
+              <%= if server_pid == nil do %>
+                <i class="fa-fw fa-regular fa-cross text-danger"></i>
+              <% else %>
+                <i class="fa-fw fa-regular fa-check text-success"></i>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
   </div>
 
 </div>

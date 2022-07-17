@@ -28,6 +28,17 @@
         link: Routes.ts_admin_client_index_path(@conn, :index)
       %>
     <% end %>
+    
+    <%= if allow?(@conn, "teiserver.admin") do %>
+      <%=
+        central_component "menu_card",
+        icon: Central.Admin.AdminLib.icon(),
+        name: "Admin",
+        text: "Teiserver Admin",
+        icon_class: "fa-duotone",
+        link: Routes.ts_admin_general_path(@conn, :index)
+      %>
+    <% end %>
   </div>
 <% end %>
 
