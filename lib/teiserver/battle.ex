@@ -437,10 +437,13 @@ defmodule Teiserver.Battle do
   @spec get_lobby(T.lobby_id() | nil) :: T.lobby() | nil
   defdelegate get_lobby(id), to: LobbyCache
 
-  @spec get_lobby_match_uuid(T.lobby_id()) :: String.t()
+  @spec get_combined_lobby_state(T.lobby_id()) :: map() | nil
+  defdelegate get_combined_lobby_state(id), to: LobbyCache
+
+  @spec get_lobby_match_uuid(T.lobby_id()) :: String.t() | nil
   defdelegate get_lobby_match_uuid(id), to: LobbyCache
 
-  @spec get_lobby_server_uuid(T.lobby_id()) :: String.t()
+  @spec get_lobby_server_uuid(T.lobby_id()) :: String.t() | nil
   defdelegate get_lobby_server_uuid(id), to: LobbyCache
 
   @spec get_lobby_by_match_uuid(String.t()) :: T.lobby() | nil

@@ -29,6 +29,19 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, result, state}
   end
 
+  def handle_call(:get_combined_state, _from, state) do
+    {:reply, %{
+      match_uuid: state.match_uuid,
+      server_uuid: state.server_uuid,
+      lobby: state.lobby,
+      bots: state.bots,
+      modoptions: state.modoptions,
+      member_list: state.member_list,
+      player_list: state.player_list,
+      queue_id: state.queue_id,
+    }, state}
+  end
+
   def handle_call(:get_match_uuid, _from, state) do
     {:reply, state.match_uuid, state}
   end
@@ -324,6 +337,8 @@ defmodule Teiserver.Battle.LobbyServer do
       },
       server_uuid: UUID.uuid1(),
       match_uuid: match_uuid,
+      queue_id: nil,
+
       bots: %{},
       member_list: [],
       player_list: [],

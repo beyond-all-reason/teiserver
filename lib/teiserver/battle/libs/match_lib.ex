@@ -39,32 +39,40 @@ defmodule Teiserver.Battle.MatchLib do
   end
 
   def match_from_lobby(lobby_id) do
-    lobby = Battle.get_lobby(lobby_id)
-    modoptions = Battle.get_modoptions(lobby_id)
+    %{
+      lobby: lobby,
+      match_uuid: match_uuid,
+      server_uuid: server_uuid,
+      modoptions: modoptions,
+      bots: bots,
+      player_list: player_list,
+      queue_id: queue_id
+    } = Battle.get_combined_lobby_state(lobby_id)
 
-    clients = Client.get_clients(lobby.players)
+    clients = Client.list_clients(player_list)
 
     teams = clients
       |> Enum.filter(fn c -> c.player == true end)
       |> Enum.group_by(fn c -> c.team_number end)
 
-    game_type = game_type(lobby, teams)
+    the_game_type = game_type(lobby, teams)
 
     match = %{
-      uuid: modoptions["server/match/uuid"],
+      uuid: match_uuid,
+      server_uuid: server_uuid,
       map: lobby.map_name,
       data: nil,
-      tags: Map.drop(modoptions, ["server/match/uuid"]),
+      tags: modoptions,
 
       team_count: Enum.count(teams),
       team_size: Enum.max(Enum.map(teams, fn {_, t} -> Enum.count(t) end)),
-      passworded: (lobby.password != nil),
-      game_type: game_type,
+      passworded: lobby.passworded,
+      game_type: the_game_type,
 
       founder_id: lobby.founder_id,
-      bots: Battle.get_bots(lobby.id),
+      bots: bots,
 
-      queue_id: Map.get(modoptions, "server/match/queue_id"),
+      queue_id: queue_id,
 
       started: Timex.now(),
       finished: nil

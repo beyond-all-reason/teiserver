@@ -2,8 +2,8 @@ defmodule Teiserver.Battle.Match do
   use CentralWeb, :schema
 
   schema "teiserver_battle_matches" do
+    field :server_uuid, :string
     field :uuid, :string
-    field :last_match_uuid, :string
     field :map, :string
     field :data, :map, default: %{} # The end of match data to be provided by clients
     field :tags, :map
@@ -38,8 +38,8 @@ defmodule Teiserver.Battle.Match do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, ~w(uuid last_match_uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id)a)
-    |> validate_required(~w(uuid map tags team_count team_size passworded game_type founder_id bots started)a)
+      |> cast(params, ~w(server_uuid uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id)a)
+      |> validate_required(~w(server_uuid uuid map tags team_count team_size passworded game_type founder_id bots started)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

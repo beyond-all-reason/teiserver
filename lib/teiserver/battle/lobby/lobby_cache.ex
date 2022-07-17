@@ -16,6 +16,11 @@ defmodule Teiserver.Battle.LobbyCache do
     call_lobby(lobby_id, :get_match_uuid)
   end
 
+  @spec get_combined_lobby_state(T.lobby_id()) :: map() | nil
+  def get_combined_lobby_state(lobby_id) do
+    call_lobby(lobby_id, :get_combined_state)
+  end
+
   @spec get_lobby_server_uuid(T.lobby_id()) :: String.t() | nil
   def get_lobby_server_uuid(lobby_id) do
     call_lobby(lobby_id, :get_server_uuid)
@@ -24,7 +29,7 @@ defmodule Teiserver.Battle.LobbyCache do
   @spec get_lobby_by_match_uuid(String.t()) :: T.lobby() | nil
   def get_lobby_by_match_uuid(uuid) do
     lobby_list = list_lobby_ids()
-      |> Stream.map(fn lobby_id -> {lobby_id, get_lobby_match_uuid(lobby_id)} end)
+      |> Stream.map(fn lobby_id -> {lobby_id, get_combined_lobby_state(lobby_id)} end)
       |> Stream.filter(fn {_lobby_id, lobby_uuid} -> lobby_uuid == uuid end)
       |> Enum.take(1)
       |> Enum.map(fn {lobby_id, _lobby_uuid} -> get_lobby(lobby_id) end)
