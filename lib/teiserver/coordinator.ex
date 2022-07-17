@@ -1,7 +1,6 @@
 defmodule Teiserver.Coordinator do
   alias Teiserver.Battle.Lobby
-  alias Teiserver.User
-  # alias Teiserver.Client
+  alias Teiserver.{Battle, User}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator.Parser
   require Logger
@@ -60,7 +59,6 @@ defmodule Teiserver.Coordinator do
     end
   end
 
-
   @spec get_consul_pid(T.lobby_id()) :: pid() | nil
   def get_consul_pid(lobby_id) do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "ConsulServer:#{lobby_id}") do
@@ -69,6 +67,16 @@ defmodule Teiserver.Coordinator do
       _ ->
         nil
     end
+  end
+
+  @spec start_all_consuls() :: :ok
+  def start_all_consuls() do
+    Battle.list_lobby_ids() |> Enum.each(fn id ->
+        case get_consul_pid(id) do
+          nil -> start_consul(id)
+          _ -> :ok
+        end
+      end)
   end
 
   @spec start_consul(T.lobby_id()) :: pid()

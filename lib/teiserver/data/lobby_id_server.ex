@@ -29,6 +29,14 @@ defmodule Teiserver.LobbyIdServer do
     end
   end
 
+  @spec set_next_id(non_neg_integer()) :: :ok | {:error, :no_pid}
+  def set_next_id(next_id) do
+    case get_server_pid() do
+      nil -> {:error, :no_pid}
+      pid -> GenServer.cast(pid, {:set_id, next_id})
+    end
+  end
+
   @spec get_server_pid() :: pid() | nil
   defp get_server_pid() do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "LobbyIdServer") do
@@ -46,6 +54,10 @@ defmodule Teiserver.LobbyIdServer do
 
   def handle_call(:next_id, _from, state) do
     {:reply, state.next_id, %{state | next_id: state.next_id + 1}}
+  end
+
+  def handle_cast({:set_id, next_id}, state) do
+    {:noreply, %{state | next_id: next_id}}
   end
 
   @spec init(Map.t()) :: {:ok, Map.t()}

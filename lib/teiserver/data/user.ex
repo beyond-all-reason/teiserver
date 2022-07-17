@@ -769,7 +769,7 @@ defmodule Teiserver.User do
         calculate_rank(user.id)
     end
 
-    springid = (if Map.get(user, :springid) != nil, do: user.springid, else: SpringIdServer.get_next_id()) |> int_parse
+    # springid = (if Map.get(user, :springid) != nil, do: user.springid, else: SpringIdServer.get_next_id()) |> int_parse
 
     # We don't care about the lobby version so much as we do about the lobby itself
     lobby_client = case Regex.run(~r/^[a-zA-Z\ ]+/, lobby_client) do
@@ -785,7 +785,7 @@ defmodule Teiserver.User do
         | last_login: round(System.system_time(:second) / 60),
           country: country,
           rank: rank,
-          springid: springid,
+          springid: user.id,
           lobby_client: lobby_client,
           lobby_hash: lobby_hash
       }

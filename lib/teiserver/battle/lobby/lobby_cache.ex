@@ -208,7 +208,6 @@ defmodule Teiserver.Battle.LobbyCache do
 
   @spec add_lobby(T.lobby()) :: T.lobby()
   def add_lobby(%{founder_id: _} = lobby) do
-
     Lobby.start_battle_lobby_throttle(lobby.id)
     start_lobby_server(lobby)
 
