@@ -99,6 +99,16 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     handle_info({:new_message, from_id, room_name, message}, state)
   end
 
+  def handle_info({:direct_message, from_id, parts}, state) when is_list(parts) do
+    new_state = parts
+      |> Enum.reduce(state, fn (part, acc_state) ->
+        {_, new_state} = handle_info({:direct_message, from_id, part}, acc_state)
+        new_state
+      end)
+
+    {:noreply, new_state}
+  end
+
   def handle_info({:direct_message, _from_id, "endGameData " <> data}, state) do
     Battle.save_match_stats(data)
     {:noreply, state}

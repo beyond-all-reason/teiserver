@@ -97,6 +97,16 @@ defmodule Teiserver.Account.AccoladeBotServer do
   def handle_info({:new_message, _userid, _room_name, _message}, state), do: {:noreply, state}
   def handle_info({:new_message_ex, _userid, _room_name, _message}, state), do: {:noreply, state}
 
+  def handle_info({:direct_message, from_id, parts}, state) when is_list(parts) do
+    new_state = parts
+      |> Enum.reduce(state, fn (part, acc_state) ->
+        {_, new_state} = handle_info({:direct_message, from_id, part}, acc_state)
+        new_state
+      end)
+
+    {:noreply, new_state}
+  end
+
   def handle_info({:direct_message, sender_id, "$" <> command}, state) do
     cmd = Coordinator.Parser.parse_command(sender_id, "$#{command}")
     new_state = CoordinatorCommands.handle_command(cmd, state)
