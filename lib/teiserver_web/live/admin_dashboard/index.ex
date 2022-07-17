@@ -4,13 +4,11 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
   alias Teiserver
   alias Teiserver.{Battle, Coordinator}
-  alias Teiserver.Battle.Lobby
-  # alias Teiserver.Account.UserLib
+  alias Teiserver.Account.AccoladeLib
 
   @impl true
   def mount(_params, session, socket) do
-    socket =
-      socket
+    socket = socket
       |> AuthPlug.live_call(session)
       |> NotificationPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
@@ -19,11 +17,9 @@ defmodule TeiserverWeb.AdminDashLive.Index do
       |> assign(:site_menu_active, "teiserver_admin")
       |> assign(:view_colour, Central.Admin.AdminLib.colours())
       |> assign(:telemetry_loading, true)
-      |> assign(:telemetry_client, nil)
-      |> assign(:telemetry_battle, nil)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> update_lobbies
-        |> update_server_pids
+      |> update_server_pids
 
     :timer.send_interval(5_000, :tick)
 
@@ -54,9 +50,9 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   def handle_info({:teiserver_telemetry, data}, socket) do
     {:noreply,
       socket
-      |> assign(:telemetry_loading, false)
-      |> assign(:telemetry_client, data.client)
-      |> assign(:telemetry_battle, data.battle)
+        |> assign(:telemetry_loading, false)
+        |> assign(:telemetry_client, data.client)
+        |> assign(:telemetry_battle, data.battle)
     }
   end
 
@@ -84,14 +80,14 @@ defmodule TeiserverWeb.AdminDashLive.Index do
   @spec update_server_pids(Plug.Socket.t()) :: Plug.Socket.t()
   defp update_server_pids(socket) do
     lobby_id_server_pid = case Horde.Registry.lookup(Teiserver.ServerRegistry, "LobbyIdServer") do
-      [{pid, _}] ->
-        pid
-      _ ->
-        nil
+      [{pid, _}] -> pid
+      _ ->nil
     end
 
     server_pids = [
-      {"Lobby ID server", lobby_id_server_pid}
+      {"Lobby ID server", lobby_id_server_pid},
+      {"Coordinator", Coordinator.get_coordinator_pid()},
+      {"Accolades", AccoladeLib.get_accolade_bot_pid()},
     ]
 
     socket

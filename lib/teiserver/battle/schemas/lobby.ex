@@ -74,7 +74,7 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec create_lobby(Map.t()) :: Map.t()
   def create_lobby(%{founder_id: _, founder_name: _, name: _} = lobby) do
-    passworded = Map.get(lobby, :password) == nil
+    passworded = Map.get(lobby, :password) != nil
 
     # Needs to be supplied a map with:
     # ip, port, engine_version, map_hash, map_name, game_name, hash_code
