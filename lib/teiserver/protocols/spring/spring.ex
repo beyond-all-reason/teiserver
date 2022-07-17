@@ -140,7 +140,7 @@ defmodule Teiserver.Protocols.Spring do
       |> Enum.filter(fn {_key, value} -> value != 1 end)
       |> Enum.empty?()
 
-    sync = if sync, do: 1, else: 0
+    sync = if sync, do: 1, else: 2
 
     [t4, t3, t2, t1] = BitParse.parse_bits("#{client.player_number}", 4)
     [a4, a3, a2, a1] = BitParse.parse_bits("#{client.team_number}", 4)
