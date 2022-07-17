@@ -92,7 +92,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 * id :: integer
 * name :: string
 * founder_id :: User.id
-* password :: nil | string
+* passworded :: boolean
 * locked :: string -- unlocked, friends, whitelist, locked
 * engine_name :: string
 * engine_version :: string
@@ -111,7 +111,7 @@ This represents a user who is logged in. A user who is logged out will not have 
   "id": 9556,
   "name": "EU 07 - 670",
   "founder_id": 1967,
-  "password": nil,
+  "passworded": false,
   "locked": "unlocked",
   "engine_name": "BAR",
   "engine_version": "145.789-rc3",
