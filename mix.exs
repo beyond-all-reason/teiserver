@@ -70,7 +70,7 @@ defmodule Central.MixProject do
       {:timex, "~> 3.7.5"},
       {:breadcrumble, "~> 1.0.0"},
       {:guardian, "~> 2.1"},
-      {:argon2_elixir, "~> 2.3"},
+      {:argon2_elixir, "~> 3.0"},
       {:bodyguard, "~> 2.4"},
       {:human_time, "~> 0.3.0"},
       {:oban, "~> 2.11"},
@@ -85,7 +85,7 @@ defmodule Central.MixProject do
       {:libcluster, "~> 3.3"},
 
       # Teiserver libs
-      {:openskill, "~> 0.1.0"},
+      {:openskill, "~> 1.0.1"},
       {:cowboy, "~> 2.9"},
       {:statistics, "~> 0.6.2"},
       {:csv, "~> 2.4"},
