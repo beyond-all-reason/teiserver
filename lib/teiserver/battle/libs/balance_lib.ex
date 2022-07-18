@@ -90,6 +90,7 @@ defmodule Teiserver.Battle.BalanceLib do
     Account.get_rating(userid, rating_type_id) |> convert_rating()
   end
 
+  def get_user_rating_value(userid, nil), do: nil
   def get_user_rating_value(userid, rating_type) do
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
     get_user_rating_value(userid, rating_type_id)
