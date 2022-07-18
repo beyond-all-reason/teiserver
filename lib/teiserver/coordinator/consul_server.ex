@@ -50,7 +50,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info(:tick, state) do
     new_state = check_queue_status(state)
     player_count_changed(new_state)
-    # fix_ids(new_state)
+    fix_ids(new_state)
     new_state = afk_check_update(new_state)
 
     # It is possible we can "forget" the coordinator_id
