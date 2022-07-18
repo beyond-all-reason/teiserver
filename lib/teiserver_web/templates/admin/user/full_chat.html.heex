@@ -30,7 +30,7 @@ Newest chat at the top of the list (read bottom to top).
 <%= case @mode do %>
   <% "room" -> %>
     <h4>Room chat - Page <%= @page + 1 %> - <%= @user.name %></h4>
-    <table class='table'>
+    <table class='table table-sm'>
       <thead>
         <tr>
           <th>Room</th>
@@ -51,7 +51,7 @@ Newest chat at the top of the list (read bottom to top).
 
   <% "lobby" -> %>
     <h4>Lobby chat - Page <%= @page + 1 %> - <%= @user.name %></h4>
-    <table class='table'>
+    <table class='table table-sm'>
       <thead>
         <tr>
           <th>Lobby</th>
