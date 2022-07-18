@@ -49,10 +49,7 @@ defmodule Teiserver.Battle.MatchLib do
       queue_id: queue_id
     } = Battle.get_combined_lobby_state(lobby_id)
 
-    clients = Client.list_clients(player_list)
-
-    teams = clients
-      |> Enum.filter(fn c -> c.player == true end)
+    teams = player_list
       |> Enum.group_by(fn c -> c.team_number end)
 
     the_game_type = game_type(lobby, teams)
@@ -78,7 +75,7 @@ defmodule Teiserver.Battle.MatchLib do
       finished: nil
     }
 
-    members = clients
+    members = player_list
       |> Enum.filter(fn c -> c.player == true end)
       |> Enum.map(fn client ->
         %{

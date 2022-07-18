@@ -97,8 +97,22 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_cast(:stop_match, state) do
-    uuid = Battle.generate_lobby_uuid()
-    modoptions = state.modoptions |> Map.put("server/match/uuid", uuid)
+    key = "server/match/uuid"
+    uuid = Battle.generate_lobby_uuid([state.id])
+    modoptions = state.modoptions |> Map.put(key, uuid)
+
+    # Need to broadcast the new uuid
+    PubSub.broadcast(
+      Central.PubSub,
+      "legacy_battle_updates:#{state.id}",
+      {:battle_updated, state.id, %{key => uuid}, :add_script_tags}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_lobby_updates:#{state.id}",
+      {:lobby_update, :set_modoption, state.id, {key, uuid}}
+    )
 
     {:noreply, %{state |
       player_list: [],

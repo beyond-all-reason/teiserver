@@ -32,7 +32,7 @@ defmodule Teiserver.Account.ClientLib do
   def get_clients([]), do: []
   def get_clients(id_list) do
     id_list
-      |> Enum.map(fn userid -> get_client_by_id(userid) end)
+      |> list_clients
   end
 
   @spec list_client_ids() :: [T.userid()]
@@ -50,6 +50,7 @@ defmodule Teiserver.Account.ClientLib do
   def list_clients(id_list) do
     id_list
       |> Enum.map(fn c -> get_client_by_id(c) end)
+      |> Enum.reject(&(&1 == nil))
   end
 
   # Updates

@@ -64,6 +64,12 @@
     <li>Password: <%= @lobby.password %></li>
   <% end %>
   <li>Queue size: <%= Enum.count(@consul.join_queue ++ @consul.low_priority_join_queue) %></li>
+  <%= if allow?(@current_user, "admin.dev.developer") do %>
+  
+    <li>Match UUID: </li>
+    <li>Server UUID: </li>
+  
+  <% end %>
 </ul>
 
 <h4>Players</h4>
