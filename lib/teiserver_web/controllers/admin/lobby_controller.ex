@@ -36,9 +36,9 @@ defmodule TeiserverWeb.Admin.LobbyController do
       order_by: "Oldest first"
     )
 
-    match_id = case Battle.list_matches(search: [uuid: lobby_guid]) do
+    match = case Battle.list_matches(search: [uuid: lobby_guid]) do
       [match] ->
-        match.id
+        match
       _ ->
         nil
     end
@@ -50,7 +50,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
     conn
       |> assign(:page, page)
       |> assign(:last_page, last_page)
-      |> assign(:match_id, match_id)
+      |> assign(:match, match)
       |> assign(:lobby_messages, lobby_messages)
       |> assign(:lobby_guid, lobby_guid)
       |> assign(:lobby, lobby)

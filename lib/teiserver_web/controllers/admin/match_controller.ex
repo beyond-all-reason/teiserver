@@ -117,4 +117,18 @@ defmodule TeiserverWeb.Admin.MatchController do
       |> assign(:matches, matches)
       |> render("user_index.html")
   end
+
+  @spec server_index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def server_index(conn, %{"uuid" => uuid}) do
+    matches = Battle.list_matches(
+        search: [
+          server_uuid: uuid
+        ],
+        order_by: "Newest first"
+      )
+
+    conn
+      |> assign(:matches, matches)
+      |> render("server_index.html")
+  end
 end

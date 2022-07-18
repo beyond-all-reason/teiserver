@@ -12,8 +12,14 @@
             </a>
           <% end %>
 
-          <%= if @match_id do %>
-            <a href={Routes.ts_admin_match_path(@conn, :show, @match_id)} class="btn btn-outline-secondary">
+          <%= if @match do %>
+            <a href={Routes.ts_admin_match_path(@conn, :server_index, @match.server_uuid)} class="btn btn-outline-secondary">
+              <i class="fa-fw fa-regular fa-server"></i>
+              Server grouping
+            </a>
+            
+            <a href={Routes.ts_admin_match_path(@conn, :show, @match.id)} class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}>
+              <%= central_component "icon", icon: Teiserver.Battle.MatchLib.icon() %>
               Match details
             </a>
           <% end %>
@@ -27,7 +33,7 @@
             <tr>
               <th>Poster</th>
               <th>Message</th>
-              <th class="d-none d-lg-block">When</th>
+              <th class="d-none d-lg-block" style="min-width: 200px;">When</th>
           </tr>
           </thead>
           <tbody>
