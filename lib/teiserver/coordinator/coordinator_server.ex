@@ -205,6 +205,8 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, state}
   end
 
+  # p = Teiserver.Coordinator.get_coordinator_pid()
+  # send(p, {:do_client_inout, :login, 2563})
   def handle_info({:do_client_inout, :login, userid}, state) do
     user = User.get_user_by_id(userid)
     if user do
@@ -215,11 +217,18 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         reports = Account.list_reports(search: [
           target_id: userid,
           expired: false,
+          response_action: "Restrict",
           filter: "closed"
         ])
 
         # Reasons you've had action taken against you
         reasons = reports
+          |> Enum.filter(fn r ->
+            cond do
+              r.responder_id == state.userid -> false
+              true -> true
+            end
+          end)
           |> Enum.map(fn report ->
             expires = if report.expires do
               ", expires #{date_to_str(report.expires, format: :ymd_hms)}"
@@ -265,6 +274,10 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           acknowledge_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
           msg ++ [@dispute_string, acknowledge_prompt]
         end
+
+        IO.puts ""
+        IO.puts msg |> Enum.join("\n")
+        IO.puts ""
 
         Coordinator.send_to_user(userid, msg)
       end
