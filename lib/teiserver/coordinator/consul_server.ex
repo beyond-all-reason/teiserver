@@ -690,20 +690,20 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec list_players(map()) :: [T.client()]
   def list_players(%{lobby_id: lobby_id}) do
-    Battle.get_lobby_players(lobby_id)
+    # Battle.get_lobby_players(lobby_id)
 
-    # Battle.get_lobby_member_list(lobby_id)
-    #   |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
-    #   |> Enum.filter(fn client -> client != nil end)
-    #   |> Enum.filter(fn client -> client.player == true and client.lobby_id == lobby_id end)
+    Battle.get_lobby_member_list(lobby_id)
+      |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
+      |> Enum.filter(fn client -> client != nil end)
+      |> Enum.filter(fn client -> client.player == true and client.lobby_id == lobby_id end)
   end
 
   @spec get_player_count(map()) :: non_neg_integer
   def get_player_count(%{lobby_id: lobby_id}) do
-    Battle.get_lobby_player_count(lobby_id)
+    # Battle.get_lobby_player_count(lobby_id)
 
-    # list_players(%{lobby_id: lobby_id})
-    #   |> Enum.count
+    list_players(%{lobby_id: lobby_id})
+      |> Enum.count
   end
 
   @spec get_user(String.t() | integer(), Map.t()) :: integer() | nil
