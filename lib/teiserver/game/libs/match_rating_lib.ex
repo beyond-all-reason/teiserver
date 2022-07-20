@@ -9,13 +9,12 @@ defmodule Teiserver.Game.MatchRatingLib do
   alias Central.Repo
   alias Teiserver.Battle.BalanceLib
   require Logger
-  alias Decimal, as: D
 
   @rated_match_types ["Team", "Duel", "FFA", "Team FFA"]
 
   @spec rating_type_list() :: [String.t()]
   def rating_type_list() do
-    ["Duel", "FFA", "Team FFA", "Small Team", "Large Team"]
+    @rated_match_types
   end
 
   @spec rating_type_id_lookup() :: map()
@@ -58,26 +57,10 @@ defmodule Teiserver.Game.MatchRatingLib do
     end
   end
 
-  @spec get_match_type(map()) :: non_neg_integer()
-  defp get_match_type(match) do
-    name = case match.game_type do
-      "Duel" -> "Duel"
-      "FFA" -> "FFA"
-      "Team FFA" -> "Team FFA"
-      "Team" ->
-        cond do
-          match.team_size <= 4 -> "Small Team"
-          match.team_size > 4 -> "Large Team"
-        end
-    end
-
-    Game.get_or_add_rating_type(name)
-  end
-
   @spec do_rate_match(Teiserver.Battle.Match.t()) :: :ok
   # Currently don't support more than 2 teams
   defp do_rate_match(%{team_count: _2} = match) do
-    rating_type_id = get_match_type(match)
+    rating_type_id = Game.get_or_add_rating_type(match.game_type)
 
     winners = match.members
       |> Enum.filter(fn membership -> membership.win end)
@@ -96,13 +79,13 @@ defmodule Teiserver.Game.MatchRatingLib do
     winner_ratings = winners
       |> Enum.map(fn membership ->
         rating = rating_lookup[membership.user_id] || BalanceLib.default_rating(rating_type_id)
-        {rating.mu |> D.to_float, rating.sigma |> D.to_float}
+        {rating.skill, rating.uncertainty}
       end)
 
     loser_ratings = losers
       |> Enum.map(fn membership ->
         rating = rating_lookup[membership.user_id] || BalanceLib.default_rating(rating_type_id)
-        {rating.mu |> D.to_float, rating.sigma |> D.to_float}
+        {rating.skill, rating.uncertainty}
       end)
 
     # Run the actual calculation
@@ -120,7 +103,6 @@ defmodule Teiserver.Game.MatchRatingLib do
         user_rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
         do_update_rating(user_id, match.id, user_rating, rating_update)
       end)
-
 
     Ecto.Multi.new()
       |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
@@ -143,13 +125,13 @@ defmodule Teiserver.Game.MatchRatingLib do
     end
 
     rating_type_id = user_rating.rating_type_id
-    {new_mu, new_sigma} = rating_update
-    new_ordinal = Openskill.ordinal(rating_update)
+    {new_skill, new_uncertainty} = rating_update
+    new_rating_value = BalanceLib.calculate_rating_value(new_skill, new_uncertainty)
 
     Account.update_rating(user_rating, %{
-      ordinal: new_ordinal,
-      mu: new_mu,
-      sigma: new_sigma
+      rating_value: new_rating_value,
+      skill: new_skill,
+      uncertainty: new_uncertainty
     })
 
     %{
@@ -158,17 +140,13 @@ defmodule Teiserver.Game.MatchRatingLib do
       match_id: match_id,
 
       value: %{
-        ordinal: new_ordinal,
-        mu: new_mu,
-        sigma: new_sigma,
+        rating_value: new_rating_value,
+        skill: new_skill,
+        uncertainty: new_uncertainty,
 
-        old_ordinal: D.to_float(user_rating.ordinal),
-        old_mu: D.to_float(user_rating.mu),
-        old_sigma: D.to_float(user_rating.sigma),
-
-        ordinal_change: new_ordinal - D.to_float(user_rating.ordinal),
-        mu_change: new_mu - D.to_float(user_rating.mu),
-        sigma_change: new_sigma - D.to_float(user_rating.sigma),
+        rating_value_change: new_rating_value - user_rating.rating_value,
+        skill_change: new_skill - user_rating.skill,
+        uncertainty_change: new_uncertainty - user_rating.uncertainty,
       }
     }
   end
@@ -191,8 +169,8 @@ defmodule Teiserver.Game.MatchRatingLib do
         rating_type_id = Game.get_or_add_rating_type(name)
 
         rating = stats["rating-#{rating_type_id}"]
-        ordinal = stats["ordinal-#{rating_type_id}"]
-        {name, {ordinal, rating}}
+        rating_value = stats["rating_value-#{rating_type_id}"]
+        {name, {rating_value, rating}}
       end)
   end
 
@@ -278,7 +256,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   end
 
   defp predict_match(match) do
-    rating_type_id = get_match_type(match)
+    rating_type_id = Game.get_or_add_rating_type(match.game_type)
     predict_winning_team(match.members, rating_type_id) |> Map.get(:winning_team)
   end
 

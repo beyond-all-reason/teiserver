@@ -155,7 +155,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
       "bots" => %{},
       "lobby_id" => lobby_id,
       "modoptions" => %{
-        "server/match/uuid" => Battle.get_lobby_uuid(lobby_id)
+        "server/match/uuid" => Battle.get_lobby_match_uuid(lobby_id)
       },
       "members" => [
         %{"away" => false, "in_game" => false, "lobby_id" => lobby_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => 0, "team_number" => 0, "userid" => user2.id}

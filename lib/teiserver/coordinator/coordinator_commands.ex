@@ -116,8 +116,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       preload: [:rating_type]
     )
       |> Enum.map(fn rating ->
-        score = rating.ordinal
-          |> Decimal.to_float()
+        score = rating.rating_value
           |> NumberHelper.round(2)
 
         "#{rating.rating_type.name}: #{score}"
@@ -186,8 +185,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
             preload: [:rating_type]
           )
             |> Enum.map(fn rating ->
-              score = rating.ordinal
-                |> Decimal.to_float()
+              score = rating.rating_value
                 |> NumberHelper.round(2)
 
               "#{rating.rating_type.name}: #{score}"

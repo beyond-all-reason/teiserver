@@ -20,54 +20,54 @@ defmodule Teiserver.Battle.BalanceLibTest do
       user_id: user1.id,
       rating_type_id: rating_type_id,
 
-      ordinal: D.new(20),
-      mu: D.new(25),
-      sigma: D.new(5),
+      rating_value: 20,
+      skill: 25,
+      uncertainty: 5,
     })
 
     Account.create_rating(%{
       user_id: user2.id,
       rating_type_id: rating_type_id,
 
-      ordinal: D.new(23),
-      mu: D.new(26),
-      sigma: D.new(3),
+      rating_value: 23,
+      skill: 26,
+      uncertainty: 3,
     })
 
     Account.create_rating(%{
       user_id: user3.id,
       rating_type_id: rating_type_id,
 
-      ordinal: D.new(25),
-      mu: D.new(30),
-      sigma: D.new(5),
+      rating_value: 25,
+      skill: 30,
+      uncertainty: 5,
     })
 
     Account.create_rating(%{
       user_id: user4.id,
       rating_type_id: rating_type_id,
 
-      ordinal: D.new(28),
-      mu: D.new(28),
-      sigma: D.new(0),
+      rating_value: 28,
+      skill: 28,
+      uncertainty: 0,
     })
 
     Account.create_rating(%{
       user_id: user5.id,
       rating_type_id: rating_type_id,
 
-      ordinal: D.new(40),
-      mu: D.new(50),
-      sigma: D.new(10),
+      rating_value: 40,
+      skill: 50,
+      uncertainty: 10,
     })
 
     Account.create_rating(%{
       user_id: user6.id,
       rating_type_id: rating_type_id,
 
-      ordinal: D.new(5),
-      mu: D.new(10),
-      sigma: D.new(5),
+      rating_value: 5,
+      skill: 10,
+      uncertainty: 5,
     })
 
     {:ok,

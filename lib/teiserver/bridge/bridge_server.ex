@@ -180,11 +180,15 @@ defmodule Teiserver.Bridge.BridgeServer do
   end
 
   defp is_promo?(message) do
-    regex = Regex.run(~r/\d+\+? for \d[a-z]\d/, message)
+    regexes = [
+      Regex.run(~r/\d+\+? for \d[a-z]\d/, message),
+      Regex.run(~r/\d needed/, message)
+    ]
+    |> Enum.reject(&(&1 == nil))
 
     cond do
       String.contains?(message, " player(s) needed for battle") -> true
-      regex != nil -> true
+      not Enum.empty?(regexes) -> true
       true -> false
     end
   end

@@ -14,6 +14,7 @@ defmodule Teiserver.Protocols.V1.TachyonConversionTest do
       engine_name: "spring-105",
       engine_version: "105.1.2.3",
       password: "word",
+      passworded: true,
       settings: %{
         max_players: 12
       }
@@ -26,7 +27,7 @@ defmodule Teiserver.Protocols.V1.TachyonConversionTest do
       map_name: "koom valley",
       game_name: "BAR",
       name: "Tachyon lobby conversion test",
-      password: true,
+      passworded: true,
       settings: %{max_players: 12}
     }
   end

@@ -37,12 +37,9 @@
   
     <%= for rt <- @rating_type_list do %>
       <%= if @ratings[rt] != nil do %>
-        <%
-          ordinal = @ratings[rt].ordinal |> Decimal.to_float |> round(2)
-        %>
         <%= central_component "section_menu_button",
           name: rt,
-          label: raw("#{rt} &nbsp;&nbsp;&nbsp; #{ordinal}"),
+          label: raw("#{rt} &nbsp;&nbsp;&nbsp; #{@ratings[rt].rating_value |> round(2)}"),
           active: @filter,
           url: "?filter=#{rt}",
           icon: "",
@@ -70,7 +67,7 @@
   <tbody>
     <%= for log <- @logs do %>
       <%
-        {text_class, icon} = if log.value["ordinal_change"] > 0 do
+        {text_class, icon} = if log.value["rating_value_change"] > 0 do
           {"text-success", "up"}
         else
           {"text-danger", "down"}
@@ -85,19 +82,19 @@
         <% end %>
         <td><%= @rating_type_id_lookup[log.rating_type_id] %></td>
         
-        <td><%= round(log.value["ordinal"], 2) %></td>
+        <td><%= round(log.value["rating_value"], 2) %></td>
         <td class={text_class}>
-          <%= round(log.value["ordinal_change"], 2) %>
+          <%= round(log.value["rating_value_change"], 2) %>
         </td>
         
-        <td><%= round(log.value["mu"], 2) %></td>
+        <td><%= round(log.value["skill"], 2) %></td>
         <td class={text_class}>
-          <%= round(log.value["mu_change"] || 0, 2) %>
+          <%= round(log.value["skill_change"] || 0, 2) %>
         </td>
         
-        <td><%= round(log.value["sigma"], 2) %></td>
+        <td><%= round(log.value["uncertainty"], 2) %></td>
         <td>
-          <%= round(log.value["sigma_change"] || 0, 2) %>
+          <%= round(log.value["uncertainty_change"] || 0, 2) %>
         </td>
 
         <td class={text_class}>

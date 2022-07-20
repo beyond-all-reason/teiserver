@@ -7,7 +7,7 @@ defmodule Teiserver.Battle.BalanceLib do
   alias Teiserver.Game.MatchRatingLib
 
   @type rating_value() :: float()
-  @type ordinal_sigma_pair() :: {float(), float()}
+  @type rating_value_uncertainty_pair() :: {float(), float()}
   @type user_rating() :: {T.userid(), rating_value()}
 
   @spec balance_players([T.userid()], non_neg_integer(), String.t(), :round_robin | :loser_picks) :: map()
@@ -59,30 +59,30 @@ defmodule Teiserver.Battle.BalanceLib do
   @spec default_rating :: List.t()
   @spec default_rating(non_neg_integer()) :: List.t()
   def default_rating(rating_type_id \\ nil) do
-    {mu, sigma} = Openskill.rating()
-    ordinal = Openskill.ordinal({mu, sigma})
+    {skill, uncertainty} = Openskill.rating()
+    rating_value = calculate_rating_value(skill, uncertainty)
 
     %{
       rating_type_id: rating_type_id,
-      mu: Decimal.from_float(mu * 1.0),
-      sigma: Decimal.from_float(sigma * 1.0),
-      ordinal: Decimal.from_float(ordinal * 1.0)
+      skill: skill,
+      uncertainty: uncertainty,
+      rating_value: rating_value
     }
   end
 
-  @spec get_user_ordinal_sigma_pair(T.userid(), String.t() | non_neg_integer()) :: ordinal_sigma_pair()
-  def get_user_ordinal_sigma_pair(userid, rating_type_id) when is_integer(rating_type_id) do
+  @spec get_user_rating_value_uncertainty_pair(T.userid(), String.t() | non_neg_integer()) :: rating_value_uncertainty_pair()
+  def get_user_rating_value_uncertainty_pair(userid, rating_type_id) when is_integer(rating_type_id) do
     rating = Account.get_rating(userid, rating_type_id) || default_rating()
 
     {
-      Decimal.to_float(rating.ordinal),
-      Decimal.to_float(rating.sigma)
+      rating.rating_value,
+      rating.uncertainty
     }
   end
 
-  def get_user_ordinal_sigma_pair(userid, rating_type) do
+  def get_user_rating_value_uncertainty_pair(userid, rating_type) do
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
-    get_user_ordinal_sigma_pair(userid, rating_type_id)
+    get_user_rating_value_uncertainty_pair(userid, rating_type_id)
   end
 
   @spec get_user_rating_value(T.userid(), String.t() | non_neg_integer()) :: rating_value()
@@ -90,7 +90,7 @@ defmodule Teiserver.Battle.BalanceLib do
     Account.get_rating(userid, rating_type_id) |> convert_rating()
   end
 
-  def get_user_rating_value(userid, nil), do: nil
+  def get_user_rating_value(_userid, nil), do: nil
   def get_user_rating_value(userid, rating_type) do
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
     get_user_rating_value(userid, rating_type_id)
@@ -100,17 +100,18 @@ defmodule Teiserver.Battle.BalanceLib do
   def convert_rating(nil) do
     default_rating() |> convert_rating()
   end
-  # def convert_rating(%{mu: mu, sigma: sigma}) do
-  #   Decimal.to_float(mu) - Decimal.to_float(sigma)
-  # end
-  def convert_rating(%{mu: mu}) do
-    Decimal.to_float(mu)
+  def convert_rating(%{rating_value: rating_value}) do
+    rating_value
   end
-  # def convert_rating(%{ordinal: ordinal}) do
-  #   Decimal.to_float(ordinal)
-  # end
+
+  @spec calculate_rating_value(float(), float()) :: float()
+  def calculate_rating_value(skill, uncertainty) do
+    skill - uncertainty
+  end
+
 
   # Each team takes it in turns to pick, they pick the highest ranked player
+  # This is a bad method
   @spec round_robin([user_rating()], map()) :: map()
   defp round_robin(players, teams) do
     do_round_robin(players, teams, 1)
@@ -191,7 +192,7 @@ defmodule Teiserver.Battle.BalanceLib do
         [max_score | remaining] = scores
         [min_score | _] = remaining
 
-        # Max score must always be at least one for this to not bork
+        # Max score skillst always be at least one for this to not bork
         max_score = max(max_score, 1)
 
         ((1 - (min_score/max_score)) * 100)

@@ -32,9 +32,9 @@ defmodule TeiserverWeb.Battle.RatingsController do
       search: [
         rating_type_id: type_id
       ],
-      order_by: "Ordinal high to low",
+      order_by: "Rating value high to low",
       preload: [:user],
-      limit: 100
+      limit: 30
     )
 
     conn

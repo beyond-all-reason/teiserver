@@ -181,11 +181,11 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     # Both players should get a message from the coordinator
     [reply] = _tachyon_recv(psocket1)
     assert reply["cmd"] == "s.communication.received_direct_message"
-    assert reply["message"] == "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk or just type something into the lobby chat."
+    assert reply["message"] == ["The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk or just type something into the lobby chat."]
 
     [reply] = _tachyon_recv(psocket2)
     assert reply["cmd"] == "s.communication.received_direct_message"
-    assert reply["message"] == "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk or just type something into the lobby chat."
+    assert reply["message"] == ["The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk or just type something into the lobby chat."]
 
     # Check consul state
     pid = Coordinator.get_consul_pid(lobby_id)
@@ -241,7 +241,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.lobby.say"
-    assert reply["message"] == "AFK-check is now complete, 1 player(s) were found to be afk"
+    assert reply["message"] == ["AFK-check is now complete, 1 player(s) were found to be afk"]
   end
 
   test "pull user", %{lobby_id: lobby_id, hsocket: hsocket, host: _host} do

@@ -178,7 +178,7 @@ defmodule Teiserver.SpringTcpServerTest do
     # Logs back in
     send(tcp_pid, {:user_logged_in, u1.id})
     r = _recv_raw(socket)
-    assert r == "ADDUSER #{u1.name} ?? #{u1.springid} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\n"
+    assert r == "ADDUSER #{u1.name} ?? #{u1.id} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\n"
 
     assert GenServer.call(tcp_pid, {:get, :known_users}) == %{
       user.id => %{lobby_id: nil, userid: user.id},
@@ -250,7 +250,7 @@ defmodule Teiserver.SpringTcpServerTest do
 
     # TODO: Sometimes this fails for no apparent reason, unable to reproduce since the above
     # 500 sleep call but I seem to recall that previously not helping
-    expected = "ADDUSER #{u1.name} ?? #{u1.springid} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\nJOINEDBATTLE #{
+    expected = "ADDUSER #{u1.name} ?? #{u1.id} LuaLobby Chobby\nCLIENTSTATUS #{u1.name} 0\nJOINEDBATTLE #{
                lobby_id + 1
              } #{u1.name}\n"
     assert r == expected
@@ -335,7 +335,7 @@ defmodule Teiserver.SpringTcpServerTest do
 
     send(tcp_pid, {:add_user_to_room, dud.id, "roomname"})
     r = _recv_until(socket)
-    assert r == "ADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nJOINED roomname #{dud.name}\n"
+    assert r == "ADDUSER #{dud.name} ?? #{dud.id} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nJOINED roomname #{dud.name}\n"
 
     # Now the non-user, should be nothing since they're not actually logged in
     send(tcp_pid, {:add_user_to_room, non_user.id, "roomname"})
@@ -359,19 +359,19 @@ defmodule Teiserver.SpringTcpServerTest do
     _recv_until(socket)
     send(tcp_pid, {:direct_message, dud.id, "msgmsg"})
     r = _recv_until(socket)
-    assert r == "ADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAIDPRIVATE #{dud.name} msgmsg\n"
+    assert r == "ADDUSER #{dud.name} ?? #{dud.id} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAIDPRIVATE #{dud.name} msgmsg\n"
 
     send(tcp_pid, {:user_logged_out, dud.id, dud.name})
     _recv_until(socket)
     send(tcp_pid, {:new_message, dud.id, "roomname", "msgmsg"})
     r = _recv_until(socket)
-    assert r == "ADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAID roomname #{dud.name} msgmsg\n"
+    assert r == "ADDUSER #{dud.name} ?? #{dud.id} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAID roomname #{dud.name} msgmsg\n"
 
     send(tcp_pid, {:user_logged_out, dud.id, dud.name})
     _recv_until(socket)
     send(tcp_pid, {:new_message_ex, dud.id, "roomname", "msgmsg"})
     r = _recv_until(socket)
-    assert r == "ADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAIDEX roomname #{dud.name} msgmsg\n"
+    assert r == "ADDUSER #{dud.name} ?? #{dud.id} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nSAIDEX roomname #{dud.name} msgmsg\n"
 
     # Now the non-user, should be nothing since they're not actually logged in
     send(tcp_pid, {:direct_message, non_user.id, "msgmsg"})
@@ -396,6 +396,6 @@ defmodule Teiserver.SpringTcpServerTest do
     # Join a room when we don't know about dud_user
     Teiserver.Protocols.SpringOut.do_join_room(state, "dud_room")
     r = _recv_until(socket)
-    assert r == "JOIN dud_room\nJOINED dud_room #{user.name}\nCHANNELTOPIC dud_room #{dud.name}\nADDUSER #{dud.name} ?? #{dud.springid} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nCLIENTS dud_room #{user.name} #{dud.name}\n"
+    assert r == "JOIN dud_room\nJOINED dud_room #{user.name}\nCHANNELTOPIC dud_room #{dud.name}\nADDUSER #{dud.name} ?? #{dud.id} LuaLobby Chobby\nCLIENTSTATUS #{dud.name} 0\nCLIENTS dud_room #{user.name} #{dud.name}\n"
   end
 end

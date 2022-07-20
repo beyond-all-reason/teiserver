@@ -3,13 +3,13 @@
 <%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
 
 <script type="text/javascript">
-  function new_ordinal(index) {
-    mu = $("#" + index + "_mu").val();
-    sigma = $("#" + index + "_sigma").val();
+  function new_rating_value(index) {
+    skill = $("#" + index + "_skill").val();
+    uncertainty = $("#" + index + "_uncertainty").val();
 
-    ordinal = mu - (sigma * 3);
+    rating_value = skill - uncertainty;
 
-    $("#" + index + "_ordinal").val(ordinal);
+    $("#" + index + "_rating_value").val(rating_value);
   }
 </script>
 
@@ -36,58 +36,54 @@
             </div>
             
             <div class="col-md-2">
-              <h5>Mu</h5>
+              <h5>Skill</h5>
             </div>
             <div class="col-md-2">
-              <h5>Sigma</h5>
+              <h5>Uncertainty</h5>
             </div>
             <div class="col-md-2" style="border-right: 1px solid #777;">
-              <h5>Ordinal</h5>
+              <h5>Rating value</h5>
             </div>
 
             <div class="col-md-2">
-              <h5>Mu</h5>
+              <h5>Skill</h5>
             </div>
             <div class="col-md-2">
-              <h5>Sigma</h5>
+              <h5>Uncertainty</h5>
             </div>
             <div class="col-md-2">
-              <h5>Ordinal</h5>
+              <h5>Rating value</h5>
             </div>
           </div>
 
           <%= for {r, i} <- Enum.with_index(@rating_type_list) do %>
             <%
               rating = @ratings[r] || @default_rating
-            
-              mu = rating.mu |> Decimal.to_float()
-              sigma = rating.sigma |> Decimal.to_float()
-              ordinal = rating.ordinal |> Decimal.to_float()
             %>
             <div class="row my-3">
               <div class="col-md-12">
                 <h4><%= r %></h4>
               </div>
               <div class="col-md-2">
-                <input type="text" value={mu} class="form-control" disabled="disabled" />
+                <input type="text" value={rating.skill} class="form-control" disabled="disabled" />
               </div>
               <div class="col-md-2">
-                <input type="text" value={sigma} class="form-control" disabled="disabled" />
+                <input type="text" value={rating.uncertainty} class="form-control" disabled="disabled" />
               </div>
               <div class="col-md-2" style="border-right: 1px solid #777;">
-                <input type="text" value={ordinal} class="form-control" disabled="disabled" />
+                <input type="text" value={rating.rating_value} class="form-control" disabled="disabled" />
               </div>
 
               <div class="col-md-2">
-                <input type="hidden" name={"#{r}[old_mu]"} value={mu} />
-                <input type="text" name={"#{r}[mu]"} id={"#{i}_mu"} value={mu} class="form-control" onkeyup={"new_ordinal(#{i})"} />
+                <input type="hidden" name={"#{r}[old_skill]"} value={rating.skill} />
+                <input type="text" name={"#{r}[skill]"} id={"#{i}_skill"} value={rating.skill} class="form-control" onkeyup={"new_rating_value(#{i})"} />
               </div>
               <div class="col-md-2">
-              <input type="hidden" name={"#{r}[old_sigma]"} value={sigma} />
-                <input type="text" name={"#{r}[sigma]"} id={"#{i}_sigma"} value={sigma} class="form-control" onkeyup={"new_ordinal(#{i})"} />
+              <input type="hidden" name={"#{r}[old_uncertainty]"} value={rating.uncertainty} />
+                <input type="text" name={"#{r}[uncertainty]"} id={"#{i}_uncertainty"} value={rating.uncertainty} class="form-control" onkeyup={"new_rating_value(#{i})"} />
               </div>
               <div class="col-md-2">
-                <input type="text" id={"#{i}_ordinal"} value={ordinal} class="form-control" disabled="disabled" />
+                <input type="text" id={"#{i}_rating_value"} value={rating.rating_value} class="form-control" disabled="disabled" />
               </div>
             </div>
           <% end %>

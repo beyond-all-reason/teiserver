@@ -104,7 +104,7 @@ defmodule Teiserver.SpringAuthTest do
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
     reply = _recv_raw(socket1)
-    assert reply =~ "ADDUSER #{user2.name} ?? #{user2.springid} LuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
     assert reply =~ " LuaLobby Chobby\n"
 
     _send_raw(socket1, "#111 IGNORELIST\n")
@@ -150,7 +150,7 @@ IGNORELISTEND\n"
   #   user2 = new_user()
   #   %{socket: socket2} = auth_setup(user2)
   #   reply = _recv_raw(socket1)
-  #   assert reply =~ "ADDUSER #{user2.name} ?? #{user2.springid} LuaLobby Chobby\n"
+  #   assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
   #   assert reply =~ " LuaLobby Chobby\n"
 
   #   _send_raw(socket2, "SAYPRIVATE #{user.name} тест!\n")
@@ -165,7 +165,7 @@ IGNORELISTEND\n"
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
     reply = _recv_raw(socket1)
-    assert reply =~ "ADDUSER #{user2.name} ?? #{user2.springid} LuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
     assert reply =~ " LuaLobby Chobby\n"
 
     _send_raw(socket1, "#7 FRIENDLIST\n")
@@ -405,7 +405,7 @@ CLIENTS test_room #{user.name}\n"
     user2 = new_user()
     %{socket: socket2} = auth_setup(user2)
     reply = _recv_raw(socket1)
-    assert reply =~ "ADDUSER #{user2.name} ?? #{user2.springid} LuaLobby Chobby\n"
+    assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
 
     _send_raw(socket2, "RING #{user1.name}\n")
     _ = _recv_raw(socket2)
@@ -505,7 +505,7 @@ CLIENTS test_room #{user.name}\n"
 
     # Check they logged back in and got re-added with the correct name
     wreply = _recv_raw(watcher)
-    assert wreply == "ADDUSER test_user_rename ?? #{user.springid} LuaLobby Chobby\nCLIENTSTATUS test_user_rename 0\n"
+    assert wreply == "ADDUSER test_user_rename ?? #{user.id} LuaLobby Chobby\nCLIENTSTATUS test_user_rename 0\n"
 
     # Next up, what if they update their status?
     _send_raw(socket, "MYSTATUS 127\n")
@@ -620,9 +620,9 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "CLIENTSTATUS #{user.name} #{new_status}\n"
   end
 
-  test "Bad springid ADDUSER", %{user: user, socket: socket} do
+  test "Bad id ADDUSER", %{user: user, socket: socket} do
     {:ok, bad_user} =
-      User.user_register_params_with_md5("test_user_bad_springid", "test_user_bad_springid@email.com", "X03MO1qnZdYdgyfeuILPmQ==", %{admin_group_id: Teiserver.user_group_id()})
+      User.user_register_params_with_md5("test_user_bad_id", "test_user_bad_id@email.com", "X03MO1qnZdYdgyfeuILPmQ==", %{admin_group_id: Teiserver.user_group_id()})
       |> Central.Account.create_user()
 
     Central.Account.create_group_membership(%{
@@ -642,7 +642,7 @@ CLIENTS test_room #{user.name}\n"
     pid = Client.get_client_by_id(user.id).tcp_pid
     send(pid, {:user_logged_in, bad_user.id})
     reply = _recv_raw(socket)
-    assert reply == "ADDUSER test_user_bad_springid ?? #{bad_user.id} \nCLIENTSTATUS test_user_bad_springid 0\n"
+    assert reply == "ADDUSER test_user_bad_id ?? #{bad_user.id} \nCLIENTSTATUS test_user_bad_id 0\n"
     Client.disconnect(bad_user.id)
   end
 
@@ -681,6 +681,6 @@ CLIENTS test_room #{user.name}\n"
 
     _send_raw(socket, "GETUSERID test_user_id_user\n")
     reply = _recv_raw(socket)
-    assert reply == "The ID for test_user_id_user is 1993717506 0d04a635e200f308 #{ip_user.springid}\n"
+    assert reply == "The ID for test_user_id_user is 1993717506 0d04a635e200f308 #{ip_user.id}\n"
   end
 end

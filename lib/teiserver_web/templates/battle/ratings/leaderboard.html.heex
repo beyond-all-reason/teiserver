@@ -34,11 +34,11 @@
         </td>
         <td style={"background-color: #{rgba_css rating.user.colour};"}><%= rating.user.name %></td>
         
-        <td><%= rating.ordinal |> c_round(2) %></td>
-        
-        <td><%= rating.mu |> c_round(2) %></td>
-        
-        <td><%= rating.sigma |> c_round(2) %></td>
+        <td><%= rating.rating_value |> round(2) %></td>
+
+        <td><%= rating.skill |> round(2) %></td>
+
+        <td><%= rating.uncertainty |> round(2) %></td>
       </tr>
     <% end %>
   </tbody>

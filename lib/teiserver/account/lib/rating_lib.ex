@@ -56,14 +56,14 @@ defmodule Teiserver.Account.RatingLib do
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
-  def order_by(query, "Ordinal high to low") do
+  def order_by(query, "Rating value high to low") do
     from ratings in query,
-      order_by: [desc: ratings.ordinal]
+      order_by: [desc: ratings.rating_value]
   end
 
-  def order_by(query, "Ordinal low to high") do
+  def order_by(query, "Rating value low to high") do
     from ratings in query,
-      order_by: [asc: ratings.ordinal]
+      order_by: [asc: ratings.rating_value]
   end
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t

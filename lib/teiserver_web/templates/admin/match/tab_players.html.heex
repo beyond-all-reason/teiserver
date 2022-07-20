@@ -6,27 +6,27 @@
       <th colspan="2" style="text-align: center; bbackground-color: #EFE;">Units</th>
       <th colspan="2" style="text-align: center; bbackground-color: #EEF;">Metal</th>
       <th colspan="2" style="text-align: center; bbackground-color: #FFE;">Energy</th>
-      
+
       <th>&nbsp;</th>
     </tr>
-    
+
     <tr>
       <th colspan="3">Name</th>
       <th>Team</th>
-      
+
       <th>Dealt</th>
       <th>Received</th>
-      
+
       <th>Killed</th>
       <th>Produced</th>
-      
+
       <th>Produced</th>
       <th>Used</th>
-      
+
       <th>Produced</th>
       <th>Used</th>
-      
-      <th>Rating</th>
+
+      <th colspan="2">Rating</th>
     </tr>
   </thead>
   <tbody>
@@ -43,22 +43,22 @@
         </td>
         <td style={"background-color: #{rgba_css m.user.colour};"}><%= m.user.name %></td>
         <td><%= m.team_id + 1 %></td>
-        
+
         <td><%= normalize m.stats["damageDealt"] %></td>
         <td><%= normalize m.stats["damageReceived"] %></td>
-        
+
         <td><%= normalize m.stats["unitsKilled"] %></td>
         <td><%= normalize m.stats["unitsProduced"] %></td>
-        
+
         <td><%= normalize m.stats["metalProduced"] %></td>
         <td><%= normalize m.stats["metalUsed"] %></td>
-        
+
         <td><%= normalize m.stats["energyProduced"] %></td>
         <td><%= normalize m.stats["energyUsed"] %></td>
 
         <td>
           <%= if rating != nil do %>
-            <%= rating.value["old_ordinal"] |> round(2) %> -&gt; <%= rating.value["ordinal"] |> round(2) %>
+            <%= rating.value["rating_value"] |> round(2) %>
           <% end %>
         </td>
       </tr>

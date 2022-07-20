@@ -818,55 +818,55 @@ defmodule Teiserver.Coordinator.ConsulServer do
     }
   end
 
-  def set_skill_modoptions(state) do
-    player_count = Battle.get_lobby_player_count(state.lobby_id)
-    rating_type = cond do
-      player_count == 2 -> "Duel"
-      state.host_teamcount > 2 ->
-        if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
-      player_count <= 8 -> "Small Team"
-      true -> "Large Team"
-    end
+  # def set_skill_modoptions(state) do
+  #   player_count = Battle.get_lobby_player_count(state.lobby_id)
+  #   rating_type = cond do
+  #     player_count == 2 -> "Duel"
+  #     state.host_teamcount > 2 ->
+  #       if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
+  #     player_count <= 8 -> "Small Team"
+  #     true -> "Large Team"
+  #   end
 
-    new_opts = state.lobby_id
-      |> Battle.get_lobby_member_list()
-      |> Enum.map(fn userid ->
-        {_ordinal, sigma} = BalanceLib.get_user_ordinal_sigma_pair(userid, rating_type)
-        rating_value = BalanceLib.get_user_rating_value(userid, rating_type)
-        username = Account.get_username_by_id(userid) |> String.downcase()
+  #   new_opts = state.lobby_id
+  #     |> Battle.get_lobby_member_list()
+  #     |> Enum.map(fn userid ->
+  #       {_ordinal, sigma} = BalanceLib.get_user_ordinal_sigma_pair(userid, rating_type)
+  #       rating_value = BalanceLib.get_user_rating_value(userid, rating_type)
+  #       username = Account.get_username_by_id(userid) |> String.downcase()
 
-        [
-          {"game/players/#{username}/skill", round(rating_value, 2)},
-          {"game/players/#{username}/skilluncertainty", round(sigma, 2)}
-        ]
-      end)
-      |> List.flatten
-      |> Map.new
+  #       [
+  #         {"game/players/#{username}/skill", round(rating_value, 2)},
+  #         {"game/players/#{username}/skilluncertainty", round(sigma, 2)}
+  #       ]
+  #     end)
+  #     |> List.flatten
+  #     |> Map.new
 
-    Battle.set_modoptions(state.lobby_id, new_opts)
-  end
+  #   Battle.set_modoptions(state.lobby_id, new_opts)
+  # end
 
-  defp set_skill_modoptions_for_user(state, userid) do
-    player_count = Battle.get_lobby_player_count(state.lobby_id)
-    rating_type = cond do
-      player_count == 2 -> "Duel"
-      state.host_teamcount > 2 ->
-        if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
-      player_count <= 8 -> "Small Team"
-      true -> "Large Team"
-    end
+  # defp set_skill_modoptions_for_user(state, userid) do
+  #   player_count = Battle.get_lobby_player_count(state.lobby_id)
+  #   rating_type = cond do
+  #     player_count == 2 -> "Duel"
+  #     state.host_teamcount > 2 ->
+  #       if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
+  #     player_count <= 8 -> "Small Team"
+  #     true -> "Large Team"
+  #   end
 
-    username = Account.get_username_by_id(userid) |> String.downcase()
-    {_ordinal, sigma} = BalanceLib.get_user_ordinal_sigma_pair(userid, rating_type)
-    rating_value = BalanceLib.get_user_rating_value(userid, rating_type)
+  #   username = Account.get_username_by_id(userid) |> String.downcase()
+  #   {_ordinal, sigma} = BalanceLib.get_user_ordinal_sigma_pair(userid, rating_type)
+  #   rating_value = BalanceLib.get_user_rating_value(userid, rating_type)
 
-    new_opts = %{
-      "game/players/#{username}/skill" => round(rating_value, 2),
-      "game/players/#{username}/skilluncertainty" => round(sigma, 2)
-    }
+  #   new_opts = %{
+  #     "game/players/#{username}/skill" => round(rating_value, 2),
+  #     "game/players/#{username}/skilluncertainty" => round(sigma, 2)
+  #   }
 
-    Battle.set_modoptions(state.lobby_id, new_opts)
-  end
+  #   Battle.set_modoptions(state.lobby_id, new_opts)
+  # end
 
   @spec get_level(String.t()) :: :banned | :spectator | :player
   def get_level("banned"), do: :banned

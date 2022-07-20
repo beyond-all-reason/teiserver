@@ -7,8 +7,7 @@ defmodule TeiserverWeb.Admin.UserController do
   alias Teiserver.Account.UserLib
   alias Teiserver.Battle.BalanceLib
   alias Central.Account.GroupLib
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Decimal, as: D
+  import Central.Helpers.NumberHelper, only: [int_parse: 1, float_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_user",
@@ -443,31 +442,31 @@ defmodule TeiserverWeb.Admin.UserController do
         changes = MatchRatingLib.rating_type_list()
           |> Enum.map(fn r -> {r, params[r]} end)
           |> Enum.reject(fn {_r, changes} ->
-            changes["mu"] == changes["old_mu"] and changes["sigma"] == changes["old_sigma"]
+            changes["skill"] == changes["old_skill"] and changes["uncertainty"] == changes["old_uncertainty"]
           end)
           |> Enum.map(fn {rating_type, changes} ->
             rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
 
             existing_rating = Account.get_rating(user.id, rating_type_id)
             user_rating = existing_rating || BalanceLib.default_rating()
-            new_mu = D.new(changes["mu"]) |> D.to_float
-            new_sigma = D.new(changes["sigma"]) |> D.to_float
-            new_ordinal = Openskill.ordinal({new_mu, new_sigma})
+            new_skill = changes["skill"] |> float_parse
+            new_uncertainty = changes["uncertainty"] |> float_parse
+            new_rating_value = BalanceLib.calculate_rating_value(new_skill, new_uncertainty)
 
             {:ok, new_rating} = case Account.get_rating(user.id, rating_type_id) do
               nil ->
                 Account.create_rating(%{
                   user_id: user.id,
                   rating_type_id: rating_type_id,
-                  ordinal: new_ordinal,
-                  mu: new_mu,
-                  sigma: new_sigma
+                  rating_value: new_rating_value,
+                  skill: new_skill,
+                  uncertainty: new_uncertainty
                 })
               existing ->
                 Account.update_rating(existing, %{
-                  ordinal: new_ordinal,
-                  mu: new_mu,
-                  sigma: new_sigma
+                  rating_value: new_rating_value,
+                  skill: new_skill,
+                  uncertainty: new_uncertainty
                 })
             end
 
@@ -477,17 +476,13 @@ defmodule TeiserverWeb.Admin.UserController do
               match_id: nil,
 
               value: %{
-                ordinal: new_ordinal,
-                mu: new_mu,
-                sigma: new_sigma,
+                rating_value: new_rating_value,
+                skill: new_skill,
+                uncertainty: new_uncertainty,
 
-                old_ordinal: D.to_float(user_rating.ordinal),
-                old_mu: D.to_float(user_rating.mu),
-                old_sigma: D.to_float(user_rating.sigma),
-
-                ordinal_change: new_ordinal - D.to_float(user_rating.ordinal),
-                mu_change: new_mu - D.to_float(user_rating.mu),
-                sigma_change: new_sigma - D.to_float(user_rating.sigma),
+                rating_value_change: new_rating_value - user_rating.rating_value,
+                skill_change: new_skill - user_rating.skill,
+                uncertainty_change: new_uncertainty - user_rating.uncertainty,
               }
             }
 
