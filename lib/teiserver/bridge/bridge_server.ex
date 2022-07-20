@@ -127,7 +127,12 @@ defmodule Teiserver.Bridge.BridgeServer do
         message = if is_list(message), do: Enum.join(message, "\n"), else: message
         message = clean_message(message)
 
-        room_name = if String.contains?(message, " player(s) needed for battle"), do: "promote", else: room_name
+        room_name = if is_promo?(message) do
+          "promote"
+        else
+          room_name
+        end
+
         forward_to_discord(from_id, state.rooms[room_name], message, state)
 
       true ->
@@ -172,6 +177,16 @@ defmodule Teiserver.Bridge.BridgeServer do
   def handle_info(msg, state) do
     Logger.error("BridgeServer handle_info error. No handler for msg of #{Kernel.inspect msg}")
     {:noreply, state}
+  end
+
+  defp is_promo?(message) do
+    regex = Regex.run(~r/\d+\+? for \d[a-z]\d/, message)
+
+    cond do
+      String.contains?(message, " player(s) needed for battle") -> true
+      regex != nil -> true
+      true -> false
+    end
   end
 
   defp do_begin() do
