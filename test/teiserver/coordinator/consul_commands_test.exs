@@ -241,7 +241,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.lobby.say"
-    assert reply["message"] == ["AFK-check is now complete, 1 player(s) were found to be afk"]
+    assert reply["message"] == "AFK-check is now complete, 1 player(s) were found to be afk"
   end
 
   test "pull user", %{lobby_id: lobby_id, hsocket: hsocket, host: _host} do

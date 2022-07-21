@@ -51,8 +51,7 @@ defmodule TeiserverWeb.Report.RatingController do
 
     rating_type = cond do
       Enum.count(player_ids) == 2 -> "Duel"
-      Enum.count(player_ids) <= 8 -> "Small Team"
-      true -> "Large Team"
+      true -> "Team"
     end
 
     balance_result = BalanceLib.balance_players(player_ids, 2, rating_type)

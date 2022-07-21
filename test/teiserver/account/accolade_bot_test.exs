@@ -32,6 +32,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
 
       founder_id: host.id,
       founder_name: host.name,
+      server_uuid: "123",
       bots: %{},
 
       started: Timex.now |> Timex.shift(minutes: -30),
@@ -122,7 +123,7 @@ defmodule Teiserver.Account.AccoladeBotTest do
     [result] = _tachyon_recv(psocket11)
     assert result == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => "Thank you for your feedback, this Accolade will be bestowed.",
+      "message" => ["Thank you for your feedback, this Accolade will be bestowed."],
       "sender_id" => AccoladeLib.get_accolade_bot_userid()
     }
 

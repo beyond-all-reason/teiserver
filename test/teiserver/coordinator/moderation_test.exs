@@ -79,7 +79,7 @@ defmodule Teiserver.Coordinator.ModerationTest do
     [msg] = _tachyon_recv(socket)
     assert msg == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => "I don't currently handle messages, sorry #{user.name}",
+      "message" => ["I don't currently handle messages, sorry #{user.name}"],
       "sender_id" => Coordinator.get_coordinator_userid()
     }
     client = Client.get_client_by_id(user.id)
@@ -89,13 +89,13 @@ defmodule Teiserver.Coordinator.ModerationTest do
     _tachyon_send(socket, %{
       "cmd" => "c.communication.send_direct_message",
       "recipient_id" => Coordinator.get_coordinator_userid(),
-      "message" => "I acknowledge this"
+      "message" => ["I acknowledge this"]
     })
     _ = _tachyon_recv(socket)
     [msg] = _tachyon_recv(socket)
     assert msg == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => "Thank you",
+      "message" => ["Thank you"],
       "sender_id" => Coordinator.get_coordinator_userid()
     }
     client = Client.get_client_by_id(user.id)

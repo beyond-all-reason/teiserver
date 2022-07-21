@@ -275,10 +275,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
           msg ++ [@dispute_string, acknowledge_prompt]
         end
 
-        IO.puts ""
-        IO.puts msg |> Enum.join("\n")
-        IO.puts ""
-
         Coordinator.send_to_user(userid, msg)
       end
     end

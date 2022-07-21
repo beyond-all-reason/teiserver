@@ -55,8 +55,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           player_count == 2 -> "Duel"
           state.host_teamcount > 2 ->
             if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
-          player_count <= 8 -> "Small Team"
-          true -> "Large Team"
+          true -> "Team"
         end
 
         rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]

@@ -4,10 +4,9 @@ defmodule Teiserver.Battle.BalanceLibTest do
   alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Account
   alias Teiserver.TeiserverTestLib
-  alias Decimal, as: D
 
   setup do
-    rating_type_id = MatchRatingLib.rating_type_name_lookup()["Small Team"]
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()["Team"]
 
     user1 = TeiserverTestLib.new_user()
     user2 = TeiserverTestLib.new_user()
@@ -81,62 +80,62 @@ defmodule Teiserver.Battle.BalanceLibTest do
   end
 
   test "round robin basic 4", %{user1: user1, user2: user2, user3: user3, user4: user4} do
-    result = BalanceLib.balance_players([user1, user2, user3, user4], 2, "Small Team", :round_robin)
+    result = BalanceLib.balance_players([user1, user2, user3, user4], 2, "Team", :round_robin)
 
     assert Enum.count(result.team_players[1]) == 2
     assert Enum.count(result.team_players[2]) == 2
 
-    assert result.stats[1].total_rating == 56.0
-    assert result.stats[2].total_rating == 53
+    assert result.stats[1].total_rating == 51
+    assert result.stats[2].total_rating == 45
 
-    assert result.deviation == 6
+    assert result.deviation == 13
   end
 
   test "round robin complex 6", %{user1: user1, user2: user2, user3: user3, user4: user4, user5: user5, user6: user6} do
-    result = BalanceLib.balance_players([user1, user2, user3, user4, user5, user6], 2, "Small Team", :round_robin)
+    result = BalanceLib.balance_players([user1, user2, user3, user4, user5, user6], 2, "Team", :round_robin)
 
     assert Enum.count(result.team_players[1]) == 3
     assert Enum.count(result.team_players[2]) == 3
 
-    assert result.stats[1].total_rating == 103
-    assert result.stats[2].total_rating == 66
+    assert result.stats[1].total_rating == 85
+    assert result.stats[2].total_rating == 56
 
-    assert result.deviation == 56
+    assert result.deviation == 52
   end
 
   test "loser picks basic 4", %{user1: user1, user2: user2, user3: user3, user4: user4} do
-    result = BalanceLib.balance_players([user1, user2, user3, user4], 2, "Small Team", :loser_picks)
+    result = BalanceLib.balance_players([user1, user2, user3, user4], 2, "Team", :loser_picks)
 
     assert Enum.count(result.team_players[1]) == 2
     assert Enum.count(result.team_players[2]) == 2
 
-    assert result.stats[1].total_rating == 55
-    assert result.stats[2].total_rating == 54
+    assert result.stats[1].total_rating == 48
+    assert result.stats[2].total_rating == 48
 
-    assert result.deviation == 2
+    assert result.deviation == 0
   end
 
   test "loser picks complex 6", %{user1: user1, user2: user2, user3: user3, user4: user4, user5: user5, user6: user6} do
-    result = BalanceLib.balance_players([user1, user2, user3, user4, user5, user6], 2, "Small Team", :loser_picks)
+    result = BalanceLib.balance_players([user1, user2, user3, user4, user5, user6], 2, "Team", :loser_picks)
 
     assert Enum.count(result.team_players[1]) == 3
     assert Enum.count(result.team_players[2]) == 3
 
-    assert result.stats[1].total_rating == 86
-    assert result.stats[2].total_rating == 83
+    assert result.stats[1].total_rating == 68
+    assert result.stats[2].total_rating == 73
 
-    assert result.deviation == 4
+    assert result.deviation == 7
   end
 
   test "loser picks uneven 5", %{user1: user1, user2: user2, user3: user3, user4: user4, user5: user5} do
-    result = BalanceLib.balance_players([user1, user2, user3, user4, user5], 2, "Small Team", :loser_picks)
+    result = BalanceLib.balance_players([user1, user2, user3, user4, user5], 2, "Team", :loser_picks)
 
     assert Enum.count(result.team_players[1]) == 2
     assert Enum.count(result.team_players[2]) == 3
 
-    assert result.stats[1].total_rating == 76
-    assert result.stats[2].total_rating == 83
+    assert result.stats[1].total_rating == 63
+    assert result.stats[2].total_rating == 73
 
-    assert result.deviation == 9
+    assert result.deviation == 16
   end
 end

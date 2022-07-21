@@ -500,7 +500,7 @@ defmodule Teiserver.TeiserverTestLib do
 
     Teiserver.Account.get_or_add_smurf_key_type("client_app_hash")
 
-    Teiserver.Game.get_or_add_rating_type("Small Team")
+    Teiserver.Game.get_or_add_rating_type("Team")
 
     Teiserver.Telemetry.get_or_add_event_type("account.user_login")
 
