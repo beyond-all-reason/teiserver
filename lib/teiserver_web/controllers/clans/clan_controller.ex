@@ -123,7 +123,7 @@ defmodule TeiserverWeb.Clans.ClanController do
       user = Account.get_user!(conn.user_id)
 
       Account.update_user(user, %{
-        "colour" => clan.colour1,
+        "colour" => clan.colour,
         "icon" => clan.icon,
         "clan_id" => clan.id
       })
@@ -476,5 +476,62 @@ defmodule TeiserverWeb.Clans.ClanController do
       |> put_flash(:danger, "No permissions.")
       |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#members")
     end
+  end
+
+  @spec leave_clan(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def leave_clan(conn, %{"clan_id" => clan_id}) do
+    clan_id = int_parse(clan_id)
+    user_membership = Clans.get_clan_membership!(clan_id, conn.assigns.current_user.id)
+    member_list = Clans.list_clan_memberships_by_clan(clan_id)
+
+    cond do
+      user_membership == nil ->
+        conn
+          |> put_flash(:info, "You have already been removed from the clan.")
+          |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#members")
+
+      Enum.count(member_list) == 1 ->
+        # Delete the entire clan
+
+
+      true ->
+        # All good, lets go!
+
+    end
+
+
+    if clan_membership do
+
+    else
+
+    end
+
+
+
+    # clan = Clans.get_clan!(clan_id)
+
+    # if role in ~w(Admin) do
+    #   Clans.delete_clan_membership(clan_membership)
+
+    #   user = Account.get_user!(user_id)
+
+    #   if user.clan_id == clan_id do
+    #     Account.update_user(user, %{"clan_id" => nil})
+
+    #     CentralWeb.Endpoint.broadcast(
+    #       "recache:#{user_id}",
+    #       "recache",
+    #       %{}
+    #     )
+    #   end
+
+    #   conn
+    #   |> put_flash(:info, "User clan membership deleted successfully.")
+    #   |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#members")
+    # else
+    #   conn
+    #   |> put_flash(:danger, "User was unable to be removed from clan.")
+    #   |> redirect(to: Routes.ts_clans_clan_path(conn, :show, clan.name) <> "#members")
+    # end
   end
 end

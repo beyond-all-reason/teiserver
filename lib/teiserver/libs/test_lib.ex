@@ -410,9 +410,7 @@ defmodule Teiserver.TeiserverTestLib do
             "name" => name,
             "tag" => "[#{name}]",
             "icon" => "fa far-house",
-            "colour1" => "#001122",
-            "colour2" => "#551122",
-            "text_colour" => "#FFFFFF",
+            "colour" => "#001122",
             "description" => "Description goes here",
             "data" => %{}
           },

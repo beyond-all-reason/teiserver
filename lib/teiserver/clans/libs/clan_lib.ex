@@ -16,7 +16,7 @@ defmodule Teiserver.Clans.ClanLib do
       type_icon: icon(),
       item_id: clan.id,
       item_type: "teiserver_clans_clan",
-      item_colour: clan.colour1,
+      item_colour: clan.colour,
       item_icon: clan.icon,
       item_label: "#{clan.name}",
       url: "/clans/#{clan.id}"

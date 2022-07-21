@@ -60,8 +60,7 @@ defmodule TeiserverWeb.Admin.ClanController do
     changeset =
       Clans.change_clan(%Clan{
         icon: "fa-solid fa-" <> StylingHelper.random_icon(),
-        colour1: StylingHelper.random_colour(),
-        colour2: StylingHelper.random_colour()
+        colour: StylingHelper.random_colour()
       })
 
     conn

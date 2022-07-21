@@ -25,13 +25,17 @@
         <hr />
 
         <div class="float-end">
+          <a href={Routes.ts_clans_clan_path(@conn, :show, @clan.name)} class={"btn btn-outline-#{bsname}"}>
+            User view
+          </a>
+
           <a href={Routes.ts_admin_clan_path(@conn, :edit, @clan)} class={"btn btn-outline-#{bsname}"}>
             <i class="fa-regular fa-fw fa-wrench"></i>
             Edit clan
           </a>
         </div>
 
-      <h3 style={"color: #{@clan.colour1}; background-color: #{@clan.colour2}; display: inline-block; padding: 5px;"}>
+      <h3 style={"color: #{@clan.colour}; display: inline-block; padding: 5px;"}>
         <%= @clan.name %>
         &nbsp;
         <i class={"fa-regular fa-fw #{@clan.icon}"}></i>

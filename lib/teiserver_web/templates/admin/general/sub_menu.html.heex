@@ -48,6 +48,14 @@
               icon: Central.Communication.CommentLib.icon()
             %>
           <% end %>
+          
+          <%= central_component "sub_menu_icon",
+            name: "clans",
+            label: "Clans",
+            active: @active,
+            url: Routes.ts_admin_clan_path(@conn, :index),
+            icon: Teiserver.Clans.ClanLib.icon()
+          %>
 
           <%= if allow?(@conn, "teiserver.moderator") do %>
             <%= central_component "sub_menu_icon",

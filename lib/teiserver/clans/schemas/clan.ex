@@ -5,10 +5,8 @@ defmodule Teiserver.Clans.Clan do
     field :name, :string
     field :tag, :string
 
+    field :colour, :string
     field :icon, :string
-    field :colour1, :string
-    field :colour2, :string
-    field :text_colour, :string
 
     field :description, :string
 
@@ -35,12 +33,12 @@ defmodule Teiserver.Clans.Clan do
   def changeset(struct, params \\ %{}) do
     params =
       params
-      |> trim_strings([:name, :tag, :icon, :colour1, :colour2, :text_colour, :description])
-      |> remove_characters([:tag], [~r/[\[\]]/])
+      |> trim_strings(~w(name tag icon colour description)a)
+      |> remove_characters(~w(tag)a, [~r/[\[\]]/])
 
     struct
-    |> cast(params, [:name, :tag, :icon, :colour1, :colour2, :text_colour, :description, :rating, :homepage])
-    |> validate_required([:name, :tag, :icon, :colour1, :colour2, :text_colour, :description, :rating, :homepage])
+    |> cast(params, ~w(name tag icon colour description rating homepage)a)
+    |> validate_required(~w(name tag icon colour description rating homepage)a)
   end
 
   def authorize(_, conn, _), do: allow?(conn, "clan")

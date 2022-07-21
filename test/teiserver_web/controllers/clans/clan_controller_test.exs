@@ -12,15 +12,13 @@ defmodule TeiserverWeb.Clans.ClanControllerTest do
   end
 
   @update_attrs %{
-    colour1: "some updated colour1",
-    colour2: "some updated colour2",
-    text_colour: "some updated colour",
+    colour: "some updated colour",
     description: "some updated description",
     icon: "fa-solid fa-wrench",
     name: "some_clan_updated_name",
     tag: "some updated tag"
   }
-  @invalid_attrs %{colour1: nil, colour2: nil, icon: nil, name: nil, tag: nil}
+  @invalid_attrs %{colour: nil, colour2: nil, icon: nil, name: nil, tag: nil}
 
   describe "index" do
     test "lists all clans", %{conn: conn} do

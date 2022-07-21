@@ -62,6 +62,7 @@ defmodule TeiserverWeb.Router do
         delete("/delete_membership/:clan_id/:user_id", ClanController, :delete_membership)
         put("/promote/:clan_id/:user_id", ClanController, :promote)
         put("/demote/:clan_id/:user_id", ClanController, :demote)
+        put("/leave_clan/:clan_id", ClanController, :leave_clan)
       end
 
       scope "/teiserver/games", TeiserverWeb.Game, as: :ts_game do
@@ -201,6 +202,13 @@ defmodule TeiserverWeb.Router do
 
         live("/client", Index, :index)
         live("/client/:id", Show, :show)
+      end
+
+      scope "/teiserver/admin", TeiserverWeb.PartyLive, as: :ts_admin do
+        pipe_through([:browser, :standard_layout, :protected])
+
+        live("/party", Index, :index)
+        live("/party/:id", Show, :show)
       end
 
       scope "/teiserver/admin", TeiserverWeb.AgentLive, as: :ts_admin do
