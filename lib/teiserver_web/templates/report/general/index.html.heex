@@ -131,6 +131,16 @@
     %>
   <% end %>
 
+  <%= if allow?(@current_user, Teiserver.Account.LeaderboardReport.permissions()) do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Account.LeaderboardReport.icon(),
+      name: "leaderboard",
+      text: "Leaderboard",
+      link: Routes.ts_reports_report_path(@conn, :show, "leaderboard")
+    %>
+  <% end %>
+
   <%= if allow?(@current_user, Teiserver.Account.ReviewReport.permissions()) do %>
     <%=
       central_component "menu_card",

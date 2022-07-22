@@ -88,6 +88,17 @@
   %>
 <% end %>
 
+<%= if allow?(@current_user, Teiserver.Account.LeaderboardReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "leaderboard",
+    label: "Leaderboard",
+    active: @active,
+    icon: Teiserver.Account.LeaderboardReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "leaderboard")
+  %>
+<% end %>
+
 
 <%= if allow?(@current_user, Teiserver.Account.ReviewReport.permissions()) do %>
   <%= central_component "section_menu_button",

@@ -27,6 +27,7 @@ defmodule TeiserverWeb.Report.ReportController do
         "new_user_funnel" -> Teiserver.Account.NewUserFunnelReport
         "accolades" -> Teiserver.Account.AccoladeReport
         "mutes" -> Teiserver.Account.MuteReport
+        "leaderboard" -> Teiserver.Account.LeaderboardReport
         "review" -> Teiserver.Account.ReviewReport
         _ ->
           raise "No handler for name of '#{name}'"

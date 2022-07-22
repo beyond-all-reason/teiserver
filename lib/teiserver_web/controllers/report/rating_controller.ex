@@ -2,6 +2,8 @@ defmodule TeiserverWeb.Report.RatingController do
   use CentralWeb, :controller
   alias Teiserver.Account
   alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Game.MatchRatingLib
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",

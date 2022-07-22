@@ -7,9 +7,9 @@ defmodule Teiserver.Telemetry.ExportPropertiesTask do
 
   def perform(params) do
     do_query(params)
-    |> add_csv_headings
-    |> CSV.encode()
-    |> Enum.to_list
+      |> add_csv_headings
+      |> CSV.encode()
+      |> Enum.to_list
   end
 
   defp add_csv_headings(output) do
