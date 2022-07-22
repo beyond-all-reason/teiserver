@@ -39,6 +39,11 @@ defmodule Teiserver.Game.MatchRatingLib do
   def rate_match(match) do
     logs = Game.list_rating_logs(search: [match_id: match.id], limit: 1, select: [:id])
 
+    sizes = match.members
+      |> Enum.group_by(fn m -> m.team_id end)
+      |> Enum.map(fn {_, members} -> Enum.count(members) end)
+      |> Enum.uniq
+
     cond do
       not Enum.member?(@rated_match_types, match.game_type) ->
         {:error, :invalid_game_type}
@@ -49,6 +54,9 @@ defmodule Teiserver.Game.MatchRatingLib do
       match.winning_team == nil ->
         {:error, :no_winning_team}
 
+      Enum.count(sizes) != 1 ->
+        {:error, :uneven_team_size}
+
       not Enum.empty?(logs) ->
         {:error, :already_rated}
 
@@ -58,9 +66,11 @@ defmodule Teiserver.Game.MatchRatingLib do
   end
 
   @spec do_rate_match(Teiserver.Battle.Match.t()) :: :ok
-  # Currently don't support more than 2 teams
   defp do_rate_match(%{team_count: _2} = match) do
     rating_type_id = Game.get_or_add_rating_type(match.game_type)
+
+    userids = match.members
+      |> Enum.map(fn %{user_id: user_id} -> user_id end)
 
     winners = match.members
       |> Enum.filter(fn membership -> membership.win end)
@@ -69,10 +79,14 @@ defmodule Teiserver.Game.MatchRatingLib do
       |> Enum.reject(fn membership -> membership.win end)
 
     # We will want to update these so we keep the whole object
-    rating_lookup = match.members
-      |> Map.new(fn membership ->
-        rating = Account.get_rating(membership.user_id, rating_type_id)
-        {membership.user_id, rating}
+    # additionally by using a list_ratings call we avoid the concern
+    # of hitting a cache
+    rating_lookup = Account.list_ratings(search: [
+      rating_type_id: rating_type_id,
+      user_id_in: userids
+    ])
+      |> Map.new(fn rating ->
+        {rating.user_id, rating}
       end)
 
     # Build ratings into lists of tuples for the OpenSkill module to handle
@@ -95,13 +109,13 @@ defmodule Teiserver.Game.MatchRatingLib do
     win_ratings = Enum.zip(winners, win_result)
       |> Enum.map(fn {%{user_id: user_id}, rating_update} ->
         user_rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
-        do_update_rating(user_id, match.id, user_rating, rating_update)
+        do_update_rating(user_id, match, user_rating, rating_update)
       end)
 
     loss_ratings = Enum.zip(losers, lose_result)
       |> Enum.map(fn {%{user_id: user_id}, rating_update} ->
         user_rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
-        do_update_rating(user_id, match.id, user_rating, rating_update)
+        do_update_rating(user_id, match, user_rating, rating_update)
       end)
 
     Ecto.Multi.new()
@@ -112,14 +126,15 @@ defmodule Teiserver.Game.MatchRatingLib do
   end
   defp do_rate_match(_), do: :ok
 
-  @spec do_update_rating(T.userid, T.match_id(), map(), {number(), number()}) :: any
-  defp do_update_rating(user_id, match_id, user_rating, rating_update) do
+  @spec do_update_rating(T.userid, map(), map(), {number(), number()}) :: any
+  defp do_update_rating(user_id, match, user_rating, rating_update) do
     # It's possible they don't yet have a rating
     user_rating = if Map.get(user_rating, :user_id) do
       user_rating
     else
       {:ok, rating} = Account.create_rating(Map.merge(user_rating, %{
-        user_id: user_id
+        user_id: user_id,
+        last_updated: match.finished
       }))
       rating
     end
@@ -131,13 +146,15 @@ defmodule Teiserver.Game.MatchRatingLib do
     Account.update_rating(user_rating, %{
       rating_value: new_rating_value,
       skill: new_skill,
-      uncertainty: new_uncertainty
+      uncertainty: new_uncertainty,
+
+      last_updated: match.finished
     })
 
     %{
       user_id: user_id,
       rating_type_id: rating_type_id,
-      match_id: match_id,
+      match_id: match.id,
 
       value: %{
         rating_value: new_rating_value,

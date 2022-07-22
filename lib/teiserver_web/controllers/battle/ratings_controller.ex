@@ -19,6 +19,10 @@ defmodule TeiserverWeb.Battle.RatingsController do
 
   @spec leaderboard(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def leaderboard(conn, params) do
+    activity_time = Timex.today()
+      |> Timex.shift(days: -35)
+      |> Timex.to_datetime()
+
     type_name = params["type"]
     {type_id, type_name} = case MatchRatingLib.rating_type_name_lookup()[type_name] do
       nil ->
@@ -28,9 +32,12 @@ defmodule TeiserverWeb.Battle.RatingsController do
         {v, type_name}
     end
 
+    my_rating = Account.get_rating(conn.assigns.current_user.id, type_id)
+
     ratings = Account.list_ratings(
       search: [
-        rating_type_id: type_id
+        rating_type_id: type_id,
+        updated_after: activity_time
       ],
       order_by: "Rating value high to low",
       preload: [:user],
@@ -41,6 +48,7 @@ defmodule TeiserverWeb.Battle.RatingsController do
       |> assign(:type_name, type_name)
       |> assign(:type_id, type_id)
       |> assign(:ratings, ratings)
+      |> assign(:my_rating, my_rating)
       |> render("leaderboard.html")
   end
 

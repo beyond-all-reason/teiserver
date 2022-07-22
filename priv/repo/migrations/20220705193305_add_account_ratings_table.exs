@@ -9,6 +9,8 @@ defmodule Central.Repo.Migrations.AddAccountRatingsTable do
       add :rating_value, :float
       add :skill, :float
       add :uncertainty, :float
+
+      add :last_updated, :timestamp
     end
     create index(:teiserver_account_ratings, [:user_id])
   end

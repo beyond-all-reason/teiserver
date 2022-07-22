@@ -9,12 +9,14 @@ defmodule Teiserver.Account.Rating do
     field :rating_value, :float
     field :skill, :float
     field :uncertainty, :float
+
+    field :last_updated, :utc_datetime
   end
 
   @doc false
   def changeset(stats, attrs \\ %{}) do
     stats
-      |> cast(attrs, ~w(user_id rating_type_id rating_value skill uncertainty)a)
-      |> validate_required(~w(user_id rating_type_id rating_value skill uncertainty)a)
+      |> cast(attrs, ~w(user_id rating_type_id rating_value skill uncertainty last_updated)a)
+      |> validate_required(~w(user_id rating_type_id rating_value skill uncertainty last_updated)a)
   end
 end

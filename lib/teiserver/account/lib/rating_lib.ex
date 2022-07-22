@@ -54,6 +54,11 @@ defmodule Teiserver.Account.RatingLib do
       where: ratings.rating_type_id in ^id_list
   end
 
+  def _search(query, :updated_after, datetime) do
+    from ratings in query,
+      where: ratings.last_updated > ^datetime
+  end
+
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Rating value high to low") do
