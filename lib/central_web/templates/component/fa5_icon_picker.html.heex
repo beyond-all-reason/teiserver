@@ -10,7 +10,8 @@
 
   field_id = "#{form.name}_#{@field}"
 
-  {thickness, the_icon} = case (Map.get(form.data, @field) || "") |> String.split(" ") do
+  value = Ecto.Changeset.get_field(@form.source, @field) || ""
+  {thickness, the_icon} = case value |> String.split(" ") do
     [a, b] -> {a, b}
     [the_icon] -> {"fa-solid", the_icon}
   end
