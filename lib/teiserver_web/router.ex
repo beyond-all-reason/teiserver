@@ -182,7 +182,7 @@ defmodule TeiserverWeb.Router do
 
       scope "/teiserver/api/spads", TeiserverWeb.API do
         pipe_through([:api])
-        get "/get_rating/:caller_id/:type", SpadsController, :get_rating
+        get "/get_rating/:target_id/:type", SpadsController, :get_rating
         get "/get_rating/:caller_id/:target_id/:type", SpadsController, :get_rating
       end
 

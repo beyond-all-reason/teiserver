@@ -613,7 +613,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       # If they don't match then we have non-unique ids
       if Enum.count(player_numbers) != Enum.count(players) do
-        Logger.info("Fixing ids")
         players
           |> Enum.reduce(0, fn (player, acc) ->
             Client.update(%{player | player_number: acc}, :client_updated_battlestatus)
