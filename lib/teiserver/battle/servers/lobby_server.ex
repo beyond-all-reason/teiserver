@@ -259,19 +259,24 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_cast({:remove_modoptions, keys}, %{modoptions: modoptions} = state) do
+    existing_keys = Map.keys(modoptions)
+
+    keys_removed = keys
+      |> Enum.filter(fn k -> Enum.member?(existing_keys, k) end)
+
     PubSub.broadcast(
       Central.PubSub,
       "legacy_battle_updates:#{state.id}",
-      {:battle_updated, state.id, keys, :remove_script_tags}
+      {:battle_updated, state.id, keys_removed, :remove_script_tags}
     )
 
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
-      {:lobby_update, :remove_modoptions, state.id, keys}
+      {:lobby_update, :remove_modoptions, state.id, keys_removed}
     )
 
-    {:noreply, %{state | modoptions: Map.drop(modoptions, keys)}}
+    {:noreply, %{state | modoptions: Map.drop(modoptions, keys_removed)}}
   end
 
   # Bots
