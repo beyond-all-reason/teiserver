@@ -39,7 +39,7 @@ defmodule CentralWeb.LiveSearch.Channel do
 
         # Live search handle_search
       "teiserver_user" ->
-        Teiserver.Account.list_users(search: [simple_search: search_term], order: "Name (A-Z)")
+        Teiserver.Account.list_users(search: [basic_search: search_term], order: "Name (A-Z)")
         |> Teiserver.Account.user_as_json()
     end
   end

@@ -299,7 +299,7 @@ defmodule TeiserverWeb.Clans.ClanController do
                 title: "Clan invite",
                 body: "Invite to clan #{clan.name}",
                 icon: ClanLib.icon(),
-                colour: ClanLib.colours() |> elem(2),
+                colour: ClanLib.colours() |> to_string,
                 redirect:
                   Routes.ts_account_relationships_path(conn, :index) <> "#clan_invites_tab"
               },
