@@ -21,11 +21,12 @@ defmodule TeiserverWeb.API.SpadsController do
 
     target_id = int_parse(target_id_str)
 
-    rating = BalanceLib.get_user_rating_value(target_id, actual_type)
+    {rating_value, uncertainty} = BalanceLib.get_user_rating_value_uncertainty_pair(target_id, actual_type)
 
     conn
       |> put_status(200)
-      |> assign(:rating, rating)
+      |> assign(:rating_value, rating_value)
+      |> assign(:uncertainty, uncertainty)
       |> render("rating.json")
   end
 end
