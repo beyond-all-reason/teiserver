@@ -141,6 +141,16 @@
     %>
   <% end %>
 
+  <%= if allow?(@current_user, Teiserver.Account.WinnersReport.permissions()) do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Account.WinnersReport.icon(),
+      name: "winners",
+      text: "Winners",
+      link: Routes.ts_reports_report_path(@conn, :show, "winners")
+    %>
+  <% end %>
+
   <%= if allow?(@current_user, Teiserver.Account.ReviewReport.permissions()) do %>
     <%=
       central_component "menu_card",

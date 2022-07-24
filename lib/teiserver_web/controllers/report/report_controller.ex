@@ -28,6 +28,7 @@ defmodule TeiserverWeb.Report.ReportController do
         "accolades" -> Teiserver.Account.AccoladeReport
         "mutes" -> Teiserver.Account.MuteReport
         "leaderboard" -> Teiserver.Account.LeaderboardReport
+        "winners" -> Teiserver.Account.WinnersReport
         "review" -> Teiserver.Account.ReviewReport
         _ ->
           raise "No handler for name of '#{name}'"

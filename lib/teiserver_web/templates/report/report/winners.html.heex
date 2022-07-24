@@ -1,0 +1,32 @@
+<% bsname = view_colour() %>
+
+<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+            active: "winners"
+          })
+        %>
+
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th colspan="2">Player</th>
+              <th>Games</th>
+              <th>Wins</th>
+              <th>Win %</th>
+            </tr>
+          </thead>
+          <tbody>
+            
+          </tbody>
+        </table>
+        
+      </div>
+    </div>
+  </div>
+</div>
