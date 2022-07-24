@@ -69,25 +69,28 @@ defmodule Teiserver.Clans do
     |> Repo.one!()
   end
 
-  # Uncomment this if needed, default files do not need this function
-  # @doc """
-  # Gets a single clan.
+  @doc """
+  Gets a single clan.
 
-  # Returns `nil` if the Clan does not exist.
+  Returns `nil` if the Clan does not exist.
 
-  # ## Examples
+  ## Examples
 
-  #     iex> get_clan(123)
-  #     %Clan{}
+      iex> get_clan(123)
+      %Clan{}
 
-  #     iex> get_clan(456)
-  #     nil
+      iex> get_clan(456)
+      nil
 
-  # """
-  # def get_clan(id, args \\ []) when not is_list(id) do
-  #   clan_query(id, args)
-  #   |> Repo.one
-  # end
+  """
+  def get_clan(nil), do: nil
+  def get_clan(id), do: get_clan(id, [])
+
+  def get_clan(nil, _), do: nil
+  def get_clan(id, args) when not is_list(id) do
+    clan_query(id, args)
+      |> Repo.one
+  end
 
   @doc """
   Creates a clan.

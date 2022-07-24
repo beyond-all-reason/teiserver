@@ -1,4 +1,14 @@
-<% bsname = view_colour() %>
+<%
+  bsname = view_colour()
+  
+  light_mode = case get_user_config_cache(@current_user, "general.Colour scheme") do
+    "Site default" -> get_site_config_cache("user.Default light mode")
+    "Light" -> true
+    "Dark" -> false
+  end
+  
+  
+%>
 
 <%= render TeiserverWeb.Clans.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "clans"}) %>
 
@@ -6,9 +16,10 @@
   .clan-box {
     width: 300px;
     height: 300px;
-    border: 3px solid #FFF;
+    border: 3px solid rgba(0, 0, 0, 0);
     display: inline-block;
     text-align: center;
+    margin: 2px;
   }
 
   .clan-name {
@@ -21,20 +32,47 @@
   }
 
   .clan-member {
-    border-color: #000000;
+    border-color: #555555;
+  }
+
+  .clan-selected {
+    background-color: rgba(255, 255, 255, 0.03);
   }
 </style>
+  
+<%= if light_mode do %>
+  <style type="text/css">
+    .clan-member {
+      border-color: #BBBBBB;
+    }
+
+    .clan-selected {
+    background-color: rgba(0, 0, 0, 0.03);
+    }
+  </style>
+<% end %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
 
+<%= if allow?(@conn, "teiserver.staff.clan") do %>
+  <div class="float-end">
+    <a href={Routes.ts_admin_clan_path(@conn, :index)} class={"btn btn-outline-#{bsname}"}>
+      Admin view
+    </a>
+  </div>
+<% end %>
+
 <%= for clan <- @clans do %>
-  <% member = Enum.member?(@memberships, clan.id) %>
+  <%
+    member = Enum.member?(@memberships, clan.id)
+    selected = @current_user.clan_id == clan.id
+  %>
   <a
     href={Routes.ts_clans_clan_path(@conn, :show, clan.name)}
-    class={"clan-box #{if member, do: "clan-member"} m-1"}
+    class={"clan-box #{if member, do: "clan-member"} #{if selected, do: "clan-selected"}"}
     style={"color: #{clan.colour};"}
   >
     <div class="clan-name">

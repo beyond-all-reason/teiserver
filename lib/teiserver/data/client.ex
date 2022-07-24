@@ -9,7 +9,7 @@
 defmodule Teiserver.Client do
   @moduledoc false
   alias Phoenix.PubSub
-  alias Teiserver.{Room, User, Account, Telemetry}
+  alias Teiserver.{Room, User, Account, Telemetry, Clans}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
   # alias Central.Helpers.TimexHelper
@@ -65,7 +65,8 @@ defmodule Teiserver.Client do
         muted: false,
         restricted: false,
         lobby_host: false,
-        party_id: nil
+        party_id: nil,
+        clan_tag: nil
       },
       client
     )
@@ -93,6 +94,11 @@ defmodule Teiserver.Client do
   def login(user, ip \\ nil) do
     stats = Account.get_user_stat_data(user.id)
 
+    clan_tag = case Clans.get_clan(user.clan_id) do
+      nil -> nil
+      clan -> clan.tag
+    end
+
     client =
       create(%{
         userid: user.id,
@@ -110,7 +116,9 @@ defmodule Teiserver.Client do
         shadowbanned: User.is_shadowbanned?(user),
         muted: User.has_mute?(user),
         awaiting_warn_ack: false,
-        warned: false
+        warned: false,
+
+        clan_tag: clan_tag
       })
 
     ClientLib.start_client_server(client)

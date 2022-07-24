@@ -38,7 +38,7 @@
       <h3 style={"color: #{@clan.colour}; display: inline-block; padding: 5px;"}>
         <%= @clan.name %>
         &nbsp;
-        <i class={"fa-regular fa-fw #{@clan.icon}"}></i>
+        <%= central_component "icon", icon: @clan.icon %>
       </h3>
       <br />
       <ul class="nav nav-tabs" role="tablist" id="the_tabs">

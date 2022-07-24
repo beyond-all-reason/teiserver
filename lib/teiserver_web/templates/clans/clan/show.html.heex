@@ -41,7 +41,7 @@
       <h3 style="display: inline-block; padding: 5px;" class="clan-colour">
         <%= @clan.name %> [<%= @clan.tag %>]
         &nbsp;
-        <i class={"fa-regular fa-fw #{@clan.icon}"}></i>
+        <%= central_component "icon", icon: @clan.icon %>
       </h3>
       <br />
 
