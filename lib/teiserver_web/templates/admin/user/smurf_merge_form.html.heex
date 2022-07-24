@@ -1,0 +1,147 @@
+<% bsname = view_colour() %>
+
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
+            active: "smurf_merge_form"
+          })
+        %>
+
+        <hr />
+
+        <h4>
+          <%= @from_user.name %> (Original)
+          &nbsp;
+          <i class="fa-fw fa-solid fa-arrow-right"></i>
+          &nbsp;
+          <%= @to_user.name %> (New user, the smurf)
+        </h4>
+        
+        <!--
+        Creating a link between these two users will mean:
+        <ul>
+          <li>Rating updates applied to one will apply to the other</li>
+          <li>Moderation actions applied to one will be silently applied to the other</li>
+          <li>Mutes applied to one will be applied to the other</li>
+        </ul>
+        -->
+
+        <form action={Routes.ts_admin_user_path(@conn, :smurf_merge_post, @from_user.id, @to_user.id)} method="post" class="">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <div class="row">
+            <div class="col-md-12 m-3">
+              <h5 class={"text-#{Teiserver.Account.RatingLib.colours}"}>
+                <%= central_component "icon", icon: Teiserver.Account.RatingLib.icon() %>
+                &nbsp;
+                <label for="" class="control-label">Ratings</label>
+              </h5>
+              <%= central_component "radio",
+                name: "merge_ratings",
+                id: "merge_ratings_nochange",
+                value: "nochange",
+                label: "Change nothing",
+                checked: false,
+                description: "No changes will be applied to ratings for #{@to_user.name}"
+              %>
+
+              <%= central_component "radio",
+                name: "merge_ratings",
+                id: "merge_ratings_copy",
+                value: "copy",
+                label: "Copy",
+                checked: true,
+                description: "Ratings from #{@from_user.name} will be used for #{@to_user.name}"
+              %>
+
+              <%= central_component "radio",
+                name: "merge_ratings",
+                id: "merge_ratings_pick_highest",
+                value: "pick_highest",
+                label: "Pick highest value",
+                checked: false,
+                description: "The highest score from each user will be used for each rating"
+              %>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12 m-3">
+              <h5 class="text-warning">
+                <%= central_component "icon", icon: Central.Helpers.StylingHelper.icon(:moderation) %>
+                &nbsp;
+                <label for="" class="control-label">Moderation reports/actions</label>
+              </h5>
+              <%= central_component "radio",
+                name: "merge_reports",
+                id: "merge_reports_nochange",
+                value: "nochange",
+                label: "Change nothing",
+                checked: false,
+                description: "No change for #{@to_user.name}"
+              %>
+
+              <%= central_component "radio",
+                name: "merge_reports",
+                id: "merge_reports_move",
+                value: "move",
+                label: "Move",
+                checked: false,
+                description: "Reports from #{@from_user.name} will be moved to #{@to_user.name}"
+              %>
+
+              <%= central_component "radio",
+                name: "merge_reports",
+                id: "merge_reports_copy",
+                value: "copy",
+                label: "Copy",
+                checked: true,
+                description: "Reports for #{@from_user.name} will be duplicated to #{@to_user.name}"
+              %>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12 m-3">
+              <h5 class="text-danger">
+                <%= central_component "icon", icon: Teiserver.Account.MuteReport.icon() %>
+                &nbsp;
+                <label for="" class="control-label">Mutes/Ignores</label>
+              </h5>
+              <%= central_component "radio",
+                name: "merge_mutes",
+                id: "merge_mutes_nochange",
+                value: "nochange",
+                label: "Change nothing",
+                checked: false,
+                description: "No users will add #{@to_user.name} as a mute"
+              %>
+
+              <%= central_component "radio",
+                name: "merge_mutes",
+                id: "merge_mutes_duplicate",
+                value: "duplicate",
+                label: "Duplicate",
+                checked: true,
+                description: "Users who have muted #{@from_user.name} will add #{@to_user.name} as a mute"
+              %>
+            </div>
+          </div>
+
+          <a href={Routes.ts_admin_user_path(@conn, :show, @to_user)} class="btn btn-secondary">
+            Cancel
+          </a>
+
+          <button type="submit" class={"btn btn-#{bsname} float-end"}>
+            Create link
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>

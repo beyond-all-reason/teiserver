@@ -74,7 +74,7 @@
           <th>Registered</th>
 
           <%= if is_admin do %>
-            <th colspan="2">&nbsp;</th>
+            <th colspan="3">&nbsp;</th>
           <% else %>
             <th>&nbsp;</th>
           <% end %>
@@ -145,7 +145,13 @@
           <%= if is_admin do %>
             <td>
               <a href={Routes.ts_admin_user_path(@conn, :edit, user.id)} class="btn btn-secondary btn-sm">
-                Edit
+                Edit user
+              </a>
+            </td>
+            
+            <td>
+              <a href={Routes.ts_admin_user_path(@conn, :smurf_merge_form, user.id, @user.id)} class={"btn btn-outline-#{bsname} btn-sm"}>
+                Merge smurf
               </a>
             </td>
           <% end %>

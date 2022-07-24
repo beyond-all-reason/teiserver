@@ -84,6 +84,17 @@
       %>
     <% end %>
     
+    <%= if @active == "smurf_merge_form" do %>
+      <%= central_component "section_menu_button",
+        name: "smurf_merge_form",
+        label: "Smurf merge",
+        active: @active,
+        icon: "fa-solid fa-merge",
+        bsname: bsname,
+        url: "#"
+      %>
+    <% end %>
+    
     <%= if @active == "reports_submitted" do %>
       <%= central_component "section_menu_button",
         name: "reports_submitted",

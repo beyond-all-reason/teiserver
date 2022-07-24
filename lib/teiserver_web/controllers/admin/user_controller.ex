@@ -749,6 +749,36 @@ defmodule TeiserverWeb.Admin.UserController do
     end
   end
 
+  @spec smurf_merge_form(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def smurf_merge_form(conn, %{"from_id" => from_id, "to_id" => to_id}) do
+    from_user = Account.get_user!(from_id)
+    to_user = Account.get_user!(to_id)
+
+    access = {
+      Central.Account.UserLib.has_access(from_user, conn),
+      Central.Account.UserLib.has_access(to_user, conn)
+    }
+
+    case access do
+      {{true, _}, {true, _}} ->
+        conn
+          |> add_breadcrumb(name: "Smurf merge form", url: conn.request_path)
+          |> assign(:from_user, from_user)
+          |> assign(:to_user, to_user)
+          |> render("smurf_merge_form.html")
+
+      _ ->
+        conn
+        |> put_flash(:danger, "Unable to access at least one of these users")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
+  end
+
+  @spec smurf_merge_post(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def smurf_merge_post(conn, %{"id1" => id1, "id2" => id2}) do
+
+  end
+
   @spec automod_action_form(Plug.Conn.t(), map) :: Plug.Conn.t()
   def automod_action_form(conn, %{"id" => id}) do
     user = Account.get_user!(id)
