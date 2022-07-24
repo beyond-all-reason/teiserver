@@ -437,6 +437,10 @@ defmodule Teiserver.Battle do
   @spec get_lobby(T.lobby_id() | nil) :: T.lobby() | nil
   defdelegate get_lobby(id), to: LobbyCache
 
+  @doc """
+  Returns a map with the following keys
+    match_uuid, server_uuid, lobby, bots, modoptions, member_list, player_list, queue_id
+  """
   @spec get_combined_lobby_state(T.lobby_id()) :: map() | nil
   defdelegate get_combined_lobby_state(id), to: LobbyCache
 

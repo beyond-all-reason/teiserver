@@ -144,7 +144,11 @@ Requests to join the battle, the host will be sent a message asking if the perso
   "cmd": "s.lobby.join_response",
   "lobbyid": 123,
   "result": "approve",
-  "lobby": Lobby
+  "lobby": Lobby,
+  "modoptions": [modoptions],
+  "bots": [],
+  "player_list": [userid],
+  "member_list": [userid],
 }
 
 // Rejection

@@ -340,7 +340,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     [reply] = _tachyon_recv_until(socket)
     assert reply == %{
       "cmd" => "s.lobby.remove_modoptions",
-      "keys" => ["singe_key", "non-existing-key"]
+      "keys" => ["singe_key"]
     }
 
     # Start areas

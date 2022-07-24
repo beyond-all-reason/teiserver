@@ -1,4 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
+  alias Teiserver.Battle
   alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Tachyon.V1.Tachyon
 
@@ -207,7 +208,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
   end
 
   def do_reply(:join_lobby_request_response, {lobby_id, :accept}) do
-    case Lobby.get_lobby(lobby_id) do
+    case Battle.get_combined_lobby_state(lobby_id) do
       nil ->
         %{
           "cmd" => "s.lobby.join_response",
@@ -215,13 +216,20 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
           "lobby_id" => lobby_id,
           "reason" => "closed"
         }
-      lobby ->
+      result ->
+        converted_result = %{
+          "lobby" => Tachyon.convert_object(result.lobby, :lobby),
+          "modoptions" => result.modoptions,
+          "bots" => result.bots,
+          "player_list" => result.player_list,
+          "member_list" => result.member_list,
+        }
+
         send(self(), {:action, {:join_lobby, lobby_id}})
-        %{
+        Map.merge(converted_result, %{
           "cmd" => "s.lobby.join_response",
           "result" => "approve",
-          "lobby" => Tachyon.convert_object(lobby, :lobby)
-        }
+        })
     end
   end
 
