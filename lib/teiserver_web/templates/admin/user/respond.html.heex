@@ -48,7 +48,7 @@
           <input type="hidden" name="_method" value="PUT" />
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
         
-          <input type="submit" value="Ignore report (Invalid)" name="form.submitted" class={"btn btn-#{report_bsname}"} />
+          <input type="submit" value="Ignore (Invalid)" name="form.submitted" class={"btn btn-#{report_bsname}"} />
         </form>
 
         <form action={Routes.ts_admin_user_path(@conn, :respond_post, @report)} method="post" style="display: inline-block; margin-right: 10px;">
@@ -58,7 +58,17 @@
           <input type="hidden" name="_method" value="PUT" />
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
-          <input type="submit" value="Ignore report (No evidence)" name="form.submitted" class={"btn btn-#{report_bsname}"} />
+          <input type="submit" value="Ignore (No evidence)" name="form.submitted" class={"btn btn-#{report_bsname}"} />
+        </form>
+
+        <form action={Routes.ts_admin_user_path(@conn, :respond_post, @report)} method="post" style="display: inline-block; margin-right: 10px;">
+          <input type="hidden" name="report[response_text]" value="Not a breach of CoC" />
+          <input type="hidden" name="report[response_action]" value="Ignore report" />
+          <input type="hidden" name="report[expires]" value="now" />
+          <input type="hidden" name="_method" value="PUT" />
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <input type="submit" value="Ignore (No breach)" name="form.submitted" class={"btn btn-#{report_bsname}"} />
         </form>
 
         <form action={Routes.ts_admin_user_path(@conn, :respond_post, @report)} method="post" style="display: inline-block; margin-right: 10px;">
@@ -68,7 +78,7 @@
           <input type="hidden" name="_method" value="PUT" />
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
-          <input type="submit" value="Handled separately" name="form.submitted" class={"btn btn-#{report_bsname}"} />
+          <input type="submit" value="Ignore (Handled separately)" name="form.submitted" class={"btn btn-#{report_bsname}"} />
         </form>
         
         <!--
