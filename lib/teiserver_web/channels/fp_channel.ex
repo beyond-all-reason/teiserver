@@ -8,7 +8,7 @@ defmodule TeiserverWeb.User.FpChannel do
   end
 
   def handle_in("fp-value", %{"value" => value}, %{assigns: %{current_user: %{id: userid}}} = socket) do
-    Account.create_smurf_key(userid, "wb1", to_string(value))
+    # Account.create_smurf_key(userid, "wb1", to_string(value))
     {:noreply, socket}
   end
 
