@@ -32,7 +32,7 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
   end
 
   @spec do_deletion([T.userid()]) :: {:ok, map()} | {:error, map()}
-  defp do_deletion(id_list) do
+  def do_deletion(id_list) do
     # Some mass deletion first
     sql_id_list = id_list
       |> Enum.join(",")
@@ -61,6 +61,17 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
 
     # Match memberships (how are they a member of a match if unverified?
     query = "DELETE FROM teiserver_battle_match_memberships WHERE user_id IN #{sql_id_list}"
+    Ecto.Adapters.SQL.query(Repo, query, [])
+
+    # Ratings too
+    query = "DELETE FROM teiserver_account_ratings WHERE user_id IN #{sql_id_list}"
+    Ecto.Adapters.SQL.query(Repo, query, [])
+
+    query = "DELETE FROM teiserver_game_rating_logs WHERE user_id IN #{sql_id_list}"
+    Ecto.Adapters.SQL.query(Repo, query, [])
+
+    # Smurf keys
+    query = "DELETE FROM teiserver_account_smurf_keys WHERE user_id IN #{sql_id_list}"
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     # Delete our cache of them
