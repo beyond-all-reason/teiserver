@@ -186,8 +186,14 @@ defmodule TeiserverWeb.Router do
         get "/get_rating/:caller_id/:target_id/:type", SpadsController, :get_rating
       end
 
+      scope "/teiserver/api/public", TeiserverWeb.API do
+        pipe_through([:api])
+        get "/leaderboard/:type", PublicController, :leaderboard
+      end
+
       scope "/teiserver/api", TeiserverWeb.API do
         pipe_through([:token_api])
+
         post "/battle/create", BattleController, :create
       end
 

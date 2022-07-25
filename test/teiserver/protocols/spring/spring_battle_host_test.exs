@@ -203,7 +203,7 @@ defmodule Teiserver.SpringBattleHostTest do
 
     _send_raw(socket, "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n")
     reply = _recv_raw(socket)
-    assert reply == "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n"
+    assert reply == "REMOVESCRIPTTAGS custom/key1\n"
 
     modoptions = Battle.get_modoptions(lobby_id)
     refute Map.has_key?(modoptions, "custom/key1")
