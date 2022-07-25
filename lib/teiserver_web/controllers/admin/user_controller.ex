@@ -460,13 +460,15 @@ defmodule TeiserverWeb.Admin.UserController do
                   rating_type_id: rating_type_id,
                   rating_value: new_rating_value,
                   skill: new_skill,
-                  uncertainty: new_uncertainty
+                  uncertainty: new_uncertainty,
+                  last_updated: Timex.now()
                 })
               existing ->
                 Account.update_rating(existing, %{
                   rating_value: new_rating_value,
                   skill: new_skill,
-                  uncertainty: new_uncertainty
+                  uncertainty: new_uncertainty,
+                  last_updated: Timex.now()
                 })
             end
 
