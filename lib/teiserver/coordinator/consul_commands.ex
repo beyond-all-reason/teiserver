@@ -153,7 +153,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         end)
         |> Enum.sort_by(fn {_player, rating_value} -> rating_value end, &>=/2)
         |> Enum.map(fn {player, rating_value} ->
-          "#{player.name}    #{rating_value}"
+          "#{player.name}    #{round(rating_value, 2)}"
         end)
 
       msg = [
