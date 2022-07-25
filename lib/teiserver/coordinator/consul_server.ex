@@ -663,6 +663,10 @@ defmodule Teiserver.Coordinator.ConsulServer do
       # If they don't match then we have non-unique ids
       if Enum.count(player_numbers) != Enum.count(players) do
         players
+          |> Enum.map(fn c -> {c.team_number, BalanceLib.get_user_rating_value(c.userid, "Team"), c} end)
+          |> Enum.sort
+          |> Enum.reverse
+          |> Enum.map(fn {_, _, c} -> c end)
           |> Enum.reduce(0, fn (player, acc) ->
             Client.update(%{player | player_number: acc}, :client_updated_battlestatus)
             acc + 1

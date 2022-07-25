@@ -31,6 +31,7 @@ defmodule Teiserver.Battle.BalanceLib do
     end
 
     stats = team_players
+      |> Enum.reject(fn {_, players} -> Enum.empty?(players) end)
       |> Map.new(fn {team_id, players} ->
         total_rating = players
           |> Enum.reduce(0, fn ({_, rating}, acc) -> acc + rating end)
