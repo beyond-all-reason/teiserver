@@ -440,7 +440,7 @@ defmodule Teiserver.Battle.Lobby do
   def can_join?(userid, lobby_id, password \\ nil, script_password \\ nil) do
     lobby_id = int_parse(lobby_id)
     battle = get_battle(lobby_id)
-    user = User.get_user_by_id(userid)
+    user = Account.get_user_by_id(userid)
     script_password = if script_password == nil, do: new_script_password(), else: script_password
 
     # In theory this would never happen but it's possible to see this at startup when
@@ -448,10 +448,21 @@ defmodule Teiserver.Battle.Lobby do
     {consul_response, consul_reason} = case Coordinator.call_consul(lobby_id, {:request_user_join_lobby, userid}) do
       {a, b} -> {a, b}
       nil -> {true, nil}
+      v ->
+        Logger.error("ConsulServer can_join? error, response #{Kernel.inspect v}")
+        {false, "ConsulServer error on can_join? call"}
     end
 
-    ignore_password = User.is_moderator?(user) or Enum.member?(user.roles, "Caster") or consul_reason == :override_approve
-    ignore_locked = User.is_moderator?(user) or Enum.member?(user.roles, "Caster") or consul_reason == :override_approve
+    ignore_password = Enum.any?([
+      User.is_moderator?(user),
+      Enum.member?(user.roles, "Caster"),
+      consul_reason == :override_approve
+    ])
+    ignore_locked = Enum.any?([
+      User.is_moderator?(user),
+      Enum.member?(user.roles, "Caster"),
+      consul_reason == :override_approve
+    ])
 
     cond do
       user == nil ->
