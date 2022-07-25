@@ -43,6 +43,15 @@
               Admin show
             </a>
             &nbsp;&nbsp;
+
+            <%= if @client != nil do %>
+              <a href={Routes.ts_admin_client_show_path(@conn, :show, @user.id)} class={"btn btn-outline-#{bsname}"} id="section-menu-new">
+                <%= central_component "icon", icon: Teiserver.Account.ClientLib.icon() %>
+                &nbsp;
+                Client view
+              </a>
+              &nbsp;&nbsp;
+            <% end %>
           <% end %>
 
           <%= if allow?(@conn, "teiserver.moderator.account") do %>

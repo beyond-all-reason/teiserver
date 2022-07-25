@@ -157,10 +157,13 @@ defmodule TeiserverWeb.Admin.UserController do
             {role, colour, icon}
           end)
 
+        client = Account.get_client_by_id(user.id)
+
         conn
           |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
           |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
           |> assign(:user, user)
+          |> assign(:client, client)
           |> assign(:user_stats, user_stats)
           |> assign(:roles, roles)
           |> assign(:reports, reports)
