@@ -42,20 +42,30 @@ defmodule TeiserverWeb.ClientLive.Show do
         client = Client.get_client_by_id(id)
         user = User.get_user_by_id(id)
 
+        connection_state = :sys.get_state(client.tcp_pid)
+
+        server_debug_messages = connection_state.print_server_messages
+        client_debug_messages = connection_state.print_client_messages
+
         case client do
           nil ->
-            {:noreply,
-            socket
-            |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
+            {
+              :noreply,
+              socket
+                |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))
+            }
 
           _ ->
             {:noreply,
-            socket
-            |> assign(:page_title, page_title(socket.assigns.live_action))
-            |> add_breadcrumb(name: client.name, url: "/teiserver/admin/clients/#{id}")
-            |> assign(:id, id)
-            |> assign(:client, client)
-            |> assign(:user, user)}
+              socket
+                |> assign(:page_title, page_title(socket.assigns.live_action))
+                |> add_breadcrumb(name: client.name, url: "/teiserver/admin/clients/#{id}")
+                |> assign(:id, id)
+                |> assign(:client, client)
+                |> assign(:user, user)
+                |> assign(:client_debug_messages, client_debug_messages)
+                |> assign(:server_debug_messages, server_debug_messages)
+            }
         end
       false ->
         {:noreply,
@@ -97,6 +107,34 @@ defmodule TeiserverWeb.ClientLive.Show do
   end
 
   @impl true
+  def handle_event("enable-server-message-logging", _event, socket) do
+    Client.enable_server_message_print(socket.assigns.id)
+    {:noreply, socket
+      |> assign(:server_debug_messages, true)
+    }
+  end
+
+  def handle_event("disable-server-message-logging", _event, socket) do
+    Client.disable_server_message_print(socket.assigns.id)
+    {:noreply, socket
+      |> assign(:server_debug_messages, false)
+    }
+  end
+
+  def handle_event("enable-client-message-logging", _event, socket) do
+    Client.enable_client_message_print(socket.assigns.id)
+    {:noreply, socket
+      |> assign(:client_debug_messages, true)
+    }
+  end
+
+  def handle_event("disable-client-message-logging", _event, socket) do
+    Client.disable_client_message_print(socket.assigns.id)
+    {:noreply, socket
+      |> assign(:client_debug_messages, false)
+    }
+  end
+
   def handle_event("force-disconnect", _event, socket) do
     Client.disconnect(socket.assigns[:id], "force-disconnect from web")
     {:noreply, socket}

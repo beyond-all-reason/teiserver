@@ -53,13 +53,33 @@
 <br />
 
 <div class="float-end">
+  <%= if @server_debug_messages do %>
+    <span class={"btn btn-#{bsname}"} phx-click="disable-server-message-logging">
+      Disable server message logging
+    </span>
+  <% else %>
+    <span class={"btn btn-outline-#{bsname}"} phx-click="enable-server-message-logging">
+      Enable server message logging
+    </span>
+  <% end %>
+
+  <%= if @client_debug_messages do %>
+    <span class={"btn btn-#{bsname}"} phx-click="disable-client-message-logging">
+      Disable client message logging
+    </span>
+  <% else %>
+    <span class={"btn btn-outline-#{bsname}"} phx-click="enable-client-message-logging">
+      Enable client message logging
+    </span>
+  <% end %>
+
   <span class="btn btn-danger" phx-click="force-disconnect">
     Force disconnect
   </span>
 </div>
 
 <span>
-  <%= live_redirect "Back", to: Routes.ts_admin_client_index_path(@socket, :index), class: "btn btn-#{bsname}" %>
+  <%= live_redirect "Back", to: Routes.ts_admin_client_index_path(@socket, :index), class: "btn btn-secondary" %>
 </span>
 
       </div>
