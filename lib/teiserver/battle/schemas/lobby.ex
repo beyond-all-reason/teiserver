@@ -378,23 +378,10 @@ defmodule Teiserver.Battle.Lobby do
   def add_start_rectangle(lobby_id, [team, a, b, c, d]) do
     [team, a, b, c, d] = int_parse([team, a, b, c, d])
     LobbyCache.add_start_rectangle(lobby_id, team, [a, b, c, d])
-
-    # battle = get_battle(lobby_id)
-    # new_rectangles = Map.put(battle.start_rectangles, team, [a, b, c, d])
-    # new_battle = %{battle | start_rectangles: new_rectangles}
-    # update_battle(new_battle, {team, [a, b, c, d]}, :add_start_rectangle)
   end
 
   def remove_start_rectangle(lobby_id, team_id) do
     LobbyCache.remove_start_area(lobby_id, team_id)
-
-    # battle = get_battle(lobby_id)
-    # team_id = int_parse(team_id)
-
-    # new_rectangles = Map.delete(battle.start_rectangles, team_id)
-
-    # new_battle = %{battle | start_rectangles: new_rectangles}
-    # update_battle(new_battle, team_id, :remove_start_rectangle)
   end
 
   @spec silence_lobby(T.lobby() | T.lobby_id()) :: T.lobby()

@@ -58,31 +58,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
   end
 
   ###########
-  def do_reply(:updated, {lobby_id, _data}) do
-    lobby = Lobby.get_lobby(lobby_id)
-    %{
-      "cmd" => "s.lobby.updated",
-      "lobby" => Tachyon.convert_object(lobby, :lobby)
-    }
-  end
-
-  def do_reply(:add_start_area, {lobby_id, {area_id, structure}}) do
-    %{
-      "cmd" => "s.lobby.add_start_area",
-      "lobby_id" => lobby_id,
-      "area_id" => area_id,
-      "structure" => structure
-    }
-  end
-
-  def do_reply(:remove_start_area, {lobby_id, area_id}) do
-    %{
-      "cmd" => "s.lobby.remove_start_area",
-      "lobby_id" => lobby_id,
-      "area_id" => area_id
-    }
-  end
-
+  # User Updates
   def do_reply(:add_user, {lobby_id, joiner_id}) do
     %{
       "cmd" => "s.lobby.add_user",
@@ -116,12 +92,41 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
+  ###########
+  # General Updates
+  def do_reply(:updated, {lobby_id, _data}) do
+    lobby = Lobby.get_lobby(lobby_id)
+    %{
+      "cmd" => "s.lobby.updated",
+      "lobby" => Tachyon.convert_object(lobby, :lobby)
+    }
+  end
+
   def do_reply(:update_value, {lobby_id, {key, value}}) do
     %{
       "cmd" => "s.lobby.update_value",
       "lobby_id" => lobby_id,
       "key" => key,
       "value" => value
+    }
+  end
+
+  ###########
+  # Start area updates
+  def do_reply(:add_start_area, {lobby_id, {area_id, structure}}) do
+    %{
+      "cmd" => "s.lobby.add_start_area",
+      "lobby_id" => lobby_id,
+      "area_id" => area_id,
+      "structure" => structure
+    }
+  end
+
+  def do_reply(:remove_start_area, {lobby_id, area_id}) do
+    %{
+      "cmd" => "s.lobby.remove_start_area",
+      "lobby_id" => lobby_id,
+      "area_id" => area_id
     }
   end
 
