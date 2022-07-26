@@ -870,7 +870,7 @@ defmodule Teiserver.Protocols.SpringIn do
     {username, reason} =
       case String.split(data, " ", parts: 2) do
         [username, reason] -> {username, reason}
-        [username] -> {username, "no reason given"}
+        [username] -> {username, "no reason given by lobby host user"}
       end
 
     userid = User.get_userid(username)
