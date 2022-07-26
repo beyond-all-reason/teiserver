@@ -40,6 +40,7 @@ defmodule TeiserverWeb.Components.PlayerListComponent do
       |> Enum.sort_by(fn c -> c.name end, &<=/2)
 
     socket = socket
+      |> assign(:current_user, assigns[:current_user])
       |> assign(:teams, teams)
       |> assign(:spectators, spectators)
 
