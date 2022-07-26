@@ -73,7 +73,7 @@
 </ul>
 
 <h4>Players</h4>
-<table class="table" id="players-table">
+<table class="table table-sm" id="players-table">
   <thead>
     <tr>
       <th width="100">&nbsp;</th>
@@ -100,7 +100,7 @@
       <%= if user do %>
         <tr id={"user-row-#{user.id}"}>
           <td width="100">
-          
+
             <%= if friend do %>
               <i class={"text-success fa-fw #{Teiserver.icon(:friend)}"}></i>
             <% end %>
@@ -139,7 +139,7 @@
 </table>
 
 <h4>Spectators</h4>
-<table class="table" id="spectators-table">
+<table class="table table-sm" id="spectators-table">
   <thead>
     <tr>
       <th width="100">&nbsp;</th>
@@ -186,31 +186,7 @@
     <% end %>
   </tbody>
 </table>
-
-<table class="table" id="data-table">
-  <tbody>
-    <tr>
-      <td>Game name</td>
-      <td><%= @lobby.game_name %></td>
-    </tr>
-  </tbody>
-</table>
-
-<%= if @bar_user.moderator do %>
-  <span class={"btn btn-outline-#{bsname}"} phx-click="reset-consul">
-    <i class='fa-fw fas fa-arrow-rotate-left'></i>
-    &nbsp;
-    Reset coordinator
-  </span>
-
-  <span class={"btn btn-outline-#{bsname}"} phx-click="force-update">
-    <i class='fa-fw fas fa-sync'></i>
-    &nbsp;
-    Force update page
-  </span>
-
-  <br /><br />
-<% end %>
+<br />
 
 <span>
   <%= live_redirect "Back", to: Routes.ts_battle_lobby_index_path(@socket, :index), class: "btn btn-#{bsname}" %>

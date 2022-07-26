@@ -36,7 +36,7 @@ defmodule TeiserverWeb.ClientLive.Show do
     case allow?(socket.assigns[:current_user], "teiserver.moderator.account") do
       true ->
         id = int_parse(id)
-        PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
+        # PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
         PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
         PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{id}")
         client = Client.get_client_by_id(id)
@@ -76,8 +76,12 @@ defmodule TeiserverWeb.ClientLive.Show do
 
   @impl true
   def handle_info({:updated_client, new_client, _reason}, socket) do
-    new_client = Client.get_client_by_id(new_client.userid)
-    {:noreply, assign(socket, :client, new_client)}
+    if new_client.userid == socket.assigns.id do
+      new_client = Client.get_client_by_id(new_client.userid)
+      {:noreply, assign(socket, :client, new_client)}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_info({:user_in, _name}, socket) do
