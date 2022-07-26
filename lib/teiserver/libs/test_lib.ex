@@ -172,8 +172,15 @@ defmodule Teiserver.TeiserverTestLib do
 
   def _recv_raw(socket) do
     case :gen_tcp.recv(socket, 0, 500) do
-      {:ok, reply} ->
-        reply |> to_string
+      {:ok, reply} -> reply |> to_string
+      {:error, :timeout} -> :timeout
+      {:error, :closed} -> :closed
+    end
+  end
+
+  def _recv_binary(socket) do
+    case :gen_tcp.recv(socket, 0, 500) do
+      {:ok, reply} -> reply
       {:error, :timeout} -> :timeout
       {:error, :closed} -> :closed
     end
