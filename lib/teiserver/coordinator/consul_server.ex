@@ -140,6 +140,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info({:user_joined, userid}, state) do
     new_approved = [userid | state.approved_users] |> Enum.uniq
+
+    if state.consul_balance == true do
+      set_skill_modoptions_for_user(state, userid)
+    end
+
     {:noreply, %{state |
       approved_users: new_approved,
       last_seen_map: state.last_seen_map |> Map.put(userid, System.system_time(:millisecond))
@@ -278,10 +283,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Coordinator.send_to_host(state.coordinator_id, state.lobby_id, "!mute #{user.name}")
     end
 
-    if state.consul_balance == true do
-      set_skill_modoptions_for_user(state, userid)
-    end
-
     {:noreply, state}
   end
 
@@ -369,6 +370,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   defp handle_lobby_chat(userid, "!autobalance adv" <> _, %{consul_balance: true} = state) do
     User.send_direct_message(state.coordinator_id, userid, "Server balance is currently enabled and trying to enable auto balance will mess things up.")
+    LobbyChat.say(userid, "!ev", state.lobby_id)
+    state
+  end
+
+  defp handle_lobby_chat(userid, "!balancemode" <> _, %{consul_balance: true} = state) do
+    User.send_direct_message(state.coordinator_id, userid, "Server balance is currently enabled and calling !balancemode will not do anything.")
     LobbyChat.say(userid, "!ev", state.lobby_id)
     state
   end

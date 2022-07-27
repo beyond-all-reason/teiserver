@@ -2,6 +2,14 @@
 
 <%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
 
+<%
+  ranking_filter = if @params["game_type"] == "Any" do
+    ""
+  else
+    "?filter=#{@params["game_type"]}"
+  end
+%>
+
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
@@ -11,18 +19,59 @@
           })
         %>
 
+        <form action={Routes.ts_reports_report_path(@conn, :show, "winners")} method="post" class="form-horizontal my-4">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
-        <table class="table">
+          <div class="row">
+            <div class="col-md-4 col-lg-3 col-xl-2 search-form-input">
+              <label for="report_mode" class="control-label">Mode:</label>
+              <%= select :report, :mode, ["Winners", "Losers"], class: "form-control", selected: @params["mode"] %>
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 search-form-input">
+              <label for="report_game_type" class="control-label">Game type:</label>
+              <%= select :report, :game_type, ["Any", "Team", "Duel", "FFA", "Team FFA"], class: "form-control", selected: @params["game_type"] %>
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2">
+              &nbsp;<br />
+              <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+            </div>
+          </div>
+        </form>
+
+        <table class="table table-sm">
           <thead>
             <tr>
               <th colspan="2">Player</th>
               <th>Games</th>
               <th>Wins</th>
               <th>Win %</th>
+              <th>&nbsp;</th>
             </tr>
           </thead>
           <tbody>
-            
+            <%= for {userid, wins, _losses, total, ratio} <- @rows do %>
+              <%
+                user = @users[userid]
+              %>
+              <tr style={"background-color: #{rgba_css user.colour};"}>
+                <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
+                  <%= central_component "icon", icon: user.icon %>
+                </td>
+                <td><%= user.name %></td>
+
+                <td><%= total %></td>
+                <td><%= wins %></td>
+                <td><%= round(round(ratio, 2) * 100) %>%</td>
+                
+                <td>
+                  <a href={Routes.ts_admin_user_path(@conn, :ratings, user) <> ranking_filter} class="btn btn-secondary btn-sm">
+                    Show ratings
+                  </a>
+                </td>
+              </tr>
+            <% end %>
           </tbody>
         </table>
         
