@@ -42,11 +42,6 @@ defmodule TeiserverWeb.ClientLive.Show do
         client = Client.get_client_by_id(id)
         user = User.get_user_by_id(id)
 
-        connection_state = :sys.get_state(client.tcp_pid)
-
-        server_debug_messages = connection_state.print_server_messages
-        client_debug_messages = connection_state.print_client_messages
-
         case client do
           nil ->
             {
@@ -56,6 +51,11 @@ defmodule TeiserverWeb.ClientLive.Show do
             }
 
           _ ->
+            connection_state = :sys.get_state(client.tcp_pid)
+
+            server_debug_messages = connection_state.print_server_messages
+            client_debug_messages = connection_state.print_client_messages
+
             {:noreply,
               socket
                 |> assign(:page_title, page_title(socket.assigns.live_action))
