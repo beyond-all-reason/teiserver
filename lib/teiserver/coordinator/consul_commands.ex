@@ -79,7 +79,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
             }}
           end)
 
-        deviation = BalanceLib.get_deviation(prediction_stats)
+        deviation = BalanceLib.get_deviation_old(prediction_stats)
 
         [
           "Team #{prediction.winning_team + 1} is predicted to win",
@@ -635,6 +635,17 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         afk_check_list: afk_check_list,
         afk_check_at: System.system_time(:millisecond)
       })
+    end
+  end
+
+  def handle_command(%{command: "backofthequeue", remaining: target} = cmd, state) do
+    case ConsulServer.get_user(target, state) do
+      nil ->
+        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
+      target_id ->
+        ConsulServer.say_command(cmd, state)
+        new_queue = List.delete(state.join_queue, target_id) ++ [target_id]
+        %{state | join_queue: new_queue}
     end
   end
 
