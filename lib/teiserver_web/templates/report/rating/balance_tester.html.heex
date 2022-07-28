@@ -35,13 +35,13 @@
         </form>
 
         <hr />
-        
+
         <%= if @balance_result do %>
           <%= for team_id <- [1, 2] do %>
-            <h4>Team <%= team_id %> - Rating: <%= @balance_result.stats[team_id].total_rating %></h4>
+            <h4>Team <%= team_id %> - Rating: <%= round(@balance_result.ratings[team_id], 2) %></h4>
             <strong>Members:</strong><br />
-              <%= for {userid, rating} <- @balance_result.team_players[team_id] |> Enum.reverse do %>
-                <%= @user_lookup[userid] %> (<%= round(rating, 2) %>)<br />
+              <%= for userid <- @balance_result.team_players[team_id] do %>
+                <%= @user_lookup[userid] %> (<%= round(@rating_lookup[userid], 2) %>)<br />
               <% end %>
             <br ><br />
           <% end %>

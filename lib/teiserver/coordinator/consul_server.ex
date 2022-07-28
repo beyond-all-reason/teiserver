@@ -741,12 +741,18 @@ defmodule Teiserver.Coordinator.ConsulServer do
         true -> "Team"
       end
 
-      balance = BalanceLib.balance_players(player_ids, state.host_teamcount, rating_type)
+      groups = player_ids
+        |> Enum.map(fn userid ->
+          {[userid], BalanceLib.get_user_rating_value(userid, rating_type)}
+        end)
+
+      balance = BalanceLib.create_balance(groups, state.host_teamcount)
+
       balance
         |> Map.get(:team_players)
-        |> Enum.each(fn {team_number, ratings} ->
-          ratings
-          |> Enum.each(fn {userid, _rating} ->
+        |> Enum.each(fn {team_number, members} ->
+          members
+          |> Enum.each(fn userid ->
             Lobby.force_change_client(state.coordinator_id, userid, %{team_number: team_number - 1})
           end)
         end)

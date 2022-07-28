@@ -2,8 +2,6 @@ defmodule TeiserverWeb.Report.RatingController do
   use CentralWeb, :controller
   alias Teiserver.Account
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.Game.MatchRatingLib
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -56,13 +54,24 @@ defmodule TeiserverWeb.Report.RatingController do
       true -> "Team"
     end
 
-    balance_result = BalanceLib.balance_players(player_ids, 2, rating_type)
+    rating_lookup = player_ids
+      |> Map.new(fn userid ->
+        {userid, BalanceLib.get_user_rating_value(userid, rating_type)}
+      end)
+
+    groups = player_ids
+      |> Enum.map(fn userid ->
+        {[userid], rating_lookup[userid]}
+      end)
+
+    balance_result = BalanceLib.create_balance(groups, 2)
 
     user_lookup = lookup_result
       |> Enum.reject(fn {_, id} -> id == nil end)
       |> Map.new(fn {name, id} -> {id, name} end)
 
     conn
+      |> assign(:rating_lookup, rating_lookup)
       |> assign(:user_lookup, user_lookup)
       |> assign(:balance_result, balance_result)
       |> assign(:found_players, found_players)
