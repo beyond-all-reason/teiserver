@@ -3,7 +3,6 @@ defmodule TeiserverWeb.Admin.LobbyController do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   alias Teiserver.{Chat, Battle}
-  alias Teiserver.Battle.Lobby
 
   plug(AssignPlug,
     site_menu_active: "teiserver_admin",

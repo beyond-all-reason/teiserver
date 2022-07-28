@@ -1,0 +1,20 @@
+<%
+  _bsname = @view_colour
+  moderator = allow?(@current_user, "teiserver.moderator")
+%>
+
+
+<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "parties", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+
+<div class="row" style="padding-top: 15vh; text-align: center;">
+  <div class="col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
+
+    <div class="card mb-3">
+      <div class="card-header p-4">
+        <h3>
+          Coming soon!
+        </h3>
+      </div>
+    </div>
+  </div>
+</div>

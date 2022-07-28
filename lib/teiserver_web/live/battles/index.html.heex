@@ -1,10 +1,9 @@
-<% bsname = @view_colour %>
-
-<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "battle_lobbies", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
-
 <%
+  bsname = @view_colour
   moderator = allow?(@current_user, "teiserver.moderator")
 %>
+
+<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "battle_lobbies", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
 
 <div class="row mt-3">
   <div class="col-md-12">

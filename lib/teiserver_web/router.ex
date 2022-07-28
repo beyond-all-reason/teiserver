@@ -101,6 +101,13 @@ defmodule TeiserverWeb.Router do
         live("/queues/:id", Show, :show)
       end
 
+      scope "/teiserver/account", TeiserverWeb.Account.PartyLive, as: :ts_game do
+        pipe_through([:browser, :standard_layout, :protected])
+
+        live("/parties", Index, :index)
+        live("/parties/:id", Show, :show)
+      end
+
 
       # REPORTING
       scope "/teiserver/reports", TeiserverWeb.Report, as: :ts_reports do
