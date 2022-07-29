@@ -1,19 +1,66 @@
 <%
-  _bsname = @view_colour
+  bsname = @view_colour
   moderator = allow?(@current_user, "teiserver.moderator")
 %>
 
+<%=
+  render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "parties", conn: Map.put(@socket, :permissions, @current_user.permissions)}
+%>
 
-<%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "parties", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+<div class="row mt-3" id="main-content">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
 
-<div class="row" style="padding-top: 15vh; text-align: center;">
-  <div class="col-sm-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3 col-xl-4 offset-xl-4">
+        <div class="float-end">
+          <%= if moderator do %>
+            <%= if @mode == "admin" do %>
+              <a href={Routes.ts_game_party_index_path(@socket, :index, "player")} class={"btn btn-outline-#{bsname}"}>
+                Player view
+              </a>
+            <% else %>
+              <a href={Routes.ts_game_party_index_path(@socket, :index, "admin")} class={"btn btn-outline-#{bsname}"}>
+                Admin view
+              </a>
+            <% end %>
+          <% end %>
+        </div>
 
-    <div class="card mb-3">
-      <div class="card-header p-4">
-        <h3>
-          Coming soon!
-        </h3>
+<table class="table table-sm">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for party <- @parties do %>
+      <%
+        non_leader_members = List.delete(party.members, party.leader)
+      %>
+      <tr>
+        <td style={"background-color: #{@user_lookup[party.leader].colour}"}>
+          <div class="badge rounded-pill bg-primary">
+            <%= @user_lookup[party.leader].name %>
+          </div>
+        </td>
+        <td>
+          <%= for member_id <- non_leader_members do %>
+            <div class="badge rounded-pill bg-secondary">
+              <%= @user_lookup[member_id].name %>
+            </div>
+          <% end %>
+        </td>
+        
+        <td>
+          
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
       </div>
     </div>
   </div>

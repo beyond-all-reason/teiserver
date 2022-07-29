@@ -1316,5 +1316,21 @@ defmodule Teiserver.Account do
   # Party stuff
   alias Teiserver.Account.PartyLib
 
+  @spec list_party_ids() :: [T.party_id()]
+  defdelegate list_party_ids(), to: PartyLib
 
+  @spec list_parties([T.party_id()]) :: [T.party()]
+  defdelegate list_parties(ids), to: PartyLib
+
+  @spec get_party(T.party_id()) :: T.party()
+  defdelegate get_party(party_id), to: PartyLib
+
+  @spec create_party(T.userid()) :: T.party()
+  defdelegate create_party(userid), to: PartyLib
+
+  @spec cast_party(T.party_id(), any) :: any
+  defdelegate cast_party(userid, msg), to: PartyLib
+
+  @spec call_party(T.party_id(), any) :: any | nil
+  defdelegate call_party(userid, msg), to: PartyLib
 end

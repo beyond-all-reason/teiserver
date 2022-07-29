@@ -3,7 +3,9 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonIn do
   alias Teiserver.Protocols.TachyonLib
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
-  alias Teiserver.Protocols.Tachyon.V1.{AuthIn, ClientIn, CommunicationIn, ConfigIn, LobbyHostIn, LobbyIn,MatchmakingIn, NewsIn, SystemIn, TelemetryIn, UserIn}
+  alias Teiserver.Protocols.Tachyon.V1.{
+    AuthIn, ClientIn, CommunicationIn, ConfigIn, LobbyHostIn, LobbyIn,MatchmakingIn, NewsIn, PartyIn, SystemIn, TelemetryIn, UserIn
+  }
 
   @spec data_in(String.t(), map()) :: map()
   def data_in(data, state) do
@@ -75,6 +77,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonIn do
           "lobby" -> LobbyIn.do_handle(subcommand, data, state)
           "matchmaking" -> MatchmakingIn.do_handle(subcommand, data, state)
           "news" -> NewsIn.do_handle(subcommand, data, state)
+          "party" -> PartyIn.do_handle(subcommand, data, state)
           "system" -> SystemIn.do_handle(subcommand, data, state)
           "telemetry" -> TelemetryIn.do_handle(subcommand, data, state)
           "user" -> UserIn.do_handle(subcommand, data, state)

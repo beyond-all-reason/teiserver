@@ -105,7 +105,8 @@ defmodule TeiserverWeb.Router do
         pipe_through([:browser, :standard_layout, :protected])
 
         live("/parties", Index, :index)
-        live("/parties/:id", Show, :show)
+        live("/parties/:mode", Index, :index)
+        live("/parties/show/:id", Show, :show)
       end
 
 

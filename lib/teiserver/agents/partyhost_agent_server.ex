@@ -12,26 +12,34 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
       email: "Partyhost_#{state.name}@agents"
     })
 
+    send(self(), :tick)
     :timer.send_interval(@tick_period, self(), :tick)
 
     {:noreply, %{state | socket: socket}}
   end
 
   def handle_info(:tick, state) do
+    if state.party_id == nil do
+      AgentLib._send(state.socket, %{cmd: "c.party.create"})
+    end
+
     {:noreply, state}
   end
 
   def handle_info({:ssl, _socket, data}, state) do
     new_state = data
-    |> AgentLib.translate
-    |> Enum.reduce(state, fn data, acc ->
-      handle_msg(data, acc)
-    end)
+      |> AgentLib.translate
+      |> Enum.reduce(state, fn data, acc ->
+        handle_msg(data, acc)
+      end)
 
     {:noreply, new_state}
   end
 
   defp handle_msg(nil, state), do: state
+  defp handle_msg(%{"cmd" => "s.party.create", "party" => party}, state) do
+    %{state | party_id: party["id"]}
+  end
 
   # Startup
   def start_link(opts \\ []) do
@@ -46,7 +54,7 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
        id: opts.id,
        number: opts.number,
        name: Map.get(opts, :name, opts.number),
-       lobby_id: nil,
+       party_id: nil,
        socket: nil
      }}
   end

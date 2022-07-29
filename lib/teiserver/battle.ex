@@ -253,7 +253,7 @@ defmodule Teiserver.Battle do
   @spec generate_lobby_uuid :: String.t()
   @spec generate_lobby_uuid([T.lobby_id()]) :: String.t()
   def generate_lobby_uuid(skip_ids \\ []) do
-    uuid = UUID.uuid1()
+    uuid = UUID.uuid4()
 
     # Check if this uuid is present in the current set of lobbies
     existing_uuid = list_lobby_ids()

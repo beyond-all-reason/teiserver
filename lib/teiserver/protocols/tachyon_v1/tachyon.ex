@@ -45,6 +45,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
       |> Map.put(:sync, sync_list)
   end
   def convert_object(queue, :queue), do: Map.take(queue, ~w(id name team_size conditions settings map_list)a)
+  def convert_object(party, :party_full), do: Map.take(party, ~w(id leader members pending_invites)a)
+  def convert_object(party, :party_public), do: Map.take(party, ~w(id leader members)a)
   def convert_object(post, :blog_post), do: Map.take(post, ~w(id short_content content url tags live_from)a)
   def convert_object(type, :user_config_type) do
     opts = type[:opts] |> Map.new

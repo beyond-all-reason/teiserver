@@ -11,7 +11,7 @@ end
 defmodule Teiserver.Account.PartyLib do
   # alias Phoenix.PubSub
   # alias Teiserver.{Account, Battle}
-  # alias Teiserver.Party
+  alias Teiserver.Account.Party
   alias Teiserver.Data.Types, as: T
 
   @spec colours() :: atom
@@ -25,7 +25,7 @@ defmodule Teiserver.Account.PartyLib do
   @spec get_party(T.party_id()) :: nil | T.party()
   def get_party(nil), do: nil
   def get_party(party_id) do
-    call_party(party_id, :party_state)
+    call_party(party_id, :get_party)
   end
 
   @spec list_party_ids() :: [T.party_id()]
@@ -43,6 +43,20 @@ defmodule Teiserver.Account.PartyLib do
   def list_parties(id_list) do
     id_list
       |> Enum.map(fn c -> get_party(c) end)
+  end
+
+  # Create
+  @spec create_party(T.userid()) :: T.party()
+  def create_party(nil), do: nil
+  def create_party(leader_id) do
+    party = %Party{
+      id: UUID.uuid4(),
+      leader: leader_id,
+      members: [leader_id],
+      pending_invites: []
+    }
+    start_party_server(party)
+    party
   end
 
   # Updates

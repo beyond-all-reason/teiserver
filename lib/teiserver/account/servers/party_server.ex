@@ -5,7 +5,7 @@ defmodule Teiserver.Account.PartyServer do
   alias Phoenix.PubSub
 
   @impl true
-  def handle_call(:get_party_state, _from, state) do
+  def handle_call(:get_party, _from, state) do
     {:reply, state.party, state}
   end
 

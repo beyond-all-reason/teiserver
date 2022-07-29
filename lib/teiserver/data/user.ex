@@ -27,7 +27,7 @@ defmodule Teiserver.User do
   def role_list(), do: ~w(Tester Streamer Donor Caster Contributor Dev Moderator Admin Verified Bot)
 
   @spec keys() :: [atom]
-  def keys(), do: [:id, :name, :email, :inserted_at, :clan_id, :permissions]
+  def keys(), do: [:id, :name, :email, :inserted_at, :clan_id, :permissions, :colour, :icon]
 
   @data_keys [
     :rank,
