@@ -1,38 +1,114 @@
 defmodule Teiserver.Account.PartyServerTest do
   use Central.DataCase, async: true
   alias Teiserver.Account.PartyLib
+  alias Teiserver.Account.Party
 
-  # test "server test" do
-  #   p = PartyLib.start_party_server()
-  #   assert is_pid(p)
+  test "server test" do
+    id = UUID.uuid1()
 
-  #   # Call it!
-  #   c = ClientLib.call_client(userid, :get_client_state)
-  #   assert c.userid == userid
-  #   assert c.away == false
-  #   assert c.lobby_client == "BAR Lobby"
+    p = PartyLib.start_party_server(%Party{
+      id: id,
+      leader: 1,
+      members: [1],
+      pending_invites: [],
+    })
+    assert is_pid(p)
 
-  #   # Call one that doesn't exist
-  #   c = ClientLib.call_client(-1, :get_client_state)
-  #   assert c == nil
+    # Check initial state
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 1,
+      members: [1],
+      pending_invites: []
+    }}
 
-  #   # Partial update
-  #   r = ClientLib.merge_update_client(%{userid: userid, team_number: 1}, :client_updated_battlestatus)
-  #   assert r == :ok
+    # Add invite
+    GenServer.cast(p, {:add_invite, 2})
+    GenServer.cast(p, {:add_invite, 3})
+    GenServer.cast(p, {:add_invite, 4})
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 1,
+      members: [1],
+      pending_invites: [4, 3, 2]
+    }}
 
-  #   # Partial update with no client server
-  #   r = ClientLib.merge_update_client(%{userid: -1, team_number: 1}, :client_updated_battlestatus)
-  #   assert r == nil
+    # Cancel one of them
+    GenServer.cast(p, {:cancel_invite, 2})
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 1,
+      members: [1],
+      pending_invites: [4, 3]
+    }}
 
+    # Accept the other
+    GenServer.cast(p, {:accept_invite, 3})
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 1,
+      members: [3, 1],
+      pending_invites: [4]
+    }}
 
-  #   # Update client
-  #   r = ClientLib.update_client(Map.put(client, :side, 1), :client_updated_battlestatus)
-  #   assert r != nil
+    # And the last
+    GenServer.cast(p, {:accept_invite, 4})
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 1,
+      members: [4, 3, 1],
+      pending_invites: []
+    }}
 
-  #   # No server
-  #   # r = ClientLib.update_client(Map.merge(client, %{side: 1, userid: -1}), :client_updated_battlestatus)
-  #   # assert r == nil
+    # New change the leader
+    GenServer.cast(p, {:new_leader, 4})
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 4,
+      members: [4, 3, 1],
+      pending_invites: []
+    }}
 
-  #   ClientLib.stop_client_server(userid)
-  # end
+    # One leaves
+    GenServer.cast(p, {:member_leave, 3})
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 4,
+      members: [4, 1],
+      pending_invites: []
+    }}
+
+    # Kick the other
+    GenServer.cast(p, {:kick_member, 1})
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 4,
+      members: [4],
+      pending_invites: []
+    }}
+
+    # Re-add someone
+    GenServer.cast(p, {:add_invite, 1})
+    GenServer.cast(p, {:accept_invite, 1})
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 4,
+      members: [1, 4],
+      pending_invites: []
+    }}
+
+    # Leader leaves
+    GenServer.cast(p, {:member_leave, 4})
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 1,
+      members: [1],
+      pending_invites: []
+    }}
+
+    # Last person leaves, party stops
+    GenServer.cast(p, {:member_leave, 1})
+    :timer.sleep(50)
+    assert Process.alive?(p) == false
+  end
 end

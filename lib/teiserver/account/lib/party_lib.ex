@@ -9,9 +9,9 @@ defmodule Teiserver.Account.Party do
 end
 
 defmodule Teiserver.Account.PartyLib do
-  alias Phoenix.PubSub
-  alias Teiserver.{Account, Battle}
-  alias Teiserver.Party
+  # alias Phoenix.PubSub
+  # alias Teiserver.{Account, Battle}
+  # alias Teiserver.Party
   alias Teiserver.Data.Types, as: T
 
   @spec colours() :: atom
@@ -58,13 +58,23 @@ defmodule Teiserver.Account.PartyLib do
     {:ok, server_pid} =
       DynamicSupervisor.start_child(Teiserver.PartySupervisor, {
         Teiserver.Account.PartyServer,
-        name: "party_#{party.party_id}",
+        name: "party_#{party.id}",
         data: %{
           party: party
         }
       })
 
     server_pid
+  end
+
+  @spec stop_party_server(T.party_id()) :: :ok | nil
+  def stop_party_server(id) do
+    case get_party_pid(id) do
+      nil -> nil
+      p ->
+        DynamicSupervisor.terminate_child(Teiserver.PartySupervisor, p)
+        :ok
+    end
   end
 
   @spec get_party_pid(T.party_id()) :: pid() | nil

@@ -383,97 +383,6 @@ defmodule Teiserver.Account do
     Repo.delete(user_stat)
   end
 
-
-  # Cache functions
-  alias alias Teiserver.Account.UserCache
-
-  @spec get_username(T.userid()) :: String.t() | nil
-  defdelegate get_username(userid), to: UserCache
-
-  @spec get_username_by_id(T.userid()) :: String.t() | nil
-  defdelegate get_username_by_id(userid), to: UserCache
-
-  @spec get_userid_from_name(String.t()) :: integer() | nil
-  def get_userid_from_name(name), do: UserCache.get_userid(name)
-
-  @spec get_user_by_name(String.t()) :: T.user() | nil
-  defdelegate get_user_by_name(username), to: UserCache
-
-  @spec get_user_by_email(String.t()) :: T.user() | nil
-  defdelegate get_user_by_email(email), to: UserCache
-
-  @spec get_user_by_discord_id(String.t()) :: T.user() | nil
-  defdelegate get_user_by_discord_id(discord_id), to: UserCache
-
-  @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
-  defdelegate get_userid_by_discord_id(discord_id), to: UserCache
-
-  @spec get_user_by_token(String.t()) :: T.user() | nil
-  defdelegate get_user_by_token(token), to: UserCache
-
-  @spec get_user_by_id(T.userid()) :: T.user() | nil
-  defdelegate get_user_by_id(id), to: UserCache
-
-  @spec list_users_from_cache(list) :: list
-  def list_users_from_cache(id_list), do: UserCache.list_users(id_list)
-
-  @spec recache_user(Integer.t()) :: :ok
-  defdelegate recache_user(id), to: UserCache
-
-  @spec convert_user(T.user()) :: T.user()
-  defdelegate convert_user(user), to: UserCache
-
-  @spec add_user(T.user()) :: T.user()
-  defdelegate add_user(user), to: UserCache
-
-  @spec update_cache_user(T.user(), boolean) :: T.user()
-  def update_cache_user(user, persist \\ false), do: UserCache.update_user(user, persist)
-
-  @spec delete_user(T.userid()) :: :ok | :no_user
-  defdelegate delete_user(userid), to: UserCache
-
-  @spec decache_user(T.userid()) :: :ok | :no_user
-  defdelegate decache_user(userid), to: UserCache
-
-
-  # Client stuff
-  alias Teiserver.Account.ClientLib
-
-  @spec get_client_by_name(String.t()) :: nil | T.client()
-  defdelegate get_client_by_name(name), to: ClientLib
-
-  @spec get_client_by_id(T.userid()) :: nil | T.client()
-  defdelegate get_client_by_id(userid), to: ClientLib
-
-  @spec get_clients([T.userid()]) :: List.t()
-  defdelegate get_clients(id_list), to: ClientLib
-
-  @spec list_client_ids() :: [T.userid()]
-  defdelegate list_client_ids(), to: ClientLib
-
-  @spec list_clients() :: [T.client()]
-  defdelegate list_clients(), to: ClientLib
-
-  @spec list_clients([T.userid()]) :: [T.client()]
-  defdelegate list_clients(id_list), to: ClientLib
-
-  @spec merge_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: :ok
-  defdelegate merge_update_client(client, reason), to: ClientLib
-
-  @spec replace_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: T.client()
-  defdelegate replace_update_client(client, reason), to: ClientLib
-
-  @spec get_client_pid(T.userid()) :: pid() | nil
-  defdelegate get_client_pid(userid), to: ClientLib
-
-  @spec cast_client(T.userid(), any) :: any
-  defdelegate cast_client(userid, msg), to: ClientLib
-
-  @spec call_client(T.userid(), any) :: any | nil
-  defdelegate call_client(userid, msg), to: ClientLib
-
-
-
   alias Teiserver.Account.AutomodAction
   alias Teiserver.Account.AutomodActionLib
 
@@ -1314,4 +1223,98 @@ defmodule Teiserver.Account do
     Central.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
     Repo.delete(rating)
   end
+
+
+  # User functions
+  alias alias Teiserver.Account.UserCache
+
+  @spec get_username(T.userid()) :: String.t() | nil
+  defdelegate get_username(userid), to: UserCache
+
+  @spec get_username_by_id(T.userid()) :: String.t() | nil
+  defdelegate get_username_by_id(userid), to: UserCache
+
+  @spec get_userid_from_name(String.t()) :: integer() | nil
+  def get_userid_from_name(name), do: UserCache.get_userid(name)
+
+  @spec get_user_by_name(String.t()) :: T.user() | nil
+  defdelegate get_user_by_name(username), to: UserCache
+
+  @spec get_user_by_email(String.t()) :: T.user() | nil
+  defdelegate get_user_by_email(email), to: UserCache
+
+  @spec get_user_by_discord_id(String.t()) :: T.user() | nil
+  defdelegate get_user_by_discord_id(discord_id), to: UserCache
+
+  @spec get_userid_by_discord_id(String.t()) :: T.userid() | nil
+  defdelegate get_userid_by_discord_id(discord_id), to: UserCache
+
+  @spec get_user_by_token(String.t()) :: T.user() | nil
+  defdelegate get_user_by_token(token), to: UserCache
+
+  @spec get_user_by_id(T.userid()) :: T.user() | nil
+  defdelegate get_user_by_id(id), to: UserCache
+
+  @spec list_users_from_cache(list) :: list
+  def list_users_from_cache(id_list), do: UserCache.list_users(id_list)
+
+  @spec recache_user(Integer.t()) :: :ok
+  defdelegate recache_user(id), to: UserCache
+
+  @spec convert_user(T.user()) :: T.user()
+  defdelegate convert_user(user), to: UserCache
+
+  @spec add_user(T.user()) :: T.user()
+  defdelegate add_user(user), to: UserCache
+
+  @spec update_cache_user(T.user(), boolean) :: T.user()
+  def update_cache_user(user, persist \\ false), do: UserCache.update_user(user, persist)
+
+  @spec delete_user(T.userid()) :: :ok | :no_user
+  defdelegate delete_user(userid), to: UserCache
+
+  @spec decache_user(T.userid()) :: :ok | :no_user
+  defdelegate decache_user(userid), to: UserCache
+
+
+  # Client stuff
+  alias Teiserver.Account.ClientLib
+
+  @spec get_client_by_name(String.t()) :: nil | T.client()
+  defdelegate get_client_by_name(name), to: ClientLib
+
+  @spec get_client_by_id(T.userid()) :: nil | T.client()
+  defdelegate get_client_by_id(userid), to: ClientLib
+
+  @spec get_clients([T.userid()]) :: List.t()
+  defdelegate get_clients(id_list), to: ClientLib
+
+  @spec list_client_ids() :: [T.userid()]
+  defdelegate list_client_ids(), to: ClientLib
+
+  @spec list_clients() :: [T.client()]
+  defdelegate list_clients(), to: ClientLib
+
+  @spec list_clients([T.userid()]) :: [T.client()]
+  defdelegate list_clients(id_list), to: ClientLib
+
+  @spec merge_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: :ok
+  defdelegate merge_update_client(client, reason), to: ClientLib
+
+  @spec replace_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: T.client()
+  defdelegate replace_update_client(client, reason), to: ClientLib
+
+  @spec get_client_pid(T.userid()) :: pid() | nil
+  defdelegate get_client_pid(userid), to: ClientLib
+
+  @spec cast_client(T.userid(), any) :: any
+  defdelegate cast_client(userid, msg), to: ClientLib
+
+  @spec call_client(T.userid(), any) :: any | nil
+  defdelegate call_client(userid, msg), to: ClientLib
+
+  # Party stuff
+  alias Teiserver.Account.PartyLib
+
+
 end

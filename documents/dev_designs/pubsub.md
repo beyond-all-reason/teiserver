@@ -3,7 +3,7 @@ Teiserver makes use of the Phoenix pubsub. This document is designed to list the
 Anything prefixed with "legacy" is something only present because of the nature of the spring protocol and is going to be removed as soon as we're able to.
 Anything prefixed with "teiserver" is something added after the spring protocol was implemented and follows better practices with clearer documentation.
 
-### Server
+## Server
 #### teiserver_server
 Used for sending out global messages about server events
 ```elixir
@@ -34,7 +34,7 @@ Used for broadcasting server event telemetry
   {:teiserver_telemetry_server_events, userid, event_type_name, value}
 ```
 
-### Battles
+## Battles
 #### legacy_all_battle_updates
 Information affecting all those not in a battle, such as a battle being created.
 
@@ -50,13 +50,13 @@ Limited information pertaining to the creation/deletion of battle lobbies.
   {:global_battle_lobby, :update_battle_info, lobby_id}
 ```
 
-### teiserver_global_match_updates
+#### teiserver_global_match_updates
 
 ```elixir
   {:global_match_updates, :match_completed, match_id}
 ```
 
-### Lobbies
+## Lobbies
 #### teiserver_lobby_host_message:#{battle_lobby_id}
 Messages intended for the host of a given lobby. This saves a call for the client pid and also allows debugging tools to hook into the messages if needed.
 Valid events:
@@ -139,8 +139,7 @@ A message every time a user logs in or logs out. Unlike legacy all_user_updates 
   {:client_inout, :disconnect, userid, reason}
 ```
 
-
-### teiserver_client_messages:#{userid}
+#### teiserver_client_messages:#{userid}
 This is the channel for sending messages to the client. It allows the client on the web and lobby application to receive messages.
 ```elixir
   # Structure
@@ -162,7 +161,7 @@ This is the channel for sending messages to the client. It allows the client on 
   {:client_message, :force_join_lobby, userid, {lobby_id, script_password}}
 ```
 
-### teiserver_client_action_updates:#{userid}
+#### teiserver_client_action_updates:#{userid}
 Informs about actions performed by a specific client
 Aside from connect/disconnect there should always be the structure of `{:client_action, :join_queue, userid, data}`
 ```elixir
@@ -176,13 +175,13 @@ Aside from connect/disconnect there should always be the structure of `{:client_
   {:client_action, :leave_lobby, userid, lobby_id}
 ```
 
-### teiserver_client_application:#{userid}
+#### teiserver_client_application:#{userid}
 Designed for lobby applications to display/perform various actions as opposed to internal agent clients or any web interfaces
 ```elixir
   {:teiserver_client_application, :ring, userid, ringer_id}
 ```
 
-### teiserver_user_updates:#{userid}
+#### teiserver_user_updates:#{userid}
 Information pertinent to a specific user
 ```elixir
   # {:user_update, ?update_type?, userid, ?data?}
@@ -190,8 +189,26 @@ Information pertinent to a specific user
   {:user_update, :update_report, user.id, report.id}
 ```
 
+## Parties
+#### teiserver_party:#{party_id}
+Sent from the queue wait server to update regarding it's status
+Valid events
+```elixir
+  {:party, :add_invite, party_id, userid}
+  {:party, :remove_invite, party_id, userid}
+  {:party, :accept_invite, party_id, userid}
 
-### Chat
+  {:party, :member_leave, party_id, userid}
+  {:party, :kick_member, party_id, userid}
+  {:party, :new_leader, party_id, userid}
+  
+  {:party, :closed, party_id, reason}
+
+  {:party, :chat, party_id, {userid, message}}
+```
+
+
+## Chat
 #### room:#{room_name}
 All updates about the room and content for the room. Likely to be kept as is and renamed as a teiserver channel due to its nature.
 
@@ -218,7 +235,7 @@ Valid events
 ```
 
 
-### Central
+## Central
 #### account_hooks
 Used for hooking into account related activities such as updating users.
 
@@ -230,6 +247,3 @@ Valid events
   {:account_hooks, :create_report, report}
   {:account_hooks, :update_report, report, :create | :respond | :update}
 ```
-
-### Dev mode
-agent_updates
