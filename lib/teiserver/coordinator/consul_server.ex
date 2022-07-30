@@ -720,7 +720,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     current_hash = make_balance_hash(state)
     lobby = Battle.get_lobby(state.lobby_id)
 
-    if current_hash != state.last_balance_hash and lobby.consul_balance == true do
+    if not lobby.in_progress and current_hash != state.last_balance_hash and lobby.consul_balance == true do
       force_rebalance(state)
     else
       {state.last_balance_hash, state.balance_result}
