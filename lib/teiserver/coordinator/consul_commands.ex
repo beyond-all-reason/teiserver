@@ -867,7 +867,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "reset"} = _cmd, state) do
-    Battle.update_lobby_value(state.lobby_id, :consul_rename, false)
+    Battle.update_lobby_values(state.lobby_id, %{consul_rename: false})
 
     ConsulServer.empty_state(state.lobby_id)
       |> ConsulServer.broadcast_update("reset")

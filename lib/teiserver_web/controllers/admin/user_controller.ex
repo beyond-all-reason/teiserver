@@ -780,8 +780,8 @@ defmodule TeiserverWeb.Admin.UserController do
   end
 
   @spec smurf_merge_post(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def smurf_merge_post(conn, %{"id1" => id1, "id2" => id2}) do
-
+  def smurf_merge_post(conn, %{"id1" => _id1, "id2" => _id2}) do
+    conn
   end
 
   @spec automod_action_form(Plug.Conn.t(), map) :: Plug.Conn.t()
