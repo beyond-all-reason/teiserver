@@ -20,10 +20,26 @@ defmodule Teiserver.Protocols.TachyonLib do
 
   @spec encode(List.t() | Map.t()) :: String.t()
   def encode(data) do
-    data
-      |> Jason.encode!()
-      |> :zlib.gzip()
-      |> Base.encode64()
+    case Jason.encode(data) do
+      {:ok, encoded_data} ->
+        encoded_data
+          |> :zlib.gzip()
+          |> Base.encode64()
+      {:error, err} ->
+        Logger.error("Tachyon encode error: #{Kernel.inspect err}\ndata: #{Kernel.inspect data}")
+
+        %{
+          result: "s.system.server_protocol_error",
+          error: "JSON encode"
+        }
+        ""
+          |> Jason.encode!
+          |> :zlib.gzip()
+          |> Base.encode64()
+    end
+
+
+
   end
 
   @spec decode(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}

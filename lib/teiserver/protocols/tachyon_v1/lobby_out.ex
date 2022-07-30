@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
-  alias Teiserver.Battle
+  alias Teiserver.{Account, Battle}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Tachyon.V1.Tachyon
 
@@ -222,12 +222,17 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
           "reason" => "closed"
         }
       result ->
+        member_list = result.member_list
+          |> Enum.map(fn userid ->
+            client = Account.get_client_by_id(userid)
+            Tachyon.convert_object(client, :client)
+          end)
+
         converted_result = %{
           "lobby" => Tachyon.convert_object(result.lobby, :lobby),
           "modoptions" => result.modoptions,
           "bots" => result.bots,
-          "player_list" => result.player_list,
-          "member_list" => result.member_list,
+          "member_list" => member_list,
         }
 
         send(self(), {:action, {:join_lobby, lobby_id}})
