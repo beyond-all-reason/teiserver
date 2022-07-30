@@ -255,6 +255,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
         Coordinator.cast_coordinator({:consul_command, Map.merge(cmd, %{lobby_id: state.lobby_id, host_id: state.host_id})})
         {:noreply, state}
 
+      Enum.member?(@always_allow, cmd.command) == false and
+      Enum.member?(@boss_commands, cmd.command) == false and
+      Enum.member?(@host_commands, cmd.command) == false ->
+        LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "No command of name '#{cmd.command}'", state.lobby_id)
+        {:noreply, state}
+
       allow_command?(cmd, state) ->
         new_state = ConsulCommands.handle_command(cmd, state)
         {:noreply, new_state}

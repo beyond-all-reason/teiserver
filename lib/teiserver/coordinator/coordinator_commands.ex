@@ -35,6 +35,10 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         end
         state
 
+      Enum.member?(@always_allow, cmd.command) == false ->
+        User.send_direct_message(state.userid, cmd.senderid, "No command of name '#{cmd.command}'")
+        state
+
       allow_command?(cmd, state) == true ->
         do_handle(cmd, state)
 
