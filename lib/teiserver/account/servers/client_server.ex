@@ -9,8 +9,8 @@ defmodule Teiserver.Account.ClientServer do
   end
 
   @impl true
-  def handle_cast({:update_value, key, value}, state) do
-    new_client = Map.put(state.client, key, value)
+  def handle_cast({:update_values, new_values}, state) do
+    new_client = Map.merge(state.client, new_values)
     {:noreply, %{state | client: new_client}}
   end
 

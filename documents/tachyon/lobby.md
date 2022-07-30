@@ -243,14 +243,15 @@ Sent by a client to inform the server their status is updated. Below are the fie
 }
 ```
 
-### `s.lobby.update_value`
-Sent by the server to inform of a change in a value of the lobby.
+### `s.lobby.update_values`
+Sent by the server to inform of a change in one or more lobby_data values.
 ```json
 {
-  "cmd": "c.lobby.update_value",
+  "cmd": "c.lobby.update_values",
   "lobby_id": 123,
-  "key": "map_name",
-  "value": "Not DSDR"
+  "new_values": {
+    "map_name": "Not DSDR"
+  }
 }
 
 ```

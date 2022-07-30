@@ -52,9 +52,9 @@ defmodule Teiserver.Battle.LobbyCache do
       |> Enum.filter(fn lobby -> lobby != nil end)
   end
 
-  @spec update_lobby_value(T.lobby_id(), atom, any) :: :ok | nil
-  def update_lobby_value(lobby_id, key, value) do
-    cast_lobby(lobby_id, {:update_value, key, value})
+  @spec update_lobby_values(T.lobby_id(), map()) :: :ok | nil
+  def update_lobby_values(lobby_id, new_values) do
+    cast_lobby(lobby_id, {:update_values, new_values})
   end
 
   @spec set_lobby_password(T.lobby_id(), String.t() | nil) :: :ok | nil

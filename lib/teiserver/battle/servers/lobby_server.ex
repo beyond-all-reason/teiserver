@@ -8,6 +8,15 @@ defmodule Teiserver.Battle.LobbyServer do
 
   @player_list_cache_age_max 500
 
+  # List of keys that can be broadcast when updated
+  @broadcast_update_keys ~w(
+    name type max_players game_name
+    locked engine_name engine_version players spectators bots ip
+    settings map_name passworded
+    map_hash tags in_progress started_at
+  )a
+
+
   @impl true
   def handle_call(:get_lobby_state, _from, state) do
     result = Map.merge(state.lobby, %{
@@ -141,7 +150,7 @@ defmodule Teiserver.Battle.LobbyServer do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
-      {:lobby_update, :update_value, state.id, {:passworded, false}}
+      {:lobby_update, :update_values, state.id, %{passworded: false}}
     )
 
     {:noreply, %{state | lobby: new_lobby}}
@@ -155,7 +164,7 @@ defmodule Teiserver.Battle.LobbyServer do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_lobby_updates:#{state.id}",
-      {:lobby_update, :update_value, state.id, {:passworded, true}}
+      {:lobby_update, :update_values, state.id, %{passworded: true}}
     )
 
     {:noreply, %{state | lobby: new_lobby}}
@@ -163,14 +172,25 @@ defmodule Teiserver.Battle.LobbyServer do
 
 
   # Generic updates
-  def handle_cast({:update_value, key, value}, state) do
-    new_lobby = Map.put(state.lobby, key, value)
+  def handle_cast({:update_values, new_values}, state) do
+    new_values = new_values
+      |> Map.filter(fn {k, _} ->
+        Map.has_key?(state.lobby, k)
+      end)
+    new_lobby = Map.merge(state.lobby, new_values)
 
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_lobby_updates:#{state.id}",
-      {:lobby_update, :update_value, state.id, {key, value}}
-    )
+    broadcast_values = new_values
+      |> Map.filter(fn {k, _} ->
+        Enum.member?(@broadcast_update_keys, k)
+      end)
+
+    if not Enum.empty?(broadcast_values) do
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_lobby_updates:#{state.id}",
+        {:lobby_update, :update_values, state.id, broadcast_values}
+      )
+    end
 
     {:noreply, %{state | lobby: new_lobby}}
   end

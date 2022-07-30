@@ -37,11 +37,11 @@ defmodule Teiserver.Battle.LobbyServerTest do
     assert c == nil
 
     # Partial update
-    r = LobbyCache.update_lobby_value(lobby_id, :map_name, "new map name")
+    r = LobbyCache.update_lobby_values(lobby_id, %{map_name: "new map name"})
     assert r == :ok
 
     # Partial update with no lobby server
-    r = LobbyCache.update_lobby_value(-1, :map_name, "new map name")
+    r = LobbyCache.update_lobby_values(-1, %{map_name: "new map name"})
     assert r == nil
 
 

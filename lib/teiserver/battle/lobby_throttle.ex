@@ -48,8 +48,9 @@ defmodule Teiserver.Battle.LobbyThrottle do
     {:noreply, %{state | player_changes: [userid | state.player_changes]}}
   end
 
-  def handle_info({:lobby_update, :update_value, _lobby_id, {key, _value}}, state) do
-    {:noreply, %{state | player_changes: [key | state.lobby_changes]}}
+  def handle_info({:lobby_update, :update_values, _lobby_id, changes}, state) do
+    keys = Map.keys(changes)
+    {:noreply, %{state | lobby_changes: (keys ++ state.lobby_changes) |> Enum.uniq}}
   end
 
   def handle_info({:lobby_update, :add_start_area, _lobby_id, _new_opts}, state) do
