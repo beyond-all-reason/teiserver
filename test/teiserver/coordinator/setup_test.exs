@@ -4,6 +4,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
   alias Teiserver.Account.UserCache
   alias Teiserver.TeiserverTestLib
   alias Teiserver.Battle.Lobby
+  alias Teiserver.Battle
   alias Teiserver.Common.PubsubListener
 
   import Teiserver.TeiserverTestLib,
@@ -26,7 +27,7 @@ defmodule Teiserver.Protocols.Coordinator.SetupTest do
       founder_name: user.name
     })
 
-    lobby = Lobby.get_battle!(lobby.id)
+    lobby = Battle.get_lobby(lobby.id)
     listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby.id}"])
 
     # No command
