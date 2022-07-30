@@ -190,6 +190,26 @@ defmodule Teiserver.Battle.LobbyServer do
         "teiserver_lobby_updates:#{state.id}",
         {:lobby_update, :update_values, state.id, broadcast_values}
       )
+
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_global_battle_lobby_updates",
+        {:global_battle_lobby, :update_battle_info, state.id}
+      )
+
+      # Spring specific stuff
+      not_update_battle_info = broadcast_values
+        |> Map.keys()
+        |> Enum.filter(fn k -> Enum.member?(~w(spectator_count locked map_hash map_name)a, k) end)
+        |> Enum.empty?()
+
+      if not not_update_battle_info do
+        PubSub.broadcast(
+          Central.PubSub,
+          "legacy_all_battle_updates",
+          {:global_battle_updated, state.id, :update_battle_info}
+        )
+      end
     end
 
     {:noreply, %{state | lobby: new_lobby}}

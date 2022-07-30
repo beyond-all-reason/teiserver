@@ -329,10 +329,10 @@ defmodule Teiserver.SpringBattleHostTest do
     assert reply == "SAIDBATTLEEX #{user.name} This is me saying something from somewhere else\n"
 
     # UPDATEBATTLEINFO
-    _send_raw(socket, "UPDATEBATTLEINFO 1 0 123456 Map name here\n")
+    _send_raw(socket, "UPDATEBATTLEINFO 0 0 123456 Map name here\n")
     :timer.sleep(100)
     reply = _recv_until(socket)
-    assert reply == "UPDATEBATTLEINFO #{battle.id} 1 0 123456 Map name here\n"
+    assert reply == "UPDATEBATTLEINFO #{battle.id} 0 0 123456 Map name here\n"
 
     # BOT TIME
     _send_raw(socket, "ADDBOT bot1 4195330 0 ai_dll\n")

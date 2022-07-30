@@ -573,9 +573,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password"})
     [reply] = _tachyon_recv(hsocket)
     assert reply == %{
-      "cmd" => "s.lobby.update_value",
-      "key" => "passworded",
-      "value" => false,
+      "cmd" => "s.lobby.update_values",
+      "new_values" => %{"passworded" => false},
       "lobby_id" => lobby_id
     }
     assert Battle.get_lobby(lobby_id).password == nil

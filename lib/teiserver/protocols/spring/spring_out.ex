@@ -230,7 +230,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:update_battle, lobby_id) when is_integer(lobby_id) do
-    do_reply(:update_battle, Lobby.get_battle(lobby_id))
+    do_reply(:update_battle, Battle.get_lobby(lobby_id))
   end
 
   defp do_reply(:update_battle, _), do: ""
