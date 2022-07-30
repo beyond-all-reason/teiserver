@@ -1,5 +1,4 @@
 defmodule Teiserver.Coordinator do
-  alias Teiserver.Battle.Lobby
   alias Teiserver.{Battle, User}
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Coordinator.Parser
@@ -161,9 +160,8 @@ defmodule Teiserver.Coordinator do
   @spec send_to_host(T.userid(), T.userid(), String.t()) :: :ok
   def send_to_host(nil, _, _), do: :ok
   def send_to_host(from_id, lobby_id, msg) do
-    battle = Lobby.get_battle!(lobby_id)
-    User.send_direct_message(from_id, battle.founder_id, msg)
-    Logger.info("send_to_host - #{battle.id}, #{msg}")
+    lobby = Battle.get_lobby(lobby_id)
+    User.send_direct_message(from_id, lobby.founder_id, msg)
   end
 
   @spec send_to_user(T.userid(), String.t()) :: :ok

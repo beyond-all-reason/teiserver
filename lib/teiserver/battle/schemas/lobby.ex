@@ -145,7 +145,6 @@ defmodule Teiserver.Battle.Lobby do
 
   # Refactor of above from when we called them battle
   def update_battle(battle, data, reason), do: LobbyCache.update_lobby(battle, data, reason)
-  def get_battle!(lobby_id), do: LobbyCache.get_lobby(lobby_id)
   def get_battle(lobby_id), do: LobbyCache.get_lobby(lobby_id)
   def add_battle(battle), do: LobbyCache.add_lobby(battle)
 

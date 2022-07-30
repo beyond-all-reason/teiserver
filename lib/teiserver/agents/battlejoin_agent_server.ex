@@ -2,6 +2,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   use GenServer
   alias Teiserver.Agents.AgentLib
   alias Teiserver.Battle.Lobby
+  alias Teiserver.Battle
   require Logger
 
   @tick_period 7000
@@ -116,7 +117,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
   defp join_battle(state, lobby_ids) do
     lobby_id = Enum.random(lobby_ids)
 
-    case Lobby.get_battle!(lobby_id) do
+    case Battle.get_lobby(lobby_id) do
       nil ->
         %{state | lobby_id: nil, stage: :no_battle}
       battle ->

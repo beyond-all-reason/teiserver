@@ -188,7 +188,7 @@ defmodule Teiserver.Battle do
       nil ->
         {:error, "no client"}
       _ ->
-        case Lobby.get_battle(lobby_id) do
+        case lobby_exists?(lobby_id) do
           nil ->
             {:error, "no battle"}
           _ ->
