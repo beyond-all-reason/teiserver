@@ -221,12 +221,12 @@ defmodule Teiserver.Protocols.SpringOut do
     "REQUESTBATTLESTATUS\n"
   end
 
-  defp do_reply(:update_battle, battle) when is_map(battle) do
-    locked = if battle.locked, do: "1", else: "0"
+  defp do_reply(:update_battle, lobby) when is_map(lobby) do
+    spectator_count = Battle.get_lobby_spectator_count(lobby.id)
+    locked = if lobby.locked, do: "1", else: "0"
 
-    "UPDATEBATTLEINFO #{battle.id} #{battle.spectator_count} #{locked} #{battle.map_hash} #{
-      battle.map_name
-    }\n"
+    "UPDATEBATTLEINFO #{lobby.id} #{spectator_count} #{locked} #{lobby.map_hash} #{
+      lobby.map_name}\n"
   end
 
   defp do_reply(:update_battle, lobby_id) when is_integer(lobby_id) do

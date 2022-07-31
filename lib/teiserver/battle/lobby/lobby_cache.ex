@@ -191,6 +191,11 @@ defmodule Teiserver.Battle.LobbyCache do
     call_lobby(lobby_id, :get_member_count)
   end
 
+  @spec get_lobby_spectator_count(T.lobby_id()) :: integer()
+  def get_lobby_spectator_count(lobby_id) do
+    call_lobby(lobby_id, :get_spectator_count)
+  end
+
   @spec get_lobby_player_count(T.lobby_id()) :: integer() | :lobby
   def get_lobby_player_count(lobby_id) do
     call_lobby(lobby_id, :get_player_count)

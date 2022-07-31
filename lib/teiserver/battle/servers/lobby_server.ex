@@ -71,6 +71,10 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, state.member_list, state}
   end
 
+  def handle_call(:get_spectator_count, _from, state) do
+    {:reply, Enum.count(state.member_list) - Enum.count(state.player_list), state}
+  end
+
   def handle_call(:get_member_count, _from, state) do
     {:reply, Enum.count(state.member_list), state}
   end
