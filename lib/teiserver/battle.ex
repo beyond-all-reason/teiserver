@@ -207,6 +207,8 @@ defmodule Teiserver.Battle do
     Telemetry.increment(:matches_started)
 
     LobbyCache.cast_lobby(lobby_id, :start_match)
+    # Need to give the lobby_server time to start the match
+    :timer.sleep(100)
 
     {match_params, members} = MatchLib.match_from_lobby(lobby_id)
     case create_match(match_params) do
