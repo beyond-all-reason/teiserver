@@ -93,24 +93,14 @@ defmodule Teiserver.Game.RatingLogLib do
   @spec order_by(Ecto.Query.t(), String.t() | nil) :: Ecto.Query.t()
   def order_by(query, nil), do: query
 
-  def order_by(query, "Name (A-Z)") do
-    from rating_logs in query,
-      order_by: [asc: rating_logs.name]
-  end
-
-  def order_by(query, "Name (Z-A)") do
-    from rating_logs in query,
-      order_by: [desc: rating_logs.name]
-  end
-
   def order_by(query, "Newest first") do
     from rating_logs in query,
-      order_by: [desc: rating_logs.match_id]
+      order_by: [desc: rating_logs.inserted_at]
   end
 
   def order_by(query, "Oldest first") do
     from rating_logs in query,
-      order_by: [asc: rating_logs.match_id]
+      order_by: [asc: rating_logs.inserted_at]
   end
 
   @spec preload(Ecto.Query.t(), List.t() | nil) :: Ecto.Query.t()

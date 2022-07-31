@@ -479,6 +479,7 @@ defmodule TeiserverWeb.Admin.UserController do
               user_id: user.id,
               rating_type_id: rating_type_id,
               match_id: nil,
+              inserted_at: Timex.now(),
 
               value: %{
                 rating_value: new_rating_value,
