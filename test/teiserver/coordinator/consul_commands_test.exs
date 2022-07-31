@@ -55,6 +55,14 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
   end
 
+  test "non existent command", %{lobby_id: lobby_id,hsocket: hsocket} do
+    data = %{cmd: "c.lobby.message", message: "$creativecommandname"}
+    _tachyon_send(hsocket, data)
+
+    [reply] = _tachyon_recv(hsocket)
+    assert reply["message"] == "No command of name 'creativecommandname'"
+  end
+
   test "specunready", %{lobby_id: lobby_id, player: player1, hsocket: hsocket} do
     %{user: player2} = tachyon_auth_setup()
 
