@@ -2,11 +2,11 @@ defmodule Teiserver.Coordinator.Parser do
   require Logger
   alias Teiserver.Coordinator
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Battle.Lobby
+  alias Teiserver.Battle
 
   @spec handle_in(Types.userid(), String.t(), Types.lobby_id()) :: :say | :handled
   def handle_in(userid, msg, lobby_id) do
-    battle = Lobby.get_battle!(lobby_id)
+    lobby = Battle.get_lobby(lobby_id)
 
     cond do
       # This instantly catches "saying" commands and means we don't need
@@ -15,7 +15,7 @@ defmodule Teiserver.Coordinator.Parser do
         :say
 
       String.slice(msg, 0..0) == "$" ->
-        parse_and_handle(userid, msg, battle)
+        parse_and_handle(userid, msg, lobby)
 
       true ->
         :say

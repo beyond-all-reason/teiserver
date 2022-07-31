@@ -155,6 +155,7 @@ defmodule Teiserver.Game.MatchRatingLib do
       user_id: user_id,
       rating_type_id: rating_type_id,
       match_id: match.id,
+      inserted_at: match.finished,
 
       value: %{
         rating_value: new_rating_value,
