@@ -13,10 +13,12 @@
           <% end %>
 
           <%= if @match do %>
-            <a href={Routes.ts_admin_match_path(@conn, :server_index, @match.server_uuid)} class="btn btn-outline-secondary">
-              <i class="fa-fw fa-regular fa-server"></i>
-              Server grouping
-            </a>
+            <%= if @match.server_uuid do %>
+              <a href={Routes.ts_admin_match_path(@conn, :server_index, @match.server_uuid)} class="btn btn-outline-secondary">
+                <i class="fa-fw fa-regular fa-server"></i>
+                Server grouping
+              </a>
+            <% end %>
             
             <a href={Routes.ts_admin_match_path(@conn, :show, @match.id)} class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}>
               <%= central_component "icon", icon: Teiserver.Battle.MatchLib.icon() %>
