@@ -19,17 +19,14 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       client == nil -> false
       Enum.member?(@forward_to_consul, cmd.command) -> true
       Enum.member?(@always_allow, cmd.command) -> true
-      (Enum.member?(@always_allow, cmd.command) == false) and (Enum.member?(@forward_to_consul, cmd.command) == false) ->
-        User.send_direct_message(state.userid, cmd.senderid, "No command of name '#{cmd.command}'")
-        false
       client.moderator == true -> true
 
-      #No moderator only coordinator commands
-      client.moderator == false ->
-        User.send_direct_message(state.userid, cmd.senderid, "You are not allowed to use this command")
+      not Enum.member?(@always_allow ++ @forward_to_consul, cmd.command) ->
+        User.send_direct_message(state.userid, cmd.senderid, "No command of name '#{cmd.command}'")
         false
 
-      true -> false
+      true ->
+        false
     end
   end
 

@@ -652,29 +652,23 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Enum.member?(@always_allow, cmd.command) -> true
       client.moderator == true -> true
 
+      Enum.member?(@host_commands, cmd.command) and not is_host ->
+        LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "You are not allowed to use the '#{cmd.command}' command (host only)", state.lobby_id)
+        false
+
+      Enum.member?(@boss_commands, cmd.command) and not (is_host or is_boss) ->
+        LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "You are not allowed to use the '#{cmd.command}' command (boss only)", state.lobby_id)
+        false
+
+      not Enum.member?(@host_commands ++ @boss_commands, cmd.command) ->
+        LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "No command of name '#{cmd.command}'", state.lobby_id)
+        false
+
+      # By default we say it's not allowed, the above conditions provide specific
+      # conditional messages explaining why a command is sometimes allowed and sometimes
+      # not allowed
       true ->
-        if Enum.member?(@host_commands, cmd.command) do
-          case is_host do
-            true -> true
-            false ->
-              LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "You are not allowed to use the '#{cmd.command}' command (host only)", state.lobby_id)
-              false
-          end
-        end
-
-        if Enum.member?(@boss_commands, cmd.command) do
-          case is_host or is_boss do
-            true -> true
-            false ->
-              LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "You are not allowed to use the '#{cmd.command}' command (boss only)", state.lobby_id)
-              false
-          end
-        end
-
-        if (Enum.member?(@host_commands, cmd.command) == false) and (Enum.member?(@boss_commands, cmd.command) == false) do
-          LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "No command of name '#{cmd.command}'", state.lobby_id)
-          false
-        end
+        false
     end
   end
 
