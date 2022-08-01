@@ -653,7 +653,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       client.moderator == true -> true
 
       true ->
-        false
         if Enum.member?(@host_commands, cmd.command) do
           case is_host do
             true -> true
