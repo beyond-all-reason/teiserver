@@ -38,7 +38,7 @@ defmodule Teiserver.Battle.MatchLib do
     end
   end
 
-  @spec match_from_lobby(T.lobby_id()) :: {map(), list()}
+  @spec match_from_lobby(T.lobby_id()) :: {map(), list()} | nil
   def match_from_lobby(lobby_id) do
     %{
       lobby: lobby,
@@ -53,39 +53,43 @@ defmodule Teiserver.Battle.MatchLib do
     teams = player_list
       |> Enum.group_by(fn c -> c.team_number end)
 
-    the_game_type = game_type(lobby, teams)
+    if teams != %{} do
+      the_game_type = game_type(lobby, teams)
 
-    match = %{
-      uuid: match_uuid,
-      server_uuid: server_uuid,
-      map: lobby.map_name,
-      data: nil,
-      tags: modoptions,
+      match = %{
+        uuid: match_uuid,
+        server_uuid: server_uuid,
+        map: lobby.map_name,
+        data: nil,
+        tags: modoptions,
 
-      team_count: Enum.count(teams),
-      team_size: Enum.max(Enum.map(teams, fn {_, t} -> Enum.count(t) end)),
-      passworded: lobby.passworded,
-      game_type: the_game_type,
+        team_count: Enum.count(teams),
+        team_size: Enum.max(Enum.map(teams, fn {_, t} -> Enum.count(t) end)),
+        passworded: lobby.passworded,
+        game_type: the_game_type,
 
-      founder_id: lobby.founder_id,
-      bots: bots,
+        founder_id: lobby.founder_id,
+        bots: bots,
 
-      queue_id: queue_id,
+        queue_id: queue_id,
 
-      started: Timex.now(),
-      finished: nil
-    }
+        started: Timex.now(),
+        finished: nil
+      }
 
-    members = player_list
-      |> Enum.filter(fn c -> c.player == true end)
-      |> Enum.map(fn client ->
-        %{
-          user_id: client.userid,
-          team_id: client.team_number
-        }
-      end)
+      members = player_list
+        |> Enum.filter(fn c -> c.player == true end)
+        |> Enum.map(fn client ->
+          %{
+            user_id: client.userid,
+            team_id: client.team_number
+          }
+        end)
 
-    {match, members}
+      {match, members}
+    else
+      nil
+    end
   end
 
   @spec stop_match(T.lobby_id()) :: {String.t(), %{finished: DateTime.t()}}

@@ -207,20 +207,23 @@ defmodule Teiserver.Battle do
     Telemetry.increment(:matches_started)
 
     LobbyCache.cast_lobby(lobby_id, :start_match)
-    # Need to give the lobby_server time to start the match
-    :timer.sleep(100)
 
-    {match_params, members} = MatchLib.match_from_lobby(lobby_id)
-    case create_match(match_params) do
-      {:ok, match} ->
-        members
-        |> Enum.map(fn m ->
-          create_match_membership(Map.merge(m, %{
-            match_id: match.id
-          }))
-        end)
-      error ->
-        Logger.error("Error inserting match: #{Kernel.inspect error}")
+    case MatchLib.match_from_lobby(lobby_id) do
+      {match_params, members} ->
+        case create_match(match_params) do
+          {:ok, match} ->
+            members
+            |> Enum.map(fn m ->
+              create_match_membership(Map.merge(m, %{
+                match_id: match.id
+              }))
+            end)
+          error ->
+            Logger.error("Error inserting match: #{Kernel.inspect error}")
+            :ok
+        end
+      nil ->
+        # No human players, we're not going to create a match with that!
         :ok
     end
 
