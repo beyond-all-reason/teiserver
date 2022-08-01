@@ -1,8 +1,9 @@
 defmodule Teiserver.Battle.MatchLib do
   use CentralWeb, :library
-  alias Teiserver.Battle
+  alias Teiserver.{Battle, Account}
   alias Teiserver.Battle.Match
   alias Teiserver.Data.Types, as: T
+  require Logger
 
   @spec icon :: String.t()
   def icon, do: "fa-regular fa-swords"
@@ -46,11 +47,14 @@ defmodule Teiserver.Battle.MatchLib do
       server_uuid: server_uuid,
       modoptions: modoptions,
       bots: bots,
-      player_list: player_list,
+      member_list: member_list,
+      # player_list: player_list,
       queue_id: queue_id
     } = Battle.get_combined_lobby_state(lobby_id)
 
-    teams = player_list
+    teams = member_list
+      |> Account.list_clients()
+      |> Enum.filter(fn c -> c.player == true end)
       |> Enum.group_by(fn c -> c.team_number end)
 
     if teams != %{} do
@@ -77,7 +81,8 @@ defmodule Teiserver.Battle.MatchLib do
         finished: nil
       }
 
-      members = player_list
+      members = member_list
+        |> Account.list_clients()
         |> Enum.filter(fn c -> c.player == true end)
         |> Enum.map(fn client ->
           %{
@@ -88,6 +93,8 @@ defmodule Teiserver.Battle.MatchLib do
 
       {match, members}
     else
+      Logger.error("EmptyTeamsMatch Lobby: #{lobby_id}\nMembers: #{Kernel.inspect member_list}")
+
       nil
     end
   end
