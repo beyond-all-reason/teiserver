@@ -1206,6 +1206,16 @@ defmodule Teiserver.Account do
       |> Repo.update()
   end
 
+  @spec create_or_update_rating(Map.t()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
+  def create_or_update_rating(attrs \\ %{}) do
+    case get_rating(attrs.user_id, attrs.rating_type_id) do
+      nil ->
+        create_rating(attrs)
+      existing ->
+        update_rating(existing, attrs)
+    end
+  end
+
   @doc """
   Deletes a Rating.
 

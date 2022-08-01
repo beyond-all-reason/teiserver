@@ -124,6 +124,9 @@ defmodule Teiserver.Battle.BalanceLib do
     get_user_rating_value(userid, rating_type_id)
   end
 
+  @doc """
+  Given a Rating object or nil, return a value representing the rating to be used
+  """
   @spec convert_rating(map() | nil) :: rating_value()
   def convert_rating(nil) do
     default_rating() |> convert_rating()

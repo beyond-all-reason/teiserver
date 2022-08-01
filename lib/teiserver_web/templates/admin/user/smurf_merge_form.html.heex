@@ -35,6 +35,33 @@
 
           <div class="row">
             <div class="col-md-12 m-3">
+              <h5 class="text-primary">
+                <%= central_component "icon", icon: "fa-solid fa-link" %>
+                &nbsp;
+                <label for="" class="control-label">Link accounts</label>
+              </h5>
+              <%= central_component "radio",
+                name: "merge_link",
+                id: "merge_link_none",
+                value: "no_link",
+                label: "No link",
+                checked: false,
+                description: "No link will be created"
+              %>
+              
+              <%= central_component "radio",
+                name: "merge_link",
+                id: "merge_link_create",
+                value: "create_link",
+                label: "Create link",
+                checked: true,
+                description: "A smurf link between the two accounts will be created"
+              %>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12 m-3">
               <h5 class={"text-#{Teiserver.Account.RatingLib.colours}"}>
                 <%= central_component "icon", icon: Teiserver.Account.RatingLib.icon() %>
                 &nbsp;
@@ -137,7 +164,7 @@
           </a>
 
           <button type="submit" class={"btn btn-#{bsname} float-end"}>
-            Create link
+            Apply
           </button>
         </form>
 

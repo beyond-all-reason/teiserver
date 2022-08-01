@@ -482,6 +482,8 @@ defmodule TeiserverWeb.Admin.UserController do
               inserted_at: Timex.now(),
 
               value: %{
+                reason: "Manual adjustment",
+
                 rating_value: new_rating_value,
                 skill: new_skill,
                 uncertainty: new_uncertainty,
@@ -775,14 +777,101 @@ defmodule TeiserverWeb.Admin.UserController do
 
       _ ->
         conn
-        |> put_flash(:danger, "Unable to access at least one of these users")
-        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+          |> put_flash(:danger, "Unable to access at least one of these users")
+          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end
 
   @spec smurf_merge_post(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def smurf_merge_post(conn, %{"id1" => _id1, "id2" => _id2}) do
-    conn
+  def smurf_merge_post(conn, params = %{"from_id" => from_id, "to_id" => to_id}) do
+    from_user = Account.get_user!(from_id)
+    to_user = Account.get_user!(to_id)
+
+    access = {
+      Central.Account.UserLib.has_access(from_user, conn),
+      Central.Account.UserLib.has_access(to_user, conn)
+    }
+
+    case access do
+      {{true, _}, {true, _}} ->
+        case params["merge_link"] do
+          _ -> :ok
+        end
+
+        case params["merge_ratings"] do
+          "pick_highest" ->
+            to_ratings = Account.list_ratings(search: [user_id: to_id])
+              |> Map.new(fn r -> {r.rating_type_id, r} end)
+
+            # Now we go through the ratings of the from player and act
+            Account.list_ratings(search: [user_id: from_id])
+              |> Enum.each(fn from_rating ->
+                rating_type_id = from_rating.rating_type_id
+                to_rating = to_ratings[rating_type_id] || BalanceLib.default_rating()
+
+                from_value = BalanceLib.convert_rating(from_rating)
+                to_value = BalanceLib.convert_rating(to_rating)
+
+                if from_value > to_value do
+                  IO.puts "FROM is higher for #{rating_type_id}"
+
+                  {:ok, _rating} = Account.create_or_update_rating(%{
+                    user_id: to_user.id,
+                    rating_type_id: rating_type_id,
+                    rating_value: from_rating.rating_value,
+                    skill: from_rating.skill,
+                    uncertainty: from_rating.uncertainty,
+                    last_updated: Timex.now()
+                  })
+
+                  log_params = %{
+                    user_id: to_user.id,
+                    rating_type_id: rating_type_id,
+                    match_id: nil,
+                    inserted_at: Timex.now(),
+
+                    value: %{
+                      reason: "Smurf adjustment",
+
+                      rating_value: from_rating.rating_value,
+                      skill: from_rating.skill,
+                      uncertainty: from_rating.uncertainty,
+
+                      rating_value_change: from_rating.rating_value - to_rating.rating_value,
+                      skill_change: from_rating.skill - to_rating.skill,
+                      uncertainty_change: from_rating.uncertainty - to_rating.uncertainty,
+                    }
+                  }
+
+                  {:ok, _log} = Game.create_rating_log(log_params)
+                end
+              end)
+
+            :ok
+          "copy" ->
+            :ok
+          _ -> :ok
+        end
+
+        case params["merge_reports"] do
+          _ -> :ok
+        end
+
+        case params["merge_mutes"] do
+          _ -> :ok
+        end
+
+        IO.puts ""
+        IO.inspect params
+        IO.puts ""
+
+        conn
+
+      _ ->
+        conn
+          |> put_flash(:danger, "Unable to access at least one of these users")
+          |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
   end
 
   @spec automod_action_form(Plug.Conn.t(), map) :: Plug.Conn.t()
