@@ -26,18 +26,6 @@ defmodule Teiserver.Battle.LobbyServer do
     {:reply, result, state}
   end
 
-  def handle_call({:get_player, player_id}, _from, %{player_list: player_list} = state) do
-    found = player_list
-      |> Enum.filter(fn p -> p.userid == player_id end)
-
-    result = case found do
-      [player] -> player
-      _ -> nil
-    end
-
-    {:reply, result, state}
-  end
-
   def handle_call(:get_combined_state, _from, state) do
     {player_list, new_state} = get_player_list(state)
 
@@ -94,7 +82,7 @@ defmodule Teiserver.Battle.LobbyServer do
   @impl true
   def handle_cast(:start_match, state) do
     player_list = state.lobby
-      |> Map.get(:players)
+      |> Map.get(:members)
       |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
       |> Enum.filter(fn client -> client != nil end)
       |> Enum.filter(fn client -> client.player == true and client.lobby_id == state.id end)

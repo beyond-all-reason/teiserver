@@ -44,6 +44,7 @@ defmodule Teiserver.Game.GenerateAchievementTypes do
       %{base_name: "017 - Infantry simulator"},
       %{base_name: "018 - Tick tock"},
       %{base_name: "019 - Catch those rare comets"},
+      %{base_name: "020 - Fortress assault"},
     ]
 
     normal = scenarios
