@@ -12,14 +12,23 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no)
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
-  defp allow_command?(%{senderid: senderid} = cmd, _state) do
+  defp allow_command?(%{senderid: senderid} = cmd, state) do
     client = Client.get_client_by_id(senderid)
 
     cond do
       client == nil -> false
       Enum.member?(@forward_to_consul, cmd.command) -> true
       Enum.member?(@always_allow, cmd.command) -> true
+      (Enum.member?(@always_allow, cmd.command) == false) and (Enum.member?(@forward_to_consul, cmd.command) == false) ->
+        User.send_direct_message(state.userid, cmd.senderid, "No command of name '#{cmd.command}'")
+        false
       client.moderator == true -> true
+
+      #No moderator only coordinator commands
+      client.moderator == false ->
+        User.send_direct_message(state.userid, cmd.senderid, "You are not allowed to use this command")
+        false
+
       true -> false
     end
   end
@@ -33,10 +42,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           consul_pid = Coordinator.get_consul_pid(client.lobby_id)
           send(consul_pid, cmd)
         end
-        state
-
-      Enum.member?(@always_allow, cmd.command) == false ->
-        User.send_direct_message(state.userid, cmd.senderid, "No command of name '#{cmd.command}'")
         state
 
       allow_command?(cmd, state) == true ->

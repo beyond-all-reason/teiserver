@@ -55,12 +55,34 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     {:ok, hsocket: hsocket, psocket: psocket, host: host, player: player, lobby_id: lobby_id, listener: listener}
   end
 
-  test "non existent command", %{lobby_id: lobby_id,hsocket: hsocket} do
+  test "non existent command", %{hsocket: hsocket} do
     data = %{cmd: "c.lobby.message", message: "$creativecommandname"}
     _tachyon_send(hsocket, data)
 
     [reply] = _tachyon_recv(hsocket)
     assert reply["message"] == "No command of name 'creativecommandname'"
+  end
+
+  test "non allowed command", %{lobby_id: lobby_id, psocket: psocket, player: player} do
+    Lobby.force_add_user_to_battle(player.id, lobby_id)
+    player_client = Client.get_client_by_id(player.id)
+    Client.update(%{player_client |
+      player: false,
+      ready: false
+    }, :client_updated_battlestatus)
+    _tachyon_recv(psocket)
+
+    data = %{cmd: "c.lobby.message", message: "$specunready"}
+    _tachyon_send(psocket, data)
+
+    [reply] = _tachyon_recv(psocket)
+    assert reply["message"] == "You are not allowed to use the 'specunready' command (host only)"
+
+    data = %{cmd: "c.lobby.message", message: "$meme"}
+    _tachyon_send(psocket, data)
+
+    [reply] = _tachyon_recv(psocket)
+    assert reply["message"] == "You are not allowed to use the 'meme' command (boss only)"
   end
 
   test "specunready", %{lobby_id: lobby_id, player: player1, hsocket: hsocket} do
@@ -612,7 +634,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert messages == []
 
     reply = _tachyon_recv(hsocket)
-    assert reply == [%{"cmd" => "s.lobby.received_lobby_direct_announce", "message" => "No command of that name", "sender_id" => Coordinator.get_coordinator_userid()}]
+    assert reply == [%{"cmd" => "s.lobby.received_lobby_direct_announce", "message" => "No command of name 'non-existing'", "sender_id" => Coordinator.get_coordinator_userid()}]
   end
 
   test "join_queue", %{lobby_id: lobby_id, host: host, hsocket: hsocket, psocket: _psocket, player: player} do

@@ -255,12 +255,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
         Coordinator.cast_coordinator({:consul_command, Map.merge(cmd, %{lobby_id: state.lobby_id, host_id: state.host_id})})
         {:noreply, state}
 
-      Enum.member?(@always_allow, cmd.command) == false and
-      Enum.member?(@boss_commands, cmd.command) == false and
-      Enum.member?(@host_commands, cmd.command) == false ->
-        LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "No command of name '#{cmd.command}'", state.lobby_id)
-        {:noreply, state}
-
       allow_command?(cmd, state) ->
         new_state = ConsulCommands.handle_command(cmd, state)
         {:noreply, new_state}
@@ -657,9 +651,31 @@ defmodule Teiserver.Coordinator.ConsulServer do
       client == nil -> false
       Enum.member?(@always_allow, cmd.command) -> true
       client.moderator == true -> true
-      Enum.member?(@host_commands, cmd.command) and is_host -> true
-      Enum.member?(@boss_commands, cmd.command) and (is_host or is_boss) -> true
-      true -> false
+
+      true ->
+        false
+        if Enum.member?(@host_commands, cmd.command) do
+          case is_host do
+            true -> true
+            false ->
+              LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "You are not allowed to use the '#{cmd.command}' command (host only)", state.lobby_id)
+              false
+          end
+        end
+
+        if Enum.member?(@boss_commands, cmd.command) do
+          case is_host or is_boss do
+            true -> true
+            false ->
+              LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "You are not allowed to use the '#{cmd.command}' command (boss only)", state.lobby_id)
+              false
+          end
+        end
+
+        if (Enum.member?(@host_commands, cmd.command) == false) and (Enum.member?(@boss_commands, cmd.command) == false) do
+          LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "No command of name '#{cmd.command}'", state.lobby_id)
+          false
+        end
     end
   end
 
