@@ -188,13 +188,13 @@ defmodule TeiserverWeb.Router do
         post "/login", SessionController, :login
       end
 
-      scope "/teiserver/api/spads", TeiserverWeb.API do
+      scope "/teiserver/api/spads", TeiserverWeb.API, as: :ts do
         pipe_through([:api])
         get "/get_rating/:target_id/:type", SpadsController, :get_rating
         get "/get_rating/:caller_id/:target_id/:type", SpadsController, :get_rating
       end
 
-      scope "/teiserver/api/public", TeiserverWeb.API do
+      scope "/teiserver/api/public", TeiserverWeb.API, as: :ts do
         pipe_through([:api])
         get "/leaderboard/:type", PublicController, :leaderboard
       end
