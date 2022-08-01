@@ -883,7 +883,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{senderid: senderid} = cmd, state) do
     if Map.has_key?(cmd, :raw) do
       # LobbyChat.do_say(cmd.senderid, cmd.raw, state.lobby_id)
-      LobbyChat.sayprivateex(state.coordinator_id, senderid, "No command of that name", state.lobby_id)
+      LobbyChat.sayprivateex(state.coordinator_id, senderid, "No command of name '#{cmd.command}'", state.lobby_id)
     else
       Logger.error("No handler in consul_server for command #{Kernel.inspect cmd}")
     end
