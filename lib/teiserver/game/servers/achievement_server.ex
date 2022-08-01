@@ -24,6 +24,7 @@ defmodule Teiserver.Game.AchievementServer do
     "017 - Infantry simulator" => "twobarbspwakonly006",
     "018 - Tick tock" => "SpeedMetalSnipe011",
     "019 - Catch those rare comets" => "threebarbscomet",
+    "020 - Fortress assault" => "FortressAssault",
   }
 
   def start_link(opts \\ []) do
