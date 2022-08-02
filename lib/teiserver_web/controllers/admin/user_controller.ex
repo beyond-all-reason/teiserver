@@ -796,6 +796,16 @@ defmodule TeiserverWeb.Admin.UserController do
       {{true, _}, {true, _}} ->
         Teiserver.Account.SmurfMergeTask.perform(from_user.id, to_user.id, merge)
 
+        fields = merge
+          |> Enum.filter(fn {_k, v} -> v == "true" end)
+          |> Enum.map(fn {k, _} -> k end)
+
+        add_audit_log(conn, "Teiserver:Smurf merge", %{
+          fields: fields,
+          from_id: from_user.id,
+          to_id: to_user.id
+        })
+
         conn
           |> put_flash(:success, "Applied the changes")
           |> redirect(to: Routes.ts_admin_user_path(conn, :show, to_user.id))
