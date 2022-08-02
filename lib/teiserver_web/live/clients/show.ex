@@ -92,6 +92,10 @@ defmodule TeiserverWeb.ClientLive.Show do
     {:noreply, socket}
   end
 
+  def handle_info({:battle_updated, _, _, _}, socket) do
+    {:noreply, socket}
+  end
+
   def handle_info({:user_logged_in, _id}, socket) do
     {:noreply, socket}
   end
