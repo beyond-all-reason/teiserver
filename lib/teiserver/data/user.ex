@@ -424,7 +424,7 @@ defmodule Teiserver.User do
 
     Account.update_user_stat(userid, %{
       "rename_log" => [System.system_time(:second) | rename_log],
-      "previous_names" => [user.name | previous_names]
+      "previous_names" => Enum.uniq([user.name | previous_names])
     })
 
     # We need to re-get the user to ensure we don't overwrite our banned flag
