@@ -49,45 +49,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
     max_player_count = ConsulServer.get_max_player_count(state)
 
-    moderator_string = case User.is_moderator?(user) do
-      true ->
-        rating_type = cond do
-          player_count == 2 -> "Duel"
-          state.host_teamcount > 2 ->
-            if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
-          true -> "Team"
-        end
-
-        rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
-
-        match_players = state.lobby_id
-          |> Battle.get_lobby_players()
-          |> Enum.map(fn p -> %{team_id: p.team_number, user_id: p.userid} end)
-
-        prediction = MatchRatingLib.predict_winning_team(match_players, rating_type_id)
-
-        scores = prediction.team_scores
-          |> Enum.map(fn {team, score} ->
-            score = round(score, 2)
-            "Team #{team + 1} total rating: #{score}"
-          end)
-
-        prediction_stats = prediction.team_scores
-          |> Map.new(fn {team_id, score} ->
-            {team_id, %{
-              total_rating: score
-            }}
-          end)
-
-        deviation = BalanceLib.get_deviation_old(prediction_stats)
-
-        [
-          "Team #{prediction.winning_team + 1} is predicted to win",
-          "Deviation of #{deviation}%"
-        ] ++ scores
-      false -> []
-    end
-
     boss_string = case state.host_bosses do
       [] -> "Nobody is bossed"
       [boss_id] ->
@@ -120,7 +81,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       pos_str,
       "Join queue: #{queue_string}",
       other_settings,
-      moderator_string,
     ]
     |> List.flatten
     |> Enum.filter(fn s -> s != nil end)
