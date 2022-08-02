@@ -518,13 +518,13 @@ defmodule Teiserver.User do
   defdelegate create_friend_request(requester, accepter), to: RelationsLib
 
   @spec ignore_user(T.userid() | nil, T.userid() | nil) :: T.user() | nil
-  defdelegate ignore_user(requester, accepter), to: RelationsLib
+  defdelegate ignore_user(ignorer_id, ignored_id), to: RelationsLib
 
   @spec unignore_user(T.userid() | nil, T.userid() | nil) :: T.user() | nil
-  defdelegate unignore_user(requester, accepter), to: RelationsLib
+  defdelegate unignore_user(unignorer_id, unignored_id), to: RelationsLib
 
   @spec remove_friend(T.userid() | nil, T.userid() | nil) :: T.user() | nil
-  defdelegate remove_friend(requester, accepter), to: RelationsLib
+  defdelegate remove_friend(remover_id, removed_id), to: RelationsLib
 
   @spec list_combined_friendslist([T.userid()]) :: [T.user()]
   defdelegate list_combined_friendslist(userids), to: RelationsLib
