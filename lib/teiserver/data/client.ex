@@ -50,7 +50,6 @@ defmodule Teiserver.Client do
 
         # TODO: Change client:lobby_id to be client:battle_lobby_id
         lobby_id: nil,
-        current_lobby_id: nil,
         print_client_messages: false,
         print_server_messages: false,
         chat_times: [],
@@ -85,8 +84,7 @@ defmodule Teiserver.Client do
           map: 0
         },
       role: "spectator",
-      lobby_id: nil,
-      current_lobby_id: nil
+      lobby_id: nil
     }
   end
 

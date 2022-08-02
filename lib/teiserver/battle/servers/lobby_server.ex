@@ -2,7 +2,7 @@ defmodule Teiserver.Battle.LobbyServer do
   use GenServer
   require Logger
   alias Central.Config
-  alias Teiserver.{Client, Battle}
+  alias Teiserver.{Account, Battle}
   alias Teiserver.Bridge.BridgeServer
   alias Phoenix.PubSub
 
@@ -62,7 +62,8 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_call(:get_spectator_count, _from, state) do
-    {:reply, Enum.count(state.member_list) - Enum.count(state.player_list), state}
+    {player_list, new_state} = get_player_list(state)
+    {:reply, Enum.count(state.member_list) - Enum.count(player_list), new_state}
   end
 
   def handle_call(:get_member_count, _from, state) do
@@ -81,10 +82,9 @@ defmodule Teiserver.Battle.LobbyServer do
 
   @impl true
   def handle_cast(:start_match, state) do
-    player_list = state.lobby
-      |> Map.get(:members)
-      |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
-      |> Enum.filter(fn client -> client != nil end)
+    player_list = state.member_list
+      |> Account.list_clients()
+      |> Enum.reject(&(&1 == nil))
       |> Enum.filter(fn client -> client.player == true and client.lobby_id == state.id end)
 
     player_list
@@ -118,7 +118,6 @@ defmodule Teiserver.Battle.LobbyServer do
     )
 
     {:noreply, %{state |
-      player_list: [],
       state: :lobby,
       match_uuid: uuid,
       modoptions: modoptions
@@ -386,8 +385,8 @@ defmodule Teiserver.Battle.LobbyServer do
 
     if cache_age > @player_list_cache_age_max do
       player_list = state.member_list
-        |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
-        |> Enum.filter(fn client -> client != nil end)
+        |> Account.list_clients()
+        |> Enum.reject(&(&1 == nil))
         |> Enum.filter(fn client -> client.player == true and client.lobby_id == state.id end)
 
       {player_list, %{state | player_list: player_list, player_list_last_updated: System.system_time(:millisecond)}}
