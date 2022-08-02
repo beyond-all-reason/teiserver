@@ -652,6 +652,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
       Enum.member?(@always_allow, cmd.command) -> true
       client.moderator == true -> true
 
+      Enum.member?(@host_commands, cmd.command) and is_host -> true
+      Enum.member?(@boss_commands, cmd.command) and (is_host or is_boss) -> true
+
       Enum.member?(@host_commands, cmd.command) and not is_host ->
         LobbyChat.sayprivateex(state.coordinator_id, cmd.senderid, "You are not allowed to use the '#{cmd.command}' command (host only)", state.lobby_id)
         false
