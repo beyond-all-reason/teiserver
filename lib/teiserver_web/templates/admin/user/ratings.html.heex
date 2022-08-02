@@ -78,7 +78,7 @@
           <td><%= log.match.map %></td>
           <td><%= log.match.team_size * log.match.team_count %></td>
         <% else %>
-          <td colspan="2">No match</td>
+          <td colspan="2"><%= log.value["reason"] || "No match" %></td>
         <% end %>
         <td><%= @rating_type_id_lookup[log.rating_type_id] %></td>
         
@@ -100,15 +100,15 @@
         <td class={text_class}>
           <i class={"fa-fw fa-solid fa-#{icon}"}></i>
         </td>
+        <td><%= date_to_str(log.inserted_at, format: :hms_or_dmy) %></td>
         <%= if log.match do %>
-          <td><%= date_to_str(log.match.started, format: :hms_or_dmy) %></td>
           <td>
             <a href={Routes.ts_admin_match_path(@conn, :show, log.match.id)} class="btn btn-secondary btn-sm">
               Show
             </a>
           </td>
         <% else %>
-          <td colspan="2">&nbsp;</td>
+          <td>&nbsp;</td>
         <% end %>
       </tr>
     <% end %>
