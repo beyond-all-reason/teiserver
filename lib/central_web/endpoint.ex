@@ -42,7 +42,7 @@ defmodule CentralWeb.Endpoint do
 
   plug(Plug.RequestId)
   plug(Plug.Telemetry, event_prefix: [:phoenix, :endpoint])
-  plug(Plug.Logger)
+  # plug(Plug.Logger)
 
   plug(Plug.Parsers,
     parsers: [:urlencoded, {:multipart, length: 500_000_000}, :json],
