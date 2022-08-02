@@ -70,6 +70,13 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("? ->> ? @> ?", users.data, ^field, ^value)
   end
 
+  # E.g. [data_contains_number: {"ignored", 9265}]
+  def _search(query, :data_contains_number, {field, value}) when is_number(value) do
+    from users in query,
+      where: fragment("(? ->> ?)::jsonb @> ?::jsonb", users.data, ^field, ^value)
+  end
+
+
   def _search(query, :bot, "Person") do
     Logger.error("user.data['bot'] is being queried, this property is due to be depreciated")
     from users in query,
