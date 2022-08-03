@@ -144,6 +144,7 @@ defmodule TeiserverWeb.ClientLive.Show do
   end
 
   def handle_event("force-disconnect", _event, socket) do
+    User.set_flood_level(socket.assigns[:id], 100)
     Client.disconnect(socket.assigns[:id], "force-disconnect from web")
     {:noreply, socket}
   end

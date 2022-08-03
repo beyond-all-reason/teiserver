@@ -180,7 +180,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   @impl true
   def handle_event("send-to-host", %{"msg" => msg}, %{assigns: assigns} = socket) do
     from_id = Coordinator.get_coordinator_userid()
-    Coordinator.handle_in(from_id, msg, assigns.id)
+    Teiserver.Coordinator.Parser.handle_in(from_id, msg, assigns.id)
 
     {:noreply, socket}
   end

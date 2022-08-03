@@ -58,6 +58,7 @@ defmodule Teiserver.Coordinator do
     end
   end
 
+  # Consul related stuff
   @spec get_consul_pid(T.lobby_id()) :: pid() | nil
   def get_consul_pid(lobby_id) do
     case Horde.Registry.lookup(Teiserver.ServerRegistry, "ConsulServer:#{lobby_id}") do
@@ -70,7 +71,8 @@ defmodule Teiserver.Coordinator do
 
   @spec start_all_consuls() :: :ok
   def start_all_consuls() do
-    Battle.list_lobby_ids() |> Enum.each(fn id ->
+    Battle.list_lobby_ids()
+      |> Enum.each(fn id ->
         case get_consul_pid(id) do
           nil -> start_consul(id)
           _ -> :ok
@@ -101,6 +103,15 @@ defmodule Teiserver.Coordinator do
     end
   end
 
+  @spec send_consul(T.lobby_id(), any) :: any
+  def send_consul(nil, _), do: :ok
+  def send_consul(lobby_id, msg) when is_integer(lobby_id) do
+    case get_consul_pid(lobby_id) do
+      nil -> nil
+      pid -> send(pid, msg)
+    end
+  end
+
   @spec call_consul(pid() | T.lobby_id(), any) :: any
   def call_consul(lobby_id, msg) when is_integer(lobby_id) do
     case get_consul_pid(lobby_id) do
@@ -109,22 +120,87 @@ defmodule Teiserver.Coordinator do
     end
   end
 
+
+  # Balancer related stuff
+  @spec get_balancer_pid(T.lobby_id()) :: pid() | nil
+  def get_balancer_pid(lobby_id) do
+    case Horde.Registry.lookup(Teiserver.ServerRegistry, "BalancerServer:#{lobby_id}") do
+      [{pid, _}] ->
+        pid
+      _ ->
+        nil
+    end
+  end
+
+  @spec start_all_balancers() :: :ok
+  def start_all_balancers() do
+    Battle.list_lobby_ids()
+      |> Enum.each(fn id ->
+        case get_balancer_pid(id) do
+          nil -> start_balancer(id)
+          _ -> :ok
+        end
+      end)
+  end
+
+  @spec start_balancer(T.lobby_id()) :: pid()
+  def start_balancer(lobby_id) do
+    {:ok, balancer_pid} =
+      DynamicSupervisor.start_child(Teiserver.Coordinator.BalancerDynamicSupervisor, {
+        Teiserver.Game.BalancerServer,
+        name: "balancer_#{lobby_id}",
+        data: %{
+          lobby_id: lobby_id,
+        }
+      })
+
+    balancer_pid
+  end
+
+  @spec cast_balancer(T.lobby_id(), any) :: any
+  def cast_balancer(nil, _), do: :ok
+  def cast_balancer(lobby_id, msg) when is_integer(lobby_id) do
+    case get_balancer_pid(lobby_id) do
+      nil -> nil
+      pid -> GenServer.cast(pid, msg)
+    end
+  end
+
+  @spec send_balancer(T.lobby_id(), any) :: any
+  def send_balancer(nil, _), do: :ok
+  def send_balancer(lobby_id, msg) when is_integer(lobby_id) do
+    case get_balancer_pid(lobby_id) do
+      nil -> nil
+      pid -> send(pid, msg)
+    end
+  end
+
+  @spec call_balancer(pid() | T.lobby_id(), any) :: any
+  def call_balancer(lobby_id, msg) when is_integer(lobby_id) do
+    case get_balancer_pid(lobby_id) do
+      nil -> nil
+      pid -> GenServer.call(pid, msg)
+    end
+  end
+
+  # Other stuff
   @spec attempt_battlestatus_update(T.client(), T.lobby_id()) :: {boolean, Map.t() | nil}
   def attempt_battlestatus_update(client, lobby_id) do
     call_consul(lobby_id, {:request_user_change_status, client})
-  end
-
-  @spec handle_in(T.userid(), String.t(), T.lobby_id()) :: :say | :handled
-  def handle_in(userid, msg, lobby_id) do
-    Parser.handle_in(userid, msg, lobby_id)
   end
 
   @spec close_lobby(T.lobby_id()) :: :ok
   def close_lobby(lobby_id) do
     case get_consul_pid(lobby_id) do
       nil -> nil
-      pid ->
-        DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, pid)
+      p ->
+        DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, p)
+    end
+
+    case get_balancer_pid(lobby_id) do
+      nil -> nil
+      p ->
+        DynamicSupervisor.terminate_child(Teiserver.Coordinator.DynamicSupervisor, p)
     end
 
     Teiserver.Throttles.stop_throttle("LobbyThrottle:#{lobby_id}")
@@ -151,6 +227,7 @@ defmodule Teiserver.Coordinator do
     :ok
   end
 
+  # Commands for the coordinator account to perform
   @spec send_to_host(T.userid(), String.t()) :: :ok
   def send_to_host(nil, _), do: :ok
   def send_to_host(lobby_id, msg) do
@@ -167,5 +244,11 @@ defmodule Teiserver.Coordinator do
   @spec send_to_user(T.userid(), String.t()) :: :ok
   def send_to_user(userid, msg) do
     User.send_direct_message(get_coordinator_userid(), userid, msg)
+  end
+
+  # Debug stuff
+  @spec list_all_internal_servers :: [T.lobby_id()]
+  def list_all_internal_servers() do
+    Horde.Registry.select(Teiserver.ServerRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 end

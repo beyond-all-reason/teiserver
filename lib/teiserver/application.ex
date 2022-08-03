@@ -71,7 +71,7 @@ defmodule Teiserver.Application do
 
       # Coordinator mode
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Coordinator.DynamicSupervisor},
-      # {Teiserver.Coordinator.AutomodServer, name: Teiserver.Coordinator.AutomodServer},
+      {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Coordinator.BalancerDynamicSupervisor},
 
       # Accolades
       {DynamicSupervisor, strategy: :one_for_one, name: Teiserver.Account.AccoladeSupervisor},

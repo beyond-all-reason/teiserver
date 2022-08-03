@@ -231,6 +231,7 @@ defmodule Teiserver.Battle.LobbyCache do
     start_lobby_server(lobby)
 
     _consul_pid = Coordinator.start_consul(lobby.id)
+    _balance_pid = Coordinator.start_balancer(lobby.id)
 
     :ok = PubSub.broadcast(
       Central.PubSub,

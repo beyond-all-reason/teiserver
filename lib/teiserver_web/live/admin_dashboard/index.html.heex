@@ -35,25 +35,35 @@
     <table class="table table-sm">
       <thead>
         <tr>
+          <th>ID</th>
           <th>Name</th>
           <th>Consul</th>
+          <th>Balancer</th>
           <th>Throttle</th>
        </tr>
       </thead>
       <tbody>
-        <%= for {lobby, consul, throttle} <- @lobbies do %>
+        <%= for {lobby, consul, balancer, throttle} <- @lobbies do %>
           <tr>
+            <td><%= lobby.id %></td>
             <td><%= lobby.name %></td>
             <td>
               <%= if consul == nil do %>
-                <i class="fa-fw fa-regular fa-cross text-danger"></i>
+                <i class="fa-fw fa-regular fa-times text-danger"></i>
+              <% else %>
+                <i class="fa-fw fa-regular fa-check text-success"></i>
+              <% end %>
+            </td>
+            <td>
+              <%= if balancer == nil do %>
+                <i class="fa-fw fa-regular fa-times text-danger"></i>
               <% else %>
                 <i class="fa-fw fa-regular fa-check text-success"></i>
               <% end %>
             </td>
             <td>
               <%= if throttle == nil do %>
-                <i class="fa-fw fa-regular fa-cross text-danger"></i>
+                <i class="fa-fw fa-regular fa-times text-danger"></i>
               <% else %>
                 <i class="fa-fw fa-regular fa-check text-success"></i>
               <% end %>
@@ -79,7 +89,7 @@
             <td><%= server_name %></td>
             <td>
               <%= if server_pid == nil do %>
-                <i class="fa-fw fa-regular fa-cross text-danger"></i>
+                <i class="fa-fw fa-regular fa-times text-danger"></i>
               <% else %>
                 <i class="fa-fw fa-regular fa-check text-success"></i>
               <% end %>

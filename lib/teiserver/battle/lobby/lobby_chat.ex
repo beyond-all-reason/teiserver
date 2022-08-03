@@ -14,7 +14,7 @@ defmodule Teiserver.Battle.LobbyChat do
   def say(userid, msg, lobby_id) do
     msg = String.replace(msg, "!!joinas spec", "!joinas spec")
 
-    case Teiserver.Coordinator.handle_in(userid, msg, lobby_id) do
+    case Teiserver.Coordinator.Parser.handle_in(userid, msg, lobby_id) do
       :say -> do_say(userid, msg, lobby_id)
       :handled -> :ok
     end
