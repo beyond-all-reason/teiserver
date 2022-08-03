@@ -79,8 +79,8 @@
       <th width="100">&nbsp;</th>
       <th>Name</th>
       <th>Ready</th>
-      <th>Bonus</th>
       <th>Team</th>
+      <th>Bonus</th>
       <th>Faction</th>
       
       <%= if @moderator do %>
@@ -110,8 +110,8 @@
           </td>
           <td><%= user.name %></td>
           <td><%= if client.ready, do: "Ready" %></td>
-          <td><%= client.handicap %></td>
           <td><%= client.team_number %></td>
+          <td><%= client.handicap %></td>
           <td><%= factions[client.side] %></td>
 
           <%= if @moderator do %>
