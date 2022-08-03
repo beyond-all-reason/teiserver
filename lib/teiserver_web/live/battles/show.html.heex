@@ -51,11 +51,14 @@
 
 <% extra = "#{@lobby.name} - #{@lobby.map_name}" %>
 <%= if @lobby.in_progress do %>
-  <h4>Match in progress - <%= extra %></h4>
+  <h4>
+    Match in progress - 
+    <%= Central.Helpers.TimexHelper.duration_to_str_short(System.system_time(:second) - (@lobby.started_at || 1652282031)) %> -
+    <%= extra %>
+  </h4>
 <% else %>
   <h4>Pre-game lobby - <%= extra %></h4>
 <% end %>
-
 
 <ul>
   <li>Max players: <%= @lobby.max_players %></li>
