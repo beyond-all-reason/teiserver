@@ -2,6 +2,7 @@ defmodule Teiserver.Account do
   import Ecto.Query, warn: false
   alias Central.Repo
   require Logger
+  alias Teiserver.Data.Types, as: T
 
   # Mostly a wrapper around Central.Account
   alias Central.Account.User
@@ -917,6 +918,22 @@ defmodule Teiserver.Account do
       nil
 
   """
+  @spec get_smurf_key(Integer.t() | List.t()) :: SmurfKey.t()
+  @spec get_smurf_key(Integer.t(), List.t()) :: SmurfKey.t()
+  def get_smurf_key(id) when not is_list(id) do
+    smurf_key_query(id, [])
+    |> Repo.one
+  end
+  def get_smurf_key(args) do
+    smurf_key_query(nil, args)
+    |> Repo.one
+  end
+  def get_smurf_key(id, args) do
+    smurf_key_query(id, args)
+    |> Repo.one
+  end
+
+  @spec get_smurf_key(T.user_id, non_neg_integer(), String.t()) :: list()
   def get_smurf_key(user_id, type_id, value) do
     smurf_key_query(nil, search: [
       user_id: user_id,

@@ -163,6 +163,67 @@
   </div>
 </div>
 
+<div class="row mt-4">
+  <div class="col-md-6">
+    <h4>Key counts</h4>
+    A high number of keys here can increase the chances of a false positive
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for {type_name, count} <- @key_count_by_type_name do %>
+          <tr>
+            <td>
+              <i class={"fa-fw fa-regular #{type_icons[type_name]} text-#{type_colours[type_name]}"}></i>
+              &nbsp;
+              <%= type_name %>
+            </td>
+            <td>
+              <%= count %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+<%= if allow?(@conn, "admin.dev") do %>
+    <div class="col-md-6">
+      <h4>Key list</h4>
+      Newest keys first
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Value</th>
+            <th>&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for key <- @all_keys do %>
+            <tr>
+              <td>
+                <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}></i>
+                &nbsp;
+                <%= key.type.name %>
+              </td>
+              <td>
+                <%= key.value %>
+              </td>
+              <td>
+                <%= link "Delete", to: Routes.ts_admin_user_path(@conn, :delete_smurf_key, key.id), class: "btn btn-danger btn-sm", method: "delete", data: [confirm: "Are you sure?"] %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+<% end %>
+  </div>
 
       </div>
     </div>

@@ -713,6 +713,20 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
+        all_keys = Account.list_smurf_keys(
+          search: [
+            user_id: user.id
+          ],
+          limit: :infinity,
+          preload: [:type],
+          order_by: "ID (High to low)"
+        )
+
+        key_count_by_type_name = all_keys
+          |> Enum.group_by(fn k -> k.type.name end, fn _ -> 1 end)
+          |> Enum.map(fn {k, vs} -> {k, Enum.count(vs)} end)
+          |> Enum.sort(&<=/2)
+
         matching_keys = Account.smurf_search(user)
 
         key_types = matching_keys
@@ -741,7 +755,9 @@ defmodule TeiserverWeb.Admin.UserController do
         stats = Account.get_user_stat_data(user.id)
 
         conn
-          |> add_breadcrumb(name: "List possible smurfs", url: conn.request_path)
+          |> add_breadcrumb(name: "List of possible smurf accounts", url: conn.request_path)
+          |> assign(:all_keys, all_keys)
+          |> assign(:key_count_by_type_name, key_count_by_type_name)
           |> assign(:user, user)
           |> assign(:stats, stats)
           |> assign(:params, search_defaults(conn))
@@ -753,6 +769,23 @@ defmodule TeiserverWeb.Admin.UserController do
       _ ->
         conn
         |> put_flash(:danger, "Unable to access this user")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :index))
+    end
+  end
+
+  @spec delete_smurf_key(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def delete_smurf_key(conn, %{"id" => id}) do
+    key = Account.get_smurf_key(id)
+
+    if key do
+      Account.delete_smurf_key(key)
+
+      conn
+        |> put_flash(:success, "Key deleted")
+        |> redirect(to: Routes.ts_admin_user_path(conn, :smurf_search, key.user_id))
+    else
+      conn
+        |> put_flash(:info, "Unable to find that key")
         |> redirect(to: Routes.ts_admin_user_path(conn, :index))
     end
   end

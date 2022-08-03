@@ -95,14 +95,14 @@ defmodule Teiserver.Account.SmurfKeyLib do
       order_by: [desc: smurf_keys.name]
   end
 
-  def order_by(query, "Newest first") do
+  def order_by(query, "ID (High to low)") do
     from smurf_keys in query,
-      order_by: [desc: smurf_keys.inserted_at]
+      order_by: [desc: smurf_keys.id]
   end
 
-  def order_by(query, "Oldest first") do
+  def order_by(query, "ID (Low to high)") do
     from smurf_keys in query,
-      order_by: [asc: smurf_keys.inserted_at]
+      order_by: [asc: smurf_keys.id]
   end
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t

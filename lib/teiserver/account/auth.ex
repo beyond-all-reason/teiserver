@@ -12,6 +12,7 @@ defmodule Teiserver.Account.Auth do
   def authorize(:smurf_search, conn, _), do: allow?(conn, "teiserver.moderator.account")
   def authorize(:smurf_merge_form, conn, _), do: allow?(conn, "teiserver.moderator.account")
   def authorize(:smurf_merge_post, conn, _), do: allow?(conn, "teiserver.moderator.account")
+  def authorize(:delete_smurf_key, conn, _), do: allow?(conn, "admin.dev")
   def authorize(:automod_form, conn, _), do: allow?(conn, "teiserver.moderator.account")
   def authorize(:ratings_form, conn, _), do: allow?(conn, "teiserver.moderator.account")
   def authorize(:ratings_post, conn, _), do: allow?(conn, "teiserver.moderator.account")
