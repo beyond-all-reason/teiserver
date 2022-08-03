@@ -200,6 +200,7 @@
           <tr>
             <th>Type</th>
             <th>Value</th>
+            <th>Updated</th>
             <th>&nbsp;</th>
           </tr>
         </thead>
@@ -213,6 +214,9 @@
               </td>
               <td>
                 <%= key.value %>
+              </td>
+              <td>
+                <%= date_to_str key.last_updated, format: :hms_or_dmy %>
               </td>
               <td>
                 <%= link "Delete", to: Routes.ts_admin_user_path(@conn, :delete_smurf_key, key.id), class: "btn btn-danger btn-sm", method: "delete", data: [confirm: "Are you sure?"] %>

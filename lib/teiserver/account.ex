@@ -962,9 +962,10 @@ defmodule Teiserver.Account do
     case get_smurf_key(user_id, type_id, value) do
       [] ->
         %SmurfKey{}
-          |> SmurfKey.changeset(%{user_id: user_id, value: value, type_id: type_id})
+          |> SmurfKey.changeset(%{user_id: user_id, value: value, type_id: type_id, last_updated: Timex.now()})
           |> Repo.insert()
       [existing] ->
+        update_smurf_key(existing, %{last_updated: Timex.now()})
         {:ok, existing}
       [existing | _] ->
         Logger.error("#{__MODULE__}.create_smurf_key found user with two identical keys: #{user_id}, #{type_id}, #{value}")
