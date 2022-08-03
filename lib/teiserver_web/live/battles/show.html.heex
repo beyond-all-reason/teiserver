@@ -80,6 +80,12 @@
       <th>Name</th>
       <th>Ready</th>
       <th>Team</th>
+
+      <th>Rating</th>
+      <%= if @moderator do %>
+        <th>Uncertainty</th>
+      <% end %>
+
       <th>Bonus</th>
       <th>Faction</th>
       
@@ -93,6 +99,7 @@
     <%= for client <- players do %>
       <%
         user = @users[client.userid]
+        {rating_value, uncertainty} = @ratings[client.userid]
 
         friend = Enum.member?(@server_user.friends, client)
         ignored = Enum.member?(@server_user.ignored, client)
@@ -100,7 +107,6 @@
       <%= if user do %>
         <tr id={"user-row-#{user.id}"}>
           <td width="100">
-
             <%= if friend do %>
               <i class={"text-success fa-fw #{Teiserver.icon(:friend)}"}></i>
             <% end %>
@@ -111,6 +117,12 @@
           <td><%= user.name %></td>
           <td><%= if client.ready, do: "Ready" %></td>
           <td><%= client.team_number %></td>
+          
+          <td><%= Central.Helpers.NumberHelper.round(rating_value, 2) %></td>
+          <%= if @moderator do %>
+            <td><%= Central.Helpers.NumberHelper.round(uncertainty, 2) %></td>
+          <% end %>
+          
           <td><%= client.handicap %></td>
           <td><%= factions[client.side] %></td>
 
@@ -145,6 +157,11 @@
       <th width="100">&nbsp;</th>
       <th>Name</th>
       
+      <th>Rating</th>
+      <%= if @moderator do %>
+        <th>Uncertainty</th>
+      <% end %>
+      
       <%= if @moderator do %>
         <th>&nbsp;</th>
       <% end %>
@@ -154,6 +171,7 @@
     <%= for client <- spectators do %>
       <%
         user = @users[client.userid]
+        {rating_value, uncertainty} = @ratings[client.userid]
 
         friend = Enum.member?(@server_user.friends, client)
         ignored = Enum.member?(@server_user.ignored, client)
@@ -169,6 +187,11 @@
             <% end %>
           </td>
           <td><%= user.name %></td>
+          
+          <td><%= Central.Helpers.NumberHelper.round(rating_value, 2) %></td>
+          <%= if @moderator do %>
+            <td><%= Central.Helpers.NumberHelper.round(uncertainty, 2) %></td>
+          <% end %>
 
           <%= if @moderator do %>
             <td>
