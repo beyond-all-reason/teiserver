@@ -85,14 +85,14 @@ defmodule Teiserver.Account.SmurfKeyLib do
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
-  def order_by(query, "Name (A-Z)") do
+  def order_by(query, "Oldest first") do
     from smurf_keys in query,
-      order_by: [asc: smurf_keys.name]
+      order_by: [asc: smurf_keys.last_updated]
   end
 
-  def order_by(query, "Name (Z-A)") do
+  def order_by(query, "Newest first") do
     from smurf_keys in query,
-      order_by: [desc: smurf_keys.name]
+      order_by: [desc: smurf_keys.last_updated]
   end
 
   def order_by(query, "ID (High to low)") do

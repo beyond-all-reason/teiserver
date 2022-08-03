@@ -719,7 +719,7 @@ defmodule TeiserverWeb.Admin.UserController do
           ],
           limit: :infinity,
           preload: [:type],
-          order_by: "ID (High to low)"
+          order_by: "Newest first"
         )
 
         key_count_by_type_name = all_keys
