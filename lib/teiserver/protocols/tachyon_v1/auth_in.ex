@@ -62,6 +62,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
   end
 
   def do_handle("verify", %{"token" => token, "code" => code}, state) do
+    # correct_code = Account.get_user_stat_data(user.id)["verification_code"]
     user = User.get_user_by_token(token)
 
     cond do

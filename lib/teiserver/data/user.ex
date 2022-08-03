@@ -587,6 +587,8 @@ defmodule Teiserver.User do
 
   @spec verify_user(T.user()) :: T.user()
   def verify_user(user) do
+    Account.delete_user_stat_keys(user.id, ~w(verification_code))
+
     %{user | verification_code: nil, verified: true, roles: ["Verified" | user.roles]}
     |> update_user(persist: true)
   end

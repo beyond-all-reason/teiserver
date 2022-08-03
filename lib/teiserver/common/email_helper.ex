@@ -7,9 +7,10 @@ defmodule Teiserver.EmailHelper do
   require Logger
 
   def new_user(user) do
+    stats = Teiserver.Account.get_user_stat_data(user.id)
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     website_url = "https://#{host}"
-    verification_code = user.data["verification_code"]
+    verification_code = stats["verification_code"]
 
     {:ok, _code} =
       Account.create_code(%{

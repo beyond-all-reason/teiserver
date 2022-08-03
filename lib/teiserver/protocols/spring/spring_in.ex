@@ -340,6 +340,8 @@ defmodule Teiserver.Protocols.SpringIn do
         state
 
       user ->
+        # correct_code = Account.get_user_stat_data(user.id)["verification_code"]
+
         case code == to_string(user.verification_code) do
           true ->
             User.verify_user(user)
