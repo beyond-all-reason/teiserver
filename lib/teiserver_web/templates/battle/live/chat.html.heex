@@ -39,7 +39,7 @@
           <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, @lobby.id), class: "btn btn-#{bsname}" %>
 
           <%= if moderator do %>
-            <a href={Routes.ts_admin_lobby_path(@socket, :chat, @lobby.uuid)} class={"btn btn-#{bsname}"}>
+            <a href={Routes.ts_admin_lobby_path(@socket, :lobby_chat, @lobby.uuid)} class={"btn btn-#{bsname}"}>
               Full chat
             </a>
           <% end %>

@@ -40,6 +40,20 @@ defmodule Teiserver.Battle.LobbyCache do
     end
   end
 
+  @spec get_lobby_by_server_uuid(String.t()) :: T.lobby() | nil
+  def get_lobby_by_server_uuid(uuid) do
+    lobby_list = list_lobby_ids()
+      |> Stream.map(fn lobby_id -> {lobby_id, get_lobby_server_uuid(lobby_id)} end)
+      |> Stream.filter(fn {_lobby_id, server_uuid} -> server_uuid == uuid end)
+      |> Enum.take(1)
+      |> Enum.map(fn {lobby_id, _server_uuid} -> get_lobby(lobby_id) end)
+
+    case lobby_list do
+      [] -> nil
+      [lobby | _] -> lobby
+    end
+  end
+
   @spec list_lobby_ids :: [T.lobby_id()]
   def list_lobby_ids() do
     Horde.Registry.select(Teiserver.LobbyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])

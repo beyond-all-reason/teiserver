@@ -28,6 +28,14 @@
             end)
         }) %>
 
+<div class="float-end">
+  <a href={Routes.ts_admin_lobby_path(@conn, :server_chat, @uuid)} class={"btn btn-outline-#{bsname}"}>
+    <i class="fa-fw fa-regular fa-server"></i>
+    &nbsp;
+    Complete server chat
+  </a>
+</div>
+
 <%= if @conn.params["search"] != nil do %>
   <%= render TeiserverWeb.Admin.MatchView, "search.html", assigns %>
 <% else %>
@@ -70,10 +78,10 @@
           Show
         </a>
       </td>
-      
+
       <td>
-        <a href={Routes.ts_admin_lobby_path(@conn, :chat, match.uuid)} class="btn btn-secondary btn-sm">
-          Chat
+        <a href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, match.uuid)} class="btn btn-secondary btn-sm">
+          Match chat
         </a>
       </td>
     </tr>

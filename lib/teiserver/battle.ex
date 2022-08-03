@@ -458,6 +458,9 @@ defmodule Teiserver.Battle do
   @spec get_lobby_by_match_uuid(String.t()) :: T.lobby() | nil
   defdelegate get_lobby_by_match_uuid(uuid), to: LobbyCache
 
+  @spec get_lobby_by_server_uuid(String.t()) :: T.lobby() | nil
+  defdelegate get_lobby_by_server_uuid(uuid), to: LobbyCache
+
   @spec get_lobby_member_list(T.lobby_id()) :: [T.userid()]
   defdelegate get_lobby_member_list(id), to: LobbyCache
 

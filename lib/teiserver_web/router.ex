@@ -296,8 +296,10 @@ defmodule TeiserverWeb.Router do
 
         resources("/achievements", AchievementController)
 
-        get("/lobbies/:id/chat", LobbyController, :chat)
-        get("/lobbies/:id/chat/:page", LobbyController, :chat)
+        get("/lobbies/:id/server_chat", LobbyController, :server_chat)
+        get("/lobbies/:id/server_chat/:page", LobbyController, :server_chat)
+        get("/lobbies/:id/lobby_chat", LobbyController, :lobby_chat)
+        get("/lobbies/:id/lobby_chat/:page", LobbyController, :lobby_chat)
       end
     end
   end

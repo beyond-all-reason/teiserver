@@ -128,6 +128,7 @@ defmodule TeiserverWeb.Admin.MatchController do
       )
 
     conn
+      |> assign(:uuid, uuid)
       |> assign(:matches, matches)
       |> render("server_index.html")
   end

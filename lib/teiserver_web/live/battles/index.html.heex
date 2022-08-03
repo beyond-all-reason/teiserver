@@ -91,7 +91,7 @@
           
           <%= if moderator do %>
             <td>
-              <a href={Routes.ts_admin_lobby_path(@socket, :chat, lobby.uuid)} class={"btn btn-sm btn-#{bsname}"}>
+              <a href={Routes.ts_admin_lobby_path(@socket, :lobby_chat, lobby.uuid)} class={"btn btn-sm btn-#{bsname}"}>
                 Full chat
               </a>
             </td>

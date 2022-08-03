@@ -59,6 +59,11 @@ defmodule Teiserver.Chat.LobbyMessageLib do
       where: room_messages.lobby_guid == ^lobby_guid
   end
 
+  def _search(query, :lobby_guid_in, lobby_guids) do
+    from room_messages in query,
+      where: room_messages.lobby_guid in ^lobby_guids
+  end
+
   def _search(query, :id_list, id_list) do
     from lobby_messages in query,
       where: lobby_messages.id in ^id_list
