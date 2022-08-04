@@ -62,19 +62,21 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthIn do
   end
 
   def do_handle("verify", %{"token" => token, "code" => code}, state) do
-    # correct_code = Account.get_user_stat_data(user.id)["verification_code"]
     user = User.get_user_by_token(token)
 
-    cond do
-      user == nil ->
+    case user do
+      nil ->
         reply(:auth, :verify, {:failure, "bad token"}, state)
 
-      user.verification_code != code ->
-        reply(:auth, :verify, {:failure, "bad code"}, state)
+      _ ->
+        correct_code = Account.get_user_stat_data(user.id)["verification_code"]
 
-      true ->
-        user = User.verify_user(user)
-        reply(:auth, :verify, {:success, user}, state)
+        if correct_code == code do
+          user = User.verify_user(user)
+          reply(:auth, :verify, {:success, user}, state)
+        else
+          reply(:auth, :verify, {:failure, "bad code"}, state)
+        end
     end
   end
 

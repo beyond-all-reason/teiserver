@@ -124,7 +124,7 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
     assert reply == [%{"cmd" => "s.auth.register", "result" => "success"}]
 
     user = User.get_user_by_email("tachyon_verify@example")
-    User.update_user(%{user | verification_code: "123456"})
+    Account.update_user_stat(user.id, %{"verification_code" => "123456"})
 
     # Bad password but also test msg_id continuance
     data = %{cmd: "c.auth.get_token", password: "bad_password", email: user.email, msg_id: 555}

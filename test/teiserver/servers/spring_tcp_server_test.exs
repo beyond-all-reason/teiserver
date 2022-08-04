@@ -2,7 +2,7 @@ defmodule Teiserver.SpringTcpServerTest do
   use Central.ServerCase, async: false
 
   alias Teiserver.Account.UserCache
-  alias Teiserver.{Client, Room}
+  alias Teiserver.{Account, Client, Room}
   require Logger
 
   import Teiserver.TeiserverTestLib,
@@ -65,8 +65,8 @@ defmodule Teiserver.SpringTcpServerTest do
     assert reply == "DENIED Incorrect code\n"
 
     # Put in the correct code
-    user = UserCache.get_user_by_name(username)
-    _send_raw(socket, "CONFIRMAGREEMENT #{user.verification_code}\n")
+    code = Account.get_user_stat_data(user.id)["verification_code"]
+    _send_raw(socket, "CONFIRMAGREEMENT #{code}\n")
 
     reply = _recv_until(socket)
     assert reply =~ "ACCEPTED #{user.name}\n"

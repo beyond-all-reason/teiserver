@@ -39,7 +39,6 @@ defmodule Teiserver.User do
     :ignored,
     :blocked,
     :password_hash,
-    :verification_code,
     :verified,
     :email_change_code,
     :last_login,
@@ -69,7 +68,6 @@ defmodule Teiserver.User do
     ignored: [],
     blocked: [],
     password_hash: nil,
-    verification_code: nil,
     verified: false,
     email_change_code: nil,
     last_login: nil,
@@ -118,8 +116,6 @@ defmodule Teiserver.User do
 
   def user_register_params(name, email, password, extra_data \\ %{}) do
     name = clean_name(name)
-    verification_code = :rand.uniform(899_999) + 100_000
-      |> to_string
     encrypted_password = encrypt_password(password)
 
     data =
@@ -139,7 +135,6 @@ defmodule Teiserver.User do
         data
         |> Map.merge(%{
           "password_hash" => encrypted_password,
-          "verification_code" => verification_code,
           "verified" => false
         })
         |> Map.merge(extra_data)
@@ -148,8 +143,6 @@ defmodule Teiserver.User do
 
   def user_register_params_with_md5(name, email, md5_password, extra_data \\ %{}) do
     name = clean_name(name)
-    verification_code = :rand.uniform(899_999) + 100_000
-      |> to_string
     encrypted_password = encrypt_password(md5_password)
 
     data =
@@ -169,7 +162,6 @@ defmodule Teiserver.User do
         data
         |> Map.merge(%{
           "password_hash" => encrypted_password,
-          "verification_code" => verification_code,
           "verified" => false
         })
         |> Map.merge(extra_data)
@@ -253,13 +245,17 @@ defmodule Teiserver.User do
           group_id: Teiserver.user_group_id()
         })
 
+        Account.update_user_stat(user.id, %{
+          "verification_code" => (:rand.uniform(899_999) + 100_000 |> to_string)
+        })
+
         # Now add them to the cache
         user
-        |> convert_user
-        |> Map.put(:springid, SpringIdServer.get_next_id())
-        |> Map.put(:password_hash, spring_md5_password(password))
-        |> Map.put(:spring_password, false)
-        |> add_user
+          |> convert_user
+          |> Map.put(:springid, SpringIdServer.get_next_id())
+          |> Map.put(:password_hash, spring_md5_password(password))
+          |> Map.put(:spring_password, false)
+          |> add_user
 
         if not String.ends_with?(user.email, "@agents") do
           case EmailHelper.new_user(user) do
@@ -294,7 +290,8 @@ defmodule Teiserver.User do
         })
 
         Account.update_user_stat(user.id, %{
-          "country" => Teiserver.Geoip.get_flag(ip)
+          "country" => Teiserver.Geoip.get_flag(ip),
+          "verification_code" => (:rand.uniform(899_999) + 100_000 |> to_string)
         })
 
         # Now add them to the cache
@@ -589,7 +586,7 @@ defmodule Teiserver.User do
   def verify_user(user) do
     Account.delete_user_stat_keys(user.id, ~w(verification_code))
 
-    %{user | verification_code: nil, verified: true, roles: ["Verified" | user.roles]}
+    %{user | verified: true, roles: ["Verified" | user.roles]}
     |> update_user(persist: true)
   end
 

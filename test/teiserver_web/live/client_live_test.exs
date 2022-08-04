@@ -67,6 +67,7 @@ defmodule TeiserverWeb.Live.ClientTest do
       assert html =~ "Battle:"# The nil is on a newline with padding so don't worry about it
 
       # Log out the user
+      # FIXME: this part is failing because the liveview subscribes to old pubsubs
       _send_raw(socket, "EXIT\n")
       assert_redirect(view, "/teiserver/admin/client", 250)
     end
