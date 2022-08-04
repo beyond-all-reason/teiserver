@@ -1216,6 +1216,7 @@ defmodule Teiserver.Account do
       |> Repo.insert()
   end
 
+  @spec update_rating(Rating.t(), map()) :: {:ok, Rating.t()} | {:error, Ecto.Changeset.t()}
   def update_rating(%Rating{} = rating, attrs) do
     Central.cache_delete(:teiserver_user_ratings, {rating.user_id, rating.rating_type_id})
 

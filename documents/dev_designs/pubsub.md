@@ -5,9 +5,12 @@ Anything prefixed with "teiserver" is something added after the spring protocol 
 
 ## Server
 #### teiserver_server
-Used for sending out global messages about server events
+Used for sending out global messages about server events.
 ```elixir
-  {:server_event, :stop, node}
+%{
+  event: "stop",
+  node: node
+}
 ```
 
 #### teiserver_telemetry

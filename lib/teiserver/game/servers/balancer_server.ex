@@ -49,7 +49,7 @@ defmodule Teiserver.Game.BalancerServer do
     {:noreply, state}
   end
 
-  def handle_info({:server_event, _event, _node}, state) do
+  def handle_info(%{channel: "teiserver_server"}, state) do
     {:noreply, state}
   end
 

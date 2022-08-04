@@ -195,7 +195,7 @@ defmodule Teiserver.TachyonTcpServer do
   def handle_info({:force_join_battle, _, _}, state), do: {:noreply, state}
 
   # Internal pubsub messaging (see pubsub.md)
-  def handle_info({:server_event, event, node}, state) do
+  def handle_info(%{channel: "teiserver_server", event: event, node: node}, state) do
     {:noreply, state.protocol_out.reply(:system, :server_event, {event, node}, state)}
   end
 
