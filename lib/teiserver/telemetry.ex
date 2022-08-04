@@ -1587,7 +1587,12 @@ defmodule Teiserver.Telemetry do
           PubSub.broadcast(
             Central.PubSub,
             "teiserver_telemetry_client_events",
-            {:teiserver_telemetry_client_events, userid, event_type_name, value}
+            %{
+              channel: "teiserver_telemetry_client_events",
+              userid: userid,
+              event_type_name: event_type_name,
+              value: value
+            }
           )
         end
 
@@ -1617,8 +1622,8 @@ defmodule Teiserver.Telemetry do
     })
   end
 
-  def log_client_property(userid, value_name, value, _hash) do
-    property_type_id = get_or_add_property_type(value_name)
+  def log_client_property(userid, property_name, value, _hash) do
+    property_type_id = get_or_add_property_type(property_name)
 
     # Delete existing ones first
     query = from properties in ClientProperty,
@@ -1638,11 +1643,16 @@ defmodule Teiserver.Telemetry do
 
     case result do
       {:ok, _event} ->
-        if Enum.member?(@broadcast_property_types, value_name) do
+        if Enum.member?(@broadcast_property_types, property_name) do
           PubSub.broadcast(
             Central.PubSub,
             "teiserver_telemetry_client_properties",
-            {:teiserver_telemetry_client_properties, userid, value_name, value}
+            %{
+              channel: "teiserver_telemetry_client_properties",
+              userid: userid,
+              property_name: property_name,
+              property_value: value
+            }
           )
         end
 

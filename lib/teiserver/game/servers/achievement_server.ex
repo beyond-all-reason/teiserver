@@ -32,12 +32,15 @@ defmodule Teiserver.Game.AchievementServer do
   end
 
   @impl true
-  def handle_info({:teiserver_telemetry_client_events,
-    userid, "game_start:singleplayer:scenario_end", %{
-    "scenarioid" => scenarioid,
-    "difficulty" => difficulty,
-    "won" => true
-  }}, state) do
+  def handle_info(%{
+    channel: "teiserver_telemetry_client_events",
+    userid: userid,
+    event_type_name: "game_start:singleplayer:scenario_end",
+    event_value: %{
+      "scenarioid" => scenarioid,
+      "difficulty" => difficulty,
+      "won" => true
+    }}, state) do
     if Enum.member?(["Normal", "Hard", "Brutal"], difficulty) do
       type_id = state.normal_scenario_map[scenarioid]
       if type_id == nil do
@@ -69,15 +72,21 @@ defmodule Teiserver.Game.AchievementServer do
     {:noreply, state}
   end
 
-  def handle_info({:teiserver_telemetry_client_events,
-    _userid, "game_start:singleplayer:scenario_end", %{
-    "won" => false
-  }}, state) do
+  def handle_info(%{
+    channel: "teiserver_telemetry_client_events",
+    event_type_name: "game_start:singleplayer:scenario_end",
+    event_value: %{
+      "won" => false
+    }}, state
+  ) do
     {:noreply, state}
   end
 
-  def handle_info({:teiserver_telemetry_client_events, _, type, value}, state) do
-    Logger.info("No AchievementServer handler for #{type} - #{Kernel.inspect value}")
+  def handle_info(%{
+    channel: "teiserver_telemetry_client_events",
+    event_type_name: event_type_name,
+    event_value: event_value}, state) do
+    Logger.info("No AchievementServer handler for #{event_type_name} - #{Kernel.inspect event_value}")
     {:noreply, state}
   end
 

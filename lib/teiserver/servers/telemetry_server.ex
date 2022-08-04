@@ -78,10 +78,13 @@ defmodule Teiserver.Telemetry.TelemetryServer do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_telemetry",
-      {:teiserver_telemetry, %{
-        client: client,
-        battle: state.battle
-      }}
+      %{
+        channel: "teiserver_telemetry",
+        data: %{
+          client: client,
+          battle: state.battle
+        }
+      }
     )
   end
 

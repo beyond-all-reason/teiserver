@@ -47,7 +47,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     }
   end
 
-  def handle_info({:teiserver_telemetry, data}, socket) do
+  def handle_info(%{channel: "teiserver_telemetry", data: data}, socket) do
     {:noreply,
       socket
         |> assign(:telemetry_loading, false)
