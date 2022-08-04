@@ -49,7 +49,11 @@ Used for broadcasting specific client telemetry property updates as defined in T
 #### teiserver_telemetry_server_events
 Used for broadcasting server event telemetry
 ```elixir
-  {:teiserver_telemetry_server_events, userid, event_type_name, value}
+%{
+  userid: userid,
+  event_type_name: event_type_name,
+  value: value
+}
 ```
 
 ## Battles

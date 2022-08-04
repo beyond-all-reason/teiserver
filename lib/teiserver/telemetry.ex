@@ -1831,7 +1831,12 @@ defmodule Teiserver.Telemetry do
             PubSub.broadcast(
               Central.PubSub,
               "teiserver_telemetry_server_events",
-              {:teiserver_telemetry_server_events, userid, event_type_name, value}
+              %{
+                channel: "teiserver_telemetry_server_events",
+                userid: userid,
+                event_type_name: event_type_name,
+                value: value
+              }
             )
           end
         end
