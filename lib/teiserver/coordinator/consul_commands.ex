@@ -35,9 +35,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         nil
       pos ->
         if Enum.member?(state.low_priority_join_queue, senderid) do
-          "You are position #{pos + 1} but in the low prority queue so other users may be added in front of you"
+          "You are at position #{pos + 1} but in the low prority queue so other users may be added in front of you"
         else
-          "You are position #{pos + 1} in the queue"
+          "You are at position #{pos + 1} in the queue"
         end
     end
 
