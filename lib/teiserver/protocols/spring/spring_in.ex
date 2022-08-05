@@ -1094,6 +1094,18 @@ defmodule Teiserver.Protocols.SpringIn do
     state
   end
 
+  defp do_handle("SAYBATTLE", "w:" <> msg, msg_id, state) do
+    do_handle("SAYBATTLE", String.trim(msg), msg_id, state)
+  end
+
+  defp do_handle("SAYBATTLE", "a:" <> msg, msg_id, state) do
+    do_handle("SAYBATTLE", String.trim(msg), msg_id, state)
+  end
+
+  defp do_handle("SAYBATTLE", "s:" <> msg, msg_id, state) do
+    do_handle("SAYBATTLE", String.trim(msg), msg_id, state)
+  end
+
   defp do_handle("SAYBATTLE", msg, _msg_id, state) do
     if Lobby.allow?(state.userid, :saybattle, state.lobby_id) do
       Lobby.say(state.userid, msg, state.lobby_id)
