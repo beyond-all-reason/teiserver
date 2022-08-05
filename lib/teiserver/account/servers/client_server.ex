@@ -1,6 +1,7 @@
 defmodule Teiserver.Account.ClientServer do
   use GenServer
   require Logger
+  alias Teiserver.Battle.LobbyChat
   # alias Teiserver.{Account}
 
   @impl true
@@ -20,6 +21,14 @@ defmodule Teiserver.Account.ClientServer do
   end
 
   def handle_cast({:update_client, new_client}, state) do
+    if state.client.player != new_client.player do
+      if new_client.player do
+        LobbyChat.persist_system_message("#{state.client.name} became a player", state.client.lobby_id)
+      else
+        LobbyChat.persist_system_message("#{state.client.name} became a spectator", state.client.lobby_id)
+      end
+    end
+
     new_client = Map.merge(state.client, new_client)
     {:noreply, %{state | client: new_client}}
   end

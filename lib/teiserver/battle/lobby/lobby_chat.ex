@@ -1,6 +1,6 @@
 defmodule Teiserver.Battle.LobbyChat do
   @moduledoc false
-  alias Teiserver.{User, Chat, Battle}
+  alias Teiserver.{User, Chat, Battle, Coordinator}
   alias Teiserver.Battle.{Lobby}
   alias Phoenix.PubSub
   alias Teiserver.Chat.WordLib
@@ -166,6 +166,15 @@ defmodule Teiserver.Battle.LobbyChat do
         user_id: userid,
       })
     end
+  end
+
+  def persist_system_message(content, lobby_id) do
+    Chat.create_lobby_message(%{
+      content: "system: #{content}",
+      lobby_guid: Battle.get_lobby_match_uuid(lobby_id),
+      inserted_at: Timex.now(),
+      user_id: Coordinator.get_coordinator_userid(),
+    })
   end
 
   defp trim_message(msg) when is_list(msg) do

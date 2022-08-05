@@ -273,6 +273,7 @@ defmodule Teiserver.Battle.Lobby do
           nil
 
         :removed ->
+          LobbyChat.persist_system_message("#{user.name} was kicked from the battle", lobby_id)
           Coordinator.cast_consul(lobby_id, {:user_kicked, userid})
 
           PubSub.broadcast(
