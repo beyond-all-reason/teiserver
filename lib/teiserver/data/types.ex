@@ -18,6 +18,7 @@ defmodule Teiserver.Data.Types do
   @type tachyon_tcp_state() :: map()
 
   @type consul_state() :: map()
+  @type balance_server_state() :: map()
 
   @type party() :: Teiserver.Account.Party.t()
 

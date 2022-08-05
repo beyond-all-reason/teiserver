@@ -56,7 +56,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       true ->
         allowed_to_send = not User.has_mute?(current_user.id)
 
-        players = Lobby.get_lobby_players!(int_parse(id))
+        players = Lobby.list_lobby_players!(int_parse(id))
         clients = get_clients(players)
 
         bar_user = User.get_user_by_id(socket.assigns.current_user.id)
@@ -171,7 +171,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       [] ->
         socket
       _ ->
-        players = Lobby.get_lobby_players!(assigns.id)
+        players = Lobby.list_lobby_players!(assigns.id)
         clients = get_clients(players)
 
         socket

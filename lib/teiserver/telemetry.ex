@@ -1591,7 +1591,7 @@ defmodule Teiserver.Telemetry do
               channel: "teiserver_telemetry_client_events",
               userid: userid,
               event_type_name: event_type_name,
-              value: value
+              event_value: value
             }
           )
         end

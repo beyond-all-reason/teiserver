@@ -215,13 +215,13 @@ defmodule Teiserver.Battle.LobbyCache do
     call_lobby(lobby_id, :get_player_count)
   end
 
-  @spec get_lobby_players(T.lobby_id()) :: [integer()]
-  def get_lobby_players(lobby_id) do
+  @spec list_lobby_players(T.lobby_id()) :: [T.client()] | nil
+  def list_lobby_players(lobby_id) do
     call_lobby(lobby_id, :get_player_list)
   end
 
-  @spec get_lobby_players!(T.lobby_id()) :: [integer()]
-  def get_lobby_players!(id) do
+  @spec list_lobby_players!(T.lobby_id()) :: [T.client()]
+  def list_lobby_players!(id) do
     get_lobby(id).players
   end
 

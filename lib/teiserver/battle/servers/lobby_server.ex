@@ -16,7 +16,6 @@ defmodule Teiserver.Battle.LobbyServer do
     map_hash tags in_progress started_at
   )a
 
-
   @impl true
   def handle_call(:get_lobby_state, _from, state) do
     result = Map.merge(state.lobby, %{

@@ -139,7 +139,7 @@ defmodule Teiserver.Battle.Lobby do
   @spec get_lobby_by_match_uuid(String.t()) :: T.lobby() | nil
   defdelegate get_lobby_by_match_uuid(uuid), to: LobbyCache
 
-  defdelegate get_lobby_players!(id), to: LobbyCache
+  defdelegate list_lobby_players!(id), to: LobbyCache
   defdelegate add_lobby(lobby), to: LobbyCache
   defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyCache
 

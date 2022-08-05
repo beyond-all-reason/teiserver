@@ -1,7 +1,6 @@
 defmodule Teiserver.Coordinator do
   alias Teiserver.{Battle, User}
   alias Teiserver.Data.Types, as: T
-  alias Teiserver.Coordinator.Parser
   require Logger
 
   @spec do_start() :: :ok | :already_started

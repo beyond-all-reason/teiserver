@@ -57,12 +57,6 @@ Used for broadcasting server event telemetry
 ```
 
 ## Battles
-#### legacy_all_battle_updates
-Information affecting all those not in a battle, such as a battle being created.
-
-#### legacy_battle_updates:#{battle_lobby_id}
-Information affecting only those in this given battle, such as a player joining.
-
 #### teiserver_global_battle_lobby_updates
 Limited information pertaining to the creation/deletion of battle lobbies.
 ```elixir
@@ -145,15 +139,6 @@ Updates specifically for liveview chat interfaces, due to the way messages are p
 ```
 
 ### User/Client
-#### legacy_all_user_updates
-Information about all users, such as a user logging on/off
-
-#### legacy_user_updates:#{userid}
-Information about a specific user such as friend related stuff.
-
-#### legacy_all_client_updates
-Overlaps with `legacy_all_user_updates` due to blurring of user vs client domain.
-
 #### teiserver_client_inout
 A message every time a user logs in or logs out. Unlike legacy all_user_updates it does not give any status updates.
 ```elixir
@@ -216,6 +201,18 @@ Information pertinent to a specific user
 Sent from the queue wait server to update regarding it's status
 Valid events
 ```elixir
+# Indicates a user has been added to a party
+add_invite: party_id, userid
+
+remove_invite: party_id, userid
+accept_invite: party_id, userid
+member_leave: party_id, userid
+kick_member: party_id, userid
+new_leader: party_id, userid
+closed: party_id, reason
+chat: party_id, {userid, message}
+
+
   {:party, :add_invite, party_id, userid}
   {:party, :remove_invite, party_id, userid}
   {:party, :accept_invite, party_id, userid}
@@ -269,3 +266,20 @@ Valid events
   {:account_hooks, :create_report, report}
   {:account_hooks, :update_report, report, :create | :respond | :update}
 ```
+
+## Legacy
+#### legacy_all_battle_updates
+Information affecting all those not in a battle, such as a battle being created.
+
+#### legacy_battle_updates:#{battle_lobby_id}
+Information affecting only those in this given battle, such as a player joining.
+
+
+#### legacy_all_user_updates
+Information about all users, such as a user logging on/off
+
+#### legacy_user_updates:#{userid}
+Information about a specific user such as friend related stuff.
+
+#### legacy_all_client_updates
+Overlaps with `legacy_all_user_updates` due to blurring of user vs client domain.

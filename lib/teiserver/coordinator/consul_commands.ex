@@ -93,7 +93,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     if state.consul_balance do
       ConsulServer.set_skill_modoptions(state)
 
-      players = Battle.get_lobby_players(state.lobby_id)
+      players = Battle.list_lobby_players(state.lobby_id)
       # player_ids = players |> Enum.map(fn p -> p.userid end)
       player_count = Enum.count(players)
 
@@ -223,7 +223,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, state)
     sender_name = User.get_username(senderid)
 
-    Lobby.get_lobby_players!(state.lobby_id)
+    Lobby.list_lobby_players!(state.lobby_id)
     |> Enum.each(fn playerid ->
       User.send_direct_message(state.coordinator_id, playerid, [
         @splitter,
@@ -397,7 +397,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "reset_approval"} = cmd, state) do
-    players = Lobby.get_lobby_players!(state.lobby_id)
+    players = Lobby.list_lobby_players!(state.lobby_id)
     new_state = %{state | approved_users: players}
     ConsulServer.say_command(cmd, new_state)
   end
@@ -817,7 +817,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     msg = RikerssMemes.handle_meme(meme, senderid, state)
 
     if not Enum.empty?(msg) do
-      Lobby.get_lobby_players!(state.lobby_id)
+      Lobby.list_lobby_players!(state.lobby_id)
       |> Enum.each(fn playerid ->
         User.send_direct_message(state.coordinator_id, playerid, msg)
       end)

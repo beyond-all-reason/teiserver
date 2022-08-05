@@ -830,7 +830,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec list_players(map()) :: [T.client()]
   def list_players(%{lobby_id: lobby_id}) do
-    # Battle.get_lobby_players(lobby_id)
+    # Battle.list_lobby_players(lobby_id)
 
     Battle.get_lobby_member_list(lobby_id)
       |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)

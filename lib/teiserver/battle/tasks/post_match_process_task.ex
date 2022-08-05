@@ -36,7 +36,6 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     :ok
   end
 
-  # Teiserver.Battle.Tasks.PostMatchProcessTask.perform_reprocess(75567)
   defp post_process_match(match) do
     new_data = Map.merge((match.data || %{}), %{
       "player_count" => Enum.count(match.members)

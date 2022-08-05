@@ -4,7 +4,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   to balance matches. For that use Teiserver.Battle.BalanceLib.
   """
 
-  alias Teiserver.{Account, Game, Battle}
+  alias Teiserver.{Account, Coordinator, Game, Battle}
   alias Teiserver.Data.Types, as: T
   alias Central.Repo
   alias Teiserver.Battle.BalanceLib
@@ -121,6 +121,13 @@ defmodule Teiserver.Game.MatchRatingLib do
     Ecto.Multi.new()
       |> Ecto.Multi.insert_all(:insert_all, Teiserver.Game.RatingLog, win_ratings ++ loss_ratings)
       |> Central.Repo.transaction()
+
+    # If there is a balancer for this match we need to tell it to reset the hashes
+    # because there are new values
+    case Battle.get_lobby_by_server_uuid(match.server_uuid) do
+      nil -> :ok
+      %{id: lobby_id} -> Coordinator.cast_balancer(lobby_id, :reset_hashes)
+    end
 
     :ok
   end

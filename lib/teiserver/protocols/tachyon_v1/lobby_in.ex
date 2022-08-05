@@ -23,7 +23,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
               "lobby" -> {f, Tachyon.convert_object(lobby, :lobby)}
               "modoptions" -> {f, Battle.get_modoptions(lobby.id)}
               "bots" -> {f, Battle.get_bots(lobby.id)}
-              "players" -> {f, Battle.get_lobby_players(lobby.id)}
+              "players" -> {f, Battle.list_lobby_players(lobby.id)}
               "members" -> {f, Battle.get_lobby_member_list(lobby.id)}
               _ -> {"#{f}", "no field by that name"}
             end
@@ -50,7 +50,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
           "lobby" -> {"lobby", Tachyon.convert_object(Battle.get_lobby(lobby_id), :lobby)}
           "bots" -> {"bots", Battle.get_bots(lobby_id)}
           "players" -> {"players",
-            Battle.get_lobby_players(lobby_id)
+            Battle.list_lobby_players(lobby_id)
               |> Enum.map(fn player ->
                 Tachyon.convert_object(player, :client)
               end)
