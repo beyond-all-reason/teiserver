@@ -2,6 +2,7 @@ defmodule Teiserver.Chat.WordLib do
   @moduledoc false
   alias Central.Config
   alias Central.Helpers.StringHelper
+  require Logger
 
   @flagged_regex ~r/(n[i1l]gg(:?[e3]r|a)|cun[t7][s5]?|\b(r[e3])?[t7]ards?\b)/iu
 
@@ -56,7 +57,14 @@ defmodule Teiserver.Chat.WordLib do
     if flagged_words(name) > 0 do
       false
     else
-      true
+      non_barcode = Regex.replace(~r/^[LliI1|]+$/, name, "")
+
+      if String.length(non_barcode) < 3 do
+        Logger.info("Blocked rename to name `#{name}`")
+        false
+      else
+        true
+      end
     end
   end
 end

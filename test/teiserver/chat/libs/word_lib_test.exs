@@ -1,10 +1,15 @@
 defmodule Teiserver.Chat.WordLibTest do
   use Central.DataCase
   alias Teiserver.Chat.WordLib
-  alias Teiserver.{Room, User}
+  alias Teiserver.{Coordinator, Room, User}
   alias Teiserver.Battle.LobbyChat
   import Teiserver.TeiserverTestLib,
     only: [new_user: 0]
+
+  setup do
+    Coordinator.start_coordinator()
+    :ok
+  end
 
   test "bad words" do
     assert WordLib.flagged_words("") == 0
@@ -13,6 +18,24 @@ defmodule Teiserver.Chat.WordLibTest do
     assert WordLib.flagged_words("he is a tard") == 1
     assert WordLib.flagged_words("he is a r3tard") == 1
     assert WordLib.flagged_words("he is a agtard") == 0
+  end
+
+  test "allowed names" do
+    allowed = [
+      "teifion",
+      "Llama"
+    ]
+    disallowed = [
+      "llLl1iI"
+    ]
+
+    for name <- allowed do
+      assert WordLib.acceptable_name?(name)
+    end
+
+    for name <- disallowed do
+      refute WordLib.acceptable_name?(name)
+    end
   end
 
   test "de-bridging - chat send_message" do
