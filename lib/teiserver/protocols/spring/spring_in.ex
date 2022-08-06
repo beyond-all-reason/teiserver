@@ -1098,7 +1098,7 @@ defmodule Teiserver.Protocols.SpringIn do
     do_handle("SAYBATTLE", String.trim(msg), msg_id, state)
   end
 
-  defp do_handle("SAYBATTLE", "w:" <> msg, msg_id, state) do
+  defp do_handle("SAYBATTLE", "web:" <> msg, msg_id, state) do
     do_handle("SAYBATTLE", String.trim(msg), msg_id, state)
   end
 

@@ -116,7 +116,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       flood_protect?(message_timestamps) ->
         send(self(), {:lobby_chat, :say, :ok, current_user.id, "--- FLOOD PROTECTION IN PLACE, PLEAES WAIT BEFORE SENDING ANOTHER MESSAGE ---"})
       true ->
-        Lobby.say(current_user.id, "w: #{content}", id)
+        Lobby.say(current_user.id, "web: #{content}", id)
     end
 
     {:noreply, socket
