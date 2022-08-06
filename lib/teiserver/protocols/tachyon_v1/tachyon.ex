@@ -19,6 +19,11 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   """
   @spec convert_object(Map.t() | nil, :user | :user_extended | :user_extended_icons | :client | :battle | :queue | :blog_post) :: Map.t() | nil
   def convert_object(nil, _), do: nil
+  def convert_object(objects, type) when is_list(objects) do
+    objects
+      |> Enum.map(fn object -> convert_object(object, type) end)
+  end
+
   def convert_object(user, :user), do: Map.take(user, ~w(id name bot clan_id springid country)a)
   def convert_object(user, :user_extended), do: Map.take(user, ~w(id name bot clan_id permissions
                     friends friend_requests ignores springid country)a)

@@ -24,7 +24,13 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
               "modoptions" -> {f, Battle.get_modoptions(lobby.id)}
               "bots" -> {f, Battle.get_bots(lobby.id)}
               "players" -> {f, Battle.list_lobby_players(lobby.id)}
-              "members" -> {f, Battle.get_lobby_member_list(lobby.id)}
+              "member_list" ->
+                clients = lobby.id
+                  |> Battle.get_lobby_member_list()
+                  |> Account.list_clients()
+                  |> Tachyon.convert_object(:client)
+
+                {f, clients}
               _ -> {"#{f}", "no field by that name"}
             end
           end)
