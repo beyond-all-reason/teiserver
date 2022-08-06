@@ -56,6 +56,8 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       true ->
         allowed_to_send = not User.has_mute?(current_user.id)
 
+        :timer.send_interval(10_000, :tick)
+
         players = Lobby.list_lobby_players!(int_parse(id))
         clients = get_clients(players)
 
@@ -199,6 +201,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_chat_path(socket, :chat, id))}
   end
 
+  def handle_info(:tick, socket) do
+    {:noreply, update_lobby(socket)}
+  end
+
   def handle_info(msg, socket) do
     Logger.warn("No handler in #{__MODULE__} for message #{Kernel.inspect msg}")
     {:noreply, socket}
@@ -285,5 +291,13 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       |> Map.new(fn c -> {c.userid, c} end)
 
     clients
+  end
+
+  defp update_lobby(socket) do
+    lobby = Lobby.get_lobby(socket.assigns.id)
+    lobby = Map.put(lobby, :uuid, Battle.get_lobby_match_uuid(socket.assigns.id))
+
+    socket
+      |> assign(:lobby, lobby)
   end
 end

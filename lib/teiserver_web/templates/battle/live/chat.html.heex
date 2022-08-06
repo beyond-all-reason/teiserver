@@ -28,6 +28,10 @@
     border-top: 1px solid rgba(150, 150, 150, 0.1);
     padding: 2px 0;
   }
+  
+  .text-system {
+    font-style: italic;
+  }
 </style>
 
 <div class="row mt-3" id="main-content">
@@ -88,7 +92,8 @@
                   String.starts_with?(message, "$") -> "text-primary2"
                   String.starts_with?(message, "s:") -> "text-warning2"
                   String.starts_with?(message, "a:") -> "text-success"
-                  String.starts_with?(message, "w:") -> "text-info2"
+                  String.starts_with?(message, "web:") -> "text-info2"
+                  String.starts_with?(message, "system:") -> "text-system"
                   String.starts_with?(message, "g:") -> ""
                   true -> ""
                 end
