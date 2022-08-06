@@ -59,6 +59,30 @@ Returns a list of user ids of those on your friend list
 }
 ```
 
+### `c.user.list_friend_users_and_clients`
+Returns a all users of your friends and clients of those that are logged in. Will specifically return information about the party of the clients as they are your friends.
+
+#### Example input/output
+```json
+{
+  "cmd": "c.user.list_friend_users_and_clients"
+}
+
+{
+  "cmd": "s.user.list_friend_ids",
+  "user_list": [
+    User,
+    User,
+    User
+  ],
+  "client_list": [
+    Client,
+    Client,
+    Client
+  ]
+}
+```
+
 #### Other user stuff
 - Mute/unmute
 - Add note

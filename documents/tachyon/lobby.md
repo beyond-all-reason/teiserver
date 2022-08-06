@@ -69,8 +69,8 @@ Allowed keys:
 - lobby
 - modoptions
 - bots
-- players
-- members (contains all members, not just players)
+- players (a list of all player clients)
+- member_list (contains a list of all the member clients)
 
 ```json
 {

@@ -38,7 +38,23 @@ defmodule Teiserver.Protocols.Tachyon.V1.UserIn do
 
   def do_handle("list_friend_ids", _, state) do
     friend_list = User.get_user_by_id(state.userid).friends
-    reply(:user, :friend_id_list, friend_list, state)
+    reply(:user, :list_friend_ids, friend_list, state)
+  end
+
+  def do_handle("list_friend_users_and_clients", _, state) do
+    friend_list = User.get_user_by_id(state.userid).friends
+
+    users = friend_list
+      |> Account.list_users()
+      |> Enum.reject(&(&1 == nil))
+      |> Tachyon.convert_object(:user)
+
+    clients = friend_list
+      |> Account.list_clients()
+      |> Enum.reject(&(&1 == nil))
+      |> Tachyon.convert_object(:client_friend)
+
+    reply(:user, :list_friend_users_and_clients, {users, clients}, state)
   end
 
   def do_handle(cmd, data, state) do

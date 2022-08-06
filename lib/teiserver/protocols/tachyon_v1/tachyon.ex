@@ -44,7 +44,23 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
     end
 
     Map.take(client, ~w(userid in_game away ready player_number
-        team_number team_colour player bonus
+        team_number team_colour player bonus muted clan_tag
+        faction lobby_id)a
+    )
+      |> Map.put(:sync, sync_list)
+      |> Map.put(:party_id, nil)
+  end
+  def convert_object(client, :client_friend) do
+    sync_list = case client.sync do
+      true -> ["game", "map"]
+      1 -> ["game", "map"]
+      false -> []
+      0 -> []
+      s -> s
+    end
+
+    Map.take(client, ~w(userid in_game away ready player_number
+        team_number team_colour player bonus muted party_id clan_tag
         faction lobby_id)a
     )
       |> Map.put(:sync, sync_list)
