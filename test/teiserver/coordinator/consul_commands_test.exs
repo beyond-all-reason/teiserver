@@ -3,7 +3,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
   alias Teiserver.Common.PubsubListener
-  alias Teiserver.Game.MatchRatingLib
+  # alias Teiserver.Game.MatchRatingLib
   alias Teiserver.{Account, Battle, User, Client, Coordinator}
   alias Teiserver.Coordinator.ConsulServer
 
@@ -547,8 +547,13 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     _tachyon_send(hsocket, data)
 
     [reply] = _tachyon_recv(hsocket)
-    assert reply["cmd"] == "s.lobby.updated"
-    assert reply["lobby"]["name"] == "New Lobby Name::?"
+    assert reply == %{
+      "cmd" => "s.lobby.update_values",
+      "lobby_id" => lobby_id,
+      "new_values" => %{
+        "name" => "New Lobby Name::?"
+      }
+    }
 
     [reply] = _tachyon_recv(hsocket)
     assert reply == %{

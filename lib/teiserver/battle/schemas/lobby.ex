@@ -368,10 +368,10 @@ defmodule Teiserver.Battle.Lobby do
   @spec rename_lobby(T.lobby_id(), String.t()) :: :ok
   @spec rename_lobby(T.lobby_id(), String.t(), boolean) :: :ok
   def rename_lobby(lobby_id, new_name, consul_rename \\ false) do
-    case get_lobby(lobby_id) do
-      nil -> nil
-      lobby ->
-        update_lobby(%{lobby | name: new_name, consul_rename: consul_rename}, nil, :rename)
+    case Battle.lobby_exists?(lobby_id) do
+      false -> nil
+      true ->
+        Battle.update_lobby_values(lobby_id, %{name: new_name, consul_rename: consul_rename})
     end
 
     :ok

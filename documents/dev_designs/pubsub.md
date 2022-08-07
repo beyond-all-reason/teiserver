@@ -57,13 +57,23 @@ Used for broadcasting server event telemetry
 ```
 
 ## Battles
-#### teiserver_global_battle_lobby_updates
+#### teiserver_global_lobby_updates
 Limited information pertaining to the creation/deletion of battle lobbies.
 ```elixir
-  {:global_battle_lobby, :opened, lobby_id}
-  {:global_battle_lobby, :closed, lobby_id}
-  {:global_battle_lobby, :rename, lobby_id}
-  {:global_battle_lobby, :update_battle_info, lobby_id}
+%{
+  event: :opened,
+  lobby: lobby,
+}
+
+%{
+  event: :closed,
+  lobby_id: lobby_id
+}
+%{
+  event: :updated_values,
+  lobby_id: lobby_id,
+  new_values: map
+}
 ```
 
 #### teiserver_global_match_updates

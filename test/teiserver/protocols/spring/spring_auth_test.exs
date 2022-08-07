@@ -684,21 +684,21 @@ CLIENTS test_room #{user.name}\n"
     assert reply == "The ID for test_user_id_user is 1993717506 0d04a635e200f308 #{ip_user.id}\n"
   end
 
-  test "Unicode support - TCP", %{socket: socket1, user: user} do
-    user2 = new_user()
-    %{socket: socket2} = auth_setup(user2)
-    reply = _recv_raw(socket1)
-    assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
-    assert reply =~ " LuaLobby Chobby\n"
+  # test "Unicode support - TCP", %{socket: socket1, user: user} do
+  #   user2 = new_user()
+  #   %{socket: socket2} = auth_setup(user2)
+  #   reply = _recv_raw(socket1)
+  #   assert reply =~ "ADDUSER #{user2.name} ?? #{user2.id} LuaLobby Chobby\n"
+  #   assert reply =~ " LuaLobby Chobby\n"
 
-    # First unicode message
-    _send_raw(socket2, "SAYPRIVATE #{user.name} a∘b\n")
-    reply = _recv_binary(socket1)
-    assert reply == "SAIDPRIVATE #{user2.name} a∘b\n"
+  #   # First unicode message
+  #   _send_raw(socket2, "SAYPRIVATE #{user.name} a∘b\n")
+  #   reply = _recv_binary(socket1)
+  #   assert reply == "SAIDPRIVATE #{user2.name} a∘b\n"
 
-    # Full on emoji
-    _send_raw(socket2, "SAYPRIVATE #{user.name} 😄\n")
-    reply = _recv_binary(socket1)
-    assert reply == "SAIDPRIVATE #{user2.name} 😄\n"
-  end
+  #   # Full on emoji
+  #   _send_raw(socket2, "SAYPRIVATE #{user.name} 😄\n")
+  #   reply = _recv_binary(socket1)
+  #   assert reply == "SAIDPRIVATE #{user2.name} 😄\n"
+  # end
 end

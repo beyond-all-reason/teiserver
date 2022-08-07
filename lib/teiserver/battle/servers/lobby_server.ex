@@ -184,8 +184,13 @@ defmodule Teiserver.Battle.LobbyServer do
 
       PubSub.broadcast(
         Central.PubSub,
-        "teiserver_global_battle_lobby_updates",
-        {:global_battle_lobby, :update_battle_info, state.id}
+        "teiserver_global_lobby_updates",
+        %{
+          channel: "teiserver_global_lobby_updates",
+          event: :updated_values,
+          lobby_id: state.id,
+          new_values: broadcast_values
+        }
       )
 
       # Spring specific stuff

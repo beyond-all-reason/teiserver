@@ -665,8 +665,8 @@ defmodule Teiserver.Protocols.SpringOut do
     PubSub.unsubscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
     PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{user.id}")
 
-    PubSub.unsubscribe(Central.PubSub, "teiserver_global_battle_lobby_updates")
-    PubSub.subscribe(Central.PubSub, "teiserver_global_battle_lobby_updates")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_global_lobby_updates")
+    PubSub.subscribe(Central.PubSub, "teiserver_global_lobby_updates")
 
     exempt_from_cmd_throttle = (user.moderator == true or User.is_bot?(user) == true)
     %{state |

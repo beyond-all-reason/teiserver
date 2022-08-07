@@ -6,7 +6,6 @@ defmodule Teiserver.SpringTcpServer do
   alias Phoenix.PubSub
   alias Central.Config
   alias Teiserver.{User, Client}
-  alias Teiserver.Tcp.{TcpLobby}
 
   @behaviour :ranch_protocol
   @spec get_ssl_opts :: [
@@ -228,15 +227,30 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, state}
   end
 
-  def handle_info({:client_message, :lobby, userid, data}, state) do
-    {:noreply, TcpLobby.handle_info({:client_message, :lobby, userid, data}, state)}
-  end
-
-  def handle_info({:global_battle_lobby, action, lobby_id}, state) do
-    {:noreply, TcpLobby.handle_info({:global_battle_lobby, action, lobby_id}, state)}
+  def handle_info({:client_message, :lobby, _userid, _data}, state) do
+    {:noreply, state}
   end
 
   def handle_info({:client_message, _topic, _userid, _data}, state) do
+    {:noreply, state}
+  end
+
+  def handle_info(%{
+    channel: "teiserver_global_lobby_updates",
+    event: :updated_values,
+    lobby_id: lobby_id,
+    new_values: new_values
+  }, state) do
+    new_state = if Map.has_key?(new_values, "name") do
+      state.protocol_out.reply(:battle, :lobby_rename, lobby_id, nil, state)
+    else
+      state
+    end
+
+    {:noreply, new_state}
+  end
+
+  def handle_info(%{channel: "teiserver_global_lobby_updates"}, state) do
     {:noreply, state}
   end
 

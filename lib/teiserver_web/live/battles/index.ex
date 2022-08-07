@@ -46,15 +46,22 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   @impl true
-  def handle_info({:global_battle_lobby, :opened, lobby_id}, socket) do
-    lobby = live_get_lobby(lobby_id)
+  def handle_info(%{
+    channel: "teiserver_global_lobby_updates",
+    event: :opened,
+    lobby: lobby
+  }, socket) do
     lobbies = [lobby | socket.assigns[:lobbies]]
       |> sort_lobbies
 
     {:noreply, assign(socket, :lobbies, lobbies)}
   end
 
-  def handle_info({:global_battle_lobby, :closed, lobby_id}, socket) do
+  def handle_info(%{
+    channel: "teiserver_global_lobby_updates",
+    event: :closed,
+    lobby_id: lobby_id
+  }, socket) do
     lobbies =
       socket.assigns[:lobbies]
       |> Enum.filter(fn b -> b.id != lobby_id end)
@@ -63,27 +70,17 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
     {:noreply, assign(socket, :lobbies, lobbies)}
   end
 
-  def handle_info({:global_battle_lobby, :rename, lobby_id}, socket) do
+  def handle_info(%{
+    channel: "teiserver_global_lobby_updates",
+    event: :updated_values,
+    lobby_id: lobby_id,
+    new_values: new_values
+  }, socket) do
     lobbies =
       socket.assigns[:lobbies]
       |> Enum.map(fn l ->
         if l.id == lobby_id do
-          live_get_lobby(lobby_id)
-        else
-          l
-        end
-      end)
-      |> sort_lobbies
-
-    {:noreply, assign(socket, :lobbies, lobbies)}
-  end
-
-  def handle_info({:global_battle_lobby, :update_battle_info, lobby_id}, socket) do
-    lobbies =
-      socket.assigns[:lobbies]
-      |> Enum.map(fn l ->
-        if l.id == lobby_id do
-          live_get_lobby(lobby_id)
+          Map.merge(l, new_values)
         else
           l
         end
@@ -104,7 +101,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   defp apply_action(socket, :index, _params) do
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_battle_lobby_updates")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_lobby_updates")
 
     socket
       |> assign(:page_title, "Listing Battles")
