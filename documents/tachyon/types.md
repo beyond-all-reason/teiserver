@@ -68,6 +68,11 @@ This represents a user who is logged in. A user who is logged out will not have 
 * faction: string
 * lobby_id: Lobby.id
 
+-- Other --
+* party_id: string
+* clan_tag: string
+* muted: boolean
+
 #### Examples
 ```json
 {
@@ -84,7 +89,10 @@ This represents a user who is logged in. A user who is logged out will not have 
     "game": 1
   },
   "faction": "random",
-  "lobby_id": 5
+  "lobby_id": 5,
+  "party_id": "abc-def",
+  "clan_tag": "TEH",
+  "muted": false
 }
 ```
 
