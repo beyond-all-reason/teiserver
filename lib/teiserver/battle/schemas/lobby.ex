@@ -103,6 +103,9 @@ defmodule Teiserver.Battle.Lobby do
         members: [],
         players: [],
 
+        # When set to false updates to this lobby won't appear in global_battle updates
+        public: true,
+
         member_count: 0,
         player_count: 0,
         spectator_count: 0,

@@ -112,6 +112,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 * start_rectangles :: map :: (id -> [type, x1, y1, x2, y2])
 * map_name :: string
 * map_hash :: string
+* public :: boolean
 
 #### Examples
 ```json
@@ -137,7 +138,8 @@ This represents a user who is logged in. A user who is logged out will not have 
     }
   },
   "map_name": "koom valley",
-  "map_hash": "hash_string_here"
+  "map_hash": "hash_string_here",
+  "public": true
 }
 ```
 
