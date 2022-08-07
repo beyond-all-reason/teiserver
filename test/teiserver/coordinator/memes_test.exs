@@ -3,6 +3,7 @@ defmodule Teiserver.Coordinator.MemesTest do
   alias Teiserver.Battle.Lobby
   alias Teiserver.Account.ClientLib
   alias Teiserver.{User, Client, Coordinator}
+  require Logger
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]
@@ -65,39 +66,41 @@ defmodule Teiserver.Coordinator.MemesTest do
   test "ticks", %{lobby_id: lobby_id, hsocket: hsocket} do
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$meme ticks"})
     [reply] = _tachyon_recv(hsocket)
-    assert reply["cmd"] == "s.lobby.updated"
-    assert match?(%{
-      "id" => ^lobby_id,
-      "disabled_units" => ~w(armaap armalab armap armavp armhp armshltx armvp armamsub armasy armfhp armplat armshltxuw armsy armmg armllt armbeamer armhlt arm armdrag armclaw armguard armjuno armham armjeth armpw armrectr armrock armwar coraap coralab corap coravp corgant corhp corlab corvp corllt corfhp corsy corjuno corhllt corhlt),
-    }, reply["lobby"])
+    assert reply == %{
+      "cmd" => "s.lobby.update_values",
+      "lobby_id" => lobby_id,
+      "new_values" => %{"disabled_units" => ~w(armaap armalab armap armavp armhp armshltx armvp armamsub armasy armfhp armplat armshltxuw armsy armmg armllt armbeamer armhlt arm armdrag armclaw armguard armjuno armham armjeth armpw armrectr armrock armwar coraap coralab corap coravp corgant corhp corlab corvp corllt corfhp corsy corjuno corhllt corhlt)}
+    }
   end
 
   test "greenfields", %{lobby_id: lobby_id, hsocket: hsocket} do
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$meme greenfields"})
     [reply] = _tachyon_recv(hsocket)
-    assert reply["cmd"] == "s.lobby.updated"
-    assert match?(%{
-      "id" => ^lobby_id,
-      "disabled_units" => ~w(armmex armamex armmoho cormex corexp cormexp cormoho),
-    }, reply["lobby"])
+    assert reply == %{
+      "cmd" => "s.lobby.update_values",
+      "lobby_id" => lobby_id,
+      "new_values" => %{"disabled_units" => ~w(armmex armamex armmoho cormex corexp cormexp cormoho)}
+    }
   end
 
-  test "poor", %{lobby_id: _lobby_id, hsocket: hsocket} do
+  test "poor", %{lobby_id: lobby_id, hsocket: hsocket} do
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$meme poor"})
     [reply] = _tachyon_recv(hsocket)
     assert reply == %{
       "cmd" => "s.lobby.set_modoptions",
+      "lobby_id" => lobby_id,
       "new_options" => %{
         "game/modoptions/resourceincomemultiplier" => "0"
       }
     }
   end
 
-  test "rich", %{lobby_id: _lobby_id, hsocket: hsocket} do
+  test "rich", %{lobby_id: lobby_id, hsocket: hsocket} do
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$meme rich"})
     [reply] = _tachyon_recv(hsocket)
     assert reply == %{
       "cmd" => "s.lobby.set_modoptions",
+      "lobby_id" => lobby_id,
       "new_options" => %{
         "game/modoptions/resourceincomemultiplier" => "1000",
         "game/modoptions/startenergy" => "100000000",
@@ -109,37 +112,35 @@ defmodule Teiserver.Coordinator.MemesTest do
   test "hardt1", %{lobby_id: lobby_id, hsocket: hsocket} do
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$meme hardt1"})
     [reply] = _tachyon_recv(hsocket)
-    assert reply["cmd"] == "s.lobby.updated"
-    assert match?(%{
-      "id" => ^lobby_id,
-      "disabled_units" => ~w(armfhp armhp armamsub armplat armalab armavp armaap armasy armshltx armshltxuw corfhp corhp coaramsub corplat coravp coralab coraap corgantuw corgant corasy),
-    }, reply["lobby"])
+    assert reply == %{
+      "cmd" => "s.lobby.update_values",
+      "lobby_id" => lobby_id,
+      "new_values" => %{"disabled_units" => ~w(armfhp armhp armamsub armplat armalab armavp armaap armasy armshltx armshltxuw corfhp corhp coaramsub corplat coravp coralab coraap corgantuw corgant corasy)}
+    }
   end
 
   test "crazy", %{lobby_id: lobby_id, hsocket: hsocket} do
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$meme crazy"})
     [reply] = _tachyon_recv(hsocket)
-    assert reply["cmd"] == "s.lobby.updated"
-    assert match?(%{
-      "id" => ^lobby_id,
-    }, reply["lobby"])
+    assert reply["cmd"] == "s.lobby.set_modoptions"
+    assert reply["lobby_id"] == lobby_id
   end
 
   test "undo", %{lobby_id: lobby_id, hsocket: hsocket} do
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$meme ticks"})
     [reply] = _tachyon_recv(hsocket)
-    assert reply["cmd"] == "s.lobby.updated"
-    assert match?(%{
-      "id" => ^lobby_id,
-      "disabled_units" => ~w(armaap armalab armap armavp armhp armshltx armvp armamsub armasy armfhp armplat armshltxuw armsy armmg armllt armbeamer armhlt arm armdrag armclaw armguard armjuno armham armjeth armpw armrectr armrock armwar coraap coralab corap coravp corgant corhp corlab corvp corllt corfhp corsy corjuno corhllt corhlt),
-    }, reply["lobby"])
+    assert reply == %{
+      "cmd" => "s.lobby.update_values",
+      "lobby_id" => lobby_id,
+      "new_values" => %{"disabled_units" => ~w(armaap armalab armap armavp armhp armshltx armvp armamsub armasy armfhp armplat armshltxuw armsy armmg armllt armbeamer armhlt arm armdrag armclaw armguard armjuno armham armjeth armpw armrectr armrock armwar coraap coralab corap coravp corgant corhp corlab corvp corllt corfhp corsy corjuno corhllt corhlt)}
+    }
 
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$meme undo"})
     [reply] = _tachyon_recv(hsocket)
-    assert reply["cmd"] == "s.lobby.updated"
-    assert match?(%{
-      "id" => ^lobby_id,
-      "disabled_units" => [],
-    }, reply["lobby"])
+    assert reply == %{
+      "cmd" => "s.lobby.update_values",
+      "lobby_id" => lobby_id,
+      "new_values" => %{"disabled_units" => []}
+    }
   end
 end

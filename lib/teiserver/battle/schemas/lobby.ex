@@ -396,32 +396,6 @@ defmodule Teiserver.Battle.Lobby do
     update_lobby(%{lobby | silence: false}, nil, :unsilence)
   end
 
-  # Unit enabling
-  def enable_all_units(lobby_id) do
-    battle = get_battle(lobby_id)
-    new_battle = %{battle | disabled_units: []}
-    update_battle(new_battle, [], :enable_all_units)
-  end
-
-  def enable_units(lobby_id, units) do
-    battle = get_battle(lobby_id)
-
-    new_units =
-      Enum.filter(battle.disabled_units, fn u ->
-        not Enum.member?(units, u)
-      end)
-
-    new_battle = %{battle | disabled_units: new_units}
-    update_battle(new_battle, units, :enable_units)
-  end
-
-  def disable_units(lobby_id, units) do
-    battle = get_battle(lobby_id)
-    new_units = battle.disabled_units ++ units
-    new_battle = %{battle | disabled_units: new_units}
-    update_battle(new_battle, units, :disable_units)
-  end
-
   @spec can_join?(Types.userid(), integer(), String.t() | nil, String.t() | nil) ::
           {:failure, String.t()} | {:waiting_on_host, String.t()}
   def can_join?(userid, lobby_id, password \\ nil, script_password \\ nil) do

@@ -53,7 +53,7 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids", "filter" => ""})
     [resp] = _tachyon_recv(socket)
     assert resp["cmd"] == "s.user.list_friend_ids"
-    friend_list = resp["friend_id_list"]
+    friend_list = resp["list_friend_ids"]
 
     assert Enum.member?(friend_list, friend1.id)
     assert Enum.member?(friend_list, friend2.id)

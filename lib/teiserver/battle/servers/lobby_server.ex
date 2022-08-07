@@ -162,12 +162,11 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, %{state | lobby: new_lobby}}
   end
 
-
   # Generic updates
   def handle_cast({:update_values, new_values}, state) do
     new_values = new_values
-      |> Map.filter(fn {k, _} ->
-        Map.has_key?(state.lobby, k)
+      |> Map.filter(fn {k, v} ->
+        Map.has_key?(state.lobby, k) and v != Map.get(state.lobby, k)
       end)
     new_lobby = Map.merge(state.lobby, new_values)
 
@@ -208,6 +207,70 @@ defmodule Teiserver.Battle.LobbyServer do
   end
 
   def handle_cast({:update_lobby, new_lobby}, state) do
+    {:noreply, %{state | lobby: new_lobby}}
+  end
+
+  # Enable/Disable units
+  def handle_cast(:enable_all_units, %{lobby: %{disabled_units: []}} = state), do: {:noreply, state}
+  def handle_cast(:enable_all_units, state) do
+    new_lobby = %{state.lobby | disabled_units: []}
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "legacy_battle_updates:#{state.id}",
+      {:battle_updated, state.id, [], :enable_all_units}
+    )
+
+    PubSub.broadcast(
+        Central.PubSub,
+      "teiserver_lobby_updates:#{state.id}",
+      {:lobby_update, :update_values, state.id, %{disabled_units: []}}
+    )
+
+    {:noreply, %{state | lobby: new_lobby}}
+  end
+
+  def handle_cast({:enable_units, _}, %{lobby: %{disabled_units: []}} = state), do: {:noreply, state}
+  def handle_cast({:enable_units, []}, state), do: {:noreply, state}
+  def handle_cast({:enable_units, units}, state) do
+    new_units =
+      Enum.filter(state.lobby.disabled_units, fn u ->
+        not Enum.member?(units, u)
+      end)
+
+    new_lobby = %{state.lobby | disabled_units: new_units}
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "legacy_battle_updates:#{state.id}",
+      {:battle_updated, state.id, units, :enable_units}
+    )
+
+    PubSub.broadcast(
+        Central.PubSub,
+      "teiserver_lobby_updates:#{state.id}",
+      {:lobby_update, :update_values, state.id, %{disabled_units: new_units}}
+    )
+
+    {:noreply, %{state | lobby: new_lobby}}
+  end
+
+  def handle_cast({:disable_units, units}, state) do
+    new_units = Enum.uniq(state.lobby.disabled_units ++ units)
+    new_lobby = %{state.lobby | disabled_units: new_units}
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "legacy_battle_updates:#{state.id}",
+      {:battle_updated, state.id, units, :disable_units}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_lobby_updates:#{state.id}",
+      {:lobby_update, :update_values, state.id, %{disabled_units: new_units}}
+    )
+
     {:noreply, %{state | lobby: new_lobby}}
   end
 

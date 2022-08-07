@@ -1013,7 +1013,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("DISABLEUNITS", data, _msg_id, state) do
     if Lobby.allow?(state.userid, :disableunits, state.lobby_id) do
       units = String.split(data, " ")
-      Lobby.disable_units(state.lobby_id, units)
+      Battle.disable_units(state.lobby_id, units)
     end
 
     state
@@ -1022,7 +1022,7 @@ defmodule Teiserver.Protocols.SpringIn do
   defp do_handle("ENABLEUNITS", data, _msg_id, state) do
     if Lobby.allow?(state.userid, :enableunits, state.lobby_id) do
       units = String.split(data, " ")
-      Lobby.enable_units(state.lobby_id, units)
+      Battle.enable_units(state.lobby_id, units)
     end
 
     state
@@ -1030,7 +1030,7 @@ defmodule Teiserver.Protocols.SpringIn do
 
   defp do_handle("ENABLEALLUNITS", _data, _msg_id, state) do
     if Lobby.allow?(state.userid, :enableallunits, state.lobby_id) do
-      Lobby.enable_all_units(state.lobby_id)
+      Battle.enable_all_units(state.lobby_id)
     end
 
     state

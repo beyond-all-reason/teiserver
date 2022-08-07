@@ -249,7 +249,7 @@ defmodule Teiserver.Account do
   end
 
   def spring_auth_check(conn, user, plain_text_password) do
-    tei_user = Teiserver.User.get_user_by_id(user.id)
+    tei_user = get_user_by_id(user.id)
     md5_password = Teiserver.User.spring_md5_password(plain_text_password)
 
     if Teiserver.User.test_password(md5_password, tei_user.password_hash) do

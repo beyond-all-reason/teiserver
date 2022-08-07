@@ -135,7 +135,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     _tachyon_send(socket2, %{
       cmd: "c.lobby.query",
       query: %{id_list: [lobby_id]},
-      fields: ["lobby", "modoptions", "bots", "players", "members"]
+      fields: ["lobby", "modoptions", "bots", "players", "member_list"]
     })
     [reply] = _tachyon_recv(socket2)
 
@@ -144,8 +144,9 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     lobby = hd(reply["lobbies"])
     assert lobby["lobby"]["id"] == lobby_id
     assert lobby["lobby"]["players"] == [user2.id]
-    assert lobby["members"] == [user2.id]
     assert lobby["players"] == []
+    assert hd(lobby["member_list"])["userid"] == user2.id
+    assert Enum.count(lobby["member_list"]) == 1
 
     # Use the get command
     _tachyon_send(socket2, %{cmd: "c.lobby.get", lobby_id: lobby_id, keys: ~w(bots modoptions players members)})
@@ -158,7 +159,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
         "server/match/uuid" => Battle.get_lobby_match_uuid(lobby_id)
       },
       "members" => [
-        %{"away" => false, "in_game" => false, "lobby_id" => lobby_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => 0, "team_number" => 0, "userid" => user2.id}
+        %{"away" => false, "in_game" => false, "lobby_id" => lobby_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => 0, "team_number" => 0, "userid" => user2.id, "clan_tag" => nil, "muted" => false, "party_id" => nil}
       ],
       "players" => []
     }
@@ -320,6 +321,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     [reply] = _tachyon_recv_until(socket)
     assert reply == %{
       "cmd" => "s.lobby.set_modoptions",
+      "lobby_id" => lobby_id,
       "new_options" => %{"singe_key" => "single_value"}
     }
 
@@ -330,6 +332,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     [reply] = _tachyon_recv_until(socket)
     assert reply == %{
       "cmd" => "s.lobby.set_modoptions",
+      "lobby_id" => lobby_id,
       "new_options" => %{
         "multi_key1" => "multi_value1",
         "multi_key2" => "multi_value2"
@@ -340,6 +343,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     [reply] = _tachyon_recv_until(socket)
     assert reply == %{
       "cmd" => "s.lobby.remove_modoptions",
+      "lobby_id" => lobby_id,
       "keys" => ["singe_key"]
     }
 

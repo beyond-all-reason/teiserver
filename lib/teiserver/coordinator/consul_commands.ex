@@ -24,8 +24,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   #################### For everybody
   def handle_command(%{command: "s"} = cmd, state), do: handle_command(Map.put(cmd, :command, "status"), state)
   def handle_command(%{command: "status", senderid: senderid} = _cmd, state) do
-    user = Account.get_user_by_id(senderid)
-
     locks = state.locks
       |> Enum.map(fn l -> to_string(l) end)
       |> Enum.join(", ")

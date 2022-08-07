@@ -1,7 +1,7 @@
 defmodule Teiserver.Coordinator.RikerssMemes do
   @moduledoc false
   alias Teiserver.{User, Battle}
-  alias Teiserver.Battle.{Lobby, LobbyChat}
+  alias Teiserver.Battle.{LobbyChat}
   alias Teiserver.Data.Types, as: T
 
   @meme_list ~w(ticks nodefence greenfields poor rich hardt1 crazy undo)
@@ -17,7 +17,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     units = ~w(armham armjeth armpw armrectr armrock armwar)
 
     cortex = ~w(coraap coralab corap coravp corgant corhp corlab corvp corllt corfhp corsy corjuno corhllt corhlt)
-    Lobby.disable_units(lobby_id, labs ++ defences ++ units ++ cortex)
+    Battle.disable_units(lobby_id, labs ++ defences ++ units ++ cortex)
 
     ["#{sender.name} has enabled the Ticks meme. In this game the only fighting unit you will be able to build will be ticks. It is highly inadvisable to play Cortex."]
   end
@@ -25,7 +25,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   def handle_meme("greenfields", senderid, %{lobby_id: lobby_id} = _state) do
     sender = User.get_user_by_id(senderid)
 
-    Lobby.disable_units(lobby_id, ~w(armmex armamex armmoho cormex corexp cormexp cormoho))
+    Battle.disable_units(lobby_id, ~w(armmex armamex armmoho cormex corexp cormexp cormoho))
 
     ["#{sender.name} has enabled the Greenfield meme. Metal extractors are disabled."]
   end
@@ -54,7 +54,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     armada = ~w(armfhp armhp armamsub armplat armalab armavp armaap armasy armshltx armshltxuw)
     cortex = ~w(corfhp corhp coaramsub corplat coravp coralab coraap corgantuw corgant corasy)
 
-    Lobby.disable_units(lobby_id, armada ++ cortex)
+    Battle.disable_units(lobby_id, armada ++ cortex)
 
     ["#{sender.name} has enabled the hard T1 meme. You can only build T1 (Seaplanes and Hovers are T1.5, they are disabled)."]
   end
@@ -127,7 +127,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
     scav_units = unit_list
       |> Enum.map(fn unit -> "#{unit}_scav" end)
 
-    Lobby.disable_units(lobby_id, unit_list ++ scav_units)
+    Battle.disable_units(lobby_id, unit_list ++ scav_units)
 
     ["#{sender.name} has enabled the No defence meme. In this game you will not be able to create any defences; good luck!"]
   end
@@ -144,7 +144,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   end
 
   def undo_memes(lobby_id) do
-    Lobby.enable_all_units(lobby_id)
+    Battle.enable_all_units(lobby_id)
 
     new_options = %{
       "game/modoptions/startmetal" => "1000",

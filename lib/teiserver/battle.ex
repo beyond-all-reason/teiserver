@@ -509,6 +509,16 @@ defmodule Teiserver.Battle do
   @spec remove_start_area(T.lobby_id(), non_neg_integer()) :: :ok | nil
   defdelegate remove_start_area(lobby_id, area_id), to: LobbyCache
 
+  # Disabled units
+  @spec enable_all_units(T.lobby_id()) :: :ok | nil
+  defdelegate enable_all_units(lobby_id), to: LobbyCache
+
+  @spec enable_units(T.lobby_id(), [String.t()]) :: :ok | nil
+  defdelegate enable_units(lobby_id, units), to: LobbyCache
+
+  @spec disable_units(T.lobby_id(), [String.t()]) :: :ok | nil
+  defdelegate disable_units(lobby_id, units), to: LobbyCache
+
   # Modoptions
   @spec get_modoptions(T.lobby_id()) :: map() | nil
   defdelegate get_modoptions(lobby_id), to: LobbyCache

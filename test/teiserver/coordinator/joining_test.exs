@@ -113,7 +113,10 @@ defmodule Teiserver.Coordinator.JoiningTest do
         "player_number" => 0,
         "userid" => user2.id,
         "player" => true,
-        "sync" => ["game", "map"]
+        "sync" => ["game", "map"],
+        "clan_tag" => nil,
+        "muted" => false,
+        "party_id" => nil
       },
       "lobby_id" => lobby_id,
       "reason" => "client_updated_battlestatus"

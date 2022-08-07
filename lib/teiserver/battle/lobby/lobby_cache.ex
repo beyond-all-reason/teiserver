@@ -154,6 +154,22 @@ defmodule Teiserver.Battle.LobbyCache do
     cast_lobby(lobby_id, {:remove_start_area, area_id})
   end
 
+  # Enabled/Disabled units
+  @spec enable_all_units(T.lobby_id()) :: :ok | nil
+  def enable_all_units(lobby_id) when is_integer(lobby_id) do
+    cast_lobby(lobby_id, :enable_all_units)
+  end
+
+  @spec enable_units(T.lobby_id(), [String.t()]) :: :ok | nil
+  def enable_units(lobby_id, units) when is_integer(lobby_id) and is_list(units) do
+    cast_lobby(lobby_id, {:enable_units, units})
+  end
+
+  @spec disable_units(T.lobby_id(), [String.t()]) :: :ok | nil
+  def disable_units(lobby_id, units) when is_integer(lobby_id) and is_list(units) do
+    cast_lobby(lobby_id, {:disable_units, units})
+  end
+
   # Bots
   @spec get_bots(T.lobby_id()) :: map() | nil
   def get_bots(lobby_id) do
