@@ -136,6 +136,16 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
     end
   end
 
+  def do_handle("watch_all", _, state) do
+    send(self(), {:action, {:watch_all_lobbies, nil}})
+    reply(:lobby, :watch_all, :success, state)
+  end
+
+  def do_handle("unwatch_all", _, state) do
+    send(self(), {:action, {:unwatch_all_lobbies, nil}})
+    reply(:lobby, :unwatch_all, :success, state)
+  end
+
   def do_handle("watch", %{"lobby_id" => lobby_id}, state) do
     case Battle.lobby_exists?(lobby_id) do
       true ->
@@ -144,6 +154,11 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
       false ->
         reply(:lobby, :watch, {:failure, "No lobby", lobby_id}, state)
     end
+  end
+
+  def do_handle("unwatch", %{"lobby_id" => lobby_id}, state) do
+    send(self(), {:action, {:unwatch_lobby, lobby_id}})
+    reply(:lobby, :watch, {:success, lobby_id}, state)
   end
 
   def do_handle("update_status", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)

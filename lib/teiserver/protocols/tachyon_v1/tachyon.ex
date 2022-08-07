@@ -134,13 +134,29 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
     %{state | lobby_id: lobby_id}
   end
 
+  def do_action(:watch_all_lobbies, _, state) do
+    PubSub.unsubscribe(Central.PubSub, "teiserver_global_lobby_updates")
+    PubSub.subscribe(Central.PubSub, "teiserver_global_lobby_updates")
+
+    state
+  end
+
+  def do_action(:unwatch_all_lobbies, _, state) do
+    PubSub.unsubscribe(Central.PubSub, "teiserver_global_lobby_updates")
+
+    state
+  end
+
   def do_action(:watch_lobby, lobby_id, state) do
-    Teiserver.Battle.Lobby.add_user_to_battle(state.userid, lobby_id, state.script_password)
-
     PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-
     PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
 
-    %{state | lobby_id: lobby_id}
+    state
+  end
+
+  def do_action(:unwatch_lobby, lobby_id, state) do
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
+
+    state
   end
 end

@@ -40,6 +40,32 @@
 }
 ```
 
+### `c.lobby.watch_all`
+Subscribes you to global lobby updates such as lobbies opening, closing and updating.
+```json
+{
+  "cmd": "c.lobby.watch_all"
+}
+
+{
+  "cmd": "s.lobby.watch_all",
+  "result": "success"
+}
+```
+
+### `c.lobby.unwatch_all`
+Unsubscribes you to the `watch_all` updates.
+```json
+{
+  "cmd": "c.lobby.unwatch_all"
+}
+
+{
+  "cmd": "s.lobby.unwatch_all",
+  "result": "success"
+}
+```
+
 ### `c.lobby.watch`
 Subscribes you to lobby updates for a given lobby without joining it. Does not subscribe you to the lobby chat and if you join then leave a lobby you will need to resubscribe to it.
 ```json
@@ -59,6 +85,21 @@ Subscribes you to lobby updates for a given lobby without joining it. Does not s
   "result": "failure",
   "reason": "No lobby",
   "lobby_id": 1234
+}
+```
+
+### `c.lobby.unwatch`
+Unsubscribes you to the lobby updates for that particular lobby. Note if you are a member of a lobby it is inadvisable to call this for that lobby.
+```json
+{
+  "cmd": "c.lobby.unwatch",
+  "lobby_id": 123
+}
+
+{
+  "cmd": "s.lobby.unwatch",
+  "result": "success",
+  "lobby_id": 123
 }
 ```
 
