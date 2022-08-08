@@ -86,6 +86,8 @@ defmodule Teiserver.TachyonTcpServer do
       # Connection microstate
       msg_id: nil,
       lobby_id: nil,
+      party_id: nil,
+      party_role: nil,
       print_client_messages: false,
       print_server_messages: false,
       script_password: nil,
@@ -145,6 +147,15 @@ defmodule Teiserver.TachyonTcpServer do
       {:leave_lobby, lobby_id} ->
         state.protocol.do_action(:leave_lobby, lobby_id, state)
 
+      {:lead_party, party_id} ->
+        state.protocol.do_action(:lead_party, party_id, state)
+
+      {:join_party, party_id} ->
+        state.protocol.do_action(:join_party, party_id, state)
+
+      {:leave_party, party_id} ->
+        state.protocol.do_action(:leave_party, party_id, state)
+
       {:set_script_password, new_script_password} ->
         %{state | script_password: new_script_password}
     end
@@ -197,6 +208,15 @@ defmodule Teiserver.TachyonTcpServer do
   # Internal pubsub messaging (see pubsub.md)
   def handle_info(%{channel: "teiserver_server", event: event, node: node}, state) do
     {:noreply, state.protocol_out.reply(:system, :server_event, {event, node}, state)}
+  end
+
+  def handle_info(data = %{channel: "teiserver_party:" <> party_id, event: event}, state) do
+    case event do
+      :updated_values ->
+        state.protocol_out.reply(:party, :updated, {party_id, data.new_values}, state)
+    end
+
+    {:noreply, state}
   end
 
   def handle_info({:lobby_host_message, event, lobby_id, data}, state) do

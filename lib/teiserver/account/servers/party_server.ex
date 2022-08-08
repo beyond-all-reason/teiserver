@@ -10,18 +10,24 @@ defmodule Teiserver.Account.PartyServer do
   end
 
   @impl true
-  def handle_cast({:add_invite, userid}, %{party: party} = state) do
+  def handle_cast({:create_invite, userid}, %{party: party} = state) do
     new_party = cond do
       Enum.member?(party.pending_invites, userid) -> party
       Enum.member?(party.members, userid) -> party
       true ->
+        new_invites = [userid | party.pending_invites] |> Enum.uniq
+
         PubSub.broadcast(
           Central.PubSub,
-          "party:#{party.id}",
-          {:party, :add_invite, party.id, userid}
+          "teiserver_party:#{party.id}",
+          %{
+            channel: "teiserver_party:#{party.id}",
+            event: :updated_values,
+            party_id: party.id,
+            new_values: %{invites: new_invites}
+          }
         )
 
-        new_invites = [userid | party.pending_invites] |> Enum.uniq
         %{party | pending_invites: new_invites}
     end
     {:noreply, %{state | party: new_party}}
@@ -30,13 +36,18 @@ defmodule Teiserver.Account.PartyServer do
   def handle_cast({:cancel_invite, userid}, %{party: party} = state) do
     new_party = cond do
       Enum.member?(party.pending_invites, userid) ->
+        new_invites = List.delete(party.pending_invites, userid)
         PubSub.broadcast(
           Central.PubSub,
-          "party:#{party.id}",
-          {:party, :cancel_invite, party.id, userid}
+          "teiserver_party:#{party.id}",
+          %{
+            channel: "teiserver_party:#{party.id}",
+            event: :updated_values,
+            party_id: party.id,
+            new_values: %{invites: new_invites}
+          }
         )
 
-        new_invites = List.delete(party.pending_invites, userid)
         %{party | pending_invites: new_invites}
 
       true -> party
@@ -47,14 +58,19 @@ defmodule Teiserver.Account.PartyServer do
   def handle_cast({:accept_invite, userid}, %{party: party} = state) do
     new_party = cond do
       Enum.member?(party.pending_invites, userid) ->
-        PubSub.broadcast(
-          Central.PubSub,
-          "party:#{party.id}",
-          {:party, :accept_invite, party.id, userid}
-        )
-
         new_invites = List.delete(party.pending_invites, userid)
         new_members = [userid | party.members] |> Enum.uniq
+
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_party:#{party.id}",
+          %{
+            channel: "teiserver_party:#{party.id}",
+            event: :updated_values,
+            party_id: party.id,
+            new_values: %{invites: new_invites, members: new_members}
+          }
+        )
         %{party | pending_invites: new_invites, members: new_members}
 
       true -> party
@@ -70,8 +86,13 @@ defmodule Teiserver.Account.PartyServer do
       party.members == [userid] ->
         PubSub.broadcast(
           Central.PubSub,
-          "party:#{party.id}",
-          {:party, :closed, party.id, "No members"}
+          "teiserver_party:#{party.id}",
+          %{
+            channel: "teiserver_party:#{party.id}",
+            event: :closed,
+            party_id: party.id,
+            reason: "No members"
+          }
         )
         Teiserver.Account.PartyLib.stop_party_server(party.id)
         party
@@ -85,16 +106,14 @@ defmodule Teiserver.Account.PartyServer do
 
         PubSub.broadcast(
           Central.PubSub,
-          "party:#{party.id}",
-          {:party, :new_leader, party.id, new_leader}
+          "teiserver_party:#{party.id}",
+          %{
+            channel: "teiserver_party:#{party.id}",
+            event: :updated_values,
+            party_id: party.id,
+            new_values: %{leader: new_leader, members: new_members}
+          }
         )
-
-        PubSub.broadcast(
-          Central.PubSub,
-          "party:#{party.id}",
-          {:party, :member_leave, party.id, userid}
-        )
-
         %{party | members: new_members, leader: new_leader}
 
       true ->
@@ -102,8 +121,13 @@ defmodule Teiserver.Account.PartyServer do
 
         PubSub.broadcast(
           Central.PubSub,
-          "party:#{party.id}",
-          {:party, :member_leave, party.id, userid}
+          "teiserver_party:#{party.id}",
+          %{
+            channel: "teiserver_party:#{party.id}",
+            event: :updated_values,
+            party_id: party.id,
+            new_values: %{members: new_members}
+          }
         )
 
         %{party | members: new_members}
@@ -115,13 +139,18 @@ defmodule Teiserver.Account.PartyServer do
   def handle_cast({:kick_member, userid}, %{party: party} = state) do
     new_party = cond do
       Enum.member?(party.members, userid) ->
+        new_members = List.delete(party.members, userid)
         PubSub.broadcast(
           Central.PubSub,
-          "party:#{party.id}",
-          {:party, :kick_member, party.id, userid}
+          "teiserver_party:#{party.id}",
+          %{
+            channel: "teiserver_party:#{party.id}",
+            event: :updated_values,
+            party_id: party.id,
+            new_values: %{members: new_members}
+          }
         )
 
-        new_members = List.delete(party.members, userid)
         %{party | members: new_members}
 
       true -> party
@@ -136,15 +165,16 @@ defmodule Teiserver.Account.PartyServer do
       true ->
         PubSub.broadcast(
           Central.PubSub,
-          "party:#{party.id}",
-          {:party, :new_leader, party.id, userid}
+          "teiserver_party:#{party.id}",
+          %{
+            channel: "teiserver_party:#{party.id}",
+            event: :updated_values,
+            party_id: party.id,
+            new_values: %{leader: userid}
+          }
         )
         %{party | leader: userid}
     end
-    {:noreply, %{state | party: new_party}}
-  end
-
-  def handle_cast({:update_party, new_party}, state) do
     {:noreply, %{state | party: new_party}}
   end
 

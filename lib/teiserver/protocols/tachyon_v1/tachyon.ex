@@ -134,6 +134,25 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
     %{state | lobby_id: lobby_id}
   end
 
+  def do_action(:lead_party, party_id, state) do
+    PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{party_id}")
+    PubSub.subscribe(Central.PubSub, "teiserver_party:#{party_id}")
+
+    %{state | party_id: party_id, party_role: :leader}
+  end
+
+  def do_action(:join_party, party_id, state) do
+    PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{party_id}")
+    PubSub.subscribe(Central.PubSub, "teiserver_party:#{party_id}")
+
+    %{state | party_id: party_id, party_role: :member}
+  end
+
+  def do_action(:leave_party, party_id, state) do
+    PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{party_id}")
+    %{state | party_id: nil, party_role: nil}
+  end
+
   def do_action(:watch_all_lobbies, _, state) do
     PubSub.unsubscribe(Central.PubSub, "teiserver_global_lobby_updates")
     PubSub.subscribe(Central.PubSub, "teiserver_global_lobby_updates")

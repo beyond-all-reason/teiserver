@@ -211,29 +211,24 @@ Information pertinent to a specific user
 Sent from the queue wait server to update regarding it's status
 Valid events
 ```elixir
-# Indicates a user has been added to a party
-add_invite: party_id, userid
+%{
+  event: :updated_values,
+  party_id: party_id,
+  new_values: map
+}
 
-remove_invite: party_id, userid
-accept_invite: party_id, userid
-member_leave: party_id, userid
-kick_member: party_id, userid
-new_leader: party_id, userid
-closed: party_id, reason
-chat: party_id, {userid, message}
+%{
+  event: :closed,
+  party_id: party_id,
+  reason: string
+}
 
-
-  {:party, :add_invite, party_id, userid}
-  {:party, :remove_invite, party_id, userid}
-  {:party, :accept_invite, party_id, userid}
-
-  {:party, :member_leave, party_id, userid}
-  {:party, :kick_member, party_id, userid}
-  {:party, :new_leader, party_id, userid}
-  
-  {:party, :closed, party_id, reason}
-
-  {:party, :chat, party_id, {userid, message}}
+%{
+  event: :chat,
+  party_id: party_id,
+  senderid: userid,
+  message: string
+}
 ```
 
 

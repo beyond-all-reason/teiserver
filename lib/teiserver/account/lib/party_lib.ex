@@ -28,6 +28,14 @@ defmodule Teiserver.Account.PartyLib do
     call_party(party_id, :get_party)
   end
 
+  @spec party_exists?(T.party_id()) :: boolean()
+  def party_exists?(party_id) do
+    case Horde.Registry.lookup(Teiserver.PartyRegistry, party_id) do
+      [{pid, _}] -> true
+      _ -> false
+    end
+  end
+
   @spec list_party_ids() :: [T.party_id()]
   def list_party_ids() do
     Horde.Registry.select(Teiserver.PartyRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
@@ -59,12 +67,21 @@ defmodule Teiserver.Account.PartyLib do
     party
   end
 
-  # Updates
-  @spec replace_update_party(Map.t()) :: :ok | nil
-  def replace_update_party(%{id: id} = party) do
-    cast_party(id, {:update_party, party})
+  # Members
+  @spec create_party_invite(T.party_id(), T.userid()) :: :ok | nil
+  def create_party_invite(party_id, userid) when is_integer(userid) do
+    cast_party(party_id, {:create_invite, userid})
   end
 
+  @spec cancel_party_invite(T.party_id(), T.userid()) :: :ok | nil
+  def cancel_party_invite(party_id, userid) when is_integer(userid) do
+    cast_party(party_id, {:cancel_invite, userid})
+  end
+
+  @spec accept_party_invite(T.party_id(), T.userid()) :: :ok | nil
+  def accept_party_invite(party_id, userid) when is_integer(userid) do
+    cast_party(party_id, {:accept_invite, userid})
+  end
 
   # Process stuff
   @spec start_party_server(T.lobby()) :: pid()

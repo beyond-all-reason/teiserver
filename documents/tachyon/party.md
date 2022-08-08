@@ -22,13 +22,13 @@ Creates a new party, if you are part of an existing party it will remove you fro
 ```
 
 ### `c.party.info`
-Returns info about a given party. If you are not a member of the party then pending invites will always be missing.
+Returns info about a given party. If you are not a member of the party then pending invites will always be missing. If the party does not exist, it will return null for the party.
 
 #### Example input/output
 ```json
 {
   "cmd": "c.party.info",
-  "id": "1d5366a6-f55d-11ec-b427-f02f74dbae33"
+  "party_id": "1d5366a6-f55d-11ec-b427-f02f74dbae33"
 }
 
 {
@@ -40,17 +40,22 @@ Returns info about a given party. If you are not a member of the party then pend
     "pending_invites": []
   }
 }
+
+{
+  "cmd": "s.party.info",
+  "party": null
+}
 ```
 
 ### `s.party.updated`
-Sends a new party state. Fires upon any updates to the party such as change of invites, membership or leadership. It will contain a new party state similar to if you had requested it via `c.party.info`.
+Sends a new party state. Fires upon any updates to the party such as change of invites, membership or leadership. It will contain a the changed values within the party. If a value is absent it means it was not changed.
 
 #### Example output
 ```json
 {
   "cmd": "s.party.updated",
-  "party": {
-    "id": "1d5366a6-f55d-11ec-b427-f02f74dbae33",
+  "party_id": "1d5366a6-f55d-11ec-b427-f02f74dbae33",
+  "new_values": {
     "leader": 123,
     "members": [123, 124],
     "pending_invites": [125]

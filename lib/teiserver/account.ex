@@ -1357,9 +1357,21 @@ defmodule Teiserver.Account do
   @spec create_party(T.userid()) :: T.party()
   defdelegate create_party(userid), to: PartyLib
 
-  @spec cast_party(T.party_id(), any) :: any
-  defdelegate cast_party(userid, msg), to: PartyLib
+  @spec create_party_invite(T.party_id(), T.userid()) :: :ok | nil
+  defdelegate create_party_invite(party_id, userid), to: PartyLib
+
+  @spec accept_party_invite(T.party_id(), T.userid()) :: :ok | nil
+  defdelegate accept_party_invite(party_id, userid), to: PartyLib
+
+  @spec cancel_party_invite(T.party_id(), T.userid()) :: :ok | nil
+  defdelegate cancel_party_invite(party_id, userid), to: PartyLib
+
+  @spec party_exists?(T.party_id()) :: boolean()
+  defdelegate party_exists?(party_id), to: PartyLib
+
+  @spec cast_party(T.party_id(), any) :: any | nil
+  defdelegate cast_party(party_id, msg), to: PartyLib
 
   @spec call_party(T.party_id(), any) :: any | nil
-  defdelegate call_party(userid, msg), to: PartyLib
+  defdelegate call_party(party_id, msg), to: PartyLib
 end
