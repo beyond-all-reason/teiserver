@@ -12,7 +12,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     {:ok, socket: socket, user: user, pid: pid}
   end
 
-  test "lobby host", %{socket: socket, pid: pid} do
+  test "lobby host", %{socket: socket, pid: pid, user: host} do
     # Open the lobby
     lobby_data = %{
       cmd: "c.lobby.create",
@@ -94,11 +94,15 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     data = %{cmd: "c.lobby_host.respond_to_join_request", userid: user3.id, response: "reject", reason: "reason given"}
     _tachyon_send(socket, data)
 
+    uuid = Battle.get_lobby_match_uuid(lobby_id)
+
     assert reply == [%{
       "cmd" => "s.lobby.join_response",
-      "result" => "reject",
-      "reason" => "reason given",
-      "lobby_id" => lobby_id
+      "result" => "approve",
+      "bots" => %{},
+      "lobby" => %{"disabled_units" => [], "engine_name" => "spring-105", "engine_version" => "105.1.2.3", "founder_id" => host.id, "game_name" => "BAR", "id" => lobby_id, "in_progress" => false, "ip" => "127.0.0.1", "locked" => false, "map_hash" => "string_of_characters", "map_name" => "koom valley", "max_players" => 16, "name" => "EU 01 - 123", "passworded" => true, "players" => [], "public" => true, "settings" => %{"max_players" => 12}, "start_rectangles" => %{}, "started_at" => nil, "type" => "normal"},
+      "member_list" => [],
+      "modoptions" => %{"server/match/uuid" => uuid}
     }]
 
     # Now request again but this time accept

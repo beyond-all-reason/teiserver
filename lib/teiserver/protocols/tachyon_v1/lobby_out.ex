@@ -222,6 +222,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
         }
       result ->
         member_list = result.member_list
+          |> Enum.uniq
           |> Enum.map(fn userid ->
             client = Account.get_client_by_id(userid)
             Tachyon.convert_object(client, :client)

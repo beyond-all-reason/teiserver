@@ -178,20 +178,19 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   end
 
   # Client message
-  def handle_info({:client_message, :matchmaking, _userid, {:join_battle, _lobby_id}}, socket) do
-    Logger.warn("index.ex Join battle")
-    {:noreply, socket}
-  end
-
-  def handle_info({:client_message, :matchmaking, _userid, {:match_ready, {_queue_id, match_id}}}, socket) do
+  def handle_info(data = %{
+    channel: "teiserver_client_messages:" <> _userid_str,
+    event: :matchmaking,
+    sub_event: :match_ready
+  }, socket) do
     Logger.warn("index.ex Match ready")
     {:noreply,
       socket
-      |> assign(:match_id, match_id)
+      |> assign(:match_id, data.match_id)
     }
   end
 
-  def handle_info({:client_message, _topic, _userid, _data}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _userid_str}, socket) do
     {:noreply, socket}
   end
 

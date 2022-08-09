@@ -215,23 +215,7 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # Client channel messages
-  def handle_info({:client_message, :received_direct_message, _userid, {_from_id, _message}}, state) do
-    # TODO: Currently we seem to subscribe to multiple channels at once
-    # so if we uncomment this we get messages double up
-    # new_state = new_chat_message(:direct_message, from_id, nil, message, state)
-    # {:noreply, new_state}
-    {:noreply, state}
-  end
-
-  def handle_info({:client_message, :matchmaking, _userid, _data}, state) do
-    {:noreply, state}
-  end
-
-  def handle_info({:client_message, :lobby, _userid, _data}, state) do
-    {:noreply, state}
-  end
-
-  def handle_info({:client_message, _topic, _userid, _data}, state) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _userid_str}, state) do
     {:noreply, state}
   end
 

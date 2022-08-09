@@ -172,16 +172,21 @@ defmodule Teiserver.Battle.Lobby do
 
   # Used to send the user PID a join battle command
   @spec force_add_user_to_battle(T.userid(), T.lobby_id()) :: :ok | nil
-  def force_add_user_to_battle(userid, battle_lobby_id) do
+  def force_add_user_to_battle(userid, lobby_id) do
     remove_user_from_any_lobby(userid)
     script_password = new_script_password()
 
-    add_user_to_battle(userid, battle_lobby_id, script_password)
+    add_user_to_battle(userid, lobby_id, script_password)
 
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_client_messages:#{userid}",
-      {:client_message, :force_join_lobby, userid, {battle_lobby_id, script_password}}
+      %{
+        channel: "teiserver_client_messages:#{userid}",
+        event: :force_join_lobby,
+        lobby_id: lobby_id,
+        script_password: script_password
+      }
     )
 
     # TODO: Depreciate this
@@ -189,7 +194,7 @@ defmodule Teiserver.Battle.Lobby do
       nil ->
         nil
       client ->
-        send(client.tcp_pid, {:force_join_battle, battle_lobby_id, script_password})
+        send(client.tcp_pid, {:force_join_battle, lobby_id, script_password})
     end
   end
 
@@ -478,7 +483,12 @@ defmodule Teiserver.Battle.Lobby do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_client_messages:#{userid}",
-      {:client_message, :join_lobby_request_response, userid, {lobby_id, :accept}}
+      %{
+        channel: "teiserver_client_messages:#{userid}",
+        event: :join_lobby_request_response,
+        lobby_id: lobby_id,
+        response: :accept
+      }
     )
     # TODO: Refactor this as per the TODO list, this should take place here and not in the client process
     # add_user_to_battle(userid, lobby_id)
@@ -491,7 +501,13 @@ defmodule Teiserver.Battle.Lobby do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_client_messages:#{userid}",
-      {:client_message, :join_lobby_request_response, userid, {lobby_id, :deny, reason}}
+      %{
+        channel: "teiserver_client_messages:#{userid}",
+        event: :join_lobby_request_response,
+        lobby_id: lobby_id,
+        response: :accept,
+        reason: reason
+      }
     )
 
     client = Client.get_client_by_id(userid)

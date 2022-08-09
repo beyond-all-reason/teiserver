@@ -4,6 +4,7 @@ defmodule Teiserver.TachyonTcpServer do
   require Logger
   alias Phoenix.PubSub
   alias Central.Config
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   alias Teiserver.{User, Client}
   alias Teiserver.Data.Types, as: T
@@ -214,6 +215,9 @@ defmodule Teiserver.TachyonTcpServer do
     case event do
       :updated_values ->
         state.protocol_out.reply(:party, :updated, {party_id, data.new_values}, state)
+
+      _ ->
+        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}")
     end
 
     {:noreply, state}
@@ -235,31 +239,40 @@ defmodule Teiserver.TachyonTcpServer do
     {:noreply, state.protocol_out.reply(:lobby, event, {lobby_id, data}, state)}
   end
 
-  def handle_info({:client_message, event, userid, data}, state) do
+  def handle_info(data = %{channel: "teiserver_client_messages:" <> userid_str}, state) do
+    userid = int_parse(userid_str)
+
     if state.userid == userid do
-      case event do
+      case data.event do
         :join_lobby_request_response ->
-          {:noreply, state.protocol_out.reply(:lobby, event, data, state)}
+          case data.response do
+            :accept ->
+              state.protocol_out.reply(:lobby, data.event, {data.lobby_id, :accept}, state)
+            :deny ->
+              state.protocol_out.reply(:lobby, data.event, {data.lobby_id, :deny, data.reason}, state)
+          end
 
         :force_join_lobby ->
-          {:noreply, state.protocol_out.reply(:lobby, event, data, state)}
+          state.protocol_out.reply(:lobby, data.event, {data.lobby_id, data.script_password}, state)
 
         :received_direct_message ->
-          {:noreply, state.protocol_out.reply(:communication, event, data, state)}
+          state.protocol_out.reply(:communication, data.event, {data.sender_id, data.message_content}, state)
 
         :lobby_direct_announce ->
-          {:noreply, state.protocol_out.reply(:lobby, :received_lobby_direct_announce, data, state)}
+          state.protocol_out.reply(:lobby, :received_lobby_direct_announce, {data.sender_id, data.message_content}, state)
 
         :matchmaking ->
-          {event, event_data} = data
-          {:noreply, state.protocol_out.reply(:matchmaking, event, event_data, state)}
+          state.protocol_out.reply(:matchmaking, data.sub_event, {data.queue_id, data.match_id}, state)
 
         _ ->
-          {:noreply, state.protocol_out.reply(:client, event, data, state)}
+          Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}")
+          state
       end
     else
-      {:noreply, state}
+      state
     end
+
+    {:noreply, state}
   end
 
   # Connection

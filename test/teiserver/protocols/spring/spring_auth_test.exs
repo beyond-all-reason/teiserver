@@ -14,7 +14,7 @@ defmodule Teiserver.SpringAuthTest do
       auth_setup: 1,
       _send_raw: 2,
       _recv_raw: 1,
-      _recv_binary: 1,
+      # _recv_binary: 1,
       _recv_until: 1,
       new_user: 0,
       new_user: 2

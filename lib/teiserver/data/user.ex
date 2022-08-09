@@ -530,8 +530,8 @@ defmodule Teiserver.User do
   def send_direct_message(from_id, to_id, "!start" <> s), do: send_direct_message(from_id, to_id, "!cv start" <> s)
   def send_direct_message(from_id, to_id, "!joinas" <> s), do: send_direct_message(from_id, to_id, "!cv joinas" <> s)
 
-  def send_direct_message(from_id, to_id, message_parts) when is_list(message_parts) do
-    sender = get_user_by_id(from_id)
+  def send_direct_message(sender_id, to_id, message_parts) when is_list(message_parts) do
+    sender = get_user_by_id(sender_id)
     if not is_restricted?(sender, ["All chat", "Direct chat"]) do
 
       if is_bot?(to_id) do
@@ -543,7 +543,7 @@ defmodule Teiserver.User do
                   |> String.replace("!clan ", "")
                   |> String.trim()
 
-                Account.update_user_stat(from_id, %{"clan" => clan})
+                Account.update_user_stat(sender_id, %{"clan" => clan})
 
               true ->
                 :ok
@@ -554,13 +554,18 @@ defmodule Teiserver.User do
       PubSub.broadcast(
         Central.PubSub,
         "legacy_user_updates:#{to_id}",
-        {:direct_message, from_id, message_parts}
+        {:direct_message, sender_id, message_parts}
       )
 
       PubSub.broadcast(
         Central.PubSub,
         "teiserver_client_messages:#{to_id}",
-        {:client_message, :received_direct_message, to_id, {from_id, message_parts}}
+        %{
+          channel: "teiserver_client_messages:#{to_id}",
+          event: :received_direct_message,
+          sender_id: sender_id,
+          message_content: message_parts
+        }
       )
     end
     :ok

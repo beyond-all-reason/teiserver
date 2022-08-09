@@ -123,7 +123,12 @@ defmodule Teiserver.Battle.LobbyChat do
       PubSub.broadcast(
         Central.PubSub,
         "teiserver_client_messages:#{to_id}",
-        {:client_message, :lobby_direct_announce, to_id, {from_id, msg}}
+        %{
+          channel: "teiserver_client_messages:#{to_id}",
+          event: :lobby_direct_announce,
+          sender_id: from_id,
+          message_content: msg
+        }
       )
       :ok
     else

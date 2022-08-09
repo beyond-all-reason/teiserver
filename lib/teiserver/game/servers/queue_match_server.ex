@@ -95,7 +95,13 @@ defmodule Teiserver.Game.QueueMatchServer do
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_client_messages:#{userid}",
-          {:client_message, :matchmaking, userid, {:match_ready, {state.queue_id, state.match_id}}}
+          %{
+            channel: "teiserver_client_messages:#{userid}",
+            event: :matchmaking,
+            sub_event: :match_ready,
+            queue_id: state.queue_id,
+            match_id: state.match_id
+          }
         )
       end)
   end
@@ -107,7 +113,13 @@ defmodule Teiserver.Game.QueueMatchServer do
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_client_messages:#{userid}",
-          {:client_message, :matchmaking, userid, {:match_cancelled, {state.queue_id, state.match_id}}}
+          %{
+            channel: "teiserver_client_messages:#{userid}",
+            event: :matchmaking,
+            sub_event: :match_cancelled,
+            queue_id: state.queue_id,
+            match_id: state.match_id
+          }
         )
       end)
 
@@ -125,7 +137,13 @@ defmodule Teiserver.Game.QueueMatchServer do
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_client_messages:#{userid}",
-          {:client_message, :matchmaking, userid, {:match_declined, {state.queue_id, state.match_id}}}
+          %{
+            channel: "teiserver_client_messages:#{userid}",
+            event: :matchmaking,
+            sub_event: :match_declined,
+            queue_id: state.queue_id,
+            match_id: state.match_id
+          }
         )
 
         PubSub.broadcast(

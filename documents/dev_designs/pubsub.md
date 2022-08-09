@@ -159,23 +159,66 @@ A message every time a user logs in or logs out. Unlike legacy all_user_updates 
 #### teiserver_client_messages:#{userid}
 This is the channel for sending messages to the client. It allows the client on the web and lobby application to receive messages.
 ```elixir
-  # Structure
-  {:client_message, topic, userid, data}
-  
-  # Matchmaking
-  {:client_message, :matchmaking, userid, {:match_ready, {queue_id, match_id}}}
-  {:client_message, :matchmaking, userid, {:join_lobby, lobby_id}}
-  {:client_message, :matchmaking, userid, {:match_cancelled, {queue_id, match_id}}}
-  {:client_message, :matchmaking, userid, {:match_declined, {queue_id, match_id}}}
+# Matchmaking
+%{
+  event: :matchmaking,
+  sub_event: :match_ready,
+  queue_id: queue_id,
+  match_id: match_id
+}
 
-  # Messaging
-  {:client_message, :received_direct_message, userid, {from_id, message_content}}
-  {:client_message, :lobby_direct_say, userid, {from_id, message_content}}
-  {:client_message, :lobby_direct_announce, userid, {from_id, message_content}}
+%{
+  event: :matchmaking,
+  sub_event: :join_lobby,
+  lobby_id: lobby_id
+}
 
-  # Server initiated actions related to the lobby
-  {:client_message, :join_lobby_request_response, userid, {lobby_id, response, reason}}
-  {:client_message, :force_join_lobby, userid, {lobby_id, script_password}}
+%{
+  event: :matchmaking,
+  sub_event: :match_cancelled,
+  queue_id: queue_id,
+  match_id: match_id
+}
+
+%{
+  event: :matchmaking,
+  sub_event: :match_declined,
+  queue_id: queue_id,
+  match_id: match_id
+}
+
+# Messaging
+%{
+  event: :received_direct_message,
+  sender_id: userid,
+  message_content: list(string)
+}
+
+%{
+  event: :lobby_direct_say,
+  sender_id: userid,
+  message_content: list(string)
+}
+
+%{
+  event: :lobby_direct_announce,
+  sender_id: userid,
+  message_content: list(string)
+}
+
+# Server initiated actions related to the lobby
+%{
+  event: :join_lobby_request_response,
+  lobby_id: lobby_id,
+  response: :accept | :deny,
+  reason: string
+}
+
+%{
+  event: :force_join_lobby,
+  lobby_id: lobby_id,
+  script_password: string
+}
 ```
 
 #### teiserver_client_action_updates:#{userid}

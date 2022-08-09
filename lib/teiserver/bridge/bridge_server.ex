@@ -145,13 +145,14 @@ defmodule Teiserver.Bridge.BridgeServer do
     handle_info({:new_message, from_id, room_name, message}, state)
   end
 
-  def handle_info({:client_message, :received_direct_message, _userid, {from_id, _content}}, state) do
-    username = User.get_username(from_id)
-    User.send_direct_message(state.userid, from_id, "I don't currently handle messages, sorry #{username}")
+  def handle_info(data = %{channel: "teiserver_client_messages:" <> _, event: :received_direct_message}, state) do
+    username = User.get_username(data.sender_id)
+    User.send_direct_message(state.userid, data.sender_id, "I don't currently handle messages, sorry #{username}")
     {:noreply, state}
   end
 
-  def handle_info({:client_message, _, _, _}, state), do: {:noreply, state}
+  def handle_info(%{channel: "teiserver_client_messages:" <> _}, state), do: {:noreply, state}
+
 
   def handle_info({:application, :prep_stop}, state) do
     channels = Application.get_env(:central, DiscordBridge)[:bridges]
