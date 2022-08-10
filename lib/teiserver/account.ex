@@ -1315,6 +1315,9 @@ defmodule Teiserver.Account do
   @spec get_client_by_id(T.userid()) :: nil | T.client()
   defdelegate get_client_by_id(userid), to: ClientLib
 
+  @spec client_exists?(T.userid()) :: boolean()
+  defdelegate client_exists?(userid), to: ClientLib
+
   @spec get_clients([T.userid()]) :: List.t()
   defdelegate get_clients(id_list), to: ClientLib
 

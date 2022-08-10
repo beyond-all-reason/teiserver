@@ -170,9 +170,16 @@ defmodule Teiserver.Battle.Lobby do
     :ok
   end
 
-  # Used to send the user PID a join battle command
   @spec force_add_user_to_battle(T.userid(), T.lobby_id()) :: :ok | nil
   def force_add_user_to_battle(userid, lobby_id) do
+    if Account.client_exists?(userid) and Battle.lobby_exists?(lobby_id) do
+      do_force_add_user_to_battle(userid, lobby_id)
+    end
+  end
+
+  # Used to send the user PID a join battle command
+  @spec do_force_add_user_to_battle(T.userid(), T.lobby_id()) :: :ok | nil
+  defp do_force_add_user_to_battle(userid, lobby_id) do
     remove_user_from_any_lobby(userid)
     script_password = new_script_password()
 

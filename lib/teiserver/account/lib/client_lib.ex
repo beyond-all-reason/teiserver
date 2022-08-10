@@ -118,6 +118,14 @@ defmodule Teiserver.Account.ClientLib do
     server_pid
   end
 
+  @spec client_exists?(T.userid()) :: pid() | boolean
+  def client_exists?(userid) do
+    case Horde.Registry.lookup(Teiserver.ClientRegistry, userid) do
+      [{_pid, _}] -> true
+      _ -> false
+    end
+  end
+
   @spec get_client_pid(T.userid()) :: pid() | nil
   def get_client_pid(userid) do
     case Horde.Registry.lookup(Teiserver.ClientRegistry, userid) do
