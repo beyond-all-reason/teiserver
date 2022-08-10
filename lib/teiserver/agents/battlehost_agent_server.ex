@@ -11,7 +11,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
 
   @map_hash "1565299817"
   @game_hash "-692780543"
-  @game_name "Beyond All Reason test-20247-08249af"
+  @game_name "Beyond All Reason test-20477-dd6db82"
   @engine_version "105.1.1-966-g597222f BAR105"
 
   def handle_info(:startup, state) do

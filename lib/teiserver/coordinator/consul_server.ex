@@ -115,7 +115,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info(:match_stop, state) do
     Battle.get_lobby_member_list(state.lobby_id)
       |> Enum.each(fn userid ->
-        Lobby.force_change_client(state.coordinator_id, userid, %{ready: false})
+        Lobby.force_change_client(state.coordinator_id, userid, %{ready: false, unready_at: System.system_time(:millisecond)})
 
         if User.is_restricted?(userid, ["All chat", "Battle chat"]) do
           name = Account.get_username_by_id(userid)
@@ -442,6 +442,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp request_user_change_status(new_client, %{userid: userid} = existing, state) do
     list_status = get_list_status(userid, state)
 
+    # Are they readying up really fast?
+    if existing.ready == false and new_client.ready == true do
+      time_elapsed = System.system_time(:millisecond) - existing.unready_at
+      if time_elapsed < 1000 do
+        Logger.warn("Ready up in #{time_elapsed}ms by #{existing.userid}/#{existing.name} using #{existing.lobby_client}")
+      end
+    end
+
     # Level to play?
     new_client = if existing.rank >= state.level_to_play do
       new_client
@@ -483,7 +491,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
       # If you make yourself a player then you are made unready at the same time
       existing.player == false and new_client.player == true ->
-        {true, %{new_client | ready: false}}
+        {true, %{new_client | ready: false, unready_at: System.system_time(:millisecond)}}
 
       # Default to true
       true ->
@@ -800,7 +808,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       [userid | _] = get_queue(state)
 
       existing = Client.get_client_by_id(userid)
-      new_client = Map.merge(existing, %{player: true, ready: false})
+      new_client = Map.merge(existing, %{player: true, ready: false, unready_at: System.system_time(:millisecond)})
       case request_user_change_status(new_client, existing, state) do
         {true, allowed_client} ->
           # Sometimes people get added and SPADS thinks they need to go, this delay might help
