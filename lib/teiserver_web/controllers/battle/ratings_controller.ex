@@ -39,7 +39,7 @@ defmodule TeiserverWeb.Battle.RatingsController do
         rating_type_id: type_id,
         updated_after: activity_time
       ],
-      order_by: "Rating value high to low",
+      order_by: "Leaderboard rating high to low",
       preload: [:user],
       limit: 30
     )

@@ -12,6 +12,8 @@
         }) %>
         <br /><br />
 
+The leaderboard weighs uncertainty a lot more than lobby balance. As a result the number you see here will not be the same as the value you see ingame.
+
 <table class="table table-sm">
   <thead>
     <tr>
@@ -25,22 +27,24 @@
   </thead>
   <tbody>
     <%= if @my_rating do %>
-        <tr style={"background-color: #{rgba_css @current_user.colour};"}>
-          <td style={"background-color: #{@current_user.colour}; color: #FFF;"} width="22">
-            &nbsp;
-          </td>
-          <td style={"background-color: #{@current_user.colour}; color: #FFF;"} width="22">
-            <%= central_component "icon", icon: @current_user.icon %>
-          </td>
-          <td><%= @current_user.name %></td>
+      <% age = Timex.diff(Timex.now(), @my_rating.last_updated, :days) %>
+    
+      <tr style={"background-color: #{rgba_css @current_user.colour};"}>
+        <td style={"background-color: #{@current_user.colour}; color: #FFF;"} width="22">
+          &nbsp;
+        </td>
+        <td style={"background-color: #{@current_user.colour}; color: #FFF;"} width="22">
+          <%= central_component "icon", icon: @current_user.icon %>
+        </td>
+        <td><%= @current_user.name %></td>
 
-          <td><%= @my_rating.rating_value |> round(2) %></td>
+        <td><%= @my_rating.leaderboard_rating |> round(2) %></td>
 
-          <td><%= date_to_str(@my_rating.last_updated, format: :dmy) %></td>
-        </tr>
-        <tr>
-          <td colspan="5">&nbsp;</td>
-        </tr>
+        <td><%= age %></td>
+      </tr>
+      <tr>
+        <td colspan="5">&nbsp;</td>
+      </tr>
     <% end %>
   
     <%= for {rating, pos} <- Enum.with_index(@ratings) do %>
@@ -55,7 +59,7 @@
         </td>
         <td><%= rating.user.name %></td>
 
-        <td><%= rating.rating_value |> round(2) %></td>
+        <td><%= rating.leaderboard_rating |> round(2) %></td>
 
         <td><%= age %></td>
       </tr>

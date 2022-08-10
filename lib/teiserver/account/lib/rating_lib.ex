@@ -71,6 +71,16 @@ defmodule Teiserver.Account.RatingLib do
       order_by: [asc: ratings.rating_value]
   end
 
+  def order_by(query, "Leaderboard rating high to low") do
+    from ratings in query,
+      order_by: [desc: ratings.leaderboard_rating]
+  end
+
+  def order_by(query, "Leaderboard rating low to high") do
+    from ratings in query,
+      order_by: [asc: ratings.leaderboard_rating]
+  end
+
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
   def preload(query, preloads) do
