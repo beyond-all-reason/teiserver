@@ -1,5 +1,11 @@
-<div class="row">
+<style type="text/css">
+  .message {
+    word-wrap: break-word;
+    max-width: 70vw;
+  }
+</style>
 
+<div class="row">
   <div class="col-md-6">
     <h4>Room chat</h4>
     <table class='table table-sm'>
@@ -14,7 +20,7 @@
         <%= for msg <- @room_messages do %>
           <tr>
             <td><%= msg.chat_room %></td>
-            <td><%= msg.content %></td>
+            <td class="message"><%= msg.content %></td>
             <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
           </tr>
         <% end %>
@@ -40,7 +46,7 @@
                 <%= msg.lobby_guid |> String.slice(0..7) %>
               </a>
             </td>
-            <td><%= msg.content %></td>
+            <td class="message"><%= msg.content %></td>
             <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
           </tr>
         <% end %>

@@ -2,6 +2,13 @@
 
 <%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "chat"}) %>
 
+<style type="text/css">
+  .message {
+    word-wrap: break-word;
+    max-width: 70vw;
+  }
+</style>
+
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
@@ -38,7 +45,7 @@
                 <%= msg.user.name %>
               </a>
             </td>
-            <td><%= msg.content %></td>
+            <td class="message"><%= msg.content %></td>
             <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
           </tr>
         <% end %>
@@ -69,7 +76,7 @@
                 <%= msg.user.name %>
               </a>
             </td>
-            <td><%= msg.content %></td>
+            <td class="message"><%= msg.content %></td>
             <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
           </tr>
         <% end %>
