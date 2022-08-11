@@ -1363,7 +1363,7 @@ defmodule Teiserver.Account do
   @spec create_party_invite(T.party_id(), T.userid()) :: :ok | nil
   defdelegate create_party_invite(party_id, userid), to: PartyLib
 
-  @spec accept_party_invite(T.party_id(), T.userid()) :: :ok | nil
+  @spec accept_party_invite(T.party_id(), T.userid()) :: {true, map()} | {false, String.t()}
   defdelegate accept_party_invite(party_id, userid), to: PartyLib
 
   @spec cancel_party_invite(T.party_id(), T.userid()) :: :ok | nil

@@ -264,6 +264,9 @@ defmodule Teiserver.TachyonTcpServer do
         :matchmaking ->
           state.protocol_out.reply(:matchmaking, data.sub_event, {data.queue_id, data.match_id}, state)
 
+        :party_invite ->
+          state.protocol_out.reply(:party, :invite, data.party_id, state)
+
         _ ->
           Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}")
           state

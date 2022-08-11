@@ -78,9 +78,9 @@ defmodule Teiserver.Account.PartyLib do
     cast_party(party_id, {:cancel_invite, userid})
   end
 
-  @spec accept_party_invite(T.party_id(), T.userid()) :: :ok | nil
+  @spec accept_party_invite(T.party_id(), T.userid()) :: {true, map()} | {false, String.t()}
   def accept_party_invite(party_id, userid) when is_integer(userid) do
-    cast_party(party_id, {:accept_invite, userid})
+    call_party(party_id, {:accept_invite, userid})
   end
 
   # Process stuff

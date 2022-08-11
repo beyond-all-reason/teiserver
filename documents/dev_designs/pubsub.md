@@ -219,6 +219,12 @@ This is the channel for sending messages to the client. It allows the client on 
   lobby_id: lobby_id,
   script_password: string
 }
+
+# Parties
+%{
+  event: :party_invite,
+  party_id: party_id
+}
 ```
 
 #### teiserver_client_action_updates:#{userid}

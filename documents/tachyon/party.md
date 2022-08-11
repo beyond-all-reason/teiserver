@@ -81,7 +81,6 @@ Server message telling a user they have been invited to a party, it will contain
 ```json
 {
   "cmd": "s.party.invite",
-  "invited_by": 123,
   "party": {
     "id": "1d5366a6-f55d-11ec-b427-f02f74dbae33",
     "leader": 123,
@@ -103,7 +102,8 @@ Accept an invite to a party, this will result in you being added to the party as
 
 // Success
 {
-  "cmd": "s.party.info",
+  "cmd": "s.party.accept",
+  "result": "accepted",
   "party": Party
 }
 

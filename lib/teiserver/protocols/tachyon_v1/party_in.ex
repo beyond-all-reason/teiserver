@@ -29,8 +29,15 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
     state
   end
 
-  def do_handle("accept", _, state) do
-    reply(:party, :create, nil, state)
+  def do_handle("accept", %{"party_id" => party_id}, state) do
+    case Account.accept_party_invite(party_id, state.userid) do
+      {true, party} ->
+        reply(:party, :accept, {true, party}, state)
+
+      {false, reason} ->
+        reply(:party, :accept, {false, reason}, state)
+    end
+    state
   end
 
   def do_handle("decline", _, state) do

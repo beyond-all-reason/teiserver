@@ -1,4 +1,6 @@
 defmodule Teiserver.Protocols.Tachyon.V1.PartyOut do
+  @moduledoc false
+  alias Teiserver.Account
   alias Teiserver.Protocols.Tachyon.V1.Tachyon
 
   @spec do_reply(atom(), any) :: Map.t()
@@ -28,6 +30,31 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyOut do
       cmd: "s.party.updated",
       party_id: party_id,
       new_values: new_values
+    }
+  end
+
+  def do_reply(:invite, party_id) do
+    party = Account.get_party(party_id)
+
+    %{
+      cmd: "s.party.invite",
+      party: Tachyon.convert_object(party, :party_full)
+    }
+  end
+
+  def do_reply(:accept, {true, party}) do
+    %{
+      cmd: "s.party.accept",
+      result: "accepted",
+      party: Tachyon.convert_object(party, :party_full)
+    }
+  end
+
+  def do_reply(:accept, {false, reason}) do
+    %{
+      cmd: "s.party.accept",
+      result: "failure",
+      reason: reason
     }
   end
 end
