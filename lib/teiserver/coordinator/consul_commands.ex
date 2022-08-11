@@ -28,7 +28,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> Enum.map(fn l -> to_string(l) end)
       |> Enum.join(", ")
 
-    pos_str = case get_queue_position(get_queue(state), senderid) do
+    queue = get_queue(state)
+
+    pos_str = case get_queue_position(queue, senderid) do
       -1 ->
         nil
       pos ->
@@ -39,9 +41,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         end
     end
 
-    queue_string = get_queue(state)
+    queue_string = queue
       |> Enum.map(&User.get_username/1)
       |> Enum.join(", ")
+
+    queue_size = Enum.count(queue)
 
     player_count = Battle.get_lobby_player_count(state.lobby_id)
 
@@ -77,7 +81,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       "Locks: #{locks}",
       "Gatekeeper: #{state.gatekeeper}",
       pos_str,
-      "Join queue: #{queue_string}",
+      "Join queue: #{queue_string} (size: #{queue_size})",
       other_settings,
     ]
     |> List.flatten
