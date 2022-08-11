@@ -443,7 +443,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     list_status = get_list_status(userid, state)
 
     # Are they readying up really fast?
-    if existing.ready == false and new_client.ready == true do
+    if existing.ready == false and new_client.ready == true and existing.unready_at != nil do
       time_elapsed = System.system_time(:millisecond) - existing.unready_at
       if time_elapsed < 1000 do
         Logger.warn("Ready up in #{time_elapsed}ms by #{existing.userid}/#{existing.name} using #{existing.lobby_client}")
