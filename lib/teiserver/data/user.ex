@@ -903,7 +903,12 @@ defmodule Teiserver.User do
     update_user(%{user | restrictions: new_restrictions}, persist: true)
   end
 
-  @spec unbridge_user(T.user(), String.t(), non_neg_integer(), String.t()) :: any
+  @spec unbridge_user(T.user() | T.userid(), String.t(), non_neg_integer(), String.t()) :: any
+  def unbridge_user(userid, message, flagged_word_count, location) when is_integer(userid) do
+    unbridge_user(get_user_by_id(userid), message, flagged_word_count, location)
+  end
+
+  def unbridge_user(nil, _, _, _), do: :no_user
   def unbridge_user(user, message, flagged_word_count, location) do
     if not is_restricted?(user, ["Bridging"]) do
       coordinator_user_id = Coordinator.get_coordinator_userid()

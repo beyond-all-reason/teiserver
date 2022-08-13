@@ -35,6 +35,7 @@ defmodule Teiserver do
     Teiserver.Protocols.TachyonLib.decode(v)
   end
 
+  @spec accolade_status :: nil | :ok
   def accolade_status() do
     Application.put_env(:elixir, :ansi_enabled, true)
     Teiserver.Account.AccoladeLib.live_debug()

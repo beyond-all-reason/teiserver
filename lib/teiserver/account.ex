@@ -1305,6 +1305,9 @@ defmodule Teiserver.Account do
   @spec decache_user(T.userid()) :: :ok | :no_user
   defdelegate decache_user(userid), to: UserCache
 
+  @spec unbridge_user(T.user(), String.t(), non_neg_integer(), String.t()) :: any
+  defdelegate unbridge_user(user, message, flagged_word_count, location), to: Teiserver.User
+
 
   # Client stuff
   alias Teiserver.Account.ClientLib
@@ -1336,6 +1339,9 @@ defmodule Teiserver.Account do
   @spec replace_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: T.client()
   defdelegate replace_update_client(client, reason), to: ClientLib
 
+  @spec move_client_to_party(T.userid(), T.party_id()) :: :ok | nil
+  defdelegate move_client_to_party(userid, party_id), to: ClientLib
+
   @spec get_client_pid(T.userid()) :: pid() | nil
   defdelegate get_client_pid(userid), to: ClientLib
 
@@ -1363,7 +1369,7 @@ defmodule Teiserver.Account do
   @spec create_party_invite(T.party_id(), T.userid()) :: :ok | nil
   defdelegate create_party_invite(party_id, userid), to: PartyLib
 
-  @spec accept_party_invite(T.party_id(), T.userid()) :: {true, map()} | {false, String.t()}
+  @spec accept_party_invite(T.party_id(), T.userid()) :: {true, map()} | {false, String.t()} | nil
   defdelegate accept_party_invite(party_id, userid), to: PartyLib
 
   @spec cancel_party_invite(T.party_id(), T.userid()) :: :ok | nil
