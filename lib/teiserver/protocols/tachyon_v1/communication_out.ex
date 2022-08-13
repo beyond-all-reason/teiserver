@@ -11,7 +11,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.CommunicationOut do
     %{
       "cmd" => "s.communication.received_direct_message",
       "sender_id" => sender_id,
-      "message" => msg
+      "message" => msg |> Enum.join("\n")
     }
   end
 
@@ -19,14 +19,22 @@ defmodule Teiserver.Protocols.Tachyon.V1.CommunicationOut do
     %{
       "cmd" => "s.communication.received_direct_message",
       "sender_id" => sender_id,
-      "message" => msg
+      "message" => msg |> Enum.join("\n")
     }
   end
 
   def do_reply(:send_direct_message, :success) do
     %{
-      "cmd" => "s.lobby.send_direct_message",
+      "cmd" => "s.communication.send_direct_message",
       "result" => "success"
+    }
+  end
+
+  def do_reply(:send_direct_message, {:failure, reason}) do
+    %{
+      "cmd" => "s.communication.send_direct_message",
+      "result" => "failure",
+      "reason" => reason
     }
   end
 end

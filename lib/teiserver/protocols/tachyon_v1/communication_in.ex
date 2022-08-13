@@ -1,5 +1,5 @@
 defmodule Teiserver.Protocols.Tachyon.V1.CommunicationIn do
-  alias Teiserver.User
+  alias Teiserver.{Account, User}
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
@@ -8,7 +8,13 @@ defmodule Teiserver.Protocols.Tachyon.V1.CommunicationIn do
   end
 
   def do_handle("send_direct_message", %{"recipient_id" => recipient_id, "message" => message}, state) do
-    User.send_direct_message(state.userid, recipient_id, message)
-    reply(:communication, :send_direct_message, :success, state)
+    cond do
+      not Account.client_exists?(recipient_id) ->
+        reply(:communication, :send_direct_message, {:failure, "Recipient offline"}, state)
+
+      true ->
+        User.send_direct_message(state.userid, recipient_id, message)
+        reply(:communication, :send_direct_message, :success, state)
+    end
   end
 end

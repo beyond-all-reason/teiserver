@@ -74,7 +74,7 @@ Newest chat at the top of the list (read bottom to top).
                 <%= msg.lobby_guid |> String.slice(0..7) %>
               </a>
             </td>
-            <td><%= msg.content %></td>
+            <td class="message"><%= msg.content %></td>
             <td class="d-none d-lg-block"><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
           </tr>
         <% end %>
