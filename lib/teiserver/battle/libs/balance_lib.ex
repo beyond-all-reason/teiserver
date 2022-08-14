@@ -89,12 +89,14 @@ defmodule Teiserver.Battle.BalanceLib do
   def default_rating(rating_type_id \\ nil) do
     {skill, uncertainty} = Openskill.rating()
     rating_value = calculate_rating_value(skill, uncertainty)
+    leaderboard_rating = calculate_leaderboard_rating(skill, uncertainty)
 
     %{
       rating_type_id: rating_type_id,
       skill: skill,
       uncertainty: uncertainty,
-      rating_value: rating_value
+      rating_value: rating_value,
+      leaderboard_rating: leaderboard_rating,
     }
   end
 
