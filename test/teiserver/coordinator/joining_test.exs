@@ -80,7 +80,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
     [reply] = _tachyon_recv(socket2)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => ["########################################", "This is the welcome message", "########################################"],
+      "message" => "########################################\nThis is the welcome message\n########################################",
       "sender_id" => Coordinator.get_coordinator_userid()
     }
 

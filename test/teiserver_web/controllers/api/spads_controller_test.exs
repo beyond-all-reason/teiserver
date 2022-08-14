@@ -22,6 +22,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
         rating_value: 20,
         skill: 25,
         uncertainty: 5,
+        leaderboard_rating: 5,
         last_updated: Timex.now(),
       })
 

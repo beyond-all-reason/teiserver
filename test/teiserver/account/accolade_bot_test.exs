@@ -104,8 +104,8 @@ defmodule Teiserver.Account.AccoladeBotTest do
       "3 - Badge C, Description for the third badge",
       ".",
       "Reply to this message with the number corresponding to the Accolade you feel is most appropriate for this player for this match."
-    ], result["message"])
-    assert Enum.at(result["message"], 1) == "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{player12.name}"
+    ], result["message"] |> String.split("\n"))
+    assert Enum.at(result["message"] |> String.split("\n"), 1) == "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{player12.name}"
 
     # Now send the response, pick the first accolade
     _tachyon_send(psocket11, %{
@@ -117,13 +117,13 @@ defmodule Teiserver.Account.AccoladeBotTest do
 
     # We expect success regarding sending the message
     [result] = _tachyon_recv(psocket11)
-    assert result == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert result == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     # And a response from the Accolade chat bot
     [result] = _tachyon_recv(psocket11)
     assert result == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => ["Thank you for your feedback, this Accolade will be bestowed."],
+      "message" => "Thank you for your feedback, this Accolade will be bestowed.",
       "sender_id" => AccoladeLib.get_accolade_bot_userid()
     }
 
@@ -171,8 +171,8 @@ defmodule Teiserver.Account.AccoladeBotTest do
       "3 - Badge C, Description for the third badge",
       ".",
       "Reply to this message with the number corresponding to the Accolade you feel is most appropriate for this player for this match."
-    ], result["message"])
-    assert Enum.at(result["message"], 1) == "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{player12.name}"
+    ], result["message"] |> String.split("\n"))
+    assert Enum.at(result["message"] |> String.split("\n"), 1) == "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{player12.name}"
 
     # Now send the response, pick the first accolade
     _tachyon_send(psocket11, %{
@@ -213,8 +213,8 @@ defmodule Teiserver.Account.AccoladeBotTest do
       "3 - Badge C, Description for the third badge",
       ".",
       "Reply to this message with the number corresponding to the Accolade you feel is most appropriate for this player for this match."
-    ], result["message"])
-    assert Enum.at(result["message"], 1) == "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{player12.name}"
+    ], result["message"] |> String.split("\n"))
+    assert Enum.at(result["message"] |> String.split("\n"), 1) == "You have an opportunity to leave feedback on one of the players in your last game. We have selected #{player12.name}"
 
     # Now send the response, pick the first accolade
     _tachyon_send(psocket11, %{

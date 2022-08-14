@@ -43,7 +43,7 @@ defmodule Teiserver.Account.PartyServerTest do
     }}
 
     # Accept the other
-    GenServer.cast(p, {:accept_invite, 3})
+    GenServer.call(p, {:accept_invite, 3})
     assert :sys.get_state(p) == %{party: %Party{
       id: id,
       leader: 1,
@@ -52,7 +52,7 @@ defmodule Teiserver.Account.PartyServerTest do
     }}
 
     # And the last
-    GenServer.cast(p, {:accept_invite, 4})
+    GenServer.call(p, {:accept_invite, 4})
     assert :sys.get_state(p) == %{party: %Party{
       id: id,
       leader: 1,
@@ -89,7 +89,7 @@ defmodule Teiserver.Account.PartyServerTest do
 
     # Re-add someone
     GenServer.cast(p, {:create_invite, 1})
-    GenServer.cast(p, {:accept_invite, 1})
+    GenServer.call(p, {:accept_invite, 1})
     assert :sys.get_state(p) == %{party: %Party{
       id: id,
       leader: 4,

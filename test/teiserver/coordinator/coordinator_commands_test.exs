@@ -17,7 +17,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
   test "no command", %{socket: socket} do
     message_coordinator(socket, "$no_command_here or here")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     # It's not a valid command and thus we ignore it currently
     reply = _tachyon_recv(socket)
@@ -27,104 +27,102 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
   test "non existent command", %{socket: socket} do
     message_coordinator(socket, "$creativecommandname")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
     message = reply["message"]
-    assert Enum.member?(message, "No command of name 'creativecommandname'")
+    assert String.contains?(message, "No command of name 'creativecommandname'")
   end
 
   test "help", %{socket: socket, user: user} do
     message_coordinator(socket, "$help")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
     message = reply["message"]
-    assert Enum.member?(message, "$whoami")
+    assert String.contains?(message, "$whoami")
 
     #Moderator help test
     User.update_user(%{user | moderator: true})
     message_coordinator(socket, "$help")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
     message = reply["message"]
 
-    assert Enum.member?(message, "$whoami")
-    assert Enum.member?(message, "$pull <user>")
-    assert Enum.member?(message, "$success")
+    assert String.contains?(message, "$whoami")
+    assert String.contains?(message, "$pull <user>")
+    assert String.contains?(message, "$success")
   end
 
   test "help not existing", %{socket: socket} do
     message_coordinator(socket, "$help give 10 corjugg Lexon")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
     message = reply["message"]
-    assert message == ["No commands matching that filter."]
-    refute Enum.member?(message, "Displays this help text.")
+    assert message == "No commands matching that filter."
+    refute String.contains?(message, "Displays this help text.")
   end
 
   test "help whois", %{socket: socket} do
     message_coordinator(socket, "$help whois")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
     message = reply["message"]
-    assert Enum.member?(message, "$whois <user>")
-    assert Enum.member?(message, "Sends back information about the user specified.")
-    assert Enum.count(message) == 2
-    refute Enum.member?(message, "Displays this help text.")
+    assert String.contains?(message, "$whois <user>")
+    assert String.contains?(message, "Sends back information about the user specified.")
+    refute String.contains?(message, "Displays this help text.")
   end
 
   test "help pull", %{socket: socket, user: user} do
     #Normal pull test
     message_coordinator(socket, "$help pull")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
     message = reply["message"]
 
-    assert message == ["No commands matching that filter."]
-    refute Enum.member?(message, "Pulls a given user into the battle.")
-    refute Enum.member?(message, "Displays this help text.")
+    assert message == "No commands matching that filter."
+    refute String.contains?(message, "Pulls a given user into the battle.")
+    refute String.contains?(message, "Displays this help text.")
 
     #Moderator pull test
     User.update_user(%{user | moderator: true})
     message_coordinator(socket, "$help pull")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
     message = reply["message"]
 
-    refute message == ["No commands matching that filter."]
-    assert Enum.count(message) == 2
-    assert Enum.member?(message, "Pulls a given user into the battle.")
-    refute Enum.member?(message, "Displays this help text.")
+    refute message == "No commands matching that filter."
+    assert String.contains?(message, "Pulls a given user into the battle.")
+    refute String.contains?(message, "Displays this help text.")
   end
 
   test "whoami", %{socket: socket, user: user, coordinator_userid: coordinator_userid} do
     message_coordinator(socket, "$whoami")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => [
-          "---------------------------",
-          "You are #{user.name}",
-          "Profile link: https://localhost/teiserver/profile/#{user.id}",
-          "Time rank: 1 with 0 player hours and 0 spectator hours for a rank hour count of 0",
-          "Skill ratings:",
-          "You currently have no accolades"
-        ],
+      "message" => String.trim("""
+---------------------------
+You are #{user.name}
+Profile link: https://localhost/teiserver/profile/#{user.id}
+Time rank: 1 with 0 player hours and 0 spectator hours for a rank hour count of 0
+Skill ratings:
+You currently have no accolades
+"""),
       "sender_id" => coordinator_userid
     }
   end
@@ -134,16 +132,16 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
 
     message_coordinator(socket, "$whois #{other_user.name}")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => [
-        "---------------------------",
-        "Found #{other_user.name}",
-        "Profile link: https://localhost/teiserver/profile/#{other_user.id}",
-      ],
+      "message" => String.trim("""
+---------------------------
+Found #{other_user.name}
+Profile link: https://localhost/teiserver/profile/#{other_user.id}
+"""),
       "sender_id" => coordinator_userid
     }
 
@@ -154,17 +152,17 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
 
     message_coordinator(socket, "$whois #{other_user.name}")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => [
-        "---------------------------",
-        "Found #{other_user.name}",
-        "Previous names: name1, name2",
-        "Profile link: https://localhost/teiserver/profile/#{other_user.id}",
-      ],
+      "message" => String.trim("""
+---------------------------
+Found #{other_user.name}
+Previous names: name1, name2
+Profile link: https://localhost/teiserver/profile/#{other_user.id}
+"""),
       "sender_id" => coordinator_userid
     }
   end
@@ -174,12 +172,12 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
 
     message_coordinator(socket, "$mute #{user2.name}")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => ["#{user2.name} is now ignored, you can unmute them with the $unignore command or via the account section of the server website."],
+      "message" => "#{user2.name} is now ignored, you can unmute them with the $unignore command or via the account section of the server website.",
       "sender_id" => coordinator_userid
     }
 
@@ -189,12 +187,12 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     # Now use it again, make sure we don't get a crash
     message_coordinator(socket, "$unmute #{user2.name}")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => ["#{user2.name} is now un-ignored."],
+      "message" => "#{user2.name} is now un-ignored.",
       "sender_id" => coordinator_userid
     }
 
@@ -204,12 +202,12 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
     # Now unmute again
     message_coordinator(socket, "$unmute #{user2.name}")
     [reply] = _tachyon_recv(socket)
-    assert reply == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert reply == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [reply] = _tachyon_recv(socket)
     assert reply == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => ["#{user2.name} is now un-ignored."],
+      "message" => "#{user2.name} is now un-ignored.",
       "sender_id" => coordinator_userid
     }
 

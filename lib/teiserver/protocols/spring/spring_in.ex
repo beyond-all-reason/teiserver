@@ -1145,9 +1145,10 @@ defmodule Teiserver.Protocols.SpringIn do
   # https://springrts.com/dl/LobbyProtocol/ProtocolDescription.html#UPDATEBATTLEINFO:client
   defp do_handle("UPDATEBATTLEINFO", data, msg_id, state) do
     case Regex.run(~r/(\d+) (\d+) (\S+) (.+)$/, data) do
-      [_, _spectator_count, locked, map_hash, map_name] ->
+      [_, spectator_count, locked, map_hash, map_name] ->
         if Lobby.allow?(state.userid, :updatebattleinfo, state.lobby_id) do
           Battle.update_lobby_values(state.lobby_id, %{
+            spectator_count: spectator_count,
             locked: locked == "1",
             map_hash: map_hash,
             map_name: map_name

@@ -212,11 +212,11 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     # Both players should get a message from the coordinator
     [reply] = _tachyon_recv(psocket1)
     assert reply["cmd"] == "s.communication.received_direct_message"
-    assert reply["message"] == ["The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk or just type something into the lobby chat."]
+    assert reply["message"] == "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk or just type something into the lobby chat."
 
     [reply] = _tachyon_recv(psocket2)
     assert reply["cmd"] == "s.communication.received_direct_message"
-    assert reply["message"] == ["The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk or just type something into the lobby chat."]
+    assert reply["message"] == "The lobby you are in is conducting an AFK check, please respond with 'hello' here to show you are not afk or just type something into the lobby chat."
 
     # Check consul state
     pid = Coordinator.get_consul_pid(lobby_id)
@@ -526,7 +526,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.communication.received_direct_message"
     assert reply["sender_id"] == Coordinator.get_coordinator_userid()
-    assert reply["message"] |> Enum.slice(0, 5) == ["--------------------------- Lobby status ---------------------------", "Status for battle ##{lobby_id}", "Locks: ", "Gatekeeper: default", "Join queue: "]
+    assert (reply["message"] |> String.split("\n") |> Enum.slice(0, 5)) == ["--------------------------- Lobby status ---------------------------", "Status for battle ##{lobby_id}", "Locks: ", "Gatekeeper: default", "Join queue:  (size: 0)"]
   end
 
   test "help", %{lobby_id: lobby_id, hsocket: hsocket, host: host} do
@@ -539,7 +539,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.communication.received_direct_message"
     assert reply["sender_id"] == Coordinator.get_coordinator_userid()
-    assert reply["message"] |> Enum.count > 5
+    assert (reply["message"] |> String.split("\n") |> Enum.count) > 5
   end
 
   test "rename", %{lobby_id: lobby_id, hsocket: hsocket, host: host} do

@@ -222,7 +222,8 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:update_battle, lobby) when is_map(lobby) do
-    spectator_count = Battle.get_lobby_spectator_count(lobby.id) + 1
+    # spectator_count = Battle.get_lobby_spectator_count(lobby.id) + 1
+    spectator_count = lobby.spectator_count
     locked = if lobby.locked, do: "1", else: "0"
 
     "UPDATEBATTLEINFO #{lobby.id} #{spectator_count} #{locked} #{lobby.map_hash} #{

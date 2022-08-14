@@ -512,7 +512,7 @@ defmodule Teiserver.Battle.Lobby do
         channel: "teiserver_client_messages:#{userid}",
         event: :join_lobby_request_response,
         lobby_id: lobby_id,
-        response: :accept,
+        response: :deny,
         reason: reason
       }
     )

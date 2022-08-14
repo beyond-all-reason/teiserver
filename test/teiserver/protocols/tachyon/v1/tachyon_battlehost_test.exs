@@ -1,6 +1,6 @@
 defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
   use Central.ServerCase
-  alias Teiserver.Battle
+  alias Teiserver.{Battle, Account}
   alias Teiserver.Battle.Lobby
   require Logger
 
@@ -62,6 +62,11 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
       "reason" => "Invalid password"
     }]
 
+    # We have a whole bunch of these because at one stage there was a bug where user2 was
+    # marked as present in the lobby when they should not have been
+    assert Account.get_client_by_id(user2.id).lobby_id == nil
+    assert GenServer.call(pid2, {:get, :lobby_id}) == nil
+
     # Good password
     # We send from both users to test for a bug found when making the agent system
     # where two messages queued up might not be decoded correctly
@@ -69,6 +74,9 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     _tachyon_send(socket2, data)
     _tachyon_send(socket3, data)
     reply = _tachyon_recv(socket2)
+
+    assert Account.get_client_by_id(user2.id).lobby_id == nil
+    assert GenServer.call(pid2, {:get, :lobby_id}) == nil
 
     assert reply == [%{
       "cmd" => "s.lobby.join",
@@ -86,29 +94,28 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     assert reply["userid"] == user3.id
 
     # Host can reject
-    data = %{cmd: "c.lobby_host.respond_to_join_request", userid: user2.id, response: "reject", reason: "reason given"}
-    _tachyon_send(socket, data)
-    reply = _tachyon_recv(socket2)
+    _tachyon_send(socket, %{cmd: "c.lobby_host.respond_to_join_request", userid: user2.id, response: "reject", reason: "reason given"})
+    [reply] = _tachyon_recv(socket2)
+
+    assert Account.get_client_by_id(user2.id).lobby_id == nil
+    assert GenServer.call(pid2, {:get, :lobby_id}) == nil
+
+    assert reply == %{
+      "cmd" => "s.lobby.join_response",
+      "result" => "reject",
+      "lobby_id" => lobby_id,
+      "reason" => "reason given"
+    }
 
     # Reject user3 at the same time
-    data = %{cmd: "c.lobby_host.respond_to_join_request", userid: user3.id, response: "reject", reason: "reason given"}
-    _tachyon_send(socket, data)
+    _tachyon_send(socket, %{cmd: "c.lobby_host.respond_to_join_request", userid: user3.id, response: "reject", reason: "reason given"})
 
     uuid = Battle.get_lobby_match_uuid(lobby_id)
 
-    assert reply == [%{
-      "cmd" => "s.lobby.join_response",
-      "result" => "approve",
-      "bots" => %{},
-      "lobby" => %{"disabled_units" => [], "engine_name" => "spring-105", "engine_version" => "105.1.2.3", "founder_id" => host.id, "game_name" => "BAR", "id" => lobby_id, "in_progress" => false, "ip" => "127.0.0.1", "locked" => false, "map_hash" => "string_of_characters", "map_name" => "koom valley", "max_players" => 16, "name" => "EU 01 - 123", "passworded" => true, "players" => [], "public" => true, "settings" => %{"max_players" => 12}, "start_rectangles" => %{}, "started_at" => nil, "type" => "normal"},
-      "member_list" => [],
-      "modoptions" => %{"server/match/uuid" => uuid}
-    }]
-
     # Now request again but this time accept
     _tachyon_send(socket2, %{cmd: "c.lobby.join", lobby_id: lobby_id, password: "password2"})
-    _tachyon_recv(socket2)
-    _tachyon_recv(socket)
+    _tachyon_recv_until(socket2)
+    _tachyon_recv_until(socket)
 
     assert GenServer.call(pid2, {:get, :lobby_id}) == nil
 
@@ -116,9 +123,14 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     _tachyon_send(socket, data)
     [reply] = _tachyon_recv(socket2)
 
-    assert reply["cmd"] == "s.lobby.join_response"
-    assert reply["result"] == "approve"
-    assert reply["lobby"]["id"] == lobby_id
+    assert reply == %{
+      "cmd" => "s.lobby.join_response",
+      "result" => "approve",
+      "bots" => %{},
+      "lobby" => %{"disabled_units" => [], "engine_name" => "spring-105", "engine_version" => "105.1.2.3", "founder_id" => host.id, "game_name" => "BAR", "id" => lobby_id, "in_progress" => false, "ip" => "127.0.0.1", "locked" => false, "map_hash" => "string_of_characters", "map_name" => "koom valley", "max_players" => 16, "name" => "EU 01 - 123", "passworded" => true, "players" => [], "public" => true, "settings" => %{"max_players" => 12}, "start_rectangles" => %{}, "started_at" => nil, "type" => "normal"},
+      "member_list" => [],
+      "modoptions" => %{"server/match/uuid" => uuid}
+    }
 
     assert GenServer.call(pid2, {:get, :lobby_id}) == lobby_id
 

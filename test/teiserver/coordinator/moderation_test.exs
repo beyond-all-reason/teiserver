@@ -52,14 +52,14 @@ defmodule Teiserver.Coordinator.ModerationTest do
     [msg] = _tachyon_recv(socket)
     assert msg == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => [
-        "This is a reminder that you received one or more formal moderation actions as listed below:",
-        " - login_with_warning_test, expires #{expires}",
-        "If the behaviour continues one or more of the following actions may be performed:",
-        "- Additional actions",
-        "If you feel that you have been the target of an erroneous or unjust moderation action please contact the head of moderation, Beherith",
-        "Acknowledge this with 'I acknowledge this' to resume play"
-      ],
+      "message" => String.trim("""
+This is a reminder that you received one or more formal moderation actions as listed below:
+ - login_with_warning_test, expires #{expires}
+If the behaviour continues one or more of the following actions may be performed:
+- Additional actions
+If you feel that you have been the target of an erroneous or unjust moderation action please contact the head of moderation, Beherith
+Acknowledge this with 'I acknowledge this' to resume play
+"""),
       "sender_id" => Coordinator.get_coordinator_userid()
     }
 
@@ -74,12 +74,12 @@ defmodule Teiserver.Coordinator.ModerationTest do
     })
     :timer.sleep(200)
     [msg] = _tachyon_recv(socket)
-    assert msg == %{"cmd" => "s.lobby.send_direct_message", "result" => "success"}
+    assert msg == %{"cmd" => "s.communication.send_direct_message", "result" => "success"}
 
     [msg] = _tachyon_recv(socket)
     assert msg == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => ["I don't currently handle messages, sorry #{user.name}"],
+      "message" => "I don't currently handle messages, sorry #{user.name}",
       "sender_id" => Coordinator.get_coordinator_userid()
     }
     client = Client.get_client_by_id(user.id)
@@ -89,13 +89,13 @@ defmodule Teiserver.Coordinator.ModerationTest do
     _tachyon_send(socket, %{
       "cmd" => "c.communication.send_direct_message",
       "recipient_id" => Coordinator.get_coordinator_userid(),
-      "message" => ["I acknowledge this"]
+      "message" => "I acknowledge this"
     })
     _ = _tachyon_recv(socket)
     [msg] = _tachyon_recv(socket)
     assert msg == %{
       "cmd" => "s.communication.received_direct_message",
-      "message" => ["Thank you"],
+      "message" => "Thank you",
       "sender_id" => Coordinator.get_coordinator_userid()
     }
     client = Client.get_client_by_id(user.id)
