@@ -11,10 +11,10 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyOut do
     }
   end
 
-  def do_reply(:info, party) do
+  def do_reply(:info_public, party) do
     %{
       cmd: "s.party.info",
-      party: Tachyon.convert_object(party, :party)
+      party: Tachyon.convert_object(party, :party_public)
     }
   end
 
@@ -55,6 +55,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyOut do
       cmd: "s.party.accept",
       result: "failure",
       reason: reason
+    }
+  end
+
+  def do_reply(:message, {sender_id, message}) when is_integer(sender_id) do
+    %{
+      cmd: "s.party.message",
+      sender_id: sender_id,
+      message: message
     }
   end
 end

@@ -3,8 +3,7 @@ defmodule Teiserver.Chat do
   alias Central.Helpers.QueryHelpers
   alias Central.Repo
 
-  alias Teiserver.Chat.RoomMessage
-  alias Teiserver.Chat.RoomMessageLib
+  alias Teiserver.Chat.{RoomMessage, RoomMessageLib}
 
   @spec room_message_query(List.t()) :: Ecto.Query.t()
   def room_message_query(args) do
@@ -156,8 +155,7 @@ defmodule Teiserver.Chat do
     RoomMessage.changeset(room_message, %{})
   end
 
-  alias Teiserver.Chat.LobbyMessage
-  alias Teiserver.Chat.LobbyMessageLib
+  alias Teiserver.Chat.{LobbyMessage, LobbyMessageLib}
 
   @spec lobby_message_query(List.t()) :: Ecto.Query.t()
   def lobby_message_query(args) do
@@ -307,5 +305,157 @@ defmodule Teiserver.Chat do
   @spec change_lobby_message(LobbyMessage.t()) :: Ecto.Changeset.t()
   def change_lobby_message(%LobbyMessage{} = lobby_message) do
     LobbyMessage.changeset(lobby_message, %{})
+  end
+
+  alias Teiserver.Chat.{PartyMessage, PartyMessageLib}
+
+  @spec party_message_query(List.t()) :: Ecto.Query.t()
+  def party_message_query(args) do
+    party_message_query(nil, args)
+  end
+
+  @spec party_message_query(Integer.t(), List.t()) :: Ecto.Query.t()
+  def party_message_query(id, args) do
+    PartyMessageLib.query_party_messages
+      |> PartyMessageLib.search(%{id: id})
+      |> PartyMessageLib.search(args[:search])
+      |> PartyMessageLib.preload(args[:preload])
+      |> PartyMessageLib.order_by(args[:order_by])
+      |> QueryHelpers.select(args[:select])
+      |> QueryHelpers.limit_query(args[:limit] || 50)
+      |> QueryHelpers.offset_query(args[:offset] || 0)
+  end
+
+  @doc """
+  Returns the list of party_messages.
+
+  ## Examples
+
+      iex> list_party_messages()
+      [%PartyMessage{}, ...]
+
+  """
+  @spec list_party_messages(List.t()) :: List.t()
+  def list_party_messages(args \\ []) do
+    party_message_query(args)
+      |> Repo.all
+  end
+
+  @doc """
+  Gets a single party_message.
+
+  Raises `Ecto.NoResultsError` if the PartyMessage does not exist.
+
+  ## Examples
+
+      iex> get_party_message!(123)
+      %PartyMessage{}
+
+      iex> get_party_message!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  @spec get_party_message!(Integer.t() | List.t()) :: PartyMessage.t()
+  @spec get_party_message!(Integer.t(), List.t()) :: PartyMessage.t()
+  def get_party_message!(id) when not is_list(id) do
+    party_message_query(id, [])
+      |> Repo.one!
+  end
+  def get_party_message!(args) do
+    party_message_query(nil, args)
+      |> Repo.one!
+  end
+  def get_party_message!(id, args) do
+    party_message_query(id, args)
+      |> Repo.one!
+  end
+
+  # Uncomment this if needed, default files do not need this function
+  # @doc """
+  # Gets a single party_message.
+
+  # Returns `nil` if the PartyMessage does not exist.
+
+  # ## Examples
+
+  #     iex> get_party_message(123)
+  #     %PartyMessage{}
+
+  #     iex> get_party_message(456)
+  #     nil
+
+  # """
+  # def get_party_message(id, args \\ []) when not is_list(id) do
+  #   party_message_query(id, args)
+  #   |> Repo.one
+  # end
+
+  @doc """
+  Creates a party_message.
+
+  ## Examples
+
+      iex> create_party_message(%{field: value})
+      {:ok, %PartyMessage{}}
+
+      iex> create_party_message(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_party_message(Map.t()) :: {:ok, PartyMessage.t()} | {:error, Ecto.Changeset.t()}
+  def create_party_message(attrs \\ %{}) do
+    %PartyMessage{}
+      |> PartyMessage.changeset(attrs)
+      |> Repo.insert()
+  end
+
+  @doc """
+  Updates a party_message.
+
+  ## Examples
+
+      iex> update_party_message(party_message, %{field: new_value})
+      {:ok, %PartyMessage{}}
+
+      iex> update_party_message(party_message, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_party_message(PartyMessage.t(), Map.t()) :: {:ok, PartyMessage.t()} | {:error, Ecto.Changeset.t()}
+  def update_party_message(%PartyMessage{} = party_message, attrs) do
+    party_message
+      |> PartyMessage.changeset(attrs)
+      |> Repo.update()
+  end
+
+  @doc """
+  Deletes a PartyMessage.
+
+  ## Examples
+
+      iex> delete_party_message(party_message)
+      {:ok, %PartyMessage{}}
+
+      iex> delete_party_message(party_message)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec delete_party_message(PartyMessage.t()) :: {:ok, PartyMessage.t()} | {:error, Ecto.Changeset.t()}
+  def delete_party_message(%PartyMessage{} = party_message) do
+    Repo.delete(party_message)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking party_message changes.
+
+  ## Examples
+
+      iex> change_party_message(party_message)
+      %Ecto.Changeset{source: %PartyMessage{}}
+
+  """
+  @spec change_party_message(PartyMessage.t()) :: Ecto.Changeset.t()
+  def change_party_message(%PartyMessage{} = party_message) do
+    PartyMessage.changeset(party_message, %{})
   end
 end

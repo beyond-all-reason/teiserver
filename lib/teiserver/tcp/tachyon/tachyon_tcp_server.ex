@@ -216,6 +216,9 @@ defmodule Teiserver.TachyonTcpServer do
       :updated_values ->
         state.protocol_out.reply(:party, :updated, {party_id, data.new_values}, state)
 
+      :message ->
+        state.protocol_out.reply(:party, :message, {data.sender_id, data.message}, state)
+
       _ ->
         Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}")
     end

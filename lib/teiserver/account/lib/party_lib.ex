@@ -10,9 +10,10 @@ end
 
 defmodule Teiserver.Account.PartyLib do
   # alias Phoenix.PubSub
-  # alias Teiserver.{Account, Battle}
+  alias Teiserver.{Chat, User}
   alias Teiserver.Account.Party
   alias Teiserver.Data.Types, as: T
+  alias Phoenix.PubSub
 
   @spec colours() :: atom
   def colours, do: :primary2
@@ -31,7 +32,7 @@ defmodule Teiserver.Account.PartyLib do
   @spec party_exists?(T.party_id()) :: boolean()
   def party_exists?(party_id) do
     case Horde.Registry.lookup(Teiserver.PartyRegistry, party_id) do
-      [{pid, _}] -> true
+      [{_pid, _}] -> true
       _ -> false
     end
   end
@@ -78,7 +79,7 @@ defmodule Teiserver.Account.PartyLib do
     cast_party(party_id, {:cancel_invite, userid})
   end
 
-  @spec accept_party_invite(T.party_id(), T.userid()) :: {true, map()} | {false, String.t()}
+  @spec accept_party_invite(T.party_id(), T.userid()) :: {true, map()} | {false, String.t()} | nil
   def accept_party_invite(party_id, userid) when is_integer(userid) do
     call_party(party_id, {:accept_invite, userid})
   end
@@ -130,5 +131,62 @@ defmodule Teiserver.Account.PartyLib do
       nil -> nil
       pid -> GenServer.call(pid, msg)
     end
+  end
+
+
+  @spec say(T.userid(), T.party_id(), String.t()) :: :ok | nil
+  def say(userid, party_id, msg) do
+    case party_exists?(party_id) do
+      false -> nil
+      true -> do_say(userid, party_id, msg)
+    end
+  end
+
+  @spec do_say(T.userid(), T.party_id(), String.t()) :: :ok | nil
+  defp do_say(userid, party_id, msg) do
+    msg = trim_message(msg)
+    user = User.get_user_by_id(userid)
+
+    allowed = cond do
+      User.is_restricted?(user, ["All chat"]) -> false
+      true -> true
+    end
+
+    if allowed do
+      persist_message(userid, msg, party_id)
+
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_party:#{party_id}",
+        %{
+          channel: "teiserver_party:#{party_id}",
+          event: :message,
+          party_id: party_id,
+          sender_id: userid,
+          message: msg
+        }
+      )
+
+      :ok
+    else
+      nil
+    end
+  end
+
+  @spec persist_message(T.userid(), String.t(), T.party_id()) :: any
+  def persist_message(userid, msg, party_id) do
+    Chat.create_party_message(%{
+      content: msg,
+      party_id: party_id,
+      inserted_at: Timex.now(),
+      user_id: userid,
+    })
+  end
+
+  defp trim_message(msg) when is_list(msg) do
+    Enum.join(msg, "\n") |> trim_message
+  end
+  defp trim_message(msg) do
+    String.trim(msg)
   end
 end

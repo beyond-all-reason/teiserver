@@ -1,6 +1,7 @@
 defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
-  alias Teiserver.Account
+  alias Teiserver.{Account}
+  alias Teiserver.Account.PartyLib
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
   def do_handle("create", _, state) do
@@ -12,12 +13,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
   def do_handle("info", %{"party_id" => party_id}, state) do
     case Account.get_party(party_id) do
       nil ->
-        reply(:party, :info, nil, state)
+        reply(:party, :info_public, nil, state)
       party ->
-        if state.party_id == party_id do
+        full_info = Enum.member?(party.pending_invites ++ party.members, state.userid)
+
+        if full_info do
           reply(:party, :info_full, party, state)
         else
-          reply(:party, :info, party, state)
+          reply(:party, :info_public, party, state)
         end
     end
   end
@@ -32,10 +35,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
   def do_handle("accept", %{"party_id" => party_id}, state) do
     case Account.accept_party_invite(party_id, state.userid) do
       {true, party} ->
+        send(self(), {:action, {:join_party, party.id}})
         reply(:party, :accept, {true, party}, state)
 
       {false, reason} ->
         reply(:party, :accept, {false, reason}, state)
+
+      nil ->
+        reply(:party, :accept, {false, "No party found"}, state)
     end
     state
   end
@@ -56,7 +63,12 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
     reply(:party, :create, nil, state)
   end
 
-  def do_handle("message", _, state) do
-    reply(:party, :create, nil, state)
+  def do_handle("message", _, %{party_id: nil} = state) do
+    state
+  end
+
+  def do_handle("message", %{"message" => message}, state) do
+    PartyLib.say(state.userid, state.party_id, message)
+    state
   end
 end

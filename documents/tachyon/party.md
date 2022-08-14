@@ -75,7 +75,7 @@ Invites a user to the party; if successful you will get a `s.party.updated` sent
 ```
 
 ### `s.party.invite`
-Server message telling a user they have been invited to a party, it will contain full party info (including pending invites) and the user who invited you.
+Server message telling a user they have been invited to a party, it will contain full party info (including pending invites) and the user who invited you. Your ID should be included in the `pending_invites` key.
 
 #### Example input
 ```json
@@ -194,7 +194,7 @@ Server informing you of a message in the party chat.
 ```json
 {
   "cmd": "s.party.message",
-  "user_id": 124,
+  "sender_id": 124,
   "message": "My fancy message here"
 }
 ```

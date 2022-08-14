@@ -273,9 +273,9 @@ Valid events
 }
 
 %{
-  event: :chat,
+  event: :message,
   party_id: party_id,
-  senderid: userid,
+  sender_id: userid,
   message: string
 }
 ```

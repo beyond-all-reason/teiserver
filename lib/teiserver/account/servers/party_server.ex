@@ -1,7 +1,7 @@
 defmodule Teiserver.Account.PartyServer do
   use GenServer
   require Logger
-  # alias Teiserver.{Account}
+  alias Teiserver.{Account}
   alias Phoenix.PubSub
 
   @impl true
@@ -25,8 +25,14 @@ defmodule Teiserver.Account.PartyServer do
             new_values: %{invites: new_invites, members: new_members}
           }
         )
+
+        Account.move_client_to_party(userid, party.id)
+
         party = %{party | pending_invites: new_invites, members: new_members}
         {{true, party}, party}
+
+      Enum.member?(party.members, userid) ->
+        {{false, "Already a member"}, party}
 
       true ->
         {{false, "Not invited"}, party}
@@ -203,6 +209,8 @@ defmodule Teiserver.Account.PartyServer do
       id,
       id
     )
+
+    Account.move_client_to_party(data.party.leader, data.party.id)
 
     {:ok, %{party: data.party}}
   end

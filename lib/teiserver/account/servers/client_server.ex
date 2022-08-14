@@ -9,6 +9,20 @@ defmodule Teiserver.Account.ClientServer do
     {:reply, state.client, state}
   end
 
+  def handle_call({:change_party, party_id}, _from, state) do
+    case state.client.party_id do
+      nil ->
+        :ok
+
+      _existing_id ->
+        :ok
+    end
+
+    new_client = %{state.client | party_id: party_id}
+
+    {:reply, :ok, %{state | client: new_client}}
+  end
+
   @impl true
   def handle_cast({:update_values, new_values}, state) do
     new_client = Map.merge(state.client, new_values)

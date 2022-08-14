@@ -4,26 +4,10 @@ defmodule Teiserver.Chat.RoomMessageLib do
 
   # Functions
   @spec icon :: String.t()
-  def icon, do: "fa-regular fa-???"
+  def icon, do: "fa-regular fa-comment"
 
   @spec colours :: atom
   def colours, do: :default
-
-  @spec make_favourite(Map.t()) :: Map.t()
-  def make_favourite(room_message) do
-    %{
-      type_colour: StylingHelper.colours(colours()) |> elem(0),
-      type_icon: icon(),
-
-      item_id: room_message.id,
-      item_type: "teiserver_chat_room_message",
-      item_colour: colours() |> elem(0),
-      item_icon: Teiserver.Chat.RoomMessageLib.icon(),
-      item_label: "#{room_message.name}",
-
-      url: "/chat/room_messages/#{room_message.id}"
-    }
-  end
 
   # Queries
   @spec query_room_messages() :: Ecto.Query.t

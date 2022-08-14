@@ -102,6 +102,10 @@ defmodule Teiserver.Account.ClientLib do
     client
   end
 
+  @spec move_client_to_party(T.userid(), T.party_id()) :: :ok | nil
+  def move_client_to_party(userid, party_id) do
+    call_client(userid, {:change_party, party_id})
+  end
 
   # Process stuff
   @spec start_client_server(T.lobby()) :: pid()
