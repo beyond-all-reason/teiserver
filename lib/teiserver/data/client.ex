@@ -38,7 +38,7 @@ defmodule Teiserver.Client do
         unready_at: nil,
         readyup_history: [],
         player_number: 0,# In spring this is team_number
-        team_colour: 0,
+        team_colour: "0",
         team_number: 0, # In spring this would be ally_team_number
         player: false,
         handicap: 0,

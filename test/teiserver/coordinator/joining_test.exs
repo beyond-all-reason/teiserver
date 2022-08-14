@@ -93,7 +93,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
         player_number: 0,
         team_number: 0,
         side: 0,
-        team_colour: 0,
+        team_colour: "0",
         ready: true
       }
     }
@@ -109,7 +109,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
         "in_game" => false,
         "lobby_id" => lobby_id,
         "ready" => false,
-        "team_colour" => 0,
+        "team_colour" => "0",
         "player_number" => 0,
         "userid" => user2.id,
         "player" => true,

@@ -16,7 +16,7 @@ defmodule Teiserver.Account.ClientServerTest do
       bot: false,
       ready: false,
       player_number: 0,
-      team_colour: 0,
+      team_colour: "0",
       team_number: 0,
       player: false,
       handicap: 0,

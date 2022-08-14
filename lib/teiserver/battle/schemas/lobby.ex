@@ -62,7 +62,7 @@ defmodule Teiserver.Battle.Lobby do
     Map.merge(
       %{
         player_number: 0,
-        team_colour: 0,
+        team_colour: "0",
         team_number: 0,
         handicap: 0,
         side: 0

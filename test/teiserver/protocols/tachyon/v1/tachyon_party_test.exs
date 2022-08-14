@@ -131,8 +131,8 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
     [resp] = _tachyon_recv(usocket)
     assert resp["cmd"] == "s.user.list_friend_ids"
     assert resp["client_list"] == [
-      %{"away" => false, "clan_tag" => nil, "in_game" => false, "lobby_id" => nil, "muted" => false, "party_id" => party_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => 0, "team_number" => 0, "userid" => friend2.id},
-      %{"away" => false, "clan_tag" => nil, "in_game" => false, "lobby_id" => nil, "muted" => false, "party_id" => party_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => 0, "team_number" => 0, "userid" => friend1.id}
+      %{"away" => false, "clan_tag" => nil, "in_game" => false, "lobby_id" => nil, "muted" => false, "party_id" => party_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => "0", "team_number" => 0, "userid" => friend2.id},
+      %{"away" => false, "clan_tag" => nil, "in_game" => false, "lobby_id" => nil, "muted" => false, "party_id" => party_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => "0", "team_number" => 0, "userid" => friend1.id}
     ]
 
     # Ensure we get the correct party info
