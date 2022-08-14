@@ -374,7 +374,7 @@ defmodule Teiserver.SpringBattleHostTest do
     _send_raw(socket, "c.battle.update_lobby_title NewName 123\n")
     :timer.sleep(1000)
     reply = _recv_until(socket)
-    assert reply == "OK cmd=c.battle.update_lobby_title\ns.battle.update_lobby_title #{lobby_id}\tNewName 123\n"
+    assert reply =~ "OK cmd=c.battle.update_lobby_title\ns.battle.update_lobby_title #{lobby_id}\tNewName 123\n"
 
     # Update the host settings
     state = Coordinator.call_consul(lobby_id, :get_all)

@@ -225,7 +225,7 @@ defmodule Teiserver.SpringTcpServer do
     lobby_id: lobby_id,
     new_values: new_values
   }, state) do
-    new_state = if Map.has_key?(new_values, "name") do
+    new_state = if Map.has_key?(new_values, :name) do
       state.protocol_out.reply(:battle, :lobby_rename, lobby_id, nil, state)
     else
       state
