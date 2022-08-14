@@ -38,11 +38,18 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
       |> Enum.join(",")
     sql_id_list = "(#{sql_id_list})"
 
+    # Clan memberships
+    query = "DELETE FROM teiserver_clan_memberships WHERE user_id IN #{sql_id_list}"
+    Ecto.Adapters.SQL.query(Repo, query, [])
+
     # Events/Properties
     query = "DELETE FROM teiserver_telemetry_client_events WHERE user_id IN #{sql_id_list}"
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     query = "DELETE FROM teiserver_telemetry_client_properties WHERE user_id IN #{sql_id_list}"
+    Ecto.Adapters.SQL.query(Repo, query, [])
+
+    query = "DELETE FROM teiserver_telemetry_server_events WHERE user_id IN #{sql_id_list}"
     Ecto.Adapters.SQL.query(Repo, query, [])
 
     # Stats
