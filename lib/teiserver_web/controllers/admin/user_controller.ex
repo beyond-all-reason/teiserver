@@ -455,6 +455,7 @@ defmodule TeiserverWeb.Admin.UserController do
             new_skill = changes["skill"] |> float_parse
             new_uncertainty = changes["uncertainty"] |> float_parse
             new_rating_value = BalanceLib.calculate_rating_value(new_skill, new_uncertainty)
+            new_leaderboard_rating = BalanceLib.calculate_leaderboard_rating(new_skill, new_uncertainty)
 
             {:ok, new_rating} = case Account.get_rating(user.id, rating_type_id) do
               nil ->
@@ -464,13 +465,15 @@ defmodule TeiserverWeb.Admin.UserController do
                   rating_value: new_rating_value,
                   skill: new_skill,
                   uncertainty: new_uncertainty,
-                  last_updated: Timex.now()
+                  leaderboard_rating: new_leaderboard_rating,
+                  last_updated: Timex.now(),
                 })
               existing ->
                 Account.update_rating(existing, %{
                   rating_value: new_rating_value,
                   skill: new_skill,
                   uncertainty: new_uncertainty,
+                  leaderboard_rating: new_leaderboard_rating,
                   last_updated: Timex.now()
                 })
             end

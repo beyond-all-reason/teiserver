@@ -149,11 +149,13 @@ defmodule Teiserver.Game.MatchRatingLib do
     rating_type_id = user_rating.rating_type_id
     {new_skill, new_uncertainty} = rating_update
     new_rating_value = BalanceLib.calculate_rating_value(new_skill, new_uncertainty)
+    new_leaderboard_rating = BalanceLib.calculate_leaderboard_rating(new_skill, new_uncertainty)
 
     Account.update_rating(user_rating, %{
       rating_value: new_rating_value,
       skill: new_skill,
       uncertainty: new_uncertainty,
+      leaderboard_rating: new_leaderboard_rating,
 
       last_updated: match.finished
     })

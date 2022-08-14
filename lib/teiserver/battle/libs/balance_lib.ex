@@ -273,4 +273,9 @@ defmodule Teiserver.Battle.BalanceLib do
   defp get_rating_values_from_rating_list(rating_list) do
     rating_list |> Enum.map(fn {_, s} -> s end)
   end
+
+  @spec calculate_leaderboard_rating(number(), number()) :: number()
+  def calculate_leaderboard_rating(skill, uncertainty) do
+    skill - (3 * uncertainty)
+  end
 end
