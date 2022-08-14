@@ -57,7 +57,7 @@ defmodule Teiserver.Chat.WordLib do
     if flagged_words(name) > 0 do
       false
     else
-      non_barcode = Regex.replace(~r/^[LliI1|]+$/, name, "")
+      non_barcode = Regex.replace(~r/^[LliI10oO|]+$/, name, "")
 
       if String.length(non_barcode) < 3 do
         Logger.info("Blocked rename to name `#{name}`")
