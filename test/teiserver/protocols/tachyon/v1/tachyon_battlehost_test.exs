@@ -227,27 +227,6 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     reply = _tachyon_recv_until(socket4)
     assert reply == []
 
-    # User4 can attempt to watch the lobby though!
-    _tachyon_recv_until(socket4)
-    _tachyon_send(socket4, %{cmd: "c.lobby.watch", lobby_id: lobby_id})
-    [reply] = _tachyon_recv(socket4)
-    assert reply == %{
-      "cmd" => "s.lobby.watch",
-      "result" => "success",
-      "lobby_id" => lobby_id
-    }
-
-    # And if we send the wrong lobby id?
-    _tachyon_recv_until(socket4)
-    _tachyon_send(socket4, %{cmd: "c.lobby.watch", lobby_id: -1000})
-    [reply] = _tachyon_recv(socket4)
-    assert reply == %{
-      "cmd" => "s.lobby.watch",
-      "result" => "failure",
-      "reason" => "No lobby",
-      "lobby_id" => -1000
-    }
-
     # Flush socket
     _tachyon_recv_until(socket)
 

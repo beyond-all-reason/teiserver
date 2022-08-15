@@ -26,6 +26,17 @@ Used for broadcasting internal telemetry for consumers (such as admin dashboard)
 }
 ```
 
+#### teiserver_public_stats
+Similar to the `teiserver_telemetry` channel but specifically limited to be public info.
+```elixir
+%{
+  user_count: integer,
+  player_count: integer,
+  lobby_count: integer,
+  in_progress_lobby_count: integer
+}
+```
+
 #### teiserver_telemetry_client_events
 Used for broadcasting specific client telemetry events as defined in Teiserver.Telemetry. Does not broadcast anonymous events.
 ```elixir

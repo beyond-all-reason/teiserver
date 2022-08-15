@@ -153,29 +153,18 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
     %{state | party_id: nil, party_role: nil}
   end
 
-  def do_action(:watch_all_lobbies, _, state) do
-    PubSub.unsubscribe(Central.PubSub, "teiserver_global_lobby_updates")
-    PubSub.subscribe(Central.PubSub, "teiserver_global_lobby_updates")
+  def do_action(:watch_channel, name, state) do
+    PubSub.unsubscribe(Central.PubSub, name)
+    PubSub.subscribe(Central.PubSub, name)
 
     state
   end
 
-  def do_action(:unwatch_all_lobbies, _, state) do
-    PubSub.unsubscribe(Central.PubSub, "teiserver_global_lobby_updates")
+  def do_action(:unwatch_channel, name, state) do
+    PubSub.unsubscribe(Central.PubSub, name)
 
     state
   end
 
-  def do_action(:watch_lobby, lobby_id, state) do
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-    PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
 
-    state
-  end
-
-  def do_action(:unwatch_lobby, lobby_id, state) do
-    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
-
-    state
-  end
 end

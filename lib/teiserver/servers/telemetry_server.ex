@@ -86,6 +86,20 @@ defmodule Teiserver.Telemetry.TelemetryServer do
         }
       }
     )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_public_stats",
+      %{
+        channel: "teiserver_public_stats",
+        data: %{
+          user_count: client.total,
+          player_count: client.player,
+          lobby_count: state.battle.total,
+          in_progresss_lobby_count: state.battle.in_progress,
+        }
+      }
+    )
   end
 
   @spec get_totals(Map.t()) :: Map.t()

@@ -6,6 +6,22 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
   @spec do_reply(atom(), any) :: Map.t() | nil
 
   ###########
+  # Watching
+  def do_reply(:opened, lobby) do
+    %{
+      "cmd" => "s.lobby.opened",
+      "lobby" => Tachyon.convert_object(lobby, :lobby)
+    }
+  end
+
+  def do_reply(:closed, lobby_id) do
+    %{
+      "cmd" => "s.lobby.closed",
+      "lobby_id" => lobby_id
+    }
+  end
+
+  ###########
   # Query
   def do_reply(:query, lobby_list) do
     %{
@@ -146,13 +162,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
-  def do_reply(:closed, {lobby_id, _reason}) do
-    %{
-      "cmd" => "s.lobby.closed",
-      "lobby_id" => lobby_id
-    }
-  end
-
   ###########
   # Join
   def do_reply(:join, :waiting) do
@@ -181,23 +190,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
           "lobby" => Tachyon.convert_object(lobby, :lobby)
         }
     end
-  end
-
-  def do_reply(:watch, {:success, lobby_id}) do
-    %{
-      "cmd" => "s.lobby.watch",
-      "result" => "success",
-      "lobby_id" => lobby_id
-    }
-  end
-
-  def do_reply(:watch, {:failure, reason, lobby_id}) do
-    %{
-      "cmd" => "s.lobby.watch",
-      "result" => "failure",
-      "reason" => reason,
-      "lobby_id" => lobby_id
-    }
   end
 
   ###########

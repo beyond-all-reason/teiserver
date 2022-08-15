@@ -7,6 +7,47 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemOut do
     }
   end
 
+  def do_reply(:server_stats, data) do
+    %{
+      cmd: "s.system.server_stats",
+      data: data
+    }
+  end
+
+  def do_reply(:watch, {:ok, channel}) do
+    %{
+      cmd: "s.system.watch",
+      result: "success",
+      channel: channel
+    }
+  end
+
+  def do_reply(:watch, {:failure, channel, reason}) do
+    %{
+      cmd: "s.system.watch",
+      result: "failure",
+      reason: reason,
+      channel: channel
+    }
+  end
+
+  def do_reply(:unwatch, {:ok, channel}) do
+    %{
+      cmd: "s.system.unwatch",
+      result: "success",
+      channel: channel
+    }
+  end
+
+  def do_reply(:unwatch, {:failure, channel, reason}) do
+    %{
+      cmd: "s.system.unwatch",
+      result: "failure",
+      reason: reason,
+      channel: channel
+    }
+  end
+
   def do_reply(:ring, ringer_id) do
     %{
       cmd: "s.system.ring",

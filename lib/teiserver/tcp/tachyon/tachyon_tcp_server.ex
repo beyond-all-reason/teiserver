@@ -142,11 +142,11 @@ defmodule Teiserver.TachyonTcpServer do
       {:join_lobby, lobby_id} ->
         state.protocol.do_action(:join_lobby, lobby_id, state)
 
-      {:watch_lobby, lobby_id} ->
-        state.protocol.do_action(:watch_lobby, lobby_id, state)
+      {:watch_channel, channel} ->
+        state.protocol.do_action(:watch_channel, channel, state)
 
-      {:leave_lobby, lobby_id} ->
-        state.protocol.do_action(:leave_lobby, lobby_id, state)
+      {:unwatch_channel, channel} ->
+        state.protocol.do_action(:unwatch_channel, channel, state)
 
       {:lead_party, party_id} ->
         state.protocol.do_action(:lead_party, party_id, state)
@@ -207,6 +207,10 @@ defmodule Teiserver.TachyonTcpServer do
   def handle_info({:force_join_battle, _, _}, state), do: {:noreply, state}
 
   # Internal pubsub messaging (see pubsub.md)
+  def handle_info(%{channel: "teiserver_public_stats", data: data}, state) do
+    {:noreply, state.protocol_out.reply(:system, :server_stats, data, state)}
+  end
+
   def handle_info(%{channel: "teiserver_server", event: event, node: node}, state) do
     {:noreply, state.protocol_out.reply(:system, :server_event, {event, node}, state)}
   end
@@ -241,6 +245,24 @@ defmodule Teiserver.TachyonTcpServer do
   def handle_info({:lobby_update, event, lobby_id, data}, state) do
     {:noreply, state.protocol_out.reply(:lobby, event, {lobby_id, data}, state)}
   end
+
+  def handle_info(data = %{channel: "teiserver_global_lobby_updates"}, state) do
+    new_state = case data.event do
+      :opened ->
+        state.protocol_out.reply(:lobby, :opened, data.lobby, state)
+
+      :closed ->
+        state.protocol_out.reply(:lobby, :closed, data.lobby_id, state)
+
+      _ ->
+        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for teiserver_global_lobby_updates.event = #{data.event}")
+        state
+    end
+
+    {:noreply, new_state}
+  end
+
+
 
   def handle_info(data = %{channel: "teiserver_client_messages:" <> userid_str}, state) do
     userid = int_parse(userid_str)
