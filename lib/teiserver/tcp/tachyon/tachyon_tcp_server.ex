@@ -254,6 +254,9 @@ defmodule Teiserver.TachyonTcpServer do
       :closed ->
         state.protocol_out.reply(:lobby, :closed, data.lobby_id, state)
 
+      :updated_values ->
+        state.protocol_out.reply(:lobby, :update_values, {data.lobby_id, data.new_values}, state)
+
       _ ->
         Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for teiserver_global_lobby_updates.event = #{data.event}")
         state
