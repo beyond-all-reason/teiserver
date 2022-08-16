@@ -4,9 +4,16 @@ defmodule TeiserverWeb.API.SpadsView do
 
   def render("rating.json", assigns) do
     %{
-      # rating: assigns.rating_value |> round(2),
       rating_value: assigns.rating_value |> round(2),
       uncertainty: assigns.uncertainty |> round(2)
+    }
+  end
+
+  def render("balance_battle.json", _assigns) do
+    %{
+      unbalance_indicator: -1,
+      player_assign_hash: %{},
+      bot_assign_hash: %{}
     }
   end
 end

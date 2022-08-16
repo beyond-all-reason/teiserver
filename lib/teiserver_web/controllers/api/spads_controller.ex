@@ -2,6 +2,7 @@ defmodule TeiserverWeb.API.SpadsController do
   use CentralWeb, :controller
   alias Teiserver.Battle.BalanceLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  require Logger
 
   # plug(Bodyguard.Plug.Authorize,
   #   policy: Teiserver.Battle.ApiAuth,
@@ -29,5 +30,14 @@ defmodule TeiserverWeb.API.SpadsController do
       |> assign(:rating_value, rating_value)
       |> assign(:uncertainty, uncertainty)
       |> render("rating.json")
+  end
+
+  @spec balance_battle(Plug.Conn.t(), map) :: Plug.Conn.t()
+  def balance_battle(conn, params) do
+    Logger.info("balance_battle: #{Kernel.inspect params}")
+
+    conn
+      |> put_status(200)
+      |> render("balance_battle.json")
   end
 end
