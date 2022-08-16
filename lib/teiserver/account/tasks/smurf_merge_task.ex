@@ -60,6 +60,7 @@ defmodule Teiserver.Account.SmurfMergeTask do
             rating_value: from_rating.rating_value,
             skill: from_rating.skill,
             uncertainty: from_rating.uncertainty,
+            leaderboard_rating: from_rating.leaderboard_rating,
             last_updated: Timex.now()
           })
 
