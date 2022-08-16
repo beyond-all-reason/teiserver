@@ -30,6 +30,7 @@ defmodule TeiserverWeb.Report.ReportController do
         "leaderboard" -> Teiserver.Account.LeaderboardReport
         "winners" -> Teiserver.Account.WinnersReport
         "review" -> Teiserver.Account.ReviewReport
+        "new_smurf" -> Teiserver.Account.NewSmurfReport
         _ ->
           raise "No handler for name of '#{name}'"
       end

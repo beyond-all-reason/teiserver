@@ -82,6 +82,11 @@ defmodule Teiserver.Account.SmurfKeyLib do
       where: smurf_keys.user_id != ^user_id
   end
 
+  def _search(query, :not_user_id_in, user_id_list) do
+    from smurf_keys in query,
+      where: not smurf_keys.user_id in ^user_id_list
+  end
+
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query

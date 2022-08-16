@@ -1,0 +1,44 @@
+<% bsname = view_colour() %>
+
+<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "new_smurf"
+          })
+        %>
+
+        <table class="table mt-4">
+          <thead>
+            <tr>
+              <th>New user</th>
+              <th>Registered</th>
+              
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for user <- @relevant_new_users do %>
+              <tr>
+                <td><%= user.name %></td>
+                <td><%= date_to_str(user.inserted_at, format: :hms_or_dmy) %></td>
+
+                <td>
+                  <a href={Routes.ts_admin_user_path(@conn, :smurf_search, user.id)} class="btn btn-secondary btn-sm">
+                    Show
+                  </a>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+        
+      </div>
+    </div>
+  </div>
+</div>

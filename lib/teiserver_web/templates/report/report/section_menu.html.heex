@@ -58,7 +58,7 @@
 <%= if allow?(@current_user, Teiserver.Account.NewUserFunnelReport.permissions()) do %>
   <%= central_component "section_menu_button",
     name: "new_user_funnel",
-    label: "New user funnel",
+    label: "User funnel",
     active: @active,
     icon: Teiserver.Account.NewUserFunnelReport.icon(),
     bsname: bsname,
@@ -66,7 +66,7 @@
   %>
 <% end %>
 
-<%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) do %>
+<%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) and Application.get_env(:central, Teiserver)[:enable_accolade_mode] == true do %>
   <%= central_component "section_menu_button",
     name: "accolades",
     label: "Accolades",
@@ -119,5 +119,17 @@
     icon: Teiserver.Account.ReviewReport.icon(),
     bsname: bsname,
     url: Routes.ts_reports_report_path(@conn, :show, "review")
+  %>
+<% end %>
+
+
+<%= if allow?(@current_user, Teiserver.Account.NewSmurfReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "new_smurf",
+    label: "New smurfs",
+    active: @active,
+    icon: Teiserver.Account.NewSmurfReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "new_smurf")
   %>
 <% end %>

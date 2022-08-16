@@ -111,7 +111,7 @@
     %>
   <% end %>
 
-  <%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) do %>
+  <%= if allow?(@current_user, Teiserver.Account.AccoladeReport.permissions()) and Application.get_env(:central, Teiserver)[:enable_accolade_mode] == true do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Account.AccoladeReport.icon(),
@@ -158,6 +158,16 @@
       name: "review",
       text: "Review",
       link: Routes.ts_reports_report_path(@conn, :show, "review")
+    %>
+  <% end %>
+
+  <%= if allow?(@current_user, Teiserver.Account.NewSmurfReport.permissions()) do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Account.NewSmurfReport.icon(),
+      name: "new_smurf",
+      text: "New smurfs",
+      link: Routes.ts_reports_report_path(@conn, :show, "new_smurf")
     %>
   <% end %>
 </div>
