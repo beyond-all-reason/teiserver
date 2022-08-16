@@ -80,7 +80,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
     Map.take(lobby, ~w(id name founder_id type max_players game_name
                    locked engine_name engine_version players spectators bots ip
                    settings map_name passworded public
-                   map_hash tags disabled_units in_progress started_at start_rectangles)a)
+                   map_hash tags disabled_units in_progress started_at start_areas)a)
   end
 
   @spec do_action(atom, any(), T.tachyon_tcp_state()) :: T.tachyon_tcp_state()

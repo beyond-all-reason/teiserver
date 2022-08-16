@@ -230,12 +230,22 @@ defmodule Teiserver.TachyonTcpServer do
     {:noreply, state}
   end
 
-  def handle_info({:lobby_host_message, event, lobby_id, data}, state) do
-    if state.lobby_host == true and state.lobby_id == lobby_id do
-      {:noreply, state.protocol_out.reply(:lobby_host, event, data, state)}
+  def handle_info(data = %{channel: "teiserver_lobby_host_message:" <> lobby_id, event: event}, state) do
+    lobby_id = int_parse(lobby_id)
+
+    new_state = if state.lobby_host == true and state.lobby_id == lobby_id do
+      case event do
+        :user_requests_to_join ->
+          state.protocol_out.reply(:lobby_host, data.event, {data.userid, data.script_password}, state)
+
+        _ ->
+          Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}")
+      end
     else
-      {:noreply, state}
+      state
     end
+
+    {:noreply, new_state}
   end
 
   def handle_info({:lobby_chat, event, lobby_id, userid, data}, state) do

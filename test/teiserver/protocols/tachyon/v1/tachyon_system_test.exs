@@ -107,7 +107,7 @@ defmodule Teiserver.Protocols.V1.TachyonSystemTest do
     assert resp == %{
       "cmd" => "s.lobby.opened",
       "lobby" => %{
-        "disabled_units" => [], "engine_name" => "spring", "engine_version" => nil, "founder_id" => bot_user.id, "game_name" => nil, "id" => 1, "in_progress" => false, "ip" => nil, "locked" => false, "map_hash" => nil, "map_name" => nil, "max_players" => 16, "name" => "lobby_chat_test_as_bot", "passworded" => false, "players" => [], "public" => true, "start_rectangles" => %{}, "started_at" => nil, "type" => "normal"
+        "disabled_units" => [], "engine_name" => "spring", "engine_version" => nil, "founder_id" => bot_user.id, "game_name" => nil, "id" => 1, "in_progress" => false, "ip" => nil, "locked" => false, "map_hash" => nil, "map_name" => nil, "max_players" => 16, "name" => "lobby_chat_test_as_bot", "passworded" => false, "players" => [], "public" => true, "start_areas" => %{}, "started_at" => nil, "type" => "normal"
         }
       }
 

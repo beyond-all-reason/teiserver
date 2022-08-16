@@ -109,7 +109,7 @@ This represents a user who is logged in. A user who is logged out will not have 
 * bots :: list (User.id)
 * ip :: string
 * settings :: map :: (string -> any) -- Replaces spring's scripttags, disabled units and should go here I think
-* start_rectangles :: map :: (id -> [type, x1, y1, x2, y2])
+* start_areas :: map :: (id -> [type, x1, y1, x2, y2])
 * map_name :: string
 * map_hash :: string
 * public :: boolean
@@ -132,7 +132,7 @@ This represents a user who is logged in. A user who is logged out will not have 
     "max_players": 16,
     "type": "team",
     "disabled_units": ["unit1", "unit2", "unit3"],
-    "start_rectangles": {
+    "start_areas": {
       "1": ["rect", 0, 0, 100, 100],
       "2": ["rect", 300, 300, 400, 400]
     }

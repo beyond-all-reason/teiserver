@@ -284,10 +284,10 @@ defmodule Teiserver.Battle.LobbyServer do
   # Start areas
   def handle_cast({:add_start_area, area_id, structure}, state) do
     new_areas = state.lobby
-      |> Map.get(:start_rectangles, %{})
+      |> Map.get(:start_areas, %{})
       |> Map.put(area_id, structure)
 
-    new_lobby = %{state.lobby | start_rectangles: new_areas}
+    new_lobby = %{state.lobby | start_areas: new_areas}
 
     PubSub.broadcast(
       Central.PubSub,
@@ -306,10 +306,10 @@ defmodule Teiserver.Battle.LobbyServer do
 
   def handle_cast({:remove_start_area, area_id}, state) do
     new_areas = state.lobby
-      |> Map.get(:start_rectangles, %{})
+      |> Map.get(:start_areas, %{})
       |> Map.drop([area_id])
 
-    new_lobby = %{state.lobby | start_rectangles: new_areas}
+    new_lobby = %{state.lobby | start_areas: new_areas}
 
     PubSub.broadcast(
       Central.PubSub,

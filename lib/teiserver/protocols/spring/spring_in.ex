@@ -794,7 +794,7 @@ defmodule Teiserver.Protocols.SpringIn do
         modoptions = Battle.get_modoptions(battle.id)
         reply(:add_script_tags, modoptions, msg_id, state)
 
-        battle.start_rectangles
+        battle.start_areas
           |> Enum.each(fn {team, r} ->
             reply(:add_start_rectangle, {team, r}, msg_id, state)
           end)

@@ -138,7 +138,13 @@ defmodule Teiserver.Battle.LobbyCache do
   @spec add_start_rectangle(T.lobby_id(), non_neg_integer(), list()) :: :ok | nil
   def add_start_rectangle(lobby_id, area_id, [a, b, c, d]) do
     area_id = int_parse(area_id)
-    cast_lobby(lobby_id, {:add_start_area, area_id, ["rect", a, b, c, d]})
+    cast_lobby(lobby_id, {:add_start_area, area_id, %{
+      shape: "rectangle",
+      x1: a,
+      y1: b,
+      x2: c,
+      y2: d
+    }})
   end
 
   @spec add_start_area(T.lobby_id(), non_neg_integer(), list()) :: :ok | nil

@@ -244,8 +244,8 @@ defmodule Teiserver.Protocols.SpringOut do
     "JOINBATTLEFAILED #{reason}\n"
   end
 
-  defp do_reply(:add_start_rectangle, {team, ["rect", left, top, right, bottom]}) do
-    "ADDSTARTRECT #{team} #{left} #{top} #{right} #{bottom}\n"
+  defp do_reply(:add_start_rectangle, {team, %{shape: "rectangle"} = definition}) do
+    "ADDSTARTRECT #{team} #{definition.x1} #{definition.y1} #{definition.x2} #{definition.y2}\n"
   end
 
   defp do_reply(:remove_start_rectangle, team) do
@@ -592,7 +592,7 @@ defmodule Teiserver.Protocols.SpringOut do
           reply(:add_bot_to_battle, {lobby.id, bot}, nil, state)
         end)
 
-      lobby.start_rectangles
+      lobby.start_areas
       |> Enum.each(fn {team, r} ->
         reply(:add_start_rectangle, {team, r}, nil, state)
       end)

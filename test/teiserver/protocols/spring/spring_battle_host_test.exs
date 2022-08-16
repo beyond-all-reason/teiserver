@@ -176,17 +176,17 @@ defmodule Teiserver.SpringBattleHostTest do
     assert battle != nil
 
     # Adding start rectangles
-    assert Enum.count(battle.start_rectangles) == 0
+    assert Enum.count(battle.start_areas) == 0
     _send_raw(socket, "ADDSTARTRECT 2 50 50 100 100\n")
     _ = _recv_raw(socket)
 
     battle = Lobby.get_battle(lobby_id)
-    assert Enum.count(battle.start_rectangles) == 1
+    assert Enum.count(battle.start_areas) == 1
 
     _send_raw(socket, "REMOVESTARTRECT 2\n")
     _ = _recv_raw(socket)
     battle = Lobby.get_battle(lobby_id)
-    assert Enum.count(battle.start_rectangles) == 0
+    assert Enum.count(battle.start_areas) == 0
 
     # Add and remove script tags
     modoptions = Battle.get_modoptions(lobby_id)

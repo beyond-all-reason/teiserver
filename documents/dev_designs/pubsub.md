@@ -98,11 +98,12 @@ Limited information pertaining to the creation/deletion of battle lobbies.
 Messages intended for the host of a given lobby. This saves a call for the client pid and also allows debugging tools to hook into the messages if needed.
 Valid events:
 ```elixir
-  # Structure
-  {:lobby_host_message, _action, lobby_id, _data}
-
-  # Examples
-  {:lobby_host_message, :user_requests_to_join, lobby_id, {userid, script_password}}
+%{
+  event: :user_requests_to_join,
+  lobby_id: lobby_id,
+  userid: userid,
+  script_password: string
+}
 ```
 
 #### teiserver_lobby_updates:#{battle_lobby_id}

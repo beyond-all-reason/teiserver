@@ -14,6 +14,13 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
+  def do_reply(:closed, {lobby_id, _}) do
+    %{
+      "cmd" => "s.lobby.closed",
+      "lobby_id" => lobby_id
+    }
+  end
+
   def do_reply(:closed, lobby_id) do
     %{
       "cmd" => "s.lobby.closed",

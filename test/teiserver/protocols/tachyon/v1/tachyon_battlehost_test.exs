@@ -127,7 +127,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
       "cmd" => "s.lobby.join_response",
       "result" => "approve",
       "bots" => %{},
-      "lobby" => %{"disabled_units" => [], "engine_name" => "spring-105", "engine_version" => "105.1.2.3", "founder_id" => host.id, "game_name" => "BAR", "id" => lobby_id, "in_progress" => false, "ip" => "127.0.0.1", "locked" => false, "map_hash" => "string_of_characters", "map_name" => "koom valley", "max_players" => 16, "name" => "EU 01 - 123", "passworded" => true, "players" => [], "public" => true, "settings" => %{"max_players" => 12}, "start_rectangles" => %{}, "started_at" => nil, "type" => "normal"},
+      "lobby" => %{"disabled_units" => [], "engine_name" => "spring-105", "engine_version" => "105.1.2.3", "founder_id" => host.id, "game_name" => "BAR", "id" => lobby_id, "in_progress" => false, "ip" => "127.0.0.1", "locked" => false, "map_hash" => "string_of_characters", "map_name" => "koom valley", "max_players" => 16, "name" => "EU 01 - 123", "passworded" => true, "players" => [], "public" => true, "settings" => %{"max_players" => 12}, "start_areas" => %{}, "started_at" => nil, "type" => "normal"},
       "member_list" => [],
       "modoptions" => %{"server/match/uuid" => uuid}
     }
@@ -175,7 +175,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
         "server/match/uuid" => Battle.get_lobby_match_uuid(lobby_id)
       },
       "members" => [
-        %{"away" => false, "in_game" => false, "lobby_id" => lobby_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => 0, "team_number" => 0, "userid" => user2.id, "clan_tag" => nil, "muted" => false, "party_id" => nil}
+        %{"away" => false, "in_game" => false, "lobby_id" => lobby_id, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => "0", "team_number" => 0, "userid" => user2.id, "clan_tag" => nil, "muted" => false, "party_id" => nil}
       ],
       "players" => []
     }
@@ -344,25 +344,25 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
 
     # Start areas
     Logger.warn("#{__ENV__.file}.#{__ENV__.line} should add, update and remove start areas via the Tachyon command")
-    Battle.add_start_area(lobby_id, 1, ["rect", 1, 2, 3, 4])
+    Battle.add_start_area(lobby_id, 1, %{shape: "rectangle", x1: 1, y1: 2, x2: 3, y2: 4})
 
     [reply] = _tachyon_recv_until(socket)
     assert reply == %{
       "cmd" => "s.lobby.add_start_area",
       "lobby_id" => lobby_id,
       "area_id" => 1,
-      "structure" => ["rect", 1, 2, 3, 4]
+      "structure" => %{"shape" => "rectangle", "x1" => 1, "y1" => 2, "x2" => 3, "y2" => 4}
     }
 
 
-    Battle.add_start_area(lobby_id, 1, ["rect", 10, 12, 24, 35])
+    Battle.add_start_area(lobby_id, 1, %{shape: "rectangle", x1: 10, y1: 12, x2: 24, y2: 35})
 
     [reply] = _tachyon_recv_until(socket)
     assert reply == %{
       "cmd" => "s.lobby.add_start_area",
       "lobby_id" => lobby_id,
       "area_id" => 1,
-      "structure" => ["rect", 10, 12, 24, 35]
+      "structure" => %{"shape" => "rectangle", "x1" => 10, "y1" => 12, "x2" => 24, "y2" => 35}
     }
 
 

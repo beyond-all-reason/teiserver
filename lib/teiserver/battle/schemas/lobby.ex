@@ -26,7 +26,7 @@ defmodule Teiserver.Battle.Lobby do
   #   spectator_count: 0,
 
   #   disabled_units: [],
-  #   start_rectangles: %{},
+  #   start_areas: %{},
 
   #   # To tie it into matchmaking
   #   queue_id: nil,
@@ -111,7 +111,7 @@ defmodule Teiserver.Battle.Lobby do
         spectator_count: 0,
 
         disabled_units: [],
-        start_rectangles: %{},
+        start_areas: %{},
 
         # To tie it into matchmaking
         queue_id: nil,
@@ -472,7 +472,13 @@ defmodule Teiserver.Battle.Lobby do
             PubSub.broadcast(
               Central.PubSub,
               "teiserver_lobby_host_message:#{lobby_id}",
-              {:lobby_host_message, :user_requests_to_join, lobby_id, {userid, script_password}}
+              %{
+                channel: "teiserver_lobby_host_message:#{lobby_id}",
+                event: :user_requests_to_join,
+                lobby_id: lobby_id,
+                userid: userid,
+                script_password: script_password
+              }
             )
             {:waiting_on_host, script_password}
         end
