@@ -385,6 +385,24 @@ defmodule Teiserver.Coordinator.ConsulServer do
     state
   end
 
+  defp handle_lobby_chat(userid, "!bset tweakdefs" <> _, state) do
+    is_boss = Enum.member?(state.host_bosses, userid)
+    if not is_boss do
+      User.send_direct_message(state.coordinator_id, userid, "Setting tweakdefs requires boss privileges")
+      LobbyChat.say(userid, "!ev", state.lobby_id)
+    end
+    state
+  end
+
+  defp handle_lobby_chat(userid, "!bset tweakunits" <> _, state) do
+    is_boss = Enum.member?(state.host_bosses, userid)
+    if not is_boss do
+      User.send_direct_message(state.coordinator_id, userid, "Setting tweakunits requires boss privileges")
+      LobbyChat.say(userid, "!ev", state.lobby_id)
+    end
+    state
+  end
+
   # Handle a command message
   defp handle_lobby_chat(userid, "!" <> msg, state) do
     trimmed_msg = String.trim(msg)
