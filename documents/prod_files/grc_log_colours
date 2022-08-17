@@ -31,7 +31,7 @@ colours=cyan
 count=once
 ======
 # [warn]
-regexp=\[error\]
+regexp=\[warn\]
 colours=yellow
 count=once
 ======
