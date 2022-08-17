@@ -5,6 +5,7 @@ defmodule Teiserver.Battle.BalanceLib do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Account
   alias Teiserver.Game.MatchRatingLib
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @type rating_value() :: float()
   @type group_tuple() :: {[T.userid()], number(), rating_value()}
@@ -115,6 +116,9 @@ defmodule Teiserver.Battle.BalanceLib do
     get_user_rating_value_uncertainty_pair(userid, rating_type_id)
   end
 
+  @doc """
+  Used to get the rating value of the user for public/reporting purposes
+  """
   @spec get_user_rating_value(T.userid(), String.t() | non_neg_integer()) :: rating_value()
   def get_user_rating_value(userid, rating_type_id) when is_integer(rating_type_id) do
     Account.get_rating(userid, rating_type_id) |> convert_rating()
@@ -124,6 +128,26 @@ defmodule Teiserver.Battle.BalanceLib do
   def get_user_rating_value(userid, rating_type) do
     rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
     get_user_rating_value(userid, rating_type_id)
+  end
+
+  @doc """
+  Used to get the rating value of the user for internal balance purposes which might be
+  different from public/reporting
+  """
+  @spec get_user_balance_rating_value(T.userid(), String.t() | non_neg_integer()) :: rating_value()
+  def get_user_balance_rating_value(userid, rating_type_id) when is_integer(rating_type_id) do
+    real_rating = get_user_rating_value(userid, rating_type_id)
+
+    stats = Account.get_user_stat_data(userid)
+    adjustment = int_parse(stats["os_global_adjust"])
+
+    real_rating + adjustment
+  end
+
+  def get_user_balance_rating_value(_userid, nil), do: nil
+  def get_user_balance_rating_value(userid, rating_type) do
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
+    get_user_balance_rating_value(userid, rating_type_id)
   end
 
   @doc """

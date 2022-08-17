@@ -92,7 +92,7 @@ defmodule Teiserver.Game.BalancerServer do
 
     groups = player_ids
       |> Enum.map(fn userid ->
-        {[userid], BalanceLib.get_user_rating_value(userid, rating_type)}
+        {[userid], BalanceLib.get_user_balance_rating_value(userid, rating_type)}
       end)
 
     BalanceLib.create_balance(groups, team_count, @balance_algorithm)
