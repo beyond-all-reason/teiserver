@@ -262,6 +262,9 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:remove_script_tags, keys) do
+    keys = keys
+      |> Enum.reject(fn k -> Enum.member?(["", " "], k) end)
+
     "REMOVESCRIPTTAGS " <> Enum.join(keys, "\t") <> "\n"
   end
 
