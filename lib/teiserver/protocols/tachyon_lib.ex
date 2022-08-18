@@ -37,9 +37,6 @@ defmodule Teiserver.Protocols.TachyonLib do
           |> :zlib.gzip()
           |> Base.encode64()
     end
-
-
-
   end
 
   @spec decode(String.t() | :timeout) :: {:ok, List.t() | Map.t()} | {:error, :bad_json}
