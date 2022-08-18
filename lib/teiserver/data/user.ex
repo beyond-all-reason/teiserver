@@ -257,6 +257,7 @@ defmodule Teiserver.User do
           |> Map.put(:password_hash, spring_md5_password(password))
           |> Map.put(:spring_password, false)
           |> add_user
+          |> update_user(persist: true)
 
         if not String.ends_with?(user.email, "@agents") and not String.ends_with?(user.email, "@beans") do
           case EmailHelper.new_user(user) do
