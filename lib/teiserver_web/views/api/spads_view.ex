@@ -9,11 +9,15 @@ defmodule TeiserverWeb.API.SpadsView do
     }
   end
 
-  def render("balance_battle.json", _assigns) do
+  def render("empty.json", _assigns) do
+    %{}
+  end
+
+  def render("balance_battle.json", assigns) do
     %{
-      unbalance_indicator: -1,
-      player_assign_hash: %{},
-      bot_assign_hash: %{}
+      unbalance_indicator: assigns.deviation,
+      player_assign_hash: assigns.players,
+      bot_assign_hash: assigns.bots
     }
   end
 end

@@ -8,10 +8,19 @@ defmodule Teiserver.Battle.BalanceLib do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @type rating_value() :: float()
-  @type group_tuple() :: {[T.userid()], number(), rating_value()}
+  @type group_tuple() :: {[T.userid()], rating_value(), non_neg_integer()}
 
   @doc """
   groups is a list of pairs, the first item being a list of members (userids) and the second being the rating applied to the group. Note this is the rating for the group as a whole and no additional maths is performed.
+
+
+  The result format with the following keys:
+  captains: map of team_id => user_id of highest ranked player in the team
+  deviation: non_neg_integer
+  ratings: map of team_id => combined rating_value for team
+  team_players: map of team_id => list of userids of players on that team
+  team_sizes: map of team_id => non_neg_integer
+  team_groups: map of team_id => list of group_tuples, {[userid], rating_value, size}
   """
   @spec create_balance([{[T.userid()], rating_value()}], non_neg_integer(), :round_robin | :loser_picks) :: map()
   def create_balance(groups, team_count, mode \\ :loser_picks) do
@@ -241,32 +250,6 @@ defmodule Teiserver.Battle.BalanceLib do
           |> Enum.map(fn {_, s} -> s end)
 
         [max_score | remaining] = raw_scores
-        [min_score | _] = remaining
-
-        # Max score skillst always be at least one for this to not bork
-        max_score = max(max_score, 1)
-
-        ((1 - (min_score/max_score)) * 100)
-          |> round
-          |> abs
-    end
-  end
-
-  @spec get_deviation_old(map()) :: number()
-  def get_deviation_old(result_stats) do
-    scores = result_stats
-      |> Enum.map(fn {_team, stats} ->
-        stats.total_rating
-      end)
-      |> Enum.sort
-
-    case scores do
-      [] ->
-        0
-      [_] ->
-        0
-      _ ->
-        [max_score | remaining] = scores
         [min_score | _] = remaining
 
         # Max score skillst always be at least one for this to not bork
