@@ -114,6 +114,7 @@ defmodule Teiserver.User do
     :crypto.hash(:md5, password) |> Base.encode64()
   end
 
+  @spec user_register_params(String.t(), String.t(), String.t(), map()) :: map()
   def user_register_params(name, email, password, extra_data \\ %{}) do
     name = clean_name(name)
     encrypted_password = encrypt_password(password)
@@ -257,7 +258,7 @@ defmodule Teiserver.User do
           |> Map.put(:spring_password, false)
           |> add_user
 
-        if not String.ends_with?(user.email, "@agents") do
+        if not String.ends_with?(user.email, "@agents") and not String.ends_with?(user.email, "@beans") do
           case EmailHelper.new_user(user) do
             {:error, error} ->
               Logger.error("Error sending new user email - #{user.email} - #{error}")

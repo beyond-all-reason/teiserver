@@ -188,6 +188,11 @@ defmodule TeiserverWeb.Router do
         post "/login", SessionController, :login
       end
 
+      scope "/teiserver/api/beans", TeiserverWeb.API, as: :ts do
+        pipe_through([:api])
+        post("/create_user", BeansController, :create_user)
+      end
+
       scope "/teiserver/api/spads", TeiserverWeb.API, as: :ts do
         pipe_through([:api])
         get "/get_rating/:target_id/:type", SpadsController, :get_rating
@@ -235,6 +240,7 @@ defmodule TeiserverWeb.Router do
         live("/agent", Index, :index)
         # live("/agent/:id", Show, :show)
       end
+
 
       scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
         pipe_through([:browser, :standard_layout, :protected])

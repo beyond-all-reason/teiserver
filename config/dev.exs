@@ -63,6 +63,7 @@ config :central, Teiserver,
   heartbeat_timeout: nil,
   enable_discord_bridge: false,
   enable_agent_mode: true,
+  enable_beans: true,
   use_geoip: true
 
 # ## SSL Support
