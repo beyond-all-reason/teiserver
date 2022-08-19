@@ -191,6 +191,8 @@ defmodule TeiserverWeb.Router do
       scope "/teiserver/api/beans", TeiserverWeb.API, as: :ts do
         pipe_through([:api])
         post("/create_user", BeansController, :create_user)
+        post("/db_update_user", BeansController, :db_update_user)
+        post("/ts_update_user", BeansController, :ts_update_user)
       end
 
       scope "/teiserver/api/spads", TeiserverWeb.API, as: :ts do

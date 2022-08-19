@@ -22,7 +22,7 @@ defmodule TeiserverWeb.API.BeansController do
 
           {:error, reason} ->
             %{
-              result: "Failure",
+              result: "failure",
               stage: "User.register_user",
               reason: reason
             }
@@ -34,7 +34,69 @@ defmodule TeiserverWeb.API.BeansController do
     conn
       |> put_status(201)
       |> assign(:result, result)
-      |> render("create_user.json", %{outcome: :success, id: 1})
+      |> render("result.json")
+  end
+
+  @spec db_update_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def db_update_user(conn, %{"email" => email, "attrs" => attrs}) do
+    result = case Account.get_user_by_email(email) do
+      nil ->
+        %{
+          "result" => "failure",
+          "stage" => "get_user_by_email",
+          "error" => "No user found"
+        }
+
+      user ->
+        db_user = Account.get_user(user.id)
+
+        case Account.update_user(db_user, attrs) do
+          {:ok, _user} ->
+            %{"result" => "success"}
+          {:error, changeset} ->
+            %{
+              "result" => "failure",
+              "stage" => "update_user",
+              "error" => Kernel.inspect(changeset)
+            }
+        end
+    end
+
+    conn
+      |> put_status(201)
+      |> assign(:result, result)
+      |> render("result.json")
+  end
+
+  @spec ts_update_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
+  def ts_update_user(conn, %{"email" => email, "attrs" => attrs}) do
+    result = case Account.get_user_by_email(email) do
+      nil ->
+        %{
+          "result" => "failure",
+          "stage" => "get_user_by_email",
+          "error" => "No user found"
+        }
+
+      user ->
+        new_user = user
+          |> Map.new(fn {k, v} ->
+            str_k = to_string(k)
+
+            {
+              k,
+              Map.get(attrs, str_k, v)
+            }
+          end)
+
+        Account.update_cache_user(new_user, persist: true)
+        %{"result" => "success"}
+    end
+
+    conn
+      |> put_status(201)
+      |> assign(:result, result)
+      |> render("result.json")
   end
 end
 
