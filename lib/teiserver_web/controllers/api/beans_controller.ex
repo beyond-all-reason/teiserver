@@ -11,10 +11,11 @@ defmodule TeiserverWeb.API.BeansController do
   @spec create_user(Plug.Conn.t(), map()) :: Plug.Conn.t()
   def create_user(conn, params) do
     email = params["email"] <> "@beans"
+    name = params["name"] <> "_beans"
 
     result = case Account.get_user_by_email(email) do
       nil ->
-        case User.register_user(params["name"], email, params["password"]) do
+        case User.register_user(name, email, params["password"]) do
           :success ->
             db_user = Account.get_user!(nil, search: [email: email])
             Central.Account.update_user(db_user, params["permissions"], :permissions)
