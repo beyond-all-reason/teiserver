@@ -28,6 +28,7 @@ defmodule TeiserverWeb.API.BeansController do
             }
         end
       user ->
+        User.set_flood_level(user.id, 0)
         %{userid: user.id}
     end
 
