@@ -123,9 +123,12 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     _tachyon_send(socket, data)
     [reply] = _tachyon_recv(socket2)
 
+    script_password = reply["script_password"]
+
     assert reply == %{
       "cmd" => "s.lobby.join_response",
       "result" => "approve",
+      "script_password" => script_password,
       "bots" => %{},
       "lobby" => %{"disabled_units" => [], "engine_name" => "spring-105", "engine_version" => "105.1.2.3", "founder_id" => host.id, "game_name" => "BAR", "id" => lobby_id, "in_progress" => false, "ip" => "127.0.0.1", "locked" => false, "map_hash" => "string_of_characters", "map_name" => "koom valley", "max_players" => 16, "name" => "EU 01 - 123", "passworded" => true, "players" => [], "public" => true, "settings" => %{"max_players" => 12}, "start_areas" => %{}, "started_at" => nil, "type" => "normal"},
       "member_list" => [],

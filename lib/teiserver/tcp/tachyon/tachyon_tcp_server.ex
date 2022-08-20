@@ -275,8 +275,6 @@ defmodule Teiserver.TachyonTcpServer do
     {:noreply, new_state}
   end
 
-
-
   def handle_info(data = %{channel: "teiserver_client_messages:" <> userid_str}, state) do
     userid = int_parse(userid_str)
 
@@ -285,7 +283,7 @@ defmodule Teiserver.TachyonTcpServer do
         :join_lobby_request_response ->
           case data.response do
             :accept ->
-              state.protocol_out.reply(:lobby, data.event, {data.lobby_id, :accept}, state)
+              state.protocol_out.reply(:lobby, data.event, {data.lobby_id, :accept, state.script_password}, state)
             :deny ->
               state.protocol_out.reply(:lobby, data.event, {data.lobby_id, :deny, data.reason}, state)
           end

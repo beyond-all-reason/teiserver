@@ -31,13 +31,13 @@ Sent by the server after watching all lobbies via `c.system.watch`.
 - `id_list` - List (Lobby ID)
 
 ##### Planned items to add
-- `min_player_count` - Integer, a count of the number of players in the battle
-- `max_player_count` - Integer, a count of the number of players in the battle
-- `spectator_count` - Integer, a count of the number of spectators in the battle
-- `member_count` - Integer, a count of the number of players and spectators in the battle
+- `min_player_count` - Integer, a count of the number of players in the lobby
+- `max_player_count` - Integer, a count of the number of players in the lobby
+- `spectator_count` - Integer, a count of the number of spectators in the lobby
+- `member_count` - Integer, a count of the number of players and spectators in the lobby
 
 #### Success response
-* battle_list :: List (Battle)
+* lobbies :: List (Battle)
 
 #### Example input/output
 ```json
@@ -51,7 +51,7 @@ Sent by the server after watching all lobbies via `c.system.watch`.
 
 {
   "cmd": "s.lobby.query",
-  "battle_list": [
+  "lobbies": [
     Battle,
     Battle,
     Battle
@@ -88,7 +88,7 @@ Allowed keys:
 
 ## Interacting
 ### c.lobby.join
-Requests to join the battle, the host will be sent a message asking if the person can join or not. Based on that an accept/reject is sent. If there is a failure to join then it means the host wasn't even consulted as the joiner didn't qualify (e.g. didn't supply the password).
+Requests to join the lobby, the host will be sent a message asking if the person can join or not. Based on that an accept/reject is sent. If there is a failure to join then it means the host wasn't even consulted as the joiner didn't qualify (e.g. didn't supply the password).
 **Stage 1**
 ```json
 {
@@ -140,7 +140,7 @@ Requests to join the battle, the host will be sent a message asking if the perso
 // Approval
 {
   "cmd": "s.lobby.join_response",
-  "lobbyid": 123,
+  "script_password": "123456789",
   "result": "approve",
   "lobby": Lobby,
   "modoptions": [modoptions],
@@ -158,13 +158,18 @@ Requests to join the battle, the host will be sent a message asking if the perso
 }
 ```
 
-### TODO: `c.lobby.force_join`
-Used when the server moves you to a lobby. It will move you out of your existing lobby (if in one) and into the lobby in the message
+### `c.lobby.force_join`
+Used when the server moves you to a lobby. It will move you out of your existing lobby (if in one) and into the lobby in the message.
 ```json
 {
   "cmd": "s.lobby.join_response",
+  "script_password": "123456789",
+  "result": "approve",
   "lobby": Lobby,
-  "script_password": "123456789"
+  "modoptions": [modoptions],
+  "bots": [],
+  "player_list": [userid],
+  "member_list": [userid],
 }
 ```
 
@@ -177,7 +182,7 @@ No server response.
 ```
 
 ### TODO: `c.lobby.send_invite`
-Sends an invite to a user to them to join the same battle as yourself. They will still have to go through the same approval process as any other join_battle command. No response from server.
+Sends an invite to a user to them to join the same lobby as yourself. They will still have to go through the same approval process as any other join_lobby command. No response from server.
 ```json
 {
   "cmd": "c.lobby.send_invite",
@@ -188,11 +193,11 @@ Sends an invite to a user to them to join the same battle as yourself. They will
 ```
 
 
-### TODO: `s.lobby.invite_to_battle`
-The message seen by a player being invited to a battle.
+### TODO: `s.lobby.invite_to_lobby`
+The message seen by a player being invited to a lobby.
 ```json
 {
-  "cmd": "s.lobby.invite_to_battle",
+  "cmd": "s.lobby.invite_to_lobby",
   "from_userid": 111,
   "lobby_id": 321,
   "message": "Please come play with me" // Optional?,
@@ -255,7 +260,7 @@ Sent by the server to inform of a change in one or more lobby_data values.
 ```
 
 ### TODO: `s.lobby.user_joined`
-Sent by the server to inform of a new player joining the battle room.
+Sent by the server to inform of a new player joining the lobby.
 ```
 
 ```

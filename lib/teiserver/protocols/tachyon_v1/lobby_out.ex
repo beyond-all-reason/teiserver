@@ -187,14 +187,24 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
   end
 
   def do_reply(:force_join_lobby, {lobby_id, script_password}) do
-    case Lobby.get_lobby(lobby_id) do
+    case Battle.get_combined_lobby_state(lobby_id) do
       nil -> nil
-      lobby ->
+      result ->
+        member_list = result.member_list
+          |> Enum.uniq
+          |> Enum.map(fn userid ->
+            client = Account.get_client_by_id(userid)
+            Tachyon.convert_object(client, :client)
+          end)
+
         send(self(), {:action, {:join_lobby, lobby_id}})
         %{
           "cmd" => "s.lobby.force_join",
+          "lobby" => Tachyon.convert_object(result.lobby, :lobby),
           "script_password" => script_password,
-          "lobby" => Tachyon.convert_object(lobby, :lobby)
+          "modoptions" => result.modoptions,
+          "bots" => result.bots,
+          "member_list" => member_list,
         }
     end
   end
@@ -210,7 +220,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
-  def do_reply(:join_lobby_request_response, {lobby_id, :accept}) do
+  def do_reply(:join_lobby_request_response, {lobby_id, :accept, script_password}) do
     case Battle.get_combined_lobby_state(lobby_id) do
       nil ->
         %{
@@ -227,18 +237,16 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
             Tachyon.convert_object(client, :client)
           end)
 
-        converted_result = %{
+        send(self(), {:action, {:join_lobby, lobby_id}})
+        %{
           "lobby" => Tachyon.convert_object(result.lobby, :lobby),
+          "script_password" => script_password,
           "modoptions" => result.modoptions,
           "bots" => result.bots,
           "member_list" => member_list,
-        }
-
-        send(self(), {:action, {:join_lobby, lobby_id}})
-        Map.merge(converted_result, %{
           "cmd" => "s.lobby.join_response",
           "result" => "approve",
-        })
+        }
     end
   end
 
