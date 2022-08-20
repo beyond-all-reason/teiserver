@@ -123,16 +123,6 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
-      key: "teiserver.Username max length",
-      section: "Moderation",
-      type: "integer",
-      permissions: ["teiserver.admin"],
-      description: "The maximum number of characters allowed in a username.",
-      opts: [],
-      default: 20
-    })
-
-    add_site_config_type(%{
       key: "teiserver.Enable accolades",
       section: "Accolades",
       type: "boolean",
@@ -160,6 +150,16 @@ defmodule Teiserver.TeiserverConfigs do
       description: "Prevents users registering with anything other than Chobby",
       opts: [],
       default: false
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Username max length",
+      section: "Registrations",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The maximum number of characters allowed in a username.",
+      opts: [],
+      default: 20
     })
 
     add_site_config_type(%{
@@ -210,6 +210,16 @@ defmodule Teiserver.TeiserverConfigs do
       description: "The default player limit for lobbies",
       opts: [],
       default: 16
+    })
+
+    add_site_config_type(%{
+      key: "teiserver.Enable server balance",
+      section: "Lobbies",
+      type: "boolean",
+      permissions: ["teiserver.admin"],
+      description: "Enable server-side balance for lobbies",
+      opts: [],
+      default: true
     })
 
     add_site_config_type(%{

@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.API.SpadsController do
   use CentralWeb, :controller
+  alias Central.Config
   alias Teiserver.{Account, Coordinator}
   alias Teiserver.Battle.BalanceLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -35,6 +36,9 @@ defmodule TeiserverWeb.API.SpadsController do
 
   @spec balance_battle(Plug.Conn.t(), map) :: Plug.Conn.t()
   def balance_battle(conn, params) do
+    _server_balance_enabled = Config.get_site_config_cache("teiserver.Enable server balance")
+    server_balance_enabled = true
+
     player_data = params["players"]
       |> String.replace(": None", ": null")
       |> String.replace("'", "\"")
@@ -44,6 +48,12 @@ defmodule TeiserverWeb.API.SpadsController do
       |> String.replace(": None", ": null")
       |> String.replace("'", "\"")
       |> Jason.decode
+
+    player_data = if server_balance_enabled do
+      player_data
+    else
+      :disabled
+    end
 
     case player_data do
       {:ok, data} ->
@@ -92,12 +102,13 @@ defmodule TeiserverWeb.API.SpadsController do
                   {team_id, rating_value, userid, Account.get_username_by_id(userid)}
                 end)
             end)
+            |> List.flatten
             |> Enum.sort
             |> Enum.with_index()
             |> Map.new(fn {{team_id, _, _, username}, idx} ->
               {username, %{
-                "team" => team_id,
-                "id" => idx
+                "team" => team_id - 1,
+                "id" => idx - 1
               }}
             end)
 
@@ -116,6 +127,11 @@ defmodule TeiserverWeb.API.SpadsController do
             |> put_status(200)
             |> render("empty.json")
         end
+
+      :disabled ->
+        conn
+          |> put_status(200)
+          |> render("empty.json")
 
       {:error, error} ->
         Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nplayers decode error: #{Kernel.inspect error}")
