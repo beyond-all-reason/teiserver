@@ -2,6 +2,7 @@ defmodule Teiserver.User do
   @moduledoc """
   Users here are a combination of Central.Account.User and the data within. They are merged like this into a map as their expected use case is very different.
   """
+  alias Central.Config
   alias Teiserver.{Account, Client, Coordinator, Telemetry}
   alias Teiserver.EmailHelper
   alias Teiserver.Battle.LobbyChat
@@ -18,7 +19,6 @@ defmodule Teiserver.User do
   alias Phoenix.PubSub
 
   @timer_sleep 500
-  @max_username_length 20
 
   @default_colour "#666666"
   @default_icon "fa-solid fa-user"
@@ -174,12 +174,14 @@ defmodule Teiserver.User do
     name = String.trim(name)
     email = String.trim(email)
 
+    max_username_length = Config.get_site_config_cache("teiserver.Username max length")
+
     cond do
       WordLib.acceptable_name?(name) == false ->
         {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
 
-      clean_name(name) |> String.length() > @max_username_length ->
-        {:failure, "Max length #{@max_username_length} characters"}
+      clean_name(name) |> String.length() > max_username_length ->
+        {:failure, "Max length #{max_username_length} characters"}
 
       clean_name(name) != name ->
         {:failure, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
@@ -204,13 +206,14 @@ defmodule Teiserver.User do
   def register_user_with_md5(name, email, md5_password, ip) do
     name = String.trim(name)
     email = String.trim(email)
+    max_username_length = Config.get_site_config_cache("teiserver.Username max length")
 
     cond do
       WordLib.acceptable_name?(name) == false ->
         {:error, "Not an acceptable name, please see section 1.4 of the code of conduct"}
 
-      clean_name(name) |> String.length() > @max_username_length ->
-        {:error, "Max length #{@max_username_length} characters"}
+      clean_name(name) |> String.length() > max_username_length ->
+        {:error, "Max length #{max_username_length} characters"}
 
       clean_name(name) != name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
@@ -374,6 +377,7 @@ defmodule Teiserver.User do
     # since_most_recent_rename = now - (Enum.slice(rename_log, 0..0) ++ [0] |> hd)
     since_rename_two = now - (Enum.slice(rename_log, 1..1) ++ [0, 0, 0] |> hd)
     since_rename_three = now - (Enum.slice(rename_log, 2..2) ++ [0, 0, 0] |> hd)
+    max_username_length = Config.get_site_config_cache("teiserver.Username max length")
 
     cond do
       is_restricted?(userid, ["Community", "Renaming"]) ->
@@ -393,8 +397,8 @@ defmodule Teiserver.User do
       admin_action == false and is_restricted?(userid, ["All chat", "Renaming"]) ->
         {:error, "Muted"}
 
-      clean_name(new_name) |> String.length() > @max_username_length ->
-        {:error, "Max length #{@max_username_length} characters"}
+      clean_name(new_name) |> String.length() > max_username_length ->
+        {:error, "Max length #{max_username_length} characters"}
 
       clean_name(new_name) != new_name ->
         {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}

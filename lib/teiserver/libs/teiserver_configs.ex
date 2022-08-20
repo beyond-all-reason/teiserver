@@ -123,6 +123,16 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "teiserver.Username max length",
+      section: "Moderation",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The maximum number of characters allowed in a username.",
+      opts: [],
+      default: 20
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Enable accolades",
       section: "Accolades",
       type: "boolean",
