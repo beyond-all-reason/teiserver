@@ -36,8 +36,7 @@ defmodule TeiserverWeb.API.SpadsController do
 
   @spec balance_battle(Plug.Conn.t(), map) :: Plug.Conn.t()
   def balance_battle(conn, params) do
-    _server_balance_enabled = Config.get_site_config_cache("teiserver.Enable server balance")
-    server_balance_enabled = true
+    server_balance_enabled = Config.get_site_config_cache("teiserver.Enable server balance")
 
     player_data = params["players"]
       |> String.replace(": None", ": null")
@@ -59,74 +58,68 @@ defmodule TeiserverWeb.API.SpadsController do
       {:ok, data} ->
         player_names = data |> Map.keys
 
-        if Enum.member?(player_names, "Teifion") do
-          first_player_name = hd(player_names)
+        first_player_name = hd(player_names)
 
-          client = Account.get_client_by_name(first_player_name)
+        client = Account.get_client_by_name(first_player_name)
 
-          Logger.warn("Teifion present, balancing game")
+        team_count = int_parse(params["nbTeams"])
+        balance_result = Coordinator.call_balancer(client.lobby_id, {
+          :make_balance, player_data, bot_data, team_count
+        })
 
-          team_count = int_parse(params["nbTeams"])
-          balance_result = Coordinator.call_balancer(client.lobby_id, {
-            :make_balance, player_data, bot_data, team_count
-          })
+        # Get some counts for later
+        total_players = balance_result.team_sizes
+          |> Map.values
+          |> Enum.sum
 
-          # Get some counts for later
-          total_players = balance_result.team_sizes
-            |> Map.values
-            |> Enum.sum
+        team_count = balance_result.team_sizes
+          |> Enum.count
 
-          team_count = balance_result.team_sizes
-            |> Enum.count
-
-          # Calculate the rating type
-          rating_type = cond do
-            total_players == 2 -> "Duel"
-            team_count == 2 -> "Team"
-            total_players == team_count -> "FFA"
-            true -> "Team FFA"
-          end
-
-          # Temporary solution until FFA and Team FFA ratings are fixed
-          rating_type = case rating_type do
-            "Team FFA" -> "Team"
-            "FFA" -> "Duel"
-            v -> v
-          end
-
-          player_result = balance_result.team_players
-            |> Enum.map(fn {team_id, players} ->
-              players
-                |> Enum.map(fn userid ->
-                  rating_value = BalanceLib.get_user_rating_value(userid, rating_type)
-                  {team_id, rating_value, userid, Account.get_username_by_id(userid)}
-                end)
-            end)
-            |> List.flatten
-            |> Enum.sort
-            |> Enum.with_index()
-            |> Map.new(fn {{team_id, _, _, username}, idx} ->
-              {username, %{
-                "team" => team_id - 1,
-                "id" => idx - 1
-              }}
-            end)
-
-          bot_result = %{}
-
-          # Logger.warn("Game balanced: #{Kernel.inspect balance_result}")
-
-          conn
-            |> put_status(200)
-            |> assign(:deviation, balance_result.deviation)
-            |> assign(:players, player_result)
-            |> assign(:bots, bot_result)
-            |> render("balance_battle.json")
-        else
-          conn
-            |> put_status(200)
-            |> render("empty.json")
+        # Calculate the rating type
+        rating_type = cond do
+          total_players == 2 -> "Duel"
+          team_count == 2 -> "Team"
+          total_players == team_count -> "FFA"
+          true -> "Team FFA"
         end
+
+        # Temporary solution until FFA and Team FFA ratings are fixed
+        rating_type = case rating_type do
+          "Team FFA" -> "Team"
+          "FFA" -> "Duel"
+          v -> v
+        end
+
+        player_result = balance_result.team_players
+          |> Enum.map(fn {team_id, players} ->
+            players
+              |> Enum.map(fn userid ->
+                rating_value = BalanceLib.get_user_rating_value(userid, rating_type)
+                {team_id, rating_value, userid, Account.get_username_by_id(userid)}
+              end)
+          end)
+          |> List.flatten
+          |> Enum.sort
+          |> Enum.with_index()
+          |> Map.new(fn {{team_id, _, _, username}, idx} ->
+            {username, %{
+              "team" => team_id - 1,
+              "id" => idx - 1
+            }}
+          end)
+
+        bot_result = %{}
+
+        if Enum.member?(player_names, "Teifion") do
+          Logger.warn("Balance result: #{Kernel.inspect player_result}")
+        end
+
+        conn
+          |> put_status(200)
+          |> assign(:deviation, balance_result.deviation)
+          |> assign(:players, player_result)
+          |> assign(:bots, bot_result)
+          |> render("balance_battle.json")
 
       :disabled ->
         conn
