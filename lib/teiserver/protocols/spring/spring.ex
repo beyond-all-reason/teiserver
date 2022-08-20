@@ -136,7 +136,8 @@ defmodule Teiserver.Protocols.Spring do
 
   @spec create_battle_status(Map.t()) :: Integer.t()
   def create_battle_status(client) do
-    sync = client.sync
+    sync = client
+      |> Map.get(:sync, %{})
       |> Enum.filter(fn {_key, value} -> value != 1 end)
       |> Enum.empty?()
 
