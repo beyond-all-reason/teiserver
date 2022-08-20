@@ -139,8 +139,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
   def do_handle("update_status", _, %{userid: nil} = state), do: reply(:system, :nouser, nil, state)
   def do_handle("update_status", _, %{lobby_id: nil} = state), do: reply(:system, :nolobby, nil, state)
   def do_handle("update_status", %{"client" => new_status}, state) do
-    updates =
-      new_status
+    updates = new_status
       |> Map.take(~w(in_game away ready player_number team_colour team_number player sync side))
       |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
 
@@ -180,5 +179,51 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
     Lobby.remove_user_from_battle(state.userid, state.lobby_id)
     new_state = %{state | lobby_id: nil, lobby_host: false}
     reply(:lobby, :leave, {:success, nil}, new_state)
+  end
+
+  def do_handle("add_bot", %{"name" => name, "status" => status, "ai_dll" => ai_dll}, state) do
+    if Lobby.allow?(state.userid, :add_bot, state.lobby_id) do
+      bot_status = status
+        |> Map.take(~w(player_number team_colour team_number side))
+        |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
+        |> Map.merge(%{
+          player: true,
+          sync: %{engine: 1, game: 1, map: 1},
+          ready: true
+        })
+
+      bot_data = Lobby.new_bot(
+        Map.merge(
+          %{
+            name: name,
+            owner_name: state.username,
+            owner_id: state.userid,
+            ai_dll: ai_dll
+          },
+          bot_status
+        )
+      )
+
+      Battle.add_bot_to_lobby(state.lobby_id, bot_data)
+    end
+    state
+  end
+
+  def do_handle("update_bot", %{"name" => name, "status" => status}, state) do
+    if Lobby.allow?(state.userid, {:update_bot, name}, state.lobby_id) do
+      bot_status = status
+        |> Map.take(~w(player_number team_colour team_number side))
+        |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
+
+      Battle.update_bot(state.lobby_id, name, bot_status)
+    end
+    state
+  end
+
+  def do_handle("remove_bot", %{"name" => name}, state) do
+    if Lobby.allow?(state.userid, {:remove_bot, name}, state.lobby_id) do
+      Battle.remove_bot(state.lobby_id, name)
+    end
+    state
   end
 end

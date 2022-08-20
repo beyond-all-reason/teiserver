@@ -231,81 +231,79 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     _tachyon_recv_until(socket)
 
     # Add a bot
-    Logger.warn("#{__ENV__.file}.#{__ENV__.line} should add, update and remove the bot via Tachyon commands")
-    Battle.add_bot_to_lobby(lobby_id, %{
-      ai_dll: "BARb",
-      handicap: 0,
-      name: "BARbarianAI(10)",
-      owner_id: 8603,
-      owner_name: "Mustard",
-      player: true,
-      player_number: 8,
-      ready: true,
-      side: 1,
-      sync: %{"engine" => 1, "game" => 1, "map" => 1},
-      team_colour: "42537",
-      team_number: 2
-    })
-
-    [reply] = _tachyon_recv_until(socket)
-    assert reply == %{
-      "bot" => %{
-      "ai_dll" => "BARb",
-      "handicap" => 0,
-      "name" => "BARbarianAI(10)",
-      "owner_id" => 8603,
-      "owner_name" => "Mustard",
-      "player" => true,
-      "player_number" => 8,
-      "ready" => true,
-      "side" => 1,
-      "sync" => %{"engine" => 1, "game" => 1, "map" => 1},
-      "team_colour" => "42537",
-      "team_number" => 2
+    data = %{
+      cmd: "c.lobby.add_bot",
+      name: "BotNumeroUno",
+      status: %{
+        team_colour: "42537",
+        player_number: 8,
+        team_number: 2,
+        side: 1,
       },
-      "cmd" => "s.lobby.add_bot"
+      ai_dll: "BARb"
     }
-
-    # Update the bot
-    Battle.update_bot(lobby_id, "BARbarianAI(10)", %{
-      ai_dll: "BARb",
-      handicap: 0,
-      name: "BARbarianAI(10)",
-      owner_id: 8603,
-      owner_name: "Mustard",
-      player: true,
-      player_number: 8,
-      ready: true,
-      side: 1,
-      sync: %{"engine" => 1, "game" => 1, "map" => 1},
-      team_colour: "123445",
-      team_number: 2
-    })
+    _tachyon_send(socket2, data)
 
     [reply] = _tachyon_recv_until(socket)
     assert reply == %{
       "bot" => %{
         "ai_dll" => "BARb",
         "handicap" => 0,
-        "name" => "BARbarianAI(10)",
-        "owner_id" => 8603,
-        "owner_name" => "Mustard",
+        "name" => "BotNumeroUno",
+        "owner_id" => user2.id,
+        "owner_name" => user2.name,
         "player" => true,
         "player_number" => 8,
         "ready" => true,
         "side" => 1,
         "sync" => %{"engine" => 1, "game" => 1, "map" => 1},
-        "team_colour" => "123445",
+        "team_colour" => "42537",
         "team_number" => 2
+      },
+      "cmd" => "s.lobby.add_bot"
+    }
+
+    # Update the bot
+    data = %{
+      cmd: "c.lobby.update_bot",
+      name: "BotNumeroUno",
+      status: %{
+        team_colour: "123445",
+        player_number: 6,
+        team_number: 1,
+        side: 1,
+      }
+    }
+    _tachyon_send(socket2, data)
+
+    [reply] = _tachyon_recv_until(socket)
+    assert reply == %{
+      "bot" => %{
+        "ai_dll" => "BARb",
+        "handicap" => 0,
+        "name" => "BotNumeroUno",
+        "owner_id" => user2.id,
+        "owner_name" => user2.name,
+        "player" => true,
+        "player_number" => 6,
+        "ready" => true,
+        "side" => 1,
+        "sync" => %{"engine" => 1, "game" => 1, "map" => 1},
+        "team_colour" => "123445",
+        "team_number" => 1
       },
       "cmd" => "s.lobby.update_bot"
     }
 
     # Remove bot
-    Battle.remove_bot(lobby_id, "BARbarianAI(10)")
+    _tachyon_send(socket2, %{
+      cmd: "c.lobby.remove_bot",
+      name: "BotNumeroUno"
+    })
+
     [reply] = _tachyon_recv_until(socket)
     assert reply == %{
-      "bot_name" => "BARbarianAI(10)",
+      "bot_name" => "BotNumeroUno",
       "cmd" => "s.lobby.remove_bot"
     }
 

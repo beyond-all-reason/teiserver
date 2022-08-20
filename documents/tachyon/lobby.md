@@ -1,5 +1,5 @@
 ## Showing
-### `s.lobby.opened`
+### s.lobby.opened
 Sent by the server after watching all lobbies via `c.system.watch`.
 ```json
 {
@@ -9,7 +9,7 @@ Sent by the server after watching all lobbies via `c.system.watch`.
 ```
 
 
-### `s.lobby.closed`
+### s.lobby.closed
 Sent by the server after watching all lobbies via `c.system.watch`.
 ```json
 {
@@ -18,7 +18,7 @@ Sent by the server after watching all lobbies via `c.system.watch`.
 }
 ```
 
-### `c.lobby.query`
+### c.lobby.query
 * query :: Query
 * fields :: List (optional)
 
@@ -60,7 +60,7 @@ Sent by the server after watching all lobbies via `c.system.watch`.
 ```
 
 
-### `c.lobby.get`
+### c.lobby.get
 Gets various properties from a lobby based on the command.
 
 Allowed keys:
@@ -87,7 +87,7 @@ Allowed keys:
 ```
 
 ## Interacting
-### `c.lobby.join`
+### c.lobby.join
 Requests to join the battle, the host will be sent a message asking if the person can join or not. Based on that an accept/reject is sent. If there is a failure to join then it means the host wasn't even consulted as the joiner didn't qualify (e.g. didn't supply the password).
 **Stage 1**
 ```json
@@ -168,7 +168,7 @@ Used when the server moves you to a lobby. It will move you out of your existing
 }
 ```
 
-### `c.lobby.leave`
+### c.lobby.leave
 No server response.
 ```json
 {
@@ -241,7 +241,7 @@ Sent by a client to inform the server their status is updated. Below are the fie
 }
 ```
 
-### `s.lobby.update_values`
+### s.lobby.update_values
 Sent by the server to inform of a change in one or more lobby_data values.
 ```json
 {
@@ -265,6 +265,44 @@ Sent by the server to inform of a new player joining the battle room.
 Sent by the server to inform of an announcement made in the room
 
 ## TODO: Bot stuff
+### c.lobby.add_bot
+```json
+{
+  "cmd": "c.lobby.add_bot",
+  "name": "MyAmazingBot",
+  "ai_dll": "MyBotDLL",
+  "status": {
+    "team_colour": "42537",
+    "player_number": 8,
+    "team_number": 2,
+    "side": 1
+  }
+}
+```
+
+
+### c.lobby.update_bot
+```json
+{
+  "cmd": "c.lobby.update_bot",
+  "name": "MyAmazingBot",
+  "status": {
+    "team_colour": "123445",
+    "player_number": 6,
+    "team_number": 1,
+    "side": 1,
+  }
+}
+```
+
+### c.lobby.remove_bot
+```json
+{
+  "cmd": "c.lobby.remove_bot",
+  "name": "MyAmazingBot"
+}
+```
+
 - Add/Remove/Update
 
 ## TODO: Telemetry
