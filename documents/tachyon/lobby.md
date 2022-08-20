@@ -254,7 +254,6 @@ Sent by the server to inform of a change in one or more lobby_data values.
 
 ```
 
-
 ### TODO: `s.lobby.user_joined`
 Sent by the server to inform of a new player joining the battle room.
 ```
@@ -264,8 +263,12 @@ Sent by the server to inform of a new player joining the battle room.
 ### TODO: `s.lobby.received_lobby_direct_announce`
 Sent by the server to inform of an announcement made in the room
 
-## TODO: Bot stuff
+## Bots
+The responses listed here are the messages which will be sent when any bot is added, updated or removed. The bot commands do not have a success/failure response.
+
 ### c.lobby.add_bot
+Used to add a bot to the lobby. Once added only the host and owner can alter it.
+
 ```json
 {
   "cmd": "c.lobby.add_bot",
@@ -278,8 +281,25 @@ Sent by the server to inform of an announcement made in the room
     "side": 1
   }
 }
-```
 
+{
+  "cmd": "s.lobby.add_bot",
+  "bot": {
+    "ai_dll": "MyBotDLL",
+    "handicap": 0,
+    "name": "MyAmazingBot",
+    "owner_id": 123,
+    "owner_name": "MyNameHere",
+    "player": true,
+    "player_number": 8,
+    "ready": true,
+    "side": 1,
+    "sync": {"engine": 1, "game": 1, "map": 1},
+    "team_colour": "42537",
+    "team_number": 2
+  }
+}
+```
 
 ### c.lobby.update_bot
 ```json
@@ -293,6 +313,24 @@ Sent by the server to inform of an announcement made in the room
     "side": 1,
   }
 }
+
+{
+  "cmd": "s.lobby.update_bot",
+  "bot": {
+    "ai_dll": "MyBotDLL",
+    "handicap": 0,
+    "name": "MyAmazingBot",
+    "owner_id": 123,
+    "owner_name": "MyNameHere",
+    "player": true,
+    "player_number": 6,
+    "ready": true,
+    "side": 1,
+    "sync": {"engine": 1, "game": 1, "map": 1},
+    "team_colour": "123445",
+    "team_number": 1
+  }
+}
 ```
 
 ### c.lobby.remove_bot
@@ -301,9 +339,12 @@ Sent by the server to inform of an announcement made in the room
   "cmd": "c.lobby.remove_bot",
   "name": "MyAmazingBot"
 }
-```
 
-- Add/Remove/Update
+{
+  "cmd": "s.lobby.remove_bot",
+  "bot_name": "BotNumeroUno"
+}
+```
 
 ## TODO: Telemetry
 - Mid-battle updates?
