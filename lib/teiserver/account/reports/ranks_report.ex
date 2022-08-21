@@ -1,6 +1,6 @@
 defmodule Teiserver.Account.RanksReport do
   alias Central.Helpers.{DatePresets, TimexHelper}
-  alias Teiserver.{Account}
+  alias Teiserver.{Account, User}
   alias Central.Repo
 
   @spec icon() :: String.t()
@@ -8,6 +8,8 @@ defmodule Teiserver.Account.RanksReport do
 
   @spec permissions() :: String.t()
   def permissions(), do: "teiserver.admin"
+
+  @keys ["0 days", "1 day", "2 days", "3 days", "1 week", "2 weeks", "3 weeks", "4 weeks", "3 months", "6 months", "1 year", "Older"]
 
   @spec run(Plug.Conn.t(), map()) :: {list(), map()}
   def run(_conn, params) do
@@ -65,24 +67,53 @@ defmodule Teiserver.Account.RanksReport do
       |> Enum.group_by(&get_registration_age/1)
       |> Map.new(fn {rank, users} -> {rank, Enum.count(users)} end)
 
+    {cumulative_registration_age, _} = @keys
+      |> Enum.reverse
+      |> Enum.map_reduce(0, fn (key, acc) ->
+        value = registration_age[key] || 0
+
+        {{key, acc + value}, acc + value}
+      end)
+
+    cumulative_registration_age = Map.new(cumulative_registration_age)
+
+    # Get ranks
     rank_count = users
       |> Enum.group_by(fn user ->
         user.data["rank"]
       end)
       |> Map.new(fn {rank, users} -> {rank, Enum.count(users)} end)
 
-    data = %{
-      total: Enum.count(users),
-      rank_count: rank_count,
-      registration_age: registration_age
-    }
+    {cumulative_rank_count, _} = rank_count
+      |> Map.keys
+      |> Enum.sort(&>=/2)
+      |> Enum.map_reduce(0, fn (key, acc) ->
+        value = rank_count[key] || 0
+
+        {{key, acc + value}, acc + value}
+      end)
+
+    cumulative_rank_count = Map.new(cumulative_rank_count)
+
+    rank_hours = ([0] ++ User.get_rank_levels())
+      |> Enum.with_index()
+      |> Map.new(fn {r, i} ->
+        {i, r}
+      end)
 
     assigns = %{
+      keys: @keys,
       params: params,
-      presets: DatePresets.presets()
+      presets: DatePresets.presets(),
+      total: Enum.count(users),
+      rank_count: rank_count,
+      cumulative_rank_count: cumulative_rank_count,
+      registration_age: registration_age,
+      cumulative_registration_age: cumulative_registration_age,
+      rank_hours: rank_hours
     }
 
-    {data, assigns}
+    {%{}, assigns}
   end
 
   defp apply_defaults(params) do

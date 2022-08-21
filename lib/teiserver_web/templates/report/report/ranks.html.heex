@@ -53,9 +53,9 @@
                 "Coop"
               ], class: "form-control", selected: @params["game_type"] %>
             </div>
-
+          </div>
+          <div class="row mt-4">
             <div class="col-md-4 col-lg-3 col-xl-2">
-              &nbsp;<br />
               <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
             </div>
           </div>
@@ -63,12 +63,15 @@
         
         <div class="help-box-large">
           Draws data from all players who played at least one multiplayer game within the timeframe specified.
+          <br /><br />
+          
+          Cumulative in this context would mean X users have this much or more account age/rank.
         </div>
-        <br /><br />
+        <br />
 
         <div class="row">
           <div class="col-lg-12 mb-3">
-            <h4>Found <%= format_number @data.total %> users</h4>
+            <h4>Found <%= format_number @total %> users</h4>
           </div>
           
           <div class="col-lg-4">
@@ -77,20 +80,24 @@
               <thead>
                 <tr>
                   <th>User for...</th>
-                  <th>User count</th>
-                  <th>%</th>
+                  <th colspan="2">Band count</th>
+                  <th>&nbsp;</th>
+                  <th colspan="2">Cumulative</th>
               </tr>
               </thead>
               <tbody>
-                <%
-                  keys = ["0 days", "1 day", "2 days", "3 days", "1 week", "2 weeks", "3 weeks", "4 weeks", "3 months", "6 months", "1 year", "Older"]
-                %>
-                <%= for age <- keys do %>
-                  <% value = @data.registration_age[age] || 0 %>
+                <%= for age <- @keys do %>
+                  <%
+                    value = @registration_age[age] || 0
+                    cvalue = @cumulative_registration_age[age]
+                  %>
                   <tr>
                     <td><%= age %></td>
                     <td><%= format_number value %></td>
-                    <td><%= percent (value/@data.total) %></td>
+                    <td><%= percent (value/@total) %></td>
+                    <td>&nbsp;</td>
+                    <td><%= format_number cvalue %></td>
+                    <td><%= percent (cvalue/@total) %>%</td>
                   </tr>
                 <% end %>
               </tbody>
@@ -103,16 +110,22 @@
               <thead>
                 <tr>
                   <th>Rank level</th>
-                  <th>User count</th>
-                  <th>%</th>
+                  <th>Hours</th>
+                  <th colspan="2">Band count</th>
+                  <th>&nbsp;</th>
+                  <th colspan="2">Cumulative</th>
               </tr>
               </thead>
               <tbody>
-                <%= for {rank, user_count} <- @data.rank_count do %>
+                <%= for {rank, user_count} <- @rank_count do %>
                   <tr>
                     <td><%= rank %></td>
+                    <td><%= @rank_hours[rank] %></td>
                     <td><%= format_number user_count %></td>
-                    <td><%= percent (user_count/@data.total) %></td>
+                    <td><%= percent (user_count/@total) %></td>
+                    <td>&nbsp;</td>
+                    <td><%= format_number @cumulative_rank_count[rank] %></td>
+                    <td><%= percent (@cumulative_rank_count[rank]/@total) %>%</td>
                   </tr>
                 <% end %>
               </tbody>

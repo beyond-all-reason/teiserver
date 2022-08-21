@@ -97,6 +97,8 @@ defmodule Teiserver.User do
     3000
   ]
 
+  def get_rank_levels(), do: @rank_levels
+
 
   @spec clean_name(String.t()) :: String.t()
   def clean_name(name) do
