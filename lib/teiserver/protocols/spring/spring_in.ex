@@ -758,7 +758,7 @@ defmodule Teiserver.Protocols.SpringIn do
               name: name,
               type: if(type == "0", do: "normal", else: "replay"),
               nattype: nattype,
-              port: port,
+              port: int_parse(port),
               max_players: int_parse(max_players),
               game_hash: game_hash,
               map_hash: map_hash,

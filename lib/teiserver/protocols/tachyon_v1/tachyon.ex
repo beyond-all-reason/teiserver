@@ -78,7 +78,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   # Slightly more complex conversions
   def convert_object(lobby, :lobby) do
     Map.take(lobby, ~w(id name founder_id type max_players game_name
-                   locked engine_name engine_version players spectators bots ip
+                   locked engine_name engine_version players spectators bots ip port
                    settings map_name passworded public
                    map_hash tags disabled_units in_progress started_at start_areas)a)
   end
