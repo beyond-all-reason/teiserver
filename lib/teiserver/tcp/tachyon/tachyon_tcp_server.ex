@@ -197,7 +197,24 @@ defmodule Teiserver.TachyonTcpServer do
   end
 
   # User updates
-  def handle_info({:user_update, _event, _userid, _data}, state) do
+  def handle_info(data = %{channel: "teiserver_user_updates:" <> _}, state) do
+    case data.event do
+      :update_report ->
+        :ok
+
+      :friend_request ->
+        state.protocol_out.reply(:user, :friend_request, data.requester_id, state)
+
+      :friend_added ->
+        state.protocol_out.reply(:user, :friend_added, data.friend_id, state)
+
+      :friend_removed ->
+        state.protocol_out.reply(:user, :friend_removed, data.friend_id, state)
+
+      _ ->
+        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}")
+    end
+
     {:noreply, state}
   end
 
@@ -208,11 +225,13 @@ defmodule Teiserver.TachyonTcpServer do
 
   # Internal pubsub messaging (see pubsub.md)
   def handle_info(%{channel: "teiserver_public_stats", data: data}, state) do
-    {:noreply, state.protocol_out.reply(:system, :server_stats, data, state)}
+    state.protocol_out.reply(:system, :server_stats, data, state)
+    {:noreply, state}
   end
 
   def handle_info(%{channel: "teiserver_server", event: event, node: node}, state) do
-    {:noreply, state.protocol_out.reply(:system, :server_event, {event, node}, state)}
+    state.protocol_out.reply(:system, :server_event, {event, node}, state)
+    {:noreply, state}
   end
 
   def handle_info(data = %{channel: "teiserver_party:" <> party_id, event: event}, state) do

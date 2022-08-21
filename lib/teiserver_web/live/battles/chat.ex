@@ -197,7 +197,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
     {:noreply, socket}
   end
 
-  def handle_info({:user_update, _update_type, _userid, _data}, %{assigns: %{id: id}} = socket) do
+  def handle_info(%{channel: "teiserver_user_updates:" <> _}, %{assigns: %{id: id}} = socket) do
     {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_chat_path(socket, :chat, id))}
   end
 

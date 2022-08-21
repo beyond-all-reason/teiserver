@@ -262,9 +262,29 @@ Designed for lobby applications to display/perform various actions as opposed to
 #### teiserver_user_updates:#{userid}
 Information pertinent to a specific user
 ```elixir
-  # {:user_update, ?update_type?, userid, ?data?}
+  %{
+    event: :update_report,
+    userid: userid,
+    report_id: report_id
+  }
 
-  {:user_update, :update_report, user.id, report.id}
+  %{
+    event: :friend_request,
+    userid: userid,
+    requester_id: userid
+  }
+
+  %{
+    event: :friend_added,
+    userid: userid,
+    friend_id: userid
+  }
+
+  %{
+    event: :friend_removed,
+    userid: userid,
+    friend_id: userid
+  }
 ```
 
 ## Parties

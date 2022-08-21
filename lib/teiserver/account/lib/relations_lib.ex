@@ -55,9 +55,51 @@ defmodule Teiserver.Account.RelationsLib do
         {:this_user_updated, [:friends, :friend_requests]}
       )
 
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_user_updates:#{requester_id}",
+        %{
+          channel: "teiserver_user_updates:#{requester_id}",
+          event: :friend_added,
+          user_id: requester_id,
+          friend_id: accepter_id
+        }
+      )
+
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_user_updates:#{accepter_id}",
+        %{
+          channel: "teiserver_user_updates:#{accepter_id}",
+          event: :friend_added,
+          user_id: accepter_id,
+          friend_id: requester_id
+        }
+      )
+
       new_accepter
     else
       accepter
+    end
+  end
+
+  @spec rescind_friend_request(T.userid() | nil, T.userid() | nil) :: User.t() | nil
+  def rescind_friend_request(nil, _), do: nil
+  def rescind_friend_request(_, nil), do: nil
+  def rescind_friend_request(rescinder_id, rescinded_id) do
+    rescinded = User.get_user_by_id(rescinded_id)
+
+    if rescinder_id in rescinded.friend_requests do
+      # Remove from requests
+      new_rescinded =
+        Map.merge(rescinded, %{
+          friend_requests: List.delete(rescinded.friend_requests, rescinder_id)
+        })
+
+      User.update_user(new_rescinded, persist: true)
+
+      # Now push out the updates
+      # TODO have an update of some sort?
     end
   end
 
@@ -123,6 +165,17 @@ defmodule Teiserver.Account.RelationsLib do
         Central.PubSub,
         "legacy_user_updates:#{potential_id}",
         {:this_user_updated, [:friend_requests]}
+      )
+
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_user_updates:#{potential_id}",
+        %{
+          channel: "teiserver_user_updates:#{potential_id}",
+          event: :friend_request,
+          user_id: potential_id,
+          requester_id: requester_id
+        }
       )
 
       new_potential
@@ -277,6 +330,28 @@ defmodule Teiserver.Account.RelationsLib do
         Central.PubSub,
         "legacy_user_updates:#{removed_id}",
         {:this_user_updated, [:friends]}
+      )
+
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_user_updates:#{removed_id}",
+        %{
+          channel: "teiserver_user_updates:#{removed_id}",
+          event: :friend_removed,
+          user_id: removed_id,
+          friend_id: remover_id
+        }
+      )
+
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_user_updates:#{removed_id}",
+        %{
+          channel: "teiserver_user_updates:#{removed_id}",
+          event: :friend_removed,
+          user_id: remover_id,
+          friend_id: removed_id
+        }
       )
 
       new_remover

@@ -150,7 +150,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     {:noreply, socket}
   end
 
-  def handle_info({:user_update, _update_type, _userid, _data}, %{assigns: %{id: id}} = socket) do
+  def handle_info(%{channel: "teiserver_user_updates:" <> _}, %{assigns: %{id: id}} = socket) do
     {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_show_path(socket, :show, id))}
   end
 

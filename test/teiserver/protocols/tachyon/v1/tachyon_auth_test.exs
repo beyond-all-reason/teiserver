@@ -1,9 +1,9 @@
 defmodule Teiserver.Protocols.V1.TachyonAuthTest do
   use Central.ServerCase
-  alias Teiserver.{User, Client}
+  alias Teiserver.{Account, User, Client}
 
   import Teiserver.TeiserverTestLib,
-    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1]
+    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]
 
   setup do
     %{socket: socket, user: user, pid: pid} = tachyon_auth_setup()
@@ -170,6 +170,105 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     assert resp["cmd"] == "s.lobby.join_response"
     assert resp["result"] == "approve"
     assert Map.has_key?(resp, "lobby")
+  end
+
+  test "friends", %{
+    socket: socket,
+    user: user,
+
+    friend1: friend1,
+    friend2: friend2
+    } do
+    User.remove_friend(friend1.id, user.id)
+    User.remove_friend(friend2.id, user.id)
+
+    _tachyon_recv_until(socket)
+
+    _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids"})
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.user.list_friend_ids",
+      "friend_id_list" => [],
+      "request_id_list" => []
+    }
+
+    # We request for friend1, friend2 requests for us
+    _tachyon_send(socket, %{"cmd" => "c.user.add_friend", "user_id" => friend1.id})
+    resp = _tachyon_recv(socket)
+    assert resp == :timeout
+
+    User.create_friend_request(friend2.id, user.id)
+
+    # We should now get a message asking us to be friends
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.user.friend_request",
+      "user_id" => friend2.id
+    }
+
+    # Check the data
+    _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids"})
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.user.list_friend_ids",
+      "friend_id_list" => [],
+      "request_id_list" => [friend2.id]
+    }
+
+    # Now reject that request
+    _tachyon_send(socket, %{"cmd" => "c.user.reject_friend_request", "user_id" => friend2.id})
+    resp = _tachyon_recv(socket)
+    assert resp == :timeout
+
+    _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids"})
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.user.list_friend_ids",
+      "friend_id_list" => [],
+      "request_id_list" => []
+    }
+
+    # Check friend1 has us in their list
+    assert Account.get_user_by_id(friend1.id).friend_requests == [user.id]
+
+    # Rescind it
+    _tachyon_send(socket, %{"cmd" => "c.user.rescind_friend_request", "user_id" => friend1.id})
+    resp = _tachyon_recv(socket)
+    assert resp == :timeout
+
+    assert Account.get_user_by_id(friend1.id).friend_requests == []
+
+    # Accept a friend request that's not there
+    _tachyon_send(socket, %{"cmd" => "c.user.accept_friend_request", "user_id" => friend2.id})
+    resp = _tachyon_recv(socket)
+    assert resp == :timeout
+
+    _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids"})
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.user.list_friend_ids",
+      "friend_id_list" => [],
+      "request_id_list" => []
+    }
+
+    # Add a friend again
+    _tachyon_send(socket, %{"cmd" => "c.user.add_friend", "user_id" => friend1.id})
+    resp = _tachyon_recv(socket)
+    assert resp == :timeout
+
+    # Accept it
+    User.accept_friend_request(user.id, friend2.id)
+
+    resp = _tachyon_recv(socket)
+    assert resp == :timeout
+
+    _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids"})
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.user.list_friend_ids",
+      "friend_id_list" => [],
+      "request_id_list" => []
+    }
   end
 
   defp create_lobby(params) do

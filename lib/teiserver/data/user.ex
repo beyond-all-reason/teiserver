@@ -520,6 +520,9 @@ defmodule Teiserver.User do
   @spec create_friend_request(T.userid() | nil, T.userid() | nil) :: T.user() | nil
   defdelegate create_friend_request(requester, accepter), to: RelationsLib
 
+  @spec rescind_friend_request(T.userid() | nil, T.userid() | nil) :: T.user() | nil
+  defdelegate rescind_friend_request(rescinder_id, requester_id), to: RelationsLib
+
   @spec ignore_user(T.userid() | nil, T.userid() | nil) :: T.user() | nil
   defdelegate ignore_user(ignorer_id, ignored_id), to: RelationsLib
 
@@ -892,7 +895,12 @@ defmodule Teiserver.User do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_user_updates:#{user.id}",
-      {:user_update, :update_report, user.id, report.id}
+      %{
+        channel: "teiserver_user_updates:#{user.id}",
+        event: :update_report,
+        user_id: user.id,
+        report_id: report.id
+      }
     )
 
     :ok
