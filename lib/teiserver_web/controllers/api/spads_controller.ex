@@ -48,15 +48,28 @@ defmodule TeiserverWeb.API.SpadsController do
       |> String.replace("'", "\"")
       |> Jason.decode
 
-    player_data = if server_balance_enabled do
-      player_data
-    else
-      :disabled
+    player_data = case player_data do
+      {:ok, data} -> data
+      _ -> :error
     end
 
-    case player_data do
-      {:ok, data} ->
-        player_names = data |> Map.keys
+    bot_data = case bot_data do
+      {:ok, data} -> data
+      _ -> :error
+    end
+
+    balance_enabled = cond do
+      player_data == :error -> false
+      Enum.empty?(player_data) -> false
+      Enum.empty?(bot_data) == false -> false
+      String.contains?(Kernel.inspect(player_data), "Teifion") -> true
+      server_balance_enabled == false -> false
+      true -> true
+    end
+
+    case balance_enabled do
+      true ->
+        player_names = player_data |> Map.keys
 
         first_player_name = hd(player_names)
 
@@ -104,13 +117,13 @@ defmodule TeiserverWeb.API.SpadsController do
           |> Map.new(fn {{team_id, _, _, username}, idx} ->
             {username, %{
               "team" => team_id - 1,
-              "id" => idx - 1
+              "id" => idx
             }}
           end)
 
         bot_result = %{}
 
-        if Enum.member?(player_names, "Teifion") do
+        if String.contains?(Kernel.inspect(player_data), "Teifion") do
           Logger.warn("Balance result: #{Kernel.inspect player_result}")
         end
 
@@ -121,14 +134,7 @@ defmodule TeiserverWeb.API.SpadsController do
           |> assign(:bots, bot_result)
           |> render("balance_battle.json")
 
-      :disabled ->
-        conn
-          |> put_status(200)
-          |> render("empty.json")
-
-      {:error, error} ->
-        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nplayers decode error: #{Kernel.inspect error}")
-
+      false ->
         conn
           |> put_status(200)
           |> render("empty.json")
