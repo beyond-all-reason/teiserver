@@ -48,12 +48,14 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
   end
 
   test "tachyon end to end", %{socket: socket, user: user, friend1: friend1, friend2: friend2} do
-    # We are already logged in, lets start by getting a list of our friends!
+    # Flush!
+    _tachyon_recv_until(socket)
 
+    # We are already logged in, lets start by getting a list of our friends!
     _tachyon_send(socket, %{"cmd" => "c.user.list_friend_ids", "filter" => ""})
     [resp] = _tachyon_recv(socket)
     assert resp["cmd"] == "s.user.list_friend_ids"
-    friend_list = resp["list_friend_ids"]
+    friend_list = resp["friend_id_list"]
 
     assert Enum.member?(friend_list, friend1.id)
     assert Enum.member?(friend_list, friend2.id)

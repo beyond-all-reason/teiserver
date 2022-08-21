@@ -28,7 +28,8 @@ defmodule Teiserver.Protocols.V1.TachyonConversionTest do
       game_name: "BAR",
       name: "Tachyon lobby conversion test",
       passworded: true,
-      settings: %{max_players: 12}
+      settings: %{max_players: 12},
+      port: 1234
     }
   end
 end
