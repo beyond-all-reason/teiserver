@@ -178,8 +178,12 @@ defmodule Teiserver.Account.PartyServer do
 
   def handle_cast({:new_leader, userid}, %{party: party} = state) do
     new_party = cond do
-      party.leader == userid -> party
-      not Enum.member?(party.members, userid) -> party
+      party.leader == userid ->
+        party
+
+      not Enum.member?(party.members, userid) ->
+        party
+
       true ->
         PubSub.broadcast(
           Central.PubSub,

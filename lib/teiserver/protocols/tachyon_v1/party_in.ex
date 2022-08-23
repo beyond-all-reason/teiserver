@@ -32,9 +32,28 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
     state
   end
 
-  def do_handle("accept", %{"party_id" => party_id}, state) do
+  # Accepting when not a member of a party
+  def do_handle("accept", %{"party_id" => party_id}, %{party_id: nil} = state) do
     case Account.accept_party_invite(party_id, state.userid) do
       {true, party} ->
+        send(self(), {:action, {:join_party, party.id}})
+        reply(:party, :accept, {true, party}, state)
+
+      {false, reason} ->
+        reply(:party, :accept, {false, reason}, state)
+
+      nil ->
+        reply(:party, :accept, {false, "No party found"}, state)
+    end
+    state
+  end
+
+  def do_handle("accept", %{"party_id" => party_id}, %{party_id: existing_party_id} = state) do
+    case Account.accept_party_invite(party_id, state.userid) do
+      {true, party} ->
+        send(self(), {:action, {:leave_party, existing_party_id}})
+        PartyLib.cast_party(existing_party_id, {:member_leave, state.userid})
+
         send(self(), {:action, {:join_party, party.id}})
         reply(:party, :accept, {true, party}, state)
 
@@ -51,19 +70,29 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
     reply(:party, :create, nil, state)
   end
 
-  def do_handle("kick", _, state) do
-    reply(:party, :create, nil, state)
+  # Past this point if they're not in a party don't even bother doing anything
+  def do_handle(_, _, %{party_id: nil} = state) do
+    state
   end
 
-  def do_handle("new_leader", _, state) do
-    reply(:party, :create, nil, state)
+  def do_handle("kick", %{"user_id" => user_id}, state) when is_integer(user_id) do
+    party = Account.get_party(state.party_id)
+    if state.userid == party.leader do
+      PartyLib.cast_party(state.party_id, {:kick_member, user_id})
+    end
+  end
+
+  def do_handle("new_leader", %{"user_id" => user_id}, state) when is_integer(user_id) do
+    party = Account.get_party(state.party_id)
+    if state.userid == party.leader do
+      PartyLib.cast_party(state.party_id, {:new_leader, user_id})
+    end
+    state
   end
 
   def do_handle("leave", _, state) do
-    reply(:party, :create, nil, state)
-  end
-
-  def do_handle("message", _, %{party_id: nil} = state) do
+    PartyLib.cast_party(state.party_id, {:member_leave, state.userid})
+    send(self(), {:action, {:leave_party, state.party_id}})
     state
   end
 

@@ -227,11 +227,71 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
     resp = _tachyon_recv(osocket1)
     assert resp == :timeout
 
-
     # Promote new leader
+    _tachyon_send(usocket, %{"cmd" => "c.party.new_leader", "user_id" => friend2.id})
+    resp = _tachyon_recv(usocket)
+    assert resp == :timeout
+
+    _tachyon_send(fsocket1, %{"cmd" => "c.party.new_leader", "user_id" => friend2.id})
+    [resp] = _tachyon_recv(usocket)
+    assert resp == %{
+      "cmd" => "s.party.updated",
+      "party_id" => party_id,
+      "new_values" => %{
+        "leader" => friend2.id
+      }
+    }
+
     # Leader leaves
+    _tachyon_send(fsocket2, %{"cmd" => "c.party.leave"})
+    [resp] = _tachyon_recv(usocket)
+    assert resp == %{
+      "cmd" => "s.party.updated",
+      "party_id" => party_id,
+      "new_values" => %{
+        "leader" => friend1.id,
+        "members" => [user.id, friend1.id]
+      }
+    }
+
     # Be invited to a different party
-    # Leave the other party
+    _tachyon_send(osocket1, %{"cmd" => "c.party.invite", "userid" => user.id})
+    [resp] = _tachyon_recv(usocket)
+    assert resp == %{
+      "cmd" => "s.party.invite",
+      "party" => %{
+        "id" => other_party_id,
+        "leader" => other1.id,
+        "members" => [other2.id, other1.id],
+        "pending_invites" => [user.id]
+      }
+    }
+
+    _tachyon_recv_until(fsocket2)
+
+    # Accept the invite, thus leaving the other party
+    _tachyon_send(usocket, %{"cmd" => "c.party.accept", "party_id" => other_party_id})
+    [resp] = _tachyon_recv(usocket)
+    assert resp == %{
+      "cmd" => "s.party.accept",
+      "result" => "accepted",
+      "party" => %{
+        "id" => other_party_id,
+        "leader" => other1.id,
+        "members" => [user.id, other2.id, other1.id],
+        "pending_invites" => []
+      }
+    }
+
+    # Check we've been removed from the first party!
+    party = Account.get_party(party_id)
+    assert not Enum.member?(party.members, user.id)
+
     # Party closes when last person leaves
+    _tachyon_send(fsocket1, %{"cmd" => "c.party.leave"})
+    _tachyon_send(fsocket2, %{"cmd" => "c.party.leave"})
+
+    party = Account.get_party(party_id)
+    assert party == nil
   end
 end
