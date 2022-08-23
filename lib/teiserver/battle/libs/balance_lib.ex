@@ -246,18 +246,23 @@ defmodule Teiserver.Battle.BalanceLib do
       [_] ->
         {1, 0}
       _ ->
+        top_team = hd(scores)
+          |> elem(0)
+
         raw_scores = scores
           |> Enum.map(fn {_, s} -> s end)
 
         [max_score | remaining] = raw_scores
         [min_score | _] = remaining
 
-        # Max score skillst always be at least one for this to not bork
+        # Max score skill needs always be at least one for this to not bork
         max_score = max(max_score, 1)
 
-        ((1 - (min_score/max_score)) * 100)
+        deviation = ((1 - (min_score/max_score)) * 100)
           |> round
           |> abs
+
+        {top_team, deviation}
     end
   end
 

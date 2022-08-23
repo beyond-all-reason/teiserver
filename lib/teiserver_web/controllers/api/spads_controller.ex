@@ -112,7 +112,7 @@ defmodule TeiserverWeb.API.SpadsController do
               end)
           end)
           |> List.flatten
-          |> Enum.sort
+          |> Enum.sort(&>=/2)
           |> Enum.with_index()
           |> Map.new(fn {{team_id, _, _, username}, idx} ->
             {username, %{
@@ -127,9 +127,17 @@ defmodule TeiserverWeb.API.SpadsController do
           Logger.warn("Balance result: #{Kernel.inspect player_result}")
         end
 
+        # This should always be the former
+        deviation = case balance_result.deviation do
+          {_, d} -> d
+          d ->
+            Logger.warn("Unexpected balance_result.deviation of #{Kernel.inspect balance_result.deviation}")
+            d
+        end
+
         conn
           |> put_status(200)
-          |> assign(:deviation, balance_result.deviation)
+          |> assign(:deviation, deviation)
           |> assign(:players, player_result)
           |> assign(:bots, bot_result)
           |> render("balance_battle.json")
