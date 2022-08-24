@@ -128,12 +128,7 @@ defmodule TeiserverWeb.API.SpadsController do
         end
 
         # This should always be the former
-        deviation = case balance_result.deviation do
-          {_, d} -> d
-          d ->
-            Logger.warn("Unexpected balance_result.deviation of #{Kernel.inspect balance_result.deviation}")
-            d
-        end
+        {_best_team, deviation} = balance_result.deviation
 
         conn
           |> put_status(200)
