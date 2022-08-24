@@ -12,7 +12,6 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
       email: "Partyhost_#{state.name}@agents"
     })
 
-    send(self(), :tick)
     :timer.send_interval(@tick_period, self(), :tick)
 
     {:noreply, %{state | socket: socket}}

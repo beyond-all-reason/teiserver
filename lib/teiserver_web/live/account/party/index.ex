@@ -35,10 +35,14 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     {:ok, socket}
   end
 
-  # @impl true
-  # def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
-  #   {:noreply, socket |> redirect(to: Routes.general_page_path(socket, :index))}
-  # end
+  @impl true
+  def handle_params(_, _, %{assigns: %{current_user: nil}} = socket) do
+    {:noreply, socket |> redirect(to: Routes.general_page_path(socket, :index))}
+  end
+
+  def handle_params(_, _, socket) do
+    {:noreply, socket}
+  end
 
   @impl true
   def render(assigns) do

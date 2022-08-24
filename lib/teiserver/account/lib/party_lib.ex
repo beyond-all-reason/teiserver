@@ -10,7 +10,7 @@ end
 
 defmodule Teiserver.Account.PartyLib do
   # alias Phoenix.PubSub
-  alias Teiserver.{Chat, User}
+  alias Teiserver.{Account, Chat, User}
   alias Teiserver.Account.Party
   alias Teiserver.Data.Types, as: T
   alias Phoenix.PubSub
@@ -20,6 +20,16 @@ defmodule Teiserver.Account.PartyLib do
 
   @spec icon() :: String.t()
   def icon, do: "fa-solid fa-people-group"
+
+  @spec leader_name(T.party_id()) :: nil | String.t()
+  def leader_name(party_id) do
+    case get_party(party_id) do
+      nil ->
+        nil
+      %{leader: leader} ->
+        Account.get_username(leader)
+    end
+  end
 
   # Retrieval
   @spec get_party(nil) :: nil
