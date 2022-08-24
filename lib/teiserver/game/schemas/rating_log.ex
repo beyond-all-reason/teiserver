@@ -5,6 +5,7 @@ defmodule Teiserver.Game.RatingLog do
     belongs_to :user, Central.Account.User
     belongs_to :rating_type, Teiserver.Game.RatingType
     belongs_to :match, Teiserver.Battle.Match
+    field :party_id, :string, default: nil
 
     field :value, :map
     field :inserted_at, :utc_datetime
@@ -16,7 +17,7 @@ defmodule Teiserver.Game.RatingLog do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-      |> cast(params, ~w(user_id rating_type_id match_id value inserted_at)a)
+      |> cast(params, ~w(user_id rating_type_id match_id value inserted_at party_id)a)
       |> validate_required(~w(user_id rating_type_id value inserted_at)a)
   end
 

@@ -87,7 +87,8 @@ defmodule Teiserver.Battle.MatchLib do
         |> Enum.map(fn client ->
           %{
             user_id: client.userid,
-            team_id: client.team_number
+            team_id: client.team_number,
+            party_id: client.party_id
           }
         end)
 
