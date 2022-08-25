@@ -181,7 +181,7 @@ No server response.
 }
 ```
 
-### TODO: `c.lobby.send_invite`
+### TODO: c.lobby.send_invite
 Sends an invite to a user to them to join the same lobby as yourself. They will still have to go through the same approval process as any other join_lobby command. No response from server.
 ```json
 {
@@ -193,7 +193,7 @@ Sends an invite to a user to them to join the same lobby as yourself. They will 
 ```
 
 
-### TODO: `s.lobby.invite_to_lobby`
+### TODO: s.lobby.invite_to_lobby
 The message seen by a player being invited to a lobby.
 ```json
 {
@@ -204,7 +204,7 @@ The message seen by a player being invited to a lobby.
 }
 ```
 
-### TODO: `c.lobby.respond_to_invite`
+### TODO: c.lobby.respond_to_invite
 Respond to an invite. This is equivalent to sending the join_lobby command listed above, the key difference it will circumvent certain locks (e.g. passwords).
 ```json
 {
@@ -220,7 +220,7 @@ Respond to an invite. This is equivalent to sending the join_lobby command liste
 }
 ```
 
-### TODO: `c.lobby.update_status`
+### TODO: c.lobby.update_status
 Sent by a client to inform the server their status is updated. Below are the fields you can update as part of the `client` object you send with the message:
 
 * `status`: String -- one of: ready, unready, afk, in-game
@@ -259,13 +259,19 @@ Sent by the server to inform of a change in one or more lobby_data values.
 
 ```
 
-### TODO: `s.lobby.user_joined`
+### s.lobby.add_user
 Sent by the server to inform of a new player joining the lobby.
+```json
+{
+  "cmd": "s.lobby.add_user",
+  "lobby_id": lobby_id,
+  "joiner_id": user_id,
+  "user": User,
+  "client": Client
+}
 ```
 
-```
-
-### TODO: `s.lobby.received_lobby_direct_announce`
+### TODO: s.lobby.received_lobby_direct_announce
 Sent by the server to inform of an announcement made in the room
 
 ## Bots

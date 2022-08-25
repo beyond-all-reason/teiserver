@@ -83,10 +83,15 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
   ###########
   # User Updates
   def do_reply(:add_user, {lobby_id, joiner_id}) do
+    client = Account.get_client_by_id(joiner_id)
+    user = Account.get_user_by_id(joiner_id)
+
     %{
       "cmd" => "s.lobby.add_user",
       "lobby_id" => lobby_id,
-      "joiner_id" => joiner_id
+      "joiner_id" => joiner_id,
+      "client" => Tachyon.convert_object(client, :client),
+      "user" => Tachyon.convert_object(user, :user),
     }
   end
 
