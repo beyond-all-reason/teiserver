@@ -59,7 +59,7 @@ defmodule Teiserver.Protocols.V1.TachyonSystemTest do
     assert resp == %{
       "cmd" => "s.system.server_stats",
       "data" => %{
-        "in_progresss_lobby_count" => 0,
+        "in_progress_lobby_count" => 0,
         "lobby_count" => 0,
         "player_count" => 0,
         "user_count" => 1
