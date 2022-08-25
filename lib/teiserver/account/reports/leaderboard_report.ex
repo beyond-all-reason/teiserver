@@ -36,7 +36,7 @@ defmodule Teiserver.Account.LeaderboardReport do
         rating_type_id: type_id,
         updated_after: activity_time
       ],
-      order_by: "Rating value high to low",
+      order_by: "Leaderboard rating high to low",
       preload: [:user],
       limit: limit
     )
@@ -59,7 +59,8 @@ defmodule Teiserver.Account.LeaderboardReport do
     headings = [[
       "Pos",
       "Player",
-      "Rating",
+      "Leaderboard rating",
+      "Game rating",
       "Skill",
       "Uncertainty",
       "Days since update"
@@ -75,6 +76,7 @@ defmodule Teiserver.Account.LeaderboardReport do
         [
           index + 1,
           rating.user.name,
+          rating.leaderboard_rating,
           rating.rating_value,
           rating.skill,
           rating.uncertainty,

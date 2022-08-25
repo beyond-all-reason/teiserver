@@ -60,7 +60,9 @@
       <th>&nbsp;</th>
       <th colspan="2">Player</th>
 
-      <th>Rating</th>
+      <th>Leaderboard rating</th>
+      <th>Game rating</th>
+
       <th>Skill</th>
       <th>Uncertainty</th>
 
@@ -84,6 +86,7 @@
         </td>
         <td><%= rating.user.name %></td>
 
+        <td><%= rating.leaderboard_rating |> round(2) %></td>
         <td><%= rating.rating_value |> round(2) %></td>
         <td><%= rating.skill |> round(2) %></td>
         <td><%= rating.uncertainty |> round(2) %></td>
