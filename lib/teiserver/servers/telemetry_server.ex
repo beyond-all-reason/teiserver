@@ -96,7 +96,7 @@ defmodule Teiserver.Telemetry.TelemetryServer do
           user_count: client.total,
           player_count: client.player,
           lobby_count: state.battle.total,
-          in_progresss_lobby_count: state.battle.in_progress,
+          in_progress_lobby_count: state.battle.in_progress,
         }
       }
     )
