@@ -207,9 +207,11 @@ defmodule Teiserver.Coordinator.ConsulServer do
         |> Map.keys
 
       client = Client.get_client_by_id(split.first_splitter_id)
+      old_lobby = Lobby.get_lobby(client.lobby_id)
       new_lobby = if client.lobby_id == state.lobby_id or client.lobby_id == nil do
         # If the first splitter is still in this lobby, move them to a new one
-        Lobby.find_empty_lobby()
+        # with the same engine version as the starting lobby
+        Lobby.find_empty_lobby(fn a -> a.engine_version == old_lobby.engine_version end)
       else
         %{id: client.lobby_id}
       end
