@@ -2,7 +2,7 @@ defmodule Central.Repo.Migrations.AddPartyIdToMatches do
   use Ecto.Migration
 
   def change do
-    alter table(:teiserver_account_ratings) do
+    alter table(:teiserver_game_rating_logs) do
       add :party_id, :string
     end
 
