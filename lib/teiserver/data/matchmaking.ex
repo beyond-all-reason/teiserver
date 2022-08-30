@@ -38,16 +38,28 @@ defmodule Teiserver.Data.Matchmaking do
     end
   end
 
-  @spec call_queue_wait(Integer.t(), any) :: any
-  def call_queue_wait(id, msg) do
-    pid = get_queue_wait_pid(id)
-    GenServer.call(pid, msg)
+  @spec call_queue_wait(T.queue_id(), any) :: any | nil
+  def call_queue_wait(queue_id, message) when is_integer(queue_id) do
+    case get_queue_wait_pid(queue_id) do
+      nil -> nil
+      pid ->
+        try do
+          GenServer.call(pid, message)
+
+          # If the process has somehow died, we just return nil
+        catch
+          :exit, _ ->
+            nil
+        end
+    end
   end
 
-  @spec cast_queue_wait(Integer.t(), any) :: any
-  def cast_queue_wait(id, msg) do
-    pid = get_queue_wait_pid(id)
-    GenServer.cast(pid, msg)
+  @spec cast_queue_wait(T.queue_id(), any) :: any
+  def cast_queue_wait(queue_id, msg) do
+    case get_queue_wait_pid(queue_id) do
+      nil -> nil
+      pid -> GenServer.cast(pid, msg)
+    end
   end
 
   @spec get_queue_match_pid(T.mm_match_id()) :: pid() | nil
@@ -60,16 +72,28 @@ defmodule Teiserver.Data.Matchmaking do
     end
   end
 
-  @spec call_queue_match(T.mm_match_id(), any) :: any
-  def call_queue_match(match_id, msg) do
-    pid = get_queue_match_pid(match_id)
-    GenServer.call(pid, msg)
+  @spec call_queue_match(T.queue_id(), any) :: any | nil
+  def call_queue_match(queue_id, message) when is_integer(queue_id) do
+    case get_queue_match_pid(queue_id) do
+      nil -> nil
+      pid ->
+        try do
+          GenServer.call(pid, message)
+
+          # If the process has somehow died, we just return nil
+        catch
+          :exit, _ ->
+            nil
+        end
+    end
   end
 
-  @spec cast_queue_match(T.mm_match_id(), any) :: any
-  def cast_queue_match(match_id, msg) do
-    pid = get_queue_match_pid(match_id)
-    GenServer.cast(pid, msg)
+  @spec cast_queue_match(T.queue_id(), any) :: any
+  def cast_queue_match(queue_id, msg) do
+    case get_queue_match_pid(queue_id) do
+      nil -> nil
+      pid -> GenServer.cast(pid, msg)
+    end
   end
 
   @spec create_match([{T.userid(), :user} | {T.party_id(), :party}], T.queue_id()) :: {pid, String.t(), list()}
