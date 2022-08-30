@@ -211,7 +211,7 @@ defmodule Central.Helpers.DatePresets do
   end
 
   def _parse_named_period("All time") do
-    start = Timex.to_date({1, 1, 1})
+    start = Timex.to_date({1900, 1, 1})
 
     {start, Timex.shift(Timex.today(), years: 1000)}
   end
