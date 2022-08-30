@@ -107,8 +107,6 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     {:noreply, socket}
   end
 
-
-
   @impl true
   def handle_event("invite:accept", %{"party_id" => party_id}, socket) do
     PartyLib.call_party(party_id, {:accept_invite, socket.assigns.user_id})
@@ -124,6 +122,19 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     Account.leave_party(party_id, socket.assigns.user_id)
     Account.move_client_to_party(socket.assigns.user_id, nil)
     {:noreply, socket}
+  end
+
+  def handle_event("create_party", _, socket) do
+    party = Account.create_party(socket.assigns.user_id)
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_party:#{party.id}")
+
+    new_parties = [party | socket.assigns.parties]
+
+    {:noreply,
+      socket
+        |> assign(:parties, new_parties)
+        |> build_user_lookup
+    }
   end
 
   @spec list_parties(map) :: map
