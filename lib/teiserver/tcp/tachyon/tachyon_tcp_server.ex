@@ -322,6 +322,10 @@ defmodule Teiserver.TachyonTcpServer do
         :party_invite ->
           state.protocol_out.reply(:party, :invite, data.party_id, state)
 
+        :disconnected ->
+          send(self(), :terminate)
+          state
+
         _ ->
           Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}")
           state

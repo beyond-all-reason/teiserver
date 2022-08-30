@@ -1,5 +1,6 @@
 defmodule Teiserver.Agents.PartyhostAgentServer do
   use GenServer
+  alias Teiserver.User
   alias Teiserver.Agents.AgentLib
   require Logger
 
@@ -7,10 +8,17 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
 
   def handle_info(:startup, state) do
     socket = AgentLib.get_socket()
-    AgentLib.login(socket, %{
+    {:success, user} = AgentLib.login(socket, %{
       name: "Partyhost_#{state.name}",
       email: "Partyhost_#{state.name}@agents"
     })
+
+    # Create friendships between this user and the first 10 users to exist
+    # currently has a bug because it'll try to update several at once and it won't work
+    0..10
+    |> Enum.each(fn other_user_id ->
+      User.create_friendship(user.id, other_user_id)
+    end)
 
     :timer.sleep(:rand.uniform(1000))
 
@@ -46,8 +54,6 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
   end
 
   defp handle_msg(%{"cmd" => "s.user.list_friend_users_and_clients", "client_list" => clients}, state) do
-    Logger.error("s.user.list_friend_users_and_clients")
-
     clients
       |> Enum.reject(fn c -> c["party_id"] == state.party_id end)
       |> Enum.each(fn c ->

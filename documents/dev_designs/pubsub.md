@@ -171,6 +171,16 @@ A message every time a user logs in or logs out. Unlike legacy all_user_updates 
 #### teiserver_client_messages:#{userid}
 This is the channel for sending messages to the client. It allows the client on the web and lobby application to receive messages.
 ```elixir
+# Connected/Disconnected, useful for the site
+%{
+  event: :connected
+}
+
+%{
+  event: :disconnected
+}
+
+
 # Matchmaking
 %{
   event: :matchmaking,

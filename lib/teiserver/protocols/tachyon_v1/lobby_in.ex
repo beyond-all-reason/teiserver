@@ -153,6 +153,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
           Client.update(allowed_client, :client_updated_battlestatus)
         {false, _} ->
           :ok
+        nil ->
+          nil
       end
     end
     state

@@ -13,18 +13,20 @@ defmodule Teiserver.Account.RelationsLib do
     user1 = User.get_user_by_id(userid1)
     user2 = User.get_user_by_id(userid2)
 
-    new_user1 = Map.merge(user1, %{
-      friends: [userid2 | user1.friends] |> Enum.uniq,
-      friend_requests: Enum.filter(user1.friend_requests, fn f -> f != userid2 end)
-    })
+    if user1 != nil and user2 != nil do
+      new_user1 = Map.merge(user1, %{
+        friends: [userid2 | user1.friends] |> Enum.uniq,
+        friend_requests: Enum.filter(user1.friend_requests, fn f -> f != userid2 end)
+      })
 
-    new_user2 = Map.merge(user2, %{
-      friends: [userid1 | user2.friends] |> Enum.uniq,
-      friend_requests: Enum.filter(user2.friend_requests, fn f -> f != userid1 end)
-    })
+      new_user2 = Map.merge(user2, %{
+        friends: [userid1 | user2.friends] |> Enum.uniq,
+        friend_requests: Enum.filter(user2.friend_requests, fn f -> f != userid1 end)
+      })
 
-    User.update_user(new_user1, persist: true)
-    User.update_user(new_user2, persist: true)
+      User.update_user(new_user1, persist: true)
+      User.update_user(new_user2, persist: true)
+    end
   end
 
   @spec accept_friend_request(T.userid() | nil, T.userid() | nil) :: User.t() | nil

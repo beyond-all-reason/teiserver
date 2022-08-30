@@ -59,16 +59,6 @@ defmodule Teiserver.Account.ClientLib do
     call_client(userid, {:change_party, party_id})
   end
 
-  @spec client_add_party_invite(T.userid(), T.party_id) :: nil | :ok
-  def client_add_party_invite(userid, party_id) do
-    cast_client(userid, {:join_party, party_id})
-  end
-
-  @spec client_remove_party_invite(T.userid(), T.party_id) :: nil | :ok
-  def client_remove_party_invite(userid, party_id) do
-    cast_client(userid, {:join_party, party_id})
-  end
-
   # Updates
   @spec merge_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: nil | :ok
   def merge_update_client(%{userid: userid} = partial_client, _reason) do

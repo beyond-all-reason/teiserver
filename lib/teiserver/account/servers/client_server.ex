@@ -2,7 +2,7 @@ defmodule Teiserver.Account.ClientServer do
   use GenServer
   require Logger
   alias Teiserver.Battle.LobbyChat
-  # alias Teiserver.{Account}
+  alias Teiserver.{Account}
 
   @impl true
   def handle_call(:get_client_state, _from, state) do
@@ -14,30 +14,17 @@ defmodule Teiserver.Account.ClientServer do
       nil ->
         :ok
 
-      _existing_id ->
+      existing_id ->
+        Account.cast_party(existing_id, {:member_leave, state.userid})
         :ok
     end
 
-    new_client = %{state.client | party_id: party_id, party_invites: []}
+    new_client = %{state.client | party_id: party_id}
 
     {:reply, :ok, %{state | client: new_client}}
   end
 
   @impl true
-  def handle_cast({:add_party_invite, party_id}, state) do
-    new_client = Map.merge(state.client, %{
-      party_invites: [party_id | state.client.party_invites] |> Enum.uniq
-    })
-    {:noreply, %{state | client: new_client}}
-  end
-
-  def handle_cast({:remove_party_invite, party_id}, state) do
-    new_client = Map.merge(state.client, %{
-      party_invites: List.delete(state.party_invites, party_id)
-    })
-    {:noreply, %{state | client: new_client}}
-  end
-
   def handle_cast({:update_values, new_values}, state) do
     new_client = Map.merge(state.client, new_values)
     {:noreply, %{state | client: new_client}}
