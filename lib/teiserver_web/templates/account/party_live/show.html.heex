@@ -1,6 +1,7 @@
 <%
   bsname = @view_colour
   moderator = allow?(@current_user, "teiserver.moderator.account")
+  leader = @party.leader == @user_id
 %>
 
 <%=
@@ -34,6 +35,22 @@
           <% end %>
         </ul>
 
+        <%= if leader or moderator do %>
+          <hr />
+          <h5>Friends</h5>
+          
+          <%= for f <- @user.friends do %>
+            <div class="my-2">
+              <%= if not Enum.member?(@party.members, f) do %>
+                <span class={"btn btn-sm btn-#{bsname}"} phx-click="create_invite" phx-value-userid={f}>
+                  Invite
+                </span>
+              <% end %>
+
+              <%= @user_lookup[f].name %>
+            </div>
+          <% end %>
+        <% end %>
 
       </div>
     </div>
