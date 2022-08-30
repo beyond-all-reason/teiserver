@@ -1,7 +1,7 @@
 defmodule Teiserver.Agents.PartyhostAgentServer do
   use GenServer
   alias Teiserver.Agents.AgentLib
-  # require Logger
+  require Logger
 
   @tick_period 5_000
 
@@ -12,6 +12,8 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
       email: "Partyhost_#{state.name}@agents"
     })
 
+    :timer.sleep(:rand.uniform(1000))
+
     :timer.send_interval(@tick_period, self(), :tick)
 
     {:noreply, %{state | socket: socket}}
@@ -20,6 +22,8 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
   def handle_info(:tick, state) do
     if state.party_id == nil do
       AgentLib._send(state.socket, %{cmd: "c.party.create"})
+    else
+      AgentLib._send(state.socket, %{cmd: "c.user.list_friend_users_and_clients"})
     end
 
     {:noreply, state}
@@ -36,8 +40,21 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
   end
 
   defp handle_msg(nil, state), do: state
+  defp handle_msg(%{"cmd" => "s.party.updated"}, state), do: state
   defp handle_msg(%{"cmd" => "s.party.create", "party" => party}, state) do
     %{state | party_id: party["id"]}
+  end
+
+  defp handle_msg(%{"cmd" => "s.user.list_friend_users_and_clients", "client_list" => clients}, state) do
+    Logger.error("Inviting")
+
+    clients
+      |> Enum.reject(fn c -> c["party_id"] == state.party_id end)
+      |> Enum.each(fn c ->
+        AgentLib._send(state.socket, %{cmd: "c.party.invite", userid: c["userid"]})
+      end)
+
+    state
   end
 
   # Startup

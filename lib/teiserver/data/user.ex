@@ -513,6 +513,9 @@ defmodule Teiserver.User do
 
 
   # Friend related
+  @spec create_friendship(T.userid(), T.userid()) :: nil
+  defdelegate create_friendship(userid1, userid2), to: RelationsLib
+
   @spec accept_friend_request(T.userid() | nil, T.userid() | nil) :: T.user() | nil
   defdelegate accept_friend_request(requester, accepter), to: RelationsLib
 
