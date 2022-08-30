@@ -130,11 +130,7 @@ defmodule Central.General.Startup do
     })
 
     # Need to get the timezones
-    zones = "timedatectl"
-      |> System.cmd(["list-timezones"])
-      |> elem(0)
-      |> String.trim
-      |> String.split("\n")
+    zones = Tzdata.zone_list()
 
     add_user_config_type(%{
       key: "general.Timezone",

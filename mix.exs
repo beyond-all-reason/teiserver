@@ -83,6 +83,7 @@ defmodule Central.MixProject do
       {:dialyxir, "~> 1.1", only: [:dev], runtime: false},
       {:dart_sass, "~> 0.3", only: [:dev]},
       {:libcluster, "~> 3.3"},
+      {:tzdata, "~> 1.1"},
 
       # Teiserver libs
       {:openskill, "~> 1.0.1"},
