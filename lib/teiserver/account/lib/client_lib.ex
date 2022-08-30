@@ -53,6 +53,22 @@ defmodule Teiserver.Account.ClientLib do
       |> Enum.reject(&(&1 == nil))
   end
 
+  # Party
+  @spec move_client_to_party(T.userid(), T.party_id()) :: :ok | nil
+  def move_client_to_party(userid, party_id) do
+    call_client(userid, {:change_party, party_id})
+  end
+
+  @spec client_add_party_invite(T.userid(), T.party_id) :: nil | :ok
+  def client_add_party_invite(userid, party_id) do
+    cast_client(userid, {:join_party, party_id})
+  end
+
+  @spec client_remove_party_invite(T.userid(), T.party_id) :: nil | :ok
+  def client_remove_party_invite(userid, party_id) do
+    cast_client(userid, {:join_party, party_id})
+  end
+
   # Updates
   @spec merge_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: nil | :ok
   def merge_update_client(%{userid: userid} = partial_client, _reason) do
@@ -102,11 +118,6 @@ defmodule Teiserver.Account.ClientLib do
     client
   end
 
-  @spec move_client_to_party(T.userid(), T.party_id()) :: :ok | nil
-  def move_client_to_party(userid, party_id) do
-    call_client(userid, {:change_party, party_id})
-  end
-
   # Process stuff
   @spec start_client_server(T.lobby()) :: pid()
   def start_client_server(client) do
@@ -149,10 +160,18 @@ defmodule Teiserver.Account.ClientLib do
   end
 
   @spec call_client(T.userid(), any) :: any | nil
-  def call_client(userid, msg) do
+  def call_client(userid, message) when is_integer(userid) do
     case get_client_pid(userid) do
       nil -> nil
-      pid -> GenServer.call(pid, msg)
+      pid ->
+        try do
+          GenServer.call(pid, message)
+
+        # If the process has somehow died, we just return nil
+        catch
+          :exit, _ ->
+            nil
+        end
     end
   end
 

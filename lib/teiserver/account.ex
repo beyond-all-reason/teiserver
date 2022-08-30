@@ -1333,6 +1333,12 @@ defmodule Teiserver.Account do
   @spec list_clients([T.userid()]) :: [T.client()]
   defdelegate list_clients(id_list), to: ClientLib
 
+  @spec client_add_party_invite(T.userid(), T.party_id()) :: nil | :ok
+  defdelegate client_add_party_invite(userid, party_id), to: ClientLib
+
+  @spec client_remove_party_invite(T.userid(), T.party_id()) :: nil | :ok
+  defdelegate client_remove_party_invite(userid, party_id), to: ClientLib
+
   @spec merge_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: :ok
   defdelegate merge_update_client(client, reason), to: ClientLib
 

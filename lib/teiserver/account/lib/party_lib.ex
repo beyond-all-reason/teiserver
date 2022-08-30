@@ -136,10 +136,18 @@ defmodule Teiserver.Account.PartyLib do
   end
 
   @spec call_party(T.party_id(), any) :: any | nil
-  def call_party(party_id, msg) do
+  def call_party(party_id, message) do
     case get_party_pid(party_id) do
       nil -> nil
-      pid -> GenServer.call(pid, msg)
+      pid ->
+        try do
+          GenServer.call(pid, message)
+
+          # If the process has somehow died, we just return nil
+        catch
+          :exit, _ ->
+            nil
+        end
     end
   end
 

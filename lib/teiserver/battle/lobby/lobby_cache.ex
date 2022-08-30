@@ -216,7 +216,7 @@ defmodule Teiserver.Battle.LobbyCache do
     cast_lobby(lobby_id, {:remove_user, userid})
   end
 
-  @spec get_lobby_member_list(T.lobby_id()) :: [T.userid()]
+  @spec get_lobby_member_list(T.lobby_id()) :: [T.userid()] | nil
   def get_lobby_member_list(lobby_id) do
     call_lobby(lobby_id, :get_member_list)
   end
@@ -323,7 +323,15 @@ defmodule Teiserver.Battle.LobbyCache do
   def call_lobby(lobby_id, message) when is_integer(lobby_id) do
     case get_lobby_pid(lobby_id) do
       nil -> nil
-      pid -> GenServer.call(pid, message)
+      pid ->
+        try do
+          GenServer.call(pid, message)
+
+          # If the process has somehow died, we just return nil
+        catch
+          :exit, _ ->
+            nil
+        end
     end
   end
 

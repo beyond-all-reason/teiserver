@@ -52,7 +52,7 @@ defmodule Teiserver.Agents.PartyjoinAgentServer do
   end
 
   defp handle_msg(%{"cmd" => "s.party.invite", "party" => %{"id" => party_id}}, state) do
-    Logger.error("INVITED")
+    Logger.error("Invite")
 
     cond do
       state.party_id == nil ->
@@ -60,7 +60,10 @@ defmodule Teiserver.Agents.PartyjoinAgentServer do
 
       state.party_id != party_id ->
         if :rand.uniform(5) == 1 do
+          Logger.error("CHANGE")
           AgentLib._send(state.socket, %{cmd: "c.party.accept", party_id: party_id})
+        else
+          Logger.error("Nope")
         end
 
       true ->

@@ -67,6 +67,7 @@ defmodule Teiserver.Client do
         restricted: false,
         lobby_host: false,
         party_id: nil,
+        party_invites: [],
         clan_tag: nil
       },
       client

@@ -46,7 +46,7 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
   end
 
   defp handle_msg(%{"cmd" => "s.user.list_friend_users_and_clients", "client_list" => clients}, state) do
-    Logger.error("Inviting")
+    Logger.error("s.user.list_friend_users_and_clients")
 
     clients
       |> Enum.reject(fn c -> c["party_id"] == state.party_id end)
