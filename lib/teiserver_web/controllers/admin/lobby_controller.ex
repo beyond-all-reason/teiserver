@@ -19,19 +19,25 @@ defmodule TeiserverWeb.Admin.LobbyController do
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
   plug(:add_breadcrumb, name: 'Users', url: '/teiserver/admin/user')
 
+  @page_size 30
+
   @spec lobby_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
   def lobby_chat(conn, params = %{"id" => lobby_guid}) do
-    page = Map.get(params, "page", 0)
-      |> int_parse
-      |> max(0)
+    {page, page_size} = if params["page"] == "all" and allow?(conn, "admin.dev") do
+      {0, 10000}
+    else
+      {Map.get(params, "page", 0)
+        |> int_parse
+        |> max(0), @page_size}
+    end
 
     lobby_messages = Chat.list_lobby_messages(
       search: [
         lobby_guid: lobby_guid
       ],
       preload: [:user],
-      limit: 300,
-      offset: page * 300,
+      limit: page_size,
+      offset: page * page_size,
       order_by: "Oldest first"
     )
 
@@ -44,7 +50,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
 
     lobby = Battle.get_lobby_by_match_uuid(lobby_guid)
 
-    last_page = Enum.count(lobby_messages) < 300
+    last_page = Enum.count(lobby_messages) < page_size
 
     conn
       |> assign(:page, page)
@@ -65,23 +71,27 @@ defmodule TeiserverWeb.Admin.LobbyController do
     )
       |> Enum.map(fn %{uuid: uuid} -> uuid end)
 
-    page = Map.get(params, "page", 0)
-      |> int_parse
-      |> max(0)
+    {page, page_size} = if params["page"] == "all" and allow?(conn, "admin.dev") do
+      {0, 10000}
+    else
+      {Map.get(params, "page", 0)
+        |> int_parse
+        |> max(0), @page_size}
+    end
 
     chat_messages = Chat.list_lobby_messages(
       search: [
         lobby_guid_in: uuids
       ],
       preload: [:user],
-      limit: 300,
-      offset: page * 300,
+      limit: page_size,
+      offset: page * page_size,
       order_by: "Oldest first"
     )
 
     lobby = Battle.get_lobby_by_server_uuid(server_uuid)
 
-    last_page = Enum.count(chat_messages) < 300
+    last_page = Enum.count(chat_messages) < page_size
 
     conn
       |> assign(:page, page)

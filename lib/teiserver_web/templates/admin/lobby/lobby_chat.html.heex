@@ -26,10 +26,18 @@
                 Server grouping
               </a>
             <% end %>
-            
+
             <a href={Routes.ts_admin_match_path(@conn, :show, @match.id)} class={"btn btn-outline-#{Teiserver.Battle.MatchLib.colours()}"}>
               <%= central_component "icon", icon: Teiserver.Battle.MatchLib.icon() %>
               Match details
+            </a>
+          <% end %>
+          
+          <%= if not @last_page or @page != 0 and allow?(@conn, "admin.dev") do %>
+            <a href={Routes.ts_admin_lobby_path(@conn, :lobby_chat, @lobby_guid, "all")} class="btn btn-outline-secondary">
+              <i class='fa-fw fa-solid fa-list'></i>
+              &nbsp;
+              Full chat
             </a>
           <% end %>
         </div>
@@ -72,7 +80,7 @@
           <div class="col-md-6">
             Discord formatted:
             <textarea rows="8" cols="40" class="form-control"><%= for msg <- @lobby_messages do %>
-  **<%= msg.user.name %>**: <%= msg.content %><% end %></textarea>
+**<%= msg.user.name %>**: <%= msg.content %><% end %></textarea>
           </div>
         </div>
 
