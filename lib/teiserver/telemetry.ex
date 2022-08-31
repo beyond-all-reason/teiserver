@@ -66,8 +66,8 @@ defmodule Teiserver.Telemetry do
       last_value("spring_raw.user_logged_out"),
 
       # Client
-      last_value("spring_mult.mystatus"),
-      last_value("spring_mult.battlestatus"),
+      last_value("spring_raw.mystatus"),
+      last_value("spring_raw.battlestatus"),
 
       # Battle
       last_value("spring_raw.global_battle_updated"),
