@@ -15,6 +15,7 @@ defmodule Teiserver.Account.ClientServerTest do
       moderator: false,
       bot: false,
       ready: false,
+      party_id: nil,
       player_number: 0,
       team_colour: "0",
       team_number: 0,

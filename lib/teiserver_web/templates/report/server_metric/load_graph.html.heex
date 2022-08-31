@@ -149,6 +149,11 @@
                   selected: Map.get(@params, "resolution", "5")
                 %>
               </div>
+              
+              <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
+                <label for='hours' class='control-label'>Hours offset</label>
+                <input type="text" name="offset" id="offset" value={@params["offset"]} class="form-control" />
+              </div>
 
               <div class='col-md-12 my-3'>
                 <button type='submit' class={"btn btn-#{bsname} float-end"}>

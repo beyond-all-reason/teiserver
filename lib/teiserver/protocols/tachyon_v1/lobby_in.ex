@@ -4,7 +4,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
   alias Teiserver.Protocols.Tachyon.V1.Tachyon
   alias Teiserver.Protocols.TachyonLib
-  alias Phoenix.PubSub
   require Logger
   alias Teiserver.Data.Types, as: T
 
@@ -177,7 +176,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyIn do
   end
 
   def do_handle("leave", _, state) do
-    PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{state.lobby_id}")
+    send(self(), {:action, {:leave_lobby, state.lobby_id}})
     Lobby.remove_user_from_battle(state.userid, state.lobby_id)
     new_state = %{state | lobby_id: nil, lobby_host: false}
     reply(:lobby, :leave, {:success, nil}, new_state)

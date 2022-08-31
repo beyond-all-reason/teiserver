@@ -26,6 +26,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
       |> add_breadcrumb(name: "Parties", url: "/teiserver/account/parties")
       |> assign(:client, client)
       |> assign(:user, user)
+      |> build_user_lookup
 
     {:ok, socket}
   end
@@ -91,8 +92,9 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     {:noreply, socket}
   end
 
+  @spec build_user_lookup(map) :: map
   def build_user_lookup(socket) do
-    existing_user_ids = Map.keys(socket.assigns.user_lookup)
+    existing_user_ids = Map.keys(socket.assigns[:user_lookup] || %{})
 
     ids = [
       socket.assigns.party.members,

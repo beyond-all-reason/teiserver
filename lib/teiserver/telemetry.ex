@@ -44,19 +44,36 @@ defmodule Teiserver.Telemetry do
       last_value("teiserver.battle.lobby"),
       last_value("teiserver.battle.in_progress"),
 
-      # Spring legacy pubsub trackers
+      # Spring legacy pubsub trackers, multiplied by the number of users
       # User
-      last_value("spring.user_logged_in"),
-      last_value("spring.user_logged_out"),
+      last_value("spring_mult.user_logged_in"),
+      last_value("spring_mult.user_logged_out"),
 
       # Client
-      last_value("spring.updated_client"),
+      last_value("spring_mult.mystatus"),
+      last_value("spring_mult.battlestatus"),
 
       # Battle
-      last_value("spring.global_battle_updated"),
-      last_value("spring.add_user_to_battle"),
-      last_value("spring.remove_user_from_battle"),
-      last_value("spring.kick_user_from_battle"),
+      last_value("spring_mult.global_battle_updated"),
+      last_value("spring_mult.add_user_to_battle"),
+      last_value("spring_mult.remove_user_from_battle"),
+      last_value("spring_mult.kick_user_from_battle"),
+
+
+      # Spring legacy pubsub trackers, raw update count only
+      # User
+      last_value("spring_raw.user_logged_in"),
+      last_value("spring_raw.user_logged_out"),
+
+      # Client
+      last_value("spring_mult.mystatus"),
+      last_value("spring_mult.battlestatus"),
+
+      # Battle
+      last_value("spring_raw.global_battle_updated"),
+      last_value("spring_raw.add_user_to_battle"),
+      last_value("spring_raw.remove_user_from_battle"),
+      last_value("spring_raw.kick_user_from_battle"),
     ]
   end
 
@@ -82,6 +99,7 @@ defmodule Teiserver.Telemetry do
     |> ServerMinuteLogLib.search(%{timestamp: timestamp})
     |> ServerMinuteLogLib.search(args[:search])
     |> ServerMinuteLogLib.order_by(args[:order])
+    |> QueryHelpers.offset_query(args[:offset] || 0)
     |> QueryHelpers.select(args[:select])
   end
 
@@ -206,6 +224,7 @@ defmodule Teiserver.Telemetry do
     |> ServerDayLogLib.search(%{date: date})
     |> ServerDayLogLib.search(args[:search])
     |> ServerDayLogLib.order_by(args[:order])
+    |> QueryHelpers.offset_query(args[:offset] || 0)
     |> QueryHelpers.select(args[:select])
   end
 
@@ -388,6 +407,7 @@ defmodule Teiserver.Telemetry do
     |> ServerMonthLogLib.search(%{date: date})
     |> ServerMonthLogLib.search(args[:search])
     |> ServerMonthLogLib.order_by(args[:order])
+    |> QueryHelpers.offset_query(args[:offset] || 0)
     |> QueryHelpers.select(args[:select])
   end
 

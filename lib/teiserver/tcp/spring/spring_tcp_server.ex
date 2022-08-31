@@ -206,8 +206,11 @@ defmodule Teiserver.SpringTcpServer do
 
   # Server messages
   def handle_info(%{channel: "teiserver_server", event: "stop"}, state) do
-    new_state = state.protocol_out.reply(:server_restart, nil, nil, state)
-    {:noreply, new_state}
+    coordinator_id = Teiserver.Coordinator.get_coordinator_userid()
+
+    state = state.protocol_out.reply(:server_restart, nil, nil, state)
+    state = new_chat_message(:direct_message, coordinator_id, nil, "Teiserver update taking place, see discord for details/issues.", state)
+    {:noreply, state}
   end
 
   def handle_info(%{channel: "teiserver_server"}, state) do

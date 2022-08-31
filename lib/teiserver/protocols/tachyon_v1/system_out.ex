@@ -62,10 +62,10 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemOut do
     }
   end
 
-  def do_reply(:nobattle, nil) do
+  def do_reply(:nolobby, nil) do
     %{
       result: "error",
-      error: "not in a battle"
+      error: "not in a lobby"
     }
   end
 

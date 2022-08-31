@@ -174,9 +174,9 @@ defmodule Teiserver.Coordinator.SplitTest do
   test "test split with different engine version", %{host: _host, player: player1, psocket: psocket1, lobby_id: lobby_id, listener: listener, empty_lobby_id: empty_lobby_id} do
     %{user: player2, socket: psocket2} = tachyon_auth_setup()
     %{user: player3, socket: psocket3} = tachyon_auth_setup()
-    %{user: player4, socket: psocket4} = tachyon_auth_setup()
-    %{user: player5, socket: psocket5} = tachyon_auth_setup()
-    %{user: player6, socket: psocket6} = tachyon_auth_setup()
+    %{user: player4, socket: _psocket4} = tachyon_auth_setup()
+    %{user: player5, socket: _psocket5} = tachyon_auth_setup()
+    %{user: player6, socket: _psocket6} = tachyon_auth_setup()
 
     # Add players to the lobby
     Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
@@ -216,7 +216,7 @@ defmodule Teiserver.Coordinator.SplitTest do
     data = %{cmd: "c.lobby.create", lobby: lobby_data}
     _tachyon_send(hsocket_empty, data)
     [reply] = _tachyon_recv(hsocket_empty)
-    empty_lobby_id = reply["lobby"]["id"]
+    _empty_lobby_id = reply["lobby"]["id"]
 
     data = %{cmd: "c.lobby.message", message: "$splitlobby"}
     _tachyon_send(psocket1, data)
