@@ -51,7 +51,6 @@ defmodule Teiserver.Telemetry do
 
       # Client
       last_value("spring_mult.mystatus"),
-      last_value("spring_mult.battlestatus"),
 
       # Battle
       last_value("spring_mult.global_battle_updated"),
@@ -67,7 +66,6 @@ defmodule Teiserver.Telemetry do
 
       # Client
       last_value("spring_raw.mystatus"),
-      last_value("spring_raw.battlestatus"),
 
       # Battle
       last_value("spring_raw.global_battle_updated"),

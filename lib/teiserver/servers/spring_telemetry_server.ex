@@ -43,8 +43,8 @@ defmodule Teiserver.Telemetry.SpringTelemetryServer do
     end
 
     if event != nil do
-      new_raw = Map.put(state, event, Map.get(state, event, 0) + 1)
-      new_mult = Map.put(state, event, Map.get(state, event, 0) + state.client_count)
+      new_raw = Map.put(state.raw, event, Map.get(state.raw, event, 0) + 1)
+      new_mult = Map.put(state.mult, event, Map.get(state.mult, event, 0) + state.client_count)
 
       new_state = %{state | raw: new_raw, mult: new_mult}
 
