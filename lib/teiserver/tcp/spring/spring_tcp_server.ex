@@ -115,6 +115,7 @@ defmodule Teiserver.SpringTcpServer do
       script_password: nil,
       exempt_from_cmd_throttle: false,
       cmd_timestamps: [],
+      status_timestamps: [],
 
       # Caching app configs
       flood_rate_limit_count: Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
@@ -865,6 +866,7 @@ defmodule Teiserver.SpringTcpServer do
     end
   end
 
+  @spec engage_flood_protection(map()) :: {:stop, String.t(), map()}
   defp engage_flood_protection(state) do
     state.protocol_out.reply(:disconnect, "Flood protection", nil, state)
     User.set_flood_level(state.userid, 10)

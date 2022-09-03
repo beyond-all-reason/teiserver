@@ -15,14 +15,16 @@
     link: Routes.ts_battle_lobby_index_path(@conn, :index)
   %>
   
-  <%=
-    central_component "menu_card",
-    icon: Teiserver.Account.PartyLib.icon(),
-    name: "parties",
-    text: "Parties",
-    icon_class: "fa-duotone",
-    link: Routes.ts_game_party_index_path(@conn, :index)
-  %>
+  <%= if allow?(@conn, "admin.dev") do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Account.PartyLib.icon(),
+      name: "parties",
+      text: "Parties",
+      icon_class: "fa-duotone",
+      link: Routes.ts_game_party_index_path(@conn, :index)
+    %>
+  <% end %>
 
   <%= if allow?(@conn, "teiserver.moderator.account") do %>
     <%=
