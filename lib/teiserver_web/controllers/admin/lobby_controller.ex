@@ -19,7 +19,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
   plug(:add_breadcrumb, name: 'Users', url: '/teiserver/admin/user')
 
-  @page_size 30
+  @page_size 200
 
   @spec lobby_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
   def lobby_chat(conn, params = %{"id" => lobby_guid}) do
