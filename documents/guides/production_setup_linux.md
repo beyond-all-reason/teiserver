@@ -12,14 +12,15 @@ Unless otherwise stated at the start of the code block, all commands are intende
 Before you start I suggest setting up the DNS to point towards your server. It'll take time to propagate so doing it first will make things smoother to start with. Different registrars will have different interfaces (and documentation for them) so I'll not go over that here. You will also need to create an email account for your server to use.
 
 ### Fresh install time
-```
+```bash
 apt-get update
 apt-get -y install htop git-core ca-certificates vim sudo curl vnstat sysstat procinfo build-essential net-tools geoip-bin libtinfo-dev aptitude lsb-release grc neofetch tcpdump
 apt-get -y upgrade
 apt-get -y autoremove
 
+# Now we use aptitude, I found it better in a number of situations
 aptitude update
-aptitude upgrade
+aptitude upgrade -y
 
 # Set timezone
 dpkg-reconfigure tzdata
@@ -27,24 +28,24 @@ dpkg-reconfigure tzdata
 
 #### Create our user
 We start by creating a user for running the deployments. Doing things as root is a bad practice!
-```
+```bash
 adduser deploy
 adduser deploy sudo
 ```
 
 ### SSH key
 Locally you should now generate an SSH key pair. I've followed the instructions [here](http://sshkeychain.sourceforge.net/mirrors/SSH-with-Keys-HOWTO/SSH-with-Keys-HOWTO-4.html).
-```
+```bash
 # LOCALLY
 ssh-keygen
-> Generating public/private rsa1 key pair.
-> Enter file in which to save the key (/home/username/.ssh/identity): /home/username/.ssh/identity
-> Enter passphrase (empty for no passphrase):
-> Enter same passphrase again:
-> Your identification has been saved in /home/username/.ssh/identity.
-> Your public key has been saved in /home/username/.ssh/id_rsa.pub.
-> The key fingerprint is:
-> 22:bc:0b:fe:f5:06:1d:c0:05:ea:59:09:e3:07:8a:8c username@caprice
+#> Generating public/private rsa1 key pair.
+#> Enter file in which to save the key (/home/username/.ssh/identity): /home/username/.ssh/identity
+#> Enter passphrase (empty for no passphrase):
+#> Enter same passphrase again:
+#> Your identification has been saved in /home/username/.ssh/identity.
+#> Your public key has been saved in /home/username/.ssh/id_rsa.pub.
+#> The key fingerprint is:
+#> 22:bc:0b:fe:f5:06:1d:c0:05:ea:59:09:e3:07:8a:8c username@caprice
 
 # That id_rsa.pub is the part we'll upload to our server and then refer to the non-pub file when we want to connect.
 
@@ -52,7 +53,7 @@ scp ~/.ssh/id_rsa.pub deploy@yourdomain.com:./id_rsa.pub
 ```
 
 Now back on the server (logged in as `deploy`) we make use of this
-```
+```bash
 cd ~
 mkdir .ssh
 chmod 700 .ssh
@@ -65,7 +66,7 @@ exit
 ```
 
 You should now be able to login to the server like so:
-```
+```bash
 ssh -i ~/.ssh/identity deploy@yourdomain.com
 ```
 
@@ -74,7 +75,7 @@ From now on we will be proceeding under the assumption you are logged in as the 
 ### Nginx (optional)
 Nginx is a webserver we'll be using to facilitate the webinterface portion of Teiserver. If you don't want to make use of the web interface you can skip this portion of the setup process. You will need to have your DNS setup ahead of this step or it will fail when you try to setup the SSL part.
 
-```
+```bash
 sudo aptitude install -y nginx
 sudo chown -R deploy:deploy /var/www/
 sudo chmod +r /var/log/nginx
@@ -87,14 +88,14 @@ echo "<html><head><meta http-equiv=\"refresh\" content=\"0; url=https://yourdoma
 
 #### Update the Nginx conf file
 The template file is located in [documents/prod_files/nginx.conf](/documents/prod_files/nginx.conf), you will need to replace the existing nginx conf with it's contents.
-```
+```bash
 sudo rm /etc/nginx/nginx.conf
 sudo vi /etc/nginx/nginx.conf
 ```
 
 #### SSL time
 We'll be using [letsencrypt](https://letsencrypt.org/) to get a free SSL certificate.
-```
+```bash
 # This is a Debian version specific command, be sure to check the letsencrypt documentation
 sudo aptitude -y install snapd
 sudo snap install core; sudo snap refresh core
@@ -105,7 +106,7 @@ sudo certbot --nginx
 # This will place your certs in /etc/letsencrypt/live/yourdomain.com
 # We'll point the site directly here but also the TLS instance of ranch
 # As a result we'll need to tweak the permissions
-sudo chmod 0755 /etc/letsencrypt/{live,archive}
+sudo chmod -R 0755 /etc/letsencrypt/{live,archive}
 
 # Lets make sure everything is hunky-dory
 sudo certbot renew --dry-run
@@ -121,14 +122,14 @@ openssl dhparam -out dh-params.pem 2048
 
 #### Enable the site
 Has to be done after the cert!
-```
+```bash
 sudo vi /etc/nginx/sites-enabled/central
 ```
 
 
 ### Postgres
 This is written with postgres 14 as the intended version. If you need this guide to tell you how to install postgres you probably don't care if there's a newer version available.
-```
+```bash
 sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
 wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
 sudo aptitude update
@@ -138,7 +139,7 @@ sudo aptitude -y install postgresql-14
 #### Setup teiserver_prod database
 You will need to replace the `---------` with a new password, the same one you will place in your `config/prod.secret.exs`.
 
-```
+```bash
 sudo su postgres
 psql postgres postgres <<EOF
 CREATE USER teiserver_prod WITH PASSWORD '---------';
@@ -148,14 +149,15 @@ ALTER USER teiserver_prod WITH SUPERUSER;
 EOF
 ```
 
+
 #### pg_stat_statements (optional)
 Following the guide at [pganalyze.com](https://pganalyze.com/docs/install/01_enabling_pg_stat_statements) we want to enable `pg_stat_statements` for our LiveDashboard. If we don't then that's okay but we won't get the full gamut of stats in the dashboard.
-```
+```bash
 sudo vi /etc/postgresql/14/main/postgresql.conf
 ```
 
 Add the following at various points:
-```
+```bash
 shared_preload_libraries = 'pg_stat_statements'
 
 # Increase the max size of the query strings Postgres records
@@ -168,7 +170,7 @@ pg_stat_statements.track = all
 #### pg_hba.conf (optional)
 I've found it useful in the past to be able to access my postgres installation without having to put the password in. You may wish to update your pg_hba.conf to enable the same.
 
-```
+```bash
 sudo vi /etc/postgresql/14/main/pg_hba.conf
 ```
 
@@ -180,6 +182,27 @@ host    all             all             127.0.0.1/32            trust
 host    all             all             ::1/128                 trust
 ```
 
+#### External connections
+If you are using clustering or hosting your postgres on a different box you will need to also enable external connections to your postgres install. You will need to perform additional edits to your pg_hba.conf
+
+```bash
+sudo vi /etc/postgresql/14/main/postgresql.conf
+```
+
+Add in the line
+```
+listen_addresses = '*'
+```
+
+```bash
+sudo vi /etc/postgresql/14/main/pg_hba.conf
+```
+
+```
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+host    all             all             0.0.0.0/0               md5
+```
+
 #### Restart postgres
 `sudo service postgresql restart`
 
@@ -188,7 +211,7 @@ You can test the changes using `psql -U teiserver_prod` from the deploy user. If
 
 ### Setting up some files and directories
 For this example I've put lots of stuff in the root directory. Feel free to relocate things.
-```
+```bash
 cd /
 
 # This is the directory it'll run from, we need it to exist or you'll get misleading errors
@@ -234,7 +257,7 @@ sudo systemctl enable central.service
 
 #### File descriptors limit
 ranch will make heavy use of your file descriptors. By default the level is quite low and I'd advise upping it. There are a _lot_ of pages on how to do this and most of them didn't have the desired effect for me. I found I needed to do the following:
-```
+```bash
 sudo vi /etc/security/limits.conf
 --- Add this ---
 root             soft    nofile          64000
@@ -287,7 +310,7 @@ Change `ENABLED="false"` to `ENABLED="true"`.
 
 There's also a script I use to automatically download the output and open a firefox browser to something which can build nice graphs out of it.
 
-```
+```bash
 #!/usr/bin/env bash
 
 # Generate file
@@ -313,7 +336,7 @@ At some stage you'll probably want to do these things, no rush though.
 ### Backups
 This is a script I run locally to create and get the backup.
 
-```
+```bash
 #!/usr/bin/env bash
 
 # Cause backup to be created
@@ -332,6 +355,25 @@ ssh -i ~/.ssh/identity deploy@yourdomain.com <<'ENDSSH'
   echo 'Remote backup removed'
 ENDSSH
 ```
+
+## Debugging a bad setup
+#### Website not working
+`curl http://localhost:8888` should produce `curl: (1) Received HTTP/0.9 when not allowed`
+`curl https://localhost:8888` should produce an error starting with `curl: (60) SSL: no alternative certificate subject name matches target host name 'localhost'`
+`curl --insecure https://localhost:8888` should produce a web page similar to `curl http://localhost:4000`
+
+`curl http://localhost:4000` should produce a web page
+`curl https://localhost:4000` should produce `curl: (35) error:1408F10B:SSL routines:ssl3_get_record:wrong version number`
+
+`curl curl http://localhost:443` should give a 400 result
+
+`openssl s_client localhost:443` should give an SSL certificate info, this is nginx
+`openssl s_client localhost:8888` should give the same info, this is the Phoenix application
+
+**Possible SSL related errors:**
+- Certbot files not existing
+- Certbot files not having the right permissions (try to `cat` them)
+- Certs not being referenced by the application (used `Application.get_env(:central, CentralWeb.Endpoint)[:https]` within the remote terminal to check the actual paths in the app) 
 
 #### What is "central"?
 I've a few different projects all of which rely on a common core of functionality (users, groups etc). This is stored as the "central" folder which makes it easier to share code and the like between them. It does mean the application launched is called "central" though. The main repo for Central is [https://github.com/Teifion/central](https://github.com/Teifion/central).
