@@ -19,11 +19,11 @@ defmodule TeiserverWeb.Admin.LobbyController do
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
   plug(:add_breadcrumb, name: 'Users', url: '/teiserver/admin/user')
 
-  @page_size 200
+  @page_size 300
 
   @spec lobby_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
   def lobby_chat(conn, params = %{"id" => lobby_guid}) do
-    {page, page_size} = if params["page"] == "all" and allow?(conn, "admin.dev") do
+    {page, page_size} = if params["page"] == "all" do
       {0, 10000}
     else
       {Map.get(params, "page", 0)
@@ -71,7 +71,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
     )
       |> Enum.map(fn %{uuid: uuid} -> uuid end)
 
-    {page, page_size} = if params["page"] == "all" and allow?(conn, "admin.dev") do
+    {page, page_size} = if params["page"] == "all" do
       {0, 10000}
     else
       {Map.get(params, "page", 0)
