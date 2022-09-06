@@ -142,6 +142,12 @@ defmodule Teiserver.Startup do
     Central.cache_put(:application_metadata_cache, "teiserver_user_group", player_group.id)
     Central.cache_put(:application_metadata_cache, "teiserver_internal_group", internal_group.id)
 
+    Central.store_put(:application_metadata_cache, "random_names_3",
+      ~w(tick pawn lazarus rocketeer crossbow mace centurion tumbleweed smuggler compass ghost sprinter butler webber platypus hound welder recluse archangel gunslinger sharpshooter umbrella fatboy marauder vanguard razorback titan)
+      ++
+      ~w(grunt graverobber aggravator trasher thug bedbug deceiver augur spectre fiend twitcher duck skuttle sumo arbiter manticore termite commando mammoth shiva karganeth catapult behemoth juggernaught)
+    )
+
     Central.Account.GroupCacheLib.update_caches(player_group)
     Central.Account.GroupCacheLib.update_caches(internal_group)
     Central.Account.GroupCacheLib.update_caches(umbrella_group)
