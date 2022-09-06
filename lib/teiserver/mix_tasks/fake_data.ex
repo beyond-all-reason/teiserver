@@ -1,9 +1,12 @@
 defmodule Mix.Tasks.Teiserver.Fakedata do
+  @moduledoc """
+  Run with mix teiserver.fakedata
+  """
+
   use Mix.Task
 
   alias Teiserver.{Account}
   alias Central.Helpers.StylingHelper
-  alias Central.Helpers.TimexHelper
 
   @settings %{
     days: 365
