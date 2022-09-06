@@ -66,8 +66,9 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
     state
   end
 
-  def do_handle("decline", _, state) do
-    reply(:party, :create, nil, state)
+  def do_handle("decline", %{"party_id" => party_id}, state) do
+    PartyLib.cast_party(party_id, {:cancel_invite, state.userid})
+    state
   end
 
   # Past this point if they're not in a party don't even bother doing anything
@@ -92,6 +93,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
 
   def do_handle("leave", _, state) do
     PartyLib.cast_party(state.party_id, {:member_leave, state.userid})
+    Account.move_client_to_party(state.userid, nil)
     send(self(), {:action, {:leave_party, state.party_id}})
     state
   end

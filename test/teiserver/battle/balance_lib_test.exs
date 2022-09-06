@@ -36,7 +36,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
         1 => 2,
         2 => 2
       },
-      deviation: 0
+      deviation: {1, 0}
     }
   end
 
@@ -72,7 +72,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
         1 => 2,
         2 => 2
       },
-      deviation: 0
+      deviation: {1, 0}
     }
   end
 
@@ -124,7 +124,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
         1 => 8,
         2 => 8
       },
-      deviation: 5
+      deviation: {1, 5}
     }
   end
 end

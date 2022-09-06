@@ -207,7 +207,7 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec add_user_to_battle(integer(), integer(), String.t() | nil) :: nil
   def add_user_to_battle(userid, lobby_id, script_password \\ nil) do
-    members = Battle.get_lobby_member_list(lobby_id)
+    members = Battle.get_lobby_member_list(lobby_id) || []
     Battle.add_user_to_lobby(userid, lobby_id, script_password)
 
     if not Enum.member?(members, userid) do

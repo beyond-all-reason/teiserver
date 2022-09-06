@@ -142,6 +142,9 @@ defmodule Teiserver.TachyonTcpServer do
       {:join_lobby, lobby_id} ->
         state.protocol.do_action(:join_lobby, lobby_id, state)
 
+      {:leave_lobby, lobby_id} ->
+        state.protocol.do_action(:leave_lobby, lobby_id, state)
+
       {:watch_channel, channel} ->
         state.protocol.do_action(:watch_channel, channel, state)
 
@@ -242,6 +245,9 @@ defmodule Teiserver.TachyonTcpServer do
       :message ->
         state.protocol_out.reply(:party, :message, {data.sender_id, data.message}, state)
 
+      :closed ->
+        state
+
       _ ->
         Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}")
     end
@@ -321,6 +327,10 @@ defmodule Teiserver.TachyonTcpServer do
 
         :party_invite ->
           state.protocol_out.reply(:party, :invite, data.party_id, state)
+
+        :disconnected ->
+          send(self(), :terminate)
+          state
 
         _ ->
           Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}")

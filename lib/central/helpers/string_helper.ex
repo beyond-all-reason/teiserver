@@ -69,6 +69,17 @@ defmodule Central.Helpers.StringHelper do
     end
   end
 
+  def possessive(nil), do: nil
+
+  def possessive(s) do
+    last_1digit = String.slice(s, -1, 1)
+
+    cond do
+      last_1digit == "s" -> "#{s}'"
+      true -> "#{s}'s"
+    end
+  end
+
   def singular(nil), do: nil
 
   def singular(s) do

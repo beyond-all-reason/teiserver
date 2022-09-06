@@ -2,7 +2,7 @@ defmodule Teiserver.Account.ClientServer do
   use GenServer
   require Logger
   alias Teiserver.Battle.LobbyChat
-  # alias Teiserver.{Account}
+  alias Teiserver.{Account}
 
   @impl true
   def handle_call(:get_client_state, _from, state) do
@@ -14,7 +14,8 @@ defmodule Teiserver.Account.ClientServer do
       nil ->
         :ok
 
-      _existing_id ->
+      existing_id ->
+        Account.cast_party(existing_id, {:member_leave, state.userid})
         :ok
     end
 

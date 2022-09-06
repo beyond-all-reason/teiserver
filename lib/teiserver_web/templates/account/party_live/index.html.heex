@@ -1,6 +1,6 @@
 <%
   bsname = @view_colour
-  moderator = allow?(@current_user, "teiserver.moderator")
+  moderator = allow?(@current_user, "teiserver.moderator.account")
 %>
 
 <%=
@@ -13,7 +13,22 @@
       <div class="card-body">
 
         <div class="float-end">
+          <%= if @client do %>
+            <span class={"btn btn-#{bsname}"} phx-click="create_party">
+              <i class="fa-fw fa-regular fa-plus"></i>
+              &nbsp;
+              Create party
+            </span>
+          <% else %>
+            <span class="btn btn-secondary disabled">
+              <i class="fa-fw fa-regular fa-wifi-exclamation"></i>
+              &nbsp;
+              Connect with client to enable functionality
+            </span>
+          <% end %>
+        
           <%= if moderator do %>
+            &nbsp;&nbsp;&nbsp;
             <%= if @mode == "admin" do %>
               <a href={Routes.ts_game_party_index_path(@socket, :index, "player")} class={"btn btn-outline-#{bsname}"}>
                 Player view
@@ -31,13 +46,26 @@
     <tr>
       <th></th>
       <th></th>
-      <th></th>
+      
+      <%= if @client do %>
+        <th colspan="2"></th>
+      <% end %>
+      
+      <%= if @mode == "admin" do %>
+        <th></th>
+      <% end %>
     </tr>
   </thead>
   <tbody>
     <%= for party <- @parties do %>
       <%
         non_leader_members = List.delete(party.members, party.leader)
+        status = cond do
+          @client == nil -> "disconnected"
+          Enum.member?(party.members, @user_id) -> "member"
+          Enum.member?(party.pending_invites, @user_id) -> "invited"
+          true -> nil
+        end
       %>
       <tr>
         <td style={"background-color: #{@user_lookup[party.leader].colour}"}>
@@ -52,12 +80,54 @@
             </div>
           <% end %>
         </td>
-        
-        <td>
-          <a href={Routes.ts_game_party_show_path(@socket, :show, party.id)} class={"btn btn-sm btn-outline-#{bsname}"}>
-            Show
-          </a>
-        </td>
+
+        <%= case status do %>
+          <% "disconnected" -> %>
+
+          <% "member" -> %>
+            <td>
+              <a href={Routes.ts_game_party_show_path(@socket, :show, party.id)} class={"btn btn-sm btn-outline-#{bsname} btn-block"}>
+                Details
+              </a>
+            </td>
+
+            <td>
+              <span phx-click="leave_party" phx-value-party_id={party.id} class="btn btn-sm btn-danger btn-block">
+                <i class="fa-fw fa-regular fa-arrow-right-from-bracket"></i>
+                &nbsp;
+                Leave party
+              </span>
+            </td>
+
+          <% "invited" -> %>
+            <td>
+              <span phx-click="invite:accept" phx-value-party_id={party.id} class="btn btn-sm btn-success btn-block">
+                <i class="fa-fw fa-regular fa-check"></i>
+                &nbsp;
+                Accept invite
+              </span>
+            </td>
+            <td>
+              <span phx-click="invite:decline" phx-value-party_id={party.id} class="btn btn-sm btn-warning btn-block">
+                <i class="fa-fw fa-regular fa-times"></i>
+                &nbsp;
+                Decline invite
+              </span>
+            </td>
+
+          <% _ -> %>
+            <td colspan="2"></td>
+        <% end %>
+
+        <%= if @mode == "admin" do %>
+          <td>
+            <a href={Routes.ts_game_party_show_path(@socket, :show, party.id)} class={"btn btn-sm btn-secondary"}>
+              <i class="fa-fw fa-regular fa-power-off"></i>
+              &nbsp;
+              Show as admin
+            </a>
+          </td>
+        <% end %>
       </tr>
     <% end %>
   </tbody>

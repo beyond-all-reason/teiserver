@@ -5,6 +5,30 @@ defmodule Teiserver.Account.RelationsLib do
   alias Teiserver.User
   alias Teiserver.Data.Types, as: T
 
+  @doc """
+  Designed to be used only for internal use, it will not propagate the information via pubsub
+  """
+  @spec create_friendship(T.userid(), T.userid()) :: nil
+  def create_friendship(userid1, userid2) do
+    user1 = User.get_user_by_id(userid1)
+    user2 = User.get_user_by_id(userid2)
+
+    if user1 != nil and user2 != nil do
+      new_user1 = Map.merge(user1, %{
+        friends: [userid2 | user1.friends] |> Enum.uniq,
+        friend_requests: Enum.filter(user1.friend_requests, fn f -> f != userid2 end)
+      })
+
+      new_user2 = Map.merge(user2, %{
+        friends: [userid1 | user2.friends] |> Enum.uniq,
+        friend_requests: Enum.filter(user2.friend_requests, fn f -> f != userid1 end)
+      })
+
+      User.update_user(new_user1, persist: true)
+      User.update_user(new_user2, persist: true)
+    end
+  end
+
   @spec accept_friend_request(T.userid() | nil, T.userid() | nil) :: User.t() | nil
   def accept_friend_request(nil, _), do: nil
   def accept_friend_request(_, nil), do: nil
@@ -17,13 +41,13 @@ defmodule Teiserver.Account.RelationsLib do
       # Add to friends, remove from requests
       new_accepter =
         Map.merge(accepter, %{
-          friends: [requester_id | accepter.friends],
+          friends: [requester_id | accepter.friends] |> Enum.uniq,
           friend_requests: Enum.filter(accepter.friend_requests, fn f -> f != requester_id end)
         })
 
       new_requester =
         Map.merge(requester, %{
-          friends: [accepter_id | requester.friends]
+          friends: [accepter_id | requester.friends] |> Enum.uniq
         })
 
       User.update_user(new_accepter, persist: true)
@@ -141,7 +165,7 @@ defmodule Teiserver.Account.RelationsLib do
       # Add to requests
       new_potential =
         Map.merge(potential, %{
-          friend_requests: [requester_id | potential.friend_requests]
+          friend_requests: [requester_id | potential.friend_requests] |> Enum.uniq
         })
 
       requester = User.get_user_by_id(requester_id)
@@ -194,7 +218,7 @@ defmodule Teiserver.Account.RelationsLib do
       # Add to requests
       new_blockr =
         Map.merge(blockr, %{
-          blockd: [blockd_id | blockr.blockd]
+          blockd: [blockd_id | blockr.blockd] |> Enum.uniq
         })
 
       User.update_user(new_blockr, persist: true)

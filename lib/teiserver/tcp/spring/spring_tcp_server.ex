@@ -115,6 +115,7 @@ defmodule Teiserver.SpringTcpServer do
       script_password: nil,
       exempt_from_cmd_throttle: false,
       cmd_timestamps: [],
+      status_timestamps: [],
 
       # Caching app configs
       flood_rate_limit_count: Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
@@ -206,8 +207,11 @@ defmodule Teiserver.SpringTcpServer do
 
   # Server messages
   def handle_info(%{channel: "teiserver_server", event: "stop"}, state) do
-    new_state = state.protocol_out.reply(:server_restart, nil, nil, state)
-    {:noreply, new_state}
+    coordinator_id = Teiserver.Coordinator.get_coordinator_userid()
+
+    state = state.protocol_out.reply(:server_restart, nil, nil, state)
+    state = new_chat_message(:direct_message, coordinator_id, nil, "Teiserver update taking place, see discord for details/issues.", state)
+    {:noreply, state}
   end
 
   def handle_info(%{channel: "teiserver_server"}, state) do
@@ -862,6 +866,7 @@ defmodule Teiserver.SpringTcpServer do
     end
   end
 
+  @spec engage_flood_protection(map()) :: {:stop, String.t(), map()}
   defp engage_flood_protection(state) do
     state.protocol_out.reply(:disconnect, "Flood protection", nil, state)
     User.set_flood_level(state.userid, 10)

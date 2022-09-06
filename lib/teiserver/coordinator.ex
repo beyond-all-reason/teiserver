@@ -118,7 +118,15 @@ defmodule Teiserver.Coordinator do
   def call_consul(lobby_id, msg) when is_integer(lobby_id) do
     case get_consul_pid(lobby_id) do
       nil -> nil
-      pid -> GenServer.call(pid, msg)
+      pid ->
+        try do
+          GenServer.call(pid, msg)
+
+          # If the process has somehow died, we just return nil
+        catch
+          :exit, _ ->
+            nil
+        end
     end
   end
 
@@ -181,7 +189,15 @@ defmodule Teiserver.Coordinator do
   def call_balancer(lobby_id, msg) when is_integer(lobby_id) do
     case get_balancer_pid(lobby_id) do
       nil -> nil
-      pid -> GenServer.call(pid, msg)
+      pid ->
+        try do
+          GenServer.call(pid, msg)
+
+          # If the process has somehow died, we just return nil
+        catch
+          :exit, _ ->
+            nil
+        end
     end
   end
 

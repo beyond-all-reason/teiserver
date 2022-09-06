@@ -51,7 +51,7 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
       "cmd" => "s.party.updated",
       "party_id" => party_id,
       "new_values" => %{
-        "invites" => [friend2.id]
+        "pending_invites" => [friend2.id]
       }
     }
 
@@ -86,7 +86,7 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
       "cmd" => "s.party.updated",
       "party_id" => party_id,
       "new_values" => %{
-        "invites" => [],
+        "pending_invites" => [],
         "members" => [friend2.id, friend1.id]
       }
     }

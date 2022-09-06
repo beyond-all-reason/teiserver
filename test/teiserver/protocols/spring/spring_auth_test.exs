@@ -99,6 +99,17 @@ defmodule Teiserver.SpringAuthTest do
     _send_raw(socket, "CHANGEPASSWORD nomatchname\n")
     reply = _recv_raw(socket)
     assert reply == "SERVERMSG No incomming match for CHANGEPASSWORD with data '\"nomatchname\"'. Userid #{user.id}\n"
+
+    # Now test spamming it, this was only added to test a warning showed up for the
+    # status flood protection code
+    # _send_raw(socket, "MYSTATUS 125\n")
+    # _ = _recv_raw(socket)
+
+    # _send_raw(socket, "MYSTATUS 126\n")
+    # _ = _recv_raw(socket)
+
+    # _send_raw(socket, "MYSTATUS 127\n")
+    # _ = _recv_raw(socket)
   end
 
   test "IGNORELIST, IGNORE, UNIGNORE, SAYPRIVATE", %{socket: socket1, user: user} do

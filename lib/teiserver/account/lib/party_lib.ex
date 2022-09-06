@@ -94,6 +94,11 @@ defmodule Teiserver.Account.PartyLib do
     call_party(party_id, {:accept_invite, userid})
   end
 
+  @spec leave_party(T.party_id(), T.userid()) :: :ok | nil
+  def leave_party(party_id, userid) when is_integer(userid) do
+    cast_party(party_id, {:member_leave, userid})
+  end
+
   # Process stuff
   @spec start_party_server(T.lobby()) :: pid()
   def start_party_server(party) do
@@ -136,10 +141,18 @@ defmodule Teiserver.Account.PartyLib do
   end
 
   @spec call_party(T.party_id(), any) :: any | nil
-  def call_party(party_id, msg) do
+  def call_party(party_id, message) do
     case get_party_pid(party_id) do
       nil -> nil
-      pid -> GenServer.call(pid, msg)
+      pid ->
+        try do
+          GenServer.call(pid, message)
+
+          # If the process has somehow died, we just return nil
+        catch
+          :exit, _ ->
+            nil
+        end
     end
   end
 

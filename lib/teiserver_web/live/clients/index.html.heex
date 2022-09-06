@@ -47,6 +47,7 @@
           <thead>
             <tr>
               <th>Name</th>
+              <th>Party</th>
               <th>Lobby</th>
               <th>HW</th>
               <th>Status</th>
@@ -64,6 +65,7 @@
                 <%= if client != nil do %>
                   <tr>
                     <td><%= client.name %></td>
+                    <td><%= client.party_id %></td>
                     <td>
                       <%= if client.lobby_id do %>
                         <%= live_redirect "Show #{client.lobby_id}", to: Routes.ts_battle_lobby_show_path(@socket, :show, client.lobby_id), class: "btn btn-sm btn-#{Teiserver.Battle.LobbyLib.colours}" %>

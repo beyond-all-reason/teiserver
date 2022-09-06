@@ -22,7 +22,7 @@ defmodule Teiserver.Account.PartyServer do
             channel: "teiserver_party:#{party.id}",
             event: :updated_values,
             party_id: party.id,
-            new_values: %{invites: new_invites, members: new_members}
+            new_values: %{pending_invites: new_invites, members: new_members}
           }
         )
 
@@ -55,7 +55,7 @@ defmodule Teiserver.Account.PartyServer do
             channel: "teiserver_party:#{party.id}",
             event: :updated_values,
             party_id: party.id,
-            new_values: %{invites: new_invites}
+            new_values: %{pending_invites: new_invites}
           }
         )
 
@@ -85,7 +85,7 @@ defmodule Teiserver.Account.PartyServer do
             channel: "teiserver_party:#{party.id}",
             event: :updated_values,
             party_id: party.id,
-            new_values: %{invites: new_invites}
+            new_values: %{pending_invites: new_invites}
           }
         )
 
@@ -112,6 +112,7 @@ defmodule Teiserver.Account.PartyServer do
             reason: "No members"
           }
         )
+
         Teiserver.Account.PartyLib.stop_party_server(party.id)
         party
 
@@ -132,6 +133,7 @@ defmodule Teiserver.Account.PartyServer do
             new_values: %{leader: new_leader, members: new_members}
           }
         )
+
         %{party | members: new_members, leader: new_leader}
 
       true ->
@@ -169,6 +171,7 @@ defmodule Teiserver.Account.PartyServer do
           }
         )
 
+        Account.move_client_to_party(userid, nil)
         %{party | members: new_members}
 
       true -> party

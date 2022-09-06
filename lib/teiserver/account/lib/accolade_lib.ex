@@ -231,7 +231,15 @@ defmodule Teiserver.Account.AccoladeLib do
   def call_accolade_bot(msg) do
     case get_accolade_bot_pid() do
       nil -> nil
-      pid -> GenServer.call(pid, msg)
+      pid ->
+        try do
+          GenServer.call(pid, msg)
+
+          # If the process has somehow died, we just return nil
+        catch
+          :exit, _ ->
+            nil
+        end
     end
   end
 

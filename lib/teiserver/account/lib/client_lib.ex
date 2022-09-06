@@ -53,6 +53,12 @@ defmodule Teiserver.Account.ClientLib do
       |> Enum.reject(&(&1 == nil))
   end
 
+  # Party
+  @spec move_client_to_party(T.userid(), T.party_id()) :: :ok | nil
+  def move_client_to_party(userid, party_id) do
+    call_client(userid, {:change_party, party_id})
+  end
+
   # Updates
   @spec merge_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: nil | :ok
   def merge_update_client(%{userid: userid} = partial_client, _reason) do
@@ -60,41 +66,47 @@ defmodule Teiserver.Account.ClientLib do
   end
 
   @spec replace_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: Map.t()
-  def replace_update_client(%{userid: userid} = client, reason) do
+  def replace_update_client(%{userid: userid} = client, :silent) do
+    # Update the process with it
+    cast_client(userid, {:update_client, client})
+    client
+  end
+
+  def replace_update_client(%{userid: userid} = client, reason = :client_updated_battlestatus) do
     # Update the process with it
     cast_client(userid, {:update_client, client})
 
-    if reason != :silent do
-      PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
+    # PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
 
-      if client.lobby_id do
-        PubSub.broadcast(
-          Central.PubSub,
-          "teiserver_lobby_updates:#{client.lobby_id}",
-          {:lobby_update, :updated_client_battlestatus, client.lobby_id, {client, reason}}
-        )
+    if client.lobby_id do
+      PubSub.broadcast(Central.PubSub, "legacy_battle_updates:#{client.lobby_id}", {:updated_client, client, reason})
 
-        if client.lobby_host do
-          case Battle.get_lobby(client.lobby_id) do
-            nil -> :ok
-            lobby ->
-              case {lobby.in_progress, client.in_game} do
-                {true, false} ->
-                  new_lobby = %{lobby |
-                    in_progress: false,
-                    started_at: nil
-                  }
-                  Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
-                {false, true} ->
-                  new_lobby = %{lobby |
-                    in_progress: true,
-                    started_at: System.system_time(:second)
-                  }
-                  Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
-                _ ->
-                  :ok
-              end
-          end
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_lobby_updates:#{client.lobby_id}",
+        {:lobby_update, :updated_client_battlestatus, client.lobby_id, {client, reason}}
+      )
+
+      if client.lobby_host do
+        case Battle.get_lobby(client.lobby_id) do
+          nil -> :ok
+          lobby ->
+            case {lobby.in_progress, client.in_game} do
+              {true, false} ->
+                new_lobby = %{lobby |
+                  in_progress: false,
+                  started_at: nil
+                }
+                Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
+              {false, true} ->
+                new_lobby = %{lobby |
+                  in_progress: true,
+                  started_at: System.system_time(:second)
+                }
+                Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
+              _ ->
+                :ok
+            end
         end
       end
     end
@@ -102,10 +114,87 @@ defmodule Teiserver.Account.ClientLib do
     client
   end
 
-  @spec move_client_to_party(T.userid(), T.party_id()) :: :ok | nil
-  def move_client_to_party(userid, party_id) do
-    call_client(userid, {:change_party, party_id})
+  def replace_update_client(%{userid: userid} = client, reason = :client_updated_status) do
+    # Update the process with it
+    cast_client(userid, {:update_client, client})
+
+    PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
+
+    if client.lobby_id do
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_lobby_updates:#{client.lobby_id}",
+        {:lobby_update, :updated_client_battlestatus, client.lobby_id, {client, reason}}
+      )
+
+      if client.lobby_host do
+        case Battle.get_lobby(client.lobby_id) do
+          nil -> :ok
+          lobby ->
+            case {lobby.in_progress, client.in_game} do
+              {true, false} ->
+                new_lobby = %{lobby |
+                  in_progress: false,
+                  started_at: nil
+                }
+                Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
+              {false, true} ->
+                new_lobby = %{lobby |
+                  in_progress: true,
+                  started_at: System.system_time(:second)
+                }
+                Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
+              _ ->
+                :ok
+            end
+        end
+      end
+    end
+
+    client
   end
+
+  # def replace_update_client(%{userid: userid} = client, reason) do
+  #   # Update the process with it
+  #   cast_client(userid, {:update_client, client})
+
+  #   if reason != :silent do
+  #     PubSub.broadcast(Central.PubSub, "legacy_all_client_updates", {:updated_client, client, reason})
+
+  #     if client.lobby_id do
+  #       PubSub.broadcast(
+  #         Central.PubSub,
+  #         "teiserver_lobby_updates:#{client.lobby_id}",
+  #         {:lobby_update, :updated_client_battlestatus, client.lobby_id, {client, reason}}
+  #       )
+
+  #       if client.lobby_host do
+  #         case Battle.get_lobby(client.lobby_id) do
+  #           nil -> :ok
+  #           lobby ->
+  #             case {lobby.in_progress, client.in_game} do
+  #               {true, false} ->
+  #                 new_lobby = %{lobby |
+  #                   in_progress: false,
+  #                   started_at: nil
+  #                 }
+  #                 Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
+  #               {false, true} ->
+  #                 new_lobby = %{lobby |
+  #                   in_progress: true,
+  #                   started_at: System.system_time(:second)
+  #                 }
+  #                 Battle.update_lobby(new_lobby, nil, :host_updated_clientstatus)
+  #               _ ->
+  #                 :ok
+  #             end
+  #         end
+  #       end
+  #     end
+  #   end
+
+  #   client
+  # end
 
   # Process stuff
   @spec start_client_server(T.lobby()) :: pid()
@@ -149,10 +238,18 @@ defmodule Teiserver.Account.ClientLib do
   end
 
   @spec call_client(T.userid(), any) :: any | nil
-  def call_client(userid, msg) do
+  def call_client(userid, message) when is_integer(userid) do
     case get_client_pid(userid) do
       nil -> nil
-      pid -> GenServer.call(pid, msg)
+      pid ->
+        try do
+          GenServer.call(pid, message)
+
+        # If the process has somehow died, we just return nil
+        catch
+          :exit, _ ->
+            nil
+        end
     end
   end
 

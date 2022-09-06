@@ -70,7 +70,7 @@ Returns a all users of your friends and clients of those that are logged in. Wil
 }
 
 {
-  "cmd": "s.user.list_friend_ids",
+  "cmd": "s.user.list_friend_users_and_clients",
   "user_list": [
     User,
     User,

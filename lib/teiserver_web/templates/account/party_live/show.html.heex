@@ -1,0 +1,58 @@
+<%
+  bsname = @view_colour
+  moderator = allow?(@current_user, "teiserver.moderator.account")
+  leader = @party.leader == @user_id
+%>
+
+<%=
+  render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "parties", conn: Map.put(@socket, :permissions, @current_user.permissions)}
+%>
+
+<div class="row mt-3" id="main-content">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname} page-card"}>
+      <div class="card-body">
+
+        <div class="float-end">
+          <%= if moderator do %>
+            
+          <% end %>
+        </div>
+
+        <h4>Leader: <%= @user_lookup[@party.leader].name %></h4>
+        <h5>Members:</h5>
+        <ul>
+          <%= for m <- @party.members do %>
+            <li><%= @user_lookup[m].name %></li>
+          <% end %>
+        </ul>
+        
+        
+        <h5>Pending invites:</h5>
+        <ul>
+          <%= for m <- @party.pending_invites do %>
+            <li><%= @user_lookup[m].name %></li>
+          <% end %>
+        </ul>
+
+        <%= if leader or moderator do %>
+          <hr />
+          <h5>Friends</h5>
+          
+          <%= for f <- @user.friends do %>
+            <div class="my-2">
+              <%= if not Enum.member?(@party.members, f) do %>
+                <span class={"btn btn-sm btn-#{bsname}"} phx-click="create_invite" phx-value-userid={f}>
+                  Invite
+                </span>
+              <% end %>
+
+              <%= @user_lookup[f].name %>
+            </div>
+          <% end %>
+        <% end %>
+
+      </div>
+    </div>
+  </div>
+</div>

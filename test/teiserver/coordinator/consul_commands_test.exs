@@ -649,6 +649,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   end
 
   test "passthrough", %{hsocket: hsocket, listener: listener} do
+    PubsubListener.get(listener)
+
     data = %{cmd: "c.lobby.message", message: "$non-existing command"}
     _tachyon_send(hsocket, data)
     messages = PubsubListener.get(listener)
@@ -671,26 +673,41 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     # At the moment we are hard coding the join queue to 8v8s until we
     # add something to get the player count limit
-    ps1 = tachyon_auth_setup()
-    ps2 = tachyon_auth_setup()
-    ps3 = tachyon_auth_setup()
-    ps4 = tachyon_auth_setup()
+    ps1 = %{user: player1, socket: _socket1} = tachyon_auth_setup()
+    ps2 = %{user: player2, socket: _socket2} = tachyon_auth_setup()
+    ps3 = %{user: player3, socket: _socket3} = tachyon_auth_setup()
+    ps4 = %{user: player4, socket: _socket4} = tachyon_auth_setup()
 
     %{user: player5, socket: socket5} = tachyon_auth_setup()
     %{user: player6, socket: socket6} = tachyon_auth_setup()
     %{user: player7, socket: socket7} = tachyon_auth_setup()
     %{user: player8, socket: _socket8} = tachyon_auth_setup()
 
+    # The 50ms delays are to allow it to add them in the correct order
     [ps1, ps2, ps3, ps4]
     |> Enum.each(fn %{user: user, socket: socket} ->
       Lobby.force_add_user_to_battle(user.id, lobby_id)
+      :timer.sleep(50)
       _tachyon_send(socket, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
     end)
 
     Lobby.force_add_user_to_battle(player5.id, lobby_id)
+    :timer.sleep(50)
     Lobby.force_add_user_to_battle(player6.id, lobby_id)
+    :timer.sleep(50)
     Lobby.force_add_user_to_battle(player7.id, lobby_id)
+    :timer.sleep(50)
     Lobby.force_add_user_to_battle(player8.id, lobby_id)
+    :timer.sleep(50)
+
+    member_ids = Battle.get_lobby_member_list(lobby_id)
+
+    assert member_ids == [player8.id, player7.id, player6.id, player5.id, player4.id, player3.id, player2.id, player1.id]
+
+    player_ids = Battle.list_lobby_players(lobby_id)
+      |> Enum.map(fn %{userid: userid} -> userid end)
+
+    assert player_ids == [player4.id, player3.id, player2.id, player1.id]
 
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
     assert queue == []

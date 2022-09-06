@@ -137,6 +137,15 @@ defmodule Teiserver.Client do
 
     PubSub.broadcast(
       Central.PubSub,
+      "teiserver_client_messages:#{user.id}",
+      %{
+        channel: "teiserver_client_messages:#{user.id}",
+        event: :connected
+      }
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
       "teiserver_client_action_updates:#{user.id}",
       {:client_action, :client_connect, user.id}
     )
@@ -259,6 +268,9 @@ defmodule Teiserver.Client do
     Room.remove_user_from_any_room(client.userid)
     leave_rooms(client.userid)
 
+    # If they are part of a party, lets leave it
+    Account.leave_party(client.party_id, client.userid)
+
     if client.bot do
       Telemetry.increment(:bots_disconnected)
     else
@@ -286,6 +298,15 @@ defmodule Teiserver.Client do
       Central.PubSub,
       "teiserver_client_inout",
       {:client_inout, :disconnect, client.userid, reason}
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_client_messages:#{client.userid}",
+      %{
+        channel: "teiserver_client_messages:#{client.userid}",
+        event: :disconnected
+      }
     )
   end
 

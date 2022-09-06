@@ -324,12 +324,14 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   @spec load(Plug.Conn.t(), map) :: Plug.Conn.t()
   def load(conn, params) do
     hours = Map.get(params, "hours", "24") |> int_parse()
+    offset = Map.get(params, "offset", "0") |> int_parse()
     resolution = Map.get(params, "resolution", "5") |> int_parse()
 
     logs =
       Telemetry.list_server_minute_logs(
         order: "Newest first",
-        limit: hours * 60
+        limit: hours * 60,
+        offset: offset * 60
       )
       |> Enum.reverse
 

@@ -16,6 +16,9 @@ defmodule Teiserver.Protocols.SpringIn do
   alias Teiserver.Protocols.Spring.{TelemetryIn, BattleIn}
   alias Teiserver.{Account}
 
+  @status_3_window 1_000
+  @status_10_window 60_000
+
   @spec data_in(String.t(), Map.t()) :: Map.t()
   def data_in(data, state) do
     if Application.get_env(:central, Teiserver)[:extra_logging] == true or state.print_client_messages do
@@ -146,24 +149,33 @@ defmodule Teiserver.Protocols.SpringIn do
     reply(:servermsg, "You need to login before you can set your status", msg_id, state)
   end
   defp do_handle("MYSTATUS", data, msg_id, state) do
-    case Regex.run(~r/(\d+)/, data) do
-      [_, new_value] ->
-        new_status =
-          Spring.parse_client_status(new_value)
-          |> Map.take([:in_game, :away])
+    {_, state} = status_flood_protect?(state)
 
-        case Client.get_client_by_id(state.userid) do
-          nil ->
-            :ok
-          client ->
-            # This just accepts it and updates the client
-            new_client = Map.merge(client, new_status)
-            Client.update(new_client, :client_updated_status)
-        end
+    # case status_flood_protect?(state) do
+    #   {true, state} ->
+    #     engage_flood_protection(state)
+    #   {false, state} ->
+        case Regex.run(~r/(\d+)/, data) do
+        [_, new_value] ->
+          new_status =
+            Spring.parse_client_status(new_value)
+            |> Map.take([:in_game, :away])
 
-      nil ->
-        _no_match(state, "MYSTATUS", msg_id, data)
-    end
+          case Client.get_client_by_id(state.userid) do
+            nil ->
+              :ok
+            client ->
+              # This just accepts it and updates the client
+              new_client = Map.merge(client, new_status)
+              if client.in_game != new_client.in_game or client.away != new_client.away do
+                Client.update(new_client, :client_updated_status)
+              end
+          end
+
+        nil ->
+          _no_match(state, "MYSTATUS", msg_id, data)
+      end
+    # end
 
     state
   end
@@ -1257,5 +1269,39 @@ defmodule Teiserver.Protocols.SpringIn do
   defp deny(state, msg_id) do
     reply(:servermsg, "You do not have permission to execute that command", msg_id, state)
     state
+  end
+
+  @spec status_flood_protect?(map()) :: {boolean, map()}
+  defp status_flood_protect?(%{exempt_from_cmd_throttle: true} = state), do: {false, state}
+  defp status_flood_protect?(state) do
+    now = System.system_time(:millisecond)
+    limiter10 = now - @status_10_window
+    limiter3 = now - @status_3_window
+
+    status_timestamps = [now | state.status_timestamps]
+      |> Enum.filter(fn cmd_ts -> cmd_ts > limiter10 end)
+
+    recent_timestamps = status_timestamps
+      |> Enum.filter(fn cmd_ts -> cmd_ts > limiter3 end)
+
+    cond do
+      Enum.count(status_timestamps) > 10 ->
+        Logger.warn("status_flood_protection:10 - #{state.username}/#{state.userid}")
+        {true, %{state | status_timestamps: status_timestamps}}
+      Enum.count(recent_timestamps) > 3 ->
+        Logger.warn("status_flood_protection:3 - #{state.username}/#{state.userid}")
+        {true, %{state | status_timestamps: status_timestamps}}
+      true ->
+        {false, %{state | status_timestamps: status_timestamps}}
+    end
+  end
+
+  @spec engage_flood_protection(map()) :: {:stop, String.t(), map()}
+  defp engage_flood_protection(state) do
+    state.protocol_out.reply(:disconnect, "Spring status flood protection", nil, state)
+    User.set_flood_level(state.userid, 10)
+    Client.disconnect(state.userid, "SpringIn.status.flood_protection")
+    Logger.error("Spring Status command overflow from #{state.username}/#{state.userid}")
+    {:stop, "Spring status flood protection", state}
   end
 end
