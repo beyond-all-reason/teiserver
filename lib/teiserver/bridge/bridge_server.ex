@@ -162,7 +162,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       [{channel_id, _}] ->
         Alchemy.Client.send_message(
           channel_id,
-          "Teiserver shutdown for node #{Node.self()}",
+          "Teiserver shutdown for node #{Teiserver.node_name()}",
           []# Options
         )
       _ ->
@@ -235,7 +235,7 @@ defmodule Teiserver.Bridge.BridgeServer do
         Logger.info("Discord connected, posting startup message")
         Alchemy.Client.send_message(
           channel_id,
-          "Teiserver startup for node #{Node.self()}",
+          "Teiserver startup for node #{Teiserver.node_name()}",
           []# Options
         )
       _ ->

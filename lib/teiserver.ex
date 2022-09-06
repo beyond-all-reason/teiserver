@@ -46,4 +46,9 @@ defmodule Teiserver do
     Application.put_env(:elixir, :ansi_enabled, true)
     Teiserver.Account.Tasks.DailyCleanupTask.manually_delete_user(id)
   end
+
+  @spec node_name() :: String.t()
+  def node_name() do
+    Application.get_env(:central, Teiserver)[:node_name] || to_string(Node.self())
+  end
 end
