@@ -7,6 +7,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   alias Teiserver.{Account}
   alias Central.Helpers.StylingHelper
+  require Logger
 
   @settings %{
     days: 365
@@ -16,6 +17,14 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   @spec run(list()) :: :ok
   def run(_args) do
+    if Application.get_env(:central, Teiserver)[:enable_beans] do
+      do_run()
+    else
+      Logger.error("Beans mode is not enabled, you cannot run the fakedata task")
+    end
+  end
+
+  defp do_run() do
     # Start by rebuilding the database
     Mix.Task.run("ecto.reset")
 
