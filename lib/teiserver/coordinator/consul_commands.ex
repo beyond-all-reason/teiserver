@@ -623,14 +623,18 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  def handle_command(%{command: "pull", remaining: target} = cmd, state) do
-    case ConsulServer.get_user(target, state) do
-      nil ->
-        ConsulServer.say_command(%{cmd | error: "no user found"}, state)
-      target_id ->
-        Lobby.force_add_user_to_battle(target_id, state.lobby_id)
-        ConsulServer.say_command(cmd, state)
-    end
+  def handle_command(%{command: "pull", remaining: targets} = cmd, state) do
+    targets
+    |> String.split(" ")
+    |> Enum.reduce(state, fn (target, acc) ->
+      case ConsulServer.get_user(target, acc) do
+        nil ->
+          ConsulServer.say_command(%{cmd | error: "user #{target} not found"}, acc)
+        target_id ->
+          Lobby.force_add_user_to_battle(target_id, acc.lobby_id)
+          ConsulServer.say_command(cmd, acc)
+      end
+    end)
   end
 
   def handle_command(%{command: "settag", remaining: remaining} = cmd, state) do
