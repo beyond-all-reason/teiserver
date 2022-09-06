@@ -286,6 +286,22 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert reply["lobby"]["id"] == lobby_id
   end
 
+  test "pull users", %{lobby_id: lobby_id, hsocket: hsocket} do
+    %{user: player2, socket: socket2} = tachyon_auth_setup()
+    %{user: player3, socket: socket3} = tachyon_auth_setup()
+
+    data = %{cmd: "c.lobby.message", message: "$pull ##{player2.id} ##{player3.id}"}
+    _tachyon_send(hsocket, data)
+
+    [reply2] = _tachyon_recv(socket2)
+    assert reply2["cmd"] == "s.lobby.force_join"
+    assert reply2["lobby"]["id"] == lobby_id
+
+    [reply3] = _tachyon_recv(socket3)
+    assert reply3["cmd"] == "s.lobby.force_join"
+    assert reply3["lobby"]["id"] == lobby_id
+  end
+
   # TODO: settag
 
   test "leveltoplay", %{lobby_id: lobby_id, hsocket: hsocket} do
