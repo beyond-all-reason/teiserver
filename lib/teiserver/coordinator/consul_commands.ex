@@ -626,6 +626,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{command: "pull", remaining: targets} = cmd, state) do
     targets
     |> String.split(" ")
+    |> Enum.map(fn name ->
+      name
+        |> String.trim()
+        |> String.downcase()
+    end)
+    |> Enum.uniq
     |> Enum.reduce(state, fn (target, acc) ->
       case ConsulServer.get_user(target, acc) do
         nil ->
