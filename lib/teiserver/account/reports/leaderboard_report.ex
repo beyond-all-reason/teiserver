@@ -1,9 +1,11 @@
 defmodule Teiserver.Account.LeaderboardReport do
   # alias Central.Helpers.{DatePresets, TimexHelper}
-  alias Teiserver.Account
+  alias Teiserver.{Account}
   alias Teiserver.Game.MatchRatingLib
   # alias Teiserver.Battle.BalanceLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  alias Central.Helpers.TimexHelper
+  alias Central.Repo
 
   @spec icon() :: String.t()
   def icon(), do: Teiserver.Account.RatingLib.icon()
@@ -23,7 +25,7 @@ defmodule Teiserver.Account.LeaderboardReport do
       |> Timex.to_datetime()
 
     type_name = params["game_type"]
-    {type_id, _type_name} = case MatchRatingLib.rating_type_name_lookup()[type_name] do
+    {type_id, type_name} = case MatchRatingLib.rating_type_name_lookup()[type_name] do
       nil ->
         type_name = hd(MatchRatingLib.rating_type_list())
         {MatchRatingLib.rating_type_name_lookup()[type_name], type_name}
@@ -41,18 +43,23 @@ defmodule Teiserver.Account.LeaderboardReport do
       limit: limit
     )
 
-    data = %{
-      ratings: ratings,
-      csv_data: make_csv_data(ratings)
-    }
+    extra_data = if params["extended"] == "true" do
+      userids = ratings |> Enum.map(fn r -> r.user_id end)
+
+      get_memberships(userids, activity_time, type_name)
+    else
+      nil
+    end
 
     assigns = %{
       params: params,
-      game_types: MatchRatingLib.rating_type_list()
-      # presets: DatePresets.presets()
+      game_types: MatchRatingLib.rating_type_list(),
+      ratings: ratings,
+      extra_data: extra_data,
+      csv_data: make_csv_data(ratings, extra_data)
     }
 
-    {data, assigns}
+    {nil, assigns}
   end
 
   defp add_csv_headings(output) do
@@ -63,15 +70,21 @@ defmodule Teiserver.Account.LeaderboardReport do
       "Game rating",
       "Skill",
       "Uncertainty",
-      "Days since update"
+      "Days since update",
+      "Game count",
+      "Win rate"
     ]]
     headings ++ output
   end
-  defp make_csv_data(ratings) do
+  defp make_csv_data(ratings, extra_data) do
     ratings
       |> Enum.with_index()
       |> Enum.map(fn {rating, index} ->
         age = Timex.diff(Timex.now(), rating.last_updated, :days)
+        extra = extra_data[rating.user_id] || %{
+          count: 1,
+          wins: 1
+        }
 
         [
           index + 1,
@@ -80,7 +93,9 @@ defmodule Teiserver.Account.LeaderboardReport do
           rating.rating_value,
           rating.skill,
           rating.uncertainty,
-          age
+          age,
+          extra.count,
+          extra.wins/extra.count
         ]
       end)
       |> add_csv_headings
@@ -92,7 +107,43 @@ defmodule Teiserver.Account.LeaderboardReport do
     Map.merge(%{
       "days" => "35",
       "limit" => "50",
-      "game_type" => (MatchRatingLib.rating_type_list() |> hd)
+      "game_type" => (MatchRatingLib.rating_type_list() |> hd),
+      "extended" => "false",
     }, Map.get(params, "report", %{}))
+  end
+
+  defp get_memberships(userids, after_date, type_name) do
+    id_str = Enum.join(userids, ", ")
+    date_str = TimexHelper.date_to_str(after_date, format: :ymd_hms)
+
+    query = """
+      SELECT
+        memberships.user_id,
+        COUNT(memberships.user_id) AS count,
+        SUM(cast(memberships.win as int)) AS wins
+      FROM
+        teiserver_battle_match_memberships memberships
+      JOIN teiserver_battle_matches matches
+        ON matches.id = memberships.match_id
+      JOIN teiserver_game_rating_logs rating_logs
+        ON matches.id = rating_logs.match_id AND rating_logs.user_id = memberships.user_id
+      WHERE
+        memberships.user_id IN (#{id_str})
+        AND matches.started > '#{date_str}'
+        AND matches.game_type = '#{type_name}'
+      GROUP BY
+        memberships.user_id
+    """
+
+    case Ecto.Adapters.SQL.query(Repo, query, []) do
+      {:ok, results} ->
+        results.rows
+        |> Map.new(fn [userid, count, wins] ->
+          {userid, %{count: count, wins: wins}}
+        end)
+
+      {a, b} ->
+        raise "ERR: #{a}, #{b}"
+    end
   end
 end

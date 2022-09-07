@@ -189,6 +189,13 @@ defmodule Teiserver.Battle.MatchLib do
       preload: [members: members]
   end
 
+  def _search(query, :user_id_in, user_ids) do
+    from matches in query,
+      join: members in assoc(matches, :members),
+      where: members.user_id in ^user_ids,
+      preload: [members: members]
+  end
+
   def _search(query, :user_rating, user_id) do
     from matches in query,
       left_join: ratings in assoc(matches, :ratings),
