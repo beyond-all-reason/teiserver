@@ -24,19 +24,23 @@ defmodule Teiserver.Telemetry.Tasks.PersistMatchDayTask do
         |> Timex.shift(days: 1)
       end
 
-    if Timex.compare(date, Timex.today()) == -1 do
-      run(date)
+    cond do
+      date == nil ->
+        :ok
+      Timex.compare(date, Timex.today()) == -1 ->
+        run(date)
 
-      new_date = Timex.shift(date, days: 1)
+        new_date = Timex.shift(date, days: 1)
 
-      if Timex.compare(new_date, Timex.today()) == -1 do
-        %{}
-        |> Teiserver.Telemetry.Tasks.PersistMatchDayTask.new()
-        |> Oban.insert()
-      end
+        if Timex.compare(new_date, Timex.today()) == -1 do
+          %{}
+          |> Teiserver.Telemetry.Tasks.PersistMatchDayTask.new()
+          |> Oban.insert()
+        end
+        :ok
+      true ->
+        :ok
     end
-
-    :ok
   end
 
   @spec run(%Date{}) :: :ok
