@@ -8,7 +8,7 @@ defmodule Teiserver.Account.RecordsReport do
   def permissions(), do: "teiserver.staff.moderator"
 
   @spec run(Plug.Conn.t(), map()) :: {nil, map()}
-  def run(_conn, params) do
+  def run(_conn, _params) do
     records = [
       {"Peak users", get_max(~w(aggregates stats peak_user_counts total))},
       {"Peak players", get_max(~w(aggregates stats peak_user_counts player))},
