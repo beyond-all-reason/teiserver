@@ -1,0 +1,53 @@
+<% bsname = view_colour() %>
+
+<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <div class="btn btn-primary2 float-end" onclick="$('.help-box, .help-box-large').toggle();">
+          <i class='fa-fw fa-solid fa-circle-info'></i>
+          &nbsp;
+          Show/Hide help
+        </div>
+        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "records"
+          })
+        %>
+        <br /><br />
+
+        <div class="help-box-large">
+          
+        </div>
+        
+
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Record</th>
+              <th>Value</th>
+              <th>Date</th>
+              <th>&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for {key, {date, value}} <- @records do %>
+              <tr>
+                <td><%= key %></td>
+                <td><%= value %></td>
+                <td><%= date_to_str(date, format: :ymd) %></td>
+                <td>
+                  <%= link "Show", to: Routes.ts_reports_server_metric_path(@conn, :day_metrics_show, date_to_str(date, format: :ymd)), class: "btn btn-secondary btn-sm" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+  </div>
+</div>

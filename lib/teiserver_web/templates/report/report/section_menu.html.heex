@@ -99,7 +99,7 @@
   %>
 <% end %>
 
-<%= if allow?(@current_user, Teiserver.Account.WinnersReport.permissions()) do %>
+<%= if false and allow?(@current_user, Teiserver.Account.WinnersReport.permissions()) do %>
   <%= central_component "section_menu_button",
     name: "winners",
     label: "Winners",
@@ -107,6 +107,17 @@
     icon: Teiserver.Account.WinnersReport.icon(),
     bsname: bsname,
     url: Routes.ts_reports_report_path(@conn, :show, "winners")
+  %>
+<% end %>
+
+<%= if allow?(@current_user, Teiserver.Account.RecordsReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "records",
+    label: "Records",
+    active: @active,
+    icon: Teiserver.Account.WinnersReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "records")
   %>
 <% end %>
 
