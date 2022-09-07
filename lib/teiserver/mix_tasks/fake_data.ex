@@ -196,7 +196,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
       server_uuid = UUID.uuid1()
 
-      Range.new(0, users_per_day())
+      Range.new(0, matches_per_day())
       |> Enum.each(fn _ ->
         max_size = Enum.count(users) |> Kernel.div(2) |> :math.floor |> round
         team_size = min(:rand.uniform(8), max_size)
