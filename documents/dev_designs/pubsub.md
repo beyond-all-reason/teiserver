@@ -244,7 +244,17 @@ This is the channel for sending messages to the client. It allows the client on 
 
 # Parties
 %{
+  event: :added_to_party,
+  party_id: party_id
+}
+
+%{
   event: :party_invite,
+  party_id: party_id
+}
+
+%{
+  event: :left_party,
   party_id: party_id
 }
 ```

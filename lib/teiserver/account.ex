@@ -1378,6 +1378,9 @@ defmodule Teiserver.Account do
   @spec leave_party(T.party_id(), T.userid()) :: :ok | nil
   defdelegate leave_party(party_id, userid), to: PartyLib
 
+  @spec kick_user_from_party(T.party_id(), T.userid()) :: :ok | nil
+  defdelegate kick_user_from_party(party_id, userid), to: PartyLib
+
   @spec party_exists?(T.party_id()) :: boolean()
   defdelegate party_exists?(party_id), to: PartyLib
 

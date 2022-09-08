@@ -18,8 +18,8 @@ defmodule Teiserver.Battle.MatchMembership do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, ~w(match_id user_id team_id win stats)a)
-    |> validate_required(~w(match_id user_id team_id)a)
-    |> unique_constraint(~w(match_id user_id)a)
+      |> cast(params, ~w(match_id user_id team_id win stats party_id)a)
+      |> validate_required(~w(match_id user_id team_id)a)
+      |> unique_constraint(~w(match_id user_id)a)
   end
 end

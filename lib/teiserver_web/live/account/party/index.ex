@@ -103,6 +103,19 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     }
   end
 
+  def handle_info(data = %{channel: "teiserver_client_messages:" <> _, event: :party_invite}, socket) do
+    party = Account.get_party(data.party_id)
+
+    new_parties = socket.assigns.parties
+      |> Enum.reject(fn p -> p.id == party.id end)
+
+    {:noreply,
+      socket
+        |> assign(:parties, [party | new_parties])
+        |> build_user_lookup()
+    }
+  end
+
   def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do
     {:noreply, socket}
   end
@@ -110,7 +123,8 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
   @impl true
   def handle_event("invite:accept", %{"party_id" => party_id}, socket) do
     PartyLib.call_party(party_id, {:accept_invite, socket.assigns.user_id})
-    {:noreply, socket}
+    :timer.sleep(100)
+    {:noreply, socket |> redirect(to: Routes.ts_game_party_show_path(socket, :show, party_id))}
   end
 
   def handle_event("invite:decline", %{"party_id" => party_id}, socket) do
@@ -118,24 +132,12 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     {:noreply, socket}
   end
 
-  def handle_event("leave_party", %{"party_id" => party_id}, socket) do
-    Account.leave_party(party_id, socket.assigns.user_id)
-    Account.move_client_to_party(socket.assigns.user_id, nil)
-    {:noreply, socket}
-  end
-
   def handle_event("create_party", _, socket) do
     party = Account.create_party(socket.assigns.user_id)
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_party:#{party.id}")
-
-    new_parties = [party | socket.assigns.parties]
-
-    {:noreply,
-      socket
-        |> assign(:parties, new_parties)
-        |> build_user_lookup
-    }
+    :timer.sleep(100)
+    {:noreply, socket |> redirect(to: Routes.ts_game_party_show_path(socket, :show, party.id))}
   end
+
 
   @spec list_parties(map) :: map
   defp list_parties(%{assigns: %{mode: "admin"}} = socket) do
@@ -155,6 +157,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     parties = socket.assigns.user_id
       |> Account.get_user_by_id
       |> Map.get(:friends)
+      |> Kernel.++([socket.assigns.user_id])
       |> Enum.map(fn user_id ->
         Account.get_client_by_id(user_id)
       end)

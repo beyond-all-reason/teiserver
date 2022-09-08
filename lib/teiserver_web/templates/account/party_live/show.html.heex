@@ -1,7 +1,7 @@
 <%
   bsname = @view_colour
   moderator = allow?(@current_user, "teiserver.moderator.account")
-  leader = @party.leader == @user_id
+  leader = moderator or (@party.leader == @user_id)
 %>
 
 <%=
@@ -14,6 +14,10 @@
       <div class="card-body">
 
         <div class="float-end">
+          <span class={"btn btn-sm btn-danger2"} phx-click="leave">
+            Leave party
+          </span>
+        
           <%= if moderator do %>
             
           <% end %>
@@ -21,34 +25,60 @@
 
         <h4>Leader: <%= @user_lookup[@party.leader].name %></h4>
         <h5>Members:</h5>
-        <ul>
-          <%= for m <- @party.members do %>
-            <li><%= @user_lookup[m].name %></li>
-          <% end %>
-        </ul>
-        
-        
-        <h5>Pending invites:</h5>
-        <ul>
-          <%= for m <- @party.pending_invites do %>
-            <li><%= @user_lookup[m].name %></li>
-          <% end %>
-        </ul>
+        <table class="table">
+          <tbody>
+            <%= for m <- @party.members do %>
+              <tr>
+                <td>
+                  <%= @user_lookup[m].name %>
+                </td>
+                <td>
+                  <%= if leader and m != @user_id do %>
+                    <span class={"btn btn-sm btn-danger"} phx-click="kick" phx-value-userid={m}>
+                      Kick
+                    </span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
 
-        <%= if leader or moderator do %>
+        <h5>Pending invites:</h5>
+        <table class="table">
+          <tbody>
+            <%= for m <- @party.pending_invites do %>
+              <tr>
+                <td>
+                  <%= @user_lookup[m].name %>
+                </td>
+                <td>
+                  <%= if leader do %>
+                    <span class={"btn btn-sm btn-warning"} phx-click="cancel_invite" phx-value-userid={m}>
+                      Cancel invite
+                    </span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+
+        <%= if leader do %>
           <hr />
           <h5>Friends</h5>
-          
-          <%= for f <- @user.friends do %>
-            <div class="my-2">
-              <%= if not Enum.member?(@party.members, f) do %>
-                <span class={"btn btn-sm btn-#{bsname}"} phx-click="create_invite" phx-value-userid={f}>
-                  Invite
-                </span>
-              <% end %>
 
-              <%= @user_lookup[f].name %>
-            </div>
+          <%= for f <- @user.friends do %>
+            <%= if Map.has_key?(@user_lookup, f) do %>
+              <div class="my-2">
+                <%= if not Enum.member?(@party.members, f) and not Enum.member?(@party.pending_invites, f) do %>
+                  <span class={"btn btn-sm btn-#{bsname}"} phx-click="create_invite" phx-value-userid={f}>
+                    Invite <%= @user_lookup[f].name %>
+                  </span>
+                <% end %>
+
+              </div>
+            <% end %>
           <% end %>
         <% end %>
 

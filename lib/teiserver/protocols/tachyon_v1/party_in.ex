@@ -32,6 +32,13 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
     state
   end
 
+  def do_handle("cancel", %{"userid" => userid}, state) do
+    if state.party_id != nil and state.party_role == :leader do
+      Account.cancel_party_invite(state.party_id, userid)
+    end
+    state
+  end
+
   # Accepting when not a member of a party
   def do_handle("accept", %{"party_id" => party_id}, %{party_id: nil} = state) do
     case Account.accept_party_invite(party_id, state.userid) do
@@ -79,7 +86,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
   def do_handle("kick", %{"user_id" => user_id}, state) when is_integer(user_id) do
     party = Account.get_party(state.party_id)
     if state.userid == party.leader do
-      PartyLib.cast_party(state.party_id, {:kick_member, user_id})
+      Account.kick_user_from_party(state.party_id, user_id)
     end
   end
 

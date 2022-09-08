@@ -99,6 +99,11 @@ defmodule Teiserver.Account.PartyLib do
     cast_party(party_id, {:member_leave, userid})
   end
 
+  @spec kick_user_from_party(T.party_id(), T.userid()) :: :ok | nil
+  def kick_user_from_party(party_id, userid) when is_integer(userid) do
+    cast_party(party_id, {:kick_member, userid})
+  end
+
   # Process stuff
   @spec start_party_server(T.lobby()) :: pid()
   def start_party_server(party) do

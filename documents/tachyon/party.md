@@ -116,6 +116,17 @@ Accept an invite to a party, this will result in you being added to the party as
 ```
 
 ### `c.party.decline`
+Cancel the invitation to the party.
+
+#### Example input
+```json
+{
+  "cmd": "c.party.cancel_invite",
+  "userid": 123
+}
+```
+
+### `c.party.decline`
 Reject the invitation to the party, result in you being removed from the party invite list.
 
 #### Example input

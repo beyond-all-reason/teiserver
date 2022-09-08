@@ -3,10 +3,15 @@ defmodule Teiserver.Account.ClientServer do
   require Logger
   alias Teiserver.Battle.LobbyChat
   alias Teiserver.{Account}
+  alias Phoenix.PubSub
 
   @impl true
   def handle_call(:get_client_state, _from, state) do
     {:reply, state.client, state}
+  end
+
+  def handle_call({:change_party, nil}, _from, %{client: %{party_id: nil}} = state) do
+    {:reply, :ok, state}
   end
 
   def handle_call({:change_party, party_id}, _from, state) do
@@ -15,11 +20,32 @@ defmodule Teiserver.Account.ClientServer do
         :ok
 
       existing_id ->
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_client_messages:#{state.userid}",
+          %{
+            channel: "teiserver_client_messages:#{state.userid}",
+            event: :left_party,
+            party_id: existing_id
+          }
+        )
         Account.cast_party(existing_id, {:member_leave, state.userid})
         :ok
     end
 
     new_client = %{state.client | party_id: party_id}
+
+    if party_id != nil do
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_client_messages:#{state.userid}",
+        %{
+          channel: "teiserver_client_messages:#{state.userid}",
+          event: :added_to_party,
+          party_id: party_id
+        }
+      )
+    end
 
     {:reply, :ok, %{state | client: new_client}}
   end
