@@ -48,6 +48,16 @@
       link: Routes.ts_reports_infolog_path(@conn, :index)
     %>
   <% end %>
+
+  <%= if allow?(@current_user, "teiserver.reports.export") do %>
+    <%=
+      central_component "menu_card",
+      icon: "fa-regular fa-download",
+      name: "exports",
+      text: "Data exports",
+      link: Routes.ts_reports_exports_path(@conn, :index)
+    %>
+  <% end %>
 </div>
 
 <div class="row mt-4">

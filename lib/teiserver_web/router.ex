@@ -162,6 +162,9 @@ defmodule TeiserverWeb.Router do
         get("/infolog/download/:id", InfologController, :download)
         resources("/infolog", InfologController, only: [:index, :show, :delete])
 
+        get("/exports/download/:id", ExportsController, :download)
+        resources("/exports", ExportsController, only: [:index])
+
         get("/show/:name", ReportController, :show)
         post("/show/:name", ReportController, :show)
 
