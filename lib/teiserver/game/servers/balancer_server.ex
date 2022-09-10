@@ -62,6 +62,7 @@ defmodule Teiserver.Game.BalancerServer do
       {state.hashes[hash], state}
     else
       result = do_make_balance(state, team_count, players)
+      |> Map.put(:hash, hash)
 
       new_hashes = Map.put(state.hashes, hash, result)
       {result, %{state | hashes: new_hashes}}
@@ -71,7 +72,8 @@ defmodule Teiserver.Game.BalancerServer do
   @spec make_player_hash(non_neg_integer(), [T.client()]) :: String.t()
   defp make_player_hash(team_count, players) do
     client_string = players
-      |> Enum.map(fn c -> c.userid end)
+      |> Enum.sort_by(fn c -> c.userid end)
+      |> Enum.map(fn c -> "#{c.userid}:#{c.party_id}" end)
       |> Enum.join(",")
 
     :crypto.hash(:md5, "#{team_count}--" <> client_string)
@@ -81,7 +83,6 @@ defmodule Teiserver.Game.BalancerServer do
   @spec do_make_balance(T.balance_server_state(), non_neg_integer(), [T.client()]) :: map()
   defp do_make_balance(_state, team_count, players) do
     player_count = Enum.count(players)
-    player_ids = Enum.map(players, fn %{userid: u} -> u end)
 
     rating_type = cond do
       player_count == 2 -> "Duel"
@@ -90,10 +91,24 @@ defmodule Teiserver.Game.BalancerServer do
       true -> "Team"
     end
 
-    groups = player_ids
-      |> Enum.map(fn userid ->
-        {[userid], BalanceLib.get_user_balance_rating_value(userid, rating_type)}
+    # Group players into parties
+    partied_players = players
+      |> Enum.group_by(fn p -> p.party_id end, fn p -> p.userid end)
+
+    groups = partied_players
+      |> Enum.map(fn
+        # The nil group is players without a party, they need to
+        # be broken out of the party
+        {nil, player_id_list} ->
+          player_id_list
+          |> Enum.map(fn userid ->
+            {[userid], BalanceLib.get_user_balance_rating_value(userid, rating_type)}
+          end)
+
+        {_party_id, player_id_list} ->
+          {player_id_list, BalanceLib.balance_party(player_id_list, rating_type)}
       end)
+      |> List.flatten
 
     BalanceLib.create_balance(groups, team_count, @balance_algorithm)
   end

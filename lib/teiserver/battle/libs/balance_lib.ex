@@ -75,12 +75,18 @@ defmodule Teiserver.Battle.BalanceLib do
     # we take the captain as the first member of that group
     captains = data.team_groups
       |> Map.new(fn {k, groups} ->
-        captain = groups
-          |> hd
-          |> elem(0)
-          |> hd
+        case groups do
+          [] ->
+            {k, nil}
 
-        {k, captain}
+          _ ->
+            captain = groups
+              |> hd
+              |> elem(0)
+              |> hd
+
+            {k, captain}
+        end
       end)
 
     team_sizes = data.team_players
@@ -291,5 +297,28 @@ defmodule Teiserver.Battle.BalanceLib do
   @spec calculate_leaderboard_rating(number(), number()) :: number()
   def calculate_leaderboard_rating(skill, uncertainty) do
     skill - (3 * uncertainty)
+  end
+
+  @spec balance_party([T.userid()], String.t() | non_neg_integer()) :: number()
+  def balance_party(userids, rating_type) do
+    ratings = userids
+      |> Enum.map(fn userid ->
+        get_user_balance_rating_value(userid, rating_type)
+      end)
+
+    count = Enum.count(ratings)
+    sum = Enum.sum(ratings)
+    mean =  sum / count
+    stdev = Statistics.stdev(ratings)
+
+    _method1 = ratings
+      |> Enum.map(fn r -> max(r, mean) end)
+      |> Enum.sum
+
+    method2 = sum + (stdev * count)
+    _method3 = sum + Enum.max(ratings)
+    _method4 = sum + mean
+
+    method2
   end
 end
