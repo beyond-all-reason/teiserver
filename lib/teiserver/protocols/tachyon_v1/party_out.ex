@@ -42,6 +42,15 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyOut do
     }
   end
 
+  def do_reply(:added_to, party_id) do
+    party = Account.get_party(party_id)
+
+    %{
+      cmd: "s.party.added_to",
+      party: Tachyon.convert_object(party, :party_full)
+    }
+  end
+
   def do_reply(:accept, {true, party}) do
     %{
       cmd: "s.party.accept",

@@ -115,6 +115,15 @@ Accept an invite to a party, this will result in you being added to the party as
 }
 ```
 
+### `s.party.added_to`
+Sent when you are added to a party.
+```json
+{
+  "cmd": "s.party.added_to",
+  "party": Party
+}
+```
+
 ### `c.party.decline`
 Cancel the invitation to the party.
 
