@@ -586,6 +586,25 @@ defmodule Teiserver.User do
   end
 
   def send_direct_message(from_id, to_id, message) do
+    if String.starts_with?(message, "!clan") do
+      host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+      website_url = "https://#{host}"
+
+      Coordinator.send_to_user(from_id, "SPADS clans have been replaced by parties. You can access them via #{website_url}/teiserver/parties.")
+
+      uuid = UUID.uuid1()
+      client = Account.get_client_by_id(from_id)
+      {:ok, _code} = Central.Account.create_code(%{
+          value: uuid <> "$#{client.ip}",
+          purpose: "one_time_login",
+          expires: Timex.now() |> Timex.shift(minutes: 5),
+          user_id: from_id
+        })
+      url = "https://#{host}/one_time_login/#{uuid}"
+
+      Coordinator.send_to_user(from_id, "If you have not already logged in, here is a one-time link to do so automatically - #{url}")
+    end
+
     send_direct_message(from_id, to_id, [message])
   end
 

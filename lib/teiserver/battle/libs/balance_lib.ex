@@ -315,10 +315,10 @@ defmodule Teiserver.Battle.BalanceLib do
       |> Enum.map(fn r -> max(r, mean) end)
       |> Enum.sum
 
-    method2 = sum + (stdev * count)
+    _method2 = sum + (stdev * count)
     _method3 = sum + Enum.max(ratings)
     _method4 = sum + mean
 
-    method2
+    sum
   end
 end
