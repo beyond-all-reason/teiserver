@@ -36,6 +36,8 @@ defmodule TeiserverWeb.API.SpadsController do
 
   @spec balance_battle(Plug.Conn.t(), map) :: Plug.Conn.t()
   def balance_battle(conn, params) do
+    Logger.info("clanMode = #{Kernel.inspect params["clanMode"]}")
+
     server_balance_enabled = Config.get_site_config_cache("teiserver.Enable server balance")
 
     player_data = params["players"]
@@ -70,9 +72,7 @@ defmodule TeiserverWeb.API.SpadsController do
     case balance_enabled do
       true ->
         player_names = player_data |> Map.keys
-
         first_player_name = hd(player_names)
-
         client = Account.get_client_by_name(first_player_name)
 
         team_count = int_parse(params["nbTeams"])

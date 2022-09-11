@@ -134,6 +134,21 @@ Valid events:
   {:lobby_update, :updated_client_battlestatus, lobby_id, {Client, reason}}
 ```
 
+#### teiserver_liveview_client:#{client_id}
+Updates for clients using the liveview to help prevent doubling up on certain other ones.
+```elixir
+  # Lobby
+  %{
+    event: :joined_lobby,
+    lobby_id: lobby_id
+  }
+
+  %{
+    event: :left_lobby,
+    lobby_id: lobby_id
+  }
+```
+
 #### teiserver_lobby_chat:#{battle_lobby_id}
 Information specific to the chat in a battle lobby, state changes to the battle are not sent via this channel.
 Valid events:

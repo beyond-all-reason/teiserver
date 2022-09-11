@@ -68,9 +68,13 @@ defmodule Teiserver.Agents.PartyjoinAgentServer do
 
   defp handle_msg(nil, state), do: state
   defp handle_msg(%{"cmd" => "s.party.updated"}, state), do: state
+
   defp handle_msg(%{"cmd" => "s.party.accept", "party" => %{"id" => party_id}}, state) do
     %{state | party_id: party_id}
   end
+
+  # Already a member can trigger a variant of this
+  defp handle_msg(%{"cmd" => "s.party.accept"}, state), do: state
 
   defp handle_msg(%{"cmd" => "s.party.invite", "party" => %{"id" => party_id}}, state) do
     %{state | party_invites: [party_id | state.party_invites] |> Enum.uniq}

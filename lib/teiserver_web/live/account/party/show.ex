@@ -3,7 +3,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   alias Phoenix.PubSub
   require Logger
 
-  alias Teiserver.Account
+  alias Teiserver.{Account, Battle}
   alias Teiserver.Account.PartyLib
   import Central.Helpers.StringHelper, only: [possessive: 1]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
@@ -17,13 +17,22 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
         |> NotificationPlug.live_call()
 
     client = Account.get_client_by_id(socket.assigns.user_id)
+    lobby_user_ids = if client.lobby_id do
+      :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{client.lobby_id}")
+      Battle.get_lobby_member_list(client.lobby_id)
+    else
+      []
+    end
+
     user = Account.get_user_by_id(socket.assigns.user_id)
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{socket.assigns.user_id}")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_client:#{socket.assigns.user_id}")
 
     socket = socket
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Parties", url: "/teiserver/account/parties")
+      |> assign(:lobby_user_ids, lobby_user_ids)
       |> assign(:client, client)
       |> assign(:user, user)
       |> assign(:party, nil)
@@ -70,6 +79,10 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   end
 
   @impl true
+  def handle_info(%{channel: "teiserver_party:" <> _, event: :closed}, socket) do
+    {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
+  end
+
   def handle_info(data = %{channel: "teiserver_party:" <> _, event: :updated_values}, socket) do
     new_party = socket.assigns.party
       |> Map.merge(data.new_values)
@@ -81,8 +94,26 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     }
   end
 
-  def handle_info(%{channel: "teiserver_party:" <> _, event: :closed}, socket) do
-    {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
+  def handle_info(data = %{channel: "teiserver_liveview_client:" <> _}, socket) do
+    socket = case data.event do
+      :joined_lobby ->
+        :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{data.lobby_id}")
+        lobby_user_ids = Battle.get_lobby_member_list(data.lobby_id)
+
+        socket
+          |> assign(:lobby_user_ids, lobby_user_ids)
+          |> build_user_lookup
+
+      :left_lobby ->
+        :ok = PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{data.lobby_id}")
+        socket
+          |> assign(:lobby_user_ids, [])
+
+      _ ->
+        socket
+    end
+
+    {:noreply, socket}
   end
 
   def handle_info(%{channel: "teiserver_party:" <> _}, socket) do
@@ -104,6 +135,30 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   end
 
   def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do
+    {:noreply, socket}
+  end
+
+  def handle_info({:lobby_update, :add_user, _lobby_id, userid}, socket) do
+    extra_ids = [userid | socket.assigns.lobby_user_ids]
+
+    {:noreply,
+      socket
+        |> assign(:lobby_user_ids, extra_ids)
+        |> build_user_lookup
+    }
+  end
+
+  def handle_info({:lobby_update, :remove_user, _lobby_id, userid}, socket) do
+    extra_ids = List.delete(socket.assigns.lobby_user_ids, userid)
+
+    {:noreply,
+      socket
+        |> assign(:lobby_user_ids, extra_ids)
+        |> build_user_lookup
+    }
+  end
+
+  def handle_info({:lobby_update, _, _, _}, socket) do
     {:noreply, socket}
   end
 
@@ -151,7 +206,8 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
     ids = [
       socket.assigns.party.members,
       socket.assigns.party.pending_invites,
-      socket.assigns.user.friends
+      socket.assigns.user.friends,
+      socket.assigns.lobby_user_ids
     ]
       |> List.flatten
       |> Enum.uniq

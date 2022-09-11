@@ -52,6 +52,10 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
   defp handle_msg(%{"cmd" => "s.party.create", "party" => party}, state) do
     %{state | party_id: party["id"]}
   end
+  defp handle_msg(%{"cmd" => "s.party.invite", "party" => %{"id" => party_id}}, state) do
+    AgentLib._send(state.socket, %{cmd: "c.party.decline", party_id: party_id})
+    state
+  end
 
   defp handle_msg(%{"cmd" => "s.user.list_friend_users_and_clients", "client_list" => clients}, state) do
     clients
