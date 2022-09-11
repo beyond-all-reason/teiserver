@@ -37,7 +37,7 @@ defmodule Teiserver.Battle.LobbyCacheTest do
     p_client = Account.get_client_by_id(player.id)
     assert p_client.lobby_id == nil
 
-    Lobby.force_add_user_to_battle(player.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player.id, lobby_id)
     p_client = Account.get_client_by_id(player.id)
     assert p_client.lobby_id == lobby_id
   end

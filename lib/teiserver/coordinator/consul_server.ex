@@ -230,12 +230,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
           lobby_id = new_lobby.id
 
           if client.lobby_id != lobby_id do
-            Lobby.force_add_user_to_battle(split.first_splitter_id, lobby_id)
+            Lobby.force_add_user_to_lobby(split.first_splitter_id, lobby_id)
           end
 
           players_to_move
           |> Enum.each(fn userid ->
-            Lobby.force_add_user_to_battle(userid, lobby_id)
+            Lobby.force_add_user_to_lobby(userid, lobby_id)
           end)
 
           LobbyChat.sayex(state.coordinator_id, "Split completed.", state.lobby_id)

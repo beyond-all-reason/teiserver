@@ -63,7 +63,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   end
 
   test "non allowed command", %{lobby_id: lobby_id, psocket: psocket, player: player} do
-    Lobby.force_add_user_to_battle(player.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player.id, lobby_id)
     player_client = Client.get_client_by_id(player.id)
     Client.update(%{player_client |
       player: false,
@@ -685,18 +685,18 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     # The 50ms delays are to allow it to add them in the correct order
     [ps1, ps2, ps3, ps4]
     |> Enum.each(fn %{user: user, socket: socket} ->
-      Lobby.force_add_user_to_battle(user.id, lobby_id)
+      Lobby.force_add_user_to_lobby(user.id, lobby_id)
       :timer.sleep(50)
       _tachyon_send(socket, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
     end)
 
-    Lobby.force_add_user_to_battle(player5.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player5.id, lobby_id)
     :timer.sleep(50)
-    Lobby.force_add_user_to_battle(player6.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player6.id, lobby_id)
     :timer.sleep(50)
-    Lobby.force_add_user_to_battle(player7.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player7.id, lobby_id)
     :timer.sleep(50)
-    Lobby.force_add_user_to_battle(player8.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player8.id, lobby_id)
     :timer.sleep(50)
 
     member_ids = Battle.get_lobby_member_list(lobby_id)
@@ -740,8 +740,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert Client.get_client_by_id(player5.id).player == true
 
     # Now get users 6 and 7 back in
-    Lobby.force_add_user_to_battle(player6.id, lobby_id)
-    Lobby.force_add_user_to_battle(player7.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player6.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player7.id, lobby_id)
 
     # Joinq again
     _tachyon_send(socket5, %{cmd: "c.lobby.message", message: "$joinq"})
@@ -810,9 +810,9 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     %{user: player2, socket: socket2} = tachyon_auth_setup()
     %{user: player3, socket: socket3} = tachyon_auth_setup()
 
-    Lobby.force_add_user_to_battle(player1.id, lobby_id)
-    Lobby.force_add_user_to_battle(player2.id, lobby_id)
-    Lobby.force_add_user_to_battle(player3.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player1.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player2.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player3.id, lobby_id)
 
     # Players 2 and 3 are playing a 1v1, player 1 is a not a player
     _tachyon_send(socket1, %{cmd: "c.lobby.update_status", client: %{player: false, ready: false}})

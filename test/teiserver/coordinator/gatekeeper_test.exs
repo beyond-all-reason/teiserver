@@ -41,7 +41,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby_id}"])
 
     # Player needs to be added to the battle
-    Lobby.force_add_user_to_battle(player.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player.id, lobby_id)
     :timer.sleep(100)
     player_client = Client.get_client_by_id(player.id)
     Client.update(%{player_client |
@@ -92,7 +92,7 @@ defmodule Teiserver.Coordinator.GatekeeperTest do
     assert match?({:waiting_on_host, _}, Lobby.can_join?(player2.id, lobby_id))
 
     # Okay, add them
-    Lobby.force_add_user_to_battle(player2.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player2.id, lobby_id)
     data = %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}}
     _tachyon_send(psocket2, data)
 

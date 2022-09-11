@@ -641,7 +641,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         nil ->
           ConsulServer.say_command(%{cmd | error: "user #{target} not found"}, acc)
         target_id ->
-          Lobby.force_add_user_to_battle(target_id, acc.lobby_id)
+          Lobby.force_add_user_to_lobby(target_id, acc.lobby_id)
           ConsulServer.say_command(cmd, acc)
       end
     end)

@@ -184,7 +184,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
     state.users
       |> Enum.each(fn userid ->
-        Lobby.force_add_user_to_battle(userid, lobby.id)
+        Lobby.force_add_user_to_lobby(userid, lobby.id)
       end)
 
     # Coordinator sets up the battle

@@ -72,7 +72,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
 
     [ps1, ps2, ps3, ps4, ps5, ps6, ps7, ps8]
     |> Enum.each(fn %{user: user, socket: socket} ->
-      Lobby.force_add_user_to_battle(user.id, lobby_id)
+      Lobby.force_add_user_to_lobby(user.id, lobby_id)
       :timer.sleep(50)# Need the sleep to ensure they all get added to the battle
       _tachyon_send(socket, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
     end)

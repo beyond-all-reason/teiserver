@@ -37,7 +37,7 @@ defmodule Teiserver.Coordinator.MatchMonitorServerTest do
     lobby_id = reply["lobby"]["id"]
 
     # Player needs to be added to the battle
-    Lobby.force_add_user_to_battle(player.id, lobby_id)
+    Lobby.force_add_user_to_lobby(player.id, lobby_id)
     :timer.sleep(100)
     player_client = Client.get_client_by_id(player.id)
     Client.update(%{player_client |

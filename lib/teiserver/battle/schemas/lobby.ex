@@ -170,26 +170,28 @@ defmodule Teiserver.Battle.Lobby do
     :ok
   end
 
-  @spec force_add_user_to_battle(T.userid(), T.lobby_id()) :: :ok | nil
-  def force_add_user_to_battle(userid, lobby_id) do
-    if Account.client_exists?(userid) and Battle.lobby_exists?(lobby_id) do
-      do_force_add_user_to_battle(userid, lobby_id)
+  @spec force_add_user_to_lobby(T.userid(), T.lobby_id()) :: :ok | nil
+  def force_add_user_to_lobby(userid, lobby_id) do
+    client = Account.get_client_by_id(userid)
+    if client != nil and client.lobby_id != lobby_id and Battle.lobby_exists?(lobby_id) do
+      do_force_add_user_to_lobby(client, lobby_id)
     end
   end
 
   # Used to send the user PID a join battle command
-  @spec do_force_add_user_to_battle(T.userid(), T.lobby_id()) :: :ok | nil
-  defp do_force_add_user_to_battle(userid, lobby_id) do
-    remove_user_from_any_lobby(userid)
+  @spec do_force_add_user_to_lobby(T.client(), T.lobby_id()) :: :ok | nil
+  defp do_force_add_user_to_lobby(nil, _), do: :ok
+  defp do_force_add_user_to_lobby(client, lobby_id) do
+    remove_user_from_any_lobby(client.userid)
     script_password = new_script_password()
 
-    add_user_to_battle(userid, lobby_id, script_password)
+    add_user_to_battle(client.userid, lobby_id, script_password)
 
     PubSub.broadcast(
       Central.PubSub,
-      "teiserver_client_messages:#{userid}",
+      "teiserver_client_messages:#{client.userid}",
       %{
-        channel: "teiserver_client_messages:#{userid}",
+        channel: "teiserver_client_messages:#{client.userid}",
         event: :force_join_lobby,
         lobby_id: lobby_id,
         script_password: script_password
@@ -197,12 +199,7 @@ defmodule Teiserver.Battle.Lobby do
     )
 
     # TODO: Depreciate this
-    case Client.get_client_by_id(userid) do
-      nil ->
-        nil
-      client ->
-        send(client.tcp_pid, {:force_join_battle, lobby_id, script_password})
-    end
+    send(client.tcp_pid, {:force_join_battle, lobby_id, script_password})
   end
 
   @spec add_user_to_battle(integer(), integer(), String.t() | nil) :: nil

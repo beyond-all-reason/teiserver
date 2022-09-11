@@ -184,9 +184,9 @@ defmodule TeiserverWeb.Live.BattleTest do
       %{user: user2, socket: _socket2} = TeiserverTestLib.tachyon_auth_setup()
       %{user: user3, socket: _socket3} = TeiserverTestLib.tachyon_auth_setup()
 
-      Lobby.force_add_user_to_battle(user1.id, lobby_id)
-      Lobby.force_add_user_to_battle(user2.id, lobby_id)
-      Lobby.force_add_user_to_battle(user3.id, lobby_id)
+      Lobby.force_add_user_to_lobby(user1.id, lobby_id)
+      Lobby.force_add_user_to_lobby(user2.id, lobby_id)
+      Lobby.force_add_user_to_lobby(user3.id, lobby_id)
       :timer.sleep(@throttle_wait)
 
       html = render(view)
