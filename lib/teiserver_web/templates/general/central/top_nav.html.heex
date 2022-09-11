@@ -14,6 +14,13 @@
     active: @site_menu_active == "teiserver_lobbies"
   %>
 
+  <%=
+    central_component "top_nav_item",
+    text: "Parties",
+    route: Routes.ts_game_party_index_path(@conn, :index),
+    active: @site_menu_active == "parties"
+  %>
+
   <%= central_component "top_nav_item",
     text: "Matches",
     route: Routes.ts_battle_match_path(@conn, :index),

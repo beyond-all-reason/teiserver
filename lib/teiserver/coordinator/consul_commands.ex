@@ -347,11 +347,15 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   def handle_command(%{command: "leaveq", senderid: senderid}, state) do
-    LobbyChat.sayprivateex(state.coordinator_id, senderid, "You have been removed from the join queue", state.lobby_id)
-    %{state |
-      join_queue: state.join_queue |> List.delete(senderid),
-      low_priority_join_queue: state.low_priority_join_queue |> List.delete(senderid)
-    }
+    if Enum.member?(get_queue(state), senderid) do
+      LobbyChat.sayprivateex(state.coordinator_id, senderid, "You have been removed from the join queue", state.lobby_id)
+      %{state |
+        join_queue: state.join_queue |> List.delete(senderid),
+        low_priority_join_queue: state.low_priority_join_queue |> List.delete(senderid)
+      }
+    else
+      state
+    end
   end
 
   def handle_command(%{command: "password?", senderid: senderid}, state) do
