@@ -158,14 +158,13 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
       |> Account.get_user_by_id
       |> Map.get(:friends)
       |> Kernel.++([socket.assigns.user_id])
-      |> Enum.map(fn user_id ->
-        Account.get_client_by_id(user_id)
-      end)
+      |> Enum.map(fn user_id -> Account.get_client_by_id(user_id) end)
       |> Enum.reject(&(&1 == nil))
       |> Enum.map(fn c -> c.party_id end)
       |> Enum.reject(&(&1 == nil))
       |> Enum.uniq
       |> Account.list_parties()
+      |> Enum.reject(&(&1 == nil))
 
     parties
       |> Enum.each(fn party ->
