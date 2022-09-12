@@ -34,9 +34,9 @@ defmodule Central.Logging.LoggingPlug do
   @spec convert_from_x_real_ip(String.t()) :: Tuple.t()
   defp convert_from_x_real_ip(ip) do
     ip
-    |> String.split(".")
-    |> Enum.map(&String.to_integer/1)
-    |> List.to_tuple()
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+      |> List.to_tuple()
   end
 
   @spec get_user_id(Plug.Conn.t()) :: nil | Integer.t()

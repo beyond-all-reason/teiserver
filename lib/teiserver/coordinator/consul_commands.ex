@@ -64,8 +64,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
 
     # Party info
-    lobby_id = 273
-    parties = Battle.list_lobby_players(lobby_id)
+    parties = Battle.list_lobby_players(state.lobby_id)
       |> Enum.group_by(
         fn p -> p.party_id end,
         fn p -> p.name end
