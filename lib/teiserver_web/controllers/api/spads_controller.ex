@@ -60,14 +60,8 @@ defmodule TeiserverWeb.API.SpadsController do
       _ -> :error
     end
 
-    player_names = player_data |> Map.keys
-    first_player_name = hd(player_names)
-    client = Account.get_client_by_name(first_player_name)
-
     balance_enabled = cond do
       player_data == :error -> false
-      client == nil -> false
-      client.lobby_id == nil -> false
       Enum.empty?(player_data) -> false
       Enum.empty?(bot_data) == false -> false
       String.contains?(Kernel.inspect(player_data), "Teifion") -> true
@@ -75,8 +69,24 @@ defmodule TeiserverWeb.API.SpadsController do
       true -> true
     end
 
-    case balance_enabled do
-      true ->
+    client = if balance_enabled do
+      player_names = Map.keys(player_data)
+      first_player_name = hd(player_names)
+      Account.get_client_by_name(first_player_name)
+    end
+
+    cond do
+      client == nil ->
+        conn
+          |> put_status(200)
+          |> render("empty.json")
+
+      client.lobby_id == nil ->
+        conn
+          |> put_status(200)
+          |> render("empty.json")
+
+      balance_enabled == true ->
         team_count = int_parse(params["nbTeams"])
         balance_result = Coordinator.call_balancer(client.lobby_id, {
           :make_balance, player_data, bot_data, team_count
@@ -139,7 +149,7 @@ defmodule TeiserverWeb.API.SpadsController do
           |> assign(:bots, bot_result)
           |> render("balance_battle.json")
 
-      false ->
+      true ->
         conn
           |> put_status(200)
           |> render("empty.json")
