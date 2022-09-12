@@ -63,6 +63,29 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         "Host bosses are: #{boss_names}"
     end
 
+    # Party info
+    lobby_id = 273
+    parties = Battle.list_lobby_players(lobby_id)
+      |> Enum.group_by(
+        fn p -> p.party_id end,
+        fn p -> p.name end
+      )
+      |> Map.drop([nil])
+      |> Enum.filter(fn {_id, members} -> Enum.count(members) > 1 end)
+      |> Enum.map(fn {_id, members} -> members end)
+
+    party_text = if not Enum.empty?(parties) do
+      party_list = parties
+        |> Enum.map(fn members ->
+          "> [#{Enum.join(members, ", ")}]"
+        end)
+        |> Enum.join("\n")
+
+      "Parties:\n#{party_list}"
+    else
+      []
+    end
+
     # Put other settings in here
     other_settings = [
       (if state.welcome_message, do: "Welcome message: #{state.welcome_message}"),
@@ -80,6 +103,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       "Status for battle ##{state.lobby_id}",
       "Locks: #{locks}",
       "Gatekeeper: #{state.gatekeeper}",
+      party_text,
       pos_str,
       "Join queue: #{queue_string} (size: #{queue_size})",
       other_settings,
