@@ -12,7 +12,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
         {[4], 8},
       ],
       2,
-      :loser_picks
+      mode: :loser_picks
     )
 
     assert result == %{
@@ -48,7 +48,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
         {[3], 7}
       ],
       2,
-      :loser_picks
+      mode: :loser_picks
     )
 
     assert result == %{
@@ -100,7 +100,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
         {[16], 8}
       ],
       2,
-      :loser_picks
+      mode: :loser_picks
     )
 
     assert result == %{

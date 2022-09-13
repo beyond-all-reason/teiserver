@@ -387,4 +387,10 @@ defmodule Teiserver.Battle.LobbyCache do
 
     Lobby.stop_battle_lobby_throttle(lobby_id)
   end
+
+  # Balance related
+  @spec get_lobby_balance_mode(T.lobby_id()) :: :solo | :grouped
+  def get_lobby_balance_mode(lobby_id) do
+    Coordinator.call_balancer(lobby_id, :get_balance_mode)
+  end
 end

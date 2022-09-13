@@ -542,6 +542,9 @@ defmodule Teiserver.Battle do
   @spec remove_user_from_lobby(T.userid(), T.lobby_id()) :: :ok
   defdelegate remove_user_from_lobby(userid, lobby_id), to: LobbyCache
 
+  # Balance
+  @spec get_lobby_balance_mode(T.lobby_id()) :: :solo | :grouped
+  defdelegate get_lobby_balance_mode(lobby_id), to: LobbyCache
 
   # Chat
   @spec say(Types.userid(), String.t(), Types.lobby_id()) :: :ok | {:error, any}

@@ -177,6 +177,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
     assert balance_result.deviation == {1, 1}
     assert balance_result.ratings == %{1 => 141.0, 2 => 140.0}
+    assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
 
     # It caches so calling it with the same settings should result in the same value
     assert Coordinator.call_balancer(lobby_id, {
@@ -199,7 +200,28 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
 
     assert party_balance_result.team_players[1] == [u8.id, u7.id, u3.id, u1.id]
     assert party_balance_result.team_players[2] == [u6.id, u5.id, u4.id, u2.id]
-    assert balance_result.deviation == {1, 11}
-    assert balance_result.ratings == %{1 => 150.0, 2 => 134.0}
+    assert party_balance_result.ratings == %{1 => 147.0, 2 => 134.0}
+    assert party_balance_result.deviation == {1, 9}
+    assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
+
+    # Now make an unfair party
+    Account.move_client_to_party(u6.id, high_party.id)
+    Account.move_client_to_party(u5.id, high_party.id)
+
+    :timer.sleep(520)
+
+    party_balance_result = Coordinator.call_balancer(lobby_id, {
+      :make_balance, player_data, bot_data, team_count
+    })
+
+    # First things first, it should be a different hash
+    refute party_balance_result.hash == balance_result.hash
+
+    # Results should be the same as the first part of the test but with mode set to solo
+    assert Battle.get_lobby_balance_mode(lobby_id) == :solo
+    assert balance_result.team_players[1] == [u8.id, u5.id, u3.id, u2.id]
+    assert balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
+    assert balance_result.ratings == %{1 => 141.0, 2 => 140.0}
+    assert balance_result.deviation == {1, 1}
   end
 end
