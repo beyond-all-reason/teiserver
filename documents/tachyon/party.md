@@ -11,7 +11,7 @@ Creates a new party, if you are part of an existing party it will remove you fro
 }
 
 {
-  "cmd": "s.party.create",
+  "cmd": "s.party.added_to",
   "party": {
     "id": "1d5366a6-f55d-11ec-b427-f02f74dbae33",
     "leader": 123,
@@ -102,8 +102,7 @@ Accept an invite to a party, this will result in you being added to the party as
 
 // Success
 {
-  "cmd": "s.party.accept",
-  "result": "accepted",
+  "cmd": "s.party.added_to",
   "party": Party
 }
 

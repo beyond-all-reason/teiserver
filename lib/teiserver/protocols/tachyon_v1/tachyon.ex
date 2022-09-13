@@ -142,15 +142,25 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   end
 
   def do_action(:join_party, party_id, state) do
-    PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{party_id}")
-    PubSub.subscribe(Central.PubSub, "teiserver_party:#{party_id}")
+    # We need this check so we don't overwrite our leader status
+    if state.party_id != party_id do
+      PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{party_id}")
+      PubSub.subscribe(Central.PubSub, "teiserver_party:#{party_id}")
 
-    %{state | party_id: party_id, party_role: :member}
+      %{state | party_id: party_id, party_role: :member}
+    else
+      state
+    end
   end
 
   def do_action(:leave_party, party_id, state) do
     PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{party_id}")
-    %{state | party_id: nil, party_role: nil}
+
+    if state.party_id == party_id do
+      %{state | party_id: nil, party_role: nil}
+    else
+      state
+    end
   end
 
   def do_action(:watch_channel, name, state) do

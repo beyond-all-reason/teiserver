@@ -4,13 +4,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyOut do
   alias Teiserver.Protocols.Tachyon.V1.Tachyon
 
   @spec do_reply(atom(), any) :: Map.t()
-  def do_reply(:create, party) do
-    %{
-      cmd: "s.party.create",
-      party: Tachyon.convert_object(party, :party_full)
-    }
-  end
-
   def do_reply(:info_public, party) do
     %{
       cmd: "s.party.info",
@@ -51,11 +44,10 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyOut do
     }
   end
 
-  def do_reply(:accept, {true, party}) do
+  def do_reply(:left_party, party_id) do
     %{
-      cmd: "s.party.accept",
-      result: "accepted",
-      party: Tachyon.convert_object(party, :party_full)
+      cmd: "s.party.left_party",
+      party_id: party_id
     }
   end
 

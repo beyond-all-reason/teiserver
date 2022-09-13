@@ -30,7 +30,7 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
     # Friend1 makes a party
     _tachyon_send(fsocket1, %{"cmd" => "c.party.create"})
     [resp] = _tachyon_recv(fsocket1)
-    assert resp["cmd"] == "s.party.create"
+    assert resp["cmd"] == "s.party.added_to"
     party_id = resp["party"]["id"]
 
     assert resp["party"] == %{
@@ -70,8 +70,7 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
     _tachyon_send(fsocket2, %{"cmd" => "c.party.accept", "party_id" => party_id})
     [resp] = _tachyon_recv(fsocket2)
     assert resp == %{
-      "cmd" => "s.party.accept",
-      "result" => "accepted",
+      "cmd" => "s.party.added_to",
       "party" => %{
         "id" => party_id,
         "leader" => friend1.id,
@@ -193,8 +192,7 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
     _tachyon_send(usocket, %{"cmd" => "c.party.accept", "party_id" => party_id})
     [resp] = _tachyon_recv(usocket)
     assert resp == %{
-      "cmd" => "s.party.accept",
-      "result" => "accepted",
+      "cmd" => "s.party.added_to",
       "party" => %{
         "id" => party_id,
         "leader" => friend1.id,
@@ -273,8 +271,13 @@ defmodule Teiserver.Protocols.V1.TachyonPartyTest do
     _tachyon_send(usocket, %{"cmd" => "c.party.accept", "party_id" => other_party_id})
     [resp] = _tachyon_recv(usocket)
     assert resp == %{
-      "cmd" => "s.party.accept",
-      "result" => "accepted",
+      "cmd" => "s.party.left_party",
+      "party_id" => party_id
+    }
+
+    [resp] = _tachyon_recv(usocket)
+    assert resp == %{
+      "cmd" => "s.party.added_to",
       "party" => %{
         "id" => other_party_id,
         "leader" => other1.id,

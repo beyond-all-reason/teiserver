@@ -7,7 +7,8 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
   def do_handle("create", _, state) do
     party = Account.create_party(state.userid)
     send(self(), {:action, {:lead_party, party.id}})
-    reply(:party, :create, party, state)
+    # reply(:party, :added_to, party.id, state)
+    state
   end
 
   def do_handle("info", %{"party_id" => party_id}, state) do
@@ -44,7 +45,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
     case Account.accept_party_invite(party_id, state.userid) do
       {true, party} ->
         send(self(), {:action, {:join_party, party.id}})
-        reply(:party, :accept, {true, party}, state)
+        state
 
       {false, reason} ->
         reply(:party, :accept, {false, reason}, state)
@@ -62,7 +63,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.PartyIn do
         PartyLib.cast_party(existing_party_id, {:member_leave, state.userid})
 
         send(self(), {:action, {:join_party, party.id}})
-        reply(:party, :accept, {true, party}, state)
+        state
 
       {false, reason} ->
         reply(:party, :accept, {false, reason}, state)
