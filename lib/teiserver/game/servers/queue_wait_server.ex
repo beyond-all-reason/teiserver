@@ -49,8 +49,12 @@ defmodule Teiserver.Game.QueueWaitServer do
 
           PubSub.broadcast(
             Central.PubSub,
-            "teiserver_client_action_updates:#{userid}",
-            {:client_action, :join_queue, userid, state.queue_id}
+            "teiserver_client_messages:#{userid}",
+            %{
+              channel: "teiserver_client_messages:#{userid}",
+              event: :joined_queue,
+              queue_id: state.queue_id
+            }
           )
 
           {:ok, new_state}
@@ -73,8 +77,12 @@ defmodule Teiserver.Game.QueueWaitServer do
 
           PubSub.broadcast(
             Central.PubSub,
-            "teiserver_client_action_updates:#{userid}",
-            {:client_action, :leave_queue, userid, state.queue_id}
+            "teiserver_client_messages:#{userid}",
+            %{
+              channel: "teiserver_client_messages:#{userid}",
+              event: :left_queue,
+              queue_id: state.queue_id
+            }
           )
 
           {:ok, %{new_state | leave_count: (state.leave_count - 1)}}
@@ -123,8 +131,12 @@ defmodule Teiserver.Game.QueueWaitServer do
 
           PubSub.broadcast(
             Central.PubSub,
-            "teiserver_client_action_updates:#{itemid}",
-            {:client_action, :join_queue, itemid, acc.queue_id}
+            "teiserver_client_messages:#{itemid}",
+            %{
+              channel: "teiserver_client_messages:#{itemid}",
+              event: :joined_queue,
+              queue_id: itemid
+            }
           )
         end
 

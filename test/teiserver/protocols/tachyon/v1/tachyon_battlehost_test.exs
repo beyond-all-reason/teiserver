@@ -126,12 +126,13 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     script_password = reply["script_password"]
 
     assert reply == %{
-      "cmd" => "s.lobby.join_response",
-      "result" => "approve",
+      "cmd" => "s.lobby.joined",
       "script_password" => script_password,
       "bots" => %{},
       "lobby" => %{"disabled_units" => [], "engine_name" => "spring-105", "engine_version" => "105.1.2.3", "founder_id" => host.id, "game_name" => "BAR", "id" => lobby_id, "in_progress" => false, "ip" => "127.0.0.1", "locked" => false, "map_hash" => "string_of_characters", "map_name" => "koom valley", "max_players" => 16, "name" => "EU 01 - 123", "passworded" => true, "players" => [], "public" => true, "settings" => %{"max_players" => 12}, "start_areas" => %{}, "started_at" => nil, "type" => "normal", "port" => 1234},
-      "member_list" => [],
+      "member_list" => [
+        %{"away" => false, "clan_tag" => nil, "in_game" => false, "lobby_id" => 1, "muted" => false, "party_id" => nil, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => "0", "team_number" => 0, "userid" => user2.id}
+      ],
       "modoptions" => %{"server/match/uuid" => uuid}
     }
 
@@ -193,8 +194,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
     _tachyon_send(socket, data)
     [reply] = _tachyon_recv(socket3)
 
-    assert reply["cmd"] == "s.lobby.join_response"
-    assert reply["result"] == "approve"
+    assert reply["cmd"] == "s.lobby.joined"
     assert reply["lobby"]["id"] == lobby_id
 
     # Ensure the lobby state is accurate

@@ -198,6 +198,16 @@ This is the channel for sending messages to the client. It allows the client on 
 
 # Matchmaking
 %{
+  event: :joined_queue,
+  queue_id: queue_id
+}
+
+%{
+  event: :left_queue,
+  queue_id: queue_id
+}
+
+%{
   event: :matchmaking,
   sub_event: :match_ready,
   queue_id: queue_id,
@@ -252,6 +262,12 @@ This is the channel for sending messages to the client. It allows the client on 
 }
 
 %{
+  event: :added_to_lobby,
+  lobby_id: lobby_id,
+  script_password: string
+}
+
+%{
   event: :force_join_lobby,
   lobby_id: lobby_id,
   script_password: string
@@ -280,9 +296,6 @@ Aside from connect/disconnect there should always be the structure of `{:client_
 ```elixir
   {:client_action, :client_connect, userid}
   {:client_action, :client_disconnect, userid}
-
-  {:client_action, :join_queue, userid, queue_id}
-  {:client_action, :leave_queue, userid, queue_id}
 
   {:client_action, :join_lobby, userid, lobby_id}
   {:client_action, :leave_lobby, userid, lobby_id}

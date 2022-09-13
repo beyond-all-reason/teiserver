@@ -74,13 +74,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> Enum.map(fn {_id, members} -> members end)
 
     party_text = if not Enum.empty?(parties) do
-      party_list = parties
-        |> Enum.map(fn members ->
-          "> [#{Enum.join(members, ", ")}]"
-        end)
-        |> Enum.join("\n")
+      Logger.warn(Kernel.inspect parties)
 
-      "Parties:\n#{party_list}"
+      party_list = parties |> Enum.map(fn members ->
+          "> #{Enum.join(members, ", ")}"
+        end)
+
+      ["Parties:" | party_list]
     else
       []
     end

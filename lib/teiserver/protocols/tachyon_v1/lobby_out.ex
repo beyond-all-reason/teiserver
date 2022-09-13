@@ -225,15 +225,39 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
-  def do_reply(:join_lobby_request_response, {lobby_id, :accept, script_password}) do
+  # def do_reply(:join_lobby_request_response, {lobby_id, :accept, script_password}) do
+  #   case Battle.get_combined_lobby_state(lobby_id) do
+  #     nil ->
+  #       %{
+  #         "cmd" => "s.lobby.join_response",
+  #         "result" => "reject",
+  #         "lobby_id" => lobby_id,
+  #         "reason" => "closed"
+  #       }
+  #     result ->
+  #       member_list = result.member_list
+  #         |> Enum.uniq
+  #         |> Enum.map(fn userid ->
+  #           client = Account.get_client_by_id(userid)
+  #           Tachyon.convert_object(client, :client)
+  #         end)
+
+  #       send(self(), {:action, {:join_lobby, lobby_id}})
+  #       %{
+  #         "lobby" => Tachyon.convert_object(result.lobby, :lobby),
+  #         "script_password" => script_password,
+  #         "modoptions" => result.modoptions,
+  #         "bots" => result.bots,
+  #         "member_list" => member_list,
+  #         "cmd" => "s.lobby.join_response",
+  #         "result" => "approve",
+  #       }
+  #   end
+  # end
+
+  def do_reply(:joined, {lobby_id, script_password}) do
     case Battle.get_combined_lobby_state(lobby_id) do
-      nil ->
-        %{
-          "cmd" => "s.lobby.join_response",
-          "result" => "reject",
-          "lobby_id" => lobby_id,
-          "reason" => "closed"
-        }
+      nil -> nil
       result ->
         member_list = result.member_list
           |> Enum.uniq
@@ -244,13 +268,12 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
 
         send(self(), {:action, {:join_lobby, lobby_id}})
         %{
+          "cmd" => "s.lobby.joined",
           "lobby" => Tachyon.convert_object(result.lobby, :lobby),
           "script_password" => script_password,
           "modoptions" => result.modoptions,
           "bots" => result.bots,
           "member_list" => member_list,
-          "cmd" => "s.lobby.join_response",
-          "result" => "approve",
         }
     end
   end

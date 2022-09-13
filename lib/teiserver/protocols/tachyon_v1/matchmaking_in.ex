@@ -2,7 +2,6 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
   # alias Teiserver.Client
   alias Teiserver.Data.Matchmaking
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
   def do_handle("query", %{"query" => _query}, state) do
@@ -15,14 +14,12 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
     reply(:matchmaking, :your_queue_list, queues, state)
   end
 
-  def do_handle("get_queue_info", %{"queue_id" => queue_id}, state) do
-    queue_id = int_parse(queue_id)
+  def do_handle("get_queue_info", %{"queue_id" => queue_id}, state) when is_integer(queue_id) do
     {queue, info} = Matchmaking.get_queue_and_info(queue_id)
     reply(:matchmaking, :queue_info, {queue, info}, state)
   end
 
-  def do_handle("join_queue", %{"queue_id" => queue_id}, state) do
-    queue_id = int_parse(queue_id)
+  def do_handle("join_queue", %{"queue_id" => queue_id}, state) when is_integer(queue_id) do
     resp = Matchmaking.add_user_to_queue(queue_id, state.userid)
 
     joined =
@@ -35,8 +32,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
 
     case joined do
       true ->
-        new_state = %{state | queues: Enum.uniq([queue_id | state.queues])}
-        reply(:matchmaking, :join_queue_success, queue_id, new_state)
+        reply(:matchmaking, :join_queue_success, queue_id, state)
 
       false ->
         reason = case resp do
@@ -47,10 +43,9 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
     end
   end
 
-  def do_handle("leave_queue", %{"queue_id" => queue_id}, state) do
-    queue_id = int_parse(queue_id)
+  def do_handle("leave_queue", %{"queue_id" => queue_id}, state) when is_integer(queue_id) do
     Matchmaking.remove_user_from_queue(queue_id, state.userid)
-    %{state | queues: List.delete(state.queues, queue_id)}
+    state
   end
 
   def do_handle("leave_all_queues", _cmd, state) do

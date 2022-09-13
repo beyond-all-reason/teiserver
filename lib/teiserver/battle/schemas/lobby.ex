@@ -180,7 +180,7 @@ defmodule Teiserver.Battle.Lobby do
 
   # Used to send the user PID a join battle command
   @spec do_force_add_user_to_lobby(T.client(), T.lobby_id()) :: :ok | nil
-  defp do_force_add_user_to_lobby(nil, _), do: :ok
+  defp do_force_add_user_to_lobby(nil, _), do: nil
   defp do_force_add_user_to_lobby(client, lobby_id) do
     remove_user_from_any_lobby(client.userid)
     script_password = new_script_password()
@@ -200,10 +200,16 @@ defmodule Teiserver.Battle.Lobby do
 
     # TODO: Depreciate this
     send(client.tcp_pid, {:force_join_battle, lobby_id, script_password})
+    :ok
   end
 
-  @spec add_user_to_battle(integer(), integer(), String.t() | nil) :: nil
-  def add_user_to_battle(userid, lobby_id, script_password \\ nil) do
+  @spec add_user_to_battle(integer(), integer()) :: nil
+  def add_user_to_battle(userid, lobby_id) do
+    add_user_to_battle(userid, lobby_id, new_script_password())
+  end
+
+  @spec add_user_to_battle(integer(), integer(), String.t()) :: nil
+  def add_user_to_battle(userid, lobby_id, script_password) do
     members = Battle.get_lobby_member_list(lobby_id) || []
     Battle.add_user_to_lobby(userid, lobby_id, script_password)
 
@@ -215,6 +221,17 @@ defmodule Teiserver.Battle.Lobby do
         Central.PubSub,
         "teiserver_client_action_updates:#{userid}",
         {:client_action, :join_lobby, userid, lobby_id}
+      )
+
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_client_messages:#{userid}",
+        %{
+          channel: "teiserver_client_messages:#{userid}",
+          event: :added_to_lobby,
+          lobby_id: lobby_id,
+          script_password: script_password
+        }
       )
 
       PubSub.broadcast(
@@ -501,7 +518,7 @@ defmodule Teiserver.Battle.Lobby do
       }
     )
     # TODO: Refactor this as per the TODO list, this should take place here and not in the client process
-    # add_user_to_battle(userid, lobby_id)
+    add_user_to_battle(userid, lobby_id)
 
     :ok
   end

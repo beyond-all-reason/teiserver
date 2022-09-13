@@ -41,9 +41,11 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     listener = PubsubListener.new_listener(["legacy_battle_updates:#{lobby_id}"])
 
     # Player needs to be added to the battle
-    Lobby.add_user_to_battle(player.id, lobby_id, "script_password")
-    player_client = Account.get_client_by_id(player.id)
-    Client.update(%{player_client | player: true}, :client_updated_battlestatus)
+    Lobby.add_user_to_battle(player.id, lobby_id)
+    # Lobby.add_user_to_battle(player.id, lobby_id, "script_password")
+    # player_client = Account.get_client_by_id(player.id)
+    # Client.update(%{player_client | player: true}, :client_updated_battlestatus)
+    _tachyon_recv_until(psocket)
 
     # Add user message
     _tachyon_recv_until(hsocket)
@@ -64,7 +66,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
   test "non allowed command", %{lobby_id: lobby_id, psocket: psocket, player: player} do
     Lobby.force_add_user_to_lobby(player.id, lobby_id)
-    player_client = Client.get_client_by_id(player.id)
+    player_client = Account.get_client_by_id(player.id)
     Client.update(%{player_client |
       player: false,
       ready: false
@@ -89,7 +91,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     # Add player2 to the battle but as a spectator
     Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
-    player_client = Client.get_client_by_id(player2.id)
+    player_client = Account.get_client_by_id(player2.id)
     Client.update(%{player_client |
       player: false,
       ready: false
@@ -97,7 +99,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     readies = Battle.get_lobby(lobby_id)
       |> Map.get(:players)
-      |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
+      |> Enum.map(fn userid -> Account.get_client_by_id(userid) |> Map.get(:ready) end)
 
     assert readies == [false, false]
 
@@ -107,21 +109,21 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     # Now we check they are ready or they're a spectator
     readies = Battle.get_lobby(lobby_id)
       |> Map.get(:players)
-      |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
+      |> Enum.map(fn userid -> Account.get_client_by_id(userid) end)
       |> Enum.map(fn c -> c.player == false or c.ready == true end)
 
     assert readies == [true, true]
 
     # Unready both again
-    player_client = Client.get_client_by_id(player1.id)
+    player_client = Account.get_client_by_id(player1.id)
     Client.update(%{player_client | ready: false}, :client_updated_battlestatus)
 
-    player_client = Client.get_client_by_id(player2.id)
+    player_client = Account.get_client_by_id(player2.id)
     Client.update(%{player_client | ready: false}, :client_updated_battlestatus)
 
     readies = Battle.get_lobby(lobby_id)
     |> Map.get(:players)
-    |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
+    |> Enum.map(fn userid -> Account.get_client_by_id(userid) |> Map.get(:ready) end)
 
     assert readies == [false, false]
   end
@@ -131,7 +133,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     # Add player2 to the battle but as a spectator
     Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
-    player_client = Client.get_client_by_id(player2.id)
+    player_client = Account.get_client_by_id(player2.id)
     Client.update(%{player_client |
       player: true,
       ready: false
@@ -139,7 +141,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     readies = Battle.get_lobby(lobby_id)
     |> Map.get(:players)
-    |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
+    |> Enum.map(fn userid -> Account.get_client_by_id(userid) |> Map.get(:ready) end)
 
     assert readies == [false, false]
 
@@ -149,20 +151,20 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     # Now we get the ready statuses
     readies = Battle.get_lobby(lobby_id)
     |> Map.get(:players)
-    |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
+    |> Enum.map(fn userid -> Account.get_client_by_id(userid) |> Map.get(:ready) end)
 
     assert readies == [true, true]
 
     # Unready both again
-    player_client = Client.get_client_by_id(player1.id)
+    player_client = Account.get_client_by_id(player1.id)
     Client.update(%{player_client | ready: false}, :client_updated_battlestatus)
 
-    player_client = Client.get_client_by_id(player2.id)
+    player_client = Account.get_client_by_id(player2.id)
     Client.update(%{player_client | ready: false}, :client_updated_battlestatus)
 
     readies = Battle.get_lobby(lobby_id)
     |> Map.get(:players)
-    |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
+    |> Enum.map(fn userid -> Account.get_client_by_id(userid) |> Map.get(:ready) end)
 
     assert readies == [false, false]
 
@@ -172,7 +174,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     readies = Battle.get_lobby(lobby_id)
     |> Map.get(:players)
-    |> Enum.map(fn userid -> Client.get_client_by_id(userid) |> Map.get(:ready) end)
+    |> Enum.map(fn userid -> Account.get_client_by_id(userid) |> Map.get(:ready) end)
 
     assert readies == [false, true]
   end
@@ -180,18 +182,18 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   test "specafk", %{player: player1, psocket: psocket1, hsocket: hsocket, lobby_id: lobby_id} do
     %{socket: psocket2, user: player2} = tachyon_auth_setup()
     Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
-    player_client1 = Client.get_client_by_id(player1.id)
+    player_client1 = Account.get_client_by_id(player1.id)
     Client.update(%{player_client1 |
       player: true
     }, :client_updated_battlestatus)
 
-    player_client2 = Client.get_client_by_id(player2.id)
+    player_client2 = Account.get_client_by_id(player2.id)
     Client.update(%{player_client2 |
       player: true
     }, :client_updated_battlestatus)
 
-    player_client1 = Client.get_client_by_id(player1.id)
-    player_client2 = Client.get_client_by_id(player2.id)
+    player_client1 = Account.get_client_by_id(player1.id)
+    player_client2 = Account.get_client_by_id(player2.id)
     assert player_client1.player == true
     assert player_client2.player == true
 
@@ -258,8 +260,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert state.afk_check_list == []
     assert state.afk_check_at == nil
 
-    player_client1 = Client.get_client_by_id(player1.id)
-    player_client2 = Client.get_client_by_id(player2.id)
+    player_client1 = Account.get_client_by_id(player1.id)
+    player_client2 = Account.get_client_by_id(player2.id)
     assert player_client1.player == true
     assert player_client2.player == false
 
@@ -342,13 +344,13 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   end
 
   test "timeout", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
-    player_client = Client.get_client_by_id(player.id)
+    player_client = Account.get_client_by_id(player.id)
     assert player_client.player == true
 
     data = %{cmd: "c.lobby.message", message: "$timeout #{player.name} Because I said so"}
     _tachyon_send(hsocket, data)
 
-    player_client = Client.get_client_by_id(player.id)
+    player_client = Account.get_client_by_id(player.id)
     assert player_client.lobby_id == nil
 
     # Check ban state (we added this after bans, don't want to get them confused)
@@ -374,13 +376,13 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   end
 
   test "kick by name", %{player: player, hsocket: hsocket, lobby_id: lobby_id} do
-    player_client = Client.get_client_by_id(player.id)
+    player_client = Account.get_client_by_id(player.id)
     assert player_client.player == true
 
     data = %{cmd: "c.lobby.message", message: "$lobbykick #{player.name}"}
     _tachyon_send(hsocket, data)
 
-    player_client = Client.get_client_by_id(player.id)
+    player_client = Account.get_client_by_id(player.id)
     assert player_client.lobby_id == nil
 
     # Check ban state
@@ -389,13 +391,13 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   end
 
   test "ban by name", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
-    player_client = Client.get_client_by_id(player.id)
+    player_client = Account.get_client_by_id(player.id)
     assert player_client.lobby_id == lobby_id
 
     data = %{cmd: "c.lobby.message", message: "$lobbyban #{player.name} Because I said so"}
     _tachyon_send(hsocket, data)
 
-    player_client = Client.get_client_by_id(player.id)
+    player_client = Account.get_client_by_id(player.id)
     assert player_client.lobby_id == nil
 
     # Check ban state
@@ -404,13 +406,13 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   end
 
   test "ban by partial name", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
-    player_client = Client.get_client_by_id(player.id)
+    player_client = Account.get_client_by_id(player.id)
     assert player_client.lobby_id == lobby_id
 
     data = %{cmd: "c.lobby.message", message: "$lobbyban #{player.name |> String.slice(0, 5)}"}
     _tachyon_send(hsocket, data)
 
-    player_client = Client.get_client_by_id(player.id)
+    player_client = Account.get_client_by_id(player.id)
     assert player_client.lobby_id == nil
 
     # Check ban state
@@ -419,14 +421,14 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   end
 
   test "error with no name", %{player: player, hsocket: hsocket, lobby_id: lobby_id} do
-    player_client = Client.get_client_by_id(player.id)
+    player_client = Account.get_client_by_id(player.id)
     assert player_client.lobby_id == lobby_id
 
     data = %{cmd: "c.lobby.message", message: "$kick noname"}
     _tachyon_send(hsocket, data)
 
     # They should not be kicked, we expect no other errors at this stage
-    player_client = Client.get_client_by_id(player.id)
+    player_client = Account.get_client_by_id(player.id)
     assert player_client.lobby_id == lobby_id
   end
 
@@ -437,8 +439,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     # Add player2 to the battle but not player 3
     Lobby.add_user_to_battle(player2.id, lobby_id, "script_password")
 
-    player1_client = Client.get_client_by_id(player1.id)
-    player2_client = Client.get_client_by_id(player2.id)
+    player1_client = Account.get_client_by_id(player1.id)
+    player2_client = Account.get_client_by_id(player2.id)
     assert player1_client.player == true
     assert player1_client.lobby_id == lobby_id
     assert player2_client.lobby_id == lobby_id
@@ -446,8 +448,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     data = %{cmd: "c.lobby.message", message: "$lobbybanmult #{player1.name} #{player2.name} #{player3.name} no_player_of_this_name"}
     _tachyon_send(hsocket, data)
 
-    player1_client = Client.get_client_by_id(player1.id)
-    player2_client = Client.get_client_by_id(player2.id)
+    player1_client = Account.get_client_by_id(player1.id)
+    player2_client = Account.get_client_by_id(player2.id)
     assert player1_client.lobby_id == nil
     assert player2_client.lobby_id == nil
 
@@ -730,14 +732,14 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert queue == [player5.id]
 
     # Now we need one of the players to become a spectator and open up a slot!
-    assert Client.get_client_by_id(player5.id).player == false
+    assert Account.get_client_by_id(player5.id).player == false
     _tachyon_send(ps1.socket, %{cmd: "c.lobby.update_status", client: %{player: false, ready: false}})
     :timer.sleep(100)
     send(consul_pid, :tick)
 
     consul_state = :sys.get_state(consul_pid)
     assert consul_state.join_queue == []
-    assert Client.get_client_by_id(player5.id).player == true
+    assert Account.get_client_by_id(player5.id).player == true
 
     # Now get users 6 and 7 back in
     Lobby.force_add_user_to_lobby(player6.id, lobby_id)
@@ -798,7 +800,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert queue == [player7.id, player8.id]
   end
 
-  test "join_queue_on_full_game", %{lobby_id: lobby_id, hsocket: hsocket, psocket: socket1, player: player1} do
+  test "join_queue_on_full_game", %{lobby_id: lobby_id, hsocket: hsocket, player: existing_player} do
     # Limit player count to 2 (1v1)
     _tachyon_send(hsocket, %{cmd: "c.lobby_host.update_host_status", boss: nil, teamsize: 1, teamcount: 2})
 
@@ -806,22 +808,26 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     max_player_count = ConsulServer.get_max_player_count(state)
     assert max_player_count == 2
 
-    # Add 2 more players
+    Lobby.kick_user_from_battle(existing_player.id, lobby_id)
+
+    # Add the players
+    %{user: player1, socket: socket1} = tachyon_auth_setup()
     %{user: player2, socket: socket2} = tachyon_auth_setup()
     %{user: player3, socket: socket3} = tachyon_auth_setup()
 
     Lobby.force_add_user_to_lobby(player1.id, lobby_id)
     Lobby.force_add_user_to_lobby(player2.id, lobby_id)
     Lobby.force_add_user_to_lobby(player3.id, lobby_id)
+    :timer.sleep(50)
 
     # Players 2 and 3 are playing a 1v1, player 1 is a not a player
     _tachyon_send(socket1, %{cmd: "c.lobby.update_status", client: %{player: false, ready: false}})
     _tachyon_send(socket2, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
     _tachyon_send(socket3, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
 
-    assert Client.get_client_by_id(player1.id).player == false
-    assert Client.get_client_by_id(player2.id).player == true
-    assert Client.get_client_by_id(player3.id).player == true
+    assert Account.get_client_by_id(player1.id).player == false
+    assert Account.get_client_by_id(player2.id).player == true
+    assert Account.get_client_by_id(player3.id).player == true
 
     # Queue should be empty at start
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
@@ -831,7 +837,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     _tachyon_send(socket1, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
 
     # And added to the join queue
-    assert Client.get_client_by_id(player1.id).player == false
+    assert Account.get_client_by_id(player1.id).player == false
     queue = Coordinator.call_consul(lobby_id, {:get, :join_queue})
     assert queue == [player1.id]
   end

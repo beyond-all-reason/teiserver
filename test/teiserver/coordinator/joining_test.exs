@@ -74,7 +74,7 @@ defmodule Teiserver.Coordinator.JoiningTest do
 
     _tachyon_send(socket, data)
     [join_response] = _tachyon_recv(socket2)
-    assert join_response["cmd"] == "s.lobby.join_response"
+    assert join_response["cmd"] == "s.lobby.joined"
 
     # Expect welcome message
     [reply] = _tachyon_recv(socket2)

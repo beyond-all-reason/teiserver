@@ -169,9 +169,10 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
 
     # We should now get info saying we are in
     [resp] = _tachyon_recv(socket)
-    assert resp["cmd"] == "s.lobby.join_response"
-    assert resp["result"] == "approve"
+    assert resp["cmd"] == "s.lobby.joined"
     assert Map.has_key?(resp, "lobby")
+    assert Map.has_key?(resp, "bots")
+    assert Map.has_key?(resp, "member_list")
   end
 
   test "friends", %{

@@ -162,6 +162,13 @@ defmodule Teiserver.TachyonTcpServer do
 
       {:set_script_password, new_script_password} ->
         %{state | script_password: new_script_password}
+
+      # Matchmaking
+      {:joined_queue, queue_id} ->
+        state.protocol.do_action(:joined_queue, queue_id, state)
+
+      {:leave_queue, queue_id} ->
+        state.protocol.do_action(:leave_party, queue_id, state)
     end
 
     {:noreply, new_state}
@@ -175,8 +182,8 @@ defmodule Teiserver.TachyonTcpServer do
       {true, state} ->
         engage_flood_protection(state)
       {false, state} ->
-        new_state = state.protocol_in.data_in(to_string(data), state)
-        {:noreply, new_state}
+        _new_state = state.protocol_in.data_in(to_string(data), state)
+        {:noreply, state}
     end
   end
 
@@ -308,13 +315,19 @@ defmodule Teiserver.TachyonTcpServer do
         :join_lobby_request_response ->
           case data.response do
             :accept ->
-              state.protocol_out.reply(:lobby, data.event, {data.lobby_id, :accept, state.script_password}, state)
+              # state.protocol_out.reply(:lobby, data.event, {data.lobby_id, :accept, state.script_password}, state)
+              state
             :deny ->
               state.protocol_out.reply(:lobby, data.event, {data.lobby_id, :deny, data.reason}, state)
           end
 
         :force_join_lobby ->
+          send(self(), {:action, {:join_lobby, data.lobby_id}})
           state.protocol_out.reply(:lobby, data.event, {data.lobby_id, data.script_password}, state)
+
+        :added_to_lobby ->
+          send(self(), {:action, {:join_lobby, data.lobby_id}})
+          state.protocol_out.reply(:lobby, :joined, {data.lobby_id, data.script_password}, state)
 
         :received_direct_message ->
           state.protocol_out.reply(:communication, data.event, {data.sender_id, data.message_content}, state)
@@ -329,7 +342,22 @@ defmodule Teiserver.TachyonTcpServer do
           state.protocol_out.reply(:party, :invite, data.party_id, state)
 
         :added_to_party ->
-          state.protocol_out.reply(:party, :invite, data.party_id, state)
+          send(self(), {:action, {:join_party, data.party_id}})
+          state.protocol_out.reply(:party, :added_to, data.party_id, state)
+
+        :left_party ->
+          send(self(), {:action, {:leave_party, data.party_id}})
+          state.protocol_out.reply(:party, :left_party, data.party_id, state)
+
+        # Matchmaking
+        :joined_queue ->
+          send(self(), {:action, {:joined_queue, data.queue_id}})
+          state.protocol_out.reply(:matchmaking, :join_queue_success, data.queue_id, state)
+
+        :left_queue ->
+          send(self(), {:action, {:leave_queue, data.queue_id}})
+          # state.protocol_out.reply(:matchmaking, :left_queue, data.queue_id, state)
+          state
 
         :disconnected ->
           send(self(), :terminate)
@@ -339,8 +367,6 @@ defmodule Teiserver.TachyonTcpServer do
           Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}\nFull data: #{Kernel.inspect data}")
           state
       end
-    else
-      state
     end
 
     {:noreply, state}

@@ -467,8 +467,6 @@ defmodule Teiserver.Battle.LobbyServer do
     {state.player_list, state}
   end
 
-
-
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -501,6 +499,8 @@ defmodule Teiserver.Battle.LobbyServer do
       member_list: [],
       player_list: [],
       player_list_last_updated: 0,
+
+      balance_mode: :party,
       state: :lobby
     }}
   end

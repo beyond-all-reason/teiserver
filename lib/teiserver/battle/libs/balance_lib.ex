@@ -22,8 +22,9 @@ defmodule Teiserver.Battle.BalanceLib do
   team_sizes: map of team_id => non_neg_integer
   team_groups: map of team_id => list of group_tuples, {[userid], rating_value, size}
   """
-  @spec create_balance([{[T.userid()], rating_value()}], non_neg_integer(), :round_robin | :loser_picks) :: map()
-  def create_balance(groups, team_count, mode \\ :loser_picks) do
+  @spec create_balance([{[T.userid()], rating_value()}], non_neg_integer()) :: map()
+  @spec create_balance([{[T.userid()], rating_value()}], non_neg_integer(), List.t()) :: map()
+  def create_balance(groups, team_count, opts \\ []) do
     # We want to calculate some values here just to make things faster
     # we add a member count and sort by rating (highest first)
     expanded_groups = groups
@@ -37,7 +38,7 @@ defmodule Teiserver.Battle.BalanceLib do
         {i, []}
       end)
 
-    team_groups = case mode do
+    team_groups = case opts[:mode] || :loser_picks do
       :loser_picks ->
         loser_picks(expanded_groups, teams)
     end

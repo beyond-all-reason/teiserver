@@ -119,7 +119,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   def do_action(:leave_lobby, lobby_id, state) do
     PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
     PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_chat:#{lobby_id}")
-    %{state | lobby_id: nil}
+    %{state | lobby_id: nil, lobby_host: false}
   end
 
   def do_action(:join_lobby, lobby_id, state) do
@@ -161,6 +161,17 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
     else
       state
     end
+  end
+
+  def do_action(:joined_queue, queue_id, state) do
+    # PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{queue_id}")
+    # PubSub.subscribe(Central.PubSub, "teiserver_party:#{queue_id}")
+    %{state | queues: Enum.uniq([queue_id | state.queues])}
+  end
+
+  def do_action(:leave_queue, queue_id, state) do
+    # PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{queue_id}")
+    %{state | queues: List.delete(state.queues, queue_id)}
   end
 
   def do_action(:watch_channel, name, state) do

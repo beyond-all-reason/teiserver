@@ -562,10 +562,10 @@ defmodule Teiserver.TachyonMatchmakingTest do
     :timer.sleep(100)
 
     [reply] = _tachyon_recv(socket1)
-    assert reply["cmd"] == "s.lobby.force_join"
+    assert reply["cmd"] == "s.lobby.joined"
 
     [reply] = _tachyon_recv(socket2)
-    assert reply["cmd"] == "s.lobby.force_join"
+    assert reply["cmd"] == "s.lobby.joined"
 
     # Clear both sockets
     _tachyon_recv_until(socket1)
