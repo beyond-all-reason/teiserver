@@ -207,6 +207,7 @@ defmodule Teiserver.Battle do
     Telemetry.increment(:matches_started)
 
     LobbyCache.cast_lobby(lobby_id, :start_match)
+    balance_mode = get_lobby_balance_mode(lobby_id)
 
     case MatchLib.match_from_lobby(lobby_id) do
       {match_params, members} ->
@@ -214,9 +215,18 @@ defmodule Teiserver.Battle do
           {:ok, match} ->
             members
             |> Enum.map(fn m ->
-              create_match_membership(Map.merge(m, %{
-                match_id: match.id
-              }))
+              # If balance mode is solo we need to strip party_id from the
+              # membership or it will mess with records
+              if balance_mode == :solo do
+                create_match_membership(Map.merge(m, %{
+                  party_id: nil,
+                  match_id: match.id
+                }))
+              else
+                create_match_membership(Map.merge(m, %{
+                  match_id: match.id
+                }))
+              end
             end)
           error ->
             Logger.error("Error inserting match: #{Kernel.inspect error}")
