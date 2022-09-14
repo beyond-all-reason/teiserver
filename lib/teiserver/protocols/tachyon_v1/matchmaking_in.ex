@@ -32,7 +32,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
 
     case joined do
       true ->
-        reply(:matchmaking, :join_queue_success, queue_id, state)
+        state
 
       false ->
         reason = case resp do
@@ -54,7 +54,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
       Matchmaking.remove_user_from_queue(queue_id, state.userid)
     end)
 
-    %{state | queues: []}
+    state
   end
 
   def do_handle("accept", %{"match_id" => match_id}, state) do

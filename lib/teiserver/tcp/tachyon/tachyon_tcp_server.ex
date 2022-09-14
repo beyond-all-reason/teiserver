@@ -167,8 +167,8 @@ defmodule Teiserver.TachyonTcpServer do
       {:joined_queue, queue_id} ->
         state.protocol.do_action(:joined_queue, queue_id, state)
 
-      {:leave_queue, queue_id} ->
-        state.protocol.do_action(:leave_party, queue_id, state)
+      {:left_queue, queue_id} ->
+        state.protocol.do_action(:left_queue, queue_id, state)
     end
 
     {:noreply, new_state}
@@ -355,7 +355,7 @@ defmodule Teiserver.TachyonTcpServer do
           state.protocol_out.reply(:matchmaking, :join_queue_success, data.queue_id, state)
 
         :left_queue ->
-          send(self(), {:action, {:leave_queue, data.queue_id}})
+          send(self(), {:action, {:left_queue, data.queue_id}})
           # state.protocol_out.reply(:matchmaking, :left_queue, data.queue_id, state)
           state
 

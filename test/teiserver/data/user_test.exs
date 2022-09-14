@@ -31,26 +31,27 @@ defmodule Teiserver.Data.UserTest do
     assert result == {:error, "Email already attached to a user"}
   end
 
-  test "calculate rank" do
-    user = TeiserverTestLib.new_user()
-    Account.update_user_stat(user.id, %{
-      "player_minutes" => 60 * 60,
-      "spectator_minutes" => 60 * 60
-    })
-    assert User.calculate_rank(user.id) == 3
+  # We will now be calculating ranks based on
+  # test "calculate rank" do
+  #   user = TeiserverTestLib.new_user()
+  #   Account.update_user_stat(user.id, %{
+  #     "player_minutes" => 60 * 60,
+  #     "spectator_minutes" => 60 * 60
+  #   })
+  #   assert User.calculate_rank(user.id) == 3
 
-    Account.update_user_stat(user.id, %{
-      "player_minutes" => 60 * 1,
-      "spectator_minutes" => 60 * 1
-    })
-    assert User.calculate_rank(user.id) == 0
+  #   Account.update_user_stat(user.id, %{
+  #     "player_minutes" => 60 * 1,
+  #     "spectator_minutes" => 60 * 1
+  #   })
+  #   assert User.calculate_rank(user.id) == 0
 
-    Account.update_user_stat(user.id, %{
-      "player_minutes" => 60 * 240,
-      "spectator_minutes" => 0
-    })
-    assert User.calculate_rank(user.id) == 4
-  end
+  #   Account.update_user_stat(user.id, %{
+  #     "player_minutes" => 60 * 240,
+  #     "spectator_minutes" => 0
+  #   })
+  #   assert User.calculate_rank(user.id) == 4
+  # end
 
   test "renaming" do
     user = TeiserverTestLib.new_user()

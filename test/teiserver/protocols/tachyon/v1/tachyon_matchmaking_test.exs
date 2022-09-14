@@ -269,13 +269,10 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert user_queues == [queue1.id]
 
     # Join again, see what happens
+    # should be nothing as we're already in the queue
     _tachyon_send(socket, %{cmd: "c.matchmaking.join_queue", queue_id: queue1.id})
-    [reply] = _tachyon_recv(socket)
-    assert reply == %{
-      "cmd" => "s.matchmaking.join_queue",
-      "queue_id" => queue1.id,
-      "result" => "success"
-    }
+    reply = _tachyon_recv(socket)
+    assert reply == :timeout
 
     # It should still just have 1 of us in it
     user_queues = :sys.get_state(client_pid) |> Map.get(:queues)

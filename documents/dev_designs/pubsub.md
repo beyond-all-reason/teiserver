@@ -198,16 +198,6 @@ This is the channel for sending messages to the client. It allows the client on 
 
 # Matchmaking
 %{
-  event: :joined_queue,
-  queue_id: queue_id
-}
-
-%{
-  event: :left_queue,
-  queue_id: queue_id
-}
-
-%{
   event: :matchmaking,
   sub_event: :match_ready,
   queue_id: queue_id,

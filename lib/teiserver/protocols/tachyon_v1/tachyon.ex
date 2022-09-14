@@ -164,13 +164,10 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
   end
 
   def do_action(:joined_queue, queue_id, state) do
-    # PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{queue_id}")
-    # PubSub.subscribe(Central.PubSub, "teiserver_party:#{queue_id}")
     %{state | queues: Enum.uniq([queue_id | state.queues])}
   end
 
-  def do_action(:leave_queue, queue_id, state) do
-    # PubSub.unsubscribe(Central.PubSub, "teiserver_party:#{queue_id}")
+  def do_action(:left_queue, queue_id, state) do
     %{state | queues: List.delete(state.queues, queue_id)}
   end
 
