@@ -42,9 +42,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     # Player needs to be added to the battle
     Lobby.add_user_to_battle(player.id, lobby_id)
-    # Lobby.add_user_to_battle(player.id, lobby_id, "script_password")
-    # player_client = Account.get_client_by_id(player.id)
-    # Client.update(%{player_client | player: true}, :client_updated_battlestatus)
+    _tachyon_send(psocket, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
     _tachyon_recv_until(psocket)
 
     # Add user message
@@ -206,6 +204,20 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     # Say the command
     data = %{cmd: "c.lobby.message", message: "$specafk"}
     _tachyon_send(hsocket, data)
+
+    # Status update for the first, can happen in either order
+    [reply1] = _tachyon_recv(hsocket)
+    assert reply1["cmd"] == "s.lobby.updated_client_battlestatus"
+    assert reply1["client"]["userid"] == player2.id or reply1["client"]["userid"] == player1.id
+
+    # And now the other
+    [reply2] = _tachyon_recv(hsocket)
+    assert reply2["cmd"] == "s.lobby.updated_client_battlestatus"
+    assert reply2["client"]["userid"] == player2.id or reply2["client"]["userid"] == player1.id
+
+    # Ensure it wasn't the same user twice
+    assert reply1["client"]["userid"] != reply2["client"]["userid"]
+
     [reply] = _tachyon_recv(hsocket)
     assert reply["cmd"] == "s.lobby.say"
     assert reply["message"] == "$specafk"
@@ -283,7 +295,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     _tachyon_send(hsocket, data)
 
     [reply] = _tachyon_recv(psocket)
-    assert reply["cmd"] == "s.lobby.force_join"
+    assert reply["cmd"] == "s.lobby.joined"
     assert reply["lobby"]["id"] == lobby_id
   end
 
@@ -295,11 +307,11 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     _tachyon_send(hsocket, data)
 
     [reply2] = _tachyon_recv(socket2)
-    assert reply2["cmd"] == "s.lobby.force_join"
+    assert reply2["cmd"] == "s.lobby.joined"
     assert reply2["lobby"]["id"] == lobby_id
 
     [reply3] = _tachyon_recv(socket3)
-    assert reply3["cmd"] == "s.lobby.force_join"
+    assert reply3["cmd"] == "s.lobby.joined"
     assert reply3["lobby"]["id"] == lobby_id
   end
 
