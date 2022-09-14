@@ -5,7 +5,7 @@ defmodule Teiserver.Battle.BalanceLib do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Account
   alias Teiserver.Game.MatchRatingLib
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
 
   @type rating_value() :: float()
   @type group_tuple() :: {[T.userid()], rating_value(), non_neg_integer()}
@@ -230,8 +230,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
     new_total = (hd(team_skills) |> elem(0)) + combined_rating
 
-    new_logs = ["Picked #{names} for team #{current_team}, adding #{combined_rating} points for new total of #{new_total}" | logs]
-
+    new_logs = ["Picked #{names} for team #{current_team}, adding #{round(combined_rating, 2)} points for new total of #{round(new_total, 2)}" | logs]
 
     do_loser_picks(remaining_groups, new_team_map, max_teamsize, new_logs)
   end

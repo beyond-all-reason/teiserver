@@ -29,6 +29,7 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
 - Max format: N, where N is a number and an integer between 1 and N is returned
 - Min/Max format: MN MX, where each is a number and an integer between them (inclusive) is returned
 ", :everybody},
+      {"explain", [], "Lists a log of the steps taken to calculate balance for the lobby", :everybody},
 
 
       #---- Boss only ----

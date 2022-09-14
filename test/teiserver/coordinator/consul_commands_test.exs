@@ -317,6 +317,39 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
   # TODO: settag
 
+  test "explain", %{lobby_id: lobby_id, hsocket: hsocket, player: player} do
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$explain"})
+
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{
+      "cmd" => "s.communication.received_direct_message",
+      "message" => [
+        "---------------------------",
+        "No balance has been created for this room",
+        "---------------------------"
+      ] |> Enum.join("\n"),
+      "sender_id" => Coordinator.get_coordinator_userid()
+    }
+
+    Coordinator.call_balancer(lobby_id, {
+      :make_balance, %{}, %{}, 2
+    })
+
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$explain"})
+
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{
+      "cmd" => "s.communication.received_direct_message",
+      "message" => [
+        "---------------------------",
+        "Balance logs, mode: solo",
+        "Picked #{player.name} for team 1, adding 16.67 points for new total of 16.67",
+        "---------------------------"
+      ] |> Enum.join("\n"),
+      "sender_id" => Coordinator.get_coordinator_userid()
+    }
+  end
+
   test "leveltoplay", %{lobby_id: lobby_id, hsocket: hsocket} do
     setting = Coordinator.call_consul(lobby_id, {:get, :level_to_play})
     assert setting == 0

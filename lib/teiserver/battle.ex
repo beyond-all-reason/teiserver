@@ -207,7 +207,7 @@ defmodule Teiserver.Battle do
     Telemetry.increment(:matches_started)
 
     LobbyCache.cast_lobby(lobby_id, :start_match)
-    balance_mode = get_lobby_balance_mode(lobby_id)
+    current_balance = get_lobby_current_balance(lobby_id)
 
     case MatchLib.match_from_lobby(lobby_id) do
       {match_params, members} ->
@@ -217,7 +217,7 @@ defmodule Teiserver.Battle do
             |> Enum.map(fn m ->
               # If balance mode is solo we need to strip party_id from the
               # membership or it will mess with records
-              if balance_mode == :solo do
+              if current_balance.balance_mode == :solo do
                 create_match_membership(Map.merge(m, %{
                   party_id: nil,
                   match_id: match.id
@@ -553,6 +553,9 @@ defmodule Teiserver.Battle do
   defdelegate remove_user_from_lobby(userid, lobby_id), to: LobbyCache
 
   # Balance
+  @spec get_lobby_current_balance(T.lobby_id()) :: map() | nil
+  defdelegate get_lobby_current_balance(lobby_id), to: LobbyCache
+
   @spec get_lobby_balance_mode(T.lobby_id()) :: :solo | :grouped
   defdelegate get_lobby_balance_mode(lobby_id), to: LobbyCache
 

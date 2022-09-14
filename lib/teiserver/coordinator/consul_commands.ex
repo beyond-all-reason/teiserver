@@ -328,6 +328,28 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+  def handle_command(%{command: "explain", senderid: senderid} = _cmd, state) do
+    balance = state.lobby_id
+      |> Battle.get_lobby_current_balance()
+
+    if balance do
+      Coordinator.send_to_user(senderid, [
+        @splitter,
+        "Balance logs, mode: #{balance.balance_mode}",
+        balance.logs,
+        @splitter
+      ] |> List.flatten)
+    else
+      Coordinator.send_to_user(senderid, [
+        @splitter,
+        "No balance has been created for this room",
+        @splitter
+      ])
+    end
+
+    state
+  end
+
   def handle_command(%{command: "joinq", senderid: senderid} = _cmd, state) do
     client = Client.get_client_by_id(senderid)
     cond do

@@ -24,8 +24,12 @@ defmodule Teiserver.Game.BalancerServer do
 
   def handle_call(:get_balance_mode, _from, %{last_balance_hash: hash} = state) do
     result = state.hashes[hash]
-
     {:reply, result.balance_mode, state}
+  end
+
+  def handle_call(:get_current_balance, _from, %{last_balance_hash: hash} = state) do
+    result = state.hashes[hash]
+    {:reply, result, state}
   end
 
   @impl true

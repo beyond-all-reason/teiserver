@@ -131,7 +131,7 @@ defmodule Teiserver.Protocols.V1.TachyonBattleHostTest do
       "bots" => %{},
       "lobby" => %{"disabled_units" => [], "engine_name" => "spring-105", "engine_version" => "105.1.2.3", "founder_id" => host.id, "game_name" => "BAR", "id" => lobby_id, "in_progress" => false, "ip" => "127.0.0.1", "locked" => false, "map_hash" => "string_of_characters", "map_name" => "koom valley", "max_players" => 16, "name" => "EU 01 - 123", "passworded" => true, "players" => [], "public" => true, "settings" => %{"max_players" => 12}, "start_areas" => %{}, "started_at" => nil, "type" => "normal", "port" => 1234},
       "member_list" => [
-        %{"away" => false, "clan_tag" => nil, "in_game" => false, "lobby_id" => 1, "muted" => false, "party_id" => nil, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => "0", "team_number" => 0, "userid" => user2.id}
+        %{"away" => false, "clan_tag" => nil, "in_game" => false, "lobby_id" => lobby_id, "muted" => false, "party_id" => nil, "player" => false, "player_number" => 0, "ready" => false, "sync" => %{"engine" => 0, "game" => 0, "map" => 0}, "team_colour" => "0", "team_number" => 0, "userid" => user2.id}
       ],
       "modoptions" => %{"server/match/uuid" => uuid}
     }

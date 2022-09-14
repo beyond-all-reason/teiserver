@@ -14,6 +14,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
       2,
       mode: :loser_picks
     )
+    |> Map.drop([:logs])
 
     assert result == %{
       team_groups: %{
@@ -50,6 +51,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
       2,
       mode: :loser_picks
     )
+    |> Map.drop([:logs])
 
     assert result == %{
       team_groups: %{
@@ -102,6 +104,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
       2,
       mode: :loser_picks
     )
+    |> Map.drop([:logs])
 
     assert result == %{
       team_groups: %{

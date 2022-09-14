@@ -389,6 +389,11 @@ defmodule Teiserver.Battle.LobbyCache do
   end
 
   # Balance related
+  @spec get_lobby_current_balance(T.lobby_id()) :: map() | nil
+  def get_lobby_current_balance(lobby_id) do
+    Coordinator.call_balancer(lobby_id, :get_current_balance)
+  end
+
   @spec get_lobby_balance_mode(T.lobby_id()) :: :solo | :grouped
   def get_lobby_balance_mode(lobby_id) do
     Coordinator.call_balancer(lobby_id, :get_balance_mode)
