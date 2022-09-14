@@ -87,15 +87,17 @@ defmodule Teiserver.User do
 
   def default_data(), do: @default_data
 
-  @rank_levels [
-    5,
-    15,
-    30,
-    100,
-    300,
-    1000,
-    3000
-  ]
+  # @rank_levels [
+  #   5,
+  #   15,
+  #   30,
+  #   100,
+  #   300,
+  #   1000,
+  #   3000
+  # ]
+
+  @rank_levels [10, 20, 25, 30, 35, 45, 100]
 
   def get_rank_levels(), do: @rank_levels
 
@@ -1055,11 +1057,21 @@ defmodule Teiserver.User do
 
   # Based on actual ingame time
   @spec calculate_rank(T.userid()) :: non_neg_integer()
+  # Old method using ingame hours
+  # def calculate_rank(userid) do
+  #   ingame_hours = rank_time(userid)
+
+  #   @rank_levels
+  #     |> Enum.filter(fn r -> r <= ingame_hours end)
+  #     |> Enum.count()
+  # end
+
+  # New method using leaderboard rating
   def calculate_rank(userid) do
-    ingame_hours = rank_time(userid)
+    rating = Account.get_player_highest_leaderboard_rating(userid)
 
     @rank_levels
-      |> Enum.filter(fn r -> r <= ingame_hours end)
+      |> Enum.filter(fn r -> r <= rating end)
       |> Enum.count()
   end
 

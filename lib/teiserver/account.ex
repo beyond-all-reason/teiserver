@@ -1148,6 +1148,7 @@ defmodule Teiserver.Account do
       |> RatingLib.preload(args[:preload])
       |> RatingLib.order_by(args[:order_by])
       |> QueryHelpers.select(args[:select])
+      |> QueryHelpers.limit_query(args[:limit] || 50)
   end
 
   @doc """
@@ -1162,7 +1163,6 @@ defmodule Teiserver.Account do
   @spec list_ratings(List.t()) :: List.t()
   def list_ratings(args \\ []) do
     rating_query(args)
-      |> QueryHelpers.limit_query(args[:limit] || 50)
       |> Repo.all
   end
 
@@ -1195,6 +1195,25 @@ defmodule Teiserver.Account do
       ], limit: 1)
         |> Repo.one
     end)
+  end
+
+  @spec get_player_highest_leaderboard_rating(T.userid()) :: number()
+  def get_player_highest_leaderboard_rating(user_id) do
+    result = rating_query(
+      search: [
+        user_id: user_id,
+      ],
+      select: [:leaderboard_rating],
+      order_by: "Leaderboard rating high to low",
+      limit: 1
+    )
+      |> Repo.one
+
+    if result do
+      result.leaderboard_rating
+    else
+      0
+    end
   end
 
   @doc """
