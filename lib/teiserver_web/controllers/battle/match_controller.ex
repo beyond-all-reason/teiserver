@@ -59,11 +59,22 @@ defmodule TeiserverWeb.Battle.MatchController do
     )
     |> Map.new(fn log -> {log.user_id, log} end)
 
+    # Creates a map where the party_id refers to an integer
+    # but only includes parties with 2 or more members
+    parties = members
+      |> Enum.group_by(fn m -> m.party_id end)
+      |> Map.drop([nil])
+      |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
+      |> Map.keys()
+      |> Enum.zip(Central.Helpers.StylingHelper.bright_hex_colour_list)
+      |> Map.new
+
     conn
       |> assign(:match, match)
       |> assign(:match_name, match_name)
       |> assign(:members, members)
       |> assign(:rating_logs, rating_logs)
+      |> assign(:parties, parties)
       |> add_breadcrumb(name: "Show: #{match_name}", url: conn.request_path)
       |> render("show.html")
   end

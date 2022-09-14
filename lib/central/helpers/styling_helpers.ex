@@ -194,6 +194,19 @@ defmodule Central.Helpers.StylingHelper do
     ]
   end
 
+  # Stand out colours
+  @spec bright_hex_colour_list() :: [String.t()]
+  def bright_hex_colour_list() do
+    [
+      "#CC0000",
+      "#00CC00",
+      "#0000CC",
+      "#CC00CC",
+      "#00CCCC",
+      "#CCCC00"
+    ]
+  end
+
   @spec random_colour() :: String.t()
   def random_colour() do
     Enum.random(hex_colour_list())
