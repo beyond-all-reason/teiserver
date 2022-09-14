@@ -203,6 +203,15 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert party_balance_result.ratings == %{1 => 147.0, 2 => 134.0}
     assert party_balance_result.deviation == {1, 9}
     assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
+    assert party_balance_result.logs == [
+      "Picked #{u8.name}, #{u7.name} for team 1, adding 97.0 points for new total of 97.0",
+      "Picked #{u6.name} for team 2, adding 38.0 points for new total of 38.0",
+      "Picked #{u5.name} for team 2, adding 36.0 points for new total of 74.0",
+      "Picked #{u4.name} for team 2, adding 35.0 points for new total of 109.0",
+      "Picked #{u3.name} for team 1, adding 30.0 points for new total of 127.0",
+      "Picked #{u2.name} for team 2, adding 25.0 points for new total of 134.0",
+      "Picked #{u1.name} for team 1, adding 20.0 points for new total of 147.0",
+    ]
 
     # Now make an unfair party
     Account.move_client_to_party(u6.id, high_party.id)
@@ -223,5 +232,15 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
     assert balance_result.ratings == %{1 => 141.0, 2 => 140.0}
     assert balance_result.deviation == {1, 1}
+    assert balance_result.logs == [
+      "Picked #{u8.name} for team 1, adding 50.0 points for new total of 50.0",
+      "Picked #{u7.name} for team 2, adding 47.0 points for new total of 47.0",
+      "Picked #{u6.name} for team 2, adding 38.0 points for new total of 85.0",
+      "Picked #{u5.name} for team 1, adding 36.0 points for new total of 86.0",
+      "Picked #{u4.name} for team 2, adding 35.0 points for new total of 120.0",
+      "Picked #{u3.name} for team 1, adding 30.0 points for new total of 116.0",
+      "Picked #{u2.name} for team 1, adding 25.0 points for new total of 141.0",
+      "Picked #{u1.name} for team 2, adding 20.0 points for new total of 140.0",
+    ]
   end
 end

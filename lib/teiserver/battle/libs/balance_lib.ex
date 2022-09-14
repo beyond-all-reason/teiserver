@@ -38,10 +38,12 @@ defmodule Teiserver.Battle.BalanceLib do
         {i, []}
       end)
 
-    team_groups = case opts[:mode] || :loser_picks do
+    {reversed_team_groups, logs} = case opts[:mode] || :loser_picks do
       :loser_picks ->
         loser_picks(expanded_groups, teams)
     end
+
+    team_groups = reversed_team_groups
       |> Map.new(fn {team_id, groups} ->
         {team_id, Enum.reverse(groups)}
       end)
@@ -57,7 +59,8 @@ defmodule Teiserver.Battle.BalanceLib do
 
     %{
       team_groups: team_groups,
-      team_players: team_players
+      team_players: team_players,
+      logs: Enum.reverse(logs)
     }
       |> calculate_balance_stats
   end
@@ -189,19 +192,19 @@ defmodule Teiserver.Battle.BalanceLib do
 
   groups is a list of tuples: {members, rating, member_count}
   """
-  @spec loser_picks([group_tuple()], map()) :: map()
+  @spec loser_picks([group_tuple()], map()) :: {map(), list()}
   def loser_picks(groups, teams) do
     total_members = groups
       |> Enum.map(fn {_, _, c} -> c end)
       |> Enum.sum
 
     max_teamsize = total_members/Enum.count(teams) |> :math.ceil() |> round()
-    do_loser_picks(groups, teams, max_teamsize)
+    do_loser_picks(groups, teams, max_teamsize, [])
   end
 
-  @spec do_loser_picks([group_tuple()], map(), non_neg_integer()) :: map()
-  defp do_loser_picks([], teams, _), do: teams
-  defp do_loser_picks(groups, teams, max_teamsize) do
+  @spec do_loser_picks([group_tuple()], map(), non_neg_integer(), list()) :: {map(), list()}
+  defp do_loser_picks([], teams, _, logs), do: {teams, logs}
+  defp do_loser_picks(groups, teams, max_teamsize, logs) do
     team_skills = teams
       |> Enum.reject(fn {_team_number, member_groups} ->
         size = sum_group_membership_size(member_groups)
@@ -220,7 +223,17 @@ defmodule Teiserver.Battle.BalanceLib do
     new_team = [picked | teams[current_team]]
     new_team_map = Map.put(teams, current_team, new_team)
 
-    do_loser_picks(remaining_groups, new_team_map, max_teamsize)
+    {group_member_ids, combined_rating, _size} = picked
+    names = group_member_ids
+      |> Enum.map(&Account.get_username_by_id/1)
+      |> Enum.join(", ")
+
+    new_total = (hd(team_skills) |> elem(0)) + combined_rating
+
+    new_logs = ["Picked #{names} for team #{current_team}, adding #{combined_rating} points for new total of #{new_total}" | logs]
+
+
+    do_loser_picks(remaining_groups, new_team_map, max_teamsize, new_logs)
   end
 
   @doc """
