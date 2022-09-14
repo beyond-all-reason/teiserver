@@ -64,7 +64,6 @@ defmodule TeiserverWeb.API.SpadsController do
       player_data == :error -> false
       Enum.empty?(player_data) -> false
       Enum.empty?(bot_data) == false -> false
-      String.contains?(Kernel.inspect(player_data), "Teifion") -> true
       server_balance_enabled == false -> false
       true -> true
     end
