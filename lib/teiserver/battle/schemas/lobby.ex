@@ -518,7 +518,7 @@ defmodule Teiserver.Battle.Lobby do
       }
     )
     # TODO: Refactor this as per the TODO list, this should take place here and not in the client process
-    add_user_to_battle(userid, lobby_id)
+    # add_user_to_battle(userid, lobby_id)
 
     :ok
   end

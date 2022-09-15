@@ -142,7 +142,7 @@ defmodule Teiserver.SpringBattleHostTest do
     _ = _recv_raw(socket2)
 
     reply = _recv_until(socket)
-    assert reply =~ "JOINEDBATTLE #{lobby_id} #{user2.name}"
+    assert reply =~ "JOINEDBATTLE #{lobby_id} #{user2.name} script_password2\n"
 
     # This used to get updated, why not any more?
     # assert reply =~ "CLIENTSTATUS #{user2.name} 0\n"

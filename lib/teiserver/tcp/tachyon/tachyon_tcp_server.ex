@@ -316,6 +316,8 @@ defmodule Teiserver.TachyonTcpServer do
           case data.response do
             :accept ->
               # state.protocol_out.reply(:lobby, data.event, {data.lobby_id, :accept, state.script_password}, state)
+              send(self(), {:action, {:join_lobby, data.lobby_id}})
+              # state.protocol_out.reply(:lobby, :joined, {data.lobby_id, state.script_password}, state)
               state
             :deny ->
               state.protocol_out.reply(:lobby, data.event, {data.lobby_id, :deny, data.reason}, state)

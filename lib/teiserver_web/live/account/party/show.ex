@@ -48,12 +48,11 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
 
   def handle_params(%{"id" => party_id}, _, socket) do
     party = Account.get_party(party_id)
-    leader_name = Account.get_username(party.leader)
-
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_party:#{party_id}")
-
     if party do
       if Enum.member?(party.members, socket.assigns.user_id) or allow?(socket, "teiserver.moderator.account") do
+        leader_name = Account.get_username(party.leader)
+        :ok = PubSub.subscribe(Central.PubSub, "teiserver_party:#{party_id}")
+
         {:noreply,
           socket
             |> add_breadcrumb(name: "#{leader_name |> possessive} party", url: "/teiserver/account/parties")
