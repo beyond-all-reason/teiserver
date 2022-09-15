@@ -97,7 +97,7 @@ defmodule Teiserver.User do
   #   3000
   # ]
 
-  @rank_levels [10, 20, 25, 30, 35, 45, 100]
+  @rank_levels [5, 11, 17, 22, 28, 35, 100]
 
   def get_rank_levels(), do: @rank_levels
 
