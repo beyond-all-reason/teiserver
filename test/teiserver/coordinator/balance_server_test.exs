@@ -165,24 +165,37 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
 
     assert (Battle.list_lobby_players(lobby_id) |> Enum.count) == 8
 
-    player_data = []
-    bot_data = []
+    opts = []
     team_count = 2
 
     balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, player_data, bot_data, team_count
+      :make_balance, team_count, opts
     })
 
     assert balance_result.team_players[1] == [u8.id, u5.id, u3.id, u2.id]
     assert balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
     assert balance_result.deviation == {1, 1}
     assert balance_result.ratings == %{1 => 141.0, 2 => 140.0}
-    assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
+    assert Battle.get_lobby_balance_mode(lobby_id) == :solo
 
     # It caches so calling it with the same settings should result in the same value
     assert Coordinator.call_balancer(lobby_id, {
-      :make_balance, player_data, bot_data, team_count
+      :make_balance, team_count, opts
     }) == balance_result
+
+    # Now if we do it again but with groups allowed it should be the same results but
+    # with grouped set to true
+    opts = [allow_groups: true]
+    grouped_balance_result = Coordinator.call_balancer(lobby_id, {
+      :make_balance, team_count, opts
+    })
+
+    assert grouped_balance_result.team_players[1] == [u8.id, u5.id, u3.id, u2.id]
+    assert grouped_balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
+    assert grouped_balance_result.deviation == {1, 1}
+    assert grouped_balance_result.ratings == %{1 => 141.0, 2 => 140.0}
+    assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
+    assert grouped_balance_result.hash != balance_result.hash
 
     # Party time, we start with the two highest rated players being put on the same team
     high_party = Account.create_party(u8.id)
@@ -192,7 +205,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     :timer.sleep(520)
 
     party_balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, player_data, bot_data, team_count
+      :make_balance, team_count, opts
     })
 
     # First things first, it should be a different hash
@@ -220,7 +233,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     :timer.sleep(520)
 
     party_balance_result = Coordinator.call_balancer(lobby_id, {
-      :make_balance, player_data, bot_data, team_count
+      :make_balance, team_count, opts
     })
 
     # First things first, it should be a different hash

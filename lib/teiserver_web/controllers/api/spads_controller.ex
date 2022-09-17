@@ -36,8 +36,6 @@ defmodule TeiserverWeb.API.SpadsController do
 
   @spec balance_battle(Plug.Conn.t(), map) :: Plug.Conn.t()
   def balance_battle(conn, params) do
-    Logger.info("clanMode = #{Kernel.inspect params["clanMode"]}")
-
     server_balance_enabled = Config.get_site_config_cache("teiserver.Enable server balance")
 
     player_data = params["players"]
@@ -87,8 +85,17 @@ defmodule TeiserverWeb.API.SpadsController do
 
       balance_enabled == true ->
         team_count = int_parse(params["nbTeams"])
+
+        Logger.info("balanceMode = #{Kernel.inspect params["balanceMode"]}")
+
+        opts = [
+          allow_groups: true#params["balanceMode"] != ""
+        ]
+
+        Logger.info(Kernel.inspect params)
+
         balance_result = Coordinator.call_balancer(client.lobby_id, {
-          :make_balance, player_data, bot_data, team_count
+          :make_balance, team_count, opts
         })
 
         # Get some counts for later
@@ -133,10 +140,6 @@ defmodule TeiserverWeb.API.SpadsController do
           end)
 
         bot_result = %{}
-
-        if String.contains?(Kernel.inspect(player_data), "Teifion") do
-          Logger.warn("Balance result: #{Kernel.inspect player_result}")
-        end
 
         # This should always be the former
         {_best_team, deviation} = balance_result.deviation

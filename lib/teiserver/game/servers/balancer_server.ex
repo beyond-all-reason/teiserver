@@ -17,8 +17,8 @@ defmodule Teiserver.Game.BalancerServer do
 
   @impl true
   # http://planetspads.free.fr/spads/doc/spadsPluginApiDoc.html#balanceBattle-self-players-bots-clanMode-nbTeams-teamSize
-  def handle_call({:make_balance, _players, _bots, team_count}, _from, state) do
-    {balance, new_state} = make_balance(team_count, state)
+  def handle_call({:make_balance, team_count, opts}, _from, state) do
+    {balance, new_state} = make_balance(team_count, state, opts)
     {:reply, balance, new_state}
   end
 
@@ -64,10 +64,10 @@ defmodule Teiserver.Game.BalancerServer do
     {:noreply, state}
   end
 
-  @spec make_balance(non_neg_integer(), T.balance_server_state()) :: {map(), T.balance_server_state()}
-  defp make_balance(team_count, state) do
+  @spec make_balance(non_neg_integer(), T.balance_server_state(), list()) :: {map(), T.balance_server_state()}
+  defp make_balance(team_count, state, opts) do
     players = Battle.list_lobby_players(state.lobby_id)
-    hash = make_player_hash(team_count, players)
+    hash = make_player_hash(team_count, players, opts)
 
     if Map.has_key?(state.hashes, hash) do
       result = state.hashes[hash]
@@ -76,8 +76,8 @@ defmodule Teiserver.Game.BalancerServer do
         last_balance_hash: hash
       }}
     else
-      result = do_make_balance(team_count, players)
-      |> Map.put(:hash, hash)
+      result = do_make_balance(team_count, players, opts)
+        |> Map.put(:hash, hash)
 
       new_hashes = Map.put(state.hashes, hash, result)
       {result, %{state |
@@ -87,19 +87,21 @@ defmodule Teiserver.Game.BalancerServer do
     end
   end
 
-  @spec make_player_hash(non_neg_integer(), [T.client()]) :: String.t()
-  defp make_player_hash(team_count, players) do
+  @spec make_player_hash(non_neg_integer(), [T.client()], list()) :: String.t()
+  defp make_player_hash(team_count, players, opts) do
     client_string = players
       |> Enum.sort_by(fn c -> c.userid end)
       |> Enum.map(fn c -> "#{c.userid}:#{c.party_id}" end)
       |> Enum.join(",")
 
-    :crypto.hash(:md5, "#{team_count}--" <> client_string)
+    opts_string = Kernel.inspect(opts)
+
+    :crypto.hash(:md5, "#{team_count}--#{client_string}--#{opts_string}")
       |> Base.encode64()
   end
 
-  @spec do_make_balance(non_neg_integer(), [T.client()]) :: map()
-  defp do_make_balance(team_count, players) do
+  @spec do_make_balance(non_neg_integer(), [T.client()], List.t()) :: map()
+  defp do_make_balance(team_count, players, opts) do
     player_count = Enum.count(players)
 
     rating_type = cond do
@@ -109,13 +111,17 @@ defmodule Teiserver.Game.BalancerServer do
       true -> "Team"
     end
 
-    party_result = make_grouped_balance(team_count, players, rating_type)
-    {_, deviation} = party_result.deviation
+    if opts[:allow_groups] do
+      party_result = make_grouped_balance(team_count, players, rating_type)
+      {_, deviation} = party_result.deviation
 
-    if deviation > @max_deviation do
-      make_solo_balance(team_count, players, rating_type)
+      if deviation > @max_deviation do
+        make_solo_balance(team_count, players, rating_type)
+      else
+        party_result
+      end
     else
-      party_result
+      make_solo_balance(team_count, players, rating_type)
     end
   end
 
