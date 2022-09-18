@@ -17,7 +17,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
         |> NotificationPlug.live_call()
 
     client = Account.get_client_by_id(socket.assigns.user_id)
-    lobby_user_ids = if client.lobby_id do
+    lobby_user_ids = if client != nil and client.lobby_id != nil do
       :ok = PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{client.lobby_id}")
       Battle.get_lobby_member_list(client.lobby_id)
     else
