@@ -42,18 +42,23 @@ defmodule TeiserverWeb.Report.ServerMetricController do
   @spec day_metrics_show(Plug.Conn.t(), map) :: Plug.Conn.t()
   def day_metrics_show(conn, %{"date" => date_str}) do
     date = TimexHelper.parse_ymd(date_str)
-    log = Telemetry.get_server_day_log(date)
 
-    users =
-      [log]
-      |> Telemetry.user_lookup()
+    if (date |> Timex.to_date) == Timex.today() do
+      conn
+        |> redirect(to: Routes.ts_reports_server_metric_path(conn, :day_metrics_today))
+    else
+      log = Telemetry.get_server_day_log(date)
 
-    conn
-      |> assign(:date, date)
-      |> assign(:data, log.data)
-      |> assign(:users, users)
-      |> add_breadcrumb(name: "Daily - #{date_str}", url: conn.request_path)
-      |> render("day_metrics_show.html")
+      users = [log]
+        |> Telemetry.user_lookup()
+
+      conn
+        |> assign(:date, date)
+        |> assign(:data, log.data)
+        |> assign(:users, users)
+        |> add_breadcrumb(name: "Daily - #{date_str}", url: conn.request_path)
+        |> render("day_metrics_show.html")
+    end
   end
 
   @spec day_metrics_today(Plug.Conn.t(), map) :: Plug.Conn.t()

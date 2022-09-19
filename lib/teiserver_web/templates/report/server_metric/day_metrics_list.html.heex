@@ -49,6 +49,12 @@
           bsname: bsname,
           url: "?filter=hourly-battles"
         %>
+        
+        <a href={Routes.ts_reports_match_metric_path(@conn, :day_metrics_list)} class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.view_colour}"}>
+          <%= central_component "icon", icon: TeiserverWeb.Report.MatchMetricView.icon %>
+          &nbsp;
+          Match data
+        </a>
         <br /><br />
 
         <h4>

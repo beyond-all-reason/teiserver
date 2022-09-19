@@ -40,6 +40,12 @@
             active: "graph"
           })
         %>
+        
+        <a href={Routes.ts_reports_server_metric_path(@conn, :day_metrics_graph)} class={"btn float-end btn-outline-#{TeiserverWeb.Report.ServerMetricView.view_colour}"}>
+          <%= central_component "icon", icon: TeiserverWeb.Report.ServerMetricView.icon %>
+          &nbsp;
+          Server data
+        </a>
         <br /><br />
 
 <div class="row">

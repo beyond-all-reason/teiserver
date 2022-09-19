@@ -40,6 +40,12 @@
             active: "graph"
           })
         %>
+        
+        <a href={Routes.ts_reports_match_metric_path(@conn, :day_metrics_graph)} class={"btn float-end btn-outline-#{TeiserverWeb.Report.MatchMetricView.view_colour}"}>
+          <%= central_component "icon", icon: TeiserverWeb.Report.MatchMetricView.icon %>
+          &nbsp;
+          Match data
+        </a>
         <br /><br />
 
 <div class="row">
