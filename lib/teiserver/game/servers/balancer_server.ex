@@ -159,10 +159,6 @@ defmodule Teiserver.Game.BalancerServer do
       end)
       |> List.flatten
 
-    IO.puts ""
-    IO.inspect groups
-    IO.puts ""
-
     BalanceLib.create_balance(groups, team_count, [mode: @balance_algorithm])
       |> Map.put(:balance_mode, :grouped)
   end
