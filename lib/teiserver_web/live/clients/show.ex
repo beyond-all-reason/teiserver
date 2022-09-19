@@ -36,9 +36,7 @@ defmodule TeiserverWeb.ClientLive.Show do
     case allow?(socket.assigns[:current_user], "teiserver.moderator.account") do
       true ->
         id = int_parse(id)
-        # PubSub.subscribe(Central.PubSub, "legacy_all_user_updates")
-        PubSub.subscribe(Central.PubSub, "legacy_all_client_updates")
-        PubSub.subscribe(Central.PubSub, "legacy_user_updates:#{id}")
+        PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{id}")
         client = Client.get_client_by_id(id)
         user = User.get_user_by_id(id)
 
@@ -84,33 +82,13 @@ defmodule TeiserverWeb.ClientLive.Show do
     end
   end
 
-  def handle_info({:user_in, _name}, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_info({:ring, _userid}, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_info({:battle_updated, _, _, _}, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_info({:user_logged_in, _id}, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_info({:user_logged_out, client_id, _name}, socket) do
-    if int_parse(client_id) == socket.assigns[:id] do
-      {:noreply,
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
+    {:noreply,
        socket
        |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
-    else
-      {:noreply, socket}
-    end
   end
 
-  def handle_info({:direct_message, _, _}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do
     {:noreply, socket}
   end
 
