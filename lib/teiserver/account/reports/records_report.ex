@@ -15,6 +15,9 @@ defmodule Teiserver.Account.RecordsReport do
 
       {"Unique users", get_max(~w(aggregates stats unique_users))},
       {"Unique players", get_max(~w(aggregates stats unique_players))},
+
+      {"Player time (days)", get_max(~w(aggregates minutes player)) |> minutes_to_days},
+      {"Total time (days)", get_max(~w(aggregates minutes total)) |> minutes_to_days},
     ]
 
     assigns = %{
@@ -47,5 +50,9 @@ defmodule Teiserver.Account.RecordsReport do
       {a, b} ->
         raise "ERR: #{a}, #{b}"
     end
+  end
+
+  defp minutes_to_days({key, minutes}) do
+    {key, round(minutes / 1440)}
   end
 end
