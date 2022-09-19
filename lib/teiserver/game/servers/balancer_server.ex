@@ -128,7 +128,7 @@ defmodule Teiserver.Game.BalancerServer do
       party_result = make_grouped_balance(team_count, players, rating_type)
       {_, deviation} = party_result.deviation
 
-      if deviation > @max_deviation do
+      if deviation > (opts[:max_deviation] || @max_deviation) do
         make_solo_balance(team_count, players, rating_type)
       else
         party_result
@@ -158,6 +158,10 @@ defmodule Teiserver.Game.BalancerServer do
           {player_id_list, BalanceLib.balance_party(player_id_list, rating_type)}
       end)
       |> List.flatten
+
+    IO.puts ""
+    IO.inspect groups
+    IO.puts ""
 
     BalanceLib.create_balance(groups, team_count, [mode: @balance_algorithm])
       |> Map.put(:balance_mode, :grouped)
