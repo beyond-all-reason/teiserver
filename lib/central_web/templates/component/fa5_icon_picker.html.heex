@@ -11,23 +11,27 @@
   field_id = "#{form.name}_#{@field}"
 
   value = Ecto.Changeset.get_field(@form.source, @field) || ""
-  {thickness, the_icon} = case value |> String.split(" ") do
-    [a, b] -> {a, b}
-    [the_icon] -> {"fa-solid", the_icon}
+  {style, thickness, the_icon} = case value |> String.split(" ") do
+    [a, b] -> {"", a, b}
+    [the_icon] -> {"", "fa-solid", the_icon}
+    [a, b, c] -> {a, b, c}
+    [a, b, c | _] -> {a, b, c}
   end
 %>
 
 <script type="text/javascript">
   function icon_updated_<%= field_id %>() {
     thickness = $('#<%= "#{field_id}_thickness" %>').val();
+    style = $('#<%= "#{field_id}_style" %>').val();
     icon = $('#<%= "#{field_id}_icon" %>').val();
 
-    $('#<%= field_id %>').val(thickness + ' ' + icon);
+    $('#<%= field_id %>').val(style + ' ' + thickness + ' ' + icon);
 
-    $('#<%= "#{field_id}_preview" %>').html("<i class='fa-2x fa-fw " + thickness + " " + icon + "'></i>");
+    $('#<%= "#{field_id}_preview" %>').html("<i class='fa-2x fa-fw " + style + " " + thickness + " " + icon + "'></i>");
   }
 
   $(function() {
+    $('#<%= "#{field_id}_style" %>').val('<%= style %>');
     $('#<%= "#{field_id}_thickness" %>').val('<%= thickness %>');
     $('#<%= "#{field_id}_icon" %>').val('<%= the_icon %>');
     icon_updated_<%= field_id %>();
@@ -47,7 +51,7 @@
 
   <input type="hidden" name={"#{form.name}[#{@field}]"} id={field_id} value={Map.get(form.data, @field)} />
 
-  <div class="col-md-4">
+  <div class="col-md-3">
     <select class="form-control" id={"#{field_id}_thickness"} onchange={"icon_updated_#{field_id}(); #{onchange}"}>
       <option value="fa-regular">Regular</option>
       <option value="fa-light">Light</option>
@@ -56,7 +60,13 @@
       <option value="fa-duotone">Duotone</option>
     </select>
   </div>
-  <div class="col-md-6">
+  <div class="col-md-3">
+    <select class="form-control" id={"#{field_id}_style"} onchange={"icon_updated_#{field_id}(); #{onchange}"}>
+      <option value="">Classic</option>
+      <!--<option value="fa-sharp">Sharp</option>-->
+    </select>
+  </div>
+  <div class="col-md-4">
     <input type="text" id={"#{field_id}_icon"} value="" placeholder="" class="form-control" onchange={"icon_updated_#{field_id}(); #{onchange}"} onkeyup={"icon_updated_#{field_id}();"} />
   </div>
   <div class="col-md-2" id={"#{field_id}_preview"}>
