@@ -332,7 +332,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     }
 
     Coordinator.call_balancer(lobby_id, {
-      :make_balance, %{}, %{}, 2
+      :make_balance, 2, [allow_groups: true]
     })
 
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$explain"})
