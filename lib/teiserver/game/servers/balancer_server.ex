@@ -17,7 +17,11 @@ defmodule Teiserver.Game.BalancerServer do
 
   @impl true
   # http://planetspads.free.fr/spads/doc/spadsPluginApiDoc.html#balanceBattle-self-players-bots-clanMode-nbTeams-teamSize
-  def handle_call({:make_balance, team_count, opts}, _from, state) do
+  def handle_call({:make_balance, team_count, call_opts}, _from, state) do
+    opts = call_opts ++ [
+      algorithm: state.algorithm
+    ]
+
     {balance, new_state} = make_balance(team_count, state, opts)
     {:reply, balance, new_state}
   end
@@ -35,6 +39,15 @@ defmodule Teiserver.Game.BalancerServer do
   @impl true
   def handle_cast(:reset_hashes, state) do
     {:noreply, %{state | hashes: %{}}}
+  end
+
+  def handle_cast({:set_algorithm, algorithm}, state) do
+    if Enum.member?(~w(loser_picks)a, algorithm) do
+      {:noreply, %{state | algorithm: algorithm}}
+    else
+      Logger.error("No BalanceServer handler for algorithm of #{algorithm}")
+      {:noreply, state}
+    end
   end
 
   @impl true
@@ -176,6 +189,7 @@ defmodule Teiserver.Game.BalancerServer do
 
       hashes: %{},
 
+      algorithm: :loser_picks,
       last_balance_hash: nil
     }
   end

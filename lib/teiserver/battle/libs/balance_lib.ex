@@ -38,7 +38,7 @@ defmodule Teiserver.Battle.BalanceLib do
         {i, []}
       end)
 
-    {reversed_team_groups, logs} = case opts[:mode] || :loser_picks do
+    {reversed_team_groups, logs} = case opts[:algorithm] || :loser_picks do
       :loser_picks ->
         loser_picks(expanded_groups, teams)
     end
