@@ -10,7 +10,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   alias Teiserver.Battle.BalanceLib
   require Logger
 
-  @rated_match_types ["Team", "Duel", "FFA", "Team FFA"]
+  @rated_match_types ["Team", "Duel", "FFA", "Team FFA", "Partied Team"]
 
   @spec rating_type_list() :: [String.t()]
   def rating_type_list() do
@@ -30,13 +30,16 @@ defmodule Teiserver.Game.MatchRatingLib do
   end
 
   @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t()) :: :ok | {:error, :no_match}
-  def rate_match(match_id) when is_integer(match_id) do
+  def rate_match(match), do: rate_match(match, false)
+
+  @spec rate_match(non_neg_integer() | Teiserver.Battle.Match.t(), boolean()) :: :ok | {:error, :no_match}
+  def rate_match(match_id, override) when is_integer(match_id) do
     Battle.get_match(match_id, preload: [:members])
-      |> rate_match()
+      |> rate_match(override)
   end
 
-  def rate_match(nil), do: {:error, :no_match}
-  def rate_match(match) do
+  def rate_match(nil, _), do: {:error, :no_match}
+  def rate_match(match, override) do
     logs = Game.list_rating_logs(search: [match_id: match.id], limit: 1, select: [:id])
 
     sizes = match.members
@@ -61,6 +64,13 @@ defmodule Teiserver.Game.MatchRatingLib do
       Enum.count(sizes) != 1 ->
         {:error, :uneven_team_size}
 
+      match.team_count < 2 ->
+        {:error, :not_enough_teams}
+
+      # If override is set to true we skip the next few checks
+      override ->
+        do_rate_match(match)
+
       not Enum.empty?(logs) ->
         {:error, :already_rated}
 
@@ -73,11 +83,20 @@ defmodule Teiserver.Game.MatchRatingLib do
   end
 
   @spec do_rate_match(Teiserver.Battle.Match.t()) :: :ok
-  defp do_rate_match(%{team_count: _2} = match) do
+  defp do_rate_match(%{team_count: team_count} = match) do
     rating_type_id = Game.get_or_add_rating_type(match.game_type)
+    partied_rating_type_id = Game.get_or_add_rating_type("Partied Team")
 
-    userids = match.members
-      |> Enum.map(fn %{user_id: user_id} -> user_id end)
+    opponent_ratio = 2/team_count
+
+    party_ids = []
+    # party_ids = match.members
+    #   |> Enum.map(fn m -> m.party_id end)
+    #   |> Enum.group_by(fn party_id -> party_id end)
+    #   |> Map.drop([nil])
+    #   |> Enum.map(fn {k, ids} -> {k, Enum.count(ids)} end)
+    #   |> Enum.filter(fn {_k, count} -> count >= 2 end)
+    #   |> Enum.map(fn {k, _} -> k end)
 
     winners = match.members
       |> Enum.filter(fn membership -> membership.win end)
@@ -85,16 +104,46 @@ defmodule Teiserver.Game.MatchRatingLib do
     losers = match.members
       |> Enum.reject(fn membership -> membership.win end)
 
+    partied_user_ids = match.members
+      |> Enum.filter(fn m -> Enum.member?(party_ids, m.party_id) end)
+      |> Enum.map(fn m -> m.user_id end)
+
+    solo_user_ids = match.members
+      |> Enum.reject(fn m -> Enum.member?(party_ids, m.party_id) end)
+      |> Enum.map(fn m -> m.user_id end)
+
     # We will want to update these so we keep the whole object
     # additionally by using a list_ratings call we avoid the concern
     # of hitting a cache
-    rating_lookup = Account.list_ratings(search: [
+    solo_rating_lookup = Account.list_ratings(search: [
       rating_type_id: rating_type_id,
-      user_id_in: userids
+      user_id_in: solo_user_ids
     ])
       |> Map.new(fn rating ->
         {rating.user_id, rating}
       end)
+
+    # Now apply a default rating for where there isn't already one
+    solo_rating_lookup = solo_user_ids
+      |> Map.new(fn userid ->
+        {userid, solo_rating_lookup[userid] || BalanceLib.default_rating(rating_type_id)}
+      end)
+
+    partied_rating_lookup = Account.list_ratings(search: [
+      rating_type_id: partied_rating_type_id,
+      user_id_in: partied_user_ids
+    ])
+      |> Map.new(fn rating ->
+        {rating.user_id, rating}
+      end)
+
+    # Partied defaults too
+    partied_rating_lookup = partied_user_ids
+      |> Map.new(fn userid ->
+        {userid, partied_rating_lookup[userid] || BalanceLib.default_rating(partied_rating_type_id)}
+      end)
+
+    rating_lookup = Map.merge(solo_rating_lookup, partied_rating_lookup)
 
     # Build ratings into lists of tuples for the OpenSkill module to handle
     winner_ratings = winners
@@ -122,7 +171,8 @@ defmodule Teiserver.Game.MatchRatingLib do
     loss_ratings = Enum.zip(losers, lose_result)
       |> Enum.map(fn {%{user_id: user_id}, rating_update} ->
         user_rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
-        do_update_rating(user_id, match, user_rating, rating_update)
+        ratiod_rating_update = apply_change_ratio(user_rating, rating_update, opponent_ratio)
+        do_update_rating(user_id, match, user_rating, ratiod_rating_update)
       end)
 
     Ecto.Multi.new()
@@ -139,6 +189,18 @@ defmodule Teiserver.Game.MatchRatingLib do
     :ok
   end
   defp do_rate_match(_), do: :ok
+
+  # Used to ratio the skill lost when there are more than 2 teams
+  @spec apply_change_ratio(map(), {number(), number()}, number()) :: {number(), number()}
+  defp apply_change_ratio(_user_rating, rating_update, 1.0), do: rating_update
+  defp apply_change_ratio(user_rating, rating_update, ratio) do
+    {s, u} = rating_update
+
+    skill_change = (user_rating.skill - s) * ratio
+    new_skill = (user_rating.skill - skill_change)
+
+    {new_skill, u}
+  end
 
   @spec do_update_rating(T.userid, map(), map(), {number(), number()}) :: any
   defp do_update_rating(user_id, match, user_rating, rating_update) do
