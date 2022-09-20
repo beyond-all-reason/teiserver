@@ -87,6 +87,7 @@ defmodule Teiserver.User do
 
   def default_data(), do: @default_data
 
+  # Time played ranks
   # @rank_levels [
   #   5,
   #   15,
@@ -97,7 +98,8 @@ defmodule Teiserver.User do
   #   3000
   # ]
 
-  @rank_levels [5, 11, 17, 22, 28, 35, 100]
+  # Leaderboard rating ranks
+  @rank_levels [3, 7, 12, 21, 26, 35, 100]
 
   def get_rank_levels(), do: @rank_levels
 
