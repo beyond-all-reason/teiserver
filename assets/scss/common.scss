@@ -93,6 +93,8 @@
 @import './mdb/accordion';
 @import './mdb/carousel';
 
-
 // Custom styles
+$admin: $danger;
+$staff: $warning;
+
 @import './custom/styles';
