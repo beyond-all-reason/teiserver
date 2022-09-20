@@ -172,6 +172,11 @@ defmodule Teiserver.Account.PartyServer do
         )
 
         Account.move_client_to_party(userid, nil)
+
+        if Enum.empty?(new_members) do
+          Teiserver.Account.PartyLib.stop_party_server(party.id)
+        end
+
         %{party | members: new_members}
 
       true -> party
