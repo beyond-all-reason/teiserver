@@ -1,3 +1,4 @@
+// scss-docs-start caret-mixins
 @mixin caret-down {
   border-top: $caret-width solid;
   border-right: $caret-width solid transparent;
@@ -31,7 +32,7 @@
       display: inline-block;
       margin-left: $caret-spacing;
       vertical-align: $caret-vertical-align;
-      content: '';
+      content: "";
       @if $direction == down {
         @include caret-down();
       } @else if $direction == up {
@@ -50,7 +51,7 @@
         display: inline-block;
         margin-right: $caret-spacing;
         vertical-align: $caret-vertical-align;
-        content: '';
+        content: "";
         @include caret-start();
       }
     }
@@ -60,3 +61,4 @@
     }
   }
 }
+// scss-docs-end caret-mixins

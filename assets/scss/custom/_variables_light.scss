@@ -91,6 +91,25 @@ $theme-colors: (primary: $primary,
   body-bg: $light,
 );
 
+$utilities-border-colors: (
+  primary: $primary,
+  primary2: $primary2,
+  secondary: $secondary,
+  success: $success,
+  success2: $success2,
+  info: $info,
+  info2: $info2,
+  warning: $warning,
+  warning2: $warning2,
+  danger: $danger,
+  danger2: $danger2,
+  light: $light,
+  dark: $dark,
+  // add any additional color below
+
+  body-bg: $dark,
+);
+
 $min-contrast-ratio: 1.9 !default;
 
 // Body

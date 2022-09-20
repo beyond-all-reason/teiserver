@@ -41,11 +41,11 @@ config :central, CentralWeb.Endpoint,
 config :dart_sass,
   version: "1.49.0",
   light: [
-    args: ~w(scss/mdb.light.scss ../priv/static/assets/mdb_light.css),
+    args: ~w(scss/light.scss ../priv/static/assets/light.css),
     cd: Path.expand("../assets", __DIR__)
   ],
   dark: [
-    args: ~w(scss/mdb.dark.scss ../priv/static/assets/mdb_dark.css),
+    args: ~w(scss/dark.scss ../priv/static/assets/dark.css),
     cd: Path.expand("../assets", __DIR__)
   ]
 

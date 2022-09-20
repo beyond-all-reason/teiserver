@@ -16,9 +16,9 @@
     %>
 
     <%= if light_mode do %>
-      <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/mdb_light.css")}/>
+      <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/light.css")}/>
     <% else %>
-      <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/mdb_dark.css")}/>
+      <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/assets/dark.css")}/>
     <% end %>
     <link phx-track-static rel="stylesheet" href={Routes.static_path(@conn, "/css/fontawesome.css")}/>
 
