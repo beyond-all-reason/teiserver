@@ -86,13 +86,9 @@ defmodule TeiserverWeb.API.SpadsController do
       balance_enabled == true ->
         team_count = int_parse(params["nbTeams"])
 
-        Logger.info("balanceMode = #{Kernel.inspect Map.keys(params)}")
-
         opts = [
-          allow_groups: true#params["balanceMode"] != ""
+          allow_groups: params["balanceMode"] != "skill"
         ]
-
-        Logger.info(Kernel.inspect params)
 
         balance_result = Coordinator.call_balancer(client.lobby_id, {
           :make_balance, team_count, opts
