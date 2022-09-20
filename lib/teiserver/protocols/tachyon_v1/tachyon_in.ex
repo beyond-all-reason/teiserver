@@ -35,17 +35,15 @@ defmodule Teiserver.Protocols.Tachyon.V1.TachyonIn do
     clean_data = raw_data
       |> String.trim
 
-    new_state =
-      case TachyonLib.decode(clean_data) do
-        {:ok, data} ->
-          dispatch(data["cmd"], data, state)
+    case TachyonLib.decode(clean_data) do
+      {:ok, data} ->
+        dispatch(data["cmd"], data, state)
 
-        {:error, error_type} ->
-          reply(:system, :error, %{location: "decode", error: error_type}, state)
-          state
-      end
+      {:error, error_type} ->
+        reply(:system, :error, %{location: "decode", error: error_type}, state)
+    end
 
-    %{new_state | last_msg: System.system_time(:second)}
+    %{state | last_msg: System.system_time(:second)}
   end
 
   # If the data has a message id we add it to the state, saves us passing around

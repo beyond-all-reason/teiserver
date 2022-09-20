@@ -47,7 +47,10 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     }
   end
 
-  test "tachyon end to end", %{socket: socket, user: user, friend1: friend1, friend2: friend2} do
+  test "tachyon end to end", %{socket: socket, user: user, friend1: friend1, friend2: friend2, pid: pid} do
+    initial_last_message = :sys.get_state(pid)
+    assert initial_last_message != nil
+
     # Flush!
     _tachyon_recv_until(socket)
 
@@ -173,6 +176,10 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     assert Map.has_key?(resp, "lobby")
     assert Map.has_key?(resp, "bots")
     assert Map.has_key?(resp, "member_list")
+
+    # And the last message should have been updated by now
+    new_last_message = :sys.get_state(pid)
+    assert initial_last_message != new_last_message
   end
 
   test "friends", %{
