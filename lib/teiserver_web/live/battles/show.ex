@@ -30,6 +30,8 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       @extra_menu_content
     end
 
+    :timer.send_interval(10_000, :tick)
+
     socket = socket
       |> Teiserver.ServerUserPlug.live_call()
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
@@ -67,7 +69,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
         index_redirect(socket)
 
       true ->
-        {users, clients, ratings} = get_user_and_clients(lobby.players)
+        {users, clients, ratings, parties} = get_user_and_clients(lobby.players)
 
         bar_user = User.get_user_by_id(socket.assigns.current_user.id)
         lobby = Map.put(lobby, :uuid, Battle.get_lobby_match_uuid(id))
@@ -85,6 +87,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
             |> get_consul_state
             |> assign(:users, users)
             |> assign(:clients, clients)
+            |> assign(:parties, parties)
         }
     end
   end
@@ -98,15 +101,38 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       Client.get_clients(id_list)
       |> Map.new(fn c -> {c.userid, c} end)
 
+    # Creates a map where the party_id refers to an integer
+    # but only includes parties with 2 or more members
+    parties = clients
+      |> Enum.map(fn {_, c} -> c end)
+      |> Enum.filter(fn c -> c.player end)
+      |> Enum.group_by(fn m -> m.party_id end)
+      |> Map.drop([nil])
+      |> Map.filter(fn {_id, members} -> Enum.count(members) > 1 end)
+      |> Map.keys()
+      |> Enum.zip(Central.Helpers.StylingHelper.bright_hex_colour_list)
+      |> Map.new
+
     ratings = users
       |> Map.new(fn {userid, _} ->
         {userid, BalanceLib.get_user_rating_value_uncertainty_pair(userid, "Team")}
       end)
 
-    {users, clients, ratings}
+    {users, clients, ratings, parties}
   end
 
   @impl true
+  def handle_info(:tick, socket) do
+    socket = if socket.assigns.lobby.in_progress do
+      socket
+        |> assign(:lobby, Battle.get_lobby(socket.assigns.id))
+    else
+      socket
+    end
+
+    {:noreply, socket}
+  end
+
   def handle_info({:battle_lobby_throttle, :closed}, socket) do
     {:noreply,
       socket
@@ -136,7 +162,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
         socket
       _ ->
         players = Battle.get_lobby_member_list(assigns.id)
-        {users, clients, ratings} = get_user_and_clients(players)
+        {users, clients, ratings, parties} = get_user_and_clients(players)
 
         new_lobby = Map.put(assigns[:lobby], :players, players)
 
@@ -145,6 +171,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
           |> assign(:users, users)
           |> assign(:clients, clients)
           |> assign(:ratings, ratings)
+          |> assign(:parties, parties)
     end
 
     {:noreply, socket}
@@ -164,7 +191,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   def handle_event("force-update", _, %{assigns: %{id: id}} = socket) do
     battle = Lobby.get_battle(id)
-    {users, clients, ratings} = get_user_and_clients(battle.players)
+    {users, clients, ratings, parties} = get_user_and_clients(battle.players)
 
     {:noreply,
       socket
@@ -173,6 +200,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
         |> assign(:users, users)
         |> assign(:clients, clients)
         |> assign(:ratings, ratings)
+        |> assign(:parties, parties)
     }
   end
 
