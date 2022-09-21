@@ -39,7 +39,6 @@ uid = Enum.random(100000..999999) |> to_string
   var <%= assigns[:name] %>_picker_target = "";
 
   function <%= assigns[:name] %>_picker (new_target) {
-    console.log("_picker");
     <%= assigns[:name] %>_picker_target = $(new_target);
 
     $('#<%= assigns[:name] %>-picker-ref').val('');
@@ -51,7 +50,6 @@ uid = Enum.random(100000..999999) |> to_string
   }
 
   function <%= assigns[:name] %>_picker_select (selection) {
-    console.log("_picker_select");
     $('#<%= assigns[:name] %>-picker-ref').val('');
     $('#<%= assigns[:name] %>-picker-modal-results').html('');
 
@@ -65,7 +63,6 @@ uid = Enum.random(100000..999999) |> to_string
   }
 
   function <%= assigns[:name] %>_picker_display (results) {
-    console.log("_picker_display");
     // if (results == "" && results != []) {return;}
     $('#<%= assigns[:name] %>-picker-modal-results').html('');
 
@@ -93,7 +90,6 @@ uid = Enum.random(100000..999999) |> to_string
   }
 
   function <%= assigns[:name] %>_picker_search () {
-    console.log("_picker_search");
     search_term = $('#<%= assigns[:name] %>-picker-ref').val();
     dataset = "<%= assigns[:name] %>";
     uid = "<%= uid %>";
@@ -113,7 +109,6 @@ uid = Enum.random(100000..999999) |> to_string
   }
 
   function live_search_results(results) {
-    console.log("live_search_results");
     <%= assigns[:name] %>_picker_display(results.results);
   }
 </script>
