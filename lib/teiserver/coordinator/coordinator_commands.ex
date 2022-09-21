@@ -125,10 +125,10 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         rating_score = rating.rating_value
           |> NumberHelper.round(2)
 
-        leaderboard_score = rating.leaderboard_value
+        leaderboard_rating = rating.leaderboard_rating
           |> NumberHelper.round(2)
 
-        "#{rating.rating_type.name} > Game: #{rating_score}, Leaderboard: #{leaderboard_score}"
+        "#{rating.rating_type.name} > Game: #{rating_score}, Leaderboard: #{leaderboard_rating}"
       end)
       |> Enum.sort
 
@@ -136,7 +136,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       @splitter,
       "You are #{sender.name}",
       "Profile link: #{profile_link}",
-      # "Time rank: #{sender.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
       "Skill ratings:",
       ratings,
       accolades_string
@@ -162,17 +161,35 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
         profile_link = "https://#{host}/teiserver/profile/#{user.id}"
 
+        ratings = Account.list_ratings(
+          search: [
+            user_id: user.id
+          ],
+          preload: [:rating_type]
+        )
+          |> Enum.map(fn rating ->
+            rating_score = rating.rating_value
+              |> NumberHelper.round(2)
+
+            leaderboard_rating = rating.leaderboard_rating
+              |> NumberHelper.round(2)
+
+            "#{rating.rating_type.name} > Game: #{rating_score}, Leaderboard: #{leaderboard_rating}"
+          end)
+          |> Enum.sort
+
         standard_parts = [
           @splitter,
           "Found #{user.name}",
           (if previous_names != "", do: "Previous names: #{previous_names}"),
-          "Profile link: #{profile_link}"
+          "Profile link: #{profile_link}",
+          ["Ratings: " | ratings]
         ]
 
         mod_parts = if User.is_moderator?(sender) do
-          player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
-          spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
-          rank_time = User.rank_time(user.id)
+          # player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
+          # spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
+          # rank_time = User.rank_time(user.id)
 
           smurfs = Account.smurf_search(user)
             |> Enum.map(fn {_key, users} -> users end)
@@ -186,19 +203,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
             [] -> "No smurfs found"
             _ -> "Found smurfs named: #{Enum.join(smurfs, ", ")}"
           end
-
-          ratings = Account.list_ratings(
-            search: [
-              user_id: user.id
-            ],
-            preload: [:rating_type]
-          )
-            |> Enum.map(fn rating ->
-              score = rating.rating_value
-                |> NumberHelper.round(2)
-
-              "#{rating.rating_type.name}: #{score}"
-            end)
 
           accolades_string = if Config.get_site_config_cache("teiserver.Enable accolades") do
             accolades = AccoladeLib.get_player_accolades(user.id)
@@ -219,10 +223,9 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           end
 
           [
-            "Rank: #{user.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
+            # "Rank: #{user.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
             smurf_string,
-            accolades_string,
-            ["Ratings: " | ratings]
+            accolades_string
           ]
         else
           []
