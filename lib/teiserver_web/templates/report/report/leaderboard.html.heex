@@ -112,10 +112,15 @@
         <td><%= rating.uncertainty |> round(2) %></td>
 
         <td><%= age %></td>
-        
+
         <%= if @extra_data do %>
-          <td><%= @extra_data[rating.user_id].count %></td>
-          <td><%= percent(@extra_data[rating.user_id].wins/@extra_data[rating.user_id].count) %>%</td>
+          <%# If there is a manual adjustment it counts as a rating update even though no games were played %>
+          <%= if @extra_data[rating.user_id] do %>
+            <td><%= @extra_data[rating.user_id].count %></td>
+            <td><%= percent(@extra_data[rating.user_id].wins/@extra_data[rating.user_id].count) %>%</td>
+          <% else %>
+            <td colspan="2">&nbsp;</td>
+          <% end %>
         <% end %>
 
         <%= if user_moderator do %>

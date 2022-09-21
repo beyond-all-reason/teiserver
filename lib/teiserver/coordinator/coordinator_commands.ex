@@ -9,7 +9,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   @splitter "---------------------------"
   @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore 1v1me un1v1 website)
-  @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no)
+  @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no explain)
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
   defp allow_command?(%{senderid: senderid} = cmd, state) do
@@ -90,9 +90,9 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     sender = User.get_user_by_id(senderid)
     stats = Account.get_user_stat_data(senderid)
 
-    player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
-    spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
-    rank_time = User.rank_time(senderid)
+    # player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
+    # spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
+    # rank_time = User.rank_time(senderid)
 
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     profile_link = "https://#{host}/teiserver/profile/#{senderid}"
@@ -122,10 +122,13 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       preload: [:rating_type]
     )
       |> Enum.map(fn rating ->
-        score = rating.rating_value
+        rating_score = rating.rating_value
           |> NumberHelper.round(2)
 
-        "#{rating.rating_type.name}: #{score}"
+        leaderboard_score = rating.leaderboard_value
+          |> NumberHelper.round(2)
+
+        "#{rating.rating_type.name} > Game: #{rating_score}, Leaderboard: #{leaderboard_score}"
       end)
       |> Enum.sort
 
@@ -133,7 +136,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       @splitter,
       "You are #{sender.name}",
       "Profile link: #{profile_link}",
-      "Time rank: #{sender.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
+      # "Time rank: #{sender.rank+1} with #{player_hours} player hours and #{spectator_hours} spectator hours for a rank hour count of #{rank_time}",
       "Skill ratings:",
       ratings,
       accolades_string

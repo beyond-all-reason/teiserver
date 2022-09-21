@@ -56,7 +56,7 @@ defmodule Teiserver.Agents.BattlejoinAgentServer do
 
   defp handle_msg(nil, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.joined", "lobby" => %{"id" => lobby_id}}, state) do
-    %{state | lobby_id: lobby_id, stage: :in}
+    %{state | lobby_id: lobby_id, stage: :in_battle}
   end
   defp handle_msg(%{"cmd" => "s.lobby.join", "result" => "waiting_for_host"}, state) do
     %{state | stage: :waiting}
