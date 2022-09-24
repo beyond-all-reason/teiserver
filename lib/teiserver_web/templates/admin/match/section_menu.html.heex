@@ -32,6 +32,15 @@
 <div class="float-end">
   <%= if assigns[:match] != nil do %>
     <%= central_component "section_menu_button",
+      name: "user_view",
+      label: "Standard view",
+      active: @active,
+      icon: Central.Account.UserLib.icon(),
+      bsname: bsname,
+      url: Routes.ts_battle_match_path(@conn, :show, @match.id)
+    %>
+    
+    <%= central_component "section_menu_button",
       name: "chat",
       label: "Chat",
       active: @active,

@@ -88,4 +88,19 @@ defmodule Teiserver.Data.UserTest do
     })
     assert User.rename_user(user.id, "rename8") == {:error, "If you keep changing your name people won't know who you are; give it a bit of time (30 days)"}
   end
+
+  test "valid_email?" do
+    data = [
+      {"name@domain.com", true},
+      {"name.name@domain.co.uk", true},
+      {"name@domain", false},
+      {"name.domain", false},
+      {"name", false},
+    ]
+
+    for {value, expected} <- data do
+      result = User.valid_email?(value)
+      assert result == expected, message: "Bad result for email '#{value}'"
+    end
+  end
 end

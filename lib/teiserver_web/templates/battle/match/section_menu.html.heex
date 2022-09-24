@@ -28,3 +28,16 @@
     url: "#"
   %>
 <% end %>
+
+<div class="float-end">
+  <%= if assigns[:match] != nil and allow?(@conn, "teiserver.staff.moderator") do %>
+    <%= central_component "section_menu_button",
+      name: "admin",
+      label: "Admin view",
+      active: @active,
+      icon: Central.Admin.AdminLib.icon(),
+      bsname: bsname,
+      url: Routes.ts_admin_match_path(@conn, :show, @match.id)
+    %>
+  <% end %>
+</div>

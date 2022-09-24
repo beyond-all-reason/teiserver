@@ -13,10 +13,11 @@
           })
         %>
 
-        <table class="table mt-4">
+        <table class="table table-sm mt-4">
           <thead>
             <tr>
               <th>New user</th>
+              <th>Status</th>
               <th>Registered</th>
               
               <th>&nbsp;</th>
@@ -24,8 +25,29 @@
           </thead>
           <tbody>
             <%= for user <- @relevant_new_users do %>
+              <%
+                user_r = %{restrictions: user.data["restrictions"] || []}
+
+                banned = Teiserver.User.is_restricted?(user_r, ["Login"])
+                muted = Teiserver.User.is_restricted?(user_r, ["All chat", "Room chat", "Direct chat", "Lobby chat", "Battle chat"])
+                warned = Teiserver.User.is_restricted?(user_r, ["Warning reminder"])
+              %>
+
               <tr>
                 <td><%= user.name %></td>
+                <td>
+                  <%= if banned do %>
+                    <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Ban")}"}></i>
+                  <% end %>
+
+                  <%= if muted do %>
+                    <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Mute")}"}></i>
+                  <% end %>
+
+                  <%= if warned do %>
+                    <i class={"fa-fw text-warning #{Central.Account.ReportLib.action_icon("Warn")}"}></i>
+                  <% end %>
+                </td>
                 <td><%= date_to_str(user.inserted_at, format: :hms_or_dmy) %></td>
 
                 <td>

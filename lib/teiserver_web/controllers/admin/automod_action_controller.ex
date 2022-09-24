@@ -39,24 +39,33 @@ defmodule TeiserverWeb.Admin.AutomodActionController do
       preload: [:user, :added_by]
     ])
 
-    logs = Logging.list_audit_logs(search: [
-      actions: [
-          "Teiserver:Updated automod action",
-          "Teiserver:Automod action enacted"
-        ],
-      details_equal: {"automod_action_id", automod_action.id |> to_string}
+    logs = Logging.list_audit_logs(
+      search: [
+        actions: [
+            "Teiserver:Updated automod action",
+            "Teiserver:Automod action enacted"
+          ],
+        details_equal: {"automod_action_id", automod_action.id |> to_string}
       ],
       joins: [:user],
       order_by: "Newest first"
     )
 
+    targets = logs
+      |> Enum.map(fn log -> log.details["target_user_id"] end)
+      |> Enum.reject(&(&1 == nil))
+      |> Map.new(fn userid ->
+        {userid, Account.get_username(userid)}
+      end)
+
     automod_action
-    |> AutomodActionLib.make_favourite
-    |> insert_recently(conn)
+      |> AutomodActionLib.make_favourite
+      |> insert_recently(conn)
 
     conn
       |> assign(:automod_action, automod_action)
       |> assign(:logs, logs)
+      |> assign(:targets, targets)
       |> add_breadcrumb(name: "Show: #{automod_action.user.name}", url: conn.request_path)
       |> render("show.html")
   end

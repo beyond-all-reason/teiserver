@@ -1,6 +1,5 @@
 defmodule Teiserver.Account.NewSmurfReport do
-  alias Central.Helpers.DatePresets
-  alias Teiserver.{Account}
+  alias Teiserver.{Account, User}
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-face-angry-horns"
@@ -9,22 +8,14 @@ defmodule Teiserver.Account.NewSmurfReport do
   def permissions(), do: "teiserver.admin"
 
   @spec run(Plug.Conn.t(), map()) :: {map(), map()}
-  def run(_conn, params) do
-    params = apply_defaults(params)
-
-    # Date range
-    {start_date, _end_date} = DatePresets.parse(
-      params["date_preset"],
-      params["start_date"],
-      params["end_date"]
-    )
-
+  def run(_conn, _params) do
     # Get new users first
     new_users = Account.list_users(
       search: [
-        inserted_after: start_date |> Timex.to_datetime,
+        inserted_after: Timex.now |> Timex.shift(days: -2),
         verified: "Verified"
       ],
+      limit: 1000,
       order_by: "Newest first"
     )
 
@@ -51,9 +42,12 @@ defmodule Teiserver.Account.NewSmurfReport do
         value_in: key_values,
         not_user_id_in: new_user_ids
       ],
-      select: [:value],
+      select: [:value, :user_id],
       limit: :infinity
     )
+    |> Enum.filter(fn %{user_id: userid} ->
+      User.is_verified?(userid)
+    end)
 
     # Extract the found values
     found_values = found_keys
@@ -66,23 +60,19 @@ defmodule Teiserver.Account.NewSmurfReport do
       |> Enum.uniq
 
     relevant_new_users = new_users
-      |> Enum.filter(fn %{id: id} -> Enum.member?(relevant_new_user_ids, id) end)
+      |> Enum.filter(fn user -> Enum.member?(relevant_new_user_ids, user.id) end)
+
+    # The idea is we will be able to show how many matches they have
+    # matches = relevant_new_users
+    #   |> Map.new(fn u ->
+    #     {u.id, nil}
+    #   end)
 
     assigns = %{
-      params: params,
-      presets: DatePresets.long_ranges(),
-      relevant_new_users: relevant_new_users
+      relevant_new_users: relevant_new_users,
+      # matches: matches
     }
 
     {%{}, assigns}
-  end
-
-  defp apply_defaults(params) do
-    Map.merge(%{
-      "date_preset" => "This week",
-      "start_date" => "",
-      "end_date" => "",
-      "mode" => ""
-    }, Map.get(params, "report", %{}))
   end
 end

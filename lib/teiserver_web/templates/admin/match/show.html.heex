@@ -52,12 +52,19 @@
         </li>
 
         <%= if @rating_logs != %{} do %>
-        <li class="nav-item">
-          <a href="#ratings_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-            <%= central_component "icon", icon: Teiserver.Account.RatingLib.icon() %>
-            Ratings
-          </a>
-        </li>
+          <li class="nav-item">
+            <a href="#ratings_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component "icon", icon: Teiserver.Account.RatingLib.icon() %>
+              Ratings
+            </a>
+          </li>
+          
+          <li class="nav-item">
+            <a href="#balance_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component "icon", icon: "fa-solid fa-scale-balanced" %>
+              Balance
+            </a>
+          </li>
         <% end %>
       </ul>
 
@@ -71,9 +78,13 @@
         </div>
 
         <%= if @rating_logs != %{} do %>
-        <div class="tab-pane" id="ratings_tab" style="padding:5px;">
-          <%= render "tab_ratings.html", assigns %>
-        </div>
+          <div class="tab-pane" id="ratings_tab" style="padding:5px;">
+            <%= render "tab_ratings.html", assigns %>
+          </div>
+          
+          <div class="tab-pane" id="balance_tab" style="padding:5px;">
+            <%= render "tab_balance.html", assigns %>
+          </div>
         <% end %>
       </div>
       <%# END OF TABS %>
