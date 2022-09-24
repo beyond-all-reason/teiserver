@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Admin.MatchController do
   use CentralWeb, :controller
 
   alias Teiserver.{Battle, Game, Account}
-  alias Teiserver.Battle.MatchLib
+  alias Teiserver.Battle.{MatchLib, BalanceLib}
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Moderator,
@@ -96,12 +96,51 @@ defmodule TeiserverWeb.Admin.MatchController do
       |> Enum.zip(Central.Helpers.StylingHelper.bright_hex_colour_list)
       |> Map.new
 
+    # Now for balance related stuff
+    past_balance_groups = members
+      |> Enum.group_by(
+        fn m -> m.party_id end,
+        fn m -> rating_logs[m.user_id].value["rating_value"] end
+      )
+
+    partied_players = members
+      |> Enum.group_by(fn p -> p.party_id end, fn p -> p.user_id end)
+
+    groups = partied_players
+      |> Enum.map(fn
+        # The nil group is players without a party, they need to
+        # be broken out of the party
+        {nil, player_id_list} ->
+          player_id_list
+          |> Enum.map(fn userid ->
+            {[userid], rating_logs[userid].value["rating_value"]}
+          end)
+
+        {_party_id, player_id_list} ->
+          party_rating = player_id_list
+            |> Enum.map(fn userid ->
+              rating_logs[userid].value["rating_value"]
+            end)
+            |> BalanceLib.balance_party_by_ratings
+
+          {player_id_list, party_rating}
+      end)
+      |> List.flatten
+
+    past_balance = BalanceLib.create_balance(groups, match.team_count, [mode: :loser_picks])
+      |> Map.put(:balance_mode, :grouped)
+
+    # What about new balance?
+    new_balance = generate_new_balance_data(match)
+
     conn
       |> assign(:match, match)
       |> assign(:match_name, match_name)
       |> assign(:members, members)
       |> assign(:rating_logs, rating_logs)
       |> assign(:parties, parties)
+      |> assign(:past_balance, past_balance)
+      |> assign(:new_balance, new_balance)
       |> add_breadcrumb(name: "Show: #{match_name}", url: conn.request_path)
       |> render("show.html")
   end
@@ -142,5 +181,35 @@ defmodule TeiserverWeb.Admin.MatchController do
       |> assign(:uuid, uuid)
       |> assign(:matches, matches)
       |> render("server_index.html")
+  end
+
+  defp generate_new_balance_data(match) do
+    rating_type = cond do
+      match.team_size == 1 -> "Duel"
+      match.team_count > 2 ->
+        if match.team_size > 1, do: "Team FFA", else: "FFA"
+      true -> "Team"
+    end
+
+    partied_players = match.members
+      |> Enum.group_by(fn p -> p.party_id end, fn p -> p.user_id end)
+
+    groups = partied_players
+      |> Enum.map(fn
+        # The nil group is players without a party, they need to
+        # be broken out of the party
+        {nil, player_id_list} ->
+          player_id_list
+          |> Enum.map(fn userid ->
+            {[userid], BalanceLib.get_user_balance_rating_value(userid, rating_type)}
+          end)
+
+        {_party_id, player_id_list} ->
+          {player_id_list, BalanceLib.balance_party(player_id_list, rating_type)}
+      end)
+      |> List.flatten
+
+    BalanceLib.create_balance(groups, match.team_count, [mode: :loser_picks])
+      |> Map.put(:balance_mode, :grouped)
   end
 end

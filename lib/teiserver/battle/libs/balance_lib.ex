@@ -362,11 +362,15 @@ defmodule Teiserver.Battle.BalanceLib do
 
   @spec balance_party([T.userid()], String.t() | non_neg_integer()) :: number()
   def balance_party(userids, rating_type) do
-    ratings = userids
+    userids
       |> Enum.map(fn userid ->
         get_user_balance_rating_value(userid, rating_type)
       end)
+      |> balance_party_by_ratings
+  end
 
+  @spec balance_party_by_ratings([number()]) :: number()
+  def balance_party_by_ratings(ratings) do
     count = Enum.count(ratings)
     sum = Enum.sum(ratings)
     mean =  sum / count
