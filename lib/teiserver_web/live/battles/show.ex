@@ -124,8 +124,12 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   @impl true
   def handle_info(:tick, socket) do
     socket = if socket.assigns.lobby.in_progress do
+      lobby = socket.assigns.id
+        |> Battle.get_lobby()
+        |> Map.put(:uuid, Battle.get_lobby_match_uuid(socket.assigns.id))
+
       socket
-        |> assign(:lobby, Battle.get_lobby(socket.assigns.id))
+        |> assign(:lobby, lobby)
     else
       socket
     end
