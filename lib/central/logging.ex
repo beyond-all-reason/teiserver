@@ -19,12 +19,12 @@ defmodule Central.Logging do
 
   defp audit_log_query(id, args) do
     AuditLogLib.query_audit_logs()
-    |> AuditLogLib.search(%{id: id})
-    |> AuditLogLib.search(args[:search])
-    |> AuditLogLib.preload(args[:joins])
-    |> AuditLogLib.order_by(args[:order])
-    |> QueryHelpers.select(args[:select])
-    |> QueryHelpers.limit_query(args[:limit] || 50)
+      |> AuditLogLib.search(%{id: id})
+      |> AuditLogLib.search(args[:search])
+      |> AuditLogLib.preload(args[:joins])
+      |> AuditLogLib.order_by(args[:order_by])
+      |> QueryHelpers.select(args[:select])
+      |> QueryHelpers.limit_query(args[:limit] || 50)
   end
 
   @doc """
