@@ -190,13 +190,16 @@ defmodule Teiserver.User do
         {:failure, "Max length #{max_username_length} characters"}
 
       clean_name(name) != name ->
-        {:failure, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
+        {:failure, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)"}
 
       get_user_by_name(name) ->
         {:failure, "Username already taken"}
 
       get_user_by_email(email) ->
         {:failure, "Email already in use"}
+
+      valid_email?(email) == false ->
+        {:error, "Invalid email"}
 
       true ->
         case do_register_user(name, email, password) do
@@ -222,13 +225,16 @@ defmodule Teiserver.User do
         {:error, "Max length #{max_username_length} characters"}
 
       clean_name(name) != name ->
-        {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)"}
+        {:error, "Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)"}
 
       get_user_by_name(name) ->
         {:error, "Username already taken"}
 
       get_user_by_email(email) ->
         {:error, "Email already attached to a user"}
+
+      valid_email?(email) == false ->
+        {:error, "Invalid email"}
 
       true ->
         case do_register_user_with_md5(name, email, md5_password, ip) do
@@ -1108,6 +1114,15 @@ defmodule Teiserver.User do
 
       required ->
         Enum.member?(user.roles, required)
+    end
+  end
+
+  @spec valid_email?(String.t()) :: boolean
+  def valid_email?(email) do
+    cond do
+      not String.contains?(email, "@") -> false
+      not String.contains?(email, ".") -> false
+      true -> true
     end
   end
 end
