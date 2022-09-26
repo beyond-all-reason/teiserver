@@ -181,6 +181,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   def handle_event("kick", %{"userid" => userid_str}, socket) do
     if leader?(socket) do
       userid = int_parse(userid_str)
+      Account.move_client_to_party(userid, nil)
       Account.kick_user_from_party(socket.assigns.party_id, userid)
     end
     {:noreply, socket}
@@ -189,7 +190,7 @@ defmodule TeiserverWeb.Account.PartyLive.Show do
   # We kick the user to ensure any connected clients will also update, leaving is normally done
   # by the connected tachyon client
   def handle_event("leave", _, socket) do
-    # Account.kick_user_from_party(socket.assigns.party_id, socket.assigns.user_id)
+    Account.move_client_to_party(socket.assigns.user_id, nil)
     Account.leave_party(socket.assigns.party_id, socket.assigns.user_id)
     {:noreply, socket |> redirect(to: Routes.ts_game_party_index_path(socket, :index))}
   end
