@@ -21,13 +21,13 @@ defmodule Teiserver.Data.UserTest do
   end
 
   test "registering a duplicate user" do
-    result = User.register_user_with_md5("dupe_name", "dupe@email", "md5_password", "ip")
+    result = User.register_user_with_md5("dupe_name", "dupe@email.e", "md5_password", "ip")
     assert result == :success
 
-    result = User.register_user_with_md5("DUPE_NAME", "DUPE@email", "md5_password", "ip")
+    result = User.register_user_with_md5("DUPE_NAME", "DUPE@email.e", "md5_password", "ip")
     assert result == {:error, "Username already taken"}
 
-    result = User.register_user_with_md5("non_dupe_name", "DUPE@email", "md5_password", "ip")
+    result = User.register_user_with_md5("non_dupe_name", "DUPE@email.e", "md5_password", "ip")
     assert result == {:error, "Email already attached to a user"}
   end
 

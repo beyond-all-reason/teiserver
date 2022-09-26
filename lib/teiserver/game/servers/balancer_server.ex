@@ -126,6 +126,7 @@ defmodule Teiserver.Game.BalancerServer do
 
     if opts[:allow_groups] do
       party_result = make_grouped_balance(team_count, players, rating_type)
+
       {_, deviation} = party_result.deviation
 
       if deviation > (opts[:max_deviation] || @max_deviation) do
@@ -150,12 +151,15 @@ defmodule Teiserver.Game.BalancerServer do
         # be broken out of the party
         {nil, player_id_list} ->
           player_id_list
-          |> Enum.map(fn userid ->
-            {[userid], BalanceLib.get_user_balance_rating_value(userid, rating_type)}
-          end)
+            |> Enum.map(fn userid ->
+              %{userid => BalanceLib.get_user_balance_rating_value(userid, rating_type)}
+            end)
 
         {_party_id, player_id_list} ->
-          {player_id_list, BalanceLib.balance_party(player_id_list, rating_type)}
+          player_id_list
+            |> Map.new(fn userid ->
+              {userid, BalanceLib.get_user_balance_rating_value(userid, rating_type)}
+            end)
       end)
       |> List.flatten
 
@@ -167,7 +171,7 @@ defmodule Teiserver.Game.BalancerServer do
   defp make_solo_balance(team_count, players, rating_type) do
     groups = players
       |> Enum.map(fn %{userid: userid} ->
-        {[userid], BalanceLib.get_user_balance_rating_value(userid, rating_type)}
+        %{userid => BalanceLib.get_user_balance_rating_value(userid, rating_type)}
       end)
 
     BalanceLib.create_balance(groups, team_count, [mode: @balance_algorithm])

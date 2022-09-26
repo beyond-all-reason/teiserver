@@ -8,11 +8,12 @@ defmodule Teiserver.Battle.BalanceLib do
   import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
 
   @type rating_value() :: float()
-  @type group_tuple() :: {[T.userid()], rating_value(), non_neg_integer()}
+  @type player_group() :: %{T.userid() => rating_value()}
+  @type group_tuple() :: {[T.userid()], rating_value(), non_neg_integer(), number()}
+  # Statistics.stdev(ratings)
 
   @doc """
-  groups is a list of pairs, the first item being a list of members (userids) and the second being the rating applied to the group. Note this is the rating for the group as a whole and no additional maths is performed.
-
+  groups is a map of %{userid => rating_value}
 
   The result format with the following keys:
   captains: map of team_id => user_id of highest ranked player in the team
@@ -22,14 +23,18 @@ defmodule Teiserver.Battle.BalanceLib do
   team_sizes: map of team_id => non_neg_integer
   team_groups: map of team_id => list of group_tuples, {[userid], rating_value, size}
   """
-  @spec create_balance([{[T.userid()], rating_value()}], non_neg_integer()) :: map()
-  @spec create_balance([{[T.userid()], rating_value()}], non_neg_integer(), List.t()) :: map()
+  @spec create_balance([player_group()], non_neg_integer()) :: map()
+  @spec create_balance([player_group()], non_neg_integer(), List.t()) :: map()
   def create_balance(groups, team_count, opts \\ []) do
     # We want to calculate some values here just to make things faster
     # we add a member count and sort by rating (highest first)
     expanded_groups = groups
-      |> Enum.map(fn {members, rating} ->
-        {members, rating, Enum.count(members)}
+      |> Enum.map(fn members ->
+        userids = Map.keys(members)
+        ratings = Map.values(members)
+        # stddev = Statistics.stdev(ratings)
+
+        {userids, Enum.sum(ratings), Enum.count(userids)}
       end)
       |> Enum.sort_by(fn {_members, rating, _size} -> rating end, &>=/2)
 

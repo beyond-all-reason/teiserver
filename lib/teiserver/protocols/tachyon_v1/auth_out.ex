@@ -83,4 +83,12 @@ defmodule Teiserver.Protocols.Tachyon.V1.AuthOut do
       "reason" => reason
     }
   end
+
+  def do_reply(:register, {:error, reason}) do
+    %{
+      "cmd" => "s.auth.register",
+      "result" => "failure",
+      "reason" => reason
+    }
+  end
 end

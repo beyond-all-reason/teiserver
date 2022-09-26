@@ -152,13 +152,13 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     # First things first, it should be a different hash
     refute party_balance_result.hash == balance_result.hash
 
-    assert party_balance_result.team_players[1] == [u8.id, u7.id, u3.id, u1.id]
+    assert party_balance_result.team_players[1] == [u7.id, u8.id, u3.id, u1.id]
     assert party_balance_result.team_players[2] == [u6.id, u5.id, u4.id, u2.id]
     assert party_balance_result.ratings == %{1 => 147.0, 2 => 134.0}
     assert party_balance_result.deviation == {1, 9}
     assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
     assert party_balance_result.logs == [
-      "Picked #{u8.name}, #{u7.name} for team 1, adding 97.0 points for new total of 97.0",
+      "Picked #{u7.name}, #{u8.name} for team 1, adding 97.0 points for new total of 97.0",
       "Picked #{u6.name} for team 2, adding 38.0 points for new total of 38.0",
       "Picked #{u5.name} for team 2, adding 36.0 points for new total of 74.0",
       "Picked #{u4.name} for team 2, adding 35.0 points for new total of 109.0",

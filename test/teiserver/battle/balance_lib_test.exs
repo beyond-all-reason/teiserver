@@ -6,10 +6,10 @@ defmodule Teiserver.Battle.BalanceLibTest do
   test "loser picks simple users" do
     result = BalanceLib.create_balance(
       [
-        {[1], 5},
-        {[2], 6},
-        {[3], 7},
-        {[4], 8},
+        %{1 => 5},
+        %{2 => 6},
+        %{3 => 7},
+        %{4 => 8},
       ],
       2,
       mode: :loser_picks
@@ -44,9 +44,9 @@ defmodule Teiserver.Battle.BalanceLibTest do
   test "loser picks simple group" do
     result = BalanceLib.create_balance(
       [
-        {[4, 1], 5 + 8},
-        {[2], 6},
-        {[3], 7}
+        %{4 => 5, 1 => 8},
+        %{2 => 6},
+        %{3 => 7}
       ],
       2,
       mode: :loser_picks
@@ -55,11 +55,11 @@ defmodule Teiserver.Battle.BalanceLibTest do
 
     assert result == %{
       team_groups: %{
-        1 => [{[4, 1], 13, 2}],
+        1 => [{[1, 4], 13, 2}],
         2 => [{[3], 7, 1}, {[2], 6, 1}]
       },
       team_players: %{
-        1 => [4, 1],
+        1 => [1, 4],
         2 => [3, 2]
       },
       ratings: %{
@@ -67,7 +67,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
         2 => 13
       },
       captains: %{
-        1 => 4,
+        1 => 1,
         2 => 3
       },
       team_sizes: %{
@@ -82,24 +82,24 @@ defmodule Teiserver.Battle.BalanceLibTest do
     result = BalanceLib.create_balance(
       [
         # Two high tier players partied together
-        {[1, 2], 41 + 35},
+        %{1 => 41, 2 => 35},
 
         # A bunch of mid-low tier players together
-        {[3, 4, 5], 20 + 17 + 13},
+        %{3 => 20, 4 => 17, 5 => 13},
 
         # A smaller bunch of even lower tier players
-        {[6, 7], 15 + 9},
+        %{6 => 15, 7 => 9},
 
         # Other players, a range of ratings
-        {[8], 31},
-        {[9], 26},
-        {[10], 25},
-        {[11], 21},
-        {[12], 19},
-        {[13], 16},
-        {[14], 16},
-        {[15], 14},
-        {[16], 8}
+        %{8 => 31},
+        %{9 => 26},
+        %{10 => 25},
+        %{11 => 21},
+        %{12 => 19},
+        %{13 => 16},
+        %{14 => 16},
+        %{15 => 14},
+        %{16 => 8}
       ],
       2,
       mode: :loser_picks

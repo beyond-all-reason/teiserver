@@ -119,7 +119,6 @@ defmodule Teiserver.Coordinator.CoordinatorCommandsTest do
 ---------------------------
 You are #{user.name}
 Profile link: https://localhost/teiserver/profile/#{user.id}
-Time rank: 1 with 0 player hours and 0 spectator hours for a rank hour count of 0
 Skill ratings:
 You currently have no accolades
 """),
@@ -141,6 +140,7 @@ You currently have no accolades
 ---------------------------
 Found #{other_user.name}
 Profile link: https://localhost/teiserver/profile/#{other_user.id}
+Ratings:
 """),
       "sender_id" => coordinator_userid
     }
@@ -162,6 +162,7 @@ Profile link: https://localhost/teiserver/profile/#{other_user.id}
 Found #{other_user.name}
 Previous names: name1, name2
 Profile link: https://localhost/teiserver/profile/#{other_user.id}
+Ratings:
 """),
       "sender_id" => coordinator_userid
     }

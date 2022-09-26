@@ -27,7 +27,7 @@ defmodule Teiserver.SpringRawTest do
     # Failure first - bad name
     _send_raw(socket, "REGISTER bad-name password raw_register_email@email.com\n")
     reply = _recv_raw(socket)
-    assert reply =~ "REGISTRATIONDENIED Invalid characters in name (only a-z, A-Z, 0-9, [, ] allowed)\n"
+    assert reply =~ "REGISTRATIONDENIED Invalid characters in name (only a-z, A-Z, 0-9, [, ] and _ allowed)\n"
 
     # Failure first - existing name
     _send_raw(socket, "REGISTER #{existing.name} password raw_register_email@email.com\n")
@@ -63,7 +63,7 @@ defmodule Teiserver.SpringRawTest do
     reply = _recv_raw(socket)
     assert reply == "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
 
-    _send_raw(socket, "REGISTER #{username} X03MO1qnZdYdgyfeuILPmQ== #{username}@email\n")
+    _send_raw(socket, "REGISTER #{username} X03MO1qnZdYdgyfeuILPmQ== #{username}@email.e\n")
     _ = _recv_raw(socket)
     user = UserCache.get_user_by_name(username)
     assert user != nil

@@ -88,7 +88,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
   defp do_handle(%{command: "whoami", senderid: senderid} = _cmd, state) do
     sender = User.get_user_by_id(senderid)
-    stats = Account.get_user_stat_data(senderid)
+    # stats = Account.get_user_stat_data(senderid)
 
     # player_hours = Map.get(stats, "player_minutes", 0)/60 |> round
     # spectator_hours = Map.get(stats, "spectator_minutes", 0)/60 |> round
@@ -183,7 +183,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           "Found #{user.name}",
           (if previous_names != "", do: "Previous names: #{previous_names}"),
           "Profile link: #{profile_link}",
-          ["Ratings: " | ratings]
+          ["Ratings:" | ratings]
         ]
 
         mod_parts = if User.is_moderator?(sender) do

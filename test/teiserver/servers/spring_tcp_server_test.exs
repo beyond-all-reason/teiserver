@@ -36,7 +36,7 @@ defmodule Teiserver.SpringTcpServerTest do
     reply = _recv_raw(socket)
     assert reply == "TASSERVER 0.38-33-ga5f3b28 * 8201 0\n"
 
-    _send_raw(socket, "REGISTER #{username} #{password} email\n")
+    _send_raw(socket, "REGISTER #{username} #{password} email@e.e\n")
     reply = _recv_raw(socket)
     assert reply == "REGISTRATIONACCEPTED\n"
 

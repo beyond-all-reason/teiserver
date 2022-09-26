@@ -76,15 +76,15 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
 
     # Now a good one
     name = new_user_name()
-    data = %{cmd: "c.auth.register", username: name, email: "tachyon_register@example", password: "password"}
+    data = %{cmd: "c.auth.register", username: name, email: "tachyon_register@example.e", password: "password"}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.register", "result" => "success"}]
 
-    db_user =  Account.get_user(nil, search: [email: "tachyon_register@example"])
+    db_user =  Account.get_user(nil, search: [email: "tachyon_register@example.e"])
     assert db_user != nil
 
-    cache_user_email = User.get_user_by_email("tachyon_register@example")
+    cache_user_email = User.get_user_by_email("tachyon_register@example.e")
     cache_user_id = User.get_user_by_id(db_user.id)
     assert cache_user_email == cache_user_id
 
@@ -118,12 +118,12 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
   test "register, verify and auth", %{socket: socket} do
     # Create the user
     name = new_user_name()
-    data = %{cmd: "c.auth.register", username: name, email: "tachyon_verify@example", password: "password"}
+    data = %{cmd: "c.auth.register", username: name, email: "tachyon_verify@example.e", password: "password"}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.register", "result" => "success"}]
 
-    user = User.get_user_by_email("tachyon_verify@example")
+    user = User.get_user_by_email("tachyon_verify@example.e")
     Account.update_user_stat(user.id, %{"verification_code" => "123456"})
 
     # Bad password but also test msg_id continuance
@@ -176,12 +176,12 @@ defmodule Teiserver.Protocols.V1.TachyonRawTest do
   test "auth existing user", %{socket: socket} do
     # Create the user
     name = new_user_name()
-    data = %{cmd: "c.auth.register", username: name, email: "tachyon_existing@example", password: "token_password"}
+    data = %{cmd: "c.auth.register", username: name, email: "tachyon_existing@example.e", password: "token_password"}
     _tachyon_send(socket, data)
     reply = _tachyon_recv(socket)
     assert reply == [%{"cmd" => "s.auth.register", "result" => "success"}]
 
-    user = User.get_user_by_email("tachyon_existing@example")
+    user = User.get_user_by_email("tachyon_existing@example.e")
     User.verify_user(user)
 
     # Bad password but also test msg_id continuance
