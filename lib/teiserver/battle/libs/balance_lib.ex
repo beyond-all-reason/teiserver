@@ -9,8 +9,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
   @type rating_value() :: float()
   @type player_group() :: %{T.userid() => rating_value()}
-  @type group_tuple() :: {[T.userid()], rating_value(), non_neg_integer(), number()}
-  # Statistics.stdev(ratings)
+  @type group_tuple() :: {[T.userid()], rating_value(), number(), non_neg_integer()}
 
   @doc """
   groups is a map of %{userid => rating_value}
@@ -32,11 +31,11 @@ defmodule Teiserver.Battle.BalanceLib do
       |> Enum.map(fn members ->
         userids = Map.keys(members)
         ratings = Map.values(members)
-        # stddev = Statistics.stdev(ratings)
+        stddev = Statistics.stdev(ratings)
 
-        {userids, Enum.sum(ratings), Enum.count(userids)}
+        {userids, Enum.sum(ratings), stddev, Enum.count(userids)}
       end)
-      |> Enum.sort_by(fn {_members, rating, _size} -> rating end, &>=/2)
+      |> Enum.sort_by(fn {_members, rating, _stddev, _size} -> rating end, &>=/2)
 
     teams = Range.new(1, team_count)
       |> Map.new(fn i ->
@@ -46,8 +45,6 @@ defmodule Teiserver.Battle.BalanceLib do
     {reversed_team_groups, logs} = case opts[:algorithm] || :loser_picks do
       :loser_picks ->
         loser_picks(expanded_groups, teams)
-      # :em_picks ->
-      #   em_picks(expanded_groups, teams)
     end
 
     team_groups = reversed_team_groups
@@ -58,7 +55,7 @@ defmodule Teiserver.Battle.BalanceLib do
     team_players = team_groups
       |> Map.new(fn {team, groups} ->
         players = groups
-          |> Enum.map(fn {members, _, _} -> members end)
+          |> Enum.map(fn {members, _, _, _} -> members end)
           |> List.flatten
 
         {team, players}
@@ -202,7 +199,7 @@ defmodule Teiserver.Battle.BalanceLib do
   @spec loser_picks([group_tuple()], map()) :: {map(), list()}
   def loser_picks(groups, teams) do
     total_members = groups
-      |> Enum.map(fn {_, _, c} -> c end)
+      |> Enum.map(fn {_, _, _, c} -> c end)
       |> Enum.sum
 
     max_teamsize = total_members/Enum.count(teams) |> :math.ceil() |> round()
@@ -230,7 +227,7 @@ defmodule Teiserver.Battle.BalanceLib do
     new_team = [picked | teams[current_team]]
     new_team_map = Map.put(teams, current_team, new_team)
 
-    {group_member_ids, combined_rating, _size} = picked
+    {group_member_ids, combined_rating, _stddev, _size} = picked
     names = group_member_ids
       |> Enum.map(&Account.get_username_by_id/1)
       |> Enum.join(", ")
@@ -241,52 +238,6 @@ defmodule Teiserver.Battle.BalanceLib do
 
     do_loser_picks(remaining_groups, new_team_map, max_teamsize, new_logs)
   end
-
-  # @doc """
-  # EM says stuff here
-  # """
-  # @spec em_picks([group_tuple()], map()) :: {map(), list()}
-  # def em_picks(groups, teams) do
-  #   total_members = groups
-  #     |> Enum.map(fn {_, _, c} -> c end)
-  #     |> Enum.sum
-
-  #   max_teamsize = total_members/Enum.count(teams) |> :math.ceil() |> round()
-  #   do_em_picks(groups, teams, max_teamsize, [])
-  # end
-
-  # @spec do_em_picks([group_tuple()], map(), non_neg_integer(), list()) :: {map(), list()}
-  # defp do_em_picks([], teams, _, logs), do: {teams, logs}
-  # defp do_em_picks(groups, teams, max_teamsize, logs) do
-  #   team_skills = teams
-  #     |> Enum.reject(fn {_team_number, member_groups} ->
-  #       size = sum_group_membership_size(member_groups)
-  #       size >= max_teamsize
-  #     end)
-  #     |> Enum.map(fn {team_number, member_groups} ->
-  #       score = sum_group_rating(member_groups)
-
-  #       {score, team_number}
-  #     end)
-  #     |> Enum.sort
-
-  #   current_team = hd(team_skills) |> elem(1)
-  #   [picked | remaining_groups] = groups
-
-  #   new_team = [picked | teams[current_team]]
-  #   new_team_map = Map.put(teams, current_team, new_team)
-
-  #   {group_member_ids, combined_rating, _size} = picked
-  #   names = group_member_ids
-  #     |> Enum.map(&Account.get_username_by_id/1)
-  #     |> Enum.join(", ")
-
-  #   new_total = (hd(team_skills) |> elem(0)) + combined_rating
-
-  #   new_logs = ["Picked #{names} for team #{current_team}, adding #{round(combined_rating, 2)} points for new total of #{round(new_total, 2)}" | logs]
-
-  #   do_loser_picks(remaining_groups, new_team_map, max_teamsize, new_logs)
-  # end
 
   @doc """
   Used to get the stats for a team after it is created via balance
@@ -343,7 +294,7 @@ defmodule Teiserver.Battle.BalanceLib do
   defp sum_group_membership_size([]), do: 0
   defp sum_group_membership_size(groups) do
     groups
-      |> Enum.map(fn {_, _, count} -> count end)
+      |> Enum.map(fn {_, _, _, count} -> count end)
       |> Enum.sum
   end
 
@@ -352,7 +303,7 @@ defmodule Teiserver.Battle.BalanceLib do
   defp sum_group_rating([]), do: 0
   defp sum_group_rating(groups) do
     groups
-      |> Enum.map(fn {_, rating, _} -> rating end)
+      |> Enum.map(fn {_, rating, _, _} -> rating end)
       |> Enum.sum
   end
 

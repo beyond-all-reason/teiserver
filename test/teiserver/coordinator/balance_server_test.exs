@@ -8,7 +8,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
   alias Teiserver.Coordinator.ConsulServer
 
   import Teiserver.TeiserverTestLib,
-    only: [tachyon_auth_setup: 0, tachyon_auth_setup: 1, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1, new_user: 1]
+    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]
 
   setup do
     Coordinator.start_coordinator()
@@ -198,101 +198,4 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     ]
   end
 
-  # test "server balance - EM test", %{lobby_id: lobby_id, host: _host, psocket: _psocket, player: player} do
-  #   # We don't want to use the player we start with, we want to number our players specifically
-  #   Lobby.remove_user_from_any_lobby(player.id)
-  #   rating_type_id = MatchRatingLib.rating_type_name_lookup()["Team"]
-
-  #   %{user: u1} = ps1 = new_user("baltest_1") |> tachyon_auth_setup()
-  #   %{user: u2} = ps2 = new_user("baltest_2") |> tachyon_auth_setup()
-  #   %{user: u3} = ps3 = new_user("EM_baltest_3") |> tachyon_auth_setup()
-  #   %{user: u4} = ps4 = new_user("SHAD_baltest_4") |> tachyon_auth_setup()
-  #   %{user: u5} = ps5 = new_user("baltest_5") |> tachyon_auth_setup()
-  #   %{user: u6} = ps6 = new_user("baltest_6") |> tachyon_auth_setup()
-  #   %{user: u7} = ps7 = new_user("baltest_7") |> tachyon_auth_setup()
-  #   %{user: u8} = ps8 = new_user("baltest_8") |> tachyon_auth_setup()
-  #   %{user: u9} = ps9 = new_user("baltest_9") |> tachyon_auth_setup()
-  #   %{user: u10} = ps10 = new_user("baltest_10") |> tachyon_auth_setup()
-  #   %{user: u11} = ps11 = new_user("baltest_11") |> tachyon_auth_setup()
-  #   %{user: u12} = ps12 = new_user("baltest_12") |> tachyon_auth_setup()
-  #   %{user: u13} = ps13 = new_user("baltest_13") |> tachyon_auth_setup()
-  #   %{user: u14} = ps14 = new_user("baltest_14") |> tachyon_auth_setup()
-  #   %{user: u15} = ps15 = new_user("baltest_15") |> tachyon_auth_setup()
-  #   %{user: u16} = ps16 = new_user("baltest_16") |> tachyon_auth_setup()
-
-  #   make_rating(u1.id, rating_type_id,  36.87)
-  #   make_rating(u2.id, rating_type_id,  33.69)
-  #   make_rating(u3.id, rating_type_id,  26.62)
-  #   make_rating(u4.id, rating_type_id,  26.31)
-  #   make_rating(u5.id, rating_type_id,  23.49)
-  #   make_rating(u6.id, rating_type_id,  23.14)
-  #   make_rating(u7.id, rating_type_id,  23)
-  #   make_rating(u8.id, rating_type_id,  22.62)
-  #   make_rating(u9.id, rating_type_id,  21.71)
-  #   make_rating(u10.id, rating_type_id, 21)
-  #   make_rating(u11.id, rating_type_id, 19.6)
-  #   make_rating(u12.id, rating_type_id, 19.6)
-  #   make_rating(u13.id, rating_type_id, 18.12)
-  #   make_rating(u14.id, rating_type_id, 17.57)
-  #   make_rating(u15.id, rating_type_id, 14.17)
-  #   make_rating(u16.id, rating_type_id, 11.45)
-
-  #   [ps1, ps2, ps3, ps4, ps5, ps6, ps7, ps8, ps9, ps10, ps11, ps12, ps13, ps14, ps15, ps16]
-  #   |> Enum.each(fn %{user: user, socket: socket} ->
-  #     Lobby.force_add_user_to_lobby(user.id, lobby_id)
-  #     :timer.sleep(50)# Need the sleep to ensure they all get added to the battle
-  #     _tachyon_send(socket, %{cmd: "c.lobby.update_status", client: %{player: true, ready: true}})
-  #   end)
-
-  #   # Users 1 and 2 are in a party
-  #   high_party = Account.create_party(u3.id)
-  #   Account.move_client_to_party(u4.id, high_party.id)
-
-  #   # low_party = Account.create_party(u14.id)
-  #   # Account.move_client_to_party(u15.id, low_party.id)
-  #   # Account.move_client_to_party(u16.id, low_party.id)
-  #   # Account.move_client_to_party(u13.id, low_party.id)
-
-  #   consul_state = Coordinator.call_consul(lobby_id, :get_all)
-  #   max_player_count = ConsulServer.get_max_player_count(consul_state)
-  #   assert max_player_count >= 16
-
-  #   assert (Battle.list_lobby_players(lobby_id) |> Enum.count) == 16
-
-  #   opts = [
-  #     allow_groups: true,
-  #     max_deviation: 100
-  #   ]
-  #   team_count = 2
-
-  #   balance_result = Coordinator.call_balancer(lobby_id, {
-  #     :make_balance, team_count, opts
-  #   })
-
-  #   _ = """
-  #   No parties
-  #   %{1 => 178.55999999999997, 2 => 180.39999999999998}
-  #   {2, 1}
-
-  #   Parties allowed
-  #   %{1 => 173.01999999999998, 2 => 185.93999999999997}
-  #   {2, 7}
-  #   """
-
-  #   IO.puts ""
-  #   IO.inspect balance_result.ratings
-  #   IO.inspect balance_result.deviation
-  #   IO.puts ""
-
-  #   IO.puts ""
-  #   IO.puts balance_result.logs |> Enum.join("\n")
-  #   IO.puts ""
-
-  #   # assert balance_result.team_players[1] == [u8.id, u5.id, u3.id, u2.id]
-  #   # assert balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
-  #   # assert balance_result.deviation == {1, 1}
-  #   # assert balance_result.ratings == %{1 => 141.0, 2 => 140.0}
-  #   # assert balance_result.logs == []
-  #   # assert Battle.get_lobby_balance_mode(lobby_id) == :solo
-  # end
 end
