@@ -101,10 +101,6 @@ defmodule Teiserver.Bridge.BridgeServer do
         # It's us, ignore it
         nil
 
-      # Ignore bots
-      User.is_bot?(user) ->
-        nil
-
       message_contains?(message, "http:") ->
         nil
 
@@ -133,7 +129,14 @@ defmodule Teiserver.Bridge.BridgeServer do
           room_name
         end
 
-        forward_to_discord(from_id, state.rooms[room_name], message, state)
+        # If they are a bot they're only allowed to post to the promotion channel
+        if User.is_bot?(user) do
+          if room_name == "promote" do
+            forward_to_discord(from_id, state.rooms[room_name], message, state)
+          end
+        else
+          forward_to_discord(from_id, state.rooms[room_name], message, state)
+        end
 
       true ->
         nil
