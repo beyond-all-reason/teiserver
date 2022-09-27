@@ -25,6 +25,7 @@ defmodule Teiserver.Battle.Match do
 
     field :started, :utc_datetime
     field :finished, :utc_datetime
+    field :game_duration, :integer
 
     has_many :members, Teiserver.Battle.MatchMembership
     has_many :ratings, Teiserver.Game.RatingLog
@@ -38,7 +39,7 @@ defmodule Teiserver.Battle.Match do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-      |> cast(params, ~w(server_uuid uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id)a)
+      |> cast(params, ~w(server_uuid uuid map data tags team_count team_size passworded game_type founder_id bots started winning_team finished processed queue_id game_duration)a)
       |> validate_required(~w(server_uuid uuid map tags team_count team_size passworded game_type founder_id bots started)a)
   end
 

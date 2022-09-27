@@ -97,12 +97,6 @@ defmodule TeiserverWeb.Admin.MatchController do
       |> Map.new
 
     # Now for balance related stuff
-    past_balance_groups = members
-      |> Enum.group_by(
-        fn m -> m.party_id end,
-        fn m -> rating_logs[m.user_id].value["rating_value"] end
-      )
-
     partied_players = members
       |> Enum.group_by(fn p -> p.party_id end, fn p -> p.user_id end)
 
@@ -112,18 +106,15 @@ defmodule TeiserverWeb.Admin.MatchController do
         # be broken out of the party
         {nil, player_id_list} ->
           player_id_list
-          |> Enum.map(fn userid ->
-            {[userid], rating_logs[userid].value["rating_value"]}
-          end)
+            |> Enum.map(fn userid ->
+              %{userid => rating_logs[userid].value["rating_value"]}
+            end)
 
         {_party_id, player_id_list} ->
-          party_rating = player_id_list
-            |> Enum.map(fn userid ->
-              rating_logs[userid].value["rating_value"]
+          player_id_list
+            |> Map.new(fn userid ->
+              {userid, rating_logs[userid].value["rating_value"]}
             end)
-            |> BalanceLib.balance_party_by_ratings
-
-          {player_id_list, party_rating}
       end)
       |> List.flatten
 
@@ -200,12 +191,15 @@ defmodule TeiserverWeb.Admin.MatchController do
         # be broken out of the party
         {nil, player_id_list} ->
           player_id_list
-          |> Enum.map(fn userid ->
-            {[userid], BalanceLib.get_user_balance_rating_value(userid, rating_type)}
-          end)
+            |> Enum.map(fn userid ->
+              %{userid => BalanceLib.get_user_balance_rating_value(userid, rating_type)}
+            end)
 
         {_party_id, player_id_list} ->
-          {player_id_list, BalanceLib.balance_party(player_id_list, rating_type)}
+          player_id_list
+            |> Map.new(fn userid ->
+              {userid, BalanceLib.get_user_balance_rating_value(userid, rating_type)}
+            end)
       end)
       |> List.flatten
 

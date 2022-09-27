@@ -177,6 +177,11 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.server_uuid == ^server_uuid
   end
 
+  def _search(query, :server_uuid_not_nil, _) do
+    from matches in query,
+      where: not is_nil(matches.server_uuid)
+  end
+
   def _search(query, :name, name) do
     from matches in query,
       where: matches.name == ^name
@@ -367,5 +372,27 @@ defmodule Teiserver.Battle.MatchLib do
     from matches in query,
       left_join: queues in assoc(matches, :queue),
       preload: [queue: queues]
+  end
+
+  @spec calculate_exit_status(integer(), integer()) :: :stayed | :early | :abandoned | :noshow
+  def calculate_exit_status(nil, _), do: :stayed
+  def calculate_exit_status(_, nil), do: :stayed
+  def calculate_exit_status(left_after, game_duration) do
+    diff = game_duration - left_after
+    left_percentage = left_after / game_duration
+
+    cond do
+      # If you last longer than the game or leave only at the very end you count
+      # as having stayed
+      left_after > game_duration -> :stayed
+      left_percentage >= 0.99 -> :stayed
+      diff < 60 -> :stayed
+
+      left_percentage >= 0.9 -> :early
+
+      left_after < 60 -> :noshow
+
+      true -> :abandoned
+    end
   end
 end

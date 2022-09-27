@@ -10,6 +10,24 @@
             show_search: false,
             active: "user"
         }) %>
+
+        <div class="float-end">
+          <%= central_component "section_menu_button",
+            name: "ratings",
+            label: "Rated matches",
+            icon: Teiserver.Account.RatingLib.icon(),
+            bsname: bsname,
+            url: Routes.ts_admin_user_path(@conn, :ratings, @user.id)
+          %>
+
+          <%= central_component "section_menu_button",
+            name: "view_user",
+            label: "View user",
+            icon: Central.Account.UserLib.icon(),
+            bsname: bsname,
+            url: Routes.ts_admin_user_path(@conn, :show, @user.id)
+          %>
+        </div>
         <br /><br />
 
 <h4>Listing Matches</h4>

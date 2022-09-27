@@ -29,6 +29,22 @@
   </div>
 </div>
 
+<%= if @stats.first_log != nil and @ratings[@filter] != nil do %>
+<div class="row m-2 mt-3">
+  <div class="col-md-4">
+    Games: <%= @stats.games %>
+  </div>
+
+  <div class="col-md-4">
+    Winrate: <%= (@stats.winrate * 100) |> round %>%
+  </div>
+
+  <div class="col-md-4">
+    Game rating change: <%= (@ratings[@filter].rating_value - @stats.first_log.value["rating_value"]) |> round(2) %>
+  </div>
+</div>
+<% end %>
+
 <table class="table table-sm mt-3">
   <thead>
     <tr>

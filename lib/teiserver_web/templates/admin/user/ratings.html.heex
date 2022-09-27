@@ -17,6 +17,15 @@
         <hr />
 
 <div class="float-end">
+  <%= central_component "section_menu_button",
+    name: "all_games",
+    label: "500 games",
+    active: @filter,
+    url: "?filter=#{@filter}&limit=500",
+    icon: "",
+    bsname: bsname
+  %>
+
   <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :ratings_form, @user)}>Edit ratings</a>
 
   <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>View user</a>
@@ -50,10 +59,33 @@
   </div>
 </div>
 
+<%= if @stats.first_log != nil and @ratings[@filter] != nil do %>
+  <div class="row m-2 mt-3">
+    <div class="col-md-3">
+      Games: <%= @stats.games %>
+    </div>
+
+    <div class="col-md-3">
+      Winrate: <%= (@stats.winrate * 100) |> round %>%
+    </div>
+
+    <div class="col-md-3">
+      Rating change: <%= (@ratings[@filter].rating_value - @stats.first_log.value["rating_value"]) |> round(2) %>
+    </div>
+    
+    <div class="col-md-3">
+      Uncertainty change: <%= (@ratings[@filter].uncertainty - @stats.first_log.value["uncertainty"]) |> round(2) %>
+    </div>
+  </div>
+<% end %>
+
 <table class="table table-sm mt-3">
   <thead>
     <tr>
       <th>Game</th>
+      <%= if @filter == "Team" do %>
+        <th>Play</th>
+      <% end %>
       <th>Players</th>
       <th>Type</th>
       <th colspan="2">Rating</th>
@@ -72,13 +104,44 @@
         else
           {"text-danger", "down"}
         end
+
+        {exit_status, play_percentage} = if log.match.game_type == "Team" do
+          exit_status = Teiserver.Battle.MatchLib.calculate_exit_status(log.match_membership.left_after, log.match.game_duration)
+          play_percentage = if exit_status != :stayed do
+            (log.match_membership.left_after/log.match.game_duration) * 100 |> round
+          end
+          {exit_status, play_percentage}
+        else
+          {:stayed, nil}
+        end
       %>
       <tr>
         <%= if log.match do %>
           <td><%= log.match.map %></td>
+          
+          <%= if @filter == "Team" do %>
+            <td>
+              <%= case exit_status do %>
+                <% :stayed -> %>
+                
+                <% :early -> %>
+                  <i class="fa-fw fa-solid fa-clock text-warning"></i>
+                  &nbsp;
+                  <%= play_percentage %>%
+                
+                <% :abandoned -> %>
+                  <i class="fa-fw fa-solid fa-person-running text-danger"></i>
+                  &nbsp;
+                  <%= play_percentage %>%
+                
+                <% :noshow -> %>
+                  <i class="fa-fw fa-solid fa-user-ninja text-info2"></i>
+              <% end %>
+            </td>
+          <% end %>
           <td><%= log.match.team_size * log.match.team_count %></td>
         <% else %>
-          <td colspan="2"><%= log.value["reason"] || "No match" %></td>
+          <td colspan="3"><%= log.value["reason"] || "No match" %></td>
         <% end %>
         <td><%= @rating_type_id_lookup[log.rating_type_id] %></td>
         

@@ -103,8 +103,18 @@ defmodule TeiserverWeb.Battle.MatchController do
       ],
       order_by: "Newest first",
       limit: 50,
-      preload: [:match]
+      preload: [:match, :match_membership]
     )
+
+    games = Enum.count(logs) |> max(1)
+    wins = Enum.filter(logs, fn l -> l.match_membership.win end) |> Enum.count
+
+    stats = %{
+      games: games,
+      winrate: wins/games,
+
+      first_log: logs |> Enum.reverse |> hd,
+    }
 
     conn
       |> assign(:filter, filter || "rating-all")
@@ -113,6 +123,7 @@ defmodule TeiserverWeb.Battle.MatchController do
       |> assign(:logs, logs)
       |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
       |> assign(:rating_type_id_lookup, MatchRatingLib.rating_type_id_lookup())
+      |> assign(:stats, stats)
       |> add_breadcrumb(name: "Ratings: #{user.name}", url: conn.request_path)
       |> render("ratings.html")
 

@@ -367,6 +367,7 @@ defmodule TeiserverWeb.Admin.UserController do
       {true, _} ->
         filter = params["filter"]
         filter_type_id = MatchRatingLib.rating_type_name_lookup()[filter]
+        limit = (params["limit"] || "50") |> int_parse
 
         ratings = Account.list_ratings(
           search: [
@@ -384,9 +385,19 @@ defmodule TeiserverWeb.Admin.UserController do
             rating_type_id: filter_type_id
           ],
           order_by: "Newest first",
-          limit: 50,
-          preload: [:match]
+          limit: limit,
+          preload: [:match, :match_membership]
         )
+
+        games = Enum.count(logs) |> max(1)
+        wins = Enum.filter(logs, fn l -> l.match_membership.win end) |> Enum.count
+
+        stats = %{
+          games: games,
+          winrate: wins/games,
+
+          first_log: logs |> Enum.reverse |> hd,
+        }
 
         conn
           |> assign(:filter, filter || "rating-all")
@@ -395,6 +406,7 @@ defmodule TeiserverWeb.Admin.UserController do
           |> assign(:logs, logs)
           |> assign(:rating_type_list, MatchRatingLib.rating_type_list())
           |> assign(:rating_type_id_lookup, MatchRatingLib.rating_type_id_lookup())
+          |> assign(:stats, stats)
           |> add_breadcrumb(name: "Ratings: #{user.name}", url: conn.request_path)
           |> render("ratings.html")
 

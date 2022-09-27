@@ -108,12 +108,22 @@ defmodule Teiserver.Game.RatingLogLib do
 
   def preload(query, preloads) do
     query = if :match in preloads, do: _preload_match(query), else: query
+    query = if :match_membership in preloads, do: _preload_match_membership(query), else: query
     query
   end
 
+  @spec _preload_match(Ecto.Query.t()) :: Ecto.Query.t()
   def _preload_match(query) do
     from rating_logs in query,
       left_join: matches in assoc(rating_logs, :match),
       preload: [match: matches]
+  end
+
+  @spec _preload_match_membership(Ecto.Query.t()) :: Ecto.Query.t()
+  def _preload_match_membership(query) do
+    from rating_logs in query,
+      left_join: match_memberships in Teiserver.Battle.MatchMembership,
+        where: match_memberships.user_id == rating_logs.user_id and match_memberships.match_id == rating_logs.match_id,
+      preload: [match_membership: match_memberships]
   end
 end

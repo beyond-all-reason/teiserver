@@ -55,7 +55,9 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
 
   defp use_export_data(%{data: %{"export_data" => export_data}} = match) do
     win_map = export_data["players"]
-    |> Map.new(fn stats -> {stats["name"], stats["win"] == 1} end)
+      |> Map.new(fn stats -> {stats["name"], stats["win"] == 1} end)
+
+    host_game_duration = max(export_data["gameDuration"], 1)
 
     winning_team = Battle.list_match_memberships(search: [match_id: match.id])
     |> Enum.map(fn m ->
@@ -73,10 +75,28 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
           }
         end)
 
-      Battle.update_match_membership(m, %{
-        win: win,
-        stats: stats
-      })
+      player_data = export_data["players"]
+        |> Enum.filter(fn p -> p["accountId"] == to_string(m.user_id) end)
+
+      case player_data do
+        [d] ->
+          left_after = case d["loseTime"] do
+            "" -> host_game_duration
+            v -> v
+          end
+
+          Battle.update_match_membership(m, %{
+            left_after: left_after,
+            win: win,
+            stats: stats
+          })
+
+        _ ->
+          Battle.update_match_membership(m, %{
+            win: win,
+            stats: stats
+          })
+      end
 
       {m.team_id, win}
     end)
@@ -84,7 +104,7 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
     |> hd_or_x({nil, nil})
     |> elem(0)
 
-    Battle.update_match(match, %{winning_team: winning_team})
+    Battle.update_match(match, %{winning_team: winning_team, game_duration: host_game_duration})
   end
   defp use_export_data(_), do: []
 
