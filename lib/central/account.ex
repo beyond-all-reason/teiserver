@@ -282,7 +282,7 @@ defmodule Central.Account do
     case Repo.one(query) do
       nil ->
         Argon2.no_user_verify()
-        Teiserver.Account.spring_auth_check_delay()
+        Argon2.no_user_verify()
         add_anonymous_audit_log(conn, "Account:Failed login", %{reason: "No user", email: email})
         {:error, "Invalid credentials"}
 
