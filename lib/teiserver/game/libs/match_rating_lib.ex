@@ -17,13 +17,13 @@ defmodule Teiserver.Game.MatchRatingLib do
     @rated_match_types
   end
 
-  @spec rating_type_id_lookup() :: map()
+  @spec rating_type_id_lookup() :: %{Integer.t() => String.t()}
   def rating_type_id_lookup() do
     rating_type_list()
       |> Map.new(fn name -> {Game.get_or_add_rating_type(name), name} end)
   end
 
-  @spec rating_type_name_lookup() :: map()
+  @spec rating_type_name_lookup() :: %{String.t() => Integer.t()}
   def rating_type_name_lookup() do
     rating_type_list()
       |> Map.new(fn name -> {name, Game.get_or_add_rating_type(name)} end)
@@ -256,6 +256,15 @@ defmodule Teiserver.Game.MatchRatingLib do
     :ok
   end
 
+  @spec reset_player_ratings(Integer.t()) :: :ok
+  def reset_player_ratings(rating_type_id) when is_integer(rating_type_id) do
+    # Delete all ratings and rating logs
+    Ecto.Adapters.SQL.query(Repo, "DELETE FROM teiserver_game_rating_logs WHERE rating_type_id = #{rating_type_id}", [])
+    Ecto.Adapters.SQL.query(Repo, "DELETE FROM teiserver_account_ratings WHERE rating_type_id = #{rating_type_id}", [])
+
+    :ok
+  end
+
   @spec get_player_rating(T.userid()) :: map
   def get_player_rating(user_id) do
     stats = Account.get_user_stat_data(user_id)
@@ -294,8 +303,32 @@ defmodule Teiserver.Game.MatchRatingLib do
     match_count
   end
 
-  @spec reset_and_re_rate() :: :ok
-  def reset_and_re_rate() do
+  @spec re_rate_all_matches_of_type(String.t()) :: non_neg_integer()
+  def re_rate_all_matches_of_type(rating_type_name) do
+    match_ids = Battle.list_matches(
+      search: [
+        game_type_in: @rated_match_types,
+        processed: true
+      ],
+      order_by: "Oldest first",
+      limit: :infinity,
+      select: [:id]
+    )
+    |> Enum.map(fn %{id: id} -> id end)
+
+    match_count = Enum.count(match_ids)
+
+    match_ids
+      |> Enum.chunk_every(50)
+      |> Enum.each(fn ids ->
+        re_rate_specific_matches(ids)
+      end)
+
+    match_count
+  end
+
+  @spec reset_and_re_rate(String.t()) :: :ok
+  def reset_and_re_rate("all") do
     start_time = System.system_time(:millisecond)
 
     reset_player_ratings()
@@ -303,6 +336,23 @@ defmodule Teiserver.Game.MatchRatingLib do
 
     time_taken = System.system_time(:millisecond) - start_time
     Logger.info("re_rate_all_matches, took #{time_taken}ms for #{match_count} matches")
+  end
+
+  def reset_and_re_rate(rating_type) do
+    start_time = System.system_time(:millisecond)
+
+    rating_type_id = rating_type_name_lookup()[rating_type]
+
+    case rating_type_id do
+      nil ->
+        Logger.error("No rating type of #{rating_type}")
+      _ ->
+        reset_player_ratings(rating_type_id)
+        match_count = re_rate_all_matches_of_type(rating_type)
+
+        time_taken = System.system_time(:millisecond) - start_time
+        Logger.info("re_rate_all_matches_of_type, took #{time_taken}ms for #{match_count} matches")
+    end
   end
 
   defp re_rate_specific_matches(ids) do
