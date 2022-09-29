@@ -43,27 +43,6 @@
     <div id="container">
       <div class="content animate-panel animated">
 
-        <div class="row">
-          <div class="col-sm-10 col-sm-offset-1">
-            <div id="flash-messages">
-              <%= if get_flash(@conn, :danger) do %>
-                <p class="alert alert-danger alert-no-margin" role="alert" id="app-flash-danger"><%= get_flash(@conn, :danger) %></p>
-              <% end %>
-              <%= if get_flash(@conn, :warning) do %>
-                <p class="alert alert-warning alert-no-margin" role="alert" id="app-flash-warning"><%= get_flash(@conn, :warning) %></p>
-              <% end %>
-              <%= if get_flash(@conn, :info) do %>
-                <p class="alert alert-info alert-no-margin" role="alert" id="app-flash-info"><%= get_flash(@conn, :info) %></p>
-              <% end %>
-              <%= if get_flash(@conn, :success) do %>
-                <p class="alert alert-success alert-no-margin" role="alert" id="app-flash-success"><%= get_flash(@conn, :success) %></p>
-              <% end %>
-            </div>
-          </div>
-        </div>
-
-
-
 <div class="row mt-3">
   <div class="col-md-10 offset-md-1">
 
