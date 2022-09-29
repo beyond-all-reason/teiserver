@@ -248,6 +248,13 @@ defmodule Teiserver.Account do
     end
   end
 
+  @spec spring_auth_check_delay() :: :ok
+  def spring_auth_check_delay() do
+    md5_password = Teiserver.User.spring_md5_password("???")
+    Teiserver.User.test_password(md5_password, "XXX")
+  end
+
+  @spec spring_auth_check(Plug.Conn.t(), User.t, String.t()) :: {:ok, User.t} | {:error, String.t()}
   def spring_auth_check(conn, user, plain_text_password) do
     tei_user = get_user_by_id(user.id)
     md5_password = Teiserver.User.spring_md5_password(plain_text_password)
