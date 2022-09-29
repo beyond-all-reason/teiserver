@@ -115,7 +115,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
 
     assert balance_result.team_players[1] == [u8.id, u5.id, u3.id, u2.id]
     assert balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
-    assert balance_result.deviation == {1, 1}
+    assert balance_result.deviation == 1
     assert balance_result.ratings == %{1 => 141.0, 2 => 140.0}
     assert Battle.get_lobby_balance_mode(lobby_id) == :solo
 
@@ -133,7 +133,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
 
     assert grouped_balance_result.team_players[1] == [u8.id, u5.id, u3.id, u2.id]
     assert grouped_balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
-    assert grouped_balance_result.deviation == {1, 1}
+    assert grouped_balance_result.deviation == 1
     assert grouped_balance_result.ratings == %{1 => 141.0, 2 => 140.0}
     assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
     assert grouped_balance_result.hash != balance_result.hash
@@ -155,7 +155,8 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert party_balance_result.team_players[1] == [u7.id, u8.id, u3.id, u1.id]
     assert party_balance_result.team_players[2] == [u6.id, u5.id, u4.id, u2.id]
     assert party_balance_result.ratings == %{1 => 147.0, 2 => 134.0}
-    assert party_balance_result.deviation == {1, 9}
+    assert party_balance_result.deviation == 9
+    assert party_balance_result.balance_mode == :grouped
     assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
     assert party_balance_result.logs == [
       "Picked #{u7.name}, #{u8.name} for team 1, adding 97.0 points for new total of 97.0",
@@ -182,11 +183,13 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
 
     # Results should be the same as the first part of the test but with mode set to solo
     assert Battle.get_lobby_balance_mode(lobby_id) == :solo
-    assert balance_result.team_players[1] == [u8.id, u5.id, u3.id, u2.id]
-    assert balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
-    assert balance_result.ratings == %{1 => 141.0, 2 => 140.0}
-    assert balance_result.deviation == {1, 1}
-    assert balance_result.logs == [
+    assert party_balance_result.balance_mode == :solo
+    assert party_balance_result.team_players[1] == [u8.id, u5.id, u3.id, u2.id]
+    assert party_balance_result.team_players[2] == [u7.id, u6.id, u4.id, u1.id]
+    assert party_balance_result.ratings == %{1 => 141.0, 2 => 140.0}
+    assert party_balance_result.deviation == 1
+    assert party_balance_result.logs == [
+      "Tried grouped mode, got a deviation of 36 and reverted to solo mode",
       "Picked #{u8.name} for team 1, adding 50.0 points for new total of 50.0",
       "Picked #{u7.name} for team 2, adding 47.0 points for new total of 47.0",
       "Picked #{u6.name} for team 2, adding 38.0 points for new total of 85.0",

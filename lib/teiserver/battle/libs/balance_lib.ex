@@ -16,7 +16,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
   The result format with the following keys:
   captains: map of team_id => user_id of highest ranked player in the team
-  deviation: non_neg_integer
+  deviation: non_neg_integer()
   ratings: map of team_id => combined rating_value for team
   team_players: map of team_id => list of userids of players on that team
   team_sizes: map of team_id => non_neg_integer
@@ -256,9 +256,9 @@ defmodule Teiserver.Battle.BalanceLib do
   @doc """
   Expects a map of %{team_id => rating_value}
 
-  Returns a pair of {best_team, deviation}
+  Returns the deviation in percentage points between the two teams
   """
-  @spec get_deviation(map()) :: {non_neg_integer(), number()}
+  @spec get_deviation(map()) :: non_neg_integer()
   def get_deviation(team_ratings) do
     scores = team_ratings
       |> Enum.sort_by(fn {_team, rating} -> rating end, &>=/2)
@@ -269,9 +269,6 @@ defmodule Teiserver.Battle.BalanceLib do
       [_] ->
         {1, 0}
       _ ->
-        top_team = hd(scores)
-          |> elem(0)
-
         raw_scores = scores
           |> Enum.map(fn {_, s} -> s end)
 
@@ -281,11 +278,9 @@ defmodule Teiserver.Battle.BalanceLib do
         # Max score skill needs always be at least one for this to not bork
         max_score = max(max_score, 1)
 
-        deviation = ((1 - (min_score/max_score)) * 100)
+        ((1 - (min_score/max_score)) * 100)
           |> round
           |> abs
-
-        {top_team, deviation}
     end
   end
 

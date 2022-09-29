@@ -137,12 +137,9 @@ defmodule TeiserverWeb.API.SpadsController do
 
         bot_result = %{}
 
-        # This should always be the former
-        {_best_team, deviation} = balance_result.deviation
-
         conn
           |> put_status(200)
-          |> assign(:deviation, deviation)
+          |> assign(:deviation, balance_result.deviation)
           |> assign(:players, player_result)
           |> assign(:bots, bot_result)
           |> render("balance_battle.json")

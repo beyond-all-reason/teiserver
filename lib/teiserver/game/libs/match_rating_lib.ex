@@ -7,7 +7,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   alias Teiserver.{Account, Coordinator, Game, Battle}
   alias Teiserver.Data.Types, as: T
   alias Central.Repo
-  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Battle.{BalanceLib, MatchLib}
   require Logger
 
   @rated_match_types ["Team", "Duel", "FFA", "Team FFA", "Partied Team"]
@@ -161,11 +161,28 @@ defmodule Teiserver.Game.MatchRatingLib do
     # Run the actual calculation
     [win_result, lose_result] = Openskill.rate([winner_ratings, loser_ratings])
 
+    status_lookup = if match.game_type == "Team" do
+      match.members
+        |> Map.new(fn membership ->
+          {membership.user_id, MatchLib.calculate_exit_status(membership.left_after, match.game_duration)}
+        end)
+    else
+      %{}
+    end
+
     # Save the results
     win_ratings = Enum.zip(winners, win_result)
       |> Enum.map(fn {%{user_id: user_id}, rating_update} ->
         user_rating = rating_lookup[user_id] || BalanceLib.default_rating(rating_type_id)
-        do_update_rating(user_id, match, user_rating, rating_update)
+
+        case Map.get(status_lookup, user_id, nil) do
+          :abandoned ->
+            do_abandoned_rating(user_id, match, user_rating, rating_update)
+          :noshow ->
+            do_noshow_rating(user_id, match, user_rating, rating_update)
+          _ ->
+            do_update_rating(user_id, match, user_rating, rating_update)
+        end
       end)
 
     loss_ratings = Enum.zip(losers, lose_result)
@@ -200,6 +217,70 @@ defmodule Teiserver.Game.MatchRatingLib do
     new_skill = (user_rating.skill - skill_change)
 
     {new_skill, u}
+  end
+
+  defp do_noshow_rating(user_id, match, user_rating, _rating_update) do
+    user_rating = if Map.get(user_rating, :user_id) do
+      user_rating
+    else
+      {:ok, rating} = Account.create_rating(Map.merge(user_rating, %{
+        user_id: user_id,
+        last_updated: match.finished
+      }))
+      rating
+    end
+    rating_type_id = user_rating.rating_type_id
+
+    %{
+      user_id: user_id,
+      rating_type_id: rating_type_id,
+      match_id: match.id,
+      inserted_at: match.finished,
+
+      value: %{
+        reason: "No show",
+
+        rating_value: user_rating.rating_value,
+        skill: user_rating.skill,
+        uncertainty: user_rating.uncertainty,
+
+        rating_value_change: 0,
+        skill_change: 0,
+        uncertainty_change: 0,
+      }
+    }
+  end
+
+  defp do_abandoned_rating(user_id, match, user_rating, _rating_update) do
+    user_rating = if Map.get(user_rating, :user_id) do
+      user_rating
+    else
+      {:ok, rating} = Account.create_rating(Map.merge(user_rating, %{
+        user_id: user_id,
+        last_updated: match.finished
+      }))
+      rating
+    end
+    rating_type_id = user_rating.rating_type_id
+
+    %{
+      user_id: user_id,
+      rating_type_id: rating_type_id,
+      match_id: match.id,
+      inserted_at: match.finished,
+
+      value: %{
+        reason: "Abandoned match",
+
+        rating_value: user_rating.rating_value,
+        skill: user_rating.skill,
+        uncertainty: user_rating.uncertainty,
+
+        rating_value_change: 0,
+        skill_change: 0,
+        uncertainty_change: 0,
+      }
+    }
   end
 
   @spec do_update_rating(T.userid, map(), map(), {number(), number()}) :: any
@@ -307,7 +388,7 @@ defmodule Teiserver.Game.MatchRatingLib do
   def re_rate_all_matches_of_type(rating_type_name) do
     match_ids = Battle.list_matches(
       search: [
-        game_type_in: @rated_match_types,
+        game_type_in: [rating_type_name],
         processed: true
       ],
       order_by: "Oldest first",

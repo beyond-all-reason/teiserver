@@ -273,7 +273,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       end)
     end)
 
-    Teiserver.Game.MatchRatingLib.reset_and_re_rate()
+    Teiserver.Game.MatchRatingLib.reset_and_re_rate("all")
   end
 
   defp make_one_time_code() do

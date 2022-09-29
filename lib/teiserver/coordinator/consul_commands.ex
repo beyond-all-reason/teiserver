@@ -337,6 +337,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         @splitter,
         "Balance logs, mode: #{balance.balance_mode}",
         balance.logs,
+        "Deviation of: #{balance.deviation}",
         @splitter
       ] |> List.flatten)
     else

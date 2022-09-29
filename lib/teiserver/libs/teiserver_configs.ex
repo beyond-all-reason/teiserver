@@ -213,6 +213,16 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "teiserver.Max deviation",
+      section: "Lobbies",
+      type: "integer",
+      permissions: ["teiserver.admin"],
+      description: "The maximum deviation in mixed party-solo balance before it reverts to purely solo balance",
+      opts: [],
+      default: 10
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Enable server balance",
       section: "Lobbies",
       type: "boolean",

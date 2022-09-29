@@ -1,12 +1,12 @@
 defmodule Teiserver.Game.BalancerServer do
   use GenServer
   require Logger
+  alias Central.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.{Battle, Coordinator}
   alias Phoenix.PubSub
 
-  @max_deviation 10
   @tick_interval 2_000
   @balance_algorithm :loser_picks
 
@@ -127,15 +127,15 @@ defmodule Teiserver.Game.BalancerServer do
     if opts[:allow_groups] do
       party_result = make_grouped_balance(team_count, players, rating_type)
 
-      {_, deviation} = party_result.deviation
+      max_deviation = opts[:max_deviation] || Config.get_site_config_cache("teiserver.Max deviation")
 
-      if deviation > (opts[:max_deviation] || @max_deviation) do
-        make_solo_balance(team_count, players, rating_type)
+      if party_result.deviation > max_deviation do
+        make_solo_balance(team_count, players, rating_type, ["Tried grouped mode, got a deviation of #{party_result.deviation} and reverted to solo mode"])
       else
         party_result
       end
     else
-      make_solo_balance(team_count, players, rating_type)
+      make_solo_balance(team_count, players, rating_type, [])
     end
   end
 
@@ -167,15 +167,20 @@ defmodule Teiserver.Game.BalancerServer do
       |> Map.put(:balance_mode, :grouped)
   end
 
-  @spec make_solo_balance(non_neg_integer(), [T.client()], String.t()) :: map()
-  defp make_solo_balance(team_count, players, rating_type) do
+  @spec make_solo_balance(non_neg_integer(), [T.client()], String.t(), [String.t()]) :: map()
+  defp make_solo_balance(team_count, players, rating_type, initial_logs) do
     groups = players
       |> Enum.map(fn %{userid: userid} ->
         %{userid => BalanceLib.get_user_balance_rating_value(userid, rating_type)}
       end)
 
-    BalanceLib.create_balance(groups, team_count, [mode: @balance_algorithm])
-      |> Map.put(:balance_mode, :solo)
+    result = BalanceLib.create_balance(groups, team_count, [mode: @balance_algorithm])
+    new_logs = [initial_logs | result.logs] |> List.flatten
+
+    Map.merge(result, %{
+      logs: new_logs,
+      balance_mode: :solo
+    })
   end
 
   @spec empty_state(T.lobby_id) :: T.balance_server_state()

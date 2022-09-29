@@ -392,12 +392,16 @@ defmodule TeiserverWeb.Admin.UserController do
         games = Enum.count(logs) |> max(1)
         wins = Enum.filter(logs, fn l -> l.match_membership.win end) |> Enum.count
 
-        stats = %{
-          games: games,
-          winrate: wins/games,
+        stats = if Enum.empty?(logs) do
+          %{first_log: nil}
+        else
+          %{
+            games: games,
+            winrate: wins/games,
 
-          first_log: logs |> Enum.reverse |> hd,
-        }
+            first_log: logs |> Enum.reverse |> hd,
+          }
+        end
 
         conn
           |> assign(:filter, filter || "rating-all")
