@@ -63,10 +63,12 @@ defmodule Teiserver.Account.ClientServer do
 
   def handle_cast({:update_client, new_client}, state) do
     if state.client.player != new_client.player and not Application.get_env(:central, Teiserver)[:test_mode] do
-      if new_client.player do
-        LobbyChat.persist_system_message("#{state.client.name} became a player", state.client.lobby_id)
-      else
-        LobbyChat.persist_system_message("#{state.client.name} became a spectator", state.client.lobby_id)
+      if state.client.lobby_id do
+        if new_client.player do
+          LobbyChat.persist_system_message("#{state.client.name} became a player", state.client.lobby_id)
+        else
+          LobbyChat.persist_system_message("#{state.client.name} became a spectator", state.client.lobby_id)
+        end
       end
     end
 

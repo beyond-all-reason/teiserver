@@ -42,6 +42,10 @@ defmodule Teiserver.Account.Tasks.DailyCleanupTask do
     query = "DELETE FROM teiserver_clan_memberships WHERE user_id IN #{sql_id_list}"
     Ecto.Adapters.SQL.query(Repo, query, [])
 
+    # Accolades
+    query = "DELETE FROM teiserver_account_accolades WHERE recipient_id IN #{sql_id_list} OR giver_id IN #{sql_id_list}"
+    Ecto.Adapters.SQL.query(Repo, query, [])
+
     # Events/Properties
     query = "DELETE FROM teiserver_telemetry_client_events WHERE user_id IN #{sql_id_list}"
     Ecto.Adapters.SQL.query(Repo, query, [])

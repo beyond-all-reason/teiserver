@@ -265,9 +265,9 @@ defmodule Teiserver.Battle.BalanceLib do
 
     case scores do
       [] ->
-        {nil, 0}
+        0
       [_] ->
-        {1, 0}
+        0
       _ ->
         raw_scores = scores
           |> Enum.map(fn {_, s} -> s end)
