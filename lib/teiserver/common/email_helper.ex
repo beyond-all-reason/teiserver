@@ -28,7 +28,7 @@ defmodule Teiserver.EmailHelper do
     html_body = """
     <p>Welcome to #{game_name}.</p>
 
-    <p>To verify your account you will need this code:: <span style="font-family: monospace">#{
+    <p>To verify your account you will need this code: <span style="font-family: monospace">#{
       verification_code
     }</span><p>
 
