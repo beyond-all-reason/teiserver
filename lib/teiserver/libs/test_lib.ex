@@ -49,7 +49,12 @@ defmodule Teiserver.TeiserverTestLib do
     case User.get_user_by_name(name) do
       nil ->
         {:ok, user} =
-          User.user_register_params_with_md5(name, "#{name}@email.com", "X03MO1qnZdYdgyfeuILPmQ==", Map.merge(%{admin_group_id: Teiserver.user_group_id()}, params))
+          User.user_register_params_with_md5(
+            name,
+            "#{name}@email.com",
+            "X03MO1qnZdYdgyfeuILPmQ==",
+            Map.merge(%{admin_group_id: Teiserver.user_group_id()}, params)
+          )
           |> Account.create_user()
 
         Account.create_group_membership(%{

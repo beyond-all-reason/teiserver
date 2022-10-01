@@ -18,8 +18,13 @@ defmodule Teiserver.Battle.BalanceLibTest do
 
     assert result == %{
       team_groups: %{
-        1 => [{[4], 8, 0, 1}, {[1], 5, 0, 1}],
-        2 => [{[3], 7, 0, 1}, {[2], 6, 0, 1}]
+        1 => [
+          {[4], %{count: 1, mean: 8.0, rating: 8, stddev: 0.0}},
+          {[1], %{count: 1, mean: 5.0, rating: 5, stddev: 0.0}}],
+        2 => [
+          {[3], %{count: 1, mean: 7.0, rating: 7, stddev: 0.0}},
+          {[2], %{count: 1, mean: 6.0, rating: 6, stddev: 0.0}}
+        ]
       },
       team_players: %{
         1 => [4, 1],
@@ -55,8 +60,13 @@ defmodule Teiserver.Battle.BalanceLibTest do
 
     assert result == %{
       team_groups: %{
-        1 => [{[1, 4], 13, 1.5, 2}],
-        2 => [{[3], 7, 0, 1}, {[2], 6, 0, 1}]
+        1 => [
+          {[1, 4], %{count: 2, mean: 6.5, rating: 13, stddev: 1.5}}
+        ],
+        2 => [
+          {[3], %{count: 1, mean: 7.0, rating: 7, stddev: 0.0}},
+          {[2], %{count: 1, mean: 6.0, rating: 6, stddev: 0.0}}
+        ]
       },
       team_players: %{
         1 => [1, 4],
@@ -109,20 +119,20 @@ defmodule Teiserver.Battle.BalanceLibTest do
     assert result == %{
       team_groups: %{
         1 => [
-          {[1, 2], 76, 3, 2},
-          {[9], 26, 0, 1},
-          {[6, 7], 24, 3, 2},
-          {[12], 19, 0, 1},
-          {[15], 14, 0, 1},
-          {[16], 8, 0, 1}
+          {[1, 2], %{rating: 76, stddev: 3, mean: 38, count: 2}},
+          {[9], %{rating: 26, stddev: 0, mean: 26, count: 1}},
+          {[6, 7], %{rating: 24, stddev: 3, mean: 12, count: 2}},
+          {[12], %{rating: 19, stddev: 0, mean: 19, count: 1}},
+          {[15], %{rating: 14, stddev: 0, mean: 14, count: 1}},
+          {[16], %{rating: 8, stddev: 0, mean: 8, count: 1}}
         ],
         2 => [
-          {[3, 4, 5], 50, 2.8674417556808756, 3},
-          {[8], 31, 0, 1},
-          {[10], 25, 0, 1},
-          {[11], 21, 0, 1},
-          {[13], 16, 0, 1},
-          {[14], 16, 0, 1}
+          {[3, 4, 5], %{rating: 50, stddev: 2.8674417556808756, mean: 16.666666666666668, count: 3}},
+          {[8], %{rating: 31, stddev: 0, mean: 31, count: 1}},
+          {[10], %{rating: 25, stddev: 0, mean: 25, count: 1}},
+          {[11], %{rating: 21, stddev: 0, mean: 21, count: 1}},
+          {[13], %{rating: 16, stddev: 0, mean: 16, count: 1}},
+          {[14], %{rating: 16, stddev: 0, mean: 16, count: 1}}
         ]
       },
       team_players: %{

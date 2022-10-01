@@ -181,6 +181,7 @@ defmodule Teiserver.Account.PartyServer do
 
       true -> party
     end
+
     {:noreply, %{state | party: new_party}}
   end
 
