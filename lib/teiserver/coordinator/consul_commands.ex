@@ -333,11 +333,20 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> Battle.get_lobby_current_balance()
 
     if balance do
+      moderator_messages = if User.is_moderator?(senderid) do
+        [
+          "Time taken: #{balance.time_taken}ms",
+        ]
+      else
+        []
+      end
+
       Coordinator.send_to_user(senderid, [
         @splitter,
         "Balance logs, mode: #{balance.balance_mode}",
         balance.logs,
         "Deviation of: #{balance.deviation}",
+        moderator_messages,
         @splitter
       ] |> List.flatten)
     else

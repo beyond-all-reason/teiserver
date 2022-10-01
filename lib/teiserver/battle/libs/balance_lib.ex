@@ -40,6 +40,8 @@ defmodule Teiserver.Battle.BalanceLib do
   @spec create_balance([player_group()], non_neg_integer()) :: map()
   @spec create_balance([player_group()], non_neg_integer(), List.t()) :: map()
   def create_balance(groups, team_count, opts \\ []) do
+    start_time = System.system_time(:millisecond)
+
     # We perform all our group calculations here and assign each group
     # an ID that's used purely for this run of balance
     expanded_groups = groups
@@ -94,10 +96,13 @@ defmodule Teiserver.Battle.BalanceLib do
         {team, players}
       end)
 
+    time_taken = System.system_time(:millisecond) - start_time
+
     %{
       team_groups: team_groups,
       team_players: team_players,
-      logs: group_logs ++ logs
+      logs: group_logs ++ logs,
+      time_taken: time_taken
     }
       |> calculate_balance_stats
   end
@@ -558,7 +563,7 @@ defmodule Teiserver.Battle.BalanceLib do
     all_combinations = make_combinations(group.count, possible_players)
 
       # This first part we are getting the relevant stat info to filter on
-      |> Enum.map(fn members ->
+      |> Stream.map(fn members ->
         member_ratings = Enum.map(members, fn %{group_rating: group_rating} -> group_rating end)
 
         members_mean = Enum.sum(member_ratings) / group.count
@@ -571,7 +576,7 @@ defmodule Teiserver.Battle.BalanceLib do
       end)
 
       # We now filter on differences in mean and stddev
-      |> Enum.filter(fn {_members, mean_diff, stddev_diff} ->
+      |> Stream.filter(fn {_members, mean_diff, stddev_diff} ->
         cond do
           mean_diff > (opts[:mean_diff_max] || @mean_diff_max) -> false
           stddev_diff > (opts[:stddev_diff_max] || @stddev_diff_max) -> false
