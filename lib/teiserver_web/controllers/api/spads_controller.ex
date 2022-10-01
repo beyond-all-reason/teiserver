@@ -38,7 +38,7 @@ defmodule TeiserverWeb.API.SpadsController do
   def balance_battle(conn, params) do
     server_balance_enabled = Config.get_site_config_cache("teiserver.Enable server balance")
 
-    player_data = params["players"]
+    raw_player_data = params["players"]
       |> String.replace(": None", ": null")
       |> String.replace("'", "\"")
       |> Jason.decode
@@ -48,7 +48,7 @@ defmodule TeiserverWeb.API.SpadsController do
       |> String.replace("'", "\"")
       |> Jason.decode
 
-    player_data = case player_data do
+    player_data = case raw_player_data do
       {:ok, data} -> data
       _ -> :error
     end
