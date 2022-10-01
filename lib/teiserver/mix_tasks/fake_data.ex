@@ -129,6 +129,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       lobby_count = user_count
         |> Kernel.div(6)
         |> round
+        |> max(1)
 
       logs = Range.new(1, 1440)
         |> Enum.map(fn m ->
