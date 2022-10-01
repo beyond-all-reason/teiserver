@@ -27,6 +27,15 @@ defmodule Teiserver.Battle.BalanceLib do
   team_players: map of team_id => list of userids of players on that team
   team_sizes: map of team_id => non_neg_integer
   team_groups: map of team_id => list of expanded_groups
+
+  Options are:
+    mode
+
+    rating_lower_boundary: the amount of rating points to search below a party
+    rating_upper_boundary: the amount of rating points to search above a party
+
+    mean_diff_max: the maximum difference in mean between the party and paired parties
+    stddev_diff_max: the maximum difference in stddev between the party and paired parties
   """
   @spec create_balance([player_group()], non_neg_integer()) :: map()
   @spec create_balance([player_group()], non_neg_integer(), List.t()) :: map()
@@ -44,7 +53,7 @@ defmodule Teiserver.Battle.BalanceLib do
           count: Enum.count(ratings),
         }
       end)
-      |> Enum.sort_by(fn %{group_rating: rating} -> rating end, &>=/2)
+
 
     # Now we have a list of groups, we need to work out which groups we're going to keep
     # we want to create partner groups but we're only going to do this in a 2 team game
@@ -55,7 +64,11 @@ defmodule Teiserver.Battle.BalanceLib do
     groups = expanded_groups
       |> Enum.filter(fn %{count: count} -> count > 1 end)
 
-    {group_pairs, solo_players, group_logs} = matchup_groups(groups, solo_players)
+    {group_pairs, solo_players, group_logs} = matchup_groups(groups, solo_players, opts)
+
+    # We now need to sort the solo players by rating
+    solo_players = solo_players
+      |> Enum.sort_by(fn %{group_rating: rating} -> rating end, &>=/2)
 
     teams = Range.new(1, team_count)
       |> Map.new(fn i ->
@@ -93,9 +106,9 @@ defmodule Teiserver.Battle.BalanceLib do
   # the purpose of this function is to go through the groups, work out which ones we can keep as
   # groups and with the ones we can't, break them up and add them back into the pool of solo
   # players for other groups
-  @spec matchup_groups([expanded_group()], [expanded_group()]) :: {[expanded_group()], [expanded_group()], [String.t()]}
-  defp matchup_groups([], solo_players), do: {[], solo_players, []}
-  defp matchup_groups(groups, solo_players) do
+  @spec matchup_groups([expanded_group()], [expanded_group()], list()) :: {[expanded_group()], [expanded_group()], [String.t()]}
+  defp matchup_groups([], solo_players, _opts), do: {[], solo_players, []}
+  defp matchup_groups(groups, solo_players, opts) do
     # First we want to re-sort these groups, we want to have the ones with the highest standard
     # deviation looked at first, they are the least likely to be able to be matched but most likely to
     # help match others
@@ -104,21 +117,41 @@ defmodule Teiserver.Battle.BalanceLib do
         Statistics.stdev(group.ratings)
       end, &<=/2)
 
-    do_matchup_groups(groups, solo_players, [], [])
+    do_matchup_groups(groups, solo_players, [], [], opts)
   end
 
-  @spec do_matchup_groups([expanded_group()], [expanded_group()], [String.t], [expanded_group()]) :: {[expanded_group()], [expanded_group()], [String.t]}
-  defp do_matchup_groups([], solo_players, [], group_pairs) do
+  @spec do_matchup_groups([expanded_group()], [expanded_group()], [String.t], [expanded_group()], list()) :: {[expanded_group()], [expanded_group()], [String.t]}
+  defp do_matchup_groups([], solo_players, [], group_pairs, _opts) do
     {group_pairs, solo_players, []}
   end
-  defp do_matchup_groups([], solo_players, logs, group_pairs) do
+  defp do_matchup_groups([], solo_players, logs, group_pairs, _opts) do
     {group_pairs, solo_players, logs ++ ["End of pairing"]}
   end
-  defp do_matchup_groups([group | remaining_groups], solo_players, logs, group_pairs) do
+  defp do_matchup_groups([group | remaining_groups], solo_players, logs, group_pairs, opts) do
     group_mean = Enum.sum(group.ratings)/Enum.count(group.ratings)
     group_stddev = Statistics.stdev(group.ratings)
 
-    case find_comparable_group(group, solo_players) do
+    case find_comparable_group(group, solo_players, opts) do
+      :no_possible_combinations ->
+        extra_solos = Enum.zip(group.members, group.ratings)
+          |> Enum.map(fn {userid, rating} -> %{
+              count: 1,
+              group_rating: rating,
+              members: [userid],
+              ratings: [rating]
+            }
+          end)
+
+        names = group.members
+          |> Enum.map(fn userid -> Account.get_username_by_id(userid) || userid end)
+          |> Enum.join(", ")
+
+        pairing_logs = [
+          "Unable to find a combination match for group of #{names} (stats: #{Enum.sum(group.ratings) |> round(2)}, #{group_mean |> round(2)}, #{group_stddev |> round(2)}), treating them as solo players"
+        ]
+
+        do_matchup_groups(remaining_groups, extra_solos ++ solo_players, logs ++ pairing_logs, group_pairs, opts)
+
       :no_possible_players ->
         extra_solos = Enum.zip(group.members, group.ratings)
           |> Enum.map(fn {userid, rating} -> %{
@@ -134,10 +167,10 @@ defmodule Teiserver.Battle.BalanceLib do
           |> Enum.join(", ")
 
         pairing_logs = [
-          "Unable to find a match for group of #{names} (stats: #{Enum.sum(group.ratings)}, #{group_mean}, #{group_stddev}), treating them as solo players"
+          "Unable to find a player match for group of #{names} (stats: #{Enum.sum(group.ratings) |> round(2)}, #{group_mean |> round(2)}, #{group_stddev |> round(2)}), treating them as solo players"
         ]
 
-        do_matchup_groups(remaining_groups, extra_solos ++ solo_players, logs ++ pairing_logs, group_pairs)
+        do_matchup_groups(remaining_groups, extra_solos ++ solo_players, logs ++ pairing_logs, group_pairs, opts)
 
       opposite_group ->
         remaining_solos = solo_players
@@ -174,7 +207,7 @@ defmodule Teiserver.Battle.BalanceLib do
           "> diff_stats #{diff_rating}, #{diff_mean}, #{diff_stddev}"
         ]
 
-        do_matchup_groups(remaining_groups, remaining_solos, logs ++ pair_logs, [new_pair | group_pairs])
+        do_matchup_groups(remaining_groups, remaining_solos, logs ++ pair_logs, [new_pair | group_pairs], opts)
     end
   end
 
@@ -493,16 +526,13 @@ defmodule Teiserver.Battle.BalanceLib do
 
   # Upper boundary is how far above the group value the members can be, lower is how far below it
   @rating_upper_boundary 5
-  @rating_lower_boundary 3
-
-  @mean_diff_max 10
-  @stddev_diff_max 10
+  @rating_upper_boundary 3
 
   # Stage one, filter out players notably better/worse than the party
-  @spec find_comparable_group(expanded_group(), [expanded_group()]) :: :no_possible_players | expanded_group()
-  defp find_comparable_group(group, solo_players) do
-    rating_lower_bound = Enum.min(group.ratings) - @rating_lower_boundary
-    rating_upper_bound = Enum.max(group.ratings) + @rating_upper_boundary
+  @spec find_comparable_group(expanded_group(), [expanded_group()], list()) :: :no_possible_players | :no_possible_combinations | expanded_group()
+  defp find_comparable_group(group, solo_players, opts) do
+    rating_lower_bound = Enum.min(group.ratings) - (opts[:rating_lower_boundary] || @rating_upper_boundary)
+    rating_upper_bound = Enum.max(group.ratings) + (opts[:rating_upper_boundary] || @rating_upper_boundary)
 
     possible_players = solo_players
       |> Enum.reject(fn solo ->
@@ -512,17 +542,20 @@ defmodule Teiserver.Battle.BalanceLib do
     if Enum.count(possible_players) < group.count do
       :no_possible_players
     else
-      filter_down_possibles(group, possible_players)
+      filter_down_possibles(group, possible_players, opts)
     end
   end
 
+  @mean_diff_max 10
+  @stddev_diff_max 4
+
   # Now we've trimmed our playerlist a bit lets check out the different combinations
-  @spec filter_down_possibles(expanded_group(), [expanded_group()]) :: expanded_group()
-  defp filter_down_possibles(group, possible_players) do
+  @spec filter_down_possibles(expanded_group(), [expanded_group()], list()) :: :no_possible_combinations | expanded_group()
+  defp filter_down_possibles(group, possible_players, opts) do
     group_mean = Enum.sum(group.ratings)/Enum.count(group.ratings)
     group_stddev = Statistics.stdev(group.ratings)
 
-    best_combination = make_combinations(group.count, possible_players)
+    all_combinations = make_combinations(group.count, possible_players)
 
       # This first part we are getting the relevant stat info to filter on
       |> Enum.map(fn members ->
@@ -540,8 +573,8 @@ defmodule Teiserver.Battle.BalanceLib do
       # We now filter on differences in mean and stddev
       |> Enum.filter(fn {_members, mean_diff, stddev_diff} ->
         cond do
-          mean_diff > @mean_diff_max -> false
-          stddev_diff > @stddev_diff_max -> false
+          mean_diff > (opts[:mean_diff_max] || @mean_diff_max) -> false
+          stddev_diff > (opts[:stddev_diff_max] || @stddev_diff_max) -> false
           true -> true
         end
       end)
@@ -550,20 +583,24 @@ defmodule Teiserver.Battle.BalanceLib do
       |> Enum.sort_by(fn
         {_members, mean_diff, stddev_diff} -> {mean_diff * stddev_diff, mean_diff, stddev_diff}
       end, &<=/2)
-      |> hd
 
-    {selected_group, _, _} = best_combination
+    case all_combinations do
+      [] ->
+        :no_possible_combinations
+      _ ->
+        {selected_group, _, _} = hd(all_combinations)
 
-    # Now turn a list of groups into one group
-    selected_group
-      |> Enum.reduce(%{members: [], ratings: [], count: 0, group_rating: 0}, fn (solo, acc) ->
-        %{
-          members: acc.members ++ solo.members,
-          ratings: acc.ratings ++ solo.ratings,
-          count: acc.count + 1,
-          group_rating: acc.group_rating + solo.group_rating,
-        }
-      end)
+        # Now turn a list of groups into one group
+        selected_group
+          |> Enum.reduce(%{members: [], ratings: [], count: 0, group_rating: 0}, fn (solo, acc) ->
+            %{
+              members: acc.members ++ solo.members,
+              ratings: acc.ratings ++ solo.ratings,
+              count: acc.count + 1,
+              group_rating: acc.group_rating + solo.group_rating,
+            }
+          end)
+    end
   end
 
   @spec make_combinations(integer(), list) :: [list]
