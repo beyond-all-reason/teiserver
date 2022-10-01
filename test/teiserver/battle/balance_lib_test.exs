@@ -92,47 +92,48 @@ defmodule Teiserver.Battle.BalanceLibTest do
     result = BalanceLib.create_balance(
       [
         # Two high tier players partied together
-        %{1 => 41, 2 => 35},
+        %{101 => 41, 102 => 35},
 
         # A bunch of mid-low tier players together
-        %{3 => 20, 4 => 17, 5 => 13},
+        %{103 => 20, 104 => 17, 105 => 13.5},
 
         # A smaller bunch of even lower tier players
-        %{6 => 15, 7 => 9},
+        %{106 => 15, 107 => 7.5},
 
         # Other players, a range of ratings
-        %{8 => 31},
-        %{9 => 26},
-        %{10 => 25},
-        %{11 => 21},
-        %{12 => 19},
-        %{13 => 16},
-        %{14 => 16},
-        %{15 => 14},
-        %{16 => 8}
+        %{108 => 31},
+        %{109 => 26},
+        %{110 => 25},
+        %{111 => 21},
+        %{112 => 19},
+        %{113 => 16},
+        %{114 => 16},
+        %{115 => 14},
+        %{116 => 8}
       ],
       2,
       mode: :loser_picks
     )
-    |> Map.drop([:logs])
 
-    assert result == %{
+    IO.puts result.logs |> Enum.join("\n")
+
+    assert Map.drop(result, [:logs]) == %{
       team_groups: %{
         1 => [
-          {[1, 2], %{rating: 76, stddev: 3, mean: 38, count: 2}},
-          {[9], %{rating: 26, stddev: 0, mean: 26, count: 1}},
-          {[6, 7], %{rating: 24, stddev: 3, mean: 12, count: 2}},
-          {[12], %{rating: 19, stddev: 0, mean: 19, count: 1}},
-          {[15], %{rating: 14, stddev: 0, mean: 14, count: 1}},
-          {[16], %{rating: 8, stddev: 0, mean: 8, count: 1}}
+          %{members: [1, 2], group_rating: 76, ratings: [41, 35], count: 2},
+          %{members: [9], group_rating: 26, ratings: [26], count: 1},
+          %{members: [6, 7], group_rating: 24, ratings: [15, 9], count: 2},
+          %{members: [12], group_rating: 19, ratings: [19], count: 1},
+          %{members: [15], group_rating: 14, ratings: [14], count: 1},
+          %{members: [16], group_rating: 8, ratings: [8], count: 1}
         ],
         2 => [
-          {[3, 4, 5], %{rating: 50, stddev: 2.8674417556808756, mean: 16.666666666666668, count: 3}},
-          {[8], %{rating: 31, stddev: 0, mean: 31, count: 1}},
-          {[10], %{rating: 25, stddev: 0, mean: 25, count: 1}},
-          {[11], %{rating: 21, stddev: 0, mean: 21, count: 1}},
-          {[13], %{rating: 16, stddev: 0, mean: 16, count: 1}},
-          {[14], %{rating: 16, stddev: 0, mean: 16, count: 1}}
+          %{members: [3, 4, 5], group_rating: 50, ratings: [20, 17, 13], count: 3},
+          %{members: [8], group_rating: 31, ratings: [31], count: 1},
+          %{members: [10], group_rating: 25, ratings: [25], count: 1},
+          %{members: [11], group_rating: 21, ratings: [21], count: 1},
+          %{members: [13], group_rating: 16, ratings: [16], count: 1},
+          %{members: [14], group_rating: 16, ratings: [16], count: 1}
         ]
       },
       team_players: %{
