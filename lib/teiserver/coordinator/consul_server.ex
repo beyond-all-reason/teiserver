@@ -108,6 +108,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
     {:noreply, state}
   end
 
+  def handle_info(:reinit, state) do
+    new_state = Map.merge(empty_state(state.lobby_id), state)
+
+    {:noreply, new_state}
+  end
+
   def handle_info(:match_start, state) do
     {:noreply, state}
   end

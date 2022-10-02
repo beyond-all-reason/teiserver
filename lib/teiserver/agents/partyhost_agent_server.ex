@@ -50,6 +50,7 @@ defmodule Teiserver.Agents.PartyhostAgentServer do
   defp handle_msg(nil, state), do: state
   defp handle_msg(%{"cmd" => "s.party.updated"}, state), do: state
   defp handle_msg(%{"cmd" => "s.party.added_to"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.party.left_party"}, state), do: state
   defp handle_msg(%{"cmd" => "s.party.create", "party" => party}, state) do
     %{state | party_id: party["id"]}
   end

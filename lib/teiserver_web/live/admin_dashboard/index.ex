@@ -56,6 +56,25 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     }
   end
 
+  @impl true
+  def handle_event("reinit-consuls", _event, socket) do
+    Battle.list_lobby_ids()
+      |> Enum.each(fn lobby_id ->
+        Coordinator.cast_consul(lobby_id, :reinit)
+      end)
+
+    {:noreply, socket}
+  end
+
+  def handle_event("reinit-balances", _event, socket) do
+    Battle.list_lobby_ids()
+      |> Enum.each(fn lobby_id ->
+        Coordinator.cast_balancer(lobby_id, :reinit)
+      end)
+
+    {:noreply, socket}
+  end
+
   @spec update_lobbies(Plug.Socket.t()) :: Plug.Socket.t()
   defp update_lobbies(socket) do
     lobbies = Battle.list_lobby_ids()

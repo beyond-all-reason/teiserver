@@ -50,6 +50,12 @@ defmodule Teiserver.Game.BalancerServer do
     end
   end
 
+  def handle_cast(:reinit, state) do
+    new_state = Map.merge(empty_state(state.lobby_id), state)
+
+    {:noreply, new_state}
+  end
+
   @impl true
   def handle_info(:tick, state) do
     {:noreply, state}

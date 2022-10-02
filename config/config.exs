@@ -81,6 +81,7 @@ config :central, Teiserver,
   spring_post_state_change_delay: 150,
   user_agreement: "A verification code has been sent to your email address. Please read our terms of service at <<<site_url>>> and the code of conduct at <<<URL>>>. Then enter your six digit code below if you agree to the terms.",
   use_geoip: true,
+  accept_all_emails: false,
 
   retention: %{
     telemetry_infolog: 25,

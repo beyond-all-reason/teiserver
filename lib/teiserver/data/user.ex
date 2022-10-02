@@ -1120,6 +1120,7 @@ defmodule Teiserver.User do
   @spec valid_email?(String.t()) :: boolean
   def valid_email?(email) do
     cond do
+      Application.get_env(:central, Teiserver)[:accept_all_emails] -> true
       not String.contains?(email, "@") -> false
       not String.contains?(email, ".") -> false
       true -> true

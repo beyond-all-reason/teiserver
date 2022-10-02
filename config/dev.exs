@@ -64,7 +64,8 @@ config :central, Teiserver,
   enable_discord_bridge: false,
   enable_agent_mode: true,
   enable_beans: true,
-  use_geoip: true
+  use_geoip: true,
+  accept_all_emails: true
 
 # ## SSL Support
 #
