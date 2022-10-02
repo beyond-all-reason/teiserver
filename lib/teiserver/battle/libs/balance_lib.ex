@@ -2,10 +2,29 @@ defmodule Teiserver.Battle.BalanceLib do
   @moduledoc """
   A set of functions related to balance. Ratings are calculated via Teiserver.Game.MatchRatingLib
   """
+  alias Central.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Account
   alias Teiserver.Game.MatchRatingLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
+
+  # Upper boundary is how far above the group value the members can be, lower is how far below it
+  @rating_lower_boundary 3
+  @rating_upper_boundary 5
+
+  @mean_diff_max 10
+  @stddev_diff_max 4
+
+  @spec defaults() :: map()
+  def defaults() do
+    %{
+      max_deviation: Config.get_site_config_cache("teiserver.Max deviation"),
+      rating_lower_boundary: @rating_lower_boundary,
+      rating_upper_boundary: @rating_upper_boundary,
+      mean_diff_max: @mean_diff_max,
+      stddev_diff_max: @stddev_diff_max
+    }
+  end
 
   @type rating_value() :: float()
   @type player_group() :: %{T.userid() => rating_value()}
@@ -347,11 +366,6 @@ defmodule Teiserver.Battle.BalanceLib do
   def loser_picks(groups, teams) do
     # teams = do_loser_picks_pairs(premade_pairs, teams)
 
-    # IO.puts ""
-    # IO.inspect teams
-    # IO.inspect premade_pairs, label: "premade_pairs"
-    # IO.puts ""
-
     total_members = groups
       |> Enum.map(fn
         {%{count: count1}, %{count: count2}} -> count1 + count2
@@ -529,19 +543,15 @@ defmodule Teiserver.Battle.BalanceLib do
     sum
   end
 
-  # Upper boundary is how far above the group value the members can be, lower is how far below it
-  @rating_upper_boundary 5
-  @rating_upper_boundary 3
-
   # Stage one, filter out players notably better/worse than the party
   @spec find_comparable_group(expanded_group(), [expanded_group()], list()) :: :no_possible_players | :no_possible_combinations | expanded_group()
   defp find_comparable_group(group, solo_players, opts) do
-    rating_lower_bound = Enum.min(group.ratings) - (opts[:rating_lower_boundary] || @rating_upper_boundary)
+    rating_lower_bound = Enum.min(group.ratings) - (opts[:rating_lower_boundary] || @rating_lower_boundary)
     rating_upper_bound = Enum.max(group.ratings) + (opts[:rating_upper_boundary] || @rating_upper_boundary)
 
     possible_players = solo_players
-      |> Enum.reject(fn solo ->
-        solo.group_rating > rating_upper_bound or solo.group_rating < rating_lower_bound
+      |> Enum.filter(fn solo ->
+        (solo.group_rating > rating_lower_bound) or (solo.group_rating < rating_upper_bound)
       end)
 
     if Enum.count(possible_players) < group.count do
@@ -550,9 +560,6 @@ defmodule Teiserver.Battle.BalanceLib do
       filter_down_possibles(group, possible_players, opts)
     end
   end
-
-  @mean_diff_max 10
-  @stddev_diff_max 4
 
   # Now we've trimmed our playerlist a bit lets check out the different combinations
   @spec filter_down_possibles(expanded_group(), [expanded_group()], list()) :: :no_possible_combinations | expanded_group()

@@ -126,7 +126,16 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
 
     # Now if we do it again but with groups allowed it should be the same results but
     # with grouped set to true
-    opts = [allow_groups: true]
+    # we set the opts here rather than using the defaults because if the defaults change it will
+    # break the test
+    opts = [
+      allow_groups: true,
+      mean_diff_max: 15,
+      stddev_diff_max: 10,
+      rating_lower_boundary: 5,
+      rating_upper_boundary: 5,
+      max_deviation: 10
+    ]
     grouped_balance_result = Coordinator.call_balancer(lobby_id, {
       :make_balance, team_count, opts
     })
@@ -153,16 +162,22 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     refute party_balance_result.hash == balance_result.hash
 
     assert party_balance_result.team_players[1] == [u7.id, u8.id, u3.id, u1.id]
-    assert party_balance_result.team_players[2] == [u6.id, u5.id, u4.id, u2.id]
+    assert party_balance_result.team_players[2] == [u6.id, u4.id, u5.id, u2.id]
     assert party_balance_result.ratings == %{1 => 147.0, 2 => 134.0}
     assert party_balance_result.deviation == 9
     assert party_balance_result.balance_mode == :grouped
     assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
     assert party_balance_result.logs == [
-      "Picked Garpike, Hound for team 1, adding 97.0 points for new total of 97.0",
-      "Picked Fury for team 2, adding 38.0 points for new total of 38.0",
-      "Picked Eagle for team 2, adding 36.0 points for new total of 74.0",
-      "Picked Destroyer for team 2, adding 35.0 points for new total of 109.0",
+      "Group pairing",
+      "> premade: Garpike, Hound",
+      "> adhoc: Fury, Destroyer",
+      "> premade stats 97.0, 48.5, 1.5",
+      "> adhoc stats 73.0, 36.5, 1.5",
+      "> diff_stats 24.0, 12.0, 0.0",
+      "End of pairing",
+      "Pair picked Garpike, Hound for team 1, adding 97.0 points for new total of 97.0",
+      "Pair picked Fury, Destroyer for team 1, adding 73.0 points for new total of 73.0",
+      "Picked Eagle for team 2, adding 36.0 points for new total of 109.0",
       "Picked Calamity for team 1, adding 30.0 points for new total of 127.0",
       "Picked Brute for team 2, adding 25.0 points for new total of 134.0",
       "Picked Arbiter for team 1, adding 20.0 points for new total of 147.0",
@@ -173,6 +188,15 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     Account.move_client_to_party(u5.id, high_party.id)
 
     :timer.sleep(520)
+
+    opts = [
+      allow_groups: true,
+      mean_diff_max: 20,
+      stddev_diff_max: 10,
+      rating_lower_boundary: 5,
+      rating_upper_boundary: 5,
+      max_deviation: 10
+    ]
 
     party_balance_result = Coordinator.call_balancer(lobby_id, {
       :make_balance, team_count, opts

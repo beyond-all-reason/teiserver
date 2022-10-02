@@ -1,14 +1,12 @@
 defmodule Teiserver.Game.BalancerServer do
   use GenServer
   require Logger
-  alias Central.Config
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.{Battle, Coordinator}
   alias Phoenix.PubSub
 
   @tick_interval 2_000
-  @balance_algorithm :loser_picks
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
@@ -19,7 +17,12 @@ defmodule Teiserver.Game.BalancerServer do
   # http://planetspads.free.fr/spads/doc/spadsPluginApiDoc.html#balanceBattle-self-players-bots-clanMode-nbTeams-teamSize
   def handle_call({:make_balance, team_count, call_opts}, _from, state) do
     opts = call_opts ++ [
-      algorithm: state.algorithm
+      algorithm: state.algorithm,
+      max_deviation: state.max_deviation,
+      rating_lower_boundary: state.rating_lower_boundary,
+      rating_upper_boundary: state.rating_upper_boundary,
+      mean_diff_max: state.mean_diff_max,
+      stddev_diff_max: state.stddev_diff_max
     ]
 
     {balance, new_state} = make_balance(team_count, state, opts)
@@ -36,6 +39,20 @@ defmodule Teiserver.Game.BalancerServer do
     {:reply, result, state}
   end
 
+  def handle_call(:report_state, _from, state) do
+    result = %{
+      hashes: Enum.count(state.hashes),
+      algorithm: state.algorithm,
+      max_deviation: state.max_deviation,
+      rating_lower_boundary: state.rating_lower_boundary,
+      rating_upper_boundary: state.rating_upper_boundary,
+      mean_diff_max: state.mean_diff_max,
+      stddev_diff_max: state.stddev_diff_max
+    }
+
+    {:reply, result, state}
+  end
+
   @impl true
   def handle_cast(:reset_hashes, state) do
     {:noreply, %{state | hashes: %{}}}
@@ -48,6 +65,20 @@ defmodule Teiserver.Game.BalancerServer do
       Logger.error("No BalanceServer handler for algorithm of #{algorithm}")
       {:noreply, state}
     end
+  end
+
+  def handle_cast({:set, key, value}, state) do
+    valid_keys = ~w(max_deviation rating_lower_boundary rating_upper_boundary mean_diff_max stddev_diff_max)a
+
+    new_state = case Enum.member?(valid_keys, key) do
+      true ->
+        Map.put(state, key, value)
+
+      false
+        state
+    end
+
+    {:noreply, new_state}
   end
 
   def handle_cast(:reinit, state) do
@@ -131,22 +162,20 @@ defmodule Teiserver.Game.BalancerServer do
     end
 
     if opts[:allow_groups] do
-      party_result = make_grouped_balance(team_count, players, rating_type)
+      party_result = make_grouped_balance(team_count, players, rating_type, opts)
 
-      max_deviation = opts[:max_deviation] || Config.get_site_config_cache("teiserver.Max deviation")
-
-      if party_result.deviation > max_deviation do
-        make_solo_balance(team_count, players, rating_type, ["Tried grouped mode, got a deviation of #{party_result.deviation} and reverted to solo mode"])
+      if party_result.deviation > opts[:max_deviation] do
+        make_solo_balance(team_count, players, rating_type, ["Tried grouped mode, got a deviation of #{party_result.deviation} and reverted to solo mode"], opts)
       else
         party_result
       end
     else
-      make_solo_balance(team_count, players, rating_type, [])
+      make_solo_balance(team_count, players, rating_type, [], opts)
     end
   end
 
-  @spec make_grouped_balance(non_neg_integer(), [T.client()], String.t()) :: map()
-  defp make_grouped_balance(team_count, players, rating_type) do
+  @spec make_grouped_balance(non_neg_integer(), [T.client()], String.t(), list()) :: map()
+  defp make_grouped_balance(team_count, players, rating_type, opts) do
     # Group players into parties
     partied_players = players
       |> Enum.group_by(fn p -> p.party_id end, fn p -> p.userid end)
@@ -169,18 +198,18 @@ defmodule Teiserver.Game.BalancerServer do
       end)
       |> List.flatten
 
-    BalanceLib.create_balance(groups, team_count, [mode: @balance_algorithm])
+    BalanceLib.create_balance(groups, team_count, opts)
       |> Map.put(:balance_mode, :grouped)
   end
 
-  @spec make_solo_balance(non_neg_integer(), [T.client()], String.t(), [String.t()]) :: map()
-  defp make_solo_balance(team_count, players, rating_type, initial_logs) do
+  @spec make_solo_balance(non_neg_integer(), [T.client()], String.t(), [String.t()], list()) :: map()
+  defp make_solo_balance(team_count, players, rating_type, initial_logs, opts) do
     groups = players
       |> Enum.map(fn %{userid: userid} ->
         %{userid => BalanceLib.get_user_balance_rating_value(userid, rating_type)}
       end)
 
-    result = BalanceLib.create_balance(groups, team_count, [mode: @balance_algorithm])
+    result = BalanceLib.create_balance(groups, team_count, opts)
     new_logs = [initial_logs | result.logs] |> List.flatten
 
     Map.merge(result, %{
@@ -197,7 +226,7 @@ defmodule Teiserver.Game.BalancerServer do
 
     founder_id = if lobby, do: lobby.founder_id, else: nil
 
-    %{
+    Map.merge(BalanceLib.defaults(), %{
       coordinator_id: Coordinator.get_coordinator_userid(),
       lobby_id: lobby_id,
       host_id: founder_id,
@@ -206,7 +235,7 @@ defmodule Teiserver.Game.BalancerServer do
 
       algorithm: :loser_picks,
       last_balance_hash: nil
-    }
+    })
   end
 
   @impl true

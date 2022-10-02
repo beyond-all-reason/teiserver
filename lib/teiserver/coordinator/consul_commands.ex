@@ -714,6 +714,63 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+  def handle_command(%{command: "bstatus", senderid: senderid}, state) do
+    balancer_state = Coordinator.call_balancer(state.lobby_id, :report_state)
+
+    values = balancer_state
+      |> Enum.map(fn {k, v} ->
+        "#{k}: #{v}"
+      end)
+      |> Enum.sort(&<=/2)
+
+    status_msg = [
+      "#{@splitter} Balancer status #{@splitter}",
+      values
+    ]
+    |> List.flatten
+    |> Enum.filter(fn s -> s != nil end)
+
+    Coordinator.send_to_user(senderid, status_msg)
+    state
+  end
+
+  def handle_command(%{command: "set", remaining: remaining} = cmd, state) do
+    [variable | value_parts] = String.split(remaining, " ")
+
+    balancer_variables = %{
+      "max_deviation" => :max_deviation,
+      "rating_lower_boundary" => :rating_lower_boundary,
+      "rating_upper_boundary" => :rating_upper_boundary,
+      "mean_diff_max" => :mean_diff_max,
+      "stddev_diff_max" => :stddev_diff_max
+    }
+
+    balancer_key = balancer_variables[variable]
+
+    cond do
+      balancer_key != nil ->
+        parse_value = value_parts
+          |> Enum.join(" ")
+          |> Integer.parse()
+
+        case parse_value do
+          {value, _} ->
+            if value > 0 do
+              Coordinator.cast_balancer(state.lobby_id, {:set, :max_deviation, value})
+              ConsulServer.say_command(cmd, state)
+            else
+              ConsulServer.say_command(%{cmd | error: "invalid value"}, state)
+            end
+
+          _ ->
+            ConsulServer.say_command(%{cmd | error: "invalid value"}, state)
+        end
+
+      true ->
+        ConsulServer.say_command(%{cmd | error: "no variable by that name"}, state)
+    end
+  end
+
   # ----------------- Moderation commands
   def handle_command(%{command: "balance"} = cmd, state) do
     lobby = Lobby.get_lobby(state.lobby_id)

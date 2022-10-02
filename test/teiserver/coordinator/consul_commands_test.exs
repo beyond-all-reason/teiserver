@@ -343,7 +343,10 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
       "message" => [
         "---------------------------",
         "Balance logs, mode: solo",
+        "Tried grouped mode, got a deviation of 100 and reverted to solo mode",
         "Picked #{player.name} for team 1, adding 16.67 points for new total of 16.67",
+        "Deviation of: 100",
+        "Time taken: 0ms",
         "---------------------------"
       ] |> Enum.join("\n"),
       "sender_id" => Coordinator.get_coordinator_userid()

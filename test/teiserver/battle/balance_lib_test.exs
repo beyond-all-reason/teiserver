@@ -14,7 +14,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
       2,
       mode: :loser_picks
     )
-    |> Map.drop([:logs])
+    |> Map.drop([:logs, :time_taken])
 
     assert result == %{
       team_groups: %{
@@ -60,7 +60,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
       mean_diff_max: 100,
       stddev_diff_max: 100
     )
-    |> Map.drop([:logs])
+    |> Map.drop([:logs, :time_taken])
 
     assert result == %{
       team_groups: %{
@@ -115,12 +115,16 @@ defmodule Teiserver.Battle.BalanceLibTest do
         %{116 => 8}
       ],
       2,
-      mode: :loser_picks
+      mode: :loser_picks,
+      rating_lower_boundary: 5,
+      rating_upper_boundary: 5,
+      mean_diff_max: 5,
+      stddev_diff_max: 5
     )
 
     # IO.puts result.logs |> Enum.join("\n")
 
-    assert Map.drop(result, [:logs]) == %{
+    assert Map.drop(result, [:logs, :time_taken]) == %{
       captains: %{1 => 114, 2 => 106},
       deviation: 4,
       ratings: %{1 => 165.5, 2 => 159.5},
@@ -172,7 +176,7 @@ defmodule Teiserver.Battle.BalanceLibTest do
 
     # IO.puts result.logs |> Enum.join("\n")
 
-    assert Map.drop(result, [:logs]) == %{
+    assert Map.drop(result, [:logs, :time_taken]) == %{
       captains: %{1 => 101, 2 => 104},
       deviation: 0,
       ratings: %{1 => 184, 2 => 184},
