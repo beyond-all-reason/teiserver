@@ -328,7 +328,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
-  def handle_command(%{command: "explain", senderid: senderid} = _cmd, state) do
+  def handle_command(%{command: "explain", senderid: senderid} = cmd, state) do
     balance = state.lobby_id
       |> Battle.get_lobby_current_balance()
 
@@ -349,6 +349,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         moderator_messages,
         @splitter
       ] |> List.flatten)
+
+      ConsulServer.say_command(cmd, state)
     else
       Coordinator.send_to_user(senderid, [
         @splitter,

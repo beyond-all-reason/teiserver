@@ -312,6 +312,65 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     state
   end
 
+  defp do_handle(%{command: "party", senderid: senderid, remaining: targets} = _cmd, state) do
+    targets
+      |> String.split(" ")
+      |> Enum.map(fn name ->
+        name
+          |> String.trim()
+          |> String.downcase()
+      end)
+      |> Enum.uniq
+      |> Enum.reduce(nil, fn (target, party_id) ->
+        case User.get_userid(target) do
+          nil ->
+            User.send_direct_message(state.userid, senderid, "Unable to find a user '#{target}'")
+            party_id
+          target_id ->
+            party_id = if party_id do
+              Account.create_party_invite(party_id, target_id)
+              Account.accept_party_invite(party_id, target_id)
+              # Account.move_client_to_party(target_id, party_id)
+              party_id
+            else
+              party = Account.create_party(target_id)
+              party.id
+            end
+            :timer.sleep(50)
+
+            party_id
+        end
+      end)
+
+    state
+  end
+
+  defp do_handle(%{command: "unparty", remaining: targets} = _cmd, state) do
+    targets
+      |> String.split(" ")
+      |> Enum.map(fn name ->
+        name
+          |> String.trim()
+          |> String.downcase()
+      end)
+      |> Enum.uniq
+      |> Enum.reduce(nil, fn (target, _) ->
+        case User.get_userid(target) do
+          nil ->
+            :ok
+          target_id ->
+            client = Account.get_client_by_id(target_id)
+
+            if client.party_id do
+              Account.leave_party(client.party_id, target_id)
+              Account.move_client_to_party(target_id, nil)
+            end
+        end
+      end)
+
+    state
+  end
+
   defp do_handle(%{command: "website", senderid: senderid} = _cmd, state) do
     uuid = UUID.uuid1()
     client = Client.get_client_by_id(senderid)
