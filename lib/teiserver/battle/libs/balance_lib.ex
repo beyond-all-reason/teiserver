@@ -59,7 +59,7 @@ defmodule Teiserver.Battle.BalanceLib do
   @spec create_balance([player_group()], non_neg_integer()) :: map()
   @spec create_balance([player_group()], non_neg_integer(), List.t()) :: map()
   def create_balance(groups, team_count, opts \\ []) do
-    start_time = System.system_time(:millisecond)
+    start_time = System.system_time(:microsecond)
 
     # We perform all our group calculations here and assign each group
     # an ID that's used purely for this run of balance
@@ -115,7 +115,7 @@ defmodule Teiserver.Battle.BalanceLib do
         {team, players}
       end)
 
-    time_taken = System.system_time(:millisecond) - start_time
+    time_taken = System.system_time(:microsecond) - start_time
 
     %{
       team_groups: team_groups,

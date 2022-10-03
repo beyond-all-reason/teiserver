@@ -72,7 +72,9 @@ defmodule Teiserver.Game.BalancerServer do
 
     new_state = case Enum.member?(valid_keys, key) do
       true ->
-        Map.put(state, key, value)
+        state
+          |> Map.put(key, value)
+          |> Map.put(:hashes, %{})
 
       false
         state

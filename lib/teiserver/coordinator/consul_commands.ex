@@ -335,7 +335,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     if balance do
       moderator_messages = if User.is_moderator?(senderid) do
         [
-          "Time taken: #{balance.time_taken}ms",
+          "Time taken: #{balance.time_taken}us",
         ]
       else
         []
