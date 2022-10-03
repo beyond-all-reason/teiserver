@@ -18,8 +18,8 @@ defmodule TeiserverWeb.API.SpadsController do
     "type" => type
   }) do
     actual_type = case type do
-      "TeamFFA" -> "Team"
-      "FFA" -> "Duel"
+      "TeamFFA" -> "FFA"
+      "FFA" -> "FFA"
       v -> v
     end
 
@@ -112,8 +112,8 @@ defmodule TeiserverWeb.API.SpadsController do
 
         # Temporary solution until FFA and Team FFA ratings are fixed
         rating_type = case rating_type do
-          "Team FFA" -> "Team"
-          "FFA" -> "Duel"
+          "Team FFA" -> "FFA"
+          "FFA" -> "FFA"
           v -> v
         end
 
