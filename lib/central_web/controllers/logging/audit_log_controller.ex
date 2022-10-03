@@ -20,16 +20,17 @@ defmodule CentralWeb.Logging.AuditLogController do
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, params) do
-    logs = Logging.list_audit_logs(joins: [:user], order: "Newest first")
-    # |> AuditLogLib.search(:groups, conn.assigns[:memberships])
-    # |> AuditLogLib.preload_user
+    logs = Logging.list_audit_logs(
+      joins: [:user],
+      order_by: "Newest first"
+    )
 
     conn
-    |> assign(:show_search, Map.has_key?(params, "search"))
-    |> assign(:params, form_params())
-    |> assign(:actions, AuditLogLib.list_audit_types())
-    |> assign(:logs, logs)
-    |> render("index.html")
+      |> assign(:show_search, Map.has_key?(params, "search"))
+      |> assign(:params, form_params())
+      |> assign(:actions, AuditLogLib.list_audit_types())
+      |> assign(:logs, logs)
+      |> render("index.html")
   end
 
   @spec search(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
@@ -44,24 +45,16 @@ defmodule CentralWeb.Logging.AuditLogController do
           group_id: params["group_id"]
         ],
         joins: [:user],
-        order: "Newest first",
+        order_by: "Newest first",
         limit: params["limit"]
       )
 
-    # |> AuditLogLib.search(:groups, conn.assigns[:memberships])
-    # |> AuditLogLib.preload_user
-    # |> AuditLogLib.search(:action, params["action"])
-    # |> AuditLogLib.search(:account_user, params["account_user"])
-    # |> AuditLogLib.order(params["order"])
-    # |> limit_query(params["limit"], 200)
-    # |> Repo.all
-
     conn
-    |> assign(:show_search, "hidden")
-    |> assign(:params, params)
-    |> assign(:actions, AuditLogLib.list_audit_types())
-    |> assign(:logs, logs)
-    |> render("index.html")
+      |> assign(:show_search, "hidden")
+      |> assign(:params, params)
+      |> assign(:actions, AuditLogLib.list_audit_types())
+      |> assign(:logs, logs)
+      |> render("index.html")
   end
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
@@ -69,8 +62,8 @@ defmodule CentralWeb.Logging.AuditLogController do
     log = Logging.get_audit_log!(id, joins: [:user, :group])
 
     conn
-    |> assign(:log, log)
-    |> render("show.html")
+      |> assign(:log, log)
+      |> render("show.html")
   end
 
   @spec form_params(Map.t()) :: Map.t()
