@@ -6,12 +6,6 @@ defmodule TeiserverWeb.API.SpadsController do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   require Logger
 
-  # plug(Bodyguard.Plug.Authorize,
-  #   policy: Teiserver.Battle.ApiAuth,
-  #   action: {Phoenix.Controller, :action_name},
-  #   user: {Central.Account.AuthLib, :current_user}
-  # )
-
   @spec get_rating(Plug.Conn.t(), map) :: Plug.Conn.t()
   def get_rating(conn, %{
     "target_id" => target_id_str,
@@ -19,7 +13,6 @@ defmodule TeiserverWeb.API.SpadsController do
   }) do
     actual_type = case type do
       "TeamFFA" -> "FFA"
-      "FFA" -> "FFA"
       v -> v
     end
 
@@ -110,10 +103,9 @@ defmodule TeiserverWeb.API.SpadsController do
           true -> "Team FFA"
         end
 
-        # Temporary solution until FFA and Team FFA ratings are fixed
+        # Temporary solution until Team FFA ratings are fixed
         rating_type = case rating_type do
           "Team FFA" -> "FFA"
-          "FFA" -> "FFA"
           v -> v
         end
 
