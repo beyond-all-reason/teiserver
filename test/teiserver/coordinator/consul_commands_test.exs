@@ -331,7 +331,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
       "sender_id" => Coordinator.get_coordinator_userid()
     }
 
-    Coordinator.call_balancer(lobby_id, {
+    balance_result = Coordinator.call_balancer(lobby_id, {
       :make_balance, 2, [allow_groups: true]
     })
 
@@ -346,7 +346,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
         "Tried grouped mode, got a deviation of 100 and reverted to solo mode",
         "Picked #{player.name} for team 1, adding 16.67 points for new total of 16.67",
         "Deviation of: 100",
-        "Time taken: 0ms",
+        "Time taken: #{balance_result.time_taken}us",
         "---------------------------"
       ] |> Enum.join("\n"),
       "sender_id" => Coordinator.get_coordinator_userid()
