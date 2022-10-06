@@ -21,9 +21,6 @@ defmodule Teiserver.Protocols.V1.TachyonSocialTest do
     User.accept_friend_request(user.id, friend1.id)
     User.accept_friend_request(user.id, friend2.id)
 
-    # User.accept_friend_request(friend1.id, user.id)
-    # User.accept_friend_request(friend2.id, user.id)
-
     User.create_friend_request(user.id, pending_friend.id)
 
     User.ignore_user(user.id, ignored.id)
@@ -204,9 +201,6 @@ defmodule Teiserver.Protocols.V1.TachyonSocialTest do
     assert user.friends == [friend2.id, friend1.id]
     assert user.friend_requests == []
 
-    # IO.puts ""
-    # IO.inspect Account.list_client_ids(), label: "All clients"
-
     # Now try c.user.list_friend_users_and_clients
     _tachyon_send(socket, %{"cmd" => "c.user.list_friend_users_and_clients"})
     [resp] = _tachyon_recv(socket)
@@ -219,36 +213,4 @@ defmodule Teiserver.Protocols.V1.TachyonSocialTest do
     user_ids = resp["user_list"] |> Enum.map(fn c -> c["id"] end) |> Enum.sort
     assert user_ids == [friend1.id, friend2.id]
   end
-
-  # defp create_lobby(params) do
-  #   %{socket: socket, user: user} = tachyon_auth_setup()
-  #   # Open the lobby
-  #   lobby_data = Map.merge(%{
-  #     cmd: "c.lobby.create",
-  #     name: "EU 01 - 123",
-  #     nattype: "none",
-  #     port: 1234,
-  #     game_hash: "string_of_characters",
-  #     map_hash: "string_of_characters",
-  #     map_name: "koom valley",
-  #     game_name: "BAR",
-  #     engine_name: "spring-105",
-  #     engine_version: "105.1.2.3",
-  #     settings: %{
-  #       max_players: 12
-  #     }
-  #   }, params)
-
-  #   # Create the lobby
-  #   data = %{cmd: "c.lobby.create", lobby: lobby_data}
-  #   _tachyon_send(socket, data)
-  #   _tachyon_recv(socket)
-
-  #   # Update the lobby
-  #   data = %{cmd: "c.lobby.update", lobby: params}
-  #   _tachyon_send(socket, data)
-  #   [reply] = _tachyon_recv(socket)
-
-  #   {reply["lobby"], user, socket}
-  # end
 end

@@ -24,9 +24,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.Tachyon do
       |> Enum.map(fn object -> convert_object(object, type) end)
   end
 
-  def convert_object(user, :user), do: Map.take(user, ~w(id name bot clan_id springid country)a)
+  def convert_object(user, :user) do
+    Map.merge(
+      Map.take(user, ~w(id name bot clan_id country)a),
+      %{"icons" => Teiserver.Account.UserLib.generate_user_icons(user)}
+    )
+  end
   def convert_object(user, :user_extended), do: Map.take(user, ~w(id name bot clan_id permissions
-                    friends friend_requests ignores springid country)a)
+                    friends friend_requests ignores country)a)
   def convert_object(user, :user_extended_icons) do
     Map.merge(
       convert_object(user, :user_extended),
