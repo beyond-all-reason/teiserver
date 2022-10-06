@@ -106,12 +106,14 @@ defmodule TeiserverWeb.Admin.MatchController do
         # be broken out of the party
         {nil, player_id_list} ->
           player_id_list
+            |> Enum.filter(fn userid -> rating_logs[userid] != nil end)
             |> Enum.map(fn userid ->
               %{userid => rating_logs[userid].value["rating_value"]}
             end)
 
         {_party_id, player_id_list} ->
           player_id_list
+            |> Enum.filter(fn userid -> rating_logs[userid] != nil end)
             |> Map.new(fn userid ->
               {userid, rating_logs[userid].value["rating_value"]}
             end)

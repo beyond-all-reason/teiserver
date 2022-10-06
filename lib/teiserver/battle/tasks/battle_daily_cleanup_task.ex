@@ -31,8 +31,13 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
     # Delete short matches
     matches
       |> Enum.filter(fn match ->
-        duration = Timex.diff(match.finished, match.started, :second)
-        duration < Application.get_env(:central, Teiserver)[:retention][:battle_minimum_seconds]
+        cond do
+          match.finished == nil -> true
+          match.started == nil -> true
+          true ->
+            duration = Timex.diff(match.finished, match.started, :second)
+            duration < Application.get_env(:central, Teiserver)[:retention][:battle_minimum_seconds]
+        end
       end)
       |> Enum.map(fn %{id: id} -> id end)
       |> Enum.join(",")
