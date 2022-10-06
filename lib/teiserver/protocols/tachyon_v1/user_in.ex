@@ -49,7 +49,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.UserIn do
     friend_list = User.get_user_by_id(state.userid).friends
 
     users = friend_list
-      |> Account.list_users()
+      |> Account.list_users_from_cache()
       |> Enum.reject(&(&1 == nil))
       |> Tachyon.convert_object(:user)
 

@@ -87,7 +87,10 @@ defmodule Teiserver.Game.MatchRatingLib do
     rating_type_id = Game.get_or_add_rating_type(match.game_type)
     partied_rating_type_id = Game.get_or_add_rating_type("Partied Team")
 
+    # opponent_ratio = 1/(team_count-1)
     opponent_ratio = 2/team_count
+    # opponent_ratio = 3/(team_count+1)
+    # opponent_ratio = 0.5
 
     party_ids = []
     # party_ids = match.members
