@@ -236,6 +236,16 @@ defmodule Teiserver.Battle.Lobby do
 
       PubSub.broadcast(
         Central.PubSub,
+        "teiserver_client_watch:#{userid}",
+        %{
+          channel: "teiserver_client_watch:#{userid}",
+          event: :added_to_lobby,
+          lobby_id: lobby_id
+        }
+      )
+
+      PubSub.broadcast(
+        Central.PubSub,
         "legacy_all_battle_updates",
         {:add_user_to_battle, userid, lobby_id, script_password}
       )
@@ -268,10 +278,20 @@ defmodule Teiserver.Battle.Lobby do
         Coordinator.cast_consul(lobby_id, {:user_left, userid})
 
         PubSub.broadcast(
-            Central.PubSub,
-            "teiserver_client_action_updates:#{userid}",
-            {:client_action, :leave_lobby, userid, lobby_id}
-          )
+          Central.PubSub,
+          "teiserver_client_watch:#{userid}",
+          %{
+            channel: "teiserver_client_watch:#{userid}",
+            event: :left_lobby,
+            lobby_id: lobby_id
+          }
+        )
+
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_client_action_updates:#{userid}",
+          {:client_action, :leave_lobby, userid, lobby_id}
+        )
 
         PubSub.broadcast(
           Central.PubSub,
@@ -304,6 +324,16 @@ defmodule Teiserver.Battle.Lobby do
         :removed ->
           LobbyChat.persist_system_message("#{user.name} was kicked from the battle", lobby_id)
           Coordinator.cast_consul(lobby_id, {:user_kicked, userid})
+
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_client_watch:#{userid}",
+            %{
+              channel: "teiserver_client_watch:#{userid}",
+              event: :left_lobby,
+              lobby_id: lobby_id
+            }
+          )
 
           PubSub.broadcast(
             Central.PubSub,

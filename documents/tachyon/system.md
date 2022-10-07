@@ -61,6 +61,9 @@ Subscribes you to global lobby updates such as lobbies opening, closing and upda
 **`lobby:<LOBBY_ID>`**
 Subscribes you to lobby updates for a given lobby without joining it. Does not subscribe you to the lobby chat and if you join then leave a lobby you will need to resubscribe to it.
 
+**`friends`**
+Subscribes you to information about each of your friends at the time of calling. If you add/remove a friend this will not updated an you will need to watch/unwatch using `friend:<USERID>`
+
 
 ### c.system.unwatch
 Unsubscribes you to the lobby updates for that particular lobby. Note if you are a member of a lobby it is inadvisable to call this for that lobby.

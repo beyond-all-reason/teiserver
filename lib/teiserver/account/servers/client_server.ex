@@ -29,6 +29,16 @@ defmodule Teiserver.Account.ClientServer do
             party_id: existing_id
           }
         )
+
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_client_watch:#{state.userid}",
+          %{
+            channel: "teiserver_client_messages:#{state.userid}",
+            event: :left_party,
+            party_id: existing_id
+          }
+        )
         Account.cast_party(existing_id, {:member_leave, state.userid})
         :ok
     end
@@ -41,6 +51,16 @@ defmodule Teiserver.Account.ClientServer do
         "teiserver_client_messages:#{state.userid}",
         %{
           channel: "teiserver_client_messages:#{state.userid}",
+          event: :added_to_party,
+          party_id: party_id
+        }
+      )
+
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_client_watch:#{state.userid}",
+        %{
+          channel: "teiserver_client_watch:#{state.userid}",
           event: :added_to_party,
           party_id: party_id
         }

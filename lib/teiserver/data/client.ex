@@ -146,6 +146,15 @@ defmodule Teiserver.Client do
 
     PubSub.broadcast(
       Central.PubSub,
+      "teiserver_client_watch:#{user.id}",
+      %{
+        channel: "teiserver_client_watch:#{user.id}",
+        event: :connected
+      }
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
       "teiserver_client_action_updates:#{user.id}",
       {:client_action, :client_connect, user.id}
     )
@@ -305,6 +314,15 @@ defmodule Teiserver.Client do
       "teiserver_client_messages:#{client.userid}",
       %{
         channel: "teiserver_client_messages:#{client.userid}",
+        event: :disconnected
+      }
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_client_watch:#{client.userid}",
+      %{
+        channel: "teiserver_client_watch:#{client.userid}",
         event: :disconnected
       }
     )

@@ -280,6 +280,41 @@ This is the channel for sending messages to the client. It allows the client on 
 }
 ```
 
+#### teiserver_client_watch:#{userid}
+Gives information about the activities of a client without containing anything personal. Used for allowing friends to be updated about the activities of friends.
+```elixir
+# In/Out
+%{
+  event: :connected
+}
+
+%{
+  event: :disconnected
+}
+
+# Lobbies 
+%{
+  event: :added_to_lobby,
+  lobby_id: lobby_id,
+}
+
+%{
+  event: :left_lobby,
+  lobby_id: lobby_id
+}
+
+# Parties
+%{
+  event: :added_to_party,
+  party_id: party_id
+}
+
+%{
+  event: :left_party,
+  party_id: party_id
+}
+```
+
 #### teiserver_client_action_updates:#{userid}
 Informs about actions performed by a specific client
 Aside from connect/disconnect there should always be the structure of `{:client_action, :join_queue, userid, data}`

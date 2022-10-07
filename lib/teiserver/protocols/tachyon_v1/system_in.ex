@@ -1,6 +1,6 @@
 defmodule Teiserver.Protocols.Tachyon.V1.SystemIn do
   import Teiserver.Protocols.Tachyon.V1.TachyonOut, only: [reply: 4]
-  alias Teiserver.Battle
+  alias Teiserver.{Account, Battle}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   @spec do_handle(String.t(), Map.t(), Map.t()) :: Map.t()
@@ -10,6 +10,25 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemIn do
 
   def do_handle("watch", %{"channel" => channel}, state) do
     case channel do
+      "friends" ->
+        user = Account.get_user_by_id(state.userid)
+
+        user.friends
+          |> Enum.each(fn f ->
+            send(self(), {:action, {:watch_channel, "teiserver_client_watch:#{f}"}})
+          end)
+        reply(:system, :watch, {:ok, channel}, state)
+
+      "friend:" <> f ->
+        f_id = int_parse(f)
+        user = Account.get_user_by_id(state.userid)
+        if Enum.member?(user.friends, f_id) do
+          send(self(), {:action, {:watch_channel, "teiserver_client_watch:#{f}"}})
+          reply(:system, :watch, {:ok, channel}, state)
+        else
+          reply(:system, :watch, {:error, channel, "Not a friend"}, state)
+        end
+
       "server_stats" ->
         send(self(), {:action, {:watch_channel, "teiserver_public_stats"}})
         reply(:system, :watch, {:ok, channel}, state)
@@ -35,6 +54,18 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemIn do
 
   def do_handle("unwatch", %{"channel" => channel}, state) do
     case channel do
+      "friends" ->
+        user = Account.get_user_by_id(state.userid)
+        user.friends
+          |> Enum.each(fn f ->
+            send(self(), {:action, {:watch_channel, "teiserver_client_watch:#{f}"}})
+          end)
+        reply(:system, :unwatch, {:ok, channel}, state)
+
+      "friend:" <> f ->
+        send(self(), {:action, {:unwatch_channel, "teiserver_client_watch:#{f}"}})
+        reply(:system, :unwatch, {:ok, channel}, state)
+
       "server_stats" ->
         send(self(), {:action, {:unwatch_channel, "teiserver_public_stats"}})
         reply(:system, :unwatch, {:ok, channel}, state)
