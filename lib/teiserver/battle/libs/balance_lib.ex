@@ -417,8 +417,8 @@ defmodule Teiserver.Battle.BalanceLib do
         new_team2_total = (team2_points) + team2_group.group_rating
 
         new_logs = logs ++ [
-          "Pair picked #{team1_names} for team 1, adding #{round(team1_group.group_rating, 2)} points for new total of #{round(new_team1_total, 2)}",
-          "Pair picked #{team2_names} for team 1, adding #{round(team2_group.group_rating, 2)} points for new total of #{round(new_team2_total, 2)}"
+          "Pair picked #{team1_names} for team #{team1}, adding #{round(team1_group.group_rating, 2)} points for new total of #{round(new_team1_total, 2)}",
+          "Pair picked #{team2_names} for team #{team2}, adding #{round(team2_group.group_rating, 2)} points for new total of #{round(new_team2_total, 2)}"
         ]
 
         do_loser_picks(remaining_groups, new_team_map, max_teamsize, new_logs)

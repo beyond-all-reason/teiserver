@@ -176,7 +176,7 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
       "> diff_stats 24.0, 12.0, 0.0",
       "End of pairing",
       "Pair picked Garpike, Hound for team 1, adding 97.0 points for new total of 97.0",
-      "Pair picked Fury, Destroyer for team 1, adding 73.0 points for new total of 73.0",
+      "Pair picked Fury, Destroyer for team 2, adding 73.0 points for new total of 73.0",
       "Picked Eagle for team 2, adding 36.0 points for new total of 109.0",
       "Picked Calamity for team 1, adding 30.0 points for new total of 127.0",
       "Picked Brute for team 2, adding 25.0 points for new total of 134.0",
