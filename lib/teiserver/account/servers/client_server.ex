@@ -34,7 +34,7 @@ defmodule Teiserver.Account.ClientServer do
           Central.PubSub,
           "teiserver_client_watch:#{state.userid}",
           %{
-            channel: "teiserver_client_messages:#{state.userid}",
+            channel: "teiserver_client_watch:#{state.userid}",
             event: :left_party,
             party_id: existing_id
           }

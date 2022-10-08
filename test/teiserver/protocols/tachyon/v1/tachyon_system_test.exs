@@ -1,9 +1,10 @@
 defmodule Teiserver.Protocols.V1.TachyonSystemTest do
   use Central.ServerCase
   alias Teiserver.{Battle, Account}
+  alias Teiserver.Account.RelationsLib
 
   import Teiserver.TeiserverTestLib,
-    only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, new_user: 0]
+    only: [tachyon_auth_setup: 0, tachyon_auth_setup: 1, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1, new_user: 0]
 
   setup do
     %{socket: socket, user: user, pid: pid} = tachyon_auth_setup()
@@ -190,5 +191,89 @@ defmodule Teiserver.Protocols.V1.TachyonSystemTest do
     assert _tachyon_recv(socket) == :timeout
 
     Battle.close_lobby(lobby.id)
+  end
+
+  test "watch - friends", %{socket: socket, user: user} do
+    friend = new_user()
+    RelationsLib.create_friend_request(user.id, friend.id)
+    RelationsLib.accept_friend_request(user.id, friend.id)
+
+    # Clear everything
+    _tachyon_recv_until(socket)
+
+    _tachyon_send(socket, %{"cmd" => "c.system.watch", "channel" => "friends"})
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.system.watch",
+      "result" => "success",
+      "channel" => "friends"
+    }
+
+    %{socket: fsocket} = tachyon_auth_setup(friend)
+
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.client.connected",
+      "userid" => friend.id
+    }
+
+    # Party time!
+    _tachyon_send(fsocket, %{"cmd" => "c.party.create"})
+
+    f_client = Account.get_client_by_id(friend.id)
+
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.client.added_to_party",
+      "userid" => friend.id,
+      "party_id" => f_client.party_id
+    }
+
+    # Bye bye party
+    _tachyon_send(fsocket, %{"cmd" => "c.party.leave"})
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.client.left_party",
+      "userid" => friend.id,
+      "party_id" => f_client.party_id
+    }
+
+    # Create a lobby for the friend
+    bot_user = new_user()
+    bot_user = Account.update_cache_user(%{bot_user | bot: true})
+
+    lobby = Battle.Lobby.create_lobby(%{
+      founder_id: bot_user.id,
+      founder_name: bot_user.name,
+      name: "lobby_chat_test_as_bot",
+      id: 1
+    })
+    |> Battle.add_lobby
+
+    Battle.Lobby.add_user_to_battle(friend.id, lobby.id, "abc")
+
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.client.added_to_lobby",
+      "userid" => friend.id,
+      "lobby_id" => lobby.id
+    }
+
+    Battle.Lobby.kick_user_from_battle(friend.id, lobby.id)
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.client.left_lobby",
+      "userid" => friend.id,
+      "lobby_id" => lobby.id
+    }
+
+    # Finally, disconnect
+    _tachyon_send(fsocket, %{"cmd" => "c.auth.disconnect"})
+
+    [resp] = _tachyon_recv(socket)
+    assert resp == %{
+      "cmd" => "s.client.disconnected",
+      "userid" => friend.id
+    }
   end
 end

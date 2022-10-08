@@ -307,6 +307,39 @@ defmodule Teiserver.TachyonTcpServer do
     {:noreply, new_state}
   end
 
+
+  def handle_info(data = %{channel: "teiserver_client_watch:" <> userid_str}, state) do
+    userid = int_parse(userid_str)
+
+    if state.userid != userid do
+      case data.event do
+        :connected ->
+          state.protocol_out.reply(:client, :connected, userid, state)
+
+        :disconnected ->
+          state.protocol_out.reply(:client, :disconnected, userid, state)
+
+        :added_to_party ->
+          state.protocol_out.reply(:client, :added_to_party, {userid, data.party_id}, state)
+
+        :left_party ->
+          state.protocol_out.reply(:client, :left_party, {userid, data.party_id}, state)
+
+        :added_to_lobby ->
+          state.protocol_out.reply(:client, :added_to_lobby, {userid, data.lobby_id}, state)
+
+        :left_lobby ->
+          state.protocol_out.reply(:client, :left_lobby, {userid, data.lobby_id}, state)
+
+        _ ->
+          Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for teiserver_global_lobby_updates.event = #{data.event}")
+          state
+      end
+    end
+
+    {:noreply, state}
+  end
+
   def handle_info(data = %{channel: "teiserver_client_messages:" <> userid_str}, state) do
     userid = int_parse(userid_str)
 

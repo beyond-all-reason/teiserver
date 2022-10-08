@@ -22,21 +22,21 @@ Subscribes you to updates updates for a given pubsub channel.
 
 ```json
 {
-  "cmd": "c.lobby.watch",
-  "channel": channel_name
+  "cmd": "c.system.watch",
+  "channel": "lobby:123"
 }
 
 {
-  "cmd": "s.lobby.watch",
+  "cmd": "s.system.watch",
   "result": "success",
-  "lobby_id": 123
+  "channel": "lobby:123"
 }
 
 {
-  "cmd": "s.lobby.watch",
+  "cmd": "s.system.watch",
   "result": "failure",
   "reason": "No lobby",
-  "lobby_id": 1234
+  "channel": "lobby:123"
 }
 ```
 
@@ -55,15 +55,16 @@ Every 9-10 seconds you will be sent a list of some server stats showing the curr
 }
 ```
 
-**`all_lobbies`**
+##### `all_lobbies`
 Subscribes you to global lobby updates such as lobbies opening, closing and updating.
 
-**`lobby:<LOBBY_ID>`**
+##### `lobby:<LOBBY_ID>`
 Subscribes you to lobby updates for a given lobby without joining it. Does not subscribe you to the lobby chat and if you join then leave a lobby you will need to resubscribe to it.
 
-**`friends`**
-Subscribes you to information about each of your friends at the time of calling. If you add/remove a friend this will not updated an you will need to watch/unwatch using `friend:<USERID>`
+##### `friends`
+Subscribes you to information about each of your friends at the time of calling. If you add/remove a friend this will not updated an you will need to watch/unwatch using `friend:<USERID>`. If you attempt to watch someone who is not a friend you will get a failure response.
 
+All friends-watch related messages are listed in [client.md](client.md).
 
 ### c.system.unwatch
 Unsubscribes you to the lobby updates for that particular lobby. Note if you are a member of a lobby it is inadvisable to call this for that lobby.
