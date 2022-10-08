@@ -77,7 +77,7 @@ defmodule Teiserver.Protocols.V1.TachyonAuthTest do
     # Now include clients
     _tachyon_send(socket, %{"cmd" => "c.user.list_users_from_ids", "id_list" => friend_list, "include_clients" => true})
     [resp] = _tachyon_recv(socket)
-    assert resp["cmd"] == "s.user.user_and_client_list"
+    assert resp["cmd"] == "s.user.user_list"
     [client] = resp["clients"]
     assert client["sync"] == %{"engine" => 0, "game" => 0, "map" => 0}
     users_map = resp["users"]

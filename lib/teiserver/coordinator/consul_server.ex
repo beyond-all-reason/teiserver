@@ -49,25 +49,29 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # Infos
   @impl true
   def handle_info(:tick, state) do
-    new_state = check_queue_status(state)
-    player_count_changed(new_state)
-    fix_ids(new_state)
-    {new_balance_hash, new_balance_result} = balance_teams(state)
-    new_state = afk_check_update(new_state)
+    if Battle.lobby_exists?(state.lobby_id) do
+      new_state = check_queue_status(state)
+      player_count_changed(new_state)
+      fix_ids(new_state)
+      {new_balance_hash, new_balance_result} = balance_teams(state)
+      new_state = afk_check_update(new_state)
 
-    # It is possible we can "forget" the coordinator_id
-    # no idea how it happens but it can cause issues to arise
-    # as such we just do a quick check for it here
-    new_state = if new_state.coordinator_id == nil do
-      %{new_state | coordinator_id: Coordinator.get_coordinator_userid()}
+      # It is possible we can "forget" the coordinator_id
+      # no idea how it happens but it can cause issues to arise
+      # as such we just do a quick check for it here
+      new_state = if new_state.coordinator_id == nil do
+        %{new_state | coordinator_id: Coordinator.get_coordinator_userid()}
+      else
+        new_state
+      end
+
+      {:noreply, %{new_state |
+        last_balance_hash: new_balance_hash,
+        balance_result: new_balance_result
+      }}
     else
-      new_state
+      {:noreply, state}
     end
-
-    {:noreply, %{new_state |
-      last_balance_hash: new_balance_hash,
-      balance_result: new_balance_result
-    }}
   end
 
   def handle_info({:put, key, value}, state) do
@@ -864,12 +868,17 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec list_players(map()) :: [T.client()]
   def list_players(%{lobby_id: lobby_id}) do
-    # Battle.list_lobby_players(lobby_id)
+    member_list = Battle.get_lobby_member_list(lobby_id)
 
-    Battle.get_lobby_member_list(lobby_id)
-      |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
-      |> Enum.filter(fn client -> client != nil end)
-      |> Enum.filter(fn client -> client.player == true and client.lobby_id == lobby_id end)
+    case member_list do
+      nil ->
+        []
+      _ ->
+        member_list
+          |> Enum.map(fn userid -> Client.get_client_by_id(userid) end)
+          |> Enum.filter(fn client -> client != nil end)
+          |> Enum.filter(fn client -> client.player == true and client.lobby_id == lobby_id end)
+    end
   end
 
   @spec get_player_count(map()) :: non_neg_integer

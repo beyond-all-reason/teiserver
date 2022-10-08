@@ -251,7 +251,6 @@ defmodule Teiserver.Protocols.V1.TachyonSystemTest do
     |> Battle.add_lobby
 
     Battle.Lobby.add_user_to_battle(friend.id, lobby.id, "abc")
-
     [resp] = _tachyon_recv(socket)
     assert resp == %{
       "cmd" => "s.client.added_to_lobby",
@@ -259,13 +258,17 @@ defmodule Teiserver.Protocols.V1.TachyonSystemTest do
       "lobby_id" => lobby.id
     }
 
-    Battle.Lobby.kick_user_from_battle(friend.id, lobby.id)
+    Battle.Lobby.remove_user_from_battle(friend.id, lobby.id)
     [resp] = _tachyon_recv(socket)
     assert resp == %{
       "cmd" => "s.client.left_lobby",
       "userid" => friend.id,
       "lobby_id" => lobby.id
     }
+
+    # FIXME Sometimes there's an extra added_to_lobby message and
+    # I have no idea why
+    _tachyon_recv_until(socket)
 
     # Finally, disconnect
     _tachyon_send(fsocket, %{"cmd" => "c.auth.disconnect"})

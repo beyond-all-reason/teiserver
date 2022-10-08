@@ -5,7 +5,7 @@ Returns a list of users as listed by the ids.
 `id_list` - list (User.id)
 
 ##### Optional
-`include_clients` - Booalen - default false
+`include_clients` - Boolean - default false
 
 #### Response
 * users :: List (User)

@@ -25,13 +25,13 @@ defmodule Teiserver.Protocols.Tachyon.V1.UserIn do
         Tachyon.convert_object(updated_u, :user)
       end)
 
-    if Map.get(args, "include_clients", false) do
+    if Map.get(args, "include_clients", true) do
       clients = id_list
         |> Client.list_clients()
         |> Enum.filter(fn c -> c != nil end)
         |> Enum.map(fn c -> Tachyon.convert_object(c, :client) end)
 
-      reply(:user, :user_and_client_list, {users, clients}, state)
+      reply(:user, :user_list, {users, clients}, state)
     else
       reply(:user, :user_list, users, state)
     end
