@@ -1057,12 +1057,14 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp check_queue_status(state) do
     join_queue = state.join_queue
     |> Enum.filter(fn userid ->
-      Client.get_client_by_id(userid).player == false
+      client = Client.get_client_by_id(userid) || %{player: false}
+      client.player == false
     end)
 
     low_priority_join_queue = state.low_priority_join_queue
     |> Enum.filter(fn userid ->
-      Client.get_client_by_id(userid).player == false
+      client = Client.get_client_by_id(userid) || %{player: false}
+      client.player == false
     end)
 
     %{state |
