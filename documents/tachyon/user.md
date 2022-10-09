@@ -21,7 +21,7 @@ Returns a list of users as listed by the ids.
 // Without clients
 {
   "cmd": "s.user.user_list",
-  "user_list": [
+  "users": [
     User,
     User,
     User
@@ -31,12 +31,12 @@ Returns a list of users as listed by the ids.
 // With clients
 {
   "cmd": "s.user.user_list",
-  "user_list": [
+  "users": [
     User,
     User,
     User
   ],
-  "client_list": [
+  "clients": [
     Client,
     Client,
     Client
