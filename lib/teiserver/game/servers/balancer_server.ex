@@ -76,7 +76,7 @@ defmodule Teiserver.Game.BalancerServer do
           |> Map.put(key, value)
           |> Map.put(:hashes, %{})
 
-      false
+      false ->
         state
     end
 

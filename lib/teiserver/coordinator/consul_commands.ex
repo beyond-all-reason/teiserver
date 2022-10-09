@@ -756,7 +756,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         case parse_value do
           {value, _} ->
             if value > 0 do
-              Coordinator.cast_balancer(state.lobby_id, {:set, :max_deviation, value})
+              Coordinator.cast_balancer(state.lobby_id, {:set, balancer_key, value})
               ConsulServer.say_command(cmd, state)
             else
               ConsulServer.say_command(%{cmd | error: "invalid value"}, state)
