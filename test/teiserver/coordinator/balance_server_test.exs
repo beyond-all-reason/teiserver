@@ -106,7 +106,9 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
 
     assert (Battle.list_lobby_players(lobby_id) |> Enum.count) == 8
 
-    opts = []
+    opts = [
+      fuzz_multiplier: 0
+    ]
     team_count = 2
 
     balance_result = Coordinator.call_balancer(lobby_id, {
@@ -134,7 +136,8 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
       stddev_diff_max: 10,
       rating_lower_boundary: 5,
       rating_upper_boundary: 5,
-      max_deviation: 10
+      max_deviation: 10,
+      fuzz_multiplier: 0
     ]
     grouped_balance_result = Coordinator.call_balancer(lobby_id, {
       :make_balance, team_count, opts
@@ -195,7 +198,8 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
       stddev_diff_max: 10,
       rating_lower_boundary: 5,
       rating_upper_boundary: 5,
-      max_deviation: 10
+      max_deviation: 10,
+      fuzz_multiplier: 0
     ]
 
     party_balance_result = Coordinator.call_balancer(lobby_id, {
@@ -298,23 +302,23 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     assert balance_result.ratings == %{1 => 239.0, 2 => 239.0}
     assert balance_result.deviation == 0
 
-    # Now we know what balance looks like without parties, lets see what happens when we have a party that can be matched.
-    # If we have users 5, 7 and 9 partied then in theory those around them should be able to party up with them
-    # mid_party = Account.create_party(u5.id)
-    # Account.move_client_to_party(u7.id, mid_party.id)
-    # Account.move_client_to_party(u9.id, mid_party.id)
+    # Now test that fuzzing happens
+    opts = [
+      allow_groups: true,
+      mean_diff_max: 20,
+      stddev_diff_max: 10,
+      rating_lower_boundary: 5,
+      rating_upper_boundary: 5,
+      max_deviation: 10,
+      fuzz_multiplier: 0.5
+    ]
 
-    # :timer.sleep(520)
+    balance_result = Coordinator.call_balancer(lobby_id, {
+      :make_balance, team_count, opts
+    })
 
-    # party_balance_result = Coordinator.call_balancer(lobby_id, {
-    #   :make_balance, team_count, opts
-    # })
-
-    # assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
-    # assert party_balance_result.balance_mode == :grouped
-    # assert party_balance_result.team_players[1] == [u16.id, u13.id, u11.id, u10.id, u7.id, u6.id, u4.id, u1.id]
-    # assert party_balance_result.team_players[2] == [u15.id, u14.id, u12.id, u9.id, u8.id, u5.id, u3.id, u2.id]
-    # assert party_balance_result.ratings == %{1 => 239.0, 2 => 239.0}
-    # assert party_balance_result.deviation == 0
+    assert Battle.get_lobby_balance_mode(lobby_id) == :grouped
+    assert balance_result.balance_mode == :grouped
+    refute balance_result.ratings == %{1 => 239.0, 2 => 239.0}
   end
 end

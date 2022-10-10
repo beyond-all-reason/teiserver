@@ -742,7 +742,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       "rating_lower_boundary" => :rating_lower_boundary,
       "rating_upper_boundary" => :rating_upper_boundary,
       "mean_diff_max" => :mean_diff_max,
-      "stddev_diff_max" => :stddev_diff_max
+      "stddev_diff_max" => :stddev_diff_max,
+      "fuzz_multiplier" => :fuzz_multiplier
     }
 
     balancer_key = balancer_variables[variable]

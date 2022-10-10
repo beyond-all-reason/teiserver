@@ -22,7 +22,8 @@ defmodule Teiserver.Game.BalancerServer do
       rating_lower_boundary: state.rating_lower_boundary,
       rating_upper_boundary: state.rating_upper_boundary,
       mean_diff_max: state.mean_diff_max,
-      stddev_diff_max: state.stddev_diff_max
+      stddev_diff_max: state.stddev_diff_max,
+      fuzz_multiplier: state.fuzz_multiplier
     ]
 
     {balance, new_state} = make_balance(team_count, state, opts)
@@ -47,6 +48,7 @@ defmodule Teiserver.Game.BalancerServer do
       rating_lower_boundary: state.rating_lower_boundary,
       rating_upper_boundary: state.rating_upper_boundary,
       mean_diff_max: state.mean_diff_max,
+      fuzz_multiplier: state.fuzz_multiplier,
       stddev_diff_max: state.stddev_diff_max
     }
 
@@ -189,13 +191,13 @@ defmodule Teiserver.Game.BalancerServer do
         {nil, player_id_list} ->
           player_id_list
             |> Enum.map(fn userid ->
-              %{userid => BalanceLib.get_user_balance_rating_value(userid, rating_type)}
+              %{userid => BalanceLib.get_user_balance_rating_value(userid, rating_type) |> fuzz_rating(opts[:fuzz_multiplier])}
             end)
 
         {_party_id, player_id_list} ->
           player_id_list
             |> Map.new(fn userid ->
-              {userid, BalanceLib.get_user_balance_rating_value(userid, rating_type)}
+              {userid, BalanceLib.get_user_balance_rating_value(userid, rating_type) |> fuzz_rating(opts[:fuzz_multiplier])}
             end)
       end)
       |> List.flatten
@@ -208,7 +210,7 @@ defmodule Teiserver.Game.BalancerServer do
   defp make_solo_balance(team_count, players, rating_type, initial_logs, opts) do
     groups = players
       |> Enum.map(fn %{userid: userid} ->
-        %{userid => BalanceLib.get_user_balance_rating_value(userid, rating_type)}
+        %{userid => BalanceLib.get_user_balance_rating_value(userid, rating_type) |> fuzz_rating(opts[:fuzz_multiplier])}
       end)
 
     result = BalanceLib.create_balance(groups, team_count, opts)
@@ -218,6 +220,12 @@ defmodule Teiserver.Game.BalancerServer do
       logs: new_logs,
       balance_mode: :solo
     })
+  end
+
+  defp fuzz_rating(rating, multiplier) do
+    # Generate something between -1 and 1
+    modifier = 1 - (:rand.uniform() * 2)
+    rating + (modifier * multiplier)
   end
 
   @spec empty_state(T.lobby_id) :: T.balance_server_state()

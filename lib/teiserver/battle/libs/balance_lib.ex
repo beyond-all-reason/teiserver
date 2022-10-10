@@ -15,6 +15,8 @@ defmodule Teiserver.Battle.BalanceLib do
   @mean_diff_max 10
   @stddev_diff_max 4
 
+  @fuzz_multiplier 0.5
+
   @spec defaults() :: map()
   def defaults() do
     %{
@@ -22,7 +24,8 @@ defmodule Teiserver.Battle.BalanceLib do
       rating_lower_boundary: @rating_lower_boundary,
       rating_upper_boundary: @rating_upper_boundary,
       mean_diff_max: @mean_diff_max,
-      stddev_diff_max: @stddev_diff_max
+      stddev_diff_max: @stddev_diff_max,
+      fuzz_multiplier: @fuzz_multiplier
     }
   end
 
