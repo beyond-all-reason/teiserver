@@ -250,9 +250,10 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     {:noreply, state}
   end
 
-  defp handle_json_msg(%{"username" => _, "CPU" => _} = contents, from_id) do
-    case User.get_user_by_name(contents["username"]) do
+  defp handle_json_msg(%{"username" => username, "CPU" => _} = contents, from_id) do
+    case User.get_user_by_name(username) do
       nil ->
+        Logger.info("No username on handle_json_msg: #{username} - #{Kernel.inspect contents}")
         :ok
       user ->
         if User.is_bot?(from_id) do
@@ -276,8 +277,8 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     end
   end
 
-  defp handle_json_msg(_contents, _from_id) do
-    # Logger.error("AHM DM no handle - #{Kernel.inspect contents}")
+  defp handle_json_msg(contents, _from_id) do
+    Logger.info("No catch on handle_json_msg: #{Kernel.inspect contents}")
     :ok
   end
 
