@@ -1,0 +1,60 @@
+<% {fg, _bg, _bsname} = view_colour(@active) |> colours() %>
+
+<style>
+  .sub-menu-icon a:hover {
+    border-bottom: 5px solid <%= fg %>;
+    color: <%= fg %>;
+  }
+
+  .sub-menu-icon .active {
+    border-bottom-color: <%= fg %>;
+  }
+
+  .sub-menu .active, .sub-menu .active:hover {
+    color: <%= fg %>;
+  }
+</style>
+
+<div class="row sub-menu">
+  <div class="col-md-12">
+    <div class="card card-default">
+      <div class="card-body" style="padding: 0 15px;">
+
+        <div class="row">
+          <%= central_component "sub_menu_icon",
+            name: "actions",
+            label: "Actions",
+            active: @active,
+            url: Routes.moderation_action_path(@conn, :index),
+            icon: Teiserver.Moderation.ActionLib.icon()
+          %>
+          
+          <%= central_component "sub_menu_icon",
+            name: "reports",
+            label: "Reports",
+            active: @active,
+            url: Routes.moderation_report_path(@conn, :index),
+            icon: Teiserver.Moderation.ReportLib.icon()
+          %>
+          
+          <%= central_component "sub_menu_icon",
+            name: "proposals",
+            label: "Proposals",
+            active: @active,
+            url: Routes.moderation_proposal_path(@conn, :index),
+            icon: Teiserver.Moderation.ProposalLib.icon()
+          %>
+          
+          <%= central_component "sub_menu_icon",
+            name: "bans",
+            label: "Bans",
+            active: @active,
+            url: Routes.moderation_ban_path(@conn, :index),
+            icon: Teiserver.Moderation.BanLib.icon()
+          %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+<% bsname = view_colour() %>
+
+<%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Moderation.ReportView, "section_menu.html", Map.merge(assigns, %{
+          basic_search: "",
+          show_search: false,
+          active: "edit"
+        })
+        %>
+
+        <hr />
+
+<%= render "form.html", Map.put(assigns, :action, Routes.moderation_report_path(@conn, :update, @report)) %>
+
+
+<hr />
+<%= link raw("<i class='far fa-fw fa-trash'></i> Delete"), to: Routes.moderation_report_path(@conn, :delete, @report), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-outline" %>
+
+      </div>
+    </div>
+  </div>
+</div>

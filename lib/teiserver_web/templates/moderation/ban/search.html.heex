@@ -1,0 +1,59 @@
+<% {fg, _bg, bsname} = view_colour() |> colours() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    $('.datepicker').datepicker({
+      format: "dd/mm/yyyy"
+    });
+
+    $('select').select2({
+      width: "100%"
+    });
+  });
+</script>
+
+<%= central_component "icon_dropdown_js", [] %>
+
+<link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
+<script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+
+<div class="search-row">
+  <form action={Routes.moderation_ban_path(@conn, :index)} method="post" class="form-horizontal" id="search-box">
+    <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+    <input type="hidden" name="search" value="true" />
+
+    <div class="row">
+      <div class="col-md-4 col-xl-2 search-form-input">
+        <label for="search_name" class="control-label">Name: </label>
+        <input type="text" name="search[name]" id="search_name" value={@conn.params["name"]} placeholder="" class="form-control" />
+      </div>
+
+      <div class="col-md-4 col-xl-2 search-form-input">
+        <label for="search_limit" class="control-label">Limit: </label>
+        <input type="text" name="search[limit]" id="search_limit" value={@conn.params["limit"]} placeholder="" class="form-control" />
+      </div>
+
+      <div class="col-md-4 col-xl-2 search-form-input">
+        <label for="search_order" class="control-label">Order by: </label>
+        <%= central_component "icon_dropdown", %{
+          name: "search[order]",
+          id: "search_order",
+          selected: @conn.params["order"] || "Newest first",
+          enumerable: [
+            %{id: "Name (A-Z)", icon: "fas fa-sort-numeric-down", colour: fg},
+            %{id: "Name (Z-A)", icon: "fas fa-sort-numeric-up", colour: fg},
+            %{id: "Newest first", icon: "fas fa-sort-numeric-down", colour: fg},
+            %{id: "Oldest first", icon: "fas fa-sort-numeric-up", colour: fg},
+          ]
+        } %>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="offset-md-8 col-md-4 offset-xl-10 col-xl-2">
+        &nbsp;<br />
+        <input type="submit" value="Search" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+      </div>
+    </div>
+  </form>
+</div>
