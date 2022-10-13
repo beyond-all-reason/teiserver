@@ -248,6 +248,15 @@ defmodule TeiserverWeb.Router do
         # live("/agent/:id", Show, :show)
       end
 
+      scope "/moderation", TeiserverWeb.Moderation, as: :moderation do
+        pipe_through([:browser, :standard_layout, :protected])
+
+        get("/", GeneralController, :index)
+        resources("/report", ReportController)
+        resources("/action", ActionController)
+        resources("/proposal", ProposalController)
+        resources("/ban", BanController)
+      end
 
       scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
         pipe_through([:browser, :standard_layout, :protected])

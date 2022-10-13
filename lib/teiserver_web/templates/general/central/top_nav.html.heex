@@ -45,6 +45,14 @@
   %>
 <% end %>
 
+<%= if allow?(@current_user, "teiserver.staff.moderator") do %>
+  <%= central_component "top_nav_item",
+    text: "Moderation",
+    route: Routes.moderation_general_path(@conn, :index),
+    active: @site_menu_active == "moderation"
+  %>
+<% end %>
+
 <%= if allow?(@current_user, "teiserver.admin") do %>
   <%= central_component "top_nav_item",
     text: "Admin",

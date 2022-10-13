@@ -16,6 +16,17 @@
     link: Routes.ts_admin_match_path(@conn, :index)
   %>
 
+  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Moderation.ReportLib.icon(),
+      name: "moderation",
+      text: "Moderation",
+      icon_class: "fa-duotone",
+      link: Routes.moderation_general_path(@conn, :index)
+    %>
+  <% end %>
+
   <%= if allow?(@conn, "teiserver.moderator.clan") do %>
     <%=
       central_component "menu_card",

@@ -5,13 +5,13 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   use Mix.Task
 
-  alias Teiserver.{Account, Telemetry, Battle}
+  alias Teiserver.{Account, Telemetry, Battle, Moderation}
   alias Central.Helpers.StylingHelper
   require Logger
 
   @settings %{
     # days: 365,
-    days: 45,
+    days: 5,
     memory: 1024 * 1024 * 1024,
 
     maps: ["Koom valley", "Comet catcher", "Tabula"]
@@ -30,7 +30,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       make_accounts()
 
       make_matches()
-      make_telemetry()
+      # make_telemetry()
+      make_moderation()
       make_one_time_code()
 
       :timer.sleep(50)
@@ -101,7 +102,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
           data: %{
             verified: true,
             lobby_client: "FakeData",
-            roles: ["Verified"]
+            roles: ["Verified"],
+            bot: false
           },
           inserted_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert,
           updated_at: Timex.shift(Timex.now(), days: -day, minutes: -minutes) |> time_convert
@@ -121,7 +123,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     |> Enum.each(fn day ->
       date = Timex.today |> Timex.shift(days: -day)
       user_ids = Account.list_users(search: [
-        inserted_after: Timex.to_datetime(date)
+        inserted_after: Timex.to_datetime(date),
+        bot: "Person"
       ], select: [:id]) |> Enum.map(fn %{id: id} -> id end)
 
       user_count = Enum.count(user_ids)
@@ -187,12 +190,79 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
     end)
   end
 
+  defp make_moderation() do
+    Range.new(0, @settings.days)
+    |> Enum.each(fn day ->
+      date = Timex.today |> Timex.shift(days: -day)
+      users = Account.list_users(search: [
+        inserted_after: Timex.to_datetime(date),
+        bot: "Person"
+      ], select: [:id, :name]) |> Enum.map(fn %{id: id, name: name} -> {id, name} end)
+
+      report_count = (Enum.count(users) / 7) |> round()
+
+      basic_reports = Range.new(0, report_count)
+        |> Enum.map(fn _ ->
+          [{reporter_id, _}, {target_id, _} | _] = Enum.shuffle(users) |> Enum.take(2)
+          report_time = date
+            |> Timex.to_datetime()
+            |> Timex.shift(minutes: 10 + :rand.uniform(1000))
+            |> time_convert
+
+          %{
+            reporter_id: reporter_id,
+            target_id: target_id,
+
+            type: "Lobby",
+            inserted_at: report_time,
+            updated_at: report_time
+          }
+        end)
+
+      match_reports = Battle.list_matches(
+        search: [
+          started_after: date |> Timex.to_datetime(),
+          started_before: date |> Timex.to_datetime() |> Timex.shift(days: 1),
+        ],
+        preload: [:members]
+      )
+        |> Enum.shuffle()
+        |> Enum.take(report_count)
+        |> Enum.map(fn match ->
+          [reporter, target | _] = Enum.shuffle(match.members) |> Enum.take(2)
+          report_time = match.started |> Timex.shift(minutes: 20) |> time_convert
+
+          relationship = cond do
+            reporter.team_id == target.team_id -> "Ally"
+            reporter.team_id != target.team_id -> "Opponent"
+          end
+
+          %{
+            reporter_id: reporter.user_id,
+            target_id: target.user_id,
+
+            type: "Game",
+            relationship: relationship,
+            match_id: match.id,
+
+            inserted_at: report_time,
+            updated_at: report_time
+          }
+        end)
+
+        Ecto.Multi.new()
+          |> Ecto.Multi.insert_all(:insert_all, Moderation.Report, basic_reports ++ match_reports)
+          |> Central.Repo.transaction()
+    end)
+  end
+
   defp make_matches() do
     Range.new(0, @settings.days)
     |> Enum.each(fn day ->
       date = Timex.today |> Timex.shift(days: -day)
       users = Account.list_users(search: [
-        inserted_after: Timex.to_datetime(date)
+        inserted_after: Timex.to_datetime(date),
+        bot: "Person"
       ], select: [:id, :name]) |> Enum.map(fn %{id: id, name: name} -> {id, name} end)
 
       server_uuid = UUID.uuid1()
@@ -269,7 +339,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
           end)
 
         Ecto.Multi.new()
-          |> Ecto.Multi.insert_all(:insert_all, Teiserver.Battle.MatchMembership, memberships1 ++ memberships2)
+          |> Ecto.Multi.insert_all(:insert_all, Battle.MatchMembership, memberships1 ++ memberships2)
           |> Central.Repo.transaction()
       end)
     end)
