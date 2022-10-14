@@ -146,7 +146,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             )
         end
       _ ->
-        Logger.info("[MatchMonitorServer] match-chat nomatch from: #{from_id}: match-chat #{data}")
+        Logger.warn("[MatchMonitorServer] match-chat nomatch from: #{from_id}: match-chat #{data}")
     end
 
     {:noreply, state}
@@ -179,7 +179,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
             )
         end
       _ ->
-        Logger.info("[MatchMonitorServer] match-chat-name nomatch from: #{from_id}: match-chat [[#{data}]]")
+        Logger.warn("[MatchMonitorServer] match-chat-name nomatch from: #{from_id}: match-chat [[#{data}]]")
     end
 
     {:noreply, state}
@@ -217,7 +217,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
     #     Logger.info("[MatchMonitorServer] match-chat-name nomatch from: #{from_id}: match-chat #{data}")
     # end
 
-    Logger.info("[MatchMonitorServer] match-chat-name-noname: match-chat [[#{data}]]")
+    Logger.warn("[MatchMonitorServer] match-chat-name-noname: match-chat [[#{data}]]")
 
     {:noreply, state}
   end
@@ -232,13 +232,13 @@ defmodule Teiserver.Battle.MatchMonitorServer do
               {:ok, data} ->
                 handle_json_msg(data, from_id)
               _ ->
-                Logger.info("AHM DM no catch, no json-decode - '#{contents_string}'")
+                Logger.warn("[MatchMonitorServer] AHM DM no catch, no json-decode - '#{contents_string}'")
             end
           _ ->
-            Logger.info("AHM DM no catch, no decompress - '#{compressed_contents}'")
+            Logger.warn("[MatchMonitorServer] AHM DM no catch, no decompress - '#{compressed_contents}'")
         end
       _ ->
-        Logger.info("AHM DM no catch, no base64 - '#{message}'")
+        Logger.warn("[MatchMonitorServer] AHM DM no catch, no base64 - '#{message}'")
     end
 
     {:noreply, state}
@@ -246,24 +246,24 @@ defmodule Teiserver.Battle.MatchMonitorServer do
 
   # Catchall handle_info
   def handle_info(msg, state) do
-    Logger.info("Match monitor Server handle_info error. No handler for msg of #{Kernel.inspect msg}")
+    Logger.warn("[MatchMonitorServer] Match monitor Server handle_info error. No handler for msg of #{Kernel.inspect msg}")
     {:noreply, state}
   end
 
-  defp handle_json_msg(%{"username" => username, "CPU" => _} = contents, from_id) do
+  defp handle_json_msg(%{"username" => username, "GPU" => _} = contents, from_id) do
     case User.get_user_by_name(username) do
       nil ->
-        Logger.info("No username on handle_json_msg: #{username} - #{Kernel.inspect contents}")
+        Logger.warn("[MatchMonitorServer] No username on handle_json_msg: #{username} - #{Kernel.inspect contents}")
         :ok
       user ->
         if User.is_bot?(from_id) do
           stats = %{
-            "hardware:cpuinfo" => contents["CPU"],
-            "hardware:gpuinfo" => contents["GPU"],
-            "hardware:osinfo" => contents["OS"],
-            "hardware:raminfo" => contents["RAM"],
-            "hardware:displaymax" => contents["Displaymax"],
-            "hardware:validation" => contents["validation"],
+            "hardware:cpuinfo" => contents["CPU"] || "Null CPU",
+            "hardware:gpuinfo" => contents["GPU"] || "Null GPU",
+            "hardware:osinfo" => contents["OS"] || "Null OS",
+            "hardware:raminfo" => contents["RAM"] || "Null RAM",
+            "hardware:displaymax" => contents["Displaymax"] || "Null DisplayMax",
+            "hardware:validation" => contents["validation"] || "Null validation",
           }
           Account.update_user_stat(user.id, stats)
 
@@ -278,7 +278,7 @@ defmodule Teiserver.Battle.MatchMonitorServer do
   end
 
   defp handle_json_msg(contents, _from_id) do
-    Logger.info("No catch on handle_json_msg: #{Kernel.inspect contents}")
+    Logger.warn("[MatchMonitorServer] No catch on handle_json_msg: #{Kernel.inspect contents}")
     :ok
   end
 
