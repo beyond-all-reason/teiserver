@@ -37,16 +37,16 @@ defmodule TeiserverWeb.Moderation.ReportController do
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     report = Moderation.get_report!(id, [
-      joins: [],
+      preload: [:target, :reporter]
     ])
 
-    report
+    fav = report
       |> ReportLib.make_favourite
       |> insert_recently(conn)
 
     conn
       |> assign(:report, report)
-      |> add_breadcrumb(name: "Show: #{report.name}", url: conn.request_path)
+      |> add_breadcrumb(name: "Show: #{fav.item_label}", url: conn.request_path)
       |> render("show.html")
   end
 

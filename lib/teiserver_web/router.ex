@@ -252,7 +252,7 @@ defmodule TeiserverWeb.Router do
         pipe_through([:browser, :standard_layout, :protected])
 
         get("/", GeneralController, :index)
-        resources("/report", ReportController)
+        resources("/report", ReportController, only: [:index, :show, :delete])
         resources("/action", ActionController)
         resources("/proposal", ProposalController)
         resources("/ban", BanController)

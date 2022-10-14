@@ -7,7 +7,7 @@
     $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     page_quick_actions = [
-      {label: "Edit report", icon: "<%= icon() %>", url: "<%= Routes.moderation_report_path(@conn, :edit, @report) %>", keywords: ["edit", "report", "edit report"]},
+      
     ];
   });
 </script>
@@ -31,32 +31,37 @@
             </div>
             <%= render "actions.html", assigns %>
           </div>
-        
-          <a href={Routes.moderation_report_path(@conn, :edit, @report)} class={"btn btn-outline-#{bsname}"}>
-            <i class="far fa-fw fa-wrench"></i>
-            Edit report
-          </a>
         </div>
 
-      <h3>
-        <%= @report.name %>
-      </h3>
-      <br />
-      <ul class="nav nav-tabs" role="tablist" id="the_tabs">
-        <li>
-          <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-            <%= central_component "icon", icon: "fas fa-file-alt" %>
-            Details
-          </a>
-        </li>
-      </ul>
+        <h3>
+          <%= @report.reporter.name %>
+          reported
+          <%= @report.target.name %>
+          
+          <%= if @report.result_id do %>
+            &nbsp;
+            <%= central_component "icon",
+              icon: Teiserver.Moderation.ActionLib.icon(),
+              class: "text-danger fa-solid"
+            %>
+          <% end %>
+        </h3>
+        <br />
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+          <li>
+            <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component "icon", icon: "fas fa-file-alt" %>
+              Details
+            </a>
+          </li>
+        </ul>
 
-      <div class="tab-content">
-        <div class="tab-pane" id="details_tab" style="padding:5px;">
-          <%= render "tab_details.html", assigns %>
+        <div class="tab-content">
+          <div class="tab-pane" id="details_tab" style="padding:5px;">
+            <%= render "tab_details.html", assigns %>
+          </div>
         </div>
-      </div>
-      <%# END OF TABS %>
+        <%# END OF TABS %>
 
       </div>
     </div>

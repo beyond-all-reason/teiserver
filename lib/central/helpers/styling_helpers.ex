@@ -76,6 +76,8 @@ defmodule Central.Helpers.StylingHelper do
   def icon(:overview, fa_type), do: "fa-#{fa_type} fa-expand-alt"
   def icon(:detail, fa_type), do: "fa-#{fa_type} fa-file-alt"
 
+  def icon(:filter, fa_type), do: "fa-#{fa_type} fa-filter"
+
   def icon(:day, fa_type), do: "fa-#{fa_type} fa-calendar-day"
   def icon(:month, fa_type), do: "fa-#{fa_type} fa-calendar-days"
 

@@ -49,21 +49,26 @@ $white: #fff;
 $gray: #868e96;
 $gray-dark: #343a40;
 $primary: #274aAf;
+$primary_transparent: #274aAf33;
 $primary-light: #ACF;
 $primary-dark: #172a6f;
 $primary2: #3498db;
 $primary2-dark: #0468ab;
 $secondary: #4A5159;
 $success: #108c1a;
+$success_transparent: #108c1a33;
 $success-dark: #006c00;
 $success2: #005c0a;
 $info: #008987;
+$info_transparent: #00898733;
 $info-dark: #006967;
 $info2: #A90088;
 $warning: #c37c02;
+$warning_transparent: #c37c0233;
 $warning2: #CC4400;
 $danger-light: #fdd;
 $danger: #a4382c;
+$danger_transparent: #a4382c33;
 $danger-dark: #84180c;
 $danger2: #800000;
 $light: #e9ecef;
@@ -87,6 +92,12 @@ $theme-colors: (primary: $primary,
   light: $light,
   dark: $dark,
   // add any additional color below
+  
+  primary_transparent: $primary_transparent,
+  success_transparent: $success_transparent,
+  info_transparent: $info_transparent,
+  warning_transparent: $warning_transparent,
+  danger_transparent: $danger_transparent,
 
   body-bg: $light,
 );
@@ -106,6 +117,12 @@ $utilities-border-colors: (
   light: $light,
   dark: $dark,
   // add any additional color below
+  
+  primary_transparent: $primary_transparent,
+  success_transparent: $success_transparent,
+  info_transparent: $info_transparent,
+  warning_transparent: $warning_transparent,
+  danger_transparent: $danger_transparent,
 
   body-bg: $dark,
 );

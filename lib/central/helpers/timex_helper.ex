@@ -163,6 +163,15 @@ defmodule Central.Helpers.TimexHelper do
     end
   end
 
+  @spec _hms_or_ymd(DateTime.t(), DateTime.t()) :: String.t()
+  defp _hms_or_ymd(the_time, today) do
+    if Timex.compare(the_time |> Timex.to_date(), today) == 0 do
+      Timex.format!(the_time, "Today at {h24}:{m}:{s}")
+    else
+      Timex.format!(the_time, "{YYYY}-{0M}-{0D}")
+    end
+  end
+
   @spec _hm_or_dmy(DateTime.t(), DateTime.t()) :: String.t()
   defp _hm_or_dmy(the_time, today) do
     if Timex.compare(the_time |> Timex.to_date(), today) == 0 do

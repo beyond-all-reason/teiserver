@@ -20,15 +20,6 @@
       url: Routes.moderation_report_path(@conn, :index) <> "?search=true"
     %>
 
-    <%= central_component "section_menu_button",
-      name: "new",
-      label: "New",
-      active: @active,
-      icon: StylingHelper.icon(:new),
-      bsname: bsname,
-      url: Routes.moderation_report_path(@conn, :new)
-    %>
-
     <%= case @active do %>
       <% "show" -> %>
         <%= central_component "section_menu_button",
