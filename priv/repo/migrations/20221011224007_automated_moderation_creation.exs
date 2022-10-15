@@ -64,5 +64,10 @@ defmodule Central.Repo.Migrations.AutomatedModerationCreation do
 
       timestamps()
     end
+
+    alter table(:account_users) do
+      add :trust_score, :integer
+      add :behaviour_score, :integer
+    end
   end
 end

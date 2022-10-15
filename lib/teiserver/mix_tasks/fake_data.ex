@@ -11,7 +11,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
 
   @settings %{
     # days: 365,
-    days: 5,
+    days: 45,
     memory: 1024 * 1024 * 1024,
 
     maps: ["Koom valley", "Comet catcher", "Tabula"]
@@ -21,7 +21,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   defp users_per_day, do: :rand.uniform(5) + 2
 
   @spec run(list()) :: :ok
-  def run(_args) do
+  def run(args) do
     if Application.get_env(:central, Teiserver)[:enable_beans] do
       # Start by rebuilding the database
       Mix.Task.run("ecto.reset")
@@ -99,6 +99,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
           permissions: ["admin.dev.developer"],
           icon: "fa-solid #{StylingHelper.random_icon}",
           colour: StylingHelper.random_colour(),
+          trust_score: 10_000,
+          behaviour_score: 10_000,
           data: %{
             verified: true,
             lobby_client: "FakeData",

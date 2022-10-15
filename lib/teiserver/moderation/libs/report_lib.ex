@@ -75,6 +75,16 @@ defmodule Teiserver.Moderation.ReportLib do
       where: reports.reporter_id in ^id_list
   end
 
+  def _search(query, :no_result, true) do
+    from reports in query,
+      where: is_nil(reports.result_id)
+  end
+
+  def _search(query, :no_result, false) do
+    from reports in query,
+      where: not is_nil(reports.result_id)
+  end
+
 
 
   def _search(query, :id_list, id_list) do

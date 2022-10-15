@@ -23,6 +23,16 @@
       label: "Lobby",
       value: @user.data["lobby_client"]
     %>
+
+    <%= central_component "detail_line",
+      label: "Trust",
+      value: format_number @user.trust_score
+    %>
+
+    <%= central_component "detail_line",
+      label: "Behaviour",
+      value: format_number @user.behaviour_score
+    %>
   </div>
   
   <div class="col-md-6">
