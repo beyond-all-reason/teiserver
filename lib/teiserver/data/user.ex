@@ -904,8 +904,8 @@ defmodule Teiserver.User do
       if is_restricted?(user, ["Login"]) do
         # If they're in a battle we need to deal with that before disconnecting them
         Logger.info("Kicking #{client.name} from battle as now banned")
-        Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
-        LobbyChat.say(Coordinator.get_coordinator_userid(), "#{client.name} kicked due to moderator action. See discord #moderation-bot for details", client.lobby_id)
+        # Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
+        # LobbyChat.say(Coordinator.get_coordinator_userid(), "#{client.name} kicked due to moderator action. See discord #moderation-bot for details", client.lobby_id)
 
         Logger.info("Disconnecting #{user.name} from server as now banned")
         Client.disconnect(user.id, "Banned")
@@ -914,8 +914,8 @@ defmodule Teiserver.User do
         # Kick?
         if is_restricted?(user, ["All lobbies"]) do
           Logger.info("Kicking #{client.name} from battle due to moderation action")
-          Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
-          LobbyChat.say(Coordinator.get_coordinator_userid(), "#{client.name} kicked due to moderator action. See discord #moderation-bot for details", client.lobby_id)
+          # Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
+          # LobbyChat.say(Coordinator.get_coordinator_userid(), "#{client.name} kicked due to moderator action. See discord #moderation-bot for details", client.lobby_id)
         end
 
         # Mute?
