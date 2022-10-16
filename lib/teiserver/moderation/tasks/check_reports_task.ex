@@ -8,7 +8,7 @@ defmodule Teiserver.Moderation.CheckReportsTask do
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(%{args: %{user_id: user_id}} = _job) do
-    recent_reports = Moderation.list_reports(
+    report_list = Moderation.list_reports(
       search: [
         target_id: user_id,
         no_result: true
@@ -16,9 +16,7 @@ defmodule Teiserver.Moderation.CheckReportsTask do
       preload: [:reporter]
     )
 
-    IO.puts ""
-    IO.inspect recent_reports
-    IO.puts ""
+    analyse_reports(report_list)
 
     :ok
   end
@@ -31,7 +29,21 @@ defmodule Teiserver.Moderation.CheckReportsTask do
   end
 
   defp analyse_reports(report_list) do
+    IO.puts ""
+    IO.inspect report_list
+    IO.puts ""
+
     types = report_list
+      |> Enum.group_by(fn r ->
+        r.type
+      end)
+
+    type_scores = types
+      |> Map.new(fn {type, reports} -> {type, Enum.count(reports)} end)
+
+    IO.puts ""
+    IO.inspect type_count
+    IO.puts ""
 
   end
 
