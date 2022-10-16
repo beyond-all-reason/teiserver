@@ -54,17 +54,14 @@ defmodule CentralWeb.Account.SessionController do
 
     cond do
       Enum.empty?(codes) ->
-        Logger.debug("SessionController.one_time_login No code")
         conn
         |> redirect(to: "/")
 
       Config.get_site_config_cache("user.Enable one time links") == false ->
-        Logger.debug("SessionController.one_time_login Enable one time links is false")
         conn
         |> redirect(to: "/")
 
       true ->
-        Logger.debug("SessionController.one_time_login success")
         code = hd(codes)
         Account.delete_code(code)
 

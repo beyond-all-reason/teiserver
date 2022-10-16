@@ -6,6 +6,7 @@ defmodule Central.Logging.LoggingPlug do
 
   @behaviour Plug
 
+  @spec init(any) :: %{}
   def init(_opts) do
     %{}
   end
