@@ -70,7 +70,7 @@ defmodule Teiserver.Game.BalancerServer do
   end
 
   def handle_cast({:set, key, value}, state) do
-    valid_keys = ~w(max_deviation rating_lower_boundary rating_upper_boundary mean_diff_max stddev_diff_max)a
+    valid_keys = ~w(max_deviation rating_lower_boundary rating_upper_boundary mean_diff_max stddev_diff_max fuzz_multiplier)a
 
     new_state = case Enum.member?(valid_keys, key) do
       true ->

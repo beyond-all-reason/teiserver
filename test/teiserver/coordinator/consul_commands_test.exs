@@ -317,7 +317,18 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
   # TODO: settag
 
-  test "explain", %{lobby_id: lobby_id, hsocket: hsocket, player: player} do
+  test "explain", %{lobby_id: lobby_id, hsocket: hsocket, host: host, player: player} do
+    # Set fuzzer to 0 or we get inconsistent values and our test breaks
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$set fuzz_multiplier 0"})
+
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{
+      "cmd" => "s.lobby.say",
+      "lobby_id" => lobby_id,
+      "message" => "$set fuzz_multiplier 0",
+      "sender_id" => host.id
+    }
+
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$explain"})
 
     [reply] = _tachyon_recv(hsocket)

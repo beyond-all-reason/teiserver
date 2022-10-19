@@ -17,12 +17,6 @@ defmodule Teiserver.Client do
 
   alias Teiserver.Data.Types, as: T
 
-  # @chat_flood_count_short 3
-  # @chat_flood_time_short 1
-  # @chat_flood_count_long 10
-  # @chat_flood_time_long 5
-  # @temp_mute_count_limit 3
-
   @spec create(Map.t()) :: Map.t()
   def create(client) do
     Map.merge(

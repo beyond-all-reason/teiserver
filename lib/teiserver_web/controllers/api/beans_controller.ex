@@ -91,7 +91,7 @@ defmodule TeiserverWeb.API.BeansController do
             }
           end)
 
-        Account.update_cache_user(new_user, persist: true)
+        Account.update_cache_user(new_user)
         %{"result" => "success"}
     end
 

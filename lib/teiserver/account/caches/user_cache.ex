@@ -200,6 +200,15 @@ defmodule Teiserver.Account.UserCache do
     user
   end
 
+  @spec update_cache_user(map() | User.t(), boolean) :: User.t()
+  def update_cache_user(%{id: userid} = data, persist \\ true) do
+    user = get_user_by_id(userid)
+    new_user = Map.merge(user, data)
+    Central.cache_put(:users, user.id, new_user)
+    if persist, do: persist_user(new_user)
+    user
+  end
+
   @spec delete_user(T.userid()) :: :ok | :no_user
   def delete_user(userid) do
     Logger.warn("UserCache.delete_user is being depreciated in favour of decache_user")

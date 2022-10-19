@@ -274,9 +274,7 @@ defmodule Teiserver.Protocols.V1.TachyonSystemTest do
     _tachyon_send(fsocket, %{"cmd" => "c.auth.disconnect"})
 
     [resp] = _tachyon_recv(socket)
-    assert resp == %{
-      "cmd" => "s.client.disconnected",
-      "userid" => friend.id
-    }
+    assert Enum.member?(["s.client.disconnected", "s.client.left_lobby"], resp["cmd"])
+    assert resp["userid"] == friend.id
   end
 end

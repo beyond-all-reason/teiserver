@@ -123,6 +123,16 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "teiserver.Require HW data to play",
+      section: "Moderation",
+      type: "boolean",
+      permissions: ["teiserver.admin"],
+      description: "Prevents someone from being a player if they don't have a HW hash yet.",
+      opts: [],
+      default: false
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Enable accolades",
       section: "Accolades",
       type: "boolean",

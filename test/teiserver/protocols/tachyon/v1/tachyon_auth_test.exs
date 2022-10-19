@@ -1,6 +1,6 @@
 defmodule Teiserver.Protocols.V1.TachyonAuthTest do
   use Central.ServerCase
-  alias Teiserver.{Account, User, Client}
+  alias Teiserver.{User, Client}
 
   import Teiserver.TeiserverTestLib,
     only: [tachyon_auth_setup: 0, _tachyon_send: 2, _tachyon_recv: 1, _tachyon_recv_until: 1]

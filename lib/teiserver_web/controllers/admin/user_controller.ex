@@ -770,7 +770,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
         # Next we want to know the date of the key we matched against for that user
         key_lookup = matching_keys
-          |> Enum.map(fn {{matched_type, matched_value}, matches} ->
+          |> Enum.map(fn {{matched_type, _matched_value}, matches} ->
             matches
             |> Enum.map(fn match ->
               {{matched_type, match.user_id}, match}

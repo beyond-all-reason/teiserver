@@ -496,6 +496,24 @@ defmodule Teiserver.Coordinator.ConsulServer do
       new_client
     end
 
+    # It's possible we are not allowing new players to become players
+    new_client = if Config.get_site_config_cache("teiserver.Require HW data to play") do
+      player_count = Battle.get_lobby_player_count(state.lobby_id)
+
+      if player_count > 4 do
+        user = Account.get_user_by_id(userid)
+        if user.hw_hash == nil do
+          %{new_client | player: false}
+        else
+          new_client
+        end
+      else
+        new_client
+      end
+    else
+      new_client
+    end
+
     new_client = state.locks
       |> Enum.reduce(new_client, fn (lock, acc) ->
         case lock do
@@ -503,7 +521,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
           :allyid -> %{acc | player_number: existing.player_number}
 
           :player ->
-            if not existing.player, do: %{acc | player: false}, else: acc
+            if existing.player, do: acc, else: %{acc | player: false}
 
           :spectator ->
             if existing.player, do: %{acc | player: true}, else: acc
