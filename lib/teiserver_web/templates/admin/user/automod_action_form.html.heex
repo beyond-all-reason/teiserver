@@ -2,6 +2,24 @@
 
 <%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
 
+<%
+  type_colours = %{
+    "hw1" => "danger",
+    "hw2" => "danger",
+    "client_app_hash" => "warning",
+    "wb1" => "success",
+    "chobby_hash" => "info"
+  }
+
+  type_icons = %{
+    "hw1" => "fa-computer",
+    "hw2" => "fa-computer",
+    "client_app_hash" => "fa-code-simple",
+    "wb1" => "fa-globe",
+    "chobby_hash" => "fa-computer-classic"
+  }
+%>
+
 <div class="row mt-4">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
@@ -17,13 +35,6 @@
 <h3>Adding automod action based on <%= @user.name %></h3>
 
 <div class="row">
-  <%
-    types = @key_types
-      |> Enum.map(fn t ->
-        {t.id, t.name}
-      end)
-  %>
-
   <div class="col-md-12 mb-4">
     <%= case Enum.count(@matching_users) do %>
       <% 0 -> %>
@@ -33,7 +44,7 @@
 
       <% _ -> %>
         <div class="alert alert-primary">
-          Matches the following unbanned user(s): <%= (for u <- @matching_users, do: u.name) |> Enum.join(", ") %>. By enabling this automod you will also ban them on their next login.
+          Potentially matches the following unbanned user(s): <%= (for u <- @matching_users, do: u.name) |> Enum.join(", ") %>. By enabling this automod you will also ban them on their next login.
         </div>
     <% end %>
   
@@ -44,17 +55,46 @@
 
       <div class="row">
         <div class="form-group col-md-12 col-lg-6 my-3">
-          <label class="control-label">Hash types:</label>
-          <%= for {id, name} <- types do %>
-            <%= central_component "checkbox",
-              name: "automod_action[type_ids][]",
-              id: "automod_action_type_#{id}",
-              value: name,
-              label: name,
-              checked: true
-            %>
-          <% end %>
+          <label class="control-label">Hashes:</label>
+          
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Value</th>
+                <th>Updated</th>
+                <th>&nbsp;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%= for key <- @all_keys do %>
+                <tr>
+                  <td>
+                    <i class={"fa-fw fa-regular #{type_icons[key.type.name]} text-#{type_colours[key.type.name]}"}></i>
+                    &nbsp;
+                    <%= key.type.name %>
+                  </td>
+                  <td>
+                    <%= key.value %>
+                  </td>
+                  <td>
+                    <%= date_to_str key.last_updated, format: :hms_or_ymd %>
+                  </td>
+                  <td>
+                    <%= central_component "checkbox",
+                      name: "automod_action[values][]",
+                      id: "automod_action_type_#{key.value}",
+                      value: key.value,
+                      label: "",
+                      checked: true
+                    %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
         </div>
+
         <div class="form-group col-md-12 col-lg-6 my-3">
           <%= label f, :reason, class: "control-label" %>
           <%= text_input f, :reason, class: "form-control", autofocus: :autofocus %>

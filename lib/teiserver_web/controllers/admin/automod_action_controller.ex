@@ -75,9 +75,9 @@ defmodule TeiserverWeb.Admin.AutomodActionController do
     changeset = Account.change_automod_action(%AutomodAction{})
 
     conn
-    |> assign(:changeset, changeset)
-    |> add_breadcrumb(name: "New automod_action", url: conn.request_path)
-    |> render("new.html")
+      |> assign(:changeset, changeset)
+      |> add_breadcrumb(name: "New automod_action", url: conn.request_path)
+      |> render("new.html")
   end
 
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

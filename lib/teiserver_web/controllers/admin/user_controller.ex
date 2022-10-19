@@ -892,6 +892,15 @@ defmodule TeiserverWeb.Admin.UserController do
         Teiserver.User.is_restricted?(user, ["Site", "Login"])
       end)
 
+    all_keys = Account.list_smurf_keys(
+      search: [
+        user_id: user.id
+      ],
+      limit: :infinity,
+      preload: [:type],
+      order_by: "Newest first"
+    )
+
     key_types = Account.list_smurf_key_types(limit: :infinity)
 
     # Update their hw_key
@@ -917,25 +926,14 @@ defmodule TeiserverWeb.Admin.UserController do
       |> assign(:user, user)
       |> assign(:user_stats, user_stats)
       |> assign(:userid, user.id)
+      |> assign(:all_keys, all_keys)
       |> render("automod_action_form.html")
   end
 
   @spec automod_action_post(Plug.Conn.t(), map) :: Plug.Conn.t()
   def automod_action_post(conn, %{"id" => id, "automod_action" => automod_action_params}) do
-    type_ids = automod_action_params["type_ids"]
+    values = automod_action_params["values"]
       |> Enum.reject(fn r -> r == "false" end)
-      |> Enum.map(fn t -> Account.get_or_add_smurf_key_type(t) end)
-
-    values = Account.list_smurf_keys(
-      search: [
-        user_id: id,
-        type_id_in: type_ids
-      ],
-      limit: :infinity,
-      select: [:value]
-    )
-      |> Enum.map(fn %{value: value} -> value end)
-      |> Enum.uniq
 
     automod_action_params = Map.merge(automod_action_params, %{
       "added_by_id" => conn.current_user.id,
@@ -979,6 +977,15 @@ defmodule TeiserverWeb.Admin.UserController do
             nil
         end
 
+        all_keys = Account.list_smurf_keys(
+          search: [
+            user_id: user.id
+          ],
+          limit: :infinity,
+          preload: [:type],
+          order_by: "Newest first"
+        )
+
         conn
           |> add_breadcrumb(name: "Add automod action form", url: conn.request_path)
           |> assign(:matching_users, matching_users)
@@ -987,6 +994,7 @@ defmodule TeiserverWeb.Admin.UserController do
           |> assign(:user, user)
           |> assign(:user_stats, user_stats)
           |> assign(:userid, user.id)
+          |> assign(:all_keys, all_keys)
           |> put_flash(:danger, error_message)
           |> render("automod_action_form.html")
     end
