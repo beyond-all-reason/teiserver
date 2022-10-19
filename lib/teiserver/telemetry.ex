@@ -1070,7 +1070,7 @@ defmodule Teiserver.Telemetry do
     Repo.delete(property_type)
   end
 
-    alias Teiserver.Telemetry.GameEventType
+  alias Teiserver.Telemetry.GameEventType
   alias Teiserver.Telemetry.GameEventTypeLib
 
   @spec game_event_type_query(List.t()) :: Ecto.Query.t()
@@ -1640,7 +1640,7 @@ defmodule Teiserver.Telemetry do
     })
   end
 
-  def log_client_property(userid, property_name, value, _hash) do
+  def log_client_property(userid, property_name, value, hash) do
     property_type_id = get_or_add_property_type(property_name)
 
     # Delete existing ones first
@@ -1658,6 +1658,8 @@ defmodule Teiserver.Telemetry do
       value: value,
       last_updated: Timex.now()
     })
+
+    Teiserver.Account.create_smurf_key(userid, "chobby_hash", hash)
 
     case result do
       {:ok, _event} ->
