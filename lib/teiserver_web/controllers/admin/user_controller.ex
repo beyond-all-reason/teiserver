@@ -746,6 +746,9 @@ defmodule TeiserverWeb.Admin.UserController do
           |> Enum.map(fn {k, vs} -> {k, Enum.count(vs)} end)
           |> Enum.sort(&<=/2)
 
+        user_key_lookup = all_keys
+          |> Map.new(fn k -> {k.value, k} end)
+
         matching_keys = Account.smurf_search(user)
 
         key_types = matching_keys
@@ -765,11 +768,17 @@ defmodule TeiserverWeb.Admin.UserController do
             user.data["last_login"]
           end, &>=/2)
 
-        crossmatch_lookup = matching_keys
-          |> Enum.map(fn {{type, _value}, matches} ->
-            matches |> Enum.map(fn %{user: u} -> {type, u.id} end)
+        # Next we want to know the date of the key we matched against for that user
+        key_lookup = matching_keys
+          |> Enum.map(fn {{matched_type, matched_value}, matches} ->
+            matches
+            |> Enum.map(fn match ->
+              {{matched_type, match.user_id}, match}
+            end)
           end)
           |> List.flatten
+          |> Enum.sort_by(fn {_k, v} -> v.last_updated end, &<=/2)
+          |> Map.new
 
         stats = Account.get_user_stat_data(user.id)
 
@@ -782,7 +791,8 @@ defmodule TeiserverWeb.Admin.UserController do
           |> assign(:params, search_defaults(conn))
           |> assign(:key_types, key_types)
           |> assign(:users, users)
-          |> assign(:crossmatch_lookup, crossmatch_lookup)
+          |> assign(:key_lookup, key_lookup)
+          |> assign(:user_key_lookup, user_key_lookup)
           |> render("smurf_list.html")
 
       _ ->

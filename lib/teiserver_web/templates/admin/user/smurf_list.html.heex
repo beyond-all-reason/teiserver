@@ -26,8 +26,19 @@
             show_search: false,
             active: "smurf"
         }) %>
+        
+        
+        <div class="help-box-large">
+          Lists all users <%= @user.name %> shares a matched key with. In the list of matches it will show the most recent match date as used by the user being matched with. This allows you to see how recently the matched player had that value vs when it was last used by <%= @user.name %>.
+        </div>
 
 <div class="float-end py-3">
+  <div class="btn btn-primary2" onclick="$('.help-box, .help-box-large').toggle();">
+    <i class='fa-fw fa-solid fa-circle-info'></i>
+    &nbsp;
+    Show/Hide help
+  </div>
+
   <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>Show user</a>
 </div>
 <h3 class="mt-4">Previous names for <%= @user.name %></h3>
@@ -74,7 +85,7 @@
           <th>Registered</th>
 
           <%= if is_admin do %>
-            <th colspan="3">&nbsp;</th>
+            <th colspan="2">&nbsp;</th>
           <% else %>
             <th>&nbsp;</th>
           <% end %>
@@ -117,11 +128,20 @@
           </td>
 
           <td>&nbsp;</td>
-          
+
           <%= for type <- @key_types do %>
             <td>
-              <%= if Enum.member?(@crossmatch_lookup, {type, user.id}) do %>
-                <i class={"fa-fw fa-regular #{type_icons[type]} text-#{type_colours[type]}"}></i>
+              <%= if Map.has_key?(@key_lookup, {type, user.id}) do %>
+                <%
+                  match = @key_lookup[{type, user.id}]
+                  user_key = @user_key_lookup[match.value]
+                %>
+
+                <i
+                  class={"fa-fw fa-regular #{type_icons[type]} text-#{type_colours[type]}"}
+                  title={"Matching key against #{date_to_str(match.last_updated, format: :ymd)}"}
+                ></i>
+                <%= date_to_str(match.last_updated, format: :ymd) %>/<%= date_to_str(user_key.last_updated, format: :ymd) %>
               <% end %>
             </td>
           <% end %>
@@ -129,11 +149,11 @@
           <td>&nbsp;</td>
 
           <td>
-            <%= date_to_str(((user.data["last_login"] || 0) * 60) |> Timex.from_unix, format: :hms_or_dmy, tz: @tz) %>
+            <%= date_to_str(((user.data["last_login"] || 0) * 60) |> Timex.from_unix, format: :hms_or_ymd, tz: @tz) %>
           </td>
 
           <td>
-            <%= date_to_str(user.inserted_at, format: :dmy) %>
+            <%= date_to_str(user.inserted_at, format: :ymd) %>
           </td>
 
           <td>
@@ -143,12 +163,6 @@
           </td>
 
           <%= if is_admin do %>
-            <td>
-              <a href={Routes.ts_admin_user_path(@conn, :edit, user.id)} class="btn btn-secondary btn-sm">
-                Edit user
-              </a>
-            </td>
-            
             <td>
               <a href={Routes.ts_admin_user_path(@conn, :smurf_merge_form, user.id, @user.id)} class={"btn btn-outline-#{bsname} btn-sm"}>
                 Merge smurf
@@ -215,7 +229,7 @@
                 <%= key.value %>
               </td>
               <td>
-                <%= date_to_str key.last_updated, format: :hms_or_dmy %>
+                <%= date_to_str key.last_updated, format: :hms_or_ymd %>
               </td>
               <td>
                 <%= link "Delete", to: Routes.ts_admin_user_path(@conn, :delete_smurf_key, key.id), class: "btn btn-danger btn-sm", method: "delete", data: [confirm: "Are you sure?"] %>
