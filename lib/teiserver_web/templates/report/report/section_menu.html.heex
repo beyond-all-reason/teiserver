@@ -144,3 +144,14 @@
     url: Routes.ts_reports_report_path(@conn, :show, "new_smurf")
   %>
 <% end %>
+
+<%= if allow?(@current_user, Teiserver.Account.OpenSkillReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "open_skill",
+    label: "Open Skill",
+    active: @active,
+    icon: Teiserver.Account.OpenSkillReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "open_skill")
+  %>
+<% end %>
