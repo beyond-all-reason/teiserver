@@ -1660,6 +1660,7 @@ defmodule Teiserver.Telemetry do
     })
 
     Teiserver.Account.create_smurf_key(userid, "chobby_hash", hash)
+    Teiserver.Account.update_cache_user(userid, %{chobby_hash: hash})
 
     case result do
       {:ok, _event} ->

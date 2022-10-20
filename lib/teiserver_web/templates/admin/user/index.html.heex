@@ -53,6 +53,7 @@
       <th>Status</th>
       <%= if is_admin do %>
         <th>HW</th>
+        <th>CHB</th>
       <% end %>
       <th>Trusted</th>
       <th>Contributor</th>
@@ -105,7 +106,15 @@
 
       <%= if is_admin do %>
         <td>
-          <%= if (user.data["hw_hash"] || "") != "" do %>
+          <%= if user.hw_hash do %>
+            <i class='fa-fw far fa-check'></i>
+          <% else %>
+            &nbsp;
+          <% end %>
+        </td>
+
+        <td>
+          <%= if user.chobby_hash do %>
             <i class='fa-fw far fa-check'></i>
           <% else %>
             &nbsp;

@@ -509,6 +509,7 @@ defmodule Teiserver.TeiserverTestLib do
     Teiserver.Account.AccoladeBotServer.get_accolade_account()
 
     Teiserver.Account.get_or_add_smurf_key_type("client_app_hash")
+    Teiserver.Account.get_or_add_smurf_key_type("chobby_hash")
 
     Teiserver.Game.get_or_add_rating_type("Team")
 

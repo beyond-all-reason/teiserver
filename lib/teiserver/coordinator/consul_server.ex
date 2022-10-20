@@ -503,6 +503,26 @@ defmodule Teiserver.Coordinator.ConsulServer do
       if player_count > 4 do
         user = Account.get_user_by_id(userid)
         if user.hw_hash == nil do
+          Logger.warn("[ConsulServer] hw hash block for #{Account.get_username(userid)}")
+          %{new_client | player: false}
+        else
+          new_client
+        end
+      else
+        new_client
+      end
+    else
+      new_client
+    end
+
+    # Same but for chobby data
+    new_client = if Config.get_site_config_cache("teiserver.Require Chobby data to play") do
+      player_count = Battle.get_lobby_player_count(state.lobby_id)
+
+      if player_count > 4 do
+        user = Account.get_user_by_id(userid)
+        if user.chobby_hash == nil do
+          Logger.warn("[ConsulServer] Chobby data block for #{Account.get_username(userid)}")
           %{new_client | player: false}
         else
           new_client
