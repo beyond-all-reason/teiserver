@@ -1,7 +1,7 @@
 defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
   use Oban.Worker, queue: :teiserver
 
-  alias Teiserver.{Battle, User}
+  alias Teiserver.{Battle, User, Coordinator}
   alias Central.Helpers.NumberHelper
   alias Central.Config
   # alias Teiserver.Data.Types, as: T
@@ -51,6 +51,13 @@ defmodule Teiserver.Battle.Tasks.PostMatchProcessTask do
 
     # We pass match.id to ensure we re-query the match correctly
     Teiserver.Game.MatchRatingLib.rate_match(match.id)
+
+    # Tell the host to re-rate some players
+    usernames = match.members
+      |> Enum.map_join(" ", fn m -> User.get_username(m.user_id) end)
+
+    msg = "updateSkill #{usernames}"
+    Coordinator.send_to_user(match.founder_id, msg)
   end
 
   defp use_export_data(%{data: %{"export_data" => export_data}} = match) do
