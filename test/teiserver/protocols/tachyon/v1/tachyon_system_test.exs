@@ -84,7 +84,7 @@ defmodule Teiserver.Protocols.V1.TachyonSystemTest do
 
   test "watch - all_lobbies", %{socket: socket} do
     bot_user = new_user()
-    bot_user = Account.update_cache_user(%{bot_user | bot: true})
+    bot_user = Account.update_cache_user(bot_user.id, %{bot: true})
 
     _tachyon_send(socket, %{"cmd" => "c.system.watch", "channel" => "all_lobbies"})
     [resp] = _tachyon_recv(socket)
@@ -148,7 +148,7 @@ defmodule Teiserver.Protocols.V1.TachyonSystemTest do
 
   test "watch - lobby:xxx", %{socket: socket} do
     bot_user = new_user()
-    bot_user = Account.update_cache_user(%{bot_user | bot: true})
+    bot_user = Account.update_cache_user(bot_user.id, %{bot: true})
 
     lobby = Battle.Lobby.create_lobby(%{
       founder_id: bot_user.id,
@@ -240,7 +240,7 @@ defmodule Teiserver.Protocols.V1.TachyonSystemTest do
 
     # Create a lobby for the friend
     bot_user = new_user()
-    bot_user = Account.update_cache_user(%{bot_user | bot: true})
+    bot_user = Account.update_cache_user(bot_user.id, %{bot: true})
 
     lobby = Battle.Lobby.create_lobby(%{
       founder_id: bot_user.id,

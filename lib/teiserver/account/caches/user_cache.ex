@@ -200,12 +200,12 @@ defmodule Teiserver.Account.UserCache do
     user
   end
 
-  @spec update_cache_user(map() | User.t(), boolean) :: User.t()
-  def update_cache_user(%{id: userid} = data, persist \\ true) do
+  @spec update_cache_user(T.userid, map()) :: User.t()
+  def update_cache_user(userid, data) do
     user = get_user_by_id(userid)
     new_user = Map.merge(user, data)
     Central.cache_put(:users, user.id, new_user)
-    if persist, do: persist_user(new_user)
+    persist_user(new_user)
     user
   end
 
