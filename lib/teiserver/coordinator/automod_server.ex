@@ -11,12 +11,13 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
   @spec check_user(T.userid()) :: nil
   def check_user(userid) do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
-      [{pid, _}] ->
-        GenServer.call(pid, {:check_user, userid})
-      _ ->
-        nil
-    end
+    check_wrapper(userid)
+    # case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
+    #   [{pid, _}] ->
+    #     GenServer.call(pid, {:check_user, userid})
+    #   _ ->
+    #     nil
+    # end
   end
 
   @spec start_automod_server() :: :ok | {:failure, String.t()}
@@ -112,94 +113,102 @@ defmodule Teiserver.Coordinator.AutomodServer do
           Enum.member?(user.roles, "Developer") -> "Developer account"
           Enum.member?(user.roles, "Trusted") -> "Trusted account"
           true ->
-            # do_check(userid)
-            do_old_check(userid)
+            do_check(userid)
+            # do_old_check(userid)
         end
     end
   end
 
   @spec do_check(T.userid()) :: String.t()
   def do_check(userid) do
-    if User.is_restricted?(userid, ["Login"]) do
+    user = Account.get_user_by_id(userid)
+    if User.is_restricted?(user, ["Login"]) do
       "Already banned"
     else
-      smurf_keys = Account.list_smurf_keys(search: [user_id: userid], select: [:type_id, :values])
+      smurf_keys = Account.list_smurf_keys(search: [user_id: userid], select: [:type_id, :value])
 
-      value_list = smurf_keys
-        |> Enum.map(fn %{value: value} -> value end)
+      value_list = smurf_keys |> Enum.map(fn %{value: value} -> value end)
 
-      _automods = Account.list_automod_actions(search: [
+      actions = Account.list_automod_actions(search: [
         enabled: true,
-        value_in: value_list
+        any_value: value_list,
+        added_before: user.inserted_at
       ])
-      |> Kernel.inspect
-    end
-  end
 
-  @spec do_old_check(T.userid()) :: String.t()
-  defp do_old_check(userid) do
-    stats = Account.get_user_stat_data(userid)
-
-    if User.is_restricted?(userid, ["Login"]) do
-      "Already banned"
-    else
-      with nil <- do_hw1_check(userid, stats),
-        nil <- do_lobby_hash_check(userid, stats)
-      do
-        "No action"
-      else
-        reason -> reason
-      end
-    end
-  end
-
-  @spec do_hw1_check(T.userid(), map()) :: String.t() | nil
-  defp do_hw1_check(userid, stats) do
-    hw1_fingerprint = Teiserver.Account.CalculateSmurfKeyTask.calculate_hw1_fingerprint(stats)
-
-    if hw1_fingerprint != "" do
-      Account.update_user_stat(userid, %{
-        hw1_fingerprint: hw1_fingerprint
-      })
-
-      user = User.get_user_by_id(userid)
-      User.update_user(%{user | hw_hash: hw1_fingerprint}, persist: true)
-
-      hashes = Account.list_automod_actions(search: [
-        enabled: true,
-        contains_value: hw1_fingerprint
-      ], limit: 1)
-
-      if not Enum.empty?(hashes) do
-        automod_action = hd(hashes)
-        do_ban(userid, automod_action)
-      else
-        nil
-      end
-    else
-      nil
-    end
-  end
-
-  @spec do_lobby_hash_check(T.userid(), map()) :: String.t() | nil
-  defp do_lobby_hash_check(userid, stats) do
-    case stats["lobby_hash"] || nil do
-      nil ->
-        nil
-      hash ->
-        hashes = Account.list_automod_actions(search: [
-          enabled: true,
-          contains_value: hash
-        ], limit: 1)
-
-        if not Enum.empty?(hashes) do
-          automod_action = hd(hashes)
+      case actions do
+        [] ->
+          "No action"
+        _ ->
+          automod_action = hd(actions)
           do_ban(userid, automod_action)
-        else
-          nil
-        end
+      end
     end
   end
+
+  # @spec do_old_check(T.userid()) :: String.t()
+  # defp do_old_check(userid) do
+  #   stats = Account.get_user_stat_data(userid)
+
+  #   if User.is_restricted?(userid, ["Login"]) do
+  #     "Already banned"
+  #   else
+  #     with nil <- do_hw1_check(userid, stats),
+  #       nil <- do_lobby_hash_check(userid, stats)
+  #     do
+  #       "No action"
+  #     else
+  #       reason -> reason
+  #     end
+  #   end
+  # end
+
+  # @spec do_hw1_check(T.userid(), map()) :: String.t() | nil
+  # defp do_hw1_check(userid, stats) do
+  #   hw1_fingerprint = Teiserver.Account.CalculateSmurfKeyTask.calculate_hw1_fingerprint(stats)
+
+  #   if hw1_fingerprint != "" do
+  #     Account.update_user_stat(userid, %{
+  #       hw1_fingerprint: hw1_fingerprint
+  #     })
+
+  #     user = User.get_user_by_id(userid)
+  #     User.update_user(%{user | hw_hash: hw1_fingerprint}, persist: true)
+
+  #     hashes = Account.list_automod_actions(search: [
+  #       enabled: true,
+  #       contains_value: hw1_fingerprint
+  #     ], limit: 1)
+
+  #     if not Enum.empty?(hashes) do
+  #       automod_action = hd(hashes)
+  #       do_ban(userid, automod_action)
+  #     else
+  #       nil
+  #     end
+  #   else
+  #     nil
+  #   end
+  # end
+
+  # @spec do_lobby_hash_check(T.userid(), map()) :: String.t() | nil
+  # defp do_lobby_hash_check(userid, stats) do
+  #   case stats["lobby_hash"] || nil do
+  #     nil ->
+  #       nil
+  #     hash ->
+  #       hashes = Account.list_automod_actions(search: [
+  #         enabled: true,
+  #         contains_value: hash
+  #       ], limit: 1)
+
+  #       if not Enum.empty?(hashes) do
+  #         automod_action = hd(hashes)
+  #         do_ban(userid, automod_action)
+  #       else
+  #         nil
+  #       end
+  #   end
+  # end
 
   def do_ban(userid, automod_action) do
     Account.update_user_stat(userid, %{"autoban_id" => automod_action.id})

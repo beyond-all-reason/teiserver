@@ -106,7 +106,7 @@
 
       <%= if is_admin do %>
         <td>
-          <%= if user.hw_hash do %>
+          <%= if user.data["hw_hash"] != "" and user.data["hw_hash"] != nil do %>
             <i class='fa-fw far fa-check'></i>
           <% else %>
             &nbsp;
@@ -114,7 +114,7 @@
         </td>
 
         <td>
-          <%= if user.chobby_hash do %>
+          <%= if user.data["chobby_hash"] != "" and user.data["chobby_hash"] != nil do %>
             <i class='fa-fw far fa-check'></i>
           <% else %>
             &nbsp;

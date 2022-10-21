@@ -69,6 +69,16 @@ defmodule Teiserver.Account.AutomodActionLib do
       where: automod_actions.id in ^id_list
   end
 
+  def _search(query, :added_before, dt) do
+    from automod_actions in query,
+      where: automod_actions.inserted_at < ^dt
+  end
+
+  def _search(query, :added_after, dt) do
+    from automod_actions in query,
+      where: automod_actions.inserted_at > ^dt
+  end
+
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Newest first") do

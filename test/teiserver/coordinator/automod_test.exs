@@ -3,6 +3,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
   alias Central.{Config, Logging}
   alias Teiserver.{Account, User, Client}
   alias Teiserver.Coordinator.{CoordinatorServer, AutomodServer}
+  alias Teiserver.Account.CalculateSmurfKeyTask
 
   import Teiserver.TeiserverTestLib,
     only: [new_user: 0, tachyon_auth_setup: 1, _tachyon_send: 2]
@@ -28,20 +29,32 @@ defmodule Teiserver.Coordinator.AutomodTest do
     })
 
     good_user = new_user()
-    Account.update_user_stat(good_user.id, %{
+    good_stats = %{
       "hardware:cpuinfo" => "123",
       "hardware:gpuinfo" => "123",
       "hardware:osinfo" => "123",
-      "hardware:raminfo" => "123"
-    })
+      "hardware:raminfo" => "123",
+      "hardware:displaymax" => "123"
+    }
+
+    hw1 = CalculateSmurfKeyTask.calculate_hw1_fingerprint(good_stats)
+    hw2 = CalculateSmurfKeyTask.calculate_hw2_fingerprint(good_stats)
+    Account.create_smurf_key(good_user.id, "hw1", hw1)
+    Account.create_smurf_key(good_user.id, "hw2", hw2)
 
     bad_user = new_user()
-    Account.update_user_stat(bad_user.id, %{
+    bad_stats = %{
       "hardware:cpuinfo" => "xyz",
       "hardware:gpuinfo" => "xyz",
       "hardware:osinfo" => "xyz",
-      "hardware:raminfo" => "xyz"
-    })
+      "hardware:raminfo" => "xyz",
+      "hardware:displaymax" => "xyz"
+    }
+
+    hw1 = CalculateSmurfKeyTask.calculate_hw1_fingerprint(bad_stats)
+    hw2 = CalculateSmurfKeyTask.calculate_hw2_fingerprint(bad_stats)
+    Account.create_smurf_key(bad_user.id, "hw1", hw1)
+    Account.create_smurf_key(bad_user.id, "hw2", hw2)
 
     result = AutomodServer.check_user(good_user.id)
     assert result == "No action"
@@ -52,7 +65,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
     assert stats["autoban_id"] == automod_action.id
   end
 
-  test "lobby_hash_ban", %{banned_user: banned_user} do
+  test "chobby_hash_ban", %{banned_user: banned_user} do
     {:ok, automod_action} = Account.create_automod_action(%{
       enabled: true,
       values: ["123456789 abcdefghij"],
@@ -62,24 +75,16 @@ defmodule Teiserver.Coordinator.AutomodTest do
     })
 
     good_user1 = new_user()
-    Account.update_user_stat(good_user1.id, %{
-      "lobby_hash" => "123456789"
-    })
+    Account.create_smurf_key(good_user1.id, "chobby_hash", "123456789")
 
     good_user2 = new_user()
-    Account.update_user_stat(good_user2.id, %{
-      "lobby_hash" => "abcdefghij"
-    })
+    Account.create_smurf_key(good_user2.id, "chobby_hash", "abcdefghij")
 
     good_user3 = new_user()
-    Account.update_user_stat(good_user3.id, %{
-      "lobby_hash" => "123456789 abcdefghijj"
-    })
+    Account.create_smurf_key(good_user3.id, "chobby_hash", "123456789 abcdefghijj")
 
     bad_user = new_user()
-    Account.update_user_stat(bad_user.id, %{
-      "lobby_hash" => "123456789 abcdefghij"
-    })
+    Account.create_smurf_key(bad_user.id, "chobby_hash", "123456789 abcdefghij")
 
     result = AutomodServer.check_user(good_user1.id)
     assert result == "No action"
@@ -96,19 +101,33 @@ defmodule Teiserver.Coordinator.AutomodTest do
     assert stats["autoban_id"] == automod_action.id
   end
 
+  test "ban added after user", %{banned_user: banned_user} do
+    bad_user1 = new_user()
+    Account.create_smurf_key(bad_user1.id, "chobby_hash", "123456789")
+    :timer.sleep(200)
+
+    {:ok, _automod_action} = Account.create_automod_action(%{
+      enabled: true,
+      values: ["123456789"],
+      added_by_id: banned_user.id,
+      user_id: banned_user.id,
+      reason: "hw-ban"
+    })
+    :timer.sleep(200)
+
+    bad_user2 = new_user()
+    Account.create_smurf_key(bad_user2.id, "chobby_hash", "123456789")
+
+    # User1 was created before the permaban, they are not banned
+    result = AutomodServer.check_user(bad_user1.id)
+    assert result == "No action"
+
+    # User2 was created after it, they get banned
+    result = AutomodServer.check_user(bad_user2.id)
+    assert result == "Banned user"
+  end
+
   test "delayed data", %{banned_user: banned_user} do
-    Teiserver.Battle.MatchMonitorServer.do_start()
-
-    standard_user = new_user()
-    %{socket: standard_socket} = tachyon_auth_setup(standard_user)
-
-    bot_user = new_user()
-    User.update_user(%{bot_user | bot: true}, persist: true)
-    %{socket: bot_socket} = tachyon_auth_setup(bot_user)
-    assert User.is_bot?(bot_user.id)
-
-    monitor_user = User.get_user_by_name("AutohostMonitor")
-
     {:ok, _automod_action} = Account.create_automod_action(%{
       enabled: true,
       values: ["uOGXziwWC1mCePGsh0tTQg=="],
@@ -116,6 +135,18 @@ defmodule Teiserver.Coordinator.AutomodTest do
       user_id: banned_user.id,
       reason: "hw-ban"
     })
+
+    Teiserver.Battle.MatchMonitorServer.do_start()
+
+    standard_user = new_user()
+    %{socket: standard_socket} = tachyon_auth_setup(standard_user)
+
+    bot_user = new_user()
+    Account.update_cache_user(bot_user.id, %{bot: true})
+    %{socket: bot_socket} = tachyon_auth_setup(bot_user)
+    assert User.is_bot?(bot_user.id)
+
+    monitor_user = User.get_user_by_name("AutohostMonitor")
 
     delayed_user = new_user()
     %{socket: _delayed_socket} = tachyon_auth_setup(delayed_user)
@@ -150,6 +181,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
       "message" => "user_info " <> encoded
     })
     :timer.sleep(200)
+    assert Enum.count(Account.list_smurf_keys(search: [user_id: delayed_user.id])) == 1
 
     # Should be no update
     stats = Account.get_user_stat_data(delayed_user.id)
@@ -164,6 +196,10 @@ defmodule Teiserver.Coordinator.AutomodTest do
       "recipient_id" => monitor_user.id,
       "message" => "user_info " <> encoded
     })
+    :timer.sleep(200)
+
+    # Should now have smurf keys
+    assert Enum.count(Account.list_smurf_keys(search: [user_id: delayed_user.id])) == 3
 
     # Should be a key now!
     stats = Account.get_user_stat_data(delayed_user.id)

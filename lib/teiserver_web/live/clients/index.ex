@@ -139,6 +139,6 @@ defmodule TeiserverWeb.ClientLive.Index do
   end
 
   defp limited_user(user) do
-    Map.take(user, ~w(id bot moderator verified hw_hash)a)
+    Map.take(user, ~w(id bot moderator verified hw_hash chobby_hash)a)
   end
 end

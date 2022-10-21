@@ -904,8 +904,9 @@ defmodule TeiserverWeb.Admin.UserController do
     key_types = Account.list_smurf_key_types(limit: :infinity)
 
     # Update their hw_key
-    hw_fingerprint = Account.get_user_stat_data(user.id)
-    |> Teiserver.Account.CalculateSmurfKeyTask.calculate_hw1_fingerprint()
+    hw_fingerprint = user.id
+      |> Account.get_user_stat_data
+      |> Teiserver.Account.CalculateSmurfKeyTask.calculate_hw1_fingerprint()
 
     Account.update_user_stat(user.id, %{
       hw_fingerprint: hw_fingerprint
