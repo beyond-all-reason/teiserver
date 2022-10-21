@@ -190,6 +190,16 @@
       link: Routes.ts_reports_report_path(@conn, :show, "new_smurf")
     %>
   <% end %>
+
+  <%= if allow?(@current_user, Teiserver.Account.OpenSkillReport.permissions()) do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Account.OpenSkillReport.icon(),
+      name: "open_skill",
+      text: "Open Skill",
+      link: Routes.ts_reports_report_path(@conn, :show, "open_skill")
+    %>
+  <% end %>
 </div>
 
 <div class="row mt-4">

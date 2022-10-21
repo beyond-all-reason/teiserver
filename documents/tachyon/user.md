@@ -125,11 +125,11 @@ Accepting a request to be friends. If it succeeds you should get a `s.user.new_f
 }
 ```
 
-### s.user.new_friend
+### s.user.friend_added
 The server informing you of a new friend.
 ```json
 {
-  "cmd": "s.user.new_friend",
+  "cmd": "s.user.friend_added",
   "user_id": userid
 }
 ```

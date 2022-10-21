@@ -1,0 +1,73 @@
+<% bsname = view_colour() %>
+
+<script src={Routes.static_path(@conn, "/js/d3.js")}></script>
+<script src={Routes.static_path(@conn, "/js/c3.min.js")}></script>
+
+<link href="/css/c3.min.css" rel="stylesheet">
+
+<%=  render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+<script>
+  $(function() {
+    var chart = c3.generate({
+      bindto: '#chart',
+      data: {
+        xs: {
+          'skill': 'skill_rounded',
+          'rating_value': 'rating_value_rounded',
+          'leaderboard_rating': 'leaderboard_rating_rounded',
+          'uncertainty': 'uncertainty_rounded',
+        },
+        rows: <%= raw Jason.encode!(@data) %>,
+        type: 'bar'
+      }
+    });
+  });
+</script>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "open_skill"
+          })
+        %>
+        <br /><br />
+
+        <form action={Routes.ts_reports_report_path(@conn, :show, "open_skill")} method="post" class="form-horizontal">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+          <div class="row">
+            <div class="col-md-4 col-lg-3 col-xl-2 search-form-input">
+              <label for="report_rating_type" class="control-label">Game type:</label>
+              <%= select :report, :rating_type, [
+                "Team",
+                "Partied Team",
+                "Duel",
+                "FFA",
+                "Team FFA"
+              ], class: "form-control", selected: @params["rating_type"] %>
+            </div>
+            <div class="col-md-4 col-lg-3 col-xl-2 search-form-input">
+              <label for="report_metrics" class="control-label">Metrics:</label>
+              <%= select :report, :metrics, [
+                "Rating",
+                "Skill",
+                "Uncertainty",
+                "Leaderboard Rating"
+              ], class: "form-control", selected: @params["metrics"] %>
+            </div>
+          </div>
+          <div class="row mt-4">
+            <div class="col-md-4 col-lg-3 col-xl-2">
+              <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+            </div>
+          </div>
+        </form>
+        <div id="chart" class='with-transitions mt-3' style="height: 400px;">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
