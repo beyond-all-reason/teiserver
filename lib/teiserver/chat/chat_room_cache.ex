@@ -169,6 +169,12 @@ defmodule Teiserver.Room do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
+    blacklisted = (User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg))
+
+    if blacklisted do
+      User.shadowban_user(user.id)
+    end
+
     if allow?(from_id, room_name) do
       case get_room(room_name) do
         nil ->
@@ -202,6 +208,12 @@ defmodule Teiserver.Room do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
+    blacklisted = (User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg))
+
+    if blacklisted do
+      User.shadowban_user(user.id)
+    end
+
     if allow?(from_id, room_name) do
       case get_room(room_name) do
         nil ->
@@ -231,6 +243,9 @@ defmodule Teiserver.Room do
   @spec allow?(Map.t(), String.t()) :: boolean()
   def allow?(userid, _room_name) do
     cond do
+      User.is_shadowbanned?(userid) ->
+        false
+
       User.is_restricted?(userid, ["All chat", "Room chat"]) ->
         false
 

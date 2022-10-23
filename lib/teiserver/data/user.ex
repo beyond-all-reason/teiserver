@@ -558,8 +558,21 @@ defmodule Teiserver.User do
 
   def send_direct_message(sender_id, to_id, message_parts) when is_list(message_parts) do
     sender = get_user_by_id(sender_id)
-    if not is_restricted?(sender, ["All chat", "Direct chat"]) do
+    msg_str = Enum.join(message_parts, "\n")
 
+    blacklisted = (is_bot?(sender) == false and WordLib.blacklisted_phrase?(msg_str))
+
+    allowed = cond do
+      blacklisted -> false
+      is_restricted?(sender, ["All chat", "Direct chat"]) -> false
+      true -> true
+    end
+
+    if blacklisted do
+      shadowban_user(sender_id)
+    end
+
+    if allowed do
       if is_bot?(to_id) do
         message_parts
           |> Enum.each(fn line ->
@@ -1028,12 +1041,11 @@ defmodule Teiserver.User do
   def is_shadowbanned?(%{shadowbanned: true}), do: true
   def is_shadowbanned?(_), do: false
 
-  @spec shadowban_user(T.userid() | T.user()) :: :ok
+  @spec shadowban_user(T.userid()) :: :ok
   def shadowban_user(nil), do: :ok
-  def shadowban_user(userid) when is_integer(userid), do: shadowban_user(get_user_by_id(userid))
-  def shadowban_user(user) do
-    update_user(%{user | shadowbanned: true, muted: [true, nil]}, persist: true)
-    Client.shadowban_client(user.id)
+  def shadowban_user(userid) when is_integer(userid) do
+    Account.update_cache_user(userid, %{shadowbanned: true})
+    Client.shadowban_client(userid)
     :ok
   end
 

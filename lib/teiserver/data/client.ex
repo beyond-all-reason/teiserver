@@ -324,8 +324,9 @@ defmodule Teiserver.Client do
 
   @spec shadowban_client(T.userid()) :: :ok
   def shadowban_client(userid) do
-    client = get_client_by_id(userid)
-    update(%{client | shadowbanned: true}, :silent)
+    # client = get_client_by_id(userid)
+    # update(%{client | shadowbanned: true}, :silent)
+    disconnect(userid, "shadowban")
     :ok
   end
 

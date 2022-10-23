@@ -712,6 +712,9 @@ defmodule Teiserver.Battle.Lobby do
       lobby == nil ->
         false
 
+      User.is_shadowbanned?(userid) ->
+        false
+
       User.is_restricted?(userid, ["All chat", "Lobby chat"]) ->
         false
 

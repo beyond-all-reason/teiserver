@@ -49,9 +49,16 @@ defmodule Teiserver.Battle.LobbyChat do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
+    blacklisted = (User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg))
+
+    if blacklisted do
+      User.shadowban_user(user.id)
+    end
+
     allowed = cond do
       User.is_restricted?(user, ["All chat", "Lobby chat"]) -> false
       String.slice(msg, 0..0) == "!" and User.is_restricted?(user, ["Host commands"]) -> false
+      blacklisted -> false
       Enum.member?([
         "!y", "!vote y", "!yes", "!vote yes",
         "!n", "!vote n", "!no", "!vote no",
@@ -88,9 +95,16 @@ defmodule Teiserver.Battle.LobbyChat do
       User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
+    blacklisted = (User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg))
+
+    if blacklisted do
+      User.shadowban_user(user.id)
+    end
+
     allowed = cond do
       User.is_restricted?(user, ["All chat", "Lobby chat", "Direct chat"]) -> false
       String.starts_with?(msg, "!") and User.is_restricted?(user, ["Host commands"]) -> false
+      blacklisted -> false
       Enum.member?([
         "!y", "!vote y", "!yes", "!vote yes",
         "!n", "!vote n", "!no", "!vote no",
@@ -123,9 +137,16 @@ defmodule Teiserver.Battle.LobbyChat do
     msg = trim_message(msg)
     sender = User.get_user_by_id(from_id)
 
+    blacklisted = (User.is_bot?(from_id) == false and WordLib.blacklisted_phrase?(msg))
+
+    if blacklisted do
+      User.shadowban_user(from_id)
+    end
+
     allowed = cond do
       User.is_restricted?(sender, ["All chat", "Lobby chat", "Direct chat"]) -> false
       String.starts_with?(msg, "!") and User.is_restricted?(sender, ["Host commands"]) -> false
+      blacklisted -> false
       Enum.member?([
         "!y", "!vote y", "!yes", "!vote yes",
         "!n", "!vote n", "!no", "!vote no",

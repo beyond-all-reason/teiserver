@@ -5,6 +5,10 @@ defmodule Teiserver.Chat.WordLib do
   require Logger
 
   @flagged_regex ~r/(n[i1l]gg(:?[e3]r|a)|cun[t7][s5]?|\b(r[e3])?[t7]ards?\b)/iu
+  @blacklisted_regexs [
+    ~r(superinnapropriateword),
+    ~r(anotherreallybadword)
+  ]
 
   @doc """
   Given a text message it will look for a set of flagged words.
@@ -66,5 +70,16 @@ defmodule Teiserver.Chat.WordLib do
         true
       end
     end
+  end
+
+  @spec blacklisted_phrase?(String.t()) :: boolean()
+  def blacklisted_phrase?(text) do
+    @blacklisted_regexs
+    |> Enum.reduce(false, fn
+      (_, true) ->
+        true
+      (r, false) ->
+        Regex.match?(r, text)
+    end)
   end
 end

@@ -686,6 +686,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
         Logger.info("ConsulServer allow_join false for #{userid} for reason #{reason}")
         {false, reason}
 
+      client.shadowbanned ->
+        {false, "Err"}
+
       state.gatekeeper == "friends" ->
         if is_on_friendlist?(userid, state, :all) do
           {true, nil}
