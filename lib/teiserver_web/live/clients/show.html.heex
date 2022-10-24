@@ -54,27 +54,35 @@
 
 <div class="float-end">
   <%= if @server_debug_messages do %>
-    <span class={"btn btn-#{bsname}"} phx-click="disable-server-message-logging">
+    <span class={"btn btn-#{bsname} mx-2"} phx-click="disable-server-message-logging">
       Disable server message logging
     </span>
   <% else %>
-    <span class={"btn btn-outline-#{bsname}"} phx-click="enable-server-message-logging">
+    <span class={"btn btn-outline-#{bsname} mx-2"} phx-click="enable-server-message-logging">
       Enable server message logging
     </span>
   <% end %>
 
   <%= if @client_debug_messages do %>
-    <span class={"btn btn-#{bsname}"} phx-click="disable-client-message-logging">
+    <span class={"btn btn-#{bsname} mx-2"} phx-click="disable-client-message-logging">
       Disable client message logging
     </span>
   <% else %>
-    <span class={"btn btn-outline-#{bsname}"} phx-click="enable-client-message-logging">
+    <span class={"btn btn-outline-#{bsname} mx-2"} phx-click="enable-client-message-logging">
       Enable client message logging
     </span>
   <% end %>
 
-  <span class="btn btn-danger" phx-click="force-disconnect">
-    Force disconnect
+  <span class="btn btn-warning mx-2" phx-click="force-error-log">
+    Error log
+  </span>
+
+  <span class="btn btn-danger mx-2" phx-click="force-reconnect">
+    Force reconnect
+  </span>
+
+  <span class="btn btn-danger2 mx-2" phx-click="force-flood">
+    Engage flood protection
   </span>
 </div>
 

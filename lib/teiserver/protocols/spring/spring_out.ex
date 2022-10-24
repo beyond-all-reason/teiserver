@@ -550,6 +550,10 @@ defmodule Teiserver.Protocols.SpringOut do
     "s.system.shutdown\n"
   end
 
+  defp do_reply(:error_log, _) do
+    "s.client.errorlog\n"
+  end
+
   # defp do_reply(:tachyon, {namespace, function, data, state}) do
   #   Teiserver.Protocols.Tachyon.V1.TachyonOut.reply(namespace, function, data, state)
   # end

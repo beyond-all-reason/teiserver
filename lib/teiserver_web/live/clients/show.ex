@@ -121,9 +121,20 @@ defmodule TeiserverWeb.ClientLive.Show do
     }
   end
 
-  def handle_event("force-disconnect", _event, socket) do
+  def handle_event("force-error-log", _event, socket) do
+    p = Client.get_client_by_id(socket.assigns.id) |> Map.get(:tcp_pid)
+    send(p, :error_log)
+    {:noreply, socket}
+  end
+
+  def handle_event("force-reconnect", _event, socket) do
+    Client.disconnect(socket.assigns[:id], "reconnect")
+    {:noreply, socket |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
+  end
+
+  def handle_event("force-flood", _event, socket) do
     User.set_flood_level(socket.assigns[:id], 100)
-    Client.disconnect(socket.assigns[:id], "force-disconnect from web")
+    Client.disconnect(socket.assigns[:id], "flood protection")
     {:noreply, socket |> redirect(to: Routes.ts_admin_client_index_path(socket, :index))}
   end
 

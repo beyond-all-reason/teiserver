@@ -243,6 +243,10 @@ defmodule Teiserver.SpringTcpServer do
   end
 
   # teiserver_lobby_updates:#{lobby_id}
+  def handle_info(:error_log, state) do
+    new_state = state.protocol_out.reply(:error_log, :error_log, nil, state)
+    {:noreply, state}
+  end
 
   # Client updates
   def handle_info({:user_logged_in, nil}, state), do: {:noreply, state}
