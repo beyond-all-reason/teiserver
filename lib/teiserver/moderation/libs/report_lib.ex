@@ -85,7 +85,15 @@ defmodule Teiserver.Moderation.ReportLib do
       where: not is_nil(reports.result_id)
   end
 
+  def _search(query, :inserted_after, datetime) do
+    from reports in query,
+      where: reports.inserted_at > ^datetime
+  end
 
+  def _search(query, :inserted_before, datetime) do
+    from reports in query,
+      where: reports.inserted_at < ^datetime
+  end
 
   def _search(query, :id_list, id_list) do
     from reports in query,

@@ -215,7 +215,8 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             reporter_id: reporter_id,
             target_id: target_id,
 
-            type: "Lobby",
+            type: "Chat",
+            sub_type: Enum.random(~w(any spam bullying abusive)),
             inserted_at: report_time,
             updated_at: report_time
           }
@@ -244,6 +245,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
             target_id: target.user_id,
 
             type: "Game",
+            sub_type: Enum.random(~w(any noob griefing cheating)),
             relationship: relationship,
             match_id: match.id,
 

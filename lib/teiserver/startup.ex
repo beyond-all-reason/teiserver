@@ -15,41 +15,28 @@ defmodule Teiserver.Startup do
     # Chat stuff
     Central.Account.UserLib.add_report_restriction_types("Chat", [
       "Bridging",
-      "Room chat",
-      "Direct chat",
-      "Lobby chat",
-      "Battle chat",
+      "Game chat",
+      "All chat",
     ])
 
     # Lobby interaction
-    Central.Account.UserLib.add_report_restriction_types("Lobby", [
-      "Host commands",
-      "Voting",
-
-      "Hosting games",
-      "Joining existing lobbies",
+    Central.Account.UserLib.add_report_restriction_types("Game", [
       "Low priority",
-      "Game queue",
+      "All lobbies",
+      "Login",
+      "Site",
     ])
 
-    Central.Account.UserLib.add_report_restriction_types("Community", [
+    Central.Account.UserLib.add_report_restriction_types("Other", [
       "Accolades",
       "Reporting",
-      "Renaming"
+      "Renaming",
+      "Matchmaking"
     ])
 
-    Central.Account.UserLib.add_report_restriction_types("Reminders", [
+    Central.Account.UserLib.add_report_restriction_types("Warnings", [
+      "Singular warning",
       "Warning reminder",
-    ])
-
-    # Global overrides
-    Central.Account.UserLib.add_report_restriction_types("Global", [
-      "All chat",
-      "All lobbies",
-      "Site",
-      "Matchmaking",
-      "Community",
-      "Login"
     ])
 
     add_audit_types([

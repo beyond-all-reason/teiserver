@@ -7,6 +7,7 @@ defmodule Teiserver.Moderation.Report do
     belongs_to :target, Central.Account.User
 
     field :type, :string
+    field :sub_type, :string
     field :extra_text, :string
 
     belongs_to :match, Teiserver.Battle.Match
@@ -22,8 +23,8 @@ defmodule Teiserver.Moderation.Report do
       |> trim_strings(~w(name)a)
 
     struct
-      |> cast(params, ~w(reporter_id target_id type extra_text match_id relationship result_id)a)
-      |> validate_required(~w(reporter_id target_id type)a)
+      |> cast(params, ~w(reporter_id target_id type sub_type extra_text match_id relationship result_id)a)
+      |> validate_required(~w(reporter_id target_id type sub_type)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

@@ -18,6 +18,7 @@ defmodule Central.Repo.Migrations.AutomatedModerationCreation do
       add :target_id, references(:account_users, on_delete: :nothing)
 
       add :type, :string
+      add :sub_type, :string
       add :extra_text, :string
 
       add :match_id, references(:teiserver_battle_matches, on_delete: :nothing)
