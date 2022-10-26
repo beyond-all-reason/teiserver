@@ -12,8 +12,8 @@ defmodule Teiserver.Battle.BalanceLib do
   @rating_lower_boundary 3
   @rating_upper_boundary 5
 
-  @mean_diff_max 10
-  @stddev_diff_max 4
+  @mean_diff_max 5
+  @stddev_diff_max 3
 
   @fuzz_multiplier 0.5
 
