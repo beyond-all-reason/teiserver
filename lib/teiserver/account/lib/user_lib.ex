@@ -123,6 +123,11 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("? -> ? @> ?", users.data, "restrictions", "\"All chat\"")
   end
 
+  def _search(query, :mod_action, "Shadowbanned") do
+    from users in query,
+      where: fragment("? ->> ? = ?", users.data, "shadowbanned", "true")
+  end
+
   def _search(query, :mod_action, "Warned") do
     from users in query,
       where: fragment("? -> ? @> ?", users.data, "restrictions", "\"Warning reminder\"")
