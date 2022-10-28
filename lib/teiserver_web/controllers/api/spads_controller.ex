@@ -8,6 +8,15 @@ defmodule TeiserverWeb.API.SpadsController do
 
   @spec get_rating(Plug.Conn.t(), map) :: Plug.Conn.t()
   def get_rating(conn, %{
+    "target_id" => "None",
+    "type" => _
+  }) do
+    conn
+      |> put_status(200)
+      |> render("empty.json")
+  end
+
+  def get_rating(conn, %{
     "target_id" => target_id_str,
     "type" => type
   }) do
