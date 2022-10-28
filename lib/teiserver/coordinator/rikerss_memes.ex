@@ -7,6 +7,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
   @meme_list ~w(ticks nodefence greenfields poor rich hardt1 crazy undo)
 
   @crazy_multiplier_opts ~w(0.3 0.5 0.7 1 1 1 1 1 1 1 1.5 2 4)
+  @crazy_multiplier_opts_middler ~w(0.5 0.7 1 1 1 1 1 1 1 1.5 2)
 
   @spec handle_meme(String.t(), T.userid(), map()) :: [String.t()]
   def handle_meme("ticks", senderid, %{lobby_id: lobby_id} = _state) do
@@ -94,7 +95,7 @@ defmodule Teiserver.Coordinator.RikerssMemes do
       "game/modoptions/multiplier_buildtimecost" => Enum.random(@crazy_multiplier_opts),
       "game/modoptions/multiplier_weapondamage" => Enum.random(@crazy_multiplier_opts),
       "game/modoptions/multiplier_buildpower" => Enum.random(@crazy_multiplier_opts),
-      "game/modoptions/multiplier_maxvelocity" => Enum.random(@crazy_multiplier_opts),
+      "game/modoptions/multiplier_maxvelocity" => Enum.random(@crazy_multiplier_opts_middler),
       "game/modoptions/multiplier_losrange" => Enum.random(@crazy_multiplier_opts),
       "game/modoptions/multiplier_radarrange" => Enum.random(@crazy_multiplier_opts),
     }
