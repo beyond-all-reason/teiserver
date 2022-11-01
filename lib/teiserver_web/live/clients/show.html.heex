@@ -73,9 +73,11 @@
     </span>
   <% end %>
 
-  <span class="btn btn-warning mx-2" phx-click="force-error-log">
-    Error log
-  </span>
+  <%= if @client.lobby_client == "LuaLobby Chobby" do %>
+    <span class="btn btn-warning mx-2" phx-click="force-error-log">
+      Error log
+    </span>
+  <% end %>
 
   <span class="btn btn-danger mx-2" phx-click="force-reconnect">
     Force reconnect
