@@ -256,6 +256,8 @@ defmodule TeiserverWeb.Router do
         resources("/action", ActionController)
         resources("/proposal", ProposalController)
         resources("/ban", BanController)
+
+        get("/user/:id", UserController, :show)
       end
 
       scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do

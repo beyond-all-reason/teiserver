@@ -42,17 +42,8 @@
 
 <div class="row mt-3">
   <div class="col-md-12">
-    <h4>Links</h4>
+    <h4>Profile/history</h4>
   </div>
-
-  <%#=
-    central_component "menu_card",
-    icon: Central.Account.ReportLib.icon(),
-    name: "reports",
-    text: "Reports",
-    icon_class: "fa-solid",
-    link: Routes.ts_admin_user_path(@conn, :show, @user) <> "#reports_tab"
-  %>
 
   <%=
     central_component "menu_card",
@@ -108,11 +99,24 @@
     link: Routes.ts_account_profile_path(@conn, :show, @user.id)
   %>
 
+  <div class="col-md-12">
+    <h4>Moderation</h4>
+  </div>
+
+  <%=
+    central_component "menu_card",
+    icon: "fa-solid #{Teiserver.Moderation.ReportLib.icon()}",
+    name: "moderation",
+    text: "Moderation",
+    icon_class: "fa-solid",
+    link: Routes.moderation_user_path(@conn, :show, @user.id)
+  %>
+
   <%=
     central_component "menu_card",
     icon: "fa-solid #{Central.Account.ReportLib.icon()}",
     name: "reports",
-    text: "Submitted reports",
+    text: "Submitted reports (old)",
     icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :reports_submitted, @user.id)
   %>

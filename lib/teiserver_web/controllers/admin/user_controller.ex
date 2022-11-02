@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.UserController do
   use CentralWeb, :controller
 
-  alias Teiserver.{Account, Chat, Game}
+  alias Teiserver.{Account, Chat, Game, Moderation}
   alias Teiserver.Game.MatchRatingLib
   alias Central.Account.User
   alias Teiserver.Account.UserLib
@@ -129,7 +129,7 @@ defmodule TeiserverWeb.Admin.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        reports =
+        old_reports =
           Central.Account.list_reports(
             search: [
               filter: {"target", user.id}
@@ -141,6 +141,24 @@ defmodule TeiserverWeb.Admin.UserController do
             ],
             order_by: "Newest first"
           )
+
+        reports_made = Moderation.list_reports(
+          search: [
+            reporter_id: user.id
+          ]
+        )
+
+        reports_against = Moderation.list_reports(
+          search: [
+            target_id: user.id
+          ]
+        )
+
+        actions = Moderation.list_actions(
+          search: [
+            target_id: user.id
+          ]
+        )
 
         user
           |> UserLib.make_favourite()
@@ -166,7 +184,10 @@ defmodule TeiserverWeb.Admin.UserController do
           |> assign(:client, client)
           |> assign(:user_stats, user_stats)
           |> assign(:roles, roles)
-          |> assign(:reports, reports)
+          |> assign(:old_reports, old_reports)
+          |> assign(:reports_made, reports_made)
+          |> assign(:reports_against, reports_against)
+          |> assign(:actions, actions)
           |> assign(:section_menu_active, "show")
           |> add_breadcrumb(name: "Show: #{user.name}", url: conn.request_path)
           |> render("show.html")

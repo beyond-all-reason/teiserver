@@ -1,0 +1,165 @@
+<%
+  bsname = view_colour()
+%>
+
+<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "ratings"
+          })
+        %>
+        <hr />
+
+        <div class="float-end">
+          <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>View user</a>
+        </div>
+
+
+        <script type="text/javascript" charset="utf-8">
+          $(function() {
+            $('.list-builder-select').select2({
+              width: "100%"
+            });
+          });
+        </script>
+
+        <style type="text/css">
+          .help-box {
+            display: none;
+            padding-bottom: 1px;
+            margin-bottom: 2px;
+          }
+        </style>
+
+        <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
+        <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+
+        <%# Button for showing the form %>
+        <div id="report-form-div" style="display: none;">
+          <h5>CoC Quick Reference</h5>
+
+          <ul>
+          <%= for {key, text} <- @coc_lookup do %>
+            <li><strong><%= key %>:</strong> <%= text %></li>
+          <% end %>
+          </ul>
+        </div>
+
+        <br /><br />
+
+        <div class="row">
+          <div class="col-md-6">
+            <h4>
+              <i class="fa-fw fa-regular fa-bullseye-pointer text-danger"></i>
+              Reports against
+            </h4>
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Reporter</th>
+                  <th colspan="2">Type</th>
+                  <th>Extra</th>
+                  <th colspan="2">Match</th>
+                  <th>Result</th>
+
+                  <th colspan="1">&nbsp;</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%= for report <- @reports_against do %>
+                  <tr>
+                    <td><%= report.reporter_id %></td>
+                    <td><%= report.type %></td>
+                    <td><%= report.sub_type %></td>
+                    <td><%= report.extra_text %></td>
+                    
+                    <%= if report.match_id do %>
+                      <td><%= report.relationship %></td>
+                      <td><%= report.match_id %></td>
+                    <% else %>
+                      <td colspan="2"></td>
+                    <% end %>
+                    
+                    <td>
+                      <%= if report.result_id do %>
+                        <i class="fa-fw fa-regular fa-check text-success"></i>
+                      <% else %>
+                        
+                      <% end %>
+                    </td>
+
+                    <td>
+                      <a href={Routes.admin_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
+                        Show
+                        &nbsp;
+                        <i class="fa-fw fas fa-eye"></i>
+                      </a>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h4>
+              <i class="fa-fw fa-regular fa-share-from-square text-info"></i>
+              Reports made
+            </h4>
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Target</th>
+                  <th colspan="2">Type</th>
+                  <th>Extra</th>
+                  <th colspan="2">Match</th>
+                  <th>Result</th>
+
+                  <th colspan="1">&nbsp;</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%= for report <- @reports_made do %>
+                  <tr>
+                    <td><%= report.target_id %></td>
+                    <td><%= report.type %></td>
+                    <td><%= report.sub_type %></td>
+                    <td><%= report.extra_text %></td>
+
+                    <%= if report.match_id do %>
+                      <td><%= report.relationship %></td>
+                      <td><%= report.match_id %></td>
+                    <% else %>
+                      <td colspan="2"></td>
+                    <% end %>
+                    
+                    <td>
+                      <%= if report.result_id do %>
+                        <i class="fa-fw fa-regular fa-check text-success"></i>
+                      <% else %>
+                        
+                      <% end %>
+                    </td>
+
+                    <td>
+                      <a href={Routes.admin_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
+                        Show
+                        &nbsp;
+                        <i class="fa-fw fas fa-eye"></i>
+                      </a>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

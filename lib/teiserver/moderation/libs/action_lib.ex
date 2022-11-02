@@ -60,6 +60,16 @@ defmodule Teiserver.Moderation.ActionLib do
       where: actions.id in ^id_list
   end
 
+  def _search(query, :target_id, target_id) do
+    from reports in query,
+      where: reports.target_id == ^target_id
+  end
+
+  def _search(query, :target_id_in, id_list) do
+    from reports in query,
+      where: reports.target_id in ^id_list
+  end
+
   def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 

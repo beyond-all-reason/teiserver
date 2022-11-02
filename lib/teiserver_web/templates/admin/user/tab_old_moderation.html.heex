@@ -1,7 +1,7 @@
 <%
   bsname = Central.Account.ReportLib.colours()
   
-  has_open_report = @reports
+  has_open_report = @old_reports
     |> Enum.filter(fn report -> report.responder == nil end)
     |> Enum.empty?
     
@@ -197,7 +197,7 @@
     </tr>
   </thead>
   <tbody>
-<%= for report <- @reports do %>
+<%= for report <- @old_reports do %>
     <tr>
       <td><%= report.reason %></td>
       <td><%= report.reporter.name %></td>

@@ -11,6 +11,9 @@ defmodule Teiserver.Account.UserLib do
   @spec colours :: atom
   def colours, do: :success
 
+  @spec colour :: atom
+  def colour, do: :success
+
   @spec make_favourite(Central.Account.User.t()) :: Map.t()
   def make_favourite(user) do
     %{
