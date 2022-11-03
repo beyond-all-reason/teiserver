@@ -124,6 +124,7 @@ alias siteinfotail='tail -f /var/log/central/info.log -n 60'
 
 alias dodeploy='sudo sh /scripts/deploy.sh'
 alias quickrestart='sudo sh /scripts/quick_restart.sh'
+alias logrotate='sudo sh /scripts/logrotate.sh'
 
 alias catsiteinfo='cat /var/log/central/info.log'
 alias centralapp='sh /apps/central/bin/central'
