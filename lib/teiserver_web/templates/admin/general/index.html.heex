@@ -37,6 +37,17 @@
       link: Routes.ts_admin_clan_path(@conn, :index)
     %>
   <% end %>
+  
+  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Moderation.ReportLib.icon(),
+      name: "moderation_admin",
+      text: "Moderation",
+      icon_class: "fa-duotone",
+      link: Routes.moderation_general_path(@conn, :index)
+    %>
+  <% end %>
 
   <%= if allow?(@conn, "teiserver.admin") do %>
     <%= central_component "menu_card", icon_class: "fa-solid", name: "", icon: Teiserver.Account.BadgeTypeLib.icon(), text: "Badge types", link: Routes.ts_admin_badge_type_path(@conn, :index) %>
