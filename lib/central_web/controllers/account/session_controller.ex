@@ -53,8 +53,13 @@ defmodule CentralWeb.Account.SessionController do
       )
 
     cond do
-      Enum.empty?(codes) ->
+      code == nil ->
         Logger.debug("SessionController.one_time_login No code")
+        conn
+          |> redirect(to: "/")
+
+      code.ip != ip ->
+        Logger.debug("SessionController.one_time_login Bad IP")
         conn
           |> redirect(to: "/")
 
@@ -65,7 +70,6 @@ defmodule CentralWeb.Account.SessionController do
 
       true ->
         Logger.debug("SessionController.one_time_login success")
-        code = hd(codes)
         Account.delete_code(code)
 
         user = Account.get_user!(code.user_id)
