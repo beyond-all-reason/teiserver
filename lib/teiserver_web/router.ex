@@ -257,6 +257,9 @@ defmodule TeiserverWeb.Router do
         resources("/proposal", ProposalController)
         resources("/ban", BanController)
 
+        get("/report_form/success", ReportFormController, :success)
+        post("/report_form", ReportFormController, :create)
+        get("/report_form/:id", ReportFormController, :index)
         get("/user/:id", UserController, :show)
       end
 
