@@ -13,22 +13,27 @@ defmodule Teiserver.Battle.LobbyChat do
   def say(_userid, "!specafk" <> _, _lobby_id), do: :ok
 
   def say(userid, "!clan" <> _, _lobby_id) do
-    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
-    website_url = "https://#{host}"
-
-    Coordinator.send_to_user(userid, "SPADS clans have been replaced by parties. You can access them via #{website_url}/teiserver/parties.")
-
-    uuid = UUID.uuid1()
     client = Account.get_client_by_id(userid)
-    {:ok, _code} = Central.Account.create_code(%{
-        value: uuid <> "$#{client.ip}",
-        purpose: "one_time_login",
-        expires: Timex.now() |> Timex.shift(minutes: 5),
-        user_id: userid
-      })
-    url = "https://#{host}/one_time_login/#{uuid}"
+    {:ok, code} = Account.create_code(%{
+      value: UUID.uuid1(),
+      purpose: "one_time_login",
+      expires: Timex.now() |> Timex.shift(minutes: 5),
+      user_id: userid,
+      metadata: %{
+        ip: client.ip,
+        redirect: "/teiserver/account/parties",
+      }
+    })
 
-    Coordinator.send_to_user(userid, "If you have not already logged in, here is a one-time link to do so automatically - #{url}")
+    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    url = "https://#{host}/one_time_login/#{code.value}"
+
+    Coordinator.send_to_user(userid, [
+      "To access parties please use this link - #{url}",
+      "You can use the $explain command to see how balance is being calculated and why you are/are not",
+      "being teamed with your party",
+      "We are working on handling it within the new client and protocol, the website is only a temporary measure."
+    ])
   end
 
   def say(userid, msg, lobby_id) do
