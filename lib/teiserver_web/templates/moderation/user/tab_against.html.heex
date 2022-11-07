@@ -1,0 +1,48 @@
+<table class="table table-sm">
+  <thead>
+    <tr>
+      <th>Reporter</th>
+      <th colspan="2">Type</th>
+      <th>Extra</th>
+      <th colspan="2">Match</th>
+
+      <th>Date</th>
+      <th>Result</th>
+
+      <th colspan="1">&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for report <- @reports_against do %>
+      <tr>
+        <td><%= report.reporter.name %></td>
+        <td><%= report.type %></td>
+        <td><%= report.sub_type %></td>
+        <td><%= report.extra_text %></td>
+        
+        <%= if report.match_id do %>
+          <td><%= report.relationship %></td>
+          <td><%= report.match_id %></td>
+        <% else %>
+          <td colspan="2"></td>
+        <% end %>
+        
+        <td><%= date_to_str(report.inserted_at, format: :hms_or_ymd) %></td>
+        
+        <td>
+          <%= if report.result_id do %>
+            <a href={Routes.moderation_action_path(@conn, :show, report.result_id)} class="btn btn-sm btn-success btn-block">
+              <i class="fa-fw fa-regular fa-check"></i>
+            </a>
+          <% end %>
+        </td>
+
+        <td>
+          <a href={Routes.moderation_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm btn-block">
+            <i class="fa-fw fas fa-eye"></i>
+          </a>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

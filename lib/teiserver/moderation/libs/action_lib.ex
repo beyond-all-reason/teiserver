@@ -61,13 +61,13 @@ defmodule Teiserver.Moderation.ActionLib do
   end
 
   def _search(query, :target_id, target_id) do
-    from reports in query,
-      where: reports.target_id == ^target_id
+    from actions in query,
+      where: actions.target_id == ^target_id
   end
 
   def _search(query, :target_id_in, id_list) do
-    from reports in query,
-      where: reports.target_id in ^id_list
+    from actions in query,
+      where: actions.target_id in ^id_list
   end
 
   def _search(query, :basic_search, ref) do

@@ -4,7 +4,7 @@ defmodule Central.Repo.Migrations.AutomatedModerationCreation do
   def change do
     create table(:moderation_actions) do
       add :target_id, references(:account_users, on_delete: :nothing)
-      add :reason, :string
+      add :reason, :text
       add :actions, :jsonb
       add :score_modifier, :integer
       add :expires, :naive_datetime

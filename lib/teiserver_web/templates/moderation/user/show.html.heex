@@ -2,6 +2,23 @@
   bsname = view_colour()
 %>
 
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+    $('#the_tabs a:first').tab('show');
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
+
+    page_quick_actions = [
+      {label: "Edit user", icon: "<%= icon() %>", url: "<%= Routes.ts_admin_user_path(@conn, :edit, @user) %>", keywords: ["edit", "user", "edit user"]},
+    ];
+
+    setTimeout(function() {
+      $("#flash-messages").show();
+    }, 4001);
+  });
+</script>
+
+
 <%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
 
 <div class="row section-menu">
@@ -21,144 +38,51 @@
         </div>
 
 
-        <script type="text/javascript" charset="utf-8">
-          $(function() {
-            $('.list-builder-select').select2({
-              width: "100%"
-            });
-          });
-        </script>
+        <h3 style={"color: #{@user.colour}"}>
+          <%= @user.name %>
+          &nbsp;
+          <%= central_component "icon", icon: @user.icon, icon_class: "fa-solid" %>
+        </h3>
+        
+        <ul class="nav nav-tabs" role="tablist" id="the_tabs">
+          <li class="nav-item" role="presentation">
+            <a href="#overview_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component "icon", icon: "fa-solid fa-bullseye-pointer" %>
+              Reports against (<%= Enum.count(@reports_against) %>)
+            </a>
+          </li>
 
-        <style type="text/css">
-          .help-box {
-            display: none;
-            padding-bottom: 1px;
-            margin-bottom: 2px;
-          }
-        </style>
+          <li class="nav-item" role="presentation">
+            <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component "icon", icon: "fa-solid fa-share-from-square" %>
+              Reports made (<%= Enum.count(@reports_made) %>)
+            </a>
+          </li>
 
-        <link rel="stylesheet" href={Routes.static_path(@conn, "/css/select2.css")}>
-        <script src={Routes.static_path(@conn, "/js/select2.js")}></script>
+          <li class="nav-item" role="presentation">
+            <a href="#old_moderation_tab" role="tab" class="nav-link" data-bs-toggle="tab">
+              <%= central_component "icon", icon: Teiserver.Moderation.ActionLib.icon(), class: "fa-solid" %>
+              Actions (<%= Enum.count(@actions) %>)
+            </a>
+          </li>
+        </ul>
 
-        <%# Button for showing the form %>
-        <div id="report-form-div" style="display: none;">
-          <h5>CoC Quick Reference</h5>
-
-          <ul>
-          <%= for {key, text} <- @coc_lookup do %>
-            <li><strong><%= key %>:</strong> <%= text %></li>
-          <% end %>
-          </ul>
-        </div>
-
-        <br /><br />
-
-        <div class="row">
-          <div class="col-md-6">
-            <h4>
-              <i class="fa-fw fa-regular fa-bullseye-pointer text-danger"></i>
-              Reports against
-            </h4>
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th>Reporter</th>
-                  <th colspan="2">Type</th>
-                  <th>Extra</th>
-                  <th colspan="2">Match</th>
-                  <th>Result</th>
-
-                  <th colspan="1">&nbsp;</th>
-                </tr>
-              </thead>
-              <tbody>
-                <%= for report <- @reports_against do %>
-                  <tr>
-                    <td><%= report.reporter.name %></td>
-                    <td><%= report.type %></td>
-                    <td><%= report.sub_type %></td>
-                    <td><%= report.extra_text %></td>
-                    
-                    <%= if report.match_id do %>
-                      <td><%= report.relationship %></td>
-                      <td><%= report.match_id %></td>
-                    <% else %>
-                      <td colspan="2"></td>
-                    <% end %>
-                    
-                    <td>
-                      <%= if report.result_id do %>
-                        <i class="fa-fw fa-regular fa-check text-success"></i>
-                      <% else %>
-                        
-                      <% end %>
-                    </td>
-
-                    <td>
-                      <a href={Routes.moderation_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
-                        Show
-                        &nbsp;
-                        <i class="fa-fw fas fa-eye"></i>
-                      </a>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
+        <div class="tab-content">
+          <div class="tab-pane" id="overview_tab" style="padding:5px;">
+            <%= render "tab_against.html", assigns %>
           </div>
-          <div class="col-md-6">
-            <h4>
-              <i class="fa-fw fa-regular fa-share-from-square text-info"></i>
-              Reports made
-            </h4>
-            <table class="table table-sm">
-              <thead>
-                <tr>
-                  <th>Target</th>
-                  <th colspan="2">Type</th>
-                  <th>Extra</th>
-                  <th colspan="2">Match</th>
-                  <th>Result</th>
 
-                  <th colspan="1">&nbsp;</th>
-                </tr>
-              </thead>
-              <tbody>
-                <%= for report <- @reports_made do %>
-                  <tr>
-                    <td><%= report.target.name %></td>
-                    <td><%= report.type %></td>
-                    <td><%= report.sub_type %></td>
-                    <td><%= report.extra_text %></td>
+          <div class="tab-pane" id="details_tab" style="padding:5px;">
+            <%= render "tab_from.html", assigns %>
+          </div>
 
-                    <%= if report.match_id do %>
-                      <td><%= report.relationship %></td>
-                      <td><%= report.match_id %></td>
-                    <% else %>
-                      <td colspan="2"></td>
-                    <% end %>
-                    
-                    <td>
-                      <%= if report.result_id do %>
-                        <i class="fa-fw fa-regular fa-check text-success"></i>
-                      <% else %>
-                        
-                      <% end %>
-                    </td>
-
-                    <td>
-                      <a href={Routes.moderation_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
-                        Show
-                        &nbsp;
-                        <i class="fa-fw fas fa-eye"></i>
-                      </a>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
+          <div class="tab-pane" id="old_moderation_tab" style="padding:5px;">
+            <%= render "tab_actions.html", assigns %>
           </div>
         </div>
+        <%# END OF TABS %>
+
+        
       </div>
     </div>
   </div>

@@ -38,7 +38,8 @@ defmodule TeiserverWeb.Moderation.UserController do
             :target,
             :responder
           ],
-          order_by: "Newest first"
+          order_by: "Newest first",
+          limit: :infinity
         )
 
         reports_against = Moderation.list_reports(
@@ -50,13 +51,16 @@ defmodule TeiserverWeb.Moderation.UserController do
             :target,
             :responder
           ],
-          order_by: "Newest first"
+          order_by: "Newest first",
+          limit: :infinity
         )
 
         actions = Moderation.list_actions(
           search: [
             target_id: user.id
-          ]
+          ],
+          order_by: "Newest first",
+          limit: :infinity
         )
 
         user
