@@ -11,7 +11,7 @@
         <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
             quick_search: "",
             show_search: false,
-            active: "ratings"
+            active: "moderation"
           })
         %>
         <hr />
@@ -74,7 +74,7 @@
               <tbody>
                 <%= for report <- @reports_against do %>
                   <tr>
-                    <td><%= report.reporter_id %></td>
+                    <td><%= report.reporter.name %></td>
                     <td><%= report.type %></td>
                     <td><%= report.sub_type %></td>
                     <td><%= report.extra_text %></td>
@@ -95,7 +95,7 @@
                     </td>
 
                     <td>
-                      <a href={Routes.admin_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
+                      <a href={Routes.moderation_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
                         Show
                         &nbsp;
                         <i class="fa-fw fas fa-eye"></i>
@@ -126,7 +126,7 @@
               <tbody>
                 <%= for report <- @reports_made do %>
                   <tr>
-                    <td><%= report.target_id %></td>
+                    <td><%= report.target.name %></td>
                     <td><%= report.type %></td>
                     <td><%= report.sub_type %></td>
                     <td><%= report.extra_text %></td>
@@ -147,7 +147,7 @@
                     </td>
 
                     <td>
-                      <a href={Routes.admin_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
+                      <a href={Routes.moderation_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
                         Show
                         &nbsp;
                         <i class="fa-fw fas fa-eye"></i>

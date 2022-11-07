@@ -7,6 +7,13 @@ defmodule Teiserver.Moderation do
 
   alias Teiserver.Moderation.{Report, ReportLib}
 
+
+  @spec icon :: String.t()
+  defdelegate icon(), to: ReportLib
+
+  @spec colour :: atom
+  defdelegate colour(), to: ReportLib
+
   @spec report_query(List.t()) :: Ecto.Query.t()
   def report_query(args) do
     report_query(nil, args)

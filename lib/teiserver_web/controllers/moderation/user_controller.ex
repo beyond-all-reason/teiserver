@@ -29,29 +29,28 @@ defmodule TeiserverWeb.Moderation.UserController do
 
     case Central.Account.UserLib.has_access(user, conn) do
       {true, _} ->
-        old_reports =
-          Central.Account.list_reports(
-            search: [
-              filter: {"target", user.id}
-            ],
-            preload: [
-              :reporter,
-              :target,
-              :responder
-            ],
-            order_by: "Newest first"
-          )
-
         reports_made = Moderation.list_reports(
           search: [
             reporter_id: user.id
-          ]
+          ],
+          preload: [
+            :reporter,
+            :target,
+            :responder
+          ],
+          order_by: "Newest first"
         )
 
         reports_against = Moderation.list_reports(
           search: [
             target_id: user.id
-          ]
+          ],
+          preload: [
+            :reporter,
+            :target,
+            :responder
+          ],
+          order_by: "Newest first"
         )
 
         actions = Moderation.list_actions(

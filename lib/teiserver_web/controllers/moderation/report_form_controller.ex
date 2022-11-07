@@ -70,7 +70,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
       reporter_id: conn.assigns.current_user.id,
       target_id: report["target_id"],
       type: report["type"],
-      sub_type: report["type"],
+      sub_type: report["sub_type"],
       extra_text: report["extra_text"],
       match_id: match_id,
       relationship: relationship

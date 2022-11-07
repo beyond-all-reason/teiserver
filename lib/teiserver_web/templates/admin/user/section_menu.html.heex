@@ -127,6 +127,17 @@
         url: "#"
       %>
     <% end %>
+    
+    <%= if @active == "moderation" do %>
+      <%= central_component "section_menu_button",
+        name: "moderation",
+        label: "Moderation",
+        active: @active,
+        icon: "fa-solid #{Teiserver.Moderation.icon()}",
+        bsname: bsname,
+        url: "#"
+      %>
+    <% end %>
   </div>
 
   <div class="col-md-3">
