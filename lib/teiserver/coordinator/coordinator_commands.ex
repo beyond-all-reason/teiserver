@@ -372,18 +372,18 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   end
 
   defp do_handle(%{command: "website", senderid: senderid} = _cmd, state) do
-    uuid = UUID.uuid1()
     client = Client.get_client_by_id(senderid)
-    {:ok, _code} = Central.Account.create_code(%{
-        value: uuid <> "$#{client.ip}",
+    {:ok, code} = Central.Account.create_code(%{
+        value: UUID.uuid1(),
         purpose: "one_time_login",
         expires: Timex.now() |> Timex.shift(minutes: 5),
-        user_id: senderid
+        user_id: senderid,
+        metadata: %{ip: client.ip}
       })
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
-    url = "https://#{host}/one_time_login/#{uuid}"
+    url = "https://#{host}/one_time_login/#{code.value}"
 
-    Coordinator.send_to_user(senderid, "Your one-time login code is #{url} it will expire in 5 minutes and must be accessed from the same IP you are accessing the game.")
+    Coordinator.send_to_user(senderid, "Your one-time login link is #{url} it will expire in 5 minutes and must be accessed from the same IP you are accessing the game.")
     state
   end
 

@@ -43,10 +43,10 @@ defmodule CentralWeb.Account.SessionController do
       |> Tuple.to_list()
       |> Enum.join(".")
 
-    codes =
-      Account.list_codes(
+    code =
+      Account.get_code(nil,
         search: [
-          value: "#{value}$#{ip}",
+          value: value,
           purpose: "one_time_login",
           expired: false
         ]
@@ -54,20 +54,23 @@ defmodule CentralWeb.Account.SessionController do
 
     cond do
       Enum.empty?(codes) ->
+        Logger.debug("SessionController.one_time_login No code")
         conn
-        |> redirect(to: "/")
+          |> redirect(to: "/")
 
       Config.get_site_config_cache("user.Enable one time links") == false ->
+        Logger.debug("SessionController.one_time_login Enable one time links is false")
         conn
-        |> redirect(to: "/")
+          |> redirect(to: "/")
 
       true ->
+        Logger.debug("SessionController.one_time_login success")
         code = hd(codes)
         Account.delete_code(code)
 
         user = Account.get_user!(code.user_id)
 
-        login_reply({:ok, user}, conn)
+        login_reply({:ok, user}, conn, code.metadata["redirect"])
     end
   end
 
@@ -78,12 +81,20 @@ defmodule CentralWeb.Account.SessionController do
     |> redirect(to: "/login")
   end
 
+  defp login_reply({:ok, user}, conn, redirect_route) do
+    conn
+      |> put_flash(:info, "Welcome back!")
+      |> Guardian.Plug.sign_in(user)
+      |> Guardian.Plug.remember_me(user)
+      |> redirect(to: redirect_route)
+  end
+
   defp login_reply({:ok, user}, conn) do
     conn
-    |> put_flash(:info, "Welcome back!")
-    |> Guardian.Plug.sign_in(user)
-    |> Guardian.Plug.remember_me(user)
-    |> redirect(to: "/")
+      |> put_flash(:info, "Welcome back!")
+      |> Guardian.Plug.sign_in(user)
+      |> Guardian.Plug.remember_me(user)
+      |> redirect(to: "/")
   end
 
   defp login_reply({:error, reason}, conn) do

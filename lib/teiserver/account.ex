@@ -1274,6 +1274,150 @@ defmodule Teiserver.Account do
   end
 
 
+
+  # Codes
+  alias Central.Account.{Code, CodeLib}
+
+  def code_query(args) do
+    code_query(nil, args)
+  end
+
+  def code_query(value, args) do
+    CodeLib.query_codes()
+      |> CodeLib.search(%{value: value})
+      |> CodeLib.search(args[:search])
+      |> CodeLib.preload(args[:preload])
+      |> CodeLib.order_by(args[:order_by])
+      |> QueryHelpers.select(args[:select])
+  end
+
+  @doc """
+  Returns the list of codes.
+
+  ## Examples
+
+      iex> list_codes()
+      [%Code{}, ...]
+
+  """
+  def list_codes(args \\ []) do
+    code_query(args)
+      |> QueryHelpers.limit_query(args[:limit] || 50)
+      |> Repo.all()
+  end
+
+  @doc """
+  Gets a single code.
+
+  Raises `Ecto.NoResultsError` if the Code does not exist.
+
+  ## Examples
+
+      iex> get_code!(123)
+      %Code{}
+
+      iex> get_code!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_code(value, args \\ []) do
+    code_query(value, args)
+      |> QueryHelpers.limit_query(args[:limit] || 1)
+      |> Repo.one()
+  end
+
+  def get_code!(value, args \\ []) do
+    code_query(value, args)
+      |> QueryHelpers.limit_query(args[:limit] || 1)
+      |> Repo.one!()
+  end
+
+  # Uncomment this if needed, default files do not need this function
+  # @doc """
+  # Gets a single code.
+
+  # Returns `nil` if the Code does not exist.
+
+  # ## Examples
+
+  #     iex> get_code(123)
+  #     %Code{}
+
+  #     iex> get_code(456)
+  #     nil
+
+  # """
+  # def get_code(id, args \\ []) when not is_list(id) do
+  #   code_query(id, args)
+  #   |> Repo.one
+  # end
+
+  @doc """
+  Creates a code.
+
+  ## Examples
+
+      iex> create_code(%{field: value})
+      {:ok, %Code{}}
+
+      iex> create_code(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec create_code(map) :: {:ok, Code.t()} | {:error, Ecto.Changeset.t()}
+  def create_code(attrs \\ %{}) do
+    %Code{}
+      |> Code.changeset(attrs)
+      |> Repo.insert()
+  end
+
+  @doc """
+  Updates a code.
+
+  ## Examples
+
+      iex> update_code(code, %{field: new_value})
+      {:ok, %Code{}}
+
+      iex> update_code(code, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_code(%Code{} = code, attrs) do
+    code
+      |> Code.changeset(attrs)
+      |> Repo.update()
+  end
+
+  @doc """
+  Deletes a Code.
+
+  ## Examples
+
+      iex> delete_code(code)
+      {:ok, %Code{}}
+
+      iex> delete_code(code)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_code(%Code{} = code) do
+    Repo.delete(code)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking code changes.
+
+  ## Examples
+
+      iex> change_code(code)
+      %Ecto.Changeset{source: %Code{}}
+
+  """
+  def change_code(%Code{} = code) do
+    Code.changeset(code, %{})
+  end
+
   # User functions
   alias alias Teiserver.Account.UserCache
 

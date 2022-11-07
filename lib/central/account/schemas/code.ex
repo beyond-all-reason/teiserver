@@ -6,6 +6,7 @@ defmodule Central.Account.Code do
     field :value, :string
     # E.g. password reset
     field :purpose, :string
+    field :metadata, :map
     field :expires, :utc_datetime
 
     belongs_to :user, Central.Account.User
@@ -19,13 +20,8 @@ defmodule Central.Account.Code do
       |> parse_humantimes([:expires])
 
     code
-    |> cast(attrs, [
-      :value,
-      :purpose,
-      :expires,
-      :user_id
-    ])
-    |> validate_required([:value, :purpose, :expires, :user_id])
+    |> cast(attrs, ~w(value purpose metadata expires user_id)a)
+    |> validate_required(~w(value purpose expires user_id)a)
   end
 
   @spec authorize(any, Plug.Conn.t(), atom) :: boolean
