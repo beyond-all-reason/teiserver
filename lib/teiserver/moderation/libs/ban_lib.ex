@@ -20,7 +20,7 @@ defmodule Teiserver.Moderation.BanLib do
       item_type: "teiserver_moderation_ban",
       item_colour: colour(),
       item_icon: icon(),
-      item_label: "#{ban.name}",
+      item_label: "#{ban.source.name}",
 
       url: "/moderation/bans/#{ban.id}"
     }
@@ -48,11 +48,6 @@ defmodule Teiserver.Moderation.BanLib do
   def _search(query, :id, id) do
     from bans in query,
       where: bans.id == ^id
-  end
-
-  def _search(query, :name, name) do
-    from bans in query,
-      where: bans.name == ^name
   end
 
   def _search(query, :id_list, id_list) do
@@ -93,14 +88,23 @@ defmodule Teiserver.Moderation.BanLib do
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
-  def preload(query, _preloads) do
-    # query = if :things in preloads, do: _preload_things(query), else: query
+  def preload(query, preloads) do
+    query = if :source in preloads, do: _preload_source(query), else: query
+    query = if :adder in preloads, do: _preload_adder(query), else: query
     query
   end
 
-  # def _preload_things(query) do
-  #   from bans in query,
-  #     left_join: things in assoc(bans, :things),
-  #     preload: [things: things]
-  # end
+  @spec _preload_source(Ecto.Query.t()) :: Ecto.Query.t()
+  def _preload_source(query) do
+    from bans in query,
+      left_join: sources in assoc(bans, :source),
+      preload: [source: sources]
+  end
+
+  @spec _preload_adder(Ecto.Query.t()) :: Ecto.Query.t()
+  def _preload_adder(query) do
+    from bans in query,
+      left_join: adders in assoc(bans, :added_by),
+      preload: [added_by: adders]
+  end
 end

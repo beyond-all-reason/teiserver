@@ -56,7 +56,7 @@ defmodule Central.Repo.Migrations.AutomatedModerationCreation do
     create index(:moderation_proposal_votes, [:proposal_id])
 
     create table(:moderation_bans) do
-      add :target_id, references(:account_users, on_delete: :nothing)
+      add :source_id, references(:account_users, on_delete: :nothing)
       add :added_by_id, references(:account_users, on_delete: :nothing)
 
       add :key_values, :jsonb

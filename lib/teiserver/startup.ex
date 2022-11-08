@@ -42,6 +42,8 @@ defmodule Teiserver.Startup do
     add_audit_types([
       "Teiserver:Updated automod action",
       "Teiserver:Automod action enacted",
+      "Moderation:Ban updated",
+      "Moderation:Ban enacted",
       "Teiserver:De-bridged user",
       "Teiserver:Changed user rating",
       "Teiserver:Smurf merge",

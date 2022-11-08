@@ -37,9 +37,17 @@
     Send password reset email
   </a>
 
+<!--
   <a class="dropdown-item" href={Routes.ts_admin_user_path(@conn, :automod_action_form, @user.id)}>
     <%= central_component "icon", icon: Teiserver.Account.AutomodActionLib.icon() %>
     &nbsp;
     Add automod action
+  </a>
+-->
+
+  <a class="dropdown-item" href={"#{Routes.moderation_ban_path(@conn, :new_with_user)}?teiserver_user=#{@user.id}"}>
+    <%= central_component "icon", icon: Teiserver.Moderation.BanLib.icon() %>
+    &nbsp;
+    Add ban
   </a>
 </div>

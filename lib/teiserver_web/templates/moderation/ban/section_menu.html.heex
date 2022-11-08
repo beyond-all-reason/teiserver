@@ -11,7 +11,7 @@
       url: Routes.moderation_ban_path(@conn, :index)
     %>
 
-    <%= central_component "section_menu_button",
+    <%#= central_component "section_menu_button",
       name: "search",
       label: "Search",
       active: @active,
@@ -53,15 +53,5 @@
       <% _ -> %>
 
     <% end %>
-  </div>
-  
-  <div class="col-md-3">
-    <form action={Routes.moderation_ban_path(@conn, :index)} method="get" class="float-end form-inline d-none d-md-block">
-      <div class="input-group">
-        <input type="text" name="s" id="basic_search" value={assigns[:basic_search] || @conn.params["s"]} placeholder="Basic search" class="form-control" style="width: 150px; display: inline-block;" />
-        &nbsp;
-        <input type="submit" value="Search" class={"btn btn-#{bsname} float-end"} style="margin-top: 0px;" />
-      </div>
-    </form>
   </div>
 </div>
