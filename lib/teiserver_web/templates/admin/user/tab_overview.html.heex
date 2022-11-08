@@ -109,7 +109,7 @@
     name: "moderation",
     text: "Moderation",
     icon_class: "fa-solid",
-    link: Routes.moderation_user_path(@conn, :show, @user.id)
+    link: Routes.moderation_report_path(@conn, :user, @user.id)
   %>
 
   <%=

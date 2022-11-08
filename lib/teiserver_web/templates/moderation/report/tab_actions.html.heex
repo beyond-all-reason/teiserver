@@ -18,10 +18,15 @@
         <td><%= action.reason %></td>
         <td><%= action.actions |> Enum.join(", ") %></td>
         <td><%= action.score_modifier %></td>
-        
+
         <td><%= action.inserted_at |> date_to_str(format: :hms_or_ymd) %></td>
         <%= if action.expires do %>
-          <td><%= action.expires |> date_to_str(format: :hms_or_ymd) %></td>
+          <%= if Timex.compare(Timex.now(), action.expires) == 1 do %>
+            <td>Expired</td>
+          <% else %>
+            <td><%= action.expires |> date_to_str(format: :hms_or_ymd) %></td>
+          <% end %>
+
           <td><%= duration_to_str(action.inserted_at, action.expires) %></td>
         <% else %>
           <td colspan="2" class="text-warning">

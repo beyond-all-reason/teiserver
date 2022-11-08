@@ -79,6 +79,20 @@ defmodule Teiserver.Moderation.ActionLib do
         )
   end
 
+  def _search(query, :expiry, "All"), do: query
+  def _search(query, :expiry, "Completed only") do
+    from actions in query,
+      where: actions.expires < ^Timex.now()
+  end
+  def _search(query, :expiry, "Unexpired only") do
+    from actions in query,
+      where: actions.expires > ^Timex.now()
+  end
+  def _search(query, :expiry, "Permanent only") do
+    from actions in query,
+      where: is_nil(actions.expires)
+  end
+
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t
   def order_by(query, nil), do: query
   def order_by(query, "Name (A-Z)") do

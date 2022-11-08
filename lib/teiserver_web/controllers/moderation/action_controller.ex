@@ -30,8 +30,28 @@ defmodule TeiserverWeb.Moderation.ActionController do
     )
 
     conn
-    |> assign(:actions, actions)
-    |> render("index.html")
+      |> assign(:params, %{})
+      |> assign(:actions, actions)
+      |> render("index.html")
+  end
+
+  @spec search(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def search(conn, %{"search" => params}) do
+    actions = Moderation.list_actions(
+      search: [
+        target_id: params["target_id"],
+        reporter_id: params["reporter_id"],
+
+        expiry: params["expiry"],
+      ],
+      preload: [:target],
+      order_by: params["order"]
+    )
+
+    conn
+      |> assign(:params, params)
+      |> assign(:actions, actions)
+      |> render("index.html")
   end
 
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

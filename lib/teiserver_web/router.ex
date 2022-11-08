@@ -254,8 +254,12 @@ defmodule TeiserverWeb.Router do
         get("/", GeneralController, :index)
 
         get("/report/user/:id", ReportController, :user)
+        # get("/report/search", ReportController, :search)
+        # post("/report/search", ReportController, :search)
         resources("/report", ReportController, only: [:index, :show, :delete])
 
+        get("/action/search", ActionController, :search)
+        post("/action/search", ActionController, :search)
         resources("/action", ActionController)
         resources("/proposal", ProposalController)
         resources("/ban", BanController)
