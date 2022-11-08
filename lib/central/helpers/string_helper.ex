@@ -129,4 +129,12 @@ defmodule Central.Helpers.StringHelper do
       w <> "ers",
     ]
   end
+
+  def breakup_long_words(string, max_length \\ 100) do
+    string
+      |> String.split(" ")
+      |> Enum.map_join(" ", fn word ->
+        String.slice(word, 0..max_length)
+      end)
+  end
 end

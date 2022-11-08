@@ -21,7 +21,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
   defp users_per_day, do: :rand.uniform(5) + 2
 
   @spec run(list()) :: :ok
-  def run(args) do
+  def run(_args) do
     if Application.get_env(:central, Teiserver)[:enable_beans] do
       # Start by rebuilding the database
       Mix.Task.run("ecto.reset")
@@ -30,7 +30,7 @@ defmodule Mix.Tasks.Teiserver.Fakedata do
       make_accounts()
 
       make_matches()
-      # make_telemetry()
+      make_telemetry()
       make_moderation()
       make_one_time_code()
 

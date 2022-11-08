@@ -1,6 +1,4 @@
-<%
-  bsname = view_colour()
-%>
+<% bsname = view_colour() %>
 
 <script type="text/javascript" charset="utf-8">
   $(function() {
@@ -8,42 +6,32 @@
     $('#the_tabs a:first').tab('show');
     $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
-    page_quick_actions = [
-      {label: "Edit user", icon: "<%= icon() %>", url: "<%= Routes.ts_admin_user_path(@conn, :edit, @user) %>", keywords: ["edit", "user", "edit user"]},
-    ];
-
-    setTimeout(function() {
-      $("#flash-messages").show();
-    }, 4001);
+    page_quick_actions = [];
   });
 </script>
 
-
-<%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
+<%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
-        <%= render TeiserverWeb.Admin.UserView, "section_menu.html", Map.merge(assigns, %{
-            quick_search: "",
+        <%= render TeiserverWeb.Moderation.ReportView, "section_menu.html", Map.merge(assigns, %{
             show_search: false,
-            active: "moderation"
-          })
-        %>
+            active: "user"
+        }) %>
         <hr />
 
         <div class="float-end">
           <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>View user</a>
         </div>
 
-
         <h3 style={"color: #{@user.colour}"}>
           <%= @user.name %>
           &nbsp;
           <%= central_component "icon", icon: @user.icon, icon_class: "fa-solid" %>
         </h3>
-        
+
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item" role="presentation">
             <a href="#overview_tab" role="tab" class="nav-link" data-bs-toggle="tab">

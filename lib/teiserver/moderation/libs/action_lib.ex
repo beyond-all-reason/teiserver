@@ -20,7 +20,7 @@ defmodule Teiserver.Moderation.ActionLib do
       item_type: "teiserver_moderation_action",
       item_colour: colour(),
       item_icon: icon(),
-      item_label: "#{action.name}",
+      item_label: "#{action.target.name}",
 
       url: "/moderation/actions/#{action.id}"
     }
@@ -103,14 +103,33 @@ defmodule Teiserver.Moderation.ActionLib do
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
-  def preload(query, _preloads) do
-    # query = if :things in preloads, do: _preload_things(query), else: query
+  def preload(query, preloads) do
+    query = if :target in preloads, do: _preload_target(query), else: query
+    query = if :reports in preloads, do: _preload_reports(query), else: query
+    query = if :reports_and_reporters in preloads, do: _preload_reports_and_reporters(query), else: query
     query
   end
 
-  # def _preload_things(query) do
-  #   from actions in query,
-  #     left_join: things in assoc(actions, :things),
-  #     preload: [things: things]
-  # end
+  @spec _preload_target(Ecto.Query.t()) :: Ecto.Query.t()
+  def _preload_target(query) do
+    from actions in query,
+      left_join: targets in assoc(actions, :target),
+      preload: [target: targets]
+  end
+
+  @spec _preload_reports(Ecto.Query.t()) :: Ecto.Query.t()
+  def _preload_reports(query) do
+    from actions in query,
+      left_join: reports in assoc(actions, :reports),
+      preload: [reports: reports]
+  end
+
+  @spec _preload_reports_and_reporters(Ecto.Query.t()) :: Ecto.Query.t()
+  def _preload_reports_and_reporters(query) do
+    from actions in query,
+      left_join: reports in assoc(actions, :reports),
+      left_join: reporters in assoc(reports, :reporter),
+      preload: [reports: {reports, reporter: reporters}]
+  end
+
 end

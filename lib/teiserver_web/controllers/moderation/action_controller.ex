@@ -25,6 +25,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
         target_id: params["target_id"],
         reporter_id: params["reporter_id"],
       ],
+      preload: [:target],
       order_by: "Newest first"
     )
 
@@ -36,7 +37,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     action = Moderation.get_action!(id, [
-      joins: [],
+      preload: [:target, :reports_and_reporters],
     ])
 
     action
@@ -44,9 +45,9 @@ defmodule TeiserverWeb.Moderation.ActionController do
     |> insert_recently(conn)
 
     conn
-    |> assign(:action, action)
-    |> add_breadcrumb(name: "Show: #{action.name}", url: conn.request_path)
-    |> render("show.html")
+      |> assign(:action, action)
+      |> add_breadcrumb(name: "Show: #{action.target.name} - #{Enum.join(action.actions, ", ")}", url: conn.request_path)
+      |> render("show.html")
   end
 
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()

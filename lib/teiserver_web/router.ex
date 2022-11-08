@@ -252,7 +252,10 @@ defmodule TeiserverWeb.Router do
         pipe_through([:browser, :standard_layout, :protected])
 
         get("/", GeneralController, :index)
+
+        get("/report/user/:id", ReportController, :user)
         resources("/report", ReportController, only: [:index, :show, :delete])
+
         resources("/action", ActionController)
         resources("/proposal", ProposalController)
         resources("/ban", BanController)
@@ -260,7 +263,6 @@ defmodule TeiserverWeb.Router do
         get("/report_form/success", ReportFormController, :success)
         post("/report_form", ReportFormController, :create)
         get("/report_form/:id", ReportFormController, :index)
-        get("/user/:id", UserController, :show)
       end
 
       scope "/teiserver/admin", TeiserverWeb.Admin, as: :ts_admin do
@@ -320,6 +322,7 @@ defmodule TeiserverWeb.Router do
         get("/matches/search", MatchController, :index)
         post("/matches/search", MatchController, :search)
         get("/matches/user/:user_id", MatchController, :user_show)
+        get("/matches/chat/:id", MatchController, :chat)
         resources("/matches", MatchController, only: [:index, :show, :delete])
 
         resources("/chat", ChatController, only: [:index])

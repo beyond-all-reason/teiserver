@@ -1,0 +1,68 @@
+<div class="row">
+  <div class="col-md-6">
+    <table class='table table-sm'>
+      <tbody>
+        <tr>
+          <td>Reason</td>
+          <td><%= breakup_long_words @action.reason %></td>
+        </tr>
+
+        <tr>
+          <td>Started:</td>
+          <td><%= date_to_str(@action.inserted_at, format: :hms_or_ymd) %></td>
+        </tr>
+
+        <%= if @action.expires do %>
+          <tr>
+            <td>Expires:</td>
+
+            <%= if Timex.compare(Timex.now(), @action.expires) == 1 do %>
+              <td>Expired</td>
+            <% else %>
+              <td><%= @action.expires |> date_to_str(format: :hms_or_ymd) %></td>
+            <% end %>
+          </tr>
+
+          <tr>
+            <td>Duration:</td>
+            <td><%= duration_to_str(@action.inserted_at, @action.expires) %></td>
+          </tr>
+        <% else %>
+          <tr>
+            <td>Expires:</td>
+            <td class="text-warning">Permanent</td>
+          </tr>
+        <% end %>
+
+        <tr>
+          <td>Score modifier:</td>
+          <td><%= @action.score_modifier %></td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+  
+  <div class="col-md-6">
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Reporter</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for report <- @action.reports do %>
+          <tr>
+            <td><%= report.reporter.name %></td>
+            <td>
+              <a href={Routes.moderation_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
+                Show report
+              </a>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

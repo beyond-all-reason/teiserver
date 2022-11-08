@@ -11,7 +11,7 @@
       url: Routes.moderation_report_path(@conn, :index)
     %>
 
-    <%= central_component "section_menu_button",
+    <%#= central_component "section_menu_button",
       name: "search",
       label: "Search",
       active: @active,
@@ -30,7 +30,17 @@
           bsname: bsname,
           url: "#"
         %>
-      
+    
+      <% "user" -> %>
+        <%= central_component "section_menu_button",
+          name: "user",
+          label: "User",
+          active: @active,
+          icon: Teiserver.Account.UserLib.icon(),
+          bsname: bsname,
+          url: "#"
+        %>  
+    
       <% "edit" -> %>
         <%= central_component "section_menu_button",
           name: "edit",

@@ -25,13 +25,11 @@
         <hr />
 
         <div class="float-end">
-          <div class="dropdown" style="display: inline-block;">
-            <div class={"btn btn-#{bsname} dropdown-toggle"} data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Actions
-            </div>
-            <%= render "actions.html", assigns %>
-          </div>
-        
+          <a href={"#{Routes.moderation_action_path(@conn, :index)}?target_id=#{@action.target_id}"} class={"btn btn-outline-#{bsname}"}>
+            <i class="far fa-fw fa-list"></i>
+            Actions for <%= @action.target.name %>
+          </a>
+          
           <a href={Routes.moderation_action_path(@conn, :edit, @action)} class={"btn btn-outline-#{bsname}"}>
             <i class="far fa-fw fa-wrench"></i>
             Edit action
@@ -39,7 +37,9 @@
         </div>
 
       <h3>
-        <%= @action.name %>
+        <%= @action.target.name %>
+        -
+        <%= Enum.join(@action.actions, ", ") %>
       </h3>
       <br />
       <ul class="nav nav-tabs" role="tablist" id="the_tabs">

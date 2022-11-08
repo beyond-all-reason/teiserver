@@ -4,6 +4,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
 
   alias Teiserver.{Account, Battle, Moderation}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  require Logger
 
   plug(AssignPlug,
     site_menu_active: "moderation",
@@ -29,7 +30,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
             finished_after: cutoff,
             user_id: target.id
           ],
-          order_by: "Newest first",
+          order_by: "Newest first"
         )
 
         conn
@@ -70,7 +71,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
       reporter_id: conn.assigns.current_user.id,
       target_id: report["target_id"],
       type: report["type"],
-      sub_type: report["sub_type"],
+      sub_type: report["subtype"],
       extra_text: report["extra_text"],
       match_id: match_id,
       relationship: relationship
@@ -82,6 +83,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
           |> redirect(to: Routes.moderation_report_form_path(conn, :success))
 
       {:error, changeset} ->
+        Logger.error(Kernel.inspect(changeset))
         raise "Error submitting report"
 
         conn

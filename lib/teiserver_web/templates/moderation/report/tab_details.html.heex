@@ -19,22 +19,36 @@
           <td>Report date:</td>
           <td><%= date_to_str(@report.inserted_at, format: :ymd_hms, tz: @tz) %></td>
         </tr>
-      
+
         <%= if @report.match_id do %>
           <tr>
             <td>Match:</td>
-            <td><%= @report.match_id %></td>
+            <td>
+              <a href={Routes.ts_admin_match_path(@conn, :show, @report.match_id)} class="btn btn-secondary btn-sm">
+                Details
+              </a>
+              
+              &nbsp;&nbsp;
+              
+              <a href={Routes.ts_admin_match_path(@conn, :chat, @report.match_id)} class="btn btn-secondary btn-sm">
+                Chat
+              </a>
+            </td>
           </tr>
           <tr>
             <td>Relationship:</td>
             <td><%= @report.relationship %></td>
           </tr>
         <% end %>
-      
+
         <%= if @report.result_id do %>
           <tr>
             <td>Result</td>
-            <td>RESULT</td>
+            <td>
+              <a href={Routes.moderation_action_path(@conn, :show, @report.result_id)} class="btn btn-secondary btn-sm">
+                View details
+              </a>
+            </td>
           </tr>
         <% end %>
 

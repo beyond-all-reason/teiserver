@@ -1,17 +1,12 @@
 defmodule TeiserverWeb.Moderation.UserController do
   use CentralWeb, :controller
 
-  alias Teiserver.{Account, Chat, Game, Moderation}
-  alias Teiserver.Game.MatchRatingLib
-  alias Central.Account.User
+  alias Teiserver.{Account, Moderation}
   alias Teiserver.Account.UserLib
-  alias Teiserver.Battle.BalanceLib
-  alias Central.Account.GroupLib
-  import Central.Helpers.NumberHelper, only: [int_parse: 1, float_parse: 1]
 
   plug(AssignPlug,
-    site_menu_active: "teiserver_user",
-    sub_menu_active: "user"
+    site_menu_active: "moderation",
+    sub_menu_active: "report"
   )
 
   plug(Bodyguard.Plug.Authorize,

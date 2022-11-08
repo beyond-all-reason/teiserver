@@ -138,6 +138,14 @@ defmodule TeiserverWeb.Admin.MatchController do
       |> render("show.html")
   end
 
+  @spec chat(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def chat(conn, %{"id" => id}) do
+    match = Battle.get_match!(id, [])
+
+    conn
+      |> redirect(to: Routes.ts_admin_lobby_path(conn, :lobby_chat, match.uuid))
+  end
+
   @spec user_show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def user_show(conn, %{"user_id" => userid}) do
     matches = Battle.list_matches(

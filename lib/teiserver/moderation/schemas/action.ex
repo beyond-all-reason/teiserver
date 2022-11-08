@@ -9,6 +9,8 @@ defmodule Teiserver.Moderation.Action do
     field :score_modifier, :integer
     field :expires, :naive_datetime
 
+    has_many :reports, Teiserver.Moderation.Report, foreign_key: :result_id
+
     timestamps()
   end
 
