@@ -29,7 +29,7 @@
             <i class="far fa-fw fa-list"></i>
             Actions for <%= @action.target.name %>
           </a>
-          
+
           <a href={Routes.moderation_action_path(@conn, :edit, @action)} class={"btn btn-outline-#{bsname}"}>
             <i class="far fa-fw fa-wrench"></i>
             Edit action
@@ -39,7 +39,7 @@
       <h3>
         <%= @action.target.name %>
         -
-        <%= Enum.join(@action.actions, ", ") %>
+        <%= Enum.join(@action.restrictions, ", ") %>
       </h3>
       <br />
       <ul class="nav nav-tabs" role="tablist" id="the_tabs">

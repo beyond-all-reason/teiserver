@@ -5,9 +5,9 @@ defmodule Teiserver.Moderation.Proposal do
   schema "moderation_proposals" do
     belongs_to :proposer, Central.Account.User
     belongs_to :target, Central.Account.User
-    belongs_to :result, Teiserver.Moderation.Action
+    belongs_to :action, Teiserver.Moderation.Action
 
-    field :actions, {:array, :string}
+    field :restrictions, {:array, :string}
     field :reason, :string
     field :duration, :string
 
@@ -23,8 +23,8 @@ defmodule Teiserver.Moderation.Proposal do
       |> trim_strings(~w(reason duration conclusion_comments)a)
 
     struct
-      |> cast(params, ~w(proposer_id target_id result_id actions reason duration applied concluded_by_id conclusion_comments)a)
-      |> validate_required(~w(proposer_id target_id actions reason duration)a)
+      |> cast(params, ~w(proposer_id target_id result_id restrictions reason duration applied concluded_by_id conclusion_comments)a)
+      |> validate_required(~w(proposer_id target_id restrictions reason duration)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

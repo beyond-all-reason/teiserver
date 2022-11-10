@@ -5,7 +5,7 @@ defmodule Central.Repo.Migrations.AutomatedModerationCreation do
     create table(:moderation_actions) do
       add :target_id, references(:account_users, on_delete: :nothing)
       add :reason, :text
-      add :actions, :jsonb
+      add :restrictions, :jsonb
       add :score_modifier, :integer
       add :expires, :naive_datetime
 
@@ -33,9 +33,9 @@ defmodule Central.Repo.Migrations.AutomatedModerationCreation do
     create table(:moderation_proposals) do
       add :proposer_id, references(:account_users, on_delete: :nothing)
       add :target_id, references(:account_users, on_delete: :nothing)
-      add :result_id, references(:moderation_actions, on_delete: :nothing)
+      add :action_id, references(:moderation_actions, on_delete: :nothing)
 
-      add :actions, :jsonb
+      add :restrictions, :jsonb
       add :reason, :text
       add :duration, :string
 

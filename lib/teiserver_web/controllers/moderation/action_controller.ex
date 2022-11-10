@@ -66,7 +66,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
     conn
       |> assign(:action, action)
-      |> add_breadcrumb(name: "Show: #{action.target.name} - #{Enum.join(action.actions, ", ")}", url: conn.request_path)
+      |> add_breadcrumb(name: "Show: #{action.target.name} - #{Enum.join(action.restrictions, ", ")}", url: conn.request_path)
       |> render("show.html")
   end
 
