@@ -23,7 +23,7 @@ defmodule Teiserver.Moderation.Proposal do
       |> trim_strings(~w(reason duration conclusion_comments)a)
 
     struct
-      |> cast(params, ~w(proposer_id target_id result_id restrictions reason duration applied concluded_by_id conclusion_comments)a)
+      |> cast(params, ~w(proposer_id target_id action_id restrictions reason duration concluded_by_id conclusion_comments)a)
       |> validate_required(~w(proposer_id target_id restrictions reason duration)a)
   end
 

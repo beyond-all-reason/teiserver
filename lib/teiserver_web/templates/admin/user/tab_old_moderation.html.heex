@@ -1,10 +1,10 @@
 <%
   bsname = Central.Account.ReportLib.colours()
-  
+
   has_open_report = @old_reports
     |> Enum.filter(fn report -> report.responder == nil end)
     |> Enum.empty?
-    
+
   has_open_report = not has_open_report
 %>
 
@@ -40,7 +40,7 @@
       <h5>
         This user has 1 or more open reports, did you mean to respond to one of those instead of making a new item?
       </h5>
-      
+
       <span class="btn btn-danger2" onclick="$('#report-form-div').hide(); $('#show-form-button').show();">Yes I did</span>
     </div>
   <% end %>

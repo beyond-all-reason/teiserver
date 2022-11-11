@@ -1,0 +1,99 @@
+<% bsname = view_colour() %>
+
+<%= form_for @changeset, @action, fn f -> %>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+  <% end %>
+
+  <input type="hidden" name="proposal[target_id]" value={@user.id} />
+
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="form-group my-2">
+        <%= label f, :reason, class: "control-label" %>
+        <%= textarea f, :reason, class: "form-control", autofocus: :autofocus %>
+        <%= error_tag f, :reason %>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="form-group my-2">
+        <%= label f, :duration, class: "control-label" %>
+        <%= text_input f, :duration, class: "form-control" %>
+        <%= error_tag f, :duration %>
+      </div>
+    </div>
+
+    <h5>Restrictions</h5>
+    <%= for {section, r_list} <- @restrictions_lists do %>
+      <div class="col-md-3 col-lg-2">
+        <strong><%= section %></strong>
+        <%= for r <- r_list do %>
+          <% r_clean = String.replace(r, " ", "_") %>
+          <%= central_component "checkbox",
+            id: "proposal_restriction_#{r_clean}",
+            name: "proposal[restrictions][#{r_clean}]",
+            label: r,
+            value: r,
+            checked: false
+          %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="col-md-10 mt-3">
+      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+        $('#proposal_restriction_Warning_reminder').prop('checked', true);
+      ">
+        Add warning
+      </div>
+
+      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+        $('#proposal_restriction_All_chat').prop('checked', true);
+      ">
+        Add mute
+      </div>
+
+      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+        $('#proposal_restriction_Site').prop('checked', true);
+        $('#proposal_restriction_Login').prop('checked', true);
+      ">
+        Add ban
+      </div>
+
+      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+        $('#code_references').val('1.4');
+        $('#code_references').trigger('change');
+        $('#proposal_restriction_Singular_warning').prop('checked', true);
+        $('#proposal_restriction_All_lobbies').prop('checked', true);
+        $('#proposal_restriction_Room_chat').prop('checked', true);
+        $('#proposal_restriction_All_lobbies').prop('checked', true);
+        $('#proposal_restriction_Matchmaking').prop('checked', true);
+        $('#proposal_restriction_Community').prop('checked', true);
+        $('#report_form_reason').val('Please rename to a name not in breach of the Code of Conduct and contact a moderator to have the restrictions lifted.');
+        $('#report_expires').val('never');
+      ">
+        Add rename
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <button type="submit" class={"btn btn-#{bsname} float-end"}>
+        Submit proposal
+      </button>
+    </div>
+  </div>
+<% end %>
+
+<hr />
+<h5>CoC Quick Reference</h5>
+
+<ul>
+  <%= for {key, text} <- @coc_lookup do %>
+    <li><strong><%= key %>:</strong> <%= text %></li>
+  <% end %>
+</ul>

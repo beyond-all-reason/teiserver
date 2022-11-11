@@ -138,7 +138,7 @@ defmodule TeiserverWeb.Moderation.BanController do
           |> assign(:user, user)
           |> assign(:user_stats, user_stats)
           |> assign(:all_keys, all_keys)
-          |> add_breadcrumb(name: "New ban", url: conn.request_path)
+          |> add_breadcrumb(name: "New ban for #{user.name}", url: conn.request_path)
           |> render("new_with_user.html")
     end
   end

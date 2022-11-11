@@ -261,6 +261,9 @@ defmodule TeiserverWeb.Router do
         get("/action/search", ActionController, :search)
         post("/action/search", ActionController, :search)
         resources("/action", ActionController)
+
+
+        get("/proposal/new_with_user", ProposalController, :new_with_user)
         resources("/proposal", ProposalController)
 
         put("/ban/:id/disable", BanController, :disable)

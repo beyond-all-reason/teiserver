@@ -16,6 +16,7 @@ defmodule Teiserver.Startup do
     Central.Account.UserLib.add_report_restriction_types("Chat", [
       "Bridging",
       "Game chat",
+      "Room chat",
       "All chat",
     ])
 
