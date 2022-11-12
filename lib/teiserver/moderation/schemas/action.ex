@@ -18,10 +18,12 @@ defmodule Teiserver.Moderation.Action do
   def changeset(struct, params \\ %{}) do
     params = params
       |> trim_strings(~w(reason)a)
+      |> parse_humantimes(~w(expires)a)
 
     struct
       |> cast(params, ~w(target_id reason restrictions score_modifier expires)a)
-      |> validate_required(~w(target_id reason restrictions score_modifier)a)
+      |> validate_required(~w(target_id reason restrictions expires score_modifier)a)
+      |> validate_length(:restrictions, min: 1)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

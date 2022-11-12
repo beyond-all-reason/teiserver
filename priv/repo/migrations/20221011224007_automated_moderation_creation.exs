@@ -65,7 +65,7 @@ defmodule Central.Repo.Migrations.AutomatedModerationCreation do
 
       add :key_values, :jsonb
       add :enabled, :boolean
-      add :reason, :string
+      add :reason, :text
 
       timestamps()
     end

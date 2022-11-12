@@ -31,8 +31,13 @@
           </a>
 
           <a href={Routes.moderation_action_path(@conn, :edit, @action)} class={"btn btn-outline-#{bsname}"}>
-            <i class="far fa-fw fa-wrench"></i>
+            <i class="fa-regular fa-fw fa-wrench"></i>
             Edit action
+          </a>
+
+          <a href={Routes.ts_admin_user_path(@conn, :show, @action.target_id)} class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"}>
+            <%= central_component "icon", icon: Teiserver.Account.UserLib.icon() %>
+            Administrate user
           </a>
         </div>
 

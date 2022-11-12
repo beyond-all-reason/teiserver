@@ -1,0 +1,140 @@
+<% bsname = view_colour() %>
+
+<script type="text/javascript" charset="utf-8">
+  $(function() {
+    var selected_tab = window.location.hash.substr(1).replace("_tab", "");
+    $('#the_tabs a:first').tab('show');
+    $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
+
+    page_quick_actions = [];
+  });
+</script>
+
+<%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "proposals"}) %>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <%= render TeiserverWeb.Moderation.ActionView, "section_menu.html", Map.merge(assigns, %{
+          basic_search: "",
+          show_search: false,
+          active: "new"
+        })
+        %>
+
+        <hr />
+<div class="float-end">
+  <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>View user</a>
+</div>
+
+<h3>Adding action against <%= @user.name %></h3>
+
+
+
+<div class="row">
+  <div class="col-md-12 mb-4">
+<%= form_for @changeset, Routes.moderation_action_path(@conn, :create), fn f -> %>
+  <%= if @changeset.action do %>
+    <div class="alert alert-danger">
+      <p>Oops, something went wrong! Please check the errors below.</p>
+    </div>
+  <% end %>
+
+  <input type="hidden" name="action[target_id]" value={@user.id} />
+
+  <div class="row">
+    <div class="col-lg-6">
+      <div class="form-group my-2">
+        <%= label f, :reason, class: "control-label" %>
+        <%= textarea f, :reason, class: "form-control", autofocus: :autofocus, rows: 4, required: "required" %>
+        <%= error_tag f, :reason %>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="form-group my-2">
+        <%= label f, :expires, class: "control-label" %>
+        <%= text_input f, :expires, class: "form-control", required: "required" %>
+        <%= error_tag f, :expires %>
+      </div>
+
+      <div class="form-group my-2">
+        <%= label f, :score_modifier, class: "control-label" %>
+        <%= text_input f, :score_modifier, class: "form-control" %>
+        <%= error_tag f, :score_modifier %>
+      </div>
+    </div>
+
+    <h5>Restrictions</h5>
+    <%= for {section, r_list} <- @restrictions_lists do %>
+      <div class="col-md-3 col-lg-2">
+        <strong><%= section %></strong>
+        <%= for r <- r_list do %>
+          <% r_clean = String.replace(r, " ", "_") %>
+          <%= central_component "checkbox",
+            id: "action_restriction_#{r_clean}",
+            name: "action[restrictions][#{r_clean}]",
+            label: r,
+            value: r,
+            checked: (Ecto.Changeset.get_field(@changeset, :restrictions) || [])
+              |> Enum.member?(r)
+          %>
+        <% end %>
+      </div>
+    <% end %>
+    <%= error_tag f, :restrictions %>
+
+    <div class="col-md-10 mt-3">
+      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+        $('#proposal_restriction_Warning_reminder').prop('checked', true);
+      ">
+        Add warning
+      </div>
+
+      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+        $('#proposal_restriction_All_chat').prop('checked', true);
+      ">
+        Add mute
+      </div>
+
+      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+        $('#proposal_restriction_Site').prop('checked', true);
+        $('#proposal_restriction_Login').prop('checked', true);
+      ">
+        Add ban
+      </div>
+
+      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+        $('#code_references').val('1.4');
+        $('#code_references').trigger('change');
+        $('#proposal_restriction_Singular_warning').prop('checked', true);
+        $('#proposal_restriction_All_lobbies').prop('checked', true);
+        $('#proposal_restriction_Room_chat').prop('checked', true);
+        $('#proposal_restriction_All_lobbies').prop('checked', true);
+        $('#proposal_restriction_Matchmaking').prop('checked', true);
+        $('#proposal_restriction_Community').prop('checked', true);
+        $('#report_form_reason').val('Please rename to a name not in breach of the Code of Conduct and contact a moderator to have the restrictions lifted.');
+        $('#report_expires').val('never');
+      ">
+        Add rename
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <button type="submit" class={"btn btn-#{bsname} float-end"}>
+        Apply action
+      </button>
+    </div>
+  </div>
+<% end %>
+
+  </div>
+</div>
+
+      </div>
+    </div>
+  </div>
+</div>

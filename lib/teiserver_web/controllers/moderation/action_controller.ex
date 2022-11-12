@@ -2,7 +2,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
   @moduledoc false
   use TeiserverWeb, :controller
 
-  alias Teiserver.Moderation
+  alias Teiserver.{Account, Moderation}
   alias Teiserver.Moderation.{Action, ActionLib}
 
   plug Bodyguard.Plug.Authorize,
@@ -70,6 +70,53 @@ defmodule TeiserverWeb.Moderation.ActionController do
       |> render("show.html")
   end
 
+  @spec new_with_user(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def new_with_user(conn, %{"teiserver_user" => user_str}) do
+    user = cond do
+      Integer.parse(user_str) != :error ->
+        {user_id, _} = Integer.parse(user_str)
+        Account.get_user(user_id)
+
+      get_hash_id(user_str) != nil ->
+        user_id = get_hash_id(user_str)
+        Account.get_user(user_id)
+
+      true ->
+        nil
+    end
+
+    case user do
+      nil ->
+        conn
+          |> add_breadcrumb(name: "New action", url: conn.request_path)
+          |> put_flash(:warning, "Unable to find that user")
+          |> render("new_select.html")
+
+      user ->
+        changeset = Moderation.change_action(%Action{
+          score_modifier: 0
+        })
+
+        reports = Moderation.list_reports(
+          search: [
+            target_id: user.id,
+            no_result: true,
+            inserted_after: Timex.shift(Timex.now(), days: -31)
+          ],
+          order_by: "Newest first",
+          limit: :infinity
+        )
+
+        conn
+          |> assign(:user, user)
+          |> assign(:changeset, changeset)
+          |> assign(:reports, reports)
+          |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+          |> add_breadcrumb(name: "New action for #{user.name}", url: conn.request_path)
+          |> render("new_with_user.html")
+    end
+  end
+
   @spec new(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def new(conn, _params) do
     changeset = Moderation.change_action(%Action{})
@@ -77,66 +124,101 @@ defmodule TeiserverWeb.Moderation.ActionController do
     conn
     |> assign(:changeset, changeset)
     |> add_breadcrumb(name: "New action", url: conn.request_path)
-    |> render("new.html")
+    |> render("new_select.html")
   end
 
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def create(conn, %{"action" => action_params}) do
+    user = Account.get_user(action_params["target_id"])
+
+    restrictions = action_params["restrictions"]
+      |> Map.values
+      |> Enum.reject(fn v -> v == "false" end)
+
+    action_params = Map.merge(action_params, %{
+      "restrictions" => restrictions
+    })
+
     case Moderation.create_action(action_params) do
-      {:ok, _action} ->
+      {:ok, action} ->
+        Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+
         conn
         |> put_flash(:info, "Action created successfully.")
         |> redirect(to: Routes.moderation_action_path(conn, :index))
 
       {:error, %Ecto.Changeset{} = changeset} ->
+        reports = Moderation.list_reports(
+          search: [
+            target_id: user.id,
+            no_result: true,
+            inserted_after: Timex.shift(Timex.now(), days: -31)
+          ],
+          order_by: "Newest first",
+          limit: :infinity
+        )
+
         conn
-        |> assign(:changeset, changeset)
-        |> render("new.html")
+          |> assign(:user, user)
+          |> assign(:changeset, changeset)
+          |> assign(:reports, reports)
+          |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+          |> add_breadcrumb(name: "New action for #{user.name}", url: conn.request_path)
+          |> render("new_with_user.html")
     end
   end
 
   @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
-    action = Moderation.get_action!(id)
+    action = Moderation.get_action!(id, preload: [:target])
 
     changeset = Moderation.change_action(action)
 
     conn
-    |> assign(:action, action)
-    |> assign(:changeset, changeset)
-    |> add_breadcrumb(name: "Edit: #{action.name}", url: conn.request_path)
-    |> render("edit.html")
+      |> assign(:action, action)
+      |> assign(:changeset, changeset)
+      |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+      |> add_breadcrumb(name: "Edit: #{action.target.name}", url: conn.request_path)
+      |> render("edit.html")
   end
 
   @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "action" => action_params}) do
     action = Moderation.get_action!(id)
 
+    restrictions = action_params["restrictions"]
+      |> Map.values
+      |> Enum.reject(fn v -> v == "false" end)
+
+    action_params = Map.merge(action_params, %{
+      "restrictions" => restrictions
+    })
+
     case Moderation.update_action(action, action_params) do
       {:ok, _action} ->
+        Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
+
         conn
-        |> put_flash(:info, "Action updated successfully.")
-        |> redirect(to: Routes.moderation_action_path(conn, :index))
+          |> put_flash(:info, "Action updated successfully.")
+          |> redirect(to: Routes.moderation_action_path(conn, :index))
       {:error, %Ecto.Changeset{} = changeset} ->
         conn
-        |> assign(:action, action)
-        |> assign(:changeset, changeset)
-        |> render("edit.html")
+          |> assign(:action, action)
+          |> assign(:changeset, changeset)
+          |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+          |> render("edit.html")
     end
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def delete(conn, %{"id" => id}) do
+  @spec halt(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def halt(conn, %{"id" => id}) do
     action = Moderation.get_action!(id)
 
-    action
-    |> ActionLib.make_favourite
-    |> remove_recently(conn)
-
-    {:ok, _action} = Moderation.delete_action(action)
-
-    conn
-    |> put_flash(:info, "Action deleted successfully.")
-    |> redirect(to: Routes.moderation_action_path(conn, :index))
+    case Moderation.update_action(action, %{"expires" => Timex.now()}) do
+      {:ok, _action} ->
+        conn
+          |> put_flash(:info, "Action halted.")
+          |> redirect(to: Routes.moderation_action_path(conn, :index))
+    end
   end
 end

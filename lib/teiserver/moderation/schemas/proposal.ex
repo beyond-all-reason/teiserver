@@ -32,6 +32,7 @@ defmodule Teiserver.Moderation.Proposal do
       |> cast(params, ~w(proposer_id target_id action_id restrictions reason duration votes_for votes_against votes_abstain concluder_id conclusion_comments)a)
       |> validate_human_time(~w(duration)a)
       |> validate_required(~w(proposer_id target_id restrictions reason votes_for votes_against votes_abstain duration)a)
+      |> validate_length(:restrictions, min: 1)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

@@ -254,13 +254,14 @@ defmodule TeiserverWeb.Router do
         get("/", GeneralController, :index)
 
         get("/report/user/:id", ReportController, :user)
-        # get("/report/search", ReportController, :search)
-        # post("/report/search", ReportController, :search)
         resources("/report", ReportController, only: [:index, :show, :delete])
 
         get("/action/search", ActionController, :search)
         post("/action/search", ActionController, :search)
-        resources("/action", ActionController)
+        get("/action/new_with_user", ActionController, :new_with_user)
+        get("/action/new_with_user", ActionController, :new_with_user)
+        put("/action/halt/:id", ActionController, :halt)
+        resources("/action", ActionController, only: [:index, :show, :new, :create, :edit, :update])
 
         get("/proposal/new_with_user", ProposalController, :new_with_user)
         put("/proposal/vote/:proposal_id/:direction", ProposalController, :vote)

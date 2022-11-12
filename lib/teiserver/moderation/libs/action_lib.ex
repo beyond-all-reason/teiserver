@@ -70,15 +70,6 @@ defmodule Teiserver.Moderation.ActionLib do
       where: actions.target_id in ^id_list
   end
 
-  def _search(query, :basic_search, ref) do
-    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
-
-    from actions in query,
-      where: (
-            ilike(actions.name, ^ref_like)
-        )
-  end
-
   def _search(query, :expiry, "All"), do: query
   def _search(query, :expiry, "Completed only") do
     from actions in query,
@@ -91,6 +82,10 @@ defmodule Teiserver.Moderation.ActionLib do
   def _search(query, :expiry, "Permanent only") do
     from actions in query,
       where: is_nil(actions.expires)
+  end
+  def _search(query, :expiry, "All active") do
+    from actions in query,
+      where: actions.expires > ^Timex.now() or is_nil(actions.expires)
   end
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t

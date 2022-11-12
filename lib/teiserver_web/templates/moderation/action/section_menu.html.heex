@@ -20,7 +20,7 @@
       url: Routes.moderation_action_path(@conn, :index) <> "?search=true"
     %>
 
-    <%#= central_component "section_menu_button",
+    <%= central_component "section_menu_button",
       name: "new",
       label: "New",
       active: @active,
@@ -39,7 +39,7 @@
           bsname: bsname,
           url: "#"
         %>
-      
+
       <% "edit" -> %>
         <%= central_component "section_menu_button",
           name: "edit",
@@ -49,7 +49,7 @@
           bsname: bsname,
           url: "#"
         %>
-      
+
       <% _ -> %>
 
     <% end %>
