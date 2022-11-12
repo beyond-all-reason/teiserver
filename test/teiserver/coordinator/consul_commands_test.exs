@@ -317,7 +317,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
   # TODO: settag
 
-  test "explain", %{lobby_id: lobby_id, hsocket: hsocket, host: host, player: player} do
+  test "explain and bstatus", %{lobby_id: lobby_id, hsocket: hsocket, host: host, player: player} do
     # Set fuzzer to 0 or we get inconsistent values and our test breaks
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$set fuzz_multiplier 0"})
 
@@ -329,7 +329,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
       "sender_id" => host.id
     }
 
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$explain"})
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$%explain"})
 
     [reply] = _tachyon_recv(hsocket)
     assert reply == %{
@@ -346,7 +346,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
       :make_balance, 2, [allow_groups: true]
     })
 
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$explain"})
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$%explain"})
 
     [reply] = _tachyon_recv(hsocket)
     assert reply == %{
@@ -359,6 +359,25 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
         "Deviation of: 100",
         "Time taken: #{balance_result.time_taken}us",
         "---------------------------"
+      ] |> Enum.join("\n"),
+      "sender_id" => Coordinator.get_coordinator_userid()
+    }
+
+    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$%bstatus"})
+
+    [reply] = _tachyon_recv(hsocket)
+    assert reply == %{
+      "cmd" => "s.communication.received_direct_message",
+      "message" => [
+        "--------------------------- Balancer status ---------------------------",
+        "algorithm: loser_picks",
+        "fuzz_multiplier: 0",
+        "hashes: 1",
+        "max_deviation: 10",
+        "mean_diff_max: 5",
+        "rating_lower_boundary: 3",
+        "rating_upper_boundary: 5",
+        "stddev_diff_max: 3"
       ] |> Enum.join("\n"),
       "sender_id" => Coordinator.get_coordinator_userid()
     }
