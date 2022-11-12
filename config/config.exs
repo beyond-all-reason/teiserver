@@ -123,7 +123,7 @@ config :central, Oban,
         {"0 2 * * *", Central.Account.UserReportCleanupTask},
 
         # Every minute
-        {"* * * * *", Teiserver.Account.Tasks.CleanupTask},
+        {"* * * * *", Teiserver.Moderation.RefreshUserRestrictionsTask},
 
         # 1:07 am
         {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
