@@ -467,7 +467,86 @@ defmodule Teiserver.Moderation do
     Proposal.changeset(proposal, %{})
   end
 
-    alias Teiserver.Moderation.{Ban, BanLib}
+
+  alias Teiserver.Moderation.{ProposalVote, ProposalVoteLib}
+
+  @doc """
+  Gets a single proposal_vote.
+
+  Raises `Ecto.NoResultsError` if the ProposalVote does not exist.
+
+  ## Examples
+
+      iex> get_proposal_vote(123)
+      %ProposalVote{}
+
+      iex> get_proposal_vote(456)
+      nil
+
+  """
+  @spec get_proposal_vote(T.user_id(), integer()) :: ProposalVote.t() | nil
+  def get_proposal_vote(user_id, proposal_id) do
+    ProposalVoteLib.query_proposal_votes()
+      |> ProposalVoteLib.search(user_id: user_id, proposal_id: proposal_id)
+      |> Repo.one()
+  end
+
+  def create_proposal_vote(attrs \\ %{}) do
+    %ProposalVote{}
+      |> ProposalVote.changeset(attrs)
+      |> Repo.insert()
+  end
+
+  @doc """
+  Updates a proposal_vote.
+
+  ## Examples
+
+      iex> update_proposal_vote(proposal_vote, %{field: new_value})
+      {:ok, %ProposalVote{}}
+
+      iex> update_proposal_vote(proposal_vote, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_proposal_vote(%ProposalVote{} = proposal_vote, attrs) do
+    proposal_vote
+      |> ProposalVote.changeset(attrs)
+      |> Repo.update()
+  end
+
+  @doc """
+  Deletes a ProposalVote.
+
+  ## Examples
+
+      iex> delete_proposal_vote(proposal_vote)
+      {:ok, %ProposalVote{}}
+
+      iex> delete_proposal_vote(proposal_vote)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_proposal_vote(%ProposalVote{} = proposal_vote) do
+    Repo.delete(proposal_vote)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking proposal_vote changes.
+
+  ## Examples
+
+      iex> change_proposal_vote(proposal_vote)
+      %Ecto.Changeset{source: %ProposalVote{}}
+
+  """
+  def change_proposal_vote(%ProposalVote{} = proposal_vote) do
+    ProposalVote.changeset(proposal_vote, %{})
+  end
+
+
+
+  alias Teiserver.Moderation.{Ban, BanLib}
 
   @spec ban_query(List.t()) :: Ecto.Query.t()
   def ban_query(args) do
@@ -617,5 +696,4 @@ defmodule Teiserver.Moderation do
   def change_ban(%Ban{} = ban) do
     Ban.changeset(ban, %{})
   end
-
 end

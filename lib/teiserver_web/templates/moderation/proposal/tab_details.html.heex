@@ -37,11 +37,13 @@
             name: "proposal[restrictions][#{r_clean}]",
             label: r,
             value: r,
-            checked: false
+            checked: (Ecto.Changeset.get_field(@changeset, :restrictions) || [])
+              |> Enum.member?(r)
           %>
         <% end %>
       </div>
     <% end %>
+    <%= error_tag f, :restrictions %>
 
     <div class="col-md-10 mt-3">
       <div class={"btn btn-outline-#{bsname} mx-2"} onclick="

@@ -20,7 +20,7 @@ defmodule Teiserver.Moderation.ProposalLib do
       item_type: "teiserver_moderation_proposal",
       item_colour: colour(),
       item_icon: icon(),
-      item_label: "#{proposal.name}",
+      item_label: "#{proposal.target.name}",
 
       url: "/moderation/proposals/#{proposal.id}"
     }
@@ -93,14 +93,40 @@ defmodule Teiserver.Moderation.ProposalLib do
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
   def preload(query, nil), do: query
-  def preload(query, _preloads) do
-    # query = if :things in preloads, do: _preload_things(query), else: query
+  def preload(query, preloads) do
+    query = if :target in preloads, do: _preload_target(query), else: query
+    query = if :proposer in preloads, do: _preload_proposer(query), else: query
+    query = if :concluder in preloads, do: _preload_concluder(query), else: query
+    query = if :votes in preloads, do: _preload_votes(query), else: query
     query
   end
 
-  # def _preload_things(query) do
-  #   from proposals in query,
-  #     left_join: things in assoc(proposals, :things),
-  #     preload: [things: things]
-  # end
+  @spec _preload_target(Ecto.Query.t()) :: Ecto.Query.t()
+  def _preload_target(query) do
+    from proposals in query,
+      left_join: targets in assoc(proposals, :target),
+      preload: [target: targets]
+  end
+
+  @spec _preload_proposer(Ecto.Query.t()) :: Ecto.Query.t()
+  def _preload_proposer(query) do
+    from proposals in query,
+      left_join: proposers in assoc(proposals, :proposer),
+      preload: [proposer: proposers]
+  end
+
+  @spec _preload_concluder(Ecto.Query.t()) :: Ecto.Query.t()
+  def _preload_concluder(query) do
+    from proposals in query,
+      left_join: concluders in assoc(proposals, :concluder),
+      preload: [concluder: concluders]
+  end
+
+  @spec _preload_votes(Ecto.Query.t()) :: Ecto.Query.t()
+  def _preload_votes(query) do
+    from proposals in query,
+      left_join: votes in assoc(proposals, :votes),
+      left_join: users in assoc(votes, :user),
+      preload: [votes: {votes, user: users}]
+  end
 end

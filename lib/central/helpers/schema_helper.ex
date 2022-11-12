@@ -291,7 +291,7 @@ defmodule Central.Helpers.SchemaHelper do
 
                 {:error, _} ->
                   # We need to do this replace to stop "invalid string" appearing multiple times
-                  {k, String.replace(v, " - Invalid string", "") <> " - Invalid string"}
+                  {k, String.replace(v, " - Invalid format", "") <> " - Invalid format"}
               end
           end
 
@@ -304,7 +304,7 @@ defmodule Central.Helpers.SchemaHelper do
   # @spec validate_human_time(map, list | atom, Keyword.t) :: t
   def validate_human_time(changeset, fields) when not is_nil(fields) do
     %{required: required, errors: errors, changes: changes} = changeset
-    message = "Unable to convert"
+    message = "Invalid format"
     fields = List.wrap(fields)
 
     fields_with_errors =

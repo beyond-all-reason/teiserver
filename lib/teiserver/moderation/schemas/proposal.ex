@@ -11,8 +11,14 @@ defmodule Teiserver.Moderation.Proposal do
     field :reason, :string
     field :duration, :string
 
-    belongs_to :concluded_by, Central.Account.User
+    belongs_to :concluder, Central.Account.User
     field :conclusion_comments, :string
+
+    field :votes_for, :integer
+    field :votes_against, :integer
+    field :votes_abstain, :integer
+
+    has_many :votes, Teiserver.Moderation.ProposalVote, foreign_key: :proposal_id
 
     timestamps()
   end
@@ -23,8 +29,9 @@ defmodule Teiserver.Moderation.Proposal do
       |> trim_strings(~w(reason duration conclusion_comments)a)
 
     struct
-      |> cast(params, ~w(proposer_id target_id action_id restrictions reason duration concluded_by_id conclusion_comments)a)
-      |> validate_required(~w(proposer_id target_id restrictions reason duration)a)
+      |> cast(params, ~w(proposer_id target_id action_id restrictions reason duration votes_for votes_against votes_abstain concluder_id conclusion_comments)a)
+      |> validate_human_time(~w(duration)a)
+      |> validate_required(~w(proposer_id target_id restrictions reason votes_for votes_against votes_abstain duration)a)
   end
 
   @spec authorize(Atom.t(), Plug.Conn.t(), Map.t()) :: Boolean.t()

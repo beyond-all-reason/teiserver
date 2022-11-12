@@ -121,7 +121,6 @@ defmodule Teiserver.Moderation.ActionLib do
     query = if :target in preloads, do: _preload_target(query), else: query
     query = if :reports in preloads, do: _preload_reports(query), else: query
     query = if :reports_and_reporters in preloads, do: _preload_reports_and_reporters(query), else: query
-    query
   end
 
   @spec _preload_target(Ecto.Query.t()) :: Ecto.Query.t()
@@ -145,5 +144,4 @@ defmodule Teiserver.Moderation.ActionLib do
       left_join: reporters in assoc(reports, :reporter),
       preload: [reports: {reports, reporter: reporters}]
   end
-
 end

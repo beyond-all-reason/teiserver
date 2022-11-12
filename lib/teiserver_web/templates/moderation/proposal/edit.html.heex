@@ -15,11 +15,9 @@
 
         <hr />
 
+<h3>Editing proposal for action against <%= @proposal.target.name %></h3>
 <%= render "form.html", Map.put(assigns, :action, Routes.moderation_proposal_path(@conn, :update, @proposal)) %>
 
-
-<hr />
-<%= link raw("<i class='far fa-fw fa-trash'></i> Delete"), to: Routes.moderation_proposal_path(@conn, :delete, @proposal), method: :delete, data: [confirm: "Are you sure?"], class: "btn btn-danger btn-outline" %>
 
       </div>
     </div>

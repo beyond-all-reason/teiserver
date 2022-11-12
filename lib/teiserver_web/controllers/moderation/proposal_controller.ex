@@ -26,6 +26,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
         target_id: params["target_id"],
         reporter_id: params["reporter_id"],
       ],
+      preload: [:target, :proposer, :concluder],
       order_by: "Newest first"
     )
 
@@ -37,7 +38,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
   @spec show(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def show(conn, %{"id" => id}) do
     proposal = Moderation.get_proposal!(id, [
-      joins: [],
+      preload: [:target, :proposer, :concluder, :votes],
     ])
 
     proposal
@@ -46,7 +47,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
 
     conn
       |> assign(:proposal, proposal)
-      |> add_breadcrumb(name: "Show: #{proposal.name}", url: conn.request_path)
+      |> add_breadcrumb(name: "Show: #{proposal.target.name}", url: conn.request_path)
       |> render("show.html")
   end
 
@@ -107,46 +108,192 @@ defmodule TeiserverWeb.Moderation.ProposalController do
 
   @spec create(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def create(conn, %{"proposal" => proposal_params}) do
-    case Moderation.create_proposal(proposal_params) do
-      {:ok, _proposal} ->
-        conn
-        |> put_flash(:info, "Proposal created successfully.")
-        |> redirect(to: Routes.moderation_proposal_path(conn, :index))
+    user = Account.get_user(proposal_params["target_id"])
 
-      {:error, %Ecto.Changeset{} = changeset} ->
-        conn
-        |> assign(:changeset, changeset)
-        |> render("new.html")
+    restrictions = proposal_params["restrictions"]
+      |> Map.values
+      |> Enum.reject(fn v -> v == "false" end)
+
+    proposal_params = Map.merge(proposal_params, %{
+      "proposer_id" => conn.assigns.current_user.id,
+      "restrictions" => restrictions,
+      "votes_for" => 1,
+      "votes_against" => 0,
+      "votes_abstain" => 0
+    })
+
+    if user do
+      case Moderation.create_proposal(proposal_params) do
+        {:ok, proposal} ->
+          Moderation.create_proposal_vote(%{
+            user_id: conn.assigns.current_user.id,
+            proposal_id: proposal.id,
+            vote: 1
+          })
+
+          conn
+            |> put_flash(:info, "Proposal created successfully.")
+            |> redirect(to: Routes.moderation_proposal_path(conn, :index))
+
+        {:error, %Ecto.Changeset{} = changeset} ->
+          reports = Moderation.list_reports(
+            search: [target_id: user.id],
+            order_by: "Newest first",
+            limit: :infinity
+          )
+          actions = Moderation.list_actions(
+            search: [target_id: user.id],
+            order_by: "Newest first",
+            limit: :infinity
+          )
+
+          conn
+            |> assign(:user, user)
+            |> assign(:changeset, changeset)
+            |> assign(:reports, reports)
+            |> assign(:actions, actions)
+            |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+            |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
+            |> add_breadcrumb(name: "New proposal for #{user.name}", url: conn.request_path)
+            |> render("new_with_user.html")
+      end
+    else
+      conn
+        |> add_breadcrumb(name: "New proposal", url: conn.request_path)
+        |> put_flash(:warning, "Unable to find that user")
+        |> render("new_select.html")
     end
   end
 
   @spec edit(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def edit(conn, %{"id" => id}) do
-    proposal = Moderation.get_proposal!(id)
+    proposal = Moderation.get_proposal!(id, preload: [:target])
 
-    changeset = Moderation.change_proposal(proposal)
+    cond do
+      proposal == nil ->
+        conn
+          |> put_flash(:warning, "No proposal found.")
+          |> redirect(to: Routes.moderation_proposal_path(conn, :index))
+      proposal.concluder_id != nil ->
+        conn
+          |> put_flash(:info, "Proposal concluded.")
+          |> redirect(to: Routes.moderation_proposal_path(conn, :show, proposal.id))
+      true ->
+        changeset = Moderation.change_proposal(proposal)
 
-    conn
-      |> assign(:proposal, proposal)
-      |> assign(:changeset, changeset)
-      |> add_breadcrumb(name: "Edit: #{proposal.name}", url: conn.request_path)
-      |> render("edit.html")
+        conn
+          |> assign(:proposal, proposal)
+          |> assign(:changeset, changeset)
+          |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
+          |> add_breadcrumb(name: "Edit: #{proposal.target.name}", url: conn.request_path)
+          |> render("edit.html")
+    end
   end
 
   @spec update(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def update(conn, %{"id" => id, "proposal" => proposal_params}) do
-    proposal = Moderation.get_proposal!(id)
+    proposal = Moderation.get_proposal!(id, preload: [:target, :votes])
 
-    case Moderation.update_proposal(proposal, proposal_params) do
-      {:ok, _proposal} ->
+    cond do
+      proposal == nil ->
         conn
-          |> put_flash(:info, "Proposal updated successfully.")
+          |> put_flash(:warning, "No proposal found.")
           |> redirect(to: Routes.moderation_proposal_path(conn, :index))
-      {:error, %Ecto.Changeset{} = changeset} ->
+      proposal.concluder_id != nil ->
         conn
-          |> assign(:proposal, proposal)
-          |> assign(:changeset, changeset)
-          |> render("edit.html")
+          |> put_flash(:info, "Proposal concluded.")
+          |> redirect(to: Routes.moderation_proposal_path(conn, :show, proposal.id))
+      true ->
+        restrictions = proposal_params["restrictions"]
+          |> Map.values
+          |> Enum.reject(fn v -> v == "false" end)
+
+        proposal.votes
+          |> Enum.filter(fn v -> v.vote == 1 end)
+          |> Enum.each(fn v ->
+            Moderation.update_proposal_vote(v, %{vote: 0})
+          end)
+
+        proposal_params = Map.merge(proposal_params, %{
+          "proposer_id" => conn.assigns.current_user.id,
+          "restrictions" => restrictions,
+          "votes_for" => 0,
+          "votes_against" => 0,
+          "votes_abstain" => proposal.votes_abstain + proposal.votes_for
+        })
+
+        case Moderation.update_proposal(proposal, proposal_params) do
+          {:ok, _proposal} ->
+            conn
+              |> put_flash(:info, "Proposal updated successfully.")
+              |> redirect(to: Routes.moderation_proposal_path(conn, :index))
+          {:error, %Ecto.Changeset{} = changeset} ->
+            conn
+              |> assign(:proposal, proposal)
+              |> assign(:changeset, changeset)
+              |> render("edit.html")
+        end
+    end
+  end
+
+  @spec vote(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def vote(conn, %{"proposal_id" => proposal_id, "direction" => direction}) do
+    proposal = Moderation.get_proposal!(proposal_id)
+
+    cond do
+      proposal == nil ->
+        conn
+          |> put_flash(:warning, "No proposal found.")
+          |> redirect(to: Routes.moderation_proposal_path(conn, :index))
+      proposal.concluder_id != nil ->
+        conn
+          |> put_flash(:info, "Proposal concluded.")
+          |> redirect(to: Routes.moderation_proposal_path(conn, :show, proposal.id))
+      true ->
+        vote_value = case direction do
+          "yes" -> 1
+          "no" -> -1
+          "abstain" -> 0
+        end
+
+        case Moderation.get_proposal_vote(conn.assigns.current_user.id, proposal.id) do
+          nil ->
+            # Create the vote
+            Moderation.create_proposal_vote(%{
+              user_id: conn.assigns.current_user.id,
+              proposal_id: proposal.id,
+              vote: vote_value
+            })
+
+            # Update the proposal
+            case direction do
+              "yes" -> Moderation.update_proposal(proposal, %{votes_for: proposal.votes_for + 1})
+              "no" -> Moderation.update_proposal(proposal, %{votes_for: proposal.votes_against + 1})
+              "abstain" -> Moderation.update_proposal(proposal, %{votes_for: proposal.votes_abstain + 1})
+            end
+
+          existing_vote ->
+            if existing_vote.vote != vote_value do
+              Moderation.update_proposal_vote(existing_vote, %{vote: vote_value})
+
+              update_new_value = case direction do
+                "yes" -> %{votes_for: proposal.votes_for + 1}
+                "no" -> %{votes_against: proposal.votes_against + 1}
+                "abstain" -> %{votes_abstain: proposal.votes_abstain + 1}
+              end
+
+              remove_old_value = case existing_vote.vote do
+                1 -> %{votes_for: proposal.votes_for - 1}
+                -1 -> %{votes_against: proposal.votes_against - 1}
+                0 -> %{votes_abstain: proposal.votes_abstain - 1}
+              end
+              Moderation.update_proposal(proposal, Map.merge(update_new_value, remove_old_value))
+            end
+        end
+
+        conn
+          |> put_flash(:success, "Vote updated.")
+          |> redirect(to: Routes.moderation_proposal_path(conn, :show, proposal.id))
     end
   end
 

@@ -39,7 +39,11 @@ defmodule Central.Repo.Migrations.AutomatedModerationCreation do
       add :reason, :text
       add :duration, :string
 
-      add :concluded_by_id, references(:account_users, on_delete: :nothing)
+      add :votes_for, :integer, default: 0
+      add :votes_against, :integer, default: 0
+      add :votes_abstain, :integer, default: 0
+
+      add :concluder_id, references(:account_users, on_delete: :nothing)
       add :conclusion_comments, :text
 
       timestamps()
@@ -47,9 +51,9 @@ defmodule Central.Repo.Migrations.AutomatedModerationCreation do
     create index(:moderation_proposals, [:target_id])
 
     create table(:moderation_proposal_votes, primary_key: false) do
-      add :voter_id, references(:account_users, on_delete: :nothing, primary_key: true)
+      add :user_id, references(:account_users, on_delete: :nothing, primary_key: true)
       add :proposal_id, references(:moderation_proposals, on_delete: :nothing, primary_key: true)
-      add :vote, :boolean
+      add :vote, :smallint
 
       timestamps()
     end

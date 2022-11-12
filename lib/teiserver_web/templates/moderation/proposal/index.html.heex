@@ -25,28 +25,67 @@
 <table class="table table-sm">
   <thead>
     <tr>
-      <th>Name</th>
-      <th colspan="2">&nbsp;</th>
+      <th>Target</th>
+      <th>Reason</th>
+
+      <th>Restrictions</th>
+      <th>Duration</th>
+
+      <th>Votes</th>
+
+      <th>Proposer</th>
+      <th colspan="2">Outcome</th>
     </tr>
   </thead>
   <tbody>
-<%= for proposal <- @proposals do %>
+    <%= for proposal <- @proposals do %>
     <tr>
-      <td><%= proposal.name %></td>
+      <td><%= proposal.target.name %></td>
 
       <td>
-        <a href={Routes.moderation_proposal_path(@conn, :show, proposal.id)} class="btn btn-secondary btn-sm">
-          Show
-        </a>
+        <%=
+        proposal.reason
+          |> String.split("\n")
+          |> hd
+        %>
       </td>
 
       <td>
-        <a href={Routes.moderation_proposal_path(@conn, :edit, proposal.id)} class="btn btn-secondary btn-sm">
-          Edit
-        </a>
+        <%= Enum.join(proposal.restrictions, ", ") %>
       </td>
+      <td><%= proposal.duration %></td>
+
+      <td>
+        <%
+          score = proposal.votes_for - proposal.votes_against
+          class = cond do
+            score < 0 -> "text-danger"
+            score > 0 -> "text-success"
+            score == 0 -> "text-info"
+          end
+        %>
+        <span class={class}><%= score %></span>
+
+        &nbsp;&nbsp;
+
+        <span class="text-success"><%= proposal.votes_for %></span>
+        /
+        <span class="text-danger"><%= proposal.votes_against %></span>
+      </td>
+
+      <td><%= proposal.proposer.name %></td>
+
+      <%= if proposal.concluder_id do %>
+
+      <% else %>
+        <td>
+          <a href={Routes.moderation_proposal_path(@conn, :show, proposal.id)} class="btn btn-secondary btn-sm">
+            Show
+          </a>
+        </td>
+      <% end %>
     </tr>
-<% end %>
+    <% end %>
   </tbody>
 </table>
 

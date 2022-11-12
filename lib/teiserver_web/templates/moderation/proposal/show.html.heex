@@ -15,7 +15,7 @@
 <%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "proposals"}) %>
 
 <div class="row section-menu">
-  <div class="col-md-12">
+  <div class="col-md-12 col-xl-6">
     <div class={"card border-#{bsname}"}>
       <div class="card-body">
         <%= render TeiserverWeb.Moderation.ProposalView, "section_menu.html", Map.merge(assigns, %{
@@ -25,38 +25,77 @@
         <hr />
 
         <div class="float-end">
-          <div class="dropdown" style="display: inline-block;">
-            <div class={"btn btn-#{bsname} dropdown-toggle"} data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Actions
-            </div>
-            <%= render "actions.html", assigns %>
+          <%= if @proposal.proposer_id == @current_user.id do %>
+            <a href={Routes.moderation_proposal_path(@conn, :edit, @proposal)} class={"btn btn-outline-#{bsname}"}>
+              <i class="far fa-fw fa-wrench"></i>
+              Edit proposal
+            </a>
+          <% end %>
+        </div>
+
+        <h3>
+          <%= @proposal.target.name %>
+        </h3>
+        <div class="row">
+          <div class="col">
+            <% rows = String.split(@proposal.reason, "\n") |> Enum.count %>
+            <label for="reason-box" class="control-label">Reason:</label>
+            <textarea name="" id="reason-box" rows={rows} class="form-control"><%= @proposal.reason %></textarea>
           </div>
-        
-          <a href={Routes.moderation_proposal_path(@conn, :edit, @proposal)} class={"btn btn-outline-#{bsname}"}>
-            <i class="far fa-fw fa-wrench"></i>
-            Edit proposal
-          </a>
         </div>
 
-      <h3>
-        <%= @proposal.name %>
-      </h3>
-      <br />
-      <ul class="nav nav-tabs" role="tablist" id="the_tabs">
-        <li>
-          <a href="#details_tab" role="tab" class="nav-link" data-bs-toggle="tab">
-            <%= central_component "icon", icon: "fas fa-file-alt" %>
-            Details
-          </a>
-        </li>
-      </ul>
+        <div class="row mt-4">
+          <div class="col">
+            <strong>Restrictions:</strong><br />
+            <%= Enum.join(@proposal.restrictions, ", ") %>
+          </div>
 
-      <div class="tab-content">
-        <div class="tab-pane" id="details_tab" style="padding:5px;">
-          <%= render "tab_details.html", assigns %>
+          <div class="col">
+            <strong>Duration:</strong><br />
+            <%= @proposal.duration %>
+          </div>
         </div>
-      </div>
-      <%# END OF TABS %>
+
+        <div class="row mt-4">
+          <div class="col">
+            <%= link raw("<i class='fa-solid fa-lg fa-fw fa-cancel'></i> Vote no"), to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "no"), method: :put, class: "btn btn-danger btn-block" %>
+          </div>
+          <div class="col">
+            <%= link raw("<i class='fa-solid fa-lg fa-fw fa-question'></i> Abstain"), to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "abstain"), method: :put, class: "btn btn-secondary btn-block" %>
+          </div>
+          <div class="col">
+            <%= link raw("<i class='fa-solid fa-lg fa-fw fa-check'></i> Vote yes"), to: Routes.moderation_proposal_path(@conn, :vote, @proposal.id, "yes"), method: :put, class: "btn btn-success btn-block" %>
+          </div>
+        </div>
+
+        <div class="row mt-4">
+          <div class="col">
+            <h5 style="text-align: center;">Votes against (<%= @proposal.votes_against %>)</h5>
+            <%= for v <- @proposal.votes do %>
+              <%= if v.vote == -1 do %>
+                <%= v.user.name %><br />
+              <% end %>
+            <% end %>
+          </div>
+
+          <div class="col">
+            <h5 style="text-align: center;">Abstains (<%= @proposal.votes_abstain %>)</h5>
+            <%= for v <- @proposal.votes do %>
+              <%= if v.vote == 0 do %>
+                <%= v.user.name %><br />
+              <% end %>
+            <% end %>
+          </div>
+
+          <div class="col">
+            <h5 style="text-align: center;">Votes in favour (<%= @proposal.votes_for %>)</h5>
+            <%= for v <- @proposal.votes do %>
+              <%= if v.vote == 1 do %>
+                <%= v.user.name %><br />
+              <% end %>
+            <% end %>
+          </div>
+        </div>
 
       </div>
     </div>
