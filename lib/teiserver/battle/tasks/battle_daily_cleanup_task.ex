@@ -3,12 +3,29 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
 
   alias Central.Repo
   alias Teiserver.{Battle}
+  import Central.Helpers.TimexHelper, only: [date_to_str: 2]
+
+  @unfinished_days 3
+  @short_match_days 7
+  @strip_data_days 35
 
   @impl Oban.Worker
   @spec perform(any) :: :ok
   def perform(_) do
+    delete_unfinished_matches()
+    delete_short_matches()
+    strip_data_from_older_matches()
+
+    # Finally, delete the older matches
+    delete_old_matches()
+
+    :ok
+  end
+
+  defp delete_unfinished_matches() do
+    # If a match is never marked as finished after X days, we delete it
     Battle.list_matches(search: [
-          inserted_before: Timex.shift(Timex.now(), days: -3),
+          inserted_before: Timex.shift(Timex.now(), days: -@unfinished_days),
           never_finished: :ok,
         ],
         select: [:id],
@@ -17,19 +34,21 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
       |> Enum.map(fn %{id: id} -> id end)
       |> Enum.join(",")
       |> delete_matches()
+  end
 
+  defp delete_short_matches() do
     # Remove tags from matches as the tags take up a lot of space and we don't need them long term
-    # only need them for 7 days since the game, we also don't want to have to search every single game
-    matches = Battle.list_matches(search: [
-        inserted_before: Timex.shift(Timex.now(), days: -7),
-        inserted_after: Timex.shift(Timex.now(), days: -21)
+    # only need them for X days since the game, we also don't want to have to search every single game
+    matches_to_process = Battle.list_matches(search: [
+        inserted_before: Timex.shift(Timex.now(), days: -@short_match_days),
+        inserted_after: Timex.shift(Timex.now(), days: -(@short_match_days*3))
       ],
       limit: :infinity
     )
       |> Enum.filter(fn match -> match.tags != %{} end)
 
     # Delete short matches
-    matches
+    matches_to_process
       |> Enum.filter(fn match ->
         cond do
           match.finished == nil -> true
@@ -39,52 +58,36 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
             duration < Application.get_env(:central, Teiserver)[:retention][:battle_minimum_seconds]
         end
       end)
-      |> Enum.map(fn %{id: id} -> id end)
-      |> Enum.join(",")
+      |> Enum.map_join(",", fn %{id: id} -> id end)
       |> delete_matches()
-
-    # Wipe tags of remaining matches
-    matches
-      |> Enum.map(fn %{id: id} -> id end)
-      |> Enum.join(",")
-      |> remove_tags
-
-    # Finally, delete the older matches
-    delete_old_matches()
-
-    :ok
   end
 
   defp delete_old_matches() do
     # Rated matches
     battle_match_rated_days = Application.get_env(:central, Teiserver)[:retention][:battle_match_rated]
 
-    ids = Battle.list_matches(search: [
+    Battle.list_matches(search: [
         inserted_before: Timex.shift(Timex.now(), days: -battle_match_rated_days),
         game_type_in: ["Team", "Duel", "FFA", "Team FFA"],
       ],
       search: [:id],
       limit: :infinity
     )
-    |> Enum.map(fn %{id: id} -> id end)
-    |> Enum.join(",")
-
-    delete_matches(ids)
+    |> Enum.map_join(",", fn %{id: id} -> id end)
+    |> delete_matches
 
     # Unrated matches
     battle_match_unrated_days = Application.get_env(:central, Teiserver)[:retention][:battle_match_unrated]
 
-    ids = Battle.list_matches(search: [
+    Battle.list_matches(search: [
         inserted_before: Timex.shift(Timex.now(), days: -battle_match_unrated_days),
         game_type_not_in: ["Team", "Duel", "FFA", "Team FFA"],
       ],
       search: [:id],
       limit: :infinity
     )
-    |> Enum.map(fn %{id: id} -> id end)
-    |> Enum.join(",")
-
-    delete_matches(ids)
+    |> Enum.map_join(",", fn %{id: id} -> id end)
+    |> delete_matches
   end
 
   defp delete_matches(""), do: :ok
@@ -108,11 +111,14 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
     Ecto.Adapters.SQL.query(Repo, query, [])
   end
 
-  defp remove_tags(""), do: :ok
-  defp remove_tags(ids) do
+  defp strip_data_from_older_matches() do
+    finished_before = Timex.now()
+      |> Timex.shift(days: -@strip_data_days)
+      |> date_to_str(:ymd_t_hms)
+
     query = """
-      UPDATE teiserver_battle_matches SET tags = '{}'
-      WHERE id IN (#{ids})
+      UPDATE teiserver_battle_matches m SET tags = '{}'
+      WHERE m.finished < #{finished_before}
 """
     Ecto.Adapters.SQL.query(Repo, query, [])
   end
