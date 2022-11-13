@@ -84,7 +84,7 @@ config :central, Teiserver,
   accept_all_emails: false,
 
   retention: %{
-    telemetry_infolog: 25,
+    telemetry_infolog: 15,
     telemetry_events: 90,
     battle_match_rated: 365,
     battle_match_unrated: 365,
