@@ -23,7 +23,9 @@
         <hr />
 
         <div class="float-end">
-          <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>View user</a>
+          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+            <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>View user</a>
+          <% end %>
         </div>
 
         <h3 style={"color: #{@user.colour}"}>
@@ -70,7 +72,7 @@
         </div>
         <%# END OF TABS %>
 
-        
+
       </div>
     </div>
   </div>

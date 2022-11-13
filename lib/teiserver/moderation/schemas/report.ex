@@ -31,5 +31,6 @@ defmodule Teiserver.Moderation.Report do
   def authorize(:index, conn, _), do: allow?(conn, "teiserver.staff.reviewer")
   def authorize(:search, conn, _), do: allow?(conn, "teiserver.staff.reviewer")
   def authorize(:show, conn, _), do: allow?(conn, "teiserver.staff.reviewer")
+  def authorize(:user, conn, _), do: allow?(conn, "teiserver.staff.reviewer")
   def authorize(_, conn, _), do: allow?(conn, "teiserver.staff.moderator")
 end

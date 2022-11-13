@@ -2,8 +2,10 @@ defmodule TeiserverWeb.Moderation.ActionController do
   @moduledoc false
   use TeiserverWeb, :controller
 
+  alias Central.Logging
   alias Teiserver.{Account, Moderation}
   alias Teiserver.Moderation.{Action, ActionLib}
+  import Central.Logging.Helpers, only: [add_audit_log: 3]
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Moderation.Action,
@@ -60,12 +62,26 @@ defmodule TeiserverWeb.Moderation.ActionController do
       preload: [:target, :reports_and_reporters],
     ])
 
+    logs = Logging.list_audit_logs(
+      search: [
+        actions: [
+            "Moderation:Action halted",
+            "Moderation:Action updated",
+            "Moderation:Action created"
+          ],
+        details_equal: {"action_id", action.id |> to_string}
+      ],
+      joins: [:user],
+      order_by: "Newest first"
+    )
+
     action
-    |> ActionLib.make_favourite
-    |> insert_recently(conn)
+      |> ActionLib.make_favourite
+      |> insert_recently(conn)
 
     conn
       |> assign(:action, action)
+      |> assign(:logs, logs)
       |> add_breadcrumb(name: "Show: #{action.target.name} - #{Enum.join(action.restrictions, ", ")}", url: conn.request_path)
       |> render("show.html")
   end
@@ -143,6 +159,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
       {:ok, action} ->
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
 
+        add_audit_log(conn, "Moderation:Action created", %{action_id: action.id})
+
         conn
         |> put_flash(:info, "Action created successfully.")
         |> redirect(to: Routes.moderation_action_path(conn, :index))
@@ -198,6 +216,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
       {:ok, _action} ->
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
 
+        add_audit_log(conn, "Moderation:Action updated", %{action_id: action.id})
+
         conn
           |> put_flash(:info, "Action updated successfully.")
           |> redirect(to: Routes.moderation_action_path(conn, :index))
@@ -216,6 +236,8 @@ defmodule TeiserverWeb.Moderation.ActionController do
 
     case Moderation.update_action(action, %{"expires" => Timex.now()}) do
       {:ok, _action} ->
+        add_audit_log(conn, "Moderation:Action halted", %{action_id: action.id})
+
         conn
           |> put_flash(:info, "Action halted.")
           |> redirect(to: Routes.moderation_action_path(conn, :index))

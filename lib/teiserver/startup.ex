@@ -41,10 +41,16 @@ defmodule Teiserver.Startup do
     ])
 
     add_audit_types([
-      "Teiserver:Updated automod action",
-      "Teiserver:Automod action enacted",
       "Moderation:Ban updated",
       "Moderation:Ban enacted",
+
+      "Moderation:Action halted",
+      "Moderation:Action updated",
+      "Moderation:Action created",
+
+      "Teiserver:Updated automod action",
+      "Teiserver:Automod action enacted",
+
       "Teiserver:De-bridged user",
       "Teiserver:Changed user rating",
       "Teiserver:Smurf merge",
@@ -52,8 +58,7 @@ defmodule Teiserver.Startup do
 
     # Permissions setup
     add_permission_set("teiserver", "admin", ~w(account battle clan queue))
-    add_permission_set("teiserver", "moderator", ~w(account battle clan queue telemetry review))
-    add_permission_set("teiserver", "staff", ~w(reviewer moderator communication clan))
+    add_permission_set("teiserver", "staff", ~w(reviewer moderator admin communication clan))
     add_permission_set("teiserver", "reports", ~w(client server match ratings infolog))
     add_permission_set("teiserver", "api", ~w(battle))
     add_permission_set("teiserver", "player", ~w(account tester contributor dev streamer donor verified bot moderator))

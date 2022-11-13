@@ -20,7 +20,6 @@ defmodule TeiserverWeb.Admin.UserController do
     user: {Central.Account.AuthLib, :current_user}
   )
 
-  plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
   plug(:add_breadcrumb, name: 'Users', url: '/teiserver/admin/user')
 
@@ -1023,7 +1022,7 @@ defmodule TeiserverWeb.Admin.UserController do
   end
 
   @spec full_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def full_chat(conn, params = %{"id" => id}) do
+  def full_chat(conn, %{"id" => id} = params) do
     page = Map.get(params, "page", 0)
       |> int_parse
       |> max(0)

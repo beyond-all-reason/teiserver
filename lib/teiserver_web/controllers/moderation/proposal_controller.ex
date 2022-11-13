@@ -174,10 +174,17 @@ defmodule TeiserverWeb.Moderation.ProposalController do
         conn
           |> put_flash(:warning, "No proposal found.")
           |> redirect(to: Routes.moderation_proposal_path(conn, :index))
+
       proposal.concluder_id != nil ->
         conn
           |> put_flash(:info, "Proposal concluded.")
           |> redirect(to: Routes.moderation_proposal_path(conn, :show, proposal.id))
+
+      proposal.proposer_id != conn.assigns.current_user.id ->
+        conn
+          |> put_flash(:warning, "Proposals can only be edited by their proposer.")
+          |> redirect(to: Routes.moderation_proposal_path(conn, :show, proposal.id))
+
       true ->
         changeset = Moderation.change_proposal(proposal)
 
@@ -268,8 +275,8 @@ defmodule TeiserverWeb.Moderation.ProposalController do
             # Update the proposal
             case direction do
               "yes" -> Moderation.update_proposal(proposal, %{votes_for: proposal.votes_for + 1})
-              "no" -> Moderation.update_proposal(proposal, %{votes_for: proposal.votes_against + 1})
-              "abstain" -> Moderation.update_proposal(proposal, %{votes_for: proposal.votes_abstain + 1})
+              "no" -> Moderation.update_proposal(proposal, %{votes_against: proposal.votes_against + 1})
+              "abstain" -> Moderation.update_proposal(proposal, %{votes_abstain: proposal.votes_abstain + 1})
             end
 
           existing_vote ->

@@ -9,7 +9,7 @@ defmodule TeiserverWeb.Report.RatingController do
   )
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Moderator,
+    policy: Teiserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 

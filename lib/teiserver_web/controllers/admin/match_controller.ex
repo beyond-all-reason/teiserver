@@ -5,7 +5,7 @@ defmodule TeiserverWeb.Admin.MatchController do
   alias Teiserver.Battle.{MatchLib, BalanceLib}
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Moderator,
+    policy: Teiserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 

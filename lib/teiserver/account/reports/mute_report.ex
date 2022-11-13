@@ -1,11 +1,12 @@
 defmodule Teiserver.Account.MuteReport do
+  @moduledoc false
   alias Teiserver.{Account, User}
 
   @spec icon() :: String.t()
   def icon(), do: Central.Account.ReportLib.action_icon("Mute")
 
   @spec permissions() :: String.t()
-  def permissions(), do: "teiserver.staff.moderator"
+  def permissions(), do: "teiserver.staff.reviewer"
 
   @spec run(Plug.Conn.t(), map()) :: {list(), map()}
   def run(_conn, _params) do

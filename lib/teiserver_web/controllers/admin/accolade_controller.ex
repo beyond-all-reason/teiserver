@@ -6,7 +6,7 @@ defmodule TeiserverWeb.Admin.AccoladeController do
   alias Teiserver.Account.AccoladeLib
 
   plug Bodyguard.Plug.Authorize,
-    policy: Teiserver.Moderator,
+    policy: Teiserver.Staff.Moderator,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
 

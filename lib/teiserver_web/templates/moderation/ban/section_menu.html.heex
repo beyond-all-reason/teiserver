@@ -20,14 +20,16 @@
       url: Routes.moderation_ban_path(@conn, :index) <> "?search=true"
     %>
 
-    <%= central_component "section_menu_button",
-      name: "new",
-      label: "New",
-      active: @active,
-      icon: StylingHelper.icon(:new),
-      bsname: bsname,
-      url: Routes.moderation_ban_path(@conn, :new)
-    %>
+    <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+      <%= central_component "section_menu_button",
+        name: "new",
+        label: "New",
+        active: @active,
+        icon: StylingHelper.icon(:new),
+        bsname: bsname,
+        url: Routes.moderation_ban_path(@conn, :new)
+      %>
+    <% end %>
 
     <%= case @active do %>
       <% "show" -> %>
@@ -39,7 +41,7 @@
           bsname: bsname,
           url: "#"
         %>
-      
+
       <% "edit" -> %>
         <%= central_component "section_menu_button",
           name: "edit",
@@ -49,7 +51,7 @@
           bsname: bsname,
           url: "#"
         %>
-      
+
       <% _ -> %>
 
     <% end %>

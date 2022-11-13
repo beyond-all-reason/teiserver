@@ -24,7 +24,7 @@
     link: Routes.ts_game_party_index_path(@conn, :index)
   %>
 
-  <%= if allow?(@conn, "teiserver.moderator.account") do %>
+  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Account.ClientLib.icon(),
@@ -35,7 +35,7 @@
     %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.admin") do %>
+  <%= if allow?(@conn, "teiserver.staff") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.icon(),
@@ -87,7 +87,7 @@
           link: Routes.ts_game_queue_path(@conn, :index)
         %>
       <% end %>
-      
+
       <%=
         central_component "menu_card",
         icon: Teiserver.Game.QueueLib.icon(),
@@ -100,9 +100,9 @@
   <% end %>
 </div>
 
-<%= if allow_any?(@conn, ~w(teiserver.reports teiserver.moderator teiserver.staff)) do %>
+<%= if allow_any?(@conn, ~w(teiserver.reports teiserver.staff)) do %>
   <div class="row">
-    <%= if allow?(@conn, "teiserver.moderator.account") do %>
+    <%= if allow?(@conn, "teiserver.staff.moderator") do %>
       <%=
         central_component "menu_card",
         icon: "fa-regular fa-users",
@@ -114,31 +114,11 @@
 
       <%=
         central_component "menu_card",
-        icon: Central.Communication.CommentLib.icon(),
-        name: "chat",
-        text: "Chat",
-        icon_class: "fa-duotone",
-        link: Routes.ts_admin_chat_path(@conn, :index)
-      %>
-
-      <%=
-        central_component "menu_card",
         icon: Teiserver.Game.AchievementTypeLib.icon(),
         name: "achievements",
         text: "Achievements",
         icon_class: "fa-duotone",
         link: Routes.ts_admin_achievement_path(@conn, :index)
-      %>
-    <% end %>
-  
-    <%= if allow_any?(@conn, ~w(teiserver.reports teiserver.moderator teiserver.staff)) do %>
-      <%=
-        central_component "menu_card",
-        icon: Central.Helpers.StylingHelper.icon(:summary),
-        name: "reports",
-        text: "Reports",
-        icon_class: "fa-duotone",
-        link: Routes.ts_reports_general_path(@conn, :index)
       %>
     <% end %>
   </div>

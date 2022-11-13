@@ -7,12 +7,11 @@ defmodule TeiserverWeb.Admin.GeneralController do
   )
 
   plug(Bodyguard.Plug.Authorize,
-    policy: Teiserver.Moderator,
+    policy: Teiserver.Staff,
     action: {Phoenix.Controller, :action_name},
     user: {Central.Account.AuthLib, :current_user}
   )
 
-  plug(:add_breadcrumb, name: 'Teiserver', url: '/teiserver')
   plug(:add_breadcrumb, name: 'Admin', url: '/teiserver/admin')
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()

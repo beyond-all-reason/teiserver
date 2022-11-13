@@ -6,10 +6,10 @@
     route: Routes.ts_general_general_path(@conn, :index),
     active: Enum.member?(~w(teiserver teiserver_account), @site_menu_active)
   %>
-  
+
   <%=
     central_component "top_nav_item",
-    text: "Live lobbies",
+    text: "Games",
     route: Routes.ts_battle_lobby_index_path(@conn, :index),
     active: @site_menu_active == "teiserver_lobbies"
   %>
@@ -20,16 +20,9 @@
     route: Routes.ts_game_party_index_path(@conn, :index),
     active: @site_menu_active == "parties"
   %>
-
-  <%= central_component "top_nav_item",
-    text: "Matches",
-    route: Routes.ts_battle_match_path(@conn, :index),
-    active: @site_menu_active == "teiserver_match"
-  %>
 <% end %>
 
-
-<%= if allow?(@current_user, "teiserver.moderator") do %>
+<%= if allow?(@current_user, "teiserver.staff") do %>
   <%= central_component "top_nav_item",
     text: "Reports",
     route: Routes.ts_reports_general_path(@conn, :index),
@@ -37,7 +30,7 @@
   %>
 <% end %>
 
-<%= if allow?(@current_user, "teiserver.moderator.account") do %>
+<%= if allow?(@current_user, "teiserver.staff.moderator") do %>
   <%= central_component "top_nav_item",
     text: "Users",
     route: Routes.ts_admin_user_path(@conn, :index),
@@ -45,7 +38,7 @@
   %>
 <% end %>
 
-<%= if allow?(@current_user, "teiserver.staff.moderator") do %>
+<%= if allow?(@current_user, "teiserver.staff.reviewer") do %>
   <%= central_component "top_nav_item",
     text: "Moderation",
     route: Routes.moderation_general_path(@conn, :index),
@@ -53,7 +46,15 @@
   %>
 <% end %>
 
-<%= if allow?(@current_user, "teiserver.admin") do %>
+<%= if allow?(@current_user, "teiserver.staff.reviewer") do %>
+  <%= central_component "top_nav_item",
+    text: "Chat",
+    route: Routes.ts_admin_chat_path(@conn, :index),
+    active: @site_menu_active == "chat"
+  %>
+<% end %>
+
+<%= if allow?(@current_user, "teiserver.staff") do %>
   <%= central_component "top_nav_item",
     text: "Admin",
     route: Routes.ts_admin_general_path(@conn, :index),

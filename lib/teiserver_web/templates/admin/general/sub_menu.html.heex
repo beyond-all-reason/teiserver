@@ -21,7 +21,7 @@
       <div class="card-body" style="padding: 0 15px;">
 
         <div class="row">
-          <%= if allow?(@conn, "teiserver.moderator.account") do %>
+          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
             <%= central_component "sub_menu_icon",
               name: "users",
               label: "Users",
@@ -31,7 +31,7 @@
             %>
           <% end %>
 
-          <%= if allow?(@conn, "teiserver.moderator") do %>
+          <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
             <%= central_component "sub_menu_icon",
               name: "matches",
               label: "Matches",
@@ -39,7 +39,7 @@
               url: Routes.ts_admin_match_path(@conn, :index),
               icon: Teiserver.Battle.MatchLib.icon()
             %>
-          
+
             <%= central_component "sub_menu_icon",
               name: "chat",
               label: "Chat",
@@ -48,16 +48,18 @@
               icon: Central.Communication.CommentLib.icon()
             %>
           <% end %>
-          
-          <%= central_component "sub_menu_icon",
-            name: "clans",
-            label: "Clans",
-            active: @active,
-            url: Routes.ts_admin_clan_path(@conn, :index),
-            icon: Teiserver.Clans.ClanLib.icon()
-          %>
 
-          <%= if allow?(@conn, "teiserver.moderator") do %>
+          <%= if allow?(@conn, "teiserver.staff.clans") do %>
+            <%= central_component "sub_menu_icon",
+              name: "clans",
+              label: "Clans",
+              active: @active,
+              url: Routes.ts_admin_clan_path(@conn, :index),
+              icon: Teiserver.Clans.ClanLib.icon()
+            %>
+          <% end %>
+
+          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
             <%= central_component "sub_menu_icon",
               name: "achievements",
               label: "Achievements",
@@ -67,7 +69,7 @@
             %>
           <% end %>
 
-          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+          <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
             <%= central_component "sub_menu_icon",
               name: "moderation",
               label: "Moderation",
