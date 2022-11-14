@@ -160,6 +160,8 @@ defmodule TeiserverWeb.Router do
         get("/client_events/event/:event_name/detail", ClientEventController, :event_detail)
 
         get("/infolog/download/:id", InfologController, :download)
+        get("/infolog/search", InfologController, :index)
+        post("/infolog/search", InfologController, :search)
         resources("/infolog", InfologController, only: [:index, :show, :delete])
 
         get("/exports/download/:id", ExportsController, :download)

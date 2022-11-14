@@ -23,31 +23,32 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
 
                       timestamp: Timex.now(),
                       metadata: metadata,
-                      contents: contents
+                      contents: contents,
+                      size: String.length(contents)
                     }
                     case Telemetry.create_infolog(params) do
                       {:ok, infolog} ->
-                        Logger.error("InfoLog success - upload_infolog - #{state.username}")
+                        # Logger.error("InfoLog success - upload_infolog - #{state.username}")
                         reply(:spring, :okay, "upload_infolog - id:#{infolog.id}", msg_id, state)
                       {:error, _changeset} ->
-                        Logger.error("InfoLog error - upload_infolog - db error for #{state.username}")
+                        # Logger.error("InfoLog error - upload_infolog - db error for #{state.username}")
                         reply(:spring, :no, "upload_infolog - db error", msg_id, state)
                     end
                   {:error, _} ->
-                    Logger.error("InfoLog error - upload_infolog - infolog gzip error for #{state.username}")
+                    # Logger.error("InfoLog error - upload_infolog - infolog gzip error for #{state.username}")
                     reply(:spring, :no, "upload_infolog - infolog gzip error", msg_id, state)
                 end
               _ ->
-                Logger.error("InfoLog error - upload_infolog - infolog contents url_decode64 error (len: #{String.length(contents64)}) for #{state.username}")
+                # Logger.error("InfoLog error - upload_infolog - infolog contents url_decode64 error (len: #{String.length(contents64)}) for #{state.username}")
                 reply(:spring, :no, "upload_infolog - infolog contents url_decode64 error", msg_id, state)
             end
 
           {:error, reason} ->
-            Logger.error("InfoLog error - upload_infolog - metadata decode - #{reason} for #{state.username}, raw: #{metadata64}")
+            # Logger.error("InfoLog error - upload_infolog - metadata decode - #{reason} for #{state.username}, raw: #{metadata64}")
             reply(:spring, :no, "upload_infolog - metadata decode - #{reason}", msg_id, state)
         end
       nil ->
-        Logger.error("InfoLog error - upload_infolog - no match for #{state.username}")
+        # Logger.error("InfoLog error - upload_infolog - no match for #{state.username}")
         reply(:spring, :no, "upload_infolog - no match", msg_id, state)
     end
   end

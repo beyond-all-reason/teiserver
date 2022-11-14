@@ -33,6 +33,17 @@ defmodule Teiserver.Telemetry.InfologLib do
       where: infologs.id == ^id
   end
 
+  def _search(query, :engine, value) do
+    from infologs in query,
+      where: fragment("? ->> ? = ?", infologs.metadata, "engineversion", ^value)
+  end
+
+  def _search(query, :game, value) do
+    from infologs in query,
+      where: fragment("? ->> ? = ?", infologs.metadata, "gameversion", ^value)
+  end
+
+  def _search(query, :log_type, "Any"), do: query
   def _search(query, :log_type, log_type) do
     from infologs in query,
       where: infologs.log_type == ^log_type
@@ -82,6 +93,16 @@ defmodule Teiserver.Telemetry.InfologLib do
   def order_by(query, "Oldest first") do
     from infologs in query,
       order_by: [asc: infologs.timestamp]
+  end
+
+  def order_by(query, "Smallest first") do
+    from infologs in query,
+      order_by: [asc: infologs.size]
+  end
+
+  def order_by(query, "Largest first") do
+    from infologs in query,
+      order_by: [desc: infologs.size]
   end
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t

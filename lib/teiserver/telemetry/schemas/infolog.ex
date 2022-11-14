@@ -9,6 +9,7 @@ defmodule Teiserver.Telemetry.Infolog do
     field :timestamp, :utc_datetime
     field :metadata, :map
     field :contents, :string
+    field :size, :integer
   end
 
   @doc """
@@ -17,8 +18,8 @@ defmodule Teiserver.Telemetry.Infolog do
   @spec changeset(Map.t(), Map.t()) :: Ecto.Changeset.t()
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:user_hash, :user_id, :log_type, :timestamp, :metadata, :contents])
-    |> validate_required([:user_hash, :log_type, :timestamp, :metadata, :contents])
+    |> cast(params, ~w(user_hash user_id log_type timestamp metadata contents size)a)
+    |> validate_required(~w(user_hash log_type timestamp metadata contents size)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

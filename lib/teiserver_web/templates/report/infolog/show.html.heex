@@ -13,33 +13,39 @@
         <hr />
 
         <div class="float-end">
-
+          <%= if allow?(@conn, "admin.dev") do %>
+            <td>
+              <%= link "Delete", to: Routes.ts_reports_infolog_path(@conn, :delete, @infolog.id), class: "btn btn-danger", method: "delete", data: [confirm: "Are you sure?"] %>
+            </td>
+          <% end %>
         </div>
 
-      <h3>
-        <%= @infolog.log_type %>
-        &nbsp;&nbsp;&nbsp;
-        Uploaded:
-        <%= date_to_str(@infolog.timestamp, format: :ymd_hms) %>
+        <h3>
+          <%= @infolog.log_type %>
+          &nbsp;&nbsp;&nbsp;
+          Uploaded:
+          <%= date_to_str(@infolog.timestamp, format: :ymd_hms) %>
 
-        &nbsp;&nbsp;&nbsp;
-        <%= time_until(@infolog.timestamp) %> ago
-        <br />
-        User: <%= @infolog.user.name %>
-      </h3>
+          &nbsp;&nbsp;&nbsp;
+          <%= time_until(@infolog.timestamp) %> ago
+          <br />
+          User: <%= @infolog.user.name %>
+        </h3>
 
-      <div class="row">
-        <div class="col-md-12">
-          <h5>Metadata</h5>
-          <textarea rows="30" class="form-control" style="font-family: monospace;"><%= Jason.encode! @infolog.metadata, pretty: true %></textarea>
+        <div class="row">
+          <div class="col-md-12">
+            <h5>Metadata</h5>
+            <textarea rows="30" class="form-control" style="font-family: monospace;"><%= Jason.encode! @infolog.metadata, pretty: true %></textarea>
+          </div>
+          <%= if @infolog.size < 3_000_000 do %>
+            <div class="col-md-12">
+              <h5>Contents</h5>
+              <textarea rows="30" class="form-control" style="font-family: monospace;"><%= @infolog.contents %></textarea>
+            </div>
+          <% else %>
+            Given the size of this infolog we are not displaying it in the web page. You will need to download it.
+          <% end %>
         </div>
-        <div class="col-md-12">
-          <h5>Contents</h5>
-          <textarea rows="30" class="form-control" style="font-family: monospace;"><%= @infolog.contents %></textarea>
-        </div>
-      </div>
-
-
 
       </div>
     </div>
