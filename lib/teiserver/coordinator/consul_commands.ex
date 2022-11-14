@@ -57,8 +57,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         "Host boss is: #{User.get_username(boss_id)}"
       boss_ids ->
         boss_names = boss_ids
-          |> Enum.map(fn b -> User.get_username(b) end)
-          |> Enum.join(", ")
+          |> Enum.map_join(", ", fn b -> User.get_username(b) end)
 
         "Host bosses are: #{boss_names}"
     end
@@ -73,16 +72,15 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       |> Enum.filter(fn {_id, members} -> Enum.count(members) > 1 end)
       |> Enum.map(fn {_id, members} -> members end)
 
-    party_text = if not Enum.empty?(parties) do
-      Logger.warn(Kernel.inspect parties)
-
-      party_list = parties |> Enum.map(fn members ->
+    party_text = if Enum.empty?(parties) do
+      []
+    else
+      party_list = parties
+        |> Enum.map(fn members ->
           "> #{Enum.join(members, ", ")}"
         end)
 
       ["Parties:" | party_list]
-    else
-      []
     end
 
     # Put other settings in here
