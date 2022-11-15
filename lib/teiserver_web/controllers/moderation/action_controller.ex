@@ -119,6 +119,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
             no_result: true,
             inserted_after: Timex.shift(Timex.now(), days: -31)
           ],
+          preload: [:reporter],
           order_by: "Newest first",
           limit: :infinity
         )
@@ -127,6 +128,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
           |> assign(:user, user)
           |> assign(:changeset, changeset)
           |> assign(:reports, reports)
+          |> assign(:selected_report_ids, [])
           |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
           |> add_breadcrumb(name: "New action for #{user.name}", url: conn.request_path)
           |> render("new_with_user.html")
@@ -155,15 +157,29 @@ defmodule TeiserverWeb.Moderation.ActionController do
       "restrictions" => restrictions
     })
 
+    report_ids = action_params["reports"]
+      |> Map.values
+      |> Enum.reject(fn v -> v == "false" end)
+      |> Enum.map(fn s -> String.to_integer(s) end)
+
     case Moderation.create_action(action_params) do
       {:ok, action} ->
         Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
 
+        if not Enum.empty?(report_ids) do
+          Moderation.list_reports(search: [id_list: report_ids], limit: :infinity)
+            |> Enum.each(fn report ->
+              Moderation.update_report(report, %{
+                result_id: action.id
+              })
+            end)
+        end
+
         add_audit_log(conn, "Moderation:Action created", %{action_id: action.id})
 
         conn
-        |> put_flash(:info, "Action created successfully.")
-        |> redirect(to: Routes.moderation_action_path(conn, :index))
+          |> put_flash(:info, "Action created successfully.")
+          |> redirect(to: Routes.moderation_action_path(conn, :index))
 
       {:error, %Ecto.Changeset{} = changeset} ->
         reports = Moderation.list_reports(
@@ -172,6 +188,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
             no_result: true,
             inserted_after: Timex.shift(Timex.now(), days: -31)
           ],
+          preload: [:reporter],
           order_by: "Newest first",
           limit: :infinity
         )
@@ -180,6 +197,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
           |> assign(:user, user)
           |> assign(:changeset, changeset)
           |> assign(:reports, reports)
+          |> assign(:selected_report_ids, report_ids)
           |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
           |> add_breadcrumb(name: "New action for #{user.name}", url: conn.request_path)
           |> render("new_with_user.html")

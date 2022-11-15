@@ -8,9 +8,17 @@
 
     page_quick_actions = [];
   });
+
+  function select_all_reports () {
+    $("#reports-row .form-check-input").prop("checked", true);
+  }
+
+  function clear_all_reports () {
+    $("#reports-row .form-check-input").prop("checked", false);
+  }
 </script>
 
-<%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "proposals"}) %>
+<%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "actions"}) %>
 
 <div class="row section-menu">
   <div class="col-md-12">
@@ -68,7 +76,7 @@
 
     <h5>Restrictions</h5>
     <%= for {section, r_list} <- @restrictions_lists do %>
-      <div class="col-md-3 col-lg-2">
+      <div class="col-md-3 col-lg-2 restrictions-col">
         <strong><%= section %></strong>
         <%= for r <- r_list do %>
           <% r_clean = String.replace(r, " ", "_") %>
@@ -85,40 +93,86 @@
     <% end %>
     <%= error_tag f, :restrictions %>
 
-    <div class="col-md-10 mt-3">
-      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
-        $('#proposal_restriction_Warning_reminder').prop('checked', true);
+    <div class="col-md-3 col-lg-2 mt-3">
+      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+        $('#action_restriction_Warning_reminder').prop('checked', true);
       ">
         Add warning
       </div>
 
-      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
-        $('#proposal_restriction_All_chat').prop('checked', true);
+      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+        $('#action_restriction_All_chat').prop('checked', true);
       ">
         Add mute
       </div>
 
-      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
-        $('#proposal_restriction_Site').prop('checked', true);
-        $('#proposal_restriction_Login').prop('checked', true);
+      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+        $('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
       ">
         Add ban
       </div>
 
-      <div class={"btn btn-outline-#{bsname} mx-2"} onclick="
+      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
         $('#code_references').val('1.4');
         $('#code_references').trigger('change');
-        $('#proposal_restriction_Singular_warning').prop('checked', true);
-        $('#proposal_restriction_All_lobbies').prop('checked', true);
-        $('#proposal_restriction_Room_chat').prop('checked', true);
-        $('#proposal_restriction_All_lobbies').prop('checked', true);
-        $('#proposal_restriction_Matchmaking').prop('checked', true);
-        $('#proposal_restriction_Community').prop('checked', true);
+        $('#action_restriction_Singular_warning').prop('checked', true);
+        $('#action_restriction_All_lobbies').prop('checked', true);
+        $('#action_restriction_Room_chat').prop('checked', true);
+        $('#action_restriction_All_lobbies').prop('checked', true);
+        $('#action_restriction_Matchmaking').prop('checked', true);
+        $('#action_restriction_Community').prop('checked', true);
         $('#report_form_reason').val('Please rename to a name not in breach of the Code of Conduct and contact a moderator to have the restrictions lifted.');
         $('#report_expires').val('never');
       ">
         Add rename
       </div>
+
+      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+        $('.restrictions-col .form-check-input').prop('checked', false);
+      ">
+        Clear all restrictions
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="row mt-4" id="reports-row">
+    <div class="col">
+      <div class="float-end">
+        <span class="btn btn-outline-secondary" onclick="select_all_reports()">Select all reports</span>
+        <span class="btn btn-outline-secondary" onclick="clear_all_reports()">Clear all reports</span>
+      </div>
+      <h5>Which reports (if any) to link to this action?</h5>
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>Reporter</th>
+            <th>Type</th>
+            <th>Reason</th>
+            <th>&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for r <- @reports do %>
+            <tr>
+              <td><%= r.reporter.name %></td>
+              <td><%= r.type %>/<%= r.sub_type %></td>
+              <td><%= r.extra_text %></td>
+              <td>
+                <%= central_component "checkbox",
+                  id: "action_report_#{r.id}",
+                  name: "action[reports][#{r.id}]",
+                  label: "",
+                  value: r.id,
+                  checked: Enum.member?(@selected_report_ids, r.id)
+                %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
     </div>
   </div>
 

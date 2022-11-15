@@ -28,6 +28,7 @@
       <th>&nbsp;</th>
       <th colspan="2">Target</th>
       <th>Type</th>
+      <th>Extra text</th>
 
       <th>Reporter</th>
       <th>Datetime</th>
@@ -48,7 +49,7 @@
           </a>
         <% end %>
       </td>
-      
+
       <td style="width: 30px;">
         <a href={Routes.moderation_report_path(@conn, :user, report.target_id)} class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}>
           <%= central_component "icon",
@@ -60,7 +61,8 @@
 
       <td><%= report.target.name %></td>
 
-      <td><%= report.type %></td>
+      <td><%= report.type %>/<%= report.sub_type %></td>
+      <td><%= report.extra_text %></td>
 
       <td><%= report.reporter.name %></td>
 

@@ -65,6 +65,16 @@ defmodule Teiserver.Moderation.ReportLib do
       where: reports.target_id in ^id_list
   end
 
+  def _search(query, :result_id, result_id) do
+    from reports in query,
+      where: reports.result_id == ^result_id
+  end
+
+  def _search(query, :result_id_in, id_list) do
+    from reports in query,
+      where: reports.result_id in ^id_list
+  end
+
   def _search(query, :reporter_id, reporter_id) do
     from reports in query,
       where: reports.reporter_id == ^reporter_id

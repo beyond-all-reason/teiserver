@@ -1,0 +1,48 @@
+<table class="table table-sm">
+  <thead>
+    <tr>
+      <th>Reporter</th>
+      <th>Type</th>
+      <th>Text</th>
+
+      <th>Datetime</th>
+      <th colspan="3">&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+
+<%= for report <- @action.reports do %>
+    <tr>
+      <td><%= report.reporter.name %></td>
+      <td><%= report.type %>/<%= report.sub_type %></td>
+      <td><%= report.extra_text %></td>
+
+
+      <td><%= date_to_str(report.inserted_at, format: :hms_or_ymd) %></td>
+
+      <td>
+        <a href={Routes.moderation_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
+          Show report
+        </a>
+      </td>
+
+      <td>
+        <%= if report.match_id do %>
+          <a href={Routes.ts_admin_match_path(@conn, :show, report.match_id)} class="btn btn-secondary btn-sm">
+            Match
+          </a>
+        <% end %>
+      </td>
+
+      <td>
+        <%= if report.match_id do %>
+          <a href={Routes.ts_admin_match_path(@conn, :chat, report.match_id)} class="btn btn-secondary btn-sm">
+            Chat
+          </a>
+        <% end %>
+      </td>
+    </tr>
+<% end %>
+
+  </tbody>
+</table>
