@@ -1659,8 +1659,22 @@ defmodule Teiserver.Telemetry do
       last_updated: Timex.now()
     })
 
-    Teiserver.Account.create_smurf_key(userid, "chobby_hash", hash)
-    Teiserver.Account.update_cache_user(userid, %{chobby_hash: hash})
+    case property_name do
+      "hardware:cpuinfo" ->
+        Teiserver.Account.create_smurf_key(userid, "chobby_hash", hash)
+        Teiserver.Account.update_cache_user(userid, %{chobby_hash: hash})
+
+      "hardware:macAddrHash" ->
+        Teiserver.Account.create_smurf_key(userid, "chobby_mac_hash", value)
+        Teiserver.Account.update_cache_user(userid, %{chobby_mac_hash: value})
+
+      "hardware:sysInfoHash" ->
+        Teiserver.Account.create_smurf_key(userid, "chobby_sysinfo_hash", value)
+        Teiserver.Account.update_cache_user(userid, %{chobby_sysinfo_hash: value})
+
+      _ ->
+        :ok
+    end
 
     case result do
       {:ok, _event} ->

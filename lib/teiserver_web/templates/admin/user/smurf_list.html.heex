@@ -26,8 +26,8 @@
             show_search: false,
             active: "smurf"
         }) %>
-        
-        
+
+
         <div class="help-box-large">
           Lists all users <%= @user.name %> shares a matched key with. In the list of matches it will show the most recent match date as used by the user being matched with. This allows you to see how recently the matched player had that value vs when it was last used by <%= @user.name %>.
         </div>
@@ -55,7 +55,9 @@
     "hw2" => "danger",
     "client_app_hash" => "warning",
     "wb1" => "success",
-    "chobby_hash" => "info"
+    "chobby_hash" => "info",
+    "chobby_sysinfo_hash" => "info",
+    "chobby_mac_hash" => "info"
   }
 
   type_icons = %{
@@ -63,7 +65,9 @@
     "hw2" => "fa-computer",
     "client_app_hash" => "fa-code-simple",
     "wb1" => "fa-globe",
-    "chobby_hash" => "fa-computer-classic"
+    "chobby_hash" => "fa-computer-classic",
+    "chobby_sysinfo_hash" => "fa-computer-classic",
+    "chobby_mac_hash" => "fa-computer-classic"
   }
 %>
 
@@ -74,15 +78,15 @@
         <tr>
           <th colspan="2">Name</th>
           <th>Status</th>
-          
+
           <th>&nbsp;</th>
-          
+
           <%= for type <- @key_types do %>
             <th><%= type %></th>
           <% end %>
-          
+
           <th>&nbsp;</th>
-          
+
           <th>Last login</th>
           <th>Registered</th>
 

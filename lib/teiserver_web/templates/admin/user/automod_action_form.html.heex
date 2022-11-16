@@ -8,7 +8,9 @@
     "hw2" => "danger",
     "client_app_hash" => "warning",
     "wb1" => "success",
-    "chobby_hash" => "info"
+    "chobby_hash" => "info",
+    "chobby_sysinfo_hash" => "info",
+    "chobby_mac_hash" => "info"
   }
 
   type_icons = %{
@@ -16,7 +18,9 @@
     "hw2" => "fa-computer",
     "client_app_hash" => "fa-code-simple",
     "wb1" => "fa-globe",
-    "chobby_hash" => "fa-computer-classic"
+    "chobby_hash" => "fa-computer-classic",
+    "chobby_sysinfo_hash" => "fa-computer-classic",
+    "chobby_mac_hash" => "fa-computer-classic"
   }
 %>
 
@@ -47,7 +51,7 @@
           Potentially matches the following unbanned user(s): <%= (for u <- @matching_users, do: u.name) |> Enum.join(", ") %>. By enabling this automod you will also ban them on their next login.
         </div>
     <% end %>
-  
+
     <%= form_for @changeset, Routes.ts_admin_user_path(@conn, :automod_action_post, @userid), fn f -> %>
       <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
       <input type='hidden' name='automod_action[user_id]' value={@userid} />
@@ -56,7 +60,7 @@
       <div class="row">
         <div class="form-group col-md-12 col-lg-6 my-3">
           <label class="control-label">Hashes:</label>
-          
+
           <table class="table table-sm">
             <thead>
               <tr>
@@ -107,7 +111,7 @@
           <%= error_tag f, :expires %>
         </div>
       </div>
-      
+
       <div class="row">
         <div class="form-group col-md-3 my-3">
           <a href={Routes.ts_admin_user_path(@conn, :show, @userid)} class="btn btn-secondary btn-block">
