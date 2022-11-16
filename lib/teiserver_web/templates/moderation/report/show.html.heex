@@ -23,12 +23,17 @@
         <hr />
 
         <div class="float-end">
-          <div class="dropdown" style="display: inline-block;">
-            <div class={"btn btn-#{bsname} dropdown-toggle"} data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Actions
-            </div>
-            <%= render "actions.html", assigns %>
-          </div>
+          <a class="btn btn-outline-warning" href={"#{Routes.moderation_report_path(@conn, :index)}?target_id=#{@report.target_id}"}>
+            <%= central_component "icon", icon: "fa-solid fa-share-from-square" %>
+            &nbsp;
+            Filter by target
+          </a>
+
+          <a class="btn btn-outline-warning" href={"#{Routes.moderation_report_path(@conn, :index)}?reporter_id=#{@report.reporter_id}"}>
+            <%= central_component "icon", icon: "fa-solid fa-bullseye" %>
+            &nbsp;
+            Filter by reporter
+          </a>
         </div>
 
         <h3>

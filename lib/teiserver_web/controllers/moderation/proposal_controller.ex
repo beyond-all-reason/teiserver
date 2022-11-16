@@ -83,7 +83,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
         )
         actions = Moderation.list_actions(
           search: [target_id: user.id],
-          order_by: "Newest first",
+          order_by: "Most recently inserted first",
           limit: :infinity
         )
 
@@ -143,7 +143,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
           )
           actions = Moderation.list_actions(
             search: [target_id: user.id],
-            order_by: "Newest first",
+            order_by: "Most recently inserted first",
             limit: :infinity
           )
 

@@ -2,13 +2,25 @@
 
 <%= render TeiserverWeb.Moderation.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "bans"}) %>
 
+<script type="text/javascript" charset="utf-8">
+  function select_all_keys () {
+    $("#keys-row .form-check-input").prop("checked", true);
+  }
+
+  function clear_all_keys () {
+    $("#keys-row .form-check-input").prop("checked", false);
+  }
+</script>
+
 <%
   type_colours = %{
     "hw1" => "danger",
     "hw2" => "danger",
     "client_app_hash" => "warning",
     "wb1" => "success",
-    "chobby_hash" => "info"
+    "chobby_hash" => "info",
+    "chobby_sysinfo_hash" => "info",
+    "chobby_mac_hash" => "info"
   }
 
   type_icons = %{
@@ -16,7 +28,9 @@
     "hw2" => "fa-computer",
     "client_app_hash" => "fa-code-simple",
     "wb1" => "fa-globe",
-    "chobby_hash" => "fa-computer-classic"
+    "chobby_hash" => "fa-computer-classic",
+    "chobby_sysinfo_hash" => "fa-computer-classic",
+    "chobby_mac_hash" => "fa-computer-classic"
   }
 %>
 
@@ -30,12 +44,12 @@
           active: "new"
         })
         %>
-        
+
         <hr />
 <div class="float-end">
   <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>View user</a>
 </div>
-        
+
 <h3>Adding ban based on <%= @user.name %></h3>
 
 <div class="row">
@@ -51,16 +65,26 @@
           Potentially matches the following unbanned user(s): <%= (for u <- @matching_users, do: u.name) |> Enum.join(", ") %>. They exist prior to this ban and will not be affected.
         </div>
     <% end %>
-  
+
     <%= form_for @changeset, Routes.moderation_ban_path(@conn, :create), fn f -> %>
       <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
       <input type='hidden' name='ban[source_id]' value={@user.id} />
       <input type='hidden' name='ban[enabled]' value="true" />
 
-      <div class="row">
+      <div class="row" id="keys-row">
         <div class="form-group col-md-12 col-lg-6 my-3">
+          <%= label f, :reason, class: "control-label" %>
+          <%= text_input f, :reason, class: "form-control", autofocus: :autofocus %>
+          <%= error_tag f, :reason %>
+        </div>
+
+        <div class="form-group col-md-12 my-3">
+          <div class="float-end">
+            <span class="btn btn-outline-secondary" onclick="select_all_keys()">Select all keys</span>
+            <span class="btn btn-outline-secondary" onclick="clear_all_keys()">Clear all keys</span>
+          </div>
+
           <label class="control-label">Hashes:</label>
-          
           <table class="table table-sm">
             <thead>
               <tr>
@@ -98,14 +122,8 @@
             </tbody>
           </table>
         </div>
-
-        <div class="form-group col-md-12 col-lg-6 my-3">
-          <%= label f, :reason, class: "control-label" %>
-          <%= text_input f, :reason, class: "form-control", autofocus: :autofocus %>
-          <%= error_tag f, :reason %>
-        </div>
       </div>
-      
+
       <div class="row">
         <div class="form-group col-md-3 my-3">
           <a href={Routes.ts_admin_user_path(@conn, :show, @user.id)} class="btn btn-secondary btn-block">

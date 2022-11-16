@@ -26,13 +26,13 @@
   <thead>
     <tr>
       <th>&nbsp;</th>
-      <th colspan="2">Target</th>
+      <th>Target</th>
       <th>Type</th>
       <th>Extra text</th>
 
       <th>Reporter</th>
       <th>Datetime</th>
-      <th colspan="3">&nbsp;</th>
+      <th colspan="2">&nbsp;</th>
     </tr>
   </thead>
   <tbody>
@@ -50,16 +50,16 @@
         <% end %>
       </td>
 
-      <td style="width: 30px;">
+      <td>
         <a href={Routes.moderation_report_path(@conn, :user, report.target_id)} class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}>
           <%= central_component "icon",
-            icon: Central.Helpers.StylingHelper.icon(:show),
+            icon: Central.Helpers.StylingHelper.icon(:user),
             class: "fa-solid"
           %>
         </a>
+        &nbsp;
+        <%= report.target.name %>
       </td>
-
-      <td><%= report.target.name %></td>
 
       <td><%= report.type %>/<%= report.sub_type %></td>
       <td><%= report.extra_text %></td>
@@ -70,25 +70,24 @@
 
       <td>
         <a href={Routes.moderation_report_path(@conn, :show, report.id)} class="btn btn-secondary btn-sm">
-          Show report
+          Details
         </a>
       </td>
 
-      <td>
-        <%= if report.match_id do %>
+
+      <%= if report.match_id do %>
+        <td>
           <a href={Routes.ts_admin_match_path(@conn, :show, report.match_id)} class="btn btn-secondary btn-sm">
             Match
           </a>
-        <% end %>
-      </td>
 
-      <td>
-        <%= if report.match_id do %>
           <a href={Routes.ts_admin_match_path(@conn, :chat, report.match_id)} class="btn btn-secondary btn-sm">
             Chat
           </a>
-        <% end %>
-      </td>
+        </td>
+      <% else %>
+        <td>&nbsp;</td>
+      <% end %>
     </tr>
 <% end %>
 

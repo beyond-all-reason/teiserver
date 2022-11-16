@@ -46,8 +46,10 @@
           id: "search_order",
           selected: @params["order"] || "Newest first",
           enumerable: [
-            %{id: "Newest first", icon: "fas fa-sort-numeric-down", colour: fg},
-            %{id: "Oldest first", icon: "fas fa-sort-numeric-up", colour: fg},
+            %{id: "Most recently inserted first", icon: "fas fa-sort-numeric-down", colour: fg},
+            %{id: "Oldest inserted first", icon: "fas fa-sort-numeric-up", colour: fg},
+            %{id: "Earliest expiry first", icon: "fas fa-sort-numeric-down", colour: fg},
+            %{id: "Latest expiry first", icon: "fas fa-sort-numeric-up", colour: fg},
           ]
         } %>
       </div>

@@ -100,14 +100,24 @@ defmodule Teiserver.Moderation.ActionLib do
       order_by: [desc: actions.name]
   end
 
-  def order_by(query, "Newest first") do
+  def order_by(query, "Most recently inserted first") do
     from actions in query,
       order_by: [desc: actions.inserted_at]
   end
 
-  def order_by(query, "Oldest first") do
+  def order_by(query, "Oldest inserted first") do
     from actions in query,
       order_by: [asc: actions.inserted_at]
+  end
+
+  def order_by(query, "Earliest expiry first") do
+    from actions in query,
+      order_by: [asc: actions.expires]
+  end
+
+  def order_by(query, "Latest expiry first") do
+    from actions in query,
+      order_by: [desc: actions.expires]
   end
 
   @spec preload(Ecto.Query.t, List.t | nil) :: Ecto.Query.t
@@ -116,6 +126,7 @@ defmodule Teiserver.Moderation.ActionLib do
     query = if :target in preloads, do: _preload_target(query), else: query
     query = if :reports in preloads, do: _preload_reports(query), else: query
     query = if :reports_and_reporters in preloads, do: _preload_reports_and_reporters(query), else: query
+    query
   end
 
   @spec _preload_target(Ecto.Query.t()) :: Ecto.Query.t()

@@ -54,7 +54,7 @@ defmodule TeiserverWeb.Moderation.UserController do
           search: [
             target_id: user.id
           ],
-          order_by: "Newest first",
+          order_by: "Most recently inserted first",
           limit: :infinity
         )
 
