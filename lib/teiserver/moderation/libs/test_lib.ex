@@ -18,4 +18,16 @@ defmodule Teiserver.Moderation.ModerationTestLib do
     }, attrs))
     report
   end
+
+  @spec action_fixture(map) :: Moderation.Action.t()
+  def action_fixture(attrs \\ %{}) do
+    {:ok, action} = Moderation.create_action(Map.merge(%{
+      target_id: GeneralTestLib.make_user().id,
+      reason: "Reason",
+      restrictions: ["Site", "Login"],
+      score_modifier: 1000,
+      expires: Timex.shift(Timex.now(), days: 5)
+    }, attrs))
+    action
+  end
 end

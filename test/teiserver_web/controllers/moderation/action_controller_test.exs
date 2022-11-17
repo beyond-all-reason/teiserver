@@ -3,17 +3,17 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   use CentralWeb.ConnCase
 
   alias Teiserver.Moderation
-  alias Teiserver.ModerationTestLib
+  alias Teiserver.Moderation.ModerationTestLib
 
   alias Central.Helpers.GeneralTestLib
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
+    GeneralTestLib.conn_setup(["teiserver.staff.reviewer", "teiserver.staff.moderator"])
     |> Teiserver.TeiserverTestLib.conn_setup()
   end
 
-  @create_attrs %{name: "some name"}
-  @update_attrs %{name: "some updated name"}
-  @invalid_attrs %{name: nil}
+  @create_attrs %{reason: "some name", restrictions: %{"Login" => "Login", "Site" => "Site"}, expires: "1 day", score_modifier: "10000"}
+  @update_attrs %{reason: "some updated name", restrictions: %{"Warning" => "Warning"}}
+  @invalid_attrs %{reason: nil, restrictions: %{}}
 
   describe "index" do
     test "lists all actions", %{conn: conn} do
@@ -23,23 +23,31 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   end
 
   describe "new action" do
-    test "renders form", %{conn: conn} do
+    test "renders select form", %{conn: conn} do
       conn = get(conn, Routes.moderation_action_path(conn, :new))
-      assert html_response(conn, 200) =~ "Create"
+      assert html_response(conn, 200) =~ "Select user:"
+    end
+
+    test "renders creation form", %{conn: conn} do
+      user = GeneralTestLib.make_user()
+      conn = get(conn, Routes.moderation_action_path(conn, :new_with_user) <> "?teiserver_user=%23#{user.id}")
+      assert html_response(conn, 200) =~ "Adding action against"
     end
   end
 
   describe "create action" do
     test "redirects to show when data is valid", %{conn: conn} do
-      conn = post(conn, Routes.moderation_action_path(conn, :create), action: @create_attrs)
+      user = GeneralTestLib.make_user()
+      conn = post(conn, Routes.moderation_action_path(conn, :create), action: Map.put(@create_attrs, "target_id", user.id))
       assert redirected_to(conn) == Routes.moderation_action_path(conn, :index)
 
-      new_action = Moderation.list_actions(search: [name: @create_attrs.name])
+      new_action = Moderation.list_actions(search: [target_id: user.id])
       assert Enum.count(new_action) == 1
     end
 
     test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.moderation_action_path(conn, :create), action: @invalid_attrs)
+      user = GeneralTestLib.make_user()
+      conn = post(conn, Routes.moderation_action_path(conn, :create), action: Map.put(@invalid_attrs, "target_id", user.id))
       assert html_response(conn, 200) =~ "Oops, something went wrong!"
     end
   end
@@ -95,19 +103,16 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
     end
   end
 
-  describe "delete action" do
-    test "deletes chosen action", %{conn: conn} do
+  describe "halt action" do
+    test "halts chosen action", %{conn: conn} do
       action = ModerationTestLib.action_fixture()
-      conn = delete(conn, Routes.moderation_action_path(conn, :delete, action))
+      conn = put(conn, Routes.moderation_action_path(conn, :halt, action.id))
       assert redirected_to(conn) == Routes.moderation_action_path(conn, :index)
-      assert_error_sent 404, fn ->
-        get(conn, Routes.moderation_action_path(conn, :show, action))
-      end
     end
 
     test "renders error for deleting nil item", %{conn: conn} do
       assert_error_sent 404, fn ->
-        delete(conn, Routes.moderation_action_path(conn, :delete, -1))
+        put(conn, Routes.moderation_action_path(conn, :halt, -1))
       end
     end
   end
