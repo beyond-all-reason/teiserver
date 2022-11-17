@@ -381,8 +381,8 @@ defmodule Central.Account.GroupLib do
   # end
 
   # Takes a conn and either a group id or an object with a group_id
-  def access?(nil, _), do: nil
-  def access?(_, nil), do: nil
+  def access?(_, _group = nil), do: true
+  def access?(_memberships = nil, _), do: false
 
   def access?(%{assigns: %{memberships: memberships}}, group_id) do
     access?(memberships, group_id)

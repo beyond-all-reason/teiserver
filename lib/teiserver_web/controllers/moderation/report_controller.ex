@@ -170,7 +170,7 @@ defmodule TeiserverWeb.Moderation.ReportController do
 
   @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
-    report = Moderation.get_report!(id)
+    report = Moderation.get_report!(id, preload: [:target, :reporter])
 
     report
       |> ReportLib.make_favourite

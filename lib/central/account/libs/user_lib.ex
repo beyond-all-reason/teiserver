@@ -47,9 +47,7 @@ defmodule Central.Account.UserLib do
     if allow?(conn, "admin.admin.full") do
       {true, nil}
     else
-      result = GroupLib.access?(conn, target_user.admin_group_id)
-
-      case result do
+      case GroupLib.access?(conn, target_user.admin_group_id) do
         true -> {true, nil}
         false -> {false, :no_access}
       end

@@ -1,13 +1,14 @@
 defmodule TeiserverWeb.Moderation.ProposalControllerTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
+  use CentralWeb.ConnCase
 
   alias Teiserver.Moderation
   alias Teiserver.ModerationTestLib
 
-  alias Teiserver.Helpers.GeneralTestLib
+  alias Central.Helpers.GeneralTestLib
   setup do
-    GeneralTestLib.conn_setup(~w(horizon.manage))
+    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
+    |> Teiserver.TeiserverTestLib.conn_setup()
   end
 
   @create_attrs %{name: "some name"}

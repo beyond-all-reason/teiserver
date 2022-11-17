@@ -1,19 +1,14 @@
 defmodule TeiserverWeb.Moderation.ReportControllerTest do
   @moduledoc false
-  use TeiserverWeb.ConnCase
+  use CentralWeb.ConnCase
 
-  alias Teiserver.Moderation
-  alias Teiserver.ModerationTestLib
+  alias Teiserver.Moderation.ModerationTestLib
 
-  alias Teiserver.Helpers.GeneralTestLib
+  alias Central.Helpers.GeneralTestLib
   setup do
-    GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.player_permissions())
+    GeneralTestLib.conn_setup(["teiserver.staff.reviewer", "teiserver.staff.moderator"])
     |> Teiserver.TeiserverTestLib.conn_setup()
   end
-
-  @create_attrs %{name: "some name"}
-  @update_attrs %{name: "some updated name"}
-  @invalid_attrs %{name: nil}
 
   describe "index" do
     test "lists all reports", %{conn: conn} do
@@ -22,33 +17,11 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
     end
   end
 
-  describe "new report" do
-    test "renders form", %{conn: conn} do
-      conn = get(conn, Routes.moderation_report_path(conn, :new))
-      assert html_response(conn, 200) =~ "Create"
-    end
-  end
-
-  describe "create report" do
-    test "redirects to show when data is valid", %{conn: conn} do
-      conn = post(conn, Routes.moderation_report_path(conn, :create), report: @create_attrs)
-      assert redirected_to(conn) == Routes.moderation_report_path(conn, :index)
-
-      new_report = Moderation.list_reports(search: [name: @create_attrs.name])
-      assert Enum.count(new_report) == 1
-    end
-
-    test "renders errors when data is invalid", %{conn: conn} do
-      conn = post(conn, Routes.moderation_report_path(conn, :create), report: @invalid_attrs)
-      assert html_response(conn, 200) =~ "Oops, something went wrong!"
-    end
-  end
-
   describe "show report" do
     test "renders show page", %{conn: conn} do
       report = ModerationTestLib.report_fixture()
       resp = get(conn, Routes.moderation_report_path(conn, :show, report))
-      assert html_response(resp, 200) =~ "Edit report"
+      assert html_response(resp, 200) =~ "Filter by target"
     end
 
     test "renders show nil item", %{conn: conn} do
@@ -58,40 +31,23 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
     end
   end
 
-  describe "edit report" do
-    test "renders form for editing nil", %{conn: conn} do
-      assert_error_sent 404, fn ->
-        get(conn, Routes.moderation_report_path(conn, :edit, -1))
-      end
+  describe "show user" do
+    test "renders user page - target", %{conn: conn} do
+      new_user = GeneralTestLib.make_user()
+      report = ModerationTestLib.report_fixture(%{target_id: new_user.id})
+      resp = get(conn, Routes.moderation_report_path(conn, :user, report.target_id))
+      assert html_response(resp, 200) =~ "Reports against ("
+      assert html_response(resp, 200) =~ "Reports made ("
+      assert html_response(resp, 200) =~ "Actions ("
     end
 
-    test "renders form for editing chosen report", %{conn: conn} do
-      report = ModerationTestLib.report_fixture()
-      conn = get(conn, Routes.moderation_report_path(conn, :edit, report))
-      assert html_response(conn, 200) =~ "Save changes"
-    end
-  end
-
-  describe "update report" do
-    test "redirects when data is valid", %{conn: conn} do
-      report = ModerationTestLib.report_fixture()
-      conn = put(conn, Routes.moderation_report_path(conn, :update, report), report: @update_attrs)
-      assert redirected_to(conn) == Routes.moderation_report_path(conn, :index)
-
-      conn = get(conn, Routes.moderation_report_path(conn, :show, report))
-      assert html_response(conn, 200) =~ "some updated"
-    end
-
-    test "renders errors when data is invalid", %{conn: conn} do
-      report = ModerationTestLib.report_fixture()
-      conn = put(conn, Routes.moderation_report_path(conn, :update, report), report: @invalid_attrs)
-      assert html_response(conn, 200) =~ "Oops, something went wrong!"
-    end
-
-    test "renders errors when nil object", %{conn: conn} do
-      assert_error_sent 404, fn ->
-        put(conn, Routes.moderation_report_path(conn, :update, -1), report: @invalid_attrs)
-      end
+    test "renders user page - reporter", %{conn: conn} do
+      new_user = GeneralTestLib.make_user()
+      report = ModerationTestLib.report_fixture(%{reporter_id: new_user.id})
+      resp = get(conn, Routes.moderation_report_path(conn, :user, report.reporter_id))
+      assert html_response(resp, 200) =~ "Reports against ("
+      assert html_response(resp, 200) =~ "Reports made ("
+      assert html_response(resp, 200) =~ "Actions ("
     end
   end
 

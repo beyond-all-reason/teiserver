@@ -5,7 +5,6 @@ defmodule TeiserverWeb.Game.QueueControllerTest do
   alias Teiserver.TeiserverTestLib
 
   alias Central.Helpers.GeneralTestLib
-
   setup do
     GeneralTestLib.conn_setup(Teiserver.TeiserverTestLib.admin_permissions())
     |> Teiserver.TeiserverTestLib.conn_setup()

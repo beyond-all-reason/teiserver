@@ -1,5 +1,5 @@
 # defmodule TeiserverWeb.Account.BadgeTypeControllerTest do
-#   use TeiserverWeb.ConnCase
+#   use CentralWeb.ConnCase
 
 #   alias Teiserver.Account
 #   alias Teiserver.AccountTestLib
