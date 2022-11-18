@@ -57,4 +57,17 @@ defmodule Teiserver.Moderation.ModerationTestLib do
 
     {proposal, vote}
   end
+
+  @spec ban_fixture(map) :: Moderation.Action.t()
+  def ban_fixture(attrs \\ %{}) do
+    {:ok, ban} = Moderation.create_ban(Map.merge(%{
+      source_id: GeneralTestLib.make_user().id,
+      added_by_id: GeneralTestLib.make_user().id,
+
+      key_values: ["key1", "key2"],
+      enabled: true,
+      reason: "Reason goes here"
+    }, attrs))
+    ban
+  end
 end

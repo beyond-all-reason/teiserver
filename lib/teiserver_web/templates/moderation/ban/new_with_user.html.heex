@@ -67,6 +67,12 @@
     <% end %>
 
     <%= form_for @changeset, Routes.moderation_ban_path(@conn, :create), fn f -> %>
+      <%= if @changeset.action do %>
+        <div class="alert alert-danger">
+          <p>Oops, something went wrong! Please check the errors below.</p>
+        </div>
+      <% end %>
+
       <input type='hidden' name='_csrf_token' value={get_csrf_token()} />
       <input type='hidden' name='ban[source_id]' value={@user.id} />
       <input type='hidden' name='ban[enabled]' value="true" />

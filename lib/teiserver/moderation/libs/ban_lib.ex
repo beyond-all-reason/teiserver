@@ -55,6 +55,16 @@ defmodule Teiserver.Moderation.BanLib do
       where: bans.id in ^id_list
   end
 
+  def _search(query, :source_id, source_id) do
+    from actions in query,
+      where: actions.source_id == ^source_id
+  end
+
+  def _search(query, :source_id_in, id_list) do
+    from actions in query,
+      where: actions.source_id in ^id_list
+  end
+
   def _search(query, :basic_search, ref) do
     ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
 
