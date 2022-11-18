@@ -30,4 +30,31 @@ defmodule Teiserver.Moderation.ModerationTestLib do
     }, attrs))
     action
   end
+
+  @spec proposal_fixture(map) :: {Moderation.Proposal.t(), Moderation.ProposalVote.t()}
+  def proposal_fixture(attrs \\ %{}) do
+    proposer = attrs[:proposer] || GeneralTestLib.make_user()
+
+    {:ok, proposal} = Moderation.create_proposal(Map.merge(%{
+      proposer_id: proposer.id,
+      target_id: GeneralTestLib.make_user().id,
+      action_id: nil,
+
+      restrictions: ["Restrict1", "Restrict2"],
+      reason: "Reasoning",
+      duration: "5 days",
+
+      votes_for: 1,
+      votes_against: 0,
+      votes_abstain: 0,
+    }, attrs))
+
+    {:ok, vote} = Moderation.create_proposal_vote(%{
+      proposal_id: proposal.id,
+      user_id: proposer.id,
+      vote: 1,
+    })
+
+    {proposal, vote}
+  end
 end

@@ -265,7 +265,7 @@ defmodule TeiserverWeb.Router do
 
         get("/proposal/new_with_user", ProposalController, :new_with_user)
         put("/proposal/vote/:proposal_id/:direction", ProposalController, :vote)
-        resources("/proposal", ProposalController)
+        resources("/proposal", ProposalController, only: [:index, :show, :new, :create, :edit, :update])
 
         put("/ban/:id/disable", BanController, :disable)
         put("/ban/:id/enable", BanController, :enable)

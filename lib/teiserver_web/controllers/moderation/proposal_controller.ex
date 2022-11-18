@@ -238,6 +238,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
             conn
               |> assign(:proposal, proposal)
               |> assign(:changeset, changeset)
+              |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
               |> render("edit.html")
         end
     end
@@ -306,7 +307,7 @@ defmodule TeiserverWeb.Moderation.ProposalController do
 
   @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def delete(conn, %{"id" => id}) do
-    proposal = Moderation.get_proposal!(id)
+    proposal = Moderation.get_proposal!(id, preload: [:target])
 
     proposal
       |> ProposalLib.make_favourite

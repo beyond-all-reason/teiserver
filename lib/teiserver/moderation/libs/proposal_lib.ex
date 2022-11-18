@@ -50,10 +50,27 @@ defmodule Teiserver.Moderation.ProposalLib do
       where: proposals.id == ^id
   end
 
-  def _search(query, :name, name) do
-    from proposals in query,
-      where: proposals.name == ^name
+  def _search(query, :target_id, target_id) do
+    from actions in query,
+      where: actions.target_id == ^target_id
   end
+
+  def _search(query, :target_id_in, id_list) do
+    from actions in query,
+      where: actions.target_id in ^id_list
+  end
+
+  def _search(query, :proposer_id, proposer_id) do
+    from actions in query,
+      where: actions.proposer_id == ^proposer_id
+  end
+
+  def _search(query, :proposer_id_in, id_list) do
+    from actions in query,
+      where: actions.proposer_id in ^id_list
+  end
+
+
 
   def _search(query, :id_list, id_list) do
     from proposals in query,
