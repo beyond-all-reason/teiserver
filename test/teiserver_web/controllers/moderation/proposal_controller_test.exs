@@ -67,6 +67,10 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
         get(conn, Routes.moderation_proposal_path(conn, :show, -1))
       end
     end
+
+    test "vote in proposal" do
+      flunk()
+    end
   end
 
   describe "edit proposal" do

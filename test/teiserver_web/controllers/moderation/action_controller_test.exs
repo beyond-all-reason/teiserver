@@ -20,6 +20,14 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
       conn = get(conn, Routes.moderation_action_path(conn, :index))
       assert html_response(conn, 200) =~ "Listing Actions"
     end
+
+    test "search" do
+      flunk()
+    end
+
+    test "list actions for a user" do
+      flunk()
+    end
   end
 
   describe "new action" do

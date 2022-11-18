@@ -15,6 +15,14 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
       conn = get(conn, Routes.moderation_report_path(conn, :index))
       assert html_response(conn, 200) =~ "Listing Reports"
     end
+
+    test "show reports by target" do
+      flunk()
+    end
+
+    test "show reports by reporter" do
+      flunk()
+    end
   end
 
   describe "show report" do

@@ -67,4 +67,13 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
     end
   end
 
+  describe "update ban" do
+    test "enable/disable" do
+      flunk()
+    end
+
+    test "halt" do
+      flunk()
+    end
+  end
 end
