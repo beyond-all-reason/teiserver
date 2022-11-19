@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
   use CentralWeb, :controller
 
   alias Teiserver.{Account, Battle, Moderation}
+  alias Moderation.ReportLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   require Logger
 
@@ -34,6 +35,8 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
         )
 
         conn
+          |> assign(:sections, ReportLib.sections())
+          |> assign(:sub_sections, ReportLib.sub_sections())
           |> assign(:matches, matches)
           |> assign(:target, target)
           |> render("index.html")
@@ -71,7 +74,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
       reporter_id: conn.assigns.current_user.id,
       target_id: report["target_id"],
       type: report["type"],
-      sub_type: report["subtype"],
+      sub_type: report["sub_type"],
       extra_text: report["extra_text"],
       match_id: match_id,
       relationship: relationship

@@ -8,24 +8,24 @@
     $("#icon-type-" + t).removeClass("fa-regular");
     $("#icon-type-" + t).addClass("fa-solid");
 
-    $(".subtype-row").hide();
-    $("#subtype-row-" + t).show();
+    $(".sub_type-row").hide();
+    $("#sub_type-row-" + t).show();
   }
 
   function select_sub_type(st) {
-    $("#report_subtype").attr("value", st);
+    $("#report_sub_type").attr("value", st);
     $("#submission-form").show();
 
-    $("#icon-subtype-" + st).removeClass("fa-regular");
-    $("#icon-subtype-" + st).addClass("fa-solid");
+    $("#icon-sub_type-" + st).removeClass("fa-regular");
+    $("#icon-sub_type-" + st).addClass("fa-solid");
 
-    $("#type-row").append($("#subtype-card-" + st));
-    $(".subtype-row").hide();
+    $("#type-row").append($("#sub_type-card-" + st));
+    $(".sub_type-row").hide();
   }
 </script>
 
 <style type="text/css">
-  .subtype-row {
+  .sub_type-row {
     display: none;
   }
 </style>
@@ -47,106 +47,42 @@
 
         <%# Type %>
         <div class="row" id="type-row">
-          <div class="col type-card" id="type-card-chat">
-            <div class="menu-card">
-              <a href="#" onclick="select_type('chat'); return false;">
-                <i class={"fa-fw #{Central.Communication.ChatRoomLib.icon()} fa-3x"} id="icon-type-chat"></i><br />
-                Chat / Communiations
-              </a>
+          <%= for {label, name, icon} <- @sections do %>
+            <div class="col type-card" id={"type-card-#{name}"}>
+              <div class="menu-card">
+                <a href="#" onclick={"select_type('#{name}'); return false;"}>
+                  <i class={"#{icon} fa-fw fa-3x"} id={"icon-type-#{name}"}></i><br />
+                  <%= label %>
+                </a>
+              </div>
             </div>
-          </div>
-          <div class="col type-card" id="type-card-actions">
-            <div class="menu-card">
-              <a href="#" onclick="select_type('actions'); return false;">
-                <i class={"fa-fw #{Teiserver.Battle.MatchLib.icon()} fa-3x"} id="icon-type-actions"></i><br />
-                In game actions
-              </a>
-            </div>
-          </div>
+          <% end %>
         </div>
 
         <%# Chat sub type %>
-        <div class="subtype-row" id="subtype-row-chat">
-          <div class="row">
-            <div class="col subtype-card" id="subtype-card-spam">
-              <div class="menu-card">
-                <a href="#" onclick="select_sub_type('spam'); return false;">
-                  <i class={"fa-fw fa-regular fa-envelopes-bulk fa-3x"} id="icon-subtype-spam"></i><br />
-                  Spam
-                </a>
-              </div>
-            </div>
-            <div class="col subtype-card" id="subtype-card-bullying">
-              <div class="menu-card">
-                <a href="#" onclick="select_sub_type('bullying'); return false;">
-                  <i class={"fa-fw fa-regular fa-person-harassing fa-3x"} id="icon-subtype-bullying"></i><br />
-                  Bullying
-                </a>
-              </div>
-            </div>
-            <div class="col subtype-card" id="subtype-card-hate">
-              <div class="menu-card">
-                <a href="#" onclick="select_sub_type('hate'); return false;">
-                  <i class={"fa-fw fa-regular fa-triangle-exclamation fa-3x"} id="icon-subtype-hate"></i><br />
-                  Hate speech
-                </a>
-              </div>
-            </div>
-            <div class="col subtype-card" id="subtype-card-other">
-              <div class="menu-card">
-                <a href="#" onclick="select_sub_type('other'); return false;">
-                  <i class={"fa-fw fa-regular fa-face-unamused fa-3x"} id="icon-subtype-other"></i><br />
-                  Other
-                </a>
-              </div>
+        <%= for {_label, section_name, _icon} <- @sections do %>
+          <div class="sub_type-row" id={"sub_type-row-#{section_name}"}>
+            <div class="row">
+              <%= for {label, name, icon} <- @sub_sections[section_name] do %>
+                <div class="col sub_type-card" id={"sub_type-card-#{name}"}>
+                  <div class="menu-card">
+                    <a href="#" onclick={"select_sub_type('#{name}'); return false;"}>
+                      <i class={"fa-fw fa-regular #{icon} fa-3x"} id={"icon-sub_type-#{name}"}></i><br />
+                      <%= label %>
+                    </a>
+                  </div>
+                </div>
+              <% end %>
             </div>
           </div>
-        </div>
+        <% end %>
 
-        <%# Actions sub type %>
-        <div class="subtype-row" id="subtype-row-actions">
-          <div class="row">
-            <div class="col subtype-card" id="subtype-card-noob">
-              <div class="menu-card">
-                <a href="#" onclick="select_sub_type('noob'); return false;">
-                  <i class={"fa-fw fa-regular fa-chevrons-up fa-3x"} id="icon-subtype-noob"></i><br />
-                  Noob
-                </a>
-              </div>
-            </div>
-            <div class="col subtype-card" id="subtype-card-griefing">
-              <div class="menu-card">
-                <a href="#" onclick="select_sub_type('griefing'); return false;">
-                  <i class={"fa-fw fa-regular fa-face-angry-horns fa-3x"} id="icon-subtype-griefing"></i><br />
-                  Griefing
-                </a>
-              </div>
-            </div>
-            <div class="col subtype-card" id="subtype-card-cheating">
-              <div class="menu-card">
-                <a href="#" onclick="select_sub_type('cheating'); return false;">
-                  <i class={"fa-fw fa-regular fa-cards fa-3x"} id="icon-subtype-cheating"></i><br />
-                  Cheating
-                </a>
-              </div>
-            </div>
-            <div class="col subtype-card" id="subtype-card-other">
-              <div class="menu-card">
-                <a href="#" onclick="select_sub_type('other'); return false;">
-                  <i class={"fa-fw fa-regular fa-face-unamused fa-3x"} id="icon-subtype-other"></i><br />
-                  Other
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-        
         <%# Submission form %>
         <form action={Routes.moderation_report_form_path(@conn, :create)} method="post" class="" style="display: none;" id="submission-form">
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
           <input type="hidden" name="report[target_id]" id="report_target_id" value={@target.id} />
           <input type="hidden" name="report[type]" id="report_type" value="none" />
-          <input type="hidden" name="report[subtype]" id="report_subtype" value="none" />
+          <input type="hidden" name="report[sub_type]" id="report_sub_type" value="none" />
 
           <%= if not Enum.empty?(@matches) do %>
             <div class="row">
