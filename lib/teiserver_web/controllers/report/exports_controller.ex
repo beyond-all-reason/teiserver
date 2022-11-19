@@ -1,7 +1,6 @@
 defmodule TeiserverWeb.Report.ExportsController do
   use CentralWeb, :controller
   alias Teiserver.Telemetry
-  import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   plug(AssignPlug,
     site_menu_active: "teiserver_report",
@@ -18,7 +17,7 @@ defmodule TeiserverWeb.Report.ExportsController do
   plug(:add_breadcrumb, name: "Exports", url: "/teiserver/reports/exports")
 
   @spec index(Plug.Conn.t(), map) :: Plug.Conn.t()
-  def index(conn, params) do
+  def index(conn, _params) do
     conn
       |> render("index.html")
   end
