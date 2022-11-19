@@ -56,22 +56,28 @@ defmodule Teiserver.Moderation.BanLib do
   end
 
   def _search(query, :source_id, source_id) do
-    from actions in query,
-      where: actions.source_id == ^source_id
+    from bans in query,
+      where: bans.source_id == ^source_id
+  end
+
+  def _search(query, :enabled, enabled) do
+    from bans in query,
+      where: bans.enabled == ^enabled
+  end
+
+  def _search(query, :any_key, key_list) do
+    from bans in query,
+      where: array_overlap_a_in_b(bans.key_values, ^key_list)
   end
 
   def _search(query, :source_id_in, id_list) do
-    from actions in query,
-      where: actions.source_id in ^id_list
+    from bans in query,
+      where: bans.source_id in ^id_list
   end
 
-  def _search(query, :basic_search, ref) do
-    ref_like = "%" <> String.replace(ref, "*", "%") <> "%"
-
+  def _search(query, :added_before, dt) do
     from bans in query,
-      where: (
-            ilike(bans.name, ^ref_like)
-        )
+      where: bans.inserted_at < ^dt
   end
 
   @spec order_by(Ecto.Query.t, String.t | nil) :: Ecto.Query.t

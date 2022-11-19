@@ -82,7 +82,7 @@ defmodule TeiserverWeb.Live.ClientTest do
       {:ok, view, _html} = live(conn, "/teiserver/admin/client/#{user.id}")
       assert Client.get_client_by_id(user.id) != nil
 
-      render_click(view, "force-disconnect", %{})
+      render_click(view, "force-reconnect", %{})
       assert_redirect(view, "/teiserver/admin/client", 250)
 
       assert Client.get_client_by_id(user.id) == nil

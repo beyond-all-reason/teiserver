@@ -2,7 +2,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
   use GenServer
   alias Central.Config
   import Central.Logging.Helpers, only: [add_audit_log: 4]
-  alias Teiserver.{Account, User, Moderation, Coordinator}
+  alias Teiserver.{Account, User, Moderation, Coordinator, Client}
   alias Phoenix.PubSub
   require Logger
   alias Teiserver.Data.Types, as: T
@@ -132,7 +132,7 @@ defmodule Teiserver.Coordinator.AutomodServer do
       Moderation.list_bans(
         search: [
           enabled: true,
-          any_value: value_list,
+          any_key: value_list,
           added_before: user.inserted_at
         ],
         limit: 1
@@ -150,9 +150,9 @@ defmodule Teiserver.Coordinator.AutomodServer do
     {:ok, action} = Moderation.create_action(%{
       target_id: userid,
       reason: "Banned",
-      actions: ["Login", "Site"],
+      restrictions: ["Login", "Site"],
       score_modifier: 0,
-      expires: nil
+      expires: Timex.now() |> Timex.shift(years: 1000)
     })
 
     add_audit_log(
@@ -165,6 +165,8 @@ defmodule Teiserver.Coordinator.AutomodServer do
         "ban_id" => ban.id,
       }
     )
+
+    Client.disconnect(userid, "Banned")
 
     "Banned user"
   end

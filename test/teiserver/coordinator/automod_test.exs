@@ -1,7 +1,7 @@
 defmodule Teiserver.Coordinator.AutomodTest do
   use Central.ServerCase, async: false
   alias Central.{Config, Logging}
-  alias Teiserver.{Account, User, Client}
+  alias Teiserver.{Account, User, Client, Moderation}
   alias Teiserver.Coordinator.{CoordinatorServer, AutomodServer}
   alias Teiserver.Account.CalculateSmurfKeyTask
 
@@ -20,11 +20,11 @@ defmodule Teiserver.Coordinator.AutomodTest do
   end
 
   test "hw_ban", %{banned_user: banned_user} do
-    {:ok, automod_action} = Account.create_automod_action(%{
+    {:ok, ban} = Moderation.create_ban(%{
       enabled: true,
-      values: ["uOGXziwWC1mCePGsh0tTQg==", "some_other_value"],
+      key_values: ["uOGXziwWC1mCePGsh0tTQg==", "some_other_value"],
       added_by_id: banned_user.id,
-      user_id: banned_user.id,
+      source_id: banned_user.id,
       reason: "hw-ban"
     })
 
@@ -41,6 +41,12 @@ defmodule Teiserver.Coordinator.AutomodTest do
     hw2 = CalculateSmurfKeyTask.calculate_hw2_fingerprint(good_stats)
     Account.create_smurf_key(good_user.id, "hw1", hw1)
     Account.create_smurf_key(good_user.id, "hw2", hw2)
+
+    IO.puts ""
+    IO.inspect {hw1, hw2}
+    IO.puts ""
+
+    :timer.sleep(100)
 
     bad_user = new_user()
     bad_stats = %{
@@ -62,15 +68,15 @@ defmodule Teiserver.Coordinator.AutomodTest do
     result = AutomodServer.check_user(bad_user.id)
     assert result == "Banned user"
     stats = Account.get_user_stat_data(bad_user.id)
-    assert stats["autoban_id"] == automod_action.id
+    assert stats["autoban_id"] == ban.id
   end
 
   test "chobby_hash_ban", %{banned_user: banned_user} do
-    {:ok, automod_action} = Account.create_automod_action(%{
+    {:ok, ban} = Moderation.create_ban(%{
       enabled: true,
-      values: ["123456789 abcdefghij"],
+      key_values: ["123456789 abcdefghij"],
       added_by_id: banned_user.id,
-      user_id: banned_user.id,
+      source_id: banned_user.id,
       reason: "hw-ban"
     })
 
@@ -98,7 +104,7 @@ defmodule Teiserver.Coordinator.AutomodTest do
     result = AutomodServer.check_user(bad_user.id)
     assert result == "Banned user"
     stats = Account.get_user_stat_data(bad_user.id)
-    assert stats["autoban_id"] == automod_action.id
+    assert stats["autoban_id"] == ban.id
   end
 
   test "ban added after user", %{banned_user: banned_user} do
@@ -106,11 +112,11 @@ defmodule Teiserver.Coordinator.AutomodTest do
     Account.create_smurf_key(bad_user1.id, "chobby_hash", "123456789")
     :timer.sleep(200)
 
-    {:ok, _automod_action} = Account.create_automod_action(%{
+    {:ok, _ban} = Moderation.create_ban(%{
       enabled: true,
-      values: ["123456789"],
+      key_values: ["123456789"],
       added_by_id: banned_user.id,
-      user_id: banned_user.id,
+      source_id: banned_user.id,
       reason: "hw-ban"
     })
     :timer.sleep(200)
@@ -128,11 +134,11 @@ defmodule Teiserver.Coordinator.AutomodTest do
   end
 
   test "delayed data", %{banned_user: banned_user} do
-    {:ok, _automod_action} = Account.create_automod_action(%{
+    {:ok, _ban} = Moderation.create_ban(%{
       enabled: true,
-      values: ["uOGXziwWC1mCePGsh0tTQg=="],
+      key_values: ["uOGXziwWC1mCePGsh0tTQg=="],
       added_by_id: banned_user.id,
-      user_id: banned_user.id,
+      source_id: banned_user.id,
       reason: "hw-ban"
     })
 
@@ -208,16 +214,17 @@ defmodule Teiserver.Coordinator.AutomodTest do
     # Should also have an automod report against them
     [log] = Logging.list_audit_logs(search: [
       actions: [
-          "Teiserver:Automod action enacted",
+          "Moderation:Ban enacted",
         ],
       details_equal: {"target_user_id", delayed_user.id |> to_string}
       ],
       order_by: "Newest first"
     )
-    report_id = log.details["report_id"]
 
-    report = Account.get_report!(report_id)
-    User.update_report(report, "any reason")
+    action_id = log.details["action_id"]
+
+    # Ensure it exists
+    Moderation.get_action!(action_id)
 
     # And disconnected
     assert Client.get_client_by_id(delayed_user.id) == nil

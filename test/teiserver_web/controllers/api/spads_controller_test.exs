@@ -152,8 +152,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
           "Crossbow" => %{"id" => 0, "team" => 1},
           "Dagger" => %{"id" => 2, "team" => 0}
         },
-        "unbalance_indicator" => 0
-
+        "unbalance_indicator" => 1
       }
     end
   end

@@ -18,17 +18,17 @@ defmodule Teiserver.SpringTelemetryTest do
     # Bad metadata base64
     _send_raw(socket, "c.telemetry.upload_infolog log_type user_hash rXTrJC0nAdWUmCH8Q7+kWQ==-- contents\n")
     reply = _recv_raw(socket)
-    assert reply == "NO cmd=upload_infolog - metadata - Base64 decode error\n"
+    assert reply == "NO cmd=upload_infolog - metadata decode - Base64 decode error\n"
 
     # Bad metadata json
     _send_raw(socket, "c.telemetry.upload_infolog log_type user_hash MTEtMTE= contents\n")
     reply = _recv_raw(socket)
-    assert reply == "NO cmd=upload_infolog - metadata - Json decode error at position 2\n"
+    assert reply == "NO cmd=upload_infolog - metadata decode - Json decode error at position 2\n"
 
     # Bad infolog base64
     _send_raw(socket, "c.telemetry.upload_infolog log_type user_hash e30= rXTrJC0nAdWUmCH8Q7+kWQ==--\n")
     reply = _recv_raw(socket)
-    assert reply == "NO cmd=upload_infolog - infolog url_decode64 error\n"
+    assert reply == "NO cmd=upload_infolog - infolog contents url_decode64 error\n"
 
     # Bad gzip
     metadata = %{key: "value", list: [1,2,3]}
