@@ -19,14 +19,24 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
     test "lists all actions", %{conn: conn} do
       conn = get(conn, Routes.moderation_action_path(conn, :index))
       assert html_response(conn, 200) =~ "Listing Actions"
+
+      # Now with an action present
+      ModerationTestLib.action_fixture()
+
+      conn = get(conn, Routes.moderation_action_path(conn, :index))
+      assert html_response(conn, 200) =~ "Listing Actions"
     end
 
-    test "search" do
-      flunk()
+    test "search", %{conn: conn} do
+      conn = post(conn, Routes.moderation_action_path(conn, :search, search: %{"order" => "Latest expiry first"}))
+      assert html_response(conn, 200) =~ "Listing Actions"
     end
 
-    test "list actions for a user" do
-      flunk()
+    test "list actions for a user", %{conn: conn} do
+      action = ModerationTestLib.action_fixture()
+
+      conn = get(conn, Routes.moderation_action_path(conn, :index) <> "?target_id=#{action.target_id}")
+      assert html_response(conn, 200) =~ "Listing Actions"
     end
   end
 
@@ -114,11 +124,16 @@ defmodule TeiserverWeb.Moderation.ActionControllerTest do
   describe "halt action" do
     test "halts chosen action", %{conn: conn} do
       action = ModerationTestLib.action_fixture()
+      assert Timex.compare(action.expires, Timex.now()) == 1
+
       conn = put(conn, Routes.moderation_action_path(conn, :halt, action.id))
       assert redirected_to(conn) == Routes.moderation_action_path(conn, :index)
+
+      action = Moderation.get_action!(action.id)
+      assert Timex.compare(action.expires, Timex.now()) == -1
     end
 
-    test "renders error for deleting nil item", %{conn: conn} do
+    test "renders error for halting nil item", %{conn: conn} do
       assert_error_sent 404, fn ->
         put(conn, Routes.moderation_action_path(conn, :halt, -1))
       end

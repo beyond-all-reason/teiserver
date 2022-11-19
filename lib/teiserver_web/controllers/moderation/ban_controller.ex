@@ -246,18 +246,31 @@ defmodule TeiserverWeb.Moderation.BanController do
     end
   end
 
-  @spec delete(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
-  def delete(conn, %{"id" => id}) do
+  @spec enable(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def enable(conn, %{"id" => id}) do
     ban = Moderation.get_ban!(id)
 
-    ban
-      |> BanLib.make_favourite
-      |> remove_recently(conn)
+    case Moderation.update_ban(ban, %{"enabled" => true}) do
+      {:ok, _ban} ->
+        add_audit_log(conn, "Moderation:Ban enabled", %{ban_id: ban.id})
 
-    {:ok, _ban} = Moderation.delete_ban(ban)
+        conn
+          |> put_flash(:info, "Ban enabled.")
+          |> redirect(to: Routes.moderation_ban_path(conn, :index))
+    end
+  end
 
-    conn
-      |> put_flash(:info, "Ban deleted successfully.")
-      |> redirect(to: Routes.moderation_ban_path(conn, :index))
+  @spec disable(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
+  def disable(conn, %{"id" => id}) do
+    ban = Moderation.get_ban!(id)
+
+    case Moderation.update_ban(ban, %{"enabled" => false}) do
+      {:ok, _ban} ->
+        add_audit_log(conn, "Moderation:Ban disabled", %{ban_id: ban.id})
+
+        conn
+          |> put_flash(:info, "Ban disabled.")
+          |> redirect(to: Routes.moderation_ban_path(conn, :index))
+    end
   end
 end

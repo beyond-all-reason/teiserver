@@ -68,12 +68,22 @@ defmodule TeiserverWeb.Moderation.BanControllerTest do
   end
 
   describe "update ban" do
-    test "enable/disable" do
-      flunk()
-    end
+    test "enable/disable", %{conn: conn} do
+      ban = ModerationTestLib.ban_fixture()
 
-    test "halt" do
-      flunk()
+      assert ban.enabled == true
+
+      conn = put(conn, Routes.moderation_ban_path(conn, :disable, ban.id))
+      assert redirected_to(conn) == Routes.moderation_ban_path(conn, :index)
+
+      ban = Moderation.get_ban!(ban.id)
+      assert ban.enabled == false
+
+      conn = put(conn, Routes.moderation_ban_path(conn, :enable, ban.id))
+      assert redirected_to(conn) == Routes.moderation_ban_path(conn, :index)
+
+      ban = Moderation.get_ban!(ban.id)
+      assert ban.enabled == true
     end
   end
 end

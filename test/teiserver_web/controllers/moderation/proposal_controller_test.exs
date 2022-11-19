@@ -2,6 +2,7 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
   @moduledoc false
   use CentralWeb.ConnCase
 
+  alias Teiserver.Agents.ModeratedAgentServer
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ModerationTestLib
 
@@ -68,8 +69,38 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
       end
     end
 
-    test "vote in proposal" do
-      flunk()
+    test "vote in proposal", %{conn: conn} do
+      {proposal, _vote} = ModerationTestLib.proposal_fixture()
+      assert proposal.votes_for == 1
+      assert proposal.votes_against == 0
+      assert proposal.votes_abstain == 0
+
+      # Vote yes
+      conn = put(conn, Routes.moderation_proposal_path(conn, :vote, proposal.id, "yes"))
+      assert redirected_to(conn) == Routes.moderation_proposal_path(conn, :show, proposal.id)
+
+      proposal = Moderation.get_proposal!(proposal.id)
+      assert proposal.votes_for == 2
+      assert proposal.votes_against == 0
+      assert proposal.votes_abstain == 0
+
+      # Vote no
+      conn = put(conn, Routes.moderation_proposal_path(conn, :vote, proposal.id, "no"))
+      assert redirected_to(conn) == Routes.moderation_proposal_path(conn, :show, proposal.id)
+
+      proposal = Moderation.get_proposal!(proposal.id)
+      assert proposal.votes_for == 1
+      assert proposal.votes_against == 1
+      assert proposal.votes_abstain == 0
+
+      # Vote abstain
+      conn = put(conn, Routes.moderation_proposal_path(conn, :vote, proposal.id, "abstain"))
+      assert redirected_to(conn) == Routes.moderation_proposal_path(conn, :show, proposal.id)
+
+      proposal = Moderation.get_proposal!(proposal.id)
+      assert proposal.votes_for == 1
+      assert proposal.votes_against == 0
+      assert proposal.votes_abstain == 1
     end
   end
 

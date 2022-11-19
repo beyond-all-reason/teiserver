@@ -41,6 +41,8 @@ defmodule Teiserver.Startup do
     ])
 
     add_audit_types([
+      "Moderation:Ban enabled",
+      "Moderation:Ban disabled",
       "Moderation:Ban updated",
       "Moderation:Ban enacted",
 

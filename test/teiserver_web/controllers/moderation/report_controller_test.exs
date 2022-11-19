@@ -14,14 +14,23 @@ defmodule TeiserverWeb.Moderation.ReportControllerTest do
     test "lists all reports", %{conn: conn} do
       conn = get(conn, Routes.moderation_report_path(conn, :index))
       assert html_response(conn, 200) =~ "Listing Reports"
+
+      # Now with at least one report present
+      ModerationTestLib.report_fixture()
+      conn = get(conn, Routes.moderation_report_path(conn, :index))
+      assert html_response(conn, 200) =~ "Listing Reports"
     end
 
-    test "show reports by target" do
-      flunk()
+    test "show reports by target", %{conn: conn} do
+      report = ModerationTestLib.report_fixture()
+      conn = get(conn, Routes.moderation_report_path(conn, :index) <> "?target_id=#{report.target_id}")
+      assert html_response(conn, 200) =~ "Listing Reports"
     end
 
-    test "show reports by reporter" do
-      flunk()
+    test "show reports by reporter", %{conn: conn} do
+      report = ModerationTestLib.report_fixture()
+      conn = get(conn, Routes.moderation_report_path(conn, :index) <> "?reporter_id=#{report.reporter_id}")
+      assert html_response(conn, 200) =~ "Listing Reports"
     end
   end
 
