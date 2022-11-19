@@ -8,7 +8,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Central.Config
 
   @splitter "---------------------------"
-  @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore 1v1me un1v1 website)
+  @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore matchme unmatch website)
   @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no explain)
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
@@ -63,23 +63,18 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     state
   end
 
-  defp do_handle(%{command: "1v1me", senderid: senderid} = _cmd, state) do
-    User.send_direct_message(state.userid, senderid, "The matchmaking test is over due to lack of interest. If you wish to resume testing please let Teifion know in the discord.")
+  defp do_handle(%{command: "matchme", senderid: senderid} = _cmd, state) do
+    case Matchmaking.add_user_to_queue(1, senderid) do
+      :failed ->
+        User.send_direct_message(state.userid, senderid, "You were not added to the queue")
+      _ ->
+        User.send_direct_message(state.userid, senderid, "You have been added to the queue. You can remove yourself by messaging me $unmatch")
+    end
+
     state
   end
 
-  # defp do_handle(%{command: "1v1me", senderid: senderid} = _cmd, state) do
-  #   case Matchmaking.add_user_to_queue(1, senderid) do
-  #     :failed ->
-  #       User.send_direct_message(state.userid, senderid, "You were not added to the queue")
-  #     _ ->
-  #       User.send_direct_message(state.userid, senderid, "You have been added to the queue. You can remove yourself by messaging me $un1v1")
-  #   end
-
-  #   state
-  # end
-
-  defp do_handle(%{command: "un1v1", senderid: senderid} = _cmd, state) do
+  defp do_handle(%{command: "unmatch", senderid: senderid} = _cmd, state) do
     Matchmaking.remove_user_from_queue(1, senderid)
     User.send_direct_message(state.userid, senderid, "You have been removed from the queue")
 
