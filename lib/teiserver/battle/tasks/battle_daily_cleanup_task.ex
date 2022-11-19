@@ -5,7 +5,7 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
   alias Teiserver.{Battle}
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
 
-  @unfinished_days 3
+  @unfinished_days 5
   @short_match_days 7
   @strip_data_days 35
 
@@ -31,8 +31,7 @@ defmodule Teiserver.Battle.Tasks.DailyCleanupTask do
         select: [:id],
         limit: :infinity
     )
-      |> Enum.map(fn %{id: id} -> id end)
-      |> Enum.join(",")
+      |> Enum.map_join(",", fn %{id: id} -> id end)
       |> delete_matches()
   end
 
