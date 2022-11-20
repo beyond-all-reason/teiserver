@@ -68,7 +68,10 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
       :failed ->
         User.send_direct_message(state.userid, senderid, "You were not added to the queue")
       _ ->
-        User.send_direct_message(state.userid, senderid, "You have been added to the queue. You can remove yourself by messaging me $unmatch")
+        User.send_direct_message(state.userid, senderid, [
+          "You have been added to the queue. You can remove yourself by messaging me $unmatch.",
+          "Matchmaking is still in development so please report any bugs in it to Teifion (I'm the one creating it) in the discord."
+        ])
     end
 
     state

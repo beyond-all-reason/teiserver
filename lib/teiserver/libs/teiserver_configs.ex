@@ -23,6 +23,17 @@ defmodule Teiserver.TeiserverConfigs do
     })
 
     add_site_config_type(%{
+      key: "matchmaking.Use ready check",
+      section: "Matchmaking",
+      type: "boolean",
+      permissions: ["teiserver.admin"],
+      description: "When set to true matchmaking uses a ready check",
+      opts: [],
+      default: true,
+      value_label: "Require ready check"
+    })
+
+    add_site_config_type(%{
       key: "teiserver.Spring flood rate limit count",
       section: "Protocol",
       type: "integer",

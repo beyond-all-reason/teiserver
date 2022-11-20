@@ -1,6 +1,7 @@
 defmodule Teiserver.Game.QueueMatchServer do
   use GenServer
   require Logger
+  alias Central.Config
   alias Teiserver.Battle.Lobby
   alias Teiserver.Data.Matchmaking
   alias Phoenix.PubSub
@@ -338,9 +339,14 @@ defmodule Teiserver.Game.QueueMatchServer do
       declined_users: []
     }
 
-    send_invites(state)
-
-    Logger.info("QueueMatchServer #{state.match_id} created, sent invites to #{Kernel.inspect users}")
+    if Config.get_site_config_cache("matchmaking.Use ready check") == true do
+      send_invites(state)
+      Logger.info("QueueMatchServer #{state.match_id} created, sent invites to #{Kernel.inspect users}")
+      state
+    else
+      Logger.info("QueueMatchServer #{state.match_id} created, accepting all users #{Kernel.inspect users} as 'matchmaking.Use ready check' is false")
+      %{state | pending_accepts: [], accepted_users: users, stage: "Finding empty lobby"}
+    end
 
     {:ok, state}
   end
