@@ -5,7 +5,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
   # use Alchemy.Cogs
   use Alchemy.Events
-  alias Teiserver.{Account, Room, Coordinator}
+  alias Teiserver.{Account, Room, Coordinator, Moderation}
   alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands}
   alias Central.{Config, Logging}
   alias Central.Account.{Report, ReportLib}
@@ -106,8 +106,8 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
   end
 
-  @spec create_report(Report.t()) :: any
-  def create_report(report) do
+  @spec new_report(Moderation.Report.t()) :: any
+  def new_report(report) do
     chan_result = Application.get_env(:central, DiscordBridge)[:bridges]
       |> Enum.filter(fn {_chan, room} -> room == "moderation-reports" end)
 
@@ -117,42 +117,79 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
 
     if chan do
-      report = Account.get_report!(report.id, preload: [:reporter, :target])
-      if report.response_action == nil do
-        # It's a fresh report, we handle it as a report creation
-        report_creation(report, chan)
-      else
-        # This was created as a whole thing, that said if it's the coordinator
-        # then we don't bridge it
-        if report.responder_id != Coordinator.get_coordinator_userid() do
-          report_updated(report, :respond)
-        end
-      end
+      report = Moderation.get_report!(report.id, preload: [:reporter, :target])
+
+      host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+      url = "https://#{host}/moderation/report?/target_id=#{report.target_id}"
+
+      msg = "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} - #{report.extra_text} - #{url}"
+
+      Alchemy.Client.send_message(
+        chan,
+        "Moderation report: #{msg}",
+        []# Options
+      )
     end
   end
 
-  # This is called from create_report and is just a way to handle that specific instance
-  defp report_creation(report, chan) do
-    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
-    url = "https://#{host}/teiserver/admin/user/#{report.target_id}#moderation_tab"
+  # @spec new_action(Moderation.Action.t()) :: any
+  # def new_action(action) do
+  #   action = Moderation.get_action!(action.id, preload: [:target])
 
-    msg = "#{report.target.name} was reported by #{report.reporter.name} for reason #{report.reason} - #{url}"
+  #   result = Application.get_env(:central, DiscordBridge)[:bridges]
+  #     |> Enum.filter(fn {_chan, room} -> room == "moderation-actions" end)
 
-    Alchemy.Client.send_message(
-      chan,
-      "Moderation report: #{msg}",
-      []# Options
-    )
-  end
+  #   chan = case result do
+  #     [{chan, _}] -> chan
+  #     _ -> nil
+  #   end
 
-  @spec report_updated(Report.t(), :create | :respond | :update) :: :ok
-  def report_updated(report, :create) do
-    if report.response_text != nil do
-      report_updated(report, :respond)
-    else
-      :ok
-    end
-  end
+  #   if chan do
+  #     past_tense = ReportLib.past_tense(report.response_action)
+
+  #     if past_tense != nil do
+  #       until = if report.expires do
+  #         "Until: " <> TimexHelper.date_to_str(report.expires, format: :hms_dmy) <> " (UTC)"
+  #       else
+  #         "Permanent"
+  #       end
+
+  #       {restrictions, action} = if not Enum.empty?(report.action_data["restriction_list"]) do
+  #         restriction_string = report.action_data["restriction_list"]
+  #           |> Enum.join(", ")
+
+  #         {"Restriction(s): #{restriction_string}", "action"}
+  #       else
+  #         {"", "warning"}
+  #       end
+
+  #       followup = if report.followup != nil do
+  #         "If the behaviour continues, a follow up of #{report.followup} may be employed"
+  #       else
+  #         ""
+  #       end
+
+  #       msg = [
+  #         "----------------------",
+  #         "Moderation #{action} for #{report.target.name}",
+  #         "Reason: #{report.response_text}",
+  #         restrictions,
+  #         until,
+  #         followup,
+  #         "----------------------"
+  #       ]
+  #       |> Enum.join("\n")
+  #       |> String.replace("\n\n", "\n")
+
+  #       Alchemy.Client.send_message(
+  #         chan,
+  #         msg,
+  #         []# Options
+  #       )
+  #     end
+  #   end
+  # end
+
 
   def report_updated(%{response_action: nil}, :respond), do: :ok
   def report_updated(%{response_action: "Ignore report"}, :respond), do: :ok

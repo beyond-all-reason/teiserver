@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   """
   use GenServer
   alias Central.Config
-  alias Teiserver.{Account, User, Clans, Room, Coordinator, Client}
+  alias Teiserver.{Account, User, Clans, Room, Coordinator, Client, Moderation}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Coordinator.{CoordinatorCommands}
   alias Phoenix.PubSub

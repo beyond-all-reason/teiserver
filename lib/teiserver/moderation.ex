@@ -2,8 +2,14 @@ defmodule Teiserver.Moderation do
   import Ecto.Query, warn: false
   alias Central.Repo
   # require Logger
-  # alias Teiserver.Data.Types, as: T
+
+  alias Phoenix.PubSub
+  alias Teiserver.Data.Types, as: T
   alias Central.Helpers.QueryHelpers
+
+  alias Teiserver.{Account}
+  import Central.Logging.Helpers, only: [add_audit_log: 4]
+
 
   alias Teiserver.Moderation.{Report, ReportLib}
 
@@ -111,7 +117,23 @@ defmodule Teiserver.Moderation do
     %Report{}
       |> Report.changeset(attrs)
       |> Repo.insert()
+      |> broadcast_create_report
   end
+
+  def broadcast_create_report({:ok, report}) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "global_moderation",
+      %{
+        channel: "global_moderation",
+        event: :new_report,
+        report: report
+      }
+    )
+
+    {:ok, report}
+  end
+  def broadcast_create_report(v), do: v
 
   @doc """
   Updates a report.
@@ -130,7 +152,23 @@ defmodule Teiserver.Moderation do
     report
       |> Report.changeset(attrs)
       |> Repo.update()
+      |> broadcast_update_report
   end
+
+  def broadcast_update_report({:ok, report}) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "global_moderation",
+      %{
+        channel: "global_moderation",
+        event: :updated_report,
+        report: report
+      }
+    )
+
+    {:ok, report}
+  end
+  def broadcast_update_report(v), do: v
 
   @doc """
   Deletes a Report.
@@ -262,7 +300,23 @@ defmodule Teiserver.Moderation do
     %Action{}
     |> Action.changeset(attrs)
     |> Repo.insert()
+    |> broadcast_create_action()
   end
+
+  def broadcast_create_action({:ok, action}) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "global_moderation",
+      %{
+        channel: "global_moderation",
+        event: :new_action,
+        action: action
+      }
+    )
+
+    {:ok, action}
+  end
+  def broadcast_create_action(v), do: v
 
   @doc """
   Updates a action.
@@ -281,7 +335,23 @@ defmodule Teiserver.Moderation do
     action
     |> Action.changeset(attrs)
     |> Repo.update()
+    |> broadcast_update_action()
   end
+
+  def broadcast_update_action({:ok, action}) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "global_moderation",
+      %{
+        channel: "global_moderation",
+        event: :updated_action,
+        action: action
+      }
+    )
+
+    {:ok, action}
+  end
+  def broadcast_update_action(v), do: v
 
   @doc """
   Deletes a Action.
@@ -413,9 +483,25 @@ defmodule Teiserver.Moderation do
   @spec create_proposal(Map.t()) :: {:ok, Proposal.t()} | {:error, Ecto.Changeset.t()}
   def create_proposal(attrs \\ %{}) do
     %Proposal{}
-    |> Proposal.changeset(attrs)
-    |> Repo.insert()
+      |> Proposal.changeset(attrs)
+      |> Repo.insert()
+      |> broadcast_create_proposal
   end
+
+  def broadcast_create_proposal({:ok, proposal}) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "global_moderation",
+      %{
+        channel: "global_moderation",
+        event: :new_proposal,
+        proposal: proposal
+      }
+    )
+
+    {:ok, proposal}
+  end
+  def broadcast_create_proposal(v), do: v
 
   @doc """
   Updates a proposal.
@@ -432,9 +518,25 @@ defmodule Teiserver.Moderation do
   @spec update_proposal(Proposal.t(), Map.t()) :: {:ok, Proposal.t()} | {:error, Ecto.Changeset.t()}
   def update_proposal(%Proposal{} = proposal, attrs) do
     proposal
-    |> Proposal.changeset(attrs)
-    |> Repo.update()
+      |> Proposal.changeset(attrs)
+      |> Repo.update()
+      |> broadcast_update_proposal
   end
+
+  def broadcast_update_proposal({:ok, proposal}) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "global_moderation",
+      %{
+        channel: "global_moderation",
+        event: :updated_proposal,
+        proposal: proposal
+      }
+    )
+
+    {:ok, proposal}
+  end
+  def broadcast_update_proposal(v), do: v
 
   @doc """
   Deletes a Proposal.
@@ -645,7 +747,23 @@ defmodule Teiserver.Moderation do
     %Ban{}
     |> Ban.changeset(attrs)
     |> Repo.insert()
+    |> broadcast_create_ban
   end
+
+  def broadcast_create_ban({:ok, ban}) do
+    PubSub.broadcast(
+      Central.PubSub,
+      "global_moderation",
+      %{
+        channel: "global_moderation",
+        event: :new_ban,
+        ban: ban
+      }
+    )
+
+    {:ok, ban}
+  end
+  def broadcast_create_ban(v), do: v
 
   @doc """
   Updates a ban.
@@ -695,5 +813,34 @@ defmodule Teiserver.Moderation do
   @spec change_ban(Ban.t()) :: Ecto.Changeset.t()
   def change_ban(%Ban{} = ban) do
     Ban.changeset(ban, %{})
+  end
+
+
+  # Others
+  @spec unbridge_user(nil | T.user() | T.userid(), String.t(), non_neg_integer(), String.t()) :: any
+  def unbridge_user(userid, message, flagged_word_count, location) when is_integer(userid) do
+    unbridge_user(Account.get_user_by_id(userid), message, flagged_word_count, location)
+  end
+
+  def unbridge_user(nil, _, _, _), do: :no_user
+  def unbridge_user(user, message, flagged_word_count, location) do
+    if not Teiserver.User.is_restricted?(user, ["Bridging"]) do
+      {:ok, action} = create_action(%{
+        target_id: user.id,
+        reason: "Automod detected flagged words",
+        restrictions: ["Bridging"],
+        score_modifier: 100,
+        expires: Timex.now() |> Timex.shift(years: 1000)
+      })
+
+      Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user.id)
+
+      client = Account.get_client_by_id(user.id) || %{ip: "no client"}
+      add_audit_log(user.id, client.ip, "Moderation:De-bridged user", %{
+        message: message,
+        flagged_word_count: flagged_word_count,
+        location: location
+      })
+    end
   end
 end

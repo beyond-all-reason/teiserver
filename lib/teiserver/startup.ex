@@ -50,6 +50,8 @@ defmodule Teiserver.Startup do
       "Moderation:Action updated",
       "Moderation:Action created",
 
+      "Moderation:De-bridged user",
+
       "Teiserver:Updated automod action",
       "Teiserver:Automod action enacted",
 

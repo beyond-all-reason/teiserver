@@ -1,7 +1,7 @@
 defmodule Teiserver.Room do
   @moduledoc false
   require Logger
-  alias Teiserver.{User, Chat, Coordinator}
+  alias Teiserver.{User, Chat, Coordinator, Moderation}
   alias alias Teiserver.Chat.WordLib
   alias Phoenix.PubSub
   alias Teiserver.Data.Types, as: T
@@ -166,7 +166,8 @@ defmodule Teiserver.Room do
   def send_message(from_id, room_name, msg) do
     user = User.get_user_by_id(from_id)
     if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
-      User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
+      Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
+      # User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
     blacklisted = (User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg))
@@ -205,7 +206,8 @@ defmodule Teiserver.Room do
   def send_message_ex(from_id, room_name, msg) do
     user = User.get_user_by_id(from_id)
     if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
-      User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
+      Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
+      # User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
     blacklisted = (User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg))

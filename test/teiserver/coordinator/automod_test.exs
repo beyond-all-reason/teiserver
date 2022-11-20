@@ -42,10 +42,6 @@ defmodule Teiserver.Coordinator.AutomodTest do
     Account.create_smurf_key(good_user.id, "hw1", hw1)
     Account.create_smurf_key(good_user.id, "hw2", hw2)
 
-    IO.puts ""
-    IO.inspect {hw1, hw2}
-    IO.puts ""
-
     :timer.sleep(100)
 
     bad_user = new_user()
