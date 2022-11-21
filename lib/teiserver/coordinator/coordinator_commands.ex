@@ -8,7 +8,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Central.Config
 
   @splitter "---------------------------"
-  @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore matchme unmatch website)
+  @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore matchmaking website)
   @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no explain)
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
@@ -63,23 +63,29 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     state
   end
 
-  defp do_handle(%{command: "matchme", senderid: senderid} = _cmd, state) do
-    case Matchmaking.add_user_to_queue(1, senderid) do
-      :failed ->
-        User.send_direct_message(state.userid, senderid, "You were not added to the queue")
-      _ ->
-        User.send_direct_message(state.userid, senderid, [
-          "You have been added to the queue. You can remove yourself by messaging me $unmatch.",
-          "Matchmaking is still in development so please report any bugs in it to Teifion (I'm the one creating it) in the discord."
-        ])
-    end
+  defp do_handle(%{command: "matchmaking", remaining: remaining, senderid: senderid} = _cmd, state) do
+    client = Account.get_client_by_id(senderid)
+    {:ok, code} = Account.create_code(%{
+      value: UUID.uuid1(),
+      purpose: "one_time_login",
+      expires: Timex.now() |> Timex.shift(minutes: 5),
+      user_id: senderid,
+      metadata: %{
+        ip: client.ip,
+        redirect: "/teiserver/matchmaking/queues",
+      }
+    })
 
-    state
-  end
+    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    url = "https://#{host}/one_time_login/#{code.value}"
 
-  defp do_handle(%{command: "unmatch", senderid: senderid} = _cmd, state) do
-    Matchmaking.remove_user_from_queue(1, senderid)
-    User.send_direct_message(state.userid, senderid, "You have been removed from the queue")
+    msg = [
+      "Matchmaking is still in development so please report any bugs in it to Teifion (I'm the one creating it) in the discord.",
+      "To join/leave queues you will need to use the website, you can access it with this link - #{url}"
+    ]
+    |> List.flatten()
+
+    User.send_direct_message(state.userid, senderid, msg)
 
     state
   end

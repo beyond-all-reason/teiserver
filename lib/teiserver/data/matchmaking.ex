@@ -154,18 +154,35 @@ defmodule Teiserver.Data.Matchmaking do
     Central.cache_put(:teiserver_queues, queue.id, queue)
   end
 
+  @spec list_queue_ids :: [non_neg_integer()]
+  def list_queue_ids() do
+    Central.cache_get(:lists, :queues)
+  end
+
   @spec list_queues :: [QueueStruct.t() | nil]
   def list_queues() do
-    Central.cache_get(:lists, :queues)
-    |> Enum.map(fn queue_id -> Central.cache_get(:teiserver_queues, queue_id) end)
+    list_queue_ids()
+      |> Enum.map(fn queue_id -> Central.cache_get(:teiserver_queues, queue_id) end)
   end
 
   @spec list_queues([Integer.t()]) :: [QueueStruct.t() | nil]
   def list_queues(id_list) do
     id_list
-    |> Enum.map(fn queue_id ->
-      Central.cache_get(:teiserver_queues, queue_id)
-    end)
+      |> Enum.map(fn queue_id ->
+        Central.cache_get(:teiserver_queues, queue_id)
+      end)
+  end
+
+  @spec get_queue_by_name(String.t()) :: QueueStruct.t() | nil
+  def get_queue_by_name(name) do
+    search_name = name
+      |> String.trim()
+      |> String.downcase()
+
+    list_queues()
+      |> Enum.find(fn %{name: queue_name} ->
+        String.downcase(queue_name) == search_name
+      end)
   end
 
   @spec add_user_to_queue(T.queue_id(), T.userid()) :: :ok | :duplicate | :failed | :missing

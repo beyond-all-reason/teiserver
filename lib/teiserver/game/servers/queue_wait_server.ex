@@ -52,7 +52,8 @@ defmodule Teiserver.Game.QueueWaitServer do
             "teiserver_client_messages:#{userid}",
             %{
               channel: "teiserver_client_messages:#{userid}",
-              event: :joined_queue,
+              event: :matchmaking,
+              sub_event: :joined_queue,
               queue_id: state.queue_id
             }
           )
@@ -80,12 +81,13 @@ defmodule Teiserver.Game.QueueWaitServer do
             "teiserver_client_messages:#{userid}",
             %{
               channel: "teiserver_client_messages:#{userid}",
-              event: :left_queue,
+              event: :matchmaking,
+              sub_event: :left_queue,
               queue_id: state.queue_id
             }
           )
 
-          {:ok, %{new_state | leave_count: (state.leave_count - 1)}}
+          {:ok, %{new_state | leave_count: (state.leave_count + 1)}}
 
         false ->
           {:missing, state}
@@ -134,7 +136,8 @@ defmodule Teiserver.Game.QueueWaitServer do
             "teiserver_client_messages:#{itemid}",
             %{
               channel: "teiserver_client_messages:#{itemid}",
-              event: :joined_queue,
+              event: :matchmaking,
+              sub_event: :joined_queue,
               queue_id: itemid
             }
           )
