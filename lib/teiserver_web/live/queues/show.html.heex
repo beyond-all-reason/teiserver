@@ -37,7 +37,7 @@
       </pre>
     </div>
     <div class="col-md-6">
-      <h4>Queue state</h4>
+      <h4>Queue wait state</h4>
       <pre>
         <%= Kernel.inspect @queue_state, pretty: true, limit: :infinity %>
       </pre>
@@ -47,7 +47,7 @@
 <br />
 
 <span>
-  <%= live_redirect "Back", to: Routes.ts_game_queue_path(@socket, :index), class: "btn btn-#{bsname}" %>
+  <%= live_redirect "Back", to: Routes.ts_game_queue_index_path(@socket, :index), class: "btn btn-#{bsname}" %>
 </span>
 
       </div>

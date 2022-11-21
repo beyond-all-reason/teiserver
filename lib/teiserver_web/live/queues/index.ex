@@ -45,6 +45,8 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
           |> Enum.empty?()
       end)
 
+    is_admin = allow?(@current_user, "teiserver.staff.admin")
+
     socket = socket
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Matchmaking", url: "/teiserver/game_live/queues")
@@ -56,6 +58,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
       |> assign(:queue_info, queue_info)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
       |> assign(:match_id, nil)
+      |> assign(:is_admin, is_admin)
 
     {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
   end
@@ -190,7 +193,37 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     }
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _userid_str}, socket) do
+  def handle_info(%{
+    channel: "teiserver_client_messages:" <> _userid_str,
+    event: :matchmaking,
+    sub_event: :joined_queue,
+    queue_id: queue_id
+  }, socket) do
+    new_queue_membership = socket.assigns.queue_membership ++ [queue_id]
+      |> Enum.uniq
+
+    {:noreply,
+      socket
+        |> assign(:queue_membership, new_queue_membership)
+    }
+  end
+
+  def handle_info(%{
+    channel: "teiserver_client_messages:" <> _userid_str,
+    event: :matchmaking,
+    sub_event: :left_queue,
+    queue_id: queue_id
+  }, socket) do
+    new_queue_membership = socket.assigns.queue_membership
+      |> List.delete(queue_id)
+
+    {:noreply,
+      socket
+        |> assign(:queue_membership, new_queue_membership)
+    }
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _userid_str} = d, socket) do
     {:noreply, socket}
   end
 

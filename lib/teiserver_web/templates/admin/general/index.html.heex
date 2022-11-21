@@ -46,10 +46,21 @@
     <%=
       central_component "menu_card",
       icon: Teiserver.Clans.ClanLib.icon(),
-      name: "clan_admin",
-      text: "Clan admin",
+      name: "clan",
+      text: "Clans",
       icon_class: "fa-duotone",
       link: Routes.ts_admin_clan_path(@conn, :index)
+    %>
+  <% end %>
+
+  <%= if allow?(@conn, "teiserver.staff.admin") do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Game.QueueLib.icon(),
+      name: "matchmaking",
+      text: "Matchmaking",
+      icon_class: "fa-duotone",
+      link: Routes.ts_game_queue_path(@conn, :index)
     %>
   <% end %>
 

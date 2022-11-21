@@ -26,7 +26,7 @@
               name: "queues",
               label: "Matchmaking",
               active: @active,
-              url: Routes.ts_game_queue_path(@conn, :index),
+              url: Routes.ts_game_queue_index_path(@conn, :index),
               icon: Teiserver.Game.QueueLib.icon()
             %>
           <% end %>
