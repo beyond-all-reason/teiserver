@@ -22,6 +22,16 @@
           </div>
         <% end %>
 
+        <div class="float-end">
+          <%= if allow?(@current_user, "teiserver.staff.admin") do %>
+            <a href={Routes.ts_game_queue_path(@socket, :index)} class={"btn btn-outline-#{bsname}"}>
+              <i class={"fa-fw fa-regular #{Central.Admin.AdminLib.icon()}"}></i>
+              &nbsp;
+              Admin view
+            </a>
+          <% end %>
+        </div>
+
         <h4>
           <%= if Enum.count(@db_queues) > 0 do %>
             Queues - <%= Enum.count(@db_queues) %>
@@ -50,7 +60,7 @@
       <td><%= queue.name %></td>
 
       <td><%= info.member_count %></td>
-      <td><%= info.mean_wait_time %></td>
+      <td><%= round(info.mean_wait_time) %></td>
 
       <td>
         <%= if @is_admin do %>
