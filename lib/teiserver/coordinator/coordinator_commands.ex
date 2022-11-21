@@ -1,5 +1,5 @@
 defmodule Teiserver.Coordinator.CoordinatorCommands do
-  alias Teiserver.{User, Account, Client, Coordinator}
+  alias Teiserver.{User, Account, Client, Coordinator, Moderation}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Data.Matchmaking
   alias Central.Helpers.NumberHelper
@@ -162,6 +162,25 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
         previous_names = (stats["previous_names"] || [])
           |> Enum.join(", ")
 
+        actions = Moderation.list_actions(
+          search: [
+            target_id: user.id,
+            expiry: "All active"
+          ]
+        )
+          |> Enum.reject(fn action ->
+            action.restrictions == ["Bridging"]
+          end)
+
+        moderation_data = if Enum.empty?(actions) do
+          []
+        else
+          action_text = actions
+            |> Enum.map(fn a -> String.split(a.reason, "\n") end)
+
+          ["This user currently has one or more restrictions applied to their account because:",  action_text]
+        end
+
         host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
         profile_link = "https://#{host}/teiserver/profile/#{user.id}"
 
@@ -187,7 +206,9 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           "Found #{user.name}",
           (if previous_names != "", do: "Previous names: #{previous_names}"),
           "Profile link: #{profile_link}",
-          ["Ratings:" | ratings]
+          ["Ratings:" | ratings],
+          moderation_data,
+          @splitter
         ]
 
         mod_parts = if User.is_moderator?(sender) do
