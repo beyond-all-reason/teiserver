@@ -58,7 +58,7 @@ defmodule CentralWeb.Account.SessionController do
         conn
           |> redirect(to: "/")
 
-      code.ip != ip ->
+      code.metadata["ip"] != ip ->
         Logger.debug("SessionController.one_time_login Bad IP")
         conn
           |> redirect(to: "/")
