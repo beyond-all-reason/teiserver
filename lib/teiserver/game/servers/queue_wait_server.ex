@@ -1,4 +1,9 @@
 defmodule Teiserver.Game.QueueWaitServer do
+  @moduledoc """
+  This is the server used to match players for a battle before passing them off
+  to a QueueMatchServer.
+  """
+
   use GenServer
   require Logger
   alias Teiserver.Data.Matchmaking

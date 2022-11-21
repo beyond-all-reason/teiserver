@@ -1,4 +1,10 @@
 defmodule Teiserver.Game.QueueMatchServer do
+  @moduledoc """
+  This server takes the players who are matched together and finds them a
+  room to play in. It (if the setting is enabled) also handles readying up
+  for the game.
+  """
+
   use GenServer
   require Logger
   alias Central.Config
