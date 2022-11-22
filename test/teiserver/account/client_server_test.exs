@@ -44,11 +44,11 @@ defmodule Teiserver.Account.ClientServerTest do
     assert c == nil
 
     # Partial update
-    r = ClientLib.merge_update_client(%{userid: userid, team_number: 1}, :client_updated_battlestatus)
+    r = ClientLib.merge_update_client(userid, %{team_number: 1})
     assert r == :ok
 
     # Partial update with no client server
-    r = ClientLib.merge_update_client(%{userid: -1, team_number: 1}, :client_updated_battlestatus)
+    r = ClientLib.merge_update_client(-1, %{team_number: 1})
     assert r == nil
 
 

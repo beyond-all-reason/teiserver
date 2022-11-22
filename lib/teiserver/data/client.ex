@@ -54,6 +54,8 @@ defmodule Teiserver.Client do
         country: nil,
         lobby_client: nil,
 
+        app_status: nil,
+
         shadowbanned: false,
         awaiting_warn_ack: false,
         warned: false,

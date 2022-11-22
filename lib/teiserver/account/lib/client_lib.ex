@@ -60,8 +60,13 @@ defmodule Teiserver.Account.ClientLib do
   end
 
   # Updates
-  @spec merge_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: nil | :ok
-  def merge_update_client(%{userid: userid} = partial_client, _reason) do
+  @spec merge_update_client(Map.t()) :: nil | :ok
+  def merge_update_client(%{userid: userid} = partial_client) do
+    cast_client(userid, {:merge_update_client, partial_client})
+  end
+
+  @spec merge_update_client(T.userid(), Map.t()) :: nil | :ok
+  def merge_update_client(userid, partial_client) do
     cast_client(userid, {:merge_update_client, partial_client})
   end
 

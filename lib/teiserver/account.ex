@@ -1497,8 +1497,11 @@ defmodule Teiserver.Account do
   @spec list_clients([T.userid()]) :: [T.client()]
   defdelegate list_clients(id_list), to: ClientLib
 
-  @spec merge_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: :ok
-  defdelegate merge_update_client(client, reason), to: ClientLib
+  @spec merge_update_client(Map.t()) :: :ok
+  defdelegate merge_update_client(client), to: ClientLib
+
+  @spec merge_update_client(T.userid(), Map.t()) :: :ok
+  defdelegate merge_update_client(userid, client), to: ClientLib
 
   @spec replace_update_client(Map.t(), :silent | :client_updated_status | :client_updated_battlestatus) :: T.client()
   defdelegate replace_update_client(client, reason), to: ClientLib

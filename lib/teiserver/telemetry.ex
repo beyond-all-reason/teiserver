@@ -6,9 +6,8 @@ defmodule Teiserver.Telemetry do
   alias Central.Repo
   alias Phoenix.PubSub
 
-  alias Teiserver.Telemetry.TelemetryServer
-  alias Teiserver.Telemetry.ServerMinuteLog
-  alias Teiserver.Telemetry.ServerMinuteLogLib
+  alias Teiserver.Account
+  alias Teiserver.Telemetry.{TelemetryServer, ServerMinuteLog, ServerMinuteLogLib}
 
   alias Teiserver.Data.Types, as: T
 
@@ -1661,6 +1660,7 @@ defmodule Teiserver.Telemetry do
 
     case property_name do
       "hardware:cpuinfo" ->
+        Account.merge_update_client(userid, %{app_status: :accepted})
         Teiserver.Account.create_smurf_key(userid, "chobby_hash", hash)
         Teiserver.Account.update_cache_user(userid, %{chobby_hash: hash})
 
