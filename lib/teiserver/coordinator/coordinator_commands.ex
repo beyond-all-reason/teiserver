@@ -64,12 +64,12 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   end
 
   defp do_handle(%{command: "party", remaining: remaining, senderid: senderid} = _cmd, state) do
-    client = Account.get_client_by_id(userid)
+    client = Account.get_client_by_id(senderid)
     {:ok, code} = Account.create_code(%{
       value: UUID.uuid1(),
       purpose: "one_time_login",
       expires: Timex.now() |> Timex.shift(minutes: 5),
-      user_id: userid,
+      user_id: senderid,
       metadata: %{
         ip: client.ip,
         redirect: "/teiserver/account/parties",
@@ -79,7 +79,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
     url = "https://#{host}/one_time_login/#{code.value}"
 
-    Coordinator.send_to_user(userid, [
+    Coordinator.send_to_user(senderid, [
       "To access parties please use this link - #{url}",
       "You can use the $explain command to see how balance is being calculated and why you are/are not being teamed with your party",
       "We are working on handling it within the new client and protocol, the website is only a temporary measure."
