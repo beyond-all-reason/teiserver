@@ -23,5 +23,5 @@ defmodule Teiserver.Telemetry.Infolog do
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean
-  def authorize(_action, conn, _params), do: allow?(conn, "teiserver.staff.telemetry")
+  def authorize(_action, conn, _params), do: allow?(conn, "teiserver.dev.infolog")
 end

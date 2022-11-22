@@ -1,5 +1,5 @@
 <div class="row">
-  <%= if allow?(@current_user, "teiserver.reports.client") do %>
+  <%= if allow?(@current_user, "teiserver.staff.telemetry") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Telemetry.ClientEventLib.icon(),
@@ -8,8 +8,8 @@
       link: Routes.ts_reports_client_event_path(@conn, :summary)
     %>
   <% end %>
-  
-  <%= if allow?(@current_user, "teiserver.reports.server") do %>
+
+  <%= if allow?(@current_user, "teiserver.staff.telemetry") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Telemetry.ServerDayLogLib.icon(),
@@ -18,8 +18,8 @@
       link: Routes.ts_reports_server_metric_path(@conn, :day_metrics_list)
     %>
   <% end %>
-  
-  <%= if allow?(@current_user, "teiserver.reports.match") do %>
+
+  <%= if allow?(@current_user, "teiserver.staff.telemetry") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Battle.MatchLib.icon(),
@@ -29,7 +29,7 @@
     %>
   <% end %>
 
-  <%= if allow?(@current_user, "teiserver.reports.rating") do %>
+  <%= if allow?(@current_user, "teiserver.staff.admin") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Account.RatingLib.icon(),
@@ -39,7 +39,7 @@
     %>
   <% end %>
 
-  <%= if allow?(@current_user, "teiserver.reports.infolog") do %>
+  <%= if allow?(@current_user, "teiserver.dev.infologs") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Telemetry.InfologLib.icon(),
@@ -49,7 +49,7 @@
     %>
   <% end %>
 
-  <%= if allow?(@current_user, "teiserver.reports.export") do %>
+  <%= if allow?(@current_user, "teiserver.staff.admin") do %>
     <%=
       central_component "menu_card",
       icon: "fa-regular fa-download",
@@ -70,7 +70,7 @@
       link: Routes.ts_reports_report_path(@conn, :show, "active")
     %>
   <% end %>
-  
+
   <%= if allow?(@current_user, Teiserver.Account.TimeSpentReport.permissions()) do %>
     <%=
       central_component "menu_card",

@@ -63,6 +63,7 @@ defmodule Teiserver.Startup do
     # Permissions setup
     add_permission_set("teiserver", "admin", ~w(account battle clan queue))
     add_permission_set("teiserver", "staff", ~w(reviewer moderator admin communication clan telemetry))
+    add_permission_set("teiserver", "dev", ~w(infolog))
     add_permission_set("teiserver", "reports", ~w(client server match ratings infolog))
     add_permission_set("teiserver", "api", ~w(battle))
     add_permission_set("teiserver", "player", ~w(account tester contributor dev streamer donor verified bot moderator))
