@@ -106,6 +106,26 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
   end
 
+  @spec new_infolog(Teiserver.Telemetry.Infolog.t()) :: any
+  def new_infolog(infolog) do
+    chan_result = Application.get_env(:central, DiscordBridge)[:bridges]
+      |> Enum.filter(fn {_chan, room} -> room == "telemetry-infologs" end)
+
+    chan = case chan_result do
+      [{chan, _}] -> chan
+      _ -> nil
+    end
+
+    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    url = "https://#{host}/teiserver/reports/infolog/#{infolog.id}"
+
+    Alchemy.Client.send_message(
+      chan,
+      "New infolog uploaded: #{infolog.metadata["errortype"]} / #{infolog.metadata["shorterror"]}.\nLink: #{url}",
+      []# Options
+    )
+  end
+
   @spec new_report(Moderation.Report.t()) :: any
   def new_report(report) do
     chan_result = Application.get_env(:central, DiscordBridge)[:bridges]
