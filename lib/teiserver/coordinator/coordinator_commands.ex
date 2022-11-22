@@ -8,7 +8,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
   alias Central.Config
 
   @splitter "---------------------------"
-  @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore matchmaking website)
+  @always_allow ~w(help whoami whois discord coc ignore mute ignore unmute unignore matchmaking website party)
   @forward_to_consul ~w(s status players follow joinq leaveq splitlobby y yes n no explain)
 
   @spec allow_command?(Map.t(), Map.t()) :: boolean()
@@ -60,6 +60,31 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
 
     say_command(cmd)
     Coordinator.send_to_user(senderid, messages)
+    state
+  end
+
+  defp do_handle(%{command: "party", remaining: remaining, senderid: senderid} = _cmd, state) do
+    client = Account.get_client_by_id(userid)
+    {:ok, code} = Account.create_code(%{
+      value: UUID.uuid1(),
+      purpose: "one_time_login",
+      expires: Timex.now() |> Timex.shift(minutes: 5),
+      user_id: userid,
+      metadata: %{
+        ip: client.ip,
+        redirect: "/teiserver/account/parties",
+      }
+    })
+
+    host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+    url = "https://#{host}/one_time_login/#{code.value}"
+
+    Coordinator.send_to_user(userid, [
+      "To access parties please use this link - #{url}",
+      "You can use the $explain command to see how balance is being calculated and why you are/are not being teamed with your party",
+      "We are working on handling it within the new client and protocol, the website is only a temporary measure."
+    ])
+
     state
   end
 
@@ -337,7 +362,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
     state
   end
 
-  defp do_handle(%{command: "party", senderid: senderid, remaining: targets} = _cmd, state) do
+  defp do_handle(%{command: "modparty", senderid: senderid, remaining: targets} = _cmd, state) do
     targets
       |> String.split(" ")
       |> Enum.map(fn name ->

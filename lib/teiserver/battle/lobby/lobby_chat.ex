@@ -30,8 +30,7 @@ defmodule Teiserver.Battle.LobbyChat do
 
     Coordinator.send_to_user(userid, [
       "To access parties please use this link - #{url}",
-      "You can use the $explain command to see how balance is being calculated and why you are/are not",
-      "being teamed with your party",
+      "You can use the $explain command to see how balance is being calculated and why you are/are not being teamed with your party",
       "We are working on handling it within the new client and protocol, the website is only a temporary measure."
     ])
   end
