@@ -198,7 +198,7 @@ defmodule Teiserver.Coordinator.CoordinatorCommands do
           end)
 
         moderation_data = if Enum.empty?(actions) do
-          []
+          ["No moderation restrictions applied."]
         else
           action_text = actions
             |> Enum.map(fn a -> String.split(a.reason, "\n") end)
