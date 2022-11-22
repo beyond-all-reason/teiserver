@@ -1,6 +1,6 @@
 <%
   {_fg, _bg, bsname} = view_colour() |> colours()
-  user_moderator = allow?(@current_user, "teiserver.moderator.account")
+  user_moderator = allow?(@current_user, "teiserver.staff.moderator")
 %>
 
 <%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
@@ -49,7 +49,7 @@
                 value: "true",
                 label: "",
                 checked: @params["extended"] == "true",
-                
+
                 description: "win/loss, match count"
               %>
             </div>
@@ -96,7 +96,7 @@
   <tbody>
     <%= for {rating, pos} <- Enum.with_index(@ratings) do %>
       <% age = Timex.diff(Timex.now(), rating.last_updated, :days) %>
-    
+
       <tr style={"background-color: #{rgba_css rating.user.colour};"}>
         <td style={"background-color: #{rating.user.colour}; color: #FFF;"} width="22">
           #<%= pos + 1 %>

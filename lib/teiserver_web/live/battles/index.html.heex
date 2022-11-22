@@ -1,6 +1,6 @@
 <%
   bsname = @view_colour
-  moderator = allow?(@current_user, "teiserver.moderator")
+  moderator = allow?(@current_user, "teiserver.staff.moderator")
 %>
 
 <%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "battle_lobbies", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
@@ -88,7 +88,7 @@
             <td>&nbsp;</td>
             <td>&nbsp;</td>
           <% end %>
-          
+
           <%= if moderator do %>
             <td>
               <%= if Map.has_key?(lobby, :uuid) do %>

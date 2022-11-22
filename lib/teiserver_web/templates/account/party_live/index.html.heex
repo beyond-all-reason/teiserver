@@ -1,6 +1,6 @@
 <%
   bsname = @view_colour
-  moderator = allow?(@current_user, "teiserver.moderator.account")
+  moderator = allow?(@current_user, "teiserver.staff.moderator")
 %>
 
 <%=
@@ -26,7 +26,7 @@
               Connect with client to enable functionality
             </span>
           <% end %>
-        
+
           <%= if moderator do %>
             &nbsp;&nbsp;&nbsp;
             <%= if @mode == "admin" do %>
@@ -46,11 +46,11 @@
     <tr>
       <th></th>
       <th></th>
-      
+
       <%= if @client do %>
         <th colspan="2"></th>
       <% end %>
-      
+
       <%= if @mode == "admin" do %>
         <th></th>
       <% end %>
@@ -92,7 +92,7 @@
             </td>
 
             <td>
-              
+
             </td>
 
           <% "invited" -> %>

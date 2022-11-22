@@ -207,7 +207,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Bridge from discord",
       section: "Discord",
       type: "boolean",
-      permissions: ["teiserver.moderator"],
+      permissions: ["teiserver.staff.moderator"],
       description: "Enables bridging from discord to in-lobby channels",
       opts: [],
       default: true
@@ -217,7 +217,7 @@ defmodule Teiserver.TeiserverConfigs do
       key: "teiserver.Bridge from server",
       section: "Discord",
       type: "boolean",
-      permissions: ["teiserver.moderator"],
+      permissions: ["teiserver.staff.moderator"],
       description: "Enables bridging from in-lobby channels to discord",
       opts: [],
       default: true

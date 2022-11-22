@@ -1,5 +1,5 @@
 <%# Live services %>
-<%= if allow?(@conn, "teiserver.moderator") do %>
+<%= if allow?(@conn, "teiserver.staff.moderator") do %>
   <div class="row page-row">
     <%=
       central_component "menu_card",
@@ -10,7 +10,7 @@
       link: Routes.ts_battle_lobby_index_path(@conn, :index)
     %>
 
-    <%= if allow?(@conn, "teiserver.moderator.account") do %>
+    <%= if allow?(@conn, "teiserver.staff.moderator") do %>
       <%=
         central_component "menu_card",
         icon: Teiserver.Account.ClientLib.icon(),
@@ -33,7 +33,7 @@
       icon_class: "fa-duotone",
       link: Routes.ts_account_general_path(@conn, :index)
     %>
-    
+
     <%=
       central_component "menu_card",
       icon: Teiserver.Battle.MatchLib.icon(),
@@ -54,7 +54,7 @@
       %>
     <% end %>
 
-    <%= if allow?(@conn, "teiserver.moderator") do %>
+    <%= if allow?(@conn, "teiserver.staff.moderator") do %>
       <%=
         central_component "menu_card",
         icon: Central.Helpers.StylingHelper.icon(:summary),
@@ -67,7 +67,7 @@
   <% end %>
 </div>
 
-<%= if allow?(@conn, "teiserver.moderator") do %>
+<%= if allow?(@conn, "teiserver.staff.moderator") do %>
   <div style="height: 50px;">&nbsp;</div>
   <div class="row page-row">
     <%=
@@ -78,7 +78,7 @@
       link: Routes.ts_admin_dash_index_path(@conn, :index)
     %>
 
-    <%= if allow?(@conn, "teiserver.moderator.account") do %>
+    <%= if allow?(@conn, "teiserver.staff.moderator") do %>
       <%=
         central_component "menu_card",
         icon: "fa-regular fa-users",
@@ -89,18 +89,7 @@
       %>
     <% end %>
 
-    <%= if false and allow?(@conn, "teiserver.moderator.clan") do %>
-      <%=
-        central_component "menu_card",
-        icon: Teiserver.Clans.ClanLib.icon(),
-        name: "clan_admin",
-        text: "Clan admin",
-        icon_class: "fa-duotone",
-        link: Routes.ts_admin_clan_path(@conn, :index)
-      %>
-    <% end %>
-
-    <%= if allow?(@conn, "teiserver.moderator") do %>
+    <%= if allow?(@conn, "teiserver.staff.moderator") do %>
       <%=
         central_component "menu_card",
         icon: Central.Communication.CommentLib.icon(),

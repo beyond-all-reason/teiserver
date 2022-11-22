@@ -19,7 +19,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{socket.assigns.user_id}")
 
     admin_mode = cond do
-      not allow?(socket, "teiserver.moderator.account") -> false
+      not allow?(socket, "teiserver.staff.moderator") -> false
       params["mode"] == "admin" -> true
       true -> false
     end

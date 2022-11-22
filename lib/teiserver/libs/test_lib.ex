@@ -398,8 +398,8 @@ defmodule Teiserver.TeiserverTestLib do
   @spec staff_permissions() :: [String.t()]
   def staff_permissions do
     m_permissions =
-      ~w(account battle clan queue)
-      |> Enum.map(fn p -> "teiserver.moderator.#{p}" end)
+      ~w(account battle clan queue moderator reviewer telemetry)
+      |> Enum.map(fn p -> "teiserver.staff.#{p}" end)
 
     permissions =
       ~w(moderator communication)

@@ -54,7 +54,7 @@
             <% end %>
           <% end %>
 
-          <%= if allow?(@conn, "teiserver.moderator.account") do %>
+          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
             <a href={Routes.ts_admin_user_path(@conn, :edit, @user)} class={"btn btn-outline-#{bsname}"}>
               <i class="fa-regular fa-fw fa-wrench"></i>
               Edit user
@@ -67,7 +67,7 @@
           &nbsp;
           <%= central_component "icon", icon: @user.icon, icon_class: "fa-solid" %>
         </h3>
-        
+
         <ul class="nav nav-tabs" role="tablist" id="the_tabs">
           <li class="nav-item" role="presentation">
             <a href="#overview_tab" role="tab" class="nav-link" data-bs-toggle="tab">

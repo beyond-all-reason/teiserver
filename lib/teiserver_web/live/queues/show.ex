@@ -39,7 +39,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
 
   @impl true
   def handle_params(%{"id" => id}, _opts, socket) do
-    case allow?(socket.assigns[:current_user], "teiserver.moderator.account") do
+    case allow?(socket.assigns[:current_user], "teiserver.staff.moderator") do
       true ->
         id = int_parse(id)
         PubSub.subscribe(Central.PubSub, "teiserver_queue_wait:#{id}")

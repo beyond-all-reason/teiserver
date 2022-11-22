@@ -1,7 +1,7 @@
 <% bsname = view_colour() %>
 
 <%
-  moderator = allow?(@current_user, "teiserver.moderator")
+  moderator = allow?(@current_user, "teiserver.staff.moderator")
 %>
 
 <%= render TeiserverWeb.Battle.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "battle_lobbies", conn: @socket}) %>
@@ -19,16 +19,16 @@
     text-align: right;
     display: inline-block;
   }
-  
+
   .chat-message {
     display: inline-block;
   }
-  
+
   .new-author {
     border-top: 1px solid rgba(150, 150, 150, 0.1);
     padding: 2px 0;
   }
-  
+
   .text-system {
     font-style: italic;
   }
@@ -53,7 +53,7 @@
 
         <%= if @lobby.in_progress do %>
           <h4>
-            Match in progress - 
+            Match in progress -
             <%= Central.Helpers.TimexHelper.duration_to_str_short(System.system_time(:second) - (@lobby.started_at || 1652282031)) %> -
             <%= extra %>
           </h4>

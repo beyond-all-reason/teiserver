@@ -28,7 +28,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
   @impl true
   def handle_params(params, _url, socket) do
-    case allow?(socket.assigns[:current_user], "teiserver.moderator.account") do
+    case allow?(socket.assigns[:current_user], "teiserver.staff.moderator") do
       true ->
         {:noreply, apply_action(socket, socket.assigns.live_action, params)}
       false ->

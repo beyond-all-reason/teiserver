@@ -88,7 +88,7 @@ defmodule Teiserver.UberserverConvert do
 
     mod_permissions =
       user_permissions ++
-        ["teiserver.moderator", "teiserver.moderator.account", "teiserver.moderator.battle"]
+        ["teiserver.staff.moderator", "teiserver.staff.moderator", "teiserver.moderator.battle"]
 
     admin_permissions =
       mod_permissions ++ ["teiserver.admin", "teiserver.admin.account", "teiserver.admin.battle"]

@@ -1,5 +1,5 @@
 <div class="row page-row">
-  <%= if allow?(@conn, "teiserver.moderator.account") do %>
+  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
     <%=
       central_component "menu_card",
       icon: "fa-regular fa-users",
@@ -10,7 +10,7 @@
     %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.moderator.clan") do %>
+  <%= if allow?(@conn, "teiserver.staff.clan") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Clans.ClanLib.icon(),
@@ -21,7 +21,7 @@
     %>
   <% end %>
 
-  <%= if allow?(@conn, "teiserver.moderator.queue") do %>
+  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
     <%=
       central_component "menu_card",
       icon: Teiserver.Game.QueueLib.icon(),

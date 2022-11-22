@@ -20,7 +20,7 @@
   value: date_to_str(@match.finished, format: :ymd_hms, tz: @tz)
 %>
 
-<%= if allow?(@conn, "teiserver.moderator") do %>
+<%= if allow?(@conn, "teiserver.staff.moderator") do %>
   <hr />
   <textarea class="form-control" style="font-family: monospace" rows="20"><%= Jason.encode!(@match.data, pretty: true) %></textarea>
 <% end %>

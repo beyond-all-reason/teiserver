@@ -27,11 +27,11 @@
   %>
 <% end %>
 
-<%= if allow?(@conn, "teiserver.moderator") do %>
+<%= if allow?(@conn, "teiserver.staff.moderator") do %>
   <hr />
   Match data
   <textarea class="form-control" style="font-family: monospace" rows="20"><%= Jason.encode!(@match.data, pretty: true) %></textarea>
-  
+
   Match bots
   <textarea class="form-control" style="font-family: monospace" rows="20"><%= Jason.encode!(@match.bots, pretty: true) %></textarea>
 <% end %>

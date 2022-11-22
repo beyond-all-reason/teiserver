@@ -41,5 +41,5 @@ defmodule Teiserver.Engine.Unit do
 
   def authorize(:index, _, _), do: true
   def authorize(:show, _, _), do: true
-  def authorize(_, conn, _), do: allow?(conn, "teiserver.moderator")
+  def authorize(_, conn, _), do: allow?(conn, "teiserver.staff.moderator")
 end

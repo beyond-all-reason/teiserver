@@ -24,7 +24,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
         |> TSAuthPlug.live_call(session)
         |> NotificationPlug.live_call()
 
-    moderator = allow?(socket, "teiserver.moderator")
+    moderator = allow?(socket, "teiserver.staff.moderator")
 
     extra_content = if moderator do
       @extra_menu_content
@@ -65,7 +65,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       lobby == nil ->
         index_redirect(socket)
 
-      (lobby.locked or lobby.password != nil) and not allow?(socket, "teiserver.moderator") ->
+      (lobby.locked or lobby.password != nil) and not allow?(socket, "teiserver.staff.moderator") ->
         index_redirect(socket)
 
       true ->

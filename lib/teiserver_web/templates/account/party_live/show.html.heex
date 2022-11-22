@@ -1,6 +1,6 @@
 <%
   bsname = @view_colour
-  moderator = allow?(@current_user, "teiserver.moderator.account")
+  moderator = allow?(@current_user, "teiserver.staff.moderator")
   leader = moderator or (@party.leader == @user_id)
 %>
 
@@ -17,9 +17,9 @@
           <span class={"btn btn-sm btn-danger2"} phx-click="leave">
             Leave party
           </span>
-        
+
           <%= if moderator do %>
-            
+
           <% end %>
         </div>
 

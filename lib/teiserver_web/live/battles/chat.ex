@@ -50,7 +50,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
       lobby == nil ->
         index_redirect(socket)
 
-      (lobby.locked or lobby.password != nil) and not allow?(socket, "teiserver.moderator") ->
+      (lobby.locked or lobby.password != nil) and not allow?(socket, "teiserver.staff.moderator") ->
         index_redirect(socket)
 
       true ->
@@ -224,7 +224,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
   defp allow_read_message?(msg, %{
     assigns: %{current_user: current_user}}) do
     cond do
-      allow?(current_user, "teiserver.moderator") -> true
+      allow?(current_user, "teiserver.staff.moderator") -> true
       String.starts_with?(msg, "s:") -> false
       String.starts_with?(msg, "a:") -> false
       true -> true
@@ -233,7 +233,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
 
   defp allow_send_message?(msg, current_user) do
     cond do
-      allow?(current_user, "teiserver.moderator") -> true
+      allow?(current_user, "teiserver.staff.moderator") -> true
       String.starts_with?(msg, "g:") -> false
       String.starts_with?(msg, "s:") -> false
       String.starts_with?(msg, "a:") -> false
