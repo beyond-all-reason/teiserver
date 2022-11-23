@@ -121,7 +121,11 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
     Alchemy.Client.send_message(
       chan,
-      "New infolog uploaded: #{infolog.metadata["errortype"]} / #{infolog.metadata["shorterror"]}.\nLink: #{url}",
+      [
+        "New infolog uploaded: #{infolog.metadata["errortype"]}",
+        "`#{infolog.metadata["shorterror"]}`",
+        "Link: #{url}",
+      ] |> Enum.join("\n"),
       []# Options
     )
   end
