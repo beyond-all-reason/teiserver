@@ -36,7 +36,6 @@ defmodule Teiserver.Startup do
     ])
 
     Central.Account.UserLib.add_report_restriction_types("Warnings", [
-      "Singular warning",
       "Warning reminder",
     ])
 

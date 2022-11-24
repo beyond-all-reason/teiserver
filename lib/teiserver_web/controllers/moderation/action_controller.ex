@@ -157,7 +157,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
       "restrictions" => restrictions
     })
 
-    report_ids = action_params["reports"] || %{}
+    report_ids = (action_params["reports"] || %{})
       |> Map.values
       |> Enum.reject(fn v -> v == "false" end)
       |> Enum.map(fn s -> String.to_integer(s) end)

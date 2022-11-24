@@ -34,6 +34,20 @@
             &nbsp;
             Filter by reporter
           </a>
+
+          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+            <a class={"btn btn-outline-#{Teiserver.Account.UserLib.colour()}"} href={Routes.ts_admin_user_path(@conn, :show, @report.target_id)}>
+              <%= central_component "icon", icon: Teiserver.Account.UserLib.icon(), class: "fa-solid" %>
+              &nbsp;
+              View user
+            </a>
+
+            <a class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"} href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@report.target_id}_"}>
+              <%= central_component "icon", icon: Teiserver.Moderation.ActionLib.icon(), class: "fa-solid" %>
+              &nbsp;
+              Action user
+            </a>
+          <% end %>
         </div>
 
         <h3>

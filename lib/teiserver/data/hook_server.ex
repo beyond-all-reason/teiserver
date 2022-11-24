@@ -17,6 +17,9 @@ defmodule Teiserver.HookServer do
 
         # Teiserver.User.create_report(payload, reason) # Reports used to have action, we don't need this at this point
 
+      :updated_report ->
+        :ok
+
       :new_action ->
         # Coordinator.update_report(payload, reason)
         # Teiserver.Bridge.DiscordBridge.report_updated(payload, reason)
@@ -43,6 +46,8 @@ defmodule Teiserver.HookServer do
         :ok
 
     end
+
+    {:noreply, state}
   end
 
   def handle_info({:account_hooks, event, payload, _reason}, state) do
