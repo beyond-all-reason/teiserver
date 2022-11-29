@@ -118,6 +118,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
     post_to_discord = cond do
       infolog.metadata["shorterror"] == "Errorlog" -> false
+      infolog.metadata["private"]    == true       -> false
       true -> true
     end
 
@@ -128,7 +129,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
       Alchemy.Client.send_message(
         chan,
         [
-          "New infolog uploaded: #{infolog.metadata["errortype"]}",
+          "New infolog uploaded: #{infolog.metadata["errortype"]} `#{infolog.metadata["filename"]}`",
           "`#{infolog.metadata["shorterror"]}`",
           "Link: #{url}",
         ] |> Enum.join("\n"),
