@@ -1,7 +1,6 @@
 defmodule Teiserver.HookServer do
   use GenServer
   alias Phoenix.PubSub
-  alias Teiserver.Coordinator
 
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, nil, opts)
@@ -25,7 +24,7 @@ defmodule Teiserver.HookServer do
         # Teiserver.Bridge.DiscordBridge.report_updated(payload, reason)
         # Teiserver.User.update_report(payload, reason)
 
-        # Teiserver.Bridge.DiscordBridge.new_action(data.report)
+        Teiserver.Bridge.DiscordBridge.new_action(data.report)
         :ok
 
       :updated_action ->

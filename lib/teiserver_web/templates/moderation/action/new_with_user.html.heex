@@ -38,8 +38,6 @@
 
 <h3>Adding action against <%= @user.name %></h3>
 
-
-
 <div class="row">
   <div class="col-md-12 mb-4">
 <%= form_for @changeset, Routes.moderation_action_path(@conn, :create), fn f -> %>
@@ -116,14 +114,14 @@
       <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
         $('#code_references').val('1.4');
         $('#code_references').trigger('change');
-        $('#action_restriction_Singular_warning').prop('checked', true);
+        $('#action_restriction_Warning_reminder').prop('checked', true);
         $('#action_restriction_All_lobbies').prop('checked', true);
         $('#action_restriction_Room_chat').prop('checked', true);
         $('#action_restriction_All_lobbies').prop('checked', true);
         $('#action_restriction_Matchmaking').prop('checked', true);
         $('#action_restriction_Community').prop('checked', true);
-        $('#report_form_reason').val('Please rename to a name not in breach of the Code of Conduct and contact a moderator to have the restrictions lifted.');
-        $('#report_expires').val('never');
+        $('#action_reason').val('Please rename to a name not in breach of the Code of Conduct and contact a moderator to have the restrictions lifted.');
+        $('#action_expires').val('1000 years');
       ">
         Add rename
       </div>
