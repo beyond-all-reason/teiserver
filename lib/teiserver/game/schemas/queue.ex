@@ -12,6 +12,7 @@ defmodule Teiserver.Game.Queue do
   schema "teiserver_game_queues" do
     field :name, :string
     field :team_size, :integer
+    field :team_count, :integer, default: 2
 
     field :icon, :string
     field :colour, :string
@@ -34,8 +35,8 @@ defmodule Teiserver.Game.Queue do
       |> remove_characters([:name], [~r/[:]/])
 
     struct
-    |> cast(params, [:name, :icon, :colour, :team_size, :conditions, :settings, :map_list])
-    |> validate_required([:name, :icon, :colour, :team_size, :map_list])
+      |> cast(params, ~w(name icon colour team_size team_count conditions settings map_list)a)
+      |> validate_required(~w(name icon colour team_size team_count map_list)a)
   end
 
   @spec authorize(atom, Plug.Conn.t(), Map.t()) :: boolean

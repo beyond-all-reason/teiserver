@@ -52,8 +52,9 @@ defmodule Teiserver.TachyonMatchmakingTest do
   test "queue wait lifecycle", %{socket: socket1, user: user1} do
     {:ok, queue} =
       Game.create_queue(%{
-        "name" => "test_queue",
+        "name" => "test_queue-1v1",
         "team_size" => 1,
+        "team_count" => 2,
         "icon" => "fa-regular fa-home",
         "colour" => "#112233",
         "map_list" => ["map1"],
@@ -84,7 +85,9 @@ defmodule Teiserver.TachyonMatchmakingTest do
     }
 
     pid = Matchmaking.get_queue_wait_pid(queue.id)
-    assert :sys.get_state(pid) |> Map.get(:wait_list) == [{user1.id, :user}]
+    groups = :sys.get_state(pid) |> Map.get(:groups_map)
+    assert Map.has_key?(groups, user1.id)
+    assert groups[user1.id].members == [user1.id]
 
     # Trigger the queue server and see if anything happens
     send(pid, :tick)

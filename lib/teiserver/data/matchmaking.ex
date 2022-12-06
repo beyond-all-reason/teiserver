@@ -1,10 +1,13 @@
-# A struct representing the in-memory version of Teiserver.Game.DBQueue
 defmodule Teiserver.Data.QueueStruct do
-  @enforce_keys [:id, :name, :team_size, :icon, :colour, :settings, :conditions, :map_list]
+  @moduledoc """
+  A struct representing the in-memory version of Teiserver.Game.DBQueue
+  """
+  @enforce_keys ~w(id name team_size team_count icon colour settings conditions map_list)a
   defstruct [
     :id,
     :name,
     :team_size,
+    :team_count,
     :icon,
     :colour,
     :settings,
@@ -16,10 +19,29 @@ defmodule Teiserver.Data.QueueStruct do
   ]
 end
 
+defmodule Teiserver.Data.QueueGroup do
+  @moduledoc false
+  @enforce_keys ~w(id members rating avoid count join_time wait_time)a
+  defstruct [
+    id: nil,
+    members: [],
+    rating: nil,
+    avoid: [],
+    count: nil,
+    join_time: nil,
+    wait_time: nil,
+
+    bucket: nil,
+    search_distance: 0,
+    max_distance: 0
+  ]
+end
+
 defmodule Teiserver.Data.Matchmaking do
   require Logger
-  alias Teiserver.Game
-  alias Teiserver.Data.QueueStruct
+  alias Teiserver.{Account, Game}
+  alias Teiserver.Battle.BalanceLib
+  alias Teiserver.Data.{QueueStruct, QueueGroup}
   alias Teiserver.Game.{QueueWaitServer, QueueMatchServer}
   alias Teiserver.Data.Types, as: T
 
@@ -185,19 +207,97 @@ defmodule Teiserver.Data.Matchmaking do
       end)
   end
 
-  @spec add_user_to_queue(T.queue_id(), T.userid()) :: :ok | :duplicate | :failed | :missing
-  def add_user_to_queue(queue_id, user_id) do
+  @spec add_user_to_queue(T.queue_id(), T.userid()) :: :ok | :not_party_leader | :duplicate | :failed | :missing | :no_queue
+  def add_user_to_queue(queue_id, userid) do
+    queue = get_queue(queue_id)
+    client = Account.get_client_by_id(userid)
+
+    if queue == nil do
+      :no_queue
+    else
+      if client.party_id do
+        party = Account.get_party(client.party_id)
+        if party.leader == userid do
+          client.party
+            |> make_group_from_party(queue)
+            |> do_add_group_to_queue(queue_id)
+        else
+          :not_party_leader
+        end
+      else
+        userid
+          |> make_group_from_userid(queue)
+          |> do_add_group_to_queue(queue_id)
+      end
+    end
+  end
+
+  @spec do_add_group_to_queue(T.userid(), T.queue_id()) :: :ok | :duplicate | :failed | :missing
+  defp do_add_group_to_queue(queue_group, queue_id) do
     case get_queue_wait_pid(queue_id) do
       nil ->
         :missing
 
       pid ->
-        GenServer.call(pid, {:add_user, user_id})
+        GenServer.call(pid, {:add_group, queue_group})
     end
   end
 
-  @spec remove_user_from_queue(T.queue_id(), T.userid()) :: :ok | :missing
-  def remove_user_from_queue(queue_id, user_id) do
+  @spec get_user_rating_for_queue(T.userid(), T.queue_id()) :: float()
+  defp get_user_rating_for_queue(userid, queue) do
+    rating_type = cond do
+      queue.settings["rating_type"] != nil -> queue.settings["rating_type"]
+      queue.team_size == 1 -> "Duel"
+      true -> "Team"
+    end
+
+    BalanceLib.get_user_rating_value(userid, rating_type)
+  end
+
+  @spec make_group_from_userid(T.userid, T.queue()) :: QueueGroup.t()
+  defp make_group_from_userid(userid, queue) when is_integer(userid) do
+    rating_value = get_user_rating_for_queue(userid, queue)
+
+    %QueueGroup{
+      id: userid,
+      members: [userid],
+      rating: rating_value,
+      avoid: [],
+      count: 1,
+      wait_time: 0,
+      join_time: System.system_time(:second),
+
+      bucket: nil,
+      search_distance: 0,
+      max_distance: nil
+    }
+  end
+
+  @spec make_group_from_party(T.party(), T.queue()) :: QueueGroup.t()
+  defp make_group_from_party(party, queue) do
+    rating_value = party.members
+      |> Enum.map(fn userid ->
+        get_user_rating_for_queue(userid, queue)
+      end)
+      |> Enum.max
+
+    %QueueGroup{
+      id: party.id,
+      members: party.members,
+      rating: rating_value,
+      avoid: [],
+      count: Enum.count(party.members),
+      wait_time: 0,
+      join_time: System.system_time(:second),
+
+      bucket: nil,
+      search_distance: 0,
+      max_distance: nil
+    }
+  end
+
+  @spec remove_group_from_queue(T.queue_id(), T.userid() | T.party_id()) :: :ok | :missing
+  def remove_group_from_queue(queue_id, user_id) do
     case get_queue_wait_pid(queue_id) do
       nil ->
         :missing
@@ -253,6 +353,7 @@ defmodule Teiserver.Data.Matchmaking do
       id: queue.id,
       name: queue.name,
       team_size: queue.team_size,
+      team_count: queue.team_count,
       icon: queue.icon,
       colour: queue.colour,
       settings: queue.settings,

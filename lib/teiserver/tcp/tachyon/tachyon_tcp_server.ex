@@ -371,7 +371,20 @@ defmodule Teiserver.TachyonTcpServer do
           state.protocol_out.reply(:lobby, :received_lobby_direct_announce, {data.sender_id, data.message_content}, state)
 
         :matchmaking ->
-          state.protocol_out.reply(:matchmaking, data.sub_event, {data.queue_id, data.match_id}, state)
+          case data.sub_event do
+            :joined_queue ->
+              send(self(), {:action, {:joined_queue, data.queue_id}})
+              state.protocol_out.reply(:matchmaking, :join_queue_success, data.queue_id, state)
+
+            :left_queue ->
+              send(self(), {:action, {:left_queue, data.queue_id}})
+              # state.protocol_out.reply(:matchmaking, :left_queue, data.queue_id, state)
+              state
+
+            _ ->
+              state.protocol_out.reply(:matchmaking, data.sub_event, {data.queue_id, data.match_id}, state)
+          end
+
 
         :party_invite ->
           state.protocol_out.reply(:party, :invite, data.party_id, state)
@@ -383,16 +396,6 @@ defmodule Teiserver.TachyonTcpServer do
         :left_party ->
           send(self(), {:action, {:leave_party, data.party_id}})
           state.protocol_out.reply(:party, :left_party, data.party_id, state)
-
-        # Matchmaking
-        :joined_queue ->
-          send(self(), {:action, {:joined_queue, data.queue_id}})
-          state.protocol_out.reply(:matchmaking, :join_queue_success, data.queue_id, state)
-
-        :left_queue ->
-          send(self(), {:action, {:left_queue, data.queue_id}})
-          # state.protocol_out.reply(:matchmaking, :left_queue, data.queue_id, state)
-          state
 
         :disconnected ->
           Logger.info("#{__MODULE__} teiserver_client_messages disconnected message")

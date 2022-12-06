@@ -28,6 +28,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
         :duplicate -> true
         :failed -> false
         :missing -> false
+        :no_queue -> false
       end
 
     case joined do
@@ -37,6 +38,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
       false ->
         reason = case resp do
           :missing -> "No queue found"
+          :no_queue -> "No queue found"
           _ -> "Failure"
         end
         reply(:matchmaking, :join_queue_failure, {queue_id, reason}, state)
@@ -44,14 +46,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
   end
 
   def do_handle("leave_queue", %{"queue_id" => queue_id}, state) when is_integer(queue_id) do
-    Matchmaking.remove_user_from_queue(queue_id, state.userid)
+    Matchmaking.remove_group_from_queue(queue_id, state.userid)
     state
   end
 
   def do_handle("leave_all_queues", _cmd, state) do
     state.queues
     |> Enum.each(fn queue_id ->
-      Matchmaking.remove_user_from_queue(queue_id, state.userid)
+      Matchmaking.remove_group_from_queue(queue_id, state.userid)
     end)
 
     state

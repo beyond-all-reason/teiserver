@@ -10,7 +10,7 @@ defmodule Teiserver.Game.RatingLog do
     field :value, :map
     field :inserted_at, :utc_datetime
 
-    has_one :match_membership, Teiserver.Battle.MatchMembership
+    # has_one :match_membership, Teiserver.Battle.MatchMembership
   end
 
   @doc """
