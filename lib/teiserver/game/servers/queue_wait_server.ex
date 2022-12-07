@@ -216,15 +216,24 @@ defmodule Teiserver.Game.QueueWaitServer do
   end
 
   def handle_info(:tick, state) do
-    {matches, new_buckets, new_groups_map, wait_times} = main_loop_search(state)
+    new_state = case main_loop_search(state) do
+      nil ->
+        state
+
+      {selected_groups, new_buckets, new_groups_map} ->
+        wait_times = selected_groups
+          |> Enum.map(fn g -> System.system_time(:second) - g.join_time end)
+
+        %{state |
+          buckets: new_buckets,
+          groups_map: new_groups_map,
+          found_match_count: (state.found_match_count + 1),
+          recent_wait_times: state.recent_wait_times ++ wait_times
+        }
+    end
 
     :timer.send_after(@tick_interval, :tick)
-    {:noreply, %{state |
-      buckets: new_buckets,
-      groups_map: new_groups_map,
-      found_match_count: (state.found_match_count + Enum.count(matches)),
-      recent_wait_times: state.recent_wait_times ++ wait_times
-    }}
+    {:noreply, state}
   end
 
   def handle_info({:update, :settings, new_list}, state),
@@ -240,25 +249,19 @@ defmodule Teiserver.Game.QueueWaitServer do
     do: {:noreply, %{state | map_list: new_list}}
 
 
-  @spec find_matches(map(), [non_neg_integer()]) :: list()
-  defp find_matches(state, groups) do
-    user_count = groups
-      |> Enum.map(fn group_id -> state.group_map[group_id].count end)
+  @spec find_matches_in_bucket(map(), [non_neg_integer()]) :: list()
+  defp find_matches_in_bucket(state, group_id_list) do
+    group_list = group_id_list
+      |> Enum.map(fn group_id -> state.groups_map[group_id] end)
+
+    user_count = group_list
+      |> Enum.map(fn group -> group.count end)
       |> Enum.sum
 
     if user_count >= state.players_needed do
-      IO.puts ""
-      IO.inspect groups
-      IO.puts ""
-
-      identify_best_match()
+      select_groups_for_balance(state, group_list)
     else
-      IO.puts ""
-      IO.inspect state.group_map
-      IO.inspect {user_count, state.players_needed}
-      IO.puts ""
-
-      []
+      nil
     end
   end
 
@@ -280,14 +283,108 @@ defmodule Teiserver.Game.QueueWaitServer do
   #     |> List.flatten
   # end
 
-  defp identify_best_match() do
+  # TODO: Actually identify which groups are closest to each other?
+  @spec select_groups_for_balance(map(), [QueueGroup.t()]) :: [QueueGroup.t()]
+  defp select_groups_for_balance(state, group_list) do
+    # We just need to find N teams of S people, then we balance it
+    # largest groups first
 
+    # First we sort the group list, should be biggest groups first
+    group_list = group_list
+      |> Enum.sort_by(fn group -> group.count end, &>=/2)
+
+    # Now we iterate through each team_id and pick groups
+    # it doesn't matter which team they are picked for as we'll be balancing it later
+    {picks, _} = 1..state.team_count
+      |> Enum.map_reduce(group_list, fn (team_id, remaining_groups) ->
+        # Grab the first groups we find from the list as long as they match the required size
+        picked = pick_groups_from_list_to_size(remaining_groups, state.team_size, [])
+
+        # IO.puts ""
+        # IO.inspect picked, label: "#{team_id} picked"
+        # IO.puts ""
+
+        # TODO: Handle :failure, also find a situation where it would happen?
+        if picked == :failure do
+          Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\npicked == :failure")
+          Logger.error("group_list: #{inspect group_list}")
+          Logger.error("team_count: #{inspect state.team_count}, team_id: #{inspect team_id}, remaining_groups: #{inspect remaining_groups}")
+        end
+
+        # Convert the groups to ids
+        picked_ids = picked |> Enum.map(fn g -> g.id end)
+
+        # Strip out from the list any groups we've picked
+        new_remaining = remaining_groups
+          |> Enum.reject(fn g -> Enum.member?(picked_ids, g.id) end)
+
+        # map and reduce
+        {picked, new_remaining}
+      end)
+
+    # Picks will now be a list of groups picked for balancing, we don't care which
+    # team they were picked as a part of since we don't handle balance here
+    List.flatten(picks)
   end
 
-  @spec main_loop_search(map()) :: {list(), map(), map(), list()}
+  # Recursively goes through a list and gets the first groups that match it's criteria of size
+  defp pick_groups_from_list_to_size(_, 0, acc), do: acc
+  defp pick_groups_from_list_to_size([], _, _), do: :failure
+
+  defp pick_groups_from_list_to_size([first_group | remaining_list], target_size, acc) do
+    if first_group.count <= target_size do
+      new_acc = [first_group | acc]
+      new_target = target_size - first_group.count
+
+      pick_groups_from_list_to_size(remaining_list, new_target, new_acc)
+    else
+      pick_groups_from_list_to_size(remaining_list, target_size, acc)
+    end
+  end
+
+  # Returns a list of the groups selected for the next match (empty list if no match found)
+  # the new buckets and the new groups_map
+  @spec main_loop_search(map()) :: {list(), map(), map()} | nil
   defp main_loop_search(state) do
-    # {matches, state.buckets, state.groups_map, []}
-    {[], state.buckets, state.groups_map, []}
+    IO.puts "state.buckets"
+    IO.inspect state.buckets
+    IO.puts ""
+
+    selected_groups = state.buckets
+      |> Stream.filter(fn {_bucket_key, group_list} ->
+        Enum.count(group_list) >= state.players_needed
+      end)
+      |> Stream.map(fn {_bucket_key, group_list} ->
+        matches = find_matches_in_bucket(state, group_list)
+      end)
+      |> Stream.reject(&(&1 == nil))
+      |> Stream.take(1)
+      |> Enum.to_list
+      |> List.flatten
+
+    if Enum.empty?(selected_groups) do
+      nil
+    else
+      selected_ids = selected_groups
+        |> Enum.map(fn g -> g.id end)
+
+      # Drop the selected ids from any bucket values
+      new_buckets = state.buckets
+        |> Map.new(fn {key, bucket_list} ->
+          {key, Enum.reject(bucket_list, fn g_id -> Enum.member?(selected_ids, g_id) end)}
+        end)
+        |> Map.filter(fn {_, bucket_list} -> not Enum.empty?(bucket_list) end)
+
+      # Drop the groups from the groups_map too
+      new_groups_map = Map.drop(state.groups_map, selected_ids)
+
+      IO.puts "New values"
+      IO.inspect new_buckets
+      IO.inspect new_groups_map
+      IO.puts ""
+
+      {selected_groups, new_buckets, new_groups_map}
+    end
   end
 
   # defp old_main_loop_search(state) do

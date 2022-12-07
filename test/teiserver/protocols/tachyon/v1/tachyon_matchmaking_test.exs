@@ -596,4 +596,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert wait_state.wait_list == []
     refute wait_state.buckets == %{}
   end
+
+  # TODO: Group bigger than max teamsize
+  # TODO: Test where there are multiple viable matches and it actually identifies the best one
 end
