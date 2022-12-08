@@ -40,7 +40,7 @@ defmodule Teiserver.Battle.BalanceLib do
   @type expanded_group_or_pair() :: expanded_group() | {expanded_group(), expanded_group()}
 
   @doc """
-  groups is a map of %{userid => rating_value}
+  groups is a list of maps of %{userid => rating_value}
 
   The result format with the following keys:
   captains: map of team_id => user_id of highest ranked player in the team

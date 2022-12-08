@@ -221,6 +221,8 @@ defmodule Teiserver.Game.QueueWaitServer do
         state
 
       {selected_groups, new_buckets, new_groups_map} ->
+        Matchmaking.create_match(selected_groups, state.queue_id)
+
         wait_times = selected_groups
           |> Enum.map(fn g -> System.system_time(:second) - g.join_time end)
 
@@ -233,7 +235,7 @@ defmodule Teiserver.Game.QueueWaitServer do
     end
 
     :timer.send_after(@tick_interval, :tick)
-    {:noreply, state}
+    {:noreply, new_state}
   end
 
   def handle_info({:update, :settings, new_list}, state),
@@ -346,10 +348,6 @@ defmodule Teiserver.Game.QueueWaitServer do
   # the new buckets and the new groups_map
   @spec main_loop_search(map()) :: {list(), map(), map()} | nil
   defp main_loop_search(state) do
-    IO.puts "state.buckets"
-    IO.inspect state.buckets
-    IO.puts ""
-
     selected_groups = state.buckets
       |> Stream.filter(fn {_bucket_key, group_list} ->
         Enum.count(group_list) >= state.players_needed
@@ -378,13 +376,12 @@ defmodule Teiserver.Game.QueueWaitServer do
       # Drop the groups from the groups_map too
       new_groups_map = Map.drop(state.groups_map, selected_ids)
 
-      IO.puts "New values"
-      IO.inspect new_buckets
-      IO.inspect new_groups_map
-      IO.puts ""
-
       {selected_groups, new_buckets, new_groups_map}
     end
+
+    # we now find matches but we don't pass them on yet and there is no concept of balance either
+    # the balance should take place in the match server and ideally will have a way to tell the
+    # BalanceServer for the room about the new rules, it should also tell the ConsulServer about the new list of approved players
   end
 
   # defp old_main_loop_search(state) do

@@ -118,16 +118,16 @@ defmodule Teiserver.Data.Matchmaking do
     end
   end
 
-  @spec create_match([{T.userid(), :user} | {T.party_id(), :party}], T.queue_id()) :: {pid, String.t(), list()}
-  def create_match(teams, queue_id) do
-    Logger.info("create_match: #{inspect teams}")
+  @spec create_match([QueueGroup.t()], T.queue_id()) :: {pid, String.t()}
+  def create_match(group_list, queue_id) do
+    Logger.info("#{__ENV__.file}:#{__ENV__.line}\ncreate_match: #{inspect group_list}")
 
-    {pid, match_id} = add_match_server(queue_id, teams)
-    {pid, match_id, teams}
+    {pid, match_id} = add_match_server(queue_id, group_list)
+    {pid, match_id}
   end
 
-  @spec add_match_server(T.queue_id(), [{T.userid(), :user} | {T.party_id(), :party}]) :: {pid, String.t()}
-  def add_match_server(queue_id, teams) do
+  @spec add_match_server(T.queue_id(), [QueueGroup.t()]) :: {pid, String.t()}
+  def add_match_server(queue_id, group_list) do
     match_id = UUID.uuid1()
 
     {:ok, pid} = DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
@@ -135,7 +135,7 @@ defmodule Teiserver.Data.Matchmaking do
       data: %{
         match_id: match_id,
         queue_id: queue_id,
-        teams: teams
+        group_list: group_list
       }
     })
 

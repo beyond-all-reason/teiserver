@@ -8,8 +8,8 @@ defmodule Teiserver.Game.QueueMatchServer do
   use GenServer
   require Logger
   alias Central.Config
-  alias Teiserver.Battle.Lobby
-  alias Teiserver.Data.Matchmaking
+  alias Teiserver.Battle.{Lobby, BalanceLib}
+  alias Teiserver.Data.{Matchmaking, QueueGroup}
   alias Phoenix.PubSub
   alias Teiserver.{Coordinator, Client, Battle}
 
@@ -66,6 +66,24 @@ defmodule Teiserver.Game.QueueMatchServer do
   end
 
   @impl true
+  def handle_info(:initial_setup, state) do
+    db_queue = Matchmaking.get_queue(state.queue_id)
+
+    :timer.send_interval(db_queue.settings["ready_tick_interval"] || @tick_interval, self(), :tick)
+    :timer.send_after(db_queue.settings["ready_wait_time"] || @ready_wait_time, :end_waiting)
+
+    balance = balance_groups(state.group_list, db_queue)
+    teams = balance.team_players
+
+    new_state = %{state |
+      balance: balance,
+      teams: teams,
+      db_queue: db_queue,
+    }
+
+    {:noreply, new_state}
+  end
+
   def handle_info(:end_waiting, state) do
     cancel_match(state)
   end
@@ -96,8 +114,8 @@ defmodule Teiserver.Game.QueueMatchServer do
   def handle_info({:update, :map_list, new_list}, state),
     do: {:noreply, %{state | map_list: new_list}}
 
-  defp send_invites(%{users: users} = state) do
-    users
+  defp send_invites(%{user_ids: user_ids} = state) do
+    user_ids
       |> Enum.map(fn userid ->
         PubSub.broadcast(
           Central.PubSub,
@@ -131,7 +149,7 @@ defmodule Teiserver.Game.QueueMatchServer do
       end)
 
     # TODO: Parties
-    state.teams
+    state.group_list
       |> Enum.filter(fn
         {userid, _age, _range, :user} -> Enum.member?(state.accepted_users, userid)
         _ -> false
@@ -292,6 +310,20 @@ defmodule Teiserver.Game.QueueMatchServer do
     %{state | stage: "Completed"}
   end
 
+  @spec balance_groups([QueueGroup.t()], map()) :: map()
+  defp balance_groups(group_list, db_queue) do
+    balance_groups = group_list
+      |> Enum.map(fn group ->
+        group.members
+          |> Map.new(fn userid ->
+            {userid, group.rating}
+          end)
+      end)
+
+    opts = []
+    BalanceLib.create_balance(balance_groups, db_queue.team_count, opts)
+  end
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -300,10 +332,7 @@ defmodule Teiserver.Game.QueueMatchServer do
   @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
-    db_queue = Matchmaking.get_queue(opts.queue_id)
-
-    :timer.send_interval(db_queue.settings["ready_tick_interval"] || @tick_interval, self(), :tick)
-    :timer.send_after(db_queue.settings["ready_wait_time"] || @ready_wait_time, :end_waiting)
+    send(self(), :initial_setup)
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
@@ -318,40 +347,36 @@ defmodule Teiserver.Game.QueueMatchServer do
       {:queue_wait, :match_attempt, opts.queue_id, opts.match_id}
     )
 
-    # TODO: Have this be a PartyLib function, to extract userids from party_ids
-    users = opts.teams
+    user_ids = opts.group_list
+      |> Enum.map(fn g -> g.members end)
       |> List.flatten
-      |> Enum.map(fn
-        {party_id, _time, _range, :party} ->
-          # FIXME: at the time of writing there is no party functionality in place
-          party_id
-
-        {userid, _time, _range, :user} ->
-          userid
-      end)
 
     state = %{
       match_id: opts.match_id,
       queue_id: opts.queue_id,
-      db_queue: db_queue,
-      teams: opts.teams,
-      users: users,
+      group_list: opts.group_list,
+      user_ids: user_ids,
+
+      # Will get assigned during :initial_setup
+      db_queue: nil,
+      teams: nil,
+      balance: nil,
 
       stage: "accepting",
       lobby_id: nil,
 
-      pending_accepts: users,
+      pending_accepts: user_ids,
       accepted_users: [],
       declined_users: []
     }
 
     if Config.get_site_config_cache("matchmaking.Use ready check") == true do
       send_invites(state)
-      Logger.info("QueueMatchServer #{state.match_id} created, sent invites to #{Kernel.inspect users}")
+      Logger.info("QueueMatchServer #{state.match_id} created, sent invites to #{inspect user_ids}")
       state
     else
-      Logger.info("QueueMatchServer #{state.match_id} created, accepting all users #{Kernel.inspect users} as 'matchmaking.Use ready check' is false")
-      %{state | pending_accepts: [], accepted_users: users, stage: "Finding empty lobby"}
+      Logger.info("QueueMatchServer #{state.match_id} created, accepting all users #{inspect user_ids} as 'matchmaking.Use ready check' is false")
+      %{state | pending_accepts: [], accepted_users: user_ids, stage: "Finding empty lobby"}
     end
 
     {:ok, state}

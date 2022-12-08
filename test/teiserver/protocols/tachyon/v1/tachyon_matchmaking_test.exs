@@ -118,23 +118,20 @@ defmodule Teiserver.TachyonMatchmakingTest do
     {:queue_wait, :match_attempt, matched_queue_id, match_id} = hd(messages)
     assert matched_queue_id == queue.id
 
-    assert :sys.get_state(pid) |> Map.get(:wait_list) == []
+    groups = :sys.get_state(pid) |> Map.get(:groups_map)
+    assert groups == %{}
 
     match_server_pid = Matchmaking.get_queue_match_pid(match_id)
     match_state = :sys.get_state(match_server_pid)
 
-    # Teams includes time based data, thus we can't directly test it
-    stripped_teams = match_state.teams
-      |> Enum.map(fn {id, _time, _range, type} -> {id, type} end)
-
     # We don't know for sure the order these will be in so we check like this
-    assert Enum.member?(stripped_teams, {user1.id, :user})
-    assert Enum.member?(stripped_teams, {user2.id, :user})
+    assert match_state.teams[1] == [user2.id]
+    assert match_state.teams[2] == [user1.id]
     assert Enum.count(match_state.teams) == 2
 
-    assert Enum.member?(match_state.users, user1.id)
-    assert Enum.member?(match_state.users, user2.id)
-    assert Enum.count(match_state.users) == 2
+    assert Enum.member?(match_state.user_ids, user1.id)
+    assert Enum.member?(match_state.user_ids, user2.id)
+    assert Enum.count(match_state.user_ids) == 2
   end
 
   test "joining and leaving all queues", %{socket: socket, user: user} do
