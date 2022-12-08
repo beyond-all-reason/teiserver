@@ -101,7 +101,7 @@ defmodule Teiserver.User do
   # ]
 
   # Leaderboard rating ranks
-  @rank_levels [3, 7, 12, 21, 26, 35, 100]
+  @rank_levels [3, 7, 12, 21, 26, 35, 1000]
 
   def get_rank_levels(), do: @rank_levels
 
