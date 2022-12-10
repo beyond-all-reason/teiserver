@@ -297,13 +297,29 @@ defmodule Teiserver.Data.Matchmaking do
   end
 
   @spec remove_group_from_queue(T.queue_id(), T.userid() | T.party_id()) :: :ok | :missing
-  def remove_group_from_queue(queue_id, user_id) do
+  def remove_group_from_queue(queue_id, userid) do
+    client = Account.get_client_by_id(userid)
+
+    if client.party_id do
+      party = Account.get_party(client.party_id)
+      if party.leader == userid do
+        do_remove_group_from_queue(party.id, queue_id)
+      else
+        :not_party_leader
+      end
+    else
+      do_remove_group_from_queue(userid, queue_id)
+    end
+  end
+
+  @spec do_remove_group_from_queue(T.userid() | T.party_id(), T.queue_id()) :: :ok | :missing
+  def do_remove_group_from_queue(group_id, queue_id) do
     case get_queue_wait_pid(queue_id) do
       nil ->
         :missing
 
       pid ->
-        GenServer.call(pid, {:remove_user, user_id})
+        GenServer.call(pid, {:remove_group, group_id})
     end
   end
 

@@ -77,19 +77,20 @@ defmodule Teiserver.Game.QueueWaitServer do
             {:queue_wait, :queue_remove_group, state.queue_id, group_id}
           )
 
-          state.group_map[group_id]
-          |> Enum.each(fn userid ->
-            PubSub.broadcast(
-              Central.PubSub,
-              "teiserver_client_messages:#{userid}",
-              %{
-                channel: "teiserver_client_messages:#{userid}",
-                event: :matchmaking,
-                sub_event: :left_queue,
-                queue_id: state.queue_id
-              }
-            )
-          end)
+          state.groups_map[group_id]
+            |> Map.get(:members)
+            |> Enum.each(fn userid ->
+              PubSub.broadcast(
+                Central.PubSub,
+                "teiserver_client_messages:#{userid}",
+                %{
+                  channel: "teiserver_client_messages:#{userid}",
+                  event: :matchmaking,
+                  sub_event: :left_queue,
+                  queue_id: state.queue_id
+                }
+              )
+            end)
 
           {:ok, %{new_state | leave_count: (state.leave_count + 1)}}
 
@@ -244,12 +245,6 @@ defmodule Teiserver.Game.QueueWaitServer do
   def handle_info({:update, :map_list, new_list}, state),
     do: {:noreply, %{state | map_list: new_list}}
 
-  def handle_info({:update, :settings, new_list}, state),
-    do: {:noreply, %{state | settings: new_list}}
-
-  def handle_info({:update, :map_list, new_list}, state),
-    do: {:noreply, %{state | map_list: new_list}}
-
 
   @spec find_matches_in_bucket(map(), [non_neg_integer()]) :: list()
   defp find_matches_in_bucket(state, group_id_list) do
@@ -353,7 +348,7 @@ defmodule Teiserver.Game.QueueWaitServer do
         Enum.count(group_list) >= state.players_needed
       end)
       |> Stream.map(fn {_bucket_key, group_list} ->
-        matches = find_matches_in_bucket(state, group_list)
+        find_matches_in_bucket(state, group_list)
       end)
       |> Stream.reject(&(&1 == nil))
       |> Stream.take(1)
@@ -378,109 +373,24 @@ defmodule Teiserver.Game.QueueWaitServer do
 
       {selected_groups, new_buckets, new_groups_map}
     end
-
-    # we now find matches but we don't pass them on yet and there is no concept of balance either
-    # the balance should take place in the match server and ideally will have a way to tell the
-    # BalanceServer for the room about the new rules, it should also tell the ConsulServer about the new list of approved players
   end
-
-  # defp old_main_loop_search(state) do
-  #   matches = state.buckets
-  #   |> Stream.map(fn {bucket_key, groups} ->
-  #     groups
-  #     |> Enum.map(fn group ->
-  #       {best_match, _distance} = find_matches(group.id, key, current_range, state.buckets)
-  #         |> Enum.sort_by(fn {_data, distance} -> distance end)
-  #         |> hd_or_x({nil, nil})
-
-  #       # If both teams are in the same bucket we can get a double-match
-  #       # event where it tries to create A-B and B-A
-  #       # to solve this we sort them based on their
-  #       # join time and call Enum.uniq later
-  #       if best_match != nil do
-  #         {_, best_time, _, _} = best_match
-
-  #         if best_time < time do
-  #           {best_match, {userid, time, current_range, type}}
-  #         else
-  #           {{userid, time, current_range, type}, best_match}
-  #         end
-  #       else
-  #         {{userid, time, current_range, type}, best_match}
-  #       end
-  #     end)
-  #   end)
-  #   |> List.flatten
-  #   |> Enum.uniq
-  #   |> Enum.filter(fn {_userid_type, match} -> match != nil end)
-  #   |> Enum.map(fn match ->
-  #     team_list = case match do
-  #       {m1, m2} -> [m1, m2]
-  #     end
-
-  #     team_list
-  #       |> Enum.each(fn
-  #         {userid, _, _, :user} ->
-  #           PubSub.broadcast(
-  #             Central.PubSub,
-  #             "teiserver_queue_wait:#{state.queue_id}",
-  #             {:queue_wait, :queue_remove_group, state.queue_id, userid}
-  #           )
-  #         _ ->
-  #           :ok
-  #       end)
-
-  #     Matchmaking.create_match(team_list, state.queue_id)
-  #   end)
-
-  #   {new_buckets, new_groups_map, wait_times} = case matches do
-  #     [] ->
-  #       {state.buckets, state.groups_map, []}
-
-  #     _ ->
-  #       # Teams will be: [{id, time, range, type}]
-  #       matched_teams = matches
-  #         |> Enum.map(fn {_pid, _match_id, teams} -> teams end)
-  #         |> List.flatten
-
-  #       new_buckets = state.buckets
-  #         |> Map.new(fn {key, members} ->
-  #           new_members = members |>
-  #             Enum.reject(fn team -> Enum.member?(matched_teams, team) end)
-
-  #           {key, new_members}
-  #         end)
-
-  #       waits_to_remove = matched_teams
-  #         |> Enum.map(fn {id, _time, _range, type} -> {id, type} end)
-
-  #       new_wait_list = state.wait_list
-  #         |> Enum.reject(fn u -> Enum.member?(waits_to_remove, u) end)
-
-  #       wait_times = matched_teams
-  #         |> Enum.map(fn {_id, time, _range, _type} -> System.system_time(:second) - time end)
-
-  #       {new_buckets, new_wait_list, wait_times}
-  #   end
-
-  #   {matches, new_buckets, new_wait_list, wait_times}
-  # end
 
   # Used to remove players from all aspects of the queue, either because
   # they left or their game started
-  @spec remove_group(T.userid(), Map.t()) :: Map.t()
-  defp remove_group(userid, state) do
-    key = bucket_function(userid)
+  @spec remove_group(T.userid() | String.t(), Map.t()) :: Map.t()
+  defp remove_group(group_id, state) do
+    # Drop the selected ids from any bucket values
+    new_buckets = state.buckets
+      |> Map.new(fn {key, bucket_list} ->
+        {key, List.delete(bucket_list, group_id)}
+      end)
+      |> Map.filter(fn {_, bucket_list} -> not Enum.empty?(bucket_list) end)
 
-    new_bucket = state.buckets[key]
-      |> Enum.reject(fn {u, _, _, :user} -> userid == u end)
-    new_buckets = Map.put(state.buckets, key, new_bucket)
-
-    new_wait_list = state.wait_list |> List.delete({userid, :user})
+    new_groups_map = Map.drop(state.groups_map, [group_id])
 
     %{state |
       buckets: new_buckets,
-      wait_list: new_wait_list
+      groups_map: new_groups_map
     }
   end
 
@@ -506,9 +416,6 @@ defmodule Teiserver.Game.QueueWaitServer do
       |> round
       |> max(1)
   end
-
-  defp hd_or_x([], x), do: x
-  defp hd_or_x([x | _], _x), do: x
 
   defp calculate_mean_wait_time(state) do
     wait_times = state.recent_wait_times ++ state.old_wait_times

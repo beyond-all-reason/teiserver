@@ -45,7 +45,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
           |> Enum.empty?()
       end)
 
-    is_admin = allow?(@current_user, "teiserver.staff.admin")
+    is_admin = allow?(socket.assigns[:current_user], "teiserver.staff.admin")
 
     socket = socket
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
@@ -78,7 +78,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
   def handle_event("leave-queue", %{"queue_id" => queue_id}, %{assigns: assigns} = socket) do
     queue_id = int_parse(queue_id)
-    Matchmaking.remove_user_from_queue(queue_id, assigns[:current_user].id)
+    Matchmaking.remove_group_from_queue(queue_id, assigns[:current_user].id)
 
     {:noreply, socket}
   end
@@ -126,7 +126,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   def handle_info({:client_action, :client_disconnect, userid}, socket) do
     socket.assigns[:queue_membership]
       |> Enum.each(fn queue_id ->
-        Matchmaking.remove_user_from_queue(queue_id, userid)
+        Matchmaking.remove_group_from_queue(queue_id, userid)
       end)
 
     {:noreply,
@@ -223,7 +223,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     }
   end
 
-  def handle_info(%{channel: "teiserver_client_messages:" <> _userid_str} = d, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _userid_str}, socket) do
     {:noreply, socket}
   end
 
