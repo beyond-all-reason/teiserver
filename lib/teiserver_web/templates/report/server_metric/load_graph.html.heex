@@ -35,7 +35,7 @@
         }
       }
     });
-    
+
     c3.generate({
       bindto: '#chart_combined_connections',
       data: {
@@ -55,7 +55,7 @@
         }
       }
     });
-    
+
     c3.generate({
       bindto: '#chart_memory',
       data: {
@@ -75,7 +75,7 @@
         }
       }
     });
-    
+
     c3.generate({
       bindto: '#chart_cpu_load',
       data: {
@@ -129,7 +129,8 @@
                     %{id: "6", name: "6"},
                     %{id: "24", name: "24"},
                     %{id: "48", name: "48 (2 days)"},
-                    %{id: "168", name: "168 (7 days)"}
+                    %{id: "168", name: "168 (7 days)"},
+                    %{id: "504", name: "504 (21 days)"}
                   ],
                   selected: Map.get(@params, "hours", "24")
                 %>
@@ -144,12 +145,13 @@
                     %{id: "1", name: "1"},
                     %{id: "5", name: "5"},
                     %{id: "30", name: "30"},
-                    %{id: "60", name: "60"}
+                    %{id: "60", name: "60"},
+                    %{id: "360", name: "360 (6 hours)"}
                   ],
                   selected: Map.get(@params, "resolution", "5")
                 %>
               </div>
-              
+
               <div class='col-xl-4 col-lg-6 col-md-12 my-3'>
                 <label for='hours' class='control-label'>Hours offset</label>
                 <input type="text" name="offset" id="offset" value={@params["offset"]} class="form-control" />
