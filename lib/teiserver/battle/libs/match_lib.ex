@@ -162,6 +162,16 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.id == ^id
   end
 
+  def _search(query, :id_before, id) do
+    from matches in query,
+      where: matches.id < ^id
+  end
+
+  def _search(query, :id_after, id) do
+    from matches in query,
+      where: matches.id > ^id
+  end
+
   def _search(query, :id_in, ids) do
     from matches in query,
       where: matches.id in ^ids

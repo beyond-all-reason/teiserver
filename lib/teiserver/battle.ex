@@ -29,6 +29,7 @@ defmodule Teiserver.Battle do
       |> MatchLib.preload(args[:preload])
       |> MatchLib.order_by(args[:order_by])
       |> QueryHelpers.select(args[:select])
+      |> QueryHelpers.limit_query(args[:limit])
   end
 
   @doc """
@@ -102,6 +103,45 @@ defmodule Teiserver.Battle do
   end
   def get_match(id, args) do
     match_query(id, args)
+    |> Repo.one
+  end
+
+
+  def get_next_match(nil), do: nil
+  def get_next_match(match_id) when is_integer(match_id) do
+    match_id
+      |> get_match()
+      |> get_next_match()
+  end
+
+  def get_next_match(%{server_uuid: server_uuid, id: match_id}) do
+    match_query(nil,
+      search: [
+        server_uuid: server_uuid,
+        id_after: match_id
+      ],
+      order_by: "Oldest first",
+      limit: 1
+    )
+    |> Repo.one
+  end
+
+  def get_prev_match(nil), do: nil
+  def get_prev_match(match_id) when is_integer(match_id) do
+    match_id
+      |> get_match()
+      |> get_prev_match()
+  end
+
+  def get_prev_match(%{server_uuid: server_uuid, id: match_id}) do
+    match_query(nil,
+      search: [
+        server_uuid: server_uuid,
+        id_before: match_id
+      ],
+      order_by: "Newest first",
+      limit: 1
+    )
     |> Repo.one
   end
 

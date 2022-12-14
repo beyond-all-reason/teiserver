@@ -3,6 +3,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   alias Teiserver.{Chat, Battle}
+  alias Teiserver.Battle.MatchLib
 
   plug(AssignPlug,
     site_menu_active: "teiserver_admin",
@@ -24,7 +25,7 @@ defmodule TeiserverWeb.Admin.LobbyController do
   @spec lobby_chat(Plug.Conn.t(), map) :: Plug.Conn.t()
   def lobby_chat(conn, params = %{"id" => lobby_guid}) do
     {page, page_size} = if params["page"] == "all" do
-      {0, 10000}
+      {0, 10_000}
     else
       {Map.get(params, "page", 0)
         |> int_parse
@@ -52,10 +53,16 @@ defmodule TeiserverWeb.Admin.LobbyController do
 
     last_page = Enum.count(lobby_messages) < page_size
 
+    next_match = Battle.get_next_match(match)
+    prev_match = Battle.get_prev_match(match)
+
     conn
       |> assign(:page, page)
       |> assign(:last_page, last_page)
       |> assign(:match, match)
+      |> assign(:match_name, MatchLib.make_match_name(match))
+      |> assign(:next_match, next_match)
+      |> assign(:prev_match, prev_match)
       |> assign(:lobby_messages, lobby_messages)
       |> assign(:lobby_guid, lobby_guid)
       |> assign(:lobby, lobby)
