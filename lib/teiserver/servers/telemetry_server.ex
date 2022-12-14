@@ -196,7 +196,8 @@ defmodule Teiserver.Telemetry.TelemetryServer do
       cpu_nprocs: :cpu_sup.nprocs(),
       # cpu_per_core: cpu_per_core |> Map.new(),
       # disk: disk |> Map.new(),
-      system_mem: :memsup.get_system_memory_data() |> Map.new()
+      system_mem: :memsup.get_system_memory_data() |> Map.new(),
+      process_count: Process.list() |> Enum.count()
     }
   end
 
