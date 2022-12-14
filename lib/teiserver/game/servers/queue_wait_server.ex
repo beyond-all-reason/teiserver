@@ -25,6 +25,10 @@ defmodule Teiserver.Game.QueueWaitServer do
 
         false ->
           bucket_key = bucket_function(group)
+          group = %{group |
+            bucket: bucket_key
+          }
+
           new_group = %{group | bucket: bucket_key}
           new_groups_map = Map.put(state.groups_map, group.id, new_group)
 
@@ -110,34 +114,38 @@ defmodule Teiserver.Game.QueueWaitServer do
     {:reply, resp, state}
   end
 
-  def handle_cast({:re_add_users, groups}, state) do
-    # First we ignore those already added
-    new_state = groups
-      |> Enum.reject(fn group -> Enum.member?(state.groups_map, group.id) end)
-      |> Enum.reduce(state, fn (group, acc) ->
-        key = bucket_function(group)
+  def handle_cast({:re_add_group, group}, state) do
+    {resp, new_state} =
+      case Map.has_key?(state.groups_map, group.id) do
+        true ->
+          {:duplicate, state}
 
-        new_bucket = [group | Map.get(acc.buckets, key, [])]
-        new_buckets = Map.put(acc.buckets, key, new_bucket)
+        false ->
+          new_groups_map = Map.put(state.groups_map, group.id, group)
 
-        new_groups_map = Map.put(acc.groups_map, group.id, group)
+          bucket_range = (group.bucket - group.search_distance)..(group.bucket + group.search_distance)
 
-        new_state = %{
-          acc
-          | buckets: new_buckets,
-            groups_map: new_groups_map,
-            skip: false
-        }
+          new_buckets = bucket_range
+            |> Enum.reduce(state.buckets, fn (bucket_key, state_buckets) ->
+              new_bucket = [group.id | Map.get(state_buckets, bucket_key, [])]
 
+              Map.put(state_buckets, bucket_key, new_bucket)
+            end)
 
-        PubSub.broadcast(
-          Central.PubSub,
-          "teiserver_queue_wait:#{state.queue_id}",
-          {:queue_wait, :queue_add_user, state.queue_id, group.id}
-        )
+          new_state = %{
+            state
+            | buckets: new_buckets,
+              groups_map: new_groups_map,
+              skip: false,
+              join_count: (state.join_count + 1)
+          }
 
-        groups
-        |> Enum.each(fn group ->
+          PubSub.broadcast(
+            Central.PubSub,
+            "teiserver_queue_wait:#{state.queue_id}",
+            {:queue_wait, :queue_add_user, state.queue_id, group.id}
+          )
+
           group.members
           |> Enum.each(fn userid ->
             PubSub.broadcast(
@@ -151,10 +159,56 @@ defmodule Teiserver.Game.QueueWaitServer do
               }
             )
           end)
-        end)
 
-        new_state
-      end)
+          {:ok, new_state}
+      end
+
+    # {:reply, resp, new_state}
+
+    # # First we ignore those already added
+    # new_state = groups
+    #   |> Enum.reject(fn group -> Enum.member?(state.groups_map, group.id) end)
+    #   |> Enum.reduce(state, fn (group, acc) ->
+    #     key = bucket_function(group)
+
+    #     new_bucket = [group | Map.get(acc.buckets, key, [])]
+    #     new_buckets = Map.put(acc.buckets, key, new_bucket)
+
+    #     new_groups_map = Map.put(acc.groups_map, group.id, group)
+
+    #     new_state = %{
+    #       acc
+    #       | buckets: new_buckets,
+    #         groups_map: new_groups_map,
+    #         skip: false
+    #     }
+
+
+    #     PubSub.broadcast(
+    #       Central.PubSub,
+    #       "teiserver_queue_wait:#{state.queue_id}",
+    #       {:queue_wait, :queue_add_user, state.queue_id, group.id}
+    #     )
+
+    #     groups
+    #     |> Enum.each(fn group ->
+    #       group.members
+    #       |> Enum.each(fn userid ->
+    #         PubSub.broadcast(
+    #           Central.PubSub,
+    #           "teiserver_client_messages:#{userid}",
+    #           %{
+    #             channel: "teiserver_client_messages:#{userid}",
+    #             event: :matchmaking,
+    #             sub_event: :joined_queue,
+    #             queue_id: state.queue_id
+    #           }
+    #         )
+    #       end)
+    #     end)
+
+    #     new_state
+    #   end)
 
     {:noreply, new_state}
   end

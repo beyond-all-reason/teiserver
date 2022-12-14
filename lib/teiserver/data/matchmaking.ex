@@ -255,7 +255,7 @@ defmodule Teiserver.Data.Matchmaking do
   end
 
   @spec make_group_from_userid(T.userid, T.queue()) :: QueueGroup.t()
-  defp make_group_from_userid(userid, queue) when is_integer(userid) do
+  def make_group_from_userid(userid, queue) when is_integer(userid) do
     rating_value = get_user_rating_for_queue(userid, queue)
 
     %QueueGroup{
@@ -274,7 +274,7 @@ defmodule Teiserver.Data.Matchmaking do
   end
 
   @spec make_group_from_party(T.party(), T.queue()) :: QueueGroup.t()
-  defp make_group_from_party(party, queue) do
+  def make_group_from_party(party, queue) do
     rating_value = party.members
       |> Enum.map(fn userid ->
         get_user_rating_for_queue(userid, queue)
@@ -323,9 +323,9 @@ defmodule Teiserver.Data.Matchmaking do
     end
   end
 
-  @spec re_add_users_to_queue(list(), T.queue_id()) :: :ok
-  def re_add_users_to_queue(player_list, queue_id) do
-    cast_queue_wait(queue_id, {:re_add_users, player_list})
+  @spec re_add_group_to_queue(QueueGroup.t(), T.queue_id()) :: :ok
+  def re_add_group_to_queue(group, queue_id) do
+    cast_queue_wait(queue_id, {:re_add_group, group})
     :ok
   end
 

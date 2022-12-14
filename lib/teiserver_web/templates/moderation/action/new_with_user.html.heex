@@ -112,8 +112,6 @@
       </div>
 
       <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
-        $('#code_references').val('1.4');
-        $('#code_references').trigger('change');
         $('#action_restriction_Warning_reminder').prop('checked', true);
         $('#action_restriction_All_lobbies').prop('checked', true);
         $('#action_restriction_Room_chat').prop('checked', true);
@@ -124,6 +122,23 @@
         $('#action_expires').val('1000 years');
       ">
         Add rename
+      </div>
+
+      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+        $('#action_restriction_Warning_reminder').prop('checked', true);
+        $('#action_reason').val('Smurf accounts are not allowed.');
+        $('#action_expires').val('1 day');
+      ">
+        Add smurf warning
+      </div>
+
+      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+        $('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Smurf account.');
+        $('#action_expires').val('1000 years');
+      ">
+        Add smurf ban
       </div>
 
       <div class={"btn btn-outline-#{bsname} btn-block"} onclick="

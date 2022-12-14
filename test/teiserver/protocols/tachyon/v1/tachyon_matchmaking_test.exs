@@ -321,15 +321,20 @@ defmodule Teiserver.TachyonMatchmakingTest do
     _tachyon_recv(socket1)
     _tachyon_recv(socket2)
 
+    # Extra group data
+    extra_group_data = %{bucket: 17, search_distance: 3}
+
     # Create the match process
-    {match_pid, match_id, teams} = Matchmaking.create_match([{user2.id, 1000, 1, :user}, {user1.id, 1000, 1, :user}], queue.id)
-    assert teams == [{user2.id, 1000, 1, :user}, {user1.id, 1000, 1, :user}]
+    {match_pid, match_id} = Matchmaking.create_match([
+      Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
+      Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
+    ], queue.id)
 
     wait_pid = Matchmaking.get_queue_wait_pid(queue.id)
 
     # Check server state
     state = :sys.get_state(match_pid)
-    assert state.users == [user2.id, user1.id]
+    assert state.user_ids == [user2.id, user1.id]
     assert state.pending_accepts == [user2.id, user1.id]
     assert state.accepted_users == []
     assert state.declined_users == []
@@ -355,7 +360,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert reply == :timeout
 
     state = :sys.get_state(match_pid)
-    assert state.users == [user2.id, user1.id]
+    assert state.user_ids == [user2.id, user1.id]
     assert state.pending_accepts == [user2.id]
     assert state.accepted_users == [user1.id]
     assert state.declined_users == []
@@ -366,7 +371,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert reply == :timeout
 
     state = :sys.get_state(match_pid)
-    assert state.users == [user2.id, user1.id]
+    assert state.user_ids == [user2.id, user1.id]
     assert state.pending_accepts == []
     assert state.accepted_users == [user1.id]
     assert state.declined_users == [user2.id]
@@ -379,8 +384,18 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     # Check wait state
     wait_state = :sys.get_state(wait_pid)
-    assert wait_state.wait_list == [{user1.id, :user}]
-    refute wait_state.buckets == %{}
+    assert wait_state.groups_map |> Map.has_key?(user1.id)
+
+    # Now ensure it added the group into 7 buckets (17 +/- 3)
+    assert wait_state.buckets == %{
+      14 => [user1.id],
+      15 => [user1.id],
+      16 => [user1.id],
+      17 => [user1.id],
+      18 => [user1.id],
+      19 => [user1.id],
+      20 => [user1.id]
+    }
   end
 
   test "wait too long - both fail to ready up", %{socket: socket1, user: user1} do
@@ -407,19 +422,24 @@ defmodule Teiserver.TachyonMatchmakingTest do
     _tachyon_recv(socket1)
     _tachyon_recv(socket2)
 
+    # Extra group data
+    extra_group_data = %{bucket: 17, search_distance: 1}
+
     # Create the match process
-    {match_pid, match_id, teams} = Matchmaking.create_match([{user2.id, 1000, 1, :user}, {user1.id, 1000, 1, :user}], queue.id)
-    assert teams == [{user2.id, 1000, 1, :user}, {user1.id, 1000, 1, :user}]
+    {match_pid, match_id} = Matchmaking.create_match([
+      Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
+      Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
+    ], queue.id)
 
     # Check server states
     match_state = :sys.get_state(match_pid)
-    assert match_state.users == [user2.id, user1.id]
+    assert match_state.user_ids == [user2.id, user1.id]
     assert match_state.pending_accepts == [user2.id, user1.id]
     assert match_state.accepted_users == []
     assert match_state.declined_users == []
 
     wait_state = :sys.get_state(wait_pid)
-    assert wait_state.wait_list == []
+    assert wait_state.groups_map == %{}
     assert wait_state.buckets == %{}
 
     send(match_pid, :end_waiting)
@@ -429,7 +449,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     # Check wait state
     wait_state = :sys.get_state(wait_pid)
-    assert wait_state.wait_list == []
+    assert wait_state.groups_map == %{}
     assert wait_state.buckets == %{}
   end
 
@@ -453,9 +473,14 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     wait_pid = Matchmaking.get_queue_wait_pid(queue.id)
 
+    # Extra group data
+    extra_group_data = %{bucket: 17, search_distance: 1}
+
     # Create the match process
-    {match_pid, match_id, teams} = Matchmaking.create_match([{user2.id, 1000, 1, :user}, {user1.id, 1000, 1, :user}], queue.id)
-    assert teams == [{user2.id, 1000, 1, :user}, {user1.id, 1000, 1, :user}]
+    {match_pid, match_id} = Matchmaking.create_match([
+      Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
+      Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
+    ], queue.id)
 
     # Clear both sockets
     _tachyon_recv(socket1)
@@ -463,13 +488,13 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     # Check server states
     match_state = :sys.get_state(match_pid)
-    assert match_state.users == [user2.id, user1.id]
+    assert match_state.user_ids == [user2.id, user1.id]
     assert match_state.pending_accepts == [user2.id, user1.id]
     assert match_state.accepted_users == []
     assert match_state.declined_users == []
 
     wait_state = :sys.get_state(wait_pid)
-    assert wait_state.wait_list == []
+    assert wait_state.groups_map == %{}
     assert wait_state.buckets == %{}
 
     # Accept user user1
@@ -478,7 +503,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert reply == :timeout
 
     state = :sys.get_state(match_pid)
-    assert state.users == [user2.id, user1.id]
+    assert state.user_ids == [user2.id, user1.id]
     assert state.pending_accepts == [user2.id]
     assert state.accepted_users == [user1.id]
     assert state.declined_users == []
@@ -505,8 +530,14 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     # Check wait state
     wait_state = :sys.get_state(wait_pid)
-    assert wait_state.wait_list == [{user1.id, :user}]
-    refute wait_state.buckets == %{}
+    assert wait_state.groups_map |> Map.has_key?(user1.id)
+
+    # Now ensure it added the group into 7 buckets (17 +/- 3)
+    assert wait_state.buckets == %{
+      16 => [user1.id],
+      17 => [user1.id],
+      18 => [user1.id]
+    }
   end
 
   test "they both accept", %{socket: socket1, user: user1} do
@@ -529,9 +560,14 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     wait_pid = Matchmaking.get_queue_wait_pid(queue.id)
 
+    # Extra group data
+    extra_group_data = %{bucket: 17, search_distance: 1}
+
     # Create the match process
-    {match_pid, match_id, teams} = Matchmaking.create_match([{user2.id, 1000, 1, :user}, {user1.id, 1000, 1, :user}], queue.id)
-    assert teams == [{user2.id, 1000, 1, :user}, {user1.id, 1000, 1, :user}]
+    {match_pid, match_id} = Matchmaking.create_match([
+      Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
+      Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
+    ], queue.id)
 
     # Clear both sockets
     _tachyon_recv_until(socket1)
@@ -539,13 +575,13 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     # Check server states
     match_state = :sys.get_state(match_pid)
-    assert match_state.users == [user2.id, user1.id]
+    assert match_state.user_ids == [user2.id, user1.id]
     assert match_state.pending_accepts == [user2.id, user1.id]
     assert match_state.accepted_users == []
     assert match_state.declined_users == []
 
     wait_state = :sys.get_state(wait_pid)
-    assert wait_state.wait_list == []
+    assert wait_state.groups_map == %{}
     assert wait_state.buckets == %{}
 
     # Ensure we have an open and empty battle
@@ -572,7 +608,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
     :timer.sleep(1000)
 
     state = :sys.get_state(match_pid)
-    assert state.users == [user2.id, user1.id]
+    assert state.user_ids == [user2.id, user1.id]
     assert state.pending_accepts == []
     assert state.accepted_users == [user2.id, user1.id]
     assert state.declined_users == []
@@ -584,14 +620,12 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     # Check wait state
     wait_state = :sys.get_state(wait_pid)
-    assert wait_state.wait_list == []
-    refute wait_state.buckets == %{}
+    assert wait_state.buckets == %{}
 
     # If we tick is that still the case?
     send(wait_pid, :tick)
     wait_state = :sys.get_state(wait_pid)
-    assert wait_state.wait_list == []
-    refute wait_state.buckets == %{}
+    assert wait_state.buckets == %{}
   end
 
   # TODO: Group bigger than max teamsize

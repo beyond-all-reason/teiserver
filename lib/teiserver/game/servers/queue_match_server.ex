@@ -132,8 +132,25 @@ defmodule Teiserver.Game.QueueMatchServer do
   end
 
   defp cancel_match(state) do
-    # These users go back into the queue
-    state.accepted_users
+    # If any of a group didn't accept, the group isn't getting re-added
+    accepted_groups = state.group_list
+      |> Enum.filter(fn group ->
+        group.members
+          |> Enum.map(fn userid ->
+            Enum.member?(state.accepted_users, userid)
+          end)
+          |> Enum.all?
+      end)
+      |> Enum.map(fn group -> group.id end)
+
+    # Re-add those groups to the wait queue
+    state.group_list
+      |> Enum.filter(fn group -> Enum.member?(accepted_groups, group.id) end)
+      |> Enum.map(fn group ->
+        Matchmaking.re_add_group_to_queue(group, state.queue_id)
+        group.members
+      end)
+      |> List.flatten
       |> Enum.each(fn userid ->
         PubSub.broadcast(
           Central.PubSub,
@@ -148,16 +165,11 @@ defmodule Teiserver.Game.QueueMatchServer do
         )
       end)
 
-    # TODO: Parties
+    # The rest get removed
     state.group_list
-      |> Enum.filter(fn
-        {userid, _age, _range, :user} -> Enum.member?(state.accepted_users, userid)
-        _ -> false
-      end)
-      |> Matchmaking.re_add_users_to_queue(state.queue_id)
-
-    # These will remove themselves from their queues
-    (state.declined_users ++ state.pending_accepts)
+      |> Enum.reject(fn group -> Enum.member?(accepted_groups, group.id) end)
+      |> Enum.map(fn group -> group.members end)
+      |> List.flatten
       |> Enum.each(fn userid ->
         PubSub.broadcast(
           Central.PubSub,
@@ -207,7 +219,7 @@ defmodule Teiserver.Game.QueueMatchServer do
       |> Lobby.get_lobby()
       |> Lobby.silence_lobby()
 
-    state.users
+    state.user_ids
       |> Enum.each(fn userid ->
         Lobby.force_add_user_to_lobby(userid, lobby.id)
       end)
@@ -229,7 +241,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
     # Now put the players on their teams, for now we're assuming every game is just a 1v1
     Logger.info("QueueMatchServer #{state.match_id} setup_lobby putting players on teams")
-    [p1, p2 | _] = state.users
+    [p1, p2 | _] = state.user_ids
     Coordinator.cast_consul(lobby.id, %{command: "change-battlestatus", remaining: p1, senderid: Coordinator.get_coordinator_userid(),
       status: %{
         player_number: 0,
