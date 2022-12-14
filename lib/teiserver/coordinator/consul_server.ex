@@ -155,6 +155,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
       set_skill_modoptions_for_user(state, userid)
     end
 
+    username = Account.get_username(userid)
+    LobbyChat.persist_system_message("#{username} joined the lobby", state.coordinator_id)
+
     {:noreply, %{state |
       approved_users: new_approved,
       last_seen_map: state.last_seen_map |> Map.put(userid, System.system_time(:millisecond))
@@ -162,6 +165,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:user_left, userid}, state) do
+    username = Account.get_username(userid)
+    LobbyChat.persist_system_message("#{username} left the lobby", state.coordinator_id)
+
     player_count_changed(state)
     {:noreply, %{state |
       join_queue: state.join_queue |> List.delete(userid),
@@ -172,6 +178,9 @@ defmodule Teiserver.Coordinator.ConsulServer do
   end
 
   def handle_info({:user_kicked, userid}, state) do
+    username = Account.get_username(userid)
+    LobbyChat.persist_system_message("#{username} kicked from the lobby", state.coordinator_id)
+
     new_approved = state.approved_users |> List.delete(userid)
     player_count_changed(state)
     {:noreply, %{state |
