@@ -156,7 +156,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     end
 
     username = Account.get_username(userid)
-    LobbyChat.persist_system_message("#{username} joined the lobby", state.coordinator_id)
+    LobbyChat.persist_system_message("#{username} joined the lobby", state.lobby_id)
 
     {:noreply, %{state |
       approved_users: new_approved,
@@ -166,7 +166,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info({:user_left, userid}, state) do
     username = Account.get_username(userid)
-    LobbyChat.persist_system_message("#{username} left the lobby", state.coordinator_id)
+    LobbyChat.persist_system_message("#{username} left the lobby", state.lobby_id)
 
     player_count_changed(state)
     {:noreply, %{state |
@@ -179,7 +179,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   def handle_info({:user_kicked, userid}, state) do
     username = Account.get_username(userid)
-    LobbyChat.persist_system_message("#{username} kicked from the lobby", state.coordinator_id)
+    LobbyChat.persist_system_message("#{username} kicked from the lobby", state.lobby_id)
 
     new_approved = state.approved_users |> List.delete(userid)
     player_count_changed(state)

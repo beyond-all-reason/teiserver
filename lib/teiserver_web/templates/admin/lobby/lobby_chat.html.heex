@@ -82,7 +82,7 @@
                 <td class="message">
                   <%= msg.content %>
                 </td>
-                <td class="d-none d-lg-block"><%= date_to_str(msg.inserted_at, :hms_dmy) %></td>
+                <td class="d-none d-lg-block"><%= date_to_str(msg.inserted_at, :ymd_hms) %></td>
               </tr>
             <% end %>
           </tbody>

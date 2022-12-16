@@ -64,7 +64,16 @@
       <td><%= report.type %>/<%= report.sub_type %></td>
       <td><%= report.extra_text %></td>
 
-      <td><%= report.reporter.name %></td>
+      <td>
+        <a href={Routes.moderation_report_path(@conn, :user, report.reporter_id)} class={"btn btn-sm btn-#{Teiserver.Account.UserLib.colour()}"}>
+          <%= central_component "icon",
+            icon: Central.Helpers.StylingHelper.icon(:user),
+            class: "fa-solid"
+          %>
+        </a>
+        &nbsp;
+        <%= report.reporter.name %>
+      </td>
 
       <td><%= date_to_str(report.inserted_at, format: :hms_or_ymd) %></td>
 

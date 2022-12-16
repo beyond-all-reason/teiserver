@@ -112,6 +112,7 @@ defmodule Teiserver.Battle.MatchLib do
     }}
   end
 
+  def make_match_name(nil), do: "Unnamed match"
   def make_match_name(match) do
     case match.game_type do
       "Duel" -> "Duel on #{match.map}"
