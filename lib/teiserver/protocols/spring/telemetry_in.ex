@@ -29,7 +29,9 @@ defmodule Teiserver.Protocols.Spring.TelemetryIn do
                     }
                     case Telemetry.create_infolog(params) do
                       {:ok, infolog} ->
-                        DiscordBridge.new_infolog(infolog)
+                        if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
+                          DiscordBridge.new_infolog(infolog)
+                        end
                         reply(:spring, :okay, "upload_infolog - id:#{infolog.id}", msg_id, state)
                       {:error, _changeset} ->
                         reply(:spring, :no, "upload_infolog - db error", msg_id, state)
