@@ -1,9 +1,11 @@
-<div class="row">
-  <div class="col-md-6 mb-4">
+<div class="row mt-2">
+  <div class="col-md-6 mb-4 col-xl-4 col-xxl-3">
     <%= if @telemetry_loading do %>
-      Telemetry loading...
+      <h4>Telemetry</h4>
+      Loading...
     <% else %>
-      <table class='table table-hover'>
+      <h4>Telemetry</h4>
+      <table class='table table-sm table-hover'>
         <tbody>
           <tr>
             <td>Users</td>
@@ -26,11 +28,11 @@
     <% end %>
   </div>
 
-  <div class="col-md-6 mb-4">
+  <div class="col-md-6 mb-4 col-xl-4 col-xxl-3 d-none">
     Notifications/items needing action
   </div>
 
-  <div class="col-md-6 mb-4">
+  <div class="col-md-6 mb-4 col-xl-4 col-xxl-3">
     <h4>Lobbies</h4>
     <table class="table table-sm">
       <thead>
@@ -74,7 +76,35 @@
     </table>
   </div>
 
-  <div class="col-md-6 mb-4">
+  <div class="col-md-6 mb-4 col-xl-4 col-xxl-3">
+    <h4>Queues</h4>
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Wait</th>
+       </tr>
+      </thead>
+      <tbody>
+        <%= for {queue, wait} <- @lobbies do %>
+          <tr>
+            <td><%= queue.id %></td>
+            <td><%= queue.name %></td>
+            <td>
+              <%= if wait == nil do %>
+                <i class="fa-fw fa-regular fa-times text-danger"></i>
+              <% else %>
+                <i class="fa-fw fa-regular fa-check text-success"></i>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="col-md-6 mb-4 col-xl-4 col-xxl-3">
     <h4>Servers</h4>
     <table class="table table-sm">
       <thead>
@@ -98,8 +128,9 @@
         <% end %>
       </tbody>
     </table>
-    
+
     <h4>Command utilities</h4>
+    <div class="btn btn-danger mx-2" phx-click="restart-consuls">Re-start all consuls</div>
     <div class="btn btn-danger mx-2" phx-click="reinit-consuls">Re-init all consuls</div>
     <div class="btn btn-danger mx-2" phx-click="reinit-balances">Re-init all balances</div>
   </div>

@@ -59,31 +59,33 @@
     <tr>
       <td><%= queue.name %></td>
 
-      <td><%= info.member_count %></td>
-      <td><%= round(info.mean_wait_time) %></td>
+      <%= if info do %>
+        <td><%= info.member_count %></td>
+        <td><%= round(info.mean_wait_time) %></td>
+        <td>
+          <%= if @is_admin do %>
+            <%= live_redirect "Show", to: Routes.ts_game_queue_show_path(@socket, :show, queue_id), class: "btn btn-sm btn-outline-#{bsname}" %>
+          <% end %>
+        </td>
+        <td>
+          <%= cond do %>
+            <% @client == nil -> %>
+              Connect with client to join queue
 
-      <td>
-        <%= if @is_admin do %>
-          <%= live_redirect "Show", to: Routes.ts_game_queue_show_path(@socket, :show, queue_id), class: "btn btn-sm btn-outline-#{bsname}" %>
-        <% end %>
-      </td>
+            <% Enum.member?(@queue_membership, queue_id) -> %>
+              <span class={"btn btn-sm btn-warning"} phx-click="leave-queue" phx-value-queue_id={queue_id}>
+                Leave queue
+              </span>
 
-      <td>
-        <%= cond do %>
-          <% @client == nil -> %>
-            Connect with client to join queue
-
-          <% Enum.member?(@queue_membership, queue_id) -> %>
-            <span class={"btn btn-sm btn-warning"} phx-click="leave-queue" phx-value-queue_id={queue_id}>
-              Leave queue
-            </span>
-
-          <% true -> %>
-            <span class={"btn btn-sm btn-primary"} phx-click="join-queue" phx-value-queue_id={queue_id}>
-              Join queue
-            </span>
-        <% end %>
-      </td>
+            <% true -> %>
+              <span class={"btn btn-sm btn-primary"} phx-click="join-queue" phx-value-queue_id={queue_id}>
+                Join queue
+              </span>
+          <% end %>
+        </td>
+      <% else %>
+        <td colspan="4" class="text-danger">System error</td>
+      <% end %>
     </tr>
 <% end %>
   </tbody>

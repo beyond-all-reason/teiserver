@@ -9,6 +9,9 @@ defmodule Teiserver.Application do
       {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.ClientRegistry]},
       {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.PartyRegistry]},
 
+      {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueWaitRegistry]},
+      {Horde.Registry, [keys: :unique, members: :auto, name: Teiserver.QueueMatchRegistry]},
+
       # These are for tracking the number of servers on the local node
       {Registry, keys: :duplicate, name: Teiserver.LocalPoolRegistry},
       {Registry, keys: :duplicate, name: Teiserver.LocalServerRegistry},

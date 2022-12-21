@@ -52,7 +52,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec get_queue_wait_pid(T.queue_id()) :: pid() | nil
   def get_queue_wait_pid(id) when is_integer(id) do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "QueueWaitServer:#{id}") do
+    case Horde.Registry.lookup(Teiserver.QueueWaitRegistry, id) do
       [{pid, _}] ->
         pid
       _ ->
@@ -86,7 +86,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec get_queue_match_pid(T.mm_match_id()) :: pid() | nil
   def get_queue_match_pid(id) do
-    case Horde.Registry.lookup(Teiserver.ServerRegistry, "QueueMatchServer:#{id}") do
+    case Horde.Registry.lookup(Teiserver.QueueMatchRegistry, id) do
       [{pid, _}] ->
         pid
       _ ->
@@ -154,7 +154,8 @@ defmodule Teiserver.Data.Matchmaking do
     call_queue_wait(id, :get_info)
   end
 
-  @spec add_queue(QueueStruct.t()) :: :ok
+  @spec add_queue(QueueStruct.t()) :: :ok | {:error, any}
+  def add_queue(nil), do: {:error, "no queue"}
   def add_queue(queue) do
     Central.cache_update(:lists, :queues, fn value ->
       new_value =
@@ -164,11 +165,19 @@ defmodule Teiserver.Data.Matchmaking do
       {:ok, new_value}
     end)
 
-    DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
+    update_queue(queue)
+
+    result = DynamicSupervisor.start_child(Teiserver.Game.QueueSupervisor, {
       QueueWaitServer,
       data: %{queue: queue}
     })
-    update_queue(queue)
+    case result do
+      {:error, err} ->
+        Logger.error("Error starting QueueWaitServer: #{__ENV__.file}:#{__ENV__.line}\n#{inspect err}")
+        {:error, err}
+      {:ok, _pid} ->
+        :ok
+    end
   end
 
   @spec update_queue(QueueStruct.t()) :: :ok
@@ -355,8 +364,9 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec add_queue_from_db(Map.t()) :: :ok
   def add_queue_from_db(queue) do
-    convert_queue(queue)
-    |> add_queue()
+    queue
+      |> convert_queue()
+      |> add_queue()
   end
 
   def refresh_queue_from_db(queue) do

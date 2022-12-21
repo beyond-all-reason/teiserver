@@ -38,11 +38,15 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     queue_membership = Map.keys(db_queues)
       |> Parallel.reject(fn queue_id ->
         p = Matchmaking.get_queue_wait_pid(queue_id)
-        state = :sys.get_state(p)
+        if p != nil do
+          state = :sys.get_state(p)
 
-        state.wait_list
-          |> Enum.filter(fn {userid, :user} -> userid == socket.assigns[:current_user].id end)
-          |> Enum.empty?()
+          state.groups_map
+            |> Enum.filter(fn {_group_id, %{members: members}} -> Enum.member?(members, socket.assigns[:current_user].id) end)
+            |> Enum.empty?()
+        else
+          true
+        end
       end)
 
     is_admin = allow?(socket.assigns[:current_user], "teiserver.staff.admin")

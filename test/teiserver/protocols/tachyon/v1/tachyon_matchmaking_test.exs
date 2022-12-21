@@ -103,18 +103,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
       "result" => "success"
     }
 
-    # This part of the test fails because it is set to instantly match people
-    # assert :sys.get_state(pid) |> Map.get(:wait_list) == [{user2.id, :user}, {user1.id, :user}]
-    # assert :sys.get_state(pid) |> Map.get(:member_count) == 2
-
-    # # Now increase range so they match
-    # send(pid, :increase_range)
-    # send(pid, :tick)
-
-    # :timer.sleep(50)
-
     messages = PubsubListener.get(match_listener)
-    # assert Enum.count(messages) == 1
     {:queue_wait, :match_attempt, matched_queue_id, match_id} = hd(messages)
     assert matched_queue_id == queue.id
 
@@ -628,6 +617,12 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert wait_state.buckets == %{}
   end
 
+  test "Team queue with both party and solo members" do
+
+  end
+
+  # TODO: Team queue with both party and solo members
+  # TODO: 3v3 queue but the 6 players are in 3 groups so can't be split
   # TODO: Group bigger than max teamsize
   # TODO: Test where there are multiple viable matches and it actually identifies the best one
 end

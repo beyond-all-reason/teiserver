@@ -485,8 +485,8 @@ defmodule Teiserver.Game.QueueWaitServer do
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
-      Teiserver.ServerRegistry,
-      "QueueWaitServer:#{opts.queue.id}",
+      Teiserver.QueueWaitRegistry,
+      opts.queue.id,
       opts.queue.id
     )
 

@@ -398,7 +398,6 @@ defmodule Teiserver.TachyonTcpServer do
           state.protocol_out.reply(:party, :left_party, data.party_id, state)
 
         :disconnected ->
-          Logger.info("#{__MODULE__} teiserver_client_messages disconnected message")
           send(self(), :terminate)
           state
 
@@ -424,14 +423,12 @@ defmodule Teiserver.TachyonTcpServer do
   end
 
   def handle_info(:terminate, state) do
-    Logger.info("#{__MODULE__} handle_info :terminate")
     Client.disconnect(state.userid, "tcp_server :terminate")
     {:stop, :normal, %{state | userid: nil}}
   end
 
   @impl true
   def terminate(_reason, state) do
-    Logger.info("#{__MODULE__} terminate function")
     Client.disconnect(state.userid, "tcp_server terminate")
   end
 

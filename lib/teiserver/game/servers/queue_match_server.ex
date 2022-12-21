@@ -348,8 +348,8 @@ defmodule Teiserver.Game.QueueMatchServer do
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
-      Teiserver.ServerRegistry,
-      "QueueMatchServer:#{opts.match_id}",
+      Teiserver.QueueMatchRegistry,
+      opts.match_id,
       opts.match_id
     )
 
