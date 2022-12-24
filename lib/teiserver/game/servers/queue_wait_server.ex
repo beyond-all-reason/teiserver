@@ -220,10 +220,14 @@ defmodule Teiserver.Game.QueueWaitServer do
   end
 
   def handle_info(:telemetry_tick, state) do
-    member_count = state.groups_map
-      |> Map.values
-      |> Map.get(:count)
-      |> Enum.sum
+    member_count = if Enum.empty?(state.groups_map) do
+      0
+    else
+      state.groups_map
+        |> Map.values
+        |> Map.get(:count)
+        |> Enum.sum
+    end
 
     Telemetry.cast_to_server({:matchmaking_update, state.queue_id, %{
       mean_wait_time: calculate_mean_wait_time(state),
