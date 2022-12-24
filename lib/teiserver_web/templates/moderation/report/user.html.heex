@@ -24,6 +24,14 @@
 
         <div class="float-end">
           <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+            <a class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"} href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@user.id}_"}>
+              <%= central_component "icon", icon: Teiserver.Moderation.ActionLib.icon(), class: "fa-solid" %>
+              &nbsp;
+              Action user
+            </a>
+          <% end %>
+
+          <%= if allow?(@conn, "teiserver.staff.moderator") do %>
             <a class={"btn btn-outline-#{bsname}"} href={Routes.ts_admin_user_path(@conn, :show, @user)}>View user</a>
           <% end %>
         </div>

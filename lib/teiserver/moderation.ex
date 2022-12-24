@@ -298,9 +298,9 @@ defmodule Teiserver.Moderation do
   @spec create_action(Map.t()) :: {:ok, Action.t()} | {:error, Ecto.Changeset.t()}
   def create_action(attrs \\ %{}) do
     %Action{}
-    |> Action.changeset(attrs)
-    |> Repo.insert()
-    |> broadcast_create_action()
+      |> Action.changeset(attrs)
+      |> Repo.insert()
+      |> broadcast_create_action()
   end
 
   def broadcast_create_action({:ok, action}) do
