@@ -227,7 +227,7 @@ defmodule Teiserver.Data.Matchmaking do
       if client.party_id do
         party = Account.get_party(client.party_id)
         if party.leader == userid do
-          client.party
+          party
             |> make_group_from_party(queue)
             |> do_add_group_to_queue(queue_id)
         else

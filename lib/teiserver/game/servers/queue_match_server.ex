@@ -332,7 +332,14 @@ defmodule Teiserver.Game.QueueMatchServer do
           end)
       end)
 
-    opts = []
+    # Massive boundaries mean it will always keep parties together
+    opts = [
+      max_deviation: 1000,
+      rating_lower_boundary: 1000,
+      rating_upper_boundary: 1000,
+      mean_diff_max: 1000,
+      stddev_diff_max: 1000
+    ]
     BalanceLib.create_balance(balance_groups, db_queue.team_count, opts)
   end
 

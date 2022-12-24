@@ -13,7 +13,7 @@ defmodule Teiserver.Game.QueueWaitServer do
 
   @default_telemetry_interval 60_000
   @default_range_increase_interval 30_000
-  @tick_interval 250
+  @default_tick_interval 250
   @update_interval 2_500
   @max_range 5
 
@@ -25,11 +25,11 @@ defmodule Teiserver.Game.QueueWaitServer do
 
         false ->
           bucket_key = bucket_function(group)
-          group = %{group |
-            bucket: bucket_key
-          }
 
-          new_group = %{group | bucket: bucket_key}
+          new_group = %{group |
+            bucket: bucket_key,
+            max_distance: (state.settings["max_range"] || @max_range)
+          }
           new_groups_map = Map.put(state.groups_map, group.id, new_group)
 
           new_bucket = [group.id | Map.get(state.buckets, bucket_key, [])]
@@ -115,7 +115,7 @@ defmodule Teiserver.Game.QueueWaitServer do
   end
 
   def handle_cast({:re_add_group, group}, state) do
-    {resp, new_state} =
+    {_resp, new_state} =
       case Map.has_key?(state.groups_map, group.id) do
         true ->
           {:duplicate, state}
@@ -163,53 +163,6 @@ defmodule Teiserver.Game.QueueWaitServer do
           {:ok, new_state}
       end
 
-    # {:reply, resp, new_state}
-
-    # # First we ignore those already added
-    # new_state = groups
-    #   |> Enum.reject(fn group -> Enum.member?(state.groups_map, group.id) end)
-    #   |> Enum.reduce(state, fn (group, acc) ->
-    #     key = bucket_function(group)
-
-    #     new_bucket = [group | Map.get(acc.buckets, key, [])]
-    #     new_buckets = Map.put(acc.buckets, key, new_bucket)
-
-    #     new_groups_map = Map.put(acc.groups_map, group.id, group)
-
-    #     new_state = %{
-    #       acc
-    #       | buckets: new_buckets,
-    #         groups_map: new_groups_map,
-    #         skip: false
-    #     }
-
-
-    #     PubSub.broadcast(
-    #       Central.PubSub,
-    #       "teiserver_queue_wait:#{state.queue_id}",
-    #       {:queue_wait, :queue_add_user, state.queue_id, group.id}
-    #     )
-
-    #     groups
-    #     |> Enum.each(fn group ->
-    #       group.members
-    #       |> Enum.each(fn userid ->
-    #         PubSub.broadcast(
-    #           Central.PubSub,
-    #           "teiserver_client_messages:#{userid}",
-    #           %{
-    #             channel: "teiserver_client_messages:#{userid}",
-    #             event: :matchmaking,
-    #             sub_event: :joined_queue,
-    #             queue_id: state.queue_id
-    #           }
-    #         )
-    #       end)
-    #     end)
-
-    #     new_state
-    #   end)
-
     {:noreply, new_state}
   end
 
@@ -218,17 +171,52 @@ defmodule Teiserver.Game.QueueWaitServer do
   end
 
   def handle_info(:increase_range, state) do
-    new_buckets = state.buckets
-      |> Map.new(fn {key, players} ->
-        new_players = players
-          |> Enum.map(fn {userid, join_time, current_range, type} ->
-            {userid, join_time, min(current_range + 1, @max_range), type}
-          end)
-
-        {key, new_players}
+    # First we go through all the groups, those that are going to be
+    # expanded we map out as going into new buckets
+    # at the end of this, new_bucket_entries should be a map
+    # of %{bucket_key => [group_id]}
+    new_bucket_entries = state.groups_map
+      |> Map.values
+      |> Enum.filter(fn group ->
+        group.search_distance < group.max_distance
+      end)
+      |> Enum.map(fn group ->
+        [
+          {group.bucket - group.search_distance - 1, group.id},
+          {group.bucket + group.search_distance + 1, group.id}
+        ]
+      end)
+      |> List.flatten
+      |> Enum.group_by(fn {bucket, _group_id} ->
+        bucket
+      end, fn {_bucket, group_id} ->
+        group_id
       end)
 
-    {:noreply, %{state | buckets: new_buckets}}
+    new_buckets = (Map.keys(state.buckets) ++ Map.keys(new_bucket_entries))
+      |> Enum.uniq
+      |> Map.new(fn key ->
+        contents = (state.buckets[key] || []) ++ (new_bucket_entries[key] || [])
+          |> Enum.uniq
+        {key, contents}
+      end)
+
+    # Update the groups
+    new_groups_map = state.groups_map
+      |> Map.new(fn {group_id, group} ->
+        new_group = if group.search_distance < group.max_distance do
+          Map.put(group, :search_distance, group.search_distance + 1)
+        else
+          group
+        end
+
+        {group_id, new_group}
+      end)
+
+    {:noreply, %{state |
+      groups_map: new_groups_map,
+      buckets: new_buckets
+    }}
   end
 
   def handle_info(:telemetry_tick, state) do
@@ -266,7 +254,7 @@ defmodule Teiserver.Game.QueueWaitServer do
   end
 
   def handle_info(:tick, %{skip: true} = state) do
-    :timer.send_after(@tick_interval, :tick)
+    :timer.send_after(state.tick_interval, :tick)
     {:noreply, state}
   end
 
@@ -289,7 +277,7 @@ defmodule Teiserver.Game.QueueWaitServer do
         }
     end
 
-    :timer.send_after(@tick_interval, :tick)
+    :timer.send_after(state.tick_interval, :tick)
     {:noreply, new_state}
   end
 
@@ -351,26 +339,26 @@ defmodule Teiserver.Game.QueueWaitServer do
         # Grab the first groups we find from the list as long as they match the required size
         picked = pick_groups_from_list_to_size(remaining_groups, state.team_size, [])
 
-        # IO.puts ""
-        # IO.inspect picked, label: "#{team_id} picked"
-        # IO.puts ""
-
-        # TODO: Handle :failure, also find a situation where it would happen?
+        # Failure happened previously when we didn't prevent parties bigger than
+        # a teamsize joining the queue, while that bug has been fixed
+        # it's in theory possible for it to fail again and thus we need to be able to handle it
         if picked == :failure do
           Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\npicked == :failure")
           Logger.error("group_list: #{inspect group_list}")
           Logger.error("team_count: #{inspect state.team_count}, team_id: #{inspect team_id}, remaining_groups: #{inspect remaining_groups}")
+
+          {[], nil}
+        else
+          # Convert the groups to ids
+          picked_ids = picked |> Enum.map(fn g -> g.id end)
+
+          # Strip out from the list any groups we've picked
+          new_remaining = remaining_groups
+            |> Enum.reject(fn g -> Enum.member?(picked_ids, g.id) end)
+
+          # map and reduce
+          {picked, new_remaining}
         end
-
-        # Convert the groups to ids
-        picked_ids = picked |> Enum.map(fn g -> g.id end)
-
-        # Strip out from the list any groups we've picked
-        new_remaining = remaining_groups
-          |> Enum.reject(fn g -> Enum.member?(picked_ids, g.id) end)
-
-        # map and reduce
-        {picked, new_remaining}
       end)
 
     # Picks will now be a list of groups picked for balancing, we don't care which
@@ -399,7 +387,13 @@ defmodule Teiserver.Game.QueueWaitServer do
   defp main_loop_search(state) do
     selected_groups = state.buckets
       |> Stream.filter(fn {_bucket_key, group_list} ->
-        Enum.count(group_list) >= state.players_needed
+        max_count = group_list
+          |> Enum.map(fn group_id ->
+            Enum.count(state.groups_map[group_id].members)
+          end)
+          |> Enum.sum
+
+        max_count >= state.players_needed
       end)
       |> Stream.map(fn {_bucket_key, group_list} ->
         find_matches_in_bucket(state, group_list)
@@ -461,6 +455,7 @@ defmodule Teiserver.Game.QueueWaitServer do
       players_needed: (db_queue.team_size * db_queue.team_count),
       map_list: db_queue.map_list |> Enum.map(fn m -> String.trim(m) end),
       settings: db_queue.settings,
+      tick_interval: db_queue.settings["tick_interval"] || @default_tick_interval
     })
   end
 

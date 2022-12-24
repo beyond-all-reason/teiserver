@@ -1,9 +1,10 @@
 defmodule Teiserver.TachyonMatchmakingTest do
   use Central.ServerCase, async: false
   require Logger
-  alias Teiserver.{Client, Game, User}
+  alias Teiserver.{Client, Game, User, Account}
   alias Teiserver.Account.ClientLib
   alias Teiserver.Data.Matchmaking
+  alias Teiserver.Game.MatchRatingLib
   alias Teiserver.Common.PubsubListener
 
   import Teiserver.TeiserverTestLib,
@@ -13,6 +14,18 @@ defmodule Teiserver.TachyonMatchmakingTest do
     Teiserver.Coordinator.start_coordinator()
     %{socket: socket, user: user} = tachyon_auth_setup()
     {:ok, socket: socket, user: user}
+  end
+
+  defp make_rating(userid, rating_type_id, rating_value) do
+    {:ok, _} = Account.create_rating(%{
+      user_id: userid,
+      rating_type_id: rating_type_id,
+      rating_value: rating_value,
+      skill: rating_value,
+      uncertainty: 0,
+      leaderboard_rating: rating_value,
+      last_updated: Timex.now(),
+    })
   end
 
   defp make_empty_lobby() do
@@ -617,12 +630,233 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert wait_state.buckets == %{}
   end
 
-  test "Team queue with both party and solo members" do
+  test "Range increases", %{socket: socket1, user: user1} do
+    {:ok, queue} =
+      Game.create_queue(%{
+        "name" => "test_queue-1v1",
+        "team_size" => 1,
+        "team_count" => 2,
+        "icon" => "fa-regular fa-home",
+        "colour" => "#112233",
+        "map_list" => ["map1"],
+        "conditions" => %{},
+        "settings" => %{
+          "tick_interval" => 60_000
+        }
+      })
+
+    # Join the queue
+    _tachyon_send(socket1, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+
+    pid = Matchmaking.get_queue_wait_pid(queue.id)
+    state = :sys.get_state(pid)
+    assert Map.has_key?(state.groups_map, user1.id)
+    assert state.groups_map[user1.id].members == [user1.id]
+    assert state.buckets == %{17 => [user1.id]}
+
+    # Increase range
+    send(pid, :increase_range)
+
+    state = :sys.get_state(pid)
+    assert Map.has_key?(state.groups_map, user1.id)
+    assert state.groups_map[user1.id].members == [user1.id]
+    assert state.buckets == %{16 => [user1.id], 17 => [user1.id], 18 => [user1.id]}
+
+    # Increase range a number of times, 1 more time than the max-distance
+    0..(state.groups_map[user1.id].max_distance + 1)
+      |> Enum.each(fn _ ->
+        send(pid, :increase_range)
+      end)
+
+    state = :sys.get_state(pid)
+    assert Map.has_key?(state.groups_map, user1.id)
+    assert state.groups_map[user1.id].members == [user1.id]
+    # Easiest way to check if the right number of buckets are being filled
+    assert state.buckets |> Map.keys |> Enum.count == (state.groups_map[user1.id].max_distance * 2) + 1
+  end
+
+  test "Team queue with both party and solo members", %{socket: socket1, user: user1} do
+    {:ok, queue} =
+      Game.create_queue(%{
+        "name" => "test_queue-3v3",
+        "team_size" => 3,
+        "team_count" => 2,
+        "icon" => "fa-regular fa-home",
+        "colour" => "#112233",
+        "map_list" => ["map1"],
+        "conditions" => %{},
+        "settings" => %{
+          "tick_interval" => 60_000
+        }
+      })
+
+    %{socket: socket2, user: user2} = tachyon_auth_setup()
+    %{socket: socket3, user: user3} = tachyon_auth_setup()
+
+    %{socket: psocket1, user: puser1} = tachyon_auth_setup()
+    %{socket: psocket2, user: puser2} = tachyon_auth_setup()
+    %{socket: psocket3, user: puser3} = tachyon_auth_setup()
+
+    # Setup ratings
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()["Team"]
+    # The solo players should be significantly higher rated than the party
+    make_rating(user1.id, rating_type_id, 25)
+    make_rating(user2.id, rating_type_id, 25)
+    make_rating(user3.id, rating_type_id, 25)
+
+    # The party should be rated based on the highest rated player
+    make_rating(puser1.id, rating_type_id, 20.2)
+    make_rating(puser2.id, rating_type_id, 5)
+    make_rating(puser3.id, rating_type_id, 5)
+
+    # Setup the party
+    _tachyon_send(psocket1, %{"cmd" => "c.party.create"})
+    [resp] = _tachyon_recv(psocket1)
+    assert resp["cmd"] == "s.party.added_to"
+    party_id = resp["party"]["id"]
+
+    _tachyon_send(psocket1, %{"cmd" => "c.party.invite", "userid" => puser2.id})
+    _tachyon_send(psocket1, %{"cmd" => "c.party.invite", "userid" => puser3.id})
+
+    _tachyon_send(psocket2, %{"cmd" => "c.party.accept", "party_id" => party_id})
+    _tachyon_send(psocket3, %{"cmd" => "c.party.accept", "party_id" => party_id})
+
+    # Ensure the party is setup the correct way
+    party = Account.get_party(party_id)
+    assert party.members == [puser3.id, puser2.id, puser1.id]
+
+    # Clear sockets
+    _tachyon_recv_until(psocket1)
+    _tachyon_recv_until(psocket2)
+
+    # Now try to join the queue as one of the members
+    _tachyon_send(psocket2, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+    [reply] = _tachyon_recv(psocket2)
+    assert reply == %{
+      "cmd" => "s.matchmaking.join_queue",
+      "reason" => "Not party leader",
+      "result" => "failure",
+      "queue_id" => queue.id
+    }
+
+    pid = Matchmaking.get_queue_wait_pid(queue.id)
+    state = :sys.get_state(pid)
+    assert state.groups_map |> Map.keys == []
+    assert state.groups_map |> Map.keys == []
+
+    # Now do it properly
+    _tachyon_send(psocket1, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+    [reply] = _tachyon_recv(psocket1)
+    assert reply == %{
+      "cmd" => "s.matchmaking.join_queue",
+      "result" => "success",
+      "queue_id" => queue.id
+    }
+
+    state = :sys.get_state(pid)
+    assert state.groups_map |> Map.keys == [party.id]
+    assert state.buckets == %{20 => [party.id]}
+    assert state.groups_map[party.id].rating == 20.2
+    assert state.groups_map[party.id].bucket == 20
+
+    # Clear sockets
+    _tachyon_recv_until(socket1)
+    _tachyon_recv_until(socket2)
+    _tachyon_recv_until(socket3)
+
+    # Now get the others to join
+    _tachyon_send(socket1, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+    _tachyon_send(socket2, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+    _tachyon_send(socket3, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+
+    [reply] = _tachyon_recv(socket1)
+    assert reply == %{
+      "cmd" => "s.matchmaking.join_queue",
+      "result" => "success",
+      "queue_id" => queue.id
+    }
+
+    [reply] = _tachyon_recv(socket2)
+    assert reply == %{
+      "cmd" => "s.matchmaking.join_queue",
+      "result" => "success",
+      "queue_id" => queue.id
+    }
+
+    [reply] = _tachyon_recv(socket3)
+    assert reply == %{
+      "cmd" => "s.matchmaking.join_queue",
+      "result" => "success",
+      "queue_id" => queue.id
+    }
+
+    state = :sys.get_state(pid)
+    assert state.groups_map |> Map.keys == [user1.id, user2.id, user3.id, party.id]
+    assert state.buckets == %{
+      25 => [user3.id, user2.id, user1.id],
+      20 => [party.id]
+    }
+
+    # Clear socket1
+    _tachyon_recv_until(socket1)
+
+    send(pid, :tick)
+
+    # Nothing should have happened
+    state = :sys.get_state(pid)
+    assert state.groups_map |> Map.keys == [user1.id, user2.id, user3.id, party.id]
+    assert state.buckets == %{
+      25 => [user3.id, user2.id, user1.id],
+      20 => [party.id]
+    }
+
+    # Okay, now increase the range 5 times
+    send(pid, :increase_range)
+    send(pid, :increase_range)
+    send(pid, :increase_range)
+    send(pid, :increase_range)
+    send(pid, :increase_range)
+
+    # And tick
+    send(pid, :tick)
+
+    state = :sys.get_state(pid)
+    assert state.groups_map == %{}
+    assert state.buckets == %{}
+
+    [reply] = _tachyon_recv(socket1)
+    match_id = reply["match_id"]
+    assert reply == %{
+      "cmd" => "s.matchmaking.match_ready",
+      "match_id" => match_id,
+      "queue_id" => queue.id
+    }
+
+    pid = Matchmaking.get_queue_match_pid(match_id)
+    state = :sys.get_state(pid)
+    team1 = state.balance.team_players[1] |> Enum.sort
+    team2 = state.balance.team_players[2] |> Enum.sort
+
+    assert team1 == [user1.id, user2.id, user3.id]
+    assert team2 == [puser1.id, puser2.id, puser3.id]
+
+    # Teams should be taken from the balance
+    assert state.teams == state.balance.team_players
+  end
+
+  test "Enough players but can't make teams with the groups", %{socket: _socket1, user: _user1} do
+    # 3v3 queue, 3 groups of 2 players
+  end
+
+  test "Group bigger than max teamsize", %{socket: _socket1, user: _user1} do
 
   end
 
-  # TODO: Team queue with both party and solo members
-  # TODO: 3v3 queue but the 6 players are in 3 groups so can't be split
-  # TODO: Group bigger than max teamsize
-  # TODO: Test where there are multiple viable matches and it actually identifies the best one
+  test "Test where there are multiple viable matches and it actually identifies the best one", %{socket: _socket1, user: _user1} do
+
+  end
+
+  test "Member leaves party, group leaves the queue", %{socket: _socket1, user: _user1} do
+
+  end
 end

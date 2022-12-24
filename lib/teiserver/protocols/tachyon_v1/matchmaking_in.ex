@@ -28,6 +28,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
         :duplicate -> true
         :failed -> false
         :missing -> false
+        :not_party_leader -> false
         :no_queue -> false
       end
 
@@ -39,6 +40,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
         reason = case resp do
           :missing -> "No queue found"
           :no_queue -> "No queue found"
+          :not_party_leader -> "Not party leader"
           _ -> "Failure"
         end
         reply(:matchmaking, :join_queue_failure, {queue_id, reason}, state)
