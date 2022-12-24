@@ -178,6 +178,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
     post_to_discord = cond do
       action.restrictions == ["Bridging"] -> false
+      action.reason == "Banned (Automod)" -> false
       chan == nil -> false
       true -> true
     end

@@ -149,11 +149,12 @@ defmodule Teiserver.Coordinator.AutomodServer do
 
     {:ok, action} = Moderation.create_action(%{
       target_id: userid,
-      reason: "Banned",
+      reason: "Banned (Automod)",
       restrictions: ["Login", "Site"],
       score_modifier: 0,
       expires: Timex.now() |> Timex.shift(years: 1000)
     })
+    Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
 
     add_audit_log(
       coordinator_user_id,
