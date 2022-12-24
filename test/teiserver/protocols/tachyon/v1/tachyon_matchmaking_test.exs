@@ -1,7 +1,7 @@
 defmodule Teiserver.TachyonMatchmakingTest do
   use Central.ServerCase, async: false
   require Logger
-  alias Teiserver.{Client, Game, User, Account}
+  alias Teiserver.{Client, Battle, Game, User, Account}
   alias Teiserver.Account.ClientLib
   alias Teiserver.Data.Matchmaking
   alias Teiserver.Game.MatchRatingLib
@@ -840,23 +840,121 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert team1 == [user1.id, user2.id, user3.id]
     assert team2 == [puser1.id, puser2.id, puser3.id]
 
-    # Teams should be taken from the balance
-    assert state.teams == state.balance.team_players
+    assert state.user_ids |> Enum.sort() == [user1.id, user2.id, user3.id, puser1.id, puser2.id, puser3.id]
+    assert state.pending_accepts |> Enum.sort() == [user1.id, user2.id, user3.id, puser1.id, puser2.id, puser3.id]
+    assert state.accepted_users == []
+    assert state.declined_users == []
+
+    # Add an empty lobby
+    %{
+      lobby_id: lobby_id
+    } = make_empty_lobby()
+
+    # Tick the match server
+    send(pid, :tick)
+
+    # Accept each user
+    _tachyon_send(socket1, %{cmd: "c.matchmaking.accept", match_id: match_id})
+    _tachyon_send(socket2, %{cmd: "c.matchmaking.accept", match_id: match_id})
+    _tachyon_send(socket3, %{cmd: "c.matchmaking.accept", match_id: match_id})
+
+    _tachyon_send(psocket1, %{cmd: "c.matchmaking.accept", match_id: match_id})
+    _tachyon_send(psocket2, %{cmd: "c.matchmaking.accept", match_id: match_id})
+    _tachyon_send(psocket3, %{cmd: "c.matchmaking.accept", match_id: match_id})
+    :timer.sleep(100)
+
+    [reply] = _tachyon_recv(socket1)
+    assert reply["cmd"] == "s.lobby.joined"
+
+    # Clear both sockets
+    _tachyon_recv_until(socket1)
+
+    # Wait for it to do everything
+    :timer.sleep(1000)
+
+    state = :sys.get_state(pid)
+
+    assert state.user_ids |> Enum.sort() == [user1.id, user2.id, user3.id, puser1.id, puser2.id, puser3.id]
+    assert state.pending_accepts == []
+    assert state.accepted_users |> Enum.sort() == [user1.id, user2.id, user3.id, puser1.id, puser2.id, puser3.id]
+    assert state.declined_users == []
+
+    lobby = Battle.get_lobby(lobby_id)
+    assert lobby.players |> Enum.sort() == [user1.id, user2.id, user3.id, puser1.id, puser2.id, puser3.id]
+
+    assert Account.get_client_by_id(user1.id).team_number == 0
+    assert Account.get_client_by_id(user2.id).team_number == 0
+    assert Account.get_client_by_id(user3.id).team_number == 0
+
+    assert Account.get_client_by_id(puser1.id).team_number == 1
+    assert Account.get_client_by_id(puser2.id).team_number == 1
+    assert Account.get_client_by_id(puser3.id).team_number == 1
   end
 
   test "Enough players but can't make teams with the groups", %{socket: _socket1, user: _user1} do
     # 3v3 queue, 3 groups of 2 players
+    {:ok, queue} =
+      Game.create_queue(%{
+        "name" => "test_queue-3v3",
+        "team_size" => 3,
+        "team_count" => 2,
+        "icon" => "fa-regular fa-home",
+        "colour" => "#112233",
+        "map_list" => ["map1"],
+        "conditions" => %{},
+        "settings" => %{
+          "tick_interval" => 60_000
+        }
+      })
+
+    %{socket: socket1_1, user: user1_1} = tachyon_auth_setup()
+    %{socket: socket1_2, user: user1_2} = tachyon_auth_setup()
+
+    %{socket: socket2_1, user: user2_1} = tachyon_auth_setup()
+    %{socket: socket2_2, user: user2_2} = tachyon_auth_setup()
+
+    %{socket: socket3_1, user: user3_1} = tachyon_auth_setup()
+    %{socket: socket3_2, user: user3_2} = tachyon_auth_setup()
+
+    # Setup the parties
+    _tachyon_send(socket1_1, %{"cmd" => "c.party.create"})
+    [resp] = _tachyon_recv(psocket1)
+    assert resp["cmd"] == "s.party.added_to"
+    party_id1 = resp["party"]["id"]
+
+    _tachyon_send(socket1_1, %{"cmd" => "c.party.invite", "userid" => user1_2.id})
+    _tachyon_send(socket1_2, %{"cmd" => "c.party.accept", "party_id" => party_id})
+
+    # Party 2
+    _tachyon_send(socket2_1, %{"cmd" => "c.party.create"})
+    [resp] = _tachyon_recv(psocket1)
+    assert resp["cmd"] == "s.party.added_to"
+    party_id1 = resp["party"]["id"]
+
+    _tachyon_send(socket2_1, %{"cmd" => "c.party.invite", "userid" => user2_2.id})
+    _tachyon_send(socket2_2, %{"cmd" => "c.party.accept", "party_id" => party_id})
+
+    # Party 3
+    _tachyon_send(socket3_1, %{"cmd" => "c.party.create"})
+    [resp] = _tachyon_recv(psocket1)
+    assert resp["cmd"] == "s.party.added_to"
+    party_id1 = resp["party"]["id"]
+
+    _tachyon_send(socket3_1, %{"cmd" => "c.party.invite", "userid" => user3_2.id})
+    _tachyon_send(socket3_2, %{"cmd" => "c.party.accept", "party_id" => party_id})
+
+    flunk "Incomplete"
   end
 
   test "Group bigger than max teamsize", %{socket: _socket1, user: _user1} do
-
+    flunk "Incomplete"
   end
 
   test "Test where there are multiple viable matches and it actually identifies the best one", %{socket: _socket1, user: _user1} do
-
+    flunk "Incomplete"
   end
 
   test "Member leaves party, group leaves the queue", %{socket: _socket1, user: _user1} do
-
+    flunk "Incomplete"
   end
 end

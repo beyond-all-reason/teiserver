@@ -106,7 +106,9 @@ defmodule Teiserver.Game.QueueMatchServer do
   end
 
   # We have pending accepts, the tick does nothing
-  def handle_info(:tick, state), do: {:noreply, state}
+  def handle_info(:tick, state) do
+    {:noreply, state}
+  end
 
   def handle_info({:update, :settings, new_list}, state),
     do: {:noreply, %{state | settings: new_list}}
@@ -239,27 +241,31 @@ defmodule Teiserver.Game.QueueMatchServer do
         :timer.sleep(100)
       end)
 
-    # Now put the players on their teams, for now we're assuming every game is just a 1v1
     Logger.info("QueueMatchServer #{state.match_id} setup_lobby putting players on teams")
-    [p1, p2 | _] = state.user_ids
-    Coordinator.cast_consul(lobby.id, %{command: "change-battlestatus", remaining: p1, senderid: Coordinator.get_coordinator_userid(),
-      status: %{
-        player_number: 0,
-        team_number: 0,
-        player: true,
-        bonus: 0,
-        ready: true
-      }
-    })
-    Coordinator.cast_consul(lobby.id, %{command: "change-battlestatus", remaining: p2, senderid: Coordinator.get_coordinator_userid(),
-      status: %{
-        player_number: 1,
-        team_number: 1,
-        player: true,
-        bonus: 0,
-        ready: true
-      }
-    })
+
+    state.teams
+      |> Enum.map(fn {team_id, team_members} ->
+        team_members
+          |> Enum.map(fn userid ->
+            {team_id, userid}
+          end)
+      end)
+      |> List.flatten
+      |> Enum.with_index()
+      |> Enum.each(fn {{team_id, userid}, index} ->
+        Coordinator.cast_consul(lobby.id, %{
+          command: "change-battlestatus",
+          remaining: userid,
+          senderid: Coordinator.get_coordinator_userid(),
+          status: %{
+            player_number: index,
+            team_number: team_id - 1,
+            player: true,
+            bonus: 0,
+            ready: true
+          }
+        })
+      end)
 
     # Update the modoptions
     Battle.set_modoptions(lobby.id, %{
@@ -270,7 +276,7 @@ defmodule Teiserver.Game.QueueMatchServer do
     # Give things time to propagate before we start
     :timer.sleep(1000)
 
-    all_clients = Client.get_clients([p1, p2])
+    all_clients = Client.get_clients(state.user_ids)
 
     all_players = all_clients
       |> Enum.map(fn c -> c != nil and c.player == true end)
@@ -279,6 +285,9 @@ defmodule Teiserver.Game.QueueMatchServer do
     all_synced = all_clients
       |> Enum.map(fn c -> c != nil and c.sync == 1 end)
       |> Enum.all?
+
+    # First player in calls commands, the others okay them
+    [first | others] = state.user_ids
 
     cond do
       all_players == false ->
@@ -296,12 +305,16 @@ defmodule Teiserver.Game.QueueMatchServer do
       true ->
         Logger.info("QueueMatchServer #{state.match_id} setup_lobby calling player cv start")
         Lobby.sayex(Coordinator.get_coordinator_userid, "Attempting to start the game, if this doesn't work feel free to start it yourselves and report the error to Teifion.", lobby.id)
+        :timer.sleep(100)
 
+        Lobby.say(first, "!cv forcestart", lobby.id)
         :timer.sleep(100)
-        Lobby.say(p1, "!cv forcestart", lobby.id)
-        :timer.sleep(100)
-        Lobby.say(p2, "!y", lobby.id)
-        :timer.sleep(100)
+
+        others
+          |> Enum.each(fn other_id ->
+            Lobby.say(other_id, "!y", lobby.id)
+            :timer.sleep(100)
+          end)
 
         Logger.info("QueueMatchServer #{state.match_id} setup_lobby calling forcestart")
         Coordinator.send_to_host(lobby.id, "!forcestart")
