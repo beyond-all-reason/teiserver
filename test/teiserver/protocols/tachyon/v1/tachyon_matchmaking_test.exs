@@ -116,6 +116,10 @@ defmodule Teiserver.TachyonMatchmakingTest do
       "result" => "success"
     }
 
+    # Tick the wait server
+    send(pid, :tick)
+    :timer.sleep(300)
+
     messages = PubsubListener.get(match_listener)
     {:queue_wait, :match_attempt, matched_queue_id, match_id} = hd(messages)
     assert matched_queue_id == queue.id
@@ -596,6 +600,11 @@ defmodule Teiserver.TachyonMatchmakingTest do
     _tachyon_send(socket2, %{cmd: "c.matchmaking.accept", match_id: match_id})
     :timer.sleep(100)
 
+    [user1.id, user2.id]
+      |> Enum.each(fn userid ->
+        Account.merge_update_client(userid, %{sync: %{engine: 1, game: 1, map: 1}})
+      end)
+
     [reply] = _tachyon_recv(socket1)
     assert reply["cmd"] == "s.lobby.joined"
 
@@ -615,19 +624,24 @@ defmodule Teiserver.TachyonMatchmakingTest do
     assert state.accepted_users == [user2.id, user1.id]
     assert state.declined_users == []
 
-    send(match_pid, :end_waiting)
-    :timer.sleep(500)
-    refute Process.alive?(match_pid)
-    assert Matchmaking.get_queue_match_pid(match_id) == nil
+    send(match_pid, :tick)
 
     # Check wait state
     wait_state = :sys.get_state(wait_pid)
+    assert wait_state.groups_map == %{}
     assert wait_state.buckets == %{}
 
     # If we tick is that still the case?
     send(wait_pid, :tick)
     wait_state = :sys.get_state(wait_pid)
+    assert wait_state.groups_map == %{}
     assert wait_state.buckets == %{}
+
+    # Now tell the match server to cancel the match
+    send(match_pid, :end_waiting)
+    :timer.sleep(500)
+    refute Process.alive?(match_pid)
+    assert Matchmaking.get_queue_match_pid(match_id) == nil
   end
 
   test "Range increases", %{socket: socket1, user: user1} do
@@ -907,54 +921,109 @@ defmodule Teiserver.TachyonMatchmakingTest do
         }
       })
 
-    %{socket: socket1_1, user: user1_1} = tachyon_auth_setup()
+    %{socket: socket1_1, user: _user1_1} = tachyon_auth_setup()
     %{socket: socket1_2, user: user1_2} = tachyon_auth_setup()
 
-    %{socket: socket2_1, user: user2_1} = tachyon_auth_setup()
+    %{socket: socket2_1, user: _user2_1} = tachyon_auth_setup()
     %{socket: socket2_2, user: user2_2} = tachyon_auth_setup()
 
-    %{socket: socket3_1, user: user3_1} = tachyon_auth_setup()
+    %{socket: socket3_1, user: _user3_1} = tachyon_auth_setup()
     %{socket: socket3_2, user: user3_2} = tachyon_auth_setup()
 
     # Setup the parties
     _tachyon_send(socket1_1, %{"cmd" => "c.party.create"})
-    [resp] = _tachyon_recv(psocket1)
+    [resp] = _tachyon_recv(socket1_1)
     assert resp["cmd"] == "s.party.added_to"
     party_id1 = resp["party"]["id"]
 
     _tachyon_send(socket1_1, %{"cmd" => "c.party.invite", "userid" => user1_2.id})
-    _tachyon_send(socket1_2, %{"cmd" => "c.party.accept", "party_id" => party_id})
+    _tachyon_send(socket1_2, %{"cmd" => "c.party.accept", "party_id" => party_id1})
 
     # Party 2
     _tachyon_send(socket2_1, %{"cmd" => "c.party.create"})
-    [resp] = _tachyon_recv(psocket1)
+    [resp] = _tachyon_recv(socket2_1)
     assert resp["cmd"] == "s.party.added_to"
-    party_id1 = resp["party"]["id"]
+    party_id2 = resp["party"]["id"]
 
     _tachyon_send(socket2_1, %{"cmd" => "c.party.invite", "userid" => user2_2.id})
-    _tachyon_send(socket2_2, %{"cmd" => "c.party.accept", "party_id" => party_id})
+    _tachyon_send(socket2_2, %{"cmd" => "c.party.accept", "party_id" => party_id2})
 
     # Party 3
     _tachyon_send(socket3_1, %{"cmd" => "c.party.create"})
-    [resp] = _tachyon_recv(psocket1)
+    [resp] = _tachyon_recv(socket3_1)
     assert resp["cmd"] == "s.party.added_to"
-    party_id1 = resp["party"]["id"]
+    party_id3 = resp["party"]["id"]
 
     _tachyon_send(socket3_1, %{"cmd" => "c.party.invite", "userid" => user3_2.id})
-    _tachyon_send(socket3_2, %{"cmd" => "c.party.accept", "party_id" => party_id})
+    _tachyon_send(socket3_2, %{"cmd" => "c.party.accept", "party_id" => party_id3})
 
-    flunk "Incomplete"
+    # Now add them to the server
+    _tachyon_send(socket1_1, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+    _tachyon_send(socket2_1, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+    _tachyon_send(socket3_1, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+
+    pid = Matchmaking.get_queue_wait_pid(queue.id)
+    state = :sys.get_state(pid)
+    assert Enum.count(state.buckets[17]) == 3
+    assert state.groups_map |> Map.keys |> Enum.sort == Enum.sort([party_id1, party_id2, party_id3])
+
+    send(pid, :tick)
+
+    state = :sys.get_state(pid)
+    assert Enum.count(state.buckets[17]) == 3
+    assert state.groups_map |> Map.keys |> Enum.sort == Enum.sort([party_id1, party_id2, party_id3])
   end
 
-  test "Group bigger than max teamsize", %{socket: _socket1, user: _user1} do
-    flunk "Incomplete"
+  test "Group bigger than max teamsize", %{socket: socket1, user: _user1} do
+    # 3v3 queue, 3 groups of 2 players
+    {:ok, queue} =
+      Game.create_queue(%{
+        "name" => "test_queue-1v1",
+        "team_size" => 1,
+        "team_count" => 2,
+        "icon" => "fa-regular fa-home",
+        "colour" => "#112233",
+        "map_list" => ["map1"],
+        "conditions" => %{},
+        "settings" => %{
+          "tick_interval" => 60_000
+        }
+      })
+
+    %{socket: socket2, user: user2} = tachyon_auth_setup()
+
+    # Setup the parties
+    _tachyon_send(socket1, %{"cmd" => "c.party.create"})
+    [resp] = _tachyon_recv(socket1)
+    assert resp["cmd"] == "s.party.added_to"
+    party_id = resp["party"]["id"]
+
+    _tachyon_send(socket1, %{"cmd" => "c.party.invite", "userid" => user2.id})
+    _tachyon_send(socket2, %{"cmd" => "c.party.accept", "party_id" => party_id})
+
+    _tachyon_recv_until(socket1)
+
+    # Attempt to join queue
+    _tachyon_send(socket1, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+
+    pid = Matchmaking.get_queue_wait_pid(queue.id)
+    state = :sys.get_state(pid)
+    refute state.groups_map |> Map.has_key?(party_id)
+
+    [reply] = _tachyon_recv(socket1)
+    assert reply == %{
+      "cmd" => "s.matchmaking.join_queue",
+      "queue_id" => queue.id,
+      "result" => "failure",
+      "reason" => "Group is larger than the queue team size"
+    }
   end
 
-  test "Test where there are multiple viable matches and it actually identifies the best one", %{socket: _socket1, user: _user1} do
-    flunk "Incomplete"
-  end
+  # test "Test where there are multiple viable matches and it actually identifies the best one", %{socket: _socket1, user: _user1} do
+  #   flunk "Incomplete"
+  # end
 
-  test "Member leaves party, group leaves the queue", %{socket: _socket1, user: _user1} do
-    flunk "Incomplete"
-  end
+  # test "Member leaves party, group leaves the queue", %{socket: _socket1, user: _user1} do
+  #   flunk "Incomplete"
+  # end
 end

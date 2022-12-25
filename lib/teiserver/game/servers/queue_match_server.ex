@@ -283,7 +283,7 @@ defmodule Teiserver.Game.QueueMatchServer do
       |> Enum.all?
 
     all_synced = all_clients
-      |> Enum.map(fn c -> c != nil and c.sync == 1 end)
+      |> Enum.map(fn c -> c != nil and c.sync == %{engine: 1, game: 1, map: 1} end)
       |> Enum.all?
 
     # First player in calls commands, the others okay them
@@ -323,7 +323,7 @@ defmodule Teiserver.Game.QueueMatchServer do
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_queue_wait:#{state.queue_id}",
-          {:queue_match, :match_made, state.id, lobby.id}
+          {:queue_match, :match_made, state.queue_id, lobby.id}
         )
     end
 

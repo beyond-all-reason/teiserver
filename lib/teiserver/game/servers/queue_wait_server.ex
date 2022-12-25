@@ -19,11 +19,14 @@ defmodule Teiserver.Game.QueueWaitServer do
 
   def handle_call({:add_group, %QueueGroup{members: _, rating: _} = group}, _from, state) do
     {resp, new_state} =
-      case Map.has_key?(state.groups_map, group.id) do
-        true ->
+      cond do
+        Map.has_key?(state.groups_map, group.id) ->
           {:duplicate, state}
 
-        false ->
+        Enum.count(group.members) > state.team_size ->
+          {:oversized_group, state}
+
+        true ->
           bucket_key = bucket_function(group)
 
           new_group = %{group |
@@ -308,29 +311,12 @@ defmodule Teiserver.Game.QueueWaitServer do
     end
   end
 
-  # @spec find_matches(T.userid() | String.t(), non_neg_integer(), non_neg_integer(), map()) :: [{T.userid(), non_neg_integer()}]
-  # defp find_matches(group_id, key, current_range, buckets) do
-  #   buckets
-  #     |> Enum.filter(fn {inner_key, _players} ->
-  #       abs(key - inner_key) <= current_range and inner_key <= key
-  #     end)
-  #     |> Enum.map(fn {inner_key, players} ->
-  #       players
-  #         |> Enum.filter(fn {group_id, _time, player_range, _type} ->
-  #           (abs(key - inner_key) <= player_range) and (group_id != userid)
-  #         end)
-  #         |> Enum.map(fn {group_id, time, player_range, type} ->
-  #           {{group_id, time, player_range, type}, abs(key - inner_key)}
-  #         end)
-  #     end)
-  #     |> List.flatten
-  # end
-
   # TODO: Actually identify which groups are closest to each other?
   @spec select_groups_for_balance(map(), [QueueGroup.t()]) :: [QueueGroup.t()]
   defp select_groups_for_balance(state, group_list) do
     # We just need to find N teams of S people, then we balance it
-    # largest groups first
+    # largest groups first, we don't care about which team
+    # they are on, that will be handled by the MatchServer
 
     # First we sort the group list, should be biggest groups first
     group_list = group_list
@@ -339,19 +325,15 @@ defmodule Teiserver.Game.QueueWaitServer do
     # Now we iterate through each team_id and pick groups
     # it doesn't matter which team they are picked for as we'll be balancing it later
     {picks, _} = 1..state.team_count
-      |> Enum.map_reduce(group_list, fn (team_id, remaining_groups) ->
+      |> Enum.map_reduce(group_list, fn (_team_id, remaining_groups) ->
         # Grab the first groups we find from the list as long as they match the required size
         picked = pick_groups_from_list_to_size(remaining_groups, state.team_size, [])
 
-        # Failure happened previously when we didn't prevent parties bigger than
-        # a teamsize joining the queue, while that bug has been fixed
-        # it's in theory possible for it to fail again and thus we need to be able to handle it
+        # Failure happens when we have enough users but can't fit them into
+        # the right number of teams (e.g. 3 groups of 2 for a 3v3)#
+        # previously it would also happen as the result of a bug
         if picked == :failure do
-          Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\npicked == :failure")
-          Logger.error("group_list: #{inspect group_list}")
-          Logger.error("team_count: #{inspect state.team_count}, team_id: #{inspect team_id}, remaining_groups: #{inspect remaining_groups}")
-
-          {[], nil}
+          {[], []}
         else
           # Convert the groups to ids
           picked_ids = picked |> Enum.map(fn g -> g.id end)
