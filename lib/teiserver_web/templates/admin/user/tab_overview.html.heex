@@ -62,7 +62,7 @@
     icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :ratings, @user)
   %>
-  
+
   <%=
     central_component "menu_card",
     icon: Teiserver.icon(:relationship),
@@ -114,20 +114,11 @@
 
   <%=
     central_component "menu_card",
-    icon: "fa-solid #{Central.Account.ReportLib.icon()}",
-    name: "reports",
-    text: "Submitted reports (old)",
-    icon_class: "fa-solid",
-    link: Routes.ts_admin_user_path(@conn, :reports_submitted, @user.id)
-  %>
-  
-  <%=
-    central_component "menu_card",
     icon: "fa-solid fa-face-angry-horns",
     name: "smurf",
     text: "Smurf search",
     icon_class: "fa-solid",
     link: Routes.ts_admin_user_path(@conn, :smurf_search, @user.id)
   %>
-  
+
 </div>

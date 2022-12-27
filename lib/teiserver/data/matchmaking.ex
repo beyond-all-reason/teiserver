@@ -385,7 +385,7 @@ defmodule Teiserver.Data.Matchmaking do
       id: queue.id,
       name: queue.name,
       team_size: queue.team_size,
-      team_count: queue.team_count,
+      team_count: queue.team_count || 2,
       icon: queue.icon,
       colour: queue.colour,
       settings: queue.settings,
