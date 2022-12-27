@@ -1019,11 +1019,88 @@ defmodule Teiserver.TachyonMatchmakingTest do
     }
   end
 
-  # test "Test where there are multiple viable matches and it actually identifies the best one", %{socket: _socket1, user: _user1} do
-  #   flunk "Incomplete"
-  # end
+  test "Test where there are multiple viable matches and it actually identifies the best one", %{socket: socket1, user: user1} do
+    {:ok, queue} =
+      Game.create_queue(%{
+        "name" => "test_queue-1v1",
+        "team_size" => 1,
+        "team_count" => 2,
+        "icon" => "fa-regular fa-home",
+        "colour" => "#112233",
+        "map_list" => ["map1"],
+        "conditions" => %{},
+        "settings" => %{
+          "tick_interval" => 60_000
+        }
+      })
 
-  # test "Member leaves party, group leaves the queue", %{socket: _socket1, user: _user1} do
-  #   flunk "Incomplete"
-  # end
+    %{socket: socket2, user: user2} = tachyon_auth_setup()
+    %{socket: socket3, user: user3} = tachyon_auth_setup()
+
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()["Duel"]
+    # The solo players should be significantly higher rated than the party
+    make_rating(user1.id, rating_type_id, 23)
+    make_rating(user2.id, rating_type_id, 25)
+    make_rating(user3.id, rating_type_id, 26)
+
+    pid = Matchmaking.get_queue_wait_pid(queue.id)
+    state = :sys.get_state(pid)
+    assert state.groups_map == %{}
+    assert state.buckets == %{}
+
+    group1 = user1.id
+      |> Matchmaking.make_group_from_userid(queue)
+      |> Map.merge(%{
+        bucket: 30,
+        search_distance: 5
+      })
+
+    group2 = user2.id
+      |> Matchmaking.make_group_from_userid(queue)
+      |> Map.merge(%{
+        bucket: 25,
+        search_distance: 0
+      })
+
+    group3 = user3.id
+      |> Matchmaking.make_group_from_userid(queue)
+      |> Map.merge(%{
+        bucket: 24,
+        search_distance: 1
+      })
+
+    Matchmaking.cast_queue_wait(queue.id, {:re_add_group, group1})
+    Matchmaking.cast_queue_wait(queue.id, {:re_add_group, group2})
+    Matchmaking.cast_queue_wait(queue.id, {:re_add_group, group3})
+
+    state = :sys.get_state(pid)
+    assert state.groups_map |> Map.keys |> Enum.sort == [user1.id, user2.id, user3.id]
+    assert state.buckets[25] |> Enum.sort == [user1.id, user2.id, user3.id]
+
+    # Re-add group 1 to ensure we can't duplicate
+    Matchmaking.cast_queue_wait(queue.id, {:re_add_group, group1})
+
+    state = :sys.get_state(pid)
+    assert state.groups_map |> Map.keys |> Enum.sort == [user1.id, user2.id, user3.id]
+    assert state.buckets[25] |> Enum.sort == [user1.id, user2.id, user3.id]
+
+    # Clear sockets
+    _tachyon_recv_until(socket1)
+    _tachyon_recv_until(socket2)
+    _tachyon_recv_until(socket3)
+
+    send(pid, :tick)
+    reply1 = _tachyon_recv(socket1)
+    assert reply1 == :timeout
+
+    reply2 = _tachyon_recv(socket2)
+    refute reply2 == :timeout
+
+    reply3 = _tachyon_recv(socket3)
+    refute reply3 == :timeout
+  end
+
+  test "Member leaves party, group leaves the queue", %{socket: _socket1, user: _user1} do
+    flunk "Incomplete"
+  end
 end

@@ -295,8 +295,8 @@ defmodule Teiserver.Game.QueueWaitServer do
     do: {:noreply, %{state | map_list: new_list}}
 
 
-  @spec find_matches_in_bucket(map(), [non_neg_integer()]) :: list()
-  defp find_matches_in_bucket(state, group_id_list) do
+  @spec find_matches_in_bucket(map(), [non_neg_integer()], non_neg_integer()) :: list()
+  defp find_matches_in_bucket(state, group_id_list, bucket_key) do
     group_list = group_id_list
       |> Enum.map(fn group_id -> state.groups_map[group_id] end)
 
@@ -305,22 +305,22 @@ defmodule Teiserver.Game.QueueWaitServer do
       |> Enum.sum
 
     if user_count >= state.players_needed do
-      select_groups_for_balance(state, group_list)
+      select_groups_for_balance(state, group_list, bucket_key)
     else
       nil
     end
   end
 
-  # TODO: Actually identify which groups are closest to each other?
-  @spec select_groups_for_balance(map(), [QueueGroup.t()]) :: [QueueGroup.t()]
-  defp select_groups_for_balance(state, group_list) do
+  @spec select_groups_for_balance(map(), [QueueGroup.t()], non_neg_integer()) :: [QueueGroup.t()]
+  defp select_groups_for_balance(state, group_list, bucket_key) do
     # We just need to find N teams of S people, then we balance it
     # largest groups first, we don't care about which team
     # they are on, that will be handled by the MatchServer
 
-    # First we sort the group list, should be biggest groups first
+    # First we sort the group list, should be biggest groups first followed
+    # by the groups closest to the correct bucket
     group_list = group_list
-      |> Enum.sort_by(fn group -> group.count end, &>=/2)
+      |> Enum.sort_by(fn group -> {group.count, -abs(group.bucket - bucket_key)} end, &>=/2)
 
     # Now we iterate through each team_id and pick groups
     # it doesn't matter which team they are picked for as we'll be balancing it later
@@ -381,8 +381,8 @@ defmodule Teiserver.Game.QueueWaitServer do
 
         max_count >= state.players_needed
       end)
-      |> Stream.map(fn {_bucket_key, group_list} ->
-        find_matches_in_bucket(state, group_list)
+      |> Stream.map(fn {bucket_key, group_list} ->
+        find_matches_in_bucket(state, group_list, bucket_key)
       end)
       |> Stream.reject(&(&1 == nil))
       |> Stream.take(1)
