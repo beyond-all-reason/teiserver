@@ -141,6 +141,8 @@ You currently have no accolades
 Found #{other_user.name}
 Profile link: https://localhost/teiserver/profile/#{other_user.id}
 Ratings:
+No moderation restrictions applied.
+---------------------------
 """),
       "sender_id" => coordinator_userid
     }

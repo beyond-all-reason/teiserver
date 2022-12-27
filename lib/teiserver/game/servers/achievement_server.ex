@@ -125,9 +125,13 @@ defmodule Teiserver.Game.AchievementServer do
 
   @impl true
   def init(_) do
-    :timer.send_after(10_000, :refresh_type_map)
+    # If it's a test server this will break as the SQL connection will bork
+    if Mix.env() != :test do
+      :timer.send_after(10_000, :refresh_type_map)
+      :timer.send_interval(300_000, :refresh_type_map)
+    end
+
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_telemetry_client_events")
-    :timer.send_interval(300_000, :refresh_type_map)
 
     {:ok, %{
       normal_scenario_map: %{},

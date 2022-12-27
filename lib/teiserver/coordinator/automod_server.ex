@@ -12,12 +12,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
   @spec check_user(T.userid()) :: nil
   def check_user(userid) do
     check_wrapper(userid)
-    # case Horde.Registry.lookup(Teiserver.ServerRegistry, "AutomodServer") do
-    #   [{pid, _}] ->
-    #     GenServer.call(pid, {:check_user, userid})
-    #   _ ->
-    #     nil
-    # end
   end
 
   @spec start_automod_server() :: :ok | {:failure, String.t()}
@@ -114,7 +108,6 @@ defmodule Teiserver.Coordinator.AutomodServer do
           Enum.member?(user.roles, "Trusted") -> "Trusted account"
           true ->
             do_check(userid)
-            # do_old_check(userid)
         end
     end
   end

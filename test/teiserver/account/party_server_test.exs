@@ -11,6 +11,7 @@ defmodule Teiserver.Account.PartyServerTest do
       leader: 1,
       members: [1],
       pending_invites: [],
+      queues: []
     })
     assert is_pid(p)
 
@@ -19,7 +20,8 @@ defmodule Teiserver.Account.PartyServerTest do
       id: id,
       leader: 1,
       members: [1],
-      pending_invites: []
+      pending_invites: [],
+      queues: []
     }}
 
     # Add invite
@@ -30,7 +32,8 @@ defmodule Teiserver.Account.PartyServerTest do
       id: id,
       leader: 1,
       members: [1],
-      pending_invites: [4, 3, 2]
+      pending_invites: [4, 3, 2],
+      queues: []
     }}
 
     # Cancel one of them
@@ -39,7 +42,8 @@ defmodule Teiserver.Account.PartyServerTest do
       id: id,
       leader: 1,
       members: [1],
-      pending_invites: [4, 3]
+      pending_invites: [4, 3],
+      queues: []
     }}
 
     # Accept the other
@@ -48,7 +52,8 @@ defmodule Teiserver.Account.PartyServerTest do
       id: id,
       leader: 1,
       members: [3, 1],
-      pending_invites: [4]
+      pending_invites: [4],
+      queues: []
     }}
 
     # And the last
@@ -57,7 +62,8 @@ defmodule Teiserver.Account.PartyServerTest do
       id: id,
       leader: 1,
       members: [4, 3, 1],
-      pending_invites: []
+      pending_invites: [],
+      queues: []
     }}
 
     # New change the leader
@@ -66,7 +72,8 @@ defmodule Teiserver.Account.PartyServerTest do
       id: id,
       leader: 4,
       members: [4, 3, 1],
-      pending_invites: []
+      pending_invites: [],
+      queues: []
     }}
 
     # One leaves
@@ -75,7 +82,8 @@ defmodule Teiserver.Account.PartyServerTest do
       id: id,
       leader: 4,
       members: [4, 1],
-      pending_invites: []
+      pending_invites: [],
+      queues: []
     }}
 
     # Kick the other
@@ -84,7 +92,8 @@ defmodule Teiserver.Account.PartyServerTest do
       id: id,
       leader: 4,
       members: [4],
-      pending_invites: []
+      pending_invites: [],
+      queues: []
     }}
 
     # Re-add someone
@@ -94,7 +103,8 @@ defmodule Teiserver.Account.PartyServerTest do
       id: id,
       leader: 4,
       members: [1, 4],
-      pending_invites: []
+      pending_invites: [],
+      queues: []
     }}
 
     # Leader leaves
@@ -103,7 +113,46 @@ defmodule Teiserver.Account.PartyServerTest do
       id: id,
       leader: 1,
       members: [1],
-      pending_invites: []
+      pending_invites: [],
+      queues: []
+    }}
+
+    # Join queue
+    GenServer.cast(p, {:join_queue, 123})
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 1,
+      members: [1],
+      pending_invites: [],
+      queues: [123]
+    }}
+
+    # Leave queue
+    GenServer.cast(p, {:leave_queue, 444})
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 1,
+      members: [1],
+      pending_invites: [],
+      queues: [123]
+    }}
+
+    GenServer.cast(p, {:leave_queue, 123})
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 1,
+      members: [1],
+      pending_invites: [],
+      queues: []
+    }}
+
+    GenServer.cast(p, {:leave_queue, 123})
+    assert :sys.get_state(p) == %{party: %Party{
+      id: id,
+      leader: 1,
+      members: [1],
+      pending_invites: [],
+      queues: []
     }}
 
     # Last person leaves, party stops

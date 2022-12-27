@@ -233,7 +233,7 @@ defmodule Teiserver.Game.QueueWaitServer do
     else
       state.groups_map
         |> Map.values
-        |> Map.get(:count)
+        |> Enum.map(fn group -> Enum.count(group.members) end)
         |> Enum.sum
     end
 
