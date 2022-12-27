@@ -513,6 +513,7 @@ defmodule Teiserver.TeiserverTestLib do
     Teiserver.Account.get_or_add_smurf_key_type("hw1")
     Teiserver.Account.get_or_add_smurf_key_type("hw2")
 
+    Teiserver.Game.get_or_add_rating_type("Duel")
     Teiserver.Game.get_or_add_rating_type("Team")
 
     Teiserver.Telemetry.get_or_add_event_type("account.user_login")

@@ -2,6 +2,7 @@ defmodule Teiserver.Account.PartyServer do
   use GenServer
   require Logger
   alias Teiserver.{Account}
+  alias Teiserver.Data.Matchmaking
   alias Phoenix.PubSub
 
   @impl true
@@ -28,7 +29,18 @@ defmodule Teiserver.Account.PartyServer do
 
         Account.move_client_to_party(userid, party.id)
 
-        party = %{party | pending_invites: new_invites, members: new_members}
+        # Now leave any queues we were in
+        party.queues
+          |> Enum.each(fn queue_id ->
+            Matchmaking.remove_group_from_queue(queue_id, party.id)
+          end)
+
+        party = %{party |
+          pending_invites: new_invites,
+          members: new_members,
+          queues: []
+        }
+
         {{true, party}, party}
 
       Enum.member?(party.members, userid) ->
@@ -151,8 +163,16 @@ defmodule Teiserver.Account.PartyServer do
         )
 
         %{party | members: new_members}
-
     end
+
+    # Now leave any queues we were in
+    party.queues
+      |> Enum.each(fn queue_id ->
+        Matchmaking.remove_group_from_queue(queue_id, party.id)
+      end)
+
+    new_party = %{new_party | queues: []}
+
     {:noreply, %{state | party: new_party}}
   end
 
@@ -182,6 +202,14 @@ defmodule Teiserver.Account.PartyServer do
       true -> party
     end
 
+    # Now leave any queues we were in
+    party.queues
+      |> Enum.each(fn queue_id ->
+        Matchmaking.remove_group_from_queue(queue_id, party.id)
+      end)
+
+    new_party = %{new_party | queues: []}
+
     {:noreply, %{state | party: new_party}}
   end
 
@@ -209,6 +237,14 @@ defmodule Teiserver.Account.PartyServer do
     {:noreply, %{state | party: new_party}}
   end
 
+  def handle_cast({:join_queue, queue_id}, %{party: party} = state) do
+    {:noreply, %{state | party: %{party | queues: [queue_id | party.queues]}}}
+  end
+
+  def handle_cast({:leave_queue, queue_id}, %{party: party} = state) do
+    {:noreply, %{state | party: %{party | queues: List.delete(party.queues, queue_id)}}}
+  end
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -216,15 +252,15 @@ defmodule Teiserver.Account.PartyServer do
 
   @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
-  def init(data = %{party: %{id: id}}) do
+  def init(%{party: %{id: id} = party}) do
     Horde.Registry.register(
       Teiserver.PartyRegistry,
       id,
       id
     )
 
-    Account.move_client_to_party(data.party.leader, data.party.id)
+    Account.move_client_to_party(party.leader, party.id)
 
-    {:ok, %{party: data.party}}
+    {:ok, %{party: party}}
   end
 end

@@ -975,7 +975,6 @@ defmodule Teiserver.TachyonMatchmakingTest do
   end
 
   test "Group bigger than max teamsize", %{socket: socket1, user: _user1} do
-    # 3v3 queue, 3 groups of 2 players
     {:ok, queue} =
       Game.create_queue(%{
         "name" => "test_queue-1v1",
@@ -1100,7 +1099,88 @@ defmodule Teiserver.TachyonMatchmakingTest do
     refute reply3 == :timeout
   end
 
-  test "Member leaves party, group leaves the queue", %{socket: _socket1, user: _user1} do
-    flunk "Incomplete"
+  test "Party members change, group leaves the queue", %{socket: socket1, user: _user1} do
+    {:ok, queue} =
+      Game.create_queue(%{
+        "name" => "test_queue-1v1",
+        "team_size" => 3,
+        "team_count" => 2,
+        "icon" => "fa-regular fa-home",
+        "colour" => "#112233",
+        "map_list" => ["map1"],
+        "conditions" => %{},
+        "settings" => %{
+          "tick_interval" => 60_000
+        }
+      })
+
+    %{socket: socket2, user: user2} = tachyon_auth_setup()
+
+    # Setup the parties
+    _tachyon_send(socket1, %{"cmd" => "c.party.create"})
+    [resp] = _tachyon_recv(socket1)
+    assert resp["cmd"] == "s.party.added_to"
+    party_id = resp["party"]["id"]
+
+    _tachyon_send(socket1, %{"cmd" => "c.party.invite", "userid" => user2.id})
+    _tachyon_send(socket2, %{"cmd" => "c.party.accept", "party_id" => party_id})
+
+    _tachyon_recv_until(socket1)
+
+    # Attempt to join queue
+    _tachyon_send(socket1, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+
+    pid = Matchmaking.get_queue_wait_pid(queue.id)
+    state = :sys.get_state(pid)
+    assert state.groups_map |> Map.has_key?(party_id)
+
+    [reply] = _tachyon_recv(socket1)
+    assert reply == %{
+      "cmd" => "s.matchmaking.join_queue",
+      "queue_id" => queue.id,
+      "result" => "success"
+    }
+
+    # Ensure the queue is listed as part of the party
+    party = Account.get_party(party_id)
+    assert party.queues == [queue.id]
+
+    # Now leave the party
+    _tachyon_send(socket2, %{cmd: "c.party.leave"})
+    party = Account.get_party(party_id)
+    refute party.members |> Enum.member?(user2.id)
+
+    # Ensure the party is removed from the queue
+    state = :sys.get_state(pid)
+    refute state.groups_map |> Map.has_key?(party_id)
+
+    # and the party no longer lists itself as being in the queue
+    party = Account.get_party(party_id)
+    assert party.queues == []
+
+    # Now test if someone joins the party it also removes them
+    _tachyon_recv_until(socket1)
+    _tachyon_send(socket1, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+
+    state = :sys.get_state(pid)
+    assert state.groups_map |> Map.has_key?(party_id)
+
+    [reply] = _tachyon_recv(socket1)
+    assert reply == %{
+      "cmd" => "s.matchmaking.join_queue",
+      "queue_id" => queue.id,
+      "result" => "success"
+    }
+
+    _tachyon_send(socket1, %{"cmd" => "c.party.invite", "userid" => user2.id})
+    _tachyon_send(socket2, %{"cmd" => "c.party.accept", "party_id" => party_id})
+
+    # Ensure the party is removed from the queue
+    state = :sys.get_state(pid)
+    refute state.groups_map |> Map.has_key?(party_id)
+
+    # and the party no longer lists itself as being in the queue
+    party = Account.get_party(party_id)
+    assert party.queues == []
   end
 end

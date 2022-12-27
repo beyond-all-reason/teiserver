@@ -306,7 +306,7 @@ defmodule Teiserver.Data.Matchmaking do
   end
 
   @spec remove_group_from_queue(T.queue_id(), T.userid() | T.party_id()) :: :ok | :missing
-  def remove_group_from_queue(queue_id, userid) do
+  def remove_group_from_queue(queue_id, userid) when is_integer(userid) do
     client = Account.get_client_by_id(userid)
 
     if client.party_id do
@@ -319,6 +319,12 @@ defmodule Teiserver.Data.Matchmaking do
     else
       do_remove_group_from_queue(userid, queue_id)
     end
+  end
+
+  # When group is a party
+  def remove_group_from_queue(queue_id, party_id) do
+    Account.party_leave_queue(party_id, queue_id)
+    do_remove_group_from_queue(party_id, queue_id)
   end
 
   @spec do_remove_group_from_queue(T.userid() | T.party_id(), T.queue_id()) :: :ok | :missing

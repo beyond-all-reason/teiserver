@@ -1548,6 +1548,20 @@ defmodule Teiserver.Account do
   @spec kick_user_from_party(T.party_id(), T.userid()) :: :ok | nil
   defdelegate kick_user_from_party(party_id, userid), to: PartyLib
 
+  @doc """
+  Tells the party server to update it's internal reference to queue membership. Does not
+  affect the QueueWaitServer
+  """
+  @spec party_join_queue(T.party_id(), T.queue_id()) :: :ok | nil
+  defdelegate party_join_queue(party_id, queue_id), to: PartyLib
+
+  @doc """
+  Tells the party server to remove it's internal reference to queue membership. Does not
+  affect the QueueWaitServer
+  """
+  @spec party_leave_queue(T.party_id(), T.queue_id()) :: :ok | nil
+  defdelegate party_leave_queue(party_id, queue_id), to: PartyLib
+
   @spec party_exists?(T.party_id()) :: boolean()
   defdelegate party_exists?(party_id), to: PartyLib
 

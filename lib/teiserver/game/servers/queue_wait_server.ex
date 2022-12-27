@@ -8,7 +8,7 @@ defmodule Teiserver.Game.QueueWaitServer do
   require Logger
   alias Teiserver.Data.{Matchmaking, QueueGroup}
   alias Phoenix.PubSub
-  alias Teiserver.{Telemetry}
+  alias Teiserver.{Account, Telemetry}
   alias Teiserver.Data.Types, as: T
 
   @default_telemetry_interval 60_000
@@ -45,6 +45,11 @@ defmodule Teiserver.Game.QueueWaitServer do
               skip: false,
               join_count: (state.join_count + 1)
           }
+
+          # If it's a party, tell the party they are now in the queue
+          if not is_integer(group.id) do
+            Account.party_join_queue(group.id, state.id)
+          end
 
           PubSub.broadcast(
             Central.PubSub,
@@ -367,7 +372,7 @@ defmodule Teiserver.Game.QueueWaitServer do
     end
   end
 
-  # Returns a list of the groups selected for the next match (empty list if no match found)
+  # Returns a list of the groups selected for the next match (nil if no match found)
   # the new buckets and the new groups_map
   @spec main_loop_search(map()) :: {list(), map(), map()} | nil
   defp main_loop_search(state) do
