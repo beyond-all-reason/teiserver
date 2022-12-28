@@ -165,6 +165,8 @@ Found #{other_user.name}
 Previous names: name1, name2
 Profile link: https://localhost/teiserver/profile/#{other_user.id}
 Ratings:
+No moderation restrictions applied.
+---------------------------
 """),
       "sender_id" => coordinator_userid
     }
