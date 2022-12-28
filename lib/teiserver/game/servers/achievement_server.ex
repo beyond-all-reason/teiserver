@@ -126,7 +126,7 @@ defmodule Teiserver.Game.AchievementServer do
   @impl true
   def init(_) do
     # If it's a test server this will break as the SQL connection will bork
-    if Mix.env() != :test do
+    if not Application.get_env(:central, Teiserver)[:test_mode] do
       :timer.send_after(10_000, :refresh_type_map)
       :timer.send_interval(300_000, :refresh_type_map)
     end
