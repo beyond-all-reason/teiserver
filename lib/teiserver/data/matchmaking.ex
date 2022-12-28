@@ -120,7 +120,7 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec create_match([QueueGroup.t()], T.queue_id()) :: {pid, String.t()}
   def create_match(group_list, queue_id) do
-    Logger.info("#{__ENV__.file}:#{__ENV__.line}\ncreate_match: #{inspect group_list}")
+    Logger.info("#{__ENV__.file}:#{__ENV__.line} create_match\\2: #{inspect group_list}")
 
     {pid, match_id} = add_match_server(queue_id, group_list)
     {pid, match_id}
@@ -408,5 +408,10 @@ defmodule Teiserver.Data.Matchmaking do
       |> Enum.count()
 
     Logger.info("pre_cache_queues, got #{queue_count} queues")
+  end
+
+  @spec list_match_servers :: [QueueStruct.t() | nil]
+  def list_match_servers() do
+    Horde.Registry.select(Teiserver.QueueMatchRegistry, [{{:"$1", :_, :_}, [], [:"$1"]}])
   end
 end

@@ -161,6 +161,11 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     {:noreply, socket}
   end
 
+  def handle_info({:queue_wait, :queue_remove_group, _queue_id, _userid}, socket) do
+    {:noreply, socket}
+  end
+
+
 
   # Client action
   def handle_info({:client_action, :join_queue, _userid, queue_id}, %{assigns: assigns} = socket) do

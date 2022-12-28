@@ -37,6 +37,7 @@ defmodule Teiserver.Game.QueueMatchServer do
               if Enum.empty?(state.declined_users) do
                 find_empty_lobby(interim_state)
               else
+                Logger.info("QueueMatchServer cancel_match #{state.match_id} because one or more declined users")
                 cancel_match(interim_state)
               end
 
@@ -85,6 +86,7 @@ defmodule Teiserver.Game.QueueMatchServer do
   end
 
   def handle_info(:end_waiting, state) do
+    Logger.info("QueueMatchServer match cancelled #{state.match_id} because :end_waiting")
     cancel_match(state)
   end
 
@@ -102,6 +104,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
   # No more to accept but declines is non-zero
   def handle_info(:tick, %{pending_accepts: []} = state) do
+    Logger.info("QueueMatchServer match cancelled #{state.match_id} because ticked and no pending accepts")
     cancel_match(state)
   end
 
@@ -192,6 +195,7 @@ defmodule Teiserver.Game.QueueMatchServer do
         )
       end)
 
+    Logger.info("QueueMatchServer match cancelled #{state.match_id}")
     DynamicSupervisor.terminate_child(Teiserver.Game.QueueSupervisor, self())
     {:noreply, state}
   end
