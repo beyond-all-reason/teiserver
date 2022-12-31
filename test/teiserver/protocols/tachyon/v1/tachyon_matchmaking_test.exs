@@ -1183,4 +1183,13 @@ defmodule Teiserver.TachyonMatchmakingTest do
     party = Account.get_party(party_id)
     assert party.queues == []
   end
+
+  test "Test it works when not sending out invites" do
+    flunk "Not done"
+  end
+
+  test "Moderated players can't do matchmaking" do
+    # Ensure a person can't circumvent it by being a member of a party
+    flunk "Not done"
+  end
 end

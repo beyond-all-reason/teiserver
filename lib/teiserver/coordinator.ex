@@ -130,7 +130,6 @@ defmodule Teiserver.Coordinator do
     end
   end
 
-
   # Balancer related stuff
   @spec get_balancer_pid(T.lobby_id()) :: pid() | nil
   def get_balancer_pid(lobby_id) do

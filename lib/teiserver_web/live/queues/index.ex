@@ -144,8 +144,15 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     {:noreply, socket}
   end
 
-  def handle_info({:queue_wait, :queue_remove_user, _queue_id, _userid}, socket) do
-    {:noreply, socket}
+  def handle_info({:queue_wait, :queue_remove_user, queue_id, userid}, socket) do
+    new_queue_membership = if userid == socket.assigns.current_user.id do
+      socket.assigns.queue_membership
+        |> List.delete(queue_id)
+    else
+      socket.assigns.queue_membership
+    end
+
+    {:noreply, socket |> assign(:queue_membership, new_queue_membership)}
   end
 
   def handle_info({:queue_wait, :match_attempt, _queue_id, _match_id}, socket) do
@@ -190,11 +197,11 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   end
 
   # Client message
-  def handle_info(data = %{
+  def handle_info(%{
     channel: "teiserver_client_messages:" <> _userid_str,
     event: :matchmaking,
     sub_event: :match_ready
-  }, socket) do
+  } = data, socket) do
     Logger.warn("index.ex Match ready")
     {:noreply,
       socket

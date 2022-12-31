@@ -74,6 +74,11 @@ defmodule TeiserverWeb.AdminDashLive.Index do
     {:noreply, socket}
   end
 
+  def handle_event("restart-balances", _event, socket) do
+    Coordinator.start_all_balancers()
+    {:noreply, socket}
+  end
+
   def handle_event("reinit-balances", _event, socket) do
     Battle.list_lobby_ids()
       |> Enum.each(fn lobby_id ->

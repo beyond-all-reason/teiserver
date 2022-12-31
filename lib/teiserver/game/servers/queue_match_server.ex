@@ -14,7 +14,7 @@ defmodule Teiserver.Game.QueueMatchServer do
   alias Teiserver.{Coordinator, Client, Battle}
 
   @tick_interval 500
-  @ready_wait_time 15_000
+  @ready_wait_time 30_000
 
   @impl true
   def handle_cast({:player_accept, player_id}, state) when is_integer(player_id) do
@@ -86,7 +86,7 @@ defmodule Teiserver.Game.QueueMatchServer do
   end
 
   def handle_info(:end_waiting, state) do
-    Logger.info("QueueMatchServer match cancelled #{state.match_id} because :end_waiting")
+    Logger.info("QueueMatchServer match cancelled #{state.match_id} because :end_waiting, state: #{inspect state}")
     cancel_match(state)
   end
 
@@ -295,13 +295,13 @@ defmodule Teiserver.Game.QueueMatchServer do
 
     cond do
       all_players == false ->
-        Logger.info("QueueMatchServer #{state.match_id} setup_lobby cannot start as not all are players")
+        Logger.info("QueueMatchServer #{state.match_id} setup_lobby cannot start as not all are players #{inspect all_clients}")
         Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched users are not a player. Please rejoin the queue and try again.", lobby.id)
 
         Battle.remove_modoptions(lobby.id, ["server/match/match_id", "server/match/queue_id"])
 
       all_synced == false ->
-        Logger.info("QueueMatchServer #{state.match_id} setup_lobby cannot start as not all are synced")
+        Logger.info("QueueMatchServer #{state.match_id} setup_lobby cannot start as not all are synced #{inspect all_clients}")
         Lobby.sayex(Coordinator.get_coordinator_userid, "Unable to start the lobby as one or more of the matched players are unsynced. Please rejoin the queue and try again.", lobby.id)
 
         Battle.remove_modoptions(lobby.id, ["server/match/match_id", "server/match/queue_id"])
@@ -406,7 +406,7 @@ defmodule Teiserver.Game.QueueMatchServer do
       declined_users: []
     }
 
-    if Config.get_site_config_cache("matchmaking.Use ready check") == true do
+    final_state = if Config.get_site_config_cache("matchmaking.Use ready check") == true do
       send_invites(state)
       Logger.info("QueueMatchServer #{state.match_id} created, sent invites to #{inspect user_ids}")
       state
@@ -415,6 +415,6 @@ defmodule Teiserver.Game.QueueMatchServer do
       %{state | pending_accepts: [], accepted_users: user_ids, stage: "Finding empty lobby"}
     end
 
-    {:ok, state}
+    {:ok, final_state}
   end
 end
