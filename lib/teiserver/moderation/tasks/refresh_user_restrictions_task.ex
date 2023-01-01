@@ -73,6 +73,8 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
       Logger.info("Update restrictions for user##{user_id} to #{Kernel.inspect new_restrictions} to expire at #{expires_as_string}")
 
       if client do
+        Account.recache_user(client.id)
+
         if Enum.member?(new_restrictions, "All chat") or Enum.member?(new_restrictions, "Battle chat") do
           Coordinator.send_to_host(client.lobby_id, "!mute #{client.name}")
         end
