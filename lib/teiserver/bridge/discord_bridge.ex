@@ -154,7 +154,12 @@ defmodule Teiserver.Bridge.DiscordBridge do
       host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
       url = "https://#{host}/moderation/report?/target_id=#{report.target_id}"
 
-      msg = "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} - #{report.extra_text} - #{url}"
+      match_icon = cond do
+        report.match_id == nil -> ""
+        true -> ":crossed_swords:"
+      end
+
+      msg = "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} #{match_icon} - #{report.extra_text} - #{url}"
 
       Alchemy.Client.send_message(
         chan,
