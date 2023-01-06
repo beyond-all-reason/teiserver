@@ -67,9 +67,6 @@ defmodule TeiserverWeb.API.SpadsController do
       Enum.empty?(player_data) -> false
       Enum.empty?(bot_data) == false -> false
       server_balance_enabled == false -> false
-
-      # # TODO: Make it work correctly for Team FFA
-      # team_count > 2 -> false
       true -> true
     end
 

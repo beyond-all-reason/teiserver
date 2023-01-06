@@ -46,6 +46,108 @@ defmodule Teiserver.Battle.BalanceLibTest do
     }
   end
 
+  test "loser picks ffa" do
+    result = BalanceLib.create_balance(
+      [
+        %{1 => 5},
+        %{2 => 6},
+        %{3 => 7},
+        %{4 => 8},
+      ],
+      4,
+      mode: :loser_picks
+    )
+    |> Map.drop([:logs, :time_taken])
+
+    assert result == %{
+      team_groups: %{
+        1 => [%{members: [4], count: 1, group_rating: 8, ratings: [8]}],
+        2 => [%{count: 1, group_rating: 7, members: [3], ratings: [7]}],
+        3 => [%{count: 1, group_rating: 6, members: [2], ratings: [6]}],
+        4 => [%{count: 1, group_rating: 5, members: [1], ratings: [5]}]
+      },
+      team_players: %{
+        1 => [4],
+        2 => [3],
+        3 => [2],
+        4 => [1]
+      },
+      ratings: %{
+        1 => 8,
+        2 => 7,
+        3 => 6,
+        4 => 5
+      },
+      captains: %{
+        1 => 4,
+        2 => 3,
+        3 => 2,
+        4 => 1
+      },
+      team_sizes: %{
+        1 => 1,
+        2 => 1,
+        3 => 1,
+        4 => 1
+      },
+      deviation: 13
+    }
+  end
+
+  test "loser picks team ffa" do
+    result = BalanceLib.create_balance(
+      [
+        %{1 => 5},
+        %{2 => 6},
+        %{3 => 7},
+        %{4 => 8},
+        %{5 => 9},
+        %{6 => 9},
+      ],
+      3,
+      mode: :loser_picks
+    )
+    |> Map.drop([:logs, :time_taken])
+
+    assert result == %{
+      team_groups: %{
+        1 => [
+          %{count: 1, group_rating: 9, members: [5], ratings: [9]},
+          %{count: 1, group_rating: 6, members: [2], ratings: [6]}
+        ],
+        2 => [
+          %{count: 1, group_rating: 9, members: [6], ratings: [9]},
+          %{count: 1, group_rating: 5, members: [1], ratings: [5]}
+        ],
+        3 => [
+          %{count: 1, group_rating: 8, members: [4], ratings: [8]},
+          %{count: 1, group_rating: 7, members: [3], ratings: [7]}
+        ]
+      },
+      team_players: %{
+        1 => [5, 2],
+        2 => [6, 1],
+        3 => [4, 3]
+      },
+      ratings: %{
+        1 => 15,
+        2 => 14,
+        3 => 15
+      },
+      captains: %{
+        1 => 5,
+        2 => 6,
+        3 => 4
+      },
+      team_sizes: %{
+        1 => 2,
+        2 => 2,
+        3 => 2
+      },
+      deviation: 0
+    }
+  end
+
   test "loser picks simple group" do
     result = BalanceLib.create_balance(
       [
@@ -173,8 +275,6 @@ defmodule Teiserver.Battle.BalanceLibTest do
       2,
       mode: :loser_picks
     )
-
-    # IO.puts result.logs |> Enum.join("\n")
 
     assert Map.drop(result, [:logs, :time_taken]) == %{
       captains: %{1 => 101, 2 => 104},

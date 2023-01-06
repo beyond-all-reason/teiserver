@@ -515,6 +515,7 @@ defmodule Teiserver.TeiserverTestLib do
 
     Teiserver.Game.get_or_add_rating_type("Duel")
     Teiserver.Game.get_or_add_rating_type("Team")
+    Teiserver.Game.get_or_add_rating_type("FFA")
 
     Teiserver.Telemetry.get_or_add_event_type("account.user_login")
 

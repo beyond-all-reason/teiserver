@@ -88,7 +88,7 @@ defmodule Teiserver.Battle.BalanceLib do
     groups = expanded_groups
       |> Enum.filter(fn %{count: count} -> count > 1 end)
 
-    {group_pairs, solo_players, group_logs} = matchup_groups(groups, solo_players, opts)
+    {group_pairs, solo_players, group_logs} = matchup_groups(groups, solo_players, opts ++ [team_count: team_count])
 
     # We now need to sort the solo players by rating
     solo_players = solo_players
@@ -148,17 +148,32 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   @spec do_matchup_groups([expanded_group()], [expanded_group()], [String.t], [expanded_group()], list()) :: {[expanded_group()], [expanded_group()], [String.t]}
-  defp do_matchup_groups([], solo_players, [], group_pairs, _opts) do
-    {group_pairs, solo_players, []}
+  defp do_matchup_groups([], solo_players, [], previous_paired_groups, _opts) do
+    {previous_paired_groups, solo_players, []}
   end
-  defp do_matchup_groups([], solo_players, logs, group_pairs, _opts) do
-    {group_pairs, solo_players, logs ++ ["End of pairing"]}
+  defp do_matchup_groups([], solo_players, logs, previous_paired_groups, _opts) do
+    {previous_paired_groups, solo_players, logs ++ ["End of pairing"]}
   end
-  defp do_matchup_groups([group | remaining_groups], solo_players, logs, group_pairs, opts) do
+  defp do_matchup_groups([group | remaining_groups], solo_players, logs, previous_paired_groups, opts) do
     group_mean = Enum.sum(group.ratings)/Enum.count(group.ratings)
     group_stddev = Statistics.stdev(group.ratings)
 
-    case find_comparable_group(group, solo_players, opts) do
+    {_remaining_solo, found_groups} = 1..(opts[:team_count]-1)
+      |> Enum.reduce({solo_players, []}, fn (_, {remaining_solo_players, results}) ->
+        result = find_comparable_group(group, remaining_solo_players, opts)
+
+        new_remaining_solo_players = case result do
+          :no_possible_combinations -> []
+          :no_possible_players -> []
+          %{members: members} ->
+            remaining_solo_players
+              |> Enum.reject(fn %{members: [m]} -> Enum.member?(members, m) end)
+        end
+
+        {new_remaining_solo_players, [result | results]}
+      end)
+
+    case hd(found_groups) do
       :no_possible_combinations ->
         extra_solos = Enum.zip(group.members, group.ratings)
           |> Enum.map(fn {userid, rating} -> %{
@@ -170,14 +185,13 @@ defmodule Teiserver.Battle.BalanceLib do
           end)
 
         names = group.members
-          |> Enum.map(fn userid -> Account.get_username_by_id(userid) || userid end)
-          |> Enum.join(", ")
+          |> Enum.map_join(", ", fn userid -> Account.get_username_by_id(userid) || userid end)
 
         pairing_logs = [
           "Unable to find a combination match for group of #{names} (stats: #{Enum.sum(group.ratings) |> round(2)}, #{group_mean |> round(2)}, #{group_stddev |> round(2)}), treating them as solo players"
         ]
 
-        do_matchup_groups(remaining_groups, extra_solos ++ solo_players, logs ++ pairing_logs, group_pairs, opts)
+        do_matchup_groups(remaining_groups, extra_solos ++ solo_players, logs ++ pairing_logs, previous_paired_groups, opts)
 
       :no_possible_players ->
         extra_solos = Enum.zip(group.members, group.ratings)
@@ -190,51 +204,49 @@ defmodule Teiserver.Battle.BalanceLib do
           end)
 
         names = group.members
-          |> Enum.map(fn userid -> Account.get_username_by_id(userid) || userid end)
-          |> Enum.join(", ")
+          |> Enum.map_join(", ", fn userid -> Account.get_username_by_id(userid) || userid end)
 
         pairing_logs = [
           "Unable to find a player match for group of #{names} (stats: #{Enum.sum(group.ratings) |> round(2)}, #{group_mean |> round(2)}, #{group_stddev |> round(2)}), treating them as solo players"
         ]
 
-        do_matchup_groups(remaining_groups, extra_solos ++ solo_players, logs ++ pairing_logs, group_pairs, opts)
+        do_matchup_groups(remaining_groups, extra_solos ++ solo_players, logs ++ pairing_logs, previous_paired_groups, opts)
 
-      opposite_group ->
+      _ ->
+        # Calculate remaining solo players
+        combined_member_ids = found_groups
+          |> Enum.map(fn g -> g.members end)
+          |> List.flatten
+
         remaining_solos = solo_players
-          |> Enum.reject(fn %{members: [userid]} -> Enum.member?(opposite_group.members, userid) end)
+          |> Enum.reject(fn %{members: [userid]} -> Enum.member?(combined_member_ids, userid) end)
 
-        group_names = group.members
-          |> Enum.map(fn userid -> Account.get_username_by_id(userid) || userid end)
-          |> Enum.join(", ")
+        # Generate log lines, using fgroup so it doesn't clash with group used
+        # earlier
+        grouped_logs = [group | found_groups]
+          |> Enum.map(fn fgroup ->
+            fgroup_name = fgroup.members
+              |> Enum.map_join(", ", fn userid -> Account.get_username_by_id(userid) || userid end)
 
-        solo_names = opposite_group.members
-          |> Enum.map(fn userid -> Account.get_username_by_id(userid) || userid end)
-          |> Enum.join(", ")
+            fgroup_mean = Enum.sum(fgroup.ratings)/Enum.count(fgroup.ratings)
+            fgroup_stddev = Statistics.stdev(fgroup.ratings)
 
-        opposite_group_mean = Enum.sum(opposite_group.ratings)/Enum.count(opposite_group.ratings)
-        opposite_group_stddev = Statistics.stdev(opposite_group.ratings)
+            [
+              "> Grouped: #{fgroup_name}",
+              "--- Rating sum: #{fgroup.group_rating |> round(2)}",
+              "--- Rating Mean: #{fgroup_mean |> round(2)}",
+              "--- Rating Stddev: #{fgroup_stddev |> round(2)}",
+            ]
+          end)
+          |> List.flatten
 
-        diff_rating = (Enum.sum(group.ratings) - Enum.sum(opposite_group.ratings)) |> round(2)
-        diff_mean = (group_mean - opposite_group_mean) |> round(2)
-        diff_stddev = (group_stddev - opposite_group_stddev) |> round(2)
+        logs = ["Group matching" | logs]
 
-        # First group is the higher rated group, needed for loser_picks algo
-        new_pair = if diff_rating > 0 do
-          {group, opposite_group}
-        else
-          {opposite_group, group}
-        end
+        # Now order the groups by rating so we can pick in the right order
+        found_groups = [group | found_groups]
+          |> Enum.sort_by(fn fg -> fg.group_rating end, &>=/2)
 
-        pair_logs = [
-          "Group pairing",
-          "> premade: #{group_names}",
-          "> adhoc: #{solo_names}",
-          "> premade stats #{Enum.sum(group.ratings) |> round(2)}, #{group_mean |> round(2)}, #{group_stddev |> round(2)}",
-          "> adhoc stats #{Enum.sum(opposite_group.ratings) |> round(2)}, #{opposite_group_mean |> round(2)}, #{opposite_group_stddev |> round(2)}",
-          "> diff_stats #{diff_rating}, #{diff_mean}, #{diff_stddev}"
-        ]
-
-        do_matchup_groups(remaining_groups, remaining_solos, logs ++ pair_logs, [new_pair | group_pairs], opts)
+        do_matchup_groups(remaining_groups, remaining_solos, logs ++ grouped_logs, [found_groups | previous_paired_groups], opts)
     end
   end
 
@@ -367,12 +379,14 @@ defmodule Teiserver.Battle.BalanceLib do
   """
   @spec loser_picks([expanded_group_or_pair()], map()) :: {map(), list()}
   def loser_picks(groups, teams) do
-    # teams = do_loser_picks_pairs(premade_pairs, teams)
-
     total_members = groups
       |> Enum.map(fn
         {%{count: count1}, %{count: count2}} -> count1 + count2
         %{count: count} -> count
+        group_list ->
+          group_list
+            |> Enum.map(fn g -> g.count end)
+            |> Enum.sum
       end)
       |> Enum.sum
 
@@ -396,38 +410,8 @@ defmodule Teiserver.Battle.BalanceLib do
       |> Enum.sort
 
     case picked do
-      # It's a pair of parties matched up against each other
-      {team1_group, team2_group} ->
-        [{team1_points, team1}, {team2_points, team2}] = team_skills
-
-        new_team1 = [team1_group | teams[team1]]
-        new_team2 = [team2_group | teams[team2]]
-
-        new_team_map = Map.merge(teams, %{
-          team1 => new_team1,
-          team2 => new_team2,
-        })
-
-        team1_names = team1_group.members
-          |> Enum.map(fn userid -> Account.get_username_by_id(userid) || userid end)
-          |> Enum.join(", ")
-
-        team2_names = team2_group.members
-          |> Enum.map(fn userid -> Account.get_username_by_id(userid) || userid end)
-          |> Enum.join(", ")
-
-        new_team1_total = (team1_points) + team1_group.group_rating
-        new_team2_total = (team2_points) + team2_group.group_rating
-
-        new_logs = logs ++ [
-          "Pair picked #{team1_names} for team #{team1}, adding #{round(team1_group.group_rating, 2)} points for new total of #{round(new_team1_total, 2)}",
-          "Pair picked #{team2_names} for team #{team2}, adding #{round(team2_group.group_rating, 2)} points for new total of #{round(new_team2_total, 2)}"
-        ]
-
-        do_loser_picks(remaining_groups, new_team_map, max_teamsize, new_logs)
-
-      # It's a single player
-      _ ->
+      # Single player
+      %{count: 1} ->
         current_team = hd(team_skills) |> elem(1)
         new_team = [picked | teams[current_team]]
         new_team_map = Map.put(teams, current_team, new_team)
@@ -441,6 +425,32 @@ defmodule Teiserver.Battle.BalanceLib do
         new_logs = logs ++ [
           "Picked #{names} for team #{current_team}, adding #{round(picked.group_rating, 2)} points for new total of #{round(new_total, 2)}"
         ]
+
+        do_loser_picks(remaining_groups, new_team_map, max_teamsize, new_logs)
+
+      # Groups, so we just merge a bunch of them into teams
+      groups ->
+        # Generate new team map
+        new_team_map = team_skills
+          |> Enum.zip(groups)
+          |> Map.new(fn {{_points, team_number}, group} ->
+            team = teams[team_number] || []
+            {team_number, [group | team]}
+          end)
+
+        # Generate logs
+        extra_logs = team_skills
+          |> Enum.zip(groups)
+          |> Enum.map(fn {{points, team_number}, group} ->
+            names = group.members
+              |> Enum.map_join(", ", fn userid -> Account.get_username_by_id(userid) || userid end)
+
+            new_team_total = points + group.group_rating
+
+            "Group picked #{names} for team #{team_number}, adding #{round(group.group_rating, 2)} points for new total of #{round(new_team_total, 2)}"
+          end)
+
+        new_logs = logs ++ extra_logs
 
         do_loser_picks(remaining_groups, new_team_map, max_teamsize, new_logs)
     end

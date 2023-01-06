@@ -161,7 +161,7 @@ defmodule Teiserver.Game.BalancerServer do
     rating_type = cond do
       player_count == 2 -> "Duel"
       team_count > 2 ->
-        if player_count > team_count, do: "Team FFA", else: "FFA"
+        if player_count > team_count, do: "Team", else: "FFA"
       true -> "Team"
     end
 
