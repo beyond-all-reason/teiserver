@@ -7,6 +7,7 @@ defmodule Teiserver.Account.Auth do
   def authorize(:show, conn, _), do: allow?(conn, "teiserver.staff.moderator")
   def authorize(:new, conn, _), do: allow?(conn, "teiserver.staff.moderator")
   def authorize(:perform_action, conn, _), do: allow?(conn, "teiserver.staff.moderator")
+  def authorize(:rename_form, conn, _), do: allow?(conn, "teiserver.staff.moderator")
   def authorize(:rename_post, conn, _), do: allow?(conn, "teiserver.staff.moderator")
   def authorize(:reset_password, conn, _), do: allow?(conn, "teiserver.staff.moderator")
   def authorize(:respond_form, conn, _), do: allow?(conn, "teiserver.staff.moderator")
