@@ -167,23 +167,23 @@ defmodule Teiserver.Battle.BalanceLibTest do
     assert result == %{
       team_groups: %{
         1 => [
-          %{count: 2, group_rating: 13, members: [2, 3], ratings: [6, 7]}
+          %{count: 2, group_rating: 13, members: [1, 4], ratings: [8, 5]}
         ],
         2 => [
-          %{count: 2, group_rating: 13, members: [1, 4], ratings: [8, 5]}
+          %{count: 2, group_rating: 13, members: [2, 3], ratings: [6, 7]}
         ]
       },
       team_players: %{
-        1 => [2, 3],
-        2 => [1, 4]
+        1 => [1, 4],
+        2 => [2, 3]
       },
       ratings: %{
         1 => 13,
         2 => 13
       },
       captains: %{
-        1 => 2,
-        2 => 1
+        1 => 1,
+        2 => 2
       },
       team_sizes: %{
         1 => 2,
@@ -224,8 +224,6 @@ defmodule Teiserver.Battle.BalanceLibTest do
       stddev_diff_max: 5
     )
 
-    # IO.puts result.logs |> Enum.join("\n")
-
     assert Map.drop(result, [:logs, :time_taken]) == %{
       captains: %{1 => 114, 2 => 106},
       deviation: 4,
@@ -246,7 +244,10 @@ defmodule Teiserver.Battle.BalanceLibTest do
           %{count: 1, group_rating: 19, members: 'p', ratings: [19]}
         ]
       },
-      team_players: %{1 => [114, 116, 103, 104, 105, 102, 108, 110], 2 => [106, 107, 111, 113, 115, 101, 109, 112]},
+      team_players: %{
+        1 => [114, 116, 103, 104, 105, 102, 108, 110],
+        2 => [106, 107, 111, 113, 115, 101, 109, 112]
+      },
       team_sizes: %{1 => 8, 2 => 8}
     }
   end
@@ -303,6 +304,117 @@ defmodule Teiserver.Battle.BalanceLibTest do
         ]
       },
       team_players: %{1 => 'ejlnprft', 2 => 'hikmoqsg'},
+      team_sizes: %{1 => 8, 2 => 8}
+    }
+  end
+
+  test "two parties" do
+    result = BalanceLib.create_balance(
+      [
+        # Our high tier party
+        %{101 => 52, 102 => 50, 103 => 49},
+
+        # Our other high tier party
+        %{104 => 51, 105 => 50, 106 => 50},
+
+        # Other players, a range of ratings
+        %{107 => 28},
+        %{108 => 27},
+        %{109 => 26},
+        %{110 => 25},
+        %{111 => 21},
+        %{112 => 19},
+        %{113 => 16},
+        %{114 => 15},
+        %{115 => 14},
+        %{116 => 8}
+      ],
+      2,
+      mode: :loser_picks
+    )
+
+    assert Map.drop(result, [:logs, :time_taken]) == %{
+      captains: %{1 => 104, 2 => 101},
+      deviation: 2,
+      ratings: %{1 => 248, 2 => 253},
+      team_groups: %{
+        1 => [
+          %{count: 3, group_rating: 151, members: [104, 105, 106], ratings: [51, 50, 50]},
+          %{count: 1, group_rating: 28, members: [107], ratings: [28]},
+          %{count: 1, group_rating: 25, members: [110], ratings: [25]},
+          %{count: 1, group_rating: 21, members: [111], ratings: [21]},
+          %{count: 1, group_rating: 15, members: [114], ratings: [15]},
+          %{count: 1, group_rating: 8, members: [116], ratings: [8]}
+        ],
+        2 => [
+          %{count: 3, group_rating: 151, members: [101, 102, 103], ratings: [52, 50, 49]},
+          %{count: 1, group_rating: 27, members: [108], ratings: [27]},
+          %{count: 1, group_rating: 26, members: [109], ratings: [26]},
+          %{count: 1, group_rating: 19, members: [112], ratings: [19]},
+          %{count: 1, group_rating: 16, members: [113], ratings: [16]},
+          %{count: 1, group_rating: 14, members: [115], ratings: [14]}
+        ]
+      },
+      team_players: %{
+        1 => [104, 105, 106, 107, 110, 111, 114, 116],
+        2 => [101, 102, 103, 108, 109, 112, 113, 115]
+      },
+      team_sizes: %{1 => 8, 2 => 8}
+    }
+
+    result2 = BalanceLib.create_balance(
+      [
+        # Our high tier party
+        %{101 => 52, 102 => 50, 103 => 49},
+
+        # Our other high tier party, only 2 people this time
+        %{104 => 51, 105 => 50},
+
+        # Other players, a range of ratings
+        %{106 => 50},
+        %{107 => 28},
+        %{108 => 27},
+        %{109 => 26},
+        %{110 => 25},
+        %{111 => 21},
+        %{112 => 19},
+        %{113 => 16},
+        %{114 => 15},
+        %{115 => 14},
+        %{116 => 8}
+      ],
+      2,
+      mode: :loser_picks
+    )
+
+    # This is very similar to the previous one but a few things about the exact
+    # pick order is different
+    assert Map.drop(result2, [:logs, :time_taken]) == %{
+      captains: %{1 => 101, 2 => 106},
+      deviation: 2,
+      ratings: %{1 => 248, 2 => 253},
+      team_groups: %{
+        1 => [
+          %{count: 3, group_rating: 151, members: [101, 102, 103], ratings: [52, 50, 49]},
+          %{count: 1, group_rating: 28, members: [107], ratings: [28]},
+          %{count: 1, group_rating: 25, members: [110], ratings: [25]},
+          %{count: 1, group_rating: 21, members: [111], ratings: [21]},
+          %{count: 1, group_rating: 15, members: [114], ratings: [15]},
+          %{count: 1, group_rating: 8, members: [116], ratings: [8]}
+        ],
+        2 => [
+          %{count: 3, group_rating: 151, members: [106, 104, 105], ratings: [50, 51, 50]},
+          %{count: 1, group_rating: 27, members: [108], ratings: [27]},
+          %{count: 1, group_rating: 26, members: [109], ratings: [26]},
+          %{count: 1, group_rating: 19, members: [112], ratings: [19]},
+          %{count: 1, group_rating: 16, members: [113], ratings: [16]},
+          %{count: 1, group_rating: 14, members: [115], ratings: [14]}
+        ]
+      },
+      team_players: %{
+        1 => [101, 102, 103, 107, 110, 111, 114, 116],
+        2 => [106, 104, 105, 108, 109, 112, 113, 115]
+      },
       team_sizes: %{1 => 8, 2 => 8}
     }
   end

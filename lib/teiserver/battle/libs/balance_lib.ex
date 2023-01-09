@@ -139,38 +139,59 @@ defmodule Teiserver.Battle.BalanceLib do
     # First we want to re-sort these groups, we want to have the ones with the highest standard
     # deviation looked at first, they are the least likely to be able to be matched but most likely to
     # help match others
-    groups
+    groups = groups
       |> Enum.sort_by(fn group ->
         Statistics.stdev(group.ratings)
       end, &<=/2)
 
-    do_matchup_groups(groups, solo_players, [], [], opts)
+    do_matchup_groups(groups ++ solo_players, [], [], opts)
   end
 
-  @spec do_matchup_groups([expanded_group()], [expanded_group()], [String.t], [expanded_group()], list()) :: {[expanded_group()], [expanded_group()], [String.t]}
-  defp do_matchup_groups([], solo_players, [], previous_paired_groups, _opts) do
-    {previous_paired_groups, solo_players, []}
+  # First argument is a list of groups (size 1 included) that need to be paired
+  # the second argument is a list of the logs built up by the function
+  # thirdly is a list of already paired up groups (so can't be paired up further)
+  # fourth is the opts list
+  # the function returns a tuple of
+  # 1: paired groups
+  # 2: non-paired groups
+  # 3: logs
+  @spec do_matchup_groups([expanded_group()], [String.t], [expanded_group()], list()) :: {[expanded_group()], [expanded_group()], [String.t]}
+  # No groups, no logs
+  defp do_matchup_groups([], [], previous_paired_groups, _opts) do
+    {previous_paired_groups, [], []}
   end
-  defp do_matchup_groups([], solo_players, logs, previous_paired_groups, _opts) do
-    {previous_paired_groups, solo_players, logs ++ ["End of pairing"]}
+
+  # No remaining groups but have some logs
+  defp do_matchup_groups([], logs, previous_paired_groups, _opts) do
+    {previous_paired_groups, [], logs ++ ["End of pairing"]}
   end
-  defp do_matchup_groups([group | remaining_groups], solo_players, logs, previous_paired_groups, opts) do
+
+  # This matches when the next group is a size 1, we no longer need to pair up
+  defp do_matchup_groups([%{count: 1} | _] = remaining_players, logs, previous_paired_groups, _opts) do
+    {previous_paired_groups, remaining_players, logs ++ ["End of pairing"]}
+  end
+
+  # Main function clause
+  defp do_matchup_groups([group | remaining_groups], logs, previous_paired_groups, opts) do
     group_mean = Enum.sum(group.ratings)/Enum.count(group.ratings)
     group_stddev = Statistics.stdev(group.ratings)
 
     {_remaining_solo, found_groups} = 1..(opts[:team_count]-1)
-      |> Enum.reduce({solo_players, []}, fn (_, {remaining_solo_players, results}) ->
-        result = find_comparable_group(group, remaining_solo_players, opts)
+      |> Enum.reduce({remaining_groups, []}, fn (_, {groups_to_search, results}) ->
+        result = find_comparable_group(group, groups_to_search, opts)
 
-        new_remaining_solo_players = case result do
+        new_groups_to_search = case result do
           :no_possible_combinations -> []
           :no_possible_players -> []
-          %{members: members} ->
-            remaining_solo_players
-              |> Enum.reject(fn %{members: [m]} -> Enum.member?(members, m) end)
+          %{members: found_members} ->
+            groups_to_search
+              |> Enum.reject(fn %{members: members} ->
+                members
+                  |> Enum.any?(fn userid -> Enum.member?(found_members, userid) end)
+              end)
         end
 
-        {new_remaining_solo_players, [result | results]}
+        {new_groups_to_search, [result | results]}
       end)
 
     case hd(found_groups) do
@@ -191,7 +212,7 @@ defmodule Teiserver.Battle.BalanceLib do
           "Unable to find a combination match for group of #{names} (stats: #{Enum.sum(group.ratings) |> round(2)}, #{group_mean |> round(2)}, #{group_stddev |> round(2)}), treating them as solo players"
         ]
 
-        do_matchup_groups(remaining_groups, extra_solos ++ solo_players, logs ++ pairing_logs, previous_paired_groups, opts)
+        do_matchup_groups(remaining_groups ++ extra_solos, logs ++ pairing_logs, previous_paired_groups, opts)
 
       :no_possible_players ->
         extra_solos = Enum.zip(group.members, group.ratings)
@@ -210,16 +231,19 @@ defmodule Teiserver.Battle.BalanceLib do
           "Unable to find a player match for group of #{names} (stats: #{Enum.sum(group.ratings) |> round(2)}, #{group_mean |> round(2)}, #{group_stddev |> round(2)}), treating them as solo players"
         ]
 
-        do_matchup_groups(remaining_groups, extra_solos ++ solo_players, logs ++ pairing_logs, previous_paired_groups, opts)
+        do_matchup_groups(remaining_groups ++ extra_solos, logs ++ pairing_logs, previous_paired_groups, opts)
 
       _ ->
         # Calculate remaining solo players
         combined_member_ids = found_groups
-          |> Enum.map(fn g -> g.members end)
+          |> Enum.map(fn g ->  g.members end)
           |> List.flatten
 
-        remaining_solos = solo_players
-          |> Enum.reject(fn %{members: [userid]} -> Enum.member?(combined_member_ids, userid) end)
+        remaining_groups = remaining_groups
+          |> Enum.reject(fn %{members: members} ->
+            members
+              |> Enum.any?(fn userid -> Enum.member?(combined_member_ids, userid) end)
+          end)
 
         # Generate log lines, using fgroup so it doesn't clash with group used
         # earlier
@@ -246,7 +270,7 @@ defmodule Teiserver.Battle.BalanceLib do
         found_groups = [group | found_groups]
           |> Enum.sort_by(fn fg -> fg.group_rating end, &>=/2)
 
-        do_matchup_groups(remaining_groups, remaining_solos, logs ++ grouped_logs, [found_groups | previous_paired_groups], opts)
+        do_matchup_groups(remaining_groups, logs ++ grouped_logs, [found_groups | previous_paired_groups], opts)
     end
   end
 
@@ -417,8 +441,7 @@ defmodule Teiserver.Battle.BalanceLib do
         new_team_map = Map.put(teams, current_team, new_team)
 
         names = picked.members
-          |> Enum.map(fn userid -> Account.get_username_by_id(userid) || userid end)
-          |> Enum.join(", ")
+          |> Enum.map_join(", ", fn userid -> Account.get_username_by_id(userid) || userid end)
 
         new_total = (hd(team_skills) |> elem(0)) + picked.group_rating
 
@@ -580,9 +603,24 @@ defmodule Teiserver.Battle.BalanceLib do
     group_mean = Enum.sum(group.ratings)/Enum.count(group.ratings)
     group_stddev = Statistics.stdev(group.ratings)
 
-    all_combinations = make_combinations(group.count, possible_players)
+    sorted_possible_players = possible_players
+      |> Enum.sort_by(fn g -> Enum.count(g.members) end, &>=/2)
 
-      # This first part we are getting the relevant stat info to filter on
+    all_combinations = make_combinations(group.count, sorted_possible_players)
+
+      # Filter out bad data (parties can cause bad group sizes)
+      |> Stream.filter(fn members ->
+        total_count = members
+          |> Enum.map(fn g -> g.count end)
+          |> Enum.sum
+
+        cond do
+          total_count > group.count -> false
+          true -> true
+        end
+      end)
+
+      # This part we are getting the relevant stat info to filter on
       |> Stream.map(fn members ->
         member_ratings = Enum.map(members, fn %{group_rating: group_rating} -> group_rating end)
 
@@ -621,17 +659,29 @@ defmodule Teiserver.Battle.BalanceLib do
             %{
               members: acc.members ++ solo.members,
               ratings: acc.ratings ++ solo.ratings,
-              count: acc.count + 1,
+              count: acc.count + solo.count,
               group_rating: acc.group_rating + solo.group_rating,
             }
           end)
     end
   end
 
+  # First argument is the size of each combination
+  # Second is the list of items to make a combination from
   @spec make_combinations(integer(), list) :: [list]
+  # defp make_combinations(0, _), do: [[]]
+  # defp make_combinations(_, []), do: []
+  # defp make_combinations(n, [x|xs]) do
+  #   (for y <- make_combinations(n - 1, xs), do: [x|y]) ++ make_combinations(n, xs)
+  # end
+
   defp make_combinations(0, _), do: [[]]
   defp make_combinations(_, []), do: []
   defp make_combinations(n, [x|xs]) do
-    (for y <- make_combinations(n - 1, xs), do: [x|y]) ++ make_combinations(n, xs)
+    if n < 0 do
+      [[]]
+    else
+      (for y <- make_combinations(n - x.count, xs), do: [x|y]) ++ make_combinations(n, xs)
+    end
   end
 end
