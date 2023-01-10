@@ -1,6 +1,21 @@
 defmodule Teiserver.Battle.BalanceLib do
   @moduledoc """
-  A set of functions related to balance. Ratings are calculated via Teiserver.Game.MatchRatingLib
+  A set of functions related to balance, if you are looking to see how balance is implemented this is the place. Ratings are calculated via Teiserver.Game.MatchRatingLib and are used here. Please note ratings and balance are two very different things and complaints about imbalanced games need to be correct in addressing balance vs ratings.
+
+  Currently the algorithm is "Loser picks". The Algorithm at a high level is:
+  1: Pairings
+  - Go through all groups of 2 or more members and pair them up
+  - If the group can be paired with other groups or solo players, they remain as a group and their opposites are tracked against them
+  - Any groups that cannot be paired will be broken into solo players and balanced as such
+
+  2: Placing paired groups
+  - Each pairing of groups are iterated through and assigned to opposite teams
+  - The team with the lowest combined rating picks first and selects the highest rated group
+
+  3: Solo players
+  - As long as there are players left to place
+  - Whichever team with the lowest combined rating and is not full picks next
+  - Said team always picks the highest rated group available
   """
   alias Central.Config
   alias Teiserver.Data.Types, as: T
@@ -8,13 +23,19 @@ defmodule Teiserver.Battle.BalanceLib do
   alias Teiserver.Game.MatchRatingLib
   import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
 
+  # These are default values and can be overridden as part of the call to create_balance()
+
   # Upper boundary is how far above the group value the members can be, lower is how far below it
+  # these values are in general used for group pairing where we look at making temporary groups on
+  # each team to make the battle fair
   @rating_lower_boundary 3
   @rating_upper_boundary 5
 
   @mean_diff_max 5
   @stddev_diff_max 3
 
+  # Fuzz multiplier is used by the BalanceServer to prevent two games being completely identical
+  # teams. It is defaulted here as the server uses this library to get defaults
   @fuzz_multiplier 0.5
 
   @spec defaults() :: map()
@@ -141,7 +162,7 @@ defmodule Teiserver.Battle.BalanceLib do
     # help match others
     groups = groups
       |> Enum.sort_by(fn group ->
-        Statistics.stdev(group.ratings)
+        {group.count, Statistics.stdev(group.ratings)}
       end, &<=/2)
 
     do_matchup_groups(groups ++ solo_players, [], [], opts)

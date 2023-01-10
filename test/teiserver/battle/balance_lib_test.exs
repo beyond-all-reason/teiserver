@@ -225,28 +225,28 @@ defmodule Teiserver.Battle.BalanceLibTest do
     )
 
     assert Map.drop(result, [:logs, :time_taken]) == %{
-      captains: %{1 => 114, 2 => 106},
-      deviation: 4,
-      ratings: %{1 => 165.5, 2 => 159.5},
+      captains: %{1 => 112, 2 => 103},
+      deviation: 2,
+      ratings: %{1 => 161, 2 => 164},
       team_groups: %{
         1 => [
-          %{count: 2, group_rating: 24, members: [114, 116], ratings: [16, 8]},
-          %{count: 3, group_rating: 50.5, members: 'ghi', ratings: [20, 17, 13.5]},
-          %{count: 1, group_rating: 35, members: [102], ratings: [35]},
-          %{count: 1, group_rating: 31, members: 'l', ratings: [31]},
-          %{count: 1, group_rating: 25, members: [110], ratings: [25]}
+          %{count: 3, group_rating: 51, members: [112, 113, 114], ratings: [19, 16, 16]},
+          %{count: 2, group_rating: 22, members: [115, 116], ratings: [14, 8]},
+          %{count: 1, group_rating: 41, members: [101], ratings: [41]},
+          %{count: 1, group_rating: 26, members: [109], ratings: [26]},
+          %{count: 1, group_rating: 21, members: [111], ratings: [21]}
         ],
         2 => [
+          %{count: 3, group_rating: 50.5, members: [103, 104, 105], ratings: [20, 17, 13.5]},
           %{count: 2, group_rating: 22.5, members: [106, 107], ratings: [15, 7.5]},
-          %{count: 3, group_rating: 51, members: 'oqs', ratings: [21, 16, 14]},
-          %{count: 1, group_rating: 41, members: 'e', ratings: [41]},
-          %{count: 1, group_rating: 26, members: 'm', ratings: [26]},
-          %{count: 1, group_rating: 19, members: 'p', ratings: [19]}
+          %{count: 1, group_rating: 35, members: [102], ratings: [35]},
+          %{count: 1, group_rating: 31, members: [108], ratings: [31]},
+          %{count: 1, group_rating: 25, members: [110], ratings: [25]},
         ]
       },
       team_players: %{
-        1 => [114, 116, 103, 104, 105, 102, 108, 110],
-        2 => [106, 107, 111, 113, 115, 101, 109, 112]
+        1 => [112, 113, 114, 115, 116, 101, 109, 111],
+        2 => [103, 104, 105, 106, 107, 102, 108, 110]
       },
       team_sizes: %{1 => 8, 2 => 8}
     }
