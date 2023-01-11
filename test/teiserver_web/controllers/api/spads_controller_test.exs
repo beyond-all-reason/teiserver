@@ -82,7 +82,6 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       assert data == %{}
     end
 
-    # Currently breaks because there's no lobby
     test "good data", %{conn: conn} do
       Coordinator.start_coordinator()
       %{socket: hsocket, user: host} = tachyon_auth_setup()
