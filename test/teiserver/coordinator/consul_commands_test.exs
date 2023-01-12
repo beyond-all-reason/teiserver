@@ -384,22 +384,75 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
   end
 
   test "leveltoplay", %{lobby_id: lobby_id, hsocket: hsocket} do
-    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_play})
-    assert setting == 0
+    # Minimum
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_level_to_play}) == 0
 
-    data = %{cmd: "c.lobby.message", message: "$leveltoplay 3"}
+    data = %{cmd: "c.lobby.message", message: "$minplaylevel 3"}
     _tachyon_send(hsocket, data)
     :timer.sleep(500)
 
-    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_play})
-    assert setting == 3
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_level_to_play}) == 3
 
-    data = %{cmd: "c.lobby.message", message: "$leveltoplay Xy"}
+    data = %{cmd: "c.lobby.message", message: "$minplaylevel Xy"}
     _tachyon_send(hsocket, data)
     :timer.sleep(500)
 
-    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_play})
-    assert setting == 3
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_level_to_play}) == 3
+
+    # Maximum
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_level_to_play}) == 1000
+
+    data = %{cmd: "c.lobby.message", message: "$maxplaylevel 13"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_level_to_play}) == 13
+
+    data = %{cmd: "c.lobby.message", message: "$maxplaylevel Xy"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_level_to_play}) == 13
+
+    # Now try to set each the other side of the other
+    data = %{cmd: "c.lobby.message", message: "$maxplaylevel 1"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_level_to_play}) == 4
+
+    data = %{cmd: "c.lobby.message", message: "$maxplaylevel 16"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_level_to_play}) == 16
+
+    data = %{cmd: "c.lobby.message", message: "$minplaylevel 20"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_level_to_play}) == 15
+
+    data = %{cmd: "c.lobby.message", message: "$setplaylevels 7 9"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_level_to_play}) == 7
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_level_to_play}) == 9
+
+    data = %{cmd: "c.lobby.message", message: "$setplaylevels 50 33"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_level_to_play}) == 33
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_level_to_play}) == 50
+
+    data = %{cmd: "c.lobby.message", message: "$resetplaylevels"}
+    _tachyon_send(hsocket, data)
+    :timer.sleep(500)
+
+    assert Coordinator.call_consul(lobby_id, {:get, :minimum_level_to_play}) == 0
+    assert Coordinator.call_consul(lobby_id, {:get, :maximum_level_to_play}) == 1000
   end
 
   test "leveltospectate", %{lobby_id: lobby_id, hsocket: hsocket} do

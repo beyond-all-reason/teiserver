@@ -495,7 +495,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
 
   #################### Host and Moderator
-  def handle_command(%{command: "resetplaylevel", remaining: ""} = cmd, state) do
+  def handle_command(%{command: "resetplaylevels", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
     %{state | minimum_level_to_play: 0, maximum_level_to_play: 1000}
   end
@@ -552,9 +552,9 @@ defmodule Teiserver.Coordinator.ConsulCommands do
               "Unable to turn '#{smax}' into an integer",
             ], state.lobby_id)
             state
-          {{min_level, _}, {max_level, _}} ->
-            min_level = min(min_level, max_level)
-            max_level = max(min_level, max_level)
+          {{min_level_o, _}, {max_level_o, _}} ->
+            min_level = min(min_level_o, max_level_o)
+            max_level = max(min_level_o, max_level_o)
 
             ConsulServer.say_command(cmd, state)
             %{state |
