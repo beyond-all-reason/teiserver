@@ -875,6 +875,16 @@ defmodule Teiserver.User do
     {:ok, user}
   end
 
+  @spec new_moderation_action(Teiserver.Moderation.Action.t()) :: :ok
+  def new_moderation_action(_action) do
+    :ok
+  end
+
+  @spec updated_moderation_action(Teiserver.Moderation.Action.t()) :: :ok
+  def updated_moderation_action(_action) do
+    :ok
+  end
+
   @spec create_report(T.report(), atom) :: :ok
   def create_report(report, reason) do
     if report.response_text != nil do

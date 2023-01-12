@@ -25,6 +25,7 @@ defmodule Teiserver.HookServer do
         # Teiserver.User.update_report(payload, reason)
 
         Teiserver.Bridge.DiscordBridge.new_action(data.action)
+        Teiserver.User.new_moderation_action(data.action)
         :ok
 
       :updated_action ->
@@ -33,6 +34,7 @@ defmodule Teiserver.HookServer do
         # Teiserver.User.update_report(payload, reason)
 
         # Teiserver.Bridge.DiscordBridge.updated_action(data.report)
+        Teiserver.User.updated_moderation_action(data.action)
         :ok
 
       :new_proposal ->

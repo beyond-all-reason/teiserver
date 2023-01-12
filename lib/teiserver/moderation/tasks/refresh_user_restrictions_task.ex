@@ -68,21 +68,29 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
         restrictions: new_restrictions,
         restricted_until: expires_as_string
       })
-      client = Account.get_client_by_id(user_id)
 
       Logger.info("Update restrictions for user##{user_id} to #{Kernel.inspect new_restrictions} to expire at #{expires_as_string}")
 
+      client = Account.get_client_by_id(user_id)
+
       if client do
-        Account.recache_user(client.userid)
-
-        if Enum.member?(new_restrictions, "All chat") or Enum.member?(new_restrictions, "Battle chat") do
-          Coordinator.send_to_host(client.lobby_id, "!mute #{client.name}")
-        end
-
-        if Enum.member?(new_restrictions, "Login") do
-          Teiserver.Client.disconnect(user_id, "Banned")
-        end
+        update_client_with_restrictions(client, new_restrictions)
       end
+    end
+  end
+
+  defp update_client_with_restrictions(client, new_restrictions) do
+    Account.recache_user(client.userid)
+
+    if Enum.member?(new_restrictions, "All chat") or Enum.member?(new_restrictions, "Battle chat") do
+      Coordinator.send_to_host(client.lobby_id, "!mute #{client.name}")
+    end
+
+    if Enum.member?(new_restrictions, "Login") do
+      Teiserver.Client.disconnect(client.userid, "Banned")
+    else
+      pid = Coordinator.get_coordinator_pid()
+      send(pid, {:do_client_inout, :login, client.userid})
     end
   end
 end
