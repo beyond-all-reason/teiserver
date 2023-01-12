@@ -141,6 +141,16 @@
     %>
   <% end %>
 
+  <%= if allow?(@current_user, Teiserver.Account.TournamentReport.permissions()) do %>
+    <%=
+      central_component "menu_card",
+      icon: "fa-regular fa-ranking-star",
+      name: "tournament",
+      text: "Tournament",
+      link: Routes.ts_reports_report_path(@conn, :show, "tournament")
+    %>
+  <% end %>
+
   <%= if allow?(@current_user, Teiserver.Account.LeaderboardReport.permissions()) do %>
     <%=
       central_component "menu_card",
