@@ -63,12 +63,21 @@
     <h5>CSV data</h5>
     <textarea rows="3" class="form-control" style="font-family: monospace;"><%= @csv_data %></textarea>
   </div>
+
   <div class="col">
     <h5>Missing names</h5>
     <textarea rows="3" class="form-control" style="font-family: monospace;"><%=
       @name_to_id_map
         |> Enum.filter(fn {_, id} -> id == nil end)
         |> Enum.map(fn {name, _} -> name end)
+        |> Enum.join("\n")
+    %></textarea>
+  </div>
+
+  <div class="col">
+    <h5>User but no rating</h5>
+    <textarea rows="3" class="form-control" style="font-family: monospace;"><%=
+      @no_ratings
         |> Enum.join("\n")
     %></textarea>
   </div>

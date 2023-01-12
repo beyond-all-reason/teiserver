@@ -17,7 +17,7 @@ defmodule Teiserver.Account.TournamentReport do
       |> String.replace(",", "\n")
       |> String.split("\n")
       |> Map.new(fn name ->
-        {name, Account.get_userid_from_name(name)}
+        {String.trim(name), Account.get_userid_from_name(name)}
       end)
 
     type_name = params["game_type"]
@@ -45,10 +45,19 @@ defmodule Teiserver.Account.TournamentReport do
       limit: Enum.count(name_to_id_map)
     )
 
+    found_ids = ratings
+      |> Enum.map(fn r -> r.user_id end)
+
+    no_ratings = name_to_id_map
+      |> Enum.reject(fn {_, id} -> id == nil or Enum.member?(found_ids, id) end)
+      |> Map.new
+      |> Map.keys
+
     assigns = %{
       params: params,
       name_to_id_map: name_to_id_map,
       game_types: MatchRatingLib.rating_type_list(),
+      no_ratings: no_ratings,
       ratings: ratings,
       csv_data: make_csv_data(ratings, params["value_type"])
     }
