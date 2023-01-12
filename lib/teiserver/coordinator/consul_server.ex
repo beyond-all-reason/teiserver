@@ -481,19 +481,31 @@ defmodule Teiserver.Coordinator.ConsulServer do
   defp request_user_change_status(new_client, %{userid: userid} = existing, state) do
     list_status = get_list_status(userid, state)
 
+    # We were using this as there were concerns over an autoready feature, leaving it here for now
     # Are they readying up really fast?
-    if existing.ready == false and new_client.ready == true and existing.unready_at != nil do
-      time_elapsed = System.system_time(:millisecond) - existing.unready_at
-      if time_elapsed < 1000 do
-        Logger.warn("Ready up in #{time_elapsed}ms by #{existing.userid}/#{existing.name} using #{existing.lobby_client}")
-      end
+    # if existing.ready == false and new_client.ready == true and existing.unready_at != nil do
+    #   time_elapsed = System.system_time(:millisecond) - existing.unready_at
+    #   if time_elapsed < 1000 do
+    #     Logger.warn("Ready up in #{time_elapsed}ms by #{existing.userid}/#{existing.name} using #{existing.lobby_client}")
+    #   end
+    # end
+
+    player_rating = if state.minimum_level_to_play > 0 or state.maximum_level_to_play < 1000 do
+      BalanceLib.get_user_balance_rating_value(userid, "Team")
+    else
+      18
     end
 
-    # Level to play?
-    new_client = if existing.rank >= state.level_to_play do
-      new_client
-    else
+    block_as_player = cond do
+      state.minimum_level_to_play > player_rating or state.maximum_level_to_play < player_rating -> true
+      existing.queuing_for_matchmaking -> true
+      true -> false
+    end
+
+    new_client = if block_as_player do
       %{new_client | player: false}
+    else
+      new_client
     end
 
     # Player limit, if they want to be a player and we have
@@ -875,8 +887,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @spec make_balance_hash(T.consul_state()) :: String.t()
   defp make_balance_hash(state) do
     client_string = list_players(state)
-      |> Enum.map(fn c -> "#{c.userid}:#{c.team_number}" end)
-      |> Enum.join(",")
+      |> Enum.map_join(",", fn c -> "#{c.userid}:#{c.team_number}" end)
 
     :crypto.hash(:md5, client_string)
       |> Base.encode64()
@@ -1017,7 +1028,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
       lobby_id: lobby_id,
       host_id: founder_id,
       gatekeeper: "default",
-      level_to_play: 0,
+      minimum_level_to_play: 0,
+      maximum_level_to_play: 1000,
       level_to_spectate: 0,
       locks: [],
       bans: %{},

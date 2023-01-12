@@ -11,7 +11,7 @@ defmodule Teiserver.Game.QueueMatchServer do
   alias Teiserver.Battle.{Lobby, BalanceLib}
   alias Teiserver.Data.{Matchmaking, QueueGroup}
   alias Phoenix.PubSub
-  alias Teiserver.{Coordinator, Client, Battle}
+  alias Teiserver.{Account, Coordinator, Battle}
 
   @tick_interval 500
   @ready_wait_time 30_000
@@ -221,6 +221,16 @@ defmodule Teiserver.Game.QueueMatchServer do
   # Try to setup a battle with the players currently readied up
   def setup_lobby(%{lobby_id: nil} = state), do: find_empty_lobby(state)
   def setup_lobby(state) do
+    # First we want to go and remove the players from their game
+    state.user_ids
+      |> Enum.each(fn userid ->
+        client = Account.get_client_by_id(userid)
+
+        if client.lobby_id do
+          Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
+        end
+      end)
+
     lobby = state.lobby_id
       |> Lobby.get_lobby()
       |> Lobby.silence_lobby()
@@ -280,7 +290,7 @@ defmodule Teiserver.Game.QueueMatchServer do
     # Give things time to propagate before we start
     :timer.sleep(1000)
 
-    all_clients = Client.get_clients(state.user_ids)
+    all_clients = Account.get_clients(state.user_ids)
 
     all_players = all_clients
       |> Enum.map(fn c -> c != nil and c.player == true end)

@@ -41,7 +41,7 @@
           <% end %>
 
           <%= live_redirect "Live chat", to: Routes.ts_battle_lobby_chat_path(@socket, :chat, @lobby.id), class: "btn btn-#{bsname}" %>
-          
+
           <%= if @moderator and @lobby.uuid do %>
             <a href={Routes.ts_admin_lobby_path(@socket, :lobby_chat, @lobby.uuid)} class={"btn btn-#{bsname}"}>
               Full chat
@@ -52,7 +52,7 @@
 <% extra = "#{@lobby.name} - #{@lobby.map_name}" %>
 <%= if @lobby.in_progress do %>
   <h4>
-    Match in progress - 
+    Match in progress -
     <%= Central.Helpers.TimexHelper.duration_to_str_short(System.system_time(:second) - (@lobby.started_at || 1652282031)) %> -
     <%= extra %>
   </h4>
@@ -60,20 +60,42 @@
   <h4>Pre-game lobby - <%= extra %></h4>
 <% end %>
 
-<ul>
-  <li>Max players: <%= @lobby.max_players %></li>
-  <li>Locked: <%= @lobby.locked %></li>
-  <%= if @lobby.password != nil do %>
-    <li>Password: <%= @lobby.password %></li>
-  <% end %>
-  <li>Queue size: <%= Enum.count(@consul.join_queue ++ @consul.low_priority_join_queue) %></li>
-  <%= if allow?(@current_user, "admin.dev.developer") do %>
-  
-    <li>Match UUID: </li>
-    <li>Server UUID: </li>
-  
-  <% end %>
-</ul>
+<div class="row">
+  <div class="col">
+    <ul>
+      <li>Max players: <%= @lobby.max_players %></li>
+      <li>Locked: <%= @lobby.locked %></li>
+      <%= if @lobby.password != nil do %>
+        <li>Password: <%= @lobby.password %></li>
+      <% end %>
+      <li>Queue size: <%= Enum.count(@consul.join_queue ++ @consul.low_priority_join_queue) %></li>
+      <%= if allow?(@current_user, "admin.dev.developer") do %>
+
+        <li>Match UUID: </li>
+        <li>Server UUID: </li>
+
+      <% end %>
+    </ul>
+  </div>
+
+  <div class="col">
+    <ul>
+      <li>Bosses:
+        <%= if Enum.empty?(@consul.host_bosses) do %>
+          No boss
+        <% else %>
+          <%=
+            @consul.host_bosses
+              |> Enum.map_join(", ", fn userid -> @users[userid].name end)
+          %>
+        <% end %>
+      </li>
+      <li>Host team-count: <%= @consul.host_teamcount %></li>
+      <li>Host team-size: <%= @consul.host_teamsize %></li>
+      <li>Skill bounds: <%= @consul.minimum_level_to_play %>, <%= @consul.maximum_level_to_play %></li>
+    </ul>
+  </div>
+</div>
 
 <h4>Players</h4>
 <table class="table table-sm" id="players-table">
@@ -92,7 +114,7 @@
 
       <th>Bonus</th>
       <th>Faction</th>
-      
+
       <%= if @moderator do %>
         <th>#</th>
         <th>&nbsp;</th>
@@ -104,7 +126,7 @@
       <%
         user = @users[client.userid]
         {rating_value, uncertainty} = @ratings[client.userid]
-        
+
         party_colour = @parties[client.party_id]
 
         friend = Enum.member?(@server_user.friends, client)
@@ -123,18 +145,18 @@
           <td><%= user.name %></td>
           <td><%= if client.ready, do: "Ready" %></td>
           <td><%= client.team_number %></td>
-          
+
           <%= if party_colour do %>
             <td style={"background-color: #{party_colour};"} width="50">&nbsp;</td>
           <% else %>
             <td width="50">&nbsp;</td>
           <% end %>
-          
+
           <td><%= Central.Helpers.NumberHelper.round(rating_value, 2) %></td>
           <%= if @moderator do %>
             <td><%= Central.Helpers.NumberHelper.round(uncertainty, 2) %></td>
           <% end %>
-          
+
           <td><%= client.handicap %></td>
           <td><%= factions[client.side] %></td>
 
@@ -168,12 +190,12 @@
     <tr>
       <th width="100">&nbsp;</th>
       <th>Name</th>
-      
+
       <th>Rating</th>
       <%= if @moderator do %>
         <th>Uncertainty</th>
       <% end %>
-      
+
       <%= if @moderator do %>
         <th>&nbsp;</th>
       <% end %>
@@ -199,7 +221,7 @@
             <% end %>
           </td>
           <td><%= user.name %></td>
-          
+
           <td><%= Central.Helpers.NumberHelper.round(rating_value, 2) %></td>
           <%= if @moderator do %>
             <td><%= Central.Helpers.NumberHelper.round(uncertainty, 2) %></td>

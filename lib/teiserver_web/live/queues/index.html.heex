@@ -85,6 +85,9 @@
             <% @client == nil -> %>
               Connect with client to join queue
 
+            <% @client.player -> %>
+              You can't join matchmaking as a player in a game, you need to become a spectator
+
             <% Enum.member?(@queue_membership, queue_id) -> %>
               <span class={"btn btn-sm btn-warning"} phx-click="leave-queue" phx-value-queue_id={queue_id}>
                 Leave queue

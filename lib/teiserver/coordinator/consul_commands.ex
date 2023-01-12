@@ -25,8 +25,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   def handle_command(%{command: "s"} = cmd, state), do: handle_command(Map.put(cmd, :command, "status"), state)
   def handle_command(%{command: "status", senderid: senderid} = _cmd, state) do
     locks = state.locks
-      |> Enum.map(fn l -> to_string(l) end)
-      |> Enum.join(", ")
+      |> Enum.map_join(", ", fn l -> to_string(l) end)
 
     queue = get_queue(state)
 
@@ -42,8 +41,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
 
     queue_string = queue
-      |> Enum.map(&User.get_username/1)
-      |> Enum.join(", ")
+      |> Enum.map_join(", ", &User.get_username/1)
 
     queue_size = Enum.count(queue)
 
@@ -83,6 +81,22 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       ["Parties:" | party_list]
     end
 
+    min_play = state.minimum_level_to_play
+    max_play = state.maximum_level_to_play
+    play_level_bounds = cond do
+      min_play > 0 and max_play < 1000 ->
+        "Play rating boundaries set to min: #{min_play}, max: #{max_play}"
+
+      min_play > 0 ->
+        "Play rating boundaries set to min: #{min_play}"
+
+      max_play < 1000 ->
+        "Play rating boundaries set to max: #{max_play}"
+
+      true ->
+        nil
+    end
+
     # Put other settings in here
     other_settings = [
       (if state.welcome_message, do: "Welcome message: #{state.welcome_message}"),
@@ -90,7 +104,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       "Team size and count are: #{state.host_teamsize} and #{state.host_teamcount}",
       boss_string,
       "Maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
-      # "Level required to play is #{state.level_to_play}",
+      play_level_bounds,
+      # "Level required to play is #{state.minimum_level_to_play}",
       # "Level required to spectate is #{state.level_to_spectate}",
     ]
     |> Enum.filter(fn v -> v != nil end)
@@ -480,29 +495,78 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
 
   #################### Host and Moderator
-  def handle_command(%{command: "leveltoplay", remaining: remaining, senderid: senderid} = cmd, state) do
+  def handle_command(%{command: "resetplaylevel", remaining: ""} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+    %{state | minimum_level_to_play: 0, maximum_level_to_play: 1000}
+  end
+
+  def handle_command(%{command: "minplaylevel", remaining: ""} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+    %{state | minimum_level_to_play: 0}
+  end
+  def handle_command(%{command: "minplaylevel", remaining: remaining, senderid: senderid} = cmd, state) do
     case Integer.parse(remaining |> String.trim) do
       :error ->
         Lobby.sayprivateex(state.coordinator_id, senderid, [
-          "No level of that type",
+          "Unable to turn '#{remaining}' into an integer",
         ], state.lobby_id)
         state
       {level, _} ->
         ConsulServer.say_command(cmd, state)
-        %{state | level_to_play: level}
+        %{state |
+          minimum_level_to_play: level |> max(0) |> min(state.maximum_level_to_play - 1)
+        }
     end
   end
 
-  def handle_command(%{command: "leveltospectate", remaining: remaining, senderid: senderid} = cmd, state) do
+  def handle_command(%{command: "maxplaylevel", remaining: ""} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+    %{state | maximum_level_to_play: 1000}
+  end
+  def handle_command(%{command: "maxplaylevel", remaining: remaining, senderid: senderid} = cmd, state) do
     case Integer.parse(remaining |> String.trim) do
       :error ->
         Lobby.sayprivateex(state.coordinator_id, senderid, [
-          "No level of that type",
+          "Unable to turn '#{remaining}' into an integer",
         ], state.lobby_id)
         state
       {level, _} ->
         ConsulServer.say_command(cmd, state)
-        %{state | level_to_spectate: level}
+        %{state |
+          maximum_level_to_play: level |> min(1000) |> max(state.minimum_level_to_play + 1)
+        }
+    end
+  end
+
+  def handle_command(%{command: "setplaylevels", remaining: remaining, senderid: senderid} = cmd, state) do
+    case String.split(remaining, " ") do
+      [smin, smax] ->
+        case {Integer.parse(smin |> String.trim), Integer.parse(smax |> String.trim)} do
+          {:error, _} ->
+            Lobby.sayprivateex(state.coordinator_id, senderid, [
+              "Unable to turn '#{smin}' into an integer",
+            ], state.lobby_id)
+            state
+          {_, :error} ->
+            Lobby.sayprivateex(state.coordinator_id, senderid, [
+              "Unable to turn '#{smax}' into an integer",
+            ], state.lobby_id)
+            state
+          {{min_level, _}, {max_level, _}} ->
+            min_level = min(min_level, max_level)
+            max_level = max(min_level, max_level)
+
+            ConsulServer.say_command(cmd, state)
+            %{state |
+              minimum_level_to_play: max(min_level, 0),
+              maximum_level_to_play: min(max_level, 1000)
+            }
+        end
+      _ ->
+        Lobby.sayprivateex(state.coordinator_id, senderid, [
+          "setplaylevels takes two numbers, no more no less",
+        ], state.lobby_id)
+        state
     end
   end
 
