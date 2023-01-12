@@ -235,6 +235,11 @@ defmodule Teiserver.Game.QueueMatchServer do
       |> Lobby.get_lobby()
       |> Lobby.silence_lobby()
 
+    Lobby.lock_lobby(state.lobby_id)
+
+    # Wait for all the kicks to take place, then move people
+    :timer.sleep(1000)
+
     state.user_ids
       |> Enum.each(fn userid ->
         Lobby.force_add_user_to_lobby(userid, lobby.id)

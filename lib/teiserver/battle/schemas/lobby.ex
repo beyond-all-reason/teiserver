@@ -442,6 +442,16 @@ defmodule Teiserver.Battle.Lobby do
     LobbyCache.remove_start_area(lobby_id, team_id)
   end
 
+  @spec lock_lobby(T.lobby_id()) :: :ok | nil
+  def lock_lobby(lobby_id) when is_integer(lobby_id) do
+    Battle.update_lobby_values(lobby_id, %{locked: true})
+  end
+
+  @spec unlock_lobby(T.lobby_id()) :: :ok | nil
+  def unlock_lobby(lobby_id) when is_integer(lobby_id) do
+    Battle.update_lobby_values(lobby_id, %{locked: true})
+  end
+
   @spec silence_lobby(T.lobby() | T.lobby_id()) :: T.lobby()
   def silence_lobby(lobby_id) when is_integer(lobby_id), do: silence_lobby(get_lobby(lobby_id))
   def silence_lobby(lobby) do
