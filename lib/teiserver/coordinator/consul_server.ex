@@ -19,7 +19,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore matchmaking website party modparty unparty)
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? explain)
-  @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename password)
+  @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename password resetplaylevels minplaylevel maxplaylevel setplaylevels)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
   @afk_check_duration 40_000
