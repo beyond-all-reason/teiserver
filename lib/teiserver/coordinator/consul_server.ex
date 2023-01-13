@@ -491,7 +491,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     # end
 
     player_rating = if state.minimum_level_to_play > 0 or state.maximum_level_to_play < 1000 do
-      BalanceLib.get_user_balance_rating_value(userid, "Team")
+      BalanceLib.get_user_balance_rating_value(userid, "Team") |> max(1)
     else
       18
     end

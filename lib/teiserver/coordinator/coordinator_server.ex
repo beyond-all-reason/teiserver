@@ -5,7 +5,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   """
   use GenServer
   alias Central.Config
-  alias Teiserver.{Account, User, Clans, Room, Coordinator, Client}
+  alias Teiserver.{Account, User, Clans, Room, Coordinator, Client, Moderation}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Coordinator.{CoordinatorCommands}
   alias Phoenix.PubSub
@@ -214,65 +214,49 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
         |> Enum.filter(fn r -> not Enum.member?(["Bridging"], r) end)
 
       if not Enum.empty?(relevant_restrictions) do
-        reports = Account.list_reports(search: [
+        actions = Moderation.list_actions(search: [
           target_id: userid,
-          expired: false,
-          response_action: "Restrict",
-          filter: "closed"
+          expiry: "Unexpired only"
         ])
 
         # Reasons you've had action taken against you
-        reasons = reports
-          |> Enum.filter(fn r ->
+        reasons = actions
+          |> Enum.filter(fn action ->
             cond do
-              r.responder_id == state.userid -> false
+              Enum.member?(action.restrictions, "Bridging") -> false
               true -> true
             end
           end)
-          |> Enum.map(fn report ->
-            expires = if report.expires do
-              ", expires #{date_to_str(report.expires, format: :ymd_hms)}"
+          |> Enum.map(fn action ->
+            expires = if action.expires do
+              ", expires #{date_to_str(action.expires, format: :ymd_hms)}"
             else
               ""
             end
 
-            " - #{report.response_text}#{expires}"
+            " - #{action.reason}#{expires}"
           end)
 
         msg = [
           "This is a reminder that you received one or more formal moderation actions as listed below:"
         ] ++ reasons
 
-        # Follow-up
-        followups = reports
-          |> Enum.filter(fn r -> r.followup != nil and r.followup != "" end)
-          |> Enum.map(fn r -> "- #{r.followup}" end)
-
-        msg = if Enum.empty?(followups) do
-          msg
-        else
-          msg ++ ["If the behaviour continues one or more of the following actions may be performed:"] ++ followups
-        end
-
-        # Code of conduct references
-        cocs = reports
-          |> Enum.map(fn r -> r.code_references end)
+        has_warning = actions
+          |> Enum.map(fn a -> a.restrictions end)
           |> List.flatten
-          |> Enum.uniq
-
-        msg = case cocs do
-          [] -> msg
-          _ -> msg ++ ["Please refer to Code of Conduct points #{Enum.join(cocs, ", ")}"]
-        end
+          |> Enum.member?("Warning reminder")
 
         # Do we need an acknowledgement? If they are muted then no.
-        msg = if User.has_mute?(user) do
-          msg ++ [@dispute_string]
-        else
-          Lobby.remove_user_from_any_lobby(user.id)
-          Client.set_awaiting_warn_ack(userid)
-          acknowledge_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
-          msg ++ [@dispute_string, acknowledge_prompt]
+        msg = cond do
+          User.has_mute?(user) ->
+            msg ++ [@dispute_string]
+          has_warning ->
+            Lobby.remove_user_from_any_lobby(user.id)
+            Client.set_awaiting_warn_ack(userid)
+            acknowledge_prompt = Config.get_site_config_cache("teiserver.Warning acknowledge prompt")
+            msg ++ [@dispute_string, acknowledge_prompt]
+          true ->
+            msg ++ [@dispute_string]
         end
 
         Coordinator.send_to_user(userid, msg)
