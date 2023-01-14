@@ -190,6 +190,8 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
       "Picked Team_Calamity for team 1, adding 30.0 points for new total of 127.0",
       "Picked Team_Brute for team 2, adding 25.0 points for new total of 134.0",
       "Picked Team_Arbiter for team 1, adding 20.0 points for new total of 147.0",
+      "Team 1 stats: x, y, z",
+      "Team 2 stats: x, y, z",
     ]
 
     # Now make an unfair party

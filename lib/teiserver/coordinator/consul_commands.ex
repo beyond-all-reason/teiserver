@@ -354,11 +354,22 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         []
       end
 
+      team_stats = balance.team_sizes
+        |> Map.keys()
+        |> Enum.sort
+        |> Enum.map(fn team_id ->
+          sum = balance.ratings[team_id] |> round
+          mean = balance.means[team_id] |> round
+          stdev = balance.stdevs[team_id] |> round(2)
+          "Team #{team_id} - sum: #{sum}, mean: #{mean}, stdev: #{stdev}"
+        end)
+
       Coordinator.send_to_user(senderid, [
         @splitter,
         "Balance logs, mode: #{balance.balance_mode}",
         balance.logs,
         "Deviation of: #{balance.deviation}",
+        team_stats,
         moderator_messages,
         @splitter
       ] |> List.flatten)

@@ -326,7 +326,24 @@ defmodule Teiserver.Battle.BalanceLib do
     team_sizes = data.team_players
       |> Map.new(fn {team, members} -> {team, Enum.count(members)} end)
 
+    means = ratings
+      |> Map.new(fn {team, rating_sum} ->
+        {team, rating_sum / team_sizes[team]}
+      end)
+
+    stdevs = data.team_groups
+      |> Map.new(fn {team, group} ->
+        stdev = group
+          |> Enum.map(fn m -> m.ratings end)
+          |> List.flatten
+          |> Statistics.stdev
+
+        {team, stdev}
+      end)
+
     Map.merge(data, %{
+      stdevs: stdevs,
+      means: means,
       team_sizes: team_sizes,
       ratings: ratings,
       captains: captains,
@@ -501,20 +518,6 @@ defmodule Teiserver.Battle.BalanceLib do
   end
 
   @doc """
-  Used to get the stats for a team after it is created via balance
-  """
-  # @spec team_stats([user_rating()]) :: {number, number}
-  def team_stats(player_list) do
-    skills = get_rating_values_from_rating_list(player_list)
-
-    {
-      Enum.sum(skills),
-      ((Enum.sum(skills) / Enum.count(skills)) * 100 |> round)/100,
-    }
-  end
-
-
-  @doc """
   Expects a map of %{team_id => rating_value}
 
   Returns the deviation in percentage points between the two teams
@@ -561,10 +564,6 @@ defmodule Teiserver.Battle.BalanceLib do
     groups
       |> Enum.map(fn %{group_rating: group_rating} -> group_rating end)
       |> Enum.sum
-  end
-
-  defp get_rating_values_from_rating_list(rating_list) do
-    rating_list |> Enum.map(fn {_, s} -> s end)
   end
 
   @spec calculate_leaderboard_rating(number(), number()) :: number()

@@ -1,7 +1,6 @@
 defmodule Teiserver.Battle.BalanceLibTest do
   use Central.DataCase, async: true
   alias Teiserver.Battle.BalanceLib
-  # alias Teiserver.TeiserverTestLib
 
   test "loser picks simple users" do
     result = BalanceLib.create_balance(
@@ -42,7 +41,9 @@ defmodule Teiserver.Battle.BalanceLibTest do
         1 => 2,
         2 => 2
       },
-      deviation: 0
+      deviation: 0,
+      means: %{1 => 6.5, 2 => 6.5},
+      stdevs: %{1 => 1.5, 2 => 0.5}
     }
   end
 
@@ -90,7 +91,9 @@ defmodule Teiserver.Battle.BalanceLibTest do
         3 => 1,
         4 => 1
       },
-      deviation: 13
+      deviation: 13,
+      means: %{1 => 8.0, 2 => 7.0, 3 => 6.0, 4 => 5.0},
+      stdevs: %{1 => 0.0, 2 => 0.0, 3 => 0.0, 4 => 0.0}
     }
   end
 
@@ -144,7 +147,9 @@ defmodule Teiserver.Battle.BalanceLibTest do
         2 => 2,
         3 => 2
       },
-      deviation: 0
+      deviation: 0,
+      means: %{1 => 7.5, 2 => 7.0, 3 => 7.5},
+      stdevs: %{1 => 1.5, 2 => 2.0, 3 => 0.5}
     }
   end
 
@@ -189,7 +194,9 @@ defmodule Teiserver.Battle.BalanceLibTest do
         1 => 2,
         2 => 2
       },
-      deviation: 0
+      deviation: 0,
+      means: %{1 => 6.5, 2 => 6.5},
+      stdevs: %{1 => 1.5, 2 => 0.5}
     }
   end
 
@@ -248,7 +255,9 @@ defmodule Teiserver.Battle.BalanceLibTest do
         1 => [112, 113, 114, 115, 116, 101, 109, 111],
         2 => [103, 104, 105, 106, 107, 102, 108, 110]
       },
-      team_sizes: %{1 => 8, 2 => 8}
+      team_sizes: %{1 => 8, 2 => 8},
+      means: %{1 => 20.125, 2 => 20.5},
+      stdevs: %{1 => 9.29297449689818, 2 => 8.671072598012312}
     }
   end
 
@@ -304,7 +313,10 @@ defmodule Teiserver.Battle.BalanceLibTest do
         ]
       },
       team_players: %{1 => 'ejlnprft', 2 => 'hikmoqsg'},
-      team_sizes: %{1 => 8, 2 => 8}
+      team_sizes: %{1 => 8, 2 => 8},
+      means: %{1 => 23.0, 2 => 23.0},
+      stdevs: %{1 => 12.816005617976296, 2 => 8.674675786448736}
+
     }
   end
 
@@ -359,7 +371,9 @@ defmodule Teiserver.Battle.BalanceLibTest do
         1 => [104, 105, 106, 107, 110, 111, 114, 116],
         2 => [101, 102, 103, 108, 109, 112, 113, 115]
       },
-      team_sizes: %{1 => 8, 2 => 8}
+      team_sizes: %{1 => 8, 2 => 8},
+      means: %{1 => 31.0, 2 => 31.625},
+      stdevs: %{1 => 16.015617378046965, 2 => 15.090870584562046}
     }
 
     result2 = BalanceLib.create_balance(
@@ -415,7 +429,10 @@ defmodule Teiserver.Battle.BalanceLibTest do
         1 => [101, 102, 103, 107, 110, 111, 114, 116],
         2 => [106, 104, 105, 108, 109, 112, 113, 115]
       },
-      team_sizes: %{1 => 8, 2 => 8}
+      team_sizes: %{1 => 8, 2 => 8},
+      means: %{1 => 31.0, 2 => 31.625},
+      stdevs: %{1 => 16.0312195418814, 2 => 15.074295174236173}
+
     }
   end
 end
