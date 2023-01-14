@@ -255,6 +255,7 @@ defmodule TeiserverWeb.Moderation.ActionController do
     case Moderation.update_action(action, %{"expires" => Timex.now()}) do
       {:ok, _action} ->
         add_audit_log(conn, "Moderation:Action halted", %{action_id: action.id})
+        Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(action.target_id)
 
         conn
           |> put_flash(:info, "Action halted.")
