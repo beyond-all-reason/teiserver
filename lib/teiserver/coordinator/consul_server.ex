@@ -181,13 +181,12 @@ defmodule Teiserver.Coordinator.ConsulServer do
     username = Account.get_username(userid)
     LobbyChat.persist_system_message("#{username} kicked from the lobby", state.lobby_id)
 
-    new_approved = state.approved_users |> List.delete(userid)
     player_count_changed(state)
     {:noreply, %{state |
       join_queue: state.join_queue |> List.delete(userid),
       low_priority_join_queue: state.low_priority_join_queue |> List.delete(userid),
       last_seen_map: state.last_seen_map |> Map.delete(userid),
-      approved_users: new_approved
+      approved_users: state.approved_users |> List.delete(userid)
     }}
   end
 
