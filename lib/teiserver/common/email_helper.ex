@@ -20,7 +20,7 @@ defmodule Teiserver.EmailHelper do
         user_id: user.id
       })
 
-    message_id = UUID.uuid4()
+    message_id = UUID.uuid4() <> "@" <> host
 
     game_name = Application.get_env(:central, Teiserver)[:game_name]
     discord = Application.get_env(:central, Teiserver)[:discord]
