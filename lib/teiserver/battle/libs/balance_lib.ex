@@ -3,19 +3,19 @@ defmodule Teiserver.Battle.BalanceLib do
   A set of functions related to balance, if you are looking to see how balance is implemented this is the place. Ratings are calculated via Teiserver.Game.MatchRatingLib and are used here. Please note ratings and balance are two very different things and complaints about imbalanced games need to be correct in addressing balance vs ratings.
 
   Currently the algorithm is "Loser picks". The Algorithm at a high level is:
-  1: Pairings
-  - Go through all groups of 2 or more members and pair them up
-  - If the group can be paired with other groups or solo players, they remain as a group and their opposites are tracked against them
-  - Any groups that cannot be paired will be broken into solo players and balanced as such
+  1: Dealing with parties
+    - Go through all groups of 2 or more members and combine their ratings to create one rating for the group
+    - If the group can be paired against a group of equal strength or if any of the remaining solo players can be combined to form a group of sufficiently equal strength, the original group remains intact
+    - Any groups that cannot be matched against a suitable group will be broken into solo players and balanced as such
 
   2: Placing paired groups
-  - Each pairing of groups are iterated through and assigned to opposite teams
-  - The team with the lowest combined rating picks first and selects the highest rated group
+    - Each pairing of groups are iterated through and assigned to opposite teams
+    - The team with the lowest combined rating picks first and selects the highest rated group
 
   3: Solo players
-  - As long as there are players left to place
-  - Whichever team with the lowest combined rating and is not full picks next
-  - Said team always picks the highest rated group available
+    - As long as there are players left to place
+    - Whichever team with the lowest combined rating and is not full picks next
+    - Said team always picks the highest rated group available
   """
   alias Central.Config
   alias Teiserver.Data.Types, as: T
