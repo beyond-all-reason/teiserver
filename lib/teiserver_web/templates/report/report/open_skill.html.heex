@@ -17,7 +17,7 @@
           'leaderboard_rating': 'leaderboard_rating_rounded',
           'uncertainty': 'uncertainty_rounded',
         },
-        rows: <%= raw Jason.encode!(@data) %>,
+        rows: <%= raw Jason.encode!(@results) %>,
         type: 'bar'
       }
     });
@@ -50,13 +50,26 @@
               ], class: "form-control", selected: @params["rating_type"] %>
             </div>
             <div class="col-md-4 col-lg-3 col-xl-2 search-form-input">
-              <label for="report_metrics" class="control-label">Metrics:</label>
-              <%= select :report, :metrics, [
-                "Rating",
+              <label for="report_metric" class="control-label">Metric:</label>
+              <%= select :report, :metric, [
+                "Game Rating",
+                "Leaderboard Rating",
                 "Skill",
                 "Uncertainty",
-                "Leaderboard Rating"
-              ], class: "form-control", selected: @params["metrics"] %>
+              ], class: "form-control", selected: @params["metric"] %>
+            </div>
+            <div class="col-md-4 col-lg-3 col-xl-2 search-form-input">
+              <label for="report_last_active" class="control-label">Max last-active:</label>
+              <%= select :report, :last_active, [
+                "7 days",
+                "31 days",
+                "180 days",
+                "Forever"
+              ], class: "form-control", selected: @params["last_active"] %>
+            </div>
+            <div class="col-md-4 col-lg-3 col-xl-2 search-form-input">
+              <label for="report_uncertainty" class="control-label">Maximum uncertainty:</label>
+              <input type="text" name="report[uncertainty]" id="report_uncertainty" value={@params["uncertainty"]} class="form-control" />
             </div>
           </div>
           <div class="row mt-4">
