@@ -142,6 +142,15 @@
       </div>
 
       <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+        $('#action_restriction_Site').prop('checked', true);
+        $('#action_restriction_Login').prop('checked', true);
+        $('#action_reason').val('Disrupting an event after being asked/warned not to.');
+        $('#action_expires').val('1 hour');
+      ">
+        Add event disruption
+      </div>
+
+      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
         $('.restrictions-col .form-check-input').prop('checked', false);
       ">
         Clear all restrictions
