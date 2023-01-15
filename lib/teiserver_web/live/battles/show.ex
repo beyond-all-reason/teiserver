@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   require Logger
 
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.{Battle, Client, Coordinator, User}
+  alias Teiserver.{Account, Battle, Client, Coordinator, User}
   alias Teiserver.Battle.{Lobby, LobbyLib}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -30,6 +30,8 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       @extra_menu_content
     end
 
+    client = Account.get_client_by_id(socket.assigns[:current_user].id)
+
     :timer.send_interval(10_000, :tick)
 
     socket = socket
@@ -37,6 +39,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Battles", url: "/teiserver/battle/lobbies")
       |> assign(:ratings, %{})
+      |> assign(:client, client)
       |> assign(:site_menu_active, "teiserver_lobbies")
       |> assign(:view_colour, LobbyLib.colours())
       |> assign(:messages, [])
@@ -60,6 +63,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{current_user.id}")
     lobby = Battle.get_lobby(id)
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_action_updates:#{socket.assigns[:current_user].id}")
 
     cond do
       lobby == nil ->
@@ -186,6 +190,18 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   end
 
   @impl true
+  def handle_event("join", _, %{assigns: %{client: nil}} = socket) do
+    {:noreply, socket}
+  end
+
+  def handle_event("join", _, %{assigns: assigns} = socket) do
+    if Battle.server_allows_join?(assigns.client.userid, assigns.id) == true do
+      Battle.add_user_to_lobby(assigns.current_user.id, assigns.id, Teiserver.Battle.Lobby.new_script_password())
+    end
+
+    {:noreply, socket}
+  end
+
   def handle_event("send-to-host", %{"msg" => msg}, %{assigns: assigns} = socket) do
     from_id = Coordinator.get_coordinator_userid()
     Teiserver.Coordinator.Parser.handle_in(from_id, msg, assigns.id)

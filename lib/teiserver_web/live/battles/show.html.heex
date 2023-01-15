@@ -40,6 +40,12 @@
             &nbsp;&nbsp;&nbsp;
           <% end %>
 
+          <%= if @client do %>
+            <span phx-click="join" class={"btn btn-#{bsname}"}>
+              Join
+            </span>
+          <% end %>
+
           <%= live_redirect "Live chat", to: Routes.ts_battle_lobby_chat_path(@socket, :chat, @lobby.id), class: "btn btn-#{bsname}" %>
 
           <%= if @moderator and @lobby.uuid do %>
@@ -163,7 +169,9 @@
           <%= if @moderator do %>
             <td><%= client.player_number %></td>
             <td>
-              <%= live_redirect "Show", to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}" %>
+              <%= live_redirect "Show",
+                to: Routes.ts_admin_client_show_path(@socket, :show, client.userid), class: "btn btn-sm btn-#{bsname}"
+              %>
 
               <span class={"btn btn-sm btn-outline-#{bsname}"} phx-click={"forcespec:#{client.userid}"}>
                 &nbsp;

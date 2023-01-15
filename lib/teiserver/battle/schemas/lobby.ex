@@ -468,9 +468,45 @@ defmodule Teiserver.Battle.Lobby do
           {:failure, String.t()} | {:waiting_on_host, String.t()}
   def can_join?(userid, lobby_id, password \\ nil, script_password \\ nil) do
     lobby_id = int_parse(lobby_id)
-    battle = get_battle(lobby_id)
+    server_result = server_allows_join?(userid, lobby_id, password)
+
+    if server_result == true do
+      script_password = if script_password == nil, do: new_script_password(), else: script_password
+      lobby = get_lobby(lobby_id)
+      if lobby != nil do
+        case Account.get_client_by_id(lobby.founder_id) do
+          nil ->
+            {:failure, "Battle closed"}
+
+          host_client ->
+            # TODO: Depreciate
+            send(host_client.tcp_pid, {:request_user_join_lobby, userid})
+
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_lobby_host_message:#{lobby_id}",
+              %{
+                channel: "teiserver_lobby_host_message:#{lobby_id}",
+                event: :user_requests_to_join,
+                lobby_id: lobby_id,
+                userid: userid,
+                script_password: script_password
+              }
+            )
+            {:waiting_on_host, script_password}
+        end
+      else
+        {:failure, "No lobby found (type 2)"}
+      end
+    else
+      server_result
+    end
+  end
+
+  @spec server_allows_join?(Types.userid(), integer(), String.t() | nil) :: {:failure, String.t()} | true
+  def server_allows_join?(userid, lobby_id, password \\ nil) do
+    lobby = get_lobby(lobby_id)
     user = Account.get_user_by_id(userid)
-    script_password = if script_password == nil, do: new_script_password(), else: script_password
 
     # In theory this would never happen but it's possible to see this at startup when
     # not everything is loaded and ready, hence the case statement
@@ -497,13 +533,13 @@ defmodule Teiserver.Battle.Lobby do
       user == nil ->
         {:failure, "You are not a user"}
 
-      battle == nil ->
-        {:failure, "No battle found"}
+      lobby == nil ->
+        {:failure, "No lobby found (type 1)"}
 
-       battle.locked == true and ignore_locked == false ->
+       lobby.locked == true and ignore_locked == false ->
         {:failure, "Battle locked"}
 
-      battle.password != nil and password != battle.password and not ignore_password ->
+      lobby.password != nil and password != lobby.password and not ignore_password ->
         {:failure, "Invalid password"}
 
       consul_response == false ->
@@ -513,28 +549,7 @@ defmodule Teiserver.Battle.Lobby do
         {:failure, "You are currently banned from joining lobbies"}
 
       true ->
-        # Okay, so far so good, what about the host? Are they okay with it?
-        case Client.get_client_by_id(battle.founder_id) do
-          nil ->
-            {:failure, "Battle closed"}
-
-          host_client ->
-            # TODO: Depreciate
-            send(host_client.tcp_pid, {:request_user_join_lobby, userid})
-
-            PubSub.broadcast(
-              Central.PubSub,
-              "teiserver_lobby_host_message:#{lobby_id}",
-              %{
-                channel: "teiserver_lobby_host_message:#{lobby_id}",
-                event: :user_requests_to_join,
-                lobby_id: lobby_id,
-                userid: userid,
-                script_password: script_password
-              }
-            )
-            {:waiting_on_host, script_password}
-        end
+        true
     end
   end
 

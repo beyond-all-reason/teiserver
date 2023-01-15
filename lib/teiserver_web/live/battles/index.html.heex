@@ -74,29 +74,38 @@
           <td><%= lobby.member_count - lobby.player_count %></td>
 
           <%= if moderator or (lobby.password == nil and lobby.locked == false) do %>
-            <td>
-              <span>
-                <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id), class: "btn btn-sm btn-#{bsname}" %>
-              </span>
-            </td>
-            <td>
-              <span>
-                <%= live_redirect "Chat", to: Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id), class: "btn btn-sm btn-#{bsname}" %>
-              </span>
-            </td>
-          <% else %>
-            <td>&nbsp;</td>
-            <td>&nbsp;</td>
-          <% end %>
+            <%= if @client do %>
+              <td>
+                <span class={"btn btn-sm btn-#{bsname}"} phx-click="join" phx-value-lobby_id={lobby.id}>
+                  Join
+                </span>
+              </td>
+            <% else %>
+              <td>&nbsp;</td>
+            <% end %>
 
-          <%= if moderator do %>
             <td>
-              <%= if Map.has_key?(lobby, :uuid) do %>
-                <a href={Routes.ts_admin_lobby_path(@socket, :lobby_chat, lobby.uuid)} class={"btn btn-sm btn-#{bsname}"}>
+              <span>
+                <%= live_redirect "Show", to: Routes.ts_battle_lobby_show_path(@socket, :show, lobby.id), class: "btn btn-sm btn-outline-#{bsname}" %>
+              </span>
+            </td>
+            <td>
+              <span>
+                <%= live_redirect "Chat", to: Routes.ts_battle_lobby_chat_path(@socket, :chat, lobby.id), class: "btn btn-sm btn-outline-#{bsname}" %>
+              </span>
+            </td>
+
+            <%= if Map.has_key?(lobby, :uuid) do %>
+              <td>
+                <a href={Routes.ts_admin_lobby_path(@socket, :lobby_chat, lobby.uuid)} class={"btn btn-sm btn-outline-#{bsname}"}>
                   Full chat
                 </a>
-              <% end %>
-            </td>
+              </td>
+            <% else %>
+              <td>&nbsp;</td>
+            <% end %>
+          <% else %>
+            <td colspan="4">&nbsp;</td>
           <% end %>
         </tr>
       <% end %>

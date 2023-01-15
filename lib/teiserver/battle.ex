@@ -540,6 +540,10 @@ defmodule Teiserver.Battle do
   @spec set_lobby_password(T.lobby_id(), String.t() | nil) :: :ok | nil
   defdelegate set_lobby_password(lobby_id, new_password), to: LobbyCache
 
+  # Requests
+  @spec server_allows_join?(T.userid(), T.lobby_id(), String.t() | nil) :: {:failure, String.t()} | true
+  defdelegate server_allows_join?(userid, lobby_id, password \\ nil), to: Lobby
+
   # Bots
   @spec get_bots(T.lobby_id()) :: map() | nil
   defdelegate get_bots(lobby_id), to: LobbyCache
