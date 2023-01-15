@@ -504,8 +504,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     state
   end
 
-
-  #################### Host and Moderator
   def handle_command(%{command: "resetplaylevels", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
     %{state | minimum_level_to_play: 0, maximum_level_to_play: 1000}
@@ -581,6 +579,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     end
   end
 
+  #################### Host and Moderator
   def handle_command(%{command: "lock", remaining: remaining, senderid: senderid} = cmd, state) do
     new_locks = case get_lock(remaining) do
       nil ->
