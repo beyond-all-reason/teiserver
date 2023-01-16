@@ -998,7 +998,7 @@ defmodule Teiserver.Protocols.SpringIn do
       keys =
         data
         |> String.downcase()
-        |> String.split("\t")
+        |> String.split(" ")
 
       Battle.remove_modoptions(state.lobby_id, keys)
     end

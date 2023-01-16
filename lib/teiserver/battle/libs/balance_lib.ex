@@ -328,7 +328,7 @@ defmodule Teiserver.Battle.BalanceLib do
 
     means = ratings
       |> Map.new(fn {team, rating_sum} ->
-        {team, rating_sum / team_sizes[team]}
+        {team, rating_sum / max(team_sizes[team], 1)}
       end)
 
     stdevs = data.team_groups

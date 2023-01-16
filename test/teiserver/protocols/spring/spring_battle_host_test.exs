@@ -176,7 +176,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert battle != nil
 
     # Adding start rectangles
-    assert Enum.count(battle.start_areas) == 0
+    assert Enum.empty?(battle.start_areas)
     _send_raw(socket, "ADDSTARTRECT 2 50 50 100 100\n")
     _ = _recv_raw(socket)
 
@@ -186,7 +186,7 @@ defmodule Teiserver.SpringBattleHostTest do
     _send_raw(socket, "REMOVESTARTRECT 2\n")
     _ = _recv_raw(socket)
     battle = Lobby.get_battle(lobby_id)
-    assert Enum.count(battle.start_areas) == 0
+    assert Enum.empty?(battle.start_areas)
 
     # Add and remove script tags
     modoptions = Battle.get_modoptions(lobby_id)
@@ -201,7 +201,7 @@ defmodule Teiserver.SpringBattleHostTest do
     assert Map.has_key?(modoptions, "custom/key1")
     assert Map.has_key?(modoptions, "custom/key2")
 
-    _send_raw(socket, "REMOVESCRIPTTAGS custom/key1\tcustom/key3\n")
+    _send_raw(socket, "REMOVESCRIPTTAGS custom/key1 custom/key3\n")
     reply = _recv_raw(socket)
     assert reply == "REMOVESCRIPTTAGS custom/key1\n"
 
