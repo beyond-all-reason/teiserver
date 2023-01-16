@@ -120,10 +120,6 @@ config :central, Oban,
 
         # Every day at 2am
         {"0 2 * * *", Central.Logging.AggregateViewLogsTask},
-        {"0 2 * * *", Central.Account.UserReportCleanupTask},
-
-        # Every minute
-        {"* * * * *", Teiserver.Moderation.RefreshUserRestrictionsTask},
 
         # 1:07 am
         {"7 1 * * *", Teiserver.Account.Tasks.DailyCleanupTask},
@@ -133,9 +129,7 @@ config :central, Oban,
 
         # Every minute
         {"* * * * *", Teiserver.Telemetry.Tasks.PersistServerMinuteTask},
-
-        # Every 5 minutes
-        # {"*/5 * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},
+        {"* * * * *", Teiserver.Moderation.RefreshUserRestrictionsTask},
 
         # Every minute
         {"* * * * *", Teiserver.Battle.Tasks.PostMatchProcessTask},

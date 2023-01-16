@@ -4,7 +4,6 @@ defmodule Teiserver.Game.BalancerServer do
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.{Battle, Coordinator}
-  alias Phoenix.PubSub
 
   @tick_interval 2_000
 

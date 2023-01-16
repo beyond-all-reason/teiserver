@@ -3,7 +3,7 @@ defmodule Teiserver.Account.MuteReport do
   alias Teiserver.{Account, User}
 
   @spec icon() :: String.t()
-  def icon(), do: Central.Account.ReportLib.action_icon("Mute")
+  def icon(), do: "fa-regular fa-microphone-slash"
 
   @spec permissions() :: String.t()
   def permissions(), do: "teiserver.staff.reviewer"

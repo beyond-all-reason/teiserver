@@ -1,7 +1,6 @@
 defmodule Teiserver.Agents.ModeratedAgentServer do
   use GenServer
-  alias Central.Account
-  alias Teiserver.Coordinator
+  alias Teiserver.{Coordinator, Moderation}
   alias Teiserver.Agents.AgentLib
   require Logger
 
@@ -26,9 +25,9 @@ defmodule Teiserver.Agents.ModeratedAgentServer do
     AgentLib._send(socket, %{cmd: "c.auth.disconnect"})
 
     # Create the report
-    case Account.list_reports(search: [target_id: user.id]) do
+    case Moderation.list_actions(search: [target_id: user.id]) do
       [] ->
-        create_report(user, state.action)
+        create_action(user, state.action)
       _ ->
         :ok
     end
@@ -100,8 +99,8 @@ defmodule Teiserver.Agents.ModeratedAgentServer do
     state
   end
 
-  defp create_report(user, "Warning") do
-    {:ok, _report} = Account.create_report(%{
+  defp create_action(user, "Warning") do
+    {:ok, _report} = Moderation.create_action(%{
       "location" => "web-admin-instant",
       "location_id" => nil,
       "reason" => "Agent mode test",
@@ -120,8 +119,8 @@ defmodule Teiserver.Agents.ModeratedAgentServer do
     })
   end
 
-  defp create_report(user, "Mute") do
-    {:ok, _report} = Account.create_report(%{
+  defp create_action(user, "Mute") do
+    {:ok, _report} = Moderation.create_action(%{
       "location" => "web-admin-instant",
       "location_id" => nil,
       "reason" => "Agent mode test",
@@ -140,8 +139,8 @@ defmodule Teiserver.Agents.ModeratedAgentServer do
     })
   end
 
-  defp create_report(user, "Ban") do
-    {:ok, _report} = Account.create_report(%{
+  defp create_action(user, "Ban") do
+    {:ok, _report} = Moderation.create_action(%{
       "location" => "web-admin-instant",
       "location_id" => nil,
       "reason" => "Agent mode test",

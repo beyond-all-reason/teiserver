@@ -12,7 +12,6 @@ defmodule Teiserver.Game.RatingLog do
 
     has_one :match_membership, Teiserver.Battle.MatchMembership
 
-
     # has_one :match_membership, Teiserver.Battle.MatchMembership
     #   join_through: "teiserver_battle_matches",
     #   join_keys: [user_id: :user_id, match_id: :id]

@@ -167,7 +167,6 @@ defmodule Teiserver.Room do
     user = User.get_user_by_id(from_id)
     if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
-      # User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
     blacklisted = (User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg))
@@ -207,7 +206,6 @@ defmodule Teiserver.Room do
     user = User.get_user_by_id(from_id)
     if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
-      # User.unbridge_user(user, msg, WordLib.flagged_words(msg), "public_chat:#{room_name}")
     end
 
     blacklisted = (User.is_bot?(user) == false and WordLib.blacklisted_phrase?(msg))

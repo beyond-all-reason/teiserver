@@ -7,8 +7,6 @@
     $('#the_tabs [href="#' + selected_tab + '_tab"]').tab('show');
 
     page_quick_actions = [
-      {label: "User reports", icons: ["fa-regular fa-bars", "<%= Central.Account.ReportLib.icon() %>"], url: "<%= Routes.admin_report_path(@conn, :user_show, @user) %>", keywords: ["report"]},
-      {label: "Add report", icons: ["fa-regular fa-plus", "<%= Central.Account.ReportLib.icon() %>"], url: "<%= Routes.logging_page_view_log_path(@conn, :index) %>?user_id=<%= @user.id %>", keywords: ["add", "report"]},
       {label: "Edit user", icons: ["fa-regular fa-wrench", "<%= icon() %>"], url: "<%= Routes.admin_user_path(@conn, :edit, @user) %>", keywords: ["edit", "user", "edit user"]},
       {label: "Password reset", icons: ["fa-regular fa-shield-alt", "fa-regular fa-undo"], url: "<%= Routes.admin_user_path(@conn, :reset_password, @user.id) %>", keywords: ["reset", "password"]},
 
@@ -108,12 +106,6 @@
             </div>
           <% end %>
         </div>
-
-        <hr />
-        <a href={Routes.admin_report_path(@conn, :user_show, @user)} class={"btn btn-outline-#{bsname}"}>
-          <%= central_component "icon", icon: Central.Account.ReportLib.icon() %>
-          Reports
-        </a>
       </div>
     </div>
   </div>

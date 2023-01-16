@@ -12,7 +12,6 @@ defmodule Teiserver.User do
   alias Argon2
   alias Central.Account.Guardian
   alias Teiserver.Data.Types, as: T
-  import Central.Logging.Helpers, only: [add_audit_log: 4]
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
   require Logger
@@ -974,45 +973,6 @@ defmodule Teiserver.User do
   def restrict_user(user, restriction) do
     new_restrictions = Enum.uniq([restriction | user.restrictions])
     update_user(%{user | restrictions: new_restrictions}, persist: true)
-  end
-
-  @spec unbridge_user(T.user() | T.userid(), String.t(), non_neg_integer(), String.t()) :: any
-  def unbridge_user(userid, message, flagged_word_count, location) when is_integer(userid) do
-    unbridge_user(get_user_by_id(userid), message, flagged_word_count, location)
-  end
-
-  def unbridge_user(nil, _, _, _), do: :no_user
-  def unbridge_user(user, message, flagged_word_count, location) do
-    if not is_restricted?(user, ["Bridging"]) do
-      coordinator_user_id = Coordinator.get_coordinator_userid()
-
-      {:ok, _report} = Central.Account.create_report(%{
-        "location" => "Automod",
-        "location_id" => nil,
-        "reason" => "Automod detected flagged words",
-        "reporter_id" => coordinator_user_id,
-        "target_id" => user.id,
-        "response_text" => "Unbridging because said: #{message}",
-        "response_action" => "Restrict",
-        "responded_at" => Timex.now(),
-        "followup" => nil,
-        "code_references" => [],
-        "expires" => nil,
-        "responder_id" => coordinator_user_id,
-        "action_data" => %{
-          "restriction_list" => ["Bridging"]
-        }
-      })
-
-      restrict_user(user, "Bridging")
-
-      client = Client.get_client_by_id(user.id) || %{ip: "no client"}
-      add_audit_log(user.id, client.ip, "Teiserver:De-bridged user", %{
-        message: message,
-        flagged_word_count: flagged_word_count,
-        location: location
-      })
-    end
   end
 
   @spec is_restricted?(T.userid() | T.user(), String.t()) :: boolean()

@@ -19,7 +19,7 @@
               <th>New user</th>
               <th>Status</th>
               <th>Registered</th>
-              
+
               <th>&nbsp;</th>
             </tr>
           </thead>
@@ -37,15 +37,15 @@
                 <td><%= user.name %></td>
                 <td>
                   <%= if banned do %>
-                    <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Ban")}"}></i>
+                    <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Ban")}"}></i>
                   <% end %>
 
                   <%= if muted do %>
-                    <i class={"fa-fw text-danger #{Central.Account.ReportLib.action_icon("Mute")}"}></i>
+                    <i class={"fa-fw text-danger #{Teiserver.Moderation.ActionLib.action_icon("Mute")}"}></i>
                   <% end %>
 
                   <%= if warned do %>
-                    <i class={"fa-fw text-warning #{Central.Account.ReportLib.action_icon("Warn")}"}></i>
+                    <i class={"fa-fw text-warning #{Teiserver.Moderation.ActionLib.action_icon("Warn")}"}></i>
                   <% end %>
                 </td>
                 <td><%= date_to_str(user.inserted_at, format: :hms_or_dmy) %></td>
@@ -59,7 +59,7 @@
             <% end %>
           </tbody>
         </table>
-        
+
       </div>
     </div>
   </div>

@@ -1,6 +1,7 @@
 defmodule Teiserver.HookServer do
   use GenServer
   alias Phoenix.PubSub
+  require Logger
 
   def start_link(opts \\ []) do
     GenServer.start_link(__MODULE__, nil, opts)
@@ -9,16 +10,6 @@ defmodule Teiserver.HookServer do
   @impl true
   def handle_info(%{channel: "global_moderation"} = data, state) do
     case data.event do
-      :new_report ->
-        # Coordinator.create_report(payload)# This DMs the user saying thank you for submitting it, we don't need that any more as it's done via the website
-
-        Teiserver.Bridge.DiscordBridge.new_report(data.report)
-
-        # Teiserver.User.create_report(payload, reason) # Reports used to have action, we don't need this at this point
-
-      :updated_report ->
-        :ok
-
       :new_action ->
         # Coordinator.update_report(payload, reason)
         # Teiserver.Bridge.DiscordBridge.report_updated(payload, reason)
@@ -46,6 +37,9 @@ defmodule Teiserver.HookServer do
       :new_ban ->
         :ok
 
+      event ->
+        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line} - No handler for event '#{event}'")
+        :ok
     end
 
     {:noreply, state}

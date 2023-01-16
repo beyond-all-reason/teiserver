@@ -50,7 +50,6 @@ defmodule Teiserver.Battle.LobbyChat do
     msg = trim_message(msg)
     user = User.get_user_by_id(userid)
     if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
-      User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 
@@ -97,7 +96,6 @@ defmodule Teiserver.Battle.LobbyChat do
     msg = trim_message(msg)
     user = User.get_user_by_id(userid)
     if User.is_bot?(user) == false and WordLib.flagged_words(msg) > 0 do
-      User.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
       Moderation.unbridge_user(user, msg, WordLib.flagged_words(msg), "lobby_chat")
     end
 

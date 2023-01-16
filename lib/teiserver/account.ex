@@ -224,30 +224,6 @@ defmodule Teiserver.Account do
   def create_group_membership(params),
     do: Central.Account.create_group_membership(params)
 
-  # Reports
-  def list_reports(args), do: Central.Account.list_reports(args)
-  def get_report(id), do: Central.Account.get_report(id)
-  def get_report!(id), do: Central.Account.get_report!(id)
-  def get_report!(id, args), do: Central.Account.get_report!(id, args)
-
-  def update_report(report, params, reason), do: Central.Account.update_report(report, params, reason)
-
-  def create_report(_, nil, _, _, _), do: {:error, "no target user"}
-  def create_report(reporter_id, target_id, location, location_id, reason) do
-    params = %{
-      "reason" => reason,
-      "target_id" => target_id,
-      "location" => location,
-      "location_id" => location_id,
-      "reporter_id" => reporter_id
-    }
-
-    case Central.Account.create_report(params) do
-      {:ok, report} -> {:ok, report}
-      {:error, _} -> {:error, "database error"}
-    end
-  end
-
   @spec spring_auth_check(Plug.Conn.t(), User.t, String.t()) :: {:ok, User.t} | {:error, String.t()}
   def spring_auth_check(conn, user, plain_text_password) do
     tei_user = get_user_by_id(user.id)
@@ -385,160 +361,7 @@ defmodule Teiserver.Account do
     Repo.delete(user_stat)
   end
 
-  alias Teiserver.Account.AutomodAction
-  alias Teiserver.Account.AutomodActionLib
-
-  @spec automod_action_query(List.t()) :: Ecto.Query.t()
-  def automod_action_query(args) do
-    automod_action_query(nil, args)
-  end
-
-  @spec automod_action_query(Integer.t(), List.t()) :: Ecto.Query.t()
-  def automod_action_query(id, args) do
-    AutomodActionLib.query_automod_actions
-      |> AutomodActionLib.search(%{id: id})
-      |> AutomodActionLib.search(args[:search])
-      |> AutomodActionLib.preload(args[:preload])
-      |> AutomodActionLib.order_by(args[:order_by])
-      |> QueryHelpers.select(args[:select])
-  end
-
-  @doc """
-  Returns the list of automod_actions.
-
-  ## Examples
-
-      iex> list_automod_actions()
-      [%AutomodAction{}, ...]
-
-  """
-  @spec list_automod_actions(List.t()) :: List.t()
-  def list_automod_actions(args \\ []) do
-    automod_action_query(args)
-      |> QueryHelpers.limit_query(args[:limit] || 50)
-      |> Repo.all
-  end
-
-  @doc """
-  Gets a single automod_action.
-
-  Raises `Ecto.NoResultsError` if the AutomodAction does not exist.
-
-  ## Examples
-
-      iex> get_automod_action!(123)
-      %AutomodAction{}
-
-      iex> get_automod_action!(456)
-      ** (Ecto.NoResultsError)
-
-  """
-  @spec get_automod_action!(Integer.t() | List.t()) :: AutomodAction.t()
-  @spec get_automod_action!(Integer.t(), List.t()) :: AutomodAction.t()
-  def get_automod_action!(id) when not is_list(id) do
-    automod_action_query(id, [])
-    |> Repo.one!
-  end
-  def get_automod_action!(args) do
-    automod_action_query(nil, args)
-    |> Repo.one!
-  end
-  def get_automod_action!(id, args) do
-    automod_action_query(id, args)
-    |> Repo.one!
-  end
-
-  # Uncomment this if needed, default files do not need this function
-  # @doc """
-  # Gets a single automod_action.
-
-  # Returns `nil` if the AutomodAction does not exist.
-
-  # ## Examples
-
-  #     iex> get_automod_action(123)
-  #     %AutomodAction{}
-
-  #     iex> get_automod_action(456)
-  #     nil
-
-  # """
-  # def get_automod_action(id, args \\ []) when not is_list(id) do
-  #   automod_action_query(id, args)
-  #   |> Repo.one
-  # end
-
-  @doc """
-  Creates a automod_action.
-
-  ## Examples
-
-      iex> create_automod_action(%{field: value})
-      {:ok, %AutomodAction{}}
-
-      iex> create_automod_action(%{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec create_automod_action(Map.t()) :: {:ok, AutomodAction.t()} | {:error, Ecto.Changeset.t()}
-  def create_automod_action(attrs \\ %{}) do
-    %AutomodAction{}
-    |> AutomodAction.changeset(attrs)
-    |> Repo.insert()
-  end
-
-  @doc """
-  Updates a automod_action.
-
-  ## Examples
-
-      iex> update_automod_action(automod_action, %{field: new_value})
-      {:ok, %AutomodAction{}}
-
-      iex> update_automod_action(automod_action, %{field: bad_value})
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec update_automod_action(AutomodAction.t(), Map.t()) :: {:ok, AutomodAction.t()} | {:error, Ecto.Changeset.t()}
-  def update_automod_action(%AutomodAction{} = automod_action, attrs) do
-    automod_action
-    |> AutomodAction.changeset(attrs)
-    |> Repo.update()
-  end
-
-  @doc """
-  Deletes a AutomodAction.
-
-  ## Examples
-
-      iex> delete_automod_action(automod_action)
-      {:ok, %AutomodAction{}}
-
-      iex> delete_automod_action(automod_action)
-      {:error, %Ecto.Changeset{}}
-
-  """
-  @spec delete_automod_action(AutomodAction.t()) :: {:ok, AutomodAction.t()} | {:error, Ecto.Changeset.t()}
-  def delete_automod_action(%AutomodAction{} = automod_action) do
-    Repo.delete(automod_action)
-  end
-
-  @doc """
-  Returns an `%Ecto.Changeset{}` for tracking automod_action changes.
-
-  ## Examples
-
-      iex> change_automod_action(automod_action)
-      %Ecto.Changeset{source: %AutomodAction{}}
-
-  """
-  @spec change_automod_action(AutomodAction.t()) :: Ecto.Changeset.t()
-  def change_automod_action(%AutomodAction{} = automod_action) do
-    AutomodAction.changeset(automod_action, %{})
-  end
-
-  alias Teiserver.Account.BadgeType
-  alias Teiserver.Account.BadgeTypeLib
+  alias Teiserver.Account.{BadgeType, BadgeTypeLib}
 
   @spec badge_type_query(List.t()) :: Ecto.Query.t()
   def badge_type_query(args) do
@@ -1468,10 +1291,6 @@ defmodule Teiserver.Account do
 
   @spec decache_user(T.userid()) :: :ok | :no_user
   defdelegate decache_user(userid), to: UserCache
-
-  @spec unbridge_user(T.user(), String.t(), non_neg_integer(), String.t()) :: any
-  defdelegate unbridge_user(user, message, flagged_word_count, location), to: Teiserver.User
-
 
   # Client stuff
   alias Teiserver.Account.ClientLib

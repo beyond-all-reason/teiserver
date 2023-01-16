@@ -21,7 +21,4 @@ defmodule Teiserver.Data.Types do
   @type balance_server_state() :: map()
 
   @type party() :: Teiserver.Account.Party.t()
-
-  # Central stuff
-  @type report() :: Central.Account.Report.t()
 end
