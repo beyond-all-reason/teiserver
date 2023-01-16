@@ -255,7 +255,10 @@ defmodule Teiserver.Coordinator do
   def send_to_host(nil, _, _), do: :ok
   def send_to_host(from_id, lobby_id, msg) do
     lobby = Battle.get_lobby(lobby_id)
-    User.send_direct_message(from_id, lobby.founder_id, msg)
+    if lobby do
+      User.send_direct_message(from_id, lobby.founder_id, msg)
+    end
+    :ok
   end
 
   @spec send_to_user(T.userid(), String.t()) :: :ok

@@ -1,7 +1,8 @@
 defmodule Teiserver.Coordinator.ModerationTest do
   use Central.ServerCase, async: false
-  alias Teiserver.{User, Coordinator, Client}
+  alias Teiserver.{User, Coordinator, Client, Moderation}
   import Central.Helpers.TimexHelper, only: [date_to_str: 2]
+  alias Teiserver.Moderation.RefreshUserRestrictionsTask
 
   import Teiserver.TeiserverTestLib,
     only: [new_user: 0, tachyon_auth_setup: 1, _tachyon_send: 2, _tachyon_recv: 1]
@@ -20,24 +21,16 @@ defmodule Teiserver.Coordinator.ModerationTest do
     refute User.has_mute?(user.id)
     refute User.is_restricted?(user.id, ["Login"])
 
-    {:ok, report} = Central.Account.create_report(%{
-      "location" => "battle-lobby",
-      "location_id" => nil,
+    {:ok, action} = Moderation.create_action(%{
       "reason" => "login_with_warning_test",
-      "reporter_id" => moderator.id,
       "target_id" => user.id,
-      "response_text" => "login_with_warning_test",
-      "response_action" => "Restrict",
-      "action_data" => %{"restriction_list" => ["Warning reminder"]},
-      "followup" => "Additional actions",
-      "code_refernces" => ["1.1", "2.2"],
-      "expires" => Timex.now |> Timex.shift(days: 1),
-      "responder_id" => moderator.id
+      "restrictions" => ["Warning reminder"],
+      "score_modifier" => 0,
+      "expires" => Timex.now |> Timex.shift(days: 1)
     })
 
-    User.create_report(report, :create)
-    # Need to allow time for it to propagate
-    :timer.sleep(200)
+    User.new_moderation_action(action)
+    RefreshUserRestrictionsTask.refresh_user(user.id)
 
     # Did it take?
     assert User.has_warning?(user.id)
@@ -48,16 +41,14 @@ defmodule Teiserver.Coordinator.ModerationTest do
     %{socket: socket} = tachyon_auth_setup(user)
     :timer.sleep(200 + delay)
 
-    expires = date_to_str(report.expires, format: :ymd_hms)
+    expires = date_to_str(action.expires, format: :ymd_hms)
     [msg] = _tachyon_recv(socket)
     assert msg == %{
       "cmd" => "s.communication.received_direct_message",
       "message" => String.trim("""
 This is a reminder that you received one or more formal moderation actions as listed below:
  - login_with_warning_test, expires #{expires}
-If the behaviour continues one or more of the following actions may be performed:
-- Additional actions
-If you feel that you have been the target of an erroneous or unjust moderation action please contact the head of moderation, Beherith
+If you feel you have been the target of an erroneous or unjust moderation action please contact the head of moderation, Beherith
 Acknowledge this with 'I acknowledge this' to resume play
 """),
       "sender_id" => Coordinator.get_coordinator_userid()
