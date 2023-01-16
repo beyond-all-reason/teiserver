@@ -50,8 +50,6 @@
 
 <%= central_component "icon_dropdown_js", [] %>
 
-<%#= render CentralWeb.Account.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "notifications"})
-%>
 
 <%= central_component "picker_script",
   module: Central.Account.UserLib,
@@ -68,16 +66,16 @@
           <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
           <div class="row">
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-xl-2 mt-3">
               <label for="central-user-search" class="control-label">User:</label>
               <%= render CentralWeb.Account.UserView, "picker.html" %>
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
-              <%= central_component "fa5_icon_picker", %{form: :f, field: :icon, short_link: true, default: "fa-exclamation"} %>
+            <div class="col-md-4 col-xl-2 mt-3">
+              <%= central_component "fa5_icon_picker", %{form: nil, field: :icon, short_link: true, default: "fa-exclamation"} %>
             </div>
 
-            <div class="col-md-4 col-xl-2 search-form-input">
+            <div class="col-md-4 col-xl-2 mt-3">
               <label for="f_colour" class="control-label">Colour:</label>
               <%= central_component "icon_dropdown", %{
                   name: "f[colour]",
@@ -101,25 +99,27 @@
                 } %>
             </div>
 
-            <div class="col-md-4 col-xl-3 search-form-input">
+            <div class="col-md-4 col-xl-3 mt-3">
               <label for="f_title" class="control-label">Title:</label>
               <input type="text" name="f[title]" id="f_title" value="Test notification" class="form-control" />
             </div>
 
-            <div class="col-md-4 col-xl-3 search-form-input">
+            <div class="col-md-4 col-xl-3 mt-3">
               <label for="f_body" class="control-label">Body:</label>
               <input type="text" name="f[body]" id="f_body" value="This is a test notification" class="form-control" />
             </div>
 
-            <div class="col-md-4 col-xl-3 search-form-input">
+            <div class="col-md-4 col-xl-3 mt-3">
               <label for="f_url" class="control-label">Url:</label>
               <input type="text" name="f[url]" id="f_url" value={Routes.communication_notification_path(@conn, :handle_test)} class="form-control" />
             </div>
-          </div>
 
-          <span class="btn btn-success float-end" onclick="submit_form();">
-            Send notification
-          </span>
+            <div class="col-md-12 mt-3">
+              <span class="btn btn-success float-end" onclick="submit_form();">
+                Send notification
+              </span>
+            </div>
+          </div>
         </form>
         <div style="clear: both"></div>
         <br />
