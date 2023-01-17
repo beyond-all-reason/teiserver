@@ -12,7 +12,7 @@
             active: "day_metrics"
           })
         %>
-        
+
         <a href={Routes.ts_reports_server_metric_path(@conn, :day_metrics_list)} class={"btn float-end btn-outline-#{TeiserverWeb.Report.ServerMetricView.view_colour}"}>
           <%= central_component "icon", icon: TeiserverWeb.Report.ServerMetricView.icon %>
           &nbsp;
@@ -27,7 +27,7 @@
             Day by day metric logs - Row count: <%= Enum.count(@logs) %>
           <% end %>
         </h4>
-        <table class="table">
+        <table class="table table-sm">
           <thead>
             <tr>
               <th>Date</th>
