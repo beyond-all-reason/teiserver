@@ -177,15 +177,13 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
   end
 
   # Client inout
-  def handle_info({:client_inout, :login, userid}, state) do
+  def handle_info(%{channel: "client_inout", event: :login, userid: userid}, state) do
     delay = Config.get_site_config_cache("teiserver.Post login action delay")
     :timer.send_after(delay, {:do_client_inout, :login, userid})
 
     {:noreply, state}
   end
 
-  # p = Teiserver.Coordinator.get_coordinator_pid()
-  # send(p, {:do_client_inout, :login, 2563})
   def handle_info({:do_client_inout, :login, userid}, state) do
     user = User.get_user_by_id(userid)
     if user do
@@ -245,7 +243,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     end
     {:noreply, state}
   end
-  def handle_info({:client_inout, :disconnect, _userid, _reason}, state), do: {:noreply, state}
+  def handle_info(%{channel: "client_inout"}, state), do: {:noreply, state}
 
   # Special debugging to see what is being sent
   def handle_info({:timeout, duration}, state) do

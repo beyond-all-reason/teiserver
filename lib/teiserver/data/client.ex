@@ -129,7 +129,11 @@ defmodule Teiserver.Client do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_client_inout",
-      {:client_inout, :login, user.id}
+      %{
+        channel: "client_inout",
+        event: :login,
+        userid: user.id
+      }
     )
 
     PubSub.broadcast(
@@ -303,8 +307,14 @@ defmodule Teiserver.Client do
     PubSub.broadcast(
       Central.PubSub,
       "teiserver_client_inout",
-      {:client_inout, :disconnect, client.userid, reason}
+      %{
+        channel: "client_inout",
+        event: :disconnect,
+        userid: client.userid,
+        reason: reason
+      }
     )
+
 
     PubSub.broadcast(
       Central.PubSub,

@@ -65,12 +65,12 @@ defmodule Teiserver.Coordinator.AutomodServer do
     {:noreply, state}
   end
 
-  def handle_info({:client_inout, :login, userid}, state) do
+  def handle_info(%{channel: "client_inout", event: :login, userid: userid}, state) do
     delay = Config.get_site_config_cache("teiserver.Automod action delay") * 1000
     :timer.send_after(delay, {:check_user, userid})
     {:noreply, state}
   end
-  def handle_info({:client_inout, :disconnect, _userid, _reason}, state), do: {:noreply, state}
+  def handle_info(%{channel: "client_inout"}, state), do: {:noreply, state}
 
   # Catchall handle_info
   def handle_info(msg, state) do

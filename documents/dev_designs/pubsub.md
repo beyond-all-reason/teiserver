@@ -179,8 +179,17 @@ Updates specifically for liveview chat interfaces, due to the way messages are p
 #### teiserver_client_inout
 A message every time a user logs in or logs out. Unlike legacy all_user_updates it does not give any status updates.
 ```elixir
-  {:client_inout, :login, userid}
-  {:client_inout, :disconnect, userid, reason}
+%{
+  event: :login
+  userid: userid
+}
+
+%{
+  event: :disconnect
+  userid: userid,
+  reason: String
+}
+
 ```
 
 #### teiserver_client_messages:#{userid}

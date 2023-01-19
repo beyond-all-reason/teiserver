@@ -133,7 +133,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   # Client inout
-  def handle_info({:client_inout, :login, userid}, state) do
+  def handle_info(%{channel: "client_inout", event: :login, userid: userid}, state) do
     :timer.send_after(500, {:do_client_inout, :login, userid})
     {:noreply, state}
   end
