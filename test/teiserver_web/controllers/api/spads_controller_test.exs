@@ -143,6 +143,9 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
       response = response(conn, 200)
       data = Jason.decode!(response)
 
+      # Due to fuzzing of values we can see the imbalance indicator change
+      # It can go as high as 2
+      assert Enum.member?([2, 1, 0], data["unbalance_indicator"])
       assert data == %{
         "bot_assign_hash" => %{},
         "player_assign_hash" => %{
@@ -151,7 +154,7 @@ defmodule TeiserverWeb.API.SpadsControllerTest do
           "Crossbow" => %{"id" => 0, "team" => 1},
           "Dagger" => %{"id" => 2, "team" => 0}
         },
-        "unbalance_indicator" => 1
+        "unbalance_indicator" => data["unbalance_indicator"]
       }
     end
   end
