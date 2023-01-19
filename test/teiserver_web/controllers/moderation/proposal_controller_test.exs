@@ -2,7 +2,6 @@ defmodule TeiserverWeb.Moderation.ProposalControllerTest do
   @moduledoc false
   use CentralWeb.ConnCase
 
-  alias Teiserver.Agents.ModeratedAgentServer
   alias Teiserver.Moderation
   alias Teiserver.Moderation.ModerationTestLib
 
