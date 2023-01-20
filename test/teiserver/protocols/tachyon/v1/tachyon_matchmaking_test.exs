@@ -1185,6 +1185,9 @@ defmodule Teiserver.TachyonMatchmakingTest do
   end
 
   test "Test it works when not sending out invites" do
+    # There is a setting to not require an invite accept/decline, all
+    # the other tests assume it to be set to true, we need to test when
+    # it is set to fals
     flunk "Not done"
   end
 

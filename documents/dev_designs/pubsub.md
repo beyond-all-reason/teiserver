@@ -132,6 +132,9 @@ Valid events:
 
   # Client
   {:lobby_update, :updated_client_battlestatus, lobby_id, {Client, reason}}
+  
+  # Queue
+  {:lobby_update, :updated_queue, lobby_id, id_list}
 ```
 
 #### teiserver_liveview_client:#{client_id}

@@ -118,7 +118,6 @@ defmodule Teiserver.Battle.Lobby do
 
         # Consul flags
         consul_rename: false,
-        consul_balance: false,
 
         # Meta data
         silence: false,

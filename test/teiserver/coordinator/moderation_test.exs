@@ -10,11 +10,10 @@ defmodule Teiserver.Coordinator.ModerationTest do
   setup do
     Coordinator.start_coordinator()
     user = new_user()
-    moderator = new_user()
-    {:ok, user: user, moderator: moderator}
+    {:ok, user: user}
   end
 
-  test "login with warning", %{user: user, moderator: moderator} do
+  test "login with warning", %{user: user} do
     delay = Central.Config.get_site_config_cache("teiserver.Post login action delay")
 
     refute User.has_warning?(user.id)

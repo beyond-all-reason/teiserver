@@ -323,7 +323,17 @@ defmodule Teiserver.SpringTcpServer do
     {:noreply, new_state}
   end
 
-  # Battles
+  # Lobbies
+  def handle_info({:lobby_update, :updated_queue, lobby_id, id_list}, state) do
+    state.protocol_out.reply(:battle, :queue_status, {lobby_id, id_list}, nil, state)
+    {:noreply, state}
+  end
+
+  def handle_info({:lobby_update, _event, _lobby_id, _data}, state) do
+    {:noreply, state}
+  end
+
+  # Battles - Legacy
   def handle_info({:battle_updated, _lobby_id, data, reason}, state) do
     new_state = battle_update(data, reason, state)
     {:noreply, new_state}

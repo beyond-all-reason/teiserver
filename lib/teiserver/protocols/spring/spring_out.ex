@@ -7,7 +7,7 @@ defmodule Teiserver.Protocols.SpringOut do
   """
   require Logger
   alias Phoenix.PubSub
-  alias Teiserver.{User, Client, Room, Battle}
+  alias Teiserver.{User, Client, Room, Battle, Coordinator}
   alias Teiserver.Battle.Lobby
   alias Teiserver.Protocols.Spring
   alias Teiserver.Protocols.Spring.{BattleOut}
@@ -31,14 +31,14 @@ defmodule Teiserver.Protocols.SpringOut do
   def reply(namespace, reply_cmd, data, msg_id, state) do
     msg =
       case namespace do
-        :battle -> BattleOut.do_reply(reply_cmd, data)
+        :battle -> BattleOut.do_reply(reply_cmd, data, state)
         :spring -> do_reply(reply_cmd, data)
       end
 
     if Application.get_env(:central, Teiserver)[:extra_logging] == true or state.print_server_messages do
       if is_list(msg) do
         msg
-        |> Enum.map(fn m ->
+        |> Enum.each(fn m ->
           Logger.info("--> #{state.username}: #{Spring.format_log(m)}")
         end)
       else
@@ -569,6 +569,7 @@ defmodule Teiserver.Protocols.SpringOut do
   @spec do_leave_battle(map(), T.lobby_id()) :: map()
   def do_leave_battle(state, lobby_id) do
     PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{lobby_id}")
+    PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby_id}")
     state
   end
 
@@ -580,6 +581,10 @@ defmodule Teiserver.Protocols.SpringOut do
       Lobby.add_user_to_battle(state.userid, lobby.id, script_password)
       PubSub.unsubscribe(Central.PubSub, "legacy_battle_updates:#{lobby.id}")
       PubSub.subscribe(Central.PubSub, "legacy_battle_updates:#{lobby.id}")
+
+      PubSub.unsubscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
+      PubSub.subscribe(Central.PubSub, "teiserver_lobby_updates:#{lobby.id}")
+
       reply(:join_battle_success, lobby, nil, state)
       reply(:add_user_to_battle, {state.userid, lobby.id, script_password}, nil, state)
 
@@ -603,6 +608,11 @@ defmodule Teiserver.Protocols.SpringOut do
       end)
 
       reply(:request_battle_status, nil, nil, state)
+
+      # Queue status
+      id_list = Coordinator.call_consul(lobby.id, :queue_state)
+
+      reply(:battle, :queue_status, {lobby.id, id_list}, nil, state)
 
       %{state | lobby_id: lobby.id}
     else
@@ -766,8 +776,7 @@ defmodule Teiserver.Protocols.SpringOut do
         msg
         |> String.trim()
         |> String.split("\n")
-        |> Enum.map(fn m -> "#{msg_id} #{m}\n" end)
-        |> Enum.join("")
+        |> Enum.map_join("", fn m -> "#{msg_id} #{m}\n" end)
       else
         msg
       end

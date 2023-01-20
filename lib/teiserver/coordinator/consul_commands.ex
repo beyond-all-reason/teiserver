@@ -1,9 +1,8 @@
 defmodule Teiserver.Coordinator.ConsulCommands do
   require Logger
   alias Teiserver.Coordinator.{ConsulServer, RikerssMemes}
-  alias Teiserver.Game.MatchRatingLib
   alias Teiserver.{Account, Battle, Coordinator, User, Client}
-  alias Teiserver.Battle.{Lobby, LobbyChat, BalanceLib}
+  alias Teiserver.Battle.{Lobby, LobbyChat}
   alias Teiserver.Data.Types, as: T
   import Central.Helpers.NumberHelper, only: [int_parse: 1, round: 2]
 
@@ -105,8 +104,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       boss_string,
       "Maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
       play_level_bounds,
-      # "Level required to play is #{state.minimum_level_to_play}",
-      # "Level required to spectate is #{state.level_to_spectate}",
     ]
     |> Enum.filter(fn v -> v != nil end)
 
@@ -124,45 +121,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     |> Enum.filter(fn s -> s != nil end)
 
     Coordinator.send_to_user(senderid, status_msg)
-    state
-  end
-
-  def handle_command(%{command: "players", senderid: senderid} = _cmd, state) do
-    if state.consul_balance do
-      ConsulServer.set_skill_modoptions(state)
-
-      players = Battle.list_lobby_players(state.lobby_id)
-      # player_ids = players |> Enum.map(fn p -> p.userid end)
-      player_count = Enum.count(players)
-
-      rating_type = cond do
-        player_count == 2 -> "Duel"
-        state.host_teamcount > 2 ->
-          if player_count > state.host_teamcount, do: "Team FFA", else: "FFA"
-        true -> "Team"
-      end
-
-      rating_type_id = MatchRatingLib.rating_type_name_lookup()[rating_type]
-
-      player_stat_lines = players
-        |> Enum.map(fn player ->
-          rating_value = BalanceLib.get_user_rating_value(player.userid, rating_type_id)
-          {player, rating_value}
-        end)
-        |> Enum.sort_by(fn {_player, rating_value} -> rating_value end, &>=/2)
-        |> Enum.map(fn {player, rating_value} ->
-          "#{player.name}    #{round(rating_value, 2)}"
-        end)
-
-      msg = [
-        "#{@splitter} Player stats #{@splitter}",
-        player_stat_lines
-      ]
-      |> List.flatten
-      |> Enum.filter(fn s -> s != nil end)
-
-      Coordinator.send_to_user(senderid, msg)
-    end
     state
   end
 
@@ -358,9 +316,11 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         |> Map.keys()
         |> Enum.sort
         |> Enum.map(fn team_id ->
-          sum = balance.ratings[team_id] |> round
-          mean = balance.means[team_id] |> round
-          stdev = balance.stdevs[team_id] |> round(2)
+          # We default them to 0 because it's possible there is no data for a team
+          # if it's empty
+          sum = (balance.ratings[team_id] || 0) |> round(1)
+          mean = (balance.means[team_id] || 0) |> round(1)
+          stdev = (balance.stdevs[team_id] || 0) |> round(2)
           "Team #{team_id} - sum: #{sum}, mean: #{mean}, stdev: #{stdev}"
         end)
 
@@ -414,6 +374,8 @@ defmodule Teiserver.Coordinator.ConsulCommands do
           %{state | join_queue: state.join_queue ++ [senderid]}
         end
 
+        ConsulServer.queue_size_changed(new_state)
+
         new_queue = get_queue(new_state)
         pos = get_queue_position(new_queue, senderid) + 1
 
@@ -434,6 +396,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         join_queue: state.join_queue |> List.delete(senderid),
         low_priority_join_queue: state.low_priority_join_queue |> List.delete(senderid)
       }
+      |> ConsulServer.queue_size_changed
     else
       state
     end
@@ -487,21 +450,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     players = Lobby.list_lobby_players!(state.lobby_id)
     new_state = %{state | approved_users: players}
     ConsulServer.say_command(cmd, new_state)
-  end
-
-  def handle_command(%{command: "password", remaining: remaining}, state) do
-    remaining = String.trim(remaining)
-
-    case remaining do
-      "" ->
-        Battle.set_lobby_password(state.lobby_id, nil)
-        Lobby.sayex(state.coordinator_id, "Password removed", state.lobby_id)
-
-      _ ->
-        Battle.set_lobby_password(state.lobby_id, remaining)
-        Lobby.sayex(state.coordinator_id, "Password updated", state.lobby_id)
-    end
-    state
   end
 
   def handle_command(%{command: "resetplaylevels", remaining: ""} = cmd, state) do
@@ -845,46 +793,6 @@ defmodule Teiserver.Coordinator.ConsulCommands do
   end
 
   # ----------------- Moderation commands
-  def handle_command(%{command: "balance"} = cmd, state) do
-    lobby = Lobby.get_lobby(state.lobby_id)
-    if lobby.consul_balance do
-      send(self(), :balance)
-      ConsulServer.say_command(cmd, state)
-    end
-    state
-  end
-
-  def handle_command(%{command: "balancemode", remaining: type, senderid: senderid} = cmd, state) do
-    type = type
-      |> String.downcase()
-      |> String.trim()
-
-    case type do
-      "consul" ->
-        lobby = Lobby.get_lobby(state.lobby_id)
-        Lobby.update_lobby(%{lobby | consul_balance: true}, nil, :balance)
-        ConsulServer.say_command(cmd, state)
-        Lobby.sayex(state.coordinator_id, "Balance mode changed to Consul mode", state.lobby_id)
-
-        :timer.send_after(500, :consul_balance_enabled)
-
-        new_locks = [:team | state.locks] |> Enum.uniq
-        %{state | locks: new_locks, consul_balance: true}
-
-      "spads" ->
-        lobby = Lobby.get_lobby(state.lobby_id)
-        Lobby.update_lobby(%{lobby | consul_balance: false}, nil, :balance)
-        ConsulServer.say_command(cmd, state)
-        Lobby.sayex(state.coordinator_id, "Balance mode changed to SPADS mode", state.lobby_id)
-
-        new_locks = List.delete(state.locks, :team)
-        %{state | locks: new_locks, consul_balance: false}
-      _ ->
-        LobbyChat.sayprivateex(state.coordinator_id, senderid, "No balancemode of that name, accepts consul and spads", state.lobby_id)
-        state
-    end
-  end
-
   def handle_command(%{command: "speclock", remaining: target} = cmd, state) do
     case ConsulServer.get_user(target, state) do
       nil ->

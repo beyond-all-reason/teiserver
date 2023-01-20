@@ -357,6 +357,8 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
         "Tried grouped mode, got a deviation of 100 and reverted to solo mode",
         "Picked #{player.name} for team 1, adding 16.67 points for new total of 16.67",
         "Deviation of: 100",
+        "Team 1 - sum: 16.7, mean: 16.7, stdev: 0.0",
+        "Team 2 - sum: 0.0, mean: 0.0, stdev: 0.0",
         "Time taken: #{balance_result.time_taken}us",
         "---------------------------"
       ] |> Enum.join("\n"),
@@ -453,25 +455,6 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
 
     assert Coordinator.call_consul(lobby_id, {:get, :minimum_level_to_play}) == 0
     assert Coordinator.call_consul(lobby_id, {:get, :maximum_level_to_play}) == 1000
-  end
-
-  test "leveltospectate", %{lobby_id: lobby_id, hsocket: hsocket} do
-    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_spectate})
-    assert setting == 0
-
-    data = %{cmd: "c.lobby.message", message: "$leveltospectate 3"}
-    _tachyon_send(hsocket, data)
-    :timer.sleep(500)
-
-    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_spectate})
-    assert setting == 3
-
-    data = %{cmd: "c.lobby.message", message: "$leveltospectate Xy"}
-    _tachyon_send(hsocket, data)
-    :timer.sleep(500)
-
-    setting = Coordinator.call_consul(lobby_id, {:get, :level_to_spectate})
-    assert setting == 3
   end
 
   test "timeout", %{host: host, player: player, hsocket: hsocket, lobby_id: lobby_id} do
@@ -714,7 +697,7 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     assert Battle.get_lobby(lobby_id).name == "New Lobby Name::?"
   end
 
-  test "password and password?", %{lobby_id: lobby_id, hsocket: hsocket} do
+  test "password? weth no password", %{lobby_id: lobby_id, hsocket: hsocket} do
     coordinator_id = Coordinator.get_coordinator_userid()
 
     _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password?"})
@@ -726,58 +709,6 @@ defmodule Teiserver.Coordinator.ConsulCommandsTest do
     }
     assert Battle.get_lobby(lobby_id).password == nil
     assert Battle.get_lobby(lobby_id).passworded == false
-
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password abcdef"})
-    [reply] = _tachyon_recv(hsocket)
-    assert reply == %{
-      "cmd" => "s.lobby.update_values",
-      "new_values" => %{"passworded" => true},
-      "lobby_id" => lobby_id
-    }
-    assert Battle.get_lobby(lobby_id).password == "abcdef"
-    assert Battle.get_lobby(lobby_id).passworded == true
-
-    [reply] = _tachyon_recv(hsocket)
-    assert reply == %{
-      "cmd" => "s.lobby.announce",
-      "message" => "Password updated",
-      "sender_id" => coordinator_id,
-      "lobby_id" => lobby_id
-    }
-
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password?"})
-    [reply] = _tachyon_recv(hsocket)
-    assert reply == %{
-      "cmd" => "s.lobby.received_lobby_direct_announce",
-      "message" => "The lobby password is currently: abcdef",
-      "sender_id" => coordinator_id
-    }
-
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password"})
-    [reply] = _tachyon_recv(hsocket)
-    assert reply == %{
-      "cmd" => "s.lobby.update_values",
-      "new_values" => %{"passworded" => false},
-      "lobby_id" => lobby_id
-    }
-    assert Battle.get_lobby(lobby_id).password == nil
-    assert Battle.get_lobby(lobby_id).passworded == false
-
-    [reply] = _tachyon_recv(hsocket)
-    assert reply == %{
-      "cmd" => "s.lobby.announce",
-      "message" => "Password removed",
-      "sender_id" => coordinator_id,
-      "lobby_id" => lobby_id
-    }
-
-    _tachyon_send(hsocket, %{cmd: "c.lobby.message", message: "$password?"})
-    [reply] = _tachyon_recv(hsocket)
-    assert reply == %{
-      "cmd" => "s.lobby.received_lobby_direct_announce",
-      "message" => "This lobby has no password set",
-      "sender_id" => coordinator_id
-    }
   end
 
   test "passthrough", %{hsocket: hsocket, listener: listener} do

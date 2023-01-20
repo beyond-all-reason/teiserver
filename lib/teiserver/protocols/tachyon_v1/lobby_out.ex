@@ -138,6 +138,14 @@ defmodule Teiserver.Protocols.Tachyon.V1.LobbyOut do
     }
   end
 
+  def do_reply(:updated_queue, {lobby_id, id_list}) do
+    %{
+      "cmd" => "s.lobby.updated_queue",
+      "lobby_id" => lobby_id,
+      "queue" => id_list
+    }
+  end
+
   ###########
   # Start area updates
   def do_reply(:add_start_area, {lobby_id, {area_id, structure}}) do
