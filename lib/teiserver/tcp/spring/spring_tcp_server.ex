@@ -116,6 +116,7 @@ defmodule Teiserver.SpringTcpServer do
       exempt_from_cmd_throttle: false,
       cmd_timestamps: [],
       status_timestamps: [],
+      app_status: nil,
 
       # Caching app configs
       flood_rate_limit_count: Config.get_site_config_cache("teiserver.Spring flood rate limit count"),
