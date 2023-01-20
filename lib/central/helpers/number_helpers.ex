@@ -105,4 +105,14 @@ defmodule Central.Helpers.NumberHelper do
   #     Decimal.add(Map.get(obj, key), acc)
   #   end)
   # end
+
+  @spec percent(number) :: integer
+  def percent(v) do
+    round(v * 100)
+  end
+
+  @spec percent(number, number) :: number
+  def percent(v, dp) do
+    round(v * 100, dp)
+  end
 end

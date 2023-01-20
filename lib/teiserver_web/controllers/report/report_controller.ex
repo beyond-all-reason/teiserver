@@ -24,6 +24,7 @@ defmodule TeiserverWeb.Report.ReportController do
         "ranks" -> Teiserver.Account.RanksReport
         "verified" -> Teiserver.Account.VerifiedReport
         "retention" -> Teiserver.Account.RetentionReport
+        "population" -> Teiserver.Account.PopulationReport
         "new_user_funnel" -> Teiserver.Account.NewUserFunnelReport
         "accolades" -> Teiserver.Account.AccoladeReport
         "mutes" -> Teiserver.Account.MuteReport
@@ -39,13 +40,15 @@ defmodule TeiserverWeb.Report.ReportController do
       end
 
     if allow?(conn.current_user, module.permissions) do
-      {data, assigns} = module.run(conn, params)
+      assigns = case module.run(conn, params) do
+        {data, assigns} -> Map.put(assigns, :data, data)
+        assigns -> assigns
+      end
 
       assigns
         |> Enum.reduce(conn, fn {key, value}, conn ->
           assign(conn, key, value)
         end)
-        |> assign(:data, data)
         |> add_breadcrumb(name: name |> String.capitalize() |> String.replace("_", " "), url: conn.request_path)
         |> render("#{name}.html")
     else

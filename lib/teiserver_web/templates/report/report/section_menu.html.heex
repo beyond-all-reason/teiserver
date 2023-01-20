@@ -55,6 +55,17 @@
   %>
 <% end %>
 
+<%= if allow?(@current_user, Teiserver.Account.PopulationReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "population",
+    label: "Population",
+    active: @active,
+    icon: Teiserver.Account.PopulationReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "population")
+  %>
+<% end %>
+
 <%= if allow?(@current_user, Teiserver.Account.NewUserFunnelReport.permissions()) do %>
   <%= central_component "section_menu_button",
     name: "new_user_funnel",
