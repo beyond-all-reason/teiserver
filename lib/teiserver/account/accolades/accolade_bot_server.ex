@@ -71,7 +71,7 @@ defmodule Teiserver.Account.AccoladeBotServer do
   end
 
   # Match ending
-  def handle_info({:global_match_updates, :match_completed, match_id}, state) do
+  def handle_info(%{channel: "global_match_updates", event: :match_completed, match_id: match_id}, state) do
     case Battle.get_match(match_id) do
       nil ->
         nil
@@ -88,7 +88,9 @@ defmodule Teiserver.Account.AccoladeBotServer do
 
     {:noreply, state}
   end
-  def handle_info({:global_match_updates, _, _}, state), do: {:noreply, state}
+  def handle_info(%{channel: "global_match_updates"}, state) do
+    {:noreply, state}
+  end
 
   # Direct/Room messaging
   def handle_info({:add_user_to_room, _userid, _room_name}, state), do: {:noreply, state}

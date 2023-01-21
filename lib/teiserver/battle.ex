@@ -296,7 +296,11 @@ defmodule Teiserver.Battle do
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_global_match_updates",
-          {:global_match_updates, :match_completed, match.id}
+          %{
+            channel: "teiserver_global_match_updates",
+            event: :match_completed,
+            match_id: match.id
+          }
         )
       _ ->
         :ok
