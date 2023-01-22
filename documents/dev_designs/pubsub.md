@@ -343,14 +343,41 @@ Gives information about the activities of a client without containing anything p
 ```
 
 #### teiserver_client_action_updates:#{userid}
-Informs about actions performed by a specific client
-Aside from connect/disconnect there should always be the structure of `{:client_action, :join_queue, userid, data}`
+Informs about actions performed by a specific client, designed to be used to keep the browser and client applications in sync where appropriate.
 ```elixir
-  {:client_action, :client_connect, userid}
-  {:client_action, :client_disconnect, userid}
+%{
+  event: :connected,
+  userid: userid
+}
 
-  {:client_action, :join_lobby, userid, lobby_id}
-  {:client_action, :leave_lobby, userid, lobby_id}
+%{
+  event: :disconnected,
+  userid: userid
+}
+
+%{
+  event: :joined_lobby,
+  userid: userid,
+  lobby_id: lobby_id
+}
+
+%{
+  event: :left_lobby,
+  userid: userid,
+  lobby_id: lobby_id
+}
+
+%{
+  event: :joined_queue,
+  userid: userid,
+  queue_id: queue_id
+}
+
+%{
+  event: :left_queue,
+  userid: userid,
+  queue_id: queue_id
+}
 ```
 
 #### teiserver_client_application:#{userid}

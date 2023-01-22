@@ -156,7 +156,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
 
   # Client action
-  def handle_info({:client_action, :join_queue, _userid, queue_id}, %{assigns: assigns} = socket) do
+  def handle_info(%{channel: "teiserver_client_action_updates:" <> _, event: :joined_queue, queue_id: queue_id}, %{assigns: assigns} = socket) do
     new_queue_membership = [queue_id | assigns[:queue_membership]]
       |> Enum.uniq
 
@@ -165,7 +165,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     |> assign(:queue_membership, new_queue_membership)}
   end
 
-  def handle_info({:client_action, :leave_queue, _userid, queue_id}, %{assigns: assigns} = socket) do
+  def handle_info(%{channel: "teiserver_client_action_updates:" <> _, event: :left_queue, queue_id: queue_id}, %{assigns: assigns} = socket) do
     new_queue_membership = List.delete(assigns[:queue_membership], queue_id)
 
     {:noreply,
@@ -173,14 +173,16 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
       |> assign(:queue_membership, new_queue_membership)}
   end
 
-  def handle_info({:client_action, :client_connect, _userid}, socket) do
+  def handle_info(%{channel: "teiserver_client_action_updates:" <> _, event: :connected}, socket) do
     {:noreply,
       socket
         |> assign(:client, Client.get_client_by_id(socket.assigns[:current_user].id))
     }
   end
 
-  def handle_info({:client_action, :client_disconnect, userid}, socket) do
+  def handle_info(%{channel: "teiserver_client_action_updates:" <> _, event: :disconnected}, socket) do
+    userid = socket.assigns[:current_user].id
+
     socket.assigns[:queue_membership]
       |> Enum.each(fn queue_id ->
         Matchmaking.remove_group_from_queue(queue_id, userid)
@@ -192,7 +194,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     }
   end
 
-  def handle_info({:client_action, _topic, _userid, _data}, socket) do
+  def handle_info(%{channel: "teiserver_client_action_updates:" <> _}, socket) do
     {:noreply, socket}
   end
 

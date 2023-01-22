@@ -1,5 +1,4 @@
 defmodule TeiserverWeb.Report.MatchMetricView do
-  alias Central.Helpers.NumberHelper
   use TeiserverWeb, :view
 
   @spec view_colour :: atom

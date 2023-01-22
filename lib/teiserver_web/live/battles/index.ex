@@ -95,21 +95,21 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   # Client action
-  def handle_info({:client_action, :client_connect, _userid}, socket) do
+  def handle_info(%{channel: "teiserver_client_action_updates:" <> _, event: :connected}, socket) do
     {:noreply,
       socket
         |> assign(:client, Account.get_client_by_id(socket.assigns[:current_user].id))
     }
   end
 
-  def handle_info({:client_action, :client_disconnect, _userid}, socket) do
+  def handle_info(%{channel: "teiserver_client_action_updates:" <> _, event: :disconnected}, socket) do
     {:noreply,
       socket
         |> assign(:client, nil)
     }
   end
 
-  def handle_info({:client_action, _topic, _userid, _data}, socket) do
+  def handle_info(%{channel: "teiserver_client_action_updates:" <> _}, socket) do
     {:noreply, socket}
   end
 

@@ -219,7 +219,12 @@ defmodule Teiserver.Battle.Lobby do
       PubSub.broadcast(
         Central.PubSub,
         "teiserver_client_action_updates:#{userid}",
-        {:client_action, :join_lobby, userid, lobby_id}
+        %{
+          channel: "teiserver_client_action_updates:#{userid}",
+          event: :joined_lobby,
+          userid: userid,
+          lobby_id: lobby_id
+        }
       )
 
       PubSub.broadcast(
@@ -289,7 +294,12 @@ defmodule Teiserver.Battle.Lobby do
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_client_action_updates:#{userid}",
-          {:client_action, :leave_lobby, userid, lobby_id}
+          %{
+            channel: "teiserver_client_action_updates:#{userid}",
+            event: :left_lobby,
+            userid: userid,
+            lobby_id: lobby_id
+          }
         )
 
         PubSub.broadcast(
