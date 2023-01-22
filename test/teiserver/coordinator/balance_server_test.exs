@@ -408,9 +408,9 @@ defmodule Teiserver.Coordinator.BalanceServerTest do
     %{user: u4} = ps4 = new_user("Team_FFA_Destroyer") |> tachyon_auth_setup()
     %{user: u5} = ps5 = new_user("Team_FFA_Eagle") |> tachyon_auth_setup()
     %{user: u6} = ps6 = new_user("Team_FFA_Fury") |> tachyon_auth_setup()
-    %{user: u7} = ps7 = new_user("Team_Garpike") |> tachyon_auth_setup()
-    %{user: u8} = ps8 = new_user("Team_Hound") |> tachyon_auth_setup()
-    %{user: u9} = ps9 = new_user("Team_Incisor") |> tachyon_auth_setup()
+    %{user: u7} = ps7 = new_user("Team_FFA_Garpike") |> tachyon_auth_setup()
+    %{user: u8} = ps8 = new_user("Team_FFA_Hound") |> tachyon_auth_setup()
+    %{user: u9} = ps9 = new_user("Team_FFA_Incisor") |> tachyon_auth_setup()
 
     rating_type_id = MatchRatingLib.rating_type_name_lookup()["Team"]
 

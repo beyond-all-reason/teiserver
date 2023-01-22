@@ -87,7 +87,7 @@ Limited information pertaining to the creation/deletion of battle lobbies.
 }
 ```
 
-#### teiserver_global_match_updates
+#### global_match_updates
 Used to communicate information to everybody regarding matches.
 ```elixir
 %{
