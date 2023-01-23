@@ -124,11 +124,12 @@
         Add rename
       </div>
 
-      <div class={"btn btn-outline-#{bsname} btn-block"} onclick="
+      <% name = Application.get_env(:central, Teiserver)[:server_admin_name] %>
+      <div class={"btn btn-outline-#{bsname} btn-block"} onclick={"
         $('#action_restriction_Warning_reminder').prop('checked', true);
-        $('#action_reason').val('Smurf accounts are not allowed.');
+        $('#action_reason').val('Smurf accounts are not allowed, if you need an exemption for some reason please talk to #{name}.');
         $('#action_expires').val('1 day');
-      ">
+      "}>
         Add smurf warning
       </div>
 

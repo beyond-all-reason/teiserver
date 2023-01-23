@@ -61,6 +61,7 @@ config :central, Teiserver,
   heartbeat_timeout: 120,
   test_mode: false,
 
+  server_admin_name: "Server Admin",
   game_name: "Full game name",
   game_name_short: "Game",
   main_website: "https://site.com/",
