@@ -77,7 +77,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
         }
       })
 
-    match_listener = PubsubListener.new_listener(["teiserver_queue_match:#{queue.id}"])
+    match_listener = PubsubListener.new_listener(["teiserver_queue:#{queue.id}"])
     queue = Matchmaking.get_queue(queue.id)
 
     %{socket: socket2, user: user2} = tachyon_auth_setup()

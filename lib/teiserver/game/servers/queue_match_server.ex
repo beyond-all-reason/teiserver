@@ -15,6 +15,7 @@ defmodule Teiserver.Game.QueueMatchServer do
 
   @tick_interval 500
   @ready_wait_time 30_000
+  @find_timeout 5_000
 
   @impl true
   def handle_cast({:player_accept, player_id}, state) when is_integer(player_id) do
@@ -113,6 +114,16 @@ defmodule Teiserver.Game.QueueMatchServer do
     {:noreply, state}
   end
 
+  # :find_timeout
+  def handle_info(:find_timeout, %{stage: "Finding empty lobby"} = state) do
+    Logger.info("QueueMatchServer match cancelled #{state.match_id} because find timeout")
+    cancel_match(state)
+  end
+
+  def handle_info(:find_timeout, state) do
+    {:noreply, state}
+  end
+
   def handle_info({:update, :settings, new_list}, state),
     do: {:noreply, %{state | settings: new_list}}
 
@@ -173,7 +184,20 @@ defmodule Teiserver.Game.QueueMatchServer do
     # The rest get removed
     state.group_list
       |> Enum.reject(fn group -> Enum.member?(accepted_groups, group.id) end)
-      |> Enum.map(fn group -> group.members end)
+      |> Enum.map(fn group ->
+        PubSub.broadcast(
+          Central.PubSub,
+          "teiserver_queue:#{state.queue_id}",
+          %{
+            channel: "teiserver_queue:#{state.queue_id}",
+            event: :queue_remove_group,
+            queue_id: state.queue_id,
+            group_id: group.id
+          }
+        )
+
+        group.members
+      end)
       |> List.flatten
       |> Enum.each(fn userid ->
         PubSub.broadcast(
@@ -186,12 +210,6 @@ defmodule Teiserver.Game.QueueMatchServer do
             queue_id: state.queue_id,
             match_id: state.match_id
           }
-        )
-
-        PubSub.broadcast(
-          Central.PubSub,
-          "teiserver_queue_wait:#{state.queue_id}",
-          {:queue_wait, :queue_remove_user, state.queue_id, userid}
         )
       end)
 
@@ -341,8 +359,13 @@ defmodule Teiserver.Game.QueueMatchServer do
 
         PubSub.broadcast(
           Central.PubSub,
-          "teiserver_queue_wait:#{state.queue_id}",
-          {:queue_match, :match_made, state.queue_id, lobby.id}
+          "teiserver_queue:#{state.queue_id}",
+          %{
+            channel: "teiserver_queue:#{state.queue_id}",
+            event: :match_made,
+            queue_id: state.queue_id,
+            lobby_id: lobby.id
+          }
         )
     end
 
@@ -384,6 +407,7 @@ defmodule Teiserver.Game.QueueMatchServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
     send(self(), :initial_setup)
+    Process.send_after(self(), :find_timeout, @find_timeout)
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
@@ -394,8 +418,13 @@ defmodule Teiserver.Game.QueueMatchServer do
 
     PubSub.broadcast(
       Central.PubSub,
-      "teiserver_queue_match:#{opts.queue_id}",
-      {:queue_wait, :match_attempt, opts.queue_id, opts.match_id}
+      "teiserver_queue:#{opts.queue_id}",
+      %{
+        channel: "teiserver_queue:#{opts.queue_id}",
+        event: :match_attempt,
+        queue_id: opts.queue_id,
+        match_id: opts.match_id
+      }
     )
 
     user_ids = opts.group_list

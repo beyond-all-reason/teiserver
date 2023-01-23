@@ -53,8 +53,13 @@ defmodule Teiserver.Game.QueueWaitServer do
 
           PubSub.broadcast(
             Central.PubSub,
-            "teiserver_queue_wait:#{state.queue_id}",
-            {:queue_wait, :queue_add_user, state.queue_id, group.id}
+            "teiserver_queue:#{state.queue_id}",
+            %{
+              channel: "teiserver_queue:#{state.queue_id}",
+              event: :queue_add_group,
+              queue_id: state.queue_id,
+              group_id: group.id
+            }
           )
 
           group.members
@@ -85,8 +90,13 @@ defmodule Teiserver.Game.QueueWaitServer do
 
           PubSub.broadcast(
             Central.PubSub,
-            "teiserver_queue_wait:#{state.queue_id}",
-            {:queue_wait, :queue_remove_group, state.queue_id, group_id}
+            "teiserver_queue:#{state.queue_id}",
+            %{
+              channel: "teiserver_queue:#{state.queue_id}",
+              event: :queue_remove_group,
+              queue_id: state.queue_id,
+              group_id: group_id
+            }
           )
 
           state.groups_map[group_id]
@@ -150,8 +160,13 @@ defmodule Teiserver.Game.QueueWaitServer do
 
           PubSub.broadcast(
             Central.PubSub,
-            "teiserver_queue_wait:#{state.queue_id}",
-            {:queue_wait, :queue_add_user, state.queue_id, group.id}
+            "teiserver_queue:#{state.queue_id}",
+            %{
+              channel: "teiserver_queue:#{state.queue_id}",
+              event: :queue_add_group,
+              queue_id: state.queue_id,
+              group_id: group.id
+            }
           )
 
           group.members

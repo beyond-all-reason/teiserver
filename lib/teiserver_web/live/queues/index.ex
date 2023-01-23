@@ -23,8 +23,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
     db_queues = Game.list_queues()
       |> Map.new(fn queue ->
-        :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue_wait:#{queue.id}")
-        :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue_match:#{queue.id}")
+        :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue:#{queue.id}")
 
         {queue.id, queue}
       end)
@@ -120,40 +119,9 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     }
   end
 
-  # Queue wait
-  def handle_info({:queue_wait, :queue_add_user, _queue_id, _userid}, socket) do
+  def handle_info(%{channel: "teiserver_queue:" <> _}, socket) do
     {:noreply, socket}
   end
-
-  def handle_info({:queue_wait, :queue_remove_user, queue_id, userid}, socket) do
-    new_queue_membership = if userid == socket.assigns.current_user.id do
-      socket.assigns.queue_membership
-        |> List.delete(queue_id)
-    else
-      socket.assigns.queue_membership
-    end
-
-    {:noreply, socket |> assign(:queue_membership, new_queue_membership)}
-  end
-
-  def handle_info({:queue_wait, :match_attempt, _queue_id, _match_id}, socket) do
-    {:noreply, socket}
-  end
-
-  # Queue match
-  def handle_info({:queue_match, :match_attempt, _queue_id, _lobby_id}, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_info({:queue_match, :match_made, _queue_id, _lobby_id}, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_info({:queue_wait, :queue_remove_group, _queue_id, _userid}, socket) do
-    {:noreply, socket}
-  end
-
-
 
   # Client action
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :joined_queue, queue_id: queue_id}, %{assigns: assigns} = socket) do

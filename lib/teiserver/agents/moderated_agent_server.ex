@@ -101,61 +101,31 @@ defmodule Teiserver.Agents.ModeratedAgentServer do
 
   defp create_action(user, "Warning") do
     {:ok, _report} = Moderation.create_action(%{
-      "location" => "web-admin-instant",
-      "location_id" => nil,
-      "reason" => "Agent mode test",
-      "reporter_id" => Coordinator.get_coordinator_userid(),
-      "target_id" => user.id,
-      "response_text" => "Agent mode test",
-      "response_action" => "Restrict",
-      "responded_at" => Timex.now(),
-      "followup" => "",
-      "code_references" => [],
-      "expires" => nil,
-      "responder_id" => Coordinator.get_coordinator_userid(),
-      "action_data" => %{
-        "restriction_list" => ["Warning reminder"]
-      }
+      target_id: user.id,
+      reason: "Agent mode test",
+      restrictions: ["Warning reminder"],
+      score_modifier: 0,
+      expires: Timex.now() |> Timex.shift(years: 1000)
     })
   end
 
   defp create_action(user, "Mute") do
     {:ok, _report} = Moderation.create_action(%{
-      "location" => "web-admin-instant",
-      "location_id" => nil,
-      "reason" => "Agent mode test",
-      "reporter_id" => Coordinator.get_coordinator_userid(),
-      "target_id" => user.id,
-      "response_text" => "Agent mode test",
-      "response_action" => "Restrict",
-      "responded_at" => Timex.now(),
-      "followup" => "",
-      "code_references" => [],
-      "expires" => nil,
-      "responder_id" => Coordinator.get_coordinator_userid(),
-      "action_data" => %{
-        "restriction_list" => ["All chat"]
-      }
+      target_id: user.id,
+      reason: "Agent mode test",
+      restrictions: ["All chat"],
+      score_modifier: 0,
+      expires: Timex.now() |> Timex.shift(years: 1000)
     })
   end
 
   defp create_action(user, "Ban") do
     {:ok, _report} = Moderation.create_action(%{
-      "location" => "web-admin-instant",
-      "location_id" => nil,
-      "reason" => "Agent mode test",
-      "reporter_id" => Coordinator.get_coordinator_userid(),
-      "target_id" => user.id,
-      "response_text" => "Agent mode test",
-      "response_action" => "Restrict",
-      "responded_at" => Timex.now(),
-      "followup" => "",
-      "code_references" => [],
-      "expires" => nil,
-      "responder_id" => Coordinator.get_coordinator_userid(),
-      "action_data" => %{
-        "restriction_list" => ["Login", "Site"]
-      }
+      target_id: user.id,
+      reason: "Agent mode test",
+      restrictions: ["Login", "Site"],
+      score_modifier: 0,
+      expires: Timex.now() |> Timex.shift(years: 1000)
     })
   end
 

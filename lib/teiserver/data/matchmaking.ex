@@ -309,7 +309,7 @@ defmodule Teiserver.Data.Matchmaking do
   def remove_group_from_queue(queue_id, userid) when is_integer(userid) do
     client = Account.get_client_by_id(userid)
 
-    if client.party_id do
+    if client != nil and client.party_id do
       party = Account.get_party(client.party_id)
       if party.leader == userid do
         do_remove_group_from_queue(party.id, queue_id)

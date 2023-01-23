@@ -11,7 +11,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
 
   @map_hash "1565299817"
   @game_hash "156940380"
-  @game_name "Beyond All Reason test-21960-4e943b5"
+  @game_name "Beyond All Reason test-22066-2652edb"
   @engine_version "105.1.1-1354-g72b2d55 BAR105"
 
   def handle_info(:startup, state) do
@@ -94,6 +94,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   defp handle_msg(%{"cmd" => "s.lobby.updated"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.updated_client_battlestatus"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.set_modoptions"}, state), do: state
+  defp handle_msg(%{"cmd" => "s.lobby.remove_modoptions"}, state), do: state
   defp handle_msg(%{"cmd" => "s.lobby.update_values"}, state), do: state
 
   defp open_battle(state) do

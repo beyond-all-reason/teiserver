@@ -407,18 +407,34 @@ Valid events
 All updates about the room and content for the room. Likely to be kept as is and renamed as a teiserver channel due to its nature.
 
 ### Matchmaking
-#### teiserver_queue_wait:#{queue_id}
+#### teiserver_queue:#{queue_id}
 Sent from the queue wait server to update regarding it's status
 Valid events
 ```elixir
-  {:queue_wait, :queue_add_user, queue_id, userid}
-  {:queue_wait, :queue_remove_user, queue_id, userid}
-  
-  {:queue_wait, :queue_add_party, queue_id, party_id}
-  {:queue_wait, :queue_remove_party, queue_id, party_id}
+%{
+  event: :queue_add_group,
+  queue_id: queue_id
+  group_id: group_id
+}
 
-  {:queue_match, :match_attempt, queue_id, match_id}
-  {:queue_match, :match_made, queue_id, lobby_id}
+%{
+  event: :queue_remove_group,
+  queue_id: queue_id
+  group_id: group_id
+}
+
+
+%{
+  event: :match_attempt,
+  queue_id: queue_id,
+  match_id: match_id
+}
+
+%{
+  event: :match_made,
+  queue_id: queue_id,
+  lobby_id: lobby_id
+}
 ```
 
 #### teiserver_queue_all_queues
