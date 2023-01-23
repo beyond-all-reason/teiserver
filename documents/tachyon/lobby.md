@@ -274,6 +274,16 @@ Sent by the server to inform of a new player joining the lobby.
 ### TODO: s.lobby.received_lobby_direct_announce
 Sent by the server to inform of an announcement made in the room
 
+### s.lobby.updated_queue
+Sent by the server when the queue of players waiting to join changes
+```json
+{
+  "cmd": "s.lobby.updated_queue",
+  "lobby_id": 650,
+  "queue": [4239, 24215, 2183, 25341, 180, 36798, 7102, 14643, 22882]
+}
+```
+
 ## Bots
 The responses listed here are the messages which will be sent when any bot is added, updated or removed. The bot commands do not have a success/failure response.
 
