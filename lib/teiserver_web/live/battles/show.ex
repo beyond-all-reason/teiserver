@@ -63,7 +63,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_liveview_lobby_updates:#{id}")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_user_updates:#{current_user.id}")
     lobby = Battle.get_lobby(id)
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_action_updates:#{socket.assigns[:current_user].id}")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{socket.assigns[:current_user].id}")
 
     cond do
       lobby == nil ->

@@ -156,7 +156,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
 
   # Client action
-  def handle_info(%{channel: "teiserver_client_action_updates:" <> _, event: :joined_queue, queue_id: queue_id}, %{assigns: assigns} = socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :joined_queue, queue_id: queue_id}, %{assigns: assigns} = socket) do
     new_queue_membership = [queue_id | assigns[:queue_membership]]
       |> Enum.uniq
 
@@ -165,7 +165,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     |> assign(:queue_membership, new_queue_membership)}
   end
 
-  def handle_info(%{channel: "teiserver_client_action_updates:" <> _, event: :left_queue, queue_id: queue_id}, %{assigns: assigns} = socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :left_queue, queue_id: queue_id}, %{assigns: assigns} = socket) do
     new_queue_membership = List.delete(assigns[:queue_membership], queue_id)
 
     {:noreply,
@@ -173,14 +173,14 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
       |> assign(:queue_membership, new_queue_membership)}
   end
 
-  def handle_info(%{channel: "teiserver_client_action_updates:" <> _, event: :connected}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
     {:noreply,
       socket
         |> assign(:client, Client.get_client_by_id(socket.assigns[:current_user].id))
     }
   end
 
-  def handle_info(%{channel: "teiserver_client_action_updates:" <> _, event: :disconnected}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
     userid = socket.assigns[:current_user].id
 
     socket.assigns[:queue_membership]
@@ -194,11 +194,6 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     }
   end
 
-  def handle_info(%{channel: "teiserver_client_action_updates:" <> _}, socket) do
-    {:noreply, socket}
-  end
-
-  # Client message
   def handle_info(%{
     channel: "teiserver_client_messages:" <> _userid_str,
     event: :matchmaking,
@@ -247,7 +242,6 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
   defp apply_action(socket, :index, _params) do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{socket.assigns[:current_user].id}")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_action_updates:#{socket.assigns[:current_user].id}")
 
     socket
     |> assign(:page_title, "Listing Battles")

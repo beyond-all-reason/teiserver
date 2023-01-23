@@ -154,16 +154,6 @@ defmodule Teiserver.Client do
       }
     )
 
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_client_action_updates:#{user.id}",
-      %{
-        channel: "teiserver_client_action_updates:#{user.id}",
-        event: :connected,
-        userid: user.id
-      }
-    )
-
     # Message logging
     if user.print_client_messages do
       enable_client_message_print(user.id)
@@ -300,16 +290,6 @@ defmodule Teiserver.Client do
       Central.PubSub,
       "legacy_all_user_updates",
       {:user_logged_out, client.userid, client.name}
-    )
-
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_client_action_updates:#{client.userid}",
-      %{
-        channel: "teiserver_client_action_updates:#{client.userid}",
-        event: :disconnected,
-        userid: client.userid
-      }
     )
 
     PubSub.broadcast(

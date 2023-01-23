@@ -95,21 +95,21 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
   end
 
   # Client action
-  def handle_info(%{channel: "teiserver_client_action_updates:" <> _, event: :connected}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
     {:noreply,
       socket
         |> assign(:client, Account.get_client_by_id(socket.assigns[:current_user].id))
     }
   end
 
-  def handle_info(%{channel: "teiserver_client_action_updates:" <> _, event: :disconnected}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
     {:noreply,
       socket
         |> assign(:client, nil)
     }
   end
 
-  def handle_info(%{channel: "teiserver_client_action_updates:" <> _}, socket) do
+  def handle_info(%{channel: "teiserver_client_messages:" <> _}, socket) do
     {:noreply, socket}
   end
 
@@ -134,13 +134,11 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
         fn v -> {v.locked, v.password != nil, -v.member_count, v.name} end,
         &<=/2
       )
-
-      # |> Enum.sort_by(fn v -> v end, &<=/2)
   end
 
   defp apply_action(socket, :index, _params) do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_lobby_updates")
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_action_updates:#{socket.assigns[:current_user].id}")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{socket.assigns[:current_user].id}")
 
     socket
       |> assign(:page_title, "Listing Battles")
