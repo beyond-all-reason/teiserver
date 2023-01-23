@@ -138,7 +138,7 @@ You will receive a standard success response, if it fails you will receive a fai
 }
 ```
 
-## `c.auth.migrate`
+## TODO: `c.auth.migrate`
 For users who do not have an email associated with their account (only possible when registering an account with the legacy protocol). Users will need to do this in order to login via Tachyon.
 * username :: string
 * password :: string
