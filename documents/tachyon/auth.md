@@ -137,3 +137,42 @@ You will receive a standard success response, if it fails you will receive a fai
   "reason": "email already exists"
 }
 ```
+
+## TODO: `c.auth.migrate`
+For users who do not have an email associated with their account (only possible when registering an account with the legacy protocol). Users will need to do this in order to login via Tachyon.
+* username :: string
+* password :: string
+* email :: email address
+
+#### Example input/output
+```json
+{
+  "cmd": "c.auth.migrate",
+  "username": "existing_user",
+  "password": "my_password",
+  "desired_email": "existing_user@101.example"
+}
+
+{
+  "cmd": "s.auth.migrate",
+  "result": "success"
+}
+
+{
+  "cmd": "s.auth.migrate",
+  "result": "failure",
+  "reason": "A user with that email address already exists"
+}
+
+{
+  "cmd": "s.auth.migrate",
+  "result": "failure",
+  "reason": "User does not exist"
+}
+
+{
+  "cmd": "s.auth.migrate",
+  "result": "failure",
+  "reason": "Invalid password"
+}
+```
