@@ -10,21 +10,15 @@ defmodule Teiserver.HookServer do
   @impl true
   def handle_info(%{channel: "global_moderation"} = data, state) do
     case data.event do
-      :new_action ->
-        # Coordinator.update_report(payload, reason)
-        # Teiserver.Bridge.DiscordBridge.report_updated(payload, reason)
-        # Teiserver.User.update_report(payload, reason)
+      :new_report ->
+        Teiserver.Bridge.DiscordBridge.new_report(data.report)
 
+      :new_action ->
         Teiserver.Bridge.DiscordBridge.new_action(data.action)
         Teiserver.User.new_moderation_action(data.action)
         :ok
 
       :updated_action ->
-        # Coordinator.update_report(payload, reason)
-        # Teiserver.Bridge.DiscordBridge.report_updated(payload, reason)
-        # Teiserver.User.update_report(payload, reason)
-
-        # Teiserver.Bridge.DiscordBridge.updated_action(data.report)
         Teiserver.User.updated_moderation_action(data.action)
         :ok
 

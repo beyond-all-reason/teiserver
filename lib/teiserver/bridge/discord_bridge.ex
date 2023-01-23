@@ -137,6 +137,37 @@ defmodule Teiserver.Bridge.DiscordBridge do
     end
   end
 
+  @spec new_report(Moderation.Report.t()) :: any
+  def new_report(report) do
+    chan_result = Application.get_env(:central, DiscordBridge)[:bridges]
+      |> Enum.filter(fn {_chan, room} -> room == "moderation-reports" end)
+
+    chan = case chan_result do
+      [{chan, _}] -> chan
+      _ -> nil
+    end
+
+    if chan do
+      report = Moderation.get_report!(report.id, preload: [:reporter, :target])
+
+      host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
+      url = "https://#{host}/moderation/report?/target_id=#{report.target_id}"
+
+      match_icon = cond do
+        report.match_id == nil -> ""
+        true -> ":crossed_swords:"
+      end
+
+      msg = "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} #{match_icon} - #{report.extra_text} - #{url}"
+
+      Alchemy.Client.send_message(
+        chan,
+        "Moderation report: #{msg}",
+        []# Options
+      )
+    end
+  end
+
   @spec new_action(Moderation.Action.t()) :: any
   def new_action(action) do
     action = Moderation.get_action!(action.id, preload: [:target])
