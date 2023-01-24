@@ -54,7 +54,8 @@ defmodule Teiserver.User do
     :print_server_messages,
     :spring_password,
     :discord_id,
-    :discord_dm_channel
+    :discord_dm_channel,
+    :steam_id
   ]
   def data_keys(), do: @data_keys
 
@@ -83,7 +84,8 @@ defmodule Teiserver.User do
     print_server_messages: false,
     spring_password: true,
     discord_id: nil,
-    discord_dm_channel: nil
+    discord_dm_channel: nil,
+    steam_id: nil
   }
 
   def default_data(), do: @default_data
