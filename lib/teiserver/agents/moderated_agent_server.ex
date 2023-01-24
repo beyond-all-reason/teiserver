@@ -1,6 +1,6 @@
 defmodule Teiserver.Agents.ModeratedAgentServer do
   use GenServer
-  alias Teiserver.{Coordinator, Moderation}
+  alias Teiserver.Moderation
   alias Teiserver.Agents.AgentLib
   require Logger
 
