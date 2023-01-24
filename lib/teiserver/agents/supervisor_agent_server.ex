@@ -6,10 +6,10 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
   def handle_info(:begin, state) do
     AgentLib.post_agent_update(state.id, "Starting agents supervisor")
 
-    add_servers("battlehost", 3)
-    add_servers("battlehost", 4, 4, %{name: "stable", number: 4, leave_chance: 0, inaction_chance: 0, password_chance: 0})
-    add_servers("battlehost", 5, 5, %{name: "unstable", number: 5, always_leave: true, leave_chance: 1, inaction_chance: 0})
-    add_servers("battlehost", 6, 6, %{name: "reject", number: 6, leave_chance: 0, reject: true})
+    add_servers("battlehost", 30)
+    # add_servers("battlehost", 4, 4, %{name: "stable", number: 4, leave_chance: 0, inaction_chance: 0, password_chance: 0})
+    # add_servers("battlehost", 5, 5, %{name: "unstable", number: 5, always_leave: true, leave_chance: 1, inaction_chance: 0})
+    # add_servers("battlehost", 6, 6, %{name: "reject", number: 6, leave_chance: 0, reject: true})
     add_servers("battlejoin", 15)
     add_servers("in_and_out", 3)
     add_servers("idle", 5)
@@ -17,7 +17,7 @@ defmodule Teiserver.Agents.SupervisorAgentServer do
     add_servers("unfriender", 3)
     add_servers("partyhost", 3)
     add_servers("partyjoin", 10)
-    add_servers("matchmaking", 1)
+    # add_servers("matchmaking", 1)
 
     add_servers("moderated", 1, 1, %{action: "Warning"})
     add_servers("moderated", 2, 2, %{action: "Mute"})

@@ -123,9 +123,10 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   end
 
   defp leave_battle(state) do
-    AgentLib._send(state.socket, %{cmd: "c.lobby.leave"})
-    AgentLib.post_agent_update(state.id, "left battle")
-    %{state | lobby_id: nil}
+    # AgentLib._send(state.socket, %{cmd: "c.lobby.leave"})
+    # AgentLib.post_agent_update(state.id, "left battle")
+    # %{state | lobby_id: nil}
+    state
   end
 
   # Startup
