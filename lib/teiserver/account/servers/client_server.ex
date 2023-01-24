@@ -67,17 +67,45 @@ defmodule Teiserver.Account.ClientServer do
       )
     end
 
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_client_messages:#{state.userid}",
+      %{
+        channel: "teiserver_client_messages:#{state.userid}",
+        event: :client_updated,
+        client: new_client
+      }
+    )
+
     {:reply, :ok, %{state | client: new_client}}
   end
 
   @impl true
   def handle_cast({:update_values, new_values}, state) do
     new_client = Map.merge(state.client, new_values)
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_client_messages:#{state.userid}",
+      %{
+        channel: "teiserver_client_messages:#{state.userid}",
+        event: :client_updated,
+        client: new_client
+      }
+    )
     {:noreply, %{state | client: new_client}}
   end
 
   def handle_cast({:merge_update_client, partial_client}, state) do
     new_client = Map.merge(state.client, partial_client)
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_client_messages:#{state.userid}",
+      %{
+        channel: "teiserver_client_messages:#{state.userid}",
+        event: :client_updated,
+        client: new_client
+      }
+    )
     {:noreply, %{state | client: new_client}}
   end
 
@@ -93,6 +121,27 @@ defmodule Teiserver.Account.ClientServer do
     end
 
     new_client = Map.merge(state.client, new_client)
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_client_messages:#{state.userid}",
+      %{
+        channel: "teiserver_client_messages:#{state.userid}",
+        event: :client_updated,
+        client: new_client
+      }
+    )
+    {:noreply, %{state | client: new_client}}
+  end
+
+  def handle_cast({:add_to_queue, queue_id}, state) do
+    new_queues = [queue_id | state.client.queues] |> Enum.uniq
+    new_client = Map.merge(state.client, %{queues: new_queues})
+    {:noreply, %{state | client: new_client}}
+  end
+
+  def handle_cast({:remove_from_queue, queue_id}, state) do
+    new_queues = state.client.queues |> List.delete(queue_id)
+    new_client = Map.merge(state.client, %{queues: new_queues})
     {:noreply, %{state | client: new_client}}
   end
 
@@ -103,7 +152,7 @@ defmodule Teiserver.Account.ClientServer do
 
   @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
-  def init(state = %{client: %{userid: userid}}) do
+  def init(%{client: %{userid: userid}} = state) do
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
       Teiserver.ClientRegistry,

@@ -64,6 +64,7 @@ defmodule Teiserver.Game.QueueWaitServer do
 
           group.members
           |> Enum.each(fn userid ->
+            Account.add_client_to_queue(userid, state.queue_id)
             PubSub.broadcast(
               Central.PubSub,
               "teiserver_client_messages:#{userid}",
@@ -102,6 +103,7 @@ defmodule Teiserver.Game.QueueWaitServer do
           state.groups_map[group_id]
             |> Map.get(:members)
             |> Enum.each(fn userid ->
+              Account.remove_client_from_queue(userid, state.queue_id)
               PubSub.broadcast(
                 Central.PubSub,
                 "teiserver_client_messages:#{userid}",
@@ -171,6 +173,7 @@ defmodule Teiserver.Game.QueueWaitServer do
 
           group.members
           |> Enum.each(fn userid ->
+            Account.add_client_to_queue(userid, state.queue_id)
             PubSub.broadcast(
               Central.PubSub,
               "teiserver_client_messages:#{userid}",

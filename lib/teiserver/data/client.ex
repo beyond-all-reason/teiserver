@@ -62,7 +62,7 @@ defmodule Teiserver.Client do
         muted: false,
         restricted: false,
         lobby_host: false,
-        queuing_for_matchmaking: false,
+        queues: [],
         party_id: nil,
         clan_tag: nil
       },

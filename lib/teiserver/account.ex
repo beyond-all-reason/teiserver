@@ -1328,6 +1328,12 @@ defmodule Teiserver.Account do
   @spec move_client_to_party(T.userid(), T.party_id()) :: :ok | nil
   defdelegate move_client_to_party(userid, party_id), to: ClientLib
 
+  @spec add_client_to_queue(T.userid(), T.queue_id()) :: :ok | nil
+  defdelegate add_client_to_queue(userid, queue_id), to: ClientLib
+
+  @spec remove_client_from_queue(T.userid(), T.queue_id()) :: :ok | nil
+  defdelegate remove_client_from_queue(userid, queue_id), to: ClientLib
+
   @spec get_client_pid(T.userid()) :: pid() | nil
   defdelegate get_client_pid(userid), to: ClientLib
 

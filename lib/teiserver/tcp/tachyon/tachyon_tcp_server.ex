@@ -401,6 +401,9 @@ defmodule Teiserver.TachyonTcpServer do
           send(self(), :terminate)
           state
 
+        :client_updated ->
+          state
+
         _ ->
           Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nNo handler for event type #{data.event}\nFull data: #{Kernel.inspect data}")
           state

@@ -447,7 +447,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     block_as_player = cond do
       state.minimum_level_to_play > player_rating or state.maximum_level_to_play < player_rating -> true
-      existing.queuing_for_matchmaking -> true
+      not Enum.empty?(existing.queues) -> true
       true -> false
     end
 

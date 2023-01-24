@@ -204,6 +204,17 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     }
   end
 
+  def handle_info(%{
+    channel: "teiserver_client_messages:" <> _userid_str,
+    event: :client_updated,
+    client: client
+  }, socket) do
+    {:noreply,
+      socket
+        |> assign(:client, client)
+    }
+  end
+
   def handle_info(%{channel: "teiserver_client_messages:" <> _userid_str}, socket) do
     {:noreply, socket}
   end
