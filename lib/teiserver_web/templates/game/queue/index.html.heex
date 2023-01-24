@@ -22,6 +22,8 @@
   <thead>
     <tr>
       <th colspan="2">Name</th>
+      <th>Enabled</th>
+      <th>Rating type</th>
       <th colspan="2">&nbsp;</th>
     </tr>
   </thead>
@@ -32,6 +34,16 @@
         <%= central_component "icon", icon: queue.icon %>
       </td>
       <td><%= queue.name %></td>
+
+      <td>
+        <%= if queue.settings["enabled"] do %>
+          <i class="fa-fw fa-regular fa-check text-success"></i>
+        <% else %>
+          <i class="fa-fw fa-regular fa-times text-danger"></i>
+        <% end %>
+      </td>
+
+      <td><%= queue.settings["rating_type"] %></td>
 
       <td>
         <a href={Routes.ts_game_queue_show_path(@conn, :show, queue.id)} class="btn btn-secondary btn-sm">

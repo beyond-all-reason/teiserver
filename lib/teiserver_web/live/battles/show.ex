@@ -4,7 +4,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   require Logger
 
   alias Teiserver.Battle.BalanceLib
-  alias Teiserver.{Account, Battle, Client, Coordinator, User}
+  alias Teiserver.{Account, Battle, Coordinator, User}
   alias Teiserver.Battle.{Lobby, LobbyLib}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
 
@@ -102,7 +102,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> Map.new(fn u -> {u.id, u} end)
 
     clients =
-      Client.get_clients(id_list)
+      Account.list_clients(id_list)
       |> Map.new(fn c -> {c.userid, c} end)
 
     # Creates a map where the party_id refers to an integer
@@ -187,6 +187,24 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
 
   def handle_info(%{channel: "teiserver_user_updates:" <> _}, %{assigns: %{id: id}} = socket) do
     {:noreply, socket |> redirect(to: Routes.ts_battle_lobby_show_path(socket, :show, id))}
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
+    {:noreply,
+      socket
+        |> assign(:client, Account.get_client_by_id(socket.assigns[:current_user].id))
+    }
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :disconnected}, socket) do
+    {:noreply,
+      socket
+        |> assign(:client, nil)
+    }
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _userid_str}, socket) do
+    {:noreply, socket}
   end
 
   @impl true

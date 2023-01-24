@@ -1191,6 +1191,13 @@ defmodule Teiserver.TachyonMatchmakingTest do
     flunk "Not done"
   end
 
+  test "joining two or more queues at once" do
+    # Currently when a match is found you are not removed from other
+    # queues. We also need to check they are re-added to the other queues
+    # correctly
+    flunk "Not done"
+  end
+
   test "Moderated players can't do matchmaking" do
     # Ensure a person can't circumvent it by being a member of a party
     flunk "Not done"

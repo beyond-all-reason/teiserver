@@ -22,6 +22,9 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue_all_queues")
 
     db_queues = Game.list_queues()
+      |> Enum.filter(fn queue ->
+        Map.get(queue.settings, "enabled", true)
+      end)
       |> Map.new(fn queue ->
         :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue:#{queue.id}")
 
