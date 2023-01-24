@@ -121,13 +121,14 @@ defmodule Teiserver.TachyonMatchmakingTest do
     :timer.sleep(300)
 
     messages = PubsubListener.get(match_listener)
-    {:queue_wait, :match_attempt, matched_queue_id, match_id} = hd(messages)
-    assert matched_queue_id == queue.id
+    attempt = hd(messages)
+    assert attempt.event == :match_attempt
+    assert attempt.queue_id == queue.id
 
     groups = :sys.get_state(pid) |> Map.get(:groups_map)
     assert groups == %{}
 
-    match_server_pid = Matchmaking.get_queue_match_pid(match_id)
+    match_server_pid = Matchmaking.get_queue_match_pid(attempt.match_id)
     match_state = :sys.get_state(match_server_pid)
 
     # We don't know for sure the order these will be in so we check like this
@@ -605,6 +606,9 @@ defmodule Teiserver.TachyonMatchmakingTest do
         Account.merge_update_client(userid, %{sync: %{engine: 1, game: 1, map: 1}})
       end)
 
+    # Wait for kicks to take place
+    :timer.sleep(1000)
+
     [reply] = _tachyon_recv(socket1)
     assert reply["cmd"] == "s.lobby.joined"
 
@@ -875,7 +879,9 @@ defmodule Teiserver.TachyonMatchmakingTest do
     _tachyon_send(psocket1, %{cmd: "c.matchmaking.accept", match_id: match_id})
     _tachyon_send(psocket2, %{cmd: "c.matchmaking.accept", match_id: match_id})
     _tachyon_send(psocket3, %{cmd: "c.matchmaking.accept", match_id: match_id})
-    :timer.sleep(100)
+
+    # Wait for kicks
+    :timer.sleep(1100)
 
     [reply] = _tachyon_recv(socket1)
     assert reply["cmd"] == "s.lobby.joined"
