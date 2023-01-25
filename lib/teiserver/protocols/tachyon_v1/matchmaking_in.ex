@@ -29,6 +29,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
         :failed -> false
         :missing -> false
         :oversized_group -> false
+        :moderated -> false
         :not_party_leader -> false
         :no_queue -> false
       end
@@ -41,6 +42,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
         reason = case resp do
           :missing -> "No queue found"
           :no_queue -> "No queue found"
+          :moderated -> "Moderation action"
           :not_party_leader -> "Not party leader"
           :oversized_group -> "Group is larger than the queue team size"
           _ -> "Failure"

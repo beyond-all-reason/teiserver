@@ -39,7 +39,7 @@ end
 
 defmodule Teiserver.Data.Matchmaking do
   require Logger
-  alias Teiserver.{Account, Game}
+  alias Teiserver.{Account, Game, User}
   alias Teiserver.Battle.BalanceLib
   alias Teiserver.Data.{QueueStruct, QueueGroup}
   alias Teiserver.Game.{QueueWaitServer, QueueMatchServer}
@@ -216,7 +216,7 @@ defmodule Teiserver.Data.Matchmaking do
       end)
   end
 
-  @spec add_user_to_queue(T.queue_id(), T.userid()) :: :ok | :not_party_leader | :duplicate | :failed | :missing | :no_queue
+  @spec add_user_to_queue(T.queue_id(), T.userid()) :: :ok | :not_party_leader | :duplicate | :failed | :missing | :moderated | :no_queue
   def add_user_to_queue(queue_id, userid) do
     queue = get_queue(queue_id)
     client = Account.get_client_by_id(userid)
@@ -224,24 +224,40 @@ defmodule Teiserver.Data.Matchmaking do
     if queue == nil do
       :no_queue
     else
-      if client.party_id do
-        party = Account.get_party(client.party_id)
-        if party.leader == userid do
-          party
-            |> make_group_from_party(queue)
+      cond do
+        client.party_id != nil ->
+          party = Account.get_party(client.party_id)
+
+          if party.leader == userid do
+            any_moderated = party.members
+              |> Stream.map(fn member_id ->
+                User.is_restricted?(member_id, "Matchmaking")
+              end)
+              |> Enum.any?
+
+            if any_moderated do
+              :moderated
+            else
+              party
+                |> make_group_from_party(queue)
+                |> do_add_group_to_queue(queue_id)
+            end
+          else
+            :not_party_leader
+          end
+
+        User.is_restricted?(userid, "Matchmaking") ->
+          :moderated
+
+        true ->
+          userid
+            |> make_group_from_userid(queue)
             |> do_add_group_to_queue(queue_id)
-        else
-          :not_party_leader
-        end
-      else
-        userid
-          |> make_group_from_userid(queue)
-          |> do_add_group_to_queue(queue_id)
       end
     end
   end
 
-  @spec do_add_group_to_queue(T.userid(), T.queue_id()) :: :ok | :duplicate | :failed | :missing
+  @spec do_add_group_to_queue(T.userid(), T.queue_id()) :: :ok | :duplicate | :failed | :missing | :moderated
   defp do_add_group_to_queue(queue_group, queue_id) do
     case get_queue_wait_pid(queue_id) do
       nil ->

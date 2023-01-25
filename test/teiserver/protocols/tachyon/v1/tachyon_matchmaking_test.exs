@@ -1,7 +1,7 @@
 defmodule Teiserver.TachyonMatchmakingTest do
   use Central.ServerCase, async: false
   require Logger
-  alias Teiserver.{Client, Battle, Game, User, Account}
+  alias Teiserver.{Client, Battle, Game, User, Account, Moderation}
   alias Teiserver.Account.ClientLib
   alias Teiserver.Data.Matchmaking
   alias Teiserver.Game.MatchRatingLib
@@ -1193,7 +1193,7 @@ defmodule Teiserver.TachyonMatchmakingTest do
   test "Test it works when not sending out invites" do
     # There is a setting to not require an invite accept/decline, all
     # the other tests assume it to be set to true, we need to test when
-    # it is set to fals
+    # it is set to false
     flunk "Not done"
   end
 
@@ -1204,8 +1204,74 @@ defmodule Teiserver.TachyonMatchmakingTest do
     flunk "Not done"
   end
 
-  test "Moderated players can't do matchmaking" do
-    # Ensure a person can't circumvent it by being a member of a party
-    flunk "Not done"
+  test "Moderated players can't do matchmaking", %{socket: socket1, user: user1} do
+    {:ok, queue} =
+      Game.create_queue(%{
+        "name" => "test_queue-1v1",
+        "team_size" => 3,
+        "team_count" => 2,
+        "icon" => "fa-regular fa-home",
+        "colour" => "#112233",
+        "map_list" => ["map1"],
+        "conditions" => %{},
+        "settings" => %{
+          "tick_interval" => 60_000
+        }
+      })
+
+    {:ok, _action} = Moderation.create_action(%{
+      "reason" => "login_with_warning_test",
+      "target_id" => user1.id,
+      "restrictions" => ["Matchmaking"],
+      "score_modifier" => 0,
+      "expires" => Timex.now |> Timex.shift(days: 1)
+    })
+    Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(user1.id)
+    assert User.is_restricted?(user1.id, "Matchmaking")
+
+    # Attempt to join queue as user1
+    _tachyon_send(socket1, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+
+    pid = Matchmaking.get_queue_wait_pid(queue.id)
+    state = :sys.get_state(pid)
+    assert state.groups_map == %{}
+
+    [reply] = _tachyon_recv(socket1)
+    assert reply == %{
+      "cmd" => "s.matchmaking.join_queue",
+      "queue_id" => queue.id,
+      "result" => "failure",
+      "reason" => "Moderation action"
+    }
+
+    # Now try it as part of a party
+    %{socket: socket2, user: _user2} = tachyon_auth_setup()
+
+    # Setup the parties
+    _tachyon_send(socket2, %{"cmd" => "c.party.create"})
+    [resp] = _tachyon_recv(socket2)
+    assert resp["cmd"] == "s.party.added_to"
+    party_id = resp["party"]["id"]
+
+    _tachyon_recv_until(socket1)
+    _tachyon_send(socket2, %{"cmd" => "c.party.invite", "userid" => user1.id})
+    _tachyon_send(socket1, %{"cmd" => "c.party.accept", "party_id" => party_id})
+
+    _tachyon_recv_until(socket2)
+
+    # Attempt to join queue as user1
+    _tachyon_send(socket2, %{cmd: "c.matchmaking.join_queue", queue_id: queue.id})
+
+    pid = Matchmaking.get_queue_wait_pid(queue.id)
+    state = :sys.get_state(pid)
+    assert state.groups_map == %{}
+
+    [reply] = _tachyon_recv(socket2)
+    assert reply == %{
+      "cmd" => "s.matchmaking.join_queue",
+      "queue_id" => queue.id,
+      "result" => "failure",
+      "reason" => "Moderation action"
+    }
   end
 end
