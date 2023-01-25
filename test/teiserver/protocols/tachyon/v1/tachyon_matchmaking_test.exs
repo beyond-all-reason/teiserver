@@ -1197,11 +1197,166 @@ defmodule Teiserver.TachyonMatchmakingTest do
     flunk "Not done"
   end
 
-  test "joining two or more queues at once" do
-    # Currently when a match is found you are not removed from other
-    # queues. We also need to check they are re-added to the other queues
-    # correctly
-    flunk "Not done"
+  test "joining two or more queues at once", %{socket: socket1, user: user1} do
+    {:ok, queue1} =
+      Game.create_queue(%{
+        "name" => "test_queue-multi1",
+        "team_size" => 1,
+        "team_count" => 2,
+        "icon" => "fa-regular fa-home",
+        "colour" => "#112233",
+        "map_list" => ["map1"],
+        "conditions" => %{},
+        "settings" => %{
+          "tick_interval" => 60_000
+        }
+      })
+
+    {:ok, queue2} =
+      Game.create_queue(%{
+        "name" => "test_queue-multi2",
+        "team_size" => 1,
+        "team_count" => 2,
+        "icon" => "fa-regular fa-home",
+        "colour" => "#112233",
+        "map_list" => ["map1"],
+        "conditions" => %{},
+        "settings" => %{
+          "tick_interval" => 60_000
+        }
+      })
+
+    _tachyon_send(socket1, %{cmd: "c.matchmaking.join_queue", queue_id: queue1.id})
+
+    client = Account.get_client_by_id(user1.id)
+    assert client.queues == [queue1.id]
+
+    pid = Matchmaking.get_queue_wait_pid(queue1.id)
+    state = :sys.get_state(pid)
+    assert state.groups_map |> Map.has_key?(user1.id)
+
+    [reply] = _tachyon_recv(socket1)
+    assert reply == %{
+      "cmd" => "s.matchmaking.join_queue",
+      "queue_id" => queue1.id,
+      "result" => "success"
+    }
+
+    # Now join the second
+    _tachyon_send(socket1, %{cmd: "c.matchmaking.join_queue", queue_id: queue2.id})
+
+    client = Account.get_client_by_id(user1.id)
+    assert client.queues == [queue2.id, queue1.id]
+
+    pid = Matchmaking.get_queue_wait_pid(queue2.id)
+    state = :sys.get_state(pid)
+    assert state.groups_map |> Map.has_key?(user1.id)
+
+    [reply] = _tachyon_recv(socket1)
+    assert reply == %{
+      "cmd" => "s.matchmaking.join_queue",
+      "queue_id" => queue2.id,
+      "result" => "success"
+    }
+
+    # Now get user 2 to join a queue
+    %{socket: socket2, user: user2} = tachyon_auth_setup()
+
+    _tachyon_send(socket2, %{cmd: "c.matchmaking.join_queue", queue_id: queue1.id})
+
+    pid = Matchmaking.get_queue_wait_pid(queue1.id)
+
+    # Trigger the queue server to make the match get started
+    send(pid, :tick)
+
+    [reply] = _tachyon_recv(socket1)
+    assert reply == %{
+      "cmd" => "s.matchmaking.match_ready",
+      "queue_id" => queue1.id,
+      "match_id" => reply["match_id"]
+    }
+
+    client = Account.get_client_by_id(user1.id)
+    assert client.queues == [queue2.id, queue1.id]
+
+    # Create the match process
+    # {match_pid, match_id} = Matchmaking.create_match([
+    #   Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
+    #   Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
+    # ], queue.id)
+
+    # # Clear both sockets
+    # _tachyon_recv_until(socket1)
+    # _tachyon_recv_until(socket2)
+
+    # # Check server states
+    # match_state = :sys.get_state(match_pid)
+    # assert match_state.user_ids == [user2.id, user1.id]
+    # assert match_state.pending_accepts == [user2.id, user1.id]
+    # assert match_state.accepted_users == []
+    # assert match_state.declined_users == []
+
+    # wait_state = :sys.get_state(wait_pid)
+    # assert wait_state.groups_map == %{}
+    # assert wait_state.buckets == %{}
+
+    # # Ensure we have an open and empty battle
+    # %{
+    #   # lobby_id: lobby_id
+    # } = make_empty_lobby()
+
+    # # Accept user user1
+    # _tachyon_send(socket1, %{cmd: "c.matchmaking.accept", match_id: match_id})
+    # _tachyon_send(socket2, %{cmd: "c.matchmaking.accept", match_id: match_id})
+    # :timer.sleep(100)
+
+    # [user1.id, user2.id]
+    #   |> Enum.each(fn userid ->
+    #     Account.merge_update_client(userid, %{sync: %{engine: 1, game: 1, map: 1}})
+    #   end)
+
+    # # Wait for kicks to take place
+    # :timer.sleep(1000)
+
+    # [reply] = _tachyon_recv(socket1)
+    # assert reply["cmd"] == "s.lobby.joined"
+
+    # [reply] = _tachyon_recv(socket2)
+    # assert reply["cmd"] == "s.lobby.joined"
+
+    # # Clear both sockets
+    # _tachyon_recv_until(socket1)
+    # _tachyon_recv_until(socket2)
+
+    # # Wait for it to do everything
+    # :timer.sleep(1000)
+
+    # state = :sys.get_state(match_pid)
+    # assert state.user_ids == [user2.id, user1.id]
+    # assert state.pending_accepts == []
+    # assert state.accepted_users == [user2.id, user1.id]
+    # assert state.declined_users == []
+
+    # send(match_pid, :tick)
+
+    # # Check wait state
+    # wait_state = :sys.get_state(wait_pid)
+    # assert wait_state.groups_map == %{}
+    # assert wait_state.buckets == %{}
+
+    # # If we tick is that still the case?
+    # send(wait_pid, :tick)
+    # wait_state = :sys.get_state(wait_pid)
+    # assert wait_state.groups_map == %{}
+    # assert wait_state.buckets == %{}
+
+    # # Now tell the match server to cancel the match
+    # send(match_pid, :end_waiting)
+    # :timer.sleep(500)
+    # refute Process.alive?(match_pid)
+    # assert Matchmaking.get_queue_match_pid(match_id) == nil
+
+    flunk "Not implemented"
   end
 
   test "Moderated players can't do matchmaking", %{socket: socket1, user: user1} do
