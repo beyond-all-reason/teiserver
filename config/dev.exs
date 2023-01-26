@@ -130,11 +130,13 @@ config :central, Oban,
   crontab: false
 
 config :logger, :error_log,
-  path: "/tmp/barserver_error.log",
+  path: "/tmp/teiserver_error.log",
+  format: "$time $metadata[$level] $message\n",
   level: :error
 
 config :logger, :info_log,
-  path: "/tmp/barserver_info.log",
+  path: "/tmp/teiserver_info.log",
+  format: "$time $metadata[$level] $message\n",
   level: :info
 
 try do
