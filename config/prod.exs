@@ -92,10 +92,12 @@ config :logger,
 
 config :logger, :error_log,
   path: "/var/log/central/error.log",
+  format: "$date $time $metadata[$level] $message\n",
   level: :error
 
 config :logger, :info_log,
   path: "/var/log/central/info.log",
+  format: "$date $time $metadata[$level] $message\n",
   level: :info
 
 # Overwritten in secret
