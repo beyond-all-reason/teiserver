@@ -76,7 +76,7 @@
     <table class="table table-sm">
       <thead>
         <tr>
-          <th colspan="2">Name</th>
+          <th colspan="3">Name/Domain</th>
           <th>Status</th>
 
           <th>&nbsp;</th>
@@ -99,12 +99,19 @@
       </thead>
       <tbody>
     <%= for user <- @users do %>
+      <%
+        email_domain = user.email
+          |> String.split("@")
+          |> Enum.reverse
+          |> hd
+      %>
+
         <tr>
           <td style={"background-color: #{user.colour}; color: #FFF;"} width="22">
             <%= central_component "icon", icon: user.icon %>
           </td>
           <td><%= user.name %></td>
-          <%= if false and is_admin do %><td><%= user.email %></td><% end %>
+          <td><%= email_domain %></td>
 
           <td>
             <%
