@@ -95,7 +95,7 @@
               </span>
             </td>
 
-            <%= if Map.has_key?(lobby, :uuid) do %>
+            <%= if moderator and Map.has_key?(lobby, :uuid) do %>
               <td>
                 <a href={Routes.ts_admin_lobby_path(@socket, :lobby_chat, lobby.uuid)} class={"btn btn-sm btn-outline-#{bsname}"}>
                   Full chat
