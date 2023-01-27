@@ -104,9 +104,6 @@ config :central, CentralWeb.Endpoint,
     ]
   ]
 
-# Do not include metadata nor timestamps in development logs
-config :logger, :console, format: "[$level] $message\n"
-
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
@@ -116,27 +113,31 @@ config :phoenix, :plug_init_mode, :runtime
 
 config :central, Central.Communication.BlogFile, save_path: "/tmp/blog_files"
 
+# Comment the below block to allow background jobs to happen in dev
+config :central, Oban,
+  queues: false,
+  crontab: false
+
+# Do not include metadata nor timestamps in development logs
+config :logger, :console, format: "[$level] $message\n"
+
 config :logger,
-  format: "[$level] $message\n",
   backends: [
     {LoggerFileBackend, :error_log},
     {LoggerFileBackend, :info_log},
     :console
   ]
 
-# Comment the below block to allow background jobs to happen in dev
-config :central, Oban,
-  queues: false,
-  crontab: false
-
 config :logger, :error_log,
   path: "/tmp/teiserver_error.log",
-  format: "$time $metadata[$level] $message\n",
+  format: "$time [$level] $metadata $message\n",
+  metadata: [:request_id, :user_id],
   level: :error
 
 config :logger, :info_log,
   path: "/tmp/teiserver_info.log",
-  format: "$time $metadata[$level] $message\n",
+  format: "$time [$level] $metadata $message\n",
+  metadata: [:request_id, :user_id],
   level: :info
 
 try do

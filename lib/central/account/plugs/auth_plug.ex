@@ -4,6 +4,7 @@ defmodule Central.Account.AuthPlug do
 
   alias Central.Account
   alias Central.Account.Guardian
+  require Logger
 
   def init(_opts) do
     # Keyword.fetch!(opts, :repo)
@@ -26,6 +27,10 @@ defmodule Central.Account.AuthPlug do
         ""
       end
 
+    if user != nil do
+      Logger.metadata([user_id: user.id] ++ Logger.metadata())
+    end
+
     conn
     |> Map.put(:current_user, user)
     |> Map.put(:user_id, user_id)
@@ -43,6 +48,11 @@ defmodule Central.Account.AuthPlug do
       end
 
     user_id = if user, do: user.id, else: nil
+
+    if user != nil do
+      request_id = Ulid.generate()
+      Logger.metadata([request_id: request_id, user_id: user.id] ++ Logger.metadata())
+    end
 
     socket
     |> Phoenix.LiveView.assign(:current_user, user)

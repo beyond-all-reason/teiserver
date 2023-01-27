@@ -96,8 +96,8 @@ config :central, Teiserver,
   }
 
 config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  format: "$date $time $metadata[$level] $message\n",
+  metadata: [:request_id, :user_id]
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
