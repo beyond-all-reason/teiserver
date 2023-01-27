@@ -1,4 +1,8 @@
-defmodule Teiserver.Account.RecalculateUserStatTask do
+defmodule Teiserver.Account.RecalculateUserDailyStatTask do
+  @moduledoc """
+  Goes through every user that logged on in the last 24 hours (it's meant to run every 12 hours)
+  and cache certain values from server day logs
+  """
   use Oban.Worker, queue: :cleanup
 
   alias Central.Repo
@@ -6,7 +10,7 @@ defmodule Teiserver.Account.RecalculateUserStatTask do
   alias Teiserver.{User, Account}
   alias alias Teiserver.Telemetry.ServerDayLog
 
-  # Teiserver.Account.RecalculateUserStatTask.perform(nil)
+  # Teiserver.Account.RecalculateUserDailyStatTask.perform(nil)
 
   @empty_row %{
     menu: 0,
@@ -19,7 +23,7 @@ defmodule Teiserver.Account.RecalculateUserStatTask do
   @spec perform(any) :: :ok
   def perform(_) do
     start_date = Timex.now()
-      |> Timex.shift(hours: -24)
+      |> Timex.shift(hours: -26)
       |> Timex.to_unix
 
     start_date = round(start_date/60)

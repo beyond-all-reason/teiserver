@@ -184,6 +184,14 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     {:noreply, state}
   end
 
+  def handle_info(%{channel: "client_inout", event: :disconnect, userid: userid}, state) do
+    Teiserver.Account.RecacheUserStatsTask.disconnected(userid)
+
+    {:noreply, state}
+  end
+
+  def handle_info(%{channel: "client_inout"}, state), do: {:noreply, state}
+
   def handle_info({:do_client_inout, :login, userid}, state) do
     user = User.get_user_by_id(userid)
     if user do
@@ -243,7 +251,7 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
     end
     {:noreply, state}
   end
-  def handle_info(%{channel: "client_inout"}, state), do: {:noreply, state}
+
 
   # Special debugging to see what is being sent
   def handle_info({:timeout, duration}, state) do
