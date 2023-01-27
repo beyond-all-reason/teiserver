@@ -50,7 +50,7 @@ defmodule Central.Account.AuthPlug do
     user_id = if user, do: user.id, else: nil
 
     if user != nil do
-      request_id = Ulid.generate()
+      request_id = ExULID.ULID.generate()
       Logger.metadata([request_id: request_id, user_id: user.id] ++ Logger.metadata())
     end
 

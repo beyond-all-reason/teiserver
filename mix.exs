@@ -84,7 +84,7 @@ defmodule Central.MixProject do
       {:dart_sass, "~> 0.3", only: [:dev]},
       {:libcluster, "~> 3.3"},
       {:tzdata, "~> 1.1"},
-      {:ulid, "~> 0.2.0"},
+      {:ex_ulid, "~> 0.1.0"},
 
       # Teiserver libs
       {:openskill, "~> 1.0.1"},
