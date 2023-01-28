@@ -59,7 +59,7 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
       new_restricted_until = actions
         |> Enum.map(fn a -> a.expires end)
         |> List.flatten
-        |> Enum.sort(&<=/2)
+        |> Enum.sort(&>=/2)
         |> hd
 
       expires_as_string = new_restricted_until |> Jason.encode! |> Jason.decode!
@@ -86,11 +86,16 @@ defmodule Teiserver.Moderation.RefreshUserRestrictionsTask do
       Coordinator.send_to_host(client.lobby_id, "!mute #{client.name}")
     end
 
-    if Enum.member?(new_restrictions, "Login") do
-      Teiserver.Client.disconnect(client.userid, "Banned")
-    else
-      pid = Coordinator.get_coordinator_pid()
-      send(pid, {:do_client_inout, :login, client.userid})
+    cond do
+      Enum.member?(new_restrictions, "Login") ->
+        Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
+        Teiserver.Client.disconnect(client.userid, "Banned")
+      Enum.member?(new_restrictions, "All lobbies") ->
+        Coordinator.send_to_host(client.lobby_id, "!gkick #{client.name}")
+        Teiserver.Client.disconnect(client.userid, "Removed from lobbies")
+      true ->
+        pid = Coordinator.get_coordinator_pid()
+        send(pid, {:do_client_inout, :login, client.userid})
     end
   end
 end

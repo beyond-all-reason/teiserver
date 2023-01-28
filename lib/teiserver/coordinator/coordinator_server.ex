@@ -222,8 +222,6 @@ defmodule Teiserver.Coordinator.CoordinatorServer do
             " - #{action.reason}#{expires}"
           end)
 
-
-
         msg = [
           "This is a reminder that you received one or more formal moderation actions as listed below:"
         ] ++ reasons
