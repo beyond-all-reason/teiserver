@@ -433,10 +433,12 @@ defmodule Teiserver.Battle.Lobby do
     Battle.update_lobby_values(lobby_id, %{locked: true})
   end
 
-  @spec silence_lobby(T.lobby() | T.lobby_id()) :: T.lobby()
-  def silence_lobby(lobby_id) when is_integer(lobby_id), do: silence_lobby(get_lobby(lobby_id))
-  def silence_lobby(lobby) do
-    update_lobby(%{lobby | silence: true}, nil, :silence)
+  @spec silence_lobby(T.lobby() | T.lobby_id()) :: :ok
+  def silence_lobby(lobby_id) when is_integer(lobby_id) do
+    Battle.update_lobby_values(lobby_id, %{silence: true})
+  end
+  def silence_lobby(%{id: lobby_id}) do
+    Battle.update_lobby_values(lobby_id, %{silence: true})
   end
 
   @spec unsilence_lobby(T.lobby() | T.lobby_id()) :: T.lobby()

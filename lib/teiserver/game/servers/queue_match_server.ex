@@ -264,8 +264,8 @@ defmodule Teiserver.Game.QueueMatchServer do
 
     lobby = state.lobby_id
       |> Lobby.get_lobby()
-      |> Lobby.silence_lobby()
 
+    Lobby.silence_lobby(state.lobby_id)
     Lobby.lock_lobby(state.lobby_id)
 
     # Wait for all the kicks to take place, then move people

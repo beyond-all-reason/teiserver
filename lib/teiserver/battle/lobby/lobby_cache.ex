@@ -85,7 +85,7 @@ defmodule Teiserver.Battle.LobbyCache do
   end
 
   def update_lobby(%{id: lobby_id} = lobby, nil, reason) do
-    Logger.warn("update_lobby is still being called, reason: #{reason}")
+    Logger.warn("update_lobby (no data) is still being called, reason: #{reason}")
     cast_lobby(lobby_id, {:update_lobby, lobby})
 
     PubSub.broadcast(
@@ -98,7 +98,7 @@ defmodule Teiserver.Battle.LobbyCache do
   end
 
   def update_lobby(%{id: lobby_id} = lobby, data, reason) do
-    Logger.warn("update_lobby is still being called, reason: #{reason}")
+    Logger.warn("update_lobby (with data) is still being called, reason: #{reason}")
     cast_lobby(lobby_id, {:update_lobby, lobby})
 
     if Enum.member?([:update_battle_info], reason) do
