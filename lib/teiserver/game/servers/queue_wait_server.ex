@@ -501,6 +501,7 @@ defmodule Teiserver.Game.QueueWaitServer do
   defp resume_paused_groups(group_ids, state) do
     groups = group_ids
       |> Map.new(fn g_id -> {g_id, state.paused_groups_map[g_id]} end)
+      |> Map.reject(fn {_, g} -> g == nil end)
 
     new_groups_map = Map.merge(state.groups_map, groups)
 

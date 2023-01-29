@@ -337,8 +337,6 @@ defmodule Teiserver.TachyonMatchmakingTest do
       Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
     ], queue.id)
 
-    wait_pid = Matchmaking.get_queue_wait_pid(queue.id)
-
     # Check server state
     state = :sys.get_state(match_pid)
     assert state.user_ids == [user2.id, user1.id]
@@ -388,21 +386,6 @@ defmodule Teiserver.TachyonMatchmakingTest do
     :timer.sleep(500)
     refute Process.alive?(match_pid)
     assert Matchmaking.get_queue_match_pid(match_id) == nil
-
-    # Check wait state
-    wait_state = :sys.get_state(wait_pid)
-    assert wait_state.groups_map |> Map.has_key?(user1.id)
-
-    # Now ensure it added the group into 7 buckets (17 +/- 3)
-    assert wait_state.buckets == %{
-      14 => [user1.id],
-      15 => [user1.id],
-      16 => [user1.id],
-      17 => [user1.id],
-      18 => [user1.id],
-      19 => [user1.id],
-      20 => [user1.id]
-    }
   end
 
   test "wait too long - both fail to ready up", %{socket: socket1, user: user1} do
@@ -533,17 +516,6 @@ defmodule Teiserver.TachyonMatchmakingTest do
       "cmd" => "s.matchmaking.match_declined",
       "match_id" => match_id,
       "queue_id" => queue.id
-    }
-
-    # Check wait state
-    wait_state = :sys.get_state(wait_pid)
-    assert wait_state.groups_map |> Map.has_key?(user1.id)
-
-    # Now ensure it added the group into 7 buckets (17 +/- 3)
-    assert wait_state.buckets == %{
-      16 => [user1.id],
-      17 => [user1.id],
-      18 => [user1.id]
     }
   end
 
