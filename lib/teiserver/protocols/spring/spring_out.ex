@@ -684,6 +684,8 @@ defmodule Teiserver.Protocols.SpringOut do
     PubSub.unsubscribe(Central.PubSub, "teiserver_global_lobby_updates")
     PubSub.subscribe(Central.PubSub, "teiserver_global_lobby_updates")
 
+    Logger.metadata([request_id: "SpringTcpServer##{user.id}"])
+
     exempt_from_cmd_throttle = (user.moderator == true or User.is_bot?(user) == true)
     %{state |
       user: user,
