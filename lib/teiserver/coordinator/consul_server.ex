@@ -858,7 +858,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
     case User.get_userid(name) do
       nil ->
         # Try partial search of players in lobby
-        battle = Lobby.get_battle(state.lobby_id)
+        battle = Lobby.get_lobby(state.lobby_id)
         found = Client.list_clients(battle.players)
           |> Enum.filter(fn client ->
             String.contains?(String.downcase(client.name), name)

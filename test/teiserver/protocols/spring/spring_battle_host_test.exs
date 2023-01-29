@@ -116,9 +116,9 @@ defmodule Teiserver.SpringBattleHostTest do
     assert battle_status == "REQUESTBATTLESTATUS"
 
     # Check the battle actually got created
-    battle = Lobby.get_battle(lobby_id)
+    battle = Lobby.get_lobby(lobby_id)
     assert battle != nil
-    assert Enum.count(battle.players) == 0
+    assert Enum.empty?(battle.players)
 
     # Now create a user to join the battle
     %{socket: socket2, user: user2} = auth_setup()
@@ -148,7 +148,7 @@ defmodule Teiserver.SpringBattleHostTest do
     # assert reply =~ "CLIENTSTATUS #{user2.name} 0\n"
 
     # Kick user2
-    battle = Lobby.get_battle(lobby_id)
+    battle = Lobby.get_lobby(lobby_id)
     assert Enum.count(battle.players) == 1
 
     _send_raw(socket, "KICKFROMBATTLE #{user2.name}\n")
@@ -172,7 +172,7 @@ defmodule Teiserver.SpringBattleHostTest do
     # Had a bug where the battle would be incorrectly closed
     # after kicking a player, it was caused by the host disconnecting
     # and in the process closed out the battle
-    battle = Lobby.get_battle(lobby_id)
+    battle = Lobby.get_lobby(lobby_id)
     assert battle != nil
 
     # Adding start rectangles
@@ -180,12 +180,12 @@ defmodule Teiserver.SpringBattleHostTest do
     _send_raw(socket, "ADDSTARTRECT 2 50 50 100 100\n")
     _ = _recv_raw(socket)
 
-    battle = Lobby.get_battle(lobby_id)
+    battle = Lobby.get_lobby(lobby_id)
     assert Enum.count(battle.start_areas) == 1
 
     _send_raw(socket, "REMOVESTARTRECT 2\n")
     _ = _recv_raw(socket)
-    battle = Lobby.get_battle(lobby_id)
+    battle = Lobby.get_lobby(lobby_id)
     assert Enum.empty?(battle.start_areas)
 
     # Add and remove script tags

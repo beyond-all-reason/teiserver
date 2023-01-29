@@ -155,7 +155,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   end
 
   def handle_info({:battle_lobby_throttle, _lobby_changes, player_changes}, %{assigns: assigns} = socket) do
-    battle = Lobby.get_battle(assigns.id)
+    battle = Lobby.get_lobby(assigns.id)
     modoptions = Battle.get_modoptions(assigns.id)
 
     socket = socket
@@ -228,7 +228,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
   end
 
   def handle_event("force-update", _, %{assigns: %{id: id}} = socket) do
-    battle = Lobby.get_battle(id)
+    battle = Lobby.get_lobby(id)
     {users, clients, ratings, parties} = get_user_and_clients(battle.players)
 
     {:noreply,

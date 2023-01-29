@@ -196,7 +196,7 @@ defmodule Teiserver.Protocols.SpringOut do
   end
 
   defp do_reply(:battle_opened, lobby_id) when is_integer(lobby_id) do
-    do_reply(:battle_opened, Lobby.get_battle(lobby_id))
+    do_reply(:battle_opened, Lobby.get_lobby(lobby_id))
   end
 
   defp do_reply(:battle_opened, _lobby_id) do
@@ -653,7 +653,7 @@ defmodule Teiserver.Protocols.SpringOut do
       send(self(), {:global_battle_updated, lobby_id, :battle_opened})
       send(self(), {:global_battle_updated, lobby_id, :update_battle_info})
 
-      battle = Lobby.get_battle(lobby_id)
+      battle = Lobby.get_lobby(lobby_id)
       if battle != nil and Map.has_key?(battle, :players) do
         battle.players
         |> Enum.each(fn player_id ->

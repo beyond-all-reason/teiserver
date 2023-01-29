@@ -28,7 +28,7 @@ defmodule Teiserver.Agents.BattlehostAgentServer do
   end
 
   def handle_info(:tick, state) do
-    battle = Lobby.get_battle(state.lobby_id)
+    battle = Lobby.get_lobby(state.lobby_id)
 
     new_state = cond do
       # Chance of doing nothing

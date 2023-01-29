@@ -1317,10 +1317,21 @@ defmodule Teiserver.TachyonMatchmakingTest do
     post_match_state1 = :sys.get_state(pid1)
     assert post_match_state1.groups_map |> Map.keys == [user1.id, user3.id]
     assert post_match_state1.paused_groups_map == %{}
+    assert post_match_state1.buckets == %{
+      0 => [user3.id],
+      1 => [user3.id],
+      2 => [user3.id],
+      20 => [user1.id],
+      21 => [user1.id],
+      22 => [user1.id]
+    }
 
     post_match_state2 = :sys.get_state(pid2)
     assert post_match_state2.groups_map |> Map.keys == [user1.id]
     assert post_match_state2.paused_groups_map == %{}
+    assert post_match_state2.buckets == %{
+      21 => [user1.id],
+    }
 
     # Ensure the clients are updated
     client1 = Account.get_client_by_id(user1.id)

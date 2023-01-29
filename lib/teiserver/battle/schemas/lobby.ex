@@ -145,12 +145,6 @@ defmodule Teiserver.Battle.Lobby do
   defdelegate add_lobby(lobby), to: LobbyCache
   defdelegate close_lobby(lobby_id, reason \\ :closed), to: LobbyCache
 
-  # Refactor of above from when we called them battle
-  def update_battle(battle, data, reason), do: LobbyCache.update_lobby(battle, data, reason)
-  def get_battle(lobby_id), do: LobbyCache.get_lobby(lobby_id)
-  def add_battle(battle), do: LobbyCache.add_lobby(battle)
-
-
   @spec start_battle_lobby_throttle(T.lobby_id()) :: pid()
   def start_battle_lobby_throttle(battle_lobby_id) do
     Teiserver.Throttles.start_throttle(battle_lobby_id, Teiserver.Battle.LobbyThrottle, "battle_lobby_throttle_#{battle_lobby_id}")
@@ -377,7 +371,7 @@ defmodule Teiserver.Battle.Lobby do
   @spec do_remove_user_from_lobby(integer(), integer()) ::
           :closed | :removed | :not_member | :no_battle
   defp do_remove_user_from_lobby(userid, lobby_id) do
-    battle = get_battle(lobby_id)
+    battle = get_lobby(lobby_id)
     Client.leave_battle(userid)
     Battle.remove_user_from_lobby(userid, lobby_id)
 
@@ -627,7 +621,7 @@ defmodule Teiserver.Battle.Lobby do
   def allow?(_userid, :host, _), do: true
 
   def allow?(changer, field, lobby_id) when is_integer(lobby_id),
-    do: allow?(changer, field, get_battle(lobby_id))
+    do: allow?(changer, field, get_lobby(lobby_id))
 
   def allow?(changer_id, field, battle) when is_integer(changer_id),
     do: allow?(Client.get_client_by_id(changer_id), field, battle)
