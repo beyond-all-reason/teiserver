@@ -70,6 +70,11 @@ defmodule Teiserver.Account.ClientLib do
     cast_client(userid, {:remove_from_queue, queue_id})
   end
 
+  @spec remove_client_from_all_queues(T.userid()) :: :ok | nil
+  def remove_client_from_all_queues(userid) do
+    cast_client(userid, :remove_from_all_queues)
+  end
+
   # Updates
   @spec merge_update_client(Map.t()) :: nil | :ok
   def merge_update_client(%{userid: userid} = partial_client) do

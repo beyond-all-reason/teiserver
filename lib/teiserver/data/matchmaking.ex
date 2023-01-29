@@ -44,6 +44,7 @@ defmodule Teiserver.Data.Matchmaking do
   alias Teiserver.Data.{QueueStruct, QueueGroup}
   alias Teiserver.Game.{QueueWaitServer, QueueMatchServer}
   alias Teiserver.Data.Types, as: T
+  alias Phoenix.PubSub
 
   @spec get_queue(Integer.t()) :: QueueStruct.t() | nil
   def get_queue(id) do
@@ -120,10 +121,17 @@ defmodule Teiserver.Data.Matchmaking do
 
   @spec create_match([QueueGroup.t()], T.queue_id()) :: {pid, String.t()}
   def create_match(group_list, queue_id) do
-    Logger.info("#{__ENV__.file}:#{__ENV__.line} create_match\\2: #{inspect group_list}")
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_global_matchmaking",
+      %{
+        channel: "teiserver_global_matchmaking",
+        event: :pause_search,
+        groups: group_list |> Enum.map(fn g -> g.id end)
+      }
+    )
 
-    {pid, match_id} = add_match_server(queue_id, group_list)
-    {pid, match_id}
+    add_match_server(queue_id, group_list)
   end
 
   @spec add_match_server(T.queue_id(), [QueueGroup.t()]) :: {pid, String.t()}

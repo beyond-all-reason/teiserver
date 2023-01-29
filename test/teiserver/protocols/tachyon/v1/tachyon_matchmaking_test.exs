@@ -1198,6 +1198,9 @@ defmodule Teiserver.TachyonMatchmakingTest do
   end
 
   test "joining two or more queues at once", %{socket: socket1, user: user1} do
+    rating_type_id = MatchRatingLib.rating_type_name_lookup()["Duel"]
+    make_rating(user1.id, rating_type_id, 21)
+
     {:ok, queue1} =
       Game.create_queue(%{
         "name" => "test_queue-multi1",
@@ -1231,8 +1234,8 @@ defmodule Teiserver.TachyonMatchmakingTest do
     client = Account.get_client_by_id(user1.id)
     assert client.queues == [queue1.id]
 
-    pid = Matchmaking.get_queue_wait_pid(queue1.id)
-    state = :sys.get_state(pid)
+    pid1 = Matchmaking.get_queue_wait_pid(queue1.id)
+    state = :sys.get_state(pid1)
     assert state.groups_map |> Map.has_key?(user1.id)
 
     [reply] = _tachyon_recv(socket1)
@@ -1248,9 +1251,9 @@ defmodule Teiserver.TachyonMatchmakingTest do
     client = Account.get_client_by_id(user1.id)
     assert client.queues == [queue2.id, queue1.id]
 
-    pid = Matchmaking.get_queue_wait_pid(queue2.id)
-    state = :sys.get_state(pid)
-    assert state.groups_map |> Map.has_key?(user1.id)
+    pid2 = Matchmaking.get_queue_wait_pid(queue2.id)
+    state = :sys.get_state(pid2)
+    assert state.groups_map |> Map.keys == [user1.id]
 
     [reply] = _tachyon_recv(socket1)
     assert reply == %{
@@ -1261,102 +1264,116 @@ defmodule Teiserver.TachyonMatchmakingTest do
 
     # Now get user 2 to join a queue
     %{socket: socket2, user: user2} = tachyon_auth_setup()
+    make_rating(user2.id, rating_type_id, 20)
+
+    # User 3 too, so we can ensure not all users are removed
+    %{socket: socket3, user: user3} = tachyon_auth_setup()
+    make_rating(user3.id, rating_type_id, 1)
 
     _tachyon_send(socket2, %{cmd: "c.matchmaking.join_queue", queue_id: queue1.id})
+    _tachyon_send(socket3, %{cmd: "c.matchmaking.join_queue", queue_id: queue1.id})
 
-    pid = Matchmaking.get_queue_wait_pid(queue1.id)
+    _tachyon_recv(socket2)
+    _tachyon_recv(socket3)
+
+    state = :sys.get_state(pid1)
+    assert state.groups_map |> Map.keys == [user1.id, user2.id, user3.id]
+
+    # Tick so our groups have expanded, we can then ensure they are later added to the right buckets
+    send(pid1, :tick)
+
+    pre_match_state1 = :sys.get_state(pid1)
+    # pre_match_state2 = :sys.get_state(pid2)
+    assert pre_match_state1.groups_map |> Map.keys == [user1.id, user2.id, user3.id]
 
     # Trigger the queue server to make the match get started
-    send(pid, :tick)
+    send(pid1, :increase_range)
+    send(pid1, :tick)
 
-    [reply] = _tachyon_recv(socket1)
-    assert reply == %{
+    during_match_state1 = :sys.get_state(pid1)
+    assert during_match_state1.groups_map |> Map.keys == [user3.id]
+
+    during_match_state2 = :sys.get_state(pid2)
+    assert during_match_state2.groups_map == %{}
+
+    client1 = Account.get_client_by_id(user1.id)
+    assert client1.queues == [queue2.id, queue1.id]
+
+    client2 = Account.get_client_by_id(user2.id)
+    assert client2.queues == [queue1.id]
+
+    client3 = Account.get_client_by_id(user3.id)
+    assert client3.queues == [queue1.id]
+
+    [reply1] = _tachyon_recv(socket1)
+    assert reply1 == %{
       "cmd" => "s.matchmaking.match_ready",
       "queue_id" => queue1.id,
-      "match_id" => reply["match_id"]
+      "match_id" => reply1["match_id"]
+    }
+    match_id = reply1["match_id"]
+
+    [reply2] = _tachyon_recv(socket2)
+    assert reply2 == %{
+      "cmd" => "s.matchmaking.match_ready",
+      "queue_id" => queue1.id,
+      "match_id" => reply2["match_id"]
     }
 
-    client = Account.get_client_by_id(user1.id)
-    assert client.queues == [queue2.id, queue1.id]
+    assert match_id == reply2["match_id"], message: "#{match_id} vs #{reply2["match_id"]}"
 
-    # Create the match process
-    # {match_pid, match_id} = Matchmaking.create_match([
-    #   Matchmaking.make_group_from_userid(user2.id, queue) |> Map.merge(extra_group_data),
-    #   Matchmaking.make_group_from_userid(user1.id, queue) |> Map.merge(extra_group_data)
-    # ], queue.id)
+    # At this point user1 and user2 are being matched against each other
+    # we now cancel this match (user2 declines) and user1 will be re-added
+    # to the wait server, we can test this is done correctly
 
-    # # Clear both sockets
-    # _tachyon_recv_until(socket1)
-    # _tachyon_recv_until(socket2)
+    match_pid = Matchmaking.get_queue_match_pid(match_id)
+    state = :sys.get_state(match_pid)
+    assert state.teams == %{1 => [user1.id], 2 => [user2.id]}
 
-    # # Check server states
-    # match_state = :sys.get_state(match_pid)
-    # assert match_state.user_ids == [user2.id, user1.id]
-    # assert match_state.pending_accepts == [user2.id, user1.id]
-    # assert match_state.accepted_users == []
-    # assert match_state.declined_users == []
+    # Accept user1
+    _tachyon_send(socket1, %{cmd: "c.matchmaking.accept", match_id: match_id})
 
-    # wait_state = :sys.get_state(wait_pid)
-    # assert wait_state.groups_map == %{}
-    # assert wait_state.buckets == %{}
+    # Decline user2
+    _tachyon_send(socket2, %{cmd: "c.matchmaking.decline", match_id: match_id})
 
-    # # Ensure we have an open and empty battle
-    # %{
-    #   # lobby_id: lobby_id
-    # } = make_empty_lobby()
+    # Test the state now
+    send(match_pid, :tick)
+    :timer.sleep(500)
+    refute Process.alive?(match_pid)
 
-    # # Accept user user1
-    # _tachyon_send(socket1, %{cmd: "c.matchmaking.accept", match_id: match_id})
-    # _tachyon_send(socket2, %{cmd: "c.matchmaking.accept", match_id: match_id})
-    # :timer.sleep(100)
+    # Check wait state
+    post_match_state1 = :sys.get_state(pid1)
+    assert post_match_state1.groups_map |> Map.keys == [user1.id, user3.id]
+    assert post_match_state1.paused_groups_map == %{}
 
-    # [user1.id, user2.id]
-    #   |> Enum.each(fn userid ->
-    #     Account.merge_update_client(userid, %{sync: %{engine: 1, game: 1, map: 1}})
-    #   end)
+    post_match_state2 = :sys.get_state(pid2)
+    assert post_match_state2.groups_map |> Map.keys == [user1.id]
+    assert post_match_state2.paused_groups_map == %{}
 
-    # # Wait for kicks to take place
-    # :timer.sleep(1000)
+    # Ensure the clients are updated
+    client1 = Account.get_client_by_id(user1.id)
+    assert client1.queues == [queue2.id, queue1.id]
 
-    # [reply] = _tachyon_recv(socket1)
-    # assert reply["cmd"] == "s.lobby.joined"
+    client2 = Account.get_client_by_id(user2.id)
+    assert client2.queues == []
 
-    # [reply] = _tachyon_recv(socket2)
-    # assert reply["cmd"] == "s.lobby.joined"
+    client3 = Account.get_client_by_id(user3.id)
+    assert client3.queues == [queue1.id]
 
-    # # Clear both sockets
-    # _tachyon_recv_until(socket1)
-    # _tachyon_recv_until(socket2)
+    # And finally, what do the user connections see?
+    [reply1] = _tachyon_recv(socket1)
+    assert reply1 == %{
+      "cmd" => "s.matchmaking.match_cancelled",
+      "queue_id" => queue1.id,
+      "match_id" => match_id
+    }
 
-    # # Wait for it to do everything
-    # :timer.sleep(1000)
-
-    # state = :sys.get_state(match_pid)
-    # assert state.user_ids == [user2.id, user1.id]
-    # assert state.pending_accepts == []
-    # assert state.accepted_users == [user2.id, user1.id]
-    # assert state.declined_users == []
-
-    # send(match_pid, :tick)
-
-    # # Check wait state
-    # wait_state = :sys.get_state(wait_pid)
-    # assert wait_state.groups_map == %{}
-    # assert wait_state.buckets == %{}
-
-    # # If we tick is that still the case?
-    # send(wait_pid, :tick)
-    # wait_state = :sys.get_state(wait_pid)
-    # assert wait_state.groups_map == %{}
-    # assert wait_state.buckets == %{}
-
-    # # Now tell the match server to cancel the match
-    # send(match_pid, :end_waiting)
-    # :timer.sleep(500)
-    # refute Process.alive?(match_pid)
-    # assert Matchmaking.get_queue_match_pid(match_id) == nil
-
-    flunk "Not implemented"
+    [reply2] = _tachyon_recv(socket2)
+    assert reply2 == %{
+      "cmd" => "s.matchmaking.match_declined",
+      "queue_id" => queue1.id,
+      "match_id" => match_id
+    }
   end
 
   test "Moderated players can't do matchmaking", %{socket: socket1, user: user1} do

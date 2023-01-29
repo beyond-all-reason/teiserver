@@ -72,7 +72,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.MatchmakingIn do
 
   def do_handle("decline", %{"match_id" => match_id}, state) do
     Matchmaking.player_decline(match_id, state.userid)
-    do_handle("leave_all_queues", nil, state)
+    state
   end
 
   # def do_handle(cmd, data, msg_id, state) do

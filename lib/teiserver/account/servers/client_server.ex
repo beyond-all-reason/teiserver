@@ -145,6 +145,11 @@ defmodule Teiserver.Account.ClientServer do
     {:noreply, %{state | client: new_client}}
   end
 
+  def handle_cast(:remove_from_all_queues, state) do
+    new_client = Map.merge(state.client, %{queues: []})
+    {:noreply, %{state | client: new_client}}
+  end
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -153,6 +158,8 @@ defmodule Teiserver.Account.ClientServer do
   @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(%{client: %{userid: userid}} = state) do
+    Logger.metadata([request_id: "ClientServer##{userid}"])
+
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
       Teiserver.ClientRegistry,

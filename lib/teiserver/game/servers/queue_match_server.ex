@@ -159,13 +159,10 @@ defmodule Teiserver.Game.QueueMatchServer do
       end)
       |> Enum.map(fn group -> group.id end)
 
-    # Re-add those groups to the wait queue
+    # Message the relevant members the match is cancelled
     state.group_list
       |> Enum.filter(fn group -> Enum.member?(accepted_groups, group.id) end)
-      |> Enum.map(fn group ->
-        Matchmaking.re_add_group_to_queue(group, state.queue_id)
-        group.members
-      end)
+      |> Enum.map(fn group -> group.members end)
       |> List.flatten
       |> Enum.each(fn userid ->
         PubSub.broadcast(
@@ -181,25 +178,13 @@ defmodule Teiserver.Game.QueueMatchServer do
         )
       end)
 
-    # The rest get removed
+    # The others can know it got declined
     state.group_list
       |> Enum.reject(fn group -> Enum.member?(accepted_groups, group.id) end)
-      |> Enum.map(fn group ->
-        PubSub.broadcast(
-          Central.PubSub,
-          "teiserver_queue:#{state.queue_id}",
-          %{
-            channel: "teiserver_queue:#{state.queue_id}",
-            event: :queue_remove_group,
-            queue_id: state.queue_id,
-            group_id: group.id
-          }
-        )
-
-        group.members
-      end)
+      |> Enum.map(fn group -> group.members end)
       |> List.flatten
       |> Enum.each(fn userid ->
+        Account.remove_client_from_all_queues(userid)
         PubSub.broadcast(
           Central.PubSub,
           "teiserver_client_messages:#{userid}",
@@ -212,6 +197,34 @@ defmodule Teiserver.Game.QueueMatchServer do
           }
         )
       end)
+
+
+    # Now message the QueueWaitServers to let them know what's up
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_global_matchmaking",
+      %{
+        channel: "teiserver_global_matchmaking",
+        event: :resume_search,
+        groups: accepted_groups
+      }
+    )
+
+    declined_groups = state.group_list
+      |> Enum.map(fn group -> group.id end)
+      |> Enum.reject(fn group_id ->
+        Enum.member?(accepted_groups, group_id)
+      end)
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_global_matchmaking",
+      %{
+        channel: "teiserver_global_matchmaking",
+        event: :cancel_search,
+        groups: declined_groups
+      }
+    )
 
     Logger.info("QueueMatchServer match cancelled #{state.match_id}")
     DynamicSupervisor.terminate_child(Teiserver.Game.QueueSupervisor, self())
@@ -408,6 +421,7 @@ defmodule Teiserver.Game.QueueMatchServer do
   def init(opts) do
     send(self(), :initial_setup)
     Process.send_after(self(), :find_timeout, @find_timeout)
+    Logger.metadata([request_id: "QueueMatchServer##{opts.queue_id}/#{opts.match_id}"])
 
     # Update the queue pids cache to point to this process
     Horde.Registry.register(

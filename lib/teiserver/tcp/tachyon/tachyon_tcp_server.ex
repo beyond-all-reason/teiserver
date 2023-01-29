@@ -378,7 +378,6 @@ defmodule Teiserver.TachyonTcpServer do
 
             :left_queue ->
               send(self(), {:action, {:left_queue, data.queue_id}})
-              # state.protocol_out.reply(:matchmaking, :left_queue, data.queue_id, state)
               state
 
             _ ->

@@ -248,6 +248,8 @@ This is the channel for sending messages to the client. It allows the client on 
   match_id: match_id
 }
 
+# Used to say you (or someone in your party) declined
+# the match and thus you are in no queues any more
 %{
   event: :matchmaking,
   sub_event: :match_declined,
@@ -411,6 +413,28 @@ Valid events
 All updates about the room and content for the room. Likely to be kept as is and renamed as a teiserver channel due to its nature.
 
 ### Matchmaking
+#### teiserver_global_matchmaking
+Used to communicate to all wait servers so groups can be added/removed from queues correctly.
+```elixir
+# A match has been found, stop these groups searching for now
+%{
+  event: :pause_search
+  groups: [group_id]
+}
+
+# Match failed to start, these groups are to resume searching
+%{
+  event: :resume_search
+  groups: [group_id]
+}
+
+# This can fire for both a match starting and a match being declined
+%{
+  event: :cancel_search
+  groups: [group_id]
+}
+```
+
 #### teiserver_queue:#{queue_id}
 Sent from the queue wait server to update regarding it's status
 Valid events

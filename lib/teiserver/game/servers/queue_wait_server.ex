@@ -192,6 +192,25 @@ defmodule Teiserver.Game.QueueWaitServer do
     {:noreply, new_state}
   end
 
+  def handle_info(%{channel: "teiserver_global_matchmaking", event: :pause_search, groups: groups}, state) do
+    new_state = pause_groups(groups, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info(%{channel: "teiserver_global_matchmaking", event: :resume_search, groups: groups}, state) do
+    new_state = resume_paused_groups(groups, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info(%{channel: "teiserver_global_matchmaking", event: :cancel_search, groups: groups}, state) do
+    new_state = remove_paused_groups(groups, state)
+    {:noreply, new_state}
+  end
+
+  def handle_info(%{channel: "teiserver_global_matchmaking"}, state) do
+    {:noreply, state}
+  end
+
   def handle_info({:refresh_from_db, db_queue}, state) do
     update_state_from_db(state, db_queue)
   end
@@ -299,11 +318,15 @@ defmodule Teiserver.Game.QueueWaitServer do
         wait_times = selected_groups
           |> Enum.map(fn g -> System.system_time(:second) - g.join_time end)
 
+        extra_paused_groups = selected_groups
+          |> Map.new(fn g -> {g.id, g} end)
+
         %{state |
           buckets: new_buckets,
           groups_map: new_groups_map,
           found_match_count: (state.found_match_count + 1),
-          recent_wait_times: state.recent_wait_times ++ wait_times
+          recent_wait_times: state.recent_wait_times ++ wait_times,
+          paused_groups_map: Map.merge(state.paused_groups_map, extra_paused_groups)
         }
     end
 
@@ -451,6 +474,82 @@ defmodule Teiserver.Game.QueueWaitServer do
     }
   end
 
+  # One or more groups found a match, pause them
+  @spec pause_groups([T.userid() | String.t()], Map.t()) :: Map.t()
+  defp pause_groups(group_ids, state) do
+    # Drop the selected ids from any bucket values
+    new_buckets = state.buckets
+      |> Map.new(fn {key, bucket_list} ->
+        {key, Enum.reject(bucket_list, fn g -> Enum.member?(group_ids, g) end)}
+      end)
+      |> Map.filter(fn {_, bucket_list} -> not Enum.empty?(bucket_list) end)
+
+    new_paused_groups_map = state.groups_map
+      |> Map.filter(fn {g_id, _} -> Enum.member?(group_ids, g_id) end)
+      |> Map.merge(state.paused_groups_map)
+
+    new_groups_map = Map.drop(state.groups_map, group_ids)
+
+    %{state |
+      buckets: new_buckets,
+      groups_map: new_groups_map,
+      paused_groups_map: new_paused_groups_map
+    }
+  end
+
+  @spec resume_paused_groups([T.userid() | String.t()], Map.t()) :: Map.t()
+  defp resume_paused_groups(group_ids, state) do
+    groups = group_ids
+      |> Map.new(fn g_id -> {g_id, state.paused_groups_map[g_id]} end)
+
+    new_groups_map = Map.merge(state.groups_map, groups)
+
+    bucket_additions = groups
+      |> Enum.map(fn {_, group} ->
+        min_bucket = group.bucket - group.search_distance
+        max_bucket = group.bucket + group.search_distance
+
+        min_bucket..max_bucket
+          |> Enum.map(fn bucket -> {bucket, group.id} end)
+      end)
+      |> List.flatten
+      |> Enum.group_by(
+        fn {bucket, _} -> bucket end,
+        fn {_, group_id} -> group_id end
+      )
+
+    # We now merge the old and new bucket lists
+    new_buckets = Map.keys(state.buckets) ++ Map.keys(bucket_additions)
+      |> Enum.uniq
+      |> Map.new(fn key ->
+        {key, Map.get(state.buckets, key, []) ++ Map.get(bucket_additions, key, [])}
+      end)
+
+    new_paused_groups_map = state.paused_groups_map
+      |> Map.reject(fn {group_id, _} ->
+        Enum.member?(group_ids, group_id)
+      end)
+
+    %{
+      state
+      | buckets: new_buckets,
+        groups_map: new_groups_map,
+        skip: false,
+        join_count: (state.join_count + Enum.count(group_ids)),
+        paused_groups_map: new_paused_groups_map
+    }
+  end
+
+  @spec remove_paused_groups([T.userid() | String.t()], Map.t()) :: Map.t()
+  defp remove_paused_groups(group_ids, state) do
+    new_paused_groups_map = state.paused_groups_map
+      |> Map.reject(fn {group_id, _} ->
+        Enum.member?(group_ids, group_id)
+      end)
+
+    %{state | paused_groups_map: new_paused_groups_map}
+  end
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -487,6 +586,9 @@ defmodule Teiserver.Game.QueueWaitServer do
     :timer.send_interval(@default_range_increase_interval, self(), :increase_range)
     :timer.send_interval(@update_interval, self(), :broadcast_update)
 
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_matchmaking")
+    Logger.metadata([request_id: "QueueWaitServer##{opts.queue.id}"])
+
     # Update the queue pids cache to point to this process
     Horde.Registry.register(
       Teiserver.QueueWaitRegistry,
@@ -497,6 +599,7 @@ defmodule Teiserver.Game.QueueWaitServer do
     state = update_state_from_db(%{
       buckets: %{},
       groups_map: %{},
+      paused_groups_map: %{},
 
       skip: false,
       queue_id: opts.queue.id,

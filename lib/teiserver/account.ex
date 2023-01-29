@@ -1334,6 +1334,9 @@ defmodule Teiserver.Account do
   @spec remove_client_from_queue(T.userid(), T.queue_id()) :: :ok | nil
   defdelegate remove_client_from_queue(userid, queue_id), to: ClientLib
 
+  @spec remove_client_from_all_queues(T.userid()) :: :ok | nil
+  defdelegate remove_client_from_all_queues(userid), to: ClientLib
+
   @spec get_client_pid(T.userid()) :: pid() | nil
   defdelegate get_client_pid(userid), to: ClientLib
 
