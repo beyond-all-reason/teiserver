@@ -151,7 +151,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
       report = Moderation.get_report!(report.id, preload: [:reporter, :target])
 
       host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
-      url = "https://#{host}/moderation/report?/target_id=#{report.target_id}"
+      url = "https://#{host}/moderation/report?target_id=#{report.target_id}"
 
       match_icon = cond do
         report.match_id == nil -> ""
