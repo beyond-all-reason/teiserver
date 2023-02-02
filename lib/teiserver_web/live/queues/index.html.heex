@@ -1,8 +1,10 @@
 <% bsname = @view_colour %>
 
-<%= render TeiserverWeb.Game.GeneralView, "sub_menu.html", %{active: "queues", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+<%=
+  render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "matchmaking", conn: Map.put(@socket, :permissions, @current_user.permissions)}
+%>
 
-<div class="row">
+<div class="row mt-3">
   <div class="col-md-12">
     <div class={"card border-#{bsname} page-card"}>
       <div class="card-body">

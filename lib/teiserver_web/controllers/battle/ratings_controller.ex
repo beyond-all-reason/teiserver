@@ -14,8 +14,7 @@ defmodule TeiserverWeb.Battle.RatingsController do
     sub_menu_active: "match"
   )
 
-  plug :add_breadcrumb, name: 'Battle', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Logs', url: '/teiserver/matches'
+  plug :add_breadcrumb, name: 'Matches', url: '/teiserver/matches'
 
   @spec leaderboard(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def leaderboard(conn, params) do
@@ -45,6 +44,7 @@ defmodule TeiserverWeb.Battle.RatingsController do
     )
 
     conn
+      |> add_breadcrumb(name: "Leaderboard", url: conn.request_path)
       |> assign(:type_name, type_name)
       |> assign(:type_id, type_id)
       |> assign(:ratings, ratings)

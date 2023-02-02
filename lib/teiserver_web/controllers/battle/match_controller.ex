@@ -15,8 +15,7 @@ defmodule TeiserverWeb.Battle.MatchController do
     sub_menu_active: "match"
   )
 
-  plug :add_breadcrumb, name: 'Battle', url: '/teiserver'
-  plug :add_breadcrumb, name: 'Logs', url: '/teiserver/matches'
+  plug :add_breadcrumb, name: 'Matches', url: '/teiserver/matches'
 
   @spec index(Plug.Conn.t(), Map.t()) :: Plug.Conn.t()
   def index(conn, _params) do

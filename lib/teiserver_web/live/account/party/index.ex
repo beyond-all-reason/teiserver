@@ -27,7 +27,7 @@ defmodule TeiserverWeb.Account.PartyLive.Index do
     mode = if admin_mode, do: "admin", else: "player"
 
     socket = socket
-      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
+      # |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Parties", url: "/teiserver/account/parties")
       |> assign(:mode, mode)
       |> assign(:client, client)

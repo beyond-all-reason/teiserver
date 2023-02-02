@@ -54,7 +54,6 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     is_admin = allow?(socket.assigns[:current_user], "teiserver.staff.admin")
 
     socket = socket
-      |> add_breadcrumb(name: "Teiserver", url: "/teiserver")
       |> add_breadcrumb(name: "Matchmaking", url: "/teiserver/game_live/queues")
       |> assign(:client, client)
       |> assign(:queue_membership, queue_membership)
