@@ -144,10 +144,27 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
       |> assign(:queue_membership, new_queue_membership)}
   end
 
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :match_declined, queue_id: queue_id}, %{assigns: assigns} = socket) do
+    new_queue_membership = List.delete(assigns[:queue_membership], queue_id)
+
+    {:noreply,
+      socket
+      |> assign(:queue_membership, new_queue_membership)
+      |> assign(:queue_membership, [])
+    }
+  end
+
+  def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :match_created, queue_id: _queue_id}, %{assigns: _assigns} = socket) do
+    {:noreply,
+      socket
+      |> assign(:queue_membership, [])}
+  end
+
   def handle_info(%{channel: "teiserver_client_messages:" <> _, event: :connected}, socket) do
     {:noreply,
       socket
         |> assign(:client, Client.get_client_by_id(socket.assigns[:current_user].id))
+        |> assign(:queue_membership, [])
     }
   end
 
@@ -162,6 +179,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     {:noreply,
       socket
         |> assign(:client, nil)
+        |> assign(:queue_membership, [])
     }
   end
 

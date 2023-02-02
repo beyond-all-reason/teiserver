@@ -41,17 +41,24 @@
         </h4>
 
 <br />
-<div class="alert alert-primary">
-  Matchmaking represents a more competitive experience and as a result griefing, smurfing and throwing will be treated more harshly than in casual games.
-</div>
 
 <div class="alert alert-warning">
   Matchmaking is in an early stage so there are a few things to bear in mind:
   <ul>
     <li>Bugs are expected; please post them to the Teiserver channel in the discord</li>
-    <li>This page doesn't always auto-reload correctly, if it seems stuck please refresh it</li>
+    <li>This page doesn't always update correctly, if it seems stuck please refresh it</li>
   </ul>
 </div>
+
+<%= if @client != nil and @client.app_status != :accepted do %>
+  <div class="alert alert-danger">
+    Unfortunately non-chobby clients are having issues updating correctly and block matchmaking from working. You can get Chobby at the <a href="https://www.beyondallreason.info/download#How-To-Install">BAR downloads page</a>.
+  </div>
+<% else %>
+  <div class="alert alert-primary">
+    Matchmaking represents a more competitive experience and as a result griefing, smurfing and throwing will be treated more harshly than in casual games.
+  </div>
+<% end %>
 
 <h4>Listing Queues</h4>
 
@@ -87,6 +94,9 @@
 
             <% @client.player -> %>
               You can't join matchmaking as a player in a game, you need to become a spectator
+
+            <% @client.app_status != :accepted -> %>
+              Non-chobby client, cannot connect to Matchmaking
 
             <% Enum.member?(@queue_membership, queue_id) -> %>
               <span class={"btn btn-sm btn-warning"} phx-click="leave-queue" phx-value-queue_id={queue_id}>

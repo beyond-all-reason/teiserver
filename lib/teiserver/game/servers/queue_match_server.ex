@@ -267,9 +267,24 @@ defmodule Teiserver.Game.QueueMatchServer do
 
     Lobby.silence_lobby(state.lobby_id)
     Lobby.lock_lobby(state.lobby_id)
+    Lobby.rename_lobby(state.lobby_id, "Matchmaking #{state.db_queue.name}", false)
 
     # Wait for all the kicks to take place, then move people
     :timer.sleep(1000)
+
+    # Cancel the searches for the groups
+    canceled_groups = state.group_list
+      |> Enum.map(fn group -> group.id end)
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_global_matchmaking",
+      %{
+        channel: "teiserver_global_matchmaking",
+        event: :cancel_search,
+        groups: canceled_groups
+      }
+    )
 
     state.user_ids
       |> Enum.each(fn userid ->
@@ -369,6 +384,21 @@ defmodule Teiserver.Game.QueueMatchServer do
         Logger.info("QueueMatchServer #{state.match_id} setup_lobby calling forcestart")
         Coordinator.send_to_host(lobby.id, "!forcestart")
         :timer.sleep(100)
+
+        all_clients
+          |> Enum.each(fn %{userid: userid} ->
+            PubSub.broadcast(
+              Central.PubSub,
+              "teiserver_client_messages:#{userid}",
+              %{
+                channel: "teiserver_client_messages:#{userid}",
+                event: :matchmaking,
+                sub_event: :match_created,
+                queue_id: state.queue_id,
+                match_id: state.match_id
+              }
+            )
+          end)
 
         PubSub.broadcast(
           Central.PubSub,

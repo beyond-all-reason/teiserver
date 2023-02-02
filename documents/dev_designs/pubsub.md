@@ -257,6 +257,15 @@ This is the channel for sending messages to the client. It allows the client on 
   match_id: match_id
 }
 
+# Used to say your match was created and (in theory) started
+# and as a result you are not in any queues
+%{
+  event: :matchmaking,
+  sub_event: :match_created,
+  queue_id: queue_id,
+  match_id: match_id
+}
+
 # Messaging
 %{
   event: :received_direct_message,
