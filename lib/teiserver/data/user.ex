@@ -23,7 +23,7 @@ defmodule Teiserver.User do
   @default_icon "fa-solid fa-user"
 
   @spec role_list :: [String.t()]
-  def role_list(), do: ~w(Tester Streamer Donor Caster Contributor Dev Moderator Admin Verified Bot)
+  def role_list(), do: ~w(Tester Streamer Donor Caster Contributor GDT Dev Moderator Admin Verified Bot)
 
   @spec keys() :: [atom]
   def keys(), do: [:id, :name, :email, :inserted_at, :clan_id, :permissions, :colour, :icon, :behaviour_score, :trust_score]
@@ -1103,6 +1103,30 @@ defmodule Teiserver.User do
       required ->
         Enum.member?(user.roles, required)
     end
+  end
+
+  @doc """
+  If a user possesses any of these roles it returns true
+  """
+  @spec has_any_role?(T.userid() | T.user() | nil, String.t() [String.t()]) :: boolean()
+  def has_any_role?(nil, _), do: false
+  def has_any_role?(userid, roles) when is_integer(userid), do: has_any_role?(get_user_by_id(userid), roles)
+  def has_any_role?(user, roles) do
+    roles
+      |> Enum.map(fn role -> Enum.member?(user.roles, role) end)
+      |> Enum.any?
+  end
+
+  @doc """
+  If a user possesses all of these roles it returns true, if any are lacking it returns false
+  """
+  @spec has_all_roles?(T.userid() | T.user() | nil, String.t() [String.t()]) :: boolean()
+  def has_all_roles?(nil, _), do: false
+  def has_all_roles?(userid, roles) when is_integer(userid), do: has_all_roles?(get_user_by_id(userid), roles)
+  def has_all_roles?(user, roles) do
+    roles
+      |> Enum.map(fn role -> Enum.member?(user.roles, role) end)
+      |> Enum.all?
   end
 
   @spec valid_email?(String.t()) :: boolean

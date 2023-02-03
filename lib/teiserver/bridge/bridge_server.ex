@@ -181,6 +181,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   defp is_promo?(message) do
     regexes = [
       Regex.run(~r/\+\d+( more|needed)?$/, message),
+      Regex.run(~r/\d+ more needed$/, message),
       Regex.run(~r/\d+\+? (more )?for \d(v|vs)\d/, message),
       Regex.run(~r/(more|needed) for \d(v|vs)\d/, message),
       Regex.run(~r/\d needed/, message)

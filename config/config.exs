@@ -50,7 +50,7 @@ config :central, Teiserver,
     tachyon: 8202
   ],
   website: [
-    url: "https://server3.beyondallreason.info"
+    url: "mywebsite.com"
   ],
   enable_benchmark: false,
   enable_hooks: true,
