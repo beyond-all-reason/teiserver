@@ -32,11 +32,12 @@ defmodule Teiserver.Bridge.BridgeServer do
     cond do
       user.discord_dm_channel == nil -> nil
       true ->
-        Alchemy.Client.send_message(
-          user.discord_dm_channel,
-          message,
-          []# Options
-        )
+        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nAlchemy.Client.send_message")
+        # Alchemy.Client.send_message(
+        #   user.discord_dm_channel,
+        #   message,
+        #   []# Options
+        # )
     end
   end
 
@@ -163,11 +164,12 @@ defmodule Teiserver.Bridge.BridgeServer do
 
     case channels do
       [{channel_id, _}] ->
-        Alchemy.Client.send_message(
-          channel_id,
-          "Teiserver shutdown for node #{Teiserver.node_name()}",
-          []# Options
-        )
+        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nAlchemy.Client.send_message")
+        # Alchemy.Client.send_message(
+        #   channel_id,
+        #   "Teiserver shutdown for node #{Teiserver.node_name()}",
+        #   []# Options
+        # )
       _ ->
         :ok
     end
@@ -236,11 +238,12 @@ defmodule Teiserver.Bridge.BridgeServer do
     case channels do
       [{channel_id, _}] ->
         Logger.info("Discord connected, posting startup message")
-        Alchemy.Client.send_message(
-          channel_id,
-          "Teiserver startup for node #{Teiserver.node_name()}",
-          []# Options
-        )
+        Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nAlchemy.Client.send_message")
+        # Alchemy.Client.send_message(
+        #   channel_id,
+        #   "Teiserver startup for node #{Teiserver.node_name()}",
+        #   []# Options
+        # )
       _ ->
         :ok
     end
@@ -257,11 +260,12 @@ defmodule Teiserver.Bridge.BridgeServer do
     new_message = message
       |> convert_emoticons
 
-    Alchemy.Client.send_message(
-      channel,
-      "**#{author}**: #{new_message}",
-      []# Options
-    )
+    Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nAlchemy.Client.send_message")
+    # Alchemy.Client.send_message(
+    #   channel,
+    #   "**#{author}**: #{new_message}",
+    #   []# Options
+    # )
   end
 
   defp convert_emoticons(message) do
@@ -316,12 +320,14 @@ defmodule Teiserver.Bridge.BridgeServer do
   def change_channel_name(_, ""), do: false
   def change_channel_name("", _), do: false
   def change_channel_name(channel_id, new_name) do
-    case Alchemy.Client.get_channel(channel_id) do
-      {:ok, _channel} ->
-        Alchemy.Client.edit_channel(channel_id, name: new_name)
-      _ ->
-        false
-    end
+    Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nAlchemy.Client.send_message")
+    # case Alchemy.Client.get_channel(channel_id) do
+    #   {:ok, _channel} ->
+    #     Alchemy.Client.edit_channel(channel_id, name: new_name)
+    #   _ ->
+    #     false
+    # end
+    false
   end
 
   @spec make_password() :: String.t

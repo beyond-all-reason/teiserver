@@ -3,18 +3,23 @@ defmodule Teiserver.Bridge.ChatCommands do
   alias Teiserver.User
   alias Teiserver.Data.Types, as: T
   alias Teiserver.Bridge.UnitNames
+  require Logger
 
   @always_allow ~w(whatwas unit)
 
-  @spec handle(Alchemy.Message.t()) :: any
-  def handle(%Alchemy.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []} = _message) do
-    [cmd | remaining] = String.split(content, " ")
-    remaining = Enum.join(remaining, " ")
-    user = User.get_user_by_discord_id(author)
+  # @spec handle(Alchemy.Message.t()) :: any
+  # def handle(%Alchemy.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []} = _message) do
+  #   [cmd | remaining] = String.split(content, " ")
+  #   remaining = Enum.join(remaining, " ")
+  #   user = User.get_user_by_discord_id(author)
 
-    if allow?(cmd, user) do
-      handle_message({user, author}, cmd, remaining, channel)
-    end
+  #   if allow?(cmd, user) do
+  #     handle_message({user, author}, cmd, remaining, channel)
+  #   end
+  # end
+
+  def handle(_) do
+    :ok
   end
 
   @spec handle_message({T.user(), String.t()}, String.t(), String.t(), String.t()) :: any
@@ -88,10 +93,11 @@ defmodule Teiserver.Bridge.ChatCommands do
   end
 
   defp reply(channel, message) do
-    Alchemy.Client.send_message(
-      channel,
-      message,
-      []# Options
-    )
+    Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nAlchemy.Client.send_message")
+    # Alchemy.Client.send_message(
+    #   channel,
+    #   message,
+    #   []# Options
+    # )
   end
 end

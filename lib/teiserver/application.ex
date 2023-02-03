@@ -99,9 +99,8 @@ defmodule Teiserver.Application do
         id: Teiserver.TachyonTcpServer,
         start: {Teiserver.TachyonTcpServer, :start_link, [[]]}
       }
-    ]
+    ] ++ discord_start()
 
-    discord_start()
 
     # Agent mode stuff, should not be enabled in prod
     children = if Application.get_env(:central, Teiserver)[:enable_agent_mode] do
@@ -119,10 +118,9 @@ defmodule Teiserver.Application do
 
   defp discord_start do
     if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
-      token = Application.get_env(:central, DiscordBridge)[:token]
-      {:ok, pid} = Alchemy.Client.start(token)
-      use Teiserver.Bridge.DiscordBridge
-      {:ok, pid}
+      [{Teiserver.Bridge.DiscordBridge, name: Teiserver.Bridge.DiscordBridge}]
+    else
+      []
     end
   end
 
