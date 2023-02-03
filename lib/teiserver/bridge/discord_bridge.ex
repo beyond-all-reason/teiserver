@@ -73,6 +73,11 @@ defmodule Teiserver.Bridge.DiscordBridge do
   end
 
   # Stuff we might want to use
+  def handle_event({:MESSAGE_CREATE, _, _ws_state}) do
+    # Has an attachment
+    :ignore
+  end
+
   def handle_event({:MESSAGE_UPDATE, _, _ws_state}) do
     :ignore
   end
@@ -95,13 +100,25 @@ defmodule Teiserver.Bridge.DiscordBridge do
     :ignore
   end
 
+  def handle_event({:THREAD_CREATE, _, _ws_state}) do
+    :ignore
+  end
+
+  def handle_event({:MESSAGE_REACTION_ADD, _, _ws_state}) do
+    :ignore
+  end
+
+  def handle_event({:CHANNEL_UPDATE, _, _ws_state}) do
+    :ignore
+  end
+
   # Default event handler, if you don't include this, your consumer WILL crash if
   # you don't have a method definition for each event type.
-  def handle_event({event, data, _ws_state}) do
-    IO.puts "handle_event"
-    IO.inspect event
-    IO.inspect data
-    IO.puts ""
+  def handle_event({_event, _data, _ws_state}) do
+    # IO.puts "handle_event"
+    # IO.inspect event
+    # IO.inspect data
+    # IO.puts ""
 
     :noop
   end
@@ -222,6 +239,20 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
       Api.create_message(channel, message)
     end
+  end
+
+  def gdt_check() do
+    channel_id = 0
+    name = ""
+    content = ""
+
+    Nostrum.Api.start_thread(channel_id, %{
+      name: name,
+      message: %{
+        content: content
+      },
+      type: 11
+    })
   end
 
   defp do_reply(%Nostrum.Struct.Message{author: author, content: content, channel_id: channel_id, mentions: mentions}) do
