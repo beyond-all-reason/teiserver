@@ -22,6 +22,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename password resetplaylevels minplaylevel maxplaylevel setplaylevels)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
+  @splitter "########################################"
+
   @afk_check_duration 40_000
 
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
@@ -265,10 +267,35 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info({:lobby_update, :add_user, _lobby_id, userid}, state) do
     user = User.get_user_by_id(userid)
 
-    if state.welcome_message do
-      splitter = "########################################"
-      parts = String.split(state.welcome_message, "$$")
-      Coordinator.send_to_user(userid, [splitter] ++ parts ++ [splitter])
+    min_play = state.minimum_level_to_play
+    max_play = state.maximum_level_to_play
+    play_level_bounds = cond do
+      min_play > 0 and max_play < 1000 ->
+        "Play rating boundaries set to min: #{min_play}, max: #{max_play}"
+
+      min_play > 0 ->
+        "Play rating boundaries set to min: #{min_play}"
+
+      max_play < 1000 ->
+        "Play rating boundaries set to max: #{max_play}"
+
+      true ->
+        nil
+    end
+
+    welcome_message = if state.welcome_message do
+      String.split(state.welcome_message, "$$")
+    end
+
+    msg = [
+      welcome_message,
+      play_level_bounds
+    ]
+    |> List.flatten
+    |> Enum.filter(fn s -> s != nil end)
+
+    if not Enum.empty?(msg) do
+      Coordinator.send_to_user(userid, [@splitter] ++ msg ++ [@splitter])
     end
 
     # If the client is muted, we need to tell the host

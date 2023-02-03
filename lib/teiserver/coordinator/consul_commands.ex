@@ -96,15 +96,20 @@ defmodule Teiserver.Coordinator.ConsulCommands do
         nil
     end
 
+    welcome_message = if state.welcome_message do
+      ["Welcome message: "] ++ String.split(state.welcome_message, "$$")
+    end
+
     # Put other settings in here
     other_settings = [
-      (if state.welcome_message, do: "Welcome message: #{state.welcome_message}"),
+      welcome_message,
       "Currently #{player_count} players",
       "Team size and count are: #{state.host_teamsize} and #{state.host_teamcount}",
       boss_string,
       "Maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
       play_level_bounds,
     ]
+    |> List.flatten
     |> Enum.filter(fn v -> v != nil end)
 
     status_msg = [
