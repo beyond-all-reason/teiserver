@@ -901,7 +901,9 @@ defmodule Teiserver.User do
     # If the report is being updated we'll need to update their restrictions
     # and that won't take place correctly in some cases
     # by making the expiry now we make it so the next check will mark them as clear
-    expires_as_string = Timex.now() |> Jason.encode! |> Jason.decode!
+    expires_as_string = Timex.now()
+      |> Jason.encode!
+      |> Jason.decode!
 
     # Get the new restrictions
     new_restrictions = user.restrictions ++ Map.get(report.action_data || %{}, "restriction_list", [])
