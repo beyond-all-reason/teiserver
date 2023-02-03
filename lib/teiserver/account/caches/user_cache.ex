@@ -115,6 +115,7 @@ defmodule Teiserver.Account.UserCache do
   def get_user_by_discord_id(nil), do: nil
   def get_user_by_discord_id(discord_id) do
     discord_id
+      |> to_string
       |> get_userid_by_discord_id
       |> get_user_by_id
   end

@@ -4,32 +4,38 @@ defmodule Teiserver.Bridge.MessageCommands do
   alias Teiserver.Account.AccoladeLib
   alias Central.Helpers.NumberHelper
   alias alias Teiserver.Bridge.UnitNames
+  alias Nostrum.Api
   require Logger
 
   @unauth ~w(discord)
   @always_allow ~w(whoami help whatwas unit)
 
-  # @spec handle(Alchemy.Message.t()) :: any
-  # def handle(%Alchemy.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []} = _message) do
-  #   [cmd | remaining] = String.split(content, " ")
-  #   remaining = Enum.join(remaining, " ")
-  #   user = User.get_user_by_discord_id(author)
+  @spec handle(Nostrum.Struct.Message.t()) :: any
+  def handle(%Nostrum.Struct.Message{author: %{id: author}, channel_id: channel, content: "$" <> content, attachments: []}) do
+    Logger.warn("1")
 
-  #   if user do
-  #     User.update_user(%{user |
-  #       discord_dm_channel: channel
-  #     }, persist: true)
-  #   end
+    [cmd | remaining] = String.split(content, " ")
+    remaining = Enum.join(remaining, " ")
+    user = User.get_user_by_discord_id(author)
 
-  #   allowed = allow?(cmd, user)
-  #   Logger.info("MessageCommands.handle #{author}, #{content}, #{allowed}")
+    if user do
+      User.update_user(%{user |
+        discord_dm_channel: channel
+      }, persist: true)
+    end
 
-  #   if allow?(cmd, user) do
-  #     handle_command({user, author}, cmd, remaining, channel)
-  #   end
-  # end
+    allowed = allow?(cmd, user)
+    Logger.info("MessageCommands.handle #{author}, #{content}, #{allowed}")
 
-  def handle(_) do
+    if allow?(cmd, user) do
+      handle_command({user, author}, cmd, remaining, channel)
+    end
+  end
+
+  def handle(msg) do
+    Logger.warn("2")
+    IO.inspect msg
+
     :ok
   end
 
@@ -189,11 +195,6 @@ defmodule Teiserver.Bridge.MessageCommands do
 
   defp reply(channel, message) when is_list(message), do: reply(channel, Enum.join(message, "\n"))
   defp reply(channel, message) do
-    Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nAlchemy.Client.send_message")
-    # Alchemy.Client.send_message(
-    #   channel,
-    #   message,
-    #   []# Options
-    # )
+    Api.create_message(channel, message)
   end
 end

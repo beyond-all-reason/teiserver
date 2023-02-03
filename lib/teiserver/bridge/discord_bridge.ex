@@ -28,17 +28,52 @@ defmodule Teiserver.Bridge.DiscordBridge do
     |> Map.new(fn {k, v} -> {v, k} end)
     |> Map.merge(@extra_text_emoticons)
 
+  def handle_event({:MESSAGE_CREATE, %{content: "$" <> _, channel_id: channel_id} = message, _ws_state}) do
+    dm_sender = Central.cache_get(:discord_bridge_dm_cache, channel_id)
 
-  def handle_event({:MESSAGE_CREATE, msg, _ws_state}) do
-    IO.puts ":MESSAGE_CREATE"
-    IO.inspect msg
-    IO.puts ""
-    # case msg.content do
-    #   "ping!" ->
-    #     Api.create_message(msg.channel_id, "I copy and pasted this code")
-    #   _ ->
-    #     :ignore
-    # end
+    if dm_sender != nil do
+      MessageCommands.handle(message)
+    else
+      ChatCommands.handle(message)
+    end
+  end
+
+  def handle_event({:MESSAGE_CREATE, %{author: author, channel_id: channel_id, attachments: [], content: content} = message, _ws_state}) do
+    room = bridge_channel_to_room(channel_id)
+    dm_sender = Central.cache_get(:discord_bridge_dm_cache, channel_id)
+
+    cond do
+      author.username == Application.get_env(:central, DiscordBridge)[:bot_name] ->
+        nil
+
+      dm_sender != nil ->
+        MessageCommands.handle(message)
+
+      room == "moderation-reports" ->
+        nil
+
+      room == "moderation-actions" ->
+        nil
+
+      String.contains?(content, "http:") ->
+        nil
+
+      String.contains?(content, "https:") ->
+        nil
+
+      Config.get_site_config_cache("teiserver.Bridge from discord") == false ->
+        nil
+
+      room != nil ->
+        do_reply(message)
+
+      true ->
+        nil
+    end
+  end
+
+  # Stuff we might want to use
+  def handle_event({:MESSAGE_UPDATE, _, _ws_state}) do
     :ignore
   end
 
@@ -56,17 +91,20 @@ defmodule Teiserver.Bridge.DiscordBridge do
     :ignore
   end
 
+  def handle_event({:READY, _, _ws_state}) do
+    :ignore
+  end
+
   # Default event handler, if you don't include this, your consumer WILL crash if
   # you don't have a method definition for each event type.
-  def handle_event(event) do
+  def handle_event({event, data, _ws_state}) do
     IO.puts "handle_event"
     IO.inspect event
+    IO.inspect data
     IO.puts ""
 
     :noop
   end
-
-
 
   @spec get_text_to_emoticon_map() :: Map.t()
   def get_text_to_emoticon_map, do: @text_to_emoticon_map
@@ -84,68 +122,12 @@ defmodule Teiserver.Bridge.DiscordBridge do
     :ok
   end
 
-  # @spec recv_message(atom | %{:attachments => any, optional(any) => any}) :: nil | :ok
-  # def recv_message(%Alchemy.Message{channel_id: channel_id, content: "$" <> _content} = message) do
-  #   dm_sender = Central.cache_get(:discord_bridge_dm_cache, channel_id)
-
-  #   if dm_sender != nil do
-  #     MessageCommands.handle(message)
-  #   else
-  #     ChatCommands.handle(message)
-  #   end
-  # end
-
-  # def recv_message(%Alchemy.Message{author: author, channel_id: channel_id, attachments: [], content: content} = message) do
-  #   room = bridge_channel_to_room(channel_id)
-  #   dm_sender = Central.cache_get(:discord_bridge_dm_cache, channel_id)
-
-  #   cond do
-  #     author.username == Application.get_env(:central, DiscordBridge)[:bot_name] ->
-  #       nil
-
-  #     dm_sender != nil ->
-  #       MessageCommands.handle(message)
-
-  #     room == "moderation-reports" ->
-  #       nil
-
-  #     room == "moderation-actions" ->
-  #       nil
-
-  #     String.contains?(content, "http:") ->
-  #       nil
-
-  #     String.contains?(content, "https:") ->
-  #       nil
-
-  #     Config.get_site_config_cache("teiserver.Bridge from discord") == false ->
-  #       nil
-
-  #     room != nil ->
-  #       do_reply(message)
-
-  #     true ->
-  #       nil
-  #   end
-  # end
-
-  def recv_message(message) do
-    cond do
-      message.attachments != [] ->
-        nil
-
-      # We expected to be able to handle it but didn't, what's happening?
-      true ->
-        Logger.debug("Unhandled DiscordBridge event: #{Kernel.inspect message}")
-    end
-  end
-
   @spec new_infolog(Teiserver.Telemetry.Infolog.t()) :: any
   def new_infolog(infolog) do
     chan_result = Application.get_env(:central, DiscordBridge)[:bridges]
       |> Enum.filter(fn {_chan, room} -> room == "telemetry-infologs" end)
 
-    chan = case chan_result do
+    channel = case chan_result do
       [{chan, _}] -> chan
       _ -> nil
     end
@@ -160,16 +142,13 @@ defmodule Teiserver.Bridge.DiscordBridge do
       host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
       url = "https://#{host}/teiserver/reports/infolog/#{infolog.id}"
 
-      Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nAlchemy.Client.send_message")
-      # Alchemy.Client.send_message(
-      #   chan,
-      #   [
-      #     "New infolog uploaded: #{infolog.metadata["errortype"]} `#{infolog.metadata["filename"]}`",
-      #     "`#{infolog.metadata["shorterror"]}`",
-      #     "Link: #{url}",
-      #   ] |> Enum.join("\n"),
-      #   []# Options
-      # )
+      message = [
+        "New infolog uploaded: #{infolog.metadata["errortype"]} `#{infolog.metadata["filename"]}`",
+        "`#{infolog.metadata["shorterror"]}`",
+        "Link: #{url}",
+      ] |> Enum.join("\n")
+
+      Api.create_message(channel, message)
     end
   end
 
@@ -178,12 +157,12 @@ defmodule Teiserver.Bridge.DiscordBridge do
     chan_result = Application.get_env(:central, DiscordBridge)[:bridges]
       |> Enum.filter(fn {_chan, room} -> room == "moderation-reports" end)
 
-    chan = case chan_result do
+    channel = case chan_result do
       [{chan, _}] -> chan
       _ -> nil
     end
 
-    if chan do
+    if channel do
       report = Moderation.get_report!(report.id, preload: [:reporter, :target])
 
       host = Application.get_env(:central, CentralWeb.Endpoint)[:url][:host]
@@ -196,12 +175,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
 
       msg = "#{report.target.name} was reported by #{report.reporter.name} because #{report.type}/#{report.sub_type} #{match_icon} - #{report.extra_text} - #{url}"
 
-      Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nAlchemy.Client.send_message")
-      # Alchemy.Client.send_message(
-      #   chan,
-      #   "Moderation report: #{msg}",
-      #   []# Options
-      # )
+      Api.create_message(channel, "Moderation report: #{msg}")
     end
   end
 
@@ -212,7 +186,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     result = Application.get_env(:central, DiscordBridge)[:bridges]
       |> Enum.filter(fn {_chan, room} -> room == "moderation-actions" end)
 
-    chan = case result do
+    channel = case result do
       [{chan, _}] -> chan
       _ -> nil
     end
@@ -220,7 +194,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
     post_to_discord = cond do
       action.restrictions == ["Bridging"] -> false
       action.reason == "Banned (Automod)" -> false
-      chan == nil -> false
+      channel == nil -> false
       true -> true
     end
 
@@ -234,7 +208,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
       restriction_string = action.restrictions
         |> Enum.join(", ")
 
-      msg = [
+      message = [
         "----------------------",
         "#{action.target.name} has been moderated.",
         "Reason: #{action.reason}",
@@ -246,53 +220,48 @@ defmodule Teiserver.Bridge.DiscordBridge do
         |> Enum.join("\n")
         |> String.replace("\n\n", "\n")
 
-      Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nAlchemy.Client.send_message")
-      # Alchemy.Client.send_message(
-      #   chan,
-      #   msg,
-      #   []# Options
-      # )
+      Api.create_message(channel, message)
     end
   end
 
-  # defp do_reply(%Alchemy.Message{author: author, content: content, channel_id: channel_id, mentions: mentions}) do
-  #   # Mentions come through encoded in a way we don't want to preserve, this substitutes them
-  #   new_content = mentions
-  #   |> Enum.reduce(content, fn (m, acc) ->
-  #     String.replace(acc, "<@!#{m.id}>", m.username)
-  #   end)
-  #   |> String.replace(~r/<#[0-9]+> ?/, "")
-  #   |> convert_emoticons
-  #   |> String.split("\n")
+  defp do_reply(%Nostrum.Struct.Message{author: author, content: content, channel_id: channel_id, mentions: mentions}) do
+    # Mentions come through encoded in a way we don't want to preserve, this substitutes them
+    new_content = mentions
+    |> Enum.reduce(content, fn (m, acc) ->
+      String.replace(acc, "<@!#{m.id}>", m.username)
+    end)
+    |> String.replace(~r/<#[0-9]+> ?/, "")
+    |> convert_emoticons
+    |> String.split("\n")
 
-  #   bridge_user_id = BridgeServer.get_bridge_userid()
-  #   from_id = bridge_user_id
+    bridge_user_id = BridgeServer.get_bridge_userid()
+    from_id = bridge_user_id
 
-  #   # Temporarily disabled as the bridge echos itself
-  #   # from_id = case User.get_userid_by_discord_id(author.id) do
-  #   #   nil ->
-  #   #     bridge_user_id
-  #   #   userid ->
-  #   #     case Client.get_client_by_id(userid) do
-  #   #       nil ->
-  #   #         bridge_user_id
-  #   #       _ ->
-  #   #         userid
-  #   #     end
-  #   # end
+    # Temporarily disabled as the bridge echos itself
+    # from_id = case User.get_userid_by_discord_id(author.id) do
+    #   nil ->
+    #     bridge_user_id
+    #   userid ->
+    #     case Client.get_client_by_id(userid) do
+    #       nil ->
+    #         bridge_user_id
+    #       _ ->
+    #         userid
+    #     end
+    # end
 
-  #   message = if from_id == bridge_user_id do
-  #     new_content
-  #     |> Enum.map(fn row ->
-  #       "#{author.username}: #{row}"
-  #     end)
-  #   else
-  #     new_content
-  #   end
+    message = if from_id == bridge_user_id do
+      new_content
+      |> Enum.map(fn row ->
+        "#{author.username}: #{row}"
+      end)
+    else
+      new_content
+    end
 
-  #   room = bridge_channel_to_room(channel_id)
-  #   Room.send_message(from_id, room, message)
-  # end
+    room = bridge_channel_to_room(channel_id)
+    Room.send_message(from_id, room, message)
+  end
 
   defp convert_emoticons(msg) do
     msg

@@ -23,6 +23,12 @@
         <hr />
 
         <div class="float-end">
+          <a class={"btn btn-outline-#{bsname}"} href={Routes.moderation_report_form_path(@conn, :index, @user.id)}>
+            <%= central_component "icon", icon: icon(), class: "fa-solid" %>
+            &nbsp;
+            Report form
+          </a>
+
           <%= if allow?(@conn, "teiserver.staff.moderator") do %>
             <a class={"btn btn-outline-#{Teiserver.Moderation.ActionLib.colour()}"} href={"#{Routes.moderation_action_path(@conn, :new_with_user)}?teiserver_user=%23#{@user.id}_"}>
               <%= central_component "icon", icon: Teiserver.Moderation.ActionLib.icon(), class: "fa-solid" %>
