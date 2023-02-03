@@ -303,7 +303,6 @@ defmodule Teiserver.Bridge.BridgeServer do
   def change_channel_name(_, ""), do: false
   def change_channel_name("", _), do: false
   def change_channel_name(channel_id, new_name) do
-    Logger.error("Error at: #{__ENV__.file}:#{__ENV__.line}\nAlchemy.Client.send_message")
     Api.modify_channel(channel_id, %{
       name: new_name
     })

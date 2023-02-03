@@ -96,7 +96,6 @@ defmodule Central.MixProject do
       {:horde, "~> 0.8"},
       {:etop, "~> 0.7.0"},
 
-      # We were using the hex version but it's not had some critical updates so pointing at our version for now
       {:nostrum, "~> 0.6"},
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true}
     ]
