@@ -10,7 +10,12 @@ Teiserver channels always send a map as the object and include the channel name 
 Used for sending out global messages about server events.
 ```elixir
 %{
-  event: "stop",
+  event: :stopping,
+  node: node
+}
+
+%{
+  event: :started,
   node: node
 }
 ```

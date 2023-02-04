@@ -74,8 +74,11 @@ defmodule Teiserver.HookServer do
     {:noreply, state}
   end
 
-  def handle_info({:application, app_event}, state) do
+  def handle_info(%{channel: "application", event: app_event}, state) do
     case app_event do
+      :started ->
+        :ok
+
       :prep_stop ->
         # Currently we don't do anything but we will
         # later want to tell each client everything is stopping for a

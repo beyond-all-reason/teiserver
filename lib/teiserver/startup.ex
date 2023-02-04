@@ -1,6 +1,7 @@
 defmodule Teiserver.Startup do
   use CentralWeb, :startup
   require Logger
+  alias Phoenix.PubSub
 
   @spec startup :: :ok
   def startup do
@@ -124,6 +125,16 @@ defmodule Teiserver.Startup do
 
     Central.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
     Central.cache_put(:application_metadata_cache, "teiserver_full_startup_completed", true)
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_server",
+      %{
+        channel: "teiserver_server",
+        event: :started,
+        node: Node.self()
+      }
+    )
 
     time_taken = System.system_time(:millisecond) - start_time
     Logger.info("Teiserver startup complete, took #{time_taken}ms")

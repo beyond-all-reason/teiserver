@@ -144,7 +144,11 @@ defmodule Central.Application do
     PubSub.broadcast(
       Central.PubSub,
       "application",
-      {:application, :prep_stop}
+      %{
+        channel: "application",
+        event: :prep_stop,
+        node: Node.self()
+      }
     )
 
     state

@@ -156,7 +156,21 @@ defmodule Teiserver.Bridge.BridgeServer do
   def handle_info(%{channel: "teiserver_client_messages:" <> _}, state), do: {:noreply, state}
 
 
-  def handle_info({:application, :prep_stop}, state) do
+  def handle_info(%{channel: "teiserver_server", event: :started}, state) do
+    channels = Application.get_env(:central, DiscordBridge)[:bridges]
+      |> Enum.filter(fn {_, name} -> name == "server-updates" end)
+
+    case channels do
+      [{channel_id, _}] ->
+        Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
+      _ ->
+        :ok
+    end
+
+    {:noreply, state}
+  end
+
+  def handle_info(%{channel: "teiserver_server", event: :prep_stop}, state) do
     channels = Application.get_env(:central, DiscordBridge)[:bridges]
       |> Enum.filter(fn {_, name} -> name == "server-updates" end)
 
@@ -170,7 +184,7 @@ defmodule Teiserver.Bridge.BridgeServer do
     {:noreply, state}
   end
 
-  def handle_info({:application, _}, state), do: {:noreply, state}
+  def handle_info(%{channel: "teiserver_server"}, state), do: {:noreply, state}
 
   # Catchall handle_info
   def handle_info(msg, state) do
@@ -222,22 +236,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       :ok = PubSub.subscribe(Central.PubSub, "room:#{room_name}")
     end)
 
-    # Startup message
-    channels = Application.get_env(:central, DiscordBridge)[:bridges]
-      |> Enum.filter(fn {_, name} -> name == "server-updates" end)
-
-    # node_start_time = Central.cache_get(:application_metadata_cache, :node_startup_datetime)
-    # diff_ms = Timex.diff(Timex.now(), node_start_time, :milliseconds)
-
-    case channels do
-      [{channel_id, _}] ->
-        Logger.info("Discord connected, posting startup message")
-        Api.create_message(channel_id, "Teiserver startup for node #{Teiserver.node_name()}")
-      _ ->
-        :ok
-    end
-
-    :ok = PubSub.subscribe(Central.PubSub, "application")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_server")
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_client_messages:#{user.id}")
 
     state

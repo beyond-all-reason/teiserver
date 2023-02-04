@@ -15,7 +15,7 @@ defmodule Teiserver.Bridge.ChatCommands do
     user = User.get_user_by_discord_id(author)
 
     if allow?(cmd, user) do
-      handle_message({user, author}, cmd, remaining, channel)
+      handle_command({user, author}, cmd, remaining, channel)
     end
   end
 
@@ -23,12 +23,20 @@ defmodule Teiserver.Bridge.ChatCommands do
     :ok
   end
 
-  @spec handle_message({T.user(), String.t()}, String.t(), String.t(), String.t()) :: any
-  def handle_message({user, discord_id}, "echo", remaining, channel) do
+  @spec handle_command({T.user(), String.t()}, String.t(), String.t(), String.t()) :: any
+  def handle_command({user, discord_id}, "echo", remaining, channel) do
     reply(channel, "Echoing <@!#{discord_id}> (aka #{user.name}), #{remaining}")
   end
 
-  def handle_message({_user, _discord_id}, "whatwas", remaining, channel) do
+  def handle_command({user, discord_id}, "gdt", remaining, channel) do
+    # IO.inspect {user, discord_id, channel}
+
+    :ok
+
+    # reply(channel, "Echoing <@!#{discord_id}> (aka #{user.name}), #{remaining}")
+  end
+
+  def handle_command({_user, _discord_id}, "whatwas", remaining, channel) do
     name = remaining
       |> String.trim()
       |> String.downcase()
@@ -54,7 +62,7 @@ defmodule Teiserver.Bridge.ChatCommands do
     end
   end
 
-  def handle_message({_user, _discord_id}, "unit", remaining, channel) do
+  def handle_command({_user, _discord_id}, "unit", remaining, channel) do
     name = remaining
       |> String.trim()
       |> String.downcase()
@@ -80,11 +88,12 @@ defmodule Teiserver.Bridge.ChatCommands do
     end
   end
 
-  def handle_message(_, _, _, _) do
+  def handle_command(_, _, _, _) do
     :ignore
   end
 
   @spec allow?(map(), map()) :: boolean
+  defp allow?("gdt", user), do: User.has_any_role?(user, ~w(Admin Moderator GDT))
   defp allow?(cmd, user) do
     if Enum.member?(@always_allow, cmd) do
       true

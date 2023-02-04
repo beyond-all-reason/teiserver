@@ -32,9 +32,9 @@ defmodule Teiserver.Bridge.MessageCommands do
     end
   end
 
-  def handle(msg) do
-    Logger.warn("2")
-    IO.inspect msg
+  def handle(_msg) do
+    # Logger.warn("2")
+    # IO.inspect msg
 
     :ok
   end
