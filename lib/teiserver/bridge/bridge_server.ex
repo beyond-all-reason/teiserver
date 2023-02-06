@@ -186,6 +186,33 @@ defmodule Teiserver.Bridge.BridgeServer do
 
   def handle_info(%{channel: "teiserver_server"}, state), do: {:noreply, state}
 
+  # pid = Teiserver.Bridge.BridgeServer.get_bridge_pid()
+  # send(pid, :gdt_check)
+  def handle_info(:gdt_check, state) do
+    Api.list_guild_threads(Application.get_env(:central, DiscordBridge)[:guild_id])
+
+    # Api.list_joined_private_archived_threads(channel_id)
+    # When a thread in 👇｜game-design-team has gone 48 hours without any new messages:
+    # 1. Lock the thread
+    # 2. Create a thread in ☝｜game-design-voting with the same name and (Vote) appended to the end
+    # 3. In the first message of the thread, ping the Admins and Game Design Team roles, and if possible, copy the content of the first post in the original thread
+
+    # When a thread in ☝｜game-design-voting has gone 48 hours without any new messages:
+    # 1. Create a poll for the members of the GDC to vote on, with the options being Accept and Reject, since making context aware voting options is probably too complicated
+    # 2. Ping the Game Design Team role to vote
+    # For threads in 💡｜suggestions , we haven't agreed on a process yet, which we'll need to do before we can get a bot to do what we want
+
+
+
+    # # Currently having an issue where I can't get the ID for the emoji
+    # # luckily we can just put the emjoi character in and it should work
+    # Nostrum.Api.create_reaction(thread.id, message.id, "👍")
+    # Nostrum.Api.create_reaction(thread.id, message.id, "👎")
+    # Nostrum.Api.create_reaction(thread.id, message.id, "👐")
+
+    {:noreply, state}
+  end
+
   # Catchall handle_info
   def handle_info(msg, state) do
     Logger.error("BridgeServer handle_info error. No handler for msg of #{Kernel.inspect msg}")
