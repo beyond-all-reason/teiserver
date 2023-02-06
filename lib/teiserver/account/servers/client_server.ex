@@ -39,7 +39,6 @@ defmodule Teiserver.Account.ClientServer do
             party_id: existing_id
           }
         )
-        Account.cast_party(existing_id, {:member_leave, state.userid})
         :ok
     end
 

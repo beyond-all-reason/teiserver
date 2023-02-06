@@ -1,10 +1,11 @@
 defmodule Teiserver.Account.PartyServerTest do
+  @moduledoc false
   use Central.DataCase, async: true
   alias Teiserver.Account.PartyLib
   alias Teiserver.Account.Party
 
   test "server test" do
-    id = UUID.uuid1()
+    id = ExULID.ULID.generate()
 
     p = PartyLib.start_party_server(%Party{
       id: id,

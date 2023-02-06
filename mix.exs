@@ -96,7 +96,7 @@ defmodule Central.MixProject do
       {:horde, "~> 0.8"},
       {:etop, "~> 0.7.0"},
 
-      {:nostrum, "~> 0.6"},
+      {:nostrum, "~> 0.6", runtime: Mix.env() != :test},
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true}
     ]
   end

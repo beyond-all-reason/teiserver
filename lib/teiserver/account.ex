@@ -1376,6 +1376,9 @@ defmodule Teiserver.Account do
   @spec kick_user_from_party(T.party_id(), T.userid()) :: :ok | nil
   defdelegate kick_user_from_party(party_id, userid), to: PartyLib
 
+  @spec move_user_to_party(T.party_id(), T.userid()) :: :ok | nil
+  defdelegate move_user_to_party(party_id, userid), to: PartyLib
+
   @doc """
   Tells the party server to update it's internal reference to queue membership. Does not
   affect the QueueWaitServer
