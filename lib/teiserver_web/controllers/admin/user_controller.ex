@@ -265,7 +265,8 @@ defmodule TeiserverWeb.Admin.UserController do
       {"donor", "Donor"},
       {"contributor", "Contributor"},
       {"caster", "Caster"},
-      {"core", "Core team"}
+      {"core", "Core team"},
+      {"gdt", "GDT"}
     ]
     |> Enum.map(fn {k, v} -> if user_params[k] == "true", do: v end)
     |> Enum.reject(&(&1 == nil))

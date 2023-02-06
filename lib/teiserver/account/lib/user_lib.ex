@@ -171,6 +171,16 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("not ? -> ? @> ?", users.data, "roles", "\"Donor\"")
   end
 
+  def _search(query, :gdt_member, "GDT") do
+    from users in query,
+      where: fragment("? -> ? @> ?", users.data, "roles", "\"GDT\"")
+  end
+
+  def _search(query, :gdt_member, "Normal") do
+    from users in query,
+      where: fragment("not ? -> ? @> ?", users.data, "roles", "\"GDT\"")
+  end
+
   def _search(query, :contributor, "Contributor") do
     from users in query,
       where: fragment("? -> ? @> ?", users.data, "roles", "\"Contributor\"")
@@ -253,13 +263,14 @@ defmodule Teiserver.Account.UserLib do
   def role_def("Raptor"), do: {"#AA6600", "fa-solid fa-drumstick"}
   def role_def("Scavenger"), do: {"#660066", "fa-solid fa-user-robot"}
 
-  def role_def("Admin"), do: {"#CE5C00", "fa-solid fa-user-circle"}
-  def role_def("Moderator"), do: {"#FFAA00", "fa-solid fa-gavel"}
-  def role_def("Core team"), do: {"#008800", "fa-solid fa-code-branch"}
-  def role_def("Contributor"), do: {"#00AA66", "fa-solid fa-code-commit"}
+  def role_def("Admin"), do: {"#CE5C00", "fa-duotone fa-user-circle"}
+  def role_def("Moderator"), do: {"#FFAA00", "fa-duotone fa-gavel"}
+  def role_def("Core team"), do: {"#008800", "fa-duotone fa-code-branch"}
+  def role_def("GDT"), do: {"#AA0000", "fa-duotone fa-pen-ruler"}
+  def role_def("Contributor"), do: {"#00AA66", "fa-duotone fa-code-commit"}
 
-  def role_def("Caster"), do: {"#660066", "fa-solid fa-microphone-lines"}
-  def role_def("Donor"), do: {"#0066AA", "fa-solid fa-euro"}
+  def role_def("Caster"), do: {"#660066", "fa-duotone fa-microphone-lines"}
+  def role_def("Donor"), do: {"#0066AA", "fa-duotone fa-euro"}
   def role_def("Streamer"), do: {"#0066AA", "fa-brands fa-twitch"}
 
   def role_def(_), do: nil
