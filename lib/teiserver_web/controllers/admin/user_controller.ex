@@ -164,7 +164,6 @@ defmodule TeiserverWeb.Admin.UserController do
         client = Account.get_client_by_id(user.id)
 
         conn
-          |> assign(:restrictions_lists, Central.Account.UserLib.list_restrictions())
           |> assign(:coc_lookup, Teiserver.Account.CodeOfConductData.flat_data())
           |> assign(:user, user)
           |> assign(:client, client)

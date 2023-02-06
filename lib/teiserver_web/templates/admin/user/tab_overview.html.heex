@@ -22,17 +22,12 @@
   <div class="col-md-12 col-lg-8">
     <h4>Restrictions</h4>
     <div class="row">
-      <%= for {section, r_list} <- @restrictions_lists do %>
+      <%= if Enum.empty?(@user.data["restrictions"]) do %>
+        No restrictions
+      <% else %>
         <div class="col-lg-3 col-xl-2 col-xxl-2">
-          <strong><%= section %></strong>
-          <%= for r <- r_list do %>
-            <% r_clean = String.replace(r, " ", "_") %>
-            <%= central_component "checkbox",
-              id: "to_restriction_#{r_clean}",
-              name: "_",
-              label: r,
-              checked: Enum.member?(@user.data["restrictions"] || [], r)
-            %>
+          <%= for r <- @user.data["restrictions"] do %>
+            <%= r %><br />
           <% end %>
         </div>
       <% end %>
