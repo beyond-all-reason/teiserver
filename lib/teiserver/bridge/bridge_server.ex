@@ -72,6 +72,7 @@ defmodule Teiserver.Bridge.BridgeServer do
   def handle_info({:update_stats, stat_name, value}, state) do
     channel_id = Application.get_env(:central, DiscordBridge)[:stat_channels]
       |> Map.get(stat_name, "")
+      |> String.to_integer()
 
     new_name = case stat_name do
       :client_count -> "Players online: #{value}"
@@ -359,7 +360,9 @@ defmodule Teiserver.Bridge.BridgeServer do
     if Application.get_env(:central, Teiserver)[:enable_discord_bridge] do
       send(self(), :begin)
     end
+
     Central.cache_put(:application_metadata_cache, "teiserver_bridge_pid", self())
+
     Horde.Registry.register(
       Teiserver.ServerRegistry,
       "BridgeServer",

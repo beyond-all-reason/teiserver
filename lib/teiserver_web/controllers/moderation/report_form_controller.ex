@@ -24,7 +24,7 @@ defmodule TeiserverWeb.Moderation.ReportFormController do
         render(conn, "no_user.html")
 
       target ->
-        cutoff = Timex.now() |> Timex.shift(hours: -24)
+        cutoff = Timex.now() |> Timex.shift(hours: -36)
 
         matches = Battle.list_matches(
           search: [
