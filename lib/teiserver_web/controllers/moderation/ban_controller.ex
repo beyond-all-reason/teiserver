@@ -161,7 +161,16 @@ defmodule TeiserverWeb.Moderation.BanController do
     })
 
     case Moderation.create_ban(ban_params) do
-      {:ok, _ban} ->
+      {:ok, ban} ->
+        # Now ban the user themselves
+        Moderation.create_action(%{
+          target_id: ban.source_id,
+          reason: ban.reason,
+          restrictions: ["Login", "Site"],
+          score_modifier: 0,
+          expires: Timex.now() |> Timex.shift(years: 1000)
+        })
+
         conn
           |> put_flash(:info, "Ban created successfully.")
           |> redirect(to: Routes.moderation_ban_path(conn, :index))
