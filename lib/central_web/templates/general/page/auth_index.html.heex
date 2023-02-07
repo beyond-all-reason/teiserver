@@ -49,8 +49,19 @@
     <%=
       central_component "menu_card",
       icon: Central.Admin.icon(),
-      text: "Admin",
+      text: "C.Admin",
       link: Routes.admin_general_path(@conn, :index)
+    %>
+  <% end %>
+
+  <%= if allow?(@conn, "teiserver.staff") do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.icon(),
+      name: "tei_admin",
+      text: "TS Admin",
+      icon_class: "fa-duotone",
+      link: Routes.ts_admin_general_path(@conn, :index)
     %>
   <% end %>
 
@@ -62,15 +73,88 @@
       link: Routes.logging_general_path(@conn, :index)
     %>
   <% end %>
+
+  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+    <%=
+      central_component "menu_card",
+      icon: "fa-regular fa-users",
+      name: "user_admin",
+      text: "User admin",
+      icon_class: "fa-duotone",
+      link: Routes.ts_admin_user_path(@conn, :index)
+    %>
+  <% end %>
 </div>
 
-&nbsp;
+<%# Live services %>
+<div class="row">
+  <%=
+    central_component "menu_card",
+    icon: Teiserver.Battle.LobbyLib.icon(),
+    name: "battle_lobbies",
+    text: "Live lobbies",
+    icon_class: "fa-duotone",
+    link: Routes.ts_battle_lobby_index_path(@conn, :index)
+  %>
 
-<%= for view <- Application.get_env(:central, Extensions)[:index_views] do %>
-  <%= render view, "index.html", assigns %>
-<% end %>
+  <%=
+    central_component "menu_card",
+    icon: Teiserver.Account.PartyLib.icon(),
+    name: "parties",
+    text: "Parties",
+    icon_class: "fa-duotone",
+    link: Routes.ts_game_party_index_path(@conn, :index)
+  %>
 
-&nbsp;
+  <%=
+    central_component "menu_card",
+    icon: Teiserver.Game.QueueLib.icon(),
+    name: "queue",
+    text: "Matchmaking",
+    icon_class: "fa-duotone",
+    link: Routes.ts_game_queue_index_path(@conn, :index)
+  %>
+
+  <%= if allow?(@conn, "teiserver.staff.moderator") do %>
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Account.ClientLib.icon(),
+      name: "live_client",
+      text: "Live clients",
+      icon_class: "fa-duotone",
+      link: Routes.ts_admin_client_index_path(@conn, :index)
+    %>
+  <% end %>
+
+  <%= if @current_user do %>
+    <%=
+      central_component "menu_card",
+      icon: "fa-regular fa-user",
+      name: "account",
+      text: "Account",
+      icon_class: "fa-duotone",
+      link: Routes.ts_account_general_path(@conn, :index)
+    %>
+
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Battle.MatchLib.icon(),
+      name: "matches",
+      text: "My matches",
+      icon_class: "fa-duotone",
+      link: Routes.ts_battle_match_path(@conn, :index)
+    %>
+
+    <%=
+      central_component "menu_card",
+      icon: Teiserver.Clans.ClanLib.icon(),
+      name: "clans",
+      text: "Clans",
+      icon_class: "fa-duotone",
+      link: Routes.ts_clans_clan_path(@conn, :index)
+    %>
+  <% end %>
+</div>
 
 <%= if @current_user do %>
   <div class="row">
@@ -97,14 +181,6 @@
         Notifications
       </a>
     </div>
-
-    <%=
-      central_component "menu_card",
-      icon: Central.Account.icon(),
-      name: "account",
-      text: "Account",
-      link: Routes.account_general_path(@conn, :index)
-    %>
 
     <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
       <form action={Routes.account_session_path(@conn, :logout)} method="post" class="link" id="signout-form">

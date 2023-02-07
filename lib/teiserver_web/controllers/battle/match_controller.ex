@@ -11,7 +11,7 @@ defmodule TeiserverWeb.Battle.MatchController do
     user: {Central.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
-    site_menu_active: "teiserver_match",
+    site_menu_active: "match",
     sub_menu_active: "match"
   )
 

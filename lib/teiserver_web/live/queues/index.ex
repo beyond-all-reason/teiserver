@@ -58,7 +58,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
       |> assign(:client, client)
       |> assign(:queue_membership, queue_membership)
       |> assign(:view_colour, QueueLib.colours())
-      |> assign(:site_menu_active, "teiserver_admin")
+      |> assign(:site_menu_active, "matchmaking")
       |> assign(:db_queues, db_queues)
       |> assign(:queue_info, queue_info)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))

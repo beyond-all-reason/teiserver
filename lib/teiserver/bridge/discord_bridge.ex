@@ -4,7 +4,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
   """
 
   use Nostrum.Consumer
-  alias Teiserver.{Room, Account}
+  alias Teiserver.{Room, Moderation, Account}
   alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands}
   alias Central.{Config}
   alias Central.Helpers.TimexHelper
@@ -73,7 +73,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
   end
 
   # Stuff we might want to use
-  def handle_event({:MESSAGE_CREATE, s, _ws}) do
+  def handle_event({:MESSAGE_CREATE, _, _ws}) do
     # Has an attachment
     :ignore
   end

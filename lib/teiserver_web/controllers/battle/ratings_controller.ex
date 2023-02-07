@@ -10,7 +10,7 @@ defmodule TeiserverWeb.Battle.RatingsController do
     user: {Central.Account.AuthLib, :current_user}
 
   plug(AssignPlug,
-    site_menu_active: "teiserver_match",
+    site_menu_active: "leaderboard",
     sub_menu_active: "match"
   )
 
