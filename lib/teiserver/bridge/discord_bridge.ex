@@ -4,7 +4,7 @@ defmodule Teiserver.Bridge.DiscordBridge do
   """
 
   use Nostrum.Consumer
-  alias Teiserver.{Room, Moderation}
+  alias Teiserver.{Room, Account}
   alias Teiserver.Bridge.{BridgeServer, MessageCommands, ChatCommands}
   alias Central.{Config}
   alias Central.Helpers.TimexHelper
@@ -28,19 +28,19 @@ defmodule Teiserver.Bridge.DiscordBridge do
     |> Map.new(fn {k, v} -> {v, k} end)
     |> Map.merge(@extra_text_emoticons)
 
-  def handle_event({:MESSAGE_CREATE, %{content: "$" <> _, channel_id: channel_id} = message, _ws_state}) do
-    dm_sender = Central.cache_get(:discord_bridge_dm_cache, channel_id)
-
-    if dm_sender != nil do
-      MessageCommands.handle(message)
-    else
-      ChatCommands.handle(message)
-    end
+  # GuildId of nil = DM
+  def handle_event({:MESSAGE_CREATE, %{content: "$" <> _, guild_id: nil} = message, _ws}) do
+    MessageCommands.handle(message)
   end
 
-  def handle_event({:MESSAGE_CREATE, %{author: author, channel_id: channel_id, attachments: [], content: content} = message, _ws_state}) do
+  # So this is a public message
+  def handle_event({:MESSAGE_CREATE, %{content: "$" <> _} = message, _ws}) do
+    ChatCommands.handle(message)
+  end
+
+  def handle_event({:MESSAGE_CREATE, %{author: author, channel_id: channel_id, attachments: [], content: content} = message, _ws}) do
     room = bridge_channel_to_room(channel_id)
-    dm_sender = Central.cache_get(:discord_bridge_dm_cache, channel_id)
+    dm_sender = Central.cache_get(:discord_bridge_dm_cache, to_string(channel_id))
 
     cond do
       author.username == Application.get_env(:central, DiscordBridge)[:bot_name] ->
@@ -73,48 +73,48 @@ defmodule Teiserver.Bridge.DiscordBridge do
   end
 
   # Stuff we might want to use
-  def handle_event({:MESSAGE_CREATE, _, _ws_state}) do
+  def handle_event({:MESSAGE_CREATE, s, _ws}) do
     # Has an attachment
     :ignore
   end
 
-  def handle_event({:MESSAGE_UPDATE, _, _ws_state}) do
+  def handle_event({:MESSAGE_UPDATE, _, _ws}) do
     :ignore
   end
 
   # Events we know we will always want to ignore, kept here so if
   # we do want to test for other events we don't start seeing these
-  def handle_event({:TYPING_START, _, _ws_state}) do
+  def handle_event({:TYPING_START, _, _ws}) do
     :ignore
   end
 
-  def handle_event({:GUILD_AVAILABLE, _, _ws_state}) do
+  def handle_event({:GUILD_AVAILABLE, _, _ws}) do
     :ignore
   end
 
-  def handle_event({:GUILD_UNAVAILABLE, _, _ws_state}) do
+  def handle_event({:GUILD_UNAVAILABLE, _, _ws}) do
     :ignore
   end
 
-  def handle_event({:READY, _, _ws_state}) do
+  def handle_event({:READY, _, _ws}) do
     :ignore
   end
 
-  def handle_event({:THREAD_CREATE, _, _ws_state}) do
+  def handle_event({:THREAD_CREATE, _, _ws}) do
     :ignore
   end
 
-  def handle_event({:MESSAGE_REACTION_ADD, _, _ws_state}) do
+  def handle_event({:MESSAGE_REACTION_ADD, _, _ws}) do
     :ignore
   end
 
-  def handle_event({:CHANNEL_UPDATE, _, _ws_state}) do
+  def handle_event({:CHANNEL_UPDATE, _, _ws}) do
     :ignore
   end
 
   # Default event handler, if you don't include this, your consumer WILL crash if
   # you don't have a method definition for each event type.
-  def handle_event({_event, _data, _ws_state}) do
+  def handle_event({_event, _data, _ws}) do
     # IO.puts "handle_event"
     # IO.inspect event
     # IO.inspect data

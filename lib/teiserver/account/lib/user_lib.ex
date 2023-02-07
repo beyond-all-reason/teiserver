@@ -73,6 +73,11 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("? ->> ? @> ?", users.data, ^field, ^value)
   end
 
+  def _search(query, :data_contains_key, field) do
+    from users in query,
+      where: fragment("? @> ?", users.data, ^field)
+  end
+
   # E.g. [data_contains_number: {"ignored", 9265}]
   def _search(query, :data_contains_number, {field, value}) when is_number(value) do
     from users in query,

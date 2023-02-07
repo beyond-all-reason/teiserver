@@ -34,7 +34,7 @@ defmodule Teiserver.Bridge.BridgeServer do
       user.discord_dm_channel == nil ->
         nil
       true ->
-        channel_id = user.discord_dm_channel |> String.to_integer()
+        channel_id = user.discord_dm_channel
         Api.create_message(channel_id, message)
     end
   end
@@ -72,7 +72,6 @@ defmodule Teiserver.Bridge.BridgeServer do
   def handle_info({:update_stats, stat_name, value}, state) do
     channel_id = Application.get_env(:central, DiscordBridge)[:stat_channels]
       |> Map.get(stat_name, "")
-      |> String.to_integer()
 
     new_name = case stat_name do
       :client_count -> "Players online: #{value}"

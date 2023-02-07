@@ -9,13 +9,13 @@ defmodule Teiserver.Bridge.ChatCommands do
   @always_allow ~w(whatwas unit)
 
   @spec handle(Nostrum.Struct.Message.t()) :: any
-  def handle(%Nostrum.Struct.Message{id: message_id, author: %{id: author}, channel_id: channel_id, content: "$" <> content, attachments: []}) do
+  def handle(%Nostrum.Struct.Message{id: message_id, author: %{id: author_id}, channel_id: channel_id, content: "$" <> content, attachments: []}) do
     [cmd | remaining] = String.split(content, " ")
     remaining = Enum.join(remaining, " ")
-    user = User.get_user_by_discord_id(author)
+    user = Account.get_user_by_discord_id(author_id)
 
     if allow?(cmd, user) do
-      handle_command({user, author, message_id}, cmd, remaining, channel_id)
+      handle_command({user, author_id, message_id}, cmd, remaining, channel_id)
     end
   end
 
@@ -46,6 +46,9 @@ defmodule Teiserver.Bridge.ChatCommands do
         # Create new thread in gdt-discussion
         {:ok, thread} = Api.start_thread(forum_id, %{
           name: "Discussion for #{channel.name}",
+          message: %{
+            content: "Thread to discuss #{channel.name} - <##{channel_id}>",
+          },
           type: 11
         })
 
@@ -63,7 +66,6 @@ defmodule Teiserver.Bridge.ChatCommands do
         |> Enum.map(fn %{data: data} -> data["discord_id"] end)
         |> Enum.reject(&(&1 == nil))
         |> Enum.each(fn user_discord_id ->
-          user_discord_id = String.to_integer(user_discord_id)
           Nostrum.Api.add_thread_member(thread.id, user_discord_id)
         end)
 
@@ -131,6 +133,7 @@ defmodule Teiserver.Bridge.ChatCommands do
   end
 
   @spec allow?(String.t(), map()) :: boolean
+  defp allow?("discord", _), do: true
   defp allow?("gdt", user), do: User.has_any_role?(user, ["Admin", "Moderator", "GDT"])
   defp allow?(cmd, user) do
     if Enum.member?(@always_allow, cmd) do
