@@ -52,6 +52,33 @@
       </tbody>
     </table>
 
+  <% "Party" -> %>
+    <h4>Party chat</h4>
+    <table class='table table-sm'>
+      <thead>
+        <tr>
+          <th>Party</th>
+          <th>Sender</th>
+          <th>Message</th>
+          <th>When</th>
+       </tr>
+      </thead>
+      <tbody>
+        <%= for msg <- @messages do %>
+          <tr>
+            <td><%= msg.chat_room %></td>
+            <td>
+              <a href={"#{Routes.ts_admin_user_path(@conn, :full_chat, msg.user.id)}?mode=room"}>
+                <%= msg.user.name %>
+              </a>
+            </td>
+            <td class="message"><%= msg.content %></td>
+            <td><%= date_to_str(msg.inserted_at, :hms_or_dmy) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
   <% "Lobby" -> %>
     <h4>Lobby chat</h4>
     <table class='table table-sm'>

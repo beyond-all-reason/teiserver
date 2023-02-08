@@ -74,6 +74,17 @@
     %>
   <% end %>
 
+  <%= if allow?(@conn, "teiserver.staff.reviewer") do %>
+    <%=
+      central_component "menu_card",
+      icon: Central.Communication.CommentLib.icon(),
+      name: "chat",
+      text: "Chat",
+      icon_class: "fa-duotone",
+      link: Routes.ts_admin_chat_path(@conn, :index)
+    %>
+  <% end %>
+
   <%= if allow?(@conn, "teiserver.staff.moderator") do %>
     <%=
       central_component "menu_card",

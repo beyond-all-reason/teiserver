@@ -1,7 +1,7 @@
 defmodule TeiserverWeb.Admin.ChatController do
   use CentralWeb, :controller
 
-  alias Teiserver.Chat
+  alias Teiserver.{Coordinator, Chat}
 
   plug Bodyguard.Plug.Authorize,
     policy: Teiserver.Chat.LobbyMessage,
@@ -27,13 +27,24 @@ defmodule TeiserverWeb.Admin.ChatController do
 
     user_id = get_hash_id(params["account_user"])
 
+    excluded_ids = if params["include_bots"] == "true" do
+      [
+
+      ]
+    else
+      [
+        Coordinator.get_coordinator_userid()
+      ]
+    end
+
     messages = case params["mode"] do
       "Lobby" ->
         Chat.list_lobby_messages(
           search: [
             term: params["term"],
             user_id: user_id,
-            inserted_after: inserted_after
+            inserted_after: inserted_after,
+            user_id_not_in: excluded_ids
           ],
           preload: [:user],
           limit: 300,
@@ -44,7 +55,20 @@ defmodule TeiserverWeb.Admin.ChatController do
           search: [
             term: params["term"],
             user_id: user_id,
-            inserted_after: inserted_after
+            inserted_after: inserted_after,
+            user_id_not_in: excluded_ids
+          ],
+          preload: [:user],
+          limit: 300,
+          order_by: params["order"]
+        )
+      "Party" ->
+        Chat.list_party_messages(
+          search: [
+            term: params["term"],
+            user_id: user_id,
+            inserted_after: inserted_after,
+            user_id_not_in: excluded_ids
           ],
           preload: [:user],
           limit: 300,

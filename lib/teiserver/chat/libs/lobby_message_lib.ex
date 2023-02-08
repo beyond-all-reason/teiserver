@@ -34,18 +34,28 @@ defmodule Teiserver.Chat.LobbyMessageLib do
   end
 
   def _search(query, :user_id, user_id) do
-    from room_messages in query,
-      where: room_messages.user_id == ^user_id
+    from lobby_messages in query,
+      where: lobby_messages.user_id == ^user_id
+  end
+
+  def _search(query, :user_id_in, id_list) do
+    from lobby_messages in query,
+      where: lobby_messages.user_id in ^id_list
+  end
+
+  def _search(query, :user_id_not_in, id_list) do
+    from lobby_messages in query,
+      where: lobby_messages.user_id not in ^id_list
   end
 
   def _search(query, :lobby_guid, lobby_guid) do
-    from room_messages in query,
-      where: room_messages.lobby_guid == ^lobby_guid
+    from lobby_messages in query,
+      where: lobby_messages.lobby_guid == ^lobby_guid
   end
 
   def _search(query, :lobby_guid_in, lobby_guids) do
-    from room_messages in query,
-      where: room_messages.lobby_guid in ^lobby_guids
+    from lobby_messages in query,
+      where: lobby_messages.lobby_guid in ^lobby_guids
   end
 
   def _search(query, :id_list, id_list) do
