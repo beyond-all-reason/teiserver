@@ -19,15 +19,13 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
 
     client = Client.get_client_by_id(socket.assigns[:current_user].id)
 
-    :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue_all_queues")
+    :ok = PubSub.subscribe(Central.PubSub, "teiserver_all_queues")
 
     db_queues = Game.list_queues()
       |> Enum.filter(fn queue ->
         Map.get(queue.settings, "enabled", true)
       end)
       |> Map.new(fn queue ->
-        :ok = PubSub.subscribe(Central.PubSub, "teiserver_queue:#{queue.id}")
-
         {queue.id, queue}
       end)
 
@@ -105,14 +103,14 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
   end
 
   @impl true
-  def handle_info({:queue_periodic_update, queue_id, member_count, mean_wait_time}, socket) do
+  def handle_info(%{event: :all_queues_periodic_update} = event, socket) do
     new_data = %{
-      member_count: member_count,
-      mean_wait_time: mean_wait_time
+      group_count: event.group_count,
+      mean_wait_time: event.mean_wait_time
     }
 
     new_info = socket.assigns[:queue_info]
-      |> Map.put(queue_id, new_data)
+      |> Map.put(event.queue_id, new_data)
 
     {
       :noreply,
@@ -121,7 +119,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
     }
   end
 
-  def handle_info(%{channel: "teiserver_queue:" <> _}, socket) do
+  def handle_info(%{channel: "teiserver_all_queues"}, socket) do
     {:noreply, socket}
   end
 

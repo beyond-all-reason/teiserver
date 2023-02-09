@@ -1,6 +1,11 @@
-<% bsname = @view_colour %>
+<%
+  bsname = @view_colour
+  #is_moderator = allow?(@current_user, "teiserver.staff.moderator")
+%>
 
-<%= render TeiserverWeb.Game.GeneralView, "sub_menu.html", %{active: "queues", conn: Map.put(@socket, :permissions, @current_user.permissions)} %>
+<%=
+  render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "matchmaking", conn: Map.put(@socket, :permissions, @current_user.permissions)}
+%>
 
 <div class="row">
   <div class="col-md-12">
@@ -15,10 +20,89 @@
         <%# <br /><br /> %>
 
 <div class="row">
-  <div class="col-md-12">
+  <div class="col-md-12 mb-2">
+    <span class="float-end">
+      <%= live_redirect "Back", to: Routes.ts_game_queue_index_path(@socket, :index), class: "btn btn-#{bsname}" %>
+    </span>
+
     <h3><%= @queue.name %></h3>
+    This is a beta page. Please feel free to ping Teifion on the discord and ask questions.
   </div>
+
   <div class="col-md-6">
+    <h4>Debug info for testing purposes</h4>
+    <strong>Bucket</strong> - This is where you start looking for a match, the system will try to match you with people closest to you in terms of skill. Your bucket is your group skill rounded off to the nearest whole number.<br />
+    <strong>Distances</strong> - The number of buckets in each direction you are searching in, once enough people occupy the same bucket they get matched up.<br />
+    <br />
+
+    <%= if @queue_info.group do %>
+      <h5>Your group</h5>
+      <table class="table table-sm">
+        <tbody>
+          <tr>
+            <td>Bucket</td>
+            <td><%= @queue_info.group.bucket %></td>
+          </tr>
+          <tr>
+            <td>Max distance</td>
+            <td><%= @queue_info.group.max_distance %></td>
+          </tr>
+          <tr>
+            <td>Current distance</td>
+            <td>
+              <%= @queue_info.group.search_distance %>
+              (
+                <%= @queue_info.group.bucket - @queue_info.group.search_distance %>,
+                <%= @queue_info.group.bucket + @queue_info.group.search_distance %>
+              )
+            </td>
+          </tr>
+          <tr>
+            <td>Group size</td>
+            <td><%= @queue_info.group.count %></td>
+          </tr>
+          <tr>
+            <td>Member ids</td>
+            <td><%= @queue_info.group.members |> Enum.join(", ") %></td>
+          </tr>
+          <tr>
+            <td>Join time</td>
+            <td>
+              <%= @queue_info.group.join_time %>
+              (<%= @system_time - @queue_info.group.join_time %>s ago)
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <br /><br />
+    <% end %>
+
+    <h5>Buckets</h5>
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Bucket</th>
+          <th>Groups</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= for {key, groups} <- @queue_info.buckets do %>
+          <% member = Enum.member?(groups, @group_id) %>
+          <tr class={if member, do: "bg-primary_transparent", else: ""}>
+            <td><%= key %></td>
+            <td><%= Enum.count(groups) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <%= if allow?(@current_user, "admin.dev.developer") do %>
+      <textarea rows="2" class="form-control monospace"><%= inspect @queue_info %></textarea>
+    <% end %>
+  </div>
+
+  <div class="col-md-3">
     <h4>Map list</h4>
     <ul>
       <%= for m <- @queue.map_list do %>
@@ -26,10 +110,19 @@
       <% end %>
     </ul>
   </div>
+
+  <div class="col-md-3">
+    <h4>Queue settings</h4>
+    <ul>
+      <%= for {k, v} <- Map.take(@queue, ~w(team_count team_size)a) |> Map.merge(@queue.settings) do %>
+        <li><%= k %>: <%= inspect v %></li>
+      <% end %>
+    </ul>
+  </div>
 </div>
 
 <%= if allow?(@current_user, "admin.dev.developer") do %>
-  <div class="row">
+  <div class="row mt-3">
     <div class="col-md-6">
       <h4>DB Queue</h4>
       <pre>

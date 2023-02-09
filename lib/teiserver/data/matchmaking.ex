@@ -158,8 +158,13 @@ defmodule Teiserver.Data.Matchmaking do
   end
 
   @spec get_queue_info(T.queue_id()) :: Map.t()
-  def get_queue_info(id) when is_integer(id) do
-    call_queue_wait(id, :get_info)
+  def get_queue_info(queue_id) when is_integer(queue_id) do
+    call_queue_wait(queue_id, :get_info)
+  end
+
+  @spec get_queue_info_for_group(T.queue_id(), T.party_id() | T.userid()) :: Map.t()
+  def get_queue_info_for_group(queue_id, group_id) when is_integer(queue_id) do
+    call_queue_wait(queue_id, {:get_info, group_id})
   end
 
   @spec add_queue(QueueStruct.t()) :: :ok | {:error, any}

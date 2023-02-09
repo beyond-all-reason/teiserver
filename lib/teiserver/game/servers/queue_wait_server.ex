@@ -12,10 +12,10 @@ defmodule Teiserver.Game.QueueWaitServer do
   alias Teiserver.Data.Types, as: T
 
   @default_telemetry_interval 60_000
-  @default_range_increase_interval 30_000
+  @default_range_increase_interval_seconds 30
   @default_tick_interval 250
   @update_interval 2_500
-  @max_range 5
+  @default_max_range 5
 
   def handle_call({:add_group, %QueueGroup{members: _, rating: _} = group}, _from, state) do
     {resp, new_state} =
@@ -31,7 +31,7 @@ defmodule Teiserver.Game.QueueWaitServer do
 
           new_group = %{group |
             bucket: bucket_key,
-            max_distance: (state.settings["max_range"] || @max_range)
+            max_distance: get_max_range(state)
           }
           new_groups_map = Map.put(state.groups_map, group.id, new_group)
 
@@ -128,7 +128,19 @@ defmodule Teiserver.Game.QueueWaitServer do
   def handle_call(:get_info, _from, state) do
     resp = %{
       mean_wait_time: state.mean_wait_time,
-      member_count: Enum.count(state.groups_map)
+      group_count: Enum.count(state.groups_map),
+      buckets: state.buckets
+    }
+
+    {:reply, resp, state}
+  end
+
+  def handle_call({:get_info, group_id}, _from, state) do
+    resp = %{
+      mean_wait_time: state.mean_wait_time,
+      group_count: Enum.count(state.groups_map),
+      buckets: state.buckets,
+      group: state.groups_map[group_id]
     }
 
     {:reply, resp, state}
@@ -215,53 +227,14 @@ defmodule Teiserver.Game.QueueWaitServer do
     update_state_from_db(state, db_queue)
   end
 
-  def handle_info(:increase_range, state) do
-    # First we go through all the groups, those that are going to be
-    # expanded we map out as going into new buckets
-    # at the end of this, new_bucket_entries should be a map
-    # of %{bucket_key => [group_id]}
-    new_bucket_entries = state.groups_map
-      |> Map.values
-      |> Enum.filter(fn group ->
-        group.search_distance < group.max_distance
-      end)
-      |> Enum.map(fn group ->
-        [
-          {group.bucket - group.search_distance - 1, group.id},
-          {group.bucket + group.search_distance + 1, group.id}
-        ]
-      end)
-      |> List.flatten
-      |> Enum.group_by(fn {bucket, _group_id} ->
-        bucket
-      end, fn {_bucket, group_id} ->
-        group_id
-      end)
+  def handle_info(:increase_range, %{range_counter: range_counter} = state) do
+    new_state = if range_counter >= get_range_increase_delay(state) do
+      do_increase_range(state)
+    else
+      %{state | range_counter: state.range_counter + 1}
+    end
 
-    new_buckets = (Map.keys(state.buckets) ++ Map.keys(new_bucket_entries))
-      |> Enum.uniq
-      |> Map.new(fn key ->
-        contents = (state.buckets[key] || []) ++ (new_bucket_entries[key] || [])
-          |> Enum.uniq
-        {key, contents}
-      end)
-
-    # Update the groups
-    new_groups_map = state.groups_map
-      |> Map.new(fn {group_id, group} ->
-        new_group = if group.search_distance < group.max_distance do
-          Map.put(group, :search_distance, group.search_distance + 1)
-        else
-          group
-        end
-
-        {group_id, new_group}
-      end)
-
-    {:noreply, %{state |
-      groups_map: new_groups_map,
-      buckets: new_buckets
-    }}
+    {:noreply, new_state}
   end
 
   def handle_info(:telemetry_tick, state) do
@@ -296,8 +269,26 @@ defmodule Teiserver.Game.QueueWaitServer do
 
     PubSub.broadcast(
       Central.PubSub,
-      "teiserver_queue_all_queues",
-      {:queue_periodic_update, state.queue_id, Enum.count(state.groups_map), mean_wait_time}
+      "teiserver_all_queues",
+      %{
+        channel: "teiserver_all_queues",
+        event: :all_queues_periodic_update,
+        queue_id: state.queue_id,
+        group_count: Enum.count(state.groups_map),
+        mean_wait_time: mean_wait_time
+      }
+    )
+
+    PubSub.broadcast(
+      Central.PubSub,
+      "teiserver_queue:#{state.queue_id}",
+      %{
+        channel: "teiserver_queue:#{state.queue_id}",
+        event: :queue_periodic_update,
+        queue_id: state.queue_id,
+        buckets: state.buckets,
+        groups: state.groups_map
+      }
     )
     {:noreply, %{state | mean_wait_time: mean_wait_time}}
   end
@@ -455,6 +446,56 @@ defmodule Teiserver.Game.QueueWaitServer do
     end
   end
 
+  defp do_increase_range(state) do
+    # First we go through all the groups, those that are going to be
+    # expanded we map out as going into new buckets
+    # at the end of this, new_bucket_entries should be a map
+    # of %{bucket_key => [group_id]}
+    new_bucket_entries = state.groups_map
+      |> Map.values
+      |> Enum.filter(fn group ->
+        group.search_distance < group.max_distance
+      end)
+      |> Enum.map(fn group ->
+        [
+          {group.bucket - group.search_distance - 1, group.id},
+          {group.bucket + group.search_distance + 1, group.id}
+        ]
+      end)
+      |> List.flatten
+      |> Enum.group_by(fn {bucket, _group_id} ->
+        bucket
+      end, fn {_bucket, group_id} ->
+        group_id
+      end)
+
+    new_buckets = (Map.keys(state.buckets) ++ Map.keys(new_bucket_entries))
+      |> Enum.uniq
+      |> Map.new(fn key ->
+        contents = (state.buckets[key] || []) ++ (new_bucket_entries[key] || [])
+          |> Enum.uniq
+        {key, contents}
+      end)
+
+    # Update the groups
+    new_groups_map = state.groups_map
+      |> Map.new(fn {group_id, group} ->
+        new_group = if group.search_distance < group.max_distance do
+          Map.put(group, :search_distance, group.search_distance + 1)
+        else
+          group
+        end
+
+        {group_id, new_group}
+      end)
+
+    %{state |
+      groups_map: new_groups_map,
+      buckets: new_buckets,
+      range_counter: 0,
+    }
+  end
+
   # Used to remove players from all aspects of the queue, either because
   # they left or their game started
   @spec remove_group(T.userid() | String.t(), Map.t()) :: Map.t()
@@ -551,6 +592,14 @@ defmodule Teiserver.Game.QueueWaitServer do
     %{state | paused_groups_map: new_paused_groups_map}
   end
 
+  defp get_max_range(state) do
+    Map.get(state.settings, "group_max_search_range", @default_max_range)
+  end
+
+  defp get_range_increase_delay(state) do
+    Map.get(state.settings, "server_range_increase_interval", @default_range_increase_interval_seconds)
+  end
+
   @spec start_link(List.t()) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts[:data], [])
@@ -584,8 +633,10 @@ defmodule Teiserver.Game.QueueWaitServer do
   @spec init(Map.t()) :: {:ok, Map.t()}
   def init(opts) do
     :timer.send_interval(@default_telemetry_interval, self(), :telemetry_tick)
-    :timer.send_interval(@default_range_increase_interval, self(), :increase_range)
     :timer.send_interval(@update_interval, self(), :broadcast_update)
+    :timer.send_interval(1_000, self(), :increase_range)
+
+    Process.send(self(), :increase_range, [])
 
     :ok = PubSub.subscribe(Central.PubSub, "teiserver_global_matchmaking")
     Logger.metadata([request_id: "QueueWaitServer##{opts.queue.id}"])
@@ -611,7 +662,11 @@ defmodule Teiserver.Game.QueueWaitServer do
       old_wait_times: [],
       join_count: 0,
       leave_count: 0,
-      found_match_count: 0
+      found_match_count: 0,
+
+      # Used to allow us to dynamically change the interval of the range increase without
+      # having to use Process.send at the end of each increase
+      range_counter: 0,
     }, opts.queue)
 
     send(self(), :tick)

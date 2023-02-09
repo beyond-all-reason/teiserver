@@ -454,6 +454,13 @@ Sent from the queue wait server to update regarding it's status
 Valid events
 ```elixir
 %{
+  event: :queue_periodic_update,
+  queue_id: queue_id,
+  buckets: map(),
+  groups_map: map()
+}
+
+%{
   event: :queue_add_group,
   queue_id: queue_id
   group_id: group_id
@@ -479,11 +486,16 @@ Valid events
 }
 ```
 
-#### teiserver_queue_all_queues
+#### teiserver_all_queues
 Data for those watching all queues at the same time
 Valid events
 ```elixir
-  {:queue_periodic_update, queue_id, queue_size, mean_wait_time}
+  %{
+    event: :all_queues_periodic_update,
+    queue_id: queue_id,
+    group_count: integer,
+    mean_wait_time: number
+  }
 ```
 
 ## Moderation

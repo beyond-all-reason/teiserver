@@ -1,4 +1,8 @@
-<% bsname = @view_colour %>
+<%
+  bsname = @view_colour
+  accepted_app = (@client == nil or @client.app_status == :accepted)
+  # accepted_app = true
+%>
 
 <%=
   render TeiserverWeb.Battle.GeneralView, "sub_menu.html", %{active: "matchmaking", conn: Map.put(@socket, :permissions, @current_user.permissions)}
@@ -52,7 +56,7 @@
   </ul>
 </div>
 
-<%= if @client != nil and @client.app_status != :accepted do %>
+<%= if @client != nil and not accepted_app do %>
   <div class="alert alert-danger">
     Unfortunately non-chobby clients are having issues updating correctly and block matchmaking from working. You can get Chobby at the <a href="https://www.beyondallreason.info/download#How-To-Install">BAR downloads page</a>.
   </div>
@@ -68,8 +72,8 @@
   <thead>
     <tr>
       <th>Name</th>
-      <th>Size</th>
-      <th>Mean wait (s)</th>
+      <th>Size (Groups)</th>
+      <th>Mean wait (secs)</th>
       <th colspan="2">&nbsp;</th>
     </tr>
   </thead>
@@ -82,10 +86,10 @@
       <td><%= queue.name %></td>
 
       <%= if info do %>
-        <td><%= info.member_count %></td>
+        <td><%= info.group_count %></td>
         <td><%= round(info.mean_wait_time) %></td>
         <td>
-          <%= if @is_admin do %>
+          <%= if @is_admin or Enum.member?(@queue_membership, queue_id) do %>
             <%= live_redirect "Show", to: Routes.ts_game_queue_show_path(@socket, :show, queue_id), class: "btn btn-sm btn-outline-#{bsname}" %>
           <% end %>
         </td>
@@ -97,7 +101,7 @@
             <% @client.player -> %>
               You can't join matchmaking as a player in a game, you need to become a spectator
 
-            <% @client.app_status != :accepted -> %>
+            <% accepted_app == false -> %>
               Non-chobby client, cannot connect to Matchmaking
 
             <% Enum.member?(@queue_membership, queue_id) -> %>
