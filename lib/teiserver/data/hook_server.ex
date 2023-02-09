@@ -88,7 +88,7 @@ defmodule Teiserver.HookServer do
           "teiserver_server",
           %{
             channel: "teiserver_server",
-            event: "stop",
+            event: :prep_stop,
             node: Node.self()
           }
         )

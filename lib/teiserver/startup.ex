@@ -126,15 +126,19 @@ defmodule Teiserver.Startup do
     Central.cache_put(:application_metadata_cache, "teiserver_partial_startup_completed", true)
     Central.cache_put(:application_metadata_cache, "teiserver_full_startup_completed", true)
 
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_server",
-      %{
-        channel: "teiserver_server",
-        event: :started,
-        node: Node.self()
-      }
-    )
+    # Give everything else a chance to have started up
+    spawn(fn ->
+      :timer.sleep(1000)
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_server",
+        %{
+          channel: "teiserver_server",
+          event: :started,
+          node: Node.self()
+        }
+      )
+    end)
 
     time_taken = System.system_time(:millisecond) - start_time
     Logger.info("Teiserver startup complete, took #{time_taken}ms")
