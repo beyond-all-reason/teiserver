@@ -76,6 +76,7 @@ defmodule Teiserver.Protocols.Tachyon.V1.SystemOut do
     }
   end
 
+  def do_reply(:server_event, {:started, _}), do: nil
   def do_reply(:server_event, {event, node}) do
     %{
       cmd: "s.system.server_event",
