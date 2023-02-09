@@ -47,6 +47,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
       winrate = win_count / total
 
       Account.update_user_stat(userid, %{
+        "recent_count.duel" => total,
         "win_count.duel" => win_count,
         "loss_count.duel" => loss_count,
         "win_rate.duel" => winrate |> percent(1)
@@ -83,6 +84,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
       winrate = win_count / total
 
       Account.update_user_stat(userid, %{
+        "recent_count.ffa" => total,
         "win_count.ffa" => win_count,
         "loss_count.ffa" => loss_count,
         "win_rate.ffa" => winrate |> percent(1)
@@ -134,6 +136,7 @@ defmodule Teiserver.Account.RecacheUserStatsTask do
         "exit_status.team.early" => (statuses[:early] || 0) / total |> percent(1),
         "exit_status.team.abandoned" => (statuses[:abandoned] || 0) / total |> percent(1),
         "exit_status.team.noshow" => (statuses[:noshow] || 0) / total |> percent(1),
+        "recent_count.team" => total,
         "win_count.team" => win_count,
         "loss_count.team" => loss_count,
         "win_rate.team" => winrate |> percent(1)
