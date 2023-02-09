@@ -19,7 +19,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   @coordinator_bot ~w(whoami whois check discord help coc ignore mute ignore unmute unignore matchmaking website party modparty unparty)
 
   @always_allow ~w(status s y n follow joinq leaveq splitlobby afks roll players password? explain)
-  @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename password resetplaylevels minplaylevel maxplaylevel setplaylevels)
+  @boss_commands ~w(gatekeeper welcome-message meme reset-approval rename password resetplaylevels minplaylevel maxplaylevel setplaylevels resetratinglevels minratinglevel maxratinglevel setratinglevels)
   @host_commands ~w(specunready makeready settag speclock forceplay lobbyban lobbybanmult unban forcespec forceplay lock unlock)
 
   @splitter "########################################"
@@ -267,17 +267,34 @@ defmodule Teiserver.Coordinator.ConsulServer do
   def handle_info({:lobby_update, :add_user, _lobby_id, userid}, state) do
     user = User.get_user_by_id(userid)
 
-    min_play = state.minimum_level_to_play
-    max_play = state.maximum_level_to_play
+    min_rate_play = state.minimum_rating_to_play
+    max_rate_play = state.maximum_rating_to_play
     play_level_bounds = cond do
-      min_play > 0 and max_play < 1000 ->
-        "Play rating boundaries set to min: #{min_play}, max: #{max_play}"
+      min_rate_play > 0 and max_rate_play < 1000 ->
+        "Play rating boundaries set to min: #{min_rate_play}, max: #{max_rate_play}"
 
-      min_play > 0 ->
-        "Play rating boundaries set to min: #{min_play}"
+      min_rate_play > 0 ->
+        "Play rating boundaries set to min: #{min_rate_play}"
 
-      max_play < 1000 ->
-        "Play rating boundaries set to max: #{max_play}"
+      max_rate_play < 1000 ->
+        "Play rating boundaries set to max: #{max_rate_play}"
+
+      true ->
+        nil
+    end
+
+    min_rank_play = state.minimum_rank_to_play
+    max_rank_play = state.maximum_rank_to_play
+
+    play_rank_bounds = cond do
+      min_rank_play > 0 and max_rank_play < 1000 ->
+        "Play rank boundaries set to min: #{min_rank_play}, max: #{max_rank_play}"
+
+      min_rank_play > 0 ->
+        "Play rank boundaries set to min: #{min_rank_play}"
+
+      max_rank_play < 1000 ->
+        "Play rank boundaries set to max: #{max_rank_play}"
 
       true ->
         nil
@@ -289,7 +306,8 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
     msg = [
       welcome_message,
-      play_level_bounds
+      play_level_bounds,
+      play_rank_bounds
     ]
     |> List.flatten
     |> Enum.filter(fn s -> s != nil end)
@@ -455,6 +473,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
   # defp request_user_change_status(new_client, %{moderator: true}, _state), do: {true, new_client}
   defp request_user_change_status(_new_client, nil, _state), do: {false, nil}
   defp request_user_change_status(new_client, %{userid: userid} = existing, state) do
+    user = Account.get_user_by_id(userid)
     list_status = get_list_status(userid, state)
 
     # We were using this as there were concerns over an autoready feature, leaving it here for now
@@ -466,14 +485,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
     #   end
     # end
 
-    player_rating = if state.minimum_level_to_play > 0 or state.maximum_level_to_play < 1000 do
+    player_rating = if state.minimum_rating_to_play > 0 or state.maximum_rating_to_play < 1000 do
       BalanceLib.get_user_balance_rating_value(userid, "Team") |> max(1)
     else
       18
     end
 
     block_as_player = cond do
-      state.minimum_level_to_play > player_rating or state.maximum_level_to_play < player_rating -> true
+      state.minimum_rating_to_play >= player_rating or state.maximum_rating_to_play <= player_rating -> true
+      # state.minimum_rank_to_play >= existing.rank or state.maximum_rank_to_play <= existing.rank -> true
       not Enum.empty?(existing.queues) -> true
       true -> false
     end
@@ -498,7 +518,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       player_count = Battle.get_lobby_player_count(state.lobby_id)
 
       if player_count > 4 do
-        user = Account.get_user_by_id(userid)
         if user.hw_hash == nil do
           Logger.warn("[ConsulServer] hw hash block for #{Account.get_username(userid)}")
           %{new_client | player: false}
@@ -517,7 +536,6 @@ defmodule Teiserver.Coordinator.ConsulServer do
       player_count = Battle.get_lobby_player_count(state.lobby_id)
 
       if player_count > 4 do
-        user = Account.get_user_by_id(userid)
         if user.chobby_hash == nil do
           Logger.warn("[ConsulServer] Chobby data block for #{Account.get_username(userid)}")
           %{new_client | player: false}
@@ -953,8 +971,13 @@ defmodule Teiserver.Coordinator.ConsulServer do
       lobby_id: lobby_id,
       host_id: founder_id,
       gatekeeper: "default",
-      minimum_level_to_play: 0,
-      maximum_level_to_play: 1000,
+
+      minimum_rating_to_play: 0,
+      maximum_rating_to_play: 1000,
+
+      minimum_rank_to_play: 0,
+      maximum_rank_to_play: 1000,
+
       level_to_spectate: 0,
       locks: [],
       bans: %{},

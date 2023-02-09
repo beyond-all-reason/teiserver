@@ -51,10 +51,15 @@ or are following someone that voted yes are also moved to that lobby.", :everybo
 > friendsplay: allows only friends of existing players to become players (but anybody can join to spectate)", :everybody},
       {"rename", ["new name"], "Renames the lobby to the name given. Requires boss privileges.", :everybody},
 
-      {"resetplaylevels", [], "Resets the play level limits to not exist. Play levels are intended to be used with $rename and $welcome-message, please be careful not to abuse them. Requires boss privileges.", :everybody},
-      {"minplaylevel", ["min-level"], "Sets the minimum level for players, you must be at least this rating to be a player. Requires boss privileges.", :everybody},
-      {"maxplaylevel", ["max-level"], "Sets the maximum level for players, you must be at below this rating to be a player. Requires boss privileges.", :everybody},
-      {"setplaylevels", ["min-level", "max-level"], "Sets the minimum and maximum levels for players. Requires boss privileges.", :everybody},
+      {"resetratinglevels", [], "Resets the rating level limits to not exist. Player limiting commands are designed to be used with $rename, please be careful not to abuse them. Requires boss privileges.", :everybody},
+      {"minratinglevel", ["min-level"], "Sets the minimum level for players, you must be at least this rating to be a player. Requires boss privileges.", :everybody},
+      {"maxratinglevel", ["max-level"], "Sets the maximum level for players, you must be at below this rating to be a player. Requires boss privileges.", :everybody},
+      {"setratinglevels", ["min-level", "max-level"], "Sets the minimum and maximum rating levels for players. Requires boss privileges.", :everybody},
+
+      # {"resetranklevels", [], "Resets the rank level limits to not exist. Player limiting commands are designed to be used with $rename, please be careful not to abuse them. Requires boss privileges.", :everybody},
+      # {"minranklevel", ["min-level"], "Sets the minimum rank level for players, you must be at least this rank to be a player. Requires boss privileges.", :everybody},
+      # {"maxranklevel", ["max-level"], "Sets the maximum rank level for players, you must be at below this rank to be a player. Requires boss privileges.", :everybody},
+      # {"setranklevels", ["min-level", "max-level"], "Sets the minimum and maximum rank levels for players. Requires boss privileges.", :everybody},
 
       #---- "hosts" only ----
       {"lock", ["(team | player | spectator | side)"], "Engages a lock on that mode, when engaged members are unable to change that attribute about themselves.

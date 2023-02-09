@@ -80,17 +80,35 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       ["Parties:" | party_list]
     end
 
-    min_play = state.minimum_level_to_play
-    max_play = state.maximum_level_to_play
+    min_rate_play = state.minimum_rating_to_play
+    max_rate_play = state.maximum_rating_to_play
+
     play_level_bounds = cond do
-      min_play > 0 and max_play < 1000 ->
-        "Play rating boundaries set to min: #{min_play}, max: #{max_play}"
+      min_rate_play > 0 and max_rate_play < 1000 ->
+        "Play rating boundaries set to min: #{min_rate_play}, max: #{max_rate_play}"
 
-      min_play > 0 ->
-        "Play rating boundaries set to min: #{min_play}"
+      min_rate_play > 0 ->
+        "Play rating boundaries set to min: #{min_rate_play}"
 
-      max_play < 1000 ->
-        "Play rating boundaries set to max: #{max_play}"
+      max_rate_play < 1000 ->
+        "Play rating boundaries set to max: #{max_rate_play}"
+
+      true ->
+        nil
+    end
+
+    min_rank_play = state.minimum_rank_to_play
+    max_rank_play = state.maximum_rank_to_play
+
+    play_rank_bounds = cond do
+      min_rank_play > 0 and max_rank_play < 1000 ->
+        "Play rank boundaries set to min: #{min_rank_play}, max: #{max_rank_play}"
+
+      min_rank_play > 0 ->
+        "Play rank boundaries set to min: #{min_rank_play}"
+
+      max_rank_play < 1000 ->
+        "Play rank boundaries set to max: #{max_rank_play}"
 
       true ->
         nil
@@ -108,6 +126,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       boss_string,
       "Maximum allowed number of players is #{max_player_count} (Host = #{state.host_teamsize * state.host_teamcount}, Coordinator = #{state.player_limit})",
       play_level_bounds,
+      play_rank_bounds,
     ]
     |> List.flatten
     |> Enum.filter(fn v -> v != nil end)
@@ -439,7 +458,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, state)
   end
 
-  def handle_command(cmd = %{command: "welcome-message", remaining: remaining}, state) do
+  def handle_command(%{command: "welcome-message", remaining: remaining} = cmd, state) do
     new_state = case String.trim(remaining) do
       "" ->
         %{state | welcome_message: nil}
@@ -457,16 +476,38 @@ defmodule Teiserver.Coordinator.ConsulCommands do
     ConsulServer.say_command(cmd, new_state)
   end
 
-  def handle_command(%{command: "resetplaylevels", remaining: ""} = cmd, state) do
-    ConsulServer.say_command(cmd, state)
-    %{state | minimum_level_to_play: 0, maximum_level_to_play: 1000}
+  # TODO: depreciate these
+  def handle_command(%{command: "resetplaylevels", senderid: senderid} = cmd, state) do
+    LobbyChat.sayprivateex(state.coordinator_id, senderid, "This command is being depreciated in favour of resetratinglevels, it will stop working soon", state.lobby_id)
+    handle_command(Map.put(cmd, :command, "resetratinglevels"), state)
   end
 
-  def handle_command(%{command: "minplaylevel", remaining: ""} = cmd, state) do
-    ConsulServer.say_command(cmd, state)
-    %{state | minimum_level_to_play: 0}
+  def handle_command(%{command: "minplaylevel", senderid: senderid} = cmd, state) do
+    LobbyChat.sayprivateex(state.coordinator_id, senderid, "This command is being depreciated in favour of minratinglevel, it will stop working soon", state.lobby_id)
+    handle_command(Map.put(cmd, :command, "minratinglevel"), state)
   end
-  def handle_command(%{command: "minplaylevel", remaining: remaining, senderid: senderid} = cmd, state) do
+
+  def handle_command(%{command: "maxplaylevel", senderid: senderid} = cmd, state) do
+    LobbyChat.sayprivateex(state.coordinator_id, senderid, "This command is being depreciated in favour of maxratinglevel, it will stop working soon", state.lobby_id)
+    handle_command(Map.put(cmd, :command, "maxratinglevel"), state)
+  end
+
+  def handle_command(%{command: "setplaylevels", senderid: senderid} = cmd, state) do
+    LobbyChat.sayprivateex(state.coordinator_id, senderid, "This command is being depreciated in favour of setratinglevels, it will stop working soon", state.lobby_id)
+    handle_command(Map.put(cmd, :command, "setratinglevels"), state)
+  end
+
+
+  def handle_command(%{command: "resetratinglevels", remaining: ""} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+    %{state | minimum_rating_to_play: 0, maximum_rating_to_play: 1000}
+  end
+
+  def handle_command(%{command: "minratinglevel", remaining: ""} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+    %{state | minimum_rating_to_play: 0}
+  end
+  def handle_command(%{command: "minratinglevel", remaining: remaining, senderid: senderid} = cmd, state) do
     case Integer.parse(remaining |> String.trim) do
       :error ->
         Lobby.sayprivateex(state.coordinator_id, senderid, [
@@ -476,16 +517,16 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       {level, _} ->
         ConsulServer.say_command(cmd, state)
         %{state |
-          minimum_level_to_play: level |> max(0) |> min(state.maximum_level_to_play - 1)
+          minimum_rating_to_play: level |> max(0) |> min(state.maximum_rating_to_play - 1)
         }
     end
   end
 
-  def handle_command(%{command: "maxplaylevel", remaining: ""} = cmd, state) do
+  def handle_command(%{command: "maxratinglevel", remaining: ""} = cmd, state) do
     ConsulServer.say_command(cmd, state)
-    %{state | maximum_level_to_play: 1000}
+    %{state | maximum_rating_to_play: 1000}
   end
-  def handle_command(%{command: "maxplaylevel", remaining: remaining, senderid: senderid} = cmd, state) do
+  def handle_command(%{command: "maxratinglevel", remaining: remaining, senderid: senderid} = cmd, state) do
     case Integer.parse(remaining |> String.trim) do
       :error ->
         Lobby.sayprivateex(state.coordinator_id, senderid, [
@@ -495,12 +536,12 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       {level, _} ->
         ConsulServer.say_command(cmd, state)
         %{state |
-          maximum_level_to_play: level |> min(1000) |> max(state.minimum_level_to_play + 1)
+          maximum_rating_to_play: level |> min(1000) |> max(state.minimum_rating_to_play + 1)
         }
     end
   end
 
-  def handle_command(%{command: "setplaylevels", remaining: remaining, senderid: senderid} = cmd, state) do
+  def handle_command(%{command: "setratinglevels", remaining: remaining, senderid: senderid} = cmd, state) do
     case String.split(remaining, " ") do
       [smin, smax] ->
         case {Integer.parse(smin |> String.trim), Integer.parse(smax |> String.trim)} do
@@ -520,13 +561,89 @@ defmodule Teiserver.Coordinator.ConsulCommands do
 
             ConsulServer.say_command(cmd, state)
             %{state |
-              minimum_level_to_play: max(min_level, 0),
-              maximum_level_to_play: min(max_level, 1000)
+              minimum_rating_to_play: max(min_level, 0),
+              maximum_rating_to_play: min(max_level, 1000)
             }
         end
       _ ->
         Lobby.sayprivateex(state.coordinator_id, senderid, [
           "setplaylevels takes two numbers, no more no less",
+        ], state.lobby_id)
+        state
+    end
+  end
+
+
+  def handle_command(%{command: "resetranklevels", remaining: ""} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+    %{state | minimum_rank_to_play: 0, maximum_rank_to_play: 1000}
+  end
+
+  def handle_command(%{command: "minranklevel", remaining: ""} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+    %{state | minimum_rank_to_play: 0}
+  end
+  def handle_command(%{command: "minranklevel", remaining: remaining, senderid: senderid} = cmd, state) do
+    case Integer.parse(remaining |> String.trim) do
+      :error ->
+        Lobby.sayprivateex(state.coordinator_id, senderid, [
+          "Unable to turn '#{remaining}' into an integer",
+        ], state.lobby_id)
+        state
+      {level, _} ->
+        ConsulServer.say_command(cmd, state)
+        %{state |
+          minimum_rank_to_play: level |> max(0) |> min(state.maximum_rank_to_play - 1)
+        }
+    end
+  end
+
+  def handle_command(%{command: "maxranklevel", remaining: ""} = cmd, state) do
+    ConsulServer.say_command(cmd, state)
+    %{state | maximum_rank_to_play: 1000}
+  end
+  def handle_command(%{command: "maxranklevel", remaining: remaining, senderid: senderid} = cmd, state) do
+    case Integer.parse(remaining |> String.trim) do
+      :error ->
+        Lobby.sayprivateex(state.coordinator_id, senderid, [
+          "Unable to turn '#{remaining}' into an integer",
+        ], state.lobby_id)
+        state
+      {level, _} ->
+        ConsulServer.say_command(cmd, state)
+        %{state |
+          maximum_rank_to_play: level |> min(1000) |> max(state.minimum_rank_to_play + 1)
+        }
+    end
+  end
+
+  def handle_command(%{command: "setranklevels", remaining: remaining, senderid: senderid} = cmd, state) do
+    case String.split(remaining, " ") do
+      [smin, smax] ->
+        case {Integer.parse(smin |> String.trim), Integer.parse(smax |> String.trim)} do
+          {:error, _} ->
+            Lobby.sayprivateex(state.coordinator_id, senderid, [
+              "Unable to turn '#{smin}' into an integer",
+            ], state.lobby_id)
+            state
+          {_, :error} ->
+            Lobby.sayprivateex(state.coordinator_id, senderid, [
+              "Unable to turn '#{smax}' into an integer",
+            ], state.lobby_id)
+            state
+          {{min_level_o, _}, {max_level_o, _}} ->
+            min_level = min(min_level_o, max_level_o)
+            max_level = max(min_level_o, max_level_o)
+
+            ConsulServer.say_command(cmd, state)
+            %{state |
+              minimum_rank_to_play: max(min_level, 0),
+              maximum_rank_to_play: min(max_level, 1000)
+            }
+        end
+      _ ->
+        Lobby.sayprivateex(state.coordinator_id, senderid, [
+          "setranklevels takes two numbers, no more no less",
         ], state.lobby_id)
         state
     end
