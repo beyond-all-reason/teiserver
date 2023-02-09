@@ -116,8 +116,12 @@ defmodule Teiserver.Battle.Lobby do
         # To tie it into matchmaking
         queue_id: nil,
 
-        # Consul flags
+        # Rename flags
+        # consul rename means it was renamed by a player and overrides spads
         consul_rename: false,
+
+        # server rename means the server renamed it and overrides players
+        server_rename: false,
 
         # Meta data
         silence: false,
@@ -403,11 +407,16 @@ defmodule Teiserver.Battle.Lobby do
 
   @spec rename_lobby(T.lobby_id(), String.t()) :: :ok
   @spec rename_lobby(T.lobby_id(), String.t(), boolean) :: :ok
-  def rename_lobby(lobby_id, new_name, consul_rename \\ false) do
+  @spec rename_lobby(T.lobby_id(), String.t(), boolean, boolean) :: :ok
+  def rename_lobby(lobby_id, new_name, consul_rename \\ false, server_rename \\ false) do
     case Battle.lobby_exists?(lobby_id) do
       false -> nil
       true ->
-        Battle.update_lobby_values(lobby_id, %{name: new_name, consul_rename: consul_rename})
+        Battle.update_lobby_values(lobby_id, %{
+          name: new_name,
+          consul_rename: consul_rename,
+          server_rename: server_rename
+        })
     end
 
     :ok

@@ -701,8 +701,13 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       new_name == "" ->
         :ok
 
+      lobby.server_rename ->
+        Lobby.sayex(state.coordinator_id, "This is a server renamed lobby, you cannot rename it", state.lobby_id)
+        :ok
+
       senderid != lobby.founder_id ->
         Lobby.rename_lobby(state.lobby_id, new_name, true)
+        ConsulServer.say_command(cmd, state)
 
       lobby.consul_rename ->
         :ok
@@ -710,7 +715,7 @@ defmodule Teiserver.Coordinator.ConsulCommands do
       true ->
         Lobby.rename_lobby(state.lobby_id, new_name, false)
     end
-    ConsulServer.say_command(cmd, state)
+    state
   end
 
   #################### Moderator only
