@@ -16,6 +16,20 @@
   }
 </script>
 
+<style type="text/css">
+  .key-date {
+    display: none;
+  }
+
+  .selected-user-row td {
+    border-bottom-width: 0px;
+  }
+
+  .under-selected-user-row td {
+    border-bottom-width: 4px;
+  }
+</style>
+
 <%= render TeiserverWeb.Admin.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "users"}) %>
 
 <div class="row section-menu">
@@ -33,6 +47,12 @@
         </div>
 
 <div class="float-end py-3">
+  <div class="btn btn-primary2" onclick="$('.key-date').toggle();">
+    <i class='fa-fw fa-solid fa-calendar'></i>
+    &nbsp;
+    Toggle dates
+  </div>
+
   <div class="btn btn-primary2" onclick="$('.help-box, .help-box-large').toggle();">
     <i class='fa-fw fa-solid fa-circle-info'></i>
     &nbsp;
@@ -79,6 +99,9 @@
           <th colspan="3">Name/Domain</th>
           <th>Status</th>
 
+          <th>Winrate</th>
+          <th>Recents</th>
+
           <th>&nbsp;</th>
 
           <%= for type <- @key_types do %>
@@ -98,8 +121,63 @@
         </tr>
       </thead>
       <tbody>
+
+        <tr class="selected-user-row">
+          <%
+            email_domain = @user.email
+              |> String.split("@")
+              |> Enum.reverse
+              |> hd
+          %>
+
+          <td style={"background-color: #{@user.colour}; color: #FFF;"} width="22">
+            <%= central_component "icon", icon: @user.icon %>
+          </td>
+          <td><%= @user.name %></td>
+          <td><%= email_domain %></td>
+
+          <td>
+            -
+          </td>
+
+          <td><%= @stats["win_rate.team"] %></td>
+          <td><%= @stats["recent_count.team"] %></td>
+
+          <td>-</td>
+
+          <%= for _type <- @key_types do %>
+            <td>
+              -
+            </td>
+          <% end %>
+
+          <td>-</td>
+
+          <td>
+            <%= date_to_str(((@user.data["last_login"] || 0) * 60) |> Timex.from_unix, format: :hms_or_ymd, tz: @tz) %>
+          </td>
+
+          <td>
+            <%= date_to_str(@user.inserted_at, format: :ymd) %>
+          </td>
+
+          <td>
+            <a href={Routes.ts_admin_user_path(@conn, :show, @user.id)} class="btn btn-secondary btn-sm">
+              Show
+            </a>
+          </td>
+
+          <td>&nbsp;</td>
+        </tr>
+
+        <tr class="under-selected-user-row">
+          <td colspan="18" style="height: 5px;"></td>
+        </tr>
+
     <%= for user <- @users do %>
       <%
+        user_stats = @stats_map[user.id]
+
         email_domain = user.email
           |> String.split("@")
           |> Enum.reverse
@@ -140,6 +218,9 @@
             <% end %>
           </td>
 
+          <td><%= user_stats["win_rate.team"] %></td>
+          <td><%= user_stats["recent_count.team"] %></td>
+
           <td>&nbsp;</td>
 
           <%= for type <- @key_types do %>
@@ -154,7 +235,9 @@
                   class={"fa-fw fa-regular #{type_icons[type]} text-#{type_colours[type]}"}
                   title={"Matching key against #{date_to_str(match.last_updated, format: :ymd)}"}
                 ></i>
+                <span class="key-date">
                 <%= date_to_str(match.last_updated, format: :ymd) %>/<%= date_to_str(user_key.last_updated, format: :ymd) %>
+                </span>
               <% end %>
             </td>
           <% end %>
@@ -175,13 +258,13 @@
             </a>
           </td>
 
-          <%= if is_admin do %>
-            <td>
+          <td>
+            <%= if false and is_admin do %>
               <a href={Routes.ts_admin_user_path(@conn, :smurf_merge_form, user.id, @user.id)} class={"btn btn-outline-#{bsname} btn-sm"}>
                 Merge smurf
               </a>
-            </td>
-          <% end %>
+            <% end %>
+          </td>
         </tr>
     <% end %>
       </tbody>

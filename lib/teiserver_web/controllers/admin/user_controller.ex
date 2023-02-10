@@ -590,6 +590,11 @@ defmodule TeiserverWeb.Admin.UserController do
           |> Enum.sort_by(fn {_k, v} -> v.last_updated end, &<=/2)
           |> Map.new
 
+        stats_map = users
+          |> Map.new(fn %{id: id} ->
+            {id, Account.get_user_stat_data(id)}
+          end)
+
         stats = Account.get_user_stat_data(user.id)
 
         conn
@@ -603,6 +608,7 @@ defmodule TeiserverWeb.Admin.UserController do
           |> assign(:users, users)
           |> assign(:key_lookup, key_lookup)
           |> assign(:user_key_lookup, user_key_lookup)
+          |> assign(:stats_map, stats_map)
           |> render("smurf_list.html")
 
       _ ->
