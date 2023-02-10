@@ -75,7 +75,7 @@
         <li>Password: <%= @lobby.password %></li>
       <% end %>
       <li>Queue size: <%= Enum.count(@consul.join_queue ++ @consul.low_priority_join_queue) %></li>
-      <%= if allow?(@current_user, "admin.dev.developer") do %>
+      <%= if @admin_dev do %>
 
         <li>Match UUID: </li>
         <li>Server UUID: </li>
@@ -117,6 +117,9 @@
       <th>Rating</th>
       <%= if @moderator do %>
         <th>Uncertainty</th>
+
+        <th>Winrate Team</th>
+        <th>Recents</th>
       <% end %>
 
       <th>Bonus</th>
@@ -162,6 +165,9 @@
           <td><%= Central.Helpers.NumberHelper.round(rating_value, 2) %></td>
           <%= if @moderator do %>
             <td><%= Central.Helpers.NumberHelper.round(uncertainty, 2) %></td>
+
+            <td><%= @stats[user.id]["win_rate.team"] %></td>
+            <td><%= @stats[user.id]["recent_count.team"] %></td>
           <% end %>
 
           <td><%= client.handicap %></td>
@@ -258,7 +264,7 @@
   <%= live_redirect "Back", to: Routes.ts_battle_lobby_index_path(@socket, :index), class: "btn btn-#{bsname}" %>
 </span>
 
-<%= if allow?(@current_user, "admin.dev.developer") do %>
+<%= if @admin_dev do %>
   <div class="row mt-3" id="admin-data">
     <div class="col-md-6 col-lg-4 col-xl-3">
       <h5>Lobby</h5>
