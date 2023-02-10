@@ -94,6 +94,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Show do
   defp assign_group_id(socket) do
     client = Account.get_client_by_id(socket.assigns.current_user.id)
     group_id = case client do
+      nil -> nil
       %{party_id: nil} -> client.userid
       %{party_id: party_id} -> party_id
     end

@@ -95,6 +95,17 @@
       link: Routes.ts_admin_user_path(@conn, :index)
     %>
   <% end %>
+
+  <%= if allow_any?(@conn, ~w(teiserver.reports teiserver.staff)) do %>
+    <%=
+      central_component "menu_card",
+      icon: Central.Helpers.StylingHelper.icon(:summary),
+      name: "reports",
+      text: "Reports",
+      icon_class: "fa-duotone",
+      link: Routes.ts_reports_general_path(@conn, :index)
+    %>
+  <% end %>
 </div>
 
 <%# Live services %>

@@ -91,11 +91,23 @@
                   <% end %>
                 </td>
 
-                <td><%= stats["win_rate.duel"] %></td>
-                <td><%= stats["win_rate.ffa"] %></td>
-                <td><%= stats["win_rate.team"] %></td>
-
                 <td><%= date_to_str(user.inserted_at, format: :hms_or_dmy) %></td>
+
+                <td>
+                  <%= if stats["recent_count.duel"] do %>
+                    <%= stats["win_rate.duel"] %>% of <%= stats["recent_count.duel"] %>
+                  <% end %>
+                </td>
+                <td>
+                  <%= if stats["recent_count.ffa"] do %>
+                    <%= stats["win_rate.ffa"] %>% of <%= stats["recent_count.ffa"] %>
+                  <% end %>
+                </td>
+                <td>
+                  <%= if stats["recent_count.team"] do %>
+                    <%= stats["win_rate.team"] %>% of <%= stats["recent_count.team"] %>
+                  <% end %>
+                </td>
 
                 <td>
                   <a href={Routes.ts_admin_user_path(@conn, :smurf_search, user.id)} class="btn btn-secondary btn-sm">
