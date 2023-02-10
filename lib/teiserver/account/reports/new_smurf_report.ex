@@ -1,5 +1,7 @@
 defmodule Teiserver.Account.NewSmurfReport do
-  alias Teiserver.{Account, User}
+  alias Teiserver.{Account, User, Battle}
+  import Central.Helpers.NumberHelper, only: [int_parse: 1]
+  require Logger
 
   @spec icon() :: String.t()
   def icon(), do: "fa-regular fa-face-angry-horns"
@@ -11,10 +13,13 @@ defmodule Teiserver.Account.NewSmurfReport do
   def run(_conn, params) do
     params = apply_defaults(params)
 
+    max_age = params["age"]
+      |> int_parse
+
     # Get new users first
     new_users = Account.list_users(
       search: [
-        inserted_after: Timex.now |> Timex.shift(days: -7),
+        inserted_after: Timex.now |> Timex.shift(days: -max_age),
         verified: "Verified"
       ],
       limit: 1000,
@@ -28,7 +33,7 @@ defmodule Teiserver.Account.NewSmurfReport do
     valid_types = Account.list_smurf_key_types(
       search: [
         name_in: ["chobby_mac_hash"]
-      ],
+      ]
     )
       |> Enum.map(fn %{id: id} -> id end)
 
@@ -111,7 +116,8 @@ defmodule Teiserver.Account.NewSmurfReport do
     Map.merge(
       %{
         "require_games" => "true",
-        "ignore_banned" => "true"
+        "ignore_banned" => "true",
+        "age" => "7"
       },
       Map.get(params, "report", %{})
     )
