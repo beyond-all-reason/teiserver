@@ -856,13 +856,15 @@ defmodule Teiserver.Coordinator.ConsulServer do
 
   @spec queue_size_changed(T.consul_state()) :: T.consul_state()
   def queue_size_changed(state) do
-    PubSub.broadcast(
-      Central.PubSub,
-      "teiserver_lobby_updates:#{state.lobby_id}",
-      {:lobby_update, :updated_queue, state.lobby_id, get_queue(state)}
-    )
+    if state.join_queue != state.last_queue_state do
+      PubSub.broadcast(
+        Central.PubSub,
+        "teiserver_lobby_updates:#{state.lobby_id}",
+        {:lobby_update, :updated_queue, state.lobby_id, get_queue(state)}
+      )
+    end
 
-    state
+    %{state | last_queue_state: state.join_queue}
   end
 
   @spec get_max_player_count(map()) :: non_neg_integer()
@@ -1008,6 +1010,7 @@ defmodule Teiserver.Coordinator.ConsulServer do
       unready_can_play: false,
 
       last_balance_hash: nil,
+      last_queue_state: [],
       balance_result: nil,
 
       player_limit: Config.get_site_config_cache("teiserver.Default player limit"),
