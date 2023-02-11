@@ -171,6 +171,8 @@ defmodule TeiserverWeb.Moderation.BanController do
           expires: Timex.now() |> Timex.shift(years: 1000)
         })
 
+        Teiserver.Moderation.RefreshUserRestrictionsTask.refresh_user(ban.source_id)
+
         conn
           |> put_flash(:info, "Ban created successfully.")
           |> redirect(to: Routes.moderation_ban_path(conn, :index))
