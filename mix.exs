@@ -96,6 +96,12 @@ defmodule Central.MixProject do
       {:horde, "~> 0.8"},
       {:etop, "~> 0.7.0"},
 
+      {:grpc, "~> 0.5.0"},
+      {:gun, "~> 2.0.1", hex: :grpc_gun, override: true},
+
+      {:protobuf, "~> 0.10.0"},
+      {:google_protos, "~> 0.1"},
+
       # If you want to connect to discord in dev mode, use this
       # {:nostrum, "~> 0.6", runtime: Mix.env() != :test},
 
