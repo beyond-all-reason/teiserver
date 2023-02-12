@@ -1,25 +1,8 @@
-// Copyright 2015 gRPC authors.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 syntax = "proto3";
 
-option java_multiple_files = true;
-option java_package = "io.grpc.examples.helloworld";
-option java_outer_classname = "HelloWorldProto";
-option objc_class_prefix = "HLW";
+option objc_class_prefix = "Tachyon";
 
-package helloworld;
+package tachyon;
 
 // The greeting service definition.
 service Greeter {
@@ -39,4 +22,122 @@ message HelloReply {
   string message = 1;
 }
 
+
+message UserId {
+  int32 id = 1;
+}
+message LobbyId {
+  int32 id = 1;
+}
+message PartyId {
+  int32 id = 1;
+}
+message QueueId {
+  int32 id = 1;
+}
+message ClanTag {
+  string tag = 1;
+}
+
+message Icon {
+  string icon_name = 1;
+}
+message Color {
+  string value = 1;
+}
+
+message User {
+  UserId id = 1;
+  string name = 2;
+  bool bot = 3;
+  int32 clan_id = 4;
+  map<string, Icon> icons = 5;
+}
+
+// Same as a user but contains privilaged information
+message PrivateUser {
+  int32 id = 1;
+  string name = 2;
+  bool bot = 3;
+  int32 clan_id = 4;
+  map<string, Icon> icons = 5;
+  
+  repeated string permissions = 9;
+  repeated UserId friends = 10;
+  repeated UserId friend_requests = 11;// Users requesting this user to be their friend
+  repeated UserId ignores = 12;
+}
+
+// This represents a user who is logged in. A user who is logged out will not have a client object.
+message Client {
+  UserId id = 1;
+  bool in_game = 2;
+  bool away = 3;
+  
+  // Game lobby related attributes
+  bool ready = 4;
+  int32 player_number = 5;
+  Color team_colour = 6;
+  bool player = 7;
+  sint32 bonus = 8;
+  map<string, int32> sync = 9;// key represents the item with a value between 0-100 showing the percentage downloaded
+  
+  string faction = 10;
+  LobbyId lobby_id = 11;
+  
+  // Other
+  PartyId party_id = 12;
+  ClanTag clan_tag = 13;
+  bool muted = 14;
+}
+
+enum LobbyStatus {
+  LOBBY_UNLOCKED = 0;
+  LOBBY_FRIENDS = 1;
+  LOBBY_WHITELIST = 2;
+  LOBBY_LOCKED = 3;
+}
+
+message StartArea {
+  string type = 1;
+  map<string, sint32> values = 2;
+}
+
+message Lobby {
+  LobbyId id = 1;
+  string name = 2;
+  UserId founder_id = 3;
+  bool passworded = 4;
+  LobbyStatus locked = 5;
+  
+  string engine_name = 6;
+  string engine_version = 7;
+  
+  repeated UserId players = 8;
+  repeated UserId spectators = 9;
+  repeated UserId bots = 10;// Ummm, they're not userids, this is wrong
+  
+  string ip = 11;
+  map<string, string> settings = 12;
+  map<int32, StartArea> start_areas = 13;
+  string map_name = 14;
+  string map_hash = 15;
+  bool public = 16;
+}
+
+message Queue {
+  QueueId id = 1;
+  string name = 2;
+  int32 team_size = 3;
+  // conditions goes here, not sure of format
+  map<string, string> settings = 4;// Not sure we want to have queue settings sent out or not
+  repeated string map_list = 5;
+}
+
+message Party {
+  PartyId id = 1;
+  UserId leader_id = 2;
+  repeated UserId members = 3;
+  repeated UserId invites = 4;
+}
 // protoc --elixir_out=gen_descriptors=true,plugins=grpc:. lib/teiserver/protocols/tachyon_v1/tachyonv1.proto
