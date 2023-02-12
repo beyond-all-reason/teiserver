@@ -98,7 +98,9 @@ defmodule Central.MixProject do
 
       # {:grpc_gun, "~> 0.5.0"},
       # {:remedy_gun, "~> 0.5.0"},
-      {:grpc, "~> 0.5.0"},
+      # {:grpc, "~> 0.5.0"},
+      {:grpc, git:  "https://github.com/elixir-grpc/grpc"},
+
       # {:gun, "~> 2.0.1", hex: :grpc_gun, override: true},
       {:gun, "~> 2.0", hex: :remedy_gun, override: true},
 

@@ -100,8 +100,8 @@ defmodule Teiserver.Application do
         start: {Teiserver.TachyonTcpServer, :start_link, [[]]}
       },
 
-      # # gRPC server
-      # {GRPC.Server.Supervisor, endpoint: Helloworld.Endpoint, port: 50051, start_server: true}
+      # gRPC server
+      {GRPC.Server.Supervisor, endpoint: Helloworld.Endpoint, port: 50051, start_server: true}
 
     ] ++ discord_start()
 

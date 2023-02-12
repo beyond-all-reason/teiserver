@@ -62,9 +62,10 @@ defmodule Central.Application do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Central.Supervisor]
     start_result = Supervisor.start_link(children, opts)
+
     Logger.info("Central.Supervisor start result: #{Kernel.inspect start_result}")
 
-    startup_sub_functions()
+    startup_sub_functions(start_result)
 
     start_result
   end
@@ -97,7 +98,10 @@ defmodule Central.Application do
     )
   end
 
-  def startup_sub_functions do
+  def startup_sub_functions({:error, _}), do: :error
+  def startup_sub_functions(_) do
+    :timer.sleep(100)
+
     # Do migrations as part of startup
     path = Application.app_dir(:central, "priv/repo/migrations")
     Ecto.Migrator.run(Central.Repo, path, :up, all: true)
