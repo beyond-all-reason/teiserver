@@ -21,7 +21,7 @@ defmodule Teiserver.Account.TSAuthPlug do
   def live_call(%{assigns: %{current_user: current_user}} = socket, _session) do
     if User.is_restricted?(current_user.id, ["Site"]) do
       socket
-        |> Phoenix.LiveView.assign(:current_user, nil)
+        |> Phoenix.LiveView.Utils.assign(:current_user, nil)
     else
       socket
     end

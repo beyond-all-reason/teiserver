@@ -1,5 +1,6 @@
 defmodule TeiserverWeb.Components.PlayerListComponent do
   use CentralWeb, :live_component
+  import Central.Account.AuthLib, only: [allow?: 2]
 
   @impl true
   def preload(list_of_assigns) do
@@ -13,11 +14,6 @@ defmodule TeiserverWeb.Components.PlayerListComponent do
   @impl true
   def mount(socket) do
     {:ok, socket}
-  end
-
-  @impl true
-  def render(assigns) do
-    Phoenix.View.render(TeiserverWeb.Battle.LiveView, "player_list_component.html", assigns)
   end
 
   @impl true
@@ -43,6 +39,7 @@ defmodule TeiserverWeb.Components.PlayerListComponent do
       |> assign(:current_user, assigns[:current_user])
       |> assign(:teams, teams)
       |> assign(:spectators, spectators)
+      |> assign(:admin, allow?(assigns[:current_user], "teiserver.admin"))
 
     {:ok, socket}
   end

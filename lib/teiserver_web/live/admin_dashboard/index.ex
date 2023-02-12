@@ -25,7 +25,7 @@ defmodule TeiserverWeb.AdminDashLive.Index do
 
     :timer.send_interval(5_000, :tick)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}
   end
 
   @impl true

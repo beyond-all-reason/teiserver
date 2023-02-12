@@ -2,7 +2,6 @@ defmodule Teiserver.Account.ClientServer do
   use GenServer
   require Logger
   alias Teiserver.Battle.LobbyChat
-  alias Teiserver.{Account}
   alias Phoenix.PubSub
 
   @impl true

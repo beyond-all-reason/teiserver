@@ -15,8 +15,8 @@ defmodule Central.Account.DefaultsPlug do
 
   def live_call(socket, _session) do
     socket
-    |> Phoenix.LiveView.assign(:site_menu_active, [])
-    |> Phoenix.LiveView.assign(:sub_menu_active, [])
-    |> Phoenix.LiveView.assign(:section_menu_active, [])
+    |> Phoenix.LiveView.Utils.assign(:site_menu_active, [])
+    |> Phoenix.LiveView.Utils.assign(:sub_menu_active, [])
+    |> Phoenix.LiveView.Utils.assign(:section_menu_active, [])
   end
 end

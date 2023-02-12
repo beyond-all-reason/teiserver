@@ -80,6 +80,7 @@ defmodule CentralWeb do
       import Central.Helpers.NumberHelper, only: [normalize: 1, round: 2, c_round: 2, percent: 1, percent: 2]
 
       import Phoenix.LiveView
+      import Phoenix.Component
       import Phoenix.LiveView.Helpers
     end
   end
@@ -97,7 +98,7 @@ defmodule CentralWeb do
   def live_view_structure do
     quote do
       use Phoenix.LiveView,
-        layout: {CentralWeb.LayoutView, "standard_live.html"}
+        layout: {CentralWeb.LayoutView, :standard_live}
 
       use Breadcrumble
       alias Central.Account.AuthPlug

@@ -50,7 +50,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Show do
       |> assign(:moderator, moderator)
       |> assign(:admin_dev, admin_dev)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}
   end
 
   @impl true

@@ -37,7 +37,7 @@ defmodule TeiserverWeb.Battle.LobbyLive.Index do
       |> assign(:lobbies, lobbies)
       |> assign(:menu_override, Routes.ts_general_general_path(socket, :index))
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}
   end
 
   @impl true

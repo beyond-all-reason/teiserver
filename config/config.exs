@@ -95,6 +95,9 @@ config :central, Teiserver,
     battle_minimum_seconds: 120
   }
 
+config :grpc,
+  start_server: true
+
 config :logger, :console,
   format: "$date $time $metadata[$level] $message\n",
   metadata: [:request_id, :user_id]

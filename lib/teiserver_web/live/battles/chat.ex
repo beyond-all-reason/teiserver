@@ -90,14 +90,10 @@ defmodule TeiserverWeb.Battle.LobbyLive.Chat do
           |> assign(:messages, messages)
           |> assign(:user_map, %{})
           |> assign(:clients, clients)
+          |> assign(:view_colour, Teiserver.Battle.LobbyLib.colours())
           |> update_user_map
         }
     end
-  end
-
-  @impl true
-  def render(assigns) do
-    Phoenix.View.render(TeiserverWeb.Battle.LiveView, "chat.html", assigns)
   end
 
   @impl true

@@ -46,13 +46,13 @@ defmodule Central.MixProject do
   defp deps do
     [
       # Default phoenix deps
-      {:phoenix, "~> 1.6.2"},
+      {:phoenix, "~> 1.6.15"},
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_html, "~> 3.0"},
       {:phoenix_live_reload, "~> 1.3.2", only: :dev},
-      {:phoenix_live_view, "~> 0.17"},
+      {:phoenix_live_view, "~> 0.18"},
       {:floki, ">= 0.31.0", only: :test},
       {:phoenix_live_dashboard, "~> 0.6"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
@@ -96,8 +96,11 @@ defmodule Central.MixProject do
       {:horde, "~> 0.8"},
       {:etop, "~> 0.7.0"},
 
+      # {:grpc_gun, "~> 0.5.0"},
+      # {:remedy_gun, "~> 0.5.0"},
       {:grpc, "~> 0.5.0"},
-      {:gun, "~> 2.0.1", hex: :grpc_gun, override: true},
+      # {:gun, "~> 2.0.1", hex: :grpc_gun, override: true},
+      {:gun, "~> 2.0", hex: :remedy_gun, override: true},
 
       {:protobuf, "~> 0.10.0"},
       {:google_protos, "~> 0.1"},

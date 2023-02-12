@@ -63,7 +63,7 @@ defmodule TeiserverWeb.Matchmaking.QueueLive.Index do
       |> assign(:match_id, nil)
       |> assign(:is_admin, is_admin)
 
-    {:ok, socket, layout: {CentralWeb.LayoutView, "standard_live.html"}}
+    {:ok, socket, layout: {CentralWeb.LayoutView, :standard_live}}
   end
 
   @impl true

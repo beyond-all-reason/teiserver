@@ -33,6 +33,6 @@ defmodule Teiserver.ServerUserPlug do
     server_user = User.get_user_by_id(userid)
 
     socket
-    |> Phoenix.LiveView.assign(:server_user, server_user)
+    |> Phoenix.LiveView.Utils.assign(:server_user, server_user)
   end
 end

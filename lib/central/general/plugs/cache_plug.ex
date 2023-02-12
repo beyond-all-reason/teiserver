@@ -21,7 +21,7 @@ defmodule Central.General.CachePlug do
 
   def live_call(socket) do
     socket
-    |> Phoenix.LiveView.assign(:memberships, Account.list_group_memberships_cache(socket.assigns.user_id))
-    |> Phoenix.LiveView.assign(:tz, Config.get_user_config_cache(socket.assigns.user_id, "general.Timezone"))
+    |> Phoenix.LiveView.Utils.assign(:memberships, Account.list_group_memberships_cache(socket.assigns.user_id))
+    |> Phoenix.LiveView.Utils.assign(:tz, Config.get_user_config_cache(socket.assigns.user_id, "general.Timezone"))
   end
 end

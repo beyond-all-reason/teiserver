@@ -1,6 +1,5 @@
-<% bsname = view_colour() %>
-
 <%
+  bsname = @view_colour
   moderator = allow?(@current_user, "teiserver.staff.moderator")
 %>
 
@@ -105,7 +104,7 @@
         </div>
 
         <%= if @allowed_to_send do %>
-          <.form let={f} for={@message_changeset} phx-submit="send-message" class="mt-2">
+          <.form :let={f} for={@message_changeset} phx-submit="send-message" class="mt-2">
             <div class="row">
               <div class="col-md-10">
                 <%= text_input f, :content, class: "form-control", autofocus: "autofocus", autocomplete: "off" %>

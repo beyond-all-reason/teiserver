@@ -1,8 +1,4 @@
 <div>
-  <%
-    admin = allow?(@current_user, "teiserver.admin")
-  %>
-
   <div class={"card page-card"}>
     <div class="card-body">
       <%= for {team, players} <- @teams do %>
@@ -10,7 +6,7 @@
         <ul class="list-unstyled">
           <%= for p <- players do %>
             <li>
-              <%= if admin do %>
+              <%= if @admin do %>
                 <a href={Routes.ts_admin_client_show_path(@socket, :show, p.userid)}><%= p.name %></a>
               <% else %>
                 <%= p.name %>
@@ -25,7 +21,7 @@
       <ul class="list-unstyled">
         <%= for p <- @spectators do %>
           <li>
-            <%= if admin do %>
+            <%= if @admin do %>
               <a href={Routes.ts_admin_client_show_path(@socket, :show, p.userid)}><%= p.name %></a>
             <% else %>
               <%= p.name %>
