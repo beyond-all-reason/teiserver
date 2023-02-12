@@ -64,7 +64,9 @@ defmodule Teiserver.Client do
         lobby_host: false,
         queues: [],
         party_id: nil,
-        clan_tag: nil
+        clan_tag: nil,
+
+        protocol: nil
       },
       client
     )
@@ -87,8 +89,8 @@ defmodule Teiserver.Client do
     }
   end
 
-  @spec login(T.user(), String.t() | nil) :: T.client()
-  def login(user, ip \\ nil) do
+  @spec login(T.user(), atom(), String.t() | nil) :: T.client()
+  def login(user, protocol, ip \\ nil) do
     stats = Account.get_user_stat_data(user.id)
 
     clan_tag = case Clans.get_clan(user.clan_id) do
@@ -115,7 +117,8 @@ defmodule Teiserver.Client do
         awaiting_warn_ack: false,
         warned: false,
 
-        clan_tag: clan_tag
+        clan_tag: clan_tag,
+        protocol: protocol
       })
 
     ClientLib.start_client_server(client)

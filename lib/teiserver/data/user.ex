@@ -703,7 +703,7 @@ defmodule Teiserver.User do
       nil -> :error
       user ->
         {:ok, user} = do_login(user, "127.0.0.1", "Teiserver Internal Client", "IC")
-        client = Client.login(user, "127.0.0.1")
+        client = Client.login(user, :internal, "127.0.0.1")
         {:ok, user, client}
     end
   end
