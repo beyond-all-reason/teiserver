@@ -8,8 +8,12 @@ package tachyon;
 service Greeter {
   // Sends a greeting
   rpc SayHello (HelloRequest) returns (HelloReply) {}
-
   rpc SayHelloStreamReply (HelloRequest) returns (stream HelloReply) {}
+}
+
+service Account {
+  rpc GetUsersFromIds (IdList) returns (UserList) {}
+  rpc GetUsersFromIdsStreamReply (IdList) returns (stream UserList) {}
 }
 
 // The request message containing the user's name.
@@ -22,21 +26,11 @@ message HelloReply {
   string message = 1;
 }
 
-
-message UserId {
-  int32 id = 1;
+message IdList {
+  repeated int32 id_list = 1;
 }
-message LobbyId {
-  int32 id = 1;
-}
-message PartyId {
-  int32 id = 1;
-}
-message QueueId {
-  int32 id = 1;
-}
-message ClanTag {
-  string tag = 1;
+message UserList {
+  repeated User user_list = 1;
 }
 
 message Icon {
@@ -47,7 +41,7 @@ message Color {
 }
 
 message User {
-  UserId id = 1;
+  int32 id = 1;
   string name = 2;
   bool bot = 3;
   int32 clan_id = 4;
@@ -63,14 +57,14 @@ message PrivateUser {
   map<string, Icon> icons = 5;
   
   repeated string permissions = 9;
-  repeated UserId friends = 10;
-  repeated UserId friend_requests = 11;// Users requesting this user to be their friend
-  repeated UserId ignores = 12;
+  repeated int32 friends = 10;
+  repeated int32 friend_requests = 11;// Users requesting this user to be their friend
+  repeated int32 ignores = 12;
 }
 
 // This represents a user who is logged in. A user who is logged out will not have a client object.
 message Client {
-  UserId id = 1;
+  int32 id = 1;
   bool in_game = 2;
   bool away = 3;
   
@@ -83,11 +77,11 @@ message Client {
   map<string, int32> sync = 9;// key represents the item with a value between 0-100 showing the percentage downloaded
   
   string faction = 10;
-  LobbyId lobby_id = 11;
+  int32 lobby_id = 11;
   
   // Other
-  PartyId party_id = 12;
-  ClanTag clan_tag = 13;
+  int32 party_id = 12;
+  string clan_tag = 13;
   bool muted = 14;
 }
 
@@ -104,18 +98,18 @@ message StartArea {
 }
 
 message Lobby {
-  LobbyId id = 1;
+  int32 id = 1;
   string name = 2;
-  UserId founder_id = 3;
+  int32 founder_id = 3;
   bool passworded = 4;
   LobbyStatus locked = 5;
   
   string engine_name = 6;
   string engine_version = 7;
   
-  repeated UserId players = 8;
-  repeated UserId spectators = 9;
-  repeated UserId bots = 10;// Ummm, they're not userids, this is wrong
+  repeated int32 players = 8;
+  repeated int32 spectators = 9;
+  repeated int32 bots = 10;// Ummm, they're not userids, this is wrong
   
   string ip = 11;
   map<string, string> settings = 12;
@@ -126,18 +120,18 @@ message Lobby {
 }
 
 message Queue {
-  QueueId id = 1;
+  int32 id = 1;
   string name = 2;
   int32 team_size = 3;
   // conditions goes here, not sure of format
-  map<string, string> settings = 4;// Not sure we want to have queue settings sent out or not
-  repeated string map_list = 5;
+  map<string, string> settings = 5;// Not sure we want to have queue settings sent out or not
+  repeated string map_list = 6;
 }
 
 message Party {
-  PartyId id = 1;
-  UserId leader_id = 2;
-  repeated UserId members = 3;
-  repeated UserId invites = 4;
+  int32 id = 1;
+  int32 leader_id = 2;
+  repeated int32 members = 3;
+  repeated int32 invites = 4;
 }
 // protoc --elixir_out=gen_descriptors=true,plugins=grpc:. lib/teiserver/protocols/tachyon_v1/tachyonv1.proto

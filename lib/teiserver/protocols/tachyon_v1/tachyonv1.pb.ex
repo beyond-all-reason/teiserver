@@ -123,7 +123,7 @@ defmodule Tachyon.HelloReply do
   field :message, 1, type: :string
 end
 
-defmodule Tachyon.UserId do
+defmodule Tachyon.IdList do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
@@ -139,9 +139,9 @@ defmodule Tachyon.UserId do
           __unknown_fields__: [],
           default_value: nil,
           extendee: nil,
-          json_name: "id",
-          label: :LABEL_OPTIONAL,
-          name: "id",
+          json_name: "idList",
+          label: :LABEL_REPEATED,
+          name: "id_list",
           number: 1,
           oneof_index: nil,
           options: nil,
@@ -150,7 +150,7 @@ defmodule Tachyon.UserId do
           type_name: nil
         }
       ],
-      name: "UserId",
+      name: "IdList",
       nested_type: [],
       oneof_decl: [],
       options: nil,
@@ -159,10 +159,10 @@ defmodule Tachyon.UserId do
     }
   end
 
-  field :id, 1, type: :int32
+  field :id_list, 1, repeated: true, type: :int32, json_name: "idList"
 end
 
-defmodule Tachyon.LobbyId do
+defmodule Tachyon.UserList do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
@@ -178,18 +178,18 @@ defmodule Tachyon.LobbyId do
           __unknown_fields__: [],
           default_value: nil,
           extendee: nil,
-          json_name: "id",
-          label: :LABEL_OPTIONAL,
-          name: "id",
+          json_name: "userList",
+          label: :LABEL_REPEATED,
+          name: "user_list",
           number: 1,
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_INT32,
-          type_name: nil
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.User"
         }
       ],
-      name: "LobbyId",
+      name: "UserList",
       nested_type: [],
       oneof_decl: [],
       options: nil,
@@ -198,124 +198,7 @@ defmodule Tachyon.LobbyId do
     }
   end
 
-  field :id, 1, type: :int32
-end
-
-defmodule Tachyon.PartyId do
-  @moduledoc false
-  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
-
-  def descriptor do
-    # credo:disable-for-next-line
-    %Google.Protobuf.DescriptorProto{
-      __unknown_fields__: [],
-      enum_type: [],
-      extension: [],
-      extension_range: [],
-      field: [
-        %Google.Protobuf.FieldDescriptorProto{
-          __unknown_fields__: [],
-          default_value: nil,
-          extendee: nil,
-          json_name: "id",
-          label: :LABEL_OPTIONAL,
-          name: "id",
-          number: 1,
-          oneof_index: nil,
-          options: nil,
-          proto3_optional: nil,
-          type: :TYPE_INT32,
-          type_name: nil
-        }
-      ],
-      name: "PartyId",
-      nested_type: [],
-      oneof_decl: [],
-      options: nil,
-      reserved_name: [],
-      reserved_range: []
-    }
-  end
-
-  field :id, 1, type: :int32
-end
-
-defmodule Tachyon.QueueId do
-  @moduledoc false
-  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
-
-  def descriptor do
-    # credo:disable-for-next-line
-    %Google.Protobuf.DescriptorProto{
-      __unknown_fields__: [],
-      enum_type: [],
-      extension: [],
-      extension_range: [],
-      field: [
-        %Google.Protobuf.FieldDescriptorProto{
-          __unknown_fields__: [],
-          default_value: nil,
-          extendee: nil,
-          json_name: "id",
-          label: :LABEL_OPTIONAL,
-          name: "id",
-          number: 1,
-          oneof_index: nil,
-          options: nil,
-          proto3_optional: nil,
-          type: :TYPE_INT32,
-          type_name: nil
-        }
-      ],
-      name: "QueueId",
-      nested_type: [],
-      oneof_decl: [],
-      options: nil,
-      reserved_name: [],
-      reserved_range: []
-    }
-  end
-
-  field :id, 1, type: :int32
-end
-
-defmodule Tachyon.ClanTag do
-  @moduledoc false
-  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
-
-  def descriptor do
-    # credo:disable-for-next-line
-    %Google.Protobuf.DescriptorProto{
-      __unknown_fields__: [],
-      enum_type: [],
-      extension: [],
-      extension_range: [],
-      field: [
-        %Google.Protobuf.FieldDescriptorProto{
-          __unknown_fields__: [],
-          default_value: nil,
-          extendee: nil,
-          json_name: "tag",
-          label: :LABEL_OPTIONAL,
-          name: "tag",
-          number: 1,
-          oneof_index: nil,
-          options: nil,
-          proto3_optional: nil,
-          type: :TYPE_STRING,
-          type_name: nil
-        }
-      ],
-      name: "ClanTag",
-      nested_type: [],
-      oneof_decl: [],
-      options: nil,
-      reserved_name: [],
-      reserved_range: []
-    }
-  end
-
-  field :tag, 1, type: :string
+  field :user_list, 1, repeated: true, type: Tachyon.User, json_name: "userList"
 end
 
 defmodule Tachyon.Icon do
@@ -481,8 +364,8 @@ defmodule Tachyon.User do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.UserId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -601,7 +484,7 @@ defmodule Tachyon.User do
     }
   end
 
-  field :id, 1, type: Tachyon.UserId
+  field :id, 1, type: :int32
   field :name, 2, type: :string
   field :bot, 3, type: :bool
   field :clan_id, 4, type: :int32, json_name: "clanId"
@@ -777,8 +660,8 @@ defmodule Tachyon.PrivateUser do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.UserId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -791,8 +674,8 @@ defmodule Tachyon.PrivateUser do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.UserId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -805,8 +688,8 @@ defmodule Tachyon.PrivateUser do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.UserId"
+          type: :TYPE_INT32,
+          type_name: nil
         }
       ],
       name: "PrivateUser",
@@ -875,9 +758,9 @@ defmodule Tachyon.PrivateUser do
   field :clan_id, 4, type: :int32, json_name: "clanId"
   field :icons, 5, repeated: true, type: Tachyon.PrivateUser.IconsEntry, map: true
   field :permissions, 9, repeated: true, type: :string
-  field :friends, 10, repeated: true, type: Tachyon.UserId
-  field :friend_requests, 11, repeated: true, type: Tachyon.UserId, json_name: "friendRequests"
-  field :ignores, 12, repeated: true, type: Tachyon.UserId
+  field :friends, 10, repeated: true, type: :int32
+  field :friend_requests, 11, repeated: true, type: :int32, json_name: "friendRequests"
+  field :ignores, 12, repeated: true, type: :int32
 end
 
 defmodule Tachyon.Client.SyncEntry do
@@ -965,8 +848,8 @@ defmodule Tachyon.Client do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.UserId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -1105,8 +988,8 @@ defmodule Tachyon.Client do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.LobbyId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -1119,8 +1002,8 @@ defmodule Tachyon.Client do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.PartyId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -1133,8 +1016,8 @@ defmodule Tachyon.Client do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.ClanTag"
+          type: :TYPE_STRING,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -1211,7 +1094,7 @@ defmodule Tachyon.Client do
     }
   end
 
-  field :id, 1, type: Tachyon.UserId
+  field :id, 1, type: :int32
   field :in_game, 2, type: :bool, json_name: "inGame"
   field :away, 3, type: :bool
   field :ready, 4, type: :bool
@@ -1221,9 +1104,9 @@ defmodule Tachyon.Client do
   field :bonus, 8, type: :sint32
   field :sync, 9, repeated: true, type: Tachyon.Client.SyncEntry, map: true
   field :faction, 10, type: :string
-  field :lobby_id, 11, type: Tachyon.LobbyId, json_name: "lobbyId"
-  field :party_id, 12, type: Tachyon.PartyId, json_name: "partyId"
-  field :clan_tag, 13, type: Tachyon.ClanTag, json_name: "clanTag"
+  field :lobby_id, 11, type: :int32, json_name: "lobbyId"
+  field :party_id, 12, type: :int32, json_name: "partyId"
+  field :clan_tag, 13, type: :string, json_name: "clanTag"
   field :muted, 14, type: :bool
 end
 
@@ -1541,8 +1424,8 @@ defmodule Tachyon.Lobby do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.LobbyId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -1569,8 +1452,8 @@ defmodule Tachyon.Lobby do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.UserId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -1639,8 +1522,8 @@ defmodule Tachyon.Lobby do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.UserId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -1653,8 +1536,8 @@ defmodule Tachyon.Lobby do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.UserId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -1667,8 +1550,8 @@ defmodule Tachyon.Lobby do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.UserId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -1865,16 +1748,16 @@ defmodule Tachyon.Lobby do
     }
   end
 
-  field :id, 1, type: Tachyon.LobbyId
+  field :id, 1, type: :int32
   field :name, 2, type: :string
-  field :founder_id, 3, type: Tachyon.UserId, json_name: "founderId"
+  field :founder_id, 3, type: :int32, json_name: "founderId"
   field :passworded, 4, type: :bool
   field :locked, 5, type: Tachyon.LobbyStatus, enum: true
   field :engine_name, 6, type: :string, json_name: "engineName"
   field :engine_version, 7, type: :string, json_name: "engineVersion"
-  field :players, 8, repeated: true, type: Tachyon.UserId
-  field :spectators, 9, repeated: true, type: Tachyon.UserId
-  field :bots, 10, repeated: true, type: Tachyon.UserId
+  field :players, 8, repeated: true, type: :int32
+  field :spectators, 9, repeated: true, type: :int32
+  field :bots, 10, repeated: true, type: :int32
   field :ip, 11, type: :string
   field :settings, 12, repeated: true, type: Tachyon.Lobby.SettingsEntry, map: true
 
@@ -1974,8 +1857,8 @@ defmodule Tachyon.Queue do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.QueueId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -2012,7 +1895,7 @@ defmodule Tachyon.Queue do
           json_name: "settings",
           label: :LABEL_REPEATED,
           name: "settings",
-          number: 4,
+          number: 5,
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
@@ -2026,7 +1909,7 @@ defmodule Tachyon.Queue do
           json_name: "mapList",
           label: :LABEL_REPEATED,
           name: "map_list",
-          number: 5,
+          number: 6,
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
@@ -2094,11 +1977,11 @@ defmodule Tachyon.Queue do
     }
   end
 
-  field :id, 1, type: Tachyon.QueueId
+  field :id, 1, type: :int32
   field :name, 2, type: :string
   field :team_size, 3, type: :int32, json_name: "teamSize"
-  field :settings, 4, repeated: true, type: Tachyon.Queue.SettingsEntry, map: true
-  field :map_list, 5, repeated: true, type: :string, json_name: "mapList"
+  field :settings, 5, repeated: true, type: Tachyon.Queue.SettingsEntry, map: true
+  field :map_list, 6, repeated: true, type: :string, json_name: "mapList"
 end
 
 defmodule Tachyon.Party do
@@ -2124,8 +2007,8 @@ defmodule Tachyon.Party do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.PartyId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -2138,8 +2021,8 @@ defmodule Tachyon.Party do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.UserId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -2152,8 +2035,8 @@ defmodule Tachyon.Party do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.UserId"
+          type: :TYPE_INT32,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -2166,8 +2049,8 @@ defmodule Tachyon.Party do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.UserId"
+          type: :TYPE_INT32,
+          type_name: nil
         }
       ],
       name: "Party",
@@ -2179,10 +2062,10 @@ defmodule Tachyon.Party do
     }
   end
 
-  field :id, 1, type: Tachyon.PartyId
-  field :leader_id, 2, type: Tachyon.UserId, json_name: "leaderId"
-  field :members, 3, repeated: true, type: Tachyon.UserId
-  field :invites, 4, repeated: true, type: Tachyon.UserId
+  field :id, 1, type: :int32
+  field :leader_id, 2, type: :int32, json_name: "leaderId"
+  field :members, 3, repeated: true, type: :int32
+  field :invites, 4, repeated: true, type: :int32
 end
 
 defmodule Tachyon.Greeter.Service do
@@ -2238,4 +2121,59 @@ end
 defmodule Tachyon.Greeter.Stub do
   @moduledoc false
   use GRPC.Stub, service: Tachyon.Greeter.Service
+end
+
+defmodule Tachyon.Account.Service do
+  @moduledoc false
+  use GRPC.Service, name: "tachyon.Account", protoc_gen_elixir_version: "0.11.0"
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.ServiceDescriptorProto{
+      __unknown_fields__: [],
+      method: [
+        %Google.Protobuf.MethodDescriptorProto{
+          __unknown_fields__: [],
+          client_streaming: false,
+          input_type: ".tachyon.IdList",
+          name: "GetUsersFromIds",
+          options: %Google.Protobuf.MethodOptions{
+            __pb_extensions__: %{},
+            __unknown_fields__: [],
+            deprecated: false,
+            idempotency_level: :IDEMPOTENCY_UNKNOWN,
+            uninterpreted_option: []
+          },
+          output_type: ".tachyon.UserList",
+          server_streaming: false
+        },
+        %Google.Protobuf.MethodDescriptorProto{
+          __unknown_fields__: [],
+          client_streaming: false,
+          input_type: ".tachyon.IdList",
+          name: "GetUsersFromIdsStreamReply",
+          options: %Google.Protobuf.MethodOptions{
+            __pb_extensions__: %{},
+            __unknown_fields__: [],
+            deprecated: false,
+            idempotency_level: :IDEMPOTENCY_UNKNOWN,
+            uninterpreted_option: []
+          },
+          output_type: ".tachyon.UserList",
+          server_streaming: true
+        }
+      ],
+      name: "Account",
+      options: nil
+    }
+  end
+
+  rpc :GetUsersFromIds, Tachyon.IdList, Tachyon.UserList
+
+  rpc :GetUsersFromIdsStreamReply, Tachyon.IdList, stream(Tachyon.UserList)
+end
+
+defmodule Tachyon.Account.Stub do
+  @moduledoc false
+  use GRPC.Stub, service: Tachyon.Account.Service
 end
