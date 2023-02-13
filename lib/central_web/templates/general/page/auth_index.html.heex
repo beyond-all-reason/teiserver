@@ -4,25 +4,16 @@
 
 <div style="height: 15px;">&nbsp;</div>
 
+<%= if @current_user == nil do %>
 <div class="row">
-  <%= if @current_user == nil do %>
-    <%=
-      central_component "menu_card",
-      icon: "fa-solid fa-sign-in-alt",
-      text: "Sign in",
-      link: Routes.account_session_path(@conn, :new)
-    %>
-  <% end %>
-
-  <!--
-  <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
-    <a href="<%#= Routes.general_page_path(@conn, :search) %>">
-      <i class="fa-solid fa-fw fa-search fa-3x"></i><br />
-      Search
-    </a>
-  </div>
-  -->
+  <%=
+    central_component "menu_card",
+    icon: "fa-solid fa-sign-in-alt",
+    text: "Sign in",
+    link: Routes.account_session_path(@conn, :new)
+  %>
 </div>
+<% end %>
 
 &nbsp;
 
@@ -188,9 +179,9 @@
       end
     %>
 
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
+    <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
       <a href={Routes.communication_notification_path(@conn, :index)}>
-        <%= central_component "icon", icon: notification_icon, class: "fa-3x" %>
+        <%= central_component "icon", icon: notification_icon, class: "fa-4x" %>
         <%= if @user_notifications_unread_count > 0 do %>
           <div class={"badge rounded-pill bg-#{Central.Communication.NotificationLib.colours()}"}
             id="communication-notifications-badge"
@@ -204,12 +195,12 @@
       </a>
     </div>
 
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
+    <div class="col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1 menu-card">
       <form action={Routes.account_session_path(@conn, :logout)} method="post" class="link" id="signout-form">
         <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
 
         <a data-submit="parent" href="#" rel="nofollow" onclick="$('#signout-form').submit();">
-          <i class="fa-duotone fa-sign-out-alt fa-fw fa-3x"></i><br />
+          <i class="fa-duotone fa-sign-out-alt fa-fw fa-4x"></i><br />
           Sign out
         </a>
       </form>

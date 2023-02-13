@@ -301,3 +301,24 @@ $button-outline-focus-colour: $dark;
 $button-outline-active-colour: $light;
 
 $select2-border-colour: $gray-700;
+
+
+// Select 2 stuff, just for dark mode
+.select2-selection {
+  border-color: $light !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered,
+.select2-results,
+.select2-search {
+  background-color: $light;
+  color: $dark !important;
+}
+
+.select2-search__field {
+  background-color: $light;
+}
+
+.text-invert {
+  color: $invert-color;
+}
