@@ -28,6 +28,11 @@
           %>
         <% end %>
 
+        <%= central_component "top_nav_item",
+          text: "My account",
+          route: Routes.ts_account_general_path(@conn, :index),
+          active: @site_menu_active == "teiserver_account"
+        %>
 
         <%= if allow?(@current_user, "admin") do %>
           <%= central_component "top_nav_item",

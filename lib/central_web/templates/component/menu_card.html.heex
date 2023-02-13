@@ -19,14 +19,27 @@
     assigns[:style] -> assigns[:style]
     true -> ""
   end
-  
+
   extra_classes = (assigns[:class] || "")
-  col_classes = (assigns[:col_classes] || "col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1")
+
+  col_classes = case assigns[:size] do
+    :small -> "col-sm-6 col-md-4 col-lg-2 col-xl-1 col-xxl-1"
+    :medium -> "col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1"
+    :large -> "col-sm-6 col-md-6 col-lg-4 col-xl-3 col-xxl-2"
+    nil -> (assigns[:col_classes] || "col-sm-6 col-md-4 col-lg-3 col-xl-2 col-xxl-1")
+  end
+
+  icon_size = case assigns[:size] do
+    :small -> "fa-3x"
+    :medium -> "fa-4x"
+    :large -> "fa-6x"
+    nil -> (assigns[:col_classes] || "fa-4x")
+  end
 %>
 
 <div class={"#{col_classes} menu-card #{extra_classes}"}>
   <a href={assigns[:link]} class="block-link" id={"sub-menu-#{assigns[:name]}"} style={style}>
-    <i class={"fa-fw #{the_icon} fa-3x"}></i><br />
+    <i class={"fa-fw #{the_icon} #{icon_size}"}></i><br />
     <%= assigns[:text] %>
   </a>
 </div>

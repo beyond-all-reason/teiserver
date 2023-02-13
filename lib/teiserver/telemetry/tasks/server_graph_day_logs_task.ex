@@ -3,14 +3,15 @@ defmodule Teiserver.Telemetry.ServerGraphDayLogsTask do
   def perform(logs, %{"field_list" => field_list} = _params, mapper_function) do
     field_list
     |> Enum.map(fn
-    {name, path} ->
-      [name | build_line(logs, path, mapper_function)]
-    field_name ->
-      name = String.split(field_name, ".")
-      |> Enum.reverse()
-      |> hd
+      {name, path} ->
+        [name | build_line(logs, path, mapper_function)]
 
-      [name | build_line(logs, field_name, mapper_function)]
+      field_name ->
+        name = String.split(field_name, ".")
+        |> Enum.reverse()
+        |> hd
+
+        [name | build_line(logs, field_name, mapper_function)]
     end)
   end
 
