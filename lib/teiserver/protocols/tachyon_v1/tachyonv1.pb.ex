@@ -201,84 +201,6 @@ defmodule Tachyon.UserList do
   field :user_list, 1, repeated: true, type: Tachyon.User, json_name: "userList"
 end
 
-defmodule Tachyon.Icon do
-  @moduledoc false
-  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
-
-  def descriptor do
-    # credo:disable-for-next-line
-    %Google.Protobuf.DescriptorProto{
-      __unknown_fields__: [],
-      enum_type: [],
-      extension: [],
-      extension_range: [],
-      field: [
-        %Google.Protobuf.FieldDescriptorProto{
-          __unknown_fields__: [],
-          default_value: nil,
-          extendee: nil,
-          json_name: "iconName",
-          label: :LABEL_OPTIONAL,
-          name: "icon_name",
-          number: 1,
-          oneof_index: nil,
-          options: nil,
-          proto3_optional: nil,
-          type: :TYPE_STRING,
-          type_name: nil
-        }
-      ],
-      name: "Icon",
-      nested_type: [],
-      oneof_decl: [],
-      options: nil,
-      reserved_name: [],
-      reserved_range: []
-    }
-  end
-
-  field :icon_name, 1, type: :string, json_name: "iconName"
-end
-
-defmodule Tachyon.Color do
-  @moduledoc false
-  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
-
-  def descriptor do
-    # credo:disable-for-next-line
-    %Google.Protobuf.DescriptorProto{
-      __unknown_fields__: [],
-      enum_type: [],
-      extension: [],
-      extension_range: [],
-      field: [
-        %Google.Protobuf.FieldDescriptorProto{
-          __unknown_fields__: [],
-          default_value: nil,
-          extendee: nil,
-          json_name: "value",
-          label: :LABEL_OPTIONAL,
-          name: "value",
-          number: 1,
-          oneof_index: nil,
-          options: nil,
-          proto3_optional: nil,
-          type: :TYPE_STRING,
-          type_name: nil
-        }
-      ],
-      name: "Color",
-      nested_type: [],
-      oneof_decl: [],
-      options: nil,
-      reserved_name: [],
-      reserved_range: []
-    }
-  end
-
-  field :value, 1, type: :string
-end
-
 defmodule Tachyon.User.IconsEntry do
   @moduledoc false
   use Protobuf, map: true, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
@@ -316,8 +238,8 @@ defmodule Tachyon.User.IconsEntry do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.Icon"
+          type: :TYPE_STRING,
+          type_name: nil
         }
       ],
       name: "IconsEntry",
@@ -338,7 +260,7 @@ defmodule Tachyon.User.IconsEntry do
   end
 
   field :key, 1, type: :string
-  field :value, 2, type: Tachyon.Icon
+  field :value, 2, type: :string
 end
 
 defmodule Tachyon.User do
@@ -457,8 +379,8 @@ defmodule Tachyon.User do
               oneof_index: nil,
               options: nil,
               proto3_optional: nil,
-              type: :TYPE_MESSAGE,
-              type_name: ".tachyon.Icon"
+              type: :TYPE_STRING,
+              type_name: nil
             }
           ],
           name: "IconsEntry",
@@ -528,8 +450,8 @@ defmodule Tachyon.PrivateUser.IconsEntry do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.Icon"
+          type: :TYPE_STRING,
+          type_name: nil
         }
       ],
       name: "IconsEntry",
@@ -550,7 +472,7 @@ defmodule Tachyon.PrivateUser.IconsEntry do
   end
 
   field :key, 1, type: :string
-  field :value, 2, type: Tachyon.Icon
+  field :value, 2, type: :string
 end
 
 defmodule Tachyon.PrivateUser do
@@ -725,8 +647,8 @@ defmodule Tachyon.PrivateUser do
               oneof_index: nil,
               options: nil,
               proto3_optional: nil,
-              type: :TYPE_MESSAGE,
-              type_name: ".tachyon.Icon"
+              type: :TYPE_STRING,
+              type_name: nil
             }
           ],
           name: "IconsEntry",
@@ -918,8 +840,8 @@ defmodule Tachyon.Client do
           oneof_index: nil,
           options: nil,
           proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.Color"
+          type: :TYPE_STRING,
+          type_name: nil
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -1099,7 +1021,7 @@ defmodule Tachyon.Client do
   field :away, 3, type: :bool
   field :ready, 4, type: :bool
   field :player_number, 5, type: :int32, json_name: "playerNumber"
-  field :team_colour, 6, type: Tachyon.Color, json_name: "teamColour"
+  field :team_colour, 6, type: :string, json_name: "teamColour"
   field :player, 7, type: :bool
   field :bonus, 8, type: :sint32
   field :sync, 9, repeated: true, type: Tachyon.Client.SyncEntry, map: true

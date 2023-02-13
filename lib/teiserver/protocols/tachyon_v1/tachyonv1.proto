@@ -33,19 +33,12 @@ message UserList {
   repeated User user_list = 1;
 }
 
-message Icon {
-  string icon_name = 1;
-}
-message Color {
-  string value = 1;
-}
-
 message User {
   int32 id = 1;
   string name = 2;
   bool bot = 3;
   int32 clan_id = 4;
-  map<string, Icon> icons = 5;
+  map<string, string> icons = 5;
 }
 
 // Same as a user but contains privilaged information
@@ -54,7 +47,7 @@ message PrivateUser {
   string name = 2;
   bool bot = 3;
   int32 clan_id = 4;
-  map<string, Icon> icons = 5;
+  map<string, string> icons = 5;
   
   repeated string permissions = 9;
   repeated int32 friends = 10;
@@ -71,7 +64,7 @@ message Client {
   // Game lobby related attributes
   bool ready = 4;
   int32 player_number = 5;
-  Color team_colour = 6;
+  string team_colour = 6;
   bool player = 7;
   sint32 bonus = 8;
   map<string, int32> sync = 9;// key represents the item with a value between 0-100 showing the percentage downloaded

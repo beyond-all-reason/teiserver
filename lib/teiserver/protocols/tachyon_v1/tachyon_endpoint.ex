@@ -30,22 +30,19 @@ defmodule Tachyon.Account.Server do
 
   defp convert_user(user) do
     Map.merge(
-      Map.take(user, ~w(id name bot clan_id country)a),
+      Map.take(user, ~w(id name bot clan_id)a),
       %{"icons" => Teiserver.Account.UserLib.generate_user_icons(user)}
     )
   end
-
 
   defp testit do
     {:ok, channel} = GRPC.Stub.connect("localhost:8203")
     request = Tachyon.HelloRequest.new(name: "grpc-elixir")
     {:ok, reply} = channel |> Tachyon.Greeter.Stub.say_hello(request)
 
-
     {:ok, channel} = GRPC.Stub.connect("localhost:8203")
     request = Tachyon.IdList.new(id_list: [1,2,3])
     {:ok, reply} = channel |> Tachyon.Account.Stub.get_users_from_ids(request)
-
 
     {:ok, channel} = GRPC.Stub.connect("localhost:8203", interceptors: [GRPC.Logger.Client])
   end
