@@ -18,12 +18,10 @@ defmodule TeiserverWeb.Account.PreferencesController do
       conn.user_id
       |> Config.get_user_configs!()
 
-    group_configs =
-      Config.get_grouped_user_configs()
-      |> Map.get("Teiserver account")
+    config_types = Config.get_grouped_user_configs()
 
     conn
-    |> assign(:group_configs, group_configs)
+    |> assign(:config_types, config_types)
     |> assign(:config_values, config_values)
     |> render("index.html")
   end
