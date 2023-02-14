@@ -4,16 +4,14 @@ option objc_class_prefix = "Tachyon";
 
 package tachyon;
 
+// To generate the proto
+// protoc --elixir_out=gen_descriptors=true,plugins=grpc:. lib/teiserver/protocols/tachyon_v1/tachyonv1.proto
+
 // The greeting service definition.
 service Greeter {
   // Sends a greeting
   rpc SayHello (HelloRequest) returns (HelloReply) {}
   rpc SayHelloStreamReply (HelloRequest) returns (stream HelloReply) {}
-}
-
-service Account {
-  rpc GetUsersFromIds (IdList) returns (UserList) {}
-  rpc GetUsersFromIdsStreamReply (IdList) returns (stream UserList) {}
 }
 
 // The request message containing the user's name.
@@ -25,6 +23,30 @@ message HelloRequest {
 message HelloReply {
   string message = 1;
 }
+
+
+
+service Account {
+  rpc GetUsersFromIds (IdList) returns (UserList) {}
+  rpc GetUsersFromIdsStreamReply (IdList) returns (stream UserList) {}
+}
+
+// Authentication
+service Authentication {
+  rpc GetToken (TokenRequest) returns (TokenReply) {}
+}
+
+message TokenRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message TokenReply {
+  string token = 1;
+}
+
+
+
 
 message IdList {
   repeated int32 id_list = 1;
@@ -127,4 +149,3 @@ message Party {
   repeated int32 members = 3;
   repeated int32 invites = 4;
 }
-// protoc --elixir_out=gen_descriptors=true,plugins=grpc:. lib/teiserver/protocols/tachyon_v1/tachyonv1.proto
