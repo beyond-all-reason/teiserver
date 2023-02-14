@@ -18,13 +18,6 @@ config :central, Central.Config,
 config :central,
   ecto_repos: [Central.Repo]
 
-config :central, Extensions,
-  applications: [Teiserver.Application],
-  startups: [Teiserver.Startup],
-  routers: [TeiserverWeb.Router],
-  index_views: [TeiserverWeb.General.CentralView],
-  topmenu_views: [TeiserverWeb.General.CentralView]
-
 # Configures the endpoint
 config :central, CentralWeb.Endpoint,
   url: [host: "localhost"],
