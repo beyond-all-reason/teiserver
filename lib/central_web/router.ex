@@ -474,13 +474,6 @@ defmodule CentralWeb.Router do
     post("/ratings/distribution_graph", RatingController, :distribution_graph)
   end
 
-  # ts_engine_X_path
-  scope "/teiserver/engine", TeiserverWeb.Engine, as: :ts_engine do
-    pipe_through([:browser, :standard_layout, :protected])
-
-    resources("/unit", UnitController)
-  end
-
   # API
   scope "/teiserver/api", TeiserverWeb.API do
     pipe_through :api
