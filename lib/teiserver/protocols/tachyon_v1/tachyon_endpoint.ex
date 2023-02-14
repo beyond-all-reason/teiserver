@@ -21,10 +21,21 @@ defmodule Tachyon.Authentication.Server do
 
   @spec get_token(Tachyon.TokenRequest.t, GRPC.Server.Stream.t) :: Tachyon.TokenReply.t
   def get_token(%{email: email, password: password}, _stream) do
-    if email == password do
-      Tachyon.TokenReply.new(token: "token-value")
-    else
-      raise GRPC.RPCError, status: GRPC.Status.unknown, message: "error message"
+    case password do
+      "password" ->
+        Tachyon.TokenReply.new(token: "token-value")
+
+      "not_found" ->
+        raise GRPC.RPCError, status: GRPC.Status.not_found, message: "error message"
+
+      "permission_denied" ->
+        raise GRPC.RPCError, status: GRPC.Status.permission_denied, message: "error message"
+
+      "unauthenticated" ->
+        raise GRPC.RPCError, status: GRPC.Status.unauthenticated, message: "error message"
+
+      _ ->
+        raise GRPC.RPCError, status: GRPC.Status.unknown, message: "error message"
     end
   end
 end
