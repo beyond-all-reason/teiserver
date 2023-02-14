@@ -89,6 +89,13 @@
     "chobby_sysinfo_hash" => "fa-computer-classic",
     "chobby_mac_hash" => "fa-computer-classic"
   }
+
+  short_name = %{
+    "chobby_hash" => "chobby",
+    "chobby_mac_hash" => "mac",
+    "chobby_sysinfo_hash" => "sysinfo",
+    "client_app_hash" => "client",
+  }
 %>
 
 <div class="row">
@@ -102,19 +109,15 @@
           <th>Winrate</th>
           <th>Recents</th>
 
-          <th>&nbsp;</th>
-
           <%= for type <- @key_types do %>
-            <th><%= type %></th>
+            <th><%= short_name[type] || type %></th>
           <% end %>
-
-          <th>&nbsp;</th>
 
           <th>Last login</th>
           <th>Registered</th>
 
           <%= if is_admin do %>
-            <th colspan="2">&nbsp;</th>
+            <th colspan="1">&nbsp;</th>
           <% else %>
             <th>&nbsp;</th>
           <% end %>
@@ -143,15 +146,12 @@
           <td><%= @stats["win_rate.team"] %></td>
           <td><%= @stats["recent_count.team"] %></td>
 
-          <td>-</td>
-
           <%= for _type <- @key_types do %>
             <td>
               -
             </td>
           <% end %>
 
-          <td>-</td>
 
           <td>
             <%= date_to_str(((@user.data["last_login"] || 0) * 60) |> Timex.from_unix, format: :hms_or_ymd, tz: @tz) %>
@@ -166,8 +166,6 @@
               Show
             </a>
           </td>
-
-          <td>&nbsp;</td>
         </tr>
 
         <tr class="under-selected-user-row">
@@ -221,8 +219,6 @@
           <td><%= user_stats["win_rate.team"] %></td>
           <td><%= user_stats["recent_count.team"] %></td>
 
-          <td>&nbsp;</td>
-
           <%= for type <- @key_types do %>
             <td>
               <%= if Map.has_key?(@key_lookup, {type, user.id}) do %>
@@ -242,8 +238,6 @@
             </td>
           <% end %>
 
-          <td>&nbsp;</td>
-
           <td>
             <%= date_to_str(((user.data["last_login"] || 0) * 60) |> Timex.from_unix, format: :hms_or_ymd, tz: @tz) %>
           </td>
@@ -258,13 +252,13 @@
             </a>
           </td>
 
+          <%= if false and is_admin do %>
           <td>
-            <%= if false and is_admin do %>
-              <a href={Routes.ts_admin_user_path(@conn, :smurf_merge_form, user.id, @user.id)} class={"btn btn-outline-#{bsname} btn-sm"}>
-                Merge smurf
-              </a>
-            <% end %>
+            <a href={Routes.ts_admin_user_path(@conn, :smurf_merge_form, user.id, @user.id)} class={"btn btn-outline-#{bsname} btn-sm"}>
+              Merge smurf
+            </a>
           </td>
+          <% end %>
         </tr>
     <% end %>
       </tbody>
