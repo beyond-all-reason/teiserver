@@ -26,6 +26,7 @@ defmodule Teiserver.Account.PopulationReport do
     }
   end
 
+  defp registration_date_where("All time"), do: nil
   defp registration_date_where(date_string) do
     start_date = case DatePresets.parse(date_string) do
       {d, _end} -> d
@@ -34,6 +35,7 @@ defmodule Teiserver.Account.PopulationReport do
     "users.inserted_at >= '#{start_date}'"
   end
 
+  defp last_login_where("All time"), do: nil
   defp last_login_where(date_string) do
     start_date = case DatePresets.parse(date_string) do
       {d, _end} -> d
