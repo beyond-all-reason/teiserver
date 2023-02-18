@@ -1,6 +1,6 @@
 defmodule Teiserver.Battle.LobbyCache do
   alias Phoenix.PubSub
-  alias Teiserver.Coordinator
+  alias Teiserver.{Battle, Coordinator}
   import Central.Helpers.NumberHelper, only: [int_parse: 1]
   alias Teiserver.Battle.Lobby
   alias Teiserver.Data.Types, as: T
@@ -14,6 +14,11 @@ defmodule Teiserver.Battle.LobbyCache do
   @spec get_lobby_match_uuid(T.lobby_id()) :: String.t() | nil
   def get_lobby_match_uuid(lobby_id) do
     call_lobby(lobby_id, :get_match_uuid)
+  end
+
+  @spec get_lobby_match_id(T.lobby_id()) :: String.t() | nil
+  def get_lobby_match_id(lobby_id) do
+    call_lobby(lobby_id, :get_match_id)
   end
 
   @spec get_combined_lobby_state(T.lobby_id()) :: map() | nil
