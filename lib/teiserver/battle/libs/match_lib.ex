@@ -311,6 +311,11 @@ defmodule Teiserver.Battle.MatchLib do
       where: matches.inserted_at < ^timestamp
   end
 
+  def _search(query, :has_started, _) do
+    from matches in query,
+      where: not is_nil(matches.started)
+  end
+
   def _search(query, :started_after, timestamp) do
     from matches in query,
       where: matches.started >= ^timestamp
