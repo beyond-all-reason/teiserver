@@ -126,6 +126,11 @@ defmodule Teiserver.Account.UserLib do
       where: fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"")
   end
 
+  def _search(query, :mod_action, "Not banned") do
+    from users in query,
+      where: not fragment("? -> ? @> ?", users.data, "restrictions", "\"Login\"")
+  end
+
   def _search(query, :mod_action, "Muted") do
     from users in query,
       where: fragment("? -> ? @> ?", users.data, "restrictions", "\"All chat\"")
