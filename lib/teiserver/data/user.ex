@@ -773,7 +773,11 @@ defmodule Teiserver.User do
             {:error, "LobbyHash/UserID missing in login"}
 
           test_password(md5_password, user.password_hash) == false ->
-            {:error, "Invalid password"}
+            if String.contains?(username, "@") do
+              {:error, "Invalid password for username, check you are not using your email address as the name"}
+            else
+              {:error, "Invalid password"}
+            end
 
           is_restricted?(user, ["Login"]) ->
             {:error, "Banned, please see Discord for details"}
@@ -791,12 +795,12 @@ defmodule Teiserver.User do
 
           Client.get_client_by_id(user.id) != nil ->
             Client.disconnect(user.id, "Already logged in")
-            if not is_bot?(user) do
-              Central.cache_put(:teiserver_login_count, user.id, 10)
-              {:error, "Existing session, please retry in 20 seconds to clear the cache"}
-            else
+            if is_bot?(user) do
               :timer.sleep(1000)
               do_login(user, ip, lobby, lobby_hash)
+            else
+              Central.cache_put(:teiserver_login_count, user.id, 10)
+              {:error, "Existing session, please retry in 20 seconds to clear the cache"}
             end
 
           true ->
