@@ -23,7 +23,7 @@ defmodule TeiserverWeb.Admin.MatchController do
   def index(conn, params) do
     matches = Battle.list_matches(
         search: [
-
+          has_started: true
         ],
         preload: [
           :queue
@@ -47,6 +47,7 @@ defmodule TeiserverWeb.Admin.MatchController do
         user_id: Map.get(params, "account_user", "") |> get_hash_id,
         queue_id: params["queue"],
         game_type: params["game_type"],
+        has_started: true
       ],
       preload: [
         :queue

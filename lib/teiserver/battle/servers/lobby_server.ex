@@ -40,8 +40,13 @@ defmodule Teiserver.Battle.LobbyServer do
     }, new_state}
   end
 
+
   def handle_call(:get_founder_id, _from, state) do
     {:reply, state.lobby.founder_id, state}
+  end
+
+  def handle_call(:get_match_id, _from, state) do
+    {:reply, state.match_id, state}
   end
 
   def handle_call(:get_match_uuid, _from, state) do
@@ -107,6 +112,8 @@ defmodule Teiserver.Battle.LobbyServer do
     uuid = Battle.generate_lobby_uuid([state.id])
     modoptions = state.modoptions |> Map.put(key, uuid)
 
+    {:ok, new_match} = Battle.create_match_from_founder_id(state.founder_id)
+
     # Need to broadcast the new uuid
     PubSub.broadcast(
       Central.PubSub,
@@ -123,6 +130,7 @@ defmodule Teiserver.Battle.LobbyServer do
     {:noreply, %{state |
       state: :lobby,
       match_uuid: uuid,
+      match_id: new_match.id,
       modoptions: modoptions
     }}
   end
@@ -491,14 +499,18 @@ defmodule Teiserver.Battle.LobbyServer do
     :timer.send_interval(2_000, :tick)
     match_uuid = Battle.generate_lobby_uuid([id])
 
+    {:ok, match} = Battle.create_match_from_founder_id(data.lobby.founder_id)
+
     {:ok, %{
       id: id,
       lobby: data.lobby,
+      founder_id: data.lobby.founder_id,
       modoptions: %{
         "server/match/uuid" => match_uuid
       },
       server_uuid: UUID.uuid1(),
       match_uuid: match_uuid,
+      match_id: match.id,
       queue_id: nil,
 
       bots: %{},
