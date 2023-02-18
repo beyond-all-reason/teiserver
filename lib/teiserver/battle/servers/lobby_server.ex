@@ -499,6 +499,8 @@ defmodule Teiserver.Battle.LobbyServer do
     :timer.send_interval(2_000, :tick)
     match_uuid = Battle.generate_lobby_uuid([id])
 
+    Logger.metadata([request_id: "LobbyServer##{id}"])
+    Logger.warn("create_match_from_founder_id")
     {:ok, match} = Battle.create_match_from_founder_id(data.lobby.founder_id)
 
     {:ok, %{
