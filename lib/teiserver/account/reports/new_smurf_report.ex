@@ -117,7 +117,7 @@ defmodule Teiserver.Account.NewSmurfReport do
       %{
         "require_games" => "true",
         "ignore_banned" => "true",
-        "age" => "7"
+        "age" => "31"
       },
       Map.get(params, "report", %{})
     )

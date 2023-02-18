@@ -106,6 +106,9 @@ defmodule Teiserver.Bridge.BridgeServer do
       message_contains?(message, "https:") ->
         nil
 
+      message_starts_with?(message, "/") ->
+        nil
+
       User.is_restricted?(user, ["Bridging"]) ->
         # Non-bridged user, ignore it
         nil
@@ -352,6 +355,13 @@ defmodule Teiserver.Bridge.BridgeServer do
     |> Enum.any?
   end
   defp message_contains?(message, contains), do: String.contains?(message, contains)
+
+  defp message_starts_with?(messages, text) when is_list(messages) do
+    messages
+    |> Enum.filter(fn m -> String.starts_with?(m, text) end)
+    |> Enum.any?
+  end
+  defp message_starts_with?(message, text), do: String.starts_with?(message, text)
 
   @impl true
   @spec init(Map.t()) :: {:ok, Map.t()}

@@ -234,7 +234,7 @@ defmodule Teiserver.User do
         {:error, "Username already taken"}
 
       get_user_by_email(email) ->
-        {:error, "Email already attached to a user"}
+        {:error, "Email already attached to a user (#{email})"}
 
       valid_email?(email) == false ->
         {:error, "Invalid email"}
