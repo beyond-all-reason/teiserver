@@ -2,18 +2,8 @@ defmodule Teiserver.Tachyon.Endpoint do
   use GRPC.Endpoint
 
   intercept GRPC.Server.Interceptors.Logger
-  run Tachyon.Greeter.Server
   run Tachyon.Account.Server
   run Tachyon.Authentication.Server
-end
-
-defmodule Tachyon.Greeter.Server do
-  use GRPC.Server, service: Tachyon.Greeter.Service
-
-  @spec say_hello(Tachyon.HelloRequest.t, GRPC.Server.Stream.t) :: Tachyon.HelloReply.t
-  def say_hello(request, _stream) do
-    Tachyon.HelloReply.new(message: "Hello #{request.name}")
-  end
 end
 
 defmodule Tachyon.Authentication.Server do

@@ -7,25 +7,6 @@ package tachyon;
 // Ideally we'd have them imported but when we do this it doesn't seem to generate the stubs correctly
 // import "lib/teiserver/tachyon/auth.proto";
 
-// The greeting service definition.
-service Greeter {
-  // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply) {}
-  rpc SayHelloStreamReply (HelloRequest) returns (stream HelloReply) {}
-}
-
-// The request message containing the user's name.
-message HelloRequest {
-  string name = 1;
-}
-
-// The response message containing the greetings
-message HelloReply {
-  string message = 1;
-}
-
-
-
 service Account {
   rpc GetUsersFromIds (AuthdIdList) returns (UserList) {}
   rpc GetUsersFromIdsStreamReply (AuthdIdList) returns (stream UserList) {}
