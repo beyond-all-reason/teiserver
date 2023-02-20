@@ -2,6 +2,8 @@ syntax = "proto3";
 
 option objc_class_prefix = "Tachyon";
 
+import "google/protobuf/any.proto";
+
 package tachyon;
 
 // Ideally we'd have them imported but when we do this it doesn't seem to generate the stubs correctly
@@ -17,6 +19,20 @@ service Authentication {
   rpc GetToken (TokenRequest) returns (TokenReply) {}
 }
 
+message WireMessageAny {
+  google.protobuf.Any object = 1;
+  int32 id = 2;
+}
+
+message WireMessageOneof {
+  int32 id = 1;
+  oneof object {
+    TokenReply token_reply = 2;
+    TokenReplyA token_reply_a = 3;
+    TokenReplyB token_reply_b = 4;
+  }
+}
+
 
 message TokenRequest {
   string email = 1;
@@ -25,6 +41,14 @@ message TokenRequest {
 
 message TokenReply {
   string token = 1;
+}
+
+message TokenReplyA {
+  string tokena = 1;
+}
+
+message TokenReplyB {
+  string tokenb = 1;
 }
 
 message AuthdIdList {

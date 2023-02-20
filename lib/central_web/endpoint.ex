@@ -15,6 +15,11 @@ defmodule CentralWeb.Endpoint do
     longpoll: false
   )
 
+  socket("/tachyon", Tachyon.TachyonSocket,
+    websocket: true,
+    longpoll: false
+  )
+
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phx.digest

@@ -1,3 +1,149 @@
+defmodule Tachyon.WireMessageAny do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      __unknown_fields__: [],
+      enum_type: [],
+      extension: [],
+      extension_range: [],
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          __unknown_fields__: [],
+          default_value: nil,
+          extendee: nil,
+          json_name: "object",
+          label: :LABEL_OPTIONAL,
+          name: "object",
+          number: 1,
+          oneof_index: nil,
+          options: nil,
+          proto3_optional: nil,
+          type: :TYPE_MESSAGE,
+          type_name: ".google.protobuf.Any"
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          __unknown_fields__: [],
+          default_value: nil,
+          extendee: nil,
+          json_name: "id",
+          label: :LABEL_OPTIONAL,
+          name: "id",
+          number: 2,
+          oneof_index: nil,
+          options: nil,
+          proto3_optional: nil,
+          type: :TYPE_INT32,
+          type_name: nil
+        }
+      ],
+      name: "WireMessageAny",
+      nested_type: [],
+      oneof_decl: [],
+      options: nil,
+      reserved_name: [],
+      reserved_range: []
+    }
+  end
+
+  field :object, 1, type: Google.Protobuf.Any
+  field :id, 2, type: :int32
+end
+
+defmodule Tachyon.WireMessageOneof do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      __unknown_fields__: [],
+      enum_type: [],
+      extension: [],
+      extension_range: [],
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          __unknown_fields__: [],
+          default_value: nil,
+          extendee: nil,
+          json_name: "id",
+          label: :LABEL_OPTIONAL,
+          name: "id",
+          number: 1,
+          oneof_index: nil,
+          options: nil,
+          proto3_optional: nil,
+          type: :TYPE_INT32,
+          type_name: nil
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          __unknown_fields__: [],
+          default_value: nil,
+          extendee: nil,
+          json_name: "tokenReply",
+          label: :LABEL_OPTIONAL,
+          name: "token_reply",
+          number: 2,
+          oneof_index: 0,
+          options: nil,
+          proto3_optional: nil,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.TokenReply"
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          __unknown_fields__: [],
+          default_value: nil,
+          extendee: nil,
+          json_name: "tokenReplyA",
+          label: :LABEL_OPTIONAL,
+          name: "token_reply_a",
+          number: 3,
+          oneof_index: 0,
+          options: nil,
+          proto3_optional: nil,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.TokenReplyA"
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          __unknown_fields__: [],
+          default_value: nil,
+          extendee: nil,
+          json_name: "tokenReplyB",
+          label: :LABEL_OPTIONAL,
+          name: "token_reply_b",
+          number: 4,
+          oneof_index: 0,
+          options: nil,
+          proto3_optional: nil,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.TokenReplyB"
+        }
+      ],
+      name: "WireMessageOneof",
+      nested_type: [],
+      oneof_decl: [
+        %Google.Protobuf.OneofDescriptorProto{
+          __unknown_fields__: [],
+          name: "object",
+          options: nil
+        }
+      ],
+      options: nil,
+      reserved_name: [],
+      reserved_range: []
+    }
+  end
+
+  oneof :object, 0
+
+  field :id, 1, type: :int32
+  field :token_reply, 2, type: Tachyon.TokenReply, json_name: "tokenReply", oneof: 0
+  field :token_reply_a, 3, type: Tachyon.TokenReplyA, json_name: "tokenReplyA", oneof: 0
+  field :token_reply_b, 4, type: Tachyon.TokenReplyB, json_name: "tokenReplyB", oneof: 0
+end
+
 defmodule Tachyon.TokenRequest do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
@@ -89,6 +235,84 @@ defmodule Tachyon.TokenReply do
   end
 
   field :token, 1, type: :string
+end
+
+defmodule Tachyon.TokenReplyA do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      __unknown_fields__: [],
+      enum_type: [],
+      extension: [],
+      extension_range: [],
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          __unknown_fields__: [],
+          default_value: nil,
+          extendee: nil,
+          json_name: "tokena",
+          label: :LABEL_OPTIONAL,
+          name: "tokena",
+          number: 1,
+          oneof_index: nil,
+          options: nil,
+          proto3_optional: nil,
+          type: :TYPE_STRING,
+          type_name: nil
+        }
+      ],
+      name: "TokenReplyA",
+      nested_type: [],
+      oneof_decl: [],
+      options: nil,
+      reserved_name: [],
+      reserved_range: []
+    }
+  end
+
+  field :tokena, 1, type: :string
+end
+
+defmodule Tachyon.TokenReplyB do
+  @moduledoc false
+  use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
+
+  def descriptor do
+    # credo:disable-for-next-line
+    %Google.Protobuf.DescriptorProto{
+      __unknown_fields__: [],
+      enum_type: [],
+      extension: [],
+      extension_range: [],
+      field: [
+        %Google.Protobuf.FieldDescriptorProto{
+          __unknown_fields__: [],
+          default_value: nil,
+          extendee: nil,
+          json_name: "tokenb",
+          label: :LABEL_OPTIONAL,
+          name: "tokenb",
+          number: 1,
+          oneof_index: nil,
+          options: nil,
+          proto3_optional: nil,
+          type: :TYPE_STRING,
+          type_name: nil
+        }
+      ],
+      name: "TokenReplyB",
+      nested_type: [],
+      oneof_decl: [],
+      options: nil,
+      reserved_name: [],
+      reserved_range: []
+    }
+  end
+
+  field :tokenb, 1, type: :string
 end
 
 defmodule Tachyon.AuthdIdList do
