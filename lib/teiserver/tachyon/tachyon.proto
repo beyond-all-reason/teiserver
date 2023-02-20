@@ -2,34 +2,32 @@ syntax = "proto3";
 
 option objc_class_prefix = "Tachyon";
 
-import "google/protobuf/any.proto";
-
 package tachyon;
 
 // Ideally we'd have them imported but when we do this it doesn't seem to generate the stubs correctly
 // import "lib/teiserver/tachyon/auth.proto";
 
-service Account {
-  rpc GetUsersFromIds (AuthdIdList) returns (UserList) {}
-  rpc GetUsersFromIdsStreamReply (AuthdIdList) returns (stream UserList) {}
-}
-
 // Authentication
 service Authentication {
   rpc GetToken (TokenRequest) returns (TokenReply) {}
+  rpc Login (LoginRequest) returns (LoginReply) {}
 }
 
-message WireMessageAny {
-  google.protobuf.Any object = 1;
-  int32 id = 2;
-}
-
-message WireMessageOneof {
+message ClientMessage {
   int32 id = 1;
   oneof object {
-    TokenReply token_reply = 2;
-    TokenReplyA token_reply_a = 3;
-    TokenReplyB token_reply_b = 4;
+    // Auth
+    TokenRequest token_request = 100;
+    LoginRequest login_request = 101;
+  }
+}
+
+message ServerMessage {
+  int32 id = 1;
+  oneof object {
+    // Auth
+    TokenReply token_reply = 100;
+    LoginReply login_reply = 101;
   }
 }
 
@@ -43,13 +41,21 @@ message TokenReply {
   string token = 1;
 }
 
-message TokenReplyA {
-  string tokena = 1;
+message LoginRequest {
+  string token = 1;
+  string app_name = 2;
+  string app_version = 3;
+  string app_hash = 4;
 }
 
-message TokenReplyB {
-  string tokenb = 1;
+message LoginReply {
+  oneof result {
+    User user = 1;
+    Failure failure = 2;
+  }
 }
+
+
 
 message AuthdIdList {
   string token = 1;
@@ -66,6 +72,11 @@ message User {
   bool bot = 3;
   int32 clan_id = 4;
   map<string, string> icons = 5;
+}
+
+message Failure {
+  string action = 1;
+  string reason = 2;
 }
 
 // // Same as a user but contains privilaged information

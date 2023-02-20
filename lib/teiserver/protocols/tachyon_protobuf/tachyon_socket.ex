@@ -23,31 +23,18 @@ defmodule Tachyon.TachyonSocket do
     IO.inspect opts
     IO.puts ""
 
-    token = Tachyon.TokenReply.new(token: "token")
-    Tachyon.WireMessageAny.new(object: token) |> Tachyon.WireMessageAny.encode() |> Tachyon.WireMessageAny.decode()
+    token_request = Tachyon.TokenRequest.new(email: "email", password: "password")
+    # token_request |> Tachyon.TokenRequest.encode()
+    # <<10, 5, 101, 109, 97, 105, 108, 18, 8, 112, 97, 115, 115, 119, 111, 114, 100>>
 
-    Tachyon.WireMessageOneof.new(object: {:token_reply, token}) |> Tachyon.WireMessageOneof.encode() |> Tachyon.WireMessageOneof.decode()
+    msg = Tachyon.ClientMessage.new(object: {:token_request, token_request})
+    enc_msg = Tachyon.ClientMessage.encode(msg)
+
+    # Now decode it
+    msg = Tachyon.ClientMessage.decode(enc_msg)
 
 
 
-    tokena = Tachyon.TokenReplyA.new(tokena: "token")
-    tokenb = Tachyon.TokenReplyB.new(tokenb: "token")
-
-    encoded_tokena = Tachyon.TokenReplyA.new(tokena: "token") |> Tachyon.TokenReplyA.encode()
-
-    Tachyon.WireMessageAny.new(object: tokena) |> Tachyon.WireMessageAny.encode() |> Tachyon.WireMessageAny.decode()
-    Tachyon.WireMessageAny.new(object: encoded_tokena) |> Tachyon.WireMessageAny.encode() |> Tachyon.WireMessageAny.decode()
-
-    Tachyon.WireMessageOneof.new(object: tokena) |> Tachyon.WireMessageOneof.encode() |> Tachyon.WireMessageOneof.decode()
-
-    tokena = Tachyon.TokenReplyA.new(tokena: "token")
-    tokenb = Tachyon.TokenReplyB.new(tokenb: "token")
-
-    Tachyon.WireMessage.new(object: tokena) |> Tachyon.WireMessage.encode() |> Tachyon.WireMessage.decode()
-    Tachyon.WireMessage.new(object: tokenb) |> Tachyon.WireMessage.encode()
-
-    Tachyon.TokenReplyA.new(tokena: "token") |> Tachyon.TokenReplyA.encode()
-    Tachyon.TokenReplyB.new(tokenb: "token") |> Tachyon.TokenReplyB.encode()
 
     {:reply, :ok, {:text, text}, state}
   end
