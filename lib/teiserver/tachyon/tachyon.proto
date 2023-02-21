@@ -13,25 +13,52 @@ service Authentication {
   rpc Login (LoginRequest) returns (LoginReply) {}
 }
 
-message ClientMessage {
-  int32 id = 1;
+// WS encoding messages
+message ClientMessageOneof {
+  int64 id = 1;
   oneof object {
     // Auth
     TokenRequest token_request = 100;
     LoginRequest login_request = 101;
+    VerifyRequest verify_request = 102;
+    RegistrationReply registration_request = 103;
+    AccountMigrationRequest account_migration_request = 104;
+    
+    DisconnectRequest disconnect_request = 120;
   }
 }
 
-message ServerMessage {
-  int32 id = 1;
+message ClientMessageAny {
+  int64 id = 1;
+  string type = 2;
+  bytes object = 3;
+}
+
+message ServerMessageOneof {
+  int64 id = 1;
   oneof object {
     // Auth
     TokenReply token_reply = 100;
     LoginReply login_reply = 101;
+    VerifyReply verify_reply = 102;
+    RegistrationReply registration_reply = 103;
+    AccountMigrationReply account_migration_reply = 104;
   }
 }
 
+message ServerMessageAny {
+  int64 id = 1;
+  string type = 2;
+  bytes object = 3;
+}
 
+// Generic response messages
+message Failure {
+  string action = 1;
+  string reason = 2;
+}
+
+// Authentication messages
 message TokenRequest {
   string email = 1;
   string password = 2;
@@ -55,15 +82,46 @@ message LoginReply {
   }
 }
 
-
-
-message AuthdIdList {
+message VerifyRequest {
   string token = 1;
-  repeated int32 id_list = 2;
+  string code = 2;
 }
 
-message UserList {
-  repeated User user_list = 1;
+message VerifyReply {
+  oneof result {
+    User user = 1;
+    Failure failure = 2;
+  }
+}
+
+message DisconnectRequest {
+  string reason = 1;
+}
+
+message RegistrationRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message RegistrationReply {
+  oneof result {
+    string token = 1;
+    Failure failure = 2;
+  }
+}
+
+message AccountMigrationRequest {
+  string username = 1;
+  string password = 2;
+  string desired_email = 3;
+}
+
+message AccountMigrationReply {
+  oneof result {
+    string token = 1;
+    Failure failure = 2;
+  }
 }
 
 message User {
@@ -74,10 +132,6 @@ message User {
   map<string, string> icons = 5;
 }
 
-message Failure {
-  string action = 1;
-  string reason = 2;
-}
 
 // // Same as a user but contains privilaged information
 // message PrivateUser {
