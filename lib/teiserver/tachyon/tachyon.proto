@@ -7,10 +7,21 @@ package tachyon;
 // Ideally we'd have them imported but when we do this it doesn't seem to generate the stubs correctly
 // import "lib/teiserver/tachyon/auth.proto";
 
+// This is what's actually used in the websocket
+service ClientMessaging {
+  rpc MessageOneof (ClientMessageOneof) returns (ServerMessageOneof) {}
+  rpc MessageAny (ClientMessageAny) returns (ServerMessageAny) {}
+}
+
+// These are not used directly but are wrapped in the websocket
 // Authentication
 service Authentication {
   rpc GetToken (TokenRequest) returns (TokenReply) {}
   rpc Login (LoginRequest) returns (LoginReply) {}
+  rpc Verify (VerifyRequest) returns (VerifyReply) {}
+  rpc Registration (RegistrationReply) returns (RegistrationReply) {}
+  rpc AccountMigration (AccountMigrationRequest) returns (AccountMigrationReply) {}
+  rpc Disconnect (DisconnectRequest) returns (None) {}
 }
 
 // WS encoding messages
@@ -57,6 +68,8 @@ message Failure {
   string action = 1;
   string reason = 2;
 }
+
+message None {}
 
 // Authentication messages
 message TokenRequest {
