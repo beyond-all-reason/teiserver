@@ -96,13 +96,7 @@ defmodule Central.MixProject do
       {:horde, "~> 0.8"},
       {:etop, "~> 0.7.0"},
 
-      # {:grpc_gun, "~> 0.5.0"},
-      # {:remedy_gun, "~> 0.5.0"},
-      # {:grpc, "~> 0.5.0"},
-      {:grpc, git:  "https://github.com/elixir-grpc/grpc"},
-
-      # {:gun, "~> 2.0.1", hex: :grpc_gun, override: true},
-      {:gun, "~> 2.0", hex: :remedy_gun, override: true},
+      {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
 
       {:protobuf, "~> 0.10.0"},
       {:google_protos, "~> 0.1"},
@@ -113,7 +107,9 @@ defmodule Central.MixProject do
       # If you only want to connect to discord in prod, use this
       {:nostrum, "~> 0.6", runtime: Mix.env() == :prod},
 
-      {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true}
+      # These were used as part of the grpc experiment
+      # {:grpc, git:  "https://github.com/elixir-grpc/grpc"},
+      # {:gun, "~> 2.0", hex: :remedy_gun, override: true},
     ]
   end
 

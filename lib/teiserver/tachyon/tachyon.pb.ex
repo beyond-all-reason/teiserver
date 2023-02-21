@@ -78,7 +78,7 @@ defmodule Tachyon.ClientMessage do
           options: nil,
           proto3_optional: nil,
           type: :TYPE_MESSAGE,
-          type_name: ".tachyon.RegistrationReply"
+          type_name: ".tachyon.RegistrationResponse"
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
@@ -132,7 +132,7 @@ defmodule Tachyon.ClientMessage do
   field :verify_request, 102, type: Tachyon.VerifyRequest, json_name: "verifyRequest", oneof: 0
 
   field :registration_request, 103,
-    type: Tachyon.RegistrationReply,
+    type: Tachyon.RegistrationResponse,
     json_name: "registrationRequest",
     oneof: 0
 
@@ -177,71 +177,99 @@ defmodule Tachyon.ServerMessage do
           __unknown_fields__: [],
           default_value: nil,
           extendee: nil,
-          json_name: "tokenReply",
+          json_name: "empty",
           label: :LABEL_OPTIONAL,
-          name: "token_reply",
+          name: "empty",
+          number: 80,
+          oneof_index: 0,
+          options: nil,
+          proto3_optional: nil,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.Empty"
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          __unknown_fields__: [],
+          default_value: nil,
+          extendee: nil,
+          json_name: "failure",
+          label: :LABEL_OPTIONAL,
+          name: "failure",
+          number: 81,
+          oneof_index: 0,
+          options: nil,
+          proto3_optional: nil,
+          type: :TYPE_MESSAGE,
+          type_name: ".tachyon.Failure"
+        },
+        %Google.Protobuf.FieldDescriptorProto{
+          __unknown_fields__: [],
+          default_value: nil,
+          extendee: nil,
+          json_name: "tokenResponse",
+          label: :LABEL_OPTIONAL,
+          name: "token_response",
           number: 100,
           oneof_index: 0,
           options: nil,
           proto3_optional: nil,
           type: :TYPE_MESSAGE,
-          type_name: ".tachyon.TokenReply"
+          type_name: ".tachyon.TokenResponse"
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
           default_value: nil,
           extendee: nil,
-          json_name: "loginReply",
+          json_name: "loginResponse",
           label: :LABEL_OPTIONAL,
-          name: "login_reply",
+          name: "login_response",
           number: 101,
           oneof_index: 0,
           options: nil,
           proto3_optional: nil,
           type: :TYPE_MESSAGE,
-          type_name: ".tachyon.LoginReply"
+          type_name: ".tachyon.LoginResponse"
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
           default_value: nil,
           extendee: nil,
-          json_name: "verifyReply",
+          json_name: "verifyResponse",
           label: :LABEL_OPTIONAL,
-          name: "verify_reply",
+          name: "verify_response",
           number: 102,
           oneof_index: 0,
           options: nil,
           proto3_optional: nil,
           type: :TYPE_MESSAGE,
-          type_name: ".tachyon.VerifyReply"
+          type_name: ".tachyon.VerifyResponse"
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
           default_value: nil,
           extendee: nil,
-          json_name: "registrationReply",
+          json_name: "registrationResponse",
           label: :LABEL_OPTIONAL,
-          name: "registration_reply",
+          name: "registration_response",
           number: 103,
           oneof_index: 0,
           options: nil,
           proto3_optional: nil,
           type: :TYPE_MESSAGE,
-          type_name: ".tachyon.RegistrationReply"
+          type_name: ".tachyon.RegistrationResponse"
         },
         %Google.Protobuf.FieldDescriptorProto{
           __unknown_fields__: [],
           default_value: nil,
           extendee: nil,
-          json_name: "accountMigrationReply",
+          json_name: "accountMigrationResponse",
           label: :LABEL_OPTIONAL,
-          name: "account_migration_reply",
+          name: "account_migration_response",
           number: 104,
           oneof_index: 0,
           options: nil,
           proto3_optional: nil,
           type: :TYPE_MESSAGE,
-          type_name: ".tachyon.AccountMigrationReply"
+          type_name: ".tachyon.AccountMigrationResponse"
         }
       ],
       name: "ServerMessage",
@@ -262,18 +290,20 @@ defmodule Tachyon.ServerMessage do
   oneof :object, 0
 
   field :id, 1, type: :int64
-  field :token_reply, 100, type: Tachyon.TokenReply, json_name: "tokenReply", oneof: 0
-  field :login_reply, 101, type: Tachyon.LoginReply, json_name: "loginReply", oneof: 0
-  field :verify_reply, 102, type: Tachyon.VerifyReply, json_name: "verifyReply", oneof: 0
+  field :empty, 80, type: Tachyon.Empty, oneof: 0
+  field :failure, 81, type: Tachyon.Failure, oneof: 0
+  field :token_response, 100, type: Tachyon.TokenResponse, json_name: "tokenResponse", oneof: 0
+  field :login_response, 101, type: Tachyon.LoginResponse, json_name: "loginResponse", oneof: 0
+  field :verify_response, 102, type: Tachyon.VerifyResponse, json_name: "verifyResponse", oneof: 0
 
-  field :registration_reply, 103,
-    type: Tachyon.RegistrationReply,
-    json_name: "registrationReply",
+  field :registration_response, 103,
+    type: Tachyon.RegistrationResponse,
+    json_name: "registrationResponse",
     oneof: 0
 
-  field :account_migration_reply, 104,
-    type: Tachyon.AccountMigrationReply,
-    json_name: "accountMigrationReply",
+  field :account_migration_response, 104,
+    type: Tachyon.AccountMigrationResponse,
+    json_name: "accountMigrationResponse",
     oneof: 0
 end
 
@@ -407,7 +437,7 @@ defmodule Tachyon.TokenRequest do
   field :password, 2, type: :string
 end
 
-defmodule Tachyon.TokenReply do
+defmodule Tachyon.TokenResponse do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
@@ -434,7 +464,7 @@ defmodule Tachyon.TokenReply do
           type_name: nil
         }
       ],
-      name: "TokenReply",
+      name: "TokenResponse",
       nested_type: [],
       oneof_decl: [],
       options: nil,
@@ -530,7 +560,7 @@ defmodule Tachyon.LoginRequest do
   field :app_hash, 4, type: :string, json_name: "appHash"
 end
 
-defmodule Tachyon.LoginReply do
+defmodule Tachyon.LoginResponse do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
@@ -550,46 +580,23 @@ defmodule Tachyon.LoginReply do
           label: :LABEL_OPTIONAL,
           name: "user",
           number: 1,
-          oneof_index: 0,
+          oneof_index: nil,
           options: nil,
           proto3_optional: nil,
           type: :TYPE_MESSAGE,
           type_name: ".tachyon.User"
-        },
-        %Google.Protobuf.FieldDescriptorProto{
-          __unknown_fields__: [],
-          default_value: nil,
-          extendee: nil,
-          json_name: "failure",
-          label: :LABEL_OPTIONAL,
-          name: "failure",
-          number: 2,
-          oneof_index: 0,
-          options: nil,
-          proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.Failure"
         }
       ],
-      name: "LoginReply",
+      name: "LoginResponse",
       nested_type: [],
-      oneof_decl: [
-        %Google.Protobuf.OneofDescriptorProto{
-          __unknown_fields__: [],
-          name: "result",
-          options: nil
-        }
-      ],
+      oneof_decl: [],
       options: nil,
       reserved_name: [],
       reserved_range: []
     }
   end
 
-  oneof :result, 0
-
-  field :user, 1, type: Tachyon.User, oneof: 0
-  field :failure, 2, type: Tachyon.Failure, oneof: 0
+  field :user, 1, type: Tachyon.User
 end
 
 defmodule Tachyon.VerifyRequest do
@@ -646,7 +653,7 @@ defmodule Tachyon.VerifyRequest do
   field :code, 2, type: :string
 end
 
-defmodule Tachyon.VerifyReply do
+defmodule Tachyon.VerifyResponse do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
@@ -666,46 +673,23 @@ defmodule Tachyon.VerifyReply do
           label: :LABEL_OPTIONAL,
           name: "user",
           number: 1,
-          oneof_index: 0,
+          oneof_index: nil,
           options: nil,
           proto3_optional: nil,
           type: :TYPE_MESSAGE,
           type_name: ".tachyon.User"
-        },
-        %Google.Protobuf.FieldDescriptorProto{
-          __unknown_fields__: [],
-          default_value: nil,
-          extendee: nil,
-          json_name: "failure",
-          label: :LABEL_OPTIONAL,
-          name: "failure",
-          number: 2,
-          oneof_index: 0,
-          options: nil,
-          proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.Failure"
         }
       ],
-      name: "VerifyReply",
+      name: "VerifyResponse",
       nested_type: [],
-      oneof_decl: [
-        %Google.Protobuf.OneofDescriptorProto{
-          __unknown_fields__: [],
-          name: "result",
-          options: nil
-        }
-      ],
+      oneof_decl: [],
       options: nil,
       reserved_name: [],
       reserved_range: []
     }
   end
 
-  oneof :result, 0
-
-  field :user, 1, type: Tachyon.User, oneof: 0
-  field :failure, 2, type: Tachyon.Failure, oneof: 0
+  field :user, 1, type: Tachyon.User
 end
 
 defmodule Tachyon.DisconnectRequest do
@@ -816,7 +800,7 @@ defmodule Tachyon.RegistrationRequest do
   field :password, 3, type: :string
 end
 
-defmodule Tachyon.RegistrationReply do
+defmodule Tachyon.RegistrationResponse do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
@@ -836,46 +820,23 @@ defmodule Tachyon.RegistrationReply do
           label: :LABEL_OPTIONAL,
           name: "token",
           number: 1,
-          oneof_index: 0,
+          oneof_index: nil,
           options: nil,
           proto3_optional: nil,
           type: :TYPE_STRING,
           type_name: nil
-        },
-        %Google.Protobuf.FieldDescriptorProto{
-          __unknown_fields__: [],
-          default_value: nil,
-          extendee: nil,
-          json_name: "failure",
-          label: :LABEL_OPTIONAL,
-          name: "failure",
-          number: 2,
-          oneof_index: 0,
-          options: nil,
-          proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.Failure"
         }
       ],
-      name: "RegistrationReply",
+      name: "RegistrationResponse",
       nested_type: [],
-      oneof_decl: [
-        %Google.Protobuf.OneofDescriptorProto{
-          __unknown_fields__: [],
-          name: "result",
-          options: nil
-        }
-      ],
+      oneof_decl: [],
       options: nil,
       reserved_name: [],
       reserved_range: []
     }
   end
 
-  oneof :result, 0
-
-  field :token, 1, type: :string, oneof: 0
-  field :failure, 2, type: Tachyon.Failure, oneof: 0
+  field :token, 1, type: :string
 end
 
 defmodule Tachyon.AccountMigrationRequest do
@@ -947,7 +908,7 @@ defmodule Tachyon.AccountMigrationRequest do
   field :desired_email, 3, type: :string, json_name: "desiredEmail"
 end
 
-defmodule Tachyon.AccountMigrationReply do
+defmodule Tachyon.AccountMigrationResponse do
   @moduledoc false
   use Protobuf, protoc_gen_elixir_version: "0.11.0", syntax: :proto3
 
@@ -967,46 +928,23 @@ defmodule Tachyon.AccountMigrationReply do
           label: :LABEL_OPTIONAL,
           name: "token",
           number: 1,
-          oneof_index: 0,
+          oneof_index: nil,
           options: nil,
           proto3_optional: nil,
           type: :TYPE_STRING,
           type_name: nil
-        },
-        %Google.Protobuf.FieldDescriptorProto{
-          __unknown_fields__: [],
-          default_value: nil,
-          extendee: nil,
-          json_name: "failure",
-          label: :LABEL_OPTIONAL,
-          name: "failure",
-          number: 2,
-          oneof_index: 0,
-          options: nil,
-          proto3_optional: nil,
-          type: :TYPE_MESSAGE,
-          type_name: ".tachyon.Failure"
         }
       ],
-      name: "AccountMigrationReply",
+      name: "AccountMigrationResponse",
       nested_type: [],
-      oneof_decl: [
-        %Google.Protobuf.OneofDescriptorProto{
-          __unknown_fields__: [],
-          name: "result",
-          options: nil
-        }
-      ],
+      oneof_decl: [],
       options: nil,
       reserved_name: [],
       reserved_range: []
     }
   end
 
-  oneof :result, 0
-
-  field :token, 1, type: :string, oneof: 0
-  field :failure, 2, type: Tachyon.Failure, oneof: 0
+  field :token, 1, type: :string
 end
 
 defmodule Tachyon.User.IconsEntry do
@@ -1219,182 +1157,4 @@ defmodule Tachyon.User do
   field :bot, 3, type: :bool
   field :clan_id, 4, type: :int32, json_name: "clanId"
   field :icons, 5, repeated: true, type: Tachyon.User.IconsEntry, map: true
-end
-
-defmodule Tachyon.WsMessaging.Service do
-  @moduledoc false
-  use GRPC.Service, name: "tachyon.WsMessaging", protoc_gen_elixir_version: "0.11.0"
-
-  def descriptor do
-    # credo:disable-for-next-line
-    %Google.Protobuf.ServiceDescriptorProto{
-      __unknown_fields__: [],
-      method: [
-        %Google.Protobuf.MethodDescriptorProto{
-          __unknown_fields__: [],
-          client_streaming: false,
-          input_type: ".tachyon.ClientMessage",
-          name: "Client",
-          options: %Google.Protobuf.MethodOptions{
-            __pb_extensions__: %{},
-            __unknown_fields__: [],
-            deprecated: false,
-            idempotency_level: :IDEMPOTENCY_UNKNOWN,
-            uninterpreted_option: []
-          },
-          output_type: ".tachyon.ServerMessage",
-          server_streaming: false
-        },
-        %Google.Protobuf.MethodDescriptorProto{
-          __unknown_fields__: [],
-          client_streaming: false,
-          input_type: ".tachyon.ServerMessage",
-          name: "Server",
-          options: %Google.Protobuf.MethodOptions{
-            __pb_extensions__: %{},
-            __unknown_fields__: [],
-            deprecated: false,
-            idempotency_level: :IDEMPOTENCY_UNKNOWN,
-            uninterpreted_option: []
-          },
-          output_type: ".tachyon.ClientMessage",
-          server_streaming: false
-        }
-      ],
-      name: "WsMessaging",
-      options: nil
-    }
-  end
-
-  rpc :Client, Tachyon.ClientMessage, Tachyon.ServerMessage
-
-  rpc :Server, Tachyon.ServerMessage, Tachyon.ClientMessage
-end
-
-defmodule Tachyon.WsMessaging.Stub do
-  @moduledoc false
-  use GRPC.Stub, service: Tachyon.WsMessaging.Service
-end
-
-defmodule Tachyon.Authentication.Service do
-  @moduledoc false
-  use GRPC.Service, name: "tachyon.Authentication", protoc_gen_elixir_version: "0.11.0"
-
-  def descriptor do
-    # credo:disable-for-next-line
-    %Google.Protobuf.ServiceDescriptorProto{
-      __unknown_fields__: [],
-      method: [
-        %Google.Protobuf.MethodDescriptorProto{
-          __unknown_fields__: [],
-          client_streaming: false,
-          input_type: ".tachyon.TokenRequest",
-          name: "GetToken",
-          options: %Google.Protobuf.MethodOptions{
-            __pb_extensions__: %{},
-            __unknown_fields__: [],
-            deprecated: false,
-            idempotency_level: :IDEMPOTENCY_UNKNOWN,
-            uninterpreted_option: []
-          },
-          output_type: ".tachyon.TokenReply",
-          server_streaming: false
-        },
-        %Google.Protobuf.MethodDescriptorProto{
-          __unknown_fields__: [],
-          client_streaming: false,
-          input_type: ".tachyon.LoginRequest",
-          name: "Login",
-          options: %Google.Protobuf.MethodOptions{
-            __pb_extensions__: %{},
-            __unknown_fields__: [],
-            deprecated: false,
-            idempotency_level: :IDEMPOTENCY_UNKNOWN,
-            uninterpreted_option: []
-          },
-          output_type: ".tachyon.LoginReply",
-          server_streaming: false
-        },
-        %Google.Protobuf.MethodDescriptorProto{
-          __unknown_fields__: [],
-          client_streaming: false,
-          input_type: ".tachyon.VerifyRequest",
-          name: "Verify",
-          options: %Google.Protobuf.MethodOptions{
-            __pb_extensions__: %{},
-            __unknown_fields__: [],
-            deprecated: false,
-            idempotency_level: :IDEMPOTENCY_UNKNOWN,
-            uninterpreted_option: []
-          },
-          output_type: ".tachyon.VerifyReply",
-          server_streaming: false
-        },
-        %Google.Protobuf.MethodDescriptorProto{
-          __unknown_fields__: [],
-          client_streaming: false,
-          input_type: ".tachyon.RegistrationReply",
-          name: "Registration",
-          options: %Google.Protobuf.MethodOptions{
-            __pb_extensions__: %{},
-            __unknown_fields__: [],
-            deprecated: false,
-            idempotency_level: :IDEMPOTENCY_UNKNOWN,
-            uninterpreted_option: []
-          },
-          output_type: ".tachyon.RegistrationReply",
-          server_streaming: false
-        },
-        %Google.Protobuf.MethodDescriptorProto{
-          __unknown_fields__: [],
-          client_streaming: false,
-          input_type: ".tachyon.AccountMigrationRequest",
-          name: "AccountMigration",
-          options: %Google.Protobuf.MethodOptions{
-            __pb_extensions__: %{},
-            __unknown_fields__: [],
-            deprecated: false,
-            idempotency_level: :IDEMPOTENCY_UNKNOWN,
-            uninterpreted_option: []
-          },
-          output_type: ".tachyon.AccountMigrationReply",
-          server_streaming: false
-        },
-        %Google.Protobuf.MethodDescriptorProto{
-          __unknown_fields__: [],
-          client_streaming: false,
-          input_type: ".tachyon.DisconnectRequest",
-          name: "Disconnect",
-          options: %Google.Protobuf.MethodOptions{
-            __pb_extensions__: %{},
-            __unknown_fields__: [],
-            deprecated: false,
-            idempotency_level: :IDEMPOTENCY_UNKNOWN,
-            uninterpreted_option: []
-          },
-          output_type: ".tachyon.Empty",
-          server_streaming: false
-        }
-      ],
-      name: "Authentication",
-      options: nil
-    }
-  end
-
-  rpc :GetToken, Tachyon.TokenRequest, Tachyon.TokenReply
-
-  rpc :Login, Tachyon.LoginRequest, Tachyon.LoginReply
-
-  rpc :Verify, Tachyon.VerifyRequest, Tachyon.VerifyReply
-
-  rpc :Registration, Tachyon.RegistrationReply, Tachyon.RegistrationReply
-
-  rpc :AccountMigration, Tachyon.AccountMigrationRequest, Tachyon.AccountMigrationReply
-
-  rpc :Disconnect, Tachyon.DisconnectRequest, Tachyon.Empty
-end
-
-defmodule Tachyon.Authentication.Stub do
-  @moduledoc false
-  use GRPC.Stub, service: Tachyon.Authentication.Service
 end

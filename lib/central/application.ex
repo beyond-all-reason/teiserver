@@ -147,10 +147,7 @@ defmodule Central.Application do
         %{
           id: Teiserver.TachyonTcpServer,
           start: {Teiserver.TachyonTcpServer, :start_link, [[]]}
-        },
-
-        # gRPC server
-        {GRPC.Server.Supervisor, endpoint: Teiserver.Tachyon.Endpoint, port: 8203, start_server: true}
+        }
       ] ++ discord_start()
 
     # Agent mode stuff, should not be enabled in prod
