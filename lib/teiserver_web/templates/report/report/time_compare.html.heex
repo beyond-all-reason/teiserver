@@ -1,0 +1,165 @@
+<% {_fg, _bg, bsname} = view_colour() |> colours() %>
+
+<style type="text/css">
+  .min-table {
+
+  }
+
+  .min-table td {
+    margin: 0;
+    padding: 0;
+    width: 50px;
+    height: 1px;
+    border-right: 1px solid #333;
+  }
+
+  .offline {
+    background-color: #000;
+  }
+
+  .menu {
+    background-color: #555;
+  }
+
+  .lobby {
+    background-color: #33A;
+  }
+
+  .spectator {
+    background-color: #3A3;
+  }
+
+  .player {
+    background-color: #A33;
+  }
+</style>
+
+<%= render TeiserverWeb.Report.GeneralView, "sub_menu.html", Map.merge(assigns, %{active: "reports"}) %>
+
+<%= central_component "picker_script",
+  module: Central.Account.UserLib,
+  name: "account_user",
+  title: "User search"
+%>
+
+<div class="row section-menu">
+  <div class="col-md-12">
+    <div class={"card border-#{bsname}"}>
+      <div class="card-body">
+        <div class="btn btn-primary2 float-end" onclick="$('.help-box, .help-box-large').toggle();">
+          <i class='fa-fw fa-solid fa-circle-info'></i>
+          &nbsp;
+          Show/Hide help
+        </div>
+        <%= render TeiserverWeb.Report.ReportView, "section_menu.html", Map.merge(assigns, %{
+            quick_search: "",
+            show_search: false,
+            active: "time_compare"
+          })
+        %>
+        <br /><br />
+
+        <form action={Routes.ts_reports_report_path(@conn, :show, "time_compare")} method="post" class="form-horizontal">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <input type="hidden" name="report[account_user1]" value={@params["account_user1"]} class="form-control" />
+          <input type="hidden" name="report[account_user2]" value={@params["account_user2"]} class="form-control" />
+
+          <input type="hidden" name="report[the_date]" value={Timex.shift(@start_date, days: -1) |> date_to_str(format: :ymd)} class="form-control" />
+
+          <input type="submit" value="1 day older" name="form.submitted" class={"btn btn-#{bsname} float-end"} />
+        </form>
+
+        <form action={Routes.ts_reports_report_path(@conn, :show, "time_compare")} method="post" class="form-horizontal">
+          <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+
+          <div class="row">
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="search_account_user1" class="control-label">User 1: </label>
+              <%= render CentralWeb.Account.UserView, "picker.html",
+                input_name: "report[account_user1]",
+                input_id: "report_account_user1",
+                value: @params["account_user1"]
+              %>
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="search_account_user2" class="control-label">User 2: </label>
+              <%= render CentralWeb.Account.UserView, "picker.html",
+                input_name: "report[account_user2]",
+                input_id: "report_account_user2",
+                value: @params["account_user2"]
+              %>
+            </div>
+
+            <div class="col-md-4 col-lg-3 col-xl-2 my-2">
+              <label for="report_the_date" class="control-label">Date:</label>
+              <input type="text" id="report_the_date" name="report[the_date]" value={@params["the_date"]} class="form-control datepicker" />
+            </div>
+
+            <div class="col-md-3 col-xl-2 search-form-input">
+              <label for="report_overlap" class="control-label">Overlaps:</label>
+              <%= central_component "checkbox",
+                name: "report[overlap]",
+                id: "report_overlap",
+                value: "true",
+                label: "Only show overlapping data",
+                checked: @params["overlap"] == "true",
+
+                description: ""
+              %>
+            </div>
+
+            <div class="col-md-3 col-xl-2 search-form-input">
+              <label for="report_skip_nil" class="control-label">Ignore empty:</label>
+              <%= central_component "checkbox",
+                name: "report[skip_nil]",
+                id: "report_skip_nil",
+                value: "true",
+                label: "Ignore logs with no activity",
+                checked: @params["skip_nil"] == "true",
+
+                description: ""
+              %>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="offset-md-8 col-md-4 offset-xl-9 col-xl-3">
+              &nbsp;<br />
+              <input type="submit" value="Update report" name="form.submitted" class={"btn btn-#{bsname} btn-block"} />
+            </div>
+          </div>
+        </form>
+
+        <div class="help-box-large">
+
+        </div>
+
+        <table class="min-table">
+          <%= if false do %>
+          <thead>
+            <tr>
+              <th>Time</th>
+
+              <%= for userid <- @user_ids do %>
+                <th><%= @users[userid].name %></th>
+              <% end %>
+            </tr>
+          </thead>
+          <% end %>
+          <tbody>
+            <%= for {_ts, statuses} <- @data do %>
+              <tr>
+                <%= for userid <- @user_ids do %>
+                  <td class={statuses[userid]}>&nbsp;</td>
+                <% end %>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+
+      </div>
+    </div>
+  </div>
+</div>

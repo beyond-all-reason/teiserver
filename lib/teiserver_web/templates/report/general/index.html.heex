@@ -97,6 +97,17 @@
     %>
   <% end %>
 
+  <%= if allow?(@current_user, Teiserver.Account.TimeCompareReport.permissions()) do %>
+    <%=
+      central_component "menu_card",
+      size: :small,
+      icon: Teiserver.Account.TimeCompareReport.icon(),
+      name: "time_compare",
+      text: "Time compare",
+      link: Routes.ts_reports_report_path(@conn, :show, "time_compare")
+    %>
+  <% end %>
+
 </div>
 
 <div class="row mt-2">

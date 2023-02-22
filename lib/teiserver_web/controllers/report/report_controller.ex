@@ -20,6 +20,7 @@ defmodule TeiserverWeb.Report.ReportController do
 
     module = case name do
         "time_spent" -> Teiserver.Account.TimeSpentReport
+        "time_compare" -> Teiserver.Account.TimeCompareReport
         "active" -> Teiserver.Account.ActiveReport
         "ranks" -> Teiserver.Account.RanksReport
         "verified" -> Teiserver.Account.VerifiedReport

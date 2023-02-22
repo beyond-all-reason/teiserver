@@ -22,6 +22,17 @@
   %>
 <% end %>
 
+<%= if allow?(@current_user, Teiserver.Account.TimeCompareReport.permissions()) do %>
+  <%= central_component "section_menu_button",
+    name: "time_compare",
+    label: "Time compare",
+    active: @active,
+    icon: Teiserver.Account.TimeCompareReport.icon(),
+    bsname: bsname,
+    url: Routes.ts_reports_report_path(@conn, :show, "time_compare")
+  %>
+<% end %>
+
 <%= if allow?(@current_user, Teiserver.Account.RanksReport.permissions()) do %>
   <%= central_component "section_menu_button",
     name: "ranks",
